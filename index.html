@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interpreter Terminology Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3EC;
+    --bg-hi:#FAF8F2;
+    --paper:#FFFEFB;
+    --ink:#3A3B36;
+    --ink-soft:#7A7A70;
+    --ink-faint:#A8A79B;
+    --line:#EAE6D9;
+    --line-soft:#F1EEE3;
+    --accent:#5C8374;
+    --accent-2:#7FA593;
+    --accent-soft:#EAF0EB;
+    --danger:#B5707D;
+    --danger-soft:#F6ECEE;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+    --serif:'IBM Plex Serif', Georgia, serif;
+    --r-sm:9px; --r-md:14px; --r-lg:20px;
+    --sh-1:0 1px 3px rgba(58,59,54,0.03), 0 1px 1px rgba(58,59,54,0.03);
+    --sh-2:0 8px 20px rgba(58,59,54,0.05), 0 2px 6px rgba(58,59,54,0.03);
+    --sh-3:0 24px 56px rgba(58,59,54,0.10), 0 6px 16px rgba(58,59,54,0.05);
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box;}
+  ::selection{background:var(--accent-soft); color:var(--ink);}
+  body{
+    margin:0; color:var(--ink); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased; background:
+      radial-gradient(1200px 600px at 100% -10%, #F1F0E6 0%, transparent 60%),
+      radial-gradient(1000px 560px at -10% 110%, #F2F1EC 0%, transparent 60%),
+      var(--bg);
+  }
+  .app{display:flex; min-height:100vh;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-thumb{background:#DEDACB; border-radius:8px; border:2px solid transparent; background-clip:padding-box;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:278px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto;
+    background:linear-gradient(180deg, var(--bg-hi), #F3F1E7 70%);
+    border-right:1px solid var(--line); padding:24px 0 20px 0;
+    display:flex; flex-direction:column; gap:3px;
+  }
+  .brand{
+    padding:2px 20px 20px 20px; margin-bottom:14px; position:relative;
+  }
+  .brand::after{
+    content:""; position:absolute; left:20px; right:20px; bottom:0; height:1px;
+    background:linear-gradient(90deg, var(--line), transparent);
+  }
+  .brand .mark{
+    width:34px; height:34px; border-radius:9px; margin-bottom:12px;
+    background:linear-gradient(140deg, var(--accent), var(--accent-2));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--sh-2), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+  .brand .mark svg{width:17px; height:17px;}
+  .brand .eyebrow{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:600;
+  }
+  .brand h1{ font-family:var(--serif); font-size:21px; margin:5px 0 6px 0; font-weight:400; letter-spacing:-.01em; line-height:1.2;}
+  .brand p{ font-size:11.5px; color:var(--ink-soft); margin:0; line-height:1.55;}
+
+  .tab{
+    position:relative; display:flex; align-items:center; gap:10px;
+    padding:10px 16px 10px 12px; margin:0 8px 0 10px; border-radius:9px 20px 20px 9px;
+    cursor:pointer; border:none; background:transparent; text-align:left;
+    font-family:var(--sans); font-size:13px; color:var(--ink-soft); width:calc(100% - 18px);
+    transition:background .16s var(--ease), color .16s var(--ease);
+  }
+  .tab:hover{ background:rgba(255,255,255,0.7); color:var(--ink); }
+  .tab.active{
+    background:var(--paper); font-weight:600; color:var(--ink);
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .tab .flag{
+    width:9px; height:9px; border-radius:3px; flex-shrink:0; transform:rotate(45deg);
+    box-shadow:0 0 0 4px color-mix(in srgb, currentColor 14%, transparent);
+  }
+  .tab .name{flex:1; line-height:1.3;}
+  .tab .count{
+    font-family:var(--mono); font-size:10px; color:var(--ink-faint);
+    background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:2px 7px;
+  }
+  .tab.active .count{ background:var(--accent-soft); color:var(--accent); border-color:transparent; }
+
+  .nav-divider{ height:1px; margin:10px 20px; background:linear-gradient(90deg, var(--line), transparent); }
+  .tab .link-flag{
+    width:18px; height:18px; border-radius:5px; flex-shrink:0; transform:none;
+    background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
+    display:flex; align-items:center; justify-content:center; box-shadow:none;
+  }
+  .tab .link-flag svg{ width:10px; height:10px; }
+
+  /* ---------- Link Directory ---------- */
+  .dir-group{ margin-bottom:8px; }
+  .dir-row{
+    display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:10px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+    margin-bottom:7px; transition:box-shadow .15s var(--ease), transform .15s var(--ease);
+  }
+  .dir-row:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); transform:translateX(2px); }
+  .dir-row .dir-dot{ width:8px; height:8px; border-radius:2px; flex-shrink:0; transform:rotate(45deg); }
+  .dir-row .dir-term{ font-family:var(--sans); font-weight:600; font-size:13.5px; min-width:0; flex:0 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
+  .dir-row .dir-kind{
+    font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint);
+    background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:2px 8px; flex-shrink:0;
+  }
+  .dir-row .dir-kind.confirmed{ color:var(--accent); background:var(--accent-soft); border-color:transparent; }
+  .dir-row .dir-url{
+    flex:1; min-width:0; font-family:var(--mono); font-size:11.5px; color:var(--accent);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:none;
+  }
+  .dir-row .dir-url:hover{ text-decoration:underline; }
+  .dir-row .dir-go{ flex-shrink:0; color:var(--ink-faint); }
+  .dir-row .dir-go svg{ width:12px; height:12px; }
+
+  .sidebar-footer{margin-top:auto; padding:16px 20px 0 20px; position:relative;}
+  .sidebar-footer::before{
+    content:""; position:absolute; left:20px; right:20px; top:0; height:1px;
+    background:linear-gradient(90deg, var(--line), transparent);
+  }
+  .whoami{font-size:10.5px; color:var(--ink-faint); margin:14px 0 7px 0; font-family:var(--mono); letter-spacing:.05em; text-transform:uppercase;}
+  .whoami-input{
+    width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:var(--r-sm);
+    font-family:var(--sans); font-size:12.5px; background:var(--paper); color:var(--ink);
+    box-shadow:var(--sh-1); transition:box-shadow .15s var(--ease);
+  }
+  .whoami-input:focus{outline:none; box-shadow:0 0 0 3px var(--accent-soft), var(--sh-1);}
+
+  /* ---------- Main ---------- */
+  .main{flex:1; padding:40px 48px 80px 48px; max-width:1060px;}
+  .topbar{
+    display:flex; gap:12px; align-items:center; margin-bottom:30px; flex-wrap:wrap;
+    position:sticky; top:0; z-index:10; padding:14px 0; margin-top:-14px;
+    background:linear-gradient(var(--bg) 72%, transparent);
+  }
+  .search{ flex:1; min-width:240px; position:relative; }
+  .search input{
+    width:100%; padding:12px 16px 12px 40px; border:1px solid var(--line); border-radius:12px;
+    font-family:var(--sans); font-size:14px; background:var(--paper); color:var(--ink);
+    box-shadow:var(--sh-1); transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
+  }
+  .search input:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); }
+  .search::before{
+    content:"⌕"; position:absolute; left:15px; top:50%; transform:translateY(-50%);
+    color:var(--ink-faint); font-size:17px; pointer-events:none;
+  }
+  .btn{
+    font-family:var(--sans); font-size:13.5px; font-weight:600; border:none; border-radius:12px;
+    padding:12px 19px; cursor:pointer; transition:transform .15s var(--ease), box-shadow .15s var(--ease), filter .15s var(--ease);
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{
+    background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
+    box-shadow:0 8px 16px -8px rgba(92,131,116,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .btn-primary:hover{ filter:brightness(1.04); box-shadow:0 10px 20px -8px rgba(92,131,116,0.5), inset 0 1px 0 rgba(255,255,255,0.25); }
+  .btn-ghost{ background:var(--paper); color:var(--ink); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line); }
+  .btn-ghost:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
+
+  .stat-strip{ display:flex; gap:20px; margin:-14px 0 26px 0; flex-wrap:wrap; }
+  .stat{ display:flex; align-items:baseline; gap:6px; }
+  .stat b{ font-family:var(--mono); font-size:17px; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums; }
+  .stat span{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); }
+
+  .section-head{display:flex; align-items:baseline; gap:11px; margin:36px 0 18px 0;}
+  .section-head:first-child{ margin-top:4px; }
+  .section-head h2{font-family:var(--serif); font-weight:400; font-size:23px; margin:0; letter-spacing:-.01em;}
+  .section-head .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+  .section-head::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  .grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:18px;}
+  @media (max-width:760px){ .grid{grid-template-columns:1fr;} .sidebar{width:100%; height:auto; position:relative;} .app{flex-direction:column;} .main{padding:26px 20px;} .dir-row{flex-wrap:wrap;} .dir-row .dir-term{max-width:100%;} }
+
+  @keyframes cardIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .card{
+    background:var(--paper); border-radius:var(--r-md);
+    padding:20px 20px 17px 20px; position:relative;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+    transition:box-shadow .2s var(--ease);
+    animation:cardIn .3s var(--ease) both;
+  }
+  .card:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
+  .card-top{ display:flex; align-items:center; justify-content:space-between; padding-right:52px; }
+  .card .chart-id{
+    font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); letter-spacing:.06em;
+  }
+  .card .tag{
+    display:inline-flex; align-items:center; gap:6px; font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.02em;
+    padding:5px 11px; border-radius:20px;
+  }
+  .card .tag::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
+  .card .term-en{font-family:var(--sans); font-weight:600; font-size:15.5px; margin:13px 0 4px 0; line-height:1.4; letter-spacing:-.003em;}
+  .card .term-es{font-family:var(--serif); font-style:italic; color:var(--accent); font-size:13.5px; margin:0 0 10px 0;}
+  .card .def{font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0;}
+  .card .links{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+  .link-pill{
+    display:inline-flex; align-items:center; gap:5px; font-family:var(--sans); font-size:11.5px; font-weight:600;
+    color:var(--accent); background:var(--accent-soft); padding:5px 10px; border-radius:20px; text-decoration:none;
+    transition:transform .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .link-pill:hover{ box-shadow:var(--sh-1); transform:translateY(-1px); }
+  .link-pill.es{ color:#8B7BAE; background:#F1EDF6; }
+  .link-pill svg{ width:10px; height:10px; }
+
+  .card .meta{
+    margin-top:12px; padding-top:10px; border-top:1px solid var(--line-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:14px;
+  }
+  .card .source{font-family:var(--mono); font-size:10px; color:var(--ink-faint);}
+  .card .actions{display:flex; gap:6px; opacity:0; transform:translateY(-2px); transition:opacity .15s var(--ease), transform .15s var(--ease);}
+  .card:hover .actions{opacity:1; transform:translateY(0);}
+  .icon-btn{
+    border:none; background:var(--bg); border-radius:8px; width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; color:var(--ink-soft);
+    box-shadow:inset 0 0 0 1px var(--line); transition:all .15s var(--ease);
+  }
+  .icon-btn:hover{ background:var(--paper); color:var(--ink); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); transform:translateY(-1px); }
+  .icon-btn.danger:hover{ background:var(--danger-soft); color:var(--danger); }
+
+  .empty{
+    text-align:center; padding:70px 20px; color:var(--ink-faint);
+  }
+  .empty .glyph{
+    font-family:var(--serif); font-size:15px; margin:0 auto 14px auto; width:44px; height:44px; border-radius:50%;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line);
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
+  }
+  .empty .glyph svg{ width:18px; height:18px; }
+
+  /* ---------- Modal ---------- */
+  @keyframes overlayIn{ from{opacity:0;} to{opacity:1;} }
+  @keyframes modalIn{ from{opacity:0; transform:translateY(10px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+  .overlay{
+    position:fixed; inset:0; background:rgba(15,23,30,0.5); backdrop-filter:blur(3px); display:none;
+    align-items:flex-start; justify-content:center; padding:64px 20px; z-index:50; overflow:auto;
+    animation:overlayIn .15s var(--ease);
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--paper); border-radius:var(--r-lg); padding:28px 28px 22px 28px; width:100%; max-width:460px;
+    box-shadow:var(--sh-3); animation:modalIn .22s var(--ease);
+  }
+  .modal h3{font-family:var(--serif); font-weight:400; font-size:20px; margin:0 0 18px 0; letter-spacing:-.01em;}
+  .field{margin-bottom:13px;}
+  .field label{
+    display:block; font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:6px;
+  }
+  .field input, .field textarea, .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm);
+    font-family:var(--sans); font-size:13.5px; color:var(--ink); background:var(--bg-hi);
+    transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
+  }
+  .field textarea{resize:vertical; min-height:66px; font-family:var(--sans);}
+  .field input:focus, .field textarea:focus, .field select:focus{
+    outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); background:var(--paper);
+  }
+  .modal-actions{display:flex; justify-content:flex-end; gap:9px; margin-top:20px;}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:var(--ink); color:#fff; padding:11px 20px; border-radius:12px; font-size:13px;
+    box-shadow:var(--sh-3); opacity:0; pointer-events:none;
+    transition:opacity .2s var(--ease), transform .2s var(--ease); z-index:80;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .loading{
+    padding:0; text-align:center; color:var(--ink-soft); font-family:var(--mono); font-size:12.5px;
+    width:100%; min-height:100vh; display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .loading::before{
+    content:""; width:14px; height:14px; border-radius:50%; border:2px solid var(--line);
+    border-top-color:var(--accent); animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{transform:rotate(360deg);} }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="loading">Loading shared terminology…</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add term</h3>
+    <div class="field"><label>English term</label><input id="fEn" type="text" placeholder="e.g. Hypertrophic cardiomyopathy"></div>
+    <div class="field"><label>Spanish term (optional)</label><input id="fEs" type="text" placeholder="e.g. Cardiopatía hipertrófica"></div>
+    <div class="field"><label>Definition / context</label><textarea id="fDef" placeholder="Plain-language definition or clinical context"></textarea></div>
+    <div class="field"><label>Source (optional)</label><input id="fSource" type="text" placeholder="e.g. NIH (Spanish)"></div>
+    <div class="field"><label>Source link (optional URL)</label><input id="fSourceUrl" type="text" placeholder="Paste the exact article/webinar link, if you have it"></div>
+    <div class="field"><label>Domain</label><select id="fCategory"></select></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTerm()">Save term</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===================================================================
+     CLOUD STORAGE SETUP
+     This app was originally built in Claude, where "window.storage" is
+     provided automatically. Outside Claude (e.g. here on Vercel), it
+     doesn't exist — so this block replaces it with a real, free backend
+     (Firebase Firestore) that has the exact same shape.
+
+     1. Create a free project at https://console.firebase.google.com
+     2. Build a Firestore Database (Start in test mode is fine to begin)
+     3. Project settings → your web app → copy the firebaseConfig object
+        and paste it below, replacing the placeholder values.
+     4. In Firestore → Rules, set:
+          rules_version = '2';
+          service cloud.firestore {
+            match /databases/{database}/documents {
+              match /terminology-hub/{docId} { allow read, write: if true; }
+            }
+          }
+        (This keeps the app open to your whole team with no login,
+        matching how it worked inside Claude. Anyone with the config
+        below could also write to Firestore directly — fine for a
+        small trusted team, not fine if this repo goes fully public.)
+==================================================================== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg",
+    authDomain: "language-specialist.firebaseapp.com",
+    projectId: "language-specialist",
+    storageBucket: "language-specialist.firebasestorage.app",
+    messagingSenderId: "779333254608",
+    appId: "1:779333254608:web:899e45cc2f6769a6850dd5"
+  };
+
+  let db = null;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+  }catch(e){
+    console.error('Firebase failed to initialize — check firebaseConfig above.', e);
+  }
+
+  // Mimics the same shape Claude's built-in window.storage provided,
+  // so nothing else in the app below needs to change.
+  window.storage = {
+    async get(key){
+      if(!db) return null;
+      const snap = await db.collection('terminology-hub').doc(key).get();
+      if(!snap.exists) return null;
+      return { key, value: snap.data().value, shared:true };
+    },
+    async set(key, value){
+      if(!db) return null;
+      await db.collection('terminology-hub').doc(key).set({ value, updatedAt: Date.now() });
+      return { key, value, shared:true };
+    },
+    async delete(key){
+      if(!db) return null;
+      await db.collection('terminology-hub').doc(key).delete();
+      return { key, deleted:true, shared:true };
+    },
+    async list(){
+      return { keys: [] };
+    }
+  };
+</script>
+
+<script>
+/* ============ Seed data (from the shared reference doc) ============ */
+const DEFAULT_DATA = {
+  categories: [
+    { id:'genetics', name:'Genetics', color:'#8B7BAE', terms:[
+      {en:'Alpha Fetoprotein (AFP) test', es:'Prueba Alfa-fetoproteína (AFP)', def:'A tumor marker test often used in prenatal screening or oncology.', source:''},
+      {en:'Aicardi-Goutières Syndrome', es:'Síndrome de Aicardi-Goutières', def:'A rare genetic condition affecting the brain, immune system, and skin.', source:''},
+      {en:'Fragile X premutation (FMR1 gene)', es:'', def:'Associated with alterations in the FMR1 gene on the X chromosome.', source:''},
+      {en:'Neurofibromatosis type 1 (NF1)', es:'', def:'A genetic disorder causing tumors on nerve tissue.', source:''},
+      {en:'Phenylketonuria (PKU)', es:'Fenilcetonuria', def:'An inherited disorder requiring a low-phenylalanine diet.', source:'NIH (Spanish)'},
+      {en:'Rett syndrome', es:'', def:'A neurodevelopmental disorder, discussed in the context of genetics test reviews.', source:''},
+      {en:'Simpson-Golabi-Behmel syndrome (SGBS)', es:'', def:'A condition identified in genetics consultations.', source:''},
+    ]},
+    { id:'onco', name:'Oncology, Hematology & Leukemia', color:'#B5707D', terms:[
+      {en:'AC-T Chemotherapy regimen', es:'', def:'Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).', source:''},
+      {en:'Autoimmune Hemolytic Anemia (AIHA)', es:'Anemia Hemolítica Autoinmunitaria', def:'Condition where the immune system destroys red blood cells.', source:''},
+      {en:'Breast fibroadenoma', es:'Fibroadenoma de mama', def:'Noncancerous breast lumps.', source:'NCI (Spanish)'},
+      {en:'Clear cell sarcoma of the kidney', es:'Sarcoma renal de células claras', def:'Differentiated from carcinoma in clinical terminology.', source:''},
+      {en:'Diffuse Large B-Cell Lymphoma (DLBCL)', es:'Linfoma Difuso de células B Grandes', def:'Aggressive lymphoma type discussed at the cancer center.', source:''},
+      {en:'Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)', es:'Tumor glioneuronal leptomeníngeo difuso (TGLD)', def:'Rare CNS tumor.', source:''},
+      {en:'Donor chimerism', es:'Quimerismo', def:'Often relevant in post-transplant monitoring.', source:'NCI (Spanish)'},
+      {en:'Glioblastoma', es:'Glioblastoma', def:'Aggressive brain cancer treated in radiation oncology.', source:''},
+      {en:'Hepatocellular carcinoma (HCC)', es:'Carcinoma hepatocelular', def:'Primary liver cancer.', source:''},
+      {en:'HPV & Myelodysplastic Syndromes (MDS)', es:'', def:'A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).', source:''},
+      {en:'LEEP biopsy', es:'', def:'Loop Electrosurgical Excision Procedure used in OB/GYN oncology.', source:''},
+      {en:'Monoclonal Gammopathy of Undetermined Significance (MGUS)', es:'GMSI', def:'Precursor plasma cell condition.', source:''},
+      {en:'Myofibroblastic stromal hyperplasia', es:'Hiperplasia estromal miofibroblástica mamaria', def:'Proliferative breast lesion.', source:''},
+      {en:'Paroxysmal nocturnal hemoglobinuria (PNH)', es:'Hemoglobinuria paroxística nocturna', def:'Rare blood disorder.', source:''},
+      {en:'Smoldering Multiple Myeloma (SMM)', es:'Mieloma Múltiple Quiescente', def:'Precursor condition to myeloma.', source:'Sergas.gal (Spanish)'},
+      {en:'Testicular Rhabdomyosarcoma', es:'Rabdomiosarcoma', def:'Pediatric soft tissue cancer.', source:''},
+      {en:'Tumor markers', es:'', def:'Trended over time to monitor treatment response.', source:''},
+      {en:'Xerocytosis (Dehydrated hereditary stomatocytosis)', es:'Xerocitosis congénita', def:'A red blood cell disorder.', source:''},
+    ]},
+    { id:'cardiac', name:'Heart Failure & Cardiac', color:'#C98FA0', terms:[
+      {en:'Breast Arterial Calcification (BAC)', es:'Calcificaciones mamarias', def:'Calcium deposits found in breast arteries.', source:''},
+      {en:'Hypertrophic cardiomyopathy', es:'Cardiopatía hipertrófica', def:'Heart muscle thickening.', source:''},
+      {en:'Peripartum cardiomyopathy (PPCM)', es:'Miocardiopatía periparto', def:'Heart failure occurring around the time of pregnancy.', source:''},
+    ]},
+    { id:'ent', name:'Peds ENT, Urology, Endocrinology & Nephrology', color:'#6F97AC', terms:[
+      {en:'Avascular necrosis (osteonecrosis)', es:'Necrosis avascular', def:'Bone tissue death.', source:''},
+      {en:'BAHA (Bone-anchored hearing aid)', es:'Implante auditivo oseointegrado', def:'Used in Peds ENT cases.', source:'EarPros (Spanish)'},
+      {en:'Cholesteatoma surgery', es:'Colesteatoma', def:'Abnormal ear growth.', source:''},
+      {en:'Gamma Knife surgery', es:'Cirugía con bisturí de rayos gamma', def:'Neurosurgical precision procedure.', source:'UHealth (Spanish)'},
+      {en:'Laryngomalacia', es:'Laringomalacia', def:'Congenital abnormality of laryngeal cartilage; associated with "noisy breathing."', source:''},
+      {en:'Multinodular goiter', es:'Bocio multinodular', def:'Thyroid enlargement.', source:''},
+      {en:'Navicular fossa', es:'Fosa navicular', def:'Urogenital anatomy term.', source:''},
+      {en:'Patulous Eustachian tube dysfunction', es:'Disfunción de las trompas de Eustaquio patulosas', def:'ENT condition.', source:''},
+      {en:'Primary ciliary dyskinesia', es:'Discinesia ciliar primaria', def:'Respiratory tract cilia disorder.', source:''},
+      {en:'Prune Belly syndrome', es:'', def:'Rare abdominal muscle disorder.', source:''},
+      {en:'Rhabdomyolysis', es:'Rabdomiolisis', def:'Skeletal muscle breakdown.', source:''},
+      {en:'Severe Combined Immunodeficiency (SCID)', es:'IDCG', def:'Rare genetic immune disorder.', source:''},
+    ]},
+    { id:'neuro', name:'Developmental & Neurology', color:'#7FA173', terms:[
+      {en:'AAC device (Augmentative and Alternative Communication)', es:'', def:'Used for patients on the spectrum or with speech/hearing challenges.', source:''},
+      {en:'Duffy-null associated neutrophil count (DANC)', es:'', def:'Not a disease — a common variation causing low neutrophil counts.', source:''},
+      {en:'Lesch-Nyhan Syndrome (LNS)', es:'Síndrome de Lesch-Nyhan', def:'Genetic neurological disorder.', source:''},
+      {en:'Oppositional Defiant Disorder (ODD)', es:'Trastorno de Oposición Desafiante (TOD)', def:'Behavioral pattern discussed in professional terminology contexts.', source:''},
+      {en:'Splinter skills', es:'', def:'Exceptional abilities often associated with Autism.', source:''},
+      {en:'Synesthesia', es:'Sinestesia', def:'A neurological condition affecting sensory pathways.', source:''},
+      {en:'Vasovagal syncope', es:'Síncope vasovagal', def:'Fainting response to triggers; requires quick recognition when a physician speaks fast.', source:''},
+    ]},
+    { id:'resources', name:'Professional Resources', color:'#BFA05E', terms:[
+      {en:'Memory Exercises', es:'', def:'Recommended by a professor for interpreter training.', source:''},
+      {en:'Interpreting and Autism (Webinar, 2025)', es:'', def:'Continuing education webinar on interpreting in autism-related encounters.', source:''},
+      {en:'Interpreter Resource Library', es:'', def:'General collection of webinar recordings for interpreters.', source:''},
+      {en:'Interpreter Mental Fatigue', es:'', def:'Session: "Strategies and Scripts for Addressing Interpreter Mental Fatigue."', source:''},
+    ]},
+  ]
+};
+
+/* ============ State ============ */
+let DATA = null;
+let activeCategory = 'all';
+let searchQuery = '';
+let editingContext = null; // {categoryId, termIndex} or null for new
+const STORAGE_KEY = 'terminology-db-v1';
+
+/* ============ Storage ============ */
+async function loadData(){
+  try{
+    const result = await window.storage.get(STORAGE_KEY, true);
+    if(result && result.value){
+      DATA = JSON.parse(result.value);
+    } else {
+      DATA = DEFAULT_DATA;
+      await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true);
+    }
+  }catch(err){
+    DATA = DEFAULT_DATA;
+    try{ await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true); }catch(e2){}
+  }
+  render();
+}
+
+async function persist(){
+  try{
+    const res = await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true);
+    if(!res){ showToast('Saved locally — sync failed, try again.'); }
+  }catch(err){
+    showToast('Could not save. Check connection and retry.');
+  }
+}
+
+/* ============ Utilities ============ */
+function whoAmI(){
+  return document.getElementById('whoInput') ? document.getElementById('whoInput').value.trim() : '';
+}
+function timeAgoLabel(){
+  const d = new Date();
+  return d.toLocaleDateString(undefined,{month:'short', day:'numeric'});
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
+function mplusUrl(term, lang){
+  const base = lang==='es' ? 'https://medlineplus.gov/spanish/search.html' : 'https://medlineplus.gov/search.html';
+  return `${base}?query=${encodeURIComponent(term)}`;
+}
+const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function renderLinks(t, categoryId){
+  const links = [];
+  if(t.url){
+    // A team member's own pasted link takes priority — trust it as the exact source.
+    links.push(`<a class="link-pill" href="${escapeAttr(t.url)}" target="_blank" rel="noopener">Source ${ICON_EXTERNAL}</a>`);
+  } else if(categoryId !== 'resources' && t.en){
+    links.push(`<a class="link-pill" href="${escapeAttr(mplusUrl(t.en,'en'))}" target="_blank" rel="noopener">Look up ${ICON_EXTERNAL}</a>`);
+  }
+  if(!t.url && categoryId !== 'resources' && t.es){
+    links.push(`<a class="link-pill es" href="${escapeAttr(mplusUrl(t.es,'es'))}" target="_blank" rel="noopener">Buscar en español ${ICON_EXTERNAL}</a>`);
+  }
+  if(links.length===0) return '';
+  return `<div class="links">${links.join('')}</div>`;
+}
+
+/* ============ Rendering ============ */
+function render(){
+  const app = document.getElementById('app');
+  const totalTerms = DATA.categories.reduce((n,c)=>n+c.terms.length,0);
+
+  const sidebarTabs = [
+    `<button class="tab ${activeCategory==='all'?'active':''}" onclick="setCategory('all')">
+       <span class="flag" style="background:#63717B; color:#63717B;"></span>
+       <span class="name">All domains</span>
+       <span class="count">${totalTerms}</span>
+     </button>`
+  ].concat(DATA.categories.map(c=>`
+     <button class="tab ${activeCategory===c.id?'active':''}" onclick="setCategory('${c.id}')">
+       <span class="flag" style="background:${c.color}; color:${c.color};"></span>
+       <span class="name">${escapeHtml(c.name)}</span>
+       <span class="count">${c.terms.length}</span>
+     </button>
+  `)).join('');
+
+  const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
+  const directoryTab = `
+     <div class="nav-divider"></div>
+     <button class="tab ${activeCategory==='directory'?'active':''}" onclick="setCategory('directory')">
+       <span class="flag link-flag">${ICON_CHAIN}</span>
+       <span class="name">Link Directory</span>
+       <span class="count">${totalLinks}</span>
+     </button>
+  `;
+
+  app.innerHTML = `
+    <div class="sidebar">
+      <div class="brand">
+        <div class="mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12V20H5.5C4.67 20 4 19.33 4 18.5V5.5Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 4H18.5C19.33 4 20 4.67 20 5.5V18.5C20 19.33 19.33 20 18.5 20H12" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 8H9M8 11H9" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <div class="eyebrow">Interpreter Reference</div>
+        <h1>Terminology Hub</h1>
+        <p>A shared, editable glossary maintained by the interpreter team. Compiled from notes by Fabiola Grijalva, Bertha Bravo Hernandez, and colleagues.</p>
+      </div>
+      ${sidebarTabs}
+      ${directoryTab}
+      <div class="sidebar-footer">
+        <div class="whoami">Attribute my edits as</div>
+        <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
+      </div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="search"><input id="searchInput" type="text" placeholder="Search terms, definitions, Spanish equivalents…" value="${escapeHtml(searchQuery)}"></div>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>
+      </div>
+      <div class="stat-strip">
+        <div class="stat"><b>${totalTerms}</b><span>terms</span></div>
+        <div class="stat"><b>${DATA.categories.length}</b><span>domains</span></div>
+        <div class="stat"><b>${DATA.categories.reduce((n,c)=>n+c.terms.filter(t=>t.url).length,0)}</b><span>with a confirmed source link</span></div>
+      </div>
+      <div id="content"></div>
+    </div>
+  `;
+
+  document.getElementById('searchInput').addEventListener('input', (e)=>{
+    searchQuery = e.target.value;
+    renderContent();
+  });
+  document.getElementById('searchInput').focus();
+  if(window.__lastWho) document.getElementById('whoInput').value = window.__lastWho;
+  document.getElementById('whoInput').addEventListener('input', (e)=>{ window.__lastWho = e.target.value; });
+
+  renderContent();
+}
+
+function renderContent(){
+  const content = document.getElementById('content');
+  const q = searchQuery.trim().toLowerCase();
+
+  if(activeCategory === 'directory'){
+    content.innerHTML = renderDirectory(q);
+    return;
+  }
+
+  let cats = activeCategory==='all' ? DATA.categories : DATA.categories.filter(c=>c.id===activeCategory);
+
+  let html = '';
+  cats.forEach(cat=>{
+    let terms = cat.terms.map((t,i)=>({...t, _idx:i}));
+    if(q){
+      terms = terms.filter(t =>
+        (t.en||'').toLowerCase().includes(q) ||
+        (t.es||'').toLowerCase().includes(q) ||
+        (t.def||'').toLowerCase().includes(q)
+      );
+    }
+    if(terms.length===0) return;
+
+    html += `<div class="section-head"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
+    html += `<div class="grid">`;
+    terms.forEach(t=>{
+      html += `
+        <div class="card">
+          <div class="card-top">
+            <span class="tag" style="color:${cat.color}; background:${cat.color}1F;">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
+            <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._idx+1).padStart(2,'0')}</span>
+          </div>
+          <div class="actions" style="position:absolute; top:16px; right:16px;">
+            <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', ${t._idx})">✎</button>
+            <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', ${t._idx})">✕</button>
+          </div>
+          <div class="term-en">${escapeHtml(t.en)}</div>
+          ${t.es ? `<div class="term-es">${escapeHtml(t.es)}</div>` : ''}
+          <p class="def">${escapeHtml(t.def)}</p>
+          ${renderLinks(t, cat.id)}
+          <div class="meta">
+            <span class="source">${t.source ? escapeHtml(t.source) : ''}</span>
+            <span class="source">${t.editedBy ? 'Edited by ' + escapeHtml(t.editedBy) : ''}</span>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  });
+
+  if(!html){
+    html = `<div class="empty"><div class="glyph">⌕</div>No terms match your search.<br>Try a different word, or add this term.</div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+function setCategory(id){
+  activeCategory = id;
+  render();
+}
+
+function renderDirectory(q){
+  let sectionsHtml = '';
+  let totalRows = 0;
+
+  DATA.categories.forEach(cat=>{
+    let rows = [];
+    cat.terms.forEach((t, idx)=>{
+      const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
+      const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q);
+      if(!matches) return;
+
+      if(t.url){
+        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url });
+      } else if(cat.id !== 'resources'){
+        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en') });
+        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es') });
+      }
+    });
+    if(rows.length===0) return;
+    totalRows += rows.length;
+
+    sectionsHtml += `<div class="section-head"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${rows.length} link${rows.length===1?'':'s'}</span></div>`;
+    sectionsHtml += `<div class="dir-group">`;
+    rows.forEach(r=>{
+      sectionsHtml += `
+        <a class="dir-row" href="${escapeAttr(r.url)}" target="_blank" rel="noopener">
+          <span class="dir-dot" style="background:${cat.color}"></span>
+          <span class="dir-term">${r.term}</span>
+          <span class="dir-kind ${r.confirmed?'confirmed':''}">${r.kind}</span>
+          <span class="dir-url">${escapeHtml(r.url)}</span>
+          <span class="dir-go">${ICON_EXTERNAL}</span>
+        </a>
+      `;
+    });
+    sectionsHtml += `</div>`;
+  });
+
+  if(totalRows===0){
+    return `<div class="empty"><div class="glyph">${ICON_CHAIN}</div>No links match your search.</div>`;
+  }
+
+  const intro = `<p style="font-size:12.5px; color:var(--ink-soft); max-width:640px; margin:-6px 0 26px 0; line-height:1.6;">
+    Every clickable reference in the glossary, in one place — confirmed source links your team has pasted in, plus the live MedlinePlus lookups used as a fallback. Click "Edit term" on any card to swap a lookup for the exact source.
+  </p>`;
+
+  return intro + sectionsHtml;
+}
+
+/* ============ Add / Edit / Delete ============ */
+function openAddModal(){
+  editingContext = null;
+  document.getElementById('modalTitle').textContent = 'Add term';
+  document.getElementById('fEn').value = '';
+  document.getElementById('fEs').value = '';
+  document.getElementById('fDef').value = '';
+  document.getElementById('fSource').value = '';
+  document.getElementById('fSourceUrl').value = '';
+  populateCategorySelect();
+  document.getElementById('fCategory').value = activeCategory==='all' ? DATA.categories[0].id : activeCategory;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('fEn').focus();
+}
+
+function openEditModal(categoryId, idx){
+  editingContext = {categoryId, idx};
+  const term = DATA.categories.find(c=>c.id===categoryId).terms[idx];
+  document.getElementById('modalTitle').textContent = 'Edit term';
+  document.getElementById('fEn').value = term.en || '';
+  document.getElementById('fEs').value = term.es || '';
+  document.getElementById('fDef').value = term.def || '';
+  document.getElementById('fSource').value = term.source || '';
+  document.getElementById('fSourceUrl').value = term.url || '';
+  populateCategorySelect();
+  document.getElementById('fCategory').value = categoryId;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('fEn').focus();
+}
+
+function populateCategorySelect(){
+  const sel = document.getElementById('fCategory');
+  sel.innerHTML = DATA.categories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+  editingContext = null;
+}
+
+async function saveTerm(){
+  const en = document.getElementById('fEn').value.trim();
+  if(!en){ showToast('English term is required.'); return; }
+  const es = document.getElementById('fEs').value.trim();
+  const def = document.getElementById('fDef').value.trim();
+  const source = document.getElementById('fSource').value.trim();
+  let url = document.getElementById('fSourceUrl').value.trim();
+  if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+  const newCategoryId = document.getElementById('fCategory').value;
+  const editor = whoAmI();
+
+  const record = { en, es, def, source, url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined };
+
+  if(editingContext){
+    const oldCat = DATA.categories.find(c=>c.id===editingContext.categoryId);
+    oldCat.terms.splice(editingContext.idx, 1);
+    const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
+    targetCat.terms.push(record);
+  } else {
+    const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
+    targetCat.terms.push(record);
+  }
+
+  closeModal();
+  await persist();
+  showToast('Term saved.');
+  render();
+}
+
+async function deleteTerm(categoryId, idx){
+  const cat = DATA.categories.find(c=>c.id===categoryId);
+  const term = cat.terms[idx];
+  if(!confirm(`Delete "${term.en}"? This can't be undone.`)) return;
+  cat.terms.splice(idx,1);
+  await persist();
+  showToast('Term deleted.');
+  render();
+}
+
+/* ============ Init ============ */
+loadData();
+</script>
+</body>
+</html>
