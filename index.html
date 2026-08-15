@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Interpreter Terminology Hub</title>
+<title>Hackensack University Medical Center Interpreter Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
@@ -68,8 +68,21 @@
     font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
     color:var(--accent); font-weight:600;
   }
-  .brand h1{ font-family:var(--serif); font-size:21px; margin:5px 0 6px 0; font-weight:400; letter-spacing:-.01em; line-height:1.2;}
+  .brand h1{ font-family:var(--serif); font-size:17px; margin:5px 0 6px 0; font-weight:400; letter-spacing:-.005em; line-height:1.32;}
   .brand p{ font-size:11.5px; color:var(--ink-soft); margin:0; line-height:1.55;}
+
+  .hipaa-notice{
+    display:flex; align-items:flex-start; gap:8px; margin-top:12px; padding:10px 11px;
+    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:10px;
+    font-size:10.5px; line-height:1.5; color:#7A5D28;
+  }
+  .hipaa-notice svg{ width:14px; height:14px; flex-shrink:0; margin-top:1px; color:#B8923E; }
+  .hipaa-notice-inline{
+    display:flex; align-items:center; gap:7px; margin:-4px 0 16px 0; padding:8px 12px;
+    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:20px;
+    font-size:11px; color:#7A5D28; width:fit-content;
+  }
+  .hipaa-notice-inline svg{ width:13px; height:13px; flex-shrink:0; color:#B8923E; }
 
   .tab{
     position:relative; display:flex; align-items:center; gap:10px;
@@ -94,6 +107,105 @@
   }
   .tab.active .count{ background:var(--accent-soft); color:var(--accent); border-color:transparent; }
 
+  .tab-delete{
+    opacity:0; font-size:11px; color:var(--ink-faint); padding:3px 5px; border-radius:5px; cursor:pointer;
+    transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
+  }
+  .tab:hover .tab-delete{ opacity:1; }
+  .tab-delete:hover{ color:var(--danger); background:var(--danger-soft); }
+
+  .tab.add-domain-btn{
+    border:1px dashed var(--line); color:var(--ink-faint); margin-top:2px; margin-bottom:6px;
+  }
+  .tab.add-domain-btn .flag{ box-shadow:none; display:flex; align-items:center; justify-content:center; width:16px; height:16px; transform:none; }
+  .tab.add-domain-btn:hover{ border-color:var(--accent-2); color:var(--accent); background:var(--accent-soft); }
+
+  .swatch-row{ display:flex; flex-wrap:wrap; gap:9px; margin-top:2px; }
+  .swatch{
+    width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid transparent; padding:0;
+    transition:transform .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .swatch:hover{ transform:scale(1.1); }
+  .swatch.selected{ box-shadow:0 0 0 2px var(--paper), 0 0 0 4px var(--ink-soft); }
+
+  /* ---------- Healthcare Providers ---------- */
+  .provider-top{ display:flex; align-items:center; gap:12px; margin-bottom:11px; }
+  .provider-avatar{
+    width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0;
+    box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .provider-avatar-fallback{
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
+    font-family:var(--sans); font-weight:600; font-size:15px;
+  }
+  .provider-name{ font-family:var(--sans); font-weight:600; font-size:15.5px; margin-bottom:4px; line-height:1.3; }
+  .provider-role-tag{ color:var(--accent); background:var(--accent-soft); }
+  .provider-facility{ font-size:12.5px; color:var(--ink-soft); margin:0 0 9px 0; line-height:1.5; }
+  .provider-phone{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--accent);
+    text-decoration:none; font-weight:600; margin-bottom:4px;
+  }
+  .provider-phone:hover{ text-decoration:underline; }
+  .provider-phone svg{ width:12px; height:12px; }
+
+  .photo-field{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .photo-preview{ width:54px; height:54px; border-radius:50%; object-fit:cover; box-shadow:inset 0 0 0 1px var(--line); flex-shrink:0; }
+  .photo-placeholder{
+    width:54px; height:54px; border-radius:50%; flex-shrink:0; background:var(--bg-hi);
+    box-shadow:inset 0 0 0 1px var(--line); display:flex; align-items:center; justify-content:center; color:var(--ink-faint);
+  }
+  .photo-placeholder svg{ width:20px; height:20px; }
+  .file-input-label{
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--accent); cursor:pointer;
+    background:var(--accent-soft); padding:8px 14px; border-radius:var(--r-sm); display:inline-block;
+  }
+  .file-input-label:hover{ filter:brightness(0.97); }
+  .file-input-hidden{ display:none; }
+
+  .count.unread{ background:var(--danger); color:#fff; font-weight:700; border-color:transparent; }
+
+  /* ---------- Team Chat ---------- */
+  .chat-panel{ display:flex; flex-direction:column; height:65vh; min-height:380px; max-height:640px; }
+  .chat-messages{
+    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px;
+    padding:6px 6px 16px 6px; scroll-behavior:smooth;
+  }
+  .chat-empty{ margin:auto; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.6; }
+  .chat-bubble-row{ display:flex; flex-direction:column; max-width:66%; }
+  .chat-bubble-row.me{ align-self:flex-end; align-items:flex-end; }
+  .chat-bubble-row.them{ align-self:flex-start; align-items:flex-start; }
+  .chat-author{ font-family:var(--sans); font-size:10.5px; font-weight:600; color:var(--ink-faint); margin:0 4px 3px 4px; }
+  .chat-bubble{ padding:10px 14px; border-radius:16px; font-size:13.5px; line-height:1.55; word-break:break-word; }
+  .chat-bubble-row.me .chat-bubble{
+    background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff; border-bottom-right-radius:4px;
+  }
+  .chat-bubble-row.them .chat-bubble{
+    background:var(--paper); color:var(--ink); border-bottom-left-radius:4px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .chat-time{ font-family:var(--mono); font-size:9px; color:var(--ink-faint); margin:4px 4px 0 4px; }
+  .chat-join-hint{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin:2px 0 12px 0; line-height:1.6; }
+  .chat-input-row{ display:flex; gap:10px; padding-top:14px; margin-top:4px; border-top:1px solid var(--line); }
+  .chat-input-row input{
+    flex:1; padding:12px 16px; border:1px solid var(--line); border-radius:24px;
+    font-family:var(--sans); font-size:14px; background:var(--paper); color:var(--ink);
+    transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
+  }
+  .chat-input-row input:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); }
+  .chat-send-btn{
+    width:44px; height:44px; border-radius:50%; flex-shrink:0; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(140deg, var(--accent-2), var(--accent));
+    box-shadow:0 8px 16px -8px rgba(92,131,116,0.45); transition:filter .15s var(--ease), transform .15s var(--ease);
+  }
+  .chat-send-btn:hover{ filter:brightness(1.05); }
+  .chat-send-btn:active{ transform:scale(0.94); }
+  .chat-send-btn svg{ width:17px; height:17px; margin-left:-1px; }
+
+  /* ---------- Notes ---------- */
+  .note-text{ font-size:14px; line-height:1.68; color:var(--ink); white-space:pre-wrap; margin:6px 0 0 0; }
+
   .nav-divider{ height:1px; margin:10px 20px; background:linear-gradient(90deg, var(--line), transparent); }
   .tab .link-flag{
     width:18px; height:18px; border-radius:5px; flex-shrink:0; transform:none;
@@ -105,13 +217,13 @@
   /* ---------- Link Directory ---------- */
   .dir-group{ margin-bottom:8px; }
   .dir-row{
-    display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:10px;
+    display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:10px;
     background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
     margin-bottom:7px; transition:box-shadow .15s var(--ease), transform .15s var(--ease);
   }
   .dir-row:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); transform:translateX(2px); }
   .dir-row .dir-dot{ width:8px; height:8px; border-radius:2px; flex-shrink:0; transform:rotate(45deg); }
-  .dir-row .dir-term{ font-family:var(--sans); font-weight:600; font-size:13.5px; min-width:0; flex:0 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
+  .dir-row .dir-term{ font-family:var(--sans); font-weight:600; font-size:13.5px; min-width:0; flex:0 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
   .dir-row .dir-kind{
     font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint);
     background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:2px 8px; flex-shrink:0;
@@ -122,7 +234,8 @@
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:none;
   }
   .dir-row .dir-url:hover{ text-decoration:underline; }
-  .dir-row .dir-go{ flex-shrink:0; color:var(--ink-faint); }
+  .dir-row .dir-go{ flex-shrink:0; color:var(--ink-faint); display:flex; text-decoration:none; }
+  .dir-row .dir-go:hover{ color:var(--accent); }
   .dir-row .dir-go svg{ width:12px; height:12px; }
 
   .sidebar-footer{margin-top:auto; padding:16px 20px 0 20px; position:relative;}
@@ -311,6 +424,53 @@
   </div>
 </div>
 
+<div class="overlay" id="domainOverlay">
+  <div class="modal">
+    <h3>Add a domain</h3>
+    <div class="field"><label>Domain name</label><input id="fDomainName" type="text" placeholder="e.g. Psychiatry &amp; Behavioral Health"></div>
+    <div class="field"><label>Color</label><div class="swatch-row" id="swatchRow"></div></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDomainModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDomain()">Create domain</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="providerOverlay">
+  <div class="modal">
+    <h3 id="providerModalTitle">Add provider</h3>
+    <div class="field"><label>Name</label><input id="fPName" type="text" placeholder="e.g. Dr. Angela Waintrub"></div>
+    <div class="field"><label>Specialty / role (optional)</label><input id="fPRole" type="text" placeholder="e.g. Pediatric Oncology"></div>
+    <div class="field"><label>Facility / department (optional)</label><input id="fPFacility" type="text" placeholder="e.g. HUMC — Joseph M. Sanzari Children's Hospital"></div>
+    <div class="field"><label>Phone (optional)</label><input id="fPPhone" type="text" placeholder="e.g. (551) 555-0123"></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="fPNotes" placeholder="Scheduling notes, best way to reach, languages, etc."></textarea></div>
+    <div class="field">
+      <label>Photo (optional)</label>
+      <div class="photo-field">
+        <div id="photoPreviewWrap"></div>
+        <label class="file-input-label" for="fPPhoto">Choose photo</label>
+        <input class="file-input-hidden" id="fPPhoto" type="file" accept="image/*" onchange="handlePhotoSelect(event)">
+        <button type="button" class="btn btn-ghost" style="padding:8px 12px; font-size:12.5px;" onclick="removePendingPhoto()">Remove</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeProviderModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProvider()">Save provider</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="noteOverlay">
+  <div class="modal">
+    <h3 id="noteModalTitle">Add note</h3>
+    <div class="field"><label>Note</label><textarea id="fNoteText" placeholder="Share a reminder, tip, or update with the team…" style="min-height:120px;"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeNoteModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save note</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- ===================================================================
@@ -329,6 +489,9 @@
           service cloud.firestore {
             match /databases/{database}/documents {
               match /terminology-hub/{docId} { allow read, write: if true; }
+              match /healthcare-providers/{docId} { allow read, write: if true; }
+              match /team-chat/{docId} { allow read, write: if true; }
+              match /team-notes/{docId} { allow read, write: if true; }
             }
           }
         (This keeps the app open to your whole team with no login,
@@ -458,6 +621,20 @@ let searchQuery = '';
 let editingContext = null; // {categoryId, termIndex} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
 
+let PROVIDERS = [];
+let editingProviderId = null;
+let pendingPhotoDataUrl = null;
+const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05E','#7C8FA8','#A97C5D'];
+let selectedSwatch = DOMAIN_COLORS[0];
+
+let NOTES = [];
+let editingNoteId = null;
+
+let CHAT_MESSAGES = [];
+let chatListenerStarted = false;
+let isInitialChatLoad = true;
+let lastSeenChatCount = 0;
+
 /* ============ Storage ============ */
 async function loadData(){
   try{
@@ -482,6 +659,102 @@ async function persist(){
   }catch(err){
     showToast('Could not save. Check connection and retry.');
   }
+}
+
+/* ============ Healthcare Providers (own Firestore collection —
+   keeps each provider + photo well under the 1MB per-document limit,
+   instead of bundling everything into the single terminology blob) ============ */
+async function loadProviders(){
+  try{
+    if(!db){ PROVIDERS = []; return; }
+    const snap = await db.collection('healthcare-providers').get();
+    PROVIDERS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(err){
+    console.error('Could not load providers', err);
+    PROVIDERS = [];
+  }
+  render();
+}
+
+async function persistProvider(record, existingId){
+  if(!db){ showToast('Not connected to the database.'); return null; }
+  if(existingId){
+    await db.collection('healthcare-providers').doc(existingId).set(record);
+    return existingId;
+  }
+  const ref = await db.collection('healthcare-providers').add(record);
+  return ref.id;
+}
+
+async function deleteProviderRemote(id){
+  if(!db) return;
+  await db.collection('healthcare-providers').doc(id).delete();
+}
+
+/* ============ Notes (own collection, loaded once like providers —
+   refresh to see a teammate's new note, same tradeoff as the rest
+   of the app except chat, which is genuinely real-time) ============ */
+async function loadNotes(){
+  try{
+    if(!db){ NOTES = []; return; }
+    const snap = await db.collection('team-notes').get();
+    NOTES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(err){
+    console.error('Could not load notes', err);
+    NOTES = [];
+  }
+  render();
+}
+
+async function persistNote(record, existingId){
+  if(!db){ showToast('Not connected to the database.'); return null; }
+  if(existingId){
+    await db.collection('team-notes').doc(existingId).set(record);
+    return existingId;
+  }
+  const ref = await db.collection('team-notes').add(record);
+  return ref.id;
+}
+
+async function deleteNoteRemote(id){
+  if(!db) return;
+  await db.collection('team-notes').doc(id).delete();
+}
+
+/* ============ Team Chat (real-time — this is the one section that
+   uses Firestore's live listener instead of load-once, so messages
+   appear for everyone without a refresh, Messenger-style).
+
+   IMPORTANT: the listener callback below NEVER calls the full render()
+   function. A background message arriving while someone is mid-edit
+   elsewhere in the app (typing a term, filling out a modal) must not
+   rebuild the whole page out from under them. It only touches the
+   chat panel itself, or a single badge element, by id. ============ */
+function startChatListener(){
+  if(chatListenerStarted || !db) return;
+  chatListenerStarted = true;
+  db.collection('team-chat').orderBy('timestamp').onSnapshot(snap=>{
+    CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if(isInitialChatLoad){
+      isInitialChatLoad = false;
+      lastSeenChatCount = CHAT_MESSAGES.length; // don't flag pre-existing history as "unread"
+    }
+    if(activeCategory === 'chat'){
+      lastSeenChatCount = CHAT_MESSAGES.length;
+      renderChatMessages();
+    }
+    updateChatBadge();
+  }, err=>{
+    console.error('Chat listener error:', err);
+  });
+}
+
+function updateChatBadge(){
+  const badge = document.getElementById('chatBadge');
+  if(!badge) return;
+  const unread = Math.max(0, CHAT_MESSAGES.length - lastSeenChatCount);
+  badge.textContent = unread > 0 ? unread : CHAT_MESSAGES.length;
+  badge.classList.toggle('unread', unread > 0);
 }
 
 /* ============ Utilities ============ */
@@ -509,6 +782,13 @@ function mplusUrl(term, lang){
 }
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const ICON_PERSON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5 19.5C5 16 8 14 12 14C16 14 19 16 19 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_PHONE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4H9.5L11 8L8.5 9.5C9.5 11.5 11.5 13.5 13.5 14.5L15 12L19 13.5V16.5C19 17.6 18.1 18.5 17 18.5C10.4 18.1 5.9 13.6 5.5 7C5.5 5.9 6.4 5 7.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_CHAT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20C10.5 20 9.09 19.6 7.88 18.89L4 20L5.11 16.12C4.4 14.91 4 13.5 4 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="1.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 8.5H16M8 12H16M8 15.5H12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12L21 4L14 21L11 13L3 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L19 6V11C19 15.5 16 19 12 21C8 19 5 15.5 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function renderLinks(t, categoryId){
   const links = [];
   if(t.url){
@@ -526,6 +806,7 @@ function renderLinks(t, categoryId){
 
 /* ============ Rendering ============ */
 function render(){
+  if(!DATA) return;
   const app = document.getElementById('app');
   const totalTerms = DATA.categories.reduce((n,c)=>n+c.terms.length,0);
 
@@ -540,12 +821,35 @@ function render(){
        <span class="flag" style="background:${c.color}; color:${c.color};"></span>
        <span class="name">${escapeHtml(c.name)}</span>
        <span class="count">${c.terms.length}</span>
+       ${c.terms.length===0 ? `<span class="tab-delete" title="Delete this empty domain" onclick="event.stopPropagation(); deleteDomain('${c.id}')">✕</span>` : ''}
      </button>
   `)).join('');
 
+  const addDomainBtn = `
+     <button class="tab add-domain-btn" onclick="openAddDomainModal()">
+       <span class="flag">${ICON_PLUS}</span>
+       <span class="name">Add domain</span>
+     </button>
+  `;
+
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
-  const directoryTab = `
+  const extrasTabs = `
      <div class="nav-divider"></div>
+     <button class="tab ${activeCategory==='chat'?'active':''}" onclick="setCategory('chat')">
+       <span class="flag link-flag">${ICON_CHAT}</span>
+       <span class="name">Team Chat</span>
+       <span class="count" id="chatBadge">${CHAT_MESSAGES.length}</span>
+     </button>
+     <button class="tab ${activeCategory==='notes'?'active':''}" onclick="setCategory('notes')">
+       <span class="flag link-flag">${ICON_NOTE}</span>
+       <span class="name">Notes</span>
+       <span class="count">${NOTES.length}</span>
+     </button>
+     <button class="tab ${activeCategory==='providers'?'active':''}" onclick="setCategory('providers')">
+       <span class="flag link-flag">${ICON_PERSON}</span>
+       <span class="name">Healthcare Providers</span>
+       <span class="count">${PROVIDERS.length}</span>
+     </button>
      <button class="tab ${activeCategory==='directory'?'active':''}" onclick="setCategory('directory')">
        <span class="flag link-flag">${ICON_CHAIN}</span>
        <span class="name">Link Directory</span>
@@ -553,40 +857,66 @@ function render(){
      </button>
   `;
 
+  let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`;
+  let searchPlaceholder = 'Search terms, definitions, Spanish equivalents…';
+  let showTopbar = true;
+  let showStatStrip = true;
+  if(activeCategory === 'providers'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
+    searchPlaceholder = 'Search providers, specialties, facilities…';
+  } else if(activeCategory === 'directory'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
+    searchPlaceholder = 'Search links…';
+  } else if(activeCategory === 'notes'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddNoteModal()">+ Add note</button>`;
+    searchPlaceholder = 'Search notes…';
+  } else if(activeCategory === 'chat'){
+    showTopbar = false;
+    showStatStrip = false;
+  }
+
   app.innerHTML = `
     <div class="sidebar">
       <div class="brand">
         <div class="mark"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12V20H5.5C4.67 20 4 19.33 4 18.5V5.5Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 4H18.5C19.33 4 20 4.67 20 5.5V18.5C20 19.33 19.33 20 18.5 20H12" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 8H9M8 11H9" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg></div>
         <div class="eyebrow">Interpreter Reference</div>
-        <h1>Terminology Hub</h1>
-        <p>A shared, editable glossary maintained by the interpreter team. Compiled from notes by Fabiola Grijalva, Bertha Bravo Hernandez, and colleagues.</p>
+        <h1>Hackensack University Medical Center Interpreter Hub</h1>
+        <p>A shared home base for the interpreter team — terminology, provider directory, notes, and live chat, all in one place. Glossary compiled from notes by Fabiola Grijalva, Bertha Bravo Hernandez, and colleagues.</p>
+        <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
       </div>
       ${sidebarTabs}
-      ${directoryTab}
+      ${addDomainBtn}
+      ${extrasTabs}
       <div class="sidebar-footer">
         <div class="whoami">Attribute my edits as</div>
         <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
       </div>
     </div>
     <div class="main">
+      ${showTopbar ? `
       <div class="topbar">
-        <div class="search"><input id="searchInput" type="text" placeholder="Search terms, definitions, Spanish equivalents…" value="${escapeHtml(searchQuery)}"></div>
-        <button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>
-      </div>
+        <div class="search"><input id="searchInput" type="text" placeholder="${searchPlaceholder}" value="${escapeHtml(searchQuery)}"></div>
+        ${addBtnHtml}
+      </div>` : ''}
+      ${showStatStrip ? `
       <div class="stat-strip">
         <div class="stat"><b>${totalTerms}</b><span>terms</span></div>
         <div class="stat"><b>${DATA.categories.length}</b><span>domains</span></div>
+        <div class="stat"><b>${PROVIDERS.length}</b><span>providers</span></div>
         <div class="stat"><b>${DATA.categories.reduce((n,c)=>n+c.terms.filter(t=>t.url).length,0)}</b><span>with a confirmed source link</span></div>
-      </div>
+      </div>` : ''}
       <div id="content"></div>
     </div>
   `;
 
-  document.getElementById('searchInput').addEventListener('input', (e)=>{
-    searchQuery = e.target.value;
-    renderContent();
-  });
-  document.getElementById('searchInput').focus();
+  const searchInputEl = document.getElementById('searchInput');
+  if(searchInputEl){
+    searchInputEl.addEventListener('input', (e)=>{
+      searchQuery = e.target.value;
+      renderContent();
+    });
+    searchInputEl.focus();
+  }
   if(window.__lastWho) document.getElementById('whoInput').value = window.__lastWho;
   document.getElementById('whoInput').addEventListener('input', (e)=>{ window.__lastWho = e.target.value; });
 
@@ -599,6 +929,43 @@ function renderContent(){
 
   if(activeCategory === 'directory'){
     content.innerHTML = renderDirectory(q);
+    return;
+  }
+
+  if(activeCategory === 'providers'){
+    content.innerHTML = renderProviders(q);
+    return;
+  }
+
+  if(activeCategory === 'notes'){
+    content.innerHTML = renderNotes(q);
+    return;
+  }
+
+  if(activeCategory === 'chat'){
+    const hasName = !!whoAmI();
+    content.innerHTML = `
+      <div class="section-head"><h2>Team Chat</h2><span class="sub">${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}</span></div>
+      <div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>
+      <div class="chat-panel">
+        <div class="chat-messages" id="chatMessages"></div>
+        ${hasName ? `
+          <div class="chat-input-row">
+            <input id="chatInput" type="text" placeholder="Message your team…" onkeydown="handleChatKeydown(event)">
+            <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">${ICON_SEND}</button>
+          </div>
+        ` : `
+          <div class="chat-join-hint">👋 Add your name to join the conversation — your team will see it next to your messages.</div>
+          <div class="chat-input-row">
+            <input id="chatNameInput" type="text" placeholder="Your name" onkeydown="handleChatNameKeydown(event)">
+            <button class="btn btn-primary" style="border-radius:24px;" onclick="joinChat()">Join chat</button>
+          </div>
+        `}
+      </div>
+    `;
+    renderChatMessages();
+    const focusTarget = document.getElementById(hasName ? 'chatInput' : 'chatNameInput');
+    if(focusTarget) focusTarget.focus();
     return;
   }
 
@@ -652,7 +1019,191 @@ function renderContent(){
 
 function setCategory(id){
   activeCategory = id;
+  if(id === 'chat'){ lastSeenChatCount = CHAT_MESSAGES.length; }
   render();
+}
+
+function renderProviders(q){
+  let list = PROVIDERS.slice();
+  if(q){
+    list = list.filter(p =>
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.role||'').toLowerCase().includes(q) ||
+      (p.facility||'').toLowerCase().includes(q) ||
+      (p.notes||'').toLowerCase().includes(q)
+    );
+  }
+  list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+
+  if(list.length===0){
+    const msg = PROVIDERS.length===0
+      ? 'No healthcare providers added yet.<br>Add the first one your team works with.'
+      : 'No providers match your search.';
+    return `<div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
+  }
+
+  let html = `<div class="section-head"><h2>Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
+  html += `<div class="grid">`;
+  list.forEach(p=>{
+    const initials = (p.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const phoneDigits = (p.phone||'').replace(/[^0-9+]/g,'');
+    html += `
+      <div class="card">
+        <div class="actions" style="position:absolute; top:16px; right:16px;">
+          <button class="icon-btn" title="Edit" onclick="openEditProviderModal('${p.id}')">✎</button>
+          <button class="icon-btn danger" title="Delete" onclick="deleteProvider('${p.id}')">✕</button>
+        </div>
+        <div class="provider-top">
+          ${p.photo
+            ? `<img class="provider-avatar" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}">`
+            : `<div class="provider-avatar provider-avatar-fallback">${escapeHtml(initials||'?')}</div>`}
+          <div>
+            <div class="provider-name">${escapeHtml(p.name)}</div>
+            ${p.role ? `<span class="tag provider-role-tag">${escapeHtml(p.role)}</span>` : ''}
+          </div>
+        </div>
+        ${p.facility ? `<p class="provider-facility">${escapeHtml(p.facility)}</p>` : ''}
+        ${p.phone ? `<a class="provider-phone" href="tel:${escapeAttr(phoneDigits)}">${ICON_PHONE}${escapeHtml(p.phone)}</a>` : ''}
+        ${p.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(p.notes)}</p>` : ''}
+        <div class="meta">
+          <span class="source"></span>
+          <span class="source">${p.addedBy ? 'Added by ' + escapeHtml(p.addedBy) : ''}</span>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  return html;
+}
+
+/* ============ Team Chat: rendering + sending ============
+   renderChatMessages() ONLY touches #chatMessages — it's called both
+   when you open the tab and by the background real-time listener, so
+   it must never disturb the input field or the rest of the page. */
+function renderChatMessages(){
+  const container = document.getElementById('chatMessages');
+  if(!container) return;
+
+  const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+  const myName = whoAmI().trim().toLowerCase();
+
+  if(CHAT_MESSAGES.length===0){
+    container.innerHTML = `<div class="chat-empty">No messages yet.<br>Say hello to the team.</div>`;
+    return;
+  }
+
+  container.innerHTML = CHAT_MESSAGES.map(m=>{
+    const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
+    const time = m.timestamp ? new Date(m.timestamp).toLocaleString(undefined,{month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
+    return `
+      <div class="chat-bubble-row ${mine ? 'me' : 'them'}">
+        ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
+        <div class="chat-bubble">${escapeHtml(m.text)}</div>
+        <div class="chat-time">${time}</div>
+      </div>
+    `;
+  }).join('');
+
+  if(wasNearBottom){
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+async function sendChatMessage(){
+  const input = document.getElementById('chatInput');
+  if(!input) return;
+  const text = input.value.trim();
+  if(!text) return;
+
+  const author = whoAmI();
+  if(!author){
+    showToast('Add your name in the sidebar first, so your team knows who\'s chatting.');
+    return;
+  }
+  if(!db){
+    showToast('Not connected to the database.');
+    return;
+  }
+
+  input.value = '';
+  input.disabled = true;
+  try{
+    await db.collection('team-chat').add({ text, author, timestamp: Date.now() });
+    // No manual state update needed — the real-time listener picks this up
+    // for everyone, including the sender, and calls renderChatMessages().
+  }catch(err){
+    showToast('Could not send — check your connection.');
+    input.value = text; // give the message back so it isn't lost
+  }
+  input.disabled = false;
+  input.focus();
+}
+
+function handleChatKeydown(event){
+  if(event.key === 'Enter' && !event.shiftKey){
+    event.preventDefault();
+    sendChatMessage();
+  }
+}
+
+function joinChat(){
+  const nameInput = document.getElementById('chatNameInput');
+  if(!nameInput) return;
+  const name = nameInput.value.trim();
+  if(!name){ showToast('Enter a name to continue.'); return; }
+
+  window.__lastWho = name;
+  const whoEl = document.getElementById('whoInput');
+  if(whoEl) whoEl.value = name; // keep the sidebar field in sync too
+
+  renderContent(); // swaps the join prompt for the real message input, in place
+}
+
+function handleChatNameKeydown(event){
+  if(event.key === 'Enter'){
+    event.preventDefault();
+    joinChat();
+  }
+}
+
+/* ============ Notes: rendering ============ */
+function renderNotes(q){
+  let list = NOTES.slice();
+  if(q){
+    list = list.filter(n => (n.text||'').toLowerCase().includes(q) || (n.author||'').toLowerCase().includes(q));
+  }
+  list.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+
+  const notice = `<div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>`;
+
+  if(list.length===0){
+    const msg = NOTES.length===0
+      ? 'No notes yet.<br>Leave the first one for your team.'
+      : 'No notes match your search.';
+    return notice + `<div class="empty"><div class="glyph">${ICON_NOTE}</div>${msg}</div>`;
+  }
+
+  let html = `<div class="section-head"><h2>Notes</h2><span class="sub">${list.length} note${list.length===1?'':'s'}</span></div>`;
+  html += notice;
+  html += `<div class="grid">`;
+  list.forEach(n=>{
+    const dateLabel = n.createdAt ? new Date(n.createdAt).toLocaleDateString(undefined,{month:'short', day:'numeric'}) : '';
+    html += `
+      <div class="card">
+        <div class="actions" style="position:absolute; top:16px; right:16px;">
+          <button class="icon-btn" title="Edit" onclick="openEditNoteModal('${n.id}')">✎</button>
+          <button class="icon-btn danger" title="Delete" onclick="deleteNote('${n.id}')">✕</button>
+        </div>
+        <p class="note-text">${escapeHtml(n.text)}</p>
+        <div class="meta">
+          <span class="source">${n.author ? escapeHtml(n.author) : 'Anonymous'}</span>
+          <span class="source">${dateLabel}</span>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  return html;
 }
 
 function renderDirectory(q){
@@ -667,10 +1218,10 @@ function renderDirectory(q){
       if(!matches) return;
 
       if(t.url){
-        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url });
+        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url, idx });
       } else if(cat.id !== 'resources'){
-        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en') });
-        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es') });
+        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en'), idx });
+        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es'), idx });
       }
     });
     if(rows.length===0) return;
@@ -680,13 +1231,14 @@ function renderDirectory(q){
     sectionsHtml += `<div class="dir-group">`;
     rows.forEach(r=>{
       sectionsHtml += `
-        <a class="dir-row" href="${escapeAttr(r.url)}" target="_blank" rel="noopener">
+        <div class="dir-row">
           <span class="dir-dot" style="background:${cat.color}"></span>
           <span class="dir-term">${r.term}</span>
           <span class="dir-kind ${r.confirmed?'confirmed':''}">${r.kind}</span>
-          <span class="dir-url">${escapeHtml(r.url)}</span>
-          <span class="dir-go">${ICON_EXTERNAL}</span>
-        </a>
+          <a class="dir-url" href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a>
+          <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', ${r.idx})">✎</button>
+          <a class="dir-go" href="${escapeAttr(r.url)}" target="_blank" rel="noopener" title="Open link">${ICON_EXTERNAL}</a>
+        </div>
       `;
     });
     sectionsHtml += `</div>`;
@@ -697,23 +1249,24 @@ function renderDirectory(q){
   }
 
   const intro = `<p style="font-size:12.5px; color:var(--ink-soft); max-width:640px; margin:-6px 0 26px 0; line-height:1.6;">
-    Every clickable reference in the glossary, in one place — confirmed source links your team has pasted in, plus the live MedlinePlus lookups used as a fallback. Click "Edit term" on any card to swap a lookup for the exact source.
+    Every clickable reference in the glossary, in one place — confirmed source links your team has pasted in, plus the live MedlinePlus lookups used as a fallback. Click the pencil on any row to edit a link, or use "+ Add link" above to add a new one to any domain.
   </p>`;
 
   return intro + sectionsHtml;
 }
 
 /* ============ Add / Edit / Delete ============ */
-function openAddModal(){
+function openAddModal(fromDirectory){
   editingContext = null;
-  document.getElementById('modalTitle').textContent = 'Add term';
+  document.getElementById('modalTitle').textContent = fromDirectory ? 'Add link' : 'Add term';
   document.getElementById('fEn').value = '';
   document.getElementById('fEs').value = '';
   document.getElementById('fDef').value = '';
   document.getElementById('fSource').value = '';
   document.getElementById('fSourceUrl').value = '';
   populateCategorySelect();
-  document.getElementById('fCategory').value = activeCategory==='all' ? DATA.categories[0].id : activeCategory;
+  const isRealDomain = DATA.categories.some(c=>c.id===activeCategory);
+  document.getElementById('fCategory').value = isRealDomain ? activeCategory : DATA.categories[0].id;
   document.getElementById('overlay').classList.add('show');
   document.getElementById('fEn').focus();
 }
@@ -758,9 +1311,15 @@ async function saveTerm(){
 
   if(editingContext){
     const oldCat = DATA.categories.find(c=>c.id===editingContext.categoryId);
-    oldCat.terms.splice(editingContext.idx, 1);
-    const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
-    targetCat.terms.push(record);
+    if(editingContext.categoryId === newCategoryId){
+      // Same domain — update in place so the term doesn't jump to the bottom of the list.
+      oldCat.terms[editingContext.idx] = record;
+    } else {
+      // Moved to a different domain — remove from the old one, append to the new one.
+      oldCat.terms.splice(editingContext.idx, 1);
+      const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
+      targetCat.terms.push(record);
+    }
   } else {
     const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
     targetCat.terms.push(record);
@@ -782,8 +1341,268 @@ async function deleteTerm(categoryId, idx){
   render();
 }
 
+/* ============ Add / delete domain ============ */
+function slugify(s){
+  return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'domain';
+}
+
+function openAddDomainModal(){
+  document.getElementById('fDomainName').value = '';
+  selectedSwatch = DOMAIN_COLORS[Math.floor(Math.random()*DOMAIN_COLORS.length)];
+  renderSwatches();
+  document.getElementById('domainOverlay').classList.add('show');
+  document.getElementById('fDomainName').focus();
+}
+
+function closeDomainModal(){
+  document.getElementById('domainOverlay').classList.remove('show');
+}
+
+function renderSwatches(){
+  const row = document.getElementById('swatchRow');
+  row.innerHTML = DOMAIN_COLORS.map(c=>
+    `<span class="swatch ${c===selectedSwatch?'selected':''}" style="background:${c};" onclick="pickSwatch('${c}')"></span>`
+  ).join('');
+}
+
+function pickSwatch(c){
+  selectedSwatch = c;
+  renderSwatches();
+}
+
+async function saveDomain(){
+  const name = document.getElementById('fDomainName').value.trim();
+  if(!name){ showToast('Domain name is required.'); return; }
+  const reserved = ['all','directory','providers'];
+  const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
+  const base = slugify(name);
+  let id = base, n = 2;
+  while(existingIds.includes(id)){ id = `${base}-${n}`; n++; }
+
+  DATA.categories.push({ id, name, color: selectedSwatch, terms: [] });
+  closeDomainModal();
+  await persist();
+  activeCategory = id;
+  showToast('Domain created.');
+  render();
+}
+
+function deleteDomain(id){
+  const cat = DATA.categories.find(c=>c.id===id);
+  if(!cat) return;
+  if(cat.terms.length>0){ showToast('Remove all terms from a domain before deleting it.'); return; }
+  if(!confirm(`Delete the empty "${cat.name}" domain?`)) return;
+  DATA.categories = DATA.categories.filter(c=>c.id!==id);
+  if(activeCategory===id) activeCategory = 'all';
+  persist().then(()=>{ showToast('Domain deleted.'); render(); });
+}
+
+/* ============ Healthcare Providers: modal + photo handling ============ */
+function openAddProviderModal(){
+  editingProviderId = null;
+  pendingPhotoDataUrl = null;
+  document.getElementById('providerModalTitle').textContent = 'Add provider';
+  document.getElementById('fPName').value = '';
+  document.getElementById('fPRole').value = '';
+  document.getElementById('fPFacility').value = '';
+  document.getElementById('fPPhone').value = '';
+  document.getElementById('fPNotes').value = '';
+  document.getElementById('fPPhoto').value = '';
+  renderPhotoPreview();
+  document.getElementById('providerOverlay').classList.add('show');
+  document.getElementById('fPName').focus();
+}
+
+function openEditProviderModal(id){
+  const p = PROVIDERS.find(x=>x.id===id);
+  if(!p) return;
+  editingProviderId = id;
+  pendingPhotoDataUrl = p.photo || null;
+  document.getElementById('providerModalTitle').textContent = 'Edit provider';
+  document.getElementById('fPName').value = p.name || '';
+  document.getElementById('fPRole').value = p.role || '';
+  document.getElementById('fPFacility').value = p.facility || '';
+  document.getElementById('fPPhone').value = p.phone || '';
+  document.getElementById('fPNotes').value = p.notes || '';
+  document.getElementById('fPPhoto').value = '';
+  renderPhotoPreview();
+  document.getElementById('providerOverlay').classList.add('show');
+  document.getElementById('fPName').focus();
+}
+
+function closeProviderModal(){
+  document.getElementById('providerOverlay').classList.remove('show');
+  editingProviderId = null;
+  pendingPhotoDataUrl = null;
+}
+
+function renderPhotoPreview(){
+  const wrap = document.getElementById('photoPreviewWrap');
+  if(pendingPhotoDataUrl){
+    wrap.innerHTML = `
+      <img class="photo-preview" src="${pendingPhotoDataUrl}" alt="Preview">
+    `;
+  } else {
+    wrap.innerHTML = `<div class="photo-placeholder">${ICON_PERSON}</div>`;
+  }
+}
+
+function removePendingPhoto(){
+  pendingPhotoDataUrl = null;
+  document.getElementById('fPPhoto').value = '';
+  renderPhotoPreview();
+}
+
+// Resizes/compresses the chosen photo client-side (max 480px, JPEG ~70%)
+// before it's ever saved, so a single provider document stays well under
+// Firestore's 1MB limit — no separate file-storage service needed.
+function handlePhotoSelect(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Please choose an image file.'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxDim = 480;
+      let w = img.width, h = img.height;
+      if(w >= h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+      else if(h > w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      pendingPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      renderPhotoPreview();
+    };
+    img.onerror = ()=>{ showToast('Could not read that image.'); };
+    img.src = e.target.result;
+  };
+  reader.onerror = ()=>{ showToast('Could not read that image.'); };
+  reader.readAsDataURL(file);
+}
+
+async function saveProvider(){
+  const name = document.getElementById('fPName').value.trim();
+  if(!name){ showToast('Provider name is required.'); return; }
+  const role = document.getElementById('fPRole').value.trim();
+  const facility = document.getElementById('fPFacility').value.trim();
+  const phone = document.getElementById('fPPhone').value.trim();
+  const notes = document.getElementById('fPNotes').value.trim();
+  const editor = whoAmI();
+  const existing = editingProviderId ? PROVIDERS.find(p=>p.id===editingProviderId) : null;
+
+  const record = {
+    name, role, facility, phone, notes,
+    photo: pendingPhotoDataUrl || null,
+    addedBy: editor || (existing && existing.addedBy) || '',
+    updatedAt: Date.now()
+  };
+
+  try{
+    const id = await persistProvider(record, editingProviderId);
+    if(!id) return;
+    if(editingProviderId){
+      const idx = PROVIDERS.findIndex(p=>p.id===editingProviderId);
+      if(idx>-1) PROVIDERS[idx] = { id, ...record };
+    } else {
+      PROVIDERS.push({ id, ...record });
+    }
+    closeProviderModal();
+    showToast('Provider saved.');
+    render();
+  }catch(err){
+    showToast('Could not save provider — check your connection.');
+  }
+}
+
+async function deleteProvider(id){
+  const p = PROVIDERS.find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm(`Delete "${p.name}"? This can't be undone.`)) return;
+  try{
+    await deleteProviderRemote(id);
+    PROVIDERS = PROVIDERS.filter(x=>x.id!==id);
+    showToast('Provider deleted.');
+    render();
+  }catch(err){
+    showToast('Could not delete — check your connection.');
+  }
+}
+
+/* ============ Notes: modal ============ */
+function openAddNoteModal(){
+  editingNoteId = null;
+  document.getElementById('noteModalTitle').textContent = 'Add note';
+  document.getElementById('fNoteText').value = '';
+  document.getElementById('noteOverlay').classList.add('show');
+  document.getElementById('fNoteText').focus();
+}
+
+function openEditNoteModal(id){
+  const n = NOTES.find(x=>x.id===id);
+  if(!n) return;
+  editingNoteId = id;
+  document.getElementById('noteModalTitle').textContent = 'Edit note';
+  document.getElementById('fNoteText').value = n.text || '';
+  document.getElementById('noteOverlay').classList.add('show');
+  document.getElementById('fNoteText').focus();
+}
+
+function closeNoteModal(){
+  document.getElementById('noteOverlay').classList.remove('show');
+  editingNoteId = null;
+}
+
+async function saveNote(){
+  const text = document.getElementById('fNoteText').value.trim();
+  if(!text){ showToast('Note can\'t be empty.'); return; }
+  const editor = whoAmI();
+  const existing = editingNoteId ? NOTES.find(n=>n.id===editingNoteId) : null;
+
+  const record = {
+    text,
+    author: editor || (existing && existing.author) || '',
+    createdAt: (existing && existing.createdAt) || Date.now(),
+    updatedAt: Date.now()
+  };
+
+  try{
+    const id = await persistNote(record, editingNoteId);
+    if(!id) return;
+    if(editingNoteId){
+      const idx = NOTES.findIndex(n=>n.id===editingNoteId);
+      if(idx>-1) NOTES[idx] = { id, ...record };
+    } else {
+      NOTES.push({ id, ...record });
+    }
+    closeNoteModal();
+    showToast('Note saved.');
+    render();
+  }catch(err){
+    showToast('Could not save note — check your connection.');
+  }
+}
+
+async function deleteNote(id){
+  const n = NOTES.find(x=>x.id===id);
+  if(!n) return;
+  if(!confirm('Delete this note? This can\'t be undone.')) return;
+  try{
+    await deleteNoteRemote(id);
+    NOTES = NOTES.filter(x=>x.id!==id);
+    showToast('Note deleted.');
+    render();
+  }catch(err){
+    showToast('Could not delete — check your connection.');
+  }
+}
+
 /* ============ Init ============ */
 loadData();
+loadProviders();
+loadNotes();
+startChatListener();
 </script>
 </body>
 </html>
