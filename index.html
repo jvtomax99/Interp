@@ -527,9 +527,9 @@
      This app was originally built in Claude, where "window.storage" is
      provided automatically. Outside Claude (e.g. here on Vercel), it
      doesn't exist — so this block replaces it with a real, free backend
-     (Firebase Firestore) that has the exact same shape.
+     (Firebase Firestore + Cloud Storage) that has the exact same shape.
 
-     1. Create a free project at https://console.firebase.google.com
+     1. Create a project at https://console.firebase.google.com
      2. Build a Firestore Database (Start in test mode is fine to begin)
      3. Project settings → your web app → copy the firebaseConfig object
         and paste it below, replacing the placeholder values.
@@ -541,15 +541,27 @@
               match /healthcare-providers/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
               match /team-notes/{docId} { allow read, write: if true; }
+              match /term-attachments/{docId} { allow read, write: if true; }
+              match /activity-log/{docId} { allow read, write: if true; }
+            }
+          }
+     5. This app also uses Cloud Storage for file attachments (photos and
+        PDFs), which requires the pay-as-you-go Blaze plan. In Storage →
+        Rules, set:
+          rules_version = '2';
+          service firebase.storage {
+            match /b/{bucket}/o {
+              match /attachments/{allPaths=**} { allow read, write: if true; }
             }
           }
         (This keeps the app open to your whole team with no login,
         matching how it worked inside Claude. Anyone with the config
-        below could also write to Firestore directly — fine for a
-        small trusted team, not fine if this repo goes fully public.)
+        below could also write to your database/storage directly — fine
+        for a small trusted team, not fine if this repo goes fully public.)
 ==================================================================== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg",
@@ -561,9 +573,11 @@
   };
 
   let db = null;
+  let storage = null;
   try{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
+    storage = firebase.storage();
   }catch(e){
     console.error('Firebase failed to initialize — check firebaseConfig above.', e);
   }
@@ -903,49 +917,57 @@ function renderActivityFeed(){
 }
 
 /* ============ Attachments (terms, chat, notes) ============
-   Images are compressed client-side the same way provider photos are.
-   PDFs can't be compressed, so they're capped at ~700KB raw so the
-   saved record stays safely under Firestore's 1MB-per-document limit. */
-const MAX_PDF_BYTES = 700 * 1024;
+   Files are uploaded to Cloud Storage; Firestore only ever stores a
+   small download-link string, never the file itself. That's what
+   removes the old ~700KB ceiling — Storage doesn't share Firestore's
+   1MB-per-document limit. Images are still compressed client-side
+   before upload purely for speed, not because of a size limit.
+   MAX_PDF_BYTES below is just an abuse guard, not a real constraint. */
+const MAX_PDF_BYTES = 25 * 1024 * 1024; // 25MB sanity cap
 
-function readFileAsAttachment(file){
+function compressImageToBlob(file){
   return new Promise((resolve, reject)=>{
-    if(!file){ reject(new Error('No file selected.')); return; }
-    const isImage = file.type.startsWith('image/');
-    const isPdf = file.type === 'application/pdf';
-    if(!isImage && !isPdf){
-      reject(new Error('Only images and PDF files are supported.'));
-      return;
-    }
-    if(isPdf && file.size > MAX_PDF_BYTES){
-      reject(new Error('That PDF is too large (limit ~700KB on the free plan). Try compressing it or splitting it up.'));
-      return;
-    }
     const reader = new FileReader();
-    reader.onerror = ()=> reject(new Error('Could not read that file.'));
-    if(isPdf){
-      reader.onload = (e)=> resolve({ filename: file.name, mimeType: file.type, dataUrl: e.target.result });
-      reader.readAsDataURL(file);
-      return;
-    }
-    // Image: resize/compress via canvas, same approach as provider photos.
+    reader.onerror = ()=> reject(new Error('Could not read that image.'));
     reader.onload = (e)=>{
       const img = new Image();
       img.onerror = ()=> reject(new Error('Could not read that image.'));
       img.onload = ()=>{
-        const maxDim = 640;
+        const maxDim = 1400;
         let w = img.width, h = img.height;
         if(w >= h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
         else if(h > w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve({ filename: file.name, mimeType: 'image/jpeg', dataUrl: canvas.toDataURL('image/jpeg', 0.75) });
+        canvas.toBlob(blob=>{
+          if(!blob) reject(new Error('Could not process that image.'));
+          else resolve(blob);
+        }, 'image/jpeg', 0.85);
       };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
+}
+
+async function readFileAsAttachment(file){
+  if(!file) throw new Error('No file selected.');
+  const isImage = file.type.startsWith('image/');
+  const isPdf = file.type === 'application/pdf';
+  if(!isImage && !isPdf) throw new Error('Only images and PDF files are supported.');
+  if(isPdf && file.size > MAX_PDF_BYTES) throw new Error('That PDF is larger than 25MB — try compressing it or splitting it up.');
+  if(!storage) throw new Error('File storage isn\'t set up yet — check the Firebase Storage setup.');
+
+  const blobToUpload = isImage ? await compressImageToBlob(file) : file;
+  const mimeType = isImage ? 'image/jpeg' : file.type;
+  const storagePath = `attachments/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${file.name}`;
+
+  const ref = storage.ref().child(storagePath);
+  const snapshot = await ref.put(blobToUpload, { contentType: mimeType });
+  const url = await snapshot.ref.getDownloadURL();
+
+  return { filename: file.name, mimeType, dataUrl: url, storagePath };
 }
 
 function attachmentChipHtml(att, removeJs){
@@ -1006,8 +1028,12 @@ async function handleTermAttachSelected(event){
 
 async function deleteAttachment(id){
   if(!confirm('Remove this attachment?')) return;
+  const att = ATTACHMENTS.find(a=>a.id===id);
   try{
     if(db) await db.collection('term-attachments').doc(id).delete();
+    if(storage && att && att.storagePath){
+      storage.ref().child(att.storagePath).delete().catch(()=>{}); // best-effort, don't block on it
+    }
     ATTACHMENTS = ATTACHMENTS.filter(a=>a.id!==id);
     render();
   }catch(err){
@@ -1959,6 +1985,9 @@ async function deleteNote(id){
   if(!confirm('Delete this note? This can\'t be undone.')) return;
   try{
     await deleteNoteRemote(id);
+    if(storage && n.attachment && n.attachment.storagePath){
+      storage.ref().child(n.attachment.storagePath).delete().catch(()=>{});
+    }
     NOTES = NOTES.filter(x=>x.id!==id);
     logActivity('deleted a note');
     showToast('Note deleted.');
