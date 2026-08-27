@@ -206,6 +206,45 @@
   /* ---------- Notes ---------- */
   .note-text{ font-size:14px; line-height:1.68; color:var(--ink); white-space:pre-wrap; margin:6px 0 0 0; }
 
+  /* ---------- Recent Updates ---------- */
+  .activity-row{
+    display:flex; align-items:baseline; gap:9px; padding:11px 14px; border-radius:10px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); margin-bottom:7px;
+  }
+  .activity-row .activity-author{ font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink); flex-shrink:0; }
+  .activity-row .activity-summary{ font-size:13px; color:var(--ink-soft); flex:1; min-width:0; }
+  .activity-row .activity-time{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); flex-shrink:0; white-space:nowrap; }
+
+  /* ---------- Attachments (terms, chat, notes) ---------- */
+  .attach-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
+  .attach-chip{
+    position:relative; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
+    border-radius:10px; overflow:hidden; box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .attach-chip.attach-image{ width:60px; height:60px; }
+  .attach-chip.attach-image img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .attach-chip.attach-file{
+    padding:8px 12px 8px 10px; background:var(--bg-hi); color:var(--accent);
+    font-family:var(--sans); font-size:11.5px; font-weight:600; max-width:170px;
+  }
+  .attach-chip.attach-file svg{ width:15px; height:15px; flex-shrink:0; }
+  .attach-chip.attach-file span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .attach-remove{
+    position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%; border:none;
+    background:rgba(20,20,18,0.55); color:#fff; font-size:10px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+  }
+  .attach-chip.attach-file .attach-remove{ position:static; margin-left:2px; background:transparent; color:var(--ink-faint); width:auto; height:auto; }
+  .attach-chip.attach-file .attach-remove:hover{ color:var(--danger); }
+  .attach-btn{
+    border:none; background:var(--bg); border-radius:8px; width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft);
+    box-shadow:inset 0 0 0 1px var(--line); transition:all .15s var(--ease); flex-shrink:0;
+  }
+  .attach-btn:hover{ background:var(--paper); color:var(--accent); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
+  .attach-btn svg{ width:14px; height:14px; }
+  .chat-attach-preview{ margin-bottom:10px; }
+
   .nav-divider{ height:1px; margin:10px 20px; background:linear-gradient(90deg, var(--line), transparent); }
   .tab .link-flag{
     width:18px; height:18px; border-radius:5px; flex-shrink:0; transform:none;
@@ -464,12 +503,22 @@
   <div class="modal">
     <h3 id="noteModalTitle">Add note</h3>
     <div class="field"><label>Note</label><textarea id="fNoteText" placeholder="Share a reminder, tip, or update with the team…" style="min-height:120px;"></textarea></div>
+    <div class="field">
+      <label>Attachment (optional)</label>
+      <div class="photo-field">
+        <div id="noteAttachPreview"></div>
+        <label class="file-input-label" for="fNoteFile">Choose file</label>
+        <input class="file-input-hidden" id="fNoteFile" type="file" accept="image/*,application/pdf" onchange="handleNoteFileSelected(event)">
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeNoteModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveNote()">Save note</button>
     </div>
   </div>
 </div>
+
+<input class="file-input-hidden" id="termAttachInput" type="file" accept="image/*,application/pdf" onchange="handleTermAttachSelected(event)">
 
 <div class="toast" id="toast"></div>
 
@@ -635,7 +684,35 @@ let chatListenerStarted = false;
 let isInitialChatLoad = true;
 let lastSeenChatCount = 0;
 
+let ACTIVITY = [];
+let activityListenerStarted = false;
+let isInitialActivityLoad = true;
+let lastSeenActivityCount = 0;
+
+let ATTACHMENTS = [];
+let pendingAttachTermId = null;
+let pendingChatAttachment = null;
+let pendingNoteAttachment = null;
+
 /* ============ Storage ============ */
+function genId(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// One-time, automatic, and safe: gives any term saved before attachments
+// existed a stable id (so a file can be tied to that exact term even if
+// it's later edited, reordered, or the list around it changes). Doesn't
+// touch any existing content — only adds a new field where it's missing.
+function ensureTermIds(){
+  let migrated = false;
+  DATA.categories.forEach(cat=>{
+    cat.terms.forEach(t=>{
+      if(!t.id){ t.id = genId(); migrated = true; }
+    });
+  });
+  return migrated;
+}
+
 async function loadData(){
   try{
     const result = await window.storage.get(STORAGE_KEY, true);
@@ -648,6 +725,9 @@ async function loadData(){
   }catch(err){
     DATA = DEFAULT_DATA;
     try{ await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true); }catch(e2){}
+  }
+  if(ensureTermIds()){
+    persist(); // silently save the newly-assigned ids so they stick
   }
   render();
 }
@@ -757,6 +837,237 @@ function updateChatBadge(){
   badge.classList.toggle('unread', unread > 0);
 }
 
+/* ============ Recent Updates (activity log) ============
+   Fire-and-forget logging: called after any successful add/edit/delete
+   elsewhere in the app. It never blocks or fails the action it's
+   logging — if writing the log entry itself fails, that's silently
+   swallowed so it can never turn a successful save into an error. */
+function logActivity(summary){
+  if(!db) return;
+  try{
+    db.collection('activity-log').add({
+      summary,
+      author: whoAmI() || 'Someone',
+      timestamp: Date.now()
+    }).catch(err=>console.error('Activity log failed', err));
+  }catch(err){
+    console.error('Activity log failed', err);
+  }
+}
+
+function startActivityListener(){
+  if(activityListenerStarted || !db) return;
+  activityListenerStarted = true;
+  db.collection('activity-log').orderBy('timestamp').onSnapshot(snap=>{
+    ACTIVITY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if(isInitialActivityLoad){
+      isInitialActivityLoad = false;
+      lastSeenActivityCount = ACTIVITY.length;
+    }
+    if(activeCategory === 'updates'){
+      lastSeenActivityCount = ACTIVITY.length;
+      renderActivityFeed();
+    }
+    updateActivityBadge();
+  }, err=>{
+    console.error('Activity listener error:', err);
+  });
+}
+
+function updateActivityBadge(){
+  const badge = document.getElementById('activityBadge');
+  if(!badge) return;
+  const unread = Math.max(0, ACTIVITY.length - lastSeenActivityCount);
+  badge.textContent = unread > 0 ? unread : ACTIVITY.length;
+  badge.classList.toggle('unread', unread > 0);
+}
+
+function renderActivityFeed(){
+  const container = document.getElementById('activityFeed');
+  if(!container) return;
+  if(ACTIVITY.length===0){
+    container.innerHTML = `<div class="empty"><div class="glyph">${ICON_BELL}</div>No activity yet.<br>Changes your team makes will show up here.</div>`;
+    return;
+  }
+  const rows = ACTIVITY.slice().reverse(); // newest first
+  container.innerHTML = rows.map(a=>{
+    const time = a.timestamp ? new Date(a.timestamp).toLocaleString(undefined,{month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : '';
+    return `
+      <div class="activity-row">
+        <span class="activity-author">${escapeHtml(a.author||'Someone')}</span>
+        <span class="activity-summary">${escapeHtml(a.summary||'')}</span>
+        <span class="activity-time">${time}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============ Attachments (terms, chat, notes) ============
+   Images are compressed client-side the same way provider photos are.
+   PDFs can't be compressed, so they're capped at ~700KB raw so the
+   saved record stays safely under Firestore's 1MB-per-document limit. */
+const MAX_PDF_BYTES = 700 * 1024;
+
+function readFileAsAttachment(file){
+  return new Promise((resolve, reject)=>{
+    if(!file){ reject(new Error('No file selected.')); return; }
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
+    if(!isImage && !isPdf){
+      reject(new Error('Only images and PDF files are supported.'));
+      return;
+    }
+    if(isPdf && file.size > MAX_PDF_BYTES){
+      reject(new Error('That PDF is too large (limit ~700KB on the free plan). Try compressing it or splitting it up.'));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('Could not read that file.'));
+    if(isPdf){
+      reader.onload = (e)=> resolve({ filename: file.name, mimeType: file.type, dataUrl: e.target.result });
+      reader.readAsDataURL(file);
+      return;
+    }
+    // Image: resize/compress via canvas, same approach as provider photos.
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('Could not read that image.'));
+      img.onload = ()=>{
+        const maxDim = 640;
+        let w = img.width, h = img.height;
+        if(w >= h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if(h > w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve({ filename: file.name, mimeType: 'image/jpeg', dataUrl: canvas.toDataURL('image/jpeg', 0.75) });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function attachmentChipHtml(att, removeJs){
+  const isImage = (att.mimeType||'').startsWith('image/');
+  const removeBtn = removeJs ? `<button class="attach-remove" title="Remove" onclick="event.preventDefault(); event.stopPropagation(); ${removeJs}">✕</button>` : '';
+  if(isImage){
+    return `<a class="attach-chip attach-image" href="${att.dataUrl}" target="_blank" rel="noopener">
+      <img src="${att.dataUrl}" alt="${escapeAttr(att.filename||'attachment')}">
+      ${removeBtn}
+    </a>`;
+  }
+  return `<a class="attach-chip attach-file" href="${att.dataUrl}" download="${escapeAttr(att.filename||'file.pdf')}">
+    ${ICON_PDF}<span>${escapeHtml(att.filename||'file.pdf')}</span>
+    ${removeBtn}
+  </a>`;
+}
+
+/* ---- Term attachments: their own collection, keyed by each term's
+   stable id, since terms themselves live packed together in one
+   shared document that can't safely hold embedded files. ---- */
+async function loadAttachments(){
+  try{
+    if(!db){ ATTACHMENTS = []; return; }
+    const snap = await db.collection('term-attachments').get();
+    ATTACHMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(err){
+    console.error('Could not load attachments', err);
+    ATTACHMENTS = [];
+  }
+  render();
+}
+
+function attachToTerm(termId){
+  pendingAttachTermId = termId;
+  document.getElementById('termAttachInput').click();
+}
+
+async function handleTermAttachSelected(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  const termId = pendingAttachTermId;
+  pendingAttachTermId = null;
+  if(!file || !termId) return;
+  if(!db){ showToast('Not connected to the database.'); return; }
+
+  try{
+    const att = await readFileAsAttachment(file);
+    const record = { termId, ...att, uploadedBy: whoAmI() || '', uploadedAt: Date.now() };
+    const ref = await db.collection('term-attachments').add(record);
+    ATTACHMENTS.push({ id: ref.id, ...record });
+    logActivity(`attached "${att.filename}" to a term`);
+    showToast('File attached.');
+    render();
+  }catch(err){
+    showToast(err.message || 'Could not attach that file.');
+  }
+}
+
+async function deleteAttachment(id){
+  if(!confirm('Remove this attachment?')) return;
+  try{
+    if(db) await db.collection('term-attachments').doc(id).delete();
+    ATTACHMENTS = ATTACHMENTS.filter(a=>a.id!==id);
+    render();
+  }catch(err){
+    showToast('Could not remove — check your connection.');
+  }
+}
+
+/* ---- Chat / note attachment picking (the record itself is embedded —
+   chat messages and notes already each live in their own document,
+   so no separate collection is needed here). ---- */
+async function handleChatFileSelected(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  try{
+    pendingChatAttachment = await readFileAsAttachment(file);
+    renderChatAttachPreview();
+  }catch(err){
+    showToast(err.message || 'Could not attach that file.');
+  }
+}
+
+function renderChatAttachPreview(){
+  const wrap = document.getElementById('chatAttachPreview');
+  if(!wrap) return;
+  wrap.innerHTML = pendingChatAttachment
+    ? attachmentChipHtml(pendingChatAttachment, 'removeChatAttachment()')
+    : '';
+}
+
+function removeChatAttachment(){
+  pendingChatAttachment = null;
+  renderChatAttachPreview();
+}
+
+async function handleNoteFileSelected(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  try{
+    pendingNoteAttachment = await readFileAsAttachment(file);
+    renderNoteAttachPreview();
+  }catch(err){
+    showToast(err.message || 'Could not attach that file.');
+  }
+}
+
+function renderNoteAttachPreview(){
+  const wrap = document.getElementById('noteAttachPreview');
+  if(!wrap) return;
+  wrap.innerHTML = pendingNoteAttachment
+    ? attachmentChipHtml(pendingNoteAttachment, 'removeNoteAttachment()')
+    : '<span style="font-size:12px; color:var(--ink-faint);">No file attached.</span>';
+}
+
+function removeNoteAttachment(){
+  pendingNoteAttachment = null;
+  renderNoteAttachPreview();
+}
+
 /* ============ Utilities ============ */
 function whoAmI(){
   return document.getElementById('whoInput') ? document.getElementById('whoInput').value.trim() : '';
@@ -789,6 +1100,9 @@ const ICON_CHAT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org
 const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="1.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 8.5H16M8 12H16M8 15.5H12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12L21 4L14 21L11 13L3 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
 const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L19 6V11C19 15.5 16 19 12 21C8 19 5 15.5 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5H14L18 7.5V20C18 20.5 17.5 21 17 21H7C6.5 21 6 20.5 6 20V4.5C6 4 6.5 3.5 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V7.5H18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function renderLinks(t, categoryId){
   const links = [];
   if(t.url){
@@ -835,6 +1149,11 @@ function render(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   const extrasTabs = `
      <div class="nav-divider"></div>
+     <button class="tab ${activeCategory==='updates'?'active':''}" onclick="setCategory('updates')">
+       <span class="flag link-flag">${ICON_BELL}</span>
+       <span class="name">Recent Updates</span>
+       <span class="count" id="activityBadge">${ACTIVITY.length}</span>
+     </button>
      <button class="tab ${activeCategory==='chat'?'active':''}" onclick="setCategory('chat')">
        <span class="flag link-flag">${ICON_CHAT}</span>
        <span class="name">Team Chat</span>
@@ -927,6 +1246,15 @@ function renderContent(){
   const content = document.getElementById('content');
   const q = searchQuery.trim().toLowerCase();
 
+  if(activeCategory === 'updates'){
+    content.innerHTML = `
+      <div class="section-head"><h2>Recent Updates</h2><span class="sub">${ACTIVITY.length} update${ACTIVITY.length===1?'':'s'}</span></div>
+      <div id="activityFeed"></div>
+    `;
+    renderActivityFeed();
+    return;
+  }
+
   if(activeCategory === 'directory'){
     content.innerHTML = renderDirectory(q);
     return;
@@ -950,7 +1278,10 @@ function renderContent(){
       <div class="chat-panel">
         <div class="chat-messages" id="chatMessages"></div>
         ${hasName ? `
+          <div class="chat-attach-preview" id="chatAttachPreview"></div>
           <div class="chat-input-row">
+            <button class="attach-btn" title="Attach a photo or PDF" onclick="document.getElementById('chatFileInput').click()">${ICON_PAPERCLIP}</button>
+            <input class="file-input-hidden" id="chatFileInput" type="file" accept="image/*,application/pdf" onchange="handleChatFileSelected(event)">
             <input id="chatInput" type="text" placeholder="Message your team…" onkeydown="handleChatKeydown(event)">
             <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">${ICON_SEND}</button>
           </div>
@@ -964,6 +1295,7 @@ function renderContent(){
       </div>
     `;
     renderChatMessages();
+    renderChatAttachPreview();
     const focusTarget = document.getElementById(hasName ? 'chatInput' : 'chatNameInput');
     if(focusTarget) focusTarget.focus();
     return;
@@ -986,6 +1318,7 @@ function renderContent(){
     html += `<div class="section-head"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
     html += `<div class="grid">`;
     terms.forEach(t=>{
+      const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
       html += `
         <div class="card">
           <div class="card-top">
@@ -993,6 +1326,7 @@ function renderContent(){
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._idx+1).padStart(2,'0')}</span>
           </div>
           <div class="actions" style="position:absolute; top:16px; right:16px;">
+            <button class="attach-btn" title="Attach a photo or PDF" onclick="attachToTerm('${t.id}')">${ICON_PAPERCLIP}</button>
             <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', ${t._idx})">✎</button>
             <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', ${t._idx})">✕</button>
           </div>
@@ -1000,6 +1334,7 @@ function renderContent(){
           ${t.es ? `<div class="term-es">${escapeHtml(t.es)}</div>` : ''}
           <p class="def">${escapeHtml(t.def)}</p>
           ${renderLinks(t, cat.id)}
+          ${termAttachments.length ? `<div class="attach-row">${termAttachments.map(a=>attachmentChipHtml(a, `deleteAttachment('${a.id}')`)).join('')}</div>` : ''}
           <div class="meta">
             <span class="source">${t.source ? escapeHtml(t.source) : ''}</span>
             <span class="source">${t.editedBy ? 'Edited by ' + escapeHtml(t.editedBy) : ''}</span>
@@ -1020,6 +1355,7 @@ function renderContent(){
 function setCategory(id){
   activeCategory = id;
   if(id === 'chat'){ lastSeenChatCount = CHAT_MESSAGES.length; }
+  if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   render();
 }
 
@@ -1098,7 +1434,8 @@ function renderChatMessages(){
     return `
       <div class="chat-bubble-row ${mine ? 'me' : 'them'}">
         ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
-        <div class="chat-bubble">${escapeHtml(m.text)}</div>
+        ${m.text ? `<div class="chat-bubble">${escapeHtml(m.text)}</div>` : ''}
+        ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
         <div class="chat-time">${time}</div>
       </div>
     `;
@@ -1113,7 +1450,7 @@ async function sendChatMessage(){
   const input = document.getElementById('chatInput');
   if(!input) return;
   const text = input.value.trim();
-  if(!text) return;
+  if(!text && !pendingChatAttachment) return;
 
   const author = whoAmI();
   if(!author){
@@ -1125,15 +1462,20 @@ async function sendChatMessage(){
     return;
   }
 
+  const attachment = pendingChatAttachment;
   input.value = '';
+  pendingChatAttachment = null;
+  renderChatAttachPreview();
   input.disabled = true;
   try{
-    await db.collection('team-chat').add({ text, author, timestamp: Date.now() });
+    await db.collection('team-chat').add({ text, author, attachment: attachment || null, timestamp: Date.now() });
     // No manual state update needed — the real-time listener picks this up
     // for everyone, including the sender, and calls renderChatMessages().
   }catch(err){
     showToast('Could not send — check your connection.');
     input.value = text; // give the message back so it isn't lost
+    pendingChatAttachment = attachment;
+    renderChatAttachPreview();
   }
   input.disabled = false;
   input.focus();
@@ -1195,6 +1537,7 @@ function renderNotes(q){
           <button class="icon-btn danger" title="Delete" onclick="deleteNote('${n.id}')">✕</button>
         </div>
         <p class="note-text">${escapeHtml(n.text)}</p>
+        ${n.attachment ? `<div class="attach-row">${attachmentChipHtml(n.attachment, null)}</div>` : ''}
         <div class="meta">
           <span class="source">${n.author ? escapeHtml(n.author) : 'Anonymous'}</span>
           <span class="source">${dateLabel}</span>
@@ -1306,8 +1649,10 @@ async function saveTerm(){
   if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
   const newCategoryId = document.getElementById('fCategory').value;
   const editor = whoAmI();
+  const targetCatName = DATA.categories.find(c=>c.id===newCategoryId).name;
 
-  const record = { en, es, def, source, url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined };
+  const existingId = editingContext ? DATA.categories.find(c=>c.id===editingContext.categoryId).terms[editingContext.idx].id : null;
+  const record = { id: existingId || genId(), en, es, def, source, url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined };
 
   if(editingContext){
     const oldCat = DATA.categories.find(c=>c.id===editingContext.categoryId);
@@ -1320,9 +1665,11 @@ async function saveTerm(){
       const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
       targetCat.terms.push(record);
     }
+    logActivity(`updated "${en}" in ${targetCatName}`);
   } else {
     const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
     targetCat.terms.push(record);
+    logActivity(`added "${en}" to ${targetCatName}`);
   }
 
   closeModal();
@@ -1337,6 +1684,15 @@ async function deleteTerm(categoryId, idx){
   if(!confirm(`Delete "${term.en}"? This can't be undone.`)) return;
   cat.terms.splice(idx,1);
   await persist();
+  logActivity(`removed "${term.en}" from ${cat.name}`);
+
+  // Clean up any files that were attached to this term.
+  const orphaned = ATTACHMENTS.filter(a=>a.termId===term.id);
+  if(orphaned.length && db){
+    orphaned.forEach(a=> db.collection('term-attachments').doc(a.id).delete().catch(()=>{}));
+    ATTACHMENTS = ATTACHMENTS.filter(a=>a.termId!==term.id);
+  }
+
   showToast('Term deleted.');
   render();
 }
@@ -1373,7 +1729,7 @@ function pickSwatch(c){
 async function saveDomain(){
   const name = document.getElementById('fDomainName').value.trim();
   if(!name){ showToast('Domain name is required.'); return; }
-  const reserved = ['all','directory','providers'];
+  const reserved = ['all','directory','providers','chat','notes','updates'];
   const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
   const base = slugify(name);
   let id = base, n = 2;
@@ -1383,6 +1739,7 @@ async function saveDomain(){
   closeDomainModal();
   await persist();
   activeCategory = id;
+  logActivity(`created the "${name}" domain`);
   showToast('Domain created.');
   render();
 }
@@ -1394,7 +1751,7 @@ function deleteDomain(id){
   if(!confirm(`Delete the empty "${cat.name}" domain?`)) return;
   DATA.categories = DATA.categories.filter(c=>c.id!==id);
   if(activeCategory===id) activeCategory = 'all';
-  persist().then(()=>{ showToast('Domain deleted.'); render(); });
+  persist().then(()=>{ logActivity(`deleted the "${cat.name}" domain`); showToast('Domain deleted.'); render(); });
 }
 
 /* ============ Healthcare Providers: modal + photo handling ============ */
@@ -1505,8 +1862,11 @@ async function saveProvider(){
     if(editingProviderId){
       const idx = PROVIDERS.findIndex(p=>p.id===editingProviderId);
       if(idx>-1) PROVIDERS[idx] = { id, ...record };
+      const photoChanged = pendingPhotoDataUrl && pendingPhotoDataUrl !== (existing && existing.photo);
+      logActivity(photoChanged ? `added a photo for ${name}` : `updated the provider ${name}`);
     } else {
       PROVIDERS.push({ id, ...record });
+      logActivity(pendingPhotoDataUrl ? `added a provider with a photo: ${name}` : `added a provider: ${name}`);
     }
     closeProviderModal();
     showToast('Provider saved.');
@@ -1523,6 +1883,7 @@ async function deleteProvider(id){
   try{
     await deleteProviderRemote(id);
     PROVIDERS = PROVIDERS.filter(x=>x.id!==id);
+    logActivity(`removed the provider ${p.name}`);
     showToast('Provider deleted.');
     render();
   }catch(err){
@@ -1533,8 +1894,10 @@ async function deleteProvider(id){
 /* ============ Notes: modal ============ */
 function openAddNoteModal(){
   editingNoteId = null;
+  pendingNoteAttachment = null;
   document.getElementById('noteModalTitle').textContent = 'Add note';
   document.getElementById('fNoteText').value = '';
+  renderNoteAttachPreview();
   document.getElementById('noteOverlay').classList.add('show');
   document.getElementById('fNoteText').focus();
 }
@@ -1543,8 +1906,10 @@ function openEditNoteModal(id){
   const n = NOTES.find(x=>x.id===id);
   if(!n) return;
   editingNoteId = id;
+  pendingNoteAttachment = n.attachment || null;
   document.getElementById('noteModalTitle').textContent = 'Edit note';
   document.getElementById('fNoteText').value = n.text || '';
+  renderNoteAttachPreview();
   document.getElementById('noteOverlay').classList.add('show');
   document.getElementById('fNoteText').focus();
 }
@@ -1552,6 +1917,7 @@ function openEditNoteModal(id){
 function closeNoteModal(){
   document.getElementById('noteOverlay').classList.remove('show');
   editingNoteId = null;
+  pendingNoteAttachment = null;
 }
 
 async function saveNote(){
@@ -1559,9 +1925,11 @@ async function saveNote(){
   if(!text){ showToast('Note can\'t be empty.'); return; }
   const editor = whoAmI();
   const existing = editingNoteId ? NOTES.find(n=>n.id===editingNoteId) : null;
+  const isNew = !editingNoteId;
 
   const record = {
     text,
+    attachment: pendingNoteAttachment || null,
     author: editor || (existing && existing.author) || '',
     createdAt: (existing && existing.createdAt) || Date.now(),
     updatedAt: Date.now()
@@ -1577,6 +1945,7 @@ async function saveNote(){
       NOTES.push({ id, ...record });
     }
     closeNoteModal();
+    logActivity(isNew ? 'left a note' : 'updated a note');
     showToast('Note saved.');
     render();
   }catch(err){
@@ -1591,6 +1960,7 @@ async function deleteNote(id){
   try{
     await deleteNoteRemote(id);
     NOTES = NOTES.filter(x=>x.id!==id);
+    logActivity('deleted a note');
     showToast('Note deleted.');
     render();
   }catch(err){
@@ -1602,7 +1972,9 @@ async function deleteNote(id){
 loadData();
 loadProviders();
 loadNotes();
+loadAttachments();
 startChatListener();
+startActivityListener();
 </script>
 </body>
 </html>
