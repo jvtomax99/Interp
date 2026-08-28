@@ -1517,6 +1517,14 @@ async function clearAllActivity(){
   }
 }
 
+/* Alphabetical comparison tuned for medical terminology:
+   - sensitivity 'base' so accented characters sort next to their plain
+     counterparts (á with a) rather than being dumped at the end
+   - numeric so "CIN 2" comes before "CIN 10", not after it */
+function collateTerms(a, b){
+  return String(a||'').localeCompare(String(b||''), undefined, { sensitivity:'base', numeric:true });
+}
+
 function prefersAutoFocus(){
   try{
     return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -1788,7 +1796,15 @@ function renderContent(){
 
   let html = '';
   cats.forEach(cat=>{
+    // Sort a *copy* for display only. Each item keeps _idx — its true position
+    // in the stored array — so the edit and delete buttons still target the
+    // right term. Reordering the stored data itself would risk mismatches
+    // when two people edit at once.
     let terms = cat.terms.map((t,i)=>({...t, _idx:i}));
+    terms.sort((a,b)=> collateTerms(a.en, b.en));
+    // Number the cards from the full sorted list, before filtering, so a
+    // search doesn't renumber everything.
+    terms.forEach((t,i)=>{ t._num = i+1; });
     if(q){
       terms = terms.filter(t =>
         (t.en||'').toLowerCase().includes(q) ||
@@ -1807,7 +1823,7 @@ function renderContent(){
         <div class="card" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;">
           <div class="card-top">
             <span class="tag" style="color:${cat.color}; background:${cat.color}1F;">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
-            <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._idx+1).padStart(2,'0')}</span>
+            <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._num).padStart(2,'0')}</span>
           </div>
           <div class="actions" style="position:absolute; top:16px; right:16px;">
             <button class="attach-btn" title="Attach a photo or PDF" onclick="attachToTerm('${t.id}')">${ICON_PAPERCLIP}</button>
@@ -2103,7 +2119,12 @@ function renderDirectory(q){
 
   DATA.categories.forEach(cat=>{
     let rows = [];
-    cat.terms.forEach((t, idx)=>{
+    // Same approach as the term grid: sort a copy for display, but keep each
+    // term's real storage index so the pencil button edits the right one.
+    const sortedTerms = cat.terms
+      .map((t, idx)=>({ t, idx }))
+      .sort((a,b)=> collateTerms(a.t.en, b.t.en));
+    sortedTerms.forEach(({ t, idx })=>{
       const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
       const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q);
       if(!matches) return;
