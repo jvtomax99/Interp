@@ -359,8 +359,9 @@
     background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
     margin-bottom:7px; transition:box-shadow .15s var(--ease), transform .15s var(--ease);
   }
-  .dir-row:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); transform:translateX(2px); }
-  .dir-row .dir-dot{ width:8px; height:8px; border-radius:2px; flex-shrink:0; transform:rotate(45deg); }
+  .dir-row:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); transform:translateX(4px); }
+  .dir-row .dir-dot{ width:8px; height:8px; border-radius:2px; flex-shrink:0; transform:rotate(45deg); transition:transform .2s var(--ease); }
+  .dir-row:hover .dir-dot{ transform:rotate(45deg) scale(1.4); }
   .dir-row .dir-term{ font-family:var(--sans); font-weight:600; font-size:13.5px; min-width:0; flex:0 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
   .dir-row .dir-kind{
     font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint);
@@ -438,23 +439,56 @@
 
   .card{
     background:var(--paper); border-radius:var(--r-md);
-    padding:20px 20px 17px 20px; position:relative;
+    padding:20px 20px 17px 20px; position:relative; overflow:hidden;
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
-    transition:box-shadow .2s var(--ease);
+    transition:box-shadow .22s var(--ease), transform .22s var(--ease);
     animation:cardIn .3s var(--ease) both;
   }
-  .card:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
-  .card-top{ display:flex; align-items:center; justify-content:space-between; padding-right:52px; }
+  /* Colored accent bar that sweeps down the left edge on hover, tinted
+     to whichever domain the card belongs to (set inline as --card-accent). */
+  .card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--card-accent, var(--accent));
+    transform:scaleY(0); transform-origin:top;
+    transition:transform .28s var(--ease);
+  }
+  .card:hover::before{ transform:scaleY(1); }
+  .card:hover{
+    box-shadow:var(--sh-2), inset 0 0 0 1px var(--line);
+    transform:translateY(-3px);
+  }
+  .card-top{ display:flex; align-items:center; justify-content:space-between; padding-right:82px; }
   .card .chart-id{
     font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); letter-spacing:.06em;
+    transition:color .2s var(--ease);
   }
+  .card:hover .chart-id{ color:var(--card-accent, var(--ink-soft)); }
   .card .tag{
     display:inline-flex; align-items:center; gap:6px; font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.02em;
-    padding:5px 11px; border-radius:20px;
+    padding:5px 11px; border-radius:20px; transition:transform .2s var(--ease);
   }
+  .card:hover .tag{ transform:translateX(2px); }
   .card .tag::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
-  .card .term-en{font-family:var(--sans); font-weight:600; font-size:15.5px; margin:13px 0 4px 0; line-height:1.4; letter-spacing:-.003em;}
-  .card .term-es{font-family:var(--serif); font-style:italic; font-weight:400; color:var(--accent); font-size:13.5px; margin:0 0 10px 0;}
+  .card .term-en{
+    font-family:var(--sans); font-weight:600; font-size:15.5px; margin:13px 0 4px 0; line-height:1.4; letter-spacing:-.003em;
+    display:flex; align-items:flex-start; gap:7px;
+  }
+  .card .term-es{
+    font-family:var(--serif); font-style:italic; font-weight:400; color:var(--accent); font-size:13.5px; margin:0 0 10px 0;
+    display:flex; align-items:flex-start; gap:7px;
+  }
+  /* Small copy buttons that appear on hover — lets an interpreter grab a
+     term or its Spanish equivalent instantly without selecting text. */
+  .copy-btn{
+    border:none; background:transparent; padding:2px 4px; border-radius:6px; cursor:pointer;
+    color:var(--ink-faint); opacity:0; flex-shrink:0; line-height:1;
+    transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease), transform .15s var(--ease);
+  }
+  .card:hover .copy-btn{ opacity:1; }
+  .copy-btn:hover{ color:var(--accent); background:var(--accent-soft); }
+  .copy-btn:active{ transform:scale(0.88); }
+  .copy-btn.copied{ color:var(--accent); opacity:1; }
+  .copy-btn svg{ width:12px; height:12px; display:block; }
   .card .def{font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0;}
   .card .links{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
   .link-pill{
@@ -1211,6 +1245,42 @@ function timeAgoLabel(){
   const d = new Date();
   return d.toLocaleDateString(undefined,{month:'short', day:'numeric'});
 }
+/* Copies a term to the clipboard and briefly swaps the icon to a
+   checkmark so there's immediate inline feedback, not just a toast.
+   Falls back to the older execCommand approach on browsers/contexts
+   where the async clipboard API isn't available (e.g. non-HTTPS). */
+async function copyText(btn, text){
+  let ok = false;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  }catch(err){
+    ok = false;
+  }
+
+  if(!ok){ showToast('Could not copy — try selecting the text manually.'); return; }
+
+  const original = btn.innerHTML;
+  btn.innerHTML = ICON_CHECK;
+  btn.classList.add('copied');
+  clearTimeout(btn._copyTimer);
+  btn._copyTimer = setTimeout(()=>{
+    btn.innerHTML = original;
+    btn.classList.remove('copied');
+  }, 1400);
+}
+
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1237,6 +1307,8 @@ const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org
 const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L19 6V11C19 15.5 16 19 12 21C8 19 5 15.5 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5H14L18 7.5V20C18 20.5 17.5 21 17 21H7C6.5 21 6 20.5 6 20V4.5C6 4 6.5 3.5 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V7.5H18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4.5C3.7 15 3 14.3 3 13.5V4.5C3 3.7 3.7 3 4.5 3H13.5C14.3 3 15 3.7 15 4.5V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
@@ -1482,10 +1554,11 @@ function renderContent(){
 
     html += `<div class="section-head"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
     html += `<div class="grid">`;
-    terms.forEach(t=>{
+    terms.forEach((t, cardIdx)=>{
       const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
+      const delay = Math.min(cardIdx * 0.03, 0.3);
       html += `
-        <div class="card">
+        <div class="card" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;">
           <div class="card-top">
             <span class="tag" style="color:${cat.color}; background:${cat.color}1F;">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._idx+1).padStart(2,'0')}</span>
@@ -1495,8 +1568,14 @@ function renderContent(){
             <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', ${t._idx})">✎</button>
             <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', ${t._idx})">✕</button>
           </div>
-          <div class="term-en">${escapeHtml(t.en)}</div>
-          ${t.es ? `<div class="term-es">${escapeHtml(t.es)}</div>` : ''}
+          <div class="term-en">
+            <span>${escapeHtml(t.en)}</span>
+            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+          </div>
+          ${t.es ? `<div class="term-es">
+            <span>${escapeHtml(t.es)}</span>
+            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+          </div>` : ''}
           <p class="def">${escapeHtml(t.def)}</p>
           ${renderLinks(t, cat.id)}
           ${termAttachments.length ? `<div class="attach-row">${termAttachments.map(a=>attachmentChipHtml(a, `deleteAttachment('${a.id}')`)).join('')}</div>` : ''}
@@ -1593,11 +1672,12 @@ function renderProviders(q){
 
   let html = `<div class="section-head"><h2>Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
   html += `<div class="grid">`;
-  list.forEach(p=>{
+  list.forEach((p, cardIdx)=>{
     const initials = (p.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
     const phoneDigits = (p.phone||'').replace(/[^0-9+]/g,'');
+    const delay = Math.min(cardIdx * 0.03, 0.3);
     html += `
-      <div class="card">
+      <div class="card" style="--card-accent:#6F97AC; animation-delay:${delay.toFixed(2)}s;">
         <div class="actions" style="position:absolute; top:16px; right:16px;">
           <button class="icon-btn" title="Edit" onclick="openEditProviderModal('${p.id}')">✎</button>
           <button class="icon-btn danger" title="Delete" onclick="deleteProvider('${p.id}')">✕</button>
@@ -1741,10 +1821,11 @@ function renderNotes(q){
   let html = `<div class="section-head"><h2>Notes</h2><span class="sub">${list.length} note${list.length===1?'':'s'}</span></div>`;
   html += notice;
   html += `<div class="grid">`;
-  list.forEach(n=>{
+  list.forEach((n, cardIdx)=>{
     const dateLabel = n.createdAt ? new Date(n.createdAt).toLocaleDateString(undefined,{month:'short', day:'numeric'}) : '';
+    const delay = Math.min(cardIdx * 0.03, 0.3);
     html += `
-      <div class="card">
+      <div class="card" style="--card-accent:#BFA05E; animation-delay:${delay.toFixed(2)}s;">
         <div class="actions" style="position:absolute; top:16px; right:16px;">
           <button class="icon-btn" title="Edit" onclick="openEditNoteModal('${n.id}')">✎</button>
           <button class="icon-btn danger" title="Delete" onclick="deleteNote('${n.id}')">✕</button>
