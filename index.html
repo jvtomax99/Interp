@@ -236,6 +236,14 @@
     width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0;
     box-shadow:inset 0 0 0 1px var(--line);
   }
+  .provider-avatar-clickable{
+    cursor:zoom-in; transition:transform .16s var(--ease), box-shadow .16s var(--ease);
+    touch-action:manipulation; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
+  }
+  @media (hover: hover) and (pointer: fine){
+    .provider-avatar-clickable:hover{ transform:scale(1.07); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
+  }
+  .provider-avatar-clickable:active{ transform:scale(0.96); }
   .provider-avatar-fallback{
     display:flex; align-items:center; justify-content:center;
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
@@ -287,6 +295,18 @@
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
   }
   .chat-time{ font-family:var(--mono); font-size:9px; color:var(--ink-faint); margin:4px 4px 0 4px; }
+  .chat-meta-row{ display:flex; align-items:center; gap:8px; margin:4px 4px 0 4px; }
+  .chat-delete{
+    border:none; background:transparent; padding:1px 4px; border-radius:6px; cursor:pointer;
+    color:var(--ink-faint); font-size:10px; line-height:1; opacity:0;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+    transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
+  }
+  .chat-bubble-row:hover .chat-delete{ opacity:1; }
+  .chat-delete:hover{ color:var(--danger); background:var(--danger-soft); }
+  @media (hover: none), (pointer: coarse){
+    .chat-delete{ opacity:1; }
+  }
   .chat-join-hint{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin:2px 0 12px 0; line-height:1.6; }
   .chat-input-row{ display:flex; gap:10px; padding-top:14px; margin-top:4px; border-top:1px solid var(--line); }
   .chat-input-row input{
@@ -316,15 +336,56 @@
   .activity-row .activity-author{ font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink); flex-shrink:0; }
   .activity-row .activity-summary{ font-size:13px; color:var(--ink-soft); flex:1; min-width:0; }
   .activity-row .activity-time{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); flex-shrink:0; white-space:nowrap; }
+  .activity-delete{
+    border:none; background:transparent; padding:2px 5px; border-radius:6px; cursor:pointer;
+    color:var(--ink-faint); font-size:11px; line-height:1; flex-shrink:0; opacity:0;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+    transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
+  }
+  .activity-row:hover .activity-delete{ opacity:1; }
+  .activity-delete:hover{ color:var(--danger); background:var(--danger-soft); }
+  @media (hover: none), (pointer: coarse){
+    .activity-delete{ opacity:1; }
+  }
+  .section-head .head-action{
+    border:none; background:var(--paper); cursor:pointer; font-family:var(--sans);
+    font-size:11.5px; font-weight:600; color:var(--ink-soft); padding:6px 12px; border-radius:20px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line); flex-shrink:0;
+    touch-action:manipulation; transition:all .15s var(--ease);
+  }
+  .section-head .head-action:hover{ color:var(--danger); box-shadow:var(--sh-2), inset 0 0 0 1px var(--danger); }
 
   /* ---------- Attachments (terms, chat, notes) ---------- */
   .attach-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:11px; }
   .attach-chip{
     position:relative; display:inline-flex; align-items:center; gap:6px; text-decoration:none;
     border-radius:10px; overflow:hidden; box-shadow:inset 0 0 0 1px var(--line-soft);
+    padding:0; border:none; background:none; font-family:inherit;
   }
-  .attach-chip.attach-image{ width:60px; height:60px; }
-  .attach-chip.attach-image img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .attach-chip.attach-image{
+    width:60px; height:60px; cursor:zoom-in;
+    transition:transform .16s var(--ease), box-shadow .16s var(--ease);
+    /* touch-action removes the browser's tap delay; touch-callout stops iOS
+       from hijacking the tap with its native "Save Image" long-press menu. */
+    touch-action:manipulation;
+    -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Hover-scale only on real pointer devices. An unconditional :hover rule
+     makes iOS treat the first tap as a hover and require a second tap to
+     actually fire the click — which is what made this feel like 3D Touch. */
+  @media (hover: hover) and (pointer: fine){
+    .attach-chip.attach-image:hover{
+      transform:scale(1.06);
+      box-shadow:var(--sh-2), inset 0 0 0 1px var(--line);
+    }
+  }
+  .attach-chip.attach-image:active{ transform:scale(0.95); }
+  /* The tap must land on the button, not the image inside it. */
+  .attach-chip.attach-image img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    pointer-events:none; -webkit-user-select:none; user-select:none;
+  }
   .attach-chip.attach-file{
     padding:8px 12px 8px 10px; background:var(--bg-hi); color:var(--accent);
     font-family:var(--sans); font-size:11.5px; font-weight:600; max-width:170px;
@@ -510,6 +571,7 @@
   .copy-btn{
     border:none; background:transparent; padding:2px 4px; border-radius:6px; cursor:pointer;
     color:var(--ink-faint); opacity:0; flex-shrink:0; line-height:1;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease), transform .15s var(--ease);
   }
   .card:hover .copy-btn{ opacity:1; }
@@ -535,6 +597,12 @@
   .card .source{font-family:var(--mono); font-size:10px; color:var(--ink-faint);}
   .card .actions{display:flex; gap:6px; opacity:0; transform:translateY(-2px); transition:opacity .15s var(--ease), transform .15s var(--ease);}
   .card:hover .actions{opacity:1; transform:translateY(0);}
+  /* Touch devices have no hover, so these controls would otherwise stay
+     invisible. Show them permanently there instead. */
+  @media (hover: none), (pointer: coarse){
+    .card .actions{ opacity:1; transform:none; }
+    .copy-btn{ opacity:1; }
+  }
   .icon-btn{
     border:none; background:var(--bg); border-radius:8px; width:26px; height:26px;
     display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; color:var(--ink-soft);
@@ -582,6 +650,48 @@
     outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); background:var(--paper);
   }
   .modal-actions{display:flex; justify-content:flex-end; gap:9px; margin-top:20px;}
+
+  /* ---------- Image lightbox ---------- */
+  @keyframes lightboxIn{ from{opacity:0;} to{opacity:1;} }
+  @keyframes lightboxImgIn{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
+  .lightbox{
+    position:fixed; inset:0; background:rgba(15,18,22,0.88); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; z-index:200; padding:32px;
+    animation:lightboxIn .18s var(--ease);
+  }
+  .lightbox.show{ display:flex; }
+  .lightbox img{
+    max-width:100%; max-height:calc(100vh - 132px); object-fit:contain;
+    border-radius:10px; box-shadow:0 24px 70px rgba(0,0,0,0.5);
+    animation:lightboxImgIn .22s var(--ease);
+  }
+  .lightbox-bar{
+    position:absolute; left:0; right:0; bottom:0; padding:16px 22px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background:linear-gradient(transparent, rgba(0,0,0,0.55));
+  }
+  .lightbox-name{
+    color:rgba(255,255,255,0.92); font-family:var(--sans); font-size:13px; font-weight:600;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .lightbox-actions{ display:flex; gap:10px; flex-shrink:0; }
+  .lightbox-btn{
+    display:inline-flex; align-items:center; gap:6px; border:none; cursor:pointer;
+    background:rgba(255,255,255,0.15); color:#fff; font-family:var(--sans); font-size:12.5px; font-weight:600;
+    padding:8px 14px; border-radius:20px; text-decoration:none; transition:background .15s var(--ease);
+  }
+  .lightbox-btn:hover{ background:rgba(255,255,255,0.28); }
+  .lightbox-btn svg{ width:13px; height:13px; }
+  .lightbox-close{
+    position:absolute; top:18px; right:20px; width:40px; height:40px; border-radius:50%; border:none;
+    background:rgba(255,255,255,0.15); color:#fff; font-size:19px; cursor:pointer; line-height:1;
+    display:flex; align-items:center; justify-content:center; transition:background .15s var(--ease);
+  }
+  .lightbox-close:hover{ background:rgba(255,255,255,0.3); }
+  @media (max-width:760px){
+    .lightbox{ padding:14px; }
+    .lightbox img{ max-height:calc(100vh - 150px); }
+  }
 
   .toast{
     position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px);
@@ -689,6 +799,17 @@
 </div>
 
 <input class="file-input-hidden" id="termAttachInput" type="file" accept="image/*,application/pdf" onchange="handleTermAttachSelected(event)">
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" title="Close" onclick="closeLightbox(event, true)">✕</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-bar">
+    <span class="lightbox-name" id="lightboxName"></span>
+    <div class="lightbox-actions">
+      <a class="lightbox-btn" id="lightboxDownload" href="" download>Download</a>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1051,7 +1172,9 @@ function startActivityListener(){
     }
     if(activeCategory === 'updates'){
       lastSeenActivityCount = ACTIVITY.length;
-      renderActivityFeed();
+      // Rebuild the panel (not the whole app) so the header count and the
+      // "Clear all" button stay in sync. Safe because this tab has no inputs.
+      renderContent();
     }
     updateActivityBadge();
   }, err=>{
@@ -1082,6 +1205,7 @@ function renderActivityFeed(){
         <span class="activity-author">${escapeHtml(a.author||'Someone')}</span>
         <span class="activity-summary">${escapeHtml(a.summary||'')}</span>
         <span class="activity-time">${time}</span>
+        <button class="activity-delete" title="Remove this update" onclick="deleteActivity('${a.id}')">✕</button>
       </div>
     `;
   }).join('');
@@ -1145,10 +1269,13 @@ function attachmentChipHtml(att, removeJs){
   const isImage = (att.mimeType||'').startsWith('image/');
   const removeBtn = removeJs ? `<button class="attach-remove" title="Remove" onclick="event.preventDefault(); event.stopPropagation(); ${removeJs}">✕</button>` : '';
   if(isImage){
-    return `<a class="attach-chip attach-image" href="${att.dataUrl}" target="_blank" rel="noopener">
+    // JSON-encode the values so filenames containing quotes or apostrophes
+    // (common with scanned documents) can't break the inline handler.
+    const args = `${JSON.stringify(att.dataUrl)}, ${JSON.stringify(att.filename||'image')}`.replace(/"/g,'&quot;');
+    return `<button type="button" class="attach-chip attach-image" title="View image" onclick="openLightbox(${args})">
       <img src="${att.dataUrl}" alt="${escapeAttr(att.filename||'attachment')}">
       ${removeBtn}
-    </a>`;
+    </button>`;
   }
   return `<a class="attach-chip attach-file" href="${att.dataUrl}" download="${escapeAttr(att.filename||'file.pdf')}">
     ${ICON_PDF}<span>${escapeHtml(att.filename||'file.pdf')}</span>
@@ -1312,6 +1439,84 @@ async function copyText(btn, text){
 /* True only on devices with a precise pointer (mouse/trackpad). Used to
    decide whether autofocusing a text field is helpful or intrusive —
    on touch devices, focusing an input pops the on-screen keyboard. */
+/* ---------- Image lightbox ---------- */
+function openLightbox(url, filename){
+  const box = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  const name = document.getElementById('lightboxName');
+  const dl = document.getElementById('lightboxDownload');
+  if(!box || !img) return;
+  img.src = url;
+  img.alt = filename || 'attachment';
+  if(name) name.textContent = filename || '';
+  if(dl){ dl.href = url; dl.setAttribute('download', filename || 'image'); }
+  box.classList.add('show');
+  document.body.style.overflow = 'hidden'; // stop the page scrolling behind the overlay
+}
+
+function closeLightbox(event, force){
+  // Only close on a click of the backdrop itself or the X — not on the image,
+  // otherwise tapping the photo you're trying to look at dismisses it.
+  if(!force && event && event.target && event.target.id === 'lightboxImg') return;
+  if(!force && event && event.target && event.target.closest && event.target.closest('.lightbox-bar')) return;
+  const box = document.getElementById('lightbox');
+  if(!box) return;
+  box.classList.remove('show');
+  document.body.style.overflow = '';
+  const img = document.getElementById('lightboxImg');
+  if(img) img.src = '';
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    const box = document.getElementById('lightbox');
+    if(box && box.classList.contains('show')) closeLightbox(null, true);
+  }
+});
+
+/* ---------- Deleting chat messages and activity entries ----------
+   Both collections have live listeners attached, so removing the document
+   is enough — the listener fires for everyone (including the person who
+   deleted it) and re-renders that panel automatically. No manual state
+   patching needed, and no full render() that could disturb other work. */
+async function deleteChatMessage(id){
+  const msg = CHAT_MESSAGES.find(m=>m.id===id);
+  if(!confirm('Delete this message for everyone? This can\'t be undone.')) return;
+  if(!db){ showToast('Not connected to the database.'); return; }
+  try{
+    await db.collection('team-chat').doc(id).delete();
+    // Clean up an attached file too, so Storage doesn't accumulate orphans.
+    if(storage && msg && msg.attachment && msg.attachment.storagePath){
+      storage.ref().child(msg.attachment.storagePath).delete().catch(()=>{});
+    }
+    showToast('Message deleted.');
+  }catch(err){
+    showToast('Could not delete — check your connection.');
+  }
+}
+
+async function deleteActivity(id){
+  if(!db){ showToast('Not connected to the database.'); return; }
+  try{
+    await db.collection('activity-log').doc(id).delete();
+  }catch(err){
+    showToast('Could not remove — check your connection.');
+  }
+}
+
+async function clearAllActivity(){
+  if(!ACTIVITY.length) return;
+  if(!confirm(`Clear all ${ACTIVITY.length} updates? This only clears the activity list — your terms, notes, providers, and messages are not affected.`)) return;
+  if(!db){ showToast('Not connected to the database.'); return; }
+  const ids = ACTIVITY.map(a=>a.id);
+  try{
+    await Promise.all(ids.map(id => db.collection('activity-log').doc(id).delete()));
+    showToast('Activity cleared.');
+  }catch(err){
+    showToast('Could not clear everything — check your connection.');
+  }
+}
+
 function prefersAutoFocus(){
   try{
     return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -1526,7 +1731,7 @@ function renderContent(){
 
   if(activeCategory === 'updates'){
     content.innerHTML = `
-      <div class="section-head"><h2>Recent Updates</h2><span class="sub">${ACTIVITY.length} update${ACTIVITY.length===1?'':'s'}</span></div>
+      <div class="section-head"><h2>Recent Updates</h2><span class="sub">${ACTIVITY.length} update${ACTIVITY.length===1?'':'s'}</span>${ACTIVITY.length ? `<button class="head-action" onclick="clearAllActivity()">Clear all</button>` : ''}</div>
       <div id="activityFeed"></div>
     `;
     renderActivityFeed();
@@ -1551,7 +1756,7 @@ function renderContent(){
   if(activeCategory === 'chat'){
     const hasName = !!whoAmI();
     content.innerHTML = `
-      <div class="section-head"><h2>Team Chat</h2><span class="sub">${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}</span></div>
+      <div class="section-head"><h2>Team Chat</h2><span class="sub" id="chatCount">${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}</span></div>
       <div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>
       <div class="chat-panel">
         <div class="chat-messages" id="chatMessages"></div>
@@ -1725,7 +1930,7 @@ function renderProviders(q){
         </div>
         <div class="provider-top">
           ${p.photo
-            ? `<img class="provider-avatar" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}">`
+            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(p.photo)}, ${JSON.stringify(p.name||'Provider photo')}`.replace(/"/g,'&quot;')})">`
             : `<div class="provider-avatar provider-avatar-fallback">${escapeHtml(initials||'?')}</div>`}
           <div>
             <div class="provider-name">${escapeHtml(p.name)}</div>
@@ -1754,6 +1959,11 @@ function renderChatMessages(){
   const container = document.getElementById('chatMessages');
   if(!container) return;
 
+  // Update the header count in place — rebuilding the whole panel here would
+  // wipe out anything the person is part-way through typing.
+  const countEl = document.getElementById('chatCount');
+  if(countEl) countEl.textContent = `${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}`;
+
   const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
   const myName = whoAmI().trim().toLowerCase();
 
@@ -1770,7 +1980,10 @@ function renderChatMessages(){
         ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
         ${m.text ? `<div class="chat-bubble">${escapeHtml(m.text)}</div>` : ''}
         ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
-        <div class="chat-time">${time}</div>
+        <div class="chat-meta-row">
+          <span class="chat-time">${time}</span>
+          <button class="chat-delete" title="Delete this message" onclick="deleteChatMessage('${m.id}')">Delete</button>
+        </div>
       </div>
     `;
   }).join('');
