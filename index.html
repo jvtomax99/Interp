@@ -677,6 +677,92 @@
   }
   .modal-actions{display:flex; justify-content:flex-end; gap:9px; margin-top:20px;}
 
+  /* ---------- CCHI practice ---------- */
+  .practice-intro{ max-width:660px; font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 20px 0; }
+  .practice-disclaimer{
+    display:flex; gap:9px; align-items:flex-start; max-width:660px;
+    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:12px;
+    padding:11px 13px; font-size:11.5px; line-height:1.55; color:#7A5D28; margin-bottom:22px;
+  }
+  .practice-disclaimer svg{ width:15px; height:15px; flex-shrink:0; margin-top:1px; color:#B8923E; }
+
+  .domain-bars{ display:flex; flex-direction:column; gap:9px; max-width:660px; margin-bottom:24px; }
+  .domain-bar-row{ display:flex; align-items:center; gap:12px; font-size:12.5px; }
+  .domain-bar-name{ width:230px; flex-shrink:0; color:var(--ink); font-weight:600; }
+  .domain-bar-track{ display:block; flex:1; height:8px; border-radius:20px; background:var(--line-soft); overflow:hidden; }
+  .domain-bar-fill{ display:block; height:100%; border-radius:20px; transition:width .6s var(--ease); }
+  .domain-bar-pct{ width:40px; text-align:right; font-family:var(--mono); font-size:11px; color:var(--ink-faint); flex-shrink:0; }
+
+  .quiz-setup{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:8px; }
+  .quiz-setup select{
+    padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--paper);
+    font-family:var(--sans); font-size:13.5px; color:var(--ink); box-shadow:var(--sh-1);
+  }
+
+  .quiz-card{
+    background:var(--paper); border-radius:18px; padding:26px 26px 22px 26px; max-width:760px;
+    box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft); animation:cardIn .3s var(--ease) both;
+  }
+  .quiz-progress-track{ height:5px; border-radius:20px; background:var(--line-soft); overflow:hidden; margin-bottom:18px; }
+  .quiz-progress-fill{ display:block; height:100%; border-radius:20px; background:linear-gradient(90deg,#0079BD,#01B8E6); transition:width .35s var(--ease); }
+  .quiz-meta{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .quiz-counter{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
+  .quiz-question{ font-size:16.5px; font-weight:600; line-height:1.5; margin:0 0 18px 0; color:var(--ink); }
+  .quiz-options{ display:flex; flex-direction:column; gap:9px; }
+  .quiz-option{
+    display:flex; align-items:flex-start; gap:11px; text-align:left; width:100%;
+    background:var(--bg-hi); border:none; border-radius:12px; padding:14px 16px; cursor:pointer;
+    font-family:var(--sans); font-size:14px; line-height:1.5; color:var(--ink);
+    box-shadow:inset 0 0 0 1px var(--line); touch-action:manipulation;
+    transition:box-shadow .15s var(--ease), background .15s var(--ease), transform .12s var(--ease);
+  }
+  .quiz-option:not(:disabled):hover{ background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--accent-2); }
+  .quiz-option:not(:disabled):active{ transform:scale(0.99); }
+  .quiz-option .opt-letter{
+    width:24px; height:24px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:var(--paper); box-shadow:inset 0 0 0 1px var(--line);
+    font-family:var(--mono); font-size:11px; font-weight:600; color:var(--ink-soft);
+  }
+  .quiz-option.correct{ background:#E9F4EE; box-shadow:inset 0 0 0 1.5px #4E9E74; }
+  .quiz-option.correct .opt-letter{ background:#4E9E74; color:#fff; box-shadow:none; }
+  .quiz-option.wrong{ background:#FBECEE; box-shadow:inset 0 0 0 1.5px var(--danger); }
+  .quiz-option.wrong .opt-letter{ background:var(--danger); color:#fff; box-shadow:none; }
+  .quiz-option:disabled{ cursor:default; }
+
+  .quiz-explain{
+    margin-top:16px; padding:14px 16px; border-radius:12px; background:var(--accent-soft);
+    font-size:13.5px; line-height:1.65; color:var(--ink); animation:cardIn .25s var(--ease) both;
+  }
+  .quiz-explain b{ color:var(--accent); }
+  .quiz-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+
+  .score-ring{
+    width:132px; height:132px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .score-ring-inner{
+    width:106px; height:106px; border-radius:50%; background:var(--paper);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .score-pct{ font-family:var(--sans); font-size:29px; font-weight:700; letter-spacing:-.02em; color:var(--ink); line-height:1; }
+  .score-label{ font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin-top:4px; }
+  .results-head{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
+  .results-summary h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 6px 0; }
+  .results-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.6; max-width:420px; }
+  .review-item{
+    background:var(--paper); border-radius:14px; padding:16px 18px; margin-bottom:10px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .review-q{ font-size:13.5px; font-weight:600; line-height:1.5; margin:0 0 8px 0; }
+  .review-line{ font-size:12.5px; line-height:1.6; color:var(--ink-soft); margin:2px 0; }
+  .review-line.good{ color:#3F7D58; }
+  .review-line.bad{ color:var(--danger); }
+  @media (max-width:760px){
+    .domain-bar-name{ width:auto; flex:1; font-size:12px; }
+    .quiz-card{ padding:20px 18px 18px 18px; }
+    .quiz-question{ font-size:15.5px; }
+  }
+
   /* ---------- Image lightbox ---------- */
   @keyframes lightboxIn{ from{opacity:0;} to{opacity:1;} }
   @keyframes lightboxImgIn{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
@@ -805,6 +891,26 @@
   </div>
 </div>
 
+<div class="overlay" id="questionOverlay">
+  <div class="modal">
+    <h3>Add a practice question</h3>
+    <div class="field"><label>Domain</label><select id="fQDomain"></select></div>
+    <div class="field"><label>Question</label><textarea id="fQText" placeholder="Write a scenario-based question, as the exam does" style="min-height:80px;"></textarea></div>
+    <div class="field"><label>Option A</label><input id="fQA" type="text"></div>
+    <div class="field"><label>Option B</label><input id="fQB" type="text"></div>
+    <div class="field"><label>Option C</label><input id="fQC" type="text"></div>
+    <div class="field"><label>Option D</label><input id="fQD" type="text"></div>
+    <div class="field"><label>Correct answer</label><select id="fQCorrect">
+      <option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option>
+    </select></div>
+    <div class="field"><label>Explanation</label><textarea id="fQExplain" placeholder="Why is that the best answer? This is what makes practice useful."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeQuestionModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuestion()">Save question</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="noteOverlay">
   <div class="modal">
     <h3 id="noteModalTitle">Add note</h3>
@@ -860,6 +966,7 @@
               match /team-notes/{docId} { allow read, write: if true; }
               match /term-attachments/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
+              match /practice-questions/{docId} { allow read, write: if true; }
             }
           }
      5. This app also uses Cloud Storage for file attachments (photos and
@@ -994,6 +1101,347 @@ const DEFAULT_DATA = {
   ]
 };
 
+/* ============ CoreCHI practice bank ============
+   Domain weights follow CCHI's current CoreCHI Exam Specifications
+   (effective May 1, 2023, from the 2022 Job Task Analysis). Several
+   third-party sites still publish the older 2017 weightings.
+
+   IMPORTANT: these are original practice questions written to match the
+   published domain structure. They are NOT real exam items, and CCHI has
+   no involvement with this app. */
+const CCHI_DOMAINS = [
+  { id:'ethics',      name:'Professional Responsibility & Ethics', weight:23, color:'#8B7BAE' },
+  { id:'encounter',   name:'Managing the Interpreting Encounter',  weight:24, color:'#6F97AC' },
+  { id:'terminology', name:'Healthcare Terminology',               weight:25, color:'#B5707D' },
+  { id:'systems',     name:'U.S. Health Systems',                  weight:13, color:'#BFA05E' },
+  { id:'cultural',    name:'Cultural Responsiveness',              weight:15, color:'#7FA173' }
+];
+
+const SEED_QUESTIONS = [
+  // ---- Professional Responsibility & Ethics ----
+  { d:'ethics', q:'During a visit, the patient asks the interpreter, "What would you do if you were me?" What is the most appropriate response?',
+    o:['Share a personal opinion, since the patient trusts the interpreter',
+       'Interpret the question so the provider can answer it',
+       'Tell the patient the interpreter is not allowed to speak to them',
+       'Advise the patient to follow the doctor\u2019s recommendation'],
+    a:1, e:'Everything said in the encounter is interpreted. The question belongs to the provider, and answering it personally would step outside the interpreter role.' },
+  { d:'ethics', q:'An interpreter realizes the patient is a close family friend. What should the interpreter do?',
+    o:['Continue, but stay especially neutral','Disclose the relationship and offer to withdraw','Continue only if the patient consents','Interpret but omit sensitive details'],
+    a:1, e:'A personal relationship is a potential conflict of interest. The professional standard is to disclose it promptly and withdraw if it could compromise impartiality.' },
+  { d:'ethics', q:'A provider steps out and asks the interpreter to "just explain the consent form" to the patient. The interpreter should:',
+    o:['Explain the form as clearly as possible','Decline, explaining that explaining the form is the provider\u2019s role','Summarize only the main points','Ask the patient to read it alone'],
+    a:1, e:'Explaining a consent form is clinical communication and informed consent is the provider\u2019s legal responsibility. The interpreter interprets that explanation, but does not deliver it.' },
+  { d:'ethics', q:'An interpreter feels distressed after interpreting a pediatric death notification. The most professionally appropriate step is to:',
+    o:['Ignore it, since emotional reactions are unprofessional','Use self-care strategies and seek debriefing or support','Request never to be assigned to pediatrics again','Discuss the case with family to process it'],
+    a:1, e:'Managing emotional well-being through self-monitoring, self-care, and appropriate support is an explicit part of the interpreter\u2019s professional responsibility. Discussing the case outside authorized channels would breach confidentiality.' },
+  { d:'ethics', q:'Which situation most clearly justifies interpreter advocacy?',
+    o:['The patient seems nervous about a procedure','The patient mentions dissatisfaction with wait times','The interpreter observes the patient being given another patient\u2019s medication','The provider speaks quickly'],
+    a:2, e:'Advocacy is reserved for situations involving potential harm to the patient\u2019s health, dignity, or safety. A medication error is an immediate safety risk; the others are handled through normal interpreting or clarification.' },
+  { d:'ethics', q:'After an encounter, a nurse asks the interpreter what the patient said about their home situation. The interpreter should:',
+    o:['Share it, since the nurse is on the care team','Decline, and suggest the nurse ask the patient directly through an interpreter','Share only non-medical details','Write a summary for the chart'],
+    a:1, e:'Confidentiality applies to everything learned in the encounter. Information should flow through the patient, not be relayed independently by the interpreter.' },
+  { d:'ethics', q:'An interpreter is offered a gift by a grateful patient\u2019s family. The most appropriate action is generally to:',
+    o:['Accept it to avoid causing offense','Politely decline, explaining professional policy','Accept it and share it with staff','Accept only if it is inexpensive'],
+    a:1, e:'Accepting gifts can compromise, or appear to compromise, impartiality. The standard practice is a respectful decline that explains the professional boundary.' },
+
+  // ---- Managing the Interpreting Encounter ----
+  { d:'encounter', q:'A provider uses an acronym the interpreter does not recognize. The interpreter should:',
+    o:['Guess based on context','Omit it and continue','Transparently ask the provider to clarify, then interpret the clarification','Interpret the acronym letter by letter'],
+    a:2, e:'Managing unfamiliar terms transparently is a core competency. The interpreter pauses, identifies themself as needing clarification, and makes the exchange visible to both parties.' },
+  { d:'encounter', q:'Which mode is generally most appropriate for a lengthy provider monologue during a treatment briefing where equipment is available?',
+    o:['Consecutive','Simultaneous','Sight translation','Summary interpreting'],
+    a:1, e:'Simultaneous interpreting suits extended one-directional speech such as briefings and educational monologues, preserving flow. Summary interpreting is not an accepted professional mode.' },
+  { d:'encounter', q:'The patient begins speaking at length without pausing, exceeding the interpreter\u2019s memory capacity. The best action is to:',
+    o:['Interpret only what is remembered','Politely intervene to request a pause, identifying the interpreter as the one speaking','Take detailed notes and wait until the end','Ask the provider to stop the patient'],
+    a:1, e:'Managing flow is the interpreter\u2019s responsibility. Intervening transparently in the first person preserves accuracy and completeness.' },
+  { d:'encounter', q:'Before an encounter begins, the interpreter should typically deliver a pre-session that includes:',
+    o:['The interpreter\u2019s qualifications and rates','The interpreter\u2019s role, confidentiality, first-person interpreting, and the right to intervene','A summary of the patient\u2019s chart','Advice on how to answer the provider'],
+    a:1, e:'A pre-session sets expectations: the interpreter\u2019s role, confidentiality, that everything will be interpreted, use of first person, and that the interpreter may intervene for clarification.' },
+  { d:'encounter', q:'A remote telephonic encounter has poor audio quality and the interpreter cannot hear reliably. The interpreter should:',
+    o:['Interpret what is audible and note gaps later','Disclose the limitation and request a fix or a different modality','Continue and ask the patient to speak louder only','End the call without explanation'],
+    a:1, e:'Recognizing modality limitations and self-monitoring the ability to interpret accurately is required. Accuracy cannot be compromised for convenience.' },
+  { d:'encounter', q:'A patient makes a remark to the interpreter in a side comment, saying "don\u2019t tell the doctor this." The interpreter should:',
+    o:['Honor the request and keep it private','Interpret it, having explained in the pre-session that everything said will be interpreted','Ask the patient to decide at the end of the visit','Report it to the nurse afterward'],
+    a:1, e:'Everything said in the encounter is interpreted. This is precisely why the pre-session establishes that expectation in advance.' },
+  { d:'encounter', q:'The interpreter realizes they made an error earlier in the session. The correct action is to:',
+    o:['Let it go if it seemed minor','Correct it openly and promptly, identifying the correction as the interpreter\u2019s','Correct it quietly in the next rendition','Mention it to the provider after the visit'],
+    a:1, e:'Errors are disclosed and corrected transparently as soon as they are recognized, because accuracy outweighs the discomfort of self-correction.' },
+
+  // ---- Healthcare Terminology ----
+  { d:'terminology', q:'A patient is described as having "dyspnea on exertion." In plain terms this means:',
+    o:['Chest pain when resting','Shortness of breath with activity','Dizziness when standing','Swelling in the legs'],
+    a:1, e:'Dyspnea means difficult or labored breathing; "on exertion" indicates it occurs with physical activity.' },
+  { d:'terminology', q:'The prefix "hypo-" in "hypoglycemia" indicates:',
+    o:['Above normal','Below normal','Rapid onset','Chronic'],
+    a:1, e:'Hypo- means under or below normal. Hypoglycemia is low blood glucose; hyperglycemia is high.' },
+  { d:'terminology', q:'"NPO" written in a patient\u2019s orders means the patient should:',
+    o:['Receive nothing by mouth','Be given pain medication as needed','Have no known allergies','Be placed on oxygen'],
+    a:0, e:'NPO is from the Latin nil per os \u2014 nothing by mouth, typically before surgery or certain procedures.' },
+  { d:'terminology', q:'"Benign" most accurately describes a growth that is:',
+    o:['Spreading to other organs','Not cancerous','Rapidly growing','Resistant to treatment'],
+    a:1, e:'Benign means non-cancerous and non-invasive, in contrast to malignant.' },
+  { d:'terminology', q:'A patient is scheduled for a "biopsy." This procedure involves:',
+    o:['Imaging the organ with sound waves','Removing tissue for examination','Measuring electrical heart activity','Draining fluid from the lungs'],
+    a:1, e:'A biopsy removes a tissue sample for laboratory examination, often to determine whether cells are cancerous.' },
+  { d:'terminology', q:'The suffix "-ectomy" indicates:',
+    o:['Surgical removal','Visual examination','Surgical repair','Creation of an opening'],
+    a:0, e:'-ectomy means surgical removal (appendectomy). Compare -oscopy (viewing), -plasty (repair), and -ostomy (creating an opening).' },
+  { d:'terminology', q:'"Prognosis" refers to:',
+    o:['The identification of the disease','The expected course and outcome of the condition','The treatment plan','The patient\u2019s medical history'],
+    a:1, e:'Prognosis is the expected course or outcome. Diagnosis is the identification of the condition itself \u2014 a distinction interpreters must render precisely.' },
+  { d:'terminology', q:'A provider says the patient is "afebrile." This means the patient:',
+    o:['Has a fever','Does not have a fever','Is dehydrated','Has an infection'],
+    a:1, e:'The prefix a- means without; febrile refers to fever. Afebrile means without fever.' },
+
+  // ---- U.S. Health Systems ----
+  { d:'systems', q:'Under Title VI of the Civil Rights Act of 1964, healthcare organizations receiving federal funds must:',
+    o:['Provide interpreters only for Spanish speakers','Take reasonable steps to provide meaningful access for people with limited English proficiency','Charge patients for language services','Use only bilingual staff'],
+    a:1, e:'Title VI prohibits national-origin discrimination, which has been interpreted to require meaningful language access for LEP patients \u2014 and patients cannot be charged for it.' },
+  { d:'systems', q:'HIPAA primarily governs:',
+    o:['Hospital accreditation standards','The privacy and security of protected health information','Medicare reimbursement rates','Interpreter certification requirements'],
+    a:1, e:'HIPAA establishes national standards for protecting patient health information, which directly shapes interpreter confidentiality obligations.' },
+  { d:'systems', q:'A patient without insurance arrives at an emergency department with a serious condition. Under EMTALA, the hospital must:',
+    o:['Transfer the patient immediately','Provide a medical screening exam and stabilizing treatment regardless of ability to pay','Require payment before treatment','Refer the patient to a clinic'],
+    a:1, e:'EMTALA requires a medical screening examination and stabilization of emergency conditions regardless of insurance or ability to pay.' },
+  { d:'systems', q:'Which best describes the role of an advance directive?',
+    o:['A bill for services rendered','A document stating a patient\u2019s wishes for future medical care if unable to communicate','A referral to a specialist','A record of immunizations'],
+    a:1, e:'An advance directive documents a patient\u2019s treatment preferences and may designate a healthcare proxy in case they become unable to communicate.' },
+
+  // ---- Cultural Responsiveness ----
+  { d:'cultural', q:'A patient mentions using a traditional remedy alongside prescribed medication. The interpreter should:',
+    o:['Omit it to avoid embarrassing the patient','Interpret it accurately so the provider can assess interactions','Advise the patient to stop using it','Explain the remedy to the provider personally'],
+    a:1, e:'The information is clinically relevant \u2014 traditional remedies can interact with prescriptions. The interpreter renders it faithfully without editorializing.' },
+  { d:'cultural', q:'A provider appears confused when a patient avoids eye contact. The most appropriate interpreter action is to:',
+    o:['Explain the patient\u2019s culture to the provider','Continue interpreting and, if a genuine misunderstanding affects care, transparently note that a cultural difference may be present','Tell the patient to make eye contact','Ignore it entirely'],
+    a:1, e:'Interpreters may act as cultural mediators when a misunderstanding genuinely impedes communication, intervening transparently \u2014 but they avoid generalizing about a patient\u2019s culture or making assumptions.' },
+  { d:'cultural', q:'Two patients speak the same language but use different words for a body part. This most likely reflects:',
+    o:['One patient\u2019s poor education','Regional or dialectal variation','A patient error','A translation mistake'],
+    a:1, e:'Languages vary regionally and among communities. Interpreters must recognize variation and clarify meaning rather than assume error or judge proficiency.' },
+  { d:'cultural', q:'A family asks that the patient not be told a terminal diagnosis, which conflicts with the provider\u2019s plan. The interpreter should:',
+    o:['Support the family\u2019s wishes','Interpret both perspectives accurately so the parties can resolve it','Decide based on the patient\u2019s culture','Withhold the diagnosis when interpreting'],
+    a:1, e:'The interpreter conveys all parties\u2019 positions faithfully. Resolving the conflict between family expectations and disclosure requirements belongs to the provider and care team, not the interpreter.' },
+  // ---- Professional Responsibility & Ethics (additional) ----
+  { d:'ethics', q:'A provider hands the interpreter a consent form and asks them to sign as a witness. The interpreter should:',
+    o:['Sign, since they were present','Decline witnessing the consent itself, and instead attest only to having interpreted accurately if a designated interpreter line exists','Sign on the patient\u2019s behalf','Refuse to participate further in the encounter'],
+    a:1, e:'Witnessing consent is a clinical/legal function. Many forms include a separate interpreter attestation line confirming accurate interpretation \u2014 that is what the interpreter may sign.' },
+  { d:'ethics', q:'The interpreter notices the provider state a medication dose that appears inconsistent with what was said moments earlier. The interpreter should:',
+    o:['Interpret exactly what was said and say nothing','Transparently flag the possible discrepancy so the provider can verify','Correct the dose while interpreting','Ask the patient which dose sounds right'],
+    a:1, e:'Interpreters do not alter content, but a potential safety discrepancy warrants a transparent intervention so the provider can confirm. This is clarification for safety, not advocacy or editing.' },
+  { d:'ethics', q:'A patient asks the interpreter for a ride home after the appointment. The most appropriate response is to:',
+    o:['Provide the ride to be helpful','Politely decline and refer the request to staff or social services','Provide the ride only if it is on the way','Ask the provider for permission'],
+    a:1, e:'Transporting patients falls outside the interpreter role and creates liability and boundary problems. Redirecting to the appropriate department preserves the role while still helping.' },
+  { d:'ethics', q:'An interpreter is assigned to a highly technical oncology consultation and does not feel competent in that subject matter. The interpreter should:',
+    o:['Accept and do their best','Disclose the limitation and decline or request a more qualified interpreter','Accept and research terms during the encounter','Accept but interpret only the simpler portions'],
+    a:1, e:'Self-monitoring one\u2019s ability to interpret in a given encounter is an explicit professional duty. Accepting work beyond one\u2019s competence risks patient harm.' },
+  { d:'ethics', q:'Which best describes the purpose of continuing education requirements for certified interpreters?',
+    o:['To increase certification revenue','To keep skills, terminology, and knowledge of regulations current','To satisfy employers only','To replace the original certification exam'],
+    a:1, e:'Maintaining credentials and pursuing professional growth keeps interpreters current on working languages, legislation, healthcare systems, and public health guidance.' },
+  { d:'ethics', q:'Before entering an isolation room, the interpreter should:',
+    o:['Interpret from the doorway to avoid risk','Follow the same standard precautions and PPE protocols required of clinical staff','Ask the patient to step outside','Refuse the assignment'],
+    a:1, e:'Adhering to personal and occupational safety measures, including standard precautions, is part of professional responsibility. Interpreting from the doorway would compromise accuracy and privacy.' },
+  { d:'ethics', q:'A provider leaves the room and asks the interpreter to "keep an eye on" the patient\u2019s young child. The interpreter should:',
+    o:['Agree, since it is a small favor','Decline, as supervising a child is outside the interpreter role','Agree only briefly','Take the child to the waiting area'],
+    a:1, e:'Supervising a child creates liability and pulls the interpreter out of role. Declining respectfully and redirecting to staff is appropriate.' },
+  { d:'ethics', q:'An interpreter strongly disagrees with a patient\u2019s decision to refuse a recommended treatment. The interpreter should:',
+    o:['Encourage the patient to reconsider','Interpret the refusal accurately without conveying personal judgment','Tell the provider the patient is making a mistake','Ask the family to intervene'],
+    a:1, e:'Impartiality requires suspending one\u2019s own values and beliefs. The patient has the right to refuse, and the interpreter conveys that faithfully.' },
+  { d:'ethics', q:'Posting a de-identified but detailed anecdote about an unusual case on social media is:',
+    o:['Acceptable if no name is used','A confidentiality risk, because details may still identify the patient','Acceptable within private groups','Encouraged for professional learning'],
+    a:1, e:'Removing a name does not guarantee de-identification. Unusual details can identify a patient, so sharing encounter specifics publicly breaches confidentiality.' },
+  { d:'ethics', q:'A patient asks the interpreter to call the pharmacy on their behalf after the visit. The interpreter should:',
+    o:['Make the call as a courtesy','Decline and direct the patient to appropriate staff or a language line','Make the call only if brief','Give the patient the interpreter\u2019s personal number'],
+    a:1, e:'Performing errands for patients extends beyond the interpreter role and creates dependency and liability. Referral to the right resource is the professional response.' },
+  { d:'ethics', q:'An interpreter also works part-time for a medical device company whose product is being discussed in an encounter. This is best described as:',
+    o:['Irrelevant to the assignment','A conflict of interest that should be disclosed','A benefit, given the product knowledge','A confidentiality issue only'],
+    a:1, e:'A financial or professional interest in the subject of the encounter is a conflict of interest and must be disclosed so it can be managed.' },
+  { d:'ethics', q:'An interpreter recognizes that they hold a personal bias about a patient\u2019s lifestyle. The professional response is to:',
+    o:['Request reassignment for every such patient','Consciously suspend the bias and interpret faithfully, seeking support or reassignment if impartiality cannot be maintained','Mention the bias to the provider','Interpret more briefly to limit involvement'],
+    a:1, e:'Impartiality involves recognizing and actively suspending one\u2019s own values and biases. If genuine impartiality is impossible, withdrawal is appropriate.' },
+  { d:'ethics', q:'During an encounter, a patient discloses information suggesting a child may be being harmed. The interpreter should:',
+    o:['Report it directly to authorities','Interpret the disclosure accurately and completely so the provider, who is a mandated reporter, can act','Ask the patient clarifying questions first','Keep it confidential'],
+    a:1, e:'The interpreter\u2019s duty is complete and accurate interpretation so the clinical team \u2014 who hold mandated reporting duties \u2014 receives the information. Interpreters should also know their own jurisdiction\u2019s reporting obligations.' },
+  { d:'ethics', q:'The primary purpose of a professional code of ethics for healthcare interpreters is to:',
+    o:['Protect interpreters from lawsuits','Guide decision-making that supports patient safety, communication, and professional integrity','Standardize interpreter pay','Define required vocabulary lists'],
+    a:1, e:'Codes of ethics provide a framework for resolving dilemmas in ways that protect patients and uphold the profession\u2019s integrity.' },
+  { d:'ethics', q:'An interpreter is running late and the provider suggests "just summarizing the key points" to save time. The interpreter should:',
+    o:['Summarize as requested','Explain that complete and accurate interpretation is required, not summary','Summarize only the provider\u2019s speech','Ask the patient which parts matter'],
+    a:1, e:'Summarizing omits content and undermines accuracy and informed consent. Time pressure does not justify incomplete interpretation.' },
+  { d:'ethics', q:'After a distressing encounter, the healthiest professional practice is to:',
+    o:['Discuss specifics with family to decompress','Use approved debriefing channels, peer support, or employee assistance while preserving confidentiality','Avoid thinking about it entirely','Post about it anonymously online'],
+    a:1, e:'Self-care and debriefing are encouraged, but must occur through channels that preserve patient confidentiality.' },
+
+  // ---- Managing the Interpreting Encounter (additional) ----
+  { d:'encounter', q:'Standard practice is for the interpreter to render speech in:',
+    o:['Third person, to show neutrality','First person, as if speaking as the original speaker','Whichever the provider prefers','Third person for the patient, first for the provider'],
+    a:1, e:'First-person interpreting keeps communication direct between provider and patient and reduces confusion about who is speaking. The interpreter refers to themself in the third person when intervening.' },
+  { d:'encounter', q:'A provider says to the interpreter, "Tell her she needs to take this twice a day." The interpreter should:',
+    o:['Say "he says you need to take this twice a day"','Interpret in first person as "You need to take this twice a day," and if the pattern persists, remind the provider to address the patient directly','Ask the provider to rephrase every time','Interpret only the medical content'],
+    a:1, e:'The interpreter renders the message in the first person and may transparently remind parties to speak directly to one another, which supports a direct provider-patient relationship.' },
+  { d:'encounter', q:'When a patient uses informal or colloquial language, the interpreter should:',
+    o:['Elevate the register to sound more professional','Preserve the speaker\u2019s register and meaning as closely as possible','Simplify it for the provider','Omit slang entirely'],
+    a:1, e:'Register is part of the message. Altering it can change the provider\u2019s clinical impression of the patient and misrepresents the speaker.' },
+  { d:'encounter', q:'The generally recommended physical positioning for an on-site interpreter is:',
+    o:['Directly between provider and patient','Beside or slightly behind the patient, supporting direct provider-patient eye contact','In a corner out of view','Seated at the provider\u2019s desk'],
+    a:1, e:'Positioning should keep the interpreter unobtrusive while allowing the provider and patient to communicate directly with each other.' },
+  { d:'encounter', q:'A family member and the patient begin speaking at the same time. The interpreter should:',
+    o:['Interpret whoever is loudest','Intervene transparently to manage turn-taking so each speaker is interpreted','Interpret only the patient','Summarize both'],
+    a:1, e:'Managing the flow of communication is the interpreter\u2019s responsibility. A transparent intervention restores order without omitting anyone.' },
+  { d:'encounter', q:'Sight translation refers to:',
+    o:['Writing a translation of a document','Reading a written document aloud in the target language','Interpreting simultaneously','Summarizing a document\u2019s contents'],
+    a:1, e:'Sight translation is the oral rendering of a written text. It differs from written translation and from summarizing.' },
+  { d:'encounter', q:'Note-taking during consecutive interpreting is best used to:',
+    o:['Create a permanent record of the encounter','Support memory for numbers, names, dosages, and sequences','Document the provider\u2019s errors','Prepare a written summary for the chart'],
+    a:1, e:'Notes support accuracy for detail-heavy content and are destroyed afterward per confidentiality practice. They are not a medical record.' },
+  { d:'encounter', q:'A patient uses profanity while describing their frustration. The interpreter should:',
+    o:['Soften it to remain professional','Interpret it faithfully, preserving the force of the message','Omit it','Ask the patient to rephrase'],
+    a:1, e:'Emotional intensity is clinically relevant. Softening or omitting language changes the message the provider receives.' },
+  { d:'encounter', q:'In a very long or emotionally intense assignment, team interpreting is used primarily to:',
+    o:['Reduce cost','Maintain accuracy by managing interpreter fatigue','Allow two languages at once','Satisfy accreditation requirements'],
+    a:1, e:'Cognitive fatigue degrades accuracy. Team interpreting with periodic hand-offs protects the quality of the rendition.' },
+  { d:'encounter', q:'During a video remote encounter, the interpreter cannot see the patient\u2019s gestures because of the camera angle. The interpreter should:',
+    o:['Continue and infer meaning','Request that the camera be adjusted, explaining why visual access matters','Switch to audio only','End the session'],
+    a:1, e:'Recognizing and addressing modality limitations is required. Visual cues affect comprehension, so requesting adjustment supports accuracy.' },
+  { d:'encounter', q:'A patient asks the interpreter, "What did the doctor just say? I did not understand." The interpreter should:',
+    o:['Explain it in simpler words','Interpret the patient\u2019s statement so the provider can re-explain','Repeat the interpretation more slowly only','Tell the patient to ask later'],
+    a:1, e:'The patient\u2019s lack of understanding is itself information the provider needs. Explaining clinical content personally would step outside the role.' },
+  { d:'encounter', q:'The interpreter encounters a term with no direct equivalent in the target language. The best approach is to:',
+    o:['Skip the term','Provide the closest rendering plus a brief transparent explanation, and request clarification if needed','Substitute a similar-sounding word','Ask the patient to guess'],
+    a:1, e:'Managing untranslatable concepts transparently \u2014 conveying meaning and flagging the gap \u2014 preserves accuracy without inventing content.' },
+  { d:'encounter', q:'The interpreter should intervene in an encounter when:',
+    o:['They disagree with the treatment plan','They need clarification, need to correct an error, or communication has broken down','The encounter is running long','The patient seems upset'],
+    a:1, e:'Interventions are appropriate for clarification, self-correction, and communication breakdown \u2014 always announced transparently in the third person.' },
+  { d:'encounter', q:'A pronoun in the source language is ambiguous about who is being referred to. The interpreter should:',
+    o:['Choose the most likely referent','Ask the speaker to clarify before interpreting','Interpret both possibilities','Use a gender-neutral pronoun'],
+    a:1, e:'Guessing risks a clinically meaningful error. A brief transparent clarification request resolves the ambiguity accurately.' },
+  { d:'encounter', q:'Which mode is generally most appropriate for a back-and-forth history-taking dialogue?',
+    o:['Simultaneous','Consecutive','Sight translation','Written translation'],
+    a:1, e:'Consecutive interpreting suits turn-taking dialogue, which is why it is the dominant mode in healthcare encounters.' },
+  { d:'encounter', q:'At the close of an encounter, an appropriate interpreter action is to:',
+    o:['Summarize the visit for the patient','Confirm no further communication is needed, then dispose of notes securely','Give the patient the interpreter\u2019s contact details','Review the chart for accuracy'],
+    a:1, e:'Interpreters do not summarize clinical content. Securely destroying notes protects confidentiality.' },
+  { d:'encounter', q:'A pre-session with the provider is most useful for:',
+    o:['Reviewing the patient\u2019s diagnosis','Clarifying the interpreter\u2019s role, positioning, and how interventions will be signaled','Agreeing on which content to omit','Discussing the interpreter\u2019s opinion of the case'],
+    a:1, e:'A brief provider pre-session sets logistics and expectations so the encounter runs smoothly, without discussing content to omit.' },
+
+  // ---- Healthcare Terminology (additional) ----
+  { d:'terminology', q:'The suffix "-itis" indicates:',
+    o:['Inflammation','Surgical removal','Tumor','Pain'],
+    a:0, e:'-itis means inflammation, as in dermatitis or appendicitis. -oma indicates tumor and -algia indicates pain.' },
+  { d:'terminology', q:'"Tachycardia" refers to:',
+    o:['A slow heart rate','A rapid heart rate','An irregular heartbeat','Chest pain'],
+    a:1, e:'Tachy- means rapid; brady- means slow. Tachycardia is an abnormally fast heart rate.' },
+  { d:'terminology', q:'A patient with "hypotension" has:',
+    o:['High blood pressure','Low blood pressure','High blood sugar','Low oxygen'],
+    a:1, e:'Hypo- means below normal; tension here refers to blood pressure. Hypertension is the elevated form.' },
+  { d:'terminology', q:'"Edema" describes:',
+    o:['Bleeding under the skin','Swelling from fluid accumulation','Skin redness','Muscle wasting'],
+    a:1, e:'Edema is swelling caused by excess fluid in body tissues, commonly seen in the legs, ankles, or feet.' },
+  { d:'terminology', q:'A medication ordered "PRN" should be given:',
+    o:['Every night','As needed','Immediately','By mouth'],
+    a:1, e:'PRN is from the Latin pro re nata \u2014 as the situation requires, or as needed.' },
+  { d:'terminology', q:'An order marked "STAT" means it should be carried out:',
+    o:['Within 24 hours','Immediately','At the next scheduled round','Only if the patient requests it'],
+    a:1, e:'STAT derives from the Latin statim, meaning immediately \u2014 a distinction with direct safety consequences.' },
+  { d:'terminology', q:'A "CBC" is a laboratory test that measures:',
+    o:['Blood glucose over three months','Components of the blood such as red cells, white cells, and platelets','Cholesterol levels','Kidney filtration rate'],
+    a:1, e:'A complete blood count evaluates red blood cells, white blood cells, hemoglobin, hematocrit, and platelets.' },
+  { d:'terminology', q:'"Local anesthesia" differs from "general anesthesia" in that local anesthesia:',
+    o:['Renders the patient fully unconscious','Numbs a specific area while the patient remains awake','Is given only to children','Requires a ventilator'],
+    a:1, e:'Local anesthesia numbs a limited area with the patient awake; general anesthesia produces controlled unconsciousness.' },
+  { d:'terminology', q:'A "contraindication" is:',
+    o:['A reason a treatment should not be used','A side effect of a medication','An alternative treatment','A required follow-up test'],
+    a:0, e:'A contraindication is a specific situation in which a drug or procedure should be avoided because of potential harm.' },
+  { d:'terminology', q:'A condition described as "chronic" is one that:',
+    o:['Comes on suddenly and resolves quickly','Persists over a long period','Is contagious','Is life-threatening'],
+    a:1, e:'Chronic conditions are long-lasting or recurrent; acute conditions have rapid onset and shorter duration.' },
+  { d:'terminology', q:'The suffix "-ology" means:',
+    o:['The study of','Inflammation of','Surgical repair of','Removal of'],
+    a:0, e:'-ology means the study of, as in cardiology (heart) or nephrology (kidneys).' },
+  { d:'terminology', q:'A "lesion" refers to:',
+    o:['An area of abnormal tissue','A surgical instrument','A type of medication','A diagnostic imaging test'],
+    a:0, e:'A lesion is any region of tissue damaged or altered by injury or disease. It is not inherently cancerous.' },
+  { d:'terminology', q:'"NKDA" documented in a chart indicates:',
+    o:['No known drug allergies','Not keeping daily appointments','Needs kidney dialysis assessment','New knee diagnosis added'],
+    a:0, e:'NKDA means no known drug allergies \u2014 a critical safety notation.' },
+  { d:'terminology', q:'"Myocardial infarction" is commonly known as:',
+    o:['A stroke','A heart attack','A blood clot in the leg','An irregular heartbeat'],
+    a:1, e:'Myo- (muscle) + cardial (heart) + infarction (tissue death from lost blood supply) \u2014 a heart attack.' },
+  { d:'terminology', q:'A provider asks whether the patient has been able to "void." This refers to:',
+    o:['Eating solid food','Urinating','Sleeping through the night','Walking unassisted'],
+    a:1, e:'To void means to empty the bladder. Interpreters should render it in language the patient will understand.' },
+  { d:'terminology', q:'"Palliative care" focuses primarily on:',
+    o:['Curing the underlying disease','Relieving symptoms and improving quality of life','Emergency stabilization','Preventive screening'],
+    a:1, e:'Palliative care manages symptoms and supports quality of life, and may be provided alongside curative treatment \u2014 it is not limited to end of life.' },
+  { d:'terminology', q:'The abbreviation "BID" on a prescription means the medication is taken:',
+    o:['Once daily','Twice daily','Three times daily','Before meals'],
+    a:1, e:'BID is bis in die \u2014 twice a day. TID is three times daily and QID is four times daily.' },
+
+  // ---- U.S. Health Systems (additional) ----
+  { d:'systems', q:'Under the Americans with Disabilities Act, a hospital must provide sign language interpreters for Deaf patients:',
+    o:['Only if the patient pays','At no cost to the patient, as an auxiliary aid for effective communication','Only for surgical procedures','Only if a family member is unavailable'],
+    a:1, e:'The ADA requires covered entities to furnish auxiliary aids and services, including qualified interpreters, at no cost to the individual.' },
+  { d:'systems', q:'Informed consent requires that the patient understands:',
+    o:['Only the name of the procedure','The nature of the procedure, its risks, benefits, and alternatives','Only the cost','Only the recovery time'],
+    a:1, e:'Valid informed consent requires comprehension of the procedure, risks, benefits, and alternatives \u2014 which is precisely why accurate interpretation is legally significant.' },
+  { d:'systems', q:'A "referral" in the U.S. system typically means:',
+    o:['A prescription for medication','Authorization or direction from one provider to see another, often a specialist','A hospital discharge order','A billing statement'],
+    a:1, e:'Referrals direct patients to specialty care and are often required by insurance plans before a specialist visit is covered.' },
+  { d:'systems', q:'A "copay" is best described as:',
+    o:['The total cost of care','A fixed amount the patient pays for a covered service','The amount the insurer pays','A penalty for missing an appointment'],
+    a:1, e:'A copayment is a fixed patient contribution per service; a deductible is the amount paid before coverage begins.' },
+  { d:'systems', q:'Medicare primarily serves:',
+    o:['Low-income individuals of any age','People aged 65 and older, and certain people with disabilities','Only military veterans','Only children'],
+    a:1, e:'Medicare is a federal program largely for those 65+ and certain younger people with disabilities. Medicaid is the income-based program administered with states.' },
+  { d:'systems', q:'Discharge instructions are important to interpret completely because they:',
+    o:['Are required for billing','Direct the patient\u2019s self-care, medications, and follow-up after leaving','Replace the consent form','Are reviewed only by the insurer'],
+    a:1, e:'Incomplete understanding of discharge instructions is a well-documented driver of readmissions and medication errors.' },
+  { d:'systems', q:'The Joint Commission is best known for:',
+    o:['Setting interpreter pay rates','Accrediting healthcare organizations against quality and safety standards','Issuing medical licenses','Managing Medicare billing'],
+    a:1, e:'The Joint Commission accredits and certifies healthcare organizations, including standards touching on communication and language access.' },
+  { d:'systems', q:'The National CLAS Standards are intended to:',
+    o:['Certify interpreters','Advance culturally and linguistically appropriate services and health equity','Set hospital pricing','Regulate medical devices'],
+    a:1, e:'The CLAS Standards provide a framework for culturally and linguistically appropriate services aimed at reducing health disparities.' },
+  { d:'systems', q:'If a patient wishes to file a complaint about their care, the interpreter should:',
+    o:['File it on the patient\u2019s behalf','Interpret the patient\u2019s request so staff can direct them to patient relations or the grievance process','Advise the patient against complaining','Handle it informally with the provider'],
+    a:1, e:'Patients have the right to file grievances. The interpreter facilitates communication about that right rather than acting as the patient\u2019s representative.' },
+
+  // ---- Cultural Responsiveness (additional) ----
+  { d:'cultural', q:'A patient nods repeatedly while the provider explains a treatment. The interpreter should:',
+    o:['Assume the patient understands','Interpret faithfully and recognize that nodding does not necessarily indicate comprehension or agreement','Tell the provider the patient agrees','Ask the patient if they are confused'],
+    a:1, e:'Nonverbal cues carry different meanings across cultures; nodding may signal listening rather than understanding. The interpreter avoids assumptions and does not editorialize.' },
+  { d:'cultural', q:'A patient requests a provider of the same gender for a physical exam. The interpreter should:',
+    o:['Explain that this is not possible','Interpret the request accurately so staff can respond','Tell the patient it is unnecessary','Decide whether the request is reasonable'],
+    a:1, e:'The request is the patient\u2019s to make and the facility\u2019s to accommodate. The interpreter conveys it without judgment.' },
+  { d:'cultural', q:'A patient attributes their illness to a culturally specific condition such as "susto" or the "evil eye." The interpreter should:',
+    o:['Omit it as unscientific','Interpret it accurately, as the patient\u2019s explanatory model is clinically relevant','Explain the belief to the provider','Correct the patient'],
+    a:1, e:'A patient\u2019s explanatory model shapes adherence and trust. Rendering it faithfully allows the provider to respond appropriately.' },
+  { d:'cultural', q:'A patient mentions religious fasting that may affect a medication schedule. The most appropriate interpreter action is to:',
+    o:['Advise the patient to skip fasting','Interpret it fully so provider and patient can adjust the plan together','Tell the provider fasting is not important','Suggest a schedule to the patient'],
+    a:1, e:'The information is clinically relevant. The provider and patient negotiate the plan; the interpreter enables that conversation.' },
+  { d:'cultural', q:'In some families, medical decisions are made collectively rather than individually. The interpreter should:',
+    o:['Insist the patient decide alone','Interpret accurately and allow the provider and patient to navigate decision-making','Advise the family on U.S. norms','Address only the family spokesperson'],
+    a:1, e:'Decision-making structures vary. The interpreter does not impose norms; the provider confirms the patient\u2019s own wishes.' },
+  { d:'cultural', q:'An interpreter shares the patient\u2019s national origin. The main risk this creates is:',
+    o:['Reduced language accuracy','Assuming shared beliefs, practices, or dialect that the patient may not hold','Inability to remain confidential','Requirement to disclose the shared background'],
+    a:1, e:'Shared origin does not mean shared beliefs. Intracultural variation and differing acculturation levels make assumptions risky.' },
+  { d:'cultural', q:'"Acculturation" refers to:',
+    o:['The process of adapting to a new culture over time','A patient\u2019s native language ability','A clinical assessment tool','A type of health insurance'],
+    a:0, e:'Acculturation varies widely among individuals from the same community, which is why interpreters avoid generalizing.' },
+  { d:'cultural', q:'A patient arrives late and explains that appointment timing is viewed flexibly in their community. The interpreter should:',
+    o:['Lecture the patient about punctuality','Interpret the explanation neutrally','Omit the explanation','Apologize to the provider on the patient\u2019s behalf'],
+    a:1, e:'The interpreter conveys the message without judgment or apology, allowing staff to respond as they see fit.' },
+  { d:'cultural', q:'A patient consistently addresses the provider with formal titles and honorifics. The interpreter should:',
+    o:['Drop them, since English is less formal','Preserve the level of formality as closely as the target language allows','Add honorifics for the provider as well','Ask the patient to be less formal'],
+    a:1, e:'Formality is part of the message and reflects the speaker\u2019s stance. It should be preserved where the target language permits.' },
+  { d:'cultural', q:'When a cultural misunderstanding appears to be affecting care, the interpreter\u2019s role as cultural mediator is to:',
+    o:['Explain the patient\u2019s entire culture to the provider','Transparently note that a cultural difference may be present, allowing the parties to explore it','Advise the provider how to proceed','Resolve the misunderstanding privately with the patient'],
+    a:1, e:'Cultural mediation is a brief, transparent intervention that surfaces a possible difference \u2014 not a lecture, and not a decision made on the parties\u2019 behalf.' },
+  { d:'cultural', q:'A patient declines to discuss a symptom in front of a family member who is present. The interpreter should:',
+    o:['Encourage the patient to speak anyway','Interpret the patient\u2019s reluctance so the provider can offer a private moment','Ask the family member to leave','Interpret the symptom anyway'],
+    a:1, e:'The reluctance itself is information the provider needs. Managing who is present in the room is the provider\u2019s decision, not the interpreter\u2019s.' }
+
+];
+
 /* ============ State ============ */
 let DATA = null;
 let activeCategory = 'home';
@@ -1005,6 +1453,15 @@ let PROVIDERS = [];
 let editingProviderId = null;
 let pendingPhotoDataUrl = null;
 let pendingPhotoPath = null;
+
+let CUSTOM_QUESTIONS = [];
+let quizActive = false;
+let quizQuestions = [];
+let quizIndex = 0;
+let quizAnswers = [];     // chosen option index per question
+let quizRevealed = false; // whether the current question's answer is shown
+let quizLength = 10;
+let quizDomainFilter = 'all';
 const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05E','#7C8FA8','#A97C5D'];
 let selectedSwatch = DOMAIN_COLORS[0];
 let selectedIcon = 'sparkle';
@@ -1552,6 +2009,60 @@ function collateTerms(a, b){
   return String(a||'').localeCompare(String(b||''), undefined, { sensitivity:'base', numeric:true });
 }
 
+/* ---------- Team-contributed practice questions ---------- */
+async function loadQuestions(){
+  try{
+    if(!db){ CUSTOM_QUESTIONS = []; return; }
+    const snap = await db.collection('practice-questions').get();
+    CUSTOM_QUESTIONS = snap.docs.map(doc=>{
+      const v = doc.data();
+      return { id:doc.id, d:v.d, q:v.q, o:v.o, a:v.a, e:v.e, addedBy:v.addedBy, custom:true };
+    });
+  }catch(err){
+    console.error('Could not load practice questions', err);
+    CUSTOM_QUESTIONS = [];
+  }
+  render();
+}
+
+function openAddQuestionModal(){
+  const sel = document.getElementById('fQDomain');
+  sel.innerHTML = CCHI_DOMAINS.map(d=>`<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+  ['fQText','fQA','fQB','fQC','fQD','fQExplain'].forEach(id=>{ document.getElementById(id).value = ''; });
+  document.getElementById('fQCorrect').value = '0';
+  document.getElementById('questionOverlay').classList.add('show');
+  if(prefersAutoFocus()) document.getElementById('fQText').focus();
+}
+
+function closeQuestionModal(){
+  document.getElementById('questionOverlay').classList.remove('show');
+}
+
+async function saveQuestion(){
+  const q = document.getElementById('fQText').value.trim();
+  const opts = ['fQA','fQB','fQC','fQD'].map(id=>document.getElementById(id).value.trim());
+  const e = document.getElementById('fQExplain').value.trim();
+  const d = document.getElementById('fQDomain').value;
+  const a = Number(document.getElementById('fQCorrect').value);
+
+  if(!q){ showToast('Enter the question text.'); return; }
+  if(opts.some(o=>!o)){ showToast('All four options are required.'); return; }
+  if(!e){ showToast('Add an explanation \u2014 it\u2019s what makes the question useful to study from.'); return; }
+  if(!db){ showToast('Not connected to the database.'); return; }
+
+  const record = { d, q, o:opts, a, e, addedBy: whoAmI() || '', createdAt: Date.now() };
+  try{
+    const ref = await db.collection('practice-questions').add(record);
+    CUSTOM_QUESTIONS.push({ id:ref.id, ...record, custom:true });
+    closeQuestionModal();
+    logActivity('added a CoreCHI practice question');
+    showToast('Question added.');
+    render();
+  }catch(err){
+    showToast('Could not save \u2014 check your connection.');
+  }
+}
+
 function prefersAutoFocus(){
   try{
     return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -1583,6 +2094,7 @@ const ICON_PHONE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_CHAT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20C10.5 20 9.09 19.6 7.88 18.89L4 20L5.11 16.12C4.4 14.91 4 13.5 4 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="1.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 8.5H16M8 12H16M8 15.5H12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12L21 4L14 21L11 13L3 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+const ICON_EXAM = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="white" stroke-width="1.7"/><path d="M8.5 9L10 10.5L13 7.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 15L10 16.5L13 13.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 9.5H16M15.5 15.5H16" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_GLYPH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.5C3 5.67 3.67 5 4.5 5H12C12.83 5 13.5 5.67 13.5 6.5V12C13.5 12.83 12.83 13.5 12 13.5H7.5L4.5 16.2V13.5C3.67 13.5 3 12.83 3 12V6.5Z" fill="white" fill-opacity="0.95"/><path d="M10.5 11C10.5 10.17 11.17 9.5 12 9.5H19.5C20.33 9.5 21 10.17 21 11V16.5C21 17.33 20.33 18 19.5 18V20.7L16.5 18H12C11.17 18 10.5 17.33 10.5 16.5V11Z" fill="white" fill-opacity="0.55"/></svg>';
 const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L19 6V11C19 15.5 16 19 12 21C8 19 5 15.5 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -1658,6 +2170,11 @@ function render(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   const extrasTabs = `
      <div class="nav-divider"></div>
+     <button class="tab ${activeCategory==='practice'?'active':''}" onclick="setCategory('practice')">
+       <span class="flag link-flag" style="background:linear-gradient(140deg,#0079BD,#252E6D);">${ICON_EXAM}</span>
+       <span class="name">CoreCHI Practice</span>
+       <span class="count">${SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length}</span>
+     </button>
      <button class="tab ${activeCategory==='updates'?'active':''}" onclick="setCategory('updates')">
        <span class="flag link-flag">${ICON_BELL}</span>
        <span class="name">Recent Updates</span>
@@ -1699,6 +2216,9 @@ function render(){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddNoteModal()">+ Add note</button>`;
     searchPlaceholder = 'Search notes…';
   } else if(activeCategory === 'chat'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'practice'){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'home'){
@@ -1767,6 +2287,11 @@ function renderContent(){
 
   if(activeCategory === 'home'){
     content.innerHTML = renderHome();
+    return;
+  }
+
+  if(activeCategory === 'practice'){
+    content.innerHTML = renderPractice();
     return;
   }
 
@@ -1896,6 +2421,290 @@ function setCategory(id){
   if(id === 'chat'){ lastSeenChatCount = CHAT_MESSAGES.length; }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   render();
+}
+
+/* ============ CoreCHI practice ============ */
+function allQuestions(){
+  return SEED_QUESTIONS.concat(CUSTOM_QUESTIONS);
+}
+
+function domainMeta(id){
+  return CCHI_DOMAINS.find(d=>d.id===id) || { id, name:id, weight:0, color:'#7A7A70' };
+}
+
+// Builds a quiz that mirrors the real exam's domain proportions rather than
+// picking uniformly at random, so practice reflects where the marks actually are.
+//
+// A short quiz can't split cleanly into 23/24/25/13/15 — rounding always has a
+// remainder. Rounding the same way every time would permanently over-represent
+// some domains, so leftover slots are handed out randomly in proportion to each
+// domain's fractional remainder. Any single quiz is approximate; the average
+// across sessions lands on the true weights.
+function buildWeightedQuiz(pool, n){
+  const byDomain = {};
+  CCHI_DOMAINS.forEach(d=>{ byDomain[d.id] = shuffle(pool.filter(q=>q.d===d.id)); });
+
+  const alloc = {};
+  const remainders = [];
+  let assigned = 0;
+  CCHI_DOMAINS.forEach(d=>{
+    const exact = n * (d.weight/100);
+    const base = Math.floor(exact);
+    alloc[d.id] = base;
+    assigned += base;
+    remainders.push({ id:d.id, frac: exact - base });
+  });
+
+  // Hand out the remaining slots by weighted random draw on the fractional
+  // remainders. Sorting by remainder would be deterministic — the same domains
+  // would win every single time and stay permanently over-represented.
+  let leftoverSlots = n - assigned;
+  const candidates = remainders.slice();
+  while(leftoverSlots > 0 && candidates.length){
+    const totalFrac = candidates.reduce((s,c)=> s + c.frac, 0);
+    let roll = Math.random() * (totalFrac || candidates.length);
+    let pick = candidates.length - 1;
+    for(let i=0;i<candidates.length;i++){
+      roll -= (totalFrac ? candidates[i].frac : 1);
+      if(roll <= 0){ pick = i; break; }
+    }
+    alloc[candidates[pick].id]++;
+    candidates.splice(pick, 1); // one extra slot per domain at most
+    leftoverSlots--;
+  }
+
+  const chosen = [];
+  CCHI_DOMAINS.forEach(d=>{ chosen.push(...byDomain[d.id].splice(0, alloc[d.id])); });
+
+  // If a domain didn't have enough questions, top up from whatever remains.
+  const leftovers = shuffle(Object.values(byDomain).flat());
+  while(chosen.length < n && leftovers.length) chosen.push(leftovers.shift());
+  return shuffle(chosen).slice(0, n);
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function renderPractice(){
+  if(quizActive) return renderQuiz();
+  if(quizAnswers.length && quizQuestions.length && quizIndex >= quizQuestions.length) return renderQuizResults();
+
+  const pool = allQuestions();
+  const counts = {};
+  CCHI_DOMAINS.forEach(d=>{ counts[d.id] = pool.filter(q=>q.d===d.id).length; });
+
+  let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span></div>`;
+  html += `<p class="practice-intro">Multiple-choice practice built around the five domains of CCHI's CoreCHI written exam. Questions are drawn in the same proportions as the real exam, so your practice weights match where the marks actually are.</p>`;
+  html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>These are original practice questions written to match CCHI's published domain structure \u2014 they are not real exam items, and this app is not affiliated with or endorsed by CCHI. Always study from official CCHI materials as well.</span></div>`;
+
+  html += `<div class="domain-bars">`;
+  CCHI_DOMAINS.forEach(d=>{
+    html += `
+      <div class="domain-bar-row">
+        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
+        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${d.weight*4}%; background:${d.color};"></span></span>
+        <span class="domain-bar-pct">${d.weight}%</span>
+        <span class="domain-bar-pct" title="questions available">${counts[d.id]}q</span>
+      </div>`;
+  });
+  html += `</div>`;
+
+  html += `
+    <div class="quiz-setup">
+      <select id="quizLenSel">
+        <option value="5">5 questions</option>
+        <option value="10" selected>10 questions</option>
+        <option value="20">20 questions</option>
+        <option value="30">30 questions</option>
+        <option value="50">50 questions</option>
+        <option value="100">100 \u2014 full length</option>
+      </select>
+      <select id="quizDomainSel">
+        <option value="all">All domains (exam-weighted)</option>
+        ${CCHI_DOMAINS.map(d=>`<option value="${d.id}">${escapeHtml(d.name)} only</option>`).join('')}
+      </select>
+      <button class="btn btn-primary" onclick="startQuiz()">Start practice</button>
+      <button class="btn btn-ghost" onclick="openAddQuestionModal()">+ Add question</button>
+    </div>
+  `;
+  return html;
+}
+
+// Randomizes the order of a question's options and remaps the correct index.
+// Without this, a fixed answer position becomes a giveaway pattern — someone
+// could score well by spotting the pattern instead of reasoning through the
+// scenario, which defeats the point of practising. Shuffling per session also
+// means repeating a question isn't just recall of "it was the third one".
+function shuffleOptions(q){
+  const order = shuffle(q.o.map((_, i) => i));
+  return { ...q, o: order.map(i => q.o[i]), a: order.indexOf(q.a) };
+}
+
+function startQuiz(){
+  const lenEl = document.getElementById('quizLenSel');
+  const domEl = document.getElementById('quizDomainSel');
+  quizLength = lenEl ? Number(lenEl.value) : 10;
+  quizDomainFilter = domEl ? domEl.value : 'all';
+
+  const pool = quizDomainFilter === 'all'
+    ? allQuestions()
+    : allQuestions().filter(q=>q.d === quizDomainFilter);
+
+  if(!pool.length){ showToast('No questions available for that domain yet.'); return; }
+
+  quizQuestions = (quizDomainFilter === 'all'
+    ? buildWeightedQuiz(pool, Math.min(quizLength, pool.length))
+    : shuffle(pool).slice(0, Math.min(quizLength, pool.length))
+  ).map(shuffleOptions);
+
+  if(quizQuestions.length < quizLength){
+    showToast(`Only ${quizQuestions.length} questions available \u2014 starting with those.`);
+  }
+  quizIndex = 0;
+  quizAnswers = [];
+  quizRevealed = false;
+  quizActive = true;
+  renderContent();
+}
+
+function renderQuiz(){
+  const q = quizQuestions[quizIndex];
+  const dm = domainMeta(q.d);
+  const chosen = quizAnswers[quizIndex];
+  const pct = Math.round((quizIndex / quizQuestions.length) * 100);
+  const letters = ['A','B','C','D','E','F'];
+
+  let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${quizIndex+1} of ${quizQuestions.length}</span>
+    <button class="head-action" onclick="exitQuiz()">Exit</button></div>`;
+
+  html += `<div class="quiz-card">
+    <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span></div>
+    <div class="quiz-meta">
+      <span class="tag" style="color:${dm.color}; background:${dm.color}1F;">${escapeHtml(dm.name)}</span>
+      <span class="quiz-counter">Question ${quizIndex+1} / ${quizQuestions.length}</span>
+    </div>
+    <p class="quiz-question">${escapeHtml(q.q)}</p>
+    <div class="quiz-options">`;
+
+  q.o.forEach((opt, i)=>{
+    let cls = '';
+    if(quizRevealed){
+      if(i === q.a) cls = 'correct';
+      else if(i === chosen) cls = 'wrong';
+    }
+    html += `<button class="quiz-option ${cls}" ${quizRevealed?'disabled':''} onclick="answerQuiz(${i})">
+      <span class="opt-letter">${letters[i]}</span><span>${escapeHtml(opt)}</span>
+    </button>`;
+  });
+  html += `</div>`;
+
+  if(quizRevealed){
+    const right = chosen === q.a;
+    html += `<div class="quiz-explain"><b>${right ? 'Correct.' : 'Not quite.'}</b> ${escapeHtml(q.e)}</div>`;
+    html += `<div class="quiz-actions">
+      <button class="btn btn-primary" onclick="nextQuestion()">${quizIndex+1 < quizQuestions.length ? 'Next question' : 'See results'}</button>
+    </div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function answerQuiz(i){
+  if(quizRevealed) return;
+  quizAnswers[quizIndex] = i;
+  quizRevealed = true;
+  renderContent();
+}
+
+function nextQuestion(){
+  quizIndex++;
+  quizRevealed = false;
+  if(quizIndex >= quizQuestions.length){
+    quizActive = false; // triggers the results view
+  }
+  renderContent();
+}
+
+function exitQuiz(){
+  quizActive = false;
+  quizQuestions = [];
+  quizAnswers = [];
+  quizIndex = 0;
+  quizRevealed = false;
+  renderContent();
+}
+
+function renderQuizResults(){
+  const total = quizQuestions.length;
+  const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
+  const pct = total ? Math.round((correct/total)*100) : 0;
+
+  // Per-domain breakdown, mirroring how CCHI reports subscores.
+  const dom = {};
+  quizQuestions.forEach((q,i)=>{
+    if(!dom[q.d]) dom[q.d] = { right:0, total:0 };
+    dom[q.d].total++;
+    if(quizAnswers[i] === q.a) dom[q.d].right++;
+  });
+
+  const ringColor = pct >= 80 ? '#4E9E74' : pct >= 60 ? '#BFA05E' : '#B5707D';
+  const verdict = pct >= 80
+    ? 'Strong result. Keep cycling through the domains to stay sharp.'
+    : pct >= 60
+      ? 'A reasonable base. Focus your next sessions on the weakest domains below.'
+      : 'Worth slowing down and studying the explanations before retrying.';
+
+  let html = `<div class="section-head"><h2>Practice Results</h2><span class="sub">${correct} of ${total} correct</span></div>`;
+  html += `<div class="results-head">
+    <div class="score-ring" style="background:conic-gradient(${ringColor} ${pct*3.6}deg, var(--line-soft) 0deg);">
+      <div class="score-ring-inner"><span class="score-pct">${pct}%</span><span class="score-label">Score</span></div>
+    </div>
+    <div class="results-summary">
+      <h3>${correct} of ${total} correct</h3>
+      <p>${verdict}</p>
+    </div>
+  </div>`;
+
+  html += `<div class="domain-bars">`;
+  CCHI_DOMAINS.forEach(d=>{
+    const s = dom[d.id];
+    if(!s) return;
+    const dpct = Math.round((s.right/s.total)*100);
+    html += `
+      <div class="domain-bar-row">
+        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
+        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${dpct}%; background:${d.color};"></span></span>
+        <span class="domain-bar-pct">${dpct}%</span>
+        <span class="domain-bar-pct">${s.right}/${s.total}</span>
+      </div>`;
+  });
+  html += `</div>`;
+
+  const missed = quizQuestions.map((q,i)=>({q,i})).filter(({q,i})=> quizAnswers[i] !== q.a);
+  if(missed.length){
+    html += `<div class="section-head"><h2>Review</h2><span class="sub">${missed.length} missed</span></div>`;
+    missed.forEach(({q,i})=>{
+      const letters = ['A','B','C','D','E','F'];
+      const yours = quizAnswers[i] != null ? `${letters[quizAnswers[i]]}. ${q.o[quizAnswers[i]]}` : 'No answer';
+      html += `<div class="review-item">
+        <p class="review-q">${escapeHtml(q.q)}</p>
+        <p class="review-line bad">Your answer: ${escapeHtml(yours)}</p>
+        <p class="review-line good">Correct: ${letters[q.a]}. ${escapeHtml(q.o[q.a])}</p>
+        <p class="review-line">${escapeHtml(q.e)}</p>
+      </div>`;
+    });
+  }
+
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px;">
+    <button class="btn btn-primary" onclick="exitQuiz()">Back to practice</button>
+  </div>`;
+  return html;
 }
 
 function renderHome(){
@@ -2604,6 +3413,7 @@ loadData();
 loadProviders();
 loadNotes();
 loadAttachments();
+loadQuestions();
 startChatListener();
 startActivityListener();
 </script>
