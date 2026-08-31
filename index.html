@@ -1004,6 +1004,7 @@ const STORAGE_KEY = 'terminology-db-v1';
 let PROVIDERS = [];
 let editingProviderId = null;
 let pendingPhotoDataUrl = null;
+let pendingPhotoPath = null;
 const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05E','#7C8FA8','#A97C5D'];
 let selectedSwatch = DOMAIN_COLORS[0];
 let selectedIcon = 'sparkle';
@@ -2374,6 +2375,7 @@ function deleteDomain(id){
 function openAddProviderModal(){
   editingProviderId = null;
   pendingPhotoDataUrl = null;
+  pendingPhotoPath = null;
   document.getElementById('providerModalTitle').textContent = 'Add provider';
   document.getElementById('fPName').value = '';
   document.getElementById('fPRole').value = '';
@@ -2391,6 +2393,7 @@ function openEditProviderModal(id){
   if(!p) return;
   editingProviderId = id;
   pendingPhotoDataUrl = p.photo || null;
+  pendingPhotoPath = p.photoPath || null;
   document.getElementById('providerModalTitle').textContent = 'Edit provider';
   document.getElementById('fPName').value = p.name || '';
   document.getElementById('fPRole').value = p.role || '';
@@ -2407,6 +2410,7 @@ function closeProviderModal(){
   document.getElementById('providerOverlay').classList.remove('show');
   editingProviderId = null;
   pendingPhotoDataUrl = null;
+  pendingPhotoPath = null;
 }
 
 function renderPhotoPreview(){
@@ -2422,37 +2426,36 @@ function renderPhotoPreview(){
 
 function removePendingPhoto(){
   pendingPhotoDataUrl = null;
+  pendingPhotoPath = null;
   document.getElementById('fPPhoto').value = '';
   renderPhotoPreview();
 }
 
-// Resizes/compresses the chosen photo client-side (max 480px, JPEG ~70%)
-// before it's ever saved, so a single provider document stays well under
-// Firestore's 1MB limit — no separate file-storage service needed.
-function handlePhotoSelect(event){
+// Provider photos now go through the same pipeline as every other
+// attachment: resized to 1400px and uploaded to Cloud Storage, with only a
+// URL kept in Firestore. The old 480px cap was a workaround from when photos
+// had to be embedded in the document to fit Firestore's 1MB limit — that
+// constraint is gone, and 480px looked blurry when opened full-screen.
+async function handlePhotoSelect(event){
   const file = event.target.files && event.target.files[0];
   if(!file) return;
   if(!file.type.startsWith('image/')){ showToast('Please choose an image file.'); return; }
 
-  const reader = new FileReader();
-  reader.onload = (e)=>{
-    const img = new Image();
-    img.onload = ()=>{
-      const maxDim = 480;
-      let w = img.width, h = img.height;
-      if(w >= h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
-      else if(h > w && h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      pendingPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.72);
-      renderPhotoPreview();
-    };
-    img.onerror = ()=>{ showToast('Could not read that image.'); };
-    img.src = e.target.result;
-  };
-  reader.onerror = ()=>{ showToast('Could not read that image.'); };
-  reader.readAsDataURL(file);
+  const label = document.querySelector('label[for="fPPhoto"]');
+  const originalLabel = label ? label.textContent : '';
+  if(label) label.textContent = 'Uploading…';
+
+  try{
+    const att = await readFileAsAttachment(file);
+    pendingPhotoDataUrl = att.dataUrl;
+    pendingPhotoPath = att.storagePath || null;
+    renderPhotoPreview();
+  }catch(err){
+    showToast(err.message || 'Could not process that image.');
+  }finally{
+    if(label) label.textContent = originalLabel || 'Choose photo';
+    event.target.value = '';
+  }
 }
 
 async function saveProvider(){
@@ -2468,6 +2471,7 @@ async function saveProvider(){
   const record = {
     name, role, facility, phone, notes,
     photo: pendingPhotoDataUrl || null,
+    photoPath: pendingPhotoPath || null,
     addedBy: editor || (existing && existing.addedBy) || '',
     updatedAt: Date.now()
   };
@@ -2475,6 +2479,11 @@ async function saveProvider(){
   try{
     const id = await persistProvider(record, editingProviderId);
     if(!id) return;
+    // If the photo was swapped out, remove the old file so Storage doesn't
+    // accumulate images nothing points at anymore.
+    if(existing && existing.photoPath && existing.photoPath !== pendingPhotoPath && storage){
+      storage.ref().child(existing.photoPath).delete().catch(()=>{});
+    }
     if(editingProviderId){
       const idx = PROVIDERS.findIndex(p=>p.id===editingProviderId);
       if(idx>-1) PROVIDERS[idx] = { id, ...record };
@@ -2498,6 +2507,9 @@ async function deleteProvider(id){
   if(!confirm(`Delete "${p.name}"? This can't be undone.`)) return;
   try{
     await deleteProviderRemote(id);
+    if(storage && p.photoPath){
+      storage.ref().child(p.photoPath).delete().catch(()=>{});
+    }
     PROVIDERS = PROVIDERS.filter(x=>x.id!==id);
     logActivity(`removed the provider ${p.name}`);
     showToast('Provider deleted.');
