@@ -1,0 +1,32 @@
+{
+  "name": "HUMC Interpreter Hub",
+  "short_name": "Interpreter Hub",
+  "description": "Shared terminology, provider directory, notes, chat, and CoreCHI practice for the Hackensack University Medical Center interpreter team.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F5F3EC",
+  "theme_color": "#252E6D",
+  "categories": ["medical", "productivity", "education"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
