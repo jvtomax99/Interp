@@ -48,6 +48,24 @@ self.addEventListener('activate', event => {
   );
 });
 
+/* Tapping a notification should bring the already-open app forward rather
+ * than opening a second copy of it. */
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const section = (event.notification.data && event.notification.data.section) || 'chat';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          client.postMessage({ type: 'open-section', section });
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
+    })
+  );
+});
+
 self.addEventListener('fetch', event => {
   const req = event.request;
 
