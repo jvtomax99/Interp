@@ -845,6 +845,107 @@
     .quiz-question{ font-size:15.5px; }
   }
 
+  /* ---------- ECG heartbeat ----------
+     A live cardiac trace: unmistakably clinical, and it reads as a pulse
+     rather than decoration. The line draws itself using stroke-dashoffset,
+     with a dot riding along the path. */
+  .ecg-strip{
+    position:relative; height:34px; margin:14px 0 2px 0; overflow:hidden;
+  }
+  .ecg-strip svg{ width:100%; height:100%; display:block; }
+  @keyframes ecgDraw{
+    0%   { stroke-dashoffset:520; }
+    55%  { stroke-dashoffset:0; }
+    100% { stroke-dashoffset:0; }
+  }
+  @keyframes ecgFade{
+    0%, 55% { opacity:1; }
+    92%,100%{ opacity:0; }
+  }
+  .ecg-line{
+    fill:none; stroke:url(#ecgGrad); stroke-width:2.2;
+    stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:520;
+    animation:ecgDraw 3.4s var(--ease) infinite, ecgFade 3.4s linear infinite;
+  }
+  @keyframes ecgBlip{
+    0%,100%{ transform:scale(1); opacity:.85; }
+    50%    { transform:scale(1.45); opacity:1; }
+  }
+  .ecg-heart{
+    animation:ecgBlip 1.1s var(--ease) infinite;
+    transform-origin:center; transform-box:fill-box;
+  }
+
+  /* ---------- Success burst ----------
+     Fires when something is saved. A short, earned moment of positivity. */
+  @keyframes burstIn{
+    0%   { transform:scale(0.3) rotate(-12deg); opacity:0; }
+    55%  { transform:scale(1.18) rotate(4deg);  opacity:1; }
+    100% { transform:scale(1) rotate(0);        opacity:1; }
+  }
+  @keyframes burstOut{
+    0%   { transform:scale(1); opacity:1; }
+    100% { transform:scale(1.5); opacity:0; }
+  }
+  @keyframes ringOut{
+    0%   { transform:scale(0.5); opacity:.6; }
+    100% { transform:scale(2.1); opacity:0; }
+  }
+  .success-burst{
+    position:fixed; left:50%; top:42%; transform:translate(-50%,-50%);
+    z-index:300; pointer-events:none;
+    display:flex; align-items:center; justify-content:center;
+    width:104px; height:104px;
+  }
+  .success-burst .sb-core{
+    width:74px; height:74px; border-radius:50%;
+    background:linear-gradient(140deg, #35A97A, #1E7F5C);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 14px 34px -10px rgba(30,127,92,0.7);
+    animation:burstIn .34s var(--ease) both, burstOut .34s var(--ease) .78s both;
+  }
+  .success-burst .sb-core svg{ width:34px; height:34px; }
+  .success-burst .sb-ring{
+    position:absolute; inset:0; border-radius:50%;
+    border:3px solid #35A97A;
+    animation:ringOut .82s var(--ease) both;
+  }
+
+  /* ---------- Quiz celebration ---------- */
+  @keyframes confettiFall{
+    0%   { transform:translateY(-18px) rotate(0deg);   opacity:0; }
+    12%  { opacity:1; }
+    100% { transform:translateY(190px) rotate(560deg); opacity:0; }
+  }
+  .confetti-host{ position:absolute; inset:0; overflow:hidden; pointer-events:none; border-radius:inherit; }
+  .confetti-bit{
+    position:absolute; top:0; width:8px; height:11px; border-radius:2px;
+    animation:confettiFall 2.1s var(--ease) forwards;
+  }
+  @keyframes scorePop{
+    0%   { transform:scale(0.7); opacity:0; }
+    60%  { transform:scale(1.08); opacity:1; }
+    100% { transform:scale(1); opacity:1; }
+  }
+  .score-ring.celebrate{ animation:scorePop .55s var(--ease) both; }
+  .results-head{ position:relative; }
+
+  /* ---------- Friendlier empty states ---------- */
+  @keyframes gentleBob{
+    0%,100% { transform:translateY(0); }
+    50%     { transform:translateY(-5px); }
+  }
+  .empty .glyph{ animation:gentleBob 2.8s var(--ease) infinite; }
+
+  @media (prefers-reduced-motion: reduce){
+    .ecg-line, .ecg-heart, .empty .glyph, .confetti-bit,
+    .success-burst .sb-core, .success-burst .sb-ring, .score-ring.celebrate{
+      animation:none !important;
+    }
+    .ecg-line{ stroke-dashoffset:0; }
+  }
+
   /* ---------- Typing indicator ---------- */
   .typing-indicator{
     display:flex; align-items:center; gap:8px; height:0; overflow:hidden;
@@ -1987,7 +2088,7 @@ function renderActivityFeed(){
   const container = document.getElementById('activityFeed');
   if(!container) return;
   if(ACTIVITY.length===0){
-    container.innerHTML = `<div class="empty"><div class="glyph">${ICON_BELL}</div>No activity yet.<br>Changes your team makes will show up here.</div>`;
+    container.innerHTML = `<div class="empty"><div class="glyph">${ICON_BELL}</div>All quiet for now.<br>Changes your team makes will show up here.</div>`;
     return;
   }
   const rows = ACTIVITY.slice().reverse(); // newest first
@@ -2365,6 +2466,7 @@ async function saveQuestion(){
     CUSTOM_QUESTIONS.push({ id:ref.id, ...record, custom:true });
     closeQuestionModal();
     logActivity('added a CoreCHI practice question');
+    successBurst();
     showToast('Question added.');
     render();
   }catch(err){
@@ -2602,6 +2704,7 @@ const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
 const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5H14L18 7.5V20C18 20.5 17.5 21 17 21H7C6.5 21 6 20.5 6 20V4.5C6 4 6.5 3.5 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V7.5H18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4.5C3.7 15 3 14.3 3 13.5V4.5C3 3.7 3.7 3 4.5 3H13.5C14.3 3 15 3.7 15 4.5V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -2797,6 +2900,11 @@ function renderContent(){
 
   if(activeCategory === 'practice'){
     content.innerHTML = renderPractice();
+    // Celebrate a strong score once the results panel is on screen.
+    if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
+      const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
+      if(Math.round((correct/quizQuestions.length)*100) >= 80) celebrateScore('.results-head');
+    }
     return;
   }
 
@@ -3170,14 +3278,14 @@ function renderQuizResults(){
 
   const ringColor = pct >= 80 ? '#4E9E74' : pct >= 60 ? '#BFA05E' : '#B5707D';
   const verdict = pct >= 80
-    ? 'Strong result. Keep cycling through the domains to stay sharp.'
+    ? '🎉 Strong result — you\u2019re tracking well. Keep cycling through the domains to stay sharp.'
     : pct >= 60
-      ? 'A reasonable base. Focus your next sessions on the weakest domains below.'
-      : 'Worth slowing down and studying the explanations before retrying.';
+      ? '👍 A solid base. Focus your next sessions on the weakest domains below.'
+      : '📘 Worth slowing down and reading the explanations before retrying — that\u2019s where the learning happens.';
 
   let html = `<div class="section-head"><h2>Practice Results</h2><span class="sub">${correct} of ${total} correct</span></div>`;
   html += `<div class="results-head">
-    <div class="score-ring" style="background:conic-gradient(${ringColor} ${pct*3.6}deg, var(--line-soft) 0deg);">
+    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" style="background:conic-gradient(${ringColor} ${pct*3.6}deg, var(--line-soft) 0deg);">
       <div class="score-ring-inner"><span class="score-pct">${pct}%</span><span class="score-label">Score</span></div>
     </div>
     <div class="results-summary">
@@ -3220,6 +3328,60 @@ function renderQuizResults(){
     <button class="btn btn-primary" onclick="exitQuiz()">Back to practice</button>
   </div>`;
   return html;
+}
+
+/* A live cardiac trace with a pulsing dot — hospital character that still
+   reads as professional rather than cartoonish. */
+const ECG_STRIP = `
+  <div class="ecg-strip" aria-hidden="true">
+    <svg viewBox="0 0 520 34" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="ecgGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stop-color="#01B8E6" stop-opacity="0.15"/>
+          <stop offset="45%"  stop-color="#0F5FA6" stop-opacity="0.85"/>
+          <stop offset="100%" stop-color="#252E6D" stop-opacity="0.9"/>
+        </linearGradient>
+      </defs>
+      <path class="ecg-line" d="M0,20 L60,20 L74,20 L82,13 L90,26 L98,4 L108,31 L118,20 L132,20 L190,20
+                                L204,20 L212,13 L220,26 L228,4 L238,31 L248,20 L262,20 L320,20
+                                L334,20 L342,13 L350,26 L358,4 L368,31 L378,20 L392,20 L520,20"/>
+      <circle class="ecg-heart" cx="98" cy="9" r="2.6" fill="#0F5FA6" opacity="0.85"/>
+    </svg>
+  </div>`;
+
+/* Brief celebratory confirmation after something is saved. Deliberately short
+   (about a second) so it acknowledges the action without getting in the way. */
+function successBurst(){
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+  const el = document.createElement('div');
+  el.className = 'success-burst';
+  el.innerHTML = `<span class="sb-ring"></span><span class="sb-core">${ICON_CHECK_WHITE}</span>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.remove(); }, 1250);
+}
+
+/* Confetti for a strong practice score. Scoped inside the results panel so it
+   can't overlay the whole interface. */
+function celebrateScore(hostSelector){
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+  const host = document.querySelector(hostSelector);
+  if(!host) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti-host';
+  const colors = ['#01B8E6','#0079BD','#252E6D','#35A97A','#BFA05E','#C98FA0'];
+  for(let i=0;i<26;i++){
+    const bit = document.createElement('span');
+    bit.className = 'confetti-bit';
+    bit.style.left = (Math.random()*100) + '%';
+    bit.style.background = colors[i % colors.length];
+    bit.style.animationDelay = (Math.random()*0.7).toFixed(2) + 's';
+    bit.style.opacity = '0';
+    wrap.appendChild(bit);
+  }
+  host.appendChild(wrap);
+  setTimeout(()=>wrap.remove(), 3200);
 }
 
 /* ---------- Live relative time ----------
@@ -3359,6 +3521,7 @@ function renderHome(){
         <div class="home-greeting-stat"><b data-countup="${PROVIDERS.length}">0</b><span>Providers</span></div>
       </div>
     </div>
+    ${ECG_STRIP}
   `;
 
   if(ACTIVITY.length > 0){
@@ -3394,7 +3557,7 @@ function renderProviders(q){
 
   if(list.length===0){
     const msg = PROVIDERS.length===0
-      ? 'No healthcare providers added yet.<br>Add the first one your team works with.'
+      ? '🩺 No providers here yet.<br>Add the first one your team works with.'
       : 'No providers match your search.';
     return `<div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
   }
@@ -3451,7 +3614,7 @@ function renderChatMessages(){
   const myName = whoAmI().trim().toLowerCase();
 
   if(CHAT_MESSAGES.length===0){
-    container.innerHTML = `<div class="chat-empty">No messages yet.<br>Say hello to the team.</div>`;
+    container.innerHTML = `<div class="chat-empty">👋 No messages yet.<br>Say hello to your team.</div>`;
     return;
   }
 
@@ -3552,7 +3715,7 @@ function renderNotes(q){
 
   if(list.length===0){
     const msg = NOTES.length===0
-      ? 'No notes yet.<br>Leave the first one for your team.'
+      ? '📝 No notes yet.<br>Leave the first one for your team.'
       : 'No notes match your search.';
     return notice + `<div class="empty"><div class="glyph">${ICON_NOTE}</div>${msg}</div>`;
   }
@@ -3712,6 +3875,7 @@ async function saveTerm(){
 
   closeModal();
   await persist();
+  successBurst();
   showToast('Term saved.');
   render();
 }
@@ -3793,6 +3957,7 @@ async function saveDomain(){
   await persist();
   activeCategory = id;
   logActivity(`created the "${name}" domain`);
+  successBurst();
   showToast('Domain created.');
   render();
 }
@@ -3930,6 +4095,7 @@ async function saveProvider(){
       logActivity(pendingPhotoDataUrl ? `added a provider with a photo: ${name}` : `added a provider: ${name}`);
     }
     closeProviderModal();
+    successBurst();
     showToast('Provider saved.');
     render();
   }catch(err){
@@ -4010,6 +4176,7 @@ async function saveNote(){
     }
     closeNoteModal();
     logActivity(isNew ? 'left a note' : 'updated a note');
+    successBurst();
     showToast('Note saved.');
     render();
   }catch(err){
