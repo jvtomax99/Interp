@@ -946,6 +946,69 @@
     .ecg-line{ stroke-dashoffset:0; }
   }
 
+  /* ---------- Global search ---------- */
+  @keyframes gsIn{ from{ opacity:0; transform:translateY(-12px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .gs-overlay{
+    position:fixed; inset:0; background:rgba(15,20,32,0.45); backdrop-filter:blur(3px);
+    display:none; align-items:flex-start; justify-content:center; z-index:250; padding:10vh 20px 20px;
+  }
+  .gs-overlay.show{ display:flex; }
+  .gs-panel{
+    width:100%; max-width:640px; background:var(--paper); border-radius:18px;
+    box-shadow:var(--sh-3); overflow:hidden; animation:gsIn .2s var(--ease);
+    display:flex; flex-direction:column; max-height:76vh;
+  }
+  .gs-inputrow{
+    display:flex; align-items:center; gap:11px; padding:16px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .gs-inputrow svg{ width:18px; height:18px; color:var(--ink-faint); flex-shrink:0; }
+  .gs-inputrow input{
+    flex:1; border:none; outline:none; background:transparent;
+    font-family:var(--sans); font-size:16px; color:var(--ink); font-weight:500;
+  }
+  .gs-hint{
+    font-family:var(--mono); font-size:9.5px; color:var(--ink-faint);
+    border:1px solid var(--line); border-radius:6px; padding:3px 6px; flex-shrink:0;
+  }
+  .gs-results{ overflow-y:auto; padding:8px; }
+  .gs-group{
+    font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-faint); padding:10px 10px 6px 10px;
+  }
+  .gs-item{
+    display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+    padding:10px 11px; border:none; background:transparent; border-radius:10px; cursor:pointer;
+    font-family:var(--sans); transition:background .12s var(--ease);
+  }
+  .gs-item:hover, .gs-item.active{ background:var(--accent-soft); }
+  .gs-ico{
+    width:28px; height:28px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gs-ico svg{ width:14px; height:14px; }
+  .gs-text{ min-width:0; flex:1; }
+  .gs-title{ font-size:13.5px; font-weight:600; color:var(--ink); line-height:1.35; }
+  .gs-sub{
+    font-size:11.5px; color:var(--ink-soft); line-height:1.4;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .gs-empty{ padding:34px 20px; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.6; }
+  .gs-mark{ background:#FFF3C4; border-radius:3px; padding:0 2px; }
+  .gs-trigger{
+    display:flex; align-items:center; gap:9px; margin:0 10px 6px 10px; padding:9px 12px;
+    width:calc(100% - 20px); border:1px dashed var(--line); border-radius:10px;
+    background:transparent; cursor:pointer; color:var(--ink-faint);
+    font-family:var(--sans); font-size:12.5px; transition:all .15s var(--ease);
+  }
+  .gs-trigger:hover{ border-color:var(--accent-2); color:var(--accent); background:var(--accent-soft); }
+  .gs-trigger svg{ width:14px; height:14px; flex-shrink:0; }
+  .gs-trigger .gs-hint{ margin-left:auto; }
+  @media (max-width:760px){
+    .gs-overlay{ padding:6vh 12px 12px; }
+    .gs-trigger .gs-hint{ display:none; }
+  }
+
   /* ---------- Translate lookup ---------- */
   .tr-panel{ max-width:760px; }
   .tr-box{
@@ -1366,6 +1429,18 @@
     <div class="lightbox-actions">
       <a class="lightbox-btn" id="lightboxDownload" href="" download>Download</a>
     </div>
+  </div>
+</div>
+
+<div class="gs-overlay" id="gsOverlay" onclick="if(event.target===this) closeGlobalSearch()">
+  <div class="gs-panel">
+    <div class="gs-inputrow">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="gsInput" type="text" placeholder="Search terms, providers, notes, chat, practice…"
+             oninput="renderGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off">
+      <span class="gs-hint">ESC</span>
+    </div>
+    <div class="gs-results" id="gsResults"></div>
   </div>
 </div>
 
@@ -3047,6 +3122,181 @@ function renderTypingIndicator(){
   host.classList.add('show');
 }
 
+/* ============ Global search ============
+   One search across every section, opened with Ctrl/Cmd+K or the sidebar
+   button. Each result knows where it lives, so selecting one navigates
+   straight there. */
+let gsIndex = 0;      // highlighted result, for keyboard navigation
+let gsMatches = [];
+
+function openGlobalSearch(){
+  const ov = document.getElementById('gsOverlay');
+  if(!ov) return;
+  ov.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  const inp = document.getElementById('gsInput');
+  if(inp){ inp.value = ''; inp.focus(); }
+  gsIndex = 0;
+  renderGlobalSearch();
+}
+
+function closeGlobalSearch(){
+  const ov = document.getElementById('gsOverlay');
+  if(!ov) return;
+  ov.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function gsHighlight(text, q){
+  const s = String(text || '');
+  if(!q) return escapeHtml(s);
+  const i = s.toLowerCase().indexOf(q.toLowerCase());
+  if(i === -1) return escapeHtml(s);
+  return escapeHtml(s.slice(0, i)) +
+         '<span class="gs-mark">' + escapeHtml(s.slice(i, i + q.length)) + '</span>' +
+         escapeHtml(s.slice(i + q.length));
+}
+
+// Builds a flat, ranked list of matches across every data source.
+function collectSearchMatches(q){
+  const query = q.trim().toLowerCase();
+  if(!query) return [];
+  const out = [];
+  const hit = (v) => (v || '').toLowerCase().includes(query);
+  const starts = (v) => (v || '').toLowerCase().startsWith(query);
+
+  DATA.categories.forEach(cat=>{
+    cat.terms.forEach(t=>{
+      if(hit(t.en) || hit(t.es) || hit(t.def)){
+        out.push({
+          group:'Terms', icon:DOMAIN_ICONS[cat.icon] || DOMAIN_ICONS.sparkle, color:cat.color,
+          title:t.en, sub:[t.es, cat.name].filter(Boolean).join(' \u00b7 '),
+          target:cat.id,
+          rank: starts(t.en) || starts(t.es) ? 0 : 1
+        });
+      }
+    });
+  });
+
+  PROVIDERS.forEach(p=>{
+    if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.notes)){
+      out.push({ group:'Providers', icon:ICON_PERSON, color:'#6F97AC',
+        title:p.name, sub:[p.role, p.facility].filter(Boolean).join(' \u00b7 '),
+        target:'providers', rank: starts(p.name) ? 0 : 1 });
+    }
+  });
+
+  NOTES.forEach(n=>{
+    if(hit(n.text) || hit(n.author)){
+      out.push({ group:'Notes', icon:ICON_NOTE, color:'#BFA05E',
+        title:(n.text||'').slice(0,70) + ((n.text||'').length>70?'\u2026':''),
+        sub:n.author ? 'by ' + n.author : '', target:'notes', rank:1 });
+    }
+  });
+
+  CHAT_MESSAGES.forEach(m=>{
+    if(hit(m.text) || hit(m.author)){
+      out.push({ group:'Chat', icon:ICON_CHAT, color:'#2E8BD0',
+        title:(m.text||'(attachment)').slice(0,70) + ((m.text||'').length>70?'\u2026':''),
+        sub:m.author || '', target:'chat', rank:1 });
+    }
+  });
+
+  allQuestions().forEach(qq=>{
+    if(hit(qq.q)){
+      const dm = domainMeta(qq.d);
+      out.push({ group:'Practice', icon:ICON_EXAM, color:'#0F5FA6',
+        title:qq.q.slice(0,72) + (qq.q.length>72?'\u2026':''),
+        sub:dm.name, target:'practice', rank:2 });
+    }
+  });
+
+  DATA.categories.forEach(cat=>{
+    if(hit(cat.name)){
+      out.push({ group:'Domains', icon:DOMAIN_ICONS[cat.icon] || DOMAIN_ICONS.sparkle, color:cat.color,
+        title:cat.name, sub:`${cat.terms.length} term${cat.terms.length===1?'':'s'}`,
+        target:cat.id, rank:0 });
+    }
+  });
+
+  out.sort((a,b)=> a.rank - b.rank);
+  return out.slice(0, 30);
+}
+
+function renderGlobalSearch(){
+  const inp = document.getElementById('gsInput');
+  const box = document.getElementById('gsResults');
+  if(!inp || !box) return;
+  const q = inp.value;
+  gsMatches = collectSearchMatches(q);
+
+  if(!q.trim()){
+    box.innerHTML = `<div class="gs-empty">Search across terms, providers, notes, chat, and practice questions.</div>`;
+    return;
+  }
+  if(!gsMatches.length){
+    box.innerHTML = `<div class="gs-empty">Nothing found for \u201c${escapeHtml(q)}\u201d.</div>`;
+    return;
+  }
+  if(gsIndex >= gsMatches.length) gsIndex = 0;
+
+  let html = '';
+  let lastGroup = '';
+  gsMatches.forEach((m, i)=>{
+    if(m.group !== lastGroup){
+      html += `<div class="gs-group">${escapeHtml(m.group)}</div>`;
+      lastGroup = m.group;
+    }
+    html += `
+      <button class="gs-item ${i===gsIndex?'active':''}" onclick="gsGo(${i})">
+        <span class="gs-ico" style="background:${m.color}1F; color:${m.color};">${m.icon}</span>
+        <span class="gs-text">
+          <span class="gs-title">${gsHighlight(m.title, q)}</span>
+          ${m.sub ? `<span class="gs-sub">${gsHighlight(m.sub, q)}</span>` : ''}
+        </span>
+      </button>`;
+  });
+  box.innerHTML = html;
+}
+
+function gsGo(i){
+  const m = gsMatches[i];
+  if(!m) return;
+  closeGlobalSearch();
+  setCategory(m.target);
+}
+
+function handleGsKeys(e){
+  if(e.key === 'Escape'){ closeGlobalSearch(); return; }
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    gsIndex = Math.min(gsIndex + 1, gsMatches.length - 1);
+    renderGlobalSearch();
+    const el = document.querySelector('.gs-item.active');
+    if(el && el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+    return;
+  }
+  if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    gsIndex = Math.max(gsIndex - 1, 0);
+    renderGlobalSearch();
+    const el = document.querySelector('.gs-item.active');
+    if(el && el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+    return;
+  }
+  if(e.key === 'Enter'){ e.preventDefault(); gsGo(gsIndex); }
+}
+
+// Ctrl/Cmd+K from anywhere, and Escape to dismiss.
+document.addEventListener('keydown', (e)=>{
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    openGlobalSearch();
+  }
+});
+
+/* ============ Global search end ============ */
+
 function prefersAutoFocus(){
   try{
     return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -3236,6 +3486,11 @@ function render(){
         <div class="brand-meta"><span class="brand-dot"></span><span>${totalTerms} terms across ${DATA.categories.length} domains</span></div>
         <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
       </div>
+      <button class="gs-trigger" onclick="openGlobalSearch()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Search everything</span>
+        <span class="gs-hint">⌘K</span>
+      </button>
       ${homeTab}
       ${sidebarTabs}
       ${addDomainBtn}
