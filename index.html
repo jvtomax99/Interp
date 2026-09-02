@@ -985,6 +985,8 @@
   }
   .tr-badge.verified{ background:#E7F5EE; color:#1E7F5C; }
   .tr-badge.machine{ background:#FBF3E3; color:#7A5D28; }
+  .tr-badge.trap{ background:#FBECEF; color:#A33449; }
+  .tr-result.trap{ box-shadow:var(--sh-2), inset 0 0 0 1.5px var(--danger); }
   .tr-badge svg{ width:12px; height:12px; }
   .tr-source{ font-size:13px; color:var(--ink-soft); margin:0 0 4px 0; }
   .tr-target{
@@ -1522,6 +1524,70 @@ const DEFAULT_DATA = {
   ]
 };
 
+/* Classic Spanish/English false friends that matter clinically. These are the
+   traps machine translation reliably gets wrong, and several appear on CCHI
+   material. The canonical example is "intoxicado" — misread as "intoxicated"
+   in a Florida ED in 1980, contributing to a misdiagnosed brain bleed and a
+   landmark malpractice settlement. */
+const FALSE_FRIENDS = [
+  { es:'intoxicado', wrong:'intoxicated (drunk)', right:'poisoned, or sick from something ingested',
+    note:'The most cited error in medical interpreting. Family meant food poisoning; it was heard as drunk.' },
+  { es:'constipado', wrong:'constipated', right:'congested / has a head cold',
+    note:'For constipation, Spanish uses estreñido.' },
+  { es:'embarazada', wrong:'embarrassed', right:'pregnant',
+    note:'For embarrassed, use avergonzado/a.' },
+  { es:'molestar', wrong:'to molest', right:'to bother or disturb',
+    note:'"¿Le molesta?" simply means "Does it bother you?"' },
+  { es:'droga', wrong:'drug (medication)', right:'illegal drug',
+    note:'For prescribed medication use medicamento or medicina.' },
+  { es:'condición', wrong:'medical condition', right:'state, status, or stipulation',
+    note:'For a medical condition use enfermedad, afección, or padecimiento.' },
+  { es:'sano', wrong:'sane', right:'healthy',
+    note:'For mentally sound, use cuerdo.' },
+  { es:'sensible', wrong:'sensible / reasonable', right:'sensitive',
+    note:'For sensible use razonable or sensato.' },
+  { es:'severo', wrong:'severe', right:'strict or harsh (traditionally)',
+    note:'Grave or intenso are safer for clinical severity, though severo is now common.' },
+  { es:'preservativo', wrong:'preservative', right:'condom',
+    note:'For a food preservative use conservante.' },
+  { es:'remover', wrong:'to remove', right:'to stir or agitate',
+    note:'To remove is quitar, extirpar, or extraer.' },
+  { es:'realizar', wrong:'to realize (become aware)', right:'to carry out or perform',
+    note:'To realize is darse cuenta.' },
+  { es:'asistir', wrong:'to assist', right:'to attend',
+    note:'To assist is ayudar or atender.' },
+  { es:'soportar', wrong:'to support', right:'to tolerate or endure',
+    note:'To support is apoyar or sostener.' },
+  { es:'actual', wrong:'actual / real', right:'current or present',
+    note:'For actual use real or verdadero.' },
+  { es:'disgusto', wrong:'disgust', right:'annoyance or upset',
+    note:'For disgust use asco or repugnancia.' },
+  { es:'contestar', wrong:'to contest', right:'to answer',
+    note:'To contest is impugnar or disputar.' },
+  { es:'recordar', wrong:'to record', right:'to remember or remind',
+    note:'To record is grabar or registrar.' },
+  { es:'pretender', wrong:'to pretend', right:'to intend or aim to',
+    note:'To pretend is fingir.' },
+  { es:'lectura', wrong:'lecture', right:'reading (including a meter or test reading)',
+    note:'A lecture is a conferencia or charla.' },
+  { es:'vaso', wrong:'vase', right:'glass, or blood vessel',
+    note:'Vaso sanguíneo is a blood vessel; a vase is a florero.' },
+  { es:'desgracia', wrong:'disgrace', right:'misfortune or tragedy',
+    note:'Disgrace is deshonra or vergüenza.' }
+];
+
+function findFalseFriends(text){
+  const q = (text||'').toLowerCase().trim();
+  if(!q) return [];
+  return FALSE_FRIENDS.filter(f=>{
+    const es = f.es.toLowerCase();
+    // Match the Spanish term, or the English word it's commonly mistaken for.
+    const wrongWord = f.wrong.split('(')[0].trim().toLowerCase().replace(/^to /,'');
+    return q === es || q.includes(es) ||
+           q === wrongWord || (wrongWord.length > 4 && q.includes(wrongWord));
+  }).slice(0, 2);
+}
+
 /* ============ Translate lookup ============
    Deliberately checks the team's own glossary before reaching for machine
    translation. For terms like "Duffy-null associated neutrophil count", a
@@ -1545,6 +1611,7 @@ const TR_LANGS = [
 let trFrom = 'en';
 let trTo = 'es';
 let trQuery = '';
+let trContext = '';
 
 function renderTranslate(){
   let html = `<div class="section-head"><h2>Translate</h2><span class="sub">glossary first</span></div>`;
@@ -1562,11 +1629,17 @@ function renderTranslate(){
           ${TR_LANGS.map(l=>`<option value="${l.code}" ${l.code===trTo?'selected':''}>${l.name}</option>`).join('')}
         </select>
       </div>
-      <div class="tr-row">
+      <div class="tr-row" style="margin-bottom:10px;">
         <input id="trInput" type="text" placeholder="Enter a word or phrase…" value="${escapeAttr(trQuery)}"
                onkeydown="if(event.key==='Enter'){event.preventDefault();runTranslate();}">
         <button class="btn btn-primary" onclick="runTranslate()">Translate</button>
       </div>
+      <div class="tr-row">
+        <input id="trContext" type="text" placeholder="Optional: the full sentence it appeared in — improves accuracy a lot"
+               value="${escapeAttr(trContext)}"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();runTranslate();}">
+      </div>
+      <p class="tr-note" style="margin-top:8px;">Single words are the hardest case for any translation engine. "Discharge" alone could be a hospital discharge or a bodily one — the sentence tells it which.</p>
     </div>
     <div id="trResults"></div>
   `;
@@ -1577,7 +1650,9 @@ function renderTranslate(){
 function swapTrLangs(){
   const a = trFrom; trFrom = trTo; trTo = a;
   const q = document.getElementById('trInput');
+  const ctx = document.getElementById('trContext');
   trQuery = q ? q.value : trQuery;
+  trContext = ctx ? ctx.value : trContext;
   renderContent();
 }
 
@@ -1595,23 +1670,59 @@ function searchGlossary(query){
       if(exact || partial) hits.push({ t, cat, idx, exact });
     });
   });
-  // Exact matches first, then alphabetical.
   hits.sort((a,b)=> (b.exact - a.exact) || collateTerms(a.t.en, b.t.en));
   return hits.slice(0, 5);
 }
 
+// Single shared call so the forward and reverse translations use identical logic.
+async function mtTranslate(text, from, to){
+  try{
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
+    const data = await res.json();
+    const out = data && data.responseData && data.responseData.translatedText;
+    if(!out || /INVALID|QUERY LENGTH|MYMEMORY WARNING|NO QUERY/i.test(out)) return null;
+    return out;
+  }catch(err){
+    return null;
+  }
+}
+
+const normalizeForCompare = s => (s||'').toLowerCase().replace(/[^\p{L}\p{N} ]/gu,'').trim();
+
 async function runTranslate(){
   const input = document.getElementById('trInput');
+  const ctxEl = document.getElementById('trContext');
   const out = document.getElementById('trResults');
   if(!input || !out) return;
   const q = input.value.trim();
-  trQuery = q;
+  const ctx = ctxEl ? ctxEl.value.trim() : '';
+  trQuery = q; trContext = ctx;
   if(!q){ out.innerHTML = ''; return; }
 
-  const gtUrl = `https://translate.google.com/?sl=${trFrom}&tl=${trTo}&text=${encodeURIComponent(q)}&op=translate`;
+  // With context supplied, translate the sentence — engines disambiguate far
+  // better with surrounding words than with a bare term.
+  const toTranslate = ctx || q;
+  const gtUrl = `https://translate.google.com/?sl=${trFrom}&tl=${trTo}&text=${encodeURIComponent(toTranslate)}&op=translate`;
+
   let html = '';
 
-  // 1. The team's verified glossary always comes first.
+  // 1. False-friend warnings come first — these are the errors that cause harm.
+  const traps = findFalseFriends(q).concat(ctx ? findFalseFriends(ctx) : []);
+  const seenTraps = new Set();
+  traps.forEach(f=>{
+    if(seenTraps.has(f.es)) return;
+    seenTraps.add(f.es);
+    html += `
+      <div class="tr-result trap">
+        <span class="tr-badge trap">${ICON_ALERT} False friend — check carefully</span>
+        <p class="tr-target" style="font-size:18px;">${escapeHtml(f.es)}</p>
+        <p class="tr-note"><b>Often mistaken for:</b> ${escapeHtml(f.wrong)}<br>
+        <b>Actually means:</b> ${escapeHtml(f.right)}</p>
+        <p class="tr-note">${escapeHtml(f.note)}</p>
+      </div>`;
+  });
+
+  // 2. The team's verified glossary.
   const hits = searchGlossary(q);
   hits.forEach(h=>{
     const isEnQuery = (h.t.en||'').toLowerCase().includes(q.toLowerCase());
@@ -1630,27 +1741,33 @@ async function runTranslate(){
       </div>`;
   });
 
+  if(!hits.length){
+    html += `<div class="tr-result"><p class="tr-note">Not in your team's glossary yet — a good candidate to add.</p></div>`;
+  }
+
   out.innerHTML = html + `<div class="tr-result"><span class="tr-badge machine">${ICON_GLOBE} Machine translation</span><p class="tr-target"><span class="tr-spinner"></span></p></div>`;
 
-  // 2. Machine translation as a clearly-labelled fallback.
-  let mt = null, mtFailed = false;
-  try{
-    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=${trFrom}|${trTo}`);
-    const data = await res.json();
-    mt = data && data.responseData && data.responseData.translatedText;
-    if(!mt || /INVALID|QUERY LENGTH|MYMEMORY WARNING/i.test(mt)) { mt = null; mtFailed = true; }
-  }catch(err){
-    mtFailed = true;
+  // 3. Machine translation, then a back-translation as a sanity check.
+  const mt = await mtTranslate(toTranslate, trFrom, trTo);
+  let back = null, drift = false;
+  if(mt){
+    back = await mtTranslate(mt, trTo, trFrom);
+    if(back) drift = normalizeForCompare(back) !== normalizeForCompare(toTranslate);
   }
 
   html += `
     <div class="tr-result">
-      <span class="tr-badge machine">${ICON_GLOBE} Machine translation \u2014 unverified</span>
+      <span class="tr-badge machine">${ICON_GLOBE} Machine translation — unverified</span>
       ${mt
-        ? `<p class="tr-source">${escapeHtml(q)}</p>
+        ? `<p class="tr-source">${escapeHtml(toTranslate)}</p>
            <p class="tr-target">${escapeHtml(mt)}</p>
+           ${back ? `<p class="tr-note"><b>Translated back:</b> "${escapeHtml(back)}"${
+              drift
+                ? ` — <span style="color:var(--danger);font-weight:600;">this differs from what you typed, so treat the translation with caution.</span>`
+                : ` — round-trips cleanly, a reasonable sign it held its meaning.`
+            }</p>` : ''}
            <p class="tr-note">Automatically generated. Confirm before relying on it, and consider adding a verified entry to the glossary.</p>`
-        : `<p class="tr-note">${mtFailed ? 'Automatic translation isn\u2019t available right now.' : ''} Use Google Translate below.</p>`}
+        : `<p class="tr-note">Automatic translation isn’t available right now. Use Google Translate below.</p>`}
       <div class="tr-actions">
         <a class="tr-mini" href="${escapeAttr(gtUrl)}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open in Google Translate</a>
         ${mt ? `<button class="tr-mini" onclick="copyText(this, ${JSON.stringify(mt).replace(/"/g,'&quot;')})">${ICON_COPY} Copy</button>` : ''}
@@ -1658,14 +1775,9 @@ async function runTranslate(){
       </div>
     </div>`;
 
-  if(!hits.length){
-    html = `<div class="tr-result"><p class="tr-note">Not in your team's glossary yet \u2014 a good candidate to add.</p></div>` + html;
-  }
   out.innerHTML = html;
 }
 
-// Pre-fills the add-term form from a lookup, closing the loop between
-// looking something up and capturing it for the team.
 function addTermFromTranslate(en, es){
   openAddModal();
   const enEl = document.getElementById('fEn');
@@ -2916,6 +3028,7 @@ const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org
 const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12L21 4L14 21L11 13L3 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
 const ICON_BELL_SM = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:12px;height:12px;vertical-align:-1px;"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_EXAM = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="white" stroke-width="1.7"/><path d="M8.5 9L10 10.5L13 7.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 15L10 16.5L13 13.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 9.5H16M15.5 15.5H16" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>';
+const ICON_ALERT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5L21 19.5H3L12 4.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10V14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="16.8" r="1" fill="currentColor"/></svg>';
 const ICON_SWAP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4L4 7L7 10" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7H16C18.2 7 20 8.8 20 11" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M17 20L20 17L17 14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 17H8C5.8 17 4 15.2 4 13" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
 const ICON_GLOBE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 12H20.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.5C14.2 6 15.2 9 15.2 12C15.2 15 14.2 18 12 20.5C9.8 18 8.8 15 8.8 12C8.8 9 9.8 6 12 3.5Z" stroke="currentColor" stroke-width="1.7"/></svg>';
 const ICON_GLYPH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.5C3 5.67 3.67 5 4.5 5H12C12.83 5 13.5 5.67 13.5 6.5V12C13.5 12.83 12.83 13.5 12 13.5H7.5L4.5 16.2V13.5C3.67 13.5 3 12.83 3 12V6.5Z" fill="white" fill-opacity="0.95"/><path d="M10.5 11C10.5 10.17 11.17 9.5 12 9.5H19.5C20.33 9.5 21 10.17 21 11V16.5C21 17.33 20.33 18 19.5 18V20.7L16.5 18H12C11.17 18 10.5 17.33 10.5 16.5V11Z" fill="white" fill-opacity="0.55"/></svg>';
