@@ -1573,7 +1573,7 @@
     <h3>Attribute my edits as</h3>
     <div class="field"><label>Your name</label><input id="fMyName" type="text" placeholder="Your name (optional)" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveMyName();}"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeNameModal()">Cancel</button>
+      <button class="btn btn-ghost" onclick="cancelNameModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveMyName()">Save</button>
     </div>
   </div>
@@ -3912,13 +3912,6 @@ function render(){
       ${extrasTabs}
       <div class="nav-divider"></div>
       ${domainsSection}
-      <div class="sidebar-footer">
-        <div class="whoami">Attribute my edits as</div>
-        <div class="whoami-pill">
-          <span class="whoami-icon">${ICON_PERSON}</span>
-          <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
-        </div>
-      </div>
     </div>
     `}
     <div class="main">
@@ -4143,7 +4136,12 @@ function toggleToolsCollapsed(){
 // the actual list, instead of expand-then-hunt-for-it.
 function setCategory(id){
   activeCategory = id;
-  if(id === 'chat'){ lastSeenChatCount = CHAT_MESSAGES.length; }
+  if(id === 'chat'){
+    lastSeenChatCount = CHAT_MESSAGES.length;
+    // Prompt for a name right away rather than waiting for someone to
+    // notice the inline "add your name" hint or the floating button.
+    if(!whoAmI()) openNameModal();
+  }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
@@ -4174,6 +4172,13 @@ function closeNameModal(){
   document.getElementById('nameOverlay').classList.remove('show');
 }
 
+// Canceling shouldn't still barge ahead with whatever add/edit/chat action
+// triggered the prompt — only a saved name does that.
+function cancelNameModal(){
+  pendingNameAction = null;
+  closeNameModal();
+}
+
 function saveMyName(){
   const name = document.getElementById('fMyName').value.trim();
   window.__lastWho = name;
@@ -4181,6 +4186,20 @@ function saveMyName(){
   if(whoEl) whoEl.value = name;
   closeNameModal();
   showToast(name ? `Attributing edits as ${name}` : 'Attribution cleared');
+  const action = pendingNameAction;
+  pendingNameAction = null;
+  if(name && action) action();
+}
+
+// Gate for anything that attributes work to a person — adding or editing a
+// term, provider, guide, or domain, and chatting. Runs the action straight
+// away if a name is already set; otherwise prompts first and picks the
+// action back up once a name is saved.
+let pendingNameAction = null;
+function requireName(action){
+  if(whoAmI()){ action(); return; }
+  pendingNameAction = action;
+  openNameModal();
 }
 
 /* ============ CoreCHI practice ============ */
@@ -4901,6 +4920,9 @@ function renderDirectory(q){
 
 /* ============ Add / Edit / Delete ============ */
 function openAddModal(fromDirectory){
+  requireName(()=>_openAddModal(fromDirectory));
+}
+function _openAddModal(fromDirectory){
   editingContext = null;
   document.getElementById('modalTitle').textContent = fromDirectory ? 'Add link' : 'Add term';
   document.getElementById('fEn').value = '';
@@ -4916,6 +4938,9 @@ function openAddModal(fromDirectory){
 }
 
 function openEditModal(categoryId, idx){
+  requireName(()=>_openEditModal(categoryId, idx));
+}
+function _openEditModal(categoryId, idx){
   editingContext = {categoryId, idx};
   const term = DATA.categories.find(c=>c.id===categoryId).terms[idx];
   document.getElementById('modalTitle').textContent = 'Edit term';
@@ -5005,6 +5030,9 @@ function slugify(s){
 }
 
 function openAddDomainModal(){
+  requireName(()=>_openAddDomainModal());
+}
+function _openAddDomainModal(){
   document.getElementById('fDomainName').value = '';
   selectedSwatch = DOMAIN_COLORS[Math.floor(Math.random()*DOMAIN_COLORS.length)];
   const iconKeys = Object.keys(DOMAIN_ICONS);
@@ -5074,6 +5102,9 @@ function deleteDomain(id){
 
 /* ============ Healthcare Providers: modal + photo handling ============ */
 function openAddProviderModal(){
+  requireName(()=>_openAddProviderModal());
+}
+function _openAddProviderModal(){
   editingProviderId = null;
   pendingPhotoDataUrl = null;
   pendingPhotoPath = null;
@@ -5090,6 +5121,9 @@ function openAddProviderModal(){
 }
 
 function openEditProviderModal(id){
+  requireName(()=>_openEditProviderModal(id));
+}
+function _openEditProviderModal(id){
   const p = PROVIDERS.find(x=>x.id===id);
   if(!p) return;
   editingProviderId = id;
@@ -5223,6 +5257,9 @@ async function deleteProvider(id){
 
 /* ============ Notes: modal ============ */
 function openAddNoteModal(){
+  requireName(()=>_openAddNoteModal());
+}
+function _openAddNoteModal(){
   editingNoteId = null;
   pendingNoteAttachment = null;
   document.getElementById('noteModalTitle').textContent = 'Add guide';
@@ -5233,6 +5270,9 @@ function openAddNoteModal(){
 }
 
 function openEditNoteModal(id){
+  requireName(()=>_openEditNoteModal(id));
+}
+function _openEditNoteModal(id){
   const n = NOTES.find(x=>x.id===id);
   if(!n) return;
   editingNoteId = id;
