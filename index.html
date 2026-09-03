@@ -3736,7 +3736,7 @@ function render(){
   const allDomainTiles = getDomainTiles();
   const resourcesTile = allDomainTiles.find(t=>t.id==='resources');
   const domainTilesForGrid = allDomainTiles.filter(t=>t.id!=='resources');
-  const domainTilesHtml = domainTilesForGrid.map((t,i)=>tileHtml(t, i, `jumpToDomain('${t.id}')`)).join('');
+  const domainTilesHtml = domainTilesForGrid.map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`)).join('');
 
   const addDomainBtn = `
      <button class="tab add-domain-btn" onclick="openAddDomainModal()">
@@ -3763,7 +3763,7 @@ function render(){
   `;
 
   const toolTileButtons = getToolTiles().map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`));
-  if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `jumpToDomain('${resourcesTile.id}')`));
+  if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`));
 
   const extrasTabs = `
      <div class="nav-section-label" onclick="toggleToolsCollapsed()" role="button" tabindex="0">
@@ -4072,22 +4072,6 @@ function setCategory(id){
 function goHome(){
   setCategory('home');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Switches to the full "All domains" glossary and smooth-scrolls straight to
-// one domain's section, rather than filtering everything else out. Used by
-// the Home screen's domain tiles, where the goal is "take me there" rather
-// than "hide everything but this."
-function jumpToDomain(id){
-  activeCategory = 'all';
-  render();
-  requestAnimationFrame(()=>{
-    const el = document.getElementById('domain-' + id);
-    if(!el) return; // domain has no terms yet, so it has no section to jump to
-    el.scrollIntoView({ behavior:'smooth', block:'start' });
-    el.classList.add('section-jump-flash');
-    setTimeout(()=> el.classList.remove('section-jump-flash'), 1500);
-  });
 }
 
 /* ============ CoreCHI practice ============ */
