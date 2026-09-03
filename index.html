@@ -929,6 +929,23 @@
     transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
   }
   .field textarea{resize:vertical; min-height:66px; font-family:var(--sans);}
+
+  .link-btn{
+    border:none; background:transparent; color:var(--accent); font-family:var(--sans);
+    font-size:12.5px; font-weight:600; cursor:pointer; padding:0; margin:-6px 0 4px 0;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+  .history-entry{
+    padding:13px 14px; border-radius:12px; background:var(--bg-hi);
+    box-shadow:inset 0 0 0 1px var(--line-soft); margin-bottom:10px;
+  }
+  .history-entry-meta{
+    display:flex; justify-content:space-between; gap:10px; font-family:var(--mono);
+    font-size:10.5px; color:var(--ink-faint); margin-bottom:8px;
+  }
+  .history-entry-en{ font-family:var(--sans); font-weight:600; font-size:14px; color:var(--ink); }
+  .history-entry-es{ font-family:var(--serif); font-style:italic; color:var(--accent); font-size:13px; margin-top:2px; }
+  .history-entry-def{ font-size:12.5px; line-height:1.55; color:var(--ink-soft); margin:6px 0 0 0; }
   .field input:focus, .field textarea:focus, .field select:focus{
     outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); background:var(--paper);
   }
@@ -1558,9 +1575,20 @@
     <div class="field"><label>Source (optional)</label><input id="fSource" type="text" placeholder="e.g. NIH (Spanish)"></div>
     <div class="field"><label>Source link (optional URL)</label><input id="fSourceUrl" type="text" placeholder="Paste the exact article/webinar link, if you have it"></div>
     <div class="field"><label>Domain</label><select id="fCategory"></select></div>
+    <div id="historyLinkSlot"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveTerm()">Save term</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="historyOverlay">
+  <div class="modal">
+    <h3>Edit history</h3>
+    <div id="historyList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeHistoryModal()">Close</button>
     </div>
   </div>
 </div>
@@ -1709,6 +1737,8 @@
           service cloud.firestore {
             match /databases/{database}/documents {
               match /terminology-hub/{docId} { allow read, write: if true; }
+              match /terminology-meta/{docId} { allow read, write: if true; }
+              match /terms/{docId} { allow read, write: if true; }
               match /healthcare-providers/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
               match /team-notes/{docId} { allow read, write: if true; }
@@ -2516,7 +2546,7 @@ try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }ca
 let toolsCollapsed = false;
 try{ toolsCollapsed = localStorage.getItem('ih_toolsCollapsed') === '1'; }catch(e){}
 let searchQuery = '';
-let editingContext = null; // {categoryId, termIndex} or null for new
+let editingContext = null; // {categoryId, termId} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
 
 let PROVIDERS = [];
@@ -2590,21 +2620,156 @@ function ensureTermIds(){
 
 async function loadData(){
   try{
-    const result = await window.storage.get(STORAGE_KEY, true);
-    if(result && result.value){
-      DATA = JSON.parse(result.value);
-    } else {
-      DATA = DEFAULT_DATA;
-      await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true);
+    if(!db){
+      // No Firestore in this environment (e.g. this preview) — fall back to
+      // the old single-blob path so the app still shows something.
+      const result = await window.storage.get(STORAGE_KEY, true);
+      DATA = (result && result.value) ? JSON.parse(result.value) : DEFAULT_DATA;
+      ensureTermIds();
+      render();
+      return;
     }
+
+    const metaSnap = await db.collection('terminology-meta').doc('categories').get();
+
+    if(!metaSnap.exists){
+      // First run on the new schema — migrate once from the old single-blob
+      // storage (or seed fresh) so nobody's existing content is lost.
+      let legacyData = null;
+      try{
+        const result = await window.storage.get(STORAGE_KEY, true);
+        if(result && result.value) legacyData = JSON.parse(result.value);
+      }catch(e){}
+      const source = legacyData || DEFAULT_DATA;
+      await migrateToPerTermStorage(source);
+    }
+
+    await loadCategoriesMeta();
+    await loadAllTerms();
+    startTermsListener();
+    startCategoriesMetaListener();
+    render();
   }catch(err){
+    console.error('loadData failed:', err);
     DATA = DEFAULT_DATA;
-    try{ await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true); }catch(e2){}
+    render();
   }
-  if(ensureTermIds()){
-    persist(); // silently save the newly-assigned ids so they stick
+}
+
+// One-time migration from the old "one giant document" model to one
+// Firestore document per term (plus a small shared doc for domain
+// metadata). This is what actually fixes concurrent editing: two people
+// saving different terms at the same time now write to different
+// documents instead of both overwriting the same blob.
+async function migrateToPerTermStorage(source){
+  const categoriesMeta = source.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon }));
+  await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
+
+  const batchSize = 400; // Firestore batch limit is 500 writes
+  let allTerms = [];
+  source.categories.forEach(cat=>{
+    cat.terms.forEach(t=>{
+      if(!t.id) t.id = genId();
+      allTerms.push({ ...t, categoryId: cat.id });
+    });
+  });
+  for(let i=0; i<allTerms.length; i+=batchSize){
+    const batch = db.batch();
+    allTerms.slice(i, i+batchSize).forEach(t=>{
+      const ref = db.collection('terms').doc(t.id);
+      batch.set(ref, t);
+    });
+    await batch.commit();
   }
-  render();
+}
+
+async function loadCategoriesMeta(){
+  const snap = await db.collection('terminology-meta').doc('categories').get();
+  const meta = snap.exists ? (snap.data().categories || []) : [];
+  DATA = { categories: meta.map(c=>({ ...c, terms: [] })) };
+}
+
+async function loadAllTerms(){
+  const snap = await db.collection('terms').get();
+  applyTermsSnapshot(snap);
+}
+
+// Rebuilds each category's terms array from a Firestore snapshot. Keeps
+// category order stable (order lives in terminology-meta, untouched here)
+// and just refills which terms belong where — this is what makes real-time
+// sync safe: nobody's array-index-based UI state points at the wrong term,
+// because edit/delete now target terms by id, not by position.
+function applyTermsSnapshot(snap){
+  const byCategory = {};
+  snap.forEach(doc=>{
+    const t = { ...doc.data(), id: doc.id };
+    const catId = t.categoryId;
+    if(!byCategory[catId]) byCategory[catId] = [];
+    byCategory[catId].push(t);
+  });
+  DATA.categories.forEach(cat=>{
+    cat.terms = byCategory[cat.id] || [];
+  });
+}
+
+let termsListenerStarted = false;
+function startTermsListener(){
+  if(termsListenerStarted || !db) return;
+  termsListenerStarted = true;
+  db.collection('terms').onSnapshot(snap=>{
+    applyTermsSnapshot(snap);
+    // A full render() (not just renderContent()) so sidebar term counts
+    // and "All domains" totals stay live too, not just whatever's open.
+    render();
+  }, err=> console.error('terms listener error:', err));
+}
+
+let categoriesMetaListenerStarted = false;
+function startCategoriesMetaListener(){
+  if(categoriesMetaListenerStarted || !db) return;
+  categoriesMetaListenerStarted = true;
+  db.collection('terminology-meta').doc('categories').onSnapshot(snap=>{
+    if(!snap.exists) return;
+    const meta = snap.data().categories || [];
+    const existingTerms = {};
+    DATA.categories.forEach(c=>{ existingTerms[c.id] = c.terms; });
+    DATA.categories = meta.map(c=>({ ...c, terms: existingTerms[c.id] || [] }));
+    render();
+  }, err=> console.error('categories-meta listener error:', err));
+}
+
+async function saveTermDoc(term){
+  if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
+  try{
+    await db.collection('terms').doc(term.id).set(term);
+    return true;
+  }catch(err){
+    showToast('Could not save. Check connection and retry.');
+    return false;
+  }
+}
+
+async function deleteTermDoc(id){
+  if(!db) return false;
+  try{
+    await db.collection('terms').doc(id).delete();
+    return true;
+  }catch(err){
+    showToast('Could not delete. Check connection and retry.');
+    return false;
+  }
+}
+
+async function saveCategoriesMeta(){
+  if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
+  try{
+    const categoriesMeta = DATA.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon }));
+    await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
+    return true;
+  }catch(err){
+    showToast('Could not save. Check connection and retry.');
+    return false;
+  }
 }
 
 async function persist(){
@@ -4181,8 +4346,8 @@ function renderContent(){
           </div>
           <div class="actions" style="position:absolute; top:16px; right:16px;">
             <button class="attach-btn" title="Attach a photo or PDF" onclick="attachToTerm('${t.id}')">${ICON_PAPERCLIP}</button>
-            <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', ${t._idx})">✎</button>
-            <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', ${t._idx})">✕</button>
+            <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', '${t.id}')">✎</button>
+            <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', '${t.id}')">✕</button>
           </div>
           <div class="term-en">
             <span>${escapeHtml(t.en)}</span>
@@ -4968,18 +5133,18 @@ function renderDirectory(q){
     // Same approach as the term grid: sort a copy for display, but keep each
     // term's real storage index so the pencil button edits the right one.
     const sortedTerms = cat.terms
-      .map((t, idx)=>({ t, idx }))
+      .map((t)=>({ t }))
       .sort((a,b)=> collateTerms(a.t.en, b.t.en));
-    sortedTerms.forEach(({ t, idx })=>{
+    sortedTerms.forEach(({ t })=>{
       const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
       const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q);
       if(!matches) return;
 
       if(t.url){
-        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url, idx });
+        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url, termId: t.id });
       } else if(cat.id !== 'resources'){
-        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en'), idx });
-        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es'), idx });
+        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en'), termId: t.id });
+        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es'), termId: t.id });
       }
     });
     if(rows.length===0) return;
@@ -4994,7 +5159,7 @@ function renderDirectory(q){
           <span class="dir-term">${r.term}</span>
           <span class="dir-kind ${r.confirmed?'confirmed':''}">${r.kind}</span>
           <a class="dir-url" href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a>
-          <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', ${r.idx})">✎</button>
+          <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', '${r.termId}')">✎</button>
           <a class="dir-go" href="${escapeAttr(r.url)}" target="_blank" rel="noopener" title="Open link">${ICON_EXTERNAL}</a>
         </div>
       `;
@@ -5028,16 +5193,17 @@ function _openAddModal(fromDirectory){
   populateCategorySelect();
   const isRealDomain = DATA.categories.some(c=>c.id===activeCategory);
   document.getElementById('fCategory').value = isRealDomain ? activeCategory : DATA.categories[0].id;
+  document.getElementById('historyLinkSlot').innerHTML = '';
   document.getElementById('overlay').classList.add('show');
   document.getElementById('fEn').focus();
 }
 
-function openEditModal(categoryId, idx){
-  requireName(()=>_openEditModal(categoryId, idx));
+function openEditModal(categoryId, termId){
+  requireName(()=>_openEditModal(categoryId, termId));
 }
-function _openEditModal(categoryId, idx){
-  editingContext = {categoryId, idx};
-  const term = DATA.categories.find(c=>c.id===categoryId).terms[idx];
+function _openEditModal(categoryId, termId){
+  editingContext = {categoryId, termId};
+  const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
   document.getElementById('modalTitle').textContent = 'Edit term';
   document.getElementById('fEn').value = term.en || '';
   document.getElementById('fEs').value = term.es || '';
@@ -5046,8 +5212,52 @@ function _openEditModal(categoryId, idx){
   document.getElementById('fSourceUrl').value = term.url || '';
   populateCategorySelect();
   document.getElementById('fCategory').value = categoryId;
+  const historySlot = document.getElementById('historyLinkSlot');
+  historySlot.innerHTML = (term.history && term.history.length)
+    ? `<button type="button" class="link-btn" onclick="openHistoryModal('${categoryId}','${termId}')">View edit history (${term.history.length})</button>`
+    : '';
   document.getElementById('overlay').classList.add('show');
   document.getElementById('fEn').focus();
+}
+
+function openHistoryModal(categoryId, termId){
+  const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
+  if(!term || !term.history || !term.history.length){ showToast('No earlier versions saved for this term.'); return; }
+  const list = document.getElementById('historyList');
+  list.innerHTML = term.history.map((v, i)=>`
+    <div class="history-entry">
+      <div class="history-entry-meta">
+        <span>${v.editedBy ? escapeHtml(v.editedBy) : 'Unknown editor'}</span>
+        <span>${v.savedAt ? new Date(v.savedAt).toLocaleString() : ''}</span>
+      </div>
+      <div class="history-entry-en">${escapeHtml(v.en || '')}</div>
+      ${v.es ? `<div class="history-entry-es">${escapeHtml(v.es)}</div>` : ''}
+      <p class="history-entry-def">${escapeHtml(v.def || '')}</p>
+      <button type="button" class="btn btn-ghost" style="margin-top:8px;" onclick="restoreHistoryVersion('${categoryId}','${termId}', ${i})">Restore this version</button>
+    </div>
+  `).join('');
+  document.getElementById('historyOverlay').classList.add('show');
+}
+
+function closeHistoryModal(){
+  document.getElementById('historyOverlay').classList.remove('show');
+}
+
+// Restoring doesn't silently overwrite — it fills the edit form with the
+// old values and lets the normal Save flow take it from there, so the
+// restore itself still goes through saveTerm() and gets its own history
+// entry (meaning a bad restore can itself be undone).
+function restoreHistoryVersion(categoryId, termId, historyIndex){
+  const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
+  const version = term && term.history && term.history[historyIndex];
+  if(!version) return;
+  document.getElementById('fEn').value = version.en || '';
+  document.getElementById('fEs').value = version.es || '';
+  document.getElementById('fDef').value = version.def || '';
+  document.getElementById('fSource').value = version.source || '';
+  document.getElementById('fSourceUrl').value = version.url || '';
+  closeHistoryModal();
+  showToast('Version loaded into the form — review, then Save to restore it.');
 }
 
 function populateCategorySelect(){
@@ -5072,20 +5282,43 @@ async function saveTerm(){
   const editor = whoAmI();
   const targetCatName = DATA.categories.find(c=>c.id===newCategoryId).name;
 
-  const existingId = editingContext ? DATA.categories.find(c=>c.id===editingContext.categoryId).terms[editingContext.idx].id : null;
-  const record = { id: existingId || genId(), en, es, def, source, url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined };
+  const existingTerm = editingContext
+    ? DATA.categories.find(c=>c.id===editingContext.categoryId).terms.find(t=>t.id===editingContext.termId)
+    : null;
 
+  // Snapshot the pre-edit values before overwriting them, so an accidental
+  // or unwanted change can be undone later. Capped at 10 — enough to catch
+  // a mistake without a term's document growing without bound.
+  let history = (existingTerm && existingTerm.history) || [];
+  if(existingTerm){
+    const snapshot = {
+      en: existingTerm.en, es: existingTerm.es, def: existingTerm.def,
+      source: existingTerm.source, url: existingTerm.url,
+      editedBy: existingTerm.editedBy, editedOn: existingTerm.editedOn,
+      savedAt: Date.now()
+    };
+    history = [snapshot, ...history].slice(0, 10);
+  }
+
+  const record = {
+    id: (existingTerm && existingTerm.id) || genId(), categoryId: newCategoryId,
+    en, es, def, source,
+    url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined,
+    history
+  };
+
+  closeModal();
+  const ok = await saveTermDoc(record);
+  if(!ok) return; // saveTermDoc already showed the error toast
+
+  // Apply locally right away rather than waiting on the real-time listener's
+  // round trip — the person who just typed the edit shouldn't have to wait
+  // to see it reflected.
   if(editingContext){
     const oldCat = DATA.categories.find(c=>c.id===editingContext.categoryId);
-    if(editingContext.categoryId === newCategoryId){
-      // Same domain — update in place so the term doesn't jump to the bottom of the list.
-      oldCat.terms[editingContext.idx] = record;
-    } else {
-      // Moved to a different domain — remove from the old one, append to the new one.
-      oldCat.terms.splice(editingContext.idx, 1);
-      const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
-      targetCat.terms.push(record);
-    }
+    oldCat.terms = oldCat.terms.filter(t=>t.id!==record.id);
+    const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
+    targetCat.terms.push(record);
     logActivity(`updated "${en}" in ${targetCatName}`);
   } else {
     const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
@@ -5093,19 +5326,19 @@ async function saveTerm(){
     logActivity(`added "${en}" to ${targetCatName}`);
   }
 
-  closeModal();
-  await persist();
   successBurst();
   showToast('Term saved.');
   render();
 }
 
-async function deleteTerm(categoryId, idx){
+async function deleteTerm(categoryId, termId){
   const cat = DATA.categories.find(c=>c.id===categoryId);
-  const term = cat.terms[idx];
+  const term = cat.terms.find(t=>t.id===termId);
+  if(!term) return;
   if(!confirm(`Delete "${term.en}"? This can't be undone.`)) return;
-  cat.terms.splice(idx,1);
-  await persist();
+  const ok = await deleteTermDoc(termId);
+  if(!ok) return;
+  cat.terms = cat.terms.filter(t=>t.id!==termId);
   logActivity(`removed "${term.en}" from ${cat.name}`);
 
   // Clean up any files that were attached to this term.
@@ -5177,7 +5410,8 @@ async function saveDomain(){
 
   DATA.categories.push({ id, name, color: selectedSwatch, icon: selectedIcon, terms: [] });
   closeDomainModal();
-  await persist();
+  const ok = await saveCategoriesMeta();
+  if(!ok){ DATA.categories.pop(); return; }
   activeCategory = id;
   logActivity(`created the "${name}" domain`);
   successBurst();
@@ -5185,14 +5419,19 @@ async function saveDomain(){
   render();
 }
 
-function deleteDomain(id){
+async function deleteDomain(id){
   const cat = DATA.categories.find(c=>c.id===id);
   if(!cat) return;
   if(cat.terms.length>0){ showToast('Remove all terms from a domain before deleting it.'); return; }
   if(!confirm(`Delete the empty "${cat.name}" domain?`)) return;
+  const previousCategories = DATA.categories;
   DATA.categories = DATA.categories.filter(c=>c.id!==id);
   if(activeCategory===id) activeCategory = 'all';
-  persist().then(()=>{ logActivity(`deleted the "${cat.name}" domain`); showToast('Domain deleted.'); render(); });
+  const ok = await saveCategoriesMeta();
+  if(!ok){ DATA.categories = previousCategories; return; }
+  logActivity(`deleted the "${cat.name}" domain`);
+  showToast('Domain deleted.');
+  render();
 }
 
 /* ============ Healthcare Providers: modal + photo handling ============ */
