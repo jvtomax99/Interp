@@ -559,6 +559,7 @@
     /* Chat's own compose bar and "Join chat" button sit at the bottom of
        the panel too — this clears them instead of stacking on top. */
     .home-fab-raised{ bottom:calc(88px + env(safe-area-inset-bottom, 0px)); }
+    body.kb-open .home-fab{ display:none; }
   }
 
   /* Same pill shape and gradient as .home-fab, but sitting inline inside the
@@ -5267,6 +5268,27 @@ startChatListener();
 startActivityListener();
 startTypingListener();
 startCeListener();
+
+// iOS doesn't reliably reposition fixed elements against the visual
+// viewport while the on-screen keyboard is open — a fixed button can end up
+// floating mid-screen instead of pinned to the true bottom, overlapping
+// whatever's there (like Team Chat's compose bar). The standard fix is to
+// hide floating UI while a text field is focused, not fight the keyboard.
+document.addEventListener('focusin', (e)=>{
+  if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
+    document.body.classList.add('kb-open');
+  }
+});
+document.addEventListener('focusout', (e)=>{
+  if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
+    setTimeout(()=>{
+      const active = document.activeElement;
+      if(!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')){
+        document.body.classList.remove('kb-open');
+      }
+    }, 50);
+  }
+});
 
 /* ---------- Install / offline support ----------
    Registered after load so it never delays first paint. Guarded because
