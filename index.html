@@ -561,6 +561,20 @@
     .home-fab-raised{ bottom:calc(88px + env(safe-area-inset-bottom, 0px)); }
     body.kb-open .home-fab{ display:none; }
   }
+
+  /* Same pill shape and gradient as .home-fab, but sitting inline inside the
+     greeting card rather than fixed to the viewport — a shortcut straight
+     into the full Recent Updates tool. */
+  .home-recent-cta{
+    display:inline-flex; align-items:center; gap:8px; margin-top:16px;
+    border:none; cursor:pointer; padding:10px 16px 10px 13px; border-radius:30px;
+    background:linear-gradient(145deg, #0079BD, #252E6D); color:#fff;
+    box-shadow:0 6px 16px -6px rgba(37,46,109,0.5), inset 0 1px 0 rgba(255,255,255,0.28);
+    font-family:var(--sans); font-size:13px; font-weight:600; transition:transform .15s var(--ease);
+  }
+  .home-recent-cta:hover{ transform:translateY(-2px); }
+  .home-recent-cta:active{ transform:scale(0.96); }
+  .home-recent-cta svg{ width:17px; height:17px; flex-shrink:0; }
   .tab .link-flag{
     width:18px; height:18px; border-radius:5px; flex-shrink:0; transform:none;
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
@@ -2386,10 +2400,6 @@ let domainsCollapsed = false;
 try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }catch(e){}
 let toolsCollapsed = false;
 try{ toolsCollapsed = localStorage.getItem('ih_toolsCollapsed') === '1'; }catch(e){}
-// Defaults to collapsed (note the reversed !== check) — the Home screen's
-// job is a quick landing, not a feed people have to scroll past every time.
-let recentActivityCollapsed = true;
-try{ recentActivityCollapsed = localStorage.getItem('ih_recentActivityCollapsed') !== '0'; }catch(e){}
 let searchQuery = '';
 let editingContext = null; // {categoryId, termIndex} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
@@ -4080,12 +4090,6 @@ function toggleToolsCollapsed(){
   render();
 }
 
-function toggleRecentActivityCollapsed(){
-  recentActivityCollapsed = !recentActivityCollapsed;
-  try{ localStorage.setItem('ih_recentActivityCollapsed', recentActivityCollapsed ? '1' : '0'); }catch(e){}
-  renderContent();
-}
-
 // The greeting banner's shortcut button: expand Recent Activity if it's
 // currently collapsed, then scroll down to it — one tap from "Hello" to
 // the actual list, instead of expand-then-hunt-for-it.
@@ -4550,25 +4554,14 @@ function renderHome(){
       <div class="home-greeting-text">
         <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span></h2>
         <p>${greeting}. Everything's in the list below — jump to a domain or tool, or pick up where your team left off.</p>
+        ${ACTIVITY.length > 0 ? `
+        <button class="home-recent-cta" onclick="setCategory('updates')">
+          ${ICON_BELL}<span>Recent activity</span>
+        </button>` : ''}
       </div>
     </div>
     ${ECG_STRIP}
   `;
-
-  if(ACTIVITY.length > 0){
-    const recent = ACTIVITY.slice(-3).reverse();
-    html += `<div class="home-recent">
-      <div class="home-recent-label" onclick="toggleRecentActivityCollapsed()" role="button" tabindex="0" style="cursor:pointer; display:flex; align-items:center; gap:7px;">
-        <span style="flex:1;">Recent activity</span>
-        <span class="nav-section-chevron ${recentActivityCollapsed ? 'is-collapsed' : ''}" style="color:var(--ink-faint);">${ICON_CHEVRON_DOWN}</span>
-      </div>`;
-    if(!recentActivityCollapsed){
-      recent.forEach(a=>{
-        html += `<div class="home-recent-row"><b>${escapeHtml(a.author||'Someone')}</b> ${escapeHtml(a.summary||'')}</div>`;
-      });
-    }
-    html += `</div>`;
-  }
 
   return html;
 }
