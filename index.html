@@ -946,6 +946,28 @@
     .ecg-line{ stroke-dashoffset:0; }
   }
 
+  /* ---------- Training & Events ---------- */
+  .ce-row{
+    display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-radius:12px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+    margin-bottom:9px; transition:box-shadow .15s var(--ease);
+  }
+  .ce-row:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
+  .ce-row:hover .activity-delete{ opacity:1; }
+  .ce-src{
+    flex-shrink:0; font-family:var(--sans); font-size:10px; font-weight:700;
+    letter-spacing:.03em; text-transform:uppercase; color:#1E7F5C; background:#E7F5EE;
+    padding:4px 9px; border-radius:20px; margin-top:2px; max-width:150px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ce-body{ flex:1; min-width:0; }
+  .ce-title{ font-size:14px; font-weight:600; color:var(--ink); margin:0; line-height:1.4; }
+  .ce-notes{ font-size:12.5px; color:var(--ink-soft); margin:5px 0 0 0; line-height:1.55; }
+  @media (max-width:760px){
+    .ce-row{ flex-wrap:wrap; }
+    .ce-src{ max-width:100%; }
+  }
+
   /* ---------- Global search ---------- */
   @keyframes gsIn{ from{ opacity:0; transform:translateY(-12px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
   .gs-overlay{
@@ -1428,6 +1450,20 @@
     <span class="lightbox-name" id="lightboxName"></span>
     <div class="lightbox-actions">
       <a class="lightbox-btn" id="lightboxDownload" href="" download>Download</a>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="eventOverlay">
+  <div class="modal">
+    <h3>Add a training or event</h3>
+    <div class="field"><label>Title</label><input id="fEvTitle" type="text" placeholder="e.g. Trauma-Informed Interpreting webinar"></div>
+    <div class="field"><label>Source (optional)</label><input id="fEvSource" type="text" placeholder="e.g. CHIA, NCIHC, HUMC in-service"></div>
+    <div class="field"><label>Link (optional)</label><input id="fEvLink" type="text" placeholder="Registration or info link"></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="fEvNotes" placeholder="Date, cost, CE hours…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEventModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Save event</button>
     </div>
   </div>
 </div>
@@ -2294,6 +2330,13 @@ let notifyEnabled = false;
 let notifiedActivityIds = new Set();
 let notifyActivityEnabled = false;
 
+let CE_EVENTS = [];
+let ceListenerStarted = false;
+let isInitialCeLoad = true;
+let lastSeenCeCount = 0;
+let notifiedCeIds = new Set();
+let notifyCeEnabled = false;
+
 let TYPING_USERS = [];
 let typingListenerStarted = false;
 let typingHeartbeat = null;
@@ -2941,14 +2984,17 @@ function loadNotifyPref(){
   try{
     notifyEnabled = localStorage.getItem('interpreterHubNotify') === 'yes';
     notifyActivityEnabled = localStorage.getItem('interpreterHubNotifyActivity') === 'yes';
+    notifyCeEnabled = localStorage.getItem('interpreterHubNotifyCe') === 'yes';
   }catch(err){
     notifyEnabled = false; // storage can be blocked in private modes
     notifyActivityEnabled = false;
+    notifyCeEnabled = false;
   }
   // A stored preference means nothing if the browser permission was revoked.
   if(typeof Notification === 'undefined' || Notification.permission !== 'granted'){
     notifyEnabled = false;
     notifyActivityEnabled = false;
+    notifyCeEnabled = false;
   }
 }
 
@@ -2958,6 +3004,25 @@ function saveNotifyPref(v){
 
 function saveNotifyActivityPref(v){
   try{ localStorage.setItem('interpreterHubNotifyActivity', v ? 'yes' : 'no'); }catch(err){}
+}
+
+function saveNotifyCePref(v){
+  try{ localStorage.setItem('interpreterHubNotifyCe', v ? 'yes' : 'no'); }catch(err){}
+}
+
+async function toggleCeNotifications(){
+  if(notifyCeEnabled){
+    notifyCeEnabled = false;
+    saveNotifyCePref(false);
+    showToast('Training alerts turned off.');
+    renderContent();
+    return;
+  }
+  if(!await ensureNotifyPermission()) return;
+  notifyCeEnabled = true;
+  saveNotifyCePref(true);
+  showToast('You\u2019ll be alerted about new training and webinars.');
+  renderContent();
 }
 
 function notificationsSupported(){
@@ -3297,6 +3362,139 @@ document.addEventListener('keydown', (e)=>{
 
 /* ============ Global search end ============ */
 
+/* ---------- Training & Events ----------
+   Fed by the daily watcher (CHIA, CCHI, NCIHC, Cross-Cultural Communications)
+   and by anyone on the team adding something they spotted elsewhere. Kept in
+   its own collection and its own section so CE opportunities aren't buried
+   under everyday glossary edits. */
+function startCeListener(){
+  if(ceListenerStarted || !db) return;
+  ceListenerStarted = true;
+  db.collection('ce-events').orderBy('timestamp').onSnapshot(snap=>{
+    CE_EVENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if(isInitialCeLoad){
+      isInitialCeLoad = false;
+      lastSeenCeCount = CE_EVENTS.length;
+      CE_EVENTS.forEach(e => notifiedCeIds.add(e.id));
+    }else{
+      CE_EVENTS.forEach(e=>{
+        if(notifiedCeIds.has(e.id)) return;
+        notifiedCeIds.add(e.id);
+        if(document.visibilityState === 'visible' && activeCategory === 'events') return;
+        showCeNotification(e);
+      });
+    }
+    if(activeCategory === 'events'){
+      lastSeenCeCount = CE_EVENTS.length;
+      renderContent();
+    }
+    updateCeBadge();
+  }, err => console.warn('Events listener unavailable:', err));
+}
+
+function updateCeBadge(){
+  const badge = document.getElementById('ceBadge');
+  if(!badge) return;
+  const unread = Math.max(0, CE_EVENTS.length - lastSeenCeCount);
+  const next = String(unread > 0 ? unread : CE_EVENTS.length);
+  const changed = badge.textContent !== next;
+  badge.textContent = next;
+  badge.classList.toggle('unread', unread > 0);
+  if(changed) pulseBadge(badge);
+}
+
+async function showCeNotification(ev){
+  if(!notifyCeEnabled) return;
+  const body = ev.title || ev.summary || 'New training opportunity';
+  await sendNotification(`${ev.source || 'Training'} \u2014 Interpreter Hub`, body, 'events', 'interpreter-hub-events');
+}
+
+function renderEvents(){
+  const sorted = CE_EVENTS.slice().sort((a,b)=> (b.timestamp||0) - (a.timestamp||0));
+
+  let html = `<div class="section-head"><h2>Training &amp; Events</h2><span class="sub">${sorted.length} item${sorted.length===1?'':'s'}</span>${
+    notificationsSupported()
+      ? `<button class="head-action ${notifyCeEnabled?'on':''}" onclick="toggleCeNotifications()">${ICON_BELL_SM} ${notifyCeEnabled?'Alerts on':'Alert me'}</button>`
+      : ''
+  }<button class="head-action" onclick="openAddEventModal()">+ Add</button></div>`;
+
+  html += `<p class="practice-intro">Checked daily across CHIA, CCHI, NCIHC, and Cross-Cultural Communications. Anyone can add something they spotted elsewhere \u2014 a hospital in-service, a conference, a newsletter item.</p>`;
+
+  if(!sorted.length){
+    html += `<div class="empty"><div class="glyph">${ICON_CALENDAR}</div>Nothing yet.<br>The watcher checks once a day, or add something manually.</div>`;
+    return html;
+  }
+
+  html += `<div class="dir-group">`;
+  sorted.forEach(ev=>{
+    const when = ev.timestamp ? relativeTime(ev.timestamp) : '';
+    const src = ev.source || 'Added by the team';
+    html += `
+      <div class="ce-row">
+        <span class="ce-src">${escapeHtml(src)}</span>
+        <div class="ce-body">
+          <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
+          ${ev.notes ? `<p class="ce-notes">${escapeHtml(ev.notes)}</p>` : ''}
+          <div class="tr-actions">
+            ${ev.link ? `<a class="tr-mini" href="${escapeAttr(ev.link)}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open</a>` : ''}
+            ${ev.addedBy ? `<span class="source" style="align-self:center;">added by ${escapeHtml(ev.addedBy)}</span>` : ''}
+          </div>
+        </div>
+        <span class="activity-time" data-ts="${ev.timestamp||''}">${when}</span>
+        <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
+      </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function openAddEventModal(){
+  document.getElementById('fEvTitle').value = '';
+  document.getElementById('fEvSource').value = '';
+  document.getElementById('fEvLink').value = '';
+  document.getElementById('fEvNotes').value = '';
+  document.getElementById('eventOverlay').classList.add('show');
+  if(prefersAutoFocus()) document.getElementById('fEvTitle').focus();
+}
+
+function closeEventModal(){
+  document.getElementById('eventOverlay').classList.remove('show');
+}
+
+async function saveEvent(){
+  const title = document.getElementById('fEvTitle').value.trim();
+  if(!title){ showToast('Give the event a title.'); return; }
+  let link = document.getElementById('fEvLink').value.trim();
+  if(link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+  const record = {
+    title,
+    source: document.getElementById('fEvSource').value.trim() || 'Added by the team',
+    link,
+    notes: document.getElementById('fEvNotes').value.trim(),
+    addedBy: whoAmI() || '',
+    timestamp: Date.now()
+  };
+  if(!db){ showToast('Not connected to the database.'); return; }
+  try{
+    await db.collection('ce-events').add(record);
+    closeEventModal();
+    successBurst();
+    showToast('Event added.');
+  }catch(err){
+    showToast('Could not save \u2014 check your connection.');
+  }
+}
+
+async function deleteCeEvent(id){
+  if(!confirm('Remove this from Training & Events?')) return;
+  if(!db) return;
+  try{
+    await db.collection('ce-events').doc(id).delete();
+  }catch(err){
+    showToast('Could not remove \u2014 check your connection.');
+  }
+}
+
 function prefersAutoFocus(){
   try{
     return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -3328,6 +3526,7 @@ const ICON_PHONE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_CHAT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20C10.5 20 9.09 19.6 7.88 18.89L4 20L5.11 16.12C4.4 14.91 4 13.5 4 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="1.6" stroke="currentColor" stroke-width="1.6"/><path d="M8 8.5H16M8 12H16M8 15.5H12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_SEND = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12L21 4L14 21L11 13L3 12Z" stroke="white" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+const ICON_CALENDAR = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 9.5H20.5" stroke="currentColor" stroke-width="1.7"/><path d="M8 3.5V6.5M16 3.5V6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="8.5" cy="13.5" r="1.1" fill="currentColor"/><circle cx="12" cy="13.5" r="1.1" fill="currentColor"/></svg>';
 const ICON_BELL_SM = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:12px;height:12px;vertical-align:-1px;"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_EXAM = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3.5" width="14" height="17" rx="2" stroke="white" stroke-width="1.7"/><path d="M8.5 9L10 10.5L13 7.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 15L10 16.5L13 13.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 9.5H16M15.5 15.5H16" stroke="white" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_SPARK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L13.4 8.6L19 10L13.4 11.4L12 17L10.6 11.4L5 10L10.6 8.6L12 3Z" fill="currentColor"/><path d="M18 15L18.7 17.3L21 18L18.7 18.7L18 21L17.3 18.7L15 18L17.3 17.3L18 15Z" fill="currentColor" opacity="0.65"/></svg>';
@@ -3410,6 +3609,11 @@ function render(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   const extrasTabs = `
      <div class="nav-divider"></div>
+     <button class="tab ${activeCategory==='events'?'active':''}" onclick="setCategory('events')">
+       <span class="flag link-flag" style="background:linear-gradient(140deg,#35A97A,#1E7F5C);">${ICON_CALENDAR}</span>
+       <span class="name">Training &amp; Events</span>
+       <span class="count" id="ceBadge">${CE_EVENTS.length}</span>
+     </button>
      <button class="tab ${activeCategory==='translate'?'active':''}" onclick="setCategory('translate')">
        <span class="flag link-flag" style="background:linear-gradient(140deg,#2E8BD0,#0F5FA6);">${ICON_GLOBE}</span>
        <span class="name">Translate</span>
@@ -3460,6 +3664,9 @@ function render(){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddNoteModal()">+ Add note</button>`;
     searchPlaceholder = 'Search notes…';
   } else if(activeCategory === 'chat'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'events'){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'translate'){
@@ -3544,6 +3751,11 @@ function renderContent(){
     return;
   }
   stopGreetingRotation(); // never leave the timer running on other sections
+
+  if(activeCategory === 'events'){
+    content.innerHTML = renderEvents();
+    return;
+  }
 
   if(activeCategory === 'translate'){
     content.innerHTML = renderTranslate();
@@ -3696,6 +3908,7 @@ function setCategory(id){
   activeCategory = id;
   if(id === 'chat'){ lastSeenChatCount = CHAT_MESSAGES.length; }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
+  if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
 }
 
@@ -4599,7 +4812,7 @@ function pickIcon(key){
 async function saveDomain(){
   const name = document.getElementById('fDomainName').value.trim();
   if(!name){ showToast('Domain name is required.'); return; }
-  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate'];
+  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events'];
   const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
   const base = slugify(name);
   let id = base, n = 2;
@@ -4865,6 +5078,7 @@ loadQuestions();
 startChatListener();
 startActivityListener();
 startTypingListener();
+startCeListener();
 
 /* ---------- Install / offline support ----------
    Registered after load so it never delays first paint. Guarded because
