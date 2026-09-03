@@ -595,11 +595,19 @@
   .stat b{ font-family:var(--mono); font-size:17px; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums; }
   .stat span{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); }
 
-  .section-head{display:flex; align-items:baseline; gap:11px; margin:36px 0 18px 0;}
+  .section-head{display:flex; align-items:baseline; gap:11px; margin:36px 0 18px 0; scroll-margin-top:132px;}
   .section-head:first-child{ margin-top:4px; }
   .section-head h2{font-family:var(--serif); font-weight:400; font-size:23px; margin:0; letter-spacing:-.01em;}
   .section-head .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
   .section-head::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  /* Brief highlight after a domain-jump lands, so it's obvious where you ended up. */
+  @keyframes sectionJumpFlash{
+    0%{ box-shadow:0 0 0 0 var(--accent-soft); }
+    25%{ box-shadow:0 0 0 10px var(--accent-soft); }
+    100%{ box-shadow:0 0 0 0 rgba(0,0,0,0); }
+  }
+  .section-jump-flash{ animation:sectionJumpFlash 1.5s var(--ease); border-radius:10px; }
 
   .grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:18px;}
   @media (max-width:760px){
@@ -3880,7 +3888,7 @@ function renderContent(){
     }
     if(terms.length===0) return;
 
-    html += `<div class="section-head"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
+    html += `<div class="section-head" id="domain-${cat.id}"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
     html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
       const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
@@ -3930,6 +3938,22 @@ function setCategory(id){
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
+}
+
+// Switches to the full "All domains" glossary and smooth-scrolls straight to
+// one domain's section, rather than filtering everything else out. Used by
+// the Home screen's domain tiles, where the goal is "take me there" rather
+// than "hide everything but this."
+function jumpToDomain(id){
+  activeCategory = 'all';
+  render();
+  requestAnimationFrame(()=>{
+    const el = document.getElementById('domain-' + id);
+    if(!el) return; // domain has no terms yet, so it has no section to jump to
+    el.scrollIntoView({ behavior:'smooth', block:'start' });
+    el.classList.add('section-jump-flash');
+    setTimeout(()=> el.classList.remove('section-jump-flash'), 1500);
+  });
 }
 
 /* ============ CoreCHI practice ============ */
@@ -4388,8 +4412,8 @@ function renderHome(){
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
   ];
 
-  const tileHtml = (t,i)=>`
-      <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${(i*0.03).toFixed(2)}s;" onclick="setCategory('${t.id}')">
+  const tileHtml = (t,i,onclickCall)=>`
+      <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${(i*0.03).toFixed(2)}s;" onclick="${onclickCall}">
         <span class="home-tile-icon">${t.icon}</span>
         <span class="home-tile-name">${escapeHtml(t.name)}</span>
         <span class="home-tile-count">${t.count} ${t.label}</span>
@@ -4422,9 +4446,9 @@ function renderHome(){
   // Grouping domains separately from tools gives the dashboard a hierarchy;
   // previously eleven unrelated tiles sat in one undifferentiated grid.
   html += `<div class="home-section-label">Terminology domains</div>`;
-  html += `<div class="home-grid">${domainTiles.map(tileHtml).join('')}</div>`;
+  html += `<div class="home-grid">${domainTiles.map((t,i)=>tileHtml(t,i,`jumpToDomain('${t.id}')`)).join('')}</div>`;
   html += `<div class="home-section-label">Tools</div>`;
-  html += `<div class="home-grid">${toolTiles.map((t,i)=>tileHtml(t,i+domainTiles.length)).join('')}</div>`;
+  html += `<div class="home-grid">${toolTiles.map((t,i)=>tileHtml(t,i+domainTiles.length,`setCategory('${t.id}')`)).join('')}</div>`;
 
   return html;
 }
