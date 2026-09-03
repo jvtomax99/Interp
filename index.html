@@ -4734,7 +4734,11 @@ async function sendChatMessage(){
     renderChatAttachPreview();
   }
   input.disabled = false;
-  input.focus();
+  // No re-focus here on purpose: keeping the keyboard open after send was
+  // also keeping the Home button hidden until a second, unrelated tap.
+  // Letting focus release lets the keyboard close and the button reappear
+  // right away — tapping the input again for the next message is a small
+  // trade worth making for that.
 }
 
 function handleChatKeydown(event){
