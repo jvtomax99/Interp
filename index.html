@@ -3804,7 +3804,14 @@ function render(){
     showStatStrip = false;
   }
 
+  // Any focused screen — a single domain or a single tool — is meant to feel
+  // isolated: no sidebar, no other tiles competing for attention. Only Home
+  // and "All domains" keep the full navigation visible, since those are the
+  // two places meant for browsing around rather than reading one thing.
+  const isFocusedView = activeCategory !== 'home' && activeCategory !== 'all';
+
   app.innerHTML = `
+    ${isFocusedView ? '' : `
     <div class="brand brand-mobile">
       <div class="brand-mark">
         <div class="brand-glyph">${ICON_GLYPH}</div>
@@ -3844,6 +3851,7 @@ function render(){
         <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
       </div>
     </div>
+    `}
     <div class="main">
       ${showTopbar ? `
       <div class="topbar">
@@ -3875,8 +3883,9 @@ function render(){
     // on-screen keyboard open every time you tap a section in the sidebar.
     if(prefersAutoFocus()) searchInputEl.focus();
   }
-  if(window.__lastWho) document.getElementById('whoInput').value = window.__lastWho;
-  document.getElementById('whoInput').addEventListener('input', (e)=>{ window.__lastWho = e.target.value; });
+  if(window.__lastWho) { const wi = document.getElementById('whoInput'); if(wi) wi.value = window.__lastWho; }
+  const whoInputEl = document.getElementById('whoInput');
+  if(whoInputEl) whoInputEl.addEventListener('input', (e)=>{ window.__lastWho = e.target.value; });
 
   renderContent();
 }
