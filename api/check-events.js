@@ -19,6 +19,7 @@
  *      it stops anyone else from hitting this endpoint.
  *   2. Add this Firestore rule so the watcher can remember what it has seen:
  *        match /watcher-state/{docId} { allow read, write: if true; }
+ *        match /ce-events/{docId} { allow read, write: if true; }
  *
  * FIRST RUN records the current state silently — it will not announce the
  * entire existing backlog. Announcements begin from the next change onward.
@@ -54,6 +55,13 @@ const SOURCES = [
     mode: 'page',
     url: 'https://www.ncihc.org/upcoming-live-events',
     link: 'https://www.ncihc.org/upcoming-live-events'
+  },
+  {
+    id: 'ccc',
+    name: 'Cross-Cultural Communications',
+    mode: 'page',
+    url: 'https://cultureandlanguage.net/training/',
+    link: 'https://cultureandlanguage.net/training/'
   }
 ];
 
@@ -87,15 +95,21 @@ async function writeState(id, state) {
   if (!res.ok) throw new Error(`state write failed: ${res.status}`);
 }
 
-async function announce(summary) {
+/* Findings go to their own collection, not the general activity log — mixing
+   "a teammate added a term" with "a new CHIA webinar" makes both easier to
+   miss. The app shows these in a dedicated Training & Events section. */
+async function announce(summary, source, link, title) {
   const body = {
     fields: {
       summary: { stringValue: summary },
+      source:  { stringValue: source || '' },
+      link:    { stringValue: link || '' },
+      title:   { stringValue: title || '' },
       author:  { stringValue: 'Events watcher' },
       timestamp: { integerValue: String(Date.now()) }
     }
   };
-  const res = await fetch(`${FS}/activity-log?key=${FIREBASE_KEY}`, {
+  const res = await fetch(`${FS}/ce-events?key=${FIREBASE_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -177,10 +191,10 @@ export default async function handler(req, res) {
 
         if (!firstRun) {
           for (const item of fresh.slice(0, MAX_ANNOUNCE_PER_SOURCE)) {
-            await announce(`posted a new ${src.name} event: "${item.title}"`);
+            await announce(`New ${src.name} event`, src.name, item.link || src.link, item.title);
           }
           if (fresh.length > MAX_ANNOUNCE_PER_SOURCE) {
-            await announce(`posted ${fresh.length - MAX_ANNOUNCE_PER_SOURCE} more ${src.name} events \u2014 see ${src.link}`);
+            await announce(`${fresh.length - MAX_ANNOUNCE_PER_SOURCE} more new events`, src.name, src.link, `${fresh.length - MAX_ANNOUNCE_PER_SOURCE} additional ${src.name} events posted`);
           }
         }
         await writeState(src.id, {
@@ -193,7 +207,7 @@ export default async function handler(req, res) {
         const hash = fingerprintPage(body);
         const changed = !firstRun && prior.hash && prior.hash !== hash;
         if (changed) {
-          await announce(`\u2014 ${src.name}'s events page has been updated. Take a look: ${src.link}`);
+          await announce(`${src.name} page updated`, src.name, src.link, `${src.name}'s events page has changed \u2014 worth a look`);
         }
         await writeState(src.id, { hash, seen: [] });
         report.push({ source: src.id, status: firstRun ? 'seeded' : (changed ? 'changed' : 'unchanged') });
