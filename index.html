@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+<script>
+  // Applied here, before any CSS renders, so the page never flashes light
+  // before switching to a saved dark preference.
+  try{
+    if(localStorage.getItem('ih_theme') === 'dark'){
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }catch(e){}
+</script>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -51,6 +60,29 @@
     --sh-2:0 1px 2px rgba(21,28,44,0.04), 0 8px 20px -8px rgba(21,28,44,0.14);
     --sh-3:0 8px 16px rgba(21,28,44,0.08), 0 28px 60px -12px rgba(21,28,44,0.22);
     --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  /* Dark theme — same navy/cyan brand identity, inverted surfaces. Accent
+     colors stay mostly as-is since they already read fine on a dark ground;
+     only the base surface/text/border/shadow variables change. */
+  html[data-theme="dark"]{
+    --bg:#0E1420;
+    --bg-hi:#141B29;
+    --paper:#1A2233;
+    --ink:#EBEFF7;
+    --ink-soft:#AEB7C9;
+    --ink-faint:#707C93;
+    --line:#2B354A;
+    --line-soft:#232C3E;
+    --accent:#4C9FE0;
+    --accent-2:#6BB4EA;
+    --accent-soft:#1B3350;
+    --navy:#7C93E8;
+    --cyan:#4FD8F5;
+    --danger:#E17B8C;
+    --danger-soft:#3A2029;
+    --sh-1:0 1px 2px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.2);
+    --sh-2:0 1px 2px rgba(0,0,0,0.3), 0 8px 20px -8px rgba(0,0,0,0.5);
+    --sh-3:0 8px 16px rgba(0,0,0,0.35), 0 28px 60px -12px rgba(0,0,0,0.6);
   }
   *{box-sizing:border-box;}
   ::selection{background:var(--accent-soft); color:var(--ink);}
@@ -200,6 +232,7 @@
     transition:background .16s var(--ease), color .16s var(--ease);
   }
   .tab:hover{ background:rgba(255,255,255,0.7); color:var(--ink); }
+  .tab:active{ background:rgba(255,255,255,0.9); transition-duration:.08s; }
   .tab.active{
     background:var(--paper); font-weight:600; color:var(--ink);
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
@@ -385,9 +418,19 @@
     padding:6px 6px 16px 6px; scroll-behavior:smooth;
   }
   .chat-empty{ margin:auto; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.6; }
-  .chat-bubble-row{ display:flex; flex-direction:column; max-width:66%; }
-  .chat-bubble-row.me{ align-self:flex-end; align-items:flex-end; }
-  .chat-bubble-row.them{ align-self:flex-start; align-items:flex-start; }
+  .chat-bubble-row{ display:flex; align-items:flex-end; gap:8px; max-width:76%; }
+  .chat-bubble-row.me{ align-self:flex-end; flex-direction:row-reverse; }
+  .chat-bubble-row.them{ align-self:flex-start; }
+  .chat-bubble-col{ display:flex; flex-direction:column; min-width:0; }
+  .chat-bubble-row.me .chat-bubble-col{ align-items:flex-end; }
+  .chat-bubble-row.them .chat-bubble-col{ align-items:flex-start; }
+  .chat-avatar{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--sans); font-weight:600; font-size:10.5px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);
+    margin-bottom:20px; /* roughly aligns with the bubble, not the timestamp row below it */
+  }
   .chat-author{ font-family:var(--sans); font-size:10.5px; font-weight:600; color:var(--ink-faint); margin:0 4px 3px 4px; }
   .chat-bubble{ padding:10px 14px; border-radius:16px; font-size:13.5px; line-height:1.55; word-break:break-word; }
   .chat-bubble-row.me .chat-bubble{
@@ -581,6 +624,23 @@
     body.kb-open .name-fab{ display:none; }
   }
 
+  .theme-fab{ display:none; }
+  @media (max-width:760px){
+    /* Top-right — the other two floating buttons already own both bottom
+       corners, and this one's used far less often than either. */
+    .theme-fab{
+      display:flex; position:fixed; right:16px; top:calc(16px + env(safe-area-inset-top, 0px));
+      width:42px; height:42px; border-radius:50%; border:none; cursor:pointer;
+      background:var(--paper); color:var(--ink-soft);
+      align-items:center; justify-content:center;
+      box-shadow:var(--sh-2), inset 0 0 0 1px var(--line);
+      z-index:60; transition:transform .15s var(--ease);
+    }
+    .theme-fab:active{ transform:scale(0.9) rotate(-15deg); }
+    .theme-fab svg{ width:18px; height:18px; }
+    body.kb-open .theme-fab{ display:none; }
+  }
+
 
   /* Same pill shape and gradient as .home-fab, but sitting inline inside the
      greeting card rather than fixed to the viewport — a shortcut straight
@@ -744,12 +804,13 @@
     transition:box-shadow .22s var(--ease), transform .22s var(--ease);
     animation:cardIn .3s var(--ease) both;
   }
-  /* Colored accent bar that sweeps down the left edge on hover, tinted
-     to whichever domain the card belongs to (set inline as --card-accent). */
+  /* Colored accent bar tinted to whichever domain the card belongs to (set
+     inline as --card-accent) — visible at rest so a card reads as "which
+     domain" at a glance, and fills in fully on hover/focus. */
   .card::before{
     content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
     background:var(--card-accent, var(--accent));
-    transform:scaleY(0); transform-origin:top;
+    transform:scaleY(0.34); transform-origin:top;
     transition:transform .28s var(--ease);
   }
   .card:hover::before{ transform:scaleY(1); }
@@ -757,6 +818,9 @@
     box-shadow:var(--sh-2), inset 0 0 0 1px var(--line);
     transform:translateY(-3px);
   }
+  /* Touch devices don't get :hover, so a press state matters more there than
+     the lift above — a quick, tactile scale-down confirms the tap landed. */
+  .card:active{ transform:scale(0.985); transition-duration:.08s; }
   .card-top{ display:flex; align-items:center; justify-content:space-between; padding-right:82px; }
   .card .chart-id{
     font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); letter-spacing:.06em;
@@ -770,11 +834,11 @@
   .card:hover .tag{ transform:translateX(2px); }
   .card .tag::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
   .card .term-en{
-    font-family:var(--sans); font-weight:600; font-size:15.5px; margin:13px 0 4px 0; line-height:1.4; letter-spacing:-.003em;
-    display:flex; align-items:flex-start; gap:7px;
+    font-family:var(--sans); font-weight:700; font-size:17px; margin:13px 0 3px 0; line-height:1.35; letter-spacing:-.008em;
+    display:flex; align-items:flex-start; gap:7px; color:var(--ink);
   }
   .card .term-es{
-    font-family:var(--serif); font-style:italic; font-weight:400; color:var(--accent); font-size:13.5px; margin:0 0 10px 0;
+    font-family:var(--serif); font-style:italic; font-weight:500; color:var(--card-accent, var(--accent)); font-size:14px; margin:0 0 12px 0;
     display:flex; align-items:flex-start; gap:7px;
   }
   /* Small copy buttons that appear on hover — lets an interpreter grab a
@@ -790,7 +854,10 @@
   .copy-btn:active{ transform:scale(0.88); }
   .copy-btn.copied{ color:var(--accent); opacity:1; }
   .copy-btn svg{ width:12px; height:12px; display:block; }
-  .card .def{font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0;}
+  .card .def{
+    font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0; padding-top:11px;
+    border-top:1px solid var(--line-soft);
+  }
   .card .links{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
   .link-pill{
     display:inline-flex; align-items:center; gap:5px; font-family:var(--sans); font-size:11.5px; font-weight:600;
@@ -826,11 +893,16 @@
     text-align:center; padding:70px 20px; color:var(--ink-faint);
   }
   .empty .glyph{
-    font-family:var(--serif); font-size:15px; margin:0 auto 14px auto; width:44px; height:44px; border-radius:50%;
-    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line);
-    display:flex; align-items:center; justify-content:center; color:var(--ink-soft);
+    font-family:var(--serif); font-size:15px; margin:0 auto 16px auto; width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(140deg, var(--accent-soft), var(--paper)); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line);
+    display:flex; align-items:center; justify-content:center; color:var(--accent);
+    animation:emptyGlyphIn .4s var(--ease) both;
   }
-  .empty .glyph svg{ width:18px; height:18px; }
+  .empty .glyph svg{ width:22px; height:22px; }
+  @keyframes emptyGlyphIn{
+    from{ opacity:0; transform:scale(0.8); }
+    to{ opacity:1; transform:scale(1); }
+  }
 
   /* ---------- Modal ---------- */
   @keyframes overlayIn{ from{opacity:0;} to{opacity:1;} }
@@ -1113,6 +1185,7 @@
     font-family:var(--sans); transition:background .12s var(--ease);
   }
   .gs-item:hover, .gs-item.active{ background:var(--accent-soft); }
+  .gs-item:active{ background:var(--accent-soft); transform:scale(0.99); }
   .gs-ico{
     width:28px; height:28px; border-radius:8px; flex-shrink:0;
     display:flex; align-items:center; justify-content:center;
@@ -3678,6 +3751,22 @@ function showToast(msg){
 // can produce a two-tone gradient (matching the bold icon style already
 // used for Training & Events, Translate, and the rest of the tools list)
 // without storing a second color per domain.
+// Deterministic per-person color for chat/initials avatars — the same name
+// always lands on the same color, so people become visually recognizable
+// across messages without needing real photos.
+function nameToColor(name){
+  const str = (name || '?').trim() || '?';
+  let hash = 0;
+  for(let i=0; i<str.length; i++){ hash = (hash * 31 + str.charCodeAt(i)) | 0; }
+  return DOMAIN_COLORS[Math.abs(hash) % DOMAIN_COLORS.length];
+}
+
+function initialsOf(name){
+  const trimmed = (name || '').trim();
+  if(!trimmed) return '?';
+  return trimmed.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+}
+
 function darkenHex(hex, pct){
   const n = hex.replace('#','');
   const r = parseInt(n.substring(0,2),16), g = parseInt(n.substring(2,4),16), b = parseInt(n.substring(4,6),16);
@@ -3752,6 +3841,8 @@ const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.2 4.2L6 6M18 18L19.8 19.8M2.5 12H5M19 12H21.5M4.2 19.8L6 18M18 6L19.8 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 
 const DOMAIN_ICONS = {
   dna: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3C7 6 17 6 17 9C17 12 7 12 7 15C7 18 17 18 17 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 5H16M8 19H16M8 12H16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
@@ -3929,6 +4020,9 @@ function render(){
       </div>` : ''}
       <div id="content" class="content-fade"></div>
     </div>
+    <button class="theme-fab" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+      ${document.documentElement.getAttribute('data-theme') === 'dark' ? ICON_SUN : ICON_MOON}
+    </button>
     <button class="name-fab ${activeCategory==='chat' ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
       ${ICON_PERSON}
     </button>
@@ -4116,6 +4210,18 @@ function renderContent(){
   }
 
   content.innerHTML = html;
+}
+
+function toggleTheme(){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if(isDark){
+    document.documentElement.removeAttribute('data-theme');
+    try{ localStorage.setItem('ih_theme', 'light'); }catch(e){}
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    try{ localStorage.setItem('ih_theme', 'dark'); }catch(e){}
+  }
+  render(); // the button's own icon needs to flip too
 }
 
 function toggleDomainsCollapsed(){
@@ -4683,7 +4789,8 @@ function renderProviders(q){
   let html = `<div class="section-head"><h2>Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
   html += `<div class="grid">`;
   list.forEach((p, cardIdx)=>{
-    const initials = (p.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const initials = initialsOf(p.name);
+    const avatarColor = nameToColor(p.name);
     const phoneDigits = (p.phone||'').replace(/[^0-9+]/g,'');
     const delay = Math.min(cardIdx * 0.03, 0.3);
     html += `
@@ -4695,7 +4802,7 @@ function renderProviders(q){
         <div class="provider-top">
           ${p.photo
             ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(p.photo)}, ${JSON.stringify(p.name||'Provider photo')}`.replace(/"/g,'&quot;')})">`
-            : `<div class="provider-avatar provider-avatar-fallback">${escapeHtml(initials||'?')}</div>`}
+            : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
           <div>
             <div class="provider-name">${escapeHtml(p.name)}</div>
             ${p.role ? `<span class="tag provider-role-tag">${escapeHtml(p.role)}</span>` : ''}
@@ -4739,14 +4846,19 @@ function renderChatMessages(){
   container.innerHTML = CHAT_MESSAGES.map(m=>{
     const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
     const time = m.timestamp ? relativeTime(m.timestamp) : '';
+    const avatarColor = nameToColor(m.author || 'Teammate');
+    const avatar = !mine ? `<div class="chat-avatar" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initialsOf(m.author || 'Teammate'))}</div>` : '';
     return `
       <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}">
-        ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
-        ${m.text ? `<div class="chat-bubble">${escapeHtml(m.text)}</div>` : ''}
-        ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
-        <div class="chat-meta-row">
-          <span class="chat-time" data-ts="${m.timestamp||''}" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${time}</span>
-          <button class="chat-delete" title="Delete this message" onclick="deleteChatMessage('${m.id}')">Delete</button>
+        ${avatar}
+        <div class="chat-bubble-col">
+          ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
+          ${m.text ? `<div class="chat-bubble">${escapeHtml(m.text)}</div>` : ''}
+          ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
+          <div class="chat-meta-row">
+            <span class="chat-time" data-ts="${m.timestamp||''}" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${time}</span>
+            <button class="chat-delete" title="Delete this message" onclick="deleteChatMessage('${m.id}')">Delete</button>
+          </div>
         </div>
       </div>
     `;
