@@ -2893,7 +2893,13 @@ function removeNoteAttachment(){
 
 /* ============ Utilities ============ */
 function whoAmI(){
-  return document.getElementById('whoInput') ? document.getElementById('whoInput').value.trim() : '';
+  // The sidebar's "Attribute my edits as" field doesn't exist at all while
+  // a focused view (like Chat) has hidden the sidebar — window.__lastWho is
+  // kept in sync by both that field and joinChat(), so it's the fallback
+  // that keeps a chosen name working everywhere, sidebar visible or not.
+  const el = document.getElementById('whoInput');
+  if(el && el.value.trim()) return el.value.trim();
+  return (window.__lastWho || '').trim();
 }
 function timeAgoLabel(){
   const d = new Date();
