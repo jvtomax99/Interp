@@ -632,13 +632,24 @@
     content:""; position:absolute; left:20px; right:20px; top:0; height:1px;
     background:linear-gradient(90deg, var(--line), transparent);
   }
-  .whoami{font-size:10.5px; color:var(--ink-faint); margin:14px 0 7px 0; font-family:var(--mono); letter-spacing:.05em; text-transform:uppercase;}
-  .whoami-input{
-    width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:var(--r-sm);
-    font-family:var(--sans); font-size:12.5px; background:var(--paper); color:var(--ink);
-    box-shadow:var(--sh-1); transition:box-shadow .15s var(--ease);
+  .whoami{font-size:10.5px; color:var(--ink-faint); margin:14px 0 8px 0; font-family:var(--mono); letter-spacing:.05em; text-transform:uppercase;}
+  /* The full gradient fill, not just an icon badge — same treatment as the
+     "Recent activity" button in the greeting card. */
+  .whoami-pill{
+    display:flex; align-items:center; gap:9px; padding:10px 16px 10px 13px; border-radius:30px;
+    background:linear-gradient(145deg, #0079BD, #252E6D);
+    box-shadow:0 6px 16px -6px rgba(37,46,109,0.5), inset 0 1px 0 rgba(255,255,255,0.28);
+    transition:transform .15s var(--ease);
   }
-  .whoami-input:focus{outline:none; box-shadow:0 0 0 3px var(--accent-soft), var(--sh-1);}
+  .whoami-pill:focus-within{ transform:translateY(-1px); }
+  .whoami-icon{ color:#fff; display:flex; align-items:center; flex-shrink:0; }
+  .whoami-icon svg{ width:17px; height:17px; }
+  .whoami-input{
+    flex:1; min-width:0; border:none; background:transparent; padding:2px 0;
+    font-family:var(--sans); font-size:13px; font-weight:600; color:#fff;
+  }
+  .whoami-input::placeholder{ color:rgba(255,255,255,0.78); }
+  .whoami-input:focus{ outline:none; }
 
   /* ---------- Main ---------- */
   .main{flex:1; padding:40px 48px 80px 48px; max-width:1060px;}
@@ -3903,7 +3914,10 @@ function render(){
       ${domainsSection}
       <div class="sidebar-footer">
         <div class="whoami">Attribute my edits as</div>
-        <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
+        <div class="whoami-pill">
+          <span class="whoami-icon">${ICON_PERSON}</span>
+          <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
+        </div>
       </div>
     </div>
     `}
