@@ -556,6 +556,9 @@
     }
     .home-fab:active{ transform:scale(0.94); }
     .home-fab svg{ width:19px; height:19px; flex-shrink:0; }
+    /* Chat's own compose bar and "Join chat" button sit at the bottom of
+       the panel too — this clears them instead of stacking on top. */
+    .home-fab-raised{ bottom:calc(88px + env(safe-area-inset-bottom, 0px)); }
   }
 
   /* Same pill shape and gradient as .home-fab, but sitting inline inside the
@@ -3886,7 +3889,7 @@ function render(){
       <div id="content" class="content-fade"></div>
     </div>
     ${activeCategory !== 'home' ? `
-    <button class="home-fab" onclick="goHome()" title="Home" aria-label="Go home">
+    <button class="home-fab ${activeCategory==='chat' ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
       ${ICON_HOME}<span>Home</span>
     </button>` : ''}
   `;
