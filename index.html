@@ -514,6 +514,49 @@
   .chat-attach-preview{ margin-bottom:10px; }
 
   .nav-divider{ height:1px; margin:10px 20px; background:linear-gradient(90deg, var(--line), transparent); }
+
+  .nav-section-label{
+    display:flex; align-items:center; gap:7px; cursor:pointer; user-select:none;
+    font-family:var(--mono); font-size:10px; letter-spacing:.11em; text-transform:uppercase;
+    color:var(--ink-faint); padding:8px 20px 6px 20px; transition:color .15s var(--ease);
+  }
+  .nav-section-label:hover{ color:var(--ink-soft); }
+  .nav-section-label span:first-child{ flex:1; }
+  .nav-section-count{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); }
+  .nav-section-chevron{ display:flex; width:12px; height:12px; transition:transform .2s var(--ease); }
+  .nav-section-chevron svg{ width:100%; height:100%; }
+  .nav-section-chevron.is-collapsed{ transform:rotate(-90deg); }
+
+  /* Sidebar tiles reuse the exact Home dashboard tile look, just tightened
+     up for the sidebar's narrower column (full-width on mobile, 278px on
+     desktop, where two Home-sized tiles wouldn't fit side by side). */
+  .nav-tile-grid{
+    grid-template-columns:repeat(auto-fill, minmax(122px, 1fr));
+    padding:0 14px 14px 14px; gap:10px;
+  }
+  .nav-tile-grid .home-tile{ min-height:112px; padding:14px 12px; border-radius:14px; gap:8px; }
+  .nav-tile-grid .home-tile-icon{ width:32px; height:32px; border-radius:9px; }
+  .nav-tile-grid .home-tile-icon svg{ width:16px; height:16px; }
+  .nav-tile-grid .home-tile-name{ font-size:12.5px; }
+  .nav-tile-grid .home-tile-count{ font-size:10px; }
+
+  .home-fab{ display:none; }
+  @media (max-width:760px){
+    /* On mobile the sidebar sits below all the page content, so Home is
+       often a long scroll away once you've jumped into a domain — this
+       stays on screen no matter how far down you've scrolled. */
+    .home-fab{
+      display:flex; position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+      border:none; cursor:pointer; padding:12px 18px 12px 14px; border-radius:30px;
+      background:linear-gradient(145deg, #0079BD, #252E6D); color:#fff;
+      align-items:center; gap:8px;
+      box-shadow:0 8px 20px -6px rgba(37,46,109,0.55), inset 0 1px 0 rgba(255,255,255,0.28);
+      z-index:60; transition:transform .15s var(--ease);
+      font-family:var(--sans); font-size:13.5px; font-weight:600;
+    }
+    .home-fab:active{ transform:scale(0.94); }
+    .home-fab svg{ width:19px; height:19px; flex-shrink:0; }
+  }
   .tab .link-flag{
     width:18px; height:18px; border-radius:5px; flex-shrink:0; transform:none;
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
@@ -615,7 +658,10 @@
     /* The base rule sets top:316px for the sticky desktop sidebar. On mobile
        the sidebar becomes position:relative, where that offset would push the
        whole nav down and leave a dead gap — so it must be reset to auto. */
-    .sidebar{width:100%; height:auto; position:relative; top:auto;}
+    .sidebar{width:100%; height:auto; position:relative; top:auto; order:2;}
+    /* Content before navigation: people should land on the Home dashboard
+       immediately, not scroll through the entire nav list to reach it. */
+    .main{order:1;}
     .app{flex-direction:column; min-height:0;}
     .main{padding:26px 20px;}
     .dir-row{flex-wrap:wrap;}
@@ -1040,9 +1086,27 @@
   .gs-trigger:hover{ border-color:var(--accent-2); color:var(--accent); background:var(--accent-soft); }
   .gs-trigger svg{ width:14px; height:14px; flex-shrink:0; }
   .gs-trigger .gs-hint{ margin-left:auto; }
+  .gs-trigger-mobile{ display:none; }
   @media (max-width:760px){
     .gs-overlay{ padding:6vh 12px 12px; }
     .gs-trigger .gs-hint{ display:none; }
+    /* Order 0 by default beats .main's order:1 and .sidebar's order:2, so
+       this copy of the search trigger lands above everything else — the
+       one thing worth reaching before scrolling past the dashboard. */
+    .gs-trigger-mobile{
+      display:flex; margin:14px 20px 0 20px; width:auto; background:var(--paper);
+      box-shadow:var(--sh-1); border-style:solid;
+    }
+    /* The sidebar's own copy would otherwise show up a second time further
+       down the page — one search box is enough. */
+    .sidebar > .gs-trigger{ display:none; }
+  }
+  .brand-mobile{ display:none; }
+  @media (max-width:760px){
+    /* Order -1 puts this ahead of the search bar's default order:0, so the
+       brand header is the very first thing on the page. */
+    .brand-mobile{ display:block; order:-1; padding:16px 20px 4px 20px; }
+    .sidebar > .brand{ display:none; }
   }
 
   /* ---------- Translate lookup ---------- */
@@ -1438,8 +1502,8 @@
 
 <div class="overlay" id="noteOverlay">
   <div class="modal">
-    <h3 id="noteModalTitle">Add note</h3>
-    <div class="field"><label>Note</label><textarea id="fNoteText" placeholder="Share a reminder, tip, or update with the team…" style="min-height:120px;"></textarea></div>
+    <h3 id="noteModalTitle">Add guide</h3>
+    <div class="field"><label>Guide</label><textarea id="fNoteText" placeholder="Share a reminder, tip, or update with the team…" style="min-height:120px;"></textarea></div>
     <div class="field">
       <label>Attachment (optional)</label>
       <div class="photo-field">
@@ -1450,7 +1514,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeNoteModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNote()">Save note</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save guide</button>
     </div>
   </div>
 </div>
@@ -1486,7 +1550,7 @@
   <div class="gs-panel">
     <div class="gs-inputrow">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input id="gsInput" type="text" placeholder="Search terms, providers, notes, chat, practice…"
+      <input id="gsInput" type="text" placeholder="Search terms, providers, guides, chat, practice…"
              oninput="renderGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off">
       <span class="gs-hint">ESC</span>
     </div>
@@ -2312,6 +2376,12 @@ const SEED_QUESTIONS = [
 /* ============ State ============ */
 let DATA = null;
 let activeCategory = 'home';
+// Remembered across visits (not just this session) so the sidebar looks the
+// way each person left it, rather than resetting every time the app opens.
+let domainsCollapsed = false;
+try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }catch(e){}
+let toolsCollapsed = false;
+try{ toolsCollapsed = localStorage.getItem('ih_toolsCollapsed') === '1'; }catch(e){}
 let searchQuery = '';
 let editingContext = null; // {categoryId, termIndex} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
@@ -3267,7 +3337,7 @@ function collectSearchMatches(q){
 
   NOTES.forEach(n=>{
     if(hit(n.text) || hit(n.author)){
-      out.push({ group:'Notes', icon:ICON_NOTE, color:'#BFA05E',
+      out.push({ group:'Guides', icon:ICON_NOTE, color:'#BFA05E',
         title:(n.text||'').slice(0,70) + ((n.text||'').length>70?'\u2026':''),
         sub:n.author ? 'by ' + n.author : '', target:'notes', rank:1 });
     }
@@ -3538,6 +3608,50 @@ function showToast(msg){
   clearTimeout(showToast._h);
   showToast._h = setTimeout(()=>t.classList.remove('show'), 2200);
 }
+// Darkens a hex color by a percentage, so a domain's single stored color
+// can produce a two-tone gradient (matching the bold icon style already
+// used for Training & Events, Translate, and the rest of the tools list)
+// without storing a second color per domain.
+function darkenHex(hex, pct){
+  const n = hex.replace('#','');
+  const r = parseInt(n.substring(0,2),16), g = parseInt(n.substring(2,4),16), b = parseInt(n.substring(4,6),16);
+  const f = 1 - (pct/100);
+  const clamp = v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0');
+  return `#${clamp(r*f)}${clamp(g*f)}${clamp(b*f)}`;
+}
+
+// Shared tile builders — used by both the Home dashboard and the sidebar,
+// so a domain or tool always looks the same wherever it's tapped from.
+function getDomainTiles(){
+  return DATA.categories.map(c=>({
+    id: c.id, name: c.name, color: c.color, icon: DOMAIN_ICONS[c.icon] || DOMAIN_ICONS.sparkle,
+    count: c.terms.length, label: c.terms.length===1 ? 'term' : 'terms'
+  }));
+}
+
+function getToolTiles(){
+  const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
+  return [
+    { id:'events',    name:'Training & Events',    color:'#35A97A', icon: ICON_CALENDAR, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
+    { id:'translate', name:'Translate',            color:'#2E8BD0', icon: ICON_GLOBE,   count: null, label: '' },
+    { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
+    { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
+    { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
+    { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
+    { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
+    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
+  ];
+}
+
+function tileHtml(t, i, onclickCall){
+  return `
+      <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
+        <span class="home-tile-icon">${t.icon}</span>
+        <span class="home-tile-name">${escapeHtml(t.name)}</span>
+        <span class="home-tile-count">${t.count===null ? '' : t.count + ' ' + t.label}</span>
+      </button>`;
+}
+
 function escapeHtml(s){
   return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -3571,6 +3685,7 @@ const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 const DOMAIN_ICONS = {
   dna: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3C7 6 17 6 17 9C17 12 7 12 7 15C7 18 17 18 17 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 5H16M8 19H16M8 12H16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
@@ -3612,20 +3727,16 @@ function render(){
      </button>
   `;
 
-  const sidebarTabs = [
-    `<button class="tab ${activeCategory==='all'?'active':''}" onclick="setCategory('all')">
-       <span class="flag icon-flag" style="background:#63717B22; color:#63717B;">${ICON_LAYERS}</span>
-       <span class="name">All domains</span>
-       <span class="count">${totalTerms}</span>
-     </button>`
-  ].concat(DATA.categories.map(c=>`
-     <button class="tab ${activeCategory===c.id?'active':''}" onclick="setCategory('${c.id}')">
-       <span class="flag icon-flag" style="background:${c.color}22; color:${c.color};">${DOMAIN_ICONS[c.icon] || DOMAIN_ICONS.sparkle}</span>
-       <span class="name">${escapeHtml(c.name)}</span>
-       <span class="count">${c.terms.length}</span>
-       ${c.terms.length===0 ? `<span class="tab-delete" title="Delete this empty domain" onclick="event.stopPropagation(); deleteDomain('${c.id}')">✕</span>` : ''}
-     </button>
-  `)).join('');
+  // Domain tiles jump-scroll into the full glossary rather than filtering it
+  // down to one domain — tapping "Genetics" should show you where Genetics
+  // sits among everything else, not hide the rest of the team's work.
+  // Professional Resources reads more like a reference tool than a clinical
+  // domain, so it's grouped with Tools below — it still jumps to its real
+  // glossary section rather than switching to a separate app screen.
+  const allDomainTiles = getDomainTiles();
+  const resourcesTile = allDomainTiles.find(t=>t.id==='resources');
+  const domainTilesForGrid = allDomainTiles.filter(t=>t.id!=='resources');
+  const domainTilesHtml = domainTilesForGrid.map((t,i)=>tileHtml(t, i, `jumpToDomain('${t.id}')`)).join('');
 
   const addDomainBtn = `
      <button class="tab add-domain-btn" onclick="openAddDomainModal()">
@@ -3634,48 +3745,33 @@ function render(){
      </button>
   `;
 
-  const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
+  // "All domains" plus a collapse toggle so the (potentially long) grid of
+  // individual domains can be tucked away without losing the entry point
+  // into the full glossary.
+  const domainsSection = `
+     <div class="nav-section-label" onclick="toggleDomainsCollapsed()" role="button" tabindex="0">
+       <span>Terminology domains</span>
+       <span class="nav-section-count">${domainTilesForGrid.length}</span>
+       <span class="nav-section-chevron ${domainsCollapsed ? 'is-collapsed' : ''}">${ICON_CHEVRON_DOWN}</span>
+     </div>
+     <button class="tab ${activeCategory==='all'?'active':''}" onclick="setCategory('all')">
+       <span class="flag link-flag" style="background:linear-gradient(140deg, #63717B, #454F57);">${ICON_LAYERS}</span>
+       <span class="name">All domains</span>
+       <span class="count">${totalTerms}</span>
+     </button>
+     ${domainsCollapsed ? '' : `<div class="home-grid nav-tile-grid">${domainTilesHtml}</div>${addDomainBtn}`}
+  `;
+
+  const toolTileButtons = getToolTiles().map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`));
+  if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `jumpToDomain('${resourcesTile.id}')`));
+
   const extrasTabs = `
-     <div class="nav-divider"></div>
-     <button class="tab ${activeCategory==='events'?'active':''}" onclick="setCategory('events')">
-       <span class="flag link-flag" style="background:linear-gradient(140deg,#35A97A,#1E7F5C);">${ICON_CALENDAR}</span>
-       <span class="name">Training &amp; Events</span>
-       <span class="count" id="ceBadge">${CE_EVENTS.length}</span>
-     </button>
-     <button class="tab ${activeCategory==='translate'?'active':''}" onclick="setCategory('translate')">
-       <span class="flag link-flag" style="background:linear-gradient(140deg,#2E8BD0,#0F5FA6);">${ICON_GLOBE}</span>
-       <span class="name">Translate</span>
-     </button>
-     <button class="tab ${activeCategory==='practice'?'active':''}" onclick="setCategory('practice')">
-       <span class="flag link-flag" style="background:linear-gradient(140deg,#0079BD,#252E6D);">${ICON_EXAM}</span>
-       <span class="name">CoreCHI Practice</span>
-       <span class="count">${SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length}</span>
-     </button>
-     <button class="tab ${activeCategory==='updates'?'active':''}" onclick="setCategory('updates')">
-       <span class="flag link-flag">${ICON_BELL}</span>
-       <span class="name">Recent Updates</span>
-       <span class="count" id="activityBadge">${ACTIVITY.length}</span>
-     </button>
-     <button class="tab ${activeCategory==='chat'?'active':''}" onclick="setCategory('chat')">
-       <span class="flag link-flag">${ICON_CHAT}</span>
-       <span class="name">Team Chat</span>
-       <span class="count" id="chatBadge">${CHAT_MESSAGES.length}</span>
-     </button>
-     <button class="tab ${activeCategory==='notes'?'active':''}" onclick="setCategory('notes')">
-       <span class="flag link-flag">${ICON_NOTE}</span>
-       <span class="name">Notes</span>
-       <span class="count">${NOTES.length}</span>
-     </button>
-     <button class="tab ${activeCategory==='providers'?'active':''}" onclick="setCategory('providers')">
-       <span class="flag link-flag">${ICON_PERSON}</span>
-       <span class="name">Healthcare Providers</span>
-       <span class="count">${PROVIDERS.length}</span>
-     </button>
-     <button class="tab ${activeCategory==='directory'?'active':''}" onclick="setCategory('directory')">
-       <span class="flag link-flag">${ICON_CHAIN}</span>
-       <span class="name">Link Directory</span>
-       <span class="count">${totalLinks}</span>
-     </button>
+     <div class="nav-section-label" onclick="toggleToolsCollapsed()" role="button" tabindex="0">
+       <span>Tools</span>
+       <span class="nav-section-count">${toolTileButtons.length}</span>
+       <span class="nav-section-chevron ${toolsCollapsed ? 'is-collapsed' : ''}">${ICON_CHEVRON_DOWN}</span>
+     </div>
+     ${toolsCollapsed ? '' : `<div class="home-grid nav-tile-grid">${toolTileButtons.join('')}</div>`}
   `;
 
   let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`;
@@ -3689,8 +3785,8 @@ function render(){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
     searchPlaceholder = 'Search links…';
   } else if(activeCategory === 'notes'){
-    addBtnHtml = `<button class="btn btn-primary" onclick="openAddNoteModal()">+ Add note</button>`;
-    searchPlaceholder = 'Search notes…';
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddNoteModal()">+ Add guide</button>`;
+    searchPlaceholder = 'Search guides…';
   } else if(activeCategory === 'chat'){
     showTopbar = false;
     showStatStrip = false;
@@ -3709,6 +3805,20 @@ function render(){
   }
 
   app.innerHTML = `
+    <div class="brand brand-mobile">
+      <div class="brand-mark">
+        <div class="brand-glyph">${ICON_GLYPH}</div>
+        <div class="brand-wordmark">
+          <div class="brand-title">Interpreter Hub</div>
+          <div class="brand-sub">HUMC Language Services</div>
+        </div>
+      </div>
+      <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
+    </div>
+    <button class="gs-trigger gs-trigger-mobile" onclick="openGlobalSearch()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Search everything</span>
+    </button>
     <div class="sidebar">
       <div class="brand">
         <div class="brand-mark">
@@ -3718,7 +3828,6 @@ function render(){
             <div class="brand-sub">HUMC Language Services</div>
           </div>
         </div>
-        <div class="brand-meta"><span class="brand-dot"></span><span>${totalTerms} terms across ${DATA.categories.length} domains</span></div>
         <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
       </div>
       <button class="gs-trigger" onclick="openGlobalSearch()">
@@ -3727,9 +3836,9 @@ function render(){
         <span class="gs-hint">⌘K</span>
       </button>
       ${homeTab}
-      ${sidebarTabs}
-      ${addDomainBtn}
       ${extrasTabs}
+      <div class="nav-divider"></div>
+      ${domainsSection}
       <div class="sidebar-footer">
         <div class="whoami">Attribute my edits as</div>
         <input class="whoami-input" id="whoInput" type="text" placeholder="Your name (optional)">
@@ -3750,6 +3859,10 @@ function render(){
       </div>` : ''}
       <div id="content" class="content-fade"></div>
     </div>
+    ${activeCategory !== 'home' ? `
+    <button class="home-fab" onclick="goHome()" title="Home" aria-label="Go home">
+      ${ICON_HOME}<span>Home</span>
+    </button>` : ''}
   `;
 
   const searchInputEl = document.getElementById('searchInput');
@@ -3932,12 +4045,33 @@ function renderContent(){
   content.innerHTML = html;
 }
 
+function toggleDomainsCollapsed(){
+  domainsCollapsed = !domainsCollapsed;
+  try{ localStorage.setItem('ih_domainsCollapsed', domainsCollapsed ? '1' : '0'); }catch(e){}
+  render();
+}
+
+function toggleToolsCollapsed(){
+  toolsCollapsed = !toolsCollapsed;
+  try{ localStorage.setItem('ih_toolsCollapsed', toolsCollapsed ? '1' : '0'); }catch(e){}
+  render();
+}
+
 function setCategory(id){
   activeCategory = id;
   if(id === 'chat'){ lastSeenChatCount = CHAT_MESSAGES.length; }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
+}
+
+// The floating Home button needs to do two things a plain setCategory('home')
+// wouldn't: switching screens doesn't reset scroll position, so without this
+// someone who jumped deep into a domain would land on Home already scrolled
+// halfway down the page.
+function goHome(){
+  setCategory('home');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Switches to the full "All domains" glossary and smooth-scrolls straight to
@@ -4395,40 +4529,12 @@ function renderHome(){
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const name = whoAmI();
-  const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
-  const totalTerms = DATA.categories.reduce((n,c)=>n+c.terms.length,0);
-
-  const domainTiles = DATA.categories.map(c=>({
-    id: c.id, name: c.name, color: c.color, icon: DOMAIN_ICONS[c.icon] || DOMAIN_ICONS.sparkle,
-    count: c.terms.length, label: c.terms.length===1 ? 'term' : 'terms'
-  }));
-
-  const toolTiles = [
-    { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
-    { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
-    { id:'notes',     name:'Notes',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'note':'notes' },
-    { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
-    { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
-    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
-  ];
-
-  const tileHtml = (t,i,onclickCall)=>`
-      <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${(i*0.03).toFixed(2)}s;" onclick="${onclickCall}">
-        <span class="home-tile-icon">${t.icon}</span>
-        <span class="home-tile-name">${escapeHtml(t.name)}</span>
-        <span class="home-tile-count">${t.count} ${t.label}</span>
-      </button>`;
 
   let html = `
     <div class="home-greeting">
       <div class="home-greeting-text">
         <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span><span class="greet-static">${name ? ', ' + escapeHtml(name) : ''}</span></h2>
-        <p>${greeting}. Jump into any section below, or pick up where your team left off.</p>
-      </div>
-      <div class="home-greeting-stats">
-        <div class="home-greeting-stat"><b data-countup="${totalTerms}">0</b><span>Terms</span></div>
-        <div class="home-greeting-stat"><b data-countup="${DATA.categories.length}">0</b><span>Domains</span></div>
-        <div class="home-greeting-stat"><b data-countup="${PROVIDERS.length}">0</b><span>Providers</span></div>
+        <p>${greeting}. Everything's in the list below — jump to a domain or tool, or pick up where your team left off.</p>
       </div>
     </div>
     ${ECG_STRIP}
@@ -4442,13 +4548,6 @@ function renderHome(){
     });
     html += `</div>`;
   }
-
-  // Grouping domains separately from tools gives the dashboard a hierarchy;
-  // previously eleven unrelated tiles sat in one undifferentiated grid.
-  html += `<div class="home-section-label">Terminology domains</div>`;
-  html += `<div class="home-grid">${domainTiles.map((t,i)=>tileHtml(t,i,`jumpToDomain('${t.id}')`)).join('')}</div>`;
-  html += `<div class="home-section-label">Tools</div>`;
-  html += `<div class="home-grid">${toolTiles.map((t,i)=>tileHtml(t,i+domainTiles.length,`setCategory('${t.id}')`)).join('')}</div>`;
 
   return html;
 }
@@ -4625,12 +4724,12 @@ function renderNotes(q){
 
   if(list.length===0){
     const msg = NOTES.length===0
-      ? '📝 No notes yet.<br>Leave the first one for your team.'
-      : 'No notes match your search.';
+      ? '📝 No guides yet.<br>Leave the first one for your team.'
+      : 'No guides match your search.';
     return notice + `<div class="empty"><div class="glyph">${ICON_NOTE}</div>${msg}</div>`;
   }
 
-  let html = `<div class="section-head"><h2>Notes</h2><span class="sub">${list.length} note${list.length===1?'':'s'}</span></div>`;
+  let html = `<div class="section-head"><h2>Guides</h2><span class="sub">${list.length} guide${list.length===1?'':'s'}</span></div>`;
   html += notice;
   html += `<div class="grid">`;
   list.forEach((n, cardIdx)=>{
@@ -5035,7 +5134,7 @@ async function deleteProvider(id){
 function openAddNoteModal(){
   editingNoteId = null;
   pendingNoteAttachment = null;
-  document.getElementById('noteModalTitle').textContent = 'Add note';
+  document.getElementById('noteModalTitle').textContent = 'Add guide';
   document.getElementById('fNoteText').value = '';
   renderNoteAttachPreview();
   document.getElementById('noteOverlay').classList.add('show');
@@ -5047,7 +5146,7 @@ function openEditNoteModal(id){
   if(!n) return;
   editingNoteId = id;
   pendingNoteAttachment = n.attachment || null;
-  document.getElementById('noteModalTitle').textContent = 'Edit note';
+  document.getElementById('noteModalTitle').textContent = 'Edit guide';
   document.getElementById('fNoteText').value = n.text || '';
   renderNoteAttachPreview();
   document.getElementById('noteOverlay').classList.add('show');
@@ -5085,7 +5184,7 @@ async function saveNote(){
       NOTES.push({ id, ...record });
     }
     closeNoteModal();
-    logActivity(isNew ? 'left a note' : 'updated a note');
+    logActivity(isNew ? 'left a guide' : 'updated a guide');
     successBurst();
     showToast('Note saved.');
     render();
