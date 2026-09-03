@@ -562,6 +562,26 @@
     body.kb-open .home-fab{ display:none; }
   }
 
+  .name-fab{ display:none; }
+  @media (max-width:760px){
+    /* Bottom-left, mirroring Home's bottom-right — the sidebar's own name
+       field disappears along with the rest of the sidebar on focused
+       screens, so this is the one way to set it from anywhere. */
+    .name-fab{
+      display:flex; position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+      width:48px; height:48px; border-radius:50%; border:none; cursor:pointer;
+      background:var(--paper); color:var(--ink-soft);
+      align-items:center; justify-content:center;
+      box-shadow:var(--sh-2), inset 0 0 0 1px var(--line);
+      z-index:60; transition:transform .15s var(--ease);
+    }
+    .name-fab:active{ transform:scale(0.92); }
+    .name-fab svg{ width:19px; height:19px; }
+    .name-fab-raised{ bottom:calc(88px + env(safe-area-inset-bottom, 0px)); }
+    body.kb-open .name-fab{ display:none; }
+  }
+
+
   /* Same pill shape and gradient as .home-fab, but sitting inline inside the
      greeting card rather than fixed to the viewport — a shortcut straight
      into the full Recent Updates tool. */
@@ -1533,6 +1553,17 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeNoteModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveNote()">Save guide</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="nameOverlay">
+  <div class="modal">
+    <h3>Attribute my edits as</h3>
+    <div class="field"><label>Your name</label><input id="fMyName" type="text" placeholder="Your name (optional)" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveMyName();}"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeNameModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMyName()">Save</button>
     </div>
   </div>
 </div>
@@ -3891,6 +3922,9 @@ function render(){
       </div>` : ''}
       <div id="content" class="content-fade"></div>
     </div>
+    <button class="name-fab ${activeCategory==='chat' ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
+      ${ICON_PERSON}
+    </button>
     ${activeCategory !== 'home' ? `
     <button class="home-fab ${activeCategory==='chat' ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
       ${ICON_HOME}<span>Home</span>
@@ -4108,6 +4142,31 @@ function setCategory(id){
 function goHome(){
   setCategory('home');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Lets someone set or change their attribution name from any screen,
+// including the focused views where the sidebar (and its own name field)
+// is hidden. window.__lastWho is the single source of truth either way —
+// see whoAmI() — so this just needs to keep that, and the sidebar field
+// when it happens to be present, in sync.
+function openNameModal(){
+  const input = document.getElementById('fMyName');
+  input.value = whoAmI();
+  document.getElementById('nameOverlay').classList.add('show');
+  if(prefersAutoFocus()) input.focus();
+}
+
+function closeNameModal(){
+  document.getElementById('nameOverlay').classList.remove('show');
+}
+
+function saveMyName(){
+  const name = document.getElementById('fMyName').value.trim();
+  window.__lastWho = name;
+  const whoEl = document.getElementById('whoInput');
+  if(whoEl) whoEl.value = name;
+  closeNameModal();
+  showToast(name ? `Attributing edits as ${name}` : 'Attribution cleared');
 }
 
 /* ============ CoreCHI practice ============ */
