@@ -947,26 +947,32 @@
   }
 
   /* ---------- Training & Events ---------- */
+  /* Stacked rather than side-by-side: a long webinar title needs the full
+     width, and squeezing it beside a badge and timestamp made it unreadable
+     on a phone. */
   .ce-row{
-    display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-radius:12px;
+    display:flex; flex-direction:column; gap:7px; padding:14px 16px; border-radius:12px;
     background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
     margin-bottom:9px; transition:box-shadow .15s var(--ease);
   }
   .ce-row:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
   .ce-row:hover .activity-delete{ opacity:1; }
+  .ce-head{ display:flex; align-items:center; gap:9px; }
   .ce-src{
-    flex-shrink:0; font-family:var(--sans); font-size:10px; font-weight:700;
-    letter-spacing:.03em; text-transform:uppercase; color:#1E7F5C; background:#E7F5EE;
-    padding:4px 9px; border-radius:20px; margin-top:2px; max-width:150px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-family:var(--sans); font-size:9.5px; font-weight:700;
+    letter-spacing:.04em; text-transform:uppercase; color:#1E7F5C; background:#E7F5EE;
+    padding:4px 9px; border-radius:20px; min-width:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;
   }
-  .ce-body{ flex:1; min-width:0; }
-  .ce-title{ font-size:14px; font-weight:600; color:var(--ink); margin:0; line-height:1.4; }
-  .ce-notes{ font-size:12.5px; color:var(--ink-soft); margin:5px 0 0 0; line-height:1.55; }
-  @media (max-width:760px){
-    .ce-row{ flex-wrap:wrap; }
-    .ce-src{ max-width:100%; }
+  .ce-time{
+    font-family:var(--mono); font-size:10px; color:var(--ink-faint);
+    font-variant-numeric:tabular-nums; white-space:nowrap;
   }
+  .ce-head .activity-delete{ margin-left:auto; }
+  .ce-title{ font-size:14.5px; font-weight:600; color:var(--ink); margin:0; line-height:1.45; }
+  .ce-notes{ font-size:12.5px; color:var(--ink-soft); margin:0; line-height:1.55; }
+  .ce-foot{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px; }
+  .ce-by{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); }
 
   /* ---------- Global search ---------- */
   @keyframes gsIn{ from{ opacity:0; transform:translateY(-12px) scale(.985); } to{ opacity:1; transform:translateY(0) scale(1); } }
@@ -3431,17 +3437,17 @@ function renderEvents(){
     const src = ev.source || 'Added by the team';
     html += `
       <div class="ce-row">
-        <span class="ce-src">${escapeHtml(src)}</span>
-        <div class="ce-body">
-          <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
-          ${ev.notes ? `<p class="ce-notes">${escapeHtml(ev.notes)}</p>` : ''}
-          <div class="tr-actions">
-            ${ev.link ? `<a class="tr-mini" href="${escapeAttr(ev.link)}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open</a>` : ''}
-            ${ev.addedBy ? `<span class="source" style="align-self:center;">added by ${escapeHtml(ev.addedBy)}</span>` : ''}
-          </div>
+        <div class="ce-head">
+          <span class="ce-src">${escapeHtml(src)}</span>
+          <span class="ce-time" data-ts="${ev.timestamp||''}">${when}</span>
+          <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
         </div>
-        <span class="activity-time" data-ts="${ev.timestamp||''}">${when}</span>
-        <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
+        <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
+        ${ev.notes ? `<p class="ce-notes">${escapeHtml(ev.notes)}</p>` : ''}
+        ${(ev.link || ev.addedBy) ? `<div class="ce-foot">
+          ${ev.link ? `<a class="tr-mini" href="${escapeAttr(ev.link)}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open</a>` : ''}
+          ${ev.addedBy ? `<span class="ce-by">added by ${escapeHtml(ev.addedBy)}</span>` : ''}
+        </div>` : ''}
       </div>`;
   });
   html += `</div>`;
@@ -3481,7 +3487,7 @@ async function saveEvent(){
     successBurst();
     showToast('Event added.');
   }catch(err){
-    showToast('Could not save \u2014 check your connection.');
+    showToast(saveErrorMessage(err, 'ce-events'));
   }
 }
 
@@ -3493,6 +3499,20 @@ async function deleteCeEvent(id){
   }catch(err){
     showToast('Could not remove \u2014 check your connection.');
   }
+}
+
+/* Firestore rejects writes to a collection with no matching security rule.
+   That surfaced as "check your connection", which sent people hunting for a
+   network problem that didn't exist. This names the real cause. */
+function saveErrorMessage(err, collection){
+  const code = (err && (err.code || err.message) || '').toString().toLowerCase();
+  if(code.includes('permission') || code.includes('insufficient')){
+    return `Saving was blocked by the database rules${collection ? ` for "${collection}"` : ''}. Add the matching Firestore rule, then try again.`;
+  }
+  if(code.includes('unavailable') || code.includes('network') || code.includes('offline')){
+    return 'Could not reach the database — check your connection.';
+  }
+  return 'Could not save. Please try again.';
 }
 
 function prefersAutoFocus(){
@@ -4965,7 +4985,7 @@ async function saveProvider(){
     showToast('Provider saved.');
     render();
   }catch(err){
-    showToast('Could not save provider — check your connection.');
+    showToast(saveErrorMessage(err, 'healthcare-providers'));
   }
 }
 
@@ -5046,7 +5066,7 @@ async function saveNote(){
     showToast('Note saved.');
     render();
   }catch(err){
-    showToast('Could not save note — check your connection.');
+    showToast(saveErrorMessage(err, 'team-notes'));
   }
 }
 
