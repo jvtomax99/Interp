@@ -2933,7 +2933,7 @@ function removeNoteAttachment(){
 function whoAmI(){
   // The sidebar's "Attribute my edits as" field doesn't exist at all while
   // a focused view (like Chat) has hidden the sidebar — window.__lastWho is
-  // kept in sync by both that field and joinChat(), so it's the fallback
+  // kept in sync by both that field and saveMyName(), so it's the fallback
   // that keeps a chosen name working everywhere, sidebar visible or not.
   const el = document.getElementById('whoInput');
   if(el && el.value.trim()) return el.value.trim();
@@ -4037,19 +4037,18 @@ function renderContent(){
             <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">${ICON_SEND}</button>
           </div>
         ` : `
-          <div class="chat-join-hint">👋 Add your name to join the conversation — your team will see it next to your messages.</div>
-          <div class="chat-input-row">
-            <input id="chatNameInput" type="text" placeholder="Your name" onkeydown="handleChatNameKeydown(event)">
-            <button class="btn btn-primary" style="border-radius:24px;" onclick="joinChat()">Join chat</button>
-          </div>
+          <div class="chat-join-hint">👋 Set your name to join the conversation — your team will see it next to your messages.</div>
+          <button class="btn btn-primary" style="border-radius:24px; align-self:center;" onclick="openNameModal()">Set your name</button>
         `}
       </div>
     `;
     renderChatMessages();
     renderChatAttachPreview();
     renderTypingIndicator();
-    const focusTarget = document.getElementById(hasName ? 'chatInput' : 'chatNameInput');
-    if(focusTarget && prefersAutoFocus()) focusTarget.focus();
+    if(hasName){
+      const focusTarget = document.getElementById('chatInput');
+      if(focusTarget && prefersAutoFocus()) focusTarget.focus();
+    }
     return;
   }
 
@@ -4186,6 +4185,10 @@ function saveMyName(){
   if(whoEl) whoEl.value = name;
   closeNameModal();
   showToast(name ? `Attributing edits as ${name}` : 'Attribution cleared');
+  // Chat's own "set your name" prompt doesn't go through requireName() (it
+  // fires automatically on entry, not from a click to gate) — refresh it
+  // directly so saving swaps straight to the real message box.
+  if(name && activeCategory === 'chat') renderContent();
   const action = pendingNameAction;
   pendingNameAction = null;
   if(name && action) action();
@@ -4799,26 +4802,6 @@ function handleChatKeydown(event){
   if(event.key === 'Enter' && !event.shiftKey){
     event.preventDefault();
     sendChatMessage();
-  }
-}
-
-function joinChat(){
-  const nameInput = document.getElementById('chatNameInput');
-  if(!nameInput) return;
-  const name = nameInput.value.trim();
-  if(!name){ showToast('Enter a name to continue.'); return; }
-
-  window.__lastWho = name;
-  const whoEl = document.getElementById('whoInput');
-  if(whoEl) whoEl.value = name; // keep the sidebar field in sync too
-
-  renderContent(); // swaps the join prompt for the real message input, in place
-}
-
-function handleChatNameKeydown(event){
-  if(event.key === 'Enter'){
-    event.preventDefault();
-    joinChat();
   }
 }
 
