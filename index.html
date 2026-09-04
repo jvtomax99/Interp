@@ -449,6 +449,25 @@
     transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
   }
   .chat-bubble-row:hover .chat-delete{ opacity:1; }
+
+  .mention{ font-weight:700; }
+  .chat-bubble-row.them .mention{ color:var(--accent); }
+  .chat-bubble-row.me .mention{ text-decoration:underline; text-underline-offset:2px; }
+  /* A message that mentions you gets a soft highlight so it's easy to spot
+     while scrolling back through a busy conversation. */
+  .chat-bubble-row.mentioned.them .chat-bubble{
+    box-shadow:var(--sh-1), inset 0 0 0 1.5px var(--accent-2);
+    background:var(--accent-soft);
+  }
+  .mention-suggestions{
+    display:none; flex-wrap:wrap; gap:6px; padding:0 6px 6px 6px;
+  }
+  .mention-suggestions.show{ display:flex; }
+  .mention-suggestions button{
+    border:none; background:var(--accent-soft); color:var(--accent); border-radius:14px;
+    padding:5px 11px; font-family:var(--sans); font-size:12px; font-weight:600; cursor:pointer;
+  }
+  .mention-suggestions button:hover{ background:var(--accent); color:#fff; }
   .chat-delete:hover{ color:var(--danger); background:var(--danger-soft); }
   @media (hover: none), (pointer: coarse){
     .chat-delete{ opacity:1; }
@@ -3714,8 +3733,10 @@ async function sendNotification(title, body, section, tag){
 async function showChatNotification(msg){
   if(!notifyEnabled) return;
   const author = msg.author || 'Teammate';
+  const mentionsMe = messageMentions(msg.text).includes(whoAmI().trim().toLowerCase());
   const body = msg.text ? msg.text : (msg.attachment ? 'Sent an attachment' : 'New message');
-  await sendNotification(`${author} \u2014 Interpreter Hub`, body, 'chat', 'interpreter-hub-chat');
+  const title = mentionsMe ? `${author} mentioned you — Interpreter Hub` : `${author} — Interpreter Hub`;
+  await sendNotification(title, body, 'chat', 'interpreter-hub-chat');
 }
 
 async function showActivityNotification(entry){
@@ -3774,10 +3795,87 @@ function clearTyping(){
   db.collection('chat-typing').doc(slugify(me) || 'anon').delete().catch(()=>{});
 }
 
+// The roster isn't hardcoded anywhere — it's just everyone who's ever
+// posted a chat message, so @mentions work for the actual team without
+// needing separate user management.
+function getKnownChatNames(){
+  const names = new Set();
+  CHAT_MESSAGES.forEach(m=>{ if(m.author) names.add(m.author.trim()); });
+  return Array.from(names).sort();
+}
+
+// Extracts lowercase names mentioned via "@Name" in a message, matched
+// against the known roster (longest names first, so "@Bertha Bravo" isn't
+// short-circuited by a shorter "@Bertha" match).
+function messageMentions(text){
+  if(!text) return [];
+  const known = getKnownChatNames().sort((a,b)=> b.length - a.length);
+  const found = [];
+  known.forEach(name=>{
+    const re = new RegExp('@' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    if(re.test(text)) found.push(name.toLowerCase());
+  });
+  return found;
+}
+
+// Bolds and tints any @Name that matches the known roster, so a mention is
+// visually obvious while scrolling — plain "@" typed without a matching
+// name (or names not yet in the roster) are left as normal text.
+function highlightMentions(text){
+  const escaped = escapeHtml(text);
+  const known = getKnownChatNames().sort((a,b)=> b.length - a.length);
+  let result = escaped;
+  known.forEach(name=>{
+    const safeName = escapeHtml(name);
+    const re = new RegExp('@' + safeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    result = result.replace(re, m=>`<span class="mention">${m}</span>`);
+  });
+  return result;
+}
+
 function handleChatTyping(){
+  // Live @-autocomplete: shows once "@" appears with nothing (or a partial
+  // name) typed after it, filtered against the known roster as you type.
+  const input = document.getElementById('chatInput');
+  if(input) updateMentionSuggestions(input);
   publishTyping();
   clearTimeout(typingHeartbeat);
   typingHeartbeat = setTimeout(clearTyping, 3500);  // stop after a pause
+}
+
+// Looks backward from the cursor for an unfinished "@word" and, if found,
+// shows matching known names to tap instead of typing the full name.
+function updateMentionSuggestions(input){
+  const box = document.getElementById('mentionSuggestions');
+  if(!box) return;
+  const cursor = input.selectionStart;
+  const before = input.value.slice(0, cursor);
+  const match = before.match(/@([a-zA-Z ]{0,30})$/);
+  if(!match){ box.innerHTML = ''; box.classList.remove('show'); return; }
+
+  const partial = match[1].trim().toLowerCase();
+  const candidates = getKnownChatNames().filter(n=>
+    !partial || n.toLowerCase().startsWith(partial) || n.toLowerCase().split(' ').some(w=>w.startsWith(partial))
+  ).slice(0, 5);
+
+  if(!candidates.length){ box.innerHTML = ''; box.classList.remove('show'); return; }
+
+  box.innerHTML = candidates.map(n=>
+    `<button type="button" onclick="pickMention(${JSON.stringify(n).replace(/"/g,'&quot;')})">@${escapeHtml(n)}</button>`
+  ).join('');
+  box.classList.add('show');
+}
+
+function pickMention(name){
+  const input = document.getElementById('chatInput');
+  if(!input) return;
+  const cursor = input.selectionStart;
+  const before = input.value.slice(0, cursor).replace(/@([a-zA-Z ]{0,30})$/, `@${name} `);
+  const after = input.value.slice(cursor);
+  input.value = before + after;
+  const box = document.getElementById('mentionSuggestions');
+  if(box){ box.innerHTML = ''; box.classList.remove('show'); }
+  input.focus();
 }
 
 function renderTypingIndicator(){
@@ -4670,6 +4768,7 @@ function renderContent(){
         <div class="chat-messages" id="chatMessages"></div>
         ${hasName ? `
           <div class="typing-indicator" id="typingIndicator"></div>
+          <div class="mention-suggestions" id="mentionSuggestions"></div>
           <div class="chat-attach-preview" id="chatAttachPreview"></div>
           <div class="chat-input-row">
             <button class="attach-btn" title="Attach a photo or PDF" onclick="document.getElementById('chatFileInput').click()">${ICON_PAPERCLIP}</button>
@@ -5481,12 +5580,13 @@ function renderChatMessages(){
     const time = m.timestamp ? relativeTime(m.timestamp) : '';
     const avatarColor = nameToColor(m.author || 'Teammate');
     const avatar = !mine ? `<div class="chat-avatar" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initialsOf(m.author || 'Teammate'))}</div>` : '';
+    const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
     return `
-      <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}">
+      <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}${mentionsMe ? ' mentioned' : ''}">
         ${avatar}
         <div class="chat-bubble-col">
           ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
-          ${m.text ? `<div class="chat-bubble">${escapeHtml(m.text)}</div>` : ''}
+          ${m.text ? `<div class="chat-bubble">${highlightMentions(m.text)}</div>` : ''}
           ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
           <div class="chat-meta-row">
             <span class="chat-time" data-ts="${m.timestamp||''}" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${time}</span>
