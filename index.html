@@ -960,6 +960,25 @@
   }
   .practice-disclaimer svg{ width:15px; height:15px; flex-shrink:0; margin-top:1px; color:#B8923E; }
 
+  .progress-card{
+    max-width:660px; padding:18px 20px; margin-bottom:24px; border-radius:14px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .progress-card p{ font-size:13px; color:var(--ink-soft); margin:0 0 10px 0; line-height:1.55; }
+  .progress-head{ display:flex; gap:28px; flex-wrap:wrap; }
+  .progress-head div{ display:flex; flex-direction:column; }
+  .progress-head b{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); }
+  .progress-head span{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+
+  .review-card{
+    max-width:480px; padding:32px 28px; border-radius:var(--r-lg); text-align:center;
+    background:var(--paper); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft);
+  }
+  .review-card-en{ font-family:var(--sans); font-weight:700; font-size:22px; margin:16px 0 6px 0; color:var(--ink); }
+  .review-card-es{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--accent); margin-bottom:12px; }
+  .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
+  .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
+
   .domain-bars{ display:flex; flex-direction:column; gap:9px; max-width:660px; margin-bottom:24px; }
   .domain-bar-row{ display:flex; align-items:center; gap:12px; font-size:12.5px; }
   .domain-bar-name{ width:230px; flex-shrink:0; color:var(--ink); font-weight:600; }
@@ -1745,6 +1764,8 @@
               match /term-attachments/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
               match /practice-questions/{docId} { allow read, write: if true; }
+              match /quiz-history/{docId} { allow read, write: if true; }
+              match /term-reviews/{docId} { allow read, write: if true; }
             }
           }
      5. This app also uses Cloud Storage for file attachments (photos and
@@ -2561,6 +2582,18 @@ let quizAnswers = [];     // chosen option index per question
 let quizRevealed = false; // whether the current question's answer is shown
 let quizLength = 10;
 let quizDomainFilter = 'all';
+
+// Term review (spaced repetition) — a simple 5-box Leitner system. Missing
+// a card resets it to box 0 (review again soon); getting it right advances
+// a box, pushing the next review further out. Intervals are in days.
+const REVIEW_INTERVALS = [0, 1, 3, 7, 14, 30];
+let TERM_REVIEWS = {}; // termId -> { box, nextReviewAt, reviewCount }
+let reviewActive = false;
+let reviewQueue = [];
+let reviewIndex = 0;
+let reviewRevealed = false;
+let reviewGotIt = 0;
+let reviewMissed = 0;
 const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05E','#7C8FA8','#A97C5D'];
 let selectedSwatch = DOMAIN_COLORS[0];
 let selectedIcon = 'sparkle';
@@ -2595,6 +2628,7 @@ let isInitialActivityLoad = true;
 let lastSeenActivityCount = 0;
 
 let ATTACHMENTS = [];
+let QUIZ_HISTORY = [];
 let pendingAttachTermId = null;
 let pendingChatAttachment = null;
 let pendingNoteAttachment = null;
@@ -2784,6 +2818,64 @@ async function persist(){
 /* ============ Healthcare Providers (own Firestore collection —
    keeps each provider + photo well under the 1MB per-document limit,
    instead of bundling everything into the single terminology blob) ============ */
+// Fetched once at startup rather than filtered by a Firestore query on
+// "who" — names are free-text, so casing/whitespace can vary session to
+// session, and matching client-side (like chat's "mine" check already
+// does) is more forgiving than requiring an exact query match.
+async function loadQuizHistory(){
+  if(!db){ QUIZ_HISTORY = []; return; }
+  try{
+    const snap = await db.collection('quiz-history').orderBy('timestamp','desc').limit(300).get();
+    QUIZ_HISTORY = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  }catch(err){
+    QUIZ_HISTORY = [];
+  }
+}
+
+function myQuizHistory(){
+  const me = whoAmI().trim().toLowerCase();
+  if(!me) return [];
+  return QUIZ_HISTORY.filter(h => (h.who||'').trim().toLowerCase() === me);
+}
+
+// One doc per person+term (deterministic id, so saving is a plain set()
+// with no query needed) — small enough that loading everyone's is fine for
+// a team this size, and simpler than a composite Firestore index.
+function reviewDocId(who, termId){
+  const safeWho = (who||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-') || 'anon';
+  return `${safeWho}__${termId}`;
+}
+
+async function loadTermReviews(){
+  TERM_REVIEWS = {};
+  if(!db) return;
+  const me = whoAmI().trim().toLowerCase();
+  if(!me) return;
+  try{
+    const snap = await db.collection('term-reviews').where('who','==',me).get();
+    snap.forEach(doc=>{
+      const d = doc.data();
+      TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount };
+    });
+  }catch(err){
+    console.error('loadTermReviews failed:', err);
+  }
+}
+
+async function saveTermReview(termId, box, reviewCount){
+  if(!db) return;
+  const me = whoAmI().trim().toLowerCase();
+  if(!me) return;
+  const nextReviewAt = Date.now() + REVIEW_INTERVALS[box] * 86400000;
+  const record = { who: me, termId, box, nextReviewAt, reviewCount };
+  TERM_REVIEWS[termId] = record;
+  try{
+    await db.collection('term-reviews').doc(reviewDocId(me, termId)).set(record);
+  }catch(err){
+    console.error('saveTermReview failed:', err);
+  }
+}
+
 async function loadProviders(){
   try{
     if(!db){ PROVIDERS = []; return; }
@@ -3955,12 +4047,160 @@ function getToolTiles(){
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: ICON_CALENDAR, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: ICON_GLOBE,   count: null, label: '' },
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
+    { id:'review',    name:'Term Review',          color:'#4E9E74', icon: ICON_REVIEW, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
     { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
   ];
+}
+
+function allTermsFlat(){
+  const out = [];
+  DATA.categories.forEach(cat=>{
+    cat.terms.forEach(t=> out.push({ ...t, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color }));
+  });
+  return out;
+}
+
+// "Due" means either scheduled for review (its interval has passed) or
+// never reviewed at all — a fresh term starts out due, same as a new card
+// in any spaced-repetition system.
+function dueReviewCount(){
+  const now = Date.now();
+  return allTermsFlat().filter(t=>{
+    const r = TERM_REVIEWS[t.id];
+    return !r || r.nextReviewAt <= now;
+  }).length;
+}
+
+function buildReviewQueue(){
+  const now = Date.now();
+  const due = allTermsFlat().filter(t=>{
+    const r = TERM_REVIEWS[t.id];
+    return !r || r.nextReviewAt <= now;
+  });
+  // Most-overdue first, then never-reviewed — the point is surfacing what's
+  // been forgotten longest, not a random grab-bag.
+  due.sort((a,b)=>{
+    const ra = TERM_REVIEWS[a.id], rb = TERM_REVIEWS[b.id];
+    const oa = ra ? ra.nextReviewAt : -Infinity;
+    const ob = rb ? rb.nextReviewAt : -Infinity;
+    return oa - ob;
+  });
+  return shuffle(due.slice(0, 15)); // capped per session so it stays a quick habit, not a chore
+}
+
+function startReview(){
+  reviewQueue = buildReviewQueue();
+  if(!reviewQueue.length){ showToast('Nothing due for review right now — check back later.'); return; }
+  reviewActive = true;
+  reviewIndex = 0;
+  reviewRevealed = false;
+  reviewGotIt = 0;
+  reviewMissed = 0;
+  renderContent();
+}
+
+function revealReviewAnswer(){
+  reviewRevealed = true;
+  renderContent();
+}
+
+async function answerReview(gotIt){
+  const term = reviewQueue[reviewIndex];
+  const prior = TERM_REVIEWS[term.id];
+  const priorBox = prior ? prior.box : 0;
+  const newBox = gotIt ? Math.min(priorBox + 1, REVIEW_INTERVALS.length - 1) : 0;
+  const reviewCount = (prior ? prior.reviewCount : 0) + 1;
+  if(gotIt) reviewGotIt++; else reviewMissed++;
+  await saveTermReview(term.id, newBox, reviewCount);
+
+  reviewIndex++;
+  reviewRevealed = false;
+  if(reviewIndex >= reviewQueue.length){
+    reviewActive = false; // falls through to the session summary view
+  }
+  renderContent();
+}
+
+function exitReview(){
+  reviewActive = false;
+  reviewQueue = [];
+  reviewIndex = 0;
+  reviewRevealed = false;
+  renderContent();
+}
+
+function renderReview(){
+  if(reviewActive) return renderReviewCard();
+  if(reviewQueue.length && reviewIndex >= reviewQueue.length) return renderReviewSummary();
+
+  const due = dueReviewCount();
+  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${due} due</span></div>`;
+  html += `<p class="practice-intro">Spaced repetition for the glossary itself — see a term, try to recall the translation and definition, then rate yourself. Terms you miss come back sooner; terms you know well come back less often.</p>`;
+
+  if(!whoAmI()){
+    html += `<div class="progress-card"><p>Set your name so your review schedule is personal to you.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+    return html;
+  }
+
+  if(due === 0){
+    html += `<div class="empty"><div class="glyph">${ICON_REVIEW}</div>Nothing due right now.<br>Check back later, or come back tomorrow.</div>`;
+    return html;
+  }
+
+  html += `<div class="quiz-setup"><button class="btn btn-primary" onclick="startReview()">Review ${Math.min(due,15)} term${Math.min(due,15)===1?'':'s'}</button></div>`;
+  return html;
+}
+
+function renderReviewCard(){
+  const term = reviewQueue[reviewIndex];
+  const progress = `${reviewIndex+1} of ${reviewQueue.length}`;
+  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${progress}</span></div>`;
+  html += `<div class="review-card">
+    <span class="tag" style="color:${term.categoryColor}; background:${term.categoryColor}1F;">${escapeHtml(term.categoryName.split(',')[0].split('&')[0].trim())}</span>
+    <div class="review-card-en">${escapeHtml(term.en)}</div>`;
+  if(reviewRevealed){
+    html += `
+      ${term.es ? `<div class="review-card-es">${escapeHtml(term.es)}</div>` : `<div class="review-card-es" style="color:var(--ink-faint); font-style:normal;">No Spanish translation on file</div>`}
+      <p class="review-card-def">${escapeHtml(term.def || '')}</p>
+      <div class="quiz-actions" style="margin-top:18px;">
+        <button class="btn btn-ghost" style="background:var(--danger-soft); color:var(--danger);" onclick="answerReview(false)">Missed it</button>
+        <button class="btn btn-primary" onclick="answerReview(true)">Got it</button>
+      </div>`;
+  } else {
+    html += `
+      <p class="review-card-prompt">What's the Spanish translation and definition?</p>
+      <div class="quiz-actions" style="margin-top:18px;">
+        <button class="btn btn-primary" onclick="revealReviewAnswer()">Show answer</button>
+      </div>`;
+  }
+  html += `</div>`;
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:16px;">
+    <button class="btn btn-ghost" onclick="exitReview()">Exit review</button>
+  </div>`;
+  return html;
+}
+
+function renderReviewSummary(){
+  const total = reviewGotIt + reviewMissed;
+  const pct = total ? Math.round((reviewGotIt/total)*100) : 0;
+  let html = `<div class="section-head"><h2>Review Complete</h2><span class="sub">${reviewGotIt} of ${total}</span></div>`;
+  html += `<div class="results-head">
+    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" style="background:conic-gradient(#4E9E74 ${pct*3.6}deg, var(--line-soft) 0deg);">
+      <div class="score-ring-inner"><span class="score-pct">${pct}%</span><span class="score-label">Known</span></div>
+    </div>
+    <div class="results-summary">
+      <h3>${reviewGotIt} known, ${reviewMissed} to revisit</h3>
+      <p>Terms you missed will come back around sooner than the ones you knew well.</p>
+    </div>
+  </div>`;
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px;">
+    <button class="btn btn-primary" onclick="exitReview()">Back to Term Review</button>
+  </div>`;
+  return html;
 }
 
 function tileHtml(t, i, onclickCall){
@@ -4008,6 +4248,7 @@ const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
 const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.2 4.2L6 6M18 18L19.8 19.8M2.5 12H5M19 12H21.5M4.2 19.8L6 18M18 6L19.8 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+const ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="7" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 3.5L16 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 12h6M9 14.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
 const DOMAIN_ICONS = {
   dna: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3C7 6 17 6 17 9C17 12 7 12 7 15C7 18 17 18 17 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 5H16M8 19H16M8 12H16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
@@ -4119,6 +4360,9 @@ function render(){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'practice'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'review'){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'home'){
@@ -4244,6 +4488,11 @@ function renderContent(){
       const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
       if(Math.round((correct/quizQuestions.length)*100) >= 80) celebrateScore('.results-head');
     }
+    return;
+  }
+
+  if(activeCategory === 'review'){
+    content.innerHTML = renderReview();
     return;
   }
 
@@ -4460,6 +4709,7 @@ function saveMyName(){
   // fires automatically on entry, not from a click to gate) — refresh it
   // directly so saving swaps straight to the real message box.
   if(name && activeCategory === 'chat') renderContent();
+  if(name) loadTermReviews().then(()=> { if(activeCategory==='review' || activeCategory==='home') renderContent(); });
   const action = pendingNameAction;
   pendingNameAction = null;
   if(name && action) action();
@@ -4556,6 +4806,8 @@ function renderPractice(){
   html += `<p class="practice-intro">Multiple-choice practice built around the five domains of CCHI's CoreCHI written exam. Questions are drawn in the same proportions as the real exam, so your practice weights match where the marks actually are.</p>`;
   html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>These are original practice questions written to match CCHI's published domain structure \u2014 they are not real exam items, and this app is not affiliated with or endorsed by CCHI. Always study from official CCHI materials as well.</span></div>`;
 
+  html += renderMyProgress();
+
   html += `<div class="domain-bars">`;
   CCHI_DOMAINS.forEach(d=>{
     html += `
@@ -4582,7 +4834,7 @@ function renderPractice(){
         <option value="all">All domains (exam-weighted)</option>
         ${CCHI_DOMAINS.map(d=>`<option value="${d.id}">${escapeHtml(d.name)} only</option>`).join('')}
       </select>
-      <button class="btn btn-primary" onclick="startQuiz()">Start practice</button>
+      <button class="btn btn-primary" onclick="requireName(startQuiz)">Start practice</button>
       <button class="btn btn-ghost" onclick="openAddQuestionModal()">+ Add question</button>
     </div>
   `;
@@ -4594,6 +4846,55 @@ function renderPractice(){
 // could score well by spotting the pattern instead of reasoning through the
 // scenario, which defeats the point of practising. Shuffling per session also
 // means repeating a question isn't just recall of "it was the third one".
+// Aggregates every past session for whoever's currently attributed, so
+// "your accuracy in Cultural Responsiveness" reflects a real track record
+// instead of resetting to nothing after each quiz.
+function renderMyProgress(){
+  const mine = myQuizHistory();
+  if(!whoAmI()){
+    return `<div class="progress-card"><p>Set your name to start tracking your practice results over time.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+  }
+  if(!mine.length){
+    return `<div class="progress-card"><p>No practice sessions yet — your results will start building a personal accuracy record here.</p></div>`;
+  }
+
+  const totalQ = mine.reduce((n,h)=>n+h.total, 0);
+  const totalRight = mine.reduce((n,h)=>n+h.correct, 0);
+  const overallPct = totalQ ? Math.round((totalRight/totalQ)*100) : 0;
+  const best = Math.max(...mine.map(h=> h.total ? Math.round((h.correct/h.total)*100) : 0));
+
+  const domainTotals = {};
+  mine.forEach(h=>{
+    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
+      if(!domainTotals[d]) domainTotals[d] = { right:0, total:0 };
+      domainTotals[d].right += s.right;
+      domainTotals[d].total += s.total;
+    });
+  });
+
+  let html = `<div class="progress-card">
+    <div class="progress-head">
+      <div><b>${mine.length}</b><span>session${mine.length===1?'':'s'}</span></div>
+      <div><b>${overallPct}%</b><span>all-time accuracy</span></div>
+      <div><b>${best}%</b><span>best session</span></div>
+    </div>
+    <div class="domain-bars" style="margin-top:14px;">`;
+  CCHI_DOMAINS.forEach(d=>{
+    const s = domainTotals[d.id];
+    if(!s) return;
+    const dpct = Math.round((s.right/s.total)*100);
+    html += `
+      <div class="domain-bar-row">
+        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
+        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${dpct}%; background:${d.color};"></span></span>
+        <span class="domain-bar-pct">${dpct}%</span>
+        <span class="domain-bar-pct">${s.right}/${s.total}</span>
+      </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
 function shuffleOptions(q){
   const order = shuffle(q.o.map((_, i) => i));
   return { ...q, o: order.map(i => q.o[i]), a: order.indexOf(q.a) };
@@ -4680,8 +4981,40 @@ function nextQuestion(){
   quizRevealed = false;
   if(quizIndex >= quizQuestions.length){
     quizActive = false; // triggers the results view
+    saveQuizResult();
   }
   renderContent();
+}
+
+// Saved once per finished quiz, keyed by whoever's attributed — this is
+// what turns the practice bank into an actual study record instead of a
+// quiz that forgets everything the moment you close it.
+async function saveQuizResult(){
+  const who = whoAmI();
+  if(!who || !db) return; // no name set, or no database — nothing to attribute this to
+
+  const total = quizQuestions.length;
+  const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
+  const domainBreakdown = {};
+  const missedQuestions = [];
+  quizQuestions.forEach((q,i)=>{
+    if(!domainBreakdown[q.d]) domainBreakdown[q.d] = { right:0, total:0 };
+    domainBreakdown[q.d].total++;
+    if(quizAnswers[i] === q.a){
+      domainBreakdown[q.d].right++;
+    } else {
+      missedQuestions.push(q.q);
+    }
+  });
+
+  try{
+    const ref = await db.collection('quiz-history').add({
+      who, total, correct, domainBreakdown, missedQuestions, timestamp: Date.now()
+    });
+    QUIZ_HISTORY.unshift({ id: ref.id, who, total, correct, domainBreakdown, missedQuestions, timestamp: Date.now() });
+  }catch(err){
+    console.error('saveQuizResult failed:', err);
+  }
 }
 
 function exitQuiz(){
@@ -5680,6 +6013,8 @@ async function deleteNote(id){
 loadNotifyPref();
 loadData();
 loadProviders();
+loadQuizHistory();
+loadTermReviews();
 loadNotes();
 loadAttachments();
 loadQuestions();
