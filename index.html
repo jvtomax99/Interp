@@ -981,6 +981,22 @@
   .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
   .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
 
+  .announcements-block{
+    max-width:660px; margin-bottom:16px; padding:14px 16px; border-radius:12px;
+    background:linear-gradient(140deg, #FBF3E3, #FAFAF6); box-shadow:inset 0 0 0 1px #E8D7B0;
+  }
+  .announcements-head{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:2px;
+    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:#8C6D2E;
+  }
+  .announcements-head span{ display:flex; align-items:center; gap:6px; }
+  .announcements-head svg{ width:13px; height:13px; }
+  .announcements-empty{ font-size:12px; color:#8C6D2E; opacity:.8; line-height:1.5; margin:8px 0 0 0; }
+  .announcement-row{ padding:10px 0; border-top:1px solid #E8D7B0; }
+  .announcement-row:first-of-type{ border-top:none; }
+  .announcement-row p{ font-size:13px; color:#4A3B18; line-height:1.5; margin:0 0 5px 0; }
+  .announcement-meta{ display:flex; align-items:center; justify-content:space-between; font-family:var(--mono); font-size:10px; color:#9B7D3F; }
+
   .domain-bars{ display:flex; flex-direction:column; gap:9px; max-width:660px; margin-bottom:24px; }
   .domain-bar-row{ display:flex; align-items:center; gap:12px; font-size:12.5px; }
   .domain-bar-name{ width:230px; flex-shrink:0; color:var(--ink); font-weight:600; }
@@ -1614,6 +1630,17 @@
   </div>
 </div>
 
+<div class="overlay" id="announcementOverlay">
+  <div class="modal">
+    <h3>Pin an announcement</h3>
+    <div class="field"><label>Announcement</label><textarea id="fAnnouncementText" placeholder="e.g. New CE requirement this quarter — see Training &amp; Events for the link" style="min-height:90px;"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAnnouncementModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addAnnouncement()">Pin it</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="domainOverlay">
   <div class="modal">
     <h3>Add a domain</h3>
@@ -1768,6 +1795,7 @@
               match /practice-questions/{docId} { allow read, write: if true; }
               match /quiz-history/{docId} { allow read, write: if true; }
               match /term-reviews/{docId} { allow read, write: if true; }
+              match /announcements/{docId} { allow read, write: if true; }
             }
           }
      5. This app also uses Cloud Storage for file attachments (photos and
@@ -2631,6 +2659,8 @@ let lastSeenActivityCount = 0;
 
 let ATTACHMENTS = [];
 let QUIZ_HISTORY = [];
+let ANNOUNCEMENTS = [];
+let announcementsListenerStarted = false;
 let pendingAttachTermId = null;
 let pendingChatAttachment = null;
 let pendingNoteAttachment = null;
@@ -3012,6 +3042,80 @@ function logActivity(summary){
   }catch(err){
     console.error('Activity log failed', err);
   }
+}
+
+// Pinned separately from the message stream so something like "new CE
+// requirement this quarter" doesn't scroll away under newer chatter — this
+// lives above the chat panel, always visible, most recent first.
+function startAnnouncementsListener(){
+  if(announcementsListenerStarted || !db) return;
+  announcementsListenerStarted = true;
+  db.collection('announcements').orderBy('createdAt','desc').onSnapshot(snap=>{
+    ANNOUNCEMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if(activeCategory === 'chat') renderContent();
+  }, err=> console.error('announcements listener error:', err));
+}
+
+async function addAnnouncement(){
+  const input = document.getElementById('fAnnouncementText');
+  const text = input.value.trim();
+  if(!text){ showToast('Write something to pin first.'); return; }
+  if(!db){ showToast('Not connected — check your connection and retry.'); return; }
+  try{
+    await db.collection('announcements').add({ text, author: whoAmI(), createdAt: Date.now() });
+    input.value = '';
+    closeAnnouncementModal();
+    logActivity('pinned an announcement');
+    showToast('Announcement pinned.');
+  }catch(err){
+    showToast('Could not pin. Check connection and retry.');
+  }
+}
+
+async function deleteAnnouncement(id){
+  if(!confirm('Remove this pinned announcement?')) return;
+  if(!db) return;
+  try{
+    await db.collection('announcements').doc(id).delete();
+  }catch(err){
+    showToast('Could not remove. Check connection and retry.');
+  }
+}
+
+function openAnnouncementModal(){
+  requireName(()=>_openAnnouncementModal());
+}
+function _openAnnouncementModal(){
+  document.getElementById('fAnnouncementText').value = '';
+  document.getElementById('announcementOverlay').classList.add('show');
+  document.getElementById('fAnnouncementText').focus();
+}
+function closeAnnouncementModal(){
+  document.getElementById('announcementOverlay').classList.remove('show');
+}
+
+function renderAnnouncements(){
+  let html = `<div class="announcements-block">
+    <div class="announcements-head">
+      <span>${ICON_PIN} Pinned</span>
+      <button class="link-btn" onclick="openAnnouncementModal()">+ Pin something</button>
+    </div>`;
+  if(!ANNOUNCEMENTS.length){
+    html += `<p class="announcements-empty">Nothing pinned — important updates (a new CE requirement, an updated protocol) go here instead of getting lost in the chat scroll.</p>`;
+  } else {
+    ANNOUNCEMENTS.forEach(a=>{
+      html += `
+        <div class="announcement-row">
+          <p>${escapeHtml(a.text)}</p>
+          <div class="announcement-meta">
+            <span>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}</span>
+            <button class="chat-delete" title="Unpin" onclick="deleteAnnouncement('${a.id}')">Unpin</button>
+          </div>
+        </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
 }
 
 function startActivityListener(){
@@ -4267,6 +4371,7 @@ const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org
 const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5H14L18 7.5V20C18 20.5 17.5 21 17 21H7C6.5 21 6 20.5 6 20V4.5C6 4 6.5 3.5 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V7.5H18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4.5C3.7 15 3 14.3 3 13.5V4.5C3 3.7 3.7 3 4.5 3H13.5C14.3 3 15 3.7 15 4.5V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 9.5H7.5L12 5.5V18.5L7.5 14.5H4V9.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 8.5C16.5 9.5 17 10.7 17 12C17 13.3 16.5 14.5 15.5 15.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18 6C19.7 7.7 20.5 9.7 20.5 12C20.5 14.3 19.7 16.3 18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>';
+const ICON_PIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 3.5L20.5 9.5L17.5 12.5L16 12L12.5 15.5L13 19L11.5 20.5L8 15L3.5 19V17.5L8 13L2.5 12.5L4 11L7.5 11.5L11 8L10.5 6.5L14.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
 const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -4560,6 +4665,7 @@ function renderContent(){
           : ''
       }</div>
       <div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>
+      ${renderAnnouncements()}
       <div class="chat-panel">
         <div class="chat-messages" id="chatMessages"></div>
         ${hasName ? `
@@ -6049,6 +6155,7 @@ loadAttachments();
 loadQuestions();
 startChatListener();
 startActivityListener();
+startAnnouncementsListener();
 startTypingListener();
 startCeListener();
 
