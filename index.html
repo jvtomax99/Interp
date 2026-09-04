@@ -5797,15 +5797,29 @@ function startGreetingRotation(){
   }, 2800);
 }
 
-function renderHome(){
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+// A different one each time Home loads — grounded in language, service, and
+// the interpreter's role specifically, rather than generic workplace quotes.
+const MOTIVATIONAL_QUOTES = [
+  "\u201cLanguage is the road map of a culture.\u201d \u2014 Rita Mae Brown",
+  "\u201cTo have another language is to possess a second soul.\u201d \u2014 Charlemagne",
+  "\u201cThe interpreter is the bridge between two worlds that cannot otherwise meet.\u201d",
+  "\u201cWords travel worlds. Translators do the driving.\u201d \u2014 Anna Rusconi",
+  "\u201cIn every act of interpreting, we carry someone else's meaning safely across.\u201d",
+  "\u201cCommunication works for those who work at it.\u201d \u2014 John Powell",
+  "\u201cA patient understood is a patient cared for.\u201d",
+  "\u201cWhat we do here echoes far beyond the room it happens in.\u201d",
+  "\u201cPrecision in language is precision in care.\u201d",
+  "\u201cEmpathy is the truest form of translation.\u201d",
+  "\u201cThe limits of my language mean the limits of my world.\u201d \u2014 Ludwig Wittgenstein",
+  "\u201cEvery word you carry across a language gap matters to someone.\u201d"
+];
 
+function renderHome(){
   let html = `
     <div class="home-greeting">
       <div class="home-greeting-text">
         <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span></h2>
-        <p>${greeting}. Everything's in the list below — jump to a domain or tool, or pick up where your team left off.</p>
+        <p>${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
         <button type="button" class="link-btn" style="margin-top:2px;" onclick="openOnboarding()">Take the tour</button>
         ${ACTIVITY.length > 0 ? `
         <button class="home-recent-cta" onclick="setCategory('updates')">
