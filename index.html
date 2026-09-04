@@ -468,6 +468,27 @@
     padding:5px 11px; font-family:var(--sans); font-size:12px; font-weight:600; cursor:pointer;
   }
   .mention-suggestions button:hover{ background:var(--accent); color:#fff; }
+
+  .print-export-row{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px;
+  }
+  .print-export-row svg{ width:15px; height:15px; }
+  .print-export-hint{ font-size:11.5px; color:var(--ink-faint); line-height:1.4; max-width:360px; }
+  .print-only-title{ display:none; }
+
+  .onboarding-modal{ max-width:420px; text-align:center; }
+  .onboarding-glyph{
+    width:56px; height:56px; border-radius:16px; margin:4px auto 18px auto;
+    background:linear-gradient(145deg, #0079BD, #252E6D);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 18px -6px rgba(37,46,109,0.55), inset 0 1px 0 rgba(255,255,255,0.28);
+  }
+  .onboarding-glyph svg{ width:28px; height:28px; }
+  .onboarding-modal h3{ font-family:var(--serif); font-size:20px; font-weight:400; margin:0 0 10px 0; }
+  .onboarding-body{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 20px 0; }
+  .onboarding-dots{ display:flex; justify-content:center; gap:7px; margin-bottom:22px; }
+  .onboarding-dot{ width:7px; height:7px; border-radius:50%; background:var(--line); transition:background .2s var(--ease), transform .2s var(--ease); }
+  .onboarding-dot.is-active{ background:var(--accent); transform:scale(1.3); }
   .chat-delete:hover{ color:var(--danger); background:var(--danger-soft); }
   @media (hover: none), (pointer: coarse){
     .chat-delete{ opacity:1; }
@@ -1584,6 +1605,33 @@
   @media (prefers-reduced-motion: reduce){
     .skeleton{ animation:none; }
   }
+
+  /* ---------- Print / PDF export ----------
+     Strips away every bit of app chrome and leaves a clean reference sheet:
+     just the domain title, generation date, and the terms themselves. */
+  @media print{
+    .sidebar, .brand-mobile, .gs-trigger-mobile, .home-fab, .name-fab, .theme-fab,
+    .topbar, .print-export-row, .actions, .copy-btn, .tab-delete,
+    .hipaa-notice, .hipaa-notice-inline, .nav-tile-grid, .content-fade > .home-greeting,
+    .stat-strip{
+      display:none !important;
+    }
+    .print-only-title{
+      display:block !important; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid #000;
+    }
+    .print-only-title h1{ font-family:var(--serif); font-size:20px; margin:0 0 4px 0; }
+    .print-only-title p{ font-family:var(--sans); font-size:11px; color:#444; margin:0; }
+    body, .app, .main{ background:#fff !important; }
+    .main{ padding:0 !important; max-width:none !important; }
+    .card{
+      box-shadow:none !important; border:1px solid #ccc !important; break-inside:avoid;
+      animation:none !important; transform:none !important;
+    }
+    .card::before{ display:none !important; }
+    .grid{ grid-template-columns:1fr 1fr !important; gap:12px !important; }
+    .section-head{ break-after:avoid; }
+    a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
+  }
 </style>
 </head>
 <body>
@@ -1656,6 +1704,35 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeAnnouncementModal()">Cancel</button>
       <button class="btn btn-primary" onclick="addAnnouncement()">Pin it</button>
+    </div>
+  </div>
+</div>
+
+<input class="file-input-hidden" id="csvImportInput" type="file" accept=".csv,text/csv" onchange="handleCsvImportSelected(event)">
+
+<div class="overlay" id="importOverlay">
+  <div class="modal">
+    <h3>Import preview</h3>
+    <div id="importPreviewBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" id="importConfirmBtn" onclick="confirmCsvImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="onboardingOverlay">
+  <div class="modal onboarding-modal">
+    <div class="onboarding-glyph">${ICON_GLYPH}</div>
+    <h3 id="onboardingTitle"></h3>
+    <p id="onboardingBody" class="onboarding-body"></p>
+    <div class="onboarding-dots" id="onboardingDots"></div>
+    <div class="modal-actions" style="justify-content:space-between;">
+      <button class="btn btn-ghost" id="onboardingBackBtn" onclick="onboardingBack()">Back</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" onclick="completeOnboarding()">Skip</button>
+        <button class="btn btn-primary" id="onboardingNextBtn" onclick="onboardingNext()">Next</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2680,6 +2757,78 @@ let ATTACHMENTS = [];
 let QUIZ_HISTORY = [];
 let ANNOUNCEMENTS = [];
 let announcementsListenerStarted = false;
+let pendingImportPlan = null;
+
+// First-run onboarding — a short walkthrough shown automatically once per
+// device, replayable any time from Home. Content lives in one array so
+// adding/reordering a step later doesn't touch the rendering logic.
+let onboardingStep = 0;
+const ONBOARDING_STEPS = [
+  {
+    title: 'Welcome to Interpreter Hub',
+    body: 'A shared home base for HUMC\u2019s interpreter team \u2014 the glossary, provider directory, team chat, and CoreCHI study tools all in one place.'
+  },
+  {
+    title: 'Everything lives in tiles',
+    body: 'Domains and tools are organized as tiles below Home. Tap a domain to see just its terms, or "All domains" to browse everything. "Search everything" finds terms, providers, chat messages, and more at once.'
+  },
+  {
+    title: 'Set your name once',
+    body: 'Tap the person icon (bottom-left on most screens) to attribute your edits, chat messages, and practice scores to yourself \u2014 you\u2019ll be asked automatically the first time you need it.'
+  },
+  {
+    title: 'Built for the team, not just you',
+    body: 'Team Chat supports @mentions and pinned announcements. Edits sync in real time and keep a history, so nothing gets silently overwritten if two people edit at once.'
+  },
+  {
+    title: 'Study tools included',
+    body: 'CoreCHI Practice tracks your accuracy by exam domain over time. Term Review resurfaces glossary terms you\u2019ve missed using spaced repetition. Export any domain to PDF or CSV whenever you need it.'
+  }
+];
+
+function shouldShowOnboarding(){
+  try{ return localStorage.getItem('ih_onboarded') !== '1'; }catch(e){ return false; }
+}
+
+function openOnboarding(){
+  onboardingStep = 0;
+  renderOnboardingStep();
+  document.getElementById('onboardingOverlay').classList.add('show');
+}
+
+function closeOnboarding(){
+  document.getElementById('onboardingOverlay').classList.remove('show');
+}
+
+function completeOnboarding(){
+  try{ localStorage.setItem('ih_onboarded', '1'); }catch(e){}
+  closeOnboarding();
+}
+
+function onboardingNext(){
+  if(onboardingStep >= ONBOARDING_STEPS.length - 1){ completeOnboarding(); return; }
+  onboardingStep++;
+  renderOnboardingStep();
+}
+
+function onboardingBack(){
+  if(onboardingStep <= 0) return;
+  onboardingStep--;
+  renderOnboardingStep();
+}
+
+function renderOnboardingStep(){
+  const step = ONBOARDING_STEPS[onboardingStep];
+  const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
+  document.getElementById('onboardingTitle').textContent = step.title;
+  document.getElementById('onboardingBody').textContent = step.body;
+  document.getElementById('onboardingDots').innerHTML = ONBOARDING_STEPS.map((_, i)=>
+    `<span class="onboarding-dot ${i===onboardingStep ? 'is-active' : ''}"></span>`
+  ).join('');
+  document.getElementById('onboardingBackBtn').style.visibility = onboardingStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('onboardingNextBtn').textContent = isLast ? 'Get started' : 'Next';
+}
+
 let pendingAttachTermId = null;
 let pendingChatAttachment = null;
 let pendingNoteAttachment = null;
@@ -2687,6 +2836,162 @@ let pendingNoteAttachment = null;
 /* ============ Storage ============ */
 function genId(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+/* ============ CSV export / import ============
+   Export is always safe — it just reads. Import is staged: parse, show a
+   preview of exactly what will be added/updated/skipped, and only write
+   to Firestore after an explicit confirm. Nothing lands in the live
+   glossary from a bad file without a human looking at the plan first. */
+
+function csvEscape(val){
+  const s = String(val==null ? '' : val);
+  if(/[",\r\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+
+function downloadTextFile(content, filename, mime){
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+}
+
+function exportTermsCsv(){
+  const scoped = activeCategory==='all' ? allTermsFlat() : allTermsFlat().filter(t=>t.categoryId===activeCategory);
+  const rows = [['id','domain','english','spanish','definition','source','source_url']];
+  scoped.forEach(t=> rows.push([t.id, t.categoryName, t.en||'', t.es||'', t.def||'', t.source||'', t.url||'']));
+  const csv = rows.map(r=> r.map(csvEscape).join(',')).join('\r\n');
+  downloadTextFile(csv, 'interpreter-hub-glossary.csv', 'text/csv;charset=utf-8');
+  showToast(`Exported ${scoped.length} term${scoped.length===1?'':'s'}.`);
+}
+
+// Minimal RFC4180-style parser — handles quoted fields containing commas,
+// quotes, or newlines, which a plain split(',') would break on (a
+// definition is exactly the kind of field likely to contain a comma).
+function parseCsv(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; } else { inQuotes = false; }
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\r'){ /* skip, \n handles the line break */ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length > 1 || r[0] !== '');
+}
+
+function triggerCsvImport(){
+  requireName(()=> document.getElementById('csvImportInput').click());
+}
+
+async function handleCsvImportSelected(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  const text = await file.text();
+  const rows = parseCsv(text);
+  if(rows.length < 2){ showToast('That file doesn\u2019t look like a valid CSV.'); return; }
+
+  const header = rows[0].map(h=>h.trim().toLowerCase());
+  const idx = {
+    id: header.indexOf('id'), domain: header.indexOf('domain'), en: header.indexOf('english'),
+    es: header.indexOf('spanish'), def: header.indexOf('definition'),
+    source: header.indexOf('source'), url: header.indexOf('source_url')
+  };
+  if(idx.domain===-1 || idx.en===-1){
+    showToast('The CSV needs at least "domain" and "english" columns.');
+    return;
+  }
+
+  const plan = { toAdd: [], toUpdate: [], errors: [] };
+  const existingIds = new Set(allTermsFlat().map(t=>t.id));
+  const editor = whoAmI();
+
+  rows.slice(1).forEach((r, i)=>{
+    const rowNum = i + 2; // +1 for header, +1 for 1-indexing
+    const domainName = (r[idx.domain]||'').trim();
+    const en = (r[idx.en]||'').trim();
+    if(!domainName || !en){ plan.errors.push(`Row ${rowNum}: missing domain or English term.`); return; }
+    const cat = DATA.categories.find(c=>c.name.toLowerCase()===domainName.toLowerCase());
+    if(!cat){ plan.errors.push(`Row ${rowNum}: no domain named "${domainName}".`); return; }
+
+    const existingId = idx.id>-1 ? (r[idx.id]||'').trim() : '';
+    const isUpdate = existingId && existingIds.has(existingId);
+    const record = {
+      id: isUpdate ? existingId : genId(),
+      categoryId: cat.id, en,
+      es: idx.es>-1 ? (r[idx.es]||'').trim() : '',
+      def: idx.def>-1 ? (r[idx.def]||'').trim() : '',
+      source: idx.source>-1 ? (r[idx.source]||'').trim() : '',
+      url: (idx.url>-1 ? (r[idx.url]||'').trim() : '') || undefined,
+      editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined
+    };
+    if(isUpdate) plan.toUpdate.push(record); else plan.toAdd.push(record);
+  });
+
+  pendingImportPlan = plan;
+  showImportPreview(plan);
+}
+
+function showImportPreview(plan){
+  const body = document.getElementById('importPreviewBody');
+  body.innerHTML = `
+    <p><b>${plan.toAdd.length}</b> new term${plan.toAdd.length===1?'':'s'} will be added.</p>
+    <p><b>${plan.toUpdate.length}</b> existing term${plan.toUpdate.length===1?'':'s'} will be updated.</p>
+    ${plan.errors.length ? `
+      <p style="color:var(--danger); margin-top:12px;"><b>${plan.errors.length}</b> row${plan.errors.length===1?'':'s'} will be skipped:</p>
+      <ul style="margin:6px 0 0 0; padding-left:18px; font-size:12px; color:var(--ink-soft); max-height:140px; overflow:auto;">
+        ${plan.errors.slice(0,20).map(e=>`<li>${escapeHtml(e)}</li>`).join('')}
+      </ul>
+    ` : ''}
+  `;
+  const confirmBtn = document.getElementById('importConfirmBtn');
+  confirmBtn.disabled = (plan.toAdd.length + plan.toUpdate.length) === 0;
+  document.getElementById('importOverlay').classList.add('show');
+}
+
+function closeImportModal(){
+  document.getElementById('importOverlay').classList.remove('show');
+  pendingImportPlan = null;
+}
+
+async function confirmCsvImport(){
+  if(!pendingImportPlan || !db) return;
+  const all = [...pendingImportPlan.toAdd, ...pendingImportPlan.toUpdate];
+  if(!all.length){ showToast('Nothing to import.'); closeImportModal(); return; }
+  const confirmBtn = document.getElementById('importConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Importing\u2026';
+  try{
+    const batchSize = 400;
+    for(let i=0; i<all.length; i+=batchSize){
+      const batch = db.batch();
+      all.slice(i, i+batchSize).forEach(r=> batch.set(db.collection('terms').doc(r.id), r));
+      await batch.commit();
+    }
+    logActivity(`imported ${all.length} term${all.length===1?'':'s'} from a CSV file`);
+    showToast('Import complete.');
+    closeImportModal();
+    await loadAllTerms();
+    render();
+  }catch(err){
+    showToast('Import failed partway through \u2014 check your connection and try again.');
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Import';
+  }
 }
 
 // One-time, automatic, and safe: gives any term saved before attachments
@@ -4470,6 +4775,9 @@ const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/
 const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4.5C3.7 15 3 14.3 3 13.5V4.5C3 3.7 3.7 3 4.5 3H13.5C14.3 3 15 3.7 15 4.5V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 9.5H7.5L12 5.5V18.5L7.5 14.5H4V9.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 8.5C16.5 9.5 17 10.7 17 12C17 13.3 16.5 14.5 15.5 15.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18 6C19.7 7.7 20.5 9.7 20.5 12C20.5 14.3 19.7 16.3 18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>';
 const ICON_PIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 3.5L20.5 9.5L17.5 12.5L16 12L12.5 15.5L13 19L11.5 20.5L8 15L3.5 19V17.5L8 13L2.5 12.5L4 11L7.5 11.5L11 8L10.5 6.5L14.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+const ICON_PRINT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9V4H18V9" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><rect x="4" y="9" width="16" height="8" rx="1.5" stroke="currentColor" stroke-width="1.7"/><path d="M6 14H18V20H6V14Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.5V15.5M12 15.5L7.5 11M12 15.5L16.5 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5V19C4.5 19.8 5.2 20.5 6 20.5H18C18.8 20.5 19.5 19.8 19.5 19V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+const ICON_UPLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5V3.5M12 3.5L7.5 8M12 3.5L16.5 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5V19C4.5 19.8 5.2 20.5 6 20.5H18C18.8 20.5 19.5 19.8 19.5 19V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -4795,6 +5103,17 @@ function renderContent(){
   let cats = activeCategory==='all' ? DATA.categories : DATA.categories.filter(c=>c.id===activeCategory);
 
   let html = '';
+  const printLabel = activeCategory==='all' ? 'the full glossary' : (cats[0] ? cats[0].name : 'this domain');
+  html += `<div class="print-export-row">
+    <button class="btn btn-ghost" onclick="window.print()">${ICON_PRINT} Export PDF</button>
+    <button class="btn btn-ghost" onclick="exportTermsCsv()">${ICON_DOWNLOAD} Export CSV</button>
+    <button class="btn btn-ghost" onclick="triggerCsvImport()">${ICON_UPLOAD} Import CSV</button>
+    <span class="print-export-hint">Prints ${escapeHtml(printLabel)} as a clean reference sheet, or exports it to a spreadsheet for bulk editing — reimport the same file after editing to update everything at once.</span>
+  </div>
+  <div class="print-only-title">
+    <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
+    <p>HUMC Language Services · Generated ${new Date().toLocaleDateString()}</p>
+  </div>`;
   cats.forEach(cat=>{
     // Sort a *copy* for display only. Each item keeps _idx — its true position
     // in the stored array — so the edit and delete buttons still target the
@@ -5487,6 +5806,7 @@ function renderHome(){
       <div class="home-greeting-text">
         <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span></h2>
         <p>${greeting}. Everything's in the list below — jump to a domain or tool, or pick up where your team left off.</p>
+        <button type="button" class="link-btn" style="margin-top:2px;" onclick="openOnboarding()">Take the tour</button>
         ${ACTIVITY.length > 0 ? `
         <button class="home-recent-cta" onclick="setCategory('updates')">
           ${ICON_BELL}<span>Recent activity</span>
@@ -6258,6 +6578,12 @@ startActivityListener();
 startAnnouncementsListener();
 startTypingListener();
 startCeListener();
+
+if(shouldShowOnboarding()){
+  // A beat after first paint, not instantly — jumping straight to a modal
+  // before the page has even rendered feels jarring.
+  setTimeout(openOnboarding, 500);
+}
 
 // iOS doesn't reliably reposition fixed elements against the visual
 // viewport while the on-screen keyboard is open — a fixed button can end up
