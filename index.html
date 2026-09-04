@@ -853,6 +853,8 @@
   .copy-btn:hover{ color:var(--accent); background:var(--accent-soft); }
   .copy-btn:active{ transform:scale(0.88); }
   .copy-btn.copied{ color:var(--accent); opacity:1; }
+  .copy-btn.speaking{ color:var(--accent); opacity:1; animation:speakPulse 1s ease-in-out infinite; }
+  @keyframes speakPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
   .copy-btn svg{ width:12px; height:12px; display:block; }
   .card .def{
     font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0; padding-top:11px;
@@ -3309,6 +3311,27 @@ async function copyText(btn, text){
   }, 1400);
 }
 
+// Text-to-speech rather than pre-recorded audio — it works instantly for
+// every term already in the glossary (and every one added going forward)
+// with no recording effort or file storage, using whatever Spanish/English
+// voice the device already has installed.
+function speakText(btn, text, lang){
+  if(!('speechSynthesis' in window)){
+    showToast('Speech isn\u2019t supported in this browser.');
+    return;
+  }
+  window.speechSynthesis.cancel(); // don't stack overlapping playback
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang;
+  utter.rate = 0.92; // slightly slower than default — clearer for unfamiliar medical terms
+  if(btn){
+    btn.classList.add('speaking');
+    utter.onend = ()=> btn.classList.remove('speaking');
+    utter.onerror = ()=> btn.classList.remove('speaking');
+  }
+  window.speechSynthesis.speak(utter);
+}
+
 /* True only on devices with a precise pointer (mouse/trackpad). Used to
    decide whether autofocusing a text field is helpful or intrusive —
    on touch devices, focusing an input pops the on-screen keyboard. */
@@ -4161,10 +4184,13 @@ function renderReviewCard(){
   let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${progress}</span></div>`;
   html += `<div class="review-card">
     <span class="tag" style="color:${term.categoryColor}; background:${term.categoryColor}1F;">${escapeHtml(term.categoryName.split(',')[0].split('&')[0].trim())}</span>
-    <div class="review-card-en">${escapeHtml(term.en)}</div>`;
+    <div class="review-card-en">
+      ${escapeHtml(term.en)}
+      <button class="copy-btn" style="opacity:1; position:relative; top:-2px;" title="Hear this term" onclick="speakText(this, ${JSON.stringify(term.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
+    </div>`;
   if(reviewRevealed){
     html += `
-      ${term.es ? `<div class="review-card-es">${escapeHtml(term.es)}</div>` : `<div class="review-card-es" style="color:var(--ink-faint); font-style:normal;">No Spanish translation on file</div>`}
+      ${term.es ? `<div class="review-card-es">${escapeHtml(term.es)} <button class="copy-btn" style="opacity:1; position:relative; top:-1px;" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(term.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button></div>` : `<div class="review-card-es" style="color:var(--ink-faint); font-style:normal;">No Spanish translation on file</div>`}
       <p class="review-card-def">${escapeHtml(term.def || '')}</p>
       <div class="quiz-actions" style="margin-top:18px;">
         <button class="btn btn-ghost" style="background:var(--danger-soft); color:var(--danger);" onclick="answerReview(false)">Missed it</button>
@@ -4240,6 +4266,7 @@ const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
 const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5H14L18 7.5V20C18 20.5 17.5 21 17 21H7C6.5 21 6 20.5 6 20V4.5C6 4 6.5 3.5 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V7.5H18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4.5C3.7 15 3 14.3 3 13.5V4.5C3 3.7 3.7 3 4.5 3H13.5C14.3 3 15 3.7 15 4.5V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 9.5H7.5L12 5.5V18.5L7.5 14.5H4V9.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 8.5C16.5 9.5 17 10.7 17 12C17 13.3 16.5 14.5 15.5 15.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18 6C19.7 7.7 20.5 9.7 20.5 12C20.5 14.3 19.7 16.3 18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>';
 const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -4601,10 +4628,12 @@ function renderContent(){
           <div class="term-en">
             <span>${escapeHtml(t.en)}</span>
             <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
           </div>
           ${t.es ? `<div class="term-es">
             <span>${escapeHtml(t.es)}</span>
             <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
           </div>` : ''}
           <p class="def">${escapeHtml(t.def)}</p>
           ${renderLinks(t, cat.id)}
