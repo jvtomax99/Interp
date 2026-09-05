@@ -774,7 +774,6 @@
     padding:12px 19px; cursor:pointer; transition:transform .15s var(--ease), box-shadow .15s var(--ease), filter .15s var(--ease);
   }
   .btn:active{ transform:translateY(1px); }
-  .btn:disabled{ opacity:.4; cursor:default; pointer-events:none; }
   .btn-primary{
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
     box-shadow:0 8px 16px -8px rgba(92,131,116,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
@@ -1021,166 +1020,6 @@
   .review-card-es{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--accent); margin-bottom:12px; }
   .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
   .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
-
-  /* ---------- In-app User Guide ---------- */
-  .user-guide{ max-width:640px; margin:0 auto; }
-  .user-guide-progress-track{ height:4px; border-radius:2px; background:var(--line-soft); overflow:hidden; }
-  .user-guide-progress-fill{ height:100%; background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .25s var(--ease); }
-  .user-guide-counter{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin:8px 0 22px 0; text-align:right; }
-  .user-guide-slide{
-    background:var(--paper); border-radius:var(--r-lg); padding:32px 28px;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); min-height:280px;
-    position:relative; overflow:hidden;
-  }
-  .user-guide-slide::before{
-    content:""; position:absolute; top:0; left:0; right:0; height:4px;
-    background:var(--guide-color, var(--accent));
-  }
-  .user-guide-slide.guide-anim-forward{ animation:guideInForward .32s var(--ease); }
-  .user-guide-slide.guide-anim-backward{ animation:guideInBackward .32s var(--ease); }
-  @keyframes guideInForward{ from{ opacity:0; transform:translateX(18px); } to{ opacity:1; transform:translateX(0); } }
-  @keyframes guideInBackward{ from{ opacity:0; transform:translateX(-18px); } to{ opacity:1; transform:translateX(0); } }
-  @media (prefers-reduced-motion: reduce){
-    .user-guide-slide.guide-anim-forward, .user-guide-slide.guide-anim-backward{ animation:none; }
-  }
-  .user-guide-slide.is-cover{ text-align:center; padding:44px 28px; }
-  .user-guide-glyph{
-    width:56px; height:56px; border-radius:16px; margin:0 auto 18px auto; color:#fff;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 18px -6px rgba(37,46,109,0.5), inset 0 1px 0 rgba(255,255,255,0.28);
-  }
-  .user-guide-slide:not(.is-cover) .user-guide-glyph{ margin:0 0 16px 0; }
-  .user-guide-glyph svg{ width:28px; height:28px; }
-  .user-guide-kicker{
-    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; color:var(--accent-2);
-    font-weight:600; margin-bottom:6px;
-  }
-  .user-guide-title{ font-family:var(--serif); font-size:23px; font-weight:400; color:var(--ink); margin:0 0 14px 0; }
-  .user-guide-body{ font-size:14px; line-height:1.65; color:var(--ink-soft); }
-  .user-guide-body p{ margin:0 0 12px 0; }
-  .user-guide-body ul, .user-guide-body ol{ margin:0 0 12px 0; padding-left:20px; }
-  .user-guide-body li{ margin-bottom:7px; }
-  .user-guide-body b{ color:var(--ink); }
-  .user-guide-note{
-    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:10px;
-    padding:11px 13px; font-size:12.5px; color:#7A5D28 !important;
-  }
-  .user-guide-note b{ color:#7A5D28; }
-  .user-guide-nav{ display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
-  .user-guide-nav .btn{ min-width:100px; }
-
-  /* Icon badge entrance — a little bounce so each slide feels alive rather
-     than static, independent of the slide-in direction animation. */
-  .user-guide-glyph{ animation:guideGlyphIn .4s var(--ease) both; }
-  @keyframes guideGlyphIn{
-    0%{ opacity:0; transform:scale(0.5) rotate(-12deg); }
-    70%{ transform:scale(1.08) rotate(3deg); }
-    100%{ opacity:1; transform:scale(1) rotate(0); }
-  }
-
-  /* Staggered reveal for list items and detail rows — each one arrives a
-     beat after the last instead of all popping in at once. */
-  .user-guide-body li, .guide-feed-row, .guide-pipeline-step, .guide-fab-item{
-    animation:guideRowIn .35s var(--ease) both;
-  }
-  .user-guide-body li:nth-child(1), .guide-feed-row:nth-child(1){ animation-delay:.05s; }
-  .user-guide-body li:nth-child(2), .guide-feed-row:nth-child(2){ animation-delay:.12s; }
-  .user-guide-body li:nth-child(3), .guide-feed-row:nth-child(3){ animation-delay:.19s; }
-  .user-guide-body li:nth-child(4){ animation-delay:.26s; }
-  .guide-pipeline-step:nth-of-type(1){ animation-delay:.05s; }
-  .guide-pipeline-step:nth-of-type(3){ animation-delay:.16s; }
-  .guide-pipeline-step:nth-of-type(5){ animation-delay:.27s; }
-  .guide-pipeline-step:nth-of-type(7){ animation-delay:.38s; }
-  .guide-fab-item:nth-child(1){ animation-delay:.05s; }
-  .guide-fab-item:nth-child(2){ animation-delay:.15s; }
-  .guide-fab-item:nth-child(3){ animation-delay:.25s; }
-  @keyframes guideRowIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
-  @media (prefers-reduced-motion: reduce){
-    .user-guide-glyph, .user-guide-body li, .guide-feed-row, .guide-pipeline-step, .guide-fab-item{ animation:none; }
-  }
-
-  /* Mini widget: the three floating buttons, previewed inline */
-  .guide-fab-row{ display:flex; gap:14px; margin:14px 0 16px 0; }
-  .guide-fab-item{
-    flex:1; display:flex; flex-direction:column; align-items:center; text-align:center;
-    background:var(--bg-hi); border-radius:12px; padding:14px 8px; gap:3px;
-  }
-  .guide-fab-dot{
-    width:38px; height:38px; border-radius:50%; color:#fff; display:flex; align-items:center;
-    justify-content:center; margin-bottom:4px; box-shadow:0 4px 10px -4px rgba(37,46,109,0.5);
-  }
-  .guide-fab-dot svg{ width:18px; height:18px; }
-  .guide-fab-item b{ font-size:12.5px; }
-  .guide-fab-item span{ font-size:10px; color:var(--ink-faint); }
-
-  /* Mini widget: the Translate pipeline, as a vertical numbered flow */
-  .guide-pipeline{ margin:14px 0 4px 0; }
-  .guide-pipeline-step{
-    display:flex; align-items:center; gap:12px; background:var(--bg-hi);
-    border-radius:12px; padding:11px 14px;
-  }
-  .guide-pipeline-num{
-    width:26px; height:26px; border-radius:50%; flex-shrink:0; background:var(--accent);
-    color:#fff; font-family:var(--sans); font-weight:700; font-size:12px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .guide-pipeline-step b{ font-size:13px; margin-right:6px; }
-  .guide-pipeline-step span{ font-size:11.5px; color:var(--ink-faint); }
-  .guide-pipeline-arrow{ display:flex; justify-content:center; margin:2px 0; opacity:.4; }
-  .guide-pipeline-arrow svg{ width:14px; height:14px; }
-
-  /* Mini widget: the Term Review interval timeline */
-  .guide-timeline{ position:relative; height:52px; margin:18px 10px 8px 10px; }
-  .guide-timeline-track{ position:absolute; top:6px; left:0; right:0; height:2px; background:var(--line); }
-  .guide-timeline-stop{ position:absolute; top:0; transform:translateX(-50%); text-align:center; font-size:10px; color:var(--ink-faint); }
-  .guide-timeline-dot{
-    display:block; width:12px; height:12px; border-radius:50%; background:var(--accent-2);
-    border:2px solid var(--paper); box-shadow:0 0 0 1px var(--line); margin:0 auto 8px auto;
-  }
-  .guide-timeline-dot.reset{ background:#E17B8C; }
-  .guide-timeline-dot.mastered{ background:#2E8B57; }
-  .guide-tag-blue{ color:#0079BD; }
-  .guide-tag-green{ color:#2E8B57; }
-
-  /* Mini widget: the Dark Mode toggle switch, animating between its states */
-  .guide-toggle{ display:flex; justify-content:center; margin:6px 0 18px 0; }
-  .guide-toggle-track{
-    width:64px; height:34px; border-radius:20px; background:linear-gradient(140deg, var(--accent-2), var(--accent));
-    display:flex; align-items:center; padding:3px; box-sizing:border-box;
-    animation:guideToggleGlow 2.6s ease-in-out infinite;
-  }
-  .guide-toggle-thumb{
-    width:28px; height:28px; border-radius:50%; background:#fff; color:var(--accent);
-    display:flex; align-items:center; justify-content:center;
-    animation:guideToggleSlide 2.6s ease-in-out infinite;
-  }
-  .guide-toggle-thumb svg{ width:15px; height:15px; }
-  @keyframes guideToggleSlide{ 0%,40%{ transform:translateX(0); } 55%,100%{ transform:translateX(30px); } }
-  @keyframes guideToggleGlow{ 0%,40%{ filter:brightness(1); } 55%,100%{ filter:brightness(0.75); } }
-  @media (prefers-reduced-motion: reduce){
-    .guide-toggle-track, .guide-toggle-thumb{ animation:none; }
-  }
-
-  /* Mini widget: a few sample Recent Updates rows */
-  .guide-feed{ margin:14px 0; display:flex; flex-direction:column; gap:7px; }
-  .guide-feed-row{
-    background:var(--bg-hi); border-radius:10px; padding:9px 12px; font-size:12px;
-    color:var(--ink-soft); display:flex; justify-content:space-between; gap:10px; align-items:baseline;
-  }
-  .guide-feed-row b{ color:var(--ink); margin-right:4px; }
-  .guide-feed-row span{ font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); flex-shrink:0; }
-
-  /* Swipe hint, shown once on the opening slide only */
-  .guide-swipe-hint{
-    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:22px;
-    color:var(--ink-faint); font-size:12px; animation:guideSwipeHint 1.6s ease-in-out infinite;
-  }
-  .guide-swipe-hint svg{ width:16px; height:16px; }
-  @keyframes guideSwipeHint{ 0%,100%{ transform:translateX(0); opacity:.6; } 50%{ transform:translateX(6px); opacity:1; } }
-  @media (prefers-reduced-motion: reduce){ .guide-swipe-hint{ animation:none; } }
-  @media (max-width:760px){
-    .user-guide-slide{ padding:26px 20px; }
-  }
 
   .announcements-block{
     max-width:660px; margin-bottom:16px; padding:14px 16px; border-radius:12px;
@@ -4743,8 +4582,7 @@ function getToolTiles(){
     { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
-    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
-    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
+    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
   ];
 }
 
@@ -4823,185 +4661,6 @@ function exitReview(){
   reviewIndex = 0;
   reviewRevealed = false;
   renderContent();
-}
-
-// The in-app User Guide — a swipeable walkthrough of every screen, built so
-// it never needs a separate file format (PDF/PPTX) to look right on a
-// phone. Content mirrors the standalone navigation guide, condensed for
-// reading on-device rather than presenting.
-const USER_GUIDE_SLIDES = [
-  { kicker: '', title: 'Interpreter Hub', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
-    <p>A section-by-section walkthrough of every screen and tool in the app — swipe or tap through whenever you need a refresher.</p>
-    <div class="guide-swipe-hint"><span>Swipe to continue</span><span style="display:inline-flex; transform:rotate(-90deg);">${ICON_CHEVRON_DOWN}</span></div>
-  ` },
-  { kicker: 'Section 1', title: 'Getting Started', icon: 'ICON_PERSON', color: '#2E8BD0', body: `
-    <p>Before you add or edit a term, send a chat message, or take a practice quiz, the app needs to know who you are so your work is properly attributed.</p>
-    <ol>
-      <li>Tap the round person icon — bottom-left corner, on every screen.</li>
-      <li>A popup titled "Attribute my edits as" appears.</li>
-      <li>Type your name and tap Save.</li>
-      <li>Your name now appears on your chat messages, term edits, and practice scores. You'll also be asked automatically the first time you need it.</li>
-    </ol>
-  ` },
-  { kicker: 'Section 1', title: 'Install It On Your Phone', icon: 'ICON_PHONE', color: '#35A97A', body: `
-    <p>Interpreter Hub is a Progressive Web App — no App Store needed. Installing it means it opens full-screen with its own icon, works offline for content you've already loaded, and can send you notifications.</p>
-    <p><b>iPhone (Safari):</b> Open the app link, tap the Share icon, then "Add to Home Screen," then "Add."</p>
-    <p><b>Android (Chrome):</b> Open the app link, tap the three-dot menu, then "Install app" or "Add to Home Screen."</p>
-  ` },
-  { kicker: 'Section 2', title: 'The Home Screen', icon: 'ICON_HOME', color: '#0F5FA6', body: `
-    <p>A quick daily landing spot — not where you browse from.</p>
-    <p><b>Greeting card</b> — a rotating multilingual hello, plus a shortcut to Recent Activity when there's something new.</p>
-    <p><b>Recent Activity</b> — collapsed by default; tap the label to expand a running log of what your teammates have changed.</p>
-    <p><b>Take the tour</b> — replays the short first-run walkthrough any time.</p>
-  ` },
-  { kicker: 'Section 3', title: 'Navigating the App', icon: 'ICON_GRID', color: '#8B7BAE', body: `
-    <p><b>Domains &amp; Tools</b> — tap any domain tile to filter the glossary to just that domain. "All domains" shows everything. The Tools grid holds Chat, Translate, Practice, and more. Both grids collapse via their section label.</p>
-    <p><b>The three floating buttons:</b></p>
-    <div class="guide-fab-row">
-      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_HOME}</span><b>Home</b><span>bottom-right</span></div>
-      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_PERSON}</span><b>Name</b><span>bottom-left</span></div>
-      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_MOON}</span><b>Theme</b><span>top-right</span></div>
-    </div>
-    <p class="user-guide-note">Opening a single domain or tool hides the sidebar for a focused view — the Home button is your way back.</p>
-  ` },
-  { kicker: 'Section 4', title: 'Search Everything', icon: 'ICON_SEARCH', color: '#2E8BD0', body: `
-    <p>One search bar covers the entire app — not just the glossary.</p>
-    <p>Tap the search bar (or press Ctrl/Cmd+K on desktop). Results are grouped by type: Terms, Providers, Guides, Chat, and more. Tap any result to jump straight to it.</p>
-  ` },
-  { kicker: 'Section 5', title: 'The Glossary', icon: 'ICON_LAYERS', color: '#6F97AC', body: `
-    <p>Terms are bilingual (English/Spanish) cards, sorted alphabetically. Each shows a definition and, if provided, a source link.</p>
-    <ul>
-      <li>Tap <b>+ Add term</b>, or the pencil icon to edit an existing one.</li>
-      <li>The copy and speaker (audio) buttons sit on every term.</li>
-      <li>Changes sync instantly for the whole team — no refresh needed.</li>
-    </ul>
-    <p class="user-guide-note">Professional Resources sits with the Tools tiles, but behaves like any other domain.</p>
-  ` },
-  { kicker: 'Section 5', title: 'Edit History, Audio & Attachments', icon: 'ICON_EDIT', color: '#C98FA0', body: `
-    <p><b>Edit History</b> — every edit saves the previous version (up to 10). "View edit history" shows who changed what and when; restore any version into the form before saving.</p>
-    <p><b>Audio Pronunciation</b> — a speaker button reads any term aloud in the correct language, using your device's built-in voice.</p>
-    <p><b>Attachments</b> — a term can carry a file, like a reference PDF or image. Look for the attachment chip on the card.</p>
-  ` },
-  { kicker: 'Section 6', title: 'Team Chat', icon: 'ICON_CHAT', color: '#2E8BD0', body: `
-    <p>Real-time messaging for quick coordination. Tap the paperclip to attach a photo or PDF. Turn on notifications to get alerted even when the app isn't open.</p>
-    <p><b>@Mentions</b> — type @ and a name to flag a teammate directly. Matching suggestions appear as you type; they see it highlighted and get notified.</p>
-    <p><b>Pinned Announcements</b> — a separate panel above the message stream, for things that shouldn't get buried, like a new CE requirement.</p>
-  ` },
-  { kicker: 'Section 7', title: 'Translate', icon: 'ICON_GLOBE', color: '#2E8BD0', body: `
-    <p>A reference aid for building and studying the glossary — not a substitute for a qualified interpreter.</p>
-    <div class="guide-pipeline">
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">1</span><b>Glossary-first</b><span>Your team's trusted entry, checked first.</span></div>
-      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">2</span><b>False-friend check</b><span>Flags traps like intoxicado, embarazada.</span></div>
-      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">3</span><b>Back-translation</b><span>Translates back to catch drifted meaning.</span></div>
-      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">4</span><b>AI breakdown</b><span>Register, regional variation &amp; cautions.</span></div>
-    </div>
-  ` },
-  { kicker: 'Section 8', title: 'CoreCHI Practice', icon: 'ICON_EXAM', color: '#0F5FA6', body: `
-    <p>Multiple-choice questions across CCHI's five official exam domains, drawn in the same proportions as the real exam.</p>
-    <p>Every finished quiz saves to your personal history — the Practice screen shows your total sessions, all-time accuracy, best score, and <b>accuracy broken down by CCHI domain</b>, the real signal for where to study.</p>
-    <p class="user-guide-note">Original practice questions matching CCHI's domain structure — not real exam items, and not CCHI-affiliated.</p>
-  ` },
-  { kicker: 'Section 9', title: 'Term Review', icon: 'ICON_REVIEW', color: '#4E9E74', body: `
-    <p>Spaced repetition for the glossary itself, separate from CoreCHI Practice. See the English term (with audio), try to recall the Spanish and definition, tap Show answer, then rate yourself.</p>
-    <div class="guide-timeline">
-      <div class="guide-timeline-track"></div>
-      <div class="guide-timeline-stop" style="left:0%;"><span class="guide-timeline-dot reset"></span><b>0</b></div>
-      <div class="guide-timeline-stop" style="left:20%;"><span class="guide-timeline-dot"></span><b>1d</b></div>
-      <div class="guide-timeline-stop" style="left:40%;"><span class="guide-timeline-dot"></span><b>3d</b></div>
-      <div class="guide-timeline-stop" style="left:60%;"><span class="guide-timeline-dot"></span><b>7d</b></div>
-      <div class="guide-timeline-stop" style="left:80%;"><span class="guide-timeline-dot"></span><b>14d</b></div>
-      <div class="guide-timeline-stop" style="left:100%;"><span class="guide-timeline-dot mastered"></span><b>30d</b></div>
-    </div>
-    <p><b class="guide-tag-blue">Missed it</b> resets to the start, reviewed again soon. <b class="guide-tag-green">Got it</b> moves one stop further along.</p>
-    <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
-  ` },
-  { kicker: 'Section 10', title: 'Providers, Guides, Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
-    <p><b>Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar).</p>
-    <p><b>Guides</b> — quick team notes and reference write-ups that don't belong in the formal glossary.</p>
-    <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
-    <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
-  ` },
-  { kicker: 'Section 11', title: 'Recent Updates', icon: 'ICON_BELL', color: '#B08D2A', body: `
-    <p>The complete, unabridged activity log for the whole app — every term added or edited, every domain created, every guide posted.</p>
-    <div class="guide-feed">
-      <div class="guide-feed-row"><b>Bertha</b> added "Hipertrofia" to Heart Failure &amp; Cardiac<span>2m ago</span></div>
-      <div class="guide-feed-row"><b>Fabiola</b> updated a term in Professional Resources<span>18m ago</span></div>
-      <div class="guide-feed-row"><b>Jose</b> pinned an announcement<span>1h ago</span></div>
-    </div>
-    <p>This is the same feed the Home screen's "Recent activity" button jumps to.</p>
-  ` },
-  { kicker: 'Section 12', title: 'Dark Mode', icon: 'ICON_MOON', color: '#252E6D', body: `
-    <div class="guide-toggle"><span class="guide-toggle-track"><span class="guide-toggle-thumb">${ICON_MOON}</span></span></div>
-    <p>Tap the sun/moon icon in the top-right corner of any screen to switch instantly between light and dark themes.</p>
-    <p>The same navy-and-cyan identity carries over, just inverted for low-light rooms and evening shifts. Your choice is remembered on that device.</p>
-  ` },
-  { kicker: 'Section 13', title: 'Exporting Your Work', icon: 'ICON_DOWNLOAD', color: '#0079BD', body: `
-    <p><b>Export PDF</b> — a clean, printable reference sheet with no app chrome. On mobile: Share → Print → Save as PDF. On desktop: Ctrl/Cmd+P.</p>
-    <p><b>CSV Export &amp; Import</b> — export to a spreadsheet for bulk editing, then re-import: matching IDs update, blank IDs create new terms. A preview always shows what will change before anything saves.</p>
-  ` },
-  { kicker: 'Section 14', title: 'Tips, Privacy & Troubleshooting', icon: 'ICON_SHIELD', color: '#BFA05E', body: `
-    <p class="user-guide-note"><b>HIPAA reminder:</b> never include patient names or identifying details anywhere in Interpreter Hub — Team Chat and Guides included.</p>
-    <ul>
-      <li>Everything syncs in real time — no need to refresh.</li>
-      <li>If something looks out of date, check your connection first.</li>
-      <li>A save that fails shows an error toast — just retry once you're back online.</li>
-      <li>Anything not covered here: ask in Team Chat, or check Guides.</li>
-    </ul>
-  ` },
-  { kicker: '', title: 'You\u2019re all set', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
-    <p>Jump back into any part of the app from Home — or replay this guide any time from the Tools grid.</p>
-  ` },
-];
-
-let guideIndex = 0;
-let guideDirection = 'forward';
-
-function goToGuideSlide(i){
-  guideDirection = i > guideIndex ? 'forward' : 'backward';
-  guideIndex = Math.max(0, Math.min(USER_GUIDE_SLIDES.length - 1, i));
-  renderContent();
-}
-function nextGuideSlide(){ if(guideIndex < USER_GUIDE_SLIDES.length - 1) goToGuideSlide(guideIndex + 1); }
-function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
-
-function renderUserGuide(){
-  const slide = USER_GUIDE_SLIDES[guideIndex];
-  const isFirst = guideIndex === 0, isLast = guideIndex === USER_GUIDE_SLIDES.length - 1;
-  const pct = Math.round(((guideIndex + 1) / USER_GUIDE_SLIDES.length) * 100);
-  const icon = ICON_GUIDE_MAP[slide.icon] || ICON_COMPASS;
-
-  return `
-    <div class="user-guide" id="userGuideRoot">
-      <div class="user-guide-progress-track"><div class="user-guide-progress-fill" style="width:${pct}%;"></div></div>
-      <div class="user-guide-counter">${guideIndex + 1} of ${USER_GUIDE_SLIDES.length}</div>
-      <div class="user-guide-slide ${slide.cover ? 'is-cover' : ''} guide-anim-${guideDirection}" style="--guide-color:${slide.color};">
-        <div class="user-guide-glyph" style="background:linear-gradient(145deg, ${slide.color}, ${darkenHex(slide.color, 30)});">${icon}</div>
-        ${slide.kicker ? `<div class="user-guide-kicker">${escapeHtml(slide.kicker.toUpperCase())}</div>` : ''}
-        <h2 class="user-guide-title">${escapeHtml(slide.title)}</h2>
-        <div class="user-guide-body">${slide.body}</div>
-      </div>
-      <div class="user-guide-nav">
-        <button class="btn btn-ghost" onclick="prevGuideSlide()" ${isFirst ? 'disabled' : ''}>Back</button>
-        <button class="btn btn-primary" onclick="${isLast ? "setCategory('home')" : 'nextGuideSlide()'}">${isLast ? 'Done' : 'Next'}</button>
-      </div>
-    </div>
-  `;
-}
-
-function setupUserGuideSwipe(){
-  const root = document.getElementById('userGuideRoot');
-  if(!root) return;
-  let startX = null;
-  root.addEventListener('touchstart', e=>{ startX = e.touches[0].clientX; }, { passive:true });
-  root.addEventListener('touchend', e=>{
-    if(startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if(Math.abs(dx) > 50){ dx < 0 ? nextGuideSlide() : prevGuideSlide(); }
-    startX = null;
-  }, { passive:true });
 }
 
 function renderReview(){
@@ -5123,25 +4782,11 @@ const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
-const ICON_GRID = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/></svg>';
-const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20L4.6 17L15.5 6.1C16 5.6 16.8 5.6 17.3 6.1L18.4 7.2C18.9 7.7 18.9 8.5 18.4 9L7.5 19.9L4 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-const ICON_COMPASS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.2 4.2L6 6M18 18L19.8 19.8M2.5 12H5M19 12H21.5M4.2 19.8L6 18M18 6L19.8 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 const ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="7" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 3.5L16 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 12h6M9 14.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-
-// Resolves the icon-name strings stored on USER_GUIDE_SLIDES to their actual
-// SVGs. A lookup map instead of direct references, since the guide's data
-// array is defined earlier in the file than these icon constants — this map
-// only gets read inside a function body, well after everything has loaded.
-const ICON_GUIDE_MAP = {
-  ICON_COMPASS, ICON_PERSON, ICON_PHONE, ICON_HOME, ICON_GRID, ICON_SEARCH,
-  ICON_LAYERS, ICON_EDIT, ICON_CHAT, ICON_GLOBE, ICON_EXAM, ICON_REVIEW,
-  ICON_CHAIN, ICON_BELL, ICON_MOON, ICON_DOWNLOAD, ICON_SHIELD,
-};
 
 const DOMAIN_ICONS = {
   dna: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3C7 6 17 6 17 9C17 12 7 12 7 15C7 18 17 18 17 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 5H16M8 19H16M8 12H16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
@@ -5258,9 +4903,6 @@ function render(){
   } else if(activeCategory === 'review'){
     showTopbar = false;
     showStatStrip = false;
-  } else if(activeCategory === 'userguide'){
-    showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'home'){
     showTopbar = false;
     showStatStrip = false;
@@ -5328,11 +4970,11 @@ function render(){
     <button class="theme-fab" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
       ${document.documentElement.getAttribute('data-theme') === 'dark' ? ICON_SUN : ICON_MOON}
     </button>
-    <button class="name-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
+    <button class="name-fab ${activeCategory==='chat' ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
       ${ICON_PERSON}
     </button>
     ${activeCategory !== 'home' ? `
-    <button class="home-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
+    <button class="home-fab ${activeCategory==='chat' ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
       ${ICON_HOME}<span>Home</span>
     </button>` : ''}
   `;
@@ -5389,13 +5031,6 @@ function renderContent(){
 
   if(activeCategory === 'review'){
     content.innerHTML = renderReview();
-    return;
-  }
-
-  if(activeCategory === 'userguide'){
-    content.innerHTML = renderUserGuide();
-    setupUserGuideSwipe();
-    if(guideIndex === USER_GUIDE_SLIDES.length - 1) celebrateScore('.user-guide-slide.is-cover');
     return;
   }
 
@@ -5580,7 +5215,6 @@ function setCategory(id){
     if(!whoAmI()) openNameModal();
   }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
-  if(id === 'userguide'){ guideIndex = 0; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
 }
@@ -6957,14 +6591,6 @@ startChatListener();
 startActivityListener();
 startAnnouncementsListener();
 startTypingListener();
-
-// Arrow-key navigation for the User Guide, desktop-only convenience —
-// harmless everywhere else since it only acts while that screen is open.
-document.addEventListener('keydown', e=>{
-  if(activeCategory !== 'userguide') return;
-  if(e.key === 'ArrowRight') nextGuideSlide();
-  if(e.key === 'ArrowLeft') prevGuideSlide();
-});
 startCeListener();
 
 if(shouldShowOnboarding()){
