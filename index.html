@@ -774,6 +774,7 @@
     padding:12px 19px; cursor:pointer; transition:transform .15s var(--ease), box-shadow .15s var(--ease), filter .15s var(--ease);
   }
   .btn:active{ transform:translateY(1px); }
+  .btn:disabled{ opacity:.4; cursor:default; pointer-events:none; }
   .btn-primary{
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
     box-shadow:0 8px 16px -8px rgba(92,131,116,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
@@ -1020,6 +1021,45 @@
   .review-card-es{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--accent); margin-bottom:12px; }
   .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
   .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
+
+  /* ---------- In-app User Guide ---------- */
+  .user-guide{ max-width:640px; margin:0 auto; }
+  .user-guide-progress-track{ height:4px; border-radius:2px; background:var(--line-soft); overflow:hidden; }
+  .user-guide-progress-fill{ height:100%; background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .25s var(--ease); }
+  .user-guide-counter{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin:8px 0 22px 0; text-align:right; }
+  .user-guide-slide{
+    background:var(--paper); border-radius:var(--r-lg); padding:32px 28px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); min-height:280px;
+    animation:contentFadeIn .3s var(--ease);
+  }
+  .user-guide-slide.is-cover{ text-align:center; padding:44px 28px; }
+  .user-guide-glyph{
+    width:56px; height:56px; border-radius:16px; margin:0 auto 18px auto;
+    background:linear-gradient(145deg, #0079BD, #252E6D); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 18px -6px rgba(37,46,109,0.5);
+  }
+  .user-guide-glyph svg{ width:28px; height:28px; }
+  .user-guide-kicker{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; color:var(--accent-2);
+    font-weight:600; margin-bottom:6px;
+  }
+  .user-guide-title{ font-family:var(--serif); font-size:23px; font-weight:400; color:var(--ink); margin:0 0 14px 0; }
+  .user-guide-body{ font-size:14px; line-height:1.65; color:var(--ink-soft); }
+  .user-guide-body p{ margin:0 0 12px 0; }
+  .user-guide-body ul, .user-guide-body ol{ margin:0 0 12px 0; padding-left:20px; }
+  .user-guide-body li{ margin-bottom:7px; }
+  .user-guide-body b{ color:var(--ink); }
+  .user-guide-note{
+    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:10px;
+    padding:11px 13px; font-size:12.5px; color:#7A5D28 !important;
+  }
+  .user-guide-note b{ color:#7A5D28; }
+  .user-guide-nav{ display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
+  .user-guide-nav .btn{ min-width:100px; }
+  @media (max-width:760px){
+    .user-guide-slide{ padding:26px 20px; }
+  }
 
   .announcements-block{
     max-width:660px; margin-bottom:16px; padding:14px 16px; border-radius:12px;
@@ -4582,7 +4622,8 @@ function getToolTiles(){
     { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
-    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
+    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
+    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
   ];
 }
 
@@ -4661,6 +4702,163 @@ function exitReview(){
   reviewIndex = 0;
   reviewRevealed = false;
   renderContent();
+}
+
+// The in-app User Guide — a swipeable walkthrough of every screen, built so
+// it never needs a separate file format (PDF/PPTX) to look right on a
+// phone. Content mirrors the standalone navigation guide, condensed for
+// reading on-device rather than presenting.
+const USER_GUIDE_SLIDES = [
+  { kicker: '', title: 'Interpreter Hub', cover: true, body: `
+    <p>A section-by-section walkthrough of every screen and tool in the app — swipe or tap through whenever you need a refresher.</p>
+  ` },
+  { kicker: 'Section 1', title: 'Getting Started', body: `
+    <p>Before you add or edit a term, send a chat message, or take a practice quiz, the app needs to know who you are so your work is properly attributed.</p>
+    <ol>
+      <li>Tap the round person icon — bottom-left corner, on every screen.</li>
+      <li>A popup titled "Attribute my edits as" appears.</li>
+      <li>Type your name and tap Save.</li>
+      <li>Your name now appears on your chat messages, term edits, and practice scores. You'll also be asked automatically the first time you need it.</li>
+    </ol>
+  ` },
+  { kicker: 'Section 1', title: 'Install It On Your Phone', body: `
+    <p>Interpreter Hub is a Progressive Web App — no App Store needed. Installing it means it opens full-screen with its own icon, works offline for content you've already loaded, and can send you notifications.</p>
+    <p><b>iPhone (Safari):</b> Open the app link, tap the Share icon, then "Add to Home Screen," then "Add."</p>
+    <p><b>Android (Chrome):</b> Open the app link, tap the three-dot menu, then "Install app" or "Add to Home Screen."</p>
+  ` },
+  { kicker: 'Section 2', title: 'The Home Screen', body: `
+    <p>A quick daily landing spot — not where you browse from.</p>
+    <p><b>Greeting card</b> — a rotating multilingual hello, plus a shortcut to Recent Activity when there's something new.</p>
+    <p><b>Recent Activity</b> — collapsed by default; tap the label to expand a running log of what your teammates have changed.</p>
+    <p><b>Take the tour</b> — replays the short first-run walkthrough any time.</p>
+  ` },
+  { kicker: 'Section 3', title: 'Navigating the App', body: `
+    <p><b>Domains &amp; Tools</b> — tap any domain tile to filter the glossary to just that domain. "All domains" shows everything. The Tools grid holds Chat, Translate, Practice, and more. Both grids collapse via their section label.</p>
+    <p><b>The three floating buttons:</b></p>
+    <ul>
+      <li><b>Home</b> (bottom-right) — jumps back to Home from anywhere.</li>
+      <li><b>Person icon</b> (bottom-left) — opens the name popup from any screen.</li>
+      <li><b>Sun/Moon</b> (top-right) — toggles light/dark instantly.</li>
+    </ul>
+    <p class="user-guide-note">Opening a single domain or tool hides the sidebar for a focused view — the Home button is your way back.</p>
+  ` },
+  { kicker: 'Section 4', title: 'Search Everything', body: `
+    <p>One search bar covers the entire app — not just the glossary.</p>
+    <p>Tap the search bar (or press Ctrl/Cmd+K on desktop). Results are grouped by type: Terms, Providers, Guides, Chat, and more. Tap any result to jump straight to it.</p>
+  ` },
+  { kicker: 'Section 5', title: 'The Glossary', body: `
+    <p>Terms are bilingual (English/Spanish) cards, sorted alphabetically. Each shows a definition and, if provided, a source link.</p>
+    <ul>
+      <li>Tap <b>+ Add term</b>, or the pencil icon to edit an existing one.</li>
+      <li>The copy and speaker (audio) buttons sit on every term.</li>
+      <li>Changes sync instantly for the whole team — no refresh needed.</li>
+    </ul>
+    <p class="user-guide-note">Professional Resources sits with the Tools tiles, but behaves like any other domain.</p>
+  ` },
+  { kicker: 'Section 5', title: 'Edit History, Audio & Attachments', body: `
+    <p><b>Edit History</b> — every edit saves the previous version (up to 10). "View edit history" shows who changed what and when; restore any version into the form before saving.</p>
+    <p><b>Audio Pronunciation</b> — a speaker button reads any term aloud in the correct language, using your device's built-in voice.</p>
+    <p><b>Attachments</b> — a term can carry a file, like a reference PDF or image. Look for the attachment chip on the card.</p>
+  ` },
+  { kicker: 'Section 6', title: 'Team Chat', body: `
+    <p>Real-time messaging for quick coordination. Tap the paperclip to attach a photo or PDF. Turn on notifications to get alerted even when the app isn't open.</p>
+    <p><b>@Mentions</b> — type @ and a name to flag a teammate directly. Matching suggestions appear as you type; they see it highlighted and get notified.</p>
+    <p><b>Pinned Announcements</b> — a separate panel above the message stream, for things that shouldn't get buried, like a new CE requirement.</p>
+  ` },
+  { kicker: 'Section 7', title: 'Translate', body: `
+    <p>A reference aid for building and studying the glossary — not a substitute for a qualified interpreter.</p>
+    <ol>
+      <li><b>Glossary-first</b> — checks your team's trusted entry before anything else.</li>
+      <li><b>False-friend check</b> — flags known traps like intoxicado and embarazada.</li>
+      <li><b>Back-translation</b> — translates back to catch drifted meaning.</li>
+      <li><b>AI breakdown</b> — register, regional variation &amp; cautions for anything new.</li>
+    </ol>
+  ` },
+  { kicker: 'Section 8', title: 'CoreCHI Practice', body: `
+    <p>Multiple-choice questions across CCHI's five official exam domains, drawn in the same proportions as the real exam.</p>
+    <p>Every finished quiz saves to your personal history — the Practice screen shows your total sessions, all-time accuracy, best score, and <b>accuracy broken down by CCHI domain</b>, the real signal for where to study.</p>
+    <p class="user-guide-note">Original practice questions matching CCHI's domain structure — not real exam items, and not CCHI-affiliated.</p>
+  ` },
+  { kicker: 'Section 9', title: 'Term Review', body: `
+    <p>Spaced repetition for the glossary itself, separate from CoreCHI Practice. See the English term (with audio), try to recall the Spanish and definition, tap Show answer, then rate yourself.</p>
+    <p><b>Missed it</b> → the term resets and comes back soon. <b>Got it</b> → its next review is pushed further out (1, 3, 7, 14, 30 days).</p>
+    <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
+  ` },
+  { kicker: 'Section 10', title: 'Providers, Guides, Links & Training', body: `
+    <p><b>Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar).</p>
+    <p><b>Guides</b> — quick team notes and reference write-ups that don't belong in the formal glossary.</p>
+    <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
+    <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
+  ` },
+  { kicker: 'Section 11', title: 'Recent Updates', body: `
+    <p>The complete, unabridged activity log for the whole app — every term added or edited, every domain created, every guide posted.</p>
+    <p>This is the same feed the Home screen's "Recent activity" button jumps to.</p>
+  ` },
+  { kicker: 'Section 12', title: 'Dark Mode', body: `
+    <p>Tap the sun/moon icon in the top-right corner of any screen to switch instantly between light and dark themes.</p>
+    <p>The same navy-and-cyan identity carries over, just inverted for low-light rooms and evening shifts. Your choice is remembered on that device.</p>
+  ` },
+  { kicker: 'Section 13', title: 'Exporting Your Work', body: `
+    <p><b>Export PDF</b> — a clean, printable reference sheet with no app chrome. On mobile: Share → Print → Save as PDF. On desktop: Ctrl/Cmd+P.</p>
+    <p><b>CSV Export &amp; Import</b> — export to a spreadsheet for bulk editing, then re-import: matching IDs update, blank IDs create new terms. A preview always shows what will change before anything saves.</p>
+  ` },
+  { kicker: 'Section 14', title: 'Tips, Privacy & Troubleshooting', body: `
+    <p class="user-guide-note"><b>HIPAA reminder:</b> never include patient names or identifying details anywhere in Interpreter Hub — Team Chat and Guides included.</p>
+    <ul>
+      <li>Everything syncs in real time — no need to refresh.</li>
+      <li>If something looks out of date, check your connection first.</li>
+      <li>A save that fails shows an error toast — just retry once you're back online.</li>
+      <li>Anything not covered here: ask in Team Chat, or check Guides.</li>
+    </ul>
+  ` },
+  { kicker: '', title: 'You\u2019re all set', cover: true, body: `
+    <p>Jump back into any part of the app from Home — or replay this guide any time from the Tools grid.</p>
+  ` },
+];
+
+let guideIndex = 0;
+
+function goToGuideSlide(i){
+  guideIndex = Math.max(0, Math.min(USER_GUIDE_SLIDES.length - 1, i));
+  renderContent();
+}
+function nextGuideSlide(){ if(guideIndex < USER_GUIDE_SLIDES.length - 1) goToGuideSlide(guideIndex + 1); }
+function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
+
+function renderUserGuide(){
+  const slide = USER_GUIDE_SLIDES[guideIndex];
+  const isFirst = guideIndex === 0, isLast = guideIndex === USER_GUIDE_SLIDES.length - 1;
+  const pct = Math.round(((guideIndex + 1) / USER_GUIDE_SLIDES.length) * 100);
+
+  return `
+    <div class="user-guide" id="userGuideRoot">
+      <div class="user-guide-progress-track"><div class="user-guide-progress-fill" style="width:${pct}%;"></div></div>
+      <div class="user-guide-counter">${guideIndex + 1} of ${USER_GUIDE_SLIDES.length}</div>
+      <div class="user-guide-slide ${slide.cover ? 'is-cover' : ''}">
+        ${slide.cover ? `<div class="user-guide-glyph">${ICON_COMPASS}</div>` : ''}
+        ${slide.kicker ? `<div class="user-guide-kicker">${escapeHtml(slide.kicker.toUpperCase())}</div>` : ''}
+        <h2 class="user-guide-title">${escapeHtml(slide.title)}</h2>
+        <div class="user-guide-body">${slide.body}</div>
+      </div>
+      <div class="user-guide-nav">
+        <button class="btn btn-ghost" onclick="prevGuideSlide()" ${isFirst ? 'disabled' : ''}>Back</button>
+        <button class="btn btn-primary" onclick="${isLast ? "setCategory('home')" : 'nextGuideSlide()'}">${isLast ? 'Done' : 'Next'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function setupUserGuideSwipe(){
+  const root = document.getElementById('userGuideRoot');
+  if(!root) return;
+  let startX = null;
+  root.addEventListener('touchstart', e=>{ startX = e.touches[0].clientX; }, { passive:true });
+  root.addEventListener('touchend', e=>{
+    if(startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx) > 50){ dx < 0 ? nextGuideSlide() : prevGuideSlide(); }
+    startX = null;
+  }, { passive:true });
 }
 
 function renderReview(){
@@ -4783,6 +4981,7 @@ const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_COMPASS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.2 4.2L6 6M18 18L19.8 19.8M2.5 12H5M19 12H21.5M4.2 19.8L6 18M18 6L19.8 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
@@ -4901,6 +5100,9 @@ function render(){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'review'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'userguide'){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'home'){
@@ -5031,6 +5233,12 @@ function renderContent(){
 
   if(activeCategory === 'review'){
     content.innerHTML = renderReview();
+    return;
+  }
+
+  if(activeCategory === 'userguide'){
+    content.innerHTML = renderUserGuide();
+    setupUserGuideSwipe();
     return;
   }
 
@@ -5215,6 +5423,7 @@ function setCategory(id){
     if(!whoAmI()) openNameModal();
   }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
+  if(id === 'userguide'){ guideIndex = 0; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
 }
@@ -6591,6 +6800,14 @@ startChatListener();
 startActivityListener();
 startAnnouncementsListener();
 startTypingListener();
+
+// Arrow-key navigation for the User Guide, desktop-only convenience —
+// harmless everywhere else since it only acts while that screen is open.
+document.addEventListener('keydown', e=>{
+  if(activeCategory !== 'userguide') return;
+  if(e.key === 'ArrowRight') nextGuideSlide();
+  if(e.key === 'ArrowLeft') prevGuideSlide();
+});
 startCeListener();
 
 if(shouldShowOnboarding()){
