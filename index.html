@@ -314,8 +314,22 @@
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
     transition:transform .18s var(--ease), box-shadow .2s var(--ease);
     animation:tileIn .45s var(--ease) both; display:flex; flex-direction:column; gap:11px;
-    font-family:inherit; min-height:150px;
+    font-family:inherit; min-height:150px; position:relative;
   }
+  /* A subgroup nested under a parent domain — since a CSS grid can't truly
+     indent, this reads as "grouped" via a smaller size, a connecting arrow
+     in the name, and a dashed left accent instead of the solid one below. */
+  .home-tile-sub{ min-height:118px; padding:15px 14px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line); }
+  .home-tile-sub .home-tile-icon{ width:32px; height:32px; }
+  .home-tile-sub .home-tile-name{ font-size:12.5px; }
+  .home-tile-edit{
+    position:absolute; top:10px; right:10px; width:24px; height:24px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; color:var(--ink-faint);
+    background:rgba(255,255,255,0.7); opacity:0; transition:opacity .15s var(--ease);
+  }
+  .home-tile-edit svg{ width:12px; height:12px; }
+  .home-tile:hover .home-tile-edit, .home-tile:focus-within .home-tile-edit{ opacity:1; }
+  @media (hover:none){ .home-tile-edit{ opacity:1; } }
   /* Push the count to the bottom edge so tiles with one-line and four-line
      names still read as the same considered shape. */
   .home-tile-name{ margin-bottom:auto; }
@@ -622,6 +636,8 @@
   .nav-tile-grid .home-tile-icon svg{ width:16px; height:16px; }
   .nav-tile-grid .home-tile-name{ font-size:12.5px; }
   .nav-tile-grid .home-tile-count{ font-size:10px; }
+  .nav-tile-grid .home-tile-sub{ min-height:90px; padding:11px 10px; }
+  .nav-tile-grid .home-tile-sub .home-tile-icon{ width:26px; height:26px; }
 
   .home-fab{ display:none; }
   @media (max-width:760px){
@@ -789,6 +805,8 @@
   .stat span{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); }
 
   .section-head{display:flex; align-items:baseline; gap:11px; margin:36px 0 18px 0; scroll-margin-top:132px;}
+  .section-head-sub{ margin-top:20px; padding-left:18px; border-left:2px dashed var(--line); }
+  .section-head-sub h2{ font-size:19px; color:var(--ink-soft); }
   .section-head:first-child{ margin-top:4px; }
   .section-head h2{font-family:var(--serif); font-weight:400; font-size:23px; margin:0; letter-spacing:-.01em;}
   .section-head .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
@@ -972,6 +990,8 @@
     transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
   }
   .field textarea{resize:vertical; min-height:66px; font-family:var(--sans);}
+  .field-hint{ font-size:11px; color:var(--ink-faint); line-height:1.5; margin:5px 0 0 0; }
+  .field select:disabled{ opacity:.55; cursor:not-allowed; }
 
   .link-btn{
     border:none; background:transparent; color:var(--accent); font-family:var(--sans);
@@ -1900,8 +1920,13 @@
 
 <div class="overlay" id="domainOverlay">
   <div class="modal">
-    <h3>Add a domain</h3>
+    <h3 id="domainModalTitle">Add a domain</h3>
     <div class="field"><label>Domain name</label><input id="fDomainName" type="text" placeholder="e.g. Psychiatry &amp; Behavioral Health"></div>
+    <div class="field">
+      <label>Parent domain (optional)</label>
+      <select id="fDomainParent"><option value="">None — top-level domain</option></select>
+      <p class="field-hint" id="fDomainParentHint">Nesting under a parent keeps this domain's terms completely separate — it's just grouped visually, like "Breast Oncology" under "Oncology, Hematology &amp; Leukemia."</p>
+    </div>
     <div class="field"><label>Color</label><div class="swatch-row" id="swatchRow"></div></div>
     <div class="field"><label>Icon</label><div class="icon-picker-row" id="iconPickerRow"></div></div>
     <div class="modal-actions">
@@ -2883,6 +2908,7 @@ let reviewGotIt = 0;
 let reviewMissed = 0;
 const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05E','#7C8FA8','#A97C5D'];
 let selectedSwatch = DOMAIN_COLORS[0];
+let editingDomainId = null; // null = creating a new domain, otherwise the id being edited
 let selectedIcon = 'sparkle';
 
 let NOTES = [];
@@ -3332,7 +3358,7 @@ async function deleteTermDoc(id){
 async function saveCategoriesMeta(){
   if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
   try{
-    const categoriesMeta = DATA.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon }));
+    const categoriesMeta = DATA.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon, parentId: c.parentId || null }));
     await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
     return true;
   }catch(err){
@@ -4743,10 +4769,26 @@ function darkenHex(hex, pct){
 
 // Shared tile builders — used by both the Home dashboard and the sidebar,
 // so a domain or tool always looks the same wherever it's tapped from.
+// Shared by the sidebar tile grid and the "All domains" glossary listing:
+// parents first, each immediately followed by its own subgroups.
+function orderedCategoriesWithSubgroups(){
+  const topLevel = DATA.categories.filter(c=>!c.parentId);
+  const ordered = [];
+  topLevel.forEach(parent=>{
+    ordered.push(parent);
+    DATA.categories.filter(c=>c.parentId===parent.id).forEach(child=> ordered.push(child));
+  });
+  // Orphaned subgroups (parent deleted) still need to show up somewhere.
+  DATA.categories.forEach(c=>{
+    if(c.parentId && !topLevel.some(p=>p.id===c.parentId) && !ordered.includes(c)) ordered.push(c);
+  });
+  return ordered;
+}
+
 function getDomainTiles(){
   return DATA.categories.map(c=>({
     id: c.id, name: c.name, color: c.color, icon: DOMAIN_ICONS[c.icon] || DOMAIN_ICONS.sparkle,
-    count: c.terms.length, label: c.terms.length===1 ? 'term' : 'terms'
+    count: c.terms.length, label: c.terms.length===1 ? 'term' : 'terms', parentId: c.parentId || null
   }));
 }
 
@@ -4969,11 +5011,13 @@ function renderReviewSummary(){
   return html;
 }
 
-function tileHtml(t, i, onclickCall){
+function tileHtml(t, i, onclickCall, opts){
+  opts = opts || {};
   return `
-      <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
+      <button class="home-tile ${opts.subgroup ? 'home-tile-sub' : ''}" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
+        ${opts.editAction ? `<span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); ${opts.editAction}">${ICON_EDIT}</span>` : ''}
         <span class="home-tile-icon">${t.icon}</span>
-        <span class="home-tile-name">${escapeHtml(t.name)}</span>
+        <span class="home-tile-name">${opts.subgroup ? '\u21B3 ' : ''}${escapeHtml(t.name)}</span>
         <span class="home-tile-count">${t.count===null ? '' : t.count + ' ' + t.label}</span>
       </button>`;
 }
@@ -5210,8 +5254,12 @@ function render(){
   // glossary section rather than switching to a separate app screen.
   const allDomainTiles = getDomainTiles();
   const resourcesTile = allDomainTiles.find(t=>t.id==='resources');
-  const domainTilesForGrid = allDomainTiles.filter(t=>t.id!=='resources');
-  const domainTilesHtml = domainTilesForGrid.map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`)).join('');
+  const orderedIds = orderedCategoriesWithSubgroups().map(c=>c.id).filter(id=>id!=='resources');
+  const tileById = {}; allDomainTiles.forEach(t=>{ tileById[t.id] = t; });
+  const domainTilesForGrid = orderedIds.map(id=>tileById[id]).filter(Boolean);
+  const domainTilesHtml = domainTilesForGrid.map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`, {
+    subgroup: !!t.parentId, editAction: `openEditDomainModal('${t.id}')`
+  })).join('');
 
   const addDomainBtn = `
      <button class="tab add-domain-btn" onclick="openAddDomainModal()">
@@ -5238,7 +5286,7 @@ function render(){
   `;
 
   const toolTileButtons = getToolTiles().map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`));
-  if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`));
+  if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`, { editAction: `openEditDomainModal('${resourcesTile.id}')` }));
 
   const extrasTabs = `
      <div class="nav-section-label" onclick="toggleToolsCollapsed()" role="button" tabindex="0">
@@ -5484,7 +5532,10 @@ function renderContent(){
     return;
   }
 
-  let cats = activeCategory==='all' ? DATA.categories : DATA.categories.filter(c=>c.id===activeCategory);
+  // Parents immediately followed by their own subgroups, so "All domains"
+  // reads as grouped when scrolling through it, same ordering as the
+  // sidebar tiles.
+  let cats = activeCategory==='all' ? orderedCategoriesWithSubgroups() : DATA.categories.filter(c=>c.id===activeCategory);
 
   let html = '';
   const printLabel = activeCategory==='all' ? 'the full glossary' : (cats[0] ? cats[0].name : 'this domain');
@@ -5517,7 +5568,7 @@ function renderContent(){
     }
     if(terms.length===0) return;
 
-    html += `<div class="section-head" id="domain-${cat.id}"><h2>${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
+    html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}"><h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
     html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
       const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
@@ -6648,7 +6699,12 @@ function openAddDomainModal(){
   requireName(()=>_openAddDomainModal());
 }
 function _openAddDomainModal(){
+  editingDomainId = null;
+  document.getElementById('domainModalTitle').textContent = 'Add a domain';
   document.getElementById('fDomainName').value = '';
+  populateDomainParentSelect(null);
+  document.getElementById('fDomainParent').disabled = false;
+  document.getElementById('fDomainParentHint').textContent = 'Nesting under a parent keeps this domain\u2019s terms completely separate — it\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
   selectedSwatch = DOMAIN_COLORS[Math.floor(Math.random()*DOMAIN_COLORS.length)];
   const iconKeys = Object.keys(DOMAIN_ICONS);
   selectedIcon = iconKeys[Math.floor(Math.random()*iconKeys.length)];
@@ -6658,8 +6714,45 @@ function _openAddDomainModal(){
   document.getElementById('fDomainName').focus();
 }
 
+function openEditDomainModal(id){
+  requireName(()=>_openEditDomainModal(id));
+}
+function _openEditDomainModal(id){
+  const cat = DATA.categories.find(c=>c.id===id);
+  if(!cat) return;
+  editingDomainId = id;
+  document.getElementById('domainModalTitle').textContent = 'Edit domain';
+  document.getElementById('fDomainName').value = cat.name;
+  populateDomainParentSelect(id);
+  const parentSelect = document.getElementById('fDomainParent');
+  const hasChildren = DATA.categories.some(c=>c.parentId===id);
+  parentSelect.value = cat.parentId || '';
+  parentSelect.disabled = hasChildren;
+  document.getElementById('fDomainParentHint').textContent = hasChildren
+    ? 'This domain already has its own subgroups, so it must stay top-level.'
+    : 'Nesting under a parent keeps this domain\u2019s terms completely separate — it\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
+  selectedSwatch = cat.color;
+  selectedIcon = cat.icon;
+  renderSwatches();
+  renderIconPicker();
+  document.getElementById('domainOverlay').classList.add('show');
+  document.getElementById('fDomainName').focus();
+}
+
+// Only top-level domains can be chosen as a parent — keeps nesting to a
+// single level rather than an open-ended tree. A domain can't be its own
+// parent, and (while editing) can't be assigned under one of its own
+// subgroups, which the top-level-only restriction already rules out.
+function populateDomainParentSelect(excludeId){
+  const sel = document.getElementById('fDomainParent');
+  const options = DATA.categories.filter(c=>!c.parentId && c.id!==excludeId);
+  sel.innerHTML = '<option value="">None — top-level domain</option>' +
+    options.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+}
+
 function closeDomainModal(){
   document.getElementById('domainOverlay').classList.remove('show');
+  editingDomainId = null;
 }
 
 function renderSwatches(){
@@ -6689,13 +6782,30 @@ function pickIcon(key){
 async function saveDomain(){
   const name = document.getElementById('fDomainName').value.trim();
   if(!name){ showToast('Domain name is required.'); return; }
-  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events'];
+  const parentSelect = document.getElementById('fDomainParent');
+  const parentId = parentSelect.disabled ? null : (parentSelect.value || null);
+
+  if(editingDomainId){
+    const cat = DATA.categories.find(c=>c.id===editingDomainId);
+    if(!cat) return;
+    const previous = { name: cat.name, color: cat.color, icon: cat.icon, parentId: cat.parentId };
+    cat.name = name; cat.color = selectedSwatch; cat.icon = selectedIcon; cat.parentId = parentId;
+    closeDomainModal();
+    const ok = await saveCategoriesMeta();
+    if(!ok){ Object.assign(cat, previous); return; }
+    logActivity(`updated the "${name}" domain`);
+    showToast('Domain updated.');
+    render();
+    return;
+  }
+
+  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide'];
   const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
   const base = slugify(name);
   let id = base, n = 2;
   while(existingIds.includes(id)){ id = `${base}-${n}`; n++; }
 
-  DATA.categories.push({ id, name, color: selectedSwatch, icon: selectedIcon, terms: [] });
+  DATA.categories.push({ id, name, color: selectedSwatch, icon: selectedIcon, parentId, terms: [] });
   closeDomainModal();
   const ok = await saveCategoriesMeta();
   if(!ok){ DATA.categories.pop(); return; }
@@ -6710,6 +6820,7 @@ async function deleteDomain(id){
   const cat = DATA.categories.find(c=>c.id===id);
   if(!cat) return;
   if(cat.terms.length>0){ showToast('Remove all terms from a domain before deleting it.'); return; }
+  if(DATA.categories.some(c=>c.parentId===id)){ showToast('Move or delete this domain\u2019s subgroups first.'); return; }
   if(!confirm(`Delete the empty "${cat.name}" domain?`)) return;
   const previousCategories = DATA.categories;
   DATA.categories = DATA.categories.filter(c=>c.id!==id);
