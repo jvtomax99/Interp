@@ -2999,6 +2999,23 @@ function genId(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// Firestore's SDK throws if any field is undefined — even nested inside an
+// array or object — which is easy to hit by accident whenever an optional
+// field (a source URL, an editor name, a past history entry) was never
+// filled in. This strips those keys out entirely rather than requiring
+// every call site to remember to guard against it individually.
+function stripUndefined(value){
+  if(Array.isArray(value)) return value.map(stripUndefined);
+  if(value && typeof value === 'object' && !(value instanceof Date)){
+    const out = {};
+    Object.keys(value).forEach(k=>{
+      if(value[k] !== undefined) out[k] = stripUndefined(value[k]);
+    });
+    return out;
+  }
+  return value;
+}
+
 /* ============ CSV export / import ============
    Export is always safe — it just reads. Import is staged: parse, show a
    preview of exactly what will be added/updated/skipped, and only write
@@ -3139,7 +3156,7 @@ async function confirmCsvImport(){
     const batchSize = 400;
     for(let i=0; i<all.length; i+=batchSize){
       const batch = db.batch();
-      all.slice(i, i+batchSize).forEach(r=> batch.set(db.collection('terms').doc(r.id), r));
+      all.slice(i, i+batchSize).forEach(r=> batch.set(db.collection('terms').doc(r.id), stripUndefined(r)));
       await batch.commit();
     }
     logActivity(`imported ${all.length} term${all.length===1?'':'s'} from a CSV file`);
@@ -3228,7 +3245,7 @@ async function migrateToPerTermStorage(source){
     const batch = db.batch();
     allTerms.slice(i, i+batchSize).forEach(t=>{
       const ref = db.collection('terms').doc(t.id);
-      batch.set(ref, t);
+      batch.set(ref, stripUndefined(t));
     });
     await batch.commit();
   }
@@ -3292,9 +3309,10 @@ function startCategoriesMetaListener(){
 async function saveTermDoc(term){
   if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
   try{
-    await db.collection('terms').doc(term.id).set(term);
+    await db.collection('terms').doc(term.id).set(stripUndefined(term));
     return true;
   }catch(err){
+    console.error('saveTermDoc failed:', err);
     showToast('Could not save. Check connection and retry.');
     return false;
   }
@@ -3387,7 +3405,7 @@ async function saveTermReview(termId, box, reviewCount){
   const record = { who: me, termId, box, nextReviewAt, reviewCount };
   TERM_REVIEWS[termId] = record;
   try{
-    await db.collection('term-reviews').doc(reviewDocId(me, termId)).set(record);
+    await db.collection('term-reviews').doc(reviewDocId(me, termId)).set(stripUndefined(record));
   }catch(err){
     console.error('saveTermReview failed:', err);
   }
@@ -3408,10 +3426,10 @@ async function loadProviders(){
 async function persistProvider(record, existingId){
   if(!db){ showToast('Not connected to the database.'); return null; }
   if(existingId){
-    await db.collection('healthcare-providers').doc(existingId).set(record);
+    await db.collection('healthcare-providers').doc(existingId).set(stripUndefined(record));
     return existingId;
   }
-  const ref = await db.collection('healthcare-providers').add(record);
+  const ref = await db.collection('healthcare-providers').add(stripUndefined(record));
   return ref.id;
 }
 
@@ -3438,10 +3456,10 @@ async function loadNotes(){
 async function persistNote(record, existingId){
   if(!db){ showToast('Not connected to the database.'); return null; }
   if(existingId){
-    await db.collection('team-notes').doc(existingId).set(record);
+    await db.collection('team-notes').doc(existingId).set(stripUndefined(record));
     return existingId;
   }
-  const ref = await db.collection('team-notes').add(record);
+  const ref = await db.collection('team-notes').add(stripUndefined(record));
   return ref.id;
 }
 
@@ -5928,9 +5946,9 @@ async function saveQuizResult(){
   });
 
   try{
-    const ref = await db.collection('quiz-history').add({
+    const ref = await db.collection('quiz-history').add(stripUndefined({
       who, total, correct, domainBreakdown, missedQuestions, timestamp: Date.now()
-    });
+    }));
     QUIZ_HISTORY.unshift({ id: ref.id, who, total, correct, domainBreakdown, missedQuestions, timestamp: Date.now() });
   }catch(err){
     console.error('saveQuizResult failed:', err);
