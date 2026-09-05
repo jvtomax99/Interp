@@ -449,6 +449,46 @@
     transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
   }
   .chat-bubble-row:hover .chat-delete{ opacity:1; }
+
+  .mention{ font-weight:700; }
+  .chat-bubble-row.them .mention{ color:var(--accent); }
+  .chat-bubble-row.me .mention{ text-decoration:underline; text-underline-offset:2px; }
+  /* A message that mentions you gets a soft highlight so it's easy to spot
+     while scrolling back through a busy conversation. */
+  .chat-bubble-row.mentioned.them .chat-bubble{
+    box-shadow:var(--sh-1), inset 0 0 0 1.5px var(--accent-2);
+    background:var(--accent-soft);
+  }
+  .mention-suggestions{
+    display:none; flex-wrap:wrap; gap:6px; padding:0 6px 6px 6px;
+  }
+  .mention-suggestions.show{ display:flex; }
+  .mention-suggestions button{
+    border:none; background:var(--accent-soft); color:var(--accent); border-radius:14px;
+    padding:5px 11px; font-family:var(--sans); font-size:12px; font-weight:600; cursor:pointer;
+  }
+  .mention-suggestions button:hover{ background:var(--accent); color:#fff; }
+
+  .print-export-row{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px;
+  }
+  .print-export-row svg{ width:15px; height:15px; }
+  .print-export-hint{ font-size:11.5px; color:var(--ink-faint); line-height:1.4; max-width:360px; }
+  .print-only-title{ display:none; }
+
+  .onboarding-modal{ max-width:420px; text-align:center; }
+  .onboarding-glyph{
+    width:56px; height:56px; border-radius:16px; margin:4px auto 18px auto;
+    background:linear-gradient(145deg, #0079BD, #252E6D);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 18px -6px rgba(37,46,109,0.55), inset 0 1px 0 rgba(255,255,255,0.28);
+  }
+  .onboarding-glyph svg{ width:28px; height:28px; }
+  .onboarding-modal h3{ font-family:var(--serif); font-size:20px; font-weight:400; margin:0 0 10px 0; }
+  .onboarding-body{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 20px 0; }
+  .onboarding-dots{ display:flex; justify-content:center; gap:7px; margin-bottom:22px; }
+  .onboarding-dot{ width:7px; height:7px; border-radius:50%; background:var(--line); transition:background .2s var(--ease), transform .2s var(--ease); }
+  .onboarding-dot.is-active{ background:var(--accent); transform:scale(1.3); }
   .chat-delete:hover{ color:var(--danger); background:var(--danger-soft); }
   @media (hover: none), (pointer: coarse){
     .chat-delete{ opacity:1; }
@@ -734,6 +774,7 @@
     padding:12px 19px; cursor:pointer; transition:transform .15s var(--ease), box-shadow .15s var(--ease), filter .15s var(--ease);
   }
   .btn:active{ transform:translateY(1px); }
+  .btn:disabled{ opacity:.4; cursor:default; pointer-events:none; }
   .btn-primary{
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
     box-shadow:0 8px 16px -8px rgba(92,131,116,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
@@ -853,6 +894,8 @@
   .copy-btn:hover{ color:var(--accent); background:var(--accent-soft); }
   .copy-btn:active{ transform:scale(0.88); }
   .copy-btn.copied{ color:var(--accent); opacity:1; }
+  .copy-btn.speaking{ color:var(--accent); opacity:1; animation:speakPulse 1s ease-in-out infinite; }
+  @keyframes speakPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
   .copy-btn svg{ width:12px; height:12px; display:block; }
   .card .def{
     font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0; padding-top:11px;
@@ -929,6 +972,23 @@
     transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
   }
   .field textarea{resize:vertical; min-height:66px; font-family:var(--sans);}
+
+  .link-btn{
+    border:none; background:transparent; color:var(--accent); font-family:var(--sans);
+    font-size:12.5px; font-weight:600; cursor:pointer; padding:0; margin:-6px 0 4px 0;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+  .history-entry{
+    padding:13px 14px; border-radius:12px; background:var(--bg-hi);
+    box-shadow:inset 0 0 0 1px var(--line-soft); margin-bottom:10px;
+  }
+  .history-entry-meta{
+    display:flex; justify-content:space-between; gap:10px; font-family:var(--mono);
+    font-size:10.5px; color:var(--ink-faint); margin-bottom:8px;
+  }
+  .history-entry-en{ font-family:var(--sans); font-weight:600; font-size:14px; color:var(--ink); }
+  .history-entry-es{ font-family:var(--serif); font-style:italic; color:var(--accent); font-size:13px; margin-top:2px; }
+  .history-entry-def{ font-size:12.5px; line-height:1.55; color:var(--ink-soft); margin:6px 0 0 0; }
   .field input:focus, .field textarea:focus, .field select:focus{
     outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); background:var(--paper);
   }
@@ -942,6 +1002,201 @@
     padding:11px 13px; font-size:11.5px; line-height:1.55; color:#7A5D28; margin-bottom:22px;
   }
   .practice-disclaimer svg{ width:15px; height:15px; flex-shrink:0; margin-top:1px; color:#B8923E; }
+
+  .progress-card{
+    max-width:660px; padding:18px 20px; margin-bottom:24px; border-radius:14px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .progress-card p{ font-size:13px; color:var(--ink-soft); margin:0 0 10px 0; line-height:1.55; }
+  .progress-head{ display:flex; gap:28px; flex-wrap:wrap; }
+  .progress-head div{ display:flex; flex-direction:column; }
+  .progress-head b{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); }
+  .progress-head span{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+
+  .review-card{
+    max-width:480px; padding:32px 28px; border-radius:var(--r-lg); text-align:center;
+    background:var(--paper); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft);
+  }
+  .review-card-en{ font-family:var(--sans); font-weight:700; font-size:22px; margin:16px 0 6px 0; color:var(--ink); }
+  .review-card-es{ font-family:var(--serif); font-style:italic; font-size:17px; color:var(--accent); margin-bottom:12px; }
+  .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
+  .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
+
+  /* ---------- In-app User Guide ---------- */
+  .user-guide{ max-width:640px; margin:0 auto; }
+  .user-guide-progress-track{ height:4px; border-radius:2px; background:var(--line-soft); overflow:hidden; }
+  .user-guide-progress-fill{ height:100%; background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .25s var(--ease); }
+  .user-guide-counter{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin:8px 0 22px 0; text-align:right; }
+  .user-guide-slide{
+    background:var(--paper); border-radius:var(--r-lg); padding:32px 28px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); min-height:280px;
+    position:relative; overflow:hidden;
+  }
+  .user-guide-slide::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:4px;
+    background:var(--guide-color, var(--accent));
+  }
+  .user-guide-slide.guide-anim-forward{ animation:guideInForward .32s var(--ease); }
+  .user-guide-slide.guide-anim-backward{ animation:guideInBackward .32s var(--ease); }
+  @keyframes guideInForward{ from{ opacity:0; transform:translateX(18px); } to{ opacity:1; transform:translateX(0); } }
+  @keyframes guideInBackward{ from{ opacity:0; transform:translateX(-18px); } to{ opacity:1; transform:translateX(0); } }
+  @media (prefers-reduced-motion: reduce){
+    .user-guide-slide.guide-anim-forward, .user-guide-slide.guide-anim-backward{ animation:none; }
+  }
+  .user-guide-slide.is-cover{ text-align:center; padding:44px 28px; }
+  .user-guide-glyph{
+    width:56px; height:56px; border-radius:16px; margin:0 auto 18px auto; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 18px -6px rgba(37,46,109,0.5), inset 0 1px 0 rgba(255,255,255,0.28);
+  }
+  .user-guide-slide:not(.is-cover) .user-guide-glyph{ margin:0 0 16px 0; }
+  .user-guide-glyph svg{ width:28px; height:28px; }
+  .user-guide-kicker{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; color:var(--accent-2);
+    font-weight:600; margin-bottom:6px;
+  }
+  .user-guide-title{ font-family:var(--serif); font-size:23px; font-weight:400; color:var(--ink); margin:0 0 14px 0; }
+  .user-guide-body{ font-size:14px; line-height:1.65; color:var(--ink-soft); }
+  .user-guide-body p{ margin:0 0 12px 0; }
+  .user-guide-body ul, .user-guide-body ol{ margin:0 0 12px 0; padding-left:20px; }
+  .user-guide-body li{ margin-bottom:7px; }
+  .user-guide-body b{ color:var(--ink); }
+  .user-guide-note{
+    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:10px;
+    padding:11px 13px; font-size:12.5px; color:#7A5D28 !important;
+  }
+  .user-guide-note b{ color:#7A5D28; }
+  .user-guide-nav{ display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
+  .user-guide-nav .btn{ min-width:100px; }
+
+  /* Icon badge entrance — a little bounce so each slide feels alive rather
+     than static, independent of the slide-in direction animation. */
+  .user-guide-glyph{ animation:guideGlyphIn .4s var(--ease) both; }
+  @keyframes guideGlyphIn{
+    0%{ opacity:0; transform:scale(0.5) rotate(-12deg); }
+    70%{ transform:scale(1.08) rotate(3deg); }
+    100%{ opacity:1; transform:scale(1) rotate(0); }
+  }
+
+  /* Staggered reveal for list items and detail rows — each one arrives a
+     beat after the last instead of all popping in at once. */
+  .user-guide-body li, .guide-feed-row, .guide-pipeline-step, .guide-fab-item{
+    animation:guideRowIn .35s var(--ease) both;
+  }
+  .user-guide-body li:nth-child(1), .guide-feed-row:nth-child(1){ animation-delay:.05s; }
+  .user-guide-body li:nth-child(2), .guide-feed-row:nth-child(2){ animation-delay:.12s; }
+  .user-guide-body li:nth-child(3), .guide-feed-row:nth-child(3){ animation-delay:.19s; }
+  .user-guide-body li:nth-child(4){ animation-delay:.26s; }
+  .guide-pipeline-step:nth-of-type(1){ animation-delay:.05s; }
+  .guide-pipeline-step:nth-of-type(3){ animation-delay:.16s; }
+  .guide-pipeline-step:nth-of-type(5){ animation-delay:.27s; }
+  .guide-pipeline-step:nth-of-type(7){ animation-delay:.38s; }
+  .guide-fab-item:nth-child(1){ animation-delay:.05s; }
+  .guide-fab-item:nth-child(2){ animation-delay:.15s; }
+  .guide-fab-item:nth-child(3){ animation-delay:.25s; }
+  @keyframes guideRowIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: reduce){
+    .user-guide-glyph, .user-guide-body li, .guide-feed-row, .guide-pipeline-step, .guide-fab-item{ animation:none; }
+  }
+
+  /* Mini widget: the three floating buttons, previewed inline */
+  .guide-fab-row{ display:flex; gap:14px; margin:14px 0 16px 0; }
+  .guide-fab-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; text-align:center;
+    background:var(--bg-hi); border-radius:12px; padding:14px 8px; gap:3px;
+  }
+  .guide-fab-dot{
+    width:38px; height:38px; border-radius:50%; color:#fff; display:flex; align-items:center;
+    justify-content:center; margin-bottom:4px; box-shadow:0 4px 10px -4px rgba(37,46,109,0.5);
+  }
+  .guide-fab-dot svg{ width:18px; height:18px; }
+  .guide-fab-item b{ font-size:12.5px; }
+  .guide-fab-item span{ font-size:10px; color:var(--ink-faint); }
+
+  /* Mini widget: the Translate pipeline, as a vertical numbered flow */
+  .guide-pipeline{ margin:14px 0 4px 0; }
+  .guide-pipeline-step{
+    display:flex; align-items:center; gap:12px; background:var(--bg-hi);
+    border-radius:12px; padding:11px 14px;
+  }
+  .guide-pipeline-num{
+    width:26px; height:26px; border-radius:50%; flex-shrink:0; background:var(--accent);
+    color:#fff; font-family:var(--sans); font-weight:700; font-size:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .guide-pipeline-step b{ font-size:13px; margin-right:6px; }
+  .guide-pipeline-step span{ font-size:11.5px; color:var(--ink-faint); }
+  .guide-pipeline-arrow{ display:flex; justify-content:center; margin:2px 0; opacity:.4; }
+  .guide-pipeline-arrow svg{ width:14px; height:14px; }
+
+  /* Mini widget: the Term Review interval timeline */
+  .guide-timeline{ position:relative; height:52px; margin:18px 10px 8px 10px; }
+  .guide-timeline-track{ position:absolute; top:6px; left:0; right:0; height:2px; background:var(--line); }
+  .guide-timeline-stop{ position:absolute; top:0; transform:translateX(-50%); text-align:center; font-size:10px; color:var(--ink-faint); }
+  .guide-timeline-dot{
+    display:block; width:12px; height:12px; border-radius:50%; background:var(--accent-2);
+    border:2px solid var(--paper); box-shadow:0 0 0 1px var(--line); margin:0 auto 8px auto;
+  }
+  .guide-timeline-dot.reset{ background:#E17B8C; }
+  .guide-timeline-dot.mastered{ background:#2E8B57; }
+  .guide-tag-blue{ color:#0079BD; }
+  .guide-tag-green{ color:#2E8B57; }
+
+  /* Mini widget: the Dark Mode toggle switch, animating between its states */
+  .guide-toggle{ display:flex; justify-content:center; margin:6px 0 18px 0; }
+  .guide-toggle-track{
+    width:64px; height:34px; border-radius:20px; background:linear-gradient(140deg, var(--accent-2), var(--accent));
+    display:flex; align-items:center; padding:3px; box-sizing:border-box;
+    animation:guideToggleGlow 2.6s ease-in-out infinite;
+  }
+  .guide-toggle-thumb{
+    width:28px; height:28px; border-radius:50%; background:#fff; color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    animation:guideToggleSlide 2.6s ease-in-out infinite;
+  }
+  .guide-toggle-thumb svg{ width:15px; height:15px; }
+  @keyframes guideToggleSlide{ 0%,40%{ transform:translateX(0); } 55%,100%{ transform:translateX(30px); } }
+  @keyframes guideToggleGlow{ 0%,40%{ filter:brightness(1); } 55%,100%{ filter:brightness(0.75); } }
+  @media (prefers-reduced-motion: reduce){
+    .guide-toggle-track, .guide-toggle-thumb{ animation:none; }
+  }
+
+  /* Mini widget: a few sample Recent Updates rows */
+  .guide-feed{ margin:14px 0; display:flex; flex-direction:column; gap:7px; }
+  .guide-feed-row{
+    background:var(--bg-hi); border-radius:10px; padding:9px 12px; font-size:12px;
+    color:var(--ink-soft); display:flex; justify-content:space-between; gap:10px; align-items:baseline;
+  }
+  .guide-feed-row b{ color:var(--ink); margin-right:4px; }
+  .guide-feed-row span{ font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); flex-shrink:0; }
+
+  /* Swipe hint, shown once on the opening slide only */
+  .guide-swipe-hint{
+    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:22px;
+    color:var(--ink-faint); font-size:12px; animation:guideSwipeHint 1.6s ease-in-out infinite;
+  }
+  .guide-swipe-hint svg{ width:16px; height:16px; }
+  @keyframes guideSwipeHint{ 0%,100%{ transform:translateX(0); opacity:.6; } 50%{ transform:translateX(6px); opacity:1; } }
+  @media (prefers-reduced-motion: reduce){ .guide-swipe-hint{ animation:none; } }
+  @media (max-width:760px){
+    .user-guide-slide{ padding:26px 20px; }
+  }
+
+  .announcements-block{
+    max-width:660px; margin-bottom:16px; padding:14px 16px; border-radius:12px;
+    background:linear-gradient(140deg, #FBF3E3, #FAFAF6); box-shadow:inset 0 0 0 1px #E8D7B0;
+  }
+  .announcements-head{
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:2px;
+    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:#8C6D2E;
+  }
+  .announcements-head span{ display:flex; align-items:center; gap:6px; }
+  .announcements-head svg{ width:13px; height:13px; }
+  .announcements-empty{ font-size:12px; color:#8C6D2E; opacity:.8; line-height:1.5; margin:8px 0 0 0; }
+  .announcement-row{ padding:10px 0; border-top:1px solid #E8D7B0; }
+  .announcement-row:first-of-type{ border-top:none; }
+  .announcement-row p{ font-size:13px; color:#4A3B18; line-height:1.5; margin:0 0 5px 0; }
+  .announcement-meta{ display:flex; align-items:center; justify-content:space-between; font-family:var(--mono); font-size:10px; color:#9B7D3F; }
 
   .domain-bars{ display:flex; flex-direction:column; gap:9px; max-width:660px; margin-bottom:24px; }
   .domain-bar-row{ display:flex; align-items:center; gap:12px; font-size:12.5px; }
@@ -1511,6 +1766,33 @@
   @media (prefers-reduced-motion: reduce){
     .skeleton{ animation:none; }
   }
+
+  /* ---------- Print / PDF export ----------
+     Strips away every bit of app chrome and leaves a clean reference sheet:
+     just the domain title, generation date, and the terms themselves. */
+  @media print{
+    .sidebar, .brand-mobile, .gs-trigger-mobile, .home-fab, .name-fab, .theme-fab,
+    .topbar, .print-export-row, .actions, .copy-btn, .tab-delete,
+    .hipaa-notice, .hipaa-notice-inline, .nav-tile-grid, .content-fade > .home-greeting,
+    .stat-strip{
+      display:none !important;
+    }
+    .print-only-title{
+      display:block !important; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid #000;
+    }
+    .print-only-title h1{ font-family:var(--serif); font-size:20px; margin:0 0 4px 0; }
+    .print-only-title p{ font-family:var(--sans); font-size:11px; color:#444; margin:0; }
+    body, .app, .main{ background:#fff !important; }
+    .main{ padding:0 !important; max-width:none !important; }
+    .card{
+      box-shadow:none !important; border:1px solid #ccc !important; break-inside:avoid;
+      animation:none !important; transform:none !important;
+    }
+    .card::before{ display:none !important; }
+    .grid{ grid-template-columns:1fr 1fr !important; gap:12px !important; }
+    .section-head{ break-after:avoid; }
+    a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
+  }
 </style>
 </head>
 <body>
@@ -1558,9 +1840,60 @@
     <div class="field"><label>Source (optional)</label><input id="fSource" type="text" placeholder="e.g. NIH (Spanish)"></div>
     <div class="field"><label>Source link (optional URL)</label><input id="fSourceUrl" type="text" placeholder="Paste the exact article/webinar link, if you have it"></div>
     <div class="field"><label>Domain</label><select id="fCategory"></select></div>
+    <div id="historyLinkSlot"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveTerm()">Save term</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="historyOverlay">
+  <div class="modal">
+    <h3>Edit history</h3>
+    <div id="historyList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeHistoryModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="announcementOverlay">
+  <div class="modal">
+    <h3>Pin an announcement</h3>
+    <div class="field"><label>Announcement</label><textarea id="fAnnouncementText" placeholder="e.g. New CE requirement this quarter — see Training &amp; Events for the link" style="min-height:90px;"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAnnouncementModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addAnnouncement()">Pin it</button>
+    </div>
+  </div>
+</div>
+
+<input class="file-input-hidden" id="csvImportInput" type="file" accept=".csv,text/csv" onchange="handleCsvImportSelected(event)">
+
+<div class="overlay" id="importOverlay">
+  <div class="modal">
+    <h3>Import preview</h3>
+    <div id="importPreviewBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Cancel</button>
+      <button class="btn btn-primary" id="importConfirmBtn" onclick="confirmCsvImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="onboardingOverlay">
+  <div class="modal onboarding-modal">
+    <div class="onboarding-glyph">${ICON_GLYPH}</div>
+    <h3 id="onboardingTitle"></h3>
+    <p id="onboardingBody" class="onboarding-body"></p>
+    <div class="onboarding-dots" id="onboardingDots"></div>
+    <div class="modal-actions" style="justify-content:space-between;">
+      <button class="btn btn-ghost" id="onboardingBackBtn" onclick="onboardingBack()">Back</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" onclick="completeOnboarding()">Skip</button>
+        <button class="btn btn-primary" id="onboardingNextBtn" onclick="onboardingNext()">Next</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1709,12 +2042,17 @@
           service cloud.firestore {
             match /databases/{database}/documents {
               match /terminology-hub/{docId} { allow read, write: if true; }
+              match /terminology-meta/{docId} { allow read, write: if true; }
+              match /terms/{docId} { allow read, write: if true; }
               match /healthcare-providers/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
               match /team-notes/{docId} { allow read, write: if true; }
               match /term-attachments/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
               match /practice-questions/{docId} { allow read, write: if true; }
+              match /quiz-history/{docId} { allow read, write: if true; }
+              match /term-reviews/{docId} { allow read, write: if true; }
+              match /announcements/{docId} { allow read, write: if true; }
             }
           }
      5. This app also uses Cloud Storage for file attachments (photos and
@@ -2516,7 +2854,7 @@ try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }ca
 let toolsCollapsed = false;
 try{ toolsCollapsed = localStorage.getItem('ih_toolsCollapsed') === '1'; }catch(e){}
 let searchQuery = '';
-let editingContext = null; // {categoryId, termIndex} or null for new
+let editingContext = null; // {categoryId, termId} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
 
 let PROVIDERS = [];
@@ -2531,6 +2869,18 @@ let quizAnswers = [];     // chosen option index per question
 let quizRevealed = false; // whether the current question's answer is shown
 let quizLength = 10;
 let quizDomainFilter = 'all';
+
+// Term review (spaced repetition) — a simple 5-box Leitner system. Missing
+// a card resets it to box 0 (review again soon); getting it right advances
+// a box, pushing the next review further out. Intervals are in days.
+const REVIEW_INTERVALS = [0, 1, 3, 7, 14, 30];
+let TERM_REVIEWS = {}; // termId -> { box, nextReviewAt, reviewCount }
+let reviewActive = false;
+let reviewQueue = [];
+let reviewIndex = 0;
+let reviewRevealed = false;
+let reviewGotIt = 0;
+let reviewMissed = 0;
 const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05E','#7C8FA8','#A97C5D'];
 let selectedSwatch = DOMAIN_COLORS[0];
 let selectedIcon = 'sparkle';
@@ -2565,6 +2915,81 @@ let isInitialActivityLoad = true;
 let lastSeenActivityCount = 0;
 
 let ATTACHMENTS = [];
+let QUIZ_HISTORY = [];
+let ANNOUNCEMENTS = [];
+let announcementsListenerStarted = false;
+let pendingImportPlan = null;
+
+// First-run onboarding — a short walkthrough shown automatically once per
+// device, replayable any time from Home. Content lives in one array so
+// adding/reordering a step later doesn't touch the rendering logic.
+let onboardingStep = 0;
+const ONBOARDING_STEPS = [
+  {
+    title: 'Welcome to Interpreter Hub',
+    body: 'A shared home base for HUMC\u2019s interpreter team \u2014 the glossary, provider directory, team chat, and CoreCHI study tools all in one place.'
+  },
+  {
+    title: 'Everything lives in tiles',
+    body: 'Domains and tools are organized as tiles below Home. Tap a domain to see just its terms, or "All domains" to browse everything. "Search everything" finds terms, providers, chat messages, and more at once.'
+  },
+  {
+    title: 'Set your name once',
+    body: 'Tap the person icon (bottom-left on most screens) to attribute your edits, chat messages, and practice scores to yourself \u2014 you\u2019ll be asked automatically the first time you need it.'
+  },
+  {
+    title: 'Built for the team, not just you',
+    body: 'Team Chat supports @mentions and pinned announcements. Edits sync in real time and keep a history, so nothing gets silently overwritten if two people edit at once.'
+  },
+  {
+    title: 'Study tools included',
+    body: 'CoreCHI Practice tracks your accuracy by exam domain over time. Term Review resurfaces glossary terms you\u2019ve missed using spaced repetition. Export any domain to PDF or CSV whenever you need it.'
+  }
+];
+
+function shouldShowOnboarding(){
+  try{ return localStorage.getItem('ih_onboarded') !== '1'; }catch(e){ return false; }
+}
+
+function openOnboarding(){
+  onboardingStep = 0;
+  renderOnboardingStep();
+  document.getElementById('onboardingOverlay').classList.add('show');
+}
+
+function closeOnboarding(){
+  document.getElementById('onboardingOverlay').classList.remove('show');
+}
+
+function completeOnboarding(){
+  try{ localStorage.setItem('ih_onboarded', '1'); }catch(e){}
+  closeOnboarding();
+}
+
+function onboardingNext(){
+  if(onboardingStep >= ONBOARDING_STEPS.length - 1){ completeOnboarding(); return; }
+  onboardingStep++;
+  renderOnboardingStep();
+}
+
+function onboardingBack(){
+  if(onboardingStep <= 0) return;
+  onboardingStep--;
+  renderOnboardingStep();
+}
+
+function renderOnboardingStep(){
+  const step = ONBOARDING_STEPS[onboardingStep];
+  const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
+  document.getElementById('onboardingTitle').textContent = step.title;
+  document.getElementById('onboardingBody').textContent = step.body;
+  document.getElementById('onboardingDots').innerHTML = ONBOARDING_STEPS.map((_, i)=>
+    `<span class="onboarding-dot ${i===onboardingStep ? 'is-active' : ''}"></span>`
+  ).join('');
+  document.getElementById('onboardingBackBtn').style.visibility = onboardingStep === 0 ? 'hidden' : 'visible';
+  document.getElementById('onboardingNextBtn').textContent = isLast ? 'Get started' : 'Next';
+}
+
 let pendingAttachTermId = null;
 let pendingChatAttachment = null;
 let pendingNoteAttachment = null;
@@ -2572,6 +2997,162 @@ let pendingNoteAttachment = null;
 /* ============ Storage ============ */
 function genId(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+/* ============ CSV export / import ============
+   Export is always safe — it just reads. Import is staged: parse, show a
+   preview of exactly what will be added/updated/skipped, and only write
+   to Firestore after an explicit confirm. Nothing lands in the live
+   glossary from a bad file without a human looking at the plan first. */
+
+function csvEscape(val){
+  const s = String(val==null ? '' : val);
+  if(/[",\r\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+
+function downloadTextFile(content, filename, mime){
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+}
+
+function exportTermsCsv(){
+  const scoped = activeCategory==='all' ? allTermsFlat() : allTermsFlat().filter(t=>t.categoryId===activeCategory);
+  const rows = [['id','domain','english','spanish','definition','source','source_url']];
+  scoped.forEach(t=> rows.push([t.id, t.categoryName, t.en||'', t.es||'', t.def||'', t.source||'', t.url||'']));
+  const csv = rows.map(r=> r.map(csvEscape).join(',')).join('\r\n');
+  downloadTextFile(csv, 'interpreter-hub-glossary.csv', 'text/csv;charset=utf-8');
+  showToast(`Exported ${scoped.length} term${scoped.length===1?'':'s'}.`);
+}
+
+// Minimal RFC4180-style parser — handles quoted fields containing commas,
+// quotes, or newlines, which a plain split(',') would break on (a
+// definition is exactly the kind of field likely to contain a comma).
+function parseCsv(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; } else { inQuotes = false; }
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\r'){ /* skip, \n handles the line break */ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length > 1 || r[0] !== '');
+}
+
+function triggerCsvImport(){
+  requireName(()=> document.getElementById('csvImportInput').click());
+}
+
+async function handleCsvImportSelected(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  const text = await file.text();
+  const rows = parseCsv(text);
+  if(rows.length < 2){ showToast('That file doesn\u2019t look like a valid CSV.'); return; }
+
+  const header = rows[0].map(h=>h.trim().toLowerCase());
+  const idx = {
+    id: header.indexOf('id'), domain: header.indexOf('domain'), en: header.indexOf('english'),
+    es: header.indexOf('spanish'), def: header.indexOf('definition'),
+    source: header.indexOf('source'), url: header.indexOf('source_url')
+  };
+  if(idx.domain===-1 || idx.en===-1){
+    showToast('The CSV needs at least "domain" and "english" columns.');
+    return;
+  }
+
+  const plan = { toAdd: [], toUpdate: [], errors: [] };
+  const existingIds = new Set(allTermsFlat().map(t=>t.id));
+  const editor = whoAmI();
+
+  rows.slice(1).forEach((r, i)=>{
+    const rowNum = i + 2; // +1 for header, +1 for 1-indexing
+    const domainName = (r[idx.domain]||'').trim();
+    const en = (r[idx.en]||'').trim();
+    if(!domainName || !en){ plan.errors.push(`Row ${rowNum}: missing domain or English term.`); return; }
+    const cat = DATA.categories.find(c=>c.name.toLowerCase()===domainName.toLowerCase());
+    if(!cat){ plan.errors.push(`Row ${rowNum}: no domain named "${domainName}".`); return; }
+
+    const existingId = idx.id>-1 ? (r[idx.id]||'').trim() : '';
+    const isUpdate = existingId && existingIds.has(existingId);
+    const record = {
+      id: isUpdate ? existingId : genId(),
+      categoryId: cat.id, en,
+      es: idx.es>-1 ? (r[idx.es]||'').trim() : '',
+      def: idx.def>-1 ? (r[idx.def]||'').trim() : '',
+      source: idx.source>-1 ? (r[idx.source]||'').trim() : '',
+      url: (idx.url>-1 ? (r[idx.url]||'').trim() : '') || undefined,
+      editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined
+    };
+    if(isUpdate) plan.toUpdate.push(record); else plan.toAdd.push(record);
+  });
+
+  pendingImportPlan = plan;
+  showImportPreview(plan);
+}
+
+function showImportPreview(plan){
+  const body = document.getElementById('importPreviewBody');
+  body.innerHTML = `
+    <p><b>${plan.toAdd.length}</b> new term${plan.toAdd.length===1?'':'s'} will be added.</p>
+    <p><b>${plan.toUpdate.length}</b> existing term${plan.toUpdate.length===1?'':'s'} will be updated.</p>
+    ${plan.errors.length ? `
+      <p style="color:var(--danger); margin-top:12px;"><b>${plan.errors.length}</b> row${plan.errors.length===1?'':'s'} will be skipped:</p>
+      <ul style="margin:6px 0 0 0; padding-left:18px; font-size:12px; color:var(--ink-soft); max-height:140px; overflow:auto;">
+        ${plan.errors.slice(0,20).map(e=>`<li>${escapeHtml(e)}</li>`).join('')}
+      </ul>
+    ` : ''}
+  `;
+  const confirmBtn = document.getElementById('importConfirmBtn');
+  confirmBtn.disabled = (plan.toAdd.length + plan.toUpdate.length) === 0;
+  document.getElementById('importOverlay').classList.add('show');
+}
+
+function closeImportModal(){
+  document.getElementById('importOverlay').classList.remove('show');
+  pendingImportPlan = null;
+}
+
+async function confirmCsvImport(){
+  if(!pendingImportPlan || !db) return;
+  const all = [...pendingImportPlan.toAdd, ...pendingImportPlan.toUpdate];
+  if(!all.length){ showToast('Nothing to import.'); closeImportModal(); return; }
+  const confirmBtn = document.getElementById('importConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Importing\u2026';
+  try{
+    const batchSize = 400;
+    for(let i=0; i<all.length; i+=batchSize){
+      const batch = db.batch();
+      all.slice(i, i+batchSize).forEach(r=> batch.set(db.collection('terms').doc(r.id), r));
+      await batch.commit();
+    }
+    logActivity(`imported ${all.length} term${all.length===1?'':'s'} from a CSV file`);
+    showToast('Import complete.');
+    closeImportModal();
+    await loadAllTerms();
+    render();
+  }catch(err){
+    showToast('Import failed partway through \u2014 check your connection and try again.');
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Import';
+  }
 }
 
 // One-time, automatic, and safe: gives any term saved before attachments
@@ -2590,21 +3171,156 @@ function ensureTermIds(){
 
 async function loadData(){
   try{
-    const result = await window.storage.get(STORAGE_KEY, true);
-    if(result && result.value){
-      DATA = JSON.parse(result.value);
-    } else {
-      DATA = DEFAULT_DATA;
-      await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true);
+    if(!db){
+      // No Firestore in this environment (e.g. this preview) — fall back to
+      // the old single-blob path so the app still shows something.
+      const result = await window.storage.get(STORAGE_KEY, true);
+      DATA = (result && result.value) ? JSON.parse(result.value) : DEFAULT_DATA;
+      ensureTermIds();
+      render();
+      return;
     }
+
+    const metaSnap = await db.collection('terminology-meta').doc('categories').get();
+
+    if(!metaSnap.exists){
+      // First run on the new schema — migrate once from the old single-blob
+      // storage (or seed fresh) so nobody's existing content is lost.
+      let legacyData = null;
+      try{
+        const result = await window.storage.get(STORAGE_KEY, true);
+        if(result && result.value) legacyData = JSON.parse(result.value);
+      }catch(e){}
+      const source = legacyData || DEFAULT_DATA;
+      await migrateToPerTermStorage(source);
+    }
+
+    await loadCategoriesMeta();
+    await loadAllTerms();
+    startTermsListener();
+    startCategoriesMetaListener();
+    render();
   }catch(err){
+    console.error('loadData failed:', err);
     DATA = DEFAULT_DATA;
-    try{ await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true); }catch(e2){}
+    render();
   }
-  if(ensureTermIds()){
-    persist(); // silently save the newly-assigned ids so they stick
+}
+
+// One-time migration from the old "one giant document" model to one
+// Firestore document per term (plus a small shared doc for domain
+// metadata). This is what actually fixes concurrent editing: two people
+// saving different terms at the same time now write to different
+// documents instead of both overwriting the same blob.
+async function migrateToPerTermStorage(source){
+  const categoriesMeta = source.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon }));
+  await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
+
+  const batchSize = 400; // Firestore batch limit is 500 writes
+  let allTerms = [];
+  source.categories.forEach(cat=>{
+    cat.terms.forEach(t=>{
+      if(!t.id) t.id = genId();
+      allTerms.push({ ...t, categoryId: cat.id });
+    });
+  });
+  for(let i=0; i<allTerms.length; i+=batchSize){
+    const batch = db.batch();
+    allTerms.slice(i, i+batchSize).forEach(t=>{
+      const ref = db.collection('terms').doc(t.id);
+      batch.set(ref, t);
+    });
+    await batch.commit();
   }
-  render();
+}
+
+async function loadCategoriesMeta(){
+  const snap = await db.collection('terminology-meta').doc('categories').get();
+  const meta = snap.exists ? (snap.data().categories || []) : [];
+  DATA = { categories: meta.map(c=>({ ...c, terms: [] })) };
+}
+
+async function loadAllTerms(){
+  const snap = await db.collection('terms').get();
+  applyTermsSnapshot(snap);
+}
+
+// Rebuilds each category's terms array from a Firestore snapshot. Keeps
+// category order stable (order lives in terminology-meta, untouched here)
+// and just refills which terms belong where — this is what makes real-time
+// sync safe: nobody's array-index-based UI state points at the wrong term,
+// because edit/delete now target terms by id, not by position.
+function applyTermsSnapshot(snap){
+  const byCategory = {};
+  snap.forEach(doc=>{
+    const t = { ...doc.data(), id: doc.id };
+    const catId = t.categoryId;
+    if(!byCategory[catId]) byCategory[catId] = [];
+    byCategory[catId].push(t);
+  });
+  DATA.categories.forEach(cat=>{
+    cat.terms = byCategory[cat.id] || [];
+  });
+}
+
+let termsListenerStarted = false;
+function startTermsListener(){
+  if(termsListenerStarted || !db) return;
+  termsListenerStarted = true;
+  db.collection('terms').onSnapshot(snap=>{
+    applyTermsSnapshot(snap);
+    // A full render() (not just renderContent()) so sidebar term counts
+    // and "All domains" totals stay live too, not just whatever's open.
+    render();
+  }, err=> console.error('terms listener error:', err));
+}
+
+let categoriesMetaListenerStarted = false;
+function startCategoriesMetaListener(){
+  if(categoriesMetaListenerStarted || !db) return;
+  categoriesMetaListenerStarted = true;
+  db.collection('terminology-meta').doc('categories').onSnapshot(snap=>{
+    if(!snap.exists) return;
+    const meta = snap.data().categories || [];
+    const existingTerms = {};
+    DATA.categories.forEach(c=>{ existingTerms[c.id] = c.terms; });
+    DATA.categories = meta.map(c=>({ ...c, terms: existingTerms[c.id] || [] }));
+    render();
+  }, err=> console.error('categories-meta listener error:', err));
+}
+
+async function saveTermDoc(term){
+  if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
+  try{
+    await db.collection('terms').doc(term.id).set(term);
+    return true;
+  }catch(err){
+    showToast('Could not save. Check connection and retry.');
+    return false;
+  }
+}
+
+async function deleteTermDoc(id){
+  if(!db) return false;
+  try{
+    await db.collection('terms').doc(id).delete();
+    return true;
+  }catch(err){
+    showToast('Could not delete. Check connection and retry.');
+    return false;
+  }
+}
+
+async function saveCategoriesMeta(){
+  if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
+  try{
+    const categoriesMeta = DATA.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon }));
+    await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
+    return true;
+  }catch(err){
+    showToast('Could not save. Check connection and retry.');
+    return false;
+  }
 }
 
 async function persist(){
@@ -2619,6 +3335,64 @@ async function persist(){
 /* ============ Healthcare Providers (own Firestore collection —
    keeps each provider + photo well under the 1MB per-document limit,
    instead of bundling everything into the single terminology blob) ============ */
+// Fetched once at startup rather than filtered by a Firestore query on
+// "who" — names are free-text, so casing/whitespace can vary session to
+// session, and matching client-side (like chat's "mine" check already
+// does) is more forgiving than requiring an exact query match.
+async function loadQuizHistory(){
+  if(!db){ QUIZ_HISTORY = []; return; }
+  try{
+    const snap = await db.collection('quiz-history').orderBy('timestamp','desc').limit(300).get();
+    QUIZ_HISTORY = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+  }catch(err){
+    QUIZ_HISTORY = [];
+  }
+}
+
+function myQuizHistory(){
+  const me = whoAmI().trim().toLowerCase();
+  if(!me) return [];
+  return QUIZ_HISTORY.filter(h => (h.who||'').trim().toLowerCase() === me);
+}
+
+// One doc per person+term (deterministic id, so saving is a plain set()
+// with no query needed) — small enough that loading everyone's is fine for
+// a team this size, and simpler than a composite Firestore index.
+function reviewDocId(who, termId){
+  const safeWho = (who||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-') || 'anon';
+  return `${safeWho}__${termId}`;
+}
+
+async function loadTermReviews(){
+  TERM_REVIEWS = {};
+  if(!db) return;
+  const me = whoAmI().trim().toLowerCase();
+  if(!me) return;
+  try{
+    const snap = await db.collection('term-reviews').where('who','==',me).get();
+    snap.forEach(doc=>{
+      const d = doc.data();
+      TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount };
+    });
+  }catch(err){
+    console.error('loadTermReviews failed:', err);
+  }
+}
+
+async function saveTermReview(termId, box, reviewCount){
+  if(!db) return;
+  const me = whoAmI().trim().toLowerCase();
+  if(!me) return;
+  const nextReviewAt = Date.now() + REVIEW_INTERVALS[box] * 86400000;
+  const record = { who: me, termId, box, nextReviewAt, reviewCount };
+  TERM_REVIEWS[termId] = record;
+  try{
+    await db.collection('term-reviews').doc(reviewDocId(me, termId)).set(record);
+  }catch(err){
+    console.error('saveTermReview failed:', err);
+  }
+}
+
 async function loadProviders(){
   try{
     if(!db){ PROVIDERS = []; return; }
@@ -2753,6 +3527,80 @@ function logActivity(summary){
   }catch(err){
     console.error('Activity log failed', err);
   }
+}
+
+// Pinned separately from the message stream so something like "new CE
+// requirement this quarter" doesn't scroll away under newer chatter — this
+// lives above the chat panel, always visible, most recent first.
+function startAnnouncementsListener(){
+  if(announcementsListenerStarted || !db) return;
+  announcementsListenerStarted = true;
+  db.collection('announcements').orderBy('createdAt','desc').onSnapshot(snap=>{
+    ANNOUNCEMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if(activeCategory === 'chat') renderContent();
+  }, err=> console.error('announcements listener error:', err));
+}
+
+async function addAnnouncement(){
+  const input = document.getElementById('fAnnouncementText');
+  const text = input.value.trim();
+  if(!text){ showToast('Write something to pin first.'); return; }
+  if(!db){ showToast('Not connected — check your connection and retry.'); return; }
+  try{
+    await db.collection('announcements').add({ text, author: whoAmI(), createdAt: Date.now() });
+    input.value = '';
+    closeAnnouncementModal();
+    logActivity('pinned an announcement');
+    showToast('Announcement pinned.');
+  }catch(err){
+    showToast('Could not pin. Check connection and retry.');
+  }
+}
+
+async function deleteAnnouncement(id){
+  if(!confirm('Remove this pinned announcement?')) return;
+  if(!db) return;
+  try{
+    await db.collection('announcements').doc(id).delete();
+  }catch(err){
+    showToast('Could not remove. Check connection and retry.');
+  }
+}
+
+function openAnnouncementModal(){
+  requireName(()=>_openAnnouncementModal());
+}
+function _openAnnouncementModal(){
+  document.getElementById('fAnnouncementText').value = '';
+  document.getElementById('announcementOverlay').classList.add('show');
+  document.getElementById('fAnnouncementText').focus();
+}
+function closeAnnouncementModal(){
+  document.getElementById('announcementOverlay').classList.remove('show');
+}
+
+function renderAnnouncements(){
+  let html = `<div class="announcements-block">
+    <div class="announcements-head">
+      <span>${ICON_PIN} Pinned</span>
+      <button class="link-btn" onclick="openAnnouncementModal()">+ Pin something</button>
+    </div>`;
+  if(!ANNOUNCEMENTS.length){
+    html += `<p class="announcements-empty">Nothing pinned — important updates (a new CE requirement, an updated protocol) go here instead of getting lost in the chat scroll.</p>`;
+  } else {
+    ANNOUNCEMENTS.forEach(a=>{
+      html += `
+        <div class="announcement-row">
+          <p>${escapeHtml(a.text)}</p>
+          <div class="announcement-meta">
+            <span>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}</span>
+            <button class="chat-delete" title="Unpin" onclick="deleteAnnouncement('${a.id}')">Unpin</button>
+          </div>
+        </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
 }
 
 function startActivityListener(){
@@ -3052,6 +3900,27 @@ async function copyText(btn, text){
   }, 1400);
 }
 
+// Text-to-speech rather than pre-recorded audio — it works instantly for
+// every term already in the glossary (and every one added going forward)
+// with no recording effort or file storage, using whatever Spanish/English
+// voice the device already has installed.
+function speakText(btn, text, lang){
+  if(!('speechSynthesis' in window)){
+    showToast('Speech isn\u2019t supported in this browser.');
+    return;
+  }
+  window.speechSynthesis.cancel(); // don't stack overlapping playback
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang;
+  utter.rate = 0.92; // slightly slower than default — clearer for unfamiliar medical terms
+  if(btn){
+    btn.classList.add('speaking');
+    utter.onend = ()=> btn.classList.remove('speaking');
+    utter.onerror = ()=> btn.classList.remove('speaking');
+  }
+  window.speechSynthesis.speak(utter);
+}
+
 /* True only on devices with a precise pointer (mouse/trackpad). Used to
    decide whether autofocusing a text field is helpful or intrusive —
    on touch devices, focusing an input pops the on-screen keyboard. */
@@ -3330,8 +4199,10 @@ async function sendNotification(title, body, section, tag){
 async function showChatNotification(msg){
   if(!notifyEnabled) return;
   const author = msg.author || 'Teammate';
+  const mentionsMe = messageMentions(msg.text).includes(whoAmI().trim().toLowerCase());
   const body = msg.text ? msg.text : (msg.attachment ? 'Sent an attachment' : 'New message');
-  await sendNotification(`${author} \u2014 Interpreter Hub`, body, 'chat', 'interpreter-hub-chat');
+  const title = mentionsMe ? `${author} mentioned you — Interpreter Hub` : `${author} — Interpreter Hub`;
+  await sendNotification(title, body, 'chat', 'interpreter-hub-chat');
 }
 
 async function showActivityNotification(entry){
@@ -3390,10 +4261,87 @@ function clearTyping(){
   db.collection('chat-typing').doc(slugify(me) || 'anon').delete().catch(()=>{});
 }
 
+// The roster isn't hardcoded anywhere — it's just everyone who's ever
+// posted a chat message, so @mentions work for the actual team without
+// needing separate user management.
+function getKnownChatNames(){
+  const names = new Set();
+  CHAT_MESSAGES.forEach(m=>{ if(m.author) names.add(m.author.trim()); });
+  return Array.from(names).sort();
+}
+
+// Extracts lowercase names mentioned via "@Name" in a message, matched
+// against the known roster (longest names first, so "@Bertha Bravo" isn't
+// short-circuited by a shorter "@Bertha" match).
+function messageMentions(text){
+  if(!text) return [];
+  const known = getKnownChatNames().sort((a,b)=> b.length - a.length);
+  const found = [];
+  known.forEach(name=>{
+    const re = new RegExp('@' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    if(re.test(text)) found.push(name.toLowerCase());
+  });
+  return found;
+}
+
+// Bolds and tints any @Name that matches the known roster, so a mention is
+// visually obvious while scrolling — plain "@" typed without a matching
+// name (or names not yet in the roster) are left as normal text.
+function highlightMentions(text){
+  const escaped = escapeHtml(text);
+  const known = getKnownChatNames().sort((a,b)=> b.length - a.length);
+  let result = escaped;
+  known.forEach(name=>{
+    const safeName = escapeHtml(name);
+    const re = new RegExp('@' + safeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    result = result.replace(re, m=>`<span class="mention">${m}</span>`);
+  });
+  return result;
+}
+
 function handleChatTyping(){
+  // Live @-autocomplete: shows once "@" appears with nothing (or a partial
+  // name) typed after it, filtered against the known roster as you type.
+  const input = document.getElementById('chatInput');
+  if(input) updateMentionSuggestions(input);
   publishTyping();
   clearTimeout(typingHeartbeat);
   typingHeartbeat = setTimeout(clearTyping, 3500);  // stop after a pause
+}
+
+// Looks backward from the cursor for an unfinished "@word" and, if found,
+// shows matching known names to tap instead of typing the full name.
+function updateMentionSuggestions(input){
+  const box = document.getElementById('mentionSuggestions');
+  if(!box) return;
+  const cursor = input.selectionStart;
+  const before = input.value.slice(0, cursor);
+  const match = before.match(/@([a-zA-Z ]{0,30})$/);
+  if(!match){ box.innerHTML = ''; box.classList.remove('show'); return; }
+
+  const partial = match[1].trim().toLowerCase();
+  const candidates = getKnownChatNames().filter(n=>
+    !partial || n.toLowerCase().startsWith(partial) || n.toLowerCase().split(' ').some(w=>w.startsWith(partial))
+  ).slice(0, 5);
+
+  if(!candidates.length){ box.innerHTML = ''; box.classList.remove('show'); return; }
+
+  box.innerHTML = candidates.map(n=>
+    `<button type="button" onclick="pickMention(${JSON.stringify(n).replace(/"/g,'&quot;')})">@${escapeHtml(n)}</button>`
+  ).join('');
+  box.classList.add('show');
+}
+
+function pickMention(name){
+  const input = document.getElementById('chatInput');
+  if(!input) return;
+  const cursor = input.selectionStart;
+  const before = input.value.slice(0, cursor).replace(/@([a-zA-Z ]{0,30})$/, `@${name} `);
+  const after = input.value.slice(cursor);
+  input.value = before + after;
+  const box = document.getElementById('mentionSuggestions');
+  if(box){ box.innerHTML = ''; box.classList.remove('show'); }
+  input.focus();
 }
 
 function renderTypingIndicator(){
@@ -3790,12 +4738,343 @@ function getToolTiles(){
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: ICON_CALENDAR, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: ICON_GLOBE,   count: null, label: '' },
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
+    { id:'review',    name:'Term Review',          color:'#4E9E74', icon: ICON_REVIEW, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
     { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
-    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
+    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
+    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
   ];
+}
+
+function allTermsFlat(){
+  const out = [];
+  DATA.categories.forEach(cat=>{
+    cat.terms.forEach(t=> out.push({ ...t, categoryId: cat.id, categoryName: cat.name, categoryColor: cat.color }));
+  });
+  return out;
+}
+
+// "Due" means either scheduled for review (its interval has passed) or
+// never reviewed at all — a fresh term starts out due, same as a new card
+// in any spaced-repetition system.
+function dueReviewCount(){
+  const now = Date.now();
+  return allTermsFlat().filter(t=>{
+    const r = TERM_REVIEWS[t.id];
+    return !r || r.nextReviewAt <= now;
+  }).length;
+}
+
+function buildReviewQueue(){
+  const now = Date.now();
+  const due = allTermsFlat().filter(t=>{
+    const r = TERM_REVIEWS[t.id];
+    return !r || r.nextReviewAt <= now;
+  });
+  // Most-overdue first, then never-reviewed — the point is surfacing what's
+  // been forgotten longest, not a random grab-bag.
+  due.sort((a,b)=>{
+    const ra = TERM_REVIEWS[a.id], rb = TERM_REVIEWS[b.id];
+    const oa = ra ? ra.nextReviewAt : -Infinity;
+    const ob = rb ? rb.nextReviewAt : -Infinity;
+    return oa - ob;
+  });
+  return shuffle(due.slice(0, 15)); // capped per session so it stays a quick habit, not a chore
+}
+
+function startReview(){
+  reviewQueue = buildReviewQueue();
+  if(!reviewQueue.length){ showToast('Nothing due for review right now — check back later.'); return; }
+  reviewActive = true;
+  reviewIndex = 0;
+  reviewRevealed = false;
+  reviewGotIt = 0;
+  reviewMissed = 0;
+  renderContent();
+}
+
+function revealReviewAnswer(){
+  reviewRevealed = true;
+  renderContent();
+}
+
+async function answerReview(gotIt){
+  const term = reviewQueue[reviewIndex];
+  const prior = TERM_REVIEWS[term.id];
+  const priorBox = prior ? prior.box : 0;
+  const newBox = gotIt ? Math.min(priorBox + 1, REVIEW_INTERVALS.length - 1) : 0;
+  const reviewCount = (prior ? prior.reviewCount : 0) + 1;
+  if(gotIt) reviewGotIt++; else reviewMissed++;
+  await saveTermReview(term.id, newBox, reviewCount);
+
+  reviewIndex++;
+  reviewRevealed = false;
+  if(reviewIndex >= reviewQueue.length){
+    reviewActive = false; // falls through to the session summary view
+  }
+  renderContent();
+}
+
+function exitReview(){
+  reviewActive = false;
+  reviewQueue = [];
+  reviewIndex = 0;
+  reviewRevealed = false;
+  renderContent();
+}
+
+// The in-app User Guide — a swipeable walkthrough of every screen, built so
+// it never needs a separate file format (PDF/PPTX) to look right on a
+// phone. Content mirrors the standalone navigation guide, condensed for
+// reading on-device rather than presenting.
+const USER_GUIDE_SLIDES = [
+  { kicker: '', title: 'Interpreter Hub', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
+    <p>A section-by-section walkthrough of every screen and tool in the app — swipe or tap through whenever you need a refresher.</p>
+    <div class="guide-swipe-hint"><span>Swipe to continue</span><span style="display:inline-flex; transform:rotate(-90deg);">${ICON_CHEVRON_DOWN}</span></div>
+  ` },
+  { kicker: 'Section 1', title: 'Getting Started', icon: 'ICON_PERSON', color: '#2E8BD0', body: `
+    <p>Before you add or edit a term, send a chat message, or take a practice quiz, the app needs to know who you are so your work is properly attributed.</p>
+    <ol>
+      <li>Tap the round person icon — bottom-left corner, on every screen.</li>
+      <li>A popup titled "Attribute my edits as" appears.</li>
+      <li>Type your name and tap Save.</li>
+      <li>Your name now appears on your chat messages, term edits, and practice scores. You'll also be asked automatically the first time you need it.</li>
+    </ol>
+  ` },
+  { kicker: 'Section 1', title: 'Install It On Your Phone', icon: 'ICON_PHONE', color: '#35A97A', body: `
+    <p>Interpreter Hub is a Progressive Web App — no App Store needed. Installing it means it opens full-screen with its own icon, works offline for content you've already loaded, and can send you notifications.</p>
+    <p><b>iPhone (Safari):</b> Open the app link, tap the Share icon, then "Add to Home Screen," then "Add."</p>
+    <p><b>Android (Chrome):</b> Open the app link, tap the three-dot menu, then "Install app" or "Add to Home Screen."</p>
+  ` },
+  { kicker: 'Section 2', title: 'The Home Screen', icon: 'ICON_HOME', color: '#0F5FA6', body: `
+    <p>A quick daily landing spot — not where you browse from.</p>
+    <p><b>Greeting card</b> — a rotating multilingual hello, plus a shortcut to Recent Activity when there's something new.</p>
+    <p><b>Recent Activity</b> — collapsed by default; tap the label to expand a running log of what your teammates have changed.</p>
+    <p><b>Take the tour</b> — replays the short first-run walkthrough any time.</p>
+  ` },
+  { kicker: 'Section 3', title: 'Navigating the App', icon: 'ICON_GRID', color: '#8B7BAE', body: `
+    <p><b>Domains &amp; Tools</b> — tap any domain tile to filter the glossary to just that domain. "All domains" shows everything. The Tools grid holds Chat, Translate, Practice, and more. Both grids collapse via their section label.</p>
+    <p><b>The three floating buttons:</b></p>
+    <div class="guide-fab-row">
+      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_HOME}</span><b>Home</b><span>bottom-right</span></div>
+      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_PERSON}</span><b>Name</b><span>bottom-left</span></div>
+      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_MOON}</span><b>Theme</b><span>top-right</span></div>
+    </div>
+    <p class="user-guide-note">Opening a single domain or tool hides the sidebar for a focused view — the Home button is your way back.</p>
+  ` },
+  { kicker: 'Section 4', title: 'Search Everything', icon: 'ICON_SEARCH', color: '#2E8BD0', body: `
+    <p>One search bar covers the entire app — not just the glossary.</p>
+    <p>Tap the search bar (or press Ctrl/Cmd+K on desktop). Results are grouped by type: Terms, Providers, Guides, Chat, and more. Tap any result to jump straight to it.</p>
+  ` },
+  { kicker: 'Section 5', title: 'The Glossary', icon: 'ICON_LAYERS', color: '#6F97AC', body: `
+    <p>Terms are bilingual (English/Spanish) cards, sorted alphabetically. Each shows a definition and, if provided, a source link.</p>
+    <ul>
+      <li>Tap <b>+ Add term</b>, or the pencil icon to edit an existing one.</li>
+      <li>The copy and speaker (audio) buttons sit on every term.</li>
+      <li>Changes sync instantly for the whole team — no refresh needed.</li>
+    </ul>
+    <p class="user-guide-note">Professional Resources sits with the Tools tiles, but behaves like any other domain.</p>
+  ` },
+  { kicker: 'Section 5', title: 'Edit History, Audio & Attachments', icon: 'ICON_EDIT', color: '#C98FA0', body: `
+    <p><b>Edit History</b> — every edit saves the previous version (up to 10). "View edit history" shows who changed what and when; restore any version into the form before saving.</p>
+    <p><b>Audio Pronunciation</b> — a speaker button reads any term aloud in the correct language, using your device's built-in voice.</p>
+    <p><b>Attachments</b> — a term can carry a file, like a reference PDF or image. Look for the attachment chip on the card.</p>
+  ` },
+  { kicker: 'Section 6', title: 'Team Chat', icon: 'ICON_CHAT', color: '#2E8BD0', body: `
+    <p>Real-time messaging for quick coordination. Tap the paperclip to attach a photo or PDF. Turn on notifications to get alerted even when the app isn't open.</p>
+    <p><b>@Mentions</b> — type @ and a name to flag a teammate directly. Matching suggestions appear as you type; they see it highlighted and get notified.</p>
+    <p><b>Pinned Announcements</b> — a separate panel above the message stream, for things that shouldn't get buried, like a new CE requirement.</p>
+  ` },
+  { kicker: 'Section 7', title: 'Translate', icon: 'ICON_GLOBE', color: '#2E8BD0', body: `
+    <p>A reference aid for building and studying the glossary — not a substitute for a qualified interpreter.</p>
+    <div class="guide-pipeline">
+      <div class="guide-pipeline-step"><span class="guide-pipeline-num">1</span><b>Glossary-first</b><span>Your team's trusted entry, checked first.</span></div>
+      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
+      <div class="guide-pipeline-step"><span class="guide-pipeline-num">2</span><b>False-friend check</b><span>Flags traps like intoxicado, embarazada.</span></div>
+      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
+      <div class="guide-pipeline-step"><span class="guide-pipeline-num">3</span><b>Back-translation</b><span>Translates back to catch drifted meaning.</span></div>
+      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
+      <div class="guide-pipeline-step"><span class="guide-pipeline-num">4</span><b>AI breakdown</b><span>Register, regional variation &amp; cautions.</span></div>
+    </div>
+  ` },
+  { kicker: 'Section 8', title: 'CoreCHI Practice', icon: 'ICON_EXAM', color: '#0F5FA6', body: `
+    <p>Multiple-choice questions across CCHI's five official exam domains, drawn in the same proportions as the real exam.</p>
+    <p>Every finished quiz saves to your personal history — the Practice screen shows your total sessions, all-time accuracy, best score, and <b>accuracy broken down by CCHI domain</b>, the real signal for where to study.</p>
+    <p class="user-guide-note">Original practice questions matching CCHI's domain structure — not real exam items, and not CCHI-affiliated.</p>
+  ` },
+  { kicker: 'Section 9', title: 'Term Review', icon: 'ICON_REVIEW', color: '#4E9E74', body: `
+    <p>Spaced repetition for the glossary itself, separate from CoreCHI Practice. See the English term (with audio), try to recall the Spanish and definition, tap Show answer, then rate yourself.</p>
+    <div class="guide-timeline">
+      <div class="guide-timeline-track"></div>
+      <div class="guide-timeline-stop" style="left:0%;"><span class="guide-timeline-dot reset"></span><b>0</b></div>
+      <div class="guide-timeline-stop" style="left:20%;"><span class="guide-timeline-dot"></span><b>1d</b></div>
+      <div class="guide-timeline-stop" style="left:40%;"><span class="guide-timeline-dot"></span><b>3d</b></div>
+      <div class="guide-timeline-stop" style="left:60%;"><span class="guide-timeline-dot"></span><b>7d</b></div>
+      <div class="guide-timeline-stop" style="left:80%;"><span class="guide-timeline-dot"></span><b>14d</b></div>
+      <div class="guide-timeline-stop" style="left:100%;"><span class="guide-timeline-dot mastered"></span><b>30d</b></div>
+    </div>
+    <p><b class="guide-tag-blue">Missed it</b> resets to the start, reviewed again soon. <b class="guide-tag-green">Got it</b> moves one stop further along.</p>
+    <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
+  ` },
+  { kicker: 'Section 10', title: 'Providers, Guides, Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
+    <p><b>Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar).</p>
+    <p><b>Guides</b> — quick team notes and reference write-ups that don't belong in the formal glossary.</p>
+    <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
+    <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
+  ` },
+  { kicker: 'Section 11', title: 'Recent Updates', icon: 'ICON_BELL', color: '#B08D2A', body: `
+    <p>The complete, unabridged activity log for the whole app — every term added or edited, every domain created, every guide posted.</p>
+    <div class="guide-feed">
+      <div class="guide-feed-row"><b>Bertha</b> added "Hipertrofia" to Heart Failure &amp; Cardiac<span>2m ago</span></div>
+      <div class="guide-feed-row"><b>Fabiola</b> updated a term in Professional Resources<span>18m ago</span></div>
+      <div class="guide-feed-row"><b>Jose</b> pinned an announcement<span>1h ago</span></div>
+    </div>
+    <p>This is the same feed the Home screen's "Recent activity" button jumps to.</p>
+  ` },
+  { kicker: 'Section 12', title: 'Dark Mode', icon: 'ICON_MOON', color: '#252E6D', body: `
+    <div class="guide-toggle"><span class="guide-toggle-track"><span class="guide-toggle-thumb">${ICON_MOON}</span></span></div>
+    <p>Tap the sun/moon icon in the top-right corner of any screen to switch instantly between light and dark themes.</p>
+    <p>The same navy-and-cyan identity carries over, just inverted for low-light rooms and evening shifts. Your choice is remembered on that device.</p>
+  ` },
+  { kicker: 'Section 13', title: 'Exporting Your Work', icon: 'ICON_DOWNLOAD', color: '#0079BD', body: `
+    <p><b>Export PDF</b> — a clean, printable reference sheet with no app chrome. On mobile: Share → Print → Save as PDF. On desktop: Ctrl/Cmd+P.</p>
+    <p><b>CSV Export &amp; Import</b> — export to a spreadsheet for bulk editing, then re-import: matching IDs update, blank IDs create new terms. A preview always shows what will change before anything saves.</p>
+  ` },
+  { kicker: 'Section 14', title: 'Tips, Privacy & Troubleshooting', icon: 'ICON_SHIELD', color: '#BFA05E', body: `
+    <p class="user-guide-note"><b>HIPAA reminder:</b> never include patient names or identifying details anywhere in Interpreter Hub — Team Chat and Guides included.</p>
+    <ul>
+      <li>Everything syncs in real time — no need to refresh.</li>
+      <li>If something looks out of date, check your connection first.</li>
+      <li>A save that fails shows an error toast — just retry once you're back online.</li>
+      <li>Anything not covered here: ask in Team Chat, or check Guides.</li>
+    </ul>
+  ` },
+  { kicker: '', title: 'You\u2019re all set', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
+    <p>Jump back into any part of the app from Home — or replay this guide any time from the Tools grid.</p>
+  ` },
+];
+
+let guideIndex = 0;
+let guideDirection = 'forward';
+
+function goToGuideSlide(i){
+  guideDirection = i > guideIndex ? 'forward' : 'backward';
+  guideIndex = Math.max(0, Math.min(USER_GUIDE_SLIDES.length - 1, i));
+  renderContent();
+}
+function nextGuideSlide(){ if(guideIndex < USER_GUIDE_SLIDES.length - 1) goToGuideSlide(guideIndex + 1); }
+function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
+
+function renderUserGuide(){
+  const slide = USER_GUIDE_SLIDES[guideIndex];
+  const isFirst = guideIndex === 0, isLast = guideIndex === USER_GUIDE_SLIDES.length - 1;
+  const pct = Math.round(((guideIndex + 1) / USER_GUIDE_SLIDES.length) * 100);
+  const icon = ICON_GUIDE_MAP[slide.icon] || ICON_COMPASS;
+
+  return `
+    <div class="user-guide" id="userGuideRoot">
+      <div class="user-guide-progress-track"><div class="user-guide-progress-fill" style="width:${pct}%;"></div></div>
+      <div class="user-guide-counter">${guideIndex + 1} of ${USER_GUIDE_SLIDES.length}</div>
+      <div class="user-guide-slide ${slide.cover ? 'is-cover' : ''} guide-anim-${guideDirection}" style="--guide-color:${slide.color};">
+        <div class="user-guide-glyph" style="background:linear-gradient(145deg, ${slide.color}, ${darkenHex(slide.color, 30)});">${icon}</div>
+        ${slide.kicker ? `<div class="user-guide-kicker">${escapeHtml(slide.kicker.toUpperCase())}</div>` : ''}
+        <h2 class="user-guide-title">${escapeHtml(slide.title)}</h2>
+        <div class="user-guide-body">${slide.body}</div>
+      </div>
+      <div class="user-guide-nav">
+        <button class="btn btn-ghost" onclick="prevGuideSlide()" ${isFirst ? 'disabled' : ''}>Back</button>
+        <button class="btn btn-primary" onclick="${isLast ? "setCategory('home')" : 'nextGuideSlide()'}">${isLast ? 'Done' : 'Next'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function setupUserGuideSwipe(){
+  const root = document.getElementById('userGuideRoot');
+  if(!root) return;
+  let startX = null;
+  root.addEventListener('touchstart', e=>{ startX = e.touches[0].clientX; }, { passive:true });
+  root.addEventListener('touchend', e=>{
+    if(startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx) > 50){ dx < 0 ? nextGuideSlide() : prevGuideSlide(); }
+    startX = null;
+  }, { passive:true });
+}
+
+function renderReview(){
+  if(reviewActive) return renderReviewCard();
+  if(reviewQueue.length && reviewIndex >= reviewQueue.length) return renderReviewSummary();
+
+  const due = dueReviewCount();
+  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${due} due</span></div>`;
+  html += `<p class="practice-intro">Spaced repetition for the glossary itself — see a term, try to recall the translation and definition, then rate yourself. Terms you miss come back sooner; terms you know well come back less often.</p>`;
+
+  if(!whoAmI()){
+    html += `<div class="progress-card"><p>Set your name so your review schedule is personal to you.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+    return html;
+  }
+
+  if(due === 0){
+    html += `<div class="empty"><div class="glyph">${ICON_REVIEW}</div>Nothing due right now.<br>Check back later, or come back tomorrow.</div>`;
+    return html;
+  }
+
+  html += `<div class="quiz-setup"><button class="btn btn-primary" onclick="startReview()">Review ${Math.min(due,15)} term${Math.min(due,15)===1?'':'s'}</button></div>`;
+  return html;
+}
+
+function renderReviewCard(){
+  const term = reviewQueue[reviewIndex];
+  const progress = `${reviewIndex+1} of ${reviewQueue.length}`;
+  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${progress}</span></div>`;
+  html += `<div class="review-card">
+    <span class="tag" style="color:${term.categoryColor}; background:${term.categoryColor}1F;">${escapeHtml(term.categoryName.split(',')[0].split('&')[0].trim())}</span>
+    <div class="review-card-en">
+      ${escapeHtml(term.en)}
+      <button class="copy-btn" style="opacity:1; position:relative; top:-2px;" title="Hear this term" onclick="speakText(this, ${JSON.stringify(term.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
+    </div>`;
+  if(reviewRevealed){
+    html += `
+      ${term.es ? `<div class="review-card-es">${escapeHtml(term.es)} <button class="copy-btn" style="opacity:1; position:relative; top:-1px;" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(term.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button></div>` : `<div class="review-card-es" style="color:var(--ink-faint); font-style:normal;">No Spanish translation on file</div>`}
+      <p class="review-card-def">${escapeHtml(term.def || '')}</p>
+      <div class="quiz-actions" style="margin-top:18px;">
+        <button class="btn btn-ghost" style="background:var(--danger-soft); color:var(--danger);" onclick="answerReview(false)">Missed it</button>
+        <button class="btn btn-primary" onclick="answerReview(true)">Got it</button>
+      </div>`;
+  } else {
+    html += `
+      <p class="review-card-prompt">What's the Spanish translation and definition?</p>
+      <div class="quiz-actions" style="margin-top:18px;">
+        <button class="btn btn-primary" onclick="revealReviewAnswer()">Show answer</button>
+      </div>`;
+  }
+  html += `</div>`;
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:16px;">
+    <button class="btn btn-ghost" onclick="exitReview()">Exit review</button>
+  </div>`;
+  return html;
+}
+
+function renderReviewSummary(){
+  const total = reviewGotIt + reviewMissed;
+  const pct = total ? Math.round((reviewGotIt/total)*100) : 0;
+  let html = `<div class="section-head"><h2>Review Complete</h2><span class="sub">${reviewGotIt} of ${total}</span></div>`;
+  html += `<div class="results-head">
+    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" style="background:conic-gradient(#4E9E74 ${pct*3.6}deg, var(--line-soft) 0deg);">
+      <div class="score-ring-inner"><span class="score-pct">${pct}%</span><span class="score-label">Known</span></div>
+    </div>
+    <div class="results-summary">
+      <h3>${reviewGotIt} known, ${reviewMissed} to revisit</h3>
+      <p>Terms you missed will come back around sooner than the ones you knew well.</p>
+    </div>
+  </div>`;
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px;">
+    <button class="btn btn-primary" onclick="exitReview()">Back to Term Review</button>
+  </div>`;
+  return html;
 }
 
 function tileHtml(t, i, onclickCall){
@@ -3835,14 +5114,34 @@ const ICON_SHIELD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
 const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 10.5C6 7 8.5 4.5 12 4.5C15.5 4.5 18 7 18 10.5V14L20 17H4L6 14V10.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 19.5C9.9 20.4 10.9 21 12 21C13.1 21 14.1 20.4 14.5 19.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_PDF = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3.5H14L18 7.5V20C18 20.5 17.5 21 17 21H7C6.5 21 6 20.5 6 20V4.5C6 4 6.5 3.5 7 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3.5V7.5H18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15H4.5C3.7 15 3 14.3 3 13.5V4.5C3 3.7 3.7 3 4.5 3H13.5C14.3 3 15 3.7 15 4.5V5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 9.5H7.5L12 5.5V18.5L7.5 14.5H4V9.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 8.5C16.5 9.5 17 10.7 17 12C17 13.3 16.5 14.5 15.5 15.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M18 6C19.7 7.7 20.5 9.7 20.5 12C20.5 14.3 19.7 16.3 18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>';
+const ICON_PIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 3.5L20.5 9.5L17.5 12.5L16 12L12.5 15.5L13 19L11.5 20.5L8 15L3.5 19V17.5L8 13L2.5 12.5L4 11L7.5 11.5L11 8L10.5 6.5L14.5 3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+const ICON_PRINT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9V4H18V9" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><rect x="4" y="9" width="16" height="8" rx="1.5" stroke="currentColor" stroke-width="1.7"/><path d="M6 14H18V20H6V14Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3.5V15.5M12 15.5L7.5 11M12 15.5L16.5 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5V19C4.5 19.8 5.2 20.5 6 20.5H18C18.8 20.5 19.5 19.8 19.5 19V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+const ICON_UPLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5V3.5M12 3.5L7.5 8M12 3.5L16.5 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5V19C4.5 19.8 5.2 20.5 6 20.5H18C18.8 20.5 19.5 19.8 19.5 19V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+const ICON_GRID = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/></svg>';
+const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20L4.6 17L15.5 6.1C16 5.6 16.8 5.6 17.3 6.1L18.4 7.2C18.9 7.7 18.9 8.5 18.4 9L7.5 19.9L4 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+const ICON_COMPASS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5V5M12 19V21.5M4.2 4.2L6 6M18 18L19.8 19.8M2.5 12H5M19 12H21.5M4.2 19.8L6 18M18 6L19.8 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+const ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="7" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 3.5L16 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 12h6M9 14.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+
+// Resolves the icon-name strings stored on USER_GUIDE_SLIDES to their actual
+// SVGs. A lookup map instead of direct references, since the guide's data
+// array is defined earlier in the file than these icon constants — this map
+// only gets read inside a function body, well after everything has loaded.
+const ICON_GUIDE_MAP = {
+  ICON_COMPASS, ICON_PERSON, ICON_PHONE, ICON_HOME, ICON_GRID, ICON_SEARCH,
+  ICON_LAYERS, ICON_EDIT, ICON_CHAT, ICON_GLOBE, ICON_EXAM, ICON_REVIEW,
+  ICON_CHAIN, ICON_BELL, ICON_MOON, ICON_DOWNLOAD, ICON_SHIELD,
+};
 
 const DOMAIN_ICONS = {
   dna: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 3C7 6 17 6 17 9C17 12 7 12 7 15C7 18 17 18 17 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 5H16M8 19H16M8 12H16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
@@ -3956,6 +5255,12 @@ function render(){
   } else if(activeCategory === 'practice'){
     showTopbar = false;
     showStatStrip = false;
+  } else if(activeCategory === 'review'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'userguide'){
+    showTopbar = false;
+    showStatStrip = false;
   } else if(activeCategory === 'home'){
     showTopbar = false;
     showStatStrip = false;
@@ -4023,11 +5328,11 @@ function render(){
     <button class="theme-fab" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
       ${document.documentElement.getAttribute('data-theme') === 'dark' ? ICON_SUN : ICON_MOON}
     </button>
-    <button class="name-fab ${activeCategory==='chat' ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
+    <button class="name-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
       ${ICON_PERSON}
     </button>
     ${activeCategory !== 'home' ? `
-    <button class="home-fab ${activeCategory==='chat' ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
+    <button class="home-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
       ${ICON_HOME}<span>Home</span>
     </button>` : ''}
   `;
@@ -4082,6 +5387,18 @@ function renderContent(){
     return;
   }
 
+  if(activeCategory === 'review'){
+    content.innerHTML = renderReview();
+    return;
+  }
+
+  if(activeCategory === 'userguide'){
+    content.innerHTML = renderUserGuide();
+    setupUserGuideSwipe();
+    if(guideIndex === USER_GUIDE_SLIDES.length - 1) celebrateScore('.user-guide-slide.is-cover');
+    return;
+  }
+
   if(activeCategory === 'updates'){
     content.innerHTML = `
       <div class="section-head"><h2>Recent Updates</h2><span class="sub">${ACTIVITY.length} update${ACTIVITY.length===1?'':'s'}</span>${
@@ -4119,10 +5436,12 @@ function renderContent(){
           : ''
       }</div>
       <div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>
+      ${renderAnnouncements()}
       <div class="chat-panel">
         <div class="chat-messages" id="chatMessages"></div>
         ${hasName ? `
           <div class="typing-indicator" id="typingIndicator"></div>
+          <div class="mention-suggestions" id="mentionSuggestions"></div>
           <div class="chat-attach-preview" id="chatAttachPreview"></div>
           <div class="chat-input-row">
             <button class="attach-btn" title="Attach a photo or PDF" onclick="document.getElementById('chatFileInput').click()">${ICON_PAPERCLIP}</button>
@@ -4149,6 +5468,17 @@ function renderContent(){
   let cats = activeCategory==='all' ? DATA.categories : DATA.categories.filter(c=>c.id===activeCategory);
 
   let html = '';
+  const printLabel = activeCategory==='all' ? 'the full glossary' : (cats[0] ? cats[0].name : 'this domain');
+  html += `<div class="print-export-row">
+    <button class="btn btn-ghost" onclick="window.print()">${ICON_PRINT} Export PDF</button>
+    <button class="btn btn-ghost" onclick="exportTermsCsv()">${ICON_DOWNLOAD} Export CSV</button>
+    <button class="btn btn-ghost" onclick="triggerCsvImport()">${ICON_UPLOAD} Import CSV</button>
+    <span class="print-export-hint">Prints ${escapeHtml(printLabel)} as a clean reference sheet, or exports it to a spreadsheet for bulk editing — reimport the same file after editing to update everything at once.</span>
+  </div>
+  <div class="print-only-title">
+    <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
+    <p>HUMC Language Services · Generated ${new Date().toLocaleDateString()}</p>
+  </div>`;
   cats.forEach(cat=>{
     // Sort a *copy* for display only. Each item keeps _idx — its true position
     // in the stored array — so the edit and delete buttons still target the
@@ -4181,16 +5511,18 @@ function renderContent(){
           </div>
           <div class="actions" style="position:absolute; top:16px; right:16px;">
             <button class="attach-btn" title="Attach a photo or PDF" onclick="attachToTerm('${t.id}')">${ICON_PAPERCLIP}</button>
-            <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', ${t._idx})">✎</button>
-            <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', ${t._idx})">✕</button>
+            <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', '${t.id}')">✎</button>
+            <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', '${t.id}')">✕</button>
           </div>
           <div class="term-en">
             <span>${escapeHtml(t.en)}</span>
             <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
           </div>
           ${t.es ? `<div class="term-es">
             <span>${escapeHtml(t.es)}</span>
             <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
           </div>` : ''}
           <p class="def">${escapeHtml(t.def)}</p>
           ${renderLinks(t, cat.id)}
@@ -4248,6 +5580,7 @@ function setCategory(id){
     if(!whoAmI()) openNameModal();
   }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
+  if(id === 'userguide'){ guideIndex = 0; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   render();
 }
@@ -4295,6 +5628,7 @@ function saveMyName(){
   // fires automatically on entry, not from a click to gate) — refresh it
   // directly so saving swaps straight to the real message box.
   if(name && activeCategory === 'chat') renderContent();
+  if(name) loadTermReviews().then(()=> { if(activeCategory==='review' || activeCategory==='home') renderContent(); });
   const action = pendingNameAction;
   pendingNameAction = null;
   if(name && action) action();
@@ -4391,6 +5725,8 @@ function renderPractice(){
   html += `<p class="practice-intro">Multiple-choice practice built around the five domains of CCHI's CoreCHI written exam. Questions are drawn in the same proportions as the real exam, so your practice weights match where the marks actually are.</p>`;
   html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>These are original practice questions written to match CCHI's published domain structure \u2014 they are not real exam items, and this app is not affiliated with or endorsed by CCHI. Always study from official CCHI materials as well.</span></div>`;
 
+  html += renderMyProgress();
+
   html += `<div class="domain-bars">`;
   CCHI_DOMAINS.forEach(d=>{
     html += `
@@ -4417,7 +5753,7 @@ function renderPractice(){
         <option value="all">All domains (exam-weighted)</option>
         ${CCHI_DOMAINS.map(d=>`<option value="${d.id}">${escapeHtml(d.name)} only</option>`).join('')}
       </select>
-      <button class="btn btn-primary" onclick="startQuiz()">Start practice</button>
+      <button class="btn btn-primary" onclick="requireName(startQuiz)">Start practice</button>
       <button class="btn btn-ghost" onclick="openAddQuestionModal()">+ Add question</button>
     </div>
   `;
@@ -4429,6 +5765,55 @@ function renderPractice(){
 // could score well by spotting the pattern instead of reasoning through the
 // scenario, which defeats the point of practising. Shuffling per session also
 // means repeating a question isn't just recall of "it was the third one".
+// Aggregates every past session for whoever's currently attributed, so
+// "your accuracy in Cultural Responsiveness" reflects a real track record
+// instead of resetting to nothing after each quiz.
+function renderMyProgress(){
+  const mine = myQuizHistory();
+  if(!whoAmI()){
+    return `<div class="progress-card"><p>Set your name to start tracking your practice results over time.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+  }
+  if(!mine.length){
+    return `<div class="progress-card"><p>No practice sessions yet — your results will start building a personal accuracy record here.</p></div>`;
+  }
+
+  const totalQ = mine.reduce((n,h)=>n+h.total, 0);
+  const totalRight = mine.reduce((n,h)=>n+h.correct, 0);
+  const overallPct = totalQ ? Math.round((totalRight/totalQ)*100) : 0;
+  const best = Math.max(...mine.map(h=> h.total ? Math.round((h.correct/h.total)*100) : 0));
+
+  const domainTotals = {};
+  mine.forEach(h=>{
+    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
+      if(!domainTotals[d]) domainTotals[d] = { right:0, total:0 };
+      domainTotals[d].right += s.right;
+      domainTotals[d].total += s.total;
+    });
+  });
+
+  let html = `<div class="progress-card">
+    <div class="progress-head">
+      <div><b>${mine.length}</b><span>session${mine.length===1?'':'s'}</span></div>
+      <div><b>${overallPct}%</b><span>all-time accuracy</span></div>
+      <div><b>${best}%</b><span>best session</span></div>
+    </div>
+    <div class="domain-bars" style="margin-top:14px;">`;
+  CCHI_DOMAINS.forEach(d=>{
+    const s = domainTotals[d.id];
+    if(!s) return;
+    const dpct = Math.round((s.right/s.total)*100);
+    html += `
+      <div class="domain-bar-row">
+        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
+        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${dpct}%; background:${d.color};"></span></span>
+        <span class="domain-bar-pct">${dpct}%</span>
+        <span class="domain-bar-pct">${s.right}/${s.total}</span>
+      </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
 function shuffleOptions(q){
   const order = shuffle(q.o.map((_, i) => i));
   return { ...q, o: order.map(i => q.o[i]), a: order.indexOf(q.a) };
@@ -4515,8 +5900,40 @@ function nextQuestion(){
   quizRevealed = false;
   if(quizIndex >= quizQuestions.length){
     quizActive = false; // triggers the results view
+    saveQuizResult();
   }
   renderContent();
+}
+
+// Saved once per finished quiz, keyed by whoever's attributed — this is
+// what turns the practice bank into an actual study record instead of a
+// quiz that forgets everything the moment you close it.
+async function saveQuizResult(){
+  const who = whoAmI();
+  if(!who || !db) return; // no name set, or no database — nothing to attribute this to
+
+  const total = quizQuestions.length;
+  const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
+  const domainBreakdown = {};
+  const missedQuestions = [];
+  quizQuestions.forEach((q,i)=>{
+    if(!domainBreakdown[q.d]) domainBreakdown[q.d] = { right:0, total:0 };
+    domainBreakdown[q.d].total++;
+    if(quizAnswers[i] === q.a){
+      domainBreakdown[q.d].right++;
+    } else {
+      missedQuestions.push(q.q);
+    }
+  });
+
+  try{
+    const ref = await db.collection('quiz-history').add({
+      who, total, correct, domainBreakdown, missedQuestions, timestamp: Date.now()
+    });
+    QUIZ_HISTORY.unshift({ id: ref.id, who, total, correct, domainBreakdown, missedQuestions, timestamp: Date.now() });
+  }catch(err){
+    console.error('saveQuizResult failed:', err);
+  }
 }
 
 function exitQuiz(){
@@ -4746,15 +6163,30 @@ function startGreetingRotation(){
   }, 2800);
 }
 
-function renderHome(){
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+// A different one each time Home loads — grounded in language, service, and
+// the interpreter's role specifically, rather than generic workplace quotes.
+const MOTIVATIONAL_QUOTES = [
+  "\u201cLanguage is the road map of a culture.\u201d \u2014 Rita Mae Brown",
+  "\u201cTo have another language is to possess a second soul.\u201d \u2014 Charlemagne",
+  "\u201cThe interpreter is the bridge between two worlds that cannot otherwise meet.\u201d",
+  "\u201cWords travel worlds. Translators do the driving.\u201d \u2014 Anna Rusconi",
+  "\u201cIn every act of interpreting, we carry someone else's meaning safely across.\u201d",
+  "\u201cCommunication works for those who work at it.\u201d \u2014 John Powell",
+  "\u201cA patient understood is a patient cared for.\u201d",
+  "\u201cWhat we do here echoes far beyond the room it happens in.\u201d",
+  "\u201cPrecision in language is precision in care.\u201d",
+  "\u201cEmpathy is the truest form of translation.\u201d",
+  "\u201cThe limits of my language mean the limits of my world.\u201d \u2014 Ludwig Wittgenstein",
+  "\u201cEvery word you carry across a language gap matters to someone.\u201d"
+];
 
+function renderHome(){
   let html = `
     <div class="home-greeting">
       <div class="home-greeting-text">
         <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span></h2>
-        <p>${greeting}. Everything's in the list below — jump to a domain or tool, or pick up where your team left off.</p>
+        <p>${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
+        <button type="button" class="link-btn" style="margin-top:2px;" onclick="openOnboarding()">Take the tour</button>
         ${ACTIVITY.length > 0 ? `
         <button class="home-recent-cta" onclick="setCategory('updates')">
           ${ICON_BELL}<span>Recent activity</span>
@@ -4848,12 +6280,13 @@ function renderChatMessages(){
     const time = m.timestamp ? relativeTime(m.timestamp) : '';
     const avatarColor = nameToColor(m.author || 'Teammate');
     const avatar = !mine ? `<div class="chat-avatar" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initialsOf(m.author || 'Teammate'))}</div>` : '';
+    const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
     return `
-      <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}">
+      <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}${mentionsMe ? ' mentioned' : ''}">
         ${avatar}
         <div class="chat-bubble-col">
           ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
-          ${m.text ? `<div class="chat-bubble">${escapeHtml(m.text)}</div>` : ''}
+          ${m.text ? `<div class="chat-bubble">${highlightMentions(m.text)}</div>` : ''}
           ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
           <div class="chat-meta-row">
             <span class="chat-time" data-ts="${m.timestamp||''}" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${time}</span>
@@ -4968,18 +6401,18 @@ function renderDirectory(q){
     // Same approach as the term grid: sort a copy for display, but keep each
     // term's real storage index so the pencil button edits the right one.
     const sortedTerms = cat.terms
-      .map((t, idx)=>({ t, idx }))
+      .map((t)=>({ t }))
       .sort((a,b)=> collateTerms(a.t.en, b.t.en));
-    sortedTerms.forEach(({ t, idx })=>{
+    sortedTerms.forEach(({ t })=>{
       const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
       const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q);
       if(!matches) return;
 
       if(t.url){
-        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url, idx });
+        rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url, termId: t.id });
       } else if(cat.id !== 'resources'){
-        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en'), idx });
-        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es'), idx });
+        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en'), termId: t.id });
+        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es'), termId: t.id });
       }
     });
     if(rows.length===0) return;
@@ -4994,7 +6427,7 @@ function renderDirectory(q){
           <span class="dir-term">${r.term}</span>
           <span class="dir-kind ${r.confirmed?'confirmed':''}">${r.kind}</span>
           <a class="dir-url" href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a>
-          <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', ${r.idx})">✎</button>
+          <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', '${r.termId}')">✎</button>
           <a class="dir-go" href="${escapeAttr(r.url)}" target="_blank" rel="noopener" title="Open link">${ICON_EXTERNAL}</a>
         </div>
       `;
@@ -5028,16 +6461,17 @@ function _openAddModal(fromDirectory){
   populateCategorySelect();
   const isRealDomain = DATA.categories.some(c=>c.id===activeCategory);
   document.getElementById('fCategory').value = isRealDomain ? activeCategory : DATA.categories[0].id;
+  document.getElementById('historyLinkSlot').innerHTML = '';
   document.getElementById('overlay').classList.add('show');
   document.getElementById('fEn').focus();
 }
 
-function openEditModal(categoryId, idx){
-  requireName(()=>_openEditModal(categoryId, idx));
+function openEditModal(categoryId, termId){
+  requireName(()=>_openEditModal(categoryId, termId));
 }
-function _openEditModal(categoryId, idx){
-  editingContext = {categoryId, idx};
-  const term = DATA.categories.find(c=>c.id===categoryId).terms[idx];
+function _openEditModal(categoryId, termId){
+  editingContext = {categoryId, termId};
+  const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
   document.getElementById('modalTitle').textContent = 'Edit term';
   document.getElementById('fEn').value = term.en || '';
   document.getElementById('fEs').value = term.es || '';
@@ -5046,8 +6480,52 @@ function _openEditModal(categoryId, idx){
   document.getElementById('fSourceUrl').value = term.url || '';
   populateCategorySelect();
   document.getElementById('fCategory').value = categoryId;
+  const historySlot = document.getElementById('historyLinkSlot');
+  historySlot.innerHTML = (term.history && term.history.length)
+    ? `<button type="button" class="link-btn" onclick="openHistoryModal('${categoryId}','${termId}')">View edit history (${term.history.length})</button>`
+    : '';
   document.getElementById('overlay').classList.add('show');
   document.getElementById('fEn').focus();
+}
+
+function openHistoryModal(categoryId, termId){
+  const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
+  if(!term || !term.history || !term.history.length){ showToast('No earlier versions saved for this term.'); return; }
+  const list = document.getElementById('historyList');
+  list.innerHTML = term.history.map((v, i)=>`
+    <div class="history-entry">
+      <div class="history-entry-meta">
+        <span>${v.editedBy ? escapeHtml(v.editedBy) : 'Unknown editor'}</span>
+        <span>${v.savedAt ? new Date(v.savedAt).toLocaleString() : ''}</span>
+      </div>
+      <div class="history-entry-en">${escapeHtml(v.en || '')}</div>
+      ${v.es ? `<div class="history-entry-es">${escapeHtml(v.es)}</div>` : ''}
+      <p class="history-entry-def">${escapeHtml(v.def || '')}</p>
+      <button type="button" class="btn btn-ghost" style="margin-top:8px;" onclick="restoreHistoryVersion('${categoryId}','${termId}', ${i})">Restore this version</button>
+    </div>
+  `).join('');
+  document.getElementById('historyOverlay').classList.add('show');
+}
+
+function closeHistoryModal(){
+  document.getElementById('historyOverlay').classList.remove('show');
+}
+
+// Restoring doesn't silently overwrite — it fills the edit form with the
+// old values and lets the normal Save flow take it from there, so the
+// restore itself still goes through saveTerm() and gets its own history
+// entry (meaning a bad restore can itself be undone).
+function restoreHistoryVersion(categoryId, termId, historyIndex){
+  const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
+  const version = term && term.history && term.history[historyIndex];
+  if(!version) return;
+  document.getElementById('fEn').value = version.en || '';
+  document.getElementById('fEs').value = version.es || '';
+  document.getElementById('fDef').value = version.def || '';
+  document.getElementById('fSource').value = version.source || '';
+  document.getElementById('fSourceUrl').value = version.url || '';
+  closeHistoryModal();
+  showToast('Version loaded into the form — review, then Save to restore it.');
 }
 
 function populateCategorySelect(){
@@ -5072,20 +6550,43 @@ async function saveTerm(){
   const editor = whoAmI();
   const targetCatName = DATA.categories.find(c=>c.id===newCategoryId).name;
 
-  const existingId = editingContext ? DATA.categories.find(c=>c.id===editingContext.categoryId).terms[editingContext.idx].id : null;
-  const record = { id: existingId || genId(), en, es, def, source, url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined };
+  const existingTerm = editingContext
+    ? DATA.categories.find(c=>c.id===editingContext.categoryId).terms.find(t=>t.id===editingContext.termId)
+    : null;
 
+  // Snapshot the pre-edit values before overwriting them, so an accidental
+  // or unwanted change can be undone later. Capped at 10 — enough to catch
+  // a mistake without a term's document growing without bound.
+  let history = (existingTerm && existingTerm.history) || [];
+  if(existingTerm){
+    const snapshot = {
+      en: existingTerm.en, es: existingTerm.es, def: existingTerm.def,
+      source: existingTerm.source, url: existingTerm.url,
+      editedBy: existingTerm.editedBy, editedOn: existingTerm.editedOn,
+      savedAt: Date.now()
+    };
+    history = [snapshot, ...history].slice(0, 10);
+  }
+
+  const record = {
+    id: (existingTerm && existingTerm.id) || genId(), categoryId: newCategoryId,
+    en, es, def, source,
+    url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined,
+    history
+  };
+
+  closeModal();
+  const ok = await saveTermDoc(record);
+  if(!ok) return; // saveTermDoc already showed the error toast
+
+  // Apply locally right away rather than waiting on the real-time listener's
+  // round trip — the person who just typed the edit shouldn't have to wait
+  // to see it reflected.
   if(editingContext){
     const oldCat = DATA.categories.find(c=>c.id===editingContext.categoryId);
-    if(editingContext.categoryId === newCategoryId){
-      // Same domain — update in place so the term doesn't jump to the bottom of the list.
-      oldCat.terms[editingContext.idx] = record;
-    } else {
-      // Moved to a different domain — remove from the old one, append to the new one.
-      oldCat.terms.splice(editingContext.idx, 1);
-      const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
-      targetCat.terms.push(record);
-    }
+    oldCat.terms = oldCat.terms.filter(t=>t.id!==record.id);
+    const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
+    targetCat.terms.push(record);
     logActivity(`updated "${en}" in ${targetCatName}`);
   } else {
     const targetCat = DATA.categories.find(c=>c.id===newCategoryId);
@@ -5093,19 +6594,19 @@ async function saveTerm(){
     logActivity(`added "${en}" to ${targetCatName}`);
   }
 
-  closeModal();
-  await persist();
   successBurst();
   showToast('Term saved.');
   render();
 }
 
-async function deleteTerm(categoryId, idx){
+async function deleteTerm(categoryId, termId){
   const cat = DATA.categories.find(c=>c.id===categoryId);
-  const term = cat.terms[idx];
+  const term = cat.terms.find(t=>t.id===termId);
+  if(!term) return;
   if(!confirm(`Delete "${term.en}"? This can't be undone.`)) return;
-  cat.terms.splice(idx,1);
-  await persist();
+  const ok = await deleteTermDoc(termId);
+  if(!ok) return;
+  cat.terms = cat.terms.filter(t=>t.id!==termId);
   logActivity(`removed "${term.en}" from ${cat.name}`);
 
   // Clean up any files that were attached to this term.
@@ -5177,7 +6678,8 @@ async function saveDomain(){
 
   DATA.categories.push({ id, name, color: selectedSwatch, icon: selectedIcon, terms: [] });
   closeDomainModal();
-  await persist();
+  const ok = await saveCategoriesMeta();
+  if(!ok){ DATA.categories.pop(); return; }
   activeCategory = id;
   logActivity(`created the "${name}" domain`);
   successBurst();
@@ -5185,14 +6687,19 @@ async function saveDomain(){
   render();
 }
 
-function deleteDomain(id){
+async function deleteDomain(id){
   const cat = DATA.categories.find(c=>c.id===id);
   if(!cat) return;
   if(cat.terms.length>0){ showToast('Remove all terms from a domain before deleting it.'); return; }
   if(!confirm(`Delete the empty "${cat.name}" domain?`)) return;
+  const previousCategories = DATA.categories;
   DATA.categories = DATA.categories.filter(c=>c.id!==id);
   if(activeCategory===id) activeCategory = 'all';
-  persist().then(()=>{ logActivity(`deleted the "${cat.name}" domain`); showToast('Domain deleted.'); render(); });
+  const ok = await saveCategoriesMeta();
+  if(!ok){ DATA.categories = previousCategories; return; }
+  logActivity(`deleted the "${cat.name}" domain`);
+  showToast('Domain deleted.');
+  render();
 }
 
 /* ============ Healthcare Providers: modal + photo handling ============ */
@@ -5441,13 +6948,30 @@ async function deleteNote(id){
 loadNotifyPref();
 loadData();
 loadProviders();
+loadQuizHistory();
+loadTermReviews();
 loadNotes();
 loadAttachments();
 loadQuestions();
 startChatListener();
 startActivityListener();
+startAnnouncementsListener();
 startTypingListener();
+
+// Arrow-key navigation for the User Guide, desktop-only convenience —
+// harmless everywhere else since it only acts while that screen is open.
+document.addEventListener('keydown', e=>{
+  if(activeCategory !== 'userguide') return;
+  if(e.key === 'ArrowRight') nextGuideSlide();
+  if(e.key === 'ArrowLeft') prevGuideSlide();
+});
 startCeListener();
+
+if(shouldShowOnboarding()){
+  // A beat after first paint, not instantly — jumping straight to a modal
+  // before the page has even rendered feels jarring.
+  setTimeout(openOnboarding, 500);
+}
 
 // iOS doesn't reliably reposition fixed elements against the visual
 // viewport while the on-screen keyboard is open — a fixed button can end up
