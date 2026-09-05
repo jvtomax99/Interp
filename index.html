@@ -319,9 +319,6 @@
   /* A subgroup nested under a parent domain — since a CSS grid can't truly
      indent, this reads as "grouped" via a smaller size, a connecting arrow
      in the name, and a dashed left accent instead of the solid one below. */
-  .home-tile-sub{ min-height:118px; padding:15px 14px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line); }
-  .home-tile-sub .home-tile-icon{ width:32px; height:32px; }
-  .home-tile-sub .home-tile-name{ font-size:12.5px; }
   .home-tile-edit{
     position:absolute; top:10px; right:10px; width:24px; height:24px; border-radius:8px;
     display:flex; align-items:center; justify-content:center; color:var(--ink-faint);
@@ -330,6 +327,55 @@
   .home-tile-edit svg{ width:12px; height:12px; }
   .home-tile:hover .home-tile-edit, .home-tile:focus-within .home-tile-edit{ opacity:1; }
   @media (hover:none){ .home-tile-edit{ opacity:1; } }
+
+  /* A parent domain with subgroups — one card, full grid width, so the
+     subgroups sit visibly inside it instead of just being nearby tiles. */
+  .domain-group{
+    grid-column:1 / -1; background:var(--paper); border-radius:16px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); overflow:hidden;
+  }
+  .domain-group-header{
+    width:100%; display:flex; align-items:center; gap:11px; padding:13px 14px;
+    background:transparent; border:none; cursor:pointer; text-align:left; position:relative;
+    font-family:inherit; transition:background .15s var(--ease);
+  }
+  .domain-group-header:hover{ background:var(--tile-tint, var(--bg-hi)); }
+  .domain-group-icon{
+    width:34px; height:34px; border-radius:10px; flex-shrink:0; color:#fff;
+    background:linear-gradient(140deg, var(--tile-color), var(--tile-color));
+    display:flex; align-items:center; justify-content:center;
+  }
+  .domain-group-icon svg{ width:17px; height:17px; }
+  .domain-group-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .domain-group-text b{ font-size:13.5px; color:var(--ink); }
+  .domain-group-text span{ font-size:10.5px; color:var(--ink-faint); }
+  .domain-group-toggle{
+    display:flex; width:20px; height:20px; flex-shrink:0; color:var(--ink-faint);
+    transition:transform .2s var(--ease);
+  }
+  .domain-group-toggle.is-collapsed{ transform:rotate(-90deg); }
+  .domain-group-toggle svg{ width:100%; height:100%; }
+  .domain-group .home-tile-edit{ top:8px; right:36px; }
+  .domain-group-children{
+    display:flex; flex-wrap:wrap; gap:7px; padding:0 14px 13px 14px;
+    animation:contentFadeIn .2s var(--ease);
+  }
+  .domain-chip{
+    display:flex; align-items:center; gap:6px; padding:7px 10px 7px 8px; border-radius:10px;
+    background:var(--bg-hi); border:none; cursor:pointer; font-family:inherit; position:relative;
+    transition:background .15s var(--ease);
+  }
+  .domain-chip:hover{ background:var(--tile-tint, var(--line-soft)); }
+  .domain-chip-icon{
+    width:20px; height:20px; border-radius:6px; flex-shrink:0; color:#fff;
+    background:var(--tile-color); display:flex; align-items:center; justify-content:center;
+  }
+  .domain-chip-icon svg{ width:11px; height:11px; }
+  .domain-chip-name{ font-size:11.5px; font-weight:600; color:var(--ink); }
+  .domain-chip-count{ font-size:10px; color:var(--ink-faint); }
+  .domain-chip .home-tile-edit{ position:static; opacity:0; width:18px; height:18px; margin-left:-2px; }
+  .domain-chip:hover .home-tile-edit{ opacity:1; }
+  @media (hover:none){ .domain-chip .home-tile-edit{ opacity:1; } }
   /* Push the count to the bottom edge so tiles with one-line and four-line
      names still read as the same considered shape. */
   .home-tile-name{ margin-bottom:auto; }
@@ -636,8 +682,6 @@
   .nav-tile-grid .home-tile-icon svg{ width:16px; height:16px; }
   .nav-tile-grid .home-tile-name{ font-size:12.5px; }
   .nav-tile-grid .home-tile-count{ font-size:10px; }
-  .nav-tile-grid .home-tile-sub{ min-height:90px; padding:11px 10px; }
-  .nav-tile-grid .home-tile-sub .home-tile-icon{ width:26px; height:26px; }
 
   .home-fab{ display:none; }
   @media (max-width:760px){
@@ -805,8 +849,8 @@
   .stat span{ font-family:var(--sans); font-size:11.5px; color:var(--ink-faint); }
 
   .section-head{display:flex; align-items:baseline; gap:11px; margin:36px 0 18px 0; scroll-margin-top:132px;}
-  .section-head-sub{ margin-top:20px; padding-left:18px; border-left:2px dashed var(--line); }
-  .section-head-sub h2{ font-size:19px; color:var(--ink-soft); }
+  .section-head-sub{ margin-top:8px; padding-left:16px; border-left:3px solid var(--line-soft); }
+  .section-head-sub h2{ font-size:18px; color:var(--ink-soft); }
   .section-head:first-child{ margin-top:4px; }
   .section-head h2{font-family:var(--serif); font-weight:400; font-size:23px; margin:0; letter-spacing:-.01em;}
   .section-head .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
@@ -2876,6 +2920,10 @@ let activeCategory = 'home';
 // way each person left it, rather than resetting every time the app opens.
 let domainsCollapsed = false;
 try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }catch(e){}
+// Per-parent collapse state for domain groups (which parents have their
+// subgroups tucked away) — a list of domain ids, persisted per device.
+let collapsedDomainGroups = [];
+try{ collapsedDomainGroups = JSON.parse(localStorage.getItem('ih_collapsedDomainGroups') || '[]'); }catch(e){}
 let toolsCollapsed = false;
 try{ toolsCollapsed = localStorage.getItem('ih_toolsCollapsed') === '1'; }catch(e){}
 let searchQuery = '';
@@ -5014,10 +5062,10 @@ function renderReviewSummary(){
 function tileHtml(t, i, onclickCall, opts){
   opts = opts || {};
   return `
-      <button class="home-tile ${opts.subgroup ? 'home-tile-sub' : ''}" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
+      <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
         ${opts.editAction ? `<span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); ${opts.editAction}">${ICON_EDIT}</span>` : ''}
         <span class="home-tile-icon">${t.icon}</span>
-        <span class="home-tile-name">${opts.subgroup ? '\u21B3 ' : ''}${escapeHtml(t.name)}</span>
+        <span class="home-tile-name">${escapeHtml(t.name)}</span>
         <span class="home-tile-count">${t.count===null ? '' : t.count + ' ' + t.label}</span>
       </button>`;
 }
@@ -5254,12 +5302,47 @@ function render(){
   // glossary section rather than switching to a separate app screen.
   const allDomainTiles = getDomainTiles();
   const resourcesTile = allDomainTiles.find(t=>t.id==='resources');
-  const orderedIds = orderedCategoriesWithSubgroups().map(c=>c.id).filter(id=>id!=='resources');
-  const tileById = {}; allDomainTiles.forEach(t=>{ tileById[t.id] = t; });
-  const domainTilesForGrid = orderedIds.map(id=>tileById[id]).filter(Boolean);
-  const domainTilesHtml = domainTilesForGrid.map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`, {
-    subgroup: !!t.parentId, editAction: `openEditDomainModal('${t.id}')`
-  })).join('');
+  const nonResourceTiles = allDomainTiles.filter(t=>t.id!=='resources');
+  const topLevelTiles = nonResourceTiles.filter(t=>!t.parentId);
+  const childrenOfDomain = pid => nonResourceTiles.filter(t=>t.parentId===pid);
+  // Orphaned subgroups (parent deleted) still need somewhere to show up.
+  const orphanTiles = nonResourceTiles.filter(t=>t.parentId && !topLevelTiles.some(p=>p.id===t.parentId));
+
+  // A parent with subgroups renders as one grouped card — its own tile up
+  // top, its subgroups as compact chips directly beneath, inside the same
+  // card. That's what actually reads as "grouped," rather than subgroups
+  // just being separate tiles that happen to sit nearby in a flat grid.
+  const domainTilesHtml = topLevelTiles.map((parent, i)=>{
+    const kids = childrenOfDomain(parent.id);
+    if(!kids.length){
+      return tileHtml(parent, i, `setCategory('${parent.id}')`, { editAction: `openEditDomainModal('${parent.id}')` });
+    }
+    const isCollapsed = collapsedDomainGroups.includes(parent.id);
+    return `
+      <div class="domain-group">
+        <button class="domain-group-header" style="--tile-color:${parent.color}; --tile-tint:${parent.color}22;" onclick="setCategory('${parent.id}')">
+          <span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); openEditDomainModal('${parent.id}')">${ICON_EDIT}</span>
+          <span class="domain-group-icon">${parent.icon}</span>
+          <span class="domain-group-text">
+            <b>${escapeHtml(parent.name)}</b>
+            <span>${parent.count} ${parent.label} \u00b7 ${kids.length} subgroup${kids.length===1?'':'s'}</span>
+          </span>
+          <span class="domain-group-toggle ${isCollapsed?'is-collapsed':''}" onclick="event.stopPropagation(); toggleDomainGroup('${parent.id}')">${ICON_CHEVRON_DOWN}</span>
+        </button>
+        ${isCollapsed ? '' : `<div class="domain-group-children">
+          ${kids.map(k=>`
+            <button class="domain-chip" style="--tile-color:${k.color};" onclick="setCategory('${k.id}')">
+              <span class="domain-chip-icon">${k.icon}</span>
+              <span class="domain-chip-name">${escapeHtml(k.name)}</span>
+              <span class="domain-chip-count">${k.count}</span>
+              <span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); openEditDomainModal('${k.id}')">${ICON_EDIT}</span>
+            </button>
+          `).join('')}
+        </div>`}
+      </div>
+    `;
+  }).concat(orphanTiles.map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`, { editAction: `openEditDomainModal('${t.id}')` }))).join('');
+  const domainTilesForGrid = topLevelTiles.concat(nonResourceTiles.filter(t=>t.parentId));
 
   const addDomainBtn = `
      <button class="tab add-domain-btn" onclick="openAddDomainModal()">
@@ -5629,6 +5712,13 @@ function toggleTheme(){
 function toggleDomainsCollapsed(){
   domainsCollapsed = !domainsCollapsed;
   try{ localStorage.setItem('ih_domainsCollapsed', domainsCollapsed ? '1' : '0'); }catch(e){}
+  render();
+}
+
+function toggleDomainGroup(parentId){
+  const idx = collapsedDomainGroups.indexOf(parentId);
+  if(idx === -1) collapsedDomainGroups.push(parentId); else collapsedDomainGroups.splice(idx, 1);
+  try{ localStorage.setItem('ih_collapsedDomainGroups', JSON.stringify(collapsedDomainGroups)); }catch(e){}
   render();
 }
 
