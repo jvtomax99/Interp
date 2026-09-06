@@ -4329,6 +4329,296 @@ const GYN_ONCOLOGY_VOCAB_V1 = [
   ['Recurrent ovarian cancer', 'Cáncer de ovario recurrente', 'Ovarian cancer that has returned after treatment.'],
 ];
 
+// Deeper, Mayo Clinic-researched additions to the Lymphoma, Leukemia, and
+// Multiple Myeloma subgroups — specific subtypes, risk factors, and
+// complications drawn from actual current clinical reference pages rather
+// than general knowledge, added on top of what's already there (checked
+// for duplicates against existing terms in each domain).
+const LYMPHOMA_VOCAB_V2 = [
+  ['Waldenström macroglobulinemia', 'Macroglobulinemia de Waldenström', 'A rare type of non-Hodgkin lymphoma that produces excess antibody protein.'],
+  ['Cutaneous B-cell lymphoma', 'Linfoma cutáneo de células B', 'A type of lymphoma that develops in B cells within the skin.'],
+  ['Cutaneous lymphoma', 'Linfoma cutáneo', 'Lymphoma that begins in or primarily affects the skin.'],
+  ['Primary CNS lymphoma', 'Linfoma primario del sistema nervioso central', 'Lymphoma that begins in the brain or spinal cord.'],
+  ['Lymphoma transformation', 'Transformación del linfoma', 'When a slow-growing lymphoma changes into a more aggressive type.'],
+  ['Epstein-Barr virus (EBV)', 'Virus de Epstein-Barr', 'A common virus linked to an increased risk of certain lymphomas.'],
+  ['Human T-lymphotropic virus (HTLV-1)', 'Virus linfotrópico humano de células T (HTLV-1)', 'A virus linked to a rare type of T-cell lymphoma.'],
+  ['Bispecific antibody therapy', 'Terapia con anticuerpos biespecíficos', 'A treatment using lab-made antibodies that bind cancer cells and immune cells together to fight lymphoma.'],
+  ['Radiopharmaceutical therapy', 'Terapia con radiofármacos', 'Treatment using a radioactive drug that targets cancer cells directly.'],
+  ['Autoimmune condition (lymphoma risk factor)', 'Afección autoinmune (factor de riesgo de linfoma)', 'A condition like rheumatoid arthritis or lupus that can raise lymphoma risk.'],
+  ['Drenching night sweats', 'Sudores nocturnos profusos', 'Very heavy night sweats severe enough to soak clothing or bedding, a classic lymphoma symptom.'],
+  ['Mycosis fungoides', 'Micosis fungoide', 'The most common form of cutaneous T-cell lymphoma.'],
+  ['Sézary syndrome', 'Síndrome de Sézary', 'An aggressive form of cutaneous T-cell lymphoma that also involves the blood.'],
+];
+
+const LEUKEMIA_VOCAB_V2 = [
+  ['Bone marrow suppression', 'Supresión de la médula ósea', 'When the bone marrow makes fewer blood cells than normal, often from disease or treatment.'],
+  ['Tumor lysis syndrome', 'Síndrome de lisis tumoral', 'A dangerous condition from cancer cells breaking down quickly and releasing their contents into the blood.'],
+  ['Leukemia cutis', 'Leucemia cutis', 'Leukemia cells that have spread to the skin, appearing as lesions.'],
+  ['Benzene exposure', 'Exposición al benceno', 'A known chemical risk factor for developing leukemia.'],
+  ['Acute leukemia', 'Leucemia aguda', 'A fast-progressing leukemia requiring immediate treatment.'],
+  ['Chronic leukemia', 'Leucemia crónica', 'A slower-progressing leukemia that may not need immediate treatment.'],
+  ['Leukemia relapse', 'Recaída de leucemia', 'When leukemia returns after successful treatment.'],
+  ['Down syndrome (leukemia risk factor)', 'Síndrome de Down (factor de riesgo de leucemia)', 'A genetic condition associated with increased leukemia risk in children.'],
+  ['Enlarged spleen (leukemia symptom)', 'Bazo agrandado (síntoma de leucemia)', 'A common sign of leukemia, sometimes causing early fullness or abdominal discomfort.'],
+  ['Prognosis (leukemia)', 'Pronóstico (leucemia)', 'The likely course and outcome of leukemia based on type and individual factors.'],
+];
+
+const MULTIPLE_MYELOMA_VOCAB_V2 = [
+  ['Spinal cord compression', 'Compresión de la médula espinal', 'A serious complication where weakened spinal bones press on the spinal cord.'],
+  ['Paraprotein', 'Paraproteína', 'An abnormal antibody protein produced by myeloma cells, also called M-protein.'],
+  ['Hyperviscosity syndrome', 'Síndrome de hiperviscosidad', 'A condition where the blood becomes too thick due to excess protein, causing circulation problems.'],
+  ['Non-secretory myeloma', 'Mieloma no secretor', "A rare form of myeloma where cells don't release detectable monoclonal protein."],
+  ['Renal failure (myeloma related)', 'Insuficiencia renal (relacionada con el mieloma)', 'Kidney failure caused by abnormal proteins from myeloma damaging the kidneys.'],
+  ['Monoclonal gammopathy', 'Gammapatía monoclonal', 'A group of conditions where plasma cells produce an abnormal antibody protein.'],
+  ['Watch and wait (myeloma)', 'Observar y esperar (mieloma)', "Monitoring myeloma without immediate treatment when it isn't causing symptoms."],
+];
+
+// Round 2 of Mayo Clinic-researched additions — Neuro-Oncology, Skin &
+// Sarcoma, Thoracic Oncology, and Gastrointestinal Oncology (pancreatic
+// focus), drawn from current clinical reference pages.
+const NEURO_ONCOLOGY_VOCAB_V2 = [
+  ['Von Hippel-Lindau disease', 'Enfermedad de von Hippel-Lindau', 'An inherited disorder that increases the risk of tumors in the brain and other organs.'],
+  ['Tuberous sclerosis', 'Esclerosis tuberosa', 'A genetic disorder causing benign tumors to grow in the brain and other organs.'],
+  ['Vinyl chloride exposure', 'Exposición al cloruro de vinilo', 'A chemical exposure linked to an increased risk of certain brain tumors.'],
+  ['Secondary (metastatic) brain tumor', 'Tumor cerebral secundario (metastásico)', 'A brain tumor that has spread from cancer elsewhere in the body.'],
+  ['Primary brain tumor', 'Tumor cerebral primario', 'A tumor that begins in the brain itself, rather than spreading from elsewhere.'],
+  ['Peritumoral edema', 'Edema peritumoral', 'Swelling in brain tissue surrounding a tumor.'],
+  ['Midline shift', 'Desplazamiento de la línea media', 'A shift of brain structures caused by pressure from a tumor or swelling, seen on imaging.'],
+];
+
+const SKIN_SARCOMA_VOCAB_V2 = [
+  ['Gardner syndrome', 'Síndrome de Gardner', 'An inherited condition that raises the risk of certain sarcomas and colon polyps.'],
+  ['Werner syndrome', 'Síndrome de Werner', 'A rare genetic disorder causing premature aging and an increased cancer risk, including sarcoma.'],
+  ['Gorlin syndrome', 'Síndrome de Gorlin', 'An inherited condition that raises the risk of basal cell carcinoma and certain sarcomas.'],
+  ["Paget's disease of bone", 'Enfermedad ósea de Paget', 'A chronic bone disorder that can raise the risk of bone sarcoma.'],
+  ['Human herpesvirus 8 (HHV-8)', 'Herpesvirus humano 8 (VHH-8)', 'A virus linked to Kaposi sarcoma, especially in people with weakened immune systems.'],
+  ['Synovial sarcoma', 'Sarcoma sinovial', 'A type of soft tissue sarcoma that often occurs near joints.'],
+  ['TNM staging', 'Estadificación TNM', 'A cancer staging system based on tumor size, lymph node involvement, and metastasis.'],
+  ['Lentigo maligna', 'Léntigo maligno', 'A slow-growing form of melanoma that develops on sun-damaged skin.'],
+  ['Amelanotic melanoma', 'Melanoma amelanótico', 'A rare form of melanoma that lacks the usual dark pigment.'],
+];
+
+const THORACIC_ONCOLOGY_VOCAB_V2 = [
+  ['Robotic bronchoscopy', 'Broncoscopia robótica', 'A minimally invasive technique using robotic guidance to reach and sample lung nodules.'],
+  ['Mediastinal lymph node staging', 'Estadificación de ganglios linfáticos mediastínicos', 'Evaluating lymph nodes in the chest to determine how far lung cancer has spread.'],
+  ['Persistent cough (lung cancer symptom)', 'Tos persistente (síntoma de cáncer de pulmón)', "A cough that doesn't go away, a common early sign of lung cancer."],
+  ['Stereotactic radiation therapy (lung)', 'Radioterapia estereotáctica (pulmón)', 'A precise, high-dose radiation technique used for certain lung tumors.'],
+];
+
+const GI_ONCOLOGY_VOCAB_V2 = [
+  ['Pancreatic cyst', 'Quiste pancreático', 'A fluid-filled sac in the pancreas that can sometimes raise cancer risk.'],
+  ['Chronic pancreatitis (cancer risk factor)', 'Pancreatitis crónica (factor de riesgo de cáncer)', 'Long-term pancreas inflammation that raises the risk of pancreatic cancer.'],
+  ['New-onset diabetes (pancreatic cancer sign)', 'Diabetes de reciente aparición (signo de cáncer pancreático)', 'A new diabetes diagnosis that can sometimes be an early sign of pancreatic cancer.'],
+  ['Metastatic vs. nonmetastatic staging', 'Estadificación metastásica vs. no metastásica', 'A simplified way of classifying whether pancreatic cancer has spread beyond the pancreas.'],
+];
+
+// Round 3 of Mayo Clinic-researched additions — Radiation Oncology, Blood &
+// Marrow Transplantation, Genitourinary Oncology, Head & Neck Oncology, and
+// Gynecologic Oncology. This completes the deepening pass across all 12
+// oncology subgroups.
+const RADIATION_ONCOLOGY_VOCAB_V2 = [
+  ['Radiation-induced infertility', 'Esterilidad inducida por radiación', 'Loss of fertility caused by radiation exposure to reproductive organs.'],
+  ['Secondary cancer (radiation-related)', 'Cáncer secundario (relacionado con la radiación)', 'A new, different cancer that can develop as a delayed effect of radiation treatment.'],
+  ['Hypofractionated radiation therapy', 'Radioterapia hipofraccionada', 'Delivering larger radiation doses over fewer treatment sessions.'],
+  ['Radiation cystitis', 'Cistitis por radiación', 'Bladder irritation or inflammation caused by pelvic radiation.'],
+  ['Radiation proctitis', 'Proctitis por radiación', 'Rectal irritation or inflammation caused by pelvic radiation.'],
+  ['Vaginal stenosis (radiation-related)', 'Estenosis vaginal (relacionada con la radiación)', 'Narrowing and dryness of the vagina, a possible late effect of pelvic radiation.'],
+  ['Radiation-induced heart damage', 'Daño cardíaco inducido por radiación', 'Heart complications that can result from radiation to the chest.'],
+  ['Low blood cell counts (radiation side effect)', 'Recuento bajo de células sanguíneas (efecto secundario de la radiación)', 'A drop in blood cell counts that can occur from radiation affecting the bone marrow.'],
+];
+
+const BLOOD_MARROW_TRANSPLANT_VOCAB_V2 = [
+  ['Acute graft-versus-host disease', 'Enfermedad aguda de injerto contra huésped', 'GVHD that develops within the first few months after transplant.'],
+  ['Chronic graft-versus-host disease', 'Enfermedad crónica de injerto contra huésped', 'GVHD that develops later and can persist long-term after transplant.'],
+  ['Graft failure', 'Fallo del injerto', "When transplanted stem cells don't successfully begin producing new blood cells."],
+  ['GVHD prophylaxis', 'Profilaxis de la EICH', 'Medication given to help prevent graft-versus-host disease after transplant.'],
+  ['Cyclosporine', 'Ciclosporina', 'An immunosuppressive medication commonly used to prevent graft-versus-host disease.'],
+  ['T-cell depletion', 'Depleción de células T', 'Removing certain immune cells from a donor graft to help reduce the risk of GVHD.'],
+];
+
+const GENITOURINARY_ONCOLOGY_VOCAB_V2 = [
+  ['Wilms tumor', 'Tumor de Wilms', 'A type of kidney cancer that primarily affects young children.'],
+  ['Digital rectal exam (DRE)', 'Tacto rectal', 'A physical exam used to check the prostate for abnormalities.'],
+  ['PI-RADS score', 'Puntaje PI-RADS', 'A standardized scoring system used to interpret prostate MRI results.'],
+  ['Lower urinary tract symptoms (LUTS)', 'Síntomas del tracto urinario inferior', 'Symptoms like urinary urgency or difficulty urinating, which can have several causes including prostate conditions.'],
+  ['Cyclophosphamide (bladder cancer risk)', 'Ciclofosfamida (riesgo de cáncer de vejiga)', 'A chemotherapy drug that can raise the long-term risk of bladder cancer.'],
+  ['Chronic bladder inflammation (cancer risk factor)', 'Inflamación crónica de la vejiga (factor de riesgo de cáncer)', 'Frequent bladder infections or irritation that can raise bladder cancer risk over time.'],
+];
+
+const HEAD_NECK_ONCOLOGY_VOCAB_V2 = [
+  ['Leukoplakia', 'Leucoplasia', 'Flat white or gray patches in the mouth that can sometimes be precancerous.'],
+  ['Erythroplakia', 'Eritroplasia', 'Red patches in the mouth that carry a higher risk of being precancerous than leukoplakia.'],
+  ['Oral cancer self-exam', 'Autoexamen de cáncer oral', 'A monthly self-check of the mouth, lips, and neck for lumps or unusual patches.'],
+  ['Lip cancer', 'Cáncer de labio', 'Cancer that develops on the lip, often linked to sun exposure.'],
+];
+
+const GYN_ONCOLOGY_VOCAB_V2 = [
+  ['FIGO staging', 'Estadificación FIGO', 'A staging system used specifically for gynecologic cancers.'],
+  ['High-grade serous carcinoma', 'Carcinoma seroso de alto grado', 'The most common and aggressive subtype of ovarian cancer.'],
+  ['Endometriosis (ovarian cancer risk factor)', 'Endometriosis (factor de riesgo de cáncer de ovario)', 'A condition linked to a modestly increased risk of ovarian cancer.'],
+  ['Hereditary ovarian cancer', 'Cáncer de ovario hereditario', 'Ovarian cancer linked to an inherited gene mutation, most often BRCA1 or BRCA2.'],
+];
+
+// "Breast Oncology" — a comprehensive vocabulary pass for the subgroup you
+// already had (kept fully intact throughout this whole effort), covering
+// staging/subtypes, receptor status, screening/diagnosis, surgery,
+// reconstruction, and treatment, researched the same way as the other 12
+// subgroups. Existing terms (Breast fibroadenoma, Myofibroblastic stromal
+// hyperplasia, AC-T Chemotherapy regimen, Intraductal papilloma) are left
+// as-is; this only adds what isn't already there.
+const BREAST_ONCOLOGY_VOCAB_V1 = [
+  ['Ductal carcinoma in situ (DCIS)', 'Carcinoma ductal in situ', 'A noninvasive, early-stage breast cancer confined to the milk ducts.'],
+  ['Invasive ductal carcinoma', 'Carcinoma ductal invasivo', 'The most common type of breast cancer, which has spread beyond the milk ducts into surrounding tissue.'],
+  ['Invasive lobular carcinoma', 'Carcinoma lobulillar invasivo', 'A type of breast cancer that begins in the milk-producing lobules and spreads into surrounding tissue.'],
+  ['Lobular carcinoma in situ (LCIS)', 'Carcinoma lobulillar in situ', "Abnormal cells in the breast lobules that raise future cancer risk but aren't cancer themselves."],
+  ['Inflammatory breast cancer', 'Cáncer de mama inflamatorio', 'A rare, aggressive form of breast cancer causing redness and swelling rather than a distinct lump.'],
+  ['Triple-negative breast cancer', 'Cáncer de mama triple negativo', 'Breast cancer that tests negative for estrogen, progesterone, and HER2 receptors.'],
+  ['HER2-positive breast cancer', 'Cáncer de mama HER2 positivo', 'Breast cancer with excess HER2 protein, which tends to grow faster but responds to targeted therapy.'],
+  ['Hormone receptor-positive breast cancer', 'Cáncer de mama con receptores hormonales positivos', 'Breast cancer that grows in response to estrogen or progesterone.'],
+  ['Estrogen receptor (ER) status', 'Estado del receptor de estrógeno', 'A lab result showing whether cancer cells have receptors that respond to estrogen.'],
+  ['Progesterone receptor (PR) status', 'Estado del receptor de progesterona', 'A lab result showing whether cancer cells have receptors that respond to progesterone.'],
+  ['Male breast cancer', 'Cáncer de mama en hombres', 'Breast cancer that occurs in men, though much less common than in women.'],
+  ['Paget disease of the breast', 'Enfermedad de Paget de la mama', 'A rare cancer involving the skin of the nipple and areola.'],
+  ['Phyllodes tumor', 'Tumor filoides', 'A rare breast tumor that can be benign or malignant, growing from connective tissue.'],
+  ['Breast cyst', 'Quiste mamario', 'A fluid-filled sac in the breast, usually benign.'],
+  ['Atypical hyperplasia (breast)', 'Hiperplasia atípica (de mama)', 'An accumulation of abnormal but noncancerous breast cells that raises future cancer risk.'],
+  ['Breast density', 'Densidad mamaria', 'The amount of glandular and fibrous tissue in the breast relative to fat, which can affect mammogram accuracy.'],
+  ['Nipple discharge', 'Secreción del pezón', 'Fluid coming from the nipple, which can have benign or concerning causes.'],
+  ['Breast lump', 'Bulto en el seno', 'A mass or thickening in breast tissue, which should always be evaluated.'],
+  ['Breast MRI', 'Resonancia magnética de mama', 'A detailed imaging scan sometimes used alongside mammography for high-risk patients.'],
+  ['Breast ultrasound', 'Ecografía mamaria', 'Imaging using sound waves to further evaluate a breast finding.'],
+  ['Core needle biopsy (breast)', 'Biopsia con aguja gruesa (de mama)', 'Removing a tissue sample from the breast using a hollow needle.'],
+  ['Stereotactic breast biopsy', 'Biopsia mamaria estereotáctica', 'An imaging-guided needle biopsy used to sample a specific area seen on mammogram.'],
+  ['Gene expression test (breast cancer)', 'Prueba de expresión génica (cáncer de mama)', 'A test analyzing tumor genes to help predict recurrence risk and guide treatment.'],
+  ['Oncotype DX', 'Oncotype DX', 'A gene expression test used to help decide whether chemotherapy is likely to help.'],
+  ['Lumpectomy', 'Tumorectomía / lumpectomía', 'Breast-conserving surgery removing the tumor and a small margin of surrounding tissue.'],
+  ['Quadrantectomy', 'Cuadrantectomía', 'Surgery removing about a quarter of the breast.'],
+  ['Total mastectomy', 'Mastectomía total', 'Surgery removing the entire breast but not the underlying lymph nodes.'],
+  ['Double mastectomy', 'Mastectomía doble', 'Surgery removing both breasts.'],
+  ['Nipple-sparing mastectomy', 'Mastectomía con conservación del pezón', 'A mastectomy technique that preserves the nipple and areola.'],
+  ['Sentinel lymph node biopsy (breast)', 'Biopsia del ganglio linfático centinela (de mama)', 'Removing the first lymph node(s) cancer would likely reach to check for spread.'],
+  ['Axillary lymph node dissection', 'Disección de ganglios linfáticos axilares', 'Surgical removal of lymph nodes under the arm to check for or treat cancer spread.'],
+  ['Lymphedema (breast cancer related)', 'Linfedema (relacionado con cáncer de mama)', 'Arm swelling that can occur after lymph node removal or radiation.'],
+  ['Breast reconstruction', 'Reconstrucción mamaria', 'Surgery to rebuild the shape of the breast after mastectomy.'],
+  ['Implant reconstruction', 'Reconstrucción con implante', 'Breast reconstruction using a saline or silicone implant.'],
+  ['Flap reconstruction (breast)', 'Reconstrucción con colgajo (mamaria)', "Breast reconstruction using the patient's own tissue from elsewhere on the body."],
+  ['Tissue expander', 'Expansor de tejido', 'A temporary device used to gradually stretch skin before permanent breast reconstruction.'],
+  ['Neoadjuvant chemotherapy (breast)', 'Quimioterapia neoadyuvante (mama)', 'Chemotherapy given before surgery to shrink a breast tumor.'],
+  ['Adjuvant chemotherapy (breast)', 'Quimioterapia adyuvante (mama)', 'Chemotherapy given after surgery to reduce the risk of recurrence.'],
+  ['Tamoxifen', 'Tamoxifeno', 'A hormone therapy medication used to treat hormone receptor-positive breast cancer.'],
+  ['Aromatase inhibitor', 'Inhibidor de la aromatasa', 'A hormone therapy medication that lowers estrogen levels, used in postmenopausal women.'],
+  ['Trastuzumab (Herceptin)', 'Trastuzumab (Herceptin)', 'A targeted therapy medication used to treat HER2-positive breast cancer.'],
+  ['Endocrine therapy (breast cancer)', 'Terapia endocrina (cáncer de mama)', 'Hormone-blocking treatment used for hormone receptor-positive breast cancer.'],
+  ['Whole breast radiation', 'Radiación de toda la mama', 'Radiation therapy directed at the entire breast, often after lumpectomy.'],
+  ['Partial breast irradiation', 'Irradiación parcial de la mama', 'Radiation therapy directed at only the area around the tumor site.'],
+  ['Breast cancer survivorship care', 'Atención de supervivencia al cáncer de mama', 'Ongoing follow-up care after breast cancer treatment ends.'],
+  ['Breast self-exam', 'Autoexamen de mama', 'A monthly self-check of the breasts for lumps or changes.'],
+  ['Clinical breast exam', 'Examen clínico de mama', 'A physical breast exam performed by a healthcare provider.'],
+  ['Breast cancer recurrence', 'Recurrencia del cáncer de mama', 'When breast cancer returns after treatment, either locally or elsewhere in the body.'],
+  ['Metastatic breast cancer', 'Cáncer de mama metastásico', 'Breast cancer that has spread to other parts of the body, such as bone, liver, or lungs.'],
+  ['Locally advanced breast cancer', 'Cáncer de mama localmente avanzado', "Breast cancer that has grown extensively in the breast or nearby lymph nodes but hasn't spread further."],
+  ['Margins (breast surgery)', 'Márgenes (cirugía de mama)', 'The edge of tissue removed during surgery, checked for remaining cancer cells.'],
+  ['Ki-67 (breast cancer marker)', 'Ki-67 (marcador de cáncer de mama)', 'A lab marker showing how quickly cancer cells are dividing.'],
+  ['Genetic counseling (breast cancer)', 'Asesoramiento genético (cáncer de mama)', 'Guidance for patients with a family history suggesting a higher inherited breast cancer risk.'],
+  ['High-risk breast cancer screening', 'Detección de cáncer de mama de alto riesgo', 'More frequent or additional screening recommended for people at elevated risk.'],
+];
+
+async function runBreastOncologyVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.breastOncologyVocabImportV1) return; // already ran
+
+    const domain = DATA.categories.find(c=>c.name==='Breast Oncology');
+    if(!domain) return; // don't create it fresh — it should already exist
+
+    const added = await bulkAddTerms(domain, BREAST_ONCOLOGY_VOCAB_V1);
+
+    await ref.set({ breastOncologyVocabImportV1: true }, { merge:true });
+    logActivity(`added ${added} research-verified terms to Breast Oncology`);
+  }catch(err){ console.error('runBreastOncologyVocabImportV1 failed:', err); }
+}
+
+async function runOncologyMayoResearchExpansionV3(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.oncologyMayoResearchExpansionV3) return; // already ran
+
+    const expansions = [
+      ['Radiation Oncology', RADIATION_ONCOLOGY_VOCAB_V2],
+      ['Blood & Marrow Transplantation', BLOOD_MARROW_TRANSPLANT_VOCAB_V2],
+      ['Genitourinary Oncology', GENITOURINARY_ONCOLOGY_VOCAB_V2],
+      ['Head & Neck Oncology', HEAD_NECK_ONCOLOGY_VOCAB_V2],
+      ['Gynecologic Oncology', GYN_ONCOLOGY_VOCAB_V2],
+    ];
+    let totalAdded = 0;
+    for(const [name, wordList] of expansions){
+      const domain = DATA.categories.find(c=>c.name===name);
+      if(!domain) continue;
+      totalAdded += await bulkAddTerms(domain, wordList);
+    }
+
+    await ref.set({ oncologyMayoResearchExpansionV3: true }, { merge:true });
+    logActivity(`added ${totalAdded} more research-verified terms, completing the deepening pass across all 12 oncology subgroups`);
+  }catch(err){ console.error('runOncologyMayoResearchExpansionV3 failed:', err); }
+}
+
+async function runOncologyMayoResearchExpansionV2(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.oncologyMayoResearchExpansionV2) return; // already ran
+
+    const expansions = [
+      ['Neuro-Oncology', NEURO_ONCOLOGY_VOCAB_V2],
+      ['Skin & Sarcoma', SKIN_SARCOMA_VOCAB_V2],
+      ['Thoracic Oncology', THORACIC_ONCOLOGY_VOCAB_V2],
+      ['Gastrointestinal Oncology', GI_ONCOLOGY_VOCAB_V2],
+    ];
+    let totalAdded = 0;
+    for(const [name, wordList] of expansions){
+      const domain = DATA.categories.find(c=>c.name===name);
+      if(!domain) continue;
+      totalAdded += await bulkAddTerms(domain, wordList);
+    }
+
+    await ref.set({ oncologyMayoResearchExpansionV2: true }, { merge:true });
+    logActivity(`added ${totalAdded} more research-verified terms to Neuro-Oncology, Skin & Sarcoma, Thoracic Oncology, and GI Oncology`);
+  }catch(err){ console.error('runOncologyMayoResearchExpansionV2 failed:', err); }
+}
+
+async function runOncologyMayoResearchExpansionV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.oncologyMayoResearchExpansionV1) return; // already ran
+
+    const expansions = [
+      ['Lymphoma', LYMPHOMA_VOCAB_V2],
+      ['Leukemia', LEUKEMIA_VOCAB_V2],
+      ['Multiple Myeloma', MULTIPLE_MYELOMA_VOCAB_V2],
+    ];
+    let totalAdded = 0;
+    for(const [name, wordList] of expansions){
+      const domain = DATA.categories.find(c=>c.name===name);
+      if(!domain) continue; // domain must already exist from the earlier subgroup import
+      totalAdded += await bulkAddTerms(domain, wordList);
+    }
+
+    await ref.set({ oncologyMayoResearchExpansionV1: true }, { merge:true });
+    logActivity(`added ${totalAdded} research-verified terms to Lymphoma, Leukemia, and Multiple Myeloma`);
+  }catch(err){ console.error('runOncologyMayoResearchExpansionV1 failed:', err); }
+}
+
 async function runOncologySubgroupsVocabImportV1(){
   if(!db) return;
   try{
@@ -5324,6 +5614,10 @@ async function loadData(){
     await runPharmacyVocabImportV1();
     await runAdultEndoNephroUroVocabImportV1();
     await runOncologySubgroupsVocabImportV1();
+    await runOncologyMayoResearchExpansionV1();
+    await runOncologyMayoResearchExpansionV2();
+    await runOncologyMayoResearchExpansionV3();
+    await runBreastOncologyVocabImportV1();
     startTermsListener();
     startCategoriesMetaListener();
     render();
