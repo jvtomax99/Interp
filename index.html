@@ -328,53 +328,38 @@
   .home-tile:hover .home-tile-edit, .home-tile:focus-within .home-tile-edit{ opacity:1; }
   @media (hover:none){ .home-tile-edit{ opacity:1; } }
 
-  /* A parent domain with subgroups — one card, full grid width, so the
-     subgroups sit visibly inside it instead of just being nearby tiles. */
-  .domain-group{
-    grid-column:1 / -1; background:var(--paper); border-radius:16px;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); overflow:hidden;
-  }
-  .domain-group-header{
-    width:100%; display:flex; align-items:center; gap:11px; padding:13px 14px;
-    background:transparent; border:none; cursor:pointer; text-align:left; position:relative;
-    font-family:inherit; transition:background .15s var(--ease);
-  }
-  .domain-group-header:hover{ background:var(--tile-tint, var(--bg-hi)); }
-  .domain-group-icon{
-    width:34px; height:34px; border-radius:10px; flex-shrink:0; color:#fff;
-    background:linear-gradient(140deg, var(--tile-color), var(--tile-color));
-    display:flex; align-items:center; justify-content:center;
-  }
-  .domain-group-icon svg{ width:17px; height:17px; }
-  .domain-group-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
-  .domain-group-text b{ font-size:13.5px; color:var(--ink); }
-  .domain-group-text span{ font-size:10.5px; color:var(--ink-faint); }
+  /* A parent domain with subgroups — the parent tile looks and sizes
+     exactly like every other tile (so the grid stays visually consistent);
+     its subgroups sit as a compact list directly beneath it, still inside
+     the same single grid cell rather than breaking the row. */
+  .domain-group{ display:flex; flex-direction:column; gap:8px; }
+  .domain-group-tile{ position:relative; }
   .domain-group-toggle{
-    display:flex; width:20px; height:20px; flex-shrink:0; color:var(--ink-faint);
-    transition:transform .2s var(--ease);
+    position:absolute; top:10px; right:38px; display:flex; align-items:center; gap:2px;
+    width:24px; height:24px; border-radius:8px; background:rgba(255,255,255,0.7);
+    color:var(--ink-faint); font-family:var(--mono); font-size:9.5px; justify-content:center;
   }
-  .domain-group-toggle.is-collapsed{ transform:rotate(-90deg); }
-  .domain-group-toggle svg{ width:100%; height:100%; }
-  .domain-group .home-tile-edit{ top:8px; right:36px; }
+  .domain-group-toggle svg{ width:12px; height:12px; transition:transform .2s var(--ease); }
+  .domain-group-toggle.is-collapsed svg{ transform:rotate(-90deg); }
   .domain-group-children{
-    display:flex; flex-wrap:wrap; gap:7px; padding:0 14px 13px 14px;
-    animation:contentFadeIn .2s var(--ease);
+    display:flex; flex-direction:column; gap:5px; animation:contentFadeIn .2s var(--ease);
   }
   .domain-chip{
-    display:flex; align-items:center; gap:6px; padding:7px 10px 7px 8px; border-radius:10px;
-    background:var(--bg-hi); border:none; cursor:pointer; font-family:inherit; position:relative;
-    transition:background .15s var(--ease);
+    display:flex; align-items:center; gap:7px; padding:8px 9px; border-radius:10px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+    border:none; cursor:pointer; font-family:inherit; position:relative; text-align:left;
+    transition:box-shadow .15s var(--ease);
   }
-  .domain-chip:hover{ background:var(--tile-tint, var(--line-soft)); }
+  .domain-chip:hover{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); }
   .domain-chip-icon{
-    width:20px; height:20px; border-radius:6px; flex-shrink:0; color:#fff;
+    width:22px; height:22px; border-radius:7px; flex-shrink:0; color:#fff;
     background:var(--tile-color); display:flex; align-items:center; justify-content:center;
   }
-  .domain-chip-icon svg{ width:11px; height:11px; }
-  .domain-chip-name{ font-size:11.5px; font-weight:600; color:var(--ink); }
-  .domain-chip-count{ font-size:10px; color:var(--ink-faint); }
-  .domain-chip .home-tile-edit{ position:static; opacity:0; width:18px; height:18px; margin-left:-2px; }
-  .domain-chip:hover .home-tile-edit{ opacity:1; }
+  .domain-chip-icon svg{ width:12px; height:12px; }
+  .domain-chip-name{ flex:1; min-width:0; font-size:12px; font-weight:600; color:var(--ink); }
+  .domain-chip-count{ font-size:10px; color:var(--ink-faint); flex-shrink:0; }
+  .domain-chip .home-tile-edit{ position:static; opacity:0; width:18px; height:18px; flex-shrink:0; }
+  .domain-chip:hover .home-tile-edit, .domain-chip:focus-within .home-tile-edit{ opacity:1; }
   @media (hover:none){ .domain-chip .home-tile-edit{ opacity:1; } }
   /* Push the count to the bottom edge so tiles with one-line and four-line
      names still read as the same considered shape. */
@@ -5320,14 +5305,14 @@ function render(){
     const isCollapsed = collapsedDomainGroups.includes(parent.id);
     return `
       <div class="domain-group">
-        <button class="domain-group-header" style="--tile-color:${parent.color}; --tile-tint:${parent.color}22;" onclick="setCategory('${parent.id}')">
+        <button class="home-tile domain-group-tile" style="--tile-color:${parent.color}; --tile-tint:${parent.color}22; --tile-glow:${parent.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="setCategory('${parent.id}')">
           <span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); openEditDomainModal('${parent.id}')">${ICON_EDIT}</span>
-          <span class="domain-group-icon">${parent.icon}</span>
-          <span class="domain-group-text">
-            <b>${escapeHtml(parent.name)}</b>
-            <span>${parent.count} ${parent.label} \u00b7 ${kids.length} subgroup${kids.length===1?'':'s'}</span>
+          <span class="home-tile-icon">${parent.icon}</span>
+          <span class="home-tile-name">${escapeHtml(parent.name)}</span>
+          <span class="home-tile-count">${parent.count} ${parent.label}</span>
+          <span class="domain-group-toggle ${isCollapsed?'is-collapsed':''}" title="${isCollapsed ? 'Show' : 'Hide'} ${kids.length} subgroup${kids.length===1?'':'s'}" onclick="event.stopPropagation(); toggleDomainGroup('${parent.id}')">
+            ${ICON_CHEVRON_DOWN}<span>${kids.length}</span>
           </span>
-          <span class="domain-group-toggle ${isCollapsed?'is-collapsed':''}" onclick="event.stopPropagation(); toggleDomainGroup('${parent.id}')">${ICON_CHEVRON_DOWN}</span>
         </button>
         ${isCollapsed ? '' : `<div class="domain-group-children">
           ${kids.map(k=>`
