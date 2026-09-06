@@ -3549,7 +3549,7 @@ const GENERAL_MEDICINE_VOCAB_V1 = [
   ['Standard of care', 'Estándar de atención', 'The level of care a competent provider is expected to give.'],
 ];
 
-async function ensureDomainExists(name, color, icon){
+async function ensureDomainExists(name, color, icon, parentId){
   let cat = DATA.categories.find(c=>c.name===name);
   if(cat) return cat;
   const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide'];
@@ -3557,7 +3557,7 @@ async function ensureDomainExists(name, color, icon){
   const base = slugify(name);
   let id = base, n = 2;
   while(existingIds.includes(id)){ id = `${base}-${n}`; n++; }
-  cat = { id, name, color, icon, parentId: null, terms: [] };
+  cat = { id, name, color, icon, parentId: parentId || null, terms: [] };
   DATA.categories.push(cat);
   await saveCategoriesMeta();
   return cat;
@@ -3576,6 +3576,1144 @@ async function bulkAddTerms(domainCat, wordList){
     await batch.commit();
   }
   return toAdd.length;
+}
+
+// "Emergency & Trauma" — covers trauma mechanisms, triage, common ED
+// presentations, resuscitation, wound care, toxicology, burns, and the
+// behavioral-health/safety terms that come up constantly in the ED.
+const EMERGENCY_TRAUMA_VOCAB_V1 = [
+  // Trauma & Injury Mechanisms
+  ['Motor vehicle accident (MVA)', 'Accidente automovilístico', 'A collision involving one or more vehicles.'],
+  ['Blunt force trauma', 'Traumatismo contuso', 'Injury caused by impact without penetrating the skin.'],
+  ['Penetrating trauma', 'Traumatismo penetrante', 'Injury where an object pierces the skin and body tissue.'],
+  ['Laceration', 'Laceración', 'A deep cut or tear in the skin.'],
+  ['Contusion / bruise', 'Contusión / moretón', 'Bleeding under the skin from blunt impact.'],
+  ['Fracture', 'Fractura', 'A broken bone.'],
+  ['Dislocation', 'Dislocación', "When a bone is forced out of its normal joint position."],
+  ['Sprain', 'Esguince', 'Stretching or tearing of a ligament.'],
+  ['Strain', 'Distensión muscular', 'Stretching or tearing of a muscle or tendon.'],
+  ['Concussion', 'Conmoción cerebral', 'A brain injury caused by a blow or jolt to the head.'],
+  ['Traumatic brain injury (TBI)', 'Lesión cerebral traumática', 'Damage to the brain from an external force.'],
+  ['Internal bleeding', 'Hemorragia interna', "Bleeding inside the body that isn't visible externally."],
+  ['Hemorrhage', 'Hemorragia', 'Heavy or uncontrolled bleeding.'],
+  ['Fall from height', 'Caída de altura', 'A fall resulting in injury, a common trauma mechanism.'],
+  ['Gunshot wound (GSW)', 'Herida de bala', 'An injury caused by a firearm projectile.'],
+  ['Stab wound', 'Herida de arma blanca', 'An injury caused by a sharp object.'],
+  // Triage & ED Process
+  ['Triage nurse', 'Enfermero/a de triaje', 'The nurse who assesses and prioritizes incoming patients.'],
+  ['Emergency Severity Index (ESI)', 'Índice de gravedad de emergencia', 'A five-level scale used to triage ED patients.'],
+  ['Ambulance / EMS', 'Ambulancia / servicios médicos de emergencia', 'Emergency transport and prehospital care providers.'],
+  ['Paramedic', 'Paramédico', 'A trained emergency medical provider who responds to and transports patients.'],
+  ['Trauma bay', 'Sala de trauma', 'The area of the ED equipped for critical trauma care.'],
+  ['Trauma team activation', 'Activación del equipo de trauma', 'Calling in a specialized team for a severely injured patient.'],
+  ['Level 1 trauma center', 'Centro de trauma de nivel 1', 'A hospital with the highest level of trauma care capability.'],
+  // Common ED Presentations
+  ['Acute abdomen', 'Abdomen agudo', 'Sudden, severe abdominal pain often requiring urgent evaluation.'],
+  ['Syncope', 'Síncope', 'A brief loss of consciousness, often called fainting.'],
+  ['Seizure', 'Convulsión', "A sudden burst of abnormal electrical activity in the brain."],
+  ['Stroke / CVA', 'Accidente cerebrovascular (ACV) / derrame cerebral', 'A sudden interruption of blood flow to the brain.'],
+  ['Anaphylaxis', 'Anafilaxia', 'A severe, life-threatening allergic reaction.'],
+  ['Sepsis', 'Sepsis', 'A life-threatening response to infection affecting the whole body.'],
+  ['Myocardial infarction (heart attack)', 'Infarto de miocardio (ataque cardíaco)', 'Loss of blood flow to part of the heart muscle.'],
+  ['Acute respiratory distress', 'Dificultad respiratoria aguda', 'Sudden, severe trouble breathing.'],
+  ['Foreign body ingestion', 'Ingestión de cuerpo extraño', "Swallowing an object that isn't food."],
+  ['Foreign body aspiration', 'Aspiración de cuerpo extraño', 'Inhaling an object into the airway.'],
+  ['Dehydration', 'Deshidratación', 'A harmful lack of body fluids.'],
+  ['Heat stroke', 'Golpe de calor', 'A dangerous rise in body temperature from heat exposure.'],
+  ['Hypoglycemia', 'Hipoglucemia', 'Abnormally low blood sugar.'],
+  ['Diabetic ketoacidosis (DKA)', 'Cetoacidosis diabética', 'A serious diabetes complication from a lack of insulin.'],
+  ['Altered mental status', 'Estado mental alterado', "A change in a patient's normal awareness or alertness."],
+  // Resuscitation & Codes
+  ['CPR (cardiopulmonary resuscitation)', 'RCP (reanimación cardiopulmonar)', 'Emergency procedure combining chest compressions and rescue breaths.'],
+  ['Defibrillator', 'Desfibrilador', 'A device that delivers an electric shock to restore normal heart rhythm.'],
+  ['Intubation', 'Intubación', "Inserting a tube into the airway to help a patient breathe."],
+  ['Airway management', 'Manejo de la vía aérea', "Steps taken to keep a patient's airway open."],
+  ['Cardiac arrest', 'Paro cardíaco', 'When the heart suddenly stops beating.'],
+  ['Respiratory arrest', 'Paro respiratorio', 'When a person stops breathing.'],
+  ['ACLS (Advanced Cardiac Life Support)', 'Soporte vital cardíaco avanzado', 'Advanced protocols used to treat cardiac emergencies.'],
+  ['Chest compressions', 'Compresiones torácicas', 'Rhythmic pressing on the chest to circulate blood during CPR.'],
+  ['Rescue breathing', 'Respiración de rescate', "Providing breaths to a person who isn't breathing on their own."],
+  ['Pulse check', 'Verificación del pulso', 'Checking for a heartbeat.'],
+  ['Return of spontaneous circulation (ROSC)', 'Retorno de la circulación espontánea', "When a patient's heartbeat and circulation resume after cardiac arrest."],
+  // Wound Care & Procedures
+  ['Suturing / stitches', 'Sutura / puntos', 'Closing a wound with thread-like material.'],
+  ['Staples (wound closure)', 'Grapas (para heridas)', 'Metal fasteners used to close certain wounds.'],
+  ['Wound irrigation', 'Irrigación de heridas', 'Rinsing a wound with fluid to clean it.'],
+  ['Debridement', 'Desbridamiento', 'Removing dead or damaged tissue from a wound.'],
+  ['Splint', 'Férula', 'A device used to keep an injured body part immobile.'],
+  ['Cast', 'Yeso / escayola', 'A hard covering used to immobilize a broken bone while it heals.'],
+  ['Tourniquet', 'Torniquete', 'A device used to stop severe bleeding by restricting blood flow.'],
+  ['Pressure dressing', 'Vendaje compresivo', 'A bandage applied firmly to control bleeding.'],
+  ['Tetanus shot', 'Vacuna antitetánica', 'An immunization given after certain wounds to prevent tetanus infection.'],
+  ['Local anesthesia', 'Anestesia local', 'Numbing medication applied to a specific area.'],
+  // Toxicology & Overdose
+  ['Overdose', 'Sobredosis', 'Taking more of a substance than the body can safely handle.'],
+  ['Poisoning', 'Envenenamiento / intoxicación', 'Harmful exposure to a toxic substance.'],
+  ['Activated charcoal', 'Carbón activado', 'A treatment used to absorb certain ingested toxins.'],
+  ['Naloxone (Narcan)', 'Naloxona (Narcan)', 'A medication that reverses opioid overdose.'],
+  ['Toxicology screen', 'Prueba toxicológica', 'A test that checks for drugs or toxins in the body.'],
+  ['Withdrawal', 'Abstinencia / síndrome de abstinencia', 'Symptoms that occur when a substance a person depends on is stopped.'],
+  ['Intentional overdose', 'Sobredosis intencional', 'An overdose taken deliberately, such as in a suicide attempt.'],
+  // Burns
+  ['Burn (first, second, third degree)', 'Quemadura (primer, segundo, tercer grado)', 'Skin damage classified by depth and severity.'],
+  ['Chemical burn', 'Quemadura química', 'A burn caused by contact with a corrosive substance.'],
+  ['Thermal burn', 'Quemadura térmica', 'A burn caused by heat, such as fire or hot liquid.'],
+  ['Electrical burn', 'Quemadura eléctrica', 'A burn caused by electrical current passing through the body.'],
+  ['Total body surface area (TBSA) burned', 'Superficie corporal total quemada', 'A measurement used to estimate burn severity.'],
+  ['Skin graft', 'Injerto de piel', 'A surgical procedure transplanting skin to cover a wound.'],
+  // Safety & Behavioral Health in the ED
+  ['Restraints (physical)', 'Sujeción física / restricciones físicas', "Devices used to limit a patient's movement for safety."],
+  ['Combative patient', 'Paciente combativo', 'A patient who is physically resistant or aggressive.'],
+  ['Domestic violence', 'Violencia doméstica', 'Abuse occurring between people in a close relationship.'],
+  ['Sexual assault exam', 'Examen por agresión sexual', 'A specialized forensic medical exam after a sexual assault.'],
+  ['Child abuse', 'Maltrato infantil', 'Physical, emotional, or sexual harm to a child.'],
+  ['Elder abuse', 'Maltrato al adulto mayor', 'Harm or neglect of an older adult.'],
+  ['Mandatory reporter', 'Denunciante obligatorio', 'A professional legally required to report suspected abuse.'],
+  ['Against medical advice (AMA)', 'Alta contra opinión médica', "When a patient leaves care against a provider's recommendation."],
+  ['Behavioral health hold', 'Retención de salud conductual', 'A legal hold for a patient who may be a danger to themselves or others.'],
+  ['Psychiatric evaluation', 'Evaluación psiquiátrica', "An assessment of a patient's mental health status."],
+  ['Suicidal ideation', 'Ideación suicida', "Thoughts about ending one's own life."],
+  ['Homicidal ideation', 'Ideación homicida', 'Thoughts about harming or killing another person.'],
+  ['Involuntary commitment', 'Internamiento involuntario', 'Legally holding a patient for psychiatric care without their consent.'],
+  ['Crisis intervention', 'Intervención en crisis', 'Immediate support given during a mental health emergency.'],
+  ['Wellness check', 'Verificación de bienestar', "A visit, often by police or EMS, to check on someone's safety."],
+  // More Trauma-Specific Terms
+  ['Compartment syndrome', 'Síndrome compartimental', 'Dangerous pressure buildup within muscles, often after injury.'],
+  ['Traumatic amputation', 'Amputación traumática', 'The loss of a limb or body part due to injury.'],
+  ['Spinal immobilization', 'Inmovilización espinal', 'Preventing spine movement after a suspected spinal injury.'],
+  ['Cervical collar (C-collar)', 'Collarín cervical', 'A device used to stabilize the neck after injury.'],
+  ['Backboard', 'Tabla espinal', 'A rigid board used to immobilize and transport an injured patient.'],
+  ['Glasgow Coma Scale (GCS)', 'Escala de coma de Glasgow', "A scale used to assess a patient's level of consciousness."],
+  ['Golden hour', 'Hora dorada', 'The critical first hour after severe trauma when treatment is most effective.'],
+  ['Multi-system trauma', 'Trauma multisistémico', 'Injuries affecting more than one body system.'],
+  ['FAST exam (Focused Assessment with Sonography for Trauma)', 'Ecografía FAST', 'An ultrasound exam used to detect internal bleeding after trauma.'],
+  ['Observation status', 'Estado de observación', 'Being monitored in the hospital without formal admission.'],
+];
+
+// "OB/GYN & Women's Health" — general gynecology, reproductive health, and
+// prenatal care. "Labor & Delivery" nests underneath it as its own
+// subgroup with a fully separate term set, mirroring how "Breast Oncology"
+// nests under Oncology.
+const OBGYN_VOCAB_V1 = [
+  // General GYN Anatomy & Exams
+  ['Pelvic exam', 'Examen pélvico', 'An exam of the female reproductive organs.'],
+  ['Pap smear', 'Papanicolaou / citología vaginal', 'A screening test for cervical cancer.'],
+  ['Speculum', 'Espéculo', 'An instrument used to view inside the vagina during an exam.'],
+  ['Uterus', 'Útero / matriz', 'The organ where a fetus develops during pregnancy.'],
+  ['Ovary', 'Ovario', 'The organ that produces eggs and hormones.'],
+  ['Fallopian tube', 'Trompa de Falopio', 'The tube connecting the ovary to the uterus.'],
+  ['Cervix', 'Cuello uterino / cérvix', 'The lower part of the uterus that opens into the vagina.'],
+  ['Endometrium', 'Endometrio', 'The lining of the uterus.'],
+  ['Vulva', 'Vulva', 'The external female genital organs.'],
+  ['Mammogram', 'Mamografía', 'An X-ray exam of the breast used to screen for cancer.'],
+  ['Breast exam', 'Examen de mama', 'A physical check of the breast for lumps or changes.'],
+  ['Transvaginal ultrasound', 'Ecografía transvaginal', 'An internal ultrasound used to view pelvic organs.'],
+  ['Colposcopy', 'Colposcopia', 'A procedure to closely examine the cervix.'],
+  ['Bimanual exam', 'Examen bimanual', 'An exam using both hands to check the uterus and ovaries.'],
+  ['HPV test', 'Prueba del VPH', 'A test that checks for human papillomavirus.'],
+  // Menstrual & Reproductive Health
+  ['Menstrual cycle', 'Ciclo menstrual', 'The monthly hormonal cycle involving ovulation and menstruation.'],
+  ['Menstruation / period', 'Menstruación / período / regla', 'The monthly shedding of the uterine lining.'],
+  ['Ovulation', 'Ovulación', 'The release of an egg from the ovary.'],
+  ['Amenorrhea', 'Amenorrea', 'The absence of menstrual periods.'],
+  ['Dysmenorrhea', 'Dismenorrea', 'Painful menstrual cramps.'],
+  ['Menorrhagia', 'Menorragia', 'Abnormally heavy menstrual bleeding.'],
+  ['Irregular periods', 'Períodos irregulares', 'Menstrual cycles that vary unpredictably in timing or length.'],
+  ['Perimenopause', 'Perimenopausia', 'The transitional period leading up to menopause.'],
+  ['Menopause', 'Menopausia', 'The permanent end of menstrual periods.'],
+  ['Hot flashes', 'Sofocos / bochornos', 'Sudden feelings of intense body heat, common in menopause.'],
+  ['Hormone replacement therapy (HRT)', 'Terapia de reemplazo hormonal', 'Treatment using hormones to relieve menopause symptoms.'],
+  ['Polycystic ovary syndrome (PCOS)', 'Síndrome de ovario poliquístico', 'A hormonal disorder affecting ovulation.'],
+  ['Endometriosis', 'Endometriosis', 'A condition where uterine-like tissue grows outside the uterus.'],
+  ['Fibroids', 'Fibromas / miomas', 'Noncancerous growths in or on the uterus.'],
+  ['Ovarian cyst', 'Quiste ovárico', 'A fluid-filled sac on or in the ovary.'],
+  // Prenatal Care
+  ['Prenatal care', 'Atención prenatal', 'Medical care received during pregnancy.'],
+  ['Due date / estimated date of delivery', 'Fecha probable de parto', 'The estimated date a baby will be born.'],
+  ['Gestational age', 'Edad gestacional', 'How far along a pregnancy is, measured in weeks.'],
+  ['Trimester', 'Trimestre', 'One of three three-month periods of pregnancy.'],
+  ['Fundal height', 'Altura uterina / altura del fondo uterino', 'A measurement of the uterus used to track fetal growth.'],
+  ['Fetal heart rate', 'Frecuencia cardíaca fetal', 'The heartbeat rate of the fetus.'],
+  ['Fetal movement / kick counts', 'Movimiento fetal / conteo de patadas', "Tracking how often the baby moves, used to monitor wellbeing."],
+  ['Gestational diabetes', 'Diabetes gestacional', 'Diabetes that develops during pregnancy.'],
+  ['Preeclampsia', 'Preeclampsia', 'A pregnancy complication involving high blood pressure and organ stress.'],
+  ['Group B strep (GBS) test', 'Prueba de estreptococo del grupo B', 'A test for bacteria that can affect the baby during delivery.'],
+  ['Anatomy scan', 'Ecografía anatómica', 'A detailed ultrasound checking fetal development, usually mid-pregnancy.'],
+  ['Placenta', 'Placenta', 'The organ that nourishes the fetus during pregnancy.'],
+  ['Placenta previa', 'Placenta previa', 'A condition where the placenta covers the cervix.'],
+  ['Amniotic fluid', 'Líquido amniótico', 'The fluid surrounding the fetus in the womb.'],
+  ['Breech position', 'Posición de nalgas / presentación podálica', 'When the baby is positioned feet or buttocks first.'],
+  // Gynecologic Conditions
+  ['Pelvic inflammatory disease (PID)', 'Enfermedad pélvica inflamatoria', 'An infection of the female reproductive organs.'],
+  ['Sexually transmitted infection (STI)', 'Infección de transmisión sexual (ITS)', 'An infection passed through sexual contact.'],
+  ['Urinary tract infection (UTI)', 'Infección urinaria', 'An infection of the urinary system.'],
+  ['Yeast infection', 'Infección por hongos / candidiasis', 'A common fungal infection of the vagina.'],
+  ['Bacterial vaginosis', 'Vaginosis bacteriana', 'An imbalance of vaginal bacteria.'],
+  ['Cervical dysplasia', 'Displasia cervical', 'Abnormal cell changes on the cervix, which can be precancerous.'],
+  ['Ovarian cancer', 'Cáncer de ovario', 'Cancer that begins in the ovaries.'],
+  ['Uterine (endometrial) cancer', 'Cáncer de útero (endometrial)', 'Cancer that begins in the lining of the uterus.'],
+  ['Cervical cancer', 'Cáncer de cuello uterino', 'Cancer that begins in the cervix.'],
+  ['Infertility', 'Infertilidad', 'Difficulty becoming pregnant after regular attempts.'],
+  // Contraception & Family Planning
+  ['Birth control / contraception', 'Anticoncepción / control de natalidad', 'Methods used to prevent pregnancy.'],
+  ['Oral contraceptive pill', 'Píldora anticonceptiva', 'A daily pill used to prevent pregnancy.'],
+  ['Intrauterine device (IUD)', 'Dispositivo intrauterino (DIU)', 'A small device placed in the uterus to prevent pregnancy.'],
+  ['Condom', 'Condón / preservativo', 'A barrier method used to prevent pregnancy and STIs.'],
+  ['Tubal ligation', 'Ligadura de trompas', 'A surgical procedure for permanent birth control in women.'],
+  ['Vasectomy', 'Vasectomía', 'A surgical procedure for permanent birth control in men.'],
+  ['Emergency contraception', 'Anticoncepción de emergencia', 'Medication used to prevent pregnancy after unprotected sex.'],
+  ['Family planning counseling', 'Consejería de planificación familiar', 'Guidance on reproductive choices and contraception options.'],
+  // Postpartum & Breastfeeding
+  ['Postpartum period', 'Período posparto', 'The weeks following childbirth as the body recovers.'],
+  ['Postpartum depression', 'Depresión posparto', 'Depression occurring after childbirth.'],
+  ['Breastfeeding / lactation', 'Lactancia materna', 'Feeding a baby with breast milk.'],
+  ['Postpartum checkup', 'Chequeo posparto', 'A follow-up visit after delivery to check recovery.'],
+  ['Postpartum hemorrhage', 'Hemorragia posparto', 'Heavy bleeding after childbirth.'],
+  ['Lochia', 'Loquios', 'Vaginal discharge after childbirth.'],
+  ['Mastitis', 'Mastitis', 'Inflammation of breast tissue, often related to breastfeeding.'],
+];
+
+const LABOR_DELIVERY_VOCAB_V1 = [
+  // Labor Process
+  ['Labor', 'Trabajo de parto', 'The process of childbirth, including contractions and cervical dilation.'],
+  ['Contractions', 'Contracciones', 'Tightening of the uterine muscles during labor.'],
+  ['Braxton Hicks contractions', 'Contracciones de Braxton Hicks', "False labor contractions that don't lead to delivery."],
+  ['Cervical dilation', 'Dilatación cervical', 'The opening of the cervix, measured in centimeters during labor.'],
+  ['Cervical effacement', 'Borramiento cervical', 'The thinning of the cervix in preparation for delivery.'],
+  ['Water breaking / rupture of membranes', 'Rotura de la fuente / ruptura de membranas', 'When the amniotic sac breaks, releasing fluid.'],
+  ['Active labor', 'Trabajo de parto activo', 'The stage of labor with more frequent, intense contractions.'],
+  ['Transition (labor stage)', 'Transición (etapa del parto)', 'The final, most intense phase before pushing.'],
+  ['Pushing stage', 'Etapa de pujo', 'The stage of labor when the mother pushes to deliver the baby.'],
+  ['Induction of labor', 'Inducción del parto', "Medically starting labor before it begins on its own."],
+  ['Augmentation of labor', 'Aceleración del parto', 'Speeding up labor that has already started.'],
+  ['Pitocin', 'Pitocina', 'A medication used to induce or strengthen contractions.'],
+  ['Epidural', 'Epidural', 'Regional anesthesia used to relieve labor pain.'],
+  ['Fetal monitor', 'Monitor fetal', "A device that tracks the baby's heart rate during labor."],
+  ['Cervical exam', 'Examen cervical', 'A check of cervical dilation and effacement during labor.'],
+  // Delivery Types & Interventions
+  ['Vaginal delivery', 'Parto vaginal', 'Delivery of the baby through the birth canal.'],
+  ['Cesarean section (C-section)', 'Cesárea', 'Surgical delivery of the baby through an incision.'],
+  ['VBAC (vaginal birth after cesarean)', 'Parto vaginal después de cesárea', 'Delivering vaginally after a previous C-section.'],
+  ['Forceps delivery', 'Parto con fórceps', 'Delivery assisted with an instrument that helps guide the baby out.'],
+  ['Vacuum-assisted delivery', 'Parto asistido con ventosa', 'Delivery assisted with a suction device.'],
+  ['Episiotomy', 'Episiotomía', 'A surgical cut made to widen the vaginal opening during delivery.'],
+  ['Perineal tear', 'Desgarro perineal', 'A tear in the tissue between the vagina and anus during delivery.'],
+  ['Skin-to-skin contact', 'Contacto piel con piel', "Placing the newborn directly on the mother's skin after birth."],
+  ['Delayed cord clamping', 'Pinzamiento tardío del cordón', 'Waiting before clamping the umbilical cord after birth.'],
+  ['Umbilical cord', 'Cordón umbilical', 'The cord connecting the baby to the placenta.'],
+  // Complications
+  ['Fetal distress', 'Sufrimiento fetal', 'Signs that the baby may not be tolerating labor well.'],
+  ['Shoulder dystocia', 'Distocia de hombros', "When the baby's shoulder becomes stuck during delivery."],
+  ['Umbilical cord prolapse', 'Prolapso del cordón umbilical', 'When the cord slips ahead of the baby during delivery, a medical emergency.'],
+  ['Preterm labor', 'Parto prematuro', 'Labor that begins before 37 weeks of pregnancy.'],
+  ['Failure to progress', 'Falta de progreso (del parto)', "When labor stalls and doesn't advance as expected."],
+  ['Placental abruption', 'Desprendimiento de placenta', 'When the placenta separates from the uterus before delivery.'],
+  ['Uterine rupture', 'Ruptura uterina', 'A tear in the uterine wall, a rare but serious complication.'],
+  ['Meconium-stained fluid', 'Líquido teñido de meconio', "Amniotic fluid containing the baby's first stool, which can signal distress."],
+  // Immediate Postpartum & Newborn
+  ['Apgar score', 'Puntaje de Apgar', "A quick assessment of a newborn's health right after birth."],
+  ['Newborn resuscitation', 'Reanimación neonatal', 'Emergency breathing support given to a newborn.'],
+  ['Cord blood banking', 'Banco de sangre del cordón umbilical', 'Collecting and storing blood from the umbilical cord after birth.'],
+  ['Rooming-in', 'Alojamiento conjunto', 'Keeping the newborn in the same room as the mother after birth.'],
+  ['Circumcision', 'Circuncisión', 'Surgical removal of the foreskin, often done shortly after birth.'],
+  ['Doula', 'Doula', 'A trained companion who provides support during labor and delivery.'],
+  ['Birth plan', 'Plan de parto', "A document outlining a mother's preferences for labor and delivery."],
+  ['Multiple gestation (twins/triplets)', 'Gestación múltiple (gemelos/trillizos)', 'A pregnancy with more than one fetus.'],
+];
+
+// "Psychiatry & Mental Health"
+const PSYCHIATRY_VOCAB_V1 = [
+  ['Depression', 'Depresión', 'A persistent feeling of sadness and loss of interest.'],
+  ['Major depressive disorder', 'Trastorno depresivo mayor', 'A clinical diagnosis of severe, persistent depression.'],
+  ['Anxiety', 'Ansiedad', 'Excessive worry or fear affecting daily life.'],
+  ['Generalized anxiety disorder (GAD)', 'Trastorno de ansiedad generalizada', 'Persistent, excessive worry about various aspects of life.'],
+  ['Panic attack', 'Ataque de pánico', 'A sudden episode of intense fear with physical symptoms.'],
+  ['Panic disorder', 'Trastorno de pánico', 'Recurrent, unexpected panic attacks.'],
+  ['Bipolar disorder', 'Trastorno bipolar', 'A condition causing extreme mood swings between mania and depression.'],
+  ['Mania', 'Manía', 'A state of abnormally elevated mood, energy, or activity.'],
+  ['Hypomania', 'Hipomanía', 'A milder form of mania.'],
+  ['Obsessive-compulsive disorder (OCD)', 'Trastorno obsesivo-compulsivo', 'A condition involving intrusive thoughts and repetitive behaviors.'],
+  ['Post-traumatic stress disorder (PTSD)', 'Trastorno de estrés postraumático', 'A condition triggered by experiencing or witnessing a traumatic event.'],
+  ['Social anxiety disorder', 'Trastorno de ansiedad social', 'Intense fear of social situations.'],
+  ['Phobia', 'Fobia', 'An intense, irrational fear of a specific thing or situation.'],
+  ['Seasonal affective disorder (SAD)', 'Trastorno afectivo estacional', 'Depression related to seasonal changes, often in winter.'],
+  ['Adjustment disorder', 'Trastorno de adaptación', 'Emotional or behavioral symptoms in response to a stressful event.'],
+  ['Schizophrenia', 'Esquizofrenia', 'A chronic disorder affecting thinking, perception, and behavior.'],
+  ['Psychosis', 'Psicosis', 'A loss of contact with reality, often with hallucinations or delusions.'],
+  ['Hallucination', 'Alucinación', "Seeing, hearing, or sensing something that isn't there."],
+  ['Delusion', 'Delirio / idea delirante', 'A fixed false belief not based in reality.'],
+  ['Paranoia', 'Paranoia', 'Irrational suspicion or mistrust of others.'],
+  ['Schizoaffective disorder', 'Trastorno esquizoafectivo', 'A condition combining features of schizophrenia and a mood disorder.'],
+  ['Catatonia', 'Catatonia', 'A state of unresponsiveness or unusual movement patterns.'],
+  ['Disorganized thinking', 'Pensamiento desorganizado', 'Thoughts that are jumbled or difficult to follow.'],
+  ['Flat affect', 'Afecto plano', 'A reduced expression of emotion.'],
+  ['Insight (psychiatric)', 'Conciencia de enfermedad / insight', "A patient's awareness of their own mental health condition."],
+  ['Substance use disorder', 'Trastorno por consumo de sustancias', 'A pattern of substance use causing significant impairment.'],
+  ['Alcohol use disorder', 'Trastorno por consumo de alcohol', 'A pattern of problematic alcohol use.'],
+  ['Opioid use disorder', 'Trastorno por consumo de opioides', 'A pattern of problematic opioid use.'],
+  ['Detoxification (detox)', 'Desintoxicación', 'The process of clearing a substance from the body under medical supervision.'],
+  ['Relapse', 'Recaída', 'A return to substance use after a period of abstinence.'],
+  ['Sobriety', 'Sobriedad', 'The state of not using alcohol or drugs.'],
+  ['Rehabilitation (rehab)', 'Rehabilitación', 'Treatment aimed at helping a person recover from addiction.'],
+  ['Twelve-step program', 'Programa de doce pasos', 'A peer support model used in addiction recovery.'],
+  ['Medication-assisted treatment (MAT)', 'Tratamiento asistido con medicamentos', 'Using medication combined with counseling to treat substance use disorder.'],
+  ['Enabling behavior', 'Comportamiento facilitador', "Actions that unintentionally support someone's addiction."],
+  ['Anorexia nervosa', 'Anorexia nerviosa', 'An eating disorder involving self-starvation and fear of weight gain.'],
+  ['Bulimia nervosa', 'Bulimia nerviosa', 'An eating disorder involving cycles of binge eating and purging.'],
+  ['Binge eating disorder', 'Trastorno por atracón', 'Recurrent episodes of eating large amounts of food with a loss of control.'],
+  ['Body dysmorphic disorder', 'Trastorno dismórfico corporal', "Excessive preoccupation with a perceived flaw in appearance."],
+  ['Borderline personality disorder', 'Trastorno límite de la personalidad', 'A condition marked by unstable relationships, self-image, and emotions.'],
+  ['Antisocial personality disorder', 'Trastorno de personalidad antisocial', 'A pattern of disregard for the rights of others.'],
+  ['Narcissistic personality disorder', 'Trastorno de personalidad narcisista', 'A pattern of grandiosity and need for admiration.'],
+  ['Self-harm', 'Autolesión', 'Deliberately hurting oneself, often as a way to cope with distress.'],
+  ['Dissociation', 'Disociación', "A sense of detachment from one's thoughts, feelings, or surroundings."],
+  ['Dissociative identity disorder', 'Trastorno de identidad disociativo', 'A condition involving two or more distinct identities.'],
+  ['Mental status exam', 'Examen del estado mental', "An assessment of a patient's cognitive and emotional functioning."],
+  ['Safety plan', 'Plan de seguridad', 'A personalized plan to help someone stay safe during a mental health crisis.'],
+  ['Psychotherapy', 'Psicoterapia', 'Talk-based treatment for mental health conditions.'],
+  ['Cognitive behavioral therapy (CBT)', 'Terapia cognitivo-conductual', 'A therapy approach focused on changing unhelpful thought patterns.'],
+  ['Dialectical behavior therapy (DBT)', 'Terapia dialéctico-conductual', 'A therapy approach focused on emotional regulation and coping skills.'],
+  ['Group therapy', 'Terapia de grupo', 'Therapy conducted with multiple patients together.'],
+  ['Family therapy', 'Terapia familiar', 'Therapy involving family members to address relational issues.'],
+  ['Psychiatrist', 'Psiquiatra', 'A medical doctor specializing in mental health.'],
+  ['Psychologist', 'Psicólogo/a', 'A mental health professional trained in psychology, typically non-prescribing.'],
+  ['Antidepressant', 'Antidepresivo', 'Medication used to treat depression.'],
+  ['Antipsychotic', 'Antipsicótico', 'Medication used to treat psychosis.'],
+  ['Mood stabilizer', 'Estabilizador del estado de ánimo', 'Medication used to control mood swings, often in bipolar disorder.'],
+  ['Anxiolytic', 'Ansiolítico', 'Medication used to reduce anxiety.'],
+  ['Dementia', 'Demencia', 'A decline in memory and thinking severe enough to affect daily life.'],
+  ["Alzheimer's disease", 'Enfermedad de Alzheimer', 'The most common cause of dementia.'],
+  ['Delirium', 'Delirio (confusión aguda)', 'A sudden, often reversible state of confusion.'],
+  ['Attention-deficit/hyperactivity disorder (ADHD)', 'Trastorno por déficit de atención e hiperactividad', 'A condition involving inattention, hyperactivity, and impulsivity.'],
+  ['Cognitive decline', 'Deterioro cognitivo', 'A worsening of memory and thinking abilities over time.'],
+  ['Insomnia', 'Insomnio', 'Persistent difficulty falling or staying asleep.'],
+  ['Sleep hygiene', 'Higiene del sueño', 'Habits that promote good, consistent sleep.'],
+  ['Grief', 'Duelo', 'The emotional response to loss.'],
+  ['Stress management', 'Manejo del estrés', 'Techniques used to cope with stress.'],
+  ['Coping mechanism', 'Mecanismo de afrontamiento', 'A strategy used to manage difficult emotions or situations.'],
+  ['Baker Act / civil commitment', 'Ley de internamiento involuntario / compromiso civil', 'Legal process for involuntary psychiatric hospitalization.'],
+  ['Outpatient treatment', 'Tratamiento ambulatorio', 'Treatment received without an overnight hospital stay.'],
+  ['Inpatient treatment', 'Tratamiento hospitalario / internamiento', 'Treatment received while admitted to a hospital.'],
+  ['Partial hospitalization program (PHP)', 'Programa de hospitalización parcial', 'A structured day treatment program without overnight stay.'],
+  ['Intensive outpatient program (IOP)', 'Programa ambulatorio intensivo', 'A structured treatment program with several sessions per week.'],
+  ['Case manager', 'Gestor/a de casos', "A professional who coordinates a patient's care and services."],
+  ['Peer support specialist', 'Especialista en apoyo entre pares', 'Someone with lived experience who supports others in recovery.'],
+  ['Trauma-informed care', 'Atención informada sobre el trauma', 'A care approach that recognizes the impact of trauma on health.'],
+  ['Adverse childhood experiences (ACEs)', 'Experiencias adversas en la infancia', 'Traumatic events occurring during childhood linked to later health issues.'],
+  ['Resilience', 'Resiliencia', 'The ability to recover from or adapt to difficult experiences.'],
+  ['Emotional regulation', 'Regulación emocional', 'The ability to manage and respond to emotional experiences.'],
+  ['Psychoeducation', 'Psicoeducación', 'Teaching patients and families about a mental health condition.'],
+  ['Stigma (mental health)', 'Estigma (de salud mental)', 'Negative attitudes or beliefs about mental illness.'],
+  ['Suicide risk factors', 'Factores de riesgo de suicidio', 'Characteristics that increase the likelihood of suicide.'],
+  ['Protective factors', 'Factores protectores', 'Characteristics that reduce the risk of a negative outcome.'],
+  ['Crisis hotline', 'Línea de crisis', 'A phone service offering immediate support during a mental health crisis.'],
+  ['Conduct disorder', 'Trastorno de conducta', "A pattern of behavior violating others' rights or social norms, seen in youth."],
+  ['Somatic symptom disorder', 'Trastorno de síntomas somáticos', 'Excessive focus on physical symptoms causing significant distress.'],
+  ['Malingering', 'Simulación', 'Intentionally faking or exaggerating symptoms for personal gain.'],
+  ['Competency evaluation', 'Evaluación de competencia', "An assessment of a person's mental capacity to make decisions or stand trial."],
+  ['Guardianship', 'Tutela / curatela', 'Legal authority granted to make decisions for someone unable to do so themselves.'],
+  ['Electroconvulsive therapy (ECT)', 'Terapia electroconvulsiva', 'A treatment using electrical stimulation for severe mental illness.'],
+  ['Transcranial magnetic stimulation (TMS)', 'Estimulación magnética transcraneal', 'A non-invasive treatment using magnetic fields to stimulate brain activity.'],
+  ['Recovery-oriented care', 'Atención orientada a la recuperación', 'A care approach focused on helping patients live fulfilling lives despite illness.'],
+  ['Therapeutic alliance', 'Alianza terapéutica', 'The trusting relationship between a patient and their therapist or provider.'],
+];
+
+async function runPsychiatryVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.psychiatryVocabImportV1) return;
+    const domain = await ensureDomainExists('Psychiatry & Mental Health', '#8B7BAE', 'brain');
+    const added = await bulkAddTerms(domain, PSYCHIATRY_VOCAB_V1);
+    await ref.set({ psychiatryVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Psychiatry & Mental Health" domain with ${added} terms`);
+  }catch(err){ console.error('runPsychiatryVocabImportV1 failed:', err); }
+}
+
+// "Infectious Disease"
+const INFECTIOUS_DISEASE_VOCAB_V1 = [
+  ['Infection', 'Infección', 'Invasion of the body by harmful microorganisms.'],
+  ['Bacteria', 'Bacterias', 'Single-celled microorganisms that can cause infection.'],
+  ['Virus', 'Virus', 'A microscopic infectious agent that reproduces inside living cells.'],
+  ['Fungus', 'Hongo', 'An organism that can cause infections such as yeast infections or ringworm.'],
+  ['Parasite', 'Parásito', 'An organism that lives on or in a host and causes harm.'],
+  ['Pathogen', 'Patógeno', 'Any organism capable of causing disease.'],
+  ['Incubation period', 'Período de incubación', 'The time between exposure to an infection and the appearance of symptoms.'],
+  ['Contagious', 'Contagioso', 'Capable of being spread from person to person.'],
+  ['Transmission (disease)', 'Transmisión (de una enfermedad)', 'The way a disease spreads from one person or source to another.'],
+  ['Airborne transmission', 'Transmisión aérea', 'Spread of disease through tiny particles in the air.'],
+  ['Droplet transmission', 'Transmisión por gotículas', 'Spread of disease through respiratory droplets.'],
+  ['Contact transmission', 'Transmisión por contacto', 'Spread of disease through direct or indirect physical contact.'],
+  ['Vector-borne disease', 'Enfermedad transmitida por vectores', 'Disease spread by an organism like a mosquito or tick.'],
+  ['Outbreak', 'Brote', 'A sudden increase in cases of a disease in a specific area.'],
+  ['Pandemic', 'Pandemia', 'A disease outbreak spread across multiple countries or continents.'],
+  ['Common cold', 'Resfriado común', 'A mild viral infection of the nose and throat.'],
+  ['Influenza (flu)', 'Influenza (gripe)', 'A contagious respiratory illness caused by influenza viruses.'],
+  ['COVID-19', 'COVID-19', 'A respiratory illness caused by the SARS-CoV-2 virus.'],
+  ['Pneumonia', 'Neumonía', 'An infection that inflames the air sacs in the lungs.'],
+  ['Bronchitis', 'Bronquitis', 'Inflammation of the airways in the lungs.'],
+  ['Strep throat', 'Faringitis estreptocócica', 'A bacterial throat infection.'],
+  ['Cellulitis', 'Celulitis (infección de la piel)', 'A bacterial skin infection causing redness and swelling.'],
+  ['Meningitis', 'Meningitis', 'Inflammation of the membranes surrounding the brain and spinal cord.'],
+  ['Tuberculosis (TB)', 'Tuberculosis', 'A bacterial infection primarily affecting the lungs.'],
+  ['Hepatitis', 'Hepatitis', 'Inflammation of the liver, often caused by a virus.'],
+  ['HIV / AIDS', 'VIH / SIDA', 'A virus that attacks the immune system, which can progress to AIDS.'],
+  ['Herpes', 'Herpes', 'A viral infection causing sores, often oral or genital.'],
+  ['Shingles', 'Culebrilla / herpes zóster', 'A painful rash caused by reactivation of the chickenpox virus.'],
+  ['Chickenpox', 'Varicela', 'A contagious viral illness causing an itchy rash.'],
+  ['Measles', 'Sarampión', 'A highly contagious viral illness with fever and rash.'],
+  ['Mumps', 'Paperas', 'A viral infection causing swelling of the salivary glands.'],
+  ['Whooping cough (pertussis)', 'Tos ferina', 'A highly contagious bacterial respiratory infection.'],
+  ['Lyme disease', 'Enfermedad de Lyme', 'A bacterial infection spread by tick bites.'],
+  ['MRSA (methicillin-resistant Staph aureus)', 'SARM (Staphylococcus aureus resistente a la meticilina)', 'A type of staph bacteria resistant to many antibiotics.'],
+  ['Rapid antigen test', 'Prueba rápida de antígenos', 'A quick test that detects specific proteins from a pathogen.'],
+  ['PCR test', 'Prueba PCR', 'A highly sensitive test that detects genetic material from a pathogen.'],
+  ['Blood culture', 'Hemocultivo', 'A test that checks for bacteria or fungi in the blood.'],
+  ['Vaccine / immunization', 'Vacuna / inmunización', 'A substance that trains the immune system to fight a specific disease.'],
+  ['Herd immunity', 'Inmunidad colectiva / de rebaño', 'Protection of a community when enough people are immune to a disease.'],
+  ['Quarantine', 'Cuarentena', 'Separating and restricting people who may have been exposed to a disease.'],
+  ['Isolation (infection control)', 'Aislamiento (control de infecciones)', 'Separating a sick person from others to prevent spread.'],
+  ['Personal protective equipment (PPE)', 'Equipo de protección personal (EPP)', 'Gear worn to prevent exposure to infectious agents.'],
+  ['Hand hygiene', 'Higiene de manos', 'Washing or sanitizing hands to prevent spreading germs.'],
+  ['Standard precautions', 'Precauciones estándar', 'Basic infection-control practices used with all patients.'],
+  ['Antibody', 'Anticuerpo', 'A protein made by the immune system to fight a specific pathogen.'],
+  ['Antigen', 'Antígeno', 'A substance that triggers an immune response.'],
+  ['Immunocompromised', 'Inmunocomprometido', 'Having a weakened immune system.'],
+  ['Booster shot', 'Dosis de refuerzo', 'An additional vaccine dose to maintain immunity.'],
+  ['Post-exposure prophylaxis (PEP)', 'Profilaxis postexposición', 'Treatment given after exposure to prevent infection.'],
+  ['Antibiotic', 'Antibiótico', 'Medication used to treat bacterial infections.'],
+  ['Antiviral', 'Antiviral', 'Medication used to treat viral infections.'],
+  ['Antifungal', 'Antimicótico', 'Medication used to treat fungal infections.'],
+  ['Antibiotic resistance', 'Resistencia a los antibióticos', 'When bacteria evolve to survive antibiotic treatment.'],
+  ['Broad-spectrum antibiotic', 'Antibiótico de amplio espectro', 'An antibiotic effective against a wide range of bacteria.'],
+  ['Sepsis', 'Sepsis', 'A life-threatening response to infection affecting the whole body.'],
+  ['Fever reducer', 'Reductor de fiebre / antipirético', 'Medication used to lower body temperature.'],
+  ['Supportive care', 'Cuidados de apoyo', 'Treatment aimed at relieving symptoms rather than curing the disease.'],
+  ['Wound culture', 'Cultivo de herida', 'A test to identify bacteria present in a wound.'],
+  ['Infectious disease specialist', 'Especialista en enfermedades infecciosas', 'A doctor who specializes in diagnosing and treating infections.'],
+  ['Chlamydia', 'Clamidia', 'A common bacterial sexually transmitted infection.'],
+  ['Gonorrhea', 'Gonorrea', 'A bacterial sexually transmitted infection.'],
+  ['Syphilis', 'Sífilis', 'A bacterial sexually transmitted infection that progresses in stages.'],
+  ['Human papillomavirus (HPV)', 'Virus del papiloma humano (VPH)', 'A common virus that can cause warts and certain cancers.'],
+  ['Norovirus', 'Norovirus', 'A highly contagious virus causing vomiting and diarrhea.'],
+  ['Salmonella', 'Salmonela', 'A type of bacteria that causes food poisoning.'],
+  ['E. coli infection', 'Infección por E. coli', 'An infection caused by certain strains of E. coli bacteria.'],
+  ['Ringworm', 'Tiña', 'A fungal skin infection causing a ring-shaped rash.'],
+  ['Scabies', 'Sarna', 'A skin infestation caused by tiny mites.'],
+  ['Notifiable disease', 'Enfermedad de notificación obligatoria', 'A disease that must be reported to public health authorities.'],
+  ['Public health department', 'Departamento de salud pública', 'The government agency responsible for community health and disease control.'],
+  ['Contact tracing', 'Rastreo de contactos', 'Identifying and notifying people exposed to an infected person.'],
+  ['Endemic', 'Endémico', 'A disease that is regularly found within a population or area.'],
+  ['Epidemic', 'Epidemia', 'A disease outbreak affecting a large number of people in a community.'],
+  ['Zoonotic disease', 'Enfermedad zoonótica', 'A disease that spreads from animals to humans.'],
+  ['Nosocomial infection (hospital-acquired)', 'Infección nosocomial (adquirida en el hospital)', 'An infection acquired during a hospital stay.'],
+  ['Central line-associated bloodstream infection (CLABSI)', 'Infección del torrente sanguíneo asociada a catéter central', 'A bloodstream infection linked to a central venous catheter.'],
+  ['Catheter-associated UTI (CAUTI)', 'Infección urinaria asociada a catéter', 'A urinary infection linked to catheter use.'],
+  ['Surgical site infection', 'Infección del sitio quirúrgico', 'An infection occurring at or near a surgical incision.'],
+  ['C. diff (Clostridioides difficile)', 'C. diff (Clostridioides difficile)', 'Bacteria that cause severe diarrhea, often after antibiotic use.'],
+  ['Fungal nail infection', 'Infección micótica de las uñas', 'A fungal infection affecting the nails.'],
+  ['Thrush (oral candidiasis)', 'Candidiasis oral / algodoncillo', 'A fungal infection of the mouth.'],
+  ['Malaria', 'Malaria / paludismo', 'A mosquito-borne parasitic infection.'],
+  ['Zika virus', 'Virus del Zika', 'A mosquito-borne virus that can cause birth defects if contracted during pregnancy.'],
+  ['West Nile virus', 'Virus del Nilo Occidental', 'A mosquito-borne virus that can cause neurological illness.'],
+  ['Rabies', 'Rabia', 'A viral infection transmitted through animal bites, almost always fatal if untreated.'],
+  ['Tetanus', 'Tétanos', 'A bacterial infection causing muscle stiffness and spasms.'],
+  ['Sepsis workup', 'Estudio de sepsis', 'Tests done to identify the source and severity of a suspected infection.'],
+  ['Fever of unknown origin', 'Fiebre de origen desconocido', 'A prolonged fever without an identified cause after initial testing.'],
+];
+
+async function runInfectiousDiseaseVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.infectiousDiseaseVocabImportV1) return;
+    const domain = await ensureDomainExists('Infectious Disease', '#6F9A7A', 'sparkle');
+    const added = await bulkAddTerms(domain, INFECTIOUS_DISEASE_VOCAB_V1);
+    await ref.set({ infectiousDiseaseVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Infectious Disease" domain with ${added} terms`);
+  }catch(err){ console.error('runInfectiousDiseaseVocabImportV1 failed:', err); }
+}
+
+// "Pulmonology & Respiratory"
+const PULMONOLOGY_VOCAB_V1 = [
+  ['Asthma', 'Asma', 'A chronic condition causing airway inflammation and breathing difficulty.'],
+  ['Chronic obstructive pulmonary disease (COPD)', 'Enfermedad pulmonar obstructiva crónica (EPOC)', 'A progressive lung disease that makes breathing difficult.'],
+  ['Emphysema', 'Enfisema', 'A lung condition that damages the air sacs, part of COPD.'],
+  ['Chronic bronchitis', 'Bronquitis crónica', 'Long-term inflammation of the airways, part of COPD.'],
+  ['Pulmonary embolism', 'Embolia pulmonar', 'A blood clot blocking an artery in the lungs.'],
+  ['Pneumothorax', 'Neumotórax', 'A collapsed lung caused by air leaking into the chest cavity.'],
+  ['Pleural effusion', 'Derrame pleural', 'A buildup of fluid around the lungs.'],
+  ['Pleurisy', 'Pleuresía', 'Inflammation of the lining around the lungs, causing chest pain.'],
+  ['Sleep apnea', 'Apnea del sueño', 'A disorder causing repeated pauses in breathing during sleep.'],
+  ['CPAP (continuous positive airway pressure)', 'CPAP (presión positiva continua en la vía aérea)', 'A machine that keeps airways open during sleep.'],
+  ['Pulmonary fibrosis', 'Fibrosis pulmonar', 'Scarring of lung tissue that makes breathing difficult.'],
+  ['Bronchiectasis', 'Bronquiectasia', 'A condition where airways become damaged and widened.'],
+  ['Interstitial lung disease', 'Enfermedad pulmonar intersticial', 'A group of disorders causing lung scarring.'],
+  ['Pulmonary hypertension', 'Hipertensión pulmonar', 'High blood pressure in the arteries of the lungs.'],
+  ['Wheezing', 'Sibilancias', 'A whistling sound made while breathing, often from narrowed airways.'],
+  ['Stridor', 'Estridor', 'A high-pitched sound indicating airway obstruction.'],
+  ['Sputum', 'Esputo / flema', 'Mucus coughed up from the lungs.'],
+  ['Hemoptysis', 'Hemoptisis', 'Coughing up blood.'],
+  ['Dyspnea', 'Disnea', 'Difficulty breathing or shortness of breath.'],
+  ['Pulmonary function test (PFT)', 'Prueba de función pulmonar', 'A test measuring how well the lungs work.'],
+  ['Spirometry', 'Espirometría', 'A test measuring how much and how fast air moves in and out of the lungs.'],
+  ['Chest X-ray', 'Radiografía de tórax', 'An imaging test of the chest and lungs.'],
+  ['CT scan of the chest', 'Tomografía computarizada de tórax', 'A detailed imaging scan of the chest.'],
+  ['Bronchoscopy', 'Broncoscopia', 'A procedure using a scope to examine the airways.'],
+  ['Thoracentesis', 'Toracentesis', 'A procedure to remove fluid from around the lungs.'],
+  ['Chest tube', 'Tubo torácico / sonda pleural', 'A tube placed to drain air or fluid from the chest.'],
+  ['Nebulizer', 'Nebulizador', 'A device that turns liquid medication into a mist to inhale.'],
+  ['Inhaler', 'Inhalador', 'A handheld device that delivers medication directly to the lungs.'],
+  ['Peak flow meter', 'Medidor de flujo máximo', 'A device used to measure how well air moves out of the lungs.'],
+  ['Oxygen therapy', 'Oxigenoterapia', 'Supplemental oxygen given to help a patient breathe.'],
+  ['Mechanical ventilation', 'Ventilación mecánica', 'A machine that breathes for a patient who cannot breathe adequately alone.'],
+  ['Ventilator', 'Ventilador (respirador)', 'A machine that assists or replaces breathing.'],
+  ['Tracheostomy', 'Traqueostomía', 'A surgical opening in the neck to help a patient breathe.'],
+  ['Pulse oximetry', 'Oximetría de pulso', 'A test measuring oxygen levels in the blood using a finger clip device.'],
+  ['Arterial blood gas (ABG)', 'Gasometría arterial', 'A blood test measuring oxygen and carbon dioxide levels.'],
+  ['Sleep study (polysomnography)', 'Estudio del sueño (polisomnografía)', 'An overnight test that monitors breathing and other functions during sleep.'],
+  ['Lung biopsy', 'Biopsia de pulmón', 'Removing a small sample of lung tissue for testing.'],
+  ['Bronchodilator', 'Broncodilatador', 'Medication that relaxes and opens the airways.'],
+  ['Corticosteroid inhaler', 'Inhalador de corticosteroides', 'Medication that reduces airway inflammation.'],
+  ['Acute respiratory distress syndrome (ARDS)', 'Síndrome de dificultad respiratoria aguda', 'Severe, sudden lung failure from widespread inflammation.'],
+  ['Croup', 'Crup', 'A viral infection causing a barking cough in young children.'],
+  ['Bronchiolitis', 'Bronquiolitis', 'Inflammation of the small airways, common in infants.'],
+  ['Respiratory syncytial virus (RSV)', 'Virus sincitial respiratorio', 'A common virus causing respiratory infections, especially in infants.'],
+  ['Aspiration pneumonia', 'Neumonía por aspiración', 'Lung infection caused by inhaling food, liquid, or vomit.'],
+  ['Lung cancer', 'Cáncer de pulmón', 'Cancer that begins in the lungs.'],
+  ['Mesothelioma', 'Mesotelioma', 'A cancer linked to asbestos exposure, usually affecting the lining of the lungs.'],
+  ['Pulmonologist', 'Neumólogo/a', 'A doctor who specializes in lung and respiratory conditions.'],
+  ['Smoking cessation', 'Cese del tabaquismo', 'Programs and treatments to help a person quit smoking.'],
+  ['Occupational lung disease', 'Enfermedad pulmonar ocupacional', 'Lung disease caused by exposure to substances at work.'],
+  ['Second-hand smoke', 'Humo de segunda mano', "Smoke inhaled involuntarily from someone else's tobacco use."],
+  ['Nasal cannula', 'Cánula nasal', 'A tube placed at the nostrils to deliver supplemental oxygen.'],
+  ['Face mask (oxygen)', 'Mascarilla de oxígeno', 'A mask used to deliver oxygen over the nose and mouth.'],
+  ['Accessory muscle use (breathing)', 'Uso de músculos accesorios (respiración)', 'Using extra muscles to breathe, a sign of respiratory distress.'],
+  ['Retractions (breathing)', 'Retracciones (respiración)', 'Visible pulling in of the chest with each breath, a sign of difficulty breathing.'],
+  ['Barrel chest', 'Tórax en tonel', 'A rounded chest shape often seen in COPD patients.'],
+  ['Clubbing (fingers)', 'Dedos en palillo de tambor', 'Rounding and enlargement of the fingertips, linked to chronic lung disease.'],
+  ['Cyanosis', 'Cianosis', 'A bluish discoloration of the skin from low oxygen levels.'],
+  ['Apnea', 'Apnea', 'A temporary pause in breathing.'],
+  ['Hypoxia', 'Hipoxia', 'A lack of adequate oxygen reaching body tissues.'],
+  ['Hypercapnia', 'Hipercapnia', 'Excess carbon dioxide in the blood.'],
+  ['Ventilator-associated pneumonia', 'Neumonía asociada al ventilador', 'Pneumonia that develops in a patient on a ventilator.'],
+  ['Extubation', 'Extubación', "Removing a breathing tube from a patient's airway."],
+  ['Pursed-lip breathing', 'Respiración con labios fruncidos', 'A breathing technique that helps slow breathing and improve airflow.'],
+  ['Diaphragmatic breathing', 'Respiración diafragmática', 'A breathing technique using the diaphragm to breathe more efficiently.'],
+  ['Pulmonary rehabilitation', 'Rehabilitación pulmonar', 'A program of exercise and education for people with chronic lung disease.'],
+  ['Home oxygen concentrator', 'Concentrador de oxígeno domiciliario', 'A device that provides supplemental oxygen at home.'],
+  ['Aspiration risk', 'Riesgo de aspiración', 'The risk of inhaling food, liquid, or saliva into the lungs.'],
+];
+
+async function runPulmonologyVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.pulmonologyVocabImportV1) return;
+    const domain = await ensureDomainExists('Pulmonology & Respiratory', '#5B8A9A', 'lungs');
+    const added = await bulkAddTerms(domain, PULMONOLOGY_VOCAB_V1);
+    await ref.set({ pulmonologyVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Pulmonology & Respiratory" domain with ${added} terms`);
+  }catch(err){ console.error('runPulmonologyVocabImportV1 failed:', err); }
+}
+
+// "Gastroenterology"
+const GASTROENTEROLOGY_VOCAB_V1 = [
+  ['Gastroesophageal reflux disease (GERD)', 'Enfermedad por reflujo gastroesofágico', 'Chronic acid reflux causing irritation of the esophagus.'],
+  ['Heartburn', 'Acidez estomacal', 'A burning sensation in the chest from acid reflux.'],
+  ['Peptic ulcer', 'Úlcera péptica', 'A sore in the lining of the stomach or small intestine.'],
+  ['Gastritis', 'Gastritis', 'Inflammation of the stomach lining.'],
+  ['Irritable bowel syndrome (IBS)', 'Síndrome del intestino irritable', 'A disorder causing abdominal pain and altered bowel habits.'],
+  ['Inflammatory bowel disease (IBD)', 'Enfermedad inflamatoria intestinal', 'Chronic inflammation of the digestive tract.'],
+  ["Crohn's disease", 'Enfermedad de Crohn', 'A type of IBD that can affect any part of the digestive tract.'],
+  ['Ulcerative colitis', 'Colitis ulcerosa', 'A type of IBD affecting the colon and rectum.'],
+  ['Celiac disease', 'Enfermedad celíaca', "An autoimmune reaction to gluten that damages the small intestine."],
+  ['Diverticulosis', 'Diverticulosis', 'Small pouches forming in the wall of the colon.'],
+  ['Diverticulitis', 'Diverticulitis', 'Inflammation or infection of diverticula in the colon.'],
+  ['Constipation', 'Estreñimiento', 'Difficulty passing stool or infrequent bowel movements.'],
+  ['Diarrhea', 'Diarrea', 'Loose or watery stools occurring frequently.'],
+  ['Fecal incontinence', 'Incontinencia fecal', 'The inability to control bowel movements.'],
+  ['Hemorrhoids', 'Hemorroides', 'Swollen veins in the rectum or anus.'],
+  ['Anal fissure', 'Fisura anal', 'A small tear in the lining of the anus.'],
+  ['Gallstones', 'Cálculos biliares', 'Hardened deposits that form in the gallbladder.'],
+  ['Cholecystitis', 'Colecistitis', 'Inflammation of the gallbladder.'],
+  ['Pancreatitis', 'Pancreatitis', 'Inflammation of the pancreas.'],
+  ['Cirrhosis', 'Cirrosis', 'Scarring of the liver from long-term damage.'],
+  ['Fatty liver disease', 'Hígado graso', 'A buildup of fat in the liver.'],
+  ['Jaundice', 'Ictericia', 'Yellowing of the skin and eyes from elevated bilirubin.'],
+  ['Ascites', 'Ascitis', 'A buildup of fluid in the abdomen, often related to liver disease.'],
+  ['Esophageal varices', 'Várices esofágicas', 'Enlarged veins in the esophagus, often from liver disease.'],
+  ['Colon polyp', 'Pólipo de colon', 'An abnormal tissue growth in the colon.'],
+  ['Colorectal cancer', 'Cáncer colorrectal', 'Cancer of the colon or rectum.'],
+  ['Colonoscopy', 'Colonoscopia', 'A procedure examining the inside of the colon with a scope.'],
+  ['Upper endoscopy (EGD)', 'Endoscopia digestiva alta', 'A procedure examining the esophagus, stomach, and small intestine with a scope.'],
+  ['Biopsy (GI)', 'Biopsia (gastrointestinal)', 'Removing a tissue sample from the digestive tract for testing.'],
+  ['Barium swallow', 'Estudio con bario / trago de bario', 'An imaging test using contrast material to view the digestive tract.'],
+  ['Stool sample / fecal occult blood test', 'Muestra de heces / prueba de sangre oculta en heces', 'A test checking stool for signs of blood or infection.'],
+  ['Liver function test', 'Prueba de función hepática', 'Blood tests that check how well the liver is working.'],
+  ['Nasogastric tube (NG tube)', 'Sonda nasogástrica', 'A tube passed through the nose into the stomach.'],
+  ['Feeding tube (G-tube)', 'Sonda de alimentación (sonda G)', 'A tube placed directly into the stomach for feeding.'],
+  ['Bowel obstruction', 'Obstrucción intestinal', 'A blockage that prevents food or fluid from passing through the intestine.'],
+  ['Bowel sounds', 'Ruidos intestinales', 'Sounds made by the movement of the intestines, checked during an exam.'],
+  ['Bloating', 'Distensión abdominal / hinchazón', 'A feeling of fullness or swelling in the abdomen.'],
+  ['Abdominal distension', 'Distensión abdominal', 'Visible swelling of the abdomen.'],
+  ['Appendicitis', 'Apendicitis', 'Inflammation of the appendix.'],
+  ['Appendectomy', 'Apendicectomía', 'Surgical removal of the appendix.'],
+  ['Hernia', 'Hernia', 'When an organ pushes through a weak spot in surrounding muscle or tissue.'],
+  ['Inguinal hernia', 'Hernia inguinal', 'A hernia occurring in the groin area.'],
+  ['Hiatal hernia', 'Hernia hiatal', 'When part of the stomach pushes up through the diaphragm.'],
+  ['Peritonitis', 'Peritonitis', 'Inflammation of the lining of the abdominal cavity, a medical emergency.'],
+  ['Gastroenterologist', 'Gastroenterólogo/a', 'A doctor who specializes in digestive system disorders.'],
+  ['Bariatric surgery', 'Cirugía bariátrica', 'Surgery performed to help with significant weight loss.'],
+  ['Gastric bypass', 'Bypass gástrico', 'A type of weight-loss surgery that reroutes the digestive tract.'],
+  ['Malabsorption', 'Malabsorción', 'Difficulty absorbing nutrients from food.'],
+  ['Dysphagia', 'Disfagia', 'Difficulty swallowing.'],
+  ['Esophagitis', 'Esofagitis', 'Inflammation of the esophagus.'],
+  ["Barrett's esophagus", 'Esófago de Barrett', 'A condition where the esophageal lining changes due to chronic acid reflux.'],
+  ['H. pylori infection', 'Infección por H. pylori', 'A bacterial infection linked to ulcers and gastritis.'],
+  ['Proton pump inhibitor (PPI)', 'Inhibidor de la bomba de protones', 'Medication that reduces stomach acid production.'],
+  ['Antacid', 'Antiácido', 'Medication that neutralizes stomach acid.'],
+  ['Laxative', 'Laxante', 'Medication used to relieve constipation.'],
+  ['Probiotic', 'Probiótico', 'Live microorganisms believed to support gut health.'],
+  ['Enema', 'Enema', 'A liquid injected into the rectum to relieve constipation or cleanse the bowel.'],
+  ['Fecal transplant', 'Trasplante de microbiota fecal', 'A procedure transferring stool from a healthy donor to treat certain gut infections.'],
+  ['Lactose intolerance', 'Intolerancia a la lactosa', 'Difficulty digesting lactose, the sugar in milk.'],
+  ['Food allergy', 'Alergia alimentaria', 'An immune reaction to a specific food.'],
+  ['Gluten sensitivity', 'Sensibilidad al gluten', 'Difficulty digesting gluten without the immune damage seen in celiac disease.'],
+  ['Melena', 'Melena', 'Black, tarry stool indicating bleeding in the upper digestive tract.'],
+  ['Hematochezia', 'Hematoquecia', 'Passing bright red blood in the stool.'],
+  ['Ostomy', 'Ostomía', 'A surgically created opening for waste to exit the body.'],
+  ['Colostomy', 'Colostomía', 'A surgical opening connecting the colon to the abdominal wall.'],
+  ['Ileostomy', 'Ileostomía', 'A surgical opening connecting the small intestine to the abdominal wall.'],
+  ['Short bowel syndrome', 'Síndrome de intestino corto', 'A condition causing poor nutrient absorption after bowel removal.'],
+  ['Total parenteral nutrition (TPN)', 'Nutrición parenteral total', 'Delivering complete nutrition directly into the bloodstream.'],
+];
+
+async function runGastroenterologyVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.gastroenterologyVocabImportV1) return;
+    const domain = await ensureDomainExists('Gastroenterology', '#B08D2A', 'stethoscope');
+    const added = await bulkAddTerms(domain, GASTROENTEROLOGY_VOCAB_V1);
+    await ref.set({ gastroenterologyVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Gastroenterology" domain with ${added} terms`);
+  }catch(err){ console.error('runGastroenterologyVocabImportV1 failed:', err); }
+}
+
+// "Orthopedics & Musculoskeletal"
+const ORTHOPEDICS_VOCAB_V1 = [
+  ['Osteoarthritis', 'Osteoartritis', 'Joint pain and stiffness from cartilage wear over time.'],
+  ['Rheumatoid arthritis', 'Artritis reumatoide', 'An autoimmune disease causing joint inflammation.'],
+  ['Gout', 'Gota', 'A type of arthritis caused by uric acid crystal buildup in joints.'],
+  ['Osteoporosis', 'Osteoporosis', 'A condition causing weak, brittle bones.'],
+  ['Osteopenia', 'Osteopenia', 'Lower-than-normal bone density, a precursor to osteoporosis.'],
+  ['Avascular necrosis', 'Necrosis avascular', 'Bone tissue death from a loss of blood supply.'],
+  ['Scoliosis', 'Escoliosis', 'An abnormal sideways curvature of the spine.'],
+  ['Herniated disc', 'Hernia de disco', 'When the soft cushion between spinal bones bulges or ruptures.'],
+  ['Sciatica', 'Ciática', 'Pain radiating along the sciatic nerve, usually down one leg.'],
+  ['Spinal stenosis', 'Estenosis espinal', 'Narrowing of the spinal canal that can pinch nerves.'],
+  ['Carpal tunnel syndrome', 'Síndrome del túnel carpiano', 'Compression of a nerve in the wrist causing numbness and pain.'],
+  ['Rotator cuff tear', 'Desgarro del manguito rotador', 'A tear in the shoulder muscles and tendons.'],
+  ['Tendonitis', 'Tendinitis', 'Inflammation of a tendon.'],
+  ['Bursitis', 'Bursitis', 'Inflammation of a fluid-filled sac that cushions a joint.'],
+  ['Plantar fasciitis', 'Fascitis plantar', 'Inflammation of the tissue along the bottom of the foot, causing heel pain.'],
+  ['ACL tear', 'Ruptura del ligamento cruzado anterior', 'A tear of the ligament that stabilizes the knee.'],
+  ['Meniscus tear', 'Desgarro de menisco', 'A tear in the cartilage that cushions the knee joint.'],
+  ['Osteomyelitis', 'Osteomielitis', 'An infection of the bone.'],
+  ['Compound fracture', 'Fractura expuesta', 'A fracture where the bone breaks through the skin.'],
+  ['Stress fracture', 'Fractura por estrés', 'A small crack in a bone from repetitive force.'],
+  ['Hip fracture', 'Fractura de cadera', 'A break in the upper part of the thighbone near the hip.'],
+  ['Hip replacement', 'Reemplazo de cadera', 'Surgery to replace a damaged hip joint with an artificial one.'],
+  ['Knee replacement', 'Reemplazo de rodilla', 'Surgery to replace a damaged knee joint with an artificial one.'],
+  ['Joint replacement', 'Reemplazo articular', 'Surgery replacing a damaged joint with an artificial implant.'],
+  ['Physical therapy', 'Fisioterapia', 'Treatment using exercise and movement to restore function.'],
+  ['Occupational therapy', 'Terapia ocupacional', 'Treatment helping patients perform daily activities.'],
+  ['Orthopedic surgeon', 'Cirujano/a ortopédico/a', 'A doctor who specializes in bone, joint, and muscle conditions.'],
+  ['Crutches', 'Muletas', 'Walking aids used to reduce weight on an injured leg.'],
+  ['Walker', 'Andador', 'A mobility aid used for support while walking.'],
+  ['Wheelchair', 'Silla de ruedas', 'A chair with wheels used for mobility.'],
+  ['Muscle atrophy', 'Atrofia muscular', 'The wasting or thinning of muscle tissue.'],
+  ['Muscle spasm', 'Espasmo muscular', 'An involuntary muscle contraction.'],
+  ['Ligament', 'Ligamento', 'Tissue that connects bone to bone.'],
+  ['Tendon', 'Tendón', 'Tissue that connects muscle to bone.'],
+  ['Cartilage', 'Cartílago', 'Flexible tissue that cushions joints.'],
+  ['Spine / vertebrae', 'Columna vertebral / vértebras', 'The bones that make up the backbone.'],
+  ['Disc (spinal)', 'Disco (espinal)', 'The cushion between spinal vertebrae.'],
+  ['Bone density scan (DEXA)', 'Densitometría ósea (DEXA)', 'A test that measures bone mineral density.'],
+  ['MRI (magnetic resonance imaging)', 'Resonancia magnética', 'A detailed imaging scan often used for soft tissue and joints.'],
+  ['Physical exam (musculoskeletal)', 'Examen físico musculoesquelético', 'An assessment of joints, muscles, and bones.'],
+  ['Gait', 'Marcha (forma de caminar)', "The manner or pattern of a person's walking."],
+  ['Contracture', 'Contractura', 'A permanent tightening of muscle or tissue limiting movement.'],
+  ['Amputation', 'Amputación', 'Surgical removal of a limb or body part.'],
+  ['Prosthesis', 'Prótesis', 'An artificial device replacing a missing body part.'],
+  ['Orthotic', 'Ortesis', 'A device used to support or correct musculoskeletal function.'],
+  ['Kyphosis', 'Cifosis', 'An excessive forward curvature of the upper spine.'],
+  ['Lordosis', 'Lordosis', 'An excessive inward curvature of the lower spine.'],
+  ['Whiplash', 'Latigazo cervical', 'A neck injury caused by a sudden back-and-forth motion.'],
+  ['Frozen shoulder', 'Hombro congelado', 'Stiffness and pain that severely limit shoulder movement.'],
+  ['Tennis elbow', 'Codo de tenista', 'Pain on the outside of the elbow from tendon overuse.'],
+  ['Fibromyalgia', 'Fibromialgia', 'A chronic condition causing widespread muscle pain and tenderness.'],
+  ['Spinal fusion', 'Fusión espinal', 'Surgery joining two or more vertebrae to stabilize the spine.'],
+  ['Laminectomy', 'Laminectomía', 'Surgery removing part of a vertebra to relieve pressure on the spinal cord or nerves.'],
+  ['Arthroscopy', 'Artroscopia', 'A minimally invasive procedure to examine or repair a joint.'],
+  ['Degenerative disc disease', 'Enfermedad degenerativa del disco', 'Wear and tear of the spinal discs over time.'],
+  ['Torn ligament', 'Ligamento desgarrado', 'Damage to a ligament from overstretching or tearing.'],
+  ['Dislocated shoulder', 'Hombro dislocado', 'When the upper arm bone pops out of the shoulder socket.'],
+  ['Pinched nerve', 'Nervio pinzado', 'Compression of a nerve causing pain, numbness, or weakness.'],
+  ['Weight-bearing status', 'Estado de carga de peso', 'Instructions on how much weight can be placed on an injured limb.'],
+  ['Non-weight bearing', 'Sin carga de peso', 'An instruction not to put any weight on an injured limb.'],
+  ['Rheumatologist', 'Reumatólogo/a', 'A doctor who specializes in autoimmune and joint diseases.'],
+  ['Physiatrist', 'Fisiatra', 'A doctor who specializes in physical medicine and rehabilitation.'],
+  ['Assistive device', 'Dispositivo de asistencia', 'Any tool that helps a person perform daily activities.'],
+  ['Immobilization', 'Inmovilización', 'Restricting movement of a body part to allow healing.'],
+];
+
+async function runOrthopedicsVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.orthopedicsVocabImportV1) return;
+    const domain = await ensureDomainExists('Orthopedics & Musculoskeletal', '#8B7355', 'bone');
+    const added = await bulkAddTerms(domain, ORTHOPEDICS_VOCAB_V1);
+    await ref.set({ orthopedicsVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Orthopedics & Musculoskeletal" domain with ${added} terms`);
+  }catch(err){ console.error('runOrthopedicsVocabImportV1 failed:', err); }
+}
+
+// "Dermatology"
+const DERMATOLOGY_VOCAB_V1 = [
+  ['Skin cancer', 'Cáncer de piel', 'Cancer that begins in the skin cells.'],
+  ['Melanoma', 'Melanoma', 'A serious form of skin cancer that develops in pigment cells.'],
+  ['Basal cell carcinoma', 'Carcinoma de células basales', 'The most common type of skin cancer, usually slow-growing.'],
+  ['Squamous cell carcinoma', 'Carcinoma de células escamosas', 'A common type of skin cancer that can spread if untreated.'],
+  ['Mole (nevus)', 'Lunar (nevo)', 'A common skin growth, usually benign.'],
+  ['Skin biopsy', 'Biopsia de piel', 'Removing a small skin sample for testing.'],
+  ['Dermatologist', 'Dermatólogo/a', 'A doctor who specializes in skin conditions.'],
+  ['Eczema (atopic dermatitis)', 'Eccema (dermatitis atópica)', 'A chronic condition causing dry, itchy, inflamed skin.'],
+  ['Psoriasis', 'Psoriasis', 'A chronic condition causing thick, scaly skin patches.'],
+  ['Acne', 'Acné', 'A skin condition causing pimples, often on the face.'],
+  ['Rosacea', 'Rosácea', 'A condition causing facial redness and visible blood vessels.'],
+  ['Hives (urticaria)', 'Urticaria (ronchas)', 'Itchy, raised welts on the skin, often from an allergic reaction.'],
+  ['Contact dermatitis', 'Dermatitis de contacto', 'Skin irritation from contact with an allergen or irritant.'],
+  ['Impetigo', 'Impétigo', 'A contagious bacterial skin infection, common in children.'],
+  ['Cold sore', 'Herpes labial / fuego labial', 'A viral sore that appears around the mouth.'],
+  ['Warts', 'Verrugas', 'Small, rough skin growths caused by a virus.'],
+  ['Lice', 'Piojos', 'Small parasitic insects that infest the scalp or body.'],
+  ['Vitiligo', 'Vitíligo', 'A condition causing patches of skin to lose pigment.'],
+  ['Alopecia (hair loss)', 'Alopecia (pérdida de cabello)', 'Partial or complete loss of hair.'],
+  ['Dandruff', 'Caspa', 'Flaking of the skin on the scalp.'],
+  ['Dry skin (xerosis)', 'Piel seca (xerosis)', 'Skin lacking adequate moisture.'],
+  ['Skin ulcer', 'Úlcera cutánea', 'An open sore on the skin that is slow to heal.'],
+  ['Pressure ulcer (bedsore)', 'Úlcera por presión (llaga)', 'Skin damage from prolonged pressure, common in bedridden patients.'],
+  ['Diabetic ulcer', 'Úlcera diabética', 'A skin sore related to diabetes, often on the feet.'],
+  ['Abscess', 'Absceso', 'A painful, pus-filled swelling caused by infection.'],
+  ['Boil', 'Furúnculo', 'A painful, pus-filled bump caused by infected hair follicles.'],
+  ['Skin tag', 'Acrocordón / verruga colgante', 'A small, harmless flap of skin.'],
+  ['Cyst (skin)', 'Quiste (de piel)', 'A closed sac under the skin containing fluid or other material.'],
+  ['Keloid', 'Queloide', 'Raised, thickened scar tissue that grows beyond the original wound.'],
+  ['Scar', 'Cicatriz', 'Marked tissue that forms after a wound heals.'],
+  ['Sunburn', 'Quemadura solar', 'Skin damage from overexposure to the sun.'],
+  ['Skin lesion', 'Lesión cutánea', 'Any abnormal change in the skin.'],
+  ['Hyperpigmentation', 'Hiperpigmentación', 'Darkening of areas of the skin.'],
+  ['Hypopigmentation', 'Hipopigmentación', 'Lightening of areas of the skin.'],
+  ['Topical medication', 'Medicamento tópico', 'Medication applied directly to the skin.'],
+  ['Corticosteroid cream', 'Crema con corticosteroides', 'A topical medication used to reduce skin inflammation.'],
+  ['Moisturizer / emollient', 'Humectante / emoliente', 'A product used to soften and hydrate the skin.'],
+  ['Sunscreen', 'Protector solar', "A product applied to protect the skin from UV rays."],
+  ['Dermoscopy', 'Dermatoscopia', 'A technique using magnification to closely examine skin lesions.'],
+  ['Cryotherapy (skin)', 'Crioterapia (de piel)', 'Freezing treatment used to remove warts or abnormal skin growths.'],
+  ['Mohs surgery', 'Cirugía de Mohs', 'A precise surgical technique for removing skin cancer.'],
+  ['Laser therapy (skin)', 'Terapia con láser (de piel)', 'Using focused light to treat various skin conditions.'],
+  ['Skin infection', 'Infección de la piel', 'Any infection affecting the skin.'],
+  ['Fungal skin infection', 'Infección micótica de la piel', 'A skin infection caused by fungus.'],
+  ['Petechiae', 'Petequias', 'Tiny red or purple spots on the skin from small bleeding under the surface.'],
+  ['Purpura', 'Púrpura', 'Purple-colored spots on the skin caused by bleeding underneath.'],
+  ['Erythema', 'Eritema', 'Redness of the skin.'],
+  ['Lesion morphology', 'Morfología de la lesión', 'The characteristic shape and appearance of a skin lesion.'],
+  ['Pruritus', 'Prurito', 'The medical term for itching.'],
+  ['Seborrheic dermatitis', 'Dermatitis seborreica', 'A common condition causing scaly patches and redness, often on the scalp.'],
+  ['Actinic keratosis', 'Queratosis actínica', 'Rough, scaly patches caused by sun damage, which can become cancerous.'],
+  ['Skin tag removal', 'Extirpación de acrocordón', 'A minor procedure to remove a skin tag.'],
+  ['Biopsy punch', 'Biopsia por punch', 'A tool used to remove a small circular sample of skin.'],
+];
+
+async function runDermatologyVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.dermatologyVocabImportV1) return;
+    const domain = await ensureDomainExists('Dermatology', '#C98FA0', 'sparkle');
+    const added = await bulkAddTerms(domain, DERMATOLOGY_VOCAB_V1);
+    await ref.set({ dermatologyVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Dermatology" domain with ${added} terms`);
+  }catch(err){ console.error('runDermatologyVocabImportV1 failed:', err); }
+}
+
+// "Ophthalmology"
+const OPHTHALMOLOGY_VOCAB_V1 = [
+  ['Visual acuity', 'Agudeza visual', 'A measurement of how clearly a person can see.'],
+  ['Eye exam', 'Examen de la vista / examen ocular', 'A comprehensive check of vision and eye health.'],
+  ['Refraction test', 'Prueba de refracción', 'A test to determine the right prescription for glasses or contacts.'],
+  ['Nearsightedness (myopia)', 'Miopía', 'Difficulty seeing distant objects clearly.'],
+  ['Farsightedness (hyperopia)', 'Hipermetropía', 'Difficulty seeing close objects clearly.'],
+  ['Astigmatism', 'Astigmatismo', 'A condition causing blurred vision from an irregularly shaped cornea.'],
+  ['Presbyopia', 'Presbicia', 'Age-related difficulty focusing on close objects.'],
+  ['Cataract', 'Catarata', "Clouding of the eye's natural lens."],
+  ['Cataract surgery', 'Cirugía de cataratas', 'Surgery to remove a clouded lens and replace it with an artificial one.'],
+  ['Glaucoma', 'Glaucoma', 'A group of eye diseases that damage the optic nerve, often from high eye pressure.'],
+  ['Intraocular pressure', 'Presión intraocular', 'The fluid pressure inside the eye.'],
+  ['Macular degeneration', 'Degeneración macular', 'A condition causing loss of central vision, common with aging.'],
+  ['Diabetic retinopathy', 'Retinopatía diabética', "Damage to the retina's blood vessels caused by diabetes."],
+  ['Retinal detachment', 'Desprendimiento de retina', 'When the retina pulls away from its normal position, a medical emergency.'],
+  ['Retina', 'Retina', 'The light-sensitive layer at the back of the eye.'],
+  ['Cornea', 'Córnea', 'The clear, dome-shaped front surface of the eye.'],
+  ['Conjunctiva', 'Conjuntiva', 'The clear membrane covering the white part of the eye.'],
+  ['Conjunctivitis (pink eye)', 'Conjuntivitis', 'Inflammation or infection of the conjunctiva.'],
+  ['Dry eye syndrome', 'Síndrome de ojo seco', "A condition where the eyes don't produce enough quality tears."],
+  ['Stye', 'Orzuelo', 'A painful bump on the eyelid caused by an infected gland.'],
+  ['Blepharitis', 'Blefaritis', 'Inflammation of the eyelids.'],
+  ['Eye pressure test (tonometry)', 'Prueba de presión ocular (tonometría)', 'A test measuring the pressure inside the eye.'],
+  ['Slit lamp exam', 'Examen con lámpara de hendidura', 'An exam using a special microscope to closely view the eye.'],
+  ['Dilated eye exam', 'Examen ocular con dilatación de pupilas', 'An eye exam using drops to widen the pupil for a better view inside.'],
+  ['Visual field test', 'Prueba de campo visual', "A test measuring a person's full range of vision."],
+  ['Optic nerve', 'Nervio óptico', 'The nerve that carries visual information from the eye to the brain.'],
+  ['Double vision (diplopia)', 'Visión doble (diplopía)', 'Seeing two images of a single object.'],
+  ['Blurred vision', 'Visión borrosa', 'A lack of sharpness in vision.'],
+  ['Floaters (eye)', 'Moscas volantes', 'Small spots or shapes that drift through the field of vision.'],
+  ['Eye strain', 'Fatiga visual', 'Tired, uncomfortable eyes, often from prolonged screen use.'],
+  ['Color blindness', 'Daltonismo', 'Difficulty distinguishing certain colors.'],
+  ['Strabismus (crossed eyes)', 'Estrabismo', 'Misalignment of the eyes.'],
+  ['Amblyopia (lazy eye)', 'Ambliopía (ojo perezoso)', 'Reduced vision in one eye due to abnormal visual development.'],
+  ['Corrective lenses / eyeglasses', 'Lentes correctivos / anteojos', 'Glasses used to correct vision problems.'],
+  ['Contact lenses', 'Lentes de contacto', 'Thin lenses worn directly on the eye to correct vision.'],
+  ['Eye drops', 'Gotas para los ojos', 'Liquid medication applied directly to the eye.'],
+  ['Ophthalmologist', 'Oftalmólogo/a', 'A medical doctor who specializes in eye care and eye surgery.'],
+  ['Optometrist', 'Optometrista', 'A professional who examines eyes and prescribes corrective lenses.'],
+  ['LASIK surgery', 'Cirugía LASIK', 'A laser surgery to correct vision by reshaping the cornea.'],
+  ['Corneal abrasion', 'Abrasión corneal', 'A scratch on the surface of the cornea.'],
+  ['Foreign body in eye', 'Cuerpo extraño en el ojo', 'An object or particle lodged in the eye.'],
+  ['Eye patch', 'Parche ocular', 'A covering worn over one eye, often after injury or surgery.'],
+  ['Photophobia', 'Fotofobia', 'Unusual sensitivity to light.'],
+  ['Chalazion', 'Chalazión', 'A small lump on the eyelid caused by a blocked gland.'],
+  ['Uveitis', 'Uveítis', 'Inflammation of the middle layer of the eye.'],
+  ['Legal blindness', 'Ceguera legal', 'A level of visual impairment recognized for disability purposes.'],
+  ['Low vision', 'Baja visión', "Significant visual impairment that isn't correctable with standard lenses."],
+  ['Peripheral vision', 'Visión periférica', 'The ability to see objects outside of the direct line of sight.'],
+];
+
+async function runOphthalmologyVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.ophthalmologyVocabImportV1) return;
+    const domain = await ensureDomainExists('Ophthalmology', '#5B8AB5', 'sparkle');
+    const added = await bulkAddTerms(domain, OPHTHALMOLOGY_VOCAB_V1);
+    await ref.set({ ophthalmologyVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Ophthalmology" domain with ${added} terms`);
+  }catch(err){ console.error('runOphthalmologyVocabImportV1 failed:', err); }
+}
+
+// "Surgery & Anesthesia"
+const SURGERY_ANESTHESIA_VOCAB_V1 = [
+  ['Surgery / operation', 'Cirugía / operación', 'A medical procedure involving incision into the body.'],
+  ['Surgeon', 'Cirujano/a', 'A doctor who performs surgical procedures.'],
+  ['Anesthesiologist', 'Anestesiólogo/a', 'A doctor who specializes in administering anesthesia.'],
+  ['General anesthesia', 'Anestesia general', 'Medication that puts a patient completely to sleep for surgery.'],
+  ['Regional anesthesia', 'Anestesia regional', 'Numbing a larger region of the body, such as an arm or leg.'],
+  ['Spinal anesthesia', 'Anestesia espinal', 'An injection into the spinal fluid to numb the lower body.'],
+  ['Sedation', 'Sedación', 'Medication used to relax a patient or induce a sleep-like state.'],
+  ['Conscious sedation', 'Sedación consciente', 'Light sedation allowing a patient to remain responsive.'],
+  ['Pre-operative (pre-op)', 'Preoperatorio', 'The period before surgery.'],
+  ['Post-operative (post-op)', 'Posoperatorio', 'The period after surgery.'],
+  ['Intraoperative', 'Intraoperatorio', 'During the surgery itself.'],
+  ['Surgical consent form', 'Formulario de consentimiento quirúrgico', 'A document a patient signs agreeing to a procedure.'],
+  ['Pre-surgical clearance', 'Autorización prequirúrgica', 'Medical approval confirming a patient is fit for surgery.'],
+  ['Operating room (OR)', 'Sala de operaciones / quirófano', 'The room where surgical procedures are performed.'],
+  ['Recovery room (PACU)', 'Sala de recuperación', 'Where patients are monitored right after surgery.'],
+  ['Incision', 'Incisión', 'A surgical cut made into the body.'],
+  ['Surgical wound', 'Herida quirúrgica', 'A wound created during surgery.'],
+  ['Surgical drain', 'Drenaje quirúrgico', 'A tube placed to remove fluid from a surgical site.'],
+  ['Anesthesia risks', 'Riesgos de la anestesia', 'Potential complications associated with anesthesia.'],
+  ['Minimally invasive surgery', 'Cirugía mínimamente invasiva', 'Surgery performed through small incisions.'],
+  ['Laparoscopic surgery', 'Cirugía laparoscópica', 'Surgery performed using a camera and small instruments through tiny incisions.'],
+  ['Open surgery', 'Cirugía abierta', 'Traditional surgery using a larger incision.'],
+  ['Robotic surgery', 'Cirugía robótica', 'Surgery performed with robotic-assisted instruments controlled by a surgeon.'],
+  ['Elective surgery', 'Cirugía electiva', 'A planned, non-emergency surgery.'],
+  ['Emergency surgery', 'Cirugía de emergencia', 'Surgery performed immediately to address a life-threatening condition.'],
+  ['Outpatient surgery', 'Cirugía ambulatoria', "Surgery that doesn't require an overnight hospital stay."],
+  ['Same-day surgery', 'Cirugía del mismo día', 'Surgery where the patient goes home the same day.'],
+  ['General surgeon', 'Cirujano/a general', 'A surgeon trained in a broad range of surgical procedures.'],
+  ['Surgical complication', 'Complicación quirúrgica', 'An unexpected problem occurring during or after surgery.'],
+  ['Blood transfusion', 'Transfusión de sangre', 'Receiving donated blood through an IV.'],
+  ['Blood type / crossmatch', 'Tipo de sangre / prueba cruzada', 'Testing to ensure donated blood is compatible with a patient.'],
+  ['Surgical site marking', 'Marcado del sitio quirúrgico', 'Marking the exact location for surgery to prevent errors.'],
+  ['Time-out (surgical safety)', 'Pausa de seguridad quirúrgica', 'A safety check performed before surgery begins.'],
+  ['Anesthesia mask', 'Mascarilla de anestesia', 'A mask used to deliver anesthesia gases.'],
+  ['Endotracheal tube', 'Tubo endotraqueal', 'A tube placed in the airway to help a patient breathe during anesthesia.'],
+  ['Post-anesthesia care', 'Cuidados posanestesia', 'Monitoring and care given right after anesthesia.'],
+  ['Nausea (post-anesthesia)', 'Náuseas (posanestesia)', 'A common side effect after receiving anesthesia.'],
+  ['Malignant hyperthermia', 'Hipertermia maligna', 'A rare, severe reaction to anesthesia causing dangerously high body temperature.'],
+  ['Anesthesia awareness', 'Conciencia bajo anestesia', 'A rare event where a patient becomes aware during general anesthesia.'],
+  ['Pain management (post-surgical)', 'Manejo del dolor (posquirúrgico)', 'Controlling pain after a surgical procedure.'],
+  ['Patient-controlled analgesia (PCA)', 'Analgesia controlada por el paciente', 'A system allowing patients to self-administer pain medication within safe limits.'],
+  ['Surgical checklist', 'Lista de verificación quirúrgica', 'A safety tool used to confirm key steps before, during, and after surgery.'],
+  ['Second opinion', 'Segunda opinión', 'Consulting another doctor to confirm a diagnosis or treatment plan.'],
+  ['Surgical scar', 'Cicatriz quirúrgica', 'A mark left on the skin after a surgical incision heals.'],
+  ['Wound dehiscence', 'Dehiscencia de la herida', 'When a surgical wound reopens after closure.'],
+  ['Anticoagulant (blood thinner)', 'Anticoagulante', "Medication that reduces the blood's ability to clot."],
+  ['Deep vein thrombosis (DVT) prevention', 'Prevención de trombosis venosa profunda', 'Measures taken to prevent blood clots after surgery.'],
+  ['Compression stockings', 'Medias de compresión', 'Stockings used to improve circulation and prevent blood clots.'],
+  ['Surgical technologist', 'Tecnólogo/a quirúrgico/a', 'A professional who assists during surgical procedures.'],
+  ['Scrub nurse', 'Enfermero/a instrumentista', 'A nurse who assists directly in the sterile field during surgery.'],
+  ['Circulating nurse', 'Enfermero/a circulante', 'A nurse who manages the operating room environment during surgery.'],
+  ['Sterile field', 'Campo estéril', 'The area kept free of microorganisms during a procedure.'],
+  ['Surgical gown / drape', 'Bata quirúrgica / campo quirúrgico', 'Sterile coverings used during surgery to prevent contamination.'],
+];
+
+async function runSurgeryAnesthesiaVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.surgeryAnesthesiaVocabImportV1) return;
+    const domain = await ensureDomainExists('Surgery & Anesthesia', '#6F7A9A', 'sparkle');
+    const added = await bulkAddTerms(domain, SURGERY_ANESTHESIA_VOCAB_V1);
+    await ref.set({ surgeryAnesthesiaVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Surgery & Anesthesia" domain with ${added} terms`);
+  }catch(err){ console.error('runSurgeryAnesthesiaVocabImportV1 failed:', err); }
+}
+
+// "Pharmacy & Medications"
+const PHARMACY_VOCAB_V1 = [
+  ['Prescription', 'Receta médica', 'A doctor\u2019s order for medication.'],
+  ['Over-the-counter (OTC) medication', 'Medicamento de venta libre', 'Medication available without a prescription.'],
+  ['Dosage', 'Dosis', 'The amount of medication to be taken.'],
+  ['Frequency (medication)', 'Frecuencia (de medicamento)', 'How often a medication should be taken.'],
+  ['Route of administration', 'Vía de administración', 'The way a medication enters the body (oral, IV, etc.).'],
+  ['Oral medication', 'Medicamento oral', 'Medication taken by mouth.'],
+  ['Sublingual', 'Sublingual', 'Administered under the tongue.'],
+  ['Subcutaneous injection', 'Inyección subcutánea', 'An injection given just under the skin.'],
+  ['Rectal medication', 'Medicamento rectal', 'Medication administered through the rectum.'],
+  ['Inhaled medication', 'Medicamento inhalado', 'Medication breathed into the lungs.'],
+  ['Refill', 'Reabastecimiento / resurtido', 'Getting an additional supply of a prescribed medication.'],
+  ['Generic medication', 'Medicamento genérico', 'A medication with the same active ingredient as a brand-name drug.'],
+  ['Brand-name medication', 'Medicamento de marca', "A medication sold under a specific manufacturer's name."],
+  ['Active ingredient', 'Ingrediente activo', "The component of a medication responsible for its effect."],
+  ['Drug interaction', 'Interacción medicamentosa', 'When one medication affects how another works.'],
+  ['Allergic reaction (medication)', 'Reacción alérgica (a un medicamento)', 'An immune response to a medication.'],
+  ['Pharmacist', 'Farmacéutico/a', 'A licensed professional who dispenses medications.'],
+  ['Pharmacy', 'Farmacia', 'The place where medications are dispensed.'],
+  ['Formulary', 'Formulario (de medicamentos)', 'A list of medications covered by an insurance plan.'],
+  ['Prior authorization', 'Autorización previa', 'Insurance approval required before certain medications are covered.'],
+  ['Copay', 'Copago', 'The portion of a medication cost paid by the patient.'],
+  ['Insulin', 'Insulina', 'A hormone medication used to manage blood sugar in diabetes.'],
+  ['Insulin pen', 'Pluma de insulina', 'A device used to inject insulin.'],
+  ['Pain reliever / analgesic', 'Analgésico', 'Medication used to relieve pain.'],
+  ['Opioid', 'Opioide', 'A class of strong pain medication with risk of dependence.'],
+  ['Non-steroidal anti-inflammatory drug (NSAID)', 'Antiinflamatorio no esteroideo (AINE)', 'A class of medication that reduces pain and inflammation.'],
+  ['Acetaminophen', 'Paracetamol / acetaminofén', 'A common medication used to relieve pain and reduce fever.'],
+  ['Antihistamine', 'Antihistamínico', 'Medication used to relieve allergy symptoms.'],
+  ['Decongestant', 'Descongestionante', 'Medication used to relieve nasal congestion.'],
+  ['Diuretic', 'Diurético', 'Medication that helps the body eliminate excess fluid.'],
+  ['Beta blocker', 'Betabloqueante', 'Medication used to lower blood pressure and heart rate.'],
+  ['ACE inhibitor', 'Inhibidor de la ECA', 'Medication used to treat high blood pressure and heart conditions.'],
+  ['Statin', 'Estatina', 'Medication used to lower cholesterol.'],
+  ['Anticonvulsant', 'Anticonvulsivo', 'Medication used to prevent or control seizures.'],
+  ['Muscle relaxant', 'Relajante muscular', 'Medication used to relieve muscle spasms.'],
+  ['Steroid (corticosteroid)', 'Esteroide (corticosteroide)', 'Medication used to reduce inflammation.'],
+  ['Hormone therapy', 'Terapia hormonal', 'Treatment using hormones to manage a medical condition.'],
+  ['Chemotherapy medication', 'Medicamento de quimioterapia', 'Drugs used to treat cancer.'],
+  ['Immunosuppressant', 'Inmunosupresor', 'Medication that reduces the activity of the immune system.'],
+  ['Medication reconciliation', 'Conciliación de medicamentos', 'Reviewing all medications a patient is taking to avoid errors.'],
+  ['Medication adherence', 'Adherencia a la medicación', 'How consistently a patient takes medication as prescribed.'],
+  ['Missed dose', 'Dosis olvidada', "A scheduled dose of medication that wasn't taken."],
+  ['Pill organizer', 'Organizador de pastillas', 'A container used to sort medications by day or time.'],
+  ['Expiration date (medication)', 'Fecha de vencimiento (del medicamento)', 'The date after which a medication should not be used.'],
+  ['Storage instructions (medication)', 'Instrucciones de almacenamiento (del medicamento)', 'Guidance on how to properly store a medication.'],
+  ['Take with food', 'Tomar con alimentos', 'An instruction to take medication alongside a meal.'],
+  ['Take on an empty stomach', 'Tomar con el estómago vacío', 'An instruction to take medication without food.'],
+  ['As needed (PRN)', 'Según sea necesario (PRN)', 'Medication taken only when symptoms occur, not on a fixed schedule.'],
+  ['Loading dose', 'Dosis de carga', 'A larger initial dose given to quickly reach an effective level.'],
+  ['Maintenance dose', 'Dosis de mantenimiento', "The regular dose taken to sustain a medication's effect."],
+  ['Titration (medication)', 'Titulación (de medicamento)', 'Gradually adjusting a medication dose to find the right level.'],
+  ['Half-life (medication)', 'Vida media (del medicamento)', 'The time it takes for half of a medication to leave the body.'],
+  ['Therapeutic level', 'Nivel terapéutico', 'The medication concentration in the blood needed for effectiveness.'],
+  ['Toxicity (medication)', 'Toxicidad (de medicamento)', 'Harmful effects caused by too much of a medication.'],
+  ['Polypharmacy', 'Polifarmacia', 'Taking multiple medications at the same time, often in older adults.'],
+  ['Compounding pharmacy', 'Farmacia de preparación magistral', 'A pharmacy that custom-prepares medications.'],
+  ['Controlled substance', 'Sustancia controlada', 'Medication regulated due to potential for abuse or dependence.'],
+  ['Medication label', 'Etiqueta del medicamento', 'The printed information on a medication package.'],
+  ['Patient package insert', 'Prospecto del paciente', 'Written information provided with a medication describing its use and risks.'],
+  ['Injection site', 'Sitio de inyección', 'The location on the body where an injection is given.'],
+  ['Auto-injector (EpiPen)', 'Autoinyector (EpiPen)', 'A device that delivers a pre-measured dose of medication automatically.'],
+  ['IV drip / infusion', 'Goteo intravenoso / infusión', 'Medication delivered slowly through an IV line over time.'],
+  ['IV push', 'Inyección intravenosa directa', 'Medication delivered quickly through an IV line.'],
+  ['Medication order', 'Orden de medicamento', "A provider's written or electronic instruction to give a specific medication."],
+  ['Pharmacy technician', 'Técnico/a de farmacia', 'A professional who assists the pharmacist in preparing medications.'],
+  ['Drug allergy list', 'Lista de alergias a medicamentos', 'A record of medications a patient cannot safely take.'],
+  ['Black box warning', 'Advertencia de recuadro negro', "The FDA's strongest warning about a medication's serious risks."],
+  ['Off-label use', 'Uso fuera de indicación', 'Using a medication for a purpose not officially approved.'],
+  ['Clinical trial (medication)', 'Ensayo clínico (de medicamento)', "Research testing a new medication's safety and effectiveness."],
+  ['Biosimilar', 'Biosimilar', 'A biologic medication highly similar to an already-approved one.'],
+];
+
+async function runPharmacyVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.pharmacyVocabImportV1) return;
+    const domain = await ensureDomainExists('Pharmacy & Medications', '#5B9A6F', 'pill');
+    const added = await bulkAddTerms(domain, PHARMACY_VOCAB_V1);
+    await ref.set({ pharmacyVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Pharmacy & Medications" domain with ${added} terms`);
+  }catch(err){ console.error('runPharmacyVocabImportV1 failed:', err); }
+}
+
+// "Adult Endocrinology, Nephrology & Urology"
+const ADULT_ENDO_NEPHRO_URO_VOCAB_V1 = [
+  ['Diabetes mellitus', 'Diabetes mellitus', 'A condition causing high blood sugar due to problems with insulin.'],
+  ['Type 1 diabetes', 'Diabetes tipo 1', 'An autoimmune form of diabetes where the body produces no insulin.'],
+  ['Type 2 diabetes', 'Diabetes tipo 2', "A form of diabetes where the body doesn't use insulin properly."],
+  ['Blood glucose / blood sugar', 'Glucosa en sangre / azúcar en sangre', 'The amount of sugar circulating in the blood.'],
+  ['Hemoglobin A1c', 'Hemoglobina A1c', 'A blood test showing average blood sugar over about three months.'],
+  ['Insulin resistance', 'Resistencia a la insulina', "When the body's cells don't respond normally to insulin."],
+  ['Thyroid gland', 'Glándula tiroides', 'A gland in the neck that regulates metabolism.'],
+  ['Hypothyroidism', 'Hipotiroidismo', 'An underactive thyroid gland.'],
+  ['Hyperthyroidism', 'Hipertiroidismo', 'An overactive thyroid gland.'],
+  ['Thyroid nodule', 'Nódulo tiroideo', 'A lump that forms within the thyroid gland.'],
+  ['Goiter', 'Bocio', 'An enlargement of the thyroid gland.'],
+  ["Hashimoto's thyroiditis", 'Tiroiditis de Hashimoto', 'An autoimmune condition causing hypothyroidism.'],
+  ["Graves' disease", 'Enfermedad de Graves', 'An autoimmune condition causing hyperthyroidism.'],
+  ['Adrenal gland', 'Glándula suprarrenal', 'A gland that produces hormones including cortisol and adrenaline.'],
+  ["Cushing's syndrome", 'Síndrome de Cushing', 'A condition caused by excess cortisol in the body.'],
+  ["Addison's disease", 'Enfermedad de Addison', 'A condition caused by insufficient adrenal hormone production.'],
+  ['Pituitary gland', 'Glándula pituitaria', 'A gland at the base of the brain that regulates other hormone glands.'],
+  ['Metabolic syndrome', 'Síndrome metabólico', 'A cluster of conditions that raise the risk of heart disease and diabetes.'],
+  ['Obesity', 'Obesidad', 'Having an excess amount of body fat.'],
+  ['Endocrinologist', 'Endocrinólogo/a', 'A doctor who specializes in hormone-related conditions.'],
+  ['Continuous glucose monitor (CGM)', 'Monitor continuo de glucosa', 'A device that tracks blood sugar levels throughout the day.'],
+  ['Insulin pump', 'Bomba de insulina', 'A device that delivers insulin continuously through the skin.'],
+  ['Endocrine panel', 'Panel endocrino', 'A group of blood tests checking hormone levels.'],
+  ['Growth hormone', 'Hormona del crecimiento', 'A hormone that regulates growth and development.'],
+  ['Kidney', 'Riñón', 'An organ that filters waste from the blood.'],
+  ['Chronic kidney disease (CKD)', 'Enfermedad renal crónica', 'A gradual loss of kidney function over time.'],
+  ['Acute kidney injury (AKI)', 'Lesión renal aguda', 'A sudden loss of kidney function.'],
+  ['End-stage renal disease (ESRD)', 'Enfermedad renal en etapa terminal', 'Complete or near-complete kidney failure.'],
+  ['Dialysis', 'Diálisis', "A treatment that filters the blood when the kidneys can't."],
+  ['Hemodialysis', 'Hemodiálisis', 'A type of dialysis using a machine to filter the blood outside the body.'],
+  ['Peritoneal dialysis', 'Diálisis peritoneal', 'A type of dialysis using the lining of the abdomen to filter blood.'],
+  ['Kidney transplant', 'Trasplante de riñón', 'Surgery to replace a failing kidney with a healthy donor kidney.'],
+  ['Kidney stones', 'Cálculos renales / piedras en el riñón', 'Hard mineral deposits that form in the kidneys.'],
+  ['Glomerulonephritis', 'Glomerulonefritis', "Inflammation of the kidney's filtering units."],
+  ['Nephrotic syndrome', 'Síndrome nefrótico', 'A kidney disorder causing excess protein loss in the urine.'],
+  ['Polycystic kidney disease', 'Enfermedad renal poliquística', 'A genetic disorder causing fluid-filled cysts in the kidneys.'],
+  ['Creatinine', 'Creatinina', 'A waste product used to measure kidney function.'],
+  ['Glomerular filtration rate (GFR)', 'Tasa de filtración glomerular', 'A measure of how well the kidneys are filtering blood.'],
+  ['Blood urea nitrogen (BUN)', 'Nitrógeno ureico en sangre', 'A blood test used to assess kidney function.'],
+  ['Proteinuria', 'Proteinuria', 'Excess protein in the urine, a sign of kidney damage.'],
+  ['Hematuria', 'Hematuria', 'Blood in the urine.'],
+  ['Fluid restriction', 'Restricción de líquidos', 'A limit on fluid intake, often for kidney or heart conditions.'],
+  ['Nephrologist', 'Nefrólogo/a', 'A doctor who specializes in kidney conditions.'],
+  ['Renal artery stenosis', 'Estenosis de la arteria renal', 'Narrowing of the artery supplying blood to the kidney.'],
+  ['Fistula (dialysis access)', 'Fístula (acceso para diálisis)', 'A surgically created connection between an artery and vein used for dialysis access.'],
+  ['Dialysis catheter', 'Catéter de diálisis', 'A tube placed to allow access for dialysis treatment.'],
+  ['Electrolyte imbalance', 'Desequilibrio electrolítico', 'Abnormal levels of minerals like sodium and potassium in the blood.'],
+  ['Potassium (electrolyte)', 'Potasio (electrolito)', 'A mineral important for nerve and muscle function, monitored closely in kidney disease.'],
+  ['Renal diet', 'Dieta renal', 'A diet designed to reduce strain on the kidneys.'],
+  ['Urologist', 'Urólogo/a', 'A doctor who specializes in the urinary tract and male reproductive system.'],
+  ['Bladder', 'Vejiga', 'The organ that stores urine.'],
+  ['Urinary incontinence', 'Incontinencia urinaria', 'The inability to control urination.'],
+  ['Overactive bladder', 'Vejiga hiperactiva', 'A condition causing a sudden, frequent urge to urinate.'],
+  ['Urinary retention', 'Retención urinaria', 'Difficulty fully emptying the bladder.'],
+  ['Catheter (urinary)', 'Catéter urinario', 'A tube inserted to drain urine from the bladder.'],
+  ['Foley catheter', 'Sonda Foley', 'A specific type of catheter left in place to continuously drain the bladder.'],
+  ['Cystoscopy', 'Cistoscopia', 'A procedure using a scope to examine the inside of the bladder.'],
+  ['Bladder cancer', 'Cáncer de vejiga', 'Cancer that begins in the bladder.'],
+  ['Kidney cancer (renal cell carcinoma)', 'Cáncer de riñón (carcinoma de células renales)', 'Cancer that begins in the kidney.'],
+  ['Prostate', 'Próstata', 'A gland in men that produces fluid for semen.'],
+  ['Benign prostatic hyperplasia (BPH)', 'Hiperplasia prostática benigna', 'A noncancerous enlargement of the prostate.'],
+  ['Prostate cancer', 'Cáncer de próstata', 'Cancer that begins in the prostate gland.'],
+  ['Prostate-specific antigen (PSA) test', 'Prueba de antígeno prostático específico (PSA)', 'A blood test used to screen for prostate conditions.'],
+  ['Erectile dysfunction', 'Disfunción eréctil', 'Difficulty achieving or maintaining an erection.'],
+  ['Testicular cancer', 'Cáncer testicular', 'Cancer that begins in the testicles.'],
+  ['Varicocele', 'Varicocele', 'Enlarged veins within the scrotum.'],
+  ['Hydrocele', 'Hidrocele', 'A fluid-filled sac around the testicle causing swelling.'],
+  ['Epididymitis', 'Epididimitis', 'Inflammation of the tube at the back of the testicle.'],
+  ['Kidney ultrasound', 'Ecografía renal', 'An imaging test used to view the kidneys.'],
+  ['Urinalysis', 'Análisis de orina', 'A test that examines the content of urine.'],
+  ['24-hour urine collection', 'Recolección de orina de 24 horas', 'Collecting all urine over a full day for testing.'],
+  ['Ureter', 'Uréter', 'The tube that carries urine from the kidney to the bladder.'],
+  ['Urethra', 'Uretra', 'The tube that carries urine out of the body.'],
+];
+
+async function runAdultEndoNephroUroVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.adultEndoNephroUroVocabImportV1) return;
+    const domain = await ensureDomainExists('Adult Endocrinology, Nephrology & Urology', '#5B7FBF', 'stethoscope');
+    const added = await bulkAddTerms(domain, ADULT_ENDO_NEPHRO_URO_VOCAB_V1);
+    await ref.set({ adultEndoNephroUroVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Adult Endocrinology, Nephrology & Urology" domain with ${added} terms`);
+  }catch(err){ console.error('runAdultEndoNephroUroVocabImportV1 failed:', err); }
+}
+
+async function runObgynVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.obgynVocabImportV1) return;
+
+    const obgyn = await ensureDomainExists("OB/GYN & Women's Health", '#B5709A', 'heart');
+    const addedMain = await bulkAddTerms(obgyn, OBGYN_VOCAB_V1);
+    const laborDelivery = await ensureDomainExists('Labor & Delivery', '#C98FA0', 'heart', obgyn.id);
+    const addedSub = await bulkAddTerms(laborDelivery, LABOR_DELIVERY_VOCAB_V1);
+
+    await ref.set({ obgynVocabImportV1: true }, { merge:true });
+    logActivity(`added "OB/GYN & Women's Health" (${addedMain} terms) and its "Labor & Delivery" subgroup (${addedSub} terms)`);
+  }catch(err){
+    console.error('runObgynVocabImportV1 failed:', err);
+  }
+}
+
+async function runEmergencyTraumaVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.emergencyTraumaVocabImportV1) return;
+
+    const domain = await ensureDomainExists('Emergency & Trauma', '#B5555B', 'bone');
+    const added = await bulkAddTerms(domain, EMERGENCY_TRAUMA_VOCAB_V1);
+
+    await ref.set({ emergencyTraumaVocabImportV1: true }, { merge:true });
+    logActivity(`added the "Emergency & Trauma" domain with ${added} terms`);
+  }catch(err){
+    console.error('runEmergencyTraumaVocabImportV1 failed:', err);
+  }
 }
 
 async function runGeneralMedicineVocabImportV1(){
@@ -3722,6 +4860,18 @@ async function loadData(){
     await runVocabReclassificationV1();
     await runGeneticsVocabImportV1();
     await runGeneralMedicineVocabImportV1();
+    await runEmergencyTraumaVocabImportV1();
+    await runObgynVocabImportV1();
+    await runPsychiatryVocabImportV1();
+    await runInfectiousDiseaseVocabImportV1();
+    await runPulmonologyVocabImportV1();
+    await runGastroenterologyVocabImportV1();
+    await runOrthopedicsVocabImportV1();
+    await runDermatologyVocabImportV1();
+    await runOphthalmologyVocabImportV1();
+    await runSurgeryAnesthesiaVocabImportV1();
+    await runPharmacyVocabImportV1();
+    await runAdultEndoNephroUroVocabImportV1();
     startTermsListener();
     startCategoriesMetaListener();
     render();
