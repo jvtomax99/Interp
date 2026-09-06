@@ -332,8 +332,15 @@
      exactly like every other tile (so the grid stays visually consistent);
      its subgroups sit as a compact list directly beneath it, still inside
      the same single grid cell rather than breaking the row. */
-  .domain-group{ display:flex; flex-direction:column; gap:8px; }
-  .domain-group-tile{ position:relative; }
+  .domain-group{
+    display:flex; flex-direction:column; gap:8px; padding:8px;
+    background:var(--bg-hi); border-radius:20px; box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .domain-group-tile{ position:relative; box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft) !important; }
+  .domain-group-children-label{
+    font-family:var(--mono); font-size:9px; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--ink-faint); padding:2px 4px 0 4px;
+  }
   .domain-group-toggle{
     position:absolute; top:10px; right:38px; display:flex; align-items:center; gap:2px;
     width:24px; height:24px; border-radius:8px; background:rgba(255,255,255,0.7);
@@ -5314,9 +5321,9 @@ function render(){
             ${ICON_CHEVRON_DOWN}<span>${kids.length}</span>
           </span>
         </button>
-        ${isCollapsed ? '' : `<div class="domain-group-children">
+        ${isCollapsed ? '' : `<div class="domain-group-children-label">Subgroups</div><div class="domain-group-children">
           ${kids.map(k=>`
-            <button class="domain-chip" style="--tile-color:${k.color};" onclick="setCategory('${k.id}')">
+            <button class="domain-chip" style="--tile-color:${k.color}; border-left:3px solid ${parent.color};" onclick="setCategory('${k.id}')">
               <span class="domain-chip-icon">${k.icon}</span>
               <span class="domain-chip-name">${escapeHtml(k.name)}</span>
               <span class="domain-chip-count">${k.count}</span>
