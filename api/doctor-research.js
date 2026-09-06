@@ -42,7 +42,9 @@ export default async function handler(req, res) {
   if (specialty && specialty.trim()) details.push(`Specialty (if helpful to confirm): ${specialty.trim()}`);
   if (location && location.trim()) details.push(`Hospital / location: ${location.trim()}`);
 
-  const systemPrompt = `You are a research assistant helping a professional medical interpreter prepare for an upcoming appointment. Given a doctor's name (and optionally a specialty or hospital to help disambiguate a common name), search the web to determine their medical specialty and specific practice focus (for example: "Hematology/Oncology — Lymphoma" rather than just "Oncology"). Do at most one or two targeted searches — prioritize speed over exhaustiveness, and if the provided specialty/location already narrows it down, use that instead of searching further. Then produce a prep list of 18 to 24 English/Spanish medical terms an interpreter should be ready to use for that specialty. Favor terms specific to that specialty over generic terms already common knowledge. Definitions should be one concise sentence, written for a professional interpreter, not a patient.
+  const isHackensack = location && /hackensack/i.test(location);
+
+  const systemPrompt = `You are a research assistant helping a professional medical interpreter prepare for an upcoming appointment. Given a doctor's name (and optionally a specialty or hospital to help disambiguate a common name), search the web to determine their medical specialty and specific practice focus (for example: "Hematology/Oncology — Lymphoma" rather than just "Oncology"). Do at most one or two targeted searches — prioritize speed over exhaustiveness, and if the provided specialty/location already narrows it down, use that instead of searching further.${isHackensack ? ' The doctor is affiliated with Hackensack Meridian Health — check the official Hackensack Meridian "Find a Doctor" directory (doctors.hackensackmeridianhealth.org) first, since it directly lists specialty, department, and location for their affiliated physicians.' : ''} Then produce a prep list of 18 to 24 English/Spanish medical terms an interpreter should be ready to use for that specialty. Favor terms specific to that specialty over generic terms already common knowledge. Definitions should be one concise sentence, written for a professional interpreter, not a patient.
 
 Respond with ONLY valid JSON, no other text, no markdown code fences, in exactly this shape:
 {
@@ -53,6 +55,16 @@ Respond with ONLY valid JSON, no other text, no markdown code fences, in exactly
 }
 
 If you cannot find reliable, specific information about this named individual, set "found" to false, explain briefly in "note", and still populate "terms" with a general list of widely-useful medical interpreting terms as a fallback so the response is never empty.`;
+
+  // When the doctor is at Hackensack Meridian, restrict the search to their
+  // own site — much faster than an open web search, and the results are
+  // guaranteed to be about their actual affiliated physicians rather than
+  // a same-named doctor somewhere else entirely.
+  const webSearchTool = { type: 'web_search_20250305', name: 'web_search', max_uses: 2 };
+  if (isHackensack) {
+    webSearchTool.allowed_domains = ['hackensackmeridianhealth.org', 'doctors.hackensackmeridianhealth.org'];
+    webSearchTool.strict = true;
+  }
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -69,11 +81,7 @@ If you cannot find reliable, specific information about this named individual, s
         messages: [
           { role: 'user', content: details.join('\n') }
         ],
-        tools: [
-          // max_uses caps how many searches Claude can run in one request —
-          // the main lever for keeping this fast on an ambiguous name.
-          { type: 'web_search_20250305', name: 'web_search', max_uses: 2 }
-        ],
+        tools: [webSearchTool],
       }),
     });
 
