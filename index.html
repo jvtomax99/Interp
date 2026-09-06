@@ -3262,6 +3262,208 @@ function ensureTermIds(){
 // as one combined "Developmental & Neurology" tile. Runs once for the whole
 // team (flagged on the shared categories doc, not per-device) and does
 // nothing on every load after that.
+// Full genetics vocabulary reference, added from a team-provided PDF
+// covering inheritance patterns, molecular biology basics, testing &
+// procedures, prenatal/reproductive genetics, common conditions, hereditary
+// cancer genetics, metabolic genetics, and counseling/ethics terms — plus a
+// set of Spanish false-friend traps and regional-variation notes specific
+// to genetics conversations. Format: [English, Spanish, Definition].
+// Phenylketonuria (PKU) is intentionally omitted — it already exists in
+// Genetics from the earlier CSV import, and this avoids a duplicate card.
+const GENETICS_VOCAB_IMPORT_V1 = [
+  // Inheritance & Family History
+  ['Autosomal dominant', 'Autosómico dominante', 'An inheritance pattern where one copy of an altered gene is enough to cause the condition.'],
+  ['Autosomal recessive', 'Autosómico recesivo', 'An inheritance pattern requiring two altered gene copies, one from each parent, to cause the condition.'],
+  ['X-linked dominant/recessive', 'Ligado al cromosoma X dominante/recesivo', 'An inheritance pattern tied to genes on the X chromosome.'],
+  ['Y-linked', 'Ligado al cromosoma Y', 'An inheritance pattern tied to genes on the Y chromosome, passed only from father to son.'],
+  ['Mitochondrial inheritance', 'Herencia mitocondrial', 'Inheritance passed only from the mother, via DNA in the mitochondria.'],
+  ['Carrier', 'Portador/a', 'A person who carries one copy of a gene variant without showing symptoms.'],
+  ['Obligate carrier', 'Portador/a obligado/a', 'Someone who must be a carrier based on family history, even without testing.'],
+  ['Proband / index case', 'Caso índice / probando', 'The first affected family member through whom a genetic condition is identified.'],
+  ['Pedigree / family tree', 'Árbol genealógico', "A diagram mapping a family's medical history across generations."],
+  ['De novo mutation', 'Mutación de novo', 'A new genetic change not inherited from either parent.'],
+  ['Germline mutation', 'Mutación en la línea germinal', 'A mutation present in egg or sperm cells, passable to offspring.'],
+  ['Somatic mutation', 'Mutación somática', 'A mutation occurring after conception, not passed to offspring.'],
+  ['Penetrance', 'Penetrancia', 'The likelihood that a person with a gene variant will show symptoms.'],
+  ['Incomplete penetrance', 'Penetrancia incompleta', 'When not everyone with a disease-causing variant develops symptoms.'],
+  ['Variable expressivity', 'Expresividad variable', 'When the same genetic condition causes different severity or features between individuals.'],
+  ['Consanguinity', 'Consanguinidad', 'A blood relationship between parents, which raises the chance of recessive conditions.'],
+  ['Anticipation (genetic)', 'Anticipación (genética)', 'A pattern where a condition appears earlier or more severely in each generation.'],
+  ['Imprinting (genomic)', 'Impronta genómica', 'When gene expression depends on whether it was inherited from the mother or father.'],
+  ['Uniparental disomy', 'Disomía uniparental', 'When both copies of a chromosome come from one parent instead of one from each.'],
+  ['Mosaicism', 'Mosaicismo', 'When a person has two or more genetically different sets of cells.'],
+  ['Compound heterozygote', 'Heterocigoto compuesto', 'Having two different altered copies of the same gene, one from each parent.'],
+  ['Homozygous / heterozygous', 'Homocigoto / heterocigoto', 'Having two identical, or two different, copies of a gene.'],
+  // Molecular & Cell Biology Basics
+  ['Gene', 'Gen', 'A segment of DNA that carries instructions for a specific trait or protein.'],
+  ['Chromosome', 'Cromosoma', 'A structure of tightly coiled DNA carrying genetic information.'],
+  ['Allele', 'Alelo', 'One of two or more versions of a gene.'],
+  ['Genome', 'Genoma', 'The complete set of genetic material in an organism.'],
+  ['DNA / RNA', 'ADN / ARN', 'The molecules that store and carry out genetic instructions.'],
+  ['Nucleotide / base pair', 'Nucleótido / par de bases', 'The basic building blocks that make up DNA and RNA.'],
+  ['Exon / intron', 'Exón / intrón', 'The coding (exon) and non-coding (intron) segments of a gene.'],
+  ['Protein', 'Proteína', "A molecule built from a gene's instructions that carries out cell functions."],
+  ['Locus', 'Locus', 'The specific physical location of a gene on a chromosome.'],
+  ['Deletion', 'Deleción', 'The loss of a piece of DNA.'],
+  ['Duplication', 'Duplicación', 'An extra copy of a piece of DNA.'],
+  ['Insertion', 'Inserción', 'Extra DNA added into a gene sequence.'],
+  ['Translocation', 'Translocación', 'When a piece of one chromosome attaches to another chromosome.'],
+  ['Inversion', 'Inversión', 'A segment of DNA that is reversed within a chromosome.'],
+  ['Microdeletion / microduplication', 'Microdeleción / microduplicación', 'A very small missing or duplicated piece of a chromosome.'],
+  ['Copy number variant (CNV)', 'Variante en el número de copias', 'A larger- or smaller-than-normal number of copies of a DNA segment.'],
+  ['Single nucleotide polymorphism (SNP)', 'Polimorfismo de un solo nucleótido', 'A common variation at a single position in the DNA sequence.'],
+  ['Frameshift mutation', 'Mutación por corrimiento del marco de lectura', "An insertion or deletion that shifts how the genetic code is read."],
+  ['Missense / nonsense mutation', 'Mutación de sentido erróneo / mutación sin sentido', 'A change that alters one amino acid (missense) or stops protein production early (nonsense).'],
+  ['Splice site variant', 'Variante del sitio de empalme', "A change affecting how a gene's coding regions are joined together."],
+  // Testing, Procedures & Results
+  ['Genetic testing / screening', 'Prueba genética / tamizaje genético', 'Lab testing to look for genetic changes linked to disease.'],
+  ['Genetic counseling', 'Asesoramiento / consejería genética', 'Guidance helping patients understand genetic risks and testing options.'],
+  ['Karyotype', 'Cariotipo', "A picture of a person's full set of chromosomes."],
+  ['Microarray analysis', 'Análisis por micromatrices (microarreglos)', 'A test that scans the genome for missing or extra DNA segments.'],
+  ['Whole exome sequencing (WES)', 'Secuenciación del exoma completo', 'Sequencing of all the protein-coding regions of the genome.'],
+  ['Whole genome sequencing (WGS)', 'Secuenciación del genoma completo', "Sequencing of a person's entire genetic code."],
+  ['Single-gene testing', 'Prueba de un solo gen', 'Testing that looks at only one specific gene.'],
+  ['Panel testing', 'Panel de pruebas genéticas', 'Testing that looks at a group of genes linked to related conditions.'],
+  ['Variant of uncertain significance (VUS)', 'Variante de significado incierto', "A genetic change whose effect on health isn't yet clear."],
+  ['Pathogenic / likely pathogenic variant', 'Variante patogénica / probablemente patogénica', 'A genetic change known or strongly believed to cause disease.'],
+  ['Benign / likely benign variant', 'Variante benigna / probablemente benigna', 'A genetic change believed not to cause disease.'],
+  ['Positive / negative / inconclusive result', 'Resultado positivo / negativo / no concluyente', "Whether testing did, did not, or couldn't clearly find a genetic change."],
+  ['Confirmatory testing', 'Prueba confirmatoria', 'A follow-up test to verify an earlier result.'],
+  ['Carrier screening', 'Tamizaje de portadores', 'Testing to see if someone carries a gene variant for a recessive condition.'],
+  ['Newborn screening', 'Tamizaje neonatal', 'Routine testing of newborns for certain genetic and metabolic conditions.'],
+  ['Predictive / presymptomatic testing', 'Prueba predictiva / presintomática', "Testing a person without symptoms to see if they'll develop a condition later."],
+  ['Diagnostic testing', 'Prueba diagnóstica', 'Testing done to confirm a suspected diagnosis in someone with symptoms.'],
+  ['Cascade testing (testing relatives)', 'Prueba en cascada', 'Testing family members of someone with a known genetic variant.'],
+  ['Segregation analysis', 'Análisis de segregación', 'Studying how a genetic variant is passed through a family.'],
+  ['Turnaround time', 'Tiempo de entrega de resultados', 'How long it takes to get test results back.'],
+  ['Blood draw / buccal swab / saliva sample', 'Extracción de sangre / hisopado bucal / muestra de saliva', 'Common ways a genetic sample is collected.'],
+  // Prenatal & Reproductive Genetics
+  ['Prenatal testing', 'Prueba prenatal', 'Testing done during pregnancy to check the health of the fetus.'],
+  ['Amniocentesis', 'Amniocentesis', 'A procedure sampling amniotic fluid to test the fetus for genetic conditions.'],
+  ['Chorionic villus sampling (CVS)', 'Muestra de vellosidades coriónicas', 'A prenatal test sampling placental tissue, usually done earlier than amniocentesis.'],
+  ['Non-invasive prenatal testing (NIPT)', 'Prueba prenatal no invasiva', "A blood test screening for certain chromosome conditions using fetal DNA in the mother's blood."],
+  ['Nuchal translucency', 'Translucencia nucal', 'An ultrasound measurement of fluid at the back of the fetal neck, used in screening.'],
+  ['Ultrasound / sonogram', 'Ecografía / sonograma', 'Imaging using sound waves to view the fetus.'],
+  ['Miscarriage / pregnancy loss', 'Aborto espontáneo / pérdida del embarazo', 'The loss of a pregnancy before the fetus can survive outside the womb.'],
+  ['Stillbirth', 'Mortinato / muerte fetal', 'The loss of a pregnancy after 20 weeks.'],
+  ['Preimplantation genetic testing (PGT)', 'Prueba genética preimplantacional', "Testing embryos created through IVF before they're transferred to the uterus."],
+  ['In vitro fertilization (IVF)', 'Fecundación in vitro', 'Fertilizing an egg outside the body before transferring the embryo to the uterus.'],
+  ['Donor egg/sperm', 'Óvulo/esperma de donante', 'An egg or sperm provided by someone other than the intended parent.'],
+  ['Termination of pregnancy', 'Interrupción del embarazo', 'Ending a pregnancy.'],
+  ['Advanced maternal age', 'Edad materna avanzada', 'Pregnancy at age 35 or older, associated with increased chromosomal risk.'],
+  ['Recurrent pregnancy loss', 'Pérdida gestacional recurrente', 'Two or more consecutive pregnancy losses.'],
+  // Common Conditions & Syndromes
+  ['Trisomy 21 / Down syndrome', 'Trisomía 21 / síndrome de Down', 'A condition caused by an extra copy of chromosome 21.'],
+  ['Trisomy 18 / Edwards syndrome', 'Trisomía 18 / síndrome de Edwards', 'A serious condition caused by an extra copy of chromosome 18.'],
+  ['Trisomy 13 / Patau syndrome', 'Trisomía 13 / síndrome de Patau', 'A serious condition caused by an extra copy of chromosome 13.'],
+  ['Turner syndrome', 'Síndrome de Turner', 'A condition in females caused by a missing or incomplete X chromosome.'],
+  ['Klinefelter syndrome', 'Síndrome de Klinefelter', 'A condition in males caused by an extra X chromosome.'],
+  ['Cystic fibrosis', 'Fibrosis quística', 'An inherited disorder causing thick mucus that affects the lungs and digestion.'],
+  ['Fragile X syndrome', 'Síndrome del X frágil', 'The most common inherited cause of intellectual disability, linked to the FMR1 gene.'],
+  ['Sickle cell trait / disease', 'Rasgo / enfermedad de células falciformes', 'A blood disorder affecting red blood cell shape and oxygen delivery.'],
+  ['Tay-Sachs disease', 'Enfermedad de Tay-Sachs', 'A fatal inherited disorder that destroys nerve cells in the brain and spinal cord.'],
+  ['Spinal muscular atrophy (SMA)', 'Atrofia muscular espinal', 'A genetic disease causing progressive loss of muscle movement control.'],
+  ['Duchenne muscular dystrophy', 'Distrofia muscular de Duchenne', 'A severe, progressive muscle-wasting disorder appearing in early childhood.'],
+  ["Huntington's disease", 'Enfermedad de Huntington', 'An inherited disorder causing progressive breakdown of brain nerve cells.'],
+  ['Marfan syndrome', 'Síndrome de Marfan', 'A connective tissue disorder affecting the heart, eyes, and skeleton.'],
+  ['Neurofibromatosis', 'Neurofibromatosis', 'A group of genetic disorders causing tumors to grow on nerve tissue.'],
+  ['Ehlers-Danlos syndrome', 'Síndrome de Ehlers-Danlos', 'A group of disorders affecting connective tissue, often causing joint hypermobility.'],
+  ['22q11.2 deletion syndrome', 'Síndrome de deleción 22q11.2', 'A condition caused by a missing piece of chromosome 22, affecting the heart, immune system, and more.'],
+  ['Prader-Willi syndrome', 'Síndrome de Prader-Willi', 'A genetic condition causing constant hunger, low muscle tone, and developmental delays.'],
+  ['Angelman syndrome', 'Síndrome de Angelman', 'A genetic disorder causing developmental delay, seizures, and a happy, excitable demeanor.'],
+  ['Congenital anomaly / birth defect', 'Anomalía congénita / defecto de nacimiento', 'A structural or functional abnormality present at birth.'],
+  ['Neural tube defect', 'Defecto del tubo neural', 'A birth defect of the brain or spine caused by incomplete closure of the neural tube.'],
+  ['Spina bifida', 'Espina bífida', "A neural tube defect where the spine doesn't fully close during development."],
+  ['Cleft lip/palate', 'Labio/paladar hendido', "A birth defect where the lip or roof of the mouth doesn't fully form."],
+  ['Intellectual disability', 'Discapacidad intelectual', 'Limitations in intellectual functioning and adaptive skills, often present from childhood.'],
+  ['Autism spectrum disorder', 'Trastorno del espectro autista', 'A developmental condition affecting communication, behavior, and social interaction.'],
+  ['Developmental delay', 'Retraso del desarrollo', "When a child doesn't reach developmental milestones at the expected age."],
+  ['Failure to thrive', 'Retraso del crecimiento / falta de progreso pondoestatural', 'Inadequate weight gain or growth in an infant or child.'],
+  // Hereditary Cancer Genetics
+  ['Hereditary cancer syndrome', 'Síndrome de cáncer hereditario', 'An inherited condition that significantly raises the risk of certain cancers.'],
+  ['BRCA1 / BRCA2', 'BRCA1 / BRCA2', 'Genes that, when altered, significantly increase the risk of breast and ovarian cancer.'],
+  ['Lynch syndrome', 'Síndrome de Lynch', 'An inherited condition raising the risk of colorectal and other cancers.'],
+  ['Li-Fraumeni syndrome', 'Síndrome de Li-Fraumeni', 'A rare inherited condition raising the risk of multiple cancer types, often at a young age.'],
+  ['Familial adenomatous polyposis (FAP)', 'Poliposis adenomatosa familiar', 'An inherited condition causing numerous colon polyps with a high cancer risk.'],
+  ['Tumor suppressor gene', 'Gen supresor de tumores', 'A gene that normally helps prevent uncontrolled cell growth.'],
+  ['Oncogene', 'Oncogén', 'A gene that can drive cancer development when mutated or overactive.'],
+  ['Somatic vs. germline testing', 'Prueba somática vs. de línea germinal', 'Testing tumor tissue only (somatic) versus testing for an inherited variant (germline).'],
+  ['Risk-reducing surgery', 'Cirugía de reducción de riesgo', 'Surgery done to lower cancer risk before disease develops.'],
+  ['Prophylactic mastectomy/oophorectomy', 'Mastectomía/ooforectomía profiláctica', 'Preventive removal of the breasts or ovaries to reduce cancer risk.'],
+  ['Increased surveillance / screening', 'Vigilancia / tamizaje aumentado', 'More frequent or earlier cancer screening for those at higher risk.'],
+  ['Lifetime risk', 'Riesgo a lo largo de la vida', "The overall chance of developing a condition over a person's lifetime."],
+  // Metabolic & Biochemical Genetics (Phenylketonuria omitted — already exists)
+  ['Inborn error of metabolism', 'Error congénito del metabolismo', "A genetic condition disrupting the body's ability to process nutrients."],
+  ['Mitochondrial disease', 'Enfermedad mitocondrial', "A disorder caused by dysfunction in the cell's energy-producing mitochondria."],
+  ['Enzyme deficiency', 'Deficiencia enzimática', 'A lack of a specific enzyme needed for normal body processes.'],
+  ['Lysosomal storage disorder', 'Enfermedad de depósito lisosomal', "A group of disorders where the body can't break down certain substances, causing buildup in cells."],
+  ['Metabolic panel', 'Panel metabólico', 'A blood test checking several body chemistry markers at once.'],
+  ['Dietary/enzyme replacement therapy', 'Terapia dietética / de reemplazo enzimático', 'Treatment using special diets or replacement enzymes to manage a metabolic disorder.'],
+  // Counseling, Ethics & Documentation
+  ['Risk assessment', 'Evaluación de riesgo', 'Evaluating a person\u2019s likelihood of having or passing on a genetic condition.'],
+  ['Recurrence risk', 'Riesgo de recurrencia', 'The chance that a genetic condition will occur again in a family.'],
+  ['Informed consent', 'Consentimiento informado', "A patient's voluntary agreement to a procedure after understanding its risks and benefits."],
+  ['Genetic predisposition', 'Predisposición genética', 'An increased likelihood of developing a condition based on genetic makeup.'],
+  ['Phenotype / genotype', 'Fenotipo / genotipo', "A person's observable traits (phenotype) versus their genetic makeup (genotype)."],
+  ['Dysmorphic features', 'Rasgos dismórficos', 'Unusual physical features that can suggest an underlying genetic condition.'],
+  ['Physical exam findings', 'Hallazgos del examen físico', 'Observations made by a clinician during a physical examination.'],
+  ['Differential diagnosis', 'Diagnóstico diferencial', "A list of possible conditions that could explain a patient's symptoms."],
+  ['Genetic Information Nondiscrimination Act (GINA)', 'Ley de No Discriminación por Información Genética (GINA)', 'A U.S. law protecting people from discrimination based on genetic information.'],
+  ['Confidentiality', 'Confidencialidad', "The obligation to keep a patient's information private."],
+  ['Duty to warn (relatives)', 'Deber de advertir (a familiares)', 'An ethical question of whether relatives should be told about a genetic risk that affects them.'],
+  ['Psychosocial support', 'Apoyo psicosocial', 'Emotional and social support offered alongside medical care.'],
+  ['Reproductive options', 'Opciones reproductivas', 'The range of choices available to a person or couple regarding having children.'],
+  ['Shared decision-making', 'Toma de decisiones compartida', 'A collaborative process between patient and provider to reach a care decision.'],
+  // False Friends & Pitfalls
+  ["Severe (false friend: \u201cSevero\u201d)", 'Severo', "\u201cSevero\u201d means 'strict' in Spanish, not 'severe.' Clinical severity = grave."],
+  ["Constipated (false friend: \u201cConstipado\u201d)", 'Constipado', "\u201cConstipado\u201d means 'having a cold' in Spanish, not 'constipated.' Constipated = estreñido/a."],
+  ["Embarrassed (false friend: \u201cEmbarazada\u201d)", 'Embarazada', "\u201cEmbarazada\u201d means 'pregnant' in Spanish, not 'embarrassed.'"],
+  ["Exit (false friend: \u201c\u00c9xito\u201d)", 'Éxito', "\u201c\u00c9xito\u201d means 'success' in Spanish, not 'exit.'"],
+  ["Actually (false friend: \u201cActualmente\u201d)", 'Actualmente', "\u201cActualmente\u201d means 'currently' in Spanish, not 'actually.'"],
+  ["To assist (false friend: \u201cAsistir\u201d)", 'Asistir', "\u201cAsistir\u201d means 'to attend' in Spanish, not 'to assist.'"],
+  ["Injury (false friend: \u201cInjuria\u201d)", 'Injuria', "\u201cInjuria\u201d means 'insult/slander' in Spanish. Injury = lesión."],
+  ["To molest (false friend: \u201cMolestar\u201d)", 'Molestar', "\u201cMolestar\u201d means 'to bother' in Spanish. Use carefully \u2014 tone and context shift risk."],
+  // Regional Variation
+  ['Flu (regional variation)', 'Gripe (Spain) / Gripa (parts of Latin America)', "Regional variation in terminology depending on the patient's country of origin."],
+  ['Common cold (regional variation)', 'Resfriado / Resfrío', 'Term varies by region.'],
+  ['Urinary tract infection, abbreviation (regional variation)', 'ITU (Spain) / IVU (Latin America)', 'Regional abbreviation variation for urinary tract infection.'],
+  ['Baby (regional variation)', 'Bebé / Nene / Guagua / Chamaco', "Strong regional variation depending on the patient's country of origin."],
+  ['Blood / bleeding (regional variation)', 'Sangre / Sangrado', "'Sangrado' is preferred in clinical documentation."],
+];
+
+async function runGeneticsVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.geneticsVocabImportV1) return; // already ran
+
+    const genetics = DATA.categories.find(c=>c.name==='Genetics');
+    if(!genetics) return;
+
+    const existingEnglish = new Set(genetics.terms.map(t=>(t.en||'').trim().toLowerCase()));
+    const batchSize = 400;
+    const toAdd = GENETICS_VOCAB_IMPORT_V1.filter(([en]) => !existingEnglish.has(en.trim().toLowerCase()));
+
+    for(let i=0; i<toAdd.length; i+=batchSize){
+      const batch = db.batch();
+      toAdd.slice(i, i+batchSize).forEach(([en, es, def])=>{
+        const id = genId();
+        batch.set(db.collection('terms').doc(id), stripUndefined({
+          id, categoryId: genetics.id, en, es, def
+        }));
+      });
+      await batch.commit();
+    }
+
+    await ref.set({ ...meta, geneticsVocabImportV1: true }, { merge:true });
+    logActivity(`added ${toAdd.length} genetics terms from the reference PDF`);
+  }catch(err){
+    console.error('runGeneticsVocabImportV1 failed:', err);
+  }
+}
+
 async function runVocabReclassificationV1(){
   if(!db) return;
   try{
@@ -3353,6 +3555,7 @@ async function loadData(){
     await loadCategoriesMeta();
     await loadAllTerms();
     await runVocabReclassificationV1();
+    await runGeneticsVocabImportV1();
     startTermsListener();
     startCategoriesMetaListener();
     render();
