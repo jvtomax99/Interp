@@ -1617,13 +1617,22 @@
 
   /* ---------- Doctor Prep ---------- */
   .doc-research{ max-width:640px; margin:0 auto; }
-  .doc-research-search{ display:flex; gap:10px; margin:18px 0 22px 0; }
+  .doc-research-search{ display:flex; gap:10px; margin:18px 0 10px 0; }
   .doc-research-search input{
     flex:1; font-family:var(--sans); font-size:14px; padding:12px 14px; border-radius:12px;
     border:none; background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
     color:var(--ink);
   }
   .doc-research-search input:focus{ outline:2px solid var(--accent-2); outline-offset:1px; }
+  .doc-research-filters{ display:flex; gap:10px; margin-bottom:14px; }
+  .doc-research-filters input{
+    flex:1; min-width:0; font-family:var(--sans); font-size:12.5px; padding:10px 12px; border-radius:10px;
+    border:none; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); color:var(--ink-soft);
+  }
+  .doc-research-filters input:focus{ outline:2px solid var(--accent-2); outline-offset:1px; }
+  .doc-research-submit{ width:100%; margin-bottom:18px; }
+  .doc-research-elapsed{ font-family:var(--mono); color:var(--ink-faint); }
+  .doc-research-cancel{ margin-top:12px; }
   .doc-research-intro{ color:var(--ink-soft); font-size:14px; line-height:1.6; }
   .doc-research-loading{
     display:flex; align-items:center; gap:10px; color:var(--ink-soft); font-size:14px; padding:20px 0;
@@ -7345,7 +7354,9 @@ function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
 // serverless endpoint (Claude with web search), then shows a prep list of
 // specialty-specific terminology, flagging which terms already exist
 // somewhere in the glossary versus which are genuinely new.
-let doctorResearchState = { status: 'idle', doctorName: '', result: null, error: null };
+let doctorResearchState = { status: 'idle', doctorName: '', specialty: '', location: 'Hackensack Meridian Health', result: null, error: null };
+let doctorResearchAbortController = null;
+let doctorResearchElapsedTimer = null;
 
 function allGlossaryTermsFlat(){
   return DATA.categories.flatMap(c => c.terms);
@@ -7367,30 +7378,58 @@ function findBestDomainMatch(specialty){
   return DATA.categories.find(c => c.name === 'General Medicine & Vital Signs') || null;
 }
 
+function cancelDoctorResearch(){
+  if(doctorResearchAbortController) doctorResearchAbortController.abort();
+  clearInterval(doctorResearchElapsedTimer);
+  doctorResearchState = { ...doctorResearchState, status: 'idle', result: null, error: null };
+  render();
+}
+
 async function runDoctorResearch(){
-  const input = document.getElementById('doctorResearchInput');
-  const name = input ? input.value.trim() : '';
+  const nameInput = document.getElementById('doctorResearchInput');
+  const specialtyInput = document.getElementById('doctorResearchSpecialty');
+  const locationInput = document.getElementById('doctorResearchLocation');
+  const name = nameInput ? nameInput.value.trim() : '';
+  const specialty = specialtyInput ? specialtyInput.value.trim() : '';
+  const location = locationInput ? locationInput.value.trim() : '';
   if(!name){ showToast('Enter a doctor\u2019s name first.'); return; }
 
-  doctorResearchState = { status: 'loading', doctorName: name, result: null, error: null };
+  doctorResearchState = { status: 'loading', doctorName: name, specialty, location, result: null, error: null, elapsed: 0 };
   render();
+
+  clearInterval(doctorResearchElapsedTimer);
+  const startedAt = Date.now();
+  doctorResearchElapsedTimer = setInterval(() => {
+    const el = document.getElementById('docResearchElapsed');
+    if(el) el.textContent = Math.round((Date.now() - startedAt) / 1000) + 's';
+  }, 1000);
+
+  doctorResearchAbortController = new AbortController();
+  const timeoutId = setTimeout(() => doctorResearchAbortController.abort('timeout'), 45000);
 
   try{
     const res = await fetch('/api/doctor-research', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doctorName: name }),
+      body: JSON.stringify({ doctorName: name, specialty, location }),
+      signal: doctorResearchAbortController.signal,
     });
     const data = await res.json();
     if(!res.ok){
-      doctorResearchState = { status: 'error', doctorName: name, result: null, error: data.error || 'Something went wrong.' };
+      doctorResearchState = { ...doctorResearchState, status: 'error', result: null, error: data.error || 'Something went wrong.' };
     } else {
-      doctorResearchState = { status: 'done', doctorName: name, result: data, error: null };
+      doctorResearchState = { ...doctorResearchState, status: 'done', result: data, error: null };
     }
   }catch(err){
     console.error('runDoctorResearch failed:', err);
-    doctorResearchState = { status: 'error', doctorName: name, result: null, error: 'Could not reach the research service. Check your connection.' };
+    const timedOut = err.name === 'AbortError';
+    doctorResearchState = { ...doctorResearchState, status: 'error', result: null,
+      error: timedOut
+        ? 'This search took longer than 45 seconds and was stopped. Try adding a specialty or location to narrow it down, or try again.'
+        : 'Could not reach the research service. Check your connection.' };
   }
+  clearTimeout(timeoutId);
+  clearInterval(doctorResearchElapsedTimer);
   render();
 }
 
@@ -7417,8 +7456,9 @@ function renderDoctorResearch(){
     body = `
       <div class="doc-research-loading">
         <span class="tr-spinner"></span>
-        <p>Researching "${escapeHtml(s.doctorName)}"\u2026</p>
-      </div>`;
+        <p>Researching "${escapeHtml(s.doctorName)}"\u2026 <span id="docResearchElapsed" class="doc-research-elapsed">0s</span></p>
+      </div>
+      <button class="btn btn-ghost doc-research-cancel" onclick="cancelDoctorResearch()">Cancel</button>`;
   } else if(s.status === 'error'){
     body = `<div class="doc-research-error">${escapeHtml(s.error)}</div>`;
   } else if(s.status === 'done' && s.result){
@@ -7451,17 +7491,23 @@ function renderDoctorResearch(){
         }).join('')}
       </div>`;
   } else {
-    body = `<p class="doc-research-intro">Type a doctor's name to look up their specialty and get a head start on the terminology likely to come up in that appointment.</p>`;
+    body = `<p class="doc-research-intro">Type a doctor's name to look up their specialty and get a head start on the terminology likely to come up in that appointment. Adding a specialty or location narrows the search and finds the right person faster.</p>`;
   }
 
   return `
     <div class="doc-research">
       <div class="section-head"><h2>Doctor Prep</h2></div>
       <div class="doc-research-search">
-        <input id="doctorResearchInput" type="text" placeholder="e.g. Dr. Andre Goy" value="${escapeHtml(s.doctorName || '')}"
+        <input id="doctorResearchInput" type="text" placeholder="Doctor's name — e.g. Dr. Andre Goy" value="${escapeHtml(s.doctorName || '')}"
           onkeydown="if(event.key==='Enter') runDoctorResearch()">
-        <button class="btn btn-primary" onclick="runDoctorResearch()" ${s.status==='loading'?'disabled':''}>Research</button>
       </div>
+      <div class="doc-research-filters">
+        <input id="doctorResearchSpecialty" type="text" placeholder="Specialty (optional) — e.g. Oncology" value="${escapeHtml(s.specialty || '')}"
+          onkeydown="if(event.key==='Enter') runDoctorResearch()">
+        <input id="doctorResearchLocation" type="text" placeholder="Hospital / location (optional)" value="${escapeHtml(s.location || '')}"
+          onkeydown="if(event.key==='Enter') runDoctorResearch()">
+      </div>
+      <button class="btn btn-primary doc-research-submit" onclick="runDoctorResearch()" ${s.status==='loading'?'disabled':''}>Research</button>
       ${body}
       <p class="doc-research-disclaimer">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
     </div>
