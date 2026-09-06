@@ -75,7 +75,7 @@ function findInDirectory(inputName) {
 }
 
 async function callClaude(apiKey, systemPrompt, userContent, tools) {
-  const body = { model: 'claude-sonnet-4-6', max_tokens: 2000, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
+  const body = { model: 'claude-sonnet-4-6', max_tokens: 4096, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
   if (tools) body.tools = tools;
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -88,10 +88,35 @@ async function callClaude(apiKey, systemPrompt, userContent, tools) {
     throw new Error('api_error');
   }
   const data = await response.json();
+
+  if (data.stop_reason === 'max_tokens') {
+    console.error('Response was truncated at max_tokens before finishing.');
+    throw new Error('truncated');
+  }
+
   const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
   const rawText = textBlocks.join('\n').trim();
-  const cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-  return JSON.parse(cleaned);
+  let cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+  // Claude occasionally adds a stray sentence before or after the JSON
+  // despite instructions not to — fall back to the outermost {...} span
+  // rather than failing outright on an otherwise-good response.
+  try {
+    return JSON.parse(cleaned);
+  } catch (firstErr) {
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1));
+      } catch (secondErr) {
+        console.error('Still failed to parse after extracting {...} span. Raw text:', rawText);
+        throw secondErr;
+      }
+    }
+    console.error('No {...} span found in response. Raw text:', rawText);
+    throw firstErr;
+  }
 }
 
 const RESPONSE_SHAPE = `Respond with ONLY valid JSON, no other text, no markdown code fences, in exactly this shape:
@@ -162,6 +187,8 @@ If you cannot find reliable, specific information about this named individual, s
     console.error('doctor-research handler failed:', err);
     if (err.message === 'api_error') {
       res.status(502).json({ error: 'Research service is temporarily unavailable. Please try again.' });
+    } else if (err.message === 'truncated') {
+      res.status(502).json({ error: 'The response was cut off before finishing. Please try again.' });
     } else if (err instanceof SyntaxError) {
       res.status(502).json({ error: 'Could not understand the research result. Please try again.' });
     } else {
