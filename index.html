@@ -1942,7 +1942,7 @@
 
 <div class="overlay" id="onboardingOverlay">
   <div class="modal onboarding-modal">
-    <div class="onboarding-glyph">${ICON_GLYPH}</div>
+    <div class="onboarding-glyph" id="onboardingGlyph"></div>
     <h3 id="onboardingTitle"></h3>
     <p id="onboardingBody" class="onboarding-body"></p>
     <div class="onboarding-dots" id="onboardingDots"></div>
@@ -3049,6 +3049,7 @@ function onboardingBack(){
 function renderOnboardingStep(){
   const step = ONBOARDING_STEPS[onboardingStep];
   const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
+  document.getElementById('onboardingGlyph').innerHTML = ICON_GLYPH;
   document.getElementById('onboardingTitle').textContent = step.title;
   document.getElementById('onboardingBody').textContent = step.body;
   document.getElementById('onboardingDots').innerHTML = ONBOARDING_STEPS.map((_, i)=>
