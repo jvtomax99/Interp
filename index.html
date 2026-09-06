@@ -3431,6 +3431,171 @@ const GENETICS_VOCAB_IMPORT_V1 = [
   ['Blood / bleeding (regional variation)', 'Sangre / Sangrado', "'Sangrado' is preferred in clinical documentation."],
 ];
 
+// "General Medicine & Vital Signs" — the first of several new domains
+// covering general Spanish medical interpreting vocabulary, built the same
+// way as the Genetics PDF import: a data array of [English, Spanish,
+// Definition] triples, added by a one-time, idempotent migration. Unlike
+// the Genetics import, this domain doesn't exist yet, so the migration
+// creates it first if needed.
+const GENERAL_MEDICINE_VOCAB_V1 = [
+  // Vital Signs
+  ['Blood pressure', 'Presión arterial', 'The force of blood pushing against artery walls, given as two numbers.'],
+  ['Heart rate / pulse', 'Frecuencia cardíaca / pulso', 'The number of heartbeats per minute.'],
+  ['Respiratory rate', 'Frecuencia respiratoria', 'The number of breaths taken per minute.'],
+  ['Temperature', 'Temperatura', 'A measure of body heat, used to detect fever or hypothermia.'],
+  ['Oxygen saturation (SpO2)', 'Saturación de oxígeno', 'The percentage of oxygen being carried in the blood.'],
+  ['Weight', 'Peso', 'Body weight, tracked at most visits.'],
+  ['Height', 'Estatura / talla', 'Body height.'],
+  ['Body Mass Index (BMI)', 'Índice de masa corporal (IMC)', 'A calculation from height and weight used to screen weight categories.'],
+  ['Fever', 'Fiebre', 'An elevated body temperature, usually a sign of infection.'],
+  ['Hypothermia', 'Hipotermia', 'Abnormally low body temperature.'],
+  ['Hypertension', 'Hipertensión', 'High blood pressure.'],
+  ['Hypotension', 'Hipotensión', 'Low blood pressure.'],
+  ['Tachycardia', 'Taquicardia', 'An abnormally fast heart rate.'],
+  ['Bradycardia', 'Bradicardia', 'An abnormally slow heart rate.'],
+  ['Tachypnea', 'Taquipnea', 'Abnormally fast breathing.'],
+  // Common Symptoms
+  ['Pain', 'Dolor', 'An unpleasant physical sensation, one of the most common reasons for a visit.'],
+  ['Nausea', 'Náuseas', 'An uncomfortable feeling of needing to vomit.'],
+  ['Vomiting', 'Vómito', 'Forceful expulsion of stomach contents through the mouth.'],
+  ['Dizziness', 'Mareo', 'A sensation of unsteadiness, lightheadedness, or spinning.'],
+  ['Fatigue', 'Fatiga / cansancio', 'A persistent feeling of tiredness or low energy.'],
+  ['Weakness', 'Debilidad', 'Reduced strength in the body or a specific area.'],
+  ['Shortness of breath', 'Dificultad para respirar / falta de aire', 'A sensation of not getting enough air.'],
+  ['Chest pain', 'Dolor de pecho', 'Pain located in the chest, which can have cardiac or non-cardiac causes.'],
+  ['Headache', 'Dolor de cabeza', 'Pain located in the head.'],
+  ['Abdominal pain', 'Dolor abdominal', 'Pain located in the belly area.'],
+  ['Back pain', 'Dolor de espalda', 'Pain located in the back.'],
+  ['Swelling / edema', 'Hinchazón / edema', 'An abnormal buildup of fluid causing puffiness in body tissue.'],
+  ['Numbness', 'Entumecimiento', 'A loss of normal sensation in part of the body.'],
+  ['Tingling', 'Hormigueo', 'A prickling or "pins and needles" sensation.'],
+  ['Chills', 'Escalofríos', 'A feeling of coldness with shivering, often with fever.'],
+  ['Night sweats', 'Sudores nocturnos', 'Heavy sweating during sleep, sometimes a sign of underlying illness.'],
+  ['Loss of appetite', 'Pérdida de apetito', 'A reduced desire to eat.'],
+  ['Unintentional weight loss', 'Pérdida de peso involuntaria', 'Losing weight without trying, which can signal an underlying condition.'],
+  ['Rash', 'Sarpullido / erupción cutánea', 'A visible change in skin color or texture, often with redness or bumps.'],
+  ['Itching', 'Picazón / comezón', 'An uncomfortable sensation prompting a person to scratch.'],
+  ['Cough', 'Tos', 'A reflex that clears the airway, often a symptom of respiratory illness.'],
+  // Pain Descriptors
+  ['Sharp pain', 'Dolor agudo / punzante', 'Pain described as sudden and stabbing.'],
+  ['Dull pain', 'Dolor sordo', 'Pain described as a low-grade, persistent ache.'],
+  ['Throbbing pain', 'Dolor pulsátil', 'Pain that comes in waves, often matching the heartbeat.'],
+  ['Burning pain', 'Dolor ardiente / quemante', 'Pain described as a burning sensation.'],
+  ['Cramping', 'Retortijones / calambres', 'Pain from sudden, involuntary muscle contraction.'],
+  ['Radiating pain', 'Dolor irradiado', 'Pain that spreads from its origin to another part of the body.'],
+  ['Pain scale (0 to 10)', 'Escala del dolor (0 al 10)', 'A tool patients use to rate pain severity from none to worst possible.'],
+  ['Onset (of symptoms)', 'Aparición / inicio (de los síntomas)', 'When a symptom first began.'],
+  ['Duration (of symptoms)', 'Duración (de los síntomas)', 'How long a symptom has been present.'],
+  ['Intermittent vs. constant', 'Intermitente vs. constante', 'Whether a symptom comes and goes, or is continuously present.'],
+  // History Taking
+  ['Chief complaint', 'Motivo principal de consulta', "The main reason for today's visit, in the patient's own words."],
+  ['Past medical history', 'Historial médico', "A patient's record of prior diagnoses and health conditions."],
+  ['Family history', 'Historial familiar', 'A record of health conditions that run in the patient\u2019s family.'],
+  ['Surgical history', 'Historial quirúrgico', "A patient's record of prior surgeries."],
+  ['Social history', 'Historial social', "Information about a patient's lifestyle, occupation, and living situation."],
+  ['Allergies', 'Alergias', 'Substances that trigger an adverse immune reaction in the patient.'],
+  ['Current medications', 'Medicamentos actuales', 'Medications the patient is presently taking.'],
+  ['Immunization history', 'Historial de vacunación', "A record of a patient's vaccinations."],
+  ['Review of systems', 'Revisión por sistemas', "A structured checklist of questions covering the body's systems."],
+  ['Exposure history', 'Historial de exposición', 'Information about contact with illness, chemicals, or environmental hazards.'],
+  ['Tobacco use', 'Consumo de tabaco', 'A patient\u2019s history of smoking or tobacco products.'],
+  ['Alcohol use', 'Consumo de alcohol', "A patient's history of alcohol consumption."],
+  ['Substance use', 'Consumo de sustancias', 'A patient\u2019s history of recreational or non-prescribed drug use.'],
+  ['Sexual history', 'Historial sexual', "Information relevant to a patient's sexual health and risk factors."],
+  // Physical Exam
+  ['Auscultation', 'Auscultación', 'Listening to internal body sounds, usually with a stethoscope.'],
+  ['Palpation', 'Palpación', 'Examining the body by feeling with the hands.'],
+  ['Percussion', 'Percusión', 'Tapping on the body to assess underlying structures by sound.'],
+  ['Inspection', 'Inspección', 'Visually examining the body for signs of illness.'],
+  ['Reflexes', 'Reflejos', 'Automatic muscle responses tested during a neurological exam.'],
+  ['Range of motion', 'Rango de movimiento', 'How far a joint can move in different directions.'],
+  ['Lymph nodes', 'Ganglios linfáticos', 'Small immune-system glands often checked for swelling.'],
+  ['Skin turgor', 'Turgencia de la piel', "A measure of skin elasticity, used to assess hydration."],
+  ['Capillary refill', 'Llenado capilar', 'How quickly color returns to skin after being pressed, used to assess circulation.'],
+  ['Pupils equal and reactive to light (PERRL)', 'Pupilas iguales y reactivas a la luz', 'A normal finding when both pupils are the same size and respond to light.'],
+  // General Clinical & Administrative Terms
+  ['Admission', 'Ingreso hospitalario', 'Being formally accepted into the hospital for care.'],
+  ['Discharge', 'Alta médica', 'Being formally released from a hospital or facility.'],
+  ['Discharge instructions', 'Instrucciones al alta', 'Guidance given to a patient for care after leaving the facility.'],
+  ['Follow-up appointment', 'Cita de seguimiento', 'A scheduled visit to check on progress after treatment.'],
+  ['Referral', 'Referencia / remisión', 'Being directed to see a specialist or another service.'],
+  ['Chart / medical record', 'Expediente médico / historia clínica', "A patient's official health record."],
+  ['Diagnosis', 'Diagnóstico', "The identification of a patient's condition."],
+  ['Prognosis', 'Pronóstico', 'The likely course or outcome of a condition.'],
+  ['Treatment plan', 'Plan de tratamiento', 'The proposed course of care for a patient.'],
+  ['Standing orders', 'Órdenes permanentes', 'Pre-approved instructions that apply automatically under set conditions.'],
+  ['NPO (nothing by mouth)', 'NPO (nada por vía oral)', 'An instruction not to eat or drink, often before a procedure.'],
+  ['IV (intravenous)', 'Vía intravenosa', 'Delivered directly into a vein.'],
+  ['IM (intramuscular)', 'Vía intramuscular', 'Delivered by injection into a muscle.'],
+  ['Code Blue', 'Código azul', 'A hospital alert signaling a patient in cardiac or respiratory arrest.'],
+  ['Isolation precautions', 'Precauciones de aislamiento', 'Extra safety measures to prevent spreading infection.'],
+  ['Informed refusal', 'Rechazo informado', 'A patient\u2019s documented decision to decline care after understanding the risks.'],
+  ['Advance directive', 'Directiva anticipada', 'A legal document stating a patient\u2019s wishes for future medical care.'],
+  ['Power of attorney (healthcare)', 'Poder notarial (de atención médica)', 'A person legally authorized to make medical decisions for a patient who cannot.'],
+  ['DNR (Do Not Resuscitate)', 'Orden de no resucitar (ONR)', 'An order instructing providers not to perform CPR.'],
+  ['Living will', 'Testamento vital', 'A document outlining a person\u2019s wishes for end-of-life care.'],
+  ['Interpreter services', 'Servicios de interpretación', 'Language access support provided to patients with limited English proficiency.'],
+  ['Consent form', 'Formulario de consentimiento', 'A signed document showing a patient agreed to a procedure.'],
+  ['Baseline', 'Valor de referencia / línea base', 'A patient\u2019s normal or starting measurement, used for comparison.'],
+  ['Acute vs. chronic', 'Agudo vs. crónico', 'Sudden and short-term versus long-term and ongoing.'],
+  ['Comorbidity', 'Comorbilidad', 'An additional condition existing alongside a primary diagnosis.'],
+  ['Contraindication', 'Contraindicación', 'A reason a treatment should be avoided for a specific patient.'],
+  ['Side effect', 'Efecto secundario', 'An unintended effect of a medication or treatment.'],
+  ['Adverse reaction', 'Reacción adversa', 'A harmful or unexpected response to a medication or treatment.'],
+  ['Triage', 'Triaje / clasificación', 'Sorting patients by the urgency of their condition.'],
+  ['Wellness visit / check-up', 'Chequeo médico / examen de rutina', 'A routine visit to monitor general health.'],
+  ['Preventive care', 'Atención preventiva', 'Care aimed at preventing illness before it occurs.'],
+  ['Screening test', 'Prueba de detección', 'A test used to check for disease in people without symptoms.'],
+  ['Standard of care', 'Estándar de atención', 'The level of care a competent provider is expected to give.'],
+];
+
+async function ensureDomainExists(name, color, icon){
+  let cat = DATA.categories.find(c=>c.name===name);
+  if(cat) return cat;
+  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide'];
+  const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
+  const base = slugify(name);
+  let id = base, n = 2;
+  while(existingIds.includes(id)){ id = `${base}-${n}`; n++; }
+  cat = { id, name, color, icon, parentId: null, terms: [] };
+  DATA.categories.push(cat);
+  await saveCategoriesMeta();
+  return cat;
+}
+
+async function bulkAddTerms(domainCat, wordList){
+  const existingEnglish = new Set(domainCat.terms.map(t=>(t.en||'').trim().toLowerCase()));
+  const toAdd = wordList.filter(([en]) => !existingEnglish.has(en.trim().toLowerCase()));
+  const batchSize = 400;
+  for(let i=0; i<toAdd.length; i+=batchSize){
+    const batch = db.batch();
+    toAdd.slice(i, i+batchSize).forEach(([en, es, def])=>{
+      const id = genId();
+      batch.set(db.collection('terms').doc(id), stripUndefined({ id, categoryId: domainCat.id, en, es, def }));
+    });
+    await batch.commit();
+  }
+  return toAdd.length;
+}
+
+async function runGeneralMedicineVocabImportV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.generalMedicineVocabImportV1) return; // already ran
+
+    const domain = await ensureDomainExists('General Medicine & Vital Signs', '#5B8A9A', 'stethoscope');
+    const added = await bulkAddTerms(domain, GENERAL_MEDICINE_VOCAB_V1);
+
+    await ref.set({ generalMedicineVocabImportV1: true }, { merge:true });
+    logActivity(`added the "General Medicine & Vital Signs" domain with ${added} terms`);
+  }catch(err){
+    console.error('runGeneralMedicineVocabImportV1 failed:', err);
+  }
+}
+
 async function runGeneticsVocabImportV1(){
   if(!db) return;
   try{
@@ -3556,6 +3721,7 @@ async function loadData(){
     await loadAllTerms();
     await runVocabReclassificationV1();
     await runGeneticsVocabImportV1();
+    await runGeneralMedicineVocabImportV1();
     startTermsListener();
     startCategoriesMetaListener();
     render();
@@ -5532,7 +5698,8 @@ const DOMAIN_ICONS = {
   pill: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="9" width="16" height="6.5" rx="3.25" transform="rotate(-45 12 12)" stroke="currentColor" stroke-width="1.6"/><path d="M9.8 9.8L14.2 14.2" stroke="currentColor" stroke-width="1.6"/></svg>',
   lungs: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 11C11 9 9 8 7.5 8C5.5 8 4 9.5 4 12C4 15 5 19 7 19C9 19 10 17 10.5 15L12 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11C13 9 15 8 16.5 8C18.5 8 20 9.5 20 12C20 15 19 19 17 19C15 19 14 17 13.5 15L12 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   bone: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6C7.1 6 8 6.9 8 8C8 8.5 7.8 9 7.5 9.3L14.7 16.5C15 16.2 15.5 16 16 16C17.1 16 18 16.9 18 18C18 19.1 17.1 20 16 20C14.9 20 14 19.1 14 18C14 17.5 14.2 17 14.5 16.7L7.3 9.5C7 9.8 6.5 10 6 10C4.9 10 4 9.1 4 8C4 6.9 4.9 6 6 6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
-  sparkle: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L13.5 9.5L20 11L13.5 12.5L12 19L10.5 12.5L4 11L10.5 9.5L12 3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'
+  sparkle: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L13.5 9.5L20 11L13.5 12.5L12 19L10.5 12.5L4 11L10.5 9.5L12 3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  stethoscope: '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4V11C6 13.8 8.2 16 11 16C13.8 16 16 13.8 16 11V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 4H4M16 8H18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="18" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="11" cy="19" r="2.3" stroke="currentColor" stroke-width="1.6"/><path d="M11 16V16.7" stroke="currentColor" stroke-width="1.6"/></svg>'
 };
 function renderLinks(t, categoryId){
   const links = [];
