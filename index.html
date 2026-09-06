@@ -1615,6 +1615,59 @@
     border-top-color:var(--accent); animation:spin .7s linear infinite; display:inline-block;
   }
 
+  /* ---------- Doctor Prep ---------- */
+  .doc-research{ max-width:640px; margin:0 auto; }
+  .doc-research-search{ display:flex; gap:10px; margin:18px 0 22px 0; }
+  .doc-research-search input{
+    flex:1; font-family:var(--sans); font-size:14px; padding:12px 14px; border-radius:12px;
+    border:none; background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+    color:var(--ink);
+  }
+  .doc-research-search input:focus{ outline:2px solid var(--accent-2); outline-offset:1px; }
+  .doc-research-intro{ color:var(--ink-soft); font-size:14px; line-height:1.6; }
+  .doc-research-loading{
+    display:flex; align-items:center; gap:10px; color:var(--ink-soft); font-size:14px; padding:20px 0;
+  }
+  .doc-research-error{
+    background:#FBEAEA; border:1px solid #E8B0B0; border-radius:12px; padding:14px 16px;
+    color:#8A2E2E; font-size:13.5px;
+  }
+  .doc-research-summary{
+    background:var(--paper); border-radius:14px; padding:16px 18px; margin-bottom:20px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .doc-research-summary.is-fallback{ background:#FBF3E3; box-shadow:inset 0 0 0 1px #E8D7B0; }
+  .doc-research-specialty{ font-family:var(--serif); font-size:18px; color:var(--ink); margin-bottom:6px; }
+  .doc-research-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.55; }
+  .doc-research-terms-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-faint);
+    margin-bottom:10px; text-transform:uppercase;
+  }
+  .doc-research-terms{ display:flex; flex-direction:column; gap:8px; }
+  .doc-research-term-card{
+    display:flex; align-items:flex-start; gap:12px; background:var(--paper); border-radius:12px;
+    padding:13px 14px; box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .doc-research-term-main{ flex:1; min-width:0; }
+  .doc-research-term-en{ font-weight:700; font-size:14px; color:var(--ink); }
+  .doc-research-term-es{ font-style:italic; color:var(--accent-2); font-size:13px; margin-top:1px; }
+  .doc-research-term-def{ font-size:12px; color:var(--ink-soft); margin-top:5px; line-height:1.5; }
+  .doc-research-badge{
+    flex-shrink:0; display:flex; align-items:center; gap:5px; font-family:var(--sans);
+    font-size:11.5px; font-weight:600; padding:7px 11px; border-radius:20px; white-space:nowrap;
+  }
+  .doc-research-badge svg{ width:12px; height:12px; }
+  .doc-research-badge.is-existing{ background:#E7F2EC; color:#2E7D5B; }
+  .doc-research-badge.is-missing{
+    background:var(--accent-2); color:#fff; border:none; cursor:pointer;
+    transition:filter .15s var(--ease);
+  }
+  .doc-research-badge.is-missing:hover{ filter:brightness(1.06); }
+  .doc-research-badge.is-missing:disabled{ background:#9AA5B0; cursor:default; }
+  .doc-research-disclaimer{
+    font-size:11px; color:var(--ink-faint); margin-top:22px; line-height:1.5; font-style:italic;
+  }
+
   /* ---------- Typing indicator ---------- */
   .typing-indicator{
     display:flex; align-items:center; gap:8px; height:0; overflow:hidden;
@@ -7188,6 +7241,7 @@ function getToolTiles(){
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
     { id:'medifind',  name:'MediFind',              color:'#35A97A', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://www.medifind.com/' },
+    { id:'doctor-research', name:'Doctor Prep',     color:'#B08D2A', icon: ICON_SPARK,  count: null, label: '' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
@@ -7286,6 +7340,134 @@ function goToGuideSlide(i){
 }
 function nextGuideSlide(){ if(guideIndex < USER_GUIDE_SLIDES.length - 1) goToGuideSlide(guideIndex + 1); }
 function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
+
+// "Doctor Prep" — looks up a doctor's specialty via the /api/doctor-research
+// serverless endpoint (Claude with web search), then shows a prep list of
+// specialty-specific terminology, flagging which terms already exist
+// somewhere in the glossary versus which are genuinely new.
+let doctorResearchState = { status: 'idle', doctorName: '', result: null, error: null };
+
+function allGlossaryTermsFlat(){
+  return DATA.categories.flatMap(c => c.terms);
+}
+
+// Best-effort match between a found specialty and an existing domain, so
+// "add to glossary" has a sensible destination without guessing wildly.
+// Falls back to General Medicine & Vital Signs, then to no match at all.
+function findBestDomainMatch(specialty){
+  if(!specialty) return null;
+  const words = specialty.toLowerCase().split(/[^a-z]+/).filter(w => w.length > 3);
+  let best = null, bestScore = 0;
+  DATA.categories.forEach(c => {
+    const name = c.name.toLowerCase();
+    const score = words.filter(w => name.includes(w)).length;
+    if(score > bestScore){ bestScore = score; best = c; }
+  });
+  if(best) return best;
+  return DATA.categories.find(c => c.name === 'General Medicine & Vital Signs') || null;
+}
+
+async function runDoctorResearch(){
+  const input = document.getElementById('doctorResearchInput');
+  const name = input ? input.value.trim() : '';
+  if(!name){ showToast('Enter a doctor\u2019s name first.'); return; }
+
+  doctorResearchState = { status: 'loading', doctorName: name, result: null, error: null };
+  render();
+
+  try{
+    const res = await fetch('/api/doctor-research', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doctorName: name }),
+    });
+    const data = await res.json();
+    if(!res.ok){
+      doctorResearchState = { status: 'error', doctorName: name, result: null, error: data.error || 'Something went wrong.' };
+    } else {
+      doctorResearchState = { status: 'done', doctorName: name, result: data, error: null };
+    }
+  }catch(err){
+    console.error('runDoctorResearch failed:', err);
+    doctorResearchState = { status: 'error', doctorName: name, result: null, error: 'Could not reach the research service. Check your connection.' };
+  }
+  render();
+}
+
+async function addSuggestedTermToGlossary(en, es, def, btn){
+  if(!whoAmI()){ requireName(() => addSuggestedTermToGlossary(en, es, def, btn)); return; }
+  const specialty = doctorResearchState.result ? doctorResearchState.result.specialty : null;
+  const domain = findBestDomainMatch(specialty);
+  if(!domain){ showToast('No matching domain found — add this one manually.'); return; }
+  const id = genId();
+  const editor = whoAmI();
+  const ok = await saveTermDoc({ id, categoryId: domain.id, en, es, def, editedBy: editor, editedOn: timeAgoLabel() });
+  if(ok){
+    logActivity(`added "${en}" to ${domain.name} from Doctor Prep`);
+    showToast(`Added to ${domain.name}.`);
+    if(btn){ btn.textContent = 'Added \u2713'; btn.disabled = true; }
+  }
+}
+
+function renderDoctorResearch(){
+  const s = doctorResearchState;
+  let body = '';
+
+  if(s.status === 'loading'){
+    body = `
+      <div class="doc-research-loading">
+        <span class="tr-spinner"></span>
+        <p>Researching "${escapeHtml(s.doctorName)}"\u2026</p>
+      </div>`;
+  } else if(s.status === 'error'){
+    body = `<div class="doc-research-error">${escapeHtml(s.error)}</div>`;
+  } else if(s.status === 'done' && s.result){
+    const r = s.result;
+    const allTerms = allGlossaryTermsFlat();
+    const domainMatch = findBestDomainMatch(r.specialty);
+    body = `
+      <div class="doc-research-summary ${r.found ? '' : 'is-fallback'}">
+        <div class="doc-research-specialty">${r.specialty ? escapeHtml(r.specialty) : 'Specialty not confidently identified'}</div>
+        <p>${escapeHtml(r.note || '')}</p>
+      </div>
+      <div class="doc-research-terms-label">Suggested terminology (${r.terms.length})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
+      <div class="doc-research-terms">
+        ${r.terms.map(t => {
+          const exists = allTerms.some(existing => (existing.en||'').trim().toLowerCase() === t.en.trim().toLowerCase());
+          const enSafe = escapeHtml(t.en).replace(/'/g,"\\'");
+          const esSafe = escapeHtml(t.es).replace(/'/g,"\\'");
+          const defSafe = escapeHtml(t.def).replace(/'/g,"\\'");
+          return `
+            <div class="doc-research-term-card">
+              <div class="doc-research-term-main">
+                <div class="doc-research-term-en">${escapeHtml(t.en)}</div>
+                <div class="doc-research-term-es">${escapeHtml(t.es)}</div>
+                <div class="doc-research-term-def">${escapeHtml(t.def)}</div>
+              </div>
+              ${exists
+                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
+                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this)">${ICON_PLUS} Add</button>`}
+            </div>`;
+        }).join('')}
+      </div>`;
+  } else {
+    body = `<p class="doc-research-intro">Type a doctor's name to look up their specialty and get a head start on the terminology likely to come up in that appointment.</p>`;
+  }
+
+  return `
+    <div class="doc-research">
+      <div class="section-head"><h2>Doctor Prep</h2></div>
+      <div class="doc-research-search">
+        <input id="doctorResearchInput" type="text" placeholder="e.g. Dr. Andre Goy" value="${escapeHtml(s.doctorName || '')}"
+          onkeydown="if(event.key==='Enter') runDoctorResearch()">
+        <button class="btn btn-primary" onclick="runDoctorResearch()" ${s.status==='loading'?'disabled':''}>Research</button>
+      </div>
+      ${body}
+      <p class="doc-research-disclaimer">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
+    </div>
+  `;
+}
+
 
 function renderUserGuide(){
   const slide = USER_GUIDE_SLIDES[guideIndex];
@@ -7714,7 +7896,13 @@ function render(){
   const allToolTiles = getToolTiles();
   const findDoctorTile = allToolTiles.find(t=>t.id==='find-doctor');
   const medifindTile = allToolTiles.find(t=>t.id==='medifind');
-  const toolTileButtons = allToolTiles.filter(t=>t.id!=='medifind').map((t,i)=>{
+  let collapsedToolGroups = [];
+  try{ collapsedToolGroups = JSON.parse(localStorage.getItem('ih_collapsedToolGroups') || '[]'); }catch(e){}
+  const translateTile = allToolTiles.find(t=>t.id==='translate');
+  const doctorResearchTile = allToolTiles.find(t=>t.id==='doctor-research');
+  const aiGroupCollapsed = collapsedToolGroups.includes('ai-tools');
+
+  const toolTileButtons = allToolTiles.filter(t=>t.id!=='medifind' && t.id!=='translate' && t.id!=='doctor-research').map((t,i)=>{
     if(t.id==='find-doctor' && medifindTile){
       return `
         <div class="domain-group">
@@ -7736,6 +7924,35 @@ function render(){
     }
     return tileHtml(t, i, t.externalUrl ? `window.open('${t.externalUrl}', '_blank')` : `setCategory('${t.id}')`);
   });
+
+  // "AI Tools" — Translate and Doctor Prep grouped together, since both are
+  // the app's AI-assisted features. The header itself is just a label (it
+  // toggles the group rather than navigating anywhere) since there's no
+  // single "primary" action between the two.
+  if(translateTile && doctorResearchTile){
+    toolTileButtons.splice(1, 0, `
+      <div class="domain-group">
+        <div class="home-tile domain-group-tile is-label" style="--tile-color:${translateTile.color}; --tile-tint:${translateTile.color}22; --tile-glow:${translateTile.color}55;" onclick="toggleToolGroup('ai-tools')" role="button" tabindex="0">
+          <span class="home-tile-icon">${ICON_SPARK}</span>
+          <span class="home-tile-name">AI Tools</span>
+          <span class="home-tile-count">2 tools</span>
+          <span class="domain-group-toggle ${aiGroupCollapsed?'is-collapsed':''}" title="${aiGroupCollapsed ? 'Show' : 'Hide'} AI tools">
+            ${ICON_CHEVRON_DOWN}<span>2 tools</span>
+          </span>
+        </div>
+        ${aiGroupCollapsed ? '' : `<div class="domain-group-children">
+          <button class="domain-chip" style="--tile-color:${translateTile.color};" onclick="setCategory('${translateTile.id}')">
+            <span class="domain-chip-icon">${translateTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(translateTile.name)}</span>
+          </button>
+          <button class="domain-chip" style="--tile-color:${doctorResearchTile.color};" onclick="setCategory('${doctorResearchTile.id}')">
+            <span class="domain-chip-icon">${doctorResearchTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(doctorResearchTile.name)}</span>
+          </button>
+        </div>`}
+      </div>`);
+  }
+
   if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`, { editAction: `openEditDomainModal('${resourcesTile.id}')` }));
 
   const extrasTabs = `
@@ -7776,6 +7993,9 @@ function render(){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'userguide'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'doctor-research'){
     showTopbar = false;
     showStatStrip = false;
   } else if(activeCategory === 'home'){
@@ -7913,6 +8133,11 @@ function renderContent(){
     content.innerHTML = renderUserGuide();
     setupUserGuideSwipe();
     if(guideIndex === USER_GUIDE_SLIDES.length - 1) celebrateScore('.user-guide-slide.is-cover');
+    return;
+  }
+
+  if(activeCategory === 'doctor-research'){
+    content.innerHTML = renderDoctorResearch();
     return;
   }
 
@@ -8086,6 +8311,15 @@ function toggleDomainGroup(parentId){
   const idx = collapsedDomainGroups.indexOf(parentId);
   if(idx === -1) collapsedDomainGroups.push(parentId); else collapsedDomainGroups.splice(idx, 1);
   try{ localStorage.setItem('ih_collapsedDomainGroups', JSON.stringify(collapsedDomainGroups)); }catch(e){}
+  render();
+}
+
+function toggleToolGroup(groupId){
+  let collapsed = [];
+  try{ collapsed = JSON.parse(localStorage.getItem('ih_collapsedToolGroups') || '[]'); }catch(e){}
+  const idx = collapsed.indexOf(groupId);
+  if(idx === -1) collapsed.push(groupId); else collapsed.splice(idx, 1);
+  try{ localStorage.setItem('ih_collapsedToolGroups', JSON.stringify(collapsed)); }catch(e){}
   render();
 }
 
