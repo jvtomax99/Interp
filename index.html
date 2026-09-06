@@ -388,6 +388,24 @@
   .home-tile-name{ font-family:var(--sans); font-weight:600; font-size:14px; color:var(--ink); line-height:1.3; }
   .home-tile-count{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
 
+  /* The little mascot — tucked into empty tile space, colored to match that
+     tile's own accent so it never looks out of place, animated with a soft
+     sway like a hanging decoration rather than anything distracting. */
+  .home-tile-mascot{
+    position:absolute; right:10px; bottom:8px; width:34px; height:34px;
+    color:var(--tile-color); opacity:0.9; pointer-events:none;
+    transform-origin:50% 0%; animation:mascotSway 4.5s ease-in-out infinite;
+  }
+  .home-tile-mascot svg{ width:100%; height:100%; }
+  .nav-tile-grid .home-tile-mascot{ width:24px; height:24px; right:8px; bottom:6px; }
+  @keyframes mascotSway{
+    0%, 100%{ transform:rotate(-4deg); }
+    50%{ transform:rotate(4deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .home-tile-mascot{ animation:none; }
+  }
+
   /* ---------- Icon picker (Add Domain) ---------- */
   .icon-picker-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .icon-pick{
@@ -7389,6 +7407,76 @@ function renderReviewSummary(){
   return html;
 }
 
+// A small recurring mascot — a friendly medical cross — tucked into the
+// empty space on tiles, in the same spirit as a cute hanging decoration.
+// Kept as one reusable SVG so it reads as a consistent little brand touch
+// rather than clutter.
+// The mascot's body, face, and animation stay identical everywhere for
+// brand consistency — only its little accessory changes to match the
+// domain's theme, the same way the reference sun wore sunglasses.
+const MASCOT_BODY = `<path d="M32 55C32 55 6 39 6 22C6 12.6 13.2 6 21.5 6C26.5 6 30.3 8.7 32 12.5C33.7 8.7 37.5 6 42.5 6C50.8 6 58 12.6 58 22C58 39 32 55 32 55Z" fill="currentColor"/>
+  <ellipse cx="18" cy="18" rx="6" ry="3.8" fill="#fff" opacity="0.3" transform="rotate(-30 18 18)"/>
+  <circle cx="17" cy="30" r="3.2" fill="#fff" opacity="0.4"/>
+  <circle cx="47" cy="30" r="3.2" fill="#fff" opacity="0.4"/>`;
+const MASCOT_FACE = `<path d="M20 30C21.4 28.2 24.1 28.2 25.5 30" stroke="#fff" stroke-width="2.3" stroke-linecap="round" opacity="0.95"/>
+  <path d="M38.5 30C39.9 28.2 42.6 28.2 44 30" stroke="#fff" stroke-width="2.3" stroke-linecap="round" opacity="0.95"/>
+  <path d="M25 34.5C25 34.5 28 38 32 38C36 38 39 34.5 39 34.5" stroke="#fff" stroke-width="2.3" stroke-linecap="round" opacity="0.95"/>`;
+
+// Each accessory sits in the same "brow" band across the top of the heart,
+// above the eyes, so swapping one in never disturbs the face below it.
+const MASCOT_ACCESSORIES = {
+  // Default — general medicine, surgery, emergency, and anything unmatched.
+  stethoscope: `<path d="M15 15C15 20 18 22 21 22C24 22 26 20 26.5 17.5" stroke="#fff" stroke-width="2.1" stroke-linecap="round" opacity="0.95"/>
+    <path d="M49 15C49 20 46 22 43 22C40.5 22 38.5 20.7 37.8 19" stroke="#fff" stroke-width="2.1" stroke-linecap="round" opacity="0.95"/>
+    <circle cx="15" cy="14" r="2.2" fill="#fff" opacity="0.95"/>
+    <circle cx="49" cy="14" r="2.2" fill="#fff" opacity="0.95"/>
+    <circle cx="32" cy="19.5" r="2.8" fill="#fff" opacity="0.95"/>`,
+  // Cardiac / heart-related domains — a little EKG trace for a brow.
+  heartbeat: `<path d="M13 18H21L24 11L29 24L33 15L36 18H51" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" fill="none"/>`,
+  // Genetics — a tiny double helix.
+  dna: `<path d="M18 10C24 14 24 18 18 22C12 26 12 30 18 34" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.95" fill="none"/>
+    <path d="M46 10C40 14 40 18 46 22C52 26 52 30 46 34" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.95" fill="none"/>
+    <path d="M19 13H45M18 22H46M19 31H45" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>`,
+  // Eye-related domains — round glasses frames.
+  glasses: `<circle cx="22" cy="18" r="6.5" stroke="#fff" stroke-width="2.1" opacity="0.95"/>
+    <circle cx="42" cy="18" r="6.5" stroke="#fff" stroke-width="2.1" opacity="0.95"/>
+    <path d="M28.5 18H35.5" stroke="#fff" stroke-width="2.1" stroke-linecap="round" opacity="0.95"/>`,
+  // Skin, orthopedics, trauma — a small adhesive bandage.
+  bandage: `<rect x="12" y="12" width="24" height="10" rx="5" transform="rotate(-18 12 12)" stroke="#fff" stroke-width="2" opacity="0.95" fill="none"/>
+    <circle cx="16" cy="10.5" r="1.1" fill="#fff" opacity="0.8"/>
+    <circle cx="21" cy="8.2" r="1.1" fill="#fff" opacity="0.8"/>
+    <circle cx="26" cy="16.5" r="1.1" fill="#fff" opacity="0.8"/>
+    <circle cx="31" cy="14.2" r="1.1" fill="#fff" opacity="0.8"/>`,
+  // Pharmacy — a little capsule worn like a party hat.
+  pill: `<rect x="24" y="6" width="16" height="9" rx="4.5" transform="rotate(3 32 10)" stroke="#fff" stroke-width="2" opacity="0.95" fill="none"/>
+    <path d="M32 6.3V15" stroke="#fff" stroke-width="1.6" opacity="0.7"/>`,
+  // Psychiatry / neurology — a little brainwave.
+  brainwave: `<path d="M13 16C17 8 21 24 25 16C29 8 33 24 37 16C41 8 45 24 51 16" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" fill="none"/>`,
+  // Pulmonology — gentle breath waves.
+  breath: `<path d="M12 14C16 14 16 20 20 20C24 20 24 14 28 14C32 14 32 20 36 20C40 20 40 14 44 14C48 14 48 20 52 20" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.95" fill="none"/>`,
+};
+
+function mascotAccessoryFor(name){
+  const n = (name || '').toLowerCase();
+  if(/cardiac|heart/.test(n)) return 'heartbeat';
+  if(/genetic/.test(n)) return 'dna';
+  if(/ophthalmology|eye/.test(n)) return 'glasses';
+  if(/dermatology|skin|sarcoma|orthopedic|musculoskeletal|trauma/.test(n)) return 'bandage';
+  if(/pharmacy|medication/.test(n)) return 'pill';
+  if(/psychiatry|mental health|neurolog|neuro-onc/.test(n)) return 'brainwave';
+  if(/pulmonology|respiratory/.test(n)) return 'breath';
+  return 'stethoscope';
+}
+
+function mascotSvgFor(name){
+  const accessory = MASCOT_ACCESSORIES[mascotAccessoryFor(name)];
+  return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    ${MASCOT_BODY}
+    ${accessory}
+    ${MASCOT_FACE}
+  </svg>`;
+}
+
 function tileHtml(t, i, onclickCall, opts){
   opts = opts || {};
   return `
@@ -7397,6 +7485,7 @@ function tileHtml(t, i, onclickCall, opts){
         <span class="home-tile-icon">${t.icon}</span>
         <span class="home-tile-name">${escapeHtml(t.name)}</span>
         <span class="home-tile-count">${t.count===null ? '' : t.count + ' ' + t.label}</span>
+        <span class="home-tile-mascot" aria-hidden="true">${mascotSvgFor(t.name)}</span>
       </button>`;
 }
 
@@ -7659,6 +7748,7 @@ function render(){
           <span class="domain-group-toggle ${isCollapsed?'is-collapsed':''}" title="${isCollapsed ? 'Show' : 'Hide'} ${kids.length} subgroup${kids.length===1?'':'s'}" onclick="event.stopPropagation(); toggleDomainGroup('${parent.id}')">
             ${ICON_CHEVRON_DOWN}<span>${kids.length} subgroup${kids.length===1?'':'s'}</span>
           </span>
+          <span class="home-tile-mascot" aria-hidden="true">${mascotSvgFor(parent.name)}</span>
         </button>
         ${isCollapsed ? '' : `<div class="domain-group-children-label">Subgroups</div><div class="domain-group-children">
           ${kids.map(k=>`
