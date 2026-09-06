@@ -327,6 +327,12 @@
   .home-tile-edit svg{ width:12px; height:12px; }
   .home-tile:hover .home-tile-edit, .home-tile:focus-within .home-tile-edit{ opacity:1; }
   @media (hover:none){ .home-tile-edit{ opacity:1; } }
+  .home-tile-external{
+    position:absolute; top:10px; right:10px; width:22px; height:22px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center; color:var(--ink-faint);
+    background:rgba(255,255,255,0.7);
+  }
+  .home-tile-external svg{ width:11px; height:11px; }
 
   /* A parent domain with subgroups — the parent tile looks and sizes
      exactly like every other tile (so the grid stays visually consistent);
@@ -7198,6 +7204,7 @@ function getToolTiles(){
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
     { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
+    { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
@@ -7482,6 +7489,7 @@ function tileHtml(t, i, onclickCall, opts){
   return `
       <button class="home-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
         ${opts.editAction ? `<span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); ${opts.editAction}">${ICON_EDIT}</span>` : ''}
+        ${t.externalUrl ? `<span class="home-tile-external" title="Opens in your browser">${ICON_EXTERNAL}</span>` : ''}
         <span class="home-tile-icon">${t.icon}</span>
         <span class="home-tile-name">${escapeHtml(t.name)}</span>
         <span class="home-tile-count">${t.count===null ? '' : t.count + ' ' + t.label}</span>
@@ -7789,7 +7797,7 @@ function render(){
      ${domainsCollapsed ? '' : `<div class="home-grid nav-tile-grid">${domainTilesHtml}</div>${addDomainBtn}`}
   `;
 
-  const toolTileButtons = getToolTiles().map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`));
+  const toolTileButtons = getToolTiles().map((t,i)=>tileHtml(t, i, t.externalUrl ? `window.open('${t.externalUrl}', '_blank')` : `setCategory('${t.id}')`));
   if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`, { editAction: `openEditDomainModal('${resourcesTile.id}')` }));
 
   const extrasTabs = `
