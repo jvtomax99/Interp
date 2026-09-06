@@ -3255,6 +3255,75 @@ function ensureTermIds(){
   return migrated;
 }
 
+// One-time domain cleanup, requested after reviewing an export of the full
+// glossary: a handful of terms sat in domains that didn't match their
+// actual clinical meaning, plus a stray "PDF of Terminology" domain and a
+// "Developmental" domain that duplicated what the sidebar already displays
+// as one combined "Developmental & Neurology" tile. Runs once for the whole
+// team (flagged on the shared categories doc, not per-device) and does
+// nothing on every load after that.
+async function runVocabReclassificationV1(){
+  if(!db) return;
+  try{
+    const ref = db.collection('terminology-meta').doc('categories');
+    const snap = await ref.get();
+    const meta = snap.exists ? snap.data() : {};
+    if(meta.vocabMigrationV1) return; // already ran
+
+    const findByName = name => DATA.categories.find(c=>c.name===name);
+    const oncology = findByName('Oncology, Hematology & Leukemia');
+    const breastOnc = findByName('Breast Oncology');
+    const genetics = findByName('Genetics');
+    const neurology = findByName('Neurology');
+    const developmental = findByName('Developmental');
+    const pdfDomain = findByName('PDF of Terminology');
+
+    // Reassign specific terms to the domain that actually matches their
+    // clinical meaning, using their exact document ids for precision.
+    const reassignments = [
+      ['mtli60r37cec6m', oncology],   // Duffy-null associated neutrophil count -> Oncology/Heme (a benign blood-count variant, not neurological)
+      ['mtli60r3x7e84a', genetics],   // Severe Combined Immunodeficiency (SCID) -> Genetics (genetic immune disorder)
+      ['mtli60r32cmqq2', oncology],   // Gamma Knife surgery -> Oncology/Heme (used for brain tumors, no ENT/Uro/Endo/Nephro link)
+      ['mtli60r3id4x7z', breastOnc],  // AC-T Chemotherapy regimen -> Breast Oncology (breast-cancer-specific regimen)
+      ['mtllktsf5bszcs', breastOnc],  // Intraductal papilloma -> Breast Oncology (a breast lesion)
+    ];
+    for(const [termId, targetCat] of reassignments){
+      if(!targetCat) continue;
+      const term = DATA.categories.flatMap(c=>c.terms).find(t=>t.id===termId);
+      if(term && term.categoryId !== targetCat.id){
+        await db.collection('terms').doc(termId).update({ categoryId: targetCat.id });
+      }
+    }
+
+    // Fold the single stray "PDF of Terminology" domain into Genetics
+    // (its one term, "Genetic", belongs there) and remove the domain.
+    if(pdfDomain && genetics){
+      const orphanTerm = pdfDomain.terms[0];
+      if(orphanTerm) await db.collection('terms').doc(orphanTerm.id).update({ categoryId: genetics.id });
+    }
+
+    // Merge "Developmental" into "Neurology" and rename the combined domain
+    // to match what the sidebar already displays as one tile.
+    if(developmental && neurology){
+      for(const t of developmental.terms){
+        await db.collection('terms').doc(t.id).update({ categoryId: neurology.id });
+      }
+    }
+
+    const newCategoriesMeta = DATA.categories
+      .filter(c=> c.id!==(pdfDomain && pdfDomain.id) && c.id!==(developmental && developmental.id))
+      .map(c=>{
+        if(neurology && c.id===neurology.id) return { id:c.id, name:'Developmental & Neurology', color:c.color, icon:c.icon, parentId:c.parentId||null };
+        return { id:c.id, name:c.name, color:c.color, icon:c.icon, parentId:c.parentId||null };
+      });
+
+    await ref.set({ categories: newCategoriesMeta, updatedAt: Date.now(), vocabMigrationV1: true }, { merge:false });
+    logActivity('cleaned up domain assignments for several terms');
+  }catch(err){
+    console.error('runVocabReclassificationV1 failed:', err);
+  }
+}
+
 async function loadData(){
   try{
     if(!db){
@@ -3283,6 +3352,7 @@ async function loadData(){
 
     await loadCategoriesMeta();
     await loadAllTerms();
+    await runVocabReclassificationV1();
     startTermsListener();
     startCategoriesMetaListener();
     render();
