@@ -2091,25 +2091,6 @@
   </div>
 </div>
 
-<div class="overlay" id="noteOverlay">
-  <div class="modal">
-    <h3 id="noteModalTitle">Add guide</h3>
-    <div class="field"><label>Guide</label><textarea id="fNoteText" placeholder="Share a reminder, tip, or update with the team…" style="min-height:120px;"></textarea></div>
-    <div class="field">
-      <label>Attachment (optional)</label>
-      <div class="photo-field">
-        <div id="noteAttachPreview"></div>
-        <label class="file-input-label" for="fNoteFile">Choose file</label>
-        <input class="file-input-hidden" id="fNoteFile" type="file" accept="image/*,application/pdf" onchange="handleNoteFileSelected(event)">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeNoteModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNote()">Save guide</button>
-    </div>
-  </div>
-</div>
-
 <div class="overlay" id="nameOverlay">
   <div class="modal">
     <h3>Attribute my edits as</h3>
@@ -2182,7 +2163,6 @@
               match /terms/{docId} { allow read, write: if true; }
               match /healthcare-providers/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
-              match /team-notes/{docId} { allow read, write: if true; }
               match /term-attachments/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
               match /practice-questions/{docId} { allow read, write: if true; }
@@ -3026,9 +3006,6 @@ let selectedSwatch = DOMAIN_COLORS[0];
 let editingDomainId = null; // null = creating a new domain, otherwise the id being edited
 let selectedIcon = 'sparkle';
 
-let NOTES = [];
-let editingNoteId = null;
-
 let CHAT_MESSAGES = [];
 let chatListenerStarted = false;
 let isInitialChatLoad = true;
@@ -3134,7 +3111,6 @@ function renderOnboardingStep(){
 
 let pendingAttachTermId = null;
 let pendingChatAttachment = null;
-let pendingNoteAttachment = null;
 
 /* ============ Storage ============ */
 function genId(){
@@ -5915,36 +5891,6 @@ async function deleteProviderRemote(id){
   await db.collection('healthcare-providers').doc(id).delete();
 }
 
-/* ============ Notes (own collection, loaded once like providers —
-   refresh to see a teammate's new note, same tradeoff as the rest
-   of the app except chat, which is genuinely real-time) ============ */
-async function loadNotes(){
-  try{
-    if(!db){ NOTES = []; return; }
-    const snap = await db.collection('team-notes').get();
-    NOTES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  }catch(err){
-    console.error('Could not load notes', err);
-    NOTES = [];
-  }
-  render();
-}
-
-async function persistNote(record, existingId){
-  if(!db){ showToast('Not connected to the database.'); return null; }
-  if(existingId){
-    await db.collection('team-notes').doc(existingId).set(stripUndefined(record));
-    return existingId;
-  }
-  const ref = await db.collection('team-notes').add(stripUndefined(record));
-  return ref.id;
-}
-
-async function deleteNoteRemote(id){
-  if(!db) return;
-  await db.collection('team-notes').doc(id).delete();
-}
-
 /* ============ Team Chat (real-time — this is the one section that
    uses Firestore's live listener instead of load-once, so messages
    appear for everyone without a refresh, Messenger-style).
@@ -6318,31 +6264,6 @@ function renderChatAttachPreview(){
 function removeChatAttachment(){
   pendingChatAttachment = null;
   renderChatAttachPreview();
-}
-
-async function handleNoteFileSelected(event){
-  const file = event.target.files && event.target.files[0];
-  event.target.value = '';
-  if(!file) return;
-  try{
-    pendingNoteAttachment = await readFileAsAttachment(file);
-    renderNoteAttachPreview();
-  }catch(err){
-    showToast(err.message || 'Could not attach that file.');
-  }
-}
-
-function renderNoteAttachPreview(){
-  const wrap = document.getElementById('noteAttachPreview');
-  if(!wrap) return;
-  wrap.innerHTML = pendingNoteAttachment
-    ? attachmentChipHtml(pendingNoteAttachment, 'removeNoteAttachment()')
-    : '<span style="font-size:12px; color:var(--ink-faint);">No file attached.</span>';
-}
-
-function removeNoteAttachment(){
-  pendingNoteAttachment = null;
-  renderNoteAttachPreview();
 }
 
 /* ============ Utilities ============ */
@@ -6917,14 +6838,6 @@ function collectSearchMatches(q){
     }
   });
 
-  NOTES.forEach(n=>{
-    if(hit(n.text) || hit(n.author)){
-      out.push({ group:'Guides', icon:ICON_NOTE, color:'#BFA05E',
-        title:(n.text||'').slice(0,70) + ((n.text||'').length>70?'\u2026':''),
-        sub:n.author ? 'by ' + n.author : '', target:'notes', rank:1 });
-    }
-  });
-
   CHAT_MESSAGES.forEach(m=>{
     if(hit(m.text) || hit(m.author)){
       out.push({ group:'Chat', icon:ICON_CHAT, color:'#2E8BD0',
@@ -7246,19 +7159,18 @@ function getDomainTiles(){
 function getToolTiles(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   return [
+    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: ICON_CALENDAR, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: ICON_GLOBE,   count: null, label: '' },
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
     { id:'review',    name:'Term Review',          color:'#4E9E74', icon: ICON_REVIEW, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
-    { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
     { id:'medifind',  name:'MediFind',              color:'#35A97A', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://www.medifind.com/' },
     { id:'doctor-research', name:'Doctor Prep',     color:'#B08D2A', icon: ICON_SPARK,  count: null, label: '' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
-    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
-    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
+    { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
   ];
 }
 
@@ -7697,7 +7609,7 @@ const ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
 const ICON_GUIDE_MAP = {
   ICON_COMPASS, ICON_PERSON, ICON_PHONE, ICON_HOME, ICON_GRID, ICON_SEARCH,
   ICON_LAYERS, ICON_EDIT, ICON_CHAT, ICON_GLOBE, ICON_EXAM, ICON_REVIEW,
-  ICON_CHAIN, ICON_BELL, ICON_MOON, ICON_DOWNLOAD, ICON_SHIELD,
+  ICON_CHAIN, ICON_BELL, ICON_MOON, ICON_DOWNLOAD, ICON_SHIELD, ICON_SPARK,
 };
 
 const USER_GUIDE_SLIDES = [
@@ -7727,6 +7639,7 @@ const USER_GUIDE_SLIDES = [
   ` },
   { kicker: 'Section 3', title: 'Navigating the App', icon: 'ICON_GRID', color: '#8B7BAE', body: `
     <p><b>Domains &amp; Tools</b> — tap any domain tile to filter the glossary to just that domain. "All domains" shows everything. The Tools grid holds Chat, Translate, Practice, and more. Both grids collapse via their section label.</p>
+    <p><b>Domain subgroups</b> — some domains, like "Oncology, Hematology &amp; Leukemia," have their own subgroups nested inside (Breast Oncology, Lymphoma, Leukemia, and more). Tap the chevron badge on the parent tile to expand or collapse its subgroups — each one still has its own separate set of terms.</p>
     <p><b>The three floating buttons:</b></p>
     <div class="guide-fab-row">
       <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_HOME}</span><b>Home</b><span>bottom-right</span></div>
@@ -7770,6 +7683,16 @@ const USER_GUIDE_SLIDES = [
       <div class="guide-pipeline-step"><span class="guide-pipeline-num">4</span><b>AI breakdown</b><span>Register, regional variation &amp; cautions.</span></div>
     </div>
   ` },
+  { kicker: 'Section 7', title: 'AI Tools: Translate & Doctor Prep', icon: 'ICON_SPARK', color: '#B08D2A', body: `
+    <p>Translate now sits inside an <b>"AI Tools"</b> group in the Tools grid, alongside a new feature: <b>Doctor Prep</b>. Tap the group to expand it and choose either one.</p>
+    <p><b>Doctor Prep</b> looks up a doctor by name, figures out their specialty, and builds a ready-made list of the English/Spanish terminology likely to come up in that appointment.</p>
+    <ul>
+      <li>Type a name, and optionally a specialty or hospital to narrow the search — this also makes the lookup faster.</li>
+      <li>Known John Theurer Cancer Center physicians are matched instantly from a built-in list, no search needed.</li>
+      <li>Each suggested term shows whether it's already in the glossary, or gives you a one-tap <b>+ Add</b> button if it's new.</li>
+    </ul>
+    <p class="user-guide-note">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
+  ` },
   { kicker: 'Section 8', title: 'CoreCHI Practice', icon: 'ICON_EXAM', color: '#0F5FA6', body: `
     <p>Multiple-choice questions across CCHI's five official exam domains, drawn in the same proportions as the real exam.</p>
     <p>Every finished quiz saves to your personal history — the Practice screen shows your total sessions, all-time accuracy, best score, and <b>accuracy broken down by CCHI domain</b>, the real signal for where to study.</p>
@@ -7789,9 +7712,9 @@ const USER_GUIDE_SLIDES = [
     <p><b class="guide-tag-blue">Missed it</b> resets to the start, reviewed again soon. <b class="guide-tag-green">Got it</b> moves one stop further along.</p>
     <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
   ` },
-  { kicker: 'Section 10', title: 'Providers, Guides, Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
+  { kicker: 'Section 10', title: 'Providers, Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
     <p><b>Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar).</p>
-    <p><b>Guides</b> — quick team notes and reference write-ups that don't belong in the formal glossary.</p>
+    <p><b>Find a Doctor</b> and <b>MediFind</b> — grouped together in the Tools grid. Find a Doctor opens Hackensack Meridian's own official directory; MediFind is nested inside it as a secondary, nationwide condition-based search. Both open in your browser.</p>
     <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
     <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
   ` },
@@ -7819,7 +7742,7 @@ const USER_GUIDE_SLIDES = [
       <li>Everything syncs in real time — no need to refresh.</li>
       <li>If something looks out of date, check your connection first.</li>
       <li>A save that fails shows an error toast — just retry once you're back online.</li>
-      <li>Anything not covered here: ask in Team Chat, or check Guides.</li>
+      <li>Anything not covered here: ask in Team Chat.</li>
     </ul>
   ` },
   { kicker: '', title: 'You\u2019re all set', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
@@ -8026,9 +7949,6 @@ function render(){
   } else if(activeCategory === 'directory'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
     searchPlaceholder = 'Search links…';
-  } else if(activeCategory === 'notes'){
-    addBtnHtml = `<button class="btn btn-primary" onclick="openAddNoteModal()">+ Add guide</button>`;
-    searchPlaceholder = 'Search guides…';
   } else if(activeCategory === 'chat'){
     showTopbar = false;
     showStatStrip = false;
@@ -8213,11 +8133,6 @@ function renderContent(){
 
   if(activeCategory === 'providers'){
     content.innerHTML = renderProviders(q);
-    return;
-  }
-
-  if(activeCategory === 'notes'){
-    content.innerHTML = renderNotes(q);
     return;
   }
 
@@ -9163,48 +9078,6 @@ function handleChatKeydown(event){
   }
 }
 
-/* ============ Notes: rendering ============ */
-function renderNotes(q){
-  let list = NOTES.slice();
-  if(q){
-    list = list.filter(n => (n.text||'').toLowerCase().includes(q) || (n.author||'').toLowerCase().includes(q));
-  }
-  list.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
-
-  const notice = `<div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>`;
-
-  if(list.length===0){
-    const msg = NOTES.length===0
-      ? '📝 No guides yet.<br>Leave the first one for your team.'
-      : 'No guides match your search.';
-    return notice + `<div class="empty"><div class="glyph">${ICON_NOTE}</div>${msg}</div>`;
-  }
-
-  let html = `<div class="section-head"><h2>Guides</h2><span class="sub">${list.length} guide${list.length===1?'':'s'}</span></div>`;
-  html += notice;
-  html += `<div class="grid">`;
-  list.forEach((n, cardIdx)=>{
-    const dateLabel = n.createdAt ? relativeTime(n.createdAt) : '';
-    const delay = Math.min(cardIdx * 0.03, 0.3);
-    html += `
-      <div class="card" style="--card-accent:#BFA05E; animation-delay:${delay.toFixed(2)}s;">
-        <div class="actions" style="position:absolute; top:16px; right:16px;">
-          <button class="icon-btn" title="Edit" onclick="openEditNoteModal('${n.id}')">✎</button>
-          <button class="icon-btn danger" title="Delete" onclick="deleteNote('${n.id}')">✕</button>
-        </div>
-        <p class="note-text">${escapeHtml(n.text)}</p>
-        ${n.attachment ? `<div class="attach-row">${attachmentChipHtml(n.attachment, null)}</div>` : ''}
-        <div class="meta">
-          <span class="source">${n.author ? escapeHtml(n.author) : 'Anonymous'}</span>
-          <span class="source" data-ts="${n.createdAt||''}">${dateLabel}</span>
-        </div>
-      </div>
-    `;
-  });
-  html += `</div>`;
-  return html;
-}
-
 function renderDirectory(q){
   let sectionsHtml = '';
   let totalRows = 0;
@@ -9730,92 +9603,6 @@ async function deleteProvider(id){
   }
 }
 
-/* ============ Notes: modal ============ */
-function openAddNoteModal(){
-  requireName(()=>_openAddNoteModal());
-}
-function _openAddNoteModal(){
-  editingNoteId = null;
-  pendingNoteAttachment = null;
-  document.getElementById('noteModalTitle').textContent = 'Add guide';
-  document.getElementById('fNoteText').value = '';
-  renderNoteAttachPreview();
-  document.getElementById('noteOverlay').classList.add('show');
-  document.getElementById('fNoteText').focus();
-}
-
-function openEditNoteModal(id){
-  requireName(()=>_openEditNoteModal(id));
-}
-function _openEditNoteModal(id){
-  const n = NOTES.find(x=>x.id===id);
-  if(!n) return;
-  editingNoteId = id;
-  pendingNoteAttachment = n.attachment || null;
-  document.getElementById('noteModalTitle').textContent = 'Edit guide';
-  document.getElementById('fNoteText').value = n.text || '';
-  renderNoteAttachPreview();
-  document.getElementById('noteOverlay').classList.add('show');
-  document.getElementById('fNoteText').focus();
-}
-
-function closeNoteModal(){
-  document.getElementById('noteOverlay').classList.remove('show');
-  editingNoteId = null;
-  pendingNoteAttachment = null;
-}
-
-async function saveNote(){
-  const text = document.getElementById('fNoteText').value.trim();
-  if(!text){ showToast('Note can\'t be empty.'); return; }
-  const editor = whoAmI();
-  const existing = editingNoteId ? NOTES.find(n=>n.id===editingNoteId) : null;
-  const isNew = !editingNoteId;
-
-  const record = {
-    text,
-    attachment: pendingNoteAttachment || null,
-    author: editor || (existing && existing.author) || '',
-    createdAt: (existing && existing.createdAt) || Date.now(),
-    updatedAt: Date.now()
-  };
-
-  try{
-    const id = await persistNote(record, editingNoteId);
-    if(!id) return;
-    if(editingNoteId){
-      const idx = NOTES.findIndex(n=>n.id===editingNoteId);
-      if(idx>-1) NOTES[idx] = { id, ...record };
-    } else {
-      NOTES.push({ id, ...record });
-    }
-    closeNoteModal();
-    logActivity(isNew ? 'left a guide' : 'updated a guide');
-    successBurst();
-    showToast('Note saved.');
-    render();
-  }catch(err){
-    showToast(saveErrorMessage(err, 'team-notes'));
-  }
-}
-
-async function deleteNote(id){
-  const n = NOTES.find(x=>x.id===id);
-  if(!n) return;
-  if(!confirm('Delete this note? This can\'t be undone.')) return;
-  try{
-    await deleteNoteRemote(id);
-    if(storage && n.attachment && n.attachment.storagePath){
-      storage.ref().child(n.attachment.storagePath).delete().catch(()=>{});
-    }
-    NOTES = NOTES.filter(x=>x.id!==id);
-    logActivity('deleted a note');
-    showToast('Note deleted.');
-    render();
-  }catch(err){
-    showToast('Could not delete — check your connection.');
-  }
-}
 
 /* ============ Init ============ */
 loadNotifyPref();
@@ -9823,7 +9610,6 @@ loadData();
 loadProviders();
 loadQuizHistory();
 loadTermReviews();
-loadNotes();
 loadAttachments();
 loadQuestions();
 startChatListener();
