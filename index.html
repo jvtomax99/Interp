@@ -258,6 +258,12 @@
 
   @keyframes contentFadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
   .content-fade{ animation:contentFadeIn .38s var(--ease); }
+  /* Global clearance from the fixed Home/Name buttons at the bottom of the
+     screen — reserved once here so no individual screen has to worry about
+     it, regardless of how short its content is. */
+  @media (max-width:760px){
+    #content{ padding-bottom:90px; }
+  }
 
   /* ---------- Home dashboard ---------- */
   .home-greeting{
@@ -685,11 +691,12 @@
 
   .home-fab{ display:none; }
   @media (max-width:760px){
-    /* On mobile the sidebar sits below all the page content, so Home is
-       often a long scroll away once you've jumped into a domain — this
-       stays on screen no matter how far down you've scrolled. */
+    /* Bottom-center — clear of Name (bottom-left) and clear of whatever
+       in-flow content ends near the bottom of the screen, since the
+       global #content bottom padding reserves space for it here. */
     .home-fab{
-      display:flex; position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+      display:flex; position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+      transform:translateX(-50%);
       border:none; cursor:pointer; padding:12px 18px 12px 14px; border-radius:30px;
       background:linear-gradient(145deg, #0079BD, #252E6D); color:#fff;
       align-items:center; gap:8px;
@@ -697,11 +704,8 @@
       z-index:60; transition:transform .15s var(--ease);
       font-family:var(--sans); font-size:13.5px; font-weight:600;
     }
-    .home-fab:active{ transform:scale(0.94); }
+    .home-fab:active{ transform:translateX(-50%) scale(0.94); }
     .home-fab svg{ width:19px; height:19px; flex-shrink:0; }
-    /* Chat's own compose bar and "Join chat" button sit at the bottom of
-       the panel too — this clears them instead of stacking on top. */
-    .home-fab-raised{ bottom:calc(88px + env(safe-area-inset-bottom, 0px)); }
     body.kb-open .home-fab{ display:none; }
   }
 
@@ -8041,7 +8045,7 @@ function render(){
       ${ICON_PERSON}
     </button>
     ${activeCategory !== 'home' ? `
-    <button class="home-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'home-fab-raised' : ''}" onclick="goHome()" title="Home" aria-label="Go home">
+    <button class="home-fab" onclick="goHome()" title="Home" aria-label="Go home">
       ${ICON_HOME}<span>Home</span>
     </button>` : ''}
   `;
