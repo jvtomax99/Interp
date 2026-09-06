@@ -7205,6 +7205,7 @@ function getToolTiles(){
     { id:'notes',     name:'Guides',                color:'#BFA05E', icon: ICON_NOTE,   count: NOTES.length, label: NOTES.length===1?'guide':'guides' },
     { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
+    { id:'medifind',  name:'MediFind',              color:'#35A97A', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://www.medifind.com/' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' }
@@ -7797,7 +7798,35 @@ function render(){
      ${domainsCollapsed ? '' : `<div class="home-grid nav-tile-grid">${domainTilesHtml}</div>${addDomainBtn}`}
   `;
 
-  const toolTileButtons = getToolTiles().map((t,i)=>tileHtml(t, i, t.externalUrl ? `window.open('${t.externalUrl}', '_blank')` : `setCategory('${t.id}')`));
+  // "Find a Doctor" and "MediFind" are grouped the same way parent/subgroup
+  // domains are — MediFind nested inside, since both serve the same
+  // "find a specialist" purpose but from different sources.
+  const allToolTiles = getToolTiles();
+  const findDoctorTile = allToolTiles.find(t=>t.id==='find-doctor');
+  const medifindTile = allToolTiles.find(t=>t.id==='medifind');
+  const toolTileButtons = allToolTiles.filter(t=>t.id!=='medifind').map((t,i)=>{
+    if(t.id==='find-doctor' && medifindTile){
+      return `
+        <div class="domain-group">
+          <button class="home-tile domain-group-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="window.open('${t.externalUrl}', '_blank')">
+            <span class="home-tile-external" title="Opens in your browser">${ICON_EXTERNAL}</span>
+            <span class="home-tile-icon">${t.icon}</span>
+            <span class="home-tile-name">${escapeHtml(t.name)}</span>
+            <span class="home-tile-count"></span>
+            <span class="home-tile-mascot" aria-hidden="true">${mascotSvgFor(t.name)}</span>
+          </button>
+          <div class="domain-group-children-label">Also try</div>
+          <div class="domain-group-children">
+            <button class="domain-chip" style="--tile-color:${medifindTile.color};" onclick="window.open('${medifindTile.externalUrl}', '_blank')">
+              <span class="domain-chip-icon">${medifindTile.icon}</span>
+              <span class="domain-chip-name">${escapeHtml(medifindTile.name)}</span>
+              <span class="home-tile-external" style="position:static; opacity:0.7;" title="Opens in your browser">${ICON_EXTERNAL}</span>
+            </button>
+          </div>
+        </div>`;
+    }
+    return tileHtml(t, i, t.externalUrl ? `window.open('${t.externalUrl}', '_blank')` : `setCategory('${t.id}')`);
+  });
   if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`, { editAction: `openEditDomainModal('${resourcesTile.id}')` }));
 
   const extrasTabs = `
