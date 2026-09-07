@@ -461,6 +461,15 @@
   .provider-phone:hover{ text-decoration:underline; }
   .provider-phone svg{ width:12px; height:12px; }
 
+  /* ---------- Doctor Directory ---------- */
+  .doc-dir-location-pin{
+    display:flex; align-items:flex-start; gap:6px; font-size:12.5px; color:var(--ink);
+    background:var(--accent-soft); border-radius:8px; padding:8px 10px; margin:9px 0; line-height:1.5;
+  }
+  .doc-dir-location-pin svg{ width:13px; height:13px; flex-shrink:0; margin-top:1px; color:var(--accent); }
+  .doc-dir-source-tag{ color:#8C6E4F; background:#F3ECE3; }
+  .doc-dir-source-tag.is-manual{ color:#4E6E9E; background:#E8EEF6; }
+
   .photo-field{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
   .photo-preview{ width:54px; height:54px; border-radius:50%; object-fit:cover; box-shadow:inset 0 0 0 1px var(--line); flex-shrink:0; }
   .photo-placeholder{
@@ -2090,6 +2099,21 @@
   </div>
 </div>
 
+<div class="overlay" id="doctorDirOverlay">
+  <div class="modal">
+    <h3 id="doctorDirModalTitle">Add doctor</h3>
+    <div class="field"><label>Name</label><input id="fDDName" type="text" placeholder="e.g. Dr. Lori A. Leslie"></div>
+    <div class="field"><label>Specialty (optional)</label><input id="fDDSpecialty" type="text" placeholder="e.g. Lymphoma \u2014 John Theurer Cancer Center"></div>
+    <div class="field"><label>Hospital / location (optional)</label><input id="fDDLocation" type="text" placeholder="e.g. Hackensack Meridian Health"></div>
+    <div class="field"><label>Location details (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. JTCC, 4th floor, Suite 401"></div>
+    <div class="field"><label>Notes (optional)</label><textarea id="fDDNotes" placeholder="Scheduling notes, quirks, best way to reach, etc."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDoctorDirModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDoctorDirEntry()">Save doctor</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="questionOverlay">
   <div class="modal">
     <h3>Add a practice question</h3>
@@ -2181,6 +2205,8 @@
               match /terminology-meta/{docId} { allow read, write: if true; }
               match /terms/{docId} { allow read, write: if true; }
               match /healthcare-providers/{docId} { allow read, write: if true; }
+              match /doctor-directory/{docId} { allow read, write: if true; }
+              match /doctor-research-cache/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
               match /term-attachments/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
@@ -2997,6 +3023,7 @@ let editingContext = null; // {categoryId, termId} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
 
 let PROVIDERS = [];
+let DOCTOR_DIRECTORY = [];
 let editingProviderId = null;
 let pendingPhotoDataUrl = null;
 let pendingPhotoPath = null;
@@ -5910,6 +5937,81 @@ async function deleteProviderRemote(id){
   await db.collection('healthcare-providers').doc(id).delete();
 }
 
+// ============ Doctor Directory ============
+// A team-maintained record of doctors, separate from the doctor-research-
+// cache (which exists purely to skip repeat AI searches). This directory is
+// what an interpreter actually browses and edits — auto-seeded from Doctor
+// Prep results, but built to hold details no search will ever surface, like
+// "JTCC, 4th floor" or a scheduling quirk. Keyed on normalized name only
+// (not name+specialty+location like the cache) since it's about the real
+// person, not any one search combination.
+function doctorDirectoryKey(name){
+  const norm = (name || '')
+    .toLowerCase()
+    .replace(/^dr\.?\s+/i, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return norm || null;
+}
+
+async function loadDoctorDirectory(){
+  try{
+    if(!db){ DOCTOR_DIRECTORY = []; return; }
+    const snap = await db.collection('doctor-directory').get();
+    DOCTOR_DIRECTORY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }catch(err){
+    console.error('Could not load doctor directory', err);
+    DOCTOR_DIRECTORY = [];
+  }
+  render();
+}
+
+async function persistDoctorDirectoryEntry(id, record){
+  if(!db){ showToast('Not connected to the database.'); return false; }
+  await db.collection('doctor-directory').doc(id).set(stripUndefined(record));
+  return true;
+}
+
+async function deleteDoctorDirectoryEntryRemote(id){
+  if(!db) return;
+  await db.collection('doctor-directory').doc(id).delete();
+}
+
+// Called after every FRESH (non-cached) successful Doctor Prep search —
+// never on a cache hit, since a cache hit means the directory should
+// already have this entry from whenever it was first researched. Only
+// touches the fields the AI is actually responsible for (specialty and the
+// general hospital/location it searched under); it never writes to
+// locationDetails or notes, which are exclusively human-maintained so a
+// re-run of Doctor Prep can never silently wipe out something like a floor
+// number someone typed in by hand.
+async function upsertDoctorDirectoryFromResearch(name, specialty, location){
+  if(!db) return;
+  const id = doctorDirectoryKey(name);
+  if(!id) return;
+  const existing = DOCTOR_DIRECTORY.find(d => d.id === id);
+  const record = {
+    ...(existing || {}),
+    name: (existing && existing.name) || name,
+    specialty: specialty || (existing && existing.specialty) || '',
+    hospitalLocation: location || (existing && existing.hospitalLocation) || '',
+    lastResearchedBy: whoAmI() || 'Someone',
+    lastResearchedAt: Date.now(),
+    source: (existing && existing.source) || 'ai',
+  };
+  try{
+    await persistDoctorDirectoryEntry(id, record);
+    const idx = DOCTOR_DIRECTORY.findIndex(d => d.id === id);
+    if(idx > -1) DOCTOR_DIRECTORY[idx] = { id, ...record };
+    else DOCTOR_DIRECTORY.push({ id, ...record });
+  }catch(err){
+    // Non-fatal — the search itself already succeeded and was shown, so a
+    // failed directory write shouldn't surface as an error to the user.
+    console.error('upsertDoctorDirectoryFromResearch failed:', err);
+  }
+}
+
+
 /* ============ Team Chat (real-time — this is the one section that
    uses Firestore's live listener instead of load-once, so messages
    appear for everyone without a refresh, Messenger-style).
@@ -6851,9 +6953,17 @@ function collectSearchMatches(q){
 
   PROVIDERS.forEach(p=>{
     if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.notes)){
-      out.push({ group:'Providers', icon:ICON_PERSON, color:'#6F97AC',
+      out.push({ group:'Provider Photos', icon:ICON_PERSON, color:'#6F97AC',
         title:p.name, sub:[p.role, p.facility].filter(Boolean).join(' \u00b7 '),
         target:'providers', rank: starts(p.name) ? 0 : 1 });
+    }
+  });
+
+  DOCTOR_DIRECTORY.forEach(d=>{
+    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(d.notes)){
+      out.push({ group:'Doctor Directory', icon:ICON_GRID, color:'#7C6A9C',
+        title:d.name, sub:[d.specialty, d.locationDetails].filter(Boolean).join(' \u00b7 '),
+        target:'doctor-directory', rank: starts(d.name) ? 0 : 1 });
     }
   });
 
@@ -6894,7 +7004,7 @@ function renderGlobalSearch(){
   gsMatches = collectSearchMatches(q);
 
   if(!q.trim()){
-    box.innerHTML = `<div class="gs-empty">Search across terms, providers, notes, chat, and practice questions.</div>`;
+    box.innerHTML = `<div class="gs-empty">Search across terms, providers, the doctor directory, notes, chat, and practice questions.</div>`;
     return;
   }
   if(!gsMatches.length){
@@ -7184,10 +7294,11 @@ function getToolTiles(){
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
     { id:'review',    name:'Term Review',          color:'#4E9E74', icon: ICON_REVIEW, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: ICON_CHAT,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
-    { id:'providers', name:'Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
+    { id:'providers', name:'Pictures of Healthcare Providers', color:'#6F97AC', icon: ICON_PERSON, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
     { id:'medifind',  name:'MediFind',              color:'#35A97A', icon: ICON_SEARCH, count: null, label: '', externalUrl: 'https://www.medifind.com/' },
     { id:'doctor-research', name:'Doctor Prep',     color:'#B08D2A', icon: ICON_SPARK,  count: null, label: '' },
+    { id:'doctor-directory', name:'Doctor Directory', color:'#7C6A9C', icon: ICON_GRID, count: DOCTOR_DIRECTORY.length, label: DOCTOR_DIRECTORY.length===1?'doctor':'doctors' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: ICON_CHAIN,  count: totalLinks, label:'links' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: ICON_BELL,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' }
   ];
@@ -7416,6 +7527,7 @@ async function runDoctorResearch(forceRefresh){
     } else {
       doctorResearchState = { ...doctorResearchState, status: 'done', result: data, error: null, cacheInfo: null };
       saveCachedDoctorResearch(cacheKey, { doctorName: name, specialty, location, result: data });
+      upsertDoctorDirectoryFromResearch(name, data.specialty || specialty, location);
     }
   }catch(err){
     console.error('runDoctorResearch failed:', err);
@@ -7783,6 +7895,7 @@ const USER_GUIDE_SLIDES = [
       <li>Each suggested term shows whether it's already in the glossary, or gives you a one-tap <b>+ Add</b> button if it's new.</li>
       <li>Results are shared with the whole team \u2014 if a colleague already researched that doctor, you'll see their result instantly with a "Cached" note and a <b>Refresh</b> button if you want a fresh lookup.</li>
     </ul>
+    <p>Every Doctor Prep search also feeds a shared <b>Doctor Directory</b> tool tile \u2014 a browsable, editable record of every doctor your team has looked up. Anyone can add details the AI would never know, like an exact floor or suite number, and those edits are never overwritten by a later search.</p>
     <p class="user-guide-note">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
   ` },
   { kicker: 'Section 8', title: 'CoreCHI Practice', icon: 'ICON_EXAM', color: '#0F5FA6', body: `
@@ -7805,7 +7918,7 @@ const USER_GUIDE_SLIDES = [
     <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
   ` },
   { kicker: 'Section 10', title: 'Providers, Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
-    <p><b>Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar).</p>
+    <p><b>Pictures of Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar). Now grouped with <b>Doctor Directory</b> in the Tools grid \u2014 tap the group to expand it and choose either one.</p>
     <p><b>Find a Doctor</b> and <b>MediFind</b> — grouped together in the Tools grid. Find a Doctor opens Hackensack Meridian's own official directory; MediFind is nested inside it as a secondary, nationwide condition-based search. Both open in your browser.</p>
     <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
     <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
@@ -7968,8 +8081,11 @@ function render(){
   const translateTile = allToolTiles.find(t=>t.id==='translate');
   const doctorResearchTile = allToolTiles.find(t=>t.id==='doctor-research');
   const aiGroupCollapsed = collapsedToolGroups.includes('ai-tools');
+  const providersTile = allToolTiles.find(t=>t.id==='providers');
+  const doctorDirTile = allToolTiles.find(t=>t.id==='doctor-directory');
+  const doctorsGroupCollapsed = collapsedToolGroups.includes('doctors-group');
 
-  const toolTileButtons = allToolTiles.filter(t=>t.id!=='medifind' && t.id!=='translate' && t.id!=='doctor-research').map((t,i)=>{
+  const toolTileButtons = allToolTiles.filter(t=>t.id!=='medifind' && t.id!=='translate' && t.id!=='doctor-research' && t.id!=='providers' && t.id!=='doctor-directory').map((t,i)=>{
     if(t.id==='find-doctor' && medifindTile){
       return `
         <div class="domain-group">
@@ -8020,6 +8136,33 @@ function render(){
       </div>`);
   }
 
+  // "Doctors" — Doctor Directory and Pictures of Healthcare Providers
+  // grouped together, since both are ways of looking up a doctor's
+  // information (a text-based record vs. a photo-based one).
+  if(doctorDirTile && providersTile){
+    toolTileButtons.splice(2, 0, `
+      <div class="domain-group">
+        <div class="home-tile domain-group-tile is-label" style="--tile-color:${doctorDirTile.color}; --tile-tint:${doctorDirTile.color}22; --tile-glow:${doctorDirTile.color}55;" onclick="toggleToolGroup('doctors-group')" role="button" tabindex="0">
+          <span class="home-tile-icon">${doctorDirTile.icon}</span>
+          <span class="home-tile-name">Doctors</span>
+          <span class="home-tile-count">2 tools</span>
+          <span class="domain-group-toggle ${doctorsGroupCollapsed?'is-collapsed':''}" title="${doctorsGroupCollapsed ? 'Show' : 'Hide'} doctor tools">
+            ${ICON_CHEVRON_DOWN}<span>2 tools</span>
+          </span>
+        </div>
+        ${doctorsGroupCollapsed ? '' : `<div class="domain-group-children">
+          <button class="domain-chip" style="--tile-color:${doctorDirTile.color};" onclick="setCategory('${doctorDirTile.id}')">
+            <span class="domain-chip-icon">${doctorDirTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(doctorDirTile.name)}</span>
+          </button>
+          <button class="domain-chip" style="--tile-color:${providersTile.color};" onclick="setCategory('${providersTile.id}')">
+            <span class="domain-chip-icon">${providersTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(providersTile.name)}</span>
+          </button>
+        </div>`}
+      </div>`);
+  }
+
   if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`, { editAction: `openEditDomainModal('${resourcesTile.id}')` }));
 
   const extrasTabs = `
@@ -8037,7 +8180,10 @@ function render(){
   let showStatStrip = true;
   if(activeCategory === 'providers'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
-    searchPlaceholder = 'Search providers, specialties, facilities…';
+    searchPlaceholder = 'Search provider photos, specialties, facilities…';
+  } else if(activeCategory === 'doctor-directory'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddDoctorDirModal()">+ Add doctor</button>`;
+    searchPlaceholder = 'Search doctors, specialties, locations…';
   } else if(activeCategory === 'directory'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
     searchPlaceholder = 'Search links…';
@@ -8228,6 +8374,11 @@ function renderContent(){
     return;
   }
 
+  if(activeCategory === 'doctor-directory'){
+    content.innerHTML = renderDoctorDirectory(q);
+    return;
+  }
+
   if(activeCategory === 'chat'){
     const hasName = !!whoAmI();
     content.innerHTML = `
@@ -8402,6 +8553,7 @@ function setCategory(id){
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   if(id === 'userguide'){ guideIndex = 0; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
+  if(id === 'doctor-directory'){ loadDoctorDirectory(); }
   render();
 }
 
@@ -9038,7 +9190,7 @@ function renderProviders(q){
     return `<div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
   }
 
-  let html = `<div class="section-head"><h2>Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
+  let html = `<div class="section-head"><h2>Pictures of Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
   html += `<div class="grid">`;
   list.forEach((p, cardIdx)=>{
     const initials = initialsOf(p.name);
@@ -9066,6 +9218,63 @@ function renderProviders(q){
         ${p.addedBy ? `<div class="meta">
           <span class="source"></span>
           <span class="source">Added by ${escapeHtml(p.addedBy)}</span>
+        </div>` : ''}
+      </div>
+    `;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderDoctorDirectory(q){
+  let list = DOCTOR_DIRECTORY.slice();
+  if(q){
+    list = list.filter(d =>
+      (d.name||'').toLowerCase().includes(q) ||
+      (d.specialty||'').toLowerCase().includes(q) ||
+      (d.hospitalLocation||'').toLowerCase().includes(q) ||
+      (d.locationDetails||'').toLowerCase().includes(q) ||
+      (d.notes||'').toLowerCase().includes(q)
+    );
+  }
+  list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+
+  if(list.length===0){
+    const msg = DOCTOR_DIRECTORY.length===0
+      ? `${ICON_GRID} No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
+      : 'No doctors match your search.';
+    return `<div class="empty"><div class="glyph">${ICON_GRID}</div>${msg}</div>`;
+  }
+
+  let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
+  html += `<div class="grid">`;
+  list.forEach((d, cardIdx)=>{
+    const initials = initialsOf(d.name);
+    const avatarColor = nameToColor(d.name);
+    const delay = Math.min(cardIdx * 0.03, 0.3);
+    const attribution = d.updatedBy
+      ? `Updated by ${escapeHtml(d.updatedBy)}`
+      : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
+    html += `
+      <div class="card" style="--card-accent:#7C6A9C; animation-delay:${delay.toFixed(2)}s;">
+        <div class="actions" style="position:absolute; top:16px; right:16px;">
+          <button class="icon-btn" title="Edit" onclick="openEditDoctorDirModal('${d.id}')">✎</button>
+          <button class="icon-btn danger" title="Delete" onclick="deleteDoctorDirEntry('${d.id}')">✕</button>
+        </div>
+        <div class="provider-top">
+          <div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>
+          <div>
+            <div class="provider-name">${escapeHtml(d.name)}</div>
+            ${d.specialty ? `<span class="tag" style="color:#7C6A9C; background:#7C6A9C1F;">${escapeHtml(d.specialty)}</span>` : ''}
+            <span class="tag doc-dir-source-tag ${d.source==='manual'?'is-manual':''}">${d.source==='manual'?'Manually added':'From Doctor Prep'}</span>
+          </div>
+        </div>
+        ${d.hospitalLocation ? `<p class="provider-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
+        ${d.locationDetails ? `<div class="doc-dir-location-pin">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
+        ${d.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(d.notes)}</p>` : ''}
+        ${attribution ? `<div class="meta">
+          <span class="source"></span>
+          <span class="source">${attribution}</span>
         </div>` : ''}
       </div>
     `;
@@ -9695,11 +9904,106 @@ async function deleteProvider(id){
   }
 }
 
+let editingDoctorDirId = null;
+
+function openAddDoctorDirModal(){
+  requireName(()=>_openAddDoctorDirModal());
+}
+function _openAddDoctorDirModal(){
+  editingDoctorDirId = null;
+  document.getElementById('doctorDirModalTitle').textContent = 'Add doctor';
+  document.getElementById('fDDName').value = '';
+  document.getElementById('fDDSpecialty').value = '';
+  document.getElementById('fDDLocation').value = '';
+  document.getElementById('fDDLocationDetails').value = '';
+  document.getElementById('fDDNotes').value = '';
+  document.getElementById('doctorDirOverlay').classList.add('show');
+  document.getElementById('fDDName').focus();
+}
+
+function openEditDoctorDirModal(id){
+  requireName(()=>_openEditDoctorDirModal(id));
+}
+function _openEditDoctorDirModal(id){
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
+  if(!d) return;
+  editingDoctorDirId = id;
+  document.getElementById('doctorDirModalTitle').textContent = 'Edit doctor';
+  document.getElementById('fDDName').value = d.name || '';
+  document.getElementById('fDDSpecialty').value = d.specialty || '';
+  document.getElementById('fDDLocation').value = d.hospitalLocation || '';
+  document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
+  document.getElementById('fDDNotes').value = d.notes || '';
+  document.getElementById('doctorDirOverlay').classList.add('show');
+  document.getElementById('fDDName').focus();
+}
+
+function closeDoctorDirModal(){
+  document.getElementById('doctorDirOverlay').classList.remove('show');
+  editingDoctorDirId = null;
+}
+
+async function saveDoctorDirEntry(){
+  const name = document.getElementById('fDDName').value.trim();
+  if(!name){ showToast('Doctor\u2019s name is required.'); return; }
+  const specialty = document.getElementById('fDDSpecialty').value.trim();
+  const hospitalLocation = document.getElementById('fDDLocation').value.trim();
+  const locationDetails = document.getElementById('fDDLocationDetails').value.trim();
+  const notes = document.getElementById('fDDNotes').value.trim();
+  const editor = whoAmI();
+
+  // Editing keeps the existing doc ID (so it stays the same physical
+  // record even if the display name is tweaked); adding fresh derives a
+  // new ID from the name so a later Doctor Prep search on the same person
+  // lands on — and merges into — this same entry rather than duplicating it.
+  const id = editingDoctorDirId || doctorDirectoryKey(name);
+  if(!id){ showToast('Could not generate an entry for that name.'); return; }
+  const existing = editingDoctorDirId ? DOCTOR_DIRECTORY.find(d=>d.id===editingDoctorDirId) : DOCTOR_DIRECTORY.find(d=>d.id===id);
+
+  const record = {
+    ...(existing || {}),
+    name, specialty, hospitalLocation, locationDetails, notes,
+    source: (existing && existing.source) || 'manual',
+    updatedBy: editor || (existing && existing.updatedBy) || '',
+    updatedAt: Date.now(),
+  };
+
+  try{
+    await persistDoctorDirectoryEntry(id, record);
+    const idx = DOCTOR_DIRECTORY.findIndex(d=>d.id===id);
+    if(idx>-1) DOCTOR_DIRECTORY[idx] = { id, ...record };
+    else DOCTOR_DIRECTORY.push({ id, ...record });
+    logActivity(editingDoctorDirId ? `updated the doctor directory entry for ${name}` : `added ${name} to the doctor directory`);
+    closeDoctorDirModal();
+    successBurst();
+    showToast('Doctor saved.');
+    render();
+  }catch(err){
+    showToast(saveErrorMessage(err, 'doctor-directory'));
+  }
+}
+
+async function deleteDoctorDirEntry(id){
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
+  if(!d) return;
+  if(!confirm(`Delete "${d.name}"? This can't be undone.`)) return;
+  try{
+    await deleteDoctorDirectoryEntryRemote(id);
+    DOCTOR_DIRECTORY = DOCTOR_DIRECTORY.filter(x=>x.id!==id);
+    logActivity(`removed ${d.name} from the doctor directory`);
+    showToast('Doctor deleted.');
+    render();
+  }catch(err){
+    showToast('Could not delete — check your connection.');
+  }
+}
+
 
 /* ============ Init ============ */
 loadNotifyPref();
 loadData();
 loadProviders();
+loadDoctorDirectory();
 loadQuizHistory();
 loadTermReviews();
 loadAttachments();
