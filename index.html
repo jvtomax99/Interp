@@ -7931,7 +7931,7 @@ const USER_GUIDE_SLIDES = [
       <li>Each suggested term shows whether it's already in the glossary, or gives you a one-tap <b>+ Add</b> button if it's new.</li>
       <li>Results are shared with the whole team \u2014 if a colleague already researched that doctor, you'll see their result instantly with a "Cached" note and a <b>Refresh</b> button if you want a fresh lookup.</li>
     </ul>
-    <p>Every Doctor Prep search also feeds a shared <b>Doctor Directory</b> tool tile \u2014 a browsable, editable record of every doctor your team has looked up. Anyone can add details the AI would never know, like an exact floor or suite number, or a photo, and those edits are never overwritten by a later search.</p>
+    <p>Every Doctor Prep search also feeds a shared <b>Doctor Directory</b> \u2014 see the "Doctors" section below for what it can do.</p>
     <p class="user-guide-note">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
   ` },
   { kicker: 'Section 8', title: 'CoreCHI Practice', icon: 'ICON_EXAM', color: '#0F5FA6', body: `
@@ -7953,8 +7953,19 @@ const USER_GUIDE_SLIDES = [
     <p><b class="guide-tag-blue">Missed it</b> resets to the start, reviewed again soon. <b class="guide-tag-green">Got it</b> moves one stop further along.</p>
     <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
   ` },
-  { kicker: 'Section 10', title: 'Providers, Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
-    <p><b>Pictures of Healthcare Providers</b> — name, role, facility, phone, notes, and an optional photo (or a colored initials avatar). Now grouped with <b>Doctor Directory</b> in the Tools grid \u2014 tap the group to expand it and choose either one.</p>
+  { kicker: 'Section 10', title: 'Doctors: Directory & Photos', icon: 'ICON_GRID', color: '#7C6A9C', body: `
+    <p>Two doctor-focused tools live together under a collapsible <b>"Doctors"</b> tile in the Tools grid — tap it to expand and choose either one.</p>
+    <p><b>Doctor Directory</b> — a shared, browsable record of every doctor your team has looked up, whether through Doctor Prep or added by hand.</p>
+    <ul>
+      <li>Every Doctor Prep search automatically adds or updates an entry here with the doctor's name, specialty, and hospital/location.</li>
+      <li>Tap <b>+ Add doctor</b> to create an entry manually — no search required.</li>
+      <li>Tap the pencil on any card to add what the AI could never know: an exact floor or suite number, scheduling notes, or a photo. These edits are permanent — re-running Doctor Prep on the same doctor later never overwrites them.</li>
+      <li><b>Tap anywhere on a card</b> to see everything Doctor Prep found for that doctor: the full research summary and the complete English/Spanish terminology list, with the same one-tap <b>+ Add</b> buttons to send new terms straight to the glossary.</li>
+      <li>A doctor with no research yet shows a <b>Research this doctor</b> button that jumps to Doctor Prep with their name already filled in.</li>
+    </ul>
+    <p><b>Pictures of Healthcare Providers</b> — a separate photo-first directory: name, role, facility, phone, notes, and a photo (or a colored initials avatar if none is set).</p>
+  ` },
+  { kicker: 'Section 10', title: 'Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
     <p><b>Find a Doctor</b> and <b>MediFind</b> — grouped together in the Tools grid. Find a Doctor opens Hackensack Meridian's own official directory; MediFind is nested inside it as a secondary, nationwide condition-based search. Both open in your browser.</p>
     <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
     <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
