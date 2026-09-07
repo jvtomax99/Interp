@@ -469,6 +469,23 @@
   .doc-dir-location-pin svg{ width:13px; height:13px; flex-shrink:0; margin-top:1px; color:var(--accent); }
   .doc-dir-source-tag{ color:#8C6E4F; background:#F3ECE3; }
   .doc-dir-source-tag.is-manual{ color:#4E6E9E; background:#E8EEF6; }
+  .doc-dir-card{ cursor:pointer; }
+  .dd-detail-header{ display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; padding-right:28px; }
+  .dd-detail-close{
+    position:absolute; top:20px; right:20px; border:none; background:transparent; cursor:pointer;
+    color:var(--ink-faint); font-size:16px; line-height:1; padding:4px; border-radius:8px;
+    transition:color .15s var(--ease), background .15s var(--ease);
+  }
+  .dd-detail-close:hover{ color:var(--ink); background:var(--bg-hi); }
+  .dd-detail-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .dd-detail-section-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-faint);
+    text-transform:uppercase; margin:20px 0 10px 0; padding-top:16px; border-top:1px solid var(--line-soft);
+  }
+  .dd-detail-empty-research{
+    font-size:13px; color:var(--ink-soft); line-height:1.6; background:var(--bg-hi); border-radius:12px;
+    padding:14px 16px;
+  }
 
   .photo-field{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
   .photo-preview{ width:54px; height:54px; border-radius:50%; object-fit:cover; box-shadow:inset 0 0 0 1px var(--line); flex-shrink:0; }
@@ -2121,6 +2138,10 @@
       <button class="btn btn-primary" onclick="saveDoctorDirEntry()">Save doctor</button>
     </div>
   </div>
+</div>
+
+<div class="overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
+  <div class="modal" id="doctorDirDetailModal" style="max-width:520px;"></div>
 </div>
 
 <div class="overlay" id="questionOverlay">
@@ -5991,12 +6012,13 @@ async function deleteDoctorDirectoryEntryRemote(id){
 // Called after every FRESH (non-cached) successful Doctor Prep search —
 // never on a cache hit, since a cache hit means the directory should
 // already have this entry from whenever it was first researched. Only
-// touches the fields the AI is actually responsible for (specialty and the
-// general hospital/location it searched under); it never writes to
-// locationDetails or notes, which are exclusively human-maintained so a
-// re-run of Doctor Prep can never silently wipe out something like a floor
-// number someone typed in by hand.
-async function upsertDoctorDirectoryFromResearch(name, specialty, location){
+// touches the fields the AI is actually responsible for (specialty, the
+// general hospital/location it searched under, and the full research
+// result for the "view full info" detail screen); it never writes to
+// locationDetails, notes, or photo, which are exclusively human-maintained
+// so a re-run of Doctor Prep can never silently wipe out something like a
+// floor number or photo someone added by hand.
+async function upsertDoctorDirectoryFromResearch(name, specialty, location, researchResult){
   if(!db) return;
   const id = doctorDirectoryKey(name);
   if(!id) return;
@@ -6006,6 +6028,7 @@ async function upsertDoctorDirectoryFromResearch(name, specialty, location){
     name: (existing && existing.name) || name,
     specialty: specialty || (existing && existing.specialty) || '',
     hospitalLocation: location || (existing && existing.hospitalLocation) || '',
+    researchResult: researchResult || (existing && existing.researchResult) || null,
     lastResearchedBy: whoAmI() || 'Someone',
     lastResearchedAt: Date.now(),
     source: (existing && existing.source) || 'ai',
@@ -7538,7 +7561,7 @@ async function runDoctorResearch(forceRefresh){
     } else {
       doctorResearchState = { ...doctorResearchState, status: 'done', result: data, error: null, cacheInfo: null };
       saveCachedDoctorResearch(cacheKey, { doctorName: name, specialty, location, result: data });
-      upsertDoctorDirectoryFromResearch(name, data.specialty || specialty, location);
+      upsertDoctorDirectoryFromResearch(name, data.specialty || specialty, location, data);
     }
   }catch(err){
     console.error('runDoctorResearch failed:', err);
@@ -7553,9 +7576,11 @@ async function runDoctorResearch(forceRefresh){
   render();
 }
 
-async function addSuggestedTermToGlossary(en, es, def, btn){
-  if(!whoAmI()){ requireName(() => addSuggestedTermToGlossary(en, es, def, btn)); return; }
-  const specialty = doctorResearchState.result ? doctorResearchState.result.specialty : null;
+async function addSuggestedTermToGlossary(en, es, def, btn, specialtyOverride){
+  if(!whoAmI()){ requireName(() => addSuggestedTermToGlossary(en, es, def, btn, specialtyOverride)); return; }
+  const specialty = specialtyOverride !== undefined
+    ? specialtyOverride
+    : (doctorResearchState.result ? doctorResearchState.result.specialty : null);
   const domain = findBestDomainMatch(specialty);
   if(!domain){ showToast('No matching domain found — add this one manually.'); return; }
   const id = genId();
@@ -9267,14 +9292,14 @@ function renderDoctorDirectory(q){
       ? `Updated by ${escapeHtml(d.updatedBy)}`
       : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
     html += `
-      <div class="card" style="--card-accent:#7C6A9C; animation-delay:${delay.toFixed(2)}s;">
+      <div class="card doc-dir-card" style="--card-accent:#7C6A9C; animation-delay:${delay.toFixed(2)}s;" onclick="openDoctorDirDetail('${d.id}')">
         <div class="actions" style="position:absolute; top:16px; right:16px;">
-          <button class="icon-btn" title="Edit" onclick="openEditDoctorDirModal('${d.id}')">✎</button>
-          <button class="icon-btn danger" title="Delete" onclick="deleteDoctorDirEntry('${d.id}')">✕</button>
+          <button class="icon-btn" title="Edit" onclick="event.stopPropagation(); openEditDoctorDirModal('${d.id}')">✎</button>
+          <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation(); deleteDoctorDirEntry('${d.id}')">✕</button>
         </div>
         <div class="provider-top">
           ${d.photo
-            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
+            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo" onclick="event.stopPropagation(); openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
             : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
           <div>
             <div class="provider-name">${escapeHtml(d.name)}</div>
@@ -9289,11 +9314,111 @@ function renderDoctorDirectory(q){
           <span class="source"></span>
           <span class="source">${attribution}</span>
         </div>` : ''}
+        ${d.researchResult && Array.isArray(d.researchResult.terms) && d.researchResult.terms.length
+          ? `<div class="meta"><span class="source"></span><span class="source">${ICON_SPARK} Tap to view Doctor Prep results</span></div>`
+          : ''}
       </div>
     `;
   });
   html += `</div>`;
   return html;
+}
+
+function closeDoctorDirDetail(){
+  document.getElementById('doctorDirDetailOverlay').classList.remove('show');
+}
+
+function openDoctorDirDetail(id){
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
+  if(!d) return;
+  document.getElementById('doctorDirDetailModal').innerHTML = renderDoctorDirDetail(d);
+  document.getElementById('doctorDirDetailOverlay').classList.add('show');
+}
+
+// Jumps to the Doctor Prep screen with the name/specialty/location already
+// filled in — doesn't trigger the search itself, since that costs an API
+// call and should stay an explicit choice, not something that fires just
+// from opening this detail view.
+function researchThisDoctorFromDirectory(id){
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
+  if(!d) return;
+  closeDoctorDirDetail();
+  doctorResearchState = {
+    ...doctorResearchState,
+    status: 'idle', doctorName: d.name || '', specialty: d.specialty || '',
+    location: d.hospitalLocation || 'Hackensack Meridian Health', result: null, error: null, cacheInfo: null,
+  };
+  setCategory('doctor-research');
+}
+
+function renderDoctorDirDetail(d){
+  const initials = initialsOf(d.name);
+  const avatarColor = nameToColor(d.name);
+  const attribution = d.updatedBy
+    ? `Updated by ${escapeHtml(d.updatedBy)}`
+    : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
+
+  const r = d.researchResult;
+  const allTerms = allGlossaryTermsFlat();
+  const specialtyForMatch = (r && r.specialty) || d.specialty || null;
+
+  let researchSection = '';
+  if(r && Array.isArray(r.terms) && r.terms.length){
+    const domainMatch = findBestDomainMatch(specialtyForMatch);
+    researchSection = `
+      <div class="dd-detail-section-label">${ICON_SPARK} Doctor Prep results</div>
+      ${r.note ? `<div class="doc-research-summary ${r.found ? '' : 'is-fallback'}"><p>${escapeHtml(r.note)}</p></div>` : ''}
+      <div class="doc-research-terms-label">Terminology (${r.terms.length})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
+      <div class="doc-research-terms">
+        ${r.terms.map(t => {
+          const exists = allTerms.some(existing => (existing.en||'').trim().toLowerCase() === (t.en||'').trim().toLowerCase());
+          const enSafe = escapeHtml(t.en).replace(/'/g,"\\'");
+          const esSafe = escapeHtml(t.es).replace(/'/g,"\\'");
+          const defSafe = escapeHtml(t.def).replace(/'/g,"\\'");
+          const specialtySafe = escapeHtml(specialtyForMatch||'').replace(/'/g,"\\'");
+          return `
+            <div class="doc-research-term-card">
+              <div class="doc-research-term-main">
+                <div class="doc-research-term-en">${escapeHtml(t.en)}</div>
+                <div class="doc-research-term-es">${escapeHtml(t.es)}</div>
+                <div class="doc-research-term-def">${escapeHtml(t.def)}</div>
+              </div>
+              ${exists
+                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
+                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this, '${specialtySafe}')">${ICON_PLUS} Add</button>`}
+            </div>`;
+        }).join('')}
+      </div>
+      <button class="btn btn-ghost" style="width:100%; margin-top:14px;" onclick="researchThisDoctorFromDirectory('${d.id}')">Research again</button>
+    `;
+  } else {
+    researchSection = `
+      <div class="dd-detail-section-label">${ICON_SPARK} Doctor Prep results</div>
+      <div class="dd-detail-empty-research">No Doctor Prep research on file for this doctor yet.</div>
+      <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="researchThisDoctorFromDirectory('${d.id}')">Research this doctor</button>
+    `;
+  }
+
+  return `
+    <button class="dd-detail-close" title="Close" onclick="closeDoctorDirDetail()">✕</button>
+    <div class="dd-detail-header">
+      ${d.photo
+        ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
+        : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
+      <div>
+        <h3 style="margin:0 0 4px 0;">${escapeHtml(d.name)}</h3>
+        <div class="dd-detail-tags">
+          ${d.specialty ? `<span class="tag" style="color:#7C6A9C; background:#7C6A9C1F;">${escapeHtml(d.specialty)}</span>` : ''}
+          <span class="tag doc-dir-source-tag ${d.source==='manual'?'is-manual':''}">${d.source==='manual'?'Manually added':'From Doctor Prep'}</span>
+        </div>
+      </div>
+    </div>
+    ${d.hospitalLocation ? `<p class="provider-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
+    ${d.locationDetails ? `<div class="doc-dir-location-pin">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
+    ${d.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(d.notes)}</p>` : ''}
+    ${attribution ? `<div class="meta"><span class="source"></span><span class="source">${attribution}</span></div>` : ''}
+    ${researchSection}
+  `;
 }
 
 /* ============ Team Chat: rendering + sending ============
