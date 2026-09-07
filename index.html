@@ -1639,6 +1639,21 @@
     margin:-4px 0 14px 2px;
   }
   .doc-research-fastpath svg{ width:13px; height:13px; flex-shrink:0; }
+  .doc-research-cache-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#EEF3F8; border-radius:10px; padding:9px 10px 9px 13px; margin-bottom:16px;
+  }
+  .doc-research-cache-banner-text{
+    display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); min-width:0;
+  }
+  .doc-research-cache-banner-text svg{ width:13px; height:13px; flex-shrink:0; color:var(--accent-2); }
+  .doc-research-cache-refresh{
+    flex-shrink:0; font-family:var(--sans); font-size:11.5px; font-weight:600;
+    padding:6px 12px; border-radius:16px; border:1px solid var(--line-soft); background:var(--paper);
+    color:var(--accent-2); cursor:pointer; white-space:nowrap; transition:filter .15s var(--ease);
+  }
+  .doc-research-cache-refresh:hover{ filter:brightness(0.97); }
+  .doc-research-cache-refresh:disabled{ opacity:.6; cursor:default; }
   .doc-research-submit{ width:100%; margin-bottom:18px; }
   .doc-research-elapsed{ font-family:var(--mono); color:var(--ink-faint); }
   .doc-research-cancel{ margin-top:12px; }
@@ -7275,9 +7290,51 @@ function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
 // serverless endpoint (Claude with web search), then shows a prep list of
 // specialty-specific terminology, flagging which terms already exist
 // somewhere in the glossary versus which are genuinely new.
-let doctorResearchState = { status: 'idle', doctorName: '', specialty: '', location: 'Hackensack Meridian Health', result: null, error: null };
+let doctorResearchState = { status: 'idle', doctorName: '', specialty: '', location: 'Hackensack Meridian Health', result: null, error: null, cacheInfo: null };
 let doctorResearchAbortController = null;
 let doctorResearchElapsedTimer = null;
+
+// A team-shared cache so the same doctor isn't researched from scratch
+// every time a different interpreter looks them up. Keyed on name +
+// specialty + location together (not name alone) since a common surname
+// under a different specialty/location is genuinely a different person —
+// only an exact match on all three is treated as "the same search".
+function doctorCacheKey(name, specialty, location){
+  const norm = s => (s || '')
+    .toLowerCase()
+    .replace(/^dr\.?\s+/i, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  const key = [norm(name), norm(specialty), norm(location)].filter(Boolean).join('__');
+  return key || null;
+}
+
+async function getCachedDoctorResearch(key){
+  if(!db || !key) return null;
+  try{
+    const snap = await db.collection('doctor-research-cache').doc(key).get();
+    if(!snap.exists) return null;
+    return snap.data();
+  }catch(err){
+    console.error('getCachedDoctorResearch failed:', err);
+    return null;
+  }
+}
+
+async function saveCachedDoctorResearch(key, { doctorName, specialty, location, result }){
+  if(!db || !key) return;
+  try{
+    await db.collection('doctor-research-cache').doc(key).set(stripUndefined({
+      doctorName, specialty, location, result,
+      cachedBy: whoAmI() || 'Someone',
+      cachedAt: Date.now(),
+    }));
+  }catch(err){
+    // Non-fatal — the search itself already succeeded and was shown to the
+    // user, so a failed cache write shouldn't surface as an error to them.
+    console.error('saveCachedDoctorResearch failed:', err);
+  }
+}
 
 function allGlossaryTermsFlat(){
   return DATA.categories.flatMap(c => c.terms);
@@ -7302,20 +7359,38 @@ function findBestDomainMatch(specialty){
 function cancelDoctorResearch(){
   if(doctorResearchAbortController) doctorResearchAbortController.abort();
   clearInterval(doctorResearchElapsedTimer);
-  doctorResearchState = { ...doctorResearchState, status: 'idle', result: null, error: null };
+  doctorResearchState = { ...doctorResearchState, status: 'idle', result: null, error: null, cacheInfo: null };
   render();
 }
 
-async function runDoctorResearch(){
+async function runDoctorResearch(forceRefresh){
   const nameInput = document.getElementById('doctorResearchInput');
   const specialtyInput = document.getElementById('doctorResearchSpecialty');
   const locationInput = document.getElementById('doctorResearchLocation');
-  const name = nameInput ? nameInput.value.trim() : '';
-  const specialty = specialtyInput ? specialtyInput.value.trim() : '';
-  const location = locationInput ? locationInput.value.trim() : '';
+  // A refresh re-runs the exact same search that's already on screen, so
+  // the inputs (which get replaced by the results view) aren't available —
+  // fall back to the values already sitting in state for that case.
+  const name = nameInput ? nameInput.value.trim() : (doctorResearchState.doctorName || '');
+  const specialty = specialtyInput ? specialtyInput.value.trim() : (doctorResearchState.specialty || '');
+  const location = locationInput ? locationInput.value.trim() : (doctorResearchState.location || '');
   if(!name){ showToast('Enter a doctor\u2019s name first.'); return; }
 
-  doctorResearchState = { status: 'loading', doctorName: name, specialty, location, result: null, error: null, elapsed: 0 };
+  const cacheKey = doctorCacheKey(name, specialty, location);
+
+  if(!forceRefresh){
+    const cached = await getCachedDoctorResearch(cacheKey);
+    if(cached && cached.result){
+      doctorResearchState = {
+        status: 'done', doctorName: name, specialty, location, error: null,
+        result: cached.result,
+        cacheInfo: { fromCache: true, cachedBy: cached.cachedBy, cachedAt: cached.cachedAt },
+      };
+      render();
+      return;
+    }
+  }
+
+  doctorResearchState = { status: 'loading', doctorName: name, specialty, location, result: null, error: null, elapsed: 0, cacheInfo: null };
   render();
 
   clearInterval(doctorResearchElapsedTimer);
@@ -7339,7 +7414,8 @@ async function runDoctorResearch(){
     if(!res.ok){
       doctorResearchState = { ...doctorResearchState, status: 'error', result: null, error: data.error || 'Something went wrong.' };
     } else {
-      doctorResearchState = { ...doctorResearchState, status: 'done', result: data, error: null };
+      doctorResearchState = { ...doctorResearchState, status: 'done', result: data, error: null, cacheInfo: null };
+      saveCachedDoctorResearch(cacheKey, { doctorName: name, specialty, location, result: data });
     }
   }catch(err){
     console.error('runDoctorResearch failed:', err);
@@ -7386,7 +7462,17 @@ function renderDoctorResearch(){
     const r = s.result;
     const allTerms = allGlossaryTermsFlat();
     const domainMatch = findBestDomainMatch(r.specialty);
+    const cache = s.cacheInfo;
+    const cacheBanner = (cache && cache.fromCache) ? `
+      <div class="doc-research-cache-banner">
+        <div class="doc-research-cache-banner-text">
+          ${ICON_CLOCK}
+          <span>Cached \u2014 researched by ${escapeHtml(cache.cachedBy || 'a teammate')}${cache.cachedAt ? ` on ${new Date(cache.cachedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</span>
+        </div>
+        <button class="doc-research-cache-refresh" onclick="runDoctorResearch(true)">Refresh</button>
+      </div>` : '';
     body = `
+      ${cacheBanner}
       <div class="doc-research-summary ${r.found ? '' : 'is-fallback'}">
         <div class="doc-research-specialty">${r.specialty ? escapeHtml(r.specialty) : 'Specialty not confidently identified'}</div>
         <p>${escapeHtml(r.note || '')}</p>
@@ -7594,6 +7680,7 @@ const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3
 const ICON_UPLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5V3.5M12 3.5L7.5 8M12 3.5L16.5 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5V19C4.5 19.8 5.2 20.5 6 20.5H18C18.8 20.5 19.5 19.8 19.5 19V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12L15.2 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
@@ -7694,6 +7781,7 @@ const USER_GUIDE_SLIDES = [
       <li>Type a name, and optionally a specialty or hospital to narrow the search — this also makes the lookup faster.</li>
       <li>Known John Theurer Cancer Center physicians are matched instantly from a built-in list, no search needed.</li>
       <li>Each suggested term shows whether it's already in the glossary, or gives you a one-tap <b>+ Add</b> button if it's new.</li>
+      <li>Results are shared with the whole team \u2014 if a colleague already researched that doctor, you'll see their result instantly with a "Cached" note and a <b>Refresh</b> button if you want a fresh lookup.</li>
     </ul>
     <p class="user-guide-note">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
   ` },
