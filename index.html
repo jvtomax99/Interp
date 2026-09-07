@@ -469,6 +469,20 @@
   .doc-dir-location-pin svg{ width:13px; height:13px; flex-shrink:0; margin-top:1px; color:var(--accent); }
   .doc-dir-source-tag{ color:#8C6E4F; background:#F3ECE3; }
   .doc-dir-source-tag.is-manual{ color:#4E6E9E; background:#E8EEF6; }
+  .ethics-filter-row{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+  .ethics-filter-pill{
+    font-family:var(--sans); font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:999px;
+    border:1px solid var(--line-soft); background:var(--paper); color:var(--ink-soft); cursor:pointer;
+    transition:all .15s var(--ease);
+  }
+  .ethics-filter-pill.is-active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .ethics-org-tag.is-ncihc{ color:#2F5D62; background:#2F5D621F; }
+  .ethics-org-tag.is-cchi{ color:#8C6E4F; background:#8C6E4F1F; }
+  .ethics-practice-box{
+    display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--ink);
+    background:var(--bg-hi); border-radius:10px; padding:10px 12px; margin-top:10px; line-height:1.5;
+  }
+  .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
   .doc-dir-card{ cursor:pointer; }
   .dd-detail-header{ display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; padding-right:28px; }
   .dd-detail-close{
@@ -3041,6 +3055,7 @@ let activeCategory = 'home';
 // Remembered across visits (not just this session) so the sidebar looks the
 // way each person left it, rather than resetting every time the app opens.
 let domainsCollapsed = false;
+let ethicsFilter = 'all';
 try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }catch(e){}
 // Per-parent collapse state for domain groups (which parents have their
 // subgroups tucked away) — a list of domain ids, persisted per device.
@@ -7001,6 +7016,14 @@ function collectSearchMatches(q){
     }
   });
 
+  ETHICS_CONTENT.forEach(e=>{
+    if(hit(e.title) || hit(e.summary) || hit(e.practice)){
+      out.push({ group:'Code of Ethics', icon:ICON_SHIELD, color:'#2F5D62',
+        title:e.title, sub:`${e.org} \u00b7 ${e.tag}`,
+        target:'ethics', rank: starts(e.title) ? 0 : 1 });
+    }
+  });
+
   CHAT_MESSAGES.forEach(m=>{
     if(hit(m.text) || hit(m.author)){
       out.push({ group:'Chat', icon:ICON_CHAT, color:'#2E8BD0',
@@ -7324,6 +7347,7 @@ function getToolTiles(){
   return [
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: ICON_COMPASS, count: USER_GUIDE_SLIDES.length, label:'slides' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: ICON_CALENDAR, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
+    { id:'ethics',    name:'Code of Ethics',       color:'#2F5D62', icon: ICON_SHIELD, count: ETHICS_CONTENT.length, label: 'entries' },
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: ICON_GLOBE,   count: null, label: '' },
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: ICON_EXAM,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
     { id:'review',    name:'Term Review',          color:'#4E9E74', icon: ICON_REVIEW, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
@@ -7851,6 +7875,56 @@ const ICON_GUIDE_MAP = {
   ICON_CHAIN, ICON_BELL, ICON_MOON, ICON_DOWNLOAD, ICON_SHIELD, ICON_SPARK,
 };
 
+// Static reference content — plain-language summaries written for this app,
+// not verbatim text from any code of ethics. Grounded in the National
+// Council on Interpreting in Health Care's 9-principle National Code of
+// Ethics (2004) and CCHI's Code of Ethics / Disciplinary Policy, cited by
+// organization on each card rather than quoted at length.
+const ETHICS_CONTENT = [
+  { id:'e-confidentiality', org:'NCIHC', tag:'Principle', title:'Confidentiality',
+    summary:`Keep everything you hear or read during an assignment private. Share it only when the law or your facility's policy specifically requires it (like mandatory abuse reporting) — never out of habit or convenience.`,
+    practice:`Don't discuss patient details in the break room, in Team Chat, or with friends and family — even to vent about a hard day.` },
+  { id:'e-accuracy', org:'NCIHC', tag:'Principle', title:'Accuracy & Fidelity',
+    summary:`Render the message completely and precisely — tone, register, and intent included — without adding, omitting, or softening anything either party said.`,
+    practice:`If a patient swears or a provider is blunt, interpret that tone too. If you don't understand a term, say so out loud instead of guessing.` },
+  { id:'e-impartiality', org:'NCIHC', tag:'Principle', title:'Impartiality',
+    summary:`Stay neutral. Don't let your own opinions, relationships, or reactions to what's being said change how you interpret it.`,
+    practice:`If you know the patient personally or feel strongly about a treatment decision, disclose the conflict and consider stepping back from the assignment.` },
+  { id:'e-respect', org:'NCIHC', tag:'Principle', title:'Respect',
+    summary:`Treat everyone in the encounter with dignity, regardless of their background, diagnosis, immigration status, or behavior.`,
+    practice:`Use the language and pronouns the patient prefers. Interpret their choices to the provider without editorializing them.` },
+  { id:'e-cultural', org:'NCIHC', tag:'Principle', title:'Cultural Awareness',
+    summary:`Language and culture are intertwined. Part of the job is noticing when a literal translation would lose or distort the intended meaning.`,
+    practice:`Flag a culturally-loaded phrase — a folk illness term, a family decision-making norm — rather than translating it word-for-word and letting the meaning get lost.` },
+  { id:'e-role', org:'NCIHC', tag:'Principle', title:'Role Boundaries',
+    summary:`Interpret — don't counsel, diagnose, give personal opinions, or fill in for other staff roles unless you're specifically asked and qualified to.`,
+    practice:`If a patient asks "what would you do?", interpret the question to the provider rather than answering it yourself.` },
+  { id:'e-professionalism', org:'NCIHC', tag:'Principle', title:'Professionalism',
+    summary:`Show up prepared and on time, and conduct yourself the way any other clinical professional would.`,
+    practice:`Keep personal phone use out of the encounter. Dress and behave consistently with the clinical setting you're in.` },
+  { id:'e-development', org:'NCIHC', tag:'Principle', title:'Professional Development',
+    summary:`Certification is a starting point, not a finish line — terminology, technique, and cultural competence all keep evolving.`,
+    practice:`This is exactly what Term Review, CoreCHI Practice, and the CE events feed in this app are for.` },
+  { id:'e-advocacy', org:'NCIHC', tag:'Principle', title:'Advocacy',
+    summary:`When you see a real risk of harm, unfairness, or a communication breakdown, you can speak up for the patient — but only after the interpreting task itself is finished, and by clearly stepping outside the interpreter role to do it.`,
+    practice:`If a patient clearly didn't understand a discharge instruction, you can flag that concern to the provider afterward — explicitly, not silently blended into the interpretation.` },
+  { id:'c-boundaries', org:'CCHI', tag:'Prohibited conduct', title:'Crossing personal boundaries',
+    summary:`Entering into a personal, romantic, or financial relationship with a patient tied to an assignment is a conduct violation, not just bad judgment.`,
+    practice:null },
+  { id:'c-gifts', org:'CCHI', tag:'Prohibited conduct', title:'Accepting unauthorized fees or gifts',
+    summary:`Taking payment, commissions, or gifts beyond what your employer authorizes — including from a patient or vendor — is prohibited.`,
+    practice:null },
+  { id:'c-scope', org:'CCHI', tag:'Prohibited conduct', title:'Practicing outside your scope',
+    summary:`Accepting an assignment that requires certification or skills you don't have — a legal proceeding, a different language pair, sign language — without disclosing that gap.`,
+    practice:null },
+  { id:'c-conflict', org:'CCHI', tag:'Prohibited conduct', title:'Undisclosed conflicts of interest',
+    summary:`Not disclosing a personal or financial connection to a patient, provider, or case that could compromise impartiality.`,
+    practice:null },
+  { id:'c-credentials', org:'CCHI', tag:'Prohibited conduct', title:'Misrepresenting credentials',
+    summary:`Claiming a certification, language qualification, or status you don't actually hold.`,
+    practice:null },
+];
+
 const USER_GUIDE_SLIDES = [
   { kicker: '', title: 'Interpreter Hub', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
     <p>A section-by-section walkthrough of every screen and tool in the app — swipe or tap through whenever you need a refresher.</p>
@@ -8231,6 +8305,9 @@ function render(){
   } else if(activeCategory === 'doctor-directory'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddDoctorDirModal()">+ Add doctor</button>`;
     searchPlaceholder = 'Search doctors, specialties, locations…';
+  } else if(activeCategory === 'ethics'){
+    addBtnHtml = '';
+    searchPlaceholder = 'Search principles, conduct…';
   } else if(activeCategory === 'directory'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
     searchPlaceholder = 'Search links…';
@@ -8423,6 +8500,11 @@ function renderContent(){
 
   if(activeCategory === 'doctor-directory'){
     content.innerHTML = renderDoctorDirectory(q);
+    return;
+  }
+
+  if(activeCategory === 'ethics'){
+    content.innerHTML = renderEthics(q);
     return;
   }
 
@@ -9430,6 +9512,61 @@ function renderDoctorDirDetail(d){
     ${attribution ? `<div class="meta"><span class="source"></span><span class="source">${attribution}</span></div>` : ''}
     ${researchSection}
   `;
+}
+
+function setEthicsFilter(f){
+  ethicsFilter = f;
+  render();
+}
+
+function renderEthics(q){
+  let list = ETHICS_CONTENT.slice();
+  if(ethicsFilter !== 'all') list = list.filter(e => e.org === ethicsFilter);
+  if(q){
+    list = list.filter(e =>
+      (e.title||'').toLowerCase().includes(q) ||
+      (e.summary||'').toLowerCase().includes(q) ||
+      (e.practice||'').toLowerCase().includes(q)
+    );
+  }
+
+  const counts = {
+    all: ETHICS_CONTENT.length,
+    NCIHC: ETHICS_CONTENT.filter(e=>e.org==='NCIHC').length,
+    CCHI: ETHICS_CONTENT.filter(e=>e.org==='CCHI').length,
+  };
+
+  let html = `<div class="section-head"><h2>Code of Ethics</h2><span class="sub">${list.length} ${list.length===1?'entry':'entries'}</span></div>`;
+  html += `<div class="ethics-filter-row">
+    <button class="ethics-filter-pill ${ethicsFilter==='all'?'is-active':''}" onclick="setEthicsFilter('all')">All (${counts.all})</button>
+    <button class="ethics-filter-pill ${ethicsFilter==='NCIHC'?'is-active':''}" onclick="setEthicsFilter('NCIHC')">NCIHC Principles (${counts.NCIHC})</button>
+    <button class="ethics-filter-pill ${ethicsFilter==='CCHI'?'is-active':''}" onclick="setEthicsFilter('CCHI')">CCHI Conduct (${counts.CCHI})</button>
+  </div>`;
+
+  if(list.length === 0){
+    html += `<div class="empty"><div class="glyph">${ICON_SHIELD}</div>No entries match your search.</div>`;
+    return html;
+  }
+
+  html += `<div class="grid">`;
+  list.forEach((e, i) => {
+    const delay = Math.min(i * 0.03, 0.3);
+    const orgColor = e.org === 'NCIHC' ? '#2F5D62' : '#8C6E4F';
+    html += `
+      <div class="card" style="--card-accent:${orgColor}; animation-delay:${delay.toFixed(2)}s;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+          <span class="tag ethics-org-tag ${e.org==='NCIHC'?'is-ncihc':'is-cchi'}">${e.org}</span>
+          <span class="tag" style="color:var(--ink-faint); background:var(--bg-hi);">${escapeHtml(e.tag)}</span>
+        </div>
+        <div class="provider-name" style="font-size:16.5px; margin-bottom:6px;">${escapeHtml(e.title)}</div>
+        <p class="def">${escapeHtml(e.summary)}</p>
+        ${e.practice ? `<div class="ethics-practice-box">${ICON_CHECK}<span><b>In practice:</b> ${escapeHtml(e.practice)}</span></div>` : ''}
+      </div>
+    `;
+  });
+  html += `</div>`;
+  html += `<p class="user-guide-note" style="margin-top:20px;">Plain-language summaries for quick reference \u2014 not a substitute for reading NCIHC's National Code of Ethics or CCHI's official Code of Ethics in full.</p>`;
+  return html;
 }
 
 /* ============ Team Chat: rendering + sending ============
