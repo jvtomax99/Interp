@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Interpreter Hub Dashboard V3: structural redesign with original app data/features preserved. -->
 <html lang="en">
 <script>
   // Applied here, before any CSS renders, so the page never flashes light
@@ -1985,850 +1984,6 @@
     a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
   }
 </style>
-
-<style id="ih-dashboard-v3">
-:root{
-  --ui-navy:#0A315E;
-  --ui-navy-deep:#072747;
-  --ui-blue:#1476D1;
-  --ui-cyan:#08B6E3;
-  --ui-bg:#F3F7FB;
-  --ui-card:#FFFFFF;
-  --ui-text:#12345B;
-  --ui-muted:#6A7D92;
-  --ui-line:#E1E9F2;
-  --ui-shadow:0 12px 34px rgba(35,76,116,.08);
-  --ui-radius:16px;
-}
-
-/* Old ornamental chrome is replaced by the new shell. */
-.top-banner,
-.greeting-banner,
-.brand-mobile,
-.gs-trigger-mobile,
-.theme-fab,
-.name-fab,
-.home-fab{display:none!important;}
-
-html,body{min-height:100%;}
-body{
-  background:var(--ui-bg)!important;
-  background-image:
-    radial-gradient(900px 560px at 100% 0%,rgba(8,182,227,.055),transparent 64%)!important;
-}
-body::before{display:none!important;}
-
-.app{
-  min-height:100vh!important;
-  display:grid!important;
-  grid-template-columns:248px minmax(0,1fr)!important;
-  align-items:stretch!important;
-}
-
-/* ===========================
-   NAVIGATION
-   =========================== */
-.ui-sidebar{
-  position:sticky;
-  top:0;
-  height:100vh;
-  overflow:auto;
-  padding:24px 14px 20px;
-  color:#fff;
-  background:
-    radial-gradient(330px 260px at 5% 0%,rgba(29,133,231,.25),transparent 67%),
-    linear-gradient(180deg,var(--ui-navy),var(--ui-navy-deep));
-  box-shadow:12px 0 34px rgba(7,35,65,.10);
-  scrollbar-width:thin;
-}
-.ui-brand{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:3px 9px 21px;
-}
-.ui-brand-mark{
-  width:39px;height:39px;
-  flex:0 0 auto;
-  border-radius:11px;
-  display:grid;place-items:center;
-  color:white;
-  background:linear-gradient(145deg,#176FC4,#04B7E3);
-  box-shadow:0 8px 20px rgba(2,29,57,.22);
-}
-.ui-brand-mark svg{width:22px;height:22px;}
-.ui-brand-copy strong{
-  display:block;
-  font-size:16px;
-  line-height:1.12;
-  font-weight:700;
-  letter-spacing:-.02em;
-}
-.ui-brand-copy span{
-  display:block;
-  color:#A9C6DF;
-  font-size:9.5px;
-  margin-top:3px;
-}
-
-.ui-nav-search{
-  width:calc(100% - 8px);
-  margin:0 4px 17px;
-  min-height:43px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:10px;
-  padding:0 11px;
-  display:flex;align-items:center;gap:9px;
-  background:rgba(255,255,255,.075);
-  color:#E7F2FB;
-  cursor:pointer;
-  text-align:left;
-}
-.ui-nav-search:hover{background:rgba(255,255,255,.12);}
-.ui-nav-search svg{width:17px;height:17px;}
-.ui-nav-search span{font-size:11px;flex:1;}
-.ui-nav-search kbd{
-  font:9px var(--mono);
-  color:#B6CDE1;
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:5px;
-  padding:3px 5px;
-  background:rgba(255,255,255,.04);
-}
-
-.ui-nav-group{margin-top:17px;}
-.ui-nav-label{
-  padding:0 10px 7px;
-  color:#79B8E9;
-  text-transform:uppercase;
-  font-size:9px;
-  font-weight:600;
-  letter-spacing:.14em;
-}
-.ui-nav-btn{
-  width:100%;
-  min-height:40px;
-  border:0;
-  border-radius:9px;
-  padding:7px 9px;
-  margin:1px 0;
-  display:grid;
-  grid-template-columns:26px minmax(0,1fr) auto;
-  align-items:center;
-  gap:8px;
-  background:transparent;
-  color:#D8E6F3;
-  cursor:pointer;
-  text-align:left;
-}
-.ui-nav-btn:hover{
-  color:white;
-  background:rgba(255,255,255,.075);
-}
-.ui-nav-btn.active{
-  color:white;
-  background:linear-gradient(135deg,#1979D8,#155FA9);
-  box-shadow:0 7px 17px rgba(0,0,0,.14);
-}
-.ui-nav-ico{
-  width:26px;height:26px;
-  border-radius:7px;
-  display:grid;place-items:center;
-  background:rgba(255,255,255,.075);
-  color:inherit;
-}
-.ui-nav-ico svg{width:15px;height:15px;}
-.ui-nav-name{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:11.5px;
-  font-weight:500;
-}
-.ui-nav-count{
-  font-size:9px;
-  color:#8CAECB;
-  font-variant-numeric:tabular-nums;
-}
-.ui-nav-btn.active .ui-nav-count{color:#D8ECFC;}
-.ui-nav-divider{
-  height:1px;
-  margin:15px 9px;
-  background:rgba(255,255,255,.095);
-}
-.ui-domain-list{
-  max-height:38vh;
-  overflow:auto;
-  padding-right:2px;
-  scrollbar-width:thin;
-}
-.ui-sidebar-footer{
-  margin:20px 8px 2px;
-  padding:12px;
-  border-radius:10px;
-  color:#AFC8DE;
-  border:1px solid rgba(255,255,255,.09);
-  background:rgba(255,255,255,.045);
-  font-size:9.5px;
-  line-height:1.45;
-}
-
-/* ===========================
-   MAIN SHELL
-   =========================== */
-.ui-main{
-  min-width:0;
-  padding:0 0 70px;
-}
-.ui-header{
-  height:72px;
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:0 28px;
-  border-bottom:1px solid var(--ui-line);
-  background:rgba(255,255,255,.86);
-  backdrop-filter:blur(16px);
-  position:sticky;
-  top:0;
-  z-index:20;
-}
-.ui-header-search{
-  flex:1;
-  max-width:710px;
-  min-height:42px;
-  border:1px solid #DCE6F0;
-  border-radius:11px;
-  display:flex;align-items:center;gap:9px;
-  padding:0 13px;
-  background:#F8FAFC;
-  color:#70849A;
-  cursor:pointer;
-  text-align:left;
-}
-.ui-header-search:hover{background:#fff;border-color:#C8DAEA;}
-.ui-header-search svg{width:18px;height:18px;}
-.ui-header-search span{font-size:12px;}
-.ui-header-spacer{flex:1;}
-.ui-header-brand{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:#173A65;
-  padding-left:12px;
-}
-.ui-header-brand-mark{
-  width:26px;height:26px;
-  display:grid;place-items:center;
-  color:#1476D1;
-}
-.ui-header-brand-mark svg{width:24px;height:24px;}
-.ui-header-brand strong{
-  font-size:11px;
-  line-height:1.1;
-  display:block;
-}
-.ui-header-brand span{
-  display:block;
-  color:#75879A;
-  font-size:8.5px;
-  margin-top:2px;
-}
-.ui-head-icon{
-  width:38px;height:38px;
-  display:grid;place-items:center;
-  border:1px solid #DDE6EF;
-  border-radius:10px;
-  background:#fff;
-  color:#31577F;
-  cursor:pointer;
-}
-.ui-head-icon:hover{background:#F7FAFD;}
-.ui-head-icon svg{width:17px;height:17px;}
-
-.ui-content{
-  width:min(1360px,calc(100% - 50px));
-  margin:0 auto;
-  padding-top:24px;
-}
-.ui-screen-top{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:18px;
-}
-.ui-back{
-  display:none;
-}
-.ui-screen-title{
-  min-width:0;
-}
-.ui-screen-title strong{
-  display:block;
-  color:#13365E;
-  font-size:19px;
-  letter-spacing:-.025em;
-}
-.ui-screen-title span{
-  color:#718499;
-  font-size:10.5px;
-}
-.ui-screen-actions{
-  margin-left:auto;
-  display:flex;gap:8px;
-}
-.ui-small-btn{
-  min-height:36px;
-  border:1px solid #DCE6EF;
-  border-radius:9px;
-  padding:0 12px;
-  background:#fff;
-  color:#315A84;
-  font-size:11px;
-  font-weight:600;
-  cursor:pointer;
-}
-.ui-small-btn.primary{
-  color:white;
-  border-color:#1476D1;
-  background:#1476D1;
-}
-
-/* Keep all original content renderers, but make their surfaces fit the shell. */
-.ui-content .content-fade{padding:0!important;}
-.ui-content .section-head{
-  margin:0 0 14px!important;
-}
-.ui-content .section-head h2{
-  font-family:var(--sans)!important;
-  font-size:20px!important;
-  font-weight:700!important;
-  letter-spacing:-.025em!important;
-  color:#14365E!important;
-}
-.ui-content .section-head .sub{color:#788A9D!important;}
-.ui-content .grid{gap:14px!important;}
-.ui-content .card,
-.ui-content .tr-panel,
-.ui-content .practice-shell,
-.ui-content .review-shell,
-.ui-content .chat-shell{
-  border-color:var(--ui-line)!important;
-}
-.ui-content .card{
-  border-radius:14px!important;
-  box-shadow:0 6px 22px rgba(35,76,116,.055)!important;
-}
-.ui-content .card:hover{
-  transform:translateY(-1px)!important;
-  box-shadow:var(--ui-shadow)!important;
-}
-.ui-content .topbar{
-  position:static!important;
-}
-
-/* ===========================
-   HOME DASHBOARD
-   =========================== */
-.dash{padding-bottom:20px;}
-.dash-hero{
-  position:relative;
-  overflow:hidden;
-  min-height:205px;
-  display:flex;
-  align-items:center;
-  padding:30px 32px;
-  border:1px solid #DDE9F4;
-  border-radius:20px;
-  background:
-    linear-gradient(90deg,rgba(255,255,255,.99) 0%,rgba(255,255,255,.94) 49%,rgba(234,246,255,.69) 100%),
-    linear-gradient(135deg,#FBFDFF,#E5F4FE);
-  box-shadow:0 12px 34px rgba(42,91,135,.075);
-}
-.dash-hero::before{
-  content:"";
-  position:absolute;
-  inset:0 0 0 55%;
-  opacity:.24;
-  background:
-    linear-gradient(120deg,transparent 8%,rgba(20,118,209,.10) 8% 9%,transparent 9% 20%,rgba(8,182,227,.10) 20% 21%,transparent 21%),
-    radial-gradient(circle at 73% 45%,rgba(20,118,209,.22),transparent 2.5%),
-    radial-gradient(circle at 81% 36%,rgba(8,182,227,.18),transparent 2.7%),
-    radial-gradient(circle at 88% 55%,rgba(20,118,209,.16),transparent 2.4%);
-  background-size:auto,70px 70px,88px 88px,98px 98px;
-}
-.dash-copy{position:relative;z-index:2;max-width:650px;}
-.dash-kicker{
-  color:#1D65A8;
-  text-transform:uppercase;
-  letter-spacing:.15em;
-  font-size:10px;
-  font-weight:700;
-  margin-bottom:7px;
-}
-.dash-hero h1{
-  margin:0;
-  color:#0F315B;
-  font-family:var(--sans);
-  font-size:clamp(36px,4.2vw,55px);
-  font-weight:700;
-  line-height:.98;
-  letter-spacing:-.05em;
-}
-.dash-hero p{
-  margin:13px 0 0;
-  color:#667A90;
-  font-size:13px;
-  line-height:1.55;
-}
-.dash-quote{
-  display:block;
-  margin-top:16px;
-  color:#2B6CA6;
-  font-size:11.5px;
-  font-style:italic;
-}
-.dash-date{
-  position:absolute;
-  z-index:3;
-  right:25px;
-  bottom:22px;
-  width:208px;
-  padding:13px 15px;
-  border:1px solid #D6E4F0;
-  border-radius:13px;
-  background:rgba(255,255,255,.88);
-  backdrop-filter:blur(9px);
-  box-shadow:0 7px 20px rgba(35,76,116,.07);
-}
-.dash-date b{
-  display:block;
-  color:#173E69;
-  font-size:11px;
-  margin-bottom:4px;
-}
-.dash-date span{
-  display:block;
-  color:#75879A;
-  font-size:9.5px;
-  line-height:1.4;
-}
-
-.dash-section{margin-top:24px;}
-.dash-head{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:14px;
-  margin-bottom:11px;
-}
-.dash-head h2{
-  margin:0;
-  color:#13365E;
-  font-family:var(--sans);
-  font-size:17px;
-  font-weight:700;
-  letter-spacing:-.025em;
-}
-.dash-head button{
-  border:0;background:transparent;
-  color:#1470C8;
-  font-size:10.5px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.dash-actions{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:12px;
-}
-.dash-action{
-  position:relative;
-  min-height:142px;
-  padding:18px;
-  border:1px solid rgba(214,227,240,.92);
-  border-radius:14px;
-  text-align:left;
-  background:var(--card-bg,#EEF7FF);
-  cursor:pointer;
-  overflow:hidden;
-  transition:.18s var(--ease);
-}
-.dash-action:hover{transform:translateY(-2px);box-shadow:var(--ui-shadow);}
-.dash-action-icon{
-  width:41px;height:41px;
-  display:grid;place-items:center;
-  border-radius:11px;
-  margin-bottom:13px;
-  color:var(--tone,#1476D1);
-  background:rgba(255,255,255,.68);
-}
-.dash-action-icon svg{width:23px;height:23px;}
-.dash-action strong{
-  display:block;
-  color:#15385F;
-  font-size:12.5px;
-  margin-bottom:4px;
-}
-.dash-action small{
-  display:block;
-  max-width:185px;
-  color:#687C91;
-  font-size:10px;
-  line-height:1.4;
-}
-.dash-action::after{
-  content:"›";
-  position:absolute;
-  right:15px;bottom:12px;
-  color:#1A4A79;
-  font-size:26px;
-}
-
-.dash-domains{
-  display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
-  gap:11px;
-}
-.dash-domain{
-  position:relative;
-  min-height:110px;
-  padding:14px;
-  border:1px solid rgba(218,229,239,.92);
-  border-radius:14px;
-  text-align:left;
-  background:var(--card-bg,#F6F9FC);
-  cursor:pointer;
-  transition:.18s var(--ease);
-}
-.dash-domain:hover{transform:translateY(-2px);box-shadow:0 9px 23px rgba(35,76,116,.07);}
-.dash-domain-icon{
-  width:35px;height:35px;
-  display:grid;place-items:center;
-  border-radius:10px;
-  margin-bottom:9px;
-  color:var(--tone,#1476D1);
-  background:rgba(255,255,255,.66);
-}
-.dash-domain-icon svg{width:20px;height:20px;}
-.dash-domain strong{
-  display:block;
-  color:#173A62;
-  font-size:11.5px;
-  line-height:1.25;
-}
-.dash-domain small{
-  display:block;
-  color:#718399;
-  font-size:9.5px;
-  margin-top:3px;
-}
-.dash-domain::after{
-  content:"›";
-  position:absolute;
-  right:10px;bottom:8px;
-  color:#27547E;
-  font-size:21px;
-}
-
-.dash-study{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:11px;
-}
-.dash-study-card{
-  min-height:84px;
-  display:grid;
-  grid-template-columns:39px minmax(0,1fr) 15px;
-  gap:10px;
-  align-items:center;
-  padding:12px 13px;
-  border:1px solid var(--ui-line);
-  border-radius:13px;
-  background:#fff;
-  cursor:pointer;
-  text-align:left;
-  transition:.18s var(--ease);
-}
-.dash-study-card:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(35,76,116,.065);}
-.dash-study-ico{
-  width:38px;height:38px;
-  display:grid;place-items:center;
-  border-radius:10px;
-  background:#EEF5FC;
-  color:var(--tone,#1476D1);
-}
-.dash-study-ico svg{width:20px;height:20px;}
-.dash-study-card strong{
-  display:block;
-  color:#16385F;
-  font-size:11.5px;
-  margin-bottom:2px;
-}
-.dash-study-card small{
-  display:block;
-  color:#75879B;
-  font-size:9px;
-  line-height:1.3;
-}
-.dash-study-arrow{color:#315C84;font-size:20px;}
-
-.dash-bottom{
-  display:grid;
-  grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr);
-  gap:15px;
-}
-.dash-activity,
-.dash-tip{
-  border:1px solid var(--ui-line);
-  border-radius:14px;
-  background:#fff;
-}
-.dash-activity{padding:3px 13px;}
-.dash-row{
-  display:grid;
-  grid-template-columns:32px minmax(0,1fr) auto;
-  gap:9px;
-  align-items:center;
-  min-height:51px;
-  border-bottom:1px solid #EDF2F7;
-}
-.dash-row:last-child{border-bottom:0;}
-.dash-row-ico{
-  width:29px;height:29px;
-  border-radius:8px;
-  display:grid;place-items:center;
-  background:#EAF4FD;
-  color:#1476D1;
-}
-.dash-row-ico svg{width:15px;height:15px;}
-.dash-row strong{
-  display:block;
-  color:#173A61;
-  font-size:10.5px;
-}
-.dash-row span{
-  display:block;
-  color:#78899B;
-  font-size:9px;
-  margin-top:1px;
-}
-.dash-row time{
-  color:#8C9AA8;
-  font-size:8.5px;
-  white-space:nowrap;
-}
-.dash-tip{
-  padding:19px;
-  background:linear-gradient(145deg,#EAF7FF,#DDF1FF);
-}
-.dash-tip-title{
-  display:flex;align-items:center;gap:8px;
-  color:#1768B4;
-  font-size:12px;
-  font-weight:700;
-  margin-bottom:13px;
-}
-.dash-tip-title svg{width:20px;height:20px;}
-.dash-tip p{
-  margin:0;
-  color:#3A607F;
-  font-size:10.5px;
-  line-height:1.55;
-}
-.dash-tip em{
-  display:block;
-  margin-top:15px;
-  color:#477298;
-  font-size:9.5px;
-}
-
-/* ===========================
-   MOBILE
-   =========================== */
-.ui-mobile-bar{display:none;}
-.ui-bottom-nav{display:none;}
-
-@media(max-width:1080px){
-  .dash-actions,.dash-study{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .dash-domains{grid-template-columns:repeat(3,minmax(0,1fr));}
-}
-
-@media(max-width:760px){
-  body{padding-bottom:68px!important;}
-  .app{
-    display:block!important;
-    min-height:100vh!important;
-  }
-  .ui-sidebar,
-  .ui-header{display:none!important;}
-  .ui-main{padding:0 0 18px!important;}
-  .ui-content{
-    width:calc(100% - 24px);
-    padding-top:0;
-  }
-  .ui-mobile-bar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    height:62px;
-    padding:0 14px;
-    border-bottom:1px solid #E2EAF2;
-    background:rgba(255,255,255,.94);
-    backdrop-filter:blur(16px);
-    position:sticky;
-    top:0;
-    z-index:30;
-  }
-  .ui-mobile-brand{display:flex;align-items:center;gap:9px;}
-  .ui-mobile-brand .ui-brand-mark{width:34px;height:34px;border-radius:10px;}
-  .ui-mobile-brand .ui-brand-copy strong{color:#15375D;font-size:13px;}
-  .ui-mobile-brand .ui-brand-copy span{color:#788A9B;font-size:8.5px;}
-  .ui-mobile-actions{display:flex;gap:6px;}
-  .ui-mobile-actions .ui-head-icon{width:35px;height:35px;}
-
-  .ui-screen-top{
-    min-height:54px;
-    margin:8px 0 10px;
-  }
-  .ui-back{
-    width:35px;height:35px;
-    display:grid;place-items:center;
-    border:1px solid #DFE8F0;
-    border-radius:10px;
-    background:white;
-    color:#315B83;
-    cursor:pointer;
-  }
-  .ui-back svg{width:17px;height:17px;}
-  .ui-screen-title strong{font-size:15px;}
-  .ui-screen-title span{font-size:9px;}
-  .ui-screen-actions{display:none;}
-
-  .dash{padding-top:12px;}
-  .dash-hero{
-    min-height:172px;
-    padding:22px 19px;
-    border-radius:17px;
-  }
-  .dash-hero h1{font-size:38px;}
-  .dash-hero p{font-size:11px;max-width:90%;}
-  .dash-date{display:none;}
-  .dash-quote{font-size:10px;margin-top:13px;}
-
-  .dash-section{margin-top:20px;}
-  .dash-head h2{font-size:15px;}
-  .dash-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
-  .dash-action{min-height:118px;padding:13px;border-radius:13px;}
-  .dash-action-icon{width:35px;height:35px;margin-bottom:9px;}
-  .dash-action-icon svg{width:20px;height:20px;}
-  .dash-action strong{font-size:11px;}
-  .dash-action small{font-size:8.8px;}
-  .dash-action::after{font-size:21px;}
-
-  .dash-domains{grid-template-columns:1fr;gap:7px;}
-  .dash-domain{
-    min-height:64px;
-    display:grid;
-    grid-template-columns:35px minmax(0,1fr) 15px;
-    align-items:center;
-    gap:10px;
-    padding:9px 11px;
-    border-radius:12px;
-  }
-  .dash-domain-icon{margin:0;width:34px;height:34px;}
-  .dash-domain::after{position:static;grid-column:3;grid-row:1;}
-
-  .dash-study{grid-template-columns:1fr;gap:7px;}
-  .dash-study-card{min-height:70px;}
-
-  .dash-bottom{grid-template-columns:1fr;}
-  .dash-tip{order:-1;}
-
-  .ui-bottom-nav{
-    position:fixed;
-    left:0;right:0;bottom:0;
-    z-index:60;
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    padding:5px 5px calc(5px + env(safe-area-inset-bottom));
-    border-top:1px solid #DCE6EF;
-    background:rgba(255,255,255,.95);
-    backdrop-filter:blur(18px);
-    box-shadow:0 -8px 22px rgba(35,76,116,.07);
-  }
-  .ui-bottom-nav button{
-    min-height:45px;
-    border:0;background:transparent;
-    color:#73869A;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    gap:2px;
-    font-size:7.5px;
-    font-weight:600;
-  }
-  .ui-bottom-nav button svg{width:18px;height:18px;}
-  .ui-bottom-nav button.active{color:#1476D1;}
-
-  /* Original focused screens get better phone spacing. */
-  .ui-content .section-head h2{font-size:18px!important;}
-  .ui-content .grid{grid-template-columns:1fr!important;}
-}
-
-/* ===========================
-   DARK MODE
-   =========================== */
-html[data-theme="dark"] body{background:#101926!important;}
-html[data-theme="dark"] .ui-main{background:#101926;}
-html[data-theme="dark"] .ui-header,
-html[data-theme="dark"] .ui-mobile-bar,
-html[data-theme="dark"] .ui-bottom-nav{
-  background:rgba(20,31,46,.95);
-  border-color:#2A394B;
-}
-html[data-theme="dark"] .ui-header-search,
-html[data-theme="dark"] .ui-head-icon,
-html[data-theme="dark"] .ui-back,
-html[data-theme="dark"] .ui-small-btn,
-html[data-theme="dark"] .dash-study-card,
-html[data-theme="dark"] .dash-activity{
-  background:#192638;
-  border-color:#2C3B4D;
-  color:#D8E6F3;
-}
-html[data-theme="dark"] .ui-header-brand,
-html[data-theme="dark"] .ui-mobile-brand .ui-brand-copy strong,
-html[data-theme="dark"] .ui-screen-title strong,
-html[data-theme="dark"] .dash-head h2,
-html[data-theme="dark"] .dash-action strong,
-html[data-theme="dark"] .dash-domain strong,
-html[data-theme="dark"] .dash-study-card strong,
-html[data-theme="dark"] .dash-row strong{
-  color:#ECF4FB!important;
-}
-html[data-theme="dark"] .dash-hero{
-  background:linear-gradient(90deg,#1A2738,#1A2738 55%,#17293D);
-  border-color:#2E4256;
-}
-html[data-theme="dark"] .dash-hero h1{color:#F0F6FC;}
-html[data-theme="dark"] .dash-hero p,
-html[data-theme="dark"] .dash-action small,
-html[data-theme="dark"] .dash-domain small,
-html[data-theme="dark"] .dash-study-card small,
-html[data-theme="dark"] .dash-row span{color:#A7B8C9;}
-html[data-theme="dark"] .dash-action,
-html[data-theme="dark"] .dash-domain{
-  filter:saturate(.72) brightness(.73);
-  border-color:#33465A;
-}
-html[data-theme="dark"] .dash-tip{
-  background:linear-gradient(145deg,#183149,#153650);
-  border-color:#2E4B64;
-}
-html[data-theme="dark"] .dash-tip p{color:#C5D6E7;}
-html[data-theme="dark"] .ui-content .section-head h2{color:#EDF4FB!important;}
-</style>
-
 </head>
 <body>
 
@@ -8950,191 +8105,325 @@ function renderLinks(t, categoryId){
 }
 
 /* ============ Rendering ============ */
-
-function uiIcon(name){
-  const map = {
-    search:`<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.2 4.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    home:`<svg viewBox="0 0 24 24" fill="none"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
-    swap:`<svg viewBox="0 0 24 24" fill="none"><path d="M5 7h13M15 4l3 3-3 3M19 17H6M9 14l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    doctor:`<svg viewBox="0 0 24 24" fill="none"><path d="M7 3v5a5 5 0 0 0 10 0V3M12 13v3a4 4 0 0 0 8 0v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="12" r="2" stroke="currentColor" stroke-width="2"/></svg>`,
-    chat:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v5a4 4 0 0 1-4 4H9l-5 4v-5.2A4 4 0 0 1 4 11z" stroke="currentColor" stroke-width="2"/></svg>`,
-    plus:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    grid:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="4" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/><rect x="17" y="10" width="4" height="5" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="10" y="17" width="5" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg>`,
-    bell:`<svg viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 1 1 12 0v5l2 3H4l2-3zM10 21h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    user:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    moon:`<svg viewBox="0 0 24 24" fill="none"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
-    sun:`<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    book:`<svg viewBox="0 0 24 24" fill="none"><path d="M4 5a3 3 0 0 1 3-3h5v18H7a3 3 0 0 0-3 2zM20 5a3 3 0 0 0-3-3h-5v18h5a3 3 0 0 1 3 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
-    exam:`<svg viewBox="0 0 24 24" fill="none"><path d="m3 9 9-5 9 5-9 5zM7 12v5c2.8 2 7.2 2 10 0v-5M21 9v6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
-    shield:`<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 20 6v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 12 2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    calendar:`<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 3v4M17 3v4M3 9h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    bulb:`<svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 22h4M8 14c-1.2-1-2-2.7-2-4.5a6 6 0 1 1 12 0c0 1.8-.8 3.5-2 4.5-1 .8-1.5 1.6-1.5 3h-5c0-1.4-.5-2.2-1.5-3z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-    back:`<svg viewBox="0 0 24 24" fill="none"><path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    more:`<svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>`
-  };
-  return map[name] || map.grid;
-}
-
-function uiSectionTitle(id){
-  if(id==='home') return ['Dashboard','Your interpreter workspace'];
-  if(id==='all') return ['Medical Terminology','All shared glossary domains'];
-  const t = getToolTiles().find(x=>x.id===id);
-  if(t) return [t.name, t.count!=null ? `${t.count} ${t.label||''}`.trim() : 'Interpreter Hub'];
-  const c = DATA.categories.find(x=>x.id===id);
-  if(c) return [c.name, `${c.terms.length} term${c.terms.length===1?'':'s'}`];
-  return ['Interpreter Hub','HUMC Language Services'];
-}
-
-
 function render(){
   if(!DATA) return;
   const app = document.getElementById('app');
   const totalTerms = DATA.categories.reduce((n,c)=>n+c.terms.length,0);
-  const tools = getToolTiles();
-  const toolById = id => tools.find(t=>t.id===id);
-  const titleInfo = uiSectionTitle(activeCategory);
-  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
 
-  const navItem = (id,name,icon,count,externalUrl) => `
-    <button class="ui-nav-btn ${activeCategory===id?'active':''}"
-      onclick="${externalUrl ? `window.open('${externalUrl}','_blank')` : `setCategory('${id}')`}">
-      <span class="ui-nav-ico">${icon}</span>
-      <span class="ui-nav-name">${escapeHtml(name)}</span>
-      ${count!=null ? `<span class="ui-nav-count">${count}</span>` : ''}
-    </button>`;
+  const homeTab = `
+     <button class="tab ${activeCategory==='home'?'active':''}" onclick="setCategory('home')">
+       <span class="flag icon-flag" style="background:var(--accent-soft); color:var(--accent);">${ICON_HOME}</span>
+       <span class="name">Home</span>
+     </button>
+  `;
 
-  const essentials = [
-    ['home','Home',uiIcon('home'),null],
-    ['translate','Translate',uiIcon('swap'),null],
-    ['doctor-research','Doctor Prep',uiIcon('doctor'),null],
-    ['chat','Team Chat',uiIcon('chat'),CHAT_MESSAGES.length]
-  ];
+  // Domain tiles jump-scroll into the full glossary rather than filtering it
+  // down to one domain — tapping "Genetics" should show you where Genetics
+  // sits among everything else, not hide the rest of the team's work.
+  // Professional Resources reads more like a reference tool than a clinical
+  // domain, so it's grouped with Tools below — it still jumps to its real
+  // glossary section rather than switching to a separate app screen.
+  const allDomainTiles = getDomainTiles();
+  const resourcesTile = allDomainTiles.find(t=>t.id==='resources');
+  const nonResourceTiles = allDomainTiles.filter(t=>t.id!=='resources');
+  const topLevelTiles = nonResourceTiles.filter(t=>!t.parentId);
+  const childrenOfDomain = pid => nonResourceTiles.filter(t=>t.parentId===pid);
+  // Orphaned subgroups (parent deleted) still need somewhere to show up.
+  const orphanTiles = nonResourceTiles.filter(t=>t.parentId && !topLevelTiles.some(p=>p.id===t.parentId));
 
-  const teamIds = ['providers','doctor-directory','practice','review','events','ethics','updates','userguide','directory'];
-  const teamNav = teamIds.map(id=>{
-    const t=toolById(id);
-    return t ? navItem(t.id,t.name,t.icon,t.count,t.externalUrl) : '';
-  }).join('');
+  // A parent with subgroups renders as one grouped card — its own tile up
+  // top, its subgroups as compact chips directly beneath, inside the same
+  // card. That's what actually reads as "grouped," rather than subgroups
+  // just being separate tiles that happen to sit nearby in a flat grid.
+  const domainTilesHtml = topLevelTiles.map((parent, i)=>{
+    const kids = childrenOfDomain(parent.id);
+    if(!kids.length){
+      return tileHtml(parent, i, `setCategory('${parent.id}')`, { editAction: `openEditDomainModal('${parent.id}')` });
+    }
+    const isCollapsed = collapsedDomainGroups.includes(parent.id);
+    return `
+      <div class="domain-group">
+        <button class="home-tile domain-group-tile" style="--tile-color:${parent.color}; --tile-tint:${parent.color}22; --tile-glow:${parent.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="setCategory('${parent.id}')">
+          <span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); openEditDomainModal('${parent.id}')">${ICON_EDIT}</span>
+          <span class="home-tile-icon">${parent.icon}</span>
+          <span class="home-tile-name">${escapeHtml(parent.name)}</span>
+          <span class="home-tile-count">${parent.count} ${parent.label}</span>
+          <span class="domain-group-toggle ${isCollapsed?'is-collapsed':''}" title="${isCollapsed ? 'Show' : 'Hide'} ${kids.length} subgroup${kids.length===1?'':'s'}" onclick="event.stopPropagation(); toggleDomainGroup('${parent.id}')">
+            ${ICON_CHEVRON_DOWN}<span>${kids.length} subgroup${kids.length===1?'':'s'}</span>
+          </span>
+        </button>
+        ${isCollapsed ? '' : `<div class="domain-group-children-label">Subgroups</div><div class="domain-group-children">
+          ${kids.map(k=>`
+            <button class="domain-chip" style="--tile-color:${k.color}; border-left:3px solid ${parent.color};" onclick="setCategory('${k.id}')">
+              <span class="domain-chip-icon">${k.icon}</span>
+              <span class="domain-chip-name">${escapeHtml(k.name)}</span>
+              <span class="domain-chip-count">${k.count}</span>
+              <span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); openEditDomainModal('${k.id}')">${ICON_EDIT}</span>
+            </button>
+          `).join('')}
+        </div>`}
+      </div>
+    `;
+  }).concat(orphanTiles.map((t,i)=>tileHtml(t, i, `setCategory('${t.id}')`, { editAction: `openEditDomainModal('${t.id}')` }))).join('');
+  const domainTilesForGrid = topLevelTiles.concat(nonResourceTiles.filter(t=>t.parentId));
 
-  const externalNav = ['find-doctor','medifind'].map(id=>{
-    const t=toolById(id);
-    return t ? navItem(t.id,t.name,t.icon,null,t.externalUrl) : '';
-  }).join('');
+  const addDomainBtn = `
+     <button class="tab add-domain-btn" onclick="openAddDomainModal()">
+       <span class="flag">${ICON_PLUS}</span>
+       <span class="name">Add domain</span>
+     </button>
+  `;
 
-  const domainNav = DATA.categories.map(c =>
-    navItem(c.id,c.name,DOMAIN_ICONS[c.icon] || ICON_LAYERS,c.terms.length)
-  ).join('');
+  // "All domains" plus a collapse toggle so the (potentially long) grid of
+  // individual domains can be tucked away without losing the entry point
+  // into the full glossary.
+  const domainsSection = `
+     <div class="nav-section-label" onclick="toggleDomainsCollapsed()" role="button" tabindex="0">
+       <span>Terminology domains</span>
+       <span class="nav-section-count">${domainTilesForGrid.length}</span>
+       <span class="nav-section-chevron ${domainsCollapsed ? 'is-collapsed' : ''}">${ICON_CHEVRON_DOWN}</span>
+     </div>
+     <button class="tab ${activeCategory==='all'?'active':''}" onclick="setCategory('all')">
+       <span class="flag link-flag" style="background:linear-gradient(140deg, #63717B, #454F57);">${ICON_LAYERS}</span>
+       <span class="name">All domains</span>
+       <span class="count">${totalTerms}</span>
+     </button>
+     ${domainsCollapsed ? '' : `<div class="home-grid nav-tile-grid">${domainTilesHtml}</div>${addDomainBtn}`}
+  `;
 
-  let screenAction = '';
-  if(activeCategory==='providers') screenAction = `<button class="ui-small-btn primary" onclick="openAddProviderModal()">+ Add provider</button>`;
-  else if(activeCategory==='doctor-directory') screenAction = `<button class="ui-small-btn primary" onclick="openAddDoctorDirModal()">+ Add doctor</button>`;
-  else if(activeCategory==='directory') screenAction = `<button class="ui-small-btn primary" onclick="openAddModal(true)">+ Add link</button>`;
-  else if(activeCategory!=='home' && activeCategory!=='chat' && activeCategory!=='events' && activeCategory!=='translate' && activeCategory!=='practice' && activeCategory!=='review' && activeCategory!=='userguide' && activeCategory!=='doctor-research' && activeCategory!=='ethics' && activeCategory!=='updates'){
-    screenAction = `<button class="ui-small-btn primary" onclick="openAddModal()">+ Add term</button>`;
+  // "Find a Doctor" and "MediFind" are grouped the same way parent/subgroup
+  // domains are — MediFind nested inside, since both serve the same
+  // "find a specialist" purpose but from different sources.
+  const allToolTiles = getToolTiles();
+  const findDoctorTile = allToolTiles.find(t=>t.id==='find-doctor');
+  const medifindTile = allToolTiles.find(t=>t.id==='medifind');
+  let collapsedToolGroups = [];
+  try{ collapsedToolGroups = JSON.parse(localStorage.getItem('ih_collapsedToolGroups') || '[]'); }catch(e){}
+  const translateTile = allToolTiles.find(t=>t.id==='translate');
+  const doctorResearchTile = allToolTiles.find(t=>t.id==='doctor-research');
+  const aiGroupCollapsed = collapsedToolGroups.includes('ai-tools');
+  const providersTile = allToolTiles.find(t=>t.id==='providers');
+  const doctorDirTile = allToolTiles.find(t=>t.id==='doctor-directory');
+  const doctorsGroupCollapsed = collapsedToolGroups.includes('doctors-group');
+
+  const toolTileButtons = allToolTiles.filter(t=>t.id!=='medifind' && t.id!=='translate' && t.id!=='doctor-research' && t.id!=='providers' && t.id!=='doctor-directory').map((t,i)=>{
+    if(t.id==='find-doctor' && medifindTile){
+      return `
+        <div class="domain-group">
+          <button class="home-tile domain-group-tile" style="--tile-color:${t.color}; --tile-tint:${t.color}22; --tile-glow:${t.color}55; animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="window.open('${t.externalUrl}', '_blank')">
+            <span class="home-tile-external" title="Opens in your browser">${ICON_EXTERNAL}</span>
+            <span class="home-tile-icon">${t.icon}</span>
+            <span class="home-tile-name">${escapeHtml(t.name)}</span>
+            <span class="home-tile-count"></span>
+          </button>
+          <div class="domain-group-children-label">Also try</div>
+          <div class="domain-group-children">
+            <button class="domain-chip" style="--tile-color:${medifindTile.color};" onclick="window.open('${medifindTile.externalUrl}', '_blank')">
+              <span class="domain-chip-icon">${medifindTile.icon}</span>
+              <span class="domain-chip-name">${escapeHtml(medifindTile.name)}</span>
+              <span class="home-tile-external" style="position:static; opacity:0.7;" title="Opens in your browser">${ICON_EXTERNAL}</span>
+            </button>
+          </div>
+        </div>`;
+    }
+    return tileHtml(t, i, t.externalUrl ? `window.open('${t.externalUrl}', '_blank')` : `setCategory('${t.id}')`);
+  });
+
+  // "AI Tools" — Translate and Doctor Prep grouped together, since both are
+  // the app's AI-assisted features. The header itself is just a label (it
+  // toggles the group rather than navigating anywhere) since there's no
+  // single "primary" action between the two.
+  if(translateTile && doctorResearchTile){
+    toolTileButtons.splice(1, 0, `
+      <div class="domain-group">
+        <div class="home-tile domain-group-tile is-label" style="--tile-color:${translateTile.color}; --tile-tint:${translateTile.color}22; --tile-glow:${translateTile.color}55;" onclick="toggleToolGroup('ai-tools')" role="button" tabindex="0">
+          <span class="home-tile-icon">${ICON_SPARK}</span>
+          <span class="home-tile-name">AI Tools</span>
+          <span class="home-tile-count">2 tools</span>
+          <span class="domain-group-toggle ${aiGroupCollapsed?'is-collapsed':''}" title="${aiGroupCollapsed ? 'Show' : 'Hide'} AI tools">
+            ${ICON_CHEVRON_DOWN}<span>2 tools</span>
+          </span>
+        </div>
+        ${aiGroupCollapsed ? '' : `<div class="domain-group-children">
+          <button class="domain-chip" style="--tile-color:${translateTile.color};" onclick="setCategory('${translateTile.id}')">
+            <span class="domain-chip-icon">${translateTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(translateTile.name)}</span>
+          </button>
+          <button class="domain-chip" style="--tile-color:${doctorResearchTile.color};" onclick="setCategory('${doctorResearchTile.id}')">
+            <span class="domain-chip-icon">${doctorResearchTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(doctorResearchTile.name)}</span>
+          </button>
+        </div>`}
+      </div>`);
   }
 
-  app.innerHTML = `
-    <aside class="ui-sidebar">
-      <div class="ui-brand">
-        <span class="ui-brand-mark">${uiIcon('grid')}</span>
-        <span class="ui-brand-copy">
-          <strong>Interpreter Hub</strong>
-          <span>HUMC Language Services</span>
-        </span>
-      </div>
-
-      <button class="ui-nav-search" onclick="openGlobalSearch()">
-        ${uiIcon('search')}<span>Search everything</span><kbd>⌘K</kbd>
-      </button>
-
-      <div class="ui-nav-group">
-        <div class="ui-nav-label">Workspace</div>
-        ${essentials.map(x=>navItem(...x)).join('')}
-      </div>
-
-      <div class="ui-nav-group">
-        <div class="ui-nav-label">Team & development</div>
-        ${teamNav}
-      </div>
-
-      <div class="ui-nav-divider"></div>
-
-      <div class="ui-nav-group">
-        <div class="ui-nav-label">Terminology</div>
-        ${navItem('all','All domains',uiIcon('grid'),totalTerms)}
-        <div class="ui-domain-list">${domainNav}</div>
-        <button class="ui-nav-btn" onclick="openAddDomainModal()">
-          <span class="ui-nav-ico">${uiIcon('plus')}</span>
-          <span class="ui-nav-name">Add domain</span>
-        </button>
-      </div>
-
-      <div class="ui-nav-group">
-        <div class="ui-nav-label">External resources</div>
-        ${externalNav}
-      </div>
-
-      <div class="ui-sidebar-footer">
-        ${uiIcon('shield')} &nbsp;Protect patient privacy and avoid sharing PHI in team tools.
-      </div>
-    </aside>
-
-    <main class="ui-main">
-      <header class="ui-header">
-        <button class="ui-header-search" onclick="openGlobalSearch()">
-          ${uiIcon('search')}<span>Search terminology, doctors, messages, and resources…</span>
-        </button>
-        <div class="ui-header-spacer"></div>
-        <div class="ui-header-brand">
-          <span class="ui-header-brand-mark">${ICON_GLYPH}</span>
-          <span><strong>Hackensack University<br>Medical Center</strong><span>Language Services</span></span>
+  // "Doctors" — Doctor Directory and Pictures of Healthcare Providers
+  // grouped together, since both are ways of looking up a doctor's
+  // information (a text-based record vs. a photo-based one).
+  if(doctorDirTile && providersTile){
+    toolTileButtons.splice(2, 0, `
+      <div class="domain-group">
+        <div class="home-tile domain-group-tile is-label" style="--tile-color:${doctorDirTile.color}; --tile-tint:${doctorDirTile.color}22; --tile-glow:${doctorDirTile.color}55;" onclick="toggleToolGroup('doctors-group')" role="button" tabindex="0">
+          <span class="home-tile-icon">${doctorDirTile.icon}</span>
+          <span class="home-tile-name">Doctors</span>
+          <span class="home-tile-count">2 tools</span>
+          <span class="domain-group-toggle ${doctorsGroupCollapsed?'is-collapsed':''}" title="${doctorsGroupCollapsed ? 'Show' : 'Hide'} doctor tools">
+            ${ICON_CHEVRON_DOWN}<span>2 tools</span>
+          </span>
         </div>
-        <button class="ui-head-icon" onclick="toggleTheme()" title="Toggle theme">${dark?uiIcon('sun'):uiIcon('moon')}</button>
-        <button class="ui-head-icon" onclick="setCategory('updates')" title="Recent updates">${uiIcon('bell')}</button>
-        <button class="ui-head-icon" onclick="openNameModal()" title="Your name">${uiIcon('user')}</button>
-      </header>
+        ${doctorsGroupCollapsed ? '' : `<div class="domain-group-children">
+          <button class="domain-chip" style="--tile-color:${doctorDirTile.color};" onclick="setCategory('${doctorDirTile.id}')">
+            <span class="domain-chip-icon">${doctorDirTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(doctorDirTile.name)}</span>
+          </button>
+          <button class="domain-chip" style="--tile-color:${providersTile.color};" onclick="setCategory('${providersTile.id}')">
+            <span class="domain-chip-icon">${providersTile.icon}</span>
+            <span class="domain-chip-name">${escapeHtml(providersTile.name)}</span>
+          </button>
+        </div>`}
+      </div>`);
+  }
 
-      <div class="ui-mobile-bar">
-        <div class="ui-mobile-brand">
-          <span class="ui-brand-mark">${uiIcon('grid')}</span>
-          <span class="ui-brand-copy"><strong>Interpreter Hub</strong><span>HUMC Language Services</span></span>
-        </div>
-        <div class="ui-mobile-actions">
-          <button class="ui-head-icon" onclick="openGlobalSearch()" aria-label="Search">${uiIcon('search')}</button>
-          <button class="ui-head-icon" onclick="openNameModal()" aria-label="Profile">${uiIcon('user')}</button>
-        </div>
-      </div>
+  if(resourcesTile) toolTileButtons.push(tileHtml(resourcesTile, toolTileButtons.length, `setCategory('${resourcesTile.id}')`, { editAction: `openEditDomainModal('${resourcesTile.id}')` }));
 
-      <div class="ui-content">
-        ${activeCategory==='home' ? '' : `
-          <div class="ui-screen-top">
-            <button class="ui-back" onclick="setCategory('home')" aria-label="Back home">${uiIcon('back')}</button>
-            <div class="ui-screen-title">
-              <strong>${escapeHtml(titleInfo[0])}</strong>
-              <span>${escapeHtml(titleInfo[1])}</span>
-            </div>
-            <div class="ui-screen-actions">
-              <button class="ui-small-btn" onclick="openGlobalSearch()">Search</button>
-              ${screenAction}
-            </div>
-          </div>
-        `}
-        <div id="content" class="content-fade"></div>
-      </div>
-    </main>
-
-    <nav class="ui-bottom-nav" aria-label="Primary navigation">
-      <button class="${activeCategory==='home'?'active':''}" onclick="setCategory('home')">${uiIcon('home')}<span>Home</span></button>
-      <button onclick="openGlobalSearch()">${uiIcon('search')}<span>Search</span></button>
-      <button class="${activeCategory==='translate'?'active':''}" onclick="setCategory('translate')">${uiIcon('swap')}<span>Translate</span></button>
-      <button class="${activeCategory==='chat'?'active':''}" onclick="setCategory('chat')">${uiIcon('chat')}<span>Chat</span></button>
-      <button class="${activeCategory==='all'?'active':''}" onclick="setCategory('all')">${uiIcon('more')}<span>More</span></button>
-    </nav>
+  const extrasTabs = `
+     <div class="nav-section-label" onclick="toggleToolsCollapsed()" role="button" tabindex="0">
+       <span>Tools</span>
+       <span class="nav-section-count">${toolTileButtons.length}</span>
+       <span class="nav-section-chevron ${toolsCollapsed ? 'is-collapsed' : ''}">${ICON_CHEVRON_DOWN}</span>
+     </div>
+     ${toolsCollapsed ? '' : `<div class="home-grid nav-tile-grid">${toolTileButtons.join('')}</div>`}
   `;
+
+  let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`;
+  let searchPlaceholder = 'Search terms, definitions, Spanish equivalents…';
+  let showTopbar = true;
+  let showStatStrip = true;
+  if(activeCategory === 'providers'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
+    searchPlaceholder = 'Search provider photos, specialties, facilities…';
+  } else if(activeCategory === 'doctor-directory'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddDoctorDirModal()">+ Add doctor</button>`;
+    searchPlaceholder = 'Search doctors, specialties, locations…';
+  } else if(activeCategory === 'ethics'){
+    addBtnHtml = '';
+    searchPlaceholder = 'Search principles, conduct…';
+  } else if(activeCategory === 'directory'){
+    addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
+    searchPlaceholder = 'Search links…';
+  } else if(activeCategory === 'chat'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'events'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'translate'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'practice'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'review'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'userguide'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'doctor-research'){
+    showTopbar = false;
+    showStatStrip = false;
+  } else if(activeCategory === 'home'){
+    showTopbar = false;
+    showStatStrip = false;
+  }
+
+  // Any focused screen — a single domain or a single tool — is meant to feel
+  // isolated: no sidebar, no other tiles competing for attention. Only Home
+  // and "All domains" keep the full navigation visible, since those are the
+  // two places meant for browsing around rather than reading one thing.
+  const isFocusedView = activeCategory !== 'home' && activeCategory !== 'all';
+
+  app.innerHTML = `
+    ${isFocusedView ? '' : `
+    <div class="brand brand-mobile">
+      <div class="brand-mark">
+        <div class="brand-glyph">${ICON_GLYPH}</div>
+        <div class="brand-wordmark">
+          <div class="brand-title">Interpreter Hub</div>
+          <div class="brand-sub">HUMC Language Services</div>
+        </div>
+      </div>
+      <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
+    </div>
+    <button class="gs-trigger gs-trigger-mobile" onclick="openGlobalSearch()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Search everything</span>
+    </button>
+    <div class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <div class="brand-glyph">${ICON_GLYPH}</div>
+          <div class="brand-wordmark">
+            <div class="brand-title">Interpreter Hub</div>
+            <div class="brand-sub">HUMC Language Services</div>
+          </div>
+        </div>
+        <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
+      </div>
+      <button class="gs-trigger" onclick="openGlobalSearch()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Search everything</span>
+        <span class="gs-hint">⌘K</span>
+      </button>
+      ${homeTab}
+      ${extrasTabs}
+      <div class="nav-divider"></div>
+      ${domainsSection}
+    </div>
+    `}
+    <div class="main">
+      ${showTopbar ? `
+      <div class="topbar">
+        <div class="search"><input id="searchInput" type="text" placeholder="${searchPlaceholder}" value="${escapeHtml(searchQuery)}"></div>
+        ${addBtnHtml}
+      </div>` : ''}
+      ${showStatStrip ? `
+      <div class="stat-strip">
+        <div class="stat"><b>${totalTerms}</b><span>terms</span></div>
+        <div class="stat"><b>${DATA.categories.length}</b><span>domains</span></div>
+        <div class="stat"><b>${PROVIDERS.length}</b><span>providers</span></div>
+        <div class="stat"><b>${DATA.categories.reduce((n,c)=>n+c.terms.filter(t=>t.url).length,0)}</b><span>with a confirmed source link</span></div>
+      </div>` : ''}
+      <div id="content" class="content-fade"></div>
+    </div>
+    <button class="theme-fab" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+      ${document.documentElement.getAttribute('data-theme') === 'dark' ? ICON_SUN : ICON_MOON}
+    </button>
+    <button class="name-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
+      ${ICON_PERSON}
+    </button>
+    ${activeCategory !== 'home' ? `
+    <button class="home-fab" onclick="goHome()" title="Home" aria-label="Go home">
+      ${ICON_HOME}<span>Home</span>
+    </button>` : ''}
+  `;
+
+  const searchInputEl = document.getElementById('searchInput');
+  if(searchInputEl){
+    searchInputEl.addEventListener('input', (e)=>{
+      searchQuery = e.target.value;
+      renderContent();
+    });
+    // Autofocus is a convenience with a mouse, but on a phone it forces the
+    // on-screen keyboard open every time you tap a section in the sidebar.
+    if(prefersAutoFocus()) searchInputEl.focus();
+  }
+  if(window.__lastWho) { const wi = document.getElementById('whoInput'); if(wi) wi.value = window.__lastWho; }
+  const whoInputEl = document.getElementById('whoInput');
+  if(whoInputEl) whoInputEl.addEventListener('input', (e)=>{ window.__lastWho = e.target.value; });
 
   renderContent();
 }
-
 
 function renderContent(){
   const content = document.getElementById('content');
@@ -9992,127 +9281,24 @@ const MOTIVATIONAL_QUOTES = [
   "\u201cEvery word you carry across a language gap matters to someone.\u201d"
 ];
 
-
 function renderHome(){
-  const now = new Date();
-  const hour = now.getHours();
-  const greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
-  const me = (typeof whoAmI==='function' ? whoAmI() : '') || 'Interpreter';
-  const firstName = String(me).trim().split(/\s+/)[0] || 'Interpreter';
-  const totalTerms = DATA.categories.reduce((n,c)=>n+c.terms.length,0);
-  const fmtDate = new Intl.DateTimeFormat(undefined,{weekday:'long',month:'short',day:'numeric',year:'numeric'}).format(now);
-
-  const preferredNames = ['Oncology','Cardiology','Neurology','Orthopedics','Gastroenterology'];
-  const selected = [];
-  preferredNames.forEach(name=>{
-    const c = DATA.categories.find(x=>(x.name||'').toLowerCase().includes(name.toLowerCase()));
-    if(c && !selected.includes(c)) selected.push(c);
-  });
-  DATA.categories.forEach(c=>{ if(selected.length<5 && !selected.includes(c)) selected.push(c); });
-
-  const bg = ['#FFF0F4','#FFF1F2','#EDF4FF','#EEF9F4','#FFF2F0'];
-  const tone = ['#DF4C79','#E24858','#387BE0','#238F69','#D66658'];
-
-  const domains = selected.map((c,i)=>`
-    <button class="dash-domain" style="--card-bg:${bg[i%bg.length]};--tone:${tone[i%tone.length]};" onclick="setCategory('${c.id}')">
-      <span class="dash-domain-icon">${DOMAIN_ICONS[c.icon] || ICON_LAYERS}</span>
-      <span><strong>${escapeHtml(c.name)}</strong><small>${c.terms.length} terms</small></span>
-    </button>`).join('');
-
-  const recent = ACTIVITY.slice().reverse().slice(0,4);
-  const activity = recent.length ? recent.map((a,i)=>`
-    <div class="dash-row">
-      <span class="dash-row-ico">${i===2?uiIcon('calendar'):(i===3?uiIcon('chat'):uiIcon('plus'))}</span>
-      <span><strong>${escapeHtml(a.author || 'Team')}</strong><span>${escapeHtml(a.summary || 'Updated Interpreter Hub')}</span></span>
-      <time>${a.timestamp ? relativeTime(a.timestamp) : ''}</time>
-    </div>`).join('') : `
-      <div class="dash-row"><span class="dash-row-ico">${uiIcon('bell')}</span><span><strong>No recent changes</strong><span>Team activity will show up here.</span></span><time></time></div>`;
-
-  return `
-    <div class="dash">
-      <section class="dash-hero">
-        <div class="dash-copy">
-          <div class="dash-kicker">${escapeHtml(greeting)},</div>
-          <h1>${escapeHtml(firstName)} <span aria-hidden="true">👋</span></h1>
-          <p>Quick access to your team tools, medical terminology, and professional resources.</p>
-          <span class="dash-quote">“Precision in language is precision in care.”</span>
-        </div>
-        <div class="dash-date">
-          <b>${escapeHtml(fmtDate)}</b>
-          <span>${totalTerms} shared glossary terms are available across ${DATA.categories.length} domains.</span>
-        </div>
-      </section>
-
-      <section class="dash-section">
-        <div class="dash-head"><h2>Quick Actions</h2></div>
-        <div class="dash-actions">
-          <button class="dash-action" style="--tone:#1676D1;--card-bg:#EAF5FF;" onclick="setCategory('translate')">
-            <span class="dash-action-icon">${uiIcon('swap')}</span>
-            <strong>Translate Term</strong><small>Get a clinical terminology breakdown with interpreter notes.</small>
-          </button>
-          <button class="dash-action" style="--tone:#7650D4;--card-bg:#F1ECFF;" onclick="setCategory('doctor-research')">
-            <span class="dash-action-icon">${uiIcon('doctor')}</span>
-            <strong>Research Doctor</strong><small>Find a specialty and prepare terminology before an encounter.</small>
-          </button>
-          <button class="dash-action" style="--tone:#1B9975;--card-bg:#EAF9F4;" onclick="setCategory('chat')">
-            <span class="dash-action-icon">${uiIcon('chat')}</span>
-            <strong>Team Chat</strong><small>Connect with your interpreter team and share updates.</small>
-          </button>
-          <button class="dash-action" style="--tone:#CF842D;--card-bg:#FFF5E8;" onclick="openAddModal()">
-            <span class="dash-action-icon">${uiIcon('plus')}</span>
-            <strong>Add Terminology</strong><small>Contribute a term, translation, definition, or source.</small>
-          </button>
-        </div>
-      </section>
-
-      <section class="dash-section">
-        <div class="dash-head"><h2>Medical Terminology</h2><button onclick="setCategory('all')">View all →</button></div>
-        <div class="dash-domains">
-          ${domains}
-          <button class="dash-domain" style="--card-bg:#F1F5F9;--tone:#496C8F;" onclick="setCategory('all')">
-            <span class="dash-domain-icon">${uiIcon('grid')}</span>
-            <span><strong>More Specialties</strong><small>${DATA.categories.length} domains</small></span>
-          </button>
-        </div>
-      </section>
-
-      <section class="dash-section">
-        <div class="dash-head"><h2>Study &amp; Professional Development</h2></div>
-        <div class="dash-study">
-          <button class="dash-study-card" onclick="setCategory('practice')">
-            <span class="dash-study-ico" style="--tone:#1676D1;">${uiIcon('exam')}</span>
-            <span><strong>CoreCHI Practice</strong><small>Practice questions for certification.</small></span><span class="dash-study-arrow">›</span>
-          </button>
-          <button class="dash-study-card" onclick="setCategory('review')">
-            <span class="dash-study-ico" style="--tone:#1B9975;">${uiIcon('book')}</span>
-            <span><strong>Term Review</strong><small>${dueReviewCount()} terms currently due.</small></span><span class="dash-study-arrow">›</span>
-          </button>
-          <button class="dash-study-card" onclick="setCategory('ethics')">
-            <span class="dash-study-ico" style="--tone:#7650D4;">${uiIcon('shield')}</span>
-            <span><strong>Ethics &amp; Standards</strong><small>Professional principles and scenarios.</small></span><span class="dash-study-arrow">›</span>
-          </button>
-          <button class="dash-study-card" onclick="setCategory('events')">
-            <span class="dash-study-ico" style="--tone:#1676D1;">${uiIcon('calendar')}</span>
-            <span><strong>Training &amp; Events</strong><small>${CE_EVENTS.length} current opportunity${CE_EVENTS.length===1?'':'ies'}.</small></span><span class="dash-study-arrow">›</span>
-          </button>
-        </div>
-      </section>
-
-      <section class="dash-section">
-        <div class="dash-head"><h2>Recent Team Activity</h2><button onclick="setCategory('updates')">View all →</button></div>
-        <div class="dash-bottom">
-          <div class="dash-activity">${activity}</div>
-          <aside class="dash-tip">
-            <div class="dash-tip-title">${uiIcon('bulb')}<span>Interpreter Tip</span></div>
-            <p>Preserve the speaker’s meaning and register first. When communication breaks down, be explicit when stepping outside the interpreting role to address the concern.</p>
-            <em>Accuracy, transparency, and role boundaries work together.</em>
-          </aside>
-        </div>
-      </section>
+  let html = `
+    <div class="home-greeting">
+      <div class="home-greeting-text">
+        <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span></h2>
+        <p>${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
+        <button type="button" class="link-btn" style="margin-top:2px;" onclick="openOnboarding()">Take the tour</button>
+        ${ACTIVITY.length > 0 ? `
+        <button class="home-recent-cta" onclick="setCategory('updates')">
+          ${ICON_BELL}<span>Recent activity</span>
+        </button>` : ''}
+      </div>
     </div>
+    ${ECG_STRIP}
   `;
-}
 
+  return html;
+}
 
 function renderProviders(q){
   let list = PROVIDERS.slice();
