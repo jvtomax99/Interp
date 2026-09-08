@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Interpreter Hub modern dashboard v2. Original application logic preserved; Home UI restyled. -->
 <html lang="en">
 <script>
   // Applied here, before any CSS renders, so the page never flashes light
@@ -1984,6 +1985,658 @@
     a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
   }
 </style>
+
+<style id="modern-dashboard-v2">
+:root{
+  --mh-navy:#0B315C;
+  --mh-navy-deep:#082847;
+  --mh-blue:#1677D2;
+  --mh-canvas:#F4F8FC;
+  --mh-surface:#FFFFFF;
+  --mh-text:#15375D;
+  --mh-muted:#657A91;
+  --mh-line:#E2EBF4;
+  --mh-shadow:0 10px 30px rgba(30,70,110,.08);
+}
+
+/* Remove the old decorative strips without touching any JS. */
+.top-banner,
+.greeting-banner{ display:none !important; }
+
+body{
+  background:
+    radial-gradient(900px 500px at 100% 0%, rgba(1,184,230,.055), transparent 62%),
+    var(--mh-canvas);
+}
+
+/* Desktop shell */
+@media(min-width:761px){
+  .app{ min-height:100vh; align-items:stretch; }
+  .sidebar{
+    top:0 !important;
+    height:100vh !important;
+    width:250px !important;
+    padding:20px 12px 24px !important;
+    background:
+      radial-gradient(360px 260px at 15% 0%, rgba(29,130,225,.24), transparent 65%),
+      linear-gradient(180deg,var(--mh-navy),var(--mh-navy-deep)) !important;
+    border-right:0 !important;
+    box-shadow:12px 0 35px rgba(7,35,66,.10);
+    color:white;
+    overflow-y:auto;
+  }
+
+  .sidebar .brand{ border:0 !important; padding:4px 10px 18px !important; }
+  .sidebar .brand-title{ color:#fff !important; font-family:var(--sans)!important; font-weight:700!important; }
+  .sidebar .brand-sub{ color:#C8D9E9 !important; }
+  .sidebar .brand-glyph{ color:#4CCAF1 !important; }
+
+  .sidebar .hipaa-notice{
+    color:#D1E0EE !important;
+    background:rgba(255,255,255,.07) !important;
+    border-color:rgba(255,255,255,.10) !important;
+  }
+
+  .sidebar .gs-trigger{
+    color:#EAF4FC !important;
+    background:rgba(255,255,255,.075) !important;
+    border-color:rgba(255,255,255,.12) !important;
+    box-shadow:none !important;
+    margin:3px 5px 12px !important;
+    width:calc(100% - 10px) !important;
+  }
+  .sidebar .gs-trigger:hover{ background:rgba(255,255,255,.12)!important; }
+  .sidebar .gs-hint{
+    color:#C7DAEC!important;
+    border-color:rgba(255,255,255,.16)!important;
+    background:rgba(255,255,255,.06)!important;
+  }
+
+  .sidebar .tab{
+    width:calc(100% - 10px)!important;
+    margin:2px 5px!important;
+    min-height:42px!important;
+    border:0!important;
+    border-radius:10px!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    color:#DCE9F6!important;
+  }
+  .sidebar .tab:hover{
+    transform:none!important;
+    background:rgba(255,255,255,.08)!important;
+    color:#fff!important;
+  }
+  .sidebar .tab.active{
+    background:linear-gradient(135deg,#1B7DDC,#1667B9)!important;
+    color:#fff!important;
+    box-shadow:0 8px 18px rgba(0,0,0,.13)!important;
+  }
+  .sidebar .tab .name{ color:inherit!important; }
+  .sidebar .tab .count{ color:#A9C3DB!important; }
+  .sidebar .tab .flag{
+    width:29px!important; height:29px!important; border-radius:8px!important;
+    box-shadow:none!important;
+  }
+
+  .sidebar .nav-section-label{
+    color:#85BCE7!important;
+    font-size:10px!important;
+    letter-spacing:.12em!important;
+    padding:0 10px 8px!important;
+    margin-top:17px!important;
+  }
+  .sidebar .nav-section-count,
+  .sidebar .nav-section-chevron{ color:#86A8C7!important; }
+
+  .sidebar .nav-divider{
+    background:rgba(255,255,255,.10)!important;
+    margin:14px 10px!important;
+  }
+
+  /* Existing home/domain tile widgets inside the sidebar become compact nav. */
+  .sidebar .nav-tile-grid{
+    grid-template-columns:1fr!important;
+    gap:3px!important;
+    padding:0 5px!important;
+  }
+  .sidebar .nav-tile-grid .home-tile{
+    width:100%!important;
+    min-height:44px!important;
+    padding:7px 9px!important;
+    border:0!important;
+    border-radius:10px!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    display:grid!important;
+    grid-template-columns:29px 1fr auto!important;
+    gap:9px!important;
+    align-items:center!important;
+  }
+  .sidebar .nav-tile-grid .home-tile:hover{
+    transform:none!important;
+    background:rgba(255,255,255,.08)!important;
+  }
+  .sidebar .nav-tile-grid .home-tile-icon{
+    width:29px!important; height:29px!important;
+    border-radius:8px!important;
+    background:rgba(255,255,255,.08)!important;
+    color:#DDEDFC!important;
+    grid-row:1 / span 2!important;
+  }
+  .sidebar .nav-tile-grid .home-tile-name{
+    color:#F3F8FC!important;
+    font-size:12px!important;
+    margin:0!important;
+  }
+  .sidebar .nav-tile-grid .home-tile-count{
+    color:#8FAEC9!important; font-size:9px!important;
+  }
+  .sidebar .nav-tile-grid .home-tile-edit,
+  .sidebar .nav-tile-grid .home-tile-external,
+  .sidebar .nav-tile-grid .domain-group-toggle{ display:none!important; }
+
+  .sidebar .domain-group-children-label{ display:none!important; }
+  .sidebar .domain-group-children{
+    gap:2px!important;
+    padding:0 0 2px 35px!important;
+  }
+  .sidebar .domain-chip{
+    min-height:34px!important;
+    border:0!important;
+    border-radius:8px!important;
+    background:transparent!important;
+    color:#C9D9E8!important;
+  }
+  .sidebar .domain-chip:hover{ background:rgba(255,255,255,.07)!important; }
+  .sidebar .domain-chip-name{ color:inherit!important; font-size:11px!important; }
+  .sidebar .domain-chip-count{ color:#84A5C3!important; }
+  .sidebar .domain-chip-icon{
+    color:#BCD5EC!important; background:rgba(255,255,255,.06)!important;
+  }
+  .sidebar .add-domain-btn{ color:#9DC6E8!important; }
+
+  .main{ min-width:0; padding:0 0 56px!important; }
+  #content{ width:min(1400px,calc(100% - 44px))!important; margin:0 auto!important; }
+}
+
+/* Dashboard */
+.mh-dashboard{
+  width:100%;
+  padding:24px 0 48px;
+  color:var(--mh-text);
+  font-family:var(--sans);
+}
+
+.mh-header{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:18px;
+}
+.mh-search{
+  flex:1;
+  min-height:48px;
+  border:1px solid var(--mh-line);
+  border-radius:14px;
+  background:#fff;
+  color:#60758C;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:0 16px;
+  cursor:pointer;
+  box-shadow:0 7px 20px rgba(31,67,105,.055);
+}
+.mh-search:hover{ border-color:#C9DBEC; box-shadow:var(--mh-shadow); }
+.mh-search svg{ width:20px;height:20px; }
+.mh-search span{ font-size:14px; }
+
+.mh-head-actions{ display:flex; gap:8px; }
+.mh-icon-btn{
+  width:44px;height:44px;
+  border:1px solid var(--mh-line);
+  border-radius:13px;
+  background:#fff;
+  color:#315A84;
+  display:grid;place-items:center;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(31,67,105,.05);
+}
+.mh-icon-btn svg{ width:19px;height:19px; }
+
+.mh-hero{
+  position:relative;
+  overflow:hidden;
+  min-height:196px;
+  padding:28px 30px;
+  border-radius:22px;
+  border:1px solid #DCEAF7;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.98),rgba(255,255,255,.92) 48%,rgba(235,247,255,.68)),
+    linear-gradient(135deg,#F8FCFF,#E6F5FF);
+  box-shadow:0 12px 35px rgba(35,82,125,.075);
+}
+.mh-hero:after{
+  content:"";
+  position:absolute;
+  right:-54px; top:-124px;
+  width:390px;height:390px;
+  opacity:.10;
+  background-image:
+    linear-gradient(45deg,transparent 43%,#1477D4 43%,#1477D4 57%,transparent 57%),
+    linear-gradient(-45deg,transparent 43%,#01B8E6 43%,#01B8E6 57%,transparent 57%);
+  background-size:52px 52px;
+  transform:rotate(10deg);
+}
+.mh-kicker{
+  position:relative; z-index:1;
+  font-size:12px; font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  color:#1A60A6;
+  margin-bottom:7px;
+}
+.mh-hero h1{
+  position:relative; z-index:1;
+  margin:0;
+  color:#102F59;
+  font-size:clamp(36px,4vw,54px);
+  line-height:1;
+  font-weight:700;
+  letter-spacing:-.045em;
+}
+.mh-hero p{
+  position:relative; z-index:1;
+  max-width:620px;
+  color:#61778F;
+  font-size:14px;
+  line-height:1.55;
+  margin:13px 0 0;
+}
+.mh-quote{
+  position:relative; z-index:1;
+  display:inline-block;
+  margin-top:15px;
+  color:#2468A7;
+  font-size:13px;
+  font-style:italic;
+}
+.mh-quote:after{
+  content:"";
+  display:block;
+  width:34px;height:2px;
+  background:#1879D2;
+  margin-top:11px;
+  border-radius:99px;
+}
+.mh-date{
+  position:absolute;
+  right:22px; bottom:20px;
+  z-index:2;
+  width:205px;
+  padding:13px 15px;
+  border:1px solid rgba(210,225,239,.96);
+  border-radius:15px;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(10px);
+  box-shadow:0 8px 24px rgba(31,67,105,.08);
+}
+.mh-date b{ display:block; color:#173F6B; font-size:12px; margin-bottom:4px; }
+.mh-date span{ color:#6B7F93; font-size:11px; line-height:1.4; }
+
+.mh-section{ margin-top:26px; }
+.mh-section-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:15px; margin-bottom:12px;
+}
+.mh-section-head h2{
+  font-family:var(--sans)!important;
+  margin:0; color:#11315A;
+  font-size:19px; font-weight:700; letter-spacing:-.025em;
+}
+.mh-link{
+  border:0; background:transparent;
+  color:#166BC0; font-size:12px; font-weight:600;
+  cursor:pointer; padding:5px 0;
+}
+
+.mh-actions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+.mh-action{
+  position:relative;
+  min-height:148px;
+  padding:19px;
+  border:1px solid rgba(214,228,241,.9);
+  border-radius:16px;
+  background:var(--bg,#EDF7FF);
+  text-align:left;
+  cursor:pointer;
+  transition:.2s var(--ease);
+}
+.mh-action:hover{ transform:translateY(-3px); box-shadow:var(--mh-shadow); }
+.mh-action-icon{
+  width:43px;height:43px;
+  display:grid;place-items:center;
+  border-radius:13px;
+  margin-bottom:14px;
+  color:var(--tone,#1677D2);
+  background:rgba(255,255,255,.65);
+}
+.mh-action-icon svg{ width:25px;height:25px; }
+.mh-action b{ display:block; color:#11335E; font-size:14px; margin-bottom:4px; }
+.mh-action span:not(.mh-action-icon){ display:block; color:#60758D; font-size:12px; line-height:1.4; max-width:190px; }
+.mh-action:after{
+  content:"›";
+  position:absolute; right:16px; bottom:13px;
+  color:#173F6D; font-size:29px; line-height:1;
+}
+
+.mh-domains{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:12px;
+}
+.mh-domain{
+  position:relative;
+  min-height:116px;
+  padding:15px;
+  border:1px solid #E3EBF3;
+  border-radius:15px;
+  background:var(--bg,#F6F9FC);
+  text-align:left;
+  cursor:pointer;
+  transition:.2s var(--ease);
+}
+.mh-domain:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(31,67,105,.075); }
+.mh-domain-icon{
+  width:38px;height:38px;
+  display:grid;place-items:center;
+  border-radius:12px;
+  margin-bottom:9px;
+  color:var(--tone,#1677D2);
+  background:rgba(255,255,255,.66);
+}
+.mh-domain-icon svg{ width:22px;height:22px; }
+.mh-domain b{ display:block; color:#17385F; font-size:13px; line-height:1.25; }
+.mh-domain small{ display:block; color:#647B94; font-size:11px; margin-top:4px; }
+.mh-domain:after{
+  content:"›";
+  position:absolute; right:11px; bottom:9px;
+  color:#1B4E80; font-size:24px;
+}
+
+.mh-study{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.mh-study-card{
+  min-height:94px;
+  display:grid;
+  grid-template-columns:42px 1fr 18px;
+  gap:10px;
+  align-items:center;
+  padding:14px;
+  border:1px solid var(--mh-line);
+  border-radius:15px;
+  background:#fff;
+  text-align:left;
+  cursor:pointer;
+  transition:.2s var(--ease);
+}
+.mh-study-card:hover{ transform:translateY(-2px); box-shadow:0 10px 26px rgba(31,67,105,.07); }
+.mh-study-ico{
+  width:40px;height:40px;
+  display:grid;place-items:center;
+  border-radius:11px;
+  background:#F0F6FD;
+  color:var(--tone,#1677D2);
+}
+.mh-study-ico svg{ width:22px;height:22px; }
+.mh-study-card b{ display:block; color:#16375E; font-size:13px; margin-bottom:3px; }
+.mh-study-card small{ color:#6B8096; font-size:10.5px; line-height:1.35; }
+.mh-study-arrow{ color:#1B4C7A; font-size:25px; }
+
+.mh-bottom{
+  display:grid;
+  grid-template-columns:minmax(0,1.6fr) minmax(260px,.85fr);
+  gap:18px;
+}
+.mh-activity,
+.mh-tip{
+  border:1px solid var(--mh-line);
+  border-radius:16px;
+  background:#fff;
+}
+.mh-activity{ padding:4px 14px; }
+.mh-activity-row{
+  display:grid;
+  grid-template-columns:34px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:11px 2px;
+  border-bottom:1px solid #EEF2F7;
+}
+.mh-activity-row:last-child{ border-bottom:0; }
+.mh-activity-dot{
+  width:31px;height:31px;
+  display:grid;place-items:center;
+  border-radius:9px;
+  background:#EAF4FF;
+  color:#1677D2;
+}
+.mh-activity-dot svg{ width:16px;height:16px; }
+.mh-activity-copy b{ display:block; color:#17385F; font-size:12px; margin-bottom:2px; }
+.mh-activity-copy span{ color:#708398; font-size:10.5px; }
+.mh-activity-time{ color:#8797A7; font-size:10px; white-space:nowrap; }
+
+.mh-tip{
+  padding:20px;
+  background:linear-gradient(145deg,#EAF7FF,#DDF1FF);
+}
+.mh-tip-title{
+  display:flex; align-items:center; gap:9px;
+  color:#1766B0; font-size:14px; font-weight:700;
+  margin-bottom:15px;
+}
+.mh-tip-title svg{ width:21px;height:21px; }
+.mh-tip p{ margin:0; color:#365D80; font-size:12px; line-height:1.55; }
+.mh-tip em{ display:block; margin-top:17px; color:#3D6D98; font-size:11px; }
+.mh-empty{ padding:17px 4px; color:#75889B; font-size:12px; }
+
+/* New mobile header and bottom navigation live only on Home. */
+.mh-mobile-top,
+.mh-bottom-nav{ display:none; }
+
+html[data-theme="dark"] body{ background:#101A28; }
+html[data-theme="dark"] .mh-search,
+html[data-theme="dark"] .mh-icon-btn,
+html[data-theme="dark"] .mh-study-card,
+html[data-theme="dark"] .mh-activity{
+  background:#192638; border-color:#2B3B4F; color:#DDEAF7;
+}
+html[data-theme="dark"] .mh-hero{
+  background:linear-gradient(90deg,rgba(25,38,56,.98),rgba(25,38,56,.88));
+  border-color:#2D435A;
+}
+html[data-theme="dark"] .mh-hero h1,
+html[data-theme="dark"] .mh-section-head h2,
+html[data-theme="dark"] .mh-action b,
+html[data-theme="dark"] .mh-domain b,
+html[data-theme="dark"] .mh-study-card b,
+html[data-theme="dark"] .mh-activity-copy b{ color:#EEF5FC; }
+html[data-theme="dark"] .mh-hero p,
+html[data-theme="dark"] .mh-action span:not(.mh-action-icon),
+html[data-theme="dark"] .mh-domain small,
+html[data-theme="dark"] .mh-study-card small,
+html[data-theme="dark"] .mh-activity-copy span{ color:#A8B9CB; }
+html[data-theme="dark"] .mh-date{ background:rgba(25,38,56,.88); border-color:#32475D; }
+html[data-theme="dark"] .mh-date b{ color:#EDF5FC; }
+html[data-theme="dark"] .mh-date span{ color:#A7B8C9; }
+html[data-theme="dark"] .mh-action,
+html[data-theme="dark"] .mh-domain{ filter:saturate(.73) brightness(.72); border-color:#34485D; }
+html[data-theme="dark"] .mh-tip{ background:linear-gradient(145deg,#173149,#153754); border-color:#2E4C66; }
+html[data-theme="dark"] .mh-tip p{ color:#C5D7E8; }
+
+/* Tablet */
+@media(max-width:1100px) and (min-width:761px){
+  .mh-actions,.mh-study{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .mh-domains{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+
+/* iPhone / mobile */
+@media(max-width:760px){
+  body{ padding-bottom:74px!important; }
+
+  /* Hide the original mobile brand/search only on the Home screen by letting
+     the dashboard supply a lighter, app-like header. Focused screens keep
+     the original back/navigation behavior untouched. */
+  .brand-mobile,
+  .gs-trigger-mobile{ display:none!important; }
+
+  #content{ width:calc(100% - 24px)!important; margin:0 auto!important; }
+  .main{ padding-bottom:22px!important; }
+
+  .mh-dashboard{ padding:10px 0 28px; }
+  .mh-header{ display:none; }
+
+  .mh-mobile-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin:2px 2px 12px;
+  }
+  .mh-mobile-brand{
+    display:flex;align-items:center;gap:9px;
+    min-width:0;
+  }
+  .mh-mobile-logo{
+    width:36px;height:36px;border-radius:11px;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,#126FC7,#02B6E4);
+    color:#fff;
+    box-shadow:0 7px 16px rgba(20,119,210,.18);
+  }
+  .mh-mobile-logo svg{ width:21px;height:21px; }
+  .mh-mobile-brand b{
+    display:block;color:#14365E;font-size:14px;line-height:1.1;
+  }
+  .mh-mobile-brand small{ color:#71859A;font-size:9px; }
+  .mh-mobile-profile{
+    width:36px;height:36px;border:1px solid #D9E6F1;border-radius:50%;
+    background:#fff;color:#1768B5;display:grid;place-items:center;
+  }
+
+  .mh-hero{
+    min-height:168px;
+    padding:22px 19px;
+    border-radius:18px;
+  }
+  .mh-hero h1{ font-size:38px; }
+  .mh-hero p{ font-size:12px; max-width:82%; }
+  .mh-quote{ display:none; }
+  .mh-date{ display:none; }
+
+  .mh-mobile-search{
+    margin-top:12px;
+    width:100%;
+    min-height:43px;
+    border:1px solid #DCE7F1;
+    border-radius:12px;
+    background:#fff;
+    color:#667B91;
+    display:flex;align-items:center;gap:9px;
+    padding:0 12px;
+    position:relative;z-index:2;
+    box-shadow:0 6px 16px rgba(31,67,105,.045);
+  }
+  .mh-mobile-search svg{ width:18px;height:18px; }
+
+  .mh-section{ margin-top:21px; }
+  .mh-section-head h2{ font-size:17px; }
+
+  .mh-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  .mh-action{
+    min-height:122px;
+    padding:14px;
+    border-radius:14px;
+  }
+  .mh-action-icon{
+    width:37px;height:37px;
+    border-radius:11px;
+    margin-bottom:9px;
+  }
+  .mh-action-icon svg{ width:21px;height:21px; }
+  .mh-action b{ font-size:12px; }
+  .mh-action span:not(.mh-action-icon){ font-size:10px; }
+  .mh-action:after{ font-size:23px; }
+
+  .mh-domains{ grid-template-columns:1fr; gap:7px; }
+  .mh-domain{
+    min-height:66px;
+    display:grid;
+    grid-template-columns:36px 1fr 16px;
+    align-items:center;
+    gap:10px;
+    padding:9px 12px;
+    border-radius:13px;
+  }
+  .mh-domain-icon{ width:35px;height:35px;margin:0; }
+  .mh-domain b{ font-size:12px; }
+  .mh-domain small{ font-size:10px; margin-top:2px; }
+  .mh-domain:after{ position:static; grid-column:3; grid-row:1; }
+
+  .mh-study{ grid-template-columns:1fr; gap:8px; }
+  .mh-study-card{ min-height:74px; padding:11px 12px; }
+
+  .mh-bottom{ grid-template-columns:1fr; }
+  .mh-tip{ order:-1; }
+
+  .mh-bottom-nav{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:50;
+    padding:7px 6px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(18px);
+    border-top:1px solid #DDE7F0;
+    box-shadow:0 -8px 22px rgba(31,67,105,.07);
+  }
+  .mh-bottom-nav button{
+    border:0;background:transparent;
+    min-height:44px;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:2px;
+    color:#708399;
+    font-size:8px;font-weight:600;
+  }
+  .mh-bottom-nav button svg{ width:19px;height:19px; }
+  .mh-bottom-nav button.active{ color:#1677D2; }
+
+  html[data-theme="dark"] .mh-mobile-brand b{ color:#EEF5FC; }
+  html[data-theme="dark"] .mh-mobile-search,
+  html[data-theme="dark"] .mh-mobile-profile,
+  html[data-theme="dark"] .mh-bottom-nav{
+    background:rgba(25,38,56,.95); border-color:#2E4054; color:#B8C8D8;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mh-action,.mh-domain,.mh-study-card{ transition:none!important; }
+}
+</style>
+
 </head>
 <body>
 
@@ -9281,24 +9934,184 @@ const MOTIVATIONAL_QUOTES = [
   "\u201cEvery word you carry across a language gap matters to someone.\u201d"
 ];
 
-function renderHome(){
-  let html = `
-    <div class="home-greeting">
-      <div class="home-greeting-text">
-        <h2><span class="greet-rotator" id="greetRotator"><span class="greet-word">Hello</span></span></h2>
-        <p>${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
-        <button type="button" class="link-btn" style="margin-top:2px;" onclick="openOnboarding()">Take the tour</button>
-        ${ACTIVITY.length > 0 ? `
-        <button class="home-recent-cta" onclick="setCategory('updates')">
-          ${ICON_BELL}<span>Recent activity</span>
-        </button>` : ''}
-      </div>
-    </div>
-    ${ECG_STRIP}
-  `;
 
-  return html;
+function renderHome(){
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+  const me = (typeof whoAmI === 'function' ? whoAmI() : '') || 'Interpreter';
+  const firstName = String(me).trim().split(/\s+/)[0] || 'Interpreter';
+
+  const searchIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.3 4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const swapIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h13M15 4l3 3-3 3M19 17H6M9 14l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const docIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3v5a5 5 0 0 0 10 0V3M12 13v3a4 4 0 0 0 8 0v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="12" r="2" stroke="currentColor" stroke-width="2"/></svg>`;
+  const chatIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2h9A3.5 3.5 0 0 1 20 5.5v6a3.5 3.5 0 0 1-3.5 3.5H10l-5 4v-4.7A3.5 3.5 0 0 1 4 11.5z" stroke="currentColor" stroke-width="2"/><path d="M8 8.5h.01M12 8.5h.01M16 8.5h.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+  const addIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h9l3 3v15H6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v4h4M12 11v6M9 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const gridIco = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="4" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/><rect x="17" y="10" width="4" height="5" rx="1"/><rect x="3" y="17" width="5" height="4" rx="1"/><rect x="10" y="17" width="5" height="4" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg>`;
+  const bookIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5a3 3 0 0 1 3-3h5v18H7a3 3 0 0 0-3 2zM20 5a3 3 0 0 0-3-3h-5v18h5a3 3 0 0 1 3 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  const examIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5zM7 12v5c2.8 2 7.2 2 10 0v-5M21 9v6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  const scaleIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v18M6 6h12M5 6l-3 6h6zM19 6l-3 6h6zM8 21h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const calIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 3v4M17 3v4M3 9h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const bellIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0v5l2 3H4l2-3zM10 21h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const moonIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  const personIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const bulbIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18h6M10 22h4M8 14c-1.2-1-2-2.7-2-4.5a6 6 0 1 1 12 0c0 1.8-.8 3.5-2 4.5-1 .8-1.5 1.6-1.5 3h-5c0-1.4-.5-2.2-1.5-3z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const homeIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  const dotsIco = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>`;
+
+  const fmtDate = new Intl.DateTimeFormat(undefined,{weekday:'long',month:'short',day:'numeric',year:'numeric'}).format(now);
+  const termTotal = (DATA && Array.isArray(DATA.categories))
+    ? DATA.categories.reduce((sum,c)=>sum + (Array.isArray(c.terms) ? c.terms.length : 0),0)
+    : 0;
+
+  const preferred = ['oncology','cardiology','neurology','orthopedics','gastroenterology'];
+  const allCats = (DATA && Array.isArray(DATA.categories)) ? DATA.categories : [];
+  const picked = [];
+  preferred.forEach(id=>{
+    const c = allCats.find(x=>String(x.id||'').toLowerCase()===id);
+    if(c) picked.push(c);
+  });
+  allCats.forEach(c=>{
+    if(picked.length < 5 && !picked.includes(c)) picked.push(c);
+  });
+
+  const domainIcons = [addIco, `<span style="font-size:25px">♥</span>`, `<span style="font-size:24px">✦</span>`, `<span style="font-size:23px">◆</span>`, `<span style="font-size:24px">◒</span>`];
+  const domainBg = ['#FFF0F4','#FFF1F2','#EEF4FF','#EFF8F4','#FFF2F1'];
+  const domainTone = ['#E8497B','#E84555','#367BE6','#218D68','#D75E55'];
+
+  const domainCards = picked.map((c,i)=>`
+    <button class="mh-domain" style="--bg:${domainBg[i%domainBg.length]};--tone:${domainTone[i%domainTone.length]};" onclick="setCategory('${String(c.id).replace(/'/g,"\\'")}')">
+      <span class="mh-domain-icon">${domainIcons[i%domainIcons.length]}</span>
+      <span>
+        <b>${escapeHtml(c.name || c.id || 'Specialty')}</b>
+        <small>${Array.isArray(c.terms) ? c.terms.length : 0} terms</small>
+      </span>
+    </button>
+  `).join('');
+
+  const recent = Array.isArray(ACTIVITY) ? ACTIVITY.slice().reverse().slice(0,4) : [];
+  const activityRows = recent.length ? recent.map((a,i)=>`
+    <div class="mh-activity-row">
+      <span class="mh-activity-dot">${i===2 ? calIco : (i===3 ? chatIco : addIco)}</span>
+      <span class="mh-activity-copy">
+        <b>${escapeHtml(a.author || 'Team')} ${escapeHtml(a.summary || 'updated Interpreter Hub')}</b>
+        <span>${escapeHtml(a.summary || 'Team activity')}</span>
+      </span>
+      <span class="mh-activity-time">${a.timestamp ? relativeTime(a.timestamp) : ''}</span>
+    </div>
+  `).join('') : `<div class="mh-empty">All quiet for now. Team changes will appear here.</div>`;
+
+  return `
+    <div class="mh-dashboard">
+      <div class="mh-mobile-top">
+        <div class="mh-mobile-brand">
+          <span class="mh-mobile-logo">${gridIco}</span>
+          <span><b>Interpreter Hub</b><small>HUMC Language Services</small></span>
+        </div>
+        <button class="mh-mobile-profile" onclick="openNameModal()" aria-label="Profile">${personIco}</button>
+      </div>
+
+      <div class="mh-header">
+        <button class="mh-search" onclick="openGlobalSearch()">${searchIco}<span>Search terms, doctors, messages, and the app…</span></button>
+        <div class="mh-head-actions">
+          <button class="mh-icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">${moonIco}</button>
+          <button class="mh-icon-btn" onclick="setCategory('updates')" aria-label="Recent updates">${bellIco}</button>
+          <button class="mh-icon-btn" onclick="openNameModal()" aria-label="Profile">${personIco}</button>
+        </div>
+      </div>
+
+      <section class="mh-hero">
+        <div class="mh-kicker">${escapeHtml(greeting)},</div>
+        <h1>${escapeHtml(firstName)} <span aria-hidden="true">👋</span></h1>
+        <p>Quick access to your team tools, terminology, and professional resources.</p>
+        <span class="mh-quote">“Precision in language is precision in care.”</span>
+        <button class="mh-mobile-search" onclick="openGlobalSearch()">${searchIco}<span>Search terms, doctors, or the app…</span></button>
+        <div class="mh-date">
+          <b>${escapeHtml(fmtDate)}</b>
+          <span>${termTotal} shared glossary terms ready when you need them.</span>
+        </div>
+      </section>
+
+      <section class="mh-section">
+        <div class="mh-section-head"><h2>Quick Actions</h2></div>
+        <div class="mh-actions">
+          <button class="mh-action" style="--tone:#1677D2;--bg:#EAF5FF;" onclick="setCategory('translate')">
+            <span class="mh-action-icon">${swapIco}</span><b>Translate Term</b><span>Get medical terminology with context</span>
+          </button>
+          <button class="mh-action" style="--tone:#7D4DD3;--bg:#F2ECFF;" onclick="setCategory('doctor-research')">
+            <span class="mh-action-icon">${docIco}</span><b>Research Doctor</b><span>Find specialties and prep terminology</span>
+          </button>
+          <button class="mh-action" style="--tone:#1C9B77;--bg:#EAF9F4;" onclick="setCategory('chat')">
+            <span class="mh-action-icon">${chatIco}</span><b>Team Chat</b><span>Connect with your interpreter team</span>
+          </button>
+          <button class="mh-action" style="--tone:#D1842C;--bg:#FFF5E8;" onclick="openAddModal()">
+            <span class="mh-action-icon">${addIco}</span><b>Add Terminology</b><span>Share a new term with the team</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="mh-section">
+        <div class="mh-section-head">
+          <h2>Medical Terminology</h2>
+          <button class="mh-link" onclick="setCategory('all')">View all →</button>
+        </div>
+        <div class="mh-domains">
+          ${domainCards}
+          <button class="mh-domain" style="--bg:#F1F5F9;--tone:#456A8F;" onclick="setCategory('all')">
+            <span class="mh-domain-icon">${gridIco}</span>
+            <span><b>More Specialties</b><small>${allCats.length} total domains</small></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="mh-section">
+        <div class="mh-section-head"><h2>Study &amp; Professional Development</h2></div>
+        <div class="mh-study">
+          <button class="mh-study-card" onclick="setCategory('practice')">
+            <span class="mh-study-ico" style="--tone:#1677D2;">${examIco}</span>
+            <span><b>CoreCHI Practice</b><small>Practice for certification</small></span><span class="mh-study-arrow">›</span>
+          </button>
+          <button class="mh-study-card" onclick="setCategory('review')">
+            <span class="mh-study-ico" style="--tone:#1C9B77;">${bookIco}</span>
+            <span><b>Term Review</b><small>Study and reinforce terminology</small></span><span class="mh-study-arrow">›</span>
+          </button>
+          <button class="mh-study-card" onclick="setCategory('ethics')">
+            <span class="mh-study-ico" style="--tone:#7654D5;">${scaleIco}</span>
+            <span><b>Ethics &amp; Standards</b><small>Key principles and scenarios</small></span><span class="mh-study-arrow">›</span>
+          </button>
+          <button class="mh-study-card" onclick="setCategory('events')">
+            <span class="mh-study-ico" style="--tone:#1677D2;">${calIco}</span>
+            <span><b>Training &amp; Events</b><small>Upcoming CE opportunities</small></span><span class="mh-study-arrow">›</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="mh-section">
+        <div class="mh-section-head">
+          <h2>Recent Team Activity</h2>
+          <button class="mh-link" onclick="setCategory('updates')">View all →</button>
+        </div>
+        <div class="mh-bottom">
+          <div class="mh-activity">${activityRows}</div>
+          <aside class="mh-tip">
+            <div class="mh-tip-title">${bulbIco}<span>Interpreter Tip</span></div>
+            <p>If a patient does not understand an instruction, preserve the interpretation first, then clearly step outside the interpreter role if you need to flag the communication concern to the care team.</p>
+            <em>Advocacy within your role matters.</em>
+          </aside>
+        </div>
+      </section>
+
+      <nav class="mh-bottom-nav" aria-label="Mobile navigation">
+        <button class="active" onclick="setCategory('home')">${homeIco}<span>Home</span></button>
+        <button onclick="openGlobalSearch()">${searchIco}<span>Search</span></button>
+        <button onclick="setCategory('translate')">${swapIco}<span>Translate</span></button>
+        <button onclick="setCategory('chat')">${chatIco}<span>Chat</span></button>
+        <button onclick="setCategory('all')">${dotsIco}<span>More</span></button>
+      </nav>
+    </div>
+  `;
 }
+
 
 function renderProviders(q){
   let list = PROVIDERS.slice();
