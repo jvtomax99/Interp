@@ -116,10 +116,10 @@
     display:flex; align-items:center; gap:14px; padding:0 18px;
     background:var(--paper); border-bottom:1px solid var(--line);
   }
-  /* Back sits left of search and only appears when there's history to
+  /* Back sits left of the brand and only appears when there's history to
      unwind, so Home doesn't show a dead control. */
   .tg-back{
-    display:none; width:38px; height:38px; flex-shrink:0; border-radius:50%;
+    display:none; width:36px; height:36px; flex-shrink:0; border-radius:50%;
     border:1px solid var(--line); background:var(--paper); color:var(--ink-soft);
     cursor:pointer; align-items:center; justify-content:center;
     transition:background .15s var(--ease), color .15s var(--ease);
@@ -127,15 +127,24 @@
   .tg-back.is-visible{ display:flex; }
   .tg-back:hover{ background:var(--bg-hi); color:var(--ink); }
   .tg-back svg{ width:19px; height:19px; }
-  .tg-search{
-    flex:1; min-width:0; max-width:620px; display:flex; align-items:center; gap:9px;
-    height:40px; padding:0 14px; border-radius:999px; cursor:pointer; text-align:left;
-    background:var(--bg); border:1px solid var(--line); color:var(--ink-faint);
-    font-family:var(--sans); font-size:13.5px; transition:border-color .15s var(--ease);
+
+  /* Brand lockup: the diamond mark beside a live-text wordmark, so it stays
+     crisp at any size and the facility name is real text rather than pixels. */
+  .tg-brand{
+    display:flex; align-items:center; gap:11px; min-width:0; flex:1;
+    background:none; border:none; padding:0; cursor:pointer; text-align:left;
+    font-family:inherit;
   }
-  .tg-search:hover{ border-color:var(--accent-2); }
-  .tg-search svg{ width:16px; height:16px; flex-shrink:0; }
-  .tg-search span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tg-mark{ height:34px; width:auto; flex-shrink:0; display:block; }
+  .tg-brand-text{ display:flex; flex-direction:column; min-width:0; }
+  .tg-brand-name{
+    font-family:var(--sans); font-size:16px; font-weight:700; letter-spacing:-.015em;
+    color:var(--ink); line-height:1.2; white-space:nowrap;
+  }
+  .tg-brand-sub{
+    font-family:var(--sans); font-size:11px; font-weight:500; color:var(--ink-soft);
+    line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
   .tg-right{ display:flex; align-items:center; gap:8px; margin-left:auto; flex-shrink:0; }
   .tg-icon-btn{
     width:38px; height:38px; border-radius:50%; border:1px solid var(--line);
@@ -150,6 +159,18 @@
     background:var(--danger); color:#fff; font-family:var(--sans); font-size:10px; font-weight:700;
     display:flex; align-items:center; justify-content:center; padding:0 4px;
   }
+  .tg-avatar{
+    width:36px; height:36px; border-radius:50%; flex-shrink:0; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    font-family:var(--sans); font-size:12.5px; font-weight:700; color:#fff;
+    background:linear-gradient(140deg, var(--accent-2), var(--navy));
+  }
+  .tg-avatar::after{
+    content:''; position:absolute; top:-1px; right:-1px; width:11px; height:11px;
+    border-radius:50%; background:var(--danger); border:2px solid var(--paper);
+    opacity:0; transition:opacity .15s var(--ease);
+  }
+  .tg-avatar.has-alert::after{ opacity:1; }
   .tg-divider{ width:1px; height:28px; background:var(--line); margin:0 2px; }
   /* Sync status. Hidden while everything is saved and online — it only
      appears when there's something the person would want to know about. */
@@ -170,11 +191,22 @@
   .tg-logo{ height:34px; width:auto; object-fit:contain; display:block; }
   @media (max-width:900px){
     .topbar-global{ height:58px; padding:0 14px; gap:10px; }
+    .tg-search-btn{ display:none; }
     .tg-logo{ height:26px; }
     .tg-icon-btn{ width:34px; height:34px; }
   }
   @media (max-width:520px){
     .tg-divider, .tg-logo{ display:none; }
+    /* The facility name stays on phones — it's the line that says which
+       hospital this is. It shrinks and ellipses rather than disappearing. */
+    .tg-mark{ height:29px; }
+    .tg-brand{ gap:9px; }
+    .tg-brand-name{ font-size:14.5px; }
+    .tg-brand-sub{ font-size:9.5px; }
+    .topbar-global{ gap:8px; padding:0 12px; }
+    .tg-icon-btn{ width:32px; height:32px; }
+    .tg-icon-btn svg{ width:16px; height:16px; }
+    .tg-avatar{ width:32px; height:32px; font-size:11.5px; }
   }
   .app{display:flex; min-height:calc(100vh - 64px);}
   ::-webkit-scrollbar{width:10px; height:10px;}
@@ -258,8 +290,10 @@
   .side-foot-btn:hover{ background:var(--side-hover); color:var(--side-ink); }
   .side-foot-btn svg{ width:16px; height:16px; }
 
+  /* The wordmark moved to the global header; the sidebar keeps only the
+     HIPAA reminder, so the name isn't printed twice on one screen. */
   .brand{
-    padding:4px 20px 18px 20px; margin-bottom:12px; position:relative;
+    padding:4px 16px 14px 16px; margin-bottom:8px; position:relative;
     flex-shrink:0; /* without this the flex column crushes the header to nothing */
   }
   .brand::after{
@@ -490,6 +524,20 @@
     background:var(--paper); border-radius:16px; padding:15px 18px; margin-bottom:24px;
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
   }
+  /* Search moved out of the header and under the hero, where it's a real
+     target instead of a 36px icon competing with the branding. */
+  .home-search{
+    display:flex; align-items:center; gap:10px; width:100%;
+    margin:-8px 0 4px 0; padding:0 16px; height:46px; border-radius:14px;
+    background:var(--paper); border:1px solid var(--line);
+    box-shadow:var(--sh-1); cursor:pointer; text-align:left;
+    font-family:var(--sans); font-size:14px; color:var(--ink-faint);
+    transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .home-search:hover{ border-color:var(--accent-2); box-shadow:var(--sh-2); }
+  .home-search svg{ width:17px; height:17px; flex-shrink:0; }
+  .home-search span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
   /* ---------- Sectioned home ---------- */
   .home-sec{ margin:26px 0 0 0; }
   .home-sec-head{
@@ -2456,16 +2504,21 @@
   <button class="tg-back" id="tgBack" onclick="goBack()" aria-label="Go back" title="Back">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
-  <button class="tg-search" onclick="openGlobalSearch()" aria-label="Search">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    <span>Search terms, doctors, or the app…</span>
+  <button class="tg-brand" onclick="goHome()" aria-label="Home">
+    <img class="tg-mark" src="./hmh-mark.png" alt="">
+    <span class="tg-brand-text">
+      <span class="tg-brand-name">Interpreter Hub</span>
+      <span class="tg-brand-sub">Hackensack University Medical Center</span>
+    </span>
   </button>
   <div class="tg-right">
     <span class="tg-sync" id="tgSync" role="status" aria-live="polite"></span>
+    <button class="tg-icon-btn tg-search-btn" onclick="openGlobalSearch()" title="Search" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
     <button class="tg-icon-btn" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" id="tgTheme"></button>
-    <button class="tg-icon-btn" onclick="setCategory('updates')" title="Recent updates" aria-label="Recent updates" id="tgBell"></button>
-    <span class="tg-divider"></span>
-    <img class="tg-logo" src="./hmh-logo.png" alt="Hackensack Meridian Health">
+    <button class="tg-icon-btn tg-bell" onclick="setCategory('updates')" title="Recent updates" aria-label="Recent updates" id="tgBell"></button>
+    <button class="tg-avatar" id="tgAvatar" onclick="openNameModal()" aria-label="Your name"></button>
   </div>
 </header>
 
@@ -8714,13 +8767,6 @@ function render(){
     </button>
     <div class="sidebar">
       <div class="brand">
-        <div class="brand-mark">
-          <div class="brand-glyph">${ICON_GLYPH}</div>
-          <div class="brand-wordmark">
-            <div class="brand-title">Interpreter Hub</div>
-            <div class="brand-sub">HUMC Language Services</div>
-          </div>
-        </div>
         <div class="hipaa-notice">${ICON_SHIELD}<span>Remember to adhere to HIPAA when sharing information.</span></div>
       </div>
       ${sideNavHtml()}
@@ -8845,10 +8891,17 @@ function syncTopBar(){
     themeBtn.innerHTML = dark ? ICON_SUN : ICON_MOON;
     themeBtn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
   }
+  const unseen = Math.max(0, ACTIVITY.length - lastSeenActivityCount);
   const bellBtn = document.getElementById('tgBell');
   if(bellBtn){
-    const unseen = Math.max(0, ACTIVITY.length - lastSeenActivityCount);
     bellBtn.innerHTML = ICON_BELL + (unseen ? `<span class="tg-badge">${unseen > 9 ? '9+' : unseen}</span>` : '');
+  }
+  const avatar = document.getElementById('tgAvatar');
+  if(avatar){
+    const who = whoAmI();
+    avatar.textContent = who ? initialsOf(who) : '?';
+    avatar.title = who ? `${who} \u2014 tap to change` : 'Add your name';
+    avatar.classList.toggle('has-alert', unseen > 0);
   }
   updateSyncStatus(false);
 }
@@ -10092,13 +10145,6 @@ function renderHome(){
     <div class="home-greeting">
       <div class="home-greeting-photo"></div>
       <div class="home-greeting-scrim"></div>
-      <div class="home-greeting-brand">
-        <span class="home-greeting-brandmark">
-          <span class="home-greeting-brandname">Interpreter Hub</span>
-          <span class="home-greeting-brandsub">Hackensack University Medical Center</span>
-        </span>
-      </div>
-      <img class="home-greeting-logo" src="./hmh-logo-white.png" alt="Hackensack Meridian Health">
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
         <h2 class="home-greeting-name">${firstName ? escapeHtml(firstName) + ' \u{1F44B}' : 'Welcome \u{1F44B}'}</h2>
@@ -10109,6 +10155,11 @@ function renderHome(){
         </div>
       </div>
     </div>
+
+    <button class="home-search" onclick="openGlobalSearch()" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.9"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      <span>Search terms, doctors, or the app…</span>
+    </button>
 
     ${renderHomeSection('Quick Actions', '', '', quickActions)}
     ${renderHomeSection('Medical Terminology', 'View all', `setCategory('all')`, termCards)}
