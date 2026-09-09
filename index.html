@@ -941,6 +941,17 @@
   .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
   .doc-dir-card{ cursor:pointer; }
   .dd-detail-header{ display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; padding-right:28px; }
+  /* Named back control. The bare ✕ said "close" but not what you'd return
+     to, and on a full-height sheet it reads as leaving the section entirely. */
+  .dd-detail-back{
+    display:inline-flex; align-items:center; gap:5px; margin:0 0 14px 0;
+    padding:7px 13px 7px 9px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--line-soft); background:var(--paper);
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    transition:border-color .15s var(--ease), color .15s var(--ease);
+  }
+  .dd-detail-back:hover{ border-color:var(--accent-2); color:var(--ink); }
+  .dd-detail-back svg{ width:15px; height:15px; flex-shrink:0; }
   .dd-detail-close{
     position:absolute; top:20px; right:20px; border:none; background:transparent; cursor:pointer;
     color:var(--ink-faint); font-size:16px; line-height:1; padding:4px; border-radius:8px;
@@ -9206,6 +9217,14 @@ function goHome(){
 }
 
 function goBack(){
+  // An open overlay is the top layer, so Back should close that first —
+  // otherwise Back on a doctor's detail silently navigates the screen behind
+  // it and the panel stays put, which reads as the button doing nothing.
+  const openOverlay = document.querySelector('.overlay.show');
+  const lb = document.getElementById('lightbox');
+  if(lb && lb.classList.contains('show')){ lb.classList.remove('show'); return; }
+  if(openOverlay){ openOverlay.classList.remove('show'); return; }
+
   // Hierarchical first, historical second. Reaching a subgroup usually means
   // tapping its chip straight from Home, so the history stack says the way
   // back is Home — but what people expect from "Breast Oncology" is to land
@@ -9227,6 +9246,11 @@ function goBack(){
 // pushes a history entry, so swiping back walks the in-app stack instead of
 // leaving the app entirely — which is what it did before.
 window.addEventListener('popstate', () => {
+  const openOverlay = document.querySelector('.overlay.show');
+  const lb = document.getElementById('lightbox');
+  if(lb && lb.classList.contains('show')){ lb.classList.remove('show'); history.pushState({ ih: true }, ''); return; }
+  if(openOverlay){ openOverlay.classList.remove('show'); history.pushState({ ih: true }, ''); return; }
+
   const cat = DATA && DATA.categories.find(c => c.id === activeCategory);
   if(cat && cat.parentId && navStack[navStack.length - 1] !== cat.parentId){
     setCategory(cat.parentId, true);
@@ -10406,6 +10430,9 @@ function renderDoctorDirDetail(d){
   `;
 
   return `
+    <button class="dd-detail-back" onclick="closeDoctorDirDetail()">
+      ${ICON_CHEVRON_LEFT}<span>All doctors</span>
+    </button>
     <button class="dd-detail-close" title="Close" onclick="closeDoctorDirDetail()">✕</button>
     <div class="dd-detail-header">
       ${d.photo
