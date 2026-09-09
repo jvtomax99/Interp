@@ -3097,6 +3097,103 @@ html[data-theme="dark"] .home-sec-head h3{
 }
 </style>
 
+
+<style id="ih-v13-icon-subdomain-fix">
+/* Smaller icon scale across Home */
+.section-family-card .home-tile-icon,
+.home-medical-rail .domain-family-head .home-tile-icon{
+  width:32px!important;
+  height:32px!important;
+}
+.section-family-card .home-tile-icon svg,
+.home-medical-rail .domain-family-head .home-tile-icon svg{
+  width:24px!important;
+  height:24px!important;
+}
+.home-quick-rail .qa-icon{
+  width:34px!important;
+  height:34px!important;
+}
+.home-quick-rail .qa-icon svg{
+  width:27px!important;
+  height:27px!important;
+}
+
+/* Medical terminology subdomains are visible again inside each parent card */
+.home-medical-rail .domain-family{
+  min-height:220px!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.home-medical-rail .domain-family-head{
+  min-height:158px!important;
+  flex:0 0 auto!important;
+}
+.home-medical-rail .domain-family-kids{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important;
+  padding:0 10px 10px!important;
+  margin-top:auto!important;
+  overflow:visible!important;
+}
+.home-medical-rail .domain-family-kids::before{
+  content:"Subdomains";
+  display:block;
+  padding:0 2px 6px;
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.home-medical-rail .domain-family-kid{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  width:100%!important;
+  border:0!important;
+  border-top:1px solid rgba(80,110,140,.10)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  padding:7px 3px!important;
+  font-size:9px!important;
+  color:var(--ink)!important;
+  text-align:left!important;
+}
+.home-medical-rail .domain-family-kid:first-of-type{
+  border-top:0!important;
+}
+.home-medical-rail .domain-family-kid span{
+  font-size:7.5px!important;
+  color:var(--ink-faint)!important;
+  flex-shrink:0!important;
+}
+
+/* Keep mobile cards readable without oversized symbols */
+@media(max-width:900px){
+  .section-family-card .home-tile-icon,
+  .home-medical-rail .domain-family-head .home-tile-icon{
+    width:30px!important;
+    height:30px!important;
+  }
+  .section-family-card .home-tile-icon svg,
+  .home-medical-rail .domain-family-head .home-tile-icon svg{
+    width:22px!important;
+    height:22px!important;
+  }
+  .home-quick-rail .qa-icon{
+    width:32px!important;
+    height:32px!important;
+  }
+  .home-quick-rail .qa-icon svg{
+    width:24px!important;
+    height:24px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -10743,6 +10840,9 @@ function renderHome(){
           <span class="home-tile-name">${escapeHtml(parent.name)}</span>
           <span class="home-tile-count">${total} ${total===1?'term':'terms'}${kids.length?` · ${kids.length} subdomains`:''}</span>
         </button>
+        ${kids.length ? `<div class="domain-family-kids">
+          ${kids.map(k=>`<button class="domain-family-kid" onclick="setCategory('${k.id}')" title="${escapeAttr(k.name)}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(k.name)}</span><span>${k.count}</span></button>`).join('')}
+        </div>` : ''}
       </div>`;
   }).join('');
 
