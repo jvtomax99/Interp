@@ -398,9 +398,12 @@
     /* Full-bleed: pulled out to the edges of the content column by the exact
        amount of its padding, and out of the top so it sits flush under the
        header. Overridden per breakpoint below to match each padding value. */
+    /* Bottom corners are rounded so the photo curves away from the floating
+       search card instead of ending in two hard notches beside it. The top
+       stays square because it butts against the header. */
     position:relative; padding:34px 48px 62px 48px;
     margin:-40px -48px 0 -48px;
-    border-radius:0; overflow:hidden; isolation:isolate;
+    border-radius:0 0 28px 28px; overflow:hidden; isolation:isolate;
     background:#2A3C5C;
     box-shadow:var(--sh-2);
     /* Column now: brand row pinned to the top, greeting block to the bottom. */
