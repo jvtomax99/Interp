@@ -675,6 +675,63 @@
   }
   .home-tile:hover .home-tile-icon{ transform:scale(1.1); }
   .home-tile-icon svg{ width:31px; height:31px; }
+  /* ---------- Domain families ---------- */
+  /* Parent and subgroups share one rail cell and one tinted surface, so they
+     can never be scrolled apart or read as unrelated destinations. */
+  .domain-family{
+    display:flex; flex-direction:column;
+    background:var(--tile-tint); border-radius:var(--r-lg);
+    box-shadow:inset 0 0 0 1px var(--tile-edge);
+    animation:tileIn .45s var(--ease) both; overflow:hidden;
+  }
+  .domain-family-head{
+    background:transparent !important; box-shadow:none !important;
+    animation:none !important; min-height:0; border-radius:0;
+  }
+  .domain-family-head:hover{ transform:none; box-shadow:none !important; }
+  .domain-family-kids{
+    display:flex; flex-direction:column; gap:1px;
+    padding:0 10px 10px 10px; margin-top:-4px;
+  }
+  .domain-family-kid{
+    display:flex; align-items:center; gap:8px; width:100%; padding:8px 10px;
+    border:none; background:rgba(255,255,255,0.55); cursor:pointer; font-family:inherit;
+    text-align:left; border-radius:8px; transition:background .15s var(--ease);
+  }
+  .domain-family-kid:hover{ background:rgba(255,255,255,0.92); }
+  .domain-family-kid::before{
+    content:'\21B3'; font-size:11px; color:var(--tile-color); opacity:.75; flex-shrink:0;
+  }
+  .domain-family-kid-name{
+    flex:1; min-width:0; font-family:var(--sans); font-size:12px; font-weight:600;
+    color:var(--ink); line-height:1.3;
+  }
+  .domain-family-kid-count{
+    font-family:var(--sans); font-size:10.5px; color:var(--ink-faint); flex-shrink:0;
+  }
+  html[data-theme="dark"] .domain-family{ background:var(--paper); }
+  html[data-theme="dark"] .domain-family-kid{ background:rgba(255,255,255,0.06); }
+  html[data-theme="dark"] .domain-family-kid:hover{ background:rgba(255,255,255,0.12); }
+
+  /* Jump bar shown at the top of a parent domain that has subgroups. */
+  .subgroup-bar{
+    display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+    padding:11px 13px; margin-bottom:16px; border-radius:12px;
+    background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .subgroup-bar-label{
+    font-family:var(--sans); font-size:10.5px; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-faint); margin-right:2px;
+  }
+  .subgroup-pill{
+    display:inline-flex; align-items:center; gap:5px; padding:6px 11px; border-radius:999px;
+    border:1px solid var(--line-soft); background:var(--paper); cursor:pointer;
+    font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink);
+    transition:border-color .15s var(--ease), background .15s var(--ease);
+  }
+  .subgroup-pill:hover{ border-color:var(--accent-2); background:var(--accent-soft); }
+  .subgroup-pill span{ font-size:10.5px; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+
   /* Marks a card as a subgroup by naming its parent above the title, so
      "Breast Oncology" reads as living under Oncology rather than as a
      standalone domain that happens to be nearby. */
@@ -8834,10 +8891,33 @@ function renderContent(){
   // Parents immediately followed by their own subgroups, so "All domains"
   // reads as grouped when scrolling through it, same ordering as the
   // sidebar tiles.
-  let cats = activeCategory==='all' ? orderedCategoriesWithSubgroups() : DATA.categories.filter(c=>c.id===activeCategory);
+  // Opening a parent domain brings its subgroups along. Previously a parent
+  // showed only its own terms, so Oncology and Breast Oncology behaved as
+  // unrelated destinations — you could be "in" Oncology and not see any of
+  // the subgroup terms that belong to it.
+  let cats;
+  if(activeCategory === 'all'){
+    cats = orderedCategoriesWithSubgroups();
+  } else {
+    const self = DATA.categories.filter(c => c.id === activeCategory);
+    const kids = DATA.categories.filter(c => c.parentId === activeCategory);
+    cats = self.concat(kids);
+  }
 
   let html = '';
   const printLabel = activeCategory==='all' ? 'the full glossary' : (cats[0] ? cats[0].name : 'this domain');
+
+  // Jump bar for a parent that has subgroups — lets you skip straight to a
+  // subgroup's section without scrolling the whole family.
+  if(activeCategory !== 'all' && cats.length > 1){
+    const parent = cats[0];
+    const kids = cats.slice(1);
+    html += `<div class="subgroup-bar">
+      <span class="subgroup-bar-label">Jump to</span>
+      <button class="subgroup-pill" onclick="document.getElementById('domain-${parent.id}')?.scrollIntoView({behavior:'smooth', block:'start'})">${escapeHtml(parent.name)}</button>
+      ${kids.map(k=>`<button class="subgroup-pill" onclick="document.getElementById('domain-${k.id}')?.scrollIntoView({behavior:'smooth', block:'start'})">${escapeHtml(k.name)} <span>${k.terms.length}</span></button>`).join('')}
+    </div>`;
+  }
   html += `<div class="print-export-row">
     <button class="btn btn-ghost" onclick="window.print()">${ICON_PRINT} Export PDF</button>
     <button class="btn btn-ghost" onclick="exportTermsCsv()">${ICON_DOWNLOAD} Export CSV</button>
@@ -9734,28 +9814,34 @@ function renderHome(){
 
   // The biggest domains lead the terminology rail — that's what people
   // actually reach for, and the full set is one tap away via View all.
-  // Every domain appears here, subgroups included — they're where a lot of
-  // the useful specificity lives (Breast Oncology, Radiation Oncology), and
-  // filtering to top-level only made them effectively invisible on Home.
-  // Each subgroup is ordered directly after its parent and labelled with it,
-  // so the rail reads as a grouped list rather than a flat jumble.
+  // A domain family renders as ONE unit: the parent card with its subgroups
+  // listed directly beneath it, inside the same rail cell. Previously each
+  // subgroup was its own card in the flow, so scrolling the rail could put
+  // "Breast Oncology" far from "Oncology" and it read as unrelated.
   const allDomainTiles = getDomainTiles().filter(t => t.id !== 'resources');
-  const orderedDomains = [];
-  allDomainTiles.filter(t => !t.parentId)
+  const termCards = allDomainTiles
+    .filter(t => !t.parentId)
     .sort((a,b) => (b.count||0) - (a.count||0))
-    .forEach(parent => {
-      orderedDomains.push({ tile: parent, parentName: null });
-      allDomainTiles.filter(k => k.parentId === parent.id)
-        .sort((a,b) => (b.count||0) - (a.count||0))
-        .forEach(kid => orderedDomains.push({ tile: kid, parentName: parent.name }));
-    });
-  const termCards = orderedDomains.map(({tile, parentName}, i) => `
-    <button class="home-tile" style="${tileVars(tile.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="setCategory('${tile.id}')">
-      <span class="home-tile-icon">${tile.icon}</span>
-      ${parentName ? `<span class="home-tile-parent">${escapeHtml(parentName.split(',')[0].split('&')[0].trim())}</span>` : ''}
-      <span class="home-tile-name">${escapeHtml(tile.name)}</span>
-      <span class="home-tile-count">${tile.count===null ? '' : tile.count + ' ' + tile.label}</span>
-    </button>`).join('');
+    .map((parent, i) => {
+      const kids = allDomainTiles.filter(k => k.parentId === parent.id)
+                                 .sort((a,b) => (b.count||0) - (a.count||0));
+      const totalTerms = (parent.count||0) + kids.reduce((n,k)=> n + (k.count||0), 0);
+      return `
+        <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
+          <button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
+            <span class="home-tile-icon">${parent.icon}</span>
+            <span class="home-tile-name">${escapeHtml(parent.name)}</span>
+            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
+          </button>
+          ${kids.length ? `<div class="domain-family-kids">
+            ${kids.map(k=>`
+              <button class="domain-family-kid" onclick="setCategory('${k.id}')">
+                <span class="domain-family-kid-name">${escapeHtml(k.name)}</span>
+                <span class="domain-family-kid-count">${k.count}</span>
+              </button>`).join('')}
+          </div>` : ''}
+        </div>`;
+    }).join('');
 
   // The Tools grid used to live on Home and was lost in the redesign; these
   // two sections put the doctor tooling and the remaining utilities back
