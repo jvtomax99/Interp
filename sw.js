@@ -17,9 +17,16 @@
  * Firebase traffic (Firestore, Cloud Storage, gstatic) is never intercepted —
  * it is cross-origin and realtime, and caching it would serve stale glossary
  * data or break the live chat listener.
+ * IMPORTANT: bump CACHE_VERSION on every deploy that matters. Browsers only
+ * re-check this file for changes occasionally (less often on an installed
+ * PWA that's suspended/resumed rather than freshly loaded), so an unchanged
+ * version string here means an unchanged precache — a stale, possibly very
+ * old index.html can sit cached indefinitely and get served if the app ever
+ * relaunches without a network connection (a real risk in a hospital, per
+ * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v1';
+const CACHE_VERSION = 'interpreter-hub-v2';
 const PRECACHE = [
   './',
   './index.html',

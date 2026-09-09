@@ -6280,7 +6280,19 @@ async function loadData(){
     render();
   }catch(err){
     console.error('loadData failed:', err);
-    DATA = DEFAULT_DATA;
+    // This chain runs the live listeners plus a long sequence of one-time
+    // migration steps every time the app boots. A hiccup partway through —
+    // one flaky migration, a momentary network drop — used to nuke whatever
+    // real data had already loaded (DATA might already hold 1,000+ real
+    // terms by this point) and silently replace it with the tiny hardcoded
+    // starter set, for the rest of the session. Only fall back to the
+    // starter set if nothing real ever loaded in the first place; otherwise
+    // keep what's already there and just surface that something went wrong.
+    if(!DATA){
+      DATA = DEFAULT_DATA;
+    } else {
+      showToast('Some data may be out of date \u2014 check your connection and reopen the app');
+    }
     render();
   }
 }
@@ -11206,9 +11218,30 @@ document.addEventListener('focusout', (e)=>{
    a failure here must never stop the app itself from working. */
 if('serviceWorker' in navigator && window.isSecureContext){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('./sw.js').catch(err=>{
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      // The browser's own periodic update check is unreliable on an
+      // installed PWA — it's often suspended and resumed rather than
+      // freshly loaded, so it can go a long time without ever asking
+      // whether sw.js has changed. Checking explicitly on load and every
+      // time the app comes back to the foreground closes that gap.
+      reg.update().catch(()=>{});
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible') reg.update().catch(()=>{});
+      });
+    }).catch(err=>{
       console.warn('Service worker registration failed:', err);
     });
+  });
+  // A new service worker taking control means a newer build is now cached —
+  // but the page already running in memory is still the old code. Without
+  // this, that old code (and whatever stale data it fell back to) can keep
+  // running silently for the rest of the session instead of picking up the
+  // fix that's already sitting there waiting.
+  let swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(swRefreshing) return;
+    swRefreshing = true;
+    window.location.reload();
   });
   // Tapping a chat notification asks the app to jump straight to Team Chat.
   navigator.serviceWorker.addEventListener('message', (event)=>{
