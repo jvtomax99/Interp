@@ -10091,6 +10091,13 @@ const MOTIVATIONAL_QUOTES = [
   "\u201cEvery word you carry across a language gap matters to someone.\u201d"
 ];
 
+// Build stamp. Shown in the More sheet and logged to the console so it's
+// possible to tell, from the phone, exactly which deploy is running — cache
+// problems and "did that upload actually land?" are otherwise guesswork.
+const BUILD_ID = 'b0909.2334';
+const BUILD_TIME = '2026-09-09 23:34 UTC';
+console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
+
 // Local-clock greeting — uses the device's own time, so an interpreter on a
 // night shift gets "Good evening" rather than whatever the server thinks.
 function greetingForNow(){
@@ -10164,7 +10171,7 @@ function sideNavHtml(){
       <span class="side-foot-avatar">${escapeHtml(initials || '?')}</span>
       <span class="side-foot-main">
         <span class="side-foot-name">${who ? escapeHtml(who) : 'Set your name'}</span>
-        <span class="side-foot-role">Interpreter</span>
+        <span class="side-foot-role">Interpreter · ${BUILD_ID}</span>
       </span>
       <button class="side-foot-btn" onclick="openNameModal()" title="Change your name" aria-label="Change your name">${ICON_EDIT}</button>
     </div>`;
@@ -10207,7 +10214,10 @@ function openMoreSheet(){
     <div class="domain-group-children" style="margin-bottom:20px;">${tools.map(t=>row(t,false)).join('')}</div>
     <div class="home-sec-head" style="margin-bottom:10px;"><h3>Terminology domains</h3>
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
-    <div class="domain-group-children">${domainRowsHtml}</div>`;
+    <div class="domain-group-children">${domainRowsHtml}</div>
+    <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
+      Build ${BUILD_ID} · ${BUILD_TIME}
+    </div>`;
   document.getElementById('moreSheetOverlay').classList.add('show');
 }
 
