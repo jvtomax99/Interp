@@ -352,7 +352,7 @@
   .home-greeting{
     position:relative; padding:26px 24px 22px 24px; margin:-6px -6px 22px -6px;
     border-radius:var(--r-lg); overflow:hidden; isolation:isolate;
-    background:#1B2740;
+    background:#2A3C5C;
     box-shadow:var(--sh-2);
     display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap;
     min-height:210px;
@@ -363,9 +363,12 @@
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
+    /* Much lighter than before so the hospital actually reads as a photo.
+       Legibility now comes from a soft radial pool behind the text block
+       plus per-element text-shadow, rather than dimming the whole image. */
     background:
-      linear-gradient(180deg, rgba(10,17,31,0.34) 0%, rgba(10,17,31,0.52) 40%, rgba(10,17,31,0.86) 100%),
-      linear-gradient(100deg, rgba(10,17,31,0.88) 0%, rgba(10,17,31,0.62) 38%, rgba(10,17,31,0.12) 78%);
+      radial-gradient(110% 135% at 0% 66%, rgba(8,14,26,0.94) 0%, rgba(8,14,26,0.80) 32%, rgba(8,14,26,0.40) 58%, rgba(8,14,26,0) 82%),
+      linear-gradient(180deg, rgba(8,14,26,0.10) 0%, rgba(8,14,26,0.06) 45%, rgba(8,14,26,0.38) 100%);
   }
   .home-greeting-text{ position:relative; max-width:34ch; }
   .home-greeting-eyebrow{
@@ -380,6 +383,9 @@
     font-size:13.5px; color:rgba(255,255,255,0.94); line-height:1.5; margin:0 0 12px 0;
     text-shadow:0 1px 10px rgba(0,0,0,0.65);
   }
+  /* Text sits in its own soft shadow rather than relying on a heavy overall
+     scrim, which is what lets the photo stay bright. */
+  .home-greeting-text{ text-shadow:0 1px 12px rgba(8,14,26,0.75); }
   .home-greeting-actions{ display:flex; gap:8px; flex-wrap:wrap; }
   .home-greeting-btn{
     display:inline-flex; align-items:center; gap:6px; font-family:var(--sans);
@@ -390,15 +396,18 @@
   }
   .home-greeting-btn:hover{ background:rgba(255,255,255,0.26); }
   .home-greeting-btn svg{ width:13px; height:13px; }
+  /* The rotating quote now sits directly under the name on every screen
+     size, in place of the old generic "quick access" line — it's the more
+     interesting sentence, and it no longer gets dropped on phones. */
   .home-greeting-quote{
-    position:relative; flex-shrink:0; max-width:26ch; text-align:right;
-    font-family:var(--serif); font-size:13px; font-style:italic; line-height:1.55;
-    color:rgba(255,255,255,0.9); text-shadow:0 1px 8px rgba(0,0,0,0.45);
+    position:relative; margin:0 0 13px 0; max-width:38ch;
+    font-family:var(--serif); font-size:14px; font-style:italic; line-height:1.5;
+    color:#FFFFFF; text-shadow:0 1px 3px rgba(6,11,20,0.95), 0 2px 16px rgba(6,11,20,0.8);
   }
   @media (max-width:640px){
-    .home-greeting{ padding:22px 18px 18px 18px; min-height:200px; }
+    .home-greeting{ padding:22px 18px 18px 18px; min-height:228px; }
     .home-greeting-name{ font-size:27px; }
-    .home-greeting-quote{ display:none; }
+    .home-greeting-quote{ font-size:13.5px; max-width:30ch; }
   }
   .home-greeting-stats{
     display:flex; gap:26px; flex-shrink:0; position:relative; padding-right:6px;
@@ -9747,13 +9756,12 @@ function renderHome(){
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
         <h2 class="home-greeting-name">${firstName ? escapeHtml(firstName) + ' \u{1F44B}' : 'Welcome \u{1F44B}'}</h2>
-        <p class="home-greeting-sub">Quick access to your team tools, terminology, and resources.</p>
+        <p class="home-greeting-quote">${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
         <div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
           <button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>
         </div>
       </div>
-      <div class="home-greeting-quote">${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</div>
     </div>
 
     ${renderHomeSection('Quick Actions', '', '', quickActions)}
