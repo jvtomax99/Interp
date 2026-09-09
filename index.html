@@ -60,6 +60,15 @@
     --sh-2:0 1px 2px rgba(21,28,44,0.04), 0 8px 20px -8px rgba(21,28,44,0.14);
     --sh-3:0 8px 16px rgba(21,28,44,0.08), 0 28px 60px -12px rgba(21,28,44,0.22);
     --ease:cubic-bezier(.2,.8,.2,1);
+    /* Liquid-glass tokens. Real backdrop blur is reserved for the few fixed
+       chrome surfaces (header, tab bar, search, sheets) — blurring dozens of
+       scrolling cards would cost far more than it shows. Cards instead get
+       translucency plus a bright top edge, which is what actually reads as
+       glass once something is behind them. */
+    --glass-bg:rgba(255,255,255,0.72);
+    --glass-edge:rgba(255,255,255,0.75);
+    --glass-shade:rgba(21,28,44,0.10);
+    --glass-blur:saturate(180%) blur(20px);
     /* Inlined chevron used as a CSS mask so tile footers can render an
        arrow without every tile carrying another inline SVG node. */
     --chev-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
@@ -100,13 +109,22 @@
        keeps it stationary while content scrolls, so it reads as a surface the
        app sits on rather than something moving behind it. */
     background-color:var(--bg);
+    /* A soft colour mesh drawn from the Hackensack palette: four large,
+       very low-opacity pools that drift apart at the corners, plus a fine
+       grain on top. Kept fixed so it reads as a surface the app rests on
+       rather than something scrolling behind it, and it gives the glass
+       surfaces something worth blurring. Nothing repeats or tiles, so there
+       is no pattern for the eye to lock onto. */
     background-image:
-      radial-gradient(1200px 620px at 100% -10%, rgba(1,184,230,0.07) 0%, transparent 62%),
-      radial-gradient(1000px 560px at -10% 110%, rgba(37,46,109,0.05) 0%, transparent 62%),
-      url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2217%22%20height%3D%2217%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2026.5%2032.5%29%22%20fill%3D%22%23252E6D%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%2276%22%20y%3D%2212%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2081.0%2017.0%29%22%20fill%3D%22%23134A91%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22132%22%20y%3D%2240%22%20width%3D%2214%22%20height%3D%2214%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20139.0%2047.0%29%22%20fill%3D%22%230079BD%22%20opacity%3D%220.055%22%2F%3E%3Crect%20x%3D%22176%22%20y%3D%2296%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20181.5%20101.5%29%22%20fill%3D%22%2301B8E6%22%20opacity%3D%220.06%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2278%22%20width%3D%2212%22%20height%3D%2212%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2046.0%2084.0%29%22%20fill%3D%22%23252E6D%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%2296%22%20y%3D%2266%22%20width%3D%2216%22%20height%3D%2216%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20104.0%2074.0%29%22%20fill%3D%22%23134A91%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22150%22%20y%3D%22132%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20155.0%20137.0%29%22%20fill%3D%22%230079BD%22%20opacity%3D%220.055%22%2F%3E%3Crect%20x%3D%2224%22%20y%3D%22140%22%20width%3D%2213%22%20height%3D%2213%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2030.5%20146.5%29%22%20fill%3D%22%2301B8E6%22%20opacity%3D%220.06%22%2F%3E%3Crect%20x%3D%2268%22%20y%3D%22168%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2073.5%20173.5%29%22%20fill%3D%22%23252E6D%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22118%22%20y%3D%22178%22%20width%3D%2215%22%20height%3D%2215%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20125.5%20185.5%29%22%20fill%3D%22%23134A91%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22186%22%20y%3D%22168%22%20width%3D%229%22%20height%3D%229%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20190.5%20172.5%29%22%20fill%3D%22%230079BD%22%20opacity%3D%220.055%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%22108%22%20width%3D%229%22%20height%3D%229%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2012.5%20112.5%29%22%20fill%3D%22%2301B8E6%22%20opacity%3D%220.06%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat:no-repeat, no-repeat, repeat;
-    background-attachment:fixed, fixed, fixed;
-    background-size:auto, auto, 200px 200px;
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E"),
+      radial-gradient(900px 700px at 88% -6%,  rgba(1,184,230,0.10) 0%, transparent 60%),
+      radial-gradient(760px 620px at 6% 12%,   rgba(37,46,109,0.06) 0%, transparent 62%),
+      radial-gradient(880px 700px at 96% 62%,  rgba(0,121,189,0.06) 0%, transparent 62%),
+      radial-gradient(1000px 780px at -8% 104%, rgba(1,184,230,0.07) 0%, transparent 64%);
+    background-repeat:repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+    background-attachment:fixed, fixed, fixed, fixed, fixed;
+    background-size:160px 160px, auto, auto, auto, auto;
+    background-blend-mode:overlay, normal, normal, normal, normal;
   }
   /* Global top bar: one slim row holding search, quick actions, and the
      brand. Replaces the old stacked logo banner + illustrated greeter strip,
@@ -120,7 +138,15 @@
     height:calc(64px + env(safe-area-inset-top, 0px));
     padding-top:env(safe-area-inset-top, 0px);
     display:flex; align-items:center; gap:14px; padding-left:18px; padding-right:18px;
-    background:var(--paper); border-bottom:1px solid var(--line);
+    background:var(--glass-bg);
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border-bottom:1px solid var(--glass-edge);
+    box-shadow:0 1px 0 var(--glass-shade);
+  }
+  /* Older engines without backdrop-filter get an opaque bar rather than a
+     see-through one that would make the text unreadable. */
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .topbar-global{ background:var(--paper); }
   }
   /* Back sits left of the brand and only appears when there's history to
      unwind, so Home doesn't show a dead control. */
@@ -572,8 +598,11 @@
     display:flex; align-items:center; gap:11px; width:100%;
     position:relative; z-index:5;
     margin:-46px 0 18px 0; padding:0 18px; height:54px; border-radius:16px;
-    background:var(--paper); border:none;
-    box-shadow:0 8px 24px -8px rgba(21,28,44,0.28), 0 2px 6px -2px rgba(21,28,44,0.16);
+    background:var(--glass-bg);
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-edge);
+    box-shadow:0 8px 24px -8px rgba(21,28,44,0.28), 0 2px 6px -2px rgba(21,28,44,0.16),
+               inset 0 1px 0 rgba(255,255,255,0.6);
     cursor:pointer; text-align:left;
     font-family:var(--sans); font-size:14px; color:var(--ink-faint);
     transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
@@ -636,7 +665,10 @@
   .qa-tile{
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
     padding:16px 6px 14px 6px; border-radius:16px; cursor:pointer; border:none;
-    background:var(--tile-tint); box-shadow:inset 0 0 0 1px var(--tile-edge);
+    background:var(--tile-tint);
+    box-shadow:inset 0 0 0 1px var(--tile-edge),
+               inset 0 1px 0 rgba(255,255,255,0.6),
+               0 1px 2px rgba(21,28,44,0.04);
     font-family:inherit; min-height:104px;
     transition:transform .18s var(--ease), box-shadow .2s var(--ease);
   }
@@ -707,7 +739,9 @@
   .home-tile{
     background:var(--tile-tint); border:none; border-radius:var(--r-lg);
     padding:16px 15px 14px 15px; text-align:left; cursor:pointer;
-    box-shadow:inset 0 0 0 1px var(--tile-edge);
+    box-shadow:inset 0 0 0 1px var(--tile-edge),
+               inset 0 1px 0 rgba(255,255,255,0.55),
+               0 1px 2px rgba(21,28,44,0.04);
     transition:transform .18s var(--ease), box-shadow .2s var(--ease);
     animation:tileIn .45s var(--ease) both; display:flex; flex-direction:column; gap:9px;
     font-family:inherit; min-height:138px; position:relative;
@@ -807,7 +841,9 @@
   .domain-family{
     display:flex; flex-direction:column;
     background:var(--tile-tint); border-radius:var(--r-lg);
-    box-shadow:inset 0 0 0 1px var(--tile-edge);
+    box-shadow:inset 0 0 0 1px var(--tile-edge),
+               inset 0 1px 0 rgba(255,255,255,0.55),
+               0 1px 2px rgba(21,28,44,0.04);
     animation:tileIn .45s var(--ease) both; overflow:hidden;
   }
   .domain-family-head{
@@ -900,6 +936,24 @@
   /* In dark mode the pale tints computed from domain colors would sit almost
      invisibly on the dark surface, so tiles fall back to the raised panel
      color and lean on the colored icon and edge for identity instead. */
+  /* The light mesh would read as haze on a dark surface, so dark mode gets
+     deeper, cooler pools at slightly higher opacity and a lighter touch of
+     grain. */
+  html[data-theme="dark"] body{
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E"),
+      radial-gradient(900px 700px at 88% -6%,  rgba(1,184,230,0.13) 0%, transparent 60%),
+      radial-gradient(760px 620px at 6% 12%,   rgba(78,110,200,0.10) 0%, transparent 62%),
+      radial-gradient(880px 700px at 96% 62%,  rgba(0,121,189,0.10) 0%, transparent 62%),
+      radial-gradient(1000px 780px at -8% 104%, rgba(1,184,230,0.09) 0%, transparent 64%);
+    background-blend-mode:soft-light, normal, normal, normal, normal;
+  }
+
+  html[data-theme="dark"]{
+    --glass-bg:rgba(28,36,54,0.66);
+    --glass-edge:rgba(255,255,255,0.14);
+    --glass-shade:rgba(0,0,0,0.34);
+  }
   html[data-theme="dark"] .home-tile,
   html[data-theme="dark"] .domain-group-tile::before,
   html[data-theme="dark"] .domain-group-tile::after{ background:var(--paper); }
@@ -925,8 +979,9 @@
   @media (max-width:900px){
     .tabbar{
       display:flex; position:fixed; left:0; right:0; bottom:0; z-index:60;
-      background:var(--paper);
-      border-top:1px solid var(--line);
+      background:var(--glass-bg);
+      -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+      border-top:1px solid var(--glass-edge);
       box-shadow:0 -4px 20px -8px rgba(21,28,44,0.18);
       padding:6px 4px calc(6px + env(safe-area-inset-bottom)) 4px;
     }
@@ -1639,6 +1694,7 @@
   }
   .overlay.show{display:flex;}
   .modal{
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
     background:var(--paper); border-radius:var(--r-lg); padding:28px 28px 22px 28px; width:100%; max-width:460px;
     box-shadow:var(--sh-3); animation:modalIn .22s var(--ease);
   }
