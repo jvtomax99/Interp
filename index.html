@@ -11613,8 +11613,24 @@ document.addEventListener('focusout', (e)=>{
    a failure here must never stop the app itself from working. */
 if('serviceWorker' in navigator && window.isSecureContext){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('./sw.js').catch(err=>{
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      // Check for a newer deploy on every launch and again periodically, so an
+      // installed PWA that gets suspended and resumed for days still picks up
+      // updates instead of sitting on whatever it had when first installed.
+      reg.update().catch(()=>{});
+      setInterval(()=> reg.update().catch(()=>{}), 60 * 60 * 1000);
+    }).catch(err=>{
       console.warn('Service worker registration failed:', err);
+    });
+
+    // When a new service worker takes control, the page is running old code
+    // against a new cache. Reload once (guarded, so it can't loop) so the
+    // person actually sees the version that was just deployed.
+    let swReloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+      if(swReloaded) return;
+      swReloaded = true;
+      window.location.reload();
     });
   });
   // Tapping a chat notification asks the app to jump straight to Team Chat.

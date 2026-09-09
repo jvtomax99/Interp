@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v2';
+const CACHE_VERSION = 'interpreter-hub-v4';
 const PRECACHE = [
   './',
   './index.html',
@@ -99,17 +99,24 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Static assets: cache-first, refreshed in the background.
+  /* Static assets: stale-while-revalidate.
+   *
+   * This used to be pure cache-first, which meant a replaced image (the hero
+   * photo, a logo) kept serving the old file forever unless CACHE_VERSION was
+   * bumped — and that's easy to forget on a deploy. Now the cached copy is
+   * returned immediately (so it's still instant, and still works offline) while
+   * a fresh copy is fetched in the background for next time. Worst case an
+   * updated image is one load behind instead of permanently stale. */
   event.respondWith(
     caches.match(req).then(hit => {
-      if (hit) return hit;
-      return fetch(req).then(res => {
+      const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
           const copy = res.clone();
           caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {});
         }
         return res;
-      });
+      }).catch(() => hit);
+      return hit || network;
     })
   );
 });
