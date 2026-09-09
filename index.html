@@ -359,7 +359,7 @@
   }
   .home-greeting-photo{
     position:absolute; inset:0; z-index:-2;
-    background:url('./hero.jpg') center 38% / cover no-repeat;
+    background:url('./hero.jpg') 62% 55% / cover no-repeat;
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
@@ -367,10 +367,17 @@
        Legibility now comes from a soft radial pool behind the text block
        plus per-element text-shadow, rather than dimming the whole image. */
     background:
-      radial-gradient(110% 135% at 0% 66%, rgba(8,14,26,0.94) 0%, rgba(8,14,26,0.80) 32%, rgba(8,14,26,0.40) 58%, rgba(8,14,26,0) 82%),
-      linear-gradient(180deg, rgba(8,14,26,0.10) 0%, rgba(8,14,26,0.06) 45%, rgba(8,14,26,0.38) 100%);
+      radial-gradient(52% 110% at -10% 62%, rgba(8,14,26,0.55) 0%, rgba(8,14,26,0.30) 40%, rgba(8,14,26,0) 76%),
+      linear-gradient(180deg, rgba(8,14,26,0.04) 0%, rgba(8,14,26,0.02) 45%, rgba(8,14,26,0.26) 100%);
   }
-  .home-greeting-text{ position:relative; max-width:34ch; }
+  /* The text sits on its own soft gradient panel. A photo-wide scrim bright
+     enough to beat sunlit brick would dim the whole hospital; this keeps the
+     darkening exactly where the words are and fades out before the sign. */
+  .home-greeting-text{
+    position:relative; max-width:34ch;
+    background:linear-gradient(100deg, rgba(8,14,26,0.88) 0%, rgba(8,14,26,0.70) 45%, rgba(8,14,26,0.32) 78%, rgba(8,14,26,0) 100%);
+    padding:16px 40px 16px 20px; margin:-16px 0 -16px -20px; border-radius:0 22px 22px 0;
+  }
   .home-greeting-eyebrow{
     font-family:var(--sans); font-size:11.5px; font-weight:650; letter-spacing:.04em;
     color:rgba(255,255,255,0.82); margin-bottom:2px;
@@ -402,7 +409,7 @@
   .home-greeting-quote{
     position:relative; margin:0 0 13px 0; max-width:38ch;
     font-family:var(--serif); font-size:14px; font-style:italic; line-height:1.5;
-    color:#FFFFFF; text-shadow:0 1px 3px rgba(6,11,20,0.95), 0 2px 16px rgba(6,11,20,0.8);
+    color:#FFFFFF; text-shadow:0 1px 2px rgba(6,11,20,1), 0 1px 10px rgba(6,11,20,0.95), 0 2px 22px rgba(6,11,20,0.7);
   }
   @media (max-width:640px){
     .home-greeting{ padding:22px 18px 18px 18px; min-height:228px; }
