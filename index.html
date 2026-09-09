@@ -2449,6 +2449,654 @@
     a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
   }
 </style>
+
+<style id="ih-v9-refinement">
+:root{
+  --v9-sidebar:#12385f;
+  --v9-sidebar-deep:#0c2c4f;
+  --v9-page:#f6f9fc;
+  --v9-blue:#1976d2;
+}
+.app{min-height:calc(100vh - 72px)!important;}
+.topbar-global{
+  height:72px!important;padding:0 28px!important;
+  background:linear-gradient(180deg,#eef8ff 0%,#fff 86%)!important;
+  box-shadow:0 1px 0 rgba(25,53,82,.06);
+}
+.tg-search{
+  height:42px!important;max-width:590px!important;border-radius:9px!important;
+  background:#fff!important;box-shadow:0 4px 14px rgba(31,68,105,.04);
+}
+.tg-logo{height:38px!important;max-width:180px;}
+.sidebar{
+  width:238px!important;top:72px!important;height:calc(100vh - 72px)!important;
+  padding:18px 0 12px!important;
+  background:
+    radial-gradient(circle at 15% 0%,rgba(36,124,207,.23),transparent 23%),
+    linear-gradient(180deg,var(--v9-sidebar),var(--v9-sidebar-deep))!important;
+}
+.main{max-width:none!important;width:100%!important;padding:0 34px 74px!important;background:transparent;}
+#content{width:min(1180px,100%);margin:0 auto;}
+
+.sidebar .brand{padding:6px 16px 18px!important;margin-bottom:4px!important;}
+.sidebar .brand-mark{margin-bottom:5px!important;}
+.sidebar .brand-glyph{width:43px!important;height:43px!important;border-radius:9px!important;box-shadow:none!important;}
+.sidebar .brand-title{
+  font-size:17px!important;line-height:1.05!important;-webkit-text-fill-color:#fff!important;
+  color:#fff!important;background:none!important;
+}
+.sidebar .brand-sub{
+  font-family:var(--sans)!important;text-transform:none!important;letter-spacing:0!important;
+  font-size:9px!important;color:#b9cce0!important;
+}
+.sidebar .hipaa-notice{display:none!important;}
+.side-nav{padding:0 10px!important;}
+.side-row{
+  min-height:37px;padding:7px 10px!important;border-radius:8px!important;gap:9px!important;
+  color:#c9d8e7!important;font-size:11.2px!important;
+}
+.side-row:hover{background:rgba(255,255,255,.07)!important;color:#fff!important;}
+.side-row.is-active{
+  background:linear-gradient(90deg,#1b74c9,#205d9e)!important;color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+}
+.side-row-icon{width:20px!important;height:20px!important;}
+.side-row-icon svg{width:18px!important;height:18px!important;}
+.side-row-count{color:#8fb0ca!important;font-size:9px!important;}
+.side-row-badge{min-width:18px!important;height:18px!important;font-size:9px!important;}
+.side-row.is-nested{
+  margin-left:29px!important;width:calc(100% - 29px)!important;min-height:29px!important;
+  padding:4px 8px!important;border-left:1px solid rgba(255,255,255,.19)!important;
+  border-radius:0 7px 7px 0!important;font-size:9.5px!important;color:#a9c2d7!important;
+}
+.side-row.is-nested .side-row-icon{display:none!important;}
+.side-label{
+  padding:14px 19px 6px!important;margin-top:4px;border-top:1px solid rgba(255,255,255,.11);
+  color:#76afe0!important;font-family:var(--sans)!important;font-size:8px!important;
+  letter-spacing:.15em!important;cursor:default!important;
+}
+.side-label svg{display:none!important;}
+.side-foot{padding:13px 13px 4px!important;}
+.side-foot-name{font-size:10px!important;}
+.side-foot-role{font-size:8px!important;}
+
+.home-greeting{
+  min-height:236px!important;margin:0 -34px 20px!important;padding:30px 30px 25px!important;
+  border-radius:0!important;box-shadow:none!important;
+}
+.home-greeting-photo{background-position:center 54%!important;}
+.home-greeting-scrim{
+  background:
+    linear-gradient(90deg,rgba(7,31,57,.79) 0%,rgba(7,31,57,.48) 34%,rgba(7,31,57,.12) 66%,rgba(7,31,57,.26) 100%),
+    linear-gradient(0deg,rgba(4,22,41,.42),rgba(4,22,41,.02) 65%)!important;
+}
+.home-greeting-brand{display:none!important;}
+.home-greeting-logo{right:31px!important;bottom:23px!important;height:29px!important;}
+.home-greeting-text{max-width:430px!important;}
+.home-greeting-eyebrow{
+  text-transform:uppercase;letter-spacing:.11em!important;font-size:10px!important;
+  font-weight:700!important;margin-bottom:4px!important;
+}
+.home-greeting-name{
+  font-size:48px!important;line-height:.98!important;letter-spacing:-.045em!important;margin-bottom:10px!important;
+}
+.home-greeting-quote{
+  font-family:var(--sans)!important;font-style:normal!important;font-size:11.5px!important;
+  max-width:305px!important;line-height:1.45!important;margin:0!important;
+}
+.home-greeting-actions{display:none!important;}
+
+.home-sec{margin-top:18px!important;}
+.home-sec-head{margin-bottom:9px!important;}
+.home-sec-head h3{font-size:17px!important;color:#14345d;}
+.home-sec-more{font-size:9.5px!important;}
+.home-rail{gap:11px!important;}
+
+.qa-card{
+  min-height:142px!important;border-radius:10px!important;padding:16px!important;
+  box-shadow:inset 0 0 0 1px rgba(37,76,112,.04)!important;
+}
+.qa-icon{width:42px!important;height:42px!important;display:flex;align-items:center;}
+.qa-icon svg{width:32px!important;height:32px!important;}
+.qa-title{font-size:12.5px!important;color:#15345c!important;}
+.qa-desc{font-size:9.7px!important;line-height:1.38!important;}
+.qa-go svg{width:14px!important;height:14px!important;}
+
+.domain-family{border-radius:10px!important;min-height:122px;overflow:visible!important;}
+.domain-family-head{min-height:105px!important;padding:14px!important;}
+.domain-family-head .home-tile-icon{width:38px!important;height:38px!important;}
+.domain-family-head .home-tile-icon svg{width:30px!important;height:30px!important;}
+.domain-family-head .home-tile-name{font-size:11.5px!important;}
+.domain-family-head .home-tile-count{font-size:8.8px!important;}
+.domain-family-kids{padding:0 10px 10px!important;gap:4px!important;}
+.domain-family-kid{padding:4px 8px!important;font-size:8px!important;background:rgba(255,255,255,.77)!important;}
+.domain-family-kid span{font-size:7px!important;}
+
+.study-section .home-rail{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+.study-section .qa-card{
+  min-height:88px!important;display:grid!important;grid-template-columns:38px minmax(0,1fr) 15px;
+  grid-template-rows:auto auto;column-gap:8px!important;row-gap:1px!important;align-items:center;
+  background:#fff!important;box-shadow:0 4px 14px rgba(37,72,108,.035),inset 0 0 0 1px #e4ebf2!important;
+}
+.study-section .qa-icon{grid-row:1/3;width:36px!important;height:36px!important;}
+.study-section .qa-icon svg{width:28px!important;height:28px!important;}
+.study-section .qa-title{grid-column:2;}
+.study-section .qa-desc{grid-column:2;}
+.study-section .qa-go{grid-column:3;grid-row:1/3;justify-content:center;}
+
+.home-two-col{gap:13px!important;}
+.home-feed{border-radius:10px!important;}
+.home-feed-row{min-height:52px;padding:10px 12px!important;}
+.home-feed-icon{width:31px!important;height:31px!important;border-radius:8px!important;}
+.home-feed-title{font-size:9.5px!important;}
+.home-feed-meta{font-size:7.8px!important;}
+.home-tip{
+  min-height:188px;border-radius:10px!important;
+  background:linear-gradient(145deg,#e4f4ff,#cfeaff)!important;
+}
+.home-tip-head{font-size:11.5px!important;color:#0e5ebc!important;}
+.home-tip-body{font-size:10px!important;color:#284f73!important;}
+.home-tip-foot{font-size:8.8px!important;color:#45657f!important;}
+
+.main > .topbar{margin-top:18px!important;top:80px!important;}
+
+@media(min-width:820px){
+  .study-section .home-rail{
+    grid-auto-flow:row!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    overflow:visible!important;margin:0!important;padding:0!important;
+  }
+}
+
+@media(max-width:900px){
+  .topbar-global{height:58px!important;padding:0 12px!important;}
+  .tg-logo{height:26px!important;}
+  .app{min-height:0!important;}
+  .main{padding:0 10px 24px!important;}
+  #content{width:100%;}
+  .home-greeting{
+    min-height:175px!important;margin:0 -10px 14px!important;padding:24px 16px 18px!important;
+  }
+  .home-greeting-name{font-size:37px!important;}
+  .home-greeting-quote{max-width:230px!important;font-size:9.5px!important;}
+  .home-greeting-logo{right:15px!important;bottom:14px!important;height:23px!important;}
+  .home-sec{margin-top:14px!important;}
+  .home-sec-head h3{font-size:14px!important;}
+  .home-rail{
+    grid-auto-columns:minmax(155px,72vw)!important;margin:0 -10px!important;padding:2px 10px 7px!important;
+  }
+  .qa-card{min-height:112px!important;}
+  .study-section .home-rail{
+    display:grid!important;grid-template-columns:1fr!important;grid-auto-flow:row!important;
+    overflow:visible!important;
+  }
+  .study-section .qa-card{min-height:66px!important;}
+  .home-two-col{grid-template-columns:1fr!important;}
+}
+html[data-theme="dark"] .home-sec-head h3{color:var(--ink)!important;}
+</style>
+
+
+<style id="ih-v10-complete-home">
+/* V10: bring back the richer component groupings without undoing V9's shell. */
+.home-feature-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.home-feature-grid.cols-2{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.home-feature-card{
+  min-height:98px;
+  border:1px solid #e2eaf2;
+  border-radius:10px;
+  background:#fff;
+  padding:13px;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) 16px;
+  align-items:center;
+  gap:9px;
+  text-align:left;
+  cursor:pointer;
+  font-family:inherit;
+  box-shadow:0 5px 16px rgba(35,70,106,.035);
+  transition:transform .16s var(--ease), box-shadow .16s var(--ease), border-color .16s var(--ease);
+}
+.home-feature-card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--sh-2);
+  border-color:color-mix(in srgb,var(--feature-color) 32%,#e2eaf2);
+}
+.home-feature-card:active{transform:scale(.985);}
+.home-feature-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--feature-color);
+  background:color-mix(in srgb,var(--feature-color) 12%,#fff);
+}
+.home-feature-icon svg{width:23px;height:23px;}
+.home-feature-copy{min-width:0;}
+.home-feature-title{
+  display:block;color:#17355d;font-size:11.3px;font-weight:700;line-height:1.2;
+}
+.home-feature-desc{
+  display:block;color:#71859a;font-size:8.4px;line-height:1.34;margin-top:3px;
+}
+.home-feature-arrow{color:#385c81;font-size:20px;line-height:1;}
+.home-feature-card.is-external .home-feature-arrow{font-size:15px;}
+
+.home-component-shell{
+  padding:14px;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 5px 16px rgba(35,70,106,.035), inset 0 0 0 1px #e5ecf3;
+}
+.home-component-head{
+  display:flex;align-items:center;gap:9px;margin-bottom:10px;
+}
+.home-component-head-icon{
+  width:33px;height:33px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--component-color);
+  background:color-mix(in srgb,var(--component-color) 12%,#fff);
+}
+.home-component-head-icon svg{width:20px;height:20px;}
+.home-component-head-copy{min-width:0;}
+.home-component-head-title{
+  display:block;color:#15345d;font-size:12.5px;font-weight:750;
+}
+.home-component-head-sub{
+  display:block;color:#7a8da0;font-size:8px;margin-top:2px;
+}
+.home-mini-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.home-mini-card{
+  min-height:66px;border:1px solid #e7edf3;border-radius:9px;background:#f9fbfd;
+  padding:9px;display:grid;grid-template-columns:31px minmax(0,1fr) 12px;align-items:center;gap:7px;
+  cursor:pointer;text-align:left;font-family:inherit;
+}
+.home-mini-card:hover{background:#fff;border-color:#d9e5ef;}
+.home-mini-icon{
+  width:30px;height:30px;border-radius:8px;background:#edf5fc;color:var(--mini-color);
+  display:flex;align-items:center;justify-content:center;
+}
+.home-mini-icon svg{width:18px;height:18px;}
+.home-mini-card strong{display:block;color:#17355d;font-size:9.2px;line-height:1.15;}
+.home-mini-card small{display:block;color:#7a8c9e;font-size:7.2px;line-height:1.25;margin-top:2px;}
+.home-mini-go{color:#466883;font-size:16px;}
+
+.home-section-note{
+  margin:-2px 0 9px;color:#7a8d9f;font-size:8.5px;line-height:1.4;
+}
+
+@media(max-width:1050px){
+  .home-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:900px){
+  .home-feature-grid,.home-feature-grid.cols-2{grid-template-columns:1fr;}
+  .home-feature-card{min-height:70px;}
+  .home-mini-list{grid-template-columns:1fr;}
+}
+html[data-theme="dark"] .home-feature-card,
+html[data-theme="dark"] .home-component-shell{
+  background:var(--paper);border-color:var(--line);
+}
+html[data-theme="dark"] .home-mini-card{background:var(--bg-hi);border-color:var(--line);}
+html[data-theme="dark"] .home-feature-title,
+html[data-theme="dark"] .home-component-head-title,
+html[data-theme="dark"] .home-mini-card strong{color:var(--ink);}
+</style>
+
+
+<style id="ih-v11-unified-sections">
+/* V11: all home sections now use the same card language as Medical Terminology. */
+.home-tool-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.home-tool-grid.cols-2{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.home-tool-grid.cols-3{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.home-tool-family{
+  min-height:122px;
+}
+.home-tool-family .domain-family-head{
+  min-height:122px!important;
+}
+.home-tool-family .home-tile-icon{
+  width:38px!important;
+  height:38px!important;
+}
+.home-tool-family .home-tile-icon svg{
+  width:30px!important;
+  height:30px!important;
+}
+.home-tool-family .home-tile-name{
+  font-size:11.5px!important;
+}
+.home-tool-family .home-tile-count{
+  font-size:8.8px!important;
+}
+.home-tool-family.external .home-tile-count::after{
+  -webkit-mask:none!important;
+  mask:none!important;
+  content:"↗"!important;
+  width:auto!important;height:auto!important;
+  background:none!important;
+  font-size:12px;
+  opacity:.65;
+}
+.home-tool-family .home-tile-count{
+  color:var(--ink-soft)!important;
+}
+.home-sec .home-section-note{
+  display:none!important;
+}
+@media(max-width:1050px){
+  .home-tool-grid,
+  .home-tool-grid.cols-2,
+  .home-tool-grid.cols-3{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:700px){
+  .home-tool-grid,
+  .home-tool-grid.cols-2,
+  .home-tool-grid.cols-3{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:6px!important;
+  }
+  .home-tool-family{
+    min-height:78px;
+  }
+  .home-tool-family .domain-family-head{
+    min-height:78px!important;
+    display:grid!important;
+    grid-template-columns:34px minmax(0,1fr) 20px;
+    grid-template-rows:auto auto;
+    column-gap:8px!important;
+    row-gap:1px!important;
+    align-items:center;
+  }
+  .home-tool-family .home-tile-icon{
+    grid-row:1/3;
+    width:32px!important;height:32px!important;
+  }
+  .home-tool-family .home-tile-icon svg{
+    width:24px!important;height:24px!important;
+  }
+  .home-tool-family .home-tile-name{
+    grid-column:2;
+    font-size:10.5px!important;
+  }
+  .home-tool-family .home-tile-count{
+    grid-column:2/4;
+    font-size:8px!important;
+  }
+}
+</style>
+
+
+<style id="ih-v12-section-rails">
+/* =========================================================
+   V12 — unified section rails
+   Every major home section now follows the Medical Terminology pattern:
+   title row + horizontally scrollable pastel cards.
+   ========================================================= */
+
+.home-sec{
+  margin-top:22px!important;
+}
+.home-sec-head{
+  align-items:center!important;
+  margin-bottom:11px!important;
+}
+.home-sec-head h3{
+  font-size:18px!important;
+  font-weight:750!important;
+  letter-spacing:-.02em!important;
+  color:#123b69!important;
+}
+.home-sec-more{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  color:#0f67b5!important;
+  text-decoration:none!important;
+}
+.home-sec-more::after{
+  content:"→";
+  font-size:15px;
+  line-height:1;
+}
+
+/* Shared rail: this is now the default for all major dashboard sections. */
+.home-section-rail{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(220px,1fr);
+  gap:12px;
+  overflow-x:auto;
+  overflow-y:visible;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:2px 1px 8px;
+  -webkit-overflow-scrolling:touch;
+}
+.home-section-rail::-webkit-scrollbar{display:none;}
+.home-section-rail > *{scroll-snap-align:start;}
+
+/* Unified pastel cards, deliberately matching Medical Terminology. */
+.section-family-card{
+  min-height:190px;
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--tile-tint);
+  box-shadow:inset 0 0 0 1px var(--tile-edge);
+  position:relative;
+}
+.section-family-card .home-tile{
+  min-height:190px!important;
+  border-radius:14px!important;
+  padding:18px 17px 15px!important;
+  gap:10px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.section-family-card .home-tile:hover{
+  transform:translateY(-3px)!important;
+  box-shadow:none!important;
+}
+.section-family-card .home-tile-icon{
+  width:42px!important;
+  height:42px!important;
+  margin-bottom:6px;
+}
+.section-family-card .home-tile-icon svg{
+  width:34px!important;
+  height:34px!important;
+}
+.section-family-card .home-tile-name{
+  font-size:14.5px!important;
+  font-weight:700!important;
+  line-height:1.28!important;
+  color:#17345d!important;
+  margin-bottom:auto!important;
+}
+.section-family-card .home-tile-count{
+  font-size:11px!important;
+  color:#61778d!important;
+  margin-top:10px!important;
+}
+.section-family-card.external .home-tile-count::after{
+  -webkit-mask:none!important;
+  mask:none!important;
+  content:"↗"!important;
+  background:none!important;
+  width:auto!important;
+  height:auto!important;
+  font-size:16px;
+  opacity:.55;
+}
+
+/* The quick action cards should visually participate in the same system too. */
+.home-quick-rail{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(220px,1fr);
+  gap:12px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:2px 1px 8px;
+  -webkit-overflow-scrolling:touch;
+}
+.home-quick-rail::-webkit-scrollbar{display:none;}
+.home-quick-rail > *{scroll-snap-align:start;}
+
+.home-quick-rail .qa-card{
+  min-height:190px!important;
+  border-radius:14px!important;
+  padding:18px 17px 15px!important;
+  gap:10px!important;
+  box-shadow:inset 0 0 0 1px var(--tile-edge)!important;
+}
+.home-quick-rail .qa-icon{
+  width:42px!important;
+  height:42px!important;
+  margin-bottom:6px!important;
+}
+.home-quick-rail .qa-icon svg{
+  width:34px!important;
+  height:34px!important;
+}
+.home-quick-rail .qa-title{
+  font-size:14.5px!important;
+  line-height:1.28!important;
+  color:#17345d!important;
+}
+.home-quick-rail .qa-desc{
+  font-size:11px!important;
+  line-height:1.45!important;
+  color:#61778d!important;
+  margin-top:2px!important;
+}
+.home-quick-rail .qa-go{
+  margin-top:auto!important;
+  justify-content:flex-end!important;
+}
+.home-quick-rail .qa-go svg{
+  width:17px!important;
+  height:17px!important;
+}
+
+/* Medical Terminology gets the exact same rail wrapper. */
+.home-medical-rail{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(220px,1fr);
+  gap:12px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:2px 1px 8px;
+  -webkit-overflow-scrolling:touch;
+}
+.home-medical-rail::-webkit-scrollbar{display:none;}
+.home-medical-rail > *{scroll-snap-align:start;}
+
+.home-medical-rail .domain-family{
+  min-height:190px!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+}
+.home-medical-rail .domain-family-head{
+  min-height:190px!important;
+  padding:18px 17px 15px!important;
+  gap:10px!important;
+}
+.home-medical-rail .domain-family-head .home-tile-icon{
+  width:42px!important;height:42px!important;
+}
+.home-medical-rail .domain-family-head .home-tile-icon svg{
+  width:34px!important;height:34px!important;
+}
+.home-medical-rail .domain-family-head .home-tile-name{
+  font-size:14.5px!important;
+  line-height:1.28!important;
+}
+.home-medical-rail .domain-family-head .home-tile-count{
+  font-size:11px!important;
+}
+.home-medical-rail .domain-family-kids{
+  display:none!important; /* keep the home cards visually clean like the screenshot */
+}
+
+/* Activity keeps its own list because it's content, not a destination section. */
+.home-two-col{
+  margin-top:2px;
+}
+
+/* Desktop still gets a rail language, but with more cards visible at once. */
+@media(min-width:980px){
+  .home-section-rail,
+  .home-quick-rail,
+  .home-medical-rail{
+    grid-auto-columns:minmax(210px,1fr);
+  }
+}
+
+/* Tablet / mobile: partial next card remains visible, matching the screenshot. */
+@media(max-width:900px){
+  .home-sec{
+    margin-top:20px!important;
+  }
+  .home-sec-head{
+    padding:0 4px!important;
+  }
+  .home-sec-head h3{
+    font-size:18px!important;
+  }
+  .home-sec-more{
+    font-size:10px!important;
+  }
+
+  .home-section-rail,
+  .home-quick-rail,
+  .home-medical-rail{
+    grid-auto-columns:74vw!important;
+    gap:10px!important;
+    margin:0 -10px!important;
+    padding:2px 10px 9px!important;
+  }
+
+  .section-family-card,
+  .home-quick-rail .qa-card,
+  .home-medical-rail .domain-family{
+    min-height:188px!important;
+  }
+  .section-family-card .home-tile,
+  .home-quick-rail .qa-card,
+  .home-medical-rail .domain-family-head{
+    min-height:188px!important;
+  }
+}
+
+html[data-theme="dark"] .home-sec-head h3{
+  color:var(--ink)!important;
+}
+</style>
+
 </head>
 <body>
 
@@ -8694,7 +9342,7 @@ function render(){
   // isolated: no sidebar, no other tiles competing for attention. Only Home
   // and "All domains" keep the full navigation visible, since those are the
   // two places meant for browsing around rather than reading one thing.
-  const isFocusedView = activeCategory !== 'home' && activeCategory !== 'all';
+  const isFocusedView = false; // V9: persistent desktop app shell; mobile CSS still hides sidebar.
 
   app.innerHTML = `
     ${isFocusedView ? '' : `
@@ -9873,54 +10521,79 @@ function sideNavHtml(){
   const unread = Math.max(0, CHAT_MESSAGES.length - lastSeenChatCount);
   const who = whoAmI();
   const initials = who ? initialsOf(who) : '';
+  const allTools = getToolTiles();
+  const allDomains = getDomainTiles();
+  const resourceDomain = allDomains.find(t=>t.id==='resources');
 
   const row = (t, opts) => {
     opts = opts || {};
-    const action = t.externalUrl ? `window.open('${t.externalUrl}','_blank')` : `setCategory('${t.id}')`;
+    const action = opts.action || (t.externalUrl ? `window.open('${t.externalUrl}','_blank','noopener')` : `setCategory('${t.id}')`);
     return `
       <button class="side-row ${opts.nested?'is-nested':''} ${activeCategory===t.id?'is-active':''}" onclick="${action}">
         <span class="side-row-icon">${t.icon}</span>
-        <span class="side-row-name">${escapeHtml(t.name)}</span>
+        <span class="side-row-name">${escapeHtml(opts.name || t.name)}</span>
         ${opts.badge ? `<span class="side-row-badge">${opts.badge>9?'9+':opts.badge}</span>` : ''}
         ${opts.chevron ? `<span class="side-row-chev">${ICON_CHEVRON_RIGHT}</span>`
           : (t.count===null||t.count===undefined ? '' : `<span class="side-row-count">${t.count}</span>`)}
       </button>`;
   };
 
-  const toolRows = getToolTiles().map(t => row(t, { badge: t.id==='chat' ? unread : 0 })).join('');
+  const toolById = id => allTools.find(t=>t.id===id);
+  const toolRow = (id, opts) => {
+    const t = toolById(id);
+    return t ? row(t, opts) : '';
+  };
 
-  // Subgroups (Breast Oncology under Oncology, etc.) render as indented rows
-  // beneath their parent. Without this they'd be reachable only from the
-  // "All domains" list, since every other surface shows top-level domains.
-  const allDomains = getDomainTiles();
-  const domainRows = allDomains.filter(t=>!t.parentId).map(parent => {
-    const kids = allDomains.filter(k => k.parentId === parent.id);
-    return row(parent, { chevron: true }) + kids.map(k => row(k, { chevron: true, nested: true })).join('');
+  const primaryRows = [
+    `<button class="side-row ${activeCategory==='home'?'is-active':''}" onclick="goHome()">
+      <span class="side-row-icon">${ICON_HOME}</span><span class="side-row-name">Home</span>
+    </button>`,
+    `<button class="side-row" onclick="openGlobalSearch()">
+      <span class="side-row-icon">${ICON_SEARCH}</span><span class="side-row-name">Search</span>
+    </button>`,
+    toolRow('translate'),
+    toolRow('doctor-research'),
+    toolRow('chat', { badge: unread }),
+    toolRow('events'),
+    toolRow('practice'),
+    toolRow('review'),
+    toolRow('doctor-directory'),
+    toolRow('providers', { name:'Provider Pictures' }),
+    toolRow('find-doctor'),
+    toolRow('medifind'),
+    toolRow('directory'),
+    toolRow('ethics'),
+    resourceDomain ? row(resourceDomain, { name:'Professional Resources' }) : '',
+    toolRow('userguide'),
+    toolRow('updates'),
+  ].join('');
+
+  const clinicalDomains = allDomains.filter(t=>t.id!=='resources');
+  const parents = clinicalDomains.filter(t=>!t.parentId);
+  const domainRows = parents.map(parent => {
+    const kids = clinicalDomains.filter(k => k.parentId === parent.id);
+    return row(parent, { chevron:true }) + kids.map(k => row(k, { nested:true })).join('');
   }).join('');
 
-  return `
-    <div class="side-nav">
-      <button class="side-row ${activeCategory==='home'?'is-active':''}" onclick="goHome()">
-        <span class="side-row-icon">${ICON_HOME}</span>
-        <span class="side-row-name">Home</span>
-      </button>
-      ${toolRows}
-    </div>
+  const orphanRows = clinicalDomains
+    .filter(t=>t.parentId && !parents.some(p=>p.id===t.parentId))
+    .map(t=>row(t, { nested:true }))
+    .join('');
 
-    <div class="side-label ${domainsCollapsed?'is-collapsed':''}" onclick="toggleDomainsCollapsed()" role="button" tabindex="0">
-      <span>Terminology</span>${ICON_CHEVRON_DOWN}
-    </div>
-    ${domainsCollapsed ? '' : `<div class="side-nav">
+  return `
+    <div class="side-nav">${primaryRows}</div>
+
+    <div class="side-label"><span>Terminology</span></div>
+    <div class="side-nav">
       ${domainRows}
+      ${orphanRows}
       <button class="side-row ${activeCategory==='all'?'is-active':''}" onclick="setCategory('all')">
-        <span class="side-row-icon">${ICON_LAYERS}</span>
-        <span class="side-row-name">View all domains</span>
+        <span class="side-row-icon">${ICON_LAYERS}</span><span class="side-row-name">View All Domains</span>
       </button>
       <button class="side-row" onclick="openAddDomainModal()">
-        <span class="side-row-icon">${ICON_PLUS}</span>
-        <span class="side-row-name">Add domain</span>
+        <span class="side-row-icon">${ICON_PLUS}</span><span class="side-row-name">Add Domain</span>
       </button>
-    </div>`}
+    </div>
 
     <div class="side-foot">
       <span class="side-foot-avatar">${escapeHtml(initials || '?')}</span>
@@ -9952,21 +10625,26 @@ function renderTabBar(){
 }
 
 function openMoreSheet(){
-  const tools = getToolTiles().filter(t=>t.id!=='medifind');
+  const tools = getToolTiles();
   const allDomains = getDomainTiles();
+  const resourceDomain = allDomains.find(t=>t.id==='resources');
+  const clinicalDomains = allDomains.filter(t=>t.id!=='resources');
   const row = (t, nested) => `
     <button class="domain-chip ${nested?'is-nested':''}" style="${tileVars(t.color)}" onclick="closeMoreSheet(); ${t.externalUrl ? `window.open('${t.externalUrl}','_blank')` : `setCategory('${t.id}')`}">
       <span class="domain-chip-icon">${t.icon}</span>
       <span class="domain-chip-name">${escapeHtml(t.name)}</span>
       ${t.count===null||t.count===undefined ? '' : `<span class="domain-chip-count">${t.count}</span>`}
     </button>`;
-  const domainRowsHtml = allDomains.filter(t=>!t.parentId).map(parent => {
-    const kids = allDomains.filter(k => k.parentId === parent.id);
+  const domainRowsHtml = clinicalDomains.filter(t=>!t.parentId).map(parent => {
+    const kids = clinicalDomains.filter(k => k.parentId === parent.id);
     return row(parent, false) + kids.map(k => row(k, true)).join('');
   }).join('');
   document.getElementById('moreSheetBody').innerHTML = `
     <div class="home-sec-head" style="margin-bottom:10px;"><h3>Tools</h3></div>
-    <div class="domain-group-children" style="margin-bottom:20px;">${tools.map(t=>row(t,false)).join('')}</div>
+    <div class="domain-group-children" style="margin-bottom:20px;">
+      ${tools.map(t=>row(t,false)).join('')}
+      ${resourceDomain ? row({...resourceDomain,name:'Professional Resources'},false) : ''}
+    </div>
     <div class="home-sec-head" style="margin-bottom:10px;"><h3>Terminology domains</h3>
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>`;
@@ -10011,80 +10689,106 @@ function qaCard(color, icon, title, desc, action){
 function renderHome(){
   const who = whoAmI();
   const firstName = who ? who.trim().split(/\s+/)[0] : '';
+  const allTools = getToolTiles();
+  const tool = id => allTools.find(t=>t.id===id);
+  const allDomainsRaw = getDomainTiles();
+  const resourceDomain = allDomainsRaw.find(t=>t.id==='resources');
 
-  const quickActions = [
-    qaCard('#2E8BD0', ICON_SWAP,   'Translate Term',  'Get medical terminology with context', `setCategory('translate')`),
-    qaCard('#7C6A9C', ICON_SPARK,  'Research Doctor', 'Find specialties and practice terms',   `setCategory('doctor-research')`),
-    qaCard('#35A97A', ICON_CHAT,   'Team Chat',       'Connect with your colleagues',          `setCategory('chat')`),
-    qaCard('#B08D2A', ICON_PLUS,   'Add Terminology', 'Share a new term with the team',        `setCategory('all')`),
+  const sectionCard = (id, meta, opts) => {
+    opts = opts || {};
+    const t = id==='resources' ? resourceDomain : tool(id);
+    if(!t) return '';
+    const color = opts.color || t.color || '#2E8BD0';
+    const name = opts.name || t.name;
+    const action = opts.action || (t.externalUrl
+      ? `window.open('${t.externalUrl}','_blank','noopener')`
+      : `setCategory('${t.id}')`);
+    return `
+      <div class="section-family-card ${t.externalUrl?'external':''}" style="${tileVars(color)}">
+        <button class="home-tile" style="${tileVars(color)}" onclick="${action}">
+          <span class="home-tile-icon">${t.icon}</span>
+          <span class="home-tile-name">${escapeHtml(name)}</span>
+          <span class="home-tile-count">${escapeHtml(meta)}</span>
+        </button>
+      </div>`;
+  };
+
+  const quickActions = `
+    <div class="home-quick-rail">
+      ${qaCard('#2E8BD0', ICON_SWAP,   'Translate Term',  'Get medical terminology with context', `setCategory('translate')`)}
+      ${qaCard('#7C6A9C', ICON_SPARK,  'Research Doctor', 'Find specialties and practice terms',   `setCategory('doctor-research')`)}
+      ${qaCard('#35A97A', ICON_CHAT,   'Team Chat',       'Connect with your colleagues',          `setCategory('chat')`)}
+      ${qaCard('#E58B3C', ICON_PLUS,   'Add Terminology', 'Share a new term with the team',        `openAddModal()`)}
+    </div>`;
+
+  const allDomainTiles = allDomainsRaw.filter(t => t.id !== 'resources');
+  const parents = allDomainTiles.filter(t => !t.parentId);
+  const preferred = ['oncology','cardiology','neurology','orthoped','gastro'];
+  const selected = [];
+  preferred.forEach(key=>{
+    const found = parents.find(t => (t.name||'').toLowerCase().includes(key));
+    if(found && !selected.some(x=>x.id===found.id)) selected.push(found);
+  });
+  parents.slice().sort((a,b)=>(b.count||0)-(a.count||0)).forEach(t=>{
+    if(selected.length<5 && !selected.some(x=>x.id===t.id)) selected.push(t);
+  });
+
+  const termCards = selected.slice(0,5).map((parent,i)=>{
+    const kids = allDomainTiles.filter(k=>k.parentId===parent.id);
+    const total = (parent.count||0) + kids.reduce((n,k)=>n+(k.count||0),0);
+    return `
+      <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*.03,.15).toFixed(2)}s">
+        <button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
+          <span class="home-tile-icon">${parent.icon}</span>
+          <span class="home-tile-name">${escapeHtml(parent.name)}</span>
+          <span class="home-tile-count">${total} ${total===1?'term':'terms'}${kids.length?` · ${kids.length} subdomains`:''}</span>
+        </button>
+      </div>`;
+  }).join('');
+
+  const aiCards = [
+    sectionCard('translate','Medical terminology + bilingual context'),
+    sectionCard('doctor-research','Specialty research + interpreter prep'),
   ].join('');
 
-  // The biggest domains lead the terminology rail — that's what people
-  // actually reach for, and the full set is one tap away via View all.
-  // A domain family renders as ONE unit: the parent card with its subgroups
-  // listed directly beneath it, inside the same rail cell. Previously each
-  // subgroup was its own card in the flow, so scrolling the rail could put
-  // "Breast Oncology" far from "Oncology" and it read as unrelated.
-  const allDomainTiles = getDomainTiles().filter(t => t.id !== 'resources');
-  const termCards = allDomainTiles
-    .filter(t => !t.parentId)
-    .sort((a,b) => (b.count||0) - (a.count||0))
-    .map((parent, i) => {
-      const kids = allDomainTiles.filter(k => k.parentId === parent.id)
-                                 .sort((a,b) => (b.count||0) - (a.count||0));
-      const totalTerms = (parent.count||0) + kids.reduce((n,k)=> n + (k.count||0), 0);
-      return `
-        <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
-          <button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
-            <span class="home-tile-icon">${parent.icon}</span>
-            <span class="home-tile-name">${escapeHtml(parent.name)}</span>
-            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
-          </button>
-          ${kids.length ? `<div class="domain-family-kids">
-            ${kids.map(k=>`
-              <button class="domain-family-kid" title="${escapeAttr(k.name)} \u00b7 ${k.count} terms" onclick="setCategory('${k.id}')">
-                ${escapeHtml(k.name)}<span>${k.count}</span>
-              </button>`).join('')}
-          </div>` : ''}
-        </div>`;
-    }).join('');
-
-  // The Tools grid used to live on Home and was lost in the redesign; these
-  // two sections put the doctor tooling and the remaining utilities back
-  // where they're reachable without opening the nav.
   const doctorCards = [
-    qaCard('#B08D2A', ICON_SPARK,  'Doctor Prep',        'AI research on a provider',     `setCategory('doctor-research')`),
-    qaCard('#7C6A9C', ICON_GRID,   'Doctor Directory',   'Saved doctors and their terms', `setCategory('doctor-directory')`),
-    qaCard('#6F97AC', ICON_PERSON, 'Provider Pictures',  'Put a face to a name',          `setCategory('providers')`),
-    qaCard('#2E8BD0', ICON_SEARCH, 'Find a Doctor',      'Hackensack Meridian directory', `window.open('https://www.hackensackmeridianhealth.org/en/doctors','_blank')`),
-  ].join('');
-
-  const utilityCards = [
-    qaCard('#8B7BAE', ICON_CHAIN,   'Link Directory',         'Every confirmed source link', `setCategory('directory')`),
-    qaCard('#5B7FBF', ICON_COMPASS, 'User Guide',             'How the app works',           `setCategory('userguide')`),
-    qaCard('#BFA05E', ICON_BELL,    'Recent Updates',         'What the team changed',       `setCategory('updates')`),
-    qaCard('#7FA173', ICON_LAYERS,  'Professional Resources', 'Reference material',          `setCategory('resources')`),
+    sectionCard('doctor-directory','Saved doctors, specialties, locations'),
+    sectionCard('providers','Provider photos + identifying details',{name:'Provider Pictures'}),
+    sectionCard('find-doctor','Hackensack Meridian physician directory'),
+    sectionCard('medifind','Find specialists using MediFind'),
   ].join('');
 
   const studyCards = [
-    qaCard('#0F5FA6', ICON_EXAM,     'CoreCHI Practice', 'Practice for certification',   `setCategory('practice')`),
-    qaCard('#4E9E74', ICON_REVIEW,   'Term Review',      'Study and reinforce',          `setCategory('review')`),
-    qaCard('#2F5D62', ICON_SHIELD,   'Code of Ethics',   'Key principles and conduct',   `setCategory('ethics')`),
-    qaCard('#35A97A', ICON_CALENDAR, 'Training & Events','Upcoming CE opportunities',    `setCategory('events')`),
+    sectionCard('practice','Certification practice questions'),
+    sectionCard('review','Spaced-repetition terminology review'),
+    sectionCard('ethics','NCIHC + CCHI ethics reference',{name:'Ethics & Standards'}),
+    sectionCard('events','Training + CE opportunities'),
+  ].join('');
+
+  const teamCards = [
+    sectionCard('chat','Team messages + @mentions'),
+    sectionCard('updates','Recent team changes + additions'),
+  ].join('');
+
+  const utilityCards = [
+    sectionCard('directory','Shared links + useful references'),
+    resourceDomain ? sectionCard('resources','Clinical + professional resources',{name:'Professional Resources'}) : '',
+    sectionCard('userguide','App walkthrough + feature guide'),
+    sectionCard('events','Training calendar + continuing education',{name:'Training & Events'}),
   ].join('');
 
   const recent = ACTIVITY.slice(-4).reverse();
   const feedHtml = recent.length
-    ? recent.map(a => `
-        <button class="home-feed-row" onclick="setCategory('updates')">
-          <span class="home-feed-icon">${ICON_BELL}</span>
-          <span class="home-feed-main">
-            <span class="home-feed-title">${escapeHtml(a.author || 'Someone')} ${escapeHtml(a.summary || '')}</span>
-            <span class="home-feed-meta" data-ts="${a.timestamp || ''}">${relativeTime(a.timestamp)}</span>
-          </span>
-          <span class="home-feed-go">${ICON_ARROW_RIGHT}</span>
-        </button>`).join('')
-    : `<div style="padding:20px 16px; font-size:13px; color:var(--ink-soft); line-height:1.5;">No team activity yet. Add a term or send a chat message to get things moving.</div>`;
+    ? recent.map(a=>`
+      <button class="home-feed-row" onclick="setCategory('updates')">
+        <span class="home-feed-icon">${ICON_BELL}</span>
+        <span class="home-feed-main">
+          <span class="home-feed-title">${escapeHtml(a.author||'Team member')} ${escapeHtml(a.summary||'updated Interpreter Hub')}</span>
+          <span class="home-feed-meta" data-ts="${a.timestamp||''}">${relativeTime(a.timestamp)}</span>
+        </span>
+        <span class="home-feed-go">${ICON_ARROW_RIGHT}</span>
+      </button>`).join('')
+    : `<div style="padding:20px 16px;font-size:12px;color:var(--ink-soft);">No recent team activity yet.</div>`;
 
   const tip = INTERPRETER_TIPS[Math.floor(Math.random()*INTERPRETER_TIPS.length)];
 
@@ -10092,34 +10796,56 @@ function renderHome(){
     <div class="home-greeting">
       <div class="home-greeting-photo"></div>
       <div class="home-greeting-scrim"></div>
-      <div class="home-greeting-brand">
-        <span class="home-greeting-brandmark">
-          <span class="home-greeting-brandname">Interpreter Hub</span>
-          <span class="home-greeting-brandsub">Hackensack University Medical Center</span>
-        </span>
-      </div>
       <img class="home-greeting-logo" src="./hmh-logo-white.png" alt="Hackensack Meridian Health">
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
-        <h2 class="home-greeting-name">${firstName ? escapeHtml(firstName) + ' \u{1F44B}' : 'Welcome \u{1F44B}'}</h2>
-        <p class="home-greeting-quote">${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
-        <div class="home-greeting-actions">
-          ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
-          <button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>
-        </div>
+        <h2 class="home-greeting-name">${firstName ? escapeHtml(firstName)+' 👋' : 'Welcome 👋'}</h2>
+        <p class="home-greeting-quote">Quick access to your team tools, terminology, and resources.</p>
       </div>
     </div>
 
-    ${renderHomeSection('Quick Actions', '', '', quickActions)}
-    ${renderHomeSection('Medical Terminology', 'View all', `setCategory('all')`, termCards)}
-    ${renderHomeSection('Doctors', '', '', doctorCards)}
-    ${renderHomeSection('Study & Professional Development', '', '', studyCards)}
-    ${renderHomeSection('Tools & Reference', '', '', utilityCards)}
+    <section class="home-sec">
+      <div class="home-sec-head"><h3>Quick Actions</h3></div>
+      ${quickActions}
+    </section>
+
+    <section class="home-sec">
+      <div class="home-sec-head">
+        <h3>Medical Terminology</h3>
+        <button class="home-sec-more" onclick="setCategory('all')">View All</button>
+      </div>
+      <div class="home-medical-rail">${termCards}</div>
+    </section>
+
+    <section class="home-sec">
+      <div class="home-sec-head"><h3>AI Tools</h3></div>
+      <div class="home-section-rail">${aiCards}</div>
+    </section>
+
+    <section class="home-sec">
+      <div class="home-sec-head"><h3>Doctors</h3></div>
+      <div class="home-section-rail">${doctorCards}</div>
+    </section>
+
+    <section class="home-sec">
+      <div class="home-sec-head"><h3>Study & Professional Development</h3></div>
+      <div class="home-section-rail">${studyCards}</div>
+    </section>
+
+    <section class="home-sec">
+      <div class="home-sec-head"><h3>Team & Collaboration</h3></div>
+      <div class="home-section-rail">${teamCards}</div>
+    </section>
+
+    <section class="home-sec">
+      <div class="home-sec-head"><h3>Utilities & Resources</h3></div>
+      <div class="home-section-rail">${utilityCards}</div>
+    </section>
 
     <section class="home-sec">
       <div class="home-sec-head">
         <h3>Recent Team Activity</h3>
-        ${ACTIVITY.length ? `<button class="home-sec-more" onclick="setCategory('updates')">View all \u2192</button>` : ''}
+        ${ACTIVITY.length ? `<button class="home-sec-more" onclick="setCategory('updates')">View All</button>` : ''}
       </div>
       <div class="home-two-col">
         <div class="home-feed">${feedHtml}</div>
