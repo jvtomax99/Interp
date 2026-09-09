@@ -111,9 +111,15 @@
   /* Global top bar: one slim row holding search, quick actions, and the
      brand. Replaces the old stacked logo banner + illustrated greeter strip,
      which together consumed ~170px of every screen before any content. */
+  /* Installed as a PWA there's no browser chrome, so the page starts at the
+     very top of the screen and the header would sit underneath the clock and
+     battery. The top safe-area inset is added as padding (it's 0 in a normal
+     browser tab, so this is harmless there). */
   .topbar-global{
-    position:sticky; top:0; z-index:30; height:64px; flex-shrink:0;
-    display:flex; align-items:center; gap:14px; padding:0 18px;
+    position:sticky; top:0; z-index:30; flex-shrink:0;
+    height:calc(64px + env(safe-area-inset-top, 0px));
+    padding-top:env(safe-area-inset-top, 0px);
+    display:flex; align-items:center; gap:14px; padding-left:18px; padding-right:18px;
     background:var(--paper); border-bottom:1px solid var(--line);
   }
   /* Back sits left of the brand and only appears when there's history to
@@ -190,7 +196,11 @@
   @media (max-width:520px){ .tg-sync span:not(.tg-sync-dot){ display:none; } .tg-sync{ padding:0 8px; } }
   .tg-logo{ height:34px; width:auto; object-fit:contain; display:block; }
   @media (max-width:900px){
-    .topbar-global{ height:58px; padding:0 14px; gap:10px; }
+    .topbar-global{
+      height:calc(58px + env(safe-area-inset-top, 0px));
+      padding-top:env(safe-area-inset-top, 0px);
+      padding-left:14px; padding-right:14px; gap:10px;
+    }
     .tg-search-btn{ display:none; }
     .tg-logo{ height:26px; }
     .tg-icon-btn{ width:34px; height:34px; }
@@ -203,12 +213,12 @@
     .tg-brand{ gap:9px; }
     .tg-brand-name{ font-size:14.5px; }
     .tg-brand-sub{ font-size:9.5px; }
-    .topbar-global{ gap:8px; padding:0 12px; }
+    .topbar-global{ gap:8px; padding-left:12px; padding-right:12px; }
     .tg-icon-btn{ width:32px; height:32px; }
     .tg-icon-btn svg{ width:16px; height:16px; }
     .tg-avatar{ width:32px; height:32px; font-size:11.5px; }
   }
-  .app{display:flex; min-height:calc(100vh - 64px);}
+  .app{display:flex; min-height:calc(100vh - 64px - env(safe-area-inset-top, 0px));}
   ::-webkit-scrollbar{width:10px; height:10px;}
   ::-webkit-scrollbar-thumb{background:#DEDACB; border-radius:8px; border:2px solid transparent; background-clip:padding-box;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -217,7 +227,7 @@
   /* Dark navy sidebar — the nav is chrome, not content, so it recedes
      behind the light working area instead of competing with it. */
   .sidebar{
-    width:262px; flex-shrink:0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto;
+    width:262px; flex-shrink:0; position:sticky; top:calc(64px + env(safe-area-inset-top, 0px)); height:calc(100vh - 64px - env(safe-area-inset-top, 0px)); overflow-y:auto;
     background:#16213C;
     border-right:none; padding:18px 0 12px 0;
     display:flex; flex-direction:column; gap:2px;
