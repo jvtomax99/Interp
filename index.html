@@ -765,6 +765,37 @@
   }
   .home-tile:hover .home-tile-count::after{ transform:translateX(3px); }
 
+  /* A domain-family head with subgroups splits into two independent click
+     targets: the icon/name jump straight to the combined view (as before),
+     while the count/chevron footer opens a picker for a single subgroup
+     instead of forcing every subgroup's terms to render at once — that
+     full-family render is what was crashing mobile Safari on large
+     families like Oncology. Both are real <button> elements sitting inside
+     the same styled div rather than the old single outer <button>. */
+  .domain-family-head-main{
+    background:none; border:none; padding:0; margin:0; text-align:left;
+    font:inherit; color:inherit; cursor:pointer; width:100%;
+    display:flex; flex-direction:column; gap:9px; flex:1;
+  }
+  .domain-family-count-btn{
+    background:none; border:none; padding:0; margin:0; text-align:left;
+    font:inherit; cursor:pointer; width:100%;
+  }
+  .subgroup-picker-hint{ font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin:0 0 14px 0; }
+  .subgroup-picker-list{
+    display:flex; flex-direction:column; border-radius:var(--r-md); overflow:hidden;
+    box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .subgroup-picker-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 14px; background:var(--paper); border:none; cursor:pointer;
+    font-family:inherit; text-align:left; transition:background .15s var(--ease);
+  }
+  .subgroup-picker-row + .subgroup-picker-row{ border-top:1px solid var(--line-soft); }
+  .subgroup-picker-row:hover{ background:var(--bg-hi); }
+  .subgroup-picker-name{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .subgroup-picker-count{ font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); flex-shrink:0; }
+
   /* In dark mode the pale tints computed from domain colors would sit almost
      invisibly on the dark surface, so tiles fall back to the raised panel
      color and lean on the colored icon and edge for identity instead. */
@@ -2592,6 +2623,10 @@
 
 <div class="overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
   <div class="modal" id="doctorDirDetailModal" style="max-width:520px;"></div>
+</div>
+
+<div class="overlay" id="subgroupPickerOverlay" onclick="if(event.target===this) closeSubgroupPicker()">
+  <div class="modal" id="subgroupPickerModal" style="max-width:420px;"></div>
 </div>
 
 <div class="overlay more-sheet-overlay" id="moreSheetOverlay" onclick="if(event.target===this) closeMoreSheet()">
@@ -9890,13 +9925,27 @@ function renderHome(){
       const kids = allDomainTiles.filter(k => k.parentId === parent.id)
                                  .sort((a,b) => (b.count||0) - (a.count||0));
       const totalTerms = (parent.count||0) + kids.reduce((n,k)=> n + (k.count||0), 0);
-      return `
-        <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
-          <button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
+      // A domain with no subgroups keeps the original single-button card —
+      // there's nothing to pick between, so it should still jump straight
+      // to the domain on any tap.
+      const headHtml = kids.length
+        ? `<div class="home-tile domain-family-head" style="${tileVars(parent.color)}">
+            <button class="domain-family-head-main" onclick="setCategory('${parent.id}')">
+              <span class="home-tile-icon">${parent.icon}</span>
+              <span class="home-tile-name">${escapeHtml(parent.name)}</span>
+            </button>
+            <button class="home-tile-count domain-family-count-btn" title="Choose a subgroup to view" onclick="event.stopPropagation(); openSubgroupPicker('${parent.id}')">
+              ${totalTerms} ${totalTerms===1?'term':'terms'} \u00b7 ${kids.length} sub
+            </button>
+          </div>`
+        : `<button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
             <span class="home-tile-icon">${parent.icon}</span>
             <span class="home-tile-name">${escapeHtml(parent.name)}</span>
-            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
-          </button>
+            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}</span>
+          </button>`;
+      return `
+        <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
+          ${headHtml}
           ${kids.length ? `<div class="domain-family-kids">
             ${kids.map(k=>`
               <button class="domain-family-kid" title="${escapeAttr(k.name)} \u00b7 ${k.count} terms" onclick="setCategory('${k.id}')">
@@ -10116,6 +10165,41 @@ function openDoctorDirDetail(id){
   if(!d) return;
   document.getElementById('doctorDirDetailModal').innerHTML = renderDoctorDirDetail(d);
   document.getElementById('doctorDirDetailOverlay').classList.add('show');
+}
+
+function closeSubgroupPicker(){
+  document.getElementById('subgroupPickerOverlay').classList.remove('show');
+}
+
+// Lets someone pick a single subgroup (or "all of X") from a parent domain
+// that has several, instead of always loading every subgroup's terms in
+// one combined page — that full-family render was the crash on mobile
+// Safari for large families like Oncology.
+function openSubgroupPicker(parentId){
+  const parent = DATA.categories.find(c => c.id === parentId);
+  if(!parent) return;
+  const kids = DATA.categories.filter(c => c.parentId === parentId)
+                               .sort((a,b) => (b.terms.length||0) - (a.terms.length||0));
+  if(!kids.length){ setCategory(parentId); return; }
+  const totalTerms = parent.terms.length + kids.reduce((n,k)=> n + k.terms.length, 0);
+  const html = `
+    <button class="dd-detail-close" title="Close" onclick="closeSubgroupPicker()">✕</button>
+    <h3 style="margin:0 0 4px 0;">${escapeHtml(parent.name)}</h3>
+    <p class="subgroup-picker-hint">${totalTerms} term${totalTerms===1?'':'s'} across ${kids.length+1} sections. Pick one to jump straight there.</p>
+    <div class="subgroup-picker-list">
+      <button class="subgroup-picker-row" onclick="closeSubgroupPicker(); setCategory('${parent.id}')">
+        <span class="subgroup-picker-name">All of ${escapeHtml(parent.name)}</span>
+        <span class="subgroup-picker-count">${totalTerms}</span>
+      </button>
+      ${kids.map(k => `
+        <button class="subgroup-picker-row" onclick="closeSubgroupPicker(); setCategory('${k.id}')">
+          <span class="subgroup-picker-name">${escapeHtml(k.name)}</span>
+          <span class="subgroup-picker-count">${k.terms.length}</span>
+        </button>`).join('')}
+    </div>
+  `;
+  document.getElementById('subgroupPickerModal').innerHTML = html;
+  document.getElementById('subgroupPickerOverlay').classList.add('show');
 }
 
 // Jumps to the Doctor Prep screen with the name/specialty/location already
