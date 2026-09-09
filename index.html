@@ -405,51 +405,37 @@
     position:relative; padding:34px 48px 74px 48px;
     margin:-40px -48px 0 -48px;
     border-radius:0; overflow:hidden; isolation:isolate;
-    background:#2A3C5C;
-    box-shadow:var(--sh-2);
+    background:transparent;
+    /* No box-shadow. It outlines the element's box regardless of how
+       transparent the content inside is, so it drew a crisp edge right where
+       the photo had faded to nothing — that was the line that survived every
+       attempt to fix the fade itself. */
+    box-shadow:none;
     /* Column now: brand row pinned to the top, greeting block to the bottom. */
     display:flex; flex-direction:column; align-items:stretch; gap:14px;
     min-height:232px;
-  }
-  /* The page surface curving up over the bottom of the photo. */
-  .home-greeting::after{
-    content:''; position:absolute; left:-1px; right:-1px; bottom:-1px; height:30px;
-    border-radius:30px 30px 0 0; z-index:2; pointer-events:none;
-    /* Must carry the page's own background layers, not a flat fill. A solid
-       colour here covered the fixed diamond texture and showed up as a pale
-       patch with a hard edge either side of the search card. Because the
-       texture is background-attachment:fixed, reusing it lines the pattern up
-       with the page exactly. */
-    background-color:var(--bg);
-    background-image:
-      radial-gradient(1200px 620px at 100% -10%, rgba(1,184,230,0.07) 0%, transparent 62%),
-      radial-gradient(1000px 560px at -10% 110%, rgba(37,46,109,0.05) 0%, transparent 62%),
-      url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2217%22%20height%3D%2217%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2026.5%2032.5%29%22%20fill%3D%22%23252E6D%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%2276%22%20y%3D%2212%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2081.0%2017.0%29%22%20fill%3D%22%23134A91%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22132%22%20y%3D%2240%22%20width%3D%2214%22%20height%3D%2214%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20139.0%2047.0%29%22%20fill%3D%22%230079BD%22%20opacity%3D%220.055%22%2F%3E%3Crect%20x%3D%22176%22%20y%3D%2296%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20181.5%20101.5%29%22%20fill%3D%22%2301B8E6%22%20opacity%3D%220.06%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%2278%22%20width%3D%2212%22%20height%3D%2212%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2046.0%2084.0%29%22%20fill%3D%22%23252E6D%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%2296%22%20y%3D%2266%22%20width%3D%2216%22%20height%3D%2216%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20104.0%2074.0%29%22%20fill%3D%22%23134A91%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22150%22%20y%3D%22132%22%20width%3D%2210%22%20height%3D%2210%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20155.0%20137.0%29%22%20fill%3D%22%230079BD%22%20opacity%3D%220.055%22%2F%3E%3Crect%20x%3D%2224%22%20y%3D%22140%22%20width%3D%2213%22%20height%3D%2213%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2030.5%20146.5%29%22%20fill%3D%22%2301B8E6%22%20opacity%3D%220.06%22%2F%3E%3Crect%20x%3D%2268%22%20y%3D%22168%22%20width%3D%2211%22%20height%3D%2211%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2073.5%20173.5%29%22%20fill%3D%22%23252E6D%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22118%22%20y%3D%22178%22%20width%3D%2215%22%20height%3D%2215%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20125.5%20185.5%29%22%20fill%3D%22%23134A91%22%20opacity%3D%220.05%22%2F%3E%3Crect%20x%3D%22186%22%20y%3D%22168%22%20width%3D%229%22%20height%3D%229%22%20rx%3D%222%22%20transform%3D%22rotate%2845%20190.5%20172.5%29%22%20fill%3D%22%230079BD%22%20opacity%3D%220.055%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%22108%22%20width%3D%229%22%20height%3D%229%22%20rx%3D%222%22%20transform%3D%22rotate%2845%2012.5%20112.5%29%22%20fill%3D%22%2301B8E6%22%20opacity%3D%220.06%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat:no-repeat, no-repeat, repeat;
-    background-attachment:fixed, fixed, fixed;
-    background-size:auto, auto, 200px 200px;
-  }
-  /* And a soft dissolve just above it, so the image melts into the page
-     instead of stopping at a line. */
-  .home-greeting::before{
-    content:''; position:absolute; left:0; right:0; bottom:0; height:66px;
-    /* Plain two-stop fade first, for Safari older than 16.4 which lacks
-       color-mix() and would drop the whole declaration otherwise. */
-    background:linear-gradient(to bottom, rgba(0,0,0,0) 0%, var(--bg) 100%);
-    background:linear-gradient(to bottom,
-      rgba(0,0,0,0) 0%,
-      color-mix(in srgb, var(--bg) 45%, transparent) 55%,
-      var(--bg) 100%);
-    z-index:1; pointer-events:none;
   }
   /* Keep the greeting above both. */
   .home-greeting-text, .home-greeting-brand{ z-index:3; }
   .home-greeting-photo{
     position:absolute; inset:0; z-index:-2;
     background:url('./hero.jpg') 62% 55% / cover no-repeat;
+    /* Concave instead of convex: the transparent area is a dome rising from
+       the bottom centre, so the page sweeps UP into the photo and the image
+       persists at the two bottom corners. A plain vertical fade with rounded
+       corners did the reverse — the photo curved away from the page. Still an
+       alpha mask, so nothing is painted and there's no edge to see. */
+    -webkit-mask-image:radial-gradient(128% 46% at 50% 104%,
+      rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
+            mask-image:radial-gradient(128% 46% at 50% 104%,
+      rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
+    -webkit-mask-image:radial-gradient(128% 46% at 50% 104%,
+      rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
+            mask-image:radial-gradient(128% 46% at 50% 104%,
+      rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
     /* Much lighter than before so the hospital actually reads as a photo.
        Legibility now comes from a soft radial pool behind the text block
        plus per-element text-shadow, rather than dimming the whole image. */
