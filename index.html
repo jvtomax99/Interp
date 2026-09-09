@@ -3194,6 +3194,95 @@ html[data-theme="dark"] .home-sec-head h3{
 }
 </style>
 
+
+<style id="ih-v14-collapsed-smaller-domains">
+/* Smaller Medical Terminology cards */
+.home-medical-rail{
+  grid-auto-columns:minmax(170px,1fr)!important;
+  gap:9px!important;
+}
+.home-medical-rail .domain-family{
+  min-height:145px!important;
+  border-radius:11px!important;
+}
+.home-medical-rail .domain-family-head{
+  min-height:145px!important;
+  padding:13px 13px 11px!important;
+  gap:7px!important;
+}
+.home-medical-rail .domain-family-head .home-tile-icon{
+  width:27px!important;
+  height:27px!important;
+  margin-bottom:2px!important;
+}
+.home-medical-rail .domain-family-head .home-tile-icon svg{
+  width:20px!important;
+  height:20px!important;
+}
+.home-medical-rail .domain-family-head .home-tile-name{
+  font-size:11.5px!important;
+  line-height:1.22!important;
+}
+.home-medical-rail .domain-family-head .home-tile-count{
+  font-size:8.8px!important;
+  margin-top:5px!important;
+}
+
+/* Collapsible subdomain control */
+.domain-sub-toggle{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:var(--tile-color);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:7px 12px 8px;
+  font-family:var(--sans);
+  font-size:8.5px;
+  font-weight:700;
+  text-align:left;
+  cursor:pointer;
+}
+.domain-sub-toggle svg{
+  width:13px!important;
+  height:13px!important;
+  transition:transform .18s var(--ease);
+}
+.domain-sub-toggle.is-open svg{
+  transform:rotate(180deg);
+}
+.home-medical-rail .domain-family-kids{
+  display:none!important;
+  padding:0 9px 8px!important;
+  margin:0!important;
+}
+.home-medical-rail .domain-family-kids.is-open{
+  display:flex!important;
+}
+.home-medical-rail .domain-family-kids::before{
+  display:none!important;
+}
+.home-medical-rail .domain-family-kid{
+  padding:6px 2px!important;
+  font-size:8.2px!important;
+}
+.home-medical-rail .domain-family-kid span{
+  font-size:7px!important;
+}
+
+@media(max-width:900px){
+  .home-medical-rail{
+    grid-auto-columns:58vw!important;
+  }
+  .home-medical-rail .domain-family,
+  .home-medical-rail .domain-family-head{
+    min-height:138px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -10783,6 +10872,17 @@ function qaCard(color, icon, title, desc, action){
     </button>`;
 }
 
+
+function toggleHomeSubdomains(id){
+  const list = document.getElementById(`homeSubs-${id}`);
+  const btn = document.getElementById(`homeSubsBtn-${id}`);
+  if(!list || !btn) return;
+  const open = !list.classList.contains('is-open');
+  list.classList.toggle('is-open', open);
+  btn.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 function renderHome(){
   const who = whoAmI();
   const firstName = who ? who.trim().split(/\s+/)[0] : '';
@@ -10840,9 +10940,13 @@ function renderHome(){
           <span class="home-tile-name">${escapeHtml(parent.name)}</span>
           <span class="home-tile-count">${total} ${total===1?'term':'terms'}${kids.length?` · ${kids.length} subdomains`:''}</span>
         </button>
-        ${kids.length ? `<div class="domain-family-kids">
-          ${kids.map(k=>`<button class="domain-family-kid" onclick="setCategory('${k.id}')" title="${escapeAttr(k.name)}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(k.name)}</span><span>${k.count}</span></button>`).join('')}
-        </div>` : ''}
+        ${kids.length ? `
+          <button id="homeSubsBtn-${parent.id}" class="domain-sub-toggle" aria-expanded="false" onclick="toggleHomeSubdomains('${parent.id}')">
+            <span>${kids.length} subdomain${kids.length===1?'':'s'}</span>${ICON_CHEVRON_DOWN}
+          </button>
+          <div id="homeSubs-${parent.id}" class="domain-family-kids">
+            ${kids.map(k=>`<button class="domain-family-kid" onclick="setCategory('${k.id}')" title="${escapeAttr(k.name)}"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(k.name)}</span><span>${k.count}</span></button>`).join('')}
+          </div>` : ''}
       </div>`;
   }).join('');
 
