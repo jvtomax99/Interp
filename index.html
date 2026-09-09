@@ -733,6 +733,8 @@
     font-size:12.5px; line-height:1.5; color:var(--ink);
   }
   .term-note svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
+  .show-more-wrap{ display:flex; justify-content:center; margin:18px 0 6px 0; }
+  .show-more-wrap .btn{ min-width:min(320px, 100%); }
   .crumb-up{
     display:inline-flex; align-items:center; gap:6px; margin-bottom:14px;
     padding:7px 13px 7px 9px; border-radius:999px; cursor:pointer;
@@ -3545,6 +3547,9 @@ let activeCategory = 'home';
 // way each person left it, rather than resetting every time the app opens.
 let domainsCollapsed = false;
 let ethicsFilter = 'all';
+// How many term cards a single render may build. Raised by "show more", and
+// reset whenever the view changes so a big domain can't slow the next screen.
+let termRenderLimit = 120;
 try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }catch(e){}
 // Per-parent collapse state for domain groups (which parents have their
 // subgroups tucked away) — a list of domain ids, persisted per device.
@@ -6321,12 +6326,28 @@ let termsListenerStarted = false;
 function startTermsListener(){
   if(termsListenerStarted || !db) return;
   termsListenerStarted = true;
+  // This listener covers the whole `terms` collection — 1700+ documents — and
+  // it re-buckets every one of them and re-renders the entire page on each
+  // snapshot. Saving a term fires several snapshots in quick succession (the
+  // local echo, then the server ack), so the work was running repeatedly and
+  // the UI froze. Coalescing into a single trailing pass keeps it live without
+  // rebuilding everything several times per edit.
+  let termsSnapTimer = null;
+  let pendingSnap = null;
   db.collection('terms').onSnapshot(snap=>{
-    applyTermsSnapshot(snap);
-    // A full render() (not just renderContent()) so sidebar term counts
-    // and "All domains" totals stay live too, not just whatever's open.
-    render();
-  }, err=> console.error('terms listener error:', err));
+    pendingSnap = snap;
+    clearTimeout(termsSnapTimer);
+    termsSnapTimer = setTimeout(()=>{
+      applyTermsSnapshot(pendingSnap);
+      pendingSnap = null;
+      // A full render() (not just renderContent()) so sidebar term counts
+      // and "All domains" totals stay live too, not just whatever's open.
+      render();
+    }, 180);
+  }, err=> {
+    console.error('terms listener error:', err);
+    showToast('Live updates stopped' + (err && err.code ? ` [${err.code}]` : '') + '. Pull to refresh.');
+  });
 }
 
 let categoriesMetaListenerStarted = false;
@@ -8998,6 +9019,12 @@ function renderContent(){
   // app had broken. Track that case and show a real empty state instead.
   let renderedAny = false;
   const emptySections = [];
+  // Rendering every term at once built ~66,000 DOM nodes for a 1700-term
+  // glossary — over a second on desktop and far worse on a phone, which is
+  // what made the app feel frozen after saving and could exhaust memory.
+  // Cards are now built up to a budget, with the rest one tap away.
+  let budget = termRenderLimit;
+  let truncatedTotal = 0;
   cats.forEach(cat=>{
     // Sort a *copy* for display only. Each item keeps _idx — its true position
     // in the stored array — so the edit and delete buttons still target the
@@ -9021,6 +9048,14 @@ function renderContent(){
 
     html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}"><h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
     html += `<div class="grid">`;
+    // Trim this section to whatever budget is left, remembering how much was
+    // held back so the "show more" control can report an honest total.
+    const fullCount = terms.length;
+    if(terms.length > budget){
+      truncatedTotal += terms.length - budget;
+      terms = terms.slice(0, Math.max(0, budget));
+    }
+    budget -= terms.length;
     terms.forEach((t, cardIdx)=>{
       const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
       const delay = Math.min(cardIdx * 0.03, 0.3);
@@ -9058,6 +9093,12 @@ function renderContent(){
     });
     html += `</div>`;
   });
+
+  if(truncatedTotal > 0){
+    html += `<div class="show-more-wrap">
+      <button class="btn btn-ghost" onclick="showMoreTerms()">Show ${Math.min(truncatedTotal, 120)} more · ${truncatedTotal} not shown</button>
+    </div>`;
+  }
 
   // This used to test `!html`, which was never true — the export row and jump
   // bar are always in the string by this point. So a domain with no terms fell
@@ -9134,6 +9175,7 @@ function closeAllOverlays(){
 
 function setCategory(id, isBack){
   closeAllOverlays();
+  termRenderLimit = 120;
   if(!isBack && activeCategory !== id){
     navStack.push(activeCategory);
     if(navStack.length > 40) navStack.shift();   // don't grow without bound
@@ -10386,6 +10428,11 @@ function renderDoctorDirDetail(d){
   `;
 }
 
+function showMoreTerms(){
+  termRenderLimit += 120;
+  renderContent();
+}
+
 function setEthicsFilter(f){
   ethicsFilter = f;
   render();
@@ -10725,9 +10772,9 @@ async function saveTerm(){
     history
   };
 
-  closeModal();
   const ok = await saveTermDoc(record);
-  if(!ok) return; // saveTermDoc already showed the error toast
+  if(!ok) return; // keep the modal open so the typing isn't lost and it can be retried
+  closeModal();
 
   // Apply locally right away rather than waiting on the real-time listener's
   // round trip — the person who just typed the edit shouldn't have to wait
