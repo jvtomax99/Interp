@@ -56,9 +56,9 @@
     --r-sm:10px; --r-md:14px; --r-lg:20px;
     /* Layered, navy-tinted shadows — closer to how real surfaces cast light
        than a single flat drop shadow. */
-    --sh-1:0 1px 2px rgba(21,28,44,0.04), 0 1px 3px rgba(21,28,44,0.03);
-    --sh-2:0 1px 2px rgba(21,28,44,0.04), 0 8px 20px -8px rgba(21,28,44,0.14);
-    --sh-3:0 8px 16px rgba(21,28,44,0.08), 0 28px 60px -12px rgba(21,28,44,0.22);
+    --sh-1:0 1px 2px rgba(21,28,44,0.06), 0 6px 16px -8px rgba(21,28,44,0.18);
+    --sh-2:0 2px 4px rgba(21,28,44,0.07), 0 14px 30px -12px rgba(21,28,44,0.26);
+    --sh-3:0 8px 16px rgba(21,28,44,0.10), 0 32px 64px -14px rgba(21,28,44,0.32);
     --ease:cubic-bezier(.2,.8,.2,1);
     /* Liquid-glass tokens. Real backdrop blur is reserved for the few fixed
        chrome surfaces (header, tab bar, search, sheets) — blurring dozens of
@@ -92,9 +92,9 @@
     --cyan:#4FD8F5;
     --danger:#E17B8C;
     --danger-soft:#3A2029;
-    --sh-1:0 1px 2px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.2);
-    --sh-2:0 1px 2px rgba(0,0,0,0.3), 0 8px 20px -8px rgba(0,0,0,0.5);
-    --sh-3:0 8px 16px rgba(0,0,0,0.35), 0 28px 60px -12px rgba(0,0,0,0.6);
+    --sh-1:0 1px 2px rgba(0,0,0,0.3), 0 8px 20px -10px rgba(0,0,0,0.6);
+    --sh-2:0 2px 4px rgba(0,0,0,0.35), 0 16px 32px -12px rgba(0,0,0,0.7);
+    --sh-3:0 8px 16px rgba(0,0,0,0.4), 0 32px 64px -14px rgba(0,0,0,0.8);
   }
   *{box-sizing:border-box;}
   ::selection{background:var(--accent-soft); color:var(--ink);}
@@ -610,6 +610,34 @@
   .home-search:hover{ border-color:var(--accent-2); box-shadow:var(--sh-2); }
   .home-search svg{ width:18px; height:18px; flex-shrink:0; }
   .home-search span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* One shared specular edge for every panel-like surface, so the glass
+     treatment is consistent instead of applying only to the cards I happened
+     to touch first. Layered on top of whatever shadow each already sets. */
+  .home-feed, .home-tip, .home-recent,
+  .domain-group-children, .domain-family-kids,
+  .subgroup-bar, .doc-research-term-card, .doc-research-summary,
+  .modal, .quiz-card, .stat-strip{
+    position:relative;
+  }
+  .home-feed::after, .home-tip::after, .home-recent::after,
+  .domain-group-children::after, .subgroup-bar::after,
+  .doc-research-term-card::after, .doc-research-summary::after,
+  .quiz-card::after{
+    content:''; position:absolute; inset:0; border-radius:inherit;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.85);
+    pointer-events:none;
+  }
+  html[data-theme="dark"] .home-feed::after,
+  html[data-theme="dark"] .home-tip::after,
+  html[data-theme="dark"] .home-recent::after,
+  html[data-theme="dark"] .domain-group-children::after,
+  html[data-theme="dark"] .subgroup-bar::after,
+  html[data-theme="dark"] .doc-research-term-card::after,
+  html[data-theme="dark"] .doc-research-summary::after,
+  html[data-theme="dark"] .quiz-card::after{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);
+  }
 
   /* ---------- Sectioned home ---------- */
   .home-sec{ margin:26px 0 0 0; }
