@@ -395,8 +395,12 @@
      Text sits on a dark gradient scrim, not the raw photo, so the greeting
      stays legible no matter how bright the sky is that day. */
   .home-greeting{
-    position:relative; padding:26px 24px 22px 24px; margin:-6px -6px 22px -6px;
-    border-radius:var(--r-lg); overflow:hidden; isolation:isolate;
+    /* Full-bleed: pulled out to the edges of the content column by the exact
+       amount of its padding, and out of the top so it sits flush under the
+       header. Overridden per breakpoint below to match each padding value. */
+    position:relative; padding:34px 48px 62px 48px;
+    margin:-40px -48px 0 -48px;
+    border-radius:0; overflow:hidden; isolation:isolate;
     background:#2A3C5C;
     box-shadow:var(--sh-2);
     /* Column now: brand row pinned to the top, greeting block to the bottom. */
@@ -497,7 +501,7 @@
     color:rgba(255,255,255,0.97); text-shadow:0 1px 3px rgba(6,11,20,1), 0 2px 14px rgba(6,11,20,0.95);
   }
   @media (max-width:640px){
-    .home-greeting{ padding:22px 18px 18px 18px; min-height:228px; }
+    .home-greeting{ min-height:228px; }
     .home-greeting-name{ font-size:27px; }
     .home-greeting-quote{ font-size:13.5px; max-width:30ch; }
   }
@@ -514,7 +518,7 @@
     color:var(--ink-faint);
   }
   @media (max-width:760px){
-    .home-greeting{ padding:20px; }
+    .home-greeting{ padding:26px 20px 58px 20px; margin:-26px -20px 0 -20px; }
     .home-greeting-stats{ gap:20px; }
   }
   .home-greeting h2{ font-family:var(--serif); font-weight:400; font-size:27px; margin:0 0 6px 0; letter-spacing:-.01em; position:relative; }
@@ -526,16 +530,20 @@
   }
   /* Search moved out of the header and under the hero, where it's a real
      target instead of a 36px icon competing with the branding. */
+  /* Lifted so it straddles the bottom edge of the hero photo, which ties the
+     two together instead of stacking them as separate blocks. */
   .home-search{
-    display:flex; align-items:center; gap:10px; width:100%;
-    margin:-8px 0 4px 0; padding:0 16px; height:46px; border-radius:14px;
-    background:var(--paper); border:1px solid var(--line);
-    box-shadow:var(--sh-1); cursor:pointer; text-align:left;
+    display:flex; align-items:center; gap:11px; width:100%;
+    position:relative; z-index:5;
+    margin:-46px 0 18px 0; padding:0 18px; height:54px; border-radius:16px;
+    background:var(--paper); border:none;
+    box-shadow:0 8px 24px -8px rgba(21,28,44,0.28), 0 2px 6px -2px rgba(21,28,44,0.16);
+    cursor:pointer; text-align:left;
     font-family:var(--sans); font-size:14px; color:var(--ink-faint);
     transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
   }
   .home-search:hover{ border-color:var(--accent-2); box-shadow:var(--sh-2); }
-  .home-search svg{ width:17px; height:17px; flex-shrink:0; }
+  .home-search svg{ width:18px; height:18px; flex-shrink:0; }
   .home-search span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   /* ---------- Sectioned home ---------- */
@@ -586,6 +594,26 @@
   .qa-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; margin-bottom:auto; }
   .qa-go{ display:flex; justify-content:flex-end; color:var(--tile-color); opacity:.6; }
   .qa-go svg{ width:15px; height:15px; }
+  /* Four across on every width — they're the primary actions, so they should
+     never require a swipe to reach. */
+  .qa-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+  .qa-tile{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
+    padding:16px 6px 14px 6px; border-radius:16px; cursor:pointer; border:none;
+    background:var(--tile-tint); box-shadow:inset 0 0 0 1px var(--tile-edge);
+    font-family:inherit; min-height:104px;
+    transition:transform .18s var(--ease), box-shadow .2s var(--ease);
+  }
+  .qa-tile:hover{ transform:translateY(-3px); box-shadow:inset 0 0 0 1px var(--tile-glow), var(--sh-2); }
+  .qa-tile:active{ transform:translateY(0) scale(0.97); }
+  .qa-tile-icon{ color:var(--tile-color); display:flex; }
+  .qa-tile-icon svg{ width:29px; height:29px; }
+  .qa-tile-label{
+    font-family:var(--sans); font-size:12px; font-weight:650; color:var(--ink);
+    line-height:1.25; text-align:center;
+  }
+  @media (max-width:360px){ .qa-tile-label{ font-size:11px; } .qa-tile{ min-height:96px; } }
+
   /* Activity + tip sit side by side on wide screens, stacked on a phone. */
   .home-two-col{ display:grid; grid-template-columns:1fr; gap:14px; }
   @media (min-width:900px){ .home-two-col{ grid-template-columns:1.35fr 1fr; } }
@@ -10065,11 +10093,18 @@ function renderHome(){
   const who = whoAmI();
   const firstName = who ? who.trim().split(/\s+/)[0] : '';
 
+  // Four compact tiles rather than description cards: at this size the label
+  // alone is enough, and it keeps the whole row on screen without swiping.
+  const qaTile = (color, icon, label, action) => `
+    <button class="qa-tile" style="${tileVars(color)}" onclick="${action}">
+      <span class="qa-tile-icon">${icon}</span>
+      <span class="qa-tile-label">${escapeHtml(label)}</span>
+    </button>`;
   const quickActions = [
-    qaCard('#2E8BD0', ICON_SWAP,   'Translate Term',  'Get medical terminology with context', `setCategory('translate')`),
-    qaCard('#7C6A9C', ICON_SPARK,  'Research Doctor', 'Find specialties and practice terms',   `setCategory('doctor-research')`),
-    qaCard('#35A97A', ICON_CHAT,   'Team Chat',       'Connect with your colleagues',          `setCategory('chat')`),
-    qaCard('#B08D2A', ICON_PLUS,   'Add Terminology', 'Share a new term with the team',        `setCategory('all')`),
+    qaTile('#2E8BD0', ICON_SWAP,  'Translate',  `setCategory('translate')`),
+    qaTile('#7C6A9C', ICON_SPARK, 'Doctor Prep',`setCategory('doctor-research')`),
+    qaTile('#35A97A', ICON_CHAT,  'Team Chat',  `setCategory('chat')`),
+    qaTile('#B08D2A', ICON_PLUS,  'Add Term',   `setCategory('all')`),
   ].join('');
 
   // The biggest domains lead the terminology rail — that's what people
@@ -10161,7 +10196,9 @@ function renderHome(){
       <span>Search terms, doctors, or the app…</span>
     </button>
 
-    ${renderHomeSection('Quick Actions', '', '', quickActions)}
+    <section class="home-sec">
+      <div class="qa-grid">${quickActions}</div>
+    </section>
     ${renderHomeSection('Medical Terminology', 'View all', `setCategory('all')`, termCards)}
     ${renderHomeSection('Doctors', '', '', doctorCards)}
     ${renderHomeSection('Study & Professional Development', '', '', studyCards)}
