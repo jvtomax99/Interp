@@ -63,14 +63,6 @@
     /* Inlined chevron used as a CSS mask so tile footers can render an
        arrow without every tile carrying another inline SVG node. */
     --chev-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
-    /* The bar's own content height, kept separate from the safe-area inset
-       so both can be combined wherever something needs to sit below the
-       bar (the app body, the desktop sidebar) without duplicating the
-       inset math in more than one place. */
-    --topbar-h:64px;
-  }
-  @media (max-width:900px){
-    :root{ --topbar-h:58px; }
   }
   /* Dark theme — same navy/cyan brand identity, inverted surfaces. Accent
      colors stay mostly as-is since they already read fine on a dark ground;
@@ -120,15 +112,8 @@
      brand. Replaces the old stacked logo banner + illustrated greeter strip,
      which together consumed ~170px of every screen before any content. */
   .topbar-global{
-    position:sticky; top:0; z-index:30; flex-shrink:0; box-sizing:border-box;
-    /* On an installed PWA (standalone display, no browser chrome) this bar
-       sits at the physical top of the screen, right under the status bar —
-       previously with no inset padding, so the status bar and the back
-       button/search field overlapped and the back button was unreachable.
-       In an ordinary browser tab this inset is 0, so nothing changes there. */
-    height:calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
-    padding:env(safe-area-inset-top, 0px) 18px 0 18px;
-    display:flex; align-items:center; gap:14px;
+    position:sticky; top:0; z-index:30; height:64px; flex-shrink:0;
+    display:flex; align-items:center; gap:14px; padding:0 18px;
     background:var(--paper); border-bottom:1px solid var(--line);
   }
   /* Back sits left of search and only appears when there's history to
@@ -184,14 +169,14 @@
   @media (max-width:520px){ .tg-sync span:not(.tg-sync-dot){ display:none; } .tg-sync{ padding:0 8px; } }
   .tg-logo{ height:34px; width:auto; object-fit:contain; display:block; }
   @media (max-width:900px){
-    .topbar-global{ padding:env(safe-area-inset-top, 0px) 14px 0 14px; gap:10px; }
+    .topbar-global{ height:58px; padding:0 14px; gap:10px; }
     .tg-logo{ height:26px; }
     .tg-icon-btn{ width:34px; height:34px; }
   }
   @media (max-width:520px){
     .tg-divider, .tg-logo{ display:none; }
   }
-  .app{display:flex; min-height:calc(100vh - var(--topbar-h) - env(safe-area-inset-top, 0px));}
+  .app{display:flex; min-height:calc(100vh - 64px);}
   ::-webkit-scrollbar{width:10px; height:10px;}
   ::-webkit-scrollbar-thumb{background:#DEDACB; border-radius:8px; border:2px solid transparent; background-clip:padding-box;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -200,10 +185,7 @@
   /* Dark navy sidebar — the nav is chrome, not content, so it recedes
      behind the light working area instead of competing with it. */
   .sidebar{
-    width:262px; flex-shrink:0; position:sticky;
-    top:calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
-    height:calc(100vh - var(--topbar-h) - env(safe-area-inset-top, 0px));
-    overflow-y:auto;
+    width:262px; flex-shrink:0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto;
     background:#16213C;
     border-right:none; padding:18px 0 12px 0;
     display:flex; flex-direction:column; gap:2px;
@@ -742,6 +724,15 @@
   html[data-theme="dark"] .domain-family-kid:hover{ background:rgba(255,255,255,0.12); }
 
   /* Jump bar shown at the top of a parent domain that has subgroups. */
+  .crumb-up{
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:14px;
+    padding:7px 13px 7px 9px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--line-soft); background:var(--paper);
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    transition:border-color .15s var(--ease), color .15s var(--ease);
+  }
+  .crumb-up:hover{ border-color:var(--accent-2); color:var(--ink); }
+  .crumb-up svg{ width:15px; height:15px; flex-shrink:0; }
   .subgroup-bar{
     display:flex; align-items:center; gap:7px; flex-wrap:wrap;
     padding:11px 13px; margin-bottom:16px; border-radius:12px;
@@ -782,37 +773,6 @@
     transition:transform .2s var(--ease);
   }
   .home-tile:hover .home-tile-count::after{ transform:translateX(3px); }
-
-  /* A domain-family head with subgroups splits into two independent click
-     targets: the icon/name jump straight to the combined view (as before),
-     while the count/chevron footer opens a picker for a single subgroup
-     instead of forcing every subgroup's terms to render at once — that
-     full-family render is what was crashing mobile Safari on large
-     families like Oncology. Both are real <button> elements sitting inside
-     the same styled div rather than the old single outer <button>. */
-  .domain-family-head-main{
-    background:none; border:none; padding:0; margin:0; text-align:left;
-    font:inherit; color:inherit; cursor:pointer; width:100%;
-    display:flex; flex-direction:column; gap:9px; flex:1;
-  }
-  .domain-family-count-btn{
-    background:none; border:none; padding:0; margin:0; text-align:left;
-    font:inherit; cursor:pointer; width:100%;
-  }
-  .subgroup-picker-hint{ font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin:0 0 14px 0; }
-  .subgroup-picker-list{
-    display:flex; flex-direction:column; border-radius:var(--r-md); overflow:hidden;
-    box-shadow:inset 0 0 0 1px var(--line-soft);
-  }
-  .subgroup-picker-row{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    padding:12px 14px; background:var(--paper); border:none; cursor:pointer;
-    font-family:inherit; text-align:left; transition:background .15s var(--ease);
-  }
-  .subgroup-picker-row + .subgroup-picker-row{ border-top:1px solid var(--line-soft); }
-  .subgroup-picker-row:hover{ background:var(--bg-hi); }
-  .subgroup-picker-name{ font-size:13.5px; font-weight:600; color:var(--ink); }
-  .subgroup-picker-count{ font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); flex-shrink:0; }
 
   /* In dark mode the pale tints computed from domain colors would sit almost
      invisibly on the dark surface, so tiles fall back to the raised panel
@@ -2641,10 +2601,6 @@
 
 <div class="overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
   <div class="modal" id="doctorDirDetailModal" style="max-width:520px;"></div>
-</div>
-
-<div class="overlay" id="subgroupPickerOverlay" onclick="if(event.target===this) closeSubgroupPicker()">
-  <div class="modal" id="subgroupPickerModal" style="max-width:420px;"></div>
 </div>
 
 <div class="overlay more-sheet-overlay" id="moreSheetOverlay" onclick="if(event.target===this) closeMoreSheet()">
@@ -6280,19 +6236,7 @@ async function loadData(){
     render();
   }catch(err){
     console.error('loadData failed:', err);
-    // This chain runs the live listeners plus a long sequence of one-time
-    // migration steps every time the app boots. A hiccup partway through —
-    // one flaky migration, a momentary network drop — used to nuke whatever
-    // real data had already loaded (DATA might already hold 1,000+ real
-    // terms by this point) and silently replace it with the tiny hardcoded
-    // starter set, for the rest of the session. Only fall back to the
-    // starter set if nothing real ever loaded in the first place; otherwise
-    // keep what's already there and just surface that something went wrong.
-    if(!DATA){
-      DATA = DEFAULT_DATA;
-    } else {
-      showToast('Some data may be out of date \u2014 check your connection and reopen the app');
-    }
+    DATA = DEFAULT_DATA;
     render();
   }
 }
@@ -8395,6 +8339,7 @@ const ICON_GRID = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20L4.6 17L15.5 6.1C16 5.6 16.8 5.6 17.3 6.1L18.4 7.2C18.9 7.7 18.9 8.5 18.4 9L7.5 19.9L4 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_COMPASS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+const ICON_CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_ARROW_RIGHT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHEVRON_DOWN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -8990,6 +8935,17 @@ function renderContent(){
   let html = '';
   const printLabel = activeCategory==='all' ? 'the full glossary' : (cats[0] ? cats[0].name : 'this domain');
 
+  // Breadcrumb on a subgroup page, so its parent is visible and one tap away
+  // rather than something you have to already know about.
+  if(activeCategory !== 'all' && cats.length === 1 && cats[0].parentId){
+    const parent = DATA.categories.find(c => c.id === cats[0].parentId);
+    if(parent){
+      html += `<button class="crumb-up" onclick="setCategory('${parent.id}')">
+        ${ICON_CHEVRON_LEFT}<span>${escapeHtml(parent.name)}</span>
+      </button>`;
+    }
+  }
+
   // Jump bar for a parent that has subgroups — lets you skip straight to a
   // subgroup's section without scrolling the whole family.
   if(activeCategory !== 'all' && cats.length > 1){
@@ -9142,15 +9098,6 @@ let navStack = [];
 function setCategory(id, isBack){
   if(!isBack && activeCategory !== id){
     navStack.push(activeCategory);
-    // Jumping straight into a subgroup (from Home, a jump-to pill, or the
-    // subgroup picker) skips its parent as far as the app's state is
-    // concerned, so back used to leapfrog straight past it. Inserting the
-    // parent here means back always unwinds one real step at a time:
-    // subgroup -> parent -> wherever you actually started.
-    const target = DATA.categories.find(c => c.id === id);
-    if(target && target.parentId && target.parentId !== activeCategory){
-      navStack.push(target.parentId);
-    }
     if(navStack.length > 40) navStack.shift();   // don't grow without bound
     try{ history.pushState({ ih: true }, ''); }catch(e){}
   }
@@ -9179,6 +9126,17 @@ function goHome(){
 }
 
 function goBack(){
+  // Hierarchical first, historical second. Reaching a subgroup usually means
+  // tapping its chip straight from Home, so the history stack says the way
+  // back is Home — but what people expect from "Breast Oncology" is to land
+  // on Oncology. Going up the tree matches the mental model; plain history
+  // still applies everywhere else.
+  const cat = DATA && DATA.categories.find(c => c.id === activeCategory);
+  if(cat && cat.parentId && navStack[navStack.length - 1] !== cat.parentId){
+    setCategory(cat.parentId, true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
   if(!navStack.length){ goHome(); return; }
   const prev = navStack.pop();
   setCategory(prev, true);
@@ -9189,6 +9147,13 @@ function goBack(){
 // pushes a history entry, so swiping back walks the in-app stack instead of
 // leaving the app entirely — which is what it did before.
 window.addEventListener('popstate', () => {
+  const cat = DATA && DATA.categories.find(c => c.id === activeCategory);
+  if(cat && cat.parentId && navStack[navStack.length - 1] !== cat.parentId){
+    setCategory(cat.parentId, true);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    history.pushState({ ih: true }, '');
+    return;
+  }
   if(navStack.length){
     const prev = navStack.pop();
     setCategory(prev, true);
@@ -9964,27 +9929,13 @@ function renderHome(){
       const kids = allDomainTiles.filter(k => k.parentId === parent.id)
                                  .sort((a,b) => (b.count||0) - (a.count||0));
       const totalTerms = (parent.count||0) + kids.reduce((n,k)=> n + (k.count||0), 0);
-      // A domain with no subgroups keeps the original single-button card —
-      // there's nothing to pick between, so it should still jump straight
-      // to the domain on any tap.
-      const headHtml = kids.length
-        ? `<div class="home-tile domain-family-head" style="${tileVars(parent.color)}">
-            <button class="domain-family-head-main" onclick="setCategory('${parent.id}')">
-              <span class="home-tile-icon">${parent.icon}</span>
-              <span class="home-tile-name">${escapeHtml(parent.name)}</span>
-            </button>
-            <button class="home-tile-count domain-family-count-btn" title="Choose a subgroup to view" onclick="event.stopPropagation(); openSubgroupPicker('${parent.id}')">
-              ${totalTerms} ${totalTerms===1?'term':'terms'} \u00b7 ${kids.length} sub
-            </button>
-          </div>`
-        : `<button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
-            <span class="home-tile-icon">${parent.icon}</span>
-            <span class="home-tile-name">${escapeHtml(parent.name)}</span>
-            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}</span>
-          </button>`;
       return `
         <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
-          ${headHtml}
+          <button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
+            <span class="home-tile-icon">${parent.icon}</span>
+            <span class="home-tile-name">${escapeHtml(parent.name)}</span>
+            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
+          </button>
           ${kids.length ? `<div class="domain-family-kids">
             ${kids.map(k=>`
               <button class="domain-family-kid" title="${escapeAttr(k.name)} \u00b7 ${k.count} terms" onclick="setCategory('${k.id}')">
@@ -10204,41 +10155,6 @@ function openDoctorDirDetail(id){
   if(!d) return;
   document.getElementById('doctorDirDetailModal').innerHTML = renderDoctorDirDetail(d);
   document.getElementById('doctorDirDetailOverlay').classList.add('show');
-}
-
-function closeSubgroupPicker(){
-  document.getElementById('subgroupPickerOverlay').classList.remove('show');
-}
-
-// Lets someone pick a single subgroup (or "all of X") from a parent domain
-// that has several, instead of always loading every subgroup's terms in
-// one combined page — that full-family render was the crash on mobile
-// Safari for large families like Oncology.
-function openSubgroupPicker(parentId){
-  const parent = DATA.categories.find(c => c.id === parentId);
-  if(!parent) return;
-  const kids = DATA.categories.filter(c => c.parentId === parentId)
-                               .sort((a,b) => (b.terms.length||0) - (a.terms.length||0));
-  if(!kids.length){ setCategory(parentId); return; }
-  const totalTerms = parent.terms.length + kids.reduce((n,k)=> n + k.terms.length, 0);
-  const html = `
-    <button class="dd-detail-close" title="Close" onclick="closeSubgroupPicker()">✕</button>
-    <h3 style="margin:0 0 4px 0;">${escapeHtml(parent.name)}</h3>
-    <p class="subgroup-picker-hint">${totalTerms} term${totalTerms===1?'':'s'} across ${kids.length+1} sections. Pick one to jump straight there.</p>
-    <div class="subgroup-picker-list">
-      <button class="subgroup-picker-row" onclick="closeSubgroupPicker(); setCategory('${parent.id}')">
-        <span class="subgroup-picker-name">All of ${escapeHtml(parent.name)}</span>
-        <span class="subgroup-picker-count">${totalTerms}</span>
-      </button>
-      ${kids.map(k => `
-        <button class="subgroup-picker-row" onclick="closeSubgroupPicker(); setCategory('${k.id}')">
-          <span class="subgroup-picker-name">${escapeHtml(k.name)}</span>
-          <span class="subgroup-picker-count">${k.terms.length}</span>
-        </button>`).join('')}
-    </div>
-  `;
-  document.getElementById('subgroupPickerModal').innerHTML = html;
-  document.getElementById('subgroupPickerOverlay').classList.add('show');
 }
 
 // Jumps to the Doctor Prep screen with the name/specialty/location already
@@ -11218,30 +11134,9 @@ document.addEventListener('focusout', (e)=>{
    a failure here must never stop the app itself from working. */
 if('serviceWorker' in navigator && window.isSecureContext){
   window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('./sw.js').then(reg => {
-      // The browser's own periodic update check is unreliable on an
-      // installed PWA — it's often suspended and resumed rather than
-      // freshly loaded, so it can go a long time without ever asking
-      // whether sw.js has changed. Checking explicitly on load and every
-      // time the app comes back to the foreground closes that gap.
-      reg.update().catch(()=>{});
-      document.addEventListener('visibilitychange', () => {
-        if(document.visibilityState === 'visible') reg.update().catch(()=>{});
-      });
-    }).catch(err=>{
+    navigator.serviceWorker.register('./sw.js').catch(err=>{
       console.warn('Service worker registration failed:', err);
     });
-  });
-  // A new service worker taking control means a newer build is now cached —
-  // but the page already running in memory is still the old code. Without
-  // this, that old code (and whatever stale data it fell back to) can keep
-  // running silently for the rest of the session instead of picking up the
-  // fix that's already sitting there waiting.
-  let swRefreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if(swRefreshing) return;
-    swRefreshing = true;
-    window.location.reload();
   });
   // Tapping a chat notification asks the app to jump straight to Team Chat.
   navigator.serviceWorker.addEventListener('message', (event)=>{
