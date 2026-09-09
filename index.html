@@ -63,6 +63,14 @@
     /* Inlined chevron used as a CSS mask so tile footers can render an
        arrow without every tile carrying another inline SVG node. */
     --chev-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
+    /* The bar's own content height, kept separate from the safe-area inset
+       so both can be combined wherever something needs to sit below the
+       bar (the app body, the desktop sidebar) without duplicating the
+       inset math in more than one place. */
+    --topbar-h:64px;
+  }
+  @media (max-width:900px){
+    :root{ --topbar-h:58px; }
   }
   /* Dark theme — same navy/cyan brand identity, inverted surfaces. Accent
      colors stay mostly as-is since they already read fine on a dark ground;
@@ -112,8 +120,15 @@
      brand. Replaces the old stacked logo banner + illustrated greeter strip,
      which together consumed ~170px of every screen before any content. */
   .topbar-global{
-    position:sticky; top:0; z-index:30; height:64px; flex-shrink:0;
-    display:flex; align-items:center; gap:14px; padding:0 18px;
+    position:sticky; top:0; z-index:30; flex-shrink:0; box-sizing:border-box;
+    /* On an installed PWA (standalone display, no browser chrome) this bar
+       sits at the physical top of the screen, right under the status bar —
+       previously with no inset padding, so the status bar and the back
+       button/search field overlapped and the back button was unreachable.
+       In an ordinary browser tab this inset is 0, so nothing changes there. */
+    height:calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+    padding:env(safe-area-inset-top, 0px) 18px 0 18px;
+    display:flex; align-items:center; gap:14px;
     background:var(--paper); border-bottom:1px solid var(--line);
   }
   /* Back sits left of search and only appears when there's history to
@@ -169,14 +184,14 @@
   @media (max-width:520px){ .tg-sync span:not(.tg-sync-dot){ display:none; } .tg-sync{ padding:0 8px; } }
   .tg-logo{ height:34px; width:auto; object-fit:contain; display:block; }
   @media (max-width:900px){
-    .topbar-global{ height:58px; padding:0 14px; gap:10px; }
+    .topbar-global{ padding:env(safe-area-inset-top, 0px) 14px 0 14px; gap:10px; }
     .tg-logo{ height:26px; }
     .tg-icon-btn{ width:34px; height:34px; }
   }
   @media (max-width:520px){
     .tg-divider, .tg-logo{ display:none; }
   }
-  .app{display:flex; min-height:calc(100vh - 64px);}
+  .app{display:flex; min-height:calc(100vh - var(--topbar-h) - env(safe-area-inset-top, 0px));}
   ::-webkit-scrollbar{width:10px; height:10px;}
   ::-webkit-scrollbar-thumb{background:#DEDACB; border-radius:8px; border:2px solid transparent; background-clip:padding-box;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -185,7 +200,10 @@
   /* Dark navy sidebar — the nav is chrome, not content, so it recedes
      behind the light working area instead of competing with it. */
   .sidebar{
-    width:262px; flex-shrink:0; position:sticky; top:64px; height:calc(100vh - 64px); overflow-y:auto;
+    width:262px; flex-shrink:0; position:sticky;
+    top:calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+    height:calc(100vh - var(--topbar-h) - env(safe-area-inset-top, 0px));
+    overflow-y:auto;
     background:#16213C;
     border-right:none; padding:18px 0 12px 0;
     display:flex; flex-direction:column; gap:2px;
@@ -9112,6 +9130,15 @@ let navStack = [];
 function setCategory(id, isBack){
   if(!isBack && activeCategory !== id){
     navStack.push(activeCategory);
+    // Jumping straight into a subgroup (from Home, a jump-to pill, or the
+    // subgroup picker) skips its parent as far as the app's state is
+    // concerned, so back used to leapfrog straight past it. Inserting the
+    // parent here means back always unwinds one real step at a time:
+    // subgroup -> parent -> wherever you actually started.
+    const target = DATA.categories.find(c => c.id === id);
+    if(target && target.parentId && target.parentId !== activeCategory){
+      navStack.push(target.parentId);
+    }
     if(navStack.length > 40) navStack.shift();   // don't grow without bound
     try{ history.pushState({ ih: true }, ''); }catch(e){}
   }
