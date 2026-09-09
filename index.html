@@ -2448,87 +2448,6 @@
     .section-head{ break-after:avoid; }
     a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
   }
-
-/* Compact home workspace: consistent cards and visible, wrapping navigation. */
-.home-rail{
-  grid-auto-flow:row; grid-auto-columns:auto;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  align-items:start; gap:10px; overflow:visible; scroll-snap-type:none;
-  margin:0; padding:0;
-}
-.home-rail > *{min-width:0;}
-.home-sec{margin-bottom:24px;}
-.home-rail .qa-card, .home-rail .domain-family-head{
-  display:grid; grid-template-columns:24px minmax(0,1fr); align-content:center;
-  column-gap:10px; row-gap:4px; width:100%; min-height:94px;
-  padding:12px; border-radius:14px; text-align:left;
-}
-.home-rail .qa-card{position:relative;}
-.home-rail .qa-icon, .home-rail .home-tile-icon{
-  grid-column:1; grid-row:1 / span 2; width:24px; height:24px;
-  align-self:start; display:flex; align-items:center; justify-content:center;
-}
-.home-rail .qa-icon svg, .home-rail .home-tile-icon svg{width:22px;height:22px;}
-.home-rail .qa-title, .home-rail .home-tile-name{
-  grid-column:2; margin:0; font-size:14px; line-height:1.4;
-  overflow-wrap:anywhere; font-weight:600;
-}
-.home-rail .qa-desc, .home-rail .home-tile-count{
-  grid-column:2; margin:0; font-size:12px; line-height:1.45; color:var(--ink-soft);
-}
-.home-rail .qa-go{display:none;}
-.home-rail .domain-family{border-radius:14px;}
-.home-rail .domain-family-head{border-radius:0;}
-.domain-subdomains{border-top:1px solid var(--tile-edge);}
-.domain-subdomains summary{
-  cursor:pointer; padding:11px 12px; min-height:44px; font-size:12px;
-  font-weight:600; line-height:1.6; color:var(--ink); list-style: none;
-}
-.domain-subdomains summary::-webkit-details-marker{display:none;}
-.domain-subdomains summary::after{content:'+';float:right;font-size:16px;line-height:1.2;}
-.domain-subdomains[open] summary::after{content:'−';}
-.subdomains-open{display:none;}
-.domain-subdomains[open] .subdomains-open{display:inline;}
-.domain-subdomains[open] .subdomains-closed{display:none;}
-.domain-subdomains .domain-family-kids{
-  display:flex; flex-direction:column; gap:0; overflow:visible;
-  margin:0; padding:0 8px 8px;
-}
-.domain-subdomains .domain-family-kid{
-  width:100%; min-height:44px; padding:9px 8px; border-radius:8px;
-  white-space:normal; text-align:left; justify-content:space-between; gap:8px;
-  background:transparent;
-}
-.domain-subdomains .domain-family-kid + .domain-family-kid{border-top:1px solid var(--tile-edge);}
-.domain-subdomains .domain-family-kid span{font-size:12px;color:var(--ink-soft);}
-.domain-subdomains .domain-family-kid .subdomain-name{font-size:14px;color:var(--ink);overflow-wrap:anywhere;}
-.domain-subdomains .domain-family-kid > span:last-child{flex-shrink:0;}
-.home-rail button:focus-visible, .domain-subdomains summary:focus-visible{
-  outline:3px solid var(--accent); outline-offset:3px;
-}
-.home-greeting{min-height:170px; padding:18px 20px; gap:10px; margin:0 0 20px;}
-.home-greeting-text{max-width:70%;}
-.home-greeting h2{font-family:var(--sans);font-size:24px;font-weight:600;margin-bottom:6px;}
-.home-greeting .home-greeting-quote{display:none;}
-.home-greeting-btn{min-height:36px;}
-.home-sec-more{min-height:44px;display:inline-flex;align-items:center;}
-@media(min-width:820px){
-  .home-rail{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
-}
-@media(max-width:540px){
-  .home-rail{grid-template-columns:minmax(0,1fr);gap:8px;}
-  .home-rail .qa-card,.home-rail .domain-family-head{min-height:72px;padding:12px 14px;}
-  .home-greeting{min-height:150px;padding:16px;}
-  .home-greeting-text{max-width:100%;}
-  .home-greeting-logo{top:16px;bottom:auto;height:22px;max-width:90px;object-fit:contain;}
-  .home-greeting-brand{padding-right:96px;}
-  .home-greeting-brandname{font-size:18px;}
-  .home-greeting-brandsub{display:none;}
-}
-@media(prefers-reduced-motion:reduce){
-  .home-rail *, .home-greeting *{animation:none!important;transition:none!important;}
-}
-
 </style>
 </head>
 <body>
@@ -10097,10 +10016,11 @@ function renderHome(){
     qaCard('#2E8BD0', ICON_SWAP,   'Translate Term',  'Get medical terminology with context', `setCategory('translate')`),
     qaCard('#7C6A9C', ICON_SPARK,  'Research Doctor', 'Find specialties and practice terms',   `setCategory('doctor-research')`),
     qaCard('#35A97A', ICON_CHAT,   'Team Chat',       'Connect with your colleagues',          `setCategory('chat')`),
-    qaCard('#B08D2A', ICON_PLUS,   'Add Terminology', 'Share a new term with the team',        `openAddModal()`),
+    qaCard('#B08D2A', ICON_PLUS,   'Add Terminology', 'Share a new term with the team',        `setCategory('all')`),
   ].join('');
 
-  // Alphabetical ordering keeps domain positions predictable as terms are added.
+  // The biggest domains lead the terminology rail — that's what people
+  // actually reach for, and the full set is one tap away via View all.
   // A domain family renders as ONE unit: the parent card with its subgroups
   // listed directly beneath it, inside the same rail cell. Previously each
   // subgroup was its own card in the flow, so scrolling the rail could put
@@ -10108,10 +10028,10 @@ function renderHome(){
   const allDomainTiles = getDomainTiles().filter(t => t.id !== 'resources');
   const termCards = allDomainTiles
     .filter(t => !t.parentId)
-    .sort((a,b) => a.name.localeCompare(b.name))
+    .sort((a,b) => (b.count||0) - (a.count||0))
     .map((parent, i) => {
       const kids = allDomainTiles.filter(k => k.parentId === parent.id)
-                                 .sort((a,b) => a.name.localeCompare(b.name));
+                                 .sort((a,b) => (b.count||0) - (a.count||0));
       const totalTerms = (parent.count||0) + kids.reduce((n,k)=> n + (k.count||0), 0);
       return `
         <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
@@ -10120,15 +10040,12 @@ function renderHome(){
             <span class="home-tile-name">${escapeHtml(parent.name)}</span>
             <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
           </button>
-          ${kids.length ? `<details class="domain-subdomains">
-            <summary><span class="subdomains-closed">Show</span><span class="subdomains-open">Hide</span> ${kids.length} subdomain${kids.length===1?'':'s'}</summary>
-            <div class="domain-family-kids">
+          ${kids.length ? `<div class="domain-family-kids">
             ${kids.map(k=>`
               <button class="domain-family-kid" title="${escapeAttr(k.name)} \u00b7 ${k.count} terms" onclick="setCategory('${k.id}')">
-                <span class="subdomain-name">${escapeHtml(k.name)}</span><span>${k.count} terms</span>
+                ${escapeHtml(k.name)}<span>${k.count}</span>
               </button>`).join('')}
-            </div>
-          </details>` : ''}
+          </div>` : ''}
         </div>`;
     }).join('');
 
