@@ -645,7 +645,7 @@
      to coarse pointers so a mouse still gets hover rather than both.
      Kept snappy (.12s) because a press should feel immediate, not animated. */
   @media (hover:none){
-    .home-tile:active{
+    .home-tile:active, .home-tile.is-pressed{
       transform:translateY(-5px) scale(1);
       box-shadow:
         inset 0 0 0 1px var(--tile-glow),
@@ -654,7 +654,7 @@
         0 16px 32px -12px rgba(21,28,44,0.30);
       transition-duration:.12s;
     }
-    .qa-tile:active{
+    .qa-tile:active, .qa-tile.is-pressed{
       transform:translateY(-4px) scale(1);
       box-shadow:
         inset 0 0 0 1px var(--tile-glow),
@@ -663,7 +663,7 @@
         0 14px 28px -12px rgba(21,28,44,0.28);
       transition-duration:.12s;
     }
-    .card:active{
+    .card:active, .card.is-pressed{
       transform:translateY(-4px) scale(1);
       box-shadow:
         inset 0 0 0 1px var(--line),
@@ -672,10 +672,12 @@
         0 16px 34px -12px rgba(21,28,44,0.28);
       transition-duration:.12s;
     }
-    .card:active::before{ transform:scaleY(1); }
-    .domain-family:active{ transform:translateY(-4px); transition:transform .12s var(--ease); }
+    .card:active::before, .card.is-pressed::before{ transform:scaleY(1); }
+    .domain-family:active, .domain-family.is-pressed{ transform:translateY(-4px); transition:transform .12s var(--ease); }
     .home-search:active, .domain-family-kid:active, .domain-chip:active,
-    .side-row:active, .subgroup-pill:active, .crumb-up:active{
+    .side-row:active, .subgroup-pill:active, .crumb-up:active,
+    .home-search.is-pressed, .domain-family-kid.is-pressed, .domain-chip.is-pressed,
+    .subgroup-pill.is-pressed, .crumb-up.is-pressed{
       transform:translateY(-2px); transition-duration:.12s;
     }
   }
@@ -751,7 +753,7 @@
       0 2px 4px rgba(21,28,44,0.07),
       0 14px 28px -12px rgba(21,28,44,0.28);
   }
-  .qa-tile:active{ transform:translateY(0) scale(0.97); }
+  @media (hover:hover){ .qa-tile:active{ transform:translateY(0) scale(0.97); } }
   .qa-tile-icon{ color:var(--tile-color); display:flex; }
   .qa-tile-icon svg{ width:29px; height:29px; }
   .qa-tile-label{
@@ -907,7 +909,7 @@
       0 2px 4px rgba(21,28,44,0.07),
       0 16px 32px -12px rgba(21,28,44,0.30);
   }
-  .home-tile:active{ transform:translateY(-1px) scale(0.97); }
+  @media (hover:hover){ .home-tile:active{ transform:translateY(-1px) scale(0.97); } }
   /* The icon sits directly on the card tint — no chip, no gradient plate.
      At full domain color against a pale wash of the same hue it carries
      the card's identity on its own. */
@@ -10131,6 +10133,32 @@ const MOTIVATIONAL_QUOTES = [
   "\u201cThe limits of my language mean the limits of my world.\u201d \u2014 Ludwig Wittgenstein",
   "\u201cEvery word you carry across a language gap matters to someone.\u201d"
 ];
+
+// A quick tap barely shows a :active state — the finger is down for maybe
+// 60ms and then the screen changes. This holds a "pressed" class on the
+// touched card for a moment longer so the lift is actually perceptible on a
+// simple touch, without needing to press and hold. Pointer events cover touch
+// and stylus; mouse still uses :hover.
+(function(){
+  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .crumb-up';
+  const HOLD_MS = 260;
+  document.addEventListener('pointerdown', (e) => {
+    if(e.pointerType === 'mouse') return;            // mouse has hover already
+    const el = e.target.closest && e.target.closest(LIFTS);
+    if(!el) return;
+    el.classList.add('is-pressed');
+    const clear = () => {
+      setTimeout(()=> el.classList.remove('is-pressed'), HOLD_MS);
+    };
+    el.addEventListener('pointerup', clear, { once:true });
+    // pointercancel is what actually fires when a touch turns into a scroll,
+    // so it's the right signal for "this wasn't a tap". An earlier version
+    // also cleared on pointerleave, but a normal tap fires that on release —
+    // which cancelled the lift instantly and made it look like nothing
+    // happened at all.
+    el.addEventListener('pointercancel', ()=> el.classList.remove('is-pressed'), { once:true });
+  }, { passive:true });
+})();
 
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
