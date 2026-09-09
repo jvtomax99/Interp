@@ -724,6 +724,15 @@
   html[data-theme="dark"] .domain-family-kid:hover{ background:rgba(255,255,255,0.12); }
 
   /* Jump bar shown at the top of a parent domain that has subgroups. */
+  /* Team notes on a term — visually distinct from the definition, since a
+     note is what colleagues learned in practice rather than what the term
+     formally means. */
+  .term-note{
+    display:flex; gap:7px; align-items:flex-start; margin-top:9px;
+    padding:9px 11px; border-radius:9px; background:var(--accent-soft);
+    font-size:12.5px; line-height:1.5; color:var(--ink);
+  }
+  .term-note svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
   .crumb-up{
     display:inline-flex; align-items:center; gap:6px; margin-bottom:14px;
     padding:7px 13px 7px 9px; border-radius:999px; cursor:pointer;
@@ -938,9 +947,14 @@
   .dd-detail-close:hover{ color:var(--ink); background:var(--bg-hi); }
   .dd-detail-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .dd-detail-section-label{
+    display:flex; align-items:center; gap:6px;
     font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-faint);
     text-transform:uppercase; margin:20px 0 10px 0; padding-top:16px; border-top:1px solid var(--line-soft);
   }
+  /* Inline SVGs default to the full width of their container without this,
+     which was rendering these labels' icons at several hundred pixels. */
+  .dd-detail-section-label svg{ width:13px; height:13px; flex-shrink:0; }
+  #doctorDirDetailModal .btn svg{ width:14px; height:14px; flex-shrink:0; vertical-align:-2px; }
   .dd-detail-empty-research{
     font-size:13px; color:var(--ink-soft); line-height:1.6; background:var(--bg-hi); border-radius:12px;
     padding:14px 16px;
@@ -2472,6 +2486,7 @@
     <div class="field"><label>English term</label><input id="fEn" type="text" placeholder="e.g. Hypertrophic cardiomyopathy"></div>
     <div class="field"><label>Spanish term (optional)</label><input id="fEs" type="text" placeholder="e.g. Cardiopatía hipertrófica"></div>
     <div class="field"><label>Definition / context</label><textarea id="fDef" placeholder="Plain-language definition or clinical context"></textarea></div>
+    <div class="field"><label>Team notes (optional)</label><textarea id="fNotes" placeholder="Usage tips, regional variants, what a provider actually says, pitfalls to avoid…"></textarea></div>
     <div class="field"><label>Source (optional)</label><input id="fSource" type="text" placeholder="e.g. NIH (Spanish)"></div>
     <div class="field"><label>Source link (optional URL)</label><input id="fSourceUrl" type="text" placeholder="Paste the exact article/webinar link, if you have it"></div>
     <div class="field"><label>Domain</label><select id="fCategory"></select></div>
@@ -2601,6 +2616,19 @@
 
 <div class="overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
   <div class="modal" id="doctorDirDetailModal" style="max-width:520px;"></div>
+</div>
+
+<div class="overlay" id="doctorTermOverlay" onclick="if(event.target===this) closeDoctorTermModal()">
+  <div class="modal">
+    <h3 id="doctorTermTitle">Add a term</h3>
+    <div class="field"><label>English</label><input id="fDTEn" type="text" placeholder="e.g. sentinel node biopsy"></div>
+    <div class="field"><label>Spanish (optional)</label><input id="fDTEs" type="text" placeholder="e.g. biopsia del ganglio centinela"></div>
+    <div class="field"><label>Notes / context (optional)</label><textarea id="fDTDef" placeholder="How this doctor phrases it, what they mean by it, anything to watch for…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDoctorTermModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDoctorTerm()">Save term</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay more-sheet-overlay" id="moreSheetOverlay" onclick="if(event.target===this) closeMoreSheet()">
@@ -2747,23 +2775,13 @@
     db = firebase.firestore();
     storage = firebase.storage();
 
-    // Offline support. Firestore keeps a local IndexedDB copy, serves reads
-    // from it when the network is gone, and queues writes until it's back —
-    // so an edit made in a dead zone (elevator, basement imaging, a bad
-    // corner of a unit) is saved locally and syncs on its own later, rather
-    // than failing with a toast the person has to notice and redo.
-    // synchronizeTabs lets the app be open in several tabs at once; without
-    // it, only the first tab would get persistence.
-    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-      // Not fatal — the app simply behaves as before, online-only.
-      if(err && err.code === 'failed-precondition'){
-        console.warn('Offline mode unavailable: another tab holds the lock.');
-      } else if(err && err.code === 'unimplemented'){
-        console.warn('Offline mode unavailable: browser lacks IndexedDB support.');
-      } else {
-        console.warn('Offline mode unavailable:', err);
-      }
-    });
+    // NOTE: Firestore offline persistence (enablePersistence) was enabled here
+    // and had to be removed. On iOS Safari it proved unstable — the app
+    // entered a crash-reload loop, and writes (adding a term) crashed the tab,
+    // because every write hits IndexedDB through a code path Safari handles
+    // poorly, especially with synchronizeTabs. Reads/writes now go straight to
+    // the network again, which is the behaviour the app shipped with for
+    // months. Don't re-enable without testing on a real iPhone first.
   }catch(e){
     console.error('Firebase failed to initialize — check firebaseConfig above.', e);
   }
@@ -3721,8 +3739,8 @@ function downloadTextFile(content, filename, mime){
 
 function exportTermsCsv(){
   const scoped = activeCategory==='all' ? allTermsFlat() : allTermsFlat().filter(t=>t.categoryId===activeCategory);
-  const rows = [['id','domain','english','spanish','definition','source','source_url']];
-  scoped.forEach(t=> rows.push([t.id, t.categoryName, t.en||'', t.es||'', t.def||'', t.source||'', t.url||'']));
+  const rows = [['id','domain','english','spanish','definition','notes','source','source_url']];
+  scoped.forEach(t=> rows.push([t.id, t.categoryName, t.en||'', t.es||'', t.def||'', t.notes||'', t.source||'', t.url||'']));
   const csv = rows.map(r=> r.map(csvEscape).join(',')).join('\r\n');
   downloadTextFile(csv, 'interpreter-hub-glossary.csv', 'text/csv;charset=utf-8');
   showToast(`Exported ${scoped.length} term${scoped.length===1?'':'s'}.`);
@@ -3768,6 +3786,7 @@ async function handleCsvImportSelected(event){
   const idx = {
     id: header.indexOf('id'), domain: header.indexOf('domain'), en: header.indexOf('english'),
     es: header.indexOf('spanish'), def: header.indexOf('definition'),
+    notes: header.indexOf('notes'),
     source: header.indexOf('source'), url: header.indexOf('source_url')
   };
   if(idx.domain===-1 || idx.en===-1){
@@ -3794,6 +3813,7 @@ async function handleCsvImportSelected(event){
       categoryId: cat.id, en,
       es: idx.es>-1 ? (r[idx.es]||'').trim() : '',
       def: idx.def>-1 ? (r[idx.def]||'').trim() : '',
+      notes: (idx.notes>-1 ? (r[idx.notes]||'').trim() : '') || undefined,
       source: idx.source>-1 ? (r[idx.source]||'').trim() : '',
       url: (idx.url>-1 ? (r[idx.url]||'').trim() : '') || undefined,
       editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined
@@ -7460,7 +7480,7 @@ function collectSearchMatches(q){
 
   DATA.categories.forEach(cat=>{
     cat.terms.forEach(t=>{
-      if(hit(t.en) || hit(t.es) || hit(t.def)){
+      if(hit(t.en) || hit(t.es) || hit(t.def) || hit(t.notes)){
         out.push({
           group:'Terms', icon:DOMAIN_ICONS[cat.icon] || DOMAIN_ICONS.sparkle, color:cat.color,
           title:t.en, sub:[t.es, cat.name].filter(Boolean).join(' \u00b7 '),
@@ -7480,7 +7500,8 @@ function collectSearchMatches(q){
   });
 
   DOCTOR_DIRECTORY.forEach(d=>{
-    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(d.notes)){
+    const customHit = (d.customTerms||[]).some(t => hit(t.en) || hit(t.es) || hit(t.def));
+    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(d.notes) || customHit){
       out.push({ group:'Doctor Directory', icon:ICON_GRID, color:'#7C6A9C',
         title:d.name, sub:[d.specialty, d.locationDetails].filter(Boolean).join(' \u00b7 '),
         target:'doctor-directory', rank: starts(d.name) ? 0 : 1 });
@@ -8766,7 +8787,9 @@ function trackWrite(promise){
     updateSyncStatus(pendingWriteCount === 0);
   };
   promise.then(settle, settle);
-  if(!navigator.onLine) return Promise.resolve();
+  // The offline early-resolve that used to live here only made sense while
+  // Firestore persistence was queueing writes locally. With that gone, a
+  // failed write must surface as a failure so the person can retry.
   return promise;
 }
 
@@ -8986,7 +9009,8 @@ function renderContent(){
       terms = terms.filter(t =>
         (t.en||'').toLowerCase().includes(q) ||
         (t.es||'').toLowerCase().includes(q) ||
-        (t.def||'').toLowerCase().includes(q)
+        (t.def||'').toLowerCase().includes(q) ||
+        (t.notes||'').toLowerCase().includes(q)
       );
     }
     if(terms.length===0){ emptySections.push(cat); return; }
@@ -9019,6 +9043,7 @@ function renderContent(){
             <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
           </div>` : ''}
           <p class="def">${escapeHtml(t.def)}</p>
+          ${t.notes ? `<div class="term-note">${ICON_EDIT}<span>${escapeHtml(t.notes)}</span></div>` : ''}
           ${renderLinks(t, cat.id)}
           ${termAttachments.length ? `<div class="attach-row">${termAttachments.map(a=>attachmentChipHtml(a, `deleteAttachment('${a.id}')`)).join('')}</div>` : ''}
           ${(t.source || t.editedBy) ? `<div class="meta">
@@ -10146,6 +10171,77 @@ function renderDoctorDirectory(q){
   return html;
 }
 
+let doctorTermTargetId = null;
+
+function openDoctorTermModal(doctorId){
+  requireName(()=>{
+    doctorTermTargetId = doctorId;
+    const d = DOCTOR_DIRECTORY.find(x=>x.id===doctorId);
+    document.getElementById('doctorTermTitle').textContent = d ? `Add a term for ${d.name}` : 'Add a term';
+    document.getElementById('fDTEn').value = '';
+    document.getElementById('fDTEs').value = '';
+    document.getElementById('fDTDef').value = '';
+    document.getElementById('doctorTermOverlay').classList.add('show');
+    document.getElementById('fDTEn').focus();
+  });
+}
+
+function closeDoctorTermModal(){
+  document.getElementById('doctorTermOverlay').classList.remove('show');
+  doctorTermTargetId = null;
+}
+
+async function saveDoctorTerm(){
+  const en = document.getElementById('fDTEn').value.trim();
+  if(!en){ showToast('English term is required.'); return; }
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===doctorTermTargetId);
+  if(!d){ showToast('Could not find that doctor.'); return; }
+
+  const term = {
+    id: genId(), en,
+    es: document.getElementById('fDTEs').value.trim() || '',
+    def: document.getElementById('fDTDef').value.trim() || '',
+    addedBy: whoAmI() || 'Someone',
+    addedAt: Date.now(),
+  };
+  const record = { ...d, customTerms: [...(d.customTerms || []), term] };
+  delete record.id;
+
+  try{
+    await persistDoctorDirectoryEntry(d.id, record);
+    const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
+    DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
+    logActivity(`added the term "${en}" to ${d.name}`);
+    closeDoctorTermModal();
+    successBurst();
+    showToast('Term added.');
+    render();
+    openDoctorDirDetail(d.id);   // keep the detail view open on the same doctor
+  }catch(err){
+    showToast(saveErrorMessage(err, 'doctor-directory'));
+  }
+}
+
+async function deleteDoctorTerm(doctorId, termId){
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===doctorId);
+  if(!d) return;
+  const term = (d.customTerms||[]).find(t=>t.id===termId);
+  if(!term) return;
+  if(!confirm(`Remove "${term.en}" from ${d.name}?`)) return;
+  const record = { ...d, customTerms: (d.customTerms||[]).filter(t=>t.id!==termId) };
+  delete record.id;
+  try{
+    await persistDoctorDirectoryEntry(d.id, record);
+    const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
+    DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
+    showToast('Term removed.');
+    render();
+    openDoctorDirDetail(d.id);
+  }catch(err){
+    showToast('Could not remove — check your connection.');
+  }
+}
+
 function closeDoctorDirDetail(){
   document.getElementById('doctorDirDetailOverlay').classList.remove('show');
 }
@@ -10221,6 +10317,39 @@ function renderDoctorDirDetail(d){
     `;
   }
 
+  // Terms the team has attached to this specific doctor by hand — the phrases
+  // this provider actually uses in the room, which no general search returns.
+  // Kept on the doctor record and never touched by a Doctor Prep re-search.
+  const custom = Array.isArray(d.customTerms) ? d.customTerms : [];
+  const customTermsSection = `
+    <div class="dd-detail-section-label">${ICON_EDIT} Team terms for this doctor</div>
+    ${custom.length ? `<div class="doc-research-terms">
+      ${custom.map(t => {
+        const exists = allTerms.some(e => (e.en||'').trim().toLowerCase() === (t.en||'').trim().toLowerCase());
+        const enS = escapeHtml(t.en).replace(/'/g,"\\'");
+        const esS = escapeHtml(t.es||'').replace(/'/g,"\\'");
+        const dfS = escapeHtml(t.def||'').replace(/'/g,"\\'");
+        const spS = escapeHtml(specialtyForMatch||'').replace(/'/g,"\\'");
+        return `
+          <div class="doc-research-term-card">
+            <div class="doc-research-term-main">
+              <div class="doc-research-term-en">${escapeHtml(t.en)}</div>
+              ${t.es ? `<div class="doc-research-term-es">${escapeHtml(t.es)}</div>` : ''}
+              ${t.def ? `<div class="doc-research-term-def">${escapeHtml(t.def)}</div>` : ''}
+              ${t.addedBy ? `<div class="doc-research-term-def" style="opacity:.65; margin-top:4px;">Added by ${escapeHtml(t.addedBy)}</div>` : ''}
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
+              ${exists
+                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
+                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enS}', '${esS}', '${dfS}', this, '${spS}')">${ICON_PLUS} Add</button>`}
+              <button class="doc-research-badge" style="background:transparent; color:var(--ink-faint);" onclick="deleteDoctorTerm('${d.id}','${t.id}')" title="Remove this term">Remove</button>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>` : `<div class="dd-detail-empty-research">No team terms yet for ${escapeHtml(d.name)}. Add the phrases this provider actually uses.</div>`}
+    <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="openDoctorTermModal('${d.id}')">${ICON_PLUS} Add a term for this doctor</button>
+  `;
+
   return `
     <button class="dd-detail-close" title="Close" onclick="closeDoctorDirDetail()">✕</button>
     <div class="dd-detail-header">
@@ -10239,6 +10368,7 @@ function renderDoctorDirDetail(d){
     ${d.locationDetails ? `<div class="doc-dir-location-pin">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
     ${d.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(d.notes)}</p>` : ''}
     ${attribution ? `<div class="meta"><span class="source"></span><span class="source">${attribution}</span></div>` : ''}
+    ${customTermsSection}
     ${researchSection}
   `;
 }
@@ -10407,7 +10537,7 @@ function renderDirectory(q){
       .sort((a,b)=> collateTerms(a.t.en, b.t.en));
     sortedTerms.forEach(({ t })=>{
       const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
-      const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q);
+      const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q);
       if(!matches) return;
 
       if(t.url){
@@ -10458,6 +10588,7 @@ function _openAddModal(fromDirectory){
   document.getElementById('fEn').value = '';
   document.getElementById('fEs').value = '';
   document.getElementById('fDef').value = '';
+  document.getElementById('fNotes').value = '';
   document.getElementById('fSource').value = '';
   document.getElementById('fSourceUrl').value = '';
   populateCategorySelect();
@@ -10478,6 +10609,7 @@ function _openEditModal(categoryId, termId){
   document.getElementById('fEn').value = term.en || '';
   document.getElementById('fEs').value = term.es || '';
   document.getElementById('fDef').value = term.def || '';
+  document.getElementById('fNotes').value = term.notes || '';
   document.getElementById('fSource').value = term.source || '';
   document.getElementById('fSourceUrl').value = term.url || '';
   populateCategorySelect();
@@ -10546,6 +10678,7 @@ async function saveTerm(){
   const es = document.getElementById('fEs').value.trim();
   const def = document.getElementById('fDef').value.trim();
   const source = document.getElementById('fSource').value.trim();
+  const notes = document.getElementById('fNotes').value.trim();
   let url = document.getElementById('fSourceUrl').value.trim();
   if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
   const newCategoryId = document.getElementById('fCategory').value;
@@ -10563,7 +10696,7 @@ async function saveTerm(){
   if(existingTerm){
     const snapshot = {
       en: existingTerm.en, es: existingTerm.es, def: existingTerm.def,
-      source: existingTerm.source, url: existingTerm.url,
+      notes: existingTerm.notes, source: existingTerm.source, url: existingTerm.url,
       editedBy: existingTerm.editedBy, editedOn: existingTerm.editedOn,
       savedAt: Date.now()
     };
@@ -10573,6 +10706,7 @@ async function saveTerm(){
   const record = {
     id: (existingTerm && existingTerm.id) || genId(), categoryId: newCategoryId,
     en, es, def, source,
+    notes: notes || undefined,
     url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined,
     history
   };
