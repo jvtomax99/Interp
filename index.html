@@ -496,7 +496,11 @@
   /* Horizontal rails on phones so a section reads as one browsable row
      instead of a wall; they become plain wrapping grids on wider screens. */
   .home-rail{
-    display:grid; grid-auto-flow:column; grid-auto-columns:minmax(158px,1fr);
+    display:grid; grid-auto-flow:column; grid-auto-columns:minmax(176px,1fr);
+    /* Without this, every cell stretches to the height of the tallest card in
+       the row — one domain with a dozen subgroups made every other card a
+       full screen tall. Cards now size to their own content. */
+    align-items:start;
     gap:10px; overflow-x:auto; scroll-snap-type:x mandatory;
     margin:0 -18px; padding:2px 18px 8px 18px; scrollbar-width:none;
   }
@@ -505,7 +509,7 @@
   @media (min-width:820px){
     .home-rail{
       grid-auto-flow:row; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-      overflow:visible; margin:0; padding:0;
+      align-items:start; overflow:visible; margin:0; padding:0;
     }
   }
   /* Quick action: wider, description-led card that names the outcome rather
@@ -694,7 +698,7 @@
     padding:0 10px 10px 10px; margin-top:-4px;
   }
   .domain-family-kid{
-    display:flex; align-items:center; gap:8px; width:100%; padding:8px 10px;
+    display:flex; align-items:center; gap:8px; width:100%; padding:7px 10px;
     border:none; background:rgba(255,255,255,0.55); cursor:pointer; font-family:inherit;
     text-align:left; border-radius:8px; transition:background .15s var(--ease);
   }
@@ -705,10 +709,21 @@
   .domain-family-kid-name{
     flex:1; min-width:0; font-family:var(--sans); font-size:12px; font-weight:600;
     color:var(--ink); line-height:1.3;
+    /* Two lines max: enough to tell "Breast Oncology" from "Radiation
+       Oncology" at this width, without letting a long name grow the card
+       without limit. */
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden;
   }
   .domain-family-kid-count{
     font-family:var(--sans); font-size:10.5px; color:var(--ink-faint); flex-shrink:0;
   }
+  .domain-family-more{
+    border:none; background:transparent; cursor:pointer; font-family:var(--sans);
+    font-size:11.5px; font-weight:600; color:var(--tile-color); padding:6px 10px;
+    text-align:left; border-radius:8px;
+  }
+  .domain-family-more:hover{ background:rgba(255,255,255,0.6); }
   html[data-theme="dark"] .domain-family{ background:var(--paper); }
   html[data-theme="dark"] .domain-family-kid{ background:rgba(255,255,255,0.06); }
   html[data-theme="dark"] .domain-family-kid:hover{ background:rgba(255,255,255,0.12); }
@@ -9834,11 +9849,12 @@ function renderHome(){
             <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
           </button>
           ${kids.length ? `<div class="domain-family-kids">
-            ${kids.map(k=>`
-              <button class="domain-family-kid" onclick="setCategory('${k.id}')">
+            ${kids.slice(0, 3).map(k=>`
+              <button class="domain-family-kid" title="${escapeAttr(k.name)}" onclick="setCategory('${k.id}')">
                 <span class="domain-family-kid-name">${escapeHtml(k.name)}</span>
                 <span class="domain-family-kid-count">${k.count}</span>
               </button>`).join('')}
+            ${kids.length > 3 ? `<button class="domain-family-more" onclick="setCategory('${parent.id}')">+${kids.length - 3} more</button>` : ''}
           </div>` : ''}
         </div>`;
     }).join('');
