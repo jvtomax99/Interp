@@ -116,6 +116,17 @@
     display:flex; align-items:center; gap:14px; padding:0 18px;
     background:var(--paper); border-bottom:1px solid var(--line);
   }
+  /* Back sits left of search and only appears when there's history to
+     unwind, so Home doesn't show a dead control. */
+  .tg-back{
+    display:none; width:38px; height:38px; flex-shrink:0; border-radius:50%;
+    border:1px solid var(--line); background:var(--paper); color:var(--ink-soft);
+    cursor:pointer; align-items:center; justify-content:center;
+    transition:background .15s var(--ease), color .15s var(--ease);
+  }
+  .tg-back.is-visible{ display:flex; }
+  .tg-back:hover{ background:var(--bg-hi); color:var(--ink); }
+  .tg-back svg{ width:19px; height:19px; }
   .tg-search{
     flex:1; min-width:0; max-width:620px; display:flex; align-items:center; gap:9px;
     height:40px; padding:0 14px; border-radius:999px; cursor:pointer; text-align:left;
@@ -2406,6 +2417,9 @@
 <body>
 
 <header class="topbar-global">
+  <button class="tg-back" id="tgBack" onclick="goBack()" aria-label="Go back" title="Back">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
   <button class="tg-search" onclick="openGlobalSearch()" aria-label="Search">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     <span>Search terms, doctors, or the app…</span>
@@ -8752,6 +8766,11 @@ window.addEventListener('offline', ()=> updateSyncStatus(false));
 // The top bar lives outside #app, so render() never rewrites it — its two
 // stateful icons are refreshed here instead of being rebuilt each time.
 function syncTopBar(){
+  const backBtn = document.getElementById('tgBack');
+  if(backBtn){
+    const canGoBack = activeCategory !== 'home' || navStack.length > 0;
+    backBtn.classList.toggle('is-visible', canGoBack);
+  }
   const themeBtn = document.getElementById('tgTheme');
   if(themeBtn){
     const dark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -8927,6 +8946,11 @@ function renderContent(){
     <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
     <p>HUMC Language Services · Generated ${new Date().toLocaleDateString()}</p>
   </div>`;
+  // A domain with no terms yet — or none matching the current search — used
+  // to render nothing at all, so opening a brand-new subgroup looked like the
+  // app had broken. Track that case and show a real empty state instead.
+  let renderedAny = false;
+  const emptySections = [];
   cats.forEach(cat=>{
     // Sort a *copy* for display only. Each item keeps _idx — its true position
     // in the stored array — so the edit and delete buttons still target the
@@ -8944,7 +8968,8 @@ function renderContent(){
         (t.def||'').toLowerCase().includes(q)
       );
     }
-    if(terms.length===0) return;
+    if(terms.length===0){ emptySections.push(cat); return; }
+    renderedAny = true;
 
     html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}"><h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
     html += `<div class="grid">`;
@@ -8985,8 +9010,17 @@ function renderContent(){
     html += `</div>`;
   });
 
-  if(!html){
-    html = `<div class="empty"><div class="glyph">⌕</div>No terms match your search.<br>Try a different word, or add this term.</div>`;
+  // This used to test `!html`, which was never true — the export row and jump
+  // bar are always in the string by this point. So a domain with no terms fell
+  // through and rendered as a blank page instead of an empty state.
+  if(!renderedAny){
+    if(q){
+      html += `<div class="empty"><div class="glyph">\u2315</div>No terms match your search.<br>Try a different word, or add this term.</div>`;
+    } else {
+      const names = emptySections.map(c=>escapeHtml(c.name)).join(', ');
+      html += `<div class="empty"><div class="glyph">${ICON_LAYERS}</div>
+        Nothing here yet${names ? ` in ${names}` : ''}.<br>Use <b>+ Add term</b> above to add the first one.</div>`;
+    }
   }
 
   content.innerHTML = html;
@@ -9035,7 +9069,17 @@ function toggleToolsCollapsed(){
 // The greeting banner's shortcut button: expand Recent Activity if it's
 // currently collapsed, then scroll down to it — one tap from "Hello" to
 // the actual list, instead of expand-then-hunt-for-it.
-function setCategory(id){
+// Where you came from, so Back can return there instead of dumping you on
+// Home. Kept as a stack rather than a single "previous" value so a chain like
+// Home -> Oncology -> Breast Oncology unwinds one step at a time.
+let navStack = [];
+
+function setCategory(id, isBack){
+  if(!isBack && activeCategory !== id){
+    navStack.push(activeCategory);
+    if(navStack.length > 40) navStack.shift();   // don't grow without bound
+    try{ history.pushState({ ih: true }, ''); }catch(e){}
+  }
   activeCategory = id;
   if(id === 'chat'){
     lastSeenChatCount = CHAT_MESSAGES.length;
@@ -9055,9 +9099,30 @@ function setCategory(id){
 // someone who jumped deep into a domain would land on Home already scrolled
 // halfway down the page.
 function goHome(){
-  setCategory('home');
+  navStack = [];
+  setCategory('home', true);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function goBack(){
+  if(!navStack.length){ goHome(); return; }
+  const prev = navStack.pop();
+  setCategory(prev, true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// The phone's own back gesture should do the same thing. Each navigation
+// pushes a history entry, so swiping back walks the in-app stack instead of
+// leaving the app entirely — which is what it did before.
+window.addEventListener('popstate', () => {
+  if(navStack.length){
+    const prev = navStack.pop();
+    setCategory(prev, true);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    history.pushState({ ih: true }, '');
+  }
+});
+try{ history.replaceState({ ih: true }, ''); }catch(e){}
 
 // Lets someone set or change their attribution name from any screen,
 // including the focused views where the sidebar (and its own name field)
