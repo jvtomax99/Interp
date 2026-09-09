@@ -666,13 +666,22 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
     padding:16px 6px 14px 6px; border-radius:16px; cursor:pointer; border:none;
     background:var(--tile-tint);
-    box-shadow:inset 0 0 0 1px var(--tile-edge),
-               inset 0 1px 0 rgba(255,255,255,0.6),
-               0 1px 2px rgba(21,28,44,0.04);
+    box-shadow:
+      inset 0 0 0 1px var(--tile-edge),
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      0 1px 2px rgba(21,28,44,0.06),
+      0 8px 20px -8px rgba(21,28,44,0.22);
     font-family:inherit; min-height:104px;
     transition:transform .18s var(--ease), box-shadow .2s var(--ease);
   }
-  .qa-tile:hover{ transform:translateY(-3px); box-shadow:inset 0 0 0 1px var(--tile-glow), var(--sh-2); }
+  .qa-tile:hover{
+    transform:translateY(-4px);
+    box-shadow:
+      inset 0 0 0 1px var(--tile-glow),
+      inset 0 1px 0 rgba(255,255,255,0.8),
+      0 2px 4px rgba(21,28,44,0.07),
+      0 14px 28px -12px rgba(21,28,44,0.28);
+  }
   .qa-tile:active{ transform:translateY(0) scale(0.97); }
   .qa-tile-icon{ color:var(--tile-color); display:flex; }
   .qa-tile-icon svg{ width:29px; height:29px; }
@@ -739,9 +748,11 @@
   .home-tile{
     background:var(--tile-tint); border:none; border-radius:var(--r-lg);
     padding:16px 15px 14px 15px; text-align:left; cursor:pointer;
-    box-shadow:inset 0 0 0 1px var(--tile-edge),
-               inset 0 1px 0 rgba(255,255,255,0.55),
-               0 1px 2px rgba(21,28,44,0.04);
+    box-shadow:
+      inset 0 0 0 1px var(--tile-edge),
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      0 1px 2px rgba(21,28,44,0.06),
+      0 8px 20px -8px rgba(21,28,44,0.22);
     transition:transform .18s var(--ease), box-shadow .2s var(--ease);
     animation:tileIn .45s var(--ease) both; display:flex; flex-direction:column; gap:9px;
     font-family:inherit; min-height:138px; position:relative;
@@ -820,8 +831,12 @@
      names still read as the same considered shape. */
   .home-tile-name{ margin-bottom:auto; }
   .home-tile:hover{
-    transform:translateY(-4px);
-    box-shadow:inset 0 0 0 1px var(--tile-glow), var(--sh-2);
+    transform:translateY(-5px);
+    box-shadow:
+      inset 0 0 0 1px var(--tile-glow),
+      inset 0 1px 0 rgba(255,255,255,0.8),
+      0 2px 4px rgba(21,28,44,0.07),
+      0 16px 32px -12px rgba(21,28,44,0.30);
   }
   .home-tile:active{ transform:translateY(-1px) scale(0.97); }
   /* The icon sits directly on the card tint — no chip, no gradient plate.
@@ -841,9 +856,11 @@
   .domain-family{
     display:flex; flex-direction:column;
     background:var(--tile-tint); border-radius:var(--r-lg);
-    box-shadow:inset 0 0 0 1px var(--tile-edge),
-               inset 0 1px 0 rgba(255,255,255,0.55),
-               0 1px 2px rgba(21,28,44,0.04);
+    box-shadow:
+      inset 0 0 0 1px var(--tile-edge),
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      0 1px 2px rgba(21,28,44,0.06),
+      0 8px 20px -8px rgba(21,28,44,0.22);
     animation:tileIn .45s var(--ease) both; overflow:hidden;
   }
   .domain-family-head{
@@ -953,6 +970,15 @@
     --glass-bg:rgba(28,36,54,0.66);
     --glass-edge:rgba(255,255,255,0.14);
     --glass-shade:rgba(0,0,0,0.34);
+  }
+  html[data-theme="dark"] .card,
+  html[data-theme="dark"] .home-tile,
+  html[data-theme="dark"] .qa-tile,
+  html[data-theme="dark"] .domain-family{
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.07),
+      0 10px 26px -12px rgba(0,0,0,0.75);
   }
   html[data-theme="dark"] .home-tile,
   html[data-theme="dark"] .domain-group-tile::before,
@@ -1578,7 +1604,11 @@
   .card{
     background:var(--paper); border-radius:var(--r-md);
     padding:20px 20px 17px 20px; position:relative; overflow:hidden;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+    box-shadow:
+      inset 0 0 0 1px var(--line-soft),
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      0 1px 2px rgba(21,28,44,0.05),
+      0 8px 22px -10px rgba(21,28,44,0.20);
     transition:box-shadow .22s var(--ease), transform .22s var(--ease);
     animation:cardIn .3s var(--ease) both;
   }
@@ -8510,7 +8540,7 @@ function renderReviewSummary(){
 // in one place so the palette can be retuned without hunting through five
 // separate template literals.
 function tileVars(color){
-  return `--tile-color:${color}; --tile-tint:${color}14; --tile-edge:${color}2E; --tile-glow:${color}55;`;
+  return `--tile-color:${color}; --tile-tint:${color}1F; --tile-edge:${color}45; --tile-glow:${color}66;`;
 }
 
 function tileHtml(t, i, onclickCall, opts){
