@@ -398,18 +398,39 @@
     /* Full-bleed: pulled out to the edges of the content column by the exact
        amount of its padding, and out of the top so it sits flush under the
        header. Overridden per breakpoint below to match each padding value. */
-    /* Bottom corners are rounded so the photo curves away from the floating
-       search card instead of ending in two hard notches beside it. The top
-       stays square because it butts against the header. */
-    position:relative; padding:34px 48px 62px 48px;
+    /* Square edges here: the curve belongs to the page sheet below, which
+       rises over the photo (see ::after) rather than the photo curving away.
+       That's the inverse of a rounded-bottom card and reads as one continuous
+       surface instead of two stacked panels. */
+    position:relative; padding:34px 48px 74px 48px;
     margin:-40px -48px 0 -48px;
-    border-radius:0 0 28px 28px; overflow:hidden; isolation:isolate;
+    border-radius:0; overflow:hidden; isolation:isolate;
     background:#2A3C5C;
     box-shadow:var(--sh-2);
     /* Column now: brand row pinned to the top, greeting block to the bottom. */
     display:flex; flex-direction:column; align-items:stretch; gap:14px;
     min-height:232px;
   }
+  /* The page surface curving up over the bottom of the photo. */
+  .home-greeting::after{
+    content:''; position:absolute; left:-1px; right:-1px; bottom:-1px; height:30px;
+    background:var(--bg); border-radius:30px 30px 0 0; z-index:2; pointer-events:none;
+  }
+  /* And a soft dissolve just above it, so the image melts into the page
+     instead of stopping at a line. */
+  .home-greeting::before{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:66px;
+    /* Plain two-stop fade first, for Safari older than 16.4 which lacks
+       color-mix() and would drop the whole declaration otherwise. */
+    background:linear-gradient(to bottom, rgba(0,0,0,0) 0%, var(--bg) 100%);
+    background:linear-gradient(to bottom,
+      rgba(0,0,0,0) 0%,
+      color-mix(in srgb, var(--bg) 45%, transparent) 55%,
+      var(--bg) 100%);
+    z-index:1; pointer-events:none;
+  }
+  /* Keep the greeting above both. */
+  .home-greeting-text, .home-greeting-brand{ z-index:3; }
   .home-greeting-photo{
     position:absolute; inset:0; z-index:-2;
     background:url('./hero.jpg') 62% 55% / cover no-repeat;
