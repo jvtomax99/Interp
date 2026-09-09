@@ -6350,7 +6350,10 @@ async function saveTermDoc(term){
     return true;
   }catch(err){
     console.error('saveTermDoc failed:', err);
-    showToast('Could not save. Check connection and retry.');
+    // Surface the real reason. The generic message sent people (and me)
+    // chasing connection problems when the actual cause was something else
+    // entirely, and the console isn't reachable on a phone.
+    showToast(saveErrorMessage(err, 'terms') + (err && err.code ? ` [${err.code}]` : ''));
     return false;
   }
 }
@@ -9120,7 +9123,17 @@ function toggleToolsCollapsed(){
 // Home -> Oncology -> Breast Oncology unwinds one step at a time.
 let navStack = [];
 
+// Overlays live above the app shell, so switching screens underneath leaves
+// them on top and the tap looks like it did nothing. Anything open gets
+// dismissed on navigation.
+function closeAllOverlays(){
+  document.querySelectorAll('.overlay.show').forEach(el => el.classList.remove('show'));
+  const lb = document.getElementById('lightbox');
+  if(lb) lb.classList.remove('show');
+}
+
 function setCategory(id, isBack){
+  closeAllOverlays();
   if(!isBack && activeCategory !== id){
     navStack.push(activeCategory);
     if(navStack.length > 40) navStack.shift();   // don't grow without bound
@@ -10588,7 +10601,7 @@ function _openAddModal(fromDirectory){
   document.getElementById('fEn').value = '';
   document.getElementById('fEs').value = '';
   document.getElementById('fDef').value = '';
-  document.getElementById('fNotes').value = '';
+  { const el = document.getElementById('fNotes'); if(el) el.value = ''; }
   document.getElementById('fSource').value = '';
   document.getElementById('fSourceUrl').value = '';
   populateCategorySelect();
@@ -10609,7 +10622,7 @@ function _openEditModal(categoryId, termId){
   document.getElementById('fEn').value = term.en || '';
   document.getElementById('fEs').value = term.es || '';
   document.getElementById('fDef').value = term.def || '';
-  document.getElementById('fNotes').value = term.notes || '';
+  { const el = document.getElementById('fNotes'); if(el) el.value = term.notes || ''; }
   document.getElementById('fSource').value = term.source || '';
   document.getElementById('fSourceUrl').value = term.url || '';
   populateCategorySelect();
@@ -10678,7 +10691,8 @@ async function saveTerm(){
   const es = document.getElementById('fEs').value.trim();
   const def = document.getElementById('fDef').value.trim();
   const source = document.getElementById('fSource').value.trim();
-  const notes = document.getElementById('fNotes').value.trim();
+  const notesEl = document.getElementById('fNotes');
+  const notes = notesEl ? notesEl.value.trim() : '';
   let url = document.getElementById('fSourceUrl').value.trim();
   if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
   const newCategoryId = document.getElementById('fCategory').value;
