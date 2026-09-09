@@ -9092,8 +9092,8 @@ function renderContent(){
     const kids = cats.slice(1);
     html += `<div class="subgroup-bar">
       <span class="subgroup-bar-label">Jump to</span>
-      <button class="subgroup-pill" onclick="document.getElementById('domain-${parent.id}')?.scrollIntoView({behavior:'smooth', block:'start'})">${escapeHtml(parent.name)}</button>
-      ${kids.map(k=>`<button class="subgroup-pill" onclick="document.getElementById('domain-${k.id}')?.scrollIntoView({behavior:'smooth', block:'start'})">${escapeHtml(k.name)} <span>${k.terms.length}</span></button>`).join('')}
+      <button class="subgroup-pill" onclick="jumpToDomain('${parent.id}')">${escapeHtml(parent.name)}</button>
+      ${kids.map(k=>`<button class="subgroup-pill" onclick="jumpToDomain('${k.id}')">${escapeHtml(k.name)} <span>${k.terms.length}</span></button>`).join('')}
     </div>`;
   }
   html += `<div class="print-export-row">
@@ -9137,17 +9137,24 @@ function renderContent(){
     }
     if(terms.length===0){ emptySections.push(cat); return; }
     renderedAny = true;
-
-    html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}"><h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2><span class="sub">${terms.length} term${terms.length===1?'':'s'}</span></div>`;
-    html += `<div class="grid">`;
     // Trim this section to whatever budget is left, remembering how much was
     // held back so the "show more" control can report an honest total.
+    // If nothing is left, skip the section outright rather than emitting a
+    // header that claims "0 terms" — that was making a truncated subgroup look
+    // empty, and left a heading with no content behind it.
     const fullCount = terms.length;
+    if(budget <= 0){
+      truncatedTotal += fullCount;
+      return;
+    }
     if(terms.length > budget){
       truncatedTotal += terms.length - budget;
       terms = terms.slice(0, Math.max(0, budget));
     }
     budget -= terms.length;
+
+    html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}"><h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2><span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span></div>`;
+    html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
       const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
       const delay = Math.min(cardIdx * 0.03, 0.3);
@@ -10033,7 +10040,7 @@ function renderTabBar(){
 }
 
 function openMoreSheet(){
-  const tools = getToolTiles().filter(t=>t.id!=='medifind');
+  const tools = getToolTiles();
   const allDomains = getDomainTiles();
   const row = (t, nested) => `
     <button class="domain-chip ${nested?'is-nested':''}" style="${tileVars(t.color)}" onclick="closeMoreSheet(); ${t.externalUrl ? `window.open('${t.externalUrl}','_blank')` : `setCategory('${t.id}')`}">
@@ -10145,6 +10152,7 @@ function renderHome(){
     qaCard('#7C6A9C', ICON_GRID,   'Doctor Directory',   'Saved doctors and their terms', `setCategory('doctor-directory')`),
     qaCard('#6F97AC', ICON_PERSON, 'Provider Pictures',  'Put a face to a name',          `setCategory('providers')`),
     qaCard('#2E8BD0', ICON_SEARCH, 'Find a Doctor',      'Hackensack Meridian directory', `window.open('https://www.hackensackmeridianhealth.org/en/doctors','_blank')`),
+    qaCard('#35A97A', ICON_SEARCH, 'MediFind',           'Nationwide, by condition',      `window.open('https://www.medifind.com/','_blank')`),
   ].join('');
 
   const utilityCards = [
@@ -10541,6 +10549,17 @@ function renderDoctorDirDetail(d){
     ${customTermsSection}
     ${researchSection}
   `;
+}
+
+// Jump-bar targets only exist in the DOM if that section actually rendered.
+// With the term-render budget, a domain's later subgroups often haven't been
+// built yet, so the old scroll-only handler silently did nothing — which is
+// why the bigger domains' subgroups appeared broken. Fall back to opening the
+// subgroup directly, which always lands somewhere correct.
+function jumpToDomain(id){
+  const el = document.getElementById('domain-' + id);
+  if(el){ el.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+  setCategory(id);
 }
 
 function showMoreTerms(){
