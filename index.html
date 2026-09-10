@@ -4393,6 +4393,12 @@ async function loadData(){
       return;
     }
 
+    // Paint immediately from the last known glossary, then refresh from the
+    // network underneath. Previously nothing appeared until all ~1,700 term
+    // documents had downloaded, which is what made opening the app feel slow
+    // every single time even though the content rarely changes.
+    if(loadGlossaryCache()) render();
+
     const metaSnap = await db.collection('terminology-meta').doc('categories').get();
 
     if(!metaSnap.exists){
@@ -4407,8 +4413,15 @@ async function loadData(){
       await migrateToPerTermStorage(source);
     }
 
-    await loadCategoriesMeta();
-    await loadAllTerms();
+    // Categories and terms are independent reads, so fetch them at the same
+    // time instead of waiting for one before starting the other. They're still
+    // APPLIED in order, because terms are bucketed into categories.
+    const [, termsSnap] = await Promise.all([
+      loadCategoriesMeta(),
+      db.collection('terms').get(),
+    ]);
+    applyTermsSnapshot(termsSnap);
+    saveGlossaryCache();
     startTermsListener();
     startCategoriesMetaListener();
     render();
@@ -4443,6 +4456,41 @@ async function migrateToPerTermStorage(source){
       batch.set(ref, stripUndefined(t));
     });
     await batch.commit();
+  }
+}
+
+/* ---------- Local glossary cache ----------
+   The glossary is ~1,700 documents and changes rarely, but every launch was
+   downloading all of it before drawing anything. These keep the last known
+   copy in localStorage so the app can paint instantly and refresh in the
+   background. The realtime listener still corrects anything stale within a
+   second of connecting, so the cache can never be authoritative for long. */
+const GLOSSARY_CACHE_KEY = 'ih_glossary_cache_v1';
+
+function saveGlossaryCache(){
+  try{
+    localStorage.setItem(GLOSSARY_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      categories: DATA.categories,
+    }));
+  }catch(err){
+    // Quota exceeded or private mode — the app works fine without a cache,
+    // it just goes back to waiting for the network.
+    console.warn('Glossary cache not saved:', err && err.name);
+  }
+}
+
+function loadGlossaryCache(){
+  try{
+    const raw = localStorage.getItem(GLOSSARY_CACHE_KEY);
+    if(!raw) return false;
+    const cached = JSON.parse(raw);
+    if(!cached || !Array.isArray(cached.categories) || !cached.categories.length) return false;
+    DATA = { ...DATA, categories: cached.categories };
+    return true;
+  }catch(err){
+    console.warn('Glossary cache unreadable, ignoring:', err && err.name);
+    return false;
   }
 }
 
@@ -4493,6 +4541,7 @@ function startTermsListener(){
     termsSnapTimer = setTimeout(()=>{
       applyTermsSnapshot(pendingSnap);
       pendingSnap = null;
+      saveGlossaryCache();
       // A full render() (not just renderContent()) so sidebar term counts
       // and "All domains" totals stay live too, not just whatever's open.
       render();
