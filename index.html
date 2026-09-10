@@ -1097,7 +1097,17 @@
        which is what carries the selection instead of colour alone. */
     .tabbar{
       display:flex; position:fixed; z-index:60;
-      left:14px; right:14px; bottom:calc(10px + env(safe-area-inset-bottom, 0px));
+      left:14px; right:14px;
+      /* In Safari (not installed) the browser toolbar occupies the bottom and
+         env(safe-area-inset-bottom) reports 0, so a small fixed offset put the
+         capsule right in the home-indicator swipe zone — taps on Home landed
+         on the system gesture instead. max() sets a floor of 22px there while
+         still clearing the inset properly when installed as a PWA. */
+      /* Safari's bottom toolbar collapses as you scroll, which grows the
+         visual viewport and drags anything fixed to bottom further down —
+         onto the home indicator. A larger floor keeps the capsule clear in
+         both toolbar states, not just the expanded one. */
+      bottom:max(38px, calc(16px + env(safe-area-inset-bottom, 0px)));
       background:var(--glass-bg);
       -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
       border:1px solid var(--glass-edge);
@@ -1135,12 +1145,15 @@
       border:2px solid var(--paper);
     }
     /* Clear the floating bar, including the gap beneath it. */
-    #content{ padding-bottom:96px; }
+    #content{ padding-bottom:128px; }
     .home-fab{ display:none; }
     /* The global top bar now owns search, branding and the theme toggle, so
        the mobile-only duplicates of all three are retired. */
-    .brand-mobile, .gs-trigger-mobile, .theme-fab{ display:none !important; }
-    .name-fab{ bottom:calc(96px + env(safe-area-inset-bottom)); }
+    /* The floating name button sat at bottom-left, directly on top of the
+       Home tab in the capsule — a 48px circle overlapping the tab's tap
+       target, so presses on Home hit the FAB instead. The header avatar
+       already opens the same name dialog, so this is pure duplication. */
+    .brand-mobile, .gs-trigger-mobile, .theme-fab, .name-fab{ display:none !important; }
   }
 
   /* More sheet — a bottom sheet on phones, a centered modal anywhere wider. */
@@ -1504,24 +1517,9 @@
   .nav-tile-grid .home-tile-name{ font-size:12.5px; }
   .nav-tile-grid .home-tile-count{ font-size:10px; }
 
-  .home-fab{ display:none; }
+  /* Retired: the bottom tab bar carries Home now. */
+  .home-fab{ display:none !important; }
   @media (max-width:760px){
-    /* Bottom-center — clear of Name (bottom-left) and clear of whatever
-       in-flow content ends near the bottom of the screen, since the
-       global #content bottom padding reserves space for it here. */
-    .home-fab{
-      display:flex; position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
-      transform:translateX(-50%);
-      border:none; cursor:pointer; padding:12px 18px 12px 14px; border-radius:30px;
-      background:linear-gradient(145deg, #0079BD, #252E6D); color:#fff;
-      align-items:center; gap:8px;
-      box-shadow:0 8px 20px -6px rgba(37,46,109,0.55), inset 0 1px 0 rgba(255,255,255,0.28);
-      z-index:60; transition:transform .15s var(--ease);
-      font-family:var(--sans); font-size:13.5px; font-weight:600;
-    }
-    .home-fab:active{ transform:translateX(-50%) scale(0.94); }
-    .home-fab svg{ width:19px; height:19px; flex-shrink:0; }
-    body.kb-open .home-fab{ display:none; }
   }
 
   .name-fab{ display:none; }
@@ -9079,10 +9077,6 @@ function render(){
     <button class="name-fab ${(activeCategory==='chat' || activeCategory==='userguide') ? 'name-fab-raised' : ''}" onclick="openNameModal()" title="Set your name" aria-label="Set your name for attribution">
       ${ICON_PERSON}
     </button>
-    ${activeCategory !== 'home' ? `
-    <button class="home-fab" onclick="goHome()" title="Home" aria-label="Go home">
-      ${ICON_HOME}<span>Home</span>
-    </button>` : ''}
     ${renderTabBar()}
   `;
 
