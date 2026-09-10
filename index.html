@@ -3890,6 +3890,19 @@ let collapsedDomainGroups = [];
 try{ collapsedDomainGroups = JSON.parse(localStorage.getItem('ih_collapsedDomainGroups') || '[]'); }catch(e){}
 let toolsCollapsed = false;
 try{ toolsCollapsed = localStorage.getItem('ih_toolsCollapsed') === '1'; }catch(e){}
+// Attribution name. Kept on window (see whoAmI()) because the sidebar field
+// that normally holds it doesn't exist in focused views — and mirrored to
+// localStorage so closing the app or reloading the PWA doesn't forget who
+// you are. Restored here, before the first render, so the Home greeting
+// paints with the name already in place instead of flashing "Welcome".
+const NAME_KEY = 'ih_myName';
+try{ window.__lastWho = localStorage.getItem(NAME_KEY) || ''; }catch(e){ window.__lastWho = ''; }
+function persistMyName(name){
+  try{
+    if(name) localStorage.setItem(NAME_KEY, name);
+    else localStorage.removeItem(NAME_KEY);
+  }catch(e){}
+}
 let searchQuery = '';
 let editingContext = null; // {categoryId, termId} or null for new
 const STORAGE_KEY = 'terminology-db-v1';
@@ -4002,6 +4015,11 @@ function closeOnboarding(){
 function completeOnboarding(){
   try{ localStorage.setItem('ih_onboarded', '1'); }catch(e){}
   closeOnboarding();
+  // Best moment to ask: they've just seen what the app does, and every
+  // shared action (terms, chat, providers) is gated on having a name anyway.
+  // Saved once, it now sticks across launches, so this should only ever
+  // appear on a genuinely new device.
+  if(!whoAmI()) setTimeout(openNameModal, 260);
 }
 
 function onboardingNext(){
@@ -5161,7 +5179,10 @@ function whoAmI(){
   // that keeps a chosen name working everywhere, sidebar visible or not.
   const el = document.getElementById('whoInput');
   if(el && el.value.trim()) return el.value.trim();
-  return (window.__lastWho || '').trim();
+  if((window.__lastWho || '').trim()) return window.__lastWho.trim();
+  // Last resort: read straight from storage. Covers the case where something
+  // reloads or replaces the in-memory value before the restore above runs.
+  try{ return (localStorage.getItem(NAME_KEY) || '').trim(); }catch(e){ return ''; }
 }
 function timeAgoLabel(){
   const d = new Date();
@@ -6972,7 +6993,12 @@ function render(){
   }
   if(window.__lastWho) { const wi = document.getElementById('whoInput'); if(wi) wi.value = window.__lastWho; }
   const whoInputEl = document.getElementById('whoInput');
-  if(whoInputEl) whoInputEl.addEventListener('input', (e)=>{ window.__lastWho = e.target.value; });
+  if(whoInputEl) whoInputEl.addEventListener('input', (e)=>{
+    window.__lastWho = e.target.value;
+    // The sidebar field is a second, equal way of setting the name — it has to
+    // save too, or typing there instead of using the modal quietly forgets.
+    persistMyName(e.target.value.trim());
+  });
 
   syncTopBar();
   renderContent();
@@ -7513,6 +7539,7 @@ function cancelNameModal(){
 function saveMyName(){
   const name = document.getElementById('fMyName').value.trim();
   window.__lastWho = name;
+  persistMyName(name);
   const whoEl = document.getElementById('whoInput');
   if(whoEl) whoEl.value = name;
   closeNameModal();
