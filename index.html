@@ -6957,12 +6957,9 @@ function renderLinks(t, categoryId){
 function render(){
   if(!DATA) return;
   const app = document.getElementById('app');
-  const totalTerms = DATA.categories.reduce((n,c)=>n+c.terms.length,0);
-
   let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`;
   let searchPlaceholder = 'Search terms, definitions, Spanish equivalents…';
   let showTopbar = true;
-  let showStatStrip = true;
   if(activeCategory === 'providers'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
     searchPlaceholder = 'Search provider photos, specialties, facilities…';
@@ -6977,28 +6974,20 @@ function render(){
     searchPlaceholder = 'Search links…';
   } else if(activeCategory === 'chat'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'events'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'translate'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'practice'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'review'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'userguide'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'doctor-research'){
     showTopbar = false;
-    showStatStrip = false;
   } else if(activeCategory === 'home'){
     showTopbar = false;
-    showStatStrip = false;
   }
 
   // Any focused screen — a single domain or a single tool — is meant to feel
@@ -7035,13 +7024,6 @@ function render(){
       <div class="topbar">
         <div class="search"><input id="searchInput" type="text" placeholder="${searchPlaceholder}" value="${escapeHtml(searchQuery)}"></div>
         ${addBtnHtml}
-      </div>` : ''}
-      ${showStatStrip ? `
-      <div class="stat-strip">
-        <div class="stat"><b>${totalTerms}</b><span>terms</span></div>
-        <div class="stat"><b>${DATA.categories.length}</b><span>domains</span></div>
-        <div class="stat"><b>${PROVIDERS.length}</b><span>providers</span></div>
-        <div class="stat"><b>${DATA.categories.reduce((n,c)=>n+c.terms.filter(t=>t.url).length,0)}</b><span>with a confirmed source link</span></div>
       </div>` : ''}
       <div id="content" class="content-fade"></div>
     </div>
