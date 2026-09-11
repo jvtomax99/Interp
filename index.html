@@ -1347,6 +1347,14 @@
     padding:8px 13px; border-radius:9px; font-family:var(--sans);
     font-size:11.5px; font-weight:700; color:var(--ink);
   }
+  .dupe-banner{
+    margin:4px 0 14px; padding:13px 14px; border-radius:13px;
+    background:var(--warn-soft, #FDF4E3); box-shadow:inset 0 0 0 1px rgba(176,141,42,0.25);
+  }
+  .dupe-banner .backfill-banner-text b{ color:#8A6D1F; }
+  .dupe-banner-actions{ display:flex; flex-wrap:wrap; gap:7px; margin-top:11px; }
+  html[data-theme="dark"] .dupe-banner{ background:rgba(176,141,42,0.12); }
+  html[data-theme="dark"] .dupe-banner .backfill-banner-text b{ color:#D9BE6E; }
   .backfill-banner-btn.is-primary{ background:var(--accent); border-color:transparent; color:#fff; }
   .backfill-banner-btn:active{ transform:scale(0.97); }
   .backfill-banner.is-running{ background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); }
@@ -2855,6 +2863,24 @@
 
   /* Was uppercase mono, which wrapped to two shouting lines above the
      results. It's a caption, not a banner. */
+  .trash-meta{ font-family:var(--sans); font-size:11px; color:var(--ink-faint); margin-top:3px; }
+  /* An actionable toast has to accept taps — the base .toast sets
+     pointer-events:none so a passive confirmation never blocks the UI
+     underneath, but that also meant the Undo button couldn't be pressed:
+     the tap fell straight through to the tab bar behind it. It also has to
+     clear the floating tab bar, or it lands underneath it on a phone. */
+  .toast.has-action{
+    display:flex; align-items:center; gap:14px; pointer-events:auto;
+    bottom:calc(24px + env(safe-area-inset-bottom));
+  }
+  @media (max-width:760px){
+    .toast.has-action{ bottom:calc(104px + env(safe-area-inset-bottom)); }
+  }
+  .toast-undo{
+    border:none; background:none; cursor:pointer; padding:2px 0;
+    font-family:var(--sans); font-size:12.5px; font-weight:700;
+    color:var(--accent-2); text-decoration:underline; flex-shrink:0;
+  }
   .doc-research-terms-label{
     font-family:var(--sans); font-size:11.5px; color:var(--ink-faint);
     margin-bottom:2px; line-height:1.45;
@@ -5279,6 +5305,117 @@ async function saveTermDoc(term){
     showToast(saveErrorMessage(err, 'terms') + (err && err.code ? ` [${err.code}]` : ''));
     return false;
   }
+}
+
+/* ---------- Recently deleted ----------
+   Nothing in the app could be undone: every delete was permanent, on a tool
+   with no login where anyone can remove anything. Deletes now copy the whole
+   record into a `deleted-items` collection first, so restoring is just
+   writing it back. The activity log can't do this job — it stores sentences,
+   not records.
+
+   Needs a Firestore rule:
+     match /deleted-items/{docId} { allow read, write: if true; } */
+let TRASH = [];
+const TRASH_RETENTION_DAYS = 30;
+
+async function loadTrash(){
+  try{
+    if(!db){ TRASH = []; return; }
+    const snap = await db.collection('deleted-items').get();
+    TRASH = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+    // Drop anything past the retention window rather than letting the bin
+    // grow forever.
+    const cutoff = Date.now() - TRASH_RETENTION_DAYS * 86400000;
+    const stale = TRASH.filter(t => (t.deletedAt || 0) < cutoff);
+    stale.forEach(t => db.collection('deleted-items').doc(t.id).delete().catch(()=>{}));
+    if(stale.length) TRASH = TRASH.filter(t => (t.deletedAt || 0) >= cutoff);
+  }catch(err){
+    console.error('Could not load deleted items', err);
+    TRASH = [];
+  }
+}
+
+async function trashItem(type, label, payload, extra){
+  const entry = {
+    type, label: label || '(untitled)',
+    payload: payload || {},
+    extra: extra || {},
+    deletedBy: whoAmI() || 'Someone',
+    deletedAt: Date.now(),
+  };
+  const id = genId();
+  try{
+    if(db) await db.collection('deleted-items').doc(id).set(stripUndefined(entry));
+  }catch(err){
+    // Never block the delete on the backup write, but say so — the user is
+    // about to be told they can undo.
+    console.error('trashItem failed:', err);
+    return null;
+  }
+  TRASH.unshift({ id, ...entry });
+  return id;
+}
+
+async function dropFromTrash(id){
+  TRASH = TRASH.filter(t => t.id !== id);
+  try{ if(db) await db.collection('deleted-items').doc(id).delete(); }catch(err){ console.error(err); }
+}
+
+async function restoreTrashItem(id){
+  const entry = TRASH.find(t => t.id === id);
+  if(!entry) return;
+  const p = entry.payload || {};
+  let ok = false;
+
+  try{
+    if(entry.type === 'term'){
+      const categoryId = (entry.extra && entry.extra.categoryId) || p.categoryId;
+      const cat = DATA.categories.find(c => c.id === categoryId);
+      if(!cat){ showToast('That domain no longer exists \u2014 restore it first.'); return; }
+      ok = await saveTermDoc({ ...p, id: p.id, categoryId });
+      if(ok && !cat.terms.some(t => t.id === p.id)) cat.terms.push({ ...p });
+    } else if(entry.type === 'doctor'){
+      await persistDoctorDirectoryEntry(p.id, p);
+      if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...p });
+      ok = true;
+    } else if(entry.type === 'provider'){
+      await persistProvider(p, p.id);
+      if(!PROVIDERS.some(x => x.id === p.id)) PROVIDERS.push({ ...p });
+      ok = true;
+    } else if(entry.type === 'domain'){
+      if(!DATA.categories.some(c => c.id === p.id)) DATA.categories.push({ ...p, terms: p.terms || [] });
+      ok = await saveCategoriesMeta();
+    }
+  }catch(err){
+    console.error('restore failed:', err);
+    ok = false;
+  }
+
+  if(!ok && entry.type !== 'doctor' && entry.type !== 'provider'){
+    showToast('Could not restore \u2014 check your connection.');
+    return;
+  }
+  await dropFromTrash(id);
+  logActivity(`restored ${entry.label}`);
+  showToast(`Restored ${entry.label}.`);
+  render();
+}
+
+// A toast you can act on, so undo is available at the moment of the mistake
+// rather than only in a screen you'd have to know about.
+function showUndoToast(msg, trashId){
+  const t = document.getElementById('toast');
+  if(!trashId){ showToast(msg); return; }
+  t.innerHTML = `<span>${escapeHtml(msg)}</span><button class="toast-undo" onclick="restoreTrashItem('${trashId}'); document.getElementById('toast').classList.remove('show');">Undo</button>`;
+  t.classList.add('show', 'has-action');
+  clearTimeout(showToast._h);
+  // Longer than a normal toast: this one asks for a decision.
+  showToast._h = setTimeout(() => {
+    t.classList.remove('show', 'has-action');
+    t.textContent = '';
+  }, 7000);
 }
 
 async function deleteTermDoc(id){
@@ -7775,6 +7912,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'events'){
     showTopbar = false;
+  } else if(activeCategory === 'trash'){
+    showTopbar = false;
   } else if(activeCategory === 'doctors'){
     showTopbar = false;
   } else if(activeCategory === 'translate'){
@@ -8018,6 +8157,11 @@ function renderContent(){
 
   if(activeCategory === 'providers'){
     content.innerHTML = renderProviders(q);
+    return;
+  }
+
+  if(activeCategory === 'trash'){
+    content.innerHTML = renderTrash();
     return;
   }
 
@@ -9032,7 +9176,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0851';
+const BUILD_ID = 'b0911.0943';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -9098,6 +9242,9 @@ function sideNavHtml(){
       <button class="side-row ${activeCategory==='all'?'is-active':''}" onclick="setCategory('all')">
         <span class="side-row-icon">${ICON_LAYERS}</span>
         <span class="side-row-name">View all domains</span>
+      </button>
+      <button class="side-row" onclick="setCategory('trash')">
+        ${DOMAIN_ICONS.clipboard}<span>Recently deleted</span>
       </button>
       <button class="side-row" onclick="openAddDomainModal()">
         <span class="side-row-icon">${ICON_PLUS}</span>
@@ -9399,6 +9546,26 @@ function renderProviders(q){
 // drop straight into Doctor Prep, which meant the Doctor Directory — the
 // thing you want when the research already exists — was only reachable by
 // scrolling Home or opening the nav. Both now sit one tap from the same tile.
+function renderTrash(){
+  if(!TRASH.length){
+    return `<div class="section-head"><h2>Recently deleted</h2></div>
+      <div class="empty">Nothing has been deleted in the last ${TRASH_RETENTION_DAYS} days.</div>`;
+  }
+  const typeLabel = { term:'Term', doctor:'Doctor', provider:'Provider', domain:'Domain' };
+  return `<div class="section-head"><h2>Recently deleted</h2><span class="sub">${TRASH.length}</span></div>
+    <p class="doc-research-intro">Anything removed in the last ${TRASH_RETENTION_DAYS} days can be put back. After that it clears itself.</p>
+    <div class="doc-research-terms">
+      ${TRASH.map(t => `
+        <div class="doc-research-term-card">
+          <div class="doc-research-term-main">
+            <div class="doc-research-term-en">${escapeHtml(t.label)}</div>
+            <div class="trash-meta">${typeLabel[t.type] || t.type} \u00b7 deleted by ${escapeHtml(t.deletedBy || 'someone')}${t.deletedAt ? ` on ${new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</div>
+          </div>
+          <button class="doc-research-badge is-missing" onclick="restoreTrashItem('${t.id}')">Restore</button>
+        </div>`).join('')}
+    </div>`;
+}
+
 function renderDoctorsHub(){
   const n = DOCTOR_DIRECTORY.length;
   return `
@@ -9415,6 +9582,145 @@ function renderDoctorsHub(){
           : 'Nothing saved yet — every Doctor Prep search adds an entry here',
         `setCategory('doctor-directory')`)}
     </div>`;
+}
+
+/* ---------- Duplicate doctors ----------
+   Entries key off the normalized full name, so "Barry Love" and "Barry A.
+   Love" become two separate doctors with two separate term lists and nothing
+   connects them. This finds the likely pairs and merges them into one.
+
+   The rule is deliberately narrow: same last name, and first names that are
+   equal or one is an initial of the other. That catches middle initials and
+   "Dr." prefixes without ever suggesting that two different Dr. Garcías are
+   the same person. */
+function nameParts(name){
+  const clean = (name || '')
+    .replace(/^\s*(dr\.?|doctor|prof\.?)\s+/i, '')
+    .replace(/,.*$/, '')
+    .replace(/\b(m\.?d\.?|d\.?o\.?|ph\.?d\.?)\b/gi, '')
+    .trim();
+  const words = normLoc(clean).toLowerCase().replace(/[^a-z\s'-]/g, '').split(/\s+/).filter(Boolean);
+  if(!words.length) return null;
+  return { first: words[0], last: words[words.length - 1], all: words };
+}
+
+function looksLikeSamePerson(a, b){
+  const pa = nameParts(a), pb = nameParts(b);
+  if(!pa || !pb) return false;
+  if(pa.last !== pb.last) return false;
+  if(pa.first === pb.first) return true;
+  // One side abbreviated to an initial: "B. Love" vs "Barry Love".
+  const initialMatch = (x, y) => x.length === 1 && y.startsWith(x);
+  return initialMatch(pa.first, pb.first) || initialMatch(pb.first, pa.first);
+}
+
+function duplicateDoctorGroups(){
+  const groups = [];
+  const used = new Set();
+  DOCTOR_DIRECTORY.forEach((d, i) => {
+    if(used.has(d.id)) return;
+    const matches = DOCTOR_DIRECTORY.filter((other, j) =>
+      j > i && !used.has(other.id) && looksLikeSamePerson(d.name, other.name));
+    if(matches.length){
+      [d, ...matches].forEach(x => used.add(x.id));
+      groups.push([d, ...matches]);
+    }
+  });
+  return groups;
+}
+
+// The record you chose wins on name and on any field where it has a value;
+// every other field falls through to the first non-empty value in the rest,
+// so nothing a teammate typed is lost to whichever entry happened to be kept.
+// Asking which name to keep and then overriding it with a heuristic would
+// make the choice a lie.
+function mergeDoctorRecords(records, preferredId){
+  const sorted = [...records].sort((a, b) => {
+    if(a.id === preferredId) return -1;
+    if(b.id === preferredId) return 1;
+    return (b.name || '').length - (a.name || '').length;
+  });
+  const keep = { ...sorted[0] };
+  const firstNonEmpty = (field) => {
+    for(const r of sorted){
+      const v = r[field];
+      if(v !== undefined && v !== null && String(v).trim() !== '') return v;
+    }
+    return undefined;
+  };
+  ['specialty','hospitalLocation','locationDetails','locationGroup','notes','photo','photoPath','source','lastResearchedBy']
+    .forEach(f => { const v = firstNonEmpty(f); if(v !== undefined) keep[f] = v; });
+
+  // Keep whichever research is richest, not whichever is newest.
+  let bestResearch = null, bestCount = -1;
+  records.forEach(r => {
+    const n = researchTermCount(r.researchResult);
+    if(r.researchResult && n > bestCount){ bestCount = n; bestResearch = r.researchResult; }
+  });
+  if(bestResearch) keep.researchResult = bestResearch;
+
+  keep.lastResearchedAt = Math.max(...records.map(r => r.lastResearchedAt || 0)) || undefined;
+
+  // Team terms are hand-written by interpreters, so they all survive —
+  // de-duplicated on the English side.
+  const seen = new Set();
+  const terms = [];
+  records.forEach(r => (Array.isArray(r.terms) ? r.terms : []).forEach(t => {
+    const k = (t.en || '').trim().toLowerCase();
+    if(!k || seen.has(k)) return;
+    seen.add(k); terms.push(t);
+  }));
+  if(terms.length) keep.terms = terms;
+
+  return keep;
+}
+
+async function mergeDuplicateDoctors(keepId){
+  if(!whoAmI()){ requireName(() => mergeDuplicateDoctors(keepId)); return; }
+  const group = duplicateDoctorGroups().find(g => g.some(d => d.id === keepId));
+  if(!group){ showToast('Nothing left to merge.'); return; }
+
+  const target = group.find(d => d.id === keepId) || group[0];
+  const merged = mergeDoctorRecords(group, target.id);
+  merged.id = target.id;
+  merged.name = target.name;
+
+  try{
+    await persistDoctorDirectoryEntry(merged.id, merged);
+    for(const other of group){
+      if(other.id === merged.id) continue;
+      // Trashed rather than dropped — a bad merge is recoverable.
+      await trashItem('doctor', `${other.name} (merged)`, other);
+      await deleteDoctorDirectoryEntryRemote(other.id);
+      DOCTOR_DIRECTORY = DOCTOR_DIRECTORY.filter(x => x.id !== other.id);
+    }
+    const idx = DOCTOR_DIRECTORY.findIndex(d => d.id === merged.id);
+    if(idx > -1) DOCTOR_DIRECTORY[idx] = merged; else DOCTOR_DIRECTORY.push(merged);
+    logActivity(`merged ${group.length} duplicate entries into ${merged.name}`);
+    showToast(`Merged into ${merged.name}.`);
+    render();
+  }catch(err){
+    console.error('merge failed:', err);
+    showToast('Could not merge \u2014 check your connection.');
+  }
+}
+
+function duplicateBannerHtml(){
+  const groups = duplicateDoctorGroups();
+  if(!groups.length) return '';
+  return groups.map(group => {
+    const names = group.map(d => escapeHtml(d.name)).join(' \u00b7 ');
+    const options = group.map(d =>
+      `<button class="backfill-banner-btn" onclick="mergeDuplicateDoctors('${d.id}')">Keep \u201c${escapeHtml(d.name)}\u201d</button>`
+    ).join('');
+    return `<div class="dupe-banner">
+      <div class="backfill-banner-text">
+        <b>Possible duplicate</b>
+        <span>${names} look like the same person. Merging keeps every note, photo and term from both.</span>
+      </div>
+      <div class="dupe-banner-actions">${options}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ---------- Terminology backfill ----------
@@ -9585,6 +9891,7 @@ function renderDoctorDirectory(q){
   const searching = !!q;
 
   let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
+  html += duplicateBannerHtml();
   html += backfillBannerHtml();
   html += groupControlsHtml('doctors', groups, searching);
   let cardIdx = -1;
@@ -10239,7 +10546,8 @@ async function deleteTerm(categoryId, termId){
   const cat = DATA.categories.find(c=>c.id===categoryId);
   const term = cat.terms.find(t=>t.id===termId);
   if(!term) return;
-  if(!confirm(`Delete "${term.en}"? This can't be undone.`)) return;
+  if(!confirm(`Delete "${term.en}"?`)) return;
+  const trashId = await trashItem('term', `"${term.en}"`, { ...term, categoryId }, { categoryId });
   const ok = await deleteTermDoc(termId);
   if(!ok) return;
   cat.terms = cat.terms.filter(t=>t.id!==termId);
@@ -10252,7 +10560,7 @@ async function deleteTerm(categoryId, termId){
     ATTACHMENTS = ATTACHMENTS.filter(a=>a.termId!==term.id);
   }
 
-  showToast('Term deleted.');
+  showUndoToast('Term deleted.', trashId);
   render();
 }
 
@@ -10397,8 +10705,9 @@ async function deleteDomain(id){
   if(activeCategory===id) activeCategory = 'all';
   const ok = await saveCategoriesMeta();
   if(!ok){ DATA.categories = previousCategories; return; }
+  const trashId = await trashItem('domain', `the "${cat.name}" domain`, { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon, parentId: cat.parentId || null, terms: [] });
   logActivity(`deleted the "${cat.name}" domain`);
-  showToast('Domain deleted.');
+  showUndoToast('Domain deleted.', trashId);
   render();
 }
 
@@ -10542,15 +10851,16 @@ async function saveProvider(){
 async function deleteProvider(id){
   const p = PROVIDERS.find(x=>x.id===id);
   if(!p) return;
-  if(!confirm(`Delete "${p.name}"? This can't be undone.`)) return;
+  if(!confirm(`Delete "${p.name}"?`)) return;
   try{
+    const trashId = await trashItem('provider', p.name, p);
     await deleteProviderRemote(id);
     if(storage && p.photoPath){
       storage.ref().child(p.photoPath).delete().catch(()=>{});
     }
     PROVIDERS = PROVIDERS.filter(x=>x.id!==id);
     logActivity(`removed the provider ${p.name}`);
-    showToast('Provider deleted.');
+    showUndoToast('Provider deleted.', trashId);
     render();
   }catch(err){
     showToast('Could not delete — check your connection.');
@@ -10772,15 +11082,16 @@ async function saveDoctorDirEntry(){
 async function deleteDoctorDirEntry(id){
   const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
   if(!d) return;
-  if(!confirm(`Delete "${d.name}"? This can't be undone.`)) return;
+  if(!confirm(`Delete "${d.name}"?`)) return;
   try{
+    const trashId = await trashItem('doctor', d.name, d);
     await deleteDoctorDirectoryEntryRemote(id);
     if(storage && d.photoPath){
       storage.ref().child(d.photoPath).delete().catch(()=>{});
     }
     DOCTOR_DIRECTORY = DOCTOR_DIRECTORY.filter(x=>x.id!==id);
     logActivity(`removed ${d.name} from the doctor directory`);
-    showToast('Doctor deleted.');
+    showUndoToast('Doctor deleted.', trashId);
     render();
   }catch(err){
     showToast('Could not delete — check your connection.');
@@ -10793,6 +11104,7 @@ loadNotifyPref();
 loadData();
 loadProviders();
 loadDoctorDirectory();
+loadTrash();
 loadQuizHistory();
 loadTermReviews();
 loadAttachments();
