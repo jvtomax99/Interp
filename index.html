@@ -2046,10 +2046,19 @@
   @keyframes modalIn{ from{opacity:0; transform:translateY(10px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);} }
   .overlay{
     position:fixed; inset:0; background:rgba(15,23,30,0.5); backdrop-filter:blur(3px); display:none;
-    align-items:flex-start; justify-content:center; padding:64px 20px; z-index:50; overflow:auto;
+    align-items:flex-start; justify-content:center; padding:64px 20px; overflow:auto;
+    /* Above the floating tab bar and the corner FABs, both at 60. At 50 the
+       tab bar drew on top of every modal in the app and swallowed the Save
+       button — you could see it, but the tap landed on Chat. */
+    z-index:100;
     animation:overlayIn .15s var(--ease);
   }
   .overlay.show{display:flex;}
+  @media (max-width:900px){
+    /* Less dead space above on a phone, and enough below that the action row
+       clears the home indicator once the tab bar is behind the backdrop. */
+    .overlay{ padding:26px 14px max(26px, calc(env(safe-area-inset-bottom) + 18px)); }
+  }
   .modal{
     -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
     background:var(--paper); border-radius:var(--r-lg); padding:28px 28px 22px 28px; width:100%; max-width:460px;
@@ -2909,7 +2918,9 @@
     position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px);
     background:var(--ink); color:#fff; padding:11px 20px; border-radius:12px; font-size:13px;
     box-shadow:var(--sh-3); opacity:0; pointer-events:none;
-    transition:opacity .2s var(--ease), transform .2s var(--ease); z-index:80;
+    /* Toasts sit above everything, including modals, the lightbox and global
+       search — a confirmation nobody can see is the same as no confirmation. */
+    transition:opacity .2s var(--ease), transform .2s var(--ease); z-index:320;
   }
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
@@ -8571,7 +8582,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0352';
+const BUILD_ID = 'b0911.0421';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
