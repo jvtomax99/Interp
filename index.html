@@ -1330,6 +1330,44 @@
     background:var(--bg-hi); border-radius:10px; padding:10px 12px; margin-top:10px; line-height:1.5;
   }
   .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
+  /* ---------- Location groups ----------
+     A heading bar rather than a plain text label: it's a control, and it
+     needs to look pressable. Quiet enough that the cards stay the focus. */
+  .group-head{
+    display:flex; align-items:center; gap:9px; width:100%;
+    margin:20px 0 11px; padding:9px 13px 9px 10px; border:none;
+    border-radius:11px; background:var(--bg-hi); cursor:pointer;
+    box-shadow:inset 0 0 0 1px var(--line-soft);
+    font-family:var(--sans); text-align:left;
+    transition:background .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .group-head:first-of-type{ margin-top:6px; }
+  @media (hover:hover){
+    .group-head:hover{ background:var(--paper); box-shadow:inset 0 0 0 1px var(--line), var(--sh-1); }
+  }
+  .group-head:active{ transform:scale(0.995); }
+  .group-chev{
+    display:flex; width:17px; height:17px; flex-shrink:0; color:var(--ink-faint);
+    transition:transform .2s var(--ease);
+  }
+  .group-chev svg{ width:17px; height:17px; }
+  .group-head.is-collapsed .group-chev{ transform:rotate(-90deg); }
+  .group-head-name{
+    flex:1; min-width:0; font-size:13px; font-weight:700; color:var(--ink);
+    line-height:1.3; overflow-wrap:break-word;
+  }
+  .group-head-count{
+    flex-shrink:0; font-size:11px; font-weight:600; color:var(--ink-faint);
+    font-variant-numeric:tabular-nums; background:var(--paper);
+    border-radius:6px; padding:3px 7px; box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .group-controls{ display:flex; justify-content:flex-end; margin:-6px 2px 0; }
+  .group-controls-btn{
+    border:none; background:none; cursor:pointer; padding:4px 2px;
+    font-family:var(--sans); font-size:11.5px; font-weight:600; color:var(--accent);
+  }
+  html[data-theme="dark"] .group-head-count{ background:rgba(255,255,255,0.05); }
+
   /* ---------- Doctor cards ----------
      These are a roster of people, not a list of records, so they're built
      as ID badges rather than as another rounded content box: portrait
@@ -4053,6 +4091,81 @@ let ethicsFilter = 'all';
 // How many term cards a single render may build. Raised by "show more", and
 // reset whenever the view changes so a big domain can't slow the next screen.
 let termRenderLimit = 120;
+
+/* ---------- Location grouping ----------
+   The provider and doctor lists are long flat alphabetical runs, but the
+   question people actually arrive with is "who's at this building today".
+   Grouping by location answers that, and collapsing lets someone fold away
+   the sites they never cover. Collapsed state is per-device and persists,
+   because the sites you ignore are the same ones tomorrow. */
+const GROUP_COLLAPSE_KEY = 'ih_collapsedGroups';
+let collapsedGroups = new Set();
+try{ collapsedGroups = new Set(JSON.parse(localStorage.getItem(GROUP_COLLAPSE_KEY) || '[]')); }catch(e){}
+
+const NO_LOCATION_LABEL = 'No location listed';
+
+function groupKeyId(scope, name){ return scope + '::' + name; }
+function isGroupCollapsed(scope, name){ return collapsedGroups.has(groupKeyId(scope, name)); }
+
+function toggleGroup(scope, encodedName){
+  const name = decodeURIComponent(encodedName);
+  const k = groupKeyId(scope, name);
+  if(collapsedGroups.has(k)) collapsedGroups.delete(k); else collapsedGroups.add(k);
+  try{ localStorage.setItem(GROUP_COLLAPSE_KEY, JSON.stringify([...collapsedGroups])); }catch(e){}
+  renderContent();
+}
+
+function setAllGroups(scope, encodedNames, collapse){
+  encodedNames.split(',').filter(Boolean).forEach(n=>{
+    const k = groupKeyId(scope, decodeURIComponent(n));
+    if(collapse) collapsedGroups.add(k); else collapsedGroups.delete(k);
+  });
+  try{ localStorage.setItem(GROUP_COLLAPSE_KEY, JSON.stringify([...collapsedGroups])); }catch(e){}
+  renderContent();
+}
+
+function groupByLocation(list, keyOf){
+  const map = new Map();
+  list.forEach(item=>{
+    const name = (keyOf(item) || '').trim() || NO_LOCATION_LABEL;
+    if(!map.has(name)) map.set(name, []);
+    map.get(name).push(item);
+  });
+  return [...map.entries()]
+    .map(([name, items]) => ({ name, items }))
+    .sort((a, b) => {
+      // Entries with no location go last rather than sorting under "N".
+      const aBlank = a.name === NO_LOCATION_LABEL, bBlank = b.name === NO_LOCATION_LABEL;
+      if(aBlank !== bBlank) return aBlank ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    });
+}
+
+// `searching` forces everything open: hiding a match inside a folded group
+// looks exactly like the search returning nothing.
+function groupHeaderHtml(scope, group, searching){
+  const collapsed = !searching && isGroupCollapsed(scope, group.name);
+  const enc = encodeURIComponent(group.name);
+  const n = group.items.length;
+  return `<button class="group-head${collapsed ? ' is-collapsed' : ''}"
+      onclick="toggleGroup('${scope}', '${enc}')"
+      aria-expanded="${collapsed ? 'false' : 'true'}">
+      <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
+      <span class="group-head-name">${escapeHtml(group.name)}</span>
+      <span class="group-head-count">${n}</span>
+    </button>`;
+}
+
+function groupControlsHtml(scope, groups, searching){
+  if(searching || groups.length < 2) return '';
+  const encAll = groups.map(g => encodeURIComponent(g.name)).join(',');
+  const anyOpen = groups.some(g => !isGroupCollapsed(scope, g.name));
+  return `<div class="group-controls">
+    <button class="group-controls-btn" onclick="setAllGroups('${scope}', '${encAll}', ${anyOpen ? 'true' : 'false'})">
+      ${anyOpen ? 'Collapse all' : 'Expand all'}
+    </button>
+  </div>`;
+}
 try{ domainsCollapsed = localStorage.getItem('ih_domainsCollapsed') === '1'; }catch(e){}
 // Per-parent collapse state for domain groups (which parents have their
 // subgroups tucked away) — a list of domain ids, persisted per device.
@@ -8359,7 +8472,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0208';
+const BUILD_ID = 'b0911.0244';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -8673,9 +8786,20 @@ function renderProviders(q){
     return `<div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
   }
 
+  // Same location grouping as the Doctor Directory — the facility field is
+  // what people are orienting by on both screens, so it behaves the same way.
+  const groups = groupByLocation(list, p => p.facility);
+  const searching = !!q;
+
   let html = `<div class="section-head"><h2>Pictures of Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
-  html += `<div class="grid">`;
-  list.forEach((p, cardIdx)=>{
+  html += groupControlsHtml('providers', groups, searching);
+  let cardIdx = -1;
+  groups.forEach(group=>{
+    html += groupHeaderHtml('providers', group, searching);
+    if(!searching && isGroupCollapsed('providers', group.name)) return;
+    html += `<div class="grid">`;
+    group.items.forEach(p=>{
+    cardIdx++;
     const initials = initialsOf(p.name);
     const avatarColor = nameToColor(p.name);
     const phoneDigits = (p.phone||'').replace(/[^0-9+]/g,'');
@@ -8695,7 +8819,6 @@ function renderProviders(q){
             ${p.role ? `<span class="tag provider-role-tag">${escapeHtml(p.role)}</span>` : ''}
           </div>
         </div>
-        ${p.facility ? `<p class="provider-facility">${escapeHtml(p.facility)}</p>` : ''}
         ${p.phone ? `<a class="provider-phone" href="tel:${escapeAttr(phoneDigits)}">${ICON_PHONE}${escapeHtml(p.phone)}</a>` : ''}
         ${p.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(p.notes)}</p>` : ''}
         ${p.addedBy ? `<div class="meta">
@@ -8704,8 +8827,9 @@ function renderProviders(q){
         </div>` : ''}
       </div>
     `;
+    });
+    html += `</div>`;
   });
-  html += `</div>`;
   return html;
 }
 
@@ -8751,9 +8875,18 @@ function renderDoctorDirectory(q){
     return `<div class="empty"><div class="glyph">${ICON_GRID}</div>${msg}</div>`;
   }
 
+  const groups = groupByLocation(list, d => d.hospitalLocation);
+  const searching = !!q;
+
   let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
-  html += `<div class="grid">`;
-  list.forEach((d, cardIdx)=>{
+  html += groupControlsHtml('doctors', groups, searching);
+  let cardIdx = -1;
+  groups.forEach(group=>{
+    html += groupHeaderHtml('doctors', group, searching);
+    if(!searching && isGroupCollapsed('doctors', group.name)) return;
+    html += `<div class="grid">`;
+    group.items.forEach(d=>{
+    cardIdx++;
     const initials = initialsOf(d.name);
     // Tinted by specialty rather than one colour for the whole directory, so
     // the same field always looks the same and the grid groups itself.
@@ -8783,11 +8916,15 @@ function renderDoctorDirectory(q){
           <div class="doc-card-id">
             <div class="doc-card-name">${escapeHtml(d.name)}</div>
             ${d.specialty ? `<div class="doc-card-specialty">${escapeHtml(d.specialty)}</div>` : ''}
-            ${d.hospitalLocation ? `<p class="doc-card-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
+            ${/* The hospital is the group heading now — repeating it on every
+                  card inside that group is noise. The floor/suite line below
+                  is what's actually specific to this person. */''}
           </div>
         </div>
-        ${d.locationDetails ? `<div class="doc-card-where">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
-        ${d.notes ? `<p class="doc-card-note">${escapeHtml(d.notes)}</p>` : ''}
+        ${/* .trim() matters: a field holding only a space is truthy, which
+              drew an empty pin row with no text beside it. */''}
+        ${(d.locationDetails||'').trim() ? `<div class="doc-card-where">${ICON_PIN}<span>${escapeHtml(d.locationDetails.trim())}</span></div>` : ''}
+        ${(d.notes||'').trim() ? `<p class="doc-card-note">${escapeHtml(d.notes.trim())}</p>` : ''}
         <div class="doc-card-foot">
           ${termCount
             ? `<span class="doc-card-terms">${ICON_SPARK}${termCount} prep term${termCount===1?'':'s'}</span>`
@@ -8796,8 +8933,9 @@ function renderDoctorDirectory(q){
         </div>
       </div>
     `;
+    });
+    html += `</div>`;
   });
-  html += `</div>`;
   return html;
 }
 
