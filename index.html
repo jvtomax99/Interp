@@ -1941,7 +1941,16 @@
   .section-head:first-child{ margin-top:4px; }
   .section-head h2{font-family:var(--serif); font-weight:400; font-size:23px; margin:0; letter-spacing:-.01em;}
   .section-head .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
-  .section-head::after{ content:""; flex:1; height:1px; background:var(--line); }
+  .section-head::after{ content:""; flex:1; height:1px; background:var(--line); order:1; }
+  /* Sits to the right of the rule rather than crowding the count. */
+  .section-edit{
+    order:2; flex-shrink:0; align-self:center;
+    border:none; background:none; cursor:pointer; padding:4px 2px;
+    font-size:13px; line-height:1; color:var(--ink-faint);
+    transition:color .15s var(--ease), transform .15s var(--ease);
+  }
+  .section-edit:active{ transform:scale(0.9); }
+  @media (hover:hover){ .section-edit:hover{ color:var(--accent); } }
 
   /* Brief highlight after a domain-jump lands, so it's obvious where you ended up. */
   @keyframes sectionJumpFlash{
@@ -1951,7 +1960,7 @@
   }
   .section-jump-flash{ animation:sectionJumpFlash 1.5s var(--ease); border-radius:10px; }
 
-  .grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:18px;}
+  .grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;}
   @media (max-width:760px){
     .grid{grid-template-columns:1fr;}
     /* The base rule sets top:316px for the sticky desktop sidebar. On mobile
@@ -1970,9 +1979,13 @@
 
   @keyframes cardIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
 
+  /* Compacted: the glossary is a reference list people scan, so the tighter
+     the rhythm the more terms land on one screen. Type is only slightly
+     smaller — most of the space came back from padding and margins, which
+     were sized for a content card rather than a dictionary entry. */
   .card{
     background:var(--paper); border-radius:var(--r-md);
-    padding:20px 20px 17px 20px; position:relative; overflow:hidden;
+    padding:14px 15px 12px 15px; position:relative; overflow:hidden;
     box-shadow:
       inset 0 0 0 1px var(--line-soft),
       inset 0 1px 0 rgba(255,255,255,0.9),
@@ -1998,7 +2011,10 @@
   /* Touch devices don't get :hover, so a press state matters more there than
      the lift above — a quick, tactile scale-down confirms the tap landed. */
   .card:active{ transform:scale(0.985); transition-duration:.08s; }
-  .card-top{ display:flex; align-items:center; justify-content:space-between; padding-right:82px; }
+  /* Reserve room for the action buttons pinned top-right. Three 26px buttons
+     plus gaps need ~100px; at 82px they overlapped the chart ID, which is why
+     it rendered clipped as "ONC-0…". */
+  .card-top{ display:flex; align-items:center; justify-content:space-between; padding-right:100px; }
   .card .chart-id{
     font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); letter-spacing:.06em;
     transition:color .2s var(--ease);
@@ -2006,16 +2022,16 @@
   .card:hover .chart-id{ color:var(--card-accent, var(--ink-soft)); }
   .card .tag{
     display:inline-flex; align-items:center; gap:6px; font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.02em;
-    padding:5px 11px; border-radius:20px; transition:transform .2s var(--ease);
+    padding:4px 9px; border-radius:20px; transition:transform .2s var(--ease);
   }
   .card:hover .tag{ transform:translateX(2px); }
   .card .tag::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
   .card .term-en{
-    font-family:var(--sans); font-weight:700; font-size:17px; margin:13px 0 3px 0; line-height:1.35; letter-spacing:-.008em;
+    font-family:var(--sans); font-weight:700; font-size:15.5px; margin:9px 0 2px 0; line-height:1.3; letter-spacing:-.008em;
     display:flex; align-items:flex-start; gap:7px; color:var(--ink);
   }
   .card .term-es{
-    font-family:var(--serif); font-style:italic; font-weight:500; color:var(--card-accent, var(--accent)); font-size:14px; margin:0 0 12px 0;
+    font-family:var(--serif); font-style:italic; font-weight:500; color:var(--card-accent, var(--accent)); font-size:13.5px; margin:0 0 8px 0;
     display:flex; align-items:flex-start; gap:7px;
   }
   /* Small copy buttons that appear on hover — lets an interpreter grab a
@@ -2034,13 +2050,13 @@
   @keyframes speakPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.15); } }
   .copy-btn svg{ width:12px; height:12px; display:block; }
   .card .def{
-    font-size:13.5px; line-height:1.68; color:var(--ink-soft); margin:0; padding-top:11px;
+    font-size:13px; line-height:1.55; color:var(--ink-soft); margin:0; padding-top:8px;
     border-top:1px solid var(--line-soft);
   }
-  .card .links{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+  .card .links{ display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
   .link-pill{
     display:inline-flex; align-items:center; gap:5px; font-family:var(--sans); font-size:11.5px; font-weight:600;
-    color:var(--accent); background:var(--accent-soft); padding:5px 10px; border-radius:20px; text-decoration:none;
+    color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:20px; text-decoration:none;
     transition:transform .15s var(--ease), box-shadow .15s var(--ease);
   }
   .link-pill:hover{ box-shadow:var(--sh-1); transform:translateY(-1px); }
@@ -2048,8 +2064,8 @@
   .link-pill svg{ width:10px; height:10px; }
 
   .card .meta{
-    margin-top:12px; padding-top:10px; border-top:1px solid var(--line-soft);
-    display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:14px;
+    margin-top:9px; padding-top:7px; border-top:1px solid var(--line-soft);
+    display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:12px;
   }
   .card .source{
     font-family:var(--mono); font-size:10px; color:var(--ink-faint);
@@ -3182,7 +3198,7 @@
     <div class="field"><label>Icon</label><div class="icon-picker-row" id="iconPickerRow"></div></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeDomainModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveDomain()">Create domain</button>
+      <button class="btn btn-primary" id="domainSaveBtn" onclick="saveDomain()">Create domain</button>
     </div>
   </div>
 </div>
@@ -7508,7 +7524,11 @@ function renderLinks(t, categoryId){
 function render(){
   if(!DATA) return;
   const app = document.getElementById('app');
-  let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`;
+  // Creating a domain lived only in the sidebar, which on a phone means two
+  // taps into the More sheet. It belongs next to "Add term" on the screens
+  // where domains are what you're looking at.
+  let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`
+    + `<button class="btn btn-ghost" onclick="openAddDomainModal()">+ New domain</button>`;
   let searchPlaceholder = 'Search terms, definitions, Spanish equivalents…';
   let showTopbar = true;
   if(activeCategory === 'providers'){
@@ -7945,7 +7965,14 @@ function renderContent(){
     }
     budget -= terms.length;
 
-    html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}"><h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2><span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span></div>`;
+    // Rename a domain or re-nest it from the heading it belongs to. The edit
+    // modal already existed but nothing called it, so domains could be created
+    // and never corrected — a typo in a name was permanent.
+    html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}">
+      <h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2>
+      <span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span>
+      <button class="section-edit" onclick="openEditDomainModal('${cat.id}')" title="Edit ${escapeAttr(cat.name)}" aria-label="Edit domain">\u270E</button>
+    </div>`;
     html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
       const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
@@ -8777,7 +8804,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0547';
+const BUILD_ID = 'b0911.0624';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -9882,6 +9909,7 @@ function openAddDomainModal(){
 function _openAddDomainModal(){
   editingDomainId = null;
   document.getElementById('domainModalTitle').textContent = 'Add a domain';
+  document.getElementById('domainSaveBtn').textContent = 'Create domain';
   document.getElementById('fDomainName').value = '';
   populateDomainParentSelect(null);
   document.getElementById('fDomainParent').disabled = false;
@@ -9903,6 +9931,9 @@ function _openEditDomainModal(id){
   if(!cat) return;
   editingDomainId = id;
   document.getElementById('domainModalTitle').textContent = 'Edit domain';
+  // The button said "Create domain" in edit mode, which made a rename look
+  // like it would duplicate the domain.
+  document.getElementById('domainSaveBtn').textContent = 'Save changes';
   document.getElementById('fDomainName').value = cat.name;
   populateDomainParentSelect(id);
   const parentSelect = document.getElementById('fDomainParent');
