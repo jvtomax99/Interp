@@ -3138,7 +3138,16 @@
     <h3 id="doctorDirModalTitle">Add doctor</h3>
     <div class="field"><label>Name</label><input id="fDDName" type="text" placeholder="e.g. Dr. Lori A. Leslie"></div>
     <div class="field"><label>Specialty (optional)</label><input id="fDDSpecialty" type="text" placeholder="e.g. Lymphoma \u2014 John Theurer Cancer Center"></div>
-    <div class="field"><label>Hospital / location (optional)</label><input id="fDDLocation" type="text" placeholder="e.g. Hackensack Meridian Health"></div>
+    <div class="field">
+      <label>Location group</label>
+      <select id="fDDGroup" onchange="onDDGroupChange()"></select>
+      <p class="field-hint" id="fDDGroupHint"></p>
+    </div>
+    <div class="field" id="fDDGroupOtherField" style="display:none;">
+      <label>Group name</label>
+      <input id="fDDGroupOther" type="text" placeholder="e.g. Englewood Health">
+    </div>
+    <div class="field"><label>Hospital / location as written (optional)</label><input id="fDDLocation" type="text" placeholder="e.g. Hackensack Meridian Health" oninput="updateDDGroupHint()"></div>
     <div class="field"><label>Location details (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. JTCC, 4th floor, Suite 401"></div>
     <div class="field"><label>Notes (optional)</label><textarea id="fDDNotes" placeholder="Scheduling notes, quirks, best way to reach, etc."></textarea></div>
     <div class="field">
@@ -4103,6 +4112,88 @@ let collapsedGroups = new Set();
 try{ collapsedGroups = new Set(JSON.parse(localStorage.getItem(GROUP_COLLAPSE_KEY) || '[]')); }catch(e){}
 
 const NO_LOCATION_LABEL = 'No location listed';
+const HMH_NETWORK_LABEL = 'Hackensack Meridian Health \u2014 site not specified';
+
+/* The location text arrives in whatever form it was typed or whatever Doctor
+   Prep returned — "JTCC", "John Theurer Cancer Center", "Theurer Cancer
+   Center at HUMC" — so grouping on the raw string scattered one building
+   across four headings. Each entry is matched to a real Hackensack Meridian
+   facility instead, and everything at that site lands in one group.
+
+   Order matters: the specific sites are tested before the campus that
+   contains them, and the campus before the network name, so "John Theurer
+   Cancer Center at Hackensack University Medical Center" files under the
+   cancer center rather than under HUMC or under HMH. */
+const HMH_LOCATIONS = [
+  // Hackensack campus — the sites Language Services covers most.
+  { name:'John Theurer Cancer Center',              match:['john theurer','theurer','jtcc'] },
+  { name:"Joseph M. Sanzari Children's Hospital",   match:['sanzari','jmsch',"children's hospital at hackensack",'childrens hospital at hackensack'] },
+  { name:'Hackensack University Medical Center',    match:['hackensack university','hackensack umc','hackensackumc','humc'] },
+  // Academic and research sites on or near that campus.
+  { name:'Hackensack Meridian School of Medicine',  match:['school of medicine','hmsom'] },
+  { name:'Center for Discovery and Innovation',     match:['discovery and innovation','cdi'] },
+  // Academic medical centers and children's hospitals elsewhere in the network.
+  { name:'Jersey Shore University Medical Center',  match:['jersey shore','jsumc'] },
+  { name:"K. Hovnanian Children's Hospital",        match:['hovnanian','khch'] },
+  // Community hospitals.
+  { name:'Ocean University Medical Center (Brick)', match:['ocean university','ocean medical'] },
+  { name:'Southern Ocean Medical Center (Manahawkin)', match:['southern ocean'] },
+  { name:'Riverview Medical Center (Red Bank)',     match:['riverview'] },
+  { name:'Bayshore Medical Center (Holmdel)',       match:['bayshore'] },
+  { name:'Mountainside Medical Center (Montclair)', match:['mountainside'] },
+  { name:'Palisades Medical Center (North Bergen)', match:['palisades'] },
+  { name:'Pascack Valley Medical Center (Westwood)',match:['pascack'] },
+  { name:'Raritan Bay Medical Center (Perth Amboy)',match:['raritan bay perth','raritan bay medical center perth','perth amboy'] },
+  { name:'Raritan Bay Medical Center (Old Bridge)', match:['old bridge'] },
+  { name:'Raritan Bay Medical Center',              match:['raritan bay','raritan'] },
+  { name:'JFK University Medical Center (Edison)',  match:['jfk university','jfk medical','jfk umc'] },
+  // Rehabilitation and behavioral health.
+  { name:'JFK Johnson Rehabilitation Institute',    match:['jfk johnson','johnson rehab'] },
+  { name:'Shore Rehabilitation Institute (Brick)',  match:['shore rehab'] },
+  { name:'Carrier Clinic (Belle Mead)',             match:['carrier clinic','carrier'] },
+  // Network name with no site attached — tested last so it never swallows a
+  // string that actually names a building.
+  { name:HMH_NETWORK_LABEL,                         match:['hackensack meridian','hmh network','hmh'] }
+];
+
+// Curly apostrophes are what phones and copy-paste actually produce, so
+// "Sanzari Children\u2019s Hospital" and "Sanzari Children's Hospital" have to
+// compare equal — otherwise the same building splits into two groups over a
+// character nobody can see.
+function normLoc(str){
+  return (str || '').replace(/[\u2018\u2019\u02BC\u00B4]/g, "'").replace(/\s+/g, ' ').trim();
+}
+
+function canonicalLocation(raw){
+  const text = normLoc(raw);
+  if(!text) return NO_LOCATION_LABEL;
+  const t = text.toLowerCase();
+  for(const loc of HMH_LOCATIONS){
+    if(loc.match.some(m => t.includes(m))) return loc.name;
+  }
+  // Somewhere outside the network, or a site this list doesn't know yet.
+  // Keep it under its own name rather than dropping it into a catch-all.
+  return text;
+}
+
+// The wording on file, shown on the card only when it adds something the
+// group heading doesn't already say.
+function rawLocationNote(raw, groupName){
+  const text = normLoc(raw);
+  if(!text) return '';
+  const heading = groupName || canonicalLocation(text);
+  if(heading === HMH_NETWORK_LABEL) return '';        // heading already says this
+  if(text.toLowerCase() === heading.toLowerCase()) return '';
+  return text;
+}
+
+// Specific buildings first, then the unplaceable ones, so the groups you can
+// actually walk to sit at the top of the screen.
+function locationSortRank(name){
+  if(name === NO_LOCATION_LABEL) return 3;
+  if(name === HMH_NETWORK_LABEL) return 2;
+  return 0;
+}
 
 function groupKeyId(scope, name){ return scope + '::' + name; }
 function isGroupCollapsed(scope, name){ return collapsedGroups.has(groupKeyId(scope, name)); }
@@ -4124,19 +4215,27 @@ function setAllGroups(scope, encodedNames, collapse){
   renderContent();
 }
 
+// A manually chosen group always wins over what the location text implies.
+// Someone who knows the building beats a string match every time — and it's
+// the only way to place a doctor whose location field is blank or wrong.
+function locationGroupName(item, rawKey){
+  const manual = ((item && item.locationGroup) || '').trim();
+  if(manual) return manual;
+  return canonicalLocation(rawKey);
+}
+
 function groupByLocation(list, keyOf){
   const map = new Map();
   list.forEach(item=>{
-    const name = (keyOf(item) || '').trim() || NO_LOCATION_LABEL;
+    const name = locationGroupName(item, keyOf(item));
     if(!map.has(name)) map.set(name, []);
     map.get(name).push(item);
   });
   return [...map.entries()]
     .map(([name, items]) => ({ name, items }))
     .sort((a, b) => {
-      // Entries with no location go last rather than sorting under "N".
-      const aBlank = a.name === NO_LOCATION_LABEL, bBlank = b.name === NO_LOCATION_LABEL;
-      if(aBlank !== bBlank) return aBlank ? 1 : -1;
+      const ra = locationSortRank(a.name), rb = locationSortRank(b.name);
+      if(ra !== rb) return ra - rb;
       return a.name.localeCompare(b.name);
     });
 }
@@ -8472,7 +8571,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0244';
+const BUILD_ID = 'b0911.0352';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -8819,6 +8918,8 @@ function renderProviders(q){
             ${p.role ? `<span class="tag provider-role-tag">${escapeHtml(p.role)}</span>` : ''}
           </div>
         </div>
+        ${rawLocationNote(p.facility, locationGroupName(p, p.facility))
+          ? `<p class="provider-facility">${escapeHtml(rawLocationNote(p.facility, locationGroupName(p, p.facility)))}</p>` : ''}
         ${p.phone ? `<a class="provider-phone" href="tel:${escapeAttr(phoneDigits)}">${ICON_PHONE}${escapeHtml(p.phone)}</a>` : ''}
         ${p.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(p.notes)}</p>` : ''}
         ${p.addedBy ? `<div class="meta">
@@ -8916,9 +9017,13 @@ function renderDoctorDirectory(q){
           <div class="doc-card-id">
             <div class="doc-card-name">${escapeHtml(d.name)}</div>
             ${d.specialty ? `<div class="doc-card-specialty">${escapeHtml(d.specialty)}</div>` : ''}
-            ${/* The hospital is the group heading now — repeating it on every
-                  card inside that group is noise. The floor/suite line below
-                  is what's actually specific to this person. */''}
+            ${/* The group heading carries the canonical facility, so repeating
+                  it on every card in that group is noise. But when the record
+                  says something different from the heading — "JTCC", or a
+                  pavilion the heading doesn't mention — that's the wording
+                  actually on file, and it's worth keeping visible. */''}
+            ${rawLocationNote(d.hospitalLocation, locationGroupName(d, d.hospitalLocation))
+              ? `<p class="doc-card-facility">${escapeHtml(rawLocationNote(d.hospitalLocation, locationGroupName(d, d.hospitalLocation)))}</p>` : ''}
           </div>
         </div>
         ${/* .trim() matters: a field holding only a space is truthy, which
@@ -9859,6 +9964,75 @@ async function deleteProvider(id){
 
 let editingDoctorDirId = null;
 
+const DD_GROUP_AUTO = '';
+const DD_GROUP_OTHER = '__other__';
+
+// Every group currently in use, so a doctor can be dropped into a heading
+// that already exists — including ones typed by hand that aren't in the
+// Hackensack Meridian table.
+function knownLocationGroups(){
+  const names = new Set(HMH_LOCATIONS.map(l => l.name));
+  DOCTOR_DIRECTORY.forEach(d=>{
+    const n = locationGroupName(d, d.hospitalLocation);
+    if(n && n !== NO_LOCATION_LABEL) names.add(n);
+  });
+  return [...names].sort((a, b) => locationSortRank(a) - locationSortRank(b) || a.localeCompare(b));
+}
+
+function populateDDGroupSelect(current){
+  const sel = document.getElementById('fDDGroup');
+  if(!sel) return;
+  const groups = knownLocationGroups();
+  const manual = (current || '').trim();
+  const isKnown = !manual || groups.includes(manual);
+  sel.innerHTML = `<option value="">Detect from the location text</option>`
+    + groups.map(g => `<option value="${escapeAttr(g)}"${manual === g ? ' selected' : ''}>${escapeHtml(g)}</option>`).join('')
+    + `<option value="${DD_GROUP_OTHER}"${!isKnown ? ' selected' : ''}>Other\u2026</option>`;
+  const otherField = document.getElementById('fDDGroupOtherField');
+  const otherInput = document.getElementById('fDDGroupOther');
+  if(otherField) otherField.style.display = isKnown ? 'none' : '';
+  if(otherInput) otherInput.value = isKnown ? '' : manual;
+  updateDDGroupHint();
+}
+
+// Says what will actually happen, because "Detect" is invisible otherwise.
+function updateDDGroupHint(){
+  const sel = document.getElementById('fDDGroup');
+  const hint = document.getElementById('fDDGroupHint');
+  if(!sel || !hint) return;
+  if(sel.value === DD_GROUP_AUTO){
+    const raw = (document.getElementById('fDDLocation')||{}).value || '';
+    const detected = canonicalLocation(raw);
+    hint.textContent = detected === NO_LOCATION_LABEL
+      ? 'With no location text, this doctor sits under \u201cNo location listed\u201d.'
+      : `Currently groups under \u201c${detected}\u201d.`;
+  } else if(sel.value === DD_GROUP_OTHER){
+    hint.textContent = 'Creates a new group with the name you type below.';
+  } else {
+    hint.textContent = 'Always groups here, whatever the location text says.';
+  }
+}
+
+function onDDGroupChange(){
+  const sel = document.getElementById('fDDGroup');
+  const otherField = document.getElementById('fDDGroupOtherField');
+  if(otherField) otherField.style.display = (sel.value === DD_GROUP_OTHER) ? '' : 'none';
+  if(sel.value === DD_GROUP_OTHER){
+    const inp = document.getElementById('fDDGroupOther');
+    if(inp) inp.focus();
+  }
+  updateDDGroupHint();
+}
+
+function selectedDDGroup(){
+  const sel = document.getElementById('fDDGroup');
+  if(!sel) return '';
+  if(sel.value === DD_GROUP_OTHER){
+    return ((document.getElementById('fDDGroupOther')||{}).value || '').trim();
+  }
+  return sel.value;
+}
+
 function openAddDoctorDirModal(){
   requireName(()=>_openAddDoctorDirModal());
 }
@@ -9873,6 +10047,7 @@ function _openAddDoctorDirModal(){
   document.getElementById('fDDLocationDetails').value = '';
   document.getElementById('fDDNotes').value = '';
   document.getElementById('fDDPhoto').value = '';
+  populateDDGroupSelect('');
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
   document.getElementById('fDDName').focus();
@@ -9894,6 +10069,7 @@ function _openEditDoctorDirModal(id){
   document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
   document.getElementById('fDDNotes').value = d.notes || '';
   document.getElementById('fDDPhoto').value = '';
+  populateDDGroupSelect(d.locationGroup || '');
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
   document.getElementById('fDDName').focus();
@@ -9967,6 +10143,7 @@ async function saveDoctorDirEntry(){
   const record = {
     ...(existing || {}),
     name, specialty, hospitalLocation, locationDetails, notes,
+    locationGroup: selectedDDGroup(),
     photo: pendingDDPhotoDataUrl || null,
     photoPath: pendingDDPhotoPath || null,
     source: (existing && existing.source) || 'manual',
