@@ -8219,7 +8219,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0025';
+const BUILD_ID = 'b0911.0042';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -8842,9 +8842,25 @@ function renderDoctorDirDetail(d){
 // why the bigger domains' subgroups appeared broken. Fall back to opening the
 // subgroup directly, which always lands somewhere correct.
 function jumpToDomain(id){
-  const el = document.getElementById('domain-' + id);
-  if(el){ el.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+  // Scrolling is only right when the target is already part of the page
+  // you're on — that's the parent's own "General terms" section.
+  //
+  // For a subgroup it was wrong, and wrong *intermittently*, which is what
+  // made Back feel broken. On a parent page every subgroup's section is in
+  // the DOM, so tapping "Radiation" used to just scroll: the heading filled
+  // the screen, it looked like you'd arrived somewhere, but activeCategory
+  // was still the parent and nothing went on the stack — so Back skipped
+  // straight past it. And because the render budget caps how many term
+  // cards get built, the target section often *wasn't* in the DOM yet, in
+  // which case the same tap fell through to a real navigation and Back
+  // behaved correctly. Same gesture, two outcomes, decided by how many
+  // terms happened to be rendered.
+  if(id === activeCategory){
+    const el = document.getElementById('domain-' + id);
+    if(el){ el.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+  }
   setCategory(id);
+  window.scrollTo({ top:0, behavior:'auto' });
 }
 
 function showMoreTerms(){
