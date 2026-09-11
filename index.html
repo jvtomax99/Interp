@@ -7507,8 +7507,18 @@ function setCategory(id, isBack){
   closeAllOverlays();
   termRenderLimit = 120;
   if(!isBack && activeCategory !== id){
-    navStack.push(activeCategory);
-    if(navStack.length > 40) navStack.shift();   // don't grow without bound
+    // If this destination is already somewhere behind us, the trip is a
+    // return, not a new step — cut the stack back to it. Without this,
+    // bouncing between a domain and its subgroup (Oncology -> Breast ->
+    // Oncology -> Breast) piled up four entries and Back just ping-ponged
+    // between the same two screens instead of unwinding towards Home.
+    const seen = navStack.findIndex(e => e.id === id);
+    if(seen !== -1){
+      navStack.length = seen;
+    } else {
+      navStack.push({ id: activeCategory, scroll: window.scrollY || 0 });
+      if(navStack.length > 40) navStack.shift();   // don't grow without bound
+    }
     try{ history.pushState({ ih: true }, ''); }catch(e){}
   }
   activeCategory = id;
@@ -7516,7 +7526,11 @@ function setCategory(id, isBack){
     lastSeenChatCount = CHAT_MESSAGES.length;
     // Prompt for a name right away rather than waiting for someone to
     // notice the inline "add your name" hint or the floating button.
-    if(!whoAmI()) openNameModal();
+    // Not when arriving via Back, though: the prompt is an overlay, and
+    // Back's first job is to close an open overlay — so backing into Chat
+    // opened the modal and the next Back merely closed it again. Two
+    // presses, no movement, which read as the button being broken.
+    if(!isBack && !whoAmI()) openNameModal();
   }
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   if(id === 'userguide'){ guideIndex = 0; }
@@ -7535,54 +7549,64 @@ function goHome(){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function goBack(){
-  // An open overlay is the top layer, so Back should close that first —
-  // otherwise Back on a doctor's detail silently navigates the screen behind
-  // it and the panel stays put, which reads as the button doing nothing.
-  const openOverlay = document.querySelector('.overlay.show');
-  const lb = document.getElementById('lightbox');
-  if(lb && lb.classList.contains('show')){ lb.classList.remove('show'); return; }
-  if(openOverlay){ openOverlay.classList.remove('show'); return; }
+// One implementation, two callers. The in-app Back button and the phone's
+// own back gesture used to carry separate copies of this logic, which is
+// exactly how they drifted apart — fix one, the other kept the old bug.
+// `smooth` is the only thing that legitimately differs between them.
+function navigateBack(smooth){
+  const behavior = smooth ? 'smooth' : 'auto';
 
-  // Hierarchical first, historical second. Reaching a subgroup usually means
-  // tapping its chip straight from Home, so the history stack says the way
-  // back is Home — but what people expect from "Breast Oncology" is to land
-  // on Oncology. Going up the tree matches the mental model; plain history
+  // An open overlay is the top layer, so Back closes that first — otherwise
+  // it navigates the screen behind the panel and the panel stays put, which
+  // reads as the button doing nothing.
+  const lb = document.getElementById('lightbox');
+  if(lb && lb.classList.contains('show')){ lb.classList.remove('show'); return true; }
+  const openOverlay = document.querySelector('.overlay.show');
+  if(openOverlay){ openOverlay.classList.remove('show'); return true; }
+
+  // Hierarchical first, historical second. Reaching a subgroup often means
+  // tapping its tile straight from Home, so history says the way back is
+  // Home — but what people expect from "Breast Oncology" is to land on
+  // Oncology. Going up the tree matches the mental model; plain history
   // still applies everywhere else.
   const cat = DATA && DATA.categories.find(c => c.id === activeCategory);
-  if(cat && cat.parentId && navStack[navStack.length - 1] !== cat.parentId){
+  if(cat && cat.parentId && (!navStack.length || navStack[navStack.length - 1].id !== cat.parentId)){
+    // If the parent is further back in the stack, unwind to it rather than
+    // leaving stale entries behind that Back would later walk through again.
+    const seen = navStack.findIndex(e => e.id === cat.parentId);
+    const scroll = seen !== -1 ? navStack[seen].scroll : 0;
+    if(seen !== -1) navStack.length = seen;
     setCategory(cat.parentId, true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
+    window.scrollTo({ top: scroll, behavior });
+    return true;
   }
-  if(!navStack.length){ goHome(); return; }
-  const prev = navStack.pop();
-  setCategory(prev, true);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if(navStack.length){
+    const prev = navStack.pop();
+    setCategory(prev.id, true);
+    // Return people to where they were reading, not to the top of a list
+    // they'd already scrolled halfway down.
+    window.scrollTo({ top: prev.scroll || 0, behavior });
+    return true;
+  }
+
+  // Nothing left to unwind. Home is the floor, not a destination Back should
+  // reach from a page that still had somewhere to go.
+  if(activeCategory !== 'home'){ goHome(); return true; }
+  return false;
+}
+
+function goBack(){
+  navigateBack(true);
 }
 
 // The phone's own back gesture should do the same thing. Each navigation
 // pushes a history entry, so swiping back walks the in-app stack instead of
-// leaving the app entirely — which is what it did before.
+// leaving the app entirely — which is what it did before. The entry is put
+// back afterwards so there's always one left to consume.
 window.addEventListener('popstate', () => {
-  const openOverlay = document.querySelector('.overlay.show');
-  const lb = document.getElementById('lightbox');
-  if(lb && lb.classList.contains('show')){ lb.classList.remove('show'); history.pushState({ ih: true }, ''); return; }
-  if(openOverlay){ openOverlay.classList.remove('show'); history.pushState({ ih: true }, ''); return; }
-
-  const cat = DATA && DATA.categories.find(c => c.id === activeCategory);
-  if(cat && cat.parentId && navStack[navStack.length - 1] !== cat.parentId){
-    setCategory(cat.parentId, true);
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    history.pushState({ ih: true }, '');
-    return;
-  }
-  if(navStack.length){
-    const prev = navStack.pop();
-    setCategory(prev, true);
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    history.pushState({ ih: true }, '');
-  }
+  const moved = navigateBack(false);
+  if(moved){ try{ history.pushState({ ih: true }, ''); }catch(e){} }
 });
 try{ history.replaceState({ ih: true }, ''); }catch(e){}
 
