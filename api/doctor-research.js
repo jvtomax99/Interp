@@ -1,198 +1,221 @@
-// Vercel serverless function — looks up a doctor's medical specialty, then
-// generates a prep list of specialty-specific English/Spanish interpreting
-// terminology.
+// api/doctor-research.js
 //
-// Deploy alongside your existing api/translate.js and api/check-events.js
-// — same folder, same environment variable (ANTHROPIC_API_KEY) already
-// configured in your Vercel project for Translate.
+// Doctor Prep. Looks up a provider, then returns terminology for that
+// specialty grouped into tiers rather than as one flat list.
 //
-// IMPORTANT — Vercel function timeout: an open web search + Claude can take
-// 15-40 seconds for an ambiguous name. Vercel's default timeout is only
-// 10 seconds on the Hobby plan (a hard platform limit that cannot be
-// extended by any code change) and up to 60s on Pro/Team (extendable via
-// the config below). If requests hang or fail without a clear error, this
-// is almost certainly why — the `maxDuration` line only takes effect on
-// Pro or higher. The local directory lookup below sidesteps this entirely
-// for known John Theurer Cancer Center physicians, since it never has to
-// call web search at all.
-export const config = {
-  maxDuration: 60,
-};
+// Why tiers: a flat list treats "biopsia" and "régimen AC-T" as the same
+// difficulty, when they are not. Drug and regimen names are where renderings
+// break (brand vs generic), procedures carry consent language, and false
+// friends are the ones that cause real harm in a room. Grouping them lets an
+// interpreter skim the part they actually need before walking in.
+//
+// The response stays backward compatible: `terms` is still a flat array of
+// everything, so cached results and the directory's term count keep working
+// against either shape.
 
-// Real physicians from the John Theurer Cancer Center building directory —
-// checked first, before ever reaching out to web search. A match here
-// means an answer in a couple of seconds instead of 20+, and one that's
-// guaranteed correct rather than hoping search finds the right person.
-// Update this list as your team confirms more providers.
-const JTCC_DIRECTORY = [
-  { name: 'Anthony C. Ingenito', division: 'Radiation Oncology' },
-  { name: 'Glen Gejerman', division: 'Radiation Oncology' },
-  { name: 'Loren Godfrey', division: 'Radiation Oncology' },
-  { name: 'Brett Lewis', division: 'Radiation Oncology' },
-  { name: 'Samuel A. Goldlust', division: 'Neuro-Oncology' },
-  { name: 'Sam Singer', division: 'Neuro-Oncology' },
-  { name: 'Andre H. Goy', division: 'Lymphoma' },
-  { name: 'Tatyana Feldman', division: 'Lymphoma' },
-  { name: 'Lori A. Leslie', division: 'Lymphoma' },
-  { name: 'Stefan Faderl', division: 'Leukemia' },
-  { name: 'Stuart L. Goldberg', division: 'Leukemia' },
-  { name: 'James McCloskey', division: 'Leukemia' },
-  { name: 'Jamie L. Koprivnikar', division: 'Leukemia' },
-  { name: 'Scott D. Rowley', division: 'Blood & Marrow Transplantation' },
-  { name: 'Michele L. Donato', division: 'Blood & Marrow Transplantation' },
-  { name: 'Alan Skarbnik', division: 'Blood & Marrow Transplantation' },
-  { name: 'Mark S. Pascal', division: 'Oncology, Hematology & Leukemia' },
-  { name: 'Robert Tassan', division: 'Oncology, Hematology & Leukemia' },
-  { name: 'Robert S. Alter', division: 'Head & Neck Oncology' },
-  { name: 'Joshua Richter', division: 'Multiple Myeloma' },
-  { name: 'David S. Siegel', division: 'Multiple Myeloma' },
-  { name: 'David H. Vesole', division: 'Multiple Myeloma' },
-  { name: 'Noa Biran', division: 'Multiple Myeloma' },
-  { name: 'Andrew L. Pecora', division: 'Skin & Sarcoma' },
-  { name: 'Harry D. Harper', division: 'Thoracic Oncology' },
-  { name: 'Stanley E. Waintraub', division: 'Breast Oncology' },
-  { name: 'Andrew A. Jennis', division: 'Gastrointestinal Oncology' },
-  { name: 'Tracy Proverbs-Singh', division: 'Gastrointestinal Oncology' },
-  { name: 'Martin E. Gutierrez', division: 'Oncology, Hematology & Leukemia' },
-  { name: 'Donna McNamara', division: 'Gynecologic Oncology' },
-  { name: 'Deena Mary Atieh Graham', division: 'Gynecologic Oncology' },
-  { name: 'Ami Vaidya', division: 'Gynecologic Oncology' },
-  { name: 'Mira C. Hellmann', division: 'Gynecologic Oncology' },
-  { name: 'Merieme Klobocista', division: 'Gynecologic Oncology' },
+const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const MODEL = 'claude-sonnet-5';
+
+// Order matters — this is the order they render in, easiest to hardest.
+const TIERS = [
+  { key: 'core',        label: 'Core terms' },
+  { key: 'procedures',  label: 'Procedures & tests' },
+  { key: 'drugs',       label: 'Drugs & regimens' },
+  { key: 'anatomy',     label: 'Anatomy & physiology' },
+  { key: 'falsefriends', label: 'False friends & pitfalls' },
 ];
 
-function normalizeName(s) {
-  return s.toLowerCase().replace(/^dr\.?\s+/i, '').replace(/[.,]/g, '').trim();
-}
-function lastNameOf(fullName) {
-  const parts = normalizeName(fullName).split(/\s+/).filter(Boolean);
-  return parts[parts.length - 1] || '';
-}
-function findInDirectory(inputName) {
-  const inputLast = lastNameOf(inputName);
-  if (!inputLast) return null;
-  return JTCC_DIRECTORY.find(d => lastNameOf(d.name) === inputLast) || null;
-}
+function buildPrompt(doctorName, specialty, location) {
+  const hints = [
+    specialty ? `Stated specialty: ${specialty}` : null,
+    location ? `Stated location or hospital: ${location}` : null,
+  ].filter(Boolean).join('\n');
 
-async function callClaude(apiKey, systemPrompt, userContent, tools) {
-  const body = { model: 'claude-sonnet-4-6', max_tokens: 4096, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
-  if (tools) body.tools = tools;
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error('Anthropic API error:', response.status, errText);
-    throw new Error('api_error');
-  }
-  const data = await response.json();
+  return `You are supporting a certified Spanish-English medical interpreter at a
+US hospital who is preparing for an appointment with a specific physician.
 
-  if (data.stop_reason === 'max_tokens') {
-    console.error('Response was truncated at max_tokens before finishing.');
-    throw new Error('truncated');
-  }
+Physician name: ${doctorName}
+${hints}
 
-  const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
-  const rawText = textBlocks.join('\n').trim();
-  let cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+Step 1 — Identify the physician. Use web search. Prefer the hospital's own
+provider directory or a primary source. If you cannot identify them with
+reasonable confidence, say so and continue using the stated specialty (or your
+best inference from the name alone) so the terminology is still useful.
 
-  // Claude occasionally adds a stray sentence before or after the JSON
-  // despite instructions not to — fall back to the outermost {...} span
-  // rather than failing outright on an otherwise-good response.
-  try {
-    return JSON.parse(cleaned);
-  } catch (firstErr) {
-    const start = cleaned.indexOf('{');
-    const end = cleaned.lastIndexOf('}');
-    if (start !== -1 && end !== -1 && end > start) {
-      try {
-        return JSON.parse(cleaned.slice(start, end + 1));
-      } catch (secondErr) {
-        console.error('Still failed to parse after extracting {...} span. Raw text:', rawText);
-        throw secondErr;
-      }
-    }
-    console.error('No {...} span found in response. Raw text:', rawText);
-    throw firstErr;
-  }
-}
+Step 2 — Produce interpreting terminology for that specialty, grouped into
+these tiers:
 
-const RESPONSE_SHAPE = `Respond with ONLY valid JSON, no other text, no markdown code fences, in exactly this shape:
+- core: the highest-frequency clinical terms in this specialty. What comes up
+  in nearly every encounter.
+- procedures: procedures, imaging, and tests this specialist orders or
+  performs. Note in the definition when one normally requires informed consent.
+- drugs: drug and regimen names. Give the generic name with the common US brand
+  name in parentheses on the English side, and render the Spanish the way it is
+  actually said in the room — many drug names are not translated. This tier
+  matters most; be specific to this specialty rather than generic.
+- anatomy: anatomy and physiology terms specific to this specialty.
+- falsefriends: Spanish-English false friends, common mistranslations, and
+  register traps that appear in THIS specialty. For each, the definition must
+  state the trap explicitly — what an interpreter might wrongly reach for and
+  what the correct rendering is.
+
+Rules for every entry:
+- "en" is the English term as a clinician says it.
+- "es" is the Spanish an interpreter would actually deliver to a patient in the
+  US. Where usage differs by country, give the widely understood form.
+- "def" is one plain sentence, under 25 words, useful to an interpreter rather
+  than a definition copied from a textbook.
+- No duplicates across tiers.
+- Aim for 6-10 entries in core, drugs and procedures; 4-6 in anatomy; 3-6 in
+  falsefriends. Fewer good entries beat padding.
+
+Return ONLY a JSON object, no markdown fences and no preamble:
+
 {
   "found": true or false,
-  "specialty": "string, or null if not found",
-  "note": "1-2 sentences: what you found and roughly where (e.g. hospital/practice), or a brief explanation if nothing reliable was found",
-  "terms": [ { "en": "string", "es": "string", "def": "string" }, ... ]
+  "specialty": "the specialty you are giving terminology for",
+  "note": "one or two sentences: who this physician is, and what an interpreter should expect from this kind of appointment",
+  "tiers": [
+    { "key": "core", "terms": [ { "en": "", "es": "", "def": "" } ] },
+    { "key": "procedures", "terms": [] },
+    { "key": "drugs", "terms": [] },
+    { "key": "anatomy", "terms": [] },
+    { "key": "falsefriends", "terms": [] }
+  ]
 }`;
+}
+
+// The model can still wrap JSON in prose or fences despite instructions, so
+// pull the outermost object rather than trusting the whole string.
+function extractJson(text) {
+  const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+  try { return JSON.parse(cleaned); } catch (e) { /* fall through */ }
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+  if (start === -1 || end <= start) return null;
+  try { return JSON.parse(cleaned.slice(start, end + 1)); } catch (e) { return null; }
+}
+
+function cleanTerm(t) {
+  if (!t || typeof t !== 'object') return null;
+  const en = String(t.en || '').trim();
+  const es = String(t.es || '').trim();
+  if (!en || !es) return null;
+  return { en, es, def: String(t.def || '').trim() };
+}
+
+// Normalizes whatever came back into the tier order above, drops empties and
+// de-duplicates on the English term so a card can't appear twice.
+function normalize(parsed, fallbackSpecialty) {
+  const seen = new Set();
+  const tiers = [];
+  const flat = [];
+
+  const rawTiers = Array.isArray(parsed.tiers) ? parsed.tiers : [];
+  for (const spec of TIERS) {
+    const match = rawTiers.find(t => t && t.key === spec.key);
+    const terms = [];
+    for (const raw of (match && Array.isArray(match.terms) ? match.terms : [])) {
+      const term = cleanTerm(raw);
+      if (!term) continue;
+      const key = term.en.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      terms.push(term);
+      flat.push(term);
+    }
+    if (terms.length) tiers.push({ key: spec.key, label: spec.label, terms });
+  }
+
+  // If the model ignored the tier shape and returned a flat list, keep it
+  // rather than returning nothing.
+  if (!tiers.length && Array.isArray(parsed.terms)) {
+    for (const raw of parsed.terms) {
+      const term = cleanTerm(raw);
+      if (!term || seen.has(term.en.toLowerCase())) continue;
+      seen.add(term.en.toLowerCase());
+      flat.push(term);
+    }
+    if (flat.length) tiers.push({ key: 'core', label: 'Core terms', terms: flat.slice() });
+  }
+
+  return {
+    found: parsed.found === true,
+    specialty: String(parsed.specialty || fallbackSpecialty || '').trim(),
+    note: String(parsed.note || '').trim(),
+    tiers,
+    terms: flat, // flat list kept for the older client and the directory count
+  };
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
-
-  const { doctorName, specialty, location } = req.body || {};
-  if (!doctorName || typeof doctorName !== 'string' || !doctorName.trim()) {
-    res.status(400).json({ error: 'A doctor name is required.' });
+    res.status(405).json({ error: 'Method not allowed.' });
     return;
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    res.status(500).json({ error: 'Server is not configured with an API key.' });
+    res.status(500).json({ error: 'The research service is not configured.' });
+    return;
+  }
+
+  const { doctorName, specialty, location } = req.body || {};
+  if (!doctorName || !String(doctorName).trim()) {
+    res.status(400).json({ error: 'A doctor name is required.' });
     return;
   }
 
   try {
-    const directoryMatch = findInDirectory(doctorName);
+    const upstream = await fetch(ANTHROPIC_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 4000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }],
+        messages: [
+          { role: 'user', content: buildPrompt(String(doctorName).trim(), specialty, location) },
+        ],
+      }),
+    });
 
-    if (directoryMatch) {
-      // Fast path: no web search at all, just generate terminology for a
-      // division we already know for certain — a couple of seconds, tops.
-      const systemPrompt = `You are helping a professional medical interpreter prepare for an appointment. The doctor's specialty division is already known: "${directoryMatch.division}" at John Theurer Cancer Center. Do not search the web — go straight to producing a prep list of 18 to 24 English/Spanish medical terms specific to that division. Favor terms specific to that specialty over generic terms already common knowledge. Definitions should be one concise sentence, written for a professional interpreter, not a patient.
-
-${RESPONSE_SHAPE}
-Set "found" to true, "specialty" to "${directoryMatch.division} — John Theurer Cancer Center", and "note" to mention this was matched directly against the confirmed building directory.`;
-
-      const parsed = await callClaude(apiKey, systemPrompt, `Division: ${directoryMatch.division}`, null);
-      if (!Array.isArray(parsed.terms)) parsed.terms = [];
-      res.status(200).json(parsed);
+    if (!upstream.ok) {
+      const detail = await upstream.text();
+      console.error('Anthropic error', upstream.status, detail);
+      res.status(502).json({ error: 'The research service returned an error. Try again.' });
       return;
     }
 
-    // Fallback path: not a known name, fall back to a real web search.
-    const details = [`Doctor name: ${doctorName.trim()}`];
-    if (specialty && specialty.trim()) details.push(`Specialty (if helpful to confirm): ${specialty.trim()}`);
-    if (location && location.trim()) details.push(`Hospital / location: ${location.trim()}`);
+    const data = await upstream.json();
 
-    const isHackensack = location && /hackensack/i.test(location);
+    // With web search enabled the reply is a mix of block types; the JSON is
+    // in the text blocks, so join those rather than assuming content[0].
+    const text = (data.content || [])
+      .filter(block => block.type === 'text')
+      .map(block => block.text)
+      .join('\n');
 
-    const systemPrompt = `You are a research assistant helping a professional medical interpreter prepare for an upcoming appointment. Given a doctor's name (and optionally a specialty or hospital to help disambiguate a common name), search the web to determine their medical specialty and specific practice focus (for example: "Hematology/Oncology — Lymphoma" rather than just "Oncology"). Do at most one or two targeted searches — prioritize speed over exhaustiveness, and if the provided specialty/location already narrows it down, use that instead of searching further.${isHackensack ? ' The doctor is affiliated with Hackensack Meridian Health — check the official Hackensack Meridian "Find a Doctor" directory (doctors.hackensackmeridianhealth.org) first, since it directly lists specialty, department, and location for their affiliated physicians.' : ''} Then produce a prep list of 18 to 24 English/Spanish medical terms an interpreter should be ready to use for that specialty. Favor terms specific to that specialty over generic terms already common knowledge. Definitions should be one concise sentence, written for a professional interpreter, not a patient.
-
-${RESPONSE_SHAPE}
-If you cannot find reliable, specific information about this named individual, set "found" to false, explain briefly in "note", and still populate "terms" with a general list of widely-useful medical interpreting terms as a fallback so the response is never empty.`;
-
-    const webSearchTool = { type: 'web_search_20250305', name: 'web_search', max_uses: 2 };
-    if (isHackensack) {
-      webSearchTool.allowed_domains = ['hackensackmeridianhealth.org', 'doctors.hackensackmeridianhealth.org'];
-      webSearchTool.strict = true;
+    const parsed = extractJson(text);
+    if (!parsed) {
+      console.error('Unparseable research response:', text.slice(0, 500));
+      res.status(502).json({ error: 'The research came back in an unexpected format. Try again.' });
+      return;
     }
 
-    const parsed = await callClaude(apiKey, systemPrompt, details.join('\n'), [webSearchTool]);
-    if (!Array.isArray(parsed.terms)) parsed.terms = [];
-    res.status(200).json(parsed);
+    const result = normalize(parsed, specialty);
+    if (!result.terms.length) {
+      res.status(502).json({ error: 'No terminology came back for that search. Try adding a specialty.' });
+      return;
+    }
+
+    res.status(200).json(result);
   } catch (err) {
-    console.error('doctor-research handler failed:', err);
-    if (err.message === 'api_error') {
-      res.status(502).json({ error: 'Research service is temporarily unavailable. Please try again.' });
-    } else if (err.message === 'truncated') {
-      res.status(502).json({ error: 'The response was cut off before finishing. Please try again.' });
-    } else if (err instanceof SyntaxError) {
-      res.status(502).json({ error: 'Could not understand the research result. Please try again.' });
-    } else {
-      res.status(500).json({ error: 'Something went wrong. Please try again.' });
-    }
+    console.error('doctor-research failed:', err);
+    res.status(500).json({ error: 'Could not complete the research. Try again.' });
   }
 }
