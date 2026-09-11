@@ -1331,42 +1331,58 @@
   }
   .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
   /* ---------- Location groups ----------
-     A heading bar rather than a plain text label: it's a control, and it
-     needs to look pressable. Quiet enough that the cards stay the focus. */
+     A place marker, the name, how many, and a disclosure arrow — in that
+     order, which is the order you read them in. The marker is tinted from
+     the location name, so a building keeps the same colour every time you
+     see it and the eye can find it without reading. Chevron on the right so
+     the names all start at the same x and the column scans cleanly. */
   .group-head{
-    display:flex; align-items:center; gap:9px; width:100%;
-    margin:20px 0 11px; padding:9px 13px 9px 10px; border:none;
-    border-radius:11px; background:var(--bg-hi); cursor:pointer;
-    box-shadow:inset 0 0 0 1px var(--line-soft);
-    font-family:var(--sans); text-align:left;
-    transition:background .15s var(--ease), box-shadow .15s var(--ease);
+    display:flex; align-items:center; gap:11px; width:100%;
+    margin:22px 0 12px; padding:11px 13px; border:none;
+    border-radius:13px; cursor:pointer; text-align:left;
+    background:var(--paper);
+    box-shadow:inset 0 0 0 1px var(--line-soft), var(--sh-1);
+    font-family:var(--sans);
+    transition:box-shadow .18s var(--ease), transform .18s var(--ease);
   }
-  .group-head:first-of-type{ margin-top:6px; }
+  .group-head:first-of-type{ margin-top:4px; }
   @media (hover:hover){
-    .group-head:hover{ background:var(--paper); box-shadow:inset 0 0 0 1px var(--line), var(--sh-1); }
+    .group-head:hover{ box-shadow:inset 0 0 0 1px var(--line), var(--sh-2); transform:translateY(-1px); }
   }
-  .group-head:active{ transform:scale(0.995); }
-  .group-chev{
-    display:flex; width:17px; height:17px; flex-shrink:0; color:var(--ink-faint);
-    transition:transform .2s var(--ease);
+  .group-head:active, .group-head.is-pressed{ transform:translateY(0) scale(0.994); }
+  .group-mark{
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    width:30px; height:30px; border-radius:9px;
+    background:color-mix(in srgb, var(--group-accent) 15%, transparent);
+    color:var(--group-accent);
   }
-  .group-chev svg{ width:17px; height:17px; }
-  .group-head.is-collapsed .group-chev{ transform:rotate(-90deg); }
+  .group-mark svg{ width:16px; height:16px; }
+  .group-head-text{ flex:1; min-width:0; }
   .group-head-name{
-    flex:1; min-width:0; font-size:13px; font-weight:700; color:var(--ink);
+    display:block; font-size:13.5px; font-weight:650; color:var(--ink);
     line-height:1.3; overflow-wrap:break-word;
   }
   .group-head-count{
-    flex-shrink:0; font-size:11px; font-weight:600; color:var(--ink-faint);
-    font-variant-numeric:tabular-nums; background:var(--paper);
-    border-radius:6px; padding:3px 7px; box-shadow:inset 0 0 0 1px var(--line-soft);
+    display:block; margin-top:2px; font-size:11px; font-weight:500;
+    color:var(--ink-faint); font-variant-numeric:tabular-nums;
   }
-  .group-controls{ display:flex; justify-content:flex-end; margin:-6px 2px 0; }
+  .group-chev{
+    display:flex; width:18px; height:18px; flex-shrink:0; color:var(--ink-faint);
+    transition:transform .22s var(--ease);
+  }
+  .group-chev svg{ width:18px; height:18px; }
+  /* Points down when open, right when closed — the arrow shows where the
+     content is, not which way the tap goes. */
+  .group-head.is-collapsed .group-chev{ transform:rotate(-90deg); }
+  /* A collapsed group is a closed drawer, so it reads flatter and quieter
+     than an open one whose cards are on show below it. */
+  .group-head.is-collapsed{ background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); }
+  .group-controls{ display:flex; justify-content:flex-end; margin:-4px 2px 0; }
   .group-controls-btn{
-    border:none; background:none; cursor:pointer; padding:4px 2px;
+    border:none; background:none; cursor:pointer; padding:5px 2px;
     font-family:var(--sans); font-size:11.5px; font-weight:600; color:var(--accent);
   }
-  html[data-theme="dark"] .group-head-count{ background:rgba(255,255,255,0.05); }
+  html[data-theme="dark"] .group-head.is-collapsed{ background:rgba(255,255,255,0.03); }
 
   /* ---------- Doctor cards ----------
      These are a roster of people, not a list of records, so they're built
@@ -1906,15 +1922,6 @@
     .main{padding:26px 20px;}
     .dir-row{flex-wrap:wrap;}
     .dir-row .dir-term{max-width:100%;}
-    /* iOS Safari force-zooms the page whenever a focused input has a font
-       size below 16px, and never zooms back out — that's what makes the
-       screen feel stuck and require pinching. 16px prevents it entirely. */
-    .search input,
-    .chat-input-row input,
-    .whoami-input,
-    .field input,
-    .field textarea,
-    .field select{ font-size:16px; }
   }
 
   @keyframes cardIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
@@ -2983,6 +2990,22 @@
     .grid{ grid-template-columns:1fr 1fr !important; gap:12px !important; }
     .section-head{ break-after:avoid; }
     a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
+  }
+  /* iOS Safari force-zooms the page whenever a focused input has a font size
+     below 16px, and never zooms back out — the screen stays enlarged and
+     scrolled sideways until you pinch it back. 16px prevents it entirely.
+
+     This lives at the end of the stylesheet on purpose. It used to sit up in
+     the mobile block around line 1900, but `.field input` is defined again at
+     line ~2060 at equal specificity, and the later rule won — so every modal
+     field was still 13.5px and every tap on one zoomed the page. */
+  @media (max-width:900px){
+    .search input,
+    .chat-input-row input,
+    .whoami-input,
+    .field input,
+    .field textarea,
+    .field select{ font-size:16px; }
   }
 </style>
 </head>
@@ -4257,12 +4280,17 @@ function groupHeaderHtml(scope, group, searching){
   const collapsed = !searching && isGroupCollapsed(scope, group.name);
   const enc = encodeURIComponent(group.name);
   const n = group.items.length;
+  const noun = scope === 'providers' ? 'provider' : 'doctor';
   return `<button class="group-head${collapsed ? ' is-collapsed' : ''}"
+      style="--group-accent:${nameToColor(group.name)};"
       onclick="toggleGroup('${scope}', '${enc}')"
       aria-expanded="${collapsed ? 'false' : 'true'}">
+      <span class="group-mark">${ICON_PIN}</span>
+      <span class="group-head-text">
+        <span class="group-head-name">${escapeHtml(group.name)}</span>
+        <span class="group-head-count">${n} ${n === 1 ? noun : noun + 's'}</span>
+      </span>
       <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
-      <span class="group-head-name">${escapeHtml(group.name)}</span>
-      <span class="group-head-count">${n}</span>
     </button>`;
 }
 
@@ -8559,7 +8587,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card';
+  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .group-head';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -8582,7 +8610,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0421';
+const BUILD_ID = 'b0911.0503';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
