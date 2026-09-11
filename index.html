@@ -1330,15 +1330,104 @@
     background:var(--bg-hi); border-radius:10px; padding:10px 12px; margin-top:10px; line-height:1.5;
   }
   .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
-  .doc-dir-card{ cursor:pointer; padding:16px 16px 13px 16px; }
-  /* Two meta rows stacked (attribution, then the Doctor Prep hint) were
-     each drawing their own top border and 12px of margin. One separator is
-     enough. */
-  .doc-dir-card .meta{ margin-top:9px; padding-top:8px; }
-  .doc-dir-card .meta + .meta{ margin-top:2px; padding-top:2px; border-top:none; }
-  .doc-dir-card .provider-top{ margin-bottom:9px; }
-  .doc-dir-card .provider-avatar{ width:44px; height:44px; }
-  .doc-dir-card .provider-avatar-fallback{ font-size:13px; }
+  /* ---------- Doctor cards ----------
+     These are a roster of people, not a list of records, so they're built
+     as ID badges rather than as another rounded content box: portrait
+     photo, name set in the serif the rest of the app reserves for headings,
+     and a spine down the left edge tinted to the specialty. The tint is
+     derived from the specialty text, so every cardiologist carries the same
+     colour and the grid groups itself visually as you scroll.
+     Standalone rather than layered on .card — overriding .card's padding,
+     accent bar and hover would have meant a specificity fight. */
+  .doc-card{
+    /* Column flex so the footer can be pinned to the bottom edge: in the
+       desktop grid, cards in a row stretch to match the tallest, and a
+       footer that isn't pinned ends up floating in the middle of the card. */
+    position:relative; display:flex; flex-direction:column; width:100%; text-align:left;
+    border:none; cursor:pointer; font-family:inherit;
+    background:var(--paper); border-radius:var(--r-md);
+    padding:15px 15px 15px 22px; overflow:hidden;
+    box-shadow:
+      inset 0 0 0 1px var(--line-soft),
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      var(--sh-1);
+    transition:box-shadow .22s var(--ease), transform .22s var(--ease);
+    animation:cardIn .3s var(--ease) both;
+  }
+  /* The spine. Full-bleed to the card's edges, so it reads as part of the
+     card's construction rather than a stripe drawn on top of it. */
+  .doc-card::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:5px;
+    background:var(--doc-accent);
+  }
+  @media (hover:hover){
+    .doc-card:hover{ transform:translateY(-2px); box-shadow:inset 0 0 0 1px var(--line), var(--sh-2); }
+  }
+  .doc-card:active, .doc-card.is-pressed{ transform:translateY(0) scale(0.992); }
+
+  .doc-card-top{ display:flex; gap:13px; align-items:flex-start; }
+  /* Portrait, not a circle: these are headshots, and a circle crops the top
+     of someone's head off. 4:5 is the shape a hospital badge photo is in. */
+  .doc-card-photo{
+    width:54px; height:66px; border-radius:9px; object-fit:cover; object-position:center top;
+    flex-shrink:0; background:var(--bg);
+    box-shadow:inset 0 0 0 1px var(--line), 0 2px 6px -2px rgba(21,28,44,0.22);
+  }
+  .doc-card-photo-fallback{
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--sans); font-size:17px; font-weight:600; letter-spacing:0.02em;
+    color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25), 0 2px 6px -2px rgba(21,28,44,0.22);
+  }
+  .doc-card-id{ min-width:0; flex:1; padding-top:1px; }
+  .doc-card-name{
+    font-family:var(--serif); font-size:17px; font-weight:400; color:var(--ink);
+    line-height:1.2; letter-spacing:-0.005em; margin-bottom:4px;
+    overflow-wrap:break-word;
+  }
+  .doc-card-specialty{
+    font-family:var(--sans); font-size:11.5px; font-weight:600; letter-spacing:0.01em;
+    color:var(--doc-accent); line-height:1.3; margin-bottom:5px;
+  }
+  .doc-card-facility{
+    font-family:var(--sans); font-size:12px; color:var(--ink-soft);
+    line-height:1.35; margin:0;
+  }
+  /* Where to go is the thing you're most often opening this card for, so it
+     gets its own row with real weight rather than a grey note. */
+  .doc-card-where{
+    display:flex; align-items:flex-start; gap:7px; margin-top:11px;
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink);
+    line-height:1.35;
+  }
+  .doc-card-where svg{ width:14px; height:14px; flex-shrink:0; margin-top:1px; color:var(--doc-accent); }
+  .doc-card-note{
+    margin:9px 0 0; font-family:var(--sans); font-size:12px;
+    color:var(--ink-soft); line-height:1.45;
+  }
+  .doc-card-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin:auto -15px -15px -22px; padding:11px 15px 9px 22px;
+    border-top:1px solid var(--line-soft); background:var(--bg-hi);
+  }
+  .doc-card-terms{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--sans); font-size:11.5px; font-weight:600; color:var(--doc-accent);
+  }
+  .doc-card-terms svg{ width:13px; height:13px; flex-shrink:0; }
+  .doc-card-by{
+    font-family:var(--sans); font-size:11px; color:var(--ink-faint);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+  }
+  .doc-card-actions{
+    position:absolute; top:11px; right:11px; display:flex; gap:6px; z-index:2;
+  }
+  /* Visible at rest on touch, where there's no hover to reveal them. */
+  @media (hover:hover){
+    .doc-card-actions{ opacity:0; transition:opacity .15s var(--ease); }
+    .doc-card:hover .doc-card-actions, .doc-card:focus-within .doc-card-actions{ opacity:1; }
+  }
+  html[data-theme="dark"] .doc-card{ background:var(--paper); }
+  html[data-theme="dark"] .doc-card-foot{ background:rgba(255,255,255,0.03); }
   .dd-detail-header{ display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; padding-right:28px; }
   /* Named back control. The bare ✕ said "close" but not what you'd return
      to, and on a full-height sheet it reads as leaving the section entirely. */
@@ -6144,6 +6233,14 @@ function nameToColor(name){
   return DOMAIN_COLORS[Math.abs(hash) % DOMAIN_COLORS.length];
 }
 
+// Stable per-specialty tint. Same input always yields the same colour, so a
+// specialty looks identical on every card and across sessions.
+function specialtyColor(specialty){
+  const s = (specialty || '').trim();
+  if(!s) return '#7C6A9C';
+  return nameToColor(s.toLowerCase());
+}
+
 function initialsOf(name){
   const trimmed = (name || '').trim();
   if(!trimmed) return '?';
@@ -8239,7 +8336,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up';
+  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -8262,7 +8359,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0124';
+const BUILD_ID = 'b0911.0208';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -8658,34 +8755,45 @@ function renderDoctorDirectory(q){
   html += `<div class="grid">`;
   list.forEach((d, cardIdx)=>{
     const initials = initialsOf(d.name);
-    const avatarColor = nameToColor(d.name);
+    // Tinted by specialty rather than one colour for the whole directory, so
+    // the same field always looks the same and the grid groups itself.
+    const accent = specialtyColor(d.specialty);
     const delay = Math.min(cardIdx * 0.03, 0.3);
-    const attribution = d.updatedBy
-      ? `Updated by ${escapeHtml(d.updatedBy)}`
+    const termCount = (d.researchResult && Array.isArray(d.researchResult.terms))
+      ? d.researchResult.terms.length : 0;
+    // "From Doctor Prep" used to sit on the card as a tag. It was on nearly
+    // every one, so it separated nothing — and the prep-terms line below
+    // already says whether research exists. Source stays in the detail view.
+    const by = d.updatedBy ? `Updated by ${escapeHtml(d.updatedBy)}`
       : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
+    const photo = d.photo
+      ? `<img class="doc-card-photo" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo"
+           onclick="event.stopPropagation(); openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
+      : `<div class="doc-card-photo doc-card-photo-fallback" style="background:linear-gradient(150deg, ${accent}, ${darkenHex(accent, 34)});">${escapeHtml(initials||'?')}</div>`;
+
     html += `
-      <div class="card doc-dir-card" style="--card-accent:#7C6A9C; animation-delay:${delay.toFixed(2)}s;" onclick="openDoctorDirDetail('${d.id}')">
-        <div class="actions" style="position:absolute; top:16px; right:16px;">
-          <button class="icon-btn" title="Edit" onclick="event.stopPropagation(); openEditDoctorDirModal('${d.id}')">✎</button>
-          <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation(); deleteDoctorDirEntry('${d.id}')">✕</button>
+      <div class="doc-card" style="--doc-accent:${accent}; animation-delay:${delay.toFixed(2)}s;"
+           onclick="openDoctorDirDetail('${d.id}')">
+        <div class="doc-card-actions">
+          <button class="icon-btn" title="Edit" onclick="event.stopPropagation(); openEditDoctorDirModal('${d.id}')">\u270E</button>
+          <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation(); deleteDoctorDirEntry('${d.id}')">\u2715</button>
         </div>
-        <div class="provider-top">
-          ${d.photo
-            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo" onclick="event.stopPropagation(); openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
-            : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
-          <div>
-            <div class="provider-name">${escapeHtml(d.name)}</div>
-            ${d.specialty ? `<span class="tag" style="color:#7C6A9C; background:#7C6A9C1F;">${escapeHtml(d.specialty)}</span>` : ''}
-            <span class="tag doc-dir-source-tag ${d.source==='manual'?'is-manual':''}">${d.source==='manual'?'Manually added':'From Doctor Prep'}</span>
+        <div class="doc-card-top">
+          ${photo}
+          <div class="doc-card-id">
+            <div class="doc-card-name">${escapeHtml(d.name)}</div>
+            ${d.specialty ? `<div class="doc-card-specialty">${escapeHtml(d.specialty)}</div>` : ''}
+            ${d.hospitalLocation ? `<p class="doc-card-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
           </div>
         </div>
-        ${d.hospitalLocation ? `<p class="provider-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
-        ${d.locationDetails ? `<div class="doc-dir-location-pin">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
-        ${d.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(d.notes)}</p>` : ''}
-        ${attribution ? `<div class="meta"><span class="source">${attribution}</span></div>` : ''}
-        ${d.researchResult && Array.isArray(d.researchResult.terms) && d.researchResult.terms.length
-          ? `<div class="meta"><span class="source">${ICON_SPARK} Tap to view Doctor Prep results</span></div>`
-          : ''}
+        ${d.locationDetails ? `<div class="doc-card-where">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
+        ${d.notes ? `<p class="doc-card-note">${escapeHtml(d.notes)}</p>` : ''}
+        <div class="doc-card-foot">
+          ${termCount
+            ? `<span class="doc-card-terms">${ICON_SPARK}${termCount} prep term${termCount===1?'':'s'}</span>`
+            : `<span class="doc-card-terms" style="color:var(--ink-faint);">No prep research yet</span>`}
+          ${by ? `<span class="doc-card-by">${by}</span>` : ''}
+        </div>
       </div>
     `;
   });
