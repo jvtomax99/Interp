@@ -1002,8 +1002,8 @@
   .crumb-up{
     display:inline-flex; align-items:center; gap:6px; margin-bottom:14px;
     padding:7px 13px 7px 9px; border-radius:999px; cursor:pointer;
-    border:1px solid var(--line-soft); background:var(--paper);
-    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    border:1px solid transparent; background:var(--accent-soft);
+    font-family:var(--sans); font-size:12.5px; font-weight:700; color:var(--accent);
     transition:border-color .15s var(--ease), color .15s var(--ease);
   }
   .crumb-up svg{ width:15px; height:15px; flex-shrink:0; }
@@ -1073,7 +1073,7 @@
   /* Scoped to real pointers: on iOS a :hover rule sticks after a tap, which
      left the last subgroup you touched looking permanently selected. */
   @media (hover:hover){
-    .crumb-up:hover{ border-color:var(--accent-2); color:var(--ink); }
+    .crumb-up:hover{ border-color:var(--accent-2); }
     .subgroup-pill:hover{ border-color:var(--accent-2); background:var(--accent-soft); }
     .subgroup-pill-all:hover{ border-color:var(--accent-2); }
   }
@@ -7292,8 +7292,11 @@ function renderContent(){
   if(activeCategory !== 'all' && cats.length === 1 && cats[0].parentId){
     const parent = DATA.categories.find(c => c.id === cats[0].parentId);
     if(parent){
+      // Now that the Back arrow only retraces your steps, this is the one
+      // control that moves *up* the hierarchy — so it says so explicitly
+      // rather than showing a bare name you have to interpret.
       html += `<button class="crumb-up" onclick="setCategory('${parent.id}')">
-        ${ICON_CHEVRON_LEFT}<span>${escapeHtml(parent.name)}</span>
+        ${ICON_CHEVRON_LEFT}<span>Up to ${escapeHtml(parent.name)}</span>
       </button>`;
     }
   }
@@ -7564,23 +7567,13 @@ function navigateBack(smooth){
   const openOverlay = document.querySelector('.overlay.show');
   if(openOverlay){ openOverlay.classList.remove('show'); return true; }
 
-  // Hierarchical first, historical second. Reaching a subgroup often means
-  // tapping its tile straight from Home, so history says the way back is
-  // Home — but what people expect from "Breast Oncology" is to land on
-  // Oncology. Going up the tree matches the mental model; plain history
-  // still applies everywhere else.
-  const cat = DATA && DATA.categories.find(c => c.id === activeCategory);
-  if(cat && cat.parentId && (!navStack.length || navStack[navStack.length - 1].id !== cat.parentId)){
-    // If the parent is further back in the stack, unwind to it rather than
-    // leaving stale entries behind that Back would later walk through again.
-    const seen = navStack.findIndex(e => e.id === cat.parentId);
-    const scroll = seen !== -1 ? navStack[seen].scroll : 0;
-    if(seen !== -1) navStack.length = seen;
-    setCategory(cat.parentId, true);
-    window.scrollTo({ top: scroll, behavior });
-    return true;
-  }
-
+  // Back is history, full stop. It used to try to be clever: on a subgroup
+  // page it walked *up* the tree to the parent instead of back to wherever
+  // you came from. That's why it felt random — from Gastrointestinal it went
+  // to Oncology, from Oncology it went Home, and from a search result it went
+  // somewhere you'd never been. Two different meanings behind one arrow is
+  // impossible to predict. Going up the tree is what the breadcrumb at the
+  // top of a subgroup page is for; this arrow only ever retraces your steps.
   if(navStack.length){
     const prev = navStack.pop();
     setCategory(prev.id, true);
@@ -8226,7 +8219,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0909.2334';
+const BUILD_ID = 'b0911.0025';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
