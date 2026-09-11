@@ -2777,6 +2777,37 @@
   .doc-research-summary.is-fallback{ background:#FBF3E3; box-shadow:inset 0 0 0 1px #E8D7B0; }
   .doc-research-specialty{ font-family:var(--serif); font-size:18px; color:var(--ink); margin-bottom:6px; }
   .doc-research-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.55; }
+  /* Tier blocks. A heading plus one line of why-this-tier-exists, so the
+     grouping teaches what it means the first time rather than looking like
+     arbitrary section breaks. */
+  .doc-tier{ margin-top:18px; }
+  .doc-tier:first-of-type{ margin-top:10px; }
+  .doc-tier-head{ display:flex; align-items:center; gap:9px; }
+  .doc-tier-label{
+    font-family:var(--sans); font-size:12.5px; font-weight:700; color:var(--ink);
+    letter-spacing:-.005em;
+  }
+  .doc-tier-count{
+    font-family:var(--sans); font-size:10.5px; font-weight:600; color:var(--ink-faint);
+    background:var(--bg-hi); border-radius:6px; padding:2px 7px;
+    font-variant-numeric:tabular-nums;
+  }
+  .doc-tier-head::after{ content:""; flex:1; height:1px; background:var(--line-soft); }
+  .doc-tier-blurb{
+    margin:4px 0 9px; font-family:var(--sans); font-size:11.5px;
+    color:var(--ink-faint); line-height:1.45;
+  }
+  /* False friends are the ones that cause harm, so they carry a warning tint
+     rather than looking like every other card in the list. */
+  .doc-research-term-card.is-pitfall{
+    background:var(--warn-soft, #FDF4E3);
+    box-shadow:inset 0 0 0 1px rgba(176,141,42,0.25);
+  }
+  html[data-theme="dark"] .doc-research-term-card.is-pitfall{
+    background:rgba(176,141,42,0.12);
+    box-shadow:inset 0 0 0 1px rgba(176,141,42,0.3);
+  }
+
   .doc-research-terms-label{
     font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-faint);
     margin-bottom:10px; text-transform:uppercase;
@@ -6996,6 +7027,80 @@ async function addSuggestedTermToGlossary(en, es, def, btn, specialtyOverride){
   }
 }
 
+/* Doctor Prep used to return one flat list of terms; it now returns tiers.
+   Cached results in Firestore and every researchResult already saved on a
+   doctor are still the old shape, so everything reads through here rather
+   than branching at each call site. */
+const RESEARCH_TIER_LABELS = {
+  core: 'Core terms',
+  procedures: 'Procedures & tests',
+  drugs: 'Drugs & regimens',
+  anatomy: 'Anatomy & physiology',
+  falsefriends: 'False friends & pitfalls',
+};
+
+const RESEARCH_TIER_BLURBS = {
+  core: 'Highest frequency in this specialty.',
+  procedures: 'What gets ordered or performed — consent language shows up here.',
+  drugs: 'Generic with the US brand name. Most renderings break here.',
+  anatomy: 'Structures and function specific to this specialty.',
+  falsefriends: 'Where the obvious rendering is the wrong one.',
+};
+
+function researchTiers(result){
+  if(!result) return [];
+  if(Array.isArray(result.tiers) && result.tiers.length){
+    return result.tiers
+      .filter(t => t && Array.isArray(t.terms) && t.terms.length)
+      .map(t => ({
+        key: t.key || 'core',
+        label: t.label || RESEARCH_TIER_LABELS[t.key] || 'Terms',
+        blurb: RESEARCH_TIER_BLURBS[t.key] || '',
+        terms: t.terms,
+      }));
+  }
+  if(Array.isArray(result.terms) && result.terms.length){
+    return [{ key: 'core', label: 'Suggested terminology', blurb: '', terms: result.terms }];
+  }
+  return [];
+}
+
+function researchTermCount(result){
+  return researchTiers(result).reduce((n, t) => n + t.terms.length, 0);
+}
+
+function renderResearchTierBlocks(tiers, specialtyOverride){
+  const allTerms = allGlossaryTermsFlat();
+  const overrideArg = specialtyOverride === undefined ? '' : `, '${String(specialtyOverride).replace(/'/g, "\\'")}'`;
+  return tiers.map(tier => `
+    <div class="doc-tier">
+      <div class="doc-tier-head">
+        <span class="doc-tier-label">${escapeHtml(tier.label)}</span>
+        <span class="doc-tier-count">${tier.terms.length}</span>
+      </div>
+      ${tier.blurb ? `<p class="doc-tier-blurb">${escapeHtml(tier.blurb)}</p>` : ''}
+      <div class="doc-research-terms">
+        ${tier.terms.map(t => {
+          const exists = allTerms.some(existing => (existing.en||'').trim().toLowerCase() === (t.en||'').trim().toLowerCase());
+          const enSafe = escapeHtml(t.en||'').replace(/'/g,"\\'");
+          const esSafe = escapeHtml(t.es||'').replace(/'/g,"\\'");
+          const defSafe = escapeHtml(t.def||'').replace(/'/g,"\\'");
+          return `
+            <div class="doc-research-term-card${tier.key === 'falsefriends' ? ' is-pitfall' : ''}">
+              <div class="doc-research-term-main">
+                <div class="doc-research-term-en">${escapeHtml(t.en||'')}</div>
+                <div class="doc-research-term-es">${escapeHtml(t.es||'')}</div>
+                ${t.def ? `<div class="doc-research-term-def">${escapeHtml(t.def)}</div>` : ''}
+              </div>
+              ${exists
+                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
+                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this${overrideArg})">${ICON_PLUS} Add</button>`}
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
 function renderDoctorResearch(){
   const s = doctorResearchState;
   let body = '';
@@ -7011,7 +7116,6 @@ function renderDoctorResearch(){
     body = `<div class="doc-research-error">${escapeHtml(s.error)}</div>`;
   } else if(s.status === 'done' && s.result){
     const r = s.result;
-    const allTerms = allGlossaryTermsFlat();
     const domainMatch = findBestDomainMatch(r.specialty);
     const cache = s.cacheInfo;
     const cacheBanner = (cache && cache.fromCache) ? `
@@ -7028,26 +7132,8 @@ function renderDoctorResearch(){
         <div class="doc-research-specialty">${r.specialty ? escapeHtml(r.specialty) : 'Specialty not confidently identified'}</div>
         <p>${escapeHtml(r.note || '')}</p>
       </div>
-      <div class="doc-research-terms-label">Suggested terminology (${r.terms.length})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
-      <div class="doc-research-terms">
-        ${r.terms.map(t => {
-          const exists = allTerms.some(existing => (existing.en||'').trim().toLowerCase() === t.en.trim().toLowerCase());
-          const enSafe = escapeHtml(t.en).replace(/'/g,"\\'");
-          const esSafe = escapeHtml(t.es).replace(/'/g,"\\'");
-          const defSafe = escapeHtml(t.def).replace(/'/g,"\\'");
-          return `
-            <div class="doc-research-term-card">
-              <div class="doc-research-term-main">
-                <div class="doc-research-term-en">${escapeHtml(t.en)}</div>
-                <div class="doc-research-term-es">${escapeHtml(t.es)}</div>
-                <div class="doc-research-term-def">${escapeHtml(t.def)}</div>
-              </div>
-              ${exists
-                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
-                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this)">${ICON_PLUS} Add</button>`}
-            </div>`;
-        }).join('')}
-      </div>`;
+      <div class="doc-research-terms-label">Suggested terminology (${researchTermCount(r)})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
+      ${renderResearchTierBlocks(researchTiers(r))}`;
   } else {
     body = `<p class="doc-research-intro">Type a doctor's name to look up their specialty and get a head start on the terminology likely to come up in that appointment. Adding a specialty or location narrows the search and finds the right person faster.</p>`;
   }
@@ -8804,7 +8890,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0624';
+const BUILD_ID = 'b0911.0712';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -9226,8 +9312,7 @@ function renderDoctorDirectory(q){
     // the same field always looks the same and the grid groups itself.
     const accent = specialtyColor(d.specialty);
     const delay = Math.min(cardIdx * 0.03, 0.3);
-    const termCount = (d.researchResult && Array.isArray(d.researchResult.terms))
-      ? d.researchResult.terms.length : 0;
+    const termCount = researchTermCount(d.researchResult);
     // "From Doctor Prep" used to sit on the card as a tag. It was on nearly
     // every one, so it separated nothing — and the prep-terms line below
     // already says whether research exists. Source stays in the detail view.
@@ -9387,32 +9472,14 @@ function renderDoctorDirDetail(d){
   const specialtyForMatch = (r && r.specialty) || d.specialty || null;
 
   let researchSection = '';
-  if(r && Array.isArray(r.terms) && r.terms.length){
+  const detailTiers = researchTiers(r);
+  if(detailTiers.length){
     const domainMatch = findBestDomainMatch(specialtyForMatch);
     researchSection = `
       <div class="dd-detail-section-label">${ICON_SPARK} Doctor Prep results</div>
       ${r.note ? `<div class="doc-research-summary ${r.found ? '' : 'is-fallback'}"><p>${escapeHtml(r.note)}</p></div>` : ''}
-      <div class="doc-research-terms-label">Terminology (${r.terms.length})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
-      <div class="doc-research-terms">
-        ${r.terms.map(t => {
-          const exists = allTerms.some(existing => (existing.en||'').trim().toLowerCase() === (t.en||'').trim().toLowerCase());
-          const enSafe = escapeHtml(t.en).replace(/'/g,"\\'");
-          const esSafe = escapeHtml(t.es).replace(/'/g,"\\'");
-          const defSafe = escapeHtml(t.def).replace(/'/g,"\\'");
-          const specialtySafe = escapeHtml(specialtyForMatch||'').replace(/'/g,"\\'");
-          return `
-            <div class="doc-research-term-card">
-              <div class="doc-research-term-main">
-                <div class="doc-research-term-en">${escapeHtml(t.en)}</div>
-                <div class="doc-research-term-es">${escapeHtml(t.es)}</div>
-                <div class="doc-research-term-def">${escapeHtml(t.def)}</div>
-              </div>
-              ${exists
-                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
-                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this, '${specialtySafe}')">${ICON_PLUS} Add</button>`}
-            </div>`;
-        }).join('')}
-      </div>
+      <div class="doc-research-terms-label">Terminology (${researchTermCount(r)})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
+      ${renderResearchTierBlocks(detailTiers, specialtyForMatch || '')}
       <button class="btn btn-ghost" style="width:100%; margin-top:14px;" onclick="researchThisDoctorFromDirectory('${d.id}')">Research again</button>
     `;
   } else {
