@@ -1337,26 +1337,70 @@
      see it and the eye can find it without reading. Chevron on the right so
      the names all start at the same x and the column scans cleanly. */
   .group-head{
-    display:flex; align-items:center; gap:11px; width:100%;
-    margin:22px 0 12px; padding:11px 13px; border:none;
-    border-radius:13px; cursor:pointer; text-align:left;
-    background:var(--paper);
+    display:flex; align-items:center; gap:4px; width:100%;
+    margin:22px 0 12px; padding:8px 8px 8px 9px;
+    border-radius:13px; background:var(--paper);
     box-shadow:inset 0 0 0 1px var(--line-soft), var(--sh-1);
     font-family:var(--sans);
-    transition:box-shadow .18s var(--ease), transform .18s var(--ease);
+    transition:box-shadow .18s var(--ease);
   }
   .group-head:first-of-type{ margin-top:4px; }
   @media (hover:hover){
-    .group-head:hover{ box-shadow:inset 0 0 0 1px var(--line), var(--sh-2); transform:translateY(-1px); }
+    .group-head:hover{ box-shadow:inset 0 0 0 1px var(--line), var(--sh-2); }
   }
-  .group-head:active, .group-head.is-pressed{ transform:translateY(0) scale(0.994); }
+  /* The mark is its own control — tap it to change the icon, tap anything
+     else to open or close the group. Two buttons side by side rather than
+     one nested in the other, which isn't valid markup and breaks the tap
+     target on iOS. */
   .group-mark{
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    width:30px; height:30px; border-radius:9px;
-    background:color-mix(in srgb, var(--group-accent) 15%, transparent);
-    color:var(--group-accent);
+    width:36px; height:36px; border:none; border-radius:10px; cursor:pointer; padding:0;
+    background:color-mix(in srgb, var(--group-accent) 14%, transparent);
+    --ic-fill:var(--group-accent); --ic-line:var(--group-accent);
+    transition:background .15s var(--ease), transform .15s var(--ease);
   }
-  .group-mark svg{ width:16px; height:16px; }
+  @media (hover:hover){
+    .group-mark:hover{ background:color-mix(in srgb, var(--group-accent) 26%, transparent); }
+  }
+  .group-mark:active{ transform:scale(0.94); }
+  .group-mark svg{ width:21px; height:21px; }
+  .group-mark-logo{ width:20px; height:20px; object-fit:contain; }
+  .group-toggle{
+    display:flex; align-items:center; gap:10px; flex:1; min-width:0;
+    border:none; background:none; cursor:pointer; text-align:left;
+    padding:4px 5px 4px 7px; font-family:var(--sans); border-radius:9px;
+    transition:transform .15s var(--ease);
+  }
+  .group-toggle:active{ transform:scale(0.995); }
+
+  /* Icon picker */
+  .group-icon-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(84px, 1fr)); gap:8px;
+  }
+  .group-icon-pick{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:12px 6px 9px; border-radius:12px; cursor:pointer;
+    border:1px solid var(--line-soft); background:var(--paper);
+    font-family:var(--sans); transition:border-color .15s var(--ease), background .15s var(--ease);
+  }
+  .group-icon-art{
+    display:flex; align-items:center; justify-content:center; width:30px; height:30px;
+    --ic-fill:var(--ink-soft); --ic-line:var(--ink-soft);
+  }
+  .group-icon-art svg{ width:26px; height:26px; }
+  .group-icon-art .group-mark-logo{ width:24px; height:24px; }
+  .group-icon-label{
+    font-size:10.5px; font-weight:600; color:var(--ink-faint); line-height:1.2; text-align:center;
+  }
+  .group-icon-pick.is-on{
+    border-color:transparent;
+    background:color-mix(in srgb, var(--group-accent) 16%, transparent);
+  }
+  .group-icon-pick.is-on .group-icon-art{ --ic-fill:var(--group-accent); --ic-line:var(--group-accent); }
+  .group-icon-pick.is-on .group-icon-label{ color:var(--group-accent); }
+  @media (hover:hover){
+    .group-icon-pick:hover{ border-color:var(--accent-2); }
+  }
   .group-head-text{ flex:1; min-width:0; }
   .group-head-name{
     display:block; font-size:13.5px; font-weight:650; color:var(--ink);
@@ -3245,6 +3289,18 @@
   </div>
 </div>
 
+<div class="overlay" id="groupIconOverlay" onclick="if(event.target===this) closeGroupIconPicker()">
+  <div class="modal">
+    <h3>Choose an icon</h3>
+    <p class="field-hint" id="groupIconTitle" style="margin:-6px 0 14px;"></p>
+    <div class="group-icon-grid" id="groupIconGrid"></div>
+    <p class="field-hint" style="margin-top:14px;">Saved on this device. Teammates keep their own choices.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeGroupIconPicker()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="nameOverlay">
   <div class="modal">
     <h3>Attribute my edits as</h3>
@@ -4229,6 +4285,112 @@ function locationSortRank(name){
   return 0;
 }
 
+/* Which icon marks each location. Keyed by group name rather than by screen,
+   so John Theurer looks the same in the Doctor Directory and in Providers.
+   Stored per device — see the note in the picker copy. */
+const GROUP_ICON_KEY = 'ih_groupIcons';
+let groupIcons = {};
+try{ groupIcons = JSON.parse(localStorage.getItem(GROUP_ICON_KEY) || '{}') || {}; }catch(e){ groupIcons = {}; }
+
+const GROUP_ICON_CHOICES = [
+  { key:'logo',        label:'HMH mark' },
+  { key:'hospital',    label:'Hospital' },
+  { key:'ribbon',      label:'Cancer' },
+  { key:'heart',       label:'Heart' },
+  { key:'brain',       label:'Brain' },
+  { key:'lungs',       label:'Lungs' },
+  { key:'bone',        label:'Bone' },
+  { key:'ear',         label:'ENT' },
+  { key:'dna',         label:'Genetics' },
+  { key:'stethoscope', label:'Primary care' },
+  { key:'nurse',       label:'Nursing' },
+  { key:'doctor',      label:'Physician' },
+  { key:'iv',          label:'Infusion' },
+  { key:'pill',        label:'Pharmacy' },
+  { key:'flask',       label:'Lab' },
+  { key:'monitor',     label:'Imaging' },
+  { key:'ambulance',   label:'Emergency' },
+  { key:'helicopter',  label:'Air transport' },
+  { key:'apple',       label:'Pediatrics' },
+  { key:'book',        label:'Teaching' },
+  { key:'shield',      label:'Behavioral' },
+  { key:'calendar',    label:'Clinic' },
+  { key:'person',      label:'Outpatient' }
+];
+
+// A sensible starting icon so nothing has to be picked by hand to look right.
+function defaultGroupIcon(name){
+  const t = (name || '').toLowerCase();
+  if(t === HMH_NETWORK_LABEL.toLowerCase()) return 'logo';
+  if(t.includes('cancer') || t.includes('theurer') || t.includes('oncolog')) return 'ribbon';
+  if(t.includes('children') || t.includes('sanzari') || t.includes('hovnanian') || t.includes('pediat')) return 'apple';
+  if(t.includes('rehab')) return 'bone';
+  if(t.includes('carrier') || t.includes('behavioral') || t.includes('psych')) return 'brain';
+  if(t.includes('school of medicine')) return 'book';
+  if(t.includes('discovery') || t.includes('innovation') || t.includes('research')) return 'flask';
+  if(t.includes('heart') || t.includes('cardi')) return 'heart';
+  if(t === NO_LOCATION_LABEL.toLowerCase()) return 'person';
+  return 'hospital';
+}
+
+function groupIconKeyFor(name){
+  const chosen = groupIcons[name];
+  if(chosen === 'logo') return 'logo';
+  if(chosen && DOMAIN_ICONS[chosen]) return chosen;
+  return defaultGroupIcon(name);
+}
+
+function markLogoFallback(img){
+  const span = document.createElement('span');
+  span.innerHTML = DOMAIN_ICONS.hospital;
+  img.replaceWith(span.firstChild);
+}
+
+function groupIconHtml(key){
+  // If the mark asset is missing the img would render as a broken-image box,
+  // so fall back to the hospital glyph rather than showing a torn icon.
+  if(key === 'logo') return `<img class="group-mark-logo" src="./hmh-mark.png" alt="" onerror="markLogoFallback(this)">`;
+  return DOMAIN_ICONS[key] || DOMAIN_ICONS.hospital;
+}
+
+let pickingIconForGroup = '';
+
+function openGroupIconPicker(encodedName){
+  pickingIconForGroup = decodeURIComponent(encodedName);
+  const current = groupIconKeyFor(pickingIconForGroup);
+  document.getElementById('groupIconTitle').textContent = pickingIconForGroup;
+  document.getElementById('groupIconGrid').innerHTML = GROUP_ICON_CHOICES.map(c=>`
+    <button class="group-icon-pick${c.key === current ? ' is-on' : ''}"
+        style="--group-accent:${nameToColor(pickingIconForGroup)};"
+        onclick="setGroupIcon('${c.key}')" title="${escapeAttr(c.label)}">
+      <span class="group-icon-art">${groupIconHtml(c.key)}</span>
+      <span class="group-icon-label">${escapeHtml(c.label)}</span>
+    </button>`).join('');
+  document.getElementById('groupIconOverlay').classList.add('show');
+}
+
+function closeGroupIconPicker(){
+  document.getElementById('groupIconOverlay').classList.remove('show');
+  pickingIconForGroup = '';
+}
+
+function setGroupIcon(key){
+  if(!pickingIconForGroup) return;
+  if(key === defaultGroupIcon(pickingIconForGroup)) delete groupIcons[pickingIconForGroup];
+  else groupIcons[pickingIconForGroup] = key;
+  try{ localStorage.setItem(GROUP_ICON_KEY, JSON.stringify(groupIcons)); }catch(e){}
+  closeGroupIconPicker();
+  renderContent();
+}
+
+/* encodeURIComponent deliberately leaves ! ' ( ) * alone, and these names go
+   into onclick="fn('...')" attributes — so "Joseph M. Sanzari Children's
+   Hospital" closed the string early and the whole handler failed to parse.
+   That header did nothing at all when tapped. Escape them explicitly. */
+function encGroup(name){
+  return encodeURIComponent(name).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+}
+
 function groupKeyId(scope, name){ return scope + '::' + name; }
 function isGroupCollapsed(scope, name){ return collapsedGroups.has(groupKeyId(scope, name)); }
 
@@ -4278,25 +4440,30 @@ function groupByLocation(list, keyOf){
 // looks exactly like the search returning nothing.
 function groupHeaderHtml(scope, group, searching){
   const collapsed = !searching && isGroupCollapsed(scope, group.name);
-  const enc = encodeURIComponent(group.name);
+  const enc = encGroup(group.name);
   const n = group.items.length;
   const noun = scope === 'providers' ? 'provider' : 'doctor';
-  return `<button class="group-head${collapsed ? ' is-collapsed' : ''}"
-      style="--group-accent:${nameToColor(group.name)};"
-      onclick="toggleGroup('${scope}', '${enc}')"
-      aria-expanded="${collapsed ? 'false' : 'true'}">
-      <span class="group-mark">${ICON_PIN}</span>
-      <span class="group-head-text">
-        <span class="group-head-name">${escapeHtml(group.name)}</span>
-        <span class="group-head-count">${n} ${n === 1 ? noun : noun + 's'}</span>
-      </span>
-      <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
-    </button>`;
+  // Two separate buttons in one row rather than a button inside a button:
+  // the mark opens the icon picker, everything else toggles the group.
+  return `<div class="group-head${collapsed ? ' is-collapsed' : ''}" style="--group-accent:${nameToColor(group.name)};">
+      <button class="group-mark" onclick="openGroupIconPicker('${enc}')"
+        title="Change the icon for ${escapeAttr(group.name)}" aria-label="Change icon">
+        ${groupIconHtml(groupIconKeyFor(group.name))}
+      </button>
+      <button class="group-toggle" onclick="toggleGroup('${scope}', '${enc}')"
+        aria-expanded="${collapsed ? 'false' : 'true'}">
+        <span class="group-head-text">
+          <span class="group-head-name">${escapeHtml(group.name)}</span>
+          <span class="group-head-count">${n} ${n === 1 ? noun : noun + 's'}</span>
+        </span>
+        <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
+      </button>
+    </div>`;
 }
 
 function groupControlsHtml(scope, groups, searching){
   if(searching || groups.length < 2) return '';
-  const encAll = groups.map(g => encodeURIComponent(g.name)).join(',');
+  const encAll = groups.map(g => encGroup(g.name)).join(',');
   const anyOpen = groups.some(g => !isGroupCollapsed(scope, g.name));
   return `<div class="group-controls">
     <button class="group-controls-btn" onclick="setAllGroups('${scope}', '${encAll}', ${anyOpen ? 'true' : 'false'})">
@@ -8587,7 +8754,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .group-head';
+  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -8610,7 +8777,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0503';
+const BUILD_ID = 'b0911.0547';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
