@@ -756,6 +756,18 @@
   /* Four across on every width — they're the primary actions, so they should
      never require a swipe to reach. */
   .qa-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+  /* Doctors hub: a landing screen with room to explain each door, so the
+     cards run full width rather than being squeezed into a rail. */
+  .hub-head{ margin:0 2px 18px; }
+  .hub-head h1{
+    font-family:var(--serif); font-size:26px; font-weight:600;
+    color:var(--ink); margin:0 0 6px; letter-spacing:-0.01em;
+  }
+  .hub-head p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.45; }
+  .hub-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+  .hub-grid .qa-card{ min-height:150px; padding:18px 18px 16px; }
+  .hub-grid .qa-title{ font-size:16px; }
+  .hub-grid .qa-desc{ font-size:12.5px; }
   .qa-tile{
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
     padding:16px 6px 14px 6px; border-radius:16px; cursor:pointer; border:none;
@@ -6976,6 +6988,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'events'){
     showTopbar = false;
+  } else if(activeCategory === 'doctors'){
+    showTopbar = false;
   } else if(activeCategory === 'translate'){
     showTopbar = false;
   } else if(activeCategory === 'practice'){
@@ -7217,6 +7231,11 @@ function renderContent(){
 
   if(activeCategory === 'providers'){
     content.innerHTML = renderProviders(q);
+    return;
+  }
+
+  if(activeCategory === 'doctors'){
+    content.innerHTML = renderDoctorsHub();
     return;
   }
 
@@ -7538,7 +7557,7 @@ function setCategory(id, isBack){
   if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
   if(id === 'userguide'){ guideIndex = 0; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
-  if(id === 'doctor-directory'){ loadDoctorDirectory(); }
+  if(id === 'doctor-directory' || id === 'doctors'){ loadDoctorDirectory(); }
   render();
 }
 
@@ -8219,7 +8238,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0042';
+const BUILD_ID = 'b0911.0103';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -8394,7 +8413,7 @@ function renderHome(){
     </button>`;
   const quickActions = [
     qaTile('#2E8BD0', DOMAIN_ICONS.globe,  'Translate',  `setCategory('translate')`),
-    qaTile('#7C6A9C', DOMAIN_ICONS.doctor, 'Doctor Prep',`setCategory('doctor-research')`),
+    qaTile('#7C6A9C', DOMAIN_ICONS.doctor, 'Doctor Prep',`setCategory('doctors')`),
     qaTile('#35A97A', DOMAIN_ICONS.chat,  'Team Chat',  `setCategory('chat')`),
     qaTile('#B08D2A', DOMAIN_ICONS.clipboard,  'Add Term',   `setCategory('all')`),
   ].join('');
@@ -8567,6 +8586,28 @@ function renderProviders(q){
   });
   html += `</div>`;
   return html;
+}
+
+// A two-door landing screen for the doctor tooling. The Home tile used to
+// drop straight into Doctor Prep, which meant the Doctor Directory — the
+// thing you want when the research already exists — was only reachable by
+// scrolling Home or opening the nav. Both now sit one tap from the same tile.
+function renderDoctorsHub(){
+  const n = DOCTOR_DIRECTORY.length;
+  return `
+    <div class="hub-head">
+      <h1>Doctors</h1>
+      <p>Look up someone new, or open what the team has already saved.</p>
+    </div>
+    <div class="hub-grid">
+      ${qaCard('#B08D2A', DOMAIN_ICONS.doctor, 'Doctor Prep',
+        'Research a provider by name — specialty, location, and the terminology likely to come up',
+        `setCategory('doctor-research')`)}
+      ${qaCard('#7C6A9C', DOMAIN_ICONS.grid, 'Doctor Directory',
+        n ? `${n} ${n===1?'doctor':'doctors'} saved by the team, with notes, photos and their term lists`
+          : 'Nothing saved yet — every Doctor Prep search adds an entry here',
+        `setCategory('doctor-directory')`)}
+    </div>`;
 }
 
 function renderDoctorDirectory(q){
