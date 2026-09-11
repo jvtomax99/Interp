@@ -688,9 +688,9 @@
     .card:active::before, .card.is-pressed::before{ transform:scaleY(1); }
     .domain-family:active, .domain-family.is-pressed{ transform:translateY(-4px); transition:transform .12s var(--ease); }
     .home-search:active, .domain-family-kid:active, .domain-chip:active,
-    .side-row:active, .subgroup-pill:active, .crumb-up:active,
+    .side-row:active, .subgroup-pill:active, .subgroup-pill-all:active, .crumb-up:active,
     .home-search.is-pressed, .domain-family-kid.is-pressed, .domain-chip.is-pressed,
-    .subgroup-pill.is-pressed, .crumb-up.is-pressed{
+    .subgroup-pill.is-pressed, .subgroup-pill-all.is-pressed, .crumb-up.is-pressed{
       transform:translateY(-2px); transition-duration:.12s;
     }
   }
@@ -1006,25 +1006,77 @@
     font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink-soft);
     transition:border-color .15s var(--ease), color .15s var(--ease);
   }
-  .crumb-up:hover{ border-color:var(--accent-2); color:var(--ink); }
   .crumb-up svg{ width:15px; height:15px; flex-shrink:0; }
+
+  /* Subgroup navigator. This was a wrapping row of variable-width pills,
+     which on a phone collapsed into a ragged block — every line a different
+     length, big dead gaps on the right, no alignment to read down. A grid
+     of equal-width cells fixes that: the columns line up, the counts sit on
+     a shared right edge, and a long name wraps inside its cell instead of
+     pushing the whole row out of rhythm. */
   .subgroup-bar{
-    display:flex; align-items:center; gap:7px; flex-wrap:wrap;
-    padding:11px 13px; margin-bottom:16px; border-radius:12px;
+    padding:13px 13px 14px; margin-bottom:16px; border-radius:14px;
     background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .subgroup-bar-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:8px; margin:0 3px 10px;
   }
   .subgroup-bar-label{
     font-family:var(--sans); font-size:10.5px; font-weight:700; letter-spacing:.07em;
-    text-transform:uppercase; color:var(--ink-faint); margin-right:2px;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .subgroup-bar-count{
+    font-family:var(--sans); font-size:10.5px; font-weight:600;
+    color:var(--ink-faint); font-variant-numeric:tabular-nums;
+  }
+  .subgroup-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(142px, 1fr));
+    /* Uniform rows here rather than a reserved two-line box inside each cell —
+       reserving left a visible hole under every single-line name. */
+    grid-auto-rows:64px; gap:7px;
   }
   .subgroup-pill{
-    display:inline-flex; align-items:center; gap:5px; padding:6px 11px; border-radius:999px;
+    display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+    gap:2px; padding:7px 11px; border-radius:11px; text-align:left;
     border:1px solid var(--line-soft); background:var(--paper); cursor:pointer;
-    font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink);
-    transition:border-color .15s var(--ease), background .15s var(--ease);
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink);
+    line-height:1.25; overflow:hidden;
+    transition:border-color .15s var(--ease), background .15s var(--ease), transform .15s var(--ease);
   }
-  .subgroup-pill:hover{ border-color:var(--accent-2); background:var(--accent-soft); }
-  .subgroup-pill span{ font-size:10.5px; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+  .subgroup-pill-name{
+    width:100%; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  /* Its own class, not a bare `span`: a `.subgroup-pill span` rule outranks
+     `.subgroup-pill-name` on specificity and silently greyed out the names. */
+  .subgroup-pill-count{
+    font-size:10.5px; font-weight:600; color:var(--ink-faint);
+    font-variant-numeric:tabular-nums;
+  }
+  /* The parent sits across the full width as the "everything here" anchor,
+     so it reads as the level above the grid rather than as a 14th subgroup. */
+  .subgroup-pill-all{
+    display:flex; flex-direction:row; align-items:center;
+    justify-content:flex-start; gap:9px; width:100%;
+    padding:11px 13px; margin-bottom:8px; border-radius:11px;
+    background:var(--accent-soft); border:1px solid transparent; color:var(--accent);
+    font-family:var(--sans); font-size:12.5px; font-weight:700; cursor:pointer;
+    transition:border-color .15s var(--ease), transform .15s var(--ease);
+  }
+  .subgroup-pill-all svg{ width:14px; height:14px; flex-shrink:0; }
+  .subgroup-pill-all .subgroup-pill-name{
+    width:auto; -webkit-line-clamp:1; color:var(--accent);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;
+  }
+  .subgroup-pill-all .subgroup-pill-count{ margin-left:auto; color:var(--accent); opacity:.75; }
+  /* Scoped to real pointers: on iOS a :hover rule sticks after a tap, which
+     left the last subgroup you touched looking permanently selected. */
+  @media (hover:hover){
+    .crumb-up:hover{ border-color:var(--accent-2); color:var(--ink); }
+    .subgroup-pill:hover{ border-color:var(--accent-2); background:var(--accent-soft); }
+    .subgroup-pill-all:hover{ border-color:var(--accent-2); }
+  }
 
   /* Marks a card as a subgroup by naming its parent above the title, so
      "Breast Oncology" reads as living under Oncology rather than as a
@@ -5171,6 +5223,27 @@ function removeChatAttachment(){
   renderChatAttachPreview();
 }
 
+/* Under "Oncology, Hematology & Leukemia" every child was labelled
+   "… Oncology" — the word carried no information there, but it doubled the
+   length of every label and forced ragged wrapping. Drop a trailing word
+   that the parent's own name already establishes, so the grid reads
+   "Breast / Radiation / Neuro" instead of thirteen variations on Oncology.
+   Only trailing words, only words the parent actually contains, and never
+   down to something too short to recognise. */
+function subgroupShortLabel(parentName, childName){
+  const child = (childName || '').trim();
+  const words = (parentName || '').split(/[^A-Za-z]+/).filter(w => w.length > 3);
+  for(const w of words){
+    // Matches both "Breast Oncology" and "Neuro-Oncology".
+    const re = new RegExp('[\\s-]+' + w + '$', 'i');
+    if(re.test(child)){
+      const short = child.replace(re, '').trim();
+      if(short.length >= 3) return short;
+    }
+  }
+  return child;
+}
+
 /* ============ Utilities ============ */
 function whoAmI(){
   // The sidebar's "Attribute my edits as" field doesn't exist at all while
@@ -7249,9 +7322,27 @@ function renderContent(){
     const parent = cats[0];
     const kids = cats.slice(1);
     html += `<div class="subgroup-bar">
-      <span class="subgroup-bar-label">Jump to</span>
-      <button class="subgroup-pill" onclick="jumpToDomain('${parent.id}')">${escapeHtml(parent.name)}</button>
-      ${kids.map(k=>`<button class="subgroup-pill" onclick="jumpToDomain('${k.id}')">${escapeHtml(k.name)} <span>${k.terms.length}</span></button>`).join('')}
+      <div class="subgroup-bar-head">
+        <span class="subgroup-bar-label">Jump to</span>
+        <span class="subgroup-bar-count">${kids.length} subgroups</span>
+      </div>
+      ${parent.terms.length ? `<button class="subgroup-pill-all" onclick="jumpToDomain('${parent.id}')" title="General ${escapeHtml(parent.name)} terms — the ones that don't sit in a subgroup">
+        ${ICON_ARROW_RIGHT}<span class="subgroup-pill-name">General terms</span>
+        <span class="subgroup-pill-count">${parent.terms.length}</span>
+      </button>` : ''}
+      <div class="subgroup-grid">
+        ${(()=>{
+          // If shortening ever collapses two subgroups onto the same label,
+          // fall back to full names for the whole group — an ambiguous jump
+          // target is worse than a long one.
+          const shorts = kids.map(k => subgroupShortLabel(parent.name, k.name));
+          const ambiguous = new Set(shorts.map(s=>s.toLowerCase())).size !== shorts.length;
+          return kids.map((k,i)=>{
+          const short = ambiguous ? k.name : shorts[i];
+          return `<button class="subgroup-pill" onclick="jumpToDomain('${k.id}')" title="${escapeHtml(k.name)}" aria-label="${escapeHtml(k.name)}, ${k.terms.length} terms"><span class="subgroup-pill-name">${escapeHtml(short)}</span><span class="subgroup-pill-count">${k.terms.length} terms</span></button>`;
+          }).join('');
+        })()}
+      </div>
     </div>`;
   }
   html += `<div class="print-export-row">
@@ -8106,7 +8197,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .crumb-up';
+  const LIFTS = '.home-tile, .qa-tile, .card, .domain-family, .domain-family-kid, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
