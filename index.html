@@ -1330,7 +1330,15 @@
     background:var(--bg-hi); border-radius:10px; padding:10px 12px; margin-top:10px; line-height:1.5;
   }
   .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
-  .doc-dir-card{ cursor:pointer; }
+  .doc-dir-card{ cursor:pointer; padding:16px 16px 13px 16px; }
+  /* Two meta rows stacked (attribution, then the Doctor Prep hint) were
+     each drawing their own top border and 12px of margin. One separator is
+     enough. */
+  .doc-dir-card .meta{ margin-top:9px; padding-top:8px; }
+  .doc-dir-card .meta + .meta{ margin-top:2px; padding-top:2px; border-top:none; }
+  .doc-dir-card .provider-top{ margin-bottom:9px; }
+  .doc-dir-card .provider-avatar{ width:44px; height:44px; }
+  .doc-dir-card .provider-avatar-fallback{ font-size:13px; }
   .dd-detail-header{ display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; padding-right:28px; }
   /* Named back control. The bare ✕ said "close" but not what you'd return
      to, and on a full-height sheet it reads as leaving the section entirely. */
@@ -1865,7 +1873,16 @@
     margin-top:12px; padding-top:10px; border-top:1px solid var(--line-soft);
     display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:14px;
   }
-  .card .source{font-family:var(--mono); font-size:10px; color:var(--ink-faint);}
+  .card .source{
+    font-family:var(--mono); font-size:10px; color:var(--ink-faint);
+    display:inline-flex; align-items:center; gap:5px; min-width:0;
+  }
+  /* An inline SVG with a viewBox and no explicit size expands to fill its
+     container — which is how the sparkle beside "Tap to view Doctor Prep
+     results" grew into a 300px graphic and stretched the doctor cards to
+     three times their proper height. Every icon dropped into a meta row
+     gets a size here rather than relying on each call site to remember. */
+  .card .source svg{ width:12px; height:12px; flex-shrink:0; }
   .card .actions{display:flex; gap:6px; opacity:0; transform:translateY(-2px); transition:opacity .15s var(--ease), transform .15s var(--ease);}
   .card:hover .actions{opacity:1; transform:translateY(0);}
   /* Touch devices have no hover, so these controls would otherwise stay
@@ -6130,7 +6147,14 @@ function nameToColor(name){
 function initialsOf(name){
   const trimmed = (name || '').trim();
   if(!trimmed) return '?';
-  return trimmed.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  // Nearly every entry in the doctor directory starts with "Dr", so taking
+  // the first two words gave "DB" for Dr Barry Love and "DA" for Dr Ana Ruiz
+  // — the avatars all began with D and told you nothing. Drop the title and
+  // initial the actual name.
+  let words = trimmed.split(/\s+/);
+  const titles = ['dr','dr.','doctor','prof','prof.','professor','mr','mr.','mrs','mrs.','ms','ms.'];
+  if(words.length > 1 && titles.includes(words[0].toLowerCase())) words = words.slice(1);
+  return words.map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase() || '?';
 }
 
 function darkenHex(hex, pct){
@@ -8238,7 +8262,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.0103';
+const BUILD_ID = 'b0911.0124';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -8658,12 +8682,9 @@ function renderDoctorDirectory(q){
         ${d.hospitalLocation ? `<p class="provider-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
         ${d.locationDetails ? `<div class="doc-dir-location-pin">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
         ${d.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(d.notes)}</p>` : ''}
-        ${attribution ? `<div class="meta">
-          <span class="source"></span>
-          <span class="source">${attribution}</span>
-        </div>` : ''}
+        ${attribution ? `<div class="meta"><span class="source">${attribution}</span></div>` : ''}
         ${d.researchResult && Array.isArray(d.researchResult.terms) && d.researchResult.terms.length
-          ? `<div class="meta"><span class="source"></span><span class="source">${ICON_SPARK} Tap to view Doctor Prep results</span></div>`
+          ? `<div class="meta"><span class="source">${ICON_SPARK} Tap to view Doctor Prep results</span></div>`
           : ''}
       </div>
     `;
