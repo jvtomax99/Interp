@@ -8488,6 +8488,13 @@ function flushSearchRender(){
    the full treatment. */
 let lastPaintedCategory = null;
 let lastHomeHtml = '';
+/* The #content element the cached HTML was actually painted into.
+   render() rebuilds #app wholesale, which replaces #content with a brand-new
+   EMPTY div — so "the markup hasn't changed" is not on its own a reason to
+   skip repainting. Skipping in that case left Home permanently blank. The
+   cache is only valid while the very element we filled is still in the page
+   and still has children. */
+let lastPaintedContentEl = null;
 
 function renderContent(){
   const content = document.getElementById('content');
@@ -8505,9 +8512,13 @@ function renderContent(){
     const homeHtml = renderHome();
     // Most startup re-renders of Home produce byte-identical markup. Rewriting
     // innerHTML with the same string still tears down and rebuilds the DOM, so
-    // skip it entirely and leave the page alone.
-    if(sameScreen && homeHtml === lastHomeHtml) return;
+    // skip it — but ONLY when this is the same element we painted last time and
+    // it still holds that content. A render() in between swaps in a fresh empty
+    // #content, and skipping then leaves the screen blank.
+    const cacheStillOnScreen = (content === lastPaintedContentEl) && content.childNodes.length > 0;
+    if(sameScreen && cacheStillOnScreen && homeHtml === lastHomeHtml) return;
     lastHomeHtml = homeHtml;
+    lastPaintedContentEl = content;
     content.innerHTML = homeHtml;
     startGreetingRotation();
     animateCountUps(!sameScreen);
@@ -9617,7 +9628,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1631';
+const BUILD_ID = 'b0912.1638';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
