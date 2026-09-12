@@ -506,15 +506,38 @@
             mask-image:radial-gradient(128% 46% at 50% 104%,
       rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
   }
+  /* Three layers, one job each — they must not share a transform, because
+     whoever writes second wins:
+       .home-greeting-photo         the frame. Holds the mask. Never moves.
+       .home-greeting-photo-inner   scroll parallax, written by JS.
+       .home-greeting-photo-drift   the slow wander, a CSS animation. */
   .home-greeting-photo-inner{
-    position:absolute; inset:-16% 0;   /* headroom for the drift */
-    background:url('./hero.jpg') 62% 55% / cover no-repeat;
+    position:absolute; inset:-16% 0;   /* headroom for the parallax */
     will-change:transform;
     transform:translate3d(0,0,0);      /* its own compositor layer */
   }
-  /* Someone who has asked for less motion gets the picture, held still. */
+  .home-greeting-photo-drift{
+    position:absolute; inset:0;
+    background:url('./hero.jpg') 62% 55% / cover no-repeat;
+    will-change:transform;
+    /* Starts already overscanned, so even at the near end of the cycle the
+       image covers its frame and no edge can appear. `alternate` makes it
+       breathe back the way it came instead of snapping to the start. */
+    animation:heroDrift 48s ease-in-out infinite alternate;
+  }
+  @keyframes heroDrift{
+    from{ transform:scale(1.05) translate3d(-1.4%, -1%, 0); }
+    to{   transform:scale(1.10) translate3d(1.4%, 1%, 0); }
+  }
+  /* Nothing to animate for a backgrounded tab — this is the compositor's
+     time and the phone's battery. */
+  .home-greeting-photo-drift.is-paused{ animation-play-state:paused; }
+
+  /* Someone who has asked for less motion gets the picture, held still —
+     both the parallax and the wander. */
   @media (prefers-reduced-motion: reduce){
     .home-greeting-photo-inner{ transform:none !important; }
+    .home-greeting-photo-drift{ animation:none !important; transform:scale(1.05); }
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
@@ -8783,6 +8806,10 @@ window.addEventListener('offline', ()=> updateSyncStatus(false));
 // entirely — iOS suspends rather than reloads an installed PWA.
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible') flushOutbox();
+  // The banner's slow wander keeps the compositor awake, so stop it whenever
+  // nobody is looking. The app sits open on Home between assignments.
+  const drift = document.querySelector('.home-greeting-photo-drift');
+  if(drift) drift.classList.toggle('is-paused', document.visibilityState !== 'visible');
 });
 
 // The top bar lives outside #app, so render() never rewrites it — its two
@@ -10020,7 +10047,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1752';
+const BUILD_ID = 'b0912.1757';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -10284,7 +10311,7 @@ function renderHome(){
 
   return `
     <div class="home-greeting">
-      <div class="home-greeting-photo"><div class="home-greeting-photo-inner"></div></div>
+      <div class="home-greeting-photo"><div class="home-greeting-photo-inner"><div class="home-greeting-photo-drift"></div></div></div>
       <div class="home-greeting-scrim"></div>
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
