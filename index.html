@@ -483,9 +483,19 @@
   }
   /* Keep the greeting above both. */
   .home-greeting-text, .home-greeting-brand{ z-index:3; }
+  /* Depth.
+     The photo drifts more slowly than the page as you scroll, which is what
+     reads as the building sitting BEHIND the glass rather than printed on it.
+
+     The movement is on an inner layer, never on this element: the alpha mask
+     below is what shapes the dome the page rises into, and translating the
+     masked element would drag the fade along with the picture. So the mask
+     and the frame stay put here, and only the image moves inside them.
+
+     The inner layer is deliberately taller than its frame, so there is room
+     to move without ever exposing an edge. */
   .home-greeting-photo{
-    position:absolute; inset:0; z-index:-2;
-    background:url('./hero.jpg') 62% 55% / cover no-repeat;
+    position:absolute; inset:0; z-index:-2; overflow:hidden;
     /* Concave instead of convex: the transparent area is a dome rising from
        the bottom centre, so the page sweeps UP into the photo and the image
        persists at the two bottom corners. A plain vertical fade with rounded
@@ -495,6 +505,16 @@
       rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
             mask-image:radial-gradient(128% 46% at 50% 104%,
       rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
+  }
+  .home-greeting-photo-inner{
+    position:absolute; inset:-16% 0;   /* headroom for the drift */
+    background:url('./hero.jpg') 62% 55% / cover no-repeat;
+    will-change:transform;
+    transform:translate3d(0,0,0);      /* its own compositor layer */
+  }
+  /* Someone who has asked for less motion gets the picture, held still. */
+  @media (prefers-reduced-motion: reduce){
+    .home-greeting-photo-inner{ transform:none !important; }
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
@@ -8822,6 +8842,45 @@ let lastHomeHtml = '';
    and still has children. */
 let lastPaintedContentEl = null;
 
+/* ---- Banner depth ----
+   The hero photo drifts more slowly than the page, so the building reads as
+   sitting behind the glass rather than printed on it.
+
+   One listener for the life of the page, not one per render — the greeting is
+   re-rendered whenever anything on Home changes, and re-binding each time
+   would stack listeners until scrolling cost a dozen handlers. The element is
+   cached on render instead of queried every frame.
+
+   Capped at HERO_DRIFT_MAX so the image can never travel past the headroom
+   its inner layer has, which would show an edge. */
+const HERO_DRIFT_RATE = 0.34;   // fraction of scroll distance
+const HERO_DRIFT_MAX = 34;      // px; inner layer has ~16% of 232px to give
+let heroPhotoEl = null;
+let heroDriftFrame = null;
+let heroMotionOff = null;
+
+function heroMotionDisabled(){
+  if(heroMotionOff === null){
+    try{
+      heroMotionOff = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }catch(err){ heroMotionOff = false; }
+  }
+  return heroMotionOff;
+}
+
+function applyHeroDrift(){
+  heroDriftFrame = null;
+  if(!heroPhotoEl || !heroPhotoEl.isConnected || heroMotionDisabled()) return;
+  const y = window.scrollY || window.pageYOffset || 0;
+  const drift = Math.min(y * HERO_DRIFT_RATE, HERO_DRIFT_MAX);
+  heroPhotoEl.style.transform = 'translate3d(0,' + drift.toFixed(1) + 'px,0)';
+}
+
+window.addEventListener('scroll', ()=>{
+  if(!heroPhotoEl) return;                    // not on Home: costs one check
+  if(heroDriftFrame === null) heroDriftFrame = requestAnimationFrame(applyHeroDrift);
+}, { passive: true });
+
 function renderContent(){
   const content = document.getElementById('content');
   // Folded once here and passed down, so every filter below compares
@@ -8848,8 +8907,14 @@ function renderContent(){
     content.innerHTML = homeHtml;
     startGreetingRotation();
     animateCountUps(!sameScreen);
+    // Re-cache the photo layer (the old node was just thrown away) and put it
+    // straight back where the current scroll position says it belongs, so a
+    // re-render mid-scroll doesn't snap the image back to the top.
+    heroPhotoEl = content.querySelector('.home-greeting-photo-inner');
+    applyHeroDrift();
     return;
   }
+  heroPhotoEl = null;     // off Home: the scroll handler does nothing
   stopGreetingRotation(); // never leave the timer running on other sections
 
   if(activeCategory === 'events'){
@@ -9955,7 +10020,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1746';
+const BUILD_ID = 'b0912.1752';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -10219,7 +10284,7 @@ function renderHome(){
 
   return `
     <div class="home-greeting">
-      <div class="home-greeting-photo"></div>
+      <div class="home-greeting-photo"><div class="home-greeting-photo-inner"></div></div>
       <div class="home-greeting-scrim"></div>
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
