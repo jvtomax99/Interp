@@ -431,6 +431,23 @@
 
   @keyframes contentFadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
   .content-fade{ animation:contentFadeIn .38s var(--ease); }
+
+  /* Re-rendering the screen you are already on is a data refresh, not an
+     arrival — replaying the fade-and-rise on every update is what made
+     startup look like the page was reloading itself two or three times.
+     Listed explicitly rather than blanket-disabling animations inside
+     #content, so ongoing ones (the speaking pulse, the sync dot, the jump
+     flash) still run. Navigating to a screen removes the class and the
+     entrances play as before. */
+  #content.no-enter,
+  #content.no-enter .home-tile,
+  #content.no-enter .domain-family,
+  #content.no-enter .domain-group-children,
+  #content.no-enter .card,
+  #content.no-enter .doc-card,
+  #content.no-enter .quiz-card,
+  #content.no-enter .quiz-explain,
+  #content.no-enter .tr-result{ animation:none; }
   /* Global clearance from the fixed Home/Name buttons at the bottom of the
      screen — reserved once here so no individual screen has to worry about
      it, regardless of how short its content is. */
@@ -8447,16 +8464,35 @@ function flushSearchRender(){
   if(searchRenderTimer){ clearTimeout(searchRenderTimer); searchRenderTimer = null; renderContent(); }
 }
 
+/* A re-render of the SAME screen is a data refresh, not an arrival. Entry
+   animations and count-ups belong to arriving; replaying them on every data
+   update is what read as "the page keeps refreshing". Navigation still gets
+   the full treatment. */
+let lastPaintedCategory = null;
+let lastHomeHtml = '';
+
 function renderContent(){
   const content = document.getElementById('content');
   // Folded once here and passed down, so every filter below compares
   // accent-stripped text against accent-stripped text.
   const q = foldText(searchQuery.trim());
 
+  const sameScreen = (lastPaintedCategory === activeCategory);
+  // Suppresses only the entry animations (see .no-enter in the stylesheet);
+  // ongoing ones like the speaking pulse are untouched.
+  if(content) content.classList.toggle('no-enter', sameScreen);
+  lastPaintedCategory = activeCategory;
+
   if(activeCategory === 'home'){
-    content.innerHTML = renderHome();
+    const homeHtml = renderHome();
+    // Most startup re-renders of Home produce byte-identical markup. Rewriting
+    // innerHTML with the same string still tears down and rebuilds the DOM, so
+    // skip it entirely and leave the page alone.
+    if(sameScreen && homeHtml === lastHomeHtml) return;
+    lastHomeHtml = homeHtml;
+    content.innerHTML = homeHtml;
     startGreetingRotation();
-    animateCountUps();
+    animateCountUps(!sameScreen);
     return;
   }
   stopGreetingRotation(); // never leave the timer running on other sections
@@ -9443,8 +9479,13 @@ setInterval(refreshRelativeTimes, 30000); // one timer for the whole app
 
 /* Counts the dashboard stats up from zero on entry. Uses requestAnimationFrame
    with an eased curve so it decelerates rather than ticking linearly. */
-function animateCountUps(){
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* animate=false writes the final numbers straight in. Re-running the count-up
+   on every re-render meant the tile figures raced up from zero again each time
+   a collection finished loading, which is most of what made startup look like
+   the page was reloading itself. */
+function animateCountUps(animate){
+  const reduce = (animate === false) ||
+    (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   document.querySelectorAll('[data-countup]').forEach(el=>{
     const target = Number(el.getAttribute('data-countup')) || 0;
     if(reduce || target === 0){ el.textContent = String(target); return; }
@@ -9490,12 +9531,14 @@ function startGreetingRotation(){
   if(!host) return;
 
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  greetIndex = 0;
+  // Deliberately NOT reset to 0. Home re-renders whenever a collection
+  // finishes loading, and resetting here made the greeting jump back to
+  // "Hello" each time instead of carrying on through the languages.
   const paint = (i, animate)=>{
     const g = GREETINGS[i];
     host.innerHTML = `<span class="greet-word${animate?' in':''}" title="${escapeAttr(g.lang)}">${escapeHtml(g.word)}</span>`;
   };
-  paint(0, false);
+  paint(greetIndex, false);
   if(reduce) return; // static greeting for anyone who prefers less motion
 
   greetTimer = setInterval(()=>{
@@ -9556,7 +9599,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1344';
+const BUILD_ID = 'b0912.1624';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -9721,6 +9764,15 @@ function qaCard(color, icon, title, desc, action){
     </button>`;
 }
 
+/* Chosen ONCE per app load rather than inside renderHome().
+   Re-rolling them on every render meant the quote and the tip changed every
+   time Home was re-rendered — and startup renders several times as each
+   collection arrives, so the quote visibly flickered through two or three
+   different lines before settling. A re-render should repaint the same page,
+   not deal a new hand. They still change every time the app is opened. */
+const SESSION_QUOTE = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+const SESSION_TIP = INTERPRETER_TIPS[Math.floor(Math.random() * INTERPRETER_TIPS.length)];
+
 function renderHome(){
   const who = whoAmI();
   const firstName = who ? who.trim().split(/\s+/)[0] : '';
@@ -9807,7 +9859,7 @@ function renderHome(){
         </button>`).join('')
     : `<div style="padding:20px 16px; font-size:13px; color:var(--ink-soft); line-height:1.5;">No team activity yet. Add a term or send a chat message to get things moving.</div>`;
 
-  const tip = INTERPRETER_TIPS[Math.floor(Math.random()*INTERPRETER_TIPS.length)];
+  const tip = SESSION_TIP;
 
   return `
     <div class="home-greeting">
@@ -9816,7 +9868,7 @@ function renderHome(){
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
         <h2 class="home-greeting-name">${firstName ? escapeHtml(firstName) + ' \u{1F44B}' : 'Welcome \u{1F44B}'}</h2>
-        <p class="home-greeting-quote">${MOTIVATIONAL_QUOTES[Math.floor(Math.random()*MOTIVATIONAL_QUOTES.length)]}</p>
+        <p class="home-greeting-quote">${SESSION_QUOTE}</p>
         <div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
           <button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>
