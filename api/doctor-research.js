@@ -81,36 +81,58 @@ function findInDirectory(inputName) {
   return JTCC_DIRECTORY.find(d => lastNameOf(d.name) === inputLast) || null;
 }
 
-async function callClaude(apiKey, systemPrompt, userContent, tools) {
-  // Raised from 4096: five tiers is more output than the old flat list, and
-  // hitting max_tokens throws the whole response away rather than truncating
-  // gracefully.
-  const body = { model: 'claude-sonnet-4-6', max_tokens: 8000, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
-  if (tools) body.tools = tools;
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error('Anthropic API error:', response.status, errText);
-    throw new Error('api_error');
-  }
-  const data = await response.json();
+// Claude Sonnet 5. Was claude-sonnet-4-6, which is previous-generation and
+// costs MORE per token ($3/$15 per million vs $2/$10) — this is cheaper and
+// newer at once. translate.js was already on Sonnet 5; this file was left
+// behind.
+const MODEL = 'claude-sonnet-5';
 
-  if (data.stop_reason === 'max_tokens') {
-    console.error('Response was truncated at max_tokens before finishing.');
-    throw new Error('truncated');
-  }
+// Structured outputs: the response is constrained to this schema instead of
+// the prompt asking nicely for JSON. `specialty` is a plain string ("" when
+// unknown) rather than a nullable — normalizeResult already turns a falsy
+// value into null, and a union type is the sort of thing that varies between
+// schema validators.
+const RESEARCH_SCHEMA = {
+  type: 'object',
+  properties: {
+    found: { type: 'boolean' },
+    specialty: { type: 'string' },
+    note: { type: 'string' },
+    tiers: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          key: { type: 'string', enum: ['core', 'procedures', 'drugs', 'anatomy', 'falsefriends'] },
+          terms: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                en: { type: 'string' },
+                es: { type: 'string' },
+                def: { type: 'string' },
+              },
+              required: ['en', 'es', 'def'],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ['key', 'terms'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['found', 'specialty', 'note', 'tiers'],
+  additionalProperties: false,
+};
 
-  const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
-  const rawText = textBlocks.join('\n').trim();
-  let cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
-
-  // Claude occasionally adds a stray sentence before or after the JSON
-  // despite instructions not to — fall back to the outermost {...} span
-  // rather than failing outright on an otherwise-good response.
+/* Tolerant parser, kept ONLY for the no-schema fallback path below.
+   When the schema is accepted the response is already valid JSON and none of
+   this runs. */
+function parseLoosely(rawText) {
+  const cleaned = rawText
+    .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
   try {
     return JSON.parse(cleaned);
   } catch (firstErr) {
@@ -127,6 +149,63 @@ async function callClaude(apiKey, systemPrompt, userContent, tools) {
     console.error('No {...} span found in response. Raw text:', rawText);
     throw firstErr;
   }
+}
+
+function textOf(data) {
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+
+async function postMessages(apiKey, body) {
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify(body),
+  });
+}
+
+async function callClaude(apiKey, systemPrompt, userContent, tools) {
+  // max_tokens raised from 4096 long ago: five tiers is more output than the
+  // old flat list, and hitting max_tokens throws the whole response away
+  // rather than truncating gracefully.
+  const base = { model: MODEL, max_tokens: 8000, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
+  if (tools) base.tools = tools;
+
+  // Ask for a schema-constrained response first. If this deployment or this
+  // combination (structured outputs alongside the server-side web search tool)
+  // is rejected, fall back to the old prose-and-parse path rather than failing
+  // the request — Doctor Prep keeps working either way.
+  let usedSchema = true;
+  let response = await postMessages(apiKey, {
+    ...base,
+    output_config: { format: { type: 'json_schema', schema: RESEARCH_SCHEMA } },
+  });
+
+  if (response.status === 400) {
+    const errText = await response.text();
+    if (/output_config|json_schema|\bformat\b/i.test(errText)) {
+      console.warn('Structured outputs rejected, retrying without a schema:', errText);
+      usedSchema = false;
+      response = await postMessages(apiKey, base);
+    } else {
+      console.error('Anthropic API error:', response.status, errText);
+      throw new Error('api_error');
+    }
+  }
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error('Anthropic API error:', response.status, errText);
+    throw new Error('api_error');
+  }
+
+  const data = await response.json();
+  if (data.stop_reason === 'max_tokens') {
+    console.error('Response was truncated at max_tokens before finishing.');
+    throw new Error('truncated');
+  }
+
+  const rawText = textOf(data);
+  return usedSchema ? JSON.parse(rawText) : parseLoosely(rawText);
 }
 
 // Render order, easiest to hardest. The client reads `label` straight off
@@ -155,7 +234,9 @@ Rules for every entry:
 - "def" is one concise sentence written for a professional interpreter, not a patient. Under 25 words.
 - No duplicates across tiers. Favor terms specific to this specialty over generic terms already common knowledge. Fewer good entries beat padding.`;
 
-const RESPONSE_SHAPE = `Respond with ONLY valid JSON, no other text, no markdown code fences, in exactly this shape:
+// The response shape is enforced by RESEARCH_SCHEMA above; this stays as a
+// description of what each field should CONTAIN, which a schema cannot say.
+const RESPONSE_SHAPE = `Fill in every field of the response:
 {
   "found": true or false,
   "specialty": "string, or null if not found",
@@ -270,9 +351,12 @@ Set "found" to true, "specialty" to "${directoryMatch.division} — John Theurer
 ${TIER_BRIEF}
 
 ${RESPONSE_SHAPE}
-If you cannot find reliable, specific information about this named individual, set "found" to false, explain briefly in "note", and still populate the tiers with widely-useful medical interpreting terminology as a fallback so the response is never empty.`;
+If you cannot find reliable, specific information about this named individual, set "found" to false, leave "specialty" as an empty string, explain briefly in "note", and still populate the tiers with widely-useful medical interpreting terminology as a fallback so the response is never empty.`;
 
-    const webSearchTool = { type: 'web_search_20250305', name: 'web_search', max_uses: 2 };
+    // web_search_20260209 adds dynamic filtering and is supported on Sonnet 5.
+    // Worth having here specifically: this tool's whole job is finding the
+    // RIGHT Dr. Gutierrez rather than any of them.
+    const webSearchTool = { type: 'web_search_20260209', name: 'web_search', max_uses: 2 };
     if (isHackensack) {
       webSearchTool.allowed_domains = ['hackensackmeridianhealth.org', 'doctors.hackensackmeridianhealth.org'];
       webSearchTool.strict = true;

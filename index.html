@@ -3060,6 +3060,45 @@
     .home-tile, .card{ animation:none !important; }
   }
 
+  /* ---------- Term check (second look after saving a term) ---------- */
+  .tc-intro{
+    font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 14px 0;
+  }
+  .tc-term{
+    font-family:var(--serif); font-size:17px; color:var(--ink); font-style:italic;
+  }
+  .tc-list{ display:flex; flex-direction:column; gap:10px; }
+  .tc-finding{
+    display:flex; gap:11px; padding:13px 14px; border-radius:14px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .tc-dot{
+    width:9px; height:9px; border-radius:50%; margin-top:5px; flex-shrink:0;
+    background:var(--ink-faint);
+  }
+  .tc-finding.sev-high .tc-dot{ background:#C24E3A; }
+  .tc-finding.sev-medium .tc-dot{ background:#B8873B; }
+  .tc-finding.sev-low .tc-dot{ background:#6F97AC; }
+  .tc-body{ flex:1; min-width:0; }
+  .tc-kind{
+    font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:3px;
+  }
+  .tc-msg{ font-size:13.5px; color:var(--ink); line-height:1.5; }
+  .tc-suggest{
+    margin-top:7px; font-size:13px; color:var(--ink); line-height:1.45;
+    padding:8px 10px; border-radius:10px; background:var(--accent-soft);
+  }
+  .tc-suggest b{ font-weight:650; }
+  .tc-dup{
+    margin-top:8px; font-family:var(--sans); font-size:12px; font-weight:600;
+    color:var(--accent); background:none; border:none; padding:0; cursor:pointer;
+    text-decoration:underline; text-underline-offset:2px;
+  }
+  .tc-foot{
+    margin-top:14px; font-size:11.5px; color:var(--ink-faint); line-height:1.45;
+  }
+
   /* ---------- Image lightbox ---------- */
   @keyframes lightboxIn{ from{opacity:0;} to{opacity:1;} }
   @keyframes lightboxImgIn{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
@@ -3394,6 +3433,22 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeDoctorTermModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveDoctorTerm()">Save term</button>
+    </div>
+  </div>
+</div>
+
+<!-- A second look at a term that was just saved. Advisory only: the term is
+     already in the glossary by the time this appears, and every action here is
+     optional. -->
+<div class="overlay" id="termCheckOverlay" onclick="if(event.target===this) closeTermCheck()">
+  <div class="modal">
+    <h3>A second look</h3>
+    <p class="tc-intro">Saved <span class="tc-term" id="tcTermName"></span>. A quick review turned up something worth a glance — you know the work, so treat these as suggestions.</p>
+    <div class="tc-list" id="tcList"></div>
+    <p class="tc-foot">The term is already saved. Nothing here changes it unless you do.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTermCheck()">Looks right</button>
+      <button class="btn btn-primary" onclick="editCheckedTerm()">Edit the term</button>
     </div>
   </div>
 </div>
@@ -9628,7 +9683,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1638';
+const BUILD_ID = 'b0912.1702';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -11016,6 +11071,144 @@ async function saveTerm(){
   successBurst();
   showToast('Term saved.');
   render();
+
+  // Deliberately not awaited: the save is done and the modal is closed. If the
+  // check has something to say it appears a moment later; if it has nothing,
+  // or cannot run, nothing happens at all.
+  runTermCheck(record, targetCatName);
+}
+
+/* ============ Term check — a second look after saving ============
+
+   Runs AFTER the term is saved, never before. A hospital tool must not refuse
+   a certified interpreter's entry because a model disagreed with it, so this
+   can only ever suggest. If it fails, is offline, or has no API key behind it,
+   it stays silent — an advisory check that nags on failure is worse than one
+   that says nothing.
+
+   Duplicate detection is split in two: the near-matches are found HERE, out of
+   the glossary already in memory, and only a handful of candidates travel to
+   the server. Sending 1,700 terms on every save would be slow and expensive,
+   and string similarity alone cannot tell that "shot" and "injection" are the
+   same concept — which is the part the model is actually for. ============ */
+
+let termCheckContext = null;
+
+// Cheap similarity on folded text: exact, containment, then shared words.
+// Good enough to nominate candidates; the model makes the real judgement.
+function termSimilarity(a, b){
+  if(!a || !b) return 0;
+  if(a === b) return 1;
+  if(a.includes(b) || b.includes(a)) return 0.8;
+  const aw = new Set(a.split(/\s+/).filter(w => w.length > 2));
+  const bw = new Set(b.split(/\s+/).filter(w => w.length > 2));
+  if(!aw.size || !bw.size) return 0;
+  let shared = 0;
+  aw.forEach(w => { if(bw.has(w)) shared++; });
+  return shared / Math.max(aw.size, bw.size);
+}
+
+function findDuplicateCandidates(term){
+  const en = foldText(term.en);
+  const es = foldText(term.es);
+  const scored = [];
+  DATA.categories.forEach(cat=>{
+    cat.terms.forEach(t=>{
+      if(t.id === term.id) return;                    // never itself
+      const score = Math.max(
+        termSimilarity(en, foldText(t.en)),
+        es ? termSimilarity(es, foldText(t.es)) : 0
+      );
+      if(score >= 0.5) scored.push({ score, id: t.id, en: t.en, es: t.es || '', domain: cat.name });
+    });
+  });
+  return scored.sort((a, b) => b.score - a.score).slice(0, 10)
+    .map(({ id, en, es, domain }) => ({ id, en, es, domain }));
+}
+
+async function runTermCheck(record, domainName){
+  // Offline the term is queued in the outbox and there is no network to ask.
+  if(!navigator.onLine) return;
+  try{
+    const res = await fetch('/api/term-check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        term: { en: record.en, es: record.es, def: record.def, notes: record.notes || '', domain: domainName },
+        candidates: findDuplicateCandidates(record)
+      })
+    });
+    // 503 means no API key is configured. That is a deployment state, not
+    // something an interpreter mid-shift can act on — stay quiet.
+    if(!res.ok) return;
+    const data = await res.json();
+    if(!data || data.verdict !== 'review' || !Array.isArray(data.findings) || !data.findings.length) return;
+    openTermCheck(record, data.findings);
+  }catch(err){
+    console.warn('Term check unavailable:', err);
+  }
+}
+
+const TC_KIND_LABEL = {
+  false_friend: 'Possible false friend',
+  duplicate:    'Possible duplicate',
+  register:     'Register',
+  regional:     'Regional usage',
+  spanish:      'Spanish rendering',
+  definition:   'Definition',
+  other:        'Worth a look'
+};
+
+function openTermCheck(record, findings){
+  const overlay = document.getElementById('termCheckOverlay');
+  const list = document.getElementById('tcList');
+  const name = document.getElementById('tcTermName');
+  if(!overlay || !list) return;
+  termCheckContext = { categoryId: record.categoryId, termId: record.id };
+  if(name) name.textContent = record.en;
+
+  list.innerHTML = findings.map(f=>{
+    const sev = ['high','medium','low'].includes(f.severity) ? f.severity : 'low';
+    const dup = f.type === 'duplicate' && f.duplicateId
+      ? `<button class="tc-dup" onclick="openDuplicateTerm('${escapeAttr(f.duplicateId)}')">See the existing entry</button>`
+      : '';
+    const suggestion = f.suggestion
+      ? `<div class="tc-suggest"><b>Suggested:</b> ${escapeHtml(f.suggestion)}</div>`
+      : '';
+    return `<div class="tc-finding sev-${sev}">
+      <span class="tc-dot"></span>
+      <div class="tc-body">
+        <div class="tc-kind">${escapeHtml(TC_KIND_LABEL[f.type] || TC_KIND_LABEL.other)}</div>
+        <div class="tc-msg">${escapeHtml(f.message)}</div>
+        ${suggestion}
+        ${dup}
+      </div>
+    </div>`;
+  }).join('');
+
+  overlay.classList.add('show');
+}
+
+function closeTermCheck(){
+  const overlay = document.getElementById('termCheckOverlay');
+  if(overlay) overlay.classList.remove('show');
+  termCheckContext = null;
+}
+
+function editCheckedTerm(){
+  const ctx = termCheckContext;
+  closeTermCheck();
+  if(ctx) openEditModal(ctx.categoryId, ctx.termId);
+}
+
+function openDuplicateTerm(id){
+  let target = null;
+  DATA.categories.forEach(cat=>{
+    if(cat.terms.some(t => t.id === id)) target = cat.id;
+  });
+  closeTermCheck();
+  if(target) setCategory(target);
+  else showToast('That entry is no longer in the glossary.');
 }
 
 async function deleteTerm(categoryId, termId){
