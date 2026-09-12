@@ -530,7 +530,11 @@
        it only grows from there. The half-degree of rotation moves a corner by
        under two pixels at this width — far inside the same margin — and is
        what stops the motion reading as a machine sliding a picture around. */
-    animation:heroDrift 24s ease-in-out infinite alternate;
+    /* Self-drift is OFF. Two passes at a continuously wandering photo both
+       read as wrong on the real screen — it draws the eye on a page people
+       land on dozens of times a shift. The keyframes are kept so it can be
+       switched back on with one line if ever wanted. */
+    transform:scale(1.06);
   }
   @keyframes heroDrift{
     from{ transform:scale(1.10) translate3d(-3.5%, -2.5%, 0) rotate(-0.5deg); }
@@ -544,7 +548,7 @@
      both the parallax and the wander. */
   @media (prefers-reduced-motion: reduce){
     .home-greeting-photo-inner{ transform:none !important; }
-    .home-greeting-photo-drift{ animation:none !important; transform:scale(1.10); }
+    .home-greeting-photo-drift{ animation:none !important; transform:scale(1.06); }
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
@@ -8887,8 +8891,8 @@ let lastPaintedContentEl = null;
 
    Capped at HERO_DRIFT_MAX so the image can never travel past the headroom
    its inner layer has, which would show an edge. */
-const HERO_DRIFT_RATE = 0.5;    // fraction of scroll distance
-const HERO_DRIFT_MAX = 52;      // px; inner layer has ~28% of 232px to give
+const HERO_DRIFT_RATE = 0.3;    // fraction of scroll distance
+const HERO_DRIFT_MAX = 30;      // px; inner layer has ~28% of 232px to give
 let heroPhotoEl = null;
 let heroDriftFrame = null;
 let heroMotionOff = null;
@@ -10054,7 +10058,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1805';
+const BUILD_ID = 'b0912.1812';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
