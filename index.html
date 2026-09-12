@@ -8095,11 +8095,29 @@ function ensureLoaded(key, loader){
   return started;
 }
 
-let renderFrame = null;
+let renderTimer = null;
+let renderPendingSince = 0;
+const RENDER_SETTLE_MS = 250;   // collapse a burst of arrivals into one paint
+const RENDER_MAX_WAIT_MS = 900; // ...but never hold an update longer than this
+
 function scheduleRender(){
-  if(renderFrame !== null) return;
-  const raf = window.requestAnimationFrame || (fn => setTimeout(fn, 16));
-  renderFrame = raf(()=>{ renderFrame = null; render(); });
+  const now = Date.now();
+  if(!renderPendingSince) renderPendingSince = now;
+  clearTimeout(renderTimer);
+  // Trailing debounce with a ceiling. A plain animation frame was not enough:
+  // the background collections land hundreds of milliseconds apart, and Home
+  // shows a count for most of them, so each arrival changed its markup and
+  // rebuilt the screen — three visible rebuilds spread over more than a
+  // second, which reads as the page flickering. Waiting for a short lull
+  // collapses them into one. The ceiling stops a steady trickle of snapshots
+  // from deferring the update indefinitely.
+  const waited = now - renderPendingSince;
+  const delay = Math.max(0, Math.min(RENDER_SETTLE_MS, RENDER_MAX_WAIT_MS - waited));
+  renderTimer = setTimeout(()=>{
+    renderTimer = null;
+    renderPendingSince = 0;
+    render();
+  }, delay);
 }
 
 function render(){
@@ -9599,7 +9617,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1624';
+const BUILD_ID = 'b0912.1631';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
