@@ -3464,7 +3464,7 @@
     <div class="gs-inputrow">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input id="gsInput" type="text" placeholder="Search terms, providers, guides, chat, practice…"
-             oninput="renderGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off">
+             oninput="scheduleGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off">
       <span class="gs-hint">ESC</span>
     </div>
     <div class="gs-results" id="gsResults"></div>
@@ -4647,10 +4647,31 @@ let selectedSwatch = DOMAIN_COLORS[0];
 let editingDomainId = null; // null = creating a new domain, otherwise the id being edited
 let selectedIcon = 'sparkle';
 
+/* Chat and the activity feed are now windowed to the newest entries (see
+   CHAT_HISTORY_LIMIT), so "unread" can no longer be a subtraction of array
+   lengths: once a collection is longer than its window the array length stops
+   growing and the badge would freeze, never reporting a new message again.
+   Unread is tracked by the id of the last message actually seen, and counted
+   as "everything after it in the current window" — which stays correct
+   whatever the window does. */
+const CHAT_HISTORY_LIMIT = 200;
 let CHAT_MESSAGES = [];
 let chatListenerStarted = false;
 let isInitialChatLoad = true;
-let lastSeenChatCount = 0;
+let lastSeenChatId = null;
+let chatSeenSeeded = false;
+
+function markChatSeen(){
+  chatSeenSeeded = true;
+  lastSeenChatId = CHAT_MESSAGES.length ? CHAT_MESSAGES[CHAT_MESSAGES.length - 1].id : null;
+}
+function unreadChatCount(){
+  if(!chatSeenSeeded) return 0;              // first load is never "unread"
+  if(!lastSeenChatId) return CHAT_MESSAGES.length;  // seen while the chat was empty
+  const i = CHAT_MESSAGES.findIndex(m => m.id === lastSeenChatId);
+  // Scrolled out of the window entirely: everything visible is newer.
+  return i === -1 ? CHAT_MESSAGES.length : CHAT_MESSAGES.length - 1 - i;
+}
 let notifiedMessageIds = new Set();
 let notifyEnabled = false;
 let notifiedActivityIds = new Set();
@@ -4668,10 +4689,23 @@ let typingListenerStarted = false;
 let typingHeartbeat = null;
 let typingLastSent = 0;
 
+const ACTIVITY_HISTORY_LIMIT = 200;
 let ACTIVITY = [];
 let activityListenerStarted = false;
 let isInitialActivityLoad = true;
-let lastSeenActivityCount = 0;
+let lastSeenActivityId = null;
+let activitySeenSeeded = false;
+
+function markActivitySeen(){
+  activitySeenSeeded = true;
+  lastSeenActivityId = ACTIVITY.length ? ACTIVITY[ACTIVITY.length - 1].id : null;
+}
+function unreadActivityCount(){
+  if(!activitySeenSeeded) return 0;
+  if(!lastSeenActivityId) return ACTIVITY.length;
+  const i = ACTIVITY.findIndex(a => a.id === lastSeenActivityId);
+  return i === -1 ? ACTIVITY.length : ACTIVITY.length - 1 - i;
+}
 
 let ATTACHMENTS = [];
 let QUIZ_HISTORY = [];
@@ -5139,17 +5173,22 @@ async function loadData(){
       await migrateToPerTermStorage(source);
     }
 
-    // Categories and terms are independent reads, so fetch them at the same
-    // time instead of waiting for one before starting the other. They're still
-    // APPLIED in order, because terms are bucketed into categories.
-    const [, termsSnap] = await Promise.all([
-      loadCategoriesMeta(),
-      db.collection('terms').get(),
-    ]);
-    applyTermsSnapshot(termsSnap);
-    saveGlossaryCache();
+    // The glossary used to be downloaded TWICE on every launch: once by an
+    // explicit .get() here, and again by the realtime listener's first
+    // snapshot, which delivers the whole collection anyway. ~1,700 documents,
+    // both times. The .get() is gone; the listener is the single source.
+    //
+    // metaSnap was already fetched above, so reuse it instead of reading the
+    // same document a second time through loadCategoriesMeta().
+    if(metaSnap.exists){
+      applyCategoriesMeta(metaSnap.data().categories || []);
+    }else{
+      await loadCategoriesMeta();   // re-read: the migration just wrote it
+    }
     startTermsListener();
     startCategoriesMetaListener();
+    // Categories are live now and terms are whatever the cache had; the
+    // listener's first snapshot fills in the real ones a moment later.
     render();
   }catch(err){
     console.error('loadData failed:', err);
@@ -5220,26 +5259,56 @@ function loadGlossaryCache(){
   }
 }
 
+/* Rebuilds DATA.categories from the metadata document while KEEPING whatever
+   terms are already in memory. This used to blank every category's terms,
+   which was harmless only because a full terms fetch was applied on the very
+   next line. Now that the listener supplies terms asynchronously, wiping them
+   here would blank the glossary between the cached paint and the first
+   snapshot. */
+function applyCategoriesMeta(meta){
+  const existingTerms = {};
+  ((DATA && DATA.categories) || []).forEach(c=>{ existingTerms[c.id] = c.terms; });
+  DATA = { categories: (meta || []).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
+}
+
 async function loadCategoriesMeta(){
   const snap = await db.collection('terminology-meta').doc('categories').get();
-  const meta = snap.exists ? (snap.data().categories || []) : [];
-  DATA = { categories: meta.map(c=>({ ...c, terms: [] })) };
+  applyCategoriesMeta(snap.exists ? (snap.data().categories || []) : []);
 }
 
 async function loadAllTerms(){
   const snap = await db.collection('terms').get();
-  applyTermsSnapshot(snap);
+  applyTermsSnapshot(snap, { full: true });
 }
 
-// Rebuilds each category's terms array from a Firestore snapshot. Keeps
-// category order stable (order lives in terminology-meta, untouched here)
-// and just refills which terms belong where — this is what makes real-time
-// sync safe: nobody's array-index-based UI state points at the wrong term,
-// because edit/delete now target terms by id, not by position.
-function applyTermsSnapshot(snap){
+/* The authoritative in-memory copy of every term, keyed by document id.
+   Terms are bucketed into categories from here, so nobody's array-index UI
+   state can point at the wrong term — edit and delete target ids, not
+   positions. */
+let TERMS_BY_ID = new Map();
+
+/* Applies only what CHANGED in a snapshot.
+   Firestore hands back every document in the collection on every snapshot,
+   and this used to deserialise all ~1,700 of them and rebuild every bucket
+   each time — so editing one term did 1,700 documents' worth of work.
+   docChanges() is the delta: editing one term now touches one entry.
+   Pass {full:true} for a one-shot .get(), where the snapshot is the complete
+   truth and anything missing from it has genuinely gone. */
+function applyTermsSnapshot(snap, opts){
+  if(opts && opts.full) TERMS_BY_ID = new Map();
+  snap.docChanges().forEach(change=>{
+    const doc = change.doc;
+    if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
+    else TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
+  });
+  bucketTermsIntoCategories();
+}
+
+// Refills each category's terms array from TERMS_BY_ID. Category order lives
+// in terminology-meta and is never touched here.
+function bucketTermsIntoCategories(){
   const byCategory = {};
-  snap.forEach(doc=>{
-    const t = { ...doc.data(), id: doc.id };
+  TERMS_BY_ID.forEach(t=>{
     const catId = t.categoryId;
     if(!byCategory[catId]) byCategory[catId] = [];
     byCategory[catId].push(t);
@@ -5253,24 +5322,31 @@ let termsListenerStarted = false;
 function startTermsListener(){
   if(termsListenerStarted || !db) return;
   termsListenerStarted = true;
-  // This listener covers the whole `terms` collection — 1700+ documents — and
-  // it re-buckets every one of them and re-renders the entire page on each
-  // snapshot. Saving a term fires several snapshots in quick succession (the
-  // local echo, then the server ack), so the work was running repeatedly and
-  // the UI froze. Coalescing into a single trailing pass keeps it live without
-  // rebuilding everything several times per edit.
+  // This listener covers the whole `terms` collection. Saving a term fires
+  // several snapshots in quick succession (the local echo, then the server
+  // ack), so the expensive tail — re-bucketing, caching, re-rendering — is
+  // coalesced into one trailing pass.
+  //
+  // The DELTA, though, is applied on every single snapshot, never coalesced.
+  // Keeping only the last snapshot and reading its docChanges() would silently
+  // drop the changes carried by the snapshots in between; keeping only the
+  // last snapshot was safe before only because the old code re-read the entire
+  // collection from it. Folding each delta in as it arrives is both correct
+  // and cheap — it touches the documents that actually changed.
   let termsSnapTimer = null;
-  let pendingSnap = null;
   db.collection('terms').onSnapshot(snap=>{
-    pendingSnap = snap;
+    snap.docChanges().forEach(change=>{
+      const doc = change.doc;
+      if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
+      else TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
+    });
     clearTimeout(termsSnapTimer);
     termsSnapTimer = setTimeout(()=>{
-      applyTermsSnapshot(pendingSnap);
-      pendingSnap = null;
+      bucketTermsIntoCategories();
       saveGlossaryCache();
       // A full render() (not just renderContent()) so sidebar term counts
       // and "All domains" totals stay live too, not just whatever's open.
-      render();
+      scheduleRender();
     }, 180);
   }, err=> {
     console.error('terms listener error:', err);
@@ -5284,10 +5360,7 @@ function startCategoriesMetaListener(){
   categoriesMetaListenerStarted = true;
   db.collection('terminology-meta').doc('categories').onSnapshot(snap=>{
     if(!snap.exists) return;
-    const meta = snap.data().categories || [];
-    const existingTerms = {};
-    DATA.categories.forEach(c=>{ existingTerms[c.id] = c.terms; });
-    DATA.categories = meta.map(c=>({ ...c, terms: existingTerms[c.id] || [] }));
+    applyCategoriesMeta(snap.data().categories || []);
     render();
   }, err=> console.error('categories-meta listener error:', err));
 }
@@ -5295,7 +5368,12 @@ function startCategoriesMetaListener(){
 async function saveTermDoc(term){
   if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
   try{
-    await trackWrite(db.collection('terms').doc(term.id).set(stripUndefined(term)));
+    const state = await queuedWrite({
+      collection: 'terms', docId: term.id, op: 'set', data: stripUndefined(term)
+    });
+    if(state === 'queued'){
+      showToast('Saved on this device — it will sync when you\u2019re back online.');
+    }
     return true;
   }catch(err){
     console.error('saveTermDoc failed:', err);
@@ -5421,7 +5499,10 @@ function showUndoToast(msg, trashId){
 async function deleteTermDoc(id){
   if(!db) return false;
   try{
-    await trackWrite(db.collection('terms').doc(id).delete());
+    const state = await queuedWrite({ collection: 'terms', docId: id, op: 'delete' });
+    if(state === 'queued'){
+      showToast('Deleted on this device — it will sync when you\u2019re back online.');
+    }
     return true;
   }catch(err){
     showToast('Could not delete. Check connection and retry.');
@@ -5520,7 +5601,7 @@ async function loadProviders(){
     console.error('Could not load providers', err);
     PROVIDERS = [];
   }
-  render();
+  scheduleRender();
 }
 
 async function persistProvider(record, existingId){
@@ -5564,7 +5645,7 @@ async function loadDoctorDirectory(){
     console.error('Could not load doctor directory', err);
     DOCTOR_DIRECTORY = [];
   }
-  render();
+  scheduleRender();
 }
 
 async function persistDoctorDirectoryEntry(id, record){
@@ -5627,11 +5708,14 @@ async function upsertDoctorDirectoryFromResearch(name, specialty, location, rese
 function startChatListener(){
   if(chatListenerStarted || !db) return;
   chatListenerStarted = true;
-  db.collection('team-chat').orderBy('timestamp').onSnapshot(snap=>{
+  // limitToLast keeps this from growing without bound. Unbounded, every
+  // phone re-downloaded the team's entire message history on every launch,
+  // forever — slower every week, for messages nobody scrolls back to.
+  db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot(snap=>{
     CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if(isInitialChatLoad){
       isInitialChatLoad = false;
-      lastSeenChatCount = CHAT_MESSAGES.length; // don't flag pre-existing history as "unread"
+      markChatSeen(); // don't flag pre-existing history as "unread"
       // Seed the seen-set so opening the app never fires a burst of
       // notifications for the entire message history.
       CHAT_MESSAGES.forEach(m => notifiedMessageIds.add(m.id));
@@ -5649,7 +5733,7 @@ function startChatListener(){
       });
     }
     if(activeCategory === 'chat'){
-      lastSeenChatCount = CHAT_MESSAGES.length;
+      markChatSeen();
       renderChatMessages();
     }
     updateChatBadge();
@@ -5668,7 +5752,7 @@ function pulseBadge(badge){
 function updateChatBadge(){
   const badge = document.getElementById('chatBadge');
   if(!badge) return;
-  const unread = Math.max(0, CHAT_MESSAGES.length - lastSeenChatCount);
+  const unread = unreadChatCount();
   const next = String(unread > 0 ? unread : CHAT_MESSAGES.length);
   const changed = badge.textContent !== next;
   badge.textContent = next;
@@ -5771,11 +5855,13 @@ function renderAnnouncements(){
 function startActivityListener(){
   if(activityListenerStarted || !db) return;
   activityListenerStarted = true;
-  db.collection('activity-log').orderBy('timestamp').onSnapshot(snap=>{
+  // Same unbounded-growth problem as team chat. The Recent Updates feed only
+  // ever shows the newest entries anyway.
+  db.collection('activity-log').orderBy('timestamp').limitToLast(ACTIVITY_HISTORY_LIMIT).onSnapshot(snap=>{
     ACTIVITY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if(isInitialActivityLoad){
       isInitialActivityLoad = false;
-      lastSeenActivityCount = ACTIVITY.length;
+      markActivitySeen();
       // Seed the seen-set so opening the app doesn't replay the whole history.
       ACTIVITY.forEach(a => notifiedActivityIds.add(a.id));
     }else{
@@ -5791,7 +5877,7 @@ function startActivityListener(){
       });
     }
     if(activeCategory === 'updates'){
-      lastSeenActivityCount = ACTIVITY.length;
+      markActivitySeen();
       // Rebuild the panel (not the whole app) so the header count and the
       // "Clear all" button stay in sync. Safe because this tab has no inputs.
       renderContent();
@@ -5805,7 +5891,7 @@ function startActivityListener(){
 function updateActivityBadge(){
   const badge = document.getElementById('activityBadge');
   if(!badge) return;
-  const unread = Math.max(0, ACTIVITY.length - lastSeenActivityCount);
+  const unread = unreadActivityCount();
   const next = String(unread > 0 ? unread : ACTIVITY.length);
   const changed = badge.textContent !== next;
   badge.textContent = next;
@@ -5918,7 +6004,7 @@ async function loadAttachments(){
     console.error('Could not load attachments', err);
     ATTACHMENTS = [];
   }
-  render();
+  scheduleRender();
 }
 
 function attachToTerm(termId){
@@ -6169,9 +6255,54 @@ async function clearAllActivity(){
 /* Alphabetical comparison tuned for medical terminology:
    - sensitivity 'base' so accented characters sort next to their plain
      counterparts (á with a) rather than being dumped at the end
-   - numeric so "CIN 2" comes before "CIN 10", not after it */
+   - numeric so "CIN 2" comes before "CIN 10", not after it
+
+   The collator is built ONCE and reused. Calling localeCompare with an
+   options object instead constructs a brand-new collator on every single
+   comparison — and renderContent() sorts every visible category on every
+   keystroke in the search box. Measured on a throttled phone profile with a
+   1,749-term glossary, that cost 272ms per keystroke in the "All domains"
+   view (2.7 seconds of frozen UI to type one word) versus 8ms this way. */
+const TERM_COLLATOR = new Intl.Collator(undefined, { sensitivity:'base', numeric:true });
 function collateTerms(a, b){
-  return String(a||'').localeCompare(String(b||''), undefined, { sensitivity:'base', numeric:true });
+  return TERM_COLLATOR.compare(String(a||''), String(b||''));
+}
+
+/* ---------- Accent-insensitive search ----------
+   Every accented Spanish term used to be unfindable unless you typed the
+   accent exactly: "cardiaca" did not match "cardíaca", "medula" did not match
+   "médula". Nobody long-presses a vowel on a phone keyboard between
+   assignments, so most of the Spanish side of the glossary was effectively
+   invisible to search.
+
+   foldText lowercases and strips diacritics, and is LENGTH-PRESERVING on
+   purpose: gsHighlight finds a match index in the folded string and then
+   slices the original, so one folded character must equal one original
+   character. Plain NFD would turn "í" into two code points and shift every
+   index after it. Only non-ASCII characters are touched, so English terms
+   pay almost nothing, and results are memoised because the same field text
+   is folded again on every keystroke. */
+const FOLD_CACHE = new Map();
+const FOLD_CACHE_MAX = 20000;
+function foldText(s){
+  const str = (s == null) ? '' : String(s);
+  if(!str) return '';
+  const cached = FOLD_CACHE.get(str);
+  if(cached !== undefined) return cached;
+  let folded = str;
+  // eslint-disable-next-line no-control-regex
+  if(/[^\u0000-\u007F]/.test(str)){
+    folded = str.replace(/[^\u0000-\u007F]/g, ch=>{
+      const bare = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      // Anything that does not collapse back to exactly one character (ß, æ,
+      // CJK, emoji) is left alone so the index math stays honest.
+      return bare.length === 1 ? bare : ch;
+    });
+  }
+  folded = folded.toLowerCase();
+  if(FOLD_CACHE.size >= FOLD_CACHE_MAX) FOLD_CACHE.clear();
+  FOLD_CACHE.set(str, folded);
+  return folded;
 }
 
 /* ---------- Team-contributed practice questions ---------- */
@@ -6187,7 +6318,7 @@ async function loadQuestions(){
     console.error('Could not load practice questions', err);
     CUSTOM_QUESTIONS = [];
   }
-  render();
+  scheduleRender();
 }
 
 function openAddQuestionModal(){
@@ -6532,6 +6663,8 @@ let gsMatches = [];
 function openGlobalSearch(){
   const ov = document.getElementById('gsOverlay');
   if(!ov) return;
+  clearTimeout(gsRenderTimer);
+  gsRenderTimer = null;
   ov.classList.add('show');
   document.body.style.overflow = 'hidden';
   const inp = document.getElementById('gsInput');
@@ -6550,7 +6683,9 @@ function closeGlobalSearch(){
 function gsHighlight(text, q){
   const s = String(text || '');
   if(!q) return escapeHtml(s);
-  const i = s.toLowerCase().indexOf(q.toLowerCase());
+  // Match against the folded forms (so an unaccented query still marks up an
+  // accented term) but slice the ORIGINAL, which foldText keeps index-aligned.
+  const i = foldText(s).indexOf(foldText(q));
   if(i === -1) return escapeHtml(s);
   return escapeHtml(s.slice(0, i)) +
          '<span class="gs-mark">' + escapeHtml(s.slice(i, i + q.length)) + '</span>' +
@@ -6559,11 +6694,13 @@ function gsHighlight(text, q){
 
 // Builds a flat, ranked list of matches across every data source.
 function collectSearchMatches(q){
-  const query = q.trim().toLowerCase();
+  const query = foldText(q.trim());
   if(!query) return [];
   const out = [];
-  const hit = (v) => (v || '').toLowerCase().includes(query);
-  const starts = (v) => (v || '').toLowerCase().startsWith(query);
+  // Folding here covers every source below at once — terms, providers, the
+  // doctor directory, ethics, chat and practice all route through these two.
+  const hit = (v) => foldText(v).includes(query);
+  const starts = (v) => foldText(v).startsWith(query);
 
   DATA.categories.forEach(cat=>{
     cat.terms.forEach(t=>{
@@ -6632,6 +6769,19 @@ function collectSearchMatches(q){
   return out.slice(0, 30);
 }
 
+/* Same trailing debounce as the glossary box. collectSearchMatches walks
+   every term, provider, doctor, chat message and practice question, so it is
+   not work to repeat once per character. Keyboard navigation flushes first,
+   so Enter always acts on the list actually being shown. */
+let gsRenderTimer = null;
+function scheduleGlobalSearch(){
+  clearTimeout(gsRenderTimer);
+  gsRenderTimer = setTimeout(()=>{ gsRenderTimer = null; renderGlobalSearch(); }, 120);
+}
+function flushGlobalSearch(){
+  if(gsRenderTimer){ clearTimeout(gsRenderTimer); gsRenderTimer = null; renderGlobalSearch(); }
+}
+
 function renderGlobalSearch(){
   const inp = document.getElementById('gsInput');
   const box = document.getElementById('gsResults');
@@ -6677,6 +6827,9 @@ function gsGo(i){
 
 function handleGsKeys(e){
   if(e.key === 'Escape'){ closeGlobalSearch(); return; }
+  // Arrow keys and Enter act on gsMatches, so settle any pending debounce
+  // before using it — otherwise a fast type-then-Enter opens a stale result.
+  if(e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') flushGlobalSearch();
   if(e.key === 'ArrowDown'){
     e.preventDefault();
     gsIndex = Math.min(gsIndex + 1, gsMatches.length - 1);
@@ -6996,7 +7149,13 @@ function buildReviewQueue(){
   return shuffle(due.slice(0, 15)); // capped per session so it stays a quick habit, not a chore
 }
 
-function startReview(){
+async function startReview(){
+  // TERM_REVIEWS is fetched when this screen opens. Building the queue before
+  // it lands would treat every term as never-reviewed, and answering one would
+  // then write a fresh box-1 record over that term's real progress. Tapping
+  // the button this fast is unlikely, but the cost of losing review history is
+  // high enough to just wait for the load.
+  await ensureLoaded('termReviews', loadTermReviews);
   reviewQueue = buildReviewQueue();
   if(!reviewQueue.length){ showToast('Nothing due for review right now — check back later.'); return; }
   reviewActive = true;
@@ -7890,6 +8049,42 @@ function renderLinks(t, categoryId){
 }
 
 /* ============ Rendering ============ */
+/* Startup fires a dozen independent loaders, and each one that finished used
+   to trigger its own full-page render — so the app rebuilt itself ten-odd
+   times in the first second, each rebuild throwing away and recreating the
+   sidebar, tab bar and content area.
+
+   scheduleRender coalesces those into one paint per frame. It is deliberately
+   NOT used by callers that read the DOM straight after rendering (setCategory
+   scrolling to an anchor, modals focusing a field); those still call render()
+   synchronously and get the DOM immediately, exactly as before. */
+/* Runs a loader the first time its screen is opened, then never again.
+   The loaders set their own module-level state, so a second call would just
+   re-download the same documents. */
+const lazyLoads = new Map();
+function ensureLoaded(key, loader){
+  const existing = lazyLoads.get(key);
+  if(existing) return existing;
+  const started = Promise.resolve()
+    .then(loader)
+    .then(()=>{ scheduleRender(); })
+    .catch(err=>{
+      // Let a failed load be retried the next time the screen is opened,
+      // rather than leaving the tab permanently empty.
+      lazyLoads.delete(key);
+      console.error('Lazy load failed for ' + key, err);
+    });
+  lazyLoads.set(key, started);
+  return started;
+}
+
+let renderFrame = null;
+function scheduleRender(){
+  if(renderFrame !== null) return;
+  const raf = window.requestAnimationFrame || (fn => setTimeout(fn, 16));
+  renderFrame = raf(()=>{ renderFrame = null; render(); });
+}
+
 function render(){
   if(!DATA) return;
   const app = document.getElementById('app');
@@ -7983,8 +8178,12 @@ function render(){
   const searchInputEl = document.getElementById('searchInput');
   if(searchInputEl){
     searchInputEl.addEventListener('input', (e)=>{
+      // The query itself is stored immediately so nothing typed is ever lost,
+      // but the re-render waits for a pause. Every keystroke used to rebuild
+      // the whole content area — sorting and re-filtering every visible
+      // category — so holding a key down queued a render per character.
       searchQuery = e.target.value;
-      renderContent();
+      scheduleSearchRender();
     });
     // Autofocus is a convenience with a mouse, but on a phone it forces the
     // on-screen keyboard open every time you tap a section in the sidebar.
@@ -8003,10 +8202,134 @@ function render(){
   renderContent();
 }
 
-// Sync status. Three states worth surfacing: offline (work is being saved
-// locally), pending (back online, still pushing), and a brief "saved"
-// confirmation. When everything is online and settled it shows nothing —
-// a permanent green badge is noise, not information.
+/* ---------- Offline outbox ----------
+   The badge used to say "Offline — changes saved here" and that was simply
+   untrue: Firestore persistence is disabled (it crash-looped iOS Safari), no
+   queue existed, and an offline write's promise never settles — so saving a
+   term in a basement hung silently and the edit was gone the moment the app
+   was backgrounded. The person had been told it was saved.
+
+   This is that queue, for real. Two properties make replay safe:
+
+   1. Every queued operation addresses an EXPLICIT document id and uses
+      set/delete, never add(). Replaying one is therefore idempotent — if the
+      original write did land after we gave up waiting, re-sending writes the
+      same document the same way instead of creating a duplicate.
+   2. Writes race a timeout. Offline, the SDK leaves the promise pending
+      forever rather than rejecting, so waiting on it is waiting on nothing.
+
+   Scope is deliberately the two things done in the field: terminology edits
+   and team chat. Everything else still reports failure honestly. */
+const OUTBOX_KEY = 'ih_outbox_v1';
+const OUTBOX_MAX = 200;      // a runaway queue shouldn't blow the storage quota
+const WRITE_TIMEOUT_MS = 12000;
+let outboxFlushing = false;
+
+function loadOutbox(){
+  try{
+    const raw = localStorage.getItem(OUTBOX_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(err){
+    console.warn('Outbox unreadable, starting empty:', err && err.name);
+    return [];
+  }
+}
+let OUTBOX = loadOutbox();
+
+function saveOutbox(){
+  try{
+    localStorage.setItem(OUTBOX_KEY, JSON.stringify(OUTBOX));
+  }catch(err){
+    console.warn('Outbox not persisted:', err && err.name);
+  }
+}
+
+function enqueueWrite(entry){
+  OUTBOX.push({ ...entry, queuedAt: Date.now() });
+  if(OUTBOX.length > OUTBOX_MAX) OUTBOX.shift();
+  saveOutbox();
+  updateSyncStatus(false);
+}
+
+// Firestore reports a dead network under several codes; a timeout of our own
+// counts too. Anything else is a real rejection and must not be retried
+// blindly.
+function isOfflineError(err){
+  const code = ((err && (err.code || err.message)) || '').toString().toLowerCase();
+  return code.includes('unavailable') || code.includes('network') ||
+         code.includes('offline') || code.includes('timeout') ||
+         code.includes('deadline');
+}
+
+function withWriteTimeout(promise){
+  let timer = null;
+  const timeout = new Promise((_, reject)=>{
+    timer = setTimeout(()=>{
+      const err = new Error('write timed out');
+      err.code = 'ih/timeout';
+      reject(err);
+    }, WRITE_TIMEOUT_MS);
+  });
+  return Promise.race([promise, timeout]).finally(()=> clearTimeout(timer));
+}
+
+function applyQueuedWrite(entry){
+  const ref = db.collection(entry.collection).doc(entry.docId);
+  return entry.op === 'delete' ? ref.delete() : ref.set(entry.data);
+}
+
+/* Returns 'sent' if it reached the server, 'queued' if it is waiting for a
+   connection. Throws only on a genuine rejection, which callers surface. */
+async function queuedWrite(entry){
+  if(!navigator.onLine){ enqueueWrite(entry); return 'queued'; }
+  try{
+    await trackWrite(withWriteTimeout(applyQueuedWrite(entry)));
+    return 'sent';
+  }catch(err){
+    if(isOfflineError(err)){ enqueueWrite(entry); return 'queued'; }
+    throw err;
+  }
+}
+
+async function flushOutbox(){
+  if(outboxFlushing || !db || !OUTBOX.length || !navigator.onLine) return;
+  outboxFlushing = true;
+  updateSyncStatus(false);
+  let sent = 0;
+  try{
+    while(OUTBOX.length && navigator.onLine){
+      const entry = OUTBOX[0];
+      try{
+        await withWriteTimeout(applyQueuedWrite(entry));
+        OUTBOX.shift();
+        saveOutbox();
+        sent++;
+      }catch(err){
+        // Still no usable connection — leave the queue intact and try again
+        // on the next 'online' event.
+        if(isOfflineError(err)) break;
+        // A permanently rejected write (bad data, removed collection) would
+        // otherwise wedge the queue forever behind it.
+        OUTBOX.shift();
+        saveOutbox();
+        console.error('Dropped an unsendable queued change:', entry, err);
+        showToast('One saved change could not be synced and was discarded.');
+      }
+    }
+  }finally{
+    outboxFlushing = false;
+    updateSyncStatus(sent > 0 && !OUTBOX.length);
+  }
+  if(sent && !OUTBOX.length){
+    showToast(`Synced ${sent} change${sent === 1 ? '' : 's'} that were waiting.`);
+  }
+}
+
+// Sync status. Offline (with an honest count of what is waiting), pending
+// (back online, still pushing), and a brief "saved" confirmation. When
+// everything is online and settled it shows nothing — a permanent green badge
+// is noise, not information.
 let pendingWriteCount = 0;
 let syncedFlashTimer = null;
 
@@ -8016,10 +8339,24 @@ function updateSyncStatus(justSynced){
   const offline = !navigator.onLine;
   el.classList.remove('is-visible','is-offline','is-pending','is-synced');
 
+  const waiting = OUTBOX.length;
+
   if(offline){
     el.classList.add('is-visible','is-offline');
-    el.innerHTML = `<span class="tg-sync-dot"></span><span>Offline \u2014 changes saved here</span>`;
-    el.title = 'You\u2019re offline. Your changes are saved on this device and will sync automatically.';
+    // Only claim something is saved when something actually is.
+    const label = waiting
+      ? `Offline \u2014 ${waiting} change${waiting === 1 ? '' : 's'} waiting`
+      : 'Offline \u2014 showing the saved copy';
+    el.innerHTML = `<span class="tg-sync-dot"></span><span>${label}</span>`;
+    el.title = waiting
+      ? `You\u2019re offline. ${waiting} change${waiting === 1 ? ' is' : 's are'} saved on this device and will send automatically when you reconnect.`
+      : 'You\u2019re offline. The glossary shown is the last synced copy. Terms and chat messages you write will be saved here and sent when you reconnect.';
+    return;
+  }
+  if(waiting){
+    el.classList.add('is-visible','is-pending');
+    el.innerHTML = `<span class="tg-sync-dot"></span><span>Sending ${waiting} saved change${waiting === 1 ? '' : 's'}\u2026</span>`;
+    el.title = 'Reconnected. Sending the changes that were made offline.';
     return;
   }
   if(pendingWriteCount > 0){
@@ -8059,8 +8396,13 @@ function trackWrite(promise){
   return promise;
 }
 
-window.addEventListener('online',  ()=> updateSyncStatus(false));
+window.addEventListener('online',  ()=>{ updateSyncStatus(false); flushOutbox(); });
 window.addEventListener('offline', ()=> updateSyncStatus(false));
+// A tab resumed from the background may have missed the 'online' event
+// entirely — iOS suspends rather than reloads an installed PWA.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible') flushOutbox();
+});
 
 // The top bar lives outside #app, so render() never rewrites it — its two
 // stateful icons are refreshed here instead of being rebuilt each time.
@@ -8076,7 +8418,7 @@ function syncTopBar(){
     themeBtn.innerHTML = dark ? ICON_SUN : ICON_MOON;
     themeBtn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
   }
-  const unseen = Math.max(0, ACTIVITY.length - lastSeenActivityCount);
+  const unseen = unreadActivityCount();
   const bellBtn = document.getElementById('tgBell');
   if(bellBtn){
     bellBtn.innerHTML = ICON_BELL + (unseen ? `<span class="tg-badge">${unseen > 9 ? '9+' : unseen}</span>` : '');
@@ -8091,9 +8433,25 @@ function syncTopBar(){
   updateSyncStatus(false);
 }
 
+/* The search box re-renders on a trailing debounce. 120ms is below the
+   threshold where typing feels laggy but still collapses a fast burst of
+   keystrokes into one render. The search input lives in the topbar, which
+   renderContent() does not touch, so debouncing can never steal focus or
+   drop a character. */
+let searchRenderTimer = null;
+function scheduleSearchRender(){
+  clearTimeout(searchRenderTimer);
+  searchRenderTimer = setTimeout(()=>{ searchRenderTimer = null; renderContent(); }, 120);
+}
+function flushSearchRender(){
+  if(searchRenderTimer){ clearTimeout(searchRenderTimer); searchRenderTimer = null; renderContent(); }
+}
+
 function renderContent(){
   const content = document.getElementById('content');
-  const q = searchQuery.trim().toLowerCase();
+  // Folded once here and passed down, so every filter below compares
+  // accent-stripped text against accent-stripped text.
+  const q = foldText(searchQuery.trim());
 
   if(activeCategory === 'home'){
     content.innerHTML = renderHome();
@@ -8305,6 +8663,16 @@ function renderContent(){
   // Cards are now built up to a budget, with the rest one tap away.
   let budget = termRenderLimit;
   let truncatedTotal = 0;
+  // Built once per render rather than kept as long-lived state: a cached index
+  // would need invalidating at six different mutation points, and rebuilding
+  // it here is already the whole win (one pass over ATTACHMENTS instead of one
+  // pass per card drawn).
+  const attachmentsByTerm = new Map();
+  ATTACHMENTS.forEach(a=>{
+    const list = attachmentsByTerm.get(a.termId);
+    if(list) list.push(a); else attachmentsByTerm.set(a.termId, [a]);
+  });
+  const EMPTY_ATTACHMENTS = [];
   cats.forEach(cat=>{
     // Sort a *copy* for display only. Each item keeps _idx — its true position
     // in the stored array — so the edit and delete buttons still target the
@@ -8316,11 +8684,12 @@ function renderContent(){
     // search doesn't renumber everything.
     terms.forEach((t,i)=>{ t._num = i+1; });
     if(q){
+      // q is already folded by renderContent, so "cardiaca" finds "cardíaca".
       terms = terms.filter(t =>
-        (t.en||'').toLowerCase().includes(q) ||
-        (t.es||'').toLowerCase().includes(q) ||
-        (t.def||'').toLowerCase().includes(q) ||
-        (t.notes||'').toLowerCase().includes(q)
+        foldText(t.en).includes(q) ||
+        foldText(t.es).includes(q) ||
+        foldText(t.def).includes(q) ||
+        foldText(t.notes).includes(q)
       );
     }
     if(terms.length===0){ emptySections.push(cat); return; }
@@ -8351,7 +8720,9 @@ function renderContent(){
     </div>`;
     html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
-      const termAttachments = ATTACHMENTS.filter(a=>a.termId===t.id);
+      // Was ATTACHMENTS.filter(...) per card — a full scan of every
+      // attachment for every card drawn, on every render.
+      const termAttachments = attachmentsByTerm.get(t.id) || EMPTY_ATTACHMENTS;
       const delay = Math.min(cardIdx * 0.03, 0.3);
       html += `
         <div class="card" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;">
@@ -8487,7 +8858,7 @@ function setCategory(id, isBack){
   }
   activeCategory = id;
   if(id === 'chat'){
-    lastSeenChatCount = CHAT_MESSAGES.length;
+    markChatSeen();
     // Prompt for a name right away rather than waiting for someone to
     // notice the inline "add your name" hint or the floating button.
     // Not when arriving via Back, though: the prompt is an overlay, and
@@ -8496,10 +8867,15 @@ function setCategory(id, isBack){
     // presses, no movement, which read as the button being broken.
     if(!isBack && !whoAmI()) openNameModal();
   }
-  if(id === 'updates'){ lastSeenActivityCount = ACTIVITY.length; }
+  if(id === 'updates'){ markActivitySeen(); }
   if(id === 'userguide'){ guideIndex = 0; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   if(id === 'doctor-directory' || id === 'doctors'){ loadDoctorDirectory(); }
+  // Quiz history (up to 300 documents) and the spaced-repetition review state
+  // are only ever read by these two screens, but were downloaded on every
+  // launch whether or not anyone opened them. Fetched on first visit instead.
+  if(id === 'practice') ensureLoaded('quizHistory', loadQuizHistory);
+  if(id === 'review')   ensureLoaded('termReviews', loadTermReviews);
   render();
 }
 
@@ -9180,7 +9556,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0911.1004';
+const BUILD_ID = 'b0912.1344';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -9201,7 +9577,7 @@ function greetingForNow(){
 // — a nested accordion inside a nav list adds a click without adding
 // information, since the list has room to show them all at once.
 function sideNavHtml(){
-  const unread = Math.max(0, CHAT_MESSAGES.length - lastSeenChatCount);
+  const unread = unreadChatCount();
   const who = whoAmI();
   const initials = who ? initialsOf(who) : '';
 
@@ -9267,7 +9643,7 @@ function sideNavHtml(){
 }
 
 function renderTabBar(){
-  const unread = Math.max(0, CHAT_MESSAGES.length - lastSeenChatCount);
+  const unread = unreadChatCount();
   const tabs = [
     { id:'home',      name:'Home',      icon:ICON_HOME,   action:`goHome()` },
     { id:'__search',  name:'Search',    icon:ICON_SEARCH, action:`openGlobalSearch()` },
@@ -9482,10 +9858,10 @@ function renderProviders(q){
   let list = PROVIDERS.slice();
   if(q){
     list = list.filter(p =>
-      (p.name||'').toLowerCase().includes(q) ||
-      (p.role||'').toLowerCase().includes(q) ||
-      (p.facility||'').toLowerCase().includes(q) ||
-      (p.notes||'').toLowerCase().includes(q)
+      foldText(p.name).includes(q) ||
+      foldText(p.role).includes(q) ||
+      foldText(p.facility).includes(q) ||
+      foldText(p.notes).includes(q)
     );
   }
   list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
@@ -9875,11 +10251,11 @@ function renderDoctorDirectory(q){
   let list = DOCTOR_DIRECTORY.slice();
   if(q){
     list = list.filter(d =>
-      (d.name||'').toLowerCase().includes(q) ||
-      (d.specialty||'').toLowerCase().includes(q) ||
-      (d.hospitalLocation||'').toLowerCase().includes(q) ||
-      (d.locationDetails||'').toLowerCase().includes(q) ||
-      (d.notes||'').toLowerCase().includes(q)
+      foldText(d.name).includes(q) ||
+      foldText(d.specialty).includes(q) ||
+      foldText(d.hospitalLocation).includes(q) ||
+      foldText(d.locationDetails).includes(q) ||
+      foldText(d.notes).includes(q)
     );
   }
   list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
@@ -10193,9 +10569,9 @@ function renderEthics(q){
   if(ethicsFilter !== 'all') list = list.filter(e => e.org === ethicsFilter);
   if(q){
     list = list.filter(e =>
-      (e.title||'').toLowerCase().includes(q) ||
-      (e.summary||'').toLowerCase().includes(q) ||
-      (e.practice||'').toLowerCase().includes(q)
+      foldText(e.title).includes(q) ||
+      foldText(e.summary).includes(q) ||
+      foldText(e.practice).includes(q)
     );
   }
 
@@ -10310,9 +10686,24 @@ async function sendChatMessage(){
   renderChatAttachPreview();
   input.disabled = true;
   try{
-    await db.collection('team-chat').add({ text, author, attachment: attachment || null, timestamp: Date.now() });
-    // No manual state update needed — the real-time listener picks this up
-    // for everyone, including the sender, and calls renderChatMessages().
+    // An explicit id rather than add(): a queued message replayed after a
+    // reconnect must land as the same document, not as a second copy. doc()
+    // mints the id locally, so this works with no connection at all.
+    const ref = db.collection('team-chat').doc();
+    const message = { text, author, attachment: attachment || null, timestamp: Date.now() };
+    const state = await queuedWrite({
+      collection: 'team-chat', docId: ref.id, op: 'set', data: message
+    });
+    if(state === 'queued'){
+      // Offline there is no listener echo, so show the message locally or it
+      // looks like it vanished. The real document carries this same id, so
+      // the next snapshot replaces this entry rather than duplicating it.
+      CHAT_MESSAGES.push({ id: ref.id, ...message, _pending: true });
+      markChatSeen();
+      renderChatMessages();
+    }
+    // Online, no manual state update is needed — the real-time listener picks
+    // it up for everyone, including the sender, and calls renderChatMessages().
   }catch(err){
     showToast('Could not send — check your connection.');
     input.value = text; // give the message back so it isn't lost
@@ -10347,7 +10738,7 @@ function renderDirectory(q){
       .sort((a,b)=> collateTerms(a.t.en, b.t.en));
     sortedTerms.forEach(({ t })=>{
       const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
-      const matches = !q || (t.en||'').toLowerCase().includes(q) || (t.es||'').toLowerCase().includes(q) || (t.def||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q);
+      const matches = !q || foldText(t.en).includes(q) || foldText(t.es).includes(q) || foldText(t.def).includes(q) || foldText(t.notes).includes(q);
       if(!matches) return;
 
       if(t.url){
@@ -11105,12 +11496,14 @@ async function deleteDoctorDirEntry(id){
 
 /* ============ Init ============ */
 loadNotifyPref();
+// Changes made offline in an earlier session are still sitting in localStorage.
+flushOutbox();
 loadData();
 loadProviders();
 loadDoctorDirectory();
 loadTrash();
-loadQuizHistory();
-loadTermReviews();
+// loadQuizHistory() and loadTermReviews() are no longer fetched here — they
+// are loaded on first visit to Practice and Term Review respectively.
 loadAttachments();
 loadQuestions();
 startChatListener();
