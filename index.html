@@ -2242,165 +2242,124 @@
   .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
   .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
 
-  /* ---------- In-app User Guide ---------- */
-  .user-guide{ max-width:640px; margin:0 auto; }
-  .user-guide-progress-track{ height:4px; border-radius:2px; background:var(--line-soft); overflow:hidden; }
-  .user-guide-progress-fill{ height:100%; background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .25s var(--ease); }
-  .user-guide-counter{ font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin:8px 0 22px 0; text-align:right; }
-  .user-guide-slide{
-    background:var(--paper); border-radius:var(--r-lg); padding:32px 28px;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); min-height:280px;
-    position:relative; overflow:hidden;
+  /* ---------- In-app guide ----------
+     A list of questions, not a slideshow. Everything here is sized for
+     someone reading one-handed on a phone between assignments: large tap
+     targets, one question per row, and an answer that opens in place rather
+     than on another screen. ---------- */
+  .user-guide{ max-width:660px; margin:0 auto; }
+
+  .guide-head h2{
+    font-family:var(--serif); font-size:26px; font-weight:400; color:var(--ink); margin:0 0 6px 0;
   }
-  .user-guide-slide::before{
-    content:""; position:absolute; top:0; left:0; right:0; height:4px;
-    background:var(--guide-color, var(--accent));
+  .guide-head p{ font-size:14px; line-height:1.6; color:var(--ink-soft); margin:0 0 18px 0; }
+
+  /* Search. 16px on the input is not a style choice - anything smaller makes
+     iOS Safari zoom the page the moment it is focused, and it never zooms
+     back out. */
+  .guide-search{
+    position:relative; display:flex; align-items:center; gap:10px;
+    background:var(--paper); border-radius:14px; padding:0 14px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); margin-bottom:20px;
   }
-  .user-guide-slide.guide-anim-forward{ animation:guideInForward .32s var(--ease); }
-  .user-guide-slide.guide-anim-backward{ animation:guideInBackward .32s var(--ease); }
-  @keyframes guideInForward{ from{ opacity:0; transform:translateX(18px); } to{ opacity:1; transform:translateX(0); } }
-  @keyframes guideInBackward{ from{ opacity:0; transform:translateX(-18px); } to{ opacity:1; transform:translateX(0); } }
-  @media (prefers-reduced-motion: reduce){
-    .user-guide-slide.guide-anim-forward, .user-guide-slide.guide-anim-backward{ animation:none; }
+  .guide-search svg{ width:18px; height:18px; color:var(--ink-faint); flex-shrink:0; }
+  .guide-search input{
+    flex:1; border:none; background:none; outline:none; font-family:var(--sans);
+    font-size:16px; color:var(--ink); padding:15px 0;
   }
-  .user-guide-slide.is-cover{ text-align:center; padding:44px 28px; }
-  .user-guide-glyph{
-    width:56px; height:56px; border-radius:16px; margin:0 auto 18px auto; color:#fff;
+  .guide-search input::placeholder{ color:var(--ink-faint); }
+  .guide-search-clear{
+    border:none; background:none; color:var(--ink-faint); font-size:15px;
+    cursor:pointer; padding:6px; line-height:1;
+  }
+
+  /* First-run shortcut list */
+  .guide-first{
+    background:linear-gradient(140deg, var(--accent-soft), var(--paper));
+    border-radius:16px; padding:16px 14px 10px 14px; margin-bottom:24px;
+    box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+  .guide-first-label{
+    font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 10px 2px;
+  }
+  .guide-first-row{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    background:none; border:none; cursor:pointer; padding:10px 2px; font-family:var(--sans);
+    font-size:14.5px; color:var(--ink); line-height:1.4;
+  }
+  .guide-first-num{
+    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    background:var(--accent); color:#fff; font-size:12px; font-weight:700;
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 18px -6px rgba(37,46,109,0.5), inset 0 1px 0 rgba(255,255,255,0.28);
   }
-  .user-guide-slide:not(.is-cover) .user-guide-glyph{ margin:0 0 16px 0; }
-  .user-guide-glyph svg{ width:28px; height:28px; }
-  .user-guide-kicker{
-    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; color:var(--accent-2);
-    font-weight:600; margin-bottom:6px;
+
+  /* Sections */
+  .guide-section{ margin-bottom:26px; }
+  .guide-section-head{
+    display:flex; align-items:center; gap:8px; margin:0 0 10px 2px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--ink-faint);
   }
-  .user-guide-title{ font-family:var(--serif); font-size:23px; font-weight:400; color:var(--ink); margin:0 0 14px 0; }
-  .user-guide-body{ font-size:14px; line-height:1.65; color:var(--ink-soft); }
-  .user-guide-body p{ margin:0 0 12px 0; }
-  .user-guide-body ul, .user-guide-body ol{ margin:0 0 12px 0; padding-left:20px; }
-  .user-guide-body li{ margin-bottom:7px; }
-  .user-guide-body b{ color:var(--ink); }
+  .guide-section-dot{
+    width:8px; height:8px; border-radius:50%; background:var(--guide-color); flex-shrink:0;
+  }
+
+  /* One question */
+  .guide-topic{
+    background:var(--paper); border-radius:14px; margin-bottom:8px;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); overflow:hidden;
+    transition:box-shadow .18s var(--ease);
+  }
+  .guide-topic.is-open{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--guide-color); }
+  .guide-q{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    font-family:var(--sans); font-size:15px; font-weight:600; color:var(--ink);
+    line-height:1.4; padding:16px 15px;   /* a generous tap target */
+  }
+  .guide-q-text{ flex:1; }
+  .guide-q-chev{
+    display:flex; color:var(--ink-faint); flex-shrink:0;
+    transition:transform .2s var(--ease);
+  }
+  .guide-q-chev svg{ width:17px; height:17px; }
+  .guide-topic.is-open .guide-q{ color:var(--guide-color); }
+  .guide-topic.is-open .guide-q-chev{ transform:rotate(180deg); color:var(--guide-color); }
+
+  .guide-a{
+    padding:0 15px 16px 15px; font-size:14px; line-height:1.7; color:var(--ink-soft);
+    animation:guideAnswerIn .22s var(--ease);
+  }
+  @keyframes guideAnswerIn{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: reduce){ .guide-a{ animation:none; } }
+  .guide-a p{ margin:0 0 11px 0; }
+  .guide-a p:last-child{ margin-bottom:0; }
+  .guide-a b{ color:var(--ink); font-weight:650; }
+  .guide-a i{ font-family:var(--serif); font-style:italic; color:var(--accent); }
+  .guide-a ol, .guide-a ul{ margin:0 0 11px 0; padding-left:22px; }
+  .guide-a li{ margin-bottom:8px; }
+  .guide-a li:last-child{ margin-bottom:0; }
+
+  .guide-empty{
+    padding:26px 18px; text-align:center; font-size:14px; line-height:1.6;
+    color:var(--ink-soft); background:var(--paper); border-radius:14px;
+    box-shadow:inset 0 0 0 1px var(--line-soft); margin-bottom:22px;
+  }
+  .guide-empty p{ margin:0 0 8px 0; }
+  .guide-empty p:last-child{ margin-bottom:0; }
+
+  .guide-foot{
+    font-size:13px; line-height:1.6; color:var(--ink-faint);
+    text-align:center; margin:6px 0 8px 0;
+  }
+
+  /* Still used by the Code of Ethics screen. */
   .user-guide-note{
-    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:10px;
-    padding:11px 13px; font-size:12.5px; color:#7A5D28 !important;
+    background:#FDF6E7; border-radius:10px; padding:11px 13px; font-size:12.5px;
+    color:#7A5D28; line-height:1.55; margin:14px 0 0 0;
   }
   .user-guide-note b{ color:#7A5D28; }
-  .user-guide-nav{ display:flex; justify-content:space-between; gap:12px; margin-top:20px; }
-  .user-guide-nav .btn{ min-width:100px; }
-
-  /* Icon badge entrance — a little bounce so each slide feels alive rather
-     than static, independent of the slide-in direction animation. */
-  .user-guide-glyph{ animation:guideGlyphIn .4s var(--ease) both; }
-  @keyframes guideGlyphIn{
-    0%{ opacity:0; transform:scale(0.5) rotate(-12deg); }
-    70%{ transform:scale(1.08) rotate(3deg); }
-    100%{ opacity:1; transform:scale(1) rotate(0); }
-  }
-
-  /* Staggered reveal for list items and detail rows — each one arrives a
-     beat after the last instead of all popping in at once. */
-  .user-guide-body li, .guide-feed-row, .guide-pipeline-step, .guide-fab-item{
-    animation:guideRowIn .35s var(--ease) both;
-  }
-  .user-guide-body li:nth-child(1), .guide-feed-row:nth-child(1){ animation-delay:.05s; }
-  .user-guide-body li:nth-child(2), .guide-feed-row:nth-child(2){ animation-delay:.12s; }
-  .user-guide-body li:nth-child(3), .guide-feed-row:nth-child(3){ animation-delay:.19s; }
-  .user-guide-body li:nth-child(4){ animation-delay:.26s; }
-  .guide-pipeline-step:nth-of-type(1){ animation-delay:.05s; }
-  .guide-pipeline-step:nth-of-type(3){ animation-delay:.16s; }
-  .guide-pipeline-step:nth-of-type(5){ animation-delay:.27s; }
-  .guide-pipeline-step:nth-of-type(7){ animation-delay:.38s; }
-  .guide-fab-item:nth-child(1){ animation-delay:.05s; }
-  .guide-fab-item:nth-child(2){ animation-delay:.15s; }
-  .guide-fab-item:nth-child(3){ animation-delay:.25s; }
-  @keyframes guideRowIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
-  @media (prefers-reduced-motion: reduce){
-    .user-guide-glyph, .user-guide-body li, .guide-feed-row, .guide-pipeline-step, .guide-fab-item{ animation:none; }
-  }
-
-  /* Mini widget: the three floating buttons, previewed inline */
-  .guide-fab-row{ display:flex; gap:14px; margin:14px 0 16px 0; }
-  .guide-fab-item{
-    flex:1; display:flex; flex-direction:column; align-items:center; text-align:center;
-    background:var(--bg-hi); border-radius:12px; padding:14px 8px; gap:3px;
-  }
-  .guide-fab-dot{
-    width:38px; height:38px; border-radius:50%; color:#fff; display:flex; align-items:center;
-    justify-content:center; margin-bottom:4px; box-shadow:0 4px 10px -4px rgba(37,46,109,0.5);
-  }
-  .guide-fab-dot svg{ width:18px; height:18px; }
-  .guide-fab-item b{ font-size:12.5px; }
-  .guide-fab-item span{ font-size:10px; color:var(--ink-faint); }
-
-  /* Mini widget: the Translate pipeline, as a vertical numbered flow */
-  .guide-pipeline{ margin:14px 0 4px 0; }
-  .guide-pipeline-step{
-    display:flex; align-items:center; gap:12px; background:var(--bg-hi);
-    border-radius:12px; padding:11px 14px;
-  }
-  .guide-pipeline-num{
-    width:26px; height:26px; border-radius:50%; flex-shrink:0; background:var(--accent);
-    color:#fff; font-family:var(--sans); font-weight:700; font-size:12px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .guide-pipeline-step b{ font-size:13px; margin-right:6px; }
-  .guide-pipeline-step span{ font-size:11.5px; color:var(--ink-faint); }
-  .guide-pipeline-arrow{ display:flex; justify-content:center; margin:2px 0; opacity:.4; }
-  .guide-pipeline-arrow svg{ width:14px; height:14px; }
-
-  /* Mini widget: the Term Review interval timeline */
-  .guide-timeline{ position:relative; height:52px; margin:18px 10px 8px 10px; }
-  .guide-timeline-track{ position:absolute; top:6px; left:0; right:0; height:2px; background:var(--line); }
-  .guide-timeline-stop{ position:absolute; top:0; transform:translateX(-50%); text-align:center; font-size:10px; color:var(--ink-faint); }
-  .guide-timeline-dot{
-    display:block; width:12px; height:12px; border-radius:50%; background:var(--accent-2);
-    border:2px solid var(--paper); box-shadow:0 0 0 1px var(--line); margin:0 auto 8px auto;
-  }
-  .guide-timeline-dot.reset{ background:#E17B8C; }
-  .guide-timeline-dot.mastered{ background:#2E8B57; }
-  .guide-tag-blue{ color:#0079BD; }
-  .guide-tag-green{ color:#2E8B57; }
-
-  /* Mini widget: the Dark Mode toggle switch, animating between its states */
-  .guide-toggle{ display:flex; justify-content:center; margin:6px 0 18px 0; }
-  .guide-toggle-track{
-    width:64px; height:34px; border-radius:20px; background:linear-gradient(140deg, var(--accent-2), var(--accent));
-    display:flex; align-items:center; padding:3px; box-sizing:border-box;
-    animation:guideToggleGlow 2.6s ease-in-out infinite;
-  }
-  .guide-toggle-thumb{
-    width:28px; height:28px; border-radius:50%; background:#fff; color:var(--accent);
-    display:flex; align-items:center; justify-content:center;
-    animation:guideToggleSlide 2.6s ease-in-out infinite;
-  }
-  .guide-toggle-thumb svg{ width:15px; height:15px; }
-  @keyframes guideToggleSlide{ 0%,40%{ transform:translateX(0); } 55%,100%{ transform:translateX(30px); } }
-  @keyframes guideToggleGlow{ 0%,40%{ filter:brightness(1); } 55%,100%{ filter:brightness(0.75); } }
-  @media (prefers-reduced-motion: reduce){
-    .guide-toggle-track, .guide-toggle-thumb{ animation:none; }
-  }
-
-  /* Mini widget: a few sample Recent Updates rows */
-  .guide-feed{ margin:14px 0; display:flex; flex-direction:column; gap:7px; }
-  .guide-feed-row{
-    background:var(--bg-hi); border-radius:10px; padding:9px 12px; font-size:12px;
-    color:var(--ink-soft); display:flex; justify-content:space-between; gap:10px; align-items:baseline;
-  }
-  .guide-feed-row b{ color:var(--ink); margin-right:4px; }
-  .guide-feed-row span{ font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); flex-shrink:0; }
-
-  /* Swipe hint, shown once on the opening slide only */
-  .guide-swipe-hint{
-    display:flex; align-items:center; justify-content:center; gap:8px; margin-top:22px;
-    color:var(--ink-faint); font-size:12px; animation:guideSwipeHint 1.6s ease-in-out infinite;
-  }
-  .guide-swipe-hint svg{ width:16px; height:16px; }
-  @keyframes guideSwipeHint{ 0%,100%{ transform:translateX(0); opacity:.6; } 50%{ transform:translateX(6px); opacity:1; } }
-  @media (prefers-reduced-motion: reduce){ .guide-swipe-hint{ animation:none; } }
-  @media (max-width:760px){
-    .user-guide-slide{ padding:26px 20px; }
-  }
 
   .announcements-block{
     max-width:660px; margin-bottom:16px; padding:14px 16px; border-radius:12px;
@@ -6820,6 +6779,20 @@ function collectSearchMatches(q){
     }
   });
 
+  // The search box has always promised "guides" in its placeholder and never
+  // actually looked at them. Someone typing "how do I add a term" got nothing.
+  GUIDE_TOPICS.forEach(t=>{
+    const body = (t.k || '') + ' ' + String(t.a).replace(/<[^>]+>/g, ' ');
+    if(hit(t.q) || hit(body)){
+      const sec = GUIDE_SECTIONS.find(x => x.id === t.section);
+      out.push({ group:'How do I…', icon:ICON_COMPASS, color:(sec && sec.color) || '#5B7FBF',
+        title:t.q.replace(/&rsquo;/g, '\u2019').replace(/&hellip;/g, '\u2026'),
+        sub:(sec && sec.name) || 'Guide',
+        target:'userguide', guideId:t.id,
+        rank: starts(t.q) ? 0 : 1 });
+    }
+  });
+
   allQuestions().forEach(qq=>{
     if(hit(qq.q)){
       const dm = domainMeta(qq.d);
@@ -6894,6 +6867,9 @@ function gsGo(i){
   const m = gsMatches[i];
   if(!m) return;
   closeGlobalSearch();
+  // A guide hit opens that answer, already expanded — landing on the guide's
+  // front page and making someone hunt again would defeat the point.
+  if(m.guideId){ openGuideTopic(m.guideId); return; }
   setCategory(m.target);
 }
 
@@ -7164,7 +7140,7 @@ function getDomainTiles(){
 function getToolTiles(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   return [
-    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: DOMAIN_ICONS.compass, count: USER_GUIDE_SLIDES.length, label:'slides' },
+    { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: DOMAIN_ICONS.compass, count: GUIDE_TOPICS.length, label:'answers' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: DOMAIN_ICONS.calendar, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'ethics',    name:'Code of Ethics',       color:'#2F5D62', icon: DOMAIN_ICONS.shield, count: ETHICS_CONTENT.length, label: 'entries' },
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: DOMAIN_ICONS.globe,   count: null, label: '' },
@@ -7273,16 +7249,47 @@ function exitReview(){
 // phone. Content mirrors the standalone navigation guide, condensed for
 // reading on-device rather than presenting.
 
-let guideIndex = 0;
-let guideDirection = 'forward';
+let guideQuery = '';
+let guideOpenId = null;
 
-function goToGuideSlide(i){
-  guideDirection = i > guideIndex ? 'forward' : 'backward';
-  guideIndex = Math.max(0, Math.min(USER_GUIDE_SLIDES.length - 1, i));
+function toggleGuideTopic(id){
+  guideOpenId = (guideOpenId === id) ? null : id;
   renderContent();
+  // Keep the question the person just tapped in view — opening a long answer
+  // above the fold otherwise pushes it off the top of the screen.
+  if(guideOpenId){
+    setTimeout(()=>{
+      const el = document.getElementById('guide-topic-' + guideOpenId);
+      if(el && el.scrollIntoView) el.scrollIntoView({ block:'nearest', behavior:'smooth' });
+    }, 30);
+  }
 }
-function nextGuideSlide(){ if(guideIndex < USER_GUIDE_SLIDES.length - 1) goToGuideSlide(guideIndex + 1); }
-function prevGuideSlide(){ if(guideIndex > 0) goToGuideSlide(guideIndex - 1); }
+
+// Used by search results, so a hit on a guide answer lands on that answer
+// already open rather than on the guide's front page.
+function openGuideTopic(id){
+  guideQuery = '';
+  guideOpenId = id;
+  setCategory('userguide');
+  setTimeout(()=>{
+    const el = document.getElementById('guide-topic-' + id);
+    if(el && el.scrollIntoView) el.scrollIntoView({ block:'center', behavior:'smooth' });
+  }, 120);
+}
+
+/* Includes the hidden keyword list. People reach for different words than the
+   guide happens to use — someone looking for the no-signal answer types
+   "offline", "no wifi", or "basement", and the answer itself may say none of
+   them. The keywords are never shown; they only make the question findable. */
+function guideTopicText(t){
+  return foldText(t.q + ' ' + (t.k || '') + ' ' + String(t.a).replace(/<[^>]+>/g, ' '));
+}
+
+function matchingGuideTopics(){
+  const q = foldText(guideQuery.trim());
+  if(!q) return GUIDE_TOPICS;
+  return GUIDE_TOPICS.filter(t => guideTopicText(t).includes(q));
+}
 
 // "Doctor Prep" — looks up a doctor's specialty via the /api/doctor-research
 // serverless endpoint (Claude with web search), then shows a prep list of
@@ -7674,41 +7681,91 @@ function renderDoctorResearch(){
 }
 
 
-function renderUserGuide(){
-  const slide = USER_GUIDE_SLIDES[guideIndex];
-  const isFirst = guideIndex === 0, isLast = guideIndex === USER_GUIDE_SLIDES.length - 1;
-  const pct = Math.round(((guideIndex + 1) / USER_GUIDE_SLIDES.length) * 100);
-  const icon = ICON_GUIDE_MAP[slide.icon] || ICON_COMPASS;
-
+function guideTopicCard(t, sectionColor){
+  const open = guideOpenId === t.id;
   return `
-    <div class="user-guide" id="userGuideRoot">
-      <div class="user-guide-progress-track"><div class="user-guide-progress-fill" style="width:${pct}%;"></div></div>
-      <div class="user-guide-counter">${guideIndex + 1} of ${USER_GUIDE_SLIDES.length}</div>
-      <div class="user-guide-slide ${slide.cover ? 'is-cover' : ''} guide-anim-${guideDirection}" style="--guide-color:${slide.color};">
-        <div class="user-guide-glyph" style="background:linear-gradient(145deg, ${slide.color}, ${darkenHex(slide.color, 30)});">${icon}</div>
-        ${slide.kicker ? `<div class="user-guide-kicker">${escapeHtml(slide.kicker.toUpperCase())}</div>` : ''}
-        <h2 class="user-guide-title">${escapeHtml(slide.title)}</h2>
-        <div class="user-guide-body">${slide.body}</div>
-      </div>
-      <div class="user-guide-nav">
-        <button class="btn btn-ghost" onclick="prevGuideSlide()" ${isFirst ? 'disabled' : ''}>Back</button>
-        <button class="btn btn-primary" onclick="${isLast ? "setCategory('home')" : 'nextGuideSlide()'}">${isLast ? 'Done' : 'Next'}</button>
-      </div>
-    </div>
-  `;
+    <div class="guide-topic ${open ? 'is-open' : ''}" id="guide-topic-${t.id}" style="--guide-color:${sectionColor};">
+      <button class="guide-q" onclick="toggleGuideTopic('${t.id}')" aria-expanded="${open}">
+        <span class="guide-q-text">${t.q}</span>
+        <span class="guide-q-chev">${ICON_CHEVRON_DOWN}</span>
+      </button>
+      ${open ? `<div class="guide-a">${t.a}</div>` : ''}
+    </div>`;
 }
 
-function setupUserGuideSwipe(){
-  const root = document.getElementById('userGuideRoot');
-  if(!root) return;
-  let startX = null;
-  root.addEventListener('touchstart', e=>{ startX = e.touches[0].clientX; }, { passive:true });
-  root.addEventListener('touchend', e=>{
-    if(startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if(Math.abs(dx) > 50){ dx < 0 ? nextGuideSlide() : prevGuideSlide(); }
-    startX = null;
-  }, { passive:true });
+function renderUserGuide(){
+  const matches = matchingGuideTopics();
+  const searching = !!guideQuery.trim();
+
+  let html = `
+    <div class="user-guide" id="userGuideRoot">
+      <div class="guide-head">
+        <h2>How do I&hellip;</h2>
+        <p>Tap a question to see the answer. Nothing here can break anything &mdash; have a look around.</p>
+      </div>
+      <div class="guide-search">
+        ${ICON_SEARCH}
+        <input id="guideSearchInput" type="text" placeholder="Type what you need help with&hellip;"
+               value="${escapeAttr(guideQuery)}" autocomplete="off">
+        ${searching ? `<button class="guide-search-clear" onclick="clearGuideSearch()" aria-label="Clear">&#10005;</button>` : ''}
+      </div>`;
+
+  if(!searching){
+    const first = GUIDE_FIRST_STEPS.map(id => GUIDE_TOPICS.find(t => t.id === id)).filter(Boolean);
+    html += `
+      <div class="guide-first">
+        <div class="guide-first-label">New here? Start with these</div>
+        ${first.map((t, i) => `
+          <button class="guide-first-row" onclick="openGuideTopic('${t.id}')">
+            <span class="guide-first-num">${i + 1}</span>
+            <span>${t.q}</span>
+          </button>`).join('')}
+      </div>`;
+  }
+
+  if(searching && !matches.length){
+    html += `
+      <div class="guide-empty">
+        <p>Nothing here matches &ldquo;${escapeHtml(guideQuery.trim())}&rdquo;.</p>
+        <p>Try a shorter word &mdash; or just ask in <b>Team Chat</b>. Somebody will know.</p>
+      </div>`;
+  }
+
+  GUIDE_SECTIONS.forEach(sec=>{
+    const inSection = matches.filter(t => t.section === sec.id);
+    if(!inSection.length) return;
+    html += `
+      <div class="guide-section">
+        <div class="guide-section-head" style="--guide-color:${sec.color};">
+          <span class="guide-section-dot"></span>${escapeHtml(sec.name)}
+        </div>
+        ${inSection.map(t => guideTopicCard(t, sec.color)).join('')}
+      </div>`;
+  });
+
+  html += `
+      <p class="guide-foot">Still stuck? Ask in <b>Team Chat</b> &mdash; and if the answer was useful, it probably belongs in here. Tell Jose.</p>
+    </div>`;
+  return html;
+}
+
+/* The guide's own search box. Same shape as the glossary search: the value is
+   stored on every keystroke so nothing typed is lost, and the redraw waits for
+   a short pause. */
+let guideSearchTimer = null;
+function setupGuideSearch(){
+  const input = document.getElementById('guideSearchInput');
+  if(!input) return;
+  input.addEventListener('input', (e)=>{
+    guideQuery = e.target.value;
+    clearTimeout(guideSearchTimer);
+    guideSearchTimer = setTimeout(()=>{ guideSearchTimer = null; renderContent(); }, 140);
+  });
+}
+
+function clearGuideSearch(){
+  guideQuery = '';
+  renderContent();
 }
 
 function renderReview(){
@@ -7855,7 +7912,7 @@ const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/
 const ICON_MOON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 const ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="7" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 3.5L16 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 12h6M9 14.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
-// Resolves the icon-name strings stored on USER_GUIDE_SLIDES to their actual
+// Resolves icon-name strings to their actual
 // SVGs. A lookup map instead of direct references, since the guide's data
 // array is defined earlier in the file than these icon constants — this map
 // only gets read inside a function body, well after everything has loaded.
@@ -7915,156 +7972,210 @@ const ETHICS_CONTENT = [
     practice:null },
 ];
 
-const USER_GUIDE_SLIDES = [
-  { kicker: '', title: 'Interpreter Hub', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
-    <p>A section-by-section walkthrough of every screen and tool in the app — swipe or tap through whenever you need a refresher.</p>
-    <div class="guide-swipe-hint"><span>Swipe to continue</span><span style="display:inline-flex; transform:rotate(-90deg);">${ICON_CHEVRON_DOWN}</span></div>
-  ` },
-  { kicker: 'Section 1', title: 'Getting Started', icon: 'ICON_PERSON', color: '#2E8BD0', body: `
-    <p>Before you add or edit a term, send a chat message, or take a practice quiz, the app needs to know who you are so your work is properly attributed.</p>
-    <ol>
-      <li>Tap the round person icon — bottom-left corner, on every screen.</li>
-      <li>A popup titled "Attribute my edits as" appears.</li>
-      <li>Type your name and tap Save.</li>
-      <li>Your name now appears on your chat messages, term edits, and practice scores. You'll also be asked automatically the first time you need it.</li>
-    </ol>
-  ` },
-  { kicker: 'Section 1', title: 'Install It On Your Phone', icon: 'ICON_PHONE', color: '#35A97A', body: `
-    <p>Interpreter Hub is a Progressive Web App — no App Store needed. Installing it means it opens full-screen with its own icon, works offline for content you've already loaded, and can send you notifications.</p>
-    <p><b>iPhone (Safari):</b> Open the app link, tap the Share icon, then "Add to Home Screen," then "Add."</p>
-    <p><b>Android (Chrome):</b> Open the app link, tap the three-dot menu, then "Install app" or "Add to Home Screen."</p>
-  ` },
-  { kicker: 'Section 2', title: 'The Home Screen', icon: 'ICON_HOME', color: '#0F5FA6', body: `
-    <p>A quick daily landing spot — not where you browse from.</p>
-    <p><b>Greeting card</b> — a rotating multilingual hello, plus a shortcut to Recent Activity when there's something new.</p>
-    <p><b>Recent Activity</b> — collapsed by default; tap the label to expand a running log of what your teammates have changed.</p>
-    <p><b>Take the tour</b> — replays the short first-run walkthrough any time.</p>
-  ` },
-  { kicker: 'Section 3', title: 'Navigating the App', icon: 'ICON_GRID', color: '#8B7BAE', body: `
-    <p><b>Domains &amp; Tools</b> — tap any domain tile to filter the glossary to just that domain. "All domains" shows everything. The Tools grid holds Chat, Translate, Practice, and more. Both grids collapse via their section label.</p>
-    <p><b>Domain subgroups</b> — some domains, like "Oncology, Hematology &amp; Leukemia," have their own subgroups nested inside (Breast Oncology, Lymphoma, Leukemia, and more). Tap the chevron badge on the parent tile to expand or collapse its subgroups — each one still has its own separate set of terms.</p>
-    <p><b>The three floating buttons:</b></p>
-    <div class="guide-fab-row">
-      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_HOME}</span><b>Home</b><span>bottom-right</span></div>
-      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_PERSON}</span><b>Name</b><span>bottom-left</span></div>
-      <div class="guide-fab-item"><span class="guide-fab-dot" style="background:linear-gradient(145deg,#0079BD,#252E6D);">${ICON_MOON}</span><b>Theme</b><span>top-right</span></div>
-    </div>
-    <p class="user-guide-note">Opening a single domain or tool hides the sidebar for a focused view — the Home button is your way back.</p>
-  ` },
-  { kicker: 'Section 4', title: 'Search Everything', icon: 'ICON_SEARCH', color: '#2E8BD0', body: `
-    <p>One search bar covers the entire app — not just the glossary.</p>
-    <p>Tap the search bar (or press Ctrl/Cmd+K on desktop). Results are grouped by type: Terms, Providers, Guides, Chat, and more. Tap any result to jump straight to it.</p>
-  ` },
-  { kicker: 'Section 5', title: 'The Glossary', icon: 'ICON_LAYERS', color: '#6F97AC', body: `
-    <p>Terms are bilingual (English/Spanish) cards, sorted alphabetically. Each shows a definition and, if provided, a source link.</p>
-    <ul>
-      <li>Tap <b>+ Add term</b>, or the pencil icon to edit an existing one.</li>
-      <li>The copy and speaker (audio) buttons sit on every term.</li>
-      <li>Changes sync instantly for the whole team — no refresh needed.</li>
-    </ul>
-    <p class="user-guide-note">Professional Resources sits with the Tools tiles, but behaves like any other domain.</p>
-  ` },
-  { kicker: 'Section 5', title: 'Edit History, Audio & Attachments', icon: 'ICON_EDIT', color: '#C98FA0', body: `
-    <p><b>Edit History</b> — every edit saves the previous version (up to 10). "View edit history" shows who changed what and when; restore any version into the form before saving.</p>
-    <p><b>Audio Pronunciation</b> — a speaker button reads any term aloud in the correct language, using your device's built-in voice.</p>
-    <p><b>Attachments</b> — a term can carry a file, like a reference PDF or image. Look for the attachment chip on the card.</p>
-  ` },
-  { kicker: 'Section 6', title: 'Team Chat', icon: 'ICON_CHAT', color: '#2E8BD0', body: `
-    <p>Real-time messaging for quick coordination. Tap the paperclip to attach a photo or PDF. Turn on notifications to get alerted even when the app isn't open.</p>
-    <p><b>@Mentions</b> — type @ and a name to flag a teammate directly. Matching suggestions appear as you type; they see it highlighted and get notified.</p>
-    <p><b>Pinned Announcements</b> — a separate panel above the message stream, for things that shouldn't get buried, like a new CE requirement.</p>
-  ` },
-  { kicker: 'Section 7', title: 'Translate', icon: 'ICON_GLOBE', color: '#2E8BD0', body: `
-    <p>A reference aid for building and studying the glossary — not a substitute for a qualified interpreter.</p>
-    <div class="guide-pipeline">
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">1</span><b>Glossary-first</b><span>Your team's trusted entry, checked first.</span></div>
-      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">2</span><b>False-friend check</b><span>Flags traps like intoxicado, embarazada.</span></div>
-      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">3</span><b>Back-translation</b><span>Translates back to catch drifted meaning.</span></div>
-      <div class="guide-pipeline-arrow">${ICON_CHEVRON_DOWN}</div>
-      <div class="guide-pipeline-step"><span class="guide-pipeline-num">4</span><b>AI breakdown</b><span>Register, regional variation &amp; cautions.</span></div>
-    </div>
-  ` },
-  { kicker: 'Section 7', title: 'AI Tools: Translate & Doctor Prep', icon: 'ICON_SPARK', color: '#B08D2A', body: `
-    <p>Translate now sits inside an <b>"AI Tools"</b> group in the Tools grid, alongside a new feature: <b>Doctor Prep</b>. Tap the group to expand it and choose either one.</p>
-    <p><b>Doctor Prep</b> looks up a doctor by name, figures out their specialty, and builds a ready-made list of the English/Spanish terminology likely to come up in that appointment.</p>
-    <ul>
-      <li>Type a name, and optionally a specialty or hospital to narrow the search — this also makes the lookup faster.</li>
-      <li>Known John Theurer Cancer Center physicians are matched instantly from a built-in list, no search needed.</li>
-      <li>Each suggested term shows whether it's already in the glossary, or gives you a one-tap <b>+ Add</b> button if it's new.</li>
-      <li>Results are shared with the whole team \u2014 if a colleague already researched that doctor, you'll see their result instantly with a "Cached" note and a <b>Refresh</b> button if you want a fresh lookup.</li>
-    </ul>
-    <p>Every Doctor Prep search also feeds a shared <b>Doctor Directory</b> \u2014 see the "Doctors" section below for what it can do.</p>
-    <p class="user-guide-note">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
-  ` },
-  { kicker: 'Section 8', title: 'CoreCHI Practice', icon: 'ICON_EXAM', color: '#0F5FA6', body: `
-    <p>Multiple-choice questions across CCHI's five official exam domains, drawn in the same proportions as the real exam.</p>
-    <p>Every finished quiz saves to your personal history — the Practice screen shows your total sessions, all-time accuracy, best score, and <b>accuracy broken down by CCHI domain</b>, the real signal for where to study.</p>
-    <p class="user-guide-note">Original practice questions matching CCHI's domain structure — not real exam items, and not CCHI-affiliated.</p>
-  ` },
-  { kicker: 'Section 9', title: 'Term Review', icon: 'ICON_REVIEW', color: '#4E9E74', body: `
-    <p>Spaced repetition for the glossary itself, separate from CoreCHI Practice. See the English term (with audio), try to recall the Spanish and definition, tap Show answer, then rate yourself.</p>
-    <div class="guide-timeline">
-      <div class="guide-timeline-track"></div>
-      <div class="guide-timeline-stop" style="left:0%;"><span class="guide-timeline-dot reset"></span><b>0</b></div>
-      <div class="guide-timeline-stop" style="left:20%;"><span class="guide-timeline-dot"></span><b>1d</b></div>
-      <div class="guide-timeline-stop" style="left:40%;"><span class="guide-timeline-dot"></span><b>3d</b></div>
-      <div class="guide-timeline-stop" style="left:60%;"><span class="guide-timeline-dot"></span><b>7d</b></div>
-      <div class="guide-timeline-stop" style="left:80%;"><span class="guide-timeline-dot"></span><b>14d</b></div>
-      <div class="guide-timeline-stop" style="left:100%;"><span class="guide-timeline-dot mastered"></span><b>30d</b></div>
-    </div>
-    <p><b class="guide-tag-blue">Missed it</b> resets to the start, reviewed again soon. <b class="guide-tag-green">Got it</b> moves one stop further along.</p>
-    <p class="user-guide-note">Sessions are capped at 15 terms, prioritizing whatever's most overdue.</p>
-  ` },
-  { kicker: 'Section 10', title: 'Doctors: Directory & Photos', icon: 'ICON_GRID', color: '#7C6A9C', body: `
-    <p>Two doctor-focused tools live together under a collapsible <b>"Doctors"</b> tile in the Tools grid — tap it to expand and choose either one.</p>
-    <p><b>Doctor Directory</b> — a shared, browsable record of every doctor your team has looked up, whether through Doctor Prep or added by hand.</p>
-    <ul>
-      <li>Every Doctor Prep search automatically adds or updates an entry here with the doctor's name, specialty, and hospital/location.</li>
-      <li>Tap <b>+ Add doctor</b> to create an entry manually — no search required.</li>
-      <li>Tap the pencil on any card to add what the AI could never know: an exact floor or suite number, scheduling notes, or a photo. These edits are permanent — re-running Doctor Prep on the same doctor later never overwrites them.</li>
-      <li><b>Tap anywhere on a card</b> to see everything Doctor Prep found for that doctor: the full research summary and the complete English/Spanish terminology list, with the same one-tap <b>+ Add</b> buttons to send new terms straight to the glossary.</li>
-      <li>A doctor with no research yet shows a <b>Research this doctor</b> button that jumps to Doctor Prep with their name already filled in.</li>
-    </ul>
-    <p><b>Pictures of Healthcare Providers</b> — a separate photo-first directory: name, role, facility, phone, notes, and a photo (or a colored initials avatar if none is set).</p>
-  ` },
-  { kicker: 'Section 10', title: 'Links & Training', icon: 'ICON_CHAIN', color: '#8B7BAE', body: `
-    <p><b>Find a Doctor</b> and <b>MediFind</b> — grouped together in the Tools grid. Find a Doctor opens Hackensack Meridian's own official directory; MediFind is nested inside it as a secondary, nationwide condition-based search. Both open in your browser.</p>
-    <p><b>Link Directory</b> — every confirmed source link across the glossary, collected automatically.</p>
-    <p><b>Training & Events</b> — CE events checked daily against CHIA, CCHI, NCIHC, and Cross-Cultural Communications.</p>
-  ` },
-  { kicker: 'Section 11', title: 'Recent Updates', icon: 'ICON_BELL', color: '#B08D2A', body: `
-    <p>The complete, unabridged activity log for the whole app — every term added or edited, every domain created, every guide posted.</p>
-    <div class="guide-feed">
-      <div class="guide-feed-row"><b>Bertha</b> added "Hipertrofia" to Heart Failure &amp; Cardiac<span>2m ago</span></div>
-      <div class="guide-feed-row"><b>Fabiola</b> updated a term in Professional Resources<span>18m ago</span></div>
-      <div class="guide-feed-row"><b>Jose</b> pinned an announcement<span>1h ago</span></div>
-    </div>
-    <p>This is the same feed the Home screen's "Recent activity" button jumps to.</p>
-  ` },
-  { kicker: 'Section 12', title: 'Dark Mode', icon: 'ICON_MOON', color: '#252E6D', body: `
-    <div class="guide-toggle"><span class="guide-toggle-track"><span class="guide-toggle-thumb">${ICON_MOON}</span></span></div>
-    <p>Tap the sun/moon icon in the top-right corner of any screen to switch instantly between light and dark themes.</p>
-    <p>The same navy-and-cyan identity carries over, just inverted for low-light rooms and evening shifts. Your choice is remembered on that device.</p>
-  ` },
-  { kicker: 'Section 13', title: 'Exporting Your Work', icon: 'ICON_DOWNLOAD', color: '#0079BD', body: `
-    <p><b>Export PDF</b> — a clean, printable reference sheet with no app chrome. On mobile: Share → Print → Save as PDF. On desktop: Ctrl/Cmd+P.</p>
-    <p><b>CSV Export &amp; Import</b> — export to a spreadsheet for bulk editing, then re-import: matching IDs update, blank IDs create new terms. A preview always shows what will change before anything saves.</p>
-  ` },
-  { kicker: 'Section 14', title: 'Tips, Privacy & Troubleshooting', icon: 'ICON_SHIELD', color: '#BFA05E', body: `
-    <p class="user-guide-note"><b>HIPAA reminder:</b> never include patient names or identifying details anywhere in Interpreter Hub — Team Chat and Guides included.</p>
-    <ul>
-      <li>Everything syncs in real time — no need to refresh.</li>
-      <li>If something looks out of date, check your connection first.</li>
-      <li>A save that fails shows an error toast — just retry once you're back online.</li>
-      <li>Anything not covered here: ask in Team Chat.</li>
-    </ul>
-  ` },
-  { kicker: '', title: 'You\u2019re all set', cover: true, icon: 'ICON_COMPASS', color: '#0079BD', body: `
-    <p>Jump back into any part of the app from Home — or replay this guide any time from the Tools grid.</p>
-  ` },
+/* ---------- The guide ----------
+   This was a twenty-slide tour you swiped through in order. That shape only
+   works if you read it once, front to back, before you need it — and nobody
+   does. People arrive at a guide mid-shift with one question, so the guide is
+   now a list of questions.
+
+   Every entry is titled the way someone would actually ask it out loud, and
+   answered in the words they'd use. No "Progressive Web App", no "chevron",
+   no keyboard shortcuts as the primary instruction. Directions are physical:
+   bottom of the screen, top-left corner. ---------- */
+
+const GUIDE_SECTIONS = [
+  { id: 'start',   name: 'Getting started',        color: '#2E8BD0' },
+  { id: 'find',    name: 'Finding a word',         color: '#0F5FA6' },
+  { id: 'change',  name: 'Adding and fixing words', color: '#B2456E' },
+  { id: 'team',    name: 'Working with your team', color: '#35A97A' },
+  { id: 'prep',    name: 'Before an appointment',  color: '#7C6A9C' },
+  { id: 'study',   name: 'Studying',               color: '#8B6D3F' },
+  { id: 'trouble', name: 'When something goes wrong', color: '#C24E3A' },
+  { id: 'out',     name: 'Getting your work out',  color: '#6F97AC' },
+  { id: 'rule',    name: 'The one rule',           color: '#2F5D62' },
 ];
+
+const GUIDE_TOPICS = [
+  { id:'name', section:'start', k:'name who signature attribution credit initials identify myself', q:'How do I put my name on my work?', a:`
+    <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
+    <ol>
+      <li>Tap the round person button in the <b>bottom-left corner</b>.</li>
+      <li>Type your name.</li>
+      <li>Tap <b>Save</b>.</li>
+    </ol>
+    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice scores.</p>` },
+
+  { id:'install', section:'start', k:'install download app icon home screen shortcut add safari chrome', q:'How do I put this on my phone like a real app?', a:`
+    <p>You don't need the App Store. It takes about ten seconds, and afterwards it opens full screen with its own icon, like any other app.</p>
+    <p><b>iPhone</b></p>
+    <ol>
+      <li>Open the app in Safari.</li>
+      <li>Tap the <b>Share</b> button at the bottom — the square with an arrow pointing up.</li>
+      <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+      <li>Tap <b>Add</b>.</li>
+    </ol>
+    <p><b>Android</b></p>
+    <ol>
+      <li>Open the app in Chrome.</li>
+      <li>Tap the three dots in the corner.</li>
+      <li>Tap <b>Install app</b>.</li>
+    </ol>` },
+
+  { id:'around', section:'start', k:'lost navigate menu buttons where tabs bar bottom find my way', q:'Where is everything?', a:`
+    <p>Five buttons sit in a bar across the <b>bottom of the screen</b>, and they are always there:</p>
+    <ol>
+      <li><b>Home</b> — the starting page.</li>
+      <li><b>Search</b> — looks through everything in the app.</li>
+      <li><b>Translate</b> — look up a word you don't have yet.</li>
+      <li><b>Chat</b> — your team.</li>
+      <li><b>More</b> — everything else: Doctor Prep, Practice, the doctor list, this guide.</li>
+    </ol>
+    <p>If you ever feel lost, tap <b>Home</b>. The arrow in the top-left corner takes you back one step.</p>` },
+
+  { id:'search', section:'find', k:'search look up find lookup word term', q:'How do I look up a word?', a:`
+    <ol>
+      <li>Tap <b>Search</b> at the bottom.</li>
+      <li>Type any part of the word — English or Spanish, either one works.</li>
+      <li>Tap the result you want.</li>
+    </ol>
+    <p>You don't need the whole word. Typing <b>hemo</b> will find <i>hemorragia</i>.</p>` },
+
+  { id:'accents', section:'find', k:'accent accents acento tilde enye typing keyboard special characters', q:'Do I have to type the accents?', a:`
+    <p><b>No.</b> Type it the easy way.</p>
+    <p>Searching <b>embolia</b> finds <i>embolía</i>. <b>medula</b> finds <i>médula ósea</i>. <b>nino</b> finds <i>niño</i>.</p>
+    <p>It works the other way too, so it doesn't matter which way you type it.</p>` },
+
+  { id:'notfound', section:'find', k:'missing cannot find not there nothing no results empty', q:"I know the word is in there, but I can't find it", a:`
+    <p>Three things to try, in this order:</p>
+    <ol>
+      <li><b>Use the Search button at the bottom.</b> The search box <i>inside</i> a domain only looks in that one domain. The Search button looks everywhere.</li>
+      <li><b>Try the other language.</b> If English isn't finding it, type the Spanish.</li>
+      <li><b>Type less.</b> A shorter piece of the word matches more.</li>
+    </ol>
+    <p>Still nothing? It may genuinely not be there yet — which means it's a good one to add.</p>` },
+
+  { id:'hear', section:'find', k:'hear listen audio sound speak pronounce pronunciation voice out loud', q:'How do I hear a word out loud?', a:`
+    <p>Tap the small <b>speaker</b> button next to any term. English and Spanish each have their own.</p>` },
+
+  { id:'add', section:'change', k:'add new create enter put in word term', q:'How do I add a word?', a:`
+    <ol>
+      <li>Open the domain it belongs to, or <b>All domains</b>.</li>
+      <li>Tap <b>+ Add term</b> near the top.</li>
+      <li>Fill in the English, the Spanish, and a short definition.</li>
+      <li>Check the domain is right, then tap <b>Save</b>.</li>
+    </ol>
+    <p>Everyone on the team sees it within a few seconds. You don't need to tell them.</p>` },
+
+  { id:'edit', section:'change', k:'edit change fix correct update wrong mistake', q:'How do I fix a word that is wrong?', a:`
+    <p>Tap the <b>pencil</b> on the term's card, make your change, tap <b>Save</b>.</p>
+    <p>Anyone on the team can fix anything. Nothing is locked.</p>` },
+
+  { id:'secondlook', section:'change', k:'second look warning popup box message appeared check suggestion false friend', q:'A box appeared after I saved. What is it?', a:`
+    <p>It's called <b>A second look</b>, and it only shows up when there might be something worth checking — a false friend, a word that already exists under another domain, or wording a patient wouldn't use.</p>
+    <p><b>Your term is already saved.</b> The box cannot undo that and cannot change anything on its own.</p>
+    <ul>
+      <li>Tap <b>Looks right</b> if you're happy — you're the interpreter, it isn't.</li>
+      <li>Tap <b>Edit the term</b> if it caught something real.</li>
+    </ul>
+    <p>Most of the time you'll never see it.</p>` },
+
+  { id:'history', section:'change', k:'history previous version old undo revert restore who changed', q:'Can I see what a word said before someone changed it?', a:`
+    <p>Yes. The last ten versions of every term are kept.</p>
+    <ol>
+      <li>Tap the <b>pencil</b> on the term.</li>
+      <li>Tap <b>View edit history</b>.</li>
+      <li>You'll see who changed it and when. You can put an older version back.</li>
+    </ol>` },
+
+  { id:'deleted', section:'change', k:'delete deleted undo restore trash bin recover accident gone', q:'I deleted something by accident', a:`
+    <p>It isn't gone.</p>
+    <p>Right after deleting, a small black bar appears at the bottom with an <b>Undo</b> button. That's the fastest way back.</p>
+    <p>If you missed it, open <b>More</b> → <b>Recently deleted</b>. Everything stays there for 30 days.</p>` },
+
+  { id:'attach', section:'change', k:'attach attachment photo picture image pdf file document upload paperclip', q:'Can I attach a photo or a PDF to a word?', a:`
+    <p>Yes — a diagram, a consent form, a photo of a whiteboard.</p>
+    <p>Tap the <b>paperclip</b> on the term's card and pick the file. It appears on the card for everyone.</p>` },
+
+  { id:'chat', section:'team', k:'chat message text team talk send', q:'How do I message the team?', a:`
+    <p>Tap <b>Chat</b> at the bottom. Type and send, like any messaging app.</p>
+    <p>The <b>paperclip</b> sends a photo or a PDF.</p>` },
+
+  { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person&rsquo;s attention?', a:`
+    <ol>
+      <li>Type <b>@</b> in the message box.</li>
+      <li>A list of names appears — tap the one you want.</li>
+      <li>Finish your message and send.</li>
+    </ol>
+    <p>Their name shows up highlighted, and they get a notification.</p>` },
+
+  { id:'updates', section:'team', k:'bell notification updates activity feed what changed news', q:'What is the bell at the top of the screen?', a:`
+    <p>It tells you what your teammates have changed — terms added, terms edited, announcements posted.</p>
+    <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent updates</b>.</p>` },
+
+  { id:'docprep', section:'prep', k:'doctor prep prepare appointment unknown specialty research before', q:"I have an appointment with a doctor I don&rsquo;t know", a:`
+    <p>Use <b>Doctor Prep</b>, under <b>More</b>.</p>
+    <ol>
+      <li>Type the doctor's name.</li>
+      <li>Add the hospital if you know it — it makes the answer faster and more accurate.</li>
+      <li>Tap search and give it a moment.</li>
+    </ol>
+    <p>You get their specialty and a list of terminology likely to come up, grouped from the everyday words through to drug names and the false friends that catch people out.</p>` },
+
+  { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
+    <p>A shared list of every doctor your team has looked up, under <b>More</b>.</p>
+    <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
+
+  { id:'translate', section:'prep', k:'translate translation ai lookup unknown word', q:'What is Translate, and when should I not use it?', a:`
+    <p>It looks in your team's glossary first. If nothing's there, it gives you a breakdown: the clinical wording, a plain-language version for a patient, notes on how formal it sounds, how it changes by country, and a warning if it's a false friend.</p>
+    <p><b>Use it to prepare and to build the glossary.</b> It is a reference, not an interpreter, and it is never a substitute for you in the room.</p>` },
+
+  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification', q:'How do I practice for the CoreCHI exam?', a:`
+    <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>These are practice questions written for studying. They are not real exam questions.</p>` },
+
+  { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill', q:'What is Term Review?', a:`
+    <p>Flashcards built from your own glossary, under <b>More</b>.</p>
+    <p>You see the English, try to remember the Spanish and the definition, then tap to check and tell it honestly whether you got it. Words you miss come back soon; words you know come back weeks later. Fifteen at a time.</p>` },
+
+  { id:'offline', section:'trouble', k:'offline no signal wifi data connection basement elevator internet down airplane', q:'Can I use it where there is no signal?', a:`
+    <p><b>Looking things up — yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
+    <p><b>Adding or changing something — also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
+    <p>The one thing that needs a connection is anything that asks the internet a question: Translate and Doctor Prep.</p>` },
+
+  { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says &ldquo;Offline &mdash; 1 change waiting&rdquo;', a:`
+    <p>That's the app being honest with you. Your change is <b>saved on this phone</b> and is waiting for a connection.</p>
+    <p>You don't need to do anything. When you're back on wifi or data it sends by itself and the message disappears.</p>
+    <p><b>Please don't retype it</b> — you'd end up with two copies.</p>` },
+
+  { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version', q:'The app looks out of date', a:`
+    <p>Close it completely and open it again.</p>
+    <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>` },
+
+  { id:'noname', section:'trouble', k:'name missing anonymous someone unknown attribution blank', q:'My name is not showing on my edits', a:`
+    <p>The app doesn't know who you are yet on this phone.</p>
+    <p>Tap the round person button in the <b>bottom-left corner</b>, type your name, tap <b>Save</b>. Edits from now on will carry it.</p>` },
+
+  { id:'print', section:'out', k:'print pdf paper printout export sheet handout', q:'How do I print a list, or save it as a PDF?', a:`
+    <p>Open the domain you want, scroll to <b>Export PDF</b>, and tap it. You get a clean printable sheet with none of the app's buttons on it.</p>
+    <p>Handy for a new interpreter's first week, or for studying on paper.</p>` },
+
+  { id:'bulk', section:'out', k:'csv excel spreadsheet bulk many at once import export mass edit', q:'I need to change a lot of words at once', a:`
+    <ol>
+      <li>Tap <b>Export CSV</b>. That gives you a spreadsheet.</li>
+      <li>Edit it in Excel or Google Sheets.</li>
+      <li>Tap <b>Import CSV</b> and choose the file you edited.</li>
+    </ol>
+    <p>Before anything is saved you get a preview of exactly what will change. Nothing happens until you confirm.</p>` },
+
+  { id:'privacy', section:'rule', k:'hipaa privacy patient confidential phi private rules safety mrn', q:'What must never go in this app?', a:`
+    <p><b>Anything that identifies a patient.</b> No names, no dates of birth, no medical record numbers, no room numbers tied to a person.</p>
+    <p>This applies everywhere — terms, definitions, notes, chat messages, doctor notes. All of it.</p>
+    <p>Describe the situation if you need to. Never the person.</p>` },
+];
+
+// Shown first, for someone opening the app for the very first time.
+const GUIDE_FIRST_STEPS = ['name', 'install', 'around', 'search'];
 
 const DOMAIN_ICONS = {
   bag: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="15" width="17" height="9.5" rx="1.5" fill="var(--ic-fill)" opacity="0.6"/><rect x="3.4" y="11.4" width="25.2" height="13.4" rx="2.2" fill="none" stroke="var(--ic-line)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.8 11.4V9.4a1.8 1.8 0 0 1 1.8-1.8h4.8a1.8 1.8 0 0 1 1.8 1.8v2" fill="none" stroke="var(--ic-line)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.4 9.6h5.2" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11.8" cy="11.4" r="0.55" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20.2" cy="11.4" r="0.55" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.4 15.6h25.2" fill="none" stroke="var(--ic-line)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/><rect x="9.2" y="12.9" width="2.8" height="3.4" rx="0.5" fill="none" stroke="var(--ic-line)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/><rect x="20" y="12.9" width="2.8" height="3.4" rx="0.5" fill="none" stroke="var(--ic-line)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.6 13.9v1.4M21.4 13.9v1.4" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.05 17.4h1.9v1.8499999999999999h1.8499999999999999v1.9h1.8499999999999999v1.9h-1.8499999999999999v1.8499999999999999h-1.9v-1.8499999999999999h-1.8499999999999999v-1.9h1.8499999999999999Z" fill="none" stroke="var(--ic-line)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 21.6h2.8M6 19.4h1.6" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.6 24.8v1.2M25.4 24.8v1.2" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 16.4v6.4" fill="none" stroke="var(--ic-line)" stroke-width="0.85" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -8609,8 +8720,7 @@ function renderContent(){
 
   if(activeCategory === 'userguide'){
     content.innerHTML = renderUserGuide();
-    setupUserGuideSwipe();
-    if(guideIndex === USER_GUIDE_SLIDES.length - 1) celebrateScore('.user-guide-slide.is-cover');
+    setupGuideSearch();
     return;
   }
 
@@ -8988,7 +9098,9 @@ function setCategory(id, isBack){
     if(!isBack && !whoAmI()) openNameModal();
   }
   if(id === 'updates'){ markActivitySeen(); }
-  if(id === 'userguide'){ guideIndex = 0; }
+  // Arriving at the guide fresh: clear the last search so it opens on the
+  // full list rather than on whatever someone filtered to last time.
+  if(id === 'userguide' && guideOpenId === null) guideQuery = '';
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   if(id === 'doctor-directory' || id === 'doctors'){ loadDoctorDirectory(); }
   // Quiz history (up to 300 documents) and the spaced-repetition review state
@@ -9683,7 +9795,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1719';
+const BUILD_ID = 'b0912.1730';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -11803,13 +11915,6 @@ startActivityListener();
 startAnnouncementsListener();
 startTypingListener();
 
-// Arrow-key navigation for the User Guide, desktop-only convenience —
-// harmless everywhere else since it only acts while that screen is open.
-document.addEventListener('keydown', e=>{
-  if(activeCategory !== 'userguide') return;
-  if(e.key === 'ArrowRight') nextGuideSlide();
-  if(e.key === 'ArrowLeft') prevGuideSlide();
-});
 startCeListener();
 
 if(shouldShowOnboarding()){
