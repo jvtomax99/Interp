@@ -512,7 +512,7 @@
        .home-greeting-photo-inner   scroll parallax, written by JS.
        .home-greeting-photo-drift   the slow wander, a CSS animation. */
   .home-greeting-photo-inner{
-    position:absolute; inset:-16% 0;   /* headroom for the parallax */
+    position:absolute; inset:-28% 0;   /* headroom for the parallax */
     will-change:transform;
     transform:translate3d(0,0,0);      /* its own compositor layer */
   }
@@ -522,12 +522,19 @@
     will-change:transform;
     /* Starts already overscanned, so even at the near end of the cycle the
        image covers its frame and no edge can appear. `alternate` makes it
-       breathe back the way it came instead of snapping to the start. */
-    animation:heroDrift 48s ease-in-out infinite alternate;
+       breathe back the way it came instead of snapping to the start.
+
+       The overscan is what limits the travel: at scale S the image hangs over
+       each edge by (S-1)/2, so a translate beyond that would pull a corner
+       into view. At 1.10 that is 5% of headroom against a 3.5% translate, and
+       it only grows from there. The half-degree of rotation moves a corner by
+       under two pixels at this width — far inside the same margin — and is
+       what stops the motion reading as a machine sliding a picture around. */
+    animation:heroDrift 24s ease-in-out infinite alternate;
   }
   @keyframes heroDrift{
-    from{ transform:scale(1.05) translate3d(-1.4%, -1%, 0); }
-    to{   transform:scale(1.10) translate3d(1.4%, 1%, 0); }
+    from{ transform:scale(1.10) translate3d(-3.5%, -2.5%, 0) rotate(-0.5deg); }
+    to{   transform:scale(1.20) translate3d(3.5%, 2.5%, 0) rotate(0.5deg); }
   }
   /* Nothing to animate for a backgrounded tab — this is the compositor's
      time and the phone's battery. */
@@ -537,7 +544,7 @@
      both the parallax and the wander. */
   @media (prefers-reduced-motion: reduce){
     .home-greeting-photo-inner{ transform:none !important; }
-    .home-greeting-photo-drift{ animation:none !important; transform:scale(1.05); }
+    .home-greeting-photo-drift{ animation:none !important; transform:scale(1.10); }
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
@@ -8880,8 +8887,8 @@ let lastPaintedContentEl = null;
 
    Capped at HERO_DRIFT_MAX so the image can never travel past the headroom
    its inner layer has, which would show an edge. */
-const HERO_DRIFT_RATE = 0.34;   // fraction of scroll distance
-const HERO_DRIFT_MAX = 34;      // px; inner layer has ~16% of 232px to give
+const HERO_DRIFT_RATE = 0.5;    // fraction of scroll distance
+const HERO_DRIFT_MAX = 52;      // px; inner layer has ~28% of 232px to give
 let heroPhotoEl = null;
 let heroDriftFrame = null;
 let heroMotionOff = null;
@@ -10047,7 +10054,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1757';
+const BUILD_ID = 'b0912.1805';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
