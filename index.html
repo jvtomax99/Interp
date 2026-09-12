@@ -9683,7 +9683,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1702';
+const BUILD_ID = 'b0912.1719';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -11075,7 +11075,17 @@ async function saveTerm(){
   // Deliberately not awaited: the save is done and the modal is closed. If the
   // check has something to say it appears a moment later; if it has nothing,
   // or cannot run, nothing happens at all.
-  runTermCheck(record, targetCatName);
+  //
+  // Only when the English or the Spanish actually moved. Editing a definition,
+  // a source, a note, or moving a term to another domain cannot change whether
+  // its Spanish is a false friend or whether it duplicates something — and
+  // re-running the check on an unchanged rendering was the single largest
+  // avoidable cost in this feature. Compared raw rather than folded, so even
+  // fixing an accent counts as a change worth re-reading.
+  const textChanged = !existingTerm ||
+    (existingTerm.en || '') !== en ||
+    (existingTerm.es || '') !== es;
+  if(textChanged) runTermCheck(record, targetCatName);
 }
 
 /* ============ Term check — a second look after saving ============
@@ -11093,6 +11103,14 @@ async function saveTerm(){
    same concept — which is the part the model is actually for. ============ */
 
 let termCheckContext = null;
+
+/* Candidates are roughly a third of what this feature sends, so these two
+   numbers are most of its running cost. They were 0.5 and 10, which sent a
+   long tail of pairs that share one common word and are never the same
+   concept — the model dutifully read them and said nothing. Tightened to the
+   band where a real duplicate actually lives. */
+const CANDIDATE_MIN_SCORE = 0.62;
+const CANDIDATE_LIMIT = 5;
 
 // Cheap similarity on folded text: exact, containment, then shared words.
 // Good enough to nominate candidates; the model makes the real judgement.
@@ -11119,10 +11137,10 @@ function findDuplicateCandidates(term){
         termSimilarity(en, foldText(t.en)),
         es ? termSimilarity(es, foldText(t.es)) : 0
       );
-      if(score >= 0.5) scored.push({ score, id: t.id, en: t.en, es: t.es || '', domain: cat.name });
+      if(score >= CANDIDATE_MIN_SCORE) scored.push({ score, id: t.id, en: t.en, es: t.es || '', domain: cat.name });
     });
   });
-  return scored.sort((a, b) => b.score - a.score).slice(0, 10)
+  return scored.sort((a, b) => b.score - a.score).slice(0, CANDIDATE_LIMIT)
     .map(({ id, en, es, domain }) => ({ id, en, es, domain }));
 }
 

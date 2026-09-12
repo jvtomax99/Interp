@@ -36,7 +36,7 @@ const MODEL = 'claude-opus-5';
 const EFFORT = 'low';
 
 const MAX_FIELD = 600;      // guards against oversized or abusive requests
-const MAX_CANDIDATES = 10;
+const MAX_CANDIDATES = 5;   // matches CANDIDATE_LIMIT in the client
 
 const FINDING_TYPES = [
   'false_friend',   // the Spanish looks right but means something else
