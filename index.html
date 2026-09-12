@@ -2249,6 +2249,42 @@
      than on another screen. ---------- */
   .user-guide{ max-width:660px; margin:0 auto; }
 
+  /* Install card — first thing on the guide, and impossible to miss. */
+  .guide-install{
+    background:linear-gradient(150deg, #0079BD, #252E6D);
+    border-radius:18px; padding:20px 18px; margin-bottom:26px; color:#fff;
+    box-shadow:0 12px 28px -14px rgba(37,46,109,0.75);
+  }
+  .guide-install-top{ display:flex; gap:13px; align-items:flex-start; }
+  .guide-install-badge{
+    width:40px; height:40px; border-radius:12px; flex-shrink:0;
+    background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center;
+  }
+  .guide-install-badge svg{ width:21px; height:21px; color:#fff; }
+  .guide-install h3{
+    font-family:var(--sans); font-size:17px; font-weight:700; margin:0 0 5px 0; color:#fff;
+  }
+  .guide-install-top p{
+    font-size:13.5px; line-height:1.55; margin:0; color:rgba(255,255,255,0.9);
+  }
+  .guide-install-tabs{ display:flex; gap:8px; margin:16px 0 14px 0; }
+  .guide-install-tabs button{
+    flex:1; font-family:var(--sans); font-size:13.5px; font-weight:650; cursor:pointer;
+    padding:10px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.32);
+    background:none; color:rgba(255,255,255,0.85);
+  }
+  .guide-install-tabs button.is-on{ background:#fff; color:#252E6D; border-color:#fff; }
+  .guide-install-steps{
+    margin:0; padding-left:22px; font-size:14px; line-height:1.6; color:#fff;
+  }
+  .guide-install-steps li{ margin-bottom:10px; }
+  .guide-install-steps li:last-child{ margin-bottom:0; }
+  .guide-install-steps b{ font-weight:700; }
+  .guide-install-foot{
+    font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.75); margin:14px 0 0 0;
+  }
+  .guide-search-clear.is-hidden{ display:none; }
+
   .guide-head h2{
     font-family:var(--serif); font-size:26px; font-weight:400; color:var(--ink); margin:0 0 6px 0;
   }
@@ -7693,22 +7729,84 @@ function guideTopicCard(t, sectionColor){
     </div>`;
 }
 
-function renderUserGuide(){
+/* ---- Installing on a phone ----
+   First thing on the guide, and deliberately not behind a tap: it is the one
+   instruction someone needs before they can follow any of the others, and the
+   person who needs it is the least likely to go looking. It shows the steps
+   for the phone they are actually holding, and disappears entirely once the
+   app is installed, so it never becomes furniture. */
+
+let guideInstallPlatform = null;   // null = detect it
+
+function appIsInstalled(){
+  try{
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true;
+  }catch(err){ return false; }
+}
+
+function detectPhonePlatform(){
+  const ua = navigator.userAgent || '';
+  if(/iPad|iPhone|iPod/.test(ua)) return 'ios';
+  if(/Android/i.test(ua)) return 'android';
+  return 'other';
+}
+
+function setGuidePlatform(p){
+  guideInstallPlatform = p;
+  renderContent();
+}
+
+const GUIDE_INSTALL_STEPS = {
+  ios: [
+    'Open this page in <b>Safari</b> (not Chrome — only Safari can do this on an iPhone).',
+    'Tap the <b>Share</b> button at the bottom of the screen — the square with an arrow pointing up out of it.',
+    'Scroll down the list and tap <b>Add to Home Screen</b>.',
+    'Tap <b>Add</b> in the top-right corner.',
+  ],
+  android: [
+    'Open this page in <b>Chrome</b>.',
+    'Tap the <b>three dots</b> in the top-right corner.',
+    'Tap <b>Install app</b>, or <b>Add to Home screen</b> if you don\u2019t see that.',
+    'Tap <b>Install</b> to confirm.',
+  ],
+};
+
+function renderGuideInstall(){
+  if(appIsInstalled()) return '';
+  const detected = detectPhonePlatform();
+  const platform = guideInstallPlatform || (detected === 'other' ? 'ios' : detected);
+  const steps = GUIDE_INSTALL_STEPS[platform] || GUIDE_INSTALL_STEPS.ios;
+  return `
+    <div class="guide-install">
+      <div class="guide-install-top">
+        <span class="guide-install-badge">${ICON_PHONE}</span>
+        <div>
+          <h3>Put this on your phone first</h3>
+          <p>It takes about ten seconds. Afterwards it opens full screen with its own icon, like any other app &mdash; and it keeps working where there&rsquo;s no signal.</p>
+        </div>
+      </div>
+      <div class="guide-install-tabs">
+        <button class="${platform === 'ios' ? 'is-on' : ''}" onclick="setGuidePlatform('ios')">iPhone</button>
+        <button class="${platform === 'android' ? 'is-on' : ''}" onclick="setGuidePlatform('android')">Android</button>
+      </div>
+      <ol class="guide-install-steps">
+        ${steps.map(t => `<li>${t}</li>`).join('')}
+      </ol>
+      <p class="guide-install-foot">${detected === 'other'
+        ? 'You look like you&rsquo;re on a computer right now &mdash; do this on your phone when you have it to hand.'
+        : 'Done it already? This box disappears once the app is installed.'}</p>
+    </div>`;
+}
+
+/* The list is rendered on its own, separately from the shell, so the search
+   box is never rebuilt while someone is typing in it. Replacing the whole
+   screen on each keystroke destroyed the field, which on a phone closes the
+   keyboard mid-word. */
+function renderGuideList(){
   const matches = matchingGuideTopics();
   const searching = !!guideQuery.trim();
-
-  let html = `
-    <div class="user-guide" id="userGuideRoot">
-      <div class="guide-head">
-        <h2>How do I&hellip;</h2>
-        <p>Tap a question to see the answer. Nothing here can break anything &mdash; have a look around.</p>
-      </div>
-      <div class="guide-search">
-        ${ICON_SEARCH}
-        <input id="guideSearchInput" type="text" placeholder="Type what you need help with&hellip;"
-               value="${escapeAttr(guideQuery)}" autocomplete="off">
-        ${searching ? `<button class="guide-search-clear" onclick="clearGuideSearch()" aria-label="Clear">&#10005;</button>` : ''}
-      </div>`;
+  let html = '';
 
   if(!searching){
     const first = GUIDE_FIRST_STEPS.map(id => GUIDE_TOPICS.find(t => t.id === id)).filter(Boolean);
@@ -7744,28 +7842,54 @@ function renderUserGuide(){
   });
 
   html += `
-      <p class="guide-foot">Still stuck? Ask in <b>Team Chat</b> &mdash; and if the answer was useful, it probably belongs in here. Tell Jose.</p>
-    </div>`;
+    <p class="guide-foot">Still stuck? Ask in <b>Team Chat</b> &mdash; and if the answer was useful, it probably belongs in here. Tell Jose.</p>`;
   return html;
 }
 
-/* The guide's own search box. Same shape as the glossary search: the value is
-   stored on every keystroke so nothing typed is lost, and the redraw waits for
-   a short pause. */
+function renderUserGuide(){
+  return `
+    <div class="user-guide" id="userGuideRoot">
+      ${renderGuideInstall()}
+      <div class="guide-head">
+        <h2>How do I&hellip;</h2>
+        <p>Tap a question to see the answer. Nothing here can break anything &mdash; have a look around.</p>
+      </div>
+      <div class="guide-search">
+        ${ICON_SEARCH}
+        <input id="guideSearchInput" type="text" placeholder="Type what you need help with&hellip;"
+               value="${escapeAttr(guideQuery)}" autocomplete="off">
+        <button class="guide-search-clear ${guideQuery.trim() ? '' : 'is-hidden'}" id="guideSearchClear"
+                onclick="clearGuideSearch()" aria-label="Clear">&#10005;</button>
+      </div>
+      <div id="guideList">${renderGuideList()}</div>
+    </div>`;
+}
+
+/* Updates ONLY the list. The input keeps its identity, its focus and the
+   keyboard. */
 let guideSearchTimer = null;
+function refreshGuideList(){
+  const list = document.getElementById('guideList');
+  if(list) list.innerHTML = renderGuideList();
+  const clear = document.getElementById('guideSearchClear');
+  if(clear) clear.classList.toggle('is-hidden', !guideQuery.trim());
+}
+
 function setupGuideSearch(){
   const input = document.getElementById('guideSearchInput');
   if(!input) return;
   input.addEventListener('input', (e)=>{
     guideQuery = e.target.value;
     clearTimeout(guideSearchTimer);
-    guideSearchTimer = setTimeout(()=>{ guideSearchTimer = null; renderContent(); }, 140);
+    guideSearchTimer = setTimeout(()=>{ guideSearchTimer = null; refreshGuideList(); }, 140);
   });
 }
 
 function clearGuideSearch(){
   guideQuery = '';
-  renderContent();
+  const input = document.getElementById('guideSearchInput');
+  if(input) input.value = '';
+  refreshGuideList();
 }
 
 function renderReview(){
@@ -8263,8 +8387,36 @@ function ensureLoaded(key, loader){
 
 let renderTimer = null;
 let renderPendingSince = 0;
+let renderDeferredByTyping = false;
 const RENDER_SETTLE_MS = 250;   // collapse a burst of arrivals into one paint
 const RENDER_MAX_WAIT_MS = 900; // ...but never hold an update longer than this
+
+/* render() rebuilds #app wholesale, which destroys every field inside it —
+   including the one someone is typing in. On a phone that closes the keyboard
+   mid-word, and anything already typed is gone with it: a half-written chat
+   message to a colleague, a search you were part-way through.
+
+   It happens because the app is live. A teammate posts, a term syncs, a
+   loader finishes — each schedules a render, and if it lands between two
+   keystrokes the field is thrown away. */
+function isTypingInApp(){
+  const el = document.activeElement;
+  if(!el) return false;
+  const tag = el.tagName;
+  if(tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
+  if(el.disabled || el.readOnly) return false;
+  // Checkboxes and radios hold no typed text and can't lose anything.
+  return !['checkbox','radio','button','submit','range','file'].includes(el.type);
+}
+
+/* Flush as soon as the field is released. Capture phase, because focusout
+   does not bubble the way we need on every browser. */
+document.addEventListener('focusout', ()=>{
+  if(renderDeferredByTyping){
+    renderDeferredByTyping = false;
+    scheduleRender();
+  }
+}, true);
 
 function scheduleRender(){
   const now = Date.now();
@@ -8281,6 +8433,14 @@ function scheduleRender(){
   const delay = Math.max(0, Math.min(RENDER_SETTLE_MS, RENDER_MAX_WAIT_MS - waited));
   renderTimer = setTimeout(()=>{
     renderTimer = null;
+    // Still typing: hold the update. Nothing is lost — the listeners have
+    // already applied the new data, this only delays repainting it — and the
+    // focusout handler above runs it the moment the field is released.
+    if(isTypingInApp()){
+      renderDeferredByTyping = true;
+      renderPendingSince = 0;
+      return;
+    }
     renderPendingSince = 0;
     render();
   }, delay);
@@ -9795,7 +9955,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1730';
+const BUILD_ID = 'b0912.1746';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
