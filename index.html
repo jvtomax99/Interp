@@ -544,6 +544,103 @@
      time and the phone's battery. */
   .home-greeting-photo-drift.is-paused{ animation-play-state:paused; }
 
+  /* ---------- The hero, graded to the light outside ----------
+     Four looks on the device's clock. Each is a filter on the photo plus a
+     coloured wash above it, and every one is meant to stand on its own — a
+     day shift must not get the boring one just because the sunset is the
+     showy one.
+
+     soft-light rather than a flat overlay: it tints the midtones and leaves
+     the brick and the sky reading as themselves, instead of dropping a sheet
+     of colour over the whole picture.
+
+     The wash sits INSIDE the photo element, so the dome mask clips it to
+     exactly the same shape — no second edge to line up. */
+  /* Two washes, because one is not enough. soft-light tints the midtones and
+     leans on whatever is underneath — lovely on brick, nearly invisible
+     against bright sky. So a second, plainly-blended layer carries the actual
+     colour of the hour on top of it. Together they hold up over both. */
+  .home-greeting-photo::after,
+  .home-greeting-photo::before{
+    content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+    transition:background 1.4s var(--ease), opacity 1.4s var(--ease);
+  }
+  .home-greeting-photo::after{ mix-blend-mode:soft-light; }
+  .home-greeting-photo::before{ z-index:2; }
+  .home-greeting-photo-drift{ transition:filter 1.4s var(--ease); }
+
+  /* Each hour grades the photo itself as well as washing it, because an
+     overlay alone cannot change what is already in the picture — a bright
+     blue sky stays a bright blue sky under any amount of amber.
+
+     Warming is done with sepia() and NOT with hue-rotate() on the original.
+     Rotating a blue sky sends it toward cyan: the first attempt at dusk came
+     out seasick green for exactly that reason. sepia() collapses everything
+     to one amber hue first, so the rotate that follows is tuning an amber,
+     which cannot land on green. */
+
+  /* Dawn — first light: hazy, lifted, a rose flush. The read against `day`
+     is low contrast and lifted blacks, not just a different tint, because a
+     tint alone is invisible next to midday. */
+  .tod-dawn .home-greeting-photo-drift{
+    filter:contrast(0.94) sepia(0.34) saturate(1.34) hue-rotate(-18deg) brightness(1.07);
+  }
+  .tod-dawn .home-greeting-photo::after{
+    background:
+      radial-gradient(105% 80% at 76% 6%, rgba(255,186,170,0.78), transparent 62%),
+      linear-gradient(198deg, rgba(146,104,178,0.46), rgba(26,36,70,0.22) 74%);
+  }
+  .tod-dawn .home-greeting-photo::before{
+    background:
+      radial-gradient(88% 66% at 80% 2%, rgba(255,172,152,0.30), transparent 64%),
+      linear-gradient(180deg, rgba(236,226,238,0.20), rgba(206,196,222,0.07) 46%, transparent 72%);
+  }
+
+  /* Day — clear and cool, the sky doing the work. The lightest hand of the
+     four: midday should look like the photograph, not like a grade. */
+  .tod-day .home-greeting-photo-drift{ filter:contrast(1.18) saturate(1.24) brightness(1.03); }
+  .tod-day .home-greeting-photo::after{
+    background:
+      radial-gradient(115% 85% at 62% 2%, rgba(152,220,255,0.55), transparent 64%),
+      linear-gradient(195deg, rgba(0,96,164,0.28), rgba(8,20,42,0.20) 76%);
+  }
+  .tod-day .home-greeting-photo::before{
+    background:radial-gradient(90% 60% at 58% 0%, rgba(128,206,255,0.16), transparent 66%);
+  }
+
+  /* Dusk — the warm one, and the whole reason Jose picked this treatment.
+     sepia is pushed high enough to actually take the blue out of the sky;
+     anything less leaves blue and amber to average into grey. */
+  .tod-dusk .home-greeting-photo-drift{
+    filter:contrast(1.12) sepia(0.80) saturate(1.80) hue-rotate(-14deg) brightness(0.95);
+  }
+  .tod-dusk .home-greeting-photo::after{
+    background:
+      radial-gradient(105% 82% at 84% 6%, rgba(255,158,74,0.88), transparent 62%),
+      linear-gradient(203deg, rgba(112,44,120,0.58), rgba(18,18,52,0.36) 70%);
+  }
+  .tod-dusk .home-greeting-photo::before{
+    background:
+      radial-gradient(88% 72% at 88% 2%, rgba(255,140,52,0.40), transparent 62%),
+      linear-gradient(205deg, rgba(142,58,104,0.26), rgba(20,20,58,0.12) 64%);
+  }
+
+  /* Night — deep indigo, lit windows still reading. */
+  .tod-night .home-greeting-photo-drift{ filter:contrast(1.26) saturate(0.82) brightness(0.62); }
+  .tod-night .home-greeting-photo::after{
+    background:
+      radial-gradient(115% 85% at 68% 4%, rgba(86,138,240,0.55), transparent 60%),
+      linear-gradient(200deg, rgba(16,24,74,0.72), rgba(4,8,24,0.56) 72%);
+  }
+  .tod-night .home-greeting-photo::before{
+    background:linear-gradient(200deg, rgba(12,20,62,0.44), rgba(4,8,26,0.30) 70%);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .home-greeting-photo::after, .home-greeting-photo::before,
+    .home-greeting-photo-drift{ transition:none; }
+  }
+
   /* Someone who has asked for less motion gets the picture, held still —
      both the parallax and the wander. */
   @media (prefers-reduced-motion: reduce){
@@ -8816,7 +8913,7 @@ window.addEventListener('offline', ()=> updateSyncStatus(false));
 // A tab resumed from the background may have missed the 'online' event
 // entirely — iOS suspends rather than reloads an installed PWA.
 document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState === 'visible') flushOutbox();
+  if(document.visibilityState === 'visible'){ flushOutbox(); syncTimeOfDay(); }
   // The banner's slow wander keeps the compositor awake, so stop it whenever
   // nobody is looking. The app sits open on Home between assignments.
   const drift = document.querySelector('.home-greeting-photo-drift');
@@ -9934,7 +10031,21 @@ function refreshRelativeTimes(){
     if(ts) el.textContent = relativeTime(ts);
   });
 }
+/* The app sits open through whole shifts, so the grade has to follow the
+   clock rather than only the last render. Swapping one class is far cheaper
+   than a render, and it crosses fade-in-fade-out because the overlay
+   transitions. */
+function syncTimeOfDay(){
+  const el = document.getElementById('homeGreeting');
+  if(!el) return;
+  const want = 'tod-' + timeOfDayPeriod();
+  if(el.classList.contains(want)) return;
+  ['tod-dawn','tod-day','tod-dusk','tod-night'].forEach(c => el.classList.remove(c));
+  el.classList.add(want);
+}
+
 setInterval(refreshRelativeTimes, 30000); // one timer for the whole app
+setInterval(syncTimeOfDay, 60000);        // and one for the light outside
 
 /* Counts the dashboard stats up from zero on entry. Uses requestAnimationFrame
    with an eased curve so it decelerates rather than ticking linearly. */
@@ -10058,9 +10169,27 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1812';
+const BUILD_ID = 'b0912.1828';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
+
+/* The hero photo is graded to the light outside, on the device's own clock.
+
+   Four periods rather than the greeting's three, because light does not work
+   in three: "Good evening" covers sunset through the small hours, and 8pm and
+   2am look nothing alike. They are derived here, in one place, so the words
+   and the colour can never be computed from different rules and disagree.
+
+   A night interpreter at 2am is greeted "Good morning" and sees the night
+   grade, which is correct on both counts — that is the greeting for their
+   shift, and it is genuinely dark outside. */
+function timeOfDayPeriod(when){
+  const h = (when || new Date()).getHours();
+  if(h >= 5 && h < 8)  return 'dawn';
+  if(h >= 8 && h < 17) return 'day';
+  if(h >= 17 && h < 21) return 'dusk';
+  return 'night';
+}
 
 // Local-clock greeting — uses the device's own time, so an interpreter on a
 // night shift gets "Good evening" rather than whatever the server thinks.
@@ -10321,7 +10450,7 @@ function renderHome(){
   const tip = SESSION_TIP;
 
   return `
-    <div class="home-greeting">
+    <div class="home-greeting tod-${timeOfDayPeriod()}" id="homeGreeting">
       <div class="home-greeting-photo"><div class="home-greeting-photo-inner"><div class="home-greeting-photo-drift"></div></div></div>
       <div class="home-greeting-scrim"></div>
       <div class="home-greeting-text">
