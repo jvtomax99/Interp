@@ -32,10 +32,20 @@ export const config = {
   maxDuration: 60,
 };
 
-const MODEL = 'claude-opus-5';
+/* Sonnet rather than Opus, deliberately. The hard judgment in this endpoint
+ * is not the model's — it is the allowlist below, which decides what counts
+ * as a source worth an interpreter's time. What is left for the model is
+ * "find the page about this concept and say which sense it covers", and
+ * Sonnet does that well at roughly 40% of the cost.
+ *
+ * Sonnet 5 at two searches works out around $0.04 a lookup against $0.09 on
+ * Opus, and each term is only paid for once per 90 days for the whole team.
+ * If results start coming back thin, raise EFFORT before reaching for a
+ * bigger model — that is the cheaper knob and usually the right one. */
+const MODEL = 'claude-sonnet-5';
 
 // A short pass: find pages, judge whether they match the sense the glossary
-// means, stop. If results come back thin, raise this before changing model.
+// means, stop.
 const EFFORT = 'low';
 
 const MAX_FIELD = 600;
