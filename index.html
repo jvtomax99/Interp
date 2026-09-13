@@ -3553,7 +3553,7 @@
     .home-sec-head h3{ font-size:18px; line-height:1.35; }
     .home-sec-more{ font-size:12px; padding:7px 10px; }
     .domain-family, .home-rail > .qa-card{ border-radius:17px; }
-    .domain-family-head, .home-rail > .qa-card{ min-height:141px; padding:14px; gap:10px; }
+    .domain-family-head, .home-rail > .qa-card{ min-height:126px; padding:14px; gap:9px; }
     .home-tile-icon, .qa-icon{ width:34px; height:34px; border-radius:11px; }
     .home-tile-icon svg, .qa-icon svg{ width:25px; height:25px; }
     .qa-tile{ min-height:87px; border-radius:16px; padding:11px 3px; gap:8px; }
@@ -3640,14 +3640,24 @@
      domains off the right edge — on a phone you could see two and a sliver.
      As a grid every domain is on screen and scanning is vertical, the same
      direction as the rest of the page. */
-  .home-rail{
-    grid-auto-flow:row; grid-auto-columns:auto;
-    grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
-    align-items:stretch; gap:13px;
-    overflow:visible; margin:0; padding:0; scroll-snap-type:none;
-  }
-  @media (max-width:760px){
-    .home-rail{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+  /* On a wide screen the domains lay out as a grid, which is where this
+     finish was designed and where there is room for it.
+
+     On a phone they stay the side-scrolling rail they have always been, and
+     that is deliberate rather than unfinished. Stacked two-across, twenty
+     domains make the terminology section ten rows tall, which pushed Doctors
+     3.3 screenfuls down the page and Tools past five. A rail keeps every
+     section one card tall, so the four section headings stay within reach of
+     a thumb and swiping sideways is how you go deeper into one of them. The
+     base rules above already describe that rail; this only needs to take
+     over at the wide end. */
+  @media (min-width:820px){
+    .home-rail{
+      grid-auto-flow:row; grid-auto-columns:auto;
+      grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+      align-items:stretch; gap:13px;
+      overflow:visible; margin:0; padding:0; scroll-snap-type:none;
+    }
   }
 
   /* Subgroups used to be a chip strip that scrolled sideways inside the card.
@@ -3676,10 +3686,22 @@
   .family-disclosure[open]{ background:color-mix(in srgb, var(--tile-color) 7%, var(--paper)); }
 
   /* One subgroup per row, full width, so long names read straight instead of
-     being truncated into a chip. */
+     being truncated into a chip.
+
+     display lives on the [open] rule, not here. Setting it unconditionally
+     overrides the browser's own hiding of a closed <details>, which left the
+     list permanently on screen with a summary above it claiming to expand it. */
   .domain-family-kids{
-    display:flex; flex-direction:column; gap:3px;
-    padding:0 8px 9px; margin-top:0; overflow:visible;
+    gap:3px; padding:0 8px 9px; margin-top:0; overflow:visible;
+  }
+  /* The original chip-strip rule further up also sets display:flex on this
+     element, and that alone is enough to defeat the browser's hiding of a
+     closed <details>. So the collapsed state is stated explicitly rather than
+     left to the user agent — and only in the grid range, since on a phone
+     these are meant to show while the details stays shut. */
+  @media (min-width:820px){
+    .family-disclosure:not([open]) > .domain-family-kids{ display:none; }
+    .family-disclosure[open] > .domain-family-kids{ display:flex; flex-direction:column; }
   }
   .domain-family-kid{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
@@ -3700,10 +3722,43 @@
     color:var(--ink-soft); font-variant-numeric:tabular-nums;
   }
 
-  /* Names are no longer clamped to one line — in a grid there is room for a
-     domain to say its whole name. */
-  .home-tile-name, .qa-title, .qa-tile-label{
-    white-space:normal; overflow:visible; -webkit-line-clamp:unset;
+  /* In the phone rail, subgroups go back to being the one-line chip strip they
+     were before. The disclosure is a grid idea: every card in a rail row
+     shares the tallest card's height, so opening one list stretched the whole
+     section and left its neighbours as tall empty boxes. The original code
+     had a comment about exactly this — uniform height is only affordable
+     because the chips are one line.
+
+     The <details> element stays in the markup either way, so there is one
+     shape of HTML to reason about; on a phone its summary is hidden and its
+     contents are shown regardless of the open state. */
+  @media (max-width:819px){
+    .family-disclosure{ border-top:none; background:transparent; }
+    .family-disclosure summary{ display:none; }
+    .family-disclosure > .domain-family-kids,
+    .family-disclosure[open] > .domain-family-kids{
+      display:flex; flex-direction:row; gap:5px; margin-top:-2px;
+      padding:0 12px 12px 12px;
+      overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
+    }
+    .family-disclosure > .domain-family-kids::-webkit-scrollbar{ display:none; }
+    .domain-family-kid{
+      display:inline-flex; width:auto; flex-shrink:0; gap:5px;
+      white-space:nowrap; border-radius:999px; border:none;
+      background:color-mix(in srgb, var(--tile-color) 12%, var(--paper));
+      padding:6px 10px; font-size:12px; font-weight:600; min-height:0;
+    }
+    .domain-family-kid span{ font-size:10.5px; padding:0; background:none; }
+  }
+
+  /* Names are no longer clamped — but only in the grid, where there is room
+     for a domain to say its whole name. In the phone rail a card is ~176px
+     wide and every card in a row shares the tallest one's height, so one
+     wrapped name there would grow the entire section. */
+  @media (min-width:820px){
+    .home-tile-name, .qa-title, .qa-tile-label{
+      white-space:normal; overflow:visible; -webkit-line-clamp:unset;
+    }
   }
 
   /* ---------- The desktop sidebar ---------- */
@@ -10599,7 +10654,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1408';
+const BUILD_ID = 'b0913.1423';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
