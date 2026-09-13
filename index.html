@@ -3735,6 +3735,15 @@
      and 40, which is a miss every so often for someone working one-handed. */
   .btn, .side-row, .home-sec-more, .domain-family-kid,
   .family-disclosure summary, .tabbar-btn{ min-height:44px; }
+  /* Only on a device actually driven by a thumb — a mouse pointer is precise,
+     and widening these on the desktop would just coarsen the layout. The swap
+     button keeps its square shape, so it grows in both directions; there is
+     room, since the two language dropdowns still only need half a row each
+     for "Portuguese", the longest name in the list. */
+  @media (max-width:900px), (pointer: coarse){
+    .tr-swap{ width:44px; height:44px; }
+    .quiz-setup select, .tr-row select, .tr-row input[type=text]{ min-height:44px; }
+  }
 
   /* A visible focus ring for anyone driving the app from a keyboard. */
   button:focus-visible, a:focus-visible, summary:focus-visible, [tabindex]:focus-visible{
