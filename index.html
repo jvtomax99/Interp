@@ -3835,6 +3835,90 @@
     .folder-overlay.show .folder-panel{ transform:none; }
   }
 
+  /* ---------- The term lookup sheet ---------- */
+  .lookup-overlay{
+    background:rgba(12,22,38,0.42);
+    backdrop-filter:blur(14px) saturate(130%);
+    -webkit-backdrop-filter:blur(14px) saturate(130%);
+    align-items:center; padding:24px 18px;
+  }
+  .lookup-overlay .lookup-panel{
+    width:min(560px, 100%); max-width:100%; padding:20px;
+    border-radius:26px; background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), 0 30px 80px rgba(10,26,54,0.38);
+    max-height:100%; overflow-y:auto; overscroll-behavior:contain;
+  }
+  .lookup-head{ display:flex; align-items:flex-start; gap:12px; margin-bottom:16px; }
+  .lookup-titles{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+  .lookup-head h3{
+    margin:0; font-family:var(--sans); font-size:19px; font-weight:650;
+    letter-spacing:-0.02em; color:var(--ink); line-height:1.25;
+  }
+  .lookup-sub{ font-size:12.5px; color:var(--ink-soft); }
+
+  .lookup-loading{
+    display:flex; align-items:center; gap:11px; padding:26px 4px;
+    font-size:14px; color:var(--ink-soft);
+  }
+  .lookup-spinner{
+    width:17px; height:17px; flex-shrink:0; border-radius:50%;
+    border:2px solid var(--line); border-top-color:var(--accent);
+    animation:lookupSpin .7s linear infinite;
+  }
+  @keyframes lookupSpin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion:reduce){ .lookup-spinner{ animation-duration:2s; } }
+
+  .lookup-note{ font-size:13px; color:var(--ink-soft); line-height:1.55; margin:0 0 12px; }
+  .lookup-grid{ display:flex; flex-direction:column; gap:9px; }
+  .lookup-card{
+    position:relative; display:flex; flex-direction:column; gap:5px;
+    padding:14px 40px 14px 14px; border-radius:14px; text-decoration:none;
+    border:1px solid var(--line); background:var(--bg-hi);
+    transition:border-color .15s var(--ease), background .15s var(--ease), transform .15s var(--ease);
+  }
+  @media (hover:hover){
+    .lookup-card:hover{ border-color:var(--accent-2); background:var(--paper); transform:translateY(-1px); }
+  }
+  .lookup-card:active{ transform:scale(0.995); }
+  .lookup-card-top{ display:flex; align-items:center; gap:7px; }
+  .lookup-site{
+    font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;
+    color:var(--accent);
+  }
+  /* Spanish is marked because it is the reason an interpreter opens this at
+     all — the page the patient's family will actually be able to read. */
+  .lookup-lang{
+    font-size:10.5px; font-weight:700; letter-spacing:0.03em;
+    padding:2px 7px; border-radius:999px;
+    background:var(--accent-soft); color:var(--accent-2);
+  }
+  .lookup-card-title{ font-size:15px; font-weight:600; color:var(--ink); line-height:1.35; }
+  .lookup-why{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; }
+  .lookup-go{
+    position:absolute; top:14px; right:13px; display:flex;
+    color:var(--ink-faint);
+  }
+  .lookup-go svg{ width:15px; height:15px; }
+  .lookup-foot{
+    font-size:11.5px; color:var(--ink-faint); line-height:1.55;
+    margin:14px 0 0; padding-top:12px; border-top:1px solid var(--line-soft);
+  }
+
+  .lookup-empty{ padding:8px 2px 4px; }
+  .lookup-empty-title{ font-size:15px; font-weight:650; color:var(--ink); margin-bottom:6px; }
+  .lookup-empty p{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; margin:0 0 14px; }
+  .lookup-fallback{
+    display:inline-flex; align-items:center; gap:7px; min-height:44px;
+    padding:10px 15px; border-radius:11px; text-decoration:none;
+    font-size:14px; font-weight:600; color:var(--accent);
+    background:var(--accent-soft);
+  }
+  .lookup-fallback svg{ width:14px; height:14px; }
+
+  /* The pill is a button now rather than a link, so it needs the link-pill
+     look explicitly — a bare <button> inherits none of it. */
+  button.link-pill{ border:none; cursor:pointer; font-family:inherit; }
+
   /* ---------- Reachability ---------- */
   /* Apple's minimum comfortable touch target is 44px. These were between 36
      and 40, which is a miss every so often for someone working one-handed. */
@@ -3860,6 +3944,13 @@
   [tabindex]:not([tabindex="-1"]):focus-visible{
     outline:3px solid var(--accent-2); outline-offset:3px;
   }
+  /* Excluding tabindex="-1" above stops OUR ring being drawn, but the browser
+     draws its own on a focused element regardless — a 1px amber outline
+     around the whole dialog every time one opened. These containers are only
+     ever focused from script, never reached by Tab, and the focus trap keeps
+     a keyboard user among the controls inside, each of which still shows a
+     ring. So the container's own outline is suppressed. */
+  [tabindex="-1"]:focus{ outline:none; }
 
   /* iOS Safari force-zooms the page whenever a focused input has a font size
      below 16px, and never zooms back out — the screen stays enlarged and
@@ -4173,6 +4264,21 @@
 
 <input class="file-input-hidden" id="termAttachInput" type="file" accept="image/*,application/pdf" onchange="handleTermAttachSelected(event)">
 
+<!-- Reference reading for a term. Carries the `overlay` class so Back closes
+     it and navigation dismisses it, same as every other sheet. -->
+<div class="overlay lookup-overlay" id="termLookup" onclick="if(event.target===this) closeTermLookup()">
+  <div class="modal lookup-panel" id="termLookupPanel">
+    <div class="lookup-head">
+      <span class="lookup-titles">
+        <h3 id="termLookupTitle"></h3>
+        <span class="lookup-sub" id="termLookupSub"></span>
+      </span>
+      <button class="folder-close" type="button" onclick="closeTermLookup()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="lookup-body" id="termLookupBody"></div>
+  </div>
+</div>
+
 <!-- Subdomain folder. Carries the `overlay` class so the app's existing
      rules apply to it for free: closeAllOverlays() dismisses it on navigation,
      and Back closes it before retracing history rather than moving the screen
@@ -4253,6 +4359,7 @@
               match /healthcare-providers/{docId} { allow read, write: if true; }
               match /doctor-directory/{docId} { allow read, write: if true; }
               match /doctor-research-cache/{docId} { allow read, write: if true; }
+              match /term-link-cache/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
               match /term-attachments/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
@@ -8705,10 +8812,6 @@ function externalUrl(raw){
   return 'https://' + url.replace(/^\/+/, '');
 }
 
-function mplusUrl(term, lang){
-  const base = lang==='es' ? 'https://medlineplus.gov/spanish/search.html' : 'https://medlineplus.gov/search.html';
-  return `${base}?query=${encodeURIComponent(term)}`;
-}
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
@@ -9061,11 +9164,13 @@ function renderLinks(t, categoryId){
   if(t.url){
     // A team member's own pasted link takes priority — trust it as the exact source.
     links.push(`<a class="link-pill" href="${escapeAttr(externalUrl(t.url))}" target="_blank" rel="noopener">Source ${ICON_EXTERNAL}</a>`);
-  } else if(categoryId !== 'resources' && t.en){
-    links.push(`<a class="link-pill" href="${escapeAttr(mplusUrl(t.en,'en'))}" target="_blank" rel="noopener">Look up ${ICON_EXTERNAL}</a>`);
   }
-  if(!t.url && categoryId !== 'resources' && t.es){
-    links.push(`<a class="link-pill es" href="${escapeAttr(mplusUrl(t.es,'es'))}" target="_blank" rel="noopener">Buscar en español ${ICON_EXTERNAL}</a>`);
+  // "Look up" used to be two fixed MedlinePlus search addresses built by
+  // string concatenation — a guess about someone else's site that could only
+  // get more wrong, and did: it opened a blank page. It now searches at the
+  // moment of the tap, so every link offered came back from a live result.
+  if(categoryId !== 'resources' && t.en){
+    links.push(`<button type="button" class="link-pill" onclick="openTermLookup('${escapeAttr(categoryId)}','${escapeAttr(t.id)}')">Look up ${ICON_SEARCH}</button>`);
   }
   if(links.length===0) return '';
   return `<div class="links">${links.join('')}</div>`;
@@ -10048,6 +10153,224 @@ function setCategory(id, isBack){
   if(movedForward) window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
+/* ---------- Looking a term up ----------
+
+   Replaces two fixed MedlinePlus search addresses that were assembled by
+   string concatenation. A hardcoded URL into someone else's site is a guess
+   that can only get more wrong as they reorganise, and there is nothing in
+   the app that would ever notice — which is how it came to open a blank page.
+
+   A search runs at the moment of the tap instead, restricted server-side to
+   patient-education and clinical sources, so every link offered came back
+   from a result seconds earlier and the sense is judged against the term's
+   own definition rather than its spelling.
+
+   Three layers of cache, because this costs money per call and a glossary
+   term is looked up by many interpreters:
+     - memory, for tapping the same term twice in one sitting
+     - Firestore, shared across the whole team and across devices
+     - and nothing at all when offline, where the sheet says so plainly. */
+
+const LOOKUP_CACHE_VERSION = 1;
+// Links rot. Long enough that the team is not re-paying for the same term
+// every week, short enough that a moved page gets found again within a term.
+const LOOKUP_CACHE_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+const lookupMemoryCache = new Map();
+let lookupRequestSeq = 0;
+
+function lookupCacheKey(t){
+  return `v${LOOKUP_CACHE_VERSION}__` + foldText(String(t.en || '')).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120);
+}
+
+async function getCachedTermLookup(key){
+  if(lookupMemoryCache.has(key)) return lookupMemoryCache.get(key);
+  if(!db || !key) return null;
+  try{
+    const snap = await db.collection('term-link-cache').doc(key).get();
+    if(!snap.exists) return null;
+    const data = snap.data();
+    if(!data || !Array.isArray(data.sources)) return null;
+    if(data.cachedAt && (Date.now() - data.cachedAt) > LOOKUP_CACHE_MAX_AGE_MS) return null;
+    lookupMemoryCache.set(key, data);
+    return data;
+  }catch(err){
+    console.error('getCachedTermLookup failed:', err);
+    return null;
+  }
+}
+
+async function saveCachedTermLookup(key, payload){
+  lookupMemoryCache.set(key, payload);
+  if(!db || !key) return;
+  try{
+    await db.collection('term-link-cache').doc(key).set(stripUndefined({
+      sources: payload.sources, note: payload.note || '',
+      cachedBy: whoAmI() || 'Someone', cachedAt: Date.now(),
+    }));
+  }catch(err){
+    // The interpreter already has their answer on screen; a failed cache
+    // write is not their problem.
+    console.error('saveCachedTermLookup failed:', err);
+  }
+}
+
+/* The same host list the lookup endpoint enforces, checked again here.
+   That is not belt-and-braces for its own sake: results are cached in
+   Firestore, and these rules are open to anyone who finds the project id, so
+   a row read back from the cache is untrusted input no matter who wrote the
+   original search. Anything not https and on this list is dropped rather
+   than rendered as a link. */
+const LOOKUP_TRUSTED_HOSTS = [
+  'medlineplus.gov','nih.gov','nlm.nih.gov','cancer.gov','cdc.gov','niddk.nih.gov',
+  'nhlbi.nih.gov','ninds.nih.gov','nei.nih.gov','fda.gov','mayoclinic.org',
+  'clevelandclinic.org','hopkinsmedicine.org','stanfordchildrens.org','kidshealth.org',
+  'healthychildren.org','familydoctor.org','heart.org','diabetes.org','cancer.org',
+  'kidney.org','lung.org','arthritis.org','who.int','paho.org',
+];
+
+function lookupSafeUrl(raw){
+  let parsed;
+  try{ parsed = new URL(String(raw || '')); }catch(err){ return ''; }
+  if(parsed.protocol !== 'https:') return '';
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+  const ok = LOOKUP_TRUSTED_HOSTS.some(site => host === site || host.endsWith('.' + site));
+  return ok ? parsed.toString() : '';
+}
+
+function closeTermLookup(){
+  const ov = document.getElementById('termLookup');
+  if(ov) ov.classList.remove('show');
+}
+
+async function openTermLookup(categoryId, termId){
+  const cat = DATA.categories.find(c => c.id === categoryId);
+  const term = cat && cat.terms.find(t => t.id === termId);
+  if(!term) return;
+
+  const ov = document.getElementById('termLookup');
+  const body = document.getElementById('termLookupBody');
+  if(!ov || !body) return;
+
+  document.getElementById('termLookupTitle').textContent = term.en || 'Look up';
+  document.getElementById('termLookupSub').textContent =
+    [term.es, cat.name].filter(Boolean).join(' · ');
+  ov.classList.add('show');
+
+  // Every open supersedes the one before it, so a slow search for a term the
+  // interpreter has already moved on from cannot paint over a newer answer.
+  const seq = ++lookupRequestSeq;
+  const stale = () => seq !== lookupRequestSeq;
+
+  const key = lookupCacheKey(term);
+  const cached = await getCachedTermLookup(key);
+  if(stale()) return;
+  if(cached){
+    renderTermLookup(cached.sources, cached.note, term, true);
+    return;
+  }
+
+  if(!navigator.onLine){
+    renderTermLookupMessage(
+      'You are offline',
+      'Looking a term up needs a connection. The glossary itself works offline — this is the one part that cannot.',
+      term);
+    return;
+  }
+
+  body.innerHTML = `
+    <div class="lookup-loading">
+      <span class="lookup-spinner" aria-hidden="true"></span>
+      <span>Searching trusted medical sources…</span>
+    </div>`;
+
+  try{
+    const res = await fetch('/api/term-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ term: { en: term.en, es: term.es, def: term.def, domain: cat.name } }),
+    });
+    if(stale()) return;
+
+    if(!res.ok){
+      renderTermLookupMessage(
+        'Lookup is unavailable right now',
+        res.status === 503
+          ? 'The lookup service is not switched on for this deployment.'
+          : 'The search could not be completed. This is usually temporary.',
+        term);
+      return;
+    }
+
+    const data = await res.json();
+    if(stale()) return;
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    if(sources.length) saveCachedTermLookup(key, { sources, note: data.note || '' });
+    renderTermLookup(sources, data.note || '', term, false);
+  }catch(err){
+    if(stale()) return;
+    console.error('term lookup failed:', err);
+    renderTermLookupMessage(
+      'The search could not be completed',
+      'This is usually temporary. The glossary entry itself is unaffected.',
+      term);
+  }
+}
+
+/* A search engine as the floor. It is not as good as the curated result, but
+   it is never a dead link, and an interpreter mid-assignment needs somewhere
+   to go rather than an apology. */
+function lookupFallbackLink(term){
+  const q = encodeURIComponent(`${term.en || ''} ${term.es || ''}`.trim() + ' medlineplus');
+  return `<a class="lookup-fallback" href="https://duckduckgo.com/?q=${q}" target="_blank" rel="noopener">
+            Search the web for this term ${ICON_EXTERNAL}</a>`;
+}
+
+function renderTermLookupMessage(title, detail, term){
+  const body = document.getElementById('termLookupBody');
+  if(!body) return;
+  body.innerHTML = `
+    <div class="lookup-empty">
+      <div class="lookup-empty-title">${escapeHtml(title)}</div>
+      <p>${escapeHtml(detail)}</p>
+      ${lookupFallbackLink(term)}
+    </div>`;
+}
+
+function renderTermLookup(rawSources, note, term, fromCache){
+  const body = document.getElementById('termLookupBody');
+  if(!body) return;
+  // Drop anything that is not https on a trusted medical host. A list that
+  // came back empty after filtering is "nothing found", not a blank sheet.
+  const sources = (rawSources || [])
+    .map(sc => ({ ...sc, url: lookupSafeUrl(sc && sc.url) }))
+    .filter(sc => sc.url);
+  if(!sources.length){
+    renderTermLookupMessage(
+      'Nothing solid came back',
+      note || 'No trusted source had a clear page for this term. That happens with rare or institution-specific wording.',
+      term);
+    return;
+  }
+  const cards = sources.map(sc => `
+    <a class="lookup-card" href="${escapeAttr(sc.url)}" target="_blank" rel="noopener">
+      <span class="lookup-card-top">
+        <span class="lookup-site">${escapeHtml(sc.site || '')}</span>
+        ${sc.language === 'es' ? '<span class="lookup-lang">Español</span>' : ''}
+      </span>
+      <span class="lookup-card-title">${escapeHtml(sc.title || '')}</span>
+      ${sc.why ? `<span class="lookup-why">${escapeHtml(sc.why)}</span>` : ''}
+      <span class="lookup-go">${ICON_EXTERNAL}</span>
+    </a>`).join('');
+
+  body.innerHTML = `
+    ${note ? `<p class="lookup-note">${escapeHtml(note)}</p>` : ''}
+    <div class="lookup-grid">${cards}</div>
+    <p class="lookup-foot">
+      ${fromCache ? 'Saved from an earlier search by the team.' : 'Found just now.'}
+      Reference reading for your own preparation — not a rendering, and not for showing a patient.
+    </p>`;
+}
+
 /* ---------- Subdomain folder ----------
 
    A domain with subgroups used to carry them inside its card, which made the
@@ -10820,7 +11143,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1553';
+const BUILD_ID = 'b0913.1602';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -12039,11 +12362,13 @@ function renderDirectory(q){
       const matches = !q || foldText(t.en).includes(q) || foldText(t.es).includes(q) || foldText(t.def).includes(q) || foldText(t.notes).includes(q);
       if(!matches) return;
 
+      // Only links a person actually pasted. The two "lookup" rows that used
+      // to sit here were fixed MedlinePlus search addresses built by string
+      // concatenation — never confirmed by anyone, and dead by the time this
+      // was written. Looking a term up is now a live search from the term
+      // itself, which has no URL to list here in advance.
       if(t.url){
         rows.push({ term: label, kind: 'Source', confirmed: true, url: t.url, termId: t.id });
-      } else if(cat.id !== 'resources'){
-        if(t.en) rows.push({ term: label, kind: 'EN lookup', confirmed: false, url: mplusUrl(t.en,'en'), termId: t.id });
-        if(t.es) rows.push({ term: label, kind: 'ES lookup', confirmed: false, url: mplusUrl(t.es,'es'), termId: t.id });
       }
     });
     if(rows.length===0) return;
@@ -12071,7 +12396,7 @@ function renderDirectory(q){
   }
 
   const intro = `<p style="font-size:12.5px; color:var(--ink-soft); max-width:640px; margin:-6px 0 26px 0; line-height:1.6;">
-    Every clickable reference in the glossary, in one place — confirmed source links your team has pasted in, plus the live MedlinePlus lookups used as a fallback. Click the pencil on any row to edit a link, or use "+ Add link" above to add a new one to any domain.
+    Every source link your team has pasted in, in one place. Click the pencil on any row to edit a link, or use "+ Add link" above to add a new one to any domain. To find reading for a term that has no source yet, open the term and tap "Look up".
   </p>`;
 
   return intro + sectionsHtml;

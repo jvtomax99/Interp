@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v23';
+const CACHE_VERSION = 'interpreter-hub-v24';
 const PRECACHE = [
   './',
   './index.html',
