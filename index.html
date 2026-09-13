@@ -3377,6 +3377,370 @@
     .section-head{ break-after:avoid; }
     a[href]::after{ content:none !important; } /* no browser-injected URL text after links */
   }
+  /* ==========================================================================
+     Home finish — banner alignment, card treatment, phone ergonomics
+
+     Adapted from a variant Jose had built elsewhere and liked. It keeps this
+     app's palette, its domain colours and its arrangement; what it changes is
+     the finish — how the greeting is set, how a card is lit, and how large a
+     thing you have to hit with a thumb.
+
+     It sits here, near the end, so it layers over the base rules above. The
+     iOS zoom guard stays after it deliberately: that guard must be last or it
+     loses on specificity, which is how it broke once before.
+
+     color-mix() is used for the tints. Where it is unsupported the whole
+     declaration is dropped and the card keeps the flat tint defined earlier,
+     which is the old design rather than a broken one.
+     ========================================================================== */
+
+  :root{
+    --finish-edge: rgba(255,255,255,0.82);
+    --finish-shadow: 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  }
+  html[data-theme="dark"]{
+    --finish-edge: rgba(209,230,255,0.15);
+    --finish-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 10px 24px -14px rgba(0,0,0,0.45);
+  }
+
+  /* ---------- The greeting ---------- */
+  /* The name is the anchor of the screen, so it is set larger and tighter,
+     and the block is given a measure so the quote wraps as a column of text
+     rather than running the full width of a phone. */
+  .home-greeting-name{
+    font-size:39px; line-height:1.1; font-weight:700; letter-spacing:-0.035em;
+    margin-bottom:11px; text-shadow:0 2px 18px rgba(11,36,70,0.4);
+  }
+  .home-greeting-eyebrow{ font-size:12px; letter-spacing:0.1em; font-weight:600; margin-bottom:7px; }
+  .home-greeting-text{ max-width:42ch; }
+  .home-greeting-quote{ max-width:40ch; }
+  .home-greeting-btn{
+    border-color:rgba(255,255,255,0.29); background:rgba(255,255,255,0.09);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.13), 0 3px 10px rgba(6,30,51,0.07);
+    transition:background .18s var(--ease), transform .18s var(--ease);
+  }
+  @media (hover:hover){ .home-greeting-btn:hover{ background:rgba(255,255,255,0.18); transform:translateY(-1px); } }
+
+  /* ---------- The search bar ---------- */
+  .home-search{
+    height:58px; border-radius:18px; gap:12px; font-size:15px;
+    box-shadow:inset 0 1px 0 var(--finish-edge), 0 5px 12px -7px rgba(18,60,106,0.27),
+               0 15px 28px -18px rgba(13,53,103,0.29);
+    transition:box-shadow .2s var(--ease), border-color .2s var(--ease);
+  }
+  .home-search > svg{ width:21px; height:21px; color:var(--accent); flex-shrink:0; }
+  .home-search span{ flex:1; min-width:0; text-align:left; }
+
+  /* ---------- Section headings ---------- */
+  /* A rule that runs out from the heading in the section's own colour, with
+     the "view all" control as a pill at the end of it. */
+  .home-sec-head{ display:flex; align-items:center; gap:14px; margin-bottom:15px; }
+  .home-sec-head h3{ font-size:19px; font-weight:650; letter-spacing:-0.025em; line-height:1.3; }
+  .home-sec-head::after{
+    content:''; height:1px; flex:1; min-width:0; order:1;
+    background:linear-gradient(90deg,
+      color-mix(in srgb, var(--section-color, var(--accent)) 28%, var(--line)), transparent);
+  }
+  .home-sec-more{
+    order:2; white-space:nowrap; font-size:13px; padding:7px 12px; border-radius:20px;
+    min-height:36px; color:var(--accent);
+    background:color-mix(in srgb, var(--section-color, var(--accent)) 9%, var(--paper));
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--section-color, var(--accent)) 18%, transparent);
+    transition:background .2s var(--ease);
+  }
+  @media (hover:hover){
+    .home-sec-more:hover{
+      background:color-mix(in srgb, var(--section-color, var(--accent)) 17%, var(--paper));
+      text-decoration:none;
+    }
+  }
+
+  /* ---------- Cards and tiles ---------- */
+  /* Every card carries its domain colour as a gradient wash plus a matching
+     edge, instead of a flat tint with a hairline. */
+  .domain-family,
+  .home-rail > .qa-card,
+  .qa-tile{
+    border:1px solid color-mix(in srgb, var(--tile-color) 35%, var(--line));
+    background:linear-gradient(145deg,
+      color-mix(in srgb, var(--tile-color) 23%, var(--paper)),
+      color-mix(in srgb, var(--tile-color) 12%, var(--paper)));
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  .domain-family, .home-rail > .qa-card{ border-radius:19px; overflow:hidden; }
+  .qa-tile{ border-radius:17px; min-height:93px; gap:9px; }
+  .domain-family-head, .home-rail > .qa-card{ min-height:138px; padding:17px; gap:10px; }
+  .domain-family-head{ flex:1; }
+  .home-tile-name, .qa-title{ font-size:14px; font-weight:650; letter-spacing:-0.015em; line-height:1.4; }
+  .home-tile-name{ margin-bottom:auto; }
+  .home-tile-count{ margin-top:0; font-size:12px; font-weight:550; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .qa-desc{ font-size:12px; line-height:1.5; color:var(--ink-soft); }
+  .qa-go{ margin-top:auto; opacity:.7; }
+  .qa-tile-label{ font-size:14px; font-weight:650; letter-spacing:-0.015em; }
+
+  /* The icon sits on a raised plate. Duotone is preserved: the flat block
+     stays the domain colour and the outline stays ink — flattening both to
+     one colour is what makes these read as generic glyphs. */
+  .home-tile-icon, .qa-icon, .qa-tile-icon{
+    width:37px; height:37px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(145deg, rgba(255,255,255,0.54), rgba(255,255,255,0.13));
+    border:1px solid rgba(255,255,255,0.46);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.9),
+               0 4px 8px -5px color-mix(in srgb, var(--tile-color) 60%, transparent);
+    color:var(--tile-color);
+    --ic-fill:var(--tile-color); --ic-line:var(--ink);
+    transition:transform .23s var(--ease);
+  }
+  .home-tile-icon svg, .qa-icon svg, .qa-tile-icon svg{ width:26px; height:26px; }
+  html[data-theme="dark"] .home-tile-icon,
+  html[data-theme="dark"] .qa-icon,
+  html[data-theme="dark"] .qa-tile-icon{
+    background:linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.015));
+    border-color:rgba(255,255,255,0.1);
+    box-shadow:inset 0 1px 0 rgba(220,238,255,0.19), 0 4px 8px rgba(0,0,0,0.07);
+  }
+  html[data-theme="dark"] .domain-family,
+  html[data-theme="dark"] .home-rail > .qa-card,
+  html[data-theme="dark"] .qa-tile{
+    background:linear-gradient(145deg,
+      color-mix(in srgb, var(--tile-color) 30%, var(--paper)),
+      color-mix(in srgb, var(--tile-color) 14%, var(--paper)));
+  }
+
+  /* Lift on hover, press on touch. :hover never fires on a touchscreen, so
+     the press state is carried by :active and the .is-pressed class. */
+  @media (hover:hover) and (prefers-reduced-motion:no-preference){
+    .domain-family:hover, .home-rail > .qa-card:hover, .qa-tile:hover{
+      transform:translateY(-3px);
+      border-color:color-mix(in srgb, var(--tile-color) 65%, var(--line));
+      box-shadow:inset 0 1px 0 var(--finish-edge),
+                 0 12px 23px -14px color-mix(in srgb, var(--tile-color) 45%, rgba(22,48,75,0.13));
+    }
+    .domain-family-head:hover{ transform:none; }
+    .domain-family:hover .home-tile-icon,
+    .qa-card:hover .qa-icon,
+    .qa-tile:hover .qa-tile-icon{ transform:translateY(-1px); }
+  }
+  @media (hover:none){
+    .qa-tile:active, .qa-card:active, .qa-tile.is-pressed, .qa-card.is-pressed{
+      transform:scale(0.985);
+    }
+    .domain-family-head:active{ transform:none; }
+  }
+
+  /* ---------- Other surfaces ---------- */
+  .home-feed, .home-tip{
+    border-radius:19px; overflow:hidden;
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  .card, .doc-card, .provider-card, .quiz-card{
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  .btn{ border-radius:11px; }
+  .btn-primary{
+    background:linear-gradient(130deg, var(--accent), var(--accent-2)); color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.21), 0 4px 10px -4px rgba(22,74,132,0.33);
+  }
+
+  /* ---------- Phone sizes for the finish ---------- */
+  @media (max-width:760px){
+    .home-greeting-name{ font-size:31px; letter-spacing:-0.03em; }
+    .home-greeting-text{ max-width:34ch; }
+    .home-search{ height:55px; border-radius:16px; font-size:14px; gap:10px; }
+    .home-search > svg{ width:20px; height:20px; }
+    .home-sec-head{ gap:9px; margin-bottom:13px; }
+    .home-sec-head h3{ font-size:18px; line-height:1.35; }
+    .home-sec-more{ font-size:12px; padding:7px 10px; }
+    .domain-family, .home-rail > .qa-card{ border-radius:17px; }
+    .domain-family-head, .home-rail > .qa-card{ min-height:141px; padding:14px; gap:10px; }
+    .home-tile-icon, .qa-icon{ width:34px; height:34px; border-radius:11px; }
+    .home-tile-icon svg, .qa-icon svg{ width:25px; height:25px; }
+    .qa-tile{ min-height:87px; border-radius:16px; padding:11px 3px; gap:8px; }
+    .qa-tile-icon{ width:34px; height:34px; border-radius:11px; }
+    .qa-tile-icon svg{ width:25px; height:25px; }
+    /* Four across on a phone, so these four stay on one line each. The
+       domain names above them do wrap — they have a half-width card to
+       wrap into and no fixed count to keep to. */
+    .qa-tile-label{ font-size:13px; white-space:nowrap; }
+    .family-disclosure summary{ padding:9px 12px; }
+  }
+  @media (max-width:370px){
+    .home-greeting-name{ font-size:29px; }
+    .home-rail{ gap:9px; }
+    .domain-family-head, .home-rail > .qa-card{ padding:13px; }
+    .qa-tile-label{ font-size:12px; }
+  }
+
+  /* ---------- Phone ergonomics ---------- */
+  /* Removes the ~300ms wait a browser holds before firing a tap, in case the
+     tap turns out to be the first half of a double-tap zoom. */
+  button, a, summary, .home-tile, .qa-tile, .qa-card{ touch-action:manipulation; }
+
+  @media (max-width:760px){
+    /* The keyboard covers the viewport rather than shrinking it, so an overlay
+       pinned to the full height runs underneath it and the field being typed
+       into can sit behind the keys. --app-visible-* is published from JS off
+       visualViewport and is the part actually on screen. Both fall back to the
+       full height where that API is missing. */
+    .overlay, .gs-overlay{
+      inset:auto 0 auto;
+      top:var(--app-visible-top, 0px);
+      height:var(--app-visible-height, 100dvh);
+      overflow:hidden;
+    }
+    .overlay{ align-items:flex-end; padding:max(14px, env(safe-area-inset-top)) 8px 0 8px; }
+    .overlay .modal{
+      max-height:100%; overflow-y:auto; overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch; scroll-padding-block:20px 90px;
+    }
+    /* Save and Cancel stay on screen while a long form scrolls under them. */
+    .modal-actions{
+      position:sticky; bottom:calc(-20px - env(safe-area-inset-bottom));
+      z-index:3; background:var(--paper); border-top:1px solid var(--line);
+      margin-top:20px; margin-bottom:calc(-20px - env(safe-area-inset-bottom));
+      padding:14px 0 calc(16px + env(safe-area-inset-bottom));
+    }
+    .modal-actions .btn{ min-height:46px; font-size:15px; }
+
+    .gs-panel{ max-height:100%; width:100%; }
+    .gs-results{ overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; min-height:0; }
+    .gs-inputrow{ flex-shrink:0; }
+
+    /* The page behind a sheet should not scroll with it. */
+    body:has(.overlay.show), body:has(.gs-overlay.show){ overflow:hidden; }
+
+    /* The tab bar is the one thing that should give way to the keyboard: it
+       is fixed to the bottom, which is exactly where the keyboard arrives.
+       body.kb-open is already set by the keyboard watcher further down. */
+    body.kb-open .tabbar,
+    body:has(.overlay.show) .tabbar,
+    body:has(.gs-overlay.show) .tabbar{ display:none; }
+
+    /* A phone held in landscape puts the notch on one side. */
+    .main{
+      padding-left:max(18px, env(safe-area-inset-left));
+      padding-right:max(18px, env(safe-area-inset-right));
+    }
+
+    /* "ESC" means nothing without a keyboard; a real Cancel button replaces
+       it, and gives a one-thumb way out of search. */
+    .gs-hint{ display:none; }
+    .gs-cancel{
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      min-width:52px; min-height:44px; padding:4px;
+      background:transparent; border:0; color:var(--accent); font-size:14px;
+      font-family:var(--sans); cursor:pointer;
+    }
+  }
+  .gs-cancel{ display:none; }
+
+  /* ---------- The domain grid ---------- */
+  /* These were a horizontal rail you swiped through, which hid most of the
+     domains off the right edge — on a phone you could see two and a sliver.
+     As a grid every domain is on screen and scanning is vertical, the same
+     direction as the rest of the page. */
+  .home-rail{
+    grid-auto-flow:row; grid-auto-columns:auto;
+    grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+    align-items:stretch; gap:13px;
+    overflow:visible; margin:0; padding:0; scroll-snap-type:none;
+  }
+  @media (max-width:760px){
+    .home-rail{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+  }
+
+  /* Subgroups used to be a chip strip that scrolled sideways inside the card.
+     In a grid that does not fit, so they fold into a disclosure. Tapping a
+     subgroup still calls setCategory(), so it still lands on the history
+     stack and Back still retraces it — that behaviour is load-bearing and is
+     deliberately unchanged here. */
+  .family-disclosure{
+    border-top:1px solid color-mix(in srgb, var(--tile-color) 24%, transparent);
+    background:color-mix(in srgb, var(--tile-color) 7%, transparent);
+  }
+  .family-disclosure summary{
+    list-style:none; cursor:pointer; display:flex; align-items:center;
+    justify-content:space-between; gap:8px; padding:9px 14px;
+    font-size:13px; color:var(--ink-soft);
+  }
+  .family-disclosure summary::-webkit-details-marker{ display:none; }
+  .family-disclosure summary svg{
+    width:15px; height:15px; color:var(--tile-color);
+    transition:transform .2s var(--ease);
+  }
+  .family-disclosure[open] summary svg{ transform:rotate(180deg); }
+  @media (hover:hover){
+    .family-disclosure summary:hover{ background:color-mix(in srgb, var(--tile-color) 8%, transparent); }
+  }
+  .family-disclosure[open]{ background:color-mix(in srgb, var(--tile-color) 7%, var(--paper)); }
+
+  /* One subgroup per row, full width, so long names read straight instead of
+     being truncated into a chip. */
+  .domain-family-kids{
+    display:flex; flex-direction:column; gap:3px;
+    padding:0 8px 9px; margin-top:0; overflow:visible;
+  }
+  .domain-family-kid{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    width:100%; text-align:left; white-space:normal;
+    background:transparent; border:1px solid transparent; border-radius:9px;
+    padding:9px 8px; font-size:14px; line-height:1.4;
+    transition:background .15s var(--ease), border-color .15s var(--ease);
+  }
+  @media (hover:hover){
+    .domain-family-kid:hover{
+      background:var(--paper);
+      border-color:color-mix(in srgb, var(--tile-color) 18%, var(--line));
+    }
+  }
+  .domain-family-kid span{
+    flex-shrink:0; font-size:12px; padding:2px 6px; border-radius:6px;
+    background:color-mix(in srgb, var(--tile-color) 10%, var(--paper));
+    color:var(--ink-soft); font-variant-numeric:tabular-nums;
+  }
+
+  /* Names are no longer clamped to one line — in a grid there is room for a
+     domain to say its whole name. */
+  .home-tile-name, .qa-title, .qa-tile-label{
+    white-space:normal; overflow:visible; -webkit-line-clamp:unset;
+  }
+
+  /* ---------- The desktop sidebar ---------- */
+  /* The selected row was a flat block of accent colour. It becomes a gradient
+     pill with a lit top edge and a shadow under it, so the current place in
+     the nav reads as raised rather than merely filled in. Nested subgroup
+     rows keep their spine and stay a size down, so the hierarchy still reads.
+
+     Type goes up half a step: the sidebar is the one part of the app only
+     ever seen on a desktop monitor at arm's length. */
+  .sidebar{ box-shadow:inset -1px 0 0 rgba(255,255,255,0.03); }
+  .side-row{
+    font-size:14px; border:1px solid transparent;
+    transition:background .15s var(--ease), color .15s var(--ease),
+               box-shadow .15s var(--ease), border-color .15s var(--ease);
+  }
+  .side-row.is-active{
+    background:linear-gradient(120deg, var(--accent), var(--accent-2));
+    border-color:rgba(255,255,255,0.09);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 10px rgba(0,0,0,0.08);
+  }
+  .side-row.is-nested{ font-size:13px; }
+  .side-row-count{ font-size:12px; opacity:.85; }
+  .side-label{ font-size:12px; letter-spacing:0.065em; }
+  .side-foot{ border-top-color:rgba(255,255,255,0.08); }
+
+  /* ---------- Reachability ---------- */
+  /* Apple's minimum comfortable touch target is 44px. These were between 36
+     and 40, which is a miss every so often for someone working one-handed. */
+  .btn, .side-row, .home-sec-more, .domain-family-kid,
+  .family-disclosure summary, .tabbar-btn{ min-height:44px; }
+
+  /* A visible focus ring for anyone driving the app from a keyboard. */
+  button:focus-visible, a:focus-visible, summary:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--accent-2); outline-offset:3px;
+  }
+
   /* iOS Safari force-zooms the page whenever a focused input has a font size
      below 16px, and never zooms back out — the screen stays enlarged and
      scrolled sideways until you pinch it back. 16px prevents it entirely.
@@ -3719,8 +4083,10 @@
     <div class="gs-inputrow">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input id="gsInput" type="text" placeholder="Search terms, providers, guides, chat, practice…"
-             oninput="scheduleGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off">
-      <span class="gs-hint">ESC</span>
+             oninput="scheduleGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off"
+             autocapitalize="none" spellcheck="false" enterkeyhint="search"
+             aria-label="Search terms, providers, guides, chat and practice">
+      <span class="gs-hint">ESC</span><button class="gs-cancel" type="button" onclick="closeGlobalSearch()">Cancel</button>
     </div>
     <div class="gs-results" id="gsResults"></div>
   </div>
@@ -6932,6 +7298,9 @@ function closeGlobalSearch(){
   const ov = document.getElementById('gsOverlay');
   if(!ov) return;
   ov.classList.remove('show');
+  // Without this the field keeps focus and the on-screen keyboard stays up
+  // over a panel that is no longer visible.
+  document.getElementById('gsInput')?.blur();
   document.body.style.overflow = '';
 }
 
@@ -9460,12 +9829,17 @@ let navStack = [];
 // them on top and the tap looks like it did nothing. Anything open gets
 // dismissed on navigation.
 function closeAllOverlays(){
+  // Global search is `.gs-overlay`, not `.overlay`, so the sweep below never
+  // reached it: navigating with search open left the panel sitting on top of
+  // a screen that had already changed underneath it.
+  if(document.getElementById('gsOverlay')?.classList.contains('show')) closeGlobalSearch();
   document.querySelectorAll('.overlay.show').forEach(el => el.classList.remove('show'));
   const lb = document.getElementById('lightbox');
   if(lb) lb.classList.remove('show');
 }
 
 function setCategory(id, isBack){
+  const movedForward = !isBack && activeCategory !== id;
   closeAllOverlays();
   termRenderLimit = 120;
   if(!isBack && activeCategory !== id){
@@ -9506,6 +9880,13 @@ function setCategory(id, isBack){
   if(id === 'practice') ensureLoaded('quizHistory', loadQuizHistory);
   if(id === 'review')   ensureLoaded('termReviews', loadTermReviews);
   render();
+  // Going somewhere new starts at the top of it. Back is the other half of
+  // this pair and deliberately does NOT come through here: it restores the
+  // scroll position recorded on the nav stack, so you return to the line you
+  // were reading. goHome() passes isBack too and does its own smooth scroll.
+  // 'instant' because a forward jump should not animate a whole page of
+  // travel; Back is the one that animates.
+  if(movedForward) window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 // The floating Home button needs to do two things a plain setCategory('home')
@@ -9523,6 +9904,9 @@ function goHome(){
 // exactly how they drifted apart — fix one, the other kept the old bug.
 // `smooth` is the only thing that legitimately differs between them.
 function navigateBack(smooth){
+  // Same reason as closeAllOverlays: the search panel is the top layer, so
+  // Back closes it rather than navigating the screen behind it.
+  if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
   const behavior = smooth ? 'smooth' : 'auto';
 
   // An open overlay is the top layer, so Back closes that first — otherwise
@@ -10206,7 +10590,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1241';
+const BUILD_ID = 'b0913.1408';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -10321,8 +10705,8 @@ function renderTabBar(){
   ];
   return `<nav class="tabbar" role="navigation" aria-label="Main">
     ${tabs.map(t=>`
-      <button class="tabbar-btn ${activeCategory===t.id?'is-active':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}">
-        ${t.icon}
+      <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>
+        <span class="tabbar-icon">${t.icon}</span>
         <span>${escapeHtml(t.name)}</span>
         ${t.badge ? `<span class="tabbar-badge">${t.badge > 9 ? '9+' : t.badge}</span>` : ''}
       </button>`).join('')}
@@ -10368,9 +10752,21 @@ const INTERPRETER_TIPS = [
   { body:`If you know the patient personally, disclose it. An undisclosed connection is the conflict, not the relationship itself.`, foot:`Impartiality is a practice, not a feeling.` },
 ];
 
+// Each home section carries a colour, used by the rule that runs out from the
+// heading and by its "view all" pill. Keyed by title because that is what the
+// call sites pass; an unlisted section falls back to the app accent rather
+// than losing the rule entirely.
+const HOME_SECTION_COLORS = {
+  'Medical Terminology': '#2E8BD0',
+  'Doctors': '#7C6A9C',
+  'Study & Professional Development': '#35A97A',
+  'Tools & Reference': '#BFA05E',
+};
+
 function renderHomeSection(title, moreLabel, moreAction, cardsHtml){
+  const sectionColor = HOME_SECTION_COLORS[title] || 'var(--accent)';
   return `
-    <section class="home-sec">
+    <section class="home-sec" style="--section-color:${sectionColor}">
       <div class="home-sec-head">
         <h3>${escapeHtml(title)}</h3>
         ${moreAction ? `<button class="home-sec-more" onclick="${moreAction}">${escapeHtml(moreLabel)} \u2192</button>` : ''}
@@ -10395,6 +10791,10 @@ function qaCard(color, icon, title, desc, action){
    collection arrives, so the quote visibly flickered through two or three
    different lines before settling. A re-render should repaint the same page,
    not deal a new hand. They still change every time the app is opened. */
+// Which domain families are expanded. Held outside the render so a Firestore
+// snapshot repainting Home does not collapse a list someone is reading.
+const expandedFamilies = new Set();
+
 const SESSION_QUOTE = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
 const SESSION_TIP = INTERPRETER_TIPS[Math.floor(Math.random() * INTERPRETER_TIPS.length)];
 
@@ -10413,7 +10813,7 @@ function renderHome(){
     qaTile('#2E8BD0', DOMAIN_ICONS.globe,  'Translate',  `setCategory('translate')`),
     qaTile('#7C6A9C', DOMAIN_ICONS.doctor, 'Doctor Prep',`setCategory('doctors')`),
     qaTile('#35A97A', DOMAIN_ICONS.chat,  'Team Chat',  `setCategory('chat')`),
-    qaTile('#B08D2A', DOMAIN_ICONS.clipboard,  'Add Term',   `setCategory('all')`),
+    qaTile('#B08D2A', DOMAIN_ICONS.clipboard,  'Add Term',   `openAddModal()`),
   ].join('');
 
   // The biggest domains lead the terminology rail — that's what people
@@ -10437,12 +10837,16 @@ function renderHome(){
             <span class="home-tile-name">${escapeHtml(parent.name)}</span>
             <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
           </button>
-          ${kids.length ? `<div class="domain-family-kids">
+          ${kids.length ? `<details class="family-disclosure" data-family="${escapeAttr(parent.id)}" ${expandedFamilies.has(parent.id) ? 'open' : ''}
+                   ontoggle="this.open ? expandedFamilies.add(this.dataset.family) : expandedFamilies.delete(this.dataset.family)">
+            <summary><span>${kids.length} ${kids.length===1?'subdomain':'subdomains'}</span>${ICON_CHEVRON_DOWN}</summary>
+            <div class="domain-family-kids">
             ${kids.map(k=>`
               <button class="domain-family-kid" title="${escapeAttr(k.name)} \u00b7 ${k.count} terms" onclick="setCategory('${k.id}')">
                 ${escapeHtml(k.name)}<span>${k.count}</span>
               </button>`).join('')}
-          </div>` : ''}
+            </div>
+          </details>` : ''}
         </div>`;
     }).join('');
 
@@ -10492,7 +10896,7 @@ function renderHome(){
       <div class="home-greeting-scrim"></div>
       <div class="home-greeting-text">
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
-        <h2 class="home-greeting-name">${firstName ? escapeHtml(firstName) + ' \u{1F44B}' : 'Welcome \u{1F44B}'}</h2>
+        <h1 class="home-greeting-name">${firstName ? escapeHtml(firstName) + ' \u{1F44B}' : 'Welcome \u{1F44B}'}</h1>
         <p class="home-greeting-quote">${SESSION_QUOTE}</p>
         <div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
@@ -12372,6 +12776,108 @@ document.addEventListener('focusout', (e)=>{
     }, 50);
   }
 });
+
+/* ---------- Phone chrome, dialogs and the on-screen keyboard ----------
+
+   Three things the app could not do from CSS alone.
+
+   1. The on-screen keyboard does not shrink the window, it covers it. An
+      overlay sized to the viewport therefore runs underneath the keyboard,
+      and the field you are typing into can end up hidden behind it.
+      `visualViewport` reports the part actually visible; publishing that as
+      two custom properties lets the overlays size themselves to it.
+
+   2. A dialog has to trap focus. Without it, tabbing walks out of the modal
+      and into the page behind — which a screen-reader user cannot see is
+      still there, and a keyboard user cannot get back from easily.
+
+   3. The browser chrome colour is set once in a meta tag, so it kept the
+      light colour after a switch to dark and left a pale band above a dark
+      app.
+
+   No data is read or written here. */
+(() => {
+  const root = document.documentElement;
+  const vv = window.visualViewport;
+
+  let frame = 0;
+  function syncViewport(){
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(()=>{
+      root.style.setProperty('--app-visible-height', `${(vv && vv.height) || window.innerHeight}px`);
+      root.style.setProperty('--app-visible-top',    `${(vv && vv.offsetTop) || 0}px`);
+    });
+  }
+  if(vv){
+    vv.addEventListener('resize', syncViewport, { passive:true });
+    vv.addEventListener('scroll', syncViewport, { passive:true });
+  }
+  window.addEventListener('resize', syncViewport, { passive:true });
+  syncViewport();
+
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const syncTheme = ()=>{ if(themeMeta) themeMeta.content = root.dataset.theme === 'dark' ? '#0d1727' : '#f3f6fc'; };
+  new MutationObserver(syncTheme).observe(root, { attributes:true, attributeFilter:['data-theme'] });
+  syncTheme();
+
+  /* Dialogs. The panels are long-lived elements toggled with a `show` class
+     rather than being created per open, so one observer per panel is enough
+     and there is nothing to tear down. */
+  const returnFocus = new WeakMap();
+  let lastPageFocus = document.activeElement;
+  document.addEventListener('focusin', e => {
+    if(!e.target.closest('.modal, .gs-panel')) lastPageFocus = e.target;
+  });
+
+  document.querySelectorAll('.overlay, .gs-overlay').forEach((layer, i) => {
+    const panel = layer.querySelector('.modal, .gs-panel');
+    if(!panel) return;
+
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    panel.tabIndex = -1;
+    const title = panel.querySelector('h3, h2');
+    if(title){
+      title.id = title.id || `ih-dialog-title-${i}`;
+      panel.setAttribute('aria-labelledby', title.id);
+    } else {
+      panel.setAttribute('aria-label', layer.id === 'gsOverlay' ? 'Search' : 'Interpreter Hub dialog');
+    }
+
+    let wasOpen = false;
+    new MutationObserver(()=>{
+      const isOpen = layer.classList.contains('show');
+      if(isOpen === wasOpen) return;      // class changes for other reasons too
+      wasOpen = isOpen;
+      if(isOpen){
+        returnFocus.set(layer, lastPageFocus);
+        if(!panel.contains(document.activeElement)) panel.focus({ preventScroll:true });
+      } else {
+        if(panel.contains(document.activeElement)) document.activeElement.blur();
+        const back = returnFocus.get(layer);
+        // Put focus back on whatever opened this, so the next Tab carries on
+        // from there rather than restarting at the top of the document.
+        if(back && back.isConnected && !panel.contains(back)) back.focus({ preventScroll:true });
+      }
+    }).observe(layer, { attributes:true, attributeFilter:['class'] });
+
+    panel.addEventListener('keydown', e => {
+      if(e.key !== 'Tab') return;
+      // Recomputed per keypress: modal contents are re-rendered, and a list
+      // captured at open time would point at elements that no longer exist.
+      const items = [...panel.querySelectorAll(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]'
+      )].filter(el => el.getClientRects().length);
+      const first = items[0], last = items[items.length - 1];
+      if(!first){ e.preventDefault(); panel.focus(); return; }
+      if(e.shiftKey && (document.activeElement === first || document.activeElement === panel)){
+        e.preventDefault(); last.focus();
+      } else if(!e.shiftKey && (document.activeElement === last || document.activeElement === panel)){
+        e.preventDefault(); first.focus();
+      }
+    });
+  });
+})();
 
 /* ---------- Install / offline support ----------
    Registered after load so it never delays first paint. Guarded because
