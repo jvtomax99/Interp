@@ -10243,6 +10243,38 @@ function lookupSafeUrl(raw){
   return ok ? parsed.toString() : '';
 }
 
+/* A live search takes somewhere between a few seconds and half a minute, and
+   most of that is out of our hands — the model searches, reads what came
+   back, and sometimes searches again. What IS in our hands is whether the
+   wait reads as work or as a hang. A spinner that never changes starts
+   looking broken at about eight seconds; one that reports what is happening
+   does not, and the last line admits when a term is taking unusually long
+   rather than pretending everything is normal. */
+const LOOKUP_STAGES = [
+  [0,     'Searching trusted medical sources…'],
+  [4500,  'Reading what came back…'],
+  [10000, 'Choosing the best pages…'],
+  [18000, 'Still going — an unusual term can take a moment.'],
+];
+
+function startLookupProgress(){
+  const body = document.getElementById('termLookupBody');
+  if(!body) return () => {};
+  const paint = msg => {
+    body.innerHTML = `
+      <div class="lookup-loading">
+        <span class="lookup-spinner" aria-hidden="true"></span>
+        <span id="lookupStage">${escapeHtml(msg)}</span>
+      </div>`;
+  };
+  paint(LOOKUP_STAGES[0][1]);
+  const timers = LOOKUP_STAGES.slice(1).map(([at, msg]) => setTimeout(() => {
+    const el = document.getElementById('lookupStage');
+    if(el) el.textContent = msg;
+  }, at));
+  return () => timers.forEach(clearTimeout);
+}
+
 function closeTermLookup(){
   const ov = document.getElementById('termLookup');
   if(ov) ov.classList.remove('show');
@@ -10262,32 +10294,34 @@ async function openTermLookup(categoryId, termId){
     [term.es, cat.name].filter(Boolean).join(' · ');
   ov.classList.add('show');
 
+  /* Paint the loading state before anything that can block. The cache read
+     goes to Firestore, and until it came back the panel still held the
+     PREVIOUS term's results — so opening one term straight after another
+     showed the old links under the new title for as long as that took. */
+  const stopProgress = startLookupProgress();
+
   // Every open supersedes the one before it, so a slow search for a term the
   // interpreter has already moved on from cannot paint over a newer answer.
   const seq = ++lookupRequestSeq;
-  const stale = () => seq !== lookupRequestSeq;
+  const stale = () => { if(seq !== lookupRequestSeq){ stopProgress(); return true; } return false; };
 
   const key = lookupCacheKey(term);
   const cached = await getCachedTermLookup(key);
   if(stale()) return;
   if(cached){
+    stopProgress();
     renderTermLookup(cached.sources, cached.note, term, true);
     return;
   }
 
   if(!navigator.onLine){
+    stopProgress();
     renderTermLookupMessage(
       'You are offline',
       'Looking a term up needs a connection. The glossary itself works offline — this is the one part that cannot.',
       term);
     return;
   }
-
-  body.innerHTML = `
-    <div class="lookup-loading">
-      <span class="lookup-spinner" aria-hidden="true"></span>
-      <span>Searching trusted medical sources…</span>
-    </div>`;
 
   try{
     const res = await fetch('/api/term-lookup', {
@@ -10298,6 +10332,7 @@ async function openTermLookup(categoryId, termId){
     if(stale()) return;
 
     if(!res.ok){
+      stopProgress();
       renderTermLookupMessage(
         'Lookup is unavailable right now',
         res.status === 503
@@ -10309,11 +10344,13 @@ async function openTermLookup(categoryId, termId){
 
     const data = await res.json();
     if(stale()) return;
+    stopProgress();
     const sources = Array.isArray(data.sources) ? data.sources : [];
     if(sources.length) saveCachedTermLookup(key, { sources, note: data.note || '' });
     renderTermLookup(sources, data.note || '', term, false);
   }catch(err){
     if(stale()) return;
+    stopProgress();
     console.error('term lookup failed:', err);
     renderTermLookupMessage(
       'The search could not be completed',
@@ -11149,7 +11186,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1606';
+const BUILD_ID = 'b0913.1904';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 

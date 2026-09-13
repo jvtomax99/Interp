@@ -44,9 +44,20 @@ export const config = {
  * bigger model — that is the cheaper knob and usually the right one. */
 const MODEL = 'claude-sonnet-5';
 
-// A short pass: find pages, judge whether they match the sense the glossary
-// means, stop.
-const EFFORT = 'low';
+/* Medium, not low. The judgment this endpoint actually has to get right is
+ * which SENSE of a term a page covers — a cardiac term must not come back
+ * with the orthopedic page, and a wrong-sense page looks perfectly
+ * legitimate to someone skimming. That is the kind of care effort buys, and
+ * Sonnet at low effort was the thin combination. Costs about half a cent
+ * more per lookup; far better value than paying double for a bigger model. */
+const EFFORT = 'medium';
+
+/* Each search is a round trip — the model searches, reads results, decides
+ * whether to search again — so this is the single biggest lever on how long
+ * an interpreter waits. Most terms are settled in one or two. Four was the
+ * worst case and it was a slow one; three still leaves room to refine a
+ * query once and caps the wait. */
+const MAX_SEARCHES = 3;
 
 const MAX_FIELD = 600;
 const MAX_SOURCES = 5;
@@ -191,7 +202,7 @@ export default async function handler(req, res) {
       tools: [{
         type: 'web_search_20260209',
         name: 'web_search',
-        max_uses: 4,
+        max_uses: MAX_SEARCHES,
         allowed_domains: TRUSTED_SITES,
       }],
     };
