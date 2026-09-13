@@ -3563,7 +3563,6 @@
        domain names above them do wrap — they have a half-width card to
        wrap into and no fixed count to keep to. */
     .qa-tile-label{ font-size:13px; white-space:nowrap; }
-    .family-disclosure summary{ padding:9px 12px; }
   }
   @media (max-width:370px){
     .home-greeting-name{ font-size:29px; }
@@ -3660,49 +3659,7 @@
     }
   }
 
-  /* Subgroups used to be a chip strip that scrolled sideways inside the card.
-     In a grid that does not fit, so they fold into a disclosure. Tapping a
-     subgroup still calls setCategory(), so it still lands on the history
-     stack and Back still retraces it — that behaviour is load-bearing and is
-     deliberately unchanged here. */
-  .family-disclosure{
-    border-top:1px solid color-mix(in srgb, var(--tile-color) 24%, transparent);
-    background:color-mix(in srgb, var(--tile-color) 7%, transparent);
-  }
-  .family-disclosure summary{
-    list-style:none; cursor:pointer; display:flex; align-items:center;
-    justify-content:space-between; gap:8px; padding:9px 14px;
-    font-size:13px; color:var(--ink-soft);
-  }
-  .family-disclosure summary::-webkit-details-marker{ display:none; }
-  .family-disclosure summary svg{
-    width:15px; height:15px; color:var(--tile-color);
-    transition:transform .2s var(--ease);
-  }
-  .family-disclosure[open] summary svg{ transform:rotate(180deg); }
-  @media (hover:hover){
-    .family-disclosure summary:hover{ background:color-mix(in srgb, var(--tile-color) 8%, transparent); }
-  }
-  .family-disclosure[open]{ background:color-mix(in srgb, var(--tile-color) 7%, var(--paper)); }
 
-  /* One subgroup per row, full width, so long names read straight instead of
-     being truncated into a chip.
-
-     display lives on the [open] rule, not here. Setting it unconditionally
-     overrides the browser's own hiding of a closed <details>, which left the
-     list permanently on screen with a summary above it claiming to expand it. */
-  .domain-family-kids{
-    gap:3px; padding:0 8px 9px; margin-top:0; overflow:visible;
-  }
-  /* The original chip-strip rule further up also sets display:flex on this
-     element, and that alone is enough to defeat the browser's hiding of a
-     closed <details>. So the collapsed state is stated explicitly rather than
-     left to the user agent — and only in the grid range, since on a phone
-     these are meant to show while the details stays shut. */
-  @media (min-width:820px){
-    .family-disclosure:not([open]) > .domain-family-kids{ display:none; }
-    .family-disclosure[open] > .domain-family-kids{ display:flex; flex-direction:column; }
-  }
   .domain-family-kid{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
     width:100%; text-align:left; white-space:normal;
@@ -3722,34 +3679,6 @@
     color:var(--ink-soft); font-variant-numeric:tabular-nums;
   }
 
-  /* In the phone rail, subgroups go back to being the one-line chip strip they
-     were before. The disclosure is a grid idea: every card in a rail row
-     shares the tallest card's height, so opening one list stretched the whole
-     section and left its neighbours as tall empty boxes. The original code
-     had a comment about exactly this — uniform height is only affordable
-     because the chips are one line.
-
-     The <details> element stays in the markup either way, so there is one
-     shape of HTML to reason about; on a phone its summary is hidden and its
-     contents are shown regardless of the open state. */
-  @media (max-width:819px){
-    .family-disclosure{ border-top:none; background:transparent; }
-    .family-disclosure summary{ display:none; }
-    .family-disclosure > .domain-family-kids,
-    .family-disclosure[open] > .domain-family-kids{
-      display:flex; flex-direction:row; gap:5px; margin-top:-2px;
-      padding:0 12px 12px 12px;
-      overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
-    }
-    .family-disclosure > .domain-family-kids::-webkit-scrollbar{ display:none; }
-    .domain-family-kid{
-      display:inline-flex; width:auto; flex-shrink:0; gap:5px;
-      white-space:nowrap; border-radius:999px; border:none;
-      background:color-mix(in srgb, var(--tile-color) 12%, var(--paper));
-      padding:6px 10px; font-size:12px; font-weight:600; min-height:0;
-    }
-    .domain-family-kid span{ font-size:10.5px; padding:0; background:none; }
-  }
 
   /* Names are no longer clamped — but only in the grid, where there is room
      for a domain to say its whole name. In the phone rail a card is ~176px
@@ -3785,11 +3714,111 @@
   .side-label{ font-size:12px; letter-spacing:0.065em; }
   .side-foot{ border-top-color:rgba(255,255,255,0.08); }
 
+  /* ---------- The subdomain folder ---------- */
+  /* Opens the way a folder of apps opens on a phone: the ground behind falls
+     back and goes soft, and the contents grow out of the card that was
+     tapped. transform-origin is set from that card's position in JS, which is
+     what ties the two together — centred, it reads as a generic dialog. */
+  .folder-overlay{
+    background:rgba(12,22,38,0.42);
+    backdrop-filter:blur(14px) saturate(130%);
+    -webkit-backdrop-filter:blur(14px) saturate(130%);
+    align-items:center; padding:24px 18px;
+  }
+  .folder-overlay .folder-panel{
+    width:min(520px, 100%); max-width:100%; padding:20px;
+    border-radius:26px; background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), 0 30px 80px rgba(10,26,54,0.38);
+    transform:scale(0.82); opacity:0;
+    transition:transform .32s cubic-bezier(.2,.9,.3,1), opacity .22s var(--ease);
+  }
+  .folder-overlay.show .folder-panel{ transform:scale(1); opacity:1; }
+
+  .folder-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .folder-icon{
+    width:40px; height:40px; border-radius:13px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--folder-color, var(--accent)) 16%, var(--paper));
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--folder-color, var(--accent)) 26%, transparent);
+    color:var(--folder-color, var(--accent));
+    --ic-fill:var(--folder-color, var(--accent)); --ic-line:var(--ink);
+  }
+  .folder-icon svg{ width:27px; height:27px; }
+  .folder-titles{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+  .folder-head h3{
+    margin:0; font-family:var(--sans); font-size:19px; font-weight:650;
+    letter-spacing:-0.02em; color:var(--ink); line-height:1.25;
+  }
+  .folder-sub{ font-size:12.5px; color:var(--ink-soft); }
+  .folder-close{
+    flex-shrink:0; width:36px; height:36px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--bg-hi); color:var(--ink-soft); font-size:15px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s var(--ease), color .15s var(--ease);
+  }
+  @media (hover:hover){ .folder-close:hover{ background:var(--line); color:var(--ink); } }
+
+  .folder-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+  @media (min-width:520px){ .folder-grid{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
+  .folder-tile{
+    display:flex; flex-direction:column; align-items:flex-start; gap:8px;
+    padding:14px; border-radius:16px; cursor:pointer; text-align:left;
+    font-family:inherit; min-height:104px;
+    border:1px solid color-mix(in srgb, var(--tile-color) 35%, var(--line));
+    background:linear-gradient(145deg,
+      color-mix(in srgb, var(--tile-color) 22%, var(--paper)),
+      color-mix(in srgb, var(--tile-color) 11%, var(--paper)));
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+    transition:transform .18s var(--ease), box-shadow .2s var(--ease);
+  }
+  /* The parent reads as the way back out to the whole domain, so it is marked
+     rather than sitting among its own children as an equal. */
+  .folder-tile.is-all{
+    border-color:color-mix(in srgb, var(--tile-color) 58%, var(--line));
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tile-color) 34%, transparent),
+               inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  .folder-tile-icon{
+    width:32px; height:32px; border-radius:11px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(145deg, rgba(255,255,255,0.54), rgba(255,255,255,0.13));
+    border:1px solid rgba(255,255,255,0.46);
+    color:var(--tile-color); --ic-fill:var(--tile-color); --ic-line:var(--ink);
+  }
+  .folder-tile-icon svg{ width:23px; height:23px; }
+  .folder-tile-name{
+    font-size:14px; font-weight:650; letter-spacing:-0.015em; line-height:1.3;
+    color:var(--ink); margin-bottom:auto;
+  }
+  .folder-tile-count{
+    font-size:12px; color:var(--ink-soft); font-weight:550; font-variant-numeric:tabular-nums;
+  }
+  @media (hover:hover){
+    .folder-tile:hover{
+      transform:translateY(-2px);
+      box-shadow:inset 0 1px 0 var(--finish-edge),
+                 0 12px 22px -14px color-mix(in srgb, var(--tile-color) 50%, transparent);
+    }
+  }
+  .folder-tile:active{ transform:scale(0.98); }
+  html[data-theme="dark"] .folder-tile{
+    background:linear-gradient(145deg,
+      color-mix(in srgb, var(--tile-color) 30%, var(--paper)),
+      color-mix(in srgb, var(--tile-color) 13%, var(--paper)));
+  }
+  html[data-theme="dark"] .folder-tile-icon{
+    background:linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.015));
+    border-color:rgba(255,255,255,0.1);
+  }
+  @media (prefers-reduced-motion:reduce){
+    .folder-overlay .folder-panel{ transition:opacity .15s linear; transform:none; }
+    .folder-overlay.show .folder-panel{ transform:none; }
+  }
+
   /* ---------- Reachability ---------- */
   /* Apple's minimum comfortable touch target is 44px. These were between 36
      and 40, which is a miss every so often for someone working one-handed. */
-  .btn, .side-row, .home-sec-more, .domain-family-kid,
-  .family-disclosure summary, .tabbar-btn{ min-height:44px; }
+  .btn, .side-row, .home-sec-more, .folder-tile, .tabbar-btn{ min-height:44px; }
   /* Only on a device actually driven by a thumb — a mouse pointer is precise,
      and widening these on the desktop would just coarsen the layout. The swap
      button keeps its square shape, so it grows in both directions; there is
@@ -3800,8 +3829,15 @@
     .quiz-setup select, .tr-row select, .tr-row input[type=text]{ min-height:44px; }
   }
 
-  /* A visible focus ring for anyone driving the app from a keyboard. */
-  button:focus-visible, a:focus-visible, summary:focus-visible, [tabindex]:focus-visible{
+  /* A visible focus ring for anyone driving the app from a keyboard.
+
+     tabindex="-1" is excluded deliberately. It means "focusable only from
+     script", which is how the dialogs take focus when they open — and that
+     was drawing a three-pixel ring around the whole panel every time one
+     appeared. A ring belongs on the control you tabbed to, not on the
+     container something put the cursor inside. */
+  button:focus-visible, a:focus-visible, summary:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible{
     outline:3px solid var(--accent-2); outline-offset:3px;
   }
 
@@ -4116,6 +4152,24 @@
 </div>
 
 <input class="file-input-hidden" id="termAttachInput" type="file" accept="image/*,application/pdf" onchange="handleTermAttachSelected(event)">
+
+<!-- Subdomain folder. Carries the `overlay` class so the app's existing
+     rules apply to it for free: closeAllOverlays() dismisses it on navigation,
+     and Back closes it before retracing history rather than moving the screen
+     underneath it. -->
+<div class="overlay folder-overlay" id="domainFolder" onclick="if(event.target===this) closeDomainFolder()">
+  <div class="modal folder-panel" id="domainFolderPanel" role="dialog" aria-modal="true" aria-labelledby="domainFolderTitle">
+    <div class="folder-head">
+      <span class="folder-icon" id="domainFolderIcon"></span>
+      <span class="folder-titles">
+        <h3 id="domainFolderTitle"></h3>
+        <span class="folder-sub" id="domainFolderSub"></span>
+      </span>
+      <button class="folder-close" type="button" onclick="closeDomainFolder()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="folder-grid" id="domainFolderGrid"></div>
+  </div>
+</div>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lightbox-close" title="Close" onclick="closeLightbox(event, true)">✕</button>
@@ -9953,6 +10007,77 @@ function setCategory(id, isBack){
   if(movedForward) window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
+/* ---------- Subdomain folder ----------
+
+   A domain with subgroups used to carry them inside its card, which made the
+   card tall — and on Home the cards sit in a row that shares one height, so
+   one domain's subgroups set the height of the whole section.
+
+   They open in a sheet instead, the way a folder of apps opens on a phone:
+   the card you tapped stays where it is, the background falls back, and the
+   contents grow out of the spot you touched. Cards stay short.
+
+   Navigation is unchanged underneath. Every tile here calls setCategory(),
+   so subgroups still land on the history stack and Back still retraces them.
+   The parent is the first tile, so tapping the domain itself is still one
+   step and nothing became unreachable. */
+function openDomainFolder(id, fromEl){
+  const tiles = getDomainTiles();
+  const parent = tiles.find(t => t.id === id);
+  if(!parent) return;
+  const kids = tiles.filter(t => t.parentId === id).sort((a,b) => (b.count||0) - (a.count||0));
+  if(!kids.length){ setCategory(id); return; }     // nothing to open into
+
+  const ov = document.getElementById('domainFolder');
+  const panel = document.getElementById('domainFolderPanel');
+  if(!ov || !panel) { setCategory(id); return; }
+
+  const total = (parent.count||0) + kids.reduce((n,k) => n + (k.count||0), 0);
+  document.getElementById('domainFolderIcon').innerHTML = parent.icon;
+  document.getElementById('domainFolderTitle').textContent = parent.name;
+  document.getElementById('domainFolderSub').textContent =
+    `${total} ${total===1?'term':'terms'} across ${kids.length + 1} ${kids.length ? 'lists' : 'list'}`;
+  panel.style.setProperty('--folder-color', parent.color);
+
+  const tile = (t, label, isAll) => `
+    <button class="folder-tile${isAll ? ' is-all' : ''}" style="${tileVars(t.color)}"
+            onclick="folderGo('${t.id}')">
+      <span class="folder-tile-icon">${t.icon}</span>
+      <span class="folder-tile-name">${escapeHtml(label)}</span>
+      <span class="folder-tile-count">${t.count} ${t.count===1?'term':'terms'}</span>
+    </button>`;
+
+  document.getElementById('domainFolderGrid').innerHTML =
+    tile(parent, 'All ' + parent.name, true) + kids.map(k => tile(k, k.name, false)).join('');
+
+  /* Grow from the card that was tapped. Without this the sheet appears from
+     the middle of the screen and the connection to what you touched is lost —
+     which is the whole point of the gesture. */
+  if(fromEl && fromEl.getBoundingClientRect){
+    const r = fromEl.getBoundingClientRect();
+    const x = ((r.left + r.width / 2) / window.innerWidth * 100).toFixed(1);
+    const y = ((r.top + r.height / 2) / window.innerHeight * 100).toFixed(1);
+    panel.style.transformOrigin = `${x}% ${y}%`;
+  } else {
+    panel.style.transformOrigin = '50% 50%';
+  }
+
+  ov.classList.add('show');
+}
+
+function closeDomainFolder(){
+  const ov = document.getElementById('domainFolder');
+  if(ov) ov.classList.remove('show');
+}
+
+// Close first, then navigate. setCategory() calls closeAllOverlays() anyway,
+// but doing it here keeps the sheet from being visible for a frame over the
+// screen it is about to leave.
+function folderGo(id){
+  closeDomainFolder();
+  setCategory(id);
+}
+
 // The floating Home button needs to do two things a plain setCategory('home')
 // wouldn't: switching screens doesn't reset scroll position, so without this
 // someone who jumped deep into a domain would land on Home already scrolled
@@ -10654,7 +10779,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1423';
+const BUILD_ID = 'b0913.1432';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -10855,10 +10980,6 @@ function qaCard(color, icon, title, desc, action){
    collection arrives, so the quote visibly flickered through two or three
    different lines before settling. A re-render should repaint the same page,
    not deal a new hand. They still change every time the app is opened. */
-// Which domain families are expanded. Held outside the render so a Firestore
-// snapshot repainting Home does not collapse a list someone is reading.
-const expandedFamilies = new Set();
-
 const SESSION_QUOTE = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
 const SESSION_TIP = INTERPRETER_TIPS[Math.floor(Math.random() * INTERPRETER_TIPS.length)];
 
@@ -10896,21 +11017,12 @@ function renderHome(){
       const totalTerms = (parent.count||0) + kids.reduce((n,k)=> n + (k.count||0), 0);
       return `
         <div class="domain-family" style="${tileVars(parent.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;">
-          <button class="home-tile domain-family-head" style="${tileVars(parent.color)}" onclick="setCategory('${parent.id}')">
+          <button class="home-tile domain-family-head" style="${tileVars(parent.color)}"
+                  onclick="${kids.length ? `openDomainFolder('${parent.id}', this)` : `setCategory('${parent.id}')`}">
             <span class="home-tile-icon">${parent.icon}</span>
             <span class="home-tile-name">${escapeHtml(parent.name)}</span>
             <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
           </button>
-          ${kids.length ? `<details class="family-disclosure" data-family="${escapeAttr(parent.id)}" ${expandedFamilies.has(parent.id) ? 'open' : ''}
-                   ontoggle="this.open ? expandedFamilies.add(this.dataset.family) : expandedFamilies.delete(this.dataset.family)">
-            <summary><span>${kids.length} ${kids.length===1?'subdomain':'subdomains'}</span>${ICON_CHEVRON_DOWN}</summary>
-            <div class="domain-family-kids">
-            ${kids.map(k=>`
-              <button class="domain-family-kid" title="${escapeAttr(k.name)} \u00b7 ${k.count} terms" onclick="setCategory('${k.id}')">
-                ${escapeHtml(k.name)}<span>${k.count}</span>
-              </button>`).join('')}
-            </div>
-          </details>` : ''}
         </div>`;
     }).join('');
 
