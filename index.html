@@ -7715,7 +7715,7 @@ function renderEvents(){
         <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
         ${ev.notes ? `<p class="ce-notes">${escapeHtml(ev.notes)}</p>` : ''}
         ${(ev.link || ev.addedBy) ? `<div class="ce-foot">
-          ${ev.link ? `<a class="tr-mini" href="${escapeAttr(ev.link)}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open</a>` : ''}
+          ${ev.link ? `<a class="tr-mini" href="${escapeAttr(externalUrl(ev.link))}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open</a>` : ''}
           ${ev.addedBy ? `<span class="ce-by">added by ${escapeHtml(ev.addedBy)}</span>` : ''}
         </div>` : ''}
       </div>`;
@@ -8684,6 +8684,27 @@ function escapeHtml(s){
   return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
+/* A link pasted without "https://" is not a link. The browser resolves it
+   against the app, so "medlineplus.gov/ency/article/000101.htm" becomes a
+   request for interp-six.vercel.app/medlineplus.gov/... — a page of ours that
+   does not exist, which is exactly what a dead link looks like.
+
+   The add-term form does prepend the scheme on save, but that guard is newer
+   than parts of the glossary and protects nothing already stored, nothing
+   imported, and nothing written by a migration. Normalising at render means
+   the href is right whatever the document happens to hold.
+
+   A real scheme is left alone so mailto: and tel: still work. "Real" means
+   the part before the colon has no dot in it — otherwise "intranet.hmh.org:8443"
+   reads as a scheme named "intranet.hmh.org" and the link opens nothing. */
+function externalUrl(raw){
+  const url = String(raw == null ? '' : raw).trim();
+  if(!url) return '';
+  const scheme = url.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+  if(scheme && !scheme[1].includes('.')) return url;
+  return 'https://' + url.replace(/^\/+/, '');
+}
+
 function mplusUrl(term, lang){
   const base = lang==='es' ? 'https://medlineplus.gov/spanish/search.html' : 'https://medlineplus.gov/search.html';
   return `${base}?query=${encodeURIComponent(term)}`;
@@ -9039,7 +9060,7 @@ function renderLinks(t, categoryId){
   const links = [];
   if(t.url){
     // A team member's own pasted link takes priority — trust it as the exact source.
-    links.push(`<a class="link-pill" href="${escapeAttr(t.url)}" target="_blank" rel="noopener">Source ${ICON_EXTERNAL}</a>`);
+    links.push(`<a class="link-pill" href="${escapeAttr(externalUrl(t.url))}" target="_blank" rel="noopener">Source ${ICON_EXTERNAL}</a>`);
   } else if(categoryId !== 'resources' && t.en){
     links.push(`<a class="link-pill" href="${escapeAttr(mplusUrl(t.en,'en'))}" target="_blank" rel="noopener">Look up ${ICON_EXTERNAL}</a>`);
   }
@@ -10799,7 +10820,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1530';
+const BUILD_ID = 'b0913.1553';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -12036,9 +12057,9 @@ function renderDirectory(q){
           <span class="dir-dot" style="background:${cat.color}"></span>
           <span class="dir-term">${r.term}</span>
           <span class="dir-kind ${r.confirmed?'confirmed':''}">${r.kind}</span>
-          <a class="dir-url" href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a>
+          <a class="dir-url" href="${escapeAttr(externalUrl(r.url))}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a>
           <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', '${r.termId}')">✎</button>
-          <a class="dir-go" href="${escapeAttr(r.url)}" target="_blank" rel="noopener" title="Open link">${ICON_EXTERNAL}</a>
+          <a class="dir-go" href="${escapeAttr(externalUrl(r.url))}" target="_blank" rel="noopener" title="Open link">${ICON_EXTERNAL}</a>
         </div>
       `;
     });
