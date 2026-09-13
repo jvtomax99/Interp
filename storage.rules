@@ -1,0 +1,19 @@
+rules_version = '2';
+
+/* Cloud Storage rules for the HUMC Interpreter Hub.
+ *
+ * Attachments on glossary terms — photos and PDFs — are the only thing the
+ * app stores here. Cloud Storage needs the pay-as-you-go Blaze plan.
+ *
+ * Apply with:  firebase deploy --only storage
+ * Or paste into console.firebase.google.com -> language-specialist ->
+ * Storage -> Rules -> Publish.
+ *
+ * Open to anyone, for the same reason and with the same caveat as
+ * firestore.rules: one trusted team, no sign-in yet.
+ */
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /attachments/{allPaths=**} { allow read, write: if true; }
+  }
+}
