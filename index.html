@@ -2575,6 +2575,17 @@
   .quiz-setup select{
     padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--paper);
     font-family:var(--sans); font-size:13.5px; color:var(--ink); box-shadow:var(--sh-1);
+    /* A <select> is as wide as its longest option unless told otherwise, and
+       "All domains (exam-weighted)" at 16px is wider than a phone screen. A
+       flex item will not shrink below that on its own, so without these the
+       dropdown hangs past the right edge and the whole page scrolls sideways. */
+    min-width:0; max-width:100%;
+  }
+  /* Given the room they now need, the two dropdowns take a row each on a
+     phone rather than being squeezed side by side — a clipped
+     "All domains (exam-weig…" helps nobody choose a domain. */
+  @media (max-width:900px), (pointer: coarse){
+    .quiz-setup select{ flex:1 1 100%; }
   }
 
   .quiz-card{
@@ -2868,6 +2879,15 @@
   .tr-row select{
     padding:12px 12px; border:1px solid var(--line); border-radius:12px; background:var(--paper);
     font-family:var(--sans); font-size:13.5px; color:var(--ink);
+  }
+  /* At 16px (which touch devices get, so Safari does not zoom) the pair of
+     language dropdowns no longer fits beside the swap button at their natural
+     width, and the row wrapped — leaving the swap button stranded next to
+     "English" instead of sitting between the two languages it swaps.
+     Sharing the row equally puts it back: the longest name in the list is
+     "Portuguese", and half a row is far more than that needs. */
+  @media (max-width:900px), (pointer: coarse){
+    .tr-row select{ flex:1 1 0; min-width:0; }
   }
   .tr-swap{
     border:none; background:var(--accent-soft); color:var(--accent); cursor:pointer;
@@ -3364,14 +3384,31 @@
      This lives at the end of the stylesheet on purpose. It used to sit up in
      the mobile block around line 1900, but `.field input` is defined again at
      line ~2060 at equal specificity, and the later rule won — so every modal
-     field was still 13.5px and every tap on one zoomed the page. */
-  @media (max-width:900px){
+     field was still 13.5px and every tap on one zoomed the page.
+
+     Two holes found later and closed here:
+
+     1. It was keyed to max-width:900px, so an iPad in landscape — a plausible
+        device on a hospital cart — was over the breakpoint and still zoomed.
+        `pointer:coarse` is the honest test: it asks whether the primary input
+        is a finger, which is exactly when Safari force-zooms, at any width.
+     2. Translate's two inputs and its language dropdowns, and the practice
+        setup dropdowns, were never in this list. Translate is the worst place
+        to lose the viewport — it is the screen used mid-assignment.
+
+     `.tr-row input[type=text]` is spelled with the attribute on purpose. The
+     rule it has to beat carries one too, so plain `.tr-row input` would be
+     less specific and quietly lose — the same trap described above. */
+  @media (max-width:900px), (pointer: coarse){
     .search input,
     .chat-input-row input,
     .whoami-input,
     .field input,
     .field textarea,
-    .field select{ font-size:16px; }
+    .field select,
+    .tr-row input[type=text],
+    .tr-row select,
+    .quiz-setup select{ font-size:16px; }
   }
 </style>
 </head>
@@ -10169,7 +10206,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0912.1828';
+const BUILD_ID = 'b0913.1241';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
