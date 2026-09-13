@@ -4350,23 +4350,29 @@
      3. Project settings → your web app → copy the firebaseConfig object
         and paste it below, replacing the placeholder values.
      4. In Firestore → Rules, set:
+          (This same block is checked in as firestore.rules, which is the
+          source of truth — `firebase deploy --only firestore:rules` applies
+          it. The copy below is here for setting a project up by hand.)
           rules_version = '2';
           service cloud.firestore {
             match /databases/{database}/documents {
               match /terminology-hub/{docId} { allow read, write: if true; }
               match /terminology-meta/{docId} { allow read, write: if true; }
               match /terms/{docId} { allow read, write: if true; }
+              match /term-attachments/{docId} { allow read, write: if true; }
+              match /term-reviews/{docId} { allow read, write: if true; }
+              match /term-link-cache/{docId} { allow read, write: if true; }
               match /healthcare-providers/{docId} { allow read, write: if true; }
               match /doctor-directory/{docId} { allow read, write: if true; }
               match /doctor-research-cache/{docId} { allow read, write: if true; }
-              match /term-link-cache/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
-              match /term-attachments/{docId} { allow read, write: if true; }
+              match /chat-typing/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
+              match /announcements/{docId} { allow read, write: if true; }
               match /practice-questions/{docId} { allow read, write: if true; }
               match /quiz-history/{docId} { allow read, write: if true; }
-              match /term-reviews/{docId} { allow read, write: if true; }
-              match /announcements/{docId} { allow read, write: if true; }
+              match /ce-events/{docId} { allow read, write: if true; }
+              match /deleted-items/{docId} { allow read, write: if true; }
             }
           }
      5. This app also uses Cloud Storage for file attachments (photos and
@@ -11143,7 +11149,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1602';
+const BUILD_ID = 'b0913.1617';
 const BUILD_TIME = '2026-09-09 23:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 

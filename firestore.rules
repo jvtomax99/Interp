@@ -1,0 +1,78 @@
+rules_version = '2';
+
+/* Firestore security rules for the HUMC Interpreter Hub (project
+ * `language-specialist`).
+ *
+ * These used to exist only as a comment inside index.html, which meant the
+ * live rules and the documented rules could drift apart with nothing to
+ * catch it. This file is the source of truth; the comment in index.html is
+ * a copy for someone setting the project up from scratch.
+ *
+ * TO APPLY THEM
+ *
+ *   From a computer, once:   npm i -g firebase-tools && firebase login
+ *   Then, from this folder:  firebase deploy --only firestore:rules
+ *
+ * Or paste the block below into the Firebase console:
+ *   console.firebase.google.com -> language-specialist -> Firestore Database
+ *   -> Rules -> replace -> Publish.
+ *
+ * A SECOND SET OF RULES LIVES IN CLOUD STORAGE, not here — attachments
+ * (photos and PDFs) are governed separately under Storage -> Rules:
+ *
+ *   rules_version = '2';
+ *   service firebase.storage {
+ *     match /b/{bucket}/o {
+ *       match /attachments/{allPaths=**} { allow read, write: if true; }
+ *     }
+ *   }
+ *
+ * KNOWN AND DELIBERATE: every rule below is `if true`, so anyone who finds
+ * the project id — which ships in the client JavaScript and cannot be hidden
+ * there — can read and write everything, including team chat. That is a
+ * documented open item, accepted for now because the app is shared inside
+ * one trusted team and has no sign-in. It is the thing to fix before this is
+ * given to a wider group; making the repository private does not help, since
+ * the project id is in the shipped bundle either way.
+ *
+ * Firestore denies any collection that no rule matches, so a new collection
+ * needs a line here or its reads and writes fail silently at the client.
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Glossary ----
+    match /terms/{docId}               { allow read, write: if true; }
+    match /terminology-meta/{docId}    { allow read, write: if true; }
+    match /terminology-hub/{docId}     { allow read, write: if true; }
+    match /term-attachments/{docId}    { allow read, write: if true; }
+    match /term-reviews/{docId}        { allow read, write: if true; }
+
+    // Reference reading found for a term, cached so the team pays for a
+    // given term's search once rather than once per interpreter.
+    match /term-link-cache/{docId}     { allow read, write: if true; }
+
+    // ---- Providers and doctors ----
+    match /healthcare-providers/{docId}  { allow read, write: if true; }
+    match /doctor-directory/{docId}      { allow read, write: if true; }
+    match /doctor-research-cache/{docId} { allow read, write: if true; }
+
+    // ---- Team ----
+    match /team-chat/{docId}      { allow read, write: if true; }
+    // Ephemeral "someone is typing" markers, written constantly while a
+    // message is being composed.
+    match /chat-typing/{docId}    { allow read, write: if true; }
+    match /activity-log/{docId}   { allow read, write: if true; }
+    match /announcements/{docId}  { allow read, write: if true; }
+
+    // ---- Study ----
+    match /practice-questions/{docId} { allow read, write: if true; }
+    match /quiz-history/{docId}       { allow read, write: if true; }
+
+    // ---- Events ----
+    match /ce-events/{docId}      { allow read, write: if true; }
+
+    // ---- Recoverable deletes ----
+    match /deleted-items/{docId}  { allow read, write: if true; }
+  }
+}
