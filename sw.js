@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v31-pin-captions';
+const CACHE_VERSION = 'interpreter-hub-v32-chat-crop';
 const PRECACHE = [
   './',
   './index.html',

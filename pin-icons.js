@@ -296,9 +296,14 @@
       medicalNames.forEach((key, i) => {
         const row = Math.floor(i / 6), col = i % 6;
         const h = rowH[row] / 209 * 256;
+        // Team Chat's caption touches its shadow, so connected-component
+        // cleanup cannot separate it. Exclude the bottom 10 source pixels
+        // while keeping the artwork's scale and position unchanged.
+        const cropHeight = key === 'chat' ? rowH[row] - 10 : rowH[row];
+        const drawHeight = cropHeight / 209 * 256;
         ctx.clearRect(0, 0, 256, 256);
         ctx.drawImage(medicalImage, col * 209 * scale, rowY[row] * scale,
-          209 * scale, rowH[row] * scale, 0, (256-h)/2, 256, h);
+          209 * scale, cropHeight * scale, 0, (256-h)/2, 256, drawHeight);
         clearSheetBackground(ctx, 256, 256);
         clearCaptionFragments(ctx, 256, 256);
         prepared[key] = canvas.toDataURL('image/png');
