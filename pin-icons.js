@@ -11,7 +11,7 @@
   width:32px;
   height:32px;
   flex:0 0 auto;
-  background-image:url('./pin-icons-hd.webp?v=hd1');
+  background-image:url('./pin-icons-source-hd-upload.png?v=src2');
   background-repeat:no-repeat;
   image-rendering:auto;
   background-size:800% 800%;
