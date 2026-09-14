@@ -1,0 +1,74 @@
+name: Apply illustrated website icons now
+on:
+  push:
+    paths:
+      - '.github/workflows/chatgpt-apply-icon-redesign-now.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply full icon redesign to index
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import textwrap, re
+
+          wf = Path('.github/workflows/chatgpt-full-icon-redesign.yml').read_text(encoding='utf-8')
+          start = wf.index("          python3 <<'PY'\n") + len("          python3 <<'PY'\n")
+          end = wf.index("\n          PY", start)
+          script = textwrap.dedent(wf[start:end])
+
+          # The original redesign runner had one matcher bug: the final object
+          # entry has no trailing comma. Correct it in memory and run the
+          # redesign script without changing that workflow file.
+          script = script.replace(
+              'pat=re.compile(rf"(?m)^  {re.escape(key)}: \' .*?\',\\s*$")',
+              'pat=re.compile(rf"(?m)^  {re.escape(key)}: \' .*?\',?\\s*$")'
+          )
+          script = script.replace(
+              'pat=re.compile(rf"(?m)^  {re.escape(key)}: \' .*?\',\\s*$")'.replace("' .*?'", "'.*?'"),
+              'pat=re.compile(rf"(?m)^  {re.escape(key)}: \' .*?\',?\\s*$")'.replace("' .*?'", "'.*?'"),
+          )
+          if "',?\\s*$" not in script:
+              raise SystemExit('Could not patch final DOMAIN_ICONS matcher')
+
+          exec(compile(script, 'icon-redesign', 'exec'), {})
+
+          text = Path('index.html').read_text(encoding='utf-8')
+          a = text.index('const DOMAIN_ICONS = {')
+          b = text.index('\n};', a) + 3
+          block = text[a:b]
+          keys = re.findall(r"(?m)^  ([A-Za-z0-9_-]+): '", block)
+          if len(keys) != 36:
+              raise SystemExit(f'Expected 36 domain icons, found {len(keys)}')
+          if 'var(--ic-fill)' in block or 'var(--ic-line)' in block:
+              raise SystemExit('Old line-art domain icons remain')
+          if 'const ICON_WAVE = ' not in text or 'home-wave-icon' not in text:
+              raise SystemExit('Greeting hand was not implemented')
+          if '\\u{1F44B}' in text:
+              raise SystemExit('Old greeting emoji still remains')
+          if 'src="./hmh-logo.png"' in text or 'src="./hmh-logo-white.png"' in text:
+              raise SystemExit('HMH wordmark image still remains in page')
+          if 'src="./hmh-mark.png"' not in text:
+              raise SystemExit('HMH mark asset is missing')
+          print('Verified 36 illustrated domain icons, smiling doctor, greeting hand, and HMH mark-only branding.')
+          PY
+          git diff --check
+      - name: Commit website icon implementation
+        shell: bash
+        run: |
+          git config user.name "jvtomax99"
+          git config user.email "jvtomax99@gmail.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No index.html changes needed"
+            exit 0
+          fi
+          git commit -m "Implement illustrated icons on website"
+          git push
