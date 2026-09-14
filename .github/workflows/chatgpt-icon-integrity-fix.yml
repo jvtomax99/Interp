@@ -1,0 +1,62 @@
+name: ChatGPT icon integrity fix
+on:
+  push:
+    paths:
+      - '.github/workflows/chatgpt-icon-integrity-fix.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore hospital icon and verify icon keys
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          old=subprocess.check_output(['git','show','HEAD^:index.html'], text=True)
+          def block(s):
+              a=s.index('const DOMAIN_ICONS = {')
+              b=s.index('\n};',a)+3
+              return a,b,s[a:b]
+          _,_,ob=block(old)
+          a,b,cb=block(text)
+          keyre=re.compile(r"(?m)^  ([A-Za-z0-9_-]+): '")
+          oldkeys=keyre.findall(ob)
+          curkeys=keyre.findall(cb)
+          missing=[k for k in oldkeys if k not in curkeys]
+          extra=[k for k in curkeys if k not in oldkeys]
+          print('Missing before fix:', missing)
+          print('Extra before fix:', extra)
+          hospital='''  hospital: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M5 27V12.5h5V8h12v4.5h5V27Z" fill="#F8FBFF" stroke="#A96F22" stroke-width="1.2" stroke-linejoin="round"/><rect x="12" y="4" width="8" height="8" rx="1" fill="#FFF" stroke="#A96F22" stroke-width="1"/><path d="M14.7 6h2.6v1.7H19v2.6h-1.7V12h-2.6v-1.7H13V7.7h1.7Z" fill="#E52E42"/><g fill="#39A8E0" stroke="#A96F22" stroke-width=".55"><rect x="7.2" y="15" width="3" height="3" rx=".4"/><rect x="21.8" y="15" width="3" height="3" rx=".4"/><rect x="7.2" y="20" width="3" height="3" rx=".4"/><rect x="21.8" y="20" width="3" height="3" rx=".4"/></g><rect x="13" y="19" width="6" height="8" rx=".8" fill="#59C3F0" stroke="#A96F22" stroke-width=".9"/></svg>',\n'''
+          if 'hospital' not in curkeys:
+              marker="  doctor: '"
+              pos=cb.index(marker)
+              line_end=cb.index('\n',pos)+1
+              cb=cb[:line_end]+hospital+cb[line_end:]
+          text=text[:a]+cb+text[b:]
+          p.write_text(text,encoding='utf-8')
+          _,_,nb=block(text)
+          newkeys=keyre.findall(nb)
+          if oldkeys != newkeys:
+              raise SystemExit(f'Icon key order/set mismatch after fix. old={oldkeys} new={newkeys}')
+          if 'pinShadow' in nb or 'pinFace' in nb or 'docFace' in nb:
+              raise SystemExit('Bubble artwork remains')
+          print('Icon key integrity verified:', len(newkeys), 'keys')
+          PY
+          git diff --check
+      - name: Commit integrity fix
+        shell: bash
+        run: |
+          git config user.name "jvtomax99"
+          git config user.email "jvtomax99@gmail.com"
+          git add index.html
+          git rm .github/workflows/chatgpt-icon-integrity-fix.yml
+          git commit -m "Restore standalone hospital icon and verify icon keys"
+          git push
