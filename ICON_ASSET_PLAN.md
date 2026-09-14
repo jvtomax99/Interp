@@ -1,6 +1,6 @@
 # Interpreter Hub HD icon asset plan
 
-The website uses the enamel-pin artwork approved in chat as a high-resolution sprite. The runtime mapping is defined in `pin-icons.js`.
+The website uses the approved enamel-pin artwork through `pin-icons.js`. The HD runtime asset keeps the existing icon mapping and layout intact; only the raster source resolution and rendering quality change.
 
 ## UI / utility artwork
 - Hello → waving hand
@@ -65,10 +65,11 @@ The website uses the enamel-pin artwork approved in chat as a high-resolution sp
 - Legal / Ethics → scales
 
 ## Branding
-Hackensack Meridian Health continues to use the repository's real `hmh-mark.png` symbol only. The generated approximation is not used.
+Hackensack Meridian Health continues to use the repository's real `hmh-mark.png` symbol only. No generated HMH wordmark is used.
 
 ## Resolution rules
-- The HD sprite is 2048×2048 with 256×256 source cells.
-- Site icons display at roughly 23–34 CSS pixels, leaving ample source resolution for Retina/3× screens.
-- Icons are downscaled only. They are never enlarged from a low-resolution source.
+- The runtime HD sprite is 1024×1024, four times the width and height of the previous 256×256 sprite.
+- Each 8×8 sprite cell is 128×128 source pixels and is displayed at roughly 23–34 CSS pixels, providing enough source resolution for high-density/Retina screens.
+- High-quality Lanczos resampling plus light sharpening is applied to preserve edges, highlights, gold outlines, and small internal details when the icons are displayed smaller.
+- Browser rendering uses `image-rendering: auto`; the site never stretches the HD cell beyond its source resolution.
 - No badge, bubble, plate, or rounded background is added around the artwork.

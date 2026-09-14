@@ -11,8 +11,9 @@
   width:32px;
   height:32px;
   flex:0 0 auto;
-  background-image:url('./pin-icons.webp');
+  background-image:url('./pin-icons-hd.webp?v=hd1');
   background-repeat:no-repeat;
+  image-rendering:auto;
   background-size:800% 800%;
   background-position:calc(var(--pin-x) * ${CELL}%) calc(var(--pin-y) * ${CELL}%);
   vertical-align:middle;

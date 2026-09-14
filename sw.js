@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v27';
+const CACHE_VERSION = 'interpreter-hub-v28';
 const PRECACHE = [
   './',
   './index.html',
@@ -34,6 +34,7 @@ const PRECACHE = [
   './icon-512.png',
   './apple-touch-icon.png',
   './pin-icons.webp',
+  './pin-icons-hd.webp',
   './pin-icons.js',
   './manifest.webmanifest'
 ];
