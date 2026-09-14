@@ -1,0 +1,1 @@
+HD icon asset upgrade in progress; this marker will be removed after the binary asset and runtime mapping are committed.
