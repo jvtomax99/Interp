@@ -1,0 +1,84 @@
+name: Build exact uploaded icon artwork
+
+on:
+  push:
+    branches: [chatgpt-exact-icons]
+
+permissions:
+  contents: write
+
+jobs:
+  build-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct exact sprite and patch website
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            pin-sprite-v1-01.txt \
+            pin-sprite-v1-02.txt \
+            pin-sprite-v1-03.txt \
+            pin-sprite-v1-04a.txt \
+            pin-sprite-v1-04b.txt \
+            pin-sprite-v1-05.txt \
+            pin-sprite-v1-06.txt \
+            pin-sprite-v1-07.txt \
+            pin-sprite-v1-08.txt \
+            pin-sprite-v1-09.txt \
+            | base64 -d > pin-icons.webp
+
+          EXPECTED="8cdc9c625b5ad5eee1cae05ab937e2fe55715bfa"
+          ACTUAL="$(git hash-object pin-icons.webp)"
+          echo "Exact sprite git hash: $ACTUAL"
+          test "$ACTUAL" = "$EXPECTED"
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          text = p.read_text(encoding='utf-8')
+          tag = '<script src="./pin-icons.js"></script>'
+          if tag not in text:
+              if '</body>' not in text:
+                  raise SystemExit('index.html has no closing body tag')
+              text = text.replace('</body>', f'{tag}\n</body>', 1)
+          p.write_text(text, encoding='utf-8')
+
+          sw = Path('sw.js')
+          s = sw.read_text(encoding='utf-8')
+          s = s.replace("const CACHE_VERSION = 'interpreter-hub-v26';", "const CACHE_VERSION = 'interpreter-hub-v27';")
+          if "'./pin-icons.webp'" not in s:
+              anchor = "  './apple-touch-icon.png',\n"
+              if anchor not in s:
+                  raise SystemExit('service worker precache anchor not found')
+              s = s.replace(anchor, anchor + "  './pin-icons.webp',\n  './pin-icons.js',\n", 1)
+          sw.write_text(s, encoding='utf-8')
+          PY
+
+          rm -f pin-sprite-v1-*.txt
+
+          test -s pin-icons.webp
+          grep -F '<script src="./pin-icons.js"></script>' index.html
+          grep -F "interpreter-hub-v27" sw.js
+          grep -F "'./pin-icons.webp'" sw.js
+          git diff --check
+
+      - name: Commit exact website icons
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "jvtomax99"
+          git config user.email "jvtomax99@gmail.com"
+          git add index.html sw.js pin-icons.js pin-icons.webp
+          git add -u 'pin-sprite-v1-*.txt' || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Use exact enamel pin artwork across website icons"
+          git push origin HEAD:chatgpt-exact-icons
