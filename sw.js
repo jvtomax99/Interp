@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v30-medical-pins';
+const CACHE_VERSION = 'interpreter-hub-v31-pin-captions';
 const PRECACHE = [
   './',
   './index.html',

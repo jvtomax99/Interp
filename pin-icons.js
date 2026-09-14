@@ -243,6 +243,42 @@
     }
     ctx.putImageData(pixels, 0, 0);
   }
+
+  // Label fragments are separate from the enamel artwork. Remove only short
+  // components wholly below the largest pin component, preserving lettering
+  // inside the pin (EN/ES) and detached accents alongside it.
+  function clearCaptionFragments(ctx, width, height){
+    const pixels = ctx.getImageData(0, 0, width, height);
+    const data = pixels.data, size = width * height;
+    const seen = new Uint8Array(size), queue = new Int32Array(size);
+    const components = [];
+    for(let start=0;start<size;start++){
+      if(seen[start] || data[start*4+3] === 0) continue;
+      let head=0, tail=1, minY=height, maxY=0;
+      queue[0]=start; seen[start]=1;
+      while(head<tail){
+        const p=queue[head++], x=p%width, y=Math.floor(p/width);
+        minY=Math.min(minY,y); maxY=Math.max(maxY,y);
+        for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+          const nx=x+dx, ny=y+dy;
+          if(nx<0 || nx>=width || ny<0 || ny>=height) continue;
+          const n=ny*width+nx;
+          if(!seen[n] && data[n*4+3] !== 0){seen[n]=1;queue[tail++]=n;}
+        }
+      }
+      components.push({points:queue.slice(0,tail),minY,maxY});
+    }
+    const main=components.reduce((a,b)=>!a || b.points.length>a.points.length?b:a,null);
+    if(!main) return;
+    for(const part of components){
+      if(part!==main && part.minY>main.maxY+1 &&
+          part.minY>height*0.65 && part.maxY-part.minY+1<height*0.15){
+        for(const p of part.points) data[p*4+3]=0;
+      }
+    }
+    ctx.putImageData(pixels,0,0);
+  }
+
   const medicalImage = new Image();
   medicalImage.onload = () => {
     try{
@@ -264,6 +300,7 @@
         ctx.drawImage(medicalImage, col * 209 * scale, rowY[row] * scale,
           209 * scale, rowH[row] * scale, 0, (256-h)/2, 256, h);
         clearSheetBackground(ctx, 256, 256);
+        clearCaptionFragments(ctx, 256, 256);
         prepared[key] = canvas.toDataURL('image/png');
       });
       Object.assign(medicalArtwork, prepared);
