@@ -1,0 +1,140 @@
+name: ChatGPT full standalone icon redesign
+on:
+  push:
+    paths:
+      - '.github/workflows/chatgpt-full-icon-redesign.yml'
+permissions:
+  contents: write
+jobs:
+  redesign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace every domain icon with standalone illustrated artwork
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+          G='#A96F22'
+          D='#263442'
+
+          icons={
+          'bag': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="10" width="24" height="17" rx="3" fill="#D69A54" stroke="{G}" stroke-width="1.2"/><path d="M11 10V7.6A2.6 2.6 0 0 1 13.6 5h4.8A2.6 2.6 0 0 1 21 7.6V10" fill="none" stroke="{G}" stroke-width="1.3"/><rect x="12.5" y="14.5" width="7" height="8" rx="1.2" fill="#FFFDF8" stroke="{G}" stroke-width=".9"/><path d="M15 16h2v1.7h1.7v2H17v1.7h-2v-1.7h-1.7v-2H15Z" fill="#E83A46"/></svg>''',
+          'clipboard': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="5.5" width="20" height="23" rx="2.4" fill="#FFF7E9" stroke="{G}" stroke-width="1.2"/><rect x="11" y="3" width="10" height="5" rx="1.5" fill="#B8C9DA" stroke="{G}" stroke-width="1"/><g fill="#46A765" stroke="{G}" stroke-width=".55"><rect x="9" y="12" width="3.4" height="3.4" rx=".5"/><rect x="9" y="19" width="3.4" height="3.4" rx=".5"/></g><path d="m9.7 13.6 1 1 2.1-2M9.7 20.6l1 1 2.1-2" fill="none" stroke="#FFF" stroke-width=".8" stroke-linecap="round"/><path d="M15 13.7h7M15 20.7h7" stroke="#8B857D" stroke-width="1.2" stroke-linecap="round"/></svg>''',
+          'nurse': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="10.3" r="5.2" fill="#D99A6C" stroke="{G}" stroke-width="1.1"/><path d="M11.3 8h9.4l-.8-3.1h-7.8Z" fill="#FFF" stroke="{G}" stroke-width="1"/><path d="M14.8 5.3h2.4v1.2h1.2v2.4h-1.2v1.2h-2.4V8.9h-1.2V6.5h1.2Z" fill="#E52E42"/><circle cx="14" cy="10.3" r=".6" fill="{D}"/><circle cx="18" cy="10.3" r=".6" fill="{D}"/><path d="M13.2 12.3q2.8 2.6 5.6 0" fill="none" stroke="#8B4B45" stroke-width=".9" stroke-linecap="round"/><path d="M10.6 17.4 6.8 19a3 3 0 0 0-1.8 2.8v5.8h22v-5.8a3 3 0 0 0-1.8-2.8l-3.8-1.6L16 21.6Z" fill="#2F74D0" stroke="{G}" stroke-width="1.1"/><rect x="21" y="21" width="3.1" height="4" rx=".5" fill="#FFF" stroke="{G}" stroke-width=".8"/></svg>''',
+          'doctor': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="9.7" r="5.3" fill="#F3BE94" stroke="{G}" stroke-width="1.1"/><path d="M10.8 8.5c.5-3.4 2.6-5.2 5.3-5.2s4.8 1.8 5.2 5.1c-1.5-.7-2.8-1.1-4.3-1.2-1.8 1.1-3.8 1.5-6.2 1.3Z" fill="#44332F" stroke="{G}" stroke-width=".9"/><circle cx="14" cy="9.7" r=".6" fill="{D}"/><circle cx="18" cy="9.7" r=".6" fill="{D}"/><path d="M13.3 11.8q2.7 2.6 5.4 0" fill="#FFF" stroke="#8B4B45" stroke-width=".8" stroke-linecap="round"/><path d="M10.8 17.2 7.6 18.6a3.2 3.2 0 0 0-1.9 2.9v6.2h20.6v-6.2a3.2 3.2 0 0 0-1.9-2.9l-3.2-1.4-3.1 3H13.9Z" fill="#FFF" stroke="{G}" stroke-width="1.1"/><path d="M13.9 17.3 16 20.2l2.1-2.9" fill="#CDEEFF" stroke="{G}" stroke-width=".8"/><path d="M11.3 18.2v3.3a2.7 2.7 0 0 0 5.4 0v-1" fill="none" stroke="#245A92" stroke-width="1.1"/><circle cx="16.7" cy="21.4" r="1.35" fill="#EAF5FF" stroke="#245A92" stroke-width="1"/></svg>''',
+          'ambulance': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M3.5 11h16v13H3.5Z" fill="#FFF" stroke="{G}" stroke-width="1.1"/><path d="M19.5 15h5l4 4v5h-9Z" fill="#F5FAFF" stroke="{G}" stroke-width="1.1"/><path d="M7 14h2.3v2.1h2.1v2.3H9.3v2.1H7v-2.1H4.9v-2.3H7Z" fill="#E63B47"/><path d="M20.5 16.5h3l2.2 2.5h-5.2Z" fill="#84D2F4" stroke="{G}" stroke-width=".7"/><rect x="6" y="8" width="6" height="3" rx="1" fill="#E63B47" stroke="{G}" stroke-width=".8"/><circle cx="9" cy="24.5" r="2.8" fill="#354454" stroke="{G}" stroke-width="1"/><circle cx="23.8" cy="24.5" r="2.8" fill="#354454" stroke="{G}" stroke-width="1"/><circle cx="9" cy="24.5" r="1.1" fill="#DCE7F0"/><circle cx="23.8" cy="24.5" r="1.1" fill="#DCE7F0"/></svg>''',
+          'stethoscope': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M7 4v8a7 7 0 0 0 14 0V4" fill="none" stroke="#7D8995" stroke-width="2" stroke-linecap="round"/><circle cx="7" cy="4" r="1.5" fill="#263D59" stroke="{G}" stroke-width=".7"/><circle cx="21" cy="4" r="1.5" fill="#263D59" stroke="{G}" stroke-width=".7"/><path d="M14 19v3a5.5 5.5 0 0 0 11 0v-2" fill="none" stroke="#2465A9" stroke-width="2.2" stroke-linecap="round"/><circle cx="25" cy="17" r="4" fill="#DCE8F2" stroke="{G}" stroke-width="1.1"/><circle cx="25" cy="17" r="2.2" fill="#6D8093"/></svg>''',
+          'pulse': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 27S5 20.8 5 12.9C5 8.6 8 6 11.2 6c2.3 0 4 1.4 4.8 3.4C16.8 7.4 18.5 6 20.8 6 24 6 27 8.6 27 12.9 27 20.8 16 27 16 27Z" fill="#E43A45" stroke="{G}" stroke-width="1.2"/><path d="M7.8 15h4l1.8-4 3.2 7.2 1.8-3.2h5.5" fill="none" stroke="#FFD04A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>''',
+          'helicopter': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M9 13c3-3 10-3.3 14 .3 2.3 2 2.1 6.4-.4 8.4-3 2.4-9.7 2.3-13-.9-2.2-2.1-2.3-5.4-.6-7.8Z" fill="#4C96D7" stroke="{G}" stroke-width="1.1"/><path d="M22.5 16.4h5.8l1.5-2M23 19.2h6.5" fill="none" stroke="{G}" stroke-width="1.1" stroke-linecap="round"/><path d="M15.5 10V7M6 7h19" stroke="{G}" stroke-width="1.2" stroke-linecap="round"/><path d="M11 14.5h4.5v4.5H11Z" fill="#EAF6FF" stroke="{G}" stroke-width=".8"/><path d="M12.4 15.3h1.7v1.1h1.1v1.7h-1.1v1.1h-1.7v-1.1h-1.1v-1.7h1.1Z" fill="#E43A45"/><path d="M10 23.4h13" stroke="{G}" stroke-width="1.1" stroke-linecap="round"/></svg>''',
+          'flask': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M12 4h8M14 4v8L7.5 25.2A2 2 0 0 0 9.3 28h13.4a2 2 0 0 0 1.8-2.8L18 12V4" fill="#EEF8FF" stroke="{G}" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 21h12l2.1 4.8a1 1 0 0 1-.9 1.4H8.8a1 1 0 0 1-.9-1.4Z" fill="#7C62D9"/><circle cx="14" cy="23.5" r="1" fill="#C3B6FF"/><circle cx="18.3" cy="25" r="1.3" fill="#A491F1"/></svg>''',
+          'pill': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(-40 15 14)"><rect x="4" y="9" width="22" height="10" rx="5" fill="#FFF7E8" stroke="{G}" stroke-width="1.2"/><path d="M15 9h6a5 5 0 0 1 0 10h-6Z" fill="#F0474C"/><path d="M15 9v10" stroke="{G}" stroke-width="1"/></g><circle cx="24" cy="24" r="4" fill="#FFF" stroke="{G}" stroke-width="1.1"/><path d="M21.5 21.5 26.5 26.5" stroke="#B7AFA5" stroke-width="1"/></svg>''',
+          'iv': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M9 4h14v14a7 7 0 0 1-14 0Z" fill="#EDF9FF" stroke="{G}" stroke-width="1.2"/><path d="M10 12h12v6a6 6 0 0 1-12 0Z" fill="#56BDEB"/><path d="M13 8h6M13 10.5h4" stroke="#347BA6" stroke-width="1" stroke-linecap="round"/><path d="M16 25v4h5v-4" fill="none" stroke="#347BA6" stroke-width="1.2" stroke-linecap="round"/><rect x="20" y="21" width="3" height="5" rx="1" fill="#FFF" stroke="{G}" stroke-width=".8"/></svg>''',
+          'monitor': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="5" width="24" height="17" rx="2.5" fill="#273B50" stroke="{G}" stroke-width="1.2"/><path d="M7 14h4l2-4 3 8 2-4h7" fill="none" stroke="#59D7D0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 22v4M11 27h10" stroke="{G}" stroke-width="1.2" stroke-linecap="round"/><circle cx="25" cy="8" r="1" fill="#82D9A7"/></svg>''',
+          'shield': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 3 27 7v8c0 7-4.5 11-11 14-6.5-3-11-7-11-14V7Z" fill="#2D74D0" stroke="{G}" stroke-width="1.2"/><path d="M16 7.8v15.4" stroke="#7FC6FF" stroke-width="1" opacity=".7"/><rect x="11" y="13" width="10" height="8" rx="1.8" fill="#FFF"/><path d="M13 13v-2a3 3 0 0 1 6 0v2" fill="none" stroke="#FFF" stroke-width="1.6"/><circle cx="16" cy="17" r="1" fill="#245A92"/><path d="M16 18v1.5" stroke="#245A92" stroke-width="1"/></svg>''',
+          'phone': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="3" width="16" height="26" rx="3.5" fill="#28384B" stroke="{G}" stroke-width="1.2"/><rect x="10" y="6" width="12" height="18" rx="1.5" fill="#BDE9FF"/><circle cx="16" cy="13" r="3.2" fill="#C98E6B" stroke="{G}" stroke-width=".7"/><path d="M11.5 21c.7-3.2 2.2-4.8 4.5-4.8s3.8 1.6 4.5 4.8" fill="#7A5BCD" stroke="{G}" stroke-width=".7"/><path d="M11.2 12.7c.4-3.4 1.8-5 4.8-5s4.4 1.6 4.8 5" fill="none" stroke="#36495F" stroke-width="1.3"/><path d="M11.3 12.6v3M20.7 12.6v3" stroke="#36495F" stroke-width="1.5" stroke-linecap="round"/><circle cx="16" cy="26.5" r="1" fill="#7E8FA5"/></svg>''',
+          'chat': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4 6h17a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-8l-5 4v-4H7a3 3 0 0 1-3-3Z" fill="#4C8DF6" stroke="{G}" stroke-width="1.2"/><path d="M14 15h11a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-3l-4 3v-3h-4a3 3 0 0 1-3-3v-4" fill="#E9F1FA" stroke="{G}" stroke-width="1.1"/><circle cx="10" cy="13" r="1" fill="#FFF"/><circle cx="14" cy="13" r="1" fill="#FFF"/><circle cx="18" cy="13" r="1" fill="#FFF"/></svg>''',
+          'apple': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 9c-3.5-3-9-1.7-10 4.5-1.3 7.7 4.1 14 8 14 1 0 1.4-.5 2-.5s1 .5 2 .5c3.9 0 9.3-6.3 8-14C25 7.3 19.5 6 16 9Z" fill="#EF4246" stroke="{G}" stroke-width="1.2"/><path d="M16 9V5" stroke="#73451F" stroke-width="1.4" stroke-linecap="round"/><path d="M16.5 5c2-1.8 4-2 6-1.7-.6 2.3-2 3.8-5 4" fill="#5CB34A" stroke="{G}" stroke-width=".8"/></svg>''',
+          'ribbon': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 4c-4 0-6.5 2.4-6.5 6 0 4.5 4.3 7.5 6.5 9.5 2.2-2 6.5-5 6.5-9.5 0-3.6-2.5-6-6.5-6Z" fill="#7B3FB8" stroke="{G}" stroke-width="1.2"/><path d="M13 15 7.5 28l8.5-6 8.5 6L19 15" fill="#7B3FB8" stroke="{G}" stroke-width="1.2" stroke-linejoin="round"/></svg>''',
+          'heart': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 29C9 25.5 5 20.4 5.4 14.1c.3-4.8 3.3-8.4 7-8.1 2 .2 3.2 1.6 3.6 3.6.5-2 1.8-3.4 3.9-3.6 3.9-.3 6.8 3.5 6.7 8.2-.2 6.4-4.2 11.4-10.6 14.8Z" fill="#D81E2F" stroke="{G}" stroke-width="1.2"/><path d="M16 10c-1 5-1.5 9.5-1.3 15M10 14c2.7 1 4.3 2.4 5 4.3M22 13c-2.5 1.1-4.2 2.8-5 5" fill="none" stroke="#F4C845" stroke-width=".8" stroke-linecap="round"/><path d="M12 8 10 3M19 8l2-5M15 8V3" stroke="#2D68B3" stroke-width="1.5" stroke-linecap="round"/></svg>''',
+          'brain': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 27.2H11a4.5 4.5 0 0 1-3.7-7 4.8 4.8 0 0 1 .9-8.5 5 5 0 0 1 7.5-4.5 5 5 0 0 1 7.7 4.3 4.9 4.9 0 0 1 1.3 8.5 4.6 4.6 0 0 1-3.8 7.2h-5.2Z" fill="#F4A4C4" stroke="{G}" stroke-width="1.2"/><path d="M16 8v18M11 10c2 1 2.8 2.5 2.4 4.2M21 10c-2 1-2.8 2.5-2.4 4.2M9 18c2.4-.8 4-.2 5 1.6M23 18c-2.4-.8-4-.2-5 1.6" fill="none" stroke="#A45773" stroke-width=".9" stroke-linecap="round"/></svg>''',
+          'dna': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M9 3c0 7 14 7 14 14S9 24 9 29M23 3c0 7-14 7-14 14s14 7 14 12" fill="none" stroke="#6A57C8" stroke-width="2" stroke-linecap="round"/><path d="M10 6h12M8.8 11h14.4M9 22h14M11 27h10" stroke="#37A8DF" stroke-width="1.3" stroke-linecap="round"/></svg>''',
+          'lungs': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M15 7v7c-3.5-5-6.6-3.3-8.4.2C5 17.3 4.9 24 8.8 27c2.5 1.8 5.2-.3 6.2-3.2Z" fill="#F58DA0" stroke="{G}" stroke-width="1.2"/><path d="M17 7v7c3.5-5 6.6-3.3 8.4.2C27 17.3 27.1 24 23.2 27c-2.5 1.8-5.2-.3-6.2-3.2Z" fill="#F58DA0" stroke="{G}" stroke-width="1.2"/><path d="M16 3v12M16 10l-5 5M16 10l5 5" fill="none" stroke="#2367A8" stroke-width="1.5" stroke-linecap="round"/></svg>''',
+          'bone': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M9 10.5 21.5 23c1.8 1.8 4.5 1.8 5.8.5 1.1-1.1.8-2.6-.2-3.7 1.3-.1 2.5-1 2.5-2.5 0-2-2.2-3.3-4-2.3L13 2.5C11.2.7 8.5.7 7.2 2c-1.1 1.1-.8 2.6.2 3.7-1.3.1-2.5 1-2.5 2.5 0 2 2.2 3.3 4.1 2.3Z" fill="#F6E8C9" stroke="{G}" stroke-width="1.2" stroke-linejoin="round"/></svg>''',
+          'ear': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M18 3.5c6.2 0 10 4.4 10 10 0 4.6-2.2 6.7-5.1 8.8-2.3 1.7-2.1 6.2-6.5 6.2-3.5 0-5.5-2.6-5.5-5.6" fill="#F2B28F" stroke="{G}" stroke-width="1.2" stroke-linecap="round"/><path d="M20 9c-3.4-1.1-6 1.3-6 4 0 2.5 1.5 3.2 3.5 3.8 1.8.5 2.3 1.7 1.8 3.3-.4 1.2-1.3 2-2.8 2" fill="none" stroke="#C77C61" stroke-width="1.2" stroke-linecap="round"/><path d="M19 12c2.3.5 3 2.3 2.2 4" fill="none" stroke="#C77C61" stroke-width="1" stroke-linecap="round"/></svg>''',
+          'book': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4 6.5c5-1.8 9-1.2 12 1.2v19c-3-2.4-7-3-12-1.2Z" fill="#EAF5FF" stroke="{G}" stroke-width="1.1"/><path d="M28 6.5c-5-1.8-9-1.2-12 1.2v19c3-2.4 7-3 12-1.2Z" fill="#D6ECFF" stroke="{G}" stroke-width="1.1"/><path d="M8 11h5M8 14h4M19 11h5M19 14h4" stroke="#4D82B8" stroke-width="1" stroke-linecap="round"/></svg>''',
+          'search': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="13.5" cy="13.5" r="8.5" fill="#CDEEFF" stroke="{G}" stroke-width="1.4"/><circle cx="13.5" cy="13.5" r="5.7" fill="#EAF9FF"/><path d="m20 20 7 7" stroke="#4D77A4" stroke-width="3.2" stroke-linecap="round"/><path d="m21.5 21.5 5.5 5.5" stroke="{G}" stroke-width="1" stroke-linecap="round"/></svg>''',
+          'calendar': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="6" width="24" height="22" rx="3" fill="#FFF" stroke="{G}" stroke-width="1.2"/><path d="M4 11h24V8.5A2.5 2.5 0 0 0 25.5 6h-19A2.5 2.5 0 0 0 4 8.5Z" fill="#E54A56"/><path d="M10 3v6M22 3v6" stroke="{G}" stroke-width="1.4" stroke-linecap="round"/><path d="m10 19 3 3 7-7" fill="none" stroke="#48A76A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>''',
+          'grid': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="10" height="10" rx="2.2" fill="#3FADE3" stroke="{G}" stroke-width="1"/><rect x="18" y="4" width="10" height="10" rx="2.2" fill="#6B5CD5" stroke="{G}" stroke-width="1"/><rect x="4" y="18" width="10" height="10" rx="2.2" fill="#F2A93B" stroke="{G}" stroke-width="1"/><rect x="18" y="18" width="10" height="10" rx="2.2" fill="#62B96A" stroke="{G}" stroke-width="1"/></svg>''',
+          'link': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M12.2 19.8 9.5 22.5a5 5 0 0 1-7-7l5-5a5 5 0 0 1 7 0" fill="none" stroke="#4C8DD4" stroke-width="3" stroke-linecap="round"/><path d="m19.8 12.2 2.7-2.7a5 5 0 0 1 7 7l-5 5a5 5 0 0 1-7 0" fill="none" stroke="{G}" stroke-width="3" stroke-linecap="round"/><path d="m11 21 10-10" stroke="#6E5BC9" stroke-width="2" stroke-linecap="round"/></svg>''',
+          'bell': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M8 14c0-5 3-8 8-8s8 3 8 8v5l3 4H5l3-4Z" fill="#F3B536" stroke="{G}" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 25c.6 2 2 3 4 3s3.4-1 4-3" fill="#D69024" stroke="{G}" stroke-width="1"/><circle cx="16" cy="5" r="1.5" fill="#F8D36D" stroke="{G}" stroke-width=".7"/></svg>''',
+          'layers': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="m16 4 12 6-12 6L4 10Z" fill="#6A5BD1" stroke="{G}" stroke-width="1.1" stroke-linejoin="round"/><path d="m5 15 11 5.5L27 15" fill="none" stroke="#3DAAE0" stroke-width="3" stroke-linejoin="round"/><path d="m5 21 11 5.5L27 21" fill="none" stroke="#8E7BE1" stroke-width="3" stroke-linejoin="round"/></svg>''',
+          'sparkle': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="m16 2 2.4 8.6L27 13l-8.6 2.4L16 24l-2.4-8.6L5 13l8.6-2.4Z" fill="#FFD34D" stroke="{G}" stroke-width="1.1"/><path d="m25 20 1.2 3.8L30 25l-3.8 1.2L25 30l-1.2-3.8L20 25l3.8-1.2Z" fill="#F7A62E" stroke="{G}" stroke-width=".8"/><path d="m7 3 .8 2.7 2.7.8-2.7.8L7 10l-.8-2.7-2.7-.8 2.7-.8Z" fill="#FFF0A7" stroke="{G}" stroke-width=".7"/></svg>''',
+          'globe': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="13" fill="#59BCEB" stroke="{G}" stroke-width="1.2"/><path d="M5 12c3 1 5 0 7-2 2-2 4-1 5 1s3 2 5 1 3 0 5 1M8 21c2-2 4-2 6 0s3 4 2 7M20 5c-1 3 0 5 2 6" fill="none" stroke="#4CA95F" stroke-width="2.5" stroke-linecap="round"/><path d="M3 16h26M16 3c4 4 6 8 6 13s-2 9-6 13c-4-4-6-8-6-13s2-9 6-13Z" fill="none" stroke="#E9F8FF" stroke-width=".7" opacity=".8"/></svg>''',
+          'compass': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="13" fill="#EAF5FF" stroke="{G}" stroke-width="1.2"/><circle cx="16" cy="16" r="10" fill="#CDEBFA" stroke="#5E8FB3" stroke-width=".8"/><path d="m20.5 10.5-3 7-7 3 3-7Z" fill="#E34A55" stroke="{G}" stroke-width="1"/><path d="m11.5 21.5 3-7 7-3-3 7Z" fill="#456FA7" opacity=".7"/><circle cx="16" cy="16" r="1.3" fill="#FFF" stroke="{G}" stroke-width=".7"/></svg>''',
+          'exam': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="4" width="20" height="25" rx="2.5" fill="#FFF7E8" stroke="{G}" stroke-width="1.2"/><rect x="11" y="2" width="10" height="5" rx="1.5" fill="#B9C9D8" stroke="{G}" stroke-width=".9"/><path d="m9 13 2 2 4-4M9 21l2 2 4-4" fill="none" stroke="#48A76A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 13h6M17 21h6" stroke="#8B857D" stroke-width="1.1" stroke-linecap="round"/></svg>''',
+          'person': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="10" r="6" fill="#E2A275" stroke="{G}" stroke-width="1.1"/><path d="M10.4 8.5c.8-3.5 2.8-5 5.6-5s4.8 1.5 5.6 5c-2-1.2-3.7-1.6-5.6-1.6s-3.6.4-5.6 1.6Z" fill="#43342F"/><circle cx="14" cy="10" r=".6" fill="{D}"/><circle cx="18" cy="10" r=".6" fill="{D}"/><path d="M13.4 12q2.6 2.5 5.2 0" fill="none" stroke="#8B4B45" stroke-width=".8" stroke-linecap="round"/><path d="M5 28c.8-7 4.6-10.5 11-10.5S26.2 21 27 28Z" fill="#4D87D8" stroke="{G}" stroke-width="1.1"/></svg>''',
+          'review': f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="8" width="18" height="16" rx="2" fill="#EAF5FF" stroke="{G}" stroke-width="1.1" transform="rotate(-7 14 16)"/><rect x="9" y="6" width="18" height="16" rx="2" fill="#FFF8EA" stroke="{G}" stroke-width="1.1" transform="rotate(5 18 14)"/><text x="12" y="16" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#2D6FAF">A</text><text x="19" y="20" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#E14E59">Á</text><path d="M13 24q3 3 6 0" fill="none" stroke="#48A76A" stroke-width="1.2" stroke-linecap="round"/></svg>''',
+          }
+
+          # Replace all 36 known domain icon entries in place. No wrappers,
+          # plates, circles or icon-background containers are added.
+          start=text.index('const DOMAIN_ICONS = {')
+          end=text.index('\n};',start)+3
+          block=text[start:end]
+          keys=re.findall(r"(?m)^  ([A-Za-z0-9_-]+): '",block)
+          missing=[k for k in keys if k not in icons]
+          extra=[k for k in icons if k not in keys]
+          if missing or extra:
+              raise SystemExit(f'Icon map mismatch. missing designs={missing} extra designs={extra}')
+          for key in keys:
+              pat=re.compile(rf"(?m)^  {re.escape(key)}: '.*?',\s*$")
+              block,n=pat.subn(lambda m,k=key: f"  {k}: '{icons[k]}',",block,count=1)
+              if n!=1: raise SystemExit(f'Could not replace {key}')
+          text=text[:start]+block+text[end:]
+
+          # Standalone waving hand replaces the emoji in the home greeting.
+          wave=f'''<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M10 27c-3-3.2-4.2-7-3.2-10.5l1.4-5c.4-1.4 2.3-1.2 2.4.3l.1 3.1 2-9.7c.3-1.5 2.4-1.3 2.4.2v7.2L17.7 4c.4-1.4 2.4-1 2.2.5l-1.3 8.6 3.4-7.3c.6-1.3 2.5-.6 2 .8l-2.5 7.6 3.5-4.7c.9-1.2 2.6-.1 1.9 1.2l-3.7 7c-1.4 2.8-2.3 5.4-2 8.3-3.7 2.8-7.6 3-11.2 1Z" fill="#F4B071" stroke="{G}" stroke-width="1.1" stroke-linejoin="round"/><path d="M9.1 18c3.5-.6 6.3.6 8.2 3.2" fill="none" stroke="#C77C52" stroke-width="1" stroke-linecap="round"/><path d="M4 11c-2 2.3-2.5 5.1-1.5 7.5M3.8 7C.4 10.6-.4 15 .9 19" fill="none" stroke="#F4B42F" stroke-width="1.8" stroke-linecap="round"/></svg>'''
+          marker='const ICON_EXTERNAL = '
+          if 'const ICON_WAVE = ' not in text:
+              pos=text.index(marker)
+              text=text[:pos]+f"const ICON_WAVE = '{wave}';\n"+text[pos:]
+          old="${firstName ? escapeHtml(firstName) + ' \\u{1F44B}' : 'Welcome \\u{1F44B}'}"
+          new="${firstName ? escapeHtml(firstName) : 'Welcome'} <span class=\"home-wave-icon\">${ICON_WAVE}</span>"
+          if old not in text:
+              raise SystemExit('Greeting wave target not found')
+          text=text.replace(old,new,1)
+
+          css='''\n/* Illustrated icons are the artwork itself: no chip, bubble, plate or frame. */\n.home-tile-icon,.qa-icon,.qa-tile-icon{background:transparent !important;border:0 !important;box-shadow:none !important;border-radius:0 !important;overflow:visible !important;}\n.home-tile-icon svg,.qa-icon svg,.qa-tile-icon svg,.icon-pick svg{overflow:visible;filter:drop-shadow(0 1.2px 1.2px rgba(70,45,25,.13));}\n.home-wave-icon{display:inline-flex;width:.92em;height:.92em;vertical-align:-.09em;margin-left:.1em;}\n.home-wave-icon svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));}\n'''
+          # Replace older ChatGPT icon overrides instead of stacking more rules.
+          text=re.sub(r'\n/\* ChatGPT icon-only enamel pin refresh \*/.*?(?=\n</style>)','',text,flags=re.S)
+          pos=text.rfind('</style>')
+          text=text[:pos]+css+text[pos:]
+
+          # HMH uses only the real mark asset, never generated artwork or wordmark image.
+          text=text.replace('src="./hmh-logo.png"','src="./hmh-mark.png"')
+          text=text.replace('src="hmh-logo.png"','src="./hmh-mark.png"')
+          text=text.replace('src="./hmh-logo-white.png"','src="./hmh-mark.png"')
+          text=text.replace('src="hmh-logo-white.png"','src="./hmh-mark.png"')
+
+          p.write_text(text,encoding='utf-8')
+
+          # Safety checks: all 36 keys remain, every one was redrawn, and the
+          # previous bubble treatment is gone.
+          out=p.read_text(encoding='utf-8')
+          a=out.index('const DOMAIN_ICONS = {'); b=out.index('\n};',a)+3
+          outblock=out[a:b]
+          outkeys=re.findall(r"(?m)^  ([A-Za-z0-9_-]+): '",outblock)
+          if outkeys!=keys: raise SystemExit('DOMAIN_ICONS key order changed')
+          if 'var(--ic-fill)' in outblock or 'var(--ic-line)' in outblock:
+              raise SystemExit('An old line-art icon remains')
+          if any(x in outblock for x in ('pinShadow','pinFace','docFace')):
+              raise SystemExit('Old bubble artwork remains')
+          if '\\u{1F44B}' in out:
+              raise SystemExit('Old greeting emoji remains')
+          print('Redesigned standalone icons:',len(outkeys))
+          print('Greeting wave replaced with standalone illustrated hand')
+          PY
+          git diff --check
+
+      - name: Verify only icon presentation changed
+        shell: bash
+        run: |
+          git diff --name-only
+          test "$(git diff --name-only | grep -v '^index.html$' | grep -v '^.github/workflows/chatgpt-full-icon-redesign.yml$' | wc -l)" -eq 0
+
+      - name: Commit full icon redesign
+        shell: bash
+        run: |
+          git config user.name "jvtomax99"
+          git config user.email "jvtomax99@gmail.com"
+          git add index.html
+          git rm .github/workflows/chatgpt-full-icon-redesign.yml
+          git commit -m "Redesign all icons as standalone illustrations"
+          git push
