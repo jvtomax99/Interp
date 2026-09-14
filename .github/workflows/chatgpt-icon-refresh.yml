@@ -1,0 +1,78 @@
+name: ChatGPT icon-only refresh
+on:
+  push:
+    paths:
+      - '.github/workflows/chatgpt-icon-refresh.yml'
+permissions:
+  contents: write
+jobs:
+  update-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply icon-only styling
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          css_marker = '/* CHATGPT_ENAMEL_PIN_ICONS */'
+          js_marker = '/* CHATGPT_SMILING_DOCTOR_ICON */'
+          if css_marker not in s:
+              css = r'''\n/* CHATGPT_ENAMEL_PIN_ICONS */
+/* Icon-only treatment: cute enamel-pin finish. No layout, wording, or app logic changes. */
+.home-tile-icon, .qa-icon, .qa-tile-icon, .folder-tile-icon,
+.group-icon-art, .gs-ico{
+  border:2px solid #c79a3b !important;
+  border-radius:14px !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,246,224,.78)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),inset 0 -2px 0 rgba(139,91,20,.12),0 3px 6px rgba(67,46,24,.16) !important;
+  overflow:visible;
+}
+.home-tile-icon svg, .qa-icon svg, .qa-tile-icon svg, .folder-tile-icon svg,
+.group-icon-art svg, .gs-ico svg{
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.8));
+}
+html[data-theme="dark"] .home-tile-icon,
+html[data-theme="dark"] .qa-icon,
+html[data-theme="dark"] .qa-tile-icon,
+html[data-theme="dark"] .folder-tile-icon,
+html[data-theme="dark"] .group-icon-art,
+html[data-theme="dark"] .gs-ico{
+  background:linear-gradient(145deg,rgba(255,250,238,.18),rgba(255,222,164,.08)) !important;
+  border-color:#d5aa52 !important;
+}
+/* HMH stays the official symbol only. The image itself is not recolored or redrawn. */
+.tg-mark, .group-mark-logo{ object-fit:contain; }
+'''
+              s = s.replace('</style>', css + '\n</style>', 1)
+          if js_marker not in s:
+              js = r'''\n<script>
+/* CHATGPT_SMILING_DOCTOR_ICON */
+/* The physician icon is intentionally a friendly, smiling enamel-pin portrait. */
+(function(){
+  const smilingDoctor = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M15 56c1-12 7-18 17-18s16 6 17 18" fill="#d9efff" stroke="#b9852f" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M24 39l8 7 8-7 3 17H21z" fill="#fff" stroke="#b9852f" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="32" cy="25" r="13" fill="#f4c7a1" stroke="#b9852f" stroke-width="3"/>
+    <path d="M19 24c0-10 5-16 13-16 8 0 13 6 13 16-4-1-7-4-9-8-4 5-10 7-17 8z" fill="#49352f" stroke="#b9852f" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="27" cy="25" r="1.6" fill="#342823"/><circle cx="37" cy="25" r="1.6" fill="#342823"/>
+    <path d="M27 31c3.2 3 6.8 3 10 0" fill="none" stroke="#a64d57" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M23 42c-4 2-5 8-3 12M41 42c4 2 5 8 3 12" fill="none" stroke="#6a87a8" stroke-width="2.3" stroke-linecap="round"/>
+    <circle cx="20" cy="54" r="2.7" fill="#b9d8ee" stroke="#b9852f" stroke-width="1.8"/>
+    <path d="M48 12l1.4 3.1L53 16.5l-3.6 1.4L48 21l-1.4-3.1-3.6-1.4 3.6-1.4z" fill="#ffd76b" stroke="#b9852f" stroke-width="1.3"/>
+  </svg>`;
+  try{ if(typeof DOMAIN_ICONS !== 'undefined') DOMAIN_ICONS.doctor = smilingDoctor; }catch(e){}
+})();
+</script>
+'''
+              s = s.replace('</body>', js + '\n</body>', 1)
+          p.write_text(s)
+      - name: Commit icon-only change
+        run: |
+          git config user.name "ChatGPT"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Refresh website icons with enamel pin styling"
+          git push
