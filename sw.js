@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v32-chat-crop';
+const CACHE_VERSION = 'interpreter-hub-v33-specialty-pins';
 const PRECACHE = [
   './',
   './index.html',
@@ -38,6 +38,7 @@ const PRECACHE = [
   './pin-icons-source-hd-upload.png',
   './pin-icons.js',
   './medical-pins.png.PNG',
+  './specialty-pins.png.PNG',
   './manifest.webmanifest'
 ];
 

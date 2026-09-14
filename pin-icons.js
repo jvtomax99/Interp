@@ -153,6 +153,10 @@
     'developmental & neurology':'neurology'
   };
   const medicalRules = [
+    [/\binfectious\b|\binfection(?:s)?\b/, 'infectious-disease'],
+    [/\bdermatology\b|\bdermatologic(?:al)?\b/, 'dermatology'],
+    [/\bophthalmology\b|\bophthalmic\b/, 'ophthalmology'],
+    [/\bsurgery\b|\bsurgical\b|\ban(?:a)?esthesia\b/, 'surgery-anesthesia'],
     [/\bgenetic(?:s)?\b|\bgenomic(?:s)?\b/, 'genetics'],
     [/\bleukemia\b/, 'leukemia'], [/\bhematology\b|\bblood bank\b/, 'hematology'],
     [/\boncology\b|\bcancer\b/, 'oncology'],
@@ -179,7 +183,7 @@
     return src ? '<img class="medical-pin" src="' + src + '" alt="" aria-hidden="true" draggable="false">' : '';
   }
   function applyMedicalPins(){
-    if(!medicalArtwork.wave) return;
+    if(!Object.keys(medicalArtwork).length) return;
     document.querySelectorAll('.home-wave-icon').forEach(el => placeMedicalPin(el, 'wave'));
     [
       ['.qa-card', '.qa-title', '.qa-icon'],
@@ -338,6 +342,41 @@
   };
   medicalImage.onerror = () => console.warn('Medical pin sheet unavailable; keeping existing icons.');
   medicalImage.src = medicalSource;
+
+
+  // Label-free 2 x 2 specialty sheet. Keep each quadrant separate and preserve
+  // its original transparency and enamel details.
+  const specialtyImage = new Image();
+  specialtyImage.onload = () => {
+    try{
+      if(Math.abs(specialtyImage.naturalWidth / specialtyImage.naturalHeight - 1) > 0.02){
+        throw new Error('Expected the square four-pin specialty sheet.');
+      }
+      const names = ['infectious-disease','dermatology','ophthalmology','surgery-anesthesia'];
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      if(!ctx) return;
+      const w = specialtyImage.naturalWidth / 2, h = specialtyImage.naturalHeight / 2;
+      const prepared = Object.create(null);
+      names.forEach((key, i) => {
+        ctx.clearRect(0, 0, 256, 256);
+        ctx.drawImage(specialtyImage, (i % 2) * w, Math.floor(i / 2) * h,
+          w, h, 0, 0, 256, 256);
+        prepared[key] = canvas.toDataURL('image/png');
+      });
+      Object.assign(medicalArtwork, prepared);
+      if(typeof DOMAIN_ICONS !== 'undefined'){
+        names.forEach(key => { DOMAIN_ICONS[key] = medicalHTML(key); });
+      }
+      if(typeof render === 'function') render();
+      applyExactPins();
+    }catch(error){
+      console.warn('Specialty pins unavailable; keeping existing icons.', error);
+    }
+  };
+  specialtyImage.onerror = () => console.warn('Specialty pin sheet unavailable; keeping existing icons.');
+  specialtyImage.src = './specialty-pins.png.PNG';
 
   // Re-render once so every domain/card immediately picks up the exact artwork.
   if(typeof render === 'function') render();
