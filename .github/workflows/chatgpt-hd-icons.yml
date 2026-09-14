@@ -1,0 +1,89 @@
+name: Build high definition icon assets
+
+on:
+  push:
+    branches: [chatgpt-hd-icon-upgrade]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt-hd-icon-upgrade
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build 4x high-definition enamel-pin sprite
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image, ImageFilter
+          from pathlib import Path
+
+          src = Path('pin-icons.webp')
+          if not src.exists():
+              raise SystemExit('pin-icons.webp is missing')
+
+          im = Image.open(src).convert('RGBA')
+          w, h = im.size
+          # The website displays each cell at roughly 23-34 CSS px. A 4x
+          # master gives every icon enough source pixels for 3x Retina screens
+          # while keeping exactly the same artwork and sprite coordinates.
+          up = im.resize((w * 4, h * 4), Image.Resampling.LANCZOS)
+
+          # Sharpen RGB detail only. Keep the resampled alpha channel untouched
+          # so the standalone icons retain clean transparent edges/no bubbles.
+          alpha = up.getchannel('A')
+          rgb = up.convert('RGB').filter(
+              ImageFilter.UnsharpMask(radius=1.15, percent=115, threshold=2)
+          )
+          out = Image.merge('RGBA', (*rgb.split(), alpha))
+          out.save('pin-icons-hd.webp', 'WEBP', quality=98, method=6)
+          print(f'HD sprite: {w}x{h} -> {w*4}x{h*4}')
+          PY
+
+      - name: Point the website at the HD master without changing layout
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('pin-icons.js')
+          s = p.read_text()
+          s = s.replace("background-image:url('./pin-icons.webp');", "background-image:url('./pin-icons-hd.webp?v=hd1');")
+          if 'image-rendering:auto;' not in s:
+              s = s.replace('background-repeat:no-repeat;', 'background-repeat:no-repeat;\n  image-rendering:auto;')
+          p.write_text(s)
+
+          sw = Path('sw.js')
+          s = sw.read_text()
+          s = s.replace("const CACHE_VERSION = 'interpreter-hub-v27';", "const CACHE_VERSION = 'interpreter-hub-v28';")
+          if "'./pin-icons-hd.webp'" not in s:
+              s = s.replace("'./pin-icons.webp',", "'./pin-icons.webp',\n  './pin-icons-hd.webp',")
+          sw.write_text(s)
+          PY
+
+      - name: Verify icon-only implementation
+        run: |
+          test -s pin-icons-hd.webp
+          grep -q "pin-icons-hd.webp?v=hd1" pin-icons.js
+          grep -q "interpreter-hub-v28" sw.js
+          python - <<'PY'
+          from PIL import Image
+          im = Image.open('pin-icons-hd.webp')
+          assert im.width >= 1024 and im.height >= 1024, im.size
+          print('Verified', im.size)
+          PY
+
+      - name: Commit generated HD asset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pin-icons-hd.webp pin-icons.js sw.js
+          git commit -m "Upgrade website icons to high definition" || exit 0
+          git push origin HEAD:chatgpt-hd-icon-upgrade
