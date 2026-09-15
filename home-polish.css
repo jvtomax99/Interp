@@ -3,12 +3,13 @@
 .main.home-layout{--home-inset:48px;}
 #content.is-home .home-greeting{
   min-height:220px;gap:0;padding:17px var(--home-inset) 39px;
-  background:#1a496a;align-items:flex-start;
+  background:transparent;align-items:flex-start;
 }
-#content.is-home .home-greeting-photo{-webkit-mask-image:none;mask-image:none;filter:brightness(1.08);}
+/* Retain the original curved photo/scrim masks so the page rises softly
+   behind Search. A transparent hero lets the same page color show through. */
+#content.is-home .home-greeting-photo{filter:brightness(1.08);}
 #content.is-home .home-greeting-photo-drift{background-position:69% 48%;}
 #content.is-home .home-greeting-scrim{
-  -webkit-mask-image:none;mask-image:none;
   background:linear-gradient(90deg,#0c28486b 0%,#1438561f 57%,#12345105 100%),
              linear-gradient(0deg,#0b2b4538,transparent 48%);
 }
