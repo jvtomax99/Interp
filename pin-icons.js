@@ -283,6 +283,32 @@
     ctx.putImageData(pixels,0,0);
   }
 
+  // Match the approved preview's optical sizing. Trim only transparent space
+  // after the existing background/caption cleanup, then fit each pin into the
+  // same square without stretching it or changing any artwork pixels.
+  function fittedPinURL(canvas){
+    const ctx = canvas.getContext('2d');
+    const {width, height} = canvas;
+    const {data} = ctx.getImageData(0, 0, width, height);
+    let left = width, top = height, right = -1, bottom = -1;
+    for(let y=0; y<height; y++) for(let x=0; x<width; x++){
+      if(data[(y*width+x)*4+3] > 50){
+        left = Math.min(left,x); top = Math.min(top,y);
+        right = Math.max(right,x); bottom = Math.max(bottom,y);
+      }
+    }
+    if(right < left || bottom < top) return canvas.toDataURL('image/png');
+    left = Math.max(0,left-2); top = Math.max(0,top-2);
+    right = Math.min(width-1,right+2); bottom = Math.min(height-1,bottom+2);
+    const fitted = document.createElement('canvas');
+    fitted.width = fitted.height = 256;
+    const output = fitted.getContext('2d');
+    if(!output) return canvas.toDataURL('image/png');
+    const w = right-left+1, h = bottom-top+1, scale = 252/Math.max(w,h);
+    output.drawImage(canvas,left,top,w,h,(256-w*scale)/2,(256-h*scale)/2,w*scale,h*scale);
+    return fitted.toDataURL('image/png');
+  }
+
   const medicalImage = new Image();
   medicalImage.onload = () => {
     try{
@@ -310,7 +336,7 @@
           209 * scale, cropHeight * scale, 0, (256-h)/2, 256, drawHeight);
         clearSheetBackground(ctx, 256, 256);
         clearCaptionFragments(ctx, 256, 256);
-        prepared[key] = canvas.toDataURL('image/png');
+        prepared[key] = fittedPinURL(canvas);
       });
       Object.assign(medicalArtwork, prepared);
       if(typeof DOMAIN_ICONS !== 'undefined'){
@@ -363,7 +389,7 @@
         ctx.clearRect(0, 0, 256, 256);
         ctx.drawImage(specialtyImage, (i % 2) * w, Math.floor(i / 2) * h,
           w, h, 0, 0, 256, 256);
-        prepared[key] = canvas.toDataURL('image/png');
+        prepared[key] = fittedPinURL(canvas);
       });
       Object.assign(medicalArtwork, prepared);
       if(typeof DOMAIN_ICONS !== 'undefined'){

@@ -3993,6 +3993,8 @@
 .home-wave-icon{display:inline-flex;width:.92em;height:.92em;vertical-align:-.09em;margin-left:.1em;}
 .home-wave-icon svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));}
 </style>
+<link rel="stylesheet" href="./home-polish.css">
+<script src="./home-polish.js" defer></script>
 </head>
 <body>
 
@@ -4301,6 +4303,20 @@
       <button class="folder-close" type="button" onclick="closeDomainFolder()" aria-label="Close">&#10005;</button>
     </div>
     <div class="folder-grid" id="domainFolderGrid"></div>
+  </div>
+</div>
+
+<div class="overlay folder-overlay" id="homeSectionOverlay" onclick="if(event.target===this) closeHomeSection()">
+  <div class="modal home-section-panel" id="homeSectionPanel" role="dialog" aria-modal="true" aria-labelledby="homeSectionTitle">
+    <div class="folder-head">
+      <span class="folder-icon" id="homeSectionIcon"></span>
+      <span class="folder-titles">
+        <h3 id="homeSectionTitle"></h3>
+        <span class="folder-sub" id="homeSectionSub"></span>
+      </span>
+      <button class="folder-close" type="button" onclick="closeHomeSection()" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="home-section-grid" id="homeSectionGrid"></div>
   </div>
 </div>
 
@@ -5593,7 +5609,7 @@ let announcementsListenerStarted = false;
 let pendingImportPlan = null;
 
 // First-run onboarding — a short walkthrough shown automatically once per
-// device, replayable any time from Home. Content lives in one array so
+// device, replayable any time from the User Guide. Content lives in one array so
 // adding/reordering a step later doesn't touch the rendering logic.
 let onboardingStep = 0;
 const ONBOARDING_STEPS = [
@@ -5636,6 +5652,7 @@ function closeOnboarding(){
 function completeOnboarding(){
   try{ localStorage.setItem('ih_onboarded', '1'); }catch(e){}
   closeOnboarding();
+  if(activeCategory === 'home') renderContent();
   // Best moment to ask: they've just seen what the app does, and every
   // shared action (terms, chat, providers) is gated on having a name anyway.
   // Saved once, it now sticks across launches, so this should only ever
@@ -8668,6 +8685,7 @@ function renderUserGuide(){
       <div class="guide-head">
         <h2>How do I&hellip;</h2>
         <p>Tap a question to see the answer. Nothing here can break anything &mdash; have a look around.</p>
+        <button type="button" class="btn btn-ghost" onclick="openOnboarding()">Take the tour</button>
       </div>
       <div class="guide-search">
         ${ICON_SEARCH}
@@ -9701,6 +9719,11 @@ window.addEventListener('scroll', ()=>{
 
 function renderContent(){
   const content = document.getElementById('content');
+  if(content){
+    content.classList.toggle('is-home', activeCategory === 'home');
+    const main = content.closest('.main');
+    if(main) main.classList.toggle('home-layout', activeCategory === 'home');
+  }
   // Folded once here and passed down, so every filter below compares
   // accent-stripped text against accent-stripped text.
   const q = foldText(searchQuery.trim());
@@ -9723,6 +9746,7 @@ function renderContent(){
     lastHomeHtml = homeHtml;
     lastPaintedContentEl = content;
     content.innerHTML = homeHtml;
+    if(typeof initHomeRails === 'function') initHomeRails(content);
     startGreetingRotation();
     animateCountUps(!sameScreen);
     // Re-cache the photo layer (the old node was just thrown away) and put it
@@ -9733,6 +9757,7 @@ function renderContent(){
     return;
   }
   heroPhotoEl = null;     // off Home: the scroll handler does nothing
+  if(typeof clearHomeRails === 'function') clearHomeRails();
   stopGreetingRotation(); // never leave the timer running on other sections
 
   if(activeCategory === 'events'){
@@ -11193,8 +11218,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0913.1904';
-const BUILD_TIME = '2026-09-09 23:34 UTC';
+const BUILD_ID = 'b0915.0747';
+const BUILD_TIME = '2026-09-15 07:47 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -11362,19 +11387,21 @@ const INTERPRETER_TIPS = [
 const HOME_SECTION_COLORS = {
   'Medical Terminology': '#2E8BD0',
   'Doctors': '#7C6A9C',
-  'Study & Professional Development': '#35A97A',
+  'Study & Development': '#35A97A',
   'Tools & Reference': '#BFA05E',
 };
 
 function renderHomeSection(title, moreLabel, moreAction, cardsHtml){
   const sectionColor = HOME_SECTION_COLORS[title] || 'var(--accent)';
+  const key = {'Medical Terminology':'medical','Doctors':'doctors','Study & Development':'study','Tools & Reference':'tools'}[title] || '';
   return `
-    <section class="home-sec" style="--section-color:${sectionColor}">
+    <section class="home-sec" data-home-section="${key}" style="--section-color:${sectionColor}">
       <div class="home-sec-head">
         <h3>${escapeHtml(title)}</h3>
-        ${moreAction ? `<button class="home-sec-more" onclick="${moreAction}">${escapeHtml(moreLabel)} \u2192</button>` : ''}
+        ${moreAction ? `<button type="button" class="home-sec-more" onclick="${moreAction}" aria-label="${escapeAttr(moreLabel + ' ' + title)}">${escapeHtml(moreLabel)} ${ICON_CHEVRON_RIGHT}</button>` : ''}
       </div>
       <div class="home-rail">${cardsHtml}</div>
+      <div class="home-rail-dots" aria-hidden="true"></div>
     </section>`;
 }
 
@@ -11435,7 +11462,7 @@ function renderHome(){
                   onclick="${kids.length ? `openDomainFolder('${parent.id}', this)` : `setCategory('${parent.id}')`}">
             <span class="home-tile-icon">${parent.icon}</span>
             <span class="home-tile-name">${escapeHtml(parent.name)}</span>
-            <span class="home-tile-count">${totalTerms} ${totalTerms===1?'term':'terms'}${kids.length ? ` \u00b7 ${kids.length} sub` : ''}</span>
+            <span class="home-tile-count"><span class="home-tile-count-text"><span class="home-term-count">${totalTerms} ${totalTerms===1?'term':'terms'}</span>${kids.length ? `<span class="home-specialty-count">${kids.length} ${kids.length===1?'specialty':'specialties'}</span>` : ''}</span></span>
           </button>
         </div>`;
     }).join('');
@@ -11488,10 +11515,10 @@ function renderHome(){
         <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
         <h1 class="home-greeting-name">${firstName ? escapeHtml(firstName) : 'Welcome'} <span class="home-wave-icon">${ICON_WAVE}</span></h1>
         <p class="home-greeting-quote">${SESSION_QUOTE}</p>
-        <div class="home-greeting-actions">
+        ${(!firstName || shouldShowOnboarding()) ? `<div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
-          <button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>
-        </div>
+          ${shouldShowOnboarding() ? `<button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>` : ''}
+        </div>` : ''}
       </div>
     </div>
 
@@ -11500,13 +11527,13 @@ function renderHome(){
       <span>Search terms, doctors, or the app…</span>
     </button>
 
-    <section class="home-sec">
+    <section class="home-sec home-quick-section">
       <div class="qa-grid">${quickActions}</div>
     </section>
     ${renderHomeSection('Medical Terminology', 'View all', `setCategory('all')`, termCards)}
-    ${renderHomeSection('Doctors', '', '', doctorCards)}
-    ${renderHomeSection('Study & Professional Development', '', '', studyCards)}
-    ${renderHomeSection('Tools & Reference', '', '', utilityCards)}
+    ${renderHomeSection('Doctors', 'View all', `openHomeSection('doctors')`, doctorCards)}
+    ${renderHomeSection('Study & Development', 'View all', `openHomeSection('study')`, studyCards)}
+    ${renderHomeSection('Tools & Reference', 'View all', `openHomeSection('tools')`, utilityCards)}
 
     <section class="home-sec">
       <div class="home-sec-head">
