@@ -2,23 +2,54 @@
    Existing feature pages retain their layout; colors use the app's theme tokens. */
 .main.home-layout{--home-inset:48px;}
 #content.is-home .home-greeting{
-  min-height:220px;gap:0;padding:28px var(--home-inset) 49px;
-  background:#173a64;
+  min-height:220px;gap:0;padding:17px var(--home-inset) 39px;
+  background:#1a496a;align-items:flex-start;
 }
-#content.is-home .home-greeting-photo{-webkit-mask-image:none;mask-image:none;}
+#content.is-home .home-greeting-photo{-webkit-mask-image:none;mask-image:none;filter:brightness(1.08);}
+#content.is-home .home-greeting-photo-drift{background-position:69% 48%;}
 #content.is-home .home-greeting-scrim{
   -webkit-mask-image:none;mask-image:none;
-  background:linear-gradient(90deg,rgba(11,31,59,.92),rgba(13,37,68,.67) 40%,rgba(12,32,60,.12)),
-             linear-gradient(0deg,rgba(11,31,59,.48),transparent 60%);
+  background:linear-gradient(90deg,#0c28486b 0%,#1438561f 57%,#12345105 100%),
+             linear-gradient(0deg,#0b2b4538,transparent 48%);
 }
-#content.is-home .home-greeting-text{max-width:42ch;text-shadow:none;}
-#content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;letter-spacing:.145em;color:#d3e8ff;margin-bottom:4px;}
-#content.is-home .home-greeting-name{font-size:39px;font-weight:600;line-height:1.16;letter-spacing:-.03em;margin:0;}
+#content.is-home .home-greeting-text{
+  width:min(310px,100%);max-width:none;margin-top:0;padding:11px 15px 12px;
+  border:1px solid #e2f6ff69;border-radius:21px;
+  background:linear-gradient(125deg,#254e6eaf,#24466572);
+  -webkit-backdrop-filter:blur(9px) saturate(1.15);backdrop-filter:blur(9px) saturate(1.15);
+  box-shadow:inset 0 1px 0 #ffffff26,inset 0 -1px 0 #0b24332b,0 9px 22px -14px #051b3499;
+  color:#fff;text-shadow:none;
+}
+#content.is-home .home-greeting-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 9px;}
+#content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;line-height:1.3;letter-spacing:.1em;color:#e9f7ff;margin:0;}
+#content.is-home .home-greeting-date{white-space:nowrap;font-size:11px;line-height:1.3;letter-spacing:-.015em;color:#f3f9ff;}
+#content.is-home .home-greeting-name-row{display:flex;align-items:center;gap:9px;margin-top:3px;}
+#content.is-home .home-greeting-name{
+  min-width:0;font-size:42px;font-weight:600;line-height:1.15;letter-spacing:-.045em;
+  margin:0;color:#fff;text-shadow:none;overflow-wrap:anywhere;
+}
+#content.is-home .home-greeting-name.is-long{font-size:32px;}
+#content.is-home .home-wave-icon{
+  display:grid;place-items:center;width:48px;height:48px;flex:none;margin:0;padding:3px;
+  border:0;border-radius:12px;background:transparent;color:#fff;cursor:pointer;
+  transform-origin:68% 80%;-webkit-tap-highlight-color:transparent;
+}
+#content.is-home .home-wave-icon svg,#content.is-home .home-wave-icon .medical-pin,
+#content.is-home .home-wave-icon .pin-sprite{width:42px;height:42px;filter:drop-shadow(0 2px 2px #06213f44);pointer-events:none;}
+#content.is-home .home-wave-icon:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+#content.is-home .home-wave-icon:active{background:#ffffff20;}
+#content.is-home .home-wave-icon.is-waving{animation:homeHelloWave 1.3s ease-in-out 1;}
+@keyframes homeHelloWave{
+  0%,100%{transform:rotate(0deg)}14%{transform:rotate(15deg)}30%{transform:rotate(-10deg)}
+  46%{transform:rotate(15deg)}62%{transform:rotate(-6deg)}78%{transform:rotate(7deg)}
+}
 #content.is-home .home-greeting-quote{
-  font:400 14px/1.55 var(--sans);color:#edf5ff;max-width:36ch;margin:10px 0 0;
-  text-shadow:none;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+  font:italic 400 13px/1.35 var(--serif);color:#f5faff;max-width:none;margin:9px 0 0;padding:0;border:0;
+  letter-spacing:0;text-shadow:none;display:block;overflow:visible;
 }
+#content.is-home .home-greeting-quote cite{display:block;margin-top:4px;font:400 11px/1.3 var(--sans);letter-spacing:.01em;color:#daecf8;}
 #content.is-home .home-greeting-actions{margin-top:13px;}
+#content.is-home .home-greeting-btn{min-height:44px;}
 #content.is-home .home-greeting-actions:empty{display:none;}
 #content.is-home .home-search{
   height:50px;margin:-25px 0 18px;padding:0 14px;gap:11px;border-radius:16px;
@@ -106,10 +137,8 @@
 }
 @media(max-width:819px){
   .main.home-layout{--home-inset:16px;padding:0 var(--home-inset) 26px;}
-  #content.is-home .home-greeting{min-height:197px;margin:0 calc(-1 * var(--home-inset));padding:28px 22px 49px;}
-  #content.is-home .home-greeting-name{font-size:34px;}
-  #content.is-home .home-greeting-quote{font-size:13px;max-width:28ch;}
-  #content.is-home .home-wave-icon,#content.is-home .home-wave-icon .medical-pin{width:32px;height:32px;}
+  #content.is-home .home-greeting{min-height:205px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
+  #content.is-home .home-greeting-text{width:min(278px,calc(100% - 36px));}
   #content.is-home .home-rail{
     grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 22px)/2.14);
     gap:11px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
@@ -138,7 +167,9 @@
 }
 @media(max-width:365px){
   .main.home-layout{--home-inset:13px;}
-  #content.is-home .home-greeting{padding-left:19px;}
+  #content.is-home .home-greeting-text{padding-left:12px;padding-right:12px;}
+  #content.is-home .home-greeting-eyebrow{letter-spacing:.05em;}
+  #content.is-home .home-greeting-name{font-size:39px;}
   #content.is-home .qa-grid{gap:5px;}
   #content.is-home .qa-tile-label{font-size:11px;}
   #content.is-home .home-sec-head h3{font-size:16px;}
@@ -152,4 +183,7 @@
     box-shadow:inset 0 1px 0 var(--finish-edge),0 7px 14px rgba(35,68,107,.07);
   }
 }
-@media(prefers-reduced-motion:reduce){.home-rail-dots span{transition:none;}}
+@media(prefers-reduced-motion:reduce){
+  .home-rail-dots span{transition:none;}
+  #content.is-home .home-wave-icon.is-waving{animation:none;}
+}

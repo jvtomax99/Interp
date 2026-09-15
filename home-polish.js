@@ -1,5 +1,22 @@
 /* Local presentation only. Each copied tool keeps its existing app action. */
 (() => {
+  let hasWavedHello = false;
+  window.initHomeGreeting = function(content){
+    const wave = content && content.querySelector('.home-wave-icon');
+    if(!wave || wave.dataset.waveReady) return;
+    wave.dataset.waveReady = 'true';
+    const play = () => {
+      wave.classList.remove('is-waving');
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      void wave.offsetWidth;
+      wave.classList.add('is-waving');
+    };
+    wave.addEventListener('animationend', () => wave.classList.remove('is-waving'));
+    wave.addEventListener('click', play);
+    // Data arrivals and theme changes rebuild Home. Only the first paint
+    // waves automatically; tapping the hand always lets someone replay it.
+    if(!hasWavedHello){ hasWavedHello = true; play(); }
+  };
   let railObserver = null;
   window.clearHomeRails = function(){
     if(railObserver) railObserver.disconnect();
@@ -53,5 +70,8 @@
     if(overlay) overlay.classList.remove('show');
   };
   const content = document.getElementById('content');
-  if(content && content.classList.contains('is-home')) initHomeRails(content);
+  if(content && content.classList.contains('is-home')){
+    initHomeGreeting(content);
+    initHomeRails(content);
+  }
 })();

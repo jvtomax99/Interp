@@ -9746,6 +9746,7 @@ function renderContent(){
     lastHomeHtml = homeHtml;
     lastPaintedContentEl = content;
     content.innerHTML = homeHtml;
+    if(typeof initHomeGreeting === 'function') initHomeGreeting(content);
     if(typeof initHomeRails === 'function') initHomeRails(content);
     startGreetingRotation();
     animateCountUps(!sameScreen);
@@ -11087,7 +11088,16 @@ function refreshRelativeTimes(){
 function syncTimeOfDay(){
   const el = document.getElementById('homeGreeting');
   if(!el) return;
-  const want = 'tod-' + timeOfDayPeriod();
+  const now = new Date();
+  const greeting = el.querySelector('.home-greeting-eyebrow');
+  const date = el.querySelector('.home-greeting-date');
+  if(greeting) greeting.textContent = greetingForNow(now).toUpperCase() + ',';
+  if(date){
+    const localDate = homeDateForNow(now);
+    date.dateTime = localDate.iso;
+    date.textContent = localDate.label;
+  }
+  const want = 'tod-' + timeOfDayPeriod(now);
   if(el.classList.contains(want)) return;
   ['tod-dawn','tod-day','tod-dusk','tod-night'].forEach(c => el.classList.remove(c));
   el.classList.add(want);
@@ -11218,8 +11228,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0915.0747';
-const BUILD_TIME = '2026-09-15 07:47 UTC';
+const BUILD_ID = 'b0915.1716';
+const BUILD_TIME = '2026-09-15 17:16 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -11242,11 +11252,18 @@ function timeOfDayPeriod(when){
 
 // Local-clock greeting — uses the device's own time, so an interpreter on a
 // night shift gets "Good evening" rather than whatever the server thinks.
-function greetingForNow(){
-  const h = new Date().getHours();
+function greetingForNow(when = new Date()){
+  const h = when.getHours();
   if(h < 12) return 'Good morning';
   if(h < 18) return 'Good afternoon';
   return 'Good evening';
+}
+
+function homeDateForNow(when){
+  return {
+    iso: [when.getFullYear(), String(when.getMonth() + 1).padStart(2,'0'), String(when.getDate()).padStart(2,'0')].join('-'),
+    label: new Intl.DateTimeFormat('en-US', {weekday:'short', month:'short', day:'numeric'}).format(when)
+  };
 }
 
 // Five destinations, chosen by what an interpreter reaches for mid-shift.
@@ -11421,12 +11438,18 @@ function qaCard(color, icon, title, desc, action){
    collection arrives, so the quote visibly flickered through two or three
    different lines before settling. A re-render should repaint the same page,
    not deal a new hand. They still change every time the app is opened. */
-const SESSION_QUOTE = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+// Keep the existing attributed, short quotes complete inside the glass panel.
+const HOME_QUOTES = MOTIVATIONAL_QUOTES.filter(quote => quote.includes(' \u2014 '))
+  .map(quote => { const [text, author] = quote.split(' \u2014 '); return {text, author}; })
+  .filter(quote => quote.text.length <= 60);
+const SESSION_QUOTE = HOME_QUOTES[Math.floor(Math.random() * HOME_QUOTES.length)];
 const SESSION_TIP = INTERPRETER_TIPS[Math.floor(Math.random() * INTERPRETER_TIPS.length)];
 
 function renderHome(){
   const who = whoAmI();
   const firstName = who ? who.trim().split(/\s+/)[0] : '';
+  const now = new Date();
+  const localDate = homeDateForNow(now);
 
   // Four compact tiles rather than description cards: at this size the label
   // alone is enough, and it keeps the whole row on screen without swiping.
@@ -11508,13 +11531,19 @@ function renderHome(){
   const tip = SESSION_TIP;
 
   return `
-    <div class="home-greeting tod-${timeOfDayPeriod()}" id="homeGreeting">
+    <div class="home-greeting tod-${timeOfDayPeriod(now)}" id="homeGreeting">
       <div class="home-greeting-photo"><div class="home-greeting-photo-inner"><div class="home-greeting-photo-drift"></div></div></div>
       <div class="home-greeting-scrim"></div>
       <div class="home-greeting-text">
-        <div class="home-greeting-eyebrow">${greetingForNow().toUpperCase()},</div>
-        <h1 class="home-greeting-name">${firstName ? escapeHtml(firstName) : 'Welcome'} <span class="home-wave-icon">${ICON_WAVE}</span></h1>
-        <p class="home-greeting-quote">${SESSION_QUOTE}</p>
+        <div class="home-greeting-meta">
+          <div class="home-greeting-eyebrow">${greetingForNow(now).toUpperCase()},</div>
+          <time class="home-greeting-date" datetime="${localDate.iso}">${escapeHtml(localDate.label)}</time>
+        </div>
+        <div class="home-greeting-name-row">
+          <h1 class="home-greeting-name${firstName.length > 10 ? ' is-long' : ''}">${firstName ? escapeHtml(firstName) : 'Welcome'}</h1>
+          <button type="button" class="home-wave-icon" aria-label="Wave hello again">${ICON_WAVE}</button>
+        </div>
+        <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<cite>${escapeHtml(SESSION_QUOTE.author)}</cite></blockquote>
         ${(!firstName || shouldShowOnboarding()) ? `<div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
           ${shouldShowOnboarding() ? `<button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>` : ''}
