@@ -9434,6 +9434,390 @@ const FALSE_FRIENDS = [
     truth:"It was a tragedy.",
     note:"Por desgracia means unfortunately. A disgrace in the shameful sense is una deshonra."
   },
+  {
+    es:"receta", looks:"recipe", means:"prescription",
+    say:"receta de cocina", risk:"critical", tag:"Medications",
+    heard:"Perdí la receta que me dio el doctor.",
+    trap:"I lost the recipe the doctor gave me.",
+    truth:"I lost the prescription the doctor gave me.",
+    note:"Receta is both, and the kitchen sense is the one an English ear reaches for. In a pharmacy conversation it is always the prescription."
+  },
+  {
+    es:"seno", looks:"sinus only", means:"breast — and also a sinus",
+    say:"depends on sense", risk:"critical", tag:"Imaging / OB",
+    heard:"Me duelen los senos.",
+    trap:"My sinuses hurt.",
+    truth:"My breasts hurt — unless she means senos paranasales.",
+    note:"Genuinely both, and they order completely different imaging. Senos paranasales is explicit for sinuses. If the sentence does not settle it, ask before it reaches a requisition."
+  },
+  {
+    es:"accidente cerebrovascular", looks:"an accident", means:"a stroke",
+    say:"accidente (for a mishap)", risk:"critical", tag:"Neuro",
+    heard:"Mi esposo tuvo un accidente cerebrovascular.",
+    trap:"My husband had an accident — heard as a fall or a crash.",
+    truth:"My husband had a stroke.",
+    note:"Often shortened to ACV. Dropping cerebrovascular turns a stroke history into a trauma history, and the two send triage in opposite directions."
+  },
+  {
+    es:"derrame", looks:"drainage", means:"a bleed, or a collection of fluid",
+    say:"drenaje", risk:"critical", tag:"Neuro / Pulm",
+    heard:"Tuvo un derrame.",
+    trap:"He had some drainage.",
+    truth:"He had a stroke — derrame cerebral. Confirm which kind.",
+    note:"Derrame cerebral is a stroke or brain bleed; derrame pleural is a pleural effusion. Alone it means a spill. Never render it as drainage."
+  },
+  {
+    es:"excitado", looks:"excited", means:"sexually aroused",
+    say:"emocionado, entusiasmado", risk:"critical", tag:"Communication",
+    heard:"El niño estaba muy excitado.",
+    trap:"The child was very aroused.",
+    truth:"The child was very worked up.",
+    note:"Going into Spanish this is the dangerous direction: telling a patient estoy excitado for I am excited is a serious misstep. Use emocionado."
+  },
+  {
+    es:"demandar", looks:"to demand", means:"to sue",
+    say:"exigir, reclamar", risk:"critical", tag:"Legal",
+    heard:"Voy a demandar al hospital.",
+    trap:"I am going to demand from the hospital.",
+    truth:"I am going to sue the hospital.",
+    note:"A stated intention to sue is a different conversation from a request, and it has to reach the chart as what it is. Una demanda is a lawsuit."
+  },
+  {
+    es:"denunciar", looks:"to denounce", means:"to report to the authorities",
+    say:"criticar públicamente", risk:"critical", tag:"Legal / Safeguarding",
+    heard:"Quiero denunciar lo que pasó.",
+    trap:"I want to denounce what happened.",
+    truth:"I want to report what happened.",
+    note:"Carries no sense of grandstanding — it is the ordinary word for filing a report about abuse, violence or a crime. Rendering it as denounce makes a safeguarding disclosure sound like a complaint."
+  },
+  {
+    es:"intervención", looks:"intervention", means:"an operation, a procedure",
+    say:"intervención (for addiction) is not used this way", risk:"critical", tag:"Surgery",
+    heard:"Le van a hacer una intervención.",
+    trap:"They are going to do an intervention.",
+    truth:"He is going to have an operation.",
+    note:"Spanish has no equivalent of the family-confrontation sense of intervention. Intervención quirúrgica is surgery."
+  },
+  {
+    es:"bulto", looks:"bulk", means:"a lump",
+    say:"volumen, grueso", risk:"critical", tag:"Exam",
+    heard:"Me encontré un bulto.",
+    trap:"I found some bulk.",
+    truth:"I found a lump.",
+    note:"A patient reporting a bulto is reporting a mass. Nothing about it is vague."
+  },
+  {
+    es:"inflamado", looks:"inflamed", means:"swollen",
+    say:"con inflamación (for true inflammation)", risk:"critical", tag:"Exam",
+    heard:"Tengo el pie inflamado.",
+    trap:"My foot is inflamed — heard as an inflammatory process.",
+    truth:"My foot is swollen.",
+    note:"Most patients mean swelling, not inflammation. Rendering it as inflamed can suggest infection or an inflammatory condition that nobody described."
+  },
+  {
+    es:"alta", looks:"high", means:"discharge from hospital",
+    say:"alto, elevado", risk:"critical", tag:"Admin",
+    heard:"Ya me dieron de alta.",
+    trap:"They already gave me high.",
+    truth:"I have already been discharged.",
+    note:"Dar de alta is to discharge; darse de alta is to register. The adjective alta meaning high is a different word doing a different job in the sentence."
+  },
+  {
+    es:"ingreso", looks:"income", means:"hospital admission — and also income",
+    say:"depends on sense", risk:"critical", tag:"Admin",
+    heard:"Fue un ingreso de urgencia.",
+    trap:"It was an emergency income.",
+    truth:"It was an emergency admission.",
+    note:"Both senses are real and both come up in the same interview — admissions history and financial screening. Let the surrounding sentence decide."
+  },
+  {
+    es:"ardor", looks:"ardour, passion", means:"burning",
+    say:"pasión, entusiasmo", risk:"high", tag:"Symptoms",
+    heard:"Siento ardor al orinar.",
+    trap:"I feel passion when I urinate.",
+    truth:"I have burning when I urinate.",
+    note:"A straightforward symptom word. Ardor de estómago is heartburn."
+  },
+  {
+    es:"acidez", looks:"acidity (a lab value)", means:"heartburn",
+    say:"acidez (in chemistry) is fine", risk:"high", tag:"GI",
+    heard:"Tengo mucha acidez.",
+    trap:"I have high acidity.",
+    truth:"I get a lot of heartburn.",
+    note:"From a patient it is reflux, not a measurement. Agruras is the common Mexican word for the same thing."
+  },
+  {
+    es:"entumecido", looks:"entombed", means:"numb",
+    say:"sepultado", risk:"high", tag:"Neuro",
+    heard:"Tengo la mano entumecida.",
+    trap:"My hand is entombed.",
+    truth:"My hand is numb.",
+    note:"Adormecido is the other common word for the same sensation — literally the limb has fallen asleep."
+  },
+  {
+    es:"estómago", looks:"stomach (the organ)", means:"the whole belly, in patient speech",
+    say:"el estómago (organ) vs el abdomen", risk:"high", tag:"GI",
+    heard:"Me duele el estómago.",
+    trap:"My stomach hurts — heard as epigastric.",
+    truth:"My belly hurts. Ask where.",
+    note:"Patients use estómago for anything between the ribs and the hips. Localising the pain is the interpreter's cue to let the clinician ask, not to guess."
+  },
+  {
+    es:"crisis", looks:"a crisis", means:"an attack, an episode",
+    say:"emergencia, situación grave", risk:"high", tag:"Clinical",
+    heard:"Le dio una crisis asmática.",
+    trap:"He had an asthma crisis.",
+    truth:"He had an asthma attack.",
+    note:"Crisis convulsiva is a seizure, crisis hipertensiva is a hypertensive emergency. English crisis sounds more catastrophic than the Spanish word usually is."
+  },
+  {
+    es:"ataque", looks:"an attack (assault)", means:"an episode — cardiac, seizure, or panic",
+    say:"agresión, asalto", risk:"high", tag:"Clinical",
+    heard:"Le dio un ataque.",
+    trap:"He was attacked.",
+    truth:"He had an attack — ask what kind.",
+    note:"On its own it is ambiguous even in Spanish: ataque al corazón, ataque epiléptico, ataque de nervios and ataque de ansiedad are four different events. Ask before choosing."
+  },
+  {
+    es:"pulmonía", looks:"pulmonary (adjective)", means:"pneumonia",
+    say:"pulmonar", risk:"high", tag:"Pulm",
+    heard:"Tuvo pulmonía el invierno pasado.",
+    trap:"He had something pulmonary last winter.",
+    truth:"He had pneumonia last winter.",
+    note:"Pulmonía is the everyday word, neumonía the clinical one. Both mean pneumonia — a specific diagnosis, not a general chest problem."
+  },
+  {
+    es:"calentura", looks:"warmth", means:"fever — and in some regions, lust",
+    say:"fiebre", risk:"high", tag:"Symptoms",
+    heard:"El niño tiene calentura.",
+    trap:"The child is warm.",
+    truth:"The child has a fever.",
+    note:"From a parent about a child it is fever, every time. The other sense exists in some countries, which is a reason to use fiebre yourself rather than a reason to hesitate over what a parent means."
+  },
+  {
+    es:"seguro", looks:"sure, safe", means:"insurance",
+    say:"seguro also means safe — context decides", risk:"high", tag:"Admin",
+    heard:"No tengo seguro.",
+    trap:"I am not sure.",
+    truth:"I do not have insurance.",
+    note:"Tengo seguro is I have coverage; estoy seguro is I am sure. The noun and the adjective look identical and only the sentence separates them."
+  },
+  {
+    es:"póliza", looks:"police", means:"an insurance policy",
+    say:"policía", risk:"high", tag:"Admin",
+    heard:"Traje mi póliza.",
+    trap:"I brought the police.",
+    truth:"I brought my insurance policy.",
+    note:"One letter and one stress mark apart from policía, and they turn up in very different conversations."
+  },
+  {
+    es:"alumbramiento", looks:"lighting, illumination", means:"delivery of the placenta",
+    say:"iluminación", risk:"high", tag:"OB",
+    heard:"El alumbramiento fue rápido.",
+    trap:"The lighting was quick.",
+    truth:"The placenta was delivered quickly.",
+    note:"Used loosely for childbirth as a whole, but in clinical Spanish it is specifically the third stage of labour. Parto is the birth itself."
+  },
+  {
+    es:"parto", looks:"part", means:"childbirth, delivery",
+    say:"parte", risk:"high", tag:"OB",
+    heard:"Fue un parto difícil.",
+    trap:"It was a difficult part.",
+    truth:"It was a difficult delivery.",
+    note:"Trabajo de parto is labour; sala de partos is the delivery room."
+  },
+  {
+    es:"vejiga", looks:"vesicle", means:"bladder — and also a blister",
+    say:"depends on sense", risk:"high", tag:"Anatomy",
+    heard:"Tengo una vejiga en el pie.",
+    trap:"I have a bladder in my foot.",
+    truth:"I have a blister on my foot.",
+    note:"Overlaps with ampolla for the blister sense. In anatomy, vejiga on its own is the bladder."
+  },
+  {
+    es:"pecho", looks:"chest only", means:"chest — and also breast",
+    say:"tórax, or seno / mama", risk:"high", tag:"Anatomy",
+    heard:"Me duele el pecho.",
+    trap:"Confidently rendering it either way.",
+    truth:"My chest hurts — or my breast hurts. Ask.",
+    note:"Dar el pecho is to breastfeed. Cardiac chest pain and breast pain are not the same complaint, and pecho does not distinguish them."
+  },
+  {
+    es:"registrar", looks:"to register", means:"to search",
+    say:"inscribir, registrarse", risk:"high", tag:"Admin",
+    heard:"Me registraron en la entrada.",
+    trap:"They registered me at the entrance.",
+    truth:"They searched me at the entrance.",
+    note:"Registrarse (reflexive) is to sign in. Registrar a alguien is to search them — a different experience to describe."
+  },
+  {
+    es:"resumir", looks:"to resume", means:"to summarize",
+    say:"reanudar", risk:"high", tag:"Communication",
+    heard:"Voy a resumir lo que dijo.",
+    trap:"I am going to resume what he said.",
+    truth:"I am going to summarize what he said.",
+    note:"To resume a treatment after a pause is reanudar."
+  },
+  {
+    es:"tratar", looks:"to treat only", means:"to treat — and, with de, to try",
+    say:"intentar", risk:"high", tag:"Clinical",
+    heard:"Traté de tomarlo.",
+    trap:"I treated myself by taking it.",
+    truth:"I tried to take it.",
+    note:"Tratar de + verb is to try. Without de it is to treat or to deal with. A medication-adherence answer can hinge on the preposition."
+  },
+  {
+    es:"padecer", looks:"to pass away", means:"to suffer from a condition",
+    say:"fallecer, morir", risk:"high", tag:"History",
+    heard:"Padece del corazón.",
+    trap:"He passed from the heart.",
+    truth:"He has heart trouble.",
+    note:"Padecimiento is a condition or ailment. Nothing in the word implies death."
+  },
+  {
+    es:"aviso", looks:"advice", means:"a notice, a warning",
+    say:"consejo", risk:"everyday", tag:"Communication",
+    heard:"Me llegó un aviso del hospital.",
+    trap:"I got some advice from the hospital.",
+    truth:"I got a notice from the hospital.",
+    note:"Advice is consejo. Avisar is to let someone know, not to advise them."
+  },
+  {
+    es:"advertir", looks:"to advertise", means:"to warn",
+    say:"anunciar, publicitar", risk:"everyday", tag:"Communication",
+    heard:"Le advirtieron del riesgo.",
+    trap:"They advertised the risk to him.",
+    truth:"They warned him about the risk.",
+    note:"Turns a documented warning into marketing, which matters when consent is the subject."
+  },
+  {
+    es:"simpático", looks:"sympathetic", means:"friendly, likeable",
+    say:"comprensivo, solidario", risk:"everyday", tag:"Communication",
+    heard:"El doctor fue muy simpático.",
+    trap:"The doctor was very sympathetic.",
+    truth:"The doctor was very pleasant.",
+    note:"A comment on manner, not on compassion. The sympathetic nervous system is sistema nervioso simpático, which is a separate technical use."
+  },
+  {
+    es:"comprensivo", looks:"comprehensive", means:"understanding",
+    say:"completo, exhaustivo", risk:"everyday", tag:"Communication",
+    heard:"Necesito un doctor comprensivo.",
+    trap:"I need a comprehensive doctor.",
+    truth:"I need an understanding doctor.",
+    note:"A comprehensive exam is un examen completo."
+  },
+  {
+    es:"educado", looks:"educated", means:"polite, well-mannered",
+    say:"culto, con estudios", risk:"everyday", tag:"Communication",
+    heard:"Es un muchacho muy educado.",
+    trap:"He is a very educated boy.",
+    truth:"He is a very polite boy.",
+    note:"A comment on manners, not schooling. Educational level is nivel de estudios."
+  },
+  {
+    es:"formal", looks:"formal", means:"reliable, dependable",
+    say:"formal (in dress or register) also exists", risk:"everyday", tag:"Communication",
+    heard:"Es una persona muy formal.",
+    trap:"He is a very formal person.",
+    truth:"He is a very reliable person.",
+    note:"Its opposite carries the load: informal means unreliable, not casual."
+  },
+  {
+    es:"particular", looks:"particular, specific", means:"private",
+    say:"específico, concreto", risk:"everyday", tag:"Admin",
+    heard:"Lo vi con un médico particular.",
+    trap:"I saw a particular doctor.",
+    truth:"I saw a private doctor.",
+    note:"Consulta particular is a private practice — relevant to where prior records live."
+  },
+  {
+    es:"suceso", looks:"success", means:"an event, an occurrence",
+    say:"éxito", risk:"everyday", tag:"Communication",
+    heard:"Fue un suceso inesperado.",
+    trap:"It was an unexpected success.",
+    truth:"It was an unexpected event.",
+    note:"Pairs with éxito, which is the real word for success. Suceder is to happen."
+  },
+  {
+    es:"embarazoso", looks:"pregnant (by association)", means:"embarrassing, awkward",
+    say:"embarazada (pregnant)", risk:"everyday", tag:"Communication",
+    heard:"Fue una situación embarazosa.",
+    trap:"It was a pregnant situation.",
+    truth:"It was an awkward situation.",
+    note:"The adjective everyone expects embarazada to be. Worth knowing precisely because the famous trap makes people over-correct."
+  },
+  {
+    es:"emocionante", looks:"emotional", means:"exciting, moving",
+    say:"emotivo, sentimental", risk:"everyday", tag:"Communication",
+    heard:"Fue muy emocionante.",
+    trap:"It was very emotional.",
+    truth:"It was very exciting.",
+    note:"Emocionado is excited, not emotional. The safer word for emotionally affected is afectado."
+  },
+  {
+    es:"probar", looks:"to probe", means:"to try, to taste, to test",
+    say:"sondear, examinar", risk:"everyday", tag:"Clinical",
+    heard:"Vamos a probar otro medicamento.",
+    trap:"We are going to probe another medication.",
+    truth:"We are going to try another medication.",
+    note:"Probarse la ropa is to try clothes on. Nothing invasive is implied."
+  },
+  {
+    es:"blando", looks:"bland", means:"soft",
+    say:"soso, sin sal", risk:"everyday", tag:"Diet",
+    heard:"Me pusieron dieta blanda.",
+    trap:"They put me on a bland diet.",
+    truth:"They put me on a soft diet.",
+    note:"A soft diet is about texture, a bland diet about seasoning, and they are ordered for different reasons. Bland in the flavourless sense is soso."
+  },
+  {
+    es:"cita", looks:"to cite, a citation", means:"an appointment",
+    say:"citar (to quote)", risk:"everyday", tag:"Admin",
+    heard:"Tengo cita el martes.",
+    trap:"I have a citation on Tuesday.",
+    truth:"I have an appointment on Tuesday.",
+    note:"Citación is the legal summons. Cita on its own is an appointment or a date."
+  },
+  {
+    es:"carta", looks:"card, cart", means:"a letter",
+    say:"tarjeta", risk:"everyday", tag:"Admin",
+    heard:"Me mandaron una carta.",
+    trap:"They sent me a card.",
+    truth:"They sent me a letter.",
+    note:"Insurance card is tarjeta de seguro. A letter from the hospital is what carta means."
+  },
+  {
+    es:"planta", looks:"plant", means:"floor of a building — and the sole of the foot",
+    say:"fábrica (industrial plant)", risk:"everyday", tag:"Anatomy / Admin",
+    heard:"Está en la tercera planta.",
+    trap:"He is at the third plant.",
+    truth:"He is on the third floor.",
+    note:"Planta del pie is the sole. Both senses turn up in a hospital, one in directions and one on an exam."
+  },
+  {
+    es:"sala", looks:"salon", means:"a room or ward",
+    say:"salón de belleza", risk:"everyday", tag:"Admin",
+    heard:"Está en la sala de espera.",
+    trap:"He is in the waiting salon.",
+    truth:"He is in the waiting room.",
+    note:"Sala de partos, sala de operaciones, sala de emergencias — the building blocks of hospital directions."
+  },
+  {
+    es:"ropa", looks:"rope", means:"clothing",
+    say:"cuerda, soga", risk:"everyday", tag:"Everyday",
+    heard:"Quítese la ropa, por favor.",
+    trap:"Take off the rope, please.",
+    truth:"Please take off your clothes.",
+    note:"Turns up in every exam-room instruction there is."
+  },
+  {
+    es:"quejarse", looks:"to quake", means:"to complain",
+    say:"temblar", risk:"everyday", tag:"Symptoms",
+    heard:"Se queja de dolor.",
+    trap:"He quakes with pain.",
+    truth:"He complains of pain.",
+    note:"Se queja de is the standard way a family member reports a symptom on someone else's behalf."
+  },
 ];
 
 
@@ -11987,7 +12371,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.0926';
+const BUILD_ID = 'b0916.0936';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
