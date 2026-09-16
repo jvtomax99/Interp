@@ -266,3 +266,78 @@ html[data-theme="dark"] #content.is-home .home-greeting::after{
 @media(max-width:365px){
   #content.is-home .home-greeting::after{ background-size:340px 100px; }
 }
+
+
+/* ---------- Folder open: spring, stagger, blur ramp ----------
+   The panel already grew from the tapped card, but everything inside it
+   arrived fully formed -- which reads as a box scaling up rather than a
+   folder opening. Three changes, all compositor-only (transform/opacity)
+   except the one-shot backdrop ramp.
+
+   These use ID specificity because the base rules in index.html are
+   .folder-overlay .folder-panel and this has to win. That is also why the
+   reduced-motion block at the bottom is repeated here at the SAME ID
+   specificity: the guard in index.html is only (0,2,0), so without this copy
+   these rules would quietly override it and animate for someone who asked
+   for no animation. */
+/* An animation, not a transition, and that is not a style preference.
+   The overlay flips display:none -> flex in the same frame the .show class
+   lands, so a transition has no rendered start state to move from and simply
+   paints the final size. That is why .modal carried animation:modalIn in the
+   first place. modalIn is replaced rather than kept, because an animation
+   outranks a transition in the cascade -- it had been driving transform for
+   its first 220ms, quietly overriding the grow-from-the-tapped-card scale
+   this folder was supposed to have. The inline transform-origin that
+   openDomainFolder() sets from the tapped card still applies. */
+@keyframes folderPanelIn{
+  from{ opacity:0; transform:scale(.80); }
+  to  { opacity:1; transform:scale(1); }
+}
+#domainFolder .folder-panel,
+#homeSectionOverlay .home-section-panel{
+  /* Overshoots slightly past full size and settles. Weight, rather than a glide. */
+  animation:folderPanelIn .40s cubic-bezier(.34,1.42,.5,1) both;
+}
+#domainFolder.show .folder-panel,
+#homeSectionOverlay.show .home-section-panel{ opacity:1; }
+
+@keyframes folderTileIn{
+  from{ opacity:0; transform:translateY(14px) scale(.94); }
+  to  { opacity:1; transform:none; }
+}
+#domainFolder.show .folder-tile,
+#homeSectionOverlay.show .home-section-grid>.qa-card{
+  animation:folderTileIn .40s cubic-bezier(.2,.9,.3,1) both;
+}
+/* Each tile starts a beat after the one before. 26ms is enough to read as a
+   cascade and short enough that the whole set has landed well inside half a
+   second -- nobody is waiting on it. */
+#domainFolder.show .folder-tile:nth-child(1),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(1){animation-delay:.03s}
+#domainFolder.show .folder-tile:nth-child(2),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(2){animation-delay:.056s}
+#domainFolder.show .folder-tile:nth-child(3),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(3){animation-delay:.082s}
+#domainFolder.show .folder-tile:nth-child(4),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(4){animation-delay:.108s}
+#domainFolder.show .folder-tile:nth-child(5),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(5){animation-delay:.134s}
+#domainFolder.show .folder-tile:nth-child(6),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(6){animation-delay:.16s}
+#domainFolder.show .folder-tile:nth-child(7),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(7){animation-delay:.186s}
+#domainFolder.show .folder-tile:nth-child(8),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(8){animation-delay:.212s}
+/* Past eight the delay stops growing, so a long list never feels sluggish. */
+#domainFolder.show .folder-tile:nth-child(n+9),#homeSectionOverlay.show .home-section-grid>.qa-card:nth-child(n+9){animation-delay:.23s}
+
+/* The backdrop used to snap to 14px blur. Ramping it makes the page behind
+   recede instead of being swapped out. This is the one expensive property
+   here, so it runs once, briefly, and is never animated again. */
+@keyframes folderBackdropIn{
+  from{ -webkit-backdrop-filter:blur(0px) saturate(100%); backdrop-filter:blur(0px) saturate(100%); background-color:rgba(12,22,38,0); }
+  to  { -webkit-backdrop-filter:blur(14px) saturate(130%); backdrop-filter:blur(14px) saturate(130%); background-color:rgba(12,22,38,.42); }
+}
+#domainFolder.show,#homeSectionOverlay.show{
+  animation:folderBackdropIn .34s var(--ease) both;
+}
+
+@media (prefers-reduced-motion:reduce){
+  #domainFolder .folder-panel,
+  #homeSectionOverlay .home-section-panel{ animation:none; transition:opacity .15s linear; transform:none; opacity:1; }
+  #domainFolder.show .folder-tile,
+  #homeSectionOverlay.show .home-section-grid>.qa-card{ animation:none; opacity:1; transform:none; }
+  #domainFolder.show,#homeSectionOverlay.show{ animation:none; }
+}

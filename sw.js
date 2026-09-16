@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v45-brand-petals';
+const CACHE_VERSION = 'interpreter-hub-v46-folder-spring';
 const PRECACHE = [
   './',
   './index.html',
