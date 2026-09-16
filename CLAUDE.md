@@ -39,6 +39,17 @@ the whole file when you only need one section.
 
 ## Where to make a change
 
+**`AGENTS.md` at the repo root is the shared contract, and it wins over this
+file where they overlap.** ChatGPT/Codex reads it automatically; this file is
+Claude's longer version. Change `AGENTS.md` first when a rule changes here,
+or the two tools drift apart again.
+
+**Fetch `main` before writing and again before pushing.** ChatGPT pushes
+directly to `main` under Jose's name, so `main` moves between sessions with
+no notice. That has already caused work to be reviewed against a stale copy
+for an entire session.
+
+
 **Jose works on this app with other tools too, and their edits land in
 `home-polish.css`, `home-polish.js` and `pin-icons.js`. Put changes in those
 files wherever they can hold them.** Two people editing the same thing in two
