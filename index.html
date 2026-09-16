@@ -11440,11 +11440,72 @@ function openDomainFolder(id, fromEl){
   }
 
   ov.classList.add('show');
+  morphFolderIcon(fromEl);
+}
+
+/* The parent's icon flies from the card you tapped into the folder header.
+ *
+ * A FLIP: measure where the icon IS on the card, measure where it WILL BE in
+ * the header, put the header icon back at the first position with a transform,
+ * then let it animate to nothing. Both elements hold the same artwork, so it
+ * reads as one icon moving rather than one fading into another.
+ *
+ * The awkward part is measuring the destination. The panel is already running
+ * its spring when this is called, so the header icon is wherever the panel has
+ * scaled it to, not where it lands. Suppressing the panel's animation for the
+ * measurement gives the settled rect -- and because .show is on by then, the
+ * base rule's transform:scale(1) is what applies, which is exactly the resting
+ * layout. Reading a rect forces layout but not paint, and this all happens in
+ * one task, so nothing is ever drawn in the suppressed state.
+ */
+function morphFolderIcon(fromEl){
+  if(!fromEl || typeof fromEl.querySelector !== 'function') return;
+  try{
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  }catch(e){}
+
+  const dest  = document.getElementById('domainFolderIcon');
+  const panel = document.getElementById('domainFolderPanel');
+  const src   = fromEl.querySelector('.home-tile-icon, .qa-icon, .folder-tile-icon');
+  if(!dest || !panel || !src) return;
+
+  const a = src.getBoundingClientRect();
+  if(!a.width || !a.height) return;
+
+  const held = panel.style.animation;
+  panel.style.animation = 'none';
+  const b = dest.getBoundingClientRect();
+  panel.style.animation = held;
+  if(!b.width || !b.height) return;
+
+  const dx = (a.left + a.width  / 2) - (b.left + b.width  / 2);
+  const dy = (a.top  + a.height / 2) - (b.top  + b.height / 2);
+  const s  = a.width / b.width;
+  // A morph across the whole screen is a distraction, not a flourish.
+  if(Math.abs(dx) > window.innerWidth || Math.abs(dy) > window.innerHeight) return;
+
+  dest.style.transition = 'none';
+  dest.style.transformOrigin = '50% 50%';
+  dest.style.transform = 'translate(' + dx.toFixed(1) + 'px, ' + dy.toFixed(1) + 'px) scale(' + s.toFixed(3) + ')';
+
+  // Two frames: the first commits the inverted position, the second starts the
+  // play. Collapsing this into one leaves the browser free to coalesce both
+  // styles and animate nothing.
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      dest.style.transition = 'transform .44s cubic-bezier(.32,1.2,.5,1)';
+      dest.style.transform = '';
+    });
+  });
 }
 
 function closeDomainFolder(){
   const ov = document.getElementById('domainFolder');
   if(ov) ov.classList.remove('show');
+  // Leave no inline transform behind, or the next open starts from wherever
+  // the last one finished instead of from the card that was just tapped.
+  const dest = document.getElementById('domainFolderIcon');
+  if(dest){ dest.style.transition = ''; dest.style.transform = ''; dest.style.transformOrigin = ''; }
 }
 
 // Close first, then navigate. setCategory() calls closeAllOverlays() anyway,
@@ -12384,7 +12445,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.1958';
+const BUILD_ID = 'b0916.2016';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
