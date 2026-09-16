@@ -39,7 +39,7 @@
 <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com">
 <!-- The hero is the first thing on screen; start it immediately instead of
      waiting for the CSS that references it to be parsed. -->
-<link rel="preload" as="image" href="./hero.jpg">
+<link rel="preload" as="image" href="./hero.jpg?v=blossom1">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -523,7 +523,15 @@
        anything. 40% frames the blossom canopy and keeps the wayfinding
        sign out of the bottom corner, where the dome mask was cutting it
        through the middle of the hospital's own name. */
-    background:url('./hero.jpg') 50% 40% / cover no-repeat;
+    /* ?v= is not decoration. hero.jpg is not in the service worker's PRECACHE
+       list, so it is served stale-while-revalidate: the cached copy comes back
+       first and the new one is only fetched for NEXT time. Swapping the photo
+       therefore showed the OLD one for a whole load, which is exactly what
+       happened on the blossom swap. Changing the URL sidesteps both that cache
+       and the browser's own. Bump this token whenever hero.jpg is replaced, and
+       keep it identical to the preload tag near the top of the file, or the
+       image is downloaded twice. */
+    background:url('./hero.jpg?v=blossom1') 50% 40% / cover no-repeat;
     will-change:transform;
     /* Starts already overscanned, so even at the near end of the cycle the
        image covers its frame and no edge can appear. `alternate` makes it
@@ -12376,7 +12384,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.1344';
+const BUILD_ID = 'b0916.1616';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
