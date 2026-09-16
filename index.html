@@ -518,7 +518,12 @@
   }
   .home-greeting-photo-drift{
     position:absolute; inset:0;
-    background:url('./hero.jpg') 62% 55% / cover no-repeat;
+    /* 50% 40%, not the old 62% 55%. The photo is a tall portrait, so cover
+       always uses its full width here and only the vertical number does
+       anything. 40% frames the blossom canopy and keeps the wayfinding
+       sign out of the bottom corner, where the dome mask was cutting it
+       through the middle of the hospital's own name. */
+    background:url('./hero.jpg') 50% 40% / cover no-repeat;
     will-change:transform;
     /* Starts already overscanned, so even at the near end of the cycle the
        image covers its frame and no edge can appear. `alternate` makes it
@@ -12371,7 +12376,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.0936';
+const BUILD_ID = 'b0916.1344';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
