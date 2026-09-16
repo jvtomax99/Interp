@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v47-icon-morph';
+const CACHE_VERSION = 'interpreter-hub-v48-folder-3up';
 const PRECACHE = [
   './',
   './index.html',

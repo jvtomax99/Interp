@@ -152,19 +152,46 @@
   #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:13.5px;}
   #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card{min-height:132px;}
   #content.is-home .qa-tile-label{font-size:11.5px;}
-  #domainFolder .folder-grid{grid-template-columns:1fr;gap:7px;}
+  /* Three across on phones, as on desktop, rather than full-width rows.
+     The rows this replaces put the icon, name and a chevron on one line, so
+     each subdomain read as a horizontal bar; these are upright cards with the
+     icon above the name, which is what "opened vertically" meant.
+
+     At 320px this leaves roughly 80px a tile. The names are NOT clamped: the
+     longest real subdomain is "Peds ENT, Urology, Endocrinology & Nephrology"
+     at 45 characters, and a three-line clamp cut it to "Peds ENT, Urology,
+     Endocrino..." on every phone size. Someone picking a specialty mid-shift
+     has to be able to read which one it is, so the tile grows instead and the
+     row grows with it. min-height only sets a floor for the short names. */
+  #domainFolder .folder-grid{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; }
   #domainFolder .folder-tile{
-    display:grid;grid-template-columns:32px minmax(0,1fr) 14px;grid-template-rows:auto auto;
-    min-height:64px;gap:2px 11px;padding:10px 11px;border-radius:13px;box-shadow:none;
-    background:var(--paper);background:color-mix(in srgb,var(--folder-color,var(--accent)) 6%,var(--paper));
-    border-color:var(--line);
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+    min-height:104px; padding:10px 9px; border-radius:14px; text-align:left;
   }
-  #domainFolder .folder-tile.is-all{border-color:color-mix(in srgb,var(--folder-color,var(--accent)) 45%,var(--line));}
-  #domainFolder .folder-tile-icon{grid-column:1;grid-row:1 / span 2;align-self:center;background:transparent;border:0;box-shadow:none;}
-  #domainFolder .folder-tile-icon .medical-pin{width:30px;height:30px;}
-  #domainFolder .folder-tile-name{grid-column:2;grid-row:1;font-size:14px;font-weight:500;margin:0;align-self:end;}
-  #domainFolder .folder-tile-count{grid-column:2;grid-row:2;font-size:11px;align-self:start;}
-  #domainFolder .folder-tile::after{content:'';grid-column:3;grid-row:1 / span 2;align-self:center;width:13px;height:13px;background:var(--ink-soft);-webkit-mask:var(--chev-mask) center/contain no-repeat;mask:var(--chev-mask) center/contain no-repeat;}
+  #domainFolder .folder-tile-icon{ width:30px; height:30px; }
+  #domainFolder .folder-tile-icon .medical-pin{ width:26px; height:26px; }
+  /* break-word, not anywhere. "anywhere" broke ordinary words mid-syllable --
+     "Endocrinol / ogy", "Hematolog / y" -- which is harder to read than the
+     truncation it replaced. break-word only splits a word that genuinely
+     cannot fit, and hyphens:auto puts a hyphen in when it has to. */
+  #domainFolder .folder-tile-name{
+    font-size:11px; line-height:1.32; font-weight:550; letter-spacing:-.012em;
+    margin:0; overflow-wrap:break-word; -webkit-hyphens:auto; hyphens:auto;
+    /* The tile is a column flexbox with align-items:flex-start, so without
+       this the name sizes to its own content and a long word pushes straight
+       out past the tile edge -- measured at 24px of spill on a 320px screen.
+       Stretching it to the tile width is what forces the wrap to happen
+       inside the card. */
+    align-self:stretch; min-width:0;
+  }
+  /* margin-top:auto pins the count to the bottom, so tiles whose names run to
+     one line and three lines still line their counts up. */
+  #domainFolder .folder-tile-count{ margin-top:auto; font-size:10.5px; line-height:1.3; }
+  @media(max-width:359px){
+    #domainFolder .folder-grid{ gap:6px; }
+    #domainFolder .folder-tile{ padding:9px 7px; min-height:98px; }
+    #domainFolder .folder-tile-name{ font-size:10.5px; }
+  }
 }
 @media(max-width:365px){
   .main.home-layout{--home-inset:13px;}
