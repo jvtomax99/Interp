@@ -11987,7 +11987,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.0903';
+const BUILD_ID = 'b0916.0926';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -12267,10 +12267,15 @@ function renderHome(){
     qaCard('#7FA173', DOMAIN_ICONS.layers,  'Professional Resources', 'Reference material',          `setCategory('resources')`),
   ].join('');
 
+  /* False Friends sits first deliberately. On a phone this rail shows about
+     two cards at 374px and scrolls sideways for the rest, so anything from
+     the third position on is off-screen until someone swipes -- which is
+     exactly why the tool could not be found on the day it shipped. New
+     tools go at the front until they are known. */
   const studyCards = [
+    qaCard('#A85468', DOMAIN_ICONS.book,     'False Friends',    'Words that betray you',        `setCategory('falsefriends')`),
     qaCard('#0F5FA6', DOMAIN_ICONS.exam,     'CoreCHI Practice', 'Practice for certification',   `setCategory('practice')`),
     qaCard('#4E9E74', DOMAIN_ICONS.review,   'Term Review',      'Study and reinforce',          `setCategory('review')`),
-    qaCard('#A85468', DOMAIN_ICONS.book,     'False Friends',    'Words that betray you',        `setCategory('falsefriends')`),
     qaCard('#2F5D62', DOMAIN_ICONS.shield,   'Code of Ethics',   'Key principles and conduct',   `setCategory('ethics')`),
     qaCard('#35A97A', DOMAIN_ICONS.calendar, 'Training & Events','Upcoming CE opportunities',    `setCategory('events')`),
   ].join('');
