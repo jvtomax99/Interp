@@ -19,18 +19,58 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | ~11,200 | The entire app. CSS ~3,130 lines, JS ~7,600 lines, all inline |
-| `sw.js` | 122 | Service worker. Network-first for HTML, cache-first for icons |
+| `index.html` | 13,575 | The whole app. All CSS and JS inline |
+| `home-polish.css` | 190 | Overlay layer. Loads right after `</style>`, so it wins |
+| `home-polish.js` | 77 | Home behaviour: hello wave, rail dots, section overlay |
+| `pin-icons.js` | 423 | The pin/icon artwork and sprite wiring |
+| `sw.js` | 130 | Service worker. Network-first for HTML, cache-first for icons |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | 8 | Cron: `/api/check-events` daily at 13:00 UTC |
-| `api/translate.js` | 128 | Translate tool — Claude API |
-| `api/doctor-research.js` | 295 | Doctor Prep — Claude API + web search |
+| `api/translate.js` | 168 | Translate tool — Claude API |
+| `api/doctor-research.js` | 379 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 224 | Cron job watching CE/training events |
-| `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
+| `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
+| `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
+| `hero.jpg`, `hmh-*.png`, `icon-*.png`, `pin-icons*.webp` | — | Image assets |
 
 Inside `index.html`, sections are marked with banner comments
 (`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
 the whole file when you only need one section.
+
+## Where to make a change
+
+**Jose works on this app with other tools too, and their edits land in
+`home-polish.css`, `home-polish.js` and `pin-icons.js`. Put changes in those
+files wherever they can hold them.** Two people editing the same thing in two
+different places is what silently killed the coloured press glow: a
+`.is-pressed` rule in `index.html` lost to an `#content.is-home` rule in
+`home-polish.css`, no error, just a dead feature.
+
+| Kind of change | Goes in |
+|---|---|
+| Home screen look — greeting, search, rails, cards, quick tiles | `home-polish.css` |
+| Mobile topbar and tab bar | `home-polish.css` (the `max-width:900px` block) |
+| Domain folder / section overlay styling | `home-polish.css` |
+| Home behaviour — wave, rail dots, section overlay | `home-polish.js` |
+| Pin and icon artwork | `pin-icons.js` |
+| Everything else | `index.html` |
+
+**The overlay files only cover Home.** They contain nothing for the glossary,
+terms, chat, Doctor Prep, study, quizzes, profile, settings or the guide —
+those screens exist only inside `index.html`, so that is where their changes
+have to go. Say so plainly rather than inventing a place to put them.
+
+**Match specificity, do not escalate it.** `home-polish.css` is written with ID
+selectors (`#content.is-home .x`). Anything added there at the same or higher
+specificity will quietly beat interaction states (`:active`, `.is-pressed`,
+`:focus-visible`) defined in `index.html`. When adding a rule, use the lowest
+specificity that works, and check that press, focus and hover still fire
+afterwards — measure them, do not assume.
+
+**Never resolve a merge with `git checkout --ours`.** It once discarded the
+`pin-icons` and `home-polish` wiring out of `index.html` in a single command.
+Resolve conflicts hunk by hunk, then confirm all three files are still loaded
+(`index.html` lines ~4005, ~4006, ~13573) before pushing.
 
 ## Deploying
 
