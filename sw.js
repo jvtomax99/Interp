@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v36-curved-fade';
+const CACHE_VERSION = 'interpreter-hub-v37-clear-fade';
 const PRECACHE = [
   './',
   './index.html',

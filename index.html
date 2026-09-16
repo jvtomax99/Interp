@@ -649,10 +649,19 @@
   }
   .home-greeting-scrim{
     position:absolute; inset:0; z-index:-1;
+    /* The scrim clears the dome EARLIER than the photo does. Both used to
+       share one mask, so right through the fade band a dark layer sat at
+       partial opacity over a pale page — and dark-at-40%-over-light is grey.
+       That was the muddy haze under the hero: darkness dissolving on top of
+       the picture, not the picture dissolving badly.
+
+       Only the mask moves here. home-polish.css owns this element's colour
+       and is left alone. The photo's own mask is also untouched, still
+       starting at 46% — the banner is meant to look exactly the same. */
     -webkit-mask-image:radial-gradient(128% 46% at 50% 104%,
-      rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
+      rgba(0,0,0,0) 62%, rgba(0,0,0,0.5) 78%, rgba(0,0,0,0.88) 88%, #000 96%);
             mask-image:radial-gradient(128% 46% at 50% 104%,
-      rgba(0,0,0,0) 46%, rgba(0,0,0,0.55) 66%, rgba(0,0,0,0.9) 82%, #000 94%);
+      rgba(0,0,0,0) 62%, rgba(0,0,0,0.5) 78%, rgba(0,0,0,0.88) 88%, #000 96%);
     /* Much lighter than before so the hospital actually reads as a photo.
        Legibility now comes from a soft radial pool behind the text block
        plus per-element text-shadow, rather than dimming the whole image. */
@@ -11228,7 +11237,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0915.1813';
+const BUILD_ID = 'b0916.0801';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
