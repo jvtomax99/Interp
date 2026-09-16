@@ -3274,6 +3274,118 @@
     margin-top:14px; font-size:11.5px; color:var(--ink-faint); line-height:1.45;
   }
 
+  /* ---------- False Friends ---------- */
+  /* Risk is carried by a colour token per card rather than a per-rule colour,
+     so a card, its badge and its left rail always agree. */
+  .ff-intro{
+    margin:0 0 17px; padding:13px 17px; border:1px solid var(--line);
+    border-radius:var(--r-md); background:var(--bg-hi);
+    font-size:13px; line-height:1.55; color:var(--ink-soft);
+  }
+  .ff-intro b{ color:var(--ink); font-weight:550; }
+
+  .ff-modes{ display:flex; gap:6px; margin-bottom:13px; }
+  .ff-mode{
+    flex:1; min-height:44px; padding:9px 13px; border:1px solid var(--line);
+    border-radius:var(--r-md); background:var(--paper); color:var(--ink-soft);
+    font-family:var(--sans); font-size:14px; font-weight:550; letter-spacing:-.015em;
+    cursor:pointer; transition:background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
+  }
+  .ff-mode.is-active{ background:var(--accent-soft); color:var(--accent); border-color:transparent; }
+  .ff-mode:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+
+  .ff-filters{ display:flex; flex-wrap:wrap; gap:6px; margin:13px 0; }
+  .ff-chip{
+    min-height:36px; padding:6px 13px; border:1px solid var(--line); border-radius:999px;
+    background:var(--paper); color:var(--ink-soft);
+    font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
+    transition:background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease);
+  }
+  .ff-chip.is-active{ background:var(--ink); color:var(--paper); border-color:transparent; }
+  .ff-chip:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+
+  .ff-list{ display:grid; gap:13px; }
+  .ff-card{
+    position:relative; overflow:hidden;
+    padding:17px 17px 17px 26px; border:1px solid var(--line);
+    border-radius:var(--r-lg); background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  /* The rail, not a full tint: the card stays white so the example text
+     underneath keeps its contrast in both themes. */
+  .ff-card::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:5px;
+    background:var(--ff-color, var(--accent));
+  }
+  .ff-head{ display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 9px; }
+  .ff-es{
+    margin:0; font-size:23px; font-weight:650; letter-spacing:-.025em;
+    line-height:1.15; color:var(--ink);
+  }
+  .ff-badge{
+    flex-shrink:0; padding:3px 9px; border-radius:999px;
+    font-size:11px; font-weight:550; letter-spacing:.02em; text-transform:uppercase;
+    color:var(--ff-color, var(--accent));
+    background:color-mix(in srgb, var(--ff-color, var(--accent)) 13%, transparent);
+  }
+  /* --ink-faint reads 2.6:1 here, under AA for 12px. --ink-soft keeps the
+     tag secondary to the headword while staying legible in both themes. */
+  .ff-tag{ font-size:12px; color:var(--ink-soft); }
+
+  .ff-gloss{ margin:9px 0 0; font-size:14px; line-height:1.5; color:var(--ink-soft); }
+  .ff-gloss .ff-looks{ color:var(--danger); font-weight:550; }
+  .ff-gloss .ff-means{ color:var(--ink); font-weight:550; }
+  .ff-say{ margin:6px 0 0; font-size:13px; line-height:1.5; color:var(--ink-soft); }
+  .ff-say b{ color:var(--ink); font-weight:550; }
+
+  /* Quoted human speech is the one place IBM Plex Serif is used in this app. */
+  .ff-example{
+    margin:13px 0 0; padding:13px; border-radius:var(--r-md);
+    background:var(--bg-hi); border:1px solid var(--line-soft);
+  }
+  .ff-heard{
+    margin:0; font-family:var(--serif); font-size:15px; line-height:1.45;
+    color:var(--ink); font-style:italic;
+  }
+  .ff-line{ display:flex; gap:9px; margin-top:9px; font-size:13px; line-height:1.45; }
+  .ff-line-mark{ flex-shrink:0; width:17px; font-weight:650; }
+  .ff-trap .ff-line-mark{ color:var(--danger); }
+  .ff-true .ff-line-mark{ color:#2F7D5B; }
+  .ff-trap{ color:var(--ink-soft); }
+  .ff-true{ color:var(--ink); }
+  .ff-note{
+    margin:13px 0 0; padding-top:13px; border-top:1px solid var(--line-soft);
+    font-size:12.5px; line-height:1.55; color:var(--ink-soft);
+  }
+
+  .ff-empty{ padding:26px 17px; text-align:center; font-size:13px; color:var(--ink-soft); }
+
+  /* Drill */
+  .ff-drill-prompt{
+    margin:0 0 6px; font-size:13px; font-weight:550; letter-spacing:.02em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .ff-drill-word{
+    margin:0 0 13px; font-size:31px; font-weight:650; letter-spacing:-.03em;
+    line-height:1.1; color:var(--ink);
+  }
+  .ff-drill-heard{
+    margin:0 0 17px; font-family:var(--serif); font-style:italic;
+    font-size:15px; line-height:1.45; color:var(--ink-soft);
+  }
+  .ff-score{
+    display:flex; align-items:baseline; gap:9px; margin-bottom:13px;
+    font-size:13px; color:var(--ink-soft);
+  }
+  .ff-score b{ font-size:23px; font-weight:650; letter-spacing:-.025em; color:var(--ink); }
+
+  @media (max-width:900px), (pointer: coarse){
+    .ff-search input{ font-size:16px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ff-mode, .ff-chip{ transition:none; }
+  }
+
   /* ---------- Image lightbox ---------- */
   @keyframes lightboxIn{ from{opacity:0;} to{opacity:1;} }
   @keyframes lightboxImgIn{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }
@@ -4547,57 +4659,6 @@ const DEFAULT_DATA = {
   ]
 };
 
-/* Classic Spanish/English false friends that matter clinically. These are the
-   traps machine translation reliably gets wrong, and several appear on CCHI
-   material. The canonical example is "intoxicado" — misread as "intoxicated"
-   in a Florida ED in 1980, contributing to a misdiagnosed brain bleed and a
-   landmark malpractice settlement. */
-const FALSE_FRIENDS = [
-  { es:'intoxicado', wrong:'intoxicated (drunk)', right:'poisoned, or sick from something ingested',
-    note:'The most cited error in medical interpreting. Family meant food poisoning; it was heard as drunk.' },
-  { es:'constipado', wrong:'constipated', right:'congested / has a head cold',
-    note:'For constipation, Spanish uses estreñido.' },
-  { es:'embarazada', wrong:'embarrassed', right:'pregnant',
-    note:'For embarrassed, use avergonzado/a.' },
-  { es:'molestar', wrong:'to molest', right:'to bother or disturb',
-    note:'"¿Le molesta?" simply means "Does it bother you?"' },
-  { es:'droga', wrong:'drug (medication)', right:'illegal drug',
-    note:'For prescribed medication use medicamento or medicina.' },
-  { es:'condición', wrong:'medical condition', right:'state, status, or stipulation',
-    note:'For a medical condition use enfermedad, afección, or padecimiento.' },
-  { es:'sano', wrong:'sane', right:'healthy',
-    note:'For mentally sound, use cuerdo.' },
-  { es:'sensible', wrong:'sensible / reasonable', right:'sensitive',
-    note:'For sensible use razonable or sensato.' },
-  { es:'severo', wrong:'severe', right:'strict or harsh (traditionally)',
-    note:'Grave or intenso are safer for clinical severity, though severo is now common.' },
-  { es:'preservativo', wrong:'preservative', right:'condom',
-    note:'For a food preservative use conservante.' },
-  { es:'remover', wrong:'to remove', right:'to stir or agitate',
-    note:'To remove is quitar, extirpar, or extraer.' },
-  { es:'realizar', wrong:'to realize (become aware)', right:'to carry out or perform',
-    note:'To realize is darse cuenta.' },
-  { es:'asistir', wrong:'to assist', right:'to attend',
-    note:'To assist is ayudar or atender.' },
-  { es:'soportar', wrong:'to support', right:'to tolerate or endure',
-    note:'To support is apoyar or sostener.' },
-  { es:'actual', wrong:'actual / real', right:'current or present',
-    note:'For actual use real or verdadero.' },
-  { es:'disgusto', wrong:'disgust', right:'annoyance or upset',
-    note:'For disgust use asco or repugnancia.' },
-  { es:'contestar', wrong:'to contest', right:'to answer',
-    note:'To contest is impugnar or disputar.' },
-  { es:'recordar', wrong:'to record', right:'to remember or remind',
-    note:'To record is grabar or registrar.' },
-  { es:'pretender', wrong:'to pretend', right:'to intend or aim to',
-    note:'To pretend is fingir.' },
-  { es:'lectura', wrong:'lecture', right:'reading (including a meter or test reading)',
-    note:'A lecture is a conferencia or charla.' },
-  { es:'vaso', wrong:'vase', right:'glass, or blood vessel',
-    note:'Vaso sanguíneo is a blood vessel; a vase is a florero.' },
-  { es:'desgracia', wrong:'disgrace', right:'misfortune or tragedy',
-    note:'Disgrace is deshonra or vergüenza.' }
-];
 
 function findFalseFriends(text){
   const q = (text||'').toLowerCase().trim();
@@ -4605,7 +4666,7 @@ function findFalseFriends(text){
   return FALSE_FRIENDS.filter(f=>{
     const es = f.es.toLowerCase();
     // Match the Spanish term, or the English word it's commonly mistaken for.
-    const wrongWord = f.wrong.split('(')[0].trim().toLowerCase().replace(/^to /,'');
+    const wrongWord = f.looks.split('(')[0].trim().toLowerCase().replace(/^to /,'');
     return q === es || q.includes(es) ||
            q === wrongWord || (wrongWord.length > 4 && q.includes(wrongWord));
   }).slice(0, 2);
@@ -4766,8 +4827,8 @@ async function runTranslate(){
       <div class="tr-result trap">
         <span class="tr-badge trap">${ICON_ALERT} False friend — check carefully</span>
         <p class="tr-target" style="font-size:18px;">${escapeHtml(f.es)}</p>
-        <p class="tr-note"><b>Often mistaken for:</b> ${escapeHtml(f.wrong)}<br>
-        <b>Actually means:</b> ${escapeHtml(f.right)}</p>
+        <p class="tr-note"><b>Often mistaken for:</b> ${escapeHtml(f.looks)}<br>
+        <b>Actually means:</b> ${escapeHtml(f.means)}</p>
         <p class="tr-note">${escapeHtml(f.note)}</p>
       </div>`;
   });
@@ -7648,6 +7709,14 @@ function collectSearchMatches(q){
     }
   });
 
+  FALSE_FRIENDS.forEach(f=>{
+    if(hit(f.es) || hit(f.looks) || hit(f.means) || hit(f.say) || hit(f.tag)){
+      out.push({ group:'False Friends', icon:ICON_ALERT, color:'#A85468',
+        title:f.es, sub:`Looks like \u201c${f.looks}\u201d \u00b7 means ${f.means}`,
+        target:'falsefriends', rank: starts(f.es) ? 0 : 1 });
+    }
+  });
+
   CHAT_MESSAGES.forEach(m=>{
     if(hit(m.text) || hit(m.author)){
       out.push({ group:'Chat', icon:ICON_CHAT, color:'#2E8BD0',
@@ -8023,6 +8092,7 @@ function getToolTiles(){
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: DOMAIN_ICONS.globe,   count: null, label: '' },
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: DOMAIN_ICONS.exam,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
     { id:'review',    name:'Term Review',          color:'#4E9E74', icon: DOMAIN_ICONS.review, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
+    { id:'falsefriends', name:'False Friends',     color:'#A85468', icon: DOMAIN_ICONS.book,   count: FALSE_FRIENDS.length, label:'traps' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: DOMAIN_ICONS.chat,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
     { id:'providers', name:'Pictures of Healthcare Providers', color:'#6F97AC', icon: DOMAIN_ICONS.person, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: DOMAIN_ICONS.search, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
@@ -8911,6 +8981,462 @@ const ICON_GUIDE_MAP = {
 // Council on Interpreting in Health Care's 9-principle National Code of
 // Ethics (2004) and CCHI's Code of Ethics / Disciplinary Policy, cited by
 // organization on each card rather than quoted at length.
+/* ---------- False Friends (falsos amigos) ---------- */
+
+/* Words that look like an English word and mean something else.
+ *
+ * In ordinary conversation a false friend is embarrassing. In a hospital it
+ * changes care. "Constipado" read as "constipated" sends a patient with a
+ * head cold toward a bowel workup. "Intoxicado" read as "intoxicated" puts
+ * an accidental poisoning in the chart as drunkenness. Those are the two
+ * that interpreters are warned about on day one and still hear misread on
+ * the floor, which is why this list starts with them.
+ *
+ * Fields:
+ *   es     the Spanish word as the patient says it
+ *   looks  the English word it is pretending to be
+ *   means  what it actually means
+ *   say    how you would really say the English word in Spanish
+ *   risk   'critical' changes clinical care | 'high' shifts meaning
+ *          materially | 'everyday' general vocabulary
+ *   heard  a line the way a patient would say it
+ *   trap   the wrong rendering, written out so it can be recognised
+ *   truth  the correct rendering
+ *   note   regional variation, register, or the reason it is genuinely hard
+ *
+ * On regional variation: this list says "ask" rather than inventing a rule
+ * where usage is genuinely split. Patients here are largely Dominican,
+ * Puerto Rican, Colombian, Ecuadorian and Mexican, and several of these
+ * words do not travel identically across those countries.
+ */
+const FALSE_FRIENDS = [
+  {
+    es:"constipado", looks:"constipated", means:"congested — blocked up with a head cold",
+    say:"estreñido", risk:"critical", tag:"ENT / GI",
+    heard:"Llevo tres días constipado.",
+    trap:"I have been constipated for three days.",
+    truth:"I have had a stuffy nose for three days.",
+    note:"The one most likely to send a patient toward the wrong workup. Usage is genuinely split: in Spain and much of Latin America it is nasal congestion, but some speakers do use constipación for the bowel sense. If context does not settle it, ask — do not pick."
+  },
+  {
+    es:"intoxicado", looks:"intoxicated", means:"poisoned — usually food, a chemical, or a medication",
+    say:"ebrio, borracho", risk:"critical", tag:"Toxicology",
+    heard:"Mi hijo está intoxicado, comió algo malo.",
+    trap:"My son is intoxicated, he ate something bad.",
+    truth:"My son has food poisoning, he ate something bad.",
+    note:"English intoxicated is read as drunk almost every time. Spanish intoxicado means poisoned by something. Rendering it as drunk puts the wrong cause in the chart and can delay a toxicology workup."
+  },
+  {
+    es:"embarazada", looks:"embarrassed", means:"pregnant",
+    say:"avergonzada, apenada", risk:"critical", tag:"OB",
+    heard:"Estoy embarazada.",
+    trap:"I am embarrassed.",
+    truth:"I am pregnant.",
+    note:"The textbook example, and still worth drilling: it decides imaging, medication and triage. Note apenada is the usual word for embarrassed across the Caribbean."
+  },
+  {
+    es:"molestia", looks:"molestation", means:"discomfort, a bother, a mild ache",
+    say:"abuso sexual", risk:"critical", tag:"Symptoms",
+    heard:"Siento una molestia en el pecho.",
+    trap:"I feel molested in my chest.",
+    truth:"I feel some discomfort in my chest.",
+    note:"Molestia is one of the most common symptom words in Spanish and almost always means mild discomfort. Reaching for the English cognate here creates a safeguarding allegation out of nothing."
+  },
+  {
+    es:"once", looks:"once (one time)", means:"eleven",
+    say:"una vez", risk:"critical", tag:"Dosing",
+    heard:"Me dijeron que tome once pastillas.",
+    trap:"They told me to take the pills once.",
+    truth:"They told me to take eleven pills.",
+    note:"A dosing error hiding inside a two-syllable word. Worth reading back any number you hear in a medication instruction, in both languages."
+  },
+  {
+    es:"preservativo", looks:"preservative", means:"condom",
+    say:"conservante", risk:"critical", tag:"Sexual health",
+    heard:"No usamos preservativo.",
+    trap:"We do not use preservatives.",
+    truth:"We do not use condoms.",
+    note:"Turns a sexual-history answer into a diet answer. Condón is also widely understood and is the more common word in Mexico and the Caribbean."
+  },
+  {
+    es:"droga", looks:"drug (medication)", means:"illicit drug",
+    say:"medicamento, medicina", risk:"critical", tag:"Medications",
+    heard:"No tomo ninguna droga.",
+    trap:"I do not take any drugs — heard as: I take no medications.",
+    truth:"I do not use any illicit drugs.",
+    note:"Asking a patient about sus drogas reads as an accusation and will shut the history down. Ask about medicamentos for the medication list, and drogas only when you mean substance use."
+  },
+  {
+    es:"ampolla", looks:"ampoule only", means:"blister — and also an ampoule",
+    say:"depends on sense", risk:"critical", tag:"Dermatology / Meds",
+    heard:"Me salió una ampolla en el pie.",
+    trap:"An ampoule came out on my foot.",
+    truth:"I got a blister on my foot.",
+    note:"Genuinely both. In a wound-care conversation it is a blister; on a medication order it is an ampoule. Let the setting decide, and confirm if it could be either."
+  },
+  {
+    es:"desorden", looks:"disorder (medical)", means:"mess, disarray",
+    say:"trastorno", risk:"high", tag:"Psych / Neuro",
+    heard:"El doctor dice que tengo un desorden.",
+    trap:"The doctor says I have a disorder.",
+    truth:"Usually: the doctor says I have a condition — but confirm which one.",
+    note:"Going into Spanish, a bipolar disorder is trastorno bipolar, never desorden bipolar. Desorden is the state of a messy room. Eating disorder is trastorno alimentario."
+  },
+  {
+    es:"condición", looks:"condition (illness)", means:"a stipulation, a term, a state",
+    say:"afección, enfermedad, padecimiento", risk:"high", tag:"Clinical",
+    heard:"¿Tiene alguna condición?",
+    trap:"Do you have any conditions? — heard as terms or requirements",
+    truth:"Do you have any medical conditions?",
+    note:"Widely used in US Spanish under English influence, so many patients here will understand it. Afección or enfermedad is safer with a patient who has recently arrived."
+  },
+  {
+    es:"severo", looks:"severe", means:"strict, harsh (of a person)",
+    say:"grave, intenso, fuerte", risk:"high", tag:"Symptoms",
+    heard:"Un dolor severo.",
+    trap:"Passable, but it is not how most patients describe pain.",
+    truth:"Dolor intenso, dolor fuerte, dolor grave.",
+    note:"The RAE now accepts severo for illness because usage pushed it there, so this is a preference rather than an error. Going into Spanish, dolor fuerte or dolor intenso is what a patient actually says."
+  },
+  {
+    es:"injuria", looks:"injury", means:"an insult, slander",
+    say:"lesión, herida", risk:"high", tag:"Trauma",
+    heard:"Injuria renal aguda.",
+    trap:"Kidney insult.",
+    truth:"Acute kidney injury.",
+    note:"The subtle one. In lay speech injuria is an insult. In clinical Spanish it is a real technical term — injuria renal, injuria pulmonar. Register decides. A patient describing a fall means lesión or herida."
+  },
+  {
+    es:"sano", looks:"sane", means:"healthy",
+    say:"cuerdo, en sus cabales", risk:"high", tag:"Psych",
+    heard:"Mi papá está sano.",
+    trap:"My father is sane.",
+    truth:"My father is healthy.",
+    note:"Turns a general-health answer into a psychiatric one. Sano y salvo is safe and sound."
+  },
+  {
+    es:"complexión", looks:"complexion (skin)", means:"build, body type",
+    say:"cutis, tez", risk:"high", tag:"Exam",
+    heard:"Es de complexión delgada.",
+    trap:"He has a thin complexion.",
+    truth:"He has a slim build.",
+    note:"Describes the frame, not the face. For skin tone or quality use cutis or tez."
+  },
+  {
+    es:"lívido", looks:"livid (furious)", means:"pale, or bluish",
+    say:"furioso, enojadísimo", risk:"high", tag:"Exam",
+    heard:"Estaba lívido.",
+    trap:"He was livid.",
+    truth:"He was pale.",
+    note:"A description of colour, not mood — and a clinically meaningful one. Reading it as anger loses a sign."
+  },
+  {
+    es:"aborto", looks:"abortion only", means:"abortion, or miscarriage",
+    say:"aborto espontáneo = miscarriage", risk:"critical", tag:"OB",
+    heard:"Tuve dos abortos.",
+    trap:"I had two abortions.",
+    truth:"Ask: aborto espontáneo (miscarriage) or aborto provocado (termination)?",
+    note:"Not a false friend so much as a word that collapses two very different histories into one. The OB history, and how the conversation should be handled, depend on which is meant. Ask."
+  },
+  {
+    es:"regla", looks:"rule", means:"menstrual period (colloquial)",
+    say:"norma (for rule)", risk:"high", tag:"OB",
+    heard:"No me ha bajado la regla.",
+    trap:"The rule has not come down for me.",
+    truth:"I have missed my period.",
+    note:"Regla, período and menstruación all appear. Bajar is the verb patients use, not venir."
+  },
+  {
+    es:"aparato", looks:"apparatus, device", means:"body system",
+    say:"dispositivo (for a device)", risk:"high", tag:"Anatomy",
+    heard:"Problemas del aparato digestivo.",
+    trap:"Problems with the digestive apparatus.",
+    truth:"Problems with the digestive system.",
+    note:"Aparato digestivo, aparato respiratorio, aparato reproductor. It can also mean a device such as a hearing aid, so context decides."
+  },
+  {
+    es:"sensible", looks:"sensible", means:"sensitive",
+    say:"sensato, razonable", risk:"high", tag:"Exam",
+    heard:"Tengo la piel muy sensible.",
+    trap:"I have very sensible skin.",
+    truth:"I have very sensitive skin.",
+    note:"Also used for emotionally sensitive. Sensato is the word for level-headed."
+  },
+  {
+    es:"soportar", looks:"to support", means:"to endure, to put up with",
+    say:"apoyar, sostener", risk:"high", tag:"Symptoms",
+    heard:"No soporto el dolor.",
+    trap:"I do not support the pain.",
+    truth:"I cannot stand the pain.",
+    note:"A direct pain-severity statement. Going into Spanish, supporting a patient emotionally is apoyar; holding weight is sostener."
+  },
+  {
+    es:"atender", looks:"to attend (an event)", means:"to see to, to care for",
+    say:"asistir a", risk:"high", tag:"Care",
+    heard:"¿Quién me va a atender?",
+    trap:"Who is going to attend me?",
+    truth:"Who is going to see me?",
+    note:"Pairs with its mirror image below: asistir means to attend, atender means to care for. They are each other's trap."
+  },
+  {
+    es:"asistir", looks:"to assist", means:"to attend, to be present at",
+    say:"ayudar", risk:"high", tag:"Care",
+    heard:"No pude asistir a la cita.",
+    trap:"I could not assist at the appointment.",
+    truth:"I could not make it to the appointment.",
+    note:"Asistir a una cita is to show up for it. To assist someone is ayudar."
+  },
+  {
+    es:"discutir", looks:"to discuss", means:"to argue",
+    say:"hablar de, tratar, comentar", risk:"high", tag:"Communication",
+    heard:"Quiero discutir esto con el doctor.",
+    trap:"May pass, but it can land as: I want to argue with the doctor.",
+    truth:"I want to talk this over with the doctor.",
+    note:"Going into Spanish especially: the doctor wants to discuss your results is quiere hablar de sus resultados, not quiere discutir sus resultados."
+  },
+  {
+    es:"remover", looks:"to remove", means:"to stir",
+    say:"quitar, extirpar, sacar", risk:"high", tag:"Surgery",
+    heard:"Hay que remover la mezcla.",
+    trap:"You have to remove the mixture.",
+    truth:"You have to stir the mixture.",
+    note:"Removing a tumour is extirpar or sacar. Remover el tumor sounds like stirring it."
+  },
+  {
+    es:"introducir", looks:"to introduce (a person)", means:"to insert",
+    say:"presentar", risk:"high", tag:"Procedures",
+    heard:"Le voy a introducir el catéter.",
+    trap:"I am going to introduce the catheter to you.",
+    truth:"I am going to insert the catheter.",
+    note:"Introducing yourself to a patient is presentarse, never introducirse."
+  },
+  {
+    es:"realizar", looks:"to realize", means:"to carry out, to perform",
+    say:"darse cuenta", risk:"high", tag:"Procedures",
+    heard:"Vamos a realizar una biopsia.",
+    trap:"We are going to realize a biopsy.",
+    truth:"We are going to perform a biopsy.",
+    note:"To realize something in the sense of noticing it is darse cuenta."
+  },
+  {
+    es:"actualmente", looks:"actually", means:"currently, at present",
+    say:"en realidad, de hecho", risk:"high", tag:"History",
+    heard:"Actualmente no tomo nada.",
+    trap:"Actually I do not take anything.",
+    truth:"I am not taking anything at the moment.",
+    note:"Changes a current-medications answer into a contradiction. En realidad is actually."
+  },
+  {
+    es:"eventualmente", looks:"eventually", means:"possibly, occasionally",
+    say:"finalmente, con el tiempo", risk:"high", tag:"History",
+    heard:"Eventualmente me duele.",
+    trap:"Eventually it hurts.",
+    truth:"It hurts now and then.",
+    note:"Frequency, not sequence. A symptom that happens occasionally is very different from one that will happen in the end."
+  },
+  {
+    es:"pariente", looks:"parent", means:"relative",
+    say:"padre y madre, padres", risk:"high", tag:"History",
+    heard:"Tengo un pariente con diabetes.",
+    trap:"My parent has diabetes.",
+    truth:"I have a relative with diabetes.",
+    note:"Changes a family history from first-degree to any degree, which is exactly the distinction the question is asking about. Ask which relative."
+  },
+  {
+    es:"compromiso", looks:"compromise", means:"commitment, obligation",
+    say:"acuerdo, concesión", risk:"high", tag:"Clinical",
+    heard:"Hay compromiso pulmonar.",
+    trap:"There is pulmonary compromise — which happens to be right here.",
+    truth:"There is lung involvement.",
+    note:"Clinically comprometido does mean involved or impaired, so the cognate can work. Socially it means a commitment: tengo un compromiso is I have a prior engagement, not I have a compromise."
+  },
+  {
+    es:"asumir", looks:"to assume (suppose)", means:"to take on, to take charge of",
+    say:"suponer, dar por hecho", risk:"everyday", tag:"Communication",
+    heard:"Asumió el cuidado de su madre.",
+    trap:"He assumed the care of his mother.",
+    truth:"He took over caring for his mother.",
+    note:"To assume in the sense of guessing is suponer."
+  },
+  {
+    es:"pretender", looks:"to pretend", means:"to intend, to aim to",
+    say:"fingir, aparentar", risk:"everyday", tag:"Communication",
+    heard:"¿Qué pretende hacer?",
+    trap:"What are you pretending to do?",
+    truth:"What are you planning to do?",
+    note:"To pretend to be asleep is fingir or hacerse el dormido."
+  },
+  {
+    es:"recordar", looks:"to record", means:"to remember, to remind",
+    say:"grabar, registrar, anotar", risk:"everyday", tag:"Communication",
+    heard:"No recuerdo la fecha.",
+    trap:"I am not recording the date.",
+    truth:"I do not remember the date.",
+    note:"Recording a conversation is grabar; writing it in the chart is registrar or anotar."
+  },
+  {
+    es:"envolver", looks:"to involve", means:"to wrap",
+    say:"involucrar, implicar", risk:"everyday", tag:"Care",
+    heard:"Envuelva la herida.",
+    trap:"Involve the wound.",
+    truth:"Wrap the wound.",
+    note:"Involving the family in a decision is involucrar a la familia."
+  },
+  {
+    es:"aplicar", looks:"to apply (for something)", means:"to apply (a substance), to put on",
+    say:"solicitar, presentar una solicitud", risk:"everyday", tag:"Care",
+    heard:"Aplique la crema dos veces al día.",
+    trap:"Apply for the cream twice a day.",
+    truth:"Put the cream on twice a day.",
+    note:"Applying for insurance or benefits is solicitar. Aplicar para un trabajo is an anglicism you will hear here, but solicitar is the standard form."
+  },
+  {
+    es:"asistencia", looks:"assistance", means:"attendance",
+    say:"ayuda, apoyo", risk:"everyday", tag:"Care",
+    heard:"La asistencia fue baja.",
+    trap:"The assistance was low.",
+    truth:"Attendance was low.",
+    note:"Asistencia médica does mean medical care, so the cognate is not always wrong. In a scheduling or class context it is attendance."
+  },
+  {
+    es:"argumento", looks:"argument (quarrel)", means:"reasoning, plot, storyline",
+    say:"discusión, pelea", risk:"everyday", tag:"Communication",
+    heard:"Tuvieron un argumento.",
+    trap:"They had an argument — in the sense of a fight.",
+    truth:"They had a line of reasoning. A quarrel is una discusión.",
+    note:"The quarrel sense is discusión or pelea."
+  },
+  {
+    es:"éxito", looks:"exit", means:"success",
+    say:"salida", risk:"everyday", tag:"Everyday",
+    heard:"La cirugía fue un éxito.",
+    trap:"The surgery was an exit.",
+    truth:"The surgery was a success.",
+    note:"Emergency exit is salida de emergencia."
+  },
+  {
+    es:"largo", looks:"large", means:"long",
+    say:"grande", risk:"everyday", tag:"Exam",
+    heard:"Una cicatriz larga.",
+    trap:"A large scar.",
+    truth:"A long scar.",
+    note:"Size is grande. Length is largo. On a wound description the two say different things."
+  },
+  {
+    es:"vaso", looks:"vase", means:"drinking glass — and, in anatomy, a vessel",
+    say:"florero", risk:"everyday", tag:"Anatomy",
+    heard:"Tome un vaso de agua.",
+    trap:"Drink a vase of water.",
+    truth:"Drink a glass of water.",
+    note:"Vaso sanguíneo is a blood vessel, so in anatomy the cognate is right. A vase for flowers is a florero."
+  },
+  {
+    es:"librería", looks:"library", means:"bookstore",
+    say:"biblioteca", risk:"everyday", tag:"Everyday",
+    heard:"Está en la librería.",
+    trap:"It is at the library.",
+    truth:"It is at the bookstore.",
+    note:"Comes up in discharge instructions and community-resource conversations."
+  },
+  {
+    es:"colegio", looks:"college", means:"school (primary or secondary)",
+    say:"universidad", risk:"everyday", tag:"Everyday",
+    heard:"Mi hija va al colegio.",
+    trap:"My daughter goes to college.",
+    truth:"My daughter goes to school.",
+    note:"Changes a paediatric patient into an adult one. College is universidad."
+  },
+  {
+    es:"lectura", looks:"lecture", means:"reading",
+    say:"conferencia, charla", risk:"everyday", tag:"Everyday",
+    heard:"La lectura de la presión.",
+    trap:"The lecture of the blood pressure.",
+    truth:"The blood pressure reading.",
+    note:"A talk or lecture is una conferencia or una charla."
+  },
+  {
+    es:"bizarro", looks:"bizarre", means:"brave, gallant (traditional)",
+    say:"extraño, raro", risk:"everyday", tag:"Everyday",
+    heard:"Un caso bizarro.",
+    trap:"A bizarre case.",
+    truth:"Traditionally: a gallant case. Increasingly used as bizarre.",
+    note:"Honest split. English influence has pushed bizarro toward strange in everyday Latin American speech, and the RAE has acknowledged it. Extraño or raro is unambiguous."
+  },
+  {
+    es:"fábrica", looks:"fabric", means:"factory",
+    say:"tela", risk:"everyday", tag:"Everyday",
+    heard:"Trabajo en una fábrica.",
+    trap:"I work in fabric.",
+    truth:"I work in a factory.",
+    note:"Occupational history matters for exposure. Fabric is tela."
+  },
+  {
+    es:"carpeta", looks:"carpet", means:"folder",
+    say:"alfombra", risk:"everyday", tag:"Everyday",
+    heard:"Traiga la carpeta.",
+    trap:"Bring the carpet.",
+    truth:"Bring the folder.",
+    note:"Comes up when a patient is asked to bring their records."
+  },
+  {
+    es:"sopa", looks:"soap", means:"soup",
+    say:"jabón", risk:"everyday", tag:"Everyday",
+    heard:"Solo puede tomar sopa.",
+    trap:"He can only drink soap.",
+    truth:"He can only have soup.",
+    note:"Turns up in diet instructions, where it matters."
+  },
+  {
+    es:"crudo", looks:"crude", means:"raw — and, in Mexico, hungover",
+    say:"grosero (for crude speech)", risk:"everyday", tag:"Diet",
+    heard:"Lo comí crudo.",
+    trap:"I ate it crude.",
+    truth:"I ate it raw.",
+    note:"Relevant to a food-poisoning history. Estar crudo is to be hungover in Mexican Spanish."
+  },
+  {
+    es:"molestar", looks:"to molest", means:"to bother, to annoy, to disturb",
+    say:"abusar sexualmente de", risk:"critical", tag:"Communication",
+    heard:"No quiero molestar a la enfermera.",
+    trap:"I do not want to molest the nurse.",
+    truth:"I do not want to bother the nurse.",
+    note:"The verb behind molestia, and the same warning applies. Molestar is ordinary politeness — perdone la molestia is sorry to trouble you."
+  },
+  {
+    es:"actual", looks:"actual", means:"current, present-day",
+    say:"real, verdadero", risk:"high", tag:"History",
+    heard:"Mi peso actual es 70 kilos.",
+    trap:"My actual weight is 70 kilos.",
+    truth:"My current weight is 70 kilos.",
+    note:"Close enough to pass unnoticed, which is what makes it risky on a chart: current weight and true weight are different claims."
+  },
+  {
+    es:"disgusto", looks:"disgust", means:"annoyance, upset, a falling-out",
+    say:"asco, repugnancia", risk:"everyday", tag:"Communication",
+    heard:"Se llevó un disgusto.",
+    trap:"She was disgusted.",
+    truth:"She was upset.",
+    note:"Physical disgust or nausea at something is asco. Estar a disgusto is to be uncomfortable or ill at ease."
+  },
+  {
+    es:"contestar", looks:"to contest", means:"to answer, to reply",
+    say:"impugnar, disputar", risk:"everyday", tag:"Communication",
+    heard:"No contestó el teléfono.",
+    trap:"He did not contest the phone.",
+    truth:"He did not answer the phone.",
+    note:"Contesting a bill or a decision is impugnar or disputar."
+  },
+  {
+    es:"desgracia", looks:"disgrace", means:"misfortune, a tragedy",
+    say:"deshonra, vergüenza", risk:"everyday", tag:"Communication",
+    heard:"Fue una desgracia.",
+    trap:"It was a disgrace.",
+    truth:"It was a tragedy.",
+    note:"Por desgracia means unfortunately. A disgrace in the shameful sense is una deshonra."
+  },
+];
+
+
 const ETHICS_CONTENT = [
   { id:'e-confidentiality', org:'NCIHC', tag:'Principle', title:'Confidentiality',
     summary:`Keep everything you hear or read during an assignment private. Share it only when the law or your facility's policy specifically requires it (like mandatory abuse reporting) — never out of habit or convenience.`,
@@ -9778,6 +10304,11 @@ function renderContent(){
   if(activeCategory === 'translate'){
     content.innerHTML = renderTranslate();
     if(trQuery) runTranslate();
+    return;
+  }
+
+  if(activeCategory === 'falsefriends'){
+    content.innerHTML = renderFalseFriends();
     return;
   }
 
@@ -10711,6 +11242,225 @@ function shuffle(arr){
   return a;
 }
 
+/* ---------- False Friends ---------- */
+
+const FF_RISKS = {
+  critical: { label:'Changes care', color:'#C2485C' },
+  high:     { label:'Shifts meaning', color:'#B08D2A' },
+  everyday: { label:'Everyday', color:'#5B7FBF' },
+};
+const FF_ORDER = ['critical','high','everyday'];
+
+let ffMode = 'study';      // 'study' | 'drill'
+let ffQuery = '';
+let ffRisk = 'all';
+let ffQuestions = [];
+let ffIndex = 0;
+let ffAnswers = [];        // chosen option index per question
+let ffRevealed = false;
+const FF_DRILL_LENGTH = 10;
+
+function ffMatches(f, q){
+  if(!q) return true;
+  const needle = foldText(q).toLowerCase();
+  return [f.es, f.looks, f.means, f.say, f.tag, f.note]
+    .some(v => foldText(v || '').toLowerCase().includes(needle));
+}
+
+function ffFiltered(){
+  return FALSE_FRIENDS
+    .filter(f => ffRisk === 'all' || f.risk === ffRisk)
+    .filter(f => ffMatches(f, ffQuery))
+    .sort((a,b) => FF_ORDER.indexOf(a.risk) - FF_ORDER.indexOf(b.risk));
+}
+
+function setFFMode(mode){
+  ffMode = mode === 'drill' ? 'drill' : 'study';
+  // Opening the drill with no questions built yet starts one, so the tab
+  // itself is the start button. Coming back to a drill in progress keeps it.
+  if(ffMode === 'drill' && !ffQuestions.length) buildFFDrill();
+  render();
+}
+function setFFRisk(risk){ ffRisk = risk; render(); }
+function ffSearch(value){
+  ffQuery = value;
+  // Re-render only the list: re-rendering the screen would recreate the
+  // input and throw away focus and the caret mid-word.
+  const list = document.getElementById('ffList');
+  if(list) list.innerHTML = renderFFCards();
+}
+
+/* Each question offers the real meaning against the false cognate it is
+ * pretending to be. The tempting wrong answer is the whole point — a drill
+ * whose distractors are unrelated teaches nothing about this particular
+ * trap. Two further meanings are borrowed from other entries so the shape
+ * of the options does not give the answer away. */
+function buildFFDrill(){
+  const pool = shuffle(FALSE_FRIENDS).slice(0, FF_DRILL_LENGTH);
+  ffQuestions = pool.map(f => {
+    const others = shuffle(FALSE_FRIENDS.filter(o => o.es !== f.es && o.means !== f.means))
+      .slice(0, 2)
+      .map(o => o.means);
+    const lure = 'It means "' + f.looks + '"';
+    const options = shuffle([f.means, lure, ...others]);
+    return { f, options, answer: options.indexOf(f.means), lure: options.indexOf(lure) };
+  });
+  ffIndex = 0;
+  ffAnswers = [];
+  ffRevealed = false;
+}
+
+function answerFF(i){
+  if(ffRevealed) return;
+  ffAnswers[ffIndex] = i;
+  ffRevealed = true;
+  render();
+}
+function nextFF(){
+  ffIndex++;
+  ffRevealed = false;
+  render();
+}
+function restartFFDrill(){ buildFFDrill(); render(); }
+
+function renderFFCards(){
+  const list = ffFiltered();
+  if(!list.length){
+    return `<div class="ff-empty">No false friend matches that. Try the Spanish word, the English word it imitates, or a specialty.</div>`;
+  }
+  return list.map(f => {
+    const risk = FF_RISKS[f.risk] || FF_RISKS.everyday;
+    return `
+      <article class="ff-card" style="--ff-color:${risk.color};">
+        <div class="ff-head">
+          <h3 class="ff-es">${escapeHtml(f.es)}</h3>
+          <span class="ff-badge">${escapeHtml(risk.label)}</span>
+          <span class="ff-tag">${escapeHtml(f.tag)}</span>
+        </div>
+        <p class="ff-gloss">Looks like <span class="ff-looks">${escapeHtml(f.looks)}</span>. Actually means <span class="ff-means">${escapeHtml(f.means)}</span>.</p>
+        <p class="ff-say">For <b>${escapeHtml(f.looks)}</b> you would say <b>${escapeHtml(f.say)}</b>.</p>
+        <div class="ff-example">
+          <p class="ff-heard">&ldquo;${escapeHtml(f.heard)}&rdquo;</p>
+          <div class="ff-line ff-trap"><span class="ff-line-mark">&#10007;</span><span>${escapeHtml(f.trap)}</span></div>
+          <div class="ff-line ff-true"><span class="ff-line-mark">&#10003;</span><span>${escapeHtml(f.truth)}</span></div>
+        </div>
+        ${f.note ? `<p class="ff-note">${escapeHtml(f.note)}</p>` : ''}
+      </article>`;
+  }).join('');
+}
+
+function renderFFStudy(){
+  const counts = FF_ORDER.map(r => ({ r, n: FALSE_FRIENDS.filter(f => f.risk === r).length }));
+  const chips = [`<button type="button" class="ff-chip${ffRisk==='all'?' is-active':''}" onclick="setFFRisk('all')">All ${FALSE_FRIENDS.length}</button>`]
+    .concat(counts.map(c =>
+      `<button type="button" class="ff-chip${ffRisk===c.r?' is-active':''}" onclick="setFFRisk('${c.r}')">${escapeHtml(FF_RISKS[c.r].label)} ${c.n}</button>`))
+    .join('');
+
+  return `
+    <div class="ff-intro">
+      <b>A false friend is a word that looks like an English word and means something else.</b>
+      Outside a hospital that is embarrassing. Inside one it changes care: <b>constipado</b>
+      read as constipated sends a head cold toward a bowel workup. Each entry below shows
+      the trap written out, so you can recognise it when you hear it.
+    </div>
+    <div class="ff-filters">${chips}</div>
+    <div class="search ff-search" style="margin-bottom:17px;">
+      <input type="text" id="ffSearch" placeholder="Search a word, a meaning, or a specialty…"
+             value="${escapeHtml(ffQuery)}" oninput="ffSearch(this.value)" aria-label="Search false friends">
+    </div>
+    <div class="ff-list" id="ffList">${renderFFCards()}</div>`;
+}
+
+function renderFFDrill(){
+  if(!ffQuestions.length) return `<div class="ff-empty">No drill questions available.</div>`;
+
+  // Results
+  if(ffIndex >= ffQuestions.length){
+    const correct = ffQuestions.reduce((n,q,i) => n + (ffAnswers[i] === q.answer ? 1 : 0), 0);
+    const lured   = ffQuestions.reduce((n,q,i) => n + (ffAnswers[i] === q.lure ? 1 : 0), 0);
+    const pct = Math.round((correct / ffQuestions.length) * 100);
+    const missed = ffQuestions.filter((q,i) => ffAnswers[i] !== q.answer);
+    return `
+      <div class="quiz-card">
+        <div class="results-head">
+          <div class="ff-score"><b>${correct} / ${ffQuestions.length}</b><span>${pct}%</span></div>
+        </div>
+        <p class="results-summary">${lured
+          ? `The false cognate caught you ${lured === 1 ? 'once' : lured + ' times'}. That is the reflex this drill is for — those are the ones worth re-reading.`
+          : `You did not take the false cognate once. That is the result that matters here.`}</p>
+        ${missed.length ? `<div class="ff-list" style="margin-top:17px;">${missed.map(q => {
+          const risk = FF_RISKS[q.f.risk] || FF_RISKS.everyday;
+          return `<article class="ff-card" style="--ff-color:${risk.color};">
+            <div class="ff-head"><h3 class="ff-es">${escapeHtml(q.f.es)}</h3><span class="ff-badge">${escapeHtml(risk.label)}</span></div>
+            <p class="ff-gloss">Looks like <span class="ff-looks">${escapeHtml(q.f.looks)}</span>. Actually means <span class="ff-means">${escapeHtml(q.f.means)}</span>.</p>
+          </article>`;
+        }).join('')}</div>` : ''}
+        <div class="quiz-actions" style="margin-top:17px;">
+          <button class="btn primary" onclick="restartFFDrill()">Drill ten more</button>
+          <button class="btn" onclick="setFFMode('study')">Back to the list</button>
+        </div>
+      </div>`;
+  }
+
+  const q = ffQuestions[ffIndex];
+  const chosen = ffAnswers[ffIndex];
+  const pct = Math.round((ffIndex / ffQuestions.length) * 100);
+  const letters = ['A','B','C','D'];
+  const risk = FF_RISKS[q.f.risk] || FF_RISKS.everyday;
+
+  let html = `<div class="quiz-card">
+    <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span></div>
+    <div class="quiz-meta">
+      <span class="tag" style="color:${risk.color}; background:${risk.color}1F;">${escapeHtml(risk.label)}</span>
+      <span class="quiz-counter">${ffIndex+1} / ${ffQuestions.length}</span>
+    </div>
+    <p class="ff-drill-prompt">A patient says</p>
+    <p class="ff-drill-word">${escapeHtml(q.f.es)}</p>
+    <p class="ff-drill-heard">&ldquo;${escapeHtml(q.f.heard)}&rdquo;</p>
+    <div class="quiz-options">`;
+
+  q.options.forEach((opt, i) => {
+    let cls = '';
+    if(ffRevealed){
+      if(i === q.answer) cls = 'correct';
+      else if(i === chosen) cls = 'wrong';
+    }
+    html += `<button class="quiz-option ${cls}" ${ffRevealed?'disabled':''} onclick="answerFF(${i})">
+      <span class="opt-letter">${letters[i]}</span><span>${escapeHtml(opt)}</span>
+    </button>`;
+  });
+  html += `</div>`;
+
+  if(ffRevealed){
+    const right = chosen === q.answer;
+    const tookLure = chosen === q.lure;
+    const lead = right ? 'Correct.' : (tookLure ? 'That is the trap.' : 'Not quite.');
+    html += `<div class="quiz-explain"><b>${lead}</b> ${escapeHtml(q.f.es)} means ${escapeHtml(q.f.means)}. For &ldquo;${escapeHtml(q.f.looks)}&rdquo; you would say ${escapeHtml(q.f.say)}.</div>`;
+    html += `<div class="ff-example">
+        <p class="ff-heard">&ldquo;${escapeHtml(q.f.heard)}&rdquo;</p>
+        <div class="ff-line ff-trap"><span class="ff-line-mark">&#10007;</span><span>${escapeHtml(q.f.trap)}</span></div>
+        <div class="ff-line ff-true"><span class="ff-line-mark">&#10003;</span><span>${escapeHtml(q.f.truth)}</span></div>
+      </div>`;
+    html += `<div class="quiz-actions" style="margin-top:17px;">
+      <button class="btn primary" onclick="nextFF()">${ffIndex + 1 >= ffQuestions.length ? 'See results' : 'Next'}</button>
+    </div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderFalseFriends(){
+  const n = FALSE_FRIENDS.length;
+  return `
+    <div class="section-head"><h2>False Friends</h2><span class="sub">${n} traps</span></div>
+    <div class="ff-modes">
+      <button type="button" class="ff-mode${ffMode==='study'?' is-active':''}" onclick="setFFMode('study')">Study</button>
+      <button type="button" class="ff-mode${ffMode==='drill'?' is-active':''}" onclick="setFFMode('drill')">Drill</button>
+    </div>
+    ${ffMode === 'drill' ? renderFFDrill() : renderFFStudy()}`;
+}
+
 function renderPractice(){
   if(quizActive) return renderQuiz();
   if(quizAnswers.length && quizQuestions.length && quizIndex >= quizQuestions.length) return renderQuizResults();
@@ -11237,7 +11987,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.0801';
+const BUILD_ID = 'b0916.0903';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -11520,6 +12270,7 @@ function renderHome(){
   const studyCards = [
     qaCard('#0F5FA6', DOMAIN_ICONS.exam,     'CoreCHI Practice', 'Practice for certification',   `setCategory('practice')`),
     qaCard('#4E9E74', DOMAIN_ICONS.review,   'Term Review',      'Study and reinforce',          `setCategory('review')`),
+    qaCard('#A85468', DOMAIN_ICONS.book,     'False Friends',    'Words that betray you',        `setCategory('falsefriends')`),
     qaCard('#2F5D62', DOMAIN_ICONS.shield,   'Code of Ethics',   'Key principles and conduct',   `setCategory('ethics')`),
     qaCard('#35A97A', DOMAIN_ICONS.calendar, 'Training & Events','Upcoming CE opportunities',    `setCategory('events')`),
   ].join('');
