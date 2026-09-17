@@ -78,6 +78,41 @@
   box-shadow:inset 0 1px 0 var(--finish-edge),var(--finish-shadow);
   border-radius:16px;min-width:0;
 }
+
+/* ---- The press glow, restored ----------------------------------------
+   index.html paints the coloured press shadow on :active/.is-pressed at
+   specificity (0,0,3,0). The resting rule directly above is
+   #content.is-home ... at (0,1,3,0) -- one ID higher -- so on Home the
+   RESTING shadow won every press. The card still lifted, so it looked wired
+   up, but the shadow never changed: measured 1 shadow colour across 6 cards,
+   navy, on all of .domain-family, .qa-tile and .home-rail > .qa-card.
+
+   Raising specificity is normally the wrong move in this file, but a state
+   rule has to outrank the resting rule it modifies -- that is the one
+   direction the escalation rule does not forbid. Adding :active/.is-pressed
+   to the SAME selectors is the smallest thing that does it.
+
+   Keep this list in step with the resting rule above. If a selector is added
+   there and not here, its press goes silent again exactly the same way.
+
+   Values are index.html's, unchanged -- this restores the existing design,
+   it does not invent a second press language. --tile-glow is the domain
+   colour at 40% alpha, set per card by tileVars().
+
+   Touch only, matching index.html. Desktop hover is handled by the
+   @media(hover:hover) block further down and is deliberately neutral. */
+@media (hover:none){
+  #content.is-home .domain-family:active,#content.is-home .domain-family.is-pressed,
+  #content.is-home .home-rail>.qa-card:active,#content.is-home .home-rail>.qa-card.is-pressed,
+  #content.is-home .qa-tile:active,#content.is-home .qa-tile.is-pressed{
+    border-color:color-mix(in srgb,var(--tile-color) 62%,var(--line));
+    box-shadow:
+      inset 0 0 0 1px var(--tile-glow),
+      inset 0 1px 0 var(--finish-edge),
+      0 3px 6px -2px color-mix(in srgb,var(--tile-color) 34%,transparent),
+      0 18px 34px -14px color-mix(in srgb,var(--tile-color) 66%,transparent);
+  }
+}
 #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card,.home-section-grid>.qa-card{
   min-height:143px;padding:14px 13px 11px;gap:8px;
 }
@@ -166,45 +201,52 @@
 }
 @media(max-width:819px){
   .main.home-layout{--home-inset:16px;padding:0 var(--home-inset) 26px;}
-  /* 268px, not 205px. The wayfinding sign is at source rows 777-895 of
+  /* 280px, not 205px. The wayfinding sign is at source rows 777-895 of
      hero.jpg; at 205px the crop stopped at row 838 and the dome had already
      dissolved the photo there, so the hospital's own name was never visible.
-     At 268px with position-Y 66% the crop runs rows 248-997 -- the sign, and
+     At 280px with position-Y 76% the crop runs rows 260-1043 -- the sign, and
      MORE canopy above it than before, not less.
 
-     20px of the extra 63px comes from the slimmer top bar above; the rest
+     20px of the extra 75px comes from the slimmer top bar above; the rest
      pushes the page down, which is the deliberate trade for showing the sign.
 
-     Keep this in step with the dome below and with background-position. */
-  #content.is-home .home-greeting{min-height:268px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
-  #content.is-home .home-greeting-photo-drift{background-position:69% 66%;}
-  /* A NARROWER dome, not a flatter one. The instinct is to flatten the arch
-     so the sign clears the fade, but flattening pushes the 50%-alpha line
-     BELOW the hero's bottom edge: the photo then meets the page at a hard
-     cut, there is no curve left for the page to rise into, and the arc of
-     marks in home-polish.js has nothing to sit on (measured: marks stranded
-     50px above the fade).
+     These three numbers -- height, position-Y and the dome below -- are one
+     setting. Changing any one alone breaks the other two. */
+  #content.is-home .home-greeting{min-height:280px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
+  #content.is-home .home-greeting-photo-drift{background-position:69% 76%;}
+  /* What makes the curve VISIBLE is not where the 50%-alpha line sits -- it
+     is whether the dissolve COMPLETES in open view, above the search bar,
+     and by how much the finish line arcs between centre and edge. Measure
+     those two numbers, not the midpoint; a dome can be perfectly consistent
+     with its arc of marks and still show no curve at all.
 
-     Narrowing instead keeps a real arch. 104% horizontal radius means the
-     dissolve peaks under Search and runs out before the bottom corners --
-     and the bottom-left corner is exactly where the sign is. Measured at
-     390x268: fade line y=225, marks 2-14px below it, same relationship the
-     205px banner had.
+     The 205px banner everyone liked:  centre finishes 11px above Search,
+                                       finish line arcs 20px centre-to-edge.
+     A first pass at 268px got:        centre finishes 0.6px BELOW Search,
+                                       edges never finish at all -> no curve.
+     This dome:                        finishes 10.8px above Search, arcs
+                                       20.9px. The old signature, restored.
+
+     A shallow dome (20% vertical radius) set high (96%) is what does it: the
+     dissolve is a thin band that completes early in the middle and late at
+     the corners, instead of a deep wash that never finishes. It also leaves
+     the bottom-left corner -- where the sign is -- at 87% opacity, clearer
+     than either previous attempt.
 
      If you change these numbers, nothing else needs editing: buildArcMarks()
      reads this gradient back and re-derives the curve. Do not re-introduce
-     hard-coded lift values there. */
+     hard-coded lift values there. But do re-measure the two numbers above. */
   #content.is-home .home-greeting-photo{
-    -webkit-mask-image:radial-gradient(104% 40% at 50% 108%,
-      rgba(0,0,0,0) 42%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.9) 78%, #000 90%);
-            mask-image:radial-gradient(104% 40% at 50% 108%,
-      rgba(0,0,0,0) 42%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.9) 78%, #000 90%);
+    -webkit-mask-image:radial-gradient(115% 20% at 50% 96%,
+      rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 64%, rgba(0,0,0,0.9) 80%, #000 92%);
+            mask-image:radial-gradient(115% 20% at 50% 96%,
+      rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 64%, rgba(0,0,0,0.9) 80%, #000 92%);
   }
   #content.is-home .home-greeting-scrim{
-    -webkit-mask-image:radial-gradient(104% 40% at 50% 108%,
-      rgba(0,0,0,0) 56%, rgba(0,0,0,0.55) 74%, rgba(0,0,0,0.9) 86%, #000 94%);
-            mask-image:radial-gradient(104% 40% at 50% 108%,
-      rgba(0,0,0,0) 56%, rgba(0,0,0,0.55) 74%, rgba(0,0,0,0.9) 86%, #000 94%);
+    -webkit-mask-image:radial-gradient(115% 20% at 50% 96%,
+      rgba(0,0,0,0) 58%, rgba(0,0,0,0.55) 76%, rgba(0,0,0,0.9) 88%, #000 96%);
+            mask-image:radial-gradient(115% 20% at 50% 96%,
+      rgba(0,0,0,0) 58%, rgba(0,0,0,0.55) 76%, rgba(0,0,0,0.9) 88%, #000 96%);
   }
   #content.is-home .home-greeting-text{width:min(278px,calc(100% - 36px));}
   #content.is-home .home-rail{
@@ -431,9 +473,20 @@ html[data-theme="dark"] .home-arc-mark{
   from{ opacity:0; transform:translateY(14px) scale(.94); }
   to  { opacity:1; transform:none; }
 }
+/* `backwards`, not `both`. With `both` the animation keeps FILLING after it
+   ends, and a filling animation outranks every declarative transform -- so
+   the entrance held transform:none forever and .folder-tile:active /
+   .is-pressed could never lift the tile. Measured: shadow and transform both
+   identical before and after a press. Same trap as .modal{animation:modalIn}
+   swallowing the folder's own grow-from-card scale.
+
+   `backwards` still applies the `from` frame through animation-delay, which
+   is what stops the stagger flashing un-animated tiles, and then releases the
+   properties when it finishes. End state is identical: opacity 1, no
+   transform -- those are the base values anyway. */
 #domainFolder.show .folder-tile,
 #homeSectionOverlay.show .home-section-grid>.qa-card{
-  animation:folderTileIn .40s cubic-bezier(.2,.9,.3,1) both;
+  animation:folderTileIn .40s cubic-bezier(.2,.9,.3,1) backwards;
 }
 /* Each tile starts a beat after the one before. 26ms is enough to read as a
    cascade and short enough that the whole set has landed well inside half a
