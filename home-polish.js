@@ -202,20 +202,66 @@
     }
     refresh();
   };
+
+  /* Medical Terminology "View all": one card per domain, in the same sheet
+     and the same card style the other sections use, instead of dumping every
+     term on one page. Built from the domain rail already on Home, so the
+     order (biggest first), colours, icons and counts always match it.
+     Each card keeps the rail's own action: a domain with specialties opens
+     its folder ON TOP of this sheet (closing it comes back here); a domain
+     without them navigates, and navigation closes every overlay. */
+  function domainSheetCards(section){
+    return Array.from(section.querySelectorAll('.home-rail .domain-family-head'), head => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'qa-card';
+      card.setAttribute('style', head.getAttribute('style') || '');
+      card.setAttribute('onclick', head.getAttribute('onclick') || '');
+      const icon = document.createElement('span');
+      icon.className = 'qa-icon';
+      const srcIcon = head.querySelector('.home-tile-icon');
+      icon.innerHTML = srcIcon ? srcIcon.innerHTML : '';
+      const title = document.createElement('span');
+      title.className = 'qa-title';
+      title.textContent = (head.querySelector('.home-tile-name') || head).textContent.trim();
+      const desc = document.createElement('span');
+      desc.className = 'qa-desc';
+      const terms = head.querySelector('.home-term-count');
+      const specs = head.querySelector('.home-specialty-count');
+      desc.textContent = terms ? terms.textContent.trim() : '';
+      if(specs){
+        desc.appendChild(document.createElement('br'));
+        desc.appendChild(document.createTextNode(specs.textContent.trim()));
+      }
+      card.append(icon, title, desc);
+      return card;
+    });
+  }
   window.openHomeSection = function(key){
     // Only the four fixed sections of Home can populate this presentation.
     if(!['medical','doctors','study','tools'].includes(key)) return;
     const section = document.querySelector('#content.is-home [data-home-section="' + key + '"]');
     const overlay = document.getElementById('homeSectionOverlay');
     if(!section || !overlay) return;
-    const cards = section.querySelectorAll('.home-rail > .qa-card');
+    const cards = key === 'medical' ? domainSheetCards(section) : section.querySelectorAll('.home-rail > .qa-card');
     if(!cards.length) return;
     document.getElementById('homeSectionTitle').textContent = section.querySelector('h3').textContent;
-    document.getElementById('homeSectionSub').textContent = cards.length + ' tools';
+    document.getElementById('homeSectionSub').textContent = key === 'medical'
+      ? cards.length + (cards.length === 1 ? ' domain' : ' domains')
+      : cards.length + ' tools';
     document.getElementById('homeSectionIcon').innerHTML = cards[0].querySelector('.qa-icon').innerHTML;
     document.getElementById('homeSectionPanel').style.setProperty('--folder-color', section.style.getPropertyValue('--section-color'));
     const grid = document.getElementById('homeSectionGrid');
-    grid.replaceChildren(...Array.from(cards, card => card.cloneNode(true)));
+    grid.replaceChildren(...Array.from(cards, card => key === 'medical' ? card : card.cloneNode(true)));
+    if(key === 'medical'){
+      // The full term list stays one tap away, below the domains.
+      const all = document.createElement('button');
+      all.type = 'button';
+      all.className = 'home-section-all';
+      all.textContent = 'Browse every term';
+      all.addEventListener('click', () => { closeHomeSection(); setCategory('all'); });
+      grid.appendChild(all);
+    }
     overlay.classList.add('show');
   };
   window.closeHomeSection = function(){

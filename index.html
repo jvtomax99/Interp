@@ -12354,7 +12354,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0916.2115';
+const BUILD_ID = 'b0917.1000';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -12683,7 +12683,7 @@ function renderHome(){
     <section class="home-sec home-quick-section">
       <div class="qa-grid">${quickActions}</div>
     </section>
-    ${renderHomeSection('Medical Terminology', 'View all', `setCategory('all')`, termCards)}
+    ${renderHomeSection('Medical Terminology', 'View all', `openHomeSection('medical')`, termCards)}
     ${renderHomeSection('Doctors', 'View all', `openHomeSection('doctors')`, doctorCards)}
     ${renderHomeSection('Study & Development', 'View all', `openHomeSection('study')`, studyCards)}
     ${renderHomeSection('Tools & Reference', 'View all', `openHomeSection('tools')`, utilityCards)}
