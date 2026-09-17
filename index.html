@@ -8086,21 +8086,29 @@ function darkenHex(hex, pct){
 // Shared by the sidebar tile grid and the "All domains" glossary listing:
 // parents first, each immediately followed by its own subgroups.
 function orderedCategoriesWithSubgroups(){
-  const topLevel = DATA.categories.filter(c=>!c.parentId);
+  // Alphabetical, through the collator that already exists for terms:
+  // accent-insensitive, so an accented name sorts with its plain letter
+  // instead of after Z, and numeric, so "Level 2" precedes "Level 10".
+  const byName = (a, b) => collateTerms(a.name, b.name);
+  const topLevel = DATA.categories.filter(c=>!c.parentId).slice().sort(byName);
   const ordered = [];
   topLevel.forEach(parent=>{
     ordered.push(parent);
-    DATA.categories.filter(c=>c.parentId===parent.id).forEach(child=> ordered.push(child));
+    DATA.categories.filter(c=>c.parentId===parent.id).slice().sort(byName)
+      .forEach(child=> ordered.push(child));
   });
   // Orphaned subgroups (parent deleted) still need to show up somewhere.
-  DATA.categories.forEach(c=>{
+  DATA.categories.slice().sort(byName).forEach(c=>{
     if(c.parentId && !topLevel.some(p=>p.id===c.parentId) && !ordered.includes(c)) ordered.push(c);
   });
   return ordered;
 }
 
 function getDomainTiles(){
-  return DATA.categories.map(c=>({
+  // Sorted here as well as in orderedCategoriesWithSubgroups(): this is the
+  // list Home, the domain folder and the all-domains view are built from,
+  // and it was returning categories in whatever order they were stored.
+  return DATA.categories.slice().sort((a,b)=>collateTerms(a.name,b.name)).map(c=>({
     id: c.id, name: c.name, color: c.color, icon: DOMAIN_ICONS[c.icon] || DOMAIN_ICONS.sparkle,
     count: c.terms.length, label: c.terms.length===1 ? 'term' : 'terms', parentId: c.parentId || null
   }));
@@ -11412,7 +11420,9 @@ function openDomainFolder(id, fromEl){
   const tiles = getDomainTiles();
   const parent = tiles.find(t => t.id === id);
   if(!parent) return;
-  const kids = tiles.filter(t => t.parentId === id).sort((a,b) => (b.count||0) - (a.count||0));
+  // Was biggest-first by term count; alphabetical now, so a subdomain sits
+  // where the rest of the app says it will.
+  const kids = tiles.filter(t => t.parentId === id).sort((a,b) => collateTerms(a.name, b.name));
   if(!kids.length){ setCategory(id); return; }     // nothing to open into
 
   const ov = document.getElementById('domainFolder');
@@ -12454,7 +12464,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1024';
+const BUILD_ID = 'b0917.1035';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 

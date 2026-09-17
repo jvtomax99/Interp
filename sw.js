@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v52-oncology-split';
+const CACHE_VERSION = 'interpreter-hub-v53-alpha-domains';
 const PRECACHE = [
   './',
   './index.html',
