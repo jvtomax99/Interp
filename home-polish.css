@@ -215,37 +215,52 @@
   #content.is-home .home-greeting{min-height:280px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
   #content.is-home .home-greeting-photo-drift{background-position:69% 76%;}
   /* What makes the curve VISIBLE is not where the 50%-alpha line sits -- it
-     is whether the dissolve COMPLETES in open view, above the search bar,
-     and by how much the finish line arcs between centre and edge. Measure
-     those two numbers, not the midpoint; a dome can be perfectly consistent
-     with its arc of marks and still show no curve at all.
+     is whether the dissolve COMPLETES in view and by how much that finish
+     line arcs between centre and edge. Measure those two, not the midpoint;
+     a dome can be perfectly consistent with its arc of marks and still show
+     no curve at all. That is exactly how the 268px version shipped.
 
-     The 205px banner everyone liked:  centre finishes 11px above Search,
-                                       finish line arcs 20px centre-to-edge.
-     A first pass at 268px got:        centre finishes 0.6px BELOW Search,
-                                       edges never finish at all -> no curve.
-     This dome:                        finishes 10.8px above Search, arcs
-                                       20.9px. The old signature, restored.
+     The 205px banner everyone liked:  finishes 11px ABOVE Search, arcs 20px.
+     A first pass at 268px:            finishes 0.6px BELOW Search and never
+                                       finishes at the edges -> no curve.
+     This dome:                        finishes 3.2px INSIDE the pill's top
+                                       edge, arcs 20.9px.
 
-     A shallow dome (20% vertical radius) set high (96%) is what does it: the
-     dissolve is a thin band that completes early in the middle and late at
-     the corners, instead of a deep wash that never finishes. It also leaves
-     the bottom-left corner -- where the sign is -- at 87% opacity, clearer
-     than either previous attempt.
+     A shallow dome -- 20% vertical radius -- is what makes the dissolve a
+     thin band that completes early in the middle and late at the corners,
+     instead of a deep wash that never finishes anywhere. It also leaves the
+     bottom-left corner, where the wayfinding sign is, at 87% opacity.
 
-     If you change these numbers, nothing else needs editing: buildArcMarks()
-     reads this gradient back and re-derives the curve. Do not re-introduce
-     hard-coded lift values there. But do re-measure the two numbers above. */
+     Where it finishes RELATIVE TO SEARCH is a deliberate change from the
+     205px original, asked for directly: the apex tucks behind the pill
+     rather than floating as a white band above it, and the arc of marks
+     rides down with it so some disappear underneath. That occlusion is the
+     effect -- depth, rather than decals printed on the photo.
+
+     `at 50% Y%` is the only thing that moves it, and it is bounded on both
+     sides. Measured at 390px:
+
+         96%   apex 10.8px ABOVE the pill   16/16 marks visible -- it floats
+        101%   apex  3.2px INSIDE it         7/16 visible -- what we want
+        104%   apex 11.6px INSIDE it         0/16 visible -- arc wasted
+
+     curve.cjs fails at both 96% and 104%, so this is a guarded range rather
+     than a number someone liked once. A 320px phone gives 4 of 13 at 101%.
+
+     Change any of these and nothing else needs editing -- buildArcMarks()
+     reads this gradient back and re-derives the marks' line. Do not
+     re-introduce hard-coded lift values there. But do re-measure the two
+     numbers at the top of this comment; they are the whole point. */
   #content.is-home .home-greeting-photo{
-    -webkit-mask-image:radial-gradient(115% 20% at 50% 96%,
+    -webkit-mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 64%, rgba(0,0,0,0.9) 80%, #000 92%);
-            mask-image:radial-gradient(115% 20% at 50% 96%,
+            mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 64%, rgba(0,0,0,0.9) 80%, #000 92%);
   }
   #content.is-home .home-greeting-scrim{
-    -webkit-mask-image:radial-gradient(115% 20% at 50% 96%,
+    -webkit-mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 58%, rgba(0,0,0,0.55) 76%, rgba(0,0,0,0.9) 88%, #000 96%);
-            mask-image:radial-gradient(115% 20% at 50% 96%,
+            mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 58%, rgba(0,0,0,0.55) 76%, rgba(0,0,0,0.9) 88%, #000 96%);
   }
   #content.is-home .home-greeting-text{width:min(278px,calc(100% - 36px));}
