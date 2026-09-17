@@ -4525,25 +4525,29 @@ const DEFAULT_DATA = {
       {en:'Rett syndrome', es:'', def:'A neurodevelopmental disorder, discussed in the context of genetics test reviews.', source:''},
       {en:'Simpson-Golabi-Behmel syndrome (SGBS)', es:'', def:'A condition identified in genetics consultations.', source:''},
     ]},
-    { id:'onco', name:'Oncology, Hematology & Leukemia', color:'#B5707D', icon:'ribbon', terms:[
+    { id:'onco', name:'Oncology', color:'#B5707D', icon:'ribbon', terms:[
       {en:'AC-T Chemotherapy regimen', es:'', def:'Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).', source:''},
-      {en:'Autoimmune Hemolytic Anemia (AIHA)', es:'Anemia Hemolítica Autoinmunitaria', def:'Condition where the immune system destroys red blood cells.', source:''},
       {en:'Breast fibroadenoma', es:'Fibroadenoma de mama', def:'Noncancerous breast lumps.', source:'NCI (Spanish)'},
       {en:'Clear cell sarcoma of the kidney', es:'Sarcoma renal de células claras', def:'Differentiated from carcinoma in clinical terminology.', source:''},
-      {en:'Diffuse Large B-Cell Lymphoma (DLBCL)', es:'Linfoma Difuso de células B Grandes', def:'Aggressive lymphoma type discussed at the cancer center.', source:''},
       {en:'Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)', es:'Tumor glioneuronal leptomeníngeo difuso (TGLD)', def:'Rare CNS tumor.', source:''},
-      {en:'Donor chimerism', es:'Quimerismo', def:'Often relevant in post-transplant monitoring.', source:'NCI (Spanish)'},
       {en:'Glioblastoma', es:'Glioblastoma', def:'Aggressive brain cancer treated in radiation oncology.', source:''},
       {en:'Hepatocellular carcinoma (HCC)', es:'Carcinoma hepatocelular', def:'Primary liver cancer.', source:''},
-      {en:'HPV & Myelodysplastic Syndromes (MDS)', es:'', def:'A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).', source:''},
       {en:'LEEP biopsy', es:'', def:'Loop Electrosurgical Excision Procedure used in OB/GYN oncology.', source:''},
-      {en:'Monoclonal Gammopathy of Undetermined Significance (MGUS)', es:'GMSI', def:'Precursor plasma cell condition.', source:''},
       {en:'Myofibroblastic stromal hyperplasia', es:'Hiperplasia estromal miofibroblástica mamaria', def:'Proliferative breast lesion.', source:''},
-      {en:'Paroxysmal nocturnal hemoglobinuria (PNH)', es:'Hemoglobinuria paroxística nocturna', def:'Rare blood disorder.', source:''},
-      {en:'Smoldering Multiple Myeloma (SMM)', es:'Mieloma Múltiple Quiescente', def:'Precursor condition to myeloma.', source:'Sergas.gal (Spanish)'},
       {en:'Testicular Rhabdomyosarcoma', es:'Rabdomiosarcoma', def:'Pediatric soft tissue cancer.', source:''},
       {en:'Tumor markers', es:'', def:'Trended over time to monitor treatment response.', source:''},
+    ]},
+    { id:'onco-hematology', name:'Hematology', color:'#9C5A72', icon:'flask', parentId:'onco', terms:[
+      {en:'Autoimmune Hemolytic Anemia (AIHA)', es:'Anemia Hemolítica Autoinmunitaria', def:'Condition where the immune system destroys red blood cells.', source:''},
+      {en:'Diffuse Large B-Cell Lymphoma (DLBCL)', es:'Linfoma Difuso de células B Grandes', def:'Aggressive lymphoma type discussed at the cancer center.', source:''},
+      {en:'Donor chimerism', es:'Quimerismo', def:'Often relevant in post-transplant monitoring.', source:'NCI (Spanish)'},
+      {en:'Monoclonal Gammopathy of Undetermined Significance (MGUS)', es:'GMSI', def:'Precursor plasma cell condition.', source:''},
+      {en:'Paroxysmal nocturnal hemoglobinuria (PNH)', es:'Hemoglobinuria paroxística nocturna', def:'Rare blood disorder.', source:''},
+      {en:'Smoldering Multiple Myeloma (SMM)', es:'Mieloma Múltiple Quiescente', def:'Precursor condition to myeloma.', source:'Sergas.gal (Spanish)'},
       {en:'Xerocytosis (Dehydrated hereditary stomatocytosis)', es:'Xerocitosis congénita', def:'A red blood cell disorder.', source:''},
+    ]},
+    { id:'onco-leukemia', name:'Leukemia', color:'#C78A9B', icon:'dna', parentId:'onco', terms:[
+      {en:'HPV & Myelodysplastic Syndromes (MDS)', es:'', def:'A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).', source:''},
     ]},
     { id:'cardiac', name:'Heart Failure & Cardiac', color:'#C98FA0', icon:'heart', terms:[
       {en:'Breast Arterial Calcification (BAC)', es:'Calcificaciones mamarias', def:'Calcium deposits found in breast arteries.', source:''},
@@ -6074,6 +6078,10 @@ async function loadData(){
     }else{
       await loadCategoriesMeta();   // re-read: the migration just wrote it
     }
+    // One-time, flagged, and safe to call on every launch: once it has run
+    // it returns after a single small document read.
+    await migrateOncologySplit();
+
     startTermsListener();
     startCategoriesMetaListener();
     // Categories are live now and terms are whatever the cache had; the
@@ -6091,8 +6099,100 @@ async function loadData(){
 // metadata). This is what actually fixes concurrent editing: two people
 // saving different terms at the same time now write to different
 // documents instead of both overwriting the same blob.
+/* ---------- Oncology split ----------
+ * "Oncology, Hematology & Leukemia" was one domain holding three different
+ * conversations. It is now "Oncology" with Hematology and Leukemia as
+ * subdomains beneath it, and the terms are filed accordingly.
+ *
+ * The sorting is done by rule rather than by a hand-written list of term ids,
+ * because the seed is only a fraction of the glossary -- the team has added
+ * terms to this domain in Firestore that this file has never seen, and those
+ * have to be filed too.
+ *
+ * Acronyms are matched against the ORIGINAL case, not the lowercased text.
+ * "ALL" for acute lymphoblastic leukemia is deliberately absent: lowercased,
+ * it matches the ordinary English word in any definition, and a term about
+ * "all patients" would have landed in Leukemia.
+ */
+const ONCO_LEUKEMIA_WORDS = /leukemi|leukaemi|myelodysplas|myeloproliferat|blast crisis|polycythemia vera|essential thrombocythemia|myelofibrosis/;
+const ONCO_LEUKEMIA_ACRONYMS = /\b(AML|CLL|CML|APL|JMML|MDS|MPN)\b/;
+const ONCO_HEMATOLOGY_WORDS = /anemi|anaemi|h[ae]moglobin|sickle|thalass|h[ae]mophil|platelet|thrombocytopen|thrombophil|neutropen|pancytopen|leukopen|coagul|clotting|von willebrand|h[ae]molytic|h[ae]molysis|bone marrow|marrow transplant|chimerism|transfus|ferritin|iron deficiency|spherocytos|stomatocytos|xerocytos|h[ae]mochromatos|porphyri|aplastic|erythrocyt|reticulocyt|myeloma|gammopathy|lymphoma|hodgkin|red blood cell|white blood cell|blood disorder|blood count|sideroblast/;
+const ONCO_HEMATOLOGY_ACRONYMS = /\b(MGUS|SMM|PNH|AIHA|ITP|TTP|DIC|DLBCL|CBC|INR|VWD|G6PD)\b/;
+
+function oncologyBucketFor(term){
+  const raw = [term && term.en, term && term.es, term && term.def].filter(Boolean).join(' ');
+  const low = raw.toLowerCase();
+  if(ONCO_LEUKEMIA_WORDS.test(low) || ONCO_LEUKEMIA_ACRONYMS.test(raw)) return 'onco-leukemia';
+  if(ONCO_HEMATOLOGY_WORDS.test(low) || ONCO_HEMATOLOGY_ACRONYMS.test(raw)) return 'onco-hematology';
+  return 'onco';                     // solid tumours, regimens, procedures
+}
+
+const ONCO_CHILDREN = [
+  { id:'onco-hematology', name:'Hematology', color:'#9C5A72', icon:'flask', parentId:'onco' },
+  { id:'onco-leukemia',   name:'Leukemia',   color:'#C78A9B', icon:'dna',   parentId:'onco' },
+];
+
+/* The flag lives in terminology-meta/migrations, NOT on the categories doc
+ * that CLAUDE.md points at. saveCategoriesMeta() writes that document with a
+ * plain .set({categories, updatedAt}), so any flag stored beside the category
+ * list is destroyed the next time somebody renames a domain -- and the
+ * migration would then run a second time. A separate document written with
+ * {merge:true} cannot be clobbered that way. */
+async function migrateOncologySplit(){
+  if(!db) return;
+  const FLAG = 'oncologySplit';
+  const flagRef = db.collection('terminology-meta').doc('migrations');
+
+  let flags = {};
+  try{
+    const snap = await flagRef.get();
+    if(snap.exists) flags = snap.data() || {};
+  }catch(err){ return; }               // offline: try again next launch
+  if(flags[FLAG]) return;
+
+  const metaRef = db.collection('terminology-meta').doc('categories');
+  const metaSnap = await metaRef.get();
+  if(!metaSnap.exists) return;         // nothing seeded yet; loadData handles that path
+  const cats = (metaSnap.data().categories || []).slice();
+
+  const parent = cats.find(c => c.id === 'onco');
+  if(!parent){
+    // Nothing to split -- record that so this does not re-read every launch.
+    await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now() }, { merge:true });
+    return;
+  }
+
+  parent.name = 'Oncology';
+  ONCO_CHILDREN.forEach(child=>{
+    const at = cats.findIndex(c => c.id === child.id);
+    if(at === -1) cats.push({ ...child });
+    else cats[at] = { ...cats[at], ...child };
+  });
+  await metaRef.set({ categories: cats, updatedAt: Date.now() }, { merge:true });
+
+  // Re-file the terms. Only ones still sitting on the parent are touched, so
+  // anything a colleague has already moved by hand is left alone.
+  const termsSnap = await db.collection('terms').where('categoryId', '==', 'onco').get();
+  const moves = [];
+  termsSnap.forEach(doc=>{
+    const want = oncologyBucketFor(doc.data());
+    if(want !== 'onco') moves.push({ ref: doc.ref, categoryId: want });
+  });
+  for(let i=0; i<moves.length; i+=400){   // Firestore caps a batch at 500 writes
+    const batch = db.batch();
+    moves.slice(i, i+400).forEach(m => batch.update(m.ref, { categoryId: m.categoryId }));
+    await batch.commit();
+  }
+
+  await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now(), [FLAG + 'Moved']: moves.length }, { merge:true });
+  console.log('Oncology split: moved ' + moves.length + ' of ' + termsSnap.size + ' terms');
+}
+
 async function migrateToPerTermStorage(source){
-  const categoriesMeta = source.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon }));
+  // parentId is carried here too. Without it a first run seeded every
+  // subdomain as a top-level domain, because this is the one path that
+  // writes the category list without going through saveCategoriesMeta().
+  const categoriesMeta = source.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon, parentId: c.parentId || null }));
   await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
 
   const batchSize = 400; // Firestore batch limit is 500 writes
@@ -12354,7 +12454,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1000';
+const BUILD_ID = 'b0917.1024';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
