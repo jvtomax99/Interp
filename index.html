@@ -1754,11 +1754,64 @@
 
   /* ---------- Team Chat ---------- */
   .chat-panel{ display:flex; flex-direction:column; height:65vh; min-height:380px; max-height:640px; }
+  /* 3px, not 12px. The gap is the space INSIDE a run of messages from one
+     person; the space BETWEEN people is added per row below. A flat 12px
+     everywhere made three quick notes from one colleague look like three
+     separate interruptions. */
   .chat-messages{
-    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px;
+    flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:3px;
     padding:6px 6px 16px 6px; scroll-behavior:smooth;
   }
-  .chat-empty{ margin:auto; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.6; }
+  .chat-bubble-row.run-first{ margin-top:13px; }
+  .chat-messages > .chat-bubble-row:first-child{ margin-top:0; }
+  /* Keeps a grouped message aligned with the one above it that has a face. */
+  .chat-avatar-gap{ width:28px; flex-shrink:0; }
+
+  /* A day break, so a long thread reads as days rather than one scroll. */
+  .chat-day{ display:flex; align-items:center; gap:10px; margin:17px 2px 4px 2px; }
+  .chat-day::before, .chat-day::after{ content:''; flex:1; height:1px; background:var(--line-soft); }
+  .chat-day span{
+    font-family:var(--sans); font-size:10.5px; font-weight:600; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink-faint); white-space:nowrap;
+  }
+  .chat-empty{ margin:auto; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.6; padding:0 24px; }
+  .chat-empty-mark{ font-size:34px; line-height:1; margin-bottom:10px; }
+  .chat-empty-title{ font-family:var(--sans); font-size:15px; font-weight:650; letter-spacing:-.02em; color:var(--ink); margin:0 0 4px 0; }
+
+  /* Reactions. One tap is the cheapest thing anyone can send, and the whole
+     reason it is here: it costs nothing to tell a colleague you saw them. */
+  .chat-reactions{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+  .chat-reaction{
+    display:inline-flex; align-items:center; gap:4px; cursor:pointer;
+    min-height:26px; padding:0 8px; border-radius:999px;
+    border:1px solid var(--line); background:var(--paper);
+    font-family:var(--sans); font-size:12px; line-height:1;
+  }
+  .chat-reaction b{ font-weight:600; font-size:10.5px; color:var(--ink-soft); }
+  .chat-reaction.is-mine{ border-color:color-mix(in srgb, var(--accent-2) 55%, var(--line)); background:var(--accent-soft); }
+  .chat-reaction.is-mine b{ color:var(--accent); }
+  .chat-reaction:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+
+  /* Revealed by tapping a message, never sitting there waiting to be hit. */
+  .chat-actions{
+    display:flex; align-items:center; gap:2px; margin-top:6px; padding:3px;
+    border-radius:999px; border:1px solid var(--line); background:var(--paper);
+    box-shadow:0 8px 20px -12px rgba(22,55,90,0.22);
+    animation:itemArrive .16s var(--ease) backwards;
+  }
+  .chat-act-emoji{
+    min-width:36px; min-height:36px; border:none; background:none; cursor:pointer;
+    font-size:17px; line-height:1; border-radius:999px;
+  }
+  .chat-act-emoji:hover{ background:var(--bg-hi); }
+  .chat-act-del{
+    min-height:36px; padding:0 11px; margin-left:2px; border:none; cursor:pointer;
+    background:none; border-radius:999px; color:var(--danger);
+    font-family:var(--sans); font-size:12px; font-weight:600;
+  }
+  .chat-act-del:hover{ background:var(--danger-soft); }
+  .chat-act-emoji:focus-visible, .chat-act-del:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
+  @media (prefers-reduced-motion:reduce){ .chat-actions{ animation:none; } }
   /* "3 new messages" while you are reading back. Absolutely positioned so it
      cannot change the thread's height -- the whole point is that nothing
      moves when a message arrives. */
@@ -1782,7 +1835,7 @@
     .chat-jump{ transition:none; }
     .chat-bubble-row.fresh{ animation:none; }
   }
-  .chat-bubble-row{ display:flex; align-items:flex-end; gap:8px; max-width:76%; }
+  .chat-bubble-row{ display:flex; align-items:flex-end; gap:8px; max-width:82%; cursor:pointer; }
   .chat-bubble-row.me{ align-self:flex-end; flex-direction:row-reverse; }
   .chat-bubble-row.them{ align-self:flex-start; }
   .chat-bubble-col{ display:flex; flex-direction:column; min-width:0; }
@@ -1806,7 +1859,14 @@
     box-shadow:inset 0 0 0 1px rgba(20,43,67,0.10);
   }
   .chat-author{ font-family:var(--sans); font-size:10.5px; font-weight:600; color:var(--ink-faint); margin:0 4px 3px 4px; }
-  .chat-bubble{ padding:10px 14px; border-radius:16px; font-size:13.5px; line-height:1.55; word-break:break-word; }
+  .chat-bubble{ padding:9px 13px; border-radius:17px; font-size:13.5px; line-height:1.55; word-break:break-word; }
+  /* The corner nearest the run flattens, so a group reads as one block of
+     speech instead of a column of identical lozenges. */
+  .chat-bubble-row.them:not(.run-first) .chat-bubble{ border-top-left-radius:6px; }
+  .chat-bubble-row.them:not(.run-last)  .chat-bubble{ border-bottom-left-radius:6px; }
+  .chat-bubble-row.me:not(.run-first)   .chat-bubble{ border-top-right-radius:6px; }
+  .chat-bubble-row.me:not(.run-last)    .chat-bubble{ border-bottom-right-radius:6px; }
+  .chat-bubble-row.is-pending .chat-bubble{ opacity:.62; }
   .chat-bubble-row.me .chat-bubble{
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff; border-bottom-right-radius:4px;
   }
@@ -1833,9 +1893,16 @@
     box-shadow:var(--sh-1), inset 0 0 0 1.5px var(--accent-2);
     background:var(--accent-soft);
   }
+  /* Floats above the input rather than sitting in the column. In the flow it
+     shrank the message list by 30px the moment you typed "@", so the whole
+     conversation jumped while you were mid-sentence. */
   .mention-suggestions{
-    display:none; flex-wrap:wrap; gap:6px; padding:0 6px 6px 6px;
+    display:none; flex-wrap:wrap; gap:6px; padding:8px;
+    position:absolute; left:0; right:0; bottom:calc(100% - 2px); z-index:6;
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--r-md);
+    box-shadow:0 8px 24px -10px rgba(22,55,90,0.28);
   }
+  .chat-input-wrap{ position:relative; }
   .mention-suggestions.show{ display:flex; }
   .mention-suggestions button{
     border:none; background:var(--accent-soft); color:var(--accent); border-radius:14px;
@@ -7872,11 +7939,18 @@ function pickMention(name){
   if(!input) return;
   const cursor = input.selectionStart;
   const before = input.value.slice(0, cursor).replace(/@([a-zA-Z ]{0,30})$/, `@${name} `);
-  const after = input.value.slice(cursor);
+  let after = input.value.slice(cursor);
+  // The replacement already ends in a space; if the text carried on with one
+  // too, picking a name left "@Ana  and" with a double gap.
+  if(after.startsWith(' ')) after = after.slice(1);
   input.value = before + after;
   const box = document.getElementById('mentionSuggestions');
   if(box){ box.innerHTML = ''; box.classList.remove('show'); }
+  // focus() alone puts the caret at the END of the whole message, so tapping
+  // a name half-way through a sentence dumped you at the end of it. Put it
+  // back where the name now finishes.
   input.focus();
+  try{ input.setSelectionRange(before.length, before.length); }catch(e){}
 }
 
 function renderTypingIndicator(){
@@ -10690,7 +10764,12 @@ function withWriteTimeout(promise){
 
 function applyQueuedWrite(entry){
   const ref = db.collection(entry.collection).doc(entry.docId);
-  return entry.op === 'delete' ? ref.delete() : ref.set(entry.data);
+  if(entry.op === 'delete') return ref.delete();
+  // 'update' touches only the named fields. Reactions need it: a set() would
+  // rewrite the whole message, so reacting to someone's note while they were
+  // still being delivered could blank the text it is attached to.
+  if(entry.op === 'update') return ref.update(entry.data);
+  return ref.set(entry.data);
 }
 
 /* Returns 'sent' if it reached the server, 'queued' if it is waiting for a
@@ -11076,13 +11155,15 @@ function renderContent(){
         <button class="chat-jump" id="chatJump" type="button" onclick="jumpToLatestChat()"></button>
         ${hasName ? `
           <div class="typing-indicator" id="typingIndicator"></div>
-          <div class="mention-suggestions" id="mentionSuggestions"></div>
           <div class="chat-attach-preview" id="chatAttachPreview"></div>
+          <div class="chat-input-wrap">
+          <div class="mention-suggestions" id="mentionSuggestions"></div>
           <div class="chat-input-row">
             <button class="attach-btn" title="Attach a photo or PDF" onclick="document.getElementById('chatFileInput').click()">${ICON_PAPERCLIP}</button>
             <input class="file-input-hidden" id="chatFileInput" type="file" accept="image/*,application/pdf" onchange="handleChatFileSelected(event)">
             <input id="chatInput" type="text" placeholder="Message your team…" oninput="handleChatTyping()" onkeydown="handleChatKeydown(event)">
             <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">${ICON_SEND}</button>
+          </div>
           </div>
         ` : `
           <div class="chat-join-hint">👋 Set your name to join the conversation — your team will see it next to your messages.</div>
@@ -12862,7 +12943,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1731';
+const BUILD_ID = 'b0917.1746';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -13996,43 +14077,90 @@ function renderEthics(q){
    free rather than being saved and restored. ------------------------------ */
 let renderedChatIds = new Set();
 let chatUnseenBelow = 0;
+let openChatActions = null;      // the one message showing its action bar
+
+/* Consecutive notes from the same person inside this window read as one turn
+   in a conversation, so they share an avatar and a name and only the last one
+   carries a time. Before this, every message repeated the face, the name and
+   the timestamp -- four lines of chrome for "ok". */
+const CHAT_GROUP_WINDOW = 5 * 60 * 1000;
+const CHAT_REACTIONS = ['\ud83d\udc4d','\u2764\ufe0f','\ud83d\ude02','\ud83d\ude4f','\u2705'];
+
+function chatDayKey(ts){
+  const d = new Date(ts || 0);
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+function chatDayLabel(ts){
+  const d = new Date(ts || 0), now = new Date();
+  const same = (a,b)=> a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+  const yest = new Date(now); yest.setDate(now.getDate()-1);
+  if(same(d, now))  return 'Today';
+  if(same(d, yest)) return 'Yesterday';
+  return d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+}
+function chatClock(ts){
+  if(!ts) return '';
+  try{ return new Date(ts).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' }); }
+  catch(e){ return relativeTime(ts); }
+}
+function reactionList(m){
+  const r = m.reactions || {};
+  return Object.keys(r).filter(k=> Array.isArray(r[k]) && r[k].length).map(k=>({ emoji:k, names:r[k] }));
+}
 
 // Everything a row's appearance depends on. If this string is unchanged the
 // existing DOM node is correct and is left alone -- including its images,
 // which is what stops avatars and attachments flickering on every snapshot.
-function chatRowSignature(m, mine, face, mentionsMe){
+function chatRowSignature(m, mine, face, mentionsMe, first, last, open){
   return [m.id, m.text || '', m.author || '', m.timestamp || '', mine ? 1 : 0,
           face || '', m.attachment ? (m.attachment.dataUrl || '') : '',
-          m._pending ? 1 : 0, mentionsMe ? 1 : 0].join('\u0001');
+          m._pending ? 1 : 0, mentionsMe ? 1 : 0, first ? 1 : 0, last ? 1 : 0,
+          open ? 1 : 0, JSON.stringify(m.reactions || {})].join('\u0001');
 }
 
-function chatRowHtml(m, mine, face, mentionsMe){
+function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
   const who = m.author || 'Teammate';
-  const time = m.timestamp ? relativeTime(m.timestamp) : '';
   const avatarColor = nameToColor(who);
   // NOT the `background:` shorthand when there is a photo. The shorthand
   // resets background-size to auto, and an inline style outranks the
   // .has-photo class that sets `cover` -- so the photo rendered at its full
-  // pixel size inside a 28px circle, showing one flat corner of the image.
-  // It looked like a plain coloured disc while every class and URL was
-  // exactly right, which is why this is spelled out per-property here.
+  // pixel size inside a circle, showing one flat corner of the image.
   const avStyle = face
     ? `background-color:${avatarColor};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;background-repeat:no-repeat;`
     : `background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});`;
   // The coloured initials stay as the element's own content under every
   // photo, so a URL that 404s falls back to them instead of a broken image.
-  const avatar = !mine
+  const avatar = mine ? '' : (first
     ? `<div class="chat-avatar${face ? ' has-photo' : ''}" style="${avStyle}" title="${escapeAttr(who)}">${escapeHtml(initialsOf(who))}</div>`
+    : `<div class="chat-avatar-gap" aria-hidden="true"></div>`);
+
+  const reactions = reactionList(m);
+  const me = whoAmI().trim().toLowerCase();
+  const chips = reactions.length
+    ? `<div class="chat-reactions">${reactions.map(r=>{
+        const iReacted = r.names.some(n=> String(n).trim().toLowerCase() === me);
+        return `<button type="button" class="chat-reaction${iReacted?' is-mine':''}" title="${escapeAttr(r.names.join(', '))}"
+          onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(r.emoji).replace(/"/g,'&quot;')})">
+          <span>${escapeHtml(r.emoji)}</span><b>${r.names.length}</b></button>`;
+      }).join('')}</div>`
     : '';
+
+  const bar = open
+    ? `<div class="chat-actions">
+        ${CHAT_REACTIONS.map(e=>`<button type="button" class="chat-act-emoji" title="React ${escapeAttr(e)}"
+            onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(e).replace(/"/g,'&quot;')})">${escapeHtml(e)}</button>`).join('')}
+        <button type="button" class="chat-act-del" onclick="event.stopPropagation(); deleteChatMessage('${m.id}')">Delete</button>
+      </div>`
+    : '';
+
   return `${avatar}
         <div class="chat-bubble-col">
-          ${!mine ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
+          ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
           ${m.text ? `<div class="chat-bubble">${highlightMentions(m.text)}</div>` : ''}
           ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
-          <div class="chat-meta-row">
-            <span class="chat-time" data-ts="${m.timestamp||''}" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${time}</span>
-            <button class="chat-delete" title="Delete this message" onclick="deleteChatMessage('${m.id}')">Delete</button>
-          </div>
+          ${chips}
+          ${bar}
+          ${last ? `<div class="chat-meta-row"><span class="chat-time" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${chatClock(m.timestamp)}${m._pending ? ' \u00b7 sending\u2026' : ''}</span></div>` : ''}
         </div>`;
 }
 
@@ -14044,17 +14172,29 @@ function chatAtBottom(container){
   return container.scrollHeight - container.scrollTop - container.clientHeight <= CHAT_BOTTOM_SLACK;
 }
 
+/* Tapping a message opens its actions. This replaced a permanently visible
+   37x12px "Delete" under EVERY message -- 109 of them on other people's, a
+   quarter of the tap minimum, one mis-tap from deleting a colleague's note
+   for everyone. Nothing is taken away: the same delete is still there, it
+   just takes a deliberate tap on the message first. */
+function toggleChatActions(id){
+  openChatActions = (openChatActions === id) ? null : id;
+  renderChatMessages();
+}
+
 function renderChatMessages(){
   const container = document.getElementById('chatMessages');
   if(!container) return;
 
-  // Update the header count in place -- rebuilding the whole panel here would
-  // wipe out anything the person is part-way through typing.
   const countEl = document.getElementById('chatCount');
   if(countEl) countEl.textContent = `${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}`;
 
   if(CHAT_MESSAGES.length===0){
-    container.innerHTML = `<div class="chat-empty">\ud83d\udc4b No messages yet.<br>Say hello to your team.</div>`;
+    container.innerHTML = `<div class="chat-empty">
+      <div class="chat-empty-mark">\ud83d\udc4b</div>
+      <p class="chat-empty-title">Nobody has said anything yet</p>
+      <p>Say hello, ask about a term, or flag what is busy on your floor.</p>
+    </div>`;
     renderedChatIds = new Set();
     setChatUnseen(0);
     return;
@@ -14063,7 +14203,7 @@ function renderChatMessages(){
   const myName = whoAmI().trim().toLowerCase();
   const stick = chatAtBottom(container);
   const existing = new Map();
-  container.querySelectorAll('.chat-bubble-row').forEach(el=> existing.set(el.dataset.mid, el));
+  container.querySelectorAll('[data-key]').forEach(el=> existing.set(el.dataset.key, el));
   // renderContent() rebuilds the whole panel when you enter Team Chat, which
   // empties this container. That is a first paint, not 200 new messages, and
   // must not animate every row in.
@@ -14072,34 +14212,58 @@ function renderChatMessages(){
   const wanted = [];
   const nextIds = new Set();
   let appended = 0;
+  let prev = null;
 
-  CHAT_MESSAGES.forEach(m=>{
+  CHAT_MESSAGES.forEach((m, idx)=>{
+    const dk = chatDayKey(m.timestamp);
+    if(!prev || chatDayKey(prev.timestamp) !== dk){
+      const key = 'd:' + dk;
+      let sep = existing.get(key);
+      const label = chatDayLabel(m.timestamp);
+      if(!sep || sep.dataset.sig !== label){
+        if(!sep) sep = document.createElement('div');
+        sep.className = 'chat-day';
+        sep.dataset.key = key; sep.dataset.sig = label;
+        sep.innerHTML = `<span>${escapeHtml(label)}</span>`;
+      }
+      wanted.push(sep); existing.delete(key);
+    }
+
+    const next = CHAT_MESSAGES[idx+1];
+    const runWithPrev = !!prev && (prev.author||'') === (m.author||'')
+      && chatDayKey(prev.timestamp) === dk
+      && (m.timestamp - prev.timestamp) < CHAT_GROUP_WINDOW;
+    const runWithNext = !!next && (next.author||'') === (m.author||'')
+      && chatDayKey(next.timestamp) === dk
+      && (next.timestamp - m.timestamp) < CHAT_GROUP_WINDOW;
+    const first = !runWithPrev, last = !runWithNext;
+
     const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
     const face = memberPhotoFor(m.author || 'Teammate');
     const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
-    const sig = chatRowSignature(m, mine, face, mentionsMe);
+    const open = openChatActions === m.id;
+    const sig = chatRowSignature(m, mine, face, mentionsMe, first, last, open);
+    const key = 'm:' + m.id;
     nextIds.add(m.id);
 
-    let el = existing.get(m.id);
+    let el = existing.get(key);
     if(el && el.dataset.sig === sig){
-      wanted.push(el);
-      existing.delete(m.id);
-      return;
+      wanted.push(el); existing.delete(key); prev = m; return;
     }
     if(!el) el = document.createElement('div');
-    el.className = `chat-bubble-row ${mine ? 'me' : 'them'}${mentionsMe ? ' mentioned' : ''}${m._pending ? ' is-pending' : ''}`;
+    el.className = `chat-bubble-row ${mine ? 'me' : 'them'}${mentionsMe ? ' mentioned' : ''}`
+      + `${m._pending ? ' is-pending' : ''}${first ? ' run-first' : ''}${last ? ' run-last' : ''}${open ? ' is-open' : ''}`;
+    el.dataset.key = key;
     el.dataset.mid = m.id;
     el.dataset.sig = sig;
-    el.innerHTML = chatRowHtml(m, mine, face, mentionsMe);
-    if(!firstPaint && !renderedChatIds.has(m.id)){
-      el.classList.add('fresh');
-      appended++;
-    }
-    wanted.push(el);
-    existing.delete(m.id);
+    el.onclick = ()=> toggleChatActions(m.id);
+    el.innerHTML = chatRowHtml(m, mine, face, mentionsMe, first, last, open);
+    if(!firstPaint && !renderedChatIds.has(m.id)){ el.classList.add('fresh'); appended++; }
+    wanted.push(el); existing.delete(key);
+    prev = m;
   });
 
-  // Anything still in `existing` is a message that was deleted.
+  // Anything still in `existing` is a message or a day that went away.
   existing.forEach(el=> el.remove());
 
   // Walk the container once, inserting or moving only where the order differs.
@@ -14110,30 +14274,42 @@ function renderChatMessages(){
     if(node === el){ node = node.nextElementSibling; continue; }
     container.insertBefore(el, node);
   }
-  while(node){ const next = node.nextElementSibling; node.remove(); node = next; }
+  while(node){ const nx = node.nextElementSibling; node.remove(); node = nx; }
 
   renderedChatIds = nextIds;
 
   if(stick || firstPaint){
-    // After layout, not during it: an avatar or attachment that has not
-    // decoded yet still has no height, and scrolling before it lands leaves
-    // the view a little short of the bottom.
     scrollChatToBottom(container);
     setChatUnseen(0);
   }else if(appended){
-    // Reading history. Nothing moved, on purpose -- but silently appending
-    // below the fold would mean missing the message entirely, so say so.
     setChatUnseen(chatUnseenBelow + appended);
   }
 }
 
-/* .chat-messages carries scroll-behavior:smooth in CSS, so `scrollTop = x`
-   starts an ANIMATION. Three of those in a row -- which is what the rAF
-   retries below are -- restart each other, and opening Team Chat animated a
-   scroll down through the whole history instead of simply starting at the
-   newest message. `behavior:'auto'` on the call overrides the stylesheet and
-   lands immediately; the pill passes 'smooth' because that one is a tap the
-   person made and should read as travel. */
+/* A reaction is the cheapest thing anyone can send, which is the point: it
+   costs one tap to tell a colleague you saw them. Stored on the message
+   itself, so it needs no new collection and no new rule. */
+async function toggleChatReaction(id, emoji){
+  const me = whoAmI().trim();
+  if(!me){ requireName(()=> toggleChatReaction(id, emoji)); return; }
+  const m = CHAT_MESSAGES.find(x=> x.id === id);
+  if(!m) return;
+  const map = Object.assign({}, m.reactions || {});
+  const list = (map[emoji] || []).slice();
+  const at = list.findIndex(n=> String(n).trim().toLowerCase() === me.toLowerCase());
+  if(at >= 0) list.splice(at, 1); else list.push(me);
+  if(list.length) map[emoji] = list; else delete map[emoji];
+  m.reactions = map;                 // optimistic; the listener echo confirms
+  openChatActions = null;
+  renderChatMessages();
+  if(!db) return;
+  try{
+    await queuedWrite({ collection:'team-chat', docId:id, op:'update', data:{ reactions: map } });
+  }catch(err){
+    showToast('Could not save that reaction.');
+  }
+}
+
 function scrollChatToBottom(container, smooth){
   const go = ()=> container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   go();
