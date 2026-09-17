@@ -1748,6 +1748,7 @@
     margin:9px 0 0 0; font-family:var(--sans); font-size:12px; line-height:1.45;
     color:var(--ink-faint);
   }
+  .name-photo-hint.is-warn{ color:#8A6420; }
 
   .count.unread{ background:var(--danger); color:#fff; font-weight:700; border-color:transparent; }
 
@@ -5681,20 +5682,76 @@ async function uploadAvatar(file, key){
   return { photo: await snapshot.ref.getDownloadURL(), photoPath: path };
 }
 
+/* Your own photo, kept on this device.
+
+   Without this, a photo only existed in Firestore. Close the app and reopen
+   it and your own face was gone -- reproduced exactly when the team-members
+   rule has not been published in the console: the save shows the photo, the
+   write is rejected, the listener errors, and the next cold start has
+   nothing to read. It also went missing on a plane, or in a basement.
+
+   So the photo is cached beside the name in localStorage, which is where
+   ih_myName already lives. This is YOUR copy only -- teammates still need
+   the collection to see you -- but it means the photo you set is the photo
+   you keep. */
+const MY_PHOTO_KEY = 'ih_myPhoto';
+let membersBlocked = false;      // the collection is unreadable (rule missing)
+
+function saveMyPhotoCache(name, photo, photoPath){
+  try{
+    if(name && photo) localStorage.setItem(MY_PHOTO_KEY, JSON.stringify({ name, photo, photoPath: photoPath||null }));
+    else localStorage.removeItem(MY_PHOTO_KEY);
+  }catch(e){}
+}
+function readMyPhotoCache(){
+  try{
+    const v = JSON.parse(localStorage.getItem(MY_PHOTO_KEY) || 'null');
+    return (v && v.name && v.photo) ? v : null;
+  }catch(e){ return null; }
+}
+
+/* Fill the gap, never fight the server. If the collection came back and has a
+   document for you, that is the truth -- including a document that says you
+   removed your photo, which is why a bare "is there a photo" check is not
+   enough: removing it on another phone has to win here, not be undone by this
+   cache. */
+function applyMyPhotoCache(serverAnswered){
+  const v = readMyPhotoCache();
+  if(!v) return;
+  const k = memberKey(v.name);
+  if(serverAnswered && TEAM_MEMBERS[k]){
+    if(!TEAM_MEMBERS[k].photo) saveMyPhotoCache('', null, null);   // removed elsewhere
+    return;
+  }
+  TEAM_MEMBERS[k] = { name: v.name, photo: v.photo, photoPath: v.photoPath, _local: true };
+}
+
 let membersListenerStarted = false;
 function startMembersListener(){
+  // The cached photo goes in FIRST, so a cold start paints your face straight
+  // away instead of waiting on a round trip that may never answer.
+  applyMyPhotoCache(false);
+  updateTopbarAvatar();
   if(membersListenerStarted || !db) return;
   membersListenerStarted = true;
   db.collection(TEAM_MEMBER_COLL).onSnapshot(snap=>{
+    membersBlocked = false;
     const next = {};
     snap.docs.forEach(d=>{ const v = d.data() || {}; next[d.id] = v; });
     TEAM_MEMBERS = next;
+    applyMyPhotoCache(true);
     // A face arriving has to repaint the messages that were drawn without it.
     if(activeCategory === 'chat') renderChatMessages();
     updateTopbarAvatar();
-  }, ()=>{
-    // No rule for this collection yet, or offline. Faces are decoration --
-    // never let that take chat down with it.
+  }, err=>{
+    // Faces are decoration -- this must never take chat down with it. But it
+    // used to be swallowed entirely, which is how a photo could vanish with
+    // nobody ever being told why.
+    membersBlocked = true;
+    console.warn('team-members unavailable (is the Firestore rule published?):', err && err.code);
+    applyMyPhotoCache(false);
+    updateTopbarAvatar();
+    renderNamePhoto();
   });
 }
 let searchQuery = '';
@@ -11868,6 +11925,13 @@ function renderNamePhoto(){
   // target without pushing Save off a 568px screen.
   well.title = photo ? 'Change your photo' : 'Add a photo of yourself';
   well.setAttribute('aria-label', well.title);
+  const hint = document.querySelector('.name-photo-hint');
+  if(hint){
+    hint.textContent = membersBlocked && photo
+      ? 'Saved on this device. Your team won\'t see it until the team-members rule is published in Firebase.'
+      : 'A photo is optional \u2014 your team sees it beside your messages in Team Chat.';
+    hint.classList.toggle('is-warn', membersBlocked && !!photo);
+  }
   actions.innerHTML = uploadingMyPhoto
     ? '<span class="name-photo-status">Adding photo\u2026</span>'
     : photo
@@ -11913,20 +11977,33 @@ async function handleMyPhotoSelected(event){
    is the part that gates adding terms and chatting. */
 async function persistMyPhoto(name){
   const key = memberDocId(name);
-  if(!key || !db) return;
+  if(!key) return;
   if(!pendingMyPhoto && !pendingMyPhotoRemove) return;
   const data = pendingMyPhoto
     ? { name, photo: pendingMyPhoto.photo, photoPath: pendingMyPhoto.photoPath, updatedAt: Date.now() }
     : { name, photo: null, photoPath: null, updatedAt: Date.now() };
-  // Optimistic: the listener echo is what normally updates this, but offline
-  // there is no echo and the face would silently not appear.
+
+  // This device first, and unconditionally. Sharing it with the team can fail
+  // -- no rule, no signal, no Firebase at all -- but none of that is a reason
+  // for your own photo to be gone the next time you open the app.
+  saveMyPhotoCache(name, data.photo, data.photoPath);
   TEAM_MEMBERS[memberKey(name)] = data;
   if(activeCategory === 'chat') renderChatMessages();
   updateTopbarAvatar();
+
+  if(!db){ membersBlocked = true; return; }
   try{
     await queuedWrite({ collection: TEAM_MEMBER_COLL, docId: key, op: 'set', data });
+    membersBlocked = false;
   }catch(err){
-    showToast('Your name is saved, but the photo could not be shared yet.');
+    const code = ((err && (err.code || err.message)) || '').toString().toLowerCase();
+    membersBlocked = true;
+    // Name the actual cause. "Could not be shared" sent nobody anywhere; the
+    // fix is one line in the Firebase console and the message should say so.
+    showToast(code.includes('permission')
+      ? 'Photo saved on this device. Your team can\'t see it until the team-members rule is published in Firebase.'
+      : 'Photo saved on this device \u2014 it will reach your team when the connection is back.');
+    renderNamePhoto();
   }
 }
 
@@ -12785,7 +12862,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1701';
+const BUILD_ID = 'b0917.1731';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
