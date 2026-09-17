@@ -1758,6 +1758,29 @@
     padding:6px 6px 16px 6px; scroll-behavior:smooth;
   }
   .chat-empty{ margin:auto; text-align:center; color:var(--ink-faint); font-size:13px; line-height:1.6; }
+  /* "3 new messages" while you are reading back. Absolutely positioned so it
+     cannot change the thread's height -- the whole point is that nothing
+     moves when a message arrives. */
+  .chat-panel{ position:relative; }
+  .chat-jump{
+    position:absolute; left:50%; bottom:64px; z-index:4;
+    transform:translate(-50%, 8px); opacity:0; pointer-events:none;
+    display:flex; align-items:center; gap:6px;
+    min-height:36px; padding:0 15px 0 11px; border-radius:999px;
+    border:1px solid var(--line); background:var(--paper); cursor:pointer;
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--accent);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),
+               0 1px 2px rgba(20,43,67,0.06),
+               0 8px 20px -12px rgba(22,55,90,0.22);
+    transition:opacity .18s var(--ease), transform .18s var(--ease);
+  }
+  .chat-jump.show{ opacity:1; transform:translate(-50%, 0); pointer-events:auto; }
+  .chat-jump svg{ width:15px; height:15px; }
+  .chat-jump:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  @media (prefers-reduced-motion:reduce){
+    .chat-jump{ transition:none; }
+    .chat-bubble-row.fresh{ animation:none; }
+  }
   .chat-bubble-row{ display:flex; align-items:flex-end; gap:8px; max-width:76%; }
   .chat-bubble-row.me{ align-self:flex-end; flex-direction:row-reverse; }
   .chat-bubble-row.them{ align-self:flex-start; }
@@ -3082,12 +3105,16 @@
   }
 
   /* ---------- Typing indicator ---------- */
+  /* The height is RESERVED, not animated. Growing 0 -> 22px shrank the
+     message list (flex:1) by the same 22px, so the whole conversation jumped
+     up every time a teammate started typing and back down when they stopped.
+     Measured: -22px. Only the opacity moves now. */
   .typing-indicator{
-    display:flex; align-items:center; gap:8px; height:0; overflow:hidden;
+    display:flex; align-items:center; gap:8px; height:22px; overflow:hidden;
     font-size:12px; color:var(--ink-soft); padding-left:4px;
-    opacity:0; transition:height .2s var(--ease), opacity .2s var(--ease);
+    opacity:0; transition:opacity .2s var(--ease);
   }
-  .typing-indicator.show{ height:22px; opacity:1; }
+  .typing-indicator.show{ opacity:1; }
   .typing-dots{ display:inline-flex; gap:3px; align-items:flex-end; }
   @keyframes typingBounce{
     0%, 60%, 100% { transform:translateY(0);   opacity:.45; }
@@ -3122,7 +3149,10 @@
     from{ opacity:0; transform:translateY(8px); }
     to{ opacity:1; transform:translateY(0); }
   }
-  .chat-bubble-row.fresh{ animation:itemArrive .34s var(--ease) both; }
+  /* `backwards`, not `both`: a filling animation outranks every declarative
+     transform, and this class stays on the row after it lands. `both` would
+     pin transform:none forever on every message in the thread. */
+  .chat-bubble-row.fresh{ animation:itemArrive .34s var(--ease) backwards; }
   .activity-row.fresh{ animation:itemArrive .34s var(--ease) both; }
 
   @media (prefers-reduced-motion: reduce){
@@ -10983,7 +11013,10 @@ function renderContent(){
       <div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>
       ${renderAnnouncements()}
       <div class="chat-panel">
-        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()"></div>
+        <!-- Sits over the bottom of the thread, not in the column: a message
+             arriving while you are reading history must not move anything. -->
+        <button class="chat-jump" id="chatJump" type="button" onclick="jumpToLatestChat()"></button>
         ${hasName ? `
           <div class="typing-indicator" id="typingIndicator"></div>
           <div class="mention-suggestions" id="mentionSuggestions"></div>
@@ -12752,7 +12785,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1643';
+const BUILD_ID = 'b0917.1701';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -13867,66 +13900,194 @@ function renderEthics(q){
    renderChatMessages() ONLY touches #chatMessages — it's called both
    when you open the tab and by the background real-time listener, so
    it must never disturb the input field or the rest of the page. */
-function renderChatMessages(){
-  const container = document.getElementById('chatMessages');
-  if(!container) return;
+/* ---- Rendering the thread --------------------------------------------
+   This used to be one container.innerHTML = messages.map(...).join(''), which
+   is why chat felt broken rather than slow. Measured on a 200-message
+   history, one arriving message:
 
-  // Update the header count in place — rebuilding the whole panel here would
-  // wipe out anything the person is part-way through typing.
-  const countEl = document.getElementById('chatCount');
-  if(countEl) countEl.textContent = `${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}`;
+     * destroyed and rebuilt all 200 rows -- 1568 elements -- every time
+     * threw away the reading position: scrolled up in history, the line you
+       were on jumped 7214px
+     * re-ran nothing, because .fresh could never apply (see below), so
+       messages appeared with no animation at all
+     * cost 13.5ms of main thread per snapshot, and every avatar and
+       attachment image re-decoded
 
-  const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
-  const myName = whoAmI().trim().toLowerCase();
+   Now it reconciles by message id: existing rows are reused and only moved,
+   changed rows are rebuilt individually, and new ones are appended. Nothing
+   above the insertion point moves, so the scroll position is preserved for
+   free rather than being saved and restored. ------------------------------ */
+let renderedChatIds = new Set();
+let chatUnseenBelow = 0;
 
-  if(CHAT_MESSAGES.length===0){
-    container.innerHTML = `<div class="chat-empty">👋 No messages yet.<br>Say hello to your team.</div>`;
-    return;
-  }
+// Everything a row's appearance depends on. If this string is unchanged the
+// existing DOM node is correct and is left alone -- including its images,
+// which is what stops avatars and attachments flickering on every snapshot.
+function chatRowSignature(m, mine, face, mentionsMe){
+  return [m.id, m.text || '', m.author || '', m.timestamp || '', mine ? 1 : 0,
+          face || '', m.attachment ? (m.attachment.dataUrl || '') : '',
+          m._pending ? 1 : 0, mentionsMe ? 1 : 0].join('\u0001');
+}
 
-  container.innerHTML = CHAT_MESSAGES.map(m=>{
-    const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
-    const time = m.timestamp ? relativeTime(m.timestamp) : '';
-    const who = m.author || 'Teammate';
-    const avatarColor = nameToColor(who);
-    const face = memberPhotoFor(who);
-    // The coloured initials stay as the element's own content, with the photo
-    // layered over them as a background. A photo that 404s -- someone cleared
-    // it, or Storage lost it -- then falls back to initials on its own rather
-    // than leaving a broken image in the thread.
-    // NOT the `background:` shorthand when there is a photo. The shorthand
-    // resets background-size to auto, and an inline style outranks the
-    // .has-photo class that sets `cover` -- so the photo rendered at its full
-    // pixel size inside a 28px circle, showing one flat corner of the image.
-    // It looked like a plain coloured disc while every class and URL was
-    // exactly right, which is why this is spelled out per-property here.
-    const tint = `linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)})`;
-    const avStyle = face
-      ? `background-color:${avatarColor};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;background-repeat:no-repeat;`
-      : `background:${tint};`;
-    const avatar = !mine
-      ? `<div class="chat-avatar${face ? ' has-photo' : ''}" style="${avStyle}" title="${escapeAttr(who)}">${escapeHtml(initialsOf(who))}</div>`
-      : '';
-    const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
-    return `
-      <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}${mentionsMe ? ' mentioned' : ''}">
-        ${avatar}
+function chatRowHtml(m, mine, face, mentionsMe){
+  const who = m.author || 'Teammate';
+  const time = m.timestamp ? relativeTime(m.timestamp) : '';
+  const avatarColor = nameToColor(who);
+  // NOT the `background:` shorthand when there is a photo. The shorthand
+  // resets background-size to auto, and an inline style outranks the
+  // .has-photo class that sets `cover` -- so the photo rendered at its full
+  // pixel size inside a 28px circle, showing one flat corner of the image.
+  // It looked like a plain coloured disc while every class and URL was
+  // exactly right, which is why this is spelled out per-property here.
+  const avStyle = face
+    ? `background-color:${avatarColor};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;background-repeat:no-repeat;`
+    : `background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});`;
+  // The coloured initials stay as the element's own content under every
+  // photo, so a URL that 404s falls back to them instead of a broken image.
+  const avatar = !mine
+    ? `<div class="chat-avatar${face ? ' has-photo' : ''}" style="${avStyle}" title="${escapeAttr(who)}">${escapeHtml(initialsOf(who))}</div>`
+    : '';
+  return `${avatar}
         <div class="chat-bubble-col">
-          ${!mine ? `<div class="chat-author">${escapeHtml(m.author || 'Teammate')}</div>` : ''}
+          ${!mine ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
           ${m.text ? `<div class="chat-bubble">${highlightMentions(m.text)}</div>` : ''}
           ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
           <div class="chat-meta-row">
             <span class="chat-time" data-ts="${m.timestamp||''}" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${time}</span>
             <button class="chat-delete" title="Delete this message" onclick="deleteChatMessage('${m.id}')">Delete</button>
           </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+        </div>`;
+}
 
-  if(wasNearBottom){
-    container.scrollTop = container.scrollHeight;
+// 48px, not 0: a thread is "at the bottom" while the last message is fully
+// visible, not only when the scroll is pinned to the exact pixel. Anything
+// tighter and a half-pixel of rounding decides whether the view follows.
+const CHAT_BOTTOM_SLACK = 48;
+function chatAtBottom(container){
+  return container.scrollHeight - container.scrollTop - container.clientHeight <= CHAT_BOTTOM_SLACK;
+}
+
+function renderChatMessages(){
+  const container = document.getElementById('chatMessages');
+  if(!container) return;
+
+  // Update the header count in place -- rebuilding the whole panel here would
+  // wipe out anything the person is part-way through typing.
+  const countEl = document.getElementById('chatCount');
+  if(countEl) countEl.textContent = `${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}`;
+
+  if(CHAT_MESSAGES.length===0){
+    container.innerHTML = `<div class="chat-empty">\ud83d\udc4b No messages yet.<br>Say hello to your team.</div>`;
+    renderedChatIds = new Set();
+    setChatUnseen(0);
+    return;
   }
+
+  const myName = whoAmI().trim().toLowerCase();
+  const stick = chatAtBottom(container);
+  const existing = new Map();
+  container.querySelectorAll('.chat-bubble-row').forEach(el=> existing.set(el.dataset.mid, el));
+  // renderContent() rebuilds the whole panel when you enter Team Chat, which
+  // empties this container. That is a first paint, not 200 new messages, and
+  // must not animate every row in.
+  const firstPaint = existing.size === 0;
+
+  const wanted = [];
+  const nextIds = new Set();
+  let appended = 0;
+
+  CHAT_MESSAGES.forEach(m=>{
+    const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
+    const face = memberPhotoFor(m.author || 'Teammate');
+    const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
+    const sig = chatRowSignature(m, mine, face, mentionsMe);
+    nextIds.add(m.id);
+
+    let el = existing.get(m.id);
+    if(el && el.dataset.sig === sig){
+      wanted.push(el);
+      existing.delete(m.id);
+      return;
+    }
+    if(!el) el = document.createElement('div');
+    el.className = `chat-bubble-row ${mine ? 'me' : 'them'}${mentionsMe ? ' mentioned' : ''}${m._pending ? ' is-pending' : ''}`;
+    el.dataset.mid = m.id;
+    el.dataset.sig = sig;
+    el.innerHTML = chatRowHtml(m, mine, face, mentionsMe);
+    if(!firstPaint && !renderedChatIds.has(m.id)){
+      el.classList.add('fresh');
+      appended++;
+    }
+    wanted.push(el);
+    existing.delete(m.id);
+  });
+
+  // Anything still in `existing` is a message that was deleted.
+  existing.forEach(el=> el.remove());
+
+  // Walk the container once, inserting or moving only where the order differs.
+  // insertBefore() on a node already in the document moves it rather than
+  // cloning, so a reordered row keeps its images and its scroll contribution.
+  let node = container.firstElementChild;
+  for(const el of wanted){
+    if(node === el){ node = node.nextElementSibling; continue; }
+    container.insertBefore(el, node);
+  }
+  while(node){ const next = node.nextElementSibling; node.remove(); node = next; }
+
+  renderedChatIds = nextIds;
+
+  if(stick || firstPaint){
+    // After layout, not during it: an avatar or attachment that has not
+    // decoded yet still has no height, and scrolling before it lands leaves
+    // the view a little short of the bottom.
+    scrollChatToBottom(container);
+    setChatUnseen(0);
+  }else if(appended){
+    // Reading history. Nothing moved, on purpose -- but silently appending
+    // below the fold would mean missing the message entirely, so say so.
+    setChatUnseen(chatUnseenBelow + appended);
+  }
+}
+
+/* .chat-messages carries scroll-behavior:smooth in CSS, so `scrollTop = x`
+   starts an ANIMATION. Three of those in a row -- which is what the rAF
+   retries below are -- restart each other, and opening Team Chat animated a
+   scroll down through the whole history instead of simply starting at the
+   newest message. `behavior:'auto'` on the call overrides the stylesheet and
+   lands immediately; the pill passes 'smooth' because that one is a tap the
+   person made and should read as travel. */
+function scrollChatToBottom(container, smooth){
+  const go = ()=> container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+  go();
+  if(smooth) return;
+  // Avatars and attachments that have not decoded yet still have no height,
+  // so one pass lands short of the bottom. Two frames covers layout settling.
+  requestAnimationFrame(()=>{ go(); requestAnimationFrame(go); });
+}
+
+function setChatUnseen(n){
+  chatUnseenBelow = Math.max(0, n);
+  const pill = document.getElementById('chatJump');
+  if(!pill) return;
+  pill.classList.toggle('show', chatUnseenBelow > 0);
+  if(chatUnseenBelow > 0){
+    pill.innerHTML = `${ICON_CHEVRON_DOWN}<span>${chatUnseenBelow} new message${chatUnseenBelow===1?'':'s'}</span>`;
+  }
+}
+
+function jumpToLatestChat(){
+  const container = document.getElementById('chatMessages');
+  if(!container) return;
+  scrollChatToBottom(container, !matchMedia('(prefers-reduced-motion: reduce)').matches);
+  setChatUnseen(0);
+}
+
+// Scrolling back down to the bottom yourself clears the pill, the same as
+// tapping it would.
+function handleChatScroll(){
+  const container = document.getElementById('chatMessages');
+  if(container && chatUnseenBelow && chatAtBottom(container)) setChatUnseen(0);
 }
 
 async function sendChatMessage(){
