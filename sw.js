@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v56-curve-tucked';
+const CACHE_VERSION = 'interpreter-hub-v57-no-arc-marks';
 const PRECACHE = [
   './',
   './index.html',

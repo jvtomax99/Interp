@@ -102,108 +102,25 @@
     return layer;
   }
 
-  /* Where the photo actually dissolves, read back off the mask that is doing
-     the dissolving.
-
-     This used to be two hard-coded numbers (edgeLift 20, centreLift 44, px up
-     from the hero's bottom) fitted by eye to the 205px banner's dome. That is
-     a trap: the dome has now changed twice, and each time the marks silently
-     detached from the curve and scattered across solid photo -- no error, just
-     a dead effect. Measured after the 268px change: 50px adrift.
-
-     So derive it. .home-greeting-photo's mask is
-         radial-gradient(RX% RY% at CX% CY%, transparent C0%, .55 C1%, ...)
-     and getComputedStyle hands that back with the percentages intact. A point
-     is at gradient position t = hypot(dx/rx, dy/ry); solving for the y where
-     t crosses 50% alpha gives the visible fade line, per column.
-
-     Returns null for a column the dome never reaches (a narrow dome leaves the
-     bottom corners solid -- that is the point of it), and null entirely if the
-     mask is missing or shaped differently, so the caller can fall back. */
-  function domeFade(hero){
-    const photo = hero.querySelector('.home-greeting-photo');
-    if(!photo) return null;
-    const cs = getComputedStyle(photo);
-    const src = cs.webkitMaskImage || cs.maskImage || '';
-    if(src.indexOf('radial-gradient') === -1) return null;
-    const n = (src.match(/[\d.]+%/g) || []).map(parseFloat);
-    if(n.length < 6) return null;
-    const w = hero.clientWidth, h = hero.clientHeight;
-    const cx = w * n[2] / 100, cy = h * n[3] / 100;
-    const rx = w * n[0] / 100, ry = h * n[1] / 100;
-    if(!(rx > 0) || !(ry > 0)) return null;
-    // n[4] is the transparent stop, n[5] the 0.55 stop: interpolate to 0.5.
-    const t = n[4] / 100 + ((n[5] - n[4]) / 100) * (0.5 / 0.55);
-    return function(x){
-      const k = (x - cx) / rx, q = t * t - k * k;
-      return q <= 0 ? null : cy - ry * Math.sqrt(q);
-    };
-  }
-
-  /* Marks ride the dissolve, a few px below it so they read as emerging out of
-     the photo rather than floating over it. */
-  function buildArcMarks(layer, hero){
-    const w = hero.clientWidth, h = hero.clientHeight;
-    if(!w || !h) return;
-    const rand = seeded(4417);
-    const count = Math.min(24, Math.max(10, Math.round(w / 24)));
-    const fade = domeFade(hero);
-    // Fallback only: the old parabola, for a mask this can't read.
-    const edgeLift = 20, centreLift = 44;
-    let html = '';
-    for(let i = 0; i < count; i++){
-      // Draw every random up front, so a skipped mark doesn't shift the ones
-      // after it and make the layout jump between rebuilds.
-      const rJit = rand(), rY = rand(), rAng = rand(), rSize = rand(), rOp = rand();
-      const u = (i + 0.5 + (rJit - 0.5) * 0.7) / count;   // 0..1 across
-      const x = u * w;
-      let base, slope;
-      if(fade){
-        base = fade(x);
-        // Nothing to sit on in this column -- the dome doesn't reach it.
-        if(base === null || base < 0 || base > h) continue;
-        const d = 0.5, a = fade(x - d), b = fade(x + d);
-        slope = (a === null || b === null) ? 0 : (b - a) / (2 * d);
-      }else{
-        const k = 2 * u - 1;                               // -1..1
-        base = h - (edgeLift + (centreLift - edgeLift) * (1 - k * k));
-        slope = 2 * k * (centreLift - edgeLift) * 2 / w;
-      }
-      const y = Math.min(h - 4, base + 8 + (rY - 0.5) * 12);
-      // Tangent of the curve, so each mark leans with it.
-      const angle = Math.atan(slope) * 180 / Math.PI + (rAng - 0.5) * 36;
-      const size = 10 + rSize * 7;
-      const opacity = 0.34 + rOp * 0.26;
-      html += '<span class="home-arc-mark" style="left:' + x.toFixed(1) + 'px;top:' + y.toFixed(1) +
-        'px;--s:' + size.toFixed(1) + 'px;--o:' + opacity.toFixed(2) + ';--r:' + angle.toFixed(0) + 'deg"></span>';
-    }
-    layer.innerHTML = html;
-  }
-
   function initHeroDecor(content){
     decorObservers.forEach(o => o.disconnect());
     decorObservers = [];
     const hero = content && content.querySelector('.home-greeting');
     if(!hero) return;
+    // .home-arc-marks is still swept up here on purpose: an installed PWA can
+    // resume on a cached page that still has the old layer in the DOM.
     hero.querySelectorAll('.home-petals, .home-arc-marks').forEach(n => n.remove());
     ensurePetalDefs();
 
-    const marks = document.createElement('div');
-    marks.className = 'home-arc-marks';
-    marks.setAttribute('aria-hidden', 'true');
     const petals = buildPetals(hero);
     const scrim = hero.querySelector('.home-greeting-scrim');
-    const anchor = scrim ? scrim.nextSibling : hero.firstChild;
-    hero.insertBefore(marks, anchor);
-    hero.insertBefore(petals, anchor);
-    buildArcMarks(marks, hero);
+    hero.insertBefore(petals, scrim ? scrim.nextSibling : hero.firstChild);
 
     if(typeof ResizeObserver !== 'undefined'){
-      let lastW = hero.clientWidth, lastH = hero.clientHeight;
+      let lastH = hero.clientHeight;
       const ro = new ResizeObserver(() => {
-        if(hero.clientWidth === lastW && hero.clientHeight === lastH) return;
-        lastW = hero.clientWidth; lastH = hero.clientHeight;
-        buildArcMarks(marks, hero);
+        if(hero.clientHeight === lastH) return;
+        lastH = hero.clientHeight;
         petals.style.setProperty('--fall', Math.round(lastH * 1.05) + 'px');
       });
       ro.observe(hero);
