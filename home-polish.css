@@ -139,8 +139,25 @@
 .home-section-all:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;}
 
 @media(max-width:900px){
-  .topbar-global{height:auto;min-height:calc(64px + env(safe-area-inset-top,0px));padding-top:calc(9px + env(safe-area-inset-top,0px));padding-bottom:9px;}
-  .tg-brand-sub{font-size:10.5px;line-height:1.35;white-space:normal;overflow:visible;text-overflow:clip;}
+  /* The bar's height was never set by the buttons -- those are 36px. It was
+     set by the facility name wrapping onto a second line at 10.5px. At 10px
+     the full string measures 191.7px against a 194.1px box, so it fits on one
+     line from 390px up (iPhone 13/14/15 and everything wider), and the 36px
+     button cluster becomes the tallest thing in the bar:
+
+         44px  =  4px + 36px + 4px          (was 64.7px)
+
+     Below ~385px it no longer fits, so it wraps by itself and the bar grows
+     to ~51px. height:auto is what allows that -- min-height is the floor, not
+     the height. Never swap this for nowrap+ellipsis: that truncates the
+     hospital's own name to "Hackensack University Medical Cent...".
+
+     The 20px this frees goes straight into the hero below, so nothing on the
+     page moves down. The buttons stay 36px -- they are already under the 44px
+     tap minimum and must not shrink further. */
+  .topbar-global{height:auto;min-height:calc(44px + env(safe-area-inset-top,0px));padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;}
+  .tg-brand-name{font-size:14px;line-height:1.15;}
+  .tg-brand-sub{font-size:10px;line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;}
   .tg-icon-btn,.tg-avatar{width:36px;height:36px;}
   .tg-right{gap:6px;}
   .tabbar{border-radius:25px;padding:5px;border-color:var(--line);}
@@ -149,7 +166,46 @@
 }
 @media(max-width:819px){
   .main.home-layout{--home-inset:16px;padding:0 var(--home-inset) 26px;}
-  #content.is-home .home-greeting{min-height:205px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
+  /* 268px, not 205px. The wayfinding sign is at source rows 777-895 of
+     hero.jpg; at 205px the crop stopped at row 838 and the dome had already
+     dissolved the photo there, so the hospital's own name was never visible.
+     At 268px with position-Y 66% the crop runs rows 248-997 -- the sign, and
+     MORE canopy above it than before, not less.
+
+     20px of the extra 63px comes from the slimmer top bar above; the rest
+     pushes the page down, which is the deliberate trade for showing the sign.
+
+     Keep this in step with the dome below and with background-position. */
+  #content.is-home .home-greeting{min-height:268px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
+  #content.is-home .home-greeting-photo-drift{background-position:69% 66%;}
+  /* A NARROWER dome, not a flatter one. The instinct is to flatten the arch
+     so the sign clears the fade, but flattening pushes the 50%-alpha line
+     BELOW the hero's bottom edge: the photo then meets the page at a hard
+     cut, there is no curve left for the page to rise into, and the arc of
+     marks in home-polish.js has nothing to sit on (measured: marks stranded
+     50px above the fade).
+
+     Narrowing instead keeps a real arch. 104% horizontal radius means the
+     dissolve peaks under Search and runs out before the bottom corners --
+     and the bottom-left corner is exactly where the sign is. Measured at
+     390x268: fade line y=225, marks 2-14px below it, same relationship the
+     205px banner had.
+
+     If you change these numbers, nothing else needs editing: buildArcMarks()
+     reads this gradient back and re-derives the curve. Do not re-introduce
+     hard-coded lift values there. */
+  #content.is-home .home-greeting-photo{
+    -webkit-mask-image:radial-gradient(104% 40% at 50% 108%,
+      rgba(0,0,0,0) 42%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.9) 78%, #000 90%);
+            mask-image:radial-gradient(104% 40% at 50% 108%,
+      rgba(0,0,0,0) 42%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.9) 78%, #000 90%);
+  }
+  #content.is-home .home-greeting-scrim{
+    -webkit-mask-image:radial-gradient(104% 40% at 50% 108%,
+      rgba(0,0,0,0) 56%, rgba(0,0,0,0.55) 74%, rgba(0,0,0,0.9) 86%, #000 94%);
+            mask-image:radial-gradient(104% 40% at 50% 108%,
+      rgba(0,0,0,0) 56%, rgba(0,0,0,0.55) 74%, rgba(0,0,0,0.9) 86%, #000 94%);
+  }
   #content.is-home .home-greeting-text{width:min(278px,calc(100% - 36px));}
   #content.is-home .home-rail{
     grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 22px)/2.14);
