@@ -1794,24 +1794,81 @@
 
   /* Revealed by tapping a message, never sitting there waiting to be hit. */
   .chat-actions{
-    display:flex; align-items:center; gap:2px; margin-top:6px; padding:3px;
-    border-radius:999px; border:1px solid var(--line); background:var(--paper);
-    box-shadow:0 8px 20px -12px rgba(22,55,90,0.22);
+    display:flex; flex-direction:column; gap:2px; margin-top:6px; padding:4px;
+    border-radius:var(--r-md); border:1px solid var(--line); background:var(--paper);
+    box-shadow:0 10px 26px -14px rgba(22,55,90,0.30);
     animation:itemArrive .16s var(--ease) backwards;
   }
+  .chat-act-emojis{ display:flex; align-items:center; gap:2px; }
+  .chat-act-row{ display:flex; flex-wrap:wrap; align-items:center; gap:2px; border-top:1px solid var(--line-soft); padding-top:3px; margin-top:1px; }
   .chat-act-emoji{
-    min-width:36px; min-height:36px; border:none; background:none; cursor:pointer;
-    font-size:17px; line-height:1; border-radius:999px;
+    min-width:38px; min-height:38px; border:none; background:none; cursor:pointer;
+    font-size:18px; line-height:1; border-radius:999px;
   }
   .chat-act-emoji:hover{ background:var(--bg-hi); }
-  .chat-act-del{
-    min-height:36px; padding:0 11px; margin-left:2px; border:none; cursor:pointer;
-    background:none; border-radius:999px; color:var(--danger);
-    font-family:var(--sans); font-size:12px; font-weight:600;
+  .chat-act{
+    display:inline-flex; align-items:center; gap:5px; min-height:38px; padding:0 10px;
+    border:none; background:none; border-radius:9px; cursor:pointer; color:var(--ink-soft);
+    font-family:var(--sans); font-size:12px; font-weight:550;
   }
-  .chat-act-del:hover{ background:var(--danger-soft); }
-  .chat-act-emoji:focus-visible, .chat-act-del:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
+  .chat-act svg{ width:15px; height:15px; flex-shrink:0; }
+  .chat-act:hover{ background:var(--bg-hi); color:var(--ink); }
+  .chat-act.is-danger{ color:var(--danger); }
+  .chat-act.is-danger:hover{ background:var(--danger-soft); }
+  .chat-act-emoji:focus-visible, .chat-act:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
   @media (prefers-reduced-motion:reduce){ .chat-actions{ animation:none; } }
+
+  /* A reply carries what it is answering, so the thread reads on its own. */
+  .chat-quote{
+    display:block; width:100%; text-align:left; cursor:pointer; margin-bottom:3px;
+    padding:5px 10px; border:none; border-left:3px solid var(--accent-2);
+    border-radius:8px; background:var(--bg-hi); font-family:var(--sans);
+  }
+  .chat-quote b{ display:block; font-size:11px; font-weight:650; color:var(--accent); }
+  .chat-quote span{
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    font-size:11.5px; line-height:1.4; color:var(--ink-soft);
+  }
+  .chat-quote:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  /* Where a tapped quote lands. */
+  .chat-bubble-row.is-found .chat-bubble{ animation:chatFound 1.4s var(--ease); }
+  @keyframes chatFound{
+    0%,100%{ box-shadow:none; }
+    18%,62%{ box-shadow:0 0 0 3px color-mix(in srgb, var(--accent-2) 42%, transparent); }
+  }
+  @media (prefers-reduced-motion:reduce){ .chat-bubble-row.is-found .chat-bubble{ animation:none; outline:2px solid var(--accent-2); } }
+
+  /* Where you left off, held in place for the whole visit. */
+  .chat-unread{ display:flex; align-items:center; gap:10px; margin:15px 2px 3px 2px; }
+  .chat-unread::before, .chat-unread::after{ content:''; flex:1; height:1px; background:color-mix(in srgb, var(--danger) 45%, transparent); }
+  .chat-unread span{
+    font-family:var(--sans); font-size:10.5px; font-weight:650; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--danger); white-space:nowrap;
+  }
+
+  /* What you are replying to, or editing, sits above the box you type in. */
+  .chat-compose-bar{ display:none; }
+  .chat-compose-bar.show{
+    display:flex; align-items:center; gap:9px; margin:0 0 7px 0; padding:7px 9px;
+    border-radius:var(--r-sm); background:var(--accent-soft);
+    border-left:3px solid var(--accent-2);
+  }
+  .chat-compose-bar.is-edit{ background:var(--bg-hi); border-left-color:var(--ink-faint); }
+  .ccb-mark{ display:flex; color:var(--accent); flex-shrink:0; }
+  .ccb-mark svg{ width:16px; height:16px; }
+  .chat-compose-bar.is-edit .ccb-mark{ color:var(--ink-soft); }
+  .ccb-body{ display:flex; flex-direction:column; min-width:0; flex:1; font-family:var(--sans); }
+  .ccb-body b{ font-size:11.5px; font-weight:650; color:var(--ink); }
+  .ccb-body span{ font-size:11.5px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ccb-x{
+    width:32px; height:32px; flex-shrink:0; border:none; background:none; cursor:pointer;
+    border-radius:50%; color:var(--ink-soft); font-size:13px;
+  }
+  .ccb-x:hover{ background:var(--paper); color:var(--ink); }
+  .ccb-x:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
+
+  .chat-link{ color:inherit; text-decoration:underline; text-underline-offset:2px; }
+  .chat-bubble-row.them .chat-link{ color:var(--accent); }
   /* "3 new messages" while you are reading back. Absolutely positioned so it
      cannot change the thread's height -- the whole point is that nothing
      moves when a message arrives. */
@@ -5871,6 +5928,19 @@ let isInitialChatLoad = true;
 let lastSeenChatId = null;
 let chatSeenSeeded = false;
 
+let chatUnreadAnchor = null;   // id of the first message you have not seen
+
+/* Called when Team Chat opens. Works out the first message you have not seen
+   yet and pins the "New messages" line above it for the whole visit -- after
+   this, markChatSeen() moves the underlying marker and the line would
+   otherwise walk down the thread while you were still reading. */
+function setChatUnreadAnchor(){
+  chatUnreadAnchor = null;
+  if(!chatSeenSeeded || !lastSeenChatId) return;
+  const i = CHAT_MESSAGES.findIndex(m => m.id === lastSeenChatId);
+  if(i >= 0 && i < CHAT_MESSAGES.length - 1) chatUnreadAnchor = CHAT_MESSAGES[i + 1].id;
+}
+
 function markChatSeen(){
   chatSeenSeeded = true;
   lastSeenChatId = CHAT_MESSAGES.length ? CHAT_MESSAGES[CHAT_MESSAGES.length - 1].id : null;
@@ -7889,6 +7959,14 @@ function messageMentions(text){
 // Bolds and tints any @Name that matches the known roster, so a mention is
 // visually obvious while scrolling — plain "@" typed without a matching
 // name (or names not yet in the roster) are left as normal text.
+/* Turn a pasted link into something tappable. Runs AFTER mentions so the two
+   cannot fight over the same run of characters, and only ever on text that
+   highlightMentions() has already escaped. */
+function linkifyChat(html){
+  return html.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]}'"])/g,
+    m => `<a class="chat-link" href="${m}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${m}</a>`);
+}
+
 function highlightMentions(text){
   const escaped = escapeHtml(text);
   const known = getKnownChatNames().sort((a,b)=> b.length - a.length);
@@ -9311,6 +9389,9 @@ const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_GRID = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.7"/></svg>';
+const ICON_TRASH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 7h14M10 7V5.5A1.5 1.5 0 0111.5 4h1A1.5 1.5 0 0114 5.5V7M7 7l.8 11.2A1.8 1.8 0 009.6 20h4.8a1.8 1.8 0 001.8-1.8L17 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_REPLY = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 7L4 12l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12h9a6 6 0 016 6v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_BOOK_PLUS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5.5A1.5 1.5 0 016.5 4H18v14H6.5A1.5 1.5 0 005 19.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.5 8.5v5M9 11h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20L4.6 17L15.5 6.1C16 5.6 16.8 5.6 17.3 6.1L18.4 7.2C18.9 7.7 18.9 8.5 18.4 9L7.5 19.9L4 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_LAYERS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L21 8L12 13L3 8L12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 12L12 17L21 12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 16L12 21L21 16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 const ICON_COMPASS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5L13 13L8.5 15.5L11 11L15.5 8.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
@@ -11156,6 +11237,7 @@ function renderContent(){
         ${hasName ? `
           <div class="typing-indicator" id="typingIndicator"></div>
           <div class="chat-attach-preview" id="chatAttachPreview"></div>
+          <div class="chat-compose-bar" id="chatComposeBar"></div>
           <div class="chat-input-wrap">
           <div class="mention-suggestions" id="mentionSuggestions"></div>
           <div class="chat-input-row">
@@ -11173,6 +11255,7 @@ function renderContent(){
     `;
     renderChatMessages();
     renderChatAttachPreview();
+    renderChatComposeBar();
     renderTypingIndicator();
     if(hasName){
       const focusTarget = document.getElementById('chatInput');
@@ -11464,6 +11547,12 @@ function setCategory(id, isBack){
   }
   activeCategory = id;
   if(id === 'chat'){
+    // ORDER MATTERS. markChatSeen() moves the marker to the newest message,
+    // so working out where you left off has to happen first -- doing it in
+    // renderContent(), which runs after this, meant the anchor was always
+    // computed against an already-updated marker and the "New messages" line
+    // could never appear.
+    setChatUnreadAnchor();
     markChatSeen();
     // Prompt for a name right away rather than waiting for someone to
     // notice the inline "add your name" hint or the floating button.
@@ -12943,7 +13032,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1746';
+const BUILD_ID = 'b0917.2135';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -14115,7 +14204,9 @@ function chatRowSignature(m, mine, face, mentionsMe, first, last, open){
   return [m.id, m.text || '', m.author || '', m.timestamp || '', mine ? 1 : 0,
           face || '', m.attachment ? (m.attachment.dataUrl || '') : '',
           m._pending ? 1 : 0, mentionsMe ? 1 : 0, first ? 1 : 0, last ? 1 : 0,
-          open ? 1 : 0, JSON.stringify(m.reactions || {})].join('\u0001');
+          open ? 1 : 0, JSON.stringify(m.reactions || {}),
+          m.editedAt || '', m.replyTo ? m.replyTo.id + '|' + (m.replyTo.text||'') : ''
+         ].join('\u0001');
 }
 
 function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
@@ -14147,20 +14238,36 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
 
   const bar = open
     ? `<div class="chat-actions">
-        ${CHAT_REACTIONS.map(e=>`<button type="button" class="chat-act-emoji" title="React ${escapeAttr(e)}"
-            onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(e).replace(/"/g,'&quot;')})">${escapeHtml(e)}</button>`).join('')}
-        <button type="button" class="chat-act-del" onclick="event.stopPropagation(); deleteChatMessage('${m.id}')">Delete</button>
+        <div class="chat-act-emojis">
+          ${CHAT_REACTIONS.map(e=>`<button type="button" class="chat-act-emoji" title="React ${escapeAttr(e)}"
+              onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(e).replace(/"/g,'&quot;')})">${escapeHtml(e)}</button>`).join('')}
+        </div>
+        <div class="chat-act-row">
+          <button type="button" class="chat-act" onclick="event.stopPropagation(); startChatReply('${m.id}')">${ICON_REPLY}<span>Reply</span></button>
+          ${m.text ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); copyChatMessage('${m.id}')">${ICON_COPY}<span>Copy</span></button>` : ''}
+          ${(mine && m.text) ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); startChatEdit('${m.id}')">${ICON_EDIT}<span>Edit</span></button>` : ''}
+          ${m.text ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); saveChatToGlossary('${m.id}')">${ICON_BOOK_PLUS}<span>Glossary</span></button>` : ''}
+          <button type="button" class="chat-act is-danger" onclick="event.stopPropagation(); deleteChatMessage('${m.id}')">${ICON_TRASH}<span>Delete</span></button>
+        </div>
       </div>`
+    : '';
+
+  // What this message is answering, above it. Tapping it goes there.
+  const quote = m.replyTo
+    ? `<button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${escapeAttr(m.replyTo.id)}')">
+         <b>${escapeHtml(m.replyTo.author || 'Teammate')}</b><span>${escapeHtml(m.replyTo.text || '')}</span>
+       </button>`
     : '';
 
   return `${avatar}
         <div class="chat-bubble-col">
           ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
-          ${m.text ? `<div class="chat-bubble">${highlightMentions(m.text)}</div>` : ''}
+          ${quote}
+          ${m.text ? `<div class="chat-bubble">${linkifyChat(highlightMentions(m.text))}</div>` : ''}
           ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
           ${chips}
           ${bar}
-          ${last ? `<div class="chat-meta-row"><span class="chat-time" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${chatClock(m.timestamp)}${m._pending ? ' \u00b7 sending\u2026' : ''}</span></div>` : ''}
+          ${(last || m.editedAt) ? `<div class="chat-meta-row"><span class="chat-time" title="${m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : ''}">${last ? chatClock(m.timestamp) : ''}${m.editedAt ? (last?' \u00b7 ':'') + 'edited' : ''}${m._pending ? ' \u00b7 sending\u2026' : ''}</span></div>` : ''}
         </div>`;
 }
 
@@ -14204,6 +14311,10 @@ function renderChatMessages(){
   const stick = chatAtBottom(container);
   const existing = new Map();
   container.querySelectorAll('[data-key]').forEach(el=> existing.set(el.dataset.key, el));
+  // Where you left off. Captured when you ENTER chat, before markChatSeen()
+  // moves the marker, and held until you leave -- so the line stays put while
+  // you read instead of sliding down message by message.
+  const unreadBefore = chatUnreadAnchor;
   // renderContent() rebuilds the whole panel when you enter Team Chat, which
   // empties this container. That is a first paint, not 200 new messages, and
   // must not animate every row in.
@@ -14215,6 +14326,17 @@ function renderChatMessages(){
   let prev = null;
 
   CHAT_MESSAGES.forEach((m, idx)=>{
+    if(unreadBefore && m.id === unreadBefore){
+      const key = 'u:' + unreadBefore;
+      let line = existing.get(key);
+      if(!line){
+        line = document.createElement('div');
+        line.className = 'chat-unread';
+        line.dataset.key = key; line.dataset.sig = 'u';
+        line.innerHTML = '<span>New messages</span>';
+      }
+      wanted.push(line); existing.delete(key);
+    }
     const dk = chatDayKey(m.timestamp);
     if(!prev || chatDayKey(prev.timestamp) !== dk){
       const key = 'd:' + dk;
@@ -14343,10 +14465,134 @@ function handleChatScroll(){
   if(container && chatUnseenBelow && chatAtBottom(container)) setChatUnseen(0);
 }
 
+/* Replying to, or editing, one specific message. Both live in the composer
+   rather than in a separate sheet: the thing you are answering stays on
+   screen while you write the answer. */
+let replyingTo = null;      // {id, author, text}
+let editingChatId = null;
+
+function startChatReply(id){
+  const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m) return;
+  editingChatId = null;
+  replyingTo = { id:m.id, author:m.author||'Teammate', text:(m.text||'').slice(0,140) };
+  openChatActions = null;
+  renderChatMessages(); renderChatComposeBar();
+  const i = document.getElementById('chatInput'); if(i) i.focus();
+}
+function startChatEdit(id){
+  const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m) return;
+  const me = whoAmI().trim().toLowerCase();
+  if(!me || (m.author||'').trim().toLowerCase() !== me){
+    showToast('You can only edit your own messages.'); return;
+  }
+  replyingTo = null;
+  editingChatId = id;
+  openChatActions = null;
+  const i = document.getElementById('chatInput');
+  if(i){ i.value = m.text || ''; i.focus();
+         try{ i.setSelectionRange(i.value.length, i.value.length); }catch(e){} }
+  renderChatMessages(); renderChatComposeBar();
+}
+function cancelChatCompose(){
+  const wasEditing = editingChatId;
+  replyingTo = null; editingChatId = null;
+  const i = document.getElementById('chatInput');
+  if(i && wasEditing) i.value = '';
+  renderChatComposeBar();
+}
+function renderChatComposeBar(){
+  const host = document.getElementById('chatComposeBar');
+  if(!host) return;
+  if(editingChatId){
+    host.className = 'chat-compose-bar show is-edit';
+    host.innerHTML = `<span class="ccb-mark">${ICON_EDIT}</span>
+      <span class="ccb-body"><b>Editing your message</b><span>Press send to save it</span></span>
+      <button type="button" class="ccb-x" onclick="cancelChatCompose()" aria-label="Stop editing">&#10005;</button>`;
+  }else if(replyingTo){
+    host.className = 'chat-compose-bar show';
+    host.innerHTML = `<span class="ccb-mark">${ICON_REPLY}</span>
+      <span class="ccb-body"><b>Replying to ${escapeHtml(replyingTo.author)}</b><span>${escapeHtml(replyingTo.text)}</span></span>
+      <button type="button" class="ccb-x" onclick="cancelChatCompose()" aria-label="Cancel reply">&#10005;</button>`;
+  }else{
+    host.className = 'chat-compose-bar';
+    host.innerHTML = '';
+  }
+}
+
+/* Jump to the message a reply is answering, and flash it so the eye lands on
+   it. Without this a quote is a dead end -- you can read the snippet but not
+   the thread it came from. */
+function jumpToChatMessage(id){
+  const row = document.querySelector(`.chat-bubble-row[data-mid="${id}"]`);
+  if(!row){ showToast('That message is older than the history kept here.'); return; }
+  row.scrollIntoView({ block:'center',
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  row.classList.remove('is-found'); void row.offsetWidth; row.classList.add('is-found');
+  setTimeout(()=> row.classList.remove('is-found'), 1400);
+}
+
+function copyChatMessage(id){
+  const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m) return;
+  const text = m.text || '';
+  openChatActions = null; renderChatMessages();
+  const done = ()=> showToast('Copied.');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, ()=> showToast('Could not copy.'));
+  }else{
+    try{
+      const ta=document.createElement('textarea'); ta.value=text;
+      ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove(); done();
+    }catch(e){ showToast('Could not copy.'); }
+  }
+}
+
+/* The bridge between the two halves of this app. Most of what gets asked in
+   here is "how do you say X" -- and the answer used to live only in the
+   thread, where nobody finds it again. This opens the glossary form with the
+   message already in it. */
+function saveChatToGlossary(id){
+  const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m || !m.text) return;
+  openChatActions = null; renderChatMessages();
+  const text = m.text.trim();
+  // "sepsis = sepsis", "stent -- stent", "biopsia: biopsy" all mean the same
+  // thing to a person writing quickly; split on any of them.
+  const pair = text.match(/^(.{1,60}?)\s*(?:=|\u2192|->|\u2014|\u2013|:)\s*(.{1,60})$/);
+  openAddModal();
+  const enEl = document.getElementById('fEn');
+  const esEl = document.getElementById('fEs');
+  if(pair){
+    // Spanish first if the left-hand side carries Spanish marks.
+    const leftIsEs = /[\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00fc\u00bf\u00a1]/i.test(pair[1]);
+    if(enEl) enEl.value = (leftIsEs ? pair[2] : pair[1]).trim();
+    if(esEl) esEl.value = (leftIsEs ? pair[1] : pair[2]).trim();
+  }else{
+    const isEs = /[\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00fc\u00bf\u00a1]/i.test(text);
+    if(isEs && esEl) esEl.value = text;
+    else if(enEl) enEl.value = text;
+  }
+  showToast('Check the fields, then save it to the glossary.');
+}
+
 async function sendChatMessage(){
   const input = document.getElementById('chatInput');
   if(!input) return;
   const text = input.value.trim();
+
+  // Editing takes the same Send button, so there is one thing to press.
+  if(editingChatId){
+    const id = editingChatId;
+    if(!text){ showToast('An empty message would just be a delete.'); return; }
+    const m = CHAT_MESSAGES.find(x=>x.id===id);
+    editingChatId = null; input.value = ''; renderChatComposeBar();
+    if(m){ m.text = text; m.editedAt = Date.now(); renderChatMessages(); }
+    try{
+      await queuedWrite({ collection:'team-chat', docId:id, op:'update',
+                          data:{ text, editedAt: Date.now() } });
+    }catch(err){ showToast('Could not save that edit.'); }
+    return;
+  }
+
   if(!text && !pendingChatAttachment) return;
 
   const author = whoAmI();
@@ -14371,7 +14617,9 @@ async function sendChatMessage(){
     // reconnect must land as the same document, not as a second copy. doc()
     // mints the id locally, so this works with no connection at all.
     const ref = db.collection('team-chat').doc();
-    const message = { text, author, attachment: attachment || null, timestamp: Date.now() };
+    const message = { text, author, attachment: attachment || null, timestamp: Date.now(),
+                      replyTo: replyingTo ? { id:replyingTo.id, author:replyingTo.author, text:replyingTo.text } : null };
+    replyingTo = null; renderChatComposeBar();
     const state = await queuedWrite({
       collection: 'team-chat', docId: ref.id, op: 'set', data: message
     });
