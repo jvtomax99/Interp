@@ -215,6 +215,7 @@
     border-radius:50%; background:var(--danger); border:2px solid var(--paper);
     opacity:0; transition:opacity .15s var(--ease);
   }
+  .tg-avatar.has-photo{ background-size:cover; background-position:center; color:transparent; }
   .tg-avatar.has-alert::after{ opacity:1; }
   .tg-divider{ width:1px; height:28px; background:var(--line); margin:0 2px; }
   /* Sync status. Hidden while everything is saved and online — it only
@@ -1703,6 +1704,51 @@
   .file-input-label:hover{ filter:brightness(0.97); }
   .file-input-hidden{ display:none; }
 
+  /* ---------- Name + optional photo ---------- */
+  .name-id-row{ display:flex; align-items:flex-start; gap:13px; }
+  .name-id-fields{ flex:1; min-width:0; display:flex; flex-direction:column; gap:9px; }
+  /* 64px, not the 28px it renders at in chat: this is the one place someone
+     looks at their own photo to decide whether they like it. */
+  .name-avatar{
+    width:64px; height:64px; border-radius:50%; flex-shrink:0; cursor:pointer;
+    border:1px dashed var(--line); background:var(--bg-hi); color:var(--ink-faint);
+    display:flex; align-items:center; justify-content:center; padding:0;
+    font-family:var(--sans); font-size:17px; font-weight:650; letter-spacing:-.02em;
+    transition:border-color .15s var(--ease), background .15s var(--ease);
+  }
+  .name-avatar:hover{ border-color:var(--accent-2); color:var(--accent); }
+  .name-avatar:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .name-avatar.has-photo{
+    background-size:cover; background-position:center;
+    border-style:solid; border-color:var(--line-soft);
+    box-shadow:inset 0 0 0 1px rgba(20,43,67,0.08);
+  }
+  .name-avatar-mark svg{ width:26px; height:26px; display:block; }
+  .name-avatar.is-busy{ cursor:progress; }
+  .name-avatar-spin{
+    width:20px; height:20px; border-radius:50%; display:block;
+    border:2px solid var(--line); border-top-color:var(--accent);
+    animation:nameAvatarSpin .7s linear infinite;
+  }
+  @keyframes nameAvatarSpin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion:reduce){ .name-avatar-spin{ animation:none; } }
+  .name-photo-actions{ display:flex; flex-wrap:wrap; gap:0 13px; align-items:center; min-height:44px; }
+  /* min-height, not padding: the text stays put and the hit area grows around
+     it. Measured 15px before this -- a third of the minimum. */
+  .name-photo-btn{
+    background:none; border:none; padding:0; cursor:pointer;
+    min-height:44px; display:inline-flex; align-items:center;
+    font-family:var(--sans); font-size:12.5px; font-weight:550; color:var(--accent);
+  }
+  .name-photo-btn:hover{ text-decoration:underline; text-underline-offset:2px; }
+  .name-photo-btn:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px; }
+  .name-photo-btn.is-remove{ color:var(--ink-soft); }
+  .name-photo-status{ font-family:var(--sans); font-size:12.5px; color:var(--ink-soft); }
+  .name-photo-hint{
+    margin:9px 0 0 0; font-family:var(--sans); font-size:12px; line-height:1.45;
+    color:var(--ink-faint);
+  }
+
   .count.unread{ background:var(--danger); color:#fff; font-weight:700; border-color:transparent; }
 
   /* ---------- Team Chat ---------- */
@@ -1724,6 +1770,16 @@
     font-family:var(--sans); font-weight:600; font-size:10.5px;
     box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);
     margin-bottom:20px; /* roughly aligns with the bubble, not the timestamp row below it */
+  }
+
+  /* A face, when there is one. The photo is a background layer over the
+     coloured initials rather than an <img>: if it fails to load, the initials
+     underneath are already there, so a dead URL degrades to the old design
+     instead of a broken-image icon in the thread. transparent text is what
+     hides them while the photo is up. */
+  .chat-avatar.has-photo{
+    background-size:cover; background-position:center; color:transparent;
+    box-shadow:inset 0 0 0 1px rgba(20,43,67,0.10);
   }
   .chat-author{ font-family:var(--sans); font-size:10.5px; font-weight:600; color:var(--ink-faint); margin:0 4px 3px 4px; }
   .chat-bubble{ padding:10px 14px; border-radius:16px; font-size:13.5px; line-height:1.55; word-break:break-word; }
@@ -4307,13 +4363,26 @@
 <div class="overlay" id="nameOverlay">
   <div class="modal">
     <h3>Attribute my edits as</h3>
-    <div class="field"><label>Your name</label><input id="fMyName" type="text" placeholder="Your name (optional)" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveMyName();}"></div>
+    <!-- The photo is optional and says so twice: in the hint and by never
+         blocking Save. Someone who only wants their name typed should be able
+         to ignore this whole row. -->
+    <div class="name-id-row">
+      <button type="button" class="name-avatar" id="nameAvatar" onclick="pickMyPhoto()"
+              aria-label="Add a photo of yourself"></button>
+      <div class="name-id-fields">
+        <div class="field" style="margin:0;"><label>Your name</label><input id="fMyName" type="text" placeholder="Your name (optional)" oninput="renderNamePhoto()" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveMyName();}"></div>
+        <div class="name-photo-actions" id="namePhotoActions"></div>
+      </div>
+    </div>
+    <p class="name-photo-hint">A photo is optional \u2014 your team sees it beside your messages in Team Chat.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="cancelNameModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveMyName()">Save</button>
+      <button class="btn btn-primary" id="nameSaveBtn" onclick="saveMyName()">Save</button>
     </div>
   </div>
 </div>
+
+<input class="file-input-hidden" id="myPhotoInput" type="file" accept="image/*" onchange="handleMyPhotoSelected(event)">
 
 <input class="file-input-hidden" id="termAttachInput" type="file" accept="image/*,application/pdf" onchange="handleTermAttachSelected(event)">
 
@@ -4434,6 +4503,7 @@
               match /doctor-research-cache/{docId} { allow read, write: if true; }
               match /team-chat/{docId} { allow read, write: if true; }
               match /chat-typing/{docId} { allow read, write: if true; }
+              match /team-members/{docId} { allow read, write: if true; }
               match /activity-log/{docId} { allow read, write: if true; }
               match /announcements/{docId} { allow read, write: if true; }
               match /practice-questions/{docId} { allow read, write: if true; }
@@ -5502,6 +5572,100 @@ function persistMyName(name){
     if(name) localStorage.setItem(NAME_KEY, name);
     else localStorage.removeItem(NAME_KEY);
   }catch(e){}
+}
+/* ---- Faces ----------------------------------------------------------
+   An optional photo alongside the name, so a message in Team Chat shows who
+   sent it rather than two initials in a coloured circle.
+
+   There is no sign-in in this app -- identity is whatever someone typed into
+   the name box -- so a photo is keyed by that name, normalised. Two people
+   who type the same name share a photo. That is the same assumption chat
+   already makes when it decides which bubbles are yours, and it is fine for
+   one team; it is one more thing that gets fixed properly on the day this
+   app grows real accounts.
+
+   The photo itself lives in Cloud Storage under attachments/, deliberately:
+   the existing Storage rule already covers that prefix, so adding faces
+   needs no second rules change in the console. Firestore holds only the
+   download URL. */
+const TEAM_MEMBER_COLL = 'team-members';
+let TEAM_MEMBERS = {};                 // key -> { name, photo, photoPath }
+
+function memberKey(name){
+  return (name||'').trim().toLowerCase().replace(/\s+/g,' ');
+}
+// Firestore document ids cannot contain / and cannot be '.' or '..'.
+function memberDocId(name){
+  const k = memberKey(name).replace(/[\/]/g,'-');
+  return (!k || k === '.' || k === '..') ? '' : k;
+}
+function memberPhotoFor(name){
+  const m = TEAM_MEMBERS[memberKey(name)];
+  return (m && m.photo) || '';
+}
+function myPhoto(){ return memberPhotoFor(whoAmI()); }
+
+/* Avatars are square and small on purpose. compressImageToBlob() is built for
+   attachments -- it keeps the aspect ratio and allows 1400px -- which for a
+   face that renders at 28px means every chat message pulls down a photo
+   hundreds of times larger than it will ever be drawn. This centre-crops to a
+   square and caps it at 256, which covers a 3x retina 64px avatar. */
+function compressAvatarToBlob(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=> reject(new Error('Could not read that image.'));
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = ()=> reject(new Error('Could not read that image.'));
+      img.onload = ()=>{
+        const SIDE = 256;
+        const side = Math.min(img.width, img.height);
+        if(!side) return reject(new Error('Could not read that image.'));
+        const sx = Math.round((img.width  - side) / 2);
+        const sy = Math.round((img.height - side) / 2);
+        const canvas = document.createElement('canvas');
+        canvas.width = SIDE; canvas.height = SIDE;
+        canvas.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, SIDE, SIDE);
+        canvas.toBlob(blob=>{
+          if(!blob) reject(new Error('Could not process that image.'));
+          else resolve(blob);
+        }, 'image/jpeg', 0.85);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadAvatar(file, key){
+  if(!file) throw new Error('No file selected.');
+  if(!file.type.startsWith('image/')) throw new Error('Pick an image file.');
+  if(!storage) throw new Error('Photo storage isn\'t set up yet.');
+  const blob = await compressAvatarToBlob(file);
+  // The Firestore key tolerates spaces; a Storage object path should not have
+  // to be URL-encoded to be read back, so the filename gets its own slug.
+  const slug = String(key||'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40) || 'member';
+  const path = `attachments/avatars/${slug}-${Date.now()}.jpg`;
+  const ref = storage.ref().child(path);
+  const snapshot = await ref.put(blob, { contentType:'image/jpeg' });
+  return { photo: await snapshot.ref.getDownloadURL(), photoPath: path };
+}
+
+let membersListenerStarted = false;
+function startMembersListener(){
+  if(membersListenerStarted || !db) return;
+  membersListenerStarted = true;
+  db.collection(TEAM_MEMBER_COLL).onSnapshot(snap=>{
+    const next = {};
+    snap.docs.forEach(d=>{ const v = d.data() || {}; next[d.id] = v; });
+    TEAM_MEMBERS = next;
+    // A face arriving has to repaint the messages that were drawn without it.
+    if(activeCategory === 'chat') renderChatMessages();
+    updateTopbarAvatar();
+  }, ()=>{
+    // No rule for this collection yet, or offline. Faces are decoration --
+    // never let that take chat down with it.
+  });
 }
 let searchQuery = '';
 let editingContext = null; // {categoryId, termId} or null for new
@@ -10590,14 +10754,26 @@ function syncTopBar(){
   if(bellBtn){
     bellBtn.innerHTML = ICON_BELL + (unseen ? `<span class="tg-badge">${unseen > 9 ? '9+' : unseen}</span>` : '');
   }
-  const avatar = document.getElementById('tgAvatar');
-  if(avatar){
-    const who = whoAmI();
-    avatar.textContent = who ? initialsOf(who) : '?';
-    avatar.title = who ? `${who} \u2014 tap to change` : 'Add your name';
-    avatar.classList.toggle('has-alert', unseen > 0);
-  }
+  updateTopbarAvatar(unseen);
   updateSyncStatus(false);
+}
+
+/* Split out of syncTopBar() so a photo arriving on the team-members listener
+   can refresh just the avatar, without a full top-bar pass. `unseen` is
+   optional -- recomputed when the listener calls this with nothing. */
+function updateTopbarAvatar(unseen){
+  const avatar = document.getElementById('tgAvatar');
+  if(!avatar) return;
+  if(unseen === undefined) unseen = unreadActivityCount();
+  const who = whoAmI();
+  const photo = myPhoto();
+  // The initial stays underneath either way: if the photo 404s (deleted from
+  // Storage) the circle still reads as a person rather than a grey hole.
+  avatar.textContent = who ? initialsOf(who) : '?';
+  avatar.style.backgroundImage = photo ? `url("${photo.replace(/"/g,'%22')}")` : '';
+  avatar.classList.toggle('has-photo', !!photo);
+  avatar.title = who ? `${who} \u2014 tap to change` : 'Add your name';
+  avatar.classList.toggle('has-alert', unseen > 0);
 }
 
 /* The search box re-renders on a trailing debounce. 120ms is below the
@@ -11605,15 +11781,120 @@ try{ history.replaceState({ ih: true }, ''); }catch(e){}
 // is hidden. window.__lastWho is the single source of truth either way —
 // see whoAmI() — so this just needs to keep that, and the sidebar field
 // when it happens to be present, in sync.
+/* Photo picked in the modal but not saved yet. null means "no change".
+   `pendingPhotoRemove` is separate from a null photo on purpose: "I did not
+   touch it" and "I want it gone" are different instructions. */
+let pendingMyPhoto = null;        // { photo, photoPath } once uploaded
+let pendingMyPhotoRemove = false;
+let uploadingMyPhoto = false;
+
 function openNameModal(){
   const input = document.getElementById('fMyName');
   input.value = whoAmI();
+  pendingMyPhoto = null;
+  pendingMyPhotoRemove = false;
+  uploadingMyPhoto = false;
+  renderNamePhoto();
   document.getElementById('nameOverlay').classList.add('show');
   if(prefersAutoFocus()) input.focus();
 }
 
 function closeNameModal(){
   document.getElementById('nameOverlay').classList.remove('show');
+}
+
+// What the well should show right now: a just-picked photo, or the saved one,
+// or nothing. Reads the live input rather than whoAmI() so typing a different
+// name immediately previews that person's photo.
+function namePhotoState(){
+  if(pendingMyPhotoRemove) return '';
+  if(pendingMyPhoto) return pendingMyPhoto.photo;
+  const el = document.getElementById('fMyName');
+  return memberPhotoFor(el ? el.value : whoAmI());
+}
+
+function renderNamePhoto(){
+  const well = document.getElementById('nameAvatar');
+  const actions = document.getElementById('namePhotoActions');
+  if(!well || !actions) return;
+  const photo = namePhotoState();
+  const el = document.getElementById('fMyName');
+  const name = (el ? el.value : whoAmI()).trim();
+
+  well.classList.toggle('has-photo', !!photo);
+  well.classList.toggle('is-busy', uploadingMyPhoto);
+  well.style.backgroundImage = photo ? `url("${photo.replace(/"/g,'%22')}")` : '';
+  well.innerHTML = uploadingMyPhoto
+    ? '<span class="name-avatar-spin" aria-hidden="true"></span>'
+    : (photo ? '' : `<span class="name-avatar-mark">${name ? escapeHtml(initialsOf(name)) : ICON_PERSON}</span>`);
+
+  // One text button, never two. Both used to be here and both were 15px tall
+  // -- a third of the 44px tap minimum, on a screen people use one-handed
+  // between assignments. The 64px well is itself the add/change control, so
+  // "Change photo" was the redundant one; what is left gets a real 44px
+  // target without pushing Save off a 568px screen.
+  well.title = photo ? 'Change your photo' : 'Add a photo of yourself';
+  well.setAttribute('aria-label', well.title);
+  actions.innerHTML = uploadingMyPhoto
+    ? '<span class="name-photo-status">Adding photo\u2026</span>'
+    : photo
+      ? `<button type="button" class="name-photo-btn is-remove" onclick="removeMyPhoto()">Remove photo</button>`
+      : `<button type="button" class="name-photo-btn" onclick="pickMyPhoto()">Add a photo</button>`;
+}
+
+function pickMyPhoto(){
+  if(uploadingMyPhoto) return;
+  const input = document.getElementById('myPhotoInput');
+  if(input){ input.value = ''; input.click(); }
+}
+
+function removeMyPhoto(){
+  pendingMyPhoto = null;
+  pendingMyPhotoRemove = true;
+  renderNamePhoto();
+}
+
+async function handleMyPhotoSelected(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  const name = (document.getElementById('fMyName').value || '').trim();
+  const key = memberDocId(name);
+  if(!key){
+    showToast('Type your name first, then add a photo.');
+    return;
+  }
+  uploadingMyPhoto = true;
+  renderNamePhoto();
+  try{
+    pendingMyPhoto = await uploadAvatar(file, key);
+    pendingMyPhotoRemove = false;
+  }catch(err){
+    showToast(err && err.message ? err.message : 'Could not add that photo.');
+  }
+  uploadingMyPhoto = false;
+  renderNamePhoto();
+}
+
+/* Writes the photo against the name being saved. Deliberately not awaited by
+   the caller: a slow or failed write must not hold up saving the name, which
+   is the part that gates adding terms and chatting. */
+async function persistMyPhoto(name){
+  const key = memberDocId(name);
+  if(!key || !db) return;
+  if(!pendingMyPhoto && !pendingMyPhotoRemove) return;
+  const data = pendingMyPhoto
+    ? { name, photo: pendingMyPhoto.photo, photoPath: pendingMyPhoto.photoPath, updatedAt: Date.now() }
+    : { name, photo: null, photoPath: null, updatedAt: Date.now() };
+  // Optimistic: the listener echo is what normally updates this, but offline
+  // there is no echo and the face would silently not appear.
+  TEAM_MEMBERS[memberKey(name)] = data;
+  if(activeCategory === 'chat') renderChatMessages();
+  updateTopbarAvatar();
+  try{
+    await queuedWrite({ collection: TEAM_MEMBER_COLL, docId: key, op: 'set', data });
+  }catch(err){
+    showToast('Your name is saved, but the photo could not be shared yet.');
+  }
 }
 
 // Canceling shouldn't still barge ahead with whatever add/edit/chat action
@@ -11624,9 +11905,16 @@ function cancelNameModal(){
 }
 
 function saveMyName(){
+  if(uploadingMyPhoto){ showToast('Still adding your photo \u2014 one moment.'); return; }
   const name = document.getElementById('fMyName').value.trim();
   window.__lastWho = name;
   persistMyName(name);
+  // Clearing your name does NOT delete the member document: other people's
+  // messages still carry that name and should keep showing the face.
+  if(name) persistMyPhoto(name);
+  pendingMyPhoto = null;
+  pendingMyPhotoRemove = false;
+  updateTopbarAvatar();
   const whoEl = document.getElementById('whoInput');
   if(whoEl) whoEl.value = name;
   closeNameModal();
@@ -12464,7 +12752,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.1624';
+const BUILD_ID = 'b0917.1643';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -13599,8 +13887,26 @@ function renderChatMessages(){
   container.innerHTML = CHAT_MESSAGES.map(m=>{
     const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
     const time = m.timestamp ? relativeTime(m.timestamp) : '';
-    const avatarColor = nameToColor(m.author || 'Teammate');
-    const avatar = !mine ? `<div class="chat-avatar" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initialsOf(m.author || 'Teammate'))}</div>` : '';
+    const who = m.author || 'Teammate';
+    const avatarColor = nameToColor(who);
+    const face = memberPhotoFor(who);
+    // The coloured initials stay as the element's own content, with the photo
+    // layered over them as a background. A photo that 404s -- someone cleared
+    // it, or Storage lost it -- then falls back to initials on its own rather
+    // than leaving a broken image in the thread.
+    // NOT the `background:` shorthand when there is a photo. The shorthand
+    // resets background-size to auto, and an inline style outranks the
+    // .has-photo class that sets `cover` -- so the photo rendered at its full
+    // pixel size inside a 28px circle, showing one flat corner of the image.
+    // It looked like a plain coloured disc while every class and URL was
+    // exactly right, which is why this is spelled out per-property here.
+    const tint = `linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)})`;
+    const avStyle = face
+      ? `background-color:${avatarColor};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;background-repeat:no-repeat;`
+      : `background:${tint};`;
+    const avatar = !mine
+      ? `<div class="chat-avatar${face ? ' has-photo' : ''}" style="${avStyle}" title="${escapeAttr(who)}">${escapeHtml(initialsOf(who))}</div>`
+      : '';
     const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
     return `
       <div class="chat-bubble-row ${mine ? 'me' : 'them'}${notifiedMessageIds.has(m.id) ? '' : ' fresh'}${mentionsMe ? ' mentioned' : ''}">
@@ -14626,6 +14932,7 @@ loadTrash();
 loadAttachments();
 loadQuestions();
 startChatListener();
+startMembersListener();
 startActivityListener();
 startAnnouncementsListener();
 startTypingListener();

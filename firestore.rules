@@ -62,6 +62,11 @@ service cloud.firestore {
     // Ephemeral "someone is typing" markers, written constantly while a
     // message is being composed.
     match /chat-typing/{docId}    { allow read, write: if true; }
+    // One document per contributor, keyed by their normalised name, holding
+    // an optional photo so Team Chat can show a face instead of initials.
+    // NOTE: the app reads this on startup. Without this line Firestore denies
+    // the collection and faces silently never appear -- no error, no clue.
+    match /team-members/{docId}   { allow read, write: if true; }
     match /activity-log/{docId}   { allow read, write: if true; }
     match /announcements/{docId}  { allow read, write: if true; }
 
