@@ -2510,16 +2510,30 @@
   .modal-actions{display:flex; justify-content:flex-end; gap:9px; margin-top:20px;}
 
   /* ---------- CCHI practice ---------- */
-  .practice-intro{ max-width:660px; font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 26px 0; }
-  .practice-disclaimer{
-    display:flex; gap:9px; align-items:flex-start; max-width:660px;
-    background:#FBF3E3; border:1px solid #E8D7B0; border-radius:12px;
-    padding:13px; font-size:11.5px; line-height:1.55; color:#7A5D28; margin-bottom:26px;
+  .practice-intro{ max-width:760px; font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 26px 0; }
+  /* It has to be on the page, but it was the loudest thing on it -- a
+     four-line cream block sitting above everything anyone came here to do.
+     Now it is one quiet line that opens. */
+  .practice-note{ max-width:760px; margin:0 0 17px 0; }
+  .practice-note summary{
+    display:flex; align-items:center; gap:6px; cursor:pointer; list-style:none;
+    font-family:var(--sans); font-size:11.5px; font-weight:500; color:var(--ink-faint);
+    padding:3px 0; min-height:44px;
   }
-  .practice-disclaimer svg{ width:15px; height:15px; flex-shrink:0; margin-top:1px; color:#B8923E; }
+  .practice-note summary::-webkit-details-marker{ display:none; }
+  .practice-note summary svg{ width:13px; height:13px; flex-shrink:0; color:#B8923E; }
+  .practice-note summary em{
+    font-style:normal; margin-left:auto; font-size:10.5px; color:var(--ink-faint); opacity:.8;
+  }
+  .practice-note[open] summary em{ visibility:hidden; }
+  .practice-note p{
+    margin:6px 0 0 0; padding:13px; border-radius:var(--r-sm);
+    background:#FBF3E3; box-shadow:inset 0 0 0 1px #E8D7B0;
+    font-size:11.5px; line-height:1.55; color:#7A5D28;
+  }
 
   .progress-card{
-    max-width:660px; padding:17px; margin-bottom:26px; border-radius:14px;
+    max-width:760px; padding:17px; margin-bottom:26px; border-radius:14px;
     background:var(--paper);
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
   }
@@ -2859,7 +2873,7 @@
   }
 
   /* ---------- This week, across the team ---------- */
-  .board{ display:flex; flex-direction:column; gap:3px; margin-bottom:26px;
+  .board{ display:flex; flex-direction:column; gap:3px; max-width:760px; margin-bottom:26px;
     padding:9px; border-radius:var(--r-md); background:var(--paper);
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft); }
   .board-row{ display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:10px;
@@ -2883,7 +2897,7 @@
   @media (max-width:420px){ .board-bar{ display:none; } }
 
   /* ---------- Badges ---------- */
-  .badge-shelf{ display:grid; grid-template-columns:repeat(auto-fill, minmax(104px, 1fr)); gap:9px; margin-bottom:26px; }
+  .badge-shelf{ display:grid; grid-template-columns:repeat(auto-fill, minmax(104px, 1fr)); gap:9px; max-width:760px; margin-bottom:26px; }
   .badge{ display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center;
     padding:13px 9px; border-radius:var(--r-md); background:var(--paper);
     box-shadow:inset 0 0 0 1px var(--line-soft); opacity:.42; filter:grayscale(1); }
@@ -3008,64 +3022,181 @@
     .mastery-seg, .study-goal-fill, .domain-bar-fill, .quiz-progress-fill{ transition:none; }
   }
 
-  /* ---------- Study system ---------- */
-  .study-today{ display:flex; gap:13px; margin:0 0 17px 0; flex-wrap:wrap; }
-  .study-streak{
+  /* ---------- Study system ----------
+
+     The screen used to be a flat stack: a loud disclaimer, then two small
+     stat cards, then four equal-weight mode cards. Nothing on it said "do
+     this one next", and there was no answer to the only question someone
+     sitting the CoreCHI actually has, which is "am I ready yet". So the
+     readiness card leads, one mode is promoted to a recommendation, and
+     the rest are compact. */
+
+  .ready-card{
+    position:relative; overflow:hidden; max-width:760px; margin:0 0 17px 0; padding:17px;
+    border-radius:var(--r-lg); color:#EAF0FF;
+    background:linear-gradient(150deg,#2B3577 0%,#1B2356 55%,#141B45 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.14),
+               0 2px 4px rgba(20,43,67,0.10),
+               0 22px 44px -20px rgba(18,28,70,0.58);
+  }
+  /* A cyan bloom off the top-right corner, so the card reads as a lit
+     surface rather than a flat navy rectangle. */
+  .ready-card::before{
+    content:''; position:absolute; top:-120px; right:-70px; width:260px; height:260px;
+    border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, rgba(1,184,230,0.32), rgba(1,184,230,0) 68%);
+  }
+  .ready-main{ position:relative; display:flex; align-items:center; gap:17px; }
+  .ready-ring{
+    width:92px; height:92px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:conic-gradient(var(--cyan) 0deg, rgba(255,255,255,0.13) 0deg);
+  }
+  .ready-ring-in{
+    width:74px; height:74px; border-radius:50%; background:#1B2352;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    min-width:106px; padding:13px 17px; border-radius:var(--r-md);
-    background:var(--paper); box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.10);
   }
-  .study-flame{ font-size:20px; line-height:1; }
-  .study-streak b{ font-family:var(--sans); font-size:23px; font-weight:650; letter-spacing:-.03em; line-height:1.15; }
-  .study-streak span:last-child{ font-size:11px; color:var(--ink-soft); }
-  .study-goal{
-    flex:1; min-width:190px; display:flex; flex-direction:column; gap:6px;
-    padding:13px 17px; border-radius:var(--r-md);
-    background:var(--paper); box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+  .ready-pct{
+    font-family:var(--sans); font-size:23px; font-weight:650;
+    letter-spacing:-.035em; line-height:1; font-variant-numeric:tabular-nums;
   }
-  .study-goal-top{ display:flex; justify-content:space-between; align-items:baseline;
-    font-family:var(--sans); font-size:12px; color:var(--ink-soft); }
-  .study-goal-top b{ font-size:15px; font-weight:650; color:var(--ink); }
-  .study-goal-track{ height:7px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
-  .study-goal-fill{ display:block; height:100%; border-radius:999px;
-    background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .4s var(--ease); }
-  .study-goal-note{ font-size:11.5px; color:var(--ink-faint); }
+  .ready-cap{
+    font-size:10px; font-weight:550; letter-spacing:.09em; text-transform:uppercase;
+    color:rgba(234,240,255,0.60); margin-top:3px;
+  }
+  .ready-say b{
+    display:block; font-family:var(--sans); font-size:15px; font-weight:650;
+    letter-spacing:-.025em; margin-bottom:6px;
+  }
+  .ready-say span{ display:block; font-size:11.5px; line-height:1.45; color:rgba(234,240,255,0.74); }
 
-  .study-modes{ display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-bottom:26px; }
+  .ready-stats{
+    position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:9px;
+    margin-top:13px; padding-top:13px; border-top:1px solid rgba(255,255,255,0.13);
+  }
+  .ready-stat{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .ready-stat i{ display:block; width:14px; height:14px; color:var(--cyan); margin-bottom:2px; }
+  .ready-stat i svg{ width:100%; height:100%; display:block; }
+  .ready-stat b{
+    font-family:var(--sans); font-size:17px; font-weight:650; letter-spacing:-.03em;
+    line-height:1.1; font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .ready-stat > span{ font-size:10.5px; line-height:1.3; color:rgba(234,240,255,0.62); }
+  .study-goal-top{ display:block; }
+  .study-goal-note{ display:block; font-size:10.5px; line-height:1.3; color:rgba(234,240,255,0.62); }
+  .study-goal.is-met .study-goal-note{ color:#9BEBC8; }
+  .study-goal-track{
+    height:4px; border-radius:999px; background:rgba(255,255,255,0.16);
+    overflow:hidden; margin-top:6px; max-width:82px;
+  }
+  .study-goal-fill{
+    display:block; height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--cyan), #7FE3FF);
+  }
+
+  /* ---------- The ways in ---------- */
+  .study-modes{ display:grid; grid-template-columns:1fr 1fr; gap:9px; max-width:760px; margin-bottom:26px; }
   .study-mode{
-    display:flex; flex-direction:column; gap:5px; text-align:left; cursor:pointer;
-    padding:13px 17px; border-radius:var(--r-md); border:1px solid var(--line);
-    background:var(--paper); font-family:var(--sans);
+    --mode:var(--accent);
+    display:flex; flex-direction:column; gap:6px; text-align:left; cursor:pointer;
+    padding:13px; border-radius:var(--r-md); border:1px solid var(--line);
+    background:var(--paper); font-family:var(--sans); color:var(--ink);
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
-    transition:transform .14s var(--ease), border-color .14s var(--ease);
+    transition:transform .14s var(--ease), border-color .14s var(--ease), box-shadow .2s var(--ease);
   }
-  .study-mode:disabled{ opacity:.5; cursor:default; }
-  .study-mode:not(:disabled):active{ transform:translateY(-2px); }
-  .study-mode.is-primary{ border-color:color-mix(in srgb, var(--accent-2) 55%, var(--line)); background:var(--accent-soft); }
-  .study-mode.is-exam{ grid-column:1 / -1; }
+  .sm-icon{
+    width:28px; height:28px; border-radius:9px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--mode) 14%, var(--paper)); color:var(--mode);
+  }
+  .sm-icon svg{ width:16px; height:16px; display:block; }
   .sm-head{ display:flex; align-items:baseline; justify-content:space-between; gap:9px; }
-  .sm-head b{ font-size:14px; font-weight:650; letter-spacing:-.02em; color:var(--ink); }
-  .sm-count{ font-size:19px; font-weight:650; letter-spacing:-.03em; color:var(--accent); }
-  .study-mode.is-exam .sm-count{ color:var(--navy); }
-  .sm-note{ font-size:11.5px; line-height:1.45; color:var(--ink-soft); }
-  @media (max-width:520px){ .study-modes{ grid-template-columns:1fr; } }
+  .sm-head b{ font-size:13px; font-weight:650; letter-spacing:-.02em; color:var(--ink); }
+  .sm-count{
+    font-size:17px; font-weight:650; letter-spacing:-.035em; color:var(--mode);
+    font-variant-numeric:tabular-nums;
+  }
+  .sm-note{ font-size:11px; line-height:1.45; color:var(--ink-soft); }
+  .study-mode:disabled{ opacity:.45; cursor:default; }
+  .study-mode:not(:disabled):active{ transform:translateY(-2px); }
 
-  .mastery-list{ display:flex; flex-direction:column; gap:13px; margin-bottom:26px; }
-  .mastery-row{ padding:13px 17px; border-radius:var(--r-md); background:var(--paper);
-    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft); }
-  .mastery-top{ display:flex; justify-content:space-between; align-items:baseline; gap:9px; margin-bottom:6px; }
-  .mastery-name{ font-family:var(--sans); font-size:13px; font-weight:550; }
-  .mastery-weight{ font-family:var(--sans); font-size:11px; color:var(--ink-faint); flex-shrink:0; }
-  .mastery-track{ display:flex; height:8px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
-  .mastery-seg{ display:block; height:100%; transition:width .4s var(--ease); }
-  .mastery-seg.is-known{ background:#4E9E74; }
-  .mastery-seg.is-shaky{ background:#BFA05E; }
-  .mastery-foot{ display:flex; align-items:center; gap:9px; margin-top:6px;
-    font-family:var(--sans); font-size:11px; color:var(--ink-soft); flex-wrap:wrap; }
-  .mastery-go{ margin-left:auto; min-height:32px; padding:0 13px; border-radius:999px; cursor:pointer;
-    border:1px solid var(--line); background:var(--bg-hi); color:var(--accent);
-    font-family:var(--sans); font-size:11.5px; font-weight:550; }
-  .mastery-go:hover{ background:var(--accent-soft); }
+  /* The one thing to do next. Promoted with CSS order so the DOM keeps a
+     stable review / mistakes / new / exam sequence underneath. */
+  .study-mode.is-next{
+    grid-column:1 / -1; order:-1; padding:17px; gap:9px;
+    border-color:color-mix(in srgb, var(--mode) 44%, var(--line));
+    background:linear-gradient(140deg, color-mix(in srgb, var(--mode) 10%, var(--paper)), var(--paper) 72%);
+  }
+  .study-mode.is-next .sm-top{ display:flex; align-items:center; gap:13px; }
+  .study-mode.is-next .sm-icon{ width:38px; height:38px; border-radius:12px; }
+  .study-mode.is-next .sm-icon svg{ width:20px; height:20px; }
+  .study-mode.is-next .sm-head{ flex:1; min-width:0; flex-direction:column; align-items:flex-start; gap:2px; }
+  .study-mode.is-next .sm-head b{ font-size:17px; letter-spacing:-.03em; }
+  .study-mode.is-next .sm-count{ font-size:27px; letter-spacing:-.04em; }
+  .study-mode.is-next .sm-note{ font-size:12px; }
+  .sm-flag{
+    align-self:flex-start; font-size:10px; font-weight:650; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--mode);
+  }
+  .sm-go{
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+    margin-top:3px; font-size:12px; font-weight:650; color:var(--mode);
+  }
+  .sm-go svg{ width:15px; height:15px; }
+
+  /* Exam sits apart from the three drills -- it is the rehearsal, not a drill. */
+  .study-mode.is-exam{
+    grid-column:1 / -1; order:9; flex-direction:row; align-items:center; gap:13px;
+    padding:13px 17px; border-color:transparent; color:#EAF0FF;
+    background:linear-gradient(135deg,#252E6D,#1A2250);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.13), 0 12px 26px -16px rgba(18,28,70,0.7);
+  }
+  .study-mode.is-exam .sm-icon{ background:rgba(255,255,255,0.13); color:#EAF0FF; }
+  .study-mode.is-exam .sm-head{ flex:1; min-width:0; flex-direction:column; align-items:flex-start; gap:2px; }
+  .study-mode.is-exam .sm-head b{ color:#fff; font-size:14px; }
+  .study-mode.is-exam .sm-count{ color:var(--cyan); }
+  .study-mode.is-exam .sm-note{ color:rgba(234,240,255,0.72); }
+
+  @media (max-width:340px){ .study-modes{ grid-template-columns:1fr; } }
+
+  /* ---------- Domains ---------- */
+  .mastery-list{ display:flex; flex-direction:column; gap:9px; max-width:760px; margin-bottom:26px; }
+  .mastery-row{
+    --dom:var(--accent);
+    padding:13px 17px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+  }
+  .mastery-top{ display:flex; align-items:flex-start; gap:9px; margin-bottom:9px; }
+  .mastery-dot{
+    width:9px; height:9px; border-radius:3px; flex-shrink:0; background:var(--dom);
+    transform:rotate(45deg); margin-top:4px;
+  }
+  .mastery-id{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .mastery-name{ font-family:var(--sans); font-size:13px; font-weight:550; letter-spacing:-.01em; }
+  .mastery-pct{
+    flex-shrink:0; font-family:var(--sans); font-size:15px; font-weight:650; letter-spacing:-.03em;
+    color:var(--dom); font-variant-numeric:tabular-nums;
+  }
+  .mastery-track{ display:flex; height:6px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
+  .mastery-seg{ display:block; height:100%; }
+  .mastery-seg.is-known{ background:var(--dom); }
+  .mastery-seg.is-shaky{ background:color-mix(in srgb, var(--dom) 36%, var(--line-soft)); }
+  .mastery-foot{
+    display:flex; align-items:center; gap:9px; margin-top:9px;
+    font-family:var(--sans); font-size:11px; color:var(--ink-soft);
+  }
+  .mastery-stats{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mastery-weight{ font-family:var(--sans); font-size:10.5px; color:var(--ink-faint); }
+  .mastery-go{
+    position:relative; flex-shrink:0; min-height:36px; padding:0 13px;
+    border-radius:999px; cursor:pointer;
+    border:1px solid color-mix(in srgb, var(--dom) 30%, var(--line));
+    background:color-mix(in srgb, var(--dom) 8%, var(--bg-hi)); color:color-mix(in srgb, var(--dom) 72%, var(--ink));
+    font-family:var(--sans); font-size:11.5px; font-weight:550;
+  }
+  .mastery-go::after{ content:''; position:absolute; inset:-4px -3px; }
+  .mastery-go:hover{ background:color-mix(in srgb, var(--dom) 16%, var(--bg-hi)); }
 
   /* Exam mode */
   .exam-bar{ display:flex; align-items:center; gap:13px; flex-wrap:wrap; margin-bottom:13px;
@@ -6349,6 +6480,70 @@ function unseenQuestions(){ return allQuestions().filter(q=> !practiceStatOf(q))
 
 /* Mastery, for the domain bars: a question counts as learned once it has been
    answered right twice in a row without a guess behind it. */
+// How ready you actually are for the sitting, weighted the way CCHI weights
+// the exam: getting Healthcare Terminology (25%) solid moves this number
+// nearly twice as far as U.S. Health Systems (13%). A question you have got
+// right once but not twice counts half -- progress should show before you
+// have nailed something, or the number never moves early on and nobody
+// comes back.
+function examReadiness(){
+  const mast = domainMastery();
+  let pct = 0;
+  CCHI_DOMAINS.forEach(d=>{
+    const m = mast[d.id]; if(!m || !m.total) return;
+    pct += (d.weight/100) * ((m.known + m.shaky*0.5) / m.total);
+  });
+  pct = Math.max(0, Math.min(100, Math.round(pct*100)));
+
+  // The weakest domain by exam weight is the honest thing to point at.
+  let worst = null;
+  CCHI_DOMAINS.forEach(d=>{
+    const m = mast[d.id]; if(!m || !m.total) return;
+    const cover = (m.known + m.shaky*0.5) / m.total;
+    const cost = (1 - cover) * d.weight;
+    if(!worst || cost > worst.cost) worst = { d, cost, cover };
+  });
+
+  let title, note;
+  if(pct === 0){
+    title = 'Not started yet';
+    note  = 'Answer a few questions and this fills in, weighted the way CCHI weights the real exam.';
+  } else if(pct < 40){
+    title = 'Getting started';
+    note  = worst ? `Most of the ground left is in ${worst.d.name}, which is ${worst.d.weight}% of the exam.` : 'Keep going.';
+  } else if(pct < 70){
+    title = 'Coming together';
+    note  = worst ? `${worst.d.name} is the biggest gap left — ${worst.d.weight}% of the exam.` : 'Keep going.';
+  } else if(pct < 85){
+    title = 'Nearly there';
+    note  = worst ? `Tighten ${worst.d.name} and sit a full simulation.` : 'Sit a full simulation.';
+  } else {
+    title = 'Exam ready';
+    note  = 'Keep the streak alive and sit a full simulation to confirm it.';
+  }
+  return { pct, title, note, worst };
+}
+
+// Drives the readiness ring from 0 so the number arrives rather than appears.
+function animateReadyRing(){
+  const ring = document.querySelector('.ready-ring');
+  const num  = ring && ring.querySelector('.ready-pct');
+  if(!ring || !num) return;
+  const pct = Number(ring.dataset.pct) || 0;
+  const paint = v => {
+    num.textContent = Math.round(v) + '%';
+    ring.style.background = `conic-gradient(var(--cyan) ${v*3.6}deg, rgba(255,255,255,0.13) 0deg)`;
+  };
+  if(reducedMotion()){ paint(pct); return; }
+  const dur = 950, t0 = performance.now();
+  const tick = now => {
+    const k = Math.min(1, (now - t0)/dur);
+    paint(pct * (1 - Math.pow(1 - k, 3)));
+    if(k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 function domainMastery(){
   const out = {};
   CCHI_DOMAINS.forEach(d=> out[d.id] = { known:0, shaky:0, unseen:0, total:0 });
@@ -9967,6 +10162,9 @@ const ICON_DOWNLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3
 const ICON_UPLOAD = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5V3.5M12 3.5L7.5 8M12 3.5L16.5 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 16.5V19C4.5 19.8 5.2 20.5 6 20.5H18C18.8 20.5 19.5 19.8 19.5 19V16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_CHECK_WHITE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12.5L10 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_FLAME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5 3c.6 3.1-1.1 4.6-2.6 6C8.2 10.5 7 12 7 14.3 7 17.9 9.9 21 13 21s5-2.6 5-6.2c0-2.3-1-4-2.3-5.6-.4 1.2-1.1 1.9-2 2.2.6-2.9.2-6-1.2-8.4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+const ICON_TARGET = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.6" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/></svg>';
+const ICON_ARROW_R = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h13M13 6.5l5.5 5.5L13 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12L15.2 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -11736,6 +11934,7 @@ function renderContent(){
   if(activeCategory === 'practice'){
     content.innerHTML = renderPractice();
     animateBars();
+    animateReadyRing();
     if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
       const ring = content.querySelector('.score-ring');
       if(ring) animateScore(Number(ring.dataset.pct) || 0);
@@ -13112,40 +13311,82 @@ function renderPractice(){
 
   let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span>
     <span class="practice-mark">${hmhDiamonds({ building:true, idle:true, size:10, gap:3 })}</span></div>`;
-  html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>Original practice questions written to match CCHI's published domain structure \u2014 not real exam items, and not affiliated with or endorsed by CCHI. Study the official CCHI materials too.</span></div>`;
 
-  // ---- today ----
-  html += `<div class="study-today">
-    <div class="study-streak">
-      <span class="study-flame">${st.days>0?'\ud83d\udd25':'\u25cb'}</span>
-      <b>${st.days||0}</b><span>day${(st.days||0)===1?'':'s'} in a row</span>
+  html += `<details class="practice-note">
+    <summary>${ICON_SHIELD}<span>Original questions, not real exam items</span><em>Read more</em></summary>
+    <p>Written to match CCHI's published domain structure — not real exam items, and not
+       affiliated with or endorsed by CCHI. Study the official CCHI materials too.</p>
+  </details>`;
+
+  // ---- how ready you are ----
+  const ready = examReadiness();
+  html += `<div class="ready-card">
+    <div class="ready-main">
+      <div class="ready-ring" data-pct="${ready.pct}">
+        <div class="ready-ring-in"><b class="ready-pct">0%</b><span class="ready-cap">ready</span></div>
+      </div>
+      <div class="ready-say">
+        <b>${escapeHtml(ready.title)}</b>
+        <span>${escapeHtml(ready.note)}</span>
+      </div>
     </div>
-    <div class="study-goal${todayCount >= DAILY_GOAL ? ' is-met' : ''}">
-      <div class="study-goal-top"><span>Today</span><b>${todayCount} / ${DAILY_GOAL}</b></div>
-      <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
-      <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'Goal met \u2014 anything more is a bonus.' : `${DAILY_GOAL-todayCount} more question${DAILY_GOAL-todayCount===1?'':'s'} to hit today's goal.`}</span>
+    <div class="ready-stats">
+      <div class="ready-stat study-streak">
+        <i>${ICON_FLAME}</i><b><span class="study-flame">${st.days||0}</span></b>
+        <span>day${(st.days||0)===1?'':'s'} in a row</span>
+      </div>
+      <div class="ready-stat study-goal${todayCount >= DAILY_GOAL ? ' is-met' : ''}">
+        <i>${ICON_TARGET}</i>
+        <span class="study-goal-top"><b>${todayCount} / ${DAILY_GOAL}</b></span>
+        <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'today — goal met' : 'answered today'}</span>
+        <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
+      </div>
+      <div class="ready-stat">
+        <i>${ICON_CLOCK}</i><b>${due}</b><span>due for review</span>
+      </div>
     </div>
   </div>`;
 
   // ---- the four ways in ----
-  html += `<div class="study-modes">
-    <button class="study-mode is-primary" onclick="requireName(()=>startStudy('review'))" ${due?'':'disabled'}>
-      <span class="sm-head"><b>Due for review</b><span class="sm-count">${due}</span></span>
-      <span class="sm-note">${due ? 'Questions your memory is about to drop. This is the highest-value thing you can do today.' : 'Nothing due right now \u2014 come back tomorrow.'}</span>
-    </button>
-    <button class="study-mode" onclick="requireName(()=>startStudy('weak'))" ${shaky?'':'disabled'}>
-      <span class="sm-head"><b>Drill my mistakes</b><span class="sm-count">${shaky}</span></span>
-      <span class="sm-note">${shaky ? 'Only the questions you have got wrong and not yet nailed twice.' : 'No mistakes on record yet.'}</span>
-    </button>
-    <button class="study-mode" onclick="requireName(()=>startStudy('new'))" ${unseen?'':'disabled'}>
-      <span class="sm-head"><b>Learn new</b><span class="sm-count">${unseen}</span></span>
-      <span class="sm-note">${unseen ? 'Questions you have never been asked.' : 'You have seen every question in the bank.'}</span>
-    </button>
-    <button class="study-mode is-exam" onclick="requireName(()=>startStudy('exam'))">
-      <span class="sm-head"><b>Exam simulation</b><span class="sm-count">100</span></span>
-      <span class="sm-note">Full length, exam-weighted, on the clock, no answers until the end \u2014 the closest thing here to the real sitting.</span>
-    </button>
-  </div>`;
+  // DOM order stays review / mistakes / new / exam; CSS `order` promotes
+  // whichever one is worth doing next, so nothing downstream has to guess.
+  const MODES = [
+    { key:'review', name:'Due for review', n:due,    color:'#0F5FA6', icon:ICON_CLOCK,
+      on:'Questions your memory is about to drop. The highest-value thing you can do today.',
+      off:'Nothing due right now — come back tomorrow.' },
+    { key:'weak',   name:'My mistakes',    n:shaky,  color:'#C2485C', icon:ICON_ALERT,
+      on:'Only what you have got wrong and not yet nailed twice.',
+      off:'No mistakes on record yet.' },
+    { key:'new',    name:'Learn new',      n:unseen, color:'#3F7D58', icon:ICON_SPARK,
+      on:'Questions you have never been asked.',
+      off:'You have seen every question in the bank.' }
+  ];
+  const nextKey = (MODES.find(m=> m.n > 0) || {}).key || 'exam';
+
+  html += `<div class="study-modes">`;
+  MODES.forEach(m=>{
+    const isNext = m.key === nextKey;
+    html += `<button class="study-mode${isNext?' is-next':''}" style="--mode:${m.color}"
+        onclick="requireName(()=>startStudy('${m.key}'))" ${m.n?'':'disabled'}>
+      ${isNext ? `<span class="sm-flag">Next up</span><span class="sm-top">
+          <span class="sm-icon">${m.icon}</span>
+          <span class="sm-head"><b>${m.name}</b></span>
+          <span class="sm-count">${m.n}</span>
+        </span>`
+        : `<span class="sm-icon">${m.icon}</span>
+           <span class="sm-head"><b>${m.name}</b><span class="sm-count">${m.n}</span></span>`}
+      <span class="sm-note">${m.n ? m.on : m.off}</span>
+      ${isNext ? `<span class="sm-go"><span>Start</span>${ICON_ARROW_R}</span>` : ''}
+    </button>`;
+  });
+  html += `<button class="study-mode is-exam" onclick="requireName(()=>startStudy('exam'))">
+      <span class="sm-icon">${ICON_EXAM}</span>
+      <span class="sm-head"><b>Exam simulation</b>
+        <span class="sm-note">Full length, exam-weighted, on the clock — the closest thing here to the real sitting.</span>
+      </span>
+      <span class="sm-count">100</span>
+    </button>`;
+  html += `</div>`;
 
   // ---- this week, across the team ----
   html += renderWeeklyBoard();
@@ -13173,17 +13414,21 @@ function renderPractice(){
     const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
     const t = m.total || 1;
     html += `
-      <div class="mastery-row">
+      <div class="mastery-row" style="--dom:${d.color}">
         <div class="mastery-top">
-          <span class="mastery-name">${escapeHtml(d.name)}</span>
-          <span class="mastery-weight" title="share of the real exam">${d.weight}%</span>
+          <span class="mastery-dot"></span>
+          <span class="mastery-id">
+            <span class="mastery-name">${escapeHtml(d.name)}</span>
+            <span class="mastery-weight">${d.weight}% of the exam</span>
+          </span>
+          <span class="mastery-pct">${Math.round(((m.known + m.shaky*0.5)/t)*100)}%</span>
         </div>
         <span class="mastery-track">
           <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
           <span class="mastery-seg is-shaky" style="width:${(m.shaky/t)*100}%"></span>
         </span>
         <div class="mastery-foot">
-          <span>${m.known} learned</span><span>${m.shaky} shaky</span><span>${m.unseen} unseen</span>
+          <span class="mastery-stats">${m.known} learned · ${m.shaky} shaky · ${m.unseen} unseen</span>
           <button class="mastery-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise</button>
         </div>
       </div>`;
@@ -14085,7 +14330,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.1112';
+const BUILD_ID = 'b0918.1210';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
