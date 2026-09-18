@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v77-pin-burst';
+const CACHE_VERSION = 'interpreter-hub-v78-pin-layers';
 const PRECACHE = [
   './',
   './index.html',

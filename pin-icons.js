@@ -241,7 +241,7 @@
   }
   /* The burst needs somewhere to sit and room to overflow into. */
   [data-pin]{ position:relative; }
-  [data-pin]::after{
+  [data-pin]::after,[data-pin]::before{
     content:''; position:absolute; left:50%; top:50%; border-radius:50%;
     pointer-events:none; opacity:0; z-index:0;
     --burst:var(--tile-color, var(--accent));
@@ -307,18 +307,26 @@
     56%{transform:scaleY(1.14) scaleX(.98)}
     78%{transform:scaleY(.96)} 100%{transform:none}
   }
+  /* The four airborne pins carry a shadow that softens and spreads as they
+     rise and snaps tight as they land -- the thing that makes a jump read as
+     weight rather than as a sprite sliding up the screen. None of these four
+     animate a filter for anything else, so there is nothing to collide with. */
   @keyframes pinHop{                /* crouch, launch, land, bounce */
-    0%{transform:none} 12%{transform:translateY(3px) scaleY(.86) scaleX(1.12)}
-    34%{transform:translateY(-16px) scaleY(1.12) scaleX(.92)}
-    52%{transform:translateY(0) scaleY(.9) scaleX(1.1)}
-    70%{transform:translateY(-7px) scaleY(1.05) scaleX(.97)}
-    88%{transform:translateY(0) scaleY(.96) scaleX(1.04)} 100%{transform:none}
+    0%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
+    12%{transform:translateY(3px) scaleY(.86) scaleX(1.12);filter:drop-shadow(0 1px 1px rgba(40,30,20,.34))}
+    34%{transform:translateY(-16px) scaleY(1.12) scaleX(.92);filter:drop-shadow(0 13px 7px rgba(40,30,20,.16))}
+    52%{transform:translateY(0) scaleY(.9) scaleX(1.1);filter:drop-shadow(0 1px 1px rgba(40,30,20,.36))}
+    70%{transform:translateY(-7px) scaleY(1.05) scaleX(.97);filter:drop-shadow(0 7px 4px rgba(40,30,20,.2))}
+    88%{transform:translateY(0) scaleY(.96) scaleX(1.04);filter:drop-shadow(0 1px 1px rgba(40,30,20,.32))}
+    100%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
   }
   @keyframes pinDrip{               /* gather, fall, splash, recover */
-    0%{transform:none} 18%{transform:translateY(-7px) scaleY(1.16) scaleX(.9)}
-    46%{transform:translateY(8px) scaleY(.82) scaleX(1.16)}
-    68%{transform:translateY(-3px) scaleY(1.08) scaleX(.96)}
-    86%{transform:translateY(1px) scaleY(.98)} 100%{transform:none}
+    0%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
+    18%{transform:translateY(-7px) scaleY(1.16) scaleX(.9);filter:drop-shadow(0 8px 5px rgba(40,30,20,.18))}
+    46%{transform:translateY(8px) scaleY(.82) scaleX(1.16);filter:drop-shadow(0 0 1px rgba(40,30,20,.4))}
+    68%{transform:translateY(-3px) scaleY(1.08) scaleX(.96);filter:drop-shadow(0 5px 3px rgba(40,30,20,.22))}
+    86%{transform:translateY(1px) scaleY(.98);filter:drop-shadow(0 2px 1px rgba(40,30,20,.3))}
+    100%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
   }
   @keyframes pinRattle{
     0%{transform:none} 10%{transform:translateX(-4px) rotate(-9deg)}
@@ -336,9 +344,11 @@
     88%{transform:rotate(-4deg)} 100%{transform:none}
   }
   @keyframes pinLift{               /* dip, rise, float down */
-    0%{transform:none} 14%{transform:translateY(3px) scale(.95)}
-    46%{transform:translateY(-14px) scale(1.16)}
-    74%{transform:translateY(-3px) scale(1.03)} 100%{transform:none}
+    0%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
+    14%{transform:translateY(3px) scale(.95);filter:drop-shadow(0 1px 1px rgba(40,30,20,.34))}
+    46%{transform:translateY(-14px) scale(1.16);filter:drop-shadow(0 12px 7px rgba(40,30,20,.15))}
+    74%{transform:translateY(-3px) scale(1.03);filter:drop-shadow(0 4px 3px rgba(40,30,20,.24))}
+    100%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
   }
   @keyframes pinFlow{
     0%{transform:none;filter:none} 16%{transform:scale(.94)}
@@ -364,9 +374,10 @@
     100%{filter:none;transform:none}
   }
   @keyframes pinPrecise{            /* one deliberate, controlled arc */
-    0%{transform:none} 20%{transform:translateY(2px) scale(.95)}
-    56%{transform:translateY(-9px) rotate(-6deg) scale(1.12)}
-    100%{transform:none}
+    0%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
+    20%{transform:translateY(2px) scale(.95);filter:drop-shadow(0 1px 1px rgba(40,30,20,.34))}
+    56%{transform:translateY(-9px) rotate(-6deg) scale(1.12);filter:drop-shadow(0 9px 5px rgba(40,30,20,.17))}
+    100%{transform:none;filter:drop-shadow(0 2px 1px rgba(40,30,20,.28))}
   }
   @keyframes pinGuard{              /* brace, then plant */
     0%{transform:none} 16%{transform:scale(.92) rotate(4deg)}
@@ -459,25 +470,85 @@
        transform:rotate(300deg)}
   }
 
+  /* ---- the second wave ----
+     One shape leaving the pin reads as a single event. A second, delayed and
+     turned against the first, reads as an effect: a double ripple off a
+     heartbeat, six more sparks between the first six, a ring chasing the
+     flash out. Same flavour families, offset in time and geometry. */
+  @keyframes burstRing2{
+    0%{width:6px;height:6px;margin:-3px;opacity:.6;
+       box-shadow:0 0 0 1.5px color-mix(in srgb,var(--burst) 55%,transparent)}
+    100%{width:54px;height:54px;margin:-27px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+  @keyframes burstHalo2{
+    0%{width:8px;height:8px;margin:-4px;opacity:0;
+       box-shadow:0 0 0 1.5px color-mix(in srgb,var(--burst) 45%,transparent)}
+    45%{opacity:.5}
+    100%{width:62px;height:62px;margin:-31px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+  @keyframes burstFlash2{
+    0%{width:10px;height:10px;margin:-5px;opacity:0;
+       box-shadow:0 0 0 2px color-mix(in srgb,#fff 70%,transparent)}
+    30%{opacity:.8}
+    100%{width:70px;height:70px;margin:-35px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+  /* six more particles, dropped between the first six and thrown less far */
+  @keyframes burstSparks2{
+    0%{width:4px;height:4px;margin:-2px;opacity:.9;
+       box-shadow:0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst),
+                  0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst)}
+    100%{width:2px;height:2px;margin:-1px;opacity:0;
+       box-shadow:15px -20px 0 0 var(--burst),24px 4px 0 0 var(--burst),9px 22px 0 0 var(--burst),
+                  -15px 20px 0 0 var(--burst),-24px -4px 0 0 var(--burst),-9px -22px 0 0 var(--burst)}
+  }
+  /* turning the other way, so the two arcs cross */
+  @keyframes burstArc2{
+    0%{width:20px;height:20px;margin:-10px;opacity:0;
+       background:conic-gradient(from 180deg,color-mix(in srgb,var(--burst) 55%,transparent) 0 30deg,transparent 30deg);
+       transform:rotate(0)}
+    35%{opacity:.6}
+    100%{width:58px;height:58px;margin:-29px;opacity:0;
+       background:conic-gradient(from 180deg,color-mix(in srgb,var(--burst) 55%,transparent) 0 30deg,transparent 30deg);
+       transform:rotate(-260deg)}
+  }
+
   [data-pin].is-tapped::after{ animation-duration:.72s; animation-timing-function:cubic-bezier(.16,.84,.34,1); }
+  [data-pin].is-tapped::before{ animation-duration:.8s; animation-delay:.08s; animation-timing-function:cubic-bezier(.16,.84,.34,1); }
 
   [data-pin="cardiology"].is-tapped::after,[data-pin="heart-failure"].is-tapped::after,
   [data-pin="chat"].is-tapped::after,[data-pin="practice"].is-tapped::after,
   [data-pin="ethics"].is-tapped::after,[data-pin="pediatrics"].is-tapped::after{ animation-name:burstRing; }
+  [data-pin="cardiology"].is-tapped::before,[data-pin="heart-failure"].is-tapped::before,
+  [data-pin="chat"].is-tapped::before,[data-pin="practice"].is-tapped::before,
+  [data-pin="ethics"].is-tapped::before,[data-pin="pediatrics"].is-tapped::before{ animation-name:burstRing2; }
 
   [data-pin="pulmonology"].is-tapped::after,[data-pin="neurology"].is-tapped::after,
   [data-pin="developmental"].is-tapped::after,[data-pin="endocrinology"].is-tapped::after,
   [data-pin="hematology"].is-tapped::after,[data-pin="leukemia"].is-tapped::after,
   [data-pin="nephrology"].is-tapped::after,[data-pin="urology"].is-tapped::after{ animation-name:burstHalo; }
+  [data-pin="pulmonology"].is-tapped::before,[data-pin="neurology"].is-tapped::before,
+  [data-pin="developmental"].is-tapped::before,[data-pin="endocrinology"].is-tapped::before,
+  [data-pin="hematology"].is-tapped::before,[data-pin="leukemia"].is-tapped::before,
+  [data-pin="nephrology"].is-tapped::before,[data-pin="urology"].is-tapped::before{ animation-name:burstHalo2; }
 
   [data-pin="emergency"].is-tapped::after,[data-pin="dermatology"].is-tapped::after,
   [data-pin="infectious-disease"].is-tapped::after,[data-pin="surgery-anesthesia"].is-tapped::after,
   [data-pin="orthopedics"].is-tapped::after{ animation-name:burstFlash; }
+  [data-pin="emergency"].is-tapped::before,[data-pin="dermatology"].is-tapped::before,
+  [data-pin="infectious-disease"].is-tapped::before,[data-pin="surgery-anesthesia"].is-tapped::before,
+  [data-pin="orthopedics"].is-tapped::before{ animation-name:burstFlash2; }
 
   [data-pin="genetics"].is-tapped::after,[data-pin="oncology"].is-tapped::after,
   [data-pin="laboratory"].is-tapped::after,[data-pin="pharmacy"].is-tapped::after,
   [data-pin="infusion"].is-tapped::after,[data-pin="ent"].is-tapped::after,
   [data-pin="ophthalmology"].is-tapped::after{ animation-name:burstSparks; }
+  [data-pin="genetics"].is-tapped::before,[data-pin="oncology"].is-tapped::before,
+  [data-pin="laboratory"].is-tapped::before,[data-pin="pharmacy"].is-tapped::before,
+  [data-pin="infusion"].is-tapped::before,[data-pin="ent"].is-tapped::before,
+  [data-pin="ophthalmology"].is-tapped::before{ animation-name:burstSparks2; }
 
   [data-pin="translate"].is-tapped::after,[data-pin="review"].is-tapped::after,
   [data-pin="medical-terminology"].is-tapped::after,[data-pin="userguide"].is-tapped::after,
@@ -486,6 +557,13 @@
   [data-pin="doctor-prep"].is-tapped::after,[data-pin="doctor-directory"].is-tapped::after,
   [data-pin="providers"].is-tapped::after,[data-pin="find-doctor"].is-tapped::after,
   [data-pin="medifind"].is-tapped::after,[data-pin="wave"].is-tapped::after{ animation-name:burstArc; }
+  [data-pin="translate"].is-tapped::before,[data-pin="review"].is-tapped::before,
+  [data-pin="medical-terminology"].is-tapped::before,[data-pin="userguide"].is-tapped::before,
+  [data-pin="resources"].is-tapped::before,[data-pin="directory"].is-tapped::before,
+  [data-pin="events"].is-tapped::before,[data-pin="updates"].is-tapped::before,
+  [data-pin="doctor-prep"].is-tapped::before,[data-pin="doctor-directory"].is-tapped::before,
+  [data-pin="providers"].is-tapped::before,[data-pin="find-doctor"].is-tapped::before,
+  [data-pin="medifind"].is-tapped::before,[data-pin="wave"].is-tapped::before{ animation-name:burstArc2; }
 
   [data-pin="cardiology"]     .is-tapped{animation-name:pinHeartbeat;animation-duration:.86s}
   [data-pin="heart-failure"]  .is-tapped{animation-name:pinHeartbeat;animation-duration:1.02s}
@@ -530,7 +608,7 @@
 
   @media (prefers-reduced-motion: reduce){
     .medical-pin.is-tapped, .pin-sprite.is-tapped{animation:none !important}
-    [data-pin].is-tapped::after{animation:none !important;opacity:0 !important}
+    [data-pin].is-tapped::after,[data-pin].is-tapped::before{animation:none !important;opacity:0 !important}
   }
   `;
   document.head.appendChild(medicalStyle);
