@@ -2774,6 +2774,96 @@
   .results-head{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
   .results-summary h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 6px 0; }
   .results-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.6; max-width:420px; }
+  /* ---------- Study motion ----------
+     Short and eased, never bouncy: this is a certification tool people open
+     between hospital assignments, and motion that plays for its own sake gets
+     old on the twentieth question. Every rule here is either feedback on
+     something the person just did, or a value growing to its real size. */
+
+  /* The moment that matters -- landing an answer. */
+  @keyframes optRight{
+    0%   { transform:scale(1); }
+    38%  { transform:scale(1.035); }
+    100% { transform:scale(1); }
+  }
+  @keyframes optWrong{
+    0%,100% { transform:translateX(0); }
+    18%     { transform:translateX(-6px); }
+    42%     { transform:translateX(5px); }
+    68%     { transform:translateX(-3px); }
+    86%     { transform:translateX(2px); }
+  }
+  @keyframes optReveal{
+    0%   { box-shadow:0 0 0 0 rgba(78,158,116,0); }
+    45%  { box-shadow:0 0 0 4px rgba(78,158,116,.34); }
+    100% { box-shadow:0 0 0 0 rgba(78,158,116,0); }
+  }
+  .quiz-option.fx-right { animation:optRight .34s var(--ease); }
+  .quiz-option.fx-wrong { animation:optWrong .40s var(--ease); }
+  .quiz-option.fx-reveal{ animation:optReveal .90s var(--ease) .12s; }
+
+  /* A run of right answers, while you are on it. */
+  @keyframes hotIn{
+    0%   { opacity:0; transform:translate(-50%, 8px) scale(.9); }
+    55%  { opacity:1; transform:translate(-50%, -2px) scale(1.04); }
+    100% { opacity:1; transform:translate(-50%, 0) scale(1); }
+  }
+  @keyframes hotOut{ to{ opacity:0; transform:translate(-50%, -10px); } }
+  .hot-streak{
+    position:absolute; left:50%; bottom:14px; z-index:4; pointer-events:none;
+    display:flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:999px;
+    background:var(--navy); color:#F2F6FF;
+    font-family:var(--sans); font-size:12.5px; font-weight:650; letter-spacing:-.01em;
+    box-shadow:0 12px 28px -12px rgba(22,55,90,.55);
+    animation:hotIn .3s var(--ease) both, hotOut .4s var(--ease) 1.5s both;
+  }
+  .hot-streak span{ font-size:14px; }
+  .quiz-card{ position:relative; }
+
+  /* A new question arriving. */
+  @keyframes quizCardIn{
+    from{ opacity:0; transform:translateY(9px); }
+    to  { opacity:1; transform:none; }
+  }
+  .quiz-card.is-entering{ animation:quizCardIn .26s var(--ease) backwards; }
+
+  /* The bars are driven from JS: set to 0, then to the real width on the next
+     frame. The transition here is what turns that into growth. */
+  .mastery-seg, .study-goal-fill, .domain-bar-fill{ transition:width .62s var(--ease); }
+  .quiz-progress-fill{ transition:width .34s var(--ease); }
+
+  /* A streak that is alive, and a goal that acknowledges being met. */
+  @keyframes flameBreathe{
+    0%,100% { transform:scale(1)    rotate(-1.5deg); }
+    50%     { transform:scale(1.09) rotate(1.5deg); }
+  }
+  .study-streak .study-flame{ display:inline-block; animation:flameBreathe 2.6s var(--ease) infinite; }
+  .study-goal.is-met .study-goal-fill{
+    background:linear-gradient(90deg, #35A97A, #4E9E74);
+    box-shadow:0 0 0 1px rgba(53,169,122,.35);
+  }
+  .study-goal.is-met .study-goal-note{ color:#3F7D58; font-weight:600; }
+
+  /* The four ways in, arriving in sequence rather than all at once. */
+  @keyframes modeIn{ from{ opacity:0; transform:translateY(7px); } to{ opacity:1; transform:none; } }
+  .study-mode{ animation:modeIn .30s var(--ease) backwards; }
+  .study-mode:nth-child(1){ animation-delay:.02s }
+  .study-mode:nth-child(2){ animation-delay:.07s }
+  .study-mode:nth-child(3){ animation-delay:.12s }
+  .study-mode:nth-child(4){ animation-delay:.17s }
+
+  /* The last minute of an exam. */
+  @keyframes clockUrge{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+  .exam-clock.is-low{ animation:clockUrge 1s steps(1,end) infinite; }
+
+  @media (prefers-reduced-motion: reduce){
+    .quiz-option.fx-right, .quiz-option.fx-wrong, .quiz-option.fx-reveal,
+    .hot-streak, .quiz-card.is-entering, .study-mode,
+    .study-streak .study-flame, .exam-clock.is-low{ animation:none !important; }
+    .mastery-seg, .study-goal-fill, .domain-bar-fill, .quiz-progress-fill{ transition:none; }
+  }
+
   /* ---------- Study system ---------- */
   .study-today{ display:flex; gap:11px; margin:0 0 15px 0; flex-wrap:wrap; }
   .study-streak{
@@ -11395,10 +11485,14 @@ function renderContent(){
 
   if(activeCategory === 'practice'){
     content.innerHTML = renderPractice();
-    // Celebrate a strong score once the results panel is on screen.
+    animateBars();
     if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
+      const ring = content.querySelector('.score-ring');
+      if(ring) animateScore(Number(ring.dataset.pct) || 0);
       const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
-      if(Math.round((correct/quizQuestions.length)*100) >= 80) celebrateScore('.results-head');
+      // Let the ring finish its sweep before the confetti, so the number
+      // landing is the thing being celebrated rather than competing with it.
+      if(Math.round((correct/quizQuestions.length)*100) >= 80) setTimeout(()=> celebrateScore('.results-head'), 700);
     }
     return;
   }
@@ -12772,7 +12866,7 @@ function renderPractice(){
       <span class="study-flame">${st.days>0?'\ud83d\udd25':'\u25cb'}</span>
       <b>${st.days||0}</b><span>day${(st.days||0)===1?'':'s'} in a row</span>
     </div>
-    <div class="study-goal">
+    <div class="study-goal${todayCount >= DAILY_GOAL ? ' is-met' : ''}">
       <div class="study-goal-top"><span>Today</span><b>${todayCount} / ${DAILY_GOAL}</b></div>
       <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
       <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'Goal met \u2014 anything more is a bonus.' : `${DAILY_GOAL-todayCount} more question${DAILY_GOAL-todayCount===1?'':'s'} to hit today's goal.`}</span>
@@ -12881,6 +12975,7 @@ function startStudy(mode, domainId){
   quizLength = quizQuestions.length;
   quizIndex = 0; quizAnswers = []; quizConfidence = []; quizRevealed = false;
   quizActive = true; reviewOpen = {};
+  quizHotStreak = 0; lastEnteredQuizIndex = -1;
 
   if(quizMode === 'exam'){
     // The real CoreCHI allows two hours for 100 questions. Scaled to the
@@ -13021,7 +13116,12 @@ function renderQuiz(){
     </div>`;
   }
 
-  html += `<div class="quiz-card">
+  // Only on a NEW question. renderContent() also runs when you answer and
+  // again when you rate your confidence; replaying the entrance on those
+  // would make the card flinch under your thumb.
+  const entering = quizIndex !== lastEnteredQuizIndex;
+  lastEnteredQuizIndex = quizIndex;
+  html += `<div class="quiz-card${entering ? ' is-entering' : ''}">
     <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span></div>
     <div class="quiz-meta">
       <span class="tag" style="color:${dm.color}; background:${dm.color}1F;">${escapeHtml(dm.name)}</span>
@@ -13079,12 +13179,89 @@ function renderQuiz(){
   return html;
 }
 
+/* How many right in a row this session. Not saved anywhere -- it exists to
+   make a good run feel like a run while you are on it. */
+let quizHotStreak = 0;
+let lastEnteredQuizIndex = -1;
+
+function reducedMotion(){
+  try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; }
+}
+
 function answerQuiz(i){
   if(quizRevealed) return;
   quizAnswers[quizIndex] = i;
   if(quizMode === 'exam'){ renderContent(); return; }   // no feedback in exam mode
   quizRevealed = true;
+  const q = quizQuestions[quizIndex];
+  const right = i === q.a;
+  quizHotStreak = right ? quizHotStreak + 1 : 0;
   renderContent();
+  // Feedback is applied AFTER the render, imperatively, rather than baked
+  // into a class the markup carries. Rating your confidence re-renders this
+  // same question, and a class in the markup would replay the shake every
+  // time -- feedback that fires twice for one answer reads as a glitch.
+  playAnswerFeedback(right, i, q.a);
+}
+
+function playAnswerFeedback(right, chosen, correct){
+  if(reducedMotion()) return;
+  requestAnimationFrame(()=>{
+    const opts = document.querySelectorAll('.quiz-option');
+    const hit = opts[right ? correct : chosen];
+    const truth = opts[correct];
+    if(hit) hit.classList.add(right ? 'fx-right' : 'fx-wrong');
+    if(!right && truth) truth.classList.add('fx-reveal');
+    if(right && quizHotStreak >= 3){
+      const card = document.querySelector('.quiz-card');
+      if(card && !card.querySelector('.hot-streak')){
+        const chip = document.createElement('div');
+        chip.className = 'hot-streak';
+        chip.innerHTML = `<span>\ud83d\udd25</span>${quizHotStreak} in a row`;
+        card.appendChild(chip);
+        setTimeout(()=> chip.remove(), 2000);
+      }
+    }
+  });
+}
+
+/* Counts a number up rather than snapping to it, and drives the score ring's
+   sweep at the same time so the two always agree. */
+function animateScore(pct){
+  const num  = document.querySelector('.score-pct');
+  const ring = document.querySelector('.score-ring');
+  if(!num || !ring) return;
+  const colour = ring.dataset.ringColour || 'var(--accent)';
+  if(reducedMotion()){
+    num.textContent = pct + '%';
+    ring.style.background = `conic-gradient(${colour} ${pct*3.6}deg, var(--line-soft) 0deg)`;
+    return;
+  }
+  const dur = 900, t0 = performance.now();
+  const tick = (now)=>{
+    const k = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - k, 3);          // ease-out cubic
+    const v = pct * eased;
+    num.textContent = Math.round(v) + '%';
+    ring.style.background = `conic-gradient(${colour} ${v*3.6}deg, var(--line-soft) 0deg)`;
+    if(k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* Bars start at zero and grow to their real width on the first paint after a
+   render. Without this they are simply present, which reads as a static
+   report rather than progress you are making. */
+function animateBars(){
+  if(reducedMotion()) return;
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill').forEach(el=>{
+      const target = el.style.width;
+      if(!target || target === '0%') return;
+      el.style.width = '0%';
+      requestAnimationFrame(()=>{ el.style.width = target; });
+    });
+  });
 }
 
 function rateConfidence(level){
@@ -13178,6 +13355,8 @@ function exitQuiz(){
   quizConfidence = [];
   quizFlags = [];
   reviewOpen = {};
+  quizHotStreak = 0;
+  lastEnteredQuizIndex = -1;
   quizQuestions = [];
   quizAnswers = [];
   quizIndex = 0;
@@ -13207,8 +13386,9 @@ function renderQuizResults(){
 
   let html = `<div class="section-head"><h2>Practice Results</h2><span class="sub">${correct} of ${total} correct</span></div>`;
   html += `<div class="results-head">
-    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" style="background:conic-gradient(${ringColor} ${pct*3.6}deg, var(--line-soft) 0deg);">
-      <div class="score-ring-inner"><span class="score-pct">${pct}%</span><span class="score-label">Score</span></div>
+    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" data-ring-colour="${ringColor}" data-pct="${pct}"
+         style="background:conic-gradient(${ringColor} 0deg, var(--line-soft) 0deg);">
+      <div class="score-ring-inner"><span class="score-pct">0%</span><span class="score-label">Score</span></div>
     </div>
     <div class="results-summary">
       <h3>${correct} of ${total} correct</h3>
@@ -13541,7 +13721,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.0845';
+const BUILD_ID = 'b0918.0859';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
