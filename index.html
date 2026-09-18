@@ -40,7 +40,13 @@
 <!-- The hero is the first thing on screen; start it immediately instead of
      waiting for the CSS that references it to be parsed. -->
 <link rel="preload" as="image" href="./hero.jpg?v=blossom1">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<!-- Inter on the VARIABLE axis (wght@100..700), not a list of fixed cuts.
+     The old link asked for IBM Plex Sans at 400;500;600 while the design
+     system asks for 550 and 650, and much of the app asks for 700. Measured:
+     550, 650 and 700 all rendered as 600 -- three weights collapsed into one,
+     which is most of why the type read flat. One variable file also replaces
+     three static ones. -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&family=Inter:wght@100..700&display=swap" rel="stylesheet">
 <style>
   :root{
     /* Cool, crisp surfaces built on the actual Hackensack Meridian brand
@@ -62,7 +68,7 @@
     --danger:#C2485C;
     --danger-soft:#FBECEF;
     --mono:'IBM Plex Mono', ui-monospace, monospace;
-    --sans:'IBM Plex Sans', system-ui, sans-serif;
+    --sans:'Inter', system-ui, -apple-system, sans-serif;
     --serif:'IBM Plex Serif', Georgia, serif;
     --r-sm:10px; --r-md:14px; --r-lg:20px;
     /* Layered, navy-tinted shadows — closer to how real surfaces cast light
@@ -14418,7 +14424,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.1332';
+const BUILD_ID = 'b0918.1455';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
