@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v75-name-flow';
+const CACHE_VERSION = 'interpreter-hub-v76-pin-taps';
 const PRECACHE = [
   './',
   './index.html',
