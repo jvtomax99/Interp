@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v78-pin-layers';
+const CACHE_VERSION = 'interpreter-hub-v79-prep-translate';
 const PRECACHE = [
   './',
   './index.html',

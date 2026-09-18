@@ -419,6 +419,28 @@
     44%{transform:scale(.88) translateY(3px) rotate(3deg)}
     66%{transform:scale(1.1) translateY(-2px)} 100%{transform:none}
   }
+  /* Doctor Prep goes and FETCHES something -- you name a provider and it
+     comes back with their terminology. So the pin does not perform outward:
+     it waits, draws in while the research gathers, and takes the hit when the
+     answer lands. Every other pin in the app expands; this one receives. */
+  @keyframes pinIntake{
+    0%{transform:none}
+    22%{transform:scale(.97) translateY(1px)}
+    48%{transform:scale(.91) translateY(2px)}     /* drawn in, waiting */
+    66%{transform:scale(1.30) translateY(-3px)}   /* it lands */
+    80%{transform:scale(.97)}
+    91%{transform:scale(1.06)} 100%{transform:none}
+  }
+  /* Translate carries a word ACROSS. The flip travels rather than spinning on
+     the spot -- it leaves one side, turns over, and arrives on the other. */
+  @keyframes pinExchange{
+    0%{transform:perspective(240px) rotateY(0) translateX(0)}
+    18%{transform:perspective(240px) rotateY(-44deg) translateX(-8px) scale(.95)}
+    50%{transform:perspective(240px) rotateY(180deg) translateX(8px) scale(1.1)}
+    82%{transform:perspective(240px) rotateY(322deg) translateX(-3px) scale(1.01)}
+    100%{transform:perspective(240px) rotateY(360deg) translateX(0)}
+  }
+
   @keyframes pinScan{               /* sweep across, then lock on */
     0%{transform:none} 18%{transform:translateX(-7px) rotate(-9deg) scale(.97)}
     46%{transform:translateX(7px) rotate(9deg)}
@@ -515,8 +537,57 @@
        transform:rotate(-260deg)}
   }
 
+  /* Particles travelling INWARD. The whole app bursts outward, so reversing
+     it is the clearest way to say "this one goes and fetches". */
+  @keyframes burstGather{
+    0%{width:3px;height:3px;margin:-1.5px;opacity:0;
+       box-shadow:0 -36px 0 0 var(--burst),31px -18px 0 0 var(--burst),31px 18px 0 0 var(--burst),
+                  0 36px 0 0 var(--burst),-31px 18px 0 0 var(--burst),-31px -18px 0 0 var(--burst)}
+    30%{opacity:.95}
+    72%{opacity:.9}
+    100%{width:6px;height:6px;margin:-3px;opacity:0;
+       box-shadow:0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst),
+                  0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst)}
+  }
+  /* the ring that closes behind them, so the arrival has a beat */
+  @keyframes burstGather2{
+    0%{width:66px;height:66px;margin:-33px;opacity:0;
+       box-shadow:0 0 0 1.5px color-mix(in srgb,var(--burst) 50%,transparent)}
+    40%{opacity:.7}
+    100%{width:10px;height:10px;margin:-5px;opacity:0;
+       box-shadow:0 0 0 2px color-mix(in srgb,var(--burst) 70%,transparent)}
+  }
+  /* Two marks changing places through the pin -- the exchange, literally. */
+  @keyframes burstSwapDots{
+    0%{width:6px;height:6px;margin:-3px;opacity:0;
+       box-shadow:-30px 0 0 0 var(--burst),30px 0 0 0 var(--burst)}
+    22%{opacity:.95}
+    78%{opacity:.85}
+    100%{width:6px;height:6px;margin:-3px;opacity:0;
+       box-shadow:30px 0 0 0 var(--burst),-30px 0 0 0 var(--burst)}
+  }
+  /* the same trade on the other axis, a beat later, so it reads as a weave */
+  @keyframes burstSwapDots2{
+    0%{width:4px;height:4px;margin:-2px;opacity:0;
+       box-shadow:0 -24px 0 0 var(--burst),0 24px 0 0 var(--burst)}
+    26%{opacity:.7}
+    100%{width:4px;height:4px;margin:-2px;opacity:0;
+       box-shadow:0 24px 0 0 var(--burst),0 -24px 0 0 var(--burst)}
+  }
+
+  [data-pin="doctor-prep"].is-tapped::after{ animation-name:burstGather; }
+  [data-pin="doctor-prep"].is-tapped::before{ animation-name:burstGather2; }
+  [data-pin="translate"].is-tapped::after{ animation-name:burstSwapDots; }
+  [data-pin="translate"].is-tapped::before{ animation-name:burstSwapDots2; }
+
   [data-pin].is-tapped::after{ animation-duration:.72s; animation-timing-function:cubic-bezier(.16,.84,.34,1); }
   [data-pin].is-tapped::before{ animation-duration:.8s; animation-delay:.08s; animation-timing-function:cubic-bezier(.16,.84,.34,1); }
+  /* Gathering is the one effect that travels inward, so it wants the opposite
+     curve: slow at the edges, quick as it converges. */
+  [data-pin="doctor-prep"].is-tapped::after{ animation-duration:.82s; animation-timing-function:cubic-bezier(.55,0,.75,.3); }
+  [data-pin="doctor-prep"].is-tapped::before{ animation-duration:.72s; animation-delay:.1s; }
+  [data-pin="translate"].is-tapped::after{ animation-duration:.86s; animation-timing-function:cubic-bezier(.5,0,.3,1); }
+  [data-pin="translate"].is-tapped::before{ animation-duration:.8s; animation-delay:.12s; }
 
   [data-pin="cardiology"].is-tapped::after,[data-pin="heart-failure"].is-tapped::after,
   [data-pin="chat"].is-tapped::after,[data-pin="practice"].is-tapped::after,
@@ -550,20 +621,8 @@
   [data-pin="infusion"].is-tapped::before,[data-pin="ent"].is-tapped::before,
   [data-pin="ophthalmology"].is-tapped::before{ animation-name:burstSparks2; }
 
-  [data-pin="translate"].is-tapped::after,[data-pin="review"].is-tapped::after,
-  [data-pin="medical-terminology"].is-tapped::after,[data-pin="userguide"].is-tapped::after,
-  [data-pin="resources"].is-tapped::after,[data-pin="directory"].is-tapped::after,
-  [data-pin="events"].is-tapped::after,[data-pin="updates"].is-tapped::after,
-  [data-pin="doctor-prep"].is-tapped::after,[data-pin="doctor-directory"].is-tapped::after,
-  [data-pin="providers"].is-tapped::after,[data-pin="find-doctor"].is-tapped::after,
-  [data-pin="medifind"].is-tapped::after,[data-pin="wave"].is-tapped::after{ animation-name:burstArc; }
-  [data-pin="translate"].is-tapped::before,[data-pin="review"].is-tapped::before,
-  [data-pin="medical-terminology"].is-tapped::before,[data-pin="userguide"].is-tapped::before,
-  [data-pin="resources"].is-tapped::before,[data-pin="directory"].is-tapped::before,
-  [data-pin="events"].is-tapped::before,[data-pin="updates"].is-tapped::before,
-  [data-pin="doctor-prep"].is-tapped::before,[data-pin="doctor-directory"].is-tapped::before,
-  [data-pin="providers"].is-tapped::before,[data-pin="find-doctor"].is-tapped::before,
-  [data-pin="medifind"].is-tapped::before,[data-pin="wave"].is-tapped::before{ animation-name:burstArc2; }
+  [data-pin="review"].is-tapped::after,[data-pin="medical-terminology"].is-tapped::after,[data-pin="userguide"].is-tapped::after,[data-pin="resources"].is-tapped::after,[data-pin="directory"].is-tapped::after,[data-pin="events"].is-tapped::after,[data-pin="updates"].is-tapped::after,[data-pin="doctor-directory"].is-tapped::after,[data-pin="providers"].is-tapped::after,[data-pin="find-doctor"].is-tapped::after,[data-pin="medifind"].is-tapped::after,[data-pin="wave"].is-tapped::after{ animation-name:burstArc; }
+  [data-pin="review"].is-tapped::before,[data-pin="medical-terminology"].is-tapped::before,[data-pin="userguide"].is-tapped::before,[data-pin="resources"].is-tapped::before,[data-pin="directory"].is-tapped::before,[data-pin="events"].is-tapped::before,[data-pin="updates"].is-tapped::before,[data-pin="doctor-directory"].is-tapped::before,[data-pin="providers"].is-tapped::before,[data-pin="find-doctor"].is-tapped::before,[data-pin="medifind"].is-tapped::before,[data-pin="wave"].is-tapped::before{ animation-name:burstArc2; }
 
   [data-pin="cardiology"]     .is-tapped{animation-name:pinHeartbeat;animation-duration:.86s}
   [data-pin="heart-failure"]  .is-tapped{animation-name:pinHeartbeat;animation-duration:1.02s}
@@ -592,14 +651,14 @@
   [data-pin="userguide"]      .is-tapped{animation-name:pinTurn;animation-duration:.74s}
   [data-pin="resources"]      .is-tapped{animation-name:pinTurn;animation-duration:.98s}
   [data-pin="directory"]      .is-tapped{animation-name:pinTurn;animation-duration:.66s}
-  [data-pin="translate"]      .is-tapped{animation-name:pinSwap;animation-duration:.78s}
+  [data-pin="translate"]      .is-tapped{animation-name:pinExchange;animation-duration:.86s}
   [data-pin="review"]         .is-tapped{animation-name:pinSwap;animation-duration:.96s}
   [data-pin="chat"]           .is-tapped{animation-name:pinBubble;animation-duration:.74s}
   [data-pin="updates"]        .is-tapped{animation-name:pinRing;animation-duration:.94s;transform-origin:50% 10%}
   [data-pin="events"]         .is-tapped{animation-name:pinFlip;animation-duration:.82s}
   [data-pin="practice"]       .is-tapped{animation-name:pinStamp;animation-duration:.7s}
   [data-pin="ethics"]         .is-tapped{animation-name:pinStamp;animation-duration:.88s}
-  [data-pin="doctor-prep"]    .is-tapped{animation-name:pinScan;animation-duration:.8s}
+  [data-pin="doctor-prep"]    .is-tapped{animation-name:pinIntake;animation-duration:.92s}
   [data-pin="doctor-directory"] .is-tapped{animation-name:pinScan;animation-duration:.96s}
   [data-pin="providers"]      .is-tapped{animation-name:pinScan;animation-duration:.72s}
   [data-pin="find-doctor"]    .is-tapped{animation-name:pinScan;animation-duration:.88s}
