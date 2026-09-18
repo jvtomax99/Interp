@@ -222,230 +222,315 @@
     #domainFolderIcon .medical-pin{width:100%;height:100%}
 
   /* ---- Each pin moves like the thing it depicts, when you tap its card ----
-     The artwork is a flat image, so there are no inner parts to animate: the
-     whole pin is the only thing that can move. That is the constraint these
-     are written against -- a heart can beat, a bell can swing, an ear can
-     turn toward you, but nothing can move independently inside the frame.
+     The artwork is a flat image, so nothing can move independently inside the
+     frame. Two things carry the weight instead:
 
-     Keyed off data-pin, which placeMedicalPin() writes. Icons that genuinely
-     depict the same object share a motion on purpose -- both heart pins beat,
-     because a second invented motion would be arbitrary, not distinct. */
+     1. ANTICIPATION. Every motion pulls back before it goes -- a heart draws
+        in before it thumps, a bone winds up before it knocks. The first pass
+        went straight to the peak, which is what made them read as a twitch
+        rather than a performance.
+     2. A BURST around the pin. The container's ::after is a second layer the
+        flat artwork cannot provide: a ring leaving a heartbeat, a halo off a
+        breath, sparks off the helix, a flash off the siren.
+
+     Both are keyed off data-pin, which placeMedicalPin() writes. */
 
   .medical-pin, .pin-sprite{
     transform-origin:50% 60%;
     will-change:transform;
   }
+  /* The burst needs somewhere to sit and room to overflow into. */
+  [data-pin]{ position:relative; }
+  [data-pin]::after{
+    content:''; position:absolute; left:50%; top:50%; border-radius:50%;
+    pointer-events:none; opacity:0; z-index:0;
+    --burst:var(--tile-color, var(--accent));
+  }
+  /* so the pin sits above its own burst */
+  [data-pin] .medical-pin, [data-pin] .pin-sprite{ position:relative; z-index:1; }
   .medical-pin.is-tapped, .pin-sprite.is-tapped{
     animation-duration:.62s;
-    animation-timing-function:cubic-bezier(.2,.8,.2,1);
+    animation-timing-function:cubic-bezier(.34,1.56,.64,1);   /* overshoot */
     animation-fill-mode:none;
-    animation-name:pinPop;                 /* the default, overridden below */
+    animation-name:pinPop;
   }
 
-  /* the fallback: a clean press-and-return */
   @keyframes pinPop{
-    0%{ transform:none; } 34%{ transform:scale(1.18); } 100%{ transform:none; }
+    0%{transform:none} 18%{transform:scale(.92)}
+    46%{transform:scale(1.22)} 100%{transform:none}
   }
 
-  /* Cardiology and heart failure -- a double thump, systole then diastole. */
-  @keyframes pinHeartbeat{
-    0%{transform:none} 14%{transform:scale(1.22)} 28%{transform:scale(1.02)}
-    42%{transform:scale(1.16)} 70%{transform:scale(.99)} 100%{transform:none}
+  /* ---- the motions ---- */
+
+  @keyframes pinHeartbeat{          /* draw in, thump, thump, settle */
+    0%{transform:none} 10%{transform:scale(.90)}
+    24%{transform:scale(1.30)} 38%{transform:scale(1.00)}
+    52%{transform:scale(1.20)} 72%{transform:scale(.97)} 100%{transform:none}
   }
-  /* Pulmonology -- one full breath, in and out, slower than everything else. */
-  @keyframes pinBreathe{
-    0%{transform:none} 45%{transform:scaleY(1.16) scaleX(1.06)}
-    75%{transform:scaleY(.96) scaleX(1.01)} 100%{transform:none}
+  @keyframes pinBreathe{            /* empty first, then fill */
+    0%{transform:none} 14%{transform:scaleY(.92) scaleX(1.03)}
+    52%{transform:scaleY(1.22) scaleX(1.08)}
+    80%{transform:scaleY(.97) scaleX(1.01)} 100%{transform:none}
   }
-  /* Genetics -- the helix turns over. */
-  @keyframes pinHelix{
-    0%{transform:perspective(220px) rotateY(0)}
-    100%{transform:perspective(220px) rotateY(360deg)}
+  @keyframes pinHelix{              /* wind back, then a full turn */
+    0%{transform:perspective(200px) rotateY(0) scale(1)}
+    14%{transform:perspective(200px) rotateY(-28deg) scale(.94)}
+    100%{transform:perspective(200px) rotateY(360deg) scale(1)}
   }
-  /* Neurology and developmental -- a thought arriving: pulse plus a lift. */
   @keyframes pinThink{
-    0%{transform:none;filter:none}
-    35%{transform:scale(1.14) translateY(-2px);filter:brightness(1.15)}
-    70%{transform:scale(1.02) translateY(0);filter:brightness(1.04)}
+    0%{transform:none;filter:none} 16%{transform:scale(.93) translateY(2px)}
+    46%{transform:scale(1.2) translateY(-5px);filter:brightness(1.22)}
+    74%{transform:scale(1.02) translateY(0);filter:brightness(1.05)}
     100%{transform:none;filter:none}
   }
-  /* Emergency -- the dash, with the siren flash on it. */
-  @keyframes pinSiren{
+  @keyframes pinSiren{              /* a real dash, not a jiggle */
     0%{transform:none;filter:none}
-    12%{transform:translateX(-3px) rotate(-4deg);filter:brightness(1.22)}
-    30%{transform:translateX(4px) rotate(3deg)}
-    48%{transform:translateX(-3px) rotate(-2deg);filter:brightness(1.18)}
-    68%{transform:translateX(2px) rotate(1deg)}
-    100%{transform:none;filter:none}
+    10%{transform:translateX(5px) rotate(5deg) scale(.95)}
+    26%{transform:translateX(-8px) rotate(-8deg) scale(1.1);filter:brightness(1.35)}
+    44%{transform:translateX(6px) rotate(6deg)}
+    60%{transform:translateX(-4px) rotate(-4deg);filter:brightness(1.2)}
+    78%{transform:translateX(2px) rotate(2deg)} 100%{transform:none;filter:none}
   }
-  /* Orthopedics -- rigid. It knocks rather than squashes. */
-  @keyframes pinKnock{
-    0%{transform:none} 20%{transform:rotate(-9deg)} 45%{transform:rotate(7deg)}
-    68%{transform:rotate(-3deg)} 100%{transform:none}
+  @keyframes pinKnock{              /* wind up, strike, ring out */
+    0%{transform:none} 14%{transform:rotate(9deg) scale(.96)}
+    34%{transform:rotate(-16deg)} 54%{transform:rotate(11deg)}
+    72%{transform:rotate(-6deg)} 88%{transform:rotate(2deg)} 100%{transform:none}
   }
-  /* ENT -- turning an ear toward the sound. */
-  @keyframes pinListen{
-    0%{transform:none} 38%{transform:rotate(-13deg) scale(1.08)}
-    72%{transform:rotate(4deg) scale(1.02)} 100%{transform:none}
+  @keyframes pinListen{             /* turn away, then lean in */
+    0%{transform:none} 16%{transform:rotate(7deg) scale(.96)}
+    50%{transform:rotate(-20deg) scale(1.14)}
+    76%{transform:rotate(6deg) scale(1.02)} 100%{transform:none}
   }
-  /* Ophthalmology -- a blink. */
-  @keyframes pinBlink{
-    0%{transform:none} 22%{transform:scaleY(.12) scaleX(1.04)}
-    44%{transform:scaleY(1.06)} 100%{transform:none}
+  @keyframes pinBlink{              /* widen, snap shut, open */
+    0%{transform:none} 14%{transform:scaleY(1.12)}
+    34%{transform:scaleY(.06) scaleX(1.08)}
+    56%{transform:scaleY(1.14) scaleX(.98)}
+    78%{transform:scaleY(.96)} 100%{transform:none}
   }
-  /* Pediatrics -- two hops, landing light. */
-  @keyframes pinHop{
-    0%{transform:none} 22%{transform:translateY(-8px) scale(1.04)}
-    42%{transform:translateY(0) scaleY(.94) scaleX(1.06)}
-    62%{transform:translateY(-4px) scale(1.02)}
-    82%{transform:translateY(0) scaleY(.98) scaleX(1.02)} 100%{transform:none}
+  @keyframes pinHop{                /* crouch, launch, land, bounce */
+    0%{transform:none} 12%{transform:translateY(3px) scaleY(.86) scaleX(1.12)}
+    34%{transform:translateY(-16px) scaleY(1.12) scaleX(.92)}
+    52%{transform:translateY(0) scaleY(.9) scaleX(1.1)}
+    70%{transform:translateY(-7px) scaleY(1.05) scaleX(.97)}
+    88%{transform:translateY(0) scaleY(.96) scaleX(1.04)} 100%{transform:none}
   }
-  /* Infusion -- a drop falls and the line settles. */
-  @keyframes pinDrip{
-    0%{transform:none} 30%{transform:translateY(-5px) scaleY(1.1)}
-    58%{transform:translateY(5px) scaleY(.9)}
-    78%{transform:translateY(0) scaleY(1.04)} 100%{transform:none}
+  @keyframes pinDrip{               /* gather, fall, splash, recover */
+    0%{transform:none} 18%{transform:translateY(-7px) scaleY(1.16) scaleX(.9)}
+    46%{transform:translateY(8px) scaleY(.82) scaleX(1.16)}
+    68%{transform:translateY(-3px) scaleY(1.08) scaleX(.96)}
+    86%{transform:translateY(1px) scaleY(.98)} 100%{transform:none}
   }
-  /* Pharmacy -- pills rattling in the bottle. */
   @keyframes pinRattle{
-    0%{transform:none} 15%{transform:translateX(-2.5px) rotate(-6deg)}
-    32%{transform:translateX(2.5px) rotate(6deg)}
-    49%{transform:translateX(-2px) rotate(-4deg)}
-    66%{transform:translateX(1.5px) rotate(3deg)}
-    83%{transform:translateX(-1px) rotate(-1deg)} 100%{transform:none}
+    0%{transform:none} 10%{transform:translateX(-4px) rotate(-9deg)}
+    26%{transform:translateX(4px) rotate(9deg)}
+    42%{transform:translateX(-3.5px) rotate(-7deg)}
+    58%{transform:translateX(3px) rotate(5deg)}
+    74%{transform:translateX(-2px) rotate(-3deg)}
+    88%{transform:translateX(1px) rotate(1deg)} 100%{transform:none}
   }
-  /* Laboratory -- the swirl of a sample being mixed. */
-  @keyframes pinSwirl{
-    0%{transform:none} 25%{transform:rotate(-11deg) translateX(-2px)}
-    50%{transform:rotate(0) translateY(-3px) scale(1.07)}
-    75%{transform:rotate(9deg) translateX(2px)} 100%{transform:none}
+  @keyframes pinSwirl{              /* a full stir, not a wiggle */
+    0%{transform:none}
+    20%{transform:rotate(-16deg) translate(-4px,2px) scale(.97)}
+    45%{transform:rotate(0) translate(0,-6px) scale(1.12)}
+    70%{transform:rotate(15deg) translate(4px,2px)}
+    88%{transform:rotate(-4deg)} 100%{transform:none}
   }
-  /* Oncology -- the ribbon lifts and settles. Deliberately gentle. */
-  @keyframes pinLift{
-    0%{transform:none} 40%{transform:translateY(-7px) scale(1.09)}
-    72%{transform:translateY(1px) scale(.99)} 100%{transform:none}
+  @keyframes pinLift{               /* dip, rise, float down */
+    0%{transform:none} 14%{transform:translateY(3px) scale(.95)}
+    46%{transform:translateY(-14px) scale(1.16)}
+    74%{transform:translateY(-3px) scale(1.03)} 100%{transform:none}
   }
-  /* Haematology and leukaemia -- a slow pulse through the blood. */
   @keyframes pinFlow{
-    0%{transform:none;filter:none}
-    30%{transform:scale(1.11);filter:brightness(1.1) saturate(1.2)}
-    60%{transform:scale(1.03);filter:brightness(1.03) saturate(1.08)}
+    0%{transform:none;filter:none} 16%{transform:scale(.94)}
+    46%{transform:scale(1.18);filter:brightness(1.16) saturate(1.3)}
+    72%{transform:scale(1.03);filter:brightness(1.05) saturate(1.1)}
     100%{transform:none;filter:none}
   }
-  /* Nephrology and urology -- the wobble of something filtering. */
   @keyframes pinWobble{
-    0%{transform:none} 22%{transform:skewX(-7deg) scale(1.05)}
-    48%{transform:skewX(5deg) scale(1.02)}
-    72%{transform:skewX(-2deg)} 100%{transform:none}
+    0%{transform:none} 14%{transform:skewX(6deg) scale(.97)}
+    36%{transform:skewX(-14deg) scale(1.1)}
+    58%{transform:skewX(10deg) scale(1.03)}
+    78%{transform:skewX(-4deg)} 100%{transform:none}
   }
-  /* Endocrinology -- a slow glow, the way a hormone acts. */
   @keyframes pinGlow{
-    0%{transform:none;filter:none}
-    45%{transform:scale(1.1);filter:brightness(1.28) saturate(1.25)}
+    0%{transform:none;filter:none} 18%{transform:scale(.95)}
+    52%{transform:scale(1.16);filter:brightness(1.4) saturate(1.35)}
     100%{transform:none;filter:none}
   }
-  /* Dermatology -- a shimmer across the surface. */
   @keyframes pinShimmer{
-    0%{filter:none;transform:none}
-    30%{filter:brightness(1.3) contrast(1.05);transform:scale(1.04)}
-    60%{filter:brightness(1.08);transform:scale(1.01)}
+    0%{filter:none;transform:none} 16%{transform:scale(.96)}
+    42%{filter:brightness(1.45) contrast(1.08);transform:scale(1.11)}
+    70%{filter:brightness(1.12);transform:scale(1.01)}
     100%{filter:none;transform:none}
   }
-  /* Surgery and anaesthesia -- one precise, unhurried movement. */
-  @keyframes pinPrecise{
-    0%{transform:none} 45%{transform:translateY(-4px) rotate(-3deg) scale(1.06)}
+  @keyframes pinPrecise{            /* one deliberate, controlled arc */
+    0%{transform:none} 20%{transform:translateY(2px) scale(.95)}
+    56%{transform:translateY(-9px) rotate(-6deg) scale(1.12)}
     100%{transform:none}
   }
-  /* Infectious disease -- a guard going up. */
-  @keyframes pinGuard{
-    0%{transform:none} 25%{transform:scale(1.16) rotate(-3deg)}
-    45%{transform:scale(1.04) rotate(2deg)}
-    65%{transform:scale(1.1) rotate(-1deg)} 100%{transform:none}
+  @keyframes pinGuard{              /* brace, then plant */
+    0%{transform:none} 16%{transform:scale(.92) rotate(4deg)}
+    42%{transform:scale(1.26) rotate(-5deg)}
+    62%{transform:scale(1.04) rotate(3deg)}
+    82%{transform:scale(1.12) rotate(-1deg)} 100%{transform:none}
   }
-  /* Anything that opens: a page, a book, a directory. */
-  @keyframes pinTurn{
-    0%{transform:perspective(220px) rotateY(0)}
-    50%{transform:perspective(220px) rotateY(-32deg) scale(1.05)}
-    100%{transform:perspective(220px) rotateY(0)}
+  @keyframes pinTurn{               /* a page actually turning over */
+    0%{transform:perspective(200px) rotateY(0)}
+    16%{transform:perspective(200px) rotateY(14deg) scale(.97)}
+    58%{transform:perspective(200px) rotateY(-58deg) scale(1.08)}
+    100%{transform:perspective(200px) rotateY(0)}
   }
-  /* Translate and review -- the two sides swap over. */
-  @keyframes pinSwap{
-    0%{transform:perspective(240px) rotateY(0)}
-    100%{transform:perspective(240px) rotateY(180deg)}
+  @keyframes pinSwap{               /* wind back, flip right over */
+    0%{transform:perspective(220px) rotateY(0) scale(1)}
+    14%{transform:perspective(220px) rotateY(-26deg) scale(.95)}
+    100%{transform:perspective(220px) rotateY(360deg) scale(1)}
   }
-  /* Chat -- the bounce of a message landing. */
   @keyframes pinBubble{
-    0%{transform:none} 26%{transform:scale(1.24) translateY(-3px)}
-    52%{transform:scale(.96) translateY(1px)}
-    78%{transform:scale(1.06)} 100%{transform:none}
+    0%{transform:none} 12%{transform:scale(.86)}
+    38%{transform:scale(1.34) translateY(-5px)}
+    60%{transform:scale(.94) translateY(2px)}
+    80%{transform:scale(1.08)} 100%{transform:none}
   }
-  /* Updates -- the bell swings from its top. */
-  @keyframes pinRing{
-    0%{transform:none} 16%{transform:rotate(-17deg)} 36%{transform:rotate(14deg)}
-    54%{transform:rotate(-9deg)} 72%{transform:rotate(5deg)}
-    88%{transform:rotate(-2deg)} 100%{transform:none}
+  @keyframes pinRing{               /* a bell that actually swings out */
+    0%{transform:none} 12%{transform:rotate(10deg)}
+    28%{transform:rotate(-24deg)} 44%{transform:rotate(19deg)}
+    60%{transform:rotate(-13deg)} 74%{transform:rotate(8deg)}
+    88%{transform:rotate(-3deg)} 100%{transform:none}
   }
-  /* Events -- a page of the calendar flips up. */
   @keyframes pinFlip{
-    0%{transform:perspective(220px) rotateX(0)}
-    50%{transform:perspective(220px) rotateX(-42deg) translateY(-2px)}
-    100%{transform:perspective(220px) rotateX(0)}
+    0%{transform:perspective(200px) rotateX(0)}
+    16%{transform:perspective(200px) rotateX(12deg) scale(.97)}
+    58%{transform:perspective(200px) rotateX(-68deg) translateY(-4px)}
+    100%{transform:perspective(200px) rotateX(0)}
   }
-  /* Practice and ethics -- a firm, settled confirmation. */
-  @keyframes pinStamp{
-    0%{transform:scale(1)} 30%{transform:scale(1.26) rotate(-5deg)}
-    55%{transform:scale(.95) rotate(2deg)} 100%{transform:none}
+  @keyframes pinStamp{              /* lift, strike down, rebound */
+    0%{transform:none} 22%{transform:scale(1.2) translateY(-6px) rotate(-7deg)}
+    44%{transform:scale(.88) translateY(3px) rotate(3deg)}
+    66%{transform:scale(1.1) translateY(-2px)} 100%{transform:none}
   }
-  /* Anything about finding someone -- a scan across, then focus. */
-  @keyframes pinScan{
-    0%{transform:none} 25%{transform:translateX(-4px) rotate(-6deg)}
-    55%{transform:translateX(4px) rotate(6deg)}
-    80%{transform:translateX(0) scale(1.12)} 100%{transform:none}
+  @keyframes pinScan{               /* sweep across, then lock on */
+    0%{transform:none} 18%{transform:translateX(-7px) rotate(-9deg) scale(.97)}
+    46%{transform:translateX(7px) rotate(9deg)}
+    70%{transform:translateX(0) rotate(0) scale(1.2)}
+    86%{transform:scale(.98)} 100%{transform:none}
   }
 
-  [data-pin="cardiology"]     .is-tapped{animation-name:pinHeartbeat;animation-duration:.78s}
-  [data-pin="heart-failure"]  .is-tapped{animation-name:pinHeartbeat;animation-duration:.92s}
-  [data-pin="pulmonology"]    .is-tapped{animation-name:pinBreathe;animation-duration:1.05s}
-  [data-pin="genetics"]       .is-tapped{animation-name:pinHelix;animation-duration:.95s}
-  [data-pin="neurology"]      .is-tapped{animation-name:pinThink;animation-duration:.72s}
-  [data-pin="developmental"]  .is-tapped{animation-name:pinThink;animation-duration:.88s}
-  [data-pin="emergency"]      .is-tapped{animation-name:pinSiren;animation-duration:.66s}
-  [data-pin="orthopedics"]    .is-tapped{animation-name:pinKnock;animation-duration:.6s}
-  [data-pin="ent"]            .is-tapped{animation-name:pinListen;animation-duration:.74s}
-  [data-pin="ophthalmology"]  .is-tapped{animation-name:pinBlink;animation-duration:.5s}
-  [data-pin="pediatrics"]     .is-tapped{animation-name:pinHop;animation-duration:.8s}
-  [data-pin="infusion"]       .is-tapped{animation-name:pinDrip;animation-duration:.82s}
-  [data-pin="pharmacy"]       .is-tapped{animation-name:pinRattle;animation-duration:.64s}
-  [data-pin="laboratory"]     .is-tapped{animation-name:pinSwirl;animation-duration:.8s}
-  [data-pin="oncology"]       .is-tapped{animation-name:pinLift;animation-duration:.86s}
-  [data-pin="hematology"]     .is-tapped{animation-name:pinFlow;animation-duration:.84s}
-  [data-pin="leukemia"]       .is-tapped{animation-name:pinFlow;animation-duration:.68s}
-  [data-pin="nephrology"]     .is-tapped{animation-name:pinWobble;animation-duration:.7s}
-  [data-pin="urology"]        .is-tapped{animation-name:pinWobble;animation-duration:.86s}
-  [data-pin="endocrinology"]  .is-tapped{animation-name:pinGlow;animation-duration:.9s}
-  [data-pin="dermatology"]    .is-tapped{animation-name:pinShimmer;animation-duration:.76s}
-  [data-pin="surgery-anesthesia"] .is-tapped{animation-name:pinPrecise;animation-duration:.6s}
-  [data-pin="infectious-disease"] .is-tapped{animation-name:pinGuard;animation-duration:.72s}
-  [data-pin="medical-terminology"] .is-tapped{animation-name:pinTurn;animation-duration:.78s}
-  [data-pin="userguide"]      .is-tapped{animation-name:pinTurn;animation-duration:.66s}
-  [data-pin="resources"]      .is-tapped{animation-name:pinTurn;animation-duration:.9s}
-  [data-pin="directory"]      .is-tapped{animation-name:pinTurn;animation-duration:.58s}
-  [data-pin="translate"]      .is-tapped{animation-name:pinSwap;animation-duration:.7s}
-  [data-pin="review"]         .is-tapped{animation-name:pinSwap;animation-duration:.88s}
-  [data-pin="chat"]           .is-tapped{animation-name:pinBubble;animation-duration:.66s}
-  [data-pin="updates"]        .is-tapped{animation-name:pinRing;animation-duration:.86s;transform-origin:50% 12%}
-  [data-pin="events"]         .is-tapped{animation-name:pinFlip;animation-duration:.74s}
-  [data-pin="practice"]       .is-tapped{animation-name:pinStamp;animation-duration:.62s}
-  [data-pin="ethics"]         .is-tapped{animation-name:pinStamp;animation-duration:.8s}
-  [data-pin="doctor-prep"]    .is-tapped{animation-name:pinScan;animation-duration:.72s}
-  [data-pin="doctor-directory"] .is-tapped{animation-name:pinScan;animation-duration:.88s}
-  [data-pin="providers"]      .is-tapped{animation-name:pinScan;animation-duration:.64s}
-  [data-pin="find-doctor"]    .is-tapped{animation-name:pinScan;animation-duration:.8s}
-  [data-pin="medifind"]       .is-tapped{animation-name:pinScan;animation-duration:.56s}
-  [data-pin="wave"]           .is-tapped{animation-name:pinListen;animation-duration:.6s}
+  /* ---- the burst layer: what the flat artwork cannot do ---- */
+
+  /* a ring leaving the pin */
+  @keyframes burstRing{
+    0%{width:8px;height:8px;margin:-4px;opacity:.85;
+       box-shadow:0 0 0 2px color-mix(in srgb,var(--burst) 70%,transparent)}
+    100%{width:76px;height:76px;margin:-38px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+  /* a soft halo swelling and fading */
+  @keyframes burstHalo{
+    0%{width:10px;height:10px;margin:-5px;opacity:0;
+       background:radial-gradient(circle,color-mix(in srgb,var(--burst) 60%,transparent),transparent 70%)}
+    40%{opacity:.7}
+    100%{width:84px;height:84px;margin:-42px;opacity:0;
+       background:radial-gradient(circle,color-mix(in srgb,var(--burst) 60%,transparent),transparent 70%)}
+  }
+  /* a fast bright flash */
+  @keyframes burstFlash{
+    0%{width:14px;height:14px;margin:-7px;opacity:.95;
+       background:radial-gradient(circle,#fff,color-mix(in srgb,var(--burst) 80%,transparent) 55%,transparent 72%)}
+    100%{width:64px;height:64px;margin:-32px;opacity:0;
+       background:radial-gradient(circle,#fff,color-mix(in srgb,var(--burst) 80%,transparent) 55%,transparent 72%)}
+  }
+  /* particles thrown outward */
+  @keyframes burstSparks{
+    0%{width:5px;height:5px;margin:-2.5px;opacity:1;border-radius:50%;
+       box-shadow:0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst),
+                  0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst)}
+    100%{width:3px;height:3px;margin:-1.5px;opacity:0;border-radius:50%;
+       box-shadow:0 -30px 0 0 var(--burst),26px -15px 0 0 var(--burst),26px 15px 0 0 var(--burst),
+                  0 30px 0 0 var(--burst),-26px 15px 0 0 var(--burst),-26px -15px 0 0 var(--burst)}
+  }
+  /* an arc sweeping round, for anything that turns or searches */
+  @keyframes burstArc{
+    0%{width:26px;height:26px;margin:-13px;opacity:0;border-radius:50%;
+       background:conic-gradient(from 0deg,color-mix(in srgb,var(--burst) 75%,transparent) 0 42deg,transparent 42deg);
+       transform:rotate(0)}
+    30%{opacity:.75}
+    100%{width:72px;height:72px;margin:-36px;opacity:0;border-radius:50%;
+       background:conic-gradient(from 0deg,color-mix(in srgb,var(--burst) 75%,transparent) 0 42deg,transparent 42deg);
+       transform:rotate(300deg)}
+  }
+
+  [data-pin].is-tapped::after{ animation-duration:.72s; animation-timing-function:cubic-bezier(.16,.84,.34,1); }
+
+  [data-pin="cardiology"].is-tapped::after,[data-pin="heart-failure"].is-tapped::after,
+  [data-pin="chat"].is-tapped::after,[data-pin="practice"].is-tapped::after,
+  [data-pin="ethics"].is-tapped::after,[data-pin="pediatrics"].is-tapped::after{ animation-name:burstRing; }
+
+  [data-pin="pulmonology"].is-tapped::after,[data-pin="neurology"].is-tapped::after,
+  [data-pin="developmental"].is-tapped::after,[data-pin="endocrinology"].is-tapped::after,
+  [data-pin="hematology"].is-tapped::after,[data-pin="leukemia"].is-tapped::after,
+  [data-pin="nephrology"].is-tapped::after,[data-pin="urology"].is-tapped::after{ animation-name:burstHalo; }
+
+  [data-pin="emergency"].is-tapped::after,[data-pin="dermatology"].is-tapped::after,
+  [data-pin="infectious-disease"].is-tapped::after,[data-pin="surgery-anesthesia"].is-tapped::after,
+  [data-pin="orthopedics"].is-tapped::after{ animation-name:burstFlash; }
+
+  [data-pin="genetics"].is-tapped::after,[data-pin="oncology"].is-tapped::after,
+  [data-pin="laboratory"].is-tapped::after,[data-pin="pharmacy"].is-tapped::after,
+  [data-pin="infusion"].is-tapped::after,[data-pin="ent"].is-tapped::after,
+  [data-pin="ophthalmology"].is-tapped::after{ animation-name:burstSparks; }
+
+  [data-pin="translate"].is-tapped::after,[data-pin="review"].is-tapped::after,
+  [data-pin="medical-terminology"].is-tapped::after,[data-pin="userguide"].is-tapped::after,
+  [data-pin="resources"].is-tapped::after,[data-pin="directory"].is-tapped::after,
+  [data-pin="events"].is-tapped::after,[data-pin="updates"].is-tapped::after,
+  [data-pin="doctor-prep"].is-tapped::after,[data-pin="doctor-directory"].is-tapped::after,
+  [data-pin="providers"].is-tapped::after,[data-pin="find-doctor"].is-tapped::after,
+  [data-pin="medifind"].is-tapped::after,[data-pin="wave"].is-tapped::after{ animation-name:burstArc; }
+
+  [data-pin="cardiology"]     .is-tapped{animation-name:pinHeartbeat;animation-duration:.86s}
+  [data-pin="heart-failure"]  .is-tapped{animation-name:pinHeartbeat;animation-duration:1.02s}
+  [data-pin="pulmonology"]    .is-tapped{animation-name:pinBreathe;animation-duration:1.15s}
+  [data-pin="genetics"]       .is-tapped{animation-name:pinHelix;animation-duration:1s}
+  [data-pin="neurology"]      .is-tapped{animation-name:pinThink;animation-duration:.8s}
+  [data-pin="developmental"]  .is-tapped{animation-name:pinThink;animation-duration:.96s}
+  [data-pin="emergency"]      .is-tapped{animation-name:pinSiren;animation-duration:.74s}
+  [data-pin="orthopedics"]    .is-tapped{animation-name:pinKnock;animation-duration:.7s}
+  [data-pin="ent"]            .is-tapped{animation-name:pinListen;animation-duration:.82s}
+  [data-pin="ophthalmology"]  .is-tapped{animation-name:pinBlink;animation-duration:.6s}
+  [data-pin="pediatrics"]     .is-tapped{animation-name:pinHop;animation-duration:.9s}
+  [data-pin="infusion"]       .is-tapped{animation-name:pinDrip;animation-duration:.9s}
+  [data-pin="pharmacy"]       .is-tapped{animation-name:pinRattle;animation-duration:.72s}
+  [data-pin="laboratory"]     .is-tapped{animation-name:pinSwirl;animation-duration:.88s}
+  [data-pin="oncology"]       .is-tapped{animation-name:pinLift;animation-duration:.94s}
+  [data-pin="hematology"]     .is-tapped{animation-name:pinFlow;animation-duration:.92s}
+  [data-pin="leukemia"]       .is-tapped{animation-name:pinFlow;animation-duration:.76s}
+  [data-pin="nephrology"]     .is-tapped{animation-name:pinWobble;animation-duration:.78s}
+  [data-pin="urology"]        .is-tapped{animation-name:pinWobble;animation-duration:.94s}
+  [data-pin="endocrinology"]  .is-tapped{animation-name:pinGlow;animation-duration:.98s}
+  [data-pin="dermatology"]    .is-tapped{animation-name:pinShimmer;animation-duration:.84s}
+  [data-pin="surgery-anesthesia"] .is-tapped{animation-name:pinPrecise;animation-duration:.68s}
+  [data-pin="infectious-disease"] .is-tapped{animation-name:pinGuard;animation-duration:.8s}
+  [data-pin="medical-terminology"] .is-tapped{animation-name:pinTurn;animation-duration:.86s}
+  [data-pin="userguide"]      .is-tapped{animation-name:pinTurn;animation-duration:.74s}
+  [data-pin="resources"]      .is-tapped{animation-name:pinTurn;animation-duration:.98s}
+  [data-pin="directory"]      .is-tapped{animation-name:pinTurn;animation-duration:.66s}
+  [data-pin="translate"]      .is-tapped{animation-name:pinSwap;animation-duration:.78s}
+  [data-pin="review"]         .is-tapped{animation-name:pinSwap;animation-duration:.96s}
+  [data-pin="chat"]           .is-tapped{animation-name:pinBubble;animation-duration:.74s}
+  [data-pin="updates"]        .is-tapped{animation-name:pinRing;animation-duration:.94s;transform-origin:50% 10%}
+  [data-pin="events"]         .is-tapped{animation-name:pinFlip;animation-duration:.82s}
+  [data-pin="practice"]       .is-tapped{animation-name:pinStamp;animation-duration:.7s}
+  [data-pin="ethics"]         .is-tapped{animation-name:pinStamp;animation-duration:.88s}
+  [data-pin="doctor-prep"]    .is-tapped{animation-name:pinScan;animation-duration:.8s}
+  [data-pin="doctor-directory"] .is-tapped{animation-name:pinScan;animation-duration:.96s}
+  [data-pin="providers"]      .is-tapped{animation-name:pinScan;animation-duration:.72s}
+  [data-pin="find-doctor"]    .is-tapped{animation-name:pinScan;animation-duration:.88s}
+  [data-pin="medifind"]       .is-tapped{animation-name:pinScan;animation-duration:.64s}
+  [data-pin="wave"]           .is-tapped{animation-name:pinListen;animation-duration:.68s}
 
   @media (prefers-reduced-motion: reduce){
     .medical-pin.is-tapped, .pin-sprite.is-tapped{animation:none !important}
+    [data-pin].is-tapped::after{animation:none !important;opacity:0 !important}
   }
   `;
   document.head.appendChild(medicalStyle);
@@ -468,8 +553,13 @@
     if(!card) return;
     const pinEl = card.querySelector('.medical-pin, .pin-sprite');
     if(!pinEl || pinEl.classList.contains('is-tapped')) return;
+    const holder = pinEl.closest('[data-pin]');
     pinEl.classList.add('is-tapped');
-    pinEl.addEventListener('animationend', () => pinEl.classList.remove('is-tapped'), { once:true });
+    if(holder) holder.classList.add('is-tapped');   // the burst rides on this
+    pinEl.addEventListener('animationend', () => {
+      pinEl.classList.remove('is-tapped');
+      if(holder) holder.classList.remove('is-tapped');
+    }, { once:true });
   }, { passive:true });
 
   function clearSheetBackground(ctx, width, height){
