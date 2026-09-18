@@ -2774,6 +2774,81 @@
   .results-head{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
   .results-summary h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 6px 0; }
   .results-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.6; max-width:420px; }
+  .practice-mark{ margin-left:auto; display:flex; align-items:center; padding-right:2px; }
+
+  /* ---------- HMH diamond motif ----------
+     The Hackensack Meridian mark is built from small squares set on point, in
+     four blues. This is that motif rebuilt in CSS -- a DECORATION that echoes
+     the identity, never a redrawing of the mark itself, which stays the real
+     asset and is never transformed (see the logo sweep further down).
+
+     Sampled straight off hmh-mark.png: #202060, #104090, #0070B0, #00B0E0. */
+  .hmh-dia{ display:inline-grid; grid-template-columns:repeat(2, 1fr); gap:var(--dg, 3px);
+    transform:rotate(45deg); flex-shrink:0; }
+  .hmh-dia i{ display:block; width:var(--ds, 9px); height:var(--ds, 9px); border-radius:1.5px; }
+  .hmh-dia i:nth-child(1){ background:#202060; }
+  .hmh-dia i:nth-child(2){ background:#104090; }
+  .hmh-dia i:nth-child(3){ background:#0070B0; }
+  .hmh-dia i:nth-child(4){ background:#00B0E0; }
+  @keyframes diaIn{
+    0%   { opacity:0; transform:scale(.2) translate(var(--fx,0), var(--fy,0)); }
+    62%  { opacity:1; transform:scale(1.12) translate(0,0); }
+    100% { opacity:1; transform:scale(1) translate(0,0); }
+  }
+  .hmh-dia.is-building i{ animation:diaIn .5s var(--ease) backwards; }
+  .hmh-dia.is-building i:nth-child(1){ --fx:-14px; --fy:-14px; animation-delay:.00s; }
+  .hmh-dia.is-building i:nth-child(2){ --fx: 14px; --fy:-14px; animation-delay:.07s; }
+  .hmh-dia.is-building i:nth-child(3){ --fx:-14px; --fy: 14px; animation-delay:.14s; }
+  .hmh-dia.is-building i:nth-child(4){ --fx: 14px; --fy: 14px; animation-delay:.21s; }
+  @keyframes diaBreathe{ 0%,100%{ opacity:.9; } 50%{ opacity:.55; } }
+  .hmh-dia.is-idle i:nth-child(2){ animation:diaBreathe 2.8s var(--ease) infinite .2s; }
+  .hmh-dia.is-idle i:nth-child(3){ animation:diaBreathe 2.8s var(--ease) infinite .9s; }
+
+  /* ---------- Exam seal ----------
+     Finishing a full simulation is the one thing here worth a stamp. The real
+     mark, lit rather than moved, over a ring that draws itself. */
+  .exam-seal{
+    position:relative; display:flex; flex-direction:column; align-items:center; gap:9px;
+    margin:18px auto 4px auto; padding:19px 22px 17px 22px; max-width:330px;
+    border-radius:var(--r-lg); text-align:center;
+    background:linear-gradient(160deg, #F7FAFE, var(--paper));
+    box-shadow:inset 0 0 0 1px var(--line-soft), var(--sh-1);
+    overflow:hidden;
+  }
+  html[data-theme="dark"] .exam-seal{ background:linear-gradient(160deg, #16213C, var(--paper)); }
+  .exam-seal-ring{
+    position:relative; width:96px; height:96px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:conic-gradient(var(--cyan) 0deg, var(--accent) 140deg, var(--navy) 260deg, var(--line-soft) 0deg);
+    animation:sealSweep 1.1s var(--ease) both;
+  }
+  @keyframes sealSweep{ from{ background:conic-gradient(var(--cyan) 0deg, var(--line-soft) 0deg); } }
+  .exam-seal-ring::after{ content:''; position:absolute; inset:5px; border-radius:50%; background:var(--paper); }
+  .exam-seal-mark{ position:relative; z-index:2; width:52px; }
+  .exam-seal-mark img{ width:100%; display:block; }
+  .exam-seal h4{ font-family:var(--sans); font-size:14px; font-weight:650; letter-spacing:-.02em; margin:0; }
+  .exam-seal p{ font-family:var(--sans); font-size:11.5px; line-height:1.5; color:var(--ink-soft); margin:0; }
+  .exam-seal .seal-score{ font-family:var(--sans); font-size:27px; font-weight:700; letter-spacing:-.035em; line-height:1.1; }
+  /* Motif corners, echoing the mark without repeating it. */
+  .exam-seal .hmh-dia{ position:absolute; opacity:.5; }
+  .exam-seal .hmh-dia.tl{ top:11px; left:13px; }
+  .exam-seal .hmh-dia.br{ bottom:11px; right:13px; }
+  .results-head.is-sealed{ display:block; margin-top:4px; }
+
+  /* A diamond riding the leading edge of the progress bar. */
+  .quiz-progress-track{ position:relative; }
+  .quiz-progress-fill{ background:linear-gradient(90deg, var(--cyan), var(--accent)); }
+  .quiz-pip{
+    position:absolute; top:50%; width:9px; height:9px; border-radius:2px;
+    background:var(--accent); transform:translate(-50%,-50%) rotate(45deg);
+    box-shadow:0 0 0 2px var(--paper); transition:left .34s var(--ease);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hmh-dia.is-building i, .hmh-dia.is-idle i, .exam-seal-ring{ animation:none !important; }
+    .quiz-pip{ transition:none; }
+  }
+
   /* ---------- This week, across the team ---------- */
   .board{ display:flex; flex-direction:column; gap:3px; margin-bottom:22px;
     padding:9px; border-radius:var(--r-md); background:var(--paper);
@@ -6188,6 +6263,15 @@ let quizFlags = [];             // exam mode: come back to this one
    if a question is reworded it starts fresh, which is the honest behaviour. */
 const PRACTICE_KEY = 'ih_practice_v1';
 let PRACTICE = {};
+
+/* The four-diamond motif, echoing the Hackensack Meridian mark. `building`
+   assembles it once; `idle` gives two of the four a slow breathe afterwards. */
+function hmhDiamonds(opts){
+  opts = opts || {};
+  const cls = ['hmh-dia', opts.building ? 'is-building' : '', opts.idle ? 'is-idle' : '', opts.extra || ''].filter(Boolean).join(' ');
+  const style = `--ds:${opts.size || 9}px; --dg:${opts.gap || 3}px;`;
+  return `<span class="${cls}" style="${style}" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`;
+}
 
 function questionId(q){
   const src = String(q.id || q.q || '');
@@ -11646,7 +11730,10 @@ function renderContent(){
       const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
       // Let the ring finish its sweep before the confetti, so the number
       // landing is the thing being celebrated rather than competing with it.
-      if(Math.round((correct/quizQuestions.length)*100) >= 80) setTimeout(()=> celebrateScore('.results-head'), 700);
+      // In exam mode the ring is gone and the seal is the thing being
+      // celebrated, so the confetti has to fall on that instead.
+      const host = content.querySelector('.exam-seal') ? '.exam-seal' : '.results-head';
+      if(Math.round((correct/quizQuestions.length)*100) >= 80) setTimeout(()=> celebrateScore(host), 700);
     }
     return;
   }
@@ -12946,7 +13033,7 @@ function renderFFDrill(){
   const risk = FF_RISKS[q.f.risk] || FF_RISKS.everyday;
 
   let html = `<div class="quiz-card">
-    <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span></div>
+    <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span><span class="quiz-pip" style="left:${pct}%"></span></div>
     <div class="quiz-meta">
       <span class="tag" style="color:${risk.color}; background:${risk.color}1F;">${escapeHtml(risk.label)}</span>
       <span class="quiz-counter">${ffIndex+1} / ${ffQuestions.length}</span>
@@ -13011,7 +13098,8 @@ function renderPractice(){
   const todayCount = (st.on === dayStamp()) ? (st.answered||0) : 0;
   const goalPct = Math.min(100, Math.round((todayCount / DAILY_GOAL) * 100));
 
-  let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span></div>`;
+  let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span>
+    <span class="practice-mark">${hmhDiamonds({ building:true, idle:true, size:10, gap:3 })}</span></div>`;
   html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>Original practice questions written to match CCHI's published domain structure \u2014 not real exam items, and not affiliated with or endorsed by CCHI. Study the official CCHI materials too.</span></div>`;
 
   // ---- today ----
@@ -13323,7 +13411,7 @@ function renderQuiz(){
   const entering = quizIndex !== lastEnteredQuizIndex;
   lastEnteredQuizIndex = quizIndex;
   html += `<div class="quiz-card${entering ? ' is-entering' : ''}">
-    <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span></div>
+    <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span><span class="quiz-pip" style="left:${pct}%"></span></div>
     <div class="quiz-meta">
       <span class="tag" style="color:${dm.color}; background:${dm.color}1F;">${escapeHtml(dm.name)}</span>
       ${(!exam && stat) ? `<span class="quiz-seen" title="your record on this question">seen ${stat.seen}\u00d7 \u00b7 ${stat.right} right</span>` : ''}
@@ -13596,16 +13684,44 @@ function renderQuizResults(){
       : '📘 Worth slowing down and reading the explanations before retrying — that\u2019s where the learning happens.';
 
   let html = `<div class="section-head"><h2>Practice Results</h2><span class="sub">${correct} of ${total} correct</span></div>`;
-  html += `<div class="results-head">
-    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" data-ring-colour="${ringColor}" data-pct="${pct}"
-         style="background:conic-gradient(${ringColor} 0deg, var(--line-soft) 0deg);">
-      <div class="score-ring-inner"><span class="score-pct">0%</span><span class="score-label">Score</span></div>
-    </div>
-    <div class="results-summary">
-      <h3>${correct} of ${total} correct</h3>
-      <p>${verdict}</p>
-    </div>
-  </div>`;
+
+  // A stamp, and only for a full simulation -- if every session earned one it
+  // would stop meaning anything by Thursday.
+  if(quizMode === 'exam'){
+    const when = new Date().toLocaleDateString(undefined, { day:'numeric', month:'long', year:'numeric' });
+    html += `<div class="exam-seal">
+      ${hmhDiamonds({ building:true, idle:true, size:7, gap:2.5, extra:'tl' })}
+      ${hmhDiamonds({ building:true, idle:true, size:7, gap:2.5, extra:'br' })}
+      <div class="exam-seal-ring">
+        <span class="exam-seal-mark logo-shine"><img src="./hmh-mark.png" alt=""></span>
+      </div>
+      <span class="seal-score">${pct}%</span>
+      <h4>Exam simulation completed</h4>
+      <p>${escapeHtml(whoAmI() || 'Interpreter')} \u00b7 ${total} questions \u00b7 ${when}<br>
+         Hackensack University Medical Center \u2014 Interpreter Services</p>
+    </div>`;
+  }
+  // The seal already carries the score, in brand colours, at the top of the
+  // page. Drawing the plain ring underneath it printed 75% twice -- which
+  // reads as a bug, not a flourish. Exam mode keeps the seal and the words;
+  // every other session keeps the ring it always had.
+  html += quizMode === 'exam'
+    ? `<div class="results-head is-sealed">
+        <div class="results-summary">
+          <h3>${correct} of ${total} correct</h3>
+          <p>${verdict}</p>
+        </div>
+      </div>`
+    : `<div class="results-head">
+        <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" data-ring-colour="${ringColor}" data-pct="${pct}"
+             style="background:conic-gradient(${ringColor} 0deg, var(--line-soft) 0deg);">
+          <div class="score-ring-inner"><span class="score-pct">0%</span><span class="score-label">Score</span></div>
+        </div>
+        <div class="results-summary">
+          <h3>${correct} of ${total} correct</h3>
+          <p>${verdict}</p>
+        </div>
+      </div>`;
 
   html += `<div class="domain-bars">`;
   CCHI_DOMAINS.forEach(d=>{
@@ -13957,7 +14073,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.0920';
+const BUILD_ID = 'b0918.0933';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
