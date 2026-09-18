@@ -2274,7 +2274,15 @@
   .section-head-sub h2{ font-size:18px; color:var(--ink-soft); }
   .section-head:first-child{ margin-top:4px; }
   .section-head h2{font-family:var(--serif); font-weight:400; font-size:23px; margin:0; letter-spacing:-.01em;}
-  .section-head .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+  /* Plex Sans, per the design system: serif is for quoted speech and the
+     interface is sans. 12/500 is the documented meta token, and it is also
+     the size that keeps the caption's footprint where mono 11 had it, so no
+     section header reflows. Mono gave tabular figures for free; a live count
+     like the chat total needs them declared. */
+  .section-head .sub{
+    font-family:var(--sans); font-size:12px; font-weight:500;
+    color:var(--ink-faint); font-variant-numeric:tabular-nums;
+  }
   .section-head::after{ content:""; flex:1; height:1px; background:var(--line); order:1; }
   /* Sits to the right of the rule rather than crowding the count. */
   .section-edit{
@@ -14077,7 +14085,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.1030';
+const BUILD_ID = 'b0918.1112';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
