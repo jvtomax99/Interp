@@ -67,6 +67,8 @@
     --cyan:#01B8E6;
     --danger:#C2485C;
     --danger-soft:#FBECEF;
+    --good:#2F7D5B;
+    --good-soft:#E7F5EE;
     --mono:'IBM Plex Mono', ui-monospace, monospace;
     --sans:'Inter', system-ui, -apple-system, sans-serif;
     --serif:'IBM Plex Serif', Georgia, serif;
@@ -111,10 +113,27 @@
     --cyan:#4FD8F5;
     --danger:#E17B8C;
     --danger-soft:#3A2029;
+    --good:#6FC79C;
+    --good-soft:#16302A;
     --sh-1:0 1px 2px rgba(0,0,0,0.3), 0 8px 20px -10px rgba(0,0,0,0.6);
     --sh-2:0 2px 4px rgba(0,0,0,0.35), 0 16px 32px -12px rgba(0,0,0,0.7);
     --sh-3:0 8px 16px rgba(0,0,0,0.4), 0 32px 64px -14px rgba(0,0,0,0.8);
   }
+  /* ---------- Emphasis inside a line ----------
+     The practice section reads well because each line carries one word that
+     means something while the rest stays quiet. Measured across the app, the
+     screens that feel flat are the ones where every word is the same ink:
+     Recent Updates was 100% default ink, False Friends 93% with 2% of its
+     33,000 characters above weight 500. These are that pattern, named by the
+     ROLE a word plays rather than the screen it sits on. */
+  .em-key   { font-weight:650; color:var(--ink); }
+  .em-good  { font-weight:650; color:var(--good); }
+  .em-bad   { font-weight:650; color:var(--danger); }
+  .em-accent{ font-weight:650; color:var(--accent); }
+  .em-quiet { font-weight:500; color:var(--ink-faint); }
+  .em-num   { font-weight:650; font-variant-numeric:tabular-nums; }
+  .em-flag  { font-size:10px; font-weight:650; letter-spacing:.09em; text-transform:uppercase; }
+
   *{box-sizing:border-box;}
   ::selection{background:var(--accent-soft); color:var(--ink);}
   /* Tabular figures keep the count badges and stats optically aligned instead
@@ -1405,7 +1424,7 @@
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
     font-family:var(--sans); font-weight:600; font-size:15px;
   }
-  .provider-name{ font-family:var(--sans); font-weight:600; font-size:15.5px; margin-bottom:4px; line-height:1.3; }
+  .provider-name{ font-family:var(--sans); font-weight:650; font-size:15.5px; margin-bottom:4px; line-height:1.3; }
   .provider-role-tag{ color:var(--accent); background:var(--accent-soft); }
   .provider-facility{ font-size:12.5px; color:var(--ink-soft); margin:0 0 9px 0; line-height:1.5; }
   .provider-phone{
@@ -1433,10 +1452,13 @@
   .ethics-org-tag.is-ncihc{ color:#2F5D62; background:#2F5D621F; }
   .ethics-org-tag.is-cchi{ color:#8C6E4F; background:#8C6E4F1F; }
   .ethics-practice-box{
-    display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--ink);
-    background:var(--bg-hi); border-radius:10px; padding:10px 12px; margin-top:10px; line-height:1.5;
+    display:flex; gap:9px; align-items:flex-start; font-size:12.5px;
+    color:color-mix(in srgb, var(--good) 62%, var(--ink));
+    background:var(--good-soft); border-radius:var(--r-sm); padding:9px 13px;
+    margin-top:9px; line-height:1.5;
   }
-  .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--accent); }
+  .ethics-practice-box b{ font-weight:650; color:var(--good); }
+  .ethics-practice-box svg{ width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--good); }
   .backfill-banner{
     display:flex; align-items:center; gap:12px;
     margin:4px 0 14px; padding:13px 14px; border-radius:13px;
@@ -2023,7 +2045,7 @@
     display:flex; align-items:baseline; gap:9px; padding:11px 14px; border-radius:10px;
     background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); margin-bottom:7px;
   }
-  .activity-row .activity-author{ font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink); flex-shrink:0; }
+  .activity-row .activity-author{ font-family:var(--sans); font-weight:650; font-size:13px; color:var(--ink); flex-shrink:0; }
   .activity-row .activity-summary{ font-size:13px; color:var(--ink-soft); flex:1; min-width:0; }
   .activity-row .activity-time{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); flex-shrink:0; white-space:nowrap; }
   .activity-delete{
@@ -3399,7 +3421,7 @@
   .ce-head{ display:flex; align-items:center; gap:9px; }
   .ce-src{
     font-family:var(--sans); font-size:9.5px; font-weight:700;
-    letter-spacing:.04em; text-transform:uppercase; color:#1E7F5C; background:#E7F5EE;
+    letter-spacing:.04em; text-transform:uppercase; color:var(--good); background:var(--good-soft);
     padding:4px 9px; border-radius:20px; min-width:0;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;
   }
@@ -3408,7 +3430,7 @@
     font-variant-numeric:tabular-nums; white-space:nowrap;
   }
   .ce-head .activity-delete{ margin-left:auto; }
-  .ce-title{ font-size:14.5px; font-weight:600; color:var(--ink); margin:0; line-height:1.45; }
+  .ce-title{ font-size:14.5px; font-weight:650; color:var(--ink); margin:0; line-height:1.45; }
   .ce-notes{ font-size:12.5px; color:var(--ink-soft); margin:0; line-height:1.55; }
   .ce-foot{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:2px; }
   .ce-by{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); }
@@ -4032,10 +4054,12 @@
   .ff-tag{ font-size:12px; color:var(--ink-soft); }
 
   .ff-gloss{ margin:9px 0 0; font-size:14px; line-height:1.5; color:var(--ink-soft); }
-  .ff-gloss .ff-looks{ color:var(--danger); font-weight:550; }
-  .ff-gloss .ff-means{ color:var(--ink); font-weight:550; }
+  .ff-gloss .ff-looks{ color:var(--danger); font-weight:650; }
+  /* What it actually means is the payload of the whole card. */
+  .ff-gloss .ff-means{ color:var(--good); font-weight:650; }
   .ff-say{ margin:6px 0 0; font-size:13px; line-height:1.5; color:var(--ink-soft); }
-  .ff-say b{ color:var(--ink); font-weight:550; }
+  .ff-say b{ color:var(--ink); font-weight:650; }
+  .ff-say b.ff-correct{ color:var(--accent); }
 
   /* Quoted human speech is the one place IBM Plex Serif is used in this app. */
   .ff-example{
@@ -4046,12 +4070,15 @@
     margin:0; font-family:var(--serif); font-size:15px; line-height:1.45;
     color:var(--ink); font-style:italic;
   }
-  .ff-line{ display:flex; gap:9px; margin-top:9px; font-size:13px; line-height:1.45; }
+  .ff-line{
+    display:flex; gap:9px; margin-top:9px; font-size:13px; line-height:1.45;
+    padding:6px 9px; border-radius:var(--r-sm);
+  }
   .ff-line-mark{ flex-shrink:0; width:17px; font-weight:650; }
   .ff-trap .ff-line-mark{ color:var(--danger); }
-  .ff-true .ff-line-mark{ color:#2F7D5B; }
-  .ff-trap{ color:var(--ink-soft); }
-  .ff-true{ color:var(--ink); }
+  .ff-true .ff-line-mark{ color:var(--good); }
+  .ff-trap{ color:color-mix(in srgb, var(--danger) 72%, var(--ink)); background:var(--danger-soft); }
+  .ff-true{ color:color-mix(in srgb, var(--good) 72%, var(--ink)); background:var(--good-soft); }
   .ff-note{
     margin:13px 0 0; padding-top:13px; border-top:1px solid var(--line-soft);
     font-size:12.5px; line-height:1.55; color:var(--ink-soft);
@@ -8148,6 +8175,26 @@ function updateActivityBadge(){
   if(changed) pulseBadge(badge);
 }
 
+// added / updated / deleted read very differently at a glance, and the term
+// in quotes is what the line is actually about.
+const ACT_VERB_ROLE = {
+  added:'good', imported:'good', restored:'good', attached:'good', merged:'good',
+  updated:'accent', refreshed:'accent', pinned:'accent',
+  deleted:'bad', removed:'bad'
+};
+function activityMarkup(summary){
+  return escapeHtml(summary || '')
+    .replace(/^([A-Za-z]+)/, (m)=>{
+      const role = ACT_VERB_ROLE[m.toLowerCase()];
+      return role ? `<span class="em-${role}">${m}</span>` : m;
+    })
+    // escapeHtml has already turned the quotes into entities by this point
+    .replace(/&quot;([^&]*)&quot;/g, '\u201c<span class="em-key">$1</span>\u201d')
+    // "... to Oncology" / "... in Cardiology" -- the domain is what the line
+    // is about, and it always lands at the end.
+    .replace(/\b(in|to|from) ([A-Z][\w&amp;;\/ -]*)$/, '$1 <span class="em-accent">$2</span>');
+}
+
 function renderActivityFeed(){
   const container = document.getElementById('activityFeed');
   if(!container) return;
@@ -8161,7 +8208,7 @@ function renderActivityFeed(){
     return `
       <div class="activity-row">
         <span class="activity-author">${escapeHtml(a.author||'Someone')}</span>
-        <span class="activity-summary">${escapeHtml(a.summary||'')}</span>
+        <span class="activity-summary">${activityMarkup(a.summary)}</span>
         <span class="activity-time" data-ts="${a.timestamp||''}" title="${a.timestamp ? escapeAttr(new Date(a.timestamp).toLocaleString()) : ''}">${time}</span>
         <button class="activity-delete" title="Remove this update" onclick="deleteActivity('${a.id}')">✕</button>
       </div>
@@ -13267,7 +13314,7 @@ function renderFFCards(){
           <span class="ff-tag">${escapeHtml(f.tag)}</span>
         </div>
         <p class="ff-gloss">Looks like <span class="ff-looks">${escapeHtml(f.looks)}</span>. Actually means <span class="ff-means">${escapeHtml(f.means)}</span>.</p>
-        <p class="ff-say">For <b>${escapeHtml(f.looks)}</b> you would say <b>${escapeHtml(f.say)}</b>.</p>
+        <p class="ff-say">For <b>${escapeHtml(f.looks)}</b> you would say <b class="ff-correct">${escapeHtml(f.say)}</b>.</p>
         <div class="ff-example">
           <p class="ff-heard">&ldquo;${escapeHtml(f.heard)}&rdquo;</p>
           <div class="ff-line ff-trap"><span class="ff-line-mark">&#10007;</span><span>${escapeHtml(f.trap)}</span></div>
@@ -14424,7 +14471,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.1455';
+const BUILD_ID = 'b0918.1618';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
