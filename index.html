@@ -2774,14 +2774,133 @@
   .results-head{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
   .results-summary h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 6px 0; }
   .results-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.6; max-width:420px; }
+  /* ---------- Study system ---------- */
+  .study-today{ display:flex; gap:11px; margin:0 0 15px 0; flex-wrap:wrap; }
+  .study-streak{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-width:106px; padding:13px 15px; border-radius:var(--r-md);
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .study-flame{ font-size:20px; line-height:1; }
+  .study-streak b{ font-family:var(--sans); font-size:23px; font-weight:700; letter-spacing:-.03em; line-height:1.15; }
+  .study-streak span:last-child{ font-size:11px; color:var(--ink-soft); }
+  .study-goal{
+    flex:1; min-width:190px; display:flex; flex-direction:column; gap:6px;
+    padding:13px 15px; border-radius:var(--r-md);
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
+  }
+  .study-goal-top{ display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--sans); font-size:12px; color:var(--ink-soft); }
+  .study-goal-top b{ font-size:15px; font-weight:650; color:var(--ink); }
+  .study-goal-track{ height:7px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
+  .study-goal-fill{ display:block; height:100%; border-radius:999px;
+    background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .4s var(--ease); }
+  .study-goal-note{ font-size:11.5px; color:var(--ink-faint); }
+
+  .study-modes{ display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:22px; }
+  .study-mode{
+    display:flex; flex-direction:column; gap:5px; text-align:left; cursor:pointer;
+    padding:14px 15px; border-radius:var(--r-md); border:1px solid var(--line);
+    background:var(--paper); font-family:var(--sans);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+    transition:transform .14s var(--ease), border-color .14s var(--ease);
+  }
+  .study-mode:disabled{ opacity:.5; cursor:default; }
+  .study-mode:not(:disabled):active{ transform:translateY(-2px); }
+  .study-mode.is-primary{ border-color:color-mix(in srgb, var(--accent-2) 55%, var(--line)); background:var(--accent-soft); }
+  .study-mode.is-exam{ grid-column:1 / -1; }
+  .sm-head{ display:flex; align-items:baseline; justify-content:space-between; gap:9px; }
+  .sm-head b{ font-size:14px; font-weight:650; letter-spacing:-.02em; color:var(--ink); }
+  .sm-count{ font-size:19px; font-weight:700; letter-spacing:-.03em; color:var(--accent); }
+  .study-mode.is-exam .sm-count{ color:var(--navy); }
+  .sm-note{ font-size:11.5px; line-height:1.45; color:var(--ink-soft); }
+  @media (max-width:520px){ .study-modes{ grid-template-columns:1fr; } }
+
+  .mastery-list{ display:flex; flex-direction:column; gap:13px; margin-bottom:22px; }
+  .mastery-row{ padding:12px 14px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); }
+  .mastery-top{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:7px; }
+  .mastery-name{ font-family:var(--sans); font-size:13px; font-weight:600; }
+  .mastery-weight{ font-family:var(--sans); font-size:11px; color:var(--ink-faint); flex-shrink:0; }
+  .mastery-track{ display:flex; height:8px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
+  .mastery-seg{ display:block; height:100%; transition:width .4s var(--ease); }
+  .mastery-seg.is-known{ background:#4E9E74; }
+  .mastery-seg.is-shaky{ background:#BFA05E; }
+  .mastery-foot{ display:flex; align-items:center; gap:11px; margin-top:7px;
+    font-family:var(--sans); font-size:11px; color:var(--ink-soft); flex-wrap:wrap; }
+  .mastery-go{ margin-left:auto; min-height:32px; padding:0 12px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--line); background:var(--bg-hi); color:var(--accent);
+    font-family:var(--sans); font-size:11.5px; font-weight:600; }
+  .mastery-go:hover{ background:var(--accent-soft); }
+
+  /* Exam mode */
+  .exam-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:13px;
+    padding:10px 14px; border-radius:var(--r-md); background:var(--navy); color:#EAF0FF; }
+  .exam-clock{ font-family:var(--mono, var(--sans)); font-size:19px; font-weight:700; letter-spacing:.02em;
+    font-variant-numeric:tabular-nums; }
+  .exam-clock.is-low{ color:#FFB4A2; }
+  .exam-note{ flex:1; min-width:150px; font-family:var(--sans); font-size:11.5px; opacity:.85; }
+  .exam-bar .btn{ min-height:34px; }
+  .exam-nav{ display:flex; gap:9px; flex-wrap:wrap; }
+  .quiz-option.picked{ border-color:var(--accent-2); background:var(--accent-soft); }
+  .quiz-seen{ font-family:var(--sans); font-size:11px; color:var(--ink-faint); }
+
+  /* Confidence */
+  .conf-ask{ margin-top:13px; padding:12px 14px; border-radius:var(--r-md);
+    background:var(--bg-hi); border:1px solid var(--line-soft); }
+  .conf-label{ display:block; font-family:var(--sans); font-size:12px; font-weight:600; margin-bottom:8px; }
+  .conf-row{ display:flex; gap:7px; flex-wrap:wrap; }
+  .conf-btn{ flex:1; min-width:96px; min-height:44px; border-radius:var(--r-sm); cursor:pointer;
+    border:1px solid var(--line); background:var(--paper);
+    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink); }
+  .conf-btn.is-sure:hover{ border-color:#4E9E74; color:#3F7D58; background:#EAF5EF; }
+  .conf-btn.is-unsure:hover{ border-color:#BFA05E; color:#8A6420; background:#FBF3E4; }
+  .conf-btn.is-guess:hover{ border-color:var(--danger); color:var(--danger); background:var(--danger-soft); }
+  .conf-btn:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .conf-note{ display:block; margin-top:8px; font-size:11px; line-height:1.45; color:var(--ink-faint); }
+  .conf-done{ margin-top:11px; font-family:var(--sans); font-size:12px; color:var(--ink-soft); }
+  .quiz-explain.is-right{ border-left:3px solid #4E9E74; }
+  .quiz-explain.is-wrong{ border-left:3px solid var(--danger); }
+
+  /* What to study next */
+  .next-up{ margin:18px 0 4px 0; padding:14px 16px; border-radius:var(--r-md);
+    background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent-2) 30%, var(--line)); }
+  .next-up > b{ font-family:var(--sans); font-size:13px; font-weight:650; }
+  .next-up ol{ margin:9px 0 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .next-up li{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .nu-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .nu-name{ font-family:var(--sans); font-size:12.5px; font-weight:600; }
+  .nu-why{ font-family:var(--sans); font-size:11.5px; color:var(--ink-soft); }
+
+  /* Review, now every question rather than only the misses */
+  .review-list{ display:flex; flex-direction:column; gap:8px; }
   .review-item{
-    background:var(--paper); border-radius:14px; padding:16px 18px; margin-bottom:10px;
+    background:var(--paper); border-radius:14px; margin-bottom:0; overflow:hidden;
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft);
   }
-  .review-q{ font-size:13.5px; font-weight:600; line-height:1.5; margin:0 0 8px 0; }
-  .review-line{ font-size:12.5px; line-height:1.6; color:var(--ink-soft); margin:2px 0; }
+  .review-head{ display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left;
+    padding:13px 15px; border:none; background:none; cursor:pointer; font-family:var(--sans); }
+  .review-mark{ flex-shrink:0; width:20px; height:20px; border-radius:50%; font-size:11px;
+    display:flex; align-items:center; justify-content:center; color:#fff; margin-top:1px; }
+  .review-item.is-right .review-mark{ background:#4E9E74; }
+  .review-item.is-wrong .review-mark{ background:var(--danger); }
+  .review-chev{ margin-left:auto; flex-shrink:0; display:flex; color:var(--ink-faint);
+    transition:transform .18s var(--ease); }
+  .review-chev svg{ width:16px; height:16px; }
+  .review-item.is-open .review-chev{ transform:rotate(180deg); }
+  .review-body{ display:none; padding:0 15px 14px 45px; }
+  .review-item.is-open .review-body{ display:block; }
+  .review-q{ font-size:13px; font-weight:600; line-height:1.5; margin:0; }
+  .review-line{ font-size:12.5px; line-height:1.6; color:var(--ink-soft); margin:5px 0 0 0; }
   .review-line.good{ color:#3F7D58; }
   .review-line.bad{ color:var(--danger); }
+  .review-line.why{ color:var(--ink-soft); }
+  .link-btn{ border:none; background:none; padding:0; cursor:pointer; color:var(--accent);
+    font-family:var(--sans); font-size:13.5px; font-weight:550; text-decoration:underline; text-underline-offset:2px; }
+  @media (prefers-reduced-motion:reduce){
+    .study-goal-fill, .mastery-seg, .review-chev{ transition:none; }
+    .study-mode{ transition:none; }
+  }
   @media (max-width:760px){
     .domain-bar-name{ width:auto; flex:1; font-size:12px; }
     .quiz-card{ padding:20px 18px 18px 18px; }
@@ -5897,6 +6016,130 @@ let quizAnswers = [];     // chosen option index per question
 let quizRevealed = false; // whether the current question's answer is shown
 let quizLength = 10;
 let quizDomainFilter = 'all';
+let quizMode = 'practice';      // 'practice' | 'review' | 'exam'
+let quizConfidence = [];        // 'sure' | 'unsure' | 'guess' per question
+let examEndsAt = 0;             // wall-clock deadline in exam mode
+let examTimer = null;
+let reviewOpen = {};            // which result rows are expanded
+let quizFlags = [];             // exam mode: come back to this one
+
+/* ---- What you personally know, question by question ------------------
+   The quiz used to be a fresh random draw every time: it never noticed that
+   you miss the same conflict-of-interest item every single session, and
+   never brought it back on purpose. That is the difference between taking
+   quizzes and studying.
+
+   Progress is per-device in localStorage, deliberately. Firestore would need
+   a rule published in the console before it worked at all -- the same trap
+   the contributor photos fell into -- and study progress is personal rather
+   than something the team shares. Quiz RESULTS still go to Firestore as
+   before, so the team-level history is unchanged.
+
+   Seed questions carry no id, so one is derived from the question text. That
+   survives reordering the bank, and stays stable as long as the wording does;
+   if a question is reworded it starts fresh, which is the honest behaviour. */
+const PRACTICE_KEY = 'ih_practice_v1';
+let PRACTICE = {};
+
+function questionId(q){
+  const src = String(q.id || q.q || '');
+  let h = 5381;
+  for(let i=0;i<src.length;i++) h = ((h*33) ^ src.charCodeAt(i)) >>> 0;
+  return 'q' + h.toString(36);
+}
+function loadPractice(){
+  try{ PRACTICE = JSON.parse(localStorage.getItem(PRACTICE_KEY) || '{}') || {}; }
+  catch(e){ PRACTICE = {}; }
+}
+function savePractice(){
+  try{ localStorage.setItem(PRACTICE_KEY, JSON.stringify(PRACTICE)); }catch(e){}
+}
+
+/* Intervals in days. Getting something right while admitting you guessed is
+   not the same as knowing it, so confidence -- not just right or wrong --
+   decides how far out the next sighting goes. A wrong answer always drops you
+   to the start of the ladder, whatever you claimed. */
+const PRACTICE_LADDER = [1, 3, 7, 16, 35, 90];
+const DAY = 86400000;
+
+function recordAnswer(q, correct, confidence){
+  const id = questionId(q);
+  const p = PRACTICE[id] || { seen:0, right:0, wrong:0, step:-1, due:0, last:0, streak:0 };
+  p.seen++;
+  p.last = Date.now();
+  p.d = q.d;
+  if(correct){
+    p.right++;
+    p.streak = (p.streak||0) + 1;
+    // A guess that happened to land moves you one rung at most, and an
+    // unsure-but-right answer never skips ahead.
+    if(confidence === 'guess')      p.step = Math.max(0, Math.min(p.step, 0));
+    else if(confidence === 'unsure') p.step = Math.min(p.step + 1, 2);
+    else                             p.step = Math.min(p.step + 1, PRACTICE_LADDER.length - 1);
+  }else{
+    p.wrong++;
+    p.streak = 0;
+    p.step = -1;                     // back to the bottom
+  }
+  const days = p.step < 0 ? 0 : PRACTICE_LADDER[p.step];
+  p.due = Date.now() + days * DAY;
+  PRACTICE[id] = p;
+  savePractice();
+}
+
+function practiceStatOf(q){ return PRACTICE[questionId(q)] || null; }
+function isDue(q, at){
+  const p = practiceStatOf(q);
+  if(!p) return false;                       // never seen is "new", not "due"
+  return (p.due || 0) <= (at || Date.now());
+}
+function dueQuestions(){ const now = Date.now(); return allQuestions().filter(q=> isDue(q, now)); }
+function shakyQuestions(){
+  // Anything you have got wrong more often than right, or missed last time.
+  return allQuestions().filter(q=>{
+    const p = practiceStatOf(q);
+    return p && (p.wrong > 0) && (p.streak < 2);
+  });
+}
+function unseenQuestions(){ return allQuestions().filter(q=> !practiceStatOf(q)); }
+
+/* Mastery, for the domain bars: a question counts as learned once it has been
+   answered right twice in a row without a guess behind it. */
+function domainMastery(){
+  const out = {};
+  CCHI_DOMAINS.forEach(d=> out[d.id] = { known:0, shaky:0, unseen:0, total:0 });
+  allQuestions().forEach(q=>{
+    const bucket = out[q.d]; if(!bucket) return;
+    bucket.total++;
+    const p = practiceStatOf(q);
+    if(!p) bucket.unseen++;
+    else if((p.streak||0) >= 2) bucket.known++;
+    else bucket.shaky++;
+  });
+  return out;
+}
+
+/* ---- Study streak ---------------------------------------------------- */
+const STREAK_KEY = 'ih_practice_streak_v1';
+function dayStamp(ts){ const d=new Date(ts||Date.now()); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
+function readStreak(){
+  try{ return JSON.parse(localStorage.getItem(STREAK_KEY) || 'null') || { days:0, last:'', answered:0, on:'' }; }
+  catch(e){ return { days:0, last:'', answered:0, on:'' }; }
+}
+function bumpStreak(){
+  const st = readStreak();
+  const today = dayStamp();
+  if(st.on !== today){ st.on = today; st.answered = 0; }
+  st.answered++;
+  if(st.last !== today){
+    const y = dayStamp(Date.now() - DAY);
+    st.days = (st.last === y) ? (st.days || 0) + 1 : 1;
+    st.last = today;
+  }
+  try{ localStorage.setItem(STREAK_KEY, JSON.stringify(st)); }catch(e){}
+  return st;
+}
+const DAILY_GOAL = 15;
 
 // Term review (spaced repetition) — a simple 5-box Leitner system. Missing
 // a card resets it to box 0 (review again soon); getting it right advances
@@ -12511,28 +12754,80 @@ function renderPractice(){
   if(quizActive) return renderQuiz();
   if(quizAnswers.length && quizQuestions.length && quizIndex >= quizQuestions.length) return renderQuizResults();
 
+  loadPractice();
   const pool = allQuestions();
-  const counts = {};
-  CCHI_DOMAINS.forEach(d=>{ counts[d.id] = pool.filter(q=>q.d===d.id).length; });
+  const due = dueQuestions().length;
+  const shaky = shakyQuestions().length;
+  const unseen = unseenQuestions().length;
+  const st = readStreak();
+  const todayCount = (st.on === dayStamp()) ? (st.answered||0) : 0;
+  const goalPct = Math.min(100, Math.round((todayCount / DAILY_GOAL) * 100));
 
   let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span></div>`;
-  html += `<p class="practice-intro">Multiple-choice practice built around the five domains of CCHI's CoreCHI written exam. Questions are drawn in the same proportions as the real exam, so your practice weights match where the marks actually are.</p>`;
-  html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>These are original practice questions written to match CCHI's published domain structure \u2014 they are not real exam items, and this app is not affiliated with or endorsed by CCHI. Always study from official CCHI materials as well.</span></div>`;
+  html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>Original practice questions written to match CCHI's published domain structure \u2014 not real exam items, and not affiliated with or endorsed by CCHI. Study the official CCHI materials too.</span></div>`;
 
+  // ---- today ----
+  html += `<div class="study-today">
+    <div class="study-streak">
+      <span class="study-flame">${st.days>0?'\ud83d\udd25':'\u25cb'}</span>
+      <b>${st.days||0}</b><span>day${(st.days||0)===1?'':'s'} in a row</span>
+    </div>
+    <div class="study-goal">
+      <div class="study-goal-top"><span>Today</span><b>${todayCount} / ${DAILY_GOAL}</b></div>
+      <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
+      <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'Goal met \u2014 anything more is a bonus.' : `${DAILY_GOAL-todayCount} more question${DAILY_GOAL-todayCount===1?'':'s'} to hit today's goal.`}</span>
+    </div>
+  </div>`;
+
+  // ---- the four ways in ----
+  html += `<div class="study-modes">
+    <button class="study-mode is-primary" onclick="requireName(()=>startStudy('review'))" ${due?'':'disabled'}>
+      <span class="sm-head"><b>Due for review</b><span class="sm-count">${due}</span></span>
+      <span class="sm-note">${due ? 'Questions your memory is about to drop. This is the highest-value thing you can do today.' : 'Nothing due right now \u2014 come back tomorrow.'}</span>
+    </button>
+    <button class="study-mode" onclick="requireName(()=>startStudy('weak'))" ${shaky?'':'disabled'}>
+      <span class="sm-head"><b>Drill my mistakes</b><span class="sm-count">${shaky}</span></span>
+      <span class="sm-note">${shaky ? 'Only the questions you have got wrong and not yet nailed twice.' : 'No mistakes on record yet.'}</span>
+    </button>
+    <button class="study-mode" onclick="requireName(()=>startStudy('new'))" ${unseen?'':'disabled'}>
+      <span class="sm-head"><b>Learn new</b><span class="sm-count">${unseen}</span></span>
+      <span class="sm-note">${unseen ? 'Questions you have never been asked.' : 'You have seen every question in the bank.'}</span>
+    </button>
+    <button class="study-mode is-exam" onclick="requireName(()=>startStudy('exam'))">
+      <span class="sm-head"><b>Exam simulation</b><span class="sm-count">100</span></span>
+      <span class="sm-note">Full length, exam-weighted, on the clock, no answers until the end \u2014 the closest thing here to the real sitting.</span>
+    </button>
+  </div>`;
+
+  // ---- where you stand ----
   html += renderMyProgress();
 
-  html += `<div class="domain-bars">`;
+  const mast = domainMastery();
+  html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
+  html += `<div class="mastery-list">`;
   CCHI_DOMAINS.forEach(d=>{
+    const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
+    const t = m.total || 1;
     html += `
-      <div class="domain-bar-row">
-        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
-        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${d.weight*4}%; background:${d.color};"></span></span>
-        <span class="domain-bar-pct">${d.weight}%</span>
-        <span class="domain-bar-pct" title="questions available">${counts[d.id]}q</span>
+      <div class="mastery-row">
+        <div class="mastery-top">
+          <span class="mastery-name">${escapeHtml(d.name)}</span>
+          <span class="mastery-weight" title="share of the real exam">${d.weight}%</span>
+        </div>
+        <span class="mastery-track">
+          <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
+          <span class="mastery-seg is-shaky" style="width:${(m.shaky/t)*100}%"></span>
+        </span>
+        <div class="mastery-foot">
+          <span>${m.known} learned</span><span>${m.shaky} shaky</span><span>${m.unseen} unseen</span>
+          <button class="mastery-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise</button>
+        </div>
       </div>`;
   });
   html += `</div>`;
 
+  // ---- the custom setup, kept for anyone who wants to choose ----
+  html += `<div class="section-head"><h2>Custom session</h2></div>`;
   html += `
     <div class="quiz-setup">
       <select id="quizLenSel">
@@ -12551,7 +12846,72 @@ function renderPractice(){
       <button class="btn btn-ghost" onclick="openAddQuestionModal()">+ Add question</button>
     </div>
   `;
+  if(Object.keys(PRACTICE).length){
+    html += `<p class="practice-intro" style="margin-top:14px;">Your question-by-question progress is kept on this device.
+      <button class="link-btn" onclick="resetPracticeProgress()">Reset it</button></p>`;
+  }
   return html;
+}
+
+function resetPracticeProgress(){
+  if(!confirm('Clear your practice progress on this device? Past session results are kept.')) return;
+  PRACTICE = {}; savePractice();
+  try{ localStorage.removeItem(STREAK_KEY); }catch(e){}
+  showToast('Practice progress cleared.');
+  renderContent();
+}
+
+/* One entry point for every way into a session, so the mode, the pool and the
+   length are decided in one place instead of three. */
+function startStudy(mode, domainId){
+  loadPractice();
+  let pool, len;
+  if(mode === 'review'){ pool = dueQuestions();   len = Math.min(20, pool.length); quizMode='review'; }
+  else if(mode === 'weak'){ pool = shakyQuestions(); len = Math.min(20, pool.length); quizMode='review'; }
+  else if(mode === 'new'){ pool = unseenQuestions(); len = Math.min(15, pool.length); quizMode='practice'; }
+  else if(mode === 'exam'){ pool = allQuestions(); len = Math.min(100, pool.length); quizMode='exam'; }
+  else { pool = allQuestions().filter(q=>q.d===domainId); len = Math.min(15, pool.length); quizMode='practice'; }
+
+  if(!pool.length){ showToast('Nothing to practise there right now.'); return; }
+
+  quizQuestions = (mode === 'exam'
+    ? buildWeightedQuiz(pool, len)
+    : shuffle(pool).slice(0, len)).map(shuffleOptions);
+  quizDomainFilter = domainId || 'all';
+  quizLength = quizQuestions.length;
+  quizIndex = 0; quizAnswers = []; quizConfidence = []; quizRevealed = false;
+  quizActive = true; reviewOpen = {};
+
+  if(quizMode === 'exam'){
+    // The real CoreCHI allows two hours for 100 questions. Scaled to the
+    // number actually drawn so a short exam-mode run keeps the same pressure.
+    examEndsAt = Date.now() + Math.round(quizQuestions.length * 72) * 1000;
+    startExamTimer();
+  }
+  renderContent();
+}
+
+function startExamTimer(){
+  clearInterval(examTimer);
+  examTimer = setInterval(()=>{
+    const el = document.getElementById('examClock');
+    if(!el){ return; }
+    const left = examEndsAt - Date.now();
+    if(left <= 0){
+      clearInterval(examTimer); examTimer = null;
+      showToast('Time is up \u2014 scoring what you have.');
+      finishQuiz();
+      return;
+    }
+    el.textContent = formatClock(left);
+    el.classList.toggle('is-low', left < 60000);
+  }, 1000);
+}
+function stopExamTimer(){ clearInterval(examTimer); examTimer = null; }
+function formatClock(ms){
+  const t = Math.max(0, Math.round(ms/1000));
+  const m = Math.floor(t/60), sec = t%60;
+  return `${m}:${String(sec).padStart(2,'0')}`;
 }
 
 // Randomizes the order of a question's options and remaps the correct index.
@@ -12646,14 +13006,26 @@ function renderQuiz(){
   const chosen = quizAnswers[quizIndex];
   const pct = Math.round((quizIndex / quizQuestions.length) * 100);
   const letters = ['A','B','C','D','E','F'];
+  const exam = quizMode === 'exam';
+  const stat = practiceStatOf(q);
 
-  let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${quizIndex+1} of ${quizQuestions.length}</span>
+  let html = `<div class="section-head"><h2>${exam ? 'Exam Simulation' : quizMode==='review' ? 'Review Session' : 'CoreCHI Practice'}</h2>
+    <span class="sub">${quizIndex+1} of ${quizQuestions.length}</span>
     <button class="head-action" onclick="exitQuiz()">Exit</button></div>`;
+
+  if(exam){
+    html += `<div class="exam-bar">
+      <span class="exam-clock" id="examClock">${formatClock(examEndsAt - Date.now())}</span>
+      <span class="exam-note">No answers until the end \u2014 flag anything you want to come back to.</span>
+      <button class="btn btn-ghost" onclick="finishQuiz()">Finish now</button>
+    </div>`;
+  }
 
   html += `<div class="quiz-card">
     <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span></div>
     <div class="quiz-meta">
       <span class="tag" style="color:${dm.color}; background:${dm.color}1F;">${escapeHtml(dm.name)}</span>
+      ${(!exam && stat) ? `<span class="quiz-seen" title="your record on this question">seen ${stat.seen}\u00d7 \u00b7 ${stat.right} right</span>` : ''}
       <span class="quiz-counter">Question ${quizIndex+1} / ${quizQuestions.length}</span>
     </div>
     <p class="quiz-question">${escapeHtml(q.q)}</p>
@@ -12664,19 +13036,44 @@ function renderQuiz(){
     if(quizRevealed){
       if(i === q.a) cls = 'correct';
       else if(i === chosen) cls = 'wrong';
-    }
+    }else if(exam && chosen === i) cls = 'picked';
     html += `<button class="quiz-option ${cls}" ${quizRevealed?'disabled':''} onclick="answerQuiz(${i})">
       <span class="opt-letter">${letters[i]}</span><span>${escapeHtml(opt)}</span>
     </button>`;
   });
   html += `</div>`;
 
-  if(quizRevealed){
-    const right = chosen === q.a;
-    html += `<div class="quiz-explain"><b>${right ? 'Correct.' : 'Not quite.'}</b> ${escapeHtml(q.e)}</div>`;
-    html += `<div class="quiz-actions">
-      <button class="btn btn-primary" onclick="nextQuestion()">${quizIndex+1 < quizQuestions.length ? 'Next question' : 'See results'}</button>
+  if(exam){
+    html += `<div class="quiz-actions exam-nav">
+      <button class="btn btn-ghost" onclick="prevQuestion()" ${quizIndex===0?'disabled':''}>Back</button>
+      <button class="btn btn-ghost" onclick="flagQuestion()">${quizFlags[quizIndex]?'\u2691 Flagged':'\u2690 Flag'}</button>
+      <button class="btn btn-primary" onclick="nextQuestion()">${quizIndex+1 < quizQuestions.length ? 'Next' : 'Finish'}</button>
     </div>`;
+  }else if(quizRevealed){
+    const right = chosen === q.a;
+    html += `<div class="quiz-explain ${right?'is-right':'is-wrong'}"><b>${right ? 'Correct.' : 'Not quite.'}</b> ${escapeHtml(q.e)}</div>`;
+    // Confidence is asked AFTER the answer is shown, so it records how it felt
+    // going in rather than being a second guess at the answer.
+    if(quizConfidence[quizIndex] == null){
+      html += `<div class="conf-ask">
+        <span class="conf-label">How sure were you?</span>
+        <div class="conf-row">
+          <button class="conf-btn is-sure"   onclick="rateConfidence('sure')">I knew it</button>
+          <button class="conf-btn is-unsure" onclick="rateConfidence('unsure')">Fairly sure</button>
+          <button class="conf-btn is-guess"  onclick="rateConfidence('guess')">I guessed</button>
+        </div>
+        <span class="conf-note">This sets when the question comes back. A lucky guess returns tomorrow; something you knew waits weeks.</span>
+      </div>`;
+    }else{
+      const next = practiceStatOf(q);
+      const when = next && next.due > Date.now()
+        ? `Back in ${Math.max(1, Math.round((next.due - Date.now())/DAY))} day${Math.round((next.due-Date.now())/DAY)===1?'':'s'}.`
+        : 'Coming back in this session\u2019s next review.';
+      html += `<div class="conf-done">${when}</div>`;
+      html += `<div class="quiz-actions">
+        <button class="btn btn-primary" onclick="nextQuestion()">${quizIndex+1 < quizQuestions.length ? 'Next question' : 'See results'}</button>
+      </div>`;
+    }
   }
   html += `</div>`;
   return html;
@@ -12685,17 +13082,61 @@ function renderQuiz(){
 function answerQuiz(i){
   if(quizRevealed) return;
   quizAnswers[quizIndex] = i;
+  if(quizMode === 'exam'){ renderContent(); return; }   // no feedback in exam mode
   quizRevealed = true;
   renderContent();
 }
 
+function rateConfidence(level){
+  const q = quizQuestions[quizIndex];
+  quizConfidence[quizIndex] = level;
+  recordAnswer(q, quizAnswers[quizIndex] === q.a, level);
+  bumpStreak();
+  renderContent();
+}
+
+function flagQuestion(){
+  quizFlags[quizIndex] = !quizFlags[quizIndex];
+  renderContent();
+}
+
+function prevQuestion(){
+  if(quizIndex === 0) return;
+  quizIndex--; quizRevealed = false;
+  renderContent();
+}
+
 function nextQuestion(){
+  // Practice mode with no confidence given (someone tapped straight past it)
+  // still has to be recorded, or the schedule silently learns nothing.
+  if(quizMode !== 'exam' && quizRevealed && quizConfidence[quizIndex] == null){
+    const q = quizQuestions[quizIndex];
+    quizConfidence[quizIndex] = 'unsure';
+    recordAnswer(q, quizAnswers[quizIndex] === q.a, 'unsure');
+    bumpStreak();
+  }
   quizIndex++;
   quizRevealed = false;
-  if(quizIndex >= quizQuestions.length){
-    quizActive = false; // triggers the results view
-    saveQuizResult();
+  if(quizIndex >= quizQuestions.length) return finishQuiz();
+  renderContent();
+}
+
+function finishQuiz(){
+  stopExamTimer();
+  if(quizMode === 'exam'){
+    // Exam mode withholds feedback, so nothing has been recorded yet. Score
+    // the whole paper now; an unanswered question counts as wrong, as it does
+    // in the real thing.
+    quizQuestions.forEach((q,i)=>{
+      if(quizConfidence[i] != null) return;
+      quizConfidence[i] = 'unsure';
+      recordAnswer(q, quizAnswers[i] === q.a, quizAnswers[i] === q.a ? 'unsure' : 'guess');
+      bumpStreak();
+    });
   }
+  quizIndex = quizQuestions.length;
+  quizActive = false;
+  saveQuizResult();
   renderContent();
 }
 
@@ -12731,7 +13172,12 @@ async function saveQuizResult(){
 }
 
 function exitQuiz(){
+  stopExamTimer();
   quizActive = false;
+  quizMode = 'practice';
+  quizConfidence = [];
+  quizFlags = [];
+  reviewOpen = {};
   quizQuestions = [];
   quizAnswers = [];
   quizIndex = 0;
@@ -12785,25 +13231,88 @@ function renderQuizResults(){
   });
   html += `</div>`;
 
-  const missed = quizQuestions.map((q,i)=>({q,i})).filter(({q,i})=> quizAnswers[i] !== q.a);
-  if(missed.length){
-    html += `<div class="section-head"><h2>Review</h2><span class="sub">${missed.length} missed</span></div>`;
-    missed.forEach(({q,i})=>{
-      const letters = ['A','B','C','D','E','F'];
-      const yours = quizAnswers[i] != null ? `${letters[quizAnswers[i]]}. ${q.o[quizAnswers[i]]}` : 'No answer';
-      html += `<div class="review-item">
-        <p class="review-q">${escapeHtml(q.q)}</p>
-        <p class="review-line bad">Your answer: ${escapeHtml(yours)}</p>
-        <p class="review-line good">Correct: ${letters[q.a]}. ${escapeHtml(q.o[q.a])}</p>
-        <p class="review-line">${escapeHtml(q.e)}</p>
-      </div>`;
-    });
+  // Where the marks actually were: your accuracy against each domain's share
+  // of the real exam, so a weak spot in a 25% domain reads louder than the
+  // same gap in a 13% one.
+  const gaps = CCHI_DOMAINS.map(d=>{
+    const st = dom[d.id];
+    if(!st || !st.total) return null;
+    const acc = st.right / st.total;
+    return { d, acc, cost: (1 - acc) * d.weight };
+  }).filter(Boolean).sort((a,b)=> b.cost - a.cost);
+
+  if(gaps.length && gaps[0].cost > 0){
+    html += `<div class="next-up">
+      <b>What to study next</b>
+      <ol>${gaps.slice(0,3).filter(g=>g.cost>0).map(g=>
+        `<li><span class="nu-dot" style="background:${g.d.color}"></span>
+          <span class="nu-name">${escapeHtml(g.d.name)}</span>
+          <span class="nu-why">${Math.round(g.acc*100)}% right, and it is ${g.d.weight}% of the exam</span>
+          <button class="mastery-go" onclick="startStudy('domain','${g.d.id}')">Practise</button></li>`).join('')}
+      </ol>
+    </div>`;
   }
 
-  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px;">
+  // Every question, not only the ones missed -- getting something right by
+  // luck is worth reading the explanation for too. Misses are open by default.
+  const letters = ['A','B','C','D','E','F'];
+  const missedCount = quizQuestions.filter((q,i)=> quizAnswers[i] !== q.a).length;
+  html += `<div class="section-head"><h2>Every question</h2><span class="sub">${missedCount} missed</span>
+    <button class="head-action" onclick="toggleAllReview()">Expand all</button></div>`;
+  html += `<div class="review-list">`;
+  quizQuestions.forEach((q,i)=>{
+    const right = quizAnswers[i] === q.a;
+    const open = reviewOpen[i] !== undefined ? reviewOpen[i] : !right;
+    const yours = quizAnswers[i] != null ? `${letters[quizAnswers[i]]}. ${q.o[quizAnswers[i]]}` : 'No answer';
+    const dm2 = domainMeta(q.d);
+    html += `<div class="review-item ${right?'is-right':'is-wrong'} ${open?'is-open':''}">
+      <button class="review-head" onclick="toggleReview(${i})">
+        <span class="review-mark">${right?'\u2713':'\u2717'}</span>
+        <span class="review-q">${escapeHtml(q.q)}</span>
+        <span class="review-chev">${ICON_CHEVRON_DOWN}</span>
+      </button>
+      <div class="review-body">
+        <span class="tag" style="color:${dm2.color}; background:${dm2.color}1F;">${escapeHtml(dm2.name)}</span>
+        ${right ? '' : `<p class="review-line bad">You chose: ${escapeHtml(yours)}</p>`}
+        <p class="review-line good">Correct: ${letters[q.a]}. ${escapeHtml(q.o[q.a])}</p>
+        <p class="review-line why">${escapeHtml(q.e)}</p>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px; flex-wrap:wrap;">
     <button class="btn btn-primary" onclick="exitQuiz()">Back to practice</button>
+    ${missedCount ? `<button class="btn btn-ghost" onclick="retryMissed()">Retry the ${missedCount} I missed</button>` : ''}
   </div>`;
   return html;
+}
+
+function toggleReview(i){
+  const right = quizAnswers[i] === quizQuestions[i].a;
+  const cur = reviewOpen[i] !== undefined ? reviewOpen[i] : !right;
+  reviewOpen[i] = !cur;
+  renderContent();
+}
+function toggleAllReview(){
+  const anyClosed = quizQuestions.some((q,i)=>{
+    const right = quizAnswers[i] === q.a;
+    return (reviewOpen[i] !== undefined ? reviewOpen[i] : !right) === false;
+  });
+  quizQuestions.forEach((q,i)=> reviewOpen[i] = anyClosed);
+  renderContent();
+}
+
+/* Straight back into the ones you got wrong, while the explanation is still
+   fresh. This is the loop that actually moves a score. */
+function retryMissed(){
+  const missed = quizQuestions.filter((q,i)=> quizAnswers[i] !== q.a);
+  if(!missed.length) return;
+  quizQuestions = shuffle(missed).map(shuffleOptions);
+  quizMode = 'review';
+  quizIndex = 0; quizAnswers = []; quizConfidence = []; quizFlags = [];
+  quizRevealed = false; quizActive = true; reviewOpen = {};
+  renderContent();
 }
 
 /* A live cardiac trace with a pulsing dot — hospital character that still
@@ -13032,7 +13541,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0917.2135';
+const BUILD_ID = 'b0918.0845';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
