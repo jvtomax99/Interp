@@ -2511,22 +2511,27 @@
 
   /* ---------- CCHI practice ---------- */
   .practice-intro{ max-width:760px; font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 26px 0; }
-  /* It has to be on the page, but it was the loudest thing on it -- a
-     four-line cream block sitting above everything anyone came here to do.
-     Now it is one quiet line that opens. */
-  .practice-note{ max-width:760px; margin:0 0 17px 0; }
-  .practice-note summary{
+  /* The standing caution a tool has to carry. It has to be on the page, but
+     as a four-line cream block it was the loudest thing on it, sitting above
+     everything anyone came to do. One quiet line that opens.
+
+     Used by Practice AND Translate -- it was called .practice-disclaimer when
+     only Practice styled it, which is exactly why deleting it looked safe. */
+  .tool-note{ max-width:760px; margin:0 0 17px 0; }
+  .tool-note summary{
     display:flex; align-items:center; gap:6px; cursor:pointer; list-style:none;
     font-family:var(--sans); font-size:11.5px; font-weight:500; color:var(--ink-faint);
     padding:3px 0; min-height:44px;
   }
-  .practice-note summary::-webkit-details-marker{ display:none; }
-  .practice-note summary svg{ width:13px; height:13px; flex-shrink:0; color:#B8923E; }
-  .practice-note summary em{
-    font-style:normal; margin-left:auto; font-size:10.5px; color:var(--ink-faint); opacity:.8;
+  .tool-note summary::-webkit-details-marker{ display:none; }
+  .tool-note summary svg{ width:13px; height:13px; flex-shrink:0; color:#B8923E; }
+  .tool-note summary span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tool-note summary em{
+    font-style:normal; margin-left:auto; flex-shrink:0;
+    font-size:10.5px; color:var(--ink-faint); opacity:.8;
   }
-  .practice-note[open] summary em{ visibility:hidden; }
-  .practice-note p{
+  .tool-note[open] summary em{ visibility:hidden; }
+  .tool-note p{
     margin:6px 0 0 0; padding:13px; border-radius:var(--r-sm);
     background:#FBF3E3; box-shadow:inset 0 0 0 1px #E8D7B0;
     font-size:11.5px; line-height:1.55; color:#7A5D28;
@@ -3487,10 +3492,45 @@
   /* ---------- Translate lookup ---------- */
   .tr-panel{ max-width:760px; }
   .tr-box{
-    background:var(--paper); border-radius:18px; padding:20px;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); margin-bottom:18px;
+    background:var(--paper); border-radius:var(--r-lg); padding:17px;
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+    margin-bottom:17px;
   }
-  .tr-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .tr-row{ display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+
+  /* The language pair reads as one control -- a from/to strip with the swap
+     sitting between the two things it swaps -- rather than two dropdowns and
+     a loose button. */
+  .tr-langs{
+    flex-wrap:nowrap; gap:6px; padding:5px; margin-bottom:13px;
+    border-radius:var(--r-md); background:var(--bg-hi);
+    box-shadow:inset 0 0 0 1px var(--line-soft);
+  }
+
+  /* The one field most sessions ever touch, so it gets the room. */
+  .tr-ask input[type=text]{ flex:1 1 220px; font-size:16px; }
+  .tr-go{ flex:0 0 auto; }
+  @media (max-width:560px){ .tr-go{ flex:1 1 100%; } }
+
+  /* The sentence field is the accuracy trick, but it is not needed every
+     time -- as a permanent second field plus a paragraph of explanation it
+     made a two-field form out of a one-field task. */
+  .tr-more{ margin-top:13px; }
+  .tr-more summary{
+    display:flex; align-items:center; gap:6px; cursor:pointer; list-style:none;
+    min-height:44px; font-family:var(--sans); font-size:12.5px; font-weight:550; color:var(--accent);
+  }
+  .tr-more summary::-webkit-details-marker{ display:none; }
+  .tr-more summary::before{
+    content:''; width:13px; height:13px; flex-shrink:0;
+    background:currentColor; -webkit-mask:var(--chev-mask) center/contain no-repeat;
+    mask:var(--chev-mask) center/contain no-repeat;
+    transition:transform .18s var(--ease);
+  }
+  .tr-more[open] summary::before{ transform:rotate(90deg); }
+  .tr-more summary span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tr-more summary em{ font-style:normal; font-weight:500; color:var(--ink-faint); flex-shrink:0; margin-left:auto; }
+  @media (prefers-reduced-motion:reduce){ .tr-more summary::before{ transition:none; } }
   .tr-row input[type=text]{
     flex:1; min-width:200px; padding:13px 16px; border:1px solid var(--line); border-radius:12px;
     font-family:var(--sans); font-size:15px; background:var(--bg-hi); color:var(--ink);
@@ -3510,9 +3550,18 @@
   @media (max-width:900px), (pointer: coarse){
     .tr-row select{ flex:1 1 0; min-width:0; }
   }
+  /* After `.tr-row select`, not before: same specificity, so order decides. */
+  .tr-langs select{
+    flex:1 1 0; min-width:0; text-align:center; text-align-last:center;
+    border:none; background:transparent; box-shadow:none;
+    font-weight:550; letter-spacing:-.01em; color:var(--ink);
+  }
+  .tr-langs select:focus-visible{ outline:2px solid var(--accent-2); outline-offset:-2px; border-radius:10px; }
+
   .tr-swap{
-    border:none; background:var(--accent-soft); color:var(--accent); cursor:pointer;
-    width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    border:none; background:var(--paper); color:var(--accent); cursor:pointer;
+    box-shadow:inset 0 0 0 1px var(--line-soft), 0 1px 2px rgba(20,43,67,0.06);
+    width:38px; height:38px; border-radius:999px; display:flex; align-items:center; justify-content:center;
     transition:transform .18s var(--ease), background .15s var(--ease); flex-shrink:0;
   }
   .tr-swap:hover{ background:var(--accent); color:#fff; }
@@ -3543,7 +3592,32 @@
     font-family:var(--sans); font-size:21px; font-weight:700; letter-spacing:-.01em;
     color:var(--ink); margin:0 0 8px 0; line-height:1.3;
   }
-  .tr-note{ font-size:12.5px; color:var(--ink-soft); line-height:1.6; margin:8px 0 0 0; }
+  .tr-note{ font-size:12px; color:var(--ink-soft); line-height:1.55; margin:9px 0 0 0; }
+
+  /* Shown until the first search. The order this tool works in is its whole
+     point and it was only ever stated in the header caption. */
+  .tr-how{ list-style:none; counter-reset:trstep; margin:0; padding:0; max-width:760px; }
+  .tr-how li{
+    counter-increment:trstep; position:relative; display:flex; flex-direction:column; gap:2px;
+    padding:0 0 17px 34px;
+  }
+  .tr-how li::before{
+    content:counter(trstep); position:absolute; left:0; top:-1px;
+    width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--sans); font-size:11px; font-weight:650;
+    color:var(--accent); background:var(--paper);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, var(--line)),
+               0 1px 2px rgba(20,43,67,0.06);
+  }
+  /* The rail that makes them read as a sequence rather than three notes. */
+  .tr-how li:not(:last-child)::after{
+    content:''; position:absolute; left:10.5px; top:26px; bottom:4px;
+    width:1px; background:var(--line);
+  }
+  .tr-how li:last-child{ padding-bottom:0; }
+  .tr-how b{ font-family:var(--sans); font-size:13px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
+  .tr-how span{ font-size:12px; line-height:1.5; color:var(--ink-soft); }
   .tr-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
   .tr-mini{
     display:inline-flex; align-items:center; gap:6px; border:none; cursor:pointer;
@@ -5337,32 +5411,46 @@ let trContext = '';
 function renderTranslate(){
   let html = `<div class="section-head"><h2>Translate</h2><span class="sub">glossary first</span></div>`;
   html += `<div class="tr-panel">`;
-  html += `<div class="practice-disclaimer">${ICON_SHIELD}<span>A reference aid for building and studying the glossary. Machine translation is not a substitute for a qualified interpreter and should not be used for patient communication.</span></div>`;
+  html += `<details class="tool-note">
+    <summary>${ICON_SHIELD}<span>Reference aid, not for patient use</span><em>More</em></summary>
+    <p>For building and studying the glossary. Machine translation is not a substitute for a
+       qualified interpreter and should not be used to communicate with a patient.</p>
+  </details>`;
 
   html += `
     <div class="tr-box">
-      <div class="tr-row" style="margin-bottom:12px;">
-        <select id="trFrom" onchange="trFrom=this.value">
+      <div class="tr-langs tr-row">
+        <select id="trFrom" onchange="trFrom=this.value" aria-label="Translate from">
           ${TR_LANGS.map(l=>`<option value="${l.code}" ${l.code===trFrom?'selected':''}>${l.name}</option>`).join('')}
         </select>
-        <button class="tr-swap" title="Swap languages" onclick="swapTrLangs()">${ICON_SWAP}</button>
-        <select id="trTo" onchange="trTo=this.value">
+        <button class="tr-swap" title="Swap languages" aria-label="Swap languages" onclick="swapTrLangs()">${ICON_SWAP}</button>
+        <select id="trTo" onchange="trTo=this.value" aria-label="Translate into">
           ${TR_LANGS.map(l=>`<option value="${l.code}" ${l.code===trTo?'selected':''}>${l.name}</option>`).join('')}
         </select>
       </div>
-      <div class="tr-row" style="margin-bottom:10px;">
-        <input id="trInput" type="text" placeholder="Enter a word or phrase…" value="${escapeAttr(trQuery)}"
+      <div class="tr-ask tr-row">
+        <input id="trInput" type="text" placeholder="A word or phrase\u2026" value="${escapeAttr(trQuery)}"
                onkeydown="if(event.key==='Enter'){event.preventDefault();runTranslate();}">
-        <button class="btn btn-primary" onclick="runTranslate()">Translate</button>
+        <button class="btn btn-primary tr-go" onclick="runTranslate()">Translate</button>
       </div>
-      <div class="tr-row">
-        <input id="trContext" type="text" placeholder="Optional: the full sentence it appeared in — improves accuracy a lot"
-               value="${escapeAttr(trContext)}"
-               onkeydown="if(event.key==='Enter'){event.preventDefault();runTranslate();}">
-      </div>
-      <p class="tr-note" style="margin-top:8px;">Single words are the hardest case for any translation engine. "Discharge" alone could be a hospital discharge or a bodily one — the sentence tells it which.</p>
+      <details class="tr-more"${trContext ? ' open' : ''}>
+        <summary><span>Add the sentence</span><em>more accurate</em></summary>
+        <div class="tr-row">
+          <input id="trContext" type="text" placeholder="The full sentence it appeared in\u2026"
+                 value="${escapeAttr(trContext)}"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();runTranslate();}">
+        </div>
+        <p class="tr-note">Single words are the hardest case for any translation engine.
+          \u201cDischarge\u201d alone could be a hospital discharge or a bodily one \u2014 the
+          sentence tells it which.</p>
+      </details>
     </div>
-    <div id="trResults"></div>
+    <div id="trResults">${trQuery ? '' : `
+      <ol class="tr-how">
+        <li><b>Your glossary first</b><span>If the team has already agreed a term, that is the answer.</span></li>
+        <li><b>Then the AI</b><span>With the sentence for context, and a note on why it chose that wording.</span></li>
+        <li><b>Machine translation last</b><span>Marked as such, so you know what you are looking at.</span></li>
+      </ol>`}</div>
   `;
   html += `</div>`;
   return html;
@@ -13312,7 +13400,7 @@ function renderPractice(){
   let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span>
     <span class="practice-mark">${hmhDiamonds({ building:true, idle:true, size:10, gap:3 })}</span></div>`;
 
-  html += `<details class="practice-note">
+  html += `<details class="tool-note">
     <summary>${ICON_SHIELD}<span>Original questions, not real exam items</span><em>Read more</em></summary>
     <p>Written to match CCHI's published domain structure — not real exam items, and not
        affiliated with or endorsed by CCHI. Study the official CCHI materials too.</p>
@@ -14330,7 +14418,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.1210';
+const BUILD_ID = 'b0918.1332';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
