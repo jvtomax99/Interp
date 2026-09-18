@@ -134,8 +134,52 @@
   color:color-mix(in srgb,var(--tile-color,var(--accent)) 74%,var(--ink));
   text-shadow:0 0 14px color-mix(in srgb,var(--tile-color,var(--accent)) 52%,transparent);
 }
+/* ---- The name flows when its domain is touched ----------------------
+   A band of deeper ink travels through the letters while the coloured halo
+   glows behind them. The band goes TOWARD --ink rather than toward the pure
+   domain colour: the resting 56% mix already sits close to the 60% point
+   where these names stop clearing 4.5:1, so a brighter peak would dip the
+   word under AA mid-sweep. Deeper raises contrast instead, and reads as the
+   word firming up under your thumb rather than washing out.
+
+   -webkit-text-fill-color only ever exists while the class is on. If an
+   animationend were ever missed, the gradient's own base colour is the
+   resting colour, so the word still renders exactly as it does at rest. */
+@keyframes homeNameFlow{
+  from{ background-position:-30% 0; }
+  to  { background-position:130% 0; }
+}
+#content.is-home .home-tile-name.is-flowing,
+#content.is-home .qa-title.is-flowing,
+#content.is-home .qa-tile-label.is-flowing,
+.home-section-grid .qa-title.is-flowing{
+  /* The band travels from the resting 56% mix to pure --ink. That is the
+     full width of the safe range: the mid-tone domain colours mean anything
+     BRIGHTER than about 60% stops clearing 4.5:1 on their own tint, so the
+     only direction with room to move is deeper. 22% was inside the range but
+     read as almost nothing -- two similar darks. */
+  background-image:linear-gradient(100deg,
+    color-mix(in srgb,var(--tile-color,var(--accent)) 56%,var(--ink)) 0 36%,
+    var(--ink) 50%,
+    color-mix(in srgb,var(--tile-color,var(--accent)) 56%,var(--ink)) 64% 100%);
+  background-size:300% 100%;
+  /* NOT no-repeat. background-position beyond 0-100% pushes the image partly
+     off the element, and with the fill transparent every uncovered letter
+     simply vanished: at 0.34s "Dermatology" rendered as "Dermatolog", at
+     0.48s as "Dermatolo". Repeating guarantees paint under every glyph for
+     the whole sweep, and the gradient starts and ends on the same colour so
+     the tiles meet seamlessly. */
+  background-repeat:repeat;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:homeNameFlow .72s var(--ease);
+}
 @media (prefers-reduced-motion:reduce){
   #content.is-home .home-tile-name,#content.is-home .qa-title,.home-section-grid .qa-title{transition:none;}
+  #content.is-home .home-tile-name.is-flowing,#content.is-home .qa-title.is-flowing,
+  #content.is-home .qa-tile-label.is-flowing,.home-section-grid .qa-title.is-flowing{
+    animation:none;background-image:none;-webkit-text-fill-color:currentColor;
+  }
 }
 #content.is-home .home-tile-count{margin-top:auto;font-size:11px;line-height:1.3;gap:6px;color:var(--ink-soft);}
 #content.is-home .home-tile-count-text{display:flex;flex-wrap:wrap;gap:3px 6px;align-items:baseline;}

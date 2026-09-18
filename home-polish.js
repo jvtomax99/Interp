@@ -237,6 +237,26 @@
     const overlay = document.getElementById('homeSectionOverlay');
     if(overlay) overlay.classList.remove('show');
   };
+  /* ---- The name flows when you touch its domain ----------------------
+     Driven by its own class rather than :active/.is-pressed, because the
+     press class only survives about 320ms on a quick tap (60ms of contact
+     plus the 260ms hold in index.html) -- a sweep hung off it would be cut
+     off part-way and snap back. This one clears itself on animationend, so
+     the flow always finishes no matter how briefly the card was touched.
+
+     Delegated from document so it keeps working after a rail re-renders. */
+  const FLOW_CARDS = '.domain-family, .home-rail > .qa-card, .home-section-grid > .qa-card, .qa-tile';
+  const FLOW_NAMES = '.home-tile-name, .qa-title, .qa-tile-label';
+  document.addEventListener('pointerdown', (e) => {
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const card = e.target.closest && e.target.closest(FLOW_CARDS);
+    if(!card) return;
+    const name = card.querySelector(FLOW_NAMES);
+    if(!name || name.classList.contains('is-flowing')) return;
+    name.classList.add('is-flowing');
+    name.addEventListener('animationend', () => name.classList.remove('is-flowing'), { once:true });
+  }, { passive:true });
+
   const content = document.getElementById('content');
   if(content && content.classList.contains('is-home')){
     initHomeGreeting(content);
