@@ -2774,6 +2774,64 @@
   .results-head{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
   .results-summary h3{ font-family:var(--serif); font-weight:400; font-size:22px; margin:0 0 6px 0; }
   .results-summary p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.6; max-width:420px; }
+  /* ---------- This week, across the team ---------- */
+  .board{ display:flex; flex-direction:column; gap:3px; margin-bottom:22px;
+    padding:9px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); }
+  .board-row{ display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:10px;
+    font-family:var(--sans); animation:modeIn .3s var(--ease) backwards; }
+  .board-row:nth-child(1){ animation-delay:.03s } .board-row:nth-child(2){ animation-delay:.07s }
+  .board-row:nth-child(3){ animation-delay:.11s } .board-row:nth-child(4){ animation-delay:.15s }
+  .board-row:nth-child(n+5){ animation-delay:.19s }
+  .board-row.is-me{ background:var(--accent-soft); }
+  .board-rank{ width:22px; flex-shrink:0; text-align:center; font-size:13px; font-weight:700; color:var(--ink-faint); }
+  .board-face{ width:28px; height:28px; border-radius:50%; flex-shrink:0; color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:600;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35); }
+  .board-face.has-photo{ color:transparent; box-shadow:inset 0 0 0 1px rgba(20,43,67,.12); }
+  .board-who{ flex:1; min-width:0; font-size:12.5px; font-weight:600; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; }
+  .board-who em{ font-style:normal; font-size:10.5px; font-weight:600; color:var(--accent); }
+  .board-bar{ width:52px; height:6px; flex-shrink:0; border-radius:999px; background:var(--line-soft); overflow:hidden; }
+  .board-fill{ display:block; height:100%; border-radius:999px; transition:width .62s var(--ease); }
+  .board-q{ width:34px; flex-shrink:0; text-align:right; font-size:13px; font-weight:700; letter-spacing:-.02em; }
+  .board-acc{ width:38px; flex-shrink:0; text-align:right; font-size:11.5px; color:var(--ink-soft); }
+  @media (max-width:420px){ .board-bar{ display:none; } }
+
+  /* ---------- Badges ---------- */
+  .badge-shelf{ display:grid; grid-template-columns:repeat(auto-fill, minmax(104px, 1fr)); gap:9px; margin-bottom:22px; }
+  .badge{ display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center;
+    padding:12px 8px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:inset 0 0 0 1px var(--line-soft); opacity:.42; filter:grayscale(1); }
+  .badge.is-won{ opacity:1; filter:none; box-shadow:var(--sh-1), inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 30%, var(--line-soft)); }
+  .badge-icon{ font-size:23px; line-height:1.15; }
+  .badge.is-won .badge-icon{ animation:badgeSettle .5s var(--ease) backwards; }
+  @keyframes badgeSettle{ 0%{ transform:scale(.6) rotate(-10deg); } 60%{ transform:scale(1.12) rotate(4deg); } 100%{ transform:none; } }
+  .badge-name{ font-family:var(--sans); font-size:11.5px; font-weight:650; letter-spacing:-.01em; }
+  .badge-note{ font-family:var(--sans); font-size:10px; line-height:1.35; color:var(--ink-faint); }
+
+  /* Announced when newly won -- a strip at the top, not a takeover. */
+  @keyframes btIn{ from{ opacity:0; transform:translate(-50%, -14px); } to{ opacity:1; transform:translate(-50%, 0); } }
+  .badge-toast{
+    position:fixed; left:50%; top:calc(12px + env(safe-area-inset-top,0px)); transform:translateX(-50%);
+    z-index:320; display:flex; flex-direction:column; gap:7px; pointer-events:none;
+    width:min(340px, calc(100vw - 28px)); padding:11px 13px;
+    border-radius:var(--r-md); background:var(--navy); color:#F2F6FF;
+    box-shadow:0 18px 40px -16px rgba(12,25,55,.7);
+    animation:btIn .32s var(--ease) both;
+  }
+  .badge-toast.is-out{ animation:btIn .32s var(--ease) reverse both; }
+  .bt-row{ display:flex; align-items:center; gap:11px; }
+  .bt-icon{ font-size:24px; line-height:1; }
+  .bt-text{ display:flex; flex-direction:column; min-width:0; font-family:var(--sans); }
+  .bt-text b{ font-size:13px; font-weight:650; }
+  .bt-text span{ font-size:11.5px; opacity:.82; }
+
+  @media (prefers-reduced-motion: reduce){
+    .board-row, .badge.is-won .badge-icon, .badge-toast{ animation:none !important; }
+    .board-fill{ transition:none; }
+  }
+
   /* ---------- Study motion ----------
      Short and eased, never bouncy: this is a certification tool people open
      between hospital assignments, and motion that plays for its own sake gets
@@ -6230,6 +6288,102 @@ function bumpStreak(){
   return st;
 }
 const DAILY_GOAL = 15;
+
+/* ---- Badges ----------------------------------------------------------
+   Milestones, not points. A number that only ever goes up stops meaning
+   anything by the second week; a thing you either have or do not is still
+   worth wanting on day thirty. They are all earned by studying rather than
+   by opening the app, so none of them can be farmed.
+
+   Kept on the device beside the rest of the practice record. */
+const BADGE_KEY = 'ih_practice_badges_v1';
+const BADGES = [
+  { id:'first10',  icon:'\ud83c\udf31', name:'First steps',      note:'Answered 10 questions' },
+  { id:'century',  icon:'\ud83d\udcda', name:'Century',          note:'Answered 100 questions' },
+  { id:'week',     icon:'\ud83d\udd25', name:'Week strong',      note:'Studied 7 days in a row' },
+  { id:'sharp',    icon:'\ud83c\udfaf', name:'Sharpshooter',     note:'10 right in a row' },
+  { id:'sweep',    icon:'\ud83e\udde0', name:'Full sweep',       note:'Practised all five domains' },
+  { id:'domain90', icon:'\ud83c\udfc5', name:'Domain master',    note:'90% in a domain, over 10+ questions' },
+  { id:'exam',     icon:'\u23f1\ufe0f', name:'Exam conditions',  note:'Finished a full exam simulation' },
+  { id:'perfect',  icon:'\ud83d\udcaf', name:'Perfect paper',    note:'100% on a session of 20 or more' },
+];
+function readBadges(){
+  try{ return JSON.parse(localStorage.getItem(BADGE_KEY) || '{}') || {}; }catch(e){ return {}; }
+}
+function saveBadges(b){ try{ localStorage.setItem(BADGE_KEY, JSON.stringify(b)); }catch(e){} }
+
+/* Returns the ones newly earned by this check, so the caller can celebrate
+   exactly those rather than re-announcing everything already won. */
+function checkBadges(ctx){
+  ctx = ctx || {};
+  const have = readBadges();
+  const won = [];
+  const grant = id => { if(!have[id]){ have[id] = Date.now(); won.push(id); } };
+
+  const answered = Object.values(PRACTICE).reduce((n,p)=> n + (p.seen||0), 0);
+  if(answered >= 10)  grant('first10');
+  if(answered >= 100) grant('century');
+  if((readStreak().days||0) >= 7) grant('week');
+  if((ctx.bestStreak||0) >= 10) grant('sharp');
+
+  const touched = {};
+  Object.values(PRACTICE).forEach(p=>{ if(p.d) touched[p.d] = true; });
+  if(CCHI_DOMAINS.every(d=> touched[d.id])) grant('sweep');
+
+  const perDomain = {};
+  Object.values(PRACTICE).forEach(p=>{
+    if(!p.d) return;
+    const t = perDomain[p.d] || (perDomain[p.d] = { right:0, seen:0 });
+    t.right += (p.right||0); t.seen += (p.seen||0);
+  });
+  if(Object.values(perDomain).some(t=> t.seen >= 10 && (t.right/t.seen) >= 0.9)) grant('domain90');
+
+  if(ctx.wasExam) grant('exam');
+  if(ctx.total >= 20 && ctx.correct === ctx.total) grant('perfect');
+
+  if(won.length) saveBadges(have);
+  return won;
+}
+
+/* A short, contained announcement -- not a full-screen takeover on a phone
+   somebody is using between assignments. */
+function announceBadges(ids){
+  if(!ids || !ids.length) return;
+  const defs = ids.map(id=> BADGES.find(b=>b.id===id)).filter(Boolean);
+  if(!defs.length) return;
+  const el = document.createElement('div');
+  el.className = 'badge-toast';
+  el.innerHTML = defs.map(d=>
+    `<div class="bt-row"><span class="bt-icon">${d.icon}</span>
+       <span class="bt-text"><b>${escapeHtml(d.name)}</b><span>${escapeHtml(d.note)}</span></span></div>`).join('');
+  document.body.appendChild(el);
+  setTimeout(()=> el.classList.add('is-out'), 3200);
+  setTimeout(()=> el.remove(), 3800);
+}
+
+/* ---- This week, across the team --------------------------------------
+   Built from quiz-history, which every session already writes and which
+   already has a Firestore rule -- so this needs nothing published in the
+   console to start working.
+
+   Ranked by questions PRACTISED, not by accuracy. Accuracy alone hands first
+   place to whoever answered five questions and got them all right, which
+   rewards doing less; effort is the thing everyone can actually control, and
+   it is the behaviour worth encouraging in a group studying together. */
+function weeklyBoard(){
+  const since = Date.now() - 7*DAY;
+  const by = {};
+  QUIZ_HISTORY.forEach(h=>{
+    if(!h.who || (h.timestamp||0) < since) return;
+    const key = h.who.trim();
+    if(!key) return;
+    const row = by[key] || (by[key] = { who:key, q:0, right:0, sessions:0 });
+    row.q += h.total || 0;
+    row.right += h.correct || 0;
+    row.sessions++;
+  });
+  return Object.values(by).sort((a,b)=> b.q - a.q || b.right - a.right);
+}
 
 // Term review (spaced repetition) — a simple 5-box Leitner system. Missing
 // a card resets it to box 0 (review again soon); getting it right advances
@@ -12893,6 +13047,22 @@ function renderPractice(){
     </button>
   </div>`;
 
+  // ---- this week, across the team ----
+  html += renderWeeklyBoard();
+
+  // ---- badges ----
+  const have = readBadges();
+  const wonCount = BADGES.filter(bd=> have[bd.id]).length;
+  html += `<div class="section-head"><h2>Badges</h2><span class="sub">${wonCount} of ${BADGES.length}</span></div>`;
+  html += `<div class="badge-shelf">` + BADGES.map(bd=>{
+    const got = !!have[bd.id];
+    return `<div class="badge ${got?'is-won':''}" title="${escapeAttr(bd.note)}">
+      <span class="badge-icon">${bd.icon}</span>
+      <span class="badge-name">${escapeHtml(bd.name)}</span>
+      <span class="badge-note">${escapeHtml(bd.note)}</span>
+    </div>`;
+  }).join('') + `</div>`;
+
   // ---- where you stand ----
   html += renderMyProgress();
 
@@ -12975,7 +13145,7 @@ function startStudy(mode, domainId){
   quizLength = quizQuestions.length;
   quizIndex = 0; quizAnswers = []; quizConfidence = []; quizRevealed = false;
   quizActive = true; reviewOpen = {};
-  quizHotStreak = 0; lastEnteredQuizIndex = -1;
+  quizHotStreak = 0; quizBestStreak = 0; lastEnteredQuizIndex = -1;
 
   if(quizMode === 'exam'){
     // The real CoreCHI allows two hours for 100 questions. Scaled to the
@@ -13017,6 +13187,37 @@ function formatClock(ms){
 // Aggregates every past session for whoever's currently attributed, so
 // "your accuracy in Cultural Responsiveness" reflects a real track record
 // instead of resetting to nothing after each quiz.
+function renderWeeklyBoard(){
+  const rows = weeklyBoard();
+  const me = whoAmI().trim().toLowerCase();
+  if(!rows.length){
+    return `<div class="section-head"><h2>This week</h2></div>
+      <div class="progress-card"><p>Nobody has practised yet this week. Finish a session and you are top of the board.</p></div>`;
+  }
+  const top = rows[0].q || 1;
+  let html = `<div class="section-head"><h2>This week</h2><span class="sub">by questions practised</span></div>`;
+  html += `<div class="board">`;
+  rows.slice(0, 8).forEach((r, i)=>{
+    const mine = me && r.who.trim().toLowerCase() === me;
+    const acc = r.q ? Math.round((r.right/r.q)*100) : 0;
+    const face = memberPhotoFor(r.who);
+    const colour = nameToColor(r.who);
+    const medal = ['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'][i] || '';
+    html += `<div class="board-row${mine?' is-me':''}">
+      <span class="board-rank">${medal || (i+1)}</span>
+      <span class="board-face${face?' has-photo':''}" style="${face
+        ? `background-color:${colour};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
+        : `background:linear-gradient(140deg, ${colour}, ${darkenHex(colour,30)});`}">${escapeHtml(initialsOf(r.who))}</span>
+      <span class="board-who">${escapeHtml(r.who)}${mine?' <em>you</em>':''}</span>
+      <span class="board-bar"><span class="board-fill" style="width:${Math.round((r.q/top)*100)}%; background:${colour};"></span></span>
+      <span class="board-q">${r.q}</span>
+      <span class="board-acc">${acc}%</span>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
 function renderMyProgress(){
   const mine = myQuizHistory();
   if(!whoAmI()){
@@ -13182,6 +13383,7 @@ function renderQuiz(){
 /* How many right in a row this session. Not saved anywhere -- it exists to
    make a good run feel like a run while you are on it. */
 let quizHotStreak = 0;
+let quizBestStreak = 0;
 let lastEnteredQuizIndex = -1;
 
 function reducedMotion(){
@@ -13196,6 +13398,7 @@ function answerQuiz(i){
   const q = quizQuestions[quizIndex];
   const right = i === q.a;
   quizHotStreak = right ? quizHotStreak + 1 : 0;
+  if(quizHotStreak > quizBestStreak) quizBestStreak = quizHotStreak;
   renderContent();
   // Feedback is applied AFTER the render, imperatively, rather than baked
   // into a class the markup carries. Rating your confidence re-renders this
@@ -13311,10 +13514,17 @@ function finishQuiz(){
       bumpStreak();
     });
   }
+  const total = quizQuestions.length;
+  const correct = quizQuestions.reduce((n,q,i)=> n + (quizAnswers[i] === q.a ? 1 : 0), 0);
+  const wasExam = quizMode === 'exam';
   quizIndex = quizQuestions.length;
   quizActive = false;
   saveQuizResult();
   renderContent();
+  // After the results are on screen, so a badge lands on top of the score
+  // rather than competing with the ring for attention.
+  const won = checkBadges({ bestStreak: quizBestStreak, total, correct, wasExam });
+  if(won.length) setTimeout(()=> announceBadges(won), 1200);
 }
 
 // Saved once per finished quiz, keyed by whoever's attributed — this is
@@ -13356,6 +13566,7 @@ function exitQuiz(){
   quizFlags = [];
   reviewOpen = {};
   quizHotStreak = 0;
+  quizBestStreak = 0;
   lastEnteredQuizIndex = -1;
   quizQuestions = [];
   quizAnswers = [];
@@ -13464,8 +13675,33 @@ function renderQuizResults(){
   html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px; flex-wrap:wrap;">
     <button class="btn btn-primary" onclick="exitQuiz()">Back to practice</button>
     ${missedCount ? `<button class="btn btn-ghost" onclick="retryMissed()">Retry the ${missedCount} I missed</button>` : ''}
+    <button class="btn btn-ghost" onclick="shareResultToChat(${correct}, ${total})">Share to Team Chat</button>
   </div>`;
   return html;
+}
+
+/* Studying alone is the reason people stop. Posting a score into the channel
+   the team already uses turns a private session into something a colleague
+   can answer -- and it is the cheapest possible nudge for the next person to
+   open the app. */
+async function shareResultToChat(correct, total){
+  const who = whoAmI();
+  if(!who){ requireName(()=> shareResultToChat(correct, total)); return; }
+  if(!db){ showToast('Not connected \u2014 try again when you are back online.'); return; }
+  const pct = total ? Math.round((correct/total)*100) : 0;
+  const mode = quizMode === 'exam' ? 'exam simulation' : 'practice session';
+  const line = pct >= 80 ? 'Feeling good about that one.'
+             : pct >= 60 ? 'Getting there.'
+             : 'Plenty to work on \u2014 back at it.';
+  const text = `\ud83d\udcda Just finished a ${total}-question ${mode}: ${correct}/${total} (${pct}%). ${line}`;
+  try{
+    const ref = db.collection('team-chat').doc();
+    await queuedWrite({ collection:'team-chat', docId:ref.id, op:'set',
+      data:{ text, author:who, attachment:null, timestamp:Date.now(), replyTo:null } });
+    showToast('Shared to Team Chat.');
+  }catch(err){
+    showToast('Could not share that \u2014 check your connection.');
+  }
 }
 
 function toggleReview(i){
@@ -13721,7 +13957,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0918.0859';
+const BUILD_ID = 'b0918.0920';
 const BUILD_TIME = '2026-09-15 18:13 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
