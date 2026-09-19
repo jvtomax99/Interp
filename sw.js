@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v85-pin-pose';
+const CACHE_VERSION = 'interpreter-hub-v86-pin-art';
 const PRECACHE = [
   './',
   './index.html',
@@ -36,6 +36,8 @@ const PRECACHE = [
   // The hello wave spirals this out of the hand, so it has to survive a
   // cold offline start like the rest of the chrome.
   './hmh-mark.png',
+  // The greeting hand. Same reason: it is on the first screen of a cold start.
+  './wave-hand.png',
   './pin-icons.webp',
   './pin-icons-hd.webp',
   './pin-icons-source-hd-upload.png',

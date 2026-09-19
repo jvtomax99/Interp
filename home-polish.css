@@ -35,7 +35,7 @@
   border:0;border-radius:12px;background:transparent;color:#fff;cursor:pointer;
   transform-origin:55% 82%;-webkit-tap-highlight-color:transparent;
 }
-#content.is-home .home-wave-icon svg{width:42px;height:42px;filter:drop-shadow(0 2px 3px #06213f55);pointer-events:none;}
+#content.is-home .home-wave-icon svg,#content.is-home .home-wave-icon .home-wave-art{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 3px #06213f55);pointer-events:none;}
 #content.is-home .home-wave-icon:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 #content.is-home .home-wave-icon:active{background:#ffffff20;}
 #content.is-home .home-wave-icon.is-waving{animation:homeHelloWave 1.3s ease-in-out 1;}
@@ -474,7 +474,7 @@
      the row -- under the 44px minimum, on the one control in this banner that
      is actually tappable. The button stays 44px; only the sprite is smaller. */
   #content.is-home .home-wave-icon{ width:44px; height:44px; }
-  #content.is-home .home-wave-icon svg{ width:34px; height:34px; }
+  #content.is-home .home-wave-icon svg,#content.is-home .home-wave-icon .home-wave-art{ width:34px; height:34px; }
   #content.is-home .home-greeting-quote{
     margin-top:5px; font-size:11.5px; line-height:1.3;
   }
