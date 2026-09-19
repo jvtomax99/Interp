@@ -30,7 +30,6 @@
 .qa-icon .pin-sprite,.qa-tile-icon .pin-sprite{width:32px;height:32px;}
 .side-row-icon .pin-sprite{width:24px;height:24px;}
 .tabbar-icon .pin-sprite{width:23px;height:23px;}
-.home-wave-icon .pin-sprite{width:1em;height:1em;}
 .icon-pick .pin-sprite{width:28px;height:28px;}
 .group-mark-logo{object-fit:contain;}
 `;
@@ -105,7 +104,14 @@
   }
 
   function applyExactPins(){
-    document.querySelectorAll('.home-wave-icon').forEach(el => setPin(el, [0,0]));
+    /* The greeting hand is NOT a sheet pin. index.html ships a drawn SVG for
+       .home-wave-icon; the sheet's 'wave' tile is a raster cartoon hand with a
+       skin tone and a leftover halo, and it was the only saturated sticker on a
+       card that is otherwise white type on glass. Both calls that used to
+       overwrite that button live here, removed on purpose -- re-adding either
+       one silently throws the drawn hand away, with no error to notice.
+       'wave' stays in medicalNames below: that array is positional against the
+       6 x 6 sheet, so dropping an entry would shift every tile after it. */
 
     document.querySelectorAll('.tabbar-btn').forEach(btn => {
       const label = (btn.querySelector('span:last-of-type')?.textContent || btn.textContent || '').trim();
@@ -184,7 +190,7 @@
   }
   function applyMedicalPins(){
     if(!Object.keys(medicalArtwork).length) return;
-    document.querySelectorAll('.home-wave-icon').forEach(el => placeMedicalPin(el, 'wave'));
+    /* .home-wave-icon is skipped on purpose -- see applyExactPins above. */
     [
       ['.qa-card', '.qa-title', '.qa-icon'],
       ['.qa-tile', '.qa-tile-label', '.qa-tile-icon'],
@@ -217,7 +223,6 @@
     .side-row.is-nested .medical-pin{width:16px;height:16px}
     .tabbar-icon .medical-pin{width:23px;height:23px}
     .domain-chip-icon .medical-pin{width:19px;height:19px}
-    .home-wave-icon .medical-pin{width:1em;height:1em}
     .icon-pick .medical-pin{width:28px;height:28px}
     #domainFolderIcon .medical-pin{width:100%;height:100%}
 

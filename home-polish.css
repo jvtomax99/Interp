@@ -33,16 +33,24 @@
 #content.is-home .home-wave-icon{
   display:grid;place-items:center;width:48px;height:48px;flex:none;margin:0;padding:3px;
   border:0;border-radius:12px;background:transparent;color:#fff;cursor:pointer;
-  transform-origin:68% 80%;-webkit-tap-highlight-color:transparent;
+  transform-origin:55% 82%;-webkit-tap-highlight-color:transparent;
 }
-#content.is-home .home-wave-icon svg,#content.is-home .home-wave-icon .medical-pin,
-#content.is-home .home-wave-icon .pin-sprite{width:42px;height:42px;filter:drop-shadow(0 2px 2px #06213f44);pointer-events:none;}
+#content.is-home .home-wave-icon svg{width:42px;height:42px;filter:drop-shadow(0 2px 2px #06213f44);pointer-events:none;}
 #content.is-home .home-wave-icon:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 #content.is-home .home-wave-icon:active{background:#ffffff20;}
 #content.is-home .home-wave-icon.is-waving{animation:homeHelloWave 1.3s ease-in-out 1;}
+/* Anticipation first: the hand draws back a few degrees before the big swing,
+   same principle as the pin motions in pin-icons.js. Going straight to the
+   peak is what made the old one read as a twitch. */
 @keyframes homeHelloWave{
-  0%,100%{transform:rotate(0deg)}14%{transform:rotate(15deg)}30%{transform:rotate(-10deg)}
-  46%{transform:rotate(15deg)}62%{transform:rotate(-6deg)}78%{transform:rotate(7deg)}
+  0%{transform:rotate(0deg) scale(1)}
+  9%{transform:rotate(-9deg) scale(1.05)}
+  24%{transform:rotate(16deg) scale(1.07)}
+  39%{transform:rotate(-12deg) scale(1.05)}
+  54%{transform:rotate(13deg) scale(1.04)}
+  69%{transform:rotate(-8deg) scale(1.03)}
+  84%{transform:rotate(8deg) scale(1.01)}
+  100%{transform:rotate(0deg) scale(1)}
 }
 #content.is-home .home-greeting-quote{
   font:italic 400 13px/1.35 var(--serif);color:#f5faff;max-width:none;margin:9px 0 0;padding:0;border:0;
@@ -425,7 +433,7 @@
      the row -- under the 44px minimum, on the one control in this banner that
      is actually tappable. The button stays 44px; only the sprite is smaller. */
   #content.is-home .home-wave-icon{ width:44px; height:44px; }
-  #content.is-home .home-wave-icon .pin-sprite{ width:30px; height:30px; }
+  #content.is-home .home-wave-icon svg{ width:34px; height:34px; }
   #content.is-home .home-greeting-quote{
     margin-top:5px; font-size:11.5px; line-height:1.3;
   }
