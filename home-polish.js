@@ -55,6 +55,22 @@
     setTimeout(() => layer.remove(), SPIRAL_MS + SPIRAL_STAGGER_MS * SPIRAL_ARMS + 250);
   }
 
+  /* The hello wave has to survive startup.
+
+     Measured on a cold open, before this: the greeting was rebuilt five times
+     in the first two seconds as cached data was replaced by live data. The
+     first hand waved at 909ms and was destroyed at 1187ms -- 278ms into a
+     1300ms swing -- and the four that replaced it never waved at all, because
+     the flag latched the moment the first one STARTED. The hand you were
+     actually left looking at had never moved.
+
+     So the flag latches on the animation ENDING, on a node still in the
+     document. Until a wave has genuinely played through, every fresh greeting
+     gets another go. WAVE_TRIES bounds it, in case something ever rebuilds
+     Home faster than the animation can finish. */
+  const WAVE_TRIES = 6;
+  let waveAttempts = 0;
+
   window.initHomeGreeting = function(content){
     const wave = content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady) return;
@@ -65,13 +81,36 @@
       void wave.offsetWidth;
       wave.classList.add('is-waving');
       spiralOut(wave);
+      lastWaveAt = Date.now();
     };
-    wave.addEventListener('animationend', () => wave.classList.remove('is-waving'));
+    wave.addEventListener('animationend', (e) => {
+      wave.classList.remove('is-waving');
+      if(e.animationName === 'homeHelloWave') hasWavedHello = true;
+    });
     wave.addEventListener('click', play);
-    // Data arrivals and theme changes rebuild Home. Only the first paint
-    // waves automatically; tapping the hand always lets someone replay it.
-    if(!hasWavedHello){ hasWavedHello = true; play(); }
+    lastGreetingWave = { el: wave, play: play };
+
+    if(!hasWavedHello && waveAttempts < WAVE_TRIES){ waveAttempts++; play(); }
   };
+
+  /* Reopening an installed PWA does not reload the page, so without this the
+     wave fires once on the very first launch and never again -- which is not
+     what "when the app is opened" means on a phone. Coming back to the
+     foreground on Home counts as opening it.
+
+     Throttled: flicking away to copy a phone number and straight back should
+     not set the hand off again. */
+  const WAVE_RESUME_GAP_MS = 45000;
+  let lastGreetingWave = null, lastWaveAt = 0;
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState !== 'visible') return;
+    const w = lastGreetingWave;
+    if(!w || !w.el.isConnected) return;
+    const now = Date.now();
+    if(now - lastWaveAt < WAVE_RESUME_GAP_MS) return;
+    lastWaveAt = now;
+    w.play();
+  });
   const initGreetingWithDecor = window.initHomeGreeting;
   window.initHomeGreeting = function(content){
     initGreetingWithDecor(content);

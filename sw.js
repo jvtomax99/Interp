@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v83-hand-spiral';
+const CACHE_VERSION = 'interpreter-hub-v84-enamel-pin';
 const PRECACHE = [
   './',
   './index.html',
