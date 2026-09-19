@@ -35,7 +35,7 @@
   border:0;border-radius:12px;background:transparent;color:#fff;cursor:pointer;
   transform-origin:55% 82%;-webkit-tap-highlight-color:transparent;
 }
-#content.is-home .home-wave-icon svg{width:42px;height:42px;filter:drop-shadow(0 2px 2px #06213f44);pointer-events:none;}
+#content.is-home .home-wave-icon svg{width:42px;height:42px;filter:drop-shadow(0 2px 3px #06213f55);pointer-events:none;}
 #content.is-home .home-wave-icon:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 #content.is-home .home-wave-icon:active{background:#ffffff20;}
 #content.is-home .home-wave-icon.is-waving{animation:homeHelloWave 1.3s ease-in-out 1;}
