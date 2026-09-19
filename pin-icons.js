@@ -575,6 +575,202 @@
        box-shadow:0 24px 0 0 var(--burst),0 -24px 0 0 var(--burst)}
   }
 
+  /* ---- the twelve that were sharing the arc ----
+     Each of these was on the same sweeping wedge. They do very different
+     jobs, so each now gets a first wave of its own; the second wave is drawn
+     from the existing complements, picked to sit under the new shape. */
+
+  /* The DOCTOR DIRECTORY pin: identifying a person. It turns side to side as
+     if being read, then snaps face-on -- and four brackets close in around it
+     like a reticle locking on. Nothing else in the app draws a square. */
+  @keyframes pinBadge{
+    0%{transform:perspective(260px) rotateY(0) scale(1)}
+    16%{transform:perspective(260px) rotateY(-34deg) scale(.96)}
+    36%{transform:perspective(260px) rotateY(30deg) scale(.98)}
+    54%{transform:perspective(260px) rotateY(-14deg) scale(1.04)}
+    70%{transform:perspective(260px) rotateY(0) scale(1.28)}   /* locked */
+    84%{transform:perspective(260px) rotateY(0) scale(.98)}
+    100%{transform:none}
+  }
+  @keyframes burstReticle{
+    0%{width:7px;height:7px;margin:-3.5px;border-radius:2px;opacity:0;
+       box-shadow:-34px -34px 0 0 var(--burst),34px -34px 0 0 var(--burst),
+                  34px 34px 0 0 var(--burst),-34px 34px 0 0 var(--burst)}
+    28%{opacity:.95}
+    72%{opacity:.9}
+    100%{width:5px;height:5px;margin:-2.5px;border-radius:2px;opacity:0;
+       box-shadow:-17px -17px 0 0 var(--burst),17px -17px 0 0 var(--burst),
+                  17px 17px 0 0 var(--burst),-17px 17px 0 0 var(--burst)}
+  }
+
+  @keyframes pinRiffle{             /* pages going past under a thumb */
+    0%{transform:perspective(200px) rotateY(0)}
+    14%{transform:perspective(200px) rotateY(-30deg) scale(.97)}
+    30%{transform:perspective(200px) rotateY(16deg)}
+    46%{transform:perspective(200px) rotateY(-24deg)}
+    62%{transform:perspective(200px) rotateY(12deg)}
+    78%{transform:perspective(200px) rotateY(-8deg) scale(1.06)}
+    100%{transform:perspective(200px) rotateY(0)}
+  }
+  @keyframes burstPages{            /* leaves fanning off to one side */
+    0%{width:5px;height:5px;margin:-2.5px;opacity:0;
+       box-shadow:0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst)}
+    26%{opacity:.85}
+    100%{width:3px;height:3px;margin:-1.5px;opacity:0;
+       box-shadow:-30px -12px 0 0 var(--burst),-34px 2px 0 0 var(--burst),-28px 16px 0 0 var(--burst)}
+  }
+
+  @keyframes pinSnap{               /* a shutter: brace, fire, recover */
+    0%{transform:none;filter:none}
+    18%{transform:scale(.9) rotate(-2deg)}
+    30%{transform:scale(1.26);filter:brightness(1.5) contrast(1.1)}
+    46%{transform:scale(.98);filter:brightness(1.05)}
+    68%{transform:scale(1.08)} 100%{transform:none;filter:none}
+  }
+  @keyframes burstSnap{             /* the flash, square like a frame */
+    0%{width:16px;height:16px;margin:-8px;border-radius:4px;opacity:.95;
+       box-shadow:0 0 0 3px color-mix(in srgb,#fff 85%,transparent)}
+    100%{width:78px;height:78px;margin:-39px;border-radius:14px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+
+  @keyframes pinSonar{              /* a slow sweep that pauses on contact */
+    0%{transform:none} 22%{transform:rotate(-12deg) scale(.97)}
+    52%{transform:rotate(11deg)}
+    64%{transform:rotate(11deg) scale(1.02)}   /* the pause */
+    82%{transform:rotate(0) scale(1.18)} 100%{transform:none}
+  }
+  @keyframes burstRadar{            /* one wedge, going round once, fast */
+    0%{width:24px;height:24px;margin:-12px;opacity:0;
+       background:conic-gradient(from 0deg,color-mix(in srgb,var(--burst) 85%,transparent) 0 26deg,transparent 26deg);
+       transform:rotate(0)}
+    20%{opacity:.9}
+    100%{width:80px;height:80px;margin:-40px;opacity:0;
+       background:conic-gradient(from 0deg,color-mix(in srgb,var(--burst) 85%,transparent) 0 26deg,transparent 26deg);
+       transform:rotate(400deg)}
+  }
+
+  @keyframes pinMagnify{            /* pull close, hold, drop back */
+    0%{transform:none} 20%{transform:scale(.92)}
+    44%{transform:scale(1.34)} 62%{transform:scale(1.3)}
+    82%{transform:scale(.97)} 100%{transform:none}
+  }
+  @keyframes burstLens{             /* a ring closing in, then opening out */
+    0%{width:72px;height:72px;margin:-36px;opacity:0;
+       box-shadow:0 0 0 2px color-mix(in srgb,var(--burst) 60%,transparent)}
+    46%{width:22px;height:22px;margin:-11px;opacity:.9;
+       box-shadow:0 0 0 2.5px color-mix(in srgb,var(--burst) 80%,transparent)}
+    100%{width:64px;height:64px;margin:-32px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+
+  @keyframes pinFan{                /* a stack spread out and gathered back */
+    0%{transform:none} 20%{transform:rotate(-10deg) translateX(-3px) scale(.97)}
+    50%{transform:rotate(12deg) translateX(4px) scale(1.1)}
+    76%{transform:rotate(-4deg) translateX(-1px)} 100%{transform:none}
+  }
+  @keyframes burstFan{              /* three leaves opening across the top */
+    0%{width:4px;height:4px;margin:-2px;opacity:0;
+       box-shadow:0 0 0 0 var(--burst),0 0 0 0 var(--burst),0 0 0 0 var(--burst)}
+    30%{opacity:.85}
+    100%{width:3px;height:3px;margin:-1.5px;opacity:0;
+       box-shadow:-26px -20px 0 0 var(--burst),0 -32px 0 0 var(--burst),26px -20px 0 0 var(--burst)}
+  }
+
+  @keyframes pinChain{              /* two links pulling taut */
+    0%{transform:none} 20%{transform:translateX(-5px) scale(.97)}
+    44%{transform:translateX(5px) scale(1.12)}
+    64%{transform:translateX(-2px) scale(1.02)}
+    82%{transform:translateX(1px)} 100%{transform:none}
+  }
+  @keyframes burstLink{             /* pairs joining out and back */
+    0%{width:5px;height:5px;margin:-2.5px;opacity:0;
+       box-shadow:-10px 0 0 0 var(--burst),10px 0 0 0 var(--burst),
+                  0 -10px 0 0 var(--burst),0 10px 0 0 var(--burst)}
+    34%{opacity:.9}
+    100%{width:4px;height:4px;margin:-2px;opacity:0;
+       box-shadow:-32px 0 0 0 var(--burst),32px 0 0 0 var(--burst),
+                  0 -32px 0 0 var(--burst),0 32px 0 0 var(--burst)}
+  }
+
+  @keyframes pinIndex{              /* a flick through an index */
+    0%{transform:none} 16%{transform:translateY(3px) scale(.96)}
+    36%{transform:translateY(-6px) skewX(-6deg)}
+    56%{transform:translateY(3px) skewX(4deg)}
+    76%{transform:translateY(-2px) skewX(-2deg) scale(1.06)}
+    100%{transform:none}
+  }
+  @keyframes burstIndex{            /* tick marks running down the edge */
+    0%{width:3px;height:9px;margin:-4.5px -1.5px;border-radius:1px;opacity:0;
+       box-shadow:20px 0 0 0 var(--burst),20px 0 0 0 var(--burst),20px 0 0 0 var(--burst)}
+    30%{opacity:.9}
+    100%{width:3px;height:7px;margin:-3.5px -1.5px;border-radius:1px;opacity:0;
+       box-shadow:26px -16px 0 0 var(--burst),28px 0 0 0 var(--burst),26px 16px 0 0 var(--burst)}
+  }
+
+  @keyframes burstWaves{            /* sound leaving a bell, not a ripple */
+    0%{width:14px;height:14px;margin:-7px;opacity:0;
+       background:conic-gradient(from -40deg,color-mix(in srgb,var(--burst) 70%,transparent) 0 80deg,transparent 80deg)}
+    25%{opacity:.8}
+    100%{width:86px;height:86px;margin:-43px;opacity:0;
+       background:conic-gradient(from -40deg,color-mix(in srgb,var(--burst) 70%,transparent) 0 80deg,transparent 80deg)}
+  }
+
+  @keyframes burstConfetti{         /* something happening, falling down */
+    0%{width:5px;height:5px;margin:-2.5px;opacity:0;
+       box-shadow:-18px -14px 0 0 var(--burst),0 -20px 0 0 var(--burst),18px -14px 0 0 var(--burst)}
+    26%{opacity:.95}
+    100%{width:4px;height:4px;margin:-2px;opacity:0;
+       box-shadow:-24px 26px 0 0 var(--burst),2px 34px 0 0 var(--burst),26px 24px 0 0 var(--burst)}
+  }
+
+  @keyframes burstEcho{             /* checked once, checked again */
+    0%{width:8px;height:8px;margin:-4px;opacity:.9;
+       box-shadow:0 0 0 2px color-mix(in srgb,var(--burst) 70%,transparent),
+                  0 0 0 2px color-mix(in srgb,var(--burst) 0%,transparent)}
+    100%{width:68px;height:68px;margin:-34px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent),
+                  0 0 0 12px color-mix(in srgb,var(--burst) 18%,transparent)}
+  }
+
+  @keyframes pinGreet{              /* a hand waving hello */
+    0%{transform:none} 14%{transform:rotate(-16deg)}
+    32%{transform:rotate(14deg)} 50%{transform:rotate(-12deg)}
+    68%{transform:rotate(9deg)} 84%{transform:rotate(-4deg)}
+    100%{transform:none}
+  }
+  @keyframes burstGreet{            /* a warm, single, unhurried ring */
+    0%{width:10px;height:10px;margin:-5px;opacity:0;
+       box-shadow:0 0 0 2px color-mix(in srgb,var(--burst) 55%,transparent)}
+    35%{opacity:.7}
+    100%{width:60px;height:60px;margin:-30px;opacity:0;
+       box-shadow:0 0 0 1px color-mix(in srgb,var(--burst) 0%,transparent)}
+  }
+
+  [data-pin="doctor-directory"].is-tapped::after{ animation-name:burstReticle; }
+  [data-pin="doctor-directory"].is-tapped::before{ animation-name:burstFlash2; }
+  [data-pin="userguide"].is-tapped::after{ animation-name:burstPages; }
+  [data-pin="userguide"].is-tapped::before{ animation-name:burstRing2; }
+  [data-pin="providers"].is-tapped::after{ animation-name:burstSnap; }
+  [data-pin="providers"].is-tapped::before{ animation-name:burstFlash2; }
+  [data-pin="find-doctor"].is-tapped::after{ animation-name:burstRadar; }
+  [data-pin="find-doctor"].is-tapped::before{ animation-name:burstRing2; }
+  [data-pin="medifind"].is-tapped::after{ animation-name:burstLens; }
+  [data-pin="medifind"].is-tapped::before{ animation-name:burstSparks2; }
+  [data-pin="resources"].is-tapped::after{ animation-name:burstFan; }
+  [data-pin="resources"].is-tapped::before{ animation-name:burstHalo2; }
+  [data-pin="directory"].is-tapped::after{ animation-name:burstLink; }
+  [data-pin="directory"].is-tapped::before{ animation-name:burstRing2; }
+  [data-pin="medical-terminology"].is-tapped::after{ animation-name:burstIndex; }
+  [data-pin="medical-terminology"].is-tapped::before{ animation-name:burstHalo2; }
+  [data-pin="updates"].is-tapped::after{ animation-name:burstWaves; }
+  [data-pin="updates"].is-tapped::before{ animation-name:burstRing2; }
+  [data-pin="events"].is-tapped::after{ animation-name:burstConfetti; }
+  [data-pin="events"].is-tapped::before{ animation-name:burstRing2; }
+  [data-pin="review"].is-tapped::after{ animation-name:burstEcho; }
+  [data-pin="review"].is-tapped::before{ animation-name:burstHalo2; }
+  [data-pin="wave"].is-tapped::after{ animation-name:burstGreet; }
+  [data-pin="wave"].is-tapped::before{ animation-name:burstHalo2; }
   [data-pin="doctor-prep"].is-tapped::after{ animation-name:burstGather; }
   [data-pin="doctor-prep"].is-tapped::before{ animation-name:burstGather2; }
   [data-pin="translate"].is-tapped::after{ animation-name:burstSwapDots; }
@@ -621,8 +817,8 @@
   [data-pin="infusion"].is-tapped::before,[data-pin="ent"].is-tapped::before,
   [data-pin="ophthalmology"].is-tapped::before{ animation-name:burstSparks2; }
 
-  [data-pin="review"].is-tapped::after,[data-pin="medical-terminology"].is-tapped::after,[data-pin="userguide"].is-tapped::after,[data-pin="resources"].is-tapped::after,[data-pin="directory"].is-tapped::after,[data-pin="events"].is-tapped::after,[data-pin="updates"].is-tapped::after,[data-pin="doctor-directory"].is-tapped::after,[data-pin="providers"].is-tapped::after,[data-pin="find-doctor"].is-tapped::after,[data-pin="medifind"].is-tapped::after,[data-pin="wave"].is-tapped::after{ animation-name:burstArc; }
-  [data-pin="review"].is-tapped::before,[data-pin="medical-terminology"].is-tapped::before,[data-pin="userguide"].is-tapped::before,[data-pin="resources"].is-tapped::before,[data-pin="directory"].is-tapped::before,[data-pin="events"].is-tapped::before,[data-pin="updates"].is-tapped::before,[data-pin="doctor-directory"].is-tapped::before,[data-pin="providers"].is-tapped::before,[data-pin="find-doctor"].is-tapped::before,[data-pin="medifind"].is-tapped::before,[data-pin="wave"].is-tapped::before{ animation-name:burstArc2; }
+  
+  
 
   [data-pin="cardiology"]     .is-tapped{animation-name:pinHeartbeat;animation-duration:.86s}
   [data-pin="heart-failure"]  .is-tapped{animation-name:pinHeartbeat;animation-duration:1.02s}
@@ -647,10 +843,10 @@
   [data-pin="dermatology"]    .is-tapped{animation-name:pinShimmer;animation-duration:.84s}
   [data-pin="surgery-anesthesia"] .is-tapped{animation-name:pinPrecise;animation-duration:.68s}
   [data-pin="infectious-disease"] .is-tapped{animation-name:pinGuard;animation-duration:.8s}
-  [data-pin="medical-terminology"] .is-tapped{animation-name:pinTurn;animation-duration:.86s}
-  [data-pin="userguide"]      .is-tapped{animation-name:pinTurn;animation-duration:.74s}
-  [data-pin="resources"]      .is-tapped{animation-name:pinTurn;animation-duration:.98s}
-  [data-pin="directory"]      .is-tapped{animation-name:pinTurn;animation-duration:.66s}
+  [data-pin="medical-terminology"] .is-tapped{animation-name:pinIndex;animation-duration:.84s}
+  [data-pin="userguide"]      .is-tapped{animation-name:pinRiffle;animation-duration:.9s}
+  [data-pin="resources"]      .is-tapped{animation-name:pinFan;animation-duration:.88s}
+  [data-pin="directory"]      .is-tapped{animation-name:pinChain;animation-duration:.72s}
   [data-pin="translate"]      .is-tapped{animation-name:pinExchange;animation-duration:.86s}
   [data-pin="review"]         .is-tapped{animation-name:pinSwap;animation-duration:.96s}
   [data-pin="chat"]           .is-tapped{animation-name:pinBubble;animation-duration:.74s}
@@ -659,11 +855,11 @@
   [data-pin="practice"]       .is-tapped{animation-name:pinStamp;animation-duration:.7s}
   [data-pin="ethics"]         .is-tapped{animation-name:pinStamp;animation-duration:.88s}
   [data-pin="doctor-prep"]    .is-tapped{animation-name:pinIntake;animation-duration:.92s}
-  [data-pin="doctor-directory"] .is-tapped{animation-name:pinScan;animation-duration:.96s}
-  [data-pin="providers"]      .is-tapped{animation-name:pinScan;animation-duration:.72s}
-  [data-pin="find-doctor"]    .is-tapped{animation-name:pinScan;animation-duration:.88s}
-  [data-pin="medifind"]       .is-tapped{animation-name:pinScan;animation-duration:.64s}
-  [data-pin="wave"]           .is-tapped{animation-name:pinListen;animation-duration:.68s}
+  [data-pin="doctor-directory"] .is-tapped{animation-name:pinBadge;animation-duration:1.02s}
+  [data-pin="providers"]      .is-tapped{animation-name:pinSnap;animation-duration:.68s}
+  [data-pin="find-doctor"]    .is-tapped{animation-name:pinSonar;animation-duration:.94s}
+  [data-pin="medifind"]       .is-tapped{animation-name:pinMagnify;animation-duration:.76s}
+  [data-pin="wave"]           .is-tapped{animation-name:pinGreet;animation-duration:.8s}
 
   @media (prefers-reduced-motion: reduce){
     .medical-pin.is-tapped, .pin-sprite.is-tapped{animation:none !important}
