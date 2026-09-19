@@ -1,6 +1,60 @@
 /* Local presentation only. Each copied tool keeps its existing app action. */
 (() => {
   let hasWavedHello = false;
+
+  /* ---------- The HMH mark spirals out of the waving hand ----------
+     Geometry lives in home-polish.css under the same heading; this only sets
+     the per-arm angles and hands them over.
+
+     The mark is warmed up at script load. The first wave fires as soon as Home
+     paints, which is early enough that an uncached PNG would otherwise miss it
+     -- and the first wave is the one nobody gets to replay. */
+  const SPIRAL_MARK = './hmh-mark.png';
+  const SPIRAL_ARMS = 7;
+  const SPIRAL_MS = 1150, SPIRAL_STAGGER_MS = 60;
+  try { new Image().src = SPIRAL_MARK; } catch(e){}
+
+  function spiralOut(wave){
+    const row = wave.parentElement;
+    if(!row) return;
+    // A wave can be replayed before the last one has cleared.
+    row.querySelectorAll('.home-wave-spiral').forEach(n => n.remove());
+
+    const layer = document.createElement('span');
+    layer.className = 'home-wave-spiral';
+    layer.setAttribute('aria-hidden', 'true');
+
+    for(let k = 0; k < SPIRAL_ARMS; k++){
+      const a0 = k * (360 / SPIRAL_ARMS) - 90;   // fan the starts evenly
+      const arm = document.createElement('i');
+      arm.style.setProperty('--a0', a0 + 'deg');
+      arm.style.setProperty('--a1', (a0 + 300) + 'deg');
+      // Three radii, so the marks do not land on one tidy ring. They travel
+      // far enough to clear the quote rather than settling on top of it.
+      arm.style.setProperty('--r', (38 + (k % 3) * 9) + 'px');
+      const delay = (SPIRAL_STAGGER_MS * k) + 'ms';
+      arm.style.animationDelay = delay;
+
+      const img = document.createElement('img');
+      img.src = SPIRAL_MARK;
+      img.alt = '';
+      img.draggable = false;
+      img.style.animationDelay = delay;   // must match the arm exactly
+      arm.appendChild(img);
+      layer.appendChild(arm);
+    }
+
+    row.appendChild(layer);
+    // Anchor on the hand's centre. Measured rather than hard-coded: the button
+    // is 48px on desktop and 44px on a phone, and the name beside it changes
+    // width with whatever is in ih_myName.
+    const rowBox = row.getBoundingClientRect(), waveBox = wave.getBoundingClientRect();
+    layer.style.left = (waveBox.left - rowBox.left + waveBox.width / 2) + 'px';
+    layer.style.top  = (waveBox.top  - rowBox.top  + waveBox.height / 2) + 'px';
+
+    setTimeout(() => layer.remove(), SPIRAL_MS + SPIRAL_STAGGER_MS * SPIRAL_ARMS + 250);
+  }
+
   window.initHomeGreeting = function(content){
     const wave = content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady) return;
@@ -10,6 +64,7 @@
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       void wave.offsetWidth;
       wave.classList.add('is-waving');
+      spiralOut(wave);
     };
     wave.addEventListener('animationend', () => wave.classList.remove('is-waving'));
     wave.addEventListener('click', play);

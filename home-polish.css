@@ -24,7 +24,7 @@
 #content.is-home .home-greeting-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 9px;}
 #content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;line-height:1.3;letter-spacing:.1em;color:#e9f7ff;margin:0;}
 #content.is-home .home-greeting-date{white-space:nowrap;font-size:11px;line-height:1.3;letter-spacing:-.015em;color:#f3f9ff;}
-#content.is-home .home-greeting-name-row{display:flex;align-items:center;gap:9px;margin-top:3px;}
+#content.is-home .home-greeting-name-row{display:flex;align-items:center;gap:9px;margin-top:3px;position:relative;}
 #content.is-home .home-greeting-name{
   min-width:0;font-size:42px;font-weight:600;line-height:1.15;letter-spacing:-.045em;
   margin:0;color:#fff;text-shadow:none;overflow-wrap:anywhere;
@@ -403,9 +403,50 @@
     box-shadow:inset 0 1px 0 var(--finish-edge),0 7px 14px rgba(35,68,107,.07);
   }
 }
+/* ---------- Hello wave: the HMH mark spirals out of the hand ----------
+   Two nested transforms make the spiral. The arm rotates and pushes outward at
+   the same time -- angle and radius growing together is what draws a spiral
+   rather than a straight burst -- and the mark inside counter-rotates by the
+   same angle so it stays upright instead of tumbling. Both animations share a
+   duration, a delay and an easing curve; if any of the three drift apart the
+   cancellation stops being exact and the marks wobble.
+
+   The layer hangs off .home-greeting-name-row, not off the button, because the
+   button is itself rotating and scaling through the wave -- anchoring here
+   keeps every spiral identical no matter where the hand is mid-swing.
+
+   .home-greeting has overflow:hidden, so the marks are clipped to the banner
+   and never run over Search. That is deliberate. */
+#content.is-home .home-wave-spiral{
+  position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:4;
+}
+#content.is-home .home-wave-spiral i{
+  position:absolute;left:0;top:0;width:0;height:0;
+  animation:homeSpiralArm 1.15s var(--ease) both;
+}
+#content.is-home .home-wave-spiral img{
+  position:absolute;left:-9px;top:-9px;width:18px;height:18px;
+  /* The mark is navy and cyan on a navy card, so it needs to be lifted off it.
+     The white pass is a halo, not a shadow -- at 14px with only the dark
+     shadow the marks read as blue specks on the photo. */
+  filter:drop-shadow(0 0 2.5px #ffffffd9) drop-shadow(0 1px 2px #06213f88);
+  animation:homeSpiralSpin 1.15s var(--ease) both;
+}
+@keyframes homeSpiralArm{
+  0%{transform:rotate(var(--a0)) translateX(3px) scale(.3);opacity:0}
+  16%{opacity:1}
+  68%{opacity:1}
+  100%{transform:rotate(var(--a1)) translateX(var(--r)) scale(.95);opacity:0}
+}
+@keyframes homeSpiralSpin{
+  0%{transform:rotate(calc(0deg - var(--a0)))}
+  100%{transform:rotate(calc(0deg - var(--a1)))}
+}
+
 @media(prefers-reduced-motion:reduce){
   .home-rail-dots span{transition:none;}
   #content.is-home .home-wave-icon.is-waving{animation:none;}
+  #content.is-home .home-wave-spiral{display:none;}
 }
 
 /* ---------- Hello card, compact on phones ----------

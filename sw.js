@@ -26,13 +26,16 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v82-hand-skin';
+const CACHE_VERSION = 'interpreter-hub-v83-hand-spiral';
 const PRECACHE = [
   './',
   './index.html',
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png',
+  // The hello wave spirals this out of the hand, so it has to survive a
+  // cold offline start like the rest of the chrome.
+  './hmh-mark.png',
   './pin-icons.webp',
   './pin-icons-hd.webp',
   './pin-icons-source-hd-upload.png',
