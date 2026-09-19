@@ -420,6 +420,10 @@
 #content.is-home .home-wave-spiral{
   position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:4;
 }
+/* The durations here are defaults. home-polish.js overrides them per instance:
+   opening the app throws a longer spiral than tapping the hand does. Whatever
+   it sets goes on BOTH the arm and the mark, or the counter-rotation below
+   stops cancelling. */
 #content.is-home .home-wave-spiral i{
   position:absolute;left:0;top:0;width:0;height:0;
   animation:homeSpiralArm 1.15s var(--ease) both;

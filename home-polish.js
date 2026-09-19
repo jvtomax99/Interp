@@ -10,11 +10,17 @@
      paints, which is early enough that an uncached PNG would otherwise miss it
      -- and the first wave is the one nobody gets to replay. */
   const SPIRAL_MARK = './hmh-mark.png';
-  const SPIRAL_ARMS = 7;
-  const SPIRAL_MS = 1150, SPIRAL_STAGGER_MS = 60;
+
+  /* Opening the app gets a bigger spiral than tapping the hand does. Opening it
+     is the moment worth dressing; a replay you asked for wants to be quick.
+     More arms and a wider stagger are what make it LAST -- stretching the
+     duration alone just slows every mark down and reads as sluggish. */
+  const SPIRAL_TAP  = { arms: 7,  ms: 1150, stagger: 60,  r0: 38, rStep: 9  };
+  const SPIRAL_OPEN = { arms: 11, ms: 2000, stagger: 135, r0: 40, rStep: 11 };
   try { new Image().src = SPIRAL_MARK; } catch(e){}
 
-  function spiralOut(wave){
+  function spiralOut(wave, cfg){
+    cfg = cfg || SPIRAL_TAP;
     const row = wave.parentElement;
     if(!row) return;
     // A wave can be replayed before the last one has cleared.
@@ -24,22 +30,26 @@
     layer.className = 'home-wave-spiral';
     layer.setAttribute('aria-hidden', 'true');
 
-    for(let k = 0; k < SPIRAL_ARMS; k++){
-      const a0 = k * (360 / SPIRAL_ARMS) - 90;   // fan the starts evenly
+    for(let k = 0; k < cfg.arms; k++){
+      const a0 = k * (360 / cfg.arms) - 90;   // fan the starts evenly
       const arm = document.createElement('i');
       arm.style.setProperty('--a0', a0 + 'deg');
       arm.style.setProperty('--a1', (a0 + 300) + 'deg');
       // Three radii, so the marks do not land on one tidy ring. They travel
       // far enough to clear the quote rather than settling on top of it.
-      arm.style.setProperty('--r', (38 + (k % 3) * 9) + 'px');
-      const delay = (SPIRAL_STAGGER_MS * k) + 'ms';
+      arm.style.setProperty('--r', (cfg.r0 + (k % 3) * cfg.rStep) + 'px');
+      const delay = (cfg.stagger * k) + 'ms';
       arm.style.animationDelay = delay;
+      arm.style.animationDuration = cfg.ms + 'ms';
 
       const img = document.createElement('img');
       img.src = SPIRAL_MARK;
       img.alt = '';
       img.draggable = false;
-      img.style.animationDelay = delay;   // must match the arm exactly
+      // Delay AND duration must match the arm exactly, or the mark's
+      // counter-rotation stops cancelling and it tumbles as it flies.
+      img.style.animationDelay = delay;
+      img.style.animationDuration = cfg.ms + 'ms';
       arm.appendChild(img);
       layer.appendChild(arm);
     }
@@ -52,7 +62,7 @@
     layer.style.left = (waveBox.left - rowBox.left + waveBox.width / 2) + 'px';
     layer.style.top  = (waveBox.top  - rowBox.top  + waveBox.height / 2) + 'px';
 
-    setTimeout(() => layer.remove(), SPIRAL_MS + SPIRAL_STAGGER_MS * SPIRAL_ARMS + 250);
+    setTimeout(() => layer.remove(), cfg.ms + cfg.stagger * cfg.arms + 250);
   }
 
   /* The hello wave has to survive startup.
@@ -75,22 +85,22 @@
     const wave = content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady) return;
     wave.dataset.waveReady = 'true';
-    const play = () => {
+    const play = (opening) => {
       wave.classList.remove('is-waving');
       if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       void wave.offsetWidth;
       wave.classList.add('is-waving');
-      spiralOut(wave);
+      spiralOut(wave, opening ? SPIRAL_OPEN : SPIRAL_TAP);
       lastWaveAt = Date.now();
     };
     wave.addEventListener('animationend', (e) => {
       wave.classList.remove('is-waving');
       if(e.animationName === 'homeHelloWave') hasWavedHello = true;
     });
-    wave.addEventListener('click', play);
+    wave.addEventListener('click', () => play(false));
     lastGreetingWave = { el: wave, play: play };
 
-    if(!hasWavedHello && waveAttempts < WAVE_TRIES){ waveAttempts++; play(); }
+    if(!hasWavedHello && waveAttempts < WAVE_TRIES){ waveAttempts++; play(true); }
   };
 
   /* Reopening an installed PWA does not reload the page, so without this the
@@ -109,7 +119,7 @@
     const now = Date.now();
     if(now - lastWaveAt < WAVE_RESUME_GAP_MS) return;
     lastWaveAt = now;
-    w.play();
+    w.play(true);   // returning to the foreground IS opening the app
   });
   const initGreetingWithDecor = window.initHomeGreeting;
   window.initHomeGreeting = function(content){
