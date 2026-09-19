@@ -428,8 +428,11 @@
   position:absolute;left:0;top:0;width:0;height:0;
   animation:homeSpiralArm 1.15s var(--ease) both;
 }
+/* Size comes from --s per mark, so a spiral is not one repeated sprite. The
+   offset has to track it or the mark stops being centred on its arm. */
 #content.is-home .home-wave-spiral img{
-  position:absolute;left:-9px;top:-9px;width:18px;height:18px;
+  position:absolute;width:var(--s,18px);height:var(--s,18px);
+  left:calc(var(--s,18px) / -2);top:calc(var(--s,18px) / -2);
   /* The mark is navy and cyan on a navy card, so it needs to be lifted off it.
      The white pass is a halo, not a shadow -- at 14px with only the dark
      shadow the marks read as blue specks on the photo. */

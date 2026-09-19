@@ -13,10 +13,17 @@
 
   /* Opening the app gets a bigger spiral than tapping the hand does. Opening it
      is the moment worth dressing; a replay you asked for wants to be quick.
-     More arms and a wider stagger are what make it LAST -- stretching the
-     duration alone just slows every mark down and reads as sluggish. */
-  const SPIRAL_TAP  = { arms: 7,  ms: 1150, stagger: 60,  r0: 38, rStep: 9  };
-  const SPIRAL_OPEN = { arms: 11, ms: 2000, stagger: 135, r0: 40, rStep: 11 };
+
+     `window` is how long marks keep being thrown, and the per-mark stagger is
+     derived from it rather than fixed. That is the whole reason the count can
+     go up without the spiral turning into a slow drip: raise `arms` alone with
+     a fixed stagger and the emission window stretches with it instead of
+     getting denser.
+
+     Angle, radius and size are jittered per mark. An even fan at this many
+     marks reads as a machine firing on a timer -- a tidy ring expanding. */
+  const SPIRAL_TAP  = { arms: 16, ms: 1150, window: 760,  r0: 34, rSpread: 30, size: [11, 19] };
+  const SPIRAL_OPEN = { arms: 26, ms: 2000, window: 1450, r0: 36, rSpread: 36, size: [12, 22] };
   try { new Image().src = SPIRAL_MARK; } catch(e){}
 
   function spiralOut(wave, cfg){
@@ -30,15 +37,47 @@
     layer.className = 'home-wave-spiral';
     layer.setAttribute('aria-hidden', 'true');
 
+    const stagger = cfg.window / cfg.arms;
+    const jitter = (spread) => (Math.random() - 0.5) * spread;
+
+    /* How far a mark may fly depends on WHICH WAY it is going. .home-greeting
+       clips, and the hand sits about 62px below the banner's top edge on a
+       phone against 218px of room below it -- so a single radius that suits
+       one direction makes marks heading the other way vanish mid-flight.
+       Measured per spiral, so it holds at every breakpoint instead of being a
+       constant that goes stale the next time the card moves. */
+    const banner = wave.closest('#homeGreeting') || wave.closest('.home-greeting');
+    const wb = wave.getBoundingClientRect();
+    let reach = () => Infinity;
+    if(banner){
+      const g = banner.getBoundingClientRect();
+      const cx = wb.left + wb.width / 2, cy = wb.top + wb.height / 2;
+      const room = { l: cx - g.left, r: g.right - cx, u: cy - g.top, d: g.bottom - cy };
+      reach = (deg, half) => {
+        // CSS rotate() then translateX() lands at (r cos t, r sin t), screen axes.
+        const t = deg * Math.PI / 180, c = Math.cos(t), sn = Math.sin(t);
+        let m = Infinity;
+        if(c >  0.001) m = Math.min(m, (room.r - half) / c);
+        if(c < -0.001) m = Math.min(m, (room.l - half) / -c);
+        if(sn >  0.001) m = Math.min(m, (room.d - half) / sn);
+        if(sn < -0.001) m = Math.min(m, (room.u - half) / -sn);
+        return Math.max(10, m);
+      };
+    }
+
     for(let k = 0; k < cfg.arms; k++){
-      const a0 = k * (360 / cfg.arms) - 90;   // fan the starts evenly
+      // Even fan, then nudged, so the marks neither queue up nor line up.
+      const a0 = k * (360 / cfg.arms) - 90 + jitter(360 / cfg.arms);
       const arm = document.createElement('i');
       arm.style.setProperty('--a0', a0 + 'deg');
-      arm.style.setProperty('--a1', (a0 + 300) + 'deg');
-      // Three radii, so the marks do not land on one tidy ring. They travel
-      // far enough to clear the quote rather than settling on top of it.
-      arm.style.setProperty('--r', (cfg.r0 + (k % 3) * cfg.rStep) + 'px');
-      const delay = (cfg.stagger * k) + 'ms';
+      // Far enough out to clear the quote rather than settling on top of it.
+      const a1 = a0 + 250 + Math.random() * 130;
+      arm.style.setProperty('--a1', a1 + 'deg');
+      const size = cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]);
+      const want = cfg.r0 + Math.random() * cfg.rSpread;
+      arm.style.setProperty('--r', Math.min(want, reach(a1, size / 2)).toFixed(1) + 'px');
+      arm.style.setProperty('--s', size.toFixed(1) + 'px');
+      const delay = Math.round(stagger * k) + 'ms';
       arm.style.animationDelay = delay;
       arm.style.animationDuration = cfg.ms + 'ms';
 
@@ -62,7 +101,7 @@
     layer.style.left = (waveBox.left - rowBox.left + waveBox.width / 2) + 'px';
     layer.style.top  = (waveBox.top  - rowBox.top  + waveBox.height / 2) + 'px';
 
-    setTimeout(() => layer.remove(), cfg.ms + cfg.stagger * cfg.arms + 250);
+    setTimeout(() => layer.remove(), cfg.ms + cfg.window + 250);
   }
 
   /* The hello wave has to survive startup.
