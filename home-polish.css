@@ -30,28 +30,6 @@
   margin:0;color:#fff;text-shadow:none;overflow-wrap:anywhere;
 }
 #content.is-home .home-greeting-name.is-long{font-size:32px;}
-#content.is-home .home-wave-icon{
-  display:grid;place-items:center;width:48px;height:48px;flex:none;margin:0;padding:3px;
-  border:0;border-radius:12px;background:transparent;color:#fff;cursor:pointer;
-  transform-origin:55% 82%;-webkit-tap-highlight-color:transparent;
-}
-#content.is-home .home-wave-icon svg,#content.is-home .home-wave-icon .home-wave-art{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 3px #06213f55);pointer-events:none;}
-#content.is-home .home-wave-icon:focus-visible{outline:2px solid #fff;outline-offset:2px;}
-#content.is-home .home-wave-icon:active{background:#ffffff20;}
-#content.is-home .home-wave-icon.is-waving{animation:homeHelloWave 1.3s ease-in-out 1;}
-/* Anticipation first: the hand draws back a few degrees before the big swing,
-   same principle as the pin motions in pin-icons.js. Going straight to the
-   peak is what made the old one read as a twitch. */
-@keyframes homeHelloWave{
-  0%{transform:rotate(0deg) scale(1)}
-  9%{transform:rotate(-9deg) scale(1.05)}
-  24%{transform:rotate(16deg) scale(1.07)}
-  39%{transform:rotate(-12deg) scale(1.05)}
-  54%{transform:rotate(13deg) scale(1.04)}
-  69%{transform:rotate(-8deg) scale(1.03)}
-  84%{transform:rotate(8deg) scale(1.01)}
-  100%{transform:rotate(0deg) scale(1)}
-}
 #content.is-home .home-greeting-quote{
   font:italic 400 13px/1.35 var(--serif);color:#f5faff;max-width:none;margin:9px 0 0;padding:0;border:0;
   letter-spacing:0;text-shadow:none;display:block;overflow:visible;
@@ -403,58 +381,7 @@
     box-shadow:inset 0 1px 0 var(--finish-edge),0 7px 14px rgba(35,68,107,.07);
   }
 }
-/* ---------- Hello wave: the HMH mark spirals out of the hand ----------
-   Two nested transforms make the spiral. The arm rotates and pushes outward at
-   the same time -- angle and radius growing together is what draws a spiral
-   rather than a straight burst -- and the mark inside counter-rotates by the
-   same angle so it stays upright instead of tumbling. Both animations share a
-   duration, a delay and an easing curve; if any of the three drift apart the
-   cancellation stops being exact and the marks wobble.
-
-   The layer hangs off .home-greeting-name-row, not off the button, because the
-   button is itself rotating and scaling through the wave -- anchoring here
-   keeps every spiral identical no matter where the hand is mid-swing.
-
-   .home-greeting has overflow:hidden, so the marks are clipped to the banner
-   and never run over Search. That is deliberate. */
-#content.is-home .home-wave-spiral{
-  position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:4;
-}
-/* The durations here are defaults. home-polish.js overrides them per instance:
-   opening the app throws a longer spiral than tapping the hand does. Whatever
-   it sets goes on BOTH the arm and the mark, or the counter-rotation below
-   stops cancelling. */
-#content.is-home .home-wave-spiral i{
-  position:absolute;left:0;top:0;width:0;height:0;
-  animation:homeSpiralArm 1.15s var(--ease) both;
-}
-/* Size comes from --s per mark, so a spiral is not one repeated sprite. The
-   offset has to track it or the mark stops being centred on its arm. */
-#content.is-home .home-wave-spiral img{
-  position:absolute;width:var(--s,18px);height:var(--s,18px);
-  left:calc(var(--s,18px) / -2);top:calc(var(--s,18px) / -2);
-  /* The mark is navy and cyan on a navy card, so it needs to be lifted off it.
-     The white pass is a halo, not a shadow -- at 14px with only the dark
-     shadow the marks read as blue specks on the photo. */
-  filter:drop-shadow(0 0 2.5px #ffffffd9) drop-shadow(0 1px 2px #06213f88);
-  animation:homeSpiralSpin 1.15s var(--ease) both;
-}
-@keyframes homeSpiralArm{
-  0%{transform:rotate(var(--a0)) translateX(3px) scale(.3);opacity:0}
-  16%{opacity:1}
-  68%{opacity:1}
-  100%{transform:rotate(var(--a1)) translateX(var(--r)) scale(.95);opacity:0}
-}
-@keyframes homeSpiralSpin{
-  0%{transform:rotate(calc(0deg - var(--a0)))}
-  100%{transform:rotate(calc(0deg - var(--a1)))}
-}
-
-@media(prefers-reduced-motion:reduce){
-  .home-rail-dots span{transition:none;}
-  #content.is-home .home-wave-icon.is-waving{animation:none;}
-  #content.is-home .home-wave-spiral{display:none;}
-}
+@media(prefers-reduced-motion:reduce){.home-rail-dots span{transition:none;}}
 
 /* ---------- Hello card, compact on phones ----------
    The card was covering 53% of the banner and 71% of its width at 390px,
@@ -480,8 +407,6 @@
      name. A first pass took the whole button to 34px, which measured 36px in
      the row -- under the 44px minimum, on the one control in this banner that
      is actually tappable. The button stays 44px; only the sprite is smaller. */
-  #content.is-home .home-wave-icon{ width:44px; height:44px; }
-  #content.is-home .home-wave-icon svg,#content.is-home .home-wave-icon .home-wave-art{ width:34px; height:34px; }
   #content.is-home .home-greeting-quote{
     margin-top:5px; font-size:11.5px; line-height:1.3;
   }
@@ -640,3 +565,20 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   #homeSectionOverlay.show .home-section-grid>.qa-card{ animation:none; opacity:1; transform:none; }
   #domainFolder.show,#homeSectionOverlay.show{ animation:none; }
 }
+
+/* Cinematic hello. A content-sized first column protects long names while
+   keeping the hand centered for Jose's greeting. The button stays transparent. */
+#content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr);gap:0;min-height:52px;}
+#content.is-home .home-greeting-name{grid-column:1;max-width:100%;}
+#content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-columns:minmax(0,1fr) 52px;gap:8px;}
+#content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:52px;height:52px;flex:none;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
+#content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
+#content.is-home .home-wave-icon:focus-visible{outline:2px solid #d8f9ff;outline-offset:3px;}
+#content.is-home .home-wave-pin{position:absolute;width:38px;height:41px;left:7px;top:5.5px;transform:rotate(8deg);transform-origin:60% 88%;filter:drop-shadow(0 2px 1px #67411380) drop-shadow(0 5px 5px #072b4580) drop-shadow(0 0 3px #ffdfac45);pointer-events:none;}
+#content.is-home .home-wave-art{display:block;width:100%;height:100%;object-fit:contain;filter:none;}
+#content.is-home .home-wave-halo{position:absolute;inset:-9px;z-index:-1;border-radius:50%;background:radial-gradient(ellipse,#a4f3ff50 0%,#39c7f92b 30%,#74b5ff0c 55%,transparent 72%);opacity:.55;transform:scale(.85);pointer-events:none;}
+#content.is-home .home-wave-shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 34%,#fff1 42%,#fff9 48%,#fff3 54%,transparent 62%);background-size:300% 100%;background-position:100% 0;mask:url('./wave-hand.png') center/contain no-repeat;-webkit-mask:url('./wave-hand.png') center/contain no-repeat;opacity:0;pointer-events:none;}
+#content.is-home .home-wave-glint{position:absolute;color:#fff1c8;pointer-events:none;opacity:0;font-size:16px;font-weight:400;line-height:1;text-shadow:0 0 7px #ffe2a3;}
+#content.is-home .home-wave-glint-a{left:6px;top:6px;}
+#content.is-home .home-wave-glint-b{right:3px;bottom:7px;font-size:11px;}
+#content.is-home .home-wave-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;}

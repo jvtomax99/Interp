@@ -2,145 +2,177 @@
 (() => {
   let hasWavedHello = false;
 
-  /* ---------- The HMH mark spirals out of the waving hand ----------
-     Geometry lives in home-polish.css under the same heading; this only sets
-     the per-arm angles and hands them over.
+  /* Approved hello sequence: sixteen original logo squares converge before
+     the gold hand enters. Each run owns its animation and cleanup. */
+  const mark = new Image();
+  mark.src = './hmh-mark.png';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const TAU = Math.PI * 2;
+  let stopGreeting = () => {};
+  let requestId = 0;
 
-     The mark is warmed up at script load. The first wave fires as soon as Home
-     paints, which is early enough that an uncached PNG would otherwise miss it
-     -- and the first wave is the one nobody gets to replay. */
-  const SPIRAL_MARK = './hmh-mark.png';
-
-  /* Opening the app gets a bigger spiral than tapping the hand does. Opening it
-     is the moment worth dressing; a replay you asked for wants to be quick.
-
-     `window` is how long marks keep being thrown, and the per-mark stagger is
-     derived from it rather than fixed. That is the whole reason the count can
-     go up without the spiral turning into a slow drip: raise `arms` alone with
-     a fixed stagger and the emission window stretches with it instead of
-     getting denser.
-
-     Angle, radius and size are jittered per mark. An even fan at this many
-     marks reads as a machine firing on a timer -- a tidy ring expanding. */
-  const SPIRAL_TAP  = { arms: 16, ms: 1150, window: 760,  r0: 34, rSpread: 30, size: [11, 19] };
-  const SPIRAL_OPEN = { arms: 26, ms: 2000, window: 1450, r0: 36, rSpread: 36, size: [12, 22] };
-  try { new Image().src = SPIRAL_MARK; } catch(e){}
-
-  function spiralOut(wave, cfg){
-    cfg = cfg || SPIRAL_TAP;
-    const row = wave.parentElement;
-    if(!row) return;
-    // A wave can be replayed before the last one has cleared.
-    row.querySelectorAll('.home-wave-spiral').forEach(n => n.remove());
-
-    const layer = document.createElement('span');
-    layer.className = 'home-wave-spiral';
-    layer.setAttribute('aria-hidden', 'true');
-
-    const stagger = cfg.window / cfg.arms;
-    const jitter = (spread) => (Math.random() - 0.5) * spread;
-
-    /* How far a mark may fly depends on WHICH WAY it is going. .home-greeting
-       clips, and the hand sits about 62px below the banner's top edge on a
-       phone against 218px of room below it -- so a single radius that suits
-       one direction makes marks heading the other way vanish mid-flight.
-       Measured per spiral, so it holds at every breakpoint instead of being a
-       constant that goes stale the next time the card moves. */
-    const banner = wave.closest('#homeGreeting') || wave.closest('.home-greeting');
-    const wb = wave.getBoundingClientRect();
-    let reach = () => Infinity;
-    if(banner){
-      const g = banner.getBoundingClientRect();
-      const cx = wb.left + wb.width / 2, cy = wb.top + wb.height / 2;
-      const room = { l: cx - g.left, r: g.right - cx, u: cy - g.top, d: g.bottom - cy };
-      reach = (deg, half) => {
-        // CSS rotate() then translateX() lands at (r cos t, r sin t), screen axes.
-        const t = deg * Math.PI / 180, c = Math.cos(t), sn = Math.sin(t);
-        let m = Infinity;
-        if(c >  0.001) m = Math.min(m, (room.r - half) / c);
-        if(c < -0.001) m = Math.min(m, (room.l - half) / -c);
-        if(sn >  0.001) m = Math.min(m, (room.d - half) / sn);
-        if(sn < -0.001) m = Math.min(m, (room.u - half) / -sn);
-        return Math.max(10, m);
-      };
+  async function playGreeting(button){
+    stopGreeting();
+    const request = ++requestId;
+    lastWaveAt = Date.now();
+    if(reduced.matches || document.hidden || !button.animate) return;
+    try {
+      await Promise.all([mark.decode(), button.querySelector('.home-wave-art').decode()]);
+    } catch(e) { return; } // Keep the static hand when artwork is unavailable.
+    if(request !== requestId || !button.isConnected || reduced.matches || document.hidden) return;
+    const hero = button.closest('.home-greeting');
+    if(!hero) return;
+    const art = button.querySelector('.home-wave-pin');
+    const halo = button.querySelector('.home-wave-halo');
+    const canvas = document.createElement('canvas');
+    canvas.className = 'home-wave-canvas';
+    canvas.setAttribute('aria-hidden','true');
+    const ctx = canvas.getContext('2d');
+    if(!ctx) return;
+    hero.appendChild(canvas);
+    let frame=0, animations=[], observer;
+    function stop(){
+      cancelAnimationFrame(frame);
+      animations.forEach(a=>{a.onfinish=null;a.cancel();});
+      animations=[];
+      canvas.remove();
+      if(observer)observer.disconnect();
+      window.removeEventListener('resize',stop);
+      if(stopGreeting===stop)stopGreeting=()=>{};
     }
-
-    for(let k = 0; k < cfg.arms; k++){
-      // Even fan, then nudged, so the marks neither queue up nor line up.
-      const a0 = k * (360 / cfg.arms) - 90 + jitter(360 / cfg.arms);
-      const arm = document.createElement('i');
-      arm.style.setProperty('--a0', a0 + 'deg');
-      // Far enough out to clear the quote rather than settling on top of it.
-      const a1 = a0 + 250 + Math.random() * 130;
-      arm.style.setProperty('--a1', a1 + 'deg');
-      const size = cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]);
-      const want = cfg.r0 + Math.random() * cfg.rSpread;
-      arm.style.setProperty('--r', Math.min(want, reach(a1, size / 2)).toFixed(1) + 'px');
-      arm.style.setProperty('--s', size.toFixed(1) + 'px');
-      const delay = Math.round(stagger * k) + 'ms';
-      arm.style.animationDelay = delay;
-      arm.style.animationDuration = cfg.ms + 'ms';
-
-      const img = document.createElement('img');
-      img.src = SPIRAL_MARK;
-      img.alt = '';
-      img.draggable = false;
-      // Delay AND duration must match the arm exactly, or the mark's
-      // counter-rotation stops cancelling and it tumbles as it flies.
-      img.style.animationDelay = delay;
-      img.style.animationDuration = cfg.ms + 'ms';
-      arm.appendChild(img);
-      layer.appendChild(arm);
+    stopGreeting=stop;
+    window.addEventListener('resize',stop,{passive:true});
+    observer=new IntersectionObserver(entries=>{
+      if(!entries[0].isIntersecting)stop();
+    });
+    observer.observe(button);
+    function animate(el,frames,options){
+      const a=el.animate(frames,options);animations.push(a);return a;
     }
-
-    row.appendChild(layer);
-    // Anchor on the hand's centre. Measured rather than hard-coded: the button
-    // is 48px on desktop and 44px on a phone, and the name beside it changes
-    // width with whatever is in ih_myName.
-    const rowBox = row.getBoundingClientRect(), waveBox = wave.getBoundingClientRect();
-    layer.style.left = (waveBox.left - rowBox.left + waveBox.width / 2) + 'px';
-    layer.style.top  = (waveBox.top  - rowBox.top  + waveBox.height / 2) + 'px';
-
-    setTimeout(() => layer.remove(), cfg.ms + cfg.window + 250);
+    const box=hero.getBoundingClientRect(), b=button.getBoundingClientRect();
+    const w=box.width,h=box.height,cx=b.left-box.left+b.width/2,cy=b.top-box.top+b.height/2;
+    const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+    // Separate the spring entrance from the greeting. Sample a continuous
+    // wrist swing so each reversal is smooth, with smaller final waves.
+    const waveFrames=Array.from({length:121},(_,i)=>{
+      const time=i/120*1900;
+      let angle=8,scale=1,x=0,y=0,opacity=1;
+      if(time<360){
+        const p=time/360,q=p-1;
+        const spring=1+2.2*q*q*q+1.2*q*q;
+        scale=.06+.94*spring;angle=8-14*(1-p)*(1-p);
+        y=4*(1-p)*(1-p);opacity=Math.min(1,p*4);
+      }else{
+        const p=(time-360)/1540;
+        const envelope=Math.sin(Math.min(1,p/.09)*Math.PI/2)*Math.pow(1-p,.85);
+        const swing=Math.sin(TAU*2.65*p);
+        angle=8+29*swing*envelope;x=1.1*swing*envelope;y=-1.2*Math.abs(swing)*envelope;
+      }
+      return {offset:i/120,opacity,transform:`translate3d(${x}px,${y}px,0) rotate(${angle}deg) scale(${scale})`};
+    });
+    const greeting = animate(art,waveFrames,{duration:1680,delay:2400,fill:'backwards',easing:'linear'});
+    greeting.onfinish=()=>{if(button.isConnected)hasWavedHello=true;stop();};
+    animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
+    animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2610,easing:'ease-in-out'});
+    button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2620+i*440}));
+    // Connected-component bounds of the sixteen actual squares in the
+    // original 314 x 261 brand asset, including its diagonal squares.
+    const squareBounds=[[60,0,113,53],[152,9,193,44],[109,45,151,78],[54,55,107,108],[152,55,205,108],[207,61,259,113],[9,67,43,109],[44,109,78,151],[182,109,216,151],[0,147,52,200],[217,152,251,194],[54,153,107,206],[152,153,205,206],[109,182,151,216],[147,207,199,261],[66,217,108,251]];
+    const logoSize=74;
+    const shards=squareBounds.map((bounds,i)=>{
+      const [l,t,r,b]=bounds;
+      const x=((l+r)/2-129.5)*logoSize/261,y=((t+b)/2-130.5)*logoSize/261;
+      return {bounds,x,y,index:i,angle:Math.atan2(y,x),reach:95+(i%5)*12,spin:(i%2?1:-1)*(Math.PI*1.1+(i%4)*.65),orbit:(i%3===0?-1:1)*(1.3+(i%5)*.32),delay:260+(i%4)*40};
+    });
+    const start=performance.now();
+    const clamp=t=>Math.max(0,Math.min(1,t));
+    const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
+    function position(p,ms){
+      const unfold=smooth((ms-p.delay)/1050);
+      const gather=smooth((ms-1530)/(830+(p.index%4)*22));
+      const angle=p.angle+p.orbit*unfold+(p.index%2?1:-1)*gather*2.45;
+      const dx=Math.cos(angle),dy=Math.sin(angle);
+      const rx=Math.min(p.reach,dx<0?cx-18:w-cx-18),ry=Math.min(p.reach,dy<0?cy-18:h-cy-35);
+      const x=(p.x*(1-unfold)+dx*rx*unfold)*(1-gather);
+      const y=(p.y*(1-unfold)+dy*ry*unfold)*(1-gather);
+      const depth=Math.sin(angle+p.index*.5)*unfold*(1-gather);
+      return {x:cx+x,y:cy+y,rotation:p.spin*(unfold+gather*.65),depth,scale:(1+depth*.16)*(1-gather*.88),alpha:clamp(ms/220)*(1-smooth((gather-.8)/.2)),gather,unfold};
+    }
+    function glow(x,y,r,alpha,warm){
+      if(alpha<=0)return;
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,`rgba(${warm?'255,224,162':'160,236,255'},${alpha})`);
+      g.addColorStop(.32,`rgba(${warm?'255,200,116':'80,197,252'},${alpha*.4})`);
+      g.addColorStop(1,'rgba(80,197,252,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);
+    }
+    function draw(now){
+      if(!button.isConnected){stop();return;}
+      const elapsed=now-start;ctx.clearRect(0,0,w,h);
+      glow(cx,cy,68,.16*(1-clamp(elapsed/1800)),false);
+      const drawOrder=shards.map(p=>({p,v:position(p,elapsed)})).sort((a,b)=>a.v.depth-b.v.depth);
+      for(const {p,v} of drawOrder){
+        if(v.alpha<=0)continue;
+        // Short tapered trails follow the actual trajectory, with no fixed rings.
+        for(let j=7;j>0;j--){
+          const a=position(p,Math.max(0,elapsed-j*13)),b=position(p,Math.max(0,elapsed-(j-1)*13));
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+          ctx.strokeStyle=`rgba(133,226,255,${v.alpha*v.unfold*(1-j/8)*.24})`;
+          ctx.lineWidth=.5+(1-j/8)*1.1;ctx.lineCap='round';ctx.stroke();
+        }
+        const [l,top,r,bottom]=p.bounds;
+        const sw=(r-l)/314*mark.naturalWidth,sh=(bottom-top)/261*mark.naturalHeight;
+        const scale=logoSize/261*v.scale,dw=(r-l)*scale,dh=(bottom-top)*scale;
+        ctx.save();ctx.translate(v.x,v.y);ctx.rotate(v.rotation);ctx.globalAlpha=v.alpha*(.85+.15*(v.depth+1)/2);
+        ctx.shadowColor='rgba(179,240,255,.9)';ctx.shadowBlur=4+3*(v.depth+1)/2;
+        if(mark.complete&&mark.naturalWidth)ctx.drawImage(mark,l/314*mark.naturalWidth,top/261*mark.naturalHeight,sw,sh,-dw/2,-dh/2,dw,dh);
+        ctx.restore();
+      }
+      // Light gathers with the returning pieces, warming as the gold pin appears.
+      const gatherLight=Math.sin(Math.PI*clamp((elapsed-1880)/920));
+      glow(cx,cy,54,gatherLight*.32,elapsed>2300);
+      if(elapsed>2380&&elapsed<3180){
+        const t=(elapsed-2380)/800,fade=Math.pow(1-t,2);
+        ctx.beginPath();ctx.ellipse(cx,cy,10+t*47,8+t*32,-.3,0,TAU);
+        ctx.strokeStyle=`rgba(214,244,255,${fade*.4})`;ctx.lineWidth=1;ctx.stroke();
+        for(let i=0;i<9;i++){
+          const a=i*2.39996,rad=18+t*(25+i%3*9);
+          const x=cx+Math.cos(a)*rad,y=cy+Math.sin(a)*rad*.65;
+          ctx.fillStyle=`rgba(${i%3?'199,240,255':'255,226,168'},${fade*.75})`;
+          ctx.beginPath();ctx.arc(x,y,.7+(i%3)*.3,0,TAU);ctx.fill();
+        }
+      }
+      if(elapsed>=3250)ctx.clearRect(0,0,w,h);
+      frame=requestAnimationFrame(draw);
+    }
+    frame=requestAnimationFrame(draw);
   }
-
-  /* The hello wave has to survive startup.
-
-     Measured on a cold open, before this: the greeting was rebuilt five times
-     in the first two seconds as cached data was replaced by live data. The
-     first hand waved at 909ms and was destroyed at 1187ms -- 278ms into a
-     1300ms swing -- and the four that replaced it never waved at all, because
-     the flag latched the moment the first one STARTED. The hand you were
-     actually left looking at had never moved.
-
-     So the flag latches on the animation ENDING, on a node still in the
-     document. Until a wave has genuinely played through, every fresh greeting
-     gets another go. WAVE_TRIES bounds it, in case something ever rebuilds
-     Home faster than the animation can finish. */
   const WAVE_TRIES = 6;
   let waveAttempts = 0;
-
   window.initHomeGreeting = function(content){
-    const wave = content && content.querySelector('.home-wave-icon');
-    if(!wave || wave.dataset.waveReady) return;
-    wave.dataset.waveReady = 'true';
-    const play = (opening) => {
-      wave.classList.remove('is-waving');
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      void wave.offsetWidth;
-      wave.classList.add('is-waving');
-      spiralOut(wave, opening ? SPIRAL_OPEN : SPIRAL_TAP);
-      lastWaveAt = Date.now();
-    };
-    wave.addEventListener('animationend', (e) => {
-      wave.classList.remove('is-waving');
-      if(e.animationName === 'homeHelloWave') hasWavedHello = true;
+    const wave=content && content.querySelector('.home-wave-icon');
+    if(!wave || wave.dataset.waveReady)return;
+    stopGreeting();
+    ++requestId;
+    wave.dataset.waveReady='cinematic-v1';
+    const image=wave.querySelector('.home-wave-art');
+    if(!image)return;
+    const pin=document.createElement('span');
+    pin.className='home-wave-pin';pin.setAttribute('aria-hidden','true');
+    image.replaceWith(pin);pin.appendChild(image);
+    const shine=document.createElement('span');shine.className='home-wave-shine';pin.appendChild(shine);
+    ['halo','glint home-wave-glint-a','glint home-wave-glint-b'].forEach((name,i)=>{
+      const el=document.createElement('span');el.className='home-wave-'+name;
+      el.setAttribute('aria-hidden','true');if(i)el.textContent='✦';wave.appendChild(el);
     });
-    wave.addEventListener('click', () => play(false));
-    lastGreetingWave = { el: wave, play: play };
-
-    if(!hasWavedHello && waveAttempts < WAVE_TRIES){ waveAttempts++; play(true); }
+    const name=wave.parentElement.querySelector('.home-greeting-name');
+    if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
+    const play=()=>playGreeting(wave);
+    wave.addEventListener('click',play);
+    lastGreetingWave={el:wave,play};
+    // Startup replaces Home several times. Latch only a completed greeting.
+    if(!hasWavedHello && waveAttempts<WAVE_TRIES){waveAttempts++;play();}
   };
+  reduced.addEventListener('change',()=>{++requestId;stopGreeting();});
 
   /* Reopening an installed PWA does not reload the page, so without this the
      wave fires once on the very first launch and never again -- which is not
@@ -152,7 +184,7 @@
   const WAVE_RESUME_GAP_MS = 45000;
   let lastGreetingWave = null, lastWaveAt = 0;
   document.addEventListener('visibilitychange', () => {
-    if(document.visibilityState !== 'visible') return;
+    if(document.visibilityState !== 'visible'){++requestId;stopGreeting();return;}
     const w = lastGreetingWave;
     if(!w || !w.el.isConnected) return;
     const now = Date.now();
