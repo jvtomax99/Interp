@@ -120,7 +120,7 @@
     const ctx = canvas.getContext('2d');
     if(!ctx) return;
     hero.appendChild(canvas);
-    const sequence=resume || {start:performance.now(),message:chooseMessage()};
+    const sequence=resume || {elapsed:0,message:chooseMessage()};
     activeSequence=sequence;
     const thought=createThought(button,sequence.message);
     let frame=0, animations=[], observer;
@@ -146,7 +146,9 @@
     observer.observe(button);
     function animate(el,frames,options){
       const a=el.animate(frames,options);
-      a.currentTime=Math.max(0,performance.now()-sequence.start);
+      // Canvas and every DOM effect advance together, including after a stall.
+      a.pause();
+      a.currentTime=sequence.elapsed;
       animations.push(a);return a;
     }
     const box=hero.getBoundingClientRect(), b=button.getBoundingClientRect();
@@ -179,10 +181,9 @@
       }
       return {offset:i/160,opacity,transform:`translate3d(${x}px,${y}px,0) rotate(${angle}deg) scale(${sx},${sy})`};
     });
-    const greeting=animate(art,waveFrames,{duration:2300,delay:2400,fill:'backwards',easing:'linear'});
-    greeting.onfinish=()=>{if(button.isConnected)hasWavedHello=true;};
-    thought.announce(Math.max(0,2780-(performance.now()-sequence.start)));
-    const messageAnimation=animate(thought.bubble,[
+    animate(art,waveFrames,{duration:2300,delay:2280,fill:'backwards',easing:'linear'});
+    let messageAnnounced=false;
+    animate(thought.bubble,[
       {opacity:0,transform:'translate(-4px,5px) rotate(-9deg) scale(.55,.7)'},
       {opacity:1,transform:'translate(0,-2px) rotate(3deg) scale(1.08,.95)',offset:0.048462},
       {opacity:1,transform:'translate(0,0) rotate(-1deg) scale(.99,1.025)',offset:0.075385},
@@ -192,7 +193,6 @@
       {opacity:1,transform:'translate(0,-1px) rotate(0deg) scale(1)',offset:0.946154},
       {opacity:0,transform:'translate(0,-7px) rotate(5deg) scale(.9)'}
     ],{duration:6500,delay:2780,easing:'ease-in-out'});
-    messageAnimation.onfinish=stop;
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
     animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2610,easing:'ease-in-out'});
     button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2840+i*550}));
@@ -205,7 +205,7 @@
       const x=((l+r)/2-129.5)*logoSize/261,y=((t+b)/2-130.5)*logoSize/261;
       return {bounds,x,y,index:i,angle:Math.atan2(y,x),reach:95+(i%5)*12,spin:(i%2?1:-1)*(Math.PI*1.1+(i%4)*.65),orbit:(i%3===0?-1:1)*(1.3+(i%5)*.32),delay:260+(i%4)*40};
     });
-    const start=sequence.start;
+    let lastFrame=null;
     button.classList.remove('home-wave-pending');
     const clamp=t=>Math.max(0,Math.min(1,t));
     const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -218,7 +218,7 @@
       const x=(p.x*(1-unfold)+dx*rx*unfold)*(1-gather);
       const y=(p.y*(1-unfold)+dy*ry*unfold)*(1-gather);
       const depth=Math.sin(angle+p.index*.5)*unfold*(1-gather);
-      return {x:cx+x,y:cy+y,rotation:p.spin*(unfold+gather*.65),depth,scale:(1+depth*.16)*(1-gather*.88),alpha:clamp(ms/220)*(1-smooth((gather-.8)/.2)),gather,unfold};
+      return {x:cx+x,y:cy+y,rotation:p.spin*(unfold+gather*.65),depth,scale:(1+depth*.16)*(1-gather*.88),alpha:clamp(ms/220)*(1-smooth((ms-2240)/260)),gather,unfold};
     }
     function glow(x,y,r,alpha,warm){
       if(alpha<=0)return;
@@ -229,8 +229,15 @@
     }
     function draw(now){
       if(!button.isConnected){stop();return;}
-      const elapsed=now-start;
-      if(elapsed>=3250){ctx.clearRect(0,0,w,h);return;}
+      // A busy startup frame must not skip the logo-to-hand handoff.
+      if(lastFrame!==null)sequence.elapsed+=Math.min(40,Math.max(0,now-lastFrame));
+      lastFrame=now;
+      const elapsed=sequence.elapsed;
+      animations.forEach(a=>{a.currentTime=elapsed;});
+      if(elapsed>=2780&&!messageAnnounced){messageAnnounced=true;thought.announce(0);}
+      if(elapsed>=4580)hasWavedHello=true;
+      if(elapsed>=9280){stop();return;}
+      if(elapsed>=3250){ctx.clearRect(0,0,w,h);frame=requestAnimationFrame(draw);return;}
       ctx.clearRect(0,0,w,h);
       glow(cx,cy,68,.16*(1-clamp(elapsed/1800)),false);
       const drawOrder=shards.map(p=>({p,v:position(p,elapsed)})).sort((a,b)=>a.v.depth-b.v.depth);
@@ -278,7 +285,7 @@
     clearTimeout(startupTimer);
     stopGreeting();
     ++requestId;
-    wave.dataset.waveReady='stable-start-v3';
+    wave.dataset.waveReady='single-clock-v4';
     const status=document.createElement('span');status.className='home-wave-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
     wave.closest('.home-greeting').appendChild(status);
     const image=wave.querySelector('.home-wave-art');
@@ -298,7 +305,7 @@
     lastGreetingWave={el:wave,play};
     // Wait for startup rebuilds to settle. If already playing, keep the
     // original clock and message rather than restarting the logo and hand.
-    if(resume && performance.now()-resume.start<9280){
+    if(resume && resume.elapsed<9280){
       playGreeting(wave,resume);
     }else if(!hasWavedHello){
       if(!reduced.matches)wave.classList.add('home-wave-pending');
