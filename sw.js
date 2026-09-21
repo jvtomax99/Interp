@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v93-positive-thoughts';
+const CACHE_VERSION = 'interpreter-hub-v94-floating-thoughts';
 const PRECACHE = [
   './',
   './index.html',

@@ -25,23 +25,59 @@
     previousMessage=next;
     return encouragements[next];
   }
+  function buildThought(bubble){
+    const source=document.createElement('canvas');source.width=source.height=288;
+    const c=source.getContext('2d');
+    c.font='192px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    c.textBaseline='top';c.fillText('💭',32,16);
+    const pixels=c.getImageData(0,0,288,288).data,seen=new Uint8Array(288*288);
+    const queue=new Int32Array(288*288),parts=[];
+    for(let seed=0;seed<seen.length;seed++){
+      if(seen[seed]||pixels[seed*4+3]<12)continue;
+      let head=0,tail=1,minX=288,minY=288,maxX=0,maxY=0;
+      queue[0]=seed;seen[seed]=1;
+      while(head<tail){
+        const v=queue[head++],x=v%288,y=Math.floor(v/288);
+        minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+        for(const n of [x>0?v-1:-1,x<287?v+1:-1,y>0?v-288:-1,y<287?v+288:-1]){
+          if(n>=0&&!seen[n]&&pixels[n*4+3]>=12){seen[n]=1;queue[tail++]=n;}
+        }
+      }
+      if(tail>12)parts.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,size:tail,indices:queue.slice(0,tail)});
+    }
+    parts.sort((a,b)=>b.size-a.size);
+    const targets=[bubble.querySelector('.home-wave-cloud'),bubble.querySelector('.home-wave-dot-near'),bubble.querySelector('.home-wave-dot-far')];
+    targets.forEach((target,i)=>{
+      const part=parts[i];target.width=part?part.w:20;target.height=part?part.h:20;
+      const out=target.getContext('2d');
+      if(part){
+        const isolated=out.createImageData(part.w,part.h);
+        for(const v of part.indices){
+          const dst=((Math.floor(v/288)-part.y)*part.w+(v%288-part.x))*4;
+          isolated.data.set(pixels.subarray(v*4,v*4+4),dst);
+        }
+        out.putImageData(isolated,0,0);
+      }
+      else{out.fillStyle='#f5f7ff';out.beginPath();out.ellipse(10,10,9,8,0,0,Math.PI*2);out.fill();}
+    });
+  }
+
   function createThought(button){
     const hero=button.closest('.home-greeting');
     const bubble=document.createElement('span');
     bubble.className='home-wave-thought';bubble.setAttribute('aria-hidden','true');
-    const cloud=document.createElement('span');cloud.className='home-wave-cloud';cloud.textContent='💭';
+    const cloud=document.createElement('canvas');cloud.className='home-wave-cloud';
+    const near=document.createElement('canvas');near.className='home-wave-dot home-wave-dot-near';
+    const far=document.createElement('canvas');far.className='home-wave-dot home-wave-dot-far';
     const message=document.createElement('span');message.className='home-wave-message';message.textContent=chooseMessage();
-    bubble.append(cloud,message);hero.appendChild(bubble);
-    const h=hero.getBoundingClientRect(),b=button.getBoundingClientRect();
-    const left=Math.max(8,Math.min(b.left-h.left+57,h.width-136));
-    let top=b.top-h.top-10;
-    // Keep the message inside narrow banners even for a long display name.
-    // When the button is too far right, place the thought below the card.
-    if(left<b.right-h.left+4){
-      const card=hero.querySelector('.home-greeting-text');
-      top=Math.min(h.height-98,(card?card.getBoundingClientRect().bottom-h.top:b.bottom-h.top)+8);
-    }
-    bubble.style.left=left+'px';bubble.style.top=top+'px';
+    bubble.append(cloud,near,far,message);
+    // Escape the greeting card's clipping and backdrop-filter layers.
+    document.body.appendChild(bubble);
+    buildThought(bubble);
+    const b=button.getBoundingClientRect();
+    const left=Math.max(8,Math.min(b.left+88,document.documentElement.clientWidth-144));
+    bubble.style.left=(left+window.scrollX)+'px';
+    bubble.style.top=(b.top+window.scrollY-10)+'px';
     let announced=0,expire=0;
     const status=hero.querySelector('.home-wave-status');
     return {bubble,announce(delay){announced=setTimeout(()=>{if(status)status.textContent=message.textContent;},delay);},
@@ -223,7 +259,7 @@
     if(!wave || wave.dataset.waveReady)return;
     stopGreeting();
     ++requestId;
-    wave.dataset.waveReady='thoughts-v1';
+    wave.dataset.waveReady='floating-thoughts-v2';
     const status=document.createElement('span');status.className='home-wave-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
     wave.closest('.home-greeting').appendChild(status);
     const image=wave.querySelector('.home-wave-art');
