@@ -10,6 +10,7 @@
   const TAU = Math.PI * 2;
   let stopGreeting = () => {};
   let requestId = 0;
+  let activeSequence = null, startupTimer = 0;
 
   const encouragements=[
     'You’ve got this!', 'You make a difference.', 'Your kindness matters.',
@@ -62,14 +63,14 @@
     });
   }
 
-  function createThought(button){
+  function createThought(button, text){
     const hero=button.closest('.home-greeting');
     const bubble=document.createElement('span');
     bubble.className='home-wave-thought';bubble.setAttribute('aria-hidden','true');
     const cloud=document.createElement('canvas');cloud.className='home-wave-cloud';
     const near=document.createElement('canvas');near.className='home-wave-dot home-wave-dot-near';
     const far=document.createElement('canvas');far.className='home-wave-dot home-wave-dot-far';
-    const message=document.createElement('span');message.className='home-wave-message';message.textContent=chooseMessage();
+    const message=document.createElement('span');message.className='home-wave-message';message.textContent=text || chooseMessage();
     bubble.append(cloud,near,far,message);
     // Escape the greeting card's clipping and backdrop-filter layers.
     document.body.appendChild(bubble);
@@ -85,22 +86,30 @@
       remove(){clearTimeout(announced);clearTimeout(expire);bubble.remove();if(status)status.textContent='';}};
   }
 
-  async function playGreeting(button){
+  async function playGreeting(button, resume = null){
+    clearTimeout(startupTimer);
     stopGreeting();
+    activeSequence=resume;
     const request = ++requestId;
     lastWaveAt = Date.now();
     if(document.hidden || !button.isConnected) return;
     if(reduced.matches || !button.animate){
       const thought=createThought(button);
       thought.bubble.style.opacity='1';thought.announce(0);
-      const stop=()=>{thought.remove();window.removeEventListener('resize',stop);if(stopGreeting===stop)stopGreeting=()=>{};};
-      stopGreeting=stop;thought.expire(stop);window.addEventListener('resize',stop,{passive:true});
+      const width=window.innerWidth;
+      const resizeStop=()=>{if(window.innerWidth!==width)stop();};
+      const stop=()=>{thought.remove();window.removeEventListener('resize',resizeStop);if(stopGreeting===stop)stopGreeting=()=>{};};
+      stopGreeting=stop;thought.expire(stop);window.addEventListener('resize',resizeStop,{passive:true});
       return;
     }
+    button.classList.add('home-wave-pending');
     try {
       await Promise.all([mark.decode(), button.querySelector('.home-wave-art').decode()]);
-    } catch(e) { return; } // Keep the static hand when artwork is unavailable.
-    if(request !== requestId || !button.isConnected || reduced.matches || document.hidden) return;
+    } catch(e) { if(request===requestId){activeSequence=null;button.classList.remove('home-wave-pending');}return; } // Keep the static hand when artwork is unavailable.
+    if(request !== requestId || !button.isConnected || reduced.matches || document.hidden){
+      if(request === requestId)button.classList.remove('home-wave-pending');
+      return;
+    }
     const hero = button.closest('.home-greeting');
     if(!hero) return;
     const art = button.querySelector('.home-wave-pin');
@@ -111,26 +120,34 @@
     const ctx = canvas.getContext('2d');
     if(!ctx) return;
     hero.appendChild(canvas);
-    const thought=createThought(button);
+    const sequence=resume || {start:performance.now(),message:chooseMessage()};
+    activeSequence=sequence;
+    const thought=createThought(button,sequence.message);
     let frame=0, animations=[], observer;
+    const width=window.innerWidth;
+    const resizeStop=()=>{if(window.innerWidth!==width)stop();};
     function stop(){
       cancelAnimationFrame(frame);
+      button.classList.remove('home-wave-pending');
+      if(activeSequence===sequence)activeSequence=null;
       animations.forEach(a=>{a.onfinish=null;a.cancel();});
       animations=[];
       canvas.remove();
       thought.remove();
       if(observer)observer.disconnect();
-      window.removeEventListener('resize',stop);
+      window.removeEventListener('resize',resizeStop);
       if(stopGreeting===stop)stopGreeting=()=>{};
     }
     stopGreeting=stop;
-    window.addEventListener('resize',stop,{passive:true});
+    window.addEventListener('resize',resizeStop,{passive:true});
     observer=new IntersectionObserver(entries=>{
       if(!entries[0].isIntersecting)stop();
     });
     observer.observe(button);
     function animate(el,frames,options){
-      const a=el.animate(frames,options);animations.push(a);return a;
+      const a=el.animate(frames,options);
+      a.currentTime=Math.max(0,performance.now()-sequence.start);
+      animations.push(a);return a;
     }
     const box=hero.getBoundingClientRect(), b=button.getBoundingClientRect();
     const w=box.width,h=box.height,cx=b.left-box.left+b.width/2,cy=b.top-box.top+b.height/2;
@@ -164,7 +181,7 @@
     });
     const greeting=animate(art,waveFrames,{duration:2300,delay:2400,fill:'backwards',easing:'linear'});
     greeting.onfinish=()=>{if(button.isConnected)hasWavedHello=true;};
-    thought.announce(2780);
+    thought.announce(Math.max(0,2780-(performance.now()-sequence.start)));
     const messageAnimation=animate(thought.bubble,[
       {opacity:0,transform:'translate(-4px,5px) rotate(-9deg) scale(.55,.7)'},
       {opacity:1,transform:'translate(0,-2px) rotate(3deg) scale(1.08,.95)',offset:0.048462},
@@ -188,7 +205,8 @@
       const x=((l+r)/2-129.5)*logoSize/261,y=((t+b)/2-130.5)*logoSize/261;
       return {bounds,x,y,index:i,angle:Math.atan2(y,x),reach:95+(i%5)*12,spin:(i%2?1:-1)*(Math.PI*1.1+(i%4)*.65),orbit:(i%3===0?-1:1)*(1.3+(i%5)*.32),delay:260+(i%4)*40};
     });
-    const start=performance.now();
+    const start=sequence.start;
+    button.classList.remove('home-wave-pending');
     const clamp=t=>Math.max(0,Math.min(1,t));
     const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
     function position(p,ms){
@@ -212,7 +230,7 @@
     function draw(now){
       if(!button.isConnected){stop();return;}
       const elapsed=now-start;
-      if(elapsed>=3250){ctx.clearRect(0,0,w,h);frame=requestAnimationFrame(draw);return;}
+      if(elapsed>=3250){ctx.clearRect(0,0,w,h);return;}
       ctx.clearRect(0,0,w,h);
       glow(cx,cy,68,.16*(1-clamp(elapsed/1800)),false);
       const drawOrder=shards.map(p=>({p,v:position(p,elapsed)})).sort((a,b)=>a.v.depth-b.v.depth);
@@ -252,14 +270,15 @@
     }
     frame=requestAnimationFrame(draw);
   }
-  const WAVE_TRIES = 6;
-  let waveAttempts = 0;
+
   window.initHomeGreeting = function(content){
     const wave=content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady)return;
+    const resume=activeSequence;
+    clearTimeout(startupTimer);
     stopGreeting();
     ++requestId;
-    wave.dataset.waveReady='floating-thoughts-v2';
+    wave.dataset.waveReady='stable-start-v3';
     const status=document.createElement('span');status.className='home-wave-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
     wave.closest('.home-greeting').appendChild(status);
     const image=wave.querySelector('.home-wave-art');
@@ -277,10 +296,16 @@
     const play=()=>playGreeting(wave);
     wave.addEventListener('click',play);
     lastGreetingWave={el:wave,play};
-    // Startup replaces Home several times. Latch only a completed greeting.
-    if(!hasWavedHello && waveAttempts<WAVE_TRIES){waveAttempts++;play();}
+    // Wait for startup rebuilds to settle. If already playing, keep the
+    // original clock and message rather than restarting the logo and hand.
+    if(resume && performance.now()-resume.start<9280){
+      playGreeting(wave,resume);
+    }else if(!hasWavedHello){
+      if(!reduced.matches)wave.classList.add('home-wave-pending');
+      startupTimer=setTimeout(()=>{if(wave.isConnected)play();},400);
+    }
   };
-  reduced.addEventListener('change',()=>{++requestId;stopGreeting();});
+  reduced.addEventListener('change',()=>{clearTimeout(startupTimer);++requestId;stopGreeting();if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');});
 
   /* Reopening an installed PWA does not reload the page, so without this the
      wave fires once on the very first launch and never again -- which is not
@@ -292,11 +317,11 @@
   const WAVE_RESUME_GAP_MS = 45000;
   let lastGreetingWave = null, lastWaveAt = 0;
   document.addEventListener('visibilitychange', () => {
-    if(document.visibilityState !== 'visible'){++requestId;stopGreeting();return;}
+    if(document.visibilityState !== 'visible'){clearTimeout(startupTimer);++requestId;stopGreeting();if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');return;}
     const w = lastGreetingWave;
     if(!w || !w.el.isConnected) return;
     const now = Date.now();
-    if(now - lastWaveAt < WAVE_RESUME_GAP_MS) return;
+    if(hasWavedHello && now - lastWaveAt < WAVE_RESUME_GAP_MS) return;
     lastWaveAt = now;
     w.play(true);   // returning to the foreground IS opening the app
   });
