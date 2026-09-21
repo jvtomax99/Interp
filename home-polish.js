@@ -11,11 +11,56 @@
   let stopGreeting = () => {};
   let requestId = 0;
 
+  const encouragements=[
+    'You’ve got this!', 'You make a difference.', 'Your kindness matters.',
+    'One step at a time.', 'You bring people closer.', 'Your voice matters.',
+    'Keep being you.', 'Small wins count.', 'You belong here.',
+    'Your care makes a difference.', 'You help people feel heard.', 'You’re appreciated.'
+  ];
+  let previousMessage=-1;
+  function chooseMessage(){
+    let next=Math.floor(Math.random()*(encouragements.length-1));
+    if(next>=previousMessage)next++;
+    if(previousMessage<0)next=Math.floor(Math.random()*encouragements.length);
+    previousMessage=next;
+    return encouragements[next];
+  }
+  function createThought(button){
+    const hero=button.closest('.home-greeting');
+    const bubble=document.createElement('span');
+    bubble.className='home-wave-thought';bubble.setAttribute('aria-hidden','true');
+    const cloud=document.createElement('span');cloud.className='home-wave-cloud';cloud.textContent='💭';
+    const message=document.createElement('span');message.className='home-wave-message';message.textContent=chooseMessage();
+    bubble.append(cloud,message);hero.appendChild(bubble);
+    const h=hero.getBoundingClientRect(),b=button.getBoundingClientRect();
+    const left=Math.max(8,Math.min(b.left-h.left+57,h.width-136));
+    let top=b.top-h.top-10;
+    // Keep the message inside narrow banners even for a long display name.
+    // When the button is too far right, place the thought below the card.
+    if(left<b.right-h.left+4){
+      const card=hero.querySelector('.home-greeting-text');
+      top=Math.min(h.height-98,(card?card.getBoundingClientRect().bottom-h.top:b.bottom-h.top)+8);
+    }
+    bubble.style.left=left+'px';bubble.style.top=top+'px';
+    let announced=0,expire=0;
+    const status=hero.querySelector('.home-wave-status');
+    return {bubble,announce(delay){announced=setTimeout(()=>{if(status)status.textContent=message.textContent;},delay);},
+      expire(fn){expire=setTimeout(fn,6500);},
+      remove(){clearTimeout(announced);clearTimeout(expire);bubble.remove();if(status)status.textContent='';}};
+  }
+
   async function playGreeting(button){
     stopGreeting();
     const request = ++requestId;
     lastWaveAt = Date.now();
-    if(reduced.matches || document.hidden || !button.animate) return;
+    if(document.hidden || !button.isConnected) return;
+    if(reduced.matches || !button.animate){
+      const thought=createThought(button);
+      thought.bubble.style.opacity='1';thought.announce(0);
+      const stop=()=>{thought.remove();window.removeEventListener('resize',stop);if(stopGreeting===stop)stopGreeting=()=>{};};
+      stopGreeting=stop;thought.expire(stop);window.addEventListener('resize',stop,{passive:true});
+      return;
+    }
     try {
       await Promise.all([mark.decode(), button.querySelector('.home-wave-art').decode()]);
     } catch(e) { return; } // Keep the static hand when artwork is unavailable.
@@ -30,12 +75,14 @@
     const ctx = canvas.getContext('2d');
     if(!ctx) return;
     hero.appendChild(canvas);
+    const thought=createThought(button);
     let frame=0, animations=[], observer;
     function stop(){
       cancelAnimationFrame(frame);
       animations.forEach(a=>{a.onfinish=null;a.cancel();});
       animations=[];
       canvas.remove();
+      thought.remove();
       if(observer)observer.disconnect();
       window.removeEventListener('resize',stop);
       if(stopGreeting===stop)stopGreeting=()=>{};
@@ -54,27 +101,48 @@
     const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
     // Separate the spring entrance from the greeting. Sample a continuous
     // wrist swing so each reversal is smooth, with smaller final waves.
-    const waveFrames=Array.from({length:121},(_,i)=>{
-      const time=i/120*1900;
-      let angle=8,scale=1,x=0,y=0,opacity=1;
-      if(time<360){
-        const p=time/360,q=p-1;
-        const spring=1+2.2*q*q*q+1.2*q*q;
-        scale=.06+.94*spring;angle=8-14*(1-p)*(1-p);
-        y=4*(1-p)*(1-p);opacity=Math.min(1,p*4);
+    const waveFrames=Array.from({length:161},(_,i)=>{
+      const time=i/160*2300;
+      let angle=8,sx=1,sy=1,x=0,y=0,opacity=1;
+      if(time<440){
+        const p=time/440;
+        const spring=1-Math.exp(-6*p)*Math.cos(8*p);
+        const settle=Math.sin(Math.PI*p);
+        sx=.08+.92*spring+.09*settle;
+        sy=.08+.92*spring-.07*settle;
+        angle=8-22*(1-p)*(1-p);
+        y=8*(1-p)-6*Math.sin(Math.PI*p);
+        opacity=Math.min(1,p*5);
       }else{
-        const p=(time-360)/1540;
-        const envelope=Math.sin(Math.min(1,p/.09)*Math.PI/2)*Math.pow(1-p,.85);
-        const swing=Math.sin(TAU*2.65*p);
-        angle=8+29*swing*envelope;x=1.1*swing*envelope;y=-1.2*Math.abs(swing)*envelope;
+        const p=(time-440)/1860;
+        const easeIn=Math.sin(Math.min(1,p/.075)*Math.PI/2);
+        const envelope=easeIn*Math.pow(1-p,.8);
+        const swing=Math.sin(TAU*3.15*p);
+        const hop=Math.pow(Math.sin(Math.PI*2*p),2)*Math.pow(1-p,1.5);
+        angle=8+31*swing*envelope;
+        x=1.8*swing*envelope;y=-4.5*hop;
+        sx=1+.035*Math.abs(swing)*envelope;
+        sy=1-.025*Math.abs(swing)*envelope;
       }
-      return {offset:i/120,opacity,transform:`translate3d(${x}px,${y}px,0) rotate(${angle}deg) scale(${scale})`};
+      return {offset:i/160,opacity,transform:`translate3d(${x}px,${y}px,0) rotate(${angle}deg) scale(${sx},${sy})`};
     });
-    const greeting = animate(art,waveFrames,{duration:1680,delay:2400,fill:'backwards',easing:'linear'});
-    greeting.onfinish=()=>{if(button.isConnected)hasWavedHello=true;stop();};
+    const greeting=animate(art,waveFrames,{duration:2300,delay:2400,fill:'backwards',easing:'linear'});
+    greeting.onfinish=()=>{if(button.isConnected)hasWavedHello=true;};
+    thought.announce(2780);
+    const messageAnimation=animate(thought.bubble,[
+      {opacity:0,transform:'translate(-4px,5px) rotate(-9deg) scale(.55,.7)'},
+      {opacity:1,transform:'translate(0,-2px) rotate(3deg) scale(1.08,.95)',offset:0.048462},
+      {opacity:1,transform:'translate(0,0) rotate(-1deg) scale(.99,1.025)',offset:0.075385},
+      {opacity:1,transform:'translate(0,0) rotate(0deg) scale(1)',offset:0.113077},
+      {opacity:1,transform:'translate(0,-3px) rotate(1deg) scale(1)',offset:0.258462},
+      {opacity:1,transform:'translate(0,0) rotate(-1deg) scale(1)',offset:0.387692},
+      {opacity:1,transform:'translate(0,-1px) rotate(0deg) scale(1)',offset:0.946154},
+      {opacity:0,transform:'translate(0,-7px) rotate(5deg) scale(.9)'}
+    ],{duration:6500,delay:2780,easing:'ease-in-out'});
+    messageAnimation.onfinish=stop;
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
     animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2610,easing:'ease-in-out'});
-    button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2620+i*440}));
+    button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2840+i*550}));
     // Connected-component bounds of the sixteen actual squares in the
     // original 314 x 261 brand asset, including its diagonal squares.
     const squareBounds=[[60,0,113,53],[152,9,193,44],[109,45,151,78],[54,55,107,108],[152,55,205,108],[207,61,259,113],[9,67,43,109],[44,109,78,151],[182,109,216,151],[0,147,52,200],[217,152,251,194],[54,153,107,206],[152,153,205,206],[109,182,151,216],[147,207,199,261],[66,217,108,251]];
@@ -107,7 +175,9 @@
     }
     function draw(now){
       if(!button.isConnected){stop();return;}
-      const elapsed=now-start;ctx.clearRect(0,0,w,h);
+      const elapsed=now-start;
+      if(elapsed>=3250){ctx.clearRect(0,0,w,h);frame=requestAnimationFrame(draw);return;}
+      ctx.clearRect(0,0,w,h);
       glow(cx,cy,68,.16*(1-clamp(elapsed/1800)),false);
       const drawOrder=shards.map(p=>({p,v:position(p,elapsed)})).sort((a,b)=>a.v.depth-b.v.depth);
       for(const {p,v} of drawOrder){
@@ -153,7 +223,9 @@
     if(!wave || wave.dataset.waveReady)return;
     stopGreeting();
     ++requestId;
-    wave.dataset.waveReady='cinematic-v1';
+    wave.dataset.waveReady='thoughts-v1';
+    const status=document.createElement('span');status.className='home-wave-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+    wave.closest('.home-greeting').appendChild(status);
     const image=wave.querySelector('.home-wave-art');
     if(!image)return;
     const pin=document.createElement('span');
