@@ -8,7 +8,7 @@
 /* Retain the original curved photo/scrim masks so the page rises softly
    behind Search. A transparent hero lets the same page color show through. */
 #content.is-home .home-greeting-photo{filter:brightness(1.08);}
-#content.is-home .home-greeting-photo-drift{background-position:69% 84%;}
+#content.is-home .home-greeting-photo-drift{background-position:69% calc(84% - 32px);}
 #content.is-home .home-greeting-scrim{
   background:linear-gradient(90deg,#0c28486b 0%,#1438561f 57%,#12345105 100%),
              linear-gradient(0deg,#0b2b4538,transparent 48%);
@@ -634,7 +634,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 }
 @media(max-width:900px){
   #content.is-home .home-greeting{padding:21px 25px 55px;}
-  #content.is-home .home-greeting-photo-drift{background-position:30% calc(76% - 24px);}
+  #content.is-home .home-greeting-photo-drift{background-position:30% calc(76% - 48px);}
 }
 @media(max-width:365px){
   #content.is-home .home-greeting{padding-left:20px;padding-right:20px;}
