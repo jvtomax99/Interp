@@ -649,7 +649,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
      Keep its scale: the added height reveals blossoms, pole and wayfinding
      sign instead of shrinking the sign to squeeze everything into a strip. */
   #content.is-home .home-greeting{min-height:650px;}
-  #content.is-home .home-greeting-photo-drift{background-position:69% calc(100% + 55px);}
+  #content.is-home .home-greeting-photo-drift{background-position:69% calc(100% - 95px);}
   #content.is-home .home-greeting-photo{
     -webkit-mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
