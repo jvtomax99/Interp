@@ -4850,6 +4850,26 @@
 .home-tile-icon svg,.qa-icon svg,.qa-tile-icon svg,.icon-pick svg{overflow:visible;filter:drop-shadow(0 1.2px 1.2px rgba(70,45,25,.13));}
 .home-wave-icon{display:inline-flex;width:.92em;height:.92em;vertical-align:-.09em;margin-left:.1em;}
 .home-wave-icon svg,.home-wave-icon .home-wave-art{width:100%;height:100%;object-fit:contain;overflow:visible;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));}
+/* Desktop reading scale. The mobile layout and content stay untouched. */
+@media (min-width:901px){
+  .side-row{font-size:15px;}
+  .side-row.is-nested{font-size:14px;}
+  .side-row-icon,.side-row-icon svg,.side-row-icon .pin-sprite{width:26px;height:26px;}
+  .side-label{font-size:13px;}
+  .tg-brand-name{font-size:17px;}
+  .tg-brand-sub{font-size:12px;}
+  .tg-icon-btn svg{width:20px;height:20px;}
+  .main{width:100%;max-width:1700px;margin-inline:auto;padding:40px 38px 80px;}
+  .section-head h2{font-size:27px;}
+  .section-head .sub{font-size:14px;}
+  .btn{font-size:15px;}
+  .search input{font-size:16px;}
+  .card .term-en{font-size:19px;}
+  .card .term-es{font-size:17px;}
+  .card .def{font-size:15px;}
+  .card .tag{font-size:12px;}
+  .card .chart-id{font-size:11px;}
+}
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -14500,8 +14520,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0919.1927';
-const BUILD_TIME = '2026-09-15 18:13 UTC';
+const BUILD_ID = 'b0927.1349';
+const BUILD_TIME = '2026-09-27 17:49 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
 /* The hero photo is graded to the light outside, on the device's own clock.

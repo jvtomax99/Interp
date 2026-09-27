@@ -642,3 +642,28 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   #content.is-home .home-greeting-name.is-long{font-size:30px;}
   #content.is-home .home-greeting-quote{font-size:20px;}
 }
+/* Keep the desktop composition and raise its reading size. Phone rules stay as is. */
+@media (min-width:901px){
+  .main.home-layout{--home-inset:38px;}
+  #content.is-home .home-greeting-name{font-size:52px;}
+  #content.is-home .home-greeting-name.is-long{font-size:38px;}
+  #content.is-home .home-greeting-quote{font-size:23px;}
+  #content.is-home .home-greeting-quote cite{font-size:12px;}
+  #content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-size:13px;}
+  #content.is-home .home-search{font-size:15px;}
+  #content.is-home .home-sec-head h3{font-size:21px;}
+  #content.is-home .home-sec-more{font-size:14px;}
+  #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:16px;}
+  #content.is-home .home-tile-count,#content.is-home .qa-desc{font-size:12.5px;}
+  #content.is-home .home-tile-icon,#content.is-home .qa-icon,
+  #content.is-home .home-tile-icon .medical-pin,#content.is-home .qa-icon .medical-pin,
+  #content.is-home .home-tile-icon .pin-sprite,#content.is-home .qa-icon .pin-sprite{width:39px;height:39px;}
+  #content.is-home .qa-tile-icon,#content.is-home .qa-tile-icon .medical-pin,
+  #content.is-home .qa-tile-icon .pin-sprite{width:34px;height:34px;}
+  #content.is-home .qa-tile-label{font-size:13.5px;}
+  #content.is-home .domain-family-kid{font-size:12.5px;}
+  #content.is-home .domain-family-kid span{font-size:10.5px;}
+}
+@media (min-width:1200px){
+  #content.is-home .home-rail{grid-template-columns:repeat(4,minmax(0,1fr));}
+}

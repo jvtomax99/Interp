@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v100-raised-banner-photo';
+const CACHE_VERSION = 'interpreter-hub-v101-desktop-scale';
 const PRECACHE = [
   './',
   './index.html',
