@@ -153,7 +153,11 @@
     }
     const box=hero.getBoundingClientRect(), b=button.getBoundingClientRect();
     const w=box.width,h=box.height,cx=b.left-box.left+b.width/2,cy=b.top-box.top+b.height/2;
-    const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+    // The desktop canvas covers the entire wide banner although the shards
+    // occupy only a small area around the hand. Native desktop resolution is
+    // enough for those pieces and avoids a costly full-width 2x canvas.
+    const desktop=window.innerWidth>=901;
+    const dpr=desktop?1:Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
     // Separate the spring entrance from the greeting. Sample a continuous
     // wrist swing so each reversal is smooth, with smaller final waves.
     const waveFrames=Array.from({length:161},(_,i)=>{
@@ -229,8 +233,9 @@
     }
     function draw(now){
       if(!button.isConnected){stop();return;}
-      // A busy startup frame must not skip the logo-to-hand handoff.
-      if(lastFrame!==null)sequence.elapsed+=Math.min(40,Math.max(0,now-lastFrame));
+      // Preserve the mobile frame cap. Desktop follows elapsed wall time so
+      // a slow frame cannot stretch the whole sequence across many seconds.
+      if(lastFrame!==null)sequence.elapsed+=desktop?Math.max(0,now-lastFrame)*1.4:Math.min(40,Math.max(0,now-lastFrame));
       lastFrame=now;
       const elapsed=sequence.elapsed;
       animations.forEach(a=>{a.currentTime=elapsed;});
@@ -379,6 +384,7 @@
     layer.setAttribute('aria-hidden', 'true');
     const rand = seeded(1917);
     const wide = hero.clientWidth > 560;
+    const desktopSpeed = window.innerWidth >= 901 ? .8 : 1;
     const count = wide ? 28 : 20;
     const palette = ['url(#hpBlue)', 'url(#hpBlue)', 'url(#hpLav)', 'url(#hpPink)'];
     // [share, size px, opacity, fall seconds, class]
@@ -397,7 +403,7 @@
       const roll = rand();
       const t = roll < tiers[0][0] ? tiers[0] : (roll < tiers[0][0] + tiers[1][0] ? tiers[1] : tiers[2]);
       const size = range(t[1][0], t[1][1]);
-      const dur = range(t[3][0], t[3][1]);
+      const dur = range(t[3][0], t[3][1]) * desktopSpeed;
       const delay = -((range(0, 20) + elapsed) % dur);
       html += '<div class="home-petal ' + t[4] + '" style="' +
         // Spread evenly across the width (with jitter) so they don't bunch
@@ -407,7 +413,7 @@
         '--fill:' + palette[i % palette.length] + ';' +
         '--o:' + range(t[2][0], t[2][1]).toFixed(2) + ';' +
         '--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;' +
-        '--flip:' + range(1.8, 3.4).toFixed(2) + 's;' +
+        '--flip:' + (range(1.8, 3.4) * desktopSpeed).toFixed(2) + 's;' +
         '--sway:' + range(-60, 60).toFixed(0) + 'px;' +
         '--r0:' + range(0, 360).toFixed(0) + 'deg;' +
         '--rest:' + range(20, 70).toFixed(0) + '%' +

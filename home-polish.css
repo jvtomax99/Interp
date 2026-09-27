@@ -645,6 +645,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 /* Keep the desktop composition and raise its reading size. Phone rules stay as is. */
 @media (min-width:901px){
   .main.home-layout{--home-inset:38px;}
+  #content.is-home .home-greeting{min-height:425px;}
   #content.is-home .home-greeting-name{font-size:52px;}
   #content.is-home .home-greeting-name.is-long{font-size:38px;}
   #content.is-home .home-greeting-quote{font-size:23px;}
