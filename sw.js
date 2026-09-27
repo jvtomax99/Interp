@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v102-desktop-tree-wave';
+const CACHE_VERSION = 'interpreter-hub-v103-desktop-panorama';
 const PRECACHE = [
   './',
   './index.html',

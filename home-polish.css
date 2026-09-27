@@ -645,7 +645,23 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 /* Keep the desktop composition and raise its reading size. Phone rules stay as is. */
 @media (min-width:901px){
   .main.home-layout{--home-inset:38px;}
-  #content.is-home .home-greeting{min-height:425px;}
+  /* Give the portrait photo the vertical space it has in the narrow view.
+     Keep its scale: the added height reveals blossoms, pole and wayfinding
+     sign instead of shrinking the sign to squeeze everything into a strip. */
+  #content.is-home .home-greeting{min-height:650px;}
+  #content.is-home .home-greeting-photo-drift{background-position:69% calc(100% + 55px);}
+  #content.is-home .home-greeting-photo{
+    -webkit-mask-image:radial-gradient(115% 20% at 50% 101%,
+      rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
+            mask-image:radial-gradient(115% 20% at 50% 101%,
+      rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
+  }
+  #content.is-home .home-greeting-scrim{
+    -webkit-mask-image:radial-gradient(115% 20% at 50% 101%,
+      rgba(0,0,0,0) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.9) 88%,#000 96%);
+            mask-image:radial-gradient(115% 20% at 50% 101%,
+      rgba(0,0,0,0) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.9) 88%,#000 96%);
+  }
   #content.is-home .home-greeting-name{font-size:52px;}
   #content.is-home .home-greeting-name.is-long{font-size:38px;}
   #content.is-home .home-greeting-quote{font-size:23px;}
