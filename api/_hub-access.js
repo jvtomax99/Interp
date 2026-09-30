@@ -3,7 +3,7 @@
  * this file as an endpoint of its own.
  *
  * Every call to Claude costs money, so once the owner locks the Hub these
- * endpoints answer only phones that joined with an invite code -- the same
+ * endpoints answer only phones that joined with the team code -- the same
  * people firestore.rules lets in.
  *
  *   Practice mode on (or nobody has claimed the Hub yet): anyone, as before.
@@ -93,7 +93,7 @@ export async function allowTeam(req, res) {
   if (token && await isMemberToken(token)) return true;
   res.status(401).json({
     error: 'members_only',
-    message: 'This tool is for the interpreter team. Open the Hub and enter your invite code.'
+    message: 'This tool is for the interpreter team. Open the Hub and enter the team code.'
   });
   return false;
 }

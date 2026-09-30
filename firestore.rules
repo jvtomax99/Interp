@@ -15,10 +15,11 @@ rules_version = '2';
  *
  * WHO GETS IN
  *
- * The Hub is for the interpreter team only. Each teammate gets a personal
- * invite code from the owner (Team access screen in the app). Typing it signs
- * the phone in and creates a document in hub-members/ keyed by that phone's
- * sign-in id. team() below is what every collection checks:
+ * The Hub is for the interpreter team only. Everyone uses one team code,
+ * which the owner shares and can change (Team access screen in the app).
+ * Typing it signs the phone in and creates a document in hub-members/ keyed
+ * by that phone's sign-in id. The owner also has an owner code of their own,
+ * for their other phones. team() below is what every collection checks:
  *
  *   isMember()   this phone joined with a code that the owner hasn't removed
  *   practice()   the owner hasn't locked the Hub yet
@@ -79,22 +80,24 @@ service cloud.firestore {
       return d.keys().hasOnly(['practice', 'updatedAt', 'updatedBy']) && d.practice is bool;
     }
 
-    // One document per person, keyed by their code. Knowing a code is what
-    // lets you in, so reading one by its code is allowed; listing them is not.
+    // The codes: the team code (kind 'team') and the owner's own code (kind
+    // 'owner'). Knowing a code is what lets you in, so reading one by its
+    // code is allowed; listing them is not. Changing the team code is a new
+    // document plus deleting the old one.
     match /hub-invites/{code} {
       allow get: if signedIn();
       allow list: if isOwner();
-      allow create: if validInvite(code)
-        && (isOwner() || (claimingNow() && request.resource.data.role == 'owner'));
+      allow create: if validInvite(code) && (isOwner() || claimingNow());
       allow update: if isOwner() && validInvite(code);
       allow delete: if isOwner();
     }
     function validInvite(code) {
       let d = request.resource.data;
       return code.matches('^[A-Z2-9]{8}$')
-        && d.keys().hasOnly(['name', 'role', 'createdAt', 'createdBy'])
+        && d.keys().hasOnly(['name', 'role', 'kind', 'createdAt', 'createdBy'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 60
-        && d.role in ['member', 'owner'];
+        && d.role in ['member', 'owner']
+        && (!('kind' in d) || d.kind in ['team', 'owner']);
     }
 
     // One document per signed-in phone.
@@ -102,17 +105,23 @@ service cloud.firestore {
       allow get: if signedIn() && (request.auth.uid == uid || isOwner());
       allow list: if isOwner();
       allow create: if signedIn() && request.auth.uid == uid && joiningWith(request.resource.data);
-      // A phone may only touch its own "last seen" details.
-      allow update: if signedIn() && request.auth.uid == uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen', 'device']);
-      // Leaving on your own, or the owner removing someone.
+      // A phone may only touch its own "last seen" details and the name its
+      // owner goes by (self-reported, so the owner can tell phones apart).
+      allow update: if signedIn() && request.auth.uid == uid && validWho(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen', 'device', 'who']);
+      // Leaving on your own, or the owner signing phones out.
       allow delete: if signedIn() && (request.auth.uid == uid || isOwner());
     }
     function joiningWith(d) {
-      return d.keys().hasOnly(['invite', 'name', 'role', 'joinedAt', 'lastSeen', 'device'])
+      return d.keys().hasOnly(['invite', 'name', 'role', 'joinedAt', 'lastSeen', 'device', 'who'])
+        && validWho(d)
         && d.invite is string && existsAfter(invitePath(d.invite))
         && d.name == getAfter(invitePath(d.invite)).data.name
         && d.role == getAfter(invitePath(d.invite)).data.role;
+    }
+
+    function validWho(d) {
+      return !('who' in d) || (d.who is string && d.who.size() <= 60);
     }
 
     // ---- Glossary ----

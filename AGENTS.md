@@ -64,8 +64,8 @@ and hover still fire — measure them, do not assume.
 
 ## Team access — the Hub is for the team only
 
-Teammates get in with a personal invite code (Team access screen, owner
-only). The real lock is `firestore.rules` / `storage.rules`; once the owner
+Teammates get in with one shared team code, which the owner shares and can
+change on the Team access screen. The real lock is `firestore.rules` / `storage.rules`; once the owner
 turns practice mode off, anything that isn't a joined phone is refused, with
 no error on screen. So when you add something:
 

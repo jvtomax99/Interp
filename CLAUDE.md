@@ -126,9 +126,12 @@ activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 ```
 
-**Team access (invite codes).** The owner creates a code per teammate on the
-Team access screen; entering it signs the phone in anonymously and creates
-`hub-members/{uid}`. Every rule is `if team()` = joined phone OR practice
+**Team access (one team code).** Everyone types the same team code
+(`hub-invites/{CODE}`, kind `team`); the owner shares it and can change it on
+the Team access screen, optionally signing every other phone out. The owner
+has a separate owner code (kind `owner`) for their own phones. Entering a code
+signs the phone in anonymously and creates `hub-members/{uid}`, with `who` =
+the name set on that phone (self-reported). Every rule is `if team()` = joined phone OR practice
 mode. Practice mode (`hub-access/settings.practice`) is the owner's switch;
 while it's on nothing is enforced. The first owner is claimed once via
 `?setup=owner`. The AI endpoints check the same thing through
