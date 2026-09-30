@@ -115,7 +115,7 @@
   /* The greeting face (option D): it rests as drawn in index.html, then
      squishes, bounces and breaks into a big open laugh, and settles back.
      FACE_MS is the face's part of the sequence, starting when it appears. */
-  const FACE_MS=3300, FACE_AT=2280;
+  const FACE_MS=3300, FACE_AT=2380, CLOUD_AT=2880, SEQUENCE_END=9380;
   const FACE_POSES=[[0,{}],[1000,{}],[1180,{blush:1.05}],[1480,{open:1,blush:1.25,gl:2}],
     [1780,{open:.9,blush:1.25}],[2080,{open:1,blush:1.25}],[2600,{open:1,blush:1.2}],[3200,{}],[FACE_MS,{}]];
   const FACE_REST={open:0,blush:1,gl:0,sqL:0,sqR:0,heart:0,glint:-1};
@@ -309,6 +309,7 @@
 
   async function playGreeting(button, resume = null){
     clearTimeout(startupTimer);
+    startupWave=null; startupDeadline=0;
     idleStop();
     stopGreeting();
     activeSequence=resume;
@@ -366,7 +367,13 @@
     stopGreeting=stop;
     window.addEventListener('resize',resizeStop,{passive:true});
     observer=new IntersectionObserver(entries=>{
-      if(!entries[0].isIntersecting)stop();
+      if(entries[0].isIntersecting)return;
+      // A repaint of Home moves the greeting, and on a slow phone the observer
+      // can report that as "off screen" with an empty box. Stop only when the
+      // face really is out of view.
+      const r=button.getBoundingClientRect();
+      if(button.isConnected&&r.width>0&&r.bottom>0&&r.top<innerHeight)return;
+      stop();
     });
     observer.observe(button);
     function animate(el,frames,options){
@@ -388,38 +395,99 @@
     animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
     let messageAnnounced=false;
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
-    animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2610,easing:'ease-in-out'});
-    button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2840+i*550}));
-    // Connected-component bounds of the sixteen actual squares in the
-    // original 314 x 261 brand asset, including its diagonal squares.
-    const squareBounds=[[60,0,113,53],[152,9,193,44],[109,45,151,78],[54,55,107,108],[152,55,205,108],[207,61,259,113],[9,67,43,109],[44,109,78,151],[182,109,216,151],[0,147,52,200],[217,152,251,194],[54,153,107,206],[152,153,205,206],[109,182,151,216],[147,207,199,261],[66,217,108,251]];
-    const logoSize=74;
-    const shards=squareBounds.map((bounds,i)=>{
-      const [l,t,r,b]=bounds;
-      const x=((l+r)/2-129.5)*logoSize/261,y=((t+b)/2-130.5)*logoSize/261;
-      return {bounds,x,y,index:i,angle:Math.atan2(y,x),reach:95+(i%5)*12,spin:(i%2?1:-1)*(Math.PI*1.1+(i%4)*.65),orbit:(i%3===0?-1:1)*(1.3+(i%5)*.32),delay:260+(i%4)*40};
-    });
+    animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2710,easing:'ease-in-out'});
+    button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2940+i*550}));
+    /* The opening ("Sparkle Snap with Light Rays", picked by Jose): the
+       sixteen squares of the Hackensack mark fly in from the edges and snap
+       into a big logo, each landing with a sparkle; light rays fan out behind
+       it, a shine glides across the pieces (never a box around them), it gives
+       one heartbeat pulse, then spins down into the smiley with a flash and a
+       ring of gold stars. Everything is drawn from the sequence's own clock. */
+    const SQ=[[60,0,113,53],[152,9,193,44],[109,45,151,78],[54,55,107,108],[152,55,205,108],[207,61,259,113],[9,67,43,109],[44,109,78,151],[182,109,216,151],[0,147,52,200],[217,152,251,194],[54,153,107,206],[152,153,205,206],[109,182,151,216],[147,207,199,261],[66,217,108,251]];
+    const BIG=150,OPEN_END=3400;
     let lastFrame=null;
     button.classList.remove('home-wave-pending');
     const clamp=t=>Math.max(0,Math.min(1,t));
     const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
-    function position(p,ms){
-      const unfold=smooth((ms-p.delay)/1050);
-      const gather=smooth((ms-1530)/(830+(p.index%4)*22));
-      const angle=p.angle+p.orbit*unfold+(p.index%2?1:-1)*gather*2.45;
-      const dx=Math.cos(angle),dy=Math.sin(angle);
-      const rx=Math.min(p.reach,dx<0?cx-18:w-cx-18),ry=Math.min(p.reach,dy<0?cy-18:h-cy-35);
-      const x=(p.x*(1-unfold)+dx*rx*unfold)*(1-gather);
-      const y=(p.y*(1-unfold)+dy*ry*unfold)*(1-gather);
-      const depth=Math.sin(angle+p.index*.5)*unfold*(1-gather);
-      return {x:cx+x,y:cy+y,rotation:p.spin*(unfold+gather*.65),depth,scale:(1+depth*.16)*(1-gather*.88),alpha:clamp(ms/220)*(1-smooth((ms-2240)/260)),gather,unfold};
+    const win=(t,a,b)=>clamp((t-a)/(b-a));
+    const easeOut3=x=>1-Math.pow(1-clamp(x),3),easeIn3=x=>Math.pow(clamp(x),3);
+    const back=(x,k)=>{x=clamp(x);const c=k+1;return 1+c*Math.pow(x-1,3)+k*Math.pow(x-1,2);};
+    const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);};
+    // Soft glows are drawn once into small sprites; blurring every frame was the
+    // costliest part of the old spiral.
+    const sprite=rgb=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+      const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,`rgba(${rgb},1)`);gr.addColorStop(.35,`rgba(${rgb},.4)`);gr.addColorStop(1,`rgba(${rgb},0)`);
+      g.fillStyle=gr;g.fillRect(0,0,64,64);return c;};
+    const GLOW_BLUE=sprite('150,230,255'),GLOW_GOLD=sprite('255,222,150'),GLOW_WHITE=sprite('255,255,255');
+    const glowAt=(spr,x,y,r,a)=>{if(a<=0||r<=0)return;ctx.globalCompositeOperation='lighter';ctx.globalAlpha=a;ctx.drawImage(spr,x-r,y-r,r*2,r*2);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';};
+    // The squares get their own layer so the shine can touch only them.
+    const layer=document.createElement('canvas');layer.width=canvas.width;layer.height=canvas.height;
+    const lctx=layer.getContext('2d'),scalePx=canvas.width/w,reachFrom=Math.max(w,h);
+    const homeOf=(i,size)=>{const b=SQ[i];return {x:((b[0]+b[2])/2-129.5)*size/261,y:((b[1]+b[3])/2-130.5)*size/261};};
+    function star(x,y,r,rot,a,color){
+      if(a<=0||r<=0)return;ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalAlpha=a;ctx.fillStyle=color;
+      ctx.beginPath();ctx.moveTo(0,-r);ctx.quadraticCurveTo(0,0,r,0);ctx.quadraticCurveTo(0,0,0,r);ctx.quadraticCurveTo(0,0,-r,0);ctx.quadraticCurveTo(0,0,0,-r);ctx.fill();ctx.restore();
     }
-    function glow(x,y,r,alpha,warm){
-      if(alpha<=0)return;
-      const g=ctx.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,`rgba(${warm?'255,224,162':'160,236,255'},${alpha})`);
-      g.addColorStop(.32,`rgba(${warm?'255,200,116':'80,197,252'},${alpha*.4})`);
-      g.addColorStop(1,'rgba(80,197,252,0)');ctx.fillStyle=g;ctx.fillRect(x-r,y-r,r*2,r*2);
+    function ringAt(r,a,width,rgb){if(a<=0)return;ctx.beginPath();ctx.ellipse(cx,cy,r,r*.72,-.2,0,TAU);ctx.strokeStyle=`rgba(${rgb},${a.toFixed(3)})`;ctx.lineWidth=width;ctx.stroke();}
+    function drawOpening(t){
+      ctx.clearRect(0,0,w,h);
+      const collapse=smooth(win(t,1750,2350)),spin=easeIn3(win(t,1750,2350))*TAU*1.5;
+      const beat=Math.sin(Math.PI*win(t,1650,1780)),scale=1+.08*beat;
+      const rays=smooth(win(t,1050,1450))*(1-smooth(win(t,1800,2250)));
+      if(rays>0){
+        const len=Math.max(190,h*.62);
+        ctx.save();ctx.translate(cx,cy);ctx.rotate(t/1000*.6);ctx.globalCompositeOperation='lighter';
+        for(let n=0;n<10;n++){
+          ctx.rotate(TAU/10);const gr=ctx.createLinearGradient(0,0,0,-len);
+          gr.addColorStop(0,`rgba(190,235,255,${((.38+.2*beat)*rays).toFixed(3)})`);gr.addColorStop(1,'rgba(190,235,255,0)');
+          ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-16,-len);ctx.lineTo(16,-len);ctx.closePath();ctx.fill();
+        }
+        ctx.restore();
+      }
+      glowAt(GLOW_BLUE,cx,cy,100*(1-collapse*.6),(.42+.3*beat+.15*rays)*smooth(win(t,900,1300))*(1-collapse));
+      lctx.setTransform(1,0,0,1,0,0);lctx.clearRect(0,0,layer.width,layer.height);lctx.setTransform(scalePx,0,0,scalePx,0,0);
+      const size=BIG*scale*(1-.92*collapse),alpha=clamp(t/120)*(1-smooth(win(t,2300,2420)));
+      const cos=Math.cos(spin),sin=Math.sin(spin),landings=[];
+      const ready=mark.complete&&mark.naturalWidth;
+      for(let i=0;i<16;i++){
+        const hm=homeOf(i,BIG),st=80+(i%8)*55,side=i%2?1:-1;
+        const a0=rnd(i)*TAU,fx=cx+Math.cos(a0)*reachFrom*.8,fy=cy+Math.sin(a0)*reachFrom*.6;
+        const k=scale*(1-.92*collapse),tx=cx+(hm.x*k)*cos-(hm.y*k)*sin,ty=cy+(hm.x*k)*sin+(hm.y*k)*cos;
+        const at=ff=>[fx+(tx-fx)*ff,fy+(ty-fy)*ff+Math.sin(Math.PI*clamp(ff))*-40*side];
+        const f=back(win(t,st,st+700),1.3),[x,y]=at(f);
+        if(f>0&&f<1){
+          const pts=[];for(let j=5;j>=0;j--)pts.push(at(back(win(t-j*16,st,st+700),1.3)));
+          for(let j=1;j<pts.length;j++){const q=j/pts.length;ctx.beginPath();ctx.moveTo(pts[j-1][0],pts[j-1][1]);ctx.lineTo(pts[j][0],pts[j][1]);
+            ctx.strokeStyle=`rgba(140,220,255,${(.35*q).toFixed(3)})`;ctx.lineWidth=3*q;ctx.lineCap='round';ctx.stroke();}
+        }
+        const b=SQ[i],s=size/261,dw=(b[2]-b[0])*s,dh=(b[3]-b[1])*s;
+        glowAt(GLOW_BLUE,x,y,Math.max(dw,dh)*1.15,alpha*.55);
+        if(ready&&alpha>0){
+          lctx.save();lctx.translate(x,y);lctx.rotate((1-clamp(f))*4*side+spin);lctx.globalAlpha=alpha;
+          lctx.drawImage(mark,b[0]/314*mark.naturalWidth,b[1]/261*mark.naturalHeight,(b[2]-b[0])/314*mark.naturalWidth,(b[3]-b[1])/261*mark.naturalHeight,-dw/2,-dh/2,dw,dh);
+          lctx.restore();
+        }
+        const land=win(t,st+700,st+1100);if(land>0&&land<1)landings.push([tx,ty,land,i]);
+      }
+      const shine=win(t,1250,1650);
+      if(shine>0&&shine<1){
+        const gx=cx-BIG+shine*BIG*2,gr=lctx.createLinearGradient(gx-26,cy-60,gx+26,cy+60);
+        gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.5,'rgba(255,255,255,.85)');gr.addColorStop(1,'rgba(255,255,255,0)');
+        lctx.globalCompositeOperation='source-atop';lctx.fillStyle=gr;lctx.fillRect(0,0,w,h);lctx.globalCompositeOperation='source-over';
+      }
+      ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(layer,0,0);ctx.restore();
+      // each square clicks into place with a ripple and a few sparkles
+      for(const [x,y,a,i] of landings){
+        ctx.beginPath();ctx.arc(x,y,6+16*easeOut3(a),0,TAU);ctx.strokeStyle=`rgba(200,240,255,${((1-a)*.8).toFixed(3)})`;ctx.lineWidth=1.4;ctx.stroke();
+        for(let n=0;n<3;n++){const ang=n*2.1+i,d=8+16*easeOut3(a);star(x+Math.cos(ang)*d,y+Math.sin(ang)*d,4*(1-a),a*3,1-a,n%2?'#FFFFFF':'#FFE27A');}
+      }
+      const fl=win(t,2330,2780);
+      if(fl>0&&fl<1){glowAt(GLOW_WHITE,cx,cy,30+90*fl,(1-fl)*.95);ringAt(20+150*easeOut3(fl),(1-fl)*.8,2.4,'214,244,255');ringAt(10+100*easeOut3(fl),(1-fl)*.55,1.2,'255,226,168');}
+      const bst=win(t,2360,3300);
+      if(bst>0&&bst<1)for(let n=0;n<14;n++){
+        const ang=n/14*TAU,d=18+100*easeOut3(bst),sx=cx+Math.cos(ang)*d*1.3,sy=cy+Math.sin(ang)*d*.8;
+        glowAt(GLOW_GOLD,sx,sy,14*(1-bst),(1-bst)*.8);star(sx,sy,9*(1-bst*.7),bst*4,1-bst,n%2?'#FFFFFF':'#FFD45A');
+      }
     }
     function draw(now){
       if(!button.isConnected){stop();return;}
@@ -431,50 +499,36 @@
       animations.forEach(a=>{a.currentTime=elapsed;});
       if(elapsed<FACE_AT+FACE_MS)setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
       else if(!idleRunning&&!sequence.idled){sequence.idled=true;setFace(faceSvg,FACE_REST);startIdle(button);}
-      thought.update(Math.max(0,elapsed-2780));
-      if(elapsed>=2780&&!messageAnnounced){messageAnnounced=true;thought.announce(0);}
+      thought.update(Math.max(0,elapsed-CLOUD_AT));
+      if(elapsed>=CLOUD_AT&&!messageAnnounced){messageAnnounced=true;thought.announce(0);}
       if(elapsed>=FACE_AT+FACE_MS)hasWavedHello=true;
-      if(elapsed>=9280){stop();return;}
-      if(elapsed>=3250){ctx.clearRect(0,0,w,h);frame=requestAnimationFrame(draw);return;}
-      ctx.clearRect(0,0,w,h);
-      glow(cx,cy,68,.16*(1-clamp(elapsed/1800)),false);
-      const drawOrder=shards.map(p=>({p,v:position(p,elapsed)})).sort((a,b)=>a.v.depth-b.v.depth);
-      for(const {p,v} of drawOrder){
-        if(v.alpha<=0)continue;
-        // Short tapered trails follow the actual trajectory, with no fixed rings.
-        for(let j=7;j>0;j--){
-          const a=position(p,Math.max(0,elapsed-j*13)),b=position(p,Math.max(0,elapsed-(j-1)*13));
-          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
-          ctx.strokeStyle=`rgba(133,226,255,${v.alpha*v.unfold*(1-j/8)*.24})`;
-          ctx.lineWidth=.5+(1-j/8)*1.1;ctx.lineCap='round';ctx.stroke();
-        }
-        const [l,top,r,bottom]=p.bounds;
-        const sw=(r-l)/314*mark.naturalWidth,sh=(bottom-top)/261*mark.naturalHeight;
-        const scale=logoSize/261*v.scale,dw=(r-l)*scale,dh=(bottom-top)*scale;
-        ctx.save();ctx.translate(v.x,v.y);ctx.rotate(v.rotation);ctx.globalAlpha=v.alpha*(.85+.15*(v.depth+1)/2);
-        ctx.shadowColor='rgba(179,240,255,.9)';ctx.shadowBlur=4+3*(v.depth+1)/2;
-        if(mark.complete&&mark.naturalWidth)ctx.drawImage(mark,l/314*mark.naturalWidth,top/261*mark.naturalHeight,sw,sh,-dw/2,-dh/2,dw,dh);
-        ctx.restore();
-      }
-      // Light gathers with the returning pieces, warming as the gold pin appears.
-      const gatherLight=Math.sin(Math.PI*clamp((elapsed-1880)/920));
-      glow(cx,cy,54,gatherLight*.32,elapsed>2300);
-      if(elapsed>2380&&elapsed<3180){
-        const t=(elapsed-2380)/800,fade=Math.pow(1-t,2);
-        ctx.beginPath();ctx.ellipse(cx,cy,10+t*47,8+t*32,-.3,0,TAU);
-        ctx.strokeStyle=`rgba(214,244,255,${fade*.4})`;ctx.lineWidth=1;ctx.stroke();
-        for(let i=0;i<9;i++){
-          const a=i*2.39996,rad=18+t*(25+i%3*9);
-          const x=cx+Math.cos(a)*rad,y=cy+Math.sin(a)*rad*.65;
-          ctx.fillStyle=`rgba(${i%3?'199,240,255':'255,226,168'},${fade*.75})`;
-          ctx.beginPath();ctx.arc(x,y,.7+(i%3)*.3,0,TAU);ctx.fill();
-        }
-      }
-      if(elapsed>=3250)ctx.clearRect(0,0,w,h);
+      if(elapsed>=SEQUENCE_END){stop();return;}
+      if(elapsed<OPEN_END)drawOpening(elapsed);
+      else if(!sequence.cleared){sequence.cleared=true;ctx.clearRect(0,0,w,h);}
       frame=requestAnimationFrame(draw);
     }
     frame=requestAnimationFrame(draw);
   }
+
+  /* Opening the app repaints Home several times as data arrives, and the
+     phone is busiest right then. Start the opening once repainting has been
+     quiet for a moment (index.html fires ih:home-paint on every Home paint),
+     but never wait more than STARTUP_MAX_WAIT. */
+  const STARTUP_QUIET=500, STARTUP_MAX_WAIT=2400;
+  let startupWave=null, startupDeadline=0;
+  function scheduleStartup(wave){
+    startupWave=wave;
+    const now=performance.now();
+    if(!startupDeadline)startupDeadline=now+STARTUP_MAX_WAIT;
+    clearTimeout(startupTimer);
+    startupTimer=setTimeout(()=>{
+      startupDeadline=0;const w=startupWave;startupWave=null;
+      if(w&&w.isConnected&&!hasWavedHello)playGreeting(w);
+    },Math.max(0,Math.min(STARTUP_QUIET,startupDeadline-now)));
+  }
+  document.addEventListener('ih:home-paint',()=>{
+    if(startupWave&&startupWave.isConnected&&!hasWavedHello&&!activeSequence)scheduleStartup(startupWave);
+  });
 
   window.initHomeGreeting = function(content){
     const wave=content && content.querySelector('.home-wave-icon');
@@ -503,11 +557,11 @@
     lastGreetingWave={el:wave,play};
     // Wait for startup rebuilds to settle. If already playing, keep the
     // original clock and message rather than restarting the logo and hand.
-    if(resume && resume.elapsed<9280){
+    if(resume && resume.elapsed<SEQUENCE_END){
       playGreeting(wave,resume);
     }else if(!hasWavedHello){
       if(!reduced.matches)wave.classList.add('home-wave-pending');
-      startupTimer=setTimeout(()=>{if(wave.isConnected)play();},400);
+      scheduleStartup(wave);
     }else{
       // Home was rebuilt after the hello already played: carry on idling.
       startIdle(wave);
@@ -620,6 +674,10 @@
   }
 
   function initHeroDecor(content){
+    // index.html keeps the same greeting across repaints of Home; its petals
+    // are already falling, so leave them be.
+    const kept = content && content.querySelector('.home-greeting');
+    if(kept && kept.dataset.decorReady && kept.querySelector('.home-petals')) return;
     decorObservers.forEach(o => o.disconnect());
     decorObservers = [];
     const hero = content && content.querySelector('.home-greeting');
@@ -630,6 +688,7 @@
     ensurePetalDefs();
 
     const petals = buildPetals(hero);
+    hero.dataset.decorReady = '1';
     const scrim = hero.querySelector('.home-greeting-scrim');
     hero.insertBefore(petals, scrim ? scrim.nextSibling : hero.firstChild);
 

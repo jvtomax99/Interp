@@ -12366,6 +12366,7 @@ let lastHomeHtml = '';
    cache is only valid while the very element we filled is still in the page
    and still has children. */
 let lastPaintedContentEl = null;
+let keptGreeting = null, keptGreetingSig = '';
 
 /* ---- Banner depth ----
    The hero photo drifts more slowly than the page, so the building reads as
@@ -12435,6 +12436,22 @@ function renderContent(){
     lastHomeHtml = homeHtml;
     lastPaintedContentEl = content;
     content.innerHTML = homeHtml;
+    // Keep the greeting that is already on screen when a repaint would draw
+    // the same one. Opening the app repaints Home once per collection that
+    // arrives, and replacing the greeting mid-way restarted its opening
+    // animation -- the glitch Jose saw. Only on a repaint of Home itself;
+    // arriving on Home still builds a fresh greeting.
+    const freshGreeting = content.querySelector('#homeGreeting');
+    if(freshGreeting){
+      const sig = freshGreeting.outerHTML;
+      if(sameScreen && keptGreeting && keptGreeting !== freshGreeting && keptGreetingSig === sig){
+        freshGreeting.replaceWith(keptGreeting);
+      } else {
+        keptGreeting = freshGreeting;
+        keptGreetingSig = sig;
+      }
+    }
+    document.dispatchEvent(new Event('ih:home-paint'));
     if(typeof initHomeGreeting === 'function') initHomeGreeting(content);
     if(typeof initHomeRails === 'function') initHomeRails(content);
     startGreetingRotation();
@@ -14871,7 +14888,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0930.1441';
+const BUILD_ID = 'b0930.1526';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
