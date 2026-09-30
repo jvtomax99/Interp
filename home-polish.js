@@ -26,62 +26,88 @@
     previousMessage=next;
     return encouragements[next];
   }
-  function buildThought(bubble){
-    const source=document.createElement('canvas');source.width=source.height=288;
-    const c=source.getContext('2d');
-    c.font='192px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-    c.textBaseline='top';c.fillText('💭',32,16);
-    const pixels=c.getImageData(0,0,288,288).data,seen=new Uint8Array(288*288);
-    const queue=new Int32Array(288*288),parts=[];
-    for(let seed=0;seed<seen.length;seed++){
-      if(seen[seed]||pixels[seed*4+3]<12)continue;
-      let head=0,tail=1,minX=288,minY=288,maxX=0,maxY=0;
-      queue[0]=seed;seen[seed]=1;
-      while(head<tail){
-        const v=queue[head++],x=v%288,y=Math.floor(v/288);
-        minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
-        for(const n of [x>0?v-1:-1,x<287?v+1:-1,y>0?v-288:-1,y<287?v+288:-1]){
-          if(n>=0&&!seen[n]&&pixels[n*4+3]>=12){seen[n]=1;queue[tail++]=n;}
-        }
-      }
-      if(tail>12)parts.push({x:minX,y:minY,w:maxX-minX+1,h:maxY-minY+1,size:tail,indices:queue.slice(0,tail)});
+  /* The thought cloud (option C "Sparkle Float", in blue). Drawn, not built
+     from the 💭 emoji: that meant a pixel flood-fill on every hello. It lands
+     with a jelly wobble, types its message, floats up while gold sparkles and
+     mini Hackensack marks twinkle, then drifts away. update(ms) is driven by
+     the greeting's own clock, starting when the cloud begins to appear. */
+  const CLOUD_BUMPS=[[26,46,19],[46,30,22],[72,24,25],[99,31,21],[117,47,16],[96,56,19],[64,59,20],[34,58,15]];
+  const cloudShapes='<rect x="14" y="34" width="112" height="36" rx="18"/>'+CLOUD_BUMPS.map(b=>`<circle cx="${b[0]}" cy="${b[1]}" r="${b[2]}"/>`).join('');
+  const CLOUD_DOTS=[{x:-15,y:37,r:3.2},{x:-5,y:27,r:5}];
+  const CLOUD_SPARKS=[[8,8],[132,14],[124,74],[58,-4]];
+  const CLOUD_MARKS=[[4,10],[136,6],[128,78],[64,-10],[100,-8]];
+  let cloudSeq=0;
+  function splitMessage(text){
+    const words=String(text).split(/\s+/);
+    if(words.length<2)return [text,''];
+    let best=[text,''],score=1e9;
+    for(let i=1;i<words.length;i++){
+      const a=words.slice(0,i).join(' '),b=words.slice(i).join(' ');
+      const sc=Math.max(a.length,b.length);
+      if(sc<score){score=sc;best=[a,b];}
     }
-    parts.sort((a,b)=>b.size-a.size);
-    const targets=[bubble.querySelector('.home-wave-cloud'),bubble.querySelector('.home-wave-dot-near'),bubble.querySelector('.home-wave-dot-far')];
-    targets.forEach((target,i)=>{
-      const part=parts[i];target.width=part?part.w:20;target.height=part?part.h:20;
-      const out=target.getContext('2d');
-      if(part){
-        const isolated=out.createImageData(part.w,part.h);
-        for(const v of part.indices){
-          const dst=((Math.floor(v/288)-part.y)*part.w+(v%288-part.x))*4;
-          isolated.data.set(pixels.subarray(v*4,v*4+4),dst);
-        }
-        out.putImageData(isolated,0,0);
-      }
-      else{out.fillStyle='#f5f7ff';out.beginPath();out.ellipse(10,10,9,8,0,0,Math.PI*2);out.fill();}
-    });
+    return best;
   }
-
   function createThought(button, text){
     const hero=button.closest('.home-greeting');
+    const id='hc'+(++cloudSeq);
+    const message=text || chooseMessage();
+    const lines=splitMessage(message);
     const bubble=document.createElement('span');
     bubble.className='home-wave-thought';bubble.setAttribute('aria-hidden','true');
-    const cloud=document.createElement('canvas');cloud.className='home-wave-cloud';
-    const near=document.createElement('canvas');near.className='home-wave-dot home-wave-dot-near';
-    const far=document.createElement('canvas');far.className='home-wave-dot home-wave-dot-far';
-    const message=document.createElement('span');message.className='home-wave-message';message.textContent=text || chooseMessage();
-    bubble.append(cloud,near,far,message);
+    bubble.innerHTML=`<svg class="home-wave-cloudsvg" viewBox="-30 -20 180 110" width="180" height="110" focusable="false">
+      <defs>
+        <linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4FAFF"/><stop offset=".5" stop-color="#CFE8FF"/><stop offset="1" stop-color="#92CDF5"/></linearGradient>
+        <clipPath id="${id}c">${cloudShapes}</clipPath>
+        <filter id="${id}s" x="-25%" y="-25%" width="150%" height="170%"><feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#8FD8FF" flood-opacity=".85"/><feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0B2340" flood-opacity=".3"/></filter>
+        <filter id="${id}b"><feGaussianBlur stdDeviation="2.5"/></filter>
+      </defs>
+      ${CLOUD_DOTS.map((d,i)=>`<circle class="hc-dot" cx="${d.x}" cy="${d.y}" r="${d.r}" fill="#E3F3FF" stroke="#fff" stroke-width="1.5" filter="url(#${id}s)"/>`).join('')}
+      <g class="hc-body">
+        <g filter="url(#${id}s)"><g fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round">${cloudShapes}</g><g fill="url(#${id}g)">${cloudShapes}</g></g>
+        <g clip-path="url(#${id}c)"><ellipse cx="52" cy="18" rx="24" ry="7" fill="#fff" opacity=".85" filter="url(#${id}b)"/><circle cx="102" cy="24" r="3" fill="#fff"/></g>
+        <text x="70" y="41" text-anchor="middle" class="hc-text"><tspan class="hc-l1" x="70"></tspan><tspan class="hc-l2" x="70" dy="15"></tspan></text>
+      </g>
+      ${CLOUD_SPARKS.map((p,i)=>`<path class="hc-spark" d="M0 -6 Q0 0 6 0 Q0 0 0 6 Q0 0 -6 0 Q0 0 0 -6Z" fill="${i%2?'#fff':'#FFE27A'}" opacity="0"/>`).join('')}
+      ${CLOUD_MARKS.map(()=>`<image class="hc-mark" href="./hmh-mark.png" width="16" height="13.3" x="-8" y="-6.6" opacity="0"/>`).join('')}
+    </svg>`;
     // Escape the greeting card's clipping and backdrop-filter layers.
     document.body.appendChild(bubble);
-    buildThought(bubble);
     const b=button.getBoundingClientRect();
     const left=Math.max(8,Math.min(b.left+88,document.documentElement.clientWidth-144));
     bubble.style.left=(left+window.scrollX)+'px';
     bubble.style.top=(b.top+window.scrollY-10)+'px';
+    const q=sel=>[...bubble.querySelectorAll(sel)];
+    const body=bubble.querySelector('.hc-body'),dots=q('.hc-dot'),sparks=q('.hc-spark'),marks=q('.hc-mark');
+    const l1=bubble.querySelector('.hc-l1'),l2=bubble.querySelector('.hc-l2');
+    const clamp=x=>x<0?0:x>1?1:x,sm=x=>{x=clamp(x);return x*x*(3-2*x);},win=(t,a,b)=>clamp((t-a)/(b-a));
+    const back=(x,k)=>{x=clamp(x);const c=k+1;return 1+c*Math.pow(x-1,3)+k*Math.pow(x-1,2);};
+    let shownChars=-1;
+    function update(ms){
+      const t=ms/1000,a=t-.3;
+      const jig=a<0?0:Math.exp(-4.2*a)*Math.sin(a*22),grow=a<0?0:back(a/.45,1.6);
+      const out=win(t,5.3,6.2);
+      const ty=-6*sm(win(t,.9,5.3))-1.5*Math.sin(Math.PI*2*t/2)-18*sm(out);
+      const op=(a<0?0:1)*(1-sm(out));
+      bubble.style.opacity=op>0||t<.4?'1':'0';
+      body.setAttribute('transform',`translate(0 ${ty.toFixed(2)}) translate(20 64) scale(${Math.max(0,grow+.1*jig).toFixed(4)} ${Math.max(0,grow-.1*jig).toFixed(4)}) translate(-20 -64)`);
+      body.setAttribute('opacity',op.toFixed(3));
+      [back(win(t,0,.2),2.2),back(win(t,.1,.3),2.2)].forEach((v,i)=>{
+        v*=1-sm(win(t,5.2,5.5));const d=CLOUD_DOTS[i];
+        dots[i].setAttribute('transform',`translate(${d.x} ${d.y}) scale(${Math.max(0,v).toFixed(3)}) translate(${-d.x} ${-d.y})`);
+      });
+      const total=lines[0].length+lines[1].length,chars=Math.floor(clamp((t-.75)/.8)*total);
+      if(chars!==shownChars){shownChars=chars;l1.textContent=lines[0].slice(0,chars);l2.textContent=lines[1].slice(0,Math.max(0,chars-lines[0].length));}
+      const lit=t>.9&&t<5.4;
+      sparks.forEach((el,i)=>{const ph=(t*1.3+i*.27)%1,sc=lit?Math.sin(Math.PI*ph)*1.2:0,p=CLOUD_SPARKS[i];
+        el.setAttribute('opacity',sc>0?1:0);el.setAttribute('transform',`translate(${p[0]} ${(p[1]+ty).toFixed(1)}) rotate(${(ph*90).toFixed(1)}) scale(${sc.toFixed(3)})`);});
+      marks.forEach((el,i)=>{const ph=(t*.55+i*.21)%1,p=CLOUD_MARKS[i],on=lit?Math.sin(Math.PI*ph)*op:0;
+        el.setAttribute('opacity',on.toFixed(3));el.setAttribute('transform',`translate(${p[0]} ${(p[1]+ty-8*ph).toFixed(1)}) rotate(${(ph*40-20).toFixed(1)}) scale(${(.8+.5*Math.sin(Math.PI*ph)).toFixed(3)})`);});
+    }
+    update(0);
     let announced=0,expire=0;
     const status=hero.querySelector('.home-wave-status');
-    return {bubble,announce(delay){announced=setTimeout(()=>{if(status)status.textContent=message.textContent;},delay);},
+    return {bubble,update,announce(delay){announced=setTimeout(()=>{if(status)status.textContent=message;},delay);},
       expire(fn){expire=setTimeout(fn,6500);},
       remove(){clearTimeout(announced);clearTimeout(expire);bubble.remove();if(status)status.textContent='';}};
   }
@@ -291,7 +317,7 @@
     if(document.hidden || !button.isConnected) return;
     if(reduced.matches || !button.animate){
       const thought=createThought(button);
-      thought.bubble.style.opacity='1';thought.announce(0);
+      thought.update(2500);thought.announce(0);
       const width=window.innerWidth;
       const resizeStop=()=>{if(window.innerWidth!==width)stop();};
       const stop=()=>{thought.remove();window.removeEventListener('resize',resizeStop);if(stopGreeting===stop)stopGreeting=()=>{};};
@@ -361,16 +387,6 @@
     const waveFrames=Array.from({length:166},(_,i)=>({offset:i/165,...faceBody(i/165*FACE_MS)}));
     animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
     let messageAnnounced=false;
-    animate(thought.bubble,[
-      {opacity:0,transform:'translate(-4px,5px) rotate(-9deg) scale(.55,.7)'},
-      {opacity:1,transform:'translate(0,-2px) rotate(3deg) scale(1.08,.95)',offset:0.048462},
-      {opacity:1,transform:'translate(0,0) rotate(-1deg) scale(.99,1.025)',offset:0.075385},
-      {opacity:1,transform:'translate(0,0) rotate(0deg) scale(1)',offset:0.113077},
-      {opacity:1,transform:'translate(0,-3px) rotate(1deg) scale(1)',offset:0.258462},
-      {opacity:1,transform:'translate(0,0) rotate(-1deg) scale(1)',offset:0.387692},
-      {opacity:1,transform:'translate(0,-1px) rotate(0deg) scale(1)',offset:0.946154},
-      {opacity:0,transform:'translate(0,-7px) rotate(5deg) scale(.9)'}
-    ],{duration:6500,delay:2780,easing:'ease-in-out'});
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
     animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2610,easing:'ease-in-out'});
     button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2840+i*550}));
@@ -415,6 +431,7 @@
       animations.forEach(a=>{a.currentTime=elapsed;});
       if(elapsed<FACE_AT+FACE_MS)setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
       else if(!idleRunning&&!sequence.idled){sequence.idled=true;setFace(faceSvg,FACE_REST);startIdle(button);}
+      thought.update(Math.max(0,elapsed-2780));
       if(elapsed>=2780&&!messageAnnounced){messageAnnounced=true;thought.announce(0);}
       if(elapsed>=FACE_AT+FACE_MS)hasWavedHello=true;
       if(elapsed>=9280){stop();return;}
