@@ -86,6 +86,56 @@
       remove(){clearTimeout(announced);clearTimeout(expire);bubble.remove();if(status)status.textContent='';}};
   }
 
+  /* The greeting face (option D): it rests as drawn in index.html, then
+     squishes, bounces and breaks into a big open laugh, and settles back.
+     FACE_MS is the face's part of the sequence, starting when it appears. */
+  const FACE_MS=3300, FACE_AT=2280;
+  const FACE_POSES=[[0,{}],[1000,{}],[1180,{blush:1.05}],[1480,{open:1,blush:1.25,gl:2}],
+    [1780,{open:.9,blush:1.25}],[2080,{open:1,blush:1.25}],[2600,{open:1,blush:1.2}],[3200,{}],[FACE_MS,{}]];
+  const FACE_REST={open:0,blush:1,gl:0};
+  function facePose(t){
+    let i=0;while(i<FACE_POSES.length-2&&t>FACE_POSES[i+1][0])i++;
+    const a=FACE_POSES[i],b=FACE_POSES[i+1];
+    let u=Math.max(0,Math.min(1,(t-a[0])/(b[0]-a[0])));u=u*u*(3-2*u);
+    const out={};
+    for(const k in FACE_REST){const va=k in a[1]?a[1][k]:FACE_REST[k],vb=k in b[1]?b[1][k]:FACE_REST[k];out[k]=va+(vb-va)*u;}
+    return out;
+  }
+  function setFace(svg,P){
+    if(!svg||!svg.querySelector)return;
+    const o=P.open,w=12+9*o,cornerY=72,topY=cornerY+7*(1-o),botY=topY+1+34*o;
+    const d=`M${(60-w).toFixed(2)} ${cornerY} Q60 ${topY.toFixed(2)} ${(60+w).toFixed(2)} ${cornerY} Q60 ${botY.toFixed(2)} ${(60-w).toFixed(2)} ${cornerY} Z`;
+    svg.querySelectorAll('.hf-mouth,.hf-mclip').forEach(el=>el.setAttribute('d',d));
+    const tongue=svg.querySelector('.hf-tongue');
+    if(tongue){tongue.setAttribute('cy',(cornerY+17*o+4).toFixed(2));tongue.setAttribute('rx',(w*.72).toFixed(2));tongue.setAttribute('ry',(10*o).toFixed(2));}
+    svg.querySelectorAll('.hf-blush').forEach(el=>{
+      const x=+el.dataset.x,bw=16*P.blush,bh=7*Math.sqrt(P.blush);
+      el.setAttribute('x',(x-bw/2).toFixed(2));el.setAttribute('y',(63-bh/2).toFixed(2));
+      el.setAttribute('width',bw.toFixed(2));el.setAttribute('height',bh.toFixed(2));el.setAttribute('rx',(bh/2).toFixed(2));
+    });
+    const glasses=svg.querySelector('.hf-glasses');
+    if(glasses)glasses.setAttribute('transform',`translate(0 ${(-P.gl).toFixed(2)})`);
+  }
+  // Squash, lift and tilt of the whole face, sampled for the Web Animation.
+  function faceBody(t){
+    const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
+    let sx=1,sy=1,y=0,angle=0,opacity=1;
+    if(t<440){
+      const p=t/440,spring=1-Math.exp(-6*p)*Math.cos(8*p),settle=Math.sin(Math.PI*p);
+      sx=.08+.92*spring+.09*settle;sy=.08+.92*spring-.07*settle;
+      angle=-14*(1-p)*(1-p);y=8*(1-p)-6*settle;opacity=Math.min(1,p*5);
+    }else if(t>=1000&&t<1180){
+      const a=smooth((t-1000)/180);sx=1+.08*a;sy=1-.08*a;y=2*a;
+    }else if(t>=1180&&t<1480){
+      const g=(t-1180)/300,e=smooth(g),arc=Math.sin(Math.PI*g);
+      sx=1+.08*(1-e)-.06*arc;sy=1-.08*(1-e)+.07*arc;y=2*(1-e)-9*arc;angle=4*arc;
+    }else if(t>=1480&&t<2600){
+      const k=(t-1480)/1120,bounce=Math.abs(Math.sin(Math.PI*3*k))*(1-.6*k);
+      y=-4*bounce;sx=1+.025*(1-bounce)*(1-k);sy=1-.025*(1-bounce)*(1-k);angle=3*Math.sin(TAU*1.5*k)*(1-k);
+    }
+    return {opacity,transform:`translate3d(0,${y.toFixed(2)}px,0) rotate(${angle.toFixed(2)}deg) scale(${sx.toFixed(4)},${sy.toFixed(4)})`};
+  }
+
   async function playGreeting(button, resume = null){
     clearTimeout(startupTimer);
     stopGreeting();
@@ -104,7 +154,8 @@
     }
     button.classList.add('home-wave-pending');
     try {
-      await Promise.all([mark.decode(), button.querySelector('.home-wave-art').decode()]);
+      const artwork=button.querySelector('.home-wave-art');
+      await Promise.all([mark.decode(), artwork && artwork.decode ? artwork.decode() : null]);
     } catch(e) { if(request===requestId){activeSequence=null;button.classList.remove('home-wave-pending');}return; } // Keep the static hand when artwork is unavailable.
     if(request !== requestId || !button.isConnected || reduced.matches || document.hidden){
       if(request === requestId)button.classList.remove('home-wave-pending');
@@ -113,6 +164,7 @@
     const hero = button.closest('.home-greeting');
     if(!hero) return;
     const art = button.querySelector('.home-wave-pin');
+    const faceSvg = button.querySelector('.home-face');
     const halo = button.querySelector('.home-wave-halo');
     const canvas = document.createElement('canvas');
     canvas.className = 'home-wave-canvas';
@@ -132,6 +184,7 @@
       if(activeSequence===sequence)activeSequence=null;
       animations.forEach(a=>{a.onfinish=null;a.cancel();});
       animations=[];
+      setFace(faceSvg,FACE_REST);
       canvas.remove();
       thought.remove();
       if(observer)observer.disconnect();
@@ -158,34 +211,9 @@
     // enough for those pieces and avoids a costly full-width 2x canvas.
     const desktop=window.innerWidth>=901;
     const dpr=desktop?1:Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
-    // Separate the spring entrance from the greeting. Sample a continuous
-    // wrist swing so each reversal is smooth, with smaller final waves.
-    const waveFrames=Array.from({length:161},(_,i)=>{
-      const time=i/160*2300;
-      let angle=8,sx=1,sy=1,x=0,y=0,opacity=1;
-      if(time<440){
-        const p=time/440;
-        const spring=1-Math.exp(-6*p)*Math.cos(8*p);
-        const settle=Math.sin(Math.PI*p);
-        sx=.08+.92*spring+.09*settle;
-        sy=.08+.92*spring-.07*settle;
-        angle=8-22*(1-p)*(1-p);
-        y=8*(1-p)-6*Math.sin(Math.PI*p);
-        opacity=Math.min(1,p*5);
-      }else{
-        const p=(time-440)/1860;
-        const easeIn=Math.sin(Math.min(1,p/.075)*Math.PI/2);
-        const envelope=easeIn*Math.pow(1-p,.8);
-        const swing=Math.sin(TAU*3.15*p);
-        const hop=Math.pow(Math.sin(Math.PI*2*p),2)*Math.pow(1-p,1.5);
-        angle=8+31*swing*envelope;
-        x=1.8*swing*envelope;y=-4.5*hop;
-        sx=1+.035*Math.abs(swing)*envelope;
-        sy=1-.025*Math.abs(swing)*envelope;
-      }
-      return {offset:i/160,opacity,transform:`translate3d(${x}px,${y}px,0) rotate(${angle}deg) scale(${sx},${sy})`};
-    });
-    animate(art,waveFrames,{duration:2300,delay:2280,fill:'backwards',easing:'linear'});
+    // The face springs in, rests as drawn, then squishes and pops into a laugh.
+    const waveFrames=Array.from({length:166},(_,i)=>({offset:i/165,...faceBody(i/165*FACE_MS)}));
+    animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
     let messageAnnounced=false;
     animate(thought.bubble,[
       {opacity:0,transform:'translate(-4px,5px) rotate(-9deg) scale(.55,.7)'},
@@ -239,8 +267,9 @@
       lastFrame=now;
       const elapsed=sequence.elapsed;
       animations.forEach(a=>{a.currentTime=elapsed;});
+      setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
       if(elapsed>=2780&&!messageAnnounced){messageAnnounced=true;thought.announce(0);}
-      if(elapsed>=4580)hasWavedHello=true;
+      if(elapsed>=FACE_AT+FACE_MS)hasWavedHello=true;
       if(elapsed>=9280){stop();return;}
       if(elapsed>=3250){ctx.clearRect(0,0,w,h);frame=requestAnimationFrame(draw);return;}
       ctx.clearRect(0,0,w,h);

@@ -604,10 +604,10 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:64px;height:64px;flex:none;margin:-6px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
 #content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
 #content.is-home .home-wave-icon:focus-visible{outline:2px solid #d8f9ff;outline-offset:3px;}
-#content.is-home .home-wave-pin{position:absolute;width:47px;height:51px;left:8.5px;top:6.5px;transform:rotate(8deg);transform-origin:60% 88%;filter:drop-shadow(0 2px 1px #67411380) drop-shadow(0 5px 5px #072b4580) drop-shadow(0 0 3px #ffdfac45);pointer-events:none;}
+#content.is-home .home-wave-pin{position:absolute;width:60px;height:60px;left:2px;top:2px;transform-origin:50% 90%;filter:drop-shadow(0 2px 2px #0b234073) drop-shadow(0 6px 8px #072b4559);pointer-events:none;}
 #content.is-home .home-wave-art{display:block;width:100%;height:100%;object-fit:contain;filter:none;}
 #content.is-home .home-wave-halo{position:absolute;inset:-9px;z-index:-1;border-radius:50%;background:radial-gradient(ellipse,#a4f3ff50 0%,#39c7f92b 30%,#74b5ff0c 55%,transparent 72%);opacity:.55;transform:scale(.85);pointer-events:none;}
-#content.is-home .home-wave-shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 34%,#fff1 42%,#fff9 48%,#fff3 54%,transparent 62%);background-size:300% 100%;background-position:100% 0;mask:url('./wave-hand.png') center/contain no-repeat;-webkit-mask:url('./wave-hand.png') center/contain no-repeat;opacity:0;pointer-events:none;}
+#content.is-home .home-wave-shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 34%,#fff1 42%,#fff9 48%,#fff3 54%,transparent 62%);background-size:300% 100%;background-position:100% 0;border-radius:50%;mask:radial-gradient(circle,#000 0 62%,transparent 64%);-webkit-mask:radial-gradient(circle,#000 0 62%,transparent 64%);opacity:0;pointer-events:none;}
 #content.is-home .home-wave-glint{position:absolute;color:#fff1c8;pointer-events:none;opacity:0;font-size:16px;font-weight:400;line-height:1;text-shadow:0 0 7px #ffe2a3;}
 #content.is-home .home-wave-glint-a{left:6px;top:6px;}
 #content.is-home .home-wave-glint-b{right:3px;bottom:7px;font-size:11px;}
