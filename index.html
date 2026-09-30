@@ -1384,6 +1384,42 @@
   .icon-pick:hover{ background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line); transform:translateY(-1px); }
   .icon-pick.selected{ background:var(--accent); color:#fff; box-shadow:var(--sh-2); }
 
+  /* ---------- Pin picker (Add / Edit domain) ----------
+     Replaces the icon row when the pin artwork is available. 46px cells: the
+     old row was 36px, under the 44px minimum on the one control you have to
+     hit precisely. The chosen cell is marked with an accent RING over the
+     soft tint, not an accent fill -- accent is never a button colour here,
+     and a solid blue square behind a pin would bury it. The Auto cell spans
+     two columns so it can carry its word. */
+  .pin-picker{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(46px, 1fr)); gap:8px;
+  }
+  .pin-pick{
+    position:relative; display:grid; place-items:center; aspect-ratio:1; min-height:46px;
+    border:0; border-radius:13px; padding:0; cursor:pointer; background:var(--bg-hi);
+    box-shadow:inset 0 0 0 1px var(--line);
+    transition:transform .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pin-pick-art{ display:grid; place-items:center; line-height:0; }
+  .pin-pick .medical-pin{ width:32px; height:32px; }
+  .pin-pick.is-on{
+    background:var(--accent-soft);
+    box-shadow:inset 0 0 0 2px var(--accent),
+      0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  }
+  .pin-pick:active{ transform:scale(.94); }
+  .pin-pick:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  @media (hover:hover){ .pin-pick:hover{ background:var(--paper); } }
+  .pin-pick-auto{
+    grid-column:span 2; aspect-ratio:auto; display:flex; align-items:center; justify-content:center; gap:6px;
+    font:550 13px/1 var(--sans); color:var(--ink-soft);
+  }
+  .pin-pick-auto .medical-pin{ width:26px; height:26px; }
+  .pin-pick-label{ white-space:nowrap; }
+  .pin-pick-auto.is-on{ color:var(--accent); }
+  @media (prefers-reduced-motion:reduce){ .pin-pick{ transition:none; } .pin-pick:active{ transform:none; } }
+
   .tab-delete{
     opacity:0; font-size:11px; color:var(--ink-faint); padding:3px 5px; border-radius:5px; cursor:pointer;
     transition:opacity .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
@@ -2313,14 +2349,23 @@
   }
   .section-head::after{ content:""; flex:1; height:1px; background:var(--line); order:1; }
   /* Sits to the right of the rule rather than crowding the count. */
+  /* Edit is how a domain's name, parent, colour and pin get changed. It was a
+     faint 13px pencil with 4px of padding -- about 15x21px to hit, a third of
+     the minimum, and easy to miss entirely. Now a labelled 44px target. */
   .section-edit{
     order:2; flex-shrink:0; align-self:center;
-    border:none; background:none; cursor:pointer; padding:4px 2px;
-    font-size:13px; line-height:1; color:var(--ink-faint);
-    transition:color .15s var(--ease), transform .15s var(--ease);
+    display:inline-flex; align-items:center; justify-content:center; gap:5px;
+    min-width:44px; min-height:44px; margin:-8px -6px -8px 0; padding:0 10px;
+    border:none; border-radius:10px; background:none; cursor:pointer;
+    font:550 13px/1 var(--sans); color:var(--ink-soft);
+    transition:color .15s var(--ease), background .15s var(--ease), transform .15s var(--ease);
+    -webkit-tap-highlight-color:transparent;
   }
-  .section-edit:active{ transform:scale(0.9); }
-  @media (hover:hover){ .section-edit:hover{ color:var(--accent); } }
+  .section-edit-label{ white-space:nowrap; }
+  .section-edit:active{ transform:scale(0.94); background:var(--accent-soft); }
+  .section-edit:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  @media (hover:hover){ .section-edit:hover{ color:var(--accent); background:var(--accent-soft); } }
+  @media (prefers-reduced-motion:reduce){ .section-edit{ transition:none; } .section-edit:active{ transform:none; } }
 
   /* Brief highlight after a domain-jump lands, so it's obvious where you ended up. */
   @keyframes sectionJumpFlash{
@@ -5000,7 +5045,11 @@
       <p class="field-hint" id="fDomainParentHint">Nesting under a parent keeps this domain's terms completely separate — it's just grouped visually, like "Breast Oncology" under "Oncology, Hematology &amp; Leukemia."</p>
     </div>
     <div class="field"><label>Color</label><div class="swatch-row" id="swatchRow"></div></div>
-    <div class="field"><label>Icon</label><div class="icon-picker-row" id="iconPickerRow"></div></div>
+    <div class="field">
+      <label id="fDomainPinLabel">Pin</label>
+      <div class="icon-picker-row" id="iconPickerRow" aria-labelledby="fDomainPinLabel"></div>
+      <p class="field-hint">Auto picks the pin from the domain’s name. Tap one to choose it yourself.</p>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeDomainModal()">Cancel</button>
       <button class="btn btn-primary" id="domainSaveBtn" onclick="saveDomain()">Create domain</button>
@@ -6843,6 +6892,37 @@ const DOMAIN_COLORS = ['#8B7BAE','#B5707D','#C98FA0','#6F97AC','#7FA173','#BFA05
 let selectedSwatch = DOMAIN_COLORS[0];
 let editingDomainId = null; // null = creating a new domain, otherwise the id being edited
 let selectedIcon = 'sparkle';
+// The pin chosen in the domain editor; null means Automatic (from the name).
+let selectedPin = null;
+
+/* Pins offered in the domain editor. Medical specialties only: the full sheet
+   also holds app-chrome pins (Team Chat, User Guide, the hello hand...) that
+   would read as a mistake on a domain, and DOMAIN_ICONS carries legacy aliases
+   (dna, ribbon, heart...) that resolve to the same artwork, so listing its keys
+   showed the same pin two or three times. */
+const DOMAIN_PIN_CHOICES = [
+  ['medical-terminology','General'], ['genetics','Genetics'], ['oncology','Oncology'],
+  ['hematology','Hematology'], ['leukemia','Leukemia'], ['cardiology','Cardiology'],
+  ['heart-failure','Heart failure'], ['pulmonology','Pulmonology'], ['neurology','Neurology'],
+  ['developmental','Developmental'], ['pediatrics','Pediatrics'], ['ent','ENT'],
+  ['urology','Urology'], ['nephrology','Nephrology'], ['endocrinology','Endocrinology'],
+  ['orthopedics','Orthopedics'], ['infectious-disease','Infectious disease'],
+  ['dermatology','Dermatology'], ['ophthalmology','Ophthalmology'],
+  ['surgery-anesthesia','Surgery & anesthesia'], ['emergency','Emergency'],
+  ['infusion','Infusion'], ['laboratory','Laboratory'], ['pharmacy','Pharmacy']
+];
+
+/* pin-icons.js asks this before deriving a pin from a domain's name, so a pin
+   chosen in the editor is what gets drawn. It only has the label text to go
+   on, hence matching by name, normalised the same way it normalises. */
+window.ihChosenPin = function(normalizedName){
+  const cats = DATA && DATA.categories;
+  if(!cats) return null;
+  for(const c of cats){
+    if(c.pin && String(c.name || '').toLowerCase().replace(/\s+/g, ' ').trim() === normalizedName) return c.pin;
+  }
+  return null;
+};
 
 /* Chat and the activity feed are now windowed to the newest entries (see
    CHAT_HISTORY_LIMIT), so "unread" can no longer be a subtraction of array
@@ -7506,11 +7586,21 @@ async function migrateOncologySplit(){
   console.log('Oncology split: moved ' + moves.length + ' of ' + termsSnap.size + ' terms');
 }
 
+/* The fields a domain stores in terminology-meta/categories. ONE definition,
+   shared by every writer. There were two hand-written copies of this list, and
+   a field added to one but not the other is how a first run once seeded every
+   subdomain as top-level (parentId was missing from the migration's copy).
+
+   `pin` is the pin chosen in the domain editor. It is written only when set:
+   Firestore rejects undefined values outright, and leaving the key off keeps
+   every domain nobody has customised exactly as it was. */
+function categoryMeta(c){
+  return { id:c.id, name:c.name, color:c.color, icon:c.icon, parentId: c.parentId || null,
+           ...(c.pin ? { pin: c.pin } : {}) };
+}
+
 async function migrateToPerTermStorage(source){
-  // parentId is carried here too. Without it a first run seeded every
-  // subdomain as a top-level domain, because this is the one path that
-  // writes the category list without going through saveCategoriesMeta().
-  const categoriesMeta = source.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon, parentId: c.parentId || null }));
+  const categoriesMeta = source.categories.map(categoryMeta);
   await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
 
   const batchSize = 400; // Firestore batch limit is 500 writes
@@ -7820,7 +7910,7 @@ async function deleteTermDoc(id){
 async function saveCategoriesMeta(){
   if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
   try{
-    const categoriesMeta = DATA.categories.map(c=>({ id:c.id, name:c.name, color:c.color, icon:c.icon, parentId: c.parentId || null }));
+    const categoriesMeta = DATA.categories.map(categoryMeta);
     await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
     return true;
   }catch(err){
@@ -12379,7 +12469,7 @@ function renderContent(){
     html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}">
       <h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2>
       <span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span>
-      <button class="section-edit" onclick="openEditDomainModal('${cat.id}')" title="Edit ${escapeAttr(cat.name)}" aria-label="Edit domain">\u270E</button>
+      <button class="section-edit" onclick="openEditDomainModal('${cat.id}')" title="Edit ${escapeAttr(cat.name)}" aria-label="Edit ${escapeAttr(cat.name)}"><span aria-hidden="true">\u270E</span><span class="section-edit-label">Edit</span></button>
     </div>`;
     html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
@@ -14520,7 +14610,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0927.2106';
+const BUILD_ID = 'b0930.0818';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -14692,13 +14782,14 @@ const HOME_SECTION_COLORS = {
   'Tools & Reference': '#BFA05E',
 };
 
-function renderHomeSection(title, moreLabel, moreAction, cardsHtml){
+function renderHomeSection(title, moreLabel, moreAction, cardsHtml, addAction, addLabel){
   const sectionColor = HOME_SECTION_COLORS[title] || 'var(--accent)';
   const key = {'Medical Terminology':'medical','Doctors':'doctors','Study & Development':'study','Tools & Reference':'tools'}[title] || '';
   return `
     <section class="home-sec" data-home-section="${key}" style="--section-color:${sectionColor}">
       <div class="home-sec-head">
         <h3>${escapeHtml(title)}</h3>
+        ${addAction ? `<button type="button" class="home-sec-add" onclick="${addAction}" aria-label="${escapeAttr(addLabel || 'Add')}"><span class="home-sec-add-pill">${ICON_PLUS}<span>New</span></span></button>` : ''}
         ${moreAction ? `<button type="button" class="home-sec-more" onclick="${moreAction}" aria-label="${escapeAttr(moreLabel + ' ' + title)}">${escapeHtml(moreLabel)} ${ICON_CHEVRON_RIGHT}</button>` : ''}
       </div>
       <div class="home-rail">${cardsHtml}</div>
@@ -14849,7 +14940,11 @@ function renderHome(){
     <section class="home-sec home-quick-section">
       <div class="qa-grid">${quickActions}</div>
     </section>
-    ${renderHomeSection('Medical Terminology', 'View all', `openHomeSection('medical')`, termCards)}
+    ${/* Creating a domain was only reachable from inside the glossary or the
+         desktop sidebar -- nothing on Home, which is where a phone opens.
+         The section header is on screen without scrolling the rail. */''}
+    ${renderHomeSection('Medical Terminology', 'View all', `openHomeSection('medical')`, termCards,
+                        `openAddDomainModal()`, 'Create a new domain')}
     ${renderHomeSection('Doctors', 'View all', `openHomeSection('doctors')`, doctorCards)}
     ${renderHomeSection('Study & Development', 'View all', `openHomeSection('study')`, studyCards)}
     ${renderHomeSection('Tools & Reference', 'View all', `openHomeSection('tools')`, utilityCards)}
@@ -16551,8 +16646,11 @@ function _openAddDomainModal(){
   document.getElementById('fDomainParent').disabled = false;
   document.getElementById('fDomainParentHint').textContent = 'Nesting under a parent keeps this domain\u2019s terms completely separate — it\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
   selectedSwatch = DOMAIN_COLORS[Math.floor(Math.random()*DOMAIN_COLORS.length)];
-  const iconKeys = Object.keys(DOMAIN_ICONS);
-  selectedIcon = iconKeys[Math.floor(Math.random()*iconKeys.length)];
+  // A new domain starts on Automatic. The stored icon is only the fallback for
+  // a name that matches no pin; it used to be a random icon, which is how
+  // domains ended up wearing a bone or a flask for no reason.
+  selectedPin = null;
+  selectedIcon = 'medical-terminology';
   renderSwatches();
   renderIconPicker();
   document.getElementById('domainOverlay').classList.add('show');
@@ -16581,6 +16679,7 @@ function _openEditDomainModal(id){
     : 'Nesting under a parent keeps this domain\u2019s terms completely separate — it\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
   selectedSwatch = cat.color;
   selectedIcon = cat.icon;
+  selectedPin = cat.pin || null;
   renderSwatches();
   renderIconPicker();
   document.getElementById('domainOverlay').classList.add('show');
@@ -16617,15 +16716,61 @@ function pickSwatch(c){
 
 function renderIconPicker(){
   const row = document.getElementById('iconPickerRow');
-  row.innerHTML = Object.keys(DOMAIN_ICONS).map(key=>
-    `<button type="button" class="icon-pick ${key===selectedIcon?'selected':''}" title="${key}" onclick="pickIcon('${key}')">${DOMAIN_ICONS[key]}</button>`
-  ).join('');
+  const art = key => (typeof window.ihPinArt === 'function' && key) ? window.ihPinArt(key) : '';
+  const choices = DOMAIN_PIN_CHOICES.filter(([key]) => art(key));
+
+  // No pin artwork (the sheet failed to load, or pin-icons.js is missing):
+  // keep the old icon row rather than show an empty field.
+  if(!choices.length){
+    row.className = 'icon-picker-row';
+    row.innerHTML = Object.keys(DOMAIN_ICONS).map(key=>
+      `<button type="button" class="icon-pick ${key===selectedIcon?'selected':''}" title="${key}" onclick="pickIcon('${key}')">${DOMAIN_ICONS[key]}</button>`
+    ).join('');
+    return;
+  }
+
+  /* Automatic previews what leaving it alone will actually draw: the pin the
+     name gives, and for a name that matches no pin (Radiology, say), the
+     domain's stored icon -- that is what pin-icons.js falls back to. Showing
+     a generic pin there instead would make the preview a lie. */
+  const typed = document.getElementById('fDomainName').value;
+  const autoKey = typeof window.ihNamePin === 'function' ? window.ihNamePin(typed) : null;
+  const editing = editingDomainId && DATA.categories.find(c => c.id === editingDomainId);
+  const fallbackIcon = editing ? editing.icon : selectedIcon;
+  const autoArt = art(autoKey) || art(fallbackIcon) || DOMAIN_ICONS[fallbackIcon] || art('medical-terminology');
+  row.className = 'pin-picker';
+  row.setAttribute('role', 'radiogroup');
+  row.setAttribute('aria-label', 'Domain pin');
+  row.innerHTML =
+    `<button type="button" class="pin-pick pin-pick-auto${selectedPin ? '' : ' is-on'}" role="radio"
+       aria-checked="${selectedPin ? 'false' : 'true'}" onclick="pickPin(null)"
+       title="Automatic: chosen from the domain name">
+       <span class="pin-pick-art">${autoArt}</span><span class="pin-pick-label">Auto</span>
+     </button>` +
+    choices.map(([key, label]) =>
+      `<button type="button" class="pin-pick${key===selectedPin ? ' is-on' : ''}" role="radio"
+         aria-checked="${key===selectedPin ? 'true' : 'false'}" onclick="pickPin('${key}')"
+         title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">
+         <span class="pin-pick-art">${art(key)}</span>
+       </button>`
+    ).join('');
 }
 
 function pickIcon(key){
   selectedIcon = key;
   renderIconPicker();
 }
+
+function pickPin(key){
+  selectedPin = key || null;
+  renderIconPicker();
+}
+
+// Keep Automatic's preview honest while the name is being typed.
+document.addEventListener('input', e => {
+  if(e.target && e.target.id === 'fDomainName' && !selectedPin &&
+     document.getElementById('domainOverlay').classList.contains('show')) renderIconPicker();
+});
 
 async function saveDomain(){
   const name = document.getElementById('fDomainName').value.trim();
@@ -16636,8 +16781,12 @@ async function saveDomain(){
   if(editingDomainId){
     const cat = DATA.categories.find(c=>c.id===editingDomainId);
     if(!cat) return;
-    const previous = { name: cat.name, color: cat.color, icon: cat.icon, parentId: cat.parentId };
+    const previous = { name: cat.name, color: cat.color, icon: cat.icon, parentId: cat.parentId, pin: cat.pin };
     cat.name = name; cat.color = selectedSwatch; cat.icon = selectedIcon; cat.parentId = parentId;
+    // A chosen pin is stored as `pin` AND as the icon, so a teammate still on
+    // an older build -- one that drops `pin` when it saves -- keeps the icon.
+    if(selectedPin){ cat.pin = selectedPin; cat.icon = selectedPin; }
+    else delete cat.pin;
     closeDomainModal();
     const ok = await saveCategoriesMeta();
     if(!ok){ Object.assign(cat, previous); return; }
@@ -16653,7 +16802,8 @@ async function saveDomain(){
   let id = base, n = 2;
   while(existingIds.includes(id)){ id = `${base}-${n}`; n++; }
 
-  DATA.categories.push({ id, name, color: selectedSwatch, icon: selectedIcon, parentId, terms: [] });
+  DATA.categories.push({ id, name, color: selectedSwatch, icon: selectedPin || selectedIcon, parentId, terms: [],
+                         ...(selectedPin ? { pin: selectedPin } : {}) });
   closeDomainModal();
   const ok = await saveCategoriesMeta();
   if(!ok){ DATA.categories.pop(); return; }
@@ -16675,7 +16825,7 @@ async function deleteDomain(id){
   if(activeCategory===id) activeCategory = 'all';
   const ok = await saveCategoriesMeta();
   if(!ok){ DATA.categories = previousCategories; return; }
-  const trashId = await trashItem('domain', `the "${cat.name}" domain`, { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon, parentId: cat.parentId || null, terms: [] });
+  const trashId = await trashItem('domain', `the "${cat.name}" domain`, { ...categoryMeta(cat), terms: [] });
   logActivity(`deleted the "${cat.name}" domain`);
   showUndoToast('Domain deleted.', trashId);
   render();

@@ -55,6 +55,36 @@
   background:transparent;box-shadow:none;border-radius:9px;font-size:12px;font-weight:500;
 }
 #content.is-home .home-sec-more svg{width:13px;height:13px;}
+/* ---- "+ New" beside "View all" on Medical Terminology ----------------------
+   Creating a domain had no entry point on Home at all. The header is on screen
+   without scrolling, which a card at the end of a sideways rail is not.
+   margin-left:auto clusters it with View all under the header's
+   space-between. The button is the 44px target; the pill inside is the look,
+   tinted from the section's own colour -- accent is never a button fill. Same
+   specificity as .home-sec-more, so nothing here outranks a press state. */
+#content.is-home .home-sec-add{
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  min-height:44px;min-width:44px;margin-left:auto;padding:0 2px;
+  border:0;background:transparent;box-shadow:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#content.is-home .home-sec-add-pill{
+  display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 11px 0 9px;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--section-color,var(--accent)) 32%,var(--line));
+  background:color-mix(in srgb,var(--section-color,var(--accent)) 10%,var(--paper));
+  color:color-mix(in srgb,var(--section-color,var(--accent)) 62%,var(--ink));
+  font:550 12px/1 var(--sans);letter-spacing:-.005em;
+  transition:transform .15s var(--ease),background .15s var(--ease);
+}
+#content.is-home .home-sec-add-pill svg{width:12px;height:12px;}
+#content.is-home .home-sec-add:active .home-sec-add-pill{
+  transform:scale(.95);background:color-mix(in srgb,var(--section-color,var(--accent)) 18%,var(--paper));
+}
+#content.is-home .home-sec-add:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:999px;}
+@media (prefers-reduced-motion:reduce){
+  #content.is-home .home-sec-add-pill{transition:none;}
+  #content.is-home .home-sec-add:active .home-sec-add-pill{transform:none;}
+}
 #content.is-home .domain-family,#content.is-home .home-rail>.qa-card,
 #content.is-home .qa-tile,.home-section-grid>.qa-card{
   border:1px solid var(--tile-edge);
@@ -684,3 +714,10 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 @media (min-width:1200px){
   #content.is-home .home-rail{grid-template-columns:repeat(4,minmax(0,1fr));}
 }
+
+/* The New-domain card at the end of the View-all domain grid. Dashed, so it
+   reads as a slot to fill rather than a domain. It has the same specificity
+   as the grid-card rule that sets `border:1px solid`, so it has to come
+   AFTER it to win -- which is why it lives at the end of this file. It only
+   touches border-style; the press glow and lift are left alone. */
+.home-section-grid>.home-section-add{border-style:dashed;}

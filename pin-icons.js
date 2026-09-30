@@ -180,10 +180,30 @@
     [/\bpharmacy\b|\bmedications\b/, 'pharmacy'],
     [/\bemergency\b/, 'emergency'], [/\bpediatric(?:s)?\b|\bpeds\b/, 'pediatrics']
   ];
-  function medicalKey(name){
-    const normalized = String(name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  function normalizePinName(name){
+    return String(name || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+  // The pin a name implies on its own -- the labels and rules above.
+  function namePinKey(normalized){
     return medicalLabels[normalized] || (medicalRules.find(([pattern]) => pattern.test(normalized)) || [])[1];
   }
+  function medicalKey(name){
+    const normalized = normalizePinName(name);
+    /* A pin chosen in the domain editor beats the name rules. Without this the
+       rules re-derive a pin from the label on every render, and whatever was
+       picked in the editor is overwritten the moment it is drawn -- which is
+       why changing a domain's pin used to be impossible even though the editor
+       had an icon row. index.html owns the domain data, so it answers through
+       window.ihChosenPin; a chosen pin whose artwork has not loaded yet falls
+       through to the name for one paint, and render() fixes it on load. */
+    const chosen = typeof window.ihChosenPin === 'function' ? window.ihChosenPin(normalized) : null;
+    if(chosen && medicalArtwork[chosen]) return chosen;
+    return namePinKey(normalized);
+  }
+  // For the domain editor: the pin "Automatic" would give a name, and the
+  // artwork for any key. Read-only views onto this file's private state.
+  window.ihNamePin = name => namePinKey(normalizePinName(name)) || null;
+  window.ihPinArt  = key  => medicalHTML(key);
   function medicalHTML(key){
     const src = medicalArtwork[key];
     return src ? '<img class="medical-pin" src="' + src + '" alt="" aria-hidden="true" draggable="false">' : '';

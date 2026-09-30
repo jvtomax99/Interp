@@ -544,6 +544,21 @@
     const grid = document.getElementById('homeSectionGrid');
     grid.replaceChildren(...Array.from(cards, card => key === 'medical' ? card : card.cloneNode(true)));
     if(key === 'medical'){
+      // A New-domain slot at the end of the domains. Built here rather than
+      // copied from the rail, so it never counts toward "N domains" above.
+      if(typeof openAddDomainModal === 'function'){
+        const add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'qa-card home-section-add';
+        if(typeof tileVars === 'function') add.setAttribute('style', tileVars(section.style.getPropertyValue('--section-color').trim() || '#0F5FA6'));
+        add.innerHTML = '<span class="qa-icon">' + (typeof ICON_PLUS !== 'undefined' ? ICON_PLUS : '+') + '</span>'
+          + '<span class="qa-title">New domain</span><span class="qa-desc">Add your own</span>';
+        add.setAttribute('aria-label', 'Create a new domain');
+        // Close the folder first: the domain editor would otherwise open
+        // underneath it.
+        add.addEventListener('click', () => { closeHomeSection(); openAddDomainModal(); });
+        grid.appendChild(add);
+      }
       // The full term list stays one tap away, below the domains.
       const all = document.createElement('button');
       all.type = 'button';
