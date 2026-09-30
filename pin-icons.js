@@ -216,7 +216,8 @@
       ['.qa-tile', '.qa-tile-label', '.qa-tile-icon'],
       ['.side-row', '.side-row-name', '.side-row-icon'],
       ['.domain-chip', '.domain-chip-name', '.domain-chip-icon'],
-      ['.home-tile, .domain-family', '.home-tile-name', '.home-tile-icon']
+      ['.home-tile, .domain-family', '.home-tile-name', '.home-tile-icon'],
+      ['.domain-banner', '.domain-banner-name', '.domain-banner-pin']
     ].forEach(([selector, labelSelector, iconSelector]) => {
       document.querySelectorAll(selector).forEach(card => {
         const label = card.querySelector(labelSelector);

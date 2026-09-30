@@ -2303,6 +2303,111 @@
     position:sticky; top:0; z-index:10; padding:14px 0; margin-top:-14px;
     background:linear-gradient(var(--bg) 72%, transparent);
   }
+
+  /* ---------- Domain banner (glossary screens) ---------- */
+  .domain-banner{
+    --dom:#0F5FA6; position:relative; overflow:hidden; border-radius:22px; margin:-6px 0 0;
+    padding:18px 18px 78px; color:#fff; background-color:var(--dom);
+    background-image:
+      radial-gradient(120% 110% at 88% 0%, color-mix(in srgb, var(--dom) 64%, #fff) 0%, transparent 62%),
+      linear-gradient(160deg, var(--dom) 30%, color-mix(in srgb, var(--dom) 70%, #000) 100%);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.22), 0 14px 30px -18px color-mix(in srgb, var(--dom) 70%, #000);
+  }
+  .domain-banner::after{
+    content:""; position:absolute; right:-44px; bottom:-64px; width:210px; height:210px; border-radius:50%;
+    background:rgba(255,255,255,0.08); pointer-events:none;
+  }
+  .domain-banner-row{ position:relative; z-index:1; display:flex; align-items:center; gap:13px; }
+  .domain-banner-pin{
+    width:56px; height:56px; flex-shrink:0; display:grid; place-items:center; border-radius:17px;
+    background:rgba(255,255,255,0.95); box-shadow:0 6px 14px -8px rgba(0,0,0,0.45);
+  }
+  .domain-banner-pin svg, .domain-banner-pin .medical-pin, .domain-banner-pin img{ width:42px; height:42px; }
+  .domain-banner-text{ flex:1; min-width:0; }
+  .domain-banner-parent{ display:block; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,0.86); }
+  .domain-banner-name{
+    font-family:var(--serif); font-weight:600; font-size:30px; line-height:1.1; letter-spacing:-.02em; margin:0;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.2); overflow-wrap:anywhere; text-wrap:balance;
+  }
+  .domain-banner-meta{ display:block; margin-top:3px; font-size:13px; font-weight:500; color:rgba(255,255,255,0.9); font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(0,0,0,0.18); }
+  .domain-banner-more{
+    flex-shrink:0; align-self:flex-start; width:44px; height:44px; border:0; border-radius:50%; cursor:pointer;
+    display:grid; place-items:center; color:#fff; background:rgba(255,255,255,0.18);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.32); transition:background-color .15s var(--ease), transform .15s var(--ease);
+  }
+  .domain-banner-more svg{ width:20px; height:20px; }
+  .domain-banner-more:hover{ background:rgba(255,255,255,0.28); }
+  .domain-banner-more:active{ transform:scale(.94); }
+  .domain-banner-more:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .domain-dock{
+    position:sticky; top:var(--dock-top, 0px); z-index:10; display:flex; gap:9px; align-items:center;
+    margin:-72px 0 22px; padding:8px 18px; border-radius:0 0 18px 18px;
+    transition:background-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .domain-dock.is-stuck{
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px);
+    box-shadow:0 10px 18px -16px rgba(22,55,90,0.45);
+  }
+  .domain-dock .search{ flex:1; min-width:0; }
+  .domain-dock .search input{ height:48px; border-radius:14px; border-color:transparent; box-shadow:0 6px 16px -10px rgba(10,20,40,0.45); }
+  .domain-dock.is-stuck .search input{ border-color:var(--line); box-shadow:var(--sh-1); }
+  .domain-add{
+    flex-shrink:0; height:48px; display:inline-flex; align-items:center; gap:6px; padding:0 17px; border:0; border-radius:14px; cursor:pointer;
+    font:600 15px var(--sans); color:var(--dom); background:#fff;
+    box-shadow:0 6px 16px -10px rgba(10,20,40,0.45), inset 0 0 0 1px rgba(255,255,255,0.6);
+    transition:transform .15s var(--ease), box-shadow .15s var(--ease);
+  }
+  .domain-dock.is-stuck .domain-add{ box-shadow:var(--sh-1), inset 0 0 0 1px var(--line); }
+  .domain-add svg{ width:17px; height:17px; }
+  .domain-add:active{ transform:translateY(1px) scale(.98); }
+  .domain-add:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  html[data-theme="dark"] .domain-add{ background:var(--paper); color:#fff; }
+  .section-anchor{ scroll-margin-top:132px; }
+  @media print{ .domain-banner, .domain-dock{ display:none !important; } }
+
+  /* The banner's ⋯ menu: a bottom sheet on phones, a centered card on desktop. */
+  .dm-overlay{ position:fixed; inset:0; z-index:1200; }
+  .dm-scrim{ position:absolute; inset:0; background:rgba(12,22,40,0.38); opacity:0; transition:opacity .22s var(--ease); }
+  .dm-sheet{
+    position:absolute; left:0; right:0; bottom:0; margin:0 auto; max-width:520px; background:var(--paper); color:var(--ink);
+    border-radius:24px 24px 0 0; padding:9px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+    box-shadow:0 -12px 30px -18px rgba(12,22,40,0.5); transform:translateY(105%); transition:transform .32s var(--ease);
+  }
+  .dm-overlay.show .dm-scrim{ opacity:1; }
+  .dm-overlay.show .dm-sheet{ transform:none; }
+  .dm-grab{ width:38px; height:5px; border-radius:3px; background:var(--line); margin:0 auto 13px; }
+  .dm-title{ margin:0 8px 6px; font-size:12px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); }
+  .dm-item{
+    display:flex; align-items:center; gap:13px; width:100%; min-height:58px; padding:8px; border:0; border-radius:14px;
+    background:none; text-align:left; font:inherit; color:var(--ink); cursor:pointer;
+  }
+  .dm-item:hover, .dm-item:active{ background:var(--bg); }
+  .dm-item:focus-visible{ outline:2px solid var(--accent-2); outline-offset:-2px; }
+  .dm-ic{ width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; }
+  .dm-ic svg{ width:20px; height:20px; }
+  .dm-text{ min-width:0; }
+  .dm-text b{ display:block; font-size:15px; font-weight:600; }
+  .dm-text small{ display:block; font-size:12.5px; color:var(--ink-soft); }
+  .dm-blue{ background:#E6F0FB; color:#0F5FA6; }
+  .dm-green{ background:#E4F4EC; color:#2F7A52; }
+  .dm-amber{ background:#FBF1E2; color:#9A5B0C; }
+  .dm-violet{ background:#EFEBF6; color:#5B4A7C; }
+  .dm-grey{ background:var(--bg); color:var(--ink-soft); }
+  html[data-theme="dark"] .dm-blue{ background:rgba(46,139,208,0.18); color:#8CC4F0; }
+  html[data-theme="dark"] .dm-green{ background:rgba(47,122,82,0.22); color:#8FD6AE; }
+  html[data-theme="dark"] .dm-amber{ background:rgba(154,91,12,0.24); color:#F0BE78; }
+  html[data-theme="dark"] .dm-violet{ background:rgba(124,106,156,0.26); color:#C9B9EA; }
+  .dm-sep{ height:1px; background:var(--line-soft); margin:6px 8px; }
+  .dm-cancel{ width:100%; height:50px; margin-top:8px; border:0; border-radius:14px; background:var(--bg); font:600 15px var(--sans); color:var(--ink); cursor:pointer; }
+  .dm-cancel:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  body:has(.dm-overlay.show) .tabbar{ display:none; }
+  @media (min-width:901px){
+    .dm-sheet{ bottom:auto; top:50%; border-radius:22px; padding-bottom:16px; opacity:0; transform:translateY(-46%) scale(.98); transition:transform .24s var(--ease), opacity .2s var(--ease); }
+    .dm-overlay.show .dm-sheet{ opacity:1; transform:translateY(-50%); }
+    .dm-grab{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ .dm-scrim, .dm-sheet, .domain-dock, .domain-banner-more, .domain-add{ transition:none; } }
   .search{ flex:1; min-width:240px; position:relative; }
   .search input{
     width:100%; padding:12px 16px 12px 40px; border:1px solid var(--line); border-radius:12px;
@@ -10433,6 +10538,7 @@ const ICON_WAVE = '<svg class="home-wave-art home-face" viewBox="4 4 112 112" ar
   + '</svg>';
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_DOTS = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
 const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 const ICON_PERSON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M5 19.5C5 16 8 14 12 14C16 14 19 16 19 19.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_PHONE = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4H9.5L11 8L8.5 9.5C9.5 11.5 11.5 13.5 13.5 14.5L15 12L19 13.5V16.5C19 17.6 18.1 18.5 17 18.5C10.4 18.1 5.9 13.6 5.5 7C5.5 5.9 6.4 5 7.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -11565,14 +11671,14 @@ const GUIDE_TOPICS = [
     <p>Tap the round person button in the <b>bottom-left corner</b>, type your name, tap <b>Save</b>. Edits from now on will carry it.</p>` },
 
   { id:'print', section:'out', k:'print pdf paper printout export sheet handout', q:'How do I print a list, or save it as a PDF?', a:`
-    <p>Open the domain you want, scroll to <b>Export PDF</b>, and tap it. You get a clean printable sheet with none of the app's buttons on it.</p>
+    <p>Open the domain you want, tap <b>⋯</b> in its colored banner, then <b>Export as PDF</b>. You get a clean printable sheet with none of the app's buttons on it.</p>
     <p>Handy for a new interpreter's first week, or for studying on paper.</p>` },
 
   { id:'bulk', section:'out', k:'csv excel spreadsheet bulk many at once import export mass edit', q:'I need to change a lot of words at once', a:`
     <ol>
-      <li>Tap <b>Export CSV</b>. That gives you a spreadsheet.</li>
+      <li>Open the domain, tap <b>⋯</b> in its banner, then <b>Export as spreadsheet</b>.</li>
       <li>Edit it in Excel or Google Sheets.</li>
-      <li>Tap <b>Import CSV</b> and choose the file you edited.</li>
+      <li>Tap <b>⋯</b> again, then <b>Import from spreadsheet</b>, and choose the file you edited.</li>
     </ol>
     <p>Before anything is saved you get a preview of exactly what will change. Nothing happens until you confirm.</p>` },
 
@@ -11731,6 +11837,130 @@ function scheduleRender(){
   }, delay);
 }
 
+/* ---------- Domain banner and its ⋯ menu ----------
+   The top of every glossary screen: the domain's pin, name and size on its
+   own color, a ⋯ button for export, import, edit and new domain, and the
+   search with + Add docked underneath. pin-icons.js swaps the stored icon
+   for the domain's pin artwork (.domain-banner-pin). */
+// White text sits on the banner, so a light domain color (a few of the
+// swatches are pale) is deepened just enough to read at 4.5:1. Dark colors
+// pass through unchanged.
+function bannerTone(hex){
+  const lum = h => {
+    const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+      .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  if(!/^#[0-9a-f]{6}$/i.test(hex || '')) return '#0F5FA6';
+  let c = hex;
+  for(let i = 0; i < 20 && 1.05 / (lum(c) + 0.05) < 4.5; i++) c = darkenHex(c, 6);
+  return c;
+}
+function domainBannerHtml(cat){
+  const isAll = !cat;
+  const name = isAll ? 'All domains' : cat.name;
+  const color = bannerTone(isAll ? '#252E6D' : (cat.color || '#0F5FA6'));
+  const family = isAll ? DATA.categories : [cat].concat(DATA.categories.filter(c => c.parentId === cat.id));
+  const count = family.reduce((n, c) => n + c.terms.length, 0);
+  const kids = isAll ? 0 : family.length - 1;
+  const meta = isAll
+    ? `${count} terms · ${DATA.categories.length} domains`
+    : `${count} term${count === 1 ? '' : 's'}${kids ? ` · ${kids} subgroup${kids === 1 ? '' : 's'}` : ''}`;
+  const parent = !isAll && cat.parentId ? DATA.categories.find(c => c.id === cat.parentId) : null;
+  const icon = isAll ? DOMAIN_ICONS.layers : (DOMAIN_ICONS[cat.icon] || DOMAIN_ICONS.sparkle);
+  return `<section class="domain-banner" style="--dom:${color};" aria-label="${escapeAttr(name)}">
+      <div class="domain-banner-row">
+        <span class="domain-banner-pin" aria-hidden="true">${icon}</span>
+        <div class="domain-banner-text">
+          ${parent ? `<span class="domain-banner-parent">${escapeHtml(parent.name)}</span>` : ''}
+          <h1 class="domain-banner-name">${escapeHtml(name)}</h1>
+          <span class="domain-banner-meta">${meta}</span>
+        </div>
+        <button class="domain-banner-more" type="button" onclick="openDomainMenu()" aria-haspopup="dialog"
+          aria-label="More for ${escapeAttr(name)}: export, import and edit">${ICON_DOTS}</button>
+      </div>
+    </section>
+    <div class="domain-dock" id="domainDock" style="--dom:${color};">
+      <div class="search"><input id="searchInput" type="text" placeholder="Search ${escapeAttr(name)}" value="${escapeHtml(searchQuery)}"
+        aria-label="Search ${escapeAttr(name)}" enterkeyhint="search" autocomplete="off" spellcheck="false"></div>
+      <button class="domain-add" type="button" onclick="openAddModal()" aria-label="Add a term">${ICON_PLUS}<span>Add</span></button>
+    </div>`;
+}
+
+/* The search row docks under the app's top bar when the banner scrolls away.
+   The old top bar stuck at 0 and slid underneath that bar, so on a phone the
+   "sticky" search was hidden exactly when a long list needed it. */
+let domainDockObserver = null;
+function watchDomainDock(){
+  if(domainDockObserver){ domainDockObserver.disconnect(); domainDockObserver = null; }
+  const bar = document.querySelector('.topbar-global');
+  const top = bar ? Math.round(bar.getBoundingClientRect().height) : 0;
+  document.documentElement.style.setProperty('--dock-top', top + 'px');
+  const dock = document.getElementById('domainDock');
+  const banner = document.querySelector('.domain-banner');
+  if(!dock || !banner || !('IntersectionObserver' in window)) return;
+  domainDockObserver = new IntersectionObserver(entries => {
+    dock.classList.toggle('is-stuck', !entries[0].isIntersecting);
+  }, { rootMargin: `-${top + 72}px 0px 0px 0px` });
+  domainDockObserver.observe(banner);
+}
+window.addEventListener('resize', () => { if(document.getElementById('domainDock')) watchDomainDock(); }, { passive:true });
+
+let domainMenuReturn = null;
+function openDomainMenu(){
+  closeDomainMenu(true);
+  const cat = activeCategory === 'all' ? null : DATA.categories.find(c => c.id === activeCategory);
+  const name = cat ? cat.name : 'All domains';
+  const item = (icon, tone, title, sub, act) =>
+    `<button type="button" class="dm-item" data-act="${act}"><span class="dm-ic dm-${tone}">${icon}</span>` +
+    `<span class="dm-text"><b>${title}</b><small>${sub}</small></span></button>`;
+  const el = document.createElement('div');
+  el.className = 'dm-overlay';
+  el.id = 'domainMenu';
+  el.innerHTML = `<div class="dm-scrim" data-act="close"></div>
+    <div class="dm-sheet" role="dialog" aria-modal="true" aria-label="${escapeAttr(name)} options">
+      <div class="dm-grab" aria-hidden="true"></div>
+      <p class="dm-title">${escapeHtml(name)}</p>
+      ${item(ICON_PRINT, 'blue', 'Export as PDF', 'A clean reference sheet to print or save', 'pdf')}
+      ${item(ICON_DOWNLOAD, 'green', 'Export as spreadsheet', 'CSV file for bulk editing', 'csv')}
+      ${item(ICON_UPLOAD, 'amber', 'Import from spreadsheet', 'Update many terms at once from a CSV', 'import')}
+      <div class="dm-sep"></div>
+      ${cat ? item(ICON_EDIT, 'violet', `Edit ${escapeHtml(cat.name)}`, 'Name, color and pin', 'edit') : ''}
+      ${item(ICON_PLUS, 'grey', 'New domain', 'Start a new list of terms', 'new')}
+      <button type="button" class="dm-cancel" data-act="close">Cancel</button>
+    </div>`;
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]');
+    if(!b) return;
+    const act = b.dataset.act;
+    closeDomainMenu();
+    // Printing waits for the sheet to slide away, or it prints the menu too.
+    if(act === 'pdf') setTimeout(() => window.print(), 320);
+    else if(act === 'csv') exportTermsCsv();
+    else if(act === 'import') triggerCsvImport();
+    else if(act === 'edit' && cat) openEditDomainModal(cat.id);
+    else if(act === 'new') openAddDomainModal();
+  });
+  domainMenuReturn = document.activeElement;
+  document.body.appendChild(el);
+  document.addEventListener('keydown', domainMenuKeys);
+  requestAnimationFrame(() => {
+    el.classList.add('show');
+    const first = el.querySelector('.dm-item');
+    if(first) first.focus({ preventScroll:true });
+  });
+}
+function closeDomainMenu(instant){
+  const el = document.getElementById('domainMenu');
+  if(!el) return;
+  document.removeEventListener('keydown', domainMenuKeys);
+  el.removeAttribute('id');
+  el.classList.remove('show');
+  if(instant) el.remove(); else setTimeout(() => el.remove(), 340);
+  if(!instant && domainMenuReturn && domainMenuReturn.isConnected) domainMenuReturn.focus({ preventScroll:true });
+}
+function domainMenuKeys(e){ if(e.key === 'Escape') closeDomainMenu(); }
+
 function render(){
   if(!DATA) return;
   const app = document.getElementById('app');
@@ -11775,6 +12005,14 @@ function render(){
     showTopbar = false;
   }
 
+  // Glossary screens (one domain, or All domains) get the colored banner:
+  // pin, name and count, a ⋯ menu for everything that isn't reading or
+  // adding a term, and the search docked under it. The search row stays
+  // outside #content on purpose -- typing re-renders #content, which would
+  // otherwise throw the field away mid-word.
+  const bannerCat = activeCategory === 'all' ? null : DATA.categories.find(c => c.id === activeCategory);
+  const bannerHtml = (activeCategory === 'all' || bannerCat) ? domainBannerHtml(bannerCat) : '';
+
   // Any focused screen — a single domain or a single tool — is meant to feel
   // isolated: no sidebar, no other tiles competing for attention. Only Home
   // and "All domains" keep the full navigation visible, since those are the
@@ -11805,11 +12043,11 @@ function render(){
     </div>
     `}
     <div class="main">
-      ${showTopbar ? `
+      ${bannerHtml || (showTopbar ? `
       <div class="topbar">
         <div class="search"><input id="searchInput" type="text" placeholder="${searchPlaceholder}" value="${escapeHtml(searchQuery)}"></div>
         ${addBtnHtml}
-      </div>` : ''}
+      </div>` : '')}
       <div id="content" class="content-fade"></div>
     </div>
     <button class="theme-fab" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
@@ -11835,6 +12073,7 @@ function render(){
     // on-screen keyboard open every time you tap a section in the sidebar.
     if(prefersAutoFocus()) searchInputEl.focus();
   }
+  watchDomainDock();
   if(window.__lastWho) { const wi = document.getElementById('whoInput'); if(wi) wi.value = window.__lastWho; }
   const whoInputEl = document.getElementById('whoInput');
   if(whoInputEl) whoInputEl.addEventListener('input', (e)=>{
@@ -12411,13 +12650,8 @@ function renderContent(){
       </div>
     </div>`;
   }
-  html += `<div class="print-export-row">
-    <button class="btn btn-ghost" onclick="window.print()">${ICON_PRINT} Export PDF</button>
-    <button class="btn btn-ghost" onclick="exportTermsCsv()">${ICON_DOWNLOAD} Export CSV</button>
-    <button class="btn btn-ghost" onclick="triggerCsvImport()">${ICON_UPLOAD} Import CSV</button>
-    <span class="print-export-hint">Prints ${escapeHtml(printLabel)} as a clean reference sheet, or exports it to a spreadsheet for bulk editing — reimport the same file after editing to update everything at once.</span>
-  </div>
-  <div class="print-only-title">
+  // Export and import live in the banner's ⋯ menu (openDomainMenu).
+  html += `<div class="print-only-title">
     <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
     <p>HUMC Language Services · Generated ${new Date().toLocaleDateString()}</p>
   </div>`;
@@ -12482,6 +12716,17 @@ function renderContent(){
     // Rename a domain or re-nest it from the heading it belongs to. The edit
     // modal already existed but nothing called it, so domains could be created
     // and never corrected — a typo in a name was permanent.
+    // The domain on screen is already named by the banner above. Keep its
+    // anchor (the jump bar scrolls to it) and, when subgroups follow, call its
+    // own terms what the jump bar calls them.
+    if(cat.id === activeCategory){
+      if(cats.length > 1){
+        html += `<div class="section-head" id="domain-${cat.id}"><h2>General terms</h2>
+          <span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span></div>`;
+      } else {
+        html += `<div class="section-anchor" id="domain-${cat.id}"></div>`;
+      }
+    } else
     html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}">
       <h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2>
       <span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span>
@@ -12543,7 +12788,7 @@ function renderContent(){
     } else {
       const names = emptySections.map(c=>escapeHtml(c.name)).join(', ');
       html += `<div class="empty"><div class="glyph">${ICON_LAYERS}</div>
-        Nothing here yet${names ? ` in ${names}` : ''}.<br>Use <b>+ Add term</b> above to add the first one.</div>`;
+        Nothing here yet${names ? ` in ${names}` : ''}.<br>Tap <b>+ Add</b> above to add the first one.</div>`;
     }
   }
 
@@ -14626,7 +14871,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0930.1103';
+const BUILD_ID = 'b0930.1312';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
