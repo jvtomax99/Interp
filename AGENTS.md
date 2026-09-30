@@ -62,6 +62,22 @@ CSS. Anything new added there at that strength will quietly disable
 `index.html`. Use the weakest selector that works, then check press, focus
 and hover still fire — measure them, do not assume.
 
+## Team access — the Hub is for the team only
+
+Teammates get in with a personal invite code (Team access screen, owner
+only). The real lock is `firestore.rules` / `storage.rules`; once the owner
+turns practice mode off, anything that isn't a joined phone is refused, with
+no error on screen. So when you add something:
+
+- **A new Firestore collection** needs a line in `firestore.rules` using
+  `if team()`, and Jose has to paste the rules into the Firebase console.
+  Without it the collection is denied everywhere.
+- **A new database call at startup** goes inside `hubAuthReady.then(...)`
+  (see the Init block), or a locked Hub refuses it as a stranger.
+- **A new `api/*.js` endpoint that spends money** starts with
+  `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
+  and the app calls it with `...(await hubAuthHeaders())` in its headers.
+
 ## Every deploy that touches `index.html`
 
 Vercel auto-deploys on push to `main`. No build step. Three things move

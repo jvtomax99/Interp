@@ -5020,6 +5020,132 @@
   .card .tag{font-size:12px;}
   .card .chart-id{font-size:11px;}
 }
+
+/* ---------- Team access: lock screen ----------
+   Comes up over everything for a phone that hasn't joined with an invite
+   code. Its own dark look (the greeting photo under navy), the same in light
+   and dark mode, so it reads as the Hub's front door rather than a sheet. */
+.access-lock{
+  position:fixed; inset:0; z-index:2000; overflow:hidden; isolation:isolate;
+  display:flex; justify-content:center; color:#fff; background:#1B2458;
+  opacity:0; transition:opacity .35s var(--ease);
+}
+.access-lock.show{ opacity:1; }
+.access-lock-photo{
+  position:absolute; inset:-14px; z-index:-2; background:#1B2458 url(hero.jpg) center 30%/cover;
+  filter:blur(4px) saturate(1.05); transform:scale(1.05);
+}
+.access-lock::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(180deg, rgba(18,26,66,.30) 0%, rgba(16,23,58,.74) 40%, rgba(12,17,44,.95) 70%);
+}
+.access-lock-inner{
+  width:100%; max-width:420px; min-height:100%; display:flex; flex-direction:column;
+  padding:calc(env(safe-area-inset-top, 0px) + 26px) 22px calc(env(safe-area-inset-bottom, 0px) + 26px);
+  overflow-y:auto;
+}
+.access-brand{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:rgba(235,240,255,.8); }
+.access-brand img{ width:20px; height:20px; object-fit:contain; filter:brightness(0) invert(1); opacity:.9; }
+.access-face{ display:flex; justify-content:center; margin-top:34px; }
+.access-face svg{ width:92px; height:92px; filter:drop-shadow(0 8px 16px rgba(0,0,0,.3)); transition:transform .5s cubic-bezier(.3,1.5,.5,1); }
+.access-face .af-calm{ transition:opacity .2s; }
+.access-face .af-heart{ transform:scale(0); transform-box:fill-box; transform-origin:center; transition:transform .45s cubic-bezier(.3,1.7,.5,1) .08s; }
+.access-face .af-smile{ opacity:0; transition:opacity .2s .05s; }
+.access-lock.is-happy .access-face svg{ transform:scale(1.14) rotate(-4deg); }
+.access-lock.is-happy .af-calm{ opacity:0; }
+.access-lock.is-happy .af-heart{ transform:scale(1); }
+.access-lock.is-happy .af-smile{ opacity:1; }
+.access-title{ margin:17px 0 0; text-align:center; font-size:26px; font-weight:650; letter-spacing:-.03em; line-height:1.15; color:#fff; text-wrap:balance; }
+.access-sub{ margin:9px auto 0; max-width:30ch; text-align:center; font-size:15px; line-height:1.45; color:rgba(235,240,255,.8); text-wrap:balance; }
+.access-spacer{ flex:1; min-height:26px; }
+.access-form{ display:flex; flex-direction:column; gap:9px; }
+.access-code{
+  width:100%; height:56px; border-radius:var(--r-md); border:1px solid rgba(255,255,255,.24);
+  background:rgba(255,255,255,.12); color:#fff; font:600 21px/1 var(--mono); letter-spacing:.16em;
+  text-align:center; text-transform:uppercase;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+}
+.access-code::placeholder{ color:rgba(235,240,255,.5); }
+.access-code:focus{ outline:none; border-color:rgba(255,255,255,.65); background:rgba(255,255,255,.17); }
+.access-code.is-shaking{ animation:accessShake .42s cubic-bezier(.36,.07,.19,.97); }
+@keyframes accessShake{ 10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)} 30%,50%,70%{transform:translateX(-7px)} 40%,60%{transform:translateX(7px)} }
+.access-msg{ min-height:20px; margin:0; text-align:center; font-size:13px; line-height:1.4; color:#FFB9C4; }
+.access-go{
+  height:54px; border:0; border-radius:var(--r-md); background:#fff; color:#1B2458;
+  font:650 17px var(--sans); letter-spacing:-.01em; cursor:pointer;
+  transition:transform .12s var(--ease), opacity .2s;
+}
+.access-go:active, .access-go.is-pressed{ transform:scale(.97); }
+.access-go:disabled{ opacity:.7; }
+.access-skip{
+  align-self:center; min-height:44px; padding:0 17px; border:0; background:none; cursor:pointer;
+  color:rgba(235,240,255,.78); font:550 14px var(--sans); text-decoration:underline; text-underline-offset:3px;
+}
+.access-lock :focus-visible{ outline:3px solid #7FC4F2; outline-offset:3px; }
+.access-ok{ display:none; flex-direction:column; gap:9px; margin-top:26px; }
+.access-ok div{ display:flex; gap:9px; align-items:flex-start; font-size:14px; line-height:1.4; color:rgba(235,240,255,.85); background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:var(--r-sm); padding:9px 13px; }
+.access-ok svg{ width:18px; height:18px; flex:none; color:#9BF0C4; margin-top:1px; }
+.access-lock.is-happy .access-ok{ display:flex; }
+.access-lock.is-happy .access-form{ visibility:hidden; }
+body.access-locked{ overflow:hidden; }
+/* display:flex above would otherwise beat the hidden attribute and leave an
+   invisible layer over the whole app, swallowing every tap. */
+.access-lock[hidden], .name-access[hidden]{ display:none !important; }
+.sr-only{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
+/* ---------- Team access: owner screen ---------- */
+.ta-card{
+  background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:17px;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  display:flex; flex-direction:column; gap:9px; margin-bottom:13px;
+}
+.ta-card h3{ margin:0; font-size:17px; font-weight:650; letter-spacing:-.02em; color:var(--ink); }
+.ta-card p{ margin:0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+.ta-label{ font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
+.ta-state{ display:flex; align-items:flex-start; gap:13px; }
+.ta-state-dot{ width:12px; height:12px; border-radius:50%; margin-top:5px; flex:none; background:#D9A441; box-shadow:0 0 0 4px rgba(217,164,65,.2); }
+.ta-card.is-locked .ta-state-dot{ background:var(--good); box-shadow:0 0 0 4px var(--good-soft); }
+.ta-state > div{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+.ta-row2{ display:flex; gap:9px; flex-wrap:wrap; }
+.ta-row2 .btn{ flex:1 1 140px; justify-content:center; min-height:44px; }
+.ta-confirm{ background:var(--danger-soft); border-radius:var(--r-md); padding:13px; display:flex; flex-direction:column; gap:9px; }
+.ta-confirm p{ color:var(--ink); }
+.ta-field{ width:100%; height:48px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi); padding:0 13px; font:500 16px var(--sans); color:var(--ink); }
+.ta-field:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 3px var(--accent-soft); }
+.ta-share{ font:italic 400 15px/1.5 var(--serif); color:var(--ink); background:var(--bg-hi); border-radius:var(--r-md); padding:13px; border-left:3px solid var(--navy); white-space:pre-line; overflow-wrap:anywhere; }
+.ta-people{ display:flex; flex-direction:column; }
+.ta-person{ display:flex; align-items:center; gap:13px; padding:13px 0; border-top:1px solid var(--line-soft); }
+.ta-person:first-child{ border-top:0; padding-top:4px; }
+.ta-avatar{ width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex:none; color:#fff; font-weight:650; font-size:14px; }
+.ta-who{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.ta-who b{ font-size:15px; font-weight:600; color:var(--ink); overflow-wrap:anywhere; }
+.ta-who span{ font-size:13px; color:var(--ink-soft); }
+.ta-code{
+  min-height:44px; padding:0 9px; border-radius:var(--r-sm); border:1px dashed var(--line); background:none; cursor:pointer;
+  font:600 13px var(--mono); letter-spacing:.06em; color:var(--ink-soft); white-space:nowrap;
+}
+.ta-remove{ min-height:44px; padding:0 9px; border:0; background:none; cursor:pointer; color:var(--danger); font:600 14px var(--sans); }
+.ta-person-confirm{ padding:0 0 13px 53px; }
+.ta-note{ font-size:13px; color:var(--ink-faint); margin:4px 2px 0; line-height:1.45; }
+.ta-code:active, .ta-remove:active, .ta-code.is-pressed, .ta-remove.is-pressed{ transform:scale(.96); }
+.ta-code:focus-visible, .ta-remove:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+/* Two buttons don't fit beside a name on a phone: they drop to their own
+   line, lined up under the name. */
+.ta-actions{ display:flex; gap:6px; align-items:center; flex:none; }
+@media (max-width:480px){
+  .ta-person{ flex-wrap:wrap; row-gap:4px; }
+  .ta-actions{ width:100%; padding-left:53px; }
+}
+/* Name sheet: your code, or the way in to Team access. */
+.name-access{ margin-top:13px; padding-top:13px; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:6px; }
+.name-access-row{ display:flex; align-items:center; justify-content:space-between; gap:9px; font-size:14px; color:var(--ink-soft); }
+.name-access-row button{ min-height:44px; }
+.name-access-code{ padding:0 13px; border-radius:var(--r-sm); border:1px dashed var(--line); background:var(--bg-hi); cursor:pointer; font:600 15px var(--mono); letter-spacing:.08em; color:var(--ink); }
+.name-access p{ margin:0; font-size:13px; color:var(--ink-faint); }
+@media (prefers-reduced-motion: reduce){
+  .access-lock, .access-face svg, .access-face .af-heart, .access-go{ transition:none; }
+  .access-code.is-shaking{ animation:none; }
+}
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -5307,6 +5433,8 @@
       </div>
     </div>
     <p class="name-photo-hint">A photo is optional \u2014 your team sees it beside your messages in Team Chat.</p>
+    <!-- Your invite code, or the way in to Team access. Filled by renderNameAccess(). -->
+    <div class="name-access" id="nameAccess" hidden></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="cancelNameModal()">Cancel</button>
       <button class="btn btn-primary" id="nameSaveBtn" onclick="saveMyName()">Save</button>
@@ -5315,6 +5443,27 @@
 </div>
 
 <input class="file-input-hidden" id="myPhotoInput" type="file" accept="image/*" onchange="handleMyPhotoSelected(event)">
+
+<!-- Team access lock screen. Not an .overlay on purpose: navigation closes
+     every .overlay, and this must stay up until the phone has joined. -->
+<div class="access-lock" id="accessLock" hidden role="dialog" aria-modal="true" aria-labelledby="accessTitle" aria-describedby="accessSub">
+  <div class="access-lock-photo" aria-hidden="true"></div>
+  <div class="access-lock-inner">
+    <div class="access-brand"><img src="hmh-mark.png" alt="">Interpreter Hub</div>
+    <div class="access-face" id="accessFace" aria-hidden="true"></div>
+    <h1 class="access-title" id="accessTitle">Welcome to the Hub</h1>
+    <p class="access-sub" id="accessSub">Type the invite code you were sent. It's yours, and it works on any of your phones.</p>
+    <div class="access-ok" id="accessOk"></div>
+    <div class="access-spacer"></div>
+    <form class="access-form" id="accessForm" novalidate onsubmit="submitAccessCode(event)">
+      <label for="accessCode" class="sr-only">Invite code</label>
+      <input class="access-code" id="accessCode" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX" oninput="accessCodeInput(this)">
+      <p class="access-msg" id="accessMsg" role="status" aria-live="polite"></p>
+      <button class="access-go" id="accessGo" type="submit">Open the Hub</button>
+      <button class="access-skip" id="accessSkip" type="button" onclick="skipAccessLock()">Skip for now</button>
+    </form>
+  </div>
+</div>
 
 <input class="file-input-hidden" id="termAttachInput" type="file" accept="image/*,application/pdf" onchange="handleTermAttachSelected(event)">
 
@@ -5417,50 +5566,18 @@
      2. Build a Firestore Database (Start in test mode is fine to begin)
      3. Project settings → your web app → copy the firebaseConfig object
         and paste it below, replacing the placeholder values.
-     4. In Firestore → Rules, set:
-          (This same block is checked in as firestore.rules, which is the
-          source of truth — `firebase deploy --only firestore:rules` applies
-          it. The copy below is here for setting a project up by hand.)
-          rules_version = '2';
-          service cloud.firestore {
-            match /databases/{database}/documents {
-              match /terminology-hub/{docId} { allow read, write: if true; }
-              match /terminology-meta/{docId} { allow read, write: if true; }
-              match /terms/{docId} { allow read, write: if true; }
-              match /term-attachments/{docId} { allow read, write: if true; }
-              match /term-reviews/{docId} { allow read, write: if true; }
-              match /term-link-cache/{docId} { allow read, write: if true; }
-              match /healthcare-providers/{docId} { allow read, write: if true; }
-              match /doctor-directory/{docId} { allow read, write: if true; }
-              match /doctor-research-cache/{docId} { allow read, write: if true; }
-              match /team-chat/{docId} { allow read, write: if true; }
-              match /chat-typing/{docId} { allow read, write: if true; }
-              match /team-members/{docId} { allow read, write: if true; }
-              match /activity-log/{docId} { allow read, write: if true; }
-              match /announcements/{docId} { allow read, write: if true; }
-              match /practice-questions/{docId} { allow read, write: if true; }
-              match /quiz-history/{docId} { allow read, write: if true; }
-              match /ce-events/{docId} { allow read, write: if true; }
-              match /deleted-items/{docId} { allow read, write: if true; }
-            }
-          }
-     5. This app also uses Cloud Storage for file attachments (photos and
-        PDFs), which requires the pay-as-you-go Blaze plan. In Storage →
-        Rules, set:
-          rules_version = '2';
-          service firebase.storage {
-            match /b/{bucket}/o {
-              match /attachments/{allPaths=**} { allow read, write: if true; }
-            }
-          }
-        (This keeps the app open to your whole team with no login,
-        matching how it worked inside Claude. Anyone with the config
-        below could also write to your database/storage directly — fine
-        for a small trusted team, not fine if this repo goes fully public.)
+     4. In Firestore → Rules, paste firestore.rules from this repo.
+     5. This app also uses Cloud Storage for attachments (Blaze plan). In
+        Storage → Rules, paste storage.rules.
+        Both files are the source of truth, and they are not open: the Hub
+        is for the interpreter team, who get in with invite codes (see the
+        Team access section and the header of firestore.rules). Codes need
+        Authentication → Sign-in method → Anonymous switched on.
 ==================================================================== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg",
@@ -5473,10 +5590,14 @@
 
   let db = null;
   let storage = null;
+  // Team access signs each phone in anonymously once it enters an invite
+  // code (see the Team access section). Missing script = no lock, as before.
+  let hubAuth = null;
   try{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
     storage = firebase.storage();
+    try{ hubAuth = firebase.auth ? firebase.auth() : null; }catch(e){ hubAuth = null; }
 
     // NOTE: Firestore offline persistence (enablePersistence) was enabled here
     // and had to be removed. On iOS Safari it proved unstable — the app
@@ -5710,7 +5831,7 @@ async function aiTranslate(text, context, from, to){
   try{
     const res = await fetch('/api/translate', {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json', ...(await hubAuthHeaders()) },
       body: JSON.stringify({ text, context, from, to })
     });
     if(res.status === 503 || res.status === 404){
@@ -7555,6 +7676,9 @@ async function loadData(){
     // every single time even though the content rarely changes.
     if(loadGlossaryCache()) render();
 
+    // Team access: don't ask the database anything until this phone's
+    // sign-in is back, or a locked Hub refuses it as a stranger.
+    await hubAuthReady;
     const metaSnap = await db.collection('terminology-meta').doc('categories').get();
 
     if(!metaSnap.exists){
@@ -9683,7 +9807,10 @@ function getToolTiles(){
     // Listed as a tool so it reaches the More sheet and the Home tools grid.
     // It was only in the desktop sidebar, which the More sheet doesn't use —
     // so on a phone, the one screen that undoes a mistake was unreachable.
-    { id:'trash',     name:'Recently deleted',    color:'#8B8B95', icon: DOMAIN_ICONS.clipboard, count: TRASH.length, label: TRASH.length===1?'item':'items' }
+    { id:'trash',     name:'Recently deleted',    color:'#8B8B95', icon: DOMAIN_ICONS.clipboard, count: TRASH.length, label: TRASH.length===1?'item':'items' },
+    // Only the owner hands out invite codes, so only the owner sees this.
+    ...(isHubOwner() ? [{ id:'team-access', name:'Team access', color:'#252E6D', icon: DOMAIN_ICONS.key,
+      count: TEAM_ACCESS.loaded ? TEAM_ACCESS.invites.length : null, label: TEAM_ACCESS.invites.length===1?'person':'people' }] : [])
   ];
 }
 
@@ -9937,7 +10064,7 @@ async function runDoctorResearch(forceRefresh){
   try{
     const res = await fetch('/api/doctor-research', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await hubAuthHeaders()) },
       body: JSON.stringify({ doctorName: name, specialty, location }),
       signal: doctorResearchAbortController.signal,
     });
@@ -11519,6 +11646,15 @@ const GUIDE_TOPICS = [
     </ol>
     <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice scores.</p>` },
 
+  { id:'invite', section:'start', k:'invite code lock locked sign in login password access new phone get in join team only', q:'The Hub is asking for an invite code', a:`
+    <p>The Hub is only for the interpreter team, so everyone has their own invite code. Jose sends it to you.</p>
+    <ol>
+      <li>Type the code on the lock screen. Capitals and the dash don't matter.</li>
+      <li>Tap <b>Open the Hub</b>.</li>
+    </ol>
+    <p>You only do this once on each phone. The same code works on a new phone, so keep it somewhere safe. To see it again, tap the round person button in the <b>bottom-left corner</b>.</p>
+    <p>If the Hub says the code isn't active, or that your phone was signed out, ask Jose for a new one.</p>` },
+
   { id:'install', section:'start', k:'install download app icon home screen shortcut add safari chrome', q:'How do I put this on my phone like a real app?', a:`
     <p>You don't need the App Store. It takes about ten seconds, and afterwards it opens full screen with its own icon, like any other app.</p>
     <p><b>iPhone</b></p>
@@ -12002,6 +12138,8 @@ function render(){
   } else if(activeCategory === 'doctor-research'){
     showTopbar = false;
   } else if(activeCategory === 'home'){
+    showTopbar = false;
+  } else if(activeCategory === 'team-access'){
     showTopbar = false;
   }
 
@@ -12542,6 +12680,11 @@ function renderContent(){
 
   if(activeCategory === 'trash'){
     content.innerHTML = renderTrash();
+    return;
+  }
+
+  if(activeCategory === 'team-access'){
+    content.innerHTML = renderTeamAccess();
     return;
   }
 
@@ -13097,7 +13240,7 @@ async function openTermLookup(categoryId, termId){
   try{
     const res = await fetch('/api/term-lookup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await hubAuthHeaders()) },
       body: JSON.stringify({ term: { en: term.en, es: term.es, def: term.def, domain: cat.name } }),
     });
     if(stale()) return;
@@ -13402,6 +13545,7 @@ function openNameModal(){
   pendingMyPhotoRemove = false;
   uploadingMyPhoto = false;
   renderNamePhoto();
+  renderNameAccess();
   document.getElementById('nameOverlay').classList.add('show');
   if(prefersAutoFocus()) input.focus();
 }
@@ -14888,7 +15032,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0930.1526';
+const BUILD_ID = 'b0930.1959';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -15552,7 +15696,7 @@ async function runTierBackfill(){
       const timer = setTimeout(() => controller.abort('timeout'), 60000);
       const res = await fetch('/api/doctor-research', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await hubAuthHeaders()) },
         body: JSON.stringify({
           doctorName: doctor.name,
           specialty: doctor.specialty || '',
@@ -16806,7 +16950,7 @@ async function runTermCheck(record, domainName){
   try{
     const res = await fetch('/api/term-check', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await hubAuthHeaders()) },
       body: JSON.stringify({
         term: { en: record.en, es: record.es, def: record.def, notes: record.notes || '', domain: domainName },
         candidates: findDuplicateCandidates(record)
@@ -17497,25 +17641,698 @@ async function deleteDoctorDirEntry(id){
 }
 
 
+/* ============ Team access ============
+   Invite codes, so the Hub opens only for the interpreter team.
+
+   The owner creates a code per teammate on the Team access screen. Typing it
+   on the lock screen signs this phone in (Firebase anonymous sign-in) and
+   adds it to hub-members/. firestore.rules and storage.rules do the actual
+   locking and api/_hub-access.js guards the AI tools -- this section is the
+   doorway, not the door.
+
+     hub-access/owner     { uid, name, at }      claimed once, by the owner
+     hub-access/settings  { practice }           false = locked
+     hub-invites/{CODE}   { name, role, createdAt, createdBy }
+     hub-members/{uid}    { invite, name, role, joinedAt, lastSeen, device }
+
+   PRACTICE MODE is how this rolls out without locking anyone out: the lock
+   screen shows, "Skip for now" lets people past, and the rules still let
+   everyone in. The owner turns it off once the team has joined.
+
+   Setting up (once): open the app with ?setup=owner, which shows the
+   "Become the owner" card. It is deliberately not linked anywhere else. */
+const ACCESS_ME_KEY = 'ih_access_me_v1';        // this phone's membership
+const ACCESS_STATE_KEY = 'ih_access_state_v1';  // last known: none | practice | locked
+const ACCESS_OWNER_KEY = 'ih_access_owner_v1';  // owner's name, for the lock screen offline
+const ACCESS_SKIP_KEY = 'ih_access_skip_until';
+const ACCESS_SKIP_MS = 12 * 60 * 60 * 1000;
+const ACCESS_HEARTBEAT_MS = 6 * 60 * 60 * 1000;
+const INVITE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // no 0/O, 1/I/L
+
+// The greeting's glasses face, calm until the code works, then heart eyes and
+// a big smile. Its own ids, since the greeting's face may not be on the page.
+const ACCESS_FACE_SVG = '<svg viewBox="4 4 112 112" focusable="false">'
+  + '<defs><radialGradient id="afFill" cx="56" cy="54" r="54" gradientUnits="userSpaceOnUse">'
+  +   '<stop offset="0" stop-color="#FFD866"/><stop offset=".78" stop-color="#F9C84B"/><stop offset="1" stop-color="#EDB43A"/></radialGradient>'
+  + '<clipPath id="afSmileClip"><path d="M44 69 Q60 90 76 69 Z"/></clipPath></defs>'
+  + '<circle cx="60" cy="60" r="47" fill="url(#afFill)" stroke="#1A1A1A" stroke-width="6"/>'
+  + '<path d="M24 50 A37 37 0 0 1 96 50 A40 34 0 0 0 24 50 Z" fill="#fff" opacity=".42"/>'
+  + '<circle cx="84" cy="27" r="4.2" fill="#fff" opacity=".95"/>'
+  + '<rect x="25" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/><rect x="79" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/>'
+  + '<g class="af-calm" fill="none" stroke="#1A1A1A" stroke-linecap="round" stroke-linejoin="round">'
+  +   '<path d="M33 52.5 L42 44.5 L51 52.5" stroke-width="4.4"/><path d="M69 52.5 L78 44.5 L87 52.5" stroke-width="4.4"/>'
+  +   '<path d="M48 72 Q60 79 72 72" stroke-width="3.6"/></g>'
+  + '<g transform="translate(42 50)"><path class="af-heart" d="M0 7 C-10 1 -10 -8 -5 -8 C-2.2 -8 0 -6 0 -4 C0 -6 2.2 -8 5 -8 C10 -8 10 1 0 7 Z" fill="#FF3F72" stroke="#1A1A1A" stroke-width="1.6"/></g>'
+  + '<g transform="translate(78 50)"><path class="af-heart" d="M0 7 C-10 1 -10 -8 -5 -8 C-2.2 -8 0 -6 0 -4 C0 -6 2.2 -8 5 -8 C10 -8 10 1 0 7 Z" fill="#FF3F72" stroke="#1A1A1A" stroke-width="1.6"/></g>'
+  + '<g class="af-smile"><path d="M44 69 Q60 90 76 69 Z" fill="#1A1A1A" stroke="#1A1A1A" stroke-width="3.4" stroke-linejoin="round"/>'
+  +   '<g clip-path="url(#afSmileClip)"><ellipse cx="60" cy="84" rx="9" ry="6" fill="#F46F7E"/></g></g>'
+  + '<g fill="none" stroke="#1A1A1A" stroke-width="4.6" stroke-linejoin="round">'
+  +   '<path d="M6 44 H14" stroke-linecap="round"/><path d="M106 44 H114" stroke-linecap="round"/>'
+  +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
+  +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
+  +   '<path d="M52 44 Q60 40 68 44"/></g></svg>';
+const ACCESS_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const ACCESS = {
+  state: (()=>{ try{ return localStorage.getItem(ACCESS_STATE_KEY) || 'unknown'; }catch(e){ return 'unknown'; } })(),
+  ownerName: (()=>{ try{ return localStorage.getItem(ACCESS_OWNER_KEY) || ''; }catch(e){ return ''; } })(),
+  ownerUid: ''
+};
+let TEAM_ACCESS = { loaded:false, loading:false, error:'', invites:[], members:[],
+  inviting:false, share:null, confirmRemove:null, confirmLock:false, busy:false };
+let accessSetupRequested = false;
+let accessFails = 0, accessCoolUntil = 0;
+
+// Resolves once Firebase has restored (or not) this phone's sign-in, so
+// nothing reads the database as a stranger when it is really a member.
+let resolveHubAuthReady;
+const hubAuthReady = new Promise(r => { resolveHubAuthReady = r; });
+(function(){
+  if(!hubAuth){ resolveHubAuthReady(); return; }
+  let done = false;
+  const finish = () => { if(!done){ done = true; resolveHubAuthReady(); } };
+  try{ hubAuth.onAuthStateChanged(finish); }catch(e){ finish(); }
+  setTimeout(finish, 2500);   // never hold the app hostage to a slow restore
+})();
+
+function readAccessMe(){
+  try{ return JSON.parse(localStorage.getItem(ACCESS_ME_KEY) || 'null'); }catch(e){ return null; }
+}
+function writeAccessMe(me){
+  try{ if(me) localStorage.setItem(ACCESS_ME_KEY, JSON.stringify(me)); else localStorage.removeItem(ACCESS_ME_KEY); }catch(e){}
+}
+function isHubMember(){ const me = readAccessMe(); return !!(me && me.member); }
+function isHubOwner(){ const me = readAccessMe(); return !!(me && me.member && me.role === 'owner'); }
+function setAccessState(state){
+  ACCESS.state = state;
+  try{ localStorage.setItem(ACCESS_STATE_KEY, state); }catch(e){}
+}
+function accessOwnerFirst(){
+  const n = (ACCESS.ownerName || '').trim();
+  return n ? n.split(/\s+/)[0] : '';
+}
+
+function tidyInviteCode(v){ return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8); }
+function formatInviteCode(c){ c = tidyInviteCode(c); return c.length > 4 ? c.slice(0, 4) + '-' + c.slice(4) : c; }
+function newInviteCode(){
+  const n = new Uint32Array(8);
+  crypto.getRandomValues(n);
+  return Array.from(n, x => INVITE_ALPHABET[x % INVITE_ALPHABET.length]).join('');
+}
+function deviceLabel(){
+  const ua = navigator.userAgent || '';
+  if(/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'iPad';
+  if(/iPhone|iPod/.test(ua)) return 'iPhone';
+  if(/Android/.test(ua)) return /Mobile/.test(ua) ? 'Android phone' : 'Android tablet';
+  if(/Macintosh/.test(ua)) return 'Mac';
+  if(/Windows/.test(ua)) return 'Windows computer';
+  return 'Computer';
+}
+
+// The AI endpoints check this once the Hub is locked (api/_hub-access.js).
+async function hubAuthHeaders(){
+  try{
+    const u = hubAuth && hubAuth.currentUser;
+    return u ? { Authorization: 'Bearer ' + await u.getIdToken() } : {};
+  }catch(e){ return {}; }
+}
+
+// Adopts the invite's name unless this phone already has one: people who were
+// using the Hub before codes existed keep the name their history is under.
+function adoptInviteName(name){
+  if(!name || whoAmI()) return;
+  window.__lastWho = name;
+  persistMyName(name);
+  const whoEl = document.getElementById('whoInput');
+  if(whoEl) whoEl.value = name;
+  try{ updateTopbarAvatar(); }catch(e){}
+}
+
+async function loadAccessState(){
+  if(!db) return ACCESS.state;
+  try{
+    const [ownerSnap, setSnap] = await Promise.all([
+      db.collection('hub-access').doc('owner').get(),
+      db.collection('hub-access').doc('settings').get()
+    ]);
+    const owner = ownerSnap.exists ? (ownerSnap.data() || {}) : null;
+    ACCESS.ownerUid = owner ? owner.uid || '' : '';
+    ACCESS.ownerName = owner ? owner.name || '' : '';
+    try{ localStorage.setItem(ACCESS_OWNER_KEY, ACCESS.ownerName); }catch(e){}
+    setAccessState(!owner ? 'none' : (setSnap.exists && setSnap.data().practice === false ? 'locked' : 'practice'));
+  }catch(err){
+    // Denied means the access rules haven't been published yet, so nothing
+    // is locked. Anything else (offline) keeps the last known state.
+    if(err && err.code === 'permission-denied') setAccessState('none');
+  }
+  return ACCESS.state;
+}
+
+/* ---- Joining ---- */
+class HubAccessError extends Error { constructor(code){ super(code); this.code = code; } }
+
+async function joinHub(code){
+  if(!hubAuth || !db) throw new HubAccessError('hub/unavailable');
+  let user = hubAuth.currentUser;
+  if(!user) user = (await hubAuth.signInAnonymously()).user;
+  const inv = await db.collection('hub-invites').doc(code).get();
+  if(!inv.exists) throw new HubAccessError('hub/no-invite');
+  const d = inv.data() || {};
+  const now = Date.now();
+  const ref = db.collection('hub-members').doc(user.uid);
+  let existing = null;
+  try{ existing = await ref.get(); }catch(e){}
+  if(existing && existing.exists && existing.data().invite === code){
+    await ref.update({ lastSeen: now, device: deviceLabel() });
+  }else{
+    if(existing && existing.exists) await ref.delete();   // switching codes on this phone
+    await ref.set({ invite: code, name: d.name, role: d.role, joinedAt: now, lastSeen: now, device: deviceLabel() });
+  }
+  const me = { member: true, uid: user.uid, code, name: d.name, role: d.role, joinedAt: now };
+  writeAccessMe(me);
+  adoptInviteName(d.name);
+  return me;
+}
+
+function accessErrorMessage(err){
+  const who = accessOwnerFirst() || 'whoever sent it';
+  const code = err && err.code;
+  if(code === 'hub/no-invite' || code === 'permission-denied') return `That code isn't active. Check it with ${who}.`;
+  if(code === 'auth/operation-not-allowed' || code === 'auth/admin-restricted-operation') return `Sign-in isn't switched on for the Hub yet. Let ${accessOwnerFirst() || 'the owner'} know.`;
+  if(code === 'auth/too-many-requests') return 'Too many tries. Wait a minute and try again.';
+  if(code === 'hub/unavailable') return "Sign-in didn't load. Check your connection, then close and reopen the app.";
+  if(code === 'auth/network-request-failed' || code === 'unavailable' || navigator.onLine === false) return "Couldn't reach the Hub. Check your connection and try again.";
+  return 'Something went wrong. Try again in a moment.';
+}
+
+function accessCodeInput(el){
+  const raw = tidyInviteCode(el.value);
+  const shown = formatInviteCode(raw);
+  if(el.value !== shown) el.value = shown;
+  const msg = document.getElementById('accessMsg');
+  if(msg && msg.textContent && Date.now() > accessCoolUntil) msg.textContent = '';
+}
+
+function accessShake(){
+  const input = document.getElementById('accessCode');
+  if(!input) return;
+  input.classList.remove('is-shaking'); void input.offsetWidth; input.classList.add('is-shaking');
+}
+
+async function submitAccessCode(e){
+  if(e) e.preventDefault();
+  const input = document.getElementById('accessCode');
+  const msg = document.getElementById('accessMsg');
+  const btn = document.getElementById('accessGo');
+  const say = t => { msg.textContent = t; accessShake(); };
+  if(Date.now() < accessCoolUntil){ say('Too many tries. Wait a moment and try again.'); return; }
+  const code = tidyInviteCode(input.value);
+  if(!code){ say('Type your invite code first.'); return; }
+  if(code.length !== 8){ say('Invite codes have 8 letters and numbers.'); return; }
+  if(navigator.onLine === false){ say('Connect to the internet to enter your code.'); return; }
+  btn.disabled = true; btn.textContent = 'Checking…';
+  try{
+    const me = await joinHub(code);
+    accessFails = 0;
+    celebrateAccess(me);
+  }catch(err){
+    if(err && (err.code === 'hub/no-invite' || err.code === 'permission-denied')){
+      accessFails++;
+      if(accessFails >= 5){ accessCoolUntil = Date.now() + 30000; accessFails = 0; }
+    }
+    say(accessErrorMessage(err));
+  }finally{
+    btn.disabled = false; btn.textContent = 'Open the Hub';
+  }
+}
+
+function celebrateAccess(me){
+  const lock = document.getElementById('accessLock');
+  const first = (me.name || '').split(/\s+/)[0] || 'there';
+  document.getElementById('accessTitle').textContent = `Hi, ${first}!`;
+  document.getElementById('accessSub').textContent = "You're in.";
+  const kept = whoAmI() && whoAmI() !== me.name ? whoAmI() : me.name;
+  document.getElementById('accessOk').innerHTML =
+    `<div>${ACCESS_CHECK_SVG}<span>Chat and edits show your name as ${escapeHtml(kept)}${/[.!?]$/.test(kept) ? '' : '.'}</span></div>`
+    + `<div>${ACCESS_CHECK_SVG}<span>This phone stays unlocked. New phone? Use the same code.</span></div>`;
+  lock.classList.add('is-happy');
+  document.activeElement && document.activeElement.blur && document.activeElement.blur();
+  setTimeout(()=>{
+    // Locked: the data listeners started as a stranger and were refused, so
+    // start clean. Practice mode: they already work; just step aside.
+    if(ACCESS.state === 'locked'){ location.reload(); return; }
+    hideAccessLock();
+    render();
+  }, 1700);
+}
+
+/* ---- The lock screen ---- */
+function renderAccessLock(mode){
+  const who = accessOwnerFirst();
+  const lock = document.getElementById('accessLock');
+  lock.classList.remove('is-happy');
+  const face = document.getElementById('accessFace');
+  if(face && !face.firstChild) face.innerHTML = ACCESS_FACE_SVG;
+  document.getElementById('accessOk').innerHTML = '';
+  document.getElementById('accessMsg').textContent = '';
+  if(mode === 'removed'){
+    document.getElementById('accessTitle').textContent = 'This phone was signed out';
+    document.getElementById('accessSub').textContent = who
+      ? `If that's a mistake, ask ${who} for a new code.`
+      : "If that's a mistake, ask for a new code.";
+  }else{
+    document.getElementById('accessTitle').textContent = 'Welcome to the Hub';
+    document.getElementById('accessSub').textContent = who
+      ? `Type the invite code ${who} sent you. It's yours, and it works on any of your phones.`
+      : "Type the invite code you were sent. It's yours, and it works on any of your phones.";
+  }
+  // No way past once the owner has locked the Hub.
+  document.getElementById('accessSkip').hidden = ACCESS.state === 'locked';
+}
+
+function showAccessLock(mode){
+  const lock = document.getElementById('accessLock');
+  if(!lock) return;
+  renderAccessLock(mode || 'join');
+  const app = document.getElementById('app');
+  if(app) app.inert = true;
+  document.body.classList.add('access-locked');
+  if(lock.hidden){
+    lock.hidden = false;
+    requestAnimationFrame(()=> lock.classList.add('show'));
+  }
+  if(prefersAutoFocus()) setTimeout(()=> document.getElementById('accessCode').focus(), 350);
+}
+
+function hideAccessLock(instant){
+  const lock = document.getElementById('accessLock');
+  if(!lock || lock.hidden) return;
+  const app = document.getElementById('app');
+  if(app) app.inert = false;
+  document.body.classList.remove('access-locked');
+  lock.classList.remove('show');
+  if(instant) lock.hidden = true;
+  else setTimeout(()=>{ if(!lock.classList.contains('show')) lock.hidden = true; }, 380);
+}
+
+function skipAccessLock(){
+  try{ localStorage.setItem(ACCESS_SKIP_KEY, String(Date.now() + ACCESS_SKIP_MS)); }catch(e){}
+  hideAccessLock();
+}
+function skippedAccessRecently(){
+  try{ return Number(localStorage.getItem(ACCESS_SKIP_KEY) || 0) > Date.now(); }catch(e){ return false; }
+}
+
+function onRemovedFromHub(){
+  writeAccessMe(null);
+  // Don't leave the team's glossary sitting on a phone that's been removed.
+  try{ [GLOSSARY_CACHE_KEY, OUTBOX_KEY].forEach(k => localStorage.removeItem(k)); }catch(e){}
+  if(hubAuth) hubAuth.signOut().catch(()=>{});
+  showAccessLock('removed');
+}
+
+// A member phone: confirm it is still on the team, and keep "last seen" fresh.
+async function checkMyMembership(){
+  const me = readAccessMe();
+  if(!me || !me.member || !db || !hubAuth) return;
+  const user = hubAuth.currentUser;
+  const rejoin = async () => {
+    if(!me.code){ onRemovedFromHub(); return; }
+    try{
+      await joinHub(me.code);
+      if(ACCESS.state === 'locked') location.reload();
+    }catch(err){
+      if(err && (err.code === 'hub/no-invite' || err.code === 'permission-denied')) onRemovedFromHub();
+    }
+  };
+  if(navigator.onLine === false) return;
+  // Sign-in lost (site data partly cleared): quietly rejoin with the saved code.
+  if(!user || user.uid !== me.uid){ await rejoin(); return; }
+  try{
+    const snap = await db.collection('hub-members').doc(user.uid).get();
+    if(!snap.exists){ await rejoin(); return; }
+    const d = snap.data() || {};
+    if(d.role !== me.role || d.name !== me.name) writeAccessMe({ ...me, role: d.role, name: d.name });
+    if(Date.now() - (d.lastSeen || 0) > ACCESS_HEARTBEAT_MS){
+      snap.ref.update({ lastSeen: Date.now(), device: deviceLabel() }).catch(()=>{});
+    }
+  }catch(err){ /* offline, or the access rules aren't published yet */ }
+}
+
+async function accessBoot(){
+  try{ accessSetupRequested = new URLSearchParams(location.search).get('setup') === 'owner'; }catch(e){}
+  if(accessSetupRequested){
+    try{ history.replaceState(history.state, '', location.pathname + location.hash); }catch(e){}
+  }
+  if(isHubMember()){
+    hubAuthReady.then(checkMyMembership);
+    loadAccessState();
+  }else{
+    // Known to be locked: cover the app before any network round trip.
+    if(ACCESS.state === 'locked') showAccessLock('join');
+    const state = await loadAccessState();
+    if(!isHubMember()){
+      if(state === 'locked' || (state === 'practice' && !skippedAccessRecently())) showAccessLock('join');
+      else hideAccessLock(true);
+    }
+  }
+  if(accessSetupRequested) setCategory('team-access');
+}
+
+/* ---- Owner: claiming the Hub (once) ---- */
+async function claimHubOwnership(){
+  const nameEl = document.getElementById('taOwnerName');
+  const name = ((nameEl && nameEl.value) || whoAmI() || '').trim();
+  if(!name){ showToast('Type your name first.'); if(nameEl) nameEl.focus(); return; }
+  if(!hubAuth || !db){ showToast("Sign-in didn't load. Reload the app and try again."); return; }
+  TEAM_ACCESS.busy = true; renderContent();
+  try{
+    const user = hubAuth.currentUser || (await hubAuth.signInAnonymously()).user;
+    const code = newInviteCode();
+    const now = Date.now();
+    const b = db.batch();
+    b.set(db.collection('hub-access').doc('owner'), { uid: user.uid, name, at: now });
+    b.set(db.collection('hub-access').doc('settings'), { practice: true, updatedAt: now, updatedBy: name });
+    b.set(db.collection('hub-invites').doc(code), { name, role: 'owner', createdAt: now, createdBy: user.uid });
+    b.set(db.collection('hub-members').doc(user.uid), { invite: code, name, role: 'owner', joinedAt: now, lastSeen: now, device: deviceLabel() });
+    await b.commit();
+    writeAccessMe({ member: true, uid: user.uid, code, name, role: 'owner', joinedAt: now });
+    if(!whoAmI()){ window.__lastWho = name; persistMyName(name); }
+    ACCESS.ownerUid = user.uid; ACCESS.ownerName = name;
+    try{ localStorage.setItem(ACCESS_OWNER_KEY, name); }catch(e){}
+    setAccessState('practice');
+    accessSetupRequested = false;
+    showToast('You own the Hub now. Practice mode is on.');
+    TEAM_ACCESS.loaded = false;
+    loadTeamAccess();
+  }catch(err){
+    const c = err && err.code;
+    showToast(c === 'auth/operation-not-allowed' || c === 'auth/admin-restricted-operation'
+      ? 'Turn on Anonymous sign-in in Firebase first (Authentication → Sign-in method).'
+      : c === 'permission-denied'
+        ? 'Firebase said no. Publish the new rules first, or the Hub already has an owner.'
+        : 'Could not set up Team access. Check your connection and try again.');
+  }finally{
+    TEAM_ACCESS.busy = false;
+    if(activeCategory === 'team-access') renderContent();
+  }
+}
+
+/* ---- Owner: the Team access screen ---- */
+async function loadTeamAccess(){
+  if(!isHubOwner() || !db || TEAM_ACCESS.loading) return;
+  TEAM_ACCESS.loading = true;
+  try{
+    await hubAuthReady;
+    const [inv, mem] = await Promise.all([
+      db.collection('hub-invites').get(),
+      db.collection('hub-members').get()
+    ]);
+    TEAM_ACCESS.invites = inv.docs.map(d => ({ code: d.id, ...d.data() }));
+    TEAM_ACCESS.members = mem.docs.map(d => ({ uid: d.id, ...d.data() }));
+    TEAM_ACCESS.loaded = true;
+    TEAM_ACCESS.error = '';
+    await loadAccessState();
+    // Phones whose code was removed but whose record survived: tidy them up.
+    const live = new Set(TEAM_ACCESS.invites.map(i => i.code));
+    const me = readAccessMe();
+    TEAM_ACCESS.members.filter(m => !live.has(m.invite) && (!me || m.uid !== me.uid)).forEach(m => {
+      db.collection('hub-members').doc(m.uid).delete().catch(()=>{});
+    });
+    TEAM_ACCESS.members = TEAM_ACCESS.members.filter(m => live.has(m.invite));
+  }catch(err){
+    TEAM_ACCESS.error = navigator.onLine === false
+      ? "You're offline. Team access needs a connection."
+      : "Couldn't load the team list. Try again in a moment.";
+  }
+  TEAM_ACCESS.loading = false;
+  if(activeCategory === 'team-access') renderContent();
+}
+
+function teamAccessAgo(ms){
+  if(!ms) return '';
+  const days = Math.floor((Date.now() - ms) / 86400000);
+  if(days <= 0) return 'active today';
+  if(days === 1) return 'active yesterday';
+  if(days < 30) return `active ${days} days ago`;
+  return 'active over a month ago';
+}
+
+function inviteShareText(inv){
+  const first = (inv.name || '').split(/\s+/)[0] || 'there';
+  return `Hi ${first}! Here's your code for the Interpreter Hub: ${formatInviteCode(inv.code)}\n`
+    + `Open ${location.origin} on your phone and type it in. It's yours, and it works on any of your phones.`;
+}
+
+const TA_COLORS = ['#0F7C8C', '#C2485C', '#4B5BC8', '#B7791F', '#1E8E5A', '#8A6CD1', '#2E8BD0'];
+
+function renderTeamAccess(){
+  const me = readAccessMe();
+  const head = `<div class="hub-head"><h1>Team access</h1><p>Who can open the Hub. Everyone gets their own invite code.</p></div>`;
+
+  if(!isHubOwner()){
+    if(ACCESS.state === 'none' || ACCESS.state === 'unknown'){
+      return head + `
+        <div class="ta-card">
+          <h3>Set up invite codes</h3>
+          <p>You become the owner: you create a code for each teammate and can remove anyone. Nothing locks yet. The Hub starts in practice mode, and you lock it when everyone has joined.</p>
+          <p>Before this works, Anonymous sign-in has to be on in Firebase and the new rules published.</p>
+          <label class="ta-label" for="taOwnerName">Your name</label>
+          <input class="ta-field" id="taOwnerName" type="text" autocomplete="name" value="${escapeAttr(whoAmI())}" placeholder="Your name">
+          <div class="ta-row2"><button class="btn btn-primary" onclick="claimHubOwnership()" ${TEAM_ACCESS.busy ? 'disabled' : ''}>${TEAM_ACCESS.busy ? 'Setting up…' : 'Become the owner'}</button></div>
+        </div>`;
+    }
+    return head + `
+      <div class="ta-card">
+        <h3>${accessOwnerFirst() ? escapeHtml(accessOwnerFirst()) + ' manages who gets in' : 'Only the owner manages who gets in'}</h3>
+        ${me && me.code
+          ? `<p>Your own code opens the Hub on any of your phones.</p>
+             <div class="ta-row2"><button class="btn btn-ghost" onclick="copyText(this, '${formatInviteCode(me.code)}')">Copy my code: ${formatInviteCode(me.code)}</button></div>`
+          : `<p>Ask ${escapeHtml(accessOwnerFirst() || 'the owner')} for your invite code.</p>
+             <div class="ta-row2"><button class="btn btn-primary" onclick="showAccessLock('join')">Enter my code</button></div>`}
+      </div>`;
+  }
+
+  if(!TEAM_ACCESS.loaded){
+    if(!TEAM_ACCESS.loading) setTimeout(loadTeamAccess, 0);
+    return head + (TEAM_ACCESS.error
+      ? `<div class="ta-card"><p>${escapeHtml(TEAM_ACCESS.error)}</p><div class="ta-row2"><button class="btn btn-ghost" onclick="loadTeamAccess()">Try again</button></div></div>`
+      : `<div class="ta-card"><p>Loading your team…</p></div>`);
+  }
+
+  const locked = ACCESS.state === 'locked';
+  const members = TEAM_ACCESS.members;
+  const phonesOf = code => members.filter(m => m.invite === code);
+  const invites = TEAM_ACCESS.invites.slice().sort((a, b) =>
+    (a.role === 'owner' ? -1 : 0) - (b.role === 'owner' ? -1 : 0) || (a.name || '').localeCompare(b.name || ''));
+  const joined = invites.filter(i => i.role !== 'owner' && phonesOf(i.code).length).length;
+  const others = invites.filter(i => i.role !== 'owner').length;
+
+  const status = `
+    <div class="ta-card ${locked ? 'is-locked' : ''}">
+      <div class="ta-state"><span class="ta-state-dot" aria-hidden="true"></span><div>
+        <h3>${locked ? 'The Hub is locked' : 'Practice mode is on'}</h3>
+        <p>${locked
+          ? 'Only people with a code get in. The database, photos and AI tools turn everyone else away.'
+          : 'People see the lock screen but can still skip it, and nothing is enforced yet. Lock the Hub once your team has joined.'}</p>
+        <p><b>${joined} of ${others}</b> invited ${others === 1 ? 'person has' : 'people have'} joined.</p>
+      </div></div>
+      ${TEAM_ACCESS.confirmLock ? `
+        <div class="ta-confirm">
+          <p>${locked
+            ? 'Turn practice mode back on? Anyone can open the Hub again, with or without a code.'
+            : `Lock the Hub now? Anyone without a code sees the lock screen with no way past it${others - joined > 0 ? `, including the ${others - joined} ${others - joined === 1 ? 'person' : 'people'} who haven't joined yet` : ''}. The daily CE-events check also stops saving new events until it gets its own sign-in.`}</p>
+          <div class="ta-row2">
+            <button class="btn btn-ghost" onclick="TEAM_ACCESS.confirmLock=false; renderContent()">Cancel</button>
+            <button class="btn btn-primary" onclick="setHubLocked(${!locked})" ${TEAM_ACCESS.busy ? 'disabled' : ''}>${locked ? 'Turn practice mode on' : 'Lock the Hub'}</button>
+          </div>
+        </div>` : `
+        <div class="ta-row2"><button class="btn btn-ghost" onclick="TEAM_ACCESS.confirmLock=true; renderContent()">${locked ? 'Turn practice mode back on' : 'Lock the Hub…'}</button></div>`}
+    </div>`;
+
+  let invitePanel;
+  if(TEAM_ACCESS.share){
+    const inv = TEAM_ACCESS.share;
+    invitePanel = `
+      <div class="ta-card">
+        <span class="ta-label">Send this to ${escapeHtml((inv.name || '').split(/\s+/)[0])}</span>
+        <p class="ta-share">${escapeHtml(inviteShareText(inv))}</p>
+        <div class="ta-row2">
+          ${navigator.share ? `<button class="btn btn-primary" onclick="shareInvite('${inv.code}')">Share…</button>` : ''}
+          <button class="btn ${navigator.share ? 'btn-ghost' : 'btn-primary'}" onclick="copyText(this, inviteShareText(TEAM_ACCESS.invites.find(i=>i.code==='${inv.code}')))">Copy message</button>
+          <button class="btn btn-ghost" onclick="TEAM_ACCESS.share=null; renderContent()">Done</button>
+        </div>
+      </div>`;
+  }else if(TEAM_ACCESS.inviting){
+    const known = Object.values(TEAM_MEMBERS || {}).map(v => v && v.name).filter(Boolean);
+    invitePanel = `
+      <div class="ta-card">
+        <label class="ta-label" for="taName">New invite</label>
+        <input class="ta-field" id="taName" type="text" list="taNames" autocomplete="off" placeholder="Teammate's name" maxlength="60"
+          onkeydown="if(event.key==='Enter'){event.preventDefault(); createInvite();}">
+        <datalist id="taNames">${known.map(n => `<option value="${escapeAttr(n)}">`).join('')}</datalist>
+        <p>Use the name they already go by in the Hub, so their chat history and photo stay with them.</p>
+        <div class="ta-row2">
+          <button class="btn btn-ghost" onclick="TEAM_ACCESS.inviting=false; renderContent()">Cancel</button>
+          <button class="btn btn-primary" onclick="createInvite()" ${TEAM_ACCESS.busy ? 'disabled' : ''}>Create code</button>
+        </div>
+      </div>`;
+  }else{
+    invitePanel = `<div class="ta-row2" style="margin-bottom:13px;"><button class="btn btn-primary" onclick="TEAM_ACCESS.inviting=true; renderContent(); setTimeout(()=>{ const n=document.getElementById('taName'); if(n) n.focus(); }, 30)">+ Invite someone</button></div>`;
+  }
+
+  const rows = invites.map((inv, i) => {
+    const phones = phonesOf(inv.code);
+    const last = Math.max(0, ...phones.map(p => p.lastSeen || p.joinedAt || 0));
+    const isMe = me && inv.code === me.code;
+    const meta = [
+      isMe ? 'You' : '', inv.role === 'owner' ? 'owner' : '',
+      phones.length ? `${phones.length} ${phones.length === 1 ? 'phone' : 'phones'}` : 'not joined yet',
+      phones.length ? teamAccessAgo(last) : ''
+    ].filter(Boolean).join(' · ');
+    const confirming = TEAM_ACCESS.confirmRemove === inv.code;
+    return `
+      <div class="ta-person">
+        <span class="ta-avatar" style="background:${TA_COLORS[i % TA_COLORS.length]}">${escapeHtml(initialsOf(inv.name || '?'))}</span>
+        <span class="ta-who"><b>${escapeHtml(inv.name || 'Unnamed')}</b><span>${escapeHtml(meta)}</span></span>
+        <span class="ta-actions">
+          <button class="ta-code" onclick="copyText(this, inviteShareText(TEAM_ACCESS.invites.find(x=>x.code==='${inv.code}')))" title="Copy their invite message" aria-label="Copy the invite message for ${escapeAttr(inv.name || '')}">${formatInviteCode(inv.code)}</button>
+          ${isMe ? '' : `<button class="ta-remove" onclick="TEAM_ACCESS.confirmRemove='${inv.code}'; renderContent()" aria-label="Remove ${escapeAttr(inv.name || '')}">Remove</button>`}
+        </span>
+      </div>
+      ${confirming ? `
+        <div class="ta-person-confirm"><div class="ta-confirm">
+          <p>Remove ${escapeHtml(inv.name || 'this person')}? ${phones.length
+            ? `${phones.length === 1 ? 'Their phone goes' : `Their ${phones.length} phones go`} back to the lock screen and their code stops working.`
+            : 'Their code stops working.'}</p>
+          <div class="ta-row2">
+            <button class="btn btn-ghost" onclick="TEAM_ACCESS.confirmRemove=null; renderContent()">Keep</button>
+            <button class="btn btn-primary" style="background:var(--danger); border-color:var(--danger);" onclick="removeTeammate('${inv.code}')" ${TEAM_ACCESS.busy ? 'disabled' : ''}>Remove</button>
+          </div>
+        </div></div>` : ''}`;
+  }).join('');
+
+  return head + status + invitePanel + `
+    <div class="ta-card">
+      <span class="ta-label">${invites.length} ${invites.length === 1 ? 'person' : 'people'}</span>
+      <div class="ta-people">${rows}</div>
+    </div>
+    <p class="ta-note">Tap a code to copy that person's invite message again. A code works on any number of their phones; a shared code shows up here as an extra phone.</p>`;
+}
+
+async function createInvite(){
+  const el = document.getElementById('taName');
+  const name = (el ? el.value : '').trim().slice(0, 60);
+  if(!name){ showToast("Type your teammate's name first."); if(el) el.focus(); return; }
+  if(!hubAuth || !hubAuth.currentUser) return;
+  TEAM_ACCESS.busy = true;
+  try{
+    const code = newInviteCode();
+    const inv = { name, role: 'member', createdAt: Date.now(), createdBy: hubAuth.currentUser.uid };
+    await db.collection('hub-invites').doc(code).set(inv);
+    TEAM_ACCESS.invites.push({ code, ...inv });
+    TEAM_ACCESS.inviting = false;
+    TEAM_ACCESS.share = { code, ...inv };
+    logActivity(`created an invite code for ${name}`);
+  }catch(err){
+    showToast(navigator.onLine === false ? "You're offline. Try again with a connection." : 'Could not create the code. Try again.');
+  }
+  TEAM_ACCESS.busy = false;
+  renderContent();
+}
+
+async function shareInvite(code){
+  const inv = TEAM_ACCESS.invites.find(i => i.code === code);
+  if(!inv || !navigator.share) return;
+  try{ await navigator.share({ text: inviteShareText(inv) }); }catch(e){ /* dismissed */ }
+}
+
+async function removeTeammate(code){
+  const inv = TEAM_ACCESS.invites.find(i => i.code === code);
+  if(!inv) return;
+  TEAM_ACCESS.busy = true;
+  try{
+    const b = db.batch();
+    b.delete(db.collection('hub-invites').doc(code));
+    TEAM_ACCESS.members.filter(m => m.invite === code).forEach(m => b.delete(db.collection('hub-members').doc(m.uid)));
+    await b.commit();
+    TEAM_ACCESS.invites = TEAM_ACCESS.invites.filter(i => i.code !== code);
+    TEAM_ACCESS.members = TEAM_ACCESS.members.filter(m => m.invite !== code);
+    TEAM_ACCESS.confirmRemove = null;
+    if(TEAM_ACCESS.share && TEAM_ACCESS.share.code === code) TEAM_ACCESS.share = null;
+    showToast(`${inv.name} removed.`);
+  }catch(err){
+    showToast('Could not remove them. Check your connection and try again.');
+  }
+  TEAM_ACCESS.busy = false;
+  renderContent();
+}
+
+async function setHubLocked(locked){
+  TEAM_ACCESS.busy = true; renderContent();
+  try{
+    await db.collection('hub-access').doc('settings').set({ practice: !locked, updatedAt: Date.now(), updatedBy: whoAmI() || ACCESS.ownerName || 'owner' });
+    setAccessState(locked ? 'locked' : 'practice');
+    TEAM_ACCESS.confirmLock = false;
+    showToast(locked ? 'The Hub is locked.' : 'Practice mode is on.');
+  }catch(err){
+    showToast('Could not change it. Check your connection and try again.');
+  }
+  TEAM_ACCESS.busy = false;
+  renderContent();
+}
+
+// The name sheet: your code, the owner's way in, or a way to enter a code.
+function renderNameAccess(){
+  const box = document.getElementById('nameAccess');
+  if(!box) return;
+  const me = readAccessMe();
+  let html = '';
+  if(me && me.member){
+    html = `<div class="name-access-row"><span>Your invite code</span>
+        <button type="button" class="name-access-code" onclick="copyText(this, '${formatInviteCode(me.code)}')" aria-label="Copy your invite code">${formatInviteCode(me.code)}</button></div>
+      <p>Use it to open the Hub on a new phone.</p>`
+      + (me.role === 'owner' ? `<button type="button" class="btn btn-ghost" style="min-height:44px;" onclick="closeNameModal(); setCategory('team-access')">Team access</button>` : '');
+  }else if(ACCESS.state === 'practice' || ACCESS.state === 'locked'){
+    html = `<div class="name-access-row"><span>Got an invite code?</span>
+      <button type="button" class="btn btn-ghost" onclick="closeNameModal(); showAccessLock('join')">Enter it</button></div>`;
+  }
+  box.innerHTML = html;
+  box.hidden = !html;
+}
+
 /* ============ Init ============ */
 loadNotifyPref();
-// Changes made offline in an earlier session are still sitting in localStorage.
-flushOutbox();
+// Team access first: a phone that isn't on the team gets the lock screen
+// before anything else. See the Team access section.
+accessBoot();
+// Paints from the glossary saved on this phone straight away; it waits for
+// the sign-in (hubAuthReady) itself before going to the network.
 loadData();
-loadProviders();
-loadDoctorDirectory();
-loadTrash();
-// loadQuizHistory() and loadTermReviews() are no longer fetched here — they
-// are loaded on first visit to Practice and Term Review respectively.
-loadAttachments();
-loadQuestions();
-startChatListener();
-startMembersListener();
-startActivityListener();
-startAnnouncementsListener();
-startTypingListener();
+// Your own face from the local cache, before any round trip.
+applyMyPhotoCache(false);
+updateTopbarAvatar();
+// Everything below talks to the database. Once the Hub is locked a request
+// made before this phone's sign-in is restored is refused -- and a refused
+// listener stays dead -- so they all wait for it. Usually well under 100 ms.
+hubAuthReady.then(()=>{
+  // Changes made offline in an earlier session are still sitting in localStorage.
+  flushOutbox();
+  loadProviders();
+  loadDoctorDirectory();
+  loadTrash();
+  // loadQuizHistory() and loadTermReviews() are no longer fetched here — they
+  // are loaded on first visit to Practice and Term Review respectively.
+  loadAttachments();
+  loadQuestions();
+  startChatListener();
+  startMembersListener();
+  startActivityListener();
+  startAnnouncementsListener();
+  startTypingListener();
 
-startCeListener();
+  startCeListener();
+});
 
 if(shouldShowOnboarding()){
   // A beat after first paint, not instantly — jumping straight to a modal

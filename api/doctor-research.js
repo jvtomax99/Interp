@@ -22,6 +22,8 @@
 // Pro or higher. The local directory lookup below sidesteps this entirely
 // for known John Theurer Cancer Center physicians, since it never has to
 // call web search at all.
+
+import { allowTeam } from './_hub-access.js';
 export const config = {
   maxDuration: 60,
 };
@@ -308,6 +310,8 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
+  // Members only once the owner locks the Hub -- see _hub-access.js.
+  if (!(await allowTeam(req, res))) return;
 
   const { doctorName, specialty, location } = req.body || {};
   if (!doctorName || typeof doctorName !== 'string' || !doctorName.trim()) {

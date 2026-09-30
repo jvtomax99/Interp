@@ -18,6 +18,8 @@
  * to the free translation path rather than breaking.
  */
 
+import { allowTeam } from './_hub-access.js';
+
 const MODEL = 'claude-sonnet-5';   // swap to 'claude-haiku-4-5' for lower cost
                                    // (model ids take no date suffix)
 
@@ -51,6 +53,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  // Members only once the owner locks the Hub -- see _hub-access.js.
+  if (!(await allowTeam(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {

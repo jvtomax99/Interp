@@ -3,37 +3,35 @@ rules_version = '2';
 /* Firestore security rules for the HUMC Interpreter Hub (project
  * `language-specialist`).
  *
- * These used to exist only as a comment inside index.html, which meant the
- * live rules and the documented rules could drift apart with nothing to
- * catch it. This file is the source of truth; the comment in index.html is
- * a copy for someone setting the project up from scratch.
+ * This file is the source of truth. The live rules are whatever was last
+ * pasted into the Firebase console, so paste this whole file after any change.
  *
  * TO APPLY THEM
  *
- *   From a computer, once:   npm i -g firebase-tools && firebase login
- *   Then, from this folder:  firebase deploy --only firestore:rules
+ *   Firebase console -> language-specialist -> Firestore Database -> Rules
+ *   -> select everything -> paste this file -> Publish.
  *
- * Or paste the block below into the Firebase console:
- *   console.firebase.google.com -> language-specialist -> Firestore Database
- *   -> Rules -> replace -> Publish.
+ *   Or, from a computer:  firebase deploy --only firestore:rules
  *
- * A SECOND SET OF RULES LIVES IN CLOUD STORAGE, not here — attachments
- * (photos and PDFs) are governed separately under Storage -> Rules:
+ * WHO GETS IN
  *
- *   rules_version = '2';
- *   service firebase.storage {
- *     match /b/{bucket}/o {
- *       match /attachments/{allPaths=**} { allow read, write: if true; }
- *     }
- *   }
+ * The Hub is for the interpreter team only. Each teammate gets a personal
+ * invite code from the owner (Team access screen in the app). Typing it signs
+ * the phone in and creates a document in hub-members/ keyed by that phone's
+ * sign-in id. team() below is what every collection checks:
  *
- * KNOWN AND DELIBERATE: every rule below is `if true`, so anyone who finds
- * the project id — which ships in the client JavaScript and cannot be hidden
- * there — can read and write everything, including team chat. That is a
- * documented open item, accepted for now because the app is shared inside
- * one trusted team and has no sign-in. It is the thing to fix before this is
- * given to a wider group; making the repository private does not help, since
- * the project id is in the shipped bundle either way.
+ *   isMember()   this phone joined with a code that the owner hasn't removed
+ *   practice()   the owner hasn't locked the Hub yet
+ *
+ * PRACTICE MODE is the switch in Team access. While it is on (and before
+ * anyone has claimed the Hub at all) everything stays open exactly as it
+ * used to be, so nobody is locked out while codes are handed out. Turning it
+ * off is what actually locks the database; there is nothing else to publish.
+ *
+ * THE EVENTS WATCHER (api/check-events.js) runs on Vercel without a sign-in,
+ * so for now it gets through only while practice mode is on. Once the Hub is
+ * locked it can no longer save new events until it is given its own way in
+ * (a Firebase service account in Vercel is the usual answer). Open item.
  *
  * Firestore denies any collection that no rule matches, so a new collection
  * needs a line here or its reads and writes fail silently at the client.
@@ -41,43 +39,122 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ---- Who is asking ----
+    function signedIn() { return request.auth != null; }
+
+    function settingsPath() { return /databases/$(database)/documents/hub-access/settings; }
+    function ownerPath()    { return /databases/$(database)/documents/hub-access/owner; }
+    function memberPath()   { return /databases/$(database)/documents/hub-members/$(request.auth.uid); }
+    function invitePath(code) { return /databases/$(database)/documents/hub-invites/$(code); }
+
+    function practice() {
+      return !exists(settingsPath()) || get(settingsPath()).data.get('practice', true) == true;
+    }
+    function isMember() { return signedIn() && exists(memberPath()); }
+    function isOwner()  { return isMember() && get(memberPath()).data.get('role', '') == 'owner'; }
+    function team()     { return isMember() || practice(); }
+
+    // Inside the one batch that claims an unowned Hub.
+    function claimingNow() {
+      return signedIn() && !exists(ownerPath()) && existsAfter(ownerPath())
+        && getAfter(ownerPath()).data.uid == request.auth.uid;
+    }
+
+    // ---- Access (Team access screen) ----
+    match /hub-access/{docId} {
+      // Two tiny flags: who owns the Hub, and whether it's locked yet. The app
+      // reads them before anyone has signed in.
+      allow get: if true;
+      allow list: if false;
+      // The first person to claim the Hub owns it. Creating is the only
+      // write ever allowed, so it can't be claimed a second time.
+      allow create: if docId == 'owner' && signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'at', 'name'])
+        && request.resource.data.uid == request.auth.uid;
+      allow create: if docId == 'settings' && (isOwner() || claimingNow()) && validSettings();
+      allow update: if docId == 'settings' && isOwner() && validSettings();
+    }
+    function validSettings() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['practice', 'updatedAt', 'updatedBy']) && d.practice is bool;
+    }
+
+    // One document per person, keyed by their code. Knowing a code is what
+    // lets you in, so reading one by its code is allowed; listing them is not.
+    match /hub-invites/{code} {
+      allow get: if signedIn();
+      allow list: if isOwner();
+      allow create: if validInvite(code)
+        && (isOwner() || (claimingNow() && request.resource.data.role == 'owner'));
+      allow update: if isOwner() && validInvite(code);
+      allow delete: if isOwner();
+    }
+    function validInvite(code) {
+      let d = request.resource.data;
+      return code.matches('^[A-Z2-9]{8}$')
+        && d.keys().hasOnly(['name', 'role', 'createdAt', 'createdBy'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 60
+        && d.role in ['member', 'owner'];
+    }
+
+    // One document per signed-in phone.
+    match /hub-members/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isOwner());
+      allow list: if isOwner();
+      allow create: if signedIn() && request.auth.uid == uid && joiningWith(request.resource.data);
+      // A phone may only touch its own "last seen" details.
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeen', 'device']);
+      // Leaving on your own, or the owner removing someone.
+      allow delete: if signedIn() && (request.auth.uid == uid || isOwner());
+    }
+    function joiningWith(d) {
+      return d.keys().hasOnly(['invite', 'name', 'role', 'joinedAt', 'lastSeen', 'device'])
+        && d.invite is string && existsAfter(invitePath(d.invite))
+        && d.name == getAfter(invitePath(d.invite)).data.name
+        && d.role == getAfter(invitePath(d.invite)).data.role;
+    }
+
     // ---- Glossary ----
-    match /terms/{docId}               { allow read, write: if true; }
-    match /terminology-meta/{docId}    { allow read, write: if true; }
-    match /terminology-hub/{docId}     { allow read, write: if true; }
-    match /term-attachments/{docId}    { allow read, write: if true; }
-    match /term-reviews/{docId}        { allow read, write: if true; }
+    match /terms/{docId}               { allow read, write: if team(); }
+    match /terminology-meta/{docId}    { allow read, write: if team(); }
+    match /terminology-hub/{docId}     { allow read, write: if team(); }
+    match /term-attachments/{docId}    { allow read, write: if team(); }
+    match /term-reviews/{docId}        { allow read, write: if team(); }
 
     // Reference reading found for a term, cached so the team pays for a
     // given term's search once rather than once per interpreter.
-    match /term-link-cache/{docId}     { allow read, write: if true; }
+    match /term-link-cache/{docId}     { allow read, write: if team(); }
 
     // ---- Providers and doctors ----
-    match /healthcare-providers/{docId}  { allow read, write: if true; }
-    match /doctor-directory/{docId}      { allow read, write: if true; }
-    match /doctor-research-cache/{docId} { allow read, write: if true; }
+    match /healthcare-providers/{docId}  { allow read, write: if team(); }
+    match /doctor-directory/{docId}      { allow read, write: if team(); }
+    match /doctor-research-cache/{docId} { allow read, write: if team(); }
 
     // ---- Team ----
-    match /team-chat/{docId}      { allow read, write: if true; }
+    match /team-chat/{docId}      { allow read, write: if team(); }
     // Ephemeral "someone is typing" markers, written constantly while a
     // message is being composed.
-    match /chat-typing/{docId}    { allow read, write: if true; }
+    match /chat-typing/{docId}    { allow read, write: if team(); }
     // One document per contributor, keyed by their normalised name, holding
     // an optional photo so Team Chat can show a face instead of initials.
     // NOTE: the app reads this on startup. Without this line Firestore denies
     // the collection and faces silently never appear -- no error, no clue.
-    match /team-members/{docId}   { allow read, write: if true; }
-    match /activity-log/{docId}   { allow read, write: if true; }
-    match /announcements/{docId}  { allow read, write: if true; }
+    match /team-members/{docId}   { allow read, write: if team(); }
+    match /activity-log/{docId}   { allow read, write: if team(); }
+    match /announcements/{docId}  { allow read, write: if team(); }
 
     // ---- Study ----
-    match /practice-questions/{docId} { allow read, write: if true; }
-    match /quiz-history/{docId}       { allow read, write: if true; }
+    match /practice-questions/{docId} { allow read, write: if team(); }
+    match /quiz-history/{docId}       { allow read, write: if team(); }
 
     // ---- Events ----
-    match /ce-events/{docId}      { allow read, write: if true; }
+    // The watcher's own memory of what it has already seen on public event
+    // pages (api/check-events.js). It was missing from this file entirely.
+    match /watcher-state/{docId}  { allow read, write: if team(); }
+    match /ce-events/{docId}      { allow read, write: if team(); }
 
     // ---- Recoverable deletes ----
-    match /deleted-items/{docId}  { allow read, write: if true; }
+    match /deleted-items/{docId}  { allow read, write: if team(); }
   }
 }

@@ -30,6 +30,7 @@ between assignments.
 | `api/doctor-research.js` | 379 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 224 | Cron job watching CE/training events |
 | `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
+| `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png`, `pin-icons*.webp` | — | Image assets |
 
@@ -121,8 +122,20 @@ terminology-hub/        legacy
 team-chat/              chat-typing/  term-attachments/  term-reviews/
 healthcare-providers/   doctor-directory/  doctor-research-cache/
 ce-events/  announcements/  practice-questions/  quiz-history/
-activity-log/  deleted-items/
+activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
+hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 ```
+
+**Team access (invite codes).** The owner creates a code per teammate on the
+Team access screen; entering it signs the phone in anonymously and creates
+`hub-members/{uid}`. Every rule is `if team()` = joined phone OR practice
+mode. Practice mode (`hub-access/settings.practice`) is the owner's switch;
+while it's on nothing is enforced. The first owner is claimed once via
+`?setup=owner`. The AI endpoints check the same thing through
+`api/_hub-access.js`, and the app sends `hubAuthHeaders()`. Startup database
+calls wait for `hubAuthReady`. Rules are tested against the Firebase emulator
+(firebase-tools + `@firebase/rules-unit-testing`; run the emulators with the
+proxy variables unset or cross-service Storage lookups silently fail).
 
 **Migrations:** new domains/terms are added by idempotent migration functions
 gated on a unique boolean flag in `terminology-meta/categories`, each awaited
@@ -228,12 +241,12 @@ extending the tail.
 
 ## Open items
 
-- **Firestore security rules are wide open** (`allow read, write: if true`)
-  across all collections, and this repo is public. Anyone who finds the
-  project ID can read and write everything, including team chat. Fix the
-  rules before pushing adoption — that is the real fix; making the repo
-  private alone is not, since the project ID is visible in the shipped JS.
-- Rules still missing for `doctor-directory` and `doctor-research-cache`.
-- No access control / auth in the app yet.
+- **Team access is built but only enforced once Jose locks it.** Until
+  practice mode is off, the rules behave as they used to (open).
+- **The events watcher (`api/check-events.js`) has no sign-in.** It works in
+  practice mode only; once locked it can't save new events until it gets its
+  own credentials (a Firebase service account in Vercel is the usual fix).
+  Putting a shared secret inside the documents it writes was rejected as a
+  credential leak.
 - `index.html` is one 628 KB file. Splitting CSS and JS out is the main
   structural cleanup available.

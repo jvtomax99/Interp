@@ -27,6 +27,8 @@
  * SETUP: none beyond the ANTHROPIC_API_KEY already configured for Translate.
  */
 
+import { allowTeam } from './_hub-access.js';
+
 const MODEL = 'claude-opus-5';
 
 // This runs on every term save, so it is deliberately a quick pass rather
@@ -100,6 +102,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  // Members only once the owner locks the Hub -- see _hub-access.js.
+  if (!(await allowTeam(req, res))) return;
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
