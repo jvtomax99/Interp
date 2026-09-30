@@ -612,6 +612,10 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-wave-glint-a{left:6px;top:6px;}
 #content.is-home .home-wave-glint-b{right:3px;bottom:7px;font-size:11px;}
 #content.is-home .home-wave-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;}
+/* Mini Hackensack marks thrown off by the face's idle animations. The layer
+   is a zero-size point at the face's centre; home-polish.js moves each mark. */
+#content.is-home .home-face-marks{position:absolute;left:50%;top:50%;width:0;height:0;z-index:8;pointer-events:none;}
+#content.is-home .home-face-marks img{position:absolute;left:-10px;top:-8.5px;width:20px;height:17px;opacity:0;will-change:transform,opacity;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 2.5px #fffc) drop-shadow(0 1px 2px #05142a80);pointer-events:none;}
 
 /* Approved floating thought, with isolated emoji cloud and dots. */
 .home-wave-thought{

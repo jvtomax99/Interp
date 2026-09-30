@@ -10400,7 +10400,9 @@ function externalUrl(raw){
    picked by Jose). It rests as drawn here -- ^^ eyes, calm smile -- then
    home-polish.js makes it squish, bounce and break into a big open laugh.
    This markup is the resting pose, so it is also exactly what shows with
-   reduced motion or if home-polish.js never loads.
+   reduced motion or if home-polish.js never loads. After the hello it
+   plays random idle animations (home-polish.js); the heart eyes and the
+   lens shine below are parts of those, hidden at rest.
 
    Every moving part carries an hf- class the animation looks up. IDs are
    fixed because only one greeting exists at a time.
@@ -10408,21 +10410,26 @@ function externalUrl(raw){
 const ICON_WAVE = '<svg class="home-wave-art home-face" viewBox="4 4 112 112" aria-hidden="true" focusable="false">'
   + '<defs><radialGradient id="hfFill" cx="56" cy="54" r="54" gradientUnits="userSpaceOnUse">'
   +   '<stop offset="0" stop-color="#FFD866"/><stop offset=".78" stop-color="#F9C84B"/><stop offset="1" stop-color="#EDB43A"/></radialGradient>'
-  + '<clipPath id="hfMouthClip"><path class="hf-mclip" d="M48 72 Q60 79 72 72 Q60 80 48 72 Z"/></clipPath></defs>'
+  + '<clipPath id="hfMouthClip"><path class="hf-mclip" d="M48 72 Q60 79 72 72 Q60 80 48 72 Z"/></clipPath>'
+  + '<clipPath id="hfLensClip"><rect x="14" y="36" width="38" height="26" rx="7"/><rect x="68" y="36" width="38" height="26" rx="7"/></clipPath></defs>'
   + '<circle cx="60" cy="60" r="47" fill="url(#hfFill)" stroke="#1A1A1A" stroke-width="6"/>'
   + '<path d="M24 50 A37 37 0 0 1 96 50 A40 34 0 0 0 24 50 Z" fill="#fff" opacity=".42"/>'
   + '<circle cx="84" cy="27" r="4.2" fill="#fff" opacity=".95"/>'
   + '<rect class="hf-blush" data-x="33" x="25" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/>'
   + '<rect class="hf-blush" data-x="87" x="79" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/>'
-  + '<path class="hf-eye" d="M33 52.5 L42 44.5 L51 52.5" fill="none" stroke="#1A1A1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>'
-  + '<path class="hf-eye" d="M69 52.5 L78 44.5 L87 52.5" fill="none" stroke="#1A1A1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<path class="hf-eye" data-x="42" data-side="-1" d="M33 52.5 L42 44.5 L51 52.5" fill="none" stroke="#1A1A1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<path class="hf-eye" data-x="78" data-side="1" d="M69 52.5 L78 44.5 L87 52.5" fill="none" stroke="#1A1A1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<path class="hf-heye" data-x="42" d="M0 7 C-10 1 -10 -8 -5 -8 C-2.2 -8 0 -6 0 -4 C0 -6 2.2 -8 5 -8 C10 -8 10 1 0 7 Z" transform="translate(42 50) scale(0)" opacity="0" fill="#FF3F72" stroke="#1A1A1A" stroke-width="1.6"/>'
+  + '<path class="hf-heye" data-x="78" d="M0 7 C-10 1 -10 -8 -5 -8 C-2.2 -8 0 -6 0 -4 C0 -6 2.2 -8 5 -8 C10 -8 10 1 0 7 Z" transform="translate(78 50) scale(0)" opacity="0" fill="#FF3F72" stroke="#1A1A1A" stroke-width="1.6"/>'
   + '<path class="hf-mouth" d="M48 72 Q60 79 72 72 Q60 80 48 72 Z" fill="#1A1A1A" stroke="#1A1A1A" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>'
   + '<g clip-path="url(#hfMouthClip)"><ellipse class="hf-tongue" cx="60" cy="76" rx="8.6" ry="0" fill="#F46F7E"/></g>'
-  + '<g class="hf-glasses" fill="none" stroke="#1A1A1A" stroke-width="4.6" stroke-linejoin="round">'
+  + '<g class="hf-glasses">'
+  +   '<g clip-path="url(#hfLensClip)"><path class="hf-glint" d="M0 30 h9 l-16 40 h-9 Z" fill="#fff" opacity=".85" transform="translate(-40 0)"/></g>'
+  +   '<g fill="none" stroke="#1A1A1A" stroke-width="4.6" stroke-linejoin="round">'
   +   '<path d="M6 44 H14" stroke-linecap="round"/><path d="M106 44 H114" stroke-linecap="round"/>'
   +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
   +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
-  +   '<path d="M52 44 Q60 40 68 44"/></g>'
+  +   '<path d="M52 44 Q60 40 68 44"/></g></g>'
   + '</svg>';
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -14619,7 +14626,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0930.1038';
+const BUILD_ID = 'b0930.1103';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
