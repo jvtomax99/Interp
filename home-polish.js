@@ -563,11 +563,17 @@
       const el=document.createElement('span');el.className='home-wave-'+name;
       el.setAttribute('aria-hidden','true');if(i)el.textContent='✦';wave.appendChild(el);
     });
-    // Ask the Hub: the turning ring and the "Ask" tag (styled in home-polish.css).
+    // Ask the Hub: the turning ring, and the "Ask" badge on a navy lanyard
+    // around Dr. Smiley's neck (styled in home-polish.css).
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
+    wave.append(ring);
+    wave.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
+      +'<path d="M25 56 L30.5 72 M39 56 L33.5 72" fill="none" stroke="#1A1A1A" stroke-width="4.2" stroke-linecap="round"/>'
+      +'<path d="M25 56 L30.5 72 M39 56 L33.5 72" fill="none" stroke="#252E6D" stroke-width="2.4" stroke-linecap="round"/>'
+      +'<rect x="29" y="69" width="6" height="5" rx="1.5" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.2"/></svg>');
     const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
     tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
-    wave.append(ring,tag);
+    wave.append(tag);
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     const play=()=>playGreeting(wave);

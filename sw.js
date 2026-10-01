@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v122-ask-tag-wide';
+const CACHE_VERSION = 'interpreter-hub-v123-lanyard-badge';
 const PRECACHE = [
   './',
   './index.html',
