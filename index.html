@@ -5238,6 +5238,49 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
   .ask-face svg, .ask-face .af-heart, .ask-face .af-calm{ transition:none; animation:none; }
   .ask-dots span{ animation:none; opacity:.6; }
 }
+
+/* ---------- Dr. Smiley companion ----------
+   He follows you around the app. On phones he peeks over the tab bar above
+   the tab you're on (over More for pages reached from More), his body tucked
+   behind its glass, and hops when you move; tapping his head opens Ask. On
+   Home and Ask he sinks away, since he already lives in those pages. On a
+   computer he is a round button in the top bar (#tgSmiley).
+   smileyRider in the script positions him; the switch is in the profile
+   sheet ("Dr. Smiley follows me", localStorage ih_smileyFollow). */
+.smiley-rider, .smiley-rider-hit{ display:none; }
+@media (max-width:900px){
+  .smiley-rider{ display:block; position:fixed; left:0; bottom:0; width:44px; height:44px; z-index:59;
+    pointer-events:none; opacity:0; transform-origin:50% 100%; will-change:transform, opacity; }
+  .smiley-rider-bob{ display:block; width:100%; height:100%; }
+  .smiley-rider.is-up .smiley-rider-bob{ animation:smileyBob 2.6s ease-in-out infinite; }
+  @keyframes smileyBob{ 50%{ transform:translateY(-1.5px); } }
+  .smiley-rider .ask-face{ display:block; width:44px; height:44px; margin:0; transition:scale .16s var(--ease); }
+  .smiley-rider .ask-face svg{ transition:none; filter:drop-shadow(0 2px 2px rgba(11,35,64,.28)) drop-shadow(0 6px 8px rgba(7,43,69,.2)); }
+  .smiley-rider.is-pressed .ask-face{ scale:.9; }
+  .smiley-rider-hit{ position:fixed; left:0; bottom:0; width:48px; height:30px; z-index:61; padding:0; border:0;
+    border-radius:16px 16px 6px 6px; background:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .smiley-rider-hit:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  /* Same moments the tab bar itself steps aside: typing, sheets, search. */
+  body.kb-open .smiley-rider, body:has(.overlay.show) .smiley-rider, body:has(.gs-overlay.show) .smiley-rider,
+  body.kb-open .smiley-rider-hit, body:has(.overlay.show) .smiley-rider-hit, body:has(.gs-overlay.show) .smiley-rider-hit{ visibility:hidden; }
+}
+/* On a computer: a round button in the top bar, his portrait cut by the
+   circle like an avatar, popping in when you arrive on a page. */
+.tg-smiley{ padding:0; overflow:hidden; background:var(--accent-soft); }
+.tg-smiley[hidden]{ display:none; }
+.tg-smiley .ask-face{ width:38px; height:38px; flex:none; margin:6px 0 0; }
+.tg-smiley .ask-face svg{ filter:none; }
+.tg-smiley.is-new svg{ animation:smileyPop .5s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes smileyPop{ 0%{ transform:translateY(22px) scale(.6); } 100%{ transform:none; } }
+@media (max-width:900px){ .tg-smiley{ display:none; } }
+.name-pref{ margin:13px 0 0; padding-top:13px; border-top:1px solid var(--line-soft); }
+.name-pref small{ display:block; color:var(--ink-soft); font-size:12px; }
+.ta-switch.is-calm[aria-checked="true"]{ background:var(--navy); }
+html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(--cyan); }
+@media (prefers-reduced-motion: reduce){
+  .smiley-rider.is-up .smiley-rider-bob, .tg-smiley.is-new svg{ animation:none; }
+  .smiley-rider .ask-face{ transition:none; }
+}
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -5257,6 +5300,7 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
   </button>
   <div class="tg-right">
     <span class="tg-sync" id="tgSync" role="status" aria-live="polite"></span>
+    <button class="tg-icon-btn tg-smiley" id="tgSmiley" onclick="openAskHub()" title="Ask the Hub" aria-label="Ask the Hub" hidden></button>
     <button class="tg-icon-btn tg-search-btn" onclick="openGlobalSearch()" title="Search" aria-label="Search">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
@@ -5527,6 +5571,10 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
     <p class="name-photo-hint">A photo is optional \u2014 your team sees it beside your messages in Team Chat.</p>
     <!-- The owner's way in to Team access, or a way to enter the code. Filled by renderNameAccess(). -->
     <div class="name-access" id="nameAccess" hidden></div>
+    <div class="ta-switchrow name-pref">
+      <span>Dr. Smiley follows me<small>On every page, above the tabs. Tap him to ask the Hub.</small></span>
+      <button class="ta-switch is-calm" id="smileyFollowSwitch" type="button" role="switch" aria-checked="true" aria-label="Dr. Smiley follows me" onclick="setSmileyFollows(this.getAttribute('aria-checked') !== 'true')"></button>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="cancelNameModal()">Cancel</button>
       <button class="btn btn-primary" id="nameSaveBtn" onclick="saveMyName()">Save</button>
@@ -12340,6 +12388,7 @@ function render(){
 
   syncTopBar();
   renderContent();
+  smileyRider.sync();
 }
 
 /* ---------- Offline outbox ----------
@@ -13673,6 +13722,7 @@ function openNameModal(){
   uploadingMyPhoto = false;
   renderNamePhoto();
   renderNameAccess();
+  document.getElementById('smileyFollowSwitch')?.setAttribute('aria-checked', String(smileyFollows()));
   document.getElementById('nameOverlay').classList.add('show');
   if(prefersAutoFocus()) input.focus();
 }
@@ -15160,7 +15210,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1001.1725';
+const BUILD_ID = 'b1001.2215';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -18854,6 +18904,138 @@ window.addEventListener('resize', () => { if(activeCategory === 'ask' && !docume
 // home-polish.js calls this when the greeting smiley is tapped.
 window.openAskHub = function(){ ASK.view = 'chat'; setCategory('ask'); };
 
+/* ---------- Dr. Smiley companion ---------- */
+// Styles and the idea are with the .smiley-rider rules. He is drawn once,
+// outside the re-rendered app, and only animates while he is moving: the
+// idle bob is CSS, so nothing runs per frame while he sits.
+function smileyFollows(){
+  try{ return localStorage.getItem('ih_smileyFollow') !== '0'; }catch(e){ return true; }
+}
+function setSmileyFollows(on){
+  try{ localStorage.setItem('ih_smileyFollow', on ? '1' : '0'); }catch(e){}
+  document.getElementById('smileyFollowSwitch')?.setAttribute('aria-checked', String(on));
+  smileyRider.sync();
+}
+const smileyRider = (() => {
+  const OUT = 30;                         // px of him showing above the tab bar
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let el = null, face = null, hit = null, raf = 0, last = 0;
+  let x = null, shown = 0, want = 0, hop = null, landAt = -1e9, glance = 0;
+  const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  function build(){
+    el = document.createElement('div');
+    el.className = 'smiley-rider'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `<span class="smiley-rider-bob"><span class="ask-face">${askFaceSvg()}</span></span>`;
+    face = el.querySelector('.ask-face');
+    hit = document.createElement('button');
+    hit.type = 'button'; hit.className = 'smiley-rider-hit'; hit.setAttribute('aria-label', 'Ask the Hub');
+    hit.addEventListener('click', () => {
+      el.classList.add('is-pressed');
+      setTimeout(() => { el.classList.remove('is-pressed'); openAskHub(); }, 150);
+    });
+    document.body.append(el, hit);
+    // The tab bar steps aside for typing, sheets and search without a
+    // repaint; when it comes back, so does he, wherever he now belongs.
+    let queued = 0;
+    const again = () => { if(!queued) queued = requestAnimationFrame(() => { queued = 0; sync(); }); };
+    const mo = new MutationObserver(again);
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    document.querySelectorAll('.overlay, .gs-overlay').forEach(o => mo.observe(o, { attributes: true, attributeFilter: ['class'] }));
+  }
+  let topLast = null;
+  function topBar(){
+    const b = document.getElementById('tgSmiley');
+    if(!b) return;
+    const on = smileyFollows() && activeCategory !== 'home' && activeCategory !== 'ask';
+    b.hidden = !on;
+    if(!on){ topLast = null; return; }
+    if(!b.firstChild) b.innerHTML = `<span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>`;
+    if(topLast !== activeCategory){
+      topLast = activeCategory;
+      b.classList.remove('is-new'); void b.offsetWidth; b.classList.add('is-new');
+    }
+  }
+  // Where he belongs right now: over the active tab, over More for every
+  // other page, or nowhere (computer, switched off, Home, Ask).
+  const phone = window.matchMedia('(max-width:900px)');
+  function place(){
+    const bar = phone.matches && document.querySelector('.tabbar');
+    if(!bar) return null;
+    // Hidden for a moment (typing, a sheet, search): the CSS hides him along
+    // with the bar, and he stays where he was.
+    if(getComputedStyle(bar).display === 'none') return 'later';
+    const btns = bar.querySelectorAll('.tabbar-btn');
+    if(!btns.length) return null;
+    const b = bar.querySelector('.tabbar-btn.is-active') || btns[btns.length - 1];
+    const r = b.getBoundingClientRect();
+    return {
+      x: r.left + r.width / 2,
+      // Anchored to the same bottom edge as the bar, so Safari's toolbar
+      // sliding away moves them together.
+      bottom: parseFloat(getComputedStyle(bar).bottom) + bar.offsetHeight - (44 - OUT),
+      hide: !smileyFollows() || activeCategory === 'home' || activeCategory === 'ask'
+    };
+  }
+  function paint(now){
+    let lift = 0, tilt = 0, sx = 1, sy = 1;
+    if(hop){
+      const p = Math.min(1, (now - hop.t0) / 560), dir = Math.sign(hop.to - hop.from);
+      x = hop.from + (hop.to - hop.from) * ease(p);
+      lift = -34 * Math.sin(Math.PI * p); tilt = 14 * dir * Math.sin(Math.PI * p);
+      if(p < .15){ sy = 1 - .5 * p; sx = 1 + .4 * p; }          // crouch before the jump
+      if(p >= 1){ hop = null; landAt = now; glance = now + 260; }
+    }
+    const q = (now - landAt) / 240;
+    if(q >= 0 && q < 1){ const k = Math.sin(Math.PI * q); sy *= 1 - .14 * k; sx *= 1 + .1 * k; }
+    const y = (1 - shown) * 52 + lift;                            // sinks behind the glass
+    el.style.opacity = Math.min(1, shown * 1.6).toFixed(3);
+    el.style.transform = `translate(${(x - 22).toFixed(2)}px,${y.toFixed(2)}px) rotate(${tilt.toFixed(2)}deg) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+    const up = shown > .98 && !hop;
+    el.classList.toggle('is-up', up);
+    hit.style.display = up ? 'block' : 'none';
+    if(up) hit.style.transform = `translateX(${(x - 24).toFixed(2)}px)`;
+    return hop || Math.abs(want - shown) > .002 || q < 1;
+  }
+  function frame(now){
+    raf = 0;
+    const dt = last ? Math.min(50, now - last) : 16; last = now;
+    shown += (want - shown) * (1 - Math.exp(-dt / (want ? 95 : 60)));
+    if(Math.abs(want - shown) <= .002) shown = want;
+    if(glance && now > glance){
+      glance = 0; face.classList.add('is-thinking');
+      setTimeout(() => face.classList.remove('is-thinking'), 1100);
+    }
+    if(paint(now) && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  function sync(){
+    try{
+      if(!el){ if(!document.body) return; build(); }
+      topBar();
+      const t = place();
+      if(t === 'later'){
+        // Behind a sheet or the keyboard he can't be seen, so a page that
+        // doesn't want him (Home, Ask, switched off) takes him away at once.
+        if(!smileyFollows() || activeCategory === 'home' || activeCategory === 'ask'){ want = shown = 0; hop = null; paint(performance.now()); }
+        return;
+      }
+      if(!t){ want = 0; shown = 0; hop = null; el.style.opacity = 0; el.classList.remove('is-up'); hit.style.display = 'none'; return; }
+      el.style.bottom = t.bottom + 'px';
+      hit.style.bottom = (t.bottom + 44 - OUT - 2) + 'px';
+      want = t.hide ? 0 : 1;
+      if(!t.hide){
+        const at = hop ? hop.to : x;
+        if(x === null || shown < .2 || reduce.matches){ x = t.x; hop = null; }
+        else if(Math.abs(t.x - at) > 1) hop = { from: x, to: t.x, t0: performance.now() };
+      }
+      if(reduce.matches){ shown = want; paint(performance.now()); return; }
+      if(!raf){ last = 0; raf = requestAnimationFrame(frame); }
+    }catch(e){ console.warn('Dr. Smiley companion:', e); }
+  }
+  window.addEventListener('resize', () => { if(el) requestAnimationFrame(sync); });
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && el) sync(); });
+  return { sync };
+})();
+
 /* ============ Init ============ */
 loadNotifyPref();
 // Team access first: a phone that isn't on the team gets the lock screen
@@ -18909,6 +19091,10 @@ document.addEventListener('focusout', (e)=>{
       const active = document.activeElement;
       if(!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')){
         document.body.classList.remove('kb-open');
+        // Ask sizes its panel to the tab bar, which is hidden while this flag
+        // is on; opening Ask straight from search sized it in that moment and
+        // put the question box behind the tab bar.
+        if(activeCategory === 'ask') fitAskPanel();
       }
     }, 50);
   }
