@@ -16,7 +16,8 @@
     'You’ve got this!', 'You make a difference.', 'Your kindness matters.',
     'One step at a time.', 'You bring people closer.', 'Your voice matters.',
     'Keep being you.', 'Small wins count.', 'You belong here.',
-    'Your care makes a difference.', 'You help people feel heard.', 'You’re appreciated.'
+    'Your care makes a difference.', 'You help people feel heard.', 'You’re appreciated.',
+    'Tap me to ask the Hub.'
   ];
   let previousMessage=-1;
   function chooseMessage(){
@@ -74,7 +75,13 @@
     // Escape the greeting card's clipping and backdrop-filter layers.
     document.body.appendChild(bubble);
     const b=button.getBoundingClientRect();
-    const left=Math.max(8,Math.min(b.left+88,document.documentElement.clientWidth-144));
+    // The cloud is 136px wide. On a narrow phone (iPhone SE) the old clamp
+    // pushed it back over the smiley; instead it starts just past the face
+    // and shrinks to fit (never below 75%).
+    const room=document.documentElement.clientWidth-8;
+    let left=Math.min(b.left+88,room-136);
+    if(left<b.right+2){left=b.right+2;bubble.style.transformOrigin='0 50%';bubble.style.scale=Math.max(.75,(room-left)/136).toFixed(3);}
+    left=Math.max(8,left);
     bubble.style.left=(left+window.scrollX)+'px';
     bubble.style.top=(b.top+window.scrollY-10)+'px';
     const q=sel=>[...bubble.querySelectorAll(sel)];
@@ -550,6 +557,11 @@
       const el=document.createElement('span');el.className='home-wave-'+name;
       el.setAttribute('aria-hidden','true');if(i)el.textContent='✦';wave.appendChild(el);
     });
+    // Ask the Hub: the turning ring and the "Ask" tag (styled in home-polish.css).
+    const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
+    const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
+    tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
+    wave.append(ring,tag);
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     const play=()=>playGreeting(wave);

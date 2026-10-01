@@ -9865,7 +9865,7 @@ function getToolTiles(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   return [
     // The team's assistant. The greeting smiley on Home opens it too.
-    { id:'ask',       name:'Ask the Hub',          color:'#252E6D', icon: '<img class="tool-logo" src="./hmh-mark.png" alt="">', count: null, label: '' },
+    { id:'ask',       name:'Ask the Hub',          color:'#252E6D', icon: '<img class="tool-logo" src="./hmh-mark-square.png" alt="">', count: null, label: '' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: DOMAIN_ICONS.compass, count: GUIDE_TOPICS.length, label:'answers' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: DOMAIN_ICONS.calendar, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'ethics',    name:'Code of Ethics',       color:'#2F5D62', icon: DOMAIN_ICONS.shield, count: ETHICS_CONTENT.length, label: 'entries' },
@@ -15097,7 +15097,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .home-ask';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -15120,7 +15120,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1001.1018';
+const BUILD_ID = 'b1001.1124';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -15434,7 +15434,7 @@ function renderHome(){
           <h1 class="home-greeting-name${firstName.length > 10 ? ' is-long' : ''}">${firstName ? escapeHtml(firstName) : 'Welcome'}</h1>
           <button type="button" class="home-wave-icon" aria-label="Ask the Hub">${ICON_WAVE}</button>
         </div>
-        <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<span class="home-quote-foot"><cite>${escapeHtml(SESSION_QUOTE.author)}</cite><button type="button" class="home-ask" onclick="openAskHub()"><span class="home-ask-mark" aria-hidden="true"><img src="./hmh-mark.png" alt=""></span><span>Ask the Hub</span></button></span></blockquote>
+        <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<cite>${escapeHtml(SESSION_QUOTE.author)}</cite></blockquote>
         ${(!firstName || shouldShowOnboarding()) ? `<div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
           ${shouldShowOnboarding() ? `<button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>` : ''}
@@ -18497,7 +18497,7 @@ function renderAsk(){
   ASK.view = 'chat';
   return `
     <div class="ask-head">
-      <span class="ask-mark" id="askFace" aria-hidden="true"><img src="./hmh-mark.png" alt=""></span>
+      <span class="ask-mark" id="askFace" aria-hidden="true"><img src="./hmh-mark-square.png" alt=""></span>
       <div class="ask-head-text"><h1>Ask the Hub</h1>
         <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p></div>
     </div>
@@ -18740,7 +18740,7 @@ function renderAskReview(){
   const when = ms => ms ? new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
   return `
     <div class="ask-head">
-      <span class="ask-mark" aria-hidden="true"><img src="./hmh-mark.png" alt=""></span>
+      <span class="ask-mark" aria-hidden="true"><img src="./hmh-mark-square.png" alt=""></span>
       <div class="ask-head-text"><h1>Lessons to review</h1><p>Corrections teammates sent from Ask the Hub. Nothing reaches anyone until you approve it.</p></div>
     </div>
     <button type="button" class="btn btn-ghost ask-back" onclick="ASK.view='chat'; renderContent()">← Back to Ask the Hub</button>

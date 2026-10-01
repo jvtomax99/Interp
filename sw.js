@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v115-ask-logo';
+const CACHE_VERSION = 'interpreter-hub-v116-ask-halo-tag';
 const PRECACHE = [
   './',
   './index.html',
@@ -36,6 +36,8 @@ const PRECACHE = [
   // The hello wave spirals this out of the hand, so it has to survive a
   // cold offline start like the rest of the chrome.
   './hmh-mark.png',
+  // The same mark, trimmed so it centres: the Ask tag on the smiley uses it.
+  './hmh-mark-square.png',
   // The greeting hand. Same reason: it is on the first screen of a cold start.
   './wave-hand.png',
   './pin-icons.webp',
