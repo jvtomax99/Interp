@@ -366,7 +366,7 @@
     const resizeStop=()=>{if(window.innerWidth!==width)stop();};
     function stop(){
       cancelAnimationFrame(frame);
-      button.classList.remove('home-wave-pending');
+      button.classList.remove('home-wave-pending','home-ask-wait');
       if(activeSequence===sequence)activeSequence=null;
       animations.forEach(a=>{a.onfinish=null;a.cancel();});
       animations=[];
@@ -407,16 +407,14 @@
     const waveFrames=Array.from({length:166},(_,i)=>({offset:i/165,...faceBody(i/165*FACE_MS)}));
     animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
     // Ask the Hub's entrance (picked by Jose: "Pendulum swing-in"). The ring
-    // fades in with the face; once he has landed, the lanyard and badge swing
-    // in from the side as one piece around his neck and settle like a
-    // pendulum, handing over to the gentle sway. `rotate` layers on top of the
-    // sway's transform. On the sequence's own clock, like everything here.
+    // fades in with the face; once he has landed, the badge is released from
+    // the side and swings to rest on its lanyard (askBadge, real physics).
     const askRing=button.querySelector('.home-ask-ring');
     if(askRing)animate(askRing,[{opacity:0},{opacity:1}],{duration:500,delay:FACE_AT,fill:'backwards',easing:'ease-out'});
-    const SWING_E='cubic-bezier(.25,.8,.35,1)';
-    const swingFrames=[{rotate:'-75deg',opacity:0,easing:SWING_E},{opacity:1,offset:.08,easing:SWING_E},{rotate:'34deg',offset:.3,easing:SWING_E},
-      {rotate:'-17deg',offset:.52,easing:SWING_E},{rotate:'8deg',offset:.7,easing:SWING_E},{rotate:'-3deg',offset:.86,easing:SWING_E},{rotate:'0deg',opacity:1}];
-    button.querySelectorAll('.home-ask-lanyard,.home-ask-tag').forEach(el=>animate(el,swingFrames,{duration:1700,delay:FACE_AT+400,fill:'backwards'}));
+    // The badge waits (hidden) until the face has landed, then is released
+    // from the side and swings to rest under its own physics (askBadge).
+    const BADGE_AT=FACE_AT+350;
+    if(sequence.elapsed<BADGE_AT)button.classList.add('home-ask-wait');
     let messageAnnounced=false;
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
     animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2710,easing:'ease-in-out'});
@@ -521,6 +519,7 @@
       lastFrame=now;
       const elapsed=sequence.elapsed;
       animations.forEach(a=>{a.currentTime=elapsed;});
+      if(elapsed>=BADGE_AT&&button.classList.contains('home-ask-wait')){button.classList.remove('home-ask-wait');askBadge.swing(-38);}
       if(elapsed<FACE_AT+FACE_MS)setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
       else if(!idleRunning&&!sequence.idled){sequence.idled=true;setFace(faceSvg,FACE_REST);startIdle(button);}
       thought.update(Math.max(0,elapsed-CLOUD_AT));
@@ -554,6 +553,76 @@
     if(startupWave&&startupWave.isConnected&&!hasWavedHello&&!activeSequence)scheduleStartup(startupWave);
   });
 
+  /* ---------- Ask badge: a real pendulum on a soft lanyard ----------
+     The "Ask" badge hangs from Dr. Smiley's neck. Instead of a fixed
+     animation it is a tiny spring simulation: gravity keeps the badge
+     hanging down while he tilts, bounces and wiggles (so it lags and swings
+     the way a real one does), friction settles it, and a faint breeze keeps
+     it alive. The two lanyard cords are redrawn every frame as soft curves
+     from his collar to the badge's clip, so they bend as it swings instead of
+     turning like a rigid hanger. Coordinates are the smiley button's (64px;
+     the neck pivot is 32,56; the clip sits 15px below it). Runs only while
+     Home's greeting is on screen; under Reduce Motion it hangs still. */
+  const askBadge=(()=>{
+    const P={x:32,y:56},A={x:25,y:56},B={x:39,y:56};
+    const K=42,C=3.2,G=.5;           // spring stiffness, friction, how much it hangs down when he tilts
+    const REST_LIMIT=10;             // swing limit in everyday motion: keeps the badge's corner clear of the quote
+    let btn=null,pin=null,tag=null,cords=[],clip=null,raf=0,last=0,theta=0,omega=0,t0=0,released=-1e9;
+    const rot=(x,y,a)=>{const c=Math.cos(a),s=Math.sin(a);return{x:P.x+x*c-y*s,y:P.y+x*s+y*c};};
+    const f=n=>(Math.round(n*100)/100);
+    // A soft limit: big swings are allowed right after the entrance and ease
+    // down to REST_LIMIT within about a second, with no hard stop.
+    function shown(now){
+      const lim=REST_LIMIT+30*Math.exp(-Math.max(0,now-released)/650);
+      return lim*Math.tanh(theta/lim);
+    }
+    let deg=0;
+    function draw(){
+      const theta=deg,a=theta*Math.PI/180,L=rot(-2.5,15,a),R=rot(2.5,15,a);
+      const cord=(S,E,side)=>`M${S.x} ${S.y} Q${f((S.x+E.x)/2+side*1.3)} ${f((S.y+E.y)/2+1.4)} ${f(E.x)} ${f(E.y)}`;
+      const d=cord(A,L,-1)+' '+cord(B,R,1);
+      for(const c of cords)c.setAttribute('d',d);
+      if(clip)clip.setAttribute('transform',`rotate(${f(theta)} ${P.x} ${P.y})`);
+      if(tag)tag.style.rotate=f(theta)+'deg';
+    }
+    function tilt(){            // Dr. Smiley's own rotation, in degrees
+      const m=getComputedStyle(pin).transform;
+      if(!m||m==='none')return 0;
+      const v=m.match(/-?[\d.]+(?:e-?\d+)?/g);
+      return v&&v.length>=2?Math.atan2(+v[1],+v[0])*180/Math.PI:0;
+    }
+    function frame(now){
+      raf=0;
+      if(!btn||!btn.isConnected||!pin||!pin.isConnected){btn=null;return;}
+      const dt=last?Math.min(.033,Math.max(0,(now-last)/1000)):0;last=now;
+      const t=(now-t0)/1000;
+      const breeze=2.2*Math.sin(t*1.745)+.8*Math.sin(t*3.3+1);
+      const target=breeze-G*tilt();
+      omega+=(-K*(theta-target)-C*omega)*dt;theta+=omega*dt;
+      deg=shown(now);draw();
+      if(!document.hidden)raf=requestAnimationFrame(frame);
+    }
+    function run(){
+      if(raf||!btn||reduced.matches||document.hidden)return;
+      last=0;raf=requestAnimationFrame(frame);
+    }
+    function rest(){if(raf)cancelAnimationFrame(raf);raf=0;theta=0;omega=0;deg=0;if(btn)draw();}
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){if(raf)cancelAnimationFrame(raf);raf=0;}else run();});
+    reduced.addEventListener('change',()=>{if(reduced.matches)rest();else run();});
+    return {
+      attach(button){
+        btn=button;pin=button.querySelector('.home-wave-pin');tag=button.querySelector('.home-ask-tag');
+        const lan=button.querySelector('.home-ask-lanyard');
+        cords=lan?[...lan.querySelectorAll('path')]:[];clip=lan?lan.querySelector('rect'):null;
+        t0=performance.now();theta=0;omega=0;deg=0;draw();
+        if(raf){cancelAnimationFrame(raf);raf=0;}
+        run();
+      },
+      // The entrance: released from the side once his face has landed.
+      swing(start){theta=start;omega=0;released=performance.now();run();}
+    };
+  })();
+
   window.initHomeGreeting = function(content){
     const wave=content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady)return;
@@ -581,12 +650,13 @@
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);
     pin.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
-      +'<path d="M25 56 L30.5 72 M39 56 L33.5 72" fill="none" stroke="#1A1A1A" stroke-width="4.2" stroke-linecap="round"/>'
-      +'<path d="M25 56 L30.5 72 M39 56 L33.5 72" fill="none" stroke="#252E6D" stroke-width="2.4" stroke-linecap="round"/>'
+      +'<path d="M25 56 L29.5 71 M39 56 L34.5 71" fill="none" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<path d="M25 56 L29.5 71 M39 56 L34.5 71" fill="none" stroke="#2B3A8F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
       +'<rect x="29" y="69" width="6" height="5" rx="1.5" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.2"/></svg>');
     const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
     tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
     pin.append(tag);
+    askBadge.attach(wave);
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     const play=()=>playGreeting(wave);
