@@ -118,7 +118,7 @@ Project `language-specialist`. Collections in use:
 
 ```
 terms/{id}              one document per term  <-- never a single shared blob
-terminology-meta/       categories + migration flags
+terminology-meta/       categories + migration flags; smiley = team points (Dr. Smiley's rank)
 terminology-hub/        legacy
 team-chat/              chat-typing/  term-attachments/  term-reviews/
 healthcare-providers/   doctor-directory/  doctor-research-cache/
