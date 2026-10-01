@@ -75,12 +75,18 @@
     // Escape the greeting card's clipping and backdrop-filter layers.
     document.body.appendChild(bubble);
     const b=button.getBoundingClientRect();
-    // The cloud is 136px wide. On a narrow phone (iPhone SE) the old clamp
-    // pushed it back over the smiley; instead it starts just past the face
-    // and shrinks to fit (never below 75%).
-    const room=document.documentElement.clientWidth-8;
-    let left=Math.min(b.left+88,room-136);
-    if(left<b.right+2){left=b.right+2;bubble.style.transformOrigin='0 50%';bubble.style.scale=Math.max(.75,(room-left)/136).toFixed(3);}
+    // The bubble box is 136px, but the drawing reaches 150px from its left
+    // edge (sparkles and marks), and nothing may pass the screen's right
+    // edge: past it, the whole page widens, shifts sideways, and on a phone
+    // zooms out. On a narrow phone (iPhone SE) the clamp alone would put the
+    // cloud over the smiley, so it starts just past the face and shrinks to
+    // fit -- but only when 75% or more fits there. A long name ("Welcome",
+    // "Guadalupe") pushes the face so far right that it can't; then the cloud
+    // stays clamped on screen, over the face, as it always has.
+    const CLOUD_W=150,room=document.documentElement.clientWidth-4;
+    let left=Math.min(b.left+88,room-CLOUD_W);
+    const fit=(room-b.right-2)/CLOUD_W;
+    if(left<b.right+2&&fit>=.75){left=b.right+2;bubble.style.transformOrigin='0 50%';bubble.style.scale=Math.min(1,fit).toFixed(3);}
     left=Math.max(8,left);
     bubble.style.left=(left+window.scrollX)+'px';
     bubble.style.top=(b.top+window.scrollY-10)+'px';

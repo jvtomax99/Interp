@@ -5049,8 +5049,8 @@
 }
 .access-brand{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:rgba(235,240,255,.8); }
 .access-brand img{ width:20px; height:20px; object-fit:contain; filter:brightness(0) invert(1); opacity:.9; }
-.access-face{ display:flex; justify-content:center; margin-top:34px; }
-.access-face svg{ width:92px; height:92px; filter:drop-shadow(0 8px 16px rgba(0,0,0,.3)); transition:transform .5s cubic-bezier(.3,1.5,.5,1); }
+.access-face{ display:flex; justify-content:center; margin:34px 0 12px; }   /* the coat hangs below the face, more so in the happy pose */
+.access-face svg{ width:92px; height:92px; overflow:visible; filter:drop-shadow(0 8px 16px rgba(0,0,0,.3)); transition:transform .5s cubic-bezier(.3,1.5,.5,1); }
 .access-face .af-calm{ transition:opacity .2s; }
 .access-face .af-heart{ transform:scale(0); transform-box:fill-box; transform-origin:center; transition:transform .45s cubic-bezier(.3,1.7,.5,1) .08s; }
 .access-face .af-smile{ opacity:0; transition:opacity .2s .05s; }
@@ -5144,7 +5144,7 @@ body.access-locked{ overflow:hidden; }
 }
 
 /* ---------- Ask the Hub ---------- */
-.ask-head{ display:flex; align-items:center; gap:13px; margin:0 2px 13px; }
+.ask-head{ display:flex; align-items:center; gap:13px; margin:0 2px 20px; }
 .ask-head-text{ min-width:0; display:flex; flex-direction:column; gap:4px; }
 .ask-head h1{ margin:0; font-size:26px; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
 .ask-head p{ margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
@@ -5170,7 +5170,7 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-panel{ height:62vh; min-height:0; max-height:none; }
 .ask-messages{ display:flex; flex-direction:column; gap:9px; }
 .ask-hello{ margin:auto 0; display:flex; flex-direction:column; align-items:center; text-align:center; gap:9px; padding:13px 2px; }
-.ask-hello .ask-face{ width:64px; height:64px; margin:0 0 4px; }
+.ask-hello .ask-face{ width:64px; height:64px; margin:0 0 7px; }   /* room for the coat below the face */
 .ask-hello p{ margin:0; font-size:14px; color:var(--ink-soft); line-height:1.45; }
 .ask-hello .ask-hello-title{ font-size:17px; font-weight:650; color:var(--ink); letter-spacing:-.02em; }
 .ask-chips{ display:flex; flex-direction:column; gap:6px; align-self:stretch; margin-top:4px; }
@@ -5221,11 +5221,14 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-lesson-edit{ height:auto; min-height:84px; padding:9px 13px; line-height:1.4; resize:vertical; }
 .card.ask-flash{ box-shadow:0 0 0 3px var(--accent-2), 0 8px 20px -12px rgba(22,55,90,0.22); transition:box-shadow .3s; }
 @media (max-width:900px){
-  .ask-head{ gap:9px; margin-bottom:9px; }
+  .ask-head{ gap:9px; margin-bottom:15px; }
   .ask-face{ width:36px; height:36px; }
-  /* Fits the empty state in an iPhone 13's 310px; shorter phones scroll it. */
-  .ask-hello{ gap:6px; padding:0 2px; }
-  .ask-hello .ask-face{ width:52px; height:52px; margin-bottom:2px; }
+  /* Fits the empty state on an iPhone 13 / SE (3rd gen), about 293px of
+     message area; shorter phones scroll it from the top. */
+  .ask-messages{ padding-bottom:8px; }
+  .ask-hello{ gap:4px; padding:0 2px; }
+  .ask-hello .ask-face{ width:48px; height:48px; margin-bottom:8px; }
+  .ask-chips{ gap:4px; }
   .ask-hello p{ font-size:13px; }
   .ask-head h1{ font-size:22px; }
   .ask-head p{ display:none; }
@@ -10730,11 +10733,31 @@ function externalUrl(raw){
    Every moving part carries an hf- class the animation looks up. IDs are
    fixed because only one greeting exists at a time.
    The previous gold-pin hand (wave-hand.png) stays in the repo. */
+// The Hub smiley's white coat, Ask the Hub's doctor look: shoulders with
+// lapels drawn behind the face, and a stethoscope around the neck in front of
+// it. Same coordinates as the face (viewBox 4 4 112 112). It hangs about 16
+// units below the drawing, so every smiley that wears it needs
+// overflow:visible and a little room underneath. `id` keeps the chest piece's
+// gradient unique to each copy.
+const HUB_COAT_BEHIND = '<g class="hub-coat">'
+  + '<path d="M4 132 C4 112 18 102 34 99 L60 112 L86 99 C102 102 116 112 116 132 Z" fill="#fff" stroke="#1A1A1A" stroke-width="3.6" stroke-linejoin="round"/>'
+  + '<path d="M34 99 L48 108 L56 132 L44 132 L40 116 L30 113 Z" fill="#E7EEF7" stroke="#1A1A1A" stroke-width="2.8" stroke-linejoin="round"/>'
+  + '<path d="M86 99 L72 108 L64 132 L76 132 L80 116 L90 113 Z" fill="#E7EEF7" stroke="#1A1A1A" stroke-width="2.8" stroke-linejoin="round"/>'
+  + '<path d="M50 108 L60 118 L70 108 L64 132 L56 132 Z" fill="#2E8BD0" stroke="#1A1A1A" stroke-width="2.6" stroke-linejoin="round"/></g>';
+function hubCoatFront(id){
+  const tube = d => `<path d="${d}" fill="none" stroke="#1A1A1A" stroke-width="8.4" stroke-linecap="round"/>`
+    + `<path d="${d}" fill="none" stroke="#2E8BD0" stroke-width="4.6" stroke-linecap="round"/>`
+    + `<path d="${d}" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.4" stroke-linecap="round" transform="translate(-.8 -.8)"/>`;
+  return `<g class="hub-steth"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".45" stop-color="#DDE4EE"/><stop offset="1" stop-color="#9AA7B8"/></linearGradient></defs>`
+    + tube('M28 104 C26 118 38 126 46 128') + tube('M92 104 C96 114 92 122 86 124')
+    + `<g transform="translate(84 126)"><circle r="8" fill="url(#${id})" stroke="#1A1A1A" stroke-width="3.2"/><circle r="4.2" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.8"/><circle cx="-2.6" cy="-2.9" r="1.6" fill="#fff"/></g></g>`;
+}
 const ICON_WAVE = '<svg class="home-wave-art home-face" viewBox="4 4 112 112" aria-hidden="true" focusable="false">'
   + '<defs><radialGradient id="hfFill" cx="56" cy="54" r="54" gradientUnits="userSpaceOnUse">'
   +   '<stop offset="0" stop-color="#FFD866"/><stop offset=".78" stop-color="#F9C84B"/><stop offset="1" stop-color="#EDB43A"/></radialGradient>'
   + '<clipPath id="hfMouthClip"><path class="hf-mclip" d="M48 72 Q60 79 72 72 Q60 80 48 72 Z"/></clipPath>'
   + '<clipPath id="hfLensClip"><rect x="14" y="36" width="38" height="26" rx="7"/><rect x="68" y="36" width="38" height="26" rx="7"/></clipPath></defs>'
+  + HUB_COAT_BEHIND
   + '<circle cx="60" cy="60" r="47" fill="url(#hfFill)" stroke="#1A1A1A" stroke-width="6"/>'
   + '<path d="M24 50 A37 37 0 0 1 96 50 A40 34 0 0 0 24 50 Z" fill="#fff" opacity=".42"/>'
   + '<circle cx="84" cy="27" r="4.2" fill="#fff" opacity=".95"/>'
@@ -10753,6 +10776,7 @@ const ICON_WAVE = '<svg class="home-wave-art home-face" viewBox="4 4 112 112" ar
   +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
   +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
   +   '<path d="M52 44 Q60 40 68 44"/></g></g>'
+  + hubCoatFront('hfSteel')
   + '</svg>';
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -15136,7 +15160,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1001.1151';
+const BUILD_ID = 'b1001.1341';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -17786,6 +17810,7 @@ const ACCESS_FACE_SVG = '<svg viewBox="4 4 112 112" focusable="false">'
   + '<defs><radialGradient id="afFill" cx="56" cy="54" r="54" gradientUnits="userSpaceOnUse">'
   +   '<stop offset="0" stop-color="#FFD866"/><stop offset=".78" stop-color="#F9C84B"/><stop offset="1" stop-color="#EDB43A"/></radialGradient>'
   + '<clipPath id="afSmileClip"><path d="M44 69 Q60 90 76 69 Z"/></clipPath></defs>'
+  + HUB_COAT_BEHIND
   + '<circle cx="60" cy="60" r="47" fill="url(#afFill)" stroke="#1A1A1A" stroke-width="6"/>'
   + '<path d="M24 50 A37 37 0 0 1 96 50 A40 34 0 0 0 24 50 Z" fill="#fff" opacity=".42"/>'
   + '<circle cx="84" cy="27" r="4.2" fill="#fff" opacity=".95"/>'
@@ -17801,7 +17826,8 @@ const ACCESS_FACE_SVG = '<svg viewBox="4 4 112 112" focusable="false">'
   +   '<path d="M6 44 H14" stroke-linecap="round"/><path d="M106 44 H114" stroke-linecap="round"/>'
   +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
   +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
-  +   '<path d="M52 44 Q60 40 68 44"/></g></svg>';
+  +   '<path d="M52 44 Q60 40 68 44"/></g>'
+  + hubCoatFront('afSteel') + '</svg>';
 const ACCESS_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ACCESS = {
   state: (()=>{ try{ return localStorage.getItem(ACCESS_STATE_KEY) || 'unknown'; }catch(e){ return 'unknown'; } })(),
@@ -18409,7 +18435,7 @@ let askFaceSeq = 0;
 // several copies can be on screen without any of them losing its colour.
 function askFaceSvg(){
   const n = ++askFaceSeq;
-  return ACCESS_FACE_SVG.replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n);
+  return ACCESS_FACE_SVG.replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n).replace(/afSteel/g, 'askSteel' + n);
 }
 
 function askTokens(text){
