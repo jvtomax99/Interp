@@ -2058,7 +2058,10 @@
   .chat-join-hint{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin:2px 0 12px 0; line-height:1.6; }
   .chat-input-row{ display:flex; gap:10px; padding-top:14px; margin-top:4px; border-top:1px solid var(--line); }
   .chat-input-row input{
-    flex:1; padding:12px 16px; border:1px solid var(--line); border-radius:24px;
+    /* min-width:0 lets the box shrink: without it a text input keeps its
+       built-in ~20-character width and pushes the send button off a 320px
+       screen (iPhone SE 1st gen). Ask the Hub and Team Chat share this row. */
+    flex:1; min-width:0; padding:12px 16px; border:1px solid var(--line); border-radius:24px;
     font-family:var(--sans); font-size:14px; background:var(--paper); color:var(--ink);
     transition:box-shadow .15s var(--ease), border-color .15s var(--ease);
   }
@@ -5145,14 +5148,20 @@ body.access-locked{ overflow:hidden; }
 .ask-head-text{ min-width:0; display:flex; flex-direction:column; gap:4px; }
 .ask-head h1{ margin:0; font-size:26px; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
 .ask-head p{ margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
-.ask-mark{ width:56px; height:56px; flex:none; display:grid; place-items:center; border-radius:17px; background:#fff;
-  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
-  transition:transform .45s cubic-bezier(.3,1.5,.5,1); }
-.ask-mark img{ width:70%; height:auto; display:block; }
-/* Thinking: the mark turns like the opening animation's logo. Found it: a little pop. */
-.ask-mark.is-thinking img{ animation:askTurn 1.6s cubic-bezier(.45,.05,.55,.95) infinite; }
-.ask-mark.is-happy{ transform:scale(1.08); }
-@keyframes askTurn{ to{ transform:rotate(360deg); } }
+/* The Hub's smiley: small at the right of the header, big in the empty
+   state. While an answer is coming it glances side to side; when one lands
+   it gets heart eyes for a moment (setAskFace). */
+.ask-face{ width:44px; height:44px; flex:none; display:block; margin-left:auto; }
+.ask-face svg{ width:100%; height:100%; display:block; overflow:visible; filter:drop-shadow(0 4px 10px rgba(22,55,90,.22)); transition:transform .5s cubic-bezier(.3,1.5,.5,1); }
+.ask-face .af-calm{ transition:opacity .2s; }
+.ask-face .af-heart{ transform:scale(0); transform-box:fill-box; transform-origin:center; transition:transform .45s cubic-bezier(.3,1.7,.5,1) .08s; }
+.ask-face .af-smile{ opacity:0; transition:opacity .2s .05s; }
+.ask-face.is-thinking .af-calm{ animation:askGlance 1.1s ease-in-out infinite; }
+.ask-face.is-happy svg{ transform:scale(1.1) rotate(-4deg); }
+.ask-face.is-happy .af-calm{ opacity:0; }
+.ask-face.is-happy .af-heart{ transform:scale(1); }
+.ask-face.is-happy .af-smile{ opacity:1; }
+@keyframes askGlance{ 0%,100%{ transform:translateX(0); } 30%{ transform:translateX(-4px); } 70%{ transform:translateX(4px); } }
 img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
   background:var(--navy); color:#fff; font:600 14px var(--sans); }
@@ -5160,10 +5169,11 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-back{ margin:0 2px 13px; min-height:44px; }
 .ask-panel{ height:62vh; min-height:0; max-height:none; }
 .ask-messages{ display:flex; flex-direction:column; gap:9px; }
-.ask-hello{ margin:auto 0; display:flex; flex-direction:column; gap:9px; padding:13px 2px; }
+.ask-hello{ margin:auto 0; display:flex; flex-direction:column; align-items:center; text-align:center; gap:9px; padding:13px 2px; }
+.ask-hello .ask-face{ width:64px; height:64px; margin:0 0 4px; }
 .ask-hello p{ margin:0; font-size:14px; color:var(--ink-soft); line-height:1.45; }
 .ask-hello .ask-hello-title{ font-size:17px; font-weight:650; color:var(--ink); letter-spacing:-.02em; }
-.ask-chips{ display:flex; flex-direction:column; gap:6px; }
+.ask-chips{ display:flex; flex-direction:column; gap:6px; align-self:stretch; margin-top:4px; }
 .ask-chip{ min-height:44px; padding:9px 13px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--paper);
   color:var(--ink); font:500 14px/1.35 var(--sans); text-align:left; cursor:pointer; }
 .ask-chip:active, .ask-chip.is-pressed{ transform:scale(.98); }
@@ -5212,13 +5222,17 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .card.ask-flash{ box-shadow:0 0 0 3px var(--accent-2), 0 8px 20px -12px rgba(22,55,90,0.22); transition:box-shadow .3s; }
 @media (max-width:900px){
   .ask-head{ gap:9px; margin-bottom:9px; }
-  .ask-mark{ width:44px; height:44px; border-radius:14px; }
+  .ask-face{ width:36px; height:36px; }
+  /* Fits the empty state in an iPhone 13's 310px; shorter phones scroll it. */
+  .ask-hello{ gap:6px; padding:0 2px; }
+  .ask-hello .ask-face{ width:52px; height:52px; margin-bottom:2px; }
+  .ask-hello p{ font-size:13px; }
   .ask-head h1{ font-size:22px; }
   .ask-head p{ display:none; }
   .ask-review-pill{ margin-bottom:9px; }
 }
 @media (prefers-reduced-motion: reduce){
-  .ask-mark, .ask-mark img{ transition:none; animation:none !important; }
+  .ask-face svg, .ask-face .af-heart, .ask-face .af-calm{ transition:none; animation:none; }
   .ask-dots span{ animation:none; opacity:.6; }
 }
 </style>
@@ -12771,7 +12785,9 @@ function renderContent(){
     content.innerHTML = renderAsk();
     fitAskPanel();
     const box = document.getElementById('askMessages');
-    if(box) box.scrollTop = box.scrollHeight;
+    // A conversation opens at its latest answer; the empty state opens at
+    // the top, so the smiley and greeting are what you see first.
+    if(box) box.scrollTop = (ASK.turns.length || ASK.phi) ? box.scrollHeight : 0;
     return;
   }
 
@@ -15120,7 +15136,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1001.1124';
+const BUILD_ID = 'b1001.1151';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -18387,6 +18403,14 @@ const ASK_STOP = new Set(('the a an and or of to in on for is are was be how do 
   + 'decir dice digo significa palabra término patient paciente').split(' ').map(w => foldText(w)));
 
 const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {} };
+let askFaceSeq = 0;
+
+// The Hub's smiley (the lock screen's face), with its own gradient ids so
+// several copies can be on screen without any of them losing its colour.
+function askFaceSvg(){
+  const n = ++askFaceSeq;
+  return ACCESS_FACE_SVG.replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n);
+}
 
 function askTokens(text){
   return foldText(String(text || '')).toLowerCase()
@@ -18497,9 +18521,9 @@ function renderAsk(){
   ASK.view = 'chat';
   return `
     <div class="ask-head">
-      <span class="ask-mark" id="askFace" aria-hidden="true"><img src="./hmh-mark-square.png" alt=""></span>
       <div class="ask-head-text"><h1>Ask the Hub</h1>
         <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p></div>
+      <span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>
     </div>
     <div id="askChrome">${askChromeHtml()}</div>
     <div class="hipaa-notice-inline">${ICON_SHIELD}<span>No patient names, dates of birth or record numbers here.</span></div>
@@ -18528,8 +18552,9 @@ function refreshAskChrome(){
 
 function askMessagesHtml(){
   if(!ASK.turns.length && !ASK.phi){
-    const ex = ['How do I explain “ejection fraction” to a patient?', '“Embarazada” or “embarrassed”?', 'Can I accept a gift from a patient?'];
+    const ex = ['How do I explain “ejection fraction”?', '“Embarazada” or “embarrassed”?', 'Can I accept a gift from a patient?'];
     return `<div class="ask-hello">
+      <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
       <p class="ask-hello-title">Hi! What do you need?</p>
       <p>I answer from the Hub first and tell you when something isn't in it.</p>
       <div class="ask-chips">${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
@@ -18740,8 +18765,8 @@ function renderAskReview(){
   const when = ms => ms ? new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
   return `
     <div class="ask-head">
-      <span class="ask-mark" aria-hidden="true"><img src="./hmh-mark-square.png" alt=""></span>
       <div class="ask-head-text"><h1>Lessons to review</h1><p>Corrections teammates sent from Ask the Hub. Nothing reaches anyone until you approve it.</p></div>
+      <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
     </div>
     <button type="button" class="btn btn-ghost ask-back" onclick="ASK.view='chat'; renderContent()">← Back to Ask the Hub</button>
     ${ASK.lessonsBlocked ? `<div class="ta-card"><p>Lessons can't load: the new Firebase rules aren't published yet.</p></div>` : ''}
