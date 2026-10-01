@@ -633,6 +633,53 @@
     };
   })();
 
+  /* Dr. Smiley's halo: the real Hackensack mark turning slowly behind his
+     head (styled in home-polish.css), cut into its sixteen squares so any one
+     of them can light up. Every 2-4 s one square he isn't covering glows
+     once. Only while the greeting is on screen; never under Reduce Motion. */
+  const askHalo=(()=>{
+    // Each square's box in hmh-mark.png (314 x 261; the art is 260 x 261).
+    const SQ=[[60,0,113,53],[152,9,193,44],[109,45,151,78],[54,55,107,108],[152,55,205,108],[207,61,259,113],[9,67,43,109],[44,109,78,151],
+      [182,109,216,151],[0,147,52,200],[217,152,251,194],[54,153,107,206],[152,153,205,206],[109,182,151,216],[147,207,199,261],[66,217,108,251]];
+    let ring=null,timer=0,uid=0;
+    function svg(){
+      const id='hq'+(++uid)+'-';let defs='',g='';
+      SQ.forEach((q,i)=>{
+        const w=q[2]-q[0],h=q[3]-q[1];
+        defs+=`<clipPath id="${id}${i}"><rect x="${q[0]}" y="${q[1]}" width="${w}" height="${h}"/></clipPath>`;
+        // The empty rect gives each square a measurable box of its own.
+        g+=`<g class="home-ask-sq" style="transform-origin:${q[0]+w/2}px ${q[1]+h/2}px"><image href="./hmh-mark.png" width="314" height="261" clip-path="url(#${id}${i})"/>`
+          +`<rect x="${q[0]}" y="${q[1]}" width="${w}" height="${h}" fill="none"/></g>`;
+      });
+      return `<svg viewBox="0 0 260 261" focusable="false"><defs>${defs}</defs>${g}</svg>`;
+    }
+    function glow(){
+      const btn=ring.parentElement,b=btn.getBoundingClientRect(),cx=b.left+32,cy=b.top+32;
+      // Visible: above his coat and outside his face (about 25px across the middle).
+      const seen=[...ring.querySelectorAll('.home-ask-sq')].filter(q=>{
+        const r=q.lastChild.getBoundingClientRect(),x=(r.left+r.right)/2-cx,y=(r.top+r.bottom)/2-cy;
+        return y<12&&Math.hypot(x,y)>27;
+      });
+      const q=seen[Math.floor(Math.random()*seen.length)];
+      if(!q)return;
+      q.classList.remove('is-glow');void q.getBBox();q.classList.add('is-glow');
+      setTimeout(()=>q.classList.remove('is-glow'),1550);
+    }
+    function tick(){
+      timer=0;
+      if(!ring||!ring.isConnected){ring=null;return;}
+      if(ring.parentElement.offsetParent&&getComputedStyle(ring).opacity>.5)glow();
+      schedule();
+    }
+    function schedule(){
+      clearTimeout(timer);timer=0;
+      if(ring&&!reduced.matches&&!document.hidden)timer=setTimeout(tick,2000+Math.random()*2000);
+    }
+    document.addEventListener('visibilitychange',schedule);
+    reduced.addEventListener('change',schedule);
+    return {attach(el){ring=el;el.innerHTML=svg();schedule();}};
+  })();
+
   window.initHomeGreeting = function(content){
     const wave=content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady)return;
@@ -653,12 +700,12 @@
       const el=document.createElement('span');el.className='home-wave-'+name;
       el.setAttribute('aria-hidden','true');if(i)el.textContent='✦';wave.appendChild(el);
     });
-    // Ask the Hub: the turning ring, and the "Ask" badge on a navy lanyard
+    // Ask the Hub: the Hackensack halo, and the "Ask" badge on a navy lanyard
     // around Dr. Smiley's neck (styled in home-polish.css). The lanyard and
     // badge live inside the face layer (pin), so they spring, bounce, laugh
     // and wiggle with him; the layer's pivot is his neck.
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
-    wave.append(ring);
+    wave.append(ring);askHalo.attach(ring);
     // The cords go inside his drawing, just above the coat and under the
     // face, so they read as around his neck; askBadge draws their path.
     const coat=pin.querySelector('.home-face .hub-coat');

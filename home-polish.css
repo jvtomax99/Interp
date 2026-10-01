@@ -746,14 +746,21 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    iPhone 13 and SE even at the end of a swing, while he bounces. Press feedback uses `scale`,
    which composes with the sway's transform. Ring, lanyard and badge wait for
    the hello animation like the face does, and stand still under Reduce
-   Motion. hmh-mark-square.png is the mark trimmed of its empty right-hand
+   Motion. The ring is the real Hackensack mark (hmh-mark.png) cut into its
+   sixteen squares, turning slowly; askHalo in home-polish.js lights one
+   visible square at a time. hmh-mark-square.png is the mark trimmed of its empty right-hand
    strip, so it sits in the exact middle of its disc. */
-#content.is-home .home-ask-ring{position:absolute;left:3px;top:3px;width:58px;height:58px;padding:3px;border-radius:50%;z-index:-1;pointer-events:none;
-  background:conic-gradient(from 0deg,#01B8E6,#BFF2FF,#7FE3FF,#2E8BD0,#252E6D,#2E8BD0,#01B8E6);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
-  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
-  filter:drop-shadow(0 0 7px rgba(1,184,230,.85));animation:homeAskTurn 3.2s linear infinite;transition:opacity .4s var(--ease);}
+#content.is-home .home-ask-ring{position:absolute;left:-5px;top:-5px;width:74px;height:74px;z-index:-1;pointer-events:none;
+  filter:drop-shadow(0 0 1.2px rgba(255,255,255,.95)) drop-shadow(0 0 7px rgba(1,184,230,.55));animation:homeAskTurn 24s linear infinite;transition:opacity .4s var(--ease);}
+#content.is-home .home-ask-ring svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;}
 @keyframes homeAskTurn{to{transform:rotate(1turn);}}
+#content.is-home .home-ask-sq{transform-box:view-box;}
+#content.is-home .home-ask-sq.is-glow{animation:homeAskGlow 1.5s var(--ease) both;}
+@keyframes homeAskGlow{
+  0%{scale:1;filter:none;}
+  18%{scale:1.45;filter:brightness(2.1) saturate(.6) drop-shadow(0 0 6px #fff) drop-shadow(0 0 16px rgba(1,184,230,.95));}
+  45%{scale:1.3;filter:brightness(1.6) drop-shadow(0 0 10px rgba(127,227,255,.9));}
+  100%{scale:1;filter:none;}}
 #content.is-home .home-ask-lanyard{position:absolute;left:-2px;top:-2px;width:64px;height:100px;overflow:visible;z-index:1;pointer-events:none;
   filter:none;transition:opacity .3s var(--ease);}
 #content.is-home .home-ask-tag{position:absolute;left:50%;top:70px;pointer-events:auto;transform:translateX(-50%);transform-origin:50% -16px;box-sizing:border-box;height:24px;
@@ -767,5 +774,5 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-ask-wait .home-ask-lanyard,#content.is-home .home-ask-wait .home-ask-tag{opacity:0;}
 #content.is-home .home-wave-icon:active .home-ask-tag,#content.is-home .home-wave-icon.home-wave-tap .home-ask-tag{scale:.94;}
 @media (prefers-reduced-motion:reduce){
-  #content.is-home .home-ask-ring,#content.is-home .home-ask-lanyard,#content.is-home .home-ask-tag{animation:none;transition:none;}
+  #content.is-home .home-ask-ring,#content.is-home .home-ask-sq,#content.is-home .home-ask-lanyard,#content.is-home .home-ask-tag{animation:none;transition:none;}
 }
