@@ -632,6 +632,9 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 .home-wave-cloudsvg{position:absolute;left:-30px;top:-20px;width:180px;height:110px;overflow:visible;}
 .home-wave-cloudsvg .hc-text{fill:#0E3A66;font:700 12.5px ui-rounded,'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.01em;}
 .home-wave-cloudsvg .hc-mark{filter:drop-shadow(0 0 2px #fff);}
+/* A cloud carrying real news (hubNews in index.html) can be tapped to go there. */
+.home-wave-thought.is-news{pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.home-wave-thought.is-news:active .hc-body{opacity:.8;}
 
 
 #content.is-home .home-wave-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
@@ -776,3 +779,19 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 @media (prefers-reduced-motion:reduce){
   #content.is-home .home-ask-ring,#content.is-home .home-ask-sq,#content.is-home .home-ask-lanyard,#content.is-home .home-ask-tag{animation:none;transition:none;}
 }
+
+/* ---------- Dr. Smiley's career card (Home) ----------
+   Markup from smileyCareerHtml() in index.html. A rank badge rather than his
+   face: Home already shows him in the greeting, and there is only ever one. */
+#content.is-home .smiley-career{display:grid;grid-template-columns:52px minmax(0,1fr);gap:13px;align-items:center;background:var(--paper);
+  border-radius:var(--r-lg);padding:13px 17px;border:1px solid var(--line-soft);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);}
+#content.is-home .smiley-career[hidden]{display:none;}
+#content.is-home .sc-badge{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 22px/1 var(--sans);
+  background:radial-gradient(circle at 35% 30%,#2E8BD0,#252E6D);box-shadow:0 0 0 3px var(--paper),0 0 0 5px #00B0E0;}
+#content.is-home .sc-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+#content.is-home .sc-rank{margin:1px 0 6px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
+#content.is-home .sc-bar{height:8px;border-radius:999px;background:var(--line-soft);overflow:hidden;}
+#content.is-home .sc-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0070B0,#00B0E0);}
+#content.is-home .sc-note{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.45;}
+#content.is-home .sc-note b{color:var(--ink);font-weight:600;}

@@ -5170,7 +5170,11 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-panel{ height:62vh; min-height:0; max-height:none; }
 .ask-messages{ display:flex; flex-direction:column; gap:9px; }
 .ask-hello{ margin:auto 0; display:flex; flex-direction:column; align-items:center; text-align:center; gap:9px; padding:13px 2px; }
-.ask-hello .ask-face{ width:64px; height:64px; margin:0 0 7px; }   /* room for the coat below the face */
+.ask-hello .ask-face{ width:64px; height:64px; margin:0 0 7px; }
+/* One Dr. Smiley at a time: while the big hello smiley is showing, the
+   header one waits (its space kept, so nothing shifts). He moves up to the
+   header when the conversation starts, where he shows his moods. */
+#content:has(.ask-hello) .ask-head .ask-face{ visibility:hidden; }   /* room for the coat below the face */
 .ask-hello p{ margin:0; font-size:14px; color:var(--ink-soft); line-height:1.45; }
 .ask-hello .ask-hello-title{ font-size:17px; font-weight:650; color:var(--ink); letter-spacing:-.02em; }
 .ask-chips{ display:flex; flex-direction:column; gap:6px; align-self:stretch; margin-top:4px; }
@@ -5239,6 +5243,91 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
   .ask-dots span{ animation:none; opacity:.6; }
 }
 
+
+/* ---------- Appointment prep ----------
+   "Prep me for an appointment" (first suggestion on Ask): pick a specialty
+   and, if known, the doctor; Dr. Smiley returns one screen to read on the
+   way. Words you're still learning come first (your Term Review record),
+   then the doctor's likely terms from Doctor Prep, the False Friends that
+   matter there, the doctor, and a way to add new words afterwards. */
+.ask-chip.prep-chip{ display:flex; align-items:center; gap:9px; color:var(--navy); font-weight:650;
+  border-color:color-mix(in srgb, var(--navy) 35%, var(--line)); }
+.ask-chip.prep-chip svg{ width:18px; height:18px; flex:none; }
+html[data-theme="dark"] .ask-chip.prep-chip{ color:var(--ink); }
+.overlay.prep-overlay{ align-items:flex-end; padding:0; }
+.prep-sheet{ background:var(--paper); width:100%; max-width:560px; margin:0 auto; border-radius:20px 20px 0 0;
+  padding:17px 17px calc(17px + env(safe-area-inset-bottom, 0px)); box-shadow:0 -8px 30px rgba(20,43,67,.25);
+  max-height:88vh; display:flex; flex-direction:column; box-sizing:border-box; }
+@media (min-width:901px){ .overlay.prep-overlay{ align-items:center; padding:26px; } .prep-sheet{ border-radius:20px; } }
+.prep-sheet h2{ font-size:19px; font-weight:650; letter-spacing:-.025em; margin:0 0 4px; color:var(--ink); }
+.prep-sheet p{ margin:0 0 13px; color:var(--ink-soft); font-size:13px; }
+.prep-doms{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px; overflow-y:auto; min-height:96px; margin:0 -4px 13px; padding:2px 4px; }
+.prep-dom{ min-height:44px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi); font:550 14px/1.2 var(--sans);
+  color:var(--ink); text-align:left; padding:6px 13px; display:flex; align-items:center; gap:9px; cursor:pointer; }
+.prep-dom i{ width:9px; height:9px; border-radius:50%; flex:none; }
+.prep-dom[aria-pressed="true"]{ border-color:var(--navy); background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--navy); }
+.prep-dom:focus-visible, .prep-go:focus-visible, .prep-act:focus-visible, .prep-row:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.prep-sheet label{ font-size:13px; font-weight:550; color:var(--ink-soft); margin:0 0 6px; }
+.prep-sheet input{ width:100%; box-sizing:border-box; height:46px; border-radius:var(--r-md); border:1px solid var(--line); padding:0 13px;
+  font:500 16px var(--sans); margin-bottom:13px; background:var(--paper); color:var(--ink); }
+.prep-go{ width:100%; min-height:48px; border-radius:999px; border:0; background:var(--navy); color:#fff; font:650 15px var(--sans); cursor:pointer; flex:none; }
+.prep-go:disabled{ opacity:.45; cursor:default; }
+.prep{ display:flex; flex-direction:column; gap:13px; max-width:720px; }
+.prep-hd{ display:flex; align-items:center; gap:13px; }
+.prep-hd .ask-face{ width:52px; height:52px; margin:0; flex:none; }
+.prep-hd small{ display:block; font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
+.prep-hd h1{ margin:2px 0 0; font-size:26px; font-weight:700; letter-spacing:-.03em; color:var(--ink); }
+.prep-hd p{ margin:2px 0 0; font-size:13px; color:var(--ink-soft); }
+.prep-change{ background:none; border:0; padding:6px 2px; margin:-6px 0; font:inherit; color:inherit; text-decoration:underline; cursor:pointer; }
+.prep-card{ background:var(--paper); border-radius:var(--r-lg); padding:13px 17px; border:1px solid var(--line-soft);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.prep-card h3{ margin:4px 0 9px; font-size:15px; font-weight:650; letter-spacing:-.02em; color:var(--ink); display:flex; align-items:baseline; gap:9px; }
+.prep-card h3 span{ margin-left:auto; font-size:12px; font-weight:500; color:var(--ink-faint); }
+.prep-row{ display:flex; align-items:center; gap:9px; width:100%; min-height:44px; padding:6px 0; border:0; border-top:1px solid var(--line-soft);
+  background:none; text-align:left; font:inherit; cursor:pointer; color:inherit; }
+.prep-row-text{ flex:1; min-width:0; display:flex; flex-wrap:wrap; column-gap:9px; align-items:baseline; }
+.prep-row b{ font-weight:600; color:var(--ink); font-size:14px; }
+.prep-row em{ font-style:normal; color:var(--ink-soft); font-size:14px; }
+.prep-pill{ font-size:11px; font-weight:650; border-radius:999px; padding:2px 7px; white-space:nowrap; flex:none; color:#8A5200; background:#FFF2DC; }
+.prep-ff{ padding:9px 0; border-top:1px solid var(--line-soft); font-size:13px; color:var(--ink-soft); line-height:1.45; }
+.prep-ff b{ color:var(--danger); font-size:14px; font-weight:650; }
+.prep-ff strong{ color:var(--ink); font-weight:600; }
+.prep-note{ font-size:13px; color:var(--ink-soft); line-height:1.45; margin:0; }
+.prep-act{ margin-top:9px; min-height:44px; padding:0 17px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
+  color:var(--navy); font:650 13px var(--sans); cursor:pointer; }
+html[data-theme="dark"] .prep-act{ color:var(--ink); }
+.prep-after{ text-align:center; color:var(--ink-soft); font-size:13px; padding:9px 0 26px; }
+.prep-after .prep-act{ background:var(--navy); color:#fff; border:0; }
+@media (prefers-reduced-motion: reduce){ .prep-sheet{ transition:none; } }
+
+/* ---------- Dr. Smiley's career ----------
+   The team levels him up together. Team points (terminology-meta/smiley,
+   counted from the day this shipped): +1 per term added, +1 per practice
+   question answered (quizzes and Term Review). Each rank adds to his outfit
+   on every Dr. Smiley in the app; reaching one plays a celebration on the
+   Home smiley, once per phone. The Home card is styled in home-polish.css. */
+.lv-acc.is-new{ animation:lvPop .8s cubic-bezier(.3,1.5,.5,1) both; transform-box:fill-box; transform-origin:50% 100%; }
+@keyframes lvPop{ 0%{ transform:translateY(-30px) scale(.3); opacity:0; } 100%{ transform:none; opacity:1; } }
+svg[data-lv="4"] .hub-steth path[stroke="#2E8BD0"], svg[data-lv="5"] .hub-steth path[stroke="#2E8BD0"]{ stroke:#D9A21B; }
+.lvl-banner{ position:fixed; left:50%; bottom:calc(112px + env(safe-area-inset-bottom, 0px)); z-index:90; translate:-50% 0;
+  width:min(360px, calc(100vw - 32px)); box-sizing:border-box; background:var(--paper); border-radius:var(--r-lg); padding:13px 17px;
+  display:grid; grid-template-columns:44px minmax(0,1fr); gap:13px; align-items:center;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 18px 40px -16px rgba(22,55,90,0.45), 0 0 0 1px var(--line);
+  animation:lvBannerIn .6s cubic-bezier(.3,1.4,.5,1) both; }
+.lvl-banner.is-out{ animation:lvBannerOut .35s var(--ease) both; }
+@keyframes lvBannerIn{ 0%{ opacity:0; transform:translateY(30px) scale(.94); } 100%{ opacity:1; transform:none; } }
+@keyframes lvBannerOut{ to{ opacity:0; transform:translateY(16px); } }
+@media (min-width:901px){ .lvl-banner{ bottom:26px; } }
+.lvl-badge{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; color:#fff; font:700 19px/1 var(--sans);
+  background:radial-gradient(circle at 35% 30%, #2E8BD0, #252E6D); box-shadow:0 0 0 3px #fff, 0 0 0 5px #00B0E0; }
+.lvl-banner small{ display:block; font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:#0070B0; }
+.lvl-banner b{ display:block; font-size:16px; font-weight:650; letter-spacing:-.02em; color:var(--ink); margin:2px 0; }
+.lvl-banner span{ font-size:13px; color:var(--ink-soft); line-height:1.4; }
+.lvl-banner button{ grid-column:1 / -1; justify-self:end; min-height:40px; padding:0 17px; border-radius:999px; border:1px solid var(--line);
+  background:var(--paper); color:var(--navy); font:650 13px var(--sans); cursor:pointer; }
+.lvl-banner button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
+@media (prefers-reduced-motion: reduce){ .lv-acc.is-new, .lvl-banner, .lvl-banner.is-out{ animation:none; } }
 /* ---------- Dr. Smiley companion ----------
    He follows you around the app. On phones he peeks over the tab bar above
    the tab you're on (over More for pages reached from More), his body tucked
@@ -8533,6 +8622,7 @@ function updateChatBadge(){
    swallowed so it can never turn a successful save into an error. */
 function logActivity(summary){
   if(!db) return;
+  teamPointsFor(summary);
   try{
     db.collection('activity-log').add({
       summary,
@@ -10021,6 +10111,7 @@ async function answerReview(gotIt){
   const newBox = gotIt ? Math.min(priorBox + 1, REVIEW_INTERVALS.length - 1) : 0;
   const reviewCount = (prior ? prior.reviewCount : 0) + 1;
   if(gotIt) reviewGotIt++; else reviewMissed++;
+  teamPoints(1);
   await saveTermReview(term.id, newBox, reviewCount);
 
   reviewIndex++;
@@ -12306,6 +12397,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'ask'){
     showTopbar = false;
+  } else if(activeCategory === 'prep'){
+    showTopbar = false;
   }
 
   // Glossary screens (one domain, or All domains) get the colored banner:
@@ -12851,6 +12944,11 @@ function renderContent(){
 
   if(activeCategory === 'team-access'){
     content.innerHTML = renderTeamAccess();
+    return;
+  }
+
+  if(activeCategory === 'prep'){
+    content.innerHTML = renderPrep();
     return;
   }
 
@@ -14745,6 +14843,7 @@ function finishQuiz(){
   quizIndex = quizQuestions.length;
   quizActive = false;
   saveQuizResult();
+  teamPoints(total);
   renderContent();
   // After the results are on screen, so a badge lands on top of the score
   // rather than competing with the ring for attention.
@@ -15522,7 +15621,7 @@ function renderHome(){
         </div>
         <div class="home-greeting-name-row">
           <h1 class="home-greeting-name${firstName.length > 10 ? ' is-long' : ''}">${firstName ? escapeHtml(firstName) : 'Welcome'}</h1>
-          <button type="button" class="home-wave-icon" aria-label="Ask the Hub">${ICON_WAVE}</button>
+          <button type="button" class="home-wave-icon" aria-label="Ask the Hub">${smileyWear(ICON_WAVE)}</button>
         </div>
         <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<cite>${escapeHtml(SESSION_QUOTE.author)}</cite></blockquote>
         ${(!firstName || shouldShowOnboarding()) ? `<div class="home-greeting-actions">
@@ -15540,6 +15639,7 @@ function renderHome(){
     <section class="home-sec home-quick-section">
       <div class="qa-grid">${quickActions}</div>
     </section>
+    ${smileyCareerHtml()}
     ${/* Creating a domain was only reachable from inside the glossary or the
          desktop sidebar -- nothing on Home, which is where a phone opens.
          The section header is on screen without scrolling the rail. */''}
@@ -18485,7 +18585,7 @@ let askFaceSeq = 0;
 // several copies can be on screen without any of them losing its colour.
 function askFaceSvg(){
   const n = ++askFaceSeq;
-  return ACCESS_FACE_SVG.replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n).replace(/afSteel/g, 'askSteel' + n);
+  return smileyWear(ACCESS_FACE_SVG).replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n).replace(/afSteel/g, 'askSteel' + n);
 }
 
 function askTokens(text){
@@ -18628,12 +18728,12 @@ function refreshAskChrome(){
 
 function askMessagesHtml(){
   if(!ASK.turns.length && !ASK.phi){
-    const ex = ['How do I explain “ejection fraction”?', '“Embarazada” or “embarrassed”?', 'Can I accept a gift from a patient?'];
+    const ex = ['How do I explain “ejection fraction”?', '“Embarazada” or “embarrassed”?'];
     return `<div class="ask-hello">
       <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
       <p class="ask-hello-title">Hi! What do you need?</p>
       <p>I answer from the Hub first and tell you when something isn't in it.</p>
-      <div class="ask-chips">${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
+      <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
     </div>`;
   }
   return ASK.turns.map(askTurnHtml).join('') + (ASK.phi ? `
@@ -18904,6 +19004,300 @@ window.addEventListener('resize', () => { if(activeCategory === 'ask' && !docume
 // home-polish.js calls this when the greeting smiley is tapped.
 window.openAskHub = function(){ ASK.view = 'chat'; setCategory('ask'); };
 
+/* ---------- Dr. Smiley's career ---------- */
+// Styles and the idea are with the .lv-acc rules; the Home card's look is in
+// home-polish.css. SMILEY_RANKS[i].at is the team points that rank needs.
+const SMILEY_RANKS = [
+  { at: 0,    name: 'Intern',    gain: 'his white coat and stethoscope' },
+  { at: 250,  name: 'Resident',  gain: 'a scrub cap in Hackensack blue' },
+  { at: 750,  name: 'Attending', gain: 'a head mirror' },
+  { at: 1500, name: 'Chief',     gain: 'a gold stethoscope' },
+  { at: 3000, name: 'Legend',    gain: 'a graduation cap' },
+];
+let SMILEY_POINTS = null, smileyCareerStarted = false, smileyCelebrating = false;
+function smileyLevel(points){
+  let lv = 1;
+  SMILEY_RANKS.forEach((r, i) => { if((points || 0) >= r.at) lv = i + 1; });
+  return lv;
+}
+function teamPoints(n){
+  n = Math.round(+n || 0);
+  if(!db || n <= 0) return;
+  try{
+    db.collection('terminology-meta').doc('smiley')
+      .set({ points: firebase.firestore.FieldValue.increment(n), updatedAt: Date.now() }, { merge: true })
+      .catch(err => console.warn('Team points not saved', err));
+  }catch(err){ console.warn('Team points not saved', err); }
+}
+// Terms added, read off the same summaries the activity log records.
+function teamPointsFor(summary){
+  const s = String(summary || '');
+  let m;
+  if((m = s.match(/^imported (\d+) term/)) || (m = s.match(/^added (\d+) .* from Doctor Prep$/))) return teamPoints(+m[1]);
+  if(/^added (the term )?"/.test(s) || s === 'added a CoreCHI practice question') teamPoints(1);
+}
+function startSmileyCareer(){
+  if(smileyCareerStarted || !db) return;
+  smileyCareerStarted = true;
+  db.collection('terminology-meta').doc('smiley').onSnapshot(snap => {
+    const before = SMILEY_POINTS;
+    SMILEY_POINTS = (snap.exists && +snap.data().points) || 0;
+    if(before !== null && smileyLevel(before) === smileyLevel(SMILEY_POINTS)){ refreshSmileyCareer(); return; }
+    smileyDressAll();
+    refreshSmileyCareer();
+    smileyMaybeCelebrate();
+  }, err => console.warn('Team points unavailable', err));
+}
+function smileyCareerHtml(){
+  if(SMILEY_POINTS === null) return '<div id="smileyCareer" hidden></div>';
+  const lv = smileyLevel(SMILEY_POINTS), rank = SMILEY_RANKS[lv - 1], next = SMILEY_RANKS[lv];
+  const pct = next ? Math.round(100 * (SMILEY_POINTS - rank.at) / (next.at - rank.at)) : 100;
+  const fmt = n => n.toLocaleString();
+  return `<section class="home-sec smiley-career" id="smileyCareer" aria-label="Dr. Smiley's rank">
+    <div class="sc-badge" aria-hidden="true">${lv}</div>
+    <div class="sc-body">
+      <div class="sc-eyebrow">Dr. Smiley · Level ${lv} of ${SMILEY_RANKS.length}</div>
+      <div class="sc-rank">${escapeHtml(rank.name)}</div>
+      <div class="sc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Progress to the next rank"><i style="width:${pct}%"></i></div>
+      <p class="sc-note">${next ? `<b>${fmt(SMILEY_POINTS)} of ${fmt(next.at)}</b> team points to <b>${escapeHtml(next.name)}</b>, when he gets ${escapeHtml(next.gain)}.`
+        : `<b>${fmt(SMILEY_POINTS)}</b> team points. The team made him a Legend.`} Every term added and practice question answered counts.</p>
+    </div></section>`;
+}
+function refreshSmileyCareer(){
+  const el = document.getElementById('smileyCareer');
+  if(!el) return;
+  const t = document.createElement('div'); t.innerHTML = smileyCareerHtml();
+  el.replaceWith(t.firstElementChild);
+}
+// What he wears at each level, drawn on top of the face (viewBox 4 4 112 112).
+const LV_INK = '#1A1A1A';
+const LV_CAP = `<path d="M104 21 q12 -6 14 4 q-8 2 -12 -1 z M104 23 q10 6 8 15 q-8 -4 -10 -12 z" fill="#2E8BD0" stroke="${LV_INK}" stroke-width="2.6" stroke-linejoin="round"/>`
+  + `<path d="M9 37 C8 14 32 4 60 4 C88 4 112 14 111 37 C92 29 28 29 9 37 Z" fill="#4FB0EA" stroke="${LV_INK}" stroke-width="4" stroke-linejoin="round"/>`
+  + `<path d="M11 32 C30 24 90 24 109 32" fill="none" stroke="#1D6FB0" stroke-width="3" stroke-linecap="round"/>`
+  + `<g fill="#fff" opacity=".9"><rect x="40" y="12" width="5" height="5" rx="1" transform="rotate(45 42.5 14.5)"/><rect x="58" y="9" width="5" height="5" rx="1" transform="rotate(45 60.5 11.5)"/><rect x="76" y="12" width="5" height="5" rx="1" transform="rotate(45 78.5 14.5)"/></g>`;
+const LV_MIRROR = `<path d="M15 33 Q60 12 105 33" fill="none" stroke="${LV_INK}" stroke-width="7.6" stroke-linecap="round"/><path d="M15 33 Q60 12 105 33" fill="none" stroke="#252E6D" stroke-width="4" stroke-linecap="round"/>`
+  + `<g transform="translate(60 21)"><circle r="13.5" fill="#E3E9F1" stroke="${LV_INK}" stroke-width="3.2"/><circle r="9" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.6"/><circle r="2.8" fill="${LV_INK}"/></g>`;
+const LV_GRAD = `<path d="M32 22 L32 31 Q60 42 88 31 L88 22 L60 31 Z" fill="#1B2350" stroke="${LV_INK}" stroke-width="3" stroke-linejoin="round"/>`
+  + `<path d="M60 4 L110 17 L60 30 L10 17 Z" fill="#252E6D" stroke="${LV_INK}" stroke-width="3.2" stroke-linejoin="round"/>`
+  + `<path d="M60 17 L99 24 L99 40" fill="none" stroke="#E0A82E" stroke-width="2.6" stroke-linecap="round"/>`
+  + `<circle cx="99" cy="43" r="3.6" fill="#E0A82E" stroke="${LV_INK}" stroke-width="1.6"/><circle cx="60" cy="17" r="2.6" fill="#E0A82E"/>`;
+// A Dr. Smiley drawing, already wearing the team's current outfit.
+function smileyWear(svg){
+  const lv = SMILEY_POINTS === null ? 1 : smileyLevel(SMILEY_POINTS), acc = smileyAccessory(lv);
+  return svg.replace('<svg ', `<svg data-lv="${lv}" `).replace(/<\/svg>\s*$/, acc ? `<g class="lv-acc">${acc}</g></svg>` : '</svg>');
+}
+function smileyAccessory(lv){
+  return lv >= 5 ? LV_GRAD : lv >= 3 ? LV_MIRROR : lv === 2 ? LV_CAP : '';
+}
+// Puts the current outfit on every Dr. Smiley on the page that isn't wearing it yet.
+function smileyDressAll(popHome){
+  const lv = SMILEY_POINTS === null ? 1 : smileyLevel(SMILEY_POINTS);
+  document.querySelectorAll('svg.home-face, .ask-face svg, .access-face svg').forEach(svg => {
+    if(svg.dataset.lv === String(lv) && !(popHome && svg.classList.contains('home-face'))) return;
+    svg.querySelector(':scope > .lv-acc')?.remove();
+    svg.dataset.lv = lv;
+    const acc = smileyAccessory(lv);
+    if(!acc) return;
+    svg.insertAdjacentHTML('beforeend', `<g class="lv-acc${popHome && svg.classList.contains('home-face') ? ' is-new' : ''}">${acc}</g>`);
+  });
+}
+// A rank reached since this phone last saw one: celebrated on the Home
+// smiley (the party spin and a burst of logo squares) with a banner under
+// him, once per phone. A phone seeing the ranks for the first time just
+// remembers where the team is.
+function smileyMaybeCelebrate(){
+  if(SMILEY_POINTS === null || smileyCelebrating) return;
+  const lv = smileyLevel(SMILEY_POINTS);
+  let seen = null;
+  try{ seen = localStorage.getItem('ih_smileyLvSeen'); }catch(e){}
+  if(seen === null){ try{ localStorage.setItem('ih_smileyLvSeen', String(lv)); }catch(e){} return; }
+  if(lv <= +seen) return;
+  // On Home, once his opening hello has finished, with the app in front.
+  if(activeCategory !== 'home' || document.hidden || document.querySelector('.home-wave-canvas, .home-wave-pending')
+     || !document.querySelector('.home-wave-icon')){ setTimeout(smileyMaybeCelebrate, 1500); return; }
+  smileyCelebrating = true;
+  try{ localStorage.setItem('ih_smileyLvSeen', String(lv)); }catch(e){}
+  const rank = SMILEY_RANKS[lv - 1];
+  smileyDressAll(true);
+  if(window.homeSmileyCelebrate) window.homeSmileyCelebrate();
+  const b = document.createElement('div');
+  b.className = 'lvl-banner'; b.setAttribute('role', 'status');
+  b.innerHTML = `<div class="lvl-badge" aria-hidden="true">${lv}</div><div><small>Level ${lv} · the team did it</small>
+    <b>Dr. Smiley is now ${/^[AEIOU]/.test(rank.name) ? 'an' : 'a'} ${escapeHtml(rank.name)}</b><span>He earned ${escapeHtml(rank.gain)} at ${rank.at.toLocaleString()} team points.</span></div>
+    <button type="button">Nice!</button>`;
+  const close = () => { if(!b.isConnected) return; b.classList.add('is-out'); setTimeout(() => { b.remove(); smileyCelebrating = false; }, 350); };
+  b.querySelector('button').addEventListener('click', close);
+  setTimeout(close, 9000);
+  document.body.appendChild(b);
+}
+document.addEventListener('visibilitychange', () => { if(!document.hidden) smileyMaybeCelebrate(); });
+
+/* ---------- Appointment prep ---------- */
+// Styles and the idea are with the .prep rules.
+const ICON_PREP = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M9 4h6v3H9zM8.5 12l2.2 2.2L15.5 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const PREP = { domainId: null, doctor: '' };
+try{ Object.assign(PREP, JSON.parse(localStorage.getItem('ih_prepLast') || '{}')); }catch(e){}
+function openPrep(){
+  let ov = document.getElementById('prepOverlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.className = 'overlay prep-overlay'; ov.id = 'prepOverlay';
+    ov.addEventListener('click', e => { if(e.target === ov) closePrep(); });
+    document.body.appendChild(ov);
+  }
+  const doms = getDomainTiles().filter(t => !t.parentId);
+  const names = [...new Set(DOCTOR_DIRECTORY.map(d => d.name).filter(Boolean))].sort();
+  ov.innerHTML = `<div class="prep-sheet" role="dialog" aria-modal="true" aria-labelledby="prepTitle">
+    <h2 id="prepTitle">Where are you heading?</h2>
+    <p>Pick the specialty. I’ll pull together what you’ll need.</p>
+    <div class="prep-doms" role="group" aria-label="Specialty">${doms.map(d => `<button type="button" class="prep-dom" data-id="${escapeAttr(d.id)}" aria-pressed="${d.id === PREP.domainId}"><i style="background:${escapeAttr(d.color)}"></i>${escapeHtml(d.name)}</button>`).join('')}</div>
+    <label for="prepDoctor">Doctor (optional)</label>
+    <input id="prepDoctor" type="text" list="prepDoctors" autocomplete="off" enterkeyhint="go" placeholder="e.g. Dr. Andre Goy" value="${escapeAttr(PREP.doctor || '')}">
+    <datalist id="prepDoctors">${names.map(n => `<option value="${escapeAttr(n)}">`).join('')}</datalist>
+    <button type="button" class="prep-go" id="prepGo" ${PREP.domainId && doms.some(d => d.id === PREP.domainId) ? '' : 'disabled'}>Get my briefing</button>
+  </div>`;
+  ov.querySelectorAll('.prep-dom').forEach(b => b.addEventListener('click', () => {
+    ov.querySelectorAll('.prep-dom').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    PREP.domainId = b.dataset.id;
+    ov.querySelector('#prepGo').disabled = false;
+  }));
+  const go = () => {
+    if(!PREP.domainId) return;
+    PREP.doctor = ov.querySelector('#prepDoctor').value.trim();
+    try{ localStorage.setItem('ih_prepLast', JSON.stringify(PREP)); }catch(e){}
+    closePrep();
+    setCategory('prep');
+  };
+  ov.querySelector('#prepGo').addEventListener('click', go);
+  ov.querySelector('#prepDoctor').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); go(); } });
+  ov.classList.add('show');
+  ov.querySelector('.prep-dom[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest' });
+}
+function closePrep(){ document.getElementById('prepOverlay')?.classList.remove('show'); }
+
+// The doctor typed, matched against the directory (Dr. prefix and case aside).
+function prepDoctorEntry(name){
+  const norm = x => String(x || '').toLowerCase().replace(/^dr\.?\s+/, '').replace(/\s+/g, ' ').trim();
+  const n = norm(name);
+  return n ? DOCTOR_DIRECTORY.find(d => norm(d.name) === n) || null : null;
+}
+// False Friends that matter in a specialty: tagged for it first, then the critical ones.
+const PREP_FF_TAGS = [[/obstet|gyn|pregnan|matern|labor/, 'OB'], [/gastro|digest|liver|bowel/, 'GI'], [/neuro|brain|stroke/, 'Neuro'],
+  [/pulmon|respir|lung/, 'Pulm'], [/surg|operat/, 'Surgery'], [/trauma|emergen/, 'Trauma'], [/toxic|poison/, 'Toxicology'],
+  [/pharm|medic/, 'Medications'], [/ent|ear|nose|throat|otolar/, 'ENT'], [/sexual|urolog/, 'Sexual health']];
+function prepTraps(dom){
+  const name = dom.name.toLowerCase();
+  const tags = PREP_FF_TAGS.filter(([re]) => re.test(name)).map(([, t]) => t);
+  const tagged = FALSE_FRIENDS.filter(f => tags.some(t => (f.tag || '').includes(t)));
+  const critical = FALSE_FRIENDS.filter(f => f.risk === 'critical' && !tagged.includes(f));
+  return tagged.concat(critical).slice(0, 3);
+}
+function renderPrep(){
+  const dom = DATA.categories.find(c => c.id === PREP.domainId);
+  if(!dom) return `<div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
+  // Your practice record, loaded once; the screen repaints when it arrives.
+  if(!prepReviewsAsked){ prepReviewsAsked = true; ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'prep') renderContent(); }).catch(() => {}); }
+  const cats = [dom].concat(DATA.categories.filter(c => c.parentId === dom.id));
+  const all = cats.flatMap(c => c.terms.map(t => ({ t, c })));
+  const rec = id => TERM_REVIEWS[id];
+  const learning = all.filter(x => rec(x.t.id) && rec(x.t.id).box <= 1);
+  const fresh = all.filter(x => !rec(x.t.id));
+  const known = all.filter(x => rec(x.t.id) && rec(x.t.id).box > 1);
+  const words = learning.concat(fresh, known).slice(0, 10);
+  const row = (x, pill) => `<button type="button" class="prep-row" onclick="prepOpenTerm('${escapeAttr(x.c.id)}','${escapeAttr(x.t.id)}')">
+      <span class="prep-row-text"><b>${escapeHtml(x.t.en || '')}</b><em>${escapeHtml(x.t.es || '')}</em></span>${pill || ''}</button>`;
+  const entry = prepDoctorEntry(PREP.doctor);
+  const docName = entry ? entry.name : PREP.doctor;
+  const research = entry && entry.researchResult ? entry.researchResult
+    : (doctorResearchState.status === 'done' && doctorResearchState.result && prepDoctorEntry(doctorResearchState.doctorName) === entry && entry ? doctorResearchState.result : null);
+  const likely = research ? (researchTiers(research).find(t => t.key === 'core') || researchTiers(research)[0] || { terms: [] }).terms.slice(0, 6) : [];
+  const traps = prepTraps(dom);
+  return `<div class="prep">
+    <div class="prep-hd"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
+      <div><small>Your briefing</small><h1>${escapeHtml(dom.name)}</h1><p>${docName ? 'with ' + escapeHtml(docName) + ' · ' : ''}<button type="button" class="prep-change" onclick="openPrep()">change</button></p></div></div>
+    ${words.length ? `<div class="prep-card"><h3>Words to have ready <span>${words.length} of ${all.length}</span></h3>
+      ${words.map(x => row(x, rec(x.t.id) && rec(x.t.id).box <= 1 ? '<span class="prep-pill">Still learning</span>' : '')).join('')}</div>` : ''}
+    ${likely.length ? `<div class="prep-card"><h3>Likely with ${escapeHtml(docName)} <span>from Doctor Prep</span></h3>
+      ${likely.map(t => `<div class="prep-row" style="cursor:default"><span class="prep-row-text"><b>${escapeHtml(t.en || '')}</b><em>${escapeHtml(t.es || '')}</em></span></div>`).join('')}</div>` : ''}
+    ${traps.length ? `<div class="prep-card"><h3>Traps to watch</h3>
+      ${traps.map(f => `<div class="prep-ff"><b>${escapeHtml(f.es)}</b> looks like “${escapeHtml(f.looks)}” but means <strong>${escapeHtml(String(f.means).split(' —')[0])}</strong>. Say <strong>${escapeHtml(f.say)}</strong>.</div>`).join('')}
+      <button type="button" class="prep-act" onclick="setCategory('falsefriends')">All False Friends</button></div>` : ''}
+    ${docName ? `<div class="prep-card"><h3>${escapeHtml(docName)}</h3>
+      ${entry && (entry.specialty || entry.hospitalLocation) ? `<p class="prep-note">${escapeHtml([entry.specialty, entry.hospitalLocation].filter(Boolean).join(' · '))}</p>` : ''}
+      ${research ? `<p class="prep-note">Doctor Prep has looked this doctor up${entry && entry.lastResearchedBy ? ' (' + escapeHtml(entry.lastResearchedBy) + ')' : ''}.</p><button type="button" class="prep-act" onclick="prepResearch()">Open in Doctor Prep</button>`
+        : `<p class="prep-note">Doctor Prep hasn’t looked this doctor up yet. It takes about 20 seconds and finds the terms likely to come up.</p><button type="button" class="prep-act" onclick="prepResearch()">Research this doctor</button>`}</div>` : ''}
+    <div class="prep-after">Back from the appointment?<br><button type="button" class="prep-act" onclick="prepAddWords()">Add new words</button></div>
+  </div>`;
+}
+let prepReviewsAsked = false;
+function prepOpenTerm(catId, termId){
+  setCategory(catId);
+  setTimeout(() => {
+    const card = document.querySelector(`.card[data-term-id="${CSS.escape(termId)}"]`);
+    if(card){ card.scrollIntoView({ block: 'center', behavior: 'smooth' }); card.classList.add('ask-flash'); setTimeout(() => card.classList.remove('ask-flash'), 2200); }
+  }, 120);
+}
+function prepResearch(){
+  const entry = prepDoctorEntry(PREP.doctor);
+  const dom = DATA.categories.find(c => c.id === PREP.domainId);
+  setCategory('doctor-research');
+  const name = document.getElementById('doctorResearchInput'), spec = document.getElementById('doctorResearchSpecialty');
+  if(name) name.value = entry ? entry.name : PREP.doctor;
+  if(spec && !spec.value) spec.value = (entry && entry.specialty) || (dom ? dom.name : '');
+  if(name && name.value) runDoctorResearch();
+}
+function prepAddWords(){
+  if(PREP.domainId) setCategory(PREP.domainId);
+  openAddModal();
+}
+
+/* ---------- Dr. Smiley's news ----------
+   The thought cloud on Home (home-polish.js) asks for one piece of real news
+   as it appears and shows it instead of an encouragement; tapping the cloud
+   goes there. Each piece shows once per phone (ih_newsSeen). Kept short so
+   it fits the cloud's two lines. CE events carry no event date, only when
+   they were posted, so the news is that a new one was posted. */
+function hubNews(){
+  let seen;
+  try{ seen = JSON.parse(localStorage.getItem('ih_newsSeen') || '[]'); }catch(e){ seen = []; }
+  const me = (whoAmI() || '').trim().toLowerCase(), now = Date.now(), RECENT = 3 * DAY;
+  const first = n => String(n || 'Someone').trim().split(/\s+/)[0];
+  const items = [];
+  const unread = unreadChatCount();
+  if(unread && CHAT_MESSAGES.length){
+    items.push({ key: 'chat:' + CHAT_MESSAGES[CHAT_MESSAGES.length - 1].id,
+      text: unread === 1 ? '1 new message in Team Chat' : `${unread > 9 ? '9+' : unread} new messages in Team Chat`,
+      go: () => setCategory('chat') });
+  }
+  // A teammate's new terms: the latest author's additions in the last 3 days.
+  const adds = ACTIVITY.filter(a => a.timestamp > now - RECENT && /^(added (the term )?"|imported \d)/.test(a.summary || '')
+    && (a.author || '').trim().toLowerCase() !== me);
+  if(adds.length){
+    const latest = adds[adds.length - 1], who = latest.author;
+    const theirs = adds.filter(a => a.author === who);
+    const count = theirs.reduce((n, a) => n + (+((a.summary.match(/^imported (\d+)/) || [])[1]) || 1), 0);
+    const doms = [...new Set(theirs.map(a => (a.summary.match(/ to (.+?)(?: from Doctor Prep)?$/) || [])[1]).filter(Boolean))];
+    let text = count === 1 ? `${first(who)} added a new term` : `${first(who)} added ${count} new terms`;
+    if(doms.length === 1){
+      const t = count === 1 ? `${first(who)} added a ${doms[0]} term` : `${first(who)} added ${count} ${doms[0]} terms`;
+      if(t.length <= 32) text = t;
+    }
+    items.push({ key: 'act:' + latest.id, text, go: () => setCategory('updates') });
+  }
+  const ce = CE_EVENTS.filter(e => e.timestamp > now - RECENT).sort((a, b) => b.timestamp - a.timestamp)[0];
+  if(ce) items.push({ key: 'ce:' + ce.id, text: 'New CE event posted', go: () => setCategory('events') });
+  if(isHubOwner() && ASK.lessons && ASK.lessons.length){
+    const n = askPendingLessons().length;
+    if(n) items.push({ key: 'lessons:' + n + ':' + ASK.lessons.length, text: n === 1 ? '1 Ask lesson to review' : `${n} Ask lessons to review`,
+      go: () => { ASK.view = 'review'; setCategory('ask'); } });
+  }
+  const next = items.find(i => !seen.includes(i.key));
+  if(!next) return null;
+  try{ localStorage.setItem('ih_newsSeen', JSON.stringify(seen.concat(next.key).slice(-40))); }catch(e){}
+  return { text: next.text, go: next.go };
+}
+window.hubNews = hubNews;
+
 /* ---------- Dr. Smiley companion ---------- */
 // Styles and the idea are with the .smiley-rider rules. He is drawn once,
 // outside the re-rendered app, and only animates while he is moving: the
@@ -18941,12 +19335,24 @@ const smileyRider = (() => {
     const mo = new MutationObserver(again);
     mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     document.querySelectorAll('.overlay, .gs-overlay').forEach(o => mo.observe(o, { attributes: true, attributeFilter: ['class'] }));
+    mo.observe(document.body, { childList: true });                 // pop-ups added to the page
+    const lock = document.getElementById('accessLock');
+    if(lock) mo.observe(lock, { attributes: true, attributeFilter: ['hidden'] });
+  }
+  // Only one Dr. Smiley at a time: any other one drawn and showing (the Home
+  // greeting, Ask, the lock screen, a pop-up) sends this one away.
+  function smileyElsewhere(){
+    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
+      if(f.closest('.smiley-rider, #tgSmiley')) continue;
+      if(f.getClientRects().length && getComputedStyle(f).visibility !== 'hidden') return true;
+    }
+    return false;
   }
   let topLast = null;
   function topBar(){
     const b = document.getElementById('tgSmiley');
     if(!b) return;
-    const on = smileyFollows() && activeCategory !== 'home' && activeCategory !== 'ask';
+    const on = smileyFollows() && activeCategory !== 'home' && activeCategory !== 'ask' && !smileyElsewhere();
     b.hidden = !on;
     if(!on){ topLast = null; return; }
     if(!b.firstChild) b.innerHTML = `<span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>`;
@@ -18973,7 +19379,7 @@ const smileyRider = (() => {
       // Anchored to the same bottom edge as the bar, so Safari's toolbar
       // sliding away moves them together.
       bottom: parseFloat(getComputedStyle(bar).bottom) + bar.offsetHeight - (44 - OUT),
-      hide: !smileyFollows() || activeCategory === 'home' || activeCategory === 'ask'
+      hide: !smileyFollows() || activeCategory === 'home' || activeCategory === 'ask' || smileyElsewhere()
     };
   }
   function paint(now){
@@ -19011,11 +19417,12 @@ const smileyRider = (() => {
     try{
       if(!el){ if(!document.body) return; build(); }
       topBar();
+      smileyDressAll();
       const t = place();
       if(t === 'later'){
         // Behind a sheet or the keyboard he can't be seen, so a page that
         // doesn't want him (Home, Ask, switched off) takes him away at once.
-        if(!smileyFollows() || activeCategory === 'home' || activeCategory === 'ask'){ want = shown = 0; hop = null; paint(performance.now()); }
+        if(!smileyFollows() || activeCategory === 'home' || activeCategory === 'ask' || smileyElsewhere()){ want = shown = 0; hop = null; paint(performance.now()); }
         return;
       }
       if(!t){ want = 0; shown = 0; hop = null; el.style.opacity = 0; el.classList.remove('is-up'); hit.style.display = 'none'; return; }
@@ -19063,6 +19470,7 @@ hubAuthReady.then(()=>{
   startChatListener();
   startMembersListener();
   startActivityListener();
+  startSmileyCareer();
   startAnnouncementsListener();
   startTypingListener();
 

@@ -52,8 +52,8 @@
   function createThought(button, text){
     const hero=button.closest('.home-greeting');
     const id='hc'+(++cloudSeq);
-    const message=text || chooseMessage();
-    const lines=splitMessage(message);
+    let message=text || chooseMessage();
+    let lines=splitMessage(message);
     const bubble=document.createElement('span');
     bubble.className='home-wave-thought';bubble.setAttribute('aria-hidden','true');
     bubble.innerHTML=`<svg class="home-wave-cloudsvg" viewBox="-30 -20 180 110" width="180" height="110" focusable="false">
@@ -103,6 +103,7 @@
       const ty=-6*sm(win(t,.9,5.3))-1.5*Math.sin(Math.PI*2*t/2)-18*sm(out);
       const op=(a<0?0:1)*(1-sm(out));
       bubble.style.opacity=op>0||t<.4?'1':'0';
+      bubble.style.pointerEvents=op>.3?'':'none';
       body.setAttribute('transform',`translate(0 ${ty.toFixed(2)}) translate(20 64) scale(${Math.max(0,grow+.1*jig).toFixed(4)} ${Math.max(0,grow-.1*jig).toFixed(4)}) translate(-20 -64)`);
       body.setAttribute('opacity',op.toFixed(3));
       [back(win(t,0,.2),2.2),back(win(t,.1,.3),2.2)].forEach((v,i)=>{
@@ -120,7 +121,20 @@
     update(0);
     let announced=0,expire=0;
     const status=hero.querySelector('.home-wave-status');
-    return {bubble,update,announce(delay){announced=setTimeout(()=>{if(status)status.textContent=message;},delay);},
+    return {bubble,update,
+      // Real news (window.hubNews, index.html) replaces the message if it is
+      // ready before the typing starts; the cloud then goes there on a tap.
+      news(n){
+        if(!n||shownChars>0)return;
+        message=n.text;lines=splitMessage(message);shownChars=-1;
+        // Tappable only clear of his face: with a long name the cloud has to
+        // sit over him, and his face must still take the tap there.
+        const r=bubble.getBoundingClientRect(),f=button.getBoundingClientRect();
+        if(r.left<f.right&&r.right>f.left&&r.top<f.bottom&&r.bottom>f.top)return;
+        bubble.classList.add('is-news');
+        bubble.addEventListener('click',()=>{stopGreeting();n.go();});
+      },
+      announce(delay){announced=setTimeout(()=>{if(status)status.textContent=message;},delay);},
       expire(fn){expire=setTimeout(fn,6500);},
       remove(){clearTimeout(announced);clearTimeout(expire);bubble.remove();if(status)status.textContent='';}};
   }
@@ -245,7 +259,10 @@
   // The pause between performances keeps a gentle happy bob going.
   function restPose(t){const p=idlePose(),b=Math.abs(Math.sin(TAU*t/1.4));p.ty=-2.2*b;p.sy=1+.02*Math.sin(TAU*t/1.4);p.sx=2-p.sy;return p;}
 
-  let idleStop=()=>{},idleRunning=false,lastIdle=-1;
+  let idleStop=()=>{},idleRunning=false,lastIdle=-1,forcedAct=null;
+  // index.html calls this when the team reaches a new rank: his next idle
+  // act is the party spin with its burst of logo squares, straight away.
+  window.homeSmileyCelebrate=()=>{forcedAct='party';};
   function startIdle(button){
     idleStop();
     if(reduced.matches||document.hidden||!button||!button.isConnected)return;
@@ -259,7 +276,7 @@
     }
     const imgs=[...layer.children];
     let raf=0,onScreen=true,act=null,actStart=0,restUntil=0,restStart=performance.now(),lastNow=0;
-    const pick=()=>{let i=Math.floor(Math.random()*(IDLE.length-1));if(i>=lastIdle&&lastIdle>=0)i++;if(lastIdle<0)i=Math.floor(Math.random()*IDLE.length);lastIdle=i;return IDLE[i];};
+    const pick=()=>{if(forcedAct){const a=IDLE.find(x=>x.name===forcedAct);forcedAct=null;if(a)return a;}let i=Math.floor(Math.random()*(IDLE.length-1));if(i>=lastIdle&&lastIdle>=0)i++;if(lastIdle<0)i=Math.floor(Math.random()*IDLE.length);lastIdle=i;return IDLE[i];};
     restUntil=restStart+900+Math.random()*900;
     function paint(p,marks){
       const u=pin.clientWidth/112;
@@ -281,7 +298,7 @@
         const t=(now-actStart)/1000;
         if(t>=act.L){act=null;restStart=now;restUntil=now+900+Math.random()*1600;paint(restPose(0),[]);}
         else paint(act.pose(t),act.marks(t));
-      }else if(now>=restUntil){act=pick();actStart=now;paint(act.pose(0),[]);}
+      }else if(now>=restUntil||forcedAct){act=pick();actStart=now;paint(act.pose(0),[]);}
       else paint(restPose((now-restStart)/1000),[]);
       if(onScreen)raf=requestAnimationFrame(frame);
     }
@@ -331,7 +348,7 @@
     if(document.hidden || !button.isConnected) return;
     if(reduced.matches || !button.animate){
       const thought=createThought(button);
-      thought.update(2500);thought.announce(0);
+      thought.news(window.hubNews&&window.hubNews());thought.update(2500);thought.announce(0);
       const width=window.innerWidth;
       const resizeStop=()=>{if(window.innerWidth!==width)stop();};
       const stop=()=>{thought.remove();window.removeEventListener('resize',resizeStop);if(stopGreeting===stop)stopGreeting=()=>{};};
@@ -415,7 +432,7 @@
     // from the side and swings to rest under its own physics (askBadge).
     const BADGE_AT=FACE_AT+350;
     if(sequence.elapsed<BADGE_AT)button.classList.add('home-ask-wait');
-    let messageAnnounced=false;
+    let messageAnnounced=false,newsShown=false;
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
     animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2710,easing:'ease-in-out'});
     button.querySelectorAll('.home-wave-glint').forEach((el,i)=>animate(el,[{opacity:0,transform:'scale(.3) rotate(-25deg)'},{opacity:.85,transform:'scale(1.05) rotate(15deg)',offset:.4},{opacity:0,transform:'scale(.5) rotate(35deg)'}],{duration:600,delay:2940+i*550}));
@@ -522,6 +539,13 @@
       if(elapsed>=BADGE_AT&&button.classList.contains('home-ask-wait')){button.classList.remove('home-ask-wait');askBadge.swing(-38);}
       if(elapsed<FACE_AT+FACE_MS)setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
       else if(!idleRunning&&!sequence.idled){sequence.idled=true;setFace(faceSvg,FACE_REST);startIdle(button);}
+      // Asked once per hello and kept on the sequence, so a hello resumed
+      // after a repaint shows the same news rather than the next one.
+      if(elapsed>=CLOUD_AT-120&&!newsShown){
+        newsShown=true;
+        if(!('news' in sequence))sequence.news=window.hubNews?window.hubNews():null;
+        thought.news(sequence.news);
+      }
       thought.update(Math.max(0,elapsed-CLOUD_AT));
       if(elapsed>=CLOUD_AT&&!messageAnnounced){messageAnnounced=true;thought.announce(0);}
       if(elapsed>=FACE_AT+FACE_MS)hasWavedHello=true;
