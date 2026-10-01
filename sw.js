@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v119-ask-tag-lower';
+const CACHE_VERSION = 'interpreter-hub-v120-ask-tag-under-coat';
 const PRECACHE = [
   './',
   './index.html',
