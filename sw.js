@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v123-lanyard-badge';
+const CACHE_VERSION = 'interpreter-hub-v124-pendulum-entrance';
 const PRECACHE = [
   './',
   './index.html',

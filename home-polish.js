@@ -406,6 +406,17 @@
     // The face springs in, rests as drawn, then squishes and pops into a laugh.
     const waveFrames=Array.from({length:166},(_,i)=>({offset:i/165,...faceBody(i/165*FACE_MS)}));
     animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
+    // Ask the Hub's entrance (picked by Jose: "Pendulum swing-in"). The ring
+    // fades in with the face; once he has landed, the lanyard and badge swing
+    // in from the side as one piece around his neck and settle like a
+    // pendulum, handing over to the gentle sway. `rotate` layers on top of the
+    // sway's transform. On the sequence's own clock, like everything here.
+    const askRing=button.querySelector('.home-ask-ring');
+    if(askRing)animate(askRing,[{opacity:0},{opacity:1}],{duration:500,delay:FACE_AT,fill:'backwards',easing:'ease-out'});
+    const SWING_E='cubic-bezier(.25,.8,.35,1)';
+    const swingFrames=[{rotate:'-75deg',opacity:0,easing:SWING_E},{opacity:1,offset:.08,easing:SWING_E},{rotate:'34deg',offset:.3,easing:SWING_E},
+      {rotate:'-17deg',offset:.52,easing:SWING_E},{rotate:'8deg',offset:.7,easing:SWING_E},{rotate:'-3deg',offset:.86,easing:SWING_E},{rotate:'0deg',opacity:1}];
+    button.querySelectorAll('.home-ask-lanyard,.home-ask-tag').forEach(el=>animate(el,swingFrames,{duration:1700,delay:FACE_AT+400,fill:'backwards'}));
     let messageAnnounced=false;
     animate(halo,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.05)',opacity:.45,offset:.55},{transform:'scale(1.7)',opacity:1,offset:.7},{transform:'scale(.85)',opacity:.35}],{duration:3500,easing:'ease-in-out'});
     animate(button.querySelector('.home-wave-shine'),[{opacity:0,backgroundPosition:'100% 0'},{opacity:.65,offset:.3},{opacity:0,backgroundPosition:'0% 0'}],{duration:950,delay:2710,easing:'ease-in-out'});
@@ -564,16 +575,18 @@
       el.setAttribute('aria-hidden','true');if(i)el.textContent='✦';wave.appendChild(el);
     });
     // Ask the Hub: the turning ring, and the "Ask" badge on a navy lanyard
-    // around Dr. Smiley's neck (styled in home-polish.css).
+    // around Dr. Smiley's neck (styled in home-polish.css). The lanyard and
+    // badge live inside the face layer (pin), so they spring, bounce, laugh
+    // and wiggle with him; the layer's pivot is his neck.
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);
-    wave.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
+    pin.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
       +'<path d="M25 56 L30.5 72 M39 56 L33.5 72" fill="none" stroke="#1A1A1A" stroke-width="4.2" stroke-linecap="round"/>'
       +'<path d="M25 56 L30.5 72 M39 56 L33.5 72" fill="none" stroke="#252E6D" stroke-width="2.4" stroke-linecap="round"/>'
       +'<rect x="29" y="69" width="6" height="5" rx="1.5" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.2"/></svg>');
     const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
     tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
-    wave.append(tag);
+    pin.append(tag);
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     const play=()=>playGreeting(wave);
