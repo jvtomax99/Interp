@@ -559,17 +559,26 @@
      hanging down while he tilts, bounces and wiggles (so it lags and swings
      the way a real one does), friction settles it, and a faint breeze keeps
      it alive. The two lanyard cords are redrawn every frame as soft curves
-     from his collar to the badge's clip, so they bend as it swings instead of
-     turning like a rigid hanger. Coordinates are the smiley button's (64px;
-     the neck pivot is 32,56; the clip sits 15px below it). Runs only while
-     Home's greeting is on screen; under Reduce Motion it hangs still. */
+     from behind his neck to the badge's clip, so they bend as it swings
+     instead of turning like a rigid hanger. The cords are drawn inside his
+     own drawing, between the coat and the face, so they start hidden behind
+     his head, come out under his chin and lie over the coat, the way a
+     lanyard sits around a neck; only the clip is drawn above, with the badge.
+     Coordinates are the smiley button's (64px; the neck pivot is 32,56; the
+     clip sits 15px below it). Runs only while Home's greeting is on screen;
+     under Reduce Motion it hangs still. */
   const askBadge=(()=>{
-    const P={x:32,y:56},A={x:25,y:56},B={x:39,y:56};
+    const f=n=>(Math.round(n*100)/100);
+    // A and B are behind his head, either side of the neck; the face hides
+    // the cords until they come out under his chin.
+    const P={x:32,y:56},A={x:23,y:47},B={x:41,y:47};
+    // Button px to the face drawing's units (viewBox 4 4 112 112 filling the
+    // 60px layer that sits at 2,2 in the button).
+    const SV=112/60,sx=x=>f((x-2)*SV+4),sy=y=>f((y-2)*SV+4);
     const K=42,C=3.2,G=.5;           // spring stiffness, friction, how much it hangs down when he tilts
-    const REST_LIMIT=10;             // swing limit in everyday motion: keeps the badge's corner clear of the quote
+    const REST_LIMIT=8;              // swing limit in everyday motion: keeps the badge's corner clear of the quote
     let btn=null,pin=null,tag=null,cords=[],clip=null,raf=0,last=0,theta=0,omega=0,t0=0,released=-1e9;
     const rot=(x,y,a)=>{const c=Math.cos(a),s=Math.sin(a);return{x:P.x+x*c-y*s,y:P.y+x*s+y*c};};
-    const f=n=>(Math.round(n*100)/100);
     // A soft limit: big swings are allowed right after the entrance and ease
     // down to REST_LIMIT within about a second, with no hard stop.
     function shown(now){
@@ -579,8 +588,9 @@
     let deg=0;
     function draw(){
       const theta=deg,a=theta*Math.PI/180,L=rot(-2.5,15,a),R=rot(2.5,15,a);
-      const cord=(S,E,side)=>`M${S.x} ${S.y} Q${f((S.x+E.x)/2+side*1.3)} ${f((S.y+E.y)/2+1.4)} ${f(E.x)} ${f(E.y)}`;
-      const d=cord(A,L,-1)+' '+cord(B,R,1);
+      // Each cord drops from behind the neck and curves in to the clip.
+      const cord=(S,E)=>`M${sx(S.x)} ${sy(S.y)} Q${sx(S.x+(E.x-S.x)*.15)} ${sy(S.y+(E.y-S.y)*.72)} ${sx(E.x)} ${sy(E.y)}`;
+      const d=cord(A,L)+' '+cord(B,R);
       for(const c of cords)c.setAttribute('d',d);
       if(clip)clip.setAttribute('transform',`rotate(${f(theta)} ${P.x} ${P.y})`);
       if(tag)tag.style.rotate=f(theta)+'deg';
@@ -613,7 +623,7 @@
       attach(button){
         btn=button;pin=button.querySelector('.home-wave-pin');tag=button.querySelector('.home-ask-tag');
         const lan=button.querySelector('.home-ask-lanyard');
-        cords=lan?[...lan.querySelectorAll('path')]:[];clip=lan?lan.querySelector('rect'):null;
+        cords=[...button.querySelectorAll('.home-face .hub-lanyard path')];clip=lan?lan.querySelector('rect'):null;
         t0=performance.now();theta=0;omega=0;deg=0;draw();
         if(raf){cancelAnimationFrame(raf);raf=0;}
         run();
@@ -649,9 +659,14 @@
     // and wiggle with him; the layer's pivot is his neck.
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);
+    // The cords go inside his drawing, just above the coat and under the
+    // face, so they read as around his neck; askBadge draws their path.
+    const coat=pin.querySelector('.home-face .hub-coat');
+    if(coat)coat.insertAdjacentHTML('afterend','<g class="hub-lanyard">'
+      +'<path fill="none" stroke="#1A1A1A" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<path fill="none" stroke="#2B3A8F" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round"/></g>');
+    // Only the clip sits above, with the badge.
     pin.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
-      +'<path d="M25 56 L29.5 71 M39 56 L34.5 71" fill="none" stroke="#1A1A1A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'<path d="M25 56 L29.5 71 M39 56 L34.5 71" fill="none" stroke="#2B3A8F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
       +'<rect x="29" y="69" width="6" height="5" rx="1.5" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.2"/></svg>');
     const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
     tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
