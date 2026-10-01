@@ -5145,17 +5145,15 @@ body.access-locked{ overflow:hidden; }
 .ask-head-text{ min-width:0; display:flex; flex-direction:column; gap:4px; }
 .ask-head h1{ margin:0; font-size:26px; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
 .ask-head p{ margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
-.ask-face{ width:56px; height:56px; flex:none; display:block; }
-.ask-face svg{ width:100%; height:100%; overflow:visible; filter:drop-shadow(0 4px 10px rgba(22,55,90,.22)); transition:transform .5s cubic-bezier(.3,1.5,.5,1); }
-.ask-face .af-calm{ transition:opacity .2s; }
-.ask-face .af-heart{ transform:scale(0); transform-box:fill-box; transform-origin:center; transition:transform .45s cubic-bezier(.3,1.7,.5,1) .08s; }
-.ask-face .af-smile{ opacity:0; transition:opacity .2s .05s; }
-.ask-face.is-thinking .af-calm{ animation:askGlance 1.1s ease-in-out infinite; }
-.ask-face.is-happy svg{ transform:scale(1.1) rotate(-4deg); }
-.ask-face.is-happy .af-calm{ opacity:0; }
-.ask-face.is-happy .af-heart{ transform:scale(1); }
-.ask-face.is-happy .af-smile{ opacity:1; }
-@keyframes askGlance{ 0%,100%{ transform:translateX(0); } 30%{ transform:translateX(-4px); } 70%{ transform:translateX(4px); } }
+.ask-mark{ width:56px; height:56px; flex:none; display:grid; place-items:center; border-radius:17px; background:#fff;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .45s cubic-bezier(.3,1.5,.5,1); }
+.ask-mark img{ width:70%; height:auto; display:block; }
+/* Thinking: the mark turns like the opening animation's logo. Found it: a little pop. */
+.ask-mark.is-thinking img{ animation:askTurn 1.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+.ask-mark.is-happy{ transform:scale(1.08); }
+@keyframes askTurn{ to{ transform:rotate(360deg); } }
+img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
   background:var(--navy); color:#fff; font:600 14px var(--sans); }
 .ask-review-pill:focus-visible, .ask-chip:focus-visible, .ask-acts button:focus-visible, .ask-src button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
@@ -5214,13 +5212,13 @@ body.access-locked{ overflow:hidden; }
 .card.ask-flash{ box-shadow:0 0 0 3px var(--accent-2), 0 8px 20px -12px rgba(22,55,90,0.22); transition:box-shadow .3s; }
 @media (max-width:900px){
   .ask-head{ gap:9px; margin-bottom:9px; }
-  .ask-face{ width:44px; height:44px; }
+  .ask-mark{ width:44px; height:44px; border-radius:14px; }
   .ask-head h1{ font-size:22px; }
   .ask-head p{ display:none; }
   .ask-review-pill{ margin-bottom:9px; }
 }
 @media (prefers-reduced-motion: reduce){
-  .ask-face svg, .ask-face .af-heart, .ask-face .af-calm{ transition:none; animation:none; }
+  .ask-mark, .ask-mark img{ transition:none; animation:none !important; }
   .ask-dots span{ animation:none; opacity:.6; }
 }
 </style>
@@ -9867,7 +9865,7 @@ function getToolTiles(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   return [
     // The team's assistant. The greeting smiley on Home opens it too.
-    { id:'ask',       name:'Ask the Hub',          color:'#4B5BC8', icon: DOMAIN_ICONS.sparkle, count: null, label: '' },
+    { id:'ask',       name:'Ask the Hub',          color:'#252E6D', icon: '<img class="tool-logo" src="./hmh-mark.png" alt="">', count: null, label: '' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: DOMAIN_ICONS.compass, count: GUIDE_TOPICS.length, label:'answers' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: DOMAIN_ICONS.calendar, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'ethics',    name:'Code of Ethics',       color:'#2F5D62', icon: DOMAIN_ICONS.shield, count: ETHICS_CONTENT.length, label: 'entries' },
@@ -15099,7 +15097,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .home-ask';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -15122,7 +15120,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1001.0956';
+const BUILD_ID = 'b1001.1018';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -15436,7 +15434,7 @@ function renderHome(){
           <h1 class="home-greeting-name${firstName.length > 10 ? ' is-long' : ''}">${firstName ? escapeHtml(firstName) : 'Welcome'}</h1>
           <button type="button" class="home-wave-icon" aria-label="Ask the Hub">${ICON_WAVE}</button>
         </div>
-        <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<cite>${escapeHtml(SESSION_QUOTE.author)}</cite></blockquote>
+        <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<span class="home-quote-foot"><cite>${escapeHtml(SESSION_QUOTE.author)}</cite><button type="button" class="home-ask" onclick="openAskHub()"><span class="home-ask-mark" aria-hidden="true"><img src="./hmh-mark.png" alt=""></span><span>Ask the Hub</span></button></span></blockquote>
         ${(!firstName || shouldShowOnboarding()) ? `<div class="home-greeting-actions">
           ${firstName ? '' : `<button type="button" class="home-greeting-btn" onclick="openNameModal()">${ICON_PERSON}<span>Add your name</span></button>`}
           ${shouldShowOnboarding() ? `<button type="button" class="home-greeting-btn" onclick="openOnboarding()">Take the tour</button>` : ''}
@@ -18389,14 +18387,6 @@ const ASK_STOP = new Set(('the a an and or of to in on for is are was be how do 
   + 'decir dice digo significa palabra término patient paciente').split(' ').map(w => foldText(w)));
 
 const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {} };
-let askFaceSeq = 0;
-
-// The greeting's face, with its own gradient ids so it can sit beside the
-// lock screen's copy without either losing its colour.
-function askFaceSvg(){
-  const n = ++askFaceSeq;
-  return ACCESS_FACE_SVG.replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n);
-}
 
 function askTokens(text){
   return foldText(String(text || '')).toLowerCase()
@@ -18507,7 +18497,7 @@ function renderAsk(){
   ASK.view = 'chat';
   return `
     <div class="ask-head">
-      <span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>
+      <span class="ask-mark" id="askFace" aria-hidden="true"><img src="./hmh-mark.png" alt=""></span>
       <div class="ask-head-text"><h1>Ask the Hub</h1>
         <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p></div>
     </div>
@@ -18750,7 +18740,7 @@ function renderAskReview(){
   const when = ms => ms ? new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
   return `
     <div class="ask-head">
-      <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
+      <span class="ask-mark" aria-hidden="true"><img src="./hmh-mark.png" alt=""></span>
       <div class="ask-head-text"><h1>Lessons to review</h1><p>Corrections teammates sent from Ask the Hub. Nothing reaches anyone until you approve it.</p></div>
     </div>
     <button type="button" class="btn btn-ghost ask-back" onclick="ASK.view='chat'; renderContent()">← Back to Ask the Hub</button>

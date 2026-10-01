@@ -719,3 +719,33 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    AFTER it to win -- which is why it lives at the end of this file. It only
    touches border-style; the press glow and lift are left alone. */
 .home-section-grid>.home-section-add{border-style:dashed;}
+
+/* ---------- Ask the Hub pill on the greeting's author line ----------
+   Right end of the quote's author line: that line is always short, and it is
+   clear of the name, the smiley and the thought cloud. If an author's name
+   ever needs the room, the pill wraps onto a line of its own instead of
+   covering anything. Its negative margins let the 44px tap target reach into
+   the card's empty bottom padding, so the card, the search bar and
+   everything under them stay exactly where they were. Opens Ask the Hub
+   (index.html, openAskHub). */
+#content.is-home .home-quote-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 13px;margin-top:9px;}
+#content.is-home .home-quote-foot cite{margin-top:0;}
+#content.is-home .home-ask{
+  display:inline-flex;align-items:center;gap:9px;min-height:44px;margin:0 0 -26px auto;padding:0 17px 0 6px;
+  border-radius:999px;border:1px solid rgba(255,255,255,.36);background:rgba(255,255,255,.16);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);
+  color:#fff;font:600 14px/1 var(--sans);font-style:normal;letter-spacing:-.01em;text-shadow:0 1px 2px rgba(10,22,52,.35);
+  box-shadow:0 8px 20px -12px rgba(8,20,48,.7);cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform .16s var(--ease),background .2s;
+}
+#content.is-home .home-ask-mark{width:32px;height:32px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(20,43,67,.25);}
+#content.is-home .home-ask-mark img{width:21px;height:auto;display:block;}
+/* One soft shine across the mark once the greeting has settled. */
+#content.is-home .home-ask-mark::after{content:"";position:absolute;inset:-20%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.9) 50%,transparent 65%);transform:translateX(-120%);animation:homeAskShine 1.4s var(--ease) 9.6s 1 both;pointer-events:none;}
+@keyframes homeAskShine{to{transform:translateX(120%);}}
+#content.is-home .home-ask:active,#content.is-home .home-ask.is-pressed{transform:scale(.96);background:rgba(255,255,255,.24);}
+#content.is-home .home-ask:focus-visible{outline:2px solid #d8f9ff;outline-offset:3px;}
+@media (prefers-reduced-motion:reduce){
+  #content.is-home .home-ask-mark::after{animation:none;display:none;}
+  #content.is-home .home-ask{transition:none;}
+}
