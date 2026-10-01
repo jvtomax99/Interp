@@ -124,6 +124,27 @@ service cloud.firestore {
       return !('who' in d) || (d.who is string && d.who.size() <= 60);
     }
 
+    // ---- Ask the Hub ----
+    // Corrections teammates send from Ask the Hub. Anyone on the team can
+    // suggest one; only the owner can approve, edit, decline or retire it,
+    // and only approved notes are sent along with questions.
+    match /hub-lessons/{id} {
+      allow read: if team();
+      allow create: if team() && validLesson() && request.resource.data.status == 'pending'
+        && !('reviewedBy' in request.resource.data) && !('reviewedAt' in request.resource.data);
+      allow update: if isOwner() && validLesson();
+      allow delete: if isOwner();
+    }
+    function validLesson() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['question', 'headline', 'termIds', 'note', 'status', 'suggestedBy',
+                               'suggestedAt', 'reviewedBy', 'reviewedAt'])
+        && d.note is string && d.note.size() > 0 && d.note.size() <= 1000
+        && d.question is string && d.question.size() <= 500
+        && d.status in ['pending', 'approved', 'declined', 'retired']
+        && (!('termIds' in d) || (d.termIds is list && d.termIds.size() <= 20));
+    }
+
     // ---- Glossary ----
     match /terms/{docId}               { allow read, write: if team(); }
     match /terminology-meta/{docId}    { allow read, write: if team(); }

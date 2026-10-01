@@ -31,6 +31,7 @@ between assignments.
 | `api/check-events.js` | 224 | Cron job watching CE/training events |
 | `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
+| `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
 | `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png`, `pin-icons*.webp` | — | Image assets |
 
@@ -124,7 +125,15 @@ healthcare-providers/   doctor-directory/  doctor-research-cache/
 ce-events/  announcements/  practice-questions/  quiz-history/
 activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
+hub-lessons/{id}                                                     <-- Ask the Hub team notes
 ```
+
+**Ask the Hub.** The phone picks up to 24 matching entries (glossary, False
+Friends, Doctor Directory, providers, Code of Ethics, User Guide) with
+`askRetrieve()` and sends them, plus approved `hub-lessons`, to `api/ask.js`.
+The model never changes; "learning" is teammates' corrections (status
+`pending`) that the owner approves on the review view. Tapping the greeting
+smiley opens it (`window.openAskHub`, called from `home-polish.js`).
 
 **Team access (one team code).** Everyone types the same team code
 (`hub-invites/{CODE}`, kind `team`); the owner shares it and can change it on

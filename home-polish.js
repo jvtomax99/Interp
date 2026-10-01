@@ -553,7 +553,14 @@
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     const play=()=>playGreeting(wave);
-    wave.addEventListener('click',play);
+    // Tapping the smiley opens Ask the Hub (index.html, window.openAskHub).
+    // The hello still plays by itself when the app opens; if Ask the Hub is
+    // missing, a tap replays the hello as it always did.
+    wave.addEventListener('click',()=>{
+      if(typeof window.openAskHub!=='function'){play();return;}
+      wave.classList.add('home-wave-tap');
+      setTimeout(()=>{wave.classList.remove('home-wave-tap');window.openAskHub();},reduced.matches?0:200);
+    });
     lastGreetingWave={el:wave,play};
     // Wait for startup rebuilds to settle. If already playing, keep the
     // original clock and message rather than restarting the logo and hand.

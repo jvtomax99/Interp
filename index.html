@@ -5139,6 +5139,90 @@ body.access-locked{ overflow:hidden; }
   .access-lock, .access-face svg, .access-face .af-heart, .access-go, .ta-switch, .ta-switch::after{ transition:none; }
   .access-code.is-shaking{ animation:none; }
 }
+
+/* ---------- Ask the Hub ---------- */
+.ask-head{ display:flex; align-items:center; gap:13px; margin:0 2px 13px; }
+.ask-head-text{ min-width:0; display:flex; flex-direction:column; gap:4px; }
+.ask-head h1{ margin:0; font-size:26px; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
+.ask-head p{ margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+.ask-face{ width:56px; height:56px; flex:none; display:block; }
+.ask-face svg{ width:100%; height:100%; overflow:visible; filter:drop-shadow(0 4px 10px rgba(22,55,90,.22)); transition:transform .5s cubic-bezier(.3,1.5,.5,1); }
+.ask-face .af-calm{ transition:opacity .2s; }
+.ask-face .af-heart{ transform:scale(0); transform-box:fill-box; transform-origin:center; transition:transform .45s cubic-bezier(.3,1.7,.5,1) .08s; }
+.ask-face .af-smile{ opacity:0; transition:opacity .2s .05s; }
+.ask-face.is-thinking .af-calm{ animation:askGlance 1.1s ease-in-out infinite; }
+.ask-face.is-happy svg{ transform:scale(1.1) rotate(-4deg); }
+.ask-face.is-happy .af-calm{ opacity:0; }
+.ask-face.is-happy .af-heart{ transform:scale(1); }
+.ask-face.is-happy .af-smile{ opacity:1; }
+@keyframes askGlance{ 0%,100%{ transform:translateX(0); } 30%{ transform:translateX(-4px); } 70%{ transform:translateX(4px); } }
+.ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
+  background:var(--navy); color:#fff; font:600 14px var(--sans); }
+.ask-review-pill:focus-visible, .ask-chip:focus-visible, .ask-acts button:focus-visible, .ask-src button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.ask-back{ margin:0 2px 13px; min-height:44px; }
+.ask-panel{ height:62vh; min-height:0; max-height:none; }
+.ask-messages{ display:flex; flex-direction:column; gap:9px; }
+.ask-hello{ margin:auto 0; display:flex; flex-direction:column; gap:9px; padding:13px 2px; }
+.ask-hello p{ margin:0; font-size:14px; color:var(--ink-soft); line-height:1.45; }
+.ask-hello .ask-hello-title{ font-size:17px; font-weight:650; color:var(--ink); letter-spacing:-.02em; }
+.ask-chips{ display:flex; flex-direction:column; gap:6px; }
+.ask-chip{ min-height:44px; padding:9px 13px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--paper);
+  color:var(--ink); font:500 14px/1.35 var(--sans); text-align:left; cursor:pointer; }
+.ask-chip:active, .ask-chip.is-pressed{ transform:scale(.98); }
+.ask-q{ align-self:flex-end; max-width:85%; background:var(--navy); color:#fff; border-radius:17px 17px 6px 17px; padding:9px 13px;
+  font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
+.ask-dots{ align-self:flex-start; display:flex; gap:4px; padding:13px; background:var(--paper); border:1px solid var(--line); border-radius:17px; }
+.ask-dots span{ width:7px; height:7px; border-radius:50%; background:var(--ink-faint); animation:askBlink 1s infinite; }
+.ask-dots span:nth-child(2){ animation-delay:.15s; } .ask-dots span:nth-child(3){ animation-delay:.3s; }
+@keyframes askBlink{ 0%,100%{ opacity:.3; } 50%{ opacity:1; } }
+.ask-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:13px; display:flex; flex-direction:column; gap:9px;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.ask-card p{ margin:0; }
+.ask-tag{ align-self:flex-start; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--good);
+  background:var(--good-soft); border-radius:7px; padding:3px 8px; }
+.ask-tag.is-off{ color:#8A5A0E; background:#FBF1DF; }
+.ask-headline{ font-size:19px; font-weight:650; letter-spacing:-.025em; line-height:1.25; color:var(--ink); overflow-wrap:anywhere; }
+.ask-lab{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 2px; display:block; }
+.ask-say{ font:italic 400 16px/1.45 var(--serif); color:var(--ink); }
+.ask-details{ font-size:14px; line-height:1.45; color:var(--ink-soft); }
+.ask-check{ font-size:13px; }
+.ask-note{ background:var(--good-soft); border-radius:var(--r-md); padding:9px 13px; display:flex; flex-direction:column; gap:2px; }
+.ask-note p{ font-size:14px; line-height:1.45; color:var(--ink); }
+.ask-note .ask-lab{ color:var(--good); }
+.ask-note small{ font-size:12px; color:var(--ink-soft); }
+.ask-src{ display:flex; flex-wrap:wrap; gap:6px; }
+.ask-src button{ min-height:32px; padding:4px 11px; border-radius:999px; border:0; background:var(--accent-soft); color:var(--ink);
+  font:600 12px var(--sans); cursor:pointer; text-align:left; }
+.ask-acts{ display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid var(--line-soft); padding-top:9px; }
+.ask-acts button{ flex:1 1 auto; min-height:44px; padding:0 13px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--bg-hi);
+  color:var(--ink); font:600 14px var(--sans); cursor:pointer; white-space:nowrap; }
+.ask-acts button.is-on{ background:var(--good-soft); border-color:transparent; color:var(--good); }
+.ask-acts button.is-go{ background:var(--navy); border-color:var(--navy); color:#fff; }
+.ask-acts button:active, .ask-acts button.is-pressed, .ask-src button:active{ transform:scale(.97); }
+.ask-warn{ border-color:#EBD3A6; }
+.ask-fix{ display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--line-soft); padding-top:9px; }
+.ask-fix textarea{ width:100%; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi); padding:9px 13px;
+  font:500 16px/1.4 var(--sans); color:var(--ink); resize:vertical; }
+.ask-fix textarea:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 3px var(--accent-soft); }
+.ask-sent{ font-size:14px; color:var(--good); border-top:1px solid var(--line-soft); padding-top:9px; }
+.ask-lesson{ display:flex; flex-direction:column; gap:6px; padding:13px 0; border-top:1px solid var(--line-soft); }
+.ask-lesson:first-of-type{ border-top:0; padding-top:4px; }
+.ask-lesson p{ margin:0; }
+.ask-lesson-q{ font-size:14px; font-weight:600; color:var(--ink); }
+.ask-lesson-a, .ask-lesson-by{ font-size:13px; color:var(--ink-soft); }
+.ask-lesson-edit{ height:auto; min-height:84px; padding:9px 13px; line-height:1.4; resize:vertical; }
+.card.ask-flash{ box-shadow:0 0 0 3px var(--accent-2), 0 8px 20px -12px rgba(22,55,90,0.22); transition:box-shadow .3s; }
+@media (max-width:900px){
+  .ask-head{ gap:9px; margin-bottom:9px; }
+  .ask-face{ width:44px; height:44px; }
+  .ask-head h1{ font-size:22px; }
+  .ask-head p{ display:none; }
+  .ask-review-pill{ margin-bottom:9px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .ask-face svg, .ask-face .af-heart, .ask-face .af-calm{ transition:none; animation:none; }
+  .ask-dots span{ animation:none; opacity:.6; }
+}
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -9782,6 +9866,8 @@ function getDomainTiles(){
 function getToolTiles(){
   const totalLinks = DATA.categories.reduce((n,c)=>n + c.terms.filter(t=>t.url || t.en || t.es).length, 0);
   return [
+    // The team's assistant. The greeting smiley on Home opens it too.
+    { id:'ask',       name:'Ask the Hub',          color:'#4B5BC8', icon: DOMAIN_ICONS.sparkle, count: null, label: '' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: DOMAIN_ICONS.compass, count: GUIDE_TOPICS.length, label:'answers' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: DOMAIN_ICONS.calendar, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'ethics',    name:'Code of Ethics',       color:'#2F5D62', icon: DOMAIN_ICONS.shield, count: ETHICS_CONTENT.length, label: 'entries' },
@@ -12134,6 +12220,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'team-access'){
     showTopbar = false;
+  } else if(activeCategory === 'ask'){
+    showTopbar = false;
   }
 
   // Glossary screens (one domain, or All domains) get the colored banner:
@@ -12681,6 +12769,14 @@ function renderContent(){
     return;
   }
 
+  if(activeCategory === 'ask'){
+    content.innerHTML = renderAsk();
+    fitAskPanel();
+    const box = document.getElementById('askMessages');
+    if(box) box.scrollTop = box.scrollHeight;
+    return;
+  }
+
   if(activeCategory === 'doctors'){
     content.innerHTML = renderDoctorsHub();
     return;
@@ -12892,7 +12988,7 @@ function renderContent(){
       const termAttachments = attachmentsByTerm.get(t.id) || EMPTY_ATTACHMENTS;
       const delay = Math.min(cardIdx * 0.03, 0.3);
       html += `
-        <div class="card" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;">
+        <div class="card" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;">
           <div class="card-top">
             <span class="tag" style="--tag-color:${cat.color};">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._num).padStart(2,'0')}</span>
@@ -15026,7 +15122,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b0930.2131';
+const BUILD_ID = 'b1001.0956';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -15338,7 +15434,7 @@ function renderHome(){
         </div>
         <div class="home-greeting-name-row">
           <h1 class="home-greeting-name${firstName.length > 10 ? ' is-long' : ''}">${firstName ? escapeHtml(firstName) : 'Welcome'}</h1>
-          <button type="button" class="home-wave-icon" aria-label="Say hello again">${ICON_WAVE}</button>
+          <button type="button" class="home-wave-icon" aria-label="Ask the Hub">${ICON_WAVE}</button>
         </div>
         <blockquote class="home-greeting-quote">${escapeHtml(SESSION_QUOTE.text)}<cite>${escapeHtml(SESSION_QUOTE.author)}</cite></blockquote>
         ${(!firstName || shouldShowOnboarding()) ? `<div class="home-greeting-actions">
@@ -17991,7 +18087,7 @@ async function accessBoot(){
 /* ---- Owner: claiming the Hub (once) ---- */
 async function claimHubOwnership(){
   const nameEl = document.getElementById('taOwnerName');
-  const name = ((nameEl && nameEl.value) || whoAmI() || '').trim().slice(0, 60);
+  const name = ((nameEl && nameEl.value) || TEAM_ACCESS.ownerDraft || whoAmI() || '').trim().slice(0, 60);
   if(!name){ showToast('Type your name first.'); if(nameEl) nameEl.focus(); return; }
   if(!hubAuth || !db){ showToast("Sign-in didn't load. Reload the app and try again."); return; }
   TEAM_ACCESS.busy = true; renderContent();
@@ -18090,7 +18186,7 @@ function renderTeamAccess(){
           <p>You become the owner: you share one code with the team and can change it any time. Nothing locks yet. The Hub starts in practice mode, and you lock it when everyone has the code.</p>
           <p>Before this works, Anonymous sign-in has to be on in Firebase and the new rules published.</p>
           <label class="ta-label" for="taOwnerName">Your name</label>
-          <input class="ta-field" id="taOwnerName" type="text" autocomplete="name" value="${escapeAttr(whoAmI())}" placeholder="Your name">
+          <input class="ta-field" id="taOwnerName" type="text" autocomplete="name" value="${escapeAttr(TEAM_ACCESS.ownerDraft != null ? TEAM_ACCESS.ownerDraft : whoAmI())}" placeholder="Your name" oninput="TEAM_ACCESS.ownerDraft=this.value">
           <div class="ta-row2"><button class="btn btn-primary" onclick="claimHubOwnership()" ${TEAM_ACCESS.busy ? 'disabled' : ''}>${TEAM_ACCESS.busy ? 'Setting up…' : 'Become the owner'}</button></div>
         </div>`;
     }
@@ -18177,7 +18273,16 @@ function renderTeamAccess(){
       </div>`;
   }).join('');
 
-  return head + status + codeCard + `
+  startAskLessons();
+  const waiting = askPendingLessons().length;
+  const lessonsCard = `
+    <div class="ta-card">
+      <span class="ta-label">Ask the Hub</span>
+      <p>${waiting ? `<b>${waiting} ${waiting === 1 ? 'correction is' : 'corrections are'}</b> waiting for you.` : 'No corrections waiting.'} Teammates send these with Correct this, and nobody sees them until you approve.</p>
+      <div class="ta-row2"><button class="btn btn-ghost" onclick="ASK.view='review'; setCategory('ask')">Review lessons</button></div>
+    </div>`;
+
+  return head + status + codeCard + lessonsCard + `
     <div class="ta-card">
       <span class="ta-label">${phones.length} ${phones.length === 1 ? 'phone' : 'phones'} signed in</span>
       <div class="ta-people">${rows}</div>
@@ -18259,6 +18364,454 @@ function syncAccessWho(){
   if(!me || !me.member || !user || !db) return;
   db.collection('hub-members').doc(user.uid).update({ who: accessWho(), lastSeen: Date.now() }).catch(()=>{});
 }
+
+/* ============ Ask the Hub ============
+   The team's assistant. The phone picks the Hub entries that match a question
+   (glossary, False Friends, Doctor Directory, providers, Code of Ethics, User
+   Guide) plus any approved team notes, and api/ask.js asks Claude to answer
+   from them. "Correct this" saves a suggestion to hub-lessons/ as pending;
+   the owner approves it on the review view, and from then on it travels with
+   every question it matches. That is the whole of the "learning": the
+   model never changes, the team's notes do.
+
+     hub-lessons/{id}  { question, headline, termIds, note, status,
+                         suggestedBy, suggestedAt, reviewedBy, reviewedAt }
+                       status: pending | approved | declined | retired
+
+   No patient information: askLooksLikePatientInfo() stops a question that
+   looks like it carries a name with a date of birth or a record number and
+   asks first. */
+const ASK_MAX_ENTRIES = 24;
+const ASK_MAX_LESSONS = 6;
+const ASK_STOP = new Set(('the a an and or of to in on for is are was be how do does what which who where when why can could should would '
+  + 'i you we they it this that with at by from my our your me us say said tell explain mean means meaning word words term '
+  + 'el la los las un una unos unas y o de del al en por para con como que qué cómo cual cuál es son se lo le les mi su sus '
+  + 'decir dice digo significa palabra término patient paciente').split(' ').map(w => foldText(w)));
+
+const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {} };
+let askFaceSeq = 0;
+
+// The greeting's face, with its own gradient ids so it can sit beside the
+// lock screen's copy without either losing its colour.
+function askFaceSvg(){
+  const n = ++askFaceSeq;
+  return ACCESS_FACE_SVG.replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n);
+}
+
+function askTokens(text){
+  return foldText(String(text || '')).toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(w => w && (w.length >= 3 || /\d/.test(w)) && !ASK_STOP.has(w));
+}
+
+function stripTags(html){
+  return String(html || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Everything the assistant may draw on, as small flat entries. Built per
+// question: a couple of thousand short records, folded once and cached by
+// foldText, is a few milliseconds.
+function askCorpus(){
+  const docs = [];
+  const add = (entry, label, strong, weak, go) => docs.push({ entry, label, strong: strong.filter(Boolean).join(' • '), weak: weak.filter(Boolean).join(' • '), go });
+  (DATA && DATA.categories || []).forEach(c => (c.terms || []).forEach(t => {
+    if(!t.en && !t.es) return;
+    add({ id: 't:' + t.id, type: 'Glossary term', domain: c.name, en: t.en || '', es: t.es || '', definition: t.def || '', notes: t.notes || '' },
+      `Glossary · ${t.en || t.es}`, [t.en, t.es], [t.def, t.notes, c.name], { cat: c.id, term: t.id });
+  }));
+  (typeof FALSE_FRIENDS !== 'undefined' ? FALSE_FRIENDS : []).forEach((f, i) => add(
+    { id: 'ff:' + i, type: 'False friend', spanish: f.es, looksLike: f.looks, means: f.means, sayInstead: f.say, note: f.note },
+    `False Friends · ${f.es}`, [f.es, f.looks], [f.means, f.say, f.note, f.heard], { cat: 'falsefriends' }));
+  (DOCTOR_DIRECTORY || []).forEach(d => add(
+    { id: 'dr:' + d.id, type: 'Doctor Directory', name: d.name, specialty: d.specialty, location: d.hospitalLocation, locationDetails: d.locationDetails, notes: d.notes },
+    `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, d.notes], { cat: 'doctor-directory' }));
+  (PROVIDERS || []).forEach(p => add(
+    { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: p.facility, notes: p.notes },
+    `Providers · ${p.name}`, [p.name], [p.role, p.facility, p.notes], { cat: 'providers' }));
+  (typeof ETHICS_CONTENT !== 'undefined' ? ETHICS_CONTENT : []).forEach(e => add(
+    { id: 'eth:' + e.id, type: 'Code of Ethics', title: e.title, summary: stripTags(e.summary), inPractice: stripTags(e.practice), source: e.org },
+    `Code of Ethics · ${e.title}`, [e.title], [stripTags(e.summary), stripTags(e.practice), e.tag], { cat: 'ethics' }));
+  (typeof GUIDE_TOPICS !== 'undefined' ? GUIDE_TOPICS : []).forEach(g => add(
+    { id: 'g:' + g.id, type: 'User Guide', question: stripTags(g.q), answer: stripTags(g.a) },
+    `User Guide · ${stripTags(g.q)}`, [stripTags(g.q), g.k], [stripTags(g.a)], { guide: g.id }));
+  return docs;
+}
+
+// Picks the entries worth sending: a word in a term's own name counts most,
+// the whole term appearing in the question counts more, a word in a
+// definition counts a little.
+function askRetrieve(question){
+  const tokens = [...new Set(askTokens(question))];
+  const folded = foldText(question).toLowerCase();
+  const docs = askCorpus();
+  const scored = [];
+  const whole = tokens.map(tok => ({ tok, re: new RegExp('(^|[^a-z0-9])' + tok + '([^a-z0-9]|$)') }));
+  for(const d of docs){
+    const strong = foldText(d.strong).toLowerCase();
+    const weak = foldText(d.weak).toLowerCase();
+    let score = 0;
+    for(const { tok, re } of whole){
+      if(re.test(strong)) score += 4;
+      else if(strong.includes(tok)) score += 2;
+      else if(weak.includes(tok)) score += 1;
+    }
+    for(const name of d.strong.split(' • ')){
+      const n = foldText(name).toLowerCase().trim();
+      if(n.length >= 4 && folded.includes(n)) score += 10;
+    }
+    if(score >= 2) scored.push({ d, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  const picked = scored.slice(0, ASK_MAX_ENTRIES).map(s => s.d);
+  const pickedIds = new Set(picked.map(d => d.entry.id));
+  const lessons = ASK.lessons.filter(l => l.status === 'approved').map(l => {
+    let s = (l.termIds || []).some(id => pickedIds.has(id)) ? 5 : 0;
+    const lt = new Set(askTokens(l.question + ' ' + (l.headline || '')));
+    s += tokens.filter(t => lt.has(t)).length * 2;
+    return { l, s };
+  }).filter(x => x.s >= 4).sort((a, b) => b.s - a.s).slice(0, ASK_MAX_LESSONS).map(x => x.l);
+  return { picked, lessons };
+}
+
+function askLooksLikePatientInfo(q){
+  const s = String(q || '');
+  return /\b(mrn|dob|d\.o\.b|date of birth|fecha de nacimiento|social security|ssn|medical record|record number|n[uú]mero de expediente)\b/i.test(s)
+    || /\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b/.test(s)
+    || /\b\d{6,}\b/.test(s)
+    || /\b(patient|paciente)\s+(named|called|llamad[oa]|se llama)\b/i.test(s)
+    || (/\b(mr|mrs|ms|miss|sr|sra|srta)\.?\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+/.test(s) && /\b(patient|paciente|room|cuarto|bed|cama|chart)\b/i.test(s));
+}
+
+function startAskLessons(){
+  if(ASK.lessonsStarted || !db) return;
+  ASK.lessonsStarted = true;
+  hubAuthReady.then(() => {
+    db.collection('hub-lessons').onSnapshot(snap => {
+      ASK.lessonsBlocked = false;
+      ASK.lessons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if(activeCategory === 'ask') refreshAskChrome();
+      if(activeCategory === 'team-access') renderContent();
+    }, err => {
+      ASK.lessonsBlocked = err && err.code === 'permission-denied';
+      ASK.lessonsStarted = false;
+    });
+  });
+}
+function askPendingLessons(){ return ASK.lessons.filter(l => l.status === 'pending'); }
+function askOwnerFirst(){ return accessOwnerFirst() || 'the team lead'; }
+
+/* ---- Rendering ---- */
+function renderAsk(){
+  startAskLessons();
+  if(ASK.view === 'review' && isHubOwner()) return renderAskReview();
+  ASK.view = 'chat';
+  return `
+    <div class="ask-head">
+      <span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>
+      <div class="ask-head-text"><h1>Ask the Hub</h1>
+        <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p></div>
+    </div>
+    <div id="askChrome">${askChromeHtml()}</div>
+    <div class="hipaa-notice-inline">${ICON_SHIELD}<span>No patient names, dates of birth or record numbers here.</span></div>
+    <div class="chat-panel ask-panel">
+      <div class="chat-messages ask-messages" id="askMessages" aria-live="polite">${askMessagesHtml()}</div>
+      <div class="chat-input-wrap"><div class="chat-input-row">
+        <label for="askInput" class="sr-only">Ask a question</label>
+        <input id="askInput" type="text" enterkeyhint="send" autocomplete="off" maxlength="500"
+          placeholder="Ask about a term or a doctor" value="${escapeAttr(ASK.draft)}"
+          oninput="ASK.draft=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitAsk();}">
+        <button class="chat-send-btn" type="button" onclick="submitAsk()" aria-label="Ask">${ICON_SEND}</button>
+      </div></div>
+    </div>`;
+}
+
+function askChromeHtml(){
+  if(!isHubOwner()) return '';
+  const n = askPendingLessons().length;
+  return n ? `<button type="button" class="ask-review-pill" onclick="ASK.view='review'; renderContent()">${n} ${n === 1 ? 'lesson' : 'lessons'} to review →</button>` : '';
+}
+function refreshAskChrome(){
+  if(ASK.view === 'review'){ renderContent(); return; }
+  const el = document.getElementById('askChrome');
+  if(el) el.innerHTML = askChromeHtml();
+}
+
+function askMessagesHtml(){
+  if(!ASK.turns.length && !ASK.phi){
+    const ex = ['How do I explain “ejection fraction” to a patient?', '“Embarazada” or “embarrassed”?', 'Can I accept a gift from a patient?'];
+    return `<div class="ask-hello">
+      <p class="ask-hello-title">Hi! What do you need?</p>
+      <p>I answer from the Hub first and tell you when something isn't in it.</p>
+      <div class="ask-chips">${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
+    </div>`;
+  }
+  return ASK.turns.map(askTurnHtml).join('') + (ASK.phi ? `
+    <div class="ask-card ask-warn" role="alert">
+      <p class="ask-headline">Check for patient details first</p>
+      <p class="ask-details">This question looks like it may include a patient's name, date of birth or record number. Ask about the term or situation without them.</p>
+      <div class="ask-acts"><button type="button" onclick="askEditPhi()">Edit my question</button><button type="button" onclick="askSendAnyway()">It's fine, ask</button></div>
+    </div>` : '');
+}
+
+function askTurnHtml(t){
+  const q = `<div class="ask-q">${escapeHtml(t.q)}</div>`;
+  if(t.status === 'loading') return q + `<div class="ask-dots" aria-label="Looking it up"><span></span><span></span><span></span></div>`;
+  if(t.status === 'error' || t.status === 'refused') return q + `
+    <div class="ask-card ask-warn">
+      <p class="ask-details">${escapeHtml(t.status === 'refused' ? "I can't help with that one. Try asking it a different way." : t.error)}</p>
+      <div class="ask-acts"><button type="button" onclick="askRetry('${t.id}')">Try again</button></div>
+    </div>`;
+  const a = t.answer;
+  const notes = (a.lessonIds || []).map(id => ASK.lessons.find(l => l.id === id)).filter(Boolean);
+  const sources = (a.sourceIds || []).map(id => t.labels[id] ? { id, label: t.labels[id] } : null).filter(Boolean);
+  const canAdd = !a.fromHub && a.suggestTerm && a.suggestTerm.en;
+  return q + `
+    <div class="ask-card" id="ask-${t.id}">
+      <span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>
+      <p class="ask-headline">${escapeHtml(a.headline)}</p>
+      ${a.say ? `<div><p class="ask-lab">${escapeHtml(a.sayLabel || 'Say')}</p><p class="ask-say">${escapeHtml(a.say)}</p></div>` : ''}
+      ${notes.map(n => `<div class="ask-note"><p class="ask-lab">Team note</p><p>${escapeHtml(n.note)}</p>
+        <small>${n.suggestedBy ? 'Suggested by ' + escapeHtml(n.suggestedBy) + ' · ' : ''}approved by ${escapeHtml(n.reviewedBy || askOwnerFirst())}</small></div>`).join('')}
+      ${a.details ? `<p class="ask-details">${escapeHtml(a.details)}</p>` : ''}
+      ${a.fromHub ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
+      ${sources.length ? `<div class="ask-src">${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${escapeAttr(s.id)}')">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
+      ${t.fixOpen ? `
+        <div class="ask-fix">
+          <label class="ask-lab" for="askFix-${t.id}">What works better?</label>
+          <textarea id="askFix-${t.id}" rows="3" maxlength="1000" oninput="askDraftFix('${t.id}', this.value)" placeholder="For example: many of our patients understand … better. Say that first.">${escapeHtml(t.fixDraft || '')}</textarea>
+          <p class="ask-details">Your note goes to ${escapeHtml(askOwnerFirst())}. Nothing changes until it's approved.</p>
+          <div class="ask-acts"><button type="button" onclick="askToggleFix('${t.id}', false)">Cancel</button><button type="button" class="is-go" onclick="askSendFix('${t.id}')">Send</button></div>
+        </div>` : t.fixSent ? `<p class="ask-sent">Thanks! ${escapeHtml(askOwnerFirst())} will review your note.</p>` : `
+        <div class="ask-acts">
+          <button type="button" class="${t.helpful ? 'is-on' : ''}" onclick="askHelpful('${t.id}')">${t.helpful ? 'Thanks!' : 'Helpful'}</button>
+          ${canAdd ? `<button type="button" onclick="askAddTerm('${t.id}')">Add to glossary</button>` : ''}
+          <button type="button" onclick="askToggleFix('${t.id}', true)">Correct this</button>
+        </div>`}
+    </div>`;
+}
+
+function renderAskMessages(scrollToEnd){
+  const box = document.getElementById('askMessages');
+  if(!box) return;
+  box.innerHTML = askMessagesHtml();
+  if(scrollToEnd) box.scrollTop = box.scrollHeight;
+  const face = document.getElementById('askFace');
+  if(face){
+    face.classList.toggle('is-thinking', ASK.busy);
+    const last = ASK.turns[ASK.turns.length - 1];
+    const happy = !ASK.busy && last && last.status === 'done' && last.answer.fromHub;
+    face.classList.toggle('is-happy', !!happy);
+    clearTimeout(face._h);
+    if(happy) face._h = setTimeout(() => face.classList.remove('is-happy'), 2600);
+  }
+}
+
+/* ---- Asking ---- */
+async function submitAsk(preset, force){
+  const input = document.getElementById('askInput');
+  const q = String(preset != null ? preset : (input ? input.value : ASK.draft)).trim().slice(0, 500);
+  if(!q || ASK.busy) return;
+  if(!force && askLooksLikePatientInfo(q)){
+    ASK.phi = q;
+    renderAskMessages(true);
+    return;
+  }
+  ASK.phi = null;
+  ASK.draft = '';
+  if(input) input.value = '';
+  const { picked, lessons } = askRetrieve(q);
+  const labels = {};
+  picked.forEach(d => { labels[d.entry.id] = d.label; });
+  const turn = { id: 'q' + Date.now().toString(36), q, status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])) };
+  const history = ASK.turns.filter(x => x.status === 'done').slice(-3)
+    .map(x => ({ q: x.q, a: [x.answer.headline, x.answer.say].filter(Boolean).join(' — ') }));
+  ASK.turns.push(turn);
+  ASK.busy = true;
+  renderAskMessages(true);
+  try{
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(await hubAuthHeaders()) },
+      body: JSON.stringify({
+        question: q,
+        entries: picked.map(d => d.entry),
+        lessons: lessons.map(l => ({ id: l.id, about: l.question, note: l.note })),
+        history
+      })
+    });
+    if(res.status === 401){ turn.status = 'error'; turn.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
+    else if(res.status === 503){ turn.status = 'error'; turn.error = "Ask the Hub isn't switched on yet: the AI key is missing on the server."; }
+    else if(!res.ok){ turn.status = 'error'; turn.error = "Couldn't get an answer just now. Try again in a moment."; }
+    else{
+      const data = await res.json();
+      if(data.refused) turn.status = 'refused';
+      else if(data.answer && data.answer.headline){ turn.status = 'done'; turn.answer = data.answer; }
+      else{ turn.status = 'error'; turn.error = "Couldn't read the answer. Try again."; }
+    }
+  }catch(err){
+    turn.status = 'error';
+    turn.error = navigator.onLine === false ? "You're offline. Ask the Hub needs a connection." : "Couldn't reach the Hub. Try again.";
+  }
+  ASK.busy = false;
+  if(activeCategory === 'ask') renderAskMessages(true);
+}
+
+function askRetry(id){
+  const i = ASK.turns.findIndex(t => t.id === id);
+  if(i < 0) return;
+  const q = ASK.turns[i].q;
+  ASK.turns.splice(i, 1);
+  submitAsk(q, true);
+}
+function askEditPhi(){
+  const q = ASK.phi; ASK.phi = null; ASK.draft = q || '';
+  renderAskMessages(true);
+  const input = document.getElementById('askInput');
+  if(input){ input.value = ASK.draft; input.focus(); }
+}
+function askSendAnyway(){ const q = ASK.phi; ASK.phi = null; submitAsk(q, true); }
+
+// Typed text lives in state, so a redraw from incoming data can't wipe it.
+function askDraftFix(id, value){ const t = ASK.turns.find(x => x.id === id); if(t) t.fixDraft = value; }
+function askHelpful(id){
+  const t = ASK.turns.find(x => x.id === id);
+  if(t){ t.helpful = true; renderAskMessages(false); }
+}
+
+function askToggleFix(id, open){
+  const t = ASK.turns.find(x => x.id === id);
+  if(!t) return;
+  t.fixOpen = open;
+  renderAskMessages(false);
+  if(open){
+    const el = document.getElementById('askFix-' + id);
+    if(el){ el.scrollIntoView({ block: 'nearest' }); if(prefersAutoFocus()) el.focus(); }
+  }
+}
+
+function askSendFix(id){
+  const t = ASK.turns.find(x => x.id === id);
+  const el = document.getElementById('askFix-' + id);
+  const note = ((el ? el.value : '') || (t && t.fixDraft) || '').trim().slice(0, 1000);
+  if(!t || !t.answer) return;
+  if(!note){ showToast('Write what works better first.'); if(el) el.focus(); return; }
+  requireName(async () => {
+    try{
+      await db.collection('hub-lessons').add({
+        question: t.q.slice(0, 500),
+        headline: (t.answer.headline || '').slice(0, 200),
+        termIds: (t.answer.sourceIds || []).slice(0, 20),
+        note,
+        status: 'pending',
+        suggestedBy: whoAmI().slice(0, 60),
+        suggestedAt: Date.now()
+      });
+      t.fixOpen = false; t.fixSent = true;
+      renderAskMessages(false);
+      showToast(`Sent to ${askOwnerFirst()} for review.`);
+    }catch(err){
+      showToast(err && err.code === 'permission-denied'
+        ? "Couldn't save it: the new Firebase rules aren't published yet."
+        : "Couldn't save it. Check your connection and try again.");
+    }
+  });
+}
+
+function askAddTerm(id){
+  const t = ASK.turns.find(x => x.id === id);
+  if(!t || !t.answer || !t.answer.suggestTerm) return;
+  const s = t.answer.suggestTerm;
+  requireName(() => {
+    _openAddModal(false);
+    document.getElementById('fEn').value = s.en || '';
+    document.getElementById('fEs').value = s.es || '';
+    document.getElementById('fDef').value = s.def || '';
+  });
+}
+
+function askOpenSource(turnId, id){
+  const t = ASK.turns.find(x => x.id === turnId);
+  const go = t && t.go && t.go[id];
+  if(!go) return;
+  if(go.guide){ openGuideTopic(go.guide); return; }
+  setCategory(go.cat);
+  if(go.term){
+    setTimeout(() => {
+      const card = document.querySelector(`.card[data-term-id="${CSS.escape(go.term)}"]`);
+      if(card){ card.scrollIntoView({ block: 'center', behavior: 'smooth' }); card.classList.add('ask-flash'); setTimeout(() => card.classList.remove('ask-flash'), 2200); }
+    }, 160);
+  }
+}
+
+/* ---- Owner: lessons to review ---- */
+function renderAskReview(){
+  const pending = askPendingLessons().sort((a, b) => (a.suggestedAt || 0) - (b.suggestedAt || 0));
+  const approved = ASK.lessons.filter(l => l.status === 'approved').sort((a, b) => (b.reviewedAt || 0) - (a.reviewedAt || 0));
+  const when = ms => ms ? new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+  return `
+    <div class="ask-head">
+      <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
+      <div class="ask-head-text"><h1>Lessons to review</h1><p>Corrections teammates sent from Ask the Hub. Nothing reaches anyone until you approve it.</p></div>
+    </div>
+    <button type="button" class="btn btn-ghost ask-back" onclick="ASK.view='chat'; renderContent()">← Back to Ask the Hub</button>
+    ${ASK.lessonsBlocked ? `<div class="ta-card"><p>Lessons can't load: the new Firebase rules aren't published yet.</p></div>` : ''}
+    <div class="ta-card">
+      <span class="ta-label">Waiting · ${pending.length}</span>
+      ${pending.length ? pending.map(l => `
+        <div class="ask-lesson">
+          <p class="ask-lesson-q">On: “${escapeHtml(l.question)}”</p>
+          ${l.headline ? `<p class="ask-lesson-a">The answer said: ${escapeHtml(l.headline)}</p>` : ''}
+          <label class="sr-only" for="askLesson-${l.id}">Team note</label>
+          <textarea class="ta-field ask-lesson-edit" id="askLesson-${l.id}" rows="3" maxlength="1000" data-id="${l.id}" oninput="ASK.edits[this.dataset.id]=this.value">${escapeHtml(ASK.edits[l.id] != null ? ASK.edits[l.id] : l.note)}</textarea>
+          <p class="ask-lesson-by">From ${escapeHtml(l.suggestedBy || 'a teammate')} · ${when(l.suggestedAt)}. You can edit the note before approving.</p>
+          <div class="ta-row2">
+            <button type="button" class="btn btn-ghost" onclick="askReviewLesson('${l.id}','declined')">Decline</button>
+            <button type="button" class="btn btn-primary" onclick="askReviewLesson('${l.id}','approved')">Approve</button>
+          </div>
+        </div>`).join('') : `<p>Nothing waiting. When a teammate taps Correct this, it shows up here.</p>`}
+    </div>
+    <div class="ta-card">
+      <span class="ta-label">In use · ${approved.length}</span>
+      ${approved.length ? approved.map(l => `
+        <div class="ask-lesson">
+          <p class="ask-lesson-q">On: “${escapeHtml(l.question)}”</p>
+          <p class="ask-say">${escapeHtml(l.note)}</p>
+          <p class="ask-lesson-by">${escapeHtml(l.suggestedBy || 'A teammate')} · approved ${when(l.reviewedAt)}</p>
+          <div class="ta-row2"><button type="button" class="btn btn-ghost" onclick="askReviewLesson('${l.id}','retired')">Stop using this note</button></div>
+        </div>`).join('') : `<p>No team notes yet.</p>`}
+    </div>`;
+}
+
+async function askReviewLesson(id, status){
+  const l = ASK.lessons.find(x => x.id === id);
+  if(!l) return;
+  const edit = document.getElementById('askLesson-' + id);
+  const note = (status === 'approved' ? (edit ? edit.value : (ASK.edits[id] != null ? ASK.edits[id] : l.note)) : (l.note || '')).trim().slice(0, 1000);
+  if(status === 'approved' && !note){ showToast('The note is empty.'); return; }
+  try{
+    await db.collection('hub-lessons').doc(id).update({ status, note, reviewedBy: (whoAmI() || ACCESS.ownerName || 'owner').slice(0, 60), reviewedAt: Date.now() });
+    showToast(status === 'approved' ? 'Approved. Everyone gets this now.' : status === 'declined' ? 'Declined. Nothing changed.' : 'That note is no longer used.');
+  }catch(err){
+    showToast("Couldn't save that. Check your connection and try again.");
+  }
+}
+
+// The conversation fills the space between the header and the floating tab
+// bar, so the question box is never under the tab bar or below the screen.
+// Phone heights differ too much for one CSS value (an iPhone SE has 568px).
+function fitAskPanel(){
+  const panel = document.querySelector('.ask-panel');
+  if(!panel) return;
+  const bar = document.querySelector('.tabbar');
+  const barRect = bar && getComputedStyle(bar).display !== 'none' ? bar.getBoundingClientRect() : null;
+  const bottom = barRect && barRect.top > 0 && barRect.top < innerHeight ? barRect.top - 9 : innerHeight - 13;
+  const top = panel.getBoundingClientRect().top + window.scrollY;
+  panel.style.height = Math.max(240, Math.round(bottom - top)) + 'px';
+}
+window.addEventListener('resize', () => { if(activeCategory === 'ask' && !document.body.classList.contains('kb-open')) fitAskPanel(); });
+
+// home-polish.js calls this when the greeting smiley is tapped.
+window.openAskHub = function(){ ASK.view = 'chat'; setCategory('ask'); };
 
 /* ============ Init ============ */
 loadNotifyPref();

@@ -604,6 +604,9 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:64px;height:64px;flex:none;margin:-6px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
 #content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
 #content.is-home .home-wave-icon:focus-visible{outline:2px solid #d8f9ff;outline-offset:3px;}
+/* Tap feedback before the smiley opens Ask the Hub (home-polish.js). */
+#content.is-home .home-wave-icon.home-wave-tap .home-wave-pin{transform:scale(.86);transition:transform .16s cubic-bezier(.2,.8,.2,1);}
+@media (prefers-reduced-motion:reduce){#content.is-home .home-wave-icon.home-wave-tap .home-wave-pin{transform:none;}}
 #content.is-home .home-wave-pin{position:absolute;width:60px;height:60px;left:2px;top:2px;transform-origin:50% 90%;filter:drop-shadow(0 2px 2px #0b234073) drop-shadow(0 6px 8px #072b4559);pointer-events:none;}
 #content.is-home .home-wave-art{display:block;width:100%;height:100%;object-fit:contain;filter:none;}
 #content.is-home .home-wave-halo{position:absolute;inset:-9px;z-index:-1;border-radius:50%;background:radial-gradient(ellipse,#a4f3ff50 0%,#39c7f92b 30%,#74b5ff0c 55%,transparent 72%);opacity:.55;transform:scale(.85);pointer-events:none;}
