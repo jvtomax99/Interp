@@ -781,30 +781,86 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 }
 
 /* ---------- Dr. Smiley's widgets (Home) ----------
-   Two tiles side by side under the quick tiles: today's warm-up and his
-   rank (a ring that fills with team points). Markup from smileyWidgetsHtml()
-   in index.html; each opens a sheet with the details. No face on either:
-   Home already shows him in the greeting, and there is only ever one. */
+   Two tiles side by side under the quick tiles: today's warm-up (amber until
+   it's done, then green, with the week's streak as dots) and his rank (a
+   dark card whose ring fills with team points). Markup from
+   smileyWidgetsHtml() in index.html; each opens a sheet with the details.
+   No face on either: Home already shows him in the greeting, and there is
+   only ever one. */
 #content.is-home .sm-widgets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}
-#content.is-home .smw{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;min-height:108px;padding:13px;box-sizing:border-box;
+#content.is-home .smw{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;min-height:108px;padding:13px;box-sizing:border-box;
   border-radius:var(--r-lg);border:1px solid var(--line-soft);background:var(--paper);text-align:left;font:inherit;color:inherit;cursor:pointer;
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);
   transition:transform .15s var(--ease);-webkit-tap-highlight-color:transparent;}
-#content.is-home .smw:active{transform:scale(.97);}
+#content.is-home .smw:active,#content.is-home .smw.is-pressed{transform:scale(.97);}
 #content.is-home .smw:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
 #content.is-home .smw-wait{visibility:hidden;}
 #content.is-home .smw-top{display:flex;align-items:center;gap:6px;width:100%;}
 #content.is-home .smw-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
-#content.is-home .smw-streak{margin-left:auto;font-size:12px;font-weight:650;color:#8A5200;background:#FFF2DC;border-radius:999px;padding:2px 7px;white-space:nowrap;}
 #content.is-home .smw-big{display:flex;align-items:center;gap:6px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
-#content.is-home .smw-sub{font-size:13px;color:var(--ink-soft);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
-#content.is-home .smw-ok{width:22px;height:22px;border-radius:50%;background:#E3F5EC;color:#1D7A4F;display:grid;place-items:center;flex:none;}
+#content.is-home .smw-sub{display:block;max-width:100%;font-size:13px;color:var(--ink-soft);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#content.is-home .smw-ok{width:22px;height:22px;border-radius:50%;background:#fff;color:#1D7A4F;display:grid;place-items:center;flex:none;box-shadow:0 1px 2px rgba(20,43,67,.10);}
 #content.is-home .smw-ok svg{width:14px;height:14px;}
-#content.is-home .smw-q{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--navy);display:grid;place-items:center;font:700 13px var(--sans);flex:none;}
-#content.is-home .smw-rank{display:flex;align-items:center;gap:9px;min-width:0;}
-#content.is-home .smw-ring{width:44px;height:44px;flex:none;}
-#content.is-home .smw-ring text{font:700 17px var(--sans);fill:var(--navy);}
-#content.is-home .smw-thanks{font-size:12px;font-weight:550;color:#0070B0;line-height:1.3;}
-html[data-theme="dark"] #content.is-home .smw-ring text{fill:#fff;}
-html[data-theme="dark"] #content.is-home .smw-thanks{color:var(--cyan);}
-@media (prefers-reduced-motion:reduce){#content.is-home .smw{transition:none;}#content.is-home .smw:active{transform:none;}}
+#content.is-home .smw-q{width:22px;height:22px;border-radius:50%;background:#fff;color:#B4610E;display:grid;place-items:center;font:700 13px var(--sans);flex:none;box-shadow:0 1px 2px rgba(20,43,67,.10);}
+
+/* Warm-up: tinted like the quick tiles. */
+#content.is-home .smw-warm{background:linear-gradient(150deg,#FFF6E5,#FFE9C7);border-color:#F2D9A8;}
+#content.is-home .smw-warm .smw-eyebrow{color:#93590A;}
+#content.is-home .smw-warm.is-done{background:linear-gradient(150deg,#ECFAF2,#D3F2E1);border-color:#B7E3C9;}
+#content.is-home .smw-warm.is-done .smw-eyebrow{color:#1F7048;}
+#content.is-home .smw-flame{margin-left:auto;display:inline-flex;align-items:center;gap:3px;font-size:13px;font-weight:650;color:#B4480F;font-variant-numeric:tabular-nums;}
+#content.is-home .smw-flame svg{width:15px;height:15px;transform-origin:50% 100%;}
+#content.is-home .smw-week{display:flex;justify-content:space-between;width:100%;max-width:140px;margin-top:auto;}
+#content.is-home .smw-week span{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:650;line-height:1;color:rgba(21,28,44,.45);}
+#content.is-home .smw-week span.is-today{color:var(--ink);}
+#content.is-home .smw-week i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.75);}
+#content.is-home .smw-week i.on{background:linear-gradient(135deg,#FFB547,#FF7A3D);box-shadow:0 0 0 2px rgba(255,181,71,.28);}
+#content.is-home .smw-week span.is-today i:not(.on){background:#fff;box-shadow:inset 0 0 0 2px #FFB547;}
+
+/* Dr. Smiley: a dark card with a glowing ring. */
+#content.is-home .smw-dark{background:radial-gradient(120% 100% at 0% 0%,#2B3A8F 0%,#1A2152 55%,#11163A 100%);border-color:transparent;color:#fff;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.14),0 1px 2px rgba(20,43,67,0.10),0 10px 22px -12px rgba(17,22,58,0.55);}
+#content.is-home .smw-dark .smw-eyebrow{color:rgba(255,255,255,.62);}
+#content.is-home .smw-dark .smw-big{color:#fff;}
+#content.is-home .smw-dark .smw-sub{color:rgba(255,255,255,.74);}
+#content.is-home .smw-rank{display:flex;align-items:center;gap:9px;min-width:0;max-width:100%;}
+#content.is-home .smw-rank > span{min-width:0;}
+#content.is-home .smw-ring{width:52px;height:52px;flex:none;filter:drop-shadow(0 0 6px rgba(1,184,230,.55));}
+#content.is-home .smw-ring text{font:700 20px var(--sans);fill:#fff;}
+#content.is-home .smw-dark .smw-sub{white-space:normal;}
+@media (max-width:359px){#content.is-home .smw-ring{width:44px;height:44px;}}
+#content.is-home .smw-thanks{font-size:12px;font-weight:550;color:#7FE3FF;line-height:1.3;}
+
+/* Arriving on Home: the widgets rise in, his ring fills, the streak dots pop
+   in one by one. Not on a repaint of Home (.no-enter) or a widget redrawn in
+   place (.smw-still); held while the widgets are still below the fold
+   (.is-waiting, from home-polish.js). */
+#content.is-home:not(.no-enter) .smw:not(.smw-still){animation:smwRise .6s var(--ease) backwards;}
+#content.is-home:not(.no-enter) .smw + .smw:not(.smw-still){animation-delay:.08s;}
+#content.is-home:not(.no-enter) .smw:not(.smw-still) .smw-arc{animation:smwFill 1.3s var(--ease) .35s backwards;}
+#content.is-home:not(.no-enter) .smw:not(.smw-still) .smw-week i.on{animation:smwPop .45s cubic-bezier(.3,1.6,.5,1) backwards;animation-delay:calc(.45s + var(--k,0) * .09s);}
+#content.is-home .smw-week i.is-new{animation:smwPop .5s cubic-bezier(.3,1.6,.5,1) backwards;}
+#content.is-home .smw-dark .smw-ring{animation:smwGlow 2.8s ease-in-out 1.6s 3;}
+#content.is-home .smw-flame svg{animation:smwFlick 1.6s ease-in-out infinite;}
+#content.is-home .sm-widgets.is-waiting .smw,#content.is-home .sm-widgets.is-waiting .smw *{animation-play-state:paused;}
+@keyframes smwRise{from{opacity:0;transform:translateY(14px) scale(.97);}}
+@keyframes smwFill{from{stroke-dashoffset:var(--arc);}}
+@keyframes smwPop{from{transform:scale(0);}}
+@keyframes smwGlow{50%{filter:drop-shadow(0 0 11px rgba(1,184,230,.85));}}
+@keyframes smwFlick{50%{transform:scale(1.12) rotate(-4deg);}}
+
+html[data-theme="dark"] #content.is-home .smw-warm{background:linear-gradient(150deg,color-mix(in srgb,#FFB547 22%,var(--paper)),color-mix(in srgb,#FFB547 10%,var(--paper)));border-color:rgba(255,181,71,.22);}
+html[data-theme="dark"] #content.is-home .smw-warm .smw-eyebrow{color:#FFC56B;}
+html[data-theme="dark"] #content.is-home .smw-warm.is-done{background:linear-gradient(150deg,color-mix(in srgb,#3DBE7A 22%,var(--paper)),color-mix(in srgb,#3DBE7A 10%,var(--paper)));border-color:rgba(61,190,122,.24);}
+html[data-theme="dark"] #content.is-home .smw-warm.is-done .smw-eyebrow{color:#7FDCA8;}
+html[data-theme="dark"] #content.is-home .smw-flame{color:#FFB36B;}
+html[data-theme="dark"] #content.is-home .smw-week span{color:rgba(235,239,247,.45);}
+html[data-theme="dark"] #content.is-home .smw-week span.is-today{color:var(--ink);}
+html[data-theme="dark"] #content.is-home .smw-week i:not(.on){background:rgba(255,255,255,.12);}
+html[data-theme="dark"] #content.is-home .smw-week span.is-today i:not(.on){background:transparent;}
+html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255,.08);}
+@media (prefers-reduced-motion:reduce){
+  #content.is-home .smw{transition:none;}
+  #content.is-home .smw:active,#content.is-home .smw.is-pressed{transform:none;}
+  #content.is-home .smw,#content.is-home .smw *{animation:none !important;}
+}

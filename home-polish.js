@@ -1051,6 +1051,27 @@
     name.addEventListener('animationend', () => name.classList.remove('is-flowing'), { once:true });
   }, { passive:true });
 
+  /* ---- Dr. Smiley's widgets wait to be seen ------------------------
+     Their entrance (rise, ring fill, streak dots) is held while they are
+     below the fold, so it plays when you scroll to them rather than
+     off-screen. If they are already in view the observer lets go on its
+     first callback. */
+  let widgetWatch = null;
+  document.addEventListener('ih:home-paint', () => {
+    if(widgetWatch){ widgetWatch.disconnect(); widgetWatch = null; }
+    const host = document.getElementById('content');
+    const sec = host && host.querySelector('.sm-widgets');
+    if(!sec || host.classList.contains('no-enter') || typeof IntersectionObserver === 'undefined') return;
+    sec.classList.add('is-waiting');
+    const io = widgetWatch = new IntersectionObserver(entries => {
+      if(!entries.some(e => e.isIntersecting)) return;
+      sec.classList.remove('is-waiting');
+      io.disconnect();
+      if(widgetWatch === io) widgetWatch = null;
+    }, { threshold: .35 });
+    io.observe(sec);
+  });
+
   const content = document.getElementById('content');
   if(content && content.classList.contains('is-home')){
     initHomeGreeting(content);
