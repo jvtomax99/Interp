@@ -19291,10 +19291,37 @@ function teamPoints(n){
   if(!db || n <= 0) return;
   teamPointsLastAt = Date.now();
   try{
-    db.collection('terminology-meta').doc('smiley')
-      .set({ points: firebase.firestore.FieldValue.increment(n), updatedAt: Date.now() }, { merge: true })
+    const inc = firebase.firestore.FieldValue.increment(n);
+    const rec = { points: inc, updatedAt: Date.now() };
+    // Who earned them this week, for "thanks to…" (names only, never a score
+    // on screen). A merge of nested maps adds to just this person's count.
+    const who = (whoAmI() || '').trim(), key = teamNameKey(who);
+    if(key){ rec.weeks = { [teamWeekKey()]: { [key]: inc } }; rec.names = { [key]: who }; }
+    db.collection('terminology-meta').doc('smiley').set(rec, { merge: true })
       .catch(err => console.warn('Team points not saved', err));
   }catch(err){ console.warn('Team points not saved', err); }
+}
+function teamNameKey(name){
+  return String(name || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+}
+// ISO week, e.g. 2026-W40.
+function teamWeekKey(date){
+  const d = new Date(date || Date.now()); d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+  const w1 = new Date(d.getFullYear(), 0, 4);
+  const wk = 1 + Math.round(((d - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+  return d.getFullYear() + '-W' + String(wk).padStart(2, '0');
+}
+// "Maria, Luis and you": who helped most this week, most first, up to three.
+let SMILEY_DATA = {};
+function teamThanksList(){
+  const wk = (SMILEY_DATA.weeks || {})[teamWeekKey()] || {}, names = SMILEY_DATA.names || {};
+  const me = teamNameKey(whoAmI());
+  const top = Object.entries(wk).filter(([, n]) => +n > 0).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([k]) => k === me ? 'you' : String(names[k] || k).trim().split(/\s+/)[0]);
+  if(!top.length) return '';
+  return top.length === 1 ? top[0] : top.slice(0, -1).join(', ') + ' and ' + top[top.length - 1];
 }
 // Terms added, read off the same summaries the activity log records.
 function teamPointsFor(summary){
@@ -19309,7 +19336,8 @@ function startSmileyCareer(){
   smileyCareerStarted = true;
   db.collection('terminology-meta').doc('smiley').onSnapshot(snap => {
     const before = SMILEY_POINTS;
-    SMILEY_POINTS = (snap.exists && +snap.data().points) || 0;
+    SMILEY_DATA = (snap.exists && snap.data()) || {};
+    SMILEY_POINTS = +SMILEY_DATA.points || 0;
     if(before !== null && smileyLevel(before) === smileyLevel(SMILEY_POINTS)){ refreshSmileyCareer(); return; }
     // Your own points tipped the team into a new rank: he cheers where you
     // are now; the full celebration waits for Home.
@@ -19332,6 +19360,7 @@ function smileyCareerHtml(){
       <div class="sc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Progress to the next rank"><i style="width:${pct}%"></i></div>
       <p class="sc-note">${next ? `<b>${fmt(SMILEY_POINTS)} of ${fmt(next.at)}</b> team points to <b>${escapeHtml(next.name)}</b>, when he gets ${escapeHtml(next.gain)}.`
         : `<b>${fmt(SMILEY_POINTS)}</b> team points. The team made him a Legend.`} Every term added and practice question answered counts.</p>
+      ${teamThanksList() ? `<p class="sc-thanks">This week, thanks to ${escapeHtml(teamThanksList())}.</p>` : ''}
     </div></section>`;
 }
 function refreshSmileyCareer(){
@@ -19394,7 +19423,7 @@ function smileyMaybeCelebrate(){
   const b = document.createElement('div');
   b.className = 'lvl-banner'; b.setAttribute('role', 'status');
   b.innerHTML = `<div class="lvl-badge" aria-hidden="true">${lv}</div><div><small>Level ${lv} · the team did it</small>
-    <b>Dr. Smiley is now ${/^[AEIOU]/.test(rank.name) ? 'an' : 'a'} ${escapeHtml(rank.name)}</b><span>He earned ${escapeHtml(rank.gain)} at ${rank.at.toLocaleString()} team points.</span></div>
+    <b>Dr. Smiley is now ${/^[AEIOU]/.test(rank.name) ? 'an' : 'a'} ${escapeHtml(rank.name)}</b><span>He earned ${escapeHtml(rank.gain)} at ${rank.at.toLocaleString()} team points.${teamThanksList() ? ' Thanks to ' + escapeHtml(teamThanksList()) + '!' : ''}</span></div>
     <button type="button">Nice!</button>`;
   const close = () => { if(!b.isConnected) return; b.classList.add('is-out'); setTimeout(() => { b.remove(); smileyCelebrating = false; }, 350); };
   b.querySelector('button').addEventListener('click', close);
@@ -19560,6 +19589,11 @@ function hubNews(){
     if(doms.length === 1){
       const t = count === 1 ? `${first(who)} added a ${doms[0]} term` : `${first(who)} added ${count} ${doms[0]} terms`;
       if(t.length <= 32) text = t;
+    }
+    // Five or more: a thank-you, by name.
+    if(count >= 5){
+      const t = doms.length === 1 ? `Thanks, ${first(who)}! ${count} ${doms[0]} terms` : '';
+      text = t && t.length <= 32 ? t : `Thanks, ${first(who)}! ${count} new terms`;
     }
     items.push({ key: 'act:' + latest.id, text, go: () => setCategory('updates') });
   }

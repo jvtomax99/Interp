@@ -795,6 +795,8 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .sc-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0070B0,#00B0E0);}
 #content.is-home .sc-note{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.45;}
 #content.is-home .sc-note b{color:var(--ink);font-weight:600;}
+#content.is-home .sc-thanks{margin:4px 0 0;font-size:12px;font-weight:550;color:#0070B0;}
+html[data-theme="dark"] #content.is-home .sc-thanks{color:var(--cyan);}
 
 /* ---------- Daily warm-up card (Home) ----------
    Markup from warmupHtml() in index.html. No face here either: the greeting
