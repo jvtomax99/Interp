@@ -19157,8 +19157,8 @@ function endAppt(){
     <button type="button" class="prep-go" id="apptAdd">Add new words</button>
     <button type="button" class="prep-act" id="apptSkip" style="margin:9px auto 0;display:block">Not now</button></div>`;
   ov.querySelector('#apptAdd').addEventListener('click', () => { ov.classList.remove('show'); if(domainId) setCategory(domainId); openAddModal(); });
-  ov.querySelector('#apptSkip').addEventListener('click', () => { ov.classList.remove('show'); setCategory('prep'); });
-  render();
+  ov.querySelector('#apptSkip').addEventListener('click', () => ov.classList.remove('show'));
+  setCategory('prep');                          // the briefing waits behind the sheet
   ov.classList.add('show');
 }
 // The pill that brings you back to the appointment from any other page.
@@ -19256,9 +19256,17 @@ function warmupAnswer(i){
     const box = correct ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0;
     saveTermReview(q.termId, box, (prior ? prior.reviewCount : 0) + 1);
   }
-  smileyReact(correct ? 'hearts' : 'think');
   const el = document.getElementById('warmup');
   if(el){ const t = document.createElement('div'); t.innerHTML = warmupHtml(); el.replaceWith(t.firstElementChild); }
+  // He reacts on the greeting; on a phone the card sits below him, so the
+  // page glides up first when he's out of view.
+  const face = document.querySelector('#content.is-home .home-wave-icon');
+  const hidden = face && face.getBoundingClientRect().top < 56;
+  if(hidden){
+    const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: instant ? 'instant' : 'smooth' });
+    setTimeout(() => smileyReact(correct ? 'hearts' : 'think'), instant ? 0 : 450);
+  }else smileyReact(correct ? 'hearts' : 'think');
 }
 
 /* ---------- Dr. Smiley's career ---------- */
@@ -19719,15 +19727,17 @@ const smileyRider = (() => {
     if(reduce.matches || !bob.animate) return true;
     const K = {
       hop:   [[0,0,1,1],[0,-16,.94,1.08],[0,0,1.08,.9],[0,-6,1,1],[0,0,1,1]],
-      wave:  [[0,0,0],[0,0,-14],[0,0,12],[0,0,-10],[0,0,8],[0,0,0]],
+      wave:  [[0,0,0],[0,-3,-18],[0,0,16],[0,-2,-13],[0,0,9],[0,0,0]],
       hearts:[[0,0,1,1],[0,-5,1.05,1.05],[0,0,1,1],[0,-3,1.03,1.03],[0,0,1,1]],
       cheer: [[0,0,0],[0,-26,180],[0,-30,360],[0,0,360]],
     }[kind];
     if(!K) return true;
     const frames = K.map(k => kind === 'wave' || kind === 'cheer'
-      ? { transform: `translateY(${k[1]}px) rotate(${k[2]}deg)` }
+      ? { transform: `translateY(${k[1]}px) rotate(${k[2]}deg)`, easing: 'ease-in-out' }
       : { transform: `translateY(${k[1]}px) scale(${k[2]},${k[3]})` });
-    bob.animate(frames, { duration: kind === 'cheer' ? 900 : kind === 'wave' ? 1100 : 700, easing: 'cubic-bezier(.3,1.3,.5,1)' });
+    // The wave sways evenly through each swing; the others pop and settle.
+    bob.animate(frames, kind === 'wave' ? { duration: 1400, easing: 'linear' }
+      : { duration: kind === 'cheer' ? 900 : 700, easing: 'cubic-bezier(.3,1.3,.5,1)' });
     return true;
   }
   return { sync, react };
