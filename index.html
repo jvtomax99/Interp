@@ -5301,6 +5301,37 @@ html[data-theme="dark"] .prep-act{ color:var(--ink); }
 @media (prefers-reduced-motion: reduce){ .prep-sheet{ transition:none; } }
 
 
+
+/* Dr. Smiley's two Home widgets open these sheets (the widgets themselves
+   are styled in home-polish.css). */
+.sm-sheet .sm-sheet-top{ display:flex; align-items:center; gap:9px; }
+.sm-sheet .sm-eyebrow{ font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
+.sm-sheet h2{ margin:6px 0 13px; }
+.sm-sheet .smw-streak{ margin-left:auto; font-size:12px; font-weight:650; color:#8A5200; background:#FFF2DC; border-radius:999px; padding:2px 9px; white-space:nowrap; }
+.sm-opts{ display:flex; flex-direction:column; gap:6px; }
+.sm-opt{ min-height:48px; padding:9px 13px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi);
+  font:550 16px/1.3 var(--sans); color:var(--ink); text-align:left; cursor:pointer; transition:transform .15s var(--ease); }
+.sm-opt:active{ transform:scale(.98); }
+.sm-opt:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.sm-result{ margin:0 0 4px; font-size:16px; color:var(--ink-soft); }
+.sm-result b{ color:var(--ink); font-weight:650; }
+.sm-result.is-right{ color:#1D7A4F; }
+html[data-theme="dark"] .sm-result.is-right{ color:#5FD3A0; }
+.sm-sheet .sm-note{ margin:6px 0 13px; font-size:14px; color:var(--ink-soft); line-height:1.45; }
+.sm-sheet .sm-note b{ color:var(--ink); font-weight:600; }
+.sm-thanks{ margin:-4px 0 13px; font-size:14px; font-weight:550; color:#0070B0; }
+html[data-theme="dark"] .sm-thanks{ color:var(--cyan); }
+.sm-bar{ height:8px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
+.sm-bar i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#0070B0,#00B0E0); }
+.sm-ranks{ list-style:none; margin:0 0 13px; padding:0; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+.sm-ranks li{ display:grid; grid-template-columns:26px minmax(0,1fr); column-gap:9px; align-items:baseline; padding:6px 9px; border-radius:var(--r-sm); color:var(--ink-soft); font-size:13px; }
+.sm-ranks li span{ grid-row:span 2; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; align-self:center; background:var(--line-soft); color:var(--ink-soft); font:700 13px var(--sans); }
+.sm-ranks li b{ color:var(--ink); font-weight:650; font-size:14px; }
+.sm-ranks li em{ font-style:normal; }
+.sm-ranks li.is-past span{ background:#E3F5EC; color:#1D7A4F; }
+.sm-ranks li.is-now{ background:var(--accent-soft); }
+.sm-ranks li.is-now span{ background:radial-gradient(circle at 35% 30%, #2E8BD0, #252E6D); color:#fff; }
+@media (prefers-reduced-motion: reduce){ .sm-opt{ transition:none; } .sm-opt:active{ transform:none; } }
 /* ---------- Appointment mode ----------
    Started from the briefing. A quiet screen: a big lookup over the whole
    glossary (that specialty first) plus False Friends, the briefing's words,
@@ -15367,7 +15398,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1002.0725';
+const BUILD_ID = 'b1002.0811';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -15697,8 +15728,7 @@ function renderHome(){
     <section class="home-sec home-quick-section">
       <div class="qa-grid">${quickActions}</div>
     </section>
-    ${warmupHtml()}
-    ${smileyCareerHtml()}
+    ${smileyWidgetsHtml()}
     ${/* Creating a domain was only reachable from inside the glossary or the
          desktop sidebar -- nothing on Home, which is where a phone opens.
          The section header is on screen without scrolling the rail. */''}
@@ -19228,21 +19258,52 @@ function warmupQuestion(){
   warmupSaveState({ ...st, qDay: today, q });
   return q;
 }
+// Home shows two widgets side by side (styled in home-polish.css): today's
+// warm-up and Dr. Smiley's rank. The details open in a sheet.
+const SM_CHECK = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function smileyWidgetsHtml(){
+  return `<section class="home-sec sm-widgets" aria-label="Warm-up and Dr. Smiley">${warmupHtml()}${smileyCareerHtml()}</section>`;
+}
+function warmupStreak(){
+  const st = warmupState();
+  return st.day === warmupDay() || st.day === warmupDay(-1) ? (st.streak || 0) : 0;
+}
 function warmupHtml(){
   if(!DATA || !DATA.categories || !DATA.categories.length) return '';
-  const q = warmupQuestion(), st = warmupState(), today = warmupDay();
-  const done = st.day === today;
-  const streak = st.day === today || st.day === warmupDay(-1) ? (st.streak || 0) : 0;
-  const head = `<div class="wu-head"><span class="wu-eyebrow">Today’s warm-up</span>${streak ? `<span class="wu-streak">${streak === 1 ? '1 day' : streak + ' days in a row'}</span>` : ''}</div>`;
-  if(done){
-    return `<section class="home-sec warmup is-done" id="warmup" aria-label="Today's warm-up">${head}
-      <p class="wu-prompt">${escapeHtml(q.prompt)}</p>
-      <p class="wu-result ${st.correct ? 'is-right' : 'is-wrong'}" role="status">${st.correct ? 'Right!' : 'The answer:'} <b>${escapeHtml(q.answer)}</b></p>
-      <p class="wu-note">${q.note ? escapeHtml(q.note) + ' · ' : ''}Back tomorrow with a new one.</p></section>`;
+  const q = warmupQuestion(), st = warmupState(), done = st.day === warmupDay(), streak = warmupStreak();
+  const body = done
+    ? `<span class="smw-big"><span class="smw-ok">${SM_CHECK}</span>${st.correct ? 'Right!' : 'Done'}</span><span class="smw-sub">${escapeHtml(q.answer)}</span>`
+    : `<span class="smw-big"><span class="smw-q" aria-hidden="true">?</span>1 question</span><span class="smw-sub">30 seconds. Tap to start.</span>`;
+  return `<button type="button" class="smw" id="warmup" onclick="openWarmupSheet()" aria-label="Today’s warm-up${done ? ', done' : ''}">
+    <span class="smw-top"><span class="smw-eyebrow">Warm-up</span>${streak ? `<span class="smw-streak">${streak === 1 ? '1 day' : streak + ' days'}</span>` : ''}</span>${body}</button>`;
+}
+function smSheet(id, html){
+  let ov = document.getElementById(id);
+  if(!ov){
+    ov = document.createElement('div'); ov.className = 'overlay prep-overlay'; ov.id = id;
+    ov.addEventListener('click', e => { if(e.target === ov) smSheetClose(id); });
+    document.body.appendChild(ov);
   }
-  return `<section class="home-sec warmup" id="warmup" aria-label="Today's warm-up">${head}
-    <p class="wu-prompt">${escapeHtml(q.prompt)}</p>
-    <div class="wu-opts">${q.options.map((o, i) => `<button type="button" class="wu-opt" onclick="warmupAnswer(${i})">${escapeHtml(o)}</button>`).join('')}</div></section>`;
+  ov.innerHTML = `<div class="prep-sheet sm-sheet" role="dialog" aria-modal="true">${html}</div>`;
+  ov.classList.add('show');
+  return ov;
+}
+function smSheetClose(id){
+  const ov = document.getElementById(id);
+  if(!ov || !ov.classList.contains('show')) return;
+  ov.classList.remove('show');
+  if(ov._after){ const f = ov._after; ov._after = null; f(); }
+}
+function openWarmupSheet(){
+  const q = warmupQuestion(), st = warmupState(), done = st.day === warmupDay(), streak = warmupStreak();
+  const head = `<div class="sm-sheet-top"><span class="sm-eyebrow">Today’s warm-up</span>${streak ? `<span class="smw-streak">${streak === 1 ? '1 day' : streak + ' days in a row'}</span>` : ''}</div>
+    <h2 id="smWarmTitle">${escapeHtml(q.prompt)}</h2>`;
+  const ov = smSheet('warmupSheet', done
+    ? `${head}<p class="sm-result ${st.correct ? 'is-right' : ''}" role="status">${st.correct ? 'Right!' : 'The answer:'} <b>${escapeHtml(q.answer)}</b></p>
+       <p class="sm-note">${q.note ? escapeHtml(q.note) + ' · ' : ''}Back tomorrow with a new one.</p>
+       <button type="button" class="prep-go" onclick="smSheetClose('warmupSheet')">Done</button>`
+    : `${head}<div class="sm-opts">${q.options.map((o, i) => `<button type="button" class="sm-opt" onclick="warmupAnswer(${i})">${escapeHtml(o)}</button>`).join('')}</div>`);
+  ov.firstElementChild.setAttribute('aria-labelledby', 'smWarmTitle');
 }
 function warmupAnswer(i){
   const q = warmupQuestion(), st = warmupState(), today = warmupDay();
@@ -19258,15 +19319,23 @@ function warmupAnswer(i){
   }
   const el = document.getElementById('warmup');
   if(el){ const t = document.createElement('div'); t.innerHTML = warmupHtml(); el.replaceWith(t.firstElementChild); }
-  // He reacts on the greeting; on a phone the card sits below him, so the
-  // page glides up first when he's out of view.
-  const face = document.querySelector('#content.is-home .home-wave-icon');
-  const hidden = face && face.getBoundingClientRect().top < 56;
-  if(hidden){
-    const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: instant ? 'instant' : 'smooth' });
-    setTimeout(() => smileyReact(correct ? 'hearts' : 'think'), instant ? 0 : 450);
-  }else smileyReact(correct ? 'hearts' : 'think');
+  // The sheet shows the result, then closes; he reacts on the greeting,
+  // and the page glides up first when he's out of view.
+  const react = () => {
+    const face = document.querySelector('#content.is-home .home-wave-icon');
+    const hidden = face && face.getBoundingClientRect().top < 56;
+    if(hidden){
+      const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: instant ? 'instant' : 'smooth' });
+      setTimeout(() => smileyReact(correct ? 'hearts' : 'think'), instant ? 0 : 450);
+    }else smileyReact(correct ? 'hearts' : 'think');
+  };
+  const ov = document.getElementById('warmupSheet');
+  if(ov && ov.classList.contains('show')){
+    openWarmupSheet();
+    ov._after = react;
+    clearTimeout(ov._t); ov._t = setTimeout(() => smSheetClose('warmupSheet'), 1600);
+  }else react();
 }
 
 /* ---------- Dr. Smiley's career ---------- */
@@ -19348,20 +19417,33 @@ function startSmileyCareer(){
   }, err => console.warn('Team points unavailable', err));
 }
 function smileyCareerHtml(){
-  if(SMILEY_POINTS === null) return '<div id="smileyCareer" hidden></div>';
+  if(SMILEY_POINTS === null) return '<span class="smw smw-wait" id="smileyCareer" aria-hidden="true"></span>';
+  const lv = smileyLevel(SMILEY_POINTS), rank = SMILEY_RANKS[lv - 1], next = SMILEY_RANKS[lv];
+  const pct = next ? 100 * (SMILEY_POINTS - rank.at) / (next.at - rank.at) : 100;
+  const r = 18.5, c = 2 * Math.PI * r, arc = c * Math.max(.03, pct / 100), thanks = teamThanksList();
+  return `<button type="button" class="smw" id="smileyCareer" onclick="openRankSheet()" aria-label="Dr. Smiley, level ${lv}, ${escapeAttr(rank.name)}, ${SMILEY_POINTS} of ${next ? next.at : SMILEY_POINTS} team points">
+    <span class="smw-top"><span class="smw-eyebrow">Dr. Smiley</span></span>
+    <span class="smw-rank"><svg class="smw-ring" viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="smRingGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0070B0"/><stop offset="1" stop-color="#00B0E0"/></linearGradient></defs>
+      <circle cx="22" cy="22" r="${r}" fill="none" stroke="var(--line-soft)" stroke-width="4"/>
+      <circle cx="22" cy="22" r="${r}" fill="none" stroke="url(#smRingGrad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${arc.toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 22 22)"/>
+      <text x="22" y="22" text-anchor="middle" dominant-baseline="central">${lv}</text></svg>
+      <span><span class="smw-big">${escapeHtml(rank.name)}</span><span class="smw-sub">${SMILEY_POINTS.toLocaleString()} / ${next ? next.at.toLocaleString() : '∞'} pts</span></span></span>
+    ${thanks ? `<span class="smw-thanks">Thanks to ${escapeHtml(thanks)}</span>` : ''}</button>`;
+}
+function openRankSheet(){
+  if(SMILEY_POINTS === null) return;
   const lv = smileyLevel(SMILEY_POINTS), rank = SMILEY_RANKS[lv - 1], next = SMILEY_RANKS[lv];
   const pct = next ? Math.round(100 * (SMILEY_POINTS - rank.at) / (next.at - rank.at)) : 100;
-  const fmt = n => n.toLocaleString();
-  return `<section class="home-sec smiley-career" id="smileyCareer" aria-label="Dr. Smiley's rank">
-    <div class="sc-badge" aria-hidden="true">${lv}</div>
-    <div class="sc-body">
-      <div class="sc-eyebrow">Dr. Smiley · Level ${lv} of ${SMILEY_RANKS.length}</div>
-      <div class="sc-rank">${escapeHtml(rank.name)}</div>
-      <div class="sc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Progress to the next rank"><i style="width:${pct}%"></i></div>
-      <p class="sc-note">${next ? `<b>${fmt(SMILEY_POINTS)} of ${fmt(next.at)}</b> team points to <b>${escapeHtml(next.name)}</b>, when he gets ${escapeHtml(next.gain)}.`
-        : `<b>${fmt(SMILEY_POINTS)}</b> team points. The team made him a Legend.`} Every term added and practice question answered counts.</p>
-      ${teamThanksList() ? `<p class="sc-thanks">This week, thanks to ${escapeHtml(teamThanksList())}.</p>` : ''}
-    </div></section>`;
+  const fmt = n => n.toLocaleString(), thanks = teamThanksList();
+  const ov = smSheet('rankSheet', `<div class="sm-sheet-top"><span class="sm-eyebrow">Dr. Smiley · Level ${lv} of ${SMILEY_RANKS.length}</span></div>
+    <h2 id="smRankTitle">${escapeHtml(rank.name)}</h2>
+    <div class="sm-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Progress to the next rank"><i style="width:${Math.max(2, pct)}%"></i></div>
+    <p class="sm-note">${next ? `<b>${fmt(SMILEY_POINTS)} of ${fmt(next.at)}</b> team points to <b>${escapeHtml(next.name)}</b>, when he gets ${escapeHtml(next.gain)}.`
+      : `<b>${fmt(SMILEY_POINTS)}</b> team points. The team made him a Legend.`} The whole team earns them: every term added and every practice question answered counts.</p>
+    ${thanks ? `<p class="sm-thanks">This week, thanks to ${escapeHtml(thanks)}.</p>` : ''}
+    <ol class="sm-ranks">${SMILEY_RANKS.map((x, i) => `<li class="${i + 1 < lv ? 'is-past' : i + 1 === lv ? 'is-now' : ''}"><span>${i + 1}</span><b>${escapeHtml(x.name)}</b><em>${i ? x.at.toLocaleString() + ' pts · ' : ''}${escapeHtml(x.gain)}</em></li>`).join('')}</ol>
+    <button type="button" class="prep-go" onclick="smSheetClose('rankSheet')">Done</button>`);
+  ov.firstElementChild.setAttribute('aria-labelledby', 'smRankTitle');
 }
 function refreshSmileyCareer(){
   const el = document.getElementById('smileyCareer');

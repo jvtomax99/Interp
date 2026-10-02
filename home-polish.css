@@ -780,41 +780,31 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   #content.is-home .home-ask-ring,#content.is-home .home-ask-sq,#content.is-home .home-ask-lanyard,#content.is-home .home-ask-tag{animation:none;transition:none;}
 }
 
-/* ---------- Dr. Smiley's career card (Home) ----------
-   Markup from smileyCareerHtml() in index.html. A rank badge rather than his
-   face: Home already shows him in the greeting, and there is only ever one. */
-#content.is-home .smiley-career{display:grid;grid-template-columns:52px minmax(0,1fr);gap:13px;align-items:center;background:var(--paper);
-  border-radius:var(--r-lg);padding:13px 17px;border:1px solid var(--line-soft);
-  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);}
-#content.is-home .smiley-career[hidden]{display:none;}
-#content.is-home .sc-badge{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font:700 22px/1 var(--sans);
-  background:radial-gradient(circle at 35% 30%,#2E8BD0,#252E6D);box-shadow:0 0 0 3px var(--paper),0 0 0 5px #00B0E0;}
-#content.is-home .sc-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
-#content.is-home .sc-rank{margin:1px 0 6px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
-#content.is-home .sc-bar{height:8px;border-radius:999px;background:var(--line-soft);overflow:hidden;}
-#content.is-home .sc-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0070B0,#00B0E0);}
-#content.is-home .sc-note{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.45;}
-#content.is-home .sc-note b{color:var(--ink);font-weight:600;}
-#content.is-home .sc-thanks{margin:4px 0 0;font-size:12px;font-weight:550;color:#0070B0;}
-html[data-theme="dark"] #content.is-home .sc-thanks{color:var(--cyan);}
-
-/* ---------- Daily warm-up card (Home) ----------
-   Markup from warmupHtml() in index.html. No face here either: the greeting
-   smiley above reacts to the answer. */
-#content.is-home .warmup{background:var(--paper);border-radius:var(--r-lg);padding:13px 17px;border:1px solid var(--line-soft);
-  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);}
-#content.is-home .wu-head{display:flex;align-items:center;gap:9px;}
-#content.is-home .wu-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
-#content.is-home .wu-streak{margin-left:auto;font-size:12px;font-weight:650;color:#8A5200;background:#FFF2DC;border-radius:999px;padding:2px 9px;}
-#content.is-home .wu-prompt{margin:6px 0 9px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
-#content.is-home .wu-opts{display:flex;flex-direction:column;gap:6px;}
-#content.is-home .wu-opt{min-height:44px;padding:9px 13px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--bg-hi);
-  font:550 15px/1.3 var(--sans);color:var(--ink);text-align:left;cursor:pointer;transition:transform .15s var(--ease);}
-#content.is-home .wu-opt:active{transform:scale(.98);}
-#content.is-home .wu-opt:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
-#content.is-home .wu-result{margin:0;font-size:15px;color:var(--ink-soft);}
-#content.is-home .wu-result b{color:var(--ink);font-weight:650;}
-#content.is-home .wu-result.is-right{color:#1D7A4F;}
-#content.is-home .wu-note{margin:4px 0 0;font-size:12px;color:var(--ink-soft);}
-html[data-theme="dark"] #content.is-home .wu-result.is-right{color:#5FD3A0;}
-@media (prefers-reduced-motion:reduce){#content.is-home .wu-opt{transition:none;}#content.is-home .wu-opt:active{transform:none;}}
+/* ---------- Dr. Smiley's widgets (Home) ----------
+   Two tiles side by side under the quick tiles: today's warm-up and his
+   rank (a ring that fills with team points). Markup from smileyWidgetsHtml()
+   in index.html; each opens a sheet with the details. No face on either:
+   Home already shows him in the greeting, and there is only ever one. */
+#content.is-home .sm-widgets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;}
+#content.is-home .smw{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;min-height:108px;padding:13px;box-sizing:border-box;
+  border-radius:var(--r-lg);border:1px solid var(--line-soft);background:var(--paper);text-align:left;font:inherit;color:inherit;cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .15s var(--ease);-webkit-tap-highlight-color:transparent;}
+#content.is-home .smw:active{transform:scale(.97);}
+#content.is-home .smw:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
+#content.is-home .smw-wait{visibility:hidden;}
+#content.is-home .smw-top{display:flex;align-items:center;gap:6px;width:100%;}
+#content.is-home .smw-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+#content.is-home .smw-streak{margin-left:auto;font-size:12px;font-weight:650;color:#8A5200;background:#FFF2DC;border-radius:999px;padding:2px 7px;white-space:nowrap;}
+#content.is-home .smw-big{display:flex;align-items:center;gap:6px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
+#content.is-home .smw-sub{font-size:13px;color:var(--ink-soft);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;}
+#content.is-home .smw-ok{width:22px;height:22px;border-radius:50%;background:#E3F5EC;color:#1D7A4F;display:grid;place-items:center;flex:none;}
+#content.is-home .smw-ok svg{width:14px;height:14px;}
+#content.is-home .smw-q{width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--navy);display:grid;place-items:center;font:700 13px var(--sans);flex:none;}
+#content.is-home .smw-rank{display:flex;align-items:center;gap:9px;min-width:0;}
+#content.is-home .smw-ring{width:44px;height:44px;flex:none;}
+#content.is-home .smw-ring text{font:700 17px var(--sans);fill:var(--navy);}
+#content.is-home .smw-thanks{font-size:12px;font-weight:550;color:#0070B0;line-height:1.3;}
+html[data-theme="dark"] #content.is-home .smw-ring text{fill:#fff;}
+html[data-theme="dark"] #content.is-home .smw-thanks{color:var(--cyan);}
+@media (prefers-reduced-motion:reduce){#content.is-home .smw{transition:none;}#content.is-home .smw:active{transform:none;}}
