@@ -5300,6 +5300,53 @@ html[data-theme="dark"] .prep-act{ color:var(--ink); }
 .prep-after .prep-act{ background:var(--navy); color:#fff; border:0; }
 @media (prefers-reduced-motion: reduce){ .prep-sheet{ transition:none; } }
 
+
+/* ---------- Appointment mode ----------
+   Started from the briefing. A quiet screen: a big lookup over the whole
+   glossary (that specialty first) plus False Friends, the briefing's words,
+   no Dr. Smiley anywhere, the screen kept on (Wake Lock). A pill brings you
+   back from any page; Done asks for new words and adds 5 team points (3+
+   minutes). Saved in ih_appt so a reload mid-appointment keeps it. */
+.prep-start{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; border:0; border-radius:var(--r-lg); padding:13px 17px;
+  background:var(--navy); color:#fff; font:650 16px/1.25 var(--sans); cursor:pointer; min-height:56px;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.18), 0 8px 20px -12px rgba(22,55,90,0.5); transition:transform .15s var(--ease); }
+.prep-start svg{ width:26px; height:26px; flex:none; }
+.prep-start small{ display:block; font-size:12px; font-weight:500; opacity:.85; margin-top:2px; }
+.prep-start:active{ transform:scale(.98); }
+.prep-start:focus-visible, .appt-done:focus-visible, .appt-pill:focus-visible, .appt-hit button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.appt{ display:flex; flex-direction:column; gap:13px; max-width:720px; padding-bottom:110px; }
+.appt-hd{ display:flex; align-items:flex-start; gap:13px; }
+.appt-hd > div{ flex:1; min-width:0; }
+.appt-hd small{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--danger); }
+.appt-hd small i, .appt-pill i{ width:8px; height:8px; border-radius:50%; background:var(--danger); flex:none; animation:apptBeat 2s ease-in-out infinite; }
+.appt-pill i{ background:#FF8A9B; }
+@keyframes apptBeat{ 50%{ opacity:.35; } }
+.appt-hd h1{ margin:2px 0 0; font-size:26px; font-weight:700; letter-spacing:-.03em; color:var(--ink); }
+.appt-hd p{ margin:2px 0 0; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.appt-done{ flex:none; min-height:44px; padding:0 20px; border-radius:999px; border:0; background:var(--navy); color:#fff; font:650 15px var(--sans); cursor:pointer; }
+html[data-theme="dark"] .appt-done, html[data-theme="dark"] .prep-start{ background:#3A4794; }
+.appt-q{ width:100%; box-sizing:border-box; height:56px; border-radius:var(--r-lg); border:1px solid var(--line); padding:0 17px;
+  font:500 20px var(--sans); color:var(--ink); background:var(--paper);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.appt-label{ font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin:4px 0 -4px; }
+#apptResults{ display:flex; flex-direction:column; gap:6px; }
+.appt-hit{ display:flex; align-items:center; gap:9px; background:var(--paper); border-radius:var(--r-md); padding:9px 9px 9px 17px; border:1px solid var(--line-soft); }
+.appt-hit > div{ flex:1; min-width:0; }
+.appt-es{ font-size:24px; font-weight:650; letter-spacing:-.02em; color:var(--ink); line-height:1.2; overflow-wrap:anywhere; }
+.appt-en{ font-size:16px; color:var(--ink-soft); margin-top:2px; overflow-wrap:anywhere; }
+.appt-hit.is-trap{ border-color:color-mix(in srgb, var(--danger) 35%, var(--line)); }
+.appt-hit.is-trap .appt-en{ color:var(--danger); }
+.appt-hit button{ width:44px; height:44px; flex:none; border-radius:50%; border:1px solid var(--line); background:var(--bg-hi); color:var(--ink-soft); cursor:pointer; display:grid; place-items:center; }
+.appt-hit button svg{ width:20px; height:20px; }
+.appt-none{ color:var(--ink-soft); font-size:14px; margin:0; }
+.appt-pill{ position:fixed; z-index:61; left:50%; translate:-50% 0; bottom:calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) + 76px); display:none; align-items:center; gap:9px;
+  min-height:40px; padding:0 17px; border-radius:999px; border:0; background:var(--navy); color:#fff; font:650 14px var(--sans); cursor:pointer;
+  box-shadow:0 8px 20px -8px rgba(22,55,90,.55); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.appt-pill.is-on{ display:inline-flex; }
+@media (min-width:901px){ .appt-pill{ left:auto; right:26px; translate:none; bottom:26px; } }
+body:has(.overlay.show) .appt-pill, body:has(.gs-overlay.show) .appt-pill{ display:none; }
+@media (max-width:900px){ body.kb-open .appt-pill{ display:none; } }   /* the on-screen keyboard covers it */
+@media (prefers-reduced-motion: reduce){ .appt-hd small i, .appt-pill i{ animation:none; } .prep-start{ transition:none; } .prep-start:active{ transform:none; } }
 /* ---------- Dr. Smiley's career ----------
    The team levels him up together. Team points (terminology-meta/smiley,
    counted from the day this shipped): +1 per term added, +1 per practice
@@ -5340,7 +5387,7 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
 @media (max-width:900px){
   .smiley-rider{ display:block; position:fixed; left:0; bottom:0; width:44px; height:44px; z-index:59;
     pointer-events:none; opacity:0; transform-origin:50% 100%; will-change:transform, opacity; }
-  .smiley-rider-bob{ display:block; width:100%; height:100%; }
+  .smiley-rider-bob{ display:block; width:100%; height:100%; transform-origin:50% 100%; }
   .smiley-rider.is-up .smiley-rider-bob{ animation:smileyBob 2.6s ease-in-out infinite; }
   @keyframes smileyBob{ 50%{ transform:translateY(-1.5px); } }
   .smiley-rider .ask-face{ display:block; width:44px; height:44px; margin:0; transition:scale .16s var(--ease); }
@@ -8583,6 +8630,7 @@ function startChatListener(){
         // No notification for your own message, and none while you're
         // already looking at the chat — the badge is enough there.
         if(mine) return;
+        smileyReact('wave');
         if(document.visibilityState === 'visible' && activeCategory === 'chat') return;
         showChatNotification(m);
       });
@@ -12399,6 +12447,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'prep'){
     showTopbar = false;
+  } else if(activeCategory === 'appt'){
+    showTopbar = false;
   }
 
   // Glossary screens (one domain, or All domains) get the colored banner:
@@ -12482,6 +12532,7 @@ function render(){
   syncTopBar();
   renderContent();
   smileyRider.sync();
+  apptPillSync();
 }
 
 /* ---------- Offline outbox ----------
@@ -12949,6 +13000,12 @@ function renderContent(){
 
   if(activeCategory === 'prep'){
     content.innerHTML = renderPrep();
+    return;
+  }
+
+  if(activeCategory === 'appt'){
+    content.innerHTML = renderAppt();
+    apptWire();
     return;
   }
 
@@ -14844,6 +14901,7 @@ function finishQuiz(){
   quizActive = false;
   saveQuizResult();
   teamPoints(total);
+  smileyReact('hearts');
   renderContent();
   // After the results are on screen, so a badge lands on top of the score
   // rather than competing with the ring for attention.
@@ -15639,6 +15697,7 @@ function renderHome(){
     <section class="home-sec home-quick-section">
       <div class="qa-grid">${quickActions}</div>
     </section>
+    ${warmupHtml()}
     ${smileyCareerHtml()}
     ${/* Creating a domain was only reachable from inside the glossary or the
          desktop sidebar -- nothing on Home, which is where a phone opens.
@@ -19004,6 +19063,204 @@ window.addEventListener('resize', () => { if(activeCategory === 'ask' && !docume
 // home-polish.js calls this when the greeting smiley is tapped.
 window.openAskHub = function(){ ASK.view = 'chat'; setCategory('ask'); };
 
+/* ---------- Appointment mode ---------- */
+// Styles and the idea are with the .appt rules.
+const ICON_CLOCK_APPT = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v4.2l2.6 1.6M9.5 2.8h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+let APPT = null, apptLock = null, apptTimer = 0;
+try{ APPT = JSON.parse(localStorage.getItem('ih_appt') || 'null'); }catch(e){ APPT = null; }
+if(APPT && !(Date.now() - APPT.start < 5 * 3600e3)) APPT = null;     // forgotten for hours: let it go
+function apptActive(){ return !!APPT; }
+function apptMinutes(){ return APPT ? Math.max(0, Math.floor((Date.now() - APPT.start) / 60000)) : 0; }
+function apptSave(){ try{ APPT ? localStorage.setItem('ih_appt', JSON.stringify(APPT)) : localStorage.removeItem('ih_appt'); }catch(e){} }
+// One request at a time: starting the appointment and painting its screen
+// both ask, and two locks would leave one never released.
+let apptLockAsking = false;
+async function apptKeepAwake(){
+  if(!APPT || !navigator.wakeLock || apptLock || apptLockAsking || document.hidden) return;
+  apptLockAsking = true;
+  try{
+    const lock = await navigator.wakeLock.request('screen');
+    if(!APPT){ lock.release(); return; }                 // ended while asking
+    apptLock = lock;
+    lock.addEventListener('release', () => { if(apptLock === lock) apptLock = null; });
+  }catch(e){ apptLock = null; }
+  finally{ apptLockAsking = false; }
+}
+function startAppt(){
+  APPT = { start: Date.now(), domainId: PREP.domainId, doctor: PREP.doctor || '' };
+  apptSave(); apptKeepAwake();
+  setCategory('appt');
+}
+function apptClockText(){ const m = apptMinutes(); return m < 1 ? 'just started' : m + (m === 1 ? ' minute' : ' minutes'); }
+function renderAppt(){
+  if(!APPT) return `<div class="appt"><p class="appt-none">No appointment running.</p></div>`;
+  const dom = DATA.categories.find(c => c.id === APPT.domainId);
+  const entry = prepDoctorEntry(APPT.doctor), doc = entry ? entry.name : APPT.doctor;
+  return `<div class="appt">
+    <div class="appt-hd"><div><small><i></i>In appointment</small><h1>${escapeHtml(dom ? dom.name : 'Appointment')}</h1>
+      <p>${doc ? 'with ' + escapeHtml(doc) + ' · ' : ''}<span id="apptClock">${apptClockText()}</span></p></div>
+      <button type="button" class="appt-done" onclick="endAppt()">Done</button></div>
+    <label class="sr-only" for="apptQ">Look up a word in English or Spanish</label>
+    <input id="apptQ" class="appt-q" type="search" placeholder="Look up a word" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+    <div id="apptResults" aria-live="polite">${apptResultsHtml('')}</div>
+  </div>`;
+}
+function apptHit(en, es, trap){
+  const speak = es ? `<button type="button" aria-label="Hear it in Spanish" onclick="speakText(this, ${escapeAttr(JSON.stringify(es))}, 'es-US')">${ICON_SPEAKER}</button>` : '';
+  return `<div class="appt-hit${trap ? ' is-trap' : ''}"><div><div class="appt-es">${escapeHtml(es || '')}</div><div class="appt-en">${escapeHtml(en || '')}</div></div>${speak}</div>`;
+}
+// The whole glossary, this specialty (and its subgroups) first, words that
+// start with what you typed first; plus any False Friend it matches.
+function apptResultsHtml(q){
+  const dom = APPT && DATA.categories.find(c => c.id === APPT.domainId);
+  const f = foldText(String(q || '').trim()).toLowerCase();
+  if(!f){
+    const words = dom ? prepWords(dom, 8).words : [];
+    return words.length ? `<p class="appt-label">Words to have ready</p>${words.map(x => apptHit(x.t.en, x.t.es)).join('')}` : '';
+  }
+  const inDom = id => dom && (id === dom.id || (DATA.categories.find(c => c.id === id) || {}).parentId === dom.id);
+  const hits = [];
+  allTermsFlat().forEach(t => {
+    const en = foldText(t.en || '').toLowerCase(), es = foldText(t.es || '').toLowerCase();
+    const at = [en.indexOf(f), es.indexOf(f)].filter(i => i >= 0);
+    if(!at.length) return;
+    const score = (Math.min(...at) === 0 ? 0 : 2) - ((en === f || es === f) ? 1 : 0) + (inDom(t.categoryId) ? 0 : 1);
+    hits.push({ t, score });
+  });
+  hits.sort((a, b) => a.score - b.score || (a.t.en || '').length - (b.t.en || '').length);
+  const traps = FALSE_FRIENDS.filter(x => foldText(x.es).toLowerCase().includes(f) || foldText(x.looks).toLowerCase().includes(f)).slice(0, 2);
+  const html = traps.map(x => apptHit(`means ${String(x.means).split(' —')[0]}, not “${x.looks}” · say ${x.say}`, x.es, true)).join('')
+    + hits.slice(0, 8).map(h => apptHit(h.t.en, h.t.es)).join('');
+  return html || `<p class="appt-none">Not in the Hub yet. Note it, and add it after the appointment.</p>`;
+}
+function apptWire(){
+  const q = document.getElementById('apptQ'), box = document.getElementById('apptResults');
+  if(q && box) q.addEventListener('input', () => { box.innerHTML = apptResultsHtml(q.value); });
+  apptKeepAwake();
+}
+function endAppt(){
+  if(!APPT) return;
+  const mins = apptMinutes(), domainId = APPT.domainId;
+  APPT = null; apptSave();
+  try{ if(apptLock) apptLock.release(); }catch(e){}
+  apptLock = null;
+  if(mins >= 3) teamPoints(5);
+  let ov = document.getElementById('apptDoneOverlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.className = 'overlay prep-overlay'; ov.id = 'apptDoneOverlay';
+    ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('show'); });
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `<div class="prep-sheet" role="dialog" aria-modal="true" aria-labelledby="apptDoneTitle">
+    <h2 id="apptDoneTitle">Appointment done</h2>
+    <p>${mins < 1 ? 'Under a minute' : mins + (mins === 1 ? ' minute' : ' minutes')}.${mins >= 3 ? ' +5 team points.' : ''} Any new words worth keeping?</p>
+    <button type="button" class="prep-go" id="apptAdd">Add new words</button>
+    <button type="button" class="prep-act" id="apptSkip" style="margin:9px auto 0;display:block">Not now</button></div>`;
+  ov.querySelector('#apptAdd').addEventListener('click', () => { ov.classList.remove('show'); if(domainId) setCategory(domainId); openAddModal(); });
+  ov.querySelector('#apptSkip').addEventListener('click', () => { ov.classList.remove('show'); setCategory('prep'); });
+  render();
+  ov.classList.add('show');
+}
+// The pill that brings you back to the appointment from any other page.
+function apptPillSync(){
+  let pill = document.getElementById('apptPill');
+  if(!APPT){ if(pill) pill.classList.remove('is-on'); clearInterval(apptTimer); apptTimer = 0; return; }
+  if(!pill){
+    pill = document.createElement('button'); pill.type = 'button'; pill.id = 'apptPill'; pill.className = 'appt-pill';
+    pill.addEventListener('click', () => setCategory('appt'));
+    document.body.appendChild(pill);
+  }
+  const paint = () => {
+    if(!APPT) return;
+    pill.innerHTML = `<i aria-hidden="true"></i>In appointment · ${apptMinutes()} min`;
+    const c = document.getElementById('apptClock'); if(c) c.textContent = apptClockText();
+  };
+  paint();
+  pill.classList.toggle('is-on', activeCategory !== 'appt');
+  if(!apptTimer) apptTimer = setInterval(paint, 30000);
+}
+document.addEventListener('visibilitychange', () => { if(!document.hidden) apptKeepAwake(); });
+
+/* ---------- Dr. Smiley reacts ---------- */
+// Whichever Dr. Smiley is on screen reacts: on Home the greeting smiley
+// (one of his own acts), elsewhere the one on the tab bar. Quiet during an
+// appointment.
+const SMILEY_HOME_ACT = { hop: 'bouncy', hearts: 'hearts', wave: 'hum', cheer: 'party', think: 'gleam' };
+function smileyReact(kind){
+  if(apptActive() || document.hidden) return;
+  if(activeCategory === 'home'){ if(window.homeSmileyAct) window.homeSmileyAct(SMILEY_HOME_ACT[kind] || 'bouncy'); return; }
+  if(smileyFollows()) smileyRider.react(kind === 'think' ? 'wave' : kind);
+}
+
+/* ---------- Daily warm-up ----------
+   One quick question a day on Home (card styled in home-polish.css): the
+   Spanish for a word (one you're still learning when your Term Review
+   record is loaded), or what a False Friend really means. Answering keeps a
+   streak (days in a row), updates your Term Review record for that word,
+   adds a team point, and the Home smiley reacts. Today's question is saved
+   when first shown, so it can't change during the day. ih_warmup. */
+function warmupDay(offset){ const d = new Date(); d.setDate(d.getDate() + (offset || 0)); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function warmupState(){ try{ return JSON.parse(localStorage.getItem('ih_warmup') || '{}') || {}; }catch(e){ return {}; } }
+function warmupSaveState(st){ try{ localStorage.setItem('ih_warmup', JSON.stringify(st)); }catch(e){} }
+function warmupQuestion(){
+  const today = warmupDay(), st = warmupState();
+  if(st.qDay === today && st.q) return st.q;
+  let h = 2166136261; for(const ch of today + (whoAmI() || '')){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  const rnd = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const shuffle = a => a.map(x => [rnd(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+  const short = x => String(x.means).split(' —')[0];
+  const terms = allTermsFlat().filter(t => t.en && t.es && t.en.length < 40 && t.es.length < 40);
+  let q;
+  if(terms.length < 3 || rnd() < .3){
+    const f = pick(FALSE_FRIENDS), other = pick(FALSE_FRIENDS.filter(x => x !== f));
+    q = { kind: 'ff', prompt: `“${f.es}” means…`, options: shuffle([...new Set([short(f), f.looks, short(other)])]), answer: short(f),
+          note: `For “${f.looks}”, say “${f.say}”.` };
+  }else{
+    const learning = terms.filter(t => TERM_REVIEWS[t.id] && TERM_REVIEWS[t.id].box <= 1);
+    const t = pick(learning.length ? learning : terms);
+    const same = terms.filter(x => x.id !== t.id && x.es !== t.es && x.categoryId === t.categoryId);
+    const pool = (same.length >= 2 ? same : terms.filter(x => x.id !== t.id && x.es !== t.es)).slice();
+    const wrong = [];
+    while(wrong.length < 2 && pool.length){ const x = pool.splice(Math.floor(rnd() * pool.length), 1)[0]; if(!wrong.includes(x.es)) wrong.push(x.es); }
+    q = { kind: 'term', termId: t.id, prompt: `The Spanish for “${t.en}”`, options: shuffle([t.es, ...wrong]), answer: t.es, note: t.categoryName };
+  }
+  warmupSaveState({ ...st, qDay: today, q });
+  return q;
+}
+function warmupHtml(){
+  if(!DATA || !DATA.categories || !DATA.categories.length) return '';
+  const q = warmupQuestion(), st = warmupState(), today = warmupDay();
+  const done = st.day === today;
+  const streak = st.day === today || st.day === warmupDay(-1) ? (st.streak || 0) : 0;
+  const head = `<div class="wu-head"><span class="wu-eyebrow">Today’s warm-up</span>${streak ? `<span class="wu-streak">${streak === 1 ? '1 day' : streak + ' days in a row'}</span>` : ''}</div>`;
+  if(done){
+    return `<section class="home-sec warmup is-done" id="warmup" aria-label="Today's warm-up">${head}
+      <p class="wu-prompt">${escapeHtml(q.prompt)}</p>
+      <p class="wu-result ${st.correct ? 'is-right' : 'is-wrong'}" role="status">${st.correct ? 'Right!' : 'The answer:'} <b>${escapeHtml(q.answer)}</b></p>
+      <p class="wu-note">${q.note ? escapeHtml(q.note) + ' · ' : ''}Back tomorrow with a new one.</p></section>`;
+  }
+  return `<section class="home-sec warmup" id="warmup" aria-label="Today's warm-up">${head}
+    <p class="wu-prompt">${escapeHtml(q.prompt)}</p>
+    <div class="wu-opts">${q.options.map((o, i) => `<button type="button" class="wu-opt" onclick="warmupAnswer(${i})">${escapeHtml(o)}</button>`).join('')}</div></section>`;
+}
+function warmupAnswer(i){
+  const q = warmupQuestion(), st = warmupState(), today = warmupDay();
+  if(st.day === today) return;
+  const correct = q.options[i] === q.answer;
+  const streak = st.day === warmupDay(-1) ? (st.streak || 0) + 1 : 1;
+  warmupSaveState({ ...st, day: today, correct, streak });
+  teamPoints(1);
+  if(q.kind === 'term' && whoAmI()){
+    const prior = TERM_REVIEWS[q.termId];
+    const box = correct ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0;
+    saveTermReview(q.termId, box, (prior ? prior.reviewCount : 0) + 1);
+  }
+  smileyReact(correct ? 'hearts' : 'think');
+  const el = document.getElementById('warmup');
+  if(el){ const t = document.createElement('div'); t.innerHTML = warmupHtml(); el.replaceWith(t.firstElementChild); }
+}
+
 /* ---------- Dr. Smiley's career ---------- */
 // Styles and the idea are with the .lv-acc rules; the Home card's look is in
 // home-polish.css. SMILEY_RANKS[i].at is the team points that rank needs.
@@ -19020,9 +19277,11 @@ function smileyLevel(points){
   SMILEY_RANKS.forEach((r, i) => { if((points || 0) >= r.at) lv = i + 1; });
   return lv;
 }
+let teamPointsLastAt = 0;
 function teamPoints(n){
   n = Math.round(+n || 0);
   if(!db || n <= 0) return;
+  teamPointsLastAt = Date.now();
   try{
     db.collection('terminology-meta').doc('smiley')
       .set({ points: firebase.firestore.FieldValue.increment(n), updatedAt: Date.now() }, { merge: true })
@@ -19032,6 +19291,7 @@ function teamPoints(n){
 // Terms added, read off the same summaries the activity log records.
 function teamPointsFor(summary){
   const s = String(summary || '');
+  if(/^(added|imported)/.test(s)) smileyReact('hop');
   let m;
   if((m = s.match(/^imported (\d+) term/)) || (m = s.match(/^added (\d+) .* from Doctor Prep$/))) return teamPoints(+m[1]);
   if(/^added (the term )?"/.test(s) || s === 'added a CoreCHI practice question') teamPoints(1);
@@ -19043,6 +19303,9 @@ function startSmileyCareer(){
     const before = SMILEY_POINTS;
     SMILEY_POINTS = (snap.exists && +snap.data().points) || 0;
     if(before !== null && smileyLevel(before) === smileyLevel(SMILEY_POINTS)){ refreshSmileyCareer(); return; }
+    // Your own points tipped the team into a new rank: he cheers where you
+    // are now; the full celebration waits for Home.
+    if(before !== null && smileyLevel(SMILEY_POINTS) > smileyLevel(before) && Date.now() - teamPointsLastAt < 8000 && activeCategory !== 'home') smileyReact('cheer');
     smileyDressAll();
     refreshSmileyCareer();
     smileyMaybeCelebrate();
@@ -19197,13 +19460,8 @@ function renderPrep(){
   if(!dom) return `<div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
   // Your practice record, loaded once; the screen repaints when it arrives.
   if(!prepReviewsAsked){ prepReviewsAsked = true; ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'prep') renderContent(); }).catch(() => {}); }
-  const cats = [dom].concat(DATA.categories.filter(c => c.parentId === dom.id));
-  const all = cats.flatMap(c => c.terms.map(t => ({ t, c })));
+  const { all, words } = prepWords(dom);
   const rec = id => TERM_REVIEWS[id];
-  const learning = all.filter(x => rec(x.t.id) && rec(x.t.id).box <= 1);
-  const fresh = all.filter(x => !rec(x.t.id));
-  const known = all.filter(x => rec(x.t.id) && rec(x.t.id).box > 1);
-  const words = learning.concat(fresh, known).slice(0, 10);
   const row = (x, pill) => `<button type="button" class="prep-row" onclick="prepOpenTerm('${escapeAttr(x.c.id)}','${escapeAttr(x.t.id)}')">
       <span class="prep-row-text"><b>${escapeHtml(x.t.en || '')}</b><em>${escapeHtml(x.t.es || '')}</em></span>${pill || ''}</button>`;
   const entry = prepDoctorEntry(PREP.doctor);
@@ -19215,6 +19473,7 @@ function renderPrep(){
   return `<div class="prep">
     <div class="prep-hd"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
       <div><small>Your briefing</small><h1>${escapeHtml(dom.name)}</h1><p>${docName ? 'with ' + escapeHtml(docName) + ' · ' : ''}<button type="button" class="prep-change" onclick="openPrep()">change</button></p></div></div>
+    <button type="button" class="prep-start" onclick="startAppt()">${ICON_CLOCK_APPT}<span>Start the appointment<small>A quiet screen with a big lookup. The screen stays on.</small></span></button>
     ${words.length ? `<div class="prep-card"><h3>Words to have ready <span>${words.length} of ${all.length}</span></h3>
       ${words.map(x => row(x, rec(x.t.id) && rec(x.t.id).box <= 1 ? '<span class="prep-pill">Still learning</span>' : '')).join('')}</div>` : ''}
     ${likely.length ? `<div class="prep-card"><h3>Likely with ${escapeHtml(docName)} <span>from Doctor Prep</span></h3>
@@ -19230,6 +19489,17 @@ function renderPrep(){
   </div>`;
 }
 let prepReviewsAsked = false;
+// A specialty's words for the briefing and the appointment: the ones you are
+// still learning (Term Review) first, then ones you haven't practiced.
+function prepWords(dom, n){
+  const cats = [dom].concat(DATA.categories.filter(c => c.parentId === dom.id));
+  const all = cats.flatMap(c => c.terms.map(t => ({ t, c })));
+  const rec = id => TERM_REVIEWS[id];
+  const learning = all.filter(x => rec(x.t.id) && rec(x.t.id).box <= 1);
+  const fresh = all.filter(x => !rec(x.t.id));
+  const known = all.filter(x => rec(x.t.id) && rec(x.t.id).box > 1);
+  return { all, words: learning.concat(fresh, known).slice(0, n || 10) };
+}
 function prepOpenTerm(catId, termId){
   setCategory(catId);
   setTimeout(() => {
@@ -19258,6 +19528,7 @@ function prepAddWords(){
    it fits the cloud's two lines. CE events carry no event date, only when
    they were posted, so the news is that a new one was posted. */
 function hubNews(){
+  if(apptActive()) return null;                 // quiet during an appointment
   let seen;
   try{ seen = JSON.parse(localStorage.getItem('ih_newsSeen') || '[]'); }catch(e){ seen = []; }
   const me = (whoAmI() || '').trim().toLowerCase(), now = Date.now(), RECENT = 3 * DAY;
@@ -19352,7 +19623,7 @@ const smileyRider = (() => {
   function topBar(){
     const b = document.getElementById('tgSmiley');
     if(!b) return;
-    const on = smileyFollows() && activeCategory !== 'home' && activeCategory !== 'ask' && !smileyElsewhere();
+    const on = smileyFollows() && activeCategory !== 'home' && activeCategory !== 'ask' && !smileyElsewhere() && !apptActive();
     b.hidden = !on;
     if(!on){ topLast = null; return; }
     if(!b.firstChild) b.innerHTML = `<span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>`;
@@ -19379,7 +19650,7 @@ const smileyRider = (() => {
       // Anchored to the same bottom edge as the bar, so Safari's toolbar
       // sliding away moves them together.
       bottom: parseFloat(getComputedStyle(bar).bottom) + bar.offsetHeight - (44 - OUT),
-      hide: !smileyFollows() || activeCategory === 'home' || activeCategory === 'ask' || smileyElsewhere()
+      hide: !smileyFollows() || activeCategory === 'home' || activeCategory === 'ask' || smileyElsewhere() || apptActive()
     };
   }
   function paint(now){
@@ -19440,7 +19711,26 @@ const smileyRider = (() => {
   }
   window.addEventListener('resize', () => { if(el) requestAnimationFrame(sync); });
   document.addEventListener('visibilitychange', () => { if(!document.hidden && el) sync(); });
-  return { sync };
+  // A short reaction while he sits on the tab bar. False if he isn't showing.
+  function react(kind){
+    if(!el || !(shown > .98) || hop || getComputedStyle(el).visibility === 'hidden') return false;
+    const bob = el.firstChild, happy = kind === 'hearts' || kind === 'cheer';
+    if(happy){ face.classList.add('is-happy'); setTimeout(() => face.classList.remove('is-happy'), 1800); }
+    if(reduce.matches || !bob.animate) return true;
+    const K = {
+      hop:   [[0,0,1,1],[0,-16,.94,1.08],[0,0,1.08,.9],[0,-6,1,1],[0,0,1,1]],
+      wave:  [[0,0,0],[0,0,-14],[0,0,12],[0,0,-10],[0,0,8],[0,0,0]],
+      hearts:[[0,0,1,1],[0,-5,1.05,1.05],[0,0,1,1],[0,-3,1.03,1.03],[0,0,1,1]],
+      cheer: [[0,0,0],[0,-26,180],[0,-30,360],[0,0,360]],
+    }[kind];
+    if(!K) return true;
+    const frames = K.map(k => kind === 'wave' || kind === 'cheer'
+      ? { transform: `translateY(${k[1]}px) rotate(${k[2]}deg)` }
+      : { transform: `translateY(${k[1]}px) scale(${k[2]},${k[3]})` });
+    bob.animate(frames, { duration: kind === 'cheer' ? 900 : kind === 'wave' ? 1100 : 700, easing: 'cubic-bezier(.3,1.3,.5,1)' });
+    return true;
+  }
+  return { sync, react };
 })();
 
 /* ============ Init ============ */

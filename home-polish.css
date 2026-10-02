@@ -795,3 +795,24 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .sc-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0070B0,#00B0E0);}
 #content.is-home .sc-note{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.45;}
 #content.is-home .sc-note b{color:var(--ink);font-weight:600;}
+
+/* ---------- Daily warm-up card (Home) ----------
+   Markup from warmupHtml() in index.html. No face here either: the greeting
+   smiley above reacts to the answer. */
+#content.is-home .warmup{background:var(--paper);border-radius:var(--r-lg);padding:13px 17px;border:1px solid var(--line-soft);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);}
+#content.is-home .wu-head{display:flex;align-items:center;gap:9px;}
+#content.is-home .wu-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+#content.is-home .wu-streak{margin-left:auto;font-size:12px;font-weight:650;color:#8A5200;background:#FFF2DC;border-radius:999px;padding:2px 9px;}
+#content.is-home .wu-prompt{margin:6px 0 9px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
+#content.is-home .wu-opts{display:flex;flex-direction:column;gap:6px;}
+#content.is-home .wu-opt{min-height:44px;padding:9px 13px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--bg-hi);
+  font:550 15px/1.3 var(--sans);color:var(--ink);text-align:left;cursor:pointer;transition:transform .15s var(--ease);}
+#content.is-home .wu-opt:active{transform:scale(.98);}
+#content.is-home .wu-opt:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
+#content.is-home .wu-result{margin:0;font-size:15px;color:var(--ink-soft);}
+#content.is-home .wu-result b{color:var(--ink);font-weight:650;}
+#content.is-home .wu-result.is-right{color:#1D7A4F;}
+#content.is-home .wu-note{margin:4px 0 0;font-size:12px;color:var(--ink-soft);}
+html[data-theme="dark"] #content.is-home .wu-result.is-right{color:#5FD3A0;}
+@media (prefers-reduced-motion:reduce){#content.is-home .wu-opt{transition:none;}#content.is-home .wu-opt:active{transform:none;}}

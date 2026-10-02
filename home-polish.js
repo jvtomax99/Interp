@@ -263,6 +263,9 @@
   // index.html calls this when the team reaches a new rank: his next idle
   // act is the party spin with its burst of logo squares, straight away.
   window.homeSmileyCelebrate=()=>{forcedAct='party';};
+  // index.html's reactions (a term added, a quiz finished, the warm-up...)
+  // play one of his own acts next: 'bouncy', 'hearts', 'hum', 'gleam', 'party'.
+  window.homeSmileyAct=name=>{forcedAct=name;};
   function startIdle(button){
     idleStop();
     if(reduced.matches||document.hidden||!button||!button.isConnected)return;
