@@ -5273,32 +5273,102 @@ html[data-theme="dark"] .ask-chip.prep-chip{ color:var(--ink); }
 .prep-go{ width:100%; min-height:48px; border-radius:999px; border:0; background:var(--navy); color:#fff; font:650 15px var(--sans); cursor:pointer; flex:none; }
 .prep-go:disabled{ opacity:.45; cursor:default; }
 .prep{ display:flex; flex-direction:column; gap:13px; max-width:720px; }
-.prep-hd{ display:flex; align-items:center; gap:13px; }
-.prep-hd .ask-face{ width:52px; height:52px; margin:0; flex:none; }
-.prep-hd small{ display:block; font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
-.prep-hd h1{ margin:2px 0 0; font-size:26px; font-weight:700; letter-spacing:-.03em; color:var(--ink); }
-.prep-hd p{ margin:2px 0 0; font-size:13px; color:var(--ink-soft); }
-.prep-change{ background:none; border:0; padding:6px 2px; margin:-6px 0; font:inherit; color:inherit; text-decoration:underline; cursor:pointer; }
-.prep-card{ background:var(--paper); border-radius:var(--r-lg); padding:13px 17px; border:1px solid var(--line-soft);
+/* Hero in the specialty's colour (--dc), darkened toward navy so white text
+   reads on every domain colour. */
+.prep-hero{ position:relative; overflow:hidden; isolation:isolate; display:flex; align-items:center; gap:13px; padding:17px; border-radius:var(--r-lg); color:#fff;
+  background:radial-gradient(90% 120% at 100% 0%, rgba(255,255,255,.16), transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--dc) 72%, #1A2152), color-mix(in srgb, var(--dc) 45%, #11163A));
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.22), 0 1px 2px rgba(20,43,67,.08), 0 14px 28px -14px color-mix(in srgb, var(--dc) 60%, transparent); }
+.prep-hero::after{ content:""; position:absolute; right:-40px; bottom:-70px; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.08); z-index:-1; }
+.prep-hero .ask-face{ width:56px; height:56px; margin:0; flex:none; filter:drop-shadow(0 4px 8px rgba(0,0,0,.2)); }
+.prep-hero .ask-face.is-cheer{ animation:prepCheer .9s cubic-bezier(.3,1.4,.5,1); }
+@keyframes prepCheer{ 30%{ transform:translateY(-10px) rotate(-8deg) scale(1.08); } 60%{ transform:translateY(0) rotate(6deg); } }
+.prep-hero-text{ flex:1; min-width:0; }
+.prep-hero small{ display:block; font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.78); }
+.prep-hero h1{ margin:2px 0 0; font-size:26px; font-weight:700; letter-spacing:-.035em; line-height:1.1; color:#fff; overflow-wrap:anywhere; }
+.prep-hero p{ margin:4px 0 0; font-size:13px; color:rgba(255,255,255,.88); display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+.prep-change{ min-height:30px; border:0; border-radius:999px; padding:0 11px; background:rgba(255,255,255,.2); font:650 12px var(--sans); color:#fff; cursor:pointer; }
+.prep-ready{ position:relative; display:block; width:64px; height:64px; flex:none; }
+.prep-ready svg{ width:64px; height:64px; }
+.prep-ready circle{ transition:stroke-dasharray .6s var(--ease); }
+.prep-ready b{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font:700 16px/1 var(--sans); letter-spacing:-.02em; }
+.prep-ready b span{ font:650 8px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; opacity:.82; margin-top:3px; }
+.prep-sec{ display:flex; align-items:baseline; gap:9px; margin:9px 2px -4px; }
+.prep-sec h3{ margin:0; font-size:17px; font-weight:650; letter-spacing:-.025em; color:var(--ink); }
+.prep-sec span{ margin-left:auto; font-size:12px; font-weight:550; color:var(--ink-faint); }
+.prep-link{ margin-left:auto; min-height:32px; border:0; background:none; padding:0 2px; font:650 13px var(--sans); color:var(--navy); cursor:pointer; }
+html[data-theme="dark"] .prep-link{ color:var(--ink); }
+.prep-card{ background:var(--paper); border-radius:var(--r-lg); padding:9px 17px; border:1px solid var(--line-soft);
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
-.prep-card h3{ margin:4px 0 9px; font-size:15px; font-weight:650; letter-spacing:-.02em; color:var(--ink); display:flex; align-items:baseline; gap:9px; }
-.prep-card h3 span{ margin-left:auto; font-size:12px; font-weight:500; color:var(--ink-faint); }
-.prep-row{ display:flex; align-items:center; gap:9px; width:100%; min-height:44px; padding:6px 0; border:0; border-top:1px solid var(--line-soft);
-  background:none; text-align:left; font:inherit; cursor:pointer; color:inherit; }
-.prep-row-text{ flex:1; min-width:0; display:flex; flex-wrap:wrap; column-gap:9px; align-items:baseline; }
-.prep-row b{ font-weight:600; color:var(--ink); font-size:14px; }
-.prep-row em{ font-style:normal; color:var(--ink-soft); font-size:14px; }
-.prep-pill{ font-size:11px; font-weight:650; border-radius:999px; padding:2px 7px; white-space:nowrap; flex:none; color:#8A5200; background:#FFF2DC; }
-.prep-ff{ padding:9px 0; border-top:1px solid var(--line-soft); font-size:13px; color:var(--ink-soft); line-height:1.45; }
-.prep-ff b{ color:var(--danger); font-size:14px; font-weight:650; }
-.prep-ff strong{ color:var(--ink); font-weight:600; }
+.prep-row{ display:flex; align-items:center; gap:13px; width:100%; min-height:44px; padding:9px 0; border-top:1px solid var(--line-soft); }
+.prep-row:first-child{ border-top:0; }
+.prep-row-text{ flex:1; min-width:0; }
+.prep-row b{ display:block; font-weight:600; color:var(--ink); font-size:15px; letter-spacing:-.01em; }
+.prep-row em{ display:block; font-style:normal; color:var(--ink-soft); font-size:14px; margin-top:2px; }
 .prep-note{ font-size:13px; color:var(--ink-soft); line-height:1.45; margin:0; }
-.prep-act{ margin-top:9px; min-height:44px; padding:0 17px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
-  color:var(--navy); font:650 13px var(--sans); cursor:pointer; }
+.prep-act{ min-height:44px; padding:0 17px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
+  color:var(--navy); font:650 13px var(--sans); cursor:pointer; white-space:nowrap; }
 html[data-theme="dark"] .prep-act{ color:var(--ink); }
-.prep-after{ text-align:center; color:var(--ink-soft); font-size:13px; padding:9px 0 26px; }
-.prep-after .prep-act{ background:var(--navy); color:#fff; border:0; }
-@media (prefers-reduced-motion: reduce){ .prep-sheet{ transition:none; } }
+.prep-act.is-main{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+/* The deck. The face is a button until it's turned; the back holds Again / Got it. */
+.prep-deck{ position:relative; height:252px; margin:4px 6px 30px; isolation:isolate; }
+.prep-fc{ position:absolute; inset:0; z-index:3; border-radius:var(--r-lg); }
+.prep-fc.is-behind{ z-index:2; transform:translateY(12px) scale(.95); }
+.prep-fc.is-b2{ z-index:1; transform:translateY(24px) scale(.9); }
+.prep-face{ position:absolute; inset:0; box-sizing:border-box; display:flex; flex-direction:column; align-items:stretch; padding:17px; margin:0; width:100%;
+  border-radius:var(--r-lg); border:1px solid var(--line-soft); background:var(--paper); text-align:center; font:inherit; color:inherit;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.82), 0 1px 2px rgba(20,43,67,.06), 0 14px 30px -14px rgba(22,55,90,.35); }
+button.prep-face{ cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform .15s var(--ease); }
+button.prep-face:active{ transform:scale(.98); }
+.prep-fc.is-behind .prep-face{ background:color-mix(in srgb, var(--paper) 94%, var(--line)); }
+.prep-fc.is-b2 .prep-face{ background:color-mix(in srgb, var(--paper) 88%, var(--line)); }
+.prep-face.is-back{ background:linear-gradient(160deg, color-mix(in srgb, var(--dc) 9%, var(--paper)), var(--paper)); }
+.prep-tag{ align-self:flex-start; font:650 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; padding:6px 9px; border-radius:999px;
+  background:color-mix(in srgb, var(--dc) 12%, var(--paper)); color:color-mix(in srgb, var(--dc) 80%, var(--ink)); }
+.prep-tag.is-learn{ background:#FFF2DC; color:#8A5200; }
+.prep-n{ position:absolute; top:19px; right:17px; font:600 12px var(--sans); color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+.prep-word{ margin:auto 0; font-size:27px; font-weight:650; letter-spacing:-.03em; line-height:1.15; color:var(--ink); overflow-wrap:anywhere; outline:none; }
+.prep-word.is-long{ font-size:21px; }
+.prep-word small{ display:block; margin-top:9px; font-size:14px; font-weight:500; letter-spacing:0; color:var(--ink-soft); }
+.prep-hint{ font:550 13px var(--sans); color:var(--ink-faint); }
+.prep-btns{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.prep-btns button{ min-height:48px; border-radius:999px; border:0; font:650 15px var(--sans); cursor:pointer; transition:transform .15s var(--ease); }
+.prep-btns button:active{ transform:scale(.96); }
+.prep-again{ background:#FFF2DC; color:#8A5200; }
+.prep-got{ background:#1D7A4F; color:#fff; }
+html[data-theme="dark"] .prep-again{ background:#4A3A1E; color:#FFD48A; }
+.prep-dots{ display:flex; justify-content:center; gap:5px; margin:-13px 0 4px; }
+.prep-dots i{ width:7px; height:7px; border-radius:999px; background:var(--line); transition:width .3s var(--ease), background .3s; }
+.prep-dots i.ok{ background:#2FAE6E; } .prep-dots i.again{ background:#F2A93B; } .prep-dots i.now{ width:18px; background:var(--navy); }
+html[data-theme="dark"] .prep-dots i.now{ background:var(--ink); }
+.prep-done{ text-align:center; padding:17px; }
+.prep-done > b{ display:block; font-size:22px; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
+.prep-done > p{ margin:6px 0 9px; color:var(--ink-soft); font-size:14px; }
+.prep-done-list{ text-align:left; }
+.prep-mark{ width:26px; height:26px; border-radius:50%; flex:none; display:grid; place-items:center; font:700 13px var(--sans); }
+.prep-mark.ok{ background:#E3F5EC; color:#1D7A4F; } .prep-mark.again{ background:#FFF2DC; color:#8A5200; }
+.prep-done-btns{ display:flex; flex-wrap:wrap; justify-content:center; gap:9px; margin-top:13px; }
+
+/* Traps: red cards you swipe through. */
+.prep-traps{ display:flex; gap:9px; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -16px; padding:4px 16px 9px; scrollbar-width:none; }
+.prep-traps::-webkit-scrollbar{ display:none; }
+.prep-ff{ flex:0 0 min(78%, 320px); scroll-snap-align:start; box-sizing:border-box; padding:13px 17px; border-radius:var(--r-lg);
+  background:linear-gradient(150deg, var(--danger-soft), var(--paper)); border:1px solid color-mix(in srgb, var(--danger) 22%, var(--line-soft)); }
+.prep-ff b{ display:block; font-size:17px; font-weight:650; color:var(--danger); letter-spacing:-.02em; }
+.prep-ff b::before{ content:"⚠ "; }
+.prep-ff p{ margin:6px 0 0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+.prep-ff strong{ color:var(--ink); font-weight:650; }
+.prep-doc{ display:flex; align-items:center; gap:13px; padding:13px 17px; }
+.prep-av{ width:44px; height:44px; border-radius:50%; flex:none; display:grid; place-items:center; font:650 15px var(--sans); color:#fff; background:linear-gradient(135deg, var(--navy), #4A5BC4); }
+.prep-doc > div{ flex:1; min-width:0; }
+.prep-doc b{ display:block; font-size:15px; font-weight:650; color:var(--ink); }
+.prep-doc small{ display:block; font-size:13px; color:var(--ink-soft); line-height:1.35; margin-top:2px; }
+.prep-after{ text-align:center; color:var(--ink-soft); font-size:13px; padding:9px 0 0; }
+.prep-after .prep-act{ margin-top:9px; }
+.prep-dom:focus-visible, .prep-go:focus-visible, .prep-act:focus-visible, .prep-change:focus-visible, .prep-link:focus-visible,
+button.prep-face:focus-visible, .prep-btns button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){ .prep-sheet{ transition:none; } .prep-ready circle, .prep-dots i, button.prep-face, .prep-btns button{ transition:none; } .prep-hero .ask-face.is-cheer{ animation:none; } }
 
 
 
@@ -5338,12 +5408,14 @@ html[data-theme="dark"] .sm-thanks{ color:var(--cyan); }
    no Dr. Smiley anywhere, the screen kept on (Wake Lock). A pill brings you
    back from any page; Done asks for new words and adds 5 team points (3+
    minutes). Saved in ih_appt so a reload mid-appointment keeps it. */
-.prep-start{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; border:0; border-radius:var(--r-lg); padding:13px 17px;
-  background:var(--navy); color:#fff; font:650 16px/1.25 var(--sans); cursor:pointer; min-height:56px;
-  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.18), 0 8px 20px -12px rgba(22,55,90,0.5); transition:transform .15s var(--ease); }
-.prep-start svg{ width:26px; height:26px; flex:none; }
-.prep-start small{ display:block; font-size:12px; font-weight:500; opacity:.85; margin-top:2px; }
-.prep-start:active{ transform:scale(.98); }
+/* Start the appointment: right under the cards. (It floated above the tab
+   bar at first, but on a small phone it sat on top of the flashcard.) */
+.prep-startbar{ display:flex; justify-content:center; }
+.prep-start{ display:inline-flex; align-items:center; gap:9px; min-height:52px; padding:0 22px 0 17px; border:0; border-radius:999px;
+  background:var(--navy); color:#fff; font:650 15px var(--sans); cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.18), 0 10px 24px -8px rgba(37,46,109,.6); transition:transform .15s var(--ease); }
+.prep-start svg{ width:22px; height:22px; flex:none; }
+.prep-start:active{ transform:scale(.97); }
 .prep-start:focus-visible, .appt-done:focus-visible, .appt-pill:focus-visible, .appt-hit button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 .appt{ display:flex; flex-direction:column; gap:13px; max-width:720px; padding-bottom:110px; }
 .appt-hd{ display:flex; align-items:flex-start; gap:13px; }
@@ -15398,7 +15470,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1002.1042';
+const BUILD_ID = 'b1002.1316';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -19206,7 +19278,7 @@ function apptPillSync(){
     const c = document.getElementById('apptClock'); if(c) c.textContent = apptClockText();
   };
   paint();
-  pill.classList.toggle('is-on', activeCategory !== 'appt');
+  pill.classList.toggle('is-on', activeCategory !== 'appt' && activeCategory !== 'prep');   // the briefing has its own button
   if(!apptTimer) apptTimer = setInterval(paint, 30000);
 }
 document.addEventListener('visibilitychange', () => { if(!document.hidden) apptKeepAwake(); });
@@ -19605,45 +19677,168 @@ function renderPrep(){
   if(!dom) return `<div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
   // Your practice record, loaded once; the screen repaints when it arrives.
   if(!prepReviewsAsked){ prepReviewsAsked = true; ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'prep') renderContent(); }).catch(() => {}); }
-  const { all, words } = prepWords(dom);
-  const rec = id => TERM_REVIEWS[id];
-  const row = (x, pill) => `<button type="button" class="prep-row" onclick="prepOpenTerm('${escapeAttr(x.c.id)}','${escapeAttr(x.t.id)}')">
-      <span class="prep-row-text"><b>${escapeHtml(x.t.en || '')}</b><em>${escapeHtml(x.t.es || '')}</em></span>${pill || ''}</button>`;
+  const tile = getDomainTiles().find(t => t.id === dom.id);
   const entry = prepDoctorEntry(PREP.doctor);
   const docName = entry ? entry.name : PREP.doctor;
   const research = entry && entry.researchResult ? entry.researchResult
     : (doctorResearchState.status === 'done' && doctorResearchState.result && prepDoctorEntry(doctorResearchState.doctorName) === entry && entry ? doctorResearchState.result : null);
   const likely = research ? (researchTiers(research).find(t => t.key === 'core') || researchTiers(research)[0] || { terms: [] }).terms.slice(0, 6) : [];
   const traps = prepTraps(dom);
-  return `<div class="prep">
-    <div class="prep-hd"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
-      <div><small>Your briefing</small><h1>${escapeHtml(dom.name)}</h1><p>${docName ? 'with ' + escapeHtml(docName) + ' · ' : ''}<button type="button" class="prep-change" onclick="openPrep()">change</button></p></div></div>
-    <button type="button" class="prep-start" onclick="startAppt()">${ICON_CLOCK_APPT}<span>Start the appointment<small>A quiet screen with a big lookup. The screen stays on.</small></span></button>
-    ${words.length ? `<div class="prep-card"><h3>Words to have ready <span>${words.length} of ${all.length}</span></h3>
-      ${words.map(x => row(x, rec(x.t.id) && rec(x.t.id).box <= 1 ? '<span class="prep-pill">Still learning</span>' : '')).join('')}</div>` : ''}
-    ${likely.length ? `<div class="prep-card"><h3>Likely with ${escapeHtml(docName)} <span>from Doctor Prep</span></h3>
-      ${likely.map(t => `<div class="prep-row" style="cursor:default"><span class="prep-row-text"><b>${escapeHtml(t.en || '')}</b><em>${escapeHtml(t.es || '')}</em></span></div>`).join('')}</div>` : ''}
-    ${traps.length ? `<div class="prep-card"><h3>Traps to watch</h3>
-      ${traps.map(f => `<div class="prep-ff"><b>${escapeHtml(f.es)}</b> looks like “${escapeHtml(f.looks)}” but means <strong>${escapeHtml(String(f.means).split(' —')[0])}</strong>. Say <strong>${escapeHtml(f.say)}</strong>.</div>`).join('')}
-      <button type="button" class="prep-act" onclick="setCategory('falsefriends')">All False Friends</button></div>` : ''}
-    ${docName ? `<div class="prep-card"><h3>${escapeHtml(docName)}</h3>
-      ${entry && (entry.specialty || entry.hospitalLocation) ? `<p class="prep-note">${escapeHtml([entry.specialty, entry.hospitalLocation].filter(Boolean).join(' · '))}</p>` : ''}
-      ${research ? `<p class="prep-note">Doctor Prep has looked this doctor up${entry && entry.lastResearchedBy ? ' (' + escapeHtml(entry.lastResearchedBy) + ')' : ''}.</p><button type="button" class="prep-act" onclick="prepResearch()">Open in Doctor Prep</button>`
-        : `<p class="prep-note">Doctor Prep hasn’t looked this doctor up yet. It takes about 20 seconds and finds the terms likely to come up.</p><button type="button" class="prep-act" onclick="prepResearch()">Research this doctor</button>`}</div>` : ''}
+  const initials = String(docName || '').replace(/^dr\.?\s+/i, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  return `<div class="prep" style="--dc:${escapeAttr((tile && tile.color) || '#252E6D')}">
+    <div class="prep-hero"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
+      <div class="prep-hero-text"><small>Your briefing</small><h1>${escapeHtml(dom.name)}</h1>
+        <p>${docName ? 'with ' + escapeHtml(docName) : 'Any doctor'}<button type="button" class="prep-change" onclick="openPrep()">Change</button></p></div>
+      <span id="prepReady">${prepReadyHtml(dom)}</span></div>
+    <div class="prep-sec"><h3>Words to have ready</h3><span>About 2 minutes</span></div>
+    <div id="prepDeck">${prepDeckHtml(dom)}</div>
+    <div class="prep-startbar">${apptActive()
+      ? `<button type="button" class="prep-start" onclick="setCategory('appt')">${ICON_CLOCK_APPT}<span>Back to the appointment</span></button>`
+      : `<button type="button" class="prep-start" onclick="startAppt()">${ICON_CLOCK_APPT}<span>Start the appointment</span></button>`}</div>
+    ${likely.length ? `<div class="prep-sec"><h3>Likely with ${escapeHtml(docName)}</h3><span>from Doctor Prep</span></div>
+      <div class="prep-card">${likely.map(t => `<div class="prep-row"><span class="prep-row-text"><b>${escapeHtml(t.en || '')}</b><em>${escapeHtml(t.es || '')}</em></span></div>`).join('')}</div>` : ''}
+    ${traps.length ? `<div class="prep-sec"><h3>Traps to watch</h3><button type="button" class="prep-link" onclick="setCategory('falsefriends')">All False Friends</button></div>
+      <div class="prep-traps">${traps.map(f => `<div class="prep-ff"><b>${escapeHtml(f.es)}</b><p>Looks like “${escapeHtml(f.looks)}” but means <strong>${escapeHtml(String(f.means).split(' —')[0])}</strong>. Say <strong>${escapeHtml(f.say)}</strong>.</p></div>`).join('')}</div>` : ''}
+    ${docName ? `<div class="prep-sec"><h3>Your doctor</h3></div>
+      <div class="prep-card prep-doc"><span class="prep-av" aria-hidden="true">${escapeHtml(initials || 'Dr')}</span>
+        <div><b>${escapeHtml(docName)}</b><small>${research ? 'Doctor Prep has looked them up' + (entry && entry.lastResearchedBy ? ' (' + escapeHtml(entry.lastResearchedBy) + ')' : '')
+          : escapeHtml([entry && entry.specialty, 'Not looked up yet · about 20 seconds'].filter(Boolean).join(' · '))}</small></div>
+        <button type="button" class="prep-act" onclick="prepResearch()">${research ? 'Open' : 'Research'}</button></div>` : ''}
     <div class="prep-after">Back from the appointment?<br><button type="button" class="prep-act" onclick="prepAddWords()">Add new words</button></div>
   </div>`;
 }
 let prepReviewsAsked = false;
 // A specialty's words for the briefing and the appointment: the ones you are
-// still learning (Term Review) first, then ones you haven't practiced.
+// still learning (Term Review) first, then everyday ones you haven't
+// practiced (short, no codes like "(DANC)"), then the rest. Only words that
+// have their Spanish.
 function prepWords(dom, n){
   const cats = [dom].concat(DATA.categories.filter(c => c.parentId === dom.id));
-  const all = cats.flatMap(c => c.terms.map(t => ({ t, c })));
+  const all = cats.flatMap(c => c.terms.map(t => ({ t, c }))).filter(x => x.t.en && x.t.es);
   const rec = id => TERM_REVIEWS[id];
+  const plain = x => x.t.en.length <= 24 && !/\(|\b[A-Z]{3,}\b/.test(x.t.en);
   const learning = all.filter(x => rec(x.t.id) && rec(x.t.id).box <= 1);
   const fresh = all.filter(x => !rec(x.t.id));
   const known = all.filter(x => rec(x.t.id) && rec(x.t.id).box > 1);
-  return { all, words: learning.concat(fresh, known).slice(0, n || 10) };
+  return { all, words: learning.concat(fresh.filter(plain), fresh.filter(x => !plain(x)), known).slice(0, n || 10) };
+}
+
+/* The deck: one card at a time. Tap to see the Spanish, then Got it or
+   Again; each answer goes into your Term Review, so the misses come back.
+   The day's deck for a specialty is kept on the phone (ih_prepDeck), so
+   leaving and coming back carries on where you were. */
+const PREP_DECK_KEY = 'ih_prepDeck';
+function prepDeck(dom){
+  const key = dom.id + '|' + warmupDay();
+  let st = null;
+  try{ st = JSON.parse(localStorage.getItem(PREP_DECK_KEY) || 'null'); }catch(e){}
+  // Until you answer a card the picks keep up with your practice record,
+  // which can arrive after the first paint; after that the day's deck holds.
+  const untouched = st && st.key === key && !st.i && !st.flip && !Object.keys(st.marks || {}).length && !st.paid;
+  if(!st || st.key !== key || !Array.isArray(st.queue) || untouched){
+    const ids = prepWords(dom).words.map(x => x.t.id);
+    // ids: the day's words (the ring counts these). queue: the cards being gone through now.
+    st = { key, ids, queue: ids.slice(), i: 0, marks: {}, flip: false, paid: 0 };
+    prepDeckSave(st);
+  }
+  return st;
+}
+function prepDeckSave(st){ try{ localStorage.setItem(PREP_DECK_KEY, JSON.stringify(st)); }catch(e){} }
+function prepDeckTerms(dom, ids){
+  const byId = new Map(prepWords(dom, 1e6).all.map(x => [x.t.id, x]));
+  return ids.map(id => byId.get(id)).filter(Boolean);
+}
+function prepReadyHtml(dom){
+  const st = prepDeck(dom), all = prepDeckTerms(dom, st.ids), n = all.length;
+  const ok = all.filter(x => st.marks[x.t.id] === 'ok').length;
+  const r = 26, c = 2 * Math.PI * r;
+  return `<span class="prep-ready" role="img" aria-label="${ok} of ${n} words ready"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="6"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c * Math.max(n ? ok / n : 0, .02)).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 32 32)"/></svg><b>${ok}/${n}<span>ready</span></b></span>`;
+}
+function prepDeckHtml(dom){
+  const st = prepDeck(dom), words = prepDeckTerms(dom, st.queue), all = prepDeckTerms(dom, st.ids);
+  if(!all.length) return `<div class="prep-card"><p class="prep-note">No words with Spanish in ${escapeHtml(dom.name)} yet.</p></div>`;
+  const dots = `<div class="prep-dots" aria-hidden="true">${words.map((x, k) => `<i class="${k === st.i ? 'now' : st.marks[x.t.id] || ''}"></i>`).join('')}</div>`;
+  if(st.i >= words.length){
+    const again = all.filter(x => st.marks[x.t.id] === 'again'), ok = all.filter(x => st.marks[x.t.id] === 'ok').length;
+    return `<div class="prep-card prep-done">
+      <b>${again.length ? 'Almost ready' : '🎉 You’re ready'}</b>
+      <p>${ok} of ${all.length} down.${st.paid ? ` +${st.paid} team points for Dr. Smiley.` : ''}</p>
+      <div class="prep-done-list">${all.map(x => `<div class="prep-row"><span class="prep-mark ${st.marks[x.t.id] === 'again' ? 'again' : 'ok'}" aria-label="${st.marks[x.t.id] === 'again' ? 'Again' : 'Got it'}">${st.marks[x.t.id] === 'again' ? '↺' : '✓'}</span><span class="prep-row-text"><b>${escapeHtml(x.t.en)}</b><em>${escapeHtml(x.t.es)}</em></span></div>`).join('')}</div>
+      <div class="prep-done-btns">${again.length ? `<button type="button" class="prep-act is-main" onclick="prepDeckRestart(true)">Practice the ${again.length === 1 ? 'one' : again.length} again</button>` : ''}
+        <button type="button" class="prep-act" onclick="prepDeckRestart(false)">Go through all ${all.length}</button></div></div>`;
+  }
+  const x = words[st.i], learn = TERM_REVIEWS[x.t.id] && TERM_REVIEWS[x.t.id].box <= 1;
+  const long = s => String(s).length > 22 ? ' is-long' : '';
+  const n = `<span class="prep-n">${st.i + 1} / ${words.length}</span>`;
+  const face = st.flip
+    ? `<div class="prep-face is-back"><span class="prep-tag">Español</span>${n}
+        <div class="prep-word${long(x.t.es)}" tabindex="-1" id="prepWordEs" lang="es">${escapeHtml(x.t.es)}<small lang="en">${escapeHtml(x.t.en)}</small></div>
+        <div class="prep-btns"><button type="button" class="prep-again" onclick="prepMark('again')">Again</button><button type="button" class="prep-got" onclick="prepMark('ok')">Got it ✓</button></div></div>`
+    : `<button type="button" class="prep-face" id="prepFront" onclick="prepFlip()" aria-label="${escapeAttr(x.t.en)}. Tap to see the Spanish."><span class="prep-tag${learn ? ' is-learn' : ''}">${learn ? 'Still learning' : 'English'}</span>${n}
+        <span class="prep-word${long(x.t.en)}">${escapeHtml(x.t.en)}</span><span class="prep-hint">Tap to see the Spanish</span></button>`;
+  const behind = [1, 2].filter(k => words[st.i + k]).map(k => `<div class="prep-fc is-behind is-b${k}" aria-hidden="true"><div class="prep-face"></div></div>`).join('');
+  return `<div class="prep-deck"><div class="prep-fc" id="prepCard">${face}</div>${behind}</div>${dots}`;
+}
+function prepDeckPaint(focus){
+  const dom = DATA.categories.find(c => c.id === PREP.domainId);
+  const deck = document.getElementById('prepDeck'), ready = document.getElementById('prepReady');
+  if(!dom || !deck) return;
+  deck.innerHTML = prepDeckHtml(dom);
+  if(ready) ready.innerHTML = prepReadyHtml(dom);
+  const f = focus && document.getElementById(focus);
+  if(f) f.focus({ preventScroll: true });
+}
+const prepCalm = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function prepFlip(){
+  const dom = DATA.categories.find(c => c.id === PREP.domainId); if(!dom) return;
+  const st = prepDeck(dom), card = document.getElementById('prepCard');
+  if(st.flip) return;
+  st.flip = true; prepDeckSave(st);
+  if(prepCalm() || !card || !card.animate){ prepDeckPaint('prepWordEs'); return; }
+  // A card turn: squeeze to an edge, swap faces, open back out.
+  card.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 160, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' });
+  setTimeout(() => {
+    prepDeckPaint('prepWordEs');
+    const c = document.getElementById('prepCard');
+    if(c) c.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 230, easing: 'cubic-bezier(.2,.8,.2,1.15)' });
+  }, 160);
+}
+function prepMark(mark){
+  const dom = DATA.categories.find(c => c.id === PREP.domainId); if(!dom) return;
+  const st = prepDeck(dom), words = prepDeckTerms(dom, st.queue), x = words[st.i];
+  if(!x || !st.flip) return;
+  st.marks[x.t.id] = mark; st.i++; st.flip = false;
+  // Into Term Review, like a practice question: Got it moves it along, Again starts it over.
+  if(whoAmI()){
+    const prior = TERM_REVIEWS[x.t.id];
+    saveTermReview(x.t.id, mark === 'ok' ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0, (prior ? prior.reviewCount : 0) + 1);
+  }
+  const finished = st.i >= words.length;
+  // Once a day per specialty: a point for each word.
+  if(finished && !st.paid){ st.paid = st.ids.length; teamPoints(st.paid); }
+  prepDeckSave(st);
+  const after = () => {
+    prepDeckPaint(finished ? null : 'prepFront');
+    if(finished){
+      const face = document.querySelector('.prep-hero .ask-face');
+      if(face && !prepCalm()){ face.classList.remove('is-cheer'); void face.offsetWidth; face.classList.add('is-cheer'); }
+    }
+  };
+  const card = document.getElementById('prepCard');
+  if(prepCalm() || !card || !card.animate){ after(); return; }
+  const dir = mark === 'ok' ? 1 : -1;
+  card.animate([{ transform: 'none', opacity: 1 }, { transform: `translateX(${dir * 115}%) rotate(${dir * 12}deg)`, opacity: 0 }], { duration: 380, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' });
+  setTimeout(after, 380);
+}
+function prepDeckRestart(onlyAgain){
+  const dom = DATA.categories.find(c => c.id === PREP.domainId); if(!dom) return;
+  const st = prepDeck(dom);
+  // Practising the misses keeps the others ticked; going through all clears them.
+  const queue = onlyAgain ? st.ids.filter(id => st.marks[id] === 'again') : st.ids.slice();
+  if(onlyAgain) queue.forEach(id => { delete st.marks[id]; }); else st.marks = {};
+  Object.assign(st, { queue, i: 0, flip: false });
+  prepDeckSave(st);
+  prepDeckPaint('prepFront');
 }
 function prepOpenTerm(catId, termId){
   setCategory(catId);

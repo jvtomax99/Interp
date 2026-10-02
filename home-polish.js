@@ -354,7 +354,16 @@
       thought.news(window.hubNews&&window.hubNews());thought.update(2500);thought.announce(0);
       const width=window.innerWidth;
       const resizeStop=()=>{if(window.innerWidth!==width)stop();};
-      const stop=()=>{thought.remove();window.removeEventListener('resize',resizeStop);if(stopGreeting===stop)stopGreeting=()=>{};};
+      // The cloud lives on <body>, so leaving Home must take it down too --
+      // without this it floated over the next page until it expired.
+      const gone=new IntersectionObserver(entries=>{
+        if(entries[0].isIntersecting)return;
+        const r=button.getBoundingClientRect();
+        if(button.isConnected&&r.width>0&&r.bottom>0&&r.top<innerHeight)return;
+        stop();
+      });
+      const stop=()=>{thought.remove();gone.disconnect();window.removeEventListener('resize',resizeStop);if(stopGreeting===stop)stopGreeting=()=>{};};
+      gone.observe(button);
       stopGreeting=stop;thought.expire(stop);window.addEventListener('resize',resizeStop,{passive:true});
       return;
     }
