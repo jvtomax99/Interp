@@ -1061,6 +1061,7 @@
     if(widgetWatch){ widgetWatch.disconnect(); widgetWatch = null; }
     const host = document.getElementById('content');
     const sec = host && host.querySelector('.sm-widgets');
+    watchCardPetals(sec);
     if(!sec || host.classList.contains('no-enter') || typeof IntersectionObserver === 'undefined') return;
     sec.classList.add('is-waiting');
     const io = widgetWatch = new IntersectionObserver(entries => {
@@ -1072,9 +1073,68 @@
     io.observe(sec);
   });
 
+  /* ---- Sakura on Dr. Smiley's card -----------------------------------
+     The banner's petals (same #hpSakura shape, same pink/blue/lavender
+     fills, same fall and flutter keyframes) drifting behind the words on
+     his rank card. index.html redraws the card whenever team points
+     arrive, so a watcher puts the petals back on each new card; their
+     delays come from the clock, so a redraw carries on mid-fall instead of
+     restarting them all at the top. Styles in home-polish.css. */
+  let cardPetalWatch = [];
+  function addCardPetals(card){
+    if(!card || !card.classList.contains('smw-dark') || card.querySelector('.smw-petals')) return;
+    ensurePetalDefs();
+    const rand = seeded(250);
+    const count = 8, fall = Math.round((card.clientHeight || 130) * 1.15);
+    const palette = ['url(#hpPink)', 'url(#hpBlue)', 'url(#hpLav)', 'url(#hpPink)'];
+    const range = (a, b) => a + rand() * (b - a);
+    const elapsed = performance.now() / 1000;
+    let html = '';
+    for(let i = 0; i < count; i++){
+      const size = range(9, 16), dur = range(6, 9.5);
+      html += '<div class="home-petal" style="' +
+        'left:' + (((i + rand()) / count) * 104 - 4).toFixed(1) + '%;' +
+        'width:' + size.toFixed(1) + 'px;height:' + (size * 1.2).toFixed(1) + 'px;' +
+        '--fill:' + palette[i % palette.length] + ';' +
+        '--o:' + range(.7, .95).toFixed(2) + ';' +
+        '--dur:' + dur.toFixed(2) + 's;--delay:' + (-((range(0, 20) + elapsed) % dur)).toFixed(2) + 's;' +
+        '--flip:' + range(1.8, 3.4).toFixed(2) + 's;' +
+        '--sway:' + range(-30, 30).toFixed(0) + 'px;' +
+        '--r0:' + range(0, 360).toFixed(0) + 'deg;' +
+        '--fall:' + fall + 'px;--rest:' + range(15, 85).toFixed(0) + '%' +
+        '"><svg><use href="#hpSakura"/></svg></div>';
+    }
+    const layer = document.createElement('div');
+    layer.className = 'smw-petals';
+    layer.setAttribute('aria-hidden', 'true');
+    layer.innerHTML = html;
+    card.prepend(layer);
+  }
+  function watchCardPetals(sec){
+    cardPetalWatch.forEach(o => o.disconnect());
+    cardPetalWatch = [];
+    if(!sec) return;
+    addCardPetals(sec.querySelector('#smileyCareer'));
+    if(typeof MutationObserver !== 'undefined'){
+      const mo = new MutationObserver(() => addCardPetals(sec.querySelector('#smileyCareer')));
+      mo.observe(sec, { childList: true });
+      cardPetalWatch.push(mo);
+    }
+    // Battery: still while the card is scrolled away, like the banner's.
+    if(typeof IntersectionObserver !== 'undefined'){
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => sec.classList.toggle('is-offscreen', !e.isIntersecting));
+      });
+      io.observe(sec);
+      cardPetalWatch.push(io);
+    }
+  }
+
   const content = document.getElementById('content');
   if(content && content.classList.contains('is-home')){
     initHomeGreeting(content);
     initHomeRails(content);
+    // Home may have painted before this file loaded, missing ih:home-paint.
+    watchCardPetals(content.querySelector('.sm-widgets'));
   }
 })();

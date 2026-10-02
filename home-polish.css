@@ -830,6 +830,13 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .smw-dark .smw-sub{white-space:normal;}
 @media (max-width:359px){#content.is-home .smw-ring{width:44px;height:44px;}}
 #content.is-home .smw-thanks{font-size:12px;font-weight:550;color:#7FE3FF;line-height:1.3;}
+/* Sakura drifting behind the words: the banner's .home-petal (shape, fall,
+   flutter, reduced-motion resting place), clipped to the card. Layer built
+   by addCardPetals() in home-polish.js. */
+#content.is-home .smw-dark{overflow:hidden;isolation:isolate;}
+#content.is-home .smw-dark > :not(.smw-petals){position:relative;z-index:1;}
+#content.is-home .smw-petals{position:absolute;inset:0;z-index:0;border-radius:inherit;overflow:hidden;pointer-events:none;}
+#content.is-home .sm-widgets.is-offscreen .home-petal,#content.is-home .sm-widgets.is-offscreen .home-petal svg{animation-play-state:paused;}
 
 /* Arriving on Home: the widgets rise in, his ring fills, the streak dots pop
    in one by one. Not on a repaint of Home (.no-enter) or a widget redrawn in
