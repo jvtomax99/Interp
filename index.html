@@ -11034,6 +11034,27 @@ const HUB_COAT_BEHIND = '<g class="hub-coat">'
   + '<path d="M34 99 L48 108 L56 132 L44 132 L40 116 L30 113 Z" fill="#E7EEF7" stroke="#1A1A1A" stroke-width="2.8" stroke-linejoin="round"/>'
   + '<path d="M86 99 L72 108 L64 132 L76 132 L80 116 L90 113 Z" fill="#E7EEF7" stroke="#1A1A1A" stroke-width="2.8" stroke-linejoin="round"/>'
   + '<path d="M50 108 L60 118 L70 108 L64 132 L56 132 Z" fill="#2E8BD0" stroke="#1A1A1A" stroke-width="2.6" stroke-linejoin="round"/></g>';
+// Soft 3D (picked by Jose): his head is a lit ball (bright top-left, warm
+// darker edge), a glossy shine instead of the flat crescent, soft cheeks,
+// glassy lenses, a shaded coat and a soft shadow under his chin. Same recipe
+// for both drawings; p is the drawing's id prefix (hf = Home, af = Ask/lock).
+function face3dDefs(p){
+  return `<radialGradient id="${p}Head" cx="44" cy="36" r="78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFF3B0"/><stop offset=".32" stop-color="#FFD95E"/><stop offset=".7" stop-color="#F6B935"/><stop offset="1" stop-color="#D98A1A"/></radialGradient>`
+    + `<radialGradient id="${p}AO" cx="60" cy="60" r="47" gradientUnits="userSpaceOnUse"><stop offset=".74" stop-color="#B35F00" stop-opacity="0"/><stop offset="1" stop-color="#9A4C00" stop-opacity=".32"/></radialGradient>`
+    + `<radialGradient id="${p}Spec" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".55" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+    + `<linearGradient id="${p}Glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#BFE6FF" stop-opacity=".3"/></linearGradient>`
+    + `<linearGradient id="${p}Coat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CBD6E6"/></linearGradient>`
+    + `<filter id="${p}Soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.3"/></filter>`
+    + `<filter id="${p}Shadow" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="3.5"/></filter>`;
+}
+// The coat (shaded) with his head's soft shadow on it, then the head itself.
+function face3dBody(p){
+  return HUB_COAT_BEHIND.replace('fill="#fff" stroke="#1A1A1A" stroke-width="3.6"', `fill="url(#${p}Coat)" stroke="#1A1A1A" stroke-width="3.6"`)
+    + `<ellipse cx="62" cy="104" rx="30" ry="7" fill="#14203F" opacity=".28" filter="url(#${p}Shadow)"/>`
+    + `<circle cx="60" cy="60" r="47" fill="url(#${p}Head)" stroke="#1A1A1A" stroke-width="6"/>`
+    + `<circle cx="60" cy="60" r="47" fill="url(#${p}AO)"/>`
+    + `<g class="face-shine"><ellipse cx="45" cy="31" rx="21" ry="11" transform="rotate(-24 45 31)" fill="url(#${p}Spec)"/><circle cx="82" cy="26" r="3.6" fill="#fff" opacity=".9"/></g>`;
+}
 function hubCoatFront(id){
   const tube = d => `<path d="${d}" fill="none" stroke="#1A1A1A" stroke-width="8.4" stroke-linecap="round"/>`
     + `<path d="${d}" fill="none" stroke="#2E8BD0" stroke-width="4.6" stroke-linecap="round"/>`
@@ -11043,16 +11064,12 @@ function hubCoatFront(id){
     + `<g transform="translate(84 126)"><circle r="8" fill="url(#${id})" stroke="#1A1A1A" stroke-width="3.2"/><circle r="4.2" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.8"/><circle cx="-2.6" cy="-2.9" r="1.6" fill="#fff"/></g></g>`;
 }
 const ICON_WAVE = '<svg class="home-wave-art home-face" viewBox="4 4 112 112" aria-hidden="true" focusable="false">'
-  + '<defs><radialGradient id="hfFill" cx="56" cy="54" r="54" gradientUnits="userSpaceOnUse">'
-  +   '<stop offset="0" stop-color="#FFD866"/><stop offset=".78" stop-color="#F9C84B"/><stop offset="1" stop-color="#EDB43A"/></radialGradient>'
+  + '<defs>' + face3dDefs('hf')
   + '<clipPath id="hfMouthClip"><path class="hf-mclip" d="M48 72 Q60 79 72 72 Q60 80 48 72 Z"/></clipPath>'
   + '<clipPath id="hfLensClip"><rect x="14" y="36" width="38" height="26" rx="7"/><rect x="68" y="36" width="38" height="26" rx="7"/></clipPath></defs>'
-  + HUB_COAT_BEHIND
-  + '<circle cx="60" cy="60" r="47" fill="url(#hfFill)" stroke="#1A1A1A" stroke-width="6"/>'
-  + '<path d="M24 50 A37 37 0 0 1 96 50 A40 34 0 0 0 24 50 Z" fill="#fff" opacity=".42"/>'
-  + '<circle cx="84" cy="27" r="4.2" fill="#fff" opacity=".95"/>'
-  + '<rect class="hf-blush" data-x="33" x="25" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/>'
-  + '<rect class="hf-blush" data-x="87" x="79" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/>'
+  + face3dBody('hf')
+  + '<rect class="hf-blush" data-x="33" x="25" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F" filter="url(#hfSoft)"/>'
+  + '<rect class="hf-blush" data-x="87" x="79" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F" filter="url(#hfSoft)"/>'
   + '<path class="hf-eye" data-x="42" data-side="-1" d="M33 52.5 L42 44.5 L51 52.5" fill="none" stroke="#1A1A1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>'
   + '<path class="hf-eye" data-x="78" data-side="1" d="M69 52.5 L78 44.5 L87 52.5" fill="none" stroke="#1A1A1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>'
   + '<path class="hf-heye" data-x="42" d="M0 7 C-10 1 -10 -8 -5 -8 C-2.2 -8 0 -6 0 -4 C0 -6 2.2 -8 5 -8 C10 -8 10 1 0 7 Z" transform="translate(42 50) scale(0)" opacity="0" fill="#FF3F72" stroke="#1A1A1A" stroke-width="1.6"/>'
@@ -11063,8 +11080,8 @@ const ICON_WAVE = '<svg class="home-wave-art home-face" viewBox="4 4 112 112" ar
   +   '<g clip-path="url(#hfLensClip)"><path class="hf-glint" d="M0 30 h9 l-16 40 h-9 Z" fill="#fff" opacity=".85" transform="translate(-40 0)"/></g>'
   +   '<g fill="none" stroke="#1A1A1A" stroke-width="4.6" stroke-linejoin="round">'
   +   '<path d="M6 44 H14" stroke-linecap="round"/><path d="M106 44 H114" stroke-linecap="round"/>'
-  +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
-  +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
+  +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="url(#hfGlass)"/>'
+  +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="url(#hfGlass)"/>'
   +   '<path d="M52 44 Q60 40 68 44"/></g></g>'
   + hubCoatFront('hfSteel')
   + '</svg>';
@@ -15470,7 +15487,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1002.1316';
+const BUILD_ID = 'b1002.2245';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -18118,14 +18135,10 @@ const INVITE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // no 0/O, 1/I/L
 // The greeting's glasses face, calm until the code works, then heart eyes and
 // a big smile. Its own ids, since the greeting's face may not be on the page.
 const ACCESS_FACE_SVG = '<svg viewBox="4 4 112 112" focusable="false">'
-  + '<defs><radialGradient id="afFill" cx="56" cy="54" r="54" gradientUnits="userSpaceOnUse">'
-  +   '<stop offset="0" stop-color="#FFD866"/><stop offset=".78" stop-color="#F9C84B"/><stop offset="1" stop-color="#EDB43A"/></radialGradient>'
+  + '<defs>' + face3dDefs('af')
   + '<clipPath id="afSmileClip"><path d="M44 69 Q60 90 76 69 Z"/></clipPath></defs>'
-  + HUB_COAT_BEHIND
-  + '<circle cx="60" cy="60" r="47" fill="url(#afFill)" stroke="#1A1A1A" stroke-width="6"/>'
-  + '<path d="M24 50 A37 37 0 0 1 96 50 A40 34 0 0 0 24 50 Z" fill="#fff" opacity=".42"/>'
-  + '<circle cx="84" cy="27" r="4.2" fill="#fff" opacity=".95"/>'
-  + '<rect x="25" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/><rect x="79" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F"/>'
+  + face3dBody('af')
+  + '<rect x="25" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F" filter="url(#afSoft)"/><rect x="79" y="59.5" width="16" height="7" rx="3.5" fill="#F7839F" filter="url(#afSoft)"/>'
   + '<g class="af-calm" fill="none" stroke="#1A1A1A" stroke-linecap="round" stroke-linejoin="round">'
   +   '<path d="M33 52.5 L42 44.5 L51 52.5" stroke-width="4.4"/><path d="M69 52.5 L78 44.5 L87 52.5" stroke-width="4.4"/>'
   +   '<path d="M48 72 Q60 79 72 72" stroke-width="3.6"/></g>'
@@ -18135,8 +18148,8 @@ const ACCESS_FACE_SVG = '<svg viewBox="4 4 112 112" focusable="false">'
   +   '<g clip-path="url(#afSmileClip)"><ellipse cx="60" cy="84" rx="9" ry="6" fill="#F46F7E"/></g></g>'
   + '<g fill="none" stroke="#1A1A1A" stroke-width="4.6" stroke-linejoin="round">'
   +   '<path d="M6 44 H14" stroke-linecap="round"/><path d="M106 44 H114" stroke-linecap="round"/>'
-  +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
-  +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="#fff" fill-opacity=".14"/>'
+  +   '<rect x="14" y="36" width="38" height="26" rx="7" fill="url(#afGlass)"/>'
+  +   '<rect x="68" y="36" width="38" height="26" rx="7" fill="url(#afGlass)"/>'
   +   '<path d="M52 44 Q60 40 68 44"/></g>'
   + hubCoatFront('afSteel') + '</svg>';
 const ACCESS_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -18746,7 +18759,7 @@ let askFaceSeq = 0;
 // several copies can be on screen without any of them losing its colour.
 function askFaceSvg(){
   const n = ++askFaceSeq;
-  return smileyWear(ACCESS_FACE_SVG).replace(/afFill/g, 'askFill' + n).replace(/afSmileClip/g, 'askClip' + n).replace(/afSteel/g, 'askSteel' + n);
+  return smileyWear(ACCESS_FACE_SVG).replace(/(id="|#)af([A-Z]\w*)/g, (m, pre, name) => pre + 'ask' + name + n);
 }
 
 function askTokens(text){
