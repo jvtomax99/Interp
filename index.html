@@ -2517,6 +2517,85 @@
     transition:box-shadow .22s var(--ease), transform .22s var(--ease);
     animation:cardIn .3s var(--ease) both;
   }
+  /* ---------- Slang & Profanity ----------
+     A heat meter instead of a word badge (five bars, cool to hot), a panel
+     that shows the domain's spread and filters it, and strong words frosted
+     over until tapped. Scoped to .card-slang / .sl-* so no other domain moves. */
+  .sl-panel{ background:var(--paper); border-radius:var(--r-lg); padding:17px; margin:0 0 17px;
+    display:flex; flex-direction:column; gap:13px;
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+  .sl-panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:9px; }
+  .sl-panel-title{ font-size:13px; font-weight:550; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+  .sl-panel-total{ font-size:13px; font-weight:500; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+  .sl-spread{ display:flex; height:10px; border-radius:999px; overflow:hidden; gap:2px; background:var(--line-soft); }
+  .sl-spread i{ display:block; height:100%; min-width:4px; }
+  /* A four-way segmented control: always fits a phone's width, no sideways scrolling. */
+  .sl-chips{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; padding:3px;
+    border-radius:var(--r-md); background:var(--line-soft); }
+  .sl-chip{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; min-height:52px; padding:6px 3px;
+    border-radius:11px; border:0; background:transparent; color:var(--ink);
+    font:550 13px/1.1 var(--sans); cursor:pointer; transition:background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease); }
+  .sl-chip-label{ display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+  .sl-chip:active{ transform:scale(.97); }
+  .sl-chip:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .sl-chip .sl-dot{ width:7px; height:7px; border-radius:50%; background:var(--dot); flex:none; }
+  .sl-chip em{ font-style:normal; font-size:12px; font-weight:500; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .sl-chip[aria-pressed="true"]{ background:var(--navy); color:#fff; box-shadow:0 1px 2px rgba(20,43,67,0.12), 0 6px 14px -8px rgba(22,55,90,0.45); }
+  .sl-chip[aria-pressed="true"] em{ color:rgba(255,255,255,.72); }
+  .sl-switch{ display:flex; align-items:center; justify-content:space-between; gap:13px; min-height:44px; cursor:pointer;
+    border-top:1px solid var(--line-soft); padding-top:9px; }
+  .sl-switch-text{ display:flex; flex-direction:column; gap:2px; }
+  .sl-switch-text b{ font-size:15px; font-weight:550; color:var(--ink); }
+  .sl-switch-text span{ font-size:13px; color:var(--ink-soft); }
+  .sl-switch input{ appearance:none; -webkit-appearance:none; flex:none; width:50px; height:30px; margin:0; border-radius:999px;
+    background:var(--line); position:relative; cursor:pointer; transition:background .2s var(--ease); }
+  .sl-switch input::after{ content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff;
+    box-shadow:0 1px 3px rgba(20,43,67,.3); transition:transform .22s var(--ease); }
+  .sl-switch input:checked{ background:var(--navy); }
+  .sl-switch input:checked::after{ transform:translateX(20px); }
+  .sl-switch input:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+  .card-slang .sl-words{ position:relative; }
+  .card-slang .term-en{ font-size:21px; letter-spacing:-.025em; margin-top:13px; }
+  .card-slang .sl-row{ display:flex; align-items:center; flex-wrap:wrap; gap:9px; margin:9px 0 6px; }
+  .sl-heat{ display:inline-flex; align-items:center; gap:3px; padding:6px 9px 6px 7px; border-radius:999px; background:var(--bg-hi);
+    box-shadow:inset 0 0 0 1px var(--line-soft); }
+  .sl-heat i{ width:6px; height:14px; border-radius:3px; background:var(--line); }
+  .sl-heat[data-heat="1"] i:nth-child(-n+1),
+  .sl-heat[data-heat="2"] i:nth-child(-n+2),
+  .sl-heat[data-heat="3"] i:nth-child(-n+3),
+  .sl-heat[data-heat="4"] i:nth-child(-n+4),
+  .sl-heat[data-heat="5"] i:nth-child(-n+5){ background:var(--seg); }
+  .sl-heat i:nth-child(1){ --seg:#3DAE9E; } .sl-heat i:nth-child(2){ --seg:#86BE57; }
+  .sl-heat i:nth-child(3){ --seg:#E9B23A; } .sl-heat i:nth-child(4){ --seg:#EC7D3C; } .sl-heat i:nth-child(5){ --seg:#D9465C; }
+  .sl-heat[data-heat="0"] i{ background:repeating-linear-gradient(135deg,#8E7CC9 0 3px,transparent 3px 5px); }
+  .sl-heat b{ margin-left:6px; font-size:13px; font-weight:600; color:var(--ink); }
+  .sl-region{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:13px; font-weight:550;
+    color:var(--ink-soft); background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); }
+  .sl-region svg{ width:13px; height:13px; }
+  .sl-note{ display:flex; gap:9px; align-items:flex-start; margin:6px 0 2px; padding:9px 13px; border-radius:var(--r-sm);
+    background:color-mix(in srgb, var(--card-accent) 9%, var(--paper)); color:var(--ink); font-size:14px; line-height:1.45; }
+  .sl-note b{ flex:none; font-size:11px; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:color-mix(in srgb, var(--card-accent) 75%, var(--ink)); padding-top:2px; }
+
+  .card-slang.is-veiled{ cursor:pointer; }
+  .card-slang.is-veiled .sl-words > div{ filter:blur(9px); opacity:.55; user-select:none; pointer-events:none; }
+  .sl-reveal{ position:absolute; inset:0; display:flex; align-items:center; justify-content:flex-start; pointer-events:none; }
+  .sl-reveal span{ display:inline-flex; align-items:center; gap:6px; padding:9px 13px; border-radius:999px;
+    background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+    font-size:14px; font-weight:600; color:var(--ink); }
+  .sl-reveal svg{ width:16px; height:16px; }
+  .card-slang.is-veiled:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .card-slang.is-unveiling .sl-words > div{ animation:slUnveil .38s var(--ease) both; }
+  @keyframes slUnveil{ from{ filter:blur(9px); opacity:.55; } to{ filter:none; opacity:1; } }
+  html[data-theme="dark"] .sl-chip[aria-pressed="true"]{ background:#AFC0FF; border-color:#AFC0FF; color:#0E1424; }
+  html[data-theme="dark"] .sl-chip[aria-pressed="true"] em{ color:rgba(14,20,36,.7); }
+  html[data-theme="dark"] .sl-switch input:checked{ background:#6F86E8; }
+  html[data-theme="dark"] .sl-reveal span{ box-shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.6); }
+  @media (prefers-reduced-motion:reduce){
+    .card-slang.is-unveiling .sl-words > div{ animation:none; }
+    .sl-chip, .sl-switch input, .sl-switch input::after{ transition:none; }
+  }
   /* Colored accent bar tinted to whichever domain the card belongs to (set
      inline as --card-accent) — visible at rest so a card reads as "which
      domain" at a glance, and fills in fully on hover/focus. */
@@ -8087,6 +8166,7 @@ async function loadData(){
     // One-time, flagged, and safe to call on every launch: once it has run
     // it returns after a single small document read.
     await migrateOncologySplit();
+    await migrateSlangGlossary();
 
     startTermsListener();
     startCategoriesMetaListener();
@@ -8192,6 +8272,222 @@ async function migrateOncologySplit(){
 
   await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now(), [FLAG + 'Moved']: moves.length }, { merge:true });
   console.log('Oncology split: moved ' + moves.length + ' of ' + termsSnap.size + ' terms');
+}
+
+/* ---------- Slang & Profanity ----------
+ * Fabiola Grijalva's "Glosario para intérpretes profesionales: vulgarismos,
+ * coloquialismos, insultos y caló" — 51 words from her Latin America list and
+ * 35 from her Caribbean list, filed as one domain with two subdomains.
+ *
+ * Each entry is [list, Spanish, English, description]. The description opens
+ * with "Vulgarity: <level>." — that sentence IS the level: the card reads its
+ * badge from it (slangLevel), so it survives editing and moving, and a teammate
+ * changes a level by editing the text. Nothing new is stored on the term.
+ *
+ * Term ids are fixed (slang-001…), so if the migration is ever interrupted and
+ * re-runs, it rewrites the same documents instead of adding duplicates. The
+ * flag lives in terminology-meta/migrations for the reason given above
+ * migrateOncologySplit. */
+const SLANG_SOURCE = 'Fabiola Grijalva, Glosario para intérpretes profesionales';
+const SLANG_SEED = [
+  ["L", "Amortiguar", "Numb", "Vulgarity: Neutral. Muy común en Ecuador."],
+  ["L", "Avergado", "Overwhelmed", "Vulgarity: High."],
+  ["L", "Bolas", "Testicles", "Vulgarity: High."],
+  ["L", "Cabrón", "Bastard, asshole, jerk", "Vulgarity: High. Puede ser amistoso entre conocidos o muy ofensivo."],
+  ["L", "Cagar", "Shit", "Vulgarity: High. Muy frecuente en urgencias."],
+  ["L", "Carajo", "Damn you", "Vulgarity: High."],
+  ["L", "Chingar", "Fuck, screw", "Vulgarity: High. Tiene muchos significados según el contexto."],
+  ["L", "Chueco", "Crooked, bent", "Vulgarity: Neutral."],
+  ["L", "Chucha", "Vagina", "Vulgarity: High. Muy común en Ecuador."],
+  ["L", "Cola", "Butt", "Vulgarity: Low. Depende del país."],
+  ["L", "Culo", "Ass", "Vulgarity: High. Anatómico o insulto."],
+  ["L", "Echar la pota", "Throw up", "Vulgarity: Medium. Coloquial."],
+  ["L", "Empastillado", "Under the influence of pills", "Vulgarity: Neutral. Coloquial."],
+  ["L", "Encabronado", "Very angry", "Vulgarity: High."],
+  ["L", "Estoy bien jodido", "I'm really messed up", "Vulgarity: High. Dolor o situación grave."],
+  ["L", "Estoy hasta la madre", "I'm fed up.", "Vulgarity: Medium. Expresa cansancio o hartazgo."],
+  ["L", "Estoy madreado", "I'm beat up", "Vulgarity: Medium. Trauma."],
+  ["L", "Estoy pedo", "I'm drunk", "Vulgarity: Medium. No significa \"I have gas\"."],
+  ["L", "Falta de aire", "Shortness of breath", "Vulgarity: Low. Muy frecuente."],
+  ["L", "Guayabo (Resaca)", "Hangover", "Vulgarity: Neutral. Propio de Colombia."],
+  ["L", "Hacer del baño", "Use the bathroom", "Vulgarity: Low. Eufemismo."],
+  ["L", "Hijo de puta", "Son of a bitch", "Vulgarity: High."],
+  ["L", "Joder", "Fuck, screw", "Vulgarity: High."],
+  ["L", "Mamado", "Drunk, to be fed up of something", "Vulgarity: Varies."],
+  ["L", "Le dio un ataque", "Had a seizure / Had an attack", "Vulgarity: Low. Confirmar significado."],
+  ["L", "Mareado", "Dizzy", "Vulgarity: Low."],
+  ["L", "Me ahogo", "I'm choking / I can't breathe", "Vulgarity: Low. Confirmar contexto."],
+  ["L", "Me duele un chingo", "It hurts like hell", "Vulgarity: Medium. Expresa intensidad."],
+  ["L", "Me está llevando la chingada", "I'm dying / I'm in really bad shape", "Vulgarity: High. Muy frecuente en urgencias."],
+  ["L", "Me rompí la madre", "I got badly hurt", "Vulgarity: High. Muy común en trauma."],
+  ["L", "Me siento de la chingada", "I feel like hell", "Vulgarity: High."],
+  ["L", "Me siento de la fregada", "I feel awful", "Vulgarity: Medium."],
+  ["L", "Me vale madre", "I don't care", "Vulgarity: Medium. Muy común en México."],
+  ["L", "Mear", "Pee", "Vulgarity: High. Frecuente en pacientes."],
+  ["L", "Nalgas", "Buttocks", "Vulgarity: Low. Preferible a \"ass\" en contexto clínico."],
+  ["L", "No me chingues", "Give me a break! / Don't mess with me!", "Vulgarity: High. No siempre se traduce con \"fuck\"."],
+  ["L", "No puedo respirar", "I can't breathe", "Vulgarity: Low. Emergencia."],
+  ["L", "Orinar", "Urinate", "Vulgarity: Low. Registro clínico."],
+  ["L", "Pajuelo", "Jerk", "Vulgarity: Medium."],
+  ["L", "Pedo", "Fart / Problem / Drunk", "Vulgarity: Varies. Depende totalmente del contexto."],
+  ["L", "Pendejo", "Idiot, asshole, dumbass", "Vulgarity: High. Depende del contexto y del país."],
+  ["L", "Pinche", "Damn, freaking", "Vulgarity: Medium. No siempre es un insulto directo."],
+  ["L", "Pipí", "Pee", "Vulgarity: Low. Pediatría."],
+  ["L", "Popó", "Poop", "Vulgarity: Low. Pediatría."],
+  ["L", "Que se joda", "Screw it/to hell with it", "Vulgarity: Medium-high."],
+  ["L", "Sangré un chingo", "I was bleeding a lot", "Vulgarity: Medium. Emergencias."],
+  ["L", "Se desmayó", "Passed out / Fainted", "Vulgarity: Low. Ambas son válidas."],
+  ["L", "Trasero", "Buttocks", "Vulgarity: Low. Término profesional."],
+  ["L", "Un madrazo", "A hard hit", "Vulgarity: Medium. Lesiones."],
+  ["L", "Vergazo", "Big hit, punch", "Vulgarity: High. Trauma físico."],
+  ["L", "Vomitar", "Vomit", "Vulgarity: Low. Registro clínico."],
+  ["C", "Bicho", "Penis", "Vulgarity: High. Region: Puerto Rico."],
+  ["C", "Chocha", "Vagina", "Vulgarity: High. Region: Puerto Rico."],
+  ["C", "Cojones", "Testicles", "Vulgarity: High. Region: Caribbean."],
+  ["C", "Come mierda", "Piece of shit", "Vulgarity: High. Region: Cuba."],
+  ["C", "Cuca", "Vagina", "Vulgarity: High. Region: Caribbean."],
+  ["C", "Culo", "Ass", "Vulgarity: High. Region: Caribbean."],
+  ["C", "Diablo", "Damn", "Vulgarity: Low. Region: Dominican Republic."],
+  ["C", "Estoy ardiendo", "It burns", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Estoy bien malo", "I'm very sick", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Estoy botando sangre", "I'm bleeding heavily", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Estoy esbaratao", "I'm worn out", "Vulgarity: Neutral. Region: Dominican Republic."],
+  ["C", "Estoy explotao", "I'm exhausted", "Vulgarity: Neutral. Region: Dominican Republic."],
+  ["C", "Estoy jodío", "I'm really sick", "Vulgarity: Medium. Region: Caribbean."],
+  ["C", "Estoy prendío en fiebre", "I have a very high fever", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Estoy vuelto mierda", "I'm fucked/messed up", "Vulgarity: High. Region: Caribbean."],
+  ["C", "Fundillo", "Butt", "Vulgarity: Low. Region: Puerto Rico, Cuba. Informal."],
+  ["C", "Le dio un jamacuco", "He/she collapsed", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Le dio un patatús", "He/She passed out", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Mamabicho", "Cocksucker", "Vulgarity: High. Region: Puerto Rico."],
+  ["C", "Me cagué", "I shit myself", "Vulgarity: High. Region: Caribbean."],
+  ["C", "Me di un cantazo", "I hit myself hard", "Vulgarity: Neutral. Region: Puerto Rico."],
+  ["C", "Me di un fuetazo", "I hit myself hard", "Vulgarity: Low. Region: Dominican Republic."],
+  ["C", "Me dio un soponcio", "I nearly fainted", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Me dio un yeyo", "I fainted/I passed out", "Vulgarity: Neutral. Region: Puerto Rico."],
+  ["C", "Me duele bien cabrón", "It hurts like hell", "Vulgarity: High. Region: Puerto Rico."],
+  ["C", "Me duele del carajo", "It hurts like hell", "Vulgarity: Medium. Region: Caribbean."],
+  ["C", "Me meé", "I peed myself", "Vulgarity: High. Region: Caribbean."],
+  ["C", "Me oriné", "I urinated on myself", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Me partí", "I got hurt badly", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Nalga", "Buttock", "Vulgarity: Low. Region: Caribbean."],
+  ["C", "Puñeta", "Fuck", "Vulgarity: High. Region: Puerto Rico."],
+  ["C", "Se abrió la cabeza", "He/She split his/her head open", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Tengo calentura", "I have fever", "Vulgarity: Neutral. Region: Caribbean."],
+  ["C", "Toto", "Vagina", "Vulgarity: High. Region: Puerto Rico, Dominican Republic."],
+  ["C", "Vete pa'l carajo", "Go to hell", "Vulgarity: Medium-high. Region: Caribbean."]
+];
+const SLANG_DOMAINS = [
+  { id:'slang',           name:'Slang & Profanity', color:'#B0505E', icon:'chat', parentId:null },
+  { id:'slang-latam',     name:'Latin America',     color:'#C26A74', icon:'chat', parentId:'slang' },
+  { id:'slang-caribbean', name:'Caribbean',         color:'#C9826A', icon:'chat', parentId:'slang' },
+];
+
+async function migrateSlangGlossary(){
+  if(!db) return;
+  const FLAG = 'slangGlossary';
+  const flagRef = db.collection('terminology-meta').doc('migrations');
+  let flags = {};
+  try{
+    const snap = await flagRef.get();
+    if(snap.exists) flags = snap.data() || {};
+  }catch(err){ return; }               // offline: try again next launch
+  if(flags[FLAG]) return;
+
+  const metaRef = db.collection('terminology-meta').doc('categories');
+  const metaSnap = await metaRef.get();
+  if(!metaSnap.exists) return;         // nothing seeded yet; loadData handles that path
+
+  // Terms first, domains second, flag last: an interrupted run leaves either
+  // nothing visible or a complete domain, never a domain with half its words.
+  const terms = SLANG_SEED.map(([list, es, en, def], i) => ({
+    id: 'slang-' + String(i + 1).padStart(3, '0'),
+    categoryId: list === 'C' ? 'slang-caribbean' : 'slang-latam',
+    en, es, def, source: SLANG_SOURCE
+  }));
+  const batch = db.batch();            // 86 writes, well under the 500 cap
+  terms.forEach(t => batch.set(db.collection('terms').doc(t.id), t));
+  await batch.commit();
+
+  const cats = (metaSnap.data().categories || []).slice();
+  SLANG_DOMAINS.forEach(d=>{
+    if(!cats.some(c => c.id === d.id)) cats.push(categoryMeta(d));
+  });
+  await metaRef.set({ categories: cats, updatedAt: Date.now() }, { merge:true });
+
+  await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now(), [FLAG + 'Count']: terms.length }, { merge:true });
+  console.log('Slang glossary: added ' + terms.length + ' terms');
+}
+
+/* Display rules for this domain only: Spanish first, a level badge, no
+   medical "Look up", and strong words veiled until tapped (a setting kept on
+   this phone, on by default, so the screen is safe to open beside a patient). */
+function isSlangDomain(cat){ return !!cat && (cat.id === 'slang' || cat.parentId === 'slang'); }
+function slangLevel(def){
+  const m = /^\s*Vulgarity:\s*(Neutral|Low|Medium-high|Medium|High|Varies)\.\s*/i.exec(def || '');
+  if(!m) return null;
+  const level = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+  let rest = (def || '').slice(m[0].length), region = '';
+  const r = /^Region:\s*([^.]+)\.\s*/i.exec(rest);
+  if(r){ region = r[1].trim(); rest = rest.slice(r[0].length); }
+  return { level, region, rest: rest.trim() };
+}
+// Bars lit on the heat meter; Varies shows all five hatched.
+const SLANG_HEAT = { Neutral:1, Low:2, Medium:3, 'Medium-high':4, High:5, Varies:0 };
+const SLANG_HEAT_COLOR = { Neutral:'#3DAE9E', Low:'#86BE57', Medium:'#E9B23A', 'Medium-high':'#EC7D3C', High:'#D9465C', Varies:'#8E7CC9' };
+const SLANG_FILTERS = [
+  { key:'all',    label:'All',    test: ()=>true,                                  dot:'' },
+  { key:'mild',   label:'Mild',   test: l => l === 'Neutral' || l === 'Low',       dot:'#86BE57' },
+  { key:'medium', label:'Medium', test: l => l === 'Medium' || l === 'Varies',     dot:'#E9B23A' },
+  { key:'strong', label:'Strong', test: l => l === 'Medium-high' || l === 'High',  dot:'#D9465C' },
+];
+let slangFilter = 'all';
+function setSlangFilter(key){ slangFilter = key; render(); }
+function slangPassesFilter(t){
+  if(slangFilter === 'all') return true;
+  const lv = slangLevel(t.def), f = SLANG_FILTERS.find(x => x.key === slangFilter);
+  return !!(lv && f && f.test(lv.level));
+}
+function renderSlangPanel(activeCat){
+  const ids = new Set(activeCat.id === 'slang'
+    ? DATA.categories.filter(isSlangDomain).map(c => c.id) : [activeCat.id]);
+  const levels = [];
+  DATA.categories.forEach(c => { if(ids.has(c.id)) c.terms.forEach(t => { const lv = slangLevel(t.def); if(lv) levels.push(lv.level); }); });
+  const count = l => levels.filter(x => x === l).length;
+  const order = ['Neutral','Low','Medium','Varies','Medium-high','High'];
+  const spread = levels.length ? order.filter(count).map(l =>
+    `<i style="flex:${count(l)};background:${SLANG_HEAT_COLOR[l]}" title="${l}: ${count(l)}"></i>`).join('') : '';
+  const chips = SLANG_FILTERS.map(f => {
+    const n = levels.filter(f.test).length;
+    return `<button type="button" class="sl-chip" aria-pressed="${slangFilter === f.key}" onclick="setSlangFilter('${f.key}')"><span class="sl-chip-label">${f.dot ? `<span class="sl-dot" style="--dot:${f.dot}"></span>` : ''}${f.label}</span><em>${n} word${n === 1 ? '' : 's'}</em></button>`;
+  }).join('');
+  return `<div class="sl-panel">
+    <div class="sl-panel-head"><span class="sl-panel-title">Intensity</span><span class="sl-panel-total">${levels.length} words</span></div>
+    <div class="sl-spread" role="img" aria-label="${order.filter(count).map(l => l + ' ' + count(l)).join(', ')}">${spread}</div>
+    <div class="sl-chips" role="group" aria-label="Filter by intensity">${chips}</div>
+    <label class="sl-switch"><span class="sl-switch-text"><b>Hide strong words</b><span>Tap a card to reveal it</span></span>
+      <input type="checkbox" role="switch" id="slangVeil" ${slangVeil ? 'checked' : ''} onchange="setSlangVeil(this.checked)" aria-label="Hide strong words until tapped"></label>
+  </div>`;
+}
+const SLANG_STRONG = new Set(['High', 'Medium-high']);
+const ICON_SL_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICON_SL_PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+let slangVeil = true;
+try{ slangVeil = localStorage.getItem('ih_slangVeil') !== 'off'; }catch(e){}
+const slangShown = new Set();
+function setSlangVeil(on){
+  slangVeil = !!on; slangShown.clear();
+  try{ localStorage.setItem('ih_slangVeil', on ? 'on' : 'off'); }catch(e){}
+  render();
+}
+function showSlangTerm(id){
+  slangShown.add(id);
+  const card = document.querySelector(`.card[data-term-id="${CSS.escape(id)}"]`);
+  if(card){
+    card.classList.remove('is-veiled'); card.classList.add('is-unveiling');
+    card.removeAttribute('role'); card.removeAttribute('tabindex'); card.removeAttribute('aria-label');
+    const pill = card.querySelector('.sl-reveal'); if(pill) pill.remove();
+  }
 }
 
 /* The fields a domain stores in terminology-meta/categories. ONE definition,
@@ -12297,7 +12593,7 @@ function renderLinks(t, categoryId){
   // string concatenation — a guess about someone else's site that could only
   // get more wrong, and did: it opened a blank page. It now searches at the
   // moment of the tap, so every link offered came back from a live result.
-  if(categoryId !== 'resources' && t.en){
+  if(categoryId !== 'resources' && t.en && !isSlangDomain(DATA.categories.find(c => c.id === categoryId))){
     links.push(`<button type="button" class="link-pill" onclick="openTermLookup('${escapeAttr(categoryId)}','${escapeAttr(t.id)}')">Look up ${ICON_SEARCH}</button>`);
   }
   if(links.length===0) return '';
@@ -13261,6 +13557,8 @@ function renderContent(){
       </div>
     </div>`;
   }
+  const slangActive = DATA.categories.find(c => c.id === activeCategory);
+  if(isSlangDomain(slangActive)) html += renderSlangPanel(slangActive);
   // Export and import live in the banner's ⋯ menu (openDomainMenu).
   html += `<div class="print-only-title">
     <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
@@ -13293,7 +13591,8 @@ function renderContent(){
     // right term. Reordering the stored data itself would risk mismatches
     // when two people edit at once.
     let terms = cat.terms.map((t,i)=>({...t, _idx:i}));
-    terms.sort((a,b)=> collateTerms(a.en, b.en));
+    const slang = isSlangDomain(cat);
+    terms.sort((a,b)=> slang ? collateTerms(a.es || a.en, b.es || b.en) : collateTerms(a.en, b.en));
     // Number the cards from the full sorted list, before filtering, so a
     // search doesn't renumber everything.
     terms.forEach((t,i)=>{ t._num = i+1; });
@@ -13306,6 +13605,7 @@ function renderContent(){
         foldText(t.notes).includes(q)
       );
     }
+    if(slang && slangFilter !== 'all') terms = terms.filter(slangPassesFilter);
     if(terms.length===0){ emptySections.push(cat); return; }
     renderedAny = true;
     // Trim this section to whatever budget is left, remembering how much was
@@ -13349,8 +13649,22 @@ function renderContent(){
       // attachment for every card drawn, on every render.
       const termAttachments = attachmentsByTerm.get(t.id) || EMPTY_ATTACHMENTS;
       const delay = Math.min(cardIdx * 0.03, 0.3);
+      const lv = slang ? slangLevel(t.def) : null;
+      const veiled = !!(lv && slangVeil && SLANG_STRONG.has(lv.level) && !slangShown.has(t.id));
+      // In Slang the Spanish is the headword: it takes the title line's style
+      // and the English the second line's, so the order reads as intended.
+      const enLine = `<div class="${slang ? 'term-es' : 'term-en'}">
+            <span>${escapeHtml(t.en)}</span>
+            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
+          </div>`;
+      const esLine = t.es ? `<div class="${slang ? 'term-en' : 'term-es'}">
+            <span>${escapeHtml(t.es)}</span>
+            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
+          </div>` : '';
       html += `
-        <div class="card" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;">
+        <div class="card${slang ? ' card-slang' : ''}${veiled ? ' is-veiled' : ''}" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;"${veiled ? ` role="button" tabindex="0" aria-label="Strong word hidden. Tap to show." onclick="showSlangTerm('${escapeAttr(t.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSlangTerm('${escapeAttr(t.id)}')}"` : ''}>
           <div class="card-top">
             <span class="tag" style="--tag-color:${cat.color};">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._num).padStart(2,'0')}</span>
@@ -13360,17 +13674,12 @@ function renderContent(){
             <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', '${t.id}')">✎</button>
             <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', '${t.id}')">✕</button>
           </div>
-          <div class="term-en">
-            <span>${escapeHtml(t.en)}</span>
-            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
-            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
+          ${!slang ? enLine + esLine : `<div class="sl-words">${esLine}${enLine}${veiled ? `<span class="sl-reveal"><span>${ICON_SL_EYE}Tap to reveal</span></span>` : ''}</div>`}
+          ${lv ? `<div class="sl-row">
+            <span class="sl-heat" data-heat="${SLANG_HEAT[lv.level]}" aria-label="Intensity: ${lv.level}"><i></i><i></i><i></i><i></i><i></i><b>${lv.level}</b></span>
+            ${lv.region ? `<span class="sl-region">${ICON_SL_PIN}${escapeHtml(lv.region)}</span>` : ''}
           </div>
-          ${t.es ? `<div class="term-es">
-            <span>${escapeHtml(t.es)}</span>
-            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
-            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
-          </div>` : ''}
-          <p class="def">${escapeHtml(t.def)}</p>
+          ${lv.rest ? `<div class="sl-note"><b>Note</b><span>${escapeHtml(lv.rest)}</span></div>` : ''}` : `<p class="def">${escapeHtml(t.def)}</p>`}
           ${t.notes ? `<div class="term-note">${ICON_EDIT}<span>${escapeHtml(t.notes)}</span></div>` : ''}
           ${renderLinks(t, cat.id)}
           ${termAttachments.length ? `<div class="attach-row">${termAttachments.map(a=>attachmentChipHtml(a, `deleteAttachment('${a.id}')`)).join('')}</div>` : ''}
@@ -15487,7 +15796,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1002.2245';
+const BUILD_ID = 'b1004.2306';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
