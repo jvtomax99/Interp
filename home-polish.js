@@ -346,6 +346,7 @@
     idleStop();
     stopGreeting();
     activeSequence=resume;
+    heartline.hide();
     const request = ++requestId;
     lastWaveAt = Date.now();
     if(document.hidden || !button.isConnected) return;
@@ -716,6 +717,50 @@
     return {attach(el){ring=el;el.innerHTML=svg();schedule();}};
   })();
 
+  /* Heartline Signature (picked by Jose: idea 5 of the heartbeat set). A
+     pink heart-monitor line above his ring draws itself -- a beat, a loop
+     into a heart, another beat -- holds, fades, and comes back every few
+     seconds. It waits for the hello to finish, steps aside while his thought
+     cloud is up, and sits behind him so a party jump passes in front of it.
+     Under Reduce Motion it is simply there, drawn and still. The drawing
+     itself is in home-polish.css (.home-heartline). */
+  const heartline=(()=>{
+    const BEAT='h5.4 q1.8 -3 3.6 0 h2.7 l1.35 2 l2.25 -16 l2.7 22 l1.8 -8 h3.6 q2.7 -5 5.4 0 h7.2';
+    // One unbroken stroke, so it draws strictly left to right: after closing
+    // the heart it runs back over the top of it (unseen: a stroke never
+    // doubles itself) and carries on from the right lobe. A jump (M) here would
+    // start a second piece drawing at the same time as the first.
+    const TOP='C44 -10 58 -12 60 -2 C62 -12 76 -10 76 2';
+    const D=`M-14 2 H6 ${BEAT} H44 ${TOP} C76 12 64 18 60 24 C56 18 44 12 44 2 ${TOP} H84 ${BEAT} H134`;
+    let el=null,timer=0;
+    const busy=()=>!hasWavedHello||!!activeSequence||el.parentElement.classList.contains('home-wave-pending')
+      ||[...document.querySelectorAll('.home-wave-thought')].some(t=>+getComputedStyle(t).opacity>.02);
+    function tick(){
+      timer=0;
+      if(!el||!el.isConnected){el=null;return;}
+      if(busy())el.classList.remove('is-draw');
+      else if(el.parentElement.offsetParent){el.classList.remove('is-draw');void el.getBoundingClientRect();el.classList.add('is-draw');}
+      schedule();
+    }
+    function schedule(wait){
+      clearTimeout(timer);timer=0;
+      if(el&&!reduced.matches&&!document.hidden)timer=setTimeout(tick,wait||5200+Math.random()*1300);
+    }
+    document.addEventListener('visibilitychange',()=>schedule(1500));
+    reduced.addEventListener('change',()=>schedule(1500));
+    return {
+      attach(button){
+        el=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        el.setAttribute('class','home-heartline');el.setAttribute('viewBox','-16 -16 152 43');
+        el.setAttribute('aria-hidden','true');el.setAttribute('focusable','false');
+        el.innerHTML=`<path class="hl-glow" pathLength="100" d="${D}"/><path class="hl-core" pathLength="100" d="${D}"/>`;
+        button.prepend(el);schedule(1500);
+      },
+      // The hello is starting again: clear the line now rather than at the next beat.
+      hide(){if(el)el.classList.remove('is-draw');schedule(1500);}
+    };
+  })();
+
   window.initHomeGreeting = function(content){
     const wave=content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady)return;
@@ -742,6 +787,7 @@
     // and wiggle with him; the layer's pivot is his neck.
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);askHalo.attach(ring);
+    heartline.attach(wave);
     // The cords go inside his drawing, just above the coat and under the
     // face, so they read as around his neck; askBadge draws their path.
     const coat=pin.querySelector('.home-face .hub-coat');
