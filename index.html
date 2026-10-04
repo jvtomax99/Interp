@@ -2542,6 +2542,18 @@
   .sl-chip em{ font-style:normal; font-size:12px; font-weight:500; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
   .sl-chip[aria-pressed="true"]{ background:var(--navy); color:#fff; box-shadow:0 1px 2px rgba(20,43,67,0.12), 0 6px 14px -8px rgba(22,55,90,0.45); }
   .sl-chip[aria-pressed="true"] em{ color:rgba(255,255,255,.72); }
+  .sl-countries{ display:flex; flex-wrap:wrap; gap:6px; margin-top:-6px; }
+  .sl-country{ display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 13px; border-radius:999px;
+    border:1px solid var(--line); background:var(--bg-hi); color:var(--ink); font:550 14px/1 var(--sans); cursor:pointer;
+    transition:background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease); }
+  .sl-country svg{ width:13px; height:13px; color:var(--ink-soft); }
+  .sl-country em{ font-style:normal; font-size:12px; font-weight:500; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .sl-country:active{ transform:scale(.97); }
+  .sl-country:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .sl-country[aria-pressed="true"]{ background:var(--navy); border-color:var(--navy); color:#fff; }
+  .sl-country[aria-pressed="true"] svg, .sl-country[aria-pressed="true"] em{ color:rgba(255,255,255,.75); }
+  html[data-theme="dark"] .sl-country[aria-pressed="true"]{ background:#AFC0FF; border-color:#AFC0FF; color:#0E1424; }
+  html[data-theme="dark"] .sl-country[aria-pressed="true"] svg, html[data-theme="dark"] .sl-country[aria-pressed="true"] em{ color:rgba(14,20,36,.7); }
   .sl-switch{ display:flex; align-items:center; justify-content:space-between; gap:13px; min-height:44px; cursor:pointer;
     border-top:1px solid var(--line-soft); padding-top:9px; }
   .sl-switch-text{ display:flex; flex-direction:column; gap:2px; }
@@ -2594,7 +2606,7 @@
   html[data-theme="dark"] .sl-reveal span{ box-shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 20px -12px rgba(0,0,0,.6); }
   @media (prefers-reduced-motion:reduce){
     .card-slang.is-unveiling .sl-words > div{ animation:none; }
-    .sl-chip, .sl-switch input, .sl-switch input::after{ transition:none; }
+    .sl-chip, .sl-country, .sl-switch input, .sl-switch input::after{ transition:none; }
   }
   /* Colored accent bar tinted to whichever domain the card belongs to (set
      inline as --card-accent) — visible at rest so a card reads as "which
@@ -8443,16 +8455,41 @@ const SLANG_FILTERS = [
 ];
 let slangFilter = 'all';
 function setSlangFilter(key){ slangFilter = key; render(); }
+/* Country, from the "Region: …." sentence (the Caribbean list names one or two
+   countries per word, comma-separated). A word listed for two countries shows
+   under both. "Caribbean" means used across the region, so it is its own
+   button. Read from the live descriptions, so a teammate's edit moves a word. */
+let slangCountry = '';
+function setSlangCountry(c){ slangCountry = c; render(); }
+function slangCountries(lv){ return lv && lv.region ? lv.region.split(',').map(x => x.trim()).filter(Boolean) : []; }
+function slangCountryLabel(c){ return c === 'Caribbean' ? 'Whole Caribbean' : c === 'Dominican Republic' ? 'Dominican Rep.' : c; }
 function slangPassesFilter(t){
-  if(slangFilter === 'all') return true;
-  const lv = slangLevel(t.def), f = SLANG_FILTERS.find(x => x.key === slangFilter);
-  return !!(lv && f && f.test(lv.level));
+  const lv = slangLevel(t.def);
+  if(slangFilter !== 'all'){
+    const f = SLANG_FILTERS.find(x => x.key === slangFilter);
+    if(!(lv && f && f.test(lv.level))) return false;
+  }
+  if(slangCountry && !slangCountries(lv).includes(slangCountry)) return false;
+  return true;
 }
 function renderSlangPanel(activeCat){
   const ids = new Set(activeCat.id === 'slang'
     ? DATA.categories.filter(isSlangDomain).map(c => c.id) : [activeCat.id]);
-  const levels = [];
-  DATA.categories.forEach(c => { if(ids.has(c.id)) c.terms.forEach(t => { const lv = slangLevel(t.def); if(lv) levels.push(lv.level); }); });
+  const levels = [], countries = new Map();
+  DATA.categories.forEach(c => { if(ids.has(c.id)) c.terms.forEach(t => {
+    const lv = slangLevel(t.def); if(!lv) return;
+    levels.push(lv.level);
+    slangCountries(lv).forEach(k => countries.set(k, (countries.get(k) || 0) + 1));
+  }); });
+  // A country picked in another view that has none of it here would hide everything.
+  if(slangCountry && !countries.has(slangCountry)) slangCountry = '';
+  const countryList = [...countries.entries()].sort((a, b) => (a[0] === 'Caribbean') - (b[0] === 'Caribbean') || b[1] - a[1]);
+  const countryRow = countryList.length ? `
+    <div class="sl-panel-head"><span class="sl-panel-title">Country</span></div>
+    <div class="sl-countries" role="group" aria-label="Filter by country">
+      <button type="button" class="sl-country" aria-pressed="${!slangCountry}" onclick="setSlangCountry('')">All</button>
+      ${countryList.map(([k, n]) => `<button type="button" class="sl-country" aria-pressed="${slangCountry === k}" onclick="setSlangCountry('${escapeAttr(k)}')">${ICON_SL_PIN}${escapeHtml(slangCountryLabel(k))}<em>${n}</em></button>`).join('')}
+    </div>` : '';
   const count = l => levels.filter(x => x === l).length;
   const order = ['Neutral','Low','Medium','Varies','Medium-high','High'];
   const spread = levels.length ? order.filter(count).map(l =>
@@ -8464,7 +8501,7 @@ function renderSlangPanel(activeCat){
   return `<div class="sl-panel">
     <div class="sl-panel-head"><span class="sl-panel-title">Intensity</span><span class="sl-panel-total">${levels.length} words</span></div>
     <div class="sl-spread" role="img" aria-label="${order.filter(count).map(l => l + ' ' + count(l)).join(', ')}">${spread}</div>
-    <div class="sl-chips" role="group" aria-label="Filter by intensity">${chips}</div>
+    <div class="sl-chips" role="group" aria-label="Filter by intensity">${chips}</div>${countryRow}
     <label class="sl-switch"><span class="sl-switch-text"><b>Hide strong words</b><span>Tap a card to reveal it</span></span>
       <input type="checkbox" role="switch" id="slangVeil" ${slangVeil ? 'checked' : ''} onchange="setSlangVeil(this.checked)" aria-label="Hide strong words until tapped"></label>
   </div>`;
@@ -13605,7 +13642,7 @@ function renderContent(){
         foldText(t.notes).includes(q)
       );
     }
-    if(slang && slangFilter !== 'all') terms = terms.filter(slangPassesFilter);
+    if(slang && (slangFilter !== 'all' || slangCountry)) terms = terms.filter(slangPassesFilter);
     if(terms.length===0){ emptySections.push(cat); return; }
     renderedAny = true;
     // Trim this section to whatever budget is left, remembering how much was
@@ -15796,7 +15833,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1004.2306';
+const BUILD_ID = 'b1004.2320';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
