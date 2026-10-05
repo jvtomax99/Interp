@@ -50,6 +50,20 @@ So:
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
 | Everything else | `index.html` |
 
+**The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
+`--ic-*`) lives in the "Visual refinement" block at the end of `index.html`'s
+stylesheet; Home's half is the block of the same name at the end of
+`home-polish.css`. Use those values instead of new one-off sizes. The
+interface face is Inter; the serif is for quoted human speech only.
+
+**Sidebar and tab bar switch at 900px**, both of them. Between 761 and 900px
+they used to show together.
+
+**Subgroups open in place.** On a parent domain (and on All domains) each
+subgroup is a collapsed heading: the heading opens it where it is, and its
+Open button navigates (`setCategory`, so Back retraces it). A new touch
+control that should show a press goes in the `LIFTS` list in `index.html`.
+
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
 nothing for the glossary, terms, chat, Doctor Prep, study, quizzes, profile,
 settings or the guide — those exist only inside `index.html`. Say so rather

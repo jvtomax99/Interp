@@ -892,3 +892,69 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
   #content.is-home .smw:active,#content.is-home .smw.is-pressed{transform:none;}
   #content.is-home .smw,#content.is-home .smw *{animation:none !important;}
 }
+
+/* ==========================================================================
+   Visual refinement (iOS-inspired pass) -- Home's half; index.html holds the
+   rest (search "Visual refinement"). Same selectors as the rules above, never
+   stronger, so these win by coming last and press/focus states still fire.
+   ========================================================================== */
+/* Resource cards: compact, with the name allowed to wrap instead of being cut. */
+#content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card,.home-section-grid>.qa-card{
+  min-height:108px;padding:13px 13px 11px;gap:6px;
+}
+#content.is-home .home-tile-icon,#content.is-home .qa-icon,.home-section-grid .qa-icon,
+#content.is-home .home-tile-icon .medical-pin,#content.is-home .qa-icon .medical-pin,.home-section-grid .qa-icon .medical-pin,
+#content.is-home .home-tile-icon .pin-sprite,#content.is-home .qa-icon .pin-sprite{width:32px;height:32px;}
+#content.is-home .home-tile-name,#content.is-home .qa-title{font-size:15px;font-weight:650;line-height:1.25;letter-spacing:-.015em;}
+#content.is-home .home-tile-count,#content.is-home .qa-desc,.home-section-grid .qa-desc{font-size:12px;}
+#content.is-home .home-sec-head h3{font-size:20px;font-weight:650;letter-spacing:-.022em;}
+#content.is-home .home-sec-more{font-size:13px;font-weight:550;}
+/* Quick tools: the same tile everywhere, the label one step larger. */
+#content.is-home .qa-tile{min-height:84px;border-radius:17px;}
+#content.is-home .qa-tile-icon,#content.is-home .qa-tile-icon .medical-pin,#content.is-home .qa-tile-icon .pin-sprite{width:32px;height:32px;}
+#content.is-home .qa-tile-label{font-size:12.5px;font-weight:550;}
+#content.is-home .home-search{border-radius:14px;}
+@media(max-width:900px){
+  /* A little more than two cards across, so the rail reads as scrollable. */
+  #content.is-home .home-rail{grid-auto-columns:calc((100% - 22px)/2.35);}
+  /* One line beside "+ New" and "View all" on a 390px phone (measured:
+     18px was 4px too wide). "View all" stays 12px here for the same reason. */
+  #content.is-home .home-sec-head h3{font-size:17px;}
+  #content.is-home .home-sec-more{font-size:12px;}
+}
+@media(max-width:365px){
+  #content.is-home .qa-tile-label{font-size:12px;}
+  #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:14px;}
+  #content.is-home .home-rail{grid-auto-columns:calc((100% - 18px)/2.2);}
+  #content.is-home .home-sec-head h3{font-size:16px;}
+  /* "Medical Terminology" wrapped at 360px even before this pass; the row's
+     gaps give back the few pixels it needs. */
+  #content.is-home .home-sec-head{gap:5px;}
+  #content.is-home .home-sec-add-pill{padding:0 9px 0 7px;}
+  #content.is-home .home-sec-more{padding-left:4px;}
+}
+/* Desktop: the phone's composition, not a wall of photo. The greeting was
+   650px tall, so on a 900px-high screen Search sat at the fold and the quick
+   tools below it. It is now sized to its content and framed on the blossoms,
+   the way the phone shows them; Search and the tools sit in the first view. */
+@media (min-width:901px){
+  #content.is-home .home-greeting{
+    min-height:0;height:clamp(340px,44vh,430px);
+    margin-left:calc(-1 * var(--home-inset));margin-right:calc(-1 * var(--home-inset));
+  }
+  #content.is-home .home-greeting-photo-drift{background-position:64% 36%;}
+  #content.is-home .home-greeting-name-row{margin-top:34px;}
+  /* 46px, not less: the Ask badge swings below his face and must clear it. */
+  #content.is-home .home-greeting-quote{margin-top:46px;font-size:21px;}
+  #content.is-home .home-search{height:54px;font-size:16px;}
+  /* Quick tools read as a row of actions: icon and label side by side. */
+  #content.is-home .qa-tile{flex-direction:row;justify-content:flex-start;gap:13px;min-height:64px;padding:13px 17px;}
+  #content.is-home .qa-tile-label{font-size:15px;font-weight:600;text-align:left;}
+  #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:16px;}
+  #content.is-home .home-tile-count,#content.is-home .qa-desc{font-size:13px;}
+  #content.is-home .home-tile-icon,#content.is-home .qa-icon,
+  #content.is-home .home-tile-icon .medical-pin,#content.is-home .qa-icon .medical-pin,
+  #content.is-home .home-tile-icon .pin-sprite,#content.is-home .qa-icon .pin-sprite{width:36px;height:36px;}
+  #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card{min-height:116px;}
+  #content.is-home .home-sec-head h3{font-size:22px;}
+}

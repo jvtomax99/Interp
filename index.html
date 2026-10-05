@@ -5681,6 +5681,118 @@ html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(
   .smiley-rider.is-up .smiley-rider-bob, .tg-smiley.is-new svg{ animation:none; }
   .smiley-rider .ask-face{ transition:none; }
 }
+
+/* ==========================================================================
+   Visual refinement (iOS-inspired pass)
+   One type scale, one spacing scale, three icon sizes, and the same press /
+   focus states everywhere outside Home (Home's half is at the end of
+   home-polish.css). Rules here match the specificity of what they refine and
+   never escalate it. Headings move to the interface face; the serif stays for
+   quoted human speech only (the greeting quote, Ask answers, review lines).
+   ========================================================================== */
+:root{
+  --fs-cap:12px; --fs-foot:13px; --fs-sub:15px; --fs-head:17px;
+  --fs-t3:20px; --fs-t2:22px; --fs-t1:28px;
+  --sp-1:6px; --sp-2:9px; --sp-3:13px; --sp-4:17px; --sp-5:26px;
+  --ic-row:24px; --ic-list:28px; --ic-tile:32px; --ic-hero:44px;
+  --press-tint:rgba(21,28,44,0.05);
+}
+html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
+
+/* The sidebar and the tab bar used to overlap from 761 to 900px (a tablet
+   held upright): the sidebar hid at 760, the tab bar appeared at 900. Both
+   now switch at 900, like the header already did. */
+@media (max-width:900px){
+  .sidebar{ display:none; }
+  .app{ flex-direction:column; min-height:0; }
+}
+@media (min-width:761px) and (max-width:900px){
+  .main{ padding:26px 26px 120px; }
+}
+
+/* ---- Headings: one face, tightening as they grow ---- */
+.domain-banner-name{ font-family:var(--sans); font-weight:700; font-size:var(--fs-t1); letter-spacing:-.03em; line-height:1.1; }
+.section-head h2{ font-family:var(--sans); font-weight:650; font-size:var(--fs-t3); letter-spacing:-.022em; }
+.section-head .sub{ font-size:var(--fs-foot); font-weight:500; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+.hub-head h1, .guide-head h2{ font-family:var(--sans); font-weight:700; letter-spacing:-.028em; }
+.modal h3, .onboarding-modal h3, .results-summary h3{ font-family:var(--sans); font-weight:650; letter-spacing:-.02em; }
+.progress-head b{ font-family:var(--sans); font-weight:700; letter-spacing:-.02em; }
+.doc-card-name{ font-family:var(--sans); font-weight:650; font-size:16px; letter-spacing:-.015em; }
+.doc-research-specialty{ font-family:var(--sans); font-weight:650; letter-spacing:-.015em; }
+@media (min-width:901px){
+  .domain-banner-name{ font-size:32px; }
+  .section-head h2{ font-size:var(--fs-t2); }
+}
+
+/* ---- Collapsible sections: a parent's subgroups, and every domain on
+   All domains. A heading row you can open in place, plus Open for the page. */
+.sec-fold{
+  display:flex; align-items:center; gap:var(--sp-1); margin:0 0 var(--sp-2);
+  background:var(--paper); border-radius:var(--r-md); position:relative;
+  box-shadow:inset 0 0 0 1px var(--line-soft), 0 1px 0 0 inset var(--finish-edge, rgba(255,255,255,.82)), var(--finish-shadow, var(--sh-1));
+}
+.sec-fold.is-sub{ margin-left:var(--sp-5); }
+.sec-fold.is-open{ margin-bottom:var(--sp-3); }
+.sec-fold-toggle{
+  flex:1; min-width:0; display:flex; align-items:center; gap:var(--sp-3);
+  min-height:60px; padding:var(--sp-2) var(--sp-1) var(--sp-2) var(--sp-4);
+  border:0; border-radius:var(--r-md); background:transparent; color:var(--ink);
+  font:inherit; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition:background .15s var(--ease);
+}
+.sec-fold-dot{ width:10px; height:10px; flex:none; border-radius:50%; background:var(--fold-color);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--fold-color) 16%, transparent); margin:0 4px; }
+.sec-fold-pin{ width:var(--ic-tile); height:var(--ic-tile); flex:none; display:flex; align-items:center; justify-content:center; }
+.sec-fold-pin img, .sec-fold-pin svg, .sec-fold-pin .pin-sprite, .sec-fold-pin .medical-pin{ width:var(--ic-tile); height:var(--ic-tile); }
+.sec-fold-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.sec-fold-name{ font-size:16px; font-weight:650; letter-spacing:-.015em; line-height:1.25; overflow-wrap:anywhere; }
+.sec-fold-count{ font-size:var(--fs-foot); font-weight:500; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.sec-fold-chev{ width:28px; height:28px; flex:none; display:grid; place-items:center; color:var(--ink-faint);
+  transition:transform .24s var(--ease), color .2s var(--ease); }
+.sec-fold-chev svg{ width:18px; height:18px; }
+.sec-fold.is-open .sec-fold-chev{ transform:rotate(180deg); color:color-mix(in srgb, var(--fold-color) 70%, var(--ink)); }
+.sec-fold-open{
+  flex:none; position:relative; margin-right:var(--sp-2); min-height:34px; padding:0 var(--sp-3);
+  border:0; border-radius:999px; cursor:pointer; font:600 var(--fs-foot)/1 var(--sans);
+  background:color-mix(in srgb, var(--fold-color) 11%, var(--paper));
+  color:color-mix(in srgb, var(--fold-color) 58%, var(--ink));
+  transition:transform .15s var(--ease), background .15s var(--ease);
+}
+.sec-fold-open::after{ content:""; position:absolute; inset:-5px -4px; }   /* 44px to hit */
+.sec-fold-toggle:active, .sec-fold-toggle.is-pressed{ background:var(--press-tint); }
+.sec-fold-open:active, .sec-fold-open.is-pressed{ transform:scale(.95); }
+.sec-fold-toggle:focus-visible, .sec-fold-open:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; }
+.sec-fold-open:focus-visible{ outline-offset:2px; }
+@media (hover:hover) and (pointer:fine){
+  .sec-fold-toggle:hover{ background:var(--bg-hi); }
+  .sec-fold-open:hover{ background:color-mix(in srgb, var(--fold-color) 18%, var(--paper)); }
+}
+.sec-fold-body{ margin:0 0 var(--sp-4); }
+.sec-fold.is-sub + .sec-fold-body{ margin-left:var(--sp-5); }
+.sec-fold-body.is-entering{ animation:secFoldIn .26s var(--ease) both; }
+@keyframes secFoldIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+.sec-fold-empty{ margin:0; padding:var(--sp-3) var(--sp-4); border-radius:var(--r-md); background:var(--bg-hi);
+  color:var(--ink-soft); font-size:14px; }
+/* General terms, under a parent's subgroups: a little air above it. */
+.sec-fold + .sec-fold-body + .section-head, .sec-fold + .section-head{ margin-top:var(--sp-5); }
+
+/* ---- Rows in the More sheet and the domain lists: readable counts, one icon size ---- */
+.domain-chip{ min-height:52px; gap:var(--sp-3); padding:var(--sp-2) var(--sp-3); }
+.domain-chip-icon{ width:var(--ic-list); height:var(--ic-list); }
+.domain-chip-icon svg, .domain-chip-icon .medical-pin, .domain-chip-icon .pin-sprite, .domain-chip-icon img{ width:var(--ic-list); height:var(--ic-list); }
+.domain-chip-name{ font-size:var(--fs-sub); font-weight:550; letter-spacing:-.01em; }
+.domain-chip-count{ font-family:var(--sans); font-size:var(--fs-foot); font-weight:500; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.domain-chip:active, .domain-chip.is-pressed{ background:var(--press-tint); }
+.domain-chip:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; }
+
+/* ---- Desktop sidebar: counts you can read, one row height ---- */
+.side-row-count{ font-size:var(--fs-foot); }
+.side-row{ min-height:44px; }
+
+@media (prefers-reduced-motion:reduce){
+  .sec-fold-body.is-entering{ animation:none; }
+  .sec-fold-chev, .sec-fold-toggle, .sec-fold-open{ transition:none; }
+}
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -6900,6 +7012,10 @@ let ethicsFilter = 'all';
 // How many term cards a single render may build. Raised by "show more", and
 // reset whenever the view changes so a big domain can't slow the next screen.
 let termRenderLimit = 120;
+// Subgroup (and All-domains) sections opened in place this session; they all
+// start collapsed. justOpenedSection lets the one just opened fade in.
+const openSections = new Set();
+let justOpenedSection = null;
 
 /* ---------- Location grouping ----------
    The provider and doctor lists are long flat alphabetical runs, but the
@@ -13753,35 +13869,13 @@ function renderContent(){
     }
   }
 
-  // Jump bar for a parent that has subgroups — lets you skip straight to a
-  // subgroup's section without scrolling the whole family.
-  if(activeCategory !== 'all' && cats.length > 1){
-    const parent = cats[0];
-    const kids = cats.slice(1);
-    html += `<div class="subgroup-bar">
-      <div class="subgroup-bar-head">
-        <span class="subgroup-bar-label">Jump to</span>
-        <span class="subgroup-bar-count">${kids.length} subgroups</span>
-      </div>
-      ${parent.terms.length ? `<button class="subgroup-pill-all" onclick="jumpToDomain('${parent.id}')" title="General ${escapeHtml(parent.name)} terms — the ones that don't sit in a subgroup">
-        ${ICON_ARROW_RIGHT}<span class="subgroup-pill-name">General terms</span>
-        <span class="subgroup-pill-count">${parent.terms.length}</span>
-      </button>` : ''}
-      <div class="subgroup-grid">
-        ${(()=>{
-          // If shortening ever collapses two subgroups onto the same label,
-          // fall back to full names for the whole group — an ambiguous jump
-          // target is worse than a long one.
-          const shorts = kids.map(k => subgroupShortLabel(parent.name, k.name));
-          const ambiguous = new Set(shorts.map(s=>s.toLowerCase())).size !== shorts.length;
-          return kids.map((k,i)=>{
-          const short = ambiguous ? k.name : shorts[i];
-          return `<button class="subgroup-pill" onclick="jumpToDomain('${k.id}')" title="${escapeHtml(k.name)}" aria-label="${escapeHtml(k.name)}, ${k.terms.length} term${k.terms.length === 1 ? '' : 's'}"><span class="subgroup-pill-name">${escapeHtml(short)}</span><span class="subgroup-pill-count">${k.terms.length} term${k.terms.length === 1 ? '' : 's'}</span></button>`;
-          }).join('');
-        })()}
-      </div>
-    </div>`;
-  }
+  // A parent's subgroups come first, as headings you can open in place
+  // (sectionFoldHead), so every one of them is on screen without scrolling
+  // past the parent's own terms. They start collapsed; a search or a Slang
+  // filter opens whichever have matches. Each heading's Open button is the
+  // real navigation into the subgroup (setCategory, so Back retraces it).
+  if(activeCategory !== 'all' && cats.length > 1) cats = cats.slice(1).concat(cats[0]);
+  const foldIcons = activeCategory === 'all' ? new Map(getDomainTiles().map(t => [t.id, t.icon])) : null;
   const slangActive = DATA.categories.find(c => c.id === activeCategory);
   if(isSlangDomain(slangActive)) html += renderSlangPanel(slangActive);
   // Export and import live in the banner's ⋯ menu (openDomainMenu).
@@ -13831,6 +13925,17 @@ function renderContent(){
       );
     }
     if(slang && (slangFilter !== 'all' || slangCountry)) terms = terms.filter(slangPassesFilter);
+    const foldable = activeCategory === 'all' || cat.id !== activeCategory;
+    const filtering = !!q || (slang && (slangFilter !== 'all' || !!slangCountry));
+    const open = !foldable || filtering || openSections.has(cat.id);
+    if(foldable && !filtering && (!open || terms.length === 0)){
+      // Collapsed, or opened with nothing in it yet: the heading alone, plus
+      // a way in to add the first term.
+      renderedAny = true;
+      html += sectionFoldHead(cat, terms.length, open, null, foldIcons);
+      if(open) html += `<div class="sec-fold-body" id="fold-${cat.id}"><p class="sec-fold-empty">Nothing here yet. Open ${escapeHtml(cat.name)} to add the first term.</p></div>`;
+      return;
+    }
     if(terms.length===0){ emptySections.push(cat); return; }
     renderedAny = true;
     // Trim this section to whatever budget is left, remembering how much was
@@ -13841,6 +13946,7 @@ function renderContent(){
     const fullCount = terms.length;
     if(budget <= 0){
       truncatedTotal += fullCount;
+      if(foldable) html += sectionFoldHead(cat, fullCount, false, null, foldIcons);
       return;
     }
     if(terms.length > budget){
@@ -13853,8 +13959,7 @@ function renderContent(){
     // modal already existed but nothing called it, so domains could be created
     // and never corrected — a typo in a name was permanent.
     // The domain on screen is already named by the banner above. Keep its
-    // anchor (the jump bar scrolls to it) and, when subgroups follow, call its
-    // own terms what the jump bar calls them.
+    // anchor, and when subgroups sit above it, head its own terms clearly.
     if(cat.id === activeCategory){
       if(cats.length > 1){
         html += `<div class="section-head" id="domain-${cat.id}"><h2>General terms</h2>
@@ -13862,12 +13967,10 @@ function renderContent(){
       } else {
         html += `<div class="section-anchor" id="domain-${cat.id}"></div>`;
       }
-    } else
-    html += `<div class="section-head ${cat.parentId ? 'section-head-sub' : ''}" id="domain-${cat.id}">
-      <h2>${cat.parentId ? '\u21B3 ' : ''}${escapeHtml(cat.name)}</h2>
-      <span class="sub">${fullCount} term${fullCount===1?'':'s'}${fullCount>terms.length?` \u00b7 showing ${terms.length}`:''}</span>
-      <button class="section-edit" onclick="openEditDomainModal('${cat.id}')" title="Edit ${escapeAttr(cat.name)}" aria-label="Edit ${escapeAttr(cat.name)}"><span aria-hidden="true">\u270E</span><span class="section-edit-label">Edit</span></button>
-    </div>`;
+    } else {
+      html += sectionFoldHead(cat, fullCount, true, terms.length, foldIcons);
+      html += `<div class="sec-fold-body${cat.id === justOpenedSection ? ' is-entering' : ''}" id="fold-${cat.id}">`;
+    }
     html += `<div class="grid">`;
     terms.forEach((t, cardIdx)=>{
       // Was ATTACHMENTS.filter(...) per card — a full scan of every
@@ -13922,7 +14025,9 @@ function renderContent(){
       `;
     });
     html += `</div>`;
+    if(foldable) html += `</div>`;   // .sec-fold-body
   });
+  justOpenedSection = null;
 
   if(truncatedTotal > 0){
     html += `<div class="show-more-wrap">
@@ -14076,10 +14181,11 @@ function setCategory(id, isBack){
    search did not even try: it opened the domain at the top. This draws far
    enough to include the term, centres it and flashes it. */
 function domainRenderOrder(catId){
-  // The same order renderContent() draws in: the domain, then its subgroups,
-  // each sorted the way that section sorts (Spanish first in Slang).
-  const cats = DATA.categories.filter(c => c.id === catId)
-    .concat(DATA.categories.filter(c => c.parentId === catId));
+  // The same order renderContent() draws in: the subgroups that are open
+  // (collapsed ones draw no cards), then the domain itself, each sorted the
+  // way that section sorts (Spanish first in Slang).
+  const cats = DATA.categories.filter(c => c.parentId === catId && openSections.has(c.id))
+    .concat(DATA.categories.filter(c => c.id === catId));
   const ids = [];
   cats.forEach(cat => {
     const slang = typeof isSlangDomain === 'function' && isSlangDomain(cat);
@@ -16054,12 +16160,17 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
-    const el = e.target.closest && e.target.closest(LIFTS);
+    let el = e.target.closest && e.target.closest(LIFTS);
     if(!el) return;
+    // A domain family card is drawn by its outer .domain-family, but the
+    // touch lands on the .home-tile button inside it, so the class went on
+    // the button and the card's press glow never showed. Mark the card.
+    const family = el.parentElement && el.parentElement.closest('.domain-family');
+    if(family) el = family;
     el.classList.add('is-pressed');
     const clear = () => {
       setTimeout(()=> el.classList.remove('is-pressed'), HOLD_MS);
@@ -16077,8 +16188,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1005.1023';
-const BUILD_TIME = '2026-09-27 21:06 UTC';
+const BUILD_ID = 'b1005.1830';
+const BUILD_TIME = '2026-10-05 18:30 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -17112,6 +17223,34 @@ function renderDoctorDirDetail(d){
 // built yet, so the old scroll-only handler silently did nothing — which is
 // why the bigger domains' subgroups appeared broken. Fall back to opening the
 // subgroup directly, which always lands somewhere correct.
+/* A collapsible section heading: name, count and a chevron that opens the
+   section in place, plus Open, which goes to it as a page (setCategory, so
+   it lands on the Back stack and its own Add and search apply). */
+function sectionFoldHead(cat, count, open, shown, icons){
+  const pin = icons && !cat.parentId ? icons.get(cat.id) : '';
+  const lead = pin ? `<span class="sec-fold-pin" aria-hidden="true">${pin}</span>` : '<span class="sec-fold-dot" aria-hidden="true"></span>';
+  const n = `${count} term${count === 1 ? '' : 's'}${shown != null && count > shown ? ` \u00b7 showing ${shown}` : ''}`;
+  return `<div class="sec-fold${open ? ' is-open' : ''}${activeCategory === 'all' && cat.parentId ? ' is-sub' : ''}" id="domain-${cat.id}" style="--fold-color:${cat.color || 'var(--accent)'}">
+    <button type="button" class="sec-fold-toggle" aria-expanded="${open}"${open ? ` aria-controls="fold-${cat.id}"` : ''} onclick="toggleSection('${cat.id}')">
+      ${lead}<span class="sec-fold-text"><span class="sec-fold-name">${escapeHtml(cat.name)}</span><span class="sec-fold-count">${n}</span></span>
+      <span class="sec-fold-chev">${ICON_CHEVRON_DOWN}</span>
+    </button>
+    <button type="button" class="sec-fold-open" onclick="setCategory('${cat.id}')" aria-label="Open ${escapeAttr(cat.name)}">Open</button>
+  </div>`;
+}
+function toggleSection(id){
+  const a = document.activeElement;
+  const hadFocus = !!(a && a.classList && a.classList.contains('sec-fold-toggle'));
+  if(openSections.has(id)) openSections.delete(id);
+  else { openSections.add(id); justOpenedSection = id; }
+  renderContent();
+  // The heading is rebuilt; keep the keyboard where it was.
+  if(hadFocus){
+    const b = document.querySelector(`#domain-${CSS.escape(id)} .sec-fold-toggle`);
+    if(b) b.focus({ preventScroll:true });
+  }
+}
+
 function jumpToDomain(id){
   // Scrolling is only right when the target is already part of the page
   // you're on — that's the parent's own "General terms" section.

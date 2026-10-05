@@ -1097,11 +1097,11 @@
         add.addEventListener('click', () => { closeHomeSection(); openAddDomainModal(); });
         grid.appendChild(add);
       }
-      // The full term list stays one tap away, below the domains.
+      // Every domain as a folded heading (All domains), one tap away below.
       const all = document.createElement('button');
       all.type = 'button';
       all.className = 'home-section-all';
-      all.textContent = 'Browse every term';
+      all.textContent = 'Browse all domains';
       all.addEventListener('click', () => { closeHomeSection(); setCategory('all'); });
       grid.appendChild(all);
     }

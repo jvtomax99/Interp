@@ -168,11 +168,20 @@ lost concurrent edits. Do not reintroduce that.
   an input.
 - **Visual separation ≠ tap separation.** Check which element actually
   receives the tap at a coordinate (`document.elementFromPoint`).
-- **Back navigation:** subgroup taps always call `setCategory()` so they land
-  on the history stack. Scroll-only (`scrollIntoView`) is reserved for
-  "General terms" when already on that parent. The breadcrumb "Up to [Parent]"
+- **Back navigation:** anything that takes you to a subgroup calls
+  `setCategory()` so it lands on the history stack — on a parent domain that
+  is a subgroup heading's **Open** button. Tapping the heading itself only
+  opens the section in place (`toggleSection`, `openSections`); that is not
+  navigation and adds nothing to the stack. The breadcrumb "Up to [Parent]"
   pill is explicit up-navigation; the Back button does pure history retracing.
   This broke three times — do not "simplify" it.
+- **Subgroups start collapsed.** A parent domain lists its subgroups first,
+  as headings, then its own General terms; All domains lists every domain the
+  same way. A search or a Slang filter opens whichever sections have matches.
+  `domainRenderOrder()` follows that order (open subgroups, then the parent).
+- **Press feedback on touch** comes from the `LIFTS` list in `index.html`
+  (the `.is-pressed` class). A domain family card is marked as a whole, not
+  the button inside it — that was why its press glow never showed.
 - **Cache-first startup:** the app paints from the `localStorage` glossary
   cache. The first load after a deploy is always slow. That is expected; it is
   not a regression.
@@ -224,11 +233,14 @@ box-shadow:
   0 8px 20px -12px rgba(22,55,90,0.22);
 ```
 
-**Type.** IBM Plex Sans for all interface text. h1 39/700 at -0.035em,
-h3 19/650 at -0.025em, body 14/500, label 13/550, meta 12/500. Tracking
-tightens as size grows. Prefer the variable-axis weights 550 and 650 over
-600 and 700. IBM Plex Serif is reserved for quoted human speech (2 uses);
-`--mono` is declared and unused.
+**Type.** Inter (variable) for all interface text — headings included; the
+banner titles and section heads used to be serif. Scale, as tokens in the
+"Visual refinement" block of `index.html`: caption 12, footnote 13, subhead
+15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`). Spacing
+6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
+cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
+weights 550 and 650. IBM Plex Serif is reserved for quoted human speech (the
+greeting quote, Ask answers, review lines).
 
 Rules that hold across the whole app:
 

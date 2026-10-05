@@ -29,7 +29,7 @@
 .home-tile-icon .pin-sprite{width:34px;height:34px;}
 .qa-icon .pin-sprite,.qa-tile-icon .pin-sprite{width:32px;height:32px;}
 .side-row-icon .pin-sprite{width:24px;height:24px;}
-.tabbar-icon .pin-sprite{width:23px;height:23px;}
+.tabbar-icon .pin-sprite{width:24px;height:24px;}
 .icon-pick .pin-sprite{width:28px;height:28px;}
 .group-mark-logo{object-fit:contain;}
 `;
@@ -246,8 +246,8 @@
     .home-tile-icon .medical-pin{width:34px;height:34px}
     .side-row-icon .medical-pin{width:24px;height:24px}
     .side-row.is-nested .medical-pin{width:16px;height:16px}
-    .tabbar-icon .medical-pin{width:23px;height:23px}
-    .domain-chip-icon .medical-pin{width:19px;height:19px}
+    .tabbar-icon .medical-pin{width:24px;height:24px}
+    .domain-chip-icon .medical-pin{width:28px;height:28px}
     .icon-pick .medical-pin{width:28px;height:28px}
     #domainFolderIcon .medical-pin{width:100%;height:100%}
 
