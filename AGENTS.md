@@ -47,7 +47,7 @@ So:
 | Mobile top bar and tab bar | `home-polish.css` (`max-width:900px` block) |
 | Domain folder / section overlay styling | `home-polish.css` |
 | Home behaviour — hello wave, rail dots, overlay | `home-polish.js` |
-| Pin and icon artwork | `pin-icons.js` |
+| Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
 | Everything else | `index.html` |
 
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
@@ -74,6 +74,10 @@ no error on screen. So when you add something:
   Without it the collection is denied everywhere.
 - **A new database call at startup** goes inside `hubAuthReady.then(...)`
   (see the Init block), or a locked Hub refuses it as a stranger.
+- **The Firebase SDK loads in the background.** `db`, `storage` and `hubAuth`
+  are `null` until `firebaseReady` resolves (`hubAuthReady` includes it), so
+  code that runs as the page loads must wait for one of them before reading
+  those. A `<script src>` tag for the SDK would block the whole app again.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.
@@ -83,7 +87,7 @@ no error on screen. So when you add something:
 Vercel auto-deploys on push to `main`. No build step. Three things move
 together or returning users get a stale app:
 
-1. `BUILD_ID` in `index.html` (~line 9183, format `bMMDD.HHMM`) — bump it.
+1. `BUILD_ID` in `index.html` (~line 16080, format `bMMDD.HHMM`) — bump it.
 2. `CACHE_VERSION` in `sw.js` (~line 29) — bump it.
 3. Any changed `api/*.js` ships in the same push.
 
@@ -92,7 +96,7 @@ https://interp-six.vercel.app before reporting success.
 
 ## Before pushing `index.html`
 
-It is one ~13,500-line file with all CSS and JS inline, used mostly on
+It is one ~21,000-line, 1.1 MB file with all CSS and JS inline, used mostly on
 phones in a hospital. Do not push it unverified.
 
 1. Syntax-check the inline scripts.

@@ -11,7 +11,7 @@
   width:32px;
   height:32px;
   flex:0 0 auto;
-  background-image:url('./pin-icons-source-hd-upload.png?v=src2');
+  background-image:url('./pin-icons-sheet.webp');
   background-repeat:no-repeat;
   image-rendering:auto;
   background-size:800% 800%;
@@ -134,9 +134,13 @@
   }
 
 
-  // The approved 6 x 6 sheet has labels below the artwork. Coordinates are
-  // normalized to its 1254px reference width; uploaded Retina copies work too.
-  const medicalSource = './medical-pins.png.PNG';
+  // Every pin is its own small file in pins/, named by its key: pins/oncology.webp.
+  // They used to be cut out of medical-pins.png.PNG (6 x 6, labels under the
+  // art) and specialty-pins.png.PNG (2 x 2) on every launch -- 5 MB of sheets
+  // and seconds of pixel work on a phone -- so they are now cut once, ahead of
+  // time, with that same code (it is in git history, before the pins/ folder).
+  // To change a pin's artwork, replace its file: 192 x 192, transparent,
+  // trimmed to the art. To add one, add its file and its key below.
   const medicalNames = [
     'genetics','oncology','hematology','leukemia','cardiology','heart-failure',
     'pediatrics','ent','urology','endocrinology','nephrology','neurology',
@@ -194,8 +198,8 @@
        picked in the editor is overwritten the moment it is drawn -- which is
        why changing a domain's pin used to be impossible even though the editor
        had an icon row. index.html owns the domain data, so it answers through
-       window.ihChosenPin; a chosen pin whose artwork has not loaded yet falls
-       through to the name for one paint, and render() fixes it on load. */
+       window.ihChosenPin; a chosen key with no artwork here (a pin since
+       removed) falls through to the name. */
     const chosen = typeof window.ihChosenPin === 'function' ? window.ihChosenPin(normalized) : null;
     if(chosen && medicalArtwork[chosen]) return chosen;
     return namePinKey(normalized);
@@ -921,185 +925,29 @@
     }, { once:true });
   }, { passive:true });
 
-  function clearSheetBackground(ctx, width, height){
-    const pixels = ctx.getImageData(0, 0, width, height);
-    const data = pixels.data;
-    const seen = new Uint8Array(width * height);
-    const queue = new Int32Array(width * height);
-    let head = 0, tail = 0;
-    function visit(p){
-      if(seen[p]) return;
-      seen[p] = 1;
-      const i = p * 4, lo = Math.min(data[i], data[i+1], data[i+2]);
-      const hi = Math.max(data[i], data[i+1], data[i+2]);
-      if(data[i+3] === 0 || (lo > 225 && hi - lo < 25)) queue[tail++] = p;
-    }
-    for(let x=0;x<width;x++){ visit(x); visit((height-1)*width+x); }
-    for(let y=0;y<height;y++){ visit(y*width); visit(y*width+width-1); }
-    while(head < tail){
-      const p = queue[head++], x = p % width, y = Math.floor(p / width);
-      data[p*4+3] = 0;
-      if(x) visit(p-1); if(x+1<width) visit(p+1);
-      if(y) visit(p-width); if(y+1<height) visit(p+width);
-    }
-    ctx.putImageData(pixels, 0, 0);
+  const specialtyNames = ['infectious-disease','dermatology','ophthalmology','surgery-anesthesia'];
+  [...medicalNames, ...specialtyNames].forEach(key => { medicalArtwork[key] = './pins/' + key + '.webp'; });
+  if(typeof DOMAIN_ICONS !== 'undefined'){
+    const iconKeys = {dna:'genetics',ribbon:'oncology',heart:'cardiology',brain:'neurology',
+      lungs:'pulmonology',bone:'orthopedics',ear:'ent',iv:'infusion',flask:'laboratory',
+      pill:'pharmacy',doctor:'doctor-prep',person:'providers',chat:'chat',calendar:'events',
+      link:'directory',bell:'updates',exam:'practice',review:'review'};
+    Object.entries(iconKeys).forEach(([key, artwork]) => { DOMAIN_ICONS[key] = medicalHTML(artwork); });
+    [...medicalNames, ...specialtyNames].forEach(key => { DOMAIN_ICONS[key] = medicalHTML(key); });
   }
-
-  // Label fragments are separate from the enamel artwork. Remove only short
-  // components wholly below the largest pin component, preserving lettering
-  // inside the pin (EN/ES) and detached accents alongside it.
-  function clearCaptionFragments(ctx, width, height){
-    const pixels = ctx.getImageData(0, 0, width, height);
-    const data = pixels.data, size = width * height;
-    const seen = new Uint8Array(size), queue = new Int32Array(size);
-    const components = [];
-    for(let start=0;start<size;start++){
-      if(seen[start] || data[start*4+3] === 0) continue;
-      let head=0, tail=1, minY=height, maxY=0;
-      queue[0]=start; seen[start]=1;
-      while(head<tail){
-        const p=queue[head++], x=p%width, y=Math.floor(p/width);
-        minY=Math.min(minY,y); maxY=Math.max(maxY,y);
-        for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
-          const nx=x+dx, ny=y+dy;
-          if(nx<0 || nx>=width || ny<0 || ny>=height) continue;
-          const n=ny*width+nx;
-          if(!seen[n] && data[n*4+3] !== 0){seen[n]=1;queue[tail++]=n;}
-        }
-      }
-      components.push({points:queue.slice(0,tail),minY,maxY});
-    }
-    const main=components.reduce((a,b)=>!a || b.points.length>a.points.length?b:a,null);
-    if(!main) return;
-    for(const part of components){
-      if(part!==main && part.minY>main.maxY+1 &&
-          part.minY>height*0.65 && part.maxY-part.minY+1<height*0.15){
-        for(const p of part.points) data[p*4+3]=0;
-      }
-    }
-    ctx.putImageData(pixels,0,0);
+  // Decorate returned display tiles only; never change saved category data.
+  const decorate = tiles => tiles.map(tile => {
+    const artwork = medicalHTML(medicalKey(tile.name));
+    return artwork ? {...tile, icon:artwork} : tile;
+  });
+  if(typeof getDomainTiles === 'function'){
+    const original = getDomainTiles;
+    getDomainTiles = function(){ return decorate(original.apply(this, arguments)); };
   }
-
-  // Match the approved preview's optical sizing. Trim only transparent space
-  // after the existing background/caption cleanup, then fit each pin into the
-  // same square without stretching it or changing any artwork pixels.
-  function fittedPinURL(canvas){
-    const ctx = canvas.getContext('2d');
-    const {width, height} = canvas;
-    const {data} = ctx.getImageData(0, 0, width, height);
-    let left = width, top = height, right = -1, bottom = -1;
-    for(let y=0; y<height; y++) for(let x=0; x<width; x++){
-      if(data[(y*width+x)*4+3] > 50){
-        left = Math.min(left,x); top = Math.min(top,y);
-        right = Math.max(right,x); bottom = Math.max(bottom,y);
-      }
-    }
-    if(right < left || bottom < top) return canvas.toDataURL('image/png');
-    left = Math.max(0,left-2); top = Math.max(0,top-2);
-    right = Math.min(width-1,right+2); bottom = Math.min(height-1,bottom+2);
-    const fitted = document.createElement('canvas');
-    fitted.width = fitted.height = 256;
-    const output = fitted.getContext('2d');
-    if(!output) return canvas.toDataURL('image/png');
-    const w = right-left+1, h = bottom-top+1, scale = 252/Math.max(w,h);
-    output.drawImage(canvas,left,top,w,h,(256-w*scale)/2,(256-h*scale)/2,w*scale,h*scale);
-    return fitted.toDataURL('image/png');
+  if(typeof getToolTiles === 'function'){
+    const original = getToolTiles;
+    getToolTiles = function(){ return decorate(original.apply(this, arguments)); };
   }
-
-  const medicalImage = new Image();
-  medicalImage.onload = () => {
-    try{
-      // A different sheet must not silently replace the existing working pins.
-      const ratio = medicalImage.naturalWidth / medicalImage.naturalHeight;
-      if(ratio < 0.98 || ratio > 1.02) throw new Error('Expected the square 36-pin sheet.');
-      const scale = medicalImage.naturalWidth / 1254;
-      const rowY = [0, 212, 410, 617, 820, 1022];
-      const rowH = [184, 167, 176, 172, 169, 163];
-      const canvas = document.createElement('canvas');
-      canvas.width = 256; canvas.height = 256;
-      const ctx = canvas.getContext('2d', {willReadFrequently:true});
-      if(!ctx) return;
-      const prepared = Object.create(null);
-      medicalNames.forEach((key, i) => {
-        const row = Math.floor(i / 6), col = i % 6;
-        const h = rowH[row] / 209 * 256;
-        // Team Chat's caption touches its shadow, so connected-component
-        // cleanup cannot separate it. Exclude the bottom 10 source pixels
-        // while keeping the artwork's scale and position unchanged.
-        const cropHeight = key === 'chat' ? rowH[row] - 10 : rowH[row];
-        const drawHeight = cropHeight / 209 * 256;
-        ctx.clearRect(0, 0, 256, 256);
-        ctx.drawImage(medicalImage, col * 209 * scale, rowY[row] * scale,
-          209 * scale, cropHeight * scale, 0, (256-h)/2, 256, drawHeight);
-        clearSheetBackground(ctx, 256, 256);
-        clearCaptionFragments(ctx, 256, 256);
-        prepared[key] = fittedPinURL(canvas);
-      });
-      Object.assign(medicalArtwork, prepared);
-      if(typeof DOMAIN_ICONS !== 'undefined'){
-        const iconKeys = {dna:'genetics',ribbon:'oncology',heart:'cardiology',brain:'neurology',
-          lungs:'pulmonology',bone:'orthopedics',ear:'ent',iv:'infusion',flask:'laboratory',
-          pill:'pharmacy',doctor:'doctor-prep',person:'providers',chat:'chat',calendar:'events',
-          link:'directory',bell:'updates',exam:'practice',review:'review'};
-        Object.entries(iconKeys).forEach(([key, artwork]) => { DOMAIN_ICONS[key] = medicalHTML(artwork); });
-        medicalNames.forEach(key => { DOMAIN_ICONS[key] = medicalHTML(key); });
-      }
-      // Decorate returned display tiles only; never change saved category data.
-      const decorate = tiles => tiles.map(tile => {
-        const artwork = medicalHTML(medicalKey(tile.name));
-        return artwork ? {...tile, icon:artwork} : tile;
-      });
-      if(typeof getDomainTiles === 'function'){
-        const original = getDomainTiles;
-        getDomainTiles = function(){ return decorate(original.apply(this, arguments)); };
-      }
-      if(typeof getToolTiles === 'function'){
-        const original = getToolTiles;
-        getToolTiles = function(){ return decorate(original.apply(this, arguments)); };
-      }
-      if(typeof render === 'function') render();
-      applyExactPins();
-    }catch(error){
-      console.warn('New medical pin sheet could not be prepared; keeping existing icons.', error);
-    }
-  };
-  medicalImage.onerror = () => console.warn('Medical pin sheet unavailable; keeping existing icons.');
-  medicalImage.src = medicalSource;
-
-
-  // Label-free 2 x 2 specialty sheet. Keep each quadrant separate and preserve
-  // its original transparency and enamel details.
-  const specialtyImage = new Image();
-  specialtyImage.onload = () => {
-    try{
-      if(Math.abs(specialtyImage.naturalWidth / specialtyImage.naturalHeight - 1) > 0.02){
-        throw new Error('Expected the square four-pin specialty sheet.');
-      }
-      const names = ['infectious-disease','dermatology','ophthalmology','surgery-anesthesia'];
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = 256;
-      const ctx = canvas.getContext('2d');
-      if(!ctx) return;
-      const w = specialtyImage.naturalWidth / 2, h = specialtyImage.naturalHeight / 2;
-      const prepared = Object.create(null);
-      names.forEach((key, i) => {
-        ctx.clearRect(0, 0, 256, 256);
-        ctx.drawImage(specialtyImage, (i % 2) * w, Math.floor(i / 2) * h,
-          w, h, 0, 0, 256, 256);
-        prepared[key] = fittedPinURL(canvas);
-      });
-      Object.assign(medicalArtwork, prepared);
-      if(typeof DOMAIN_ICONS !== 'undefined'){
-        names.forEach(key => { DOMAIN_ICONS[key] = medicalHTML(key); });
-      }
-      if(typeof render === 'function') render();
-      applyExactPins();
-    }catch(error){
-      console.warn('Specialty pins unavailable; keeping existing icons.', error);
-    }
-  };
-  specialtyImage.onerror = () => console.warn('Specialty pin sheet unavailable; keeping existing icons.');
-  specialtyImage.src = './specialty-pins.png.PNG';
 
   // Re-render once so every domain/card immediately picks up the exact artwork.
   if(typeof render === 'function') render();

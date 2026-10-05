@@ -2718,6 +2718,76 @@
   .icon-btn:hover{ background:var(--paper); color:var(--ink); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line); transform:translateY(-1px); }
   .icon-btn.danger:hover{ background:var(--danger-soft); color:var(--danger); }
 
+  /* ---------- Term cards on phones ----------
+     One ⋯ button (openCardMenu) instead of the three-button row, the hear
+     buttons as full-size pills in the bottom row, and no tag/ID line -- the
+     banner above already names the domain, so each card is a line shorter.
+     Every target is 44px. Scoped to term cards; desktop is unchanged. */
+  .card-more, .card .say-pill, .card .links-say-only{ display:none; }
+  .card-menu{
+    position:fixed; z-index:1200; min-width:224px; padding:6px; border-radius:var(--r-md);
+    background:var(--glass-bg); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22),
+      0 18px 40px -18px rgba(22,55,90,0.35), inset 0 0 0 1px var(--line-soft);
+    opacity:0; transform:scale(.96); transition:opacity .16s var(--ease), transform .16s var(--ease);
+  }
+  .card-menu.is-open{ opacity:1; transform:none; }
+  .card-menu-item{
+    display:flex; align-items:center; gap:13px; width:100%; min-height:44px; padding:0 13px;
+    border:0; border-radius:10px; background:transparent; color:var(--ink); text-align:left;
+    font:550 15px/1.2 var(--sans); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .card-menu-item svg{ width:18px; height:18px; flex:none; color:var(--ink-soft); }
+  .card-menu-x{ width:18px; text-align:center; font-size:14px; flex:none; }
+  .card-menu-item:hover, .card-menu-item:active{ background:var(--accent-soft); }
+  .card-menu-item:focus-visible{ outline:3px solid var(--accent); outline-offset:-3px; }
+  .card-menu-item.is-danger{ color:var(--danger); }
+  .card-menu-item.is-danger:hover, .card-menu-item.is-danger:active{ background:var(--danger-soft); }
+  .card-menu-sep{ height:1px; margin:4px 9px; background:var(--line-soft); }
+  @media (max-width:900px){
+    .card[data-term-id] .card-top,
+    .card[data-term-id] .actions,
+    .card[data-term-id] .copy-btn{ display:none; }
+    /* The first line clears the ⋯ button; it is the headword in every domain. */
+    .card[data-term-id] .term-en{ margin-top:0; padding-right:38px; }
+    /* z-index: Slang's word block is positioned and would otherwise take its taps. */
+    .card[data-term-id] .card-more{
+      display:flex; align-items:center; justify-content:center; position:absolute; top:3px; right:3px; z-index:2;
+      width:44px; height:44px; padding:0; border:0; background:transparent; color:var(--ink-soft);
+      cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+    }
+    .card-more > span{
+      display:flex; align-items:center; justify-content:center; gap:3px; width:32px; height:32px; border-radius:10px;
+      background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft);
+      transition:background .15s var(--ease), color .15s var(--ease), transform .15s var(--ease);
+    }
+    .card-more i{ width:4px; height:4px; border-radius:50%; background:currentColor; }
+    .card-more:active > span, .card-more[aria-expanded="true"] > span{ background:var(--accent-soft); color:var(--ink); transform:scale(.92); }
+    .card-more:focus-visible{ outline:none; }
+    .card-more:focus-visible > span{ outline:3px solid var(--accent); outline-offset:1px; }
+    .card[data-term-id] .def{ font-size:14px; }
+    .card[data-term-id] .source{ font-size:12px; }
+    .card[data-term-id] .links{ gap:9px; margin-top:13px; }
+    .card[data-term-id] .links-say-only{ display:flex; }
+    .card[data-term-id] .link-pill{ position:relative; min-height:34px; padding:0 13px; gap:6px; font-size:13px; font-weight:550; }
+    /* 34px to look at, 44px to hit; nothing sits directly above or below. */
+    .card[data-term-id] .link-pill::after{ content:""; position:absolute; inset:-5px 0; }
+    .card[data-term-id] .link-pill svg{ width:13px; height:13px; }
+    .card[data-term-id] .say-pill{
+      display:inline-flex; color:var(--ink); background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft);
+    }
+    .card[data-term-id] .say-pill svg{ width:16px; height:16px; color:color-mix(in srgb, var(--card-accent, var(--accent)) 64%, var(--ink)); }
+    .card[data-term-id] .say-pill.speaking{ background:var(--accent-soft); }
+    .card[data-term-id] .say-pill.speaking svg{ animation:speakPulse 1s ease-in-out infinite; }
+    /* A strong word that is still hidden can't be played out loud. */
+    .card[data-term-id].is-veiled .say-pill{ display:none; }
+    .card[data-term-id].is-veiled .links-say-only{ display:none; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card-menu, .card-more > span{ transition:none; }
+    .card[data-term-id] .say-pill.speaking svg{ animation:none; }
+  }
+
   .empty{
     text-align:center; padding:70px 20px; color:var(--ink-faint);
   }
@@ -6044,10 +6114,6 @@ html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(
         Team access section and the header of firestore.rules). Codes need
         Authentication → Sign-in method → Anonymous switched on.
 ==================================================================== -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg",
@@ -6063,6 +6129,30 @@ html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(
   // Team access signs each phone in anonymously once it enters an invite
   // code (see the Team access section). Missing script = no lock, as before.
   let hubAuth = null;
+
+  /* The Firebase SDK loads without holding up the app. These four files used
+     to be plain <script> tags, and the browser would not run a single line of
+     the app until all four had arrived from gstatic.com -- on slow hospital
+     Wi-Fi the screen sat there for as long as that took, even though the
+     glossary was already saved on the phone. Now the app paints from that
+     saved copy straight away and anything that talks to the database waits
+     for firebaseReady (hubAuthReady, in the Team access section, includes it).
+     async=false keeps them running in order: app first, then the rest. */
+  const firebaseReady = new Promise(resolve => {
+    const files = ['app', 'firestore', 'storage', 'auth'];
+    let left = files.length;
+    const settle = () => { if(--left === 0){ initFirebase(); resolve(); } };
+    files.forEach(name => {
+      const s = document.createElement('script');
+      s.src = `https://www.gstatic.com/firebasejs/10.12.2/firebase-${name}-compat.js`;
+      s.async = false;
+      s.onload = settle;
+      s.onerror = settle;     // offline: carry on without it, as before
+      document.head.appendChild(s);
+    });
+  });
+
+  function initFirebase(){
   try{
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
@@ -6078,6 +6168,7 @@ html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(
     // months. Don't re-enable without testing on a real iPhone first.
   }catch(e){
     console.error('Firebase failed to initialize — check firebaseConfig above.', e);
+  }
   }
 
   // Mimics the same shape Claude's built-in window.storage provided,
@@ -7726,6 +7817,9 @@ const ONBOARDING_STEPS = [
   }
 ];
 
+// The welcome tour waits while the Team access lock is up -- it used to open
+// underneath it -- and starts once this phone is in (hideAccessLock).
+let onboardingAfterLock = false;
 function shouldShowOnboarding(){
   try{ return localStorage.getItem('ih_onboarded') !== '1'; }catch(e){ return false; }
 }
@@ -8129,26 +8223,31 @@ async function bulkAddTerms(domainCat, wordList){
 
 
 async function loadData(){
+  let fromCache = false;
   try{
+    // Paint immediately from the last known glossary, then refresh from the
+    // network underneath. Previously nothing appeared until all ~1,700 term
+    // documents had downloaded, which is what made opening the app feel slow
+    // every single time even though the content rarely changes.
+    fromCache = loadGlossaryCache();
+    if(fromCache) render();
+
+    // Team access: don't ask the database anything until this phone's
+    // sign-in is back, or a locked Hub refuses it as a stranger. This also
+    // waits for the Firebase SDK, which now loads in the background.
+    await hubAuthReady;
+
     if(!db){
-      // No Firestore in this environment (e.g. this preview) — fall back to
-      // the old single-blob path so the app still shows something.
+      // No Firestore (offline with no copy of the SDK, or this preview). Keep
+      // the glossary saved on this phone if there is one; otherwise show the
+      // built-in starter set so the app still shows something.
+      if(fromCache) return;
       const result = await window.storage.get(STORAGE_KEY, true);
       DATA = (result && result.value) ? JSON.parse(result.value) : DEFAULT_DATA;
       ensureTermIds();
       render();
       return;
     }
-
-    // Paint immediately from the last known glossary, then refresh from the
-    // network underneath. Previously nothing appeared until all ~1,700 term
-    // documents had downloaded, which is what made opening the app feel slow
-    // every single time even though the content rarely changes.
-    if(loadGlossaryCache()) render();
-
-    // Team access: don't ask the database anything until this phone's
-    // sign-in is back, or a locked Hub refuses it as a stranger.
-    await hubAuthReady;
     const metaSnap = await db.collection('terminology-meta').doc('categories').get();
 
     if(!metaSnap.exists){
@@ -8187,6 +8286,9 @@ async function loadData(){
     render();
   }catch(err){
     console.error('loadData failed:', err);
+    // A network failure must not swap the team's glossary for the 51-term
+    // starter set when this phone already has the real one.
+    if(fromCache) return;
     DATA = DEFAULT_DATA;
     render();
   }
@@ -10086,7 +10188,7 @@ function collectSearchMatches(q){
         out.push({
           group:'Terms', icon:DOMAIN_ICONS[cat.icon] || DOMAIN_ICONS.sparkle, color:cat.color,
           title:t.en, sub:[t.es, cat.name].filter(Boolean).join(' \u00b7 '),
-          target:cat.id,
+          target:cat.id, termId:t.id,
           rank: starts(t.en) || starts(t.es) ? 0 : 1
         });
       }
@@ -10225,6 +10327,8 @@ function gsGo(i){
   // A guide hit opens that answer, already expanded — landing on the guide's
   // front page and making someone hunt again would defeat the point.
   if(m.guideId){ openGuideTopic(m.guideId); return; }
+  // A term opens on that term, not at the top of its domain.
+  if(m.termId){ revealTerm(m.target, m.termId); return; }
   setCategory(m.target);
 }
 
@@ -12620,7 +12724,7 @@ const DOMAIN_ICONS = {
   person: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="10" r="6" fill="#E2A275" stroke="#A96F22" stroke-width="1.1"/><path d="M10.4 8.5c.8-3.5 2.8-5 5.6-5s4.8 1.5 5.6 5c-2-1.2-3.7-1.6-5.6-1.6s-3.6.4-5.6 1.6Z" fill="#43342F"/><circle cx="14" cy="10" r=".6" fill="#263442"/><circle cx="18" cy="10" r=".6" fill="#263442"/><path d="M13.4 12q2.6 2.5 5.2 0" fill="none" stroke="#8B4B45" stroke-width=".8" stroke-linecap="round"/><path d="M5 28c.8-7 4.6-10.5 11-10.5S26.2 21 27 28Z" fill="#4D87D8" stroke="#A96F22" stroke-width="1.1"/></svg>',
   review: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="8" width="18" height="16" rx="2" fill="#EAF5FF" stroke="#A96F22" stroke-width="1.1" transform="rotate(-7 14 16)"/><rect x="9" y="6" width="18" height="16" rx="2" fill="#FFF8EA" stroke="#A96F22" stroke-width="1.1" transform="rotate(5 18 14)"/><text x="12" y="16" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#2D6FAF">A</text><text x="19" y="20" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#E14E59">Á</text><path d="M13 24q3 3 6 0" fill="none" stroke="#48A76A" stroke-width="1.2" stroke-linecap="round"/></svg>',
 };
-function renderLinks(t, categoryId){
+function renderLinks(t, categoryId, lead = ''){
   const links = [];
   if(t.url){
     // A team member's own pasted link takes priority — trust it as the exact source.
@@ -12633,8 +12737,92 @@ function renderLinks(t, categoryId){
   if(categoryId !== 'resources' && t.en && !isSlangDomain(DATA.categories.find(c => c.id === categoryId))){
     links.push(`<button type="button" class="link-pill" onclick="openTermLookup('${escapeAttr(categoryId)}','${escapeAttr(t.id)}')">Look up ${ICON_SEARCH}</button>`);
   }
-  if(links.length===0) return '';
-  return `<div class="links">${links.join('')}</div>`;
+  if(links.length===0 && !lead) return '';
+  // links-say-only: nothing but the phone's hear pills, which desktop hides.
+  return `<div class="links${links.length ? '' : ' links-say-only'}">${lead}${links.join('')}</div>`;
+}
+
+/* ---------- Term card menu (phones) ----------
+   On a phone a term card carried a row of three 26px buttons -- Attach, Edit,
+   and Delete right beside Edit -- and its Copy buttons were 20 x 16px. There
+   they live behind one ⋯ button now: 44px to tap, Delete set apart in red,
+   and the confirm it always had. Hearing a term stays one tap (.say-pill).
+   One menu element serves every card; desktop keeps its hover row. */
+let cardMenuEl = null, cardMenuBtn = null;
+function closeCardMenu(focusBack){
+  if(!cardMenuEl || cardMenuEl.hidden) return;
+  cardMenuEl.hidden = true;
+  cardMenuEl.classList.remove('is-open');
+  const btn = cardMenuBtn; cardMenuBtn = null;
+  if(btn){ btn.setAttribute('aria-expanded', 'false'); if(focusBack && btn.isConnected) btn.focus(); }
+}
+function cardMenuSetup(){
+  cardMenuEl = document.createElement('div');
+  cardMenuEl.className = 'card-menu';
+  cardMenuEl.setAttribute('role', 'menu');
+  cardMenuEl.hidden = true;
+  document.body.appendChild(cardMenuEl);
+  // Any tap outside closes it; so does scrolling, since it would drift off its card.
+  document.addEventListener('pointerdown', e => {
+    if(!cardMenuEl.hidden && !cardMenuEl.contains(e.target) && !(cardMenuBtn && cardMenuBtn.contains(e.target))) closeCardMenu();
+  }, true);
+  window.addEventListener('scroll', () => closeCardMenu(), { passive:true, capture:true });
+  window.addEventListener('resize', () => closeCardMenu());
+  cardMenuEl.addEventListener('keydown', e => {
+    const items = [...cardMenuEl.querySelectorAll('[role="menuitem"]')];
+    const i = items.indexOf(document.activeElement);
+    if(e.key === 'Escape'){ e.preventDefault(); closeCardMenu(true); }
+    else if(e.key === 'ArrowDown'){ e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if(e.key === 'Tab'){ closeCardMenu(); }
+  });
+}
+function openCardMenu(e, btn, catId, termId){
+  e.stopPropagation();            // a hidden strong word's card reveals on any tap
+  if(cardMenuBtn === btn){ closeCardMenu(); return; }
+  closeCardMenu();
+  const cat = DATA.categories.find(c => c.id === catId);
+  const t = cat && cat.terms.find(x => x.id === termId);
+  if(!t) return;
+  if(!cardMenuEl) cardMenuSetup();
+  const item = (act, icon, label, cls = '') =>
+    `<button type="button" role="menuitem" class="card-menu-item${cls}" data-act="${act}">${icon}<span>${label}</span></button>`;
+  cardMenuEl.innerHTML =
+    item('copy-en', ICON_COPY, 'Copy English') +
+    (t.es ? item('copy-es', ICON_COPY, 'Copy Spanish') : '') +
+    item('attach', ICON_PAPERCLIP, 'Attach photo or PDF') +
+    item('edit', ICON_EDIT, 'Edit term') +
+    '<div class="card-menu-sep" role="separator"></div>' +
+    item('delete', '<span class="card-menu-x" aria-hidden="true">✕</span>', 'Delete term', ' is-danger');
+  cardMenuEl.onclick = async ev => {
+    const b = ev.target.closest('[data-act]');
+    if(!b) return;
+    const act = b.dataset.act;
+    closeCardMenu(act !== 'edit' && act !== 'attach');
+    if(act === 'copy-en' || act === 'copy-es'){
+      const text = act === 'copy-en' ? t.en : t.es;
+      // copyText swaps the button it is given for a tick; give it a spare one
+      // and say so in a toast instead, since the menu has already closed.
+      const spare = document.createElement('button');
+      await copyText(spare, text);
+      if(spare.classList.contains('copied')) showToast('Copied “' + text + '”');
+    }
+    else if(act === 'attach') attachToTerm(t.id);
+    else if(act === 'edit') openEditModal(cat.id, t.id);
+    else if(act === 'delete') deleteTerm(cat.id, t.id);
+  };
+  // Under the button, right edges aligned; above it when there is no room below.
+  cardMenuEl.hidden = false;
+  const r = btn.getBoundingClientRect(), m = cardMenuEl.getBoundingClientRect();
+  const below = r.bottom + 6 + m.height <= window.innerHeight - 90;   // clear of the tab bar
+  cardMenuEl.style.top = Math.max(9, below ? r.bottom + 6 : r.top - 6 - m.height) + 'px';
+  cardMenuEl.style.left = Math.max(9, Math.min(r.right - m.width, window.innerWidth - m.width - 9)) + 'px';
+  cardMenuEl.style.transformOrigin = below ? 'top right' : 'bottom right';
+  requestAnimationFrame(() => cardMenuEl.classList.add('is-open'));
+  cardMenuBtn = btn;
+  btn.setAttribute('aria-expanded', 'true');
+  // Opened from the keyboard, move into the menu; a tap leaves focus alone.
+  if(e.detail === 0) cardMenuEl.querySelector('[role="menuitem"]').focus();
 }
 
 /* ============ Rendering ============ */
@@ -13588,7 +13776,7 @@ function renderContent(){
           const ambiguous = new Set(shorts.map(s=>s.toLowerCase())).size !== shorts.length;
           return kids.map((k,i)=>{
           const short = ambiguous ? k.name : shorts[i];
-          return `<button class="subgroup-pill" onclick="jumpToDomain('${k.id}')" title="${escapeHtml(k.name)}" aria-label="${escapeHtml(k.name)}, ${k.terms.length} terms"><span class="subgroup-pill-name">${escapeHtml(short)}</span><span class="subgroup-pill-count">${k.terms.length} terms</span></button>`;
+          return `<button class="subgroup-pill" onclick="jumpToDomain('${k.id}')" title="${escapeHtml(k.name)}" aria-label="${escapeHtml(k.name)}, ${k.terms.length} term${k.terms.length === 1 ? '' : 's'}"><span class="subgroup-pill-name">${escapeHtml(short)}</span><span class="subgroup-pill-count">${k.terms.length} term${k.terms.length === 1 ? '' : 's'}</span></button>`;
           }).join('');
         })()}
       </div>
@@ -13700,6 +13888,11 @@ function renderContent(){
             <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
             <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
           </div>` : '';
+      // Phones: hearing a term is the action used most mid-session, so it gets
+      // a full-size pill in the bottom row (see .say-pill). The headword first.
+      const sayPill = (text, lang, code) => `<button type="button" class="link-pill say-pill" aria-label="Hear ${code === 'EN' ? 'in English' : 'in Spanish'}: ${escapeAttr(text)}" onclick="speakText(this, ${JSON.stringify(text).replace(/"/g,'&quot;')}, '${lang}')">${ICON_SPEAKER}<span>${code}</span></button>`;
+      const sayEn = sayPill(t.en, 'en-US', 'EN'), sayEs = t.es ? sayPill(t.es, 'es-ES', 'ES') : '';
+      const say = slang ? sayEs + sayEn : sayEn + sayEs;
       html += `
         <div class="card${slang ? ' card-slang' : ''}${veiled ? ' is-veiled' : ''}" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;"${veiled ? ` role="button" tabindex="0" aria-label="Strong word hidden. Tap to show." onclick="showSlangTerm('${escapeAttr(t.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSlangTerm('${escapeAttr(t.id)}')}"` : ''}>
           <div class="card-top">
@@ -13711,6 +13904,7 @@ function renderContent(){
             <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', '${t.id}')">✎</button>
             <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', '${t.id}')">✕</button>
           </div>
+          <button type="button" class="card-more" aria-haspopup="menu" aria-expanded="false" aria-label="More for ${escapeAttr(t.en)}" onclick="openCardMenu(event, this, '${cat.id}', '${t.id}')"><span aria-hidden="true"><i></i><i></i><i></i></span></button>
           ${!slang ? enLine + esLine : `<div class="sl-words">${esLine}${enLine}${veiled ? `<span class="sl-reveal"><span>${ICON_SL_EYE}Tap to reveal</span></span>` : ''}</div>`}
           ${lv ? `<div class="sl-row">
             <span class="sl-heat" data-heat="${SLANG_HEAT[lv.level]}" aria-label="Intensity: ${lv.level}"><i></i><i></i><i></i><i></i><i></i><b>${lv.level}</b></span>
@@ -13718,7 +13912,7 @@ function renderContent(){
           </div>
           ${lv.rest ? `<div class="sl-note"><b>Note</b><span>${escapeHtml(lv.rest)}</span></div>` : ''}` : `<p class="def">${escapeHtml(t.def)}</p>`}
           ${t.notes ? `<div class="term-note">${ICON_EDIT}<span>${escapeHtml(t.notes)}</span></div>` : ''}
-          ${renderLinks(t, cat.id)}
+          ${renderLinks(t, cat.id, say)}
           ${termAttachments.length ? `<div class="attach-row">${termAttachments.map(a=>attachmentChipHtml(a, `deleteAttachment('${a.id}')`)).join('')}</div>` : ''}
           ${(t.source || t.editedBy) ? `<div class="meta">
             <span class="source">${t.source ? escapeHtml(t.source) : ''}</span>
@@ -13815,6 +14009,10 @@ function closeAllOverlays(){
 
 function setCategory(id, isBack){
   const movedForward = !isBack && activeCategory !== id;
+  // The search box above a domain filters that domain only. It used to keep
+  // its text when you moved on, so the next domain opened already filtered
+  // (often to "No terms match") with no sign of why.
+  if(activeCategory !== id) searchQuery = '';
   closeAllOverlays();
   termRenderLimit = 120;
   if(!isBack && activeCategory !== id){
@@ -13868,6 +14066,52 @@ function setCategory(id, isBack){
   // 'instant' because a forward jump should not animate a whole page of
   // travel; Back is the one that animates.
   if(movedForward) window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+/* ---------- Opening one particular term ----------
+   Search results, Ask the Hub's sources and the appointment briefing all
+   point at a single term. Each used to open its domain and then look for the
+   card, but a domain only draws its first 120 cards (termRenderLimit), so a
+   term further down the alphabet was never on the page to scroll to, and
+   search did not even try: it opened the domain at the top. This draws far
+   enough to include the term, centres it and flashes it. */
+function domainRenderOrder(catId){
+  // The same order renderContent() draws in: the domain, then its subgroups,
+  // each sorted the way that section sorts (Spanish first in Slang).
+  const cats = DATA.categories.filter(c => c.id === catId)
+    .concat(DATA.categories.filter(c => c.parentId === catId));
+  const ids = [];
+  cats.forEach(cat => {
+    const slang = typeof isSlangDomain === 'function' && isSlangDomain(cat);
+    cat.terms.slice()
+      .sort((a, b) => slang ? collateTerms(a.es || a.en, b.es || b.en) : collateTerms(a.en, b.en))
+      .forEach(t => ids.push(t.id));
+  });
+  return ids;
+}
+
+function revealTerm(catId, termId){
+  if(!DATA.categories.some(c => c.id === catId)) return;
+  // Asked for by name, so nothing should hide it: no leftover filter, and a
+  // strong slang word is shown rather than veiled.
+  searchQuery = '';
+  if(typeof slangFilter !== 'undefined'){ slangFilter = 'all'; slangCountry = ''; }
+  if(typeof slangShown !== 'undefined') slangShown.add(termId);
+  setCategory(catId);
+  const find = () => document.querySelector(`.card[data-term-id="${CSS.escape(termId)}"]`);
+  let card = find();
+  if(!card){
+    const ids = domainRenderOrder(catId), at = ids.indexOf(termId);
+    termRenderLimit = Math.max(termRenderLimit, at >= 0 ? at + 40 : ids.length);
+    renderContent();
+    card = find();
+  }
+  if(!card) return;
+  requestAnimationFrame(() => {
+    card.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
+    card.classList.add('ask-flash');
+    setTimeout(() => card.classList.remove('ask-flash'), 2200);
+  });
 }
 
 /* ---------- Looking a term up ----------
@@ -15833,7 +16077,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1004.2320';
+const BUILD_ID = 'b1005.1023';
 const BUILD_TIME = '2026-09-27 21:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -18513,13 +18757,14 @@ let accessFails = 0, accessCoolUntil = 0;
 // nothing reads the database as a stranger when it is really a member.
 let resolveHubAuthReady;
 const hubAuthReady = new Promise(r => { resolveHubAuthReady = r; });
-(function(){
+// The SDK itself loads in the background (firebaseReady), so wait for it too.
+firebaseReady.then(function(){
   if(!hubAuth){ resolveHubAuthReady(); return; }
   let done = false;
   const finish = () => { if(!done){ done = true; resolveHubAuthReady(); } };
   try{ hubAuth.onAuthStateChanged(finish); }catch(e){ finish(); }
   setTimeout(finish, 2500);   // never hold the app hostage to a slow restore
-})();
+});
 
 function readAccessMe(){
   try{ return JSON.parse(localStorage.getItem(ACCESS_ME_KEY) || 'null'); }catch(e){ return null; }
@@ -18566,6 +18811,9 @@ async function hubAuthHeaders(){
 }
 
 async function loadAccessState(){
+  // Before the SDK is here there is no answer yet, and "unknown" would let a
+  // phone that has never joined past the lock.
+  await firebaseReady;
   if(!db) return ACCESS.state;
   try{
     const [ownerSnap, setSnap] = await Promise.all([
@@ -18710,6 +18958,9 @@ function showAccessLock(mode){
   const app = document.getElementById('app');
   if(app) app.inert = true;
   document.body.classList.add('access-locked');
+  // Not seen yet, so not marked as seen: it comes back after joining.
+  const tour = document.getElementById('onboardingOverlay');
+  if(tour && tour.classList.contains('show')){ tour.classList.remove('show'); onboardingAfterLock = true; }
   if(lock.hidden){
     lock.hidden = false;
     requestAnimationFrame(()=> lock.classList.add('show'));
@@ -18726,6 +18977,10 @@ function hideAccessLock(instant){
   lock.classList.remove('show');
   if(instant) lock.hidden = true;
   else setTimeout(()=>{ if(!lock.classList.contains('show')) lock.hidden = true; }, 380);
+  if(onboardingAfterLock){
+    onboardingAfterLock = false;
+    if(shouldShowOnboarding()) setTimeout(openOnboarding, 500);
+  }
 }
 
 function skipAccessLock(){
@@ -19445,13 +19700,8 @@ function askOpenSource(turnId, id){
   const go = t && t.go && t.go[id];
   if(!go) return;
   if(go.guide){ openGuideTopic(go.guide); return; }
+  if(go.term){ revealTerm(go.cat, go.term); return; }
   setCategory(go.cat);
-  if(go.term){
-    setTimeout(() => {
-      const card = document.querySelector(`.card[data-term-id="${CSS.escape(go.term)}"]`);
-      if(card){ card.scrollIntoView({ block: 'center', behavior: 'smooth' }); card.classList.add('ask-flash'); setTimeout(() => card.classList.remove('ask-flash'), 2200); }
-    }, 160);
-  }
 }
 
 /* ---- Owner: lessons to review ---- */
@@ -20200,11 +20450,7 @@ function prepDeckRestart(onlyAgain){
   prepDeckPaint('prepFront');
 }
 function prepOpenTerm(catId, termId){
-  setCategory(catId);
-  setTimeout(() => {
-    const card = document.querySelector(`.card[data-term-id="${CSS.escape(termId)}"]`);
-    if(card){ card.scrollIntoView({ block: 'center', behavior: 'smooth' }); card.classList.add('ask-flash'); setTimeout(() => card.classList.remove('ask-flash'), 2200); }
-  }, 120);
+  revealTerm(catId, termId);
 }
 function prepResearch(){
   const entry = prepDoctorEntry(PREP.doctor);
@@ -20476,7 +20722,10 @@ hubAuthReady.then(()=>{
 if(shouldShowOnboarding()){
   // A beat after first paint, not instantly — jumping straight to a modal
   // before the page has even rendered feels jarring.
-  setTimeout(openOnboarding, 500);
+  setTimeout(()=>{
+    if(document.body.classList.contains('access-locked')) onboardingAfterLock = true;
+    else openOnboarding();
+  }, 500);
 }
 
 // iOS doesn't reliably reposition fixed elements against the visual

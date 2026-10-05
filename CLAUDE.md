@@ -19,11 +19,13 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 13,575 | The whole app. All CSS and JS inline |
-| `home-polish.css` | 190 | Overlay layer. Loads right after `</style>`, so it wins |
-| `home-polish.js` | 77 | Home behaviour: hello wave, rail dots, section overlay |
-| `pin-icons.js` | 423 | The pin/icon artwork and sprite wiring |
-| `sw.js` | 130 | Service worker. Network-first for HTML, cache-first for icons |
+| `index.html` | 20,894 | The whole app (1.1 MB). All CSS and JS inline |
+| `home-polish.css` | 894 | Overlay layer. Loads right after `</style>`, so it wins |
+| `home-polish.js` | 1,220 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
+| `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
+| `pins/*.webp` | 40 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
+| `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
+| `sw.js` | 175 | Service worker. Network-first for HTML, stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | 8 | Cron: `/api/check-events` daily at 13:00 UTC |
 | `api/translate.js` | 168 | Translate tool — Claude API |
@@ -33,7 +35,8 @@ between assignments.
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
 | `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
-| `hero.jpg`, `hmh-*.png`, `icon-*.png`, `pin-icons*.webp` | — | Image assets |
+| `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
+| `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more; the files above were cut from them |
 
 Inside `index.html`, sections are marked with banner comments
 (`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
@@ -83,7 +86,7 @@ afterwards — measure them, do not assume.
 **Never resolve a merge with `git checkout --ours`.** It once discarded the
 `pin-icons` and `home-polish` wiring out of `index.html` in a single command.
 Resolve conflicts hunk by hunk, then confirm all three files are still loaded
-(`index.html` lines ~4005, ~4006, ~13573) before pushing.
+(`index.html` lines ~5685, ~5686, ~20892) before pushing.
 
 ## Deploying
 
@@ -91,9 +94,9 @@ Vercel auto-deploys on push to the default branch. There is no build step.
 
 **Three things must stay in sync on every deploy that changes `index.html`:**
 
-1. **`BUILD_ID`** (`index.html`, ~line 9183, format `bMMDD.HHMM`) — bump it.
+1. **`BUILD_ID`** (`index.html`, ~line 16080, format `bMMDD.HHMM`) — bump it.
    This is the only reliable way to confirm what is actually live.
-2. **`CACHE_VERSION`** (`sw.js` line 29, currently `interpreter-hub-v4`) —
+2. **`CACHE_VERSION`** (`sw.js` line 29) —
    bump it whenever `index.html` changes meaningfully, or returning users
    keep the stale cached app.
 3. If an `api/*.js` file changed, it ships in the same push.
@@ -173,6 +176,15 @@ lost concurrent edits. Do not reintroduce that.
 - **Cache-first startup:** the app paints from the `localStorage` glossary
   cache. The first load after a deploy is always slow. That is expected; it is
   not a regression.
+- **The Firebase SDK loads in the background** (`firebaseReady`, next to
+  `firebaseConfig`). It used to be four blocking `<script>` tags, and the app
+  ran no code at all until they arrived — 8 s of blank screen on slow Wi-Fi.
+  `db`, `storage` and `hubAuth` are `null` until it resolves; `hubAuthReady`
+  includes it. Never read them at script load, and never put the SDK back as
+  plain `<script src>` tags.
+- **Pins are pre-cut files.** `pin-icons.js` used to download 9 MB of sheets
+  and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
+  each pin is `pins/<key>.webp`; to change one, replace its file.
 - `localStorage` key `ih_myName` holds the user's display name.
 
 ## Design system
@@ -260,5 +272,5 @@ extending the tail.
   own credentials (a Firebase service account in Vercel is the usual fix).
   Putting a shared secret inside the documents it writes was rejected as a
   credential leak.
-- `index.html` is one 628 KB file. Splitting CSS and JS out is the main
+- `index.html` is one 1.1 MB file. Splitting CSS and JS out is the main
   structural cleanup available.

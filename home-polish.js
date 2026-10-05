@@ -154,6 +154,13 @@
     for(const k in FACE_REST){const va=k in a[1]?a[1][k]:FACE_REST[k],vb=k in b[1]?b[1][k]:FACE_REST[k];out[k]=va+(vb-va)*u;}
     return out;
   }
+  // Dr. Smiley's current tilt in degrees, kept by the greeting loop that sets
+  // it. The Ask badge's lanyard follows it; reading it back from the browser
+  // (getComputedStyle) right after the loop had written it forced a full style
+  // recalculation every frame, which was most of Home's idle CPU.
+  // During the entrance wave a browser animation tilts him instead, so the
+  // badge reads that back only while the wave is in its window (~3 s).
+  let smileyTilt=0,entranceWave=null;
   // Writing an SVG attribute repaints the face even when the value is the
   // same, and the idle runs every frame, so only write what changed.
   const setA=(el,name,value)=>{const v=String(value);if(el.getAttribute(name)!==v)el.setAttribute(name,v);};
@@ -281,10 +288,16 @@
     let raf=0,onScreen=true,act=null,actStart=0,restUntil=0,restStart=performance.now(),lastNow=0;
     const pick=()=>{if(forcedAct){const a=IDLE.find(x=>x.name===forcedAct);forcedAct=null;if(a)return a;}let i=Math.floor(Math.random()*(IDLE.length-1));if(i>=lastIdle&&lastIdle>=0)i++;if(lastIdle<0)i=Math.floor(Math.random()*IDLE.length);lastIdle=i;return IDLE[i];};
     restUntil=restStart+900+Math.random()*900;
+    // His drawing's units to px. Measured once and again only when he is
+    // resized: reading clientWidth inside every frame, right after the last
+    // frame's style writes, forced a layout pass 60 times a second.
+    let u=pin.clientWidth/112;
+    const ro=new ResizeObserver(()=>{u=pin.clientWidth/112;});
+    ro.observe(pin);
     function paint(p,marks){
-      const u=pin.clientWidth/112;
       if(pin.style.transformOrigin!==p.pivot)pin.style.transformOrigin=p.pivot;
       pin.style.transform=`translate3d(${(p.tx*u).toFixed(1)}px,${(p.ty*u).toFixed(1)}px,0) rotate(${p.rot.toFixed(1)}deg) scale(${p.sx.toFixed(3)},${p.sy.toFixed(3)})`;
+      smileyTilt=((+p.rot.toFixed(1)+180)%360+360)%360-180;   // as written above, wrapped to ±180 as the browser reports it
       setFace(svg,p);
       imgs.forEach((img,i)=>{
         const m=marks[i];
@@ -314,8 +327,8 @@
     pin.style.willChange='transform';
     raf=requestAnimationFrame(frame);
     idleStop=()=>{
-      if(raf)cancelAnimationFrame(raf);raf=0;io.disconnect();idleRunning=false;
-      pin.style.transform='';pin.style.transformOrigin='';pin.style.willChange='';setFace(svg,FACE_REST);
+      if(raf)cancelAnimationFrame(raf);raf=0;io.disconnect();ro.disconnect();idleRunning=false;
+      pin.style.transform='';pin.style.transformOrigin='';pin.style.willChange='';smileyTilt=0;setFace(svg,FACE_REST);
       imgs.forEach(img=>{img.style.opacity='0';});
       idleStop=()=>{};
     };
@@ -435,7 +448,7 @@
     const dpr=desktop?1:Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
     // The face springs in, rests as drawn, then squishes and pops into a laugh.
     const waveFrames=Array.from({length:166},(_,i)=>({offset:i/165,...faceBody(i/165*FACE_MS)}));
-    animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
+    entranceWave=animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
     // Ask the Hub's entrance (picked by Jose: "Pendulum swing-in"). The ring
     // fades in with the face; once he has landed, the badge is released from
     // the side and swings to rest on its lanyard (askBadge, real physics).
@@ -615,6 +628,14 @@
     const K=42,C=3.2,G=.5;           // spring stiffness, friction, how much it hangs down when he tilts
     const REST_LIMIT=8;              // swing limit in everyday motion: keeps the badge's corner clear of the quote
     let btn=null,pin=null,tag=null,cords=[],clip=null,raf=0,last=0,theta=0,omega=0,t0=0,released=-1e9;
+    // Off screen (scrolled down Home) nobody sees it swing, so it stops.
+    let onScreen=true;
+    const io=new IntersectionObserver(entries=>{
+      // Several notices can arrive at once; only the newest one for the
+      // current badge says where it is now.
+      for(const e of entries)if(e.target===btn)onScreen=e.isIntersecting;
+      if(onScreen)run();
+    });
     const rot=(x,y,a)=>{const c=Math.cos(a),s=Math.sin(a);return{x:P.x+x*c-y*s,y:P.y+x*s+y*c};};
     // A soft limit: big swings are allowed right after the entrance and ease
     // down to REST_LIMIT within about a second, with no hard stop.
@@ -632,7 +653,9 @@
       if(clip)clip.setAttribute('transform',`rotate(${f(theta)} ${P.x} ${P.y})`);
       if(tag)tag.style.rotate=f(theta)+'deg';
     }
-    function tilt(){            // Dr. Smiley's own rotation, in degrees
+    function tilt(){                      // Dr. Smiley's own rotation, in degrees
+      const w=entranceWave;
+      if(!w||!w.effect||w.effect.getComputedTiming().progress===null)return smileyTilt;
       const m=getComputedStyle(pin).transform;
       if(!m||m==='none')return 0;
       const v=m.match(/-?[\d.]+(?:e-?\d+)?/g);
@@ -647,10 +670,10 @@
       const target=breeze-G*tilt();
       omega+=(-K*(theta-target)-C*omega)*dt;theta+=omega*dt;
       deg=shown(now);draw();
-      if(!document.hidden)raf=requestAnimationFrame(frame);
+      if(!document.hidden&&onScreen)raf=requestAnimationFrame(frame);
     }
     function run(){
-      if(raf||!btn||reduced.matches||document.hidden)return;
+      if(raf||!btn||reduced.matches||document.hidden||!onScreen)return;
       last=0;raf=requestAnimationFrame(frame);
     }
     function rest(){if(raf)cancelAnimationFrame(raf);raf=0;theta=0;omega=0;deg=0;if(btn)draw();}
@@ -658,7 +681,9 @@
     reduced.addEventListener('change',()=>{if(reduced.matches)rest();else run();});
     return {
       attach(button){
+        if(btn)io.unobserve(btn);
         btn=button;pin=button.querySelector('.home-wave-pin');tag=button.querySelector('.home-ask-tag');
+        onScreen=true;io.observe(button);
         const lan=button.querySelector('.home-ask-lanyard');
         cords=[...button.querySelectorAll('.home-face .hub-lanyard path')];clip=lan?lan.querySelector('rect'):null;
         t0=performance.now();theta=0;omega=0;deg=0;draw();

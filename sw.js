@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v138-slang-country';
+const CACHE_VERSION = 'interpreter-hub-v139-five-fixes';
 const PRECACHE = [
   './',
   './index.html',
@@ -40,14 +40,52 @@ const PRECACHE = [
   './hmh-mark-square.png',
   // The greeting hand. Same reason: it is on the first screen of a cold start.
   './wave-hand.png',
-  './pin-icons.webp',
-  './pin-icons-hd.webp',
-  './pin-icons-source-hd-upload.png',
   './pin-icons.js',
   './home-polish.css',
   './home-polish.js',
-  './medical-pins.png.PNG',
-  './specialty-pins.png.PNG',
+  // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
+  // sheets these replaced were 9 MB and were cut up again on every launch.
+  './pin-icons-sheet.webp',
+  './pins/genetics.webp',
+  './pins/oncology.webp',
+  './pins/hematology.webp',
+  './pins/leukemia.webp',
+  './pins/cardiology.webp',
+  './pins/heart-failure.webp',
+  './pins/pediatrics.webp',
+  './pins/ent.webp',
+  './pins/urology.webp',
+  './pins/endocrinology.webp',
+  './pins/nephrology.webp',
+  './pins/neurology.webp',
+  './pins/developmental.webp',
+  './pins/pulmonology.webp',
+  './pins/orthopedics.webp',
+  './pins/infusion.webp',
+  './pins/laboratory.webp',
+  './pins/pharmacy.webp',
+  './pins/medical-terminology.webp',
+  './pins/resources.webp',
+  './pins/doctor-prep.webp',
+  './pins/doctor-directory.webp',
+  './pins/providers.webp',
+  './pins/find-doctor.webp',
+  './pins/medifind.webp',
+  './pins/translate.webp',
+  './pins/chat.webp',
+  './pins/directory.webp',
+  './pins/userguide.webp',
+  './pins/updates.webp',
+  './pins/practice.webp',
+  './pins/review.webp',
+  './pins/ethics.webp',
+  './pins/events.webp',
+  './pins/emergency.webp',
+  './pins/wave.webp',
+  './pins/infectious-disease.webp',
+  './pins/dermatology.webp',
+  './pins/ophthalmology.webp',
+  './pins/surgery-anesthesia.webp',
   './manifest.webmanifest'
 ];
 
