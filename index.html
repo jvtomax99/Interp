@@ -254,11 +254,48 @@
   .tg-sync.is-offline{ background:#FBEEDC; color:#8A6420; }
   .tg-sync.is-pending{ background:#E8EEF6; color:#31557F; }
   .tg-sync.is-synced{ background:#E4F3EA; color:#2C6A48; }
+  /* Something needs the person: a change that couldn't be stored or synced.
+     The only state that stays readable on a phone, and the only one that asks
+     to be tapped. */
+  .tg-sync{ border:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .tg-sync.is-problem{ background:var(--danger-soft); color:var(--danger);
+    /* --danger alone is 4.2:1 on its soft tint at this size; a touch of ink
+       takes it past 4.5 in light and lightens it further in dark. */
+    color:color-mix(in srgb, var(--danger) 80%, var(--ink)); }
+  .tg-sync:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .tg-sync{ transition:transform .16s var(--ease), filter .16s var(--ease); }
+  .tg-sync:active, .tg-sync.is-pressed{ transform:scale(.95); filter:brightness(.96); }
+  @media (prefers-reduced-motion:reduce){ .tg-sync{ transition:none; } }
+  .tg-sync-short, .tg-sync-mark{ display:none; }
   .tg-sync-dot{ width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
   .tg-sync.is-pending .tg-sync-dot{ animation:syncPulse 1.1s ease-in-out infinite; }
   @keyframes syncPulse{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
   @media (prefers-reduced-motion:reduce){ .tg-sync.is-pending .tg-sync-dot{ animation:none; } }
-  @media (max-width:520px){ .tg-sync span:not(.tg-sync-dot){ display:none; } .tg-sync{ padding:0 8px; } }
+  @media (max-width:520px){ .tg-sync span:not(.tg-sync-dot){ display:none; } .tg-sync{ padding:0 8px; }
+    .tg-sync.is-problem span.tg-sync-short{ display:inline; }
+    /* Room for the short label without the hospital line wrapping to four
+       rows and pushing the top bar taller. Only while there is a problem. */
+    .topbar-global.has-sync-problem .tg-brand-sub{ display:none; } }
+  /* The narrowest phones keep "Interpreter Hub" whole: the badge shrinks to
+     its count (or "!") and the sheet behind it explains. */
+  /* Compact: just the count or "!", no dot, so "Interpreter Hub" keeps its
+     room. Used for problems with no short label, on the narrowest phones,
+     and on any phone once the Back button takes its share of the bar. */
+  @media (max-width:520px){
+    .tg-sync.is-problem.is-compact span.tg-sync-short,
+    .tg-back.is-visible ~ .tg-right .tg-sync.is-problem span.tg-sync-short{ display:none; }
+    .tg-sync.is-problem.is-compact span.tg-sync-mark,
+    .tg-back.is-visible ~ .tg-right .tg-sync.is-problem span.tg-sync-mark{ display:inline; }
+    .tg-sync.is-problem.is-compact .tg-sync-dot,
+    .tg-back.is-visible ~ .tg-right .tg-sync.is-problem .tg-sync-dot{ display:none; }
+    .tg-sync.is-problem.is-compact,
+    .tg-back.is-visible ~ .tg-right .tg-sync.is-problem{ min-width:30px; padding:0 9px; justify-content:center; } }
+  @media (max-width:380px){
+    .tg-sync.is-problem span.tg-sync-short{ display:none; }
+    .tg-sync.is-problem span.tg-sync-mark{ display:inline; }
+    .tg-sync.is-problem .tg-sync-dot{ display:none; }
+    .tg-sync.is-problem{ min-width:30px; padding:0 9px; justify-content:center; } }
+  .tg-sync-mark{ font-variant-numeric:tabular-nums; font-weight:700; }
   .tg-logo{ height:34px; width:auto; object-fit:contain; display:block; }
   @media (max-width:900px){
     .topbar-global{
@@ -2862,6 +2899,21 @@
   }
   .modal-actions{display:flex; justify-content:flex-end; gap:9px; margin-top:20px;}
 
+  /* Unsent changes sheet: reuses the edit-history card for each change. */
+  .outbox-head{ display:flex; align-items:baseline; gap:9px; font-family:var(--sans); font-size:15px; font-weight:650; margin:17px 0 6px; color:var(--ink); }
+  .outbox-head span{ font-size:13px; font-weight:550; color:var(--ink-soft); }
+  .outbox-sub{ font-size:13px; line-height:1.5; color:var(--ink-soft); margin:0 0 9px; }
+  .outbox-note{ padding:13px 14px; border-radius:12px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); margin-bottom:9px; }
+  .outbox-note.is-problem{ background:var(--danger-soft); box-shadow:none; }
+  .outbox-note p{ font-size:13px; line-height:1.55; color:var(--ink); margin:0 0 9px; }
+  .outbox-note p:last-child{ margin-bottom:0; }
+  .outbox-reason{ font-size:13px; line-height:1.5; color:var(--danger); margin:6px 0 0; }
+  .outbox-actions{ display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+  .outbox-actions .btn, .outbox-note .btn{ min-height:44px; }
+  .outbox-discard{ color:var(--danger); }
+  .outbox-copy{ width:100%; min-height:110px; margin-top:9px; font-family:var(--mono); font-size:16px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--paper); color:var(--ink); padding:9px; }
+  .outbox-sheet .history-entry-meta span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%; }
+
   /* ---------- CCHI practice ---------- */
   .practice-intro{ max-width:760px; font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 26px 0; }
   /* The standing caution a tool has to carry. It has to be on the page, but
@@ -4102,6 +4154,7 @@
      clear the floating tab bar, or it lands underneath it on a phone. */
   .toast.has-action{
     display:flex; align-items:center; gap:14px; pointer-events:auto;
+    width:max-content; max-width:min(calc(100vw - 32px), 440px);
     bottom:calc(24px + env(safe-area-inset-bottom));
   }
   @media (max-width:760px){
@@ -5811,7 +5864,8 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
     </span>
   </button>
   <div class="tg-right">
-    <span class="tg-sync" id="tgSync" role="status" aria-live="polite"></span>
+    <button type="button" class="tg-sync" id="tgSync" onclick="openOutboxSheet()"></button>
+    <span class="sr-only" id="tgSyncLive" role="status" aria-live="polite"></span>
     <button class="tg-icon-btn tg-smiley" id="tgSmiley" onclick="openAskHub()" title="Ask the Hub" aria-label="Ask the Hub" hidden></button>
     <button class="tg-icon-btn tg-search-btn" onclick="openGlobalSearch()" title="Search" aria-label="Search">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -6031,6 +6085,15 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
     <div class="more-sheet-grip"></div>
     <button class="dd-detail-close" title="Close" onclick="closeMoreSheet()">✕</button>
     <div id="moreSheetBody"></div>
+  </div>
+</div>
+
+<div class="overlay more-sheet-overlay" id="outboxOverlay" onclick="if(event.target===this) closeOutboxSheet()">
+  <div class="modal more-sheet outbox-sheet" role="dialog" aria-modal="true" aria-labelledby="outboxSheetTitle">
+    <div class="more-sheet-grip"></div>
+    <button class="dd-detail-close" title="Close" aria-label="Close" onclick="closeOutboxSheet()">✕</button>
+    <h3 id="outboxSheetTitle">Unsent changes</h3>
+    <div id="outboxSheetBody"></div>
   </div>
 </div>
 
@@ -8927,12 +8990,12 @@ async function saveTermDoc(term){
     const state = await queuedWrite({
       collection: 'terms', docId: term.id, op: 'set', data: stripUndefined(term)
     });
-    if(state === 'queued'){
-      showToast('Saved on this device — it will sync when you\u2019re back online.');
-    }
-    return true;
+    if(state === 'queued') showToast(queuedNotice('Saved'));
+    return state;   // 'sent' or 'queued' -- both truthy, so callers testing ok still work
   }catch(err){
     console.error('saveTermDoc failed:', err);
+    const stored = outboxErrorMessage(err, 'Not saved', 'Your draft is still in the form.');
+    if(stored){ showOutboxActionToast(stored); return false; }
     // Surface the real reason. The generic message sent people (and me)
     // chasing connection problems when the actual cause was something else
     // entirely, and the console isn't reachable on a phone.
@@ -9056,11 +9119,11 @@ async function deleteTermDoc(id){
   if(!db) return false;
   try{
     const state = await queuedWrite({ collection: 'terms', docId: id, op: 'delete' });
-    if(state === 'queued'){
-      showToast('Deleted on this device — it will sync when you\u2019re back online.');
-    }
-    return true;
+    if(state === 'queued') showToast(queuedNotice('Deleted'));
+    return state;
   }catch(err){
+    const stored = outboxErrorMessage(err, 'Not deleted', 'The term is still in the glossary.');
+    if(stored){ showOutboxActionToast(stored); return false; }
     showToast('Could not delete. Check connection and retry.');
     return false;
   }
@@ -10639,6 +10702,7 @@ function prefersAutoFocus(){
 
 function showToast(msg){
   const t = document.getElementById('toast');
+  t.classList.remove('has-action');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(showToast._h);
@@ -13309,43 +13373,143 @@ function render(){
       forever rather than rejecting, so waiting on it is waiting on nothing.
 
    Scope is deliberately the two things done in the field: terminology edits
-   and team chat. Everything else still reports failure honestly. */
+   and team chat. Everything else still reports failure honestly.
+
+   Nothing in here may lose a change without the person being told:
+   - A change is only reported as queued once it is actually written to this
+     phone's storage. If storage is full or switched off, the caller gets an
+     error, says so, and keeps the person's draft.
+   - When the queue is full the NEW change is refused. Older waiting work is
+     never pushed out to make room (it used to be, silently).
+   - A change the server permanently refuses is moved to a "held" list with
+     its full contents, not thrown away, so it can be sent again, copied or
+     deliberately discarded from the Unsent changes sheet. */
 const OUTBOX_KEY = 'ih_outbox_v1';
+const OUTBOX_HELD_KEY = 'ih_outbox_held_v1';
+const OUTBOX_UNREADABLE_KEY = 'ih_outbox_unreadable_v1';
 const OUTBOX_MAX = 200;      // a runaway queue shouldn't blow the storage quota
 const WRITE_TIMEOUT_MS = 12000;
 let outboxFlushing = false;
+// null while storage works; 'ih/storage-full' or 'ih/storage-unavailable'
+// after a write to it failed. Cleared by the next write that succeeds.
+let outboxStorageProblem = null;
 
-function loadOutbox(){
+function outboxError(code, cause){
+  const err = new Error(code);
+  err.code = code;
+  if(cause) err.cause = cause;
+  return err;
+}
+
+function isOutboxError(err){
+  return !!(err && typeof err.code === 'string' && err.code.startsWith('ih/') && err.code !== 'ih/timeout');
+}
+
+// Browsers name a full quota differently: QuotaExceededError (Chrome,
+// Safari), NS_ERROR_DOM_QUOTA_REACHED (Firefox), or only the legacy codes.
+// Anything else (SecurityError with site data blocked, no localStorage at
+// all) means storage can't be used here.
+function storageErrorCode(err){
+  const name = (err && err.name) || '';
+  const code = err && err.code;
+  if(name === 'QuotaExceededError' || name === 'NS_ERROR_DOM_QUOTA_REACHED' || code === 22 || code === 1014){
+    return 'ih/storage-full';
+  }
+  return 'ih/storage-unavailable';
+}
+
+// Entries queued before this version have no qid. Derive one from what they
+// already carry, so the same entry gets the same key on every load.
+function outboxEntryKey(e){
+  return e.qid || [e.collection, e.docId, e.op, e.queuedAt].join('|');
+}
+
+function readOutboxKey(key){
+  let raw = null;
   try{
-    const raw = localStorage.getItem(OUTBOX_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    raw = localStorage.getItem(key);
   }catch(err){
-    console.warn('Outbox unreadable, starting empty:', err && err.name);
+    outboxStorageProblem = storageErrorCode(err);
     return [];
   }
-}
-let OUTBOX = loadOutbox();
-
-function saveOutbox(){
+  if(!raw) return [];
   try{
-    localStorage.setItem(OUTBOX_KEY, JSON.stringify(OUTBOX));
+    const parsed = JSON.parse(raw);
+    if(Array.isArray(parsed)) return parsed.map(e => ({ ...e, qid: outboxEntryKey(e) }));
+  }catch(err){}
+  // Unreadable. Starting empty would overwrite it on the next save, so keep
+  // the raw text aside first; it is still the person's work.
+  console.warn('Saved changes unreadable; kept aside under', OUTBOX_UNREADABLE_KEY);
+  try{
+    const earlier = localStorage.getItem(OUTBOX_UNREADABLE_KEY);
+    localStorage.setItem(OUTBOX_UNREADABLE_KEY, earlier ? earlier + '\n' + raw : raw);
+    localStorage.removeItem(key);
+  }catch(e){}
+  return [];
+}
+
+// Throws an outboxError when the write doesn't stick.
+function writeOutboxKey(key, list){
+  try{
+    if(list.length) localStorage.setItem(key, JSON.stringify(list));
+    else localStorage.removeItem(key);
   }catch(err){
-    console.warn('Outbox not persisted:', err && err.name);
+    throw outboxError(storageErrorCode(err), err);
   }
+}
+
+let OUTBOX = readOutboxKey(OUTBOX_KEY);
+let OUTBOX_HELD = readOutboxKey(OUTBOX_HELD_KEY);
+
+/* Persists the queue (or the list given) and only then reports success.
+   Throws on failure and records the problem so the badge can show it. */
+function saveOutbox(list = OUTBOX){
+  try{
+    writeOutboxKey(OUTBOX_KEY, list);
+  }catch(err){
+    outboxStorageProblem = err.code;
+    throw err;
+  }
+  outboxStorageProblem = null;
+}
+
+function saveOutboxHeld(list = OUTBOX_HELD){
+  try{
+    writeOutboxKey(OUTBOX_HELD_KEY, list);
+  }catch(err){
+    outboxStorageProblem = err.code;
+    throw err;
+  }
+  outboxStorageProblem = null;
 }
 
 function enqueueWrite(entry){
-  OUTBOX.push({ ...entry, queuedAt: Date.now() });
-  if(OUTBOX.length > OUTBOX_MAX) OUTBOX.shift();
-  saveOutbox();
+  if(OUTBOX.length >= OUTBOX_MAX){
+    updateSyncStatus(false);
+    throw outboxError('ih/outbox-full');
+  }
+  const queued = { ...entry, qid: genId(), queuedAt: Date.now() };
+  const next = OUTBOX.concat([queued]);
+  try{
+    saveOutbox(next);
+  }catch(err){
+    updateSyncStatus(false);
+    throw err;
+  }
+  OUTBOX = next;
   updateSyncStatus(false);
+  return queued;
+}
+
+function hasQueuedFor(entry){
+  return OUTBOX.some(e => e.collection === entry.collection && e.docId === entry.docId);
 }
 
 // Firestore reports a dead network under several codes; a timeout of our own
 // counts too. Anything else is a real rejection and must not be retried
 // blindly.
 function isOfflineError(err){
+  if(isOutboxError(err)) return false;
   const code = ((err && (err.code || err.message)) || '').toString().toLowerCase();
   return code.includes('unavailable') || code.includes('network') ||
          code.includes('offline') || code.includes('timeout') ||
@@ -13374,10 +13538,21 @@ function applyQueuedWrite(entry){
   return ref.set(entry.data);
 }
 
-/* Returns 'sent' if it reached the server, 'queued' if it is waiting for a
-   connection. Throws only on a genuine rejection, which callers surface. */
+/* Returns 'sent' if it reached the server, 'queued' once it is safely stored
+   on this phone waiting for a connection. Throws on a genuine rejection, and
+   on a change that could not be stored (code ih/outbox-full,
+   ih/storage-full, ih/storage-unavailable); callers surface both and keep
+   the person's draft. */
 async function queuedWrite(entry){
   if(!navigator.onLine){ enqueueWrite(entry); return 'queued'; }
+  // An older change to this same document is still waiting. Writing past it
+  // would let the replay land afterwards and undo this newer one, so join
+  // the queue behind it instead.
+  if(hasQueuedFor(entry)){
+    enqueueWrite(entry);
+    flushOutbox();
+    return 'queued';
+  }
   try{
     await trackWrite(withWriteTimeout(applyQueuedWrite(entry)));
     return 'sent';
@@ -13387,38 +13562,311 @@ async function queuedWrite(entry){
   }
 }
 
+// What the person is told after a change was stored rather than sent.
+function queuedNotice(done){
+  return navigator.onLine
+    ? `${done} on this device — sending now.`
+    : `${done} on this device — it will sync when you’re back online.`;
+}
+
+/* Sends what is waiting, oldest first. Each operation addresses an explicit
+   document with set/update/delete, so if the app is closed between a write
+   landing and the queue being trimmed, replaying it on the next launch
+   rewrites the same document rather than creating a second one. */
 async function flushOutbox(){
   if(outboxFlushing || !db || !OUTBOX.length || !navigator.onLine) return;
   outboxFlushing = true;
   updateSyncStatus(false);
-  let sent = 0;
+  let sent = 0, held = 0;
   try{
     while(OUTBOX.length && navigator.onLine){
       const entry = OUTBOX[0];
+      let rejected = null;
       try{
         await withWriteTimeout(applyQueuedWrite(entry));
-        OUTBOX.shift();
-        saveOutbox();
-        sent++;
       }catch(err){
         // Still no usable connection — leave the queue intact and try again
         // on the next 'online' event.
         if(isOfflineError(err)) break;
-        // A permanently rejected write (bad data, removed collection) would
-        // otherwise wedge the queue forever behind it.
-        OUTBOX.shift();
-        saveOutbox();
-        console.error('Dropped an unsendable queued change:', entry, err);
-        showToast('One saved change could not be synced and was discarded.');
+        rejected = err;
+      }
+      // By identity, not shift(): the queue may have grown while we waited.
+      const rest = OUTBOX.filter(e => e !== entry);
+      if(rejected){
+        // A permanently refused write (rules, a document that no longer
+        // exists) would wedge the queue behind it. Move it aside with its
+        // contents. The held copy is written first: if that fails the
+        // change stays queued and we stop, rather than lose it.
+        console.error('A queued change was refused by the server:', entry, rejected);
+        const heldEntry = { ...entry, heldAt: Date.now(),
+          reason: String((rejected && (rejected.code || rejected.message)) || 'rejected') };
+        const nextHeld = OUTBOX_HELD.some(e => e.qid === entry.qid)
+          ? OUTBOX_HELD : OUTBOX_HELD.concat([heldEntry]);
+        try{
+          saveOutboxHeld(nextHeld);
+        }catch(storeErr){
+          entry.lastError = heldEntry.reason;
+          break;
+        }
+        OUTBOX_HELD = nextHeld;
+        held++;
+      } else {
+        sent++;
+      }
+      OUTBOX = rest;
+      try{
+        saveOutbox(rest);
+      }catch(storeErr){
+        // The change reached the server (or the held list) but the queue on
+        // disk still lists it. Replaying it after a restart rewrites the
+        // same document, so carry on; the badge shows the storage problem.
       }
     }
   }finally{
     outboxFlushing = false;
-    updateSyncStatus(sent > 0 && !OUTBOX.length);
+    updateSyncStatus(sent > 0 && !OUTBOX.length && !OUTBOX_HELD.length);
   }
-  if(sent && !OUTBOX.length){
+  if(held){
+    showOutboxActionToast(`${held} change${held === 1 ? '' : 's'} couldn’t sync. Nothing was lost.`);
+  } else if(sent && !OUTBOX.length){
     showToast(`Synced ${sent} change${sent === 1 ? '' : 's'} that were waiting.`);
   }
+}
+
+
+/* ---------- Unsent changes sheet ----------
+   Opened from the sync badge and from the "couldn't save / couldn't sync"
+   toasts. Shows what is waiting, anything the server refused (with its full
+   contents, so it can be sent again, copied, or deliberately discarded), and
+   any storage problem with a way to check again. */
+function outboxErrorMessage(err, lead, kept){
+  const code = err && err.code;
+  // Short on purpose: it is a toast. What to do about it is in the sheet
+  // behind its Review button.
+  const reason = code === 'ih/outbox-full'
+      ? `${OUTBOX_MAX} changes are already waiting to sync.`
+    : code === 'ih/storage-full'
+      ? 'This phone\u2019s storage is full.'
+    : code === 'ih/storage-unavailable'
+      ? 'This browser is blocking offline saving.'
+    : null;
+  if(!reason) return null;
+  return `${lead}: ${reason}${kept ? ' ' + kept : ''}`;
+}
+
+function showOutboxActionToast(msg){
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${escapeHtml(msg)}</span><button class="toast-undo" onclick="document.getElementById('toast').classList.remove('show','has-action'); openOutboxSheet();">Review</button>`;
+  t.classList.add('show', 'has-action');
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(() => {
+    t.classList.remove('show', 'has-action');
+    t.textContent = '';
+  }, 9000);
+}
+
+function describeOutboxEntry(e){
+  const d = e.data || {};
+  if(e.collection === 'terms'){
+    if(e.op === 'delete'){
+      let name = '';
+      DATA.categories.forEach(c => { const t = c.terms.find(x => x.id === e.docId); if(t) name = t.en; });
+      return { title: `Delete term${name ? `: ${name}` : ''}`, detail: '' };
+    }
+    return { title: `Term: ${d.en || '(no English term)'}`,
+             detail: [d.es, d.def].filter(Boolean).join(' — ') };
+  }
+  if(e.collection === 'team-chat'){
+    if(e.op === 'update' && d.reactions) return { title: 'Reaction on a chat message', detail: '' };
+    if(e.op === 'update') return { title: 'Chat message edit', detail: d.text || '' };
+    if(e.op === 'delete') return { title: 'Delete a chat message', detail: '' };
+    return { title: 'Chat message', detail: (d.text || '') + (d.attachment ? ' (with attachment)' : '') };
+  }
+  if(e.collection === TEAM_MEMBER_COLL) return { title: 'Your profile photo', detail: '' };
+  return { title: `Change to ${e.collection}`, detail: '' };
+}
+
+function outboxReasonText(reason){
+  const r = String(reason || '').toLowerCase();
+  if(r.includes('permission') || r.includes('insufficient') || r.includes('unauthenticated')){
+    return 'The database refused it. This phone may need to rejoin the team on Team access, then send it again.';
+  }
+  if(r.includes('not-found') || r.includes('no document')){
+    return 'It changes something that no longer exists — someone may have deleted it.';
+  }
+  if(r.includes('resource-exhausted')) return 'The database is over its limit right now. Send it again later.';
+  return 'The database couldn’t accept it as written.';
+}
+
+function outboxEntryText(e){
+  const { title, detail } = describeOutboxEntry(e);
+  return `${title}${detail ? `\n${detail}` : ''}\n\n${JSON.stringify({ collection: e.collection, id: e.docId, op: e.op, data: e.data || null }, null, 2)}`;
+}
+
+function outboxWhen(ts){
+  try{ return ts ? new Date(ts).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : ''; }
+  catch(e){ return ''; }
+}
+
+function renderOutboxSheet(){
+  const body = document.getElementById('outboxSheetBody');
+  if(!body) return;
+  const parts = [];
+  if(outboxStorageProblem){
+    const full = outboxStorageProblem === 'ih/storage-full';
+    parts.push(`<div class="outbox-note is-problem">
+      <p><b>${full ? 'This phone’s storage for the Hub is full.' : 'This browser isn’t letting the Hub save changes on the phone.'}</b>
+      ${full ? 'New changes can’t be kept while you’re offline. Anything already listed below is still safe.'
+             : 'This happens in private browsing or when site data is blocked. Changes can still be saved while you’re online.'}</p>
+      <button type="button" class="btn btn-ghost" onclick="recheckOutboxStorage()">Check again</button>
+    </div>`);
+  }
+  if(OUTBOX.length >= OUTBOX_MAX){
+    parts.push(`<div class="outbox-note is-problem"><p><b>The offline queue is full.</b> ${OUTBOX_MAX} changes are waiting. New changes can’t be saved offline until these send — reconnect to send them. Nothing waiting has been removed.</p></div>`);
+  }
+  if(OUTBOX_HELD.length){
+    parts.push(`<h4 class="outbox-head">Didn’t sync <span>${OUTBOX_HELD.length}</span></h4>
+      <p class="outbox-sub">The database refused these. Nothing was deleted: send again, copy, or discard each one.</p>`);
+    OUTBOX_HELD.forEach(e => {
+      const { title, detail } = describeOutboxEntry(e);
+      const q = escapeAttr(e.qid);
+      parts.push(`<div class="history-entry outbox-item" data-qid="${q}">
+        <div class="history-entry-meta"><span>${escapeHtml(outboxWhen(e.queuedAt))}</span><span title="${escapeAttr(e.reason || '')}">${escapeHtml(e.reason || '')}</span></div>
+        <div class="history-entry-en">${escapeHtml(title)}</div>
+        ${detail ? `<p class="history-entry-def">${escapeHtml(detail)}</p>` : ''}
+        <p class="outbox-reason">${escapeHtml(outboxReasonText(e.reason))}</p>
+        <div class="outbox-actions">
+          <button type="button" class="btn btn-ghost" onclick="retryHeldChange(this.closest('[data-qid]').dataset.qid)">Send again</button>
+          <button type="button" class="btn btn-ghost" onclick="copyOutboxEntry(this.closest('[data-qid]').dataset.qid, this)">Copy</button>
+          <button type="button" class="btn btn-ghost outbox-discard" onclick="discardHeldChange(this.closest('[data-qid]').dataset.qid)">Discard</button>
+        </div>
+      </div>`);
+    });
+  }
+  if(OUTBOX.length){
+    const online = navigator.onLine;
+    parts.push(`<h4 class="outbox-head">Waiting to send <span>${OUTBOX.length}</span></h4>
+      <p class="outbox-sub">${online ? 'Saved on this phone and sending now.' : 'Saved on this phone. They send by themselves when you’re back online.'}</p>`);
+    OUTBOX.forEach(e => {
+      const { title, detail } = describeOutboxEntry(e);
+      parts.push(`<div class="history-entry outbox-item">
+        <div class="history-entry-meta"><span>${escapeHtml(outboxWhen(e.queuedAt))}</span>${e.lastError ? `<span>${escapeHtml(e.lastError)}</span>` : ''}</div>
+        <div class="history-entry-en">${escapeHtml(title)}</div>
+        ${detail ? `<p class="history-entry-def">${escapeHtml(detail)}</p>` : ''}
+      </div>`);
+    });
+    if(online && db) parts.push(`<div class="modal-actions"><button type="button" class="btn btn-primary" onclick="flushOutbox()">Send now</button></div>`);
+  }
+  let unreadable = null;
+  try{ unreadable = localStorage.getItem(OUTBOX_UNREADABLE_KEY); }catch(e){}
+  if(unreadable){
+    parts.push(`<div class="outbox-note"><p><b>Some saved changes couldn’t be read.</b> They were kept aside, not deleted. Copy them and send them to Jose.</p>
+      <button type="button" class="btn btn-ghost" onclick="copyOutboxUnreadable(this)">Copy</button></div>`);
+  }
+  if(!parts.length){
+    parts.push(`<p class="outbox-sub">Nothing waiting. Every change on this phone has reached the team.</p>`);
+  }
+  body.innerHTML = parts.join('');
+}
+
+function openOutboxSheet(){
+  // The toast that sent the person here would otherwise sit on top of it.
+  const t = document.getElementById('toast');
+  clearTimeout(showToast._h);
+  t.classList.remove('show', 'has-action');
+  renderOutboxSheet();
+  document.getElementById('outboxOverlay').classList.add('show');
+}
+function closeOutboxSheet(){
+  document.getElementById('outboxOverlay').classList.remove('show');
+}
+
+async function copyText(text, btn){
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('Copied.');
+  }catch(err){
+    // No clipboard access: put the text where it can be selected by hand.
+    const item = btn && btn.closest('.outbox-item, .outbox-note');
+    if(item && !item.querySelector('textarea')){
+      const ta = document.createElement('textarea');
+      ta.className = 'outbox-copy'; ta.readOnly = true; ta.value = text;
+      ta.setAttribute('aria-label', 'Change contents');
+      item.appendChild(ta);
+      ta.focus(); ta.select();
+    }
+    showToast('Select the text and copy it.');
+  }
+}
+
+function copyOutboxEntry(qid, btn){
+  const e = OUTBOX_HELD.find(x => x.qid === qid);
+  if(e) copyText(outboxEntryText(e), btn);
+}
+
+function copyOutboxUnreadable(btn){
+  let raw = '';
+  try{ raw = localStorage.getItem(OUTBOX_UNREADABLE_KEY) || ''; }catch(e){}
+  copyText(raw, btn);
+}
+
+// Back into the queue, at the end, so it sends after anything newer that is
+// already waiting. The queue copy is stored before the held copy is removed.
+function retryHeldChange(qid){
+  const e = OUTBOX_HELD.find(x => x.qid === qid);
+  if(!e) return;
+  if(OUTBOX.length >= OUTBOX_MAX){ showToast(`The offline queue is full (${OUTBOX_MAX}). Let it send first.`); return; }
+  const { heldAt, reason, lastError, ...entry } = e;
+  const nextQueue = OUTBOX.concat([entry]);
+  const nextHeld = OUTBOX_HELD.filter(x => x.qid !== qid);
+  try{
+    saveOutbox(nextQueue);
+  }catch(err){
+    showToast(outboxErrorMessage(err, 'Couldn\u2019t move it', 'It is still listed.') || 'Couldn’t move it. It is still listed.');
+    updateSyncStatus(false);
+    return;
+  }
+  OUTBOX = nextQueue;
+  OUTBOX_HELD = nextHeld;
+  try{ saveOutboxHeld(nextHeld); }catch(err){ /* re-listed after a restart; Discard clears it */ }
+  updateSyncStatus(false);
+  renderOutboxSheet();
+  if(navigator.onLine) flushOutbox();
+  else showToast('Queued. It will send when you’re back online.');
+}
+
+function discardHeldChange(qid){
+  const e = OUTBOX_HELD.find(x => x.qid === qid);
+  if(!e) return;
+  if(!confirm(`Discard “${describeOutboxEntry(e).title}”? It can’t be recovered afterwards.`)) return;
+  const next = OUTBOX_HELD.filter(x => x.qid !== qid);
+  try{
+    saveOutboxHeld(next);
+  }catch(err){
+    showToast('Couldn’t discard it — this phone’s storage isn’t responding.');
+    return;
+  }
+  OUTBOX_HELD = next;
+  updateSyncStatus(false);
+  renderOutboxSheet();
+}
+
+// The person freed space or left private browsing. Prove storage works, then
+// write what is in memory back out, since a failed trim may have left the
+// stored queue longer than the real one.
+function recheckOutboxStorage(){
+  try{
+    localStorage.setItem('ih_storage_probe', '1');
+    localStorage.removeItem('ih_storage_probe');
+    saveOutbox(OUTBOX);
+    saveOutboxHeld(OUTBOX_HELD);
+    showToast('Storage works again. New changes can be saved offline.');
+  }catch(err){
+    outboxStorageProblem = (err && err.code && String(err.code).startsWith('ih/')) ? err.code : storageErrorCode(err);
+    showToast('Still can’t save on this phone.');
+  }
+  updateSyncStatus(false);
+  renderOutboxSheet();
 }
 
 // Sync status. Offline (with an honest count of what is waiting), pending
@@ -13428,13 +13876,53 @@ async function flushOutbox(){
 let pendingWriteCount = 0;
 let syncedFlashTimer = null;
 
+// Anything the person has to act on, or null. Ordered by urgency: a change
+// that can't be stored at all beats one that is full, beats one refused.
+function outboxProblem(){
+  const n = OUTBOX_HELD.length;
+  if(outboxStorageProblem === 'ih/storage-full'){
+    return { label: 'Phone storage full \u2014 new changes can\u2019t be kept offline', mark: '!', short: '' };
+  }
+  if(outboxStorageProblem){
+    return { label: 'This browser isn\u2019t letting the Hub save changes offline', mark: '!', short: '' };
+  }
+  if(OUTBOX.length >= OUTBOX_MAX){
+    return { label: `${OUTBOX.length} changes waiting \u2014 the offline queue is full`, mark: '!', short: '' };
+  }
+  if(n){
+    return { label: `${n} change${n === 1 ? '' : 's'} didn\u2019t sync`, mark: String(n), short: `${n} unsent` };
+  }
+  return null;
+}
+
+function setSyncAnnouncement(text){
+  const live = document.getElementById('tgSyncLive');
+  if(live && live.textContent !== text) live.textContent = text;
+}
+
 function updateSyncStatus(justSynced){
   const el = document.getElementById('tgSync');
   if(!el) return;
   const offline = !navigator.onLine;
-  el.classList.remove('is-visible','is-offline','is-pending','is-synced');
+  el.classList.remove('is-visible','is-offline','is-pending','is-synced','is-problem','is-compact');
 
   const waiting = OUTBOX.length;
+  const problem = outboxProblem();
+  const bar = el.closest('.topbar-global');
+  if(bar) bar.classList.toggle('has-sync-problem', !!problem);
+  if(problem){
+    el.classList.add('is-visible','is-problem');
+    // No short phone label means the phone shows only the mark (count or !).
+    el.classList.toggle('is-compact', !problem.short);
+    el.innerHTML = `<span class="tg-sync-dot"></span><span class="tg-sync-long">${problem.label}</span><span class="tg-sync-short">${problem.short}</span><span class="tg-sync-mark">${problem.mark}</span>`;
+    el.title = problem.label + '. Tap to review.';
+    el.setAttribute('aria-label', problem.label + '. Review unsent changes');
+    setSyncAnnouncement(problem.label);
+    if(document.getElementById('outboxOverlay')?.classList.contains('show')) renderOutboxSheet();
+    return;
+  }
+  el.removeAttribute('aria-label');
+  if(document.getElementById('outboxOverlay')?.classList.contains('show')) renderOutboxSheet();
 
   if(offline){
     el.classList.add('is-visible','is-offline');
@@ -13443,6 +13931,7 @@ function updateSyncStatus(justSynced){
       ? `Offline \u2014 ${waiting} change${waiting === 1 ? '' : 's'} waiting`
       : 'Offline \u2014 showing the saved copy';
     el.innerHTML = `<span class="tg-sync-dot"></span><span>${label}</span>`;
+    setSyncAnnouncement(label);
     el.title = waiting
       ? `You\u2019re offline. ${waiting} change${waiting === 1 ? ' is' : 's are'} saved on this device and will send automatically when you reconnect.`
       : 'You\u2019re offline. The glossary shown is the last synced copy. Terms and chat messages you write will be saved here and sent when you reconnect.';
@@ -13451,6 +13940,7 @@ function updateSyncStatus(justSynced){
   if(waiting){
     el.classList.add('is-visible','is-pending');
     el.innerHTML = `<span class="tg-sync-dot"></span><span>Sending ${waiting} saved change${waiting === 1 ? '' : 's'}\u2026</span>`;
+    setSyncAnnouncement(`Sending ${waiting} saved change${waiting === 1 ? '' : 's'}`);
     el.title = 'Reconnected. Sending the changes that were made offline.';
     return;
   }
@@ -13463,6 +13953,7 @@ function updateSyncStatus(justSynced){
   if(justSynced){
     el.classList.add('is-visible','is-synced');
     el.innerHTML = `<span class="tg-sync-dot"></span><span>All changes saved</span>`;
+    setSyncAnnouncement('All changes saved');
     el.title = 'Everything is synced with the team.';
     clearTimeout(syncedFlashTimer);
     syncedFlashTimer = setTimeout(()=>{ pendingWriteCount = 0; updateSyncStatus(false); }, 2600);
@@ -14807,6 +15298,8 @@ async function persistMyPhoto(name){
   }catch(err){
     const code = ((err && (err.code || err.message)) || '').toString().toLowerCase();
     membersBlocked = true;
+    const stored = outboxErrorMessage(err, 'Photo saved on this device, but not queued for your team', '');
+    if(stored){ showOutboxActionToast(stored); renderNamePhoto(); return; }
     // Name the actual cause. "Could not be shared" sent nobody anywhere; the
     // fix is one line in the Firebase console and the message should say so.
     showToast(code.includes('permission')
@@ -15922,10 +16415,12 @@ async function shareResultToChat(correct, total){
   const text = `\ud83d\udcda Just finished a ${total}-question ${mode}: ${correct}/${total} (${pct}%). ${line}`;
   try{
     const ref = db.collection('team-chat').doc();
-    await queuedWrite({ collection:'team-chat', docId:ref.id, op:'set',
+    const state = await queuedWrite({ collection:'team-chat', docId:ref.id, op:'set',
       data:{ text, author:who, attachment:null, timestamp:Date.now(), replyTo:null } });
-    showToast('Shared to Team Chat.');
+    showToast(state === 'queued' ? queuedNotice('Shared') : 'Shared to Team Chat.');
   }catch(err){
+    const stored = outboxErrorMessage(err, 'Not shared', 'Your result is still here.');
+    if(stored){ showOutboxActionToast(stored); return; }
     showToast('Could not share that \u2014 check your connection.');
   }
 }
@@ -16160,7 +16655,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -17606,6 +18101,7 @@ async function toggleChatReaction(id, emoji){
   if(!me){ requireName(()=> toggleChatReaction(id, emoji)); return; }
   const m = CHAT_MESSAGES.find(x=> x.id === id);
   if(!m) return;
+  const before = m.reactions;
   const map = Object.assign({}, m.reactions || {});
   const list = (map[emoji] || []).slice();
   const at = list.findIndex(n=> String(n).trim().toLowerCase() === me.toLowerCase());
@@ -17618,7 +18114,11 @@ async function toggleChatReaction(id, emoji){
   try{
     await queuedWrite({ collection:'team-chat', docId:id, op:'update', data:{ reactions: map } });
   }catch(err){
-    showToast('Could not save that reaction.');
+    // Don't keep showing a reaction that was never stored anywhere.
+    if(m.reactions === map){ m.reactions = before; renderChatMessages(); }
+    const stored = outboxErrorMessage(err, 'Reaction not saved', '');
+    if(stored) showOutboxActionToast(stored);
+    else showToast('Could not save that reaction.');
   }
 }
 
@@ -17764,6 +18264,8 @@ function saveChatToGlossary(id){
   showToast('Check the fields, then save it to the glossary.');
 }
 
+let chatRetryDocId = null;   // see sendChatMessage
+let sendingReply = null;
 async function sendChatMessage(){
   const input = document.getElementById('chatInput');
   if(!input) return;
@@ -17774,12 +18276,22 @@ async function sendChatMessage(){
     const id = editingChatId;
     if(!text){ showToast('An empty message would just be a delete.'); return; }
     const m = CHAT_MESSAGES.find(x=>x.id===id);
+    const prev = m ? { text: m.text, editedAt: m.editedAt } : null;
     editingChatId = null; input.value = ''; renderChatComposeBar();
     if(m){ m.text = text; m.editedAt = Date.now(); renderChatMessages(); }
     try{
       await queuedWrite({ collection:'team-chat', docId:id, op:'update',
                           data:{ text, editedAt: Date.now() } });
-    }catch(err){ showToast('Could not save that edit.'); }
+    }catch(err){
+      // Give the edit back so it can be sent again, and show the message as
+      // it really is.
+      if(m && prev){ m.text = prev.text; m.editedAt = prev.editedAt; renderChatMessages(); }
+      const box = document.getElementById('chatInput');
+      if(box && !box.value){ editingChatId = id; box.value = text; renderChatComposeBar(); }
+      const stored = outboxErrorMessage(err, 'Edit not saved', 'Your edit is back in the message box.');
+      if(stored) showOutboxActionToast(stored);
+      else showToast('Could not save that edit. It is back in the message box.');
+    }
     return;
   }
 
@@ -17806,13 +18318,20 @@ async function sendChatMessage(){
     // An explicit id rather than add(): a queued message replayed after a
     // reconnect must land as the same document, not as a second copy. doc()
     // mints the id locally, so this works with no connection at all.
-    const ref = db.collection('team-chat').doc();
+    // A retry after a failed send reuses the same id: if the first attempt
+    // timed out but landed, this rewrites it rather than posting it twice.
+    const ref = chatRetryDocId ? db.collection('team-chat').doc(chatRetryDocId) : db.collection('team-chat').doc();
+    chatRetryDocId = ref.id;
     const message = { text, author, attachment: attachment || null, timestamp: Date.now(),
                       replyTo: replyingTo ? { id:replyingTo.id, author:replyingTo.author, text:replyingTo.text } : null };
+    const reply = replyingTo;
     replyingTo = null; renderChatComposeBar();
+    sendingReply = reply;
     const state = await queuedWrite({
       collection: 'team-chat', docId: ref.id, op: 'set', data: message
     });
+    chatRetryDocId = null;
+    sendingReply = null;
     if(state === 'queued'){
       // Offline there is no listener echo, so show the message locally or it
       // looks like it vanished. The real document carries this same id, so
@@ -17824,10 +18343,14 @@ async function sendChatMessage(){
     // Online, no manual state update is needed — the real-time listener picks
     // it up for everyone, including the sender, and calls renderChatMessages().
   }catch(err){
-    showToast('Could not send — check your connection.');
+    const stored = outboxErrorMessage(err, 'Not sent', 'Your message is back in the box.');
+    if(stored) showOutboxActionToast(stored);
+    else showToast('Could not send — check your connection.');
     input.value = text; // give the message back so it isn't lost
     pendingChatAttachment = attachment;
     renderChatAttachPreview();
+    if(sendingReply && !replyingTo){ replyingTo = sendingReply; renderChatComposeBar(); }
+    sendingReply = null;
   }
   input.disabled = false;
   // No re-focus here on purpose: keeping the keyboard open after send was
@@ -17906,6 +18429,7 @@ function openAddModal(fromDirectory){
 }
 function _openAddModal(fromDirectory){
   editingContext = null;
+  newTermDraftId = null;
   document.getElementById('modalTitle').textContent = fromDirectory ? 'Add link' : 'Add term';
   document.getElementById('fEn').value = '';
   document.getElementById('fEs').value = '';
@@ -17989,9 +18513,11 @@ function populateCategorySelect(){
   sel.innerHTML = DATA.categories.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
 }
 
+let newTermDraftId = null;   // see saveTerm
 function closeModal(){
   document.getElementById('overlay').classList.remove('show');
   editingContext = null;
+  newTermDraftId = null;
 }
 
 async function saveTerm(){
@@ -18026,8 +18552,12 @@ async function saveTerm(){
     history = [snapshot, ...history].slice(0, 10);
   }
 
+  // A new term keeps one id for as long as its form is open. If a save timed
+  // out but landed after all, trying again rewrites that same document
+  // instead of adding a second copy of the term.
+  if(!existingTerm && !newTermDraftId) newTermDraftId = genId();
   const record = {
-    id: (existingTerm && existingTerm.id) || genId(), categoryId: newCategoryId,
+    id: (existingTerm && existingTerm.id) || newTermDraftId, categoryId: newCategoryId,
     en, es, def, source,
     notes: notes || undefined,
     url: url || undefined, editedBy: editor || undefined, editedOn: editor ? timeAgoLabel() : undefined,
@@ -18037,6 +18567,7 @@ async function saveTerm(){
   const ok = await saveTermDoc(record);
   if(!ok) return; // keep the modal open so the typing isn't lost and it can be retried
   closeModal();
+  const savedToast = ok === 'queued' ? queuedNotice('Term saved') : 'Term saved.';
 
   // Apply locally right away rather than waiting on the real-time listener's
   // round trip — the person who just typed the edit shouldn't have to wait
@@ -18054,7 +18585,7 @@ async function saveTerm(){
   }
 
   successBurst();
-  showToast('Term saved.');
+  showToast(savedToast);
   render();
 
   // Deliberately not awaited: the save is done and the modal is closed. If the
@@ -19133,7 +19664,9 @@ function skippedAccessRecently(){
 function onRemovedFromHub(){
   writeAccessMe(null);
   // Don't leave the team's glossary sitting on a phone that's been signed out.
-  try{ [GLOSSARY_CACHE_KEY, OUTBOX_KEY].forEach(k => localStorage.removeItem(k)); }catch(e){}
+  // That includes changes waiting or held on it: they hold team data too.
+  try{ [GLOSSARY_CACHE_KEY, OUTBOX_KEY, OUTBOX_HELD_KEY, OUTBOX_UNREADABLE_KEY].forEach(k => localStorage.removeItem(k)); }catch(e){}
+  OUTBOX = []; OUTBOX_HELD = [];
   if(hubAuth) hubAuth.signOut().catch(()=>{});
   showAccessLock('removed');
 }
