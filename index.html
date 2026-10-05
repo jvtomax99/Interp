@@ -5846,6 +5846,306 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
   .sec-fold-body.is-entering{ animation:none; }
   .sec-fold-chev, .sec-fold-toggle, .sec-fold-open{ transition:none; }
 }
+
+/* ---------- Team Chat, redesigned ----------
+   One screen that fits the phone: a slim header, the HIPAA line, one pinned
+   strip that opens on demand, then the thread, with the message box docked
+   just above the tab bar. Before this the box sat 120px below the screen
+   behind the tab bar, and two pinned notes filled the whole view.
+   Scoped to .tc so Ask the Hub, which shares .chat-panel, is untouched. */
+.tc{ display:flex; flex-direction:column; max-width:880px; }
+.tc-head{ display:flex; align-items:center; gap:var(--sp-2); margin:0 0 var(--sp-1); min-height:44px; }
+.tc-title{ display:flex; align-items:baseline; flex-wrap:wrap; column-gap:var(--sp-2); min-width:0; flex:1; }
+.tc-title h2{ font-family:var(--sans); font-size:var(--fs-t3); font-weight:650; letter-spacing:-.022em; margin:0; line-height:1.15; }
+.tc-sub{ font-size:var(--fs-cap); color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.tc-icon-btn{
+  width:44px; height:44px; flex-shrink:0; border-radius:50%; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink-soft); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.tc-icon-btn svg{ width:20px; height:20px; }
+.tc-icon-btn[aria-pressed="true"]{ color:var(--accent); background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent-2) 45%, var(--line)); }
+.tc-icon-btn:active, .tc-icon-btn.is-pressed{ transform:scale(.94); }
+.tc-icon-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+
+.tc-hipaa{
+  display:flex; align-items:center; gap:var(--sp-1); margin:0 0 var(--sp-2);
+  font-size:var(--fs-cap); color:#7A5D28; line-height:1.35;
+}
+.tc-hipaa svg{ width:14px; height:14px; flex-shrink:0; color:#B8923E; }
+:root[data-theme="dark"] .tc-hipaa{ color:#D9BE85; }
+:root[data-theme="dark"] .tc-hipaa svg{ color:#D9BE85; }
+
+/* Pinned: one line until opened. The newest pin is what shows. */
+.tc-pinned{ position:relative; z-index:8; margin:0 0 var(--sp-2); border-radius:var(--r-md); background:linear-gradient(140deg, #FBF3E3, #FAF7EF); box-shadow:inset 0 0 0 1px #E8D7B0; }
+:root[data-theme="dark"] .tc-pinned{ background:#2A2618; box-shadow:inset 0 0 0 1px #4A4127; }
+.tc-pinned-bar{
+  display:flex; align-items:center; gap:var(--sp-2); width:100%; min-height:44px; padding:0 var(--sp-3);
+  border:none; background:none; cursor:pointer; text-align:left; font-family:var(--sans); color:#4A3B18;
+  -webkit-tap-highlight-color:transparent;
+}
+:root[data-theme="dark"] .tc-pinned-bar{ color:#EADBB8; }
+.tc-pinned-bar > svg:first-child{ width:15px; height:15px; flex-shrink:0; color:#B8923E; }
+.tc-pinned-text{ flex:1; min-width:0; font-size:var(--fs-foot); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tc-pinned-count{ font-size:var(--fs-cap); font-weight:650; color:#8C6D2E; font-variant-numeric:tabular-nums; }
+:root[data-theme="dark"] .tc-pinned-count{ color:#D9BE85; }
+.tc-pinned-chev{ display:flex; width:16px; height:16px; color:#8C6D2E; transition:transform .2s var(--ease); }
+.tc-pinned-chev svg{ width:16px; height:16px; }
+.tc-pinned.is-open .tc-pinned-chev{ transform:rotate(180deg); }
+.tc-pinned-bar:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; border-radius:var(--r-md); }
+.tc-pinned-list{
+  /* Opens over the thread rather than pushing it down, so the message box
+     never moves off the screen. */
+  display:none; position:absolute; left:0; right:0; top:calc(100% - 6px);
+  padding:var(--sp-1) var(--sp-3) var(--sp-2); max-height:min(50vh, 360px); overflow:auto;
+  border-radius:0 0 var(--r-md) var(--r-md); background:inherit; background-color:#FAF5E9;
+  box-shadow:inset 0 0 0 1px #E8D7B0, var(--sh-2);
+}
+:root[data-theme="dark"] .tc-pinned-list{ background-color:#2A2618; box-shadow:inset 0 0 0 1px #4A4127, var(--sh-2); }
+.tc-pinned.is-open{ border-bottom-left-radius:0; border-bottom-right-radius:0; }
+.tc-pinned.is-open .tc-pinned-list{ display:block; }
+.tc-pin-row{ display:flex; align-items:flex-start; gap:var(--sp-2); padding:var(--sp-2) 0; border-top:1px solid #E8D7B0; }
+.tc-pin-row:first-child{ border-top:none; }
+:root[data-theme="dark"] .tc-pin-row{ border-top-color:#4A4127; }
+.tc-pin-row p{ flex:1; margin:0; font-size:var(--fs-foot); line-height:1.5; color:#4A3B18; }
+:root[data-theme="dark"] .tc-pin-row p{ color:#EADBB8; }
+.tc-pin-row small{ display:block; font-size:var(--fs-cap); color:#7A5D28; margin-top:2px; }
+:root[data-theme="dark"] .tc-pin-row small{ color:#C9AE78; }
+.tc-pin-actions{ display:flex; justify-content:flex-end; padding-top:var(--sp-1); border-top:1px solid #E8D7B0; }
+:root[data-theme="dark"] .tc-pin-actions{ border-top-color:#4A4127; }
+.tc-text-btn{
+  min-height:44px; padding:0 var(--sp-3); border:none; background:none; cursor:pointer; border-radius:999px;
+  font-family:var(--sans); font-size:var(--fs-foot); font-weight:650; color:#7A5D28;
+}
+:root[data-theme="dark"] .tc-text-btn{ color:#E3C88D; }
+.tc-text-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; }
+
+/* The panel: thread on top, composer docked under it. Its height is set by
+   fitChatPanel() to end just above the tab bar. */
+.tc .chat-panel.tc-panel{
+  height:auto; min-height:0; max-height:none; border-radius:var(--r-lg);
+  background:color-mix(in srgb, var(--paper) 55%, transparent);
+  box-shadow:inset 0 0 0 1px var(--line-soft);
+  overflow:hidden;
+}
+.tc-panel .chat-messages{ padding:var(--sp-2) var(--sp-3) var(--sp-3); gap:2px; overscroll-behavior:contain; }
+.tc-panel.is-dragging{ box-shadow:inset 0 0 0 2px var(--accent-2); background:var(--accent-soft); }
+.tc-drop-hint{
+  position:absolute; inset:0; z-index:5; display:none; align-items:center; justify-content:center;
+  font-family:var(--sans); font-weight:650; font-size:var(--fs-sub); color:var(--accent); pointer-events:none;
+}
+.tc-panel.is-dragging .tc-drop-hint{ display:flex; }
+
+/* Day and unread markers as quiet centred chips. */
+.tc-panel .chat-day{ justify-content:center; margin:var(--sp-4) 0 var(--sp-1); }
+.tc-panel .chat-day::before, .tc-panel .chat-day::after{ display:none; }
+.tc-panel .chat-day span{
+  padding:3px 10px; border-radius:999px; background:var(--paper); box-shadow:inset 0 0 0 1px var(--line-soft);
+  font-size:11px; letter-spacing:.03em; color:var(--ink-soft);
+}
+
+/* Bubbles */
+.tc-panel .chat-bubble-row{ max-width:min(82%, 560px); gap:var(--sp-1); }
+.tc-panel .chat-bubble-row.run-first{ margin-top:var(--sp-2); }
+.tc-panel .chat-avatar{ width:30px; height:30px; margin-bottom:2px; font-size:11px; }
+.tc-panel .chat-avatar-gap{ width:30px; }
+.tc-panel .chat-author{
+  font-size:var(--fs-cap); font-weight:650; margin:0 var(--sp-2) 3px;
+  color:color-mix(in srgb, var(--who, var(--ink-soft)) 72%, var(--ink));
+}
+.tc-panel .chat-bubble{
+  position:relative; padding:8px 12px 7px; border-radius:20px; font-size:15px; line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.tc-panel .chat-bubble-row.them .chat-bubble{
+  background:var(--paper); box-shadow:0 1px 1px rgba(20,43,67,0.05), inset 0 0 0 1px var(--line-soft);
+}
+.tc-panel .chat-bubble-row.me .chat-bubble{
+  /* Fixed brand blues in both themes: white text on them is 5:1 or better.
+     The old accent-2 start was 3.7:1, and 2.3:1 in dark mode. */
+  background:linear-gradient(160deg, #1A6DB5, #0F5FA6);
+  box-shadow:0 6px 14px -10px rgba(15,95,166,0.7);
+}
+/* The run's last bubble keeps a small tail corner; the rest stay round. */
+.tc-panel .chat-bubble-row.them.run-last .chat-bubble{ border-bottom-left-radius:6px; }
+.tc-panel .chat-bubble-row.me.run-last .chat-bubble{ border-bottom-right-radius:6px; }
+.tc-panel .chat-bubble-row.them:not(.run-first) .chat-bubble{ border-top-left-radius:8px; }
+.tc-panel .chat-bubble-row.me:not(.run-first) .chat-bubble{ border-top-right-radius:8px; }
+.tc-panel .chat-bubble-row.mentioned.them .chat-bubble{
+  background:var(--accent-soft); box-shadow:inset 3px 0 0 var(--accent-2), inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 30%, transparent);
+}
+
+/* Time sits inside the bubble, on the last line, so a message costs one
+   block instead of a bubble plus a row of mono text under it. */
+.tc-meta{
+  float:right; display:inline-flex; align-items:center; gap:3px; position:relative; top:5px;
+  margin:0 -3px 0 var(--sp-2); font-size:11px; line-height:1; font-variant-numeric:tabular-nums;
+  color:var(--ink-soft); white-space:nowrap; pointer-events:none;
+}
+.chat-bubble-row.me .tc-meta{ color:rgba(255,255,255,.85); }
+.tc-meta svg{ width:12px; height:12px; }
+.tc-meta.on-media{
+  position:absolute; right:8px; bottom:8px; top:auto; float:none; margin:0; padding:3px 7px; border-radius:999px;
+  background:rgba(12,18,30,.55); color:#fff;
+}
+.tc-panel .chat-meta-row{ display:none; }
+
+/* Photos. Sized from the stored width and height, so a picture arriving
+   does not shove the thread around while it decodes. */
+.tc-panel .chat-bubble.has-media{ padding:3px; width:min-content; max-width:100%; }
+.tc-panel .chat-bubble.has-media .tc-caption{ padding:5px 9px 4px; }
+.tc-media{ display:grid; gap:3px; border-radius:17px; overflow:hidden; position:relative; width:min(270px, 62vw); }
+.tc-media.n2, .tc-media.n3, .tc-media.n4{ grid-template-columns:1fr 1fr; }
+.tc-media.n3 .tc-photo:first-child{ grid-column:1 / -1; aspect-ratio:2 / 1; }
+.tc-photo{
+  position:relative; display:block; width:100%; padding:0; margin:0; border:none; cursor:zoom-in;
+  background:color-mix(in srgb, var(--line) 70%, transparent); aspect-ratio:1 / 1; overflow:hidden;
+  -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.tc-media.n1 .tc-photo{ aspect-ratio:var(--ar, 4 / 3); max-height:340px; }
+.tc-photo img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; -webkit-user-select:none; user-select:none; }
+.tc-photo:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; }
+.tc-photo .tc-more{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(12,18,30,.5); color:#fff; font-family:var(--sans); font-size:22px; font-weight:650;
+}
+.tc-files{ display:flex; flex-direction:column; gap:var(--sp-1); margin-top:var(--sp-1); }
+.chat-bubble-row.me .tc-files .attach-chip.attach-file{ background:rgba(255,255,255,.18); color:#fff; }
+
+/* Reactions tuck under the bubble's edge. */
+.tc-panel .chat-reactions{ margin-top:-6px; padding:0 var(--sp-2); position:relative; z-index:1; }
+.tc-panel .chat-reaction{ min-height:28px; box-shadow:0 1px 2px rgba(20,43,67,0.08); }
+
+/* Actions, opened by tapping a message. */
+.tc-panel .chat-actions{
+  margin-top:var(--sp-1); padding:var(--sp-1); border-radius:var(--r-lg); border:none;
+  box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft);
+}
+.tc-panel .chat-act-emoji{ min-width:44px; min-height:44px; font-size:21px; }
+.tc-panel .chat-act{ min-height:44px; font-size:var(--fs-foot); }
+
+/* Typing: a bubble of its own at the foot of the thread. Height reserved. */
+.tc-panel .typing-indicator{ height:26px; padding:0 var(--sp-3); font-size:var(--fs-cap); }
+.tc-panel .typing-dots{ padding:6px 9px; border-radius:999px; background:var(--paper); box-shadow:inset 0 0 0 1px var(--line-soft); }
+
+/* Composer */
+.tc-composer{ padding:var(--sp-1) var(--sp-2) var(--sp-2); border-top:1px solid var(--line-soft); background:color-mix(in srgb, var(--paper) 85%, transparent);
+  -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); }
+.tc-composer .chat-compose-bar.show{ margin:0 0 var(--sp-1); border-radius:var(--r-md); }
+.tc-row{ display:flex; align-items:flex-end; gap:var(--sp-1); }
+.tc-field{
+  flex:1; min-width:0; display:flex; align-items:flex-end; border-radius:22px;
+  background:var(--paper); box-shadow:inset 0 0 0 1px var(--line);
+  transition:box-shadow .15s var(--ease);
+}
+.tc-field:focus-within{ box-shadow:inset 0 0 0 1.5px var(--accent-2), 0 0 0 4px var(--accent-soft); }
+.tc-field textarea{
+  flex:1; min-width:0; resize:none; border:none; outline:none; background:transparent; color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.4; padding:11px 4px 11px 16px;
+  max-height:132px; min-height:44px; overflow-y:auto; display:block;
+}
+.tc-field textarea::placeholder{ color:var(--ink-faint); }
+.tc-field .tc-in-btn{
+  width:44px; height:44px; flex-shrink:0; border:none; background:none; cursor:pointer; border-radius:50%;
+  color:var(--ink-soft); display:flex; align-items:center; justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.tc-field .tc-in-btn svg{ width:21px; height:21px; }
+.tc-field .tc-in-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-4px; }
+.tc-row > .tc-icon-btn{ box-shadow:none; background:transparent; border-color:transparent; }
+.tc-row > .tc-icon-btn:hover{ background:var(--bg-hi); }
+.tc-send{
+  width:44px; height:44px; flex-shrink:0; border-radius:50%; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  background:linear-gradient(140deg, var(--accent-2), var(--accent));
+  box-shadow:0 8px 16px -8px rgba(15,95,166,.6);
+  transition:transform .15s var(--ease), filter .15s var(--ease), opacity .15s var(--ease);
+}
+.tc-send svg{ width:19px; height:19px; margin-left:-2px; }
+.tc-send:disabled{ background:var(--line); box-shadow:none; cursor:default; }
+.tc-send:disabled svg path{ stroke:var(--ink-faint); }
+.tc-send:not(:disabled):active, .tc-send.is-pressed{ transform:scale(.92); }
+.tc-send:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.tc-send.is-busy svg{ display:none; }
+.tc-send.is-busy::after{
+  content:''; width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff;
+  animation:tcSpin .8s linear infinite;
+}
+@keyframes tcSpin{ to{ transform:rotate(360deg); } }
+
+/* The photo tray: what you are about to send, with upload progress. */
+.tc-tray{ display:flex; gap:var(--sp-2); overflow-x:auto; padding:var(--sp-1) 2px var(--sp-2); scrollbar-width:none; }
+.tc-tray::-webkit-scrollbar{ display:none; }
+.tc-tray:empty{ display:none; }
+.tc-thumb{
+  position:relative; flex:0 0 auto; width:72px; height:72px; border-radius:var(--r-md); overflow:visible;
+  background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line);
+}
+.tc-thumb-img{ width:100%; height:100%; border-radius:var(--r-md); overflow:hidden; display:block; }
+.tc-thumb-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+.tc-thumb.is-file .tc-thumb-img{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:6px; color:var(--accent); }
+.tc-thumb.is-file .tc-thumb-img svg{ width:24px; height:24px; }
+.tc-thumb.is-file .tc-thumb-img span{ font-size:10.5px; color:var(--ink-soft); max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tc-thumb-state{
+  position:absolute; inset:0; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center;
+  background:rgba(12,18,30,.38); color:#fff; border:none; padding:0; font:inherit;
+}
+.tc-thumb.is-done .tc-thumb-state{ display:none; }
+.tc-thumb-state svg{ width:30px; height:30px; }
+.tc-thumb.is-error .tc-thumb-state{ background:color-mix(in srgb, var(--danger) 70%, rgba(12,18,30,.4)); cursor:pointer; }
+.tc-ring-bg{ stroke:rgba(255,255,255,.35); }
+.tc-ring{ stroke:#fff; transition:stroke-dashoffset .2s linear; transform:rotate(-90deg); transform-origin:50% 50%; }
+/* 24px badge, 44px target: the hit area reaches past the corner. */
+.tc-thumb-x{
+  position:absolute; top:-7px; right:-7px; width:24px; height:24px; border-radius:50%; border:2px solid var(--paper);
+  background:var(--ink); color:var(--paper); cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center;
+}
+.tc-thumb-x::before{ content:''; position:absolute; inset:-10px; }
+.tc-thumb-x svg{ width:12px; height:12px; }
+.tc-thumb-x:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
+.tc-thumb-add{
+  flex:0 0 auto; width:72px; height:72px; border-radius:var(--r-md); border:1.5px dashed var(--line);
+  background:transparent; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.tc-thumb-add svg{ width:22px; height:22px; }
+.tc-tray-note{ font-size:var(--fs-cap); color:var(--ink-soft); padding:0 2px var(--sp-1); }
+.tc-tray-note.is-problem{ color:var(--danger); }
+
+/* Lightbox: step through a message's photos. */
+.lightbox-nav{
+  position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%; border:none;
+  background:rgba(255,255,255,.16); color:#fff; cursor:pointer; display:none; align-items:center; justify-content:center; z-index:2;
+}
+.lightbox-nav svg{ width:22px; height:22px; }
+.lightbox-nav.prev{ left:12px; } .lightbox-nav.next{ right:12px; }
+.lightbox.is-gallery .lightbox-nav{ display:flex; }
+.lightbox-nav:disabled{ opacity:.3; cursor:default; }
+.lightbox-count{ font-variant-numeric:tabular-nums; opacity:.8; margin-left:var(--sp-2); }
+
+/* The chat screen fills the window; nothing to scroll past below it. */
+.main:has(> #content > .tc){ padding-bottom:24px; }
+@media (max-width:900px){
+  /* The chat screen fills the space between the bars; nothing to scroll past. */
+  .main:has(> #content > .tc){ padding-bottom:0; }
+  #content:has(> .tc){ padding-bottom:0; }
+  .tc-head{ margin-top:-12px; }
+  /* While typing, the strips step aside so the thread keeps its room. */
+  body.kb-open .tc-hipaa, body.kb-open .tc-pinned{ display:none; }
+}
+/* A phone on its side has about 240px between the bars: the pinned strip
+   steps aside and the header tightens so the thread and box still fit. */
+@media (max-height:500px) and (max-width:1000px){
+  .tc-pinned{ display:none; }
+  .tc-head{ min-height:36px; margin-bottom:0; }
+  .tc-hipaa{ margin-bottom:var(--sp-1); }
+}
+@media (prefers-reduced-motion:reduce){
+  .tc-send, .tc-icon-btn, .tc-pinned-chev, .tc-ring{ transition:none; }
+  .tc-send.is-busy::after{ animation-duration:2.4s; }
+}
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -6229,8 +6529,10 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
   </div>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <button class="lightbox-close" title="Close" onclick="closeLightbox(event, true)">✕</button>
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)" role="dialog" aria-modal="true" aria-label="Photo">
+  <button class="lightbox-close" title="Close" aria-label="Close" onclick="closeLightbox(event, true)">✕</button>
+  <button type="button" class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous photo" onclick="event.stopPropagation(); stepLightbox(-1)"></button>
+  <button type="button" class="lightbox-nav next" id="lightboxNext" aria-label="Next photo" onclick="event.stopPropagation(); stepLightbox(1)"></button>
   <img id="lightboxImg" src="" alt="">
   <div class="lightbox-bar">
     <span class="lightbox-name" id="lightboxName"></span>
@@ -8050,7 +8352,7 @@ function renderOnboardingStep(){
 }
 
 let pendingAttachTermId = null;
-let pendingChatAttachment = null;
+let pendingChatAttachments = [];   // the photo tray, see addChatFiles()
 
 /* ============ Storage ============ */
 function genId(){
@@ -9407,7 +9709,8 @@ function startAnnouncementsListener(){
   announcementsListenerStarted = true;
   db.collection('announcements').orderBy('createdAt','desc').onSnapshot(snap=>{
     ANNOUNCEMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if(activeCategory === 'chat') renderContent();
+    // Only the strip: rebuilding the screen used to wipe a half-typed message.
+    if(activeCategory === 'chat'){ renderPinnedStrip(); fitChatPanel(); }
   }, err=> console.error('announcements listener error:', err));
 }
 
@@ -9471,6 +9774,124 @@ function renderAnnouncements(){
   }
   html += `</div>`;
   return html;
+}
+
+/* Team Chat's pinned strip: one line with the newest pin until it is opened.
+   Two pins used to take 300px, the whole phone screen above the thread. */
+let tcPinnedOpen = false;
+function renderPinnedStrip(){
+  const host = document.getElementById('tcPinned');
+  if(!host) return;
+  if(!ANNOUNCEMENTS.length){
+    host.innerHTML = `<div class="tc-pinned${tcPinnedOpen ? ' is-open' : ''}"><button type="button" class="tc-pinned-bar" onclick="openAnnouncementModal()">
+      ${ICON_PIN}<span class="tc-pinned-text">Pin an update for the team</span><span class="tc-pinned-chev">${ICON_PLUS}</span></button></div>`;
+    return;
+  }
+  const top = ANNOUNCEMENTS[0];
+  const rows = ANNOUNCEMENTS.map(a => `<div class="tc-pin-row"><p>${escapeHtml(a.text)}<small>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}</small></p>
+      <button type="button" class="tc-text-btn" onclick="deleteAnnouncement('${a.id}')" aria-label="Unpin: ${escapeAttr(a.text.slice(0, 60))}">Unpin</button></div>`).join('');
+  host.innerHTML = `<div class="tc-pinned${tcPinnedOpen ? ' is-open' : ''}">
+    <button type="button" class="tc-pinned-bar" onclick="toggleTcPinned()" aria-expanded="${tcPinnedOpen}" aria-controls="tcPinnedList">
+      ${ICON_PIN}<span class="tc-pinned-text">${escapeHtml(top.text)}</span>
+      ${ANNOUNCEMENTS.length > 1 ? `<span class="tc-pinned-count">${ANNOUNCEMENTS.length} pinned</span>` : ''}
+      <span class="tc-pinned-chev">${ICON_CHEVRON_DOWN}</span>
+    </button>
+    <div class="tc-pinned-list" id="tcPinnedList">${rows}
+      <div class="tc-pin-actions"><button type="button" class="tc-text-btn" onclick="openAnnouncementModal()">+ Pin something</button></div>
+    </div>
+  </div>`;
+}
+function toggleTcPinned(){
+  tcPinnedOpen = !tcPinnedOpen;
+  renderPinnedStrip();
+}
+// A tap anywhere else, or Escape, folds the list away again.
+document.addEventListener('pointerdown', e => {
+  if(!tcPinnedOpen || !e.target.closest || e.target.closest('.tc-pinned') || e.target.closest('.overlay')) return;
+  tcPinnedOpen = false; renderPinnedStrip();
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && tcPinnedOpen){ tcPinnedOpen = false; renderPinnedStrip(); }
+});
+
+function syncChatNotifyButton(){
+  const b = document.getElementById('chatNotifyBtn');
+  if(!b) return;
+  b.innerHTML = ICON_BELL_TC;
+  b.setAttribute('aria-pressed', notifyEnabled ? 'true' : 'false');
+  b.setAttribute('aria-label', notifyEnabled ? 'Chat notifications on' : 'Chat notifications off');
+  b.title = notifyEnabled ? 'Notifications on. Tap to turn off.' : 'Get notified about new messages';
+}
+
+/* Sizes the thread to end just above the tab bar (or the window's foot on
+   desktop), the same way Ask the Hub does, so the message box is always on
+   screen without scrolling the page. */
+function fitChatPanel(){
+  const panel = document.getElementById('tcPanel');
+  if(!panel) return;
+  const bar = document.querySelector('.tabbar');
+  const kb = document.body.classList.contains('kb-open');
+  const barRect = !kb && bar && getComputedStyle(bar).display !== 'none' ? bar.getBoundingClientRect() : null;
+  const vv = window.visualViewport;
+  const visBottom = vv ? vv.offsetTop + vv.height : innerHeight;
+  const top = panel.getBoundingClientRect().top;
+  let bottom = barRect && barRect.top > 0 && barRect.top < visBottom ? barRect.top - 9 : visBottom - (innerWidth > 900 ? 24 : 9);
+  // Dr. Smiley rides on top of the active tab, his head about 30px above
+  // it; keep the message box clear of him. (He slides in after this runs,
+  // so his own position can't be measured yet.)
+  const rider = barRect && document.querySelector('.smiley-rider');
+  if(rider && getComputedStyle(rider).display !== 'none') bottom = Math.min(bottom, barRect.top - 34);
+  const box = document.getElementById('chatMessages');
+  const stick = box ? chatAtBottom(box) : true;
+  panel.style.height = Math.max(innerHeight < 500 ? 150 : 260, Math.round(bottom - top)) + 'px';
+  if(box && stick) box.scrollTop = box.scrollHeight;
+}
+window.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatPanel(); }, { passive:true });
+if(window.visualViewport) window.visualViewport.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatPanel(); }, { passive:true });
+
+/* The message box grows with what you write, up to about five lines. */
+let chatDraft = '';
+function autosizeChatInput(){
+  const t = document.getElementById('chatInput');
+  if(!t || t.tagName !== 'TEXTAREA') return;
+  t.style.height = 'auto';
+  t.style.height = Math.min(t.scrollHeight, 132) + 'px';
+}
+function updateChatSendState(){
+  const btn = document.getElementById('chatSendBtn');
+  const box = document.getElementById('chatInput');
+  if(!btn || !box) return;
+  const hasText = !!box.value.trim();
+  const hasFiles = pendingChatAttachments.length > 0;
+  btn.disabled = !(hasText || hasFiles);
+  const cam = document.getElementById('chatCameraBtn');
+  if(cam) cam.hidden = hasText;           // the camera steps aside once you type, like other messengers
+}
+
+/* Photos dragged onto the thread, or pasted into the box, join the tray. */
+function wireChatDrop(){
+  const panel = document.getElementById('tcPanel');
+  const box = document.getElementById('chatInput');
+  if(panel && !panel.dataset.drop){
+    panel.dataset.drop = '1';
+    let depth = 0;
+    const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+    panel.addEventListener('dragenter', e => { if(!hasFiles(e)) return; e.preventDefault(); depth++; panel.classList.add('is-dragging'); });
+    panel.addEventListener('dragover', e => { if(hasFiles(e)) e.preventDefault(); });
+    panel.addEventListener('dragleave', () => { depth = Math.max(0, depth - 1); if(!depth) panel.classList.remove('is-dragging'); });
+    panel.addEventListener('drop', e => {
+      if(!hasFiles(e)) return;
+      e.preventDefault(); depth = 0; panel.classList.remove('is-dragging');
+      addChatFiles(Array.from(e.dataTransfer.files || []));
+    });
+  }
+  if(box && !box.dataset.paste){
+    box.dataset.paste = '1';
+    box.addEventListener('paste', e => {
+      const files = Array.from((e.clipboardData && e.clipboardData.files) || []).filter(f => f.type.startsWith('image/'));
+      if(files.length){ e.preventDefault(); addChatFiles(files); }
+    });
+  }
 }
 
 function startActivityListener(){
@@ -9689,33 +10110,209 @@ async function deleteAttachment(id){
   }
 }
 
-/* ---- Chat / note attachment picking (the record itself is embedded —
-   chat messages and notes already each live in their own document,
-   so no separate collection is needed here). ---- */
-async function handleChatFileSelected(event){
-  const file = event.target.files && event.target.files[0];
-  event.target.value = '';
-  if(!file) return;
-  try{
-    pendingChatAttachment = await readFileAsAttachment(file);
-    renderChatAttachPreview();
-  }catch(err){
-    showToast(err.message || 'Could not attach that file.');
+/* ---- Chat photos -----------------------------------------------------
+   A photo used to be uploaded the moment it was picked, with nothing on
+   screen until it finished: on hospital Wi-Fi that was several seconds of
+   nothing, a Send that went without the photo, one file at a time, and a
+   60px thumbnail with an 18px remove button.
+
+   Now each photo goes into a tray straight away from a local preview, is
+   shrunk and stripped of its metadata (camera photos carry GPS position) on
+   the phone, and uploads in the background with a progress ring. Send waits
+   for anything still uploading. A failed upload stays in the tray to retry.
+   Removing one before sending also removes its uploaded file. Up to
+   CHAT_TRAY_MAX per message. -------------------------------------------- */
+const CHAT_TRAY_MAX = 6;
+const CHAT_PHOTO_MAX_DIM = 1600;
+
+function chatFileId(){ return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+// Decodes, applies the camera's rotation, scales the long edge to maxDim and
+// re-encodes as JPEG. Re-encoding drops EXIF, including location.
+async function prepareChatImage(file, maxDim){
+  let src = null, w = 0, h = 0, close = ()=>{};
+  if(window.createImageBitmap){
+    try{
+      src = await createImageBitmap(file, { imageOrientation:'from-image' });
+      w = src.width; h = src.height; close = ()=>{ try{ src.close(); }catch(e){} };
+    }catch(e){ src = null; }
   }
+  if(!src){
+    const url = URL.createObjectURL(file);
+    try{
+      src = await new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = ()=> resolve(img);
+        img.onerror = ()=> reject(new Error('This photo format can’t be read here. Try a JPEG or PNG.'));
+        img.src = url;
+      });
+    }finally{ setTimeout(()=> URL.revokeObjectURL(url), 0); }
+    w = src.naturalWidth; h = src.naturalHeight;
+  }
+  if(!w || !h){ close(); throw new Error('Could not read that photo.'); }
+  const scale = Math.min(1, maxDim / Math.max(w, h));
+  const cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = cw; canvas.height = ch;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch);      // transparent PNGs get a white ground, not black
+  ctx.drawImage(src, 0, 0, cw, ch);
+  close();
+  const blob = await new Promise((resolve, reject)=> canvas.toBlob(b => b ? resolve(b) : reject(new Error('Could not process that photo.')), 'image/jpeg', 0.82));
+  return { blob, width: cw, height: ch };
+}
+
+function handleChatFileSelected(event){
+  const files = event.target.files ? Array.from(event.target.files) : [];
+  event.target.value = '';
+  addChatFiles(files);
+}
+
+function addChatFiles(files){
+  if(!files || !files.length) return;
+  if(!whoAmI()){ requireName(()=> addChatFiles(files)); return; }
+  const room = CHAT_TRAY_MAX - pendingChatAttachments.length;
+  if(room <= 0){ showToast(`Up to ${CHAT_TRAY_MAX} at a time. Send these first.`); return; }
+  const usable = [];
+  let skipped = 0;
+  files.forEach(f => {
+    const ok = f && (f.type.startsWith('image/') || f.type === 'application/pdf');
+    if(ok && !(f.type === 'application/pdf' && f.size > MAX_PDF_BYTES)) usable.push(f); else skipped++;
+  });
+  const take = usable.slice(0, room);
+  if(usable.length > room) showToast(`Added ${room}. Up to ${CHAT_TRAY_MAX} per message.`);
+  else if(skipped) showToast(skipped === 1 ? 'That file isn’t a photo or PDF, so it was left out.' : `${skipped} files weren’t photos or PDFs, so they were left out.`);
+  take.forEach(file => {
+    const isImage = file.type.startsWith('image/');
+    const item = { id: chatFileId(), file, name: file.name || (isImage ? 'photo.jpg' : 'file.pdf'), isImage,
+                   preview: isImage ? URL.createObjectURL(file) : '', status: 'waiting', progress: 0, att: null, task: null, error: '' };
+    pendingChatAttachments.push(item);
+    startChatUpload(item);
+  });
+  renderChatAttachPreview();
+  updateChatSendState();
+}
+
+async function startChatUpload(item){
+  if(!pendingChatAttachments.includes(item)) return;
+  if(!storage){ item.status = 'error'; item.error = 'Photo storage isn’t set up.'; renderChatAttachPreview(); return; }
+  if(navigator.onLine === false){ item.status = 'waiting'; item.error = ''; renderChatAttachPreview(); return; }
+  item.status = 'uploading'; item.progress = 0; item.error = '';
+  renderChatAttachPreview(); updateChatSendState();
+  try{
+    let blob = item.file, width = null, height = null, mimeType = item.file.type;
+    if(item.isImage){
+      const prepared = await prepareChatImage(item.file, CHAT_PHOTO_MAX_DIM);
+      blob = prepared.blob; width = prepared.width; height = prepared.height; mimeType = 'image/jpeg';
+    }
+    if(!pendingChatAttachments.includes(item)) return;          // removed while it was being prepared
+    const safe = (item.name || 'file').replace(/[^\w.\-]+/g, '_').slice(-60);
+    const storagePath = `attachments/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${item.isImage ? safe.replace(/\.\w+$/, '') + '.jpg' : safe}`;
+    const task = storage.ref().child(storagePath).put(blob, { contentType: mimeType });
+    item.task = task; item.storagePath = storagePath;
+    if(task && typeof task.on === 'function'){
+      task.on('state_changed', snap => {
+        if(snap && snap.totalBytes){ item.progress = snap.bytesTransferred / snap.totalBytes; paintChatTrayProgress(item); }
+      }, ()=>{}, ()=>{});
+    }
+    const snap = await task;
+    const url = await snap.ref.getDownloadURL();
+    if(!pendingChatAttachments.includes(item)){
+      // Removed while uploading: don't leave the file behind.
+      storage.ref().child(storagePath).delete().catch(()=>{});
+      return;
+    }
+    item.att = { filename: item.name, mimeType, dataUrl: url, storagePath };
+    if(width && height){ item.att.width = width; item.att.height = height; }
+    item.status = 'done'; item.progress = 1; item.task = null;
+  }catch(err){
+    if(!pendingChatAttachments.includes(item)) return;
+    item.status = 'error'; item.task = null;
+    item.error = (err && err.message && !/storage\//.test(err.code || '')) ? err.message : 'Upload failed. Tap to try again.';
+  }
+  renderChatAttachPreview(); updateChatSendState();
+  const done = chatTrayWaiters.splice(0);
+  done.forEach(fn => fn());
+}
+
+function retryChatUpload(id){
+  const item = pendingChatAttachments.find(x => x.id === id);
+  if(item && item.status !== 'uploading') startChatUpload(item);
+}
+
+function removeChatTrayItem(id){
+  const item = pendingChatAttachments.find(x => x.id === id);
+  if(!item) return;
+  pendingChatAttachments = pendingChatAttachments.filter(x => x !== item);
+  if(item.task && typeof item.task.cancel === 'function'){ try{ item.task.cancel(); }catch(e){} }
+  if(item.att && item.att.storagePath && storage) storage.ref().child(item.att.storagePath).delete().catch(()=>{});
+  if(item.preview) setTimeout(()=> URL.revokeObjectURL(item.preview), 1000);
+  renderChatAttachPreview(); updateChatSendState();
+  const done = chatTrayWaiters.splice(0);
+  done.forEach(fn => fn());
+}
+
+// Called after a message is sent: the files now belong to it.
+function clearChatTray(){
+  pendingChatAttachments.forEach(i => { if(i.preview) setTimeout(()=> URL.revokeObjectURL(i.preview), 4000); });
+  pendingChatAttachments = [];
+  renderChatAttachPreview(); updateChatSendState();
+}
+
+// Resolves when nothing in the tray is still uploading.
+let chatTrayWaiters = [];
+function chatTraySettled(){
+  return new Promise(resolve => {
+    const check = ()=>{
+      if(!pendingChatAttachments.some(i => i.status === 'uploading')) resolve();
+      else chatTrayWaiters.push(check);
+    };
+    check();
+  });
+}
+
+const TC_RING_C = 2 * Math.PI * 13;
+function paintChatTrayProgress(item){
+  const ring = document.querySelector(`.tc-thumb[data-fid="${item.id}"] .tc-ring`);
+  if(ring) ring.style.strokeDashoffset = String(TC_RING_C * (1 - Math.max(0.04, Math.min(1, item.progress))));
 }
 
 function renderChatAttachPreview(){
   const wrap = document.getElementById('chatAttachPreview');
   if(!wrap) return;
-  wrap.innerHTML = pendingChatAttachment
-    ? attachmentChipHtml(pendingChatAttachment, 'removeChatAttachment()')
-    : '';
+  if(!pendingChatAttachments.length){ wrap.innerHTML = ''; return; }
+  const thumbs = pendingChatAttachments.map(i => {
+    const label = escapeAttr(i.name);
+    const img = i.isImage
+      ? `<span class="tc-thumb-img"><img src="${escapeAttr(i.preview)}" alt=""></span>`
+      : `<span class="tc-thumb-img">${ICON_PDF}<span>${escapeHtml(i.name)}</span></span>`;
+    let state = '';
+    if(i.status === 'uploading' || i.status === 'waiting'){
+      const off = TC_RING_C * (1 - Math.max(0.04, Math.min(1, i.progress)));
+      state = `<span class="tc-thumb-state" aria-hidden="true"><svg viewBox="0 0 32 32"><circle class="tc-ring-bg" cx="16" cy="16" r="13" fill="none" stroke-width="3"/><circle class="tc-ring" cx="16" cy="16" r="13" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="${TC_RING_C.toFixed(2)}" style="stroke-dashoffset:${off.toFixed(2)}"/></svg></span>`;
+    }else if(i.status === 'error'){
+      state = `<button type="button" class="tc-thumb-state" onclick="retryChatUpload('${i.id}')" aria-label="Try uploading ${label} again" title="${escapeAttr(i.error || 'Upload failed. Tap to try again.')}">${ICON_RETRY_TC}</button>`;
+    }
+    return `<div class="tc-thumb is-${i.status}${i.isImage ? '' : ' is-file'}" data-fid="${i.id}">
+      ${img}${state}
+      <button type="button" class="tc-thumb-x" onclick="removeChatTrayItem('${i.id}')" aria-label="Remove ${label}">${ICON_X_TC}</button>
+    </div>`;
+  }).join('');
+  const add = pendingChatAttachments.length < CHAT_TRAY_MAX
+    ? `<button type="button" class="tc-thumb-add" onclick="document.getElementById('chatFileInput').click()" aria-label="Add more photos">${ICON_PLUS}</button>` : '';
+  const failed = pendingChatAttachments.filter(i => i.status === 'error').length;
+  const waiting = pendingChatAttachments.filter(i => i.status === 'waiting').length;
+  const note = failed
+    ? `<div class="tc-tray-note is-problem" role="status">${failed === 1 ? 'One photo didn’t upload.' : `${failed} photos didn’t upload.`} Tap it to try again, or remove it.</div>`
+    : waiting ? `<div class="tc-tray-note" role="status">You’re offline. Photos upload when the connection is back.</div>` : '';
+  wrap.innerHTML = `<div class="tc-tray">${thumbs}${add}</div>${note}`;
+  if(activeCategory === 'chat') fitChatPanel();
 }
 
-function removeChatAttachment(){
-  pendingChatAttachment = null;
-  renderChatAttachPreview();
-}
+// Back online: anything that was waiting starts uploading.
+window.addEventListener('online', ()=>{
+  pendingChatAttachments.filter(i => i.status === 'waiting').forEach(startChatUpload);
+});
 
 /* Under "Oncology, Hematology & Leukemia" every child was labelled
    "… Oncology" — the word carried no information there, but it doubled the
@@ -9816,7 +10413,58 @@ function speakText(btn, text, lang){
    decide whether autofocusing a text field is helpful or intrusive —
    on touch devices, focusing an input pops the on-screen keyboard. */
 /* ---------- Image lightbox ---------- */
+// A set of photos to step through (one chat message's), or null for one.
+let lightboxSet = null;
+function openChatPhotos(mid, index){
+  const m = CHAT_MESSAGES.find(x => x.id === mid);
+  if(!m) return;
+  const photos = chatAttachmentsOf(m).filter(a => (a.mimeType || '').startsWith('image/'));
+  if(!photos.length) return;
+  const items = photos.map(a => ({ url: a.dataUrl, name: a.filename || 'photo.jpg' }));
+  const i = Math.max(0, Math.min(items.length - 1, index || 0));
+  openLightbox(items[i].url, items[i].name);
+  if(items.length > 1){ lightboxSet = { items, i }; paintLightboxSet(); }
+}
+function paintLightboxSet(){
+  const box = document.getElementById('lightbox');
+  if(!box || !lightboxSet) return;
+  const { items, i } = lightboxSet;
+  box.classList.add('is-gallery');
+  const img = document.getElementById('lightboxImg');
+  img.src = items[i].url;
+  const name = document.getElementById('lightboxName');
+  if(name) name.innerHTML = `${escapeHtml(items[i].name)}<span class="lightbox-count">${i + 1} / ${items.length}</span>`;
+  const dl = document.getElementById('lightboxDownload');
+  if(dl){ dl.href = items[i].url; dl.setAttribute('download', items[i].name); }
+  const prev = document.getElementById('lightboxPrev'), next = document.getElementById('lightboxNext');
+  if(prev){ prev.innerHTML = ICON_CHEV_L_TC; prev.disabled = i === 0; }
+  if(next){ next.innerHTML = ICON_CHEV_R_TC; next.disabled = i === items.length - 1; }
+}
+function stepLightbox(d){
+  if(!lightboxSet) return;
+  const n = lightboxSet.i + d;
+  if(n < 0 || n >= lightboxSet.items.length) return;
+  lightboxSet.i = n;
+  paintLightboxSet();
+}
+(function(){
+  let x0 = null, y0 = null;
+  document.addEventListener('touchstart', e => {
+    if(!lightboxSet || !e.target.closest || !e.target.closest('#lightbox')) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, { passive:true });
+  document.addEventListener('touchend', e => {
+    if(x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    x0 = null;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) stepLightbox(dx < 0 ? 1 : -1);
+  }, { passive:true });
+})();
+
 function openLightbox(url, filename){
+  lightboxSet = null;
+  const lbx = document.getElementById('lightbox');
+  if(lbx) lbx.classList.remove('is-gallery');
   const box = document.getElementById('lightbox');
   const img = document.getElementById('lightboxImg');
   const name = document.getElementById('lightboxName');
@@ -9837,7 +10485,8 @@ function closeLightbox(event, force){
   if(!force && event && event.target && event.target.closest && event.target.closest('.lightbox-bar')) return;
   const box = document.getElementById('lightbox');
   if(!box) return;
-  box.classList.remove('show');
+  box.classList.remove('show', 'is-gallery');
+  lightboxSet = null;
   document.body.style.overflow = '';
   const img = document.getElementById('lightboxImg');
   if(img) img.src = '';
@@ -9847,6 +10496,10 @@ document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape'){
     const box = document.getElementById('lightbox');
     if(box && box.classList.contains('show')) closeLightbox(null, true);
+  }
+  if((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && lightboxSet){
+    const box = document.getElementById('lightbox');
+    if(box && box.classList.contains('show')) stepLightbox(e.key === 'ArrowLeft' ? -1 : 1);
   }
 });
 
@@ -9862,8 +10515,8 @@ async function deleteChatMessage(id){
   try{
     await db.collection('team-chat').doc(id).delete();
     // Clean up an attached file too, so Storage doesn't accumulate orphans.
-    if(storage && msg && msg.attachment && msg.attachment.storagePath){
-      storage.ref().child(msg.attachment.storagePath).delete().catch(()=>{});
+    if(storage && msg){
+      chatAttachmentsOf(msg).forEach(a => { if(a.storagePath) storage.ref().child(a.storagePath).delete().catch(()=>{}); });
     }
     showToast('Message deleted.');
   }catch(err){
@@ -10082,14 +10735,14 @@ async function toggleNotifications(){
     notifyEnabled = false;
     saveNotifyPref(false);
     showToast('Chat notifications turned off.');
-    renderContent();
+    if(document.getElementById('chatNotifyBtn')) syncChatNotifyButton(); else renderContent();
     return;
   }
   if(!await ensureNotifyPermission()) return;
   notifyEnabled = true;
   saveNotifyPref(true);
   showToast('Chat notifications on.');
-  renderContent();
+  if(document.getElementById('chatNotifyBtn')) syncChatNotifyButton(); else renderContent();
 }
 
 async function toggleActivityNotifications(){
@@ -10136,7 +10789,11 @@ async function showChatNotification(msg){
   if(!notifyEnabled) return;
   const author = msg.author || 'Teammate';
   const mentionsMe = messageMentions(msg.text).includes(whoAmI().trim().toLowerCase());
-  const body = msg.text ? msg.text : (msg.attachment ? 'Sent an attachment' : 'New message');
+  const files = chatAttachmentsOf(msg);
+  const photos = files.filter(a => (a.mimeType || '').startsWith('image/')).length;
+  const body = msg.text ? msg.text
+    : photos ? (photos === 1 ? 'Sent a photo' : `Sent ${photos} photos`)
+    : files.length ? 'Sent an attachment' : 'New message';
   const title = mentionsMe ? `${author} mentioned you — Interpreter Hub` : `${author} — Interpreter Hub`;
   await sendNotification(title, body, 'chat', 'interpreter-hub-chat');
 }
@@ -11734,6 +12391,14 @@ const ICON_FLAME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_TARGET = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.2" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.6" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/></svg>';
 const ICON_ARROW_R = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h13M13 6.5l5.5 5.5L13 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12L15.2 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_CAMERA_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5C4 7.67 4.67 7 5.5 7H8L9.6 5h4.8L16 7h2.5c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.7"/></svg>';
+const ICON_PHOTOS_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4 16.5l4.5-4 3.5 3 3-2.5 5 4" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+const ICON_X_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+const ICON_RETRY_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4.5V8h-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_CLOCK_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_CHEV_L_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_CHEV_R_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_BELL_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 1.5h-15L6 16.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 const ICON_PAPERCLIP = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 12.5L14.5 6C16 4.5 18.3 4.5 19.7 6C21.1 7.5 21.1 9.8 19.7 11.2L11.5 19.4C9.6 21.3 6.5 21.3 4.6 19.4C2.7 17.5 2.7 14.4 4.6 12.5L12.5 4.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_HOME = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19C6 19.5 6.5 20 7 20H17C17.5 20 18 19.5 18 19V10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_SEARCH = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
@@ -13680,7 +14345,8 @@ function describeOutboxEntry(e){
     if(e.op === 'update' && d.reactions) return { title: 'Reaction on a chat message', detail: '' };
     if(e.op === 'update') return { title: 'Chat message edit', detail: d.text || '' };
     if(e.op === 'delete') return { title: 'Delete a chat message', detail: '' };
-    return { title: 'Chat message', detail: (d.text || '') + (d.attachment ? ' (with attachment)' : '') };
+    const nFiles = Array.isArray(d.attachments) ? d.attachments.length : (d.attachment ? 1 : 0);
+    return { title: 'Chat message', detail: (d.text || '') + (nFiles ? ` (with ${nFiles === 1 ? 'an attachment' : nFiles + ' attachments'})` : '') };
   }
   if(e.collection === TEAM_MEMBER_COLL) return { title: 'Your profile photo', detail: '' };
   return { title: `Change to ${e.collection}`, detail: '' };
@@ -14284,46 +14950,69 @@ function renderContent(){
 
   if(activeCategory === 'chat'){
     const hasName = !!whoAmI();
+    const n = CHAT_MESSAGES.length;
     content.innerHTML = `
-      <div class="section-head"><h2>Team Chat</h2><span class="sub" id="chatCount">${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}</span>${
-        notificationsSupported()
-          ? `<button class="head-action ${notifyEnabled?'on':''}" onclick="toggleNotifications()" title="${notifyEnabled?'Turn off chat notifications':'Get notified about new messages'}">${ICON_BELL_SM} ${notifyEnabled?'Notifications on':'Notify me'}</button>`
-          : ''
-      }</div>
-      <div class="hipaa-notice-inline">${ICON_SHIELD}<span>Remember to adhere to HIPAA — no patient names or identifying details here.</span></div>
-      ${renderAnnouncements()}
-      <div class="chat-panel">
-        <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()"></div>
-        <!-- Sits over the bottom of the thread, not in the column: a message
-             arriving while you are reading history must not move anything. -->
-        <button class="chat-jump" id="chatJump" type="button" onclick="jumpToLatestChat()"></button>
-        ${hasName ? `
-          <div class="typing-indicator" id="typingIndicator"></div>
-          <div class="chat-attach-preview" id="chatAttachPreview"></div>
-          <div class="chat-compose-bar" id="chatComposeBar"></div>
-          <div class="chat-input-wrap">
-          <div class="mention-suggestions" id="mentionSuggestions"></div>
-          <div class="chat-input-row">
-            <button class="attach-btn" title="Attach a photo or PDF" onclick="document.getElementById('chatFileInput').click()">${ICON_PAPERCLIP}</button>
-            <input class="file-input-hidden" id="chatFileInput" type="file" accept="image/*,application/pdf" onchange="handleChatFileSelected(event)">
-            <input id="chatInput" type="text" placeholder="Message your team…" oninput="handleChatTyping()" onkeydown="handleChatKeydown(event)">
-            <button class="chat-send-btn" onclick="sendChatMessage()" title="Send">${ICON_SEND}</button>
-          </div>
-          </div>
-        ` : `
-          <div class="chat-join-hint">👋 Set your name to join the conversation — your team will see it next to your messages.</div>
-          <button class="btn btn-primary" style="border-radius:24px; align-self:center;" onclick="openNameModal()">Set your name</button>
-        `}
+      <div class="tc">
+        <div class="tc-head">
+          <div class="tc-title"><h2>Team Chat</h2><span class="tc-sub" id="chatCount">${n} message${n===1?'':'s'}</span></div>
+          ${notificationsSupported() ? `<button type="button" class="tc-icon-btn" id="chatNotifyBtn" onclick="toggleNotifications()"></button>` : ''}
+        </div>
+        <div class="tc-hipaa">${ICON_SHIELD}<span>HIPAA: no patient names or identifying details.</span></div>
+        <div id="tcPinned"></div>
+        <div class="chat-panel tc-panel" id="tcPanel">
+          <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()" role="log" aria-label="Team messages"></div>
+          <!-- Sits over the bottom of the thread, not in the column: a message
+               arriving while you are reading history must not move anything. -->
+          <button class="chat-jump" id="chatJump" type="button" onclick="jumpToLatestChat()"></button>
+          <div class="tc-drop-hint">Drop photos to add them</div>
+          ${hasName ? `
+            <div class="typing-indicator" id="typingIndicator"></div>
+            <div class="tc-composer">
+              <div class="chat-compose-bar" id="chatComposeBar"></div>
+              <div id="chatAttachPreview"></div>
+              <div class="chat-input-wrap">
+                <div class="mention-suggestions" id="mentionSuggestions"></div>
+                <div class="tc-row">
+                  <button type="button" class="tc-icon-btn" onclick="document.getElementById('chatFileInput').click()" aria-label="Add photos or a PDF" title="Photos or PDF">${ICON_PHOTOS_TC}</button>
+                  <input class="file-input-hidden" id="chatFileInput" type="file" accept="image/*,application/pdf" multiple onchange="handleChatFileSelected(event)">
+                  <input class="file-input-hidden" id="chatCameraInput" type="file" accept="image/*" capture="environment" onchange="handleChatFileSelected(event)">
+                  <div class="tc-field">
+                    <textarea id="chatInput" rows="1" placeholder="Message your team" aria-label="Message your team" enterkeyhint="send"
+                      oninput="handleChatTyping(); autosizeChatInput(); chatDraft = this.value; updateChatSendState();" onkeydown="handleChatKeydown(event)"></textarea>
+                    <button type="button" class="tc-in-btn" id="chatCameraBtn" onclick="document.getElementById('chatCameraInput').click()" aria-label="Take a photo" title="Camera">${ICON_CAMERA_TC}</button>
+                  </div>
+                  <button type="button" class="tc-send" id="chatSendBtn" onclick="sendChatMessage()" aria-label="Send" disabled>${ICON_SEND}</button>
+                </div>
+              </div>
+            </div>
+          ` : `
+            <div class="tc-composer" style="text-align:center;">
+              <div class="chat-join-hint">Set your name to join the conversation. Your team sees it next to your messages.</div>
+              <button class="btn btn-primary" style="border-radius:24px;" onclick="openNameModal()">Set your name</button>
+            </div>
+          `}
+        </div>
       </div>
     `;
+    renderPinnedStrip();
+    syncChatNotifyButton();
     renderChatMessages();
     renderChatAttachPreview();
     renderChatComposeBar();
     renderTypingIndicator();
     if(hasName){
-      const focusTarget = document.getElementById('chatInput');
-      if(focusTarget && prefersAutoFocus()) focusTarget.focus();
+      const box = document.getElementById('chatInput');
+      // A rebuild of this screen (a pin arriving, the bell) must not eat a
+      // half-written message.
+      if(box && chatDraft){ box.value = chatDraft; autosizeChatInput(); }
+      updateChatSendState();
+      wireChatDrop();
+      if(box && prefersAutoFocus()) box.focus();
     }
+    fitChatPanel();
+    // Dr. Smiley takes his place on the tab bar just after this; fit again
+    // once he has, so the message box clears him.
+    requestAnimationFrame(fitChatPanel);
     return;
   }
 
@@ -16655,7 +17344,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -17885,9 +18574,16 @@ function reactionList(m){
 // Everything a row's appearance depends on. If this string is unchanged the
 // existing DOM node is correct and is left alone -- including its images,
 // which is what stops avatars and attachments flickering on every snapshot.
+// Every file on a message: the list when there is one, else the single field
+// older messages (and older phones) use.
+function chatAttachmentsOf(m){
+  if(Array.isArray(m.attachments) && m.attachments.length) return m.attachments.filter(Boolean);
+  return m.attachment ? [m.attachment] : [];
+}
+
 function chatRowSignature(m, mine, face, mentionsMe, first, last, open){
   return [m.id, m.text || '', m.author || '', m.timestamp || '', mine ? 1 : 0,
-          face || '', m.attachment ? (m.attachment.dataUrl || '') : '',
+          face || '', chatAttachmentsOf(m).map(a => a.dataUrl || '').join('|'),
           m._pending ? 1 : 0, mentionsMe ? 1 : 0, first ? 1 : 0, last ? 1 : 0,
           open ? 1 : 0, JSON.stringify(m.reactions || {}),
           m.editedAt || '', m.replyTo ? m.replyTo.id + '|' + (m.replyTo.text||'') : ''
@@ -17943,6 +18639,42 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
          <b>${escapeHtml(m.replyTo.author || 'Teammate')}</b><span>${escapeHtml(m.replyTo.text || '')}</span>
        </button>`
     : '';
+
+  // Inside the panel the redesign draws photos and the time inside the bubble.
+  const tc = !!document.getElementById('tcPanel');
+  if(tc){
+    const atts = chatAttachmentsOf(m);
+    const photos = atts.filter(a => (a.mimeType || '').startsWith('image/'));
+    const files = atts.filter(a => !(a.mimeType || '').startsWith('image/'));
+    const metaInner = `${(last || m.editedAt) && m.timestamp ? chatClock(m.timestamp) : ''}${m.editedAt ? (last ? ' · ' : '') + 'edited' : ''}${m._pending ? ICON_CLOCK_TC : ''}`;
+    const showMeta = !!(last || m.editedAt || m._pending);
+    const metaTitle = m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : '';
+    let media = '';
+    if(photos.length){
+      const shown = photos.slice(0, 4);
+      const nCls = 'n' + Math.min(shown.length, 4);
+      media = `<div class="tc-media ${nCls}">${shown.map((a, i) => {
+        const ar = (a.width && a.height) ? Math.max(0.6, Math.min(1.8, a.width / a.height)).toFixed(3) : '1.333';
+        const more = (i === 3 && photos.length > 4) ? `<span class="tc-more">+${photos.length - 4}</span>` : '';
+        return `<button type="button" class="tc-photo" style="--ar:${ar}" onclick="event.stopPropagation(); openChatPhotos('${m.id}', ${i})" aria-label="Open photo ${i + 1} of ${photos.length}${a.filename ? ': ' + escapeAttr(a.filename) : ''}">
+          <img src="${escapeAttr(a.dataUrl)}" alt="" loading="lazy" decoding="async"${a.width && a.height ? ` width="${a.width}" height="${a.height}"` : ''}>${more}</button>`;
+      }).join('')}${(!m.text && showMeta) ? `<span class="tc-meta on-media" title="${metaTitle}">${metaInner}</span>` : ''}</div>`;
+    }
+    const fileChips = files.length ? `<div class="tc-files">${files.map(a => attachmentChipHtml(a, null)).join('')}</div>` : '';
+    const meta = showMeta && (m.text || !photos.length) ? `<span class="tc-meta" title="${metaTitle}">${metaInner}</span>` : '';
+    const textHtml = m.text ? linkifyChat(highlightMentions(m.text)) : '';
+    const body = photos.length
+      ? `<div class="chat-bubble has-media">${media}${(m.text || fileChips || meta) ? `<div class="tc-caption">${textHtml}${fileChips}${meta}</div>` : ''}</div>`
+      : (m.text || files.length) ? `<div class="chat-bubble">${textHtml}${fileChips}${meta}</div>` : '';
+    return `${avatar}
+        <div class="chat-bubble-col">
+          ${(!mine && first) ? `<div class="chat-author" style="--who:${avatarColor}">${escapeHtml(who)}</div>` : ''}
+          ${quote}
+          ${body}
+          ${chips}
+          ${bar}
+        </div>`;
+  }
 
   return `${avatar}
         <div class="chat-bubble-col">
@@ -18277,7 +19009,7 @@ async function sendChatMessage(){
     if(!text){ showToast('An empty message would just be a delete.'); return; }
     const m = CHAT_MESSAGES.find(x=>x.id===id);
     const prev = m ? { text: m.text, editedAt: m.editedAt } : null;
-    editingChatId = null; input.value = ''; renderChatComposeBar();
+    editingChatId = null; input.value = ''; chatDraft = ''; autosizeChatInput(); updateChatSendState(); renderChatComposeBar();
     if(m){ m.text = text; m.editedAt = Date.now(); renderChatMessages(); }
     try{
       await queuedWrite({ collection:'team-chat', docId:id, op:'update',
@@ -18287,7 +19019,7 @@ async function sendChatMessage(){
       // it really is.
       if(m && prev){ m.text = prev.text; m.editedAt = prev.editedAt; renderChatMessages(); }
       const box = document.getElementById('chatInput');
-      if(box && !box.value){ editingChatId = id; box.value = text; renderChatComposeBar(); }
+      if(box && !box.value){ editingChatId = id; box.value = text; chatDraft = text; autosizeChatInput(); updateChatSendState(); renderChatComposeBar(); }
       const stored = outboxErrorMessage(err, 'Edit not saved', 'Your edit is back in the message box.');
       if(stored) showOutboxActionToast(stored);
       else showToast('Could not save that edit. It is back in the message box.');
@@ -18295,7 +19027,7 @@ async function sendChatMessage(){
     return;
   }
 
-  if(!text && !pendingChatAttachment) return;
+  if(!text && !pendingChatAttachments.length) return;
 
   const author = whoAmI();
   if(!author){
@@ -18307,12 +19039,36 @@ async function sendChatMessage(){
     return;
   }
 
-  const attachment = pendingChatAttachment;
+  // Photos first. Anything still uploading is waited for, with the send
+  // button showing it; anything that failed stops the send so it can be
+  // retried or removed, rather than going out without the picture.
+  const sendBtn = document.getElementById('chatSendBtn');
+  if(pendingChatAttachments.some(i => i.status === 'uploading')){
+    if(sendBtn){ sendBtn.classList.add('is-busy'); sendBtn.disabled = true; sendBtn.setAttribute('aria-label', 'Sending once the photos finish uploading'); }
+    await chatTraySettled();
+    if(sendBtn){ sendBtn.classList.remove('is-busy'); sendBtn.setAttribute('aria-label', 'Send'); }
+    updateChatSendState();
+  }
+  if(pendingChatAttachments.some(i => i.status !== 'done')){
+    const waiting = pendingChatAttachments.some(i => i.status === 'waiting');
+    showToast(waiting ? 'Photos upload once you’re back online. Send the text alone by removing them.'
+                      : 'A photo didn’t upload. Tap it to try again, or remove it.');
+    return;
+  }
+  const atts = pendingChatAttachments.map(i => i.att).filter(Boolean);
+  const box = document.getElementById('chatInput');
+  const sentText = box ? box.value.trim() : text;    // anything typed while photos uploaded
+  if(!sentText && !atts.length) return;
+
   clearTimeout(typingHeartbeat);
   clearTyping();
-  input.value = '';
-  pendingChatAttachment = null;
+  if(box){ box.value = ''; }
+  chatDraft = '';
+  autosizeChatInput();
+  const trayItems = pendingChatAttachments.slice();
+  pendingChatAttachments = [];
   renderChatAttachPreview();
+  updateChatSendState();
   input.disabled = true;
   try{
     // An explicit id rather than add(): a queued message replayed after a
@@ -18322,8 +19078,11 @@ async function sendChatMessage(){
     // timed out but landed, this rewrites it rather than posting it twice.
     const ref = chatRetryDocId ? db.collection('team-chat').doc(chatRetryDocId) : db.collection('team-chat').doc();
     chatRetryDocId = ref.id;
-    const message = { text, author, attachment: attachment || null, timestamp: Date.now(),
+    // `attachment` (the first file) is kept alongside `attachments` so a phone
+    // still running the previous version shows at least the first photo.
+    const message = { text: sentText, author, attachment: atts[0] || null, timestamp: Date.now(),
                       replyTo: replyingTo ? { id:replyingTo.id, author:replyingTo.author, text:replyingTo.text } : null };
+    if(atts.length > 1) message.attachments = atts;
     const reply = replyingTo;
     replyingTo = null; renderChatComposeBar();
     sendingReply = reply;
@@ -18332,6 +19091,7 @@ async function sendChatMessage(){
     });
     chatRetryDocId = null;
     sendingReply = null;
+    trayItems.forEach(i => { if(i.preview) setTimeout(()=> URL.revokeObjectURL(i.preview), 4000); });
     if(state === 'queued'){
       // Offline there is no listener echo, so show the message locally or it
       // looks like it vanished. The real document carries this same id, so
@@ -18346,9 +19106,13 @@ async function sendChatMessage(){
     const stored = outboxErrorMessage(err, 'Not sent', 'Your message is back in the box.');
     if(stored) showOutboxActionToast(stored);
     else showToast('Could not send — check your connection.');
-    input.value = text; // give the message back so it isn't lost
-    pendingChatAttachment = attachment;
+    const back = document.getElementById('chatInput') || input;
+    back.value = sentText; // give the message back so it isn't lost
+    chatDraft = sentText;
+    autosizeChatInput();
+    pendingChatAttachments = trayItems.concat(pendingChatAttachments);
     renderChatAttachPreview();
+    updateChatSendState();
     if(sendingReply && !replyingTo){ replyingTo = sendingReply; renderChatComposeBar(); }
     sendingReply = null;
   }
@@ -21408,6 +22172,7 @@ if(shouldShowOnboarding()){
 document.addEventListener('focusin', (e)=>{
   if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
     document.body.classList.add('kb-open');
+    if(activeCategory === 'chat') requestAnimationFrame(fitChatPanel);
   }
 });
 document.addEventListener('focusout', (e)=>{
@@ -21420,6 +22185,7 @@ document.addEventListener('focusout', (e)=>{
         // is on; opening Ask straight from search sized it in that moment and
         // put the question box behind the tab bar.
         if(activeCategory === 'ask') fitAskPanel();
+        if(activeCategory === 'chat') fitChatPanel();
       }
     }, 50);
   }
