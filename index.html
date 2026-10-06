@@ -12718,8 +12718,9 @@ function externalUrl(raw){
 }
 
 /* Dr. Smiley: the cartoon doctor from Jose's character sheet, head and
-   shoulders, with his lanyard painted in (drsmiley/*.webp, all four on the
-   same shoulders, so changing face never moves him). Every Dr. Smiley in the
+   shoulders (drsmiley/*.webp, all four on the same shoulders, so changing
+   face never moves him). On Home his lanyard is live cords drawn over him
+   by home-polish.js, as on the old smiley. Every Dr. Smiley in the
    app -- the greeting, the dock, Ask the Hub, the lock screen, the top bar --
    is this one drawing in the old smiley's box (viewBox 4 4 112 112), so the
    sizes and places around him didn't change. He hangs below the box like the
@@ -12730,8 +12731,7 @@ function externalUrl(raw){
    it from the state classes the app already sets (.is-happy, .is-giggle,
    .is-wink, the lock screen's .is-happy); on Home, home-polish.js picks it
    from his animation pose (setFace) and writes svg[data-face].
-   His neck sits on the box's centre line (x 60); the painted clip is where
-   the Home "Ask" tag hangs. */
+   His neck sits on the box's centre line (x 60), under the Home "Ask" tag. */
 const DR_SMILEY_FACES = ['gentle', 'wink', 'happy', 'laugh'];
 function drSmileyArt(cls){
   return `<svg class="ds-art${cls ? ' ' + cls : ''}" viewBox="4 4 112 112" aria-hidden="true" focusable="false">`
@@ -17755,7 +17755,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1801';
+const BUILD_ID = 'b1006.1807';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than

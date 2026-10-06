@@ -634,7 +634,7 @@
     const f=n=>(Math.round(n*100)/100);
     // A and B are behind his head, either side of the neck; the face hides
     // the cords until they come out under his chin.
-    const P={x:32,y:56},A={x:23,y:47},B={x:41,y:47};
+    const P={x:32,y:56},A={x:25.5,y:47},B={x:38.5,y:47};
     // Button px to the face drawing's units (viewBox 4 4 112 112 filling the
     // 60px layer that sits at 2,2 in the button).
     const SV=112/60,sx=x=>f((x-2)*SV+4),sy=y=>f((y-2)*SV+4);
@@ -826,8 +826,22 @@
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);askHalo.attach(ring);
     heartline.attach(wave);
-    // His lanyard and its clip are painted into his picture; the badge hangs
-    // from the clip and swings from its top edge (home-polish.css).
+    // His lanyard, as on the old smiley: two navy cords that come out from
+    // under his chin and meet at the badge's clip, redrawn every frame by
+    // askBadge so they swing with it. They sit on top of his picture, and a
+    // mask in the shape of his head and jaw hides the part behind his chin.
+    // Drawing units (viewBox 4 4 112 112); fixed ids, as only one greeting exists.
+    const art=pin.querySelector('.home-face');
+    if(art)art.insertAdjacentHTML('beforeend','<defs><mask id="dsNeckMask" maskUnits="userSpaceOnUse" x="-20" y="-40" width="160" height="200">'
+      +'<rect x="-20" y="-40" width="160" height="200" fill="#fff"/>'
+      +'<path fill="#000" d="M-20 -40 H140 V86.9 L120 86.9 L92.6 95.3 L86.9 99.7 L81.1 102.4 L76.7 103.7 L71.4 104.6 L64.8 104.6 L58.2 104.1 L52.9 103.3 L48.5 101.9 L46.2 100.6 L43.1 98.4 L37 94.4 L14 88.2 L-20 88.2 Z"/></mask></defs>'
+      +'<g class="hub-lanyard" mask="url(#dsNeckMask)">'
+      +'<path fill="none" stroke="#151B48" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<path fill="none" stroke="#2C3E9E" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<path fill="none" stroke="#7D93E8" stroke-opacity=".55" stroke-width="1" stroke-linecap="round" transform="translate(-.6 -.4)"/></g>');
+    // Only the clip sits above, with the badge.
+    pin.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
+      +'<rect x="29" y="69" width="6" height="5" rx="1.5" fill="#C9D3E0" stroke="#151B48" stroke-width="1.1"/></svg>');
     const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
     tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
     pin.append(tag);
