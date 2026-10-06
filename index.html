@@ -17801,8 +17801,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1148';
-const BUILD_TIME = '2026-10-06 11:48 UTC';
+const BUILD_ID = 'b1006.1155';
+const BUILD_TIME = '2026-10-06 11:55 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -17977,9 +17977,9 @@ function dockAfterRender(){
     if(window.dockIdleRestart) window.dockIdleRestart();
   }
 }
-/* Tucked, the bar is a pill holding the current tab's icon and name. Its
-   width is worked out from the name before it shrinks, so the shrink can
-   animate to the exact size. */
+/* Tucked, the bar is a medicine capsule: the tab's icon in one half, its
+   name in the other. Its width is worked out from the name before it
+   shrinks, so the shrink can animate to the exact size. */
 let dockMeasure = null;
 function dockTuck(){
   const b = document.body;
@@ -17990,9 +17990,10 @@ function dockTuck(){
     const name = btn ? (btn.getAttribute('aria-label') || '') : '';
     try{
       dockMeasure = dockMeasure || document.createElement('canvas').getContext('2d');
-      dockMeasure.font = '650 14px ' + (getComputedStyle(b).fontFamily || 'system-ui');
-      const w = Math.ceil(12 + 30 + 7 + dockMeasure.measureText(name).width + 17 + 2);
-      b.style.setProperty('--mini-w', Math.min(w, Math.round(window.innerWidth * .6)) + 'px');
+      dockMeasure.font = '700 14px ' + (getComputedStyle(b).fontFamily || 'system-ui');
+      // Two equal halves, like a capsule: the icon's half and the name's half.
+      const half = Math.max(56, Math.ceil(15 + dockMeasure.measureText(name).width + 15));
+      b.style.setProperty('--mini-w', Math.min(half * 2, Math.round(window.innerWidth * .62)) + 'px');
     }catch(e){}
   }
   b.classList.add('dock-mini');
