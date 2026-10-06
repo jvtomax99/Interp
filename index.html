@@ -17801,8 +17801,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1134';
-const BUILD_TIME = '2026-10-06 11:34 UTC';
+const BUILD_ID = 'b1006.1148';
+const BUILD_TIME = '2026-10-06 11:48 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -17971,8 +17971,31 @@ function dockAfterRender(){
     bar.style.setProperty('--tab-i', i);
     dockLensAt = i;
   }
-  // A new screen always starts with the bar open.
-  if(dockCat !== activeCategory){ dockCat = activeCategory; document.body.classList.remove('dock-mini'); }
+  // A new screen always starts with the bar open, and the idle count restarts.
+  if(dockCat !== activeCategory){
+    dockCat = activeCategory; document.body.classList.remove('dock-mini');
+    if(window.dockIdleRestart) window.dockIdleRestart();
+  }
+}
+/* Tucked, the bar is a pill holding the current tab's icon and name. Its
+   width is worked out from the name before it shrinks, so the shrink can
+   animate to the exact size. */
+let dockMeasure = null;
+function dockTuck(){
+  const b = document.body;
+  if(b.classList.contains('dock-mini')) return;
+  const bar = document.querySelector('.tabbar');
+  if(bar){
+    const btn = bar.querySelector('.tabbar-btn.is-active') || [...bar.querySelectorAll('.tabbar-btn')].pop();
+    const name = btn ? (btn.getAttribute('aria-label') || '') : '';
+    try{
+      dockMeasure = dockMeasure || document.createElement('canvas').getContext('2d');
+      dockMeasure.font = '650 14px ' + (getComputedStyle(b).fontFamily || 'system-ui');
+      const w = Math.ceil(12 + 30 + 7 + dockMeasure.measureText(name).width + 17 + 2);
+      b.style.setProperty('--mini-w', Math.min(w, Math.round(window.innerWidth * .6)) + 'px');
+    }catch(e){}
+  }
+  b.classList.add('dock-mini');
 }
 function dockTabAt(bar, x){
   const btns = [...bar.querySelectorAll('.tabbar-btn')];
@@ -17990,9 +18013,28 @@ function dockTabAt(bar, x){
     if(Math.abs(dy) < 8 && y > 80) return;
     lastY = y;
     if(!phone.matches || !document.querySelector('.tabbar')) return;
-    if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open')) body().classList.add('dock-mini');
+    if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open')) dockTuck();
     else if(dy < 0 || y <= 80) body().classList.remove('dock-mini');
   }, { passive:true });
+  // Left alone for a few seconds, the bar tucks away too. Any touch, key or
+  // scroll starts the count again (it doesn't open the bar: tap the pill or
+  // scroll up for that). Same exceptions as scrolling: not in Team Chat, and
+  // not while the keyboard, a sheet or search is open.
+  const IDLE_TUCK = 8000;
+  let idleTuck = 0;
+  const canTuck = () => {
+    const bar = document.querySelector('.tabbar');
+    return phone.matches && !!bar && getComputedStyle(bar).display !== 'none' && !document.hidden
+      && activeCategory !== 'chat' && !body().classList.contains('kb-open')
+      && !document.querySelector('.overlay.show, .gs-overlay.show, .dm-overlay.show');
+  };
+  window.dockIdleRestart = () => {
+    clearTimeout(idleTuck);
+    idleTuck = setTimeout(() => { if(canTuck()) dockTuck(); else window.dockIdleRestart(); }, IDLE_TUCK);
+  };
+  ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.addEventListener(t, window.dockIdleRestart, { passive: true, capture: true }));
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) window.dockIdleRestart(); });
+  window.dockIdleRestart();
   // While tucked, a tap on the pill opens the bar instead of navigating.
   let swallowUntil = 0;
   document.addEventListener('click', e => {

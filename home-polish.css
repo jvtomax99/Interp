@@ -326,17 +326,22 @@
   @keyframes dockZ{0%{opacity:0;transform:translate(0,5px) scale(.6);}25%{opacity:1;}100%{opacity:0;transform:translate(9px,-16px) scale(1.15);}}
 
   /* Tucked while you scroll down */
-  /* Tucked: the pill becomes a circle exactly Dr. Smiley's size, on the same
-     line, and the tab's icon grows to fill it. */
-  body.dock-mini .tabbar{right:calc(100% - 14px - 54px);height:54px;padding:0;border-radius:50%;}
-  body.dock-mini .tabbar-btn{height:52px;padding:0;justify-content:center;}
+  /* Tucked (scrolling down, or left alone): a pill the height of Dr.
+     Smiley's circle, on the same line, holding the current tab's icon and
+     name. Its width (--mini-w) is measured by dockTuck() in index.html. */
+  body.dock-mini .tabbar{right:calc(100% - 14px - var(--mini-w, 120px));height:54px;padding:0;border-radius:999px;}
+  body.dock-mini .tabbar-btn{height:52px;padding:0;}
   body.dock-mini .tabbar-btn:not(.is-active){flex-grow:0;flex-basis:0;opacity:0;overflow:hidden;pointer-events:none;}
   body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{flex-grow:1;opacity:1;pointer-events:auto;}
-  body.dock-mini .tabbar-btn > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
+  body.dock-mini .tabbar-btn.is-active,
+  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{flex-direction:row;justify-content:center;gap:7px;padding:0 17px 0 12px;
+    font-size:14px;font-weight:650;letter-spacing:-.01em;color:var(--accent);white-space:nowrap;}
+  body.dock-mini .tabbar-btn:not(.is-active) > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
+  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child > span:not(.tabbar-icon):not(.tabbar-badge){display:inline;}
   body.dock-mini .tabbar-lens{opacity:0;}
   body.dock-mini .tabbar-btn.is-active .tabbar-icon,
-  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.6);}
-  body.dock-mini .tabbar-badge{top:3px;right:3px;}
+  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);margin-inline:3px;}
+  body.dock-mini .tabbar-badge{top:4px;left:30px;right:auto;}
   body.dock-mini .dock-smiley{width:54px;height:54px;}
   body.dock-mini .dock-smiley-tag{opacity:0;}
 
