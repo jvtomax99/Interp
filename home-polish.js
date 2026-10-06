@@ -371,6 +371,8 @@
     // the side and swings to rest on its lanyard (askBadge, real physics).
     const askRing=button.querySelector('.home-ask-ring');
     if(askRing)animate(askRing,[{opacity:0},{opacity:1}],{duration:500,delay:FACE_AT,fill:'backwards',easing:'ease-out'});
+    const askDisc=button.querySelector('.home-ask-disc');
+    if(askDisc)animate(askDisc,[{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'none'}],{duration:450,delay:FACE_AT-120,fill:'backwards',easing:'cubic-bezier(.3,1.4,.5,1)'});
     // The badge waits (hidden) until the face has landed, then is released
     // from the side and swings to rest under its own physics (askBadge).
     const BADGE_AT=FACE_AT+350;
@@ -729,6 +731,9 @@
     // with him; the layer's pivot is his neck.
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);askHalo.attach(ring);
+    // The disc he pops out of (home-polish.css), in front of the turning mark, behind him.
+    const disc=document.createElement('span');disc.className='home-ask-disc';disc.setAttribute('aria-hidden','true');
+    pin.before(disc);
     heartline.attach(wave);
     // His lanyard, as on the old smiley: two navy cords that come out from
     // under his chin and meet at the badge's clip, redrawn every frame by

@@ -304,15 +304,23 @@
   body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
   body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
   /* The shadow rides on the part that bobs, so no light gap opens under him. */
-  .dock-smiley-bob{position:relative;display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;transform-origin:50% 100%;background:linear-gradient(180deg,#F0F8FD,#DEEEFD);
-    box-shadow:0 1px 2px rgba(21,28,44,.28),0 10px 24px -8px rgba(21,28,44,.40),0 2px 6px -2px rgba(21,28,44,.24);}
+  /* Pop-out (option A): a glossy disc, smaller than the button, with his head
+     coming out over its top edge; below his ears he is cut to the disc
+     (clip-path on .ask-face, whose box is 105.7% of the button at -9.4%, 3%). */
+  .dock-smiley-bob{position:relative;display:block;width:100%;height:100%;transform-origin:50% 100%;}
+  .dock-smiley-bob::before{content:"";position:absolute;left:5px;top:10px;width:48px;height:48px;border-radius:50%;
+    background:radial-gradient(circle at 38% 28%,#ffffff 0,#e8f4ff 28%,#b9d8f5 62%,#7fb1e3 100%);
+    box-shadow:inset 0 -5px 10px rgba(20,60,120,.35),inset 0 3px 5px rgba(255,255,255,.9),0 0 0 2px rgba(255,255,255,.9),0 1px 2px rgba(21,28,44,.28),0 10px 22px -8px rgba(21,28,44,.45);}
   /* No constant bob: between his expressions he stays still (drFaceIdle). */
   .dock-smiley-bob{transform-origin:50% 88%;}
   @keyframes dockBob{50%{transform:translateY(-1.5px);}}
-  /* His head fills the circle edge to edge: the picture's width is the
-     circle's, its top the circle's top; collar and lanyard fall outside. */
-  .dock-smiley .ask-face{position:absolute;display:block;left:-9.4%;top:3%;width:105.7%;height:105.7%;margin:0;}
-  .dock-smiley .ask-face svg{display:block;width:100%;height:100%;filter:none;}
+  /* His face at 88% of the button, his head coming out over the top of the
+     disc (.dock-smiley-bob::before); the clip and shadow are set below. */
+  .dock-smiley .ask-face{position:absolute;display:block;left:-.4%;top:-4.4%;width:88%;height:88%;margin:0;}
+  .dock-smiley .ask-face svg{display:block;width:100%;height:100%;filter:none;clip-path:path('M-60 -90 H140 V37.55 H53.22 A24 24 0 0 1 5.26 37.55 H-60 Z');}
+  .dock-smiley .ask-face{filter:drop-shadow(0 2px 3px rgba(5,15,40,.3));}
+  body.dock-mini .dock-smiley .ask-face svg{clip-path:path('M-60 -90 H140 V34.96 H49.55 A22.34 22.34 0 0 1 4.9 34.96 H-60 Z');}
+  body.dock-mini .dock-smiley-bob::before{left:4.66px;top:9.31px;width:44.69px;height:44.69px;}
   .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:750;line-height:14px;
     letter-spacing:.02em;color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
   .dock-smiley:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
@@ -843,10 +851,23 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    sixteen squares, turning slowly; askHalo in home-polish.js lights one
    visible square at a time. hmh-mark-square.png is the mark trimmed of its empty right-hand
    strip, so it sits in the exact middle of its disc. */
-#content.is-home .home-ask-ring{position:absolute;left:-5px;top:-5px;width:74px;height:74px;z-index:-1;pointer-events:none;
+#content.is-home .home-ask-ring{position:absolute;left:-12px;top:-2px;width:88px;height:88px;z-index:-1;pointer-events:none;
   filter:drop-shadow(0 0 1.2px rgba(255,255,255,.95)) drop-shadow(0 0 7px rgba(1,184,230,.55));animation:homeAskTurn 24s linear infinite;transition:opacity .4s var(--ease);}
 #content.is-home .home-ask-ring svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;}
 @keyframes homeAskTurn{to{transform:rotate(1turn);}}
+/* Pop-out (option A, picked by Jose): a glossy disc behind Dr. Smiley, the
+   Hackensack mark turning behind the disc. His shoulders stay inside the
+   disc; above his ears he comes out over its edge, like a sticker lifting off
+   the page. The cut is a clip-path on his drawing (60px box at 2,2): open
+   above y 45, the disc below it (centre 30,40, radius 29). His lanyard cords
+   are inside the drawing, so they stay on him; the clip and tag sit outside. */
+#content.is-home .home-ask-disc{position:absolute;left:3px;top:13px;width:58px;height:58px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 38% 28%,#ffffff 0,#e8f4ff 28%,#b9d8f5 62%,#7fb1e3 100%);
+  box-shadow:inset 0 -6px 12px rgba(20,60,120,.35),inset 0 3px 6px rgba(255,255,255,.9),0 0 0 2.2px rgba(255,255,255,.85),0 10px 22px -6px rgba(5,15,40,.6);
+  transition:opacity .4s var(--ease);}
+#content.is-home .home-face{clip-path:path('M-60 -90 H130 V45 H58.6 A29 29 0 0 1 1.4 45 H-60 Z');filter:none;}
+#content.is-home .home-wave-pin{filter:drop-shadow(0 2px 2px #0b234073) drop-shadow(0 6px 8px #072b4559);}
+#content.is-home .home-wave-pending .home-ask-disc{opacity:0;}
 #content.is-home .home-ask-sq{transform-box:view-box;}
 #content.is-home .home-ask-sq.is-glow{animation:homeAskGlow 1.5s var(--ease) both;}
 @keyframes homeAskGlow{
