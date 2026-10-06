@@ -2293,6 +2293,21 @@
   }
   .tab .link-flag svg{ width:10px; height:10px; }
 
+  /* ---------- 3D Body ---------- */
+  /* Human Atlas (atlas/) runs in a frame kept outside #app: render() rebuilds
+     #app, and a frame inside it would reload the whole body on every repaint.
+     anatomySync() adds and removes it. It sits under the app's top bar, whose
+     Back button leaves it, and the floating tab bar and Dr. Smiley step away
+     because the viewer has its own controls along the bottom. */
+  .anat-layer{ position:fixed; left:0; right:0; bottom:0; top:var(--anat-top, 64px); z-index:25;
+    background:#F3F4F4; box-shadow:inset 0 1px 0 var(--line-soft); }
+  .anat-layer iframe{ display:block; width:100%; height:100%; border:0; background:transparent; }
+  .anat-wait{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none;
+    color:var(--ink-soft); font-size:var(--fs-footnote, 13px); letter-spacing:.01em; }
+  body.anat-open{ overflow:hidden; }
+  body.anat-open .tabbar, body.anat-open .dock-smiley, body.anat-open .appt-pill,
+  body.anat-open .name-fab, body.anat-open .theme-fab{ display:none !important; }
+
   /* ---------- Link Directory ---------- */
   .dir-group{ margin-bottom:8px; }
   .dir-row{
@@ -8719,7 +8734,7 @@ function ensureTermIds(){
 async function ensureDomainExists(name, color, icon, parentId){
   let cat = DATA.categories.find(c=>c.name===name);
   if(cat) return cat;
-  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide'];
+  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide','anatomy'];
   const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
   const base = slugify(name);
   let id = base, n = 2;
@@ -11871,6 +11886,7 @@ function getToolTiles(){
     // The team's assistant. The greeting smiley on Home opens it too.
     { id:'ask',       name:'Ask the Hub',          color:'#252E6D', icon: '<img class="tool-logo" src="./hmh-mark-square.png" alt="">', count: null, label: '' },
     { id:'userguide', name:'User Guide',           color:'#5B7FBF', icon: DOMAIN_ICONS.compass, count: GUIDE_TOPICS.length, label:'answers' },
+    { id:'anatomy',   name:'3D Body',              color:'#C8655A', icon: DOMAIN_ICONS.anatomy || DOMAIN_ICONS.heart, count: null, label: '' },
     { id:'events',    name:'Training & Events',    color:'#35A97A', icon: DOMAIN_ICONS.calendar, count: CE_EVENTS.length, label: CE_EVENTS.length===1?'item':'items' },
     { id:'ethics',    name:'Code of Ethics',       color:'#2F5D62', icon: DOMAIN_ICONS.shield, count: ETHICS_CONTENT.length, label: 'entries' },
     { id:'translate', name:'Translate',            color:'#2E8BD0', icon: DOMAIN_ICONS.globe,   count: null, label: '' },
@@ -12931,6 +12947,44 @@ const ICON_GUIDE_MAP = {
 // Council on Interpreting in Health Care's 9-principle National Code of
 // Ethics (2004) and CCHI's Code of Ethics / Disciplinary Policy, cited by
 // organization on each card rather than quoted at length.
+/* ---------- 3D Body ----------
+   Human Atlas, an interactive 3D anatomy viewer written by someone outside
+   the team (atlas/; atlas/README.md says where it came from, the two
+   licences and how to rebuild it). It is walled off from the Hub: the frame
+   is sandboxed without allow-same-origin, and vercel.json sends the same
+   sandbox as a header, so even opened on its own it runs as an anonymous
+   origin and cannot read the Hub's sign-in, saved data or page. Do not add
+   allow-same-origin.
+   The frame is made when this screen opens and removed when it closes: left
+   running it would hold the whole body in the phone's graphics memory behind
+   every other screen. The models (about 33 MB) are cached by the browser
+   (long-lived headers in vercel.json), so the second visit is quicker. */
+function anatomySync(){
+  const want = activeCategory === 'anatomy';
+  let layer = document.getElementById('anatLayer');
+  document.body.classList.toggle('anat-open', want);
+  if(!want){ if(layer) layer.remove(); return; }
+  anatomyPlace();
+  if(layer) return;
+  layer = document.createElement('div');
+  layer.id = 'anatLayer';
+  layer.className = 'anat-layer';
+  layer.innerHTML = `<div class="anat-wait">Opening the 3D body&hellip;</div>
+    <iframe src="./atlas/index.html" title="3D Body: interactive anatomy"
+      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>`;
+  layer.querySelector('iframe').addEventListener('load', () => {
+    layer.querySelector('.anat-wait')?.remove();
+  }, { once:true });
+  document.body.appendChild(layer);
+}
+// The top bar is sticky, and taller on desktop and with a notch.
+function anatomyPlace(){
+  const bar = document.querySelector('.topbar-global');
+  const top = bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0;
+  document.documentElement.style.setProperty('--anat-top', top + 'px');
+}
+window.addEventListener('resize', () => { if(activeCategory === 'anatomy') anatomyPlace(); });
+
 /* ---------- False Friends (falsos amigos) ---------- */
 
 /* Words that look like an English word and mean something else.
@@ -14430,6 +14484,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'ask'){
     showTopbar = false;
+  } else if(activeCategory === 'anatomy'){
+    showTopbar = false;
   } else if(activeCategory === 'prep'){
     showTopbar = false;
   } else if(activeCategory === 'appt'){
@@ -14516,6 +14572,7 @@ function render(){
 
   syncTopBar();
   renderContent();
+  anatomySync();
   smileyRider.sync();
   dockAfterRender();
   apptPillSync();
@@ -15373,6 +15430,11 @@ function renderContent(){
   if(activeCategory === 'userguide'){
     content.innerHTML = renderUserGuide();
     setupGuideSearch();
+    return;
+  }
+
+  if(activeCategory === 'anatomy'){
+    content.innerHTML = '';
     return;
   }
 
@@ -17875,7 +17937,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.2312';
+const BUILD_ID = 'b1006.2351';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -18356,6 +18418,7 @@ function renderHome(){
   ].join('');
 
   const utilityCards = [
+    qaCard('#C8655A', DOMAIN_ICONS.anatomy || DOMAIN_ICONS.heart, '3D Body', 'Tap any part to name it', `setCategory('anatomy')`),
     qaCard('#8B7BAE', DOMAIN_ICONS.link,   'Link Directory',         'Every confirmed source link', `setCategory('directory')`),
     qaCard('#5B7FBF', DOMAIN_ICONS.compass, 'User Guide',             'How the app works',           `setCategory('userguide')`),
     qaCard('#BFA05E', DOMAIN_ICONS.bell,    'Recent Updates',         'What the team changed',       `setCategory('updates')`),
@@ -20794,7 +20857,7 @@ async function saveDomain(){
     return;
   }
 
-  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide'];
+  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide','anatomy'];
   const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
   const base = slugify(name);
   let id = base, n = 2;

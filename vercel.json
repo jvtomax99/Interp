@@ -4,5 +4,21 @@
       "path": "/api/check-events",
       "schedule": "0 13 * * *"
     }
+  ],
+  "headers": [
+    {
+      "source": "/atlas/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    },
+    {
+      "source": "/atlas/(assets|models)/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ]
 }

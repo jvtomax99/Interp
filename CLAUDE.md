@@ -23,12 +23,13 @@ between assignments.
 | `home-polish.css` | 894 | Overlay layer. Loads right after `</style>`, so it wins |
 | `home-polish.js` | 1,220 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
 | `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
-| `pins/*.webp` | 40 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
+| `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 5 files | Dr. Smiley: `base` (his calm head and shoulders), `face` (a strip of 18 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, `drFacePlay()`, `drFaceIdle()`, `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
 | `sw.js` | 175 | Service worker. Network-first for HTML, stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
-| `vercel.json` | 8 | Cron: `/api/check-events` daily at 13:00 UTC |
+| `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/` |
+| `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md` |
 | `api/translate.js` | 168 | Translate tool — Claude API |
 | `api/doctor-research.js` | 379 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 224 | Cron job watching CE/training events |

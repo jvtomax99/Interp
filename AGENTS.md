@@ -48,6 +48,7 @@ So:
 | Domain folder / section overlay styling | `home-polish.css` |
 | Home behaviour — hello wave, rail dots, overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
+| 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first |
 | Everything else | `index.html` |
 
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
@@ -92,6 +93,10 @@ no error on screen. So when you add something:
   are `null` until `firebaseReady` resolves (`hubAuthReady` includes it), so
   code that runs as the page loads must wait for one of them before reading
   those. A `<script src>` tag for the SDK would block the whole app again.
+- **`atlas/` (3D Body) is outside code, walled off.** Its frame is sandboxed
+  without `allow-same-origin`, and `vercel.json` sends the same sandbox as a
+  header. Never add `allow-same-origin` or load its scripts into the Hub's
+  own page: it would then reach the team sign-in and saved data.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.

@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v165-dock-tag-tucked';
+const CACHE_VERSION = 'interpreter-hub-v166-3d-body';
 const PRECACHE = [
   './',
   './index.html',
@@ -95,6 +95,7 @@ const PRECACHE = [
   './pins/dermatology.webp',
   './pins/ophthalmology.webp',
   './pins/surgery-anesthesia.webp',
+  './pins/anatomy.webp',
   './manifest.webmanifest'
 ];
 
@@ -143,6 +144,10 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // let all cross-origin pass through
+  // 3D Body (atlas/) is walled off and caches itself through the browser
+  // (vercel.json). Its 33 MB of models must never go through the cache below,
+  // which would fetch every one of them again in the background on each visit.
+  if (url.pathname.startsWith('/atlas/')) return;
 
   const isDocument = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
