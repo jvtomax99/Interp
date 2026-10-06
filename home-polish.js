@@ -164,21 +164,28 @@
   // Writing an SVG attribute repaints the face even when the value is the
   // same, and the idle runs every frame, so only write what changed.
   const setA=(el,name,value)=>{const v=String(value);if(el.getAttribute(name)!==v)el.setAttribute(name,v);};
-  // Dr. Smiley is a picture now (drSmileyArt in index.html), so a pose picks
-  // one of his four faces: both eyes squeezed is his laugh, one is a wink,
-  // heart eyes, an open mouth or a big blush is his big smile, otherwise calm.
-  // CSS shows the face named in data-face. The vector parts below only exist
-  // in the old drawing; with the picture they find nothing and do nothing.
-  function faceFor(P){
-    const l=(P.sqL||0)>.5,r=(P.sqR||0)>.5;
-    if(l&&r)return 'laugh';
-    if(l||r)return 'wink';
-    if((P.heart||0)>.3||(P.open||0)>.5||(P.blush||1)>1.12)return 'happy';
-    return 'gentle';
+  // Dr. Smiley is a picture whose eyes and mouth move frame by frame
+  // (drSmileyArt in index.html), so a pose picks the frame: the mouth opens
+  // through smile1 and smile2 to the smile, both eyes squeezing go through
+  // laugh1 and laugh2 to the laugh, one eye squeezing is the wink. The
+  // vector parts further down only exist in the old drawing and find nothing.
+  function frameFor(P){
+    const l=P.sqL||0,r=P.sqR||0,o=Math.max(P.open||0,(P.heart||0)>.3?.8:0);
+    const e=Math.min(l,r);
+    if(e>.75)return o>.6?'laugh':'laugh2';
+    if(e>.4)return o>.5?'laugh2':'laugh1';
+    const w=Math.max(l,r);
+    if(w>.75)return 'wink';
+    if(w>.45)return 'wink2';
+    if(w>.15)return 'wink1';
+    if(o>.75)return 'smile';
+    if(o>.45)return 'smile2';
+    if(o>.15)return 'smile1';
+    return 'rest';
   }
   function setFace(svg,P){
     if(!svg||!svg.querySelector)return;
-    if(svg.classList.contains('ds-art')){const f=faceFor(P);if(svg.dataset.face!==f)svg.dataset.face=f;}
+    if(svg.classList.contains('ds-art')&&typeof window.drFaceSet==='function'){window.drFaceSet(svg,frameFor(P));return;}
     const o=P.open,w=12+9*o,cornerY=72,topY=cornerY+7*(1-o),botY=topY+1+34*o;
     const d=`M${(60-w).toFixed(2)} ${cornerY} Q60 ${topY.toFixed(2)} ${(60+w).toFixed(2)} ${cornerY} Q60 ${botY.toFixed(2)} ${(60-w).toFixed(2)} ${cornerY} Z`;
     svg.querySelectorAll('.hf-mouth,.hf-mclip').forEach(el=>setA(el,'d',d));
@@ -209,140 +216,36 @@
     if(glint)setA(glint,'transform',`translate(${(P.glint<0?-40:-10+140*P.glint).toFixed(2)} 0)`);
   }
 
-  /* ---------- Idle: random happy loops after the hello ----------
-     Six short performances, picked at random (never the same twice in a
-     row) with a brief bouncy pause between them. Anything that flies off
-     the face is a mini Hackensack mark. Positions are in the face's own
-     drawing units (the face is 112 units across, centred on 60,60).
-     Stops with reduced motion, when the tab is hidden, and while the face
-     is scrolled out of view, so it costs nothing when nobody can see it. */
-  const clamp1=x=>x<0?0:x>1?1:x;
-  const sm1=x=>{x=clamp1(x);return x*x*(3-2*x);};
-  const win=(t,a,b)=>clamp1((t-a)/(b-a));
-  const bump=(t,a,b)=>Math.sin(Math.PI*win(t,a,b));
-  const backOut=x=>{const c1=2.4,c3=c1+1;x=clamp1(x);return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+  /* ---------- Idle: after the hello ----------
+     His face runs on drFaceIdle (index.html): one timer, blinks at irregular
+     moments, now and then a smile, a laugh or a wink, each with a lead-in, a
+     short peak and a slower way back, and a lean of a degree or two of his pin
+     (never a bounce or a scale). Nothing moves between them. Stops with
+     reduced motion, when the tab is hidden, and while he is scrolled out of
+     view, so it costs nothing when nobody can see it. */
   const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);};
-  const idlePose=()=>({tx:0,ty:0,rot:0,sx:1,sy:1,pivot:'50% 90%',...FACE_REST});
-  const IDLE=[
-    { name:'bouncy', L:2.4,
-      pose(t){const p=idlePose(),ph=(t%.6)/.6,air=Math.sin(Math.PI*ph);
-        const land=ph<.12?1-ph/.12:ph>.9?(ph-.9)/.1:0;
-        p.ty=-9*air;p.sx=1+.09*land-.03*air;p.sy=1-.09*land+.04*air;p.open=.25+.45*air;p.blush=1.1+.15*air;
-        p.sqL=bump(t,1.75,2.15);p.rot=3*Math.sin(TAU*t/1.2);return p;},
-      marks(){return [];} },
-    { name:'hum', L:3.2,
-      pose(t){const p=idlePose(),s=Math.sin(TAU*t/1.6);
-        p.rot=10*s;p.tx=3*s;p.ty=-2.5*Math.abs(s);p.open=.18+.14*Math.abs(Math.sin(TAU*t/.4));p.blush=1.15+.1*Math.sin(TAU*t/.8);return p;},
-      marks(t){const out=[];
-        for(let k=0;k<4;k++){const a=t-.8*k;if(a<0||a>1.7)continue;const side=k%2?-1:1;
-          out.push({x:60+side*(40+16*a)+4*Math.sin(a*6),y:30-34*a,r:12*Math.sin(a*5)*side,s:1+.35*a,o:a<.2?a/.2:1-(a-.2)/1.5});}
-        return out;} },
-    { name:'giggle', L:3.6,
-      pose(t){const p=idlePose(),b=sm1(win(t,1.5,1.7))*(1-sm1(win(t,2.7,3)));
-        p.sy=1+.025*Math.sin(TAU*t/1.2)*(1-b);p.sx=1-.02*Math.sin(TAU*t/1.2)*(1-b);
-        p.sqL=p.sqR=b;p.open=b;p.blush=1+.35*b;p.ty=-5*b*Math.abs(Math.sin(TAU*t*3));p.rot=7*b*Math.sin(TAU*t*7);
-        if(t>1.3&&t<1.5){const a=sm1(win(t,1.3,1.5));p.sx=1+.08*a;p.sy=1-.08*a;}
-        return p;},
-      marks(t){const out=[],a=t-1.62;if(a<0||a>1)return out;
-        for(let i=0;i<7;i++){const ang=-Math.PI/2+(i-3)*.52,d=54+34*sm1(a);
-          out.push({x:60+Math.cos(ang)*d,y:58+Math.sin(ang)*d*.9,r:120*a,s:1.3*Math.sin(Math.PI*a),o:1});}
-        return out;} },
-    { name:'gleam', L:3.4,
-      pose(t){const p=idlePose();
-        p.gl=5*bump(t,.3,.75);p.ty=-3*bump(t,.3,.75);p.glint=win(t,.8,1.35);
-        p.sqR=sm1(win(t,1.6,1.75))*(1-sm1(win(t,2.25,2.4)));p.open=.35*bump(t,1.5,2.6);p.rot=-6*bump(t,1.5,2.6);
-        p.blush=1+.3*bump(t,1.5,2.6);p.ty+=-2*Math.abs(Math.sin(TAU*t/.8))*win(t,2.4,3.4);return p;},
-      marks(t){const a=t-1.65;if(a<0||a>.9)return [];
-        return [{x:98+14*a,y:30-18*a,r:90*a,s:1.5*Math.sin(Math.PI*a/.9),o:1}];} },
-    { name:'party', L:3.8,
-      pose(t){const p=idlePose(),crouch=bump(t,.1,.45),air=win(t,.45,1.05);
-        p.pivot='50% 50%';
-        if(t<.45){p.sx=1+.12*crouch;p.sy=1-.12*crouch;p.ty=4*crouch;}
-        else if(t<1.05){p.ty=-26*Math.sin(Math.PI*air);p.rot=360*sm1(air);p.sx=.94;p.sy=1.07;}
-        else{const land=bump(t,1.05,1.3);p.sx=1+.14*land;p.sy=1-.14*land;p.ty=5*land-4*Math.abs(Math.sin(TAU*(t-1.3)))*(1-win(t,1.3,3.2));}
-        const laugh=sm1(win(t,1.05,1.2))*(1-sm1(win(t,2.8,3.3)));
-        p.open=laugh;p.sqL=p.sqR=sm1(win(t,.45,.6))*(1-sm1(win(t,1.3,1.5)));p.blush=1+.4*laugh;return p;},
-      marks(t){const out=[],a=t-1.08;if(a<0||a>1.5)return out;
-        for(let i=0;i<14;i++){const ang=-Math.PI*(.08+.84*rnd(i)),v=70+50*rnd(i+20);
-          out.push({x:60+Math.cos(ang)*v*a,y:40+Math.sin(ang)*v*a+70*a*a,r:(rnd(i+40)-.5)*900*a,s:.8+.4*rnd(i+60),o:1-win(a,1,1.5)});}
-        return out;} },
-    { name:'hearts', L:3.4,
-      pose(t){const p=idlePose(),h=backOut(win(t,.4,.75))*(1-sm1(win(t,2.5,2.8))),hc=clamp1(h);
-        const beat=Math.max(0,Math.sin(TAU*t*1.6));
-        p.heart=h*(1+.12*beat);p.open=.75*hc;p.blush=1+.45*hc;
-        p.sx=p.sy=1+.035*beat*hc;p.ty=-2*beat*hc;p.rot=4*Math.sin(TAU*t/1.7)*hc;return p;},
-      marks(t){const out=[];
-        for(let k=0;k<5;k++){const a=t-(.7+.4*k);if(a<0||a>1.4)continue;const side=k%2?1:-1;
-          out.push({x:60+side*(18+(10*k)%30)+6*Math.sin(a*5),y:14-36*a,r:side*10*Math.sin(a*4),s:.9+.45*a,o:a<.15?a/.15:1-(a-.15)/1.25});}
-        return out;} }
-  ];
-  // The pause between performances keeps a gentle happy bob going.
-  function restPose(t){const p=idlePose(),b=Math.abs(Math.sin(TAU*t/1.4));p.ty=-2.2*b;p.sy=1+.02*Math.sin(TAU*t/1.4);p.sx=2-p.sy;return p;}
-
-  let idleStop=()=>{},idleRunning=false,lastIdle=-1,forcedAct=null;
-  // index.html calls this when the team reaches a new rank: his next idle
-  // act is the party spin with its burst of logo squares, straight away.
-  window.homeSmileyCelebrate=()=>{forcedAct='party';};
-  // index.html's reactions (a term added, a quiz finished, the warm-up...)
-  // play one of his own acts next: 'bouncy', 'hearts', 'hum', 'gleam', 'party'.
-  window.homeSmileyAct=name=>{forcedAct=name;};
+  // index.html's reactions (a term added, a quiz finished, the warm-up...) and
+  // a new team rank ask for one of these by their old names.
+  const ACT_FACE={bouncy:'smile',hearts:'smile',hum:'smile',gleam:'wink',giggle:'laugh',party:'laugh'};
+  let idleStop=()=>{},idleRunning=false,forcedAct=null,idleCtl=null;
+  const actNow=name=>{const f=ACT_FACE[name]||'smile';if(idleCtl){idleCtl.act(f);forcedAct=null;}else forcedAct=name;};
+  window.homeSmileyCelebrate=()=>actNow('party');
+  window.homeSmileyAct=name=>actNow(name);
   function startIdle(button){
     idleStop();
     if(reduced.matches||document.hidden||!button||!button.isConnected)return;
     const pin=button.querySelector('.home-wave-pin'),svg=button.querySelector('.home-face');
-    if(!pin||!svg)return;
-    let layer=button.querySelector('.home-face-marks');
-    if(!layer){
-      layer=document.createElement('span');layer.className='home-face-marks';layer.setAttribute('aria-hidden','true');
-      for(let i=0;i<14;i++){const img=document.createElement('img');img.src='./hmh-mark.png';img.alt='';img.draggable=false;layer.appendChild(img);}
-      button.appendChild(layer);
-    }
-    const imgs=[...layer.children];
-    let raf=0,onScreen=true,act=null,actStart=0,restUntil=0,restStart=performance.now(),lastNow=0;
-    const pick=()=>{if(forcedAct){const a=IDLE.find(x=>x.name===forcedAct);forcedAct=null;if(a)return a;}let i=Math.floor(Math.random()*(IDLE.length-1));if(i>=lastIdle&&lastIdle>=0)i++;if(lastIdle<0)i=Math.floor(Math.random()*IDLE.length);lastIdle=i;return IDLE[i];};
-    restUntil=restStart+900+Math.random()*900;
-    // His drawing's units to px. Measured once and again only when he is
-    // resized: reading clientWidth inside every frame, right after the last
-    // frame's style writes, forced a layout pass 60 times a second.
-    let u=pin.clientWidth/112;
-    const ro=new ResizeObserver(()=>{u=pin.clientWidth/112;});
-    ro.observe(pin);
-    function paint(p,marks){
-      if(pin.style.transformOrigin!==p.pivot)pin.style.transformOrigin=p.pivot;
-      pin.style.transform=`translate3d(${(p.tx*u).toFixed(1)}px,${(p.ty*u).toFixed(1)}px,0) rotate(${p.rot.toFixed(1)}deg) scale(${p.sx.toFixed(3)},${p.sy.toFixed(3)})`;
-      smileyTilt=((+p.rot.toFixed(1)+180)%360+360)%360-180;   // as written above, wrapped to ±180 as the browser reports it
-      setFace(svg,p);
-      imgs.forEach((img,i)=>{
-        const m=marks[i];
-        if(!m||m.o<=0){if(img.style.opacity!=='0')img.style.opacity='0';return;}
-        img.style.opacity=clamp1(m.o).toFixed(3);
-        img.style.transform=`translate3d(${((m.x-60)*u).toFixed(2)}px,${((m.y-60)*u).toFixed(2)}px,0) rotate(${m.r.toFixed(1)}deg) scale(${Math.max(0,m.s).toFixed(3)})`;
-      });
-    }
-    function frame(now){
-      raf=0;
-      if(!button.isConnected||document.hidden){idleStop();return;}
-      lastNow=now;
-      if(act){
-        const t=(now-actStart)/1000;
-        if(t>=act.L){act=null;restStart=now;restUntil=now+900+Math.random()*1600;paint(restPose(0),[]);}
-        else paint(act.pose(t),act.marks(t));
-      }else if(now>=restUntil||forcedAct){act=pick();actStart=now;paint(act.pose(0),[]);}
-      else paint(restPose((now-restStart)/1000),[]);
-      if(onScreen)raf=requestAnimationFrame(frame);
-    }
-    const io=new IntersectionObserver(entries=>{
-      onScreen=entries[0].isIntersecting;
-      if(onScreen&&!raf&&idleRunning)raf=requestAnimationFrame(frame);
-    });
+    if(!pin||!svg||typeof window.drFaceIdle!=='function')return;
+    let onScreen=true;
+    const io=new IntersectionObserver(entries=>{onScreen=entries[0].isIntersecting;});
     io.observe(button);
-    idleRunning=true;
-    pin.style.willChange='transform';
-    raf=requestAnimationFrame(frame);
+    pin.style.transformOrigin='50% 88%';
+    const ctl=window.drFaceIdle(svg,pin,{canPlay:()=>onScreen&&button.isConnected,first:forcedAct?300:1600+Math.random()*1200});
+    idleCtl=ctl;idleRunning=true;
+    if(forcedAct){const f=ACT_FACE[forcedAct]||'smile';forcedAct=null;ctl.act(f);}
     idleStop=()=>{
-      if(raf)cancelAnimationFrame(raf);raf=0;io.disconnect();ro.disconnect();idleRunning=false;
-      pin.style.transform='';pin.style.transformOrigin='';pin.style.willChange='';smileyTilt=0;setFace(svg,FACE_REST);
-      imgs.forEach(img=>{img.style.opacity='0';});
+      ctl.stop();io.disconnect();idleRunning=false;idleCtl=null;
+      pin.style.transform='';pin.style.transformOrigin='';smileyTilt=0;setFace(svg,FACE_REST);
       idleStop=()=>{};
     };
   }

@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v156-smiley-cords';
+const CACHE_VERSION = 'interpreter-hub-v157-smiley-face-frames';
 const PRECACHE = [
   './',
   './index.html',
@@ -40,12 +40,11 @@ const PRECACHE = [
   './hmh-mark-square.png',
   // The greeting hand. Same reason: it is on the first screen of a cold start.
   './wave-hand.png',
-  // Dr. Smiley's four faces (drSmileyArt in index.html): on Home, the dock,
-  // Ask the Hub and the lock screen, so they must work offline from the start.
-  './drsmiley/gentle.webp',
-  './drsmiley/wink.webp',
-  './drsmiley/happy.webp',
-  './drsmiley/laugh.webp',
+  // Dr. Smiley (drSmileyArt in index.html): his picture and the strip of
+  // frames his face moves through. On Home, the dock, Ask the Hub and the
+  // lock screen, so they must work offline from the start.
+  './drsmiley/base.webp',
+  './drsmiley/face.webp',
   './pin-icons.js',
   './home-polish.css',
   './home-polish.js',
