@@ -15413,6 +15413,7 @@ function renderContent(){
   if(activeCategory === 'ask'){
     content.innerHTML = renderAsk();
     fitAskPanel();
+    askFaceSync();
     const box = document.getElementById('askMessages');
     // A conversation opens at its latest answer; the empty state opens at
     // the top, so the smiley and greeting are what you see first.
@@ -17859,7 +17860,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1904';
+const BUILD_ID = 'b1006.2017';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -21464,12 +21465,17 @@ function showAccessLock(mode){
     lock.hidden = false;
     requestAnimationFrame(()=> lock.classList.add('show'));
   }
+  // He blinks now and then while you type the code.
+  const lockSvg = document.querySelector('#accessFace svg');
+  if(lockSvg && !(lockIdle && lockIdle.running)) lockIdle = drFaceIdle(lockSvg, null, { expressions: false, canPlay: () => !lock.hidden && !lock.classList.contains('is-happy') });
   if(prefersAutoFocus()) setTimeout(()=> document.getElementById('accessCode').focus(), 350);
 }
+let lockIdle = null;
 
 function hideAccessLock(instant){
   const lock = document.getElementById('accessLock');
   if(!lock || lock.hidden) return;
+  if(lockIdle){ lockIdle.stop(); lockIdle = null; }
   const app = document.getElementById('app');
   if(app) app.inert = false;
   document.body.classList.remove('access-locked');
@@ -22074,6 +22080,21 @@ function renderAskMessages(scrollToEnd){
       drFacePlay(svg, 'smile', svg);
     }
   }
+  askFaceSync();
+}
+// Ask the Hub's Dr. Smiley blinks now and then while you're on the screen
+// (drFaceIdle, blinks only: his smile is kept for when an answer lands).
+// Whichever face is showing gets it: the big hello one, or the header one
+// once a conversation has started. A repaint makes a new face; the old one's
+// timer stops by itself once its face is gone.
+let askIdle = null;
+function askFaceSync(){
+  if(activeCategory !== 'ask') return;
+  const svg = document.querySelector('.ask-hello .ask-face svg') || document.querySelector('#askFace svg');
+  if(!svg || (askIdle && askIdle.running && askIdle.svg === svg)) return;
+  if(askIdle) askIdle.stop();
+  askIdle = drFaceIdle(svg, svg, { expressions: false, canPlay: () => activeCategory === 'ask' && !ASK.busy });
+  askIdle.svg = svg;
 }
 
 /* ---- Asking ---- */
