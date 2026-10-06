@@ -25,6 +25,7 @@ between assignments.
 | `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 40 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
+| `drsmiley/*.webp` | 4 files | Dr. Smiley's faces (gentle, wink, happy, laugh), head and shoulders with the lanyard painted in; used by `drSmileyArt()` everywhere he appears |
 | `sw.js` | 175 | Service worker. Network-first for HTML, stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | 8 | Cron: `/api/check-events` daily at 13:00 UTC |

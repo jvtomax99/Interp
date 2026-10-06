@@ -294,11 +294,8 @@
   .tabbar.is-dragging .tabbar-lens{transition:scale .2s;scale:1.06 1.1;background:color-mix(in srgb,var(--accent) 18%,var(--paper));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 6px 16px -8px rgba(22,55,90,.45);}
 
-  /* His head is the button: the artwork is drawn 112% wide so the outline of
-     his head (r 47 + a 6-unit stroke in a 112-unit box) lands on the circle's
-     edge; a hair larger, over his own outline colour, so no light sliver
-     shows, and 3% low so his cap fills the top and his coat collar stays
-     out of the circle. No ring, no gap. */
+  /* His head is the button: his face fills a light sky circle, no ring,
+     no gap (positioned below). */
   .dock-smiley{position:fixed;z-index:60;right:14px;bottom:var(--dock-bottom);width:58px;height:58px;padding:0;border-radius:50%;
     border:0;background:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
@@ -307,18 +304,19 @@
   body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
   body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
   /* The shadow rides on the part that bobs, so no light gap opens under him. */
-  .dock-smiley-bob{position:relative;display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;transform-origin:50% 100%;background:#1A1A1A;
+  .dock-smiley-bob{position:relative;display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;transform-origin:50% 100%;background:linear-gradient(180deg,#F0F8FD,#DEEEFD);
     box-shadow:0 1px 2px rgba(21,28,44,.28),0 10px 24px -8px rgba(21,28,44,.40),0 2px 6px -2px rgba(21,28,44,.24);}
   body.dock-has-smiley .dock-smiley-bob{animation:dockBob 3.2s ease-in-out infinite;}
   @keyframes dockBob{50%{transform:translateY(-1.5px);}}
-  .dock-smiley .ask-face{position:absolute;display:block;left:-6.75%;top:-3.75%;width:113.5%;height:113.5%;margin:0;}
+  /* His head fills the circle edge to edge: the picture's width is the
+     circle's, its top the circle's top; collar and lanyard fall outside. */
+  .dock-smiley .ask-face{position:absolute;display:block;left:-9.4%;top:3%;width:105.7%;height:105.7%;margin:0;}
   .dock-smiley .ask-face svg{display:block;width:100%;height:100%;filter:none;}
   .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:750;line-height:14px;
     letter-spacing:.02em;color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
   .dock-smiley:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
-  /* Idle emotes (smileyRider in index.html): a giggle is his ^ ^ eyes with
-     the big open smile; a doze sends two z's floating up. */
-  .dock-smiley .ask-face.is-giggle .af-smile{opacity:1;}
+  /* Idle emotes (smileyRider in index.html): the face for each is picked in
+     index.html (.is-wink, .is-happy, .is-giggle); a doze sends two z's up. */
   .dock-smiley-z{position:absolute;right:-3px;top:-7px;font:800 13px/1 var(--sans);color:var(--accent);opacity:0;pointer-events:none;}
   .dock-smiley-z + .dock-smiley-z{right:-11px;top:-17px;font-size:10px;}
   .dock-smiley.is-dozing .dock-smiley-z{animation:dockZ 2.6s ease-out .4s both;}
@@ -857,7 +855,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   100%{scale:1;filter:none;}}
 #content.is-home .home-ask-lanyard{position:absolute;left:-2px;top:-2px;width:64px;height:100px;overflow:visible;z-index:1;pointer-events:none;
   filter:none;transition:opacity .3s var(--ease);}
-#content.is-home .home-ask-tag{position:absolute;left:50%;top:70px;pointer-events:auto;transform:translateX(-50%);transform-origin:50% -16px;box-sizing:border-box;height:24px;
+#content.is-home .home-ask-tag{position:absolute;left:50%;top:70px;pointer-events:auto;transform:translateX(-50%);transform-origin:50% -1px;box-sizing:border-box;height:24px;
   display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 9px 0 4px;
   border-radius:7px;z-index:2;background:rgba(255,255,255,.95);color:#252E6D;font:650 13px/1 var(--sans);letter-spacing:.01em;white-space:nowrap;
   box-shadow:0 0 0 1px rgba(255,255,255,.55),0 4px 10px rgba(8,20,48,.34);

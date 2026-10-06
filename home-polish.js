@@ -164,8 +164,21 @@
   // Writing an SVG attribute repaints the face even when the value is the
   // same, and the idle runs every frame, so only write what changed.
   const setA=(el,name,value)=>{const v=String(value);if(el.getAttribute(name)!==v)el.setAttribute(name,v);};
+  // Dr. Smiley is a picture now (drSmileyArt in index.html), so a pose picks
+  // one of his four faces: both eyes squeezed is his laugh, one is a wink,
+  // heart eyes, an open mouth or a big blush is his big smile, otherwise calm.
+  // CSS shows the face named in data-face. The vector parts below only exist
+  // in the old drawing; with the picture they find nothing and do nothing.
+  function faceFor(P){
+    const l=(P.sqL||0)>.5,r=(P.sqR||0)>.5;
+    if(l&&r)return 'laugh';
+    if(l||r)return 'wink';
+    if((P.heart||0)>.3||(P.open||0)>.5||(P.blush||1)>1.12)return 'happy';
+    return 'gentle';
+  }
   function setFace(svg,P){
     if(!svg||!svg.querySelector)return;
+    if(svg.classList.contains('ds-art')){const f=faceFor(P);if(svg.dataset.face!==f)svg.dataset.face=f;}
     const o=P.open,w=12+9*o,cornerY=72,topY=cornerY+7*(1-o),botY=topY+1+34*o;
     const d=`M${(60-w).toFixed(2)} ${cornerY} Q60 ${topY.toFixed(2)} ${(60+w).toFixed(2)} ${cornerY} Q60 ${botY.toFixed(2)} ${(60-w).toFixed(2)} ${cornerY} Z`;
     svg.querySelectorAll('.hf-mouth,.hf-mclip').forEach(el=>setA(el,'d',d));
@@ -806,22 +819,15 @@
       const el=document.createElement('span');el.className='home-wave-'+name;
       el.setAttribute('aria-hidden','true');if(i)el.textContent='✦';wave.appendChild(el);
     });
-    // Ask the Hub: the Hackensack halo, and the "Ask" badge on a navy lanyard
-    // around Dr. Smiley's neck (styled in home-polish.css). The lanyard and
-    // badge live inside the face layer (pin), so they spring, bounce, laugh
-    // and wiggle with him; the layer's pivot is his neck.
+    // Ask the Hub: the Hackensack halo, and the "Ask" badge on the lanyard
+    // round Dr. Smiley's neck (styled in home-polish.css). The badge lives
+    // inside the face layer (pin), so it springs, bounces, laughs and wiggles
+    // with him; the layer's pivot is his neck.
     const ring=document.createElement('span');ring.className='home-ask-ring';ring.setAttribute('aria-hidden','true');
     wave.append(ring);askHalo.attach(ring);
     heartline.attach(wave);
-    // The cords go inside his drawing, just above the coat and under the
-    // face, so they read as around his neck; askBadge draws their path.
-    const coat=pin.querySelector('.home-face .hub-coat');
-    if(coat)coat.insertAdjacentHTML('afterend','<g class="hub-lanyard">'
-      +'<path fill="none" stroke="#1A1A1A" stroke-width="7.4" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'<path fill="none" stroke="#2B3A8F" stroke-width="4.1" stroke-linecap="round" stroke-linejoin="round"/></g>');
-    // Only the clip sits above, with the badge.
-    pin.insertAdjacentHTML('beforeend','<svg class="home-ask-lanyard" viewBox="0 0 64 100" aria-hidden="true" focusable="false">'
-      +'<rect x="29" y="69" width="6" height="5" rx="1.5" fill="#C9D3E0" stroke="#1A1A1A" stroke-width="1.2"/></svg>');
+    // His lanyard and its clip are painted into his picture; the badge hangs
+    // from the clip and swings from its top edge (home-polish.css).
     const tag=document.createElement('span');tag.className='home-ask-tag';tag.setAttribute('aria-hidden','true');
     tag.innerHTML='<span class="home-ask-tag-mark"><img src="./hmh-mark-square.png" alt=""></span>Ask';
     pin.append(tag);
