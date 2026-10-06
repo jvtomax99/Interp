@@ -178,6 +178,7 @@
     if(w>.75)return 'wink';
     if(w>.45)return 'wink2';
     if(w>.15)return 'wink1';
+    if((P.heart||0)>.3)return 'love';
     if(o>.75)return 'smile';
     if(o>.45)return 'smile2';
     if(o>.15)return 'smile1';
@@ -226,7 +227,7 @@
   const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);};
   // index.html's reactions (a term added, a quiz finished, the warm-up...) and
   // a new team rank ask for one of these by their old names.
-  const ACT_FACE={bouncy:'smile',hearts:'smile',hum:'smile',gleam:'wink',giggle:'laugh',party:'laugh'};
+  const ACT_FACE={bouncy:'smile',hearts:'love',hum:'smile',gleam:'glance',giggle:'laugh',party:'laugh'};
   let idleStop=()=>{},idleRunning=false,forcedAct=null,idleCtl=null;
   const actNow=name=>{const f=ACT_FACE[name]||'smile';if(idleCtl){idleCtl.act(f);forcedAct=null;}else forcedAct=name;};
   window.homeSmileyCelebrate=()=>actNow('party');

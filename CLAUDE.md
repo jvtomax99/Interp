@@ -25,7 +25,7 @@ between assignments.
 | `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 40 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
-| `drsmiley/base.webp`, `drsmiley/face.webp` | 2 files | Dr. Smiley: his calm head-and-shoulders picture, and a strip of 14 frames of his eyes and mouth built on that same face (`drSmileyArt()`, `drFacePlay()`, `drFaceIdle()` in `index.html`). On Home, `home-polish.js` draws his lanyard as live cords over him |
+| `drsmiley/*.webp` | 5 files | Dr. Smiley: `base` (his calm head and shoulders), `face` (a strip of 18 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, `drFacePlay()`, `drFaceIdle()`, `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
 | `sw.js` | 175 | Service worker. Network-first for HTML, stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | 8 | Cron: `/api/check-events` daily at 13:00 UTC |

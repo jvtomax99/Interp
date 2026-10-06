@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v158-smiley-blinks';
+const CACHE_VERSION = 'interpreter-hub-v159-smiley-drawn-faces';
 const PRECACHE = [
   './',
   './index.html',
@@ -45,6 +45,10 @@ const PRECACHE = [
   // lock screen, so they must work offline from the start.
   './drsmiley/base.webp',
   './drsmiley/face.webp',
+  // His rank outfits (smileyAccessory in index.html).
+  './drsmiley/hat-cap.webp',
+  './drsmiley/hat-mirror.webp',
+  './drsmiley/hat-grad.webp',
   './pin-icons.js',
   './home-polish.css',
   './home-polish.js',
