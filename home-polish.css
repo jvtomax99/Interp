@@ -294,34 +294,42 @@
   .tabbar.is-dragging .tabbar-lens{transition:scale .2s;scale:1.06 1.1;background:color-mix(in srgb,var(--accent) 18%,var(--paper));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 6px 16px -8px rgba(22,55,90,.45);}
 
+  /* His head is the button: the artwork is drawn 112% wide so the outline of
+     his head (r 47 + a 6-unit stroke in a 112-unit box) lands on the circle's
+     edge; a hair larger, over his own outline colour, so no light sliver
+     shows, and 3% low so his cap fills the top and his coat collar stays
+     out of the circle. No ring, no gap. */
   .dock-smiley{position:fixed;z-index:60;right:14px;bottom:var(--dock-bottom);width:58px;height:58px;padding:0;border-radius:50%;
-    border:1px solid var(--glass-edge);background:radial-gradient(circle at 50% 30%,#FFFFFF 0%,#EEF5FC 62%,#DCE9F7 100%);
-    box-shadow:0 10px 28px -8px rgba(21,28,44,.30),0 2px 6px -2px rgba(21,28,44,.18),inset 0 1px 0 rgba(255,255,255,.85);
+    border:0;background:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
     opacity:0;transform:translateY(16px) scale(.4);pointer-events:none;
     transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),width .3s var(--ease),height .3s var(--ease);}
-  html[data-theme="dark"] .dock-smiley{border-color:rgba(255,255,255,.14);background:radial-gradient(circle at 50% 30%,#3A4766 0%,#26304A 72%);}
   body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
   body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
-  .dock-smiley-bob{display:block;width:44px;height:44px;transform-origin:50% 100%;transition:width .3s,height .3s;}
+  /* The shadow rides on the part that bobs, so no light gap opens under him. */
+  .dock-smiley-bob{position:relative;display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;transform-origin:50% 100%;background:#1A1A1A;
+    box-shadow:0 1px 2px rgba(21,28,44,.28),0 10px 24px -8px rgba(21,28,44,.40),0 2px 6px -2px rgba(21,28,44,.24);}
   body.dock-has-smiley .dock-smiley-bob{animation:dockBob 3.2s ease-in-out infinite;}
   @keyframes dockBob{50%{transform:translateY(-1.5px);}}
-  .dock-smiley .ask-face{display:block;width:100%;height:100%;margin:0;}
-  .dock-smiley .ask-face svg{filter:drop-shadow(0 2px 2px rgba(11,35,64,.22));}
+  .dock-smiley .ask-face{position:absolute;display:block;left:-6.75%;top:-3.75%;width:113.5%;height:113.5%;margin:0;}
+  .dock-smiley .ask-face svg{display:block;width:100%;height:100%;filter:none;}
   .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:750;line-height:14px;
     letter-spacing:.02em;color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
   .dock-smiley:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
 
   /* Tucked while you scroll down */
-  body.dock-mini .tabbar{right:calc(100% - 14px - 54px);height:54px;}
-  body.dock-mini .tabbar-btn{height:44px;}
-  body.dock-mini .tabbar-btn:not(.is-active){flex-grow:0;flex-basis:0;padding:0;opacity:0;overflow:hidden;pointer-events:none;}
-  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{flex-grow:1;padding:5px 2px 4px;opacity:1;}
+  /* Tucked: the pill becomes a circle exactly Dr. Smiley's size, on the same
+     line, and the tab's icon grows to fill it. */
+  body.dock-mini .tabbar{right:calc(100% - 14px - 54px);height:54px;padding:0;border-radius:50%;}
+  body.dock-mini .tabbar-btn{height:52px;padding:0;justify-content:center;}
+  body.dock-mini .tabbar-btn:not(.is-active){flex-grow:0;flex-basis:0;opacity:0;overflow:hidden;pointer-events:none;}
+  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{flex-grow:1;opacity:1;pointer-events:auto;}
   body.dock-mini .tabbar-btn > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
   body.dock-mini .tabbar-lens{opacity:0;}
-  body.dock-mini .tabbar-btn.is-active{background:color-mix(in srgb,var(--accent) 12%,transparent);}
+  body.dock-mini .tabbar-btn.is-active .tabbar-icon,
+  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.6);}
+  body.dock-mini .tabbar-badge{top:3px;right:3px;}
   body.dock-mini .dock-smiley{width:54px;height:54px;}
-  body.dock-mini .dock-smiley-bob{width:40px;height:40px;}
   body.dock-mini .dock-smiley-tag{opacity:0;}
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
