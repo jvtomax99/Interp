@@ -17801,8 +17801,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1209';
-const BUILD_TIME = '2026-10-06 12:09 UTC';
+const BUILD_ID = 'b1006.1222';
+const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -17973,7 +17973,7 @@ function dockAfterRender(){
   }
   // A new screen always starts with the bar open, and the idle count restarts.
   if(dockCat !== activeCategory){
-    dockCat = activeCategory; document.body.classList.remove('dock-mini');
+    dockCat = activeCategory; dockOpen();
     if(window.dockIdleRestart) window.dockIdleRestart();
   }
 }
@@ -17997,6 +17997,20 @@ function dockTuck(){
     }catch(e){}
   }
   b.classList.add('dock-mini');
+  dockRefitChat();
+}
+// Opens the tucked bar. In Team Chat the message box sits on the bar, so
+// after the bar changes size the thread is refitted to it.
+function dockOpen(){
+  const b = document.body;
+  if(!b.classList.contains('dock-mini')) return;
+  b.classList.remove('dock-mini');
+  dockRefitChat();
+}
+function dockRefitChat(){
+  if(activeCategory !== 'chat' || typeof fitChatPanel !== 'function') return;
+  requestAnimationFrame(fitChatPanel);
+  setTimeout(fitChatPanel, 460);                 // once the bar has finished moving
 }
 function dockTabAt(bar, x){
   const btns = [...bar.querySelectorAll('.tabbar-btn')];
@@ -18006,8 +18020,9 @@ function dockTabAt(bar, x){
 (function wireDock(){
   const phone = window.matchMedia('(max-width:900px)');
   const body = () => document.body;
-  // Scrolling down tucks the bar into a small pill; up (or the top) opens it.
-  // Not in Team Chat, whose message box sits on the bar.
+  // Scrolling down tucks the bar into a capsule; up (or the top) opens it.
+  // Team Chat scrolls its own thread rather than the page, so that is
+  // watched below.
   let lastY = window.scrollY;
   window.addEventListener('scroll', () => {
     const y = window.scrollY, dy = y - lastY;
@@ -18015,18 +18030,34 @@ function dockTabAt(bar, x){
     lastY = y;
     if(!phone.matches || !document.querySelector('.tabbar')) return;
     if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open')) dockTuck();
-    else if(dy < 0 || y <= 80) body().classList.remove('dock-mini');
+    else if((dy < 0 || y <= 80) && activeCategory !== 'chat') dockOpen();
   }, { passive:true });
-  // Left alone for 4 seconds, the bar tucks away too. Any touch, key or
-  // scroll starts the count again (it doesn't open the bar: tap the pill or
-  // scroll up for that). Same exceptions as scrolling: not in Team Chat, and
-  // not while the keyboard, a sheet or search is open.
+  // In Team Chat: your own scrolling of the thread does the same. A new
+  // message scrolling it for you doesn't count (no touch just before).
+  let threadY = null, touchedAt = 0;
+  window.addEventListener('pointerdown', () => { touchedAt = performance.now(); }, { passive:true, capture:true });
+  window.addEventListener('wheel', () => { touchedAt = performance.now(); }, { passive:true, capture:true });
+  document.addEventListener('scroll', e => {
+    const t = e.target;
+    if(!t || t.id !== 'chatMessages' || activeCategory !== 'chat' || !phone.matches) return;
+    const y = t.scrollTop;
+    if(threadY === null){ threadY = y; return; }
+    const dy = y - threadY;
+    if(Math.abs(dy) < 8) return;
+    threadY = y;
+    if(performance.now() - touchedAt > 1500 || body().classList.contains('kb-open')) return;
+    if(dy > 0) dockTuck(); else dockOpen();
+  }, { passive:true, capture:true });
+  // Left alone for 4 seconds, the bar tucks away too, Team Chat included.
+  // Any touch, key or scroll starts the count again (it doesn't open the
+  // bar: tap the capsule or scroll up for that). Not while the keyboard, a
+  // sheet or search is open.
   const IDLE_TUCK = 4000;
   let idleTuck = 0;
   const canTuck = () => {
     const bar = document.querySelector('.tabbar');
     return phone.matches && !!bar && getComputedStyle(bar).display !== 'none' && !document.hidden
-      && activeCategory !== 'chat' && !body().classList.contains('kb-open')
+      && !body().classList.contains('kb-open')
       && !document.querySelector('.overlay.show, .gs-overlay.show, .dm-overlay.show');
   };
   window.dockIdleRestart = () => {
@@ -18042,7 +18073,7 @@ function dockTabAt(bar, x){
     const bar = e.target.closest && e.target.closest('.tabbar');
     if(!bar) return;
     if(e.isTrusted && performance.now() < swallowUntil){ e.preventDefault(); e.stopPropagation(); return; }
-    if(body().classList.contains('dock-mini')){ e.preventDefault(); e.stopPropagation(); body().classList.remove('dock-mini'); }
+    if(body().classList.contains('dock-mini')){ e.preventDefault(); e.stopPropagation(); dockOpen(); }
   }, true);
   // Drag along the bar: the lens follows your thumb and lands where you let go.
   let drag = null;

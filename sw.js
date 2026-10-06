@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v151-idle-4s';
+const CACHE_VERSION = 'interpreter-hub-v152-chat-capsule';
 const PRECACHE = [
   './',
   './index.html',
