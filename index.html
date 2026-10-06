@@ -17798,19 +17798,31 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.0948';
-const BUILD_TIME = '2026-10-06 09:48 UTC';
+const BUILD_ID = 'b1006.1020';
+const BUILD_TIME = '2026-10-06 10:20 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
-/* Installed on an iPhone, the app can be handed a viewport shorter than the
-   screen: everything fixed to the bottom (the tab bar) then floats high with
-   an empty band under it. Measure that shortfall so the tab bar can sit
-   where it should. Only for the installed iPhone app, upright, and only for
-   a plausible gap; anywhere else it stays 0 and nothing moves. */
+/* Installed on an iPhone, the app is sometimes handed a viewport shorter than
+   the screen: everything fixed to the bottom (the tab bar) then floats high
+   with an empty band under it, and sometimes it isn't. innerHeight can't
+   tell the two apart, so measure the box fixed elements are actually placed
+   in (a fixed probe stretched top to bottom) and compare it with the screen.
+   Only for the installed iPhone app, upright, and only for a plausible gap;
+   anywhere else it stays 0 and nothing moves. The probe is watched, so the
+   value follows iOS if it changes its mind while the app is open. */
+let vpProbe = null;
 function measureViewportGap(){
   let gap = 0;
   try{
-    if(navigator.standalone === true && innerHeight > innerWidth){
-      const g = screen.height - innerHeight;
+    if(!vpProbe){
+      vpProbe = document.createElement('div');
+      vpProbe.setAttribute('aria-hidden', 'true');
+      vpProbe.style.cssText = 'position:fixed;top:0;bottom:0;left:0;width:1px;visibility:hidden;pointer-events:none;z-index:-1';
+      document.body.appendChild(vpProbe);
+      if(window.ResizeObserver) new ResizeObserver(() => measureViewportGap()).observe(vpProbe);
+    }
+    const fixedH = vpProbe.getBoundingClientRect().height;
+    if(navigator.standalone === true && fixedH > innerWidth){
+      const g = screen.height - fixedH;
       if(g >= 20 && g <= 100) gap = Math.round(g);
     }
   }catch(e){}
@@ -17823,6 +17835,8 @@ function measureViewportGap(){
 measureViewportGap();
 window.addEventListener('resize', measureViewportGap, { passive:true });
 window.addEventListener('orientationchange', () => setTimeout(measureViewportGap, 300));
+window.addEventListener('pageshow', measureViewportGap);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setTimeout(measureViewportGap, 120); });
 /* What this phone reports about its screen, shown small under the build in
    More: the screen height, the height the app actually gets, and the top and
    bottom safe areas. A gap between the first two is space the app can't use. */
@@ -17836,7 +17850,8 @@ function screenReport(){
     p.remove();
     const vv = window.visualViewport;
     const gap = getComputedStyle(document.documentElement).getPropertyValue('--vp-gap').trim() || '0px';
-    return `Screen ${screen.height} · app ${innerHeight}${vv ? ' / ' + Math.round(vv.height) : ''} · safe ${t}/${b} · gap ${gap}`;
+    const fixedH = vpProbe ? Math.round(vpProbe.getBoundingClientRect().height) : '?';
+    return `Screen ${screen.height} · app ${innerHeight}${vv ? ' / ' + Math.round(vv.height) : ''} · fixed ${fixedH} · safe ${t}/${b} · gap ${gap}`;
   }catch(e){ return ''; }
 }
 

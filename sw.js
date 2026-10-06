@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v144-chat-onebar';
+const CACHE_VERSION = 'interpreter-hub-v145-tabbar-fix';
 const PRECACHE = [
   './',
   './index.html',
