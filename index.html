@@ -5864,10 +5864,12 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
 html[data-theme="dark"] .tc{ --tc-recv:#26304A; }
 
 /* Header: who is in the conversation, not just a title. */
-.tc-head{ display:flex; align-items:center; gap:var(--sp-2); margin:0 0 var(--sp-1); min-height:48px; }
+.tc-head{ display:flex; align-items:center; gap:var(--sp-2); margin:0 0 var(--sp-1); min-height:44px; }
+.tc-head .tc-icon-btn{ margin-inline:-4px; }
+.tc-head .tc-icon-btn svg{ width:21px; height:21px; }
 .tc-faces{ display:flex; flex-shrink:0; padding-left:6px; }
 .tc-faces .chat-avatar{
-  width:34px; height:34px; margin:0 0 0 -8px; font-size:12px;
+  width:30px; height:30px; margin:0 0 0 -9px; font-size:11px;
   box-shadow:0 0 0 2px var(--bg), inset 0 0 0 1px rgba(255,255,255,.3);
 }
 .tc-faces .chat-avatar:first-child{ margin-left:0; }
@@ -5887,13 +5889,15 @@ html[data-theme="dark"] .tc{ --tc-recv:#26304A; }
 .tc-icon-btn:active, .tc-icon-btn.is-pressed{ transform:scale(.92); }
 .tc-icon-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
 
-.tc-hipaa{ display:flex; align-items:center; gap:var(--sp-1); margin:0 0 var(--sp-2); font-size:var(--fs-cap); color:#7A5D28; line-height:1.35; }
+/* Sits right above the message box: always visible, and next to where you type. */
+.tc-hipaa{ display:flex; align-items:center; gap:var(--sp-1); margin:0 var(--sp-2) var(--sp-1); font-size:var(--fs-cap); color:#7A5D28; line-height:1.35; }
+.tc-composer[style*="center"] .tc-hipaa{ justify-content:center; }
 .tc-hipaa svg{ width:14px; height:14px; flex-shrink:0; color:#B8923E; }
 html[data-theme="dark"] .tc-hipaa{ color:#D9BE85; }
 html[data-theme="dark"] .tc-hipaa svg{ color:#D9BE85; }
 
 /* Pinned: one line until opened; the list floats over the thread. */
-.tc-pinned{ position:relative; z-index:8; margin:0 0 var(--sp-2); border-radius:var(--r-md); background:#FBF5E8; box-shadow:inset 0 0 0 1px #E8D7B0; }
+.tc-pinned{ position:relative; z-index:8; margin:0 0 var(--sp-1); border-radius:var(--r-md); background:#FBF5E8; box-shadow:inset 0 0 0 1px #E8D7B0; }
 html[data-theme="dark"] .tc-pinned{ background:#2A2618; box-shadow:inset 0 0 0 1px #4A4127; }
 .tc-pinned-bar{
   display:flex; align-items:center; gap:var(--sp-2); width:100%; min-height:44px; padding:0 var(--sp-3);
@@ -6243,7 +6247,6 @@ body.pv-open{ overflow:hidden; }
   .main:has(> #content > .tc){ padding-bottom:0; }
   #content:has(> .tc){ padding-bottom:0; }
   .tc-head{ margin-top:-14px; }
-  /* The HIPAA reminder stays while typing; that is when it matters. */
   body.kb-open .tc-pinned{ display:none; }
 }
 @media (max-height:500px) and (max-width:1000px){
@@ -9902,11 +9905,8 @@ let tcPinnedOpen = false;
 function renderPinnedStrip(){
   const host = document.getElementById('tcPinned');
   if(!host) return;
-  if(!ANNOUNCEMENTS.length){
-    host.innerHTML = `<div class="tc-pinned${tcPinnedOpen ? ' is-open' : ''}"><button type="button" class="tc-pinned-bar" onclick="openAnnouncementModal()">
-      ${ICON_PIN}<span class="tc-pinned-text">Pin an update for the team</span><span class="tc-pinned-chev">${ICON_PLUS}</span></button></div>`;
-    return;
-  }
+  // Nothing pinned: no strip at all. The pin button in the header pins.
+  if(!ANNOUNCEMENTS.length){ host.innerHTML = ''; return; }
   const top = ANNOUNCEMENTS[0];
   const rows = ANNOUNCEMENTS.map(a => `<div class="tc-pin-row"><p>${escapeHtml(a.text)}<small>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}</small></p>
       <button type="button" class="tc-text-btn" onclick="deleteAnnouncement('${a.id}')" aria-label="Unpin: ${escapeAttr(a.text.slice(0, 60))}">Unpin</button></div>`).join('');
@@ -15352,9 +15352,9 @@ function renderContent(){
         <div class="tc-head">
           <div class="tc-faces" id="tcFaces" aria-hidden="true"></div>
           <div class="tc-title"><h2>Team Chat</h2><span class="tc-sub" id="chatCount"></span></div>
+          <button type="button" class="tc-icon-btn" id="tcPinBtn" onclick="openAnnouncementModal()" aria-label="Pin an update for the team" title="Pin an update for the team">${ICON_PIN}</button>
           ${notificationsSupported() ? `<button type="button" class="tc-icon-btn" id="chatNotifyBtn" onclick="toggleNotifications()"></button>` : ''}
         </div>
-        <div class="tc-hipaa">${ICON_SHIELD}<span>HIPAA: no patient names or identifying details.</span></div>
         <div id="tcPinned"></div>
         <div class="chat-panel tc-panel" id="tcPanel">
           <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()" role="log" aria-label="Team messages" aria-live="polite" aria-relevant="additions"></div>
@@ -15368,6 +15368,7 @@ function renderContent(){
               <div class="chat-compose-bar" id="chatComposeBar"></div>
               <div id="chatAttachPreview"></div>
               <div class="tc-note" id="tcNote" role="status"></div>
+              <div class="tc-hipaa">${ICON_SHIELD}<span>HIPAA: no patient names or identifying details.</span></div>
               <div class="chat-input-wrap">
                 <div class="mention-suggestions" id="mentionSuggestions"></div>
                 <div class="tc-row">
@@ -15381,6 +15382,7 @@ function renderContent(){
             </div>
           ` : `
             <div class="tc-composer" style="text-align:center;">
+              <div class="tc-hipaa">${ICON_SHIELD}<span>HIPAA: no patient names or identifying details.</span></div>
               <div class="chat-join-hint">Set your name to join the conversation. Your team sees it next to your messages.</div>
               <button class="btn btn-primary" style="border-radius:24px;" onclick="openNameModal()">Set your name</button>
             </div>
@@ -17766,7 +17768,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.0029';
+const BUILD_ID = 'b1006.0839';
 const BUILD_TIME = '2026-10-05 18:30 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
