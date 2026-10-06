@@ -5374,7 +5374,7 @@ body.access-locked{ overflow:hidden; }
 /* The window his face shows through: its own size and clipping, whatever the
    rules for the svg around it say (.ask-face svg is 100% wide and shows
    overflow, which would stretch the strip and show every frame at once). */
-svg.ds-art svg.ds-face{ width:75.525px !important; height:61.392px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
+svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
 .ask-face.is-thinking svg{ animation:askThink 1.1s ease-in-out infinite; transform-origin:50% 90%; }
 @keyframes askThink{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(-6deg); } 70%{ transform:rotate(5deg); } }
 img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
@@ -12711,7 +12711,7 @@ function externalUrl(raw){
 }
 
 /* Dr. Smiley: the cartoon doctor from Jose's character sheet, head and
-   shoulders. Every Dr. Smiley in the app -- the greeting, the dock, Ask the
+   shoulders, cut out from Jose's drawn calm face. Every Dr. Smiley in the app -- the greeting, the dock, Ask the
    Hub, the lock screen, the top bar -- is drSmileyArt() in the old smiley's
    box (viewBox 4 4 112 112), so the sizes and places around him didn't
    change. He hangs below the box like the old coat did, so each copy keeps
@@ -12731,13 +12731,15 @@ function externalUrl(raw){
    lifting), smile; laugh1/laugh2 (eyes squeezing, mouth widening),
    laugh/laughB (the laugh mouth open and a little less open, for "ha-ha");
    lookL/lookR (eyes to the viewer's left/right); love (heart eyes); sleep.
-   In picture pixels (240 x 300 base) the window is x 30, y 94, 171 x 139. */
+   In picture units (240 x 300 base) the window is x 40, y 106, 151 x 111; the
+   strip is see-through except where frames change, so the picture's own
+   edge shows wherever the window crosses his outline. */
 const DR_FACE_FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep'];
-const DR_FACE_W = 171, DR_FACE_H = 139;
+const DR_FACE_W = 151, DR_FACE_H = 111;
 function drSmileyArt(cls){
   return `<svg class="ds-art${cls ? ' ' + cls : ''}" viewBox="4 4 112 112" aria-hidden="true" focusable="false">`
     + '<image class="ds-base" href="./drsmiley/base.webp" x="14" y=".8" width="106" height="132.5" preserveAspectRatio="none"/>'
-    + `<svg class="ds-face" x="27.25" y="42.317" width="75.525" height="61.392" viewBox="0 0 ${DR_FACE_W} ${DR_FACE_H}" preserveAspectRatio="none">`
+    + `<svg class="ds-face" x="31.667" y="47.617" width="66.692" height="49.025" viewBox="0 0 ${DR_FACE_W} ${DR_FACE_H}" preserveAspectRatio="none">`
     +   `<image class="ds-sheet" href="./drsmiley/face.webp" x="0" y="0" width="${DR_FACE_W * DR_FACE_FRAMES.length}" height="${DR_FACE_H}" preserveAspectRatio="none"/></svg>`
     + '</svg>';
 }
@@ -17873,7 +17875,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.2126';
+const BUILD_ID = 'b1006.2137';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than

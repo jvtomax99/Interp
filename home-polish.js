@@ -738,7 +738,7 @@
     const art=pin.querySelector('.home-face');
     if(art)art.insertAdjacentHTML('beforeend','<defs><mask id="dsNeckMask" maskUnits="userSpaceOnUse" x="-20" y="-40" width="160" height="200">'
       +'<rect x="-20" y="-40" width="160" height="200" fill="#fff"/>'
-      +'<path fill="#000" d="M-20 -40 H140 V86.9 L120 86.9 L92.6 95.3 L86.9 99.7 L81.1 102.4 L76.7 103.7 L71.4 104.6 L64.8 104.6 L58.2 104.1 L52.9 103.3 L48.5 101.9 L46.2 100.6 L43.1 98.4 L37 94.4 L14 88.2 L-20 88.2 Z"/></mask></defs>'
+      +'<path fill="#000" d="M-20 -40 H140 V88.7 L107.6 88.7 L106.5 89.6 L97.0 90.5 L95.9 91.3 L95.3 92.2 L94.6 93.1 L93.7 94.0 L92.8 94.9 L91.7 95.8 L90.6 96.6 L89.3 97.5 L87.8 98.4 L85.8 99.3 L83.6 100.2 L80.9 101.1 L77.8 101.9 L69.7 102.8 L59.5 103.5 L54.2 102.6 L50.4 101.7 L47.3 100.8 L45.1 100.0 L43.1 99.1 L41.4 98.2 L39.6 97.3 L38.1 96.4 L36.5 95.5 L35.2 94.7 L33.9 93.8 L32.8 92.9 L31.7 92.0 L30.8 91.1 L29.9 90.2 L29.2 89.4 L-20 88.7 Z"/></mask></defs>'
       +'<g class="hub-lanyard" mask="url(#dsNeckMask)">'
       +'<path fill="none" stroke="#151B48" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>'
       +'<path fill="none" stroke="#2C3E9E" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>'
