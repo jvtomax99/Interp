@@ -271,9 +271,66 @@
   .tg-brand-sub{font-size:10px;line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;}
   .tg-icon-btn,.tg-avatar{width:36px;height:36px;}
   .tg-right{gap:6px;}
-  .tabbar{border-radius:25px;padding:5px;border-color:var(--line);}
-  .tabbar-btn{min-height:52px;border-radius:20px;font-size:11px;font-weight:500;gap:4px;color:var(--ink-soft);}
-  .tabbar-btn.is-active,html[data-theme="dark"] .tabbar-btn.is-active{background:var(--accent-soft);color:var(--accent);}
+  /* ---------- Split dock ----------
+     Five tabs in one glass capsule, Dr. Smiley in his own round button to its
+     right (.dock-smiley, drawn by smileyRider in index.html). A glass lens
+     sits under the current tab and slides to the next one; it can be dragged.
+     Scrolling down tucks the capsule into a small pill holding the current
+     tab; scrolling up, or tapping the pill, opens it again (wireDock). */
+  .tabbar{height:58px;padding:4px;border-radius:999px;border-color:var(--glass-edge);touch-action:pan-y;
+    transition:right .42s var(--ease),height .3s var(--ease);}
+  body.dock-has-smiley .tabbar{right:calc(14px + 58px + 9px);}
+  .tabbar-btn{min-height:0;height:48px;padding:5px 2px 4px;border-radius:999px;font-size:10.5px;font-weight:550;gap:2px;color:var(--ink-soft);z-index:1;
+    transition:color .2s var(--ease),flex-grow .42s var(--ease),opacity .2s var(--ease);}
+  .tabbar-btn.is-active,html[data-theme="dark"] .tabbar-btn.is-active{background:transparent;color:var(--accent);font-weight:650;}
+  .tabbar-icon{transition:transform .32s cubic-bezier(.3,1.5,.5,1);}
+  .tabbar-btn.is-active .tabbar-icon{transform:scale(1.08);}
+  .tabbar-btn.is-under .tabbar-icon{transform:scale(1.3) translateY(-1px);}
+  .tabbar-lens{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / var(--tab-n,5));border-radius:999px;pointer-events:none;
+    background:color-mix(in srgb,var(--accent) 12%,transparent);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.75),0 1px 2px rgba(20,43,67,.06);
+    transform:translateX(calc(var(--tab-i,0) * 100%));transition:transform .46s cubic-bezier(.3,1.3,.5,1),opacity .2s,scale .2s;}
+  html[data-theme="dark"] .tabbar-lens{background:rgba(255,255,255,.13);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.18);}
+  .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-lens{opacity:0;}
+  .tabbar.is-dragging .tabbar-lens{transition:scale .2s;scale:1.06 1.1;background:color-mix(in srgb,var(--accent) 18%,var(--paper));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 6px 16px -8px rgba(22,55,90,.45);}
+
+  .dock-smiley{position:fixed;z-index:60;right:14px;bottom:var(--dock-bottom);width:58px;height:58px;padding:0;border-radius:50%;
+    border:1px solid var(--glass-edge);background:radial-gradient(circle at 50% 30%,#FFFFFF 0%,#EEF5FC 62%,#DCE9F7 100%);
+    box-shadow:0 10px 28px -8px rgba(21,28,44,.30),0 2px 6px -2px rgba(21,28,44,.18),inset 0 1px 0 rgba(255,255,255,.85);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    opacity:0;transform:translateY(16px) scale(.4);pointer-events:none;
+    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),width .3s var(--ease),height .3s var(--ease);}
+  html[data-theme="dark"] .dock-smiley{border-color:rgba(255,255,255,.14);background:radial-gradient(circle at 50% 30%,#3A4766 0%,#26304A 72%);}
+  body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
+  body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
+  .dock-smiley-bob{display:block;width:44px;height:44px;transform-origin:50% 100%;transition:width .3s,height .3s;}
+  body.dock-has-smiley .dock-smiley-bob{animation:dockBob 3.2s ease-in-out infinite;}
+  @keyframes dockBob{50%{transform:translateY(-1.5px);}}
+  .dock-smiley .ask-face{display:block;width:100%;height:100%;margin:0;}
+  .dock-smiley .ask-face svg{filter:drop-shadow(0 2px 2px rgba(11,35,64,.22));}
+  .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:750;line-height:14px;
+    letter-spacing:.02em;color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
+  .dock-smiley:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
+
+  /* Tucked while you scroll down */
+  body.dock-mini .tabbar{right:calc(100% - 14px - 54px);height:54px;}
+  body.dock-mini .tabbar-btn{height:44px;}
+  body.dock-mini .tabbar-btn:not(.is-active){flex-grow:0;flex-basis:0;padding:0;opacity:0;overflow:hidden;pointer-events:none;}
+  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{flex-grow:1;padding:5px 2px 4px;opacity:1;}
+  body.dock-mini .tabbar-btn > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
+  body.dock-mini .tabbar-lens{opacity:0;}
+  body.dock-mini .tabbar-btn.is-active{background:color-mix(in srgb,var(--accent) 12%,transparent);}
+  body.dock-mini .dock-smiley{width:54px;height:54px;}
+  body.dock-mini .dock-smiley-bob{width:40px;height:40px;}
+  body.dock-mini .dock-smiley-tag{opacity:0;}
+
+  /* He steps aside whenever the bar does: typing, sheets, search. */
+  body.kb-open .dock-smiley,body:has(.overlay.show) .dock-smiley,body:has(.gs-overlay.show) .dock-smiley,body:has(.dm-overlay.show) .dock-smiley{visibility:hidden;}
+}
+@media(min-width:901px){.dock-smiley{display:none;}}
+@media(prefers-reduced-motion:reduce){
+  .tabbar,.tabbar-btn,.tabbar-icon,.tabbar-lens,.dock-smiley,.dock-smiley-bob{transition:none !important;}
+  body.dock-has-smiley .dock-smiley-bob{animation:none;}
 }
 @media(max-width:819px){
   .main.home-layout{--home-inset:16px;padding:0 var(--home-inset) 26px;}

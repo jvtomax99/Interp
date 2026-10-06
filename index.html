@@ -1328,6 +1328,8 @@
 
   /* ---------- Bottom tab bar (phones) ---------- */
   .tabbar{ display:none; }
+  /* Where the dock sits: the capsule and Dr. Smiley's button share it. */
+  :root{ --dock-bottom:max(6px, calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) - var(--vp-gap, 0px))); }
   @media (max-width:900px){
     /* A floating capsule rather than a full-width bar welded to the bottom
        edge: it sits inset from the sides, fully rounded, with the page
@@ -1349,7 +1351,7 @@
       /* --vp-gap: how much shorter than the screen iOS made the app's
          viewport (0 normally; see measureViewportGap). The capsule moves
          down by that much, but never closer than 6px to the viewport edge. */
-      bottom:max(6px, calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) - var(--vp-gap, 0px)));
+      bottom:var(--dock-bottom);
       background:var(--glass-bg);
       -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
       border:1px solid var(--glass-edge);
@@ -5660,7 +5662,7 @@ html[data-theme="dark"] .appt-done, html[data-theme="dark"] .prep-start{ backgro
 .appt-hit button{ width:44px; height:44px; flex:none; border-radius:50%; border:1px solid var(--line); background:var(--bg-hi); color:var(--ink-soft); cursor:pointer; display:grid; place-items:center; }
 .appt-hit button svg{ width:20px; height:20px; }
 .appt-none{ color:var(--ink-soft); font-size:14px; margin:0; }
-.appt-pill{ position:fixed; z-index:61; left:50%; translate:-50% 0; bottom:calc(max(6px, calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) - var(--vp-gap, 0px))) + 76px); display:none; align-items:center; gap:9px;
+.appt-pill{ position:fixed; z-index:61; left:50%; translate:-50% 0; bottom:calc(var(--dock-bottom) + 76px); display:none; align-items:center; gap:9px;
   min-height:40px; padding:0 17px; border-radius:999px; border:0; background:var(--navy); color:#fff; font:650 14px var(--sans); cursor:pointer;
   box-shadow:0 8px 20px -8px rgba(22,55,90,.55); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .appt-pill.is-on{ display:inline-flex; }
@@ -14442,6 +14444,7 @@ function render(){
   syncTopBar();
   renderContent();
   smileyRider.sync();
+  dockAfterRender();
   apptPillSync();
 }
 
@@ -17798,8 +17801,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1020';
-const BUILD_TIME = '2026-10-06 10:20 UTC';
+const BUILD_ID = 'b1006.1102';
+const BUILD_TIME = '2026-10-06 11:02 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -17954,6 +17957,91 @@ function sideNavHtml(){
     </div>`;
 }
 
+/* ---------- Split dock (phones) ----------
+   Looks: the "Split dock" block in home-polish.css. The lens is drawn where it
+   was on the last screen and then moved, so it glides between tabs even
+   though the whole bar is rebuilt on every render. */
+let dockLensAt = -1, dockCat = null;
+function dockAfterRender(){
+  const bar = document.querySelector('.tabbar');
+  if(!bar) return;
+  const i = [...bar.querySelectorAll('.tabbar-btn')].findIndex(b => b.classList.contains('is-active'));
+  if(i >= 0){
+    bar.getBoundingClientRect();                 // settle the old spot first
+    bar.style.setProperty('--tab-i', i);
+    dockLensAt = i;
+  }
+  // A new screen always starts with the bar open.
+  if(dockCat !== activeCategory){ dockCat = activeCategory; document.body.classList.remove('dock-mini'); }
+}
+function dockTabAt(bar, x){
+  const btns = [...bar.querySelectorAll('.tabbar-btn')];
+  return btns.find(b => { const r = b.getBoundingClientRect(); return x >= r.left && x < r.right; })
+    || (x < bar.getBoundingClientRect().left + bar.offsetWidth / 2 ? btns[0] : btns[btns.length - 1]);
+}
+(function wireDock(){
+  const phone = window.matchMedia('(max-width:900px)');
+  const body = () => document.body;
+  // Scrolling down tucks the bar into a small pill; up (or the top) opens it.
+  // Not in Team Chat, whose message box sits on the bar.
+  let lastY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY, dy = y - lastY;
+    if(Math.abs(dy) < 8 && y > 80) return;
+    lastY = y;
+    if(!phone.matches || !document.querySelector('.tabbar')) return;
+    if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open')) body().classList.add('dock-mini');
+    else if(dy < 0 || y <= 80) body().classList.remove('dock-mini');
+  }, { passive:true });
+  // While tucked, a tap on the pill opens the bar instead of navigating.
+  let swallowUntil = 0;
+  document.addEventListener('click', e => {
+    const bar = e.target.closest && e.target.closest('.tabbar');
+    if(!bar) return;
+    if(e.isTrusted && performance.now() < swallowUntil){ e.preventDefault(); e.stopPropagation(); return; }
+    if(body().classList.contains('dock-mini')){ e.preventDefault(); e.stopPropagation(); body().classList.remove('dock-mini'); }
+  }, true);
+  // Drag along the bar: the lens follows your thumb and lands where you let go.
+  let drag = null;
+  document.addEventListener('pointerdown', e => {
+    const bar = e.target.closest && e.target.closest('.tabbar');
+    if(!bar || !phone.matches || e.button > 0 || body().classList.contains('dock-mini')) return;
+    drag = { bar, x0: e.clientX, y0: e.clientY, id: e.pointerId, on: false };
+  }, true);
+  document.addEventListener('pointermove', e => {
+    if(!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if(!drag.on){
+      if(Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ drag = null; return; }
+      if(Math.abs(dx) < 10) return;
+      drag.on = true; drag.bar.classList.add('is-dragging');
+      try{ drag.bar.setPointerCapture(e.pointerId); }catch(err){}
+    }
+    const lens = drag.bar.querySelector('.tabbar-lens');
+    const r = drag.bar.getBoundingClientRect(), w = lens.offsetWidth;
+    const x = Math.max(0, Math.min(r.width - 8 - w, e.clientX - r.left - 4 - w / 2));
+    lens.style.transform = `translateX(${x}px)`;
+    const under = dockTabAt(drag.bar, e.clientX);
+    drag.bar.querySelectorAll('.tabbar-btn').forEach(b => b.classList.toggle('is-under', b === under));
+  }, true);
+  const finish = (e, cancel) => {
+    if(!drag) return;
+    const d = drag; drag = null;
+    if(!d.on) return;
+    d.bar.classList.remove('is-dragging');
+    d.bar.querySelectorAll('.tabbar-btn').forEach(b => b.classList.remove('is-under'));
+    d.bar.querySelector('.tabbar-lens').style.transform = '';
+    if(cancel) return;
+    const t = dockTabAt(d.bar, e.clientX);
+    const btns = [...d.bar.querySelectorAll('.tabbar-btn')];
+    d.bar.style.setProperty('--tab-i', btns.indexOf(t));
+    swallowUntil = performance.now() + 450;      // the release's own click
+    setTimeout(() => t.click(), 160);            // after the lens lands
+  };
+  document.addEventListener('pointerup', e => finish(e, false), true);
+  document.addEventListener('pointercancel', e => finish(e, true), true);
+})();
+
 function renderTabBar(){
   const unread = unreadChatCount();
   const tabs = [
@@ -17963,7 +18051,9 @@ function renderTabBar(){
     { id:'chat',      name:'Chat',      icon:ICON_CHAT,   action:`setCategory('chat')`, badge:unread },
     { id:'__more',    name:'More',      icon:ICON_GRID,   action:`openMoreSheet()` },
   ];
-  return `<nav class="tabbar" role="navigation" aria-label="Main">
+  const at = tabs.findIndex(t => t.id === activeCategory);
+  return `<nav class="tabbar" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
+    <span class="tabbar-lens" aria-hidden="true"></span>
     ${tabs.map(t=>`
       <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>
         <span class="tabbar-icon">${t.icon}</span>
@@ -22193,8 +22283,10 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden) apptK
 const SMILEY_HOME_ACT = { hop: 'bouncy', hearts: 'hearts', wave: 'hum', cheer: 'party', think: 'gleam' };
 function smileyReact(kind){
   if(apptActive() || document.hidden) return;
-  if(activeCategory === 'home'){ if(window.homeSmileyAct) window.homeSmileyAct(SMILEY_HOME_ACT[kind] || 'bouncy'); return; }
-  if(smileyFollows()) smileyRider.react(kind === 'think' ? 'wave' : kind);
+  // The dock's Dr. Smiley when he's showing (on Home too, once the greeting
+  // has scrolled away), otherwise the greeting's.
+  if(smileyFollows() && smileyRider.react(kind === 'think' ? 'wave' : kind)) return;
+  if(activeCategory === 'home' && window.homeSmileyAct) window.homeSmileyAct(SMILEY_HOME_ACT[kind] || 'bouncy');
 }
 
 /* ---------- Daily warm-up ----------
@@ -22814,8 +22906,8 @@ function hubNews(){
 window.hubNews = hubNews;
 
 /* ---------- Dr. Smiley companion ---------- */
-// Styles and the idea are with the .smiley-rider rules. He is drawn once,
-// outside the re-rendered app, and only animates while he is moving: the
+// On a phone he is the round button in the split dock (looks: "Split dock"
+// in home-polish.css). He is drawn once, outside the re-rendered app; his
 // idle bob is CSS, so nothing runs per frame while he sits.
 function smileyFollows(){
   try{ return localStorage.getItem('ih_smileyFollow') !== '0'; }catch(e){ return true; }
@@ -22826,40 +22918,57 @@ function setSmileyFollows(on){
   smileyRider.sync();
 }
 const smileyRider = (() => {
-  const OUT = 30;                         // px of him showing above the tab bar
+  /* On a phone he lives in the dock: his own round button beside the tab
+     capsule (.dock-smiley; looks in home-polish.css). Tapping him opens Ask
+     the Hub. Only one Dr. Smiley at a time: while another one is on screen
+     (the Home greeting, Ask, the lock screen, a pop-up) he steps out and the
+     capsule takes the room, so on Home he hops in once the greeting scrolls
+     away. On a computer he is the round button in the top bar (#tgSmiley). */
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let el = null, face = null, hit = null, raf = 0, last = 0;
-  let x = null, shown = 0, want = 0, hop = null, landAt = -1e9, glance = 0;
-  const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  const phone = window.matchMedia('(max-width:900px)');
+  let btn = null, face = null, bob = null, lastCat = null;
   function build(){
-    el = document.createElement('div');
-    el.className = 'smiley-rider'; el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = `<span class="smiley-rider-bob"><span class="ask-face">${askFaceSvg()}</span></span>`;
-    face = el.querySelector('.ask-face');
-    hit = document.createElement('button');
-    hit.type = 'button'; hit.className = 'smiley-rider-hit'; hit.setAttribute('aria-label', 'Ask the Hub');
-    hit.addEventListener('click', () => {
-      el.classList.add('is-pressed');
-      setTimeout(() => { el.classList.remove('is-pressed'); openAskHub(); }, 150);
+    btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'dock-smiley';
+    btn.setAttribute('aria-label', 'Ask the Hub'); btn.title = 'Ask the Hub';
+    btn.innerHTML = `<span class="dock-smiley-bob"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span></span><span class="dock-smiley-tag" aria-hidden="true">Ask</span>`;
+    face = btn.querySelector('.ask-face'); bob = btn.querySelector('.dock-smiley-bob');
+    btn.addEventListener('click', () => {
+      btn.classList.add('is-pressed');
+      setTimeout(() => { btn.classList.remove('is-pressed'); openAskHub(); }, 140);
     });
-    document.body.append(el, hit);
-    // The tab bar steps aside for typing, sheets and search without a
-    // repaint; when it comes back, so does he, wherever he now belongs.
+    document.body.append(btn);
+    // Sheets, search and the keyboard come and go without a repaint; check
+    // again whenever they do.
     let queued = 0;
     const again = () => { if(!queued) queued = requestAnimationFrame(() => { queued = 0; sync(); }); };
     const mo = new MutationObserver(again);
     mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     document.querySelectorAll('.overlay, .gs-overlay').forEach(o => mo.observe(o, { attributes: true, attributeFilter: ['class'] }));
-    mo.observe(document.body, { childList: true });                 // pop-ups added to the page
+    mo.observe(document.body, { childList: true });
     const lock = document.getElementById('accessLock');
     if(lock) mo.observe(lock, { attributes: true, attributeFilter: ['hidden'] });
+    // The Home greeting scrolling in or out of view hands him over.
+    let sq = 0;
+    window.addEventListener('scroll', () => { if(!sq) sq = requestAnimationFrame(() => { sq = 0; place(); }); }, { passive:true });
   }
   // Only one Dr. Smiley at a time: any other one drawn and showing (the Home
   // greeting, Ask, the lock screen, a pop-up) sends this one away.
   function smileyElsewhere(){
     for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
-      if(f.closest('.smiley-rider, #tgSmiley')) continue;
+      if(f.closest('.smiley-rider, .dock-smiley, #tgSmiley')) continue;
       if(f.getClientRects().length && getComputedStyle(f).visibility !== 'hidden') return true;
+    }
+    return false;
+  }
+  // The same, but only counting one you can actually see right now.
+  function smileyInView(){
+    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
+      if(f.closest('.smiley-rider, .dock-smiley, #tgSmiley')) continue;
+      const r = f.getBoundingClientRect();
+      if(!r.width || r.bottom <= 0 || r.top >= window.innerHeight) continue;
+      if(getComputedStyle(f).visibility === 'hidden') continue;
+      return true;
     }
     return false;
   }
@@ -22876,102 +22985,49 @@ const smileyRider = (() => {
       b.classList.remove('is-new'); void b.offsetWidth; b.classList.add('is-new');
     }
   }
-  // Where he belongs right now: over the active tab, over More for every
-  // other page, or nowhere (computer, switched off, Home, Ask).
-  const phone = window.matchMedia('(max-width:900px)');
+  function shown(){
+    return !!btn && document.body.classList.contains('dock-has-smiley') && getComputedStyle(btn).visibility !== 'hidden';
+  }
   function place(){
-    const bar = phone.matches && document.querySelector('.tabbar');
-    if(!bar) return null;
-    // Hidden for a moment (typing, a sheet, search): the CSS hides him along
-    // with the bar, and he stays where he was.
-    if(getComputedStyle(bar).display === 'none') return 'later';
-    const btns = bar.querySelectorAll('.tabbar-btn');
-    if(!btns.length) return null;
-    const b = bar.querySelector('.tabbar-btn.is-active') || btns[btns.length - 1];
-    const r = b.getBoundingClientRect();
-    return {
-      x: r.left + r.width / 2,
-      // Anchored to the same bottom edge as the bar, so Safari's toolbar
-      // sliding away moves them together.
-      bottom: parseFloat(getComputedStyle(bar).bottom) + bar.offsetHeight - (44 - OUT),
-      hide: !smileyFollows() || activeCategory === 'home' || activeCategory === 'ask' || smileyElsewhere() || apptActive()
-    };
-  }
-  function paint(now){
-    let lift = 0, tilt = 0, sx = 1, sy = 1;
-    if(hop){
-      const p = Math.min(1, (now - hop.t0) / 560), dir = Math.sign(hop.to - hop.from);
-      x = hop.from + (hop.to - hop.from) * ease(p);
-      lift = -34 * Math.sin(Math.PI * p); tilt = 14 * dir * Math.sin(Math.PI * p);
-      if(p < .15){ sy = 1 - .5 * p; sx = 1 + .4 * p; }          // crouch before the jump
-      if(p >= 1){ hop = null; landAt = now; glance = now + 260; }
-    }
-    const q = (now - landAt) / 240;
-    if(q >= 0 && q < 1){ const k = Math.sin(Math.PI * q); sy *= 1 - .14 * k; sx *= 1 + .1 * k; }
-    const y = (1 - shown) * 52 + lift;                            // sinks behind the glass
-    el.style.opacity = Math.min(1, shown * 1.6).toFixed(3);
-    el.style.transform = `translate(${(x - 22).toFixed(2)}px,${y.toFixed(2)}px) rotate(${tilt.toFixed(2)}deg) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
-    const up = shown > .98 && !hop;
-    el.classList.toggle('is-up', up);
-    hit.style.display = up ? 'block' : 'none';
-    if(up) hit.style.transform = `translateX(${(x - 24).toFixed(2)}px)`;
-    return hop || Math.abs(want - shown) > .002 || q < 1;
-  }
-  function frame(now){
-    raf = 0;
-    const dt = last ? Math.min(50, now - last) : 16; last = now;
-    shown += (want - shown) * (1 - Math.exp(-dt / (want ? 95 : 60)));
-    if(Math.abs(want - shown) <= .002) shown = want;
-    if(glance && now > glance){
-      glance = 0; face.classList.add('is-thinking');
+    if(!btn) return;
+    const want = phone.matches && !!document.querySelector('.tabbar') && smileyFollows()
+      && activeCategory !== 'ask' && !apptActive() && !smileyInView();
+    document.body.classList.toggle('dock-has-smiley', want);
+    btn.tabIndex = want ? 0 : -1;
+    btn.setAttribute('aria-hidden', want ? 'false' : 'true');
+    // A new screen: he glances at it.
+    if(want && lastCat !== null && lastCat !== activeCategory && !reduce.matches){
+      face.classList.add('is-thinking');
       setTimeout(() => face.classList.remove('is-thinking'), 1100);
     }
-    if(paint(now) && !document.hidden) raf = requestAnimationFrame(frame);
+    lastCat = activeCategory;
   }
   function sync(){
     try{
-      if(!el){ if(!document.body) return; build(); }
+      if(!btn){ if(!document.body) return; build(); }
       topBar();
       smileyDressAll();
-      const t = place();
-      if(t === 'later'){
-        // Behind a sheet or the keyboard he can't be seen, so a page that
-        // doesn't want him (Home, Ask, switched off) takes him away at once.
-        if(!smileyFollows() || activeCategory === 'home' || activeCategory === 'ask' || smileyElsewhere()){ want = shown = 0; hop = null; paint(performance.now()); }
-        return;
-      }
-      if(!t){ want = 0; shown = 0; hop = null; el.style.opacity = 0; el.classList.remove('is-up'); hit.style.display = 'none'; return; }
-      el.style.bottom = t.bottom + 'px';
-      hit.style.bottom = (t.bottom + 44 - OUT - 2) + 'px';
-      want = t.hide ? 0 : 1;
-      if(!t.hide){
-        const at = hop ? hop.to : x;
-        if(x === null || shown < .2 || reduce.matches){ x = t.x; hop = null; }
-        else if(Math.abs(t.x - at) > 1) hop = { from: x, to: t.x, t0: performance.now() };
-      }
-      if(reduce.matches){ shown = want; paint(performance.now()); return; }
-      if(!raf){ last = 0; raf = requestAnimationFrame(frame); }
+      place();
     }catch(e){ console.warn('Dr. Smiley companion:', e); }
   }
-  window.addEventListener('resize', () => { if(el) requestAnimationFrame(sync); });
-  document.addEventListener('visibilitychange', () => { if(!document.hidden && el) sync(); });
-  // A short reaction while he sits on the tab bar. False if he isn't showing.
+  window.addEventListener('resize', () => { if(btn) requestAnimationFrame(sync); });
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && btn) sync(); });
+  // A short reaction in the dock. False if he isn't showing.
   function react(kind){
-    if(!el || !(shown > .98) || hop || getComputedStyle(el).visibility === 'hidden') return false;
-    const bob = el.firstChild, happy = kind === 'hearts' || kind === 'cheer';
+    if(!shown()) return false;
+    const happy = kind === 'hearts' || kind === 'cheer';
     if(happy){ face.classList.add('is-happy'); setTimeout(() => face.classList.remove('is-happy'), 1800); }
     if(reduce.matches || !bob.animate) return true;
     const K = {
-      hop:   [[0,0,1,1],[0,-16,.94,1.08],[0,0,1.08,.9],[0,-6,1,1],[0,0,1,1]],
-      wave:  [[0,0,0],[0,-3,-18],[0,0,16],[0,-2,-13],[0,0,9],[0,0,0]],
-      hearts:[[0,0,1,1],[0,-5,1.05,1.05],[0,0,1,1],[0,-3,1.03,1.03],[0,0,1,1]],
-      cheer: [[0,0,0],[0,-26,180],[0,-30,360],[0,0,360]],
+      hop:   [[0,0,1,1],[0,-10,.94,1.08],[0,0,1.08,.9],[0,-4,1,1],[0,0,1,1]],
+      wave:  [[0,0,0],[0,-2,-18],[0,0,16],[0,-1,-13],[0,0,9],[0,0,0]],
+      hearts:[[0,0,1,1],[0,-4,1.08,1.08],[0,0,1,1],[0,-2,1.04,1.04],[0,0,1,1]],
+      cheer: [[0,0,0],[0,-14,180],[0,-16,360],[0,0,360]],
     }[kind];
     if(!K) return true;
     const frames = K.map(k => kind === 'wave' || kind === 'cheer'
       ? { transform: `translateY(${k[1]}px) rotate(${k[2]}deg)`, easing: 'ease-in-out' }
       : { transform: `translateY(${k[1]}px) scale(${k[2]},${k[3]})` });
-    // The wave sways evenly through each swing; the others pop and settle.
     bob.animate(frames, kind === 'wave' ? { duration: 1400, easing: 'linear' }
       : { duration: kind === 'cheer' ? 900 : 700, easing: 'cubic-bezier(.3,1.3,.5,1)' });
     return true;
