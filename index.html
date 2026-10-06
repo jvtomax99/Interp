@@ -5847,304 +5847,415 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
   .sec-fold-chev, .sec-fold-toggle, .sec-fold-open{ transition:none; }
 }
 
-/* ---------- Team Chat, redesigned ----------
-   One screen that fits the phone: a slim header, the HIPAA line, one pinned
-   strip that opens on demand, then the thread, with the message box docked
-   just above the tab bar. Before this the box sat 120px below the screen
-   behind the tab bar, and two pinned notes filled the whole view.
+/* ---------- Team Chat ----------
+   A messaging screen first: the thread fills the space between the bars and
+   the box you type in is always on screen. Photos stand on their own at
+   about 80% of the thread's width, in their real shape. Received messages
+   are a soft grey fill, yours are the Hub's blue, and runs from one person
+   share one name and one avatar.
    Scoped to .tc so Ask the Hub, which shares .chat-panel, is untouched. */
-.tc{ display:flex; flex-direction:column; max-width:880px; }
-.tc-head{ display:flex; align-items:center; gap:var(--sp-2); margin:0 0 var(--sp-1); min-height:44px; }
-.tc-title{ display:flex; align-items:baseline; flex-wrap:wrap; column-gap:var(--sp-2); min-width:0; flex:1; }
-.tc-title h2{ font-family:var(--sans); font-size:var(--fs-t3); font-weight:650; letter-spacing:-.022em; margin:0; line-height:1.15; }
-.tc-sub{ font-size:var(--fs-cap); color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.tc{
+  --tc-sent:#1565AF; --tc-sent-ink:#FFFFFF;
+  --tc-recv:#EEF1F6; --tc-recv-ink:var(--ink);
+  --tc-radius:22px; --tc-tight:6px;
+  --tc-photo-max:420px;
+  display:flex; flex-direction:column; max-width:880px;
+}
+html[data-theme="dark"] .tc{ --tc-recv:#26304A; }
+
+/* Header: who is in the conversation, not just a title. */
+.tc-head{ display:flex; align-items:center; gap:var(--sp-2); margin:0 0 var(--sp-1); min-height:48px; }
+.tc-faces{ display:flex; flex-shrink:0; padding-left:6px; }
+.tc-faces .chat-avatar{
+  width:34px; height:34px; margin:0 0 0 -8px; font-size:12px;
+  box-shadow:0 0 0 2px var(--bg), inset 0 0 0 1px rgba(255,255,255,.3);
+}
+.tc-faces .chat-avatar:first-child{ margin-left:0; }
+.tc-title{ display:flex; flex-direction:column; min-width:0; flex:1; }
+.tc-title h2{ font-family:var(--sans); font-size:var(--fs-head); font-weight:650; letter-spacing:-.018em; margin:0; line-height:1.2; }
+.tc-sub{ font-size:var(--fs-cap); color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tc-icon-btn{
-  width:44px; height:44px; flex-shrink:0; border-radius:50%; border:1px solid var(--line);
-  background:var(--paper); color:var(--ink-soft); cursor:pointer;
+  width:44px; height:44px; flex-shrink:0; border-radius:50%; border:none;
+  background:transparent; color:var(--ink-soft); cursor:pointer;
   display:flex; align-items:center; justify-content:center;
-  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
   transition:transform .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
   -webkit-tap-highlight-color:transparent;
 }
-.tc-icon-btn svg{ width:20px; height:20px; }
-.tc-icon-btn[aria-pressed="true"]{ color:var(--accent); background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent-2) 45%, var(--line)); }
-.tc-icon-btn:active, .tc-icon-btn.is-pressed{ transform:scale(.94); }
-.tc-icon-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.tc-icon-btn svg{ width:22px; height:22px; }
+.tc-icon-btn:hover{ background:var(--line-soft); color:var(--ink); }
+.tc-icon-btn[aria-pressed="true"]{ color:var(--accent); }
+.tc-icon-btn:active, .tc-icon-btn.is-pressed{ transform:scale(.92); }
+.tc-icon-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
 
-.tc-hipaa{
-  display:flex; align-items:center; gap:var(--sp-1); margin:0 0 var(--sp-2);
-  font-size:var(--fs-cap); color:#7A5D28; line-height:1.35;
-}
+.tc-hipaa{ display:flex; align-items:center; gap:var(--sp-1); margin:0 0 var(--sp-2); font-size:var(--fs-cap); color:#7A5D28; line-height:1.35; }
 .tc-hipaa svg{ width:14px; height:14px; flex-shrink:0; color:#B8923E; }
-:root[data-theme="dark"] .tc-hipaa{ color:#D9BE85; }
-:root[data-theme="dark"] .tc-hipaa svg{ color:#D9BE85; }
+html[data-theme="dark"] .tc-hipaa{ color:#D9BE85; }
+html[data-theme="dark"] .tc-hipaa svg{ color:#D9BE85; }
 
-/* Pinned: one line until opened. The newest pin is what shows. */
-.tc-pinned{ position:relative; z-index:8; margin:0 0 var(--sp-2); border-radius:var(--r-md); background:linear-gradient(140deg, #FBF3E3, #FAF7EF); box-shadow:inset 0 0 0 1px #E8D7B0; }
-:root[data-theme="dark"] .tc-pinned{ background:#2A2618; box-shadow:inset 0 0 0 1px #4A4127; }
+/* Pinned: one line until opened; the list floats over the thread. */
+.tc-pinned{ position:relative; z-index:8; margin:0 0 var(--sp-2); border-radius:var(--r-md); background:#FBF5E8; box-shadow:inset 0 0 0 1px #E8D7B0; }
+html[data-theme="dark"] .tc-pinned{ background:#2A2618; box-shadow:inset 0 0 0 1px #4A4127; }
 .tc-pinned-bar{
   display:flex; align-items:center; gap:var(--sp-2); width:100%; min-height:44px; padding:0 var(--sp-3);
-  border:none; background:none; cursor:pointer; text-align:left; font-family:var(--sans); color:#4A3B18;
-  -webkit-tap-highlight-color:transparent;
+  border:none; background:none; cursor:pointer; text-align:left; font-family:var(--sans); color:#4A3B18; -webkit-tap-highlight-color:transparent;
 }
-:root[data-theme="dark"] .tc-pinned-bar{ color:#EADBB8; }
+html[data-theme="dark"] .tc-pinned-bar{ color:#EADBB8; }
 .tc-pinned-bar > svg:first-child{ width:15px; height:15px; flex-shrink:0; color:#B8923E; }
 .tc-pinned-text{ flex:1; min-width:0; font-size:var(--fs-foot); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tc-pinned-count{ font-size:var(--fs-cap); font-weight:650; color:#8C6D2E; font-variant-numeric:tabular-nums; }
-:root[data-theme="dark"] .tc-pinned-count{ color:#D9BE85; }
-.tc-pinned-chev{ display:flex; width:16px; height:16px; color:#8C6D2E; transition:transform .2s var(--ease); }
+.tc-pinned-count{ font-size:var(--fs-cap); font-weight:650; color:#7A5D28; font-variant-numeric:tabular-nums; }
+html[data-theme="dark"] .tc-pinned-count{ color:#D9BE85; }
+.tc-pinned-chev{ display:flex; width:16px; height:16px; color:#7A5D28; transition:transform .2s var(--ease); }
+html[data-theme="dark"] .tc-pinned-chev{ color:#D9BE85; }
 .tc-pinned-chev svg{ width:16px; height:16px; }
 .tc-pinned.is-open .tc-pinned-chev{ transform:rotate(180deg); }
 .tc-pinned-bar:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; border-radius:var(--r-md); }
 .tc-pinned-list{
-  /* Opens over the thread rather than pushing it down, so the message box
-     never moves off the screen. */
   display:none; position:absolute; left:0; right:0; top:calc(100% - 6px);
   padding:var(--sp-1) var(--sp-3) var(--sp-2); max-height:min(50vh, 360px); overflow:auto;
-  border-radius:0 0 var(--r-md) var(--r-md); background:inherit; background-color:#FAF5E9;
-  box-shadow:inset 0 0 0 1px #E8D7B0, var(--sh-2);
+  border-radius:0 0 var(--r-md) var(--r-md); background:#FAF5E9; box-shadow:inset 0 0 0 1px #E8D7B0, var(--sh-2);
 }
-:root[data-theme="dark"] .tc-pinned-list{ background-color:#2A2618; box-shadow:inset 0 0 0 1px #4A4127, var(--sh-2); }
+html[data-theme="dark"] .tc-pinned-list{ background:#2A2618; box-shadow:inset 0 0 0 1px #4A4127, var(--sh-2); }
 .tc-pinned.is-open{ border-bottom-left-radius:0; border-bottom-right-radius:0; }
 .tc-pinned.is-open .tc-pinned-list{ display:block; }
 .tc-pin-row{ display:flex; align-items:flex-start; gap:var(--sp-2); padding:var(--sp-2) 0; border-top:1px solid #E8D7B0; }
 .tc-pin-row:first-child{ border-top:none; }
-:root[data-theme="dark"] .tc-pin-row{ border-top-color:#4A4127; }
+html[data-theme="dark"] .tc-pin-row{ border-top-color:#4A4127; }
 .tc-pin-row p{ flex:1; margin:0; font-size:var(--fs-foot); line-height:1.5; color:#4A3B18; }
-:root[data-theme="dark"] .tc-pin-row p{ color:#EADBB8; }
+html[data-theme="dark"] .tc-pin-row p{ color:#EADBB8; }
 .tc-pin-row small{ display:block; font-size:var(--fs-cap); color:#7A5D28; margin-top:2px; }
-:root[data-theme="dark"] .tc-pin-row small{ color:#C9AE78; }
+html[data-theme="dark"] .tc-pin-row small{ color:#C9AE78; }
 .tc-pin-actions{ display:flex; justify-content:flex-end; padding-top:var(--sp-1); border-top:1px solid #E8D7B0; }
-:root[data-theme="dark"] .tc-pin-actions{ border-top-color:#4A4127; }
-.tc-text-btn{
-  min-height:44px; padding:0 var(--sp-3); border:none; background:none; cursor:pointer; border-radius:999px;
-  font-family:var(--sans); font-size:var(--fs-foot); font-weight:650; color:#7A5D28;
-}
-:root[data-theme="dark"] .tc-text-btn{ color:#E3C88D; }
+html[data-theme="dark"] .tc-pin-actions{ border-top-color:#4A4127; }
+.tc-text-btn{ min-height:44px; padding:0 var(--sp-3); border:none; background:none; cursor:pointer; border-radius:999px; font-family:var(--sans); font-size:var(--fs-foot); font-weight:650; color:#7A5D28; }
+html[data-theme="dark"] .tc-text-btn{ color:#E3C88D; }
 .tc-text-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; }
 
-/* The panel: thread on top, composer docked under it. Its height is set by
-   fitChatPanel() to end just above the tab bar. */
-.tc .chat-panel.tc-panel{
-  height:auto; min-height:0; max-height:none; border-radius:var(--r-lg);
-  background:color-mix(in srgb, var(--paper) 55%, transparent);
-  box-shadow:inset 0 0 0 1px var(--line-soft);
-  overflow:hidden;
+/* The panel. Its height is set by fitChatPanel() to end above the tab bar. */
+.tc .chat-panel.tc-panel{ height:auto; min-height:0; max-height:none; border-radius:var(--r-lg); background:var(--paper); box-shadow:inset 0 0 0 1px var(--line-soft); overflow:hidden; }
+.tc-panel .chat-messages{
+  padding:var(--sp-2) var(--sp-3) var(--sp-3); gap:2px; overscroll-behavior:contain; scroll-behavior:auto;
+  container-type:inline-size;
 }
-.tc-panel .chat-messages{ padding:var(--sp-2) var(--sp-3) var(--sp-3); gap:2px; overscroll-behavior:contain; }
-.tc-panel.is-dragging{ box-shadow:inset 0 0 0 2px var(--accent-2); background:var(--accent-soft); }
-.tc-drop-hint{
-  position:absolute; inset:0; z-index:5; display:none; align-items:center; justify-content:center;
-  font-family:var(--sans); font-weight:650; font-size:var(--fs-sub); color:var(--accent); pointer-events:none;
-}
+.tc-panel.is-dragging{ box-shadow:inset 0 0 0 2px var(--accent-2); }
+.tc-drop-hint{ position:absolute; inset:0; z-index:5; display:none; align-items:center; justify-content:center; background:color-mix(in srgb, var(--accent-soft) 85%, transparent);
+  font-family:var(--sans); font-weight:650; font-size:var(--fs-sub); color:var(--accent); pointer-events:none; }
 .tc-panel.is-dragging .tc-drop-hint{ display:flex; }
 
-/* Day and unread markers as quiet centred chips. */
-.tc-panel .chat-day{ justify-content:center; margin:var(--sp-4) 0 var(--sp-1); }
+/* Time markers: plain centred text, not boxes. */
+.tc-panel .chat-day{ justify-content:center; margin:var(--sp-4) 0 var(--sp-2); }
 .tc-panel .chat-day::before, .tc-panel .chat-day::after{ display:none; }
-.tc-panel .chat-day span{
-  padding:3px 10px; border-radius:999px; background:var(--paper); box-shadow:inset 0 0 0 1px var(--line-soft);
-  font-size:11px; letter-spacing:.03em; color:var(--ink-soft);
-}
+.tc-panel .chat-day span{ font-size:var(--fs-cap); font-weight:550; letter-spacing:0; text-transform:none; color:var(--ink-soft); }
+.tc-panel .chat-unread span{ font-size:var(--fs-cap); }
+
+/* Rows */
+.tc-panel .chat-bubble-row{ max-width:min(78%, 560px); gap:8px; align-items:flex-end; position:relative; touch-action:pan-y; }
+.tc-panel .chat-bubble-row.has-photos{ max-width:100%; }
+.tc-panel .chat-bubble-row.run-first{ margin-top:var(--sp-3); }
+.tc-panel .chat-avatar{ width:28px; height:28px; margin-bottom:0; font-size:11px; flex-shrink:0; }
+.tc-panel .chat-avatar-gap{ width:28px; }
+.tc-panel .chat-author{ font-size:var(--fs-cap); font-weight:600; margin:0 var(--sp-3) 3px; color:var(--ink-soft); }
+.tc-panel .chat-bubble-col{ gap:2px; min-width:0; }
 
 /* Bubbles */
-.tc-panel .chat-bubble-row{ max-width:min(82%, 560px); gap:var(--sp-1); }
-.tc-panel .chat-bubble-row.run-first{ margin-top:var(--sp-2); }
-.tc-panel .chat-avatar{ width:30px; height:30px; margin-bottom:2px; font-size:11px; }
-.tc-panel .chat-avatar-gap{ width:30px; }
-.tc-panel .chat-author{
-  font-size:var(--fs-cap); font-weight:650; margin:0 var(--sp-2) 3px;
-  color:color-mix(in srgb, var(--who, var(--ink-soft)) 72%, var(--ink));
-}
 .tc-panel .chat-bubble{
-  position:relative; padding:8px 12px 7px; border-radius:20px; font-size:15px; line-height:1.45;
-  overflow-wrap:anywhere;
+  position:relative; padding:9px 14px; border-radius:var(--tc-radius); font-size:15.5px; line-height:1.4;
+  overflow-wrap:anywhere; box-shadow:none; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition:transform .12s var(--ease);
 }
-.tc-panel .chat-bubble-row.them .chat-bubble{
-  background:var(--paper); box-shadow:0 1px 1px rgba(20,43,67,0.05), inset 0 0 0 1px var(--line-soft);
-}
-.tc-panel .chat-bubble-row.me .chat-bubble{
-  /* Fixed brand blues in both themes: white text on them is 5:1 or better.
-     The old accent-2 start was 3.7:1, and 2.3:1 in dark mode. */
-  background:linear-gradient(160deg, #1A6DB5, #0F5FA6);
-  box-shadow:0 6px 14px -10px rgba(15,95,166,0.7);
-}
-/* The run's last bubble keeps a small tail corner; the rest stay round. */
-.tc-panel .chat-bubble-row.them.run-last .chat-bubble{ border-bottom-left-radius:6px; }
-.tc-panel .chat-bubble-row.me.run-last .chat-bubble{ border-bottom-right-radius:6px; }
-.tc-panel .chat-bubble-row.them:not(.run-first) .chat-bubble{ border-top-left-radius:8px; }
-.tc-panel .chat-bubble-row.me:not(.run-first) .chat-bubble{ border-top-right-radius:8px; }
-.tc-panel .chat-bubble-row.mentioned.them .chat-bubble{
-  background:var(--accent-soft); box-shadow:inset 3px 0 0 var(--accent-2), inset 0 0 0 1px color-mix(in srgb, var(--accent-2) 30%, transparent);
-}
-
-/* Time sits inside the bubble, on the last line, so a message costs one
-   block instead of a bubble plus a row of mono text under it. */
-.tc-meta{
-  float:right; display:inline-flex; align-items:center; gap:3px; position:relative; top:5px;
-  margin:0 -3px 0 var(--sp-2); font-size:11px; line-height:1; font-variant-numeric:tabular-nums;
-  color:var(--ink-soft); white-space:nowrap; pointer-events:none;
-}
-.chat-bubble-row.me .tc-meta{ color:rgba(255,255,255,.85); }
-.tc-meta svg{ width:12px; height:12px; }
-.tc-meta.on-media{
-  position:absolute; right:8px; bottom:8px; top:auto; float:none; margin:0; padding:3px 7px; border-radius:999px;
-  background:rgba(12,18,30,.55); color:#fff;
-}
+.tc-panel .chat-bubble:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.tc-panel .chat-bubble-row.them .chat-bubble{ background:var(--tc-recv); color:var(--tc-recv-ink); box-shadow:none; }
+.tc-panel .chat-bubble-row.me .chat-bubble{ background:var(--tc-sent); color:var(--tc-sent-ink); box-shadow:none; }
+/* Runs: the corners facing the neighbouring bubble tighten. */
+.tc-panel .chat-bubble-row.them:not(.run-first) .chat-bubble{ border-top-left-radius:var(--tc-tight); }
+.tc-panel .chat-bubble-row.them:not(.run-last) .chat-bubble{ border-bottom-left-radius:var(--tc-tight); }
+.tc-panel .chat-bubble-row.me:not(.run-first) .chat-bubble{ border-top-right-radius:var(--tc-tight); }
+.tc-panel .chat-bubble-row.me:not(.run-last) .chat-bubble{ border-bottom-right-radius:var(--tc-tight); }
+.tc-panel .chat-bubble-row.them.run-last .chat-bubble, .tc-panel .chat-bubble-row.me.run-last .chat-bubble{ border-bottom-left-radius:var(--tc-radius); border-bottom-right-radius:var(--tc-radius); }
+.tc-panel .chat-bubble-row.them.run-last:not(.run-first) .chat-bubble{ border-top-left-radius:var(--tc-tight); }
+.tc-panel .chat-bubble-row.me.run-last:not(.run-first) .chat-bubble{ border-top-right-radius:var(--tc-tight); }
+.tc-panel .chat-bubble-row.mentioned.them .chat-bubble{ box-shadow:inset 0 0 0 1.5px var(--accent-2); background:var(--accent-soft); }
+.tc-panel .chat-bubble.is-emoji{ background:none !important; padding:2px 2px; font-size:40px; line-height:1.1; }
+.tc-panel .chat-link{ text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1px; word-break:break-all; }
+.tc-panel .chat-bubble-row.them .chat-link{ color:var(--accent); }
+.tc-panel .chat-bubble-row.me .chat-link, .tc-panel .chat-bubble-row.me .mention{ color:#fff; }
 .tc-panel .chat-meta-row{ display:none; }
+.tc-edited{ font-size:var(--fs-cap); opacity:.75; margin-left:4px; white-space:nowrap; }
 
-/* Photos. Sized from the stored width and height, so a picture arriving
-   does not shove the thread around while it decodes. */
-.tc-panel .chat-bubble.has-media{ padding:3px; width:min-content; max-width:100%; }
-.tc-panel .chat-bubble.has-media .tc-caption{ padding:5px 9px 4px; }
-.tc-media{ display:grid; gap:3px; border-radius:17px; overflow:hidden; position:relative; width:min(270px, 62vw); }
-.tc-media.n2, .tc-media.n3, .tc-media.n4{ grid-template-columns:1fr 1fr; }
-.tc-media.n3 .tc-photo:first-child{ grid-column:1 / -1; aspect-ratio:2 / 1; }
+/* Time and delivery under a run, quiet. */
+.tc-panel .chat-bubble-row{ flex-wrap:wrap; }
+/* Wrapping is only for the time row: the bubble shrinks beside the avatar, never drops under it. */
+.tc-panel .chat-bubble-row .chat-bubble-col{ flex:0 1 auto; max-width:100%; }
+.tc-panel .chat-bubble-row.them .chat-bubble-col{ max-width:calc(100% - 36px); }
+.tc-foot{ flex-basis:100%; order:5; font-size:11.5px; color:var(--ink-soft); margin:3px var(--sp-3) 0; font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:5px; }
+.chat-bubble-row.them .tc-foot{ padding-left:36px; }
+.chat-bubble-row.me .tc-foot{ justify-content:flex-end; margin-right:var(--sp-1); }
+.tc-foot svg{ width:12px; height:12px; }
+.tc-status{ font-size:11.5px; color:var(--ink-soft); text-align:right; margin:2px var(--sp-1) 0 0; }
+
+/* Photos: their own block, no bubble around them, in their real shape. */
+.tc-media{
+  position:relative; display:grid; gap:3px; border-radius:18px; overflow:hidden;
+  width:min(80vw, var(--tc-photo-max)); width:min(82cqi, var(--tc-photo-max));
+}
+.chat-bubble-row.them .tc-media{ width:min(74vw, var(--tc-photo-max)); width:min(76cqi, var(--tc-photo-max)); }
+/* One photo: width follows the shape, so a tall picture gets narrower
+   rather than cropped or towering over the thread. */
+.tc-media.n1{ width:min(80vw, var(--tc-photo-max), calc(var(--tc-maxh) * var(--ar))); width:min(82cqi, var(--tc-photo-max), calc(var(--tc-maxh) * var(--ar))); }
+.chat-bubble-row.them .tc-media.n1{ width:min(74vw, var(--tc-photo-max), calc(var(--tc-maxh) * var(--ar))); width:min(76cqi, var(--tc-photo-max), calc(var(--tc-maxh) * var(--ar))); }
+.tc-panel{ --tc-maxh:min(460px, 60vh); }
+.tc-media.n2{ grid-template-columns:1fr 1fr; }
+.tc-media.n3{ grid-template-columns:1fr 1fr; }
+.tc-media.n3 .tc-photo:first-child{ grid-column:1 / -1; aspect-ratio:16 / 10; }
+.tc-media.n4{ grid-template-columns:1fr 1fr; }
+.tc-media.n5{ grid-template-columns:repeat(6, 1fr); }
+.tc-media.n5 .tc-photo:nth-child(-n+2){ grid-column:span 3; }
+.tc-media.n5 .tc-photo:nth-child(n+3){ grid-column:span 2; }
+.tc-media.n6{ grid-template-columns:repeat(3, 1fr); }
 .tc-photo{
-  position:relative; display:block; width:100%; padding:0; margin:0; border:none; cursor:zoom-in;
-  background:color-mix(in srgb, var(--line) 70%, transparent); aspect-ratio:1 / 1; overflow:hidden;
+  position:relative; display:block; width:100%; padding:0; margin:0; border:none; cursor:zoom-in; overflow:hidden;
+  aspect-ratio:1 / 1; background:color-mix(in srgb, var(--line) 75%, var(--paper));
   -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
-.tc-media.n1 .tc-photo{ aspect-ratio:var(--ar, 4 / 3); max-height:340px; }
-.tc-photo img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; -webkit-user-select:none; user-select:none; }
+.tc-media.n1 .tc-photo{ aspect-ratio:var(--ar); }
+.tc-photo img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; -webkit-user-select:none; user-select:none; opacity:0; transition:opacity .25s var(--ease); }
+.tc-media.n1 .tc-photo img{ object-fit:contain; }
+.tc-photo.is-loaded img{ opacity:1; }
+/* Loading: a slow sheen across the reserved space. */
+.tc-photo:not(.is-loaded):not(.is-failed)::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--paper) 55%, transparent) 50%, transparent 80%);
+  background-size:220% 100%; animation:tcSheen 1.4s linear infinite;
+}
+@keyframes tcSheen{ from{ background-position:120% 0; } to{ background-position:-120% 0; } }
+.tc-photo-fail{ position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:var(--sp-2);
+  color:var(--ink-soft); font-family:var(--sans); font-size:var(--fs-cap); text-align:center; }
+.tc-photo-fail svg{ width:24px; height:24px; }
+.tc-photo.is-failed{ cursor:pointer; }
+.tc-photo.is-failed .tc-photo-fail{ display:flex; }
 .tc-photo:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-3px; }
-.tc-photo .tc-more{
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  background:rgba(12,18,30,.5); color:#fff; font-family:var(--sans); font-size:22px; font-weight:650;
+.tc-photo:active{ filter:brightness(.92); }
+.tc-photo-time{
+  position:absolute; right:8px; bottom:8px; padding:3px 8px; border-radius:999px; pointer-events:none;
+  background:rgba(10,14,24,.55); color:#fff; font-size:11px; font-variant-numeric:tabular-nums;
 }
-.tc-files{ display:flex; flex-direction:column; gap:var(--sp-1); margin-top:var(--sp-1); }
-.chat-bubble-row.me .tc-files .attach-chip.attach-file{ background:rgba(255,255,255,.18); color:#fff; }
+.chat-bubble-row.has-photos .chat-bubble{ margin-top:2px; }
+.chat-bubble-row.me.has-photos .chat-bubble-col{ align-items:flex-end; }
+.tc-files{ display:flex; flex-direction:column; gap:var(--sp-1); }
+.tc-file{ display:flex; align-items:center; gap:var(--sp-2); min-height:48px; padding:8px 14px; border-radius:16px; text-decoration:none;
+  background:var(--tc-recv); color:var(--ink); font-family:var(--sans); font-size:var(--fs-foot); font-weight:550; max-width:280px; }
+.chat-bubble-row.me .tc-file{ background:var(--tc-sent); color:#fff; }
+.tc-file svg{ width:22px; height:22px; flex-shrink:0; }
+.tc-file span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tc-file:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 
-/* Reactions tuck under the bubble's edge. */
-.tc-panel .chat-reactions{ margin-top:-6px; padding:0 var(--sp-2); position:relative; z-index:1; }
-.tc-panel .chat-reaction{ min-height:28px; box-shadow:0 1px 2px rgba(20,43,67,0.08); }
-
-/* Actions, opened by tapping a message. */
-.tc-panel .chat-actions{
-  margin-top:var(--sp-1); padding:var(--sp-1); border-radius:var(--r-lg); border:none;
-  box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft);
+/* Replies: a faded copy of what is being answered, above the answer. */
+.tc-panel .chat-quote{
+  display:flex; align-items:center; gap:8px; width:auto; max-width:100%; margin:0 0 -8px; padding:7px 12px 14px;
+  border:none; border-radius:16px 16px 6px 6px; background:color-mix(in srgb, var(--tc-recv) 70%, var(--paper)); color:var(--ink-soft);
+  text-align:left; cursor:pointer; opacity:.9;
 }
-.tc-panel .chat-act-emoji{ min-width:44px; min-height:44px; font-size:21px; }
-.tc-panel .chat-act{ min-height:44px; font-size:var(--fs-foot); }
+.tc-panel .chat-bubble-row.me .chat-quote{ align-self:flex-end; }
+.tc-quote-label{ display:block; font-size:11.5px; color:var(--ink-soft); margin:0 var(--sp-3) 3px; }
+.chat-bubble-row.me .tc-quote-label{ text-align:right; }
+.tc-panel .chat-quote span{ font-size:13.5px; color:var(--ink-soft); -webkit-line-clamp:2; }
+.tc-panel .chat-quote img{ width:34px; height:34px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+.tc-panel .chat-quote b{ display:none; }
 
-/* Typing: a bubble of its own at the foot of the thread. Height reserved. */
-.tc-panel .typing-indicator{ height:26px; padding:0 var(--sp-3); font-size:var(--fs-cap); }
-.tc-panel .typing-dots{ padding:6px 9px; border-radius:999px; background:var(--paper); box-shadow:inset 0 0 0 1px var(--line-soft); }
+/* Reactions sit on the bubble's lower edge. */
+.tc-panel .chat-reactions{ margin:-9px var(--sp-2) 0; position:relative; z-index:1; gap:3px; }
+.chat-bubble-row.me .chat-reactions{ justify-content:flex-end; }
+.tc-panel .chat-reaction{ position:relative; min-height:26px; padding:0 7px; border:2px solid var(--paper); background:var(--tc-recv); font-size:13px; box-shadow:none; }
+.tc-panel .chat-reaction.is-mine{ background:var(--accent-soft); border-color:var(--paper); }
+.tc-panel .chat-reaction b{ font-size:11px; }
+.tc-panel .chat-reaction::before{ content:''; position:absolute; inset:-9px -2px; }
+.chat-reaction.is-new span{ animation:tcPop .42s cubic-bezier(.3,1.6,.5,1); display:inline-block; }
+@keyframes tcPop{ 0%{ transform:scale(.3); } 60%{ transform:scale(1.25); } 100%{ transform:scale(1); } }
+.tc-heart-burst{ position:absolute; left:50%; top:50%; width:56px; height:56px; margin:-28px 0 0 -28px; pointer-events:none; z-index:3;
+  animation:tcHeart .7s cubic-bezier(.2,.9,.3,1.2) forwards; font-size:44px; line-height:56px; text-align:center; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
+@keyframes tcHeart{ 0%{ transform:scale(.2); opacity:0; } 30%{ transform:scale(1.15); opacity:1; } 70%{ transform:scale(1); opacity:1; } 100%{ transform:scale(1.1) translateY(-10px); opacity:0; } }
 
-/* Composer */
-.tc-composer{ padding:var(--sp-1) var(--sp-2) var(--sp-2); border-top:1px solid var(--line-soft); background:color-mix(in srgb, var(--paper) 85%, transparent);
-  -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); }
-.tc-composer .chat-compose-bar.show{ margin:0 0 var(--sp-1); border-radius:var(--r-md); }
-.tc-row{ display:flex; align-items:flex-end; gap:var(--sp-1); }
-.tc-field{
-  flex:1; min-width:0; display:flex; align-items:flex-end; border-radius:22px;
-  background:var(--paper); box-shadow:inset 0 0 0 1px var(--line);
-  transition:box-shadow .15s var(--ease);
-}
-.tc-field:focus-within{ box-shadow:inset 0 0 0 1.5px var(--accent-2), 0 0 0 4px var(--accent-soft); }
-.tc-field textarea{
+/* Swipe right to reply. */
+.tc-swipe-cue{ position:absolute; left:-34px; top:50%; width:28px; height:28px; margin-top:-14px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--line-soft); color:var(--ink-soft); opacity:0; transform:scale(.6); pointer-events:none; }
+.tc-swipe-cue svg{ width:16px; height:16px; }
+.tc-swipe-cue.is-ready{ background:var(--accent); color:#fff; }
+
+/* The action menu floats over the thread instead of pushing it around. */
+.tc-menu-scrim{ position:fixed; inset:0; z-index:150; background:rgba(10,14,24,.18); animation:tcFade .14s var(--ease); }
+html[data-theme="dark"] .tc-menu-scrim{ background:rgba(0,0,0,.4); }
+@keyframes tcFade{ from{ opacity:0; } to{ opacity:1; } }
+.tc-menu{ position:fixed; z-index:151; display:flex; flex-direction:column; gap:var(--sp-2); width:max-content; max-width:calc(100vw - 24px); animation:tcMenuIn .18s var(--ease); }
+@keyframes tcMenuIn{ from{ opacity:0; transform:scale(.94); } to{ opacity:1; transform:scale(1); } }
+.tc-menu-emojis{ display:flex; gap:2px; padding:4px; border-radius:999px; background:var(--paper); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft); }
+.tc-menu-emoji{ width:44px; height:44px; border:none; border-radius:50%; background:none; cursor:pointer; font-size:24px; line-height:1; transition:transform .12s var(--ease); }
+.tc-menu-emoji:hover, .tc-menu-emoji:focus-visible{ transform:scale(1.18); background:var(--line-soft); outline:none; }
+.tc-menu-emoji.is-mine{ background:var(--accent-soft); }
+.tc-menu-list{ display:flex; flex-direction:column; min-width:200px; padding:4px; border-radius:var(--r-md); background:var(--paper); box-shadow:var(--sh-2), inset 0 0 0 1px var(--line-soft); }
+.tc-menu-item{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); min-height:44px; padding:0 var(--sp-3); border:none; background:none; border-radius:10px;
+  font-family:var(--sans); font-size:var(--fs-sub); color:var(--ink); cursor:pointer; text-align:left; }
+.tc-menu-item svg{ width:18px; height:18px; color:var(--ink-soft); }
+.tc-menu-item:hover, .tc-menu-item:focus-visible{ background:var(--line-soft); outline:none; }
+.tc-menu-item.is-danger, .tc-menu-item.is-danger svg{ color:var(--danger); }
+
+/* Typing: real presence from chat-typing, as a small bubble. */
+.tc-panel .typing-indicator{ height:0; overflow:hidden; padding:0 var(--sp-3); font-size:var(--fs-cap); }
+.tc-panel .typing-indicator.show{ height:28px; }
+.tc-panel .typing-dots{ padding:7px 10px; border-radius:999px; background:var(--tc-recv); box-shadow:none; }
+
+/* New messages while you read older ones. */
+.tc-jump-wrap{ position:absolute; left:0; right:0; z-index:4; display:flex; justify-content:center; pointer-events:none; }
+.tc-panel .chat-jump{ position:static; transform:translateY(8px); background:var(--accent); color:#fff; border:none; box-shadow:var(--sh-2); font-weight:600; }
+.tc-panel .chat-jump.show{ transform:none; }
+
+/* Composer: one pill with the attach button, the text and send. */
+.tc-composer{ padding:var(--sp-2); border-top:1px solid var(--line-soft); background:var(--paper); }
+.tc-composer .chat-compose-bar.show{ margin:0 0 var(--sp-2); border-radius:var(--r-md); border-left:0; background:var(--bg-hi); box-shadow:inset 3px 0 0 var(--accent-2); }
+.tc-row{ display:flex; align-items:flex-end; gap:4px; padding:3px; border-radius:26px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line); transition:box-shadow .15s var(--ease); }
+.tc-row:focus-within{ box-shadow:inset 0 0 0 1.5px var(--accent-2); }
+.tc-row textarea{
   flex:1; min-width:0; resize:none; border:none; outline:none; background:transparent; color:var(--ink);
-  font-family:var(--sans); font-size:16px; line-height:1.4; padding:11px 4px 11px 16px;
-  max-height:132px; min-height:44px; overflow-y:auto; display:block;
+  font-family:var(--sans); font-size:16px; line-height:1.4; padding:10px 4px; max-height:132px; min-height:44px; overflow-y:auto; display:block;
 }
-.tc-field textarea::placeholder{ color:var(--ink-faint); }
-.tc-field .tc-in-btn{
-  width:44px; height:44px; flex-shrink:0; border:none; background:none; cursor:pointer; border-radius:50%;
-  color:var(--ink-soft); display:flex; align-items:center; justify-content:center;
-  -webkit-tap-highlight-color:transparent;
-}
-.tc-field .tc-in-btn svg{ width:21px; height:21px; }
-.tc-field .tc-in-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-4px; }
-.tc-row > .tc-icon-btn{ box-shadow:none; background:transparent; border-color:transparent; }
-.tc-row > .tc-icon-btn:hover{ background:var(--bg-hi); }
+.tc-row textarea::placeholder{ color:var(--ink-soft); }
+.tc-attach{ width:44px; height:44px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--accent); cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.tc-attach svg{ width:22px; height:22px; }
+.tc-attach:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
 .tc-send{
   width:44px; height:44px; flex-shrink:0; border-radius:50%; border:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; color:#fff;
-  background:linear-gradient(140deg, var(--accent-2), var(--accent));
-  box-shadow:0 8px 16px -8px rgba(15,95,166,.6);
-  transition:transform .15s var(--ease), filter .15s var(--ease), opacity .15s var(--ease);
+  display:flex; align-items:center; justify-content:center; color:#fff; background:var(--tc-sent);
+  transition:transform .15s var(--ease), opacity .15s var(--ease), background .15s var(--ease);
 }
-.tc-send svg{ width:19px; height:19px; margin-left:-2px; }
-.tc-send:disabled{ background:var(--line); box-shadow:none; cursor:default; }
+.tc-send svg{ width:20px; height:20px; margin-left:-2px; }
+.tc-send:disabled{ background:transparent; cursor:default; }
 .tc-send:disabled svg path{ stroke:var(--ink-faint); }
-.tc-send:not(:disabled):active, .tc-send.is-pressed{ transform:scale(.92); }
+.tc-send:not(:disabled):active, .tc-send.is-pressed{ transform:scale(.9); }
 .tc-send:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.tc-send.is-busy{ background:var(--tc-sent); }
 .tc-send.is-busy svg{ display:none; }
-.tc-send.is-busy::after{
-  content:''; width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff;
-  animation:tcSpin .8s linear infinite;
-}
+.tc-send.is-busy::after{ content:''; width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; animation:tcSpin .8s linear infinite; }
 @keyframes tcSpin{ to{ transform:rotate(360deg); } }
+.tc-note{ font-size:var(--fs-cap); color:var(--danger); margin:0 var(--sp-2) var(--sp-1); }
+.tc-note:empty{ display:none; }
 
-/* The photo tray: what you are about to send, with upload progress. */
-.tc-tray{ display:flex; gap:var(--sp-2); overflow-x:auto; padding:var(--sp-1) 2px var(--sp-2); scrollbar-width:none; }
+/* The tray: what you are about to send, with upload progress. */
+.tc-tray{ display:flex; gap:var(--sp-2); overflow-x:auto; padding:8px 4px var(--sp-2); scrollbar-width:none; }
 .tc-tray::-webkit-scrollbar{ display:none; }
-.tc-tray:empty{ display:none; }
-.tc-thumb{
-  position:relative; flex:0 0 auto; width:72px; height:72px; border-radius:var(--r-md); overflow:visible;
-  background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line);
-}
+.tc-thumb{ position:relative; flex:0 0 auto; width:76px; height:76px; border-radius:var(--r-md); background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line); }
 .tc-thumb-img{ width:100%; height:100%; border-radius:var(--r-md); overflow:hidden; display:block; }
 .tc-thumb-img img{ width:100%; height:100%; object-fit:cover; display:block; }
 .tc-thumb.is-file .tc-thumb-img{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:6px; color:var(--accent); }
 .tc-thumb.is-file .tc-thumb-img svg{ width:24px; height:24px; }
 .tc-thumb.is-file .tc-thumb-img span{ font-size:10.5px; color:var(--ink-soft); max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tc-thumb-state{
-  position:absolute; inset:0; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center;
-  background:rgba(12,18,30,.38); color:#fff; border:none; padding:0; font:inherit;
-}
+.tc-thumb-state{ position:absolute; inset:0; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; background:rgba(12,18,30,.38); color:#fff; border:none; padding:0; font:inherit; }
 .tc-thumb.is-done .tc-thumb-state{ display:none; }
 .tc-thumb-state svg{ width:30px; height:30px; }
-.tc-thumb.is-error .tc-thumb-state{ background:color-mix(in srgb, var(--danger) 70%, rgba(12,18,30,.4)); cursor:pointer; }
+.tc-thumb.is-error .tc-thumb-state{ background:color-mix(in srgb, var(--danger) 72%, rgba(12,18,30,.4)); cursor:pointer; }
 .tc-ring-bg{ stroke:rgba(255,255,255,.35); }
 .tc-ring{ stroke:#fff; transition:stroke-dashoffset .2s linear; transform:rotate(-90deg); transform-origin:50% 50%; }
-/* 24px badge, 44px target: the hit area reaches past the corner. */
-.tc-thumb-x{
-  position:absolute; top:-7px; right:-7px; width:24px; height:24px; border-radius:50%; border:2px solid var(--paper);
-  background:var(--ink); color:var(--paper); cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center;
-}
-.tc-thumb-x::before{ content:''; position:absolute; inset:-10px; }
+.tc-thumb-x{ position:absolute; top:-7px; right:-7px; width:26px; height:26px; border-radius:50%; border:2px solid var(--paper); background:var(--ink); color:var(--paper);
+  cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; }
+.tc-thumb-x::before{ content:''; position:absolute; inset:-9px; }
 .tc-thumb-x svg{ width:12px; height:12px; }
 .tc-thumb-x:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
-.tc-thumb-add{
-  flex:0 0 auto; width:72px; height:72px; border-radius:var(--r-md); border:1.5px dashed var(--line);
-  background:transparent; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center;
-}
+.tc-thumb-add{ flex:0 0 auto; width:76px; height:76px; border-radius:var(--r-md); border:1.5px dashed var(--line); background:transparent; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .tc-thumb-add svg{ width:22px; height:22px; }
-.tc-tray-note{ font-size:var(--fs-cap); color:var(--ink-soft); padding:0 2px var(--sp-1); }
+.tc-tray-note{ font-size:var(--fs-cap); color:var(--ink-soft); padding:0 4px var(--sp-1); }
 .tc-tray-note.is-problem{ color:var(--danger); }
 
-/* Lightbox: step through a message's photos. */
-.lightbox-nav{
-  position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%; border:none;
-  background:rgba(255,255,255,.16); color:#fff; cursor:pointer; display:none; align-items:center; justify-content:center; z-index:2;
-}
-.lightbox-nav svg{ width:22px; height:22px; }
-.lightbox-nav.prev{ left:12px; } .lightbox-nav.next{ right:12px; }
-.lightbox.is-gallery .lightbox-nav{ display:flex; }
-.lightbox-nav:disabled{ opacity:.3; cursor:default; }
-.lightbox-count{ font-variant-numeric:tabular-nums; opacity:.8; margin-left:var(--sp-2); }
+/* Empty: a friendly start with real shortcuts into the box. */
+.tc-empty{ margin:auto; text-align:center; padding:var(--sp-5) var(--sp-4); display:flex; flex-direction:column; align-items:center; gap:var(--sp-2); }
+.tc-empty-wave{ font-size:46px; line-height:1; animation:tcWave 2.4s ease-in-out 2; transform-origin:70% 80%; }
+@keyframes tcWave{ 0%,60%,100%{ transform:rotate(0); } 10%,30%{ transform:rotate(14deg); } 20%,40%{ transform:rotate(-8deg); } }
+.tc-empty h3{ font-family:var(--sans); font-size:var(--fs-head); font-weight:650; margin:var(--sp-1) 0 0; color:var(--ink); }
+.tc-empty p{ font-size:var(--fs-foot); color:var(--ink-soft); margin:0; max-width:30ch; line-height:1.5; }
+.tc-starters{ display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-1); margin-top:var(--sp-2); }
+.tc-starter{ min-height:44px; padding:0 var(--sp-3); border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:var(--fs-foot); cursor:pointer; }
+.tc-starter:hover{ border-color:var(--accent-2); }
+.tc-starter:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 
-/* The chat screen fills the window; nothing to scroll past below it. */
+/* ---------- Photo viewer ----------
+   Its own layer above everything but the lock screen. The X is fixed to the
+   corner inside the phone's safe area, 48px, white on a dark disc, and sits
+   outside the image layer, so zooming or moving the picture never hides it.
+   The old lightbox put it at top:18px, under the iPhone status bar in the
+   installed app (the page runs edge to edge), where it could not be seen
+   or tapped. */
+.pv{ position:fixed; inset:0; z-index:400; color:#fff; touch-action:none; overscroll-behavior:contain; }
+.pv[hidden]{ display:none; }
+.pv-backdrop{ position:absolute; inset:0; background:#05070B; opacity:1; }
+.pv-stage{ position:absolute; inset:0; overflow:hidden; cursor:grab; }
+.pv-stage.is-zoomed{ cursor:move; }
+.pv-track{ position:absolute; inset:0; will-change:transform; }
+.pv-img{
+  position:absolute; left:50%; top:50%; max-width:none; transform-origin:0 0; user-select:none; -webkit-user-select:none;
+  -webkit-user-drag:none; will-change:transform; opacity:0; transition:opacity .2s var(--ease);
+}
+.pv-img.is-ready{ opacity:1; }
+.pv-status{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--sp-2); pointer-events:none; font-family:var(--sans); font-size:var(--fs-foot); color:rgba(255,255,255,.85); }
+.pv-status:empty{ display:none; }
+.pv-spinner{ width:30px; height:30px; border-radius:50%; border:3px solid rgba(255,255,255,.25); border-top-color:#fff; animation:tcSpin .9s linear infinite; }
+.pv-retry{ pointer-events:auto; min-height:44px; padding:0 var(--sp-4); border-radius:999px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.12); color:#fff; font:600 var(--fs-foot) var(--sans); cursor:pointer; }
+.pv-top{
+  position:absolute; left:0; right:0; top:0; z-index:3; display:flex; align-items:center; gap:var(--sp-2);
+  padding:calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 10px) 24px calc(env(safe-area-inset-left, 0px) + 16px);
+  background:linear-gradient(rgba(5,7,11,.6), rgba(5,7,11,0)); pointer-events:none;
+}
+.pv-who{ flex:1; min-width:0; font-family:var(--sans); font-size:var(--fs-foot); line-height:1.3; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+.pv-who b{ display:block; font-weight:650; font-size:var(--fs-sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pv-who span{ opacity:.8; }
+.pv-close{
+  pointer-events:auto; flex-shrink:0; width:48px; height:48px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  background:rgba(20,24,32,.72); border:1.5px solid rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); box-shadow:0 2px 10px rgba(0,0,0,.45);
+}
+.pv-close svg{ width:22px; height:22px; }
+.pv-close:hover{ background:rgba(40,46,58,.85); }
+.pv-close:focus-visible, .pv-nav:focus-visible, .pv-dot:focus-visible{ outline:3px solid #8CC8F5; outline-offset:2px; }
+.pv-nav{
+  position:absolute; top:50%; z-index:3; width:48px; height:48px; margin-top:-24px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:#fff; background:rgba(20,24,32,.6); border:1px solid rgba(255,255,255,.3);
+}
+.pv-nav svg{ width:24px; height:24px; }
+.pv-nav[hidden]{ display:none; }
+.pv-prev{ left:calc(env(safe-area-inset-left, 0px) + 12px); }
+.pv-next{ right:calc(env(safe-area-inset-right, 0px) + 12px); }
+@media (hover:none) and (pointer:coarse){ .pv-nav{ display:none; } }
+.pv-bottom{
+  position:absolute; left:0; right:0; bottom:0; z-index:3; display:flex; flex-direction:column; align-items:center; gap:var(--sp-2);
+  padding:24px calc(env(safe-area-inset-right, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 16px) calc(env(safe-area-inset-left, 0px) + 16px);
+  background:linear-gradient(rgba(5,7,11,0), rgba(5,7,11,.6)); pointer-events:none;
+}
+.pv-caption{ max-width:640px; font-size:var(--fs-foot); line-height:1.45; text-align:center; text-shadow:0 1px 2px rgba(0,0,0,.6); display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.pv-caption:empty{ display:none; }
+.pv-dots{ display:flex; gap:6px; pointer-events:auto; }
+.pv-dot{ width:28px; height:28px; padding:0; border:none; background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.pv-dot::after{ content:''; width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.4); transition:background .2s, transform .2s; }
+.pv-dot[aria-current="true"]::after{ background:#fff; transform:scale(1.25); }
+body.pv-open{ overflow:hidden; }
+
+@media (max-width:760px){
+  /* The thread runs edge to edge on a phone, so photos get the width. */
+  .tc .chat-panel.tc-panel{ margin-inline:-18px; border-radius:0; box-shadow:none; border-top:1px solid var(--line-soft); }
+}
 .main:has(> #content > .tc){ padding-bottom:24px; }
 @media (max-width:900px){
-  /* The chat screen fills the space between the bars; nothing to scroll past. */
   .main:has(> #content > .tc){ padding-bottom:0; }
   #content:has(> .tc){ padding-bottom:0; }
-  .tc-head{ margin-top:-12px; }
-  /* While typing, the strips step aside so the thread keeps its room. */
-  body.kb-open .tc-hipaa, body.kb-open .tc-pinned{ display:none; }
+  .tc-head{ margin-top:-14px; }
+  /* The HIPAA reminder stays while typing; that is when it matters. */
+  body.kb-open .tc-pinned{ display:none; }
 }
-/* A phone on its side has about 240px between the bars: the pinned strip
-   steps aside and the header tightens so the thread and box still fit. */
 @media (max-height:500px) and (max-width:1000px){
   .tc-pinned{ display:none; }
-  .tc-head{ min-height:36px; margin-bottom:0; }
-  .tc-hipaa{ margin-bottom:var(--sp-1); }
+  .tc-head{ min-height:40px; margin-bottom:0; }
+  .tc-faces{ display:none; }
 }
 @media (prefers-reduced-motion:reduce){
-  .tc-send, .tc-icon-btn, .tc-pinned-chev, .tc-ring{ transition:none; }
-  .tc-send.is-busy::after{ animation-duration:2.4s; }
+  .tc-send, .tc-icon-btn, .tc-pinned-chev, .tc-ring, .tc-panel .chat-bubble, .tc-photo img, .pv-img{ transition:none; }
+  .tc-photo:not(.is-loaded):not(.is-failed)::before, .tc-empty-wave, .chat-reaction.is-new span, .tc-menu, .tc-menu-scrim{ animation:none; }
+  .tc-heart-burst{ animation-duration:.01s; }
+  .tc-send.is-busy::after, .pv-spinner{ animation-duration:2s; }
 }
 </style>
 <link rel="stylesheet" href="./home-polish.css">
@@ -6529,16 +6640,21 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
   </div>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)" role="dialog" aria-modal="true" aria-label="Photo">
-  <button class="lightbox-close" title="Close" aria-label="Close" onclick="closeLightbox(event, true)">✕</button>
-  <button type="button" class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous photo" onclick="event.stopPropagation(); stepLightbox(-1)"></button>
-  <button type="button" class="lightbox-nav next" id="lightboxNext" aria-label="Next photo" onclick="event.stopPropagation(); stepLightbox(1)"></button>
-  <img id="lightboxImg" src="" alt="">
-  <div class="lightbox-bar">
-    <span class="lightbox-name" id="lightboxName"></span>
-    <div class="lightbox-actions">
-      <a class="lightbox-btn" id="lightboxDownload" href="" download>Download</a>
-    </div>
+<div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="pv-backdrop" id="pvBackdrop"></div>
+  <div class="pv-stage" id="pvStage">
+    <div class="pv-track" id="pvTrack"><img class="pv-img" id="pvImg" alt="" draggable="false"></div>
+    <div class="pv-status" id="pvStatus" role="status" aria-live="polite"></div>
+  </div>
+  <div class="pv-top">
+    <div class="pv-who" id="pvWho"></div>
+    <button type="button" class="pv-close" id="pvClose" aria-label="Close photo" title="Close (Esc)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  </div>
+  <button type="button" class="pv-nav pv-prev" id="pvPrev" aria-label="Previous photo" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button type="button" class="pv-nav pv-next" id="pvNext" aria-label="Next photo" hidden><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <div class="pv-bottom">
+    <div class="pv-caption" id="pvCaption"></div>
+    <div class="pv-dots" id="pvDots" role="tablist" aria-label="Photos in this message"></div>
   </div>
 </div>
 
@@ -9632,8 +9748,12 @@ function startChatListener(){
   // limitToLast keeps this from growing without bound. Unbounded, every
   // phone re-downloaded the team's entire message history on every launch,
   // forever — slower every week, for messages nobody scrolls back to.
-  db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot(snap=>{
-    CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // includeMetadataChanges: a message you send shows at once from the local
+  // cache with hasPendingWrites set, and the listener fires again when the
+  // server confirms it. That second call is what turns "Sending" into "Sent";
+  // without it the chat could only guess.
+  db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot({ includeMetadataChanges: true }, snap=>{
+    CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data(), _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
     if(isInitialChatLoad){
       isInitialChatLoad = false;
       markChatSeen(); // don't flag pre-existing history as "unread"
@@ -9844,10 +9964,20 @@ function fitChatPanel(){
   const box = document.getElementById('chatMessages');
   const stick = box ? chatAtBottom(box) : true;
   panel.style.height = Math.max(innerHeight < 500 ? 150 : 260, Math.round(bottom - top)) + 'px';
+  // A single photo is never taller than the conversation you can see, so a
+  // portrait one is always viewable whole. Not while typing: the keyboard
+  // would shrink every photo the moment you tap the box.
+  if(box && !kb){
+    const fit = Math.max(220, Math.min(460, Math.round(innerHeight * 0.6), box.clientHeight - 40));
+    if(panel.style.getPropertyValue('--tc-maxh') !== fit + 'px') panel.style.setProperty('--tc-maxh', fit + 'px');
+  }
   if(box && stick) box.scrollTop = box.scrollHeight;
 }
 window.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatPanel(); }, { passive:true });
-if(window.visualViewport) window.visualViewport.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatPanel(); }, { passive:true });
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatPanel(); }, { passive:true });
+  window.visualViewport.addEventListener('scroll', () => { if(activeCategory === 'chat' && document.body.classList.contains('kb-open')) fitChatPanel(); }, { passive:true });
+}
 
 /* The message box grows with what you write, up to about five lines. */
 let chatDraft = '';
@@ -9863,7 +9993,7 @@ function updateChatSendState(){
   if(!btn || !box) return;
   const hasText = !!box.value.trim();
   const hasFiles = pendingChatAttachments.length > 0;
-  btn.disabled = !(hasText || hasFiles);
+  btn.disabled = chatSendBusy || !(hasText || hasFiles);
   const cam = document.getElementById('chatCameraBtn');
   if(cam) cam.hidden = hasText;           // the camera steps aside once you type, like other messengers
 }
@@ -10412,96 +10542,350 @@ function speakText(btn, text, lang){
 /* True only on devices with a precise pointer (mouse/trackpad). Used to
    decide whether autofocusing a text field is helpful or intrusive —
    on touch devices, focusing an input pops the on-screen keyboard. */
-/* ---------- Image lightbox ---------- */
-// A set of photos to step through (one chat message's), or null for one.
-let lightboxSet = null;
-function openChatPhotos(mid, index){
+/* ---------- Photo viewer ----------
+   Replaces the old lightbox, whose close button sat at top:18px: under the
+   iPhone status bar in the installed app, where it could not be seen or
+   tapped. Every photo in the app opens here: chat, term attachments,
+   provider and doctor pictures.
+
+   One picture at a time on a dark stage. Pinch or double-tap to zoom, drag
+   to move a zoomed picture, swipe sideways for the next photo in the same
+   message, swipe down to close. The X is always there regardless.
+   Gestures are decided once per touch: a zoomed picture pans, an unzoomed
+   one swipes or dismisses, never both. Closing puts the conversation back
+   exactly where it was and returns focus to the photo that opened it. */
+const PV = { open:false, items:[], i:0, s:1, x:0, y:0, w:0, h:0, nw:0, nh:0,
+             opener:null, scroll:null, inerted:[], busy:false, lastTap:null };
+const PV_MAX = 4;
+const pvReduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function pvIsOpen(){ return PV.open; }
+
+function openChatPhotos(mid, index, originEl){
   const m = CHAT_MESSAGES.find(x => x.id === mid);
   if(!m) return;
   const photos = chatAttachmentsOf(m).filter(a => (a.mimeType || '').startsWith('image/'));
   if(!photos.length) return;
-  const items = photos.map(a => ({ url: a.dataUrl, name: a.filename || 'photo.jpg' }));
-  const i = Math.max(0, Math.min(items.length - 1, index || 0));
-  openLightbox(items[i].url, items[i].name);
-  if(items.length > 1){ lightboxSet = { items, i }; paintLightboxSet(); }
+  const when = m.timestamp ? `${chatDayLabel(m.timestamp)} ${chatClock(m.timestamp)}` : '';
+  const items = photos.map((a, i) => ({ url:a.dataUrl, w:a.width || 0, h:a.height || 0,
+    title:(m.author || 'Teammate'), sub:when, caption:m.text || '', key:`${mid}:${i}` }));
+  openPhotoViewer(items, index || 0, originEl);
 }
-function paintLightboxSet(){
-  const box = document.getElementById('lightbox');
-  if(!box || !lightboxSet) return;
-  const { items, i } = lightboxSet;
-  box.classList.add('is-gallery');
-  const img = document.getElementById('lightboxImg');
-  img.src = items[i].url;
-  const name = document.getElementById('lightboxName');
-  if(name) name.innerHTML = `${escapeHtml(items[i].name)}<span class="lightbox-count">${i + 1} / ${items.length}</span>`;
-  const dl = document.getElementById('lightboxDownload');
-  if(dl){ dl.href = items[i].url; dl.setAttribute('download', items[i].name); }
-  const prev = document.getElementById('lightboxPrev'), next = document.getElementById('lightboxNext');
-  if(prev){ prev.innerHTML = ICON_CHEV_L_TC; prev.disabled = i === 0; }
-  if(next){ next.innerHTML = ICON_CHEV_R_TC; next.disabled = i === items.length - 1; }
+
+// Kept for the term, provider and doctor photos that call it inline.
+function openLightbox(url, filename){
+  const ev = window.event;
+  const origin = ev && ev.target && ev.target.closest ? ev.target.closest('button, img') : null;
+  openPhotoViewer([{ url, w:0, h:0, title:filename || 'Photo', sub:'', caption:'', key:'' }], 0, origin);
 }
-function stepLightbox(d){
-  if(!lightboxSet) return;
-  const n = lightboxSet.i + d;
-  if(n < 0 || n >= lightboxSet.items.length) return;
-  lightboxSet.i = n;
-  paintLightboxSet();
+function closeLightbox(){ closePhotoViewer(); }
+
+function openPhotoViewer(items, index, originEl){
+  const pv = document.getElementById('pv');
+  if(!pv || !items.length) return;
+  if(PV.open) closePhotoViewer({ instant:true });
+  PV.items = items; PV.i = Math.max(0, Math.min(items.length - 1, index));
+  PV.opener = originEl || document.activeElement;
+  const thread = document.getElementById('chatMessages');
+  PV.scroll = { win: window.scrollY, thread: thread ? thread.scrollTop : null };
+  // Everything behind is out of reach while this is open.
+  PV.inerted = [];
+  Array.from(document.body.children).forEach(el => {
+    if(el === pv || el.id === 'toast' || el.tagName === 'SCRIPT' || el.inert) return;
+    el.inert = true; PV.inerted.push(el);
+  });
+  document.body.classList.add('pv-open');
+  pv.hidden = false;
+  PV.open = true;
+  pvShow(PV.i, { from: originEl });
+  document.getElementById('pvClose').focus({ preventScroll:true });
 }
-(function(){
-  let x0 = null, y0 = null;
-  document.addEventListener('touchstart', e => {
-    if(!lightboxSet || !e.target.closest || !e.target.closest('#lightbox')) return;
-    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
-  }, { passive:true });
-  document.addEventListener('touchend', e => {
-    if(x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
-    x0 = null;
-    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) stepLightbox(dx < 0 ? 1 : -1);
-  }, { passive:true });
+
+function pvStageSize(){
+  const st = document.getElementById('pvStage');
+  return { W: st.clientWidth, H: st.clientHeight };
+}
+// The picture's fitted size at zoom 1: as large as fits, never more than
+// twice its own pixels.
+function pvFit(nw, nh){
+  const { W, H } = pvStageSize();
+  const k = Math.min(W / nw, H / nh, 2);
+  PV.w = Math.round(nw * k); PV.h = Math.round(nh * k);
+  const img = document.getElementById('pvImg');
+  img.style.width = PV.w + 'px'; img.style.height = PV.h + 'px';
+}
+function pvApply(anim){
+  const img = document.getElementById('pvImg');
+  const t = `translate3d(${PV.x - PV.w * PV.s / 2}px, ${PV.y - PV.h * PV.s / 2}px, 0) scale(${PV.s})`;
+  if(anim && !pvReduced()){
+    const from = getComputedStyle(img).transform;
+    img.style.transform = t;
+    img.animate([{ transform: from === 'none' ? t : from }, { transform: t }], { duration: 220, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  }else img.style.transform = t;
+  document.getElementById('pvStage').classList.toggle('is-zoomed', PV.s > 1.01);
+}
+function pvBounds(s){
+  const { W, H } = pvStageSize();
+  return { mx: Math.max(0, (PV.w * s - W) / 2), my: Math.max(0, (PV.h * s - H) / 2) };
+}
+function pvClamp(){
+  const b = pvBounds(PV.s);
+  PV.x = Math.max(-b.mx, Math.min(b.mx, PV.x));
+  PV.y = Math.max(-b.my, Math.min(b.my, PV.y));
+}
+function pvZoomAt(s2, px, py, anim){
+  // Keep the point under the finger (px, py from the stage centre) still.
+  s2 = Math.max(1, Math.min(PV_MAX, s2));
+  PV.x = px - (px - PV.x) * (s2 / PV.s);
+  PV.y = py - (py - PV.y) * (s2 / PV.s);
+  PV.s = s2;
+  if(PV.s <= 1.001){ PV.s = 1; PV.x = 0; PV.y = 0; }
+  pvClamp(); pvApply(anim);
+}
+
+function pvShow(i, opts){
+  opts = opts || {};
+  const it = PV.items[i];
+  if(!it) return;
+  PV.i = i; PV.s = 1; PV.x = 0; PV.y = 0;
+  const img = document.getElementById('pvImg');
+  const status = document.getElementById('pvStatus');
+  const n = PV.items.length;
+  document.getElementById('pvWho').innerHTML = `<b>${escapeHtml(it.title || '')}</b>${it.sub ? `<span>${escapeHtml(it.sub)}</span>` : ''}`;
+  document.getElementById('pvCaption').textContent = it.caption || '';
+  const prev = document.getElementById('pvPrev'), next = document.getElementById('pvNext');
+  prev.hidden = i === 0; next.hidden = i === n - 1;
+  document.getElementById('pv').setAttribute('aria-label', n > 1 ? `Photo ${i + 1} of ${n}` : 'Photo');
+  document.getElementById('pvDots').innerHTML = n > 1 ? PV.items.map((_, k) =>
+    `<button type="button" class="pv-dot" role="tab" aria-label="Photo ${k + 1} of ${n}" aria-current="${k === i}" onclick="pvGo(${k})"></button>`).join('') : '';
+  img.classList.remove('is-ready');
+  img.removeAttribute('src');
+  img.alt = n > 1 ? `Photo ${i + 1} of ${n}${it.title ? ' from ' + it.title : ''}` : (it.title || 'Photo');
+  status.innerHTML = '<span class="pv-spinner" aria-hidden="true"></span><span class="sr-only">Loading photo</span>';
+  // A size known up front (stored, or the thumbnail already in the thread)
+  // lets the picture grow out of its thumbnail before the big one arrives.
+  let nw = it.w, nh = it.h;
+  const thumb = opts.from && opts.from.querySelector ? (opts.from.tagName === 'IMG' ? opts.from : opts.from.querySelector('img')) : null;
+  if((!nw || !nh) && thumb && thumb.naturalWidth){ nw = thumb.naturalWidth; nh = thumb.naturalHeight; }
+  const ready = ()=>{
+    status.innerHTML = '';
+    pvFit(img.naturalWidth || nw, img.naturalHeight || nh);
+    pvApply(false);
+    img.classList.add('is-ready');
+  };
+  const grow = (from)=>{
+    if(!from || pvReduced() || !from.getBoundingClientRect) return;
+    const r = from.getBoundingClientRect();
+    if(!r.width || r.bottom < 0 || r.top > innerHeight) return;
+    const st = document.getElementById('pvStage').getBoundingClientRect();
+    const cx = st.left + st.width / 2, cy = st.top + st.height / 2;
+    const s0 = Math.max(r.width / PV.w, r.height / PV.h);
+    const x0 = r.left + r.width / 2 - cx, y0 = r.top + r.height / 2 - cy;
+    const t0 = `translate3d(${x0 - PV.w * s0 / 2}px, ${y0 - PV.h * s0 / 2}px, 0) scale(${s0})`;
+    const t1 = `translate3d(${-PV.w / 2}px, ${-PV.h / 2}px, 0) scale(1)`;
+    img.animate([{ transform: t0, opacity: .6 }, { transform: t1, opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    document.getElementById('pvBackdrop').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'ease-out' });
+  };
+  if(nw && nh){ pvFit(nw, nh); pvApply(false); }
+  img.onload = ()=>{ ready(); };
+  img.onerror = ()=>{
+    status.innerHTML = `<span>This photo didn’t load.</span><button type="button" class="pv-retry" onclick="pvShow(${i})">Try again</button>`;
+  };
+  img.src = it.url;
+  if(img.complete && img.naturalWidth){ ready(); }
+  if(opts.from && nw && nh){ img.classList.add('is-ready'); grow(opts.from); }
+  else if(!opts.slide && !pvReduced()) document.getElementById('pvBackdrop').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+}
+
+function pvGo(k, dir){
+  if(!PV.open || k < 0 || k >= PV.items.length || k === PV.i) return;
+  const track = document.getElementById('pvTrack');
+  const { W } = pvStageSize();
+  const d = dir || (k > PV.i ? 1 : -1);
+  if(pvReduced()){ track.style.transform = ''; pvShow(k, { slide:true }); return; }
+  const cur = new DOMMatrix(getComputedStyle(track).transform).m41 || 0;
+  track.animate([{ transform:`translateX(${cur}px)` }, { transform:`translateX(${-d * W}px)` }], { duration: 160, easing: 'ease-in' }).onfinish = ()=>{
+    pvShow(k, { slide:true });
+    track.style.transform = '';
+    track.animate([{ transform:`translateX(${d * W * 0.35}px)`, opacity: 0 }, { transform:'translateX(0)', opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  };
+  track.style.transform = `translateX(${-d * W}px)`;
+}
+
+function closePhotoViewer(opts){
+  opts = opts || {};
+  const pv = document.getElementById('pv');
+  if(!PV.open || !pv) return;
+  PV.open = false;
+  const img = document.getElementById('pvImg');
+  const it = PV.items[PV.i] || {};
+  const target = (it.key && document.querySelector(`[data-pv="${it.key}"]`)) || PV.opener;
+  const finish = ()=>{
+    pv.hidden = true;
+    img.removeAttribute('src'); img.classList.remove('is-ready');
+    document.getElementById('pvTrack').style.transform = '';
+    document.getElementById('pvBackdrop').style.opacity = '';
+    PV.inerted.forEach(el => { el.inert = false; });
+    PV.inerted = [];
+    document.body.classList.remove('pv-open');
+    // Exactly where you were in the conversation.
+    const thread = document.getElementById('chatMessages');
+    if(PV.scroll){
+      if(thread && PV.scroll.thread !== null) thread.scrollTop = PV.scroll.thread;
+      window.scrollTo(0, PV.scroll.win);
+    }
+    if(target && target.isConnected && target.focus) target.focus({ preventScroll:true });
+  };
+  if(opts.instant || pvReduced()){ finish(); return; }
+  // Shrink back into the photo it came from when that is on screen.
+  const r = target && target.isConnected && target.getBoundingClientRect ? target.getBoundingClientRect() : null;
+  const st = document.getElementById('pvStage').getBoundingClientRect();
+  const from = getComputedStyle(img).transform;
+  let to = null;
+  if(r && r.width && r.bottom > 0 && r.top < innerHeight && PV.w){
+    const cx = st.left + st.width / 2, cy = st.top + st.height / 2;
+    const s0 = Math.max(r.width / PV.w, r.height / PV.h);
+    to = `translate3d(${r.left + r.width / 2 - cx - PV.w * s0 / 2}px, ${r.top + r.height / 2 - cy - PV.h * s0 / 2}px, 0) scale(${s0})`;
+  }
+  const a = img.animate(to ? [{ transform: from === 'none' ? to : from, opacity: 1 }, { transform: to, opacity: .4 }]
+                          : [{ opacity: 1, transform: from === 'none' ? 'none' : from }, { opacity: 0, transform: (from === 'none' ? '' : from + ' ') + 'scale(.94)' }],
+                        { duration: 220, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+  document.getElementById('pvBackdrop').animate([{ opacity: getComputedStyle(document.getElementById('pvBackdrop')).opacity }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+  a.onfinish = ()=>{ a.cancel(); document.getElementById('pvBackdrop').getAnimations().forEach(x => x.cancel()); finish(); };
+}
+
+// Gestures. One decision per touch: pan (zoomed), swipe (sideways) or
+// dismiss (down); a second finger turns it into a pinch.
+(function wirePhotoViewer(){
+  const stage = document.getElementById('pvStage');
+  if(!stage) return;
+  document.getElementById('pvClose').onclick = ()=> closePhotoViewer();
+  document.getElementById('pvPrev').onclick = ()=> pvGo(PV.i - 1);
+  document.getElementById('pvNext').onclick = ()=> pvGo(PV.i + 1);
+  const pts = new Map();
+  let g = null;
+  const centre = (x, y)=>{ const r = stage.getBoundingClientRect(); return { x: x - r.left - r.width / 2, y: y - r.top - r.height / 2 }; };
+  const dist = ()=>{ const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  const mid = ()=>{ const [a, b] = [...pts.values()]; return centre((a.x + b.x) / 2, (a.y + b.y) / 2); };
+  stage.addEventListener('pointerdown', e => {
+    if(!PV.open) return;
+    try{ stage.setPointerCapture(e.pointerId); }catch(err){}
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if(pts.size === 2){
+      const m = mid();
+      g = { type:'pinch', d0: dist(), s0: PV.s, x0: PV.x, y0: PV.y, m0: m };
+    }else if(pts.size === 1){
+      g = { type:'pending', sx: e.clientX, sy: e.clientY, t: performance.now(), x0: PV.x, y0: PV.y };
+    }
+  });
+  stage.addEventListener('pointermove', e => {
+    if(!g || !pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if(g.type === 'pinch' && pts.size >= 2){
+      const m = mid();
+      const s2 = Math.max(0.8, Math.min(PV_MAX * 1.15, g.s0 * dist() / g.d0));
+      PV.s = s2;
+      PV.x = m.x - (g.m0.x - g.x0) * (s2 / g.s0);
+      PV.y = m.y - (g.m0.y - g.y0) * (s2 / g.s0);
+      pvApply(false);
+      return;
+    }
+    const dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+    if(g.type === 'pending' && Math.hypot(dx, dy) > 8){
+      g.type = PV.s > 1.01 ? 'pan' : (Math.abs(dx) > Math.abs(dy) ? (PV.items.length > 1 ? 'swipe' : 'none') : (dy > 0 ? 'dismiss' : 'none'));
+    }
+    if(g.type === 'pan'){
+      const b = pvBounds(PV.s);
+      const rub = (v, m)=> v > m ? m + (v - m) * .35 : v < -m ? -m + (v + m) * .35 : v;
+      PV.x = rub(g.x0 + dx, b.mx); PV.y = rub(g.y0 + dy, b.my);
+      pvApply(false);
+    }else if(g.type === 'swipe'){
+      const atEdge = (dx > 0 && PV.i === 0) || (dx < 0 && PV.i === PV.items.length - 1);
+      document.getElementById('pvTrack').style.transform = `translateX(${atEdge ? dx * .3 : dx}px)`;
+    }else if(g.type === 'dismiss'){
+      document.getElementById('pvTrack').style.transform = `translateY(${dy}px) scale(${Math.max(.85, 1 - dy / 1200)})`;
+      document.getElementById('pvBackdrop').style.opacity = String(Math.max(.25, 1 - dy / 450));
+    }
+  });
+  const end = (e, cancelled)=>{
+    if(!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    if(!g) return;
+    const track = document.getElementById('pvTrack');
+    if(g.type === 'pinch'){
+      if(pts.size === 1){
+        // One finger left on the glass carries on as a pan.
+        const [p] = [...pts.values()];
+        g = { type: PV.s > 1.01 ? 'pan' : 'none', sx: p.x, sy: p.y, t: performance.now(), x0: PV.x, y0: PV.y };
+      }else{ g = null; }
+      if(PV.s < 1){ PV.s = 1; PV.x = 0; PV.y = 0; }
+      if(PV.s > PV_MAX){ const c = { x: PV.x, y: PV.y }; pvZoomAt(PV_MAX, 0, 0, true); }
+      pvClamp(); pvApply(true);
+      return;
+    }
+    const dx = e.clientX - g.sx, dy = e.clientY - g.sy, dt = Math.max(1, performance.now() - g.t);
+    const { W } = pvStageSize();
+    if(g.type === 'pending' && !cancelled){
+      // A tap. Two quick ones toggle zoom at that spot.
+      const now = performance.now(), c = centre(e.clientX, e.clientY);
+      if(PV.lastTap && now - PV.lastTap.t < 320 && Math.hypot(e.clientX - PV.lastTap.x, e.clientY - PV.lastTap.y) < 40){
+        PV.lastTap = null;
+        if(PV.s > 1.01){ PV.s = 1; PV.x = 0; PV.y = 0; pvApply(true); }
+        else pvZoomAt(2.5, c.x, c.y, true);
+      }else PV.lastTap = { t: now, x: e.clientX, y: e.clientY };
+    }else if(g.type === 'pan'){
+      pvClamp(); pvApply(true);
+    }else if(g.type === 'swipe'){
+      const v = dx / dt;
+      if((dx < -W * .2 || v < -.45) && PV.i < PV.items.length - 1) pvGo(PV.i + 1, 1);
+      else if((dx > W * .2 || v > .45) && PV.i > 0) pvGo(PV.i - 1, -1);
+      else{ const from = track.style.transform; track.style.transform = ''; if(!pvReduced()) track.animate([{ transform: from }, { transform: 'translateX(0)' }], { duration: 200, easing: 'cubic-bezier(.2,.8,.2,1)' }); }
+    }else if(g.type === 'dismiss'){
+      if(!cancelled && (dy > 110 || dy / dt > .6)){ closePhotoViewer(); }
+      else{
+        const from = track.style.transform; track.style.transform = '';
+        document.getElementById('pvBackdrop').style.opacity = '';
+        if(!pvReduced()) track.animate([{ transform: from }, { transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      }
+    }
+    g = null;
+  };
+  stage.addEventListener('pointerup', e => end(e, false));
+  stage.addEventListener('pointercancel', e => end(e, true));
+  // Trackpad pinch arrives as ctrl+wheel; a wheel on a zoomed picture moves it.
+  stage.addEventListener('wheel', e => {
+    if(!PV.open) return;
+    e.preventDefault();
+    const c = centre(e.clientX, e.clientY);
+    if(e.ctrlKey || e.metaKey) pvZoomAt(PV.s * Math.exp(-e.deltaY * 0.01), c.x, c.y, false);
+    else if(PV.s > 1.01){ PV.x -= e.deltaX; PV.y -= e.deltaY; pvClamp(); pvApply(false); }
+  }, { passive:false });
+  // iOS Safari still pinch-zooms the page under the viewer without this.
+  document.addEventListener('gesturestart', e => { if(PV.open) e.preventDefault(); });
+  window.addEventListener('resize', ()=>{
+    if(!PV.open) return;
+    const img = document.getElementById('pvImg');
+    if(img.naturalWidth){ PV.s = 1; PV.x = 0; PV.y = 0; pvFit(img.naturalWidth, img.naturalHeight); pvApply(false); }
+  });
 })();
 
-function openLightbox(url, filename){
-  lightboxSet = null;
-  const lbx = document.getElementById('lightbox');
-  if(lbx) lbx.classList.remove('is-gallery');
-  const box = document.getElementById('lightbox');
-  const img = document.getElementById('lightboxImg');
-  const name = document.getElementById('lightboxName');
-  const dl = document.getElementById('lightboxDownload');
-  if(!box || !img) return;
-  img.src = url;
-  img.alt = filename || 'attachment';
-  if(name) name.textContent = filename || '';
-  if(dl){ dl.href = url; dl.setAttribute('download', filename || 'image'); }
-  box.classList.add('show');
-  document.body.style.overflow = 'hidden'; // stop the page scrolling behind the overlay
-}
-
-function closeLightbox(event, force){
-  // Only close on a click of the backdrop itself or the X — not on the image,
-  // otherwise tapping the photo you're trying to look at dismisses it.
-  if(!force && event && event.target && event.target.id === 'lightboxImg') return;
-  if(!force && event && event.target && event.target.closest && event.target.closest('.lightbox-bar')) return;
-  const box = document.getElementById('lightbox');
-  if(!box) return;
-  box.classList.remove('show', 'is-gallery');
-  lightboxSet = null;
-  document.body.style.overflow = '';
-  const img = document.getElementById('lightboxImg');
-  if(img) img.src = '';
-}
-
 document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape'){
-    const box = document.getElementById('lightbox');
-    if(box && box.classList.contains('show')) closeLightbox(null, true);
+  if(!PV.open) return;
+  if(e.key === 'Escape'){ e.preventDefault(); closePhotoViewer(); return; }
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); pvGo(PV.i - 1); return; }
+  if(e.key === 'ArrowRight'){ e.preventDefault(); pvGo(PV.i + 1); return; }
+  if(e.key === '+' || e.key === '='){ e.preventDefault(); pvZoomAt(PV.s * 1.6, 0, 0, true); return; }
+  if(e.key === '-'){ e.preventDefault(); pvZoomAt(PV.s / 1.6, 0, 0, true); return; }
+  if(e.key === '0'){ e.preventDefault(); pvZoomAt(1, 0, 0, true); return; }
+  if(e.key === 'Tab'){
+    // Focus stays inside the viewer.
+    const f = [...document.querySelectorAll('#pv button:not([hidden])')].filter(b => b.offsetParent !== null || b.id === 'pvClose');
+    if(!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    e.preventDefault();
+    const n = e.shiftKey ? (i <= 0 ? f.length - 1 : i - 1) : (i === f.length - 1 ? 0 : i + 1);
+    f[n].focus();
   }
-  if((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && lightboxSet){
-    const box = document.getElementById('lightbox');
-    if(box && box.classList.contains('show')) stepLightbox(e.key === 'ArrowLeft' ? -1 : 1);
-  }
-});
+}, true);
 
 /* ---------- Deleting chat messages and activity entries ----------
    Both collections have live listeners attached, so removing the document
@@ -10820,21 +11204,28 @@ function startTypingListener(){
   if(typingListenerStarted || !db) return;
   typingListenerStarted = true;
   db.collection('chat-typing').onSnapshot(snap=>{
-    const me = whoAmI().trim().toLowerCase();
-    const now = Date.now();
-    TYPING_USERS = snap.docs
-      .map(d => d.data())
-      .filter(v => v && v.name && v.at && (now - v.at) < TYPING_TTL)
-      .filter(v => v.name.trim().toLowerCase() !== me)
-      .map(v => v.name);
-    renderTypingIndicator();
+    typingEntries = snap.docs.map(d => d.data()).filter(v => v && v.name && v.at);
+    refreshTypingUsers();
   }, err => console.warn('Typing listener unavailable:', err));
 
-  // Entries expire on time even when nobody is actively publishing.
+  // Entries expire on time even when nobody is actively publishing: a phone
+  // that went away mid-sentence must not leave "Ana is typing" up for good.
   setInterval(()=>{
     if(!TYPING_USERS.length) return;
-    renderTypingIndicator();
+    refreshTypingUsers();
   }, 2500);
+}
+let typingEntries = [];
+function refreshTypingUsers(){
+  const me = whoAmI().trim().toLowerCase();
+  const now = Date.now();
+  const names = typingEntries
+    .filter(v => (now - v.at) < TYPING_TTL)
+    .filter(v => v.name.trim().toLowerCase() !== me)
+    .map(v => v.name);
+  if(names.join('\n') === TYPING_USERS.join('\n')) return;
+  TYPING_USERS = names;
+  renderTypingIndicator();
 }
 
 function publishTyping(){
@@ -10956,7 +11347,12 @@ function renderTypingIndicator(){
   const host = document.getElementById('typingIndicator');
   if(!host) return;
   const names = TYPING_USERS.slice(0, 3);
-  if(!names.length){ host.innerHTML = ''; host.classList.remove('show'); return; }
+  // The row only takes room while someone is really typing; keep the
+  // newest message in view when it opens or closes.
+  const box = document.getElementById('chatMessages');
+  const stick = box && chatAtBottom(box);
+  const settle = ()=>{ if(stick) box.scrollTop = box.scrollHeight; };
+  if(!names.length){ host.innerHTML = ''; host.classList.remove('show'); settle(); return; }
   const label = names.length === 1
     ? `${names[0]} is typing`
     : names.length === 2
@@ -10964,6 +11360,7 @@ function renderTypingIndicator(){
       : `${names[0]}, ${names[1]} and others are typing`;
   host.innerHTML = `<span class="typing-dots"><i></i><i></i><i></i></span><span>${escapeHtml(label)}</span>`;
   host.classList.add('show');
+  settle();
 }
 
 /* ============ Global search ============
@@ -14950,37 +15347,34 @@ function renderContent(){
 
   if(activeCategory === 'chat'){
     const hasName = !!whoAmI();
-    const n = CHAT_MESSAGES.length;
     content.innerHTML = `
       <div class="tc">
         <div class="tc-head">
-          <div class="tc-title"><h2>Team Chat</h2><span class="tc-sub" id="chatCount">${n} message${n===1?'':'s'}</span></div>
+          <div class="tc-faces" id="tcFaces" aria-hidden="true"></div>
+          <div class="tc-title"><h2>Team Chat</h2><span class="tc-sub" id="chatCount"></span></div>
           ${notificationsSupported() ? `<button type="button" class="tc-icon-btn" id="chatNotifyBtn" onclick="toggleNotifications()"></button>` : ''}
         </div>
         <div class="tc-hipaa">${ICON_SHIELD}<span>HIPAA: no patient names or identifying details.</span></div>
         <div id="tcPinned"></div>
         <div class="chat-panel tc-panel" id="tcPanel">
-          <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()" role="log" aria-label="Team messages"></div>
-          <!-- Sits over the bottom of the thread, not in the column: a message
-               arriving while you are reading history must not move anything. -->
-          <button class="chat-jump" id="chatJump" type="button" onclick="jumpToLatestChat()"></button>
+          <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()" role="log" aria-label="Team messages" aria-live="polite" aria-relevant="additions"></div>
+          <!-- Floats over the bottom of the thread, so a message arriving while
+               you read history moves nothing. -->
+          <div class="tc-jump-wrap" id="tcJumpWrap"><button class="chat-jump" id="chatJump" type="button" onclick="jumpToLatestChat()"></button></div>
           <div class="tc-drop-hint">Drop photos to add them</div>
           ${hasName ? `
             <div class="typing-indicator" id="typingIndicator"></div>
-            <div class="tc-composer">
+            <div class="tc-composer" id="tcComposer">
               <div class="chat-compose-bar" id="chatComposeBar"></div>
               <div id="chatAttachPreview"></div>
+              <div class="tc-note" id="tcNote" role="status"></div>
               <div class="chat-input-wrap">
                 <div class="mention-suggestions" id="mentionSuggestions"></div>
                 <div class="tc-row">
-                  <button type="button" class="tc-icon-btn" onclick="document.getElementById('chatFileInput').click()" aria-label="Add photos or a PDF" title="Photos or PDF">${ICON_PHOTOS_TC}</button>
+                  <button type="button" class="tc-attach" onclick="document.getElementById('chatFileInput').click()" aria-label="Add photos" title="Add photos">${ICON_PHOTOS_TC}</button>
                   <input class="file-input-hidden" id="chatFileInput" type="file" accept="image/*,application/pdf" multiple onchange="handleChatFileSelected(event)">
-                  <input class="file-input-hidden" id="chatCameraInput" type="file" accept="image/*" capture="environment" onchange="handleChatFileSelected(event)">
-                  <div class="tc-field">
-                    <textarea id="chatInput" rows="1" placeholder="Message your team" aria-label="Message your team" enterkeyhint="send"
-                      oninput="handleChatTyping(); autosizeChatInput(); chatDraft = this.value; updateChatSendState();" onkeydown="handleChatKeydown(event)"></textarea>
-                    <button type="button" class="tc-in-btn" id="chatCameraBtn" onclick="document.getElementById('chatCameraInput').click()" aria-label="Take a photo" title="Camera">${ICON_CAMERA_TC}</button>
-                  </div>
+                  <textarea id="chatInput" rows="1" placeholder="Message the team…" aria-label="Message the team" enterkeyhint="send"
+                    oninput="handleChatTyping(); autosizeChatInput(); chatDraft = this.value; updateChatSendState(); setChatNote('');" onkeydown="handleChatKeydown(event)"></textarea>
                   <button type="button" class="tc-send" id="chatSendBtn" onclick="sendChatMessage()" aria-label="Send" disabled>${ICON_SEND}</button>
                 </div>
               </div>
@@ -14996,6 +15390,7 @@ function renderContent(){
     `;
     renderPinnedStrip();
     syncChatNotifyButton();
+    renderChatHeader();
     renderChatMessages();
     renderChatAttachPreview();
     renderChatComposeBar();
@@ -15009,6 +15404,7 @@ function renderContent(){
       wireChatDrop();
       if(box && prefersAutoFocus()) box.focus();
     }
+    wireChatGestures();
     fitChatPanel();
     // Dr. Smiley takes his place on the tab bar just after this; fit again
     // once he has, so the message box clears him.
@@ -15288,8 +15684,7 @@ function closeAllOverlays(){
   // a screen that had already changed underneath it.
   if(document.getElementById('gsOverlay')?.classList.contains('show')) closeGlobalSearch();
   document.querySelectorAll('.overlay.show').forEach(el => el.classList.remove('show'));
-  const lb = document.getElementById('lightbox');
-  if(lb) lb.classList.remove('show');
+  if(PV.open) closePhotoViewer({ instant:true });
 }
 
 function setCategory(id, isBack){
@@ -15812,8 +16207,7 @@ function navigateBack(smooth){
   // An open overlay is the top layer, so Back closes that first — otherwise
   // it navigates the screen behind the panel and the panel stays put, which
   // reads as the button doing nothing.
-  const lb = document.getElementById('lightbox');
-  if(lb && lb.classList.contains('show')){ lb.classList.remove('show'); return true; }
+  if(PV.open){ closePhotoViewer(); return true; }
   const openOverlay = document.querySelector('.overlay.show');
   if(openOverlay){ openOverlay.classList.remove('show'); return true; }
 
@@ -17372,7 +17766,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1005.1830';
+const BUILD_ID = 'b1006.0029';
 const BUILD_TIME = '2026-10-05 18:30 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 
@@ -18581,16 +18975,80 @@ function chatAttachmentsOf(m){
   return m.attachment ? [m.attachment] : [];
 }
 
-function chatRowSignature(m, mine, face, mentionsMe, first, last, open){
+function chatRowSignature(m, mine, face, mentionsMe, first, last, open, status){
   return [m.id, m.text || '', m.author || '', m.timestamp || '', mine ? 1 : 0,
           face || '', chatAttachmentsOf(m).map(a => a.dataUrl || '').join('|'),
-          m._pending ? 1 : 0, mentionsMe ? 1 : 0, first ? 1 : 0, last ? 1 : 0,
-          open ? 1 : 0, JSON.stringify(m.reactions || {}),
-          m.editedAt || '', m.replyTo ? m.replyTo.id + '|' + (m.replyTo.text||'') : ''
+          m._pending ? 1 : 0, m._local ? 1 : 0, mentionsMe ? 1 : 0, first ? 1 : 0, last ? 1 : 0,
+          open ? 1 : 0, JSON.stringify(m.reactions || {}), status || '',
+          m.editedAt || '', m.replyTo ? m.replyTo.id + '|' + (m.replyTo.text||'') + '|' + (m.replyTo.photo||'') : ''
          ].join('\u0001');
 }
 
-function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
+// Delivery, only from what the data actually says. A message held in the
+// offline queue (_pending) or not yet acknowledged by the server
+// (hasPendingWrites, kept as _local) is "Sending"; anything else in the
+// thread has reached the server. Nothing here knows who has read what, so
+// nothing claims it.
+function chatDelivery(m){
+  return (m._pending || m._local) ? 'sending' : 'sent';
+}
+
+// One emoji (or two or three) on its own reads better big, without a bubble.
+function chatIsEmojiOnly(text){
+  const t = (text || '').trim();
+  if(!t || t.length > 12) return false;
+  try{ return /^(\p{Extended_Pictographic}|\p{Emoji_Component}|\u200d|\ufe0f|\s)+$/u.test(t) && /\p{Extended_Pictographic}/u.test(t); }
+  catch(e){ return false; }
+}
+
+// Stored shape of a photo, or the one measured when it first loaded (older
+// messages carry no size). Kept so a re-render reserves the right space.
+const TC_PHOTO_AR = new Map();
+function chatPhotoAr(a){
+  if(TC_PHOTO_AR.has(a.dataUrl)) return TC_PHOTO_AR.get(a.dataUrl);
+  if(a.width && a.height) return a.width / a.height;
+  return 4 / 3;
+}
+function tcPhotoLoaded(img){
+  const tile = img.closest('.tc-photo');
+  if(!tile) return;
+  tile.classList.add('is-loaded');
+  tile.classList.remove('is-failed');
+  const url = img.getAttribute('src');
+  if(!img.naturalWidth || !img.naturalHeight) return;
+  const ar = img.naturalWidth / img.naturalHeight;
+  TC_PHOTO_AR.set(url, ar);
+  // Older photos carry no size, and a stored size can be wrong: once the
+  // picture is here, settle a single photo on its real shape, without moving
+  // the thread if you are reading at the bottom.
+  const media = tile.closest('.tc-media');
+  if(!media || !media.classList.contains('n1')) return;
+  const real = Math.max(0.4, Math.min(3, ar));
+  const shown = parseFloat(getComputedStyle(media).getPropertyValue('--ar')) || real;
+  if(Math.abs(shown - real) <= 0.03) return;
+  const box = document.getElementById('chatMessages');
+  const stick = box && chatAtBottom(box);
+  media.style.setProperty('--ar', real.toFixed(4));
+  if(stick) box.scrollTop = box.scrollHeight;
+}
+function tcPhotoFailed(img){
+  const tile = img.closest('.tc-photo');
+  if(tile){ tile.classList.add('is-failed'); tile.classList.remove('is-loaded'); }
+}
+// A failed tile retries instead of opening an empty viewer.
+function tcPhotoTap(btn, mid, index, ev){
+  if(ev) ev.stopPropagation();
+  if(tcSuppressClick){ tcSuppressClick = false; return; }
+  if(btn.classList.contains('is-failed')){
+    const img = btn.querySelector('img');
+    btn.classList.remove('is-failed');
+    const src = img.getAttribute('src'); img.removeAttribute('src'); img.setAttribute('src', src);
+    return;
+  }
+  openChatPhotos(mid, index, btn);
+}
+
+function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
   const who = m.author || 'Teammate';
   const avatarColor = nameToColor(who);
   // NOT the `background:` shorthand when there is a photo. The shorthand
@@ -18611,7 +19069,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
   const chips = reactions.length
     ? `<div class="chat-reactions">${reactions.map(r=>{
         const iReacted = r.names.some(n=> String(n).trim().toLowerCase() === me);
-        return `<button type="button" class="chat-reaction${iReacted?' is-mine':''}" title="${escapeAttr(r.names.join(', '))}"
+        return `<button type="button" class="chat-reaction${iReacted?' is-mine':''}" data-emoji="${escapeAttr(r.emoji)}" aria-pressed="${iReacted}" aria-label="${escapeAttr(r.emoji)} ${r.names.length}: ${escapeAttr(r.names.join(', '))}${iReacted ? '. Tap to remove yours' : '. Tap to add yours'}" title="${escapeAttr(r.names.join(', '))}"
           onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(r.emoji).replace(/"/g,'&quot;')})">
           <span>${escapeHtml(r.emoji)}</span><b>${r.names.length}</b></button>`;
       }).join('')}</div>`
@@ -18640,40 +19098,64 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open){
        </button>`
     : '';
 
-  // Inside the panel the redesign draws photos and the time inside the bubble.
+  // Inside the redesigned panel: photos on their own, at full size, the text
+  // in its own bubble, the avatar beside the last message of a run.
   const tc = !!document.getElementById('tcPanel');
   if(tc){
     const atts = chatAttachmentsOf(m);
     const photos = atts.filter(a => (a.mimeType || '').startsWith('image/'));
     const files = atts.filter(a => !(a.mimeType || '').startsWith('image/'));
-    const metaInner = `${(last || m.editedAt) && m.timestamp ? chatClock(m.timestamp) : ''}${m.editedAt ? (last ? ' · ' : '') + 'edited' : ''}${m._pending ? ICON_CLOCK_TC : ''}`;
-    const showMeta = !!(last || m.editedAt || m._pending);
-    const metaTitle = m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : '';
+    const tsTitle = m.timestamp ? escapeAttr(new Date(m.timestamp).toLocaleString()) : '';
+    const sending = chatDelivery(m) === 'sending';
+    const avTc = mine ? '' : (last
+      ? `<div class="chat-avatar${face ? ' has-photo' : ''}" style="${avStyle}" title="${escapeAttr(who)}" aria-hidden="true">${escapeHtml(initialsOf(who))}</div>`
+      : `<div class="chat-avatar-gap" aria-hidden="true"></div>`);
     let media = '';
     if(photos.length){
-      const shown = photos.slice(0, 4);
-      const nCls = 'n' + Math.min(shown.length, 4);
-      media = `<div class="tc-media ${nCls}">${shown.map((a, i) => {
-        const ar = (a.width && a.height) ? Math.max(0.6, Math.min(1.8, a.width / a.height)).toFixed(3) : '1.333';
-        const more = (i === 3 && photos.length > 4) ? `<span class="tc-more">+${photos.length - 4}</span>` : '';
-        return `<button type="button" class="tc-photo" style="--ar:${ar}" onclick="event.stopPropagation(); openChatPhotos('${m.id}', ${i})" aria-label="Open photo ${i + 1} of ${photos.length}${a.filename ? ': ' + escapeAttr(a.filename) : ''}">
-          <img src="${escapeAttr(a.dataUrl)}" alt="" loading="lazy" decoding="async"${a.width && a.height ? ` width="${a.width}" height="${a.height}"` : ''}>${more}</button>`;
-      }).join('')}${(!m.text && showMeta) ? `<span class="tc-meta on-media" title="${metaTitle}">${metaInner}</span>` : ''}</div>`;
+      const shown = photos.slice(0, 6);
+      const n = shown.length;
+      const ar1 = Math.max(0.4, Math.min(3, chatPhotoAr(shown[0]))).toFixed(4);
+      const timeOnPhoto = (!m.text && last && m.timestamp) ? `<span class="tc-photo-time">${sending ? 'Sending…' : chatClock(m.timestamp)}</span>` : '';
+      media = `<div class="tc-media n${n}" style="--ar:${ar1}">${shown.map((a, i) => {
+        return `<button type="button" class="tc-photo" data-pv="${m.id}:${i}"
+            onclick="tcPhotoTap(this, '${m.id}', ${i}, event)" oncontextmenu="openChatMenuFor(event, '${m.id}', this)" onkeydown="if(event.key==='ContextMenu'||(event.shiftKey&&event.key==='F10')){openChatMenuFor(event,'${m.id}',this)}"
+            aria-label="Photo ${i + 1} of ${photos.length} from ${escapeAttr(who)}. Open full screen">
+          <img src="${escapeAttr(a.dataUrl)}" alt="" decoding="async"${i > 1 ? ' loading="lazy"' : ''}${a.width && a.height ? ` width="${a.width}" height="${a.height}"` : ''} onload="tcPhotoLoaded(this)" onerror="tcPhotoFailed(this)">
+          <span class="tc-photo-fail">${ICON_RETRY_TC}<span>Photo didn’t load.<br>Tap to try again</span></span>
+        </button>`;
+      }).join('')}${timeOnPhoto}</div>`;
     }
-    const fileChips = files.length ? `<div class="tc-files">${files.map(a => attachmentChipHtml(a, null)).join('')}</div>` : '';
-    const meta = showMeta && (m.text || !photos.length) ? `<span class="tc-meta" title="${metaTitle}">${metaInner}</span>` : '';
-    const textHtml = m.text ? linkifyChat(highlightMentions(m.text)) : '';
-    const body = photos.length
-      ? `<div class="chat-bubble has-media">${media}${(m.text || fileChips || meta) ? `<div class="tc-caption">${textHtml}${fileChips}${meta}</div>` : ''}</div>`
-      : (m.text || files.length) ? `<div class="chat-bubble">${textHtml}${fileChips}${meta}</div>` : '';
-    return `${avatar}
+    const emojiOnly = !photos.length && !files.length && chatIsEmojiOnly(m.text);
+    const textBubble = m.text
+      ? `<div class="chat-bubble${emojiOnly ? ' is-emoji' : ''}" tabindex="0" data-mid="${m.id}"
+            onkeydown="if(event.key==='Enter'||event.key===' '||event.key==='ContextMenu'||(event.shiftKey&&event.key==='F10')){openChatMenuFor(event,'${m.id}',this)}"
+            aria-label="${escapeAttr(mine ? 'You' : who)}: ${escapeAttr(m.text.slice(0, 300))}. Press Enter to react or reply.">${linkifyChat(highlightMentions(m.text))}${m.editedAt ? '<span class="tc-edited">edited</span>' : ''}</div>`
+      : '';
+    const fileChips = files.length ? `<div class="tc-files">${files.map(a =>
+        `<a class="tc-file" href="${escapeAttr(a.dataUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ICON_PDF}<span>${escapeHtml(a.filename || 'file.pdf')}</span></a>`).join('')}</div>` : '';
+    const replyQuote = m.replyTo
+      ? `<span class="tc-quote-label">${mine ? 'You' : escapeHtml(who)} replied to ${escapeHtml(m.replyTo.author || 'Teammate')}</span>
+         <button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${escapeAttr(m.replyTo.id)}')" aria-label="Go to the message from ${escapeAttr(m.replyTo.author || 'Teammate')} this replies to">
+           ${m.replyTo.photo ? `<img src="${escapeAttr(m.replyTo.photo)}" alt="">` : ''}<span>${escapeHtml(m.replyTo.text || (m.replyTo.photo ? 'Photo' : ''))}</span>
+         </button>`
+      : '';
+    // Under the last message of a run: its time, and for your own newest
+    // message whether it has reached the server.
+    const showFoot = last && m.timestamp && (m.text || files.length || status);
+    const foot = showFoot
+      ? `<div class="tc-foot" title="${tsTitle}">${sending ? `${ICON_CLOCK_TC}<span>Sending\u2026</span>` : `<span>${(m.text || files.length) ? chatClock(m.timestamp) : ''}${status === 'sent' ? `${(m.text || files.length) ? ' \u00b7 ' : ''}Sent` : ''}</span>`}</div>`
+      : '';
+    return `${avTc}
         <div class="chat-bubble-col">
-          ${(!mine && first) ? `<div class="chat-author" style="--who:${avatarColor}">${escapeHtml(who)}</div>` : ''}
-          ${quote}
-          ${body}
+          ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
+          ${replyQuote}
+          ${media}
+          ${textBubble}
+          ${fileChips}
           ${chips}
-          ${bar}
-        </div>`;
+        </div>
+        <span class="tc-swipe-cue" aria-hidden="true">${ICON_REPLY}</span>
+        ${foot}`;
   }
 
   return `${avatar}
@@ -18709,20 +19191,29 @@ function toggleChatActions(id){
 function renderChatMessages(){
   const container = document.getElementById('chatMessages');
   if(!container) return;
+  const tc = !!document.getElementById('tcPanel');
 
-  const countEl = document.getElementById('chatCount');
-  if(countEl) countEl.textContent = `${CHAT_MESSAGES.length} message${CHAT_MESSAGES.length===1?'':'s'}`;
+  renderChatHeader();
 
   if(CHAT_MESSAGES.length===0){
-    container.innerHTML = `<div class="chat-empty">
-      <div class="chat-empty-mark">\ud83d\udc4b</div>
-      <p class="chat-empty-title">Nobody has said anything yet</p>
-      <p>Say hello, ask about a term, or flag what is busy on your floor.</p>
-    </div>`;
+    container.innerHTML = tc
+      ? `<div class="tc-empty">
+          <div class="tc-empty-wave" aria-hidden="true">👋</div>
+          <h3>Say hi to the team</h3>
+          <p>Ask about a term, share a photo of new signage, or flag what’s busy on your floor.</p>
+          <div class="tc-starters">${CHAT_STARTERS.map(t => `<button type="button" class="tc-starter" onclick="useChatStarter(${JSON.stringify(t).replace(/"/g, '&quot;')})">${escapeHtml(t)}</button>`).join('')}</div>
+        </div>`
+      : `<div class="chat-empty">
+          <div class="chat-empty-mark">👋</div>
+          <p class="chat-empty-title">Nobody has said anything yet</p>
+          <p>Say hello, ask about a term, or flag what is busy on your floor.</p>
+        </div>`;
     renderedChatIds = new Set();
     setChatUnseen(0);
     return;
   }
+  const emptyLeft = container.querySelector('.tc-empty, .chat-empty');
+  if(emptyLeft) emptyLeft.remove();
 
   const myName = whoAmI().trim().toLowerCase();
   const stick = chatAtBottom(container);
@@ -18739,8 +19230,9 @@ function renderChatMessages(){
 
   const wanted = [];
   const nextIds = new Set();
-  let appended = 0;
+  let appended = 0, appendedMine = false;
   let prev = null;
+  const lastMsg = CHAT_MESSAGES[CHAT_MESSAGES.length - 1];
 
   CHAT_MESSAGES.forEach((m, idx)=>{
     if(unreadBefore && m.id === unreadBefore){
@@ -18755,10 +19247,14 @@ function renderChatMessages(){
       wanted.push(line); existing.delete(key);
     }
     const dk = chatDayKey(m.timestamp);
-    if(!prev || chatDayKey(prev.timestamp) !== dk){
-      const key = 'd:' + dk;
+    // A time marker at each new day, and after an hour of quiet, so a long
+    // thread reads as conversations rather than one scroll.
+    const newDay = !prev || chatDayKey(prev.timestamp) !== dk;
+    const longGap = !newDay && tc && prev && (m.timestamp - prev.timestamp) >= 60 * 60 * 1000;
+    if(newDay || longGap){
+      const key = newDay ? 'd:' + dk : 'g:' + m.id;
       let sep = existing.get(key);
-      const label = chatDayLabel(m.timestamp);
+      const label = tc ? `${chatDayLabel(m.timestamp)} ${chatClock(m.timestamp)}` : chatDayLabel(m.timestamp);
       if(!sep || sep.dataset.sig !== label){
         if(!sep) sep = document.createElement('div');
         sep.className = 'chat-day';
@@ -18769,19 +19265,22 @@ function renderChatMessages(){
     }
 
     const next = CHAT_MESSAGES[idx+1];
+    const gapOk = (a, b) => !tc || (b.timestamp - a.timestamp) < 60 * 60 * 1000;
     const runWithPrev = !!prev && (prev.author||'') === (m.author||'')
       && chatDayKey(prev.timestamp) === dk
-      && (m.timestamp - prev.timestamp) < CHAT_GROUP_WINDOW;
+      && (m.timestamp - prev.timestamp) < CHAT_GROUP_WINDOW && gapOk(prev, m);
     const runWithNext = !!next && (next.author||'') === (m.author||'')
       && chatDayKey(next.timestamp) === dk
-      && (next.timestamp - m.timestamp) < CHAT_GROUP_WINDOW;
+      && (next.timestamp - m.timestamp) < CHAT_GROUP_WINDOW && gapOk(m, next);
     const first = !runWithPrev, last = !runWithNext;
 
     const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
     const face = memberPhotoFor(m.author || 'Teammate');
     const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
-    const open = openChatActions === m.id;
-    const sig = chatRowSignature(m, mine, face, mentionsMe, first, last, open);
+    const open = !tc && openChatActions === m.id;
+    // "Sent" under your newest message, when it is the newest in the thread.
+    const status = (tc && mine && m === lastMsg && chatDelivery(m) === 'sent') ? 'sent' : '';
+    const sig = chatRowSignature(m, mine, face, mentionsMe, first, last, open, status);
     const key = 'm:' + m.id;
     nextIds.add(m.id);
 
@@ -18790,14 +19289,18 @@ function renderChatMessages(){
       wanted.push(el); existing.delete(key); prev = m; return;
     }
     if(!el) el = document.createElement('div');
+    const hasPhotos = chatAttachmentsOf(m).some(a => (a.mimeType || '').startsWith('image/'));
     el.className = `chat-bubble-row ${mine ? 'me' : 'them'}${mentionsMe ? ' mentioned' : ''}`
-      + `${m._pending ? ' is-pending' : ''}${first ? ' run-first' : ''}${last ? ' run-last' : ''}${open ? ' is-open' : ''}`;
+      + `${(m._pending || m._local) ? ' is-pending' : ''}${first ? ' run-first' : ''}${last ? ' run-last' : ''}${open ? ' is-open' : ''}${hasPhotos ? ' has-photos' : ''}`;
     el.dataset.key = key;
     el.dataset.mid = m.id;
     el.dataset.sig = sig;
-    el.onclick = ()=> toggleChatActions(m.id);
-    el.innerHTML = chatRowHtml(m, mine, face, mentionsMe, first, last, open);
-    if(!firstPaint && !renderedChatIds.has(m.id)){ el.classList.add('fresh'); appended++; }
+    el.onclick = tc ? null : ()=> toggleChatActions(m.id);
+    el.innerHTML = chatRowHtml(m, mine, face, mentionsMe, first, last, open, status);
+    if(!firstPaint && !renderedChatIds.has(m.id)){
+      el.classList.add('fresh'); appended++;
+      if(mine) appendedMine = true;
+    }
     wanted.push(el); existing.delete(key);
     prev = m;
   });
@@ -18817,7 +19320,9 @@ function renderChatMessages(){
 
   renderedChatIds = nextIds;
 
-  if(stick || firstPaint){
+  // Follow the conversation when you are at the bottom, or when the new
+  // message is yours. Reading older messages, you stay put and get the pill.
+  if(stick || firstPaint || appendedMine){
     scrollChatToBottom(container);
     setChatUnseen(0);
   }else if(appended){
@@ -18825,9 +19330,48 @@ function renderChatMessages(){
   }
 }
 
-/* A reaction is the cheapest thing anyone can send, which is the point: it
-   costs one tap to tell a colleague you saw them. Stored on the message
-   itself, so it needs no new collection and no new rule. */
+const CHAT_STARTERS = ['Good morning, team! ☀️', 'Anyone free to cover a session?', 'Quick terminology question:'];
+function useChatStarter(text){
+  const box = document.getElementById('chatInput');
+  if(!box){ if(!whoAmI()) openNameModal(); return; }
+  box.value = text + (text.endsWith(':') ? ' ' : '');
+  chatDraft = box.value;
+  autosizeChatInput(); updateChatSendState();
+  box.focus();
+  try{ box.setSelectionRange(box.value.length, box.value.length); }catch(e){}
+}
+
+/* Header: the faces of the people talking lately, and who they are. */
+function renderChatHeader(){
+  const faces = document.getElementById('tcFaces');
+  const sub = document.getElementById('chatCount');
+  if(!faces && !sub) return;
+  const me = whoAmI().trim().toLowerCase();
+  const seen = [], keys = new Set();
+  for(let i = CHAT_MESSAGES.length - 1; i >= 0 && seen.length < 12; i--){
+    const a = (CHAT_MESSAGES[i].author || '').trim();
+    const k = a.toLowerCase();
+    if(!a || k === me || keys.has(k)) continue;
+    keys.add(k); seen.push(a);
+  }
+  if(faces){
+    faces.innerHTML = seen.slice(0, 3).map(name => {
+      const c = nameToColor(name), face = memberPhotoFor(name);
+      const st = face
+        ? `background-color:${c};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
+        : `background:linear-gradient(140deg, ${c}, ${darkenHex(c, 30)});`;
+      return `<span class="chat-avatar${face ? ' has-photo' : ''}" style="${st}">${escapeHtml(initialsOf(name))}</span>`;
+    }).join('');
+    faces.style.display = seen.length ? '' : 'none';
+  }
+  if(sub){
+    const names = seen.slice(0, 3).map(n => n.split(' ')[0]);
+    const more = seen.length - names.length;
+    sub.textContent = !seen.length ? 'Your interpreter team'
+      : names.join(', ') + (more > 0 ? ` and ${more} other${more === 1 ? '' : 's'}` : '');
+  }
+}
+
 async function toggleChatReaction(id, emoji){
   const me = whoAmI().trim();
   if(!me){ requireName(()=> toggleChatReaction(id, emoji)); return; }
@@ -18842,6 +19386,10 @@ async function toggleChatReaction(id, emoji){
   m.reactions = map;                 // optimistic; the listener echo confirms
   openChatActions = null;
   renderChatMessages();
+  if(at < 0){
+    const chip = document.querySelector(`.chat-bubble-row[data-mid="${id}"] .chat-reaction[data-emoji="${CSS.escape(emoji)}"]`);
+    if(chip) chip.classList.add('is-new');
+  }
   if(!db) return;
   try{
     await queuedWrite({ collection:'team-chat', docId:id, op:'update', data:{ reactions: map } });
@@ -18893,10 +19441,226 @@ function handleChatScroll(){
 let replyingTo = null;      // {id, author, text}
 let editingChatId = null;
 
+/* ---------- Message interactions ----------
+   Tap a message (or press Enter on it) for reactions and actions, in a menu
+   that floats over the thread. Long-press does the same on photos. On a
+   touch screen, double-tap a message to heart it and swipe it right to
+   reply. All of these write the same `reactions` map and `replyTo` field the
+   chat already stored, so they persist and older phones show them too. */
+const TC_REACTIONS = [['❤️','Heart'], ['😂','Laugh'], ['😮','Wow'], ['👍','Thumbs up'], ['🙏','Thank you'], ['✅','Done']];
+let tcMenu = null;
+let tcSuppressClick = false;
+
+function chatAnchorFor(mid){
+  return document.querySelector(`.chat-bubble[data-mid="${mid}"]`) || document.querySelector(`[data-pv^="${mid}:"]`);
+}
+
+function openChatMenuFor(ev, mid, anchor){
+  if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+  const m = CHAT_MESSAGES.find(x => x.id === mid);
+  if(!m || !whoAmI()) return;
+  closeChatMenu(true);
+  const me = whoAmI().trim().toLowerCase();
+  const mine = (m.author || '').trim().toLowerCase() === me;
+  const reacted = e => ((m.reactions || {})[e] || []).some(n => String(n).trim().toLowerCase() === me);
+  const scrim = document.createElement('div');
+  scrim.className = 'tc-menu-scrim';
+  const menu = document.createElement('div');
+  // Lifting the finger after a long-press sends a click to whatever is under
+  // it now: the scrim (which would close the menu at once) or, on a tall
+  // photo, a menu item. Swallow that one click.
+  const swallow = e => { if(tcSuppressClick){ e.preventDefault(); e.stopPropagation(); tcSuppressClick = false; } };
+  scrim.addEventListener('click', swallow, true);
+  menu.addEventListener('click', swallow, true);
+  scrim.addEventListener('click', ()=> closeChatMenu());
+  menu.className = 'tc-menu';
+  menu.setAttribute('role', 'dialog');
+  menu.setAttribute('aria-label', `Message from ${mine ? 'you' : (m.author || 'a teammate')}`);
+  const item = (act, label, icon, danger) => `<button type="button" class="tc-menu-item${danger ? ' is-danger' : ''}" data-act="${act}"><span>${label}</span>${icon}</button>`;
+  menu.innerHTML = `<div class="tc-menu-emojis" role="group" aria-label="React">${TC_REACTIONS.map(([e, name]) =>
+      `<button type="button" class="tc-menu-emoji${reacted(e) ? ' is-mine' : ''}" data-emoji="${e}" aria-pressed="${reacted(e)}" aria-label="${name}${reacted(e) ? ' (yours, tap to remove)' : ''}">${e}</button>`).join('')}</div>
+    <div class="tc-menu-list">
+      ${item('reply', 'Reply', ICON_REPLY)}
+      ${m.text ? item('copy', 'Copy', ICON_COPY) : ''}
+      ${(mine && m.text) ? item('edit', 'Edit', ICON_EDIT) : ''}
+      ${m.text ? item('glossary', 'Add to glossary', ICON_BOOK_PLUS) : ''}
+      ${item('delete', 'Delete', ICON_TRASH, true)}
+    </div>`;
+  document.body.appendChild(scrim);
+  document.body.appendChild(menu);
+  // Below the message when there is room, otherwise above; on its side.
+  const a = anchor && anchor.isConnected ? anchor : chatAnchorFor(mid);
+  const r = a ? a.getBoundingClientRect() : { left: 16, right: innerWidth - 16, top: innerHeight / 3, bottom: innerHeight / 3 };
+  const mw = menu.offsetWidth, mh = menu.offsetHeight, pad = 12;
+  const vv = window.visualViewport;
+  const vTop = (vv ? vv.offsetTop : 0) + pad, vBottom = (vv ? vv.offsetTop + vv.height : innerHeight) - pad;
+  let top = r.bottom + 8;
+  if(top + mh > vBottom) top = r.top - mh - 8;
+  top = Math.max(vTop, Math.min(top, vBottom - mh));
+  let left = mine ? r.right - mw : r.left;
+  left = Math.max(pad, Math.min(left, innerWidth - mw - pad));
+  menu.style.top = Math.round(top) + 'px';
+  menu.style.left = Math.round(left) + 'px';
+  menu.style.transformOrigin = `${mine ? 'right' : 'left'} ${top > r.top ? 'top' : 'bottom'}`;
+  menu.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    e.stopPropagation();
+    if(b.dataset.emoji){ closeChatMenu(); toggleChatReaction(mid, b.dataset.emoji); return; }
+    const act = b.dataset.act;
+    closeChatMenu(act === 'reply' || act === 'edit');
+    if(act === 'reply') startChatReply(mid);
+    else if(act === 'copy') copyChatMessage(mid);
+    else if(act === 'edit') startChatEdit(mid);
+    else if(act === 'glossary') saveChatToGlossary(mid);
+    else if(act === 'delete') deleteChatMessage(mid);
+  });
+  menu.addEventListener('keydown', e => {
+    const btns = [...menu.querySelectorAll('button')];
+    const i = btns.indexOf(document.activeElement);
+    if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); closeChatMenu(); }
+    else if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); btns[(i + 1) % btns.length].focus(); }
+    else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); btns[(i - 1 + btns.length) % btns.length].focus(); }
+    else if(e.key === 'Tab'){ e.preventDefault(); btns[e.shiftKey ? (i - 1 + btns.length) % btns.length : (i + 1) % btns.length].focus(); }
+  });
+  tcMenu = { mid, scrim, menu, back: a };
+  const first = menu.querySelector('.tc-menu-emoji');
+  if(first) first.focus({ preventScroll:true });
+}
+
+function closeChatMenu(silent){
+  if(!tcMenu) return;
+  const { mid, scrim, menu, back } = tcMenu;
+  tcMenu = null;
+  scrim.remove(); menu.remove();
+  if(!silent){
+    const el = (back && back.isConnected) ? back : chatAnchorFor(mid);
+    if(el && el.focus) el.focus({ preventScroll:true });
+  }
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && tcMenu){ e.preventDefault(); closeChatMenu(); } });
+
+// Heart a message with a double tap: adds a heart (a second double tap
+// doesn't take it away; the menu or the chip does that).
+function heartChatMessage(mid, el){
+  const m = CHAT_MESSAGES.find(x => x.id === mid);
+  if(!m || !whoAmI()) return;
+  const me = whoAmI().trim().toLowerCase();
+  const heart = '❤️';
+  const has = ((m.reactions || {})[heart] || []).some(n => String(n).trim().toLowerCase() === me);
+  if(!has) toggleChatReaction(mid, heart);
+  const host = chatAnchorFor(mid) || el;
+  if(host && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){
+    const b = document.createElement('span');
+    b.className = 'tc-heart-burst'; b.textContent = heart; b.setAttribute('aria-hidden', 'true');
+    host.appendChild(b);
+    setTimeout(()=> b.remove(), 750);
+  }
+  if(navigator.vibrate) try{ navigator.vibrate(8); }catch(e){}
+}
+
+/* Touch and mouse on the thread, delegated so re-rendered rows need nothing. */
+function wireChatGestures(){
+  const box = document.getElementById('chatMessages');
+  if(!box || box.dataset.gestures) return;
+  box.dataset.gestures = '1';
+  let st = null, lastTap = null, tapTimer = 0;
+  const reset = row => {
+    if(!row) return;
+    const col = row.querySelector('.chat-bubble-col'), cue = row.querySelector('.tc-swipe-cue');
+    if(col){
+      const from = col.style.transform;
+      col.style.transform = '';
+      if(from && col.animate) col.animate([{ transform: from }, { transform: 'none' }], { duration: 180, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    }
+    if(cue){ cue.style.opacity = ''; cue.style.transform = ''; cue.classList.remove('is-ready'); }
+  };
+  box.addEventListener('pointerdown', e => {
+    const row = e.target.closest('.chat-bubble-row');
+    if(!row || e.button > 0 || !e.isPrimary) return;
+    const onPhoto = !!e.target.closest('.tc-photo');
+    const onControl = !onPhoto && !!e.target.closest('button, a');
+    st = { row, mid: row.dataset.mid, x0: e.clientX, y0: e.clientY, type: 'pending', touch: e.pointerType !== 'mouse', onPhoto, onControl,
+           onBubble: !!e.target.closest('.chat-bubble') && !e.target.closest('a'), target: e.target };
+    if(st.touch && !onControl){
+      // Long-press: the menu, the way it works in most messaging apps.
+      st.timer = setTimeout(()=>{
+        if(!st || st.type !== 'pending') return;
+        st.type = 'long';
+        tcSuppressClick = true;
+        if(navigator.vibrate) try{ navigator.vibrate(10); }catch(err){}
+        openChatMenuFor(null, st.mid, st.onPhoto ? st.target.closest('.tc-photo') : chatAnchorFor(st.mid));
+      }, 450);
+    }
+  });
+  box.addEventListener('pointermove', e => {
+    if(!st || !e.isPrimary) return;
+    const dx = e.clientX - st.x0, dy = e.clientY - st.y0;
+    if(st.type === 'pending' && Math.hypot(dx, dy) > 8){
+      clearTimeout(st.timer);
+      st.type = (st.touch && dx > 0 && Math.abs(dx) > Math.abs(dy) * 1.4) ? 'swipe' : 'scroll';
+    }
+    if(st.type === 'swipe'){
+      const d = Math.min(76, Math.max(0, dx * .6));
+      const col = st.row.querySelector('.chat-bubble-col'), cue = st.row.querySelector('.tc-swipe-cue');
+      if(col) col.style.transform = `translateX(${d}px)`;
+      if(cue){
+        cue.style.opacity = String(Math.min(1, d / 50));
+        cue.style.transform = `translateX(${d}px) scale(${.6 + Math.min(.4, d / 140)})`;
+        const ready = d >= 56;
+        if(ready && !cue.classList.contains('is-ready') && navigator.vibrate) try{ navigator.vibrate(6); }catch(err){}
+        cue.classList.toggle('is-ready', ready);
+      }
+    }
+  });
+  const end = (e, cancel) => {
+    if(!st) return;
+    clearTimeout(st.timer);
+    const s0 = st; st = null;
+    if(s0.type === 'swipe'){
+      const ready = s0.row.querySelector('.tc-swipe-cue.is-ready');
+      reset(s0.row);
+      tcSuppressClick = true;
+      setTimeout(()=>{ tcSuppressClick = false; }, 350);
+      if(ready && !cancel) startChatReply(s0.mid);
+      return;
+    }
+    if(s0.type === 'long'){ setTimeout(()=>{ tcSuppressClick = false; }, 350); return; }
+    if(s0.type !== 'pending' || cancel || !s0.onBubble) return;
+    // A tap on a message: the menu. On touch, wait a moment for a second tap,
+    // which hearts it instead.
+    if(!s0.touch){ openChatMenuFor(null, s0.mid, chatAnchorFor(s0.mid)); return; }
+    const now = performance.now();
+    if(lastTap && lastTap.mid === s0.mid && now - lastTap.t < 300){
+      clearTimeout(tapTimer); lastTap = null;
+      heartChatMessage(s0.mid, s0.row);
+      return;
+    }
+    lastTap = { mid: s0.mid, t: now };
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(()=>{ lastTap = null; openChatMenuFor(null, s0.mid, chatAnchorFor(s0.mid)); }, 290);
+  };
+  box.addEventListener('pointerup', e => end(e, false));
+  box.addEventListener('pointercancel', e => end(e, true));
+  box.addEventListener('contextmenu', e => {
+    const row = e.target.closest('.chat-bubble-row');
+    if(!row || e.target.closest('a')) return;
+    e.preventDefault();
+    if(!tcMenu) openChatMenuFor(null, row.dataset.mid, e.target.closest('.tc-photo') || chatAnchorFor(row.dataset.mid));
+  });
+}
+
+function setChatNote(msg){
+  const n = document.getElementById('tcNote');
+  if(n) n.textContent = msg || '';
+}
+
 function startChatReply(id){
   const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m) return;
   editingChatId = null;
+  const firstPhoto = chatAttachmentsOf(m).find(a => (a.mimeType || '').startsWith('image/'));
   replyingTo = { id:m.id, author:m.author||'Teammate', text:(m.text||'').slice(0,140) };
+  if(firstPhoto) replyingTo.photo = firstPhoto.dataUrl;
   openChatActions = null;
   renderChatMessages(); renderChatComposeBar();
   const i = document.getElementById('chatInput'); if(i) i.focus();
@@ -18998,9 +19762,17 @@ function saveChatToGlossary(id){
 
 let chatRetryDocId = null;   // see sendChatMessage
 let sendingReply = null;
+let chatSendBusy = false;     // one send at a time: a double tap or Enter+click can't post twice
 async function sendChatMessage(){
+  if(chatSendBusy) return;
+  chatSendBusy = true;
+  try{ await sendChatMessageOnce(); }
+  finally{ chatSendBusy = false; updateChatSendState(); }
+}
+async function sendChatMessageOnce(){
   const input = document.getElementById('chatInput');
   if(!input) return;
+  setChatNote('');
   const text = input.value.trim();
 
   // Editing takes the same Send button, so there is one thing to press.
@@ -19081,7 +19853,7 @@ async function sendChatMessage(){
     // `attachment` (the first file) is kept alongside `attachments` so a phone
     // still running the previous version shows at least the first photo.
     const message = { text: sentText, author, attachment: atts[0] || null, timestamp: Date.now(),
-                      replyTo: replyingTo ? { id:replyingTo.id, author:replyingTo.author, text:replyingTo.text } : null };
+                      replyTo: replyingTo ? Object.assign({ id:replyingTo.id, author:replyingTo.author, text:replyingTo.text }, replyingTo.photo ? { photo: replyingTo.photo } : {}) : null };
     if(atts.length > 1) message.attachments = atts;
     const reply = replyingTo;
     replyingTo = null; renderChatComposeBar();
@@ -19106,6 +19878,7 @@ async function sendChatMessage(){
     const stored = outboxErrorMessage(err, 'Not sent', 'Your message is back in the box.');
     if(stored) showOutboxActionToast(stored);
     else showToast('Could not send — check your connection.');
+    setChatNote('Didn\u2019t send. Your message is back in the box. Tap send to try again.');
     const back = document.getElementById('chatInput') || input;
     back.value = sentText; // give the message back so it isn't lost
     chatDraft = sentText;
