@@ -5716,6 +5716,9 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
   /* Same moments the tab bar itself steps aside: typing, sheets, search. */
   body.kb-open .smiley-rider, body:has(.overlay.show) .smiley-rider, body:has(.gs-overlay.show) .smiley-rider,
   body.kb-open .smiley-rider-hit, body:has(.overlay.show) .smiley-rider-hit, body:has(.gs-overlay.show) .smiley-rider-hit{ visibility:hidden; }
+  /* In Team Chat he steps aside too, so the message box can sit right on
+     the tab bar instead of leaving room for his head. */
+  body:has(#content > .tc) .smiley-rider, body:has(#content > .tc) .smiley-rider-hit{ visibility:hidden; }
 }
 /* On a computer: a round button in the top bar, his portrait cut by the
    circle like an avatar, popping in when you arrive on a page. */
@@ -6112,7 +6115,9 @@ html[data-theme="dark"] .tc-menu-scrim{ background:rgba(0,0,0,.4); }
 .tc-panel .chat-jump.show{ transform:none; }
 
 /* Composer: one pill with the attach button, the text and send. */
-.tc-composer{ padding:var(--sp-2); border-top:1px solid var(--line-soft); background:var(--paper); }
+.tc-composer{ padding:var(--sp-1) var(--sp-2) var(--sp-2); background:var(--paper); }
+.tc-composer .tc-hipaa{ justify-content:center; margin:0 0 5px; line-height:1.2; }
+.tc-composer .tc-hipaa svg{ width:12px; height:12px; }
 .tc-composer .chat-compose-bar.show{ margin:0 0 var(--sp-2); border-radius:var(--r-md); border-left:0; background:var(--bg-hi); box-shadow:inset 3px 0 0 var(--accent-2); }
 .tc-row{ display:flex; align-items:flex-end; gap:4px; padding:3px; border-radius:26px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line); transition:box-shadow .15s var(--ease); }
 .tc-row:focus-within{ box-shadow:inset 0 0 0 1.5px var(--accent-2); }
@@ -9955,12 +9960,13 @@ function fitChatPanel(){
   const vv = window.visualViewport;
   const visBottom = vv ? vv.offsetTop + vv.height : innerHeight;
   const top = panel.getBoundingClientRect().top;
-  let bottom = barRect && barRect.top > 0 && barRect.top < visBottom ? barRect.top - 9 : visBottom - (innerWidth > 900 ? 24 : 9);
+  let bottom = barRect && barRect.top > 0 && barRect.top < visBottom ? barRect.top - 6 : visBottom - (innerWidth > 900 ? 24 : 9);
   // Dr. Smiley rides on top of the active tab, his head about 30px above
   // it; keep the message box clear of him. (He slides in after this runs,
   // so his own position can't be measured yet.)
   const rider = barRect && document.querySelector('.smiley-rider');
-  if(rider && getComputedStyle(rider).display !== 'none') bottom = Math.min(bottom, barRect.top - 34);
+  const riderCs = rider && getComputedStyle(rider);
+  if(riderCs && riderCs.display !== 'none' && riderCs.visibility !== 'hidden') bottom = Math.min(bottom, barRect.top - 34);
   const box = document.getElementById('chatMessages');
   const stick = box ? chatAtBottom(box) : true;
   panel.style.height = Math.max(innerHeight < 500 ? 150 : 260, Math.round(bottom - top)) + 'px';
@@ -17768,9 +17774,24 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.0839';
-const BUILD_TIME = '2026-10-05 18:30 UTC';
+const BUILD_ID = 'b1006.0919';
+const BUILD_TIME = '2026-10-06 09:19 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
+/* What this phone reports about its screen, shown small under the build in
+   More: the screen height, the height the app actually gets, and the top and
+   bottom safe areas. A gap between the first two is space the app can't use. */
+function screenReport(){
+  try{
+    const p = document.createElement('div');
+    p.style.cssText = 'position:fixed;top:0;left:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
+    document.body.appendChild(p);
+    const cs = getComputedStyle(p);
+    const t = Math.round(parseFloat(cs.paddingTop) || 0), b = Math.round(parseFloat(cs.paddingBottom) || 0);
+    p.remove();
+    const vv = window.visualViewport;
+    return `Screen ${screen.height} · app ${innerHeight}${vv ? ' / ' + Math.round(vv.height) : ''} · safe ${t}/${b}`;
+  }catch(e){ return ''; }
+}
 
 /* The hero photo is graded to the light outside, on the device's own clock.
 
@@ -17910,7 +17931,7 @@ function openMoreSheet(){
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
     <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
-      Build ${BUILD_ID} · ${BUILD_TIME}
+      Build ${BUILD_ID} · ${BUILD_TIME}<br>${screenReport()}
     </div>`;
   document.getElementById('moreSheetOverlay').classList.add('show');
 }
