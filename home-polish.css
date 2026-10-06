@@ -362,7 +362,7 @@
   body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
   body.dock-mini .tabbar-badge{top:3px;left:auto;right:calc(50% + 3px);border-color:#1F78C6;}
   body.dock-mini .dock-smiley{width:54px;height:54px;}
-  body.dock-mini .dock-smiley-tag{opacity:0;}
+  /* The Ask tag stays when the bar is tucked too (Jose). */
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
   body.kb-open .dock-smiley,body:has(.overlay.show) .dock-smiley,body:has(.gs-overlay.show) .dock-smiley,body:has(.dm-overlay.show) .dock-smiley{visibility:hidden;}
