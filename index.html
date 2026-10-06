@@ -1346,6 +1346,10 @@
          onto the home indicator. A larger floor keeps the capsule clear in
          both toolbar states, not just the expanded one. */
       bottom:max(38px, calc(16px + env(safe-area-inset-bottom, 0px)));
+      /* --vp-gap: how much shorter than the screen iOS made the app's
+         viewport (0 normally; see measureViewportGap). The capsule moves
+         down by that much, but never closer than 6px to the viewport edge. */
+      bottom:max(6px, calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) - var(--vp-gap, 0px)));
       background:var(--glass-bg);
       -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
       border:1px solid var(--glass-edge);
@@ -5656,7 +5660,7 @@ html[data-theme="dark"] .appt-done, html[data-theme="dark"] .prep-start{ backgro
 .appt-hit button{ width:44px; height:44px; flex:none; border-radius:50%; border:1px solid var(--line); background:var(--bg-hi); color:var(--ink-soft); cursor:pointer; display:grid; place-items:center; }
 .appt-hit button svg{ width:20px; height:20px; }
 .appt-none{ color:var(--ink-soft); font-size:14px; margin:0; }
-.appt-pill{ position:fixed; z-index:61; left:50%; translate:-50% 0; bottom:calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) + 76px); display:none; align-items:center; gap:9px;
+.appt-pill{ position:fixed; z-index:61; left:50%; translate:-50% 0; bottom:calc(max(6px, calc(max(38px, calc(16px + env(safe-area-inset-bottom, 0px))) - var(--vp-gap, 0px))) + 76px); display:none; align-items:center; gap:9px;
   min-height:40px; padding:0 17px; border-radius:999px; border:0; background:var(--navy); color:#fff; font:650 14px var(--sans); cursor:pointer;
   box-shadow:0 8px 20px -8px rgba(22,55,90,.55); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .appt-pill.is-on{ display:inline-flex; }
@@ -6253,7 +6257,24 @@ body.pv-open{ overflow:hidden; }
   #content:has(> .tc){ padding-bottom:0; }
   .tc-head{ margin-top:-14px; }
   body.kb-open .tc-pinned{ display:none; }
+  /* One bar, like a messaging app: the app's top bar steps aside and the
+     chat header takes the top of the screen, with its own back arrow.
+     The top bar comes straight back while something needs attention
+     (offline, or changes that didn't send), so that warning is never hidden. */
+  body:has(#content > .tc):not(:has(#tgSync.is-problem, #tgSync.is-offline)) .topbar-global{ display:none; }
+  body:has(#content > .tc):not(:has(#tgSync.is-problem, #tgSync.is-offline)) .tc-head{
+    position:relative; z-index:9; margin:calc(-1 * var(--tc-content-top, 26px)) -18px 0;
+    padding:calc(env(safe-area-inset-top, 0px) + 5px) 8px 5px 4px;
+    background:var(--glass-bg); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border-bottom:1px solid var(--line-soft);
+  }
+  body:has(#content > .tc):not(:has(#tgSync.is-problem, #tgSync.is-offline)) .tc-back{ display:flex; }
 }
+.tc-back{ display:none; width:40px; height:44px; flex-shrink:0; align-items:center; justify-content:center; margin-right:-4px;
+  border:none; background:none; color:var(--accent); cursor:pointer; border-radius:12px; -webkit-tap-highlight-color:transparent; }
+.tc-back svg{ width:24px; height:24px; }
+.tc-back:active{ opacity:.55; }
+.tc-back:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-2px; }
 @media (max-height:500px) and (max-width:1000px){
   .tc-pinned{ display:none; }
   .tc-head{ min-height:40px; margin-bottom:0; }
@@ -14972,6 +14993,8 @@ function setSyncAnnouncement(text){
 function updateSyncStatus(justSynced){
   const el = document.getElementById('tgSync');
   if(!el) return;
+  // In Team Chat the top bar shows only for trouble; refit once it settles.
+  if(activeCategory === 'chat') requestAnimationFrame(fitChatPanel);
   const offline = !navigator.onLine;
   el.classList.remove('is-visible','is-offline','is-pending','is-synced','is-problem','is-compact');
 
@@ -15356,6 +15379,7 @@ function renderContent(){
     content.innerHTML = `
       <div class="tc">
         <div class="tc-head">
+          <button type="button" class="tc-back" onclick="goBack()" aria-label="Go back" title="Back"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="tc-faces" id="tcFaces" aria-hidden="true"></div>
           <div class="tc-title"><h2>Team Chat</h2><span class="tc-sub" id="chatCount"></span></div>
           <button type="button" class="tc-icon-btn" id="tcPinBtn" onclick="openAnnouncementModal()" aria-label="Pin an update for the team" title="Pin an update for the team">${ICON_PIN}</button>
@@ -17774,9 +17798,31 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.0919';
-const BUILD_TIME = '2026-10-06 09:19 UTC';
+const BUILD_ID = 'b1006.0948';
+const BUILD_TIME = '2026-10-06 09:48 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
+/* Installed on an iPhone, the app can be handed a viewport shorter than the
+   screen: everything fixed to the bottom (the tab bar) then floats high with
+   an empty band under it. Measure that shortfall so the tab bar can sit
+   where it should. Only for the installed iPhone app, upright, and only for
+   a plausible gap; anywhere else it stays 0 and nothing moves. */
+function measureViewportGap(){
+  let gap = 0;
+  try{
+    if(navigator.standalone === true && innerHeight > innerWidth){
+      const g = screen.height - innerHeight;
+      if(g >= 20 && g <= 100) gap = Math.round(g);
+    }
+  }catch(e){}
+  const root = document.documentElement;
+  if(root.style.getPropertyValue('--vp-gap') !== gap + 'px'){
+    root.style.setProperty('--vp-gap', gap + 'px');
+    if(typeof activeCategory !== 'undefined' && activeCategory === 'chat') requestAnimationFrame(fitChatPanel);
+  }
+}
+measureViewportGap();
+window.addEventListener('resize', measureViewportGap, { passive:true });
+window.addEventListener('orientationchange', () => setTimeout(measureViewportGap, 300));
 /* What this phone reports about its screen, shown small under the build in
    More: the screen height, the height the app actually gets, and the top and
    bottom safe areas. A gap between the first two is space the app can't use. */
@@ -17789,7 +17835,8 @@ function screenReport(){
     const t = Math.round(parseFloat(cs.paddingTop) || 0), b = Math.round(parseFloat(cs.paddingBottom) || 0);
     p.remove();
     const vv = window.visualViewport;
-    return `Screen ${screen.height} · app ${innerHeight}${vv ? ' / ' + Math.round(vv.height) : ''} · safe ${t}/${b}`;
+    const gap = getComputedStyle(document.documentElement).getPropertyValue('--vp-gap').trim() || '0px';
+    return `Screen ${screen.height} · app ${innerHeight}${vv ? ' / ' + Math.round(vv.height) : ''} · safe ${t}/${b} · gap ${gap}`;
   }catch(e){ return ''; }
 }
 
