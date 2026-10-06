@@ -17801,8 +17801,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1155';
-const BUILD_TIME = '2026-10-06 11:55 UTC';
+const BUILD_ID = 'b1006.1209';
+const BUILD_TIME = '2026-10-06 12:09 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -18017,11 +18017,11 @@ function dockTabAt(bar, x){
     if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open')) dockTuck();
     else if(dy < 0 || y <= 80) body().classList.remove('dock-mini');
   }, { passive:true });
-  // Left alone for a few seconds, the bar tucks away too. Any touch, key or
+  // Left alone for 4 seconds, the bar tucks away too. Any touch, key or
   // scroll starts the count again (it doesn't open the bar: tap the pill or
   // scroll up for that). Same exceptions as scrolling: not in Team Chat, and
   // not while the keyboard, a sheet or search is open.
-  const IDLE_TUCK = 8000;
+  const IDLE_TUCK = 4000;
   let idleTuck = 0;
   const canTuck = () => {
     const bar = document.querySelector('.tabbar');
