@@ -17801,8 +17801,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1006.1124';
-const BUILD_TIME = '2026-10-06 11:24 UTC';
+const BUILD_ID = 'b1006.1134';
+const BUILD_TIME = '2026-10-06 11:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -22931,7 +22931,8 @@ const smileyRider = (() => {
     btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'dock-smiley';
     btn.setAttribute('aria-label', 'Ask the Hub'); btn.title = 'Ask the Hub';
-    btn.innerHTML = `<span class="dock-smiley-bob"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span></span><span class="dock-smiley-tag" aria-hidden="true">Ask</span>`;
+    btn.innerHTML = `<span class="dock-smiley-bob"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span></span><span class="dock-smiley-tag" aria-hidden="true">Ask</span>`
+      + '<span class="dock-smiley-z" aria-hidden="true">z</span><span class="dock-smiley-z" aria-hidden="true">z</span>';
     face = btn.querySelector('.ask-face'); bob = btn.querySelector('.dock-smiley-bob');
     btn.addEventListener('click', () => {
       btn.classList.add('is-pressed');
@@ -22988,6 +22989,7 @@ const smileyRider = (() => {
   function shown(){
     return !!btn && document.body.classList.contains('dock-has-smiley') && getComputedStyle(btn).visibility !== 'hidden';
   }
+  let wasShown = false;
   function place(){
     if(!btn) return;
     const want = phone.matches && !!document.querySelector('.tabbar') && smileyFollows()
@@ -23001,6 +23003,72 @@ const smileyRider = (() => {
       setTimeout(() => face.classList.remove('is-thinking'), 1100);
     }
     lastCat = activeCategory;
+    // He starts emoting a few seconds after he arrives, and stops when he goes.
+    if(want && !wasShown) idleArm(3500);
+    if(!want){ clearTimeout(idleTimer); idleTimer = 0; }
+    wasShown = want;
+  }
+
+  /* Idle emotes. Now and then, while he sits in the dock, he does a little
+     something: a glance, a sway, a hop, heart eyes, a giggle, a nod, and after
+     a while without a touch, a doze. One at a time, 7-14 s apart, never while
+     you're touching or scrolling, nothing with reduced motion, and after two
+     quiet minutes he settles down until the next touch, so a phone left open
+     between assignments isn't kept busy. Each emote is a short one-off
+     animation; nothing runs between them. */
+  const EMOTES = ['glance', 'sway', 'hop', 'love', 'giggle', 'nod'];
+  const QUIET = 120000, DOZE_AFTER = 45000;
+  let idleTimer = 0, lastEmote = '', quietSince = performance.now(), busyUntil = 0;
+  ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.addEventListener(t, () => {
+    const now = performance.now(), slept = now - quietSince > QUIET;
+    quietSince = now; busyUntil = now + 1500;
+    if(slept && wasShown) idleArm(2500);
+  }, { passive: true, capture: true }));
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && wasShown) idleArm(3000); });
+  function idleArm(delay){
+    clearTimeout(idleTimer); idleTimer = 0;
+    if(reduce.matches || !btn) return;
+    idleTimer = setTimeout(idleTick, delay == null ? 7000 + Math.random() * 7000 : delay);
+  }
+  function idleTick(){
+    idleTimer = 0;
+    if(!wasShown || document.hidden || reduce.matches) return;
+    const now = performance.now();
+    // Behind the keyboard or a sheet, or you're busy: try again shortly.
+    if(!shown() || now < busyUntil){ idleArm(4000); return; }
+    const quiet = now - quietSince;
+    if(quiet > QUIET) return;                       // asleep until the next touch
+    let pick = quiet > DOZE_AFTER && lastEmote !== 'doze' ? 'doze' : null;
+    while(!pick || pick === lastEmote) pick = EMOTES[Math.floor(Math.random() * EMOTES.length)];
+    lastEmote = pick;
+    emote(pick);
+    idleArm();
+  }
+  function flash(cls, ms){ face.classList.add(cls); setTimeout(() => face.classList.remove(cls), ms); }
+  function emote(kind){
+    if(!btn || reduce.matches || !bob.animate) return false;
+    switch(kind){
+      case 'glance':
+        flash('is-thinking', 1100);
+        bob.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-6deg)' }, { transform: 'rotate(5deg)' }, { transform: 'rotate(0)' }], { duration: 1100, easing: 'ease-in-out' });
+        return true;
+      case 'love':  return react('hearts');
+      case 'sway':  return react('wave');
+      case 'hop':   return react('hop');
+      case 'giggle':
+        flash('is-giggle', 1300);
+        bob.animate([0, -5, 5, -4, 4, -2, 0].map(r => ({ transform: `rotate(${r}deg)` })), { duration: 900, easing: 'ease-in-out' });
+        return true;
+      case 'nod':
+        bob.animate([{ transform: 'none' }, { transform: 'translateY(2px) scale(1,.95)' }, { transform: 'none' }, { transform: 'translateY(2px) scale(1,.95)' }, { transform: 'none' }], { duration: 900, easing: 'ease-in-out' });
+        return true;
+      case 'doze':
+        btn.classList.remove('is-dozing'); void btn.offsetWidth; btn.classList.add('is-dozing');
+        setTimeout(() => btn.classList.remove('is-dozing'), 3600);
+        bob.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(9deg) translateY(1px)', offset: .25 }, { transform: 'rotate(9deg) translateY(1px)', offset: .8 }, { transform: 'rotate(0)' }], { duration: 3200, easing: 'ease-in-out' });
+        return true;
+    }
+    return false;
   }
   function sync(){
     try{
@@ -23032,7 +23100,7 @@ const smileyRider = (() => {
       : { duration: kind === 'cheer' ? 900 : 700, easing: 'cubic-bezier(.3,1.3,.5,1)' });
     return true;
   }
-  return { sync, react };
+  return { sync, react, emote };
 })();
 
 /* ============ Init ============ */
