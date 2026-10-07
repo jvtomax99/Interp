@@ -5392,6 +5392,7 @@ body.access-locked{ overflow:hidden; }
 /* Effects that float off Dr. Smiley's head (drFaceFx). Sized from the
    element that holds him: 58px in the dock, 64px on Home. */
 .ds-fx{ position:absolute; right:-4px; top:-6px; width:0; height:0; pointer-events:none; z-index:3; }
+.ds-fx.is-leaving{ opacity:0; transition:opacity .2s ease; }
 .ds-fx-g{ position:absolute; left:0; top:0; width:15px; height:15px; opacity:0;
   animation:dsFxFloat 2.1s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i) * .32s); }
 .ds-fx-g svg{ display:block; width:100%; height:100%; filter:drop-shadow(0 1px 1.5px rgba(20,43,67,.28)); }
@@ -12855,14 +12856,14 @@ const DR_FACE_SEQ = {
   nod:   { f: [['smile1', 80], ['smile2', 80], ['smile', 900], ['smile2', 90], ['smile1', 100], ['rest', 300]],
            head: [[0, 0, 0], [160, 0, 1.1], [330, 0, -.2], [520, 0, 1.1], [700, 0, -.1], [900, 0, 0], [1550, 0, 0]] },
   // "Hmm": eyes off to one side with his head on a slant, a blink, a look the other way.
-  think: { f: [['rest', 120], ['lookUL', 1500], ['blink1', 45], ['blink2', 40], ['shut', 60], ['blink2', 45], ['blink1', 50], ['lookU', 700], ['rest', 360]],
-           head: [[0, 0, 0], [220, -2.6, -.3], [1620, -2.6, -.3], [1860, 1.2, 0], [2560, 1.2, 0], [2960, 0, 0]], fx: 'question', fxAt: 300 },
+  think: { f: [['rest', 90], ['blink1', 45], ['rest', 40], ['lookUL', 1500], ['blink1', 45], ['blink2', 40], ['shut', 60], ['blink2', 45], ['blink1', 50], ['lookU', 700], ['rest', 380]],
+           head: [[0, 0, 0], [110, .5, .2], [330, -2.6, -.3], [1730, -2.6, -.3], [1970, 1.2, 0], [2670, 1.2, 0], [3050, 0, 0]], fx: 'question', fxAt: 380 },
   // A quick, short laugh with little shakes.
-  giggle: { f: [['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['smile', 320], ['smile2', 80], ['smile1', 90], ['rest', 320]],
-            head: [[0, 0, 0], [120, -1.1, .3], [230, 1.1, .3], [340, -1.1, .3], [450, 1.1, .3], [560, -.8, .2], [670, .6, .1], [990, 0, 0], [1480, 0, 0]] },
+  giggle: { f: [['rest', 60], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['smile', 340], ['smile2', 90], ['smile1', 100], ['rest', 340]],
+            head: [[0, 0, 0], [90, 0, .45], [180, -1.1, .3], [290, 1.1, .3], [400, -1.1, .3], [510, 1.1, .3], [620, -.8, .2], [730, .6, .1], [1080, 0, 0], [1600, 0, 0]] },
   // Pleased with himself: a big smile, chin up.
-  proud: { f: [['smile1', 80], ['smile2', 80], ['smile', 1400], ['smile2', 90], ['smile1', 100], ['rest', 320]],
-           head: [[0, 0, 0], [160, 1, -.9], [1560, 1, -.9], [1760, 0, 0], [2070, 0, 0]], fx: 'sparkle', fxAt: 200 },
+  proud: { f: [['rest', 70], ['smile1', 80], ['smile2', 80], ['smile', 1400], ['smile2', 90], ['smile1', 110], ['rest', 340]],
+           head: [[0, 0, 0], [90, -.3, .4], [260, 1, -.9], [1630, 1, -.9], [1880, 0, 0], [2170, 0, 0]], fx: 'sparkle', fxAt: 270 },
   // Humming: lips moving to a beat, swaying.
   sing:  { f: [['smile1', 160], ['smile2', 230], ['smile1', 190], ['smile2', 230], ['smile1', 190], ['smile2', 230], ['smile1', 170], ['rest', 320]],
            head: [[0, 0, 0], [390, -2, 0], [810, 2, 0], [1230, -2, 0], [1600, 1, 0], [1720, 0, 0], [1720, 0, 0]], fx: 'notes', fxAt: 150 },
@@ -12876,11 +12877,11 @@ const DR_FACE_SEQ = {
   peekL: { f: [['lookL', 650], ['rest', 200]], head: [[0, 0, 0], [120, -1.2, 0], [650, -1.2, 0], [850, 0, 0]] },
   peekR: { f: [['lookR', 650], ['rest', 200]], head: [[0, 0, 0], [120, 1.2, 0], [650, 1.2, 0], [850, 0, 0]] },
   // A new chat message: a look to it, then a smile.
-  notice: { f: [['rest', 80], ['lookR', 520], ['rest', 90], ['smile1', 70], ['smile2', 70], ['smile', 800], ['smile2', 90], ['smile1', 100], ['rest', 300]],
-            head: [[0, 0, 0], [140, 1.4, 0], [600, 1.4, 0], [760, 0, -.6], [1560, 0, -.5], [1820, 0, 0], [2120, 0, 0]] },
+  notice: { f: [['rest', 60], ['blink1', 50], ['rest', 40], ['lookR', 560], ['rest', 90], ['smile1', 70], ['smile2', 70], ['smile', 800], ['smile2', 90], ['smile1', 110], ['rest', 340]],
+            head: [[0, 0, 0], [90, -.4, .3], [260, 1.4, 0], [710, 1.4, 0], [870, 0, -.6], [1670, 0, -.5], [1930, 0, 0], [2280, 0, 0]] },
   // Pressed and held: a giggle and hearts.
-  pet:   { f: [['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 420], ['smile2', 80], ['smile1', 90], ['rest', 320]],
-           head: [[0, 0, 0], [120, -1.4, .3], [230, 1.4, .3], [340, -1.4, .3], [450, 1.4, .3], [560, -1, .2], [670, .8, .1], [1100, 0, -.4], [1530, 0, 0], [1850, 0, 0]], fx: 'hearts', fxAt: 120 },
+  pet:   { f: [['rest', 60], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
+           head: [[0, 0, 0], [90, 0, .45], [180, -1.4, .3], [290, 1.4, .3], [400, -1.4, .3], [510, 1.4, .3], [620, -1, .2], [730, .8, .1], [1160, 0, -.4], [1620, 0, 0], [1880, 0, 0]], fx: 'hearts', fxAt: 180 },
 };
 /* His mood carries over for a few minutes: good moments (hearts, a new
    term, a level, a pet) make him happier -- more smiles, laughs, hums, heart
@@ -12888,24 +12889,6 @@ const DR_FACE_SEQ = {
 const drMood = { kind: '', until: 0 };
 function drSetMood(kind, ms){ drMood.kind = kind; drMood.until = performance.now() + ms; }
 function drMoodNow(){ return performance.now() < drMood.until ? drMood.kind : ''; }
-/* Talking, while Ask the Hub's answer appears: his mouth opens and closes
-   through the smile frames in an uneven rhythm, with small nods. */
-function drFaceTalk(svg, head, ms, done){
-  const mouths = ['smile1', 'smile2', 'smile', 'smile2', 'smile1', 'rest'];
-  const f = [], h = [[0, 0, 0]];
-  let t = 0, prev = '';
-  while(t < ms){
-    let m = mouths[Math.floor(Math.random() * mouths.length)];
-    if(m === prev) m = m === 'rest' ? 'smile2' : 'rest';
-    const d = 80 + Math.round(Math.random() * 90);
-    f.push([m, d]); t += d; prev = m;
-    if(Math.random() < .12){ f.push(['rest', 160]); t += 160; }
-  }
-  f.push(['smile1', 90], ['rest', 260]); t += 350;
-  for(let k = 420; k < t - 400; k += 520 + Math.round(Math.random() * 300)) h.push([k, (Math.random() - .5) * 1.6, .5], [k + 180, 0, 0]);
-  h.push([t, 0, 0]);
-  drFacePlay(svg, { f, head: h }, head, done);
-}
 /* Small effects that float off his head for a moment: hearts, a heart, music
    notes, sparkles, a question mark. They go in the element that holds his
    lean (his pin on Home, the dock button), so they sit beside him without
@@ -12928,166 +12911,558 @@ function drFaceFx(head, kind){
   setTimeout(() => fx.remove(), 2800);
   return fx;
 }
+/* ---------- Dr. Smiley: animation engine ----------
+   One controller (DrAnim) per Dr. Smiley on screen -- Home's greeting, the
+   dock, Ask's faces, the lock screen -- made on first use for his
+   svg.ds-art and found again by drAnim(svg). It owns everything that moves
+   him, so nothing competes:
+     face    the strip frame (expressions and gaze share it)
+     head    the lean, a Web Animation on the element that holds him (his pin
+             on Home, his circle in the dock; Ask passes the svg itself)
+     effects hearts, notes, sparkles, "?" floating off his head
+   Every request has a priority (DR_P):
+     IDLE 1   his own blinks, eye darts and idle expressions
+     GAZE 2   his eyes following your finger
+     REACT 3  reactions to the app: a message, hearts, a wrong answer...
+     DIRECT 4 something you did to him: petting him, Ask nodding and talking
+   A request at or above the priority of what's playing takes over; a lower
+   one is turned away (play() returns false). Taking over never snaps to his
+   resting face: the face walks through the in-between frames (DR_FACE_BACK,
+   drFacePath) into the new expression, the head eases on from where it is,
+   and effects fade instead of vanishing. Sequences are walked the same way,
+   so two frames that aren't neighbours always get their in-betweens.
+   Reduced motion: no idle, no gaze, no lean, no effects, no sway; a direct
+   reaction shows its peak frame, still, then his resting face.
+   Hidden page: everything pauses (timers cleared) and resumes on return. A
+   controller whose svg leaves the page destroys itself (timers, lean,
+   effects, listeners), checked on every timer and by a sweep every 4 s.
+   Window listeners are shared (one set for all controllers), added while
+   any controller follows the finger and removed when none does. */
+const DR_P = { IDLE: 1, GAZE: 2, REACT: 3, DIRECT: 4 };
+const DR_STEP = 38;   // ms per in-between frame
+// The way back to rest from every frame, one in-between at a time.
+const DR_FACE_BACK = {
+  blink1: 'rest', blink2: 'blink1', shut: 'blink2', sleep: 'shut',
+  wink1: 'rest', wink2: 'wink1', wink: 'wink2',
+  smile1: 'rest', smile2: 'smile1', smile: 'smile2',
+  laugh1: 'smile2', laugh2: 'laugh1', laugh: 'laugh2', laughB: 'laugh',
+  love: 'smile2',
+  halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
+  lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
+};
+// Neighbours: each frame and its way back, plus the steps the drawn
+// sequences take on purpose (a smile breaking into a laugh, a laugh's
+// "ha-ha" mouth, squinting straight into laughter).
+const DR_FACE_NEAR = (() => {
+  const n = {};
+  const link = (a, b) => { (n[a] = n[a] || new Set()).add(b); (n[b] = n[b] || new Set()).add(a); };
+  Object.entries(DR_FACE_BACK).forEach(([a, b]) => link(a, b));
+  link('smile', 'laugh1'); link('laugh1', 'laughB');
+  return n;
+})();
+const drPathCache = new Map();
+// The frames between a and b (both ends excluded): shortest walk over neighbours.
+function drFacePath(a, b){
+  if(a === b || !a || !b) return [];
+  const key = a + '>' + b;
+  if(drPathCache.has(key)) return drPathCache.get(key);
+  const prev = { [a]: null }, q = [a];
+  while(q.length){
+    const x = q.shift();
+    if(x === b) break;
+    (DR_FACE_NEAR[x] || []).forEach(y => { if(!(y in prev)){ prev[y] = x; q.push(y); } });
+  }
+  const out = [];
+  if(b in prev) for(let x = prev[b]; x && x !== a; x = prev[x]) out.unshift(x);
+  drPathCache.set(key, out);
+  return out;
+}
+// A sequence with its in-betweens filled in, its length and its peak (the
+// frame it holds longest, for reduced motion). Cached per sequence object.
+const drSeqCache = new WeakMap();
+function drSeq(name){
+  const raw = typeof name === 'object' ? name : DR_FACE_SEQ[name];
+  if(!raw) return null;
+  if(drSeqCache.has(raw)) return drSeqCache.get(raw);
+  const f = [];
+  raw.f.forEach(([fr, ms], i) => {
+    const prev = i ? raw.f[i - 1][0] : null;
+    let take = 0;
+    if(prev) drFacePath(prev, fr).forEach(m => { f.push([m, DR_STEP]); take += DR_STEP; });
+    f.push([fr, Math.max(DR_STEP, ms - Math.min(take, ms / 2))]);
+  });
+  const total = f.reduce((t, s) => t + s[1], 0);
+  const peak = raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
+  const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
+  drSeqCache.set(raw, seq);
+  return seq;
+}
+const drReduce = matchMedia('(prefers-reduced-motion: reduce)');
+const drAnims = new Set(), drAnimOf = new WeakMap();
+let drSweepTimer = 0;
+function drSweep(){
+  drAnims.forEach(a => { if(!a.svg.isConnected) a.destroy(); });
+  if(!drAnims.size){ clearInterval(drSweepTimer); drSweepTimer = 0; }
+}
+function drAnim(svg, o){
+  if(!svg || !svg.querySelector) return null;
+  let a = drAnimOf.get(svg);
+  if(a && a.dead) a = null;
+  if(!a){ a = new DrAnim(svg, o || {}); }
+  else if(o && o.head && o.head !== a.head) a.head = o.head;
+  return a;
+}
+class DrAnim{
+  constructor(svg, o){
+    this.svg = svg; this.sheet = svg.querySelector('.ds-sheet');
+    this.head = o.head || null;
+    this.timers = new Set(); this.fx = new Set();
+    this.run = null; this.headAnim = null; this.idle = null; this.g = null; this.dead = false;
+    drAnims.add(this); drAnimOf.set(svg, this);
+    if(!drSweepTimer) drSweepTimer = setInterval(drSweep, 4000);
+  }
+  // ---- housekeeping ----
+  later(fn, ms){
+    const t = setTimeout(() => { this.timers.delete(t); if(this.alive()) fn(); }, ms);
+    this.timers.add(t);
+    return t;
+  }
+  clear(t){ if(t){ clearTimeout(t); this.timers.delete(t); } }
+  alive(){
+    if(this.dead) return false;
+    if(!this.svg.isConnected){ this.destroy(); return false; }
+    return true;
+  }
+  destroy(){
+    if(this.dead) return;
+    this.dead = true;
+    this.timers.forEach(t => clearTimeout(t)); this.timers.clear();
+    if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    this.fx.forEach(el => el.remove()); this.fx.clear();
+    this.run = null; this.idle = null; this.g = null;
+    drAnims.delete(this); drInputSync();
+    if(drAnimOf.get(this.svg) === this) drAnimOf.delete(this.svg);
+  }
+  frame(){
+    const x = -(+(this.sheet && this.sheet.getAttribute('x')) || 0);
+    return DR_FACE_FRAMES[Math.round(x / DR_FACE_W)] || 'rest';
+  }
+  set(name){ drFaceSet(this.svg, name); }
+  get busy(){ return !!this.run; }
+  get priority(){ return this.run ? this.run.p : 0; }
+  // ---- the head ----
+  headNow(){ return this.head ? getComputedStyle(this.head).transform : 'none'; }
+  headSwap(anim){
+    const old = this.headAnim;
+    this.headAnim = anim;
+    if(old && old !== anim) old.cancel();
+  }
+  // The sequence's lean, starting from wherever the head is now. skip: ms of
+  // the sequence already passed over; lead: ms of in-betweens before it.
+  // The head never jumps: it eases from where it is onto the sequence's path,
+  // meeting it DR_HEAD_BLEND ms in (or after the in-betweens, if longer).
+  headPlay(keys, skip, lead){
+    if(!this.head || !this.head.animate || drReduce.matches) return;
+    const from = this.headNow();
+    const total = (keys ? keys[keys.length - 1][0] : 0);
+    const B = Math.max(0, DR_HEAD_BLEND - lead), meet = skip + B;
+    const dur = Math.max(DR_HEAD_BLEND + 20, lead + Math.max(B, total - skip));
+    const ease = 'cubic-bezier(.45,0,.35,1)';
+    const kf = [{ offset: 0, transform: from, easing: 'cubic-bezier(.3,0,.25,1)' }];
+    const at = t => {   // the sequence's lean at time t, interpolated
+      if(!keys || !keys.length) return [0, 0];
+      if(t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+      for(let i = 1; i < keys.length; i++){
+        const [t1, r1, y1] = keys[i], [t0, r0, y0] = keys[i - 1];
+        if(t <= t1){ const k = t1 > t0 ? (t - t0) / (t1 - t0) : 1; return [r0 + (r1 - r0) * k, y0 + (y1 - y0) * k]; }
+      }
+      const l = keys[keys.length - 1]; return [l[1], l[2]];
+    };
+    const [mr, my] = at(meet);
+    kf.push({ offset: Math.min(1, (lead + B) / dur), transform: `translateY(${my.toFixed(3)}%) rotate(${mr.toFixed(3)}deg)`, easing: ease });
+    if(keys) keys.forEach(([t, r, y]) => {
+      if(t <= meet) return;
+      kf.push({ offset: Math.min(1, (lead + t - skip) / dur), transform: `translateY(${y}%) rotate(${r}deg)`, easing: ease });
+    });
+    if(kf[kf.length - 1].offset < 1) kf.push({ offset: 1, transform: 'translateY(0%) rotate(0deg)' });
+    kf[kf.length - 1].offset = 1;
+    for(let i = 1; i < kf.length; i++) if(kf[i].offset < kf[i - 1].offset) kf[i].offset = kf[i - 1].offset;
+    try{ this.headSwap(this.head.animate(kf, { duration: dur })); }catch(e){}
+  }
+  // Ease the head to a lean and hold it (gaze), or back to upright (and let go,
+  // so CSS like Home's press shrink applies again).
+  headTo(r, y, ms){
+    if(!this.head || !this.head.animate || drReduce.matches) return;
+    const upright = !r && !y;
+    try{
+      const a = this.head.animate([{ transform: this.headNow() }, { transform: `translateY(${y}%) rotate(${r}deg)` }],
+        { duration: ms, easing: 'cubic-bezier(.3,0,.2,1)', fill: upright ? 'none' : 'forwards' });
+      this.headSwap(a);
+    }catch(e){}
+  }
+  // ---- effects ----
+  effect(kind){
+    const el = drFaceFx(this.head, kind);
+    if(!el) return;
+    this.fx.add(el);
+    this.later(() => this.fx.delete(el), 2900);
+  }
+  fadeEffects(){
+    this.fx.forEach(el => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 220); });
+    this.fx.clear();
+  }
+  // ---- expressions ----
+  // Play a sequence (a DR_FACE_SEQ name or a {f, head} object). Returns false
+  // if something more important is playing. done(): only when it completes.
+  play(name, o){
+    o = o || {};
+    const p = o.priority || DR_P.REACT;
+    if(!this.alive() || document.hidden) return false;
+    if(name === 'glance') name = Math.random() < .5 ? 'glanceL' : 'glanceR';
+    const seq = drSeq(name);
+    if(!seq) return false;
+    if(this.run && this.run.p > p) return false;
+    if(drReduce.matches && p < DR_P.REACT) return false;
+    this.stopRun(false);
+    if(drReduce.matches){
+      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done);
+    }
+    const run = { p, name: typeof name === 'string' ? name : 'custom', timers: [] };
+    this.run = run;
+    // Join the sequence where the face already is if that frame is part of
+    // its build-up (before its peak; never a rest frame), else walk in from
+    // the current frame.
+    const cur = this.frame();
+    let start = 0;
+    const build = seq.f.slice(0, seq.peakAt).map(s => s[0]);
+    const at = cur === 'rest' ? -1 : build.indexOf(cur);
+    if(at > 0) start = at;
+    const bridge = at > -1 ? [] : drFacePath(cur, seq.f[0][0]);
+    const skip = seq.f.slice(0, start).reduce((t, s) => t + s[1], 0);
+    const lead = bridge.length * DR_STEP;
+    const frames = bridge.map(f => [f, DR_STEP]).concat(seq.f.slice(start));
+    // Every sequence ends on his resting face (a blink ends on blink1).
+    const last = frames.length ? frames[frames.length - 1][0] : this.frame();
+    if(last !== 'rest') drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
+    this.headPlay(seq.head, skip, lead);
+    if(seq.fx && this.head && !drReduce.matches){
+      run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
+    }
+    let i = 0;
+    const step = () => {
+      if(this.run !== run) return;
+      if(i >= frames.length){ this.finish(run, o.done); return; }
+      const [f, ms] = frames[i++];
+      this.set(f);
+      run.timers.push(this.later(step, ms));
+    };
+    step();
+    return true;
+  }
+  // Reduced motion: the expression's peak, still, then rest. No lean, no effects.
+  still(frame, ms, p, done){
+    const run = { p, name: 'still', timers: [] };
+    this.run = run;
+    this.set(frame);
+    run.timers.push(this.later(() => { if(this.run !== run) return; this.set('rest'); this.finish(run, done); }, ms));
+    return true;
+  }
+  finish(run, done){
+    if(this.run !== run) return;
+    this.run = null;
+    if(done) done();
+    this.idleNext();
+  }
+  // Stop what's playing. settle: walk the face back to rest and ease the head
+  // upright (nothing new follows); otherwise the next request takes over from
+  // the current frame and lean.
+  stopRun(settle){
+    const run = this.run;
+    if(!run) return;
+    run.timers.forEach(t => this.clear(t));
+    if(run.gazeTimer) this.clear(run.gazeTimer);
+    this.run = null;
+    this.fadeEffects();
+    if(settle) this.settle();
+  }
+  // Back to rest through the in-betweens (and upright), interruptible by anything.
+  settle(then){
+    const path = drFacePath(this.frame(), 'rest').concat(this.frame() === 'rest' ? [] : ['rest']);
+    this.headTo(0, 0, Math.max(220, path.length * DR_STEP + 120));
+    if(!path.length){ if(then) then(); this.idleNext(); return; }
+    const run = { p: .5, name: 'settle', timers: [] };
+    this.run = run;
+    let i = 0;
+    const step = () => {
+      if(this.run !== run) return;
+      if(i >= path.length){ this.finish(run, then); return; }
+      this.set(path[i++]);
+      run.timers.push(this.later(step, DR_STEP));
+    };
+    step();
+  }
+  // Talking (Ask): the mouth through the smile frames in an uneven rhythm,
+  // with small nods; longer for longer answers.
+  talk(ms, o){
+    o = o || {};
+    const p = o.priority || DR_P.DIRECT;
+    if(drReduce.matches){
+      if(!this.alive() || document.hidden || (this.run && this.run.p > p)) return false;
+      this.stopRun(false);
+      return this.still('smile1', Math.min(1200, ms), p, o.done);
+    }
+    const mouths = ['smile1', 'smile2', 'smile', 'smile2', 'smile1', 'rest'];
+    const f = [['smile1', 70]], h = [[0, 0, 0], [90, 0, .4]];
+    let t = 70, prev = 'smile1';
+    while(t < ms){
+      let m = mouths[Math.floor(Math.random() * mouths.length)];
+      if(m === prev) m = m === 'rest' ? 'smile2' : 'rest';
+      const d = 80 + Math.round(Math.random() * 90);
+      f.push([m, d]); t += d; prev = m;
+      if(Math.random() < .12){ f.push(['rest', 160]); t += 160; }
+    }
+    f.push(['smile1', 90], ['rest', 260]); t += 350;
+    for(let k = 420; k < t - 400; k += 520 + Math.round(Math.random() * 300)) h.push([k, (Math.random() - .5) * 1.6, .5], [k + 180, 0, 0]);
+    h.push([t, 0, 0]);
+    return this.play({ f, head: h }, { priority: p, done: o.done });
+  }
+  // ---- gaze: the eyes follow a finger ----
+  // Hysteresis: his eyes stay in a direction until the finger is clearly in
+  // the next one (DR_GAZE_HYST degrees past the line), the near/far step has
+  // a dead band, the "looking at you" circle is entered closer than it's left,
+  // and a new direction must hold DR_GAZE_DWELL ms before he moves his eyes.
+  gazeCan(){
+    return !!(this.idle && this.idle.opts.expressions !== false) && !drReduce.matches && !document.hidden && this.alive()
+      && (this.idle.opts.visible ? this.idle.opts.visible() : (!this.idle.opts.canPlay || this.idle.opts.canPlay()));
+  }
+  gazeStart(x, y, target){
+    if(!this.gazeCan()) return false;
+    if(this.head && this.head.parentElement && target && this.head.parentElement.contains(target)) return false;
+    if(!this.svg.getBoundingClientRect().width) return false;
+    if(this.run && this.run.p >= DR_P.GAZE && !this.run.gaze) return false;
+    if(this.run && this.run.gaze){ this.clear(this.run.endTimer); this.gazeMove(x, y); return true; }
+    this.stopRun(false);
+    this.run = { p: DR_P.GAZE, name: 'gaze', gaze: true, timers: [] };
+    this.g = { center: true, sector: null, far: false, shown: this.frame(), want: null, wantAt: 0, x, y, tilt: null, first: true };
+    this.gazeMove(x, y);
+    return true;
+  }
+  gazeAim(x, y){
+    const g = this.g, r = this.svg.getBoundingClientRect();
+    const dx = x - (r.left + r.width * .5), dy = y - (r.top + r.height * .45), d = Math.hypot(dx, dy);
+    const rin = Math.max(24, r.width * .42), rout = rin + 18;
+    if(g.center ? d < rout : d < rin){ g.center = true; g.sector = null; return 'rest'; }
+    const a = Math.atan2(dy, dx) * 180 / Math.PI;      // 0 right, 90 down
+    const dist = s => { const v = Math.abs(((a - s * 45) % 360 + 540) % 360 - 180); return v; };
+    let s = ((Math.round(a / 45) % 8) + 8) % 8;
+    if(!g.center && g.sector !== null && dist(g.sector) <= 22.5 + DR_GAZE_HYST) s = g.sector;
+    g.center = false; g.sector = s;
+    g.far = g.far ? d > 125 : d > 185;   // a wide dead band: near/far is a small change
+    return ['halfR', 'lookDR', 'lookD', 'lookDL', 'halfL', 'lookUL', 'lookU', 'lookUR'][s]
+      .replace('halfR', g.far ? 'lookR' : 'halfR').replace('halfL', g.far ? 'lookL' : 'halfL');
+  }
+  gazeMove(x, y){
+    const run = this.run;
+    if(!run || !run.gaze || !this.alive()) return;
+    const g = this.g; g.x = x; g.y = y;
+    const want = this.gazeAim(x, y);
+    const now = performance.now();
+    if(want === g.shown){ g.want = null; return; }
+    if(want !== g.want){ g.want = want; g.wantAt = now; }
+    const wait = g.first ? 0 : DR_GAZE_DWELL - (now - g.wantAt);
+    g.first = false;
+    if(wait > 0){
+      if(!run.gazeTimer) run.gazeTimer = this.later(() => { run.gazeTimer = 0; if(this.run === run) this.gazeMove(g.x, g.y); }, wait);
+      return;
+    }
+    this.gazeShow(want);
+  }
+  gazeShow(to){
+    const run = this.run, g = this.g;
+    g.shown = to; g.want = null;
+    run.timers.forEach(t => this.clear(t)); run.timers = [];
+    const path = drFacePath(this.frame(), to).concat([to]);
+    let i = 0;
+    const step = () => { if(this.run !== run) return; this.set(path[i++]); if(i < path.length) run.timers.push(this.later(step, 30)); };
+    step();
+    // The head follows the eyes a little.
+    const [tilt, lift] = DR_GAZE_LEAN[to] || [0, 0];
+    if(g.tilt !== tilt + ',' + lift){ g.tilt = tilt + ',' + lift; this.headTo(tilt, lift, 200); }
+  }
+  gazeEnd(){
+    const run = this.run;
+    if(!run || !run.gaze) return;
+    this.clear(run.endTimer);
+    run.endTimer = this.later(() => {
+      if(this.run !== run) return;
+      this.stopRun(false);
+      // Back to you: through the in-betweens, upright, then a blink.
+      this.settle(() => this.play('blink', { priority: DR_P.IDLE }));
+    }, 450);
+  }
+  // ---- idle: his own rhythm ----
+  // Left alone: a blink every 2-6 s at irregular moments (now and then a
+  // double blink or a longer pause), eye darts, and every 5-8 s one of his
+  // expressions -- none of his last three again, at most one wink or kiss a
+  // minute; more smiles and hums in the morning, a doze now and then late at
+  // night, tilted by his mood (drMoodNow). opts: canPlay(), visible(),
+  // quietMs (settle after this long without a touch), dozeMs, onAct(kind),
+  // expressions (false: blinks only), first (ms before the first).
+  startIdle(opts){
+    opts = opts || {};
+    if(this.idle){ this.idle.opts = opts; return this; }
+    this.idle = { opts, timer: 0, settled: false, recent: [], lastExpr: -1e9, lastWink: -1e9, last: '' };
+    drInputSync();
+    this.idleArm(opts.first == null ? 900 + Math.random() * 700 : opts.first);
+    return this;
+  }
+  stopIdle(){
+    if(!this.idle) return;
+    this.clear(this.idle.timer);
+    this.idle = null;
+    if(this.run && this.run.gaze) this.stopRun(false);
+    if(this.run && this.run.p <= DR_P.GAZE) this.stopRun(false);
+    this.set('rest');
+    if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    drInputSync();
+  }
+  idleArm(ms){
+    const I = this.idle;
+    if(!I || this.dead) return;
+    this.clear(I.timer); I.timer = 0;
+    if(drReduce.matches || document.hidden) return;
+    const gap = Math.random() < .08 ? 4000 + Math.random() * 1500 : 1200 + Math.random() * 1800;
+    I.timer = this.later(() => { I.timer = 0; this.idleTick(); }, ms == null ? gap : ms);
+  }
+  idleNext(){ if(this.idle && !this.run) this.idleArm(); }
+  idleTick(){
+    const I = this.idle;
+    if(!I || !this.alive()) return;
+    const o = I.opts;
+    if(document.hidden || (o.canPlay && !o.canPlay())){ this.idleArm(1500); return; }
+    if(this.run) return;   // idleNext() re-arms when it ends
+    const now = performance.now(), quiet = now - drInput.last;
+    if(o.quietMs && quiet > o.quietMs){ I.settled = true; return; }
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    let kind = 'blink';
+    if(o.dozeMs && quiet > o.dozeMs && I.last !== 'doze') kind = 'doze';
+    else if(o.expressions !== false && now - I.lastExpr > 2500 && Math.random() < .8){
+      const hour = new Date().getHours(), morning = hour >= 5 && hour < 11, late = hour >= 21 || hour < 5;
+      const mood = drMoodNow(), happy = mood === 'happy' ? 1.8 : 1, thoughtful = mood === 'thoughtful';
+      const pool = [['smile', (morning ? .22 : .16) * happy], ['laugh', (thoughtful ? .03 : .1) * happy], ['giggle', (thoughtful ? .03 : .1) * happy], ['nod', .1], ['think', thoughtful ? .25 : .1],
+        ['love', .09 * happy], ['proud', .08 * happy], ['sing', (morning ? .16 : .08) * happy], ['around', thoughtful ? .14 : .07], ['wink', .07], ['kiss', .05], ...(late ? [['doze', .1]] : [])]
+        .filter(([k]) => !I.recent.includes(k) && !((k === 'wink' || k === 'kiss') && now - I.lastWink < 60000));
+      let r = Math.random() * pool.reduce((t, p) => t + p[1], 0);
+      for(const [k, w] of pool){ if((r -= w) <= 0){ kind = k; break; } }
+      if(kind === 'blink' && pool.length) kind = pool[0][0];
+    }
+    if(kind === 'blink' && o.expressions !== false && I.last !== 'glance' && Math.random() < .16) kind = 'glance';
+    if(kind === 'blink' && o.expressions !== false && Math.random() < .22){
+      const darts = ['halfL', 'halfR', 'lookU', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'lookD'];
+      this.play({ f: [[darts[Math.floor(Math.random() * darts.length)], Math.round(rnd(450, 1000))], ['rest', 60]] }, { priority: DR_P.IDLE });
+      return;
+    }
+    if(kind === 'blink' && Math.random() < .18){ this.play(DR_DOUBLE_BLINK, { priority: DR_P.IDLE }); return; }
+    const expr = kind !== 'blink' && kind !== 'glance';
+    if(kind !== 'blink'){ I.last = kind; if(kind === 'wink' || kind === 'kiss') I.lastWink = now; }
+    if(expr){ I.recent.push(kind); if(I.recent.length > 3) I.recent.shift(); }
+    if(o.onAct) o.onAct(kind);
+    this.play(kind, { priority: DR_P.IDLE, done: () => { if(expr && this.idle) this.idle.lastExpr = performance.now(); } });
+  }
+  wake(){
+    const I = this.idle;
+    if(I && I.settled){ I.settled = false; this.idleArm(1200); }
+  }
+  // ---- page hidden / shown ----
+  pause(){
+    this.timers.forEach(t => clearTimeout(t)); this.timers.clear();
+    if(this.idle) this.idle.timer = 0;
+    this.run = null; this.g = null;
+    if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    this.fx.forEach(el => el.remove()); this.fx.clear();
+    this.set('rest');
+  }
+  resume(){ if(this.idle) this.idleArm(900 + Math.random() * 700); }
+}
+const DR_GAZE_HYST = 10, DR_GAZE_DWELL = 90, DR_HEAD_BLEND = 140;
+// How far the head leans with each gaze: [tilt deg, lift %].
+const DR_GAZE_LEAN = { rest: [0, 0], halfL: [-.6, 0], halfR: [.6, 0], lookL: [-1.2, 0], lookR: [1.2, 0], lookU: [0, -.35], lookD: [0, .35],
+  lookUL: [-1, -.35], lookUR: [1, -.35], lookDL: [-1, .35], lookDR: [1, .35] };
+const DR_DOUBLE_BLINK = { f: [['blink1', 45], ['blink2', 40], ['shut', 75], ['blink2', 45], ['blink1', 60], ['rest', 140], ['blink1', 45], ['blink2', 40], ['shut', 70], ['blink2', 45], ['blink1', 60]] };
+/* Shared input: one set of window listeners for every controller, there
+   only while at least one follows the finger. Touch events (not pointer
+   events), so the eyes keep following through a scroll. */
+const drInput = { last: performance.now(), on: false };
+function drInputEvent(e){
+  const touch = e.touches ? (e.touches[0] || e.changedTouches[0]) : e;
+  const type = e.type;
+  if(type === 'touchstart' || type === 'mousedown' || type === 'keydown' || type === 'scroll' || type === 'wheel' || type === 'pointerdown'){
+    drInput.last = performance.now();
+    drAnims.forEach(a => a.wake());
+  }
+  if(type === 'keydown' || type === 'scroll' || type === 'wheel' || type === 'pointerdown') return;
+  if(type === 'mousemove' && !(e.buttons & 1)) return;
+  const end = type === 'touchend' || type === 'touchcancel' || type === 'mouseup';
+  if(end && e.touches && e.touches.length) return;
+  drAnims.forEach(a => {
+    if(!a.idle) return;
+    if(type === 'touchstart' || type === 'mousedown'){ if(touch) a.gazeStart(touch.clientX, touch.clientY, e.target); }
+    else if(end) a.gazeEnd();
+    else if(touch) a.gazeMove(touch.clientX, touch.clientY);
+  });
+}
+const DR_INPUT = ['touchstart', 'touchmove', 'touchend', 'touchcancel', 'mousedown', 'mousemove', 'mouseup', 'pointerdown', 'keydown', 'scroll', 'wheel'];
+function drInputSync(){
+  const want = [...drAnims].some(a => a.idle);
+  if(want === drInput.on) return;
+  drInput.on = want;
+  DR_INPUT.forEach(t => want ? window.addEventListener(t, drInputEvent, { passive: true, capture: true })
+                             : window.removeEventListener(t, drInputEvent, { capture: true }));
+}
+document.addEventListener('visibilitychange', () => {
+  drAnims.forEach(a => document.hidden ? a.pause() : a.resume());
+});
+drReduce.addEventListener('change', () => {
+  if(drReduce.matches) drAnims.forEach(a => a.pause());
+  else drAnims.forEach(a => a.resume());
+});
+// For tests and the preview.
+function drAnimDebug(){
+  let timers = 0, fx = 0;
+  drAnims.forEach(a => { timers += a.timers.size; fx += a.fx.size; });
+  return { controllers: drAnims.size, timers, fx, listening: drInput.on, sweeping: !!drSweepTimer };
+}
+
+/* ---- The names the rest of the app calls (kept, now on the engine) ---- */
 function drFaceSet(svg, name){
   const sheet = svg && svg.querySelector && svg.querySelector('.ds-sheet');
   if(!sheet) return;
   const x = String(-DR_FACE_W * Math.max(0, DR_FACE_FRAMES.indexOf(name)));
   if(sheet.getAttribute('x') !== x) sheet.setAttribute('x', x);
 }
-// One expression at a time per face: starting one cancels whatever that face
-// was doing (its timer and its lean), so nothing overlaps or competes.
-const drFaceRuns = new WeakMap();
-function drFaceBusy(svg){ return drFaceRuns.has(svg); }
-function drFacePlay(svg, name, head, done){
-  if(name === 'glance') name = Math.random() < .5 ? 'glanceL' : 'glanceR';
-  const prev = svg && drFaceRuns.get(svg); if(prev) prev.cancel();
-  const seq = typeof name === 'object' ? name : DR_FACE_SEQ[name];
-  if(!svg || !seq){ if(done) done(); return; }
-  let i = 0, timer = 0, anim = null, alive = true;
-  const total = seq.f.reduce((t, s) => t + s[1], 0);
-  if(seq.head && head && head.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches){
-    const kf = seq.head.map(([t, r, y]) => ({ offset: Math.min(1, t / total), transform: `translateY(${y}%) rotate(${r}deg)`, easing: 'cubic-bezier(.45,0,.35,1)' }));
-    kf[kf.length - 1].offset = 1;
-    try{ anim = head.animate(kf, { duration: total }); }catch(e){ anim = null; }
-  }
-  let fx = null, fxTimer = 0;
-  if(seq.fx && head) fxTimer = setTimeout(() => { if(alive) fx = drFaceFx(head, seq.fx); }, seq.fxAt || 0);
-  const run = { cancel(){ alive = false; clearTimeout(timer); clearTimeout(fxTimer); if(fx) fx.remove(); if(anim) anim.cancel(); drFaceSet(svg, 'rest'); drFaceRuns.delete(svg); } };
-  drFaceRuns.set(svg, run);
-  const step = () => {
-    if(!alive) return;
-    if(i >= seq.f.length){ drFaceSet(svg, 'rest'); drFaceRuns.delete(svg); if(done) done(); return; }
-    const [f, ms] = seq.f[i++]; drFaceSet(svg, f); timer = setTimeout(step, ms);
-  };
-  step();
+function drFaceBusy(svg){ const a = svg && drAnimOf.get(svg); return !!(a && a.busy); }
+// An expression as a reaction (REACT unless given), e.g. the lock screen's smile.
+function drFacePlay(svg, name, head, done, priority){
+  const a = drAnim(svg, { head: head || null });
+  if(!a){ if(done) done(); return false; }
+  return a.play(name, { priority: priority || DR_P.REACT, done });
 }
-/* Left alone, one timer runs his face: a blink every 2-6 s at irregular
-   moments (now and then a double blink, now and then a longer pause), and
-   every 5-8 s one of his expressions -- a smile, a laugh, a giggle, a nod, a
-   think, heart eyes, a proud look, a hum, a look around, a wink or a blown
-   kiss -- the first a second or so after he appears, none of his last three
-   again, at most one wink or kiss a minute. (Jose: he took too long.) In the
-   morning he hums and smiles more; late at night he dozes now and then.
-   His eyes follow your finger while you touch the screen, and between
-   expressions they dart about now and then. His mood (drMoodNow) tilts the
-   choice: happier after good moments, more thoughtful after a miss. Nothing moves between them. Nothing at all with
-   reduced motion, while the page is hidden, or while canPlay() says no.
-   opts: canPlay(), quietMs (settle after this long without a touch, until the
-   next one), dozeMs (doze once after this long), onAct(kind), expressions
-   (false: blinks only), first (ms before the first). */
+function drFaceTalk(svg, head, ms, done){
+  const a = drAnim(svg, { head: head || null });
+  return a ? a.talk(ms, { priority: DR_P.DIRECT, done }) : false;
+}
+// His own rhythm on this face. Returns { act(kind), stop(), running }.
 function drFaceIdle(svg, head, opts){
-  opts = opts || {};
-  const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
-  let timer = 0, on = true, settled = false, last = '', recent = [], lastExpr = -1e9, lastWink = -1e9, touched = performance.now();
-  const rnd = (a, b) => a + Math.random() * (b - a);
-  const gap = () => Math.random() < .08 ? rnd(4000, 5500) : rnd(1200, 3000);
-  function arm(ms){ clearTimeout(timer); timer = 0; if(on && !reduceQ.matches) timer = setTimeout(tick, ms == null ? gap() : ms); }
-  function play(kind){
-    const expr = kind !== 'blink' && kind !== 'glance';
-    if(kind !== 'blink'){ last = kind; if(kind === 'wink' || kind === 'kiss') lastWink = performance.now(); }
-    if(expr){ recent.push(kind); if(recent.length > 3) recent.shift(); }
-    if(opts.onAct) opts.onAct(kind);
-    // The wait to the next expression counts from the end of this one.
-    drFacePlay(svg, kind, head, () => { if(expr) lastExpr = performance.now(); arm(); });
-  }
-  function tick(){
-    timer = 0;
-    if(!on) return;
-    if(!svg.isConnected){ api.stop(); return; }
-    if(document.hidden || (opts.canPlay && !opts.canPlay())){ arm(1500); return; }
-    if(drFaceBusy(svg)){ arm(1200); return; }
-    const now = performance.now(), quiet = now - touched;
-    if(opts.quietMs && quiet > opts.quietMs){ settled = true; return; }
-    let kind = 'blink';
-    if(opts.dozeMs && quiet > opts.dozeMs && last !== 'doze') kind = 'doze';
-    else if(opts.expressions !== false && now - lastExpr > 2500 && Math.random() < .8){
-      const hour = new Date().getHours(), morning = hour >= 5 && hour < 11, late = hour >= 21 || hour < 5;
-      const mood = drMoodNow(), happy = mood === 'happy' ? 1.8 : 1, thoughtful = mood === 'thoughtful';
-      const pool = [['smile', (morning ? .22 : .16) * happy], ['laugh', (thoughtful ? .03 : .1) * happy], ['giggle', (thoughtful ? .03 : .1) * happy], ['nod', .1], ['think', thoughtful ? .25 : .1],
-        ['love', .09 * happy], ['proud', .08 * happy], ['sing', (morning ? .16 : .08) * happy], ['around', thoughtful ? .14 : .07], ['wink', .07], ['kiss', .05], ...(late ? [['doze', .1]] : [])]
-        .filter(([k]) => !recent.includes(k) && !((k === 'wink' || k === 'kiss') && now - lastWink < 60000));
-      let r = Math.random() * pool.reduce((t, p) => t + p[1], 0);
-      for(const [k, w] of pool){ if((r -= w) <= 0){ kind = k; break; } }
-      if(kind === 'blink' && pool.length) kind = pool[0][0];
-    }
-    // Now and then he looks off to one side instead of a plain blink.
-    if(kind === 'blink' && opts.expressions !== false && last !== 'glance' && Math.random() < .16) kind = 'glance';
-    // Now and then his eyes dart somewhere and come back.
-    if(kind === 'blink' && opts.expressions !== false && Math.random() < .22){
-      const darts = ['halfL', 'halfR', 'lookU', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'lookD'];
-      drFacePlay(svg, { f: [[darts[Math.floor(Math.random() * darts.length)], Math.round(rnd(450, 1000))], ['rest', 60]] }, null, () => arm());
-      return;
-    }
-    if(kind === 'blink' && Math.random() < .18){
-      drFacePlay(svg, 'blink', null, () => { if(on) timer = setTimeout(() => drFacePlay(svg, 'blink', null, () => arm()), 140); });
-      return;
-    }
-    play(kind);
-  }
-  /* His eyes follow your finger: while you touch the screen -- a tap, a
-     scroll, a drag -- he looks toward it (up, down, to a side or between, a
-     little or a lot), and a moment after you let go he looks back at you
-     with a blink. Not in the middle of an expression; not with reduced
-     motion; only while he can be seen (opts.visible(), else canPlay()). */
-  let following = null, followEnd = 0;
-  function gazeAt(x, y){
-    const r = svg.getBoundingClientRect();
-    const dx = x - (r.left + r.width * .5), dy = y - (r.top + r.height * .45), dist = Math.hypot(dx, dy);
-    if(dist < Math.max(28, r.width * .45)) return 'rest';
-    const a = Math.atan2(dy, dx) * 180 / Math.PI, far = dist > 150;   // 0 = right, 90 = down
-    if(a > -22.5 && a <= 22.5) return far ? 'lookR' : 'halfR';
-    if(a > 157.5 || a <= -157.5) return far ? 'lookL' : 'halfL';
-    if(a > 22.5 && a <= 67.5) return 'lookDR';
-    if(a > 67.5 && a <= 112.5) return 'lookD';
-    if(a > 112.5) return 'lookDL';
-    if(a > -67.5) return 'lookUR';
-    if(a > -112.5) return 'lookU';
-    return 'lookUL';
-  }
-  function follow(e){
-    const t = e.touches ? e.touches[0] || e.changedTouches[0] : e;
-    const end = e.type === 'touchend' || e.type === 'touchcancel' || e.type === 'mouseup';
-    if(!following){
-      if(!(e.type === 'touchstart' || e.type === 'mousedown') || !on || opts.expressions === false || reduceQ.matches || document.hidden || !svg.isConnected) return;
-      if(opts.visible ? !opts.visible() : (opts.canPlay && !opts.canPlay())) return;
-      if(drFaceBusy(svg) || !svg.getBoundingClientRect().width) return;
-      if(head && head.parentElement && head.parentElement.contains(e.target)) return;
-      clearTimeout(timer); timer = 0;
-      const run = { cancel(){ if(following === run) following = null; clearTimeout(followEnd); drFaceRuns.delete(svg); drFaceSet(svg, 'rest'); } };
-      following = run; drFaceRuns.set(svg, run);
-    }
-    if(end){
-      if(e.touches && e.touches.length) return;
-      clearTimeout(followEnd);
-      const run = following;
-      followEnd = setTimeout(() => {
-        if(following !== run) return;
-        following = null; drFaceRuns.delete(svg);
-        drFacePlay(svg, 'blink', null, () => arm());
-      }, 450);
-      return;
-    }
-    if(e.type === 'mousemove' && !(e.buttons & 1)) return;
-    clearTimeout(followEnd);
-    if(t) drFaceSet(svg, gazeAt(t.clientX, t.clientY));
-  }
-  const FOLLOW = ['touchstart', 'touchmove', 'touchend', 'touchcancel', 'mousedown', 'mousemove', 'mouseup'];
-  FOLLOW.forEach(t => window.addEventListener(t, follow, { passive: true, capture: true }));
-  const wake = () => { touched = performance.now(); if(settled && on){ settled = false; arm(1200); } };
-  ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.addEventListener(t, wake, { passive: true, capture: true }));
-  const api = {
-    // An expression right now (a reaction), then back to the usual rhythm.
-    act(kind){ if(!on || !(DR_FACE_SEQ[kind] || kind === 'glance')) return; clearTimeout(timer); timer = 0; settled = false; play(kind); },
-    stop(){
-      if(!on) return; on = false; clearTimeout(timer); timer = 0;
-      const r = drFaceRuns.get(svg); if(r) r.cancel();
-      ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.removeEventListener(t, wake, { capture: true }));
-      FOLLOW.forEach(t => window.removeEventListener(t, follow, { capture: true }));
-    },
-    get running(){ return on; },
+  const a = drAnim(svg, { head: head || null });
+  if(!a) return { act(){}, stop(){}, running: false };
+  a.startIdle(opts || {});
+  return {
+    // A reaction now: petting is DIRECT, everything else REACT.
+    act(kind){ return a.play(kind, { priority: kind === 'pet' ? DR_P.DIRECT : DR_P.REACT }); },
+    stop(){ a.stopIdle(); },
+    get running(){ return !!a.idle && !a.dead; },
   };
-  arm(opts.first == null ? rnd(900, 1600) : opts.first);
-  return api;
 }
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CHAIN = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 15L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 6.5L12 5C13.66 3.34 16.34 3.34 18 5V5C19.66 6.66 19.66 9.34 18 11L16.5 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 17.5L12 19C10.34 20.66 7.66 20.66 6 19V19C4.34 17.34 4.34 14.66 6 13L7.5 11.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -18152,7 +18527,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.0928';
+const BUILD_ID = 'b1007.1016';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -22380,11 +22755,11 @@ function renderAskMessages(scrollToEnd){
       face.dataset.talked = last.id;
       if(last.status === 'done'){
         const words = [last.answer.headline, last.answer.say].filter(Boolean).join(' ').split(/\s+/).length;
-        drFaceTalk(svg, svg, Math.min(3600, 900 + words * 110), () => { if(happy) drFacePlay(svg, 'smile', svg); });
+        drFaceTalk(svg, svg, Math.min(3600, 900 + words * 110), () => { if(happy) drFacePlay(svg, 'smile', svg, null, DR_P.DIRECT); });
       }else drFacePlay(svg, 'think', svg);
     }else if(ASK.busy && face.dataset.nodded !== String(ASK.turns.length)){
       face.dataset.nodded = String(ASK.turns.length);
-      drFacePlay(svg, 'nod', svg);
+      drFacePlay(svg, 'nod', svg, null, DR_P.DIRECT);
     }
   }
   askFaceSync();
@@ -22768,31 +23143,42 @@ window.smileyPettable = smileyPettable;
 /* Scrolling carries him: he leans against the scroll a few degrees and
    springs back upright when it stops. On the CSS rotate property of the
    element that holds all of him (the dock button, the Home badge), so it
-   stacks on everything else. Off with reduced motion. */
+   stacks on everything else. One shared scroll listener for every swaying
+   element (it used to add one per Home rebuild, never removed); elements
+   that leave the page are dropped, and the listener goes when none is left.
+   Off with reduced motion. */
+const drSways = new Set();
+let drSwayLast = new WeakMap(), drSwayOn = false;
+function drSwayScroll(e){
+  if(drReduce.matches) return;
+  const t = e.target === document ? document.scrollingElement : e.target;
+  if(!t || typeof t.scrollTop !== 'number') return;
+  const y = t.scrollTop, was = drSwayLast.has(t) ? drSwayLast.get(t) : y;
+  drSwayLast.set(t, y);
+  const push = Math.max(-1.1, Math.min(1.1, -(y - was) * .03));
+  drSways.forEach(s => {
+    if(!s.el.isConnected){ drSways.delete(s); return; }
+    s.push += push;
+    if(!s.raf) s.raf = requestAnimationFrame(s.step);
+  });
+  if(!drSways.size){ document.removeEventListener('scroll', drSwayScroll, { capture: true }); drSwayOn = false; }
+}
 function smileySway(el, origin){
   if(!el || el.__sway) return;
   el.__sway = true;
   if(origin) el.style.transformOrigin = origin;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  const last = new WeakMap();
-  let ang = 0, vel = 0, push = 0, raf = 0;
-  const step = () => {
-    raf = 0;
-    if(!el.isConnected) return;
-    vel = (vel + push - ang * .14) * .78; push = 0;
-    ang = Math.max(-5, Math.min(5, ang + vel));
-    if(Math.abs(ang) < .03 && Math.abs(vel) < .03){ ang = vel = 0; el.style.rotate = ''; return; }
-    el.style.rotate = ang.toFixed(2) + 'deg';
-    raf = requestAnimationFrame(step);
+  const s = { el, ang: 0, vel: 0, push: 0, raf: 0 };
+  s.step = () => {
+    s.raf = 0;
+    if(!el.isConnected){ drSways.delete(s); return; }
+    s.vel = (s.vel + s.push - s.ang * .14) * .78; s.push = 0;
+    s.ang = Math.max(-5, Math.min(5, s.ang + s.vel));
+    if(Math.abs(s.ang) < .03 && Math.abs(s.vel) < .03){ s.ang = s.vel = 0; el.style.rotate = ''; return; }
+    el.style.rotate = s.ang.toFixed(2) + 'deg';
+    s.raf = requestAnimationFrame(s.step);
   };
-  document.addEventListener('scroll', e => {
-    if(reduce.matches || !el.isConnected) return;
-    const t = e.target === document ? document.scrollingElement : e.target;
-    if(!t || typeof t.scrollTop !== 'number') return;
-    const y = t.scrollTop, was = last.has(t) ? last.get(t) : y; last.set(t, y);
-    push += Math.max(-1.1, Math.min(1.1, -(y - was) * .03));
-    if(!raf) raf = requestAnimationFrame(step);
-  }, { passive: true, capture: true });
+  drSways.add(s);
+  if(!drSwayOn){ drSwayOn = true; document.addEventListener('scroll', drSwayScroll, { passive: true, capture: true }); }
 }
 window.smileySway = smileySway;
 
@@ -23543,8 +23929,8 @@ const smileyRider = (() => {
     think: 'think', proud: 'proud', sing: 'sing', kiss: 'kiss', around: 'around', notice: 'notice', pet: 'pet' };
   function emote(kind){
     const f = EMOTE_FACE[kind];
-    if(!btn || reduce.matches || !f) return false;
-    if(idle) idle.act(f); else drFacePlay(svgOf(), f, bob);
+    if(!btn || !f) return false;
+    if(idle) idle.act(f); else drFacePlay(svgOf(), f, bob, null, f === 'pet' ? DR_P.DIRECT : DR_P.REACT);
     if(f === 'doze'){ btn.classList.remove('is-dozing'); void btn.offsetWidth; btn.classList.add('is-dozing'); setTimeout(() => btn.classList.remove('is-dozing'), 3600); }
     return true;
   }

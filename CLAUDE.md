@@ -25,7 +25,7 @@ between assignments.
 | `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
-| `drsmiley/*.webp` | 5 files | Dr. Smiley: `base` (his calm head and shoulders), `face` (a strip of 18 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, `drFacePlay()`, `drFaceIdle()`, `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
+| `drsmiley/*.webp` | 5 files | Dr. Smiley: `base` (his calm head and shoulders), `face` (a strip of 18 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
 | `sw.js` | 175 | Service worker. Network-first for HTML, stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/` |
@@ -197,6 +197,14 @@ lost concurrent edits. Do not reintroduce that.
   and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
   each pin is `pins/<key>.webp`; to change one, replace its file.
 - `localStorage` key `ih_myName` holds the user's display name.
+- **Dr. Smiley moves only through his controller.** One `DrAnim` per
+  character (`drAnim(svg, {head})`) owns his face frame, gaze, lean and
+  effects, with priorities (`DR_P`: IDLE < GAZE < REACT < DIRECT). Ask it to
+  `play()` / `talk()`; don't set frames or animate his pin yourself (the Home
+  greeting's frame-by-frame `drFaceSet` is the one exception, while his idle
+  is stopped). Interruptions walk through in-between frames (`DR_FACE_BACK`);
+  a sequence whose consecutive frames aren't neighbours gets them filled in.
+  Reduced motion, a hidden page and a detached svg are handled there.
 
 ## Design system
 
