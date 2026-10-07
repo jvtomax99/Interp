@@ -3103,6 +3103,12 @@
   .guide-q-chev svg{ width:17px; height:17px; }
   .guide-topic.is-open .guide-q{ color:var(--guide-color); }
   .guide-topic.is-open .guide-q-chev{ transform:rotate(180deg); color:var(--guide-color); }
+  /* Section colors are picked for white cards; navy (Asking Dr. Smiley) or
+     teal (The one rule) on the dark card read at under 2.5:1. Lighten them
+     toward the dark ink so every open question stays readable. */
+  html[data-theme="dark"] .guide-topic.is-open .guide-q,
+  html[data-theme="dark"] .guide-topic.is-open .guide-q-chev{ color:color-mix(in srgb, var(--guide-color) 45%, var(--ink)); }
+  html[data-theme="dark"] .guide-topic.is-open{ box-shadow:var(--sh-2), inset 0 0 0 1px color-mix(in srgb, var(--guide-color) 60%, var(--ink)); }
 
   .guide-a{
     padding:0 15px 16px 15px; font-size:14px; line-height:1.7; color:var(--ink-soft);
@@ -8551,23 +8557,23 @@ let onboardingStep = 0;
 const ONBOARDING_STEPS = [
   {
     title: 'Welcome to Interpreter Hub',
-    body: 'A shared home base for HUMC\u2019s interpreter team \u2014 the glossary, provider directory, team chat, and CoreCHI study tools all in one place.'
+    body: 'A shared home base for HUMC\u2019s interpreter team \u2014 the glossary, appointment briefings, doctor lists, team chat and CoreCHI study tools, all in one place.'
   },
   {
-    title: 'Everything lives in tiles',
-    body: 'Domains and tools are organized as tiles below Home. Tap a domain to see just its terms, or "All domains" to browse everything. "Search everything" finds terms, providers, chat messages, and more at once.'
+    title: 'Five buttons at the bottom',
+    body: 'Home, Search, Translate, Chat and More are always there. Search finds terms, doctors and help at once, in English or Spanish, accents optional. If you\u2019re ever lost, tap Home.'
   },
   {
     title: 'Set your name once',
-    body: 'Tap the person icon (bottom-left on most screens) to attribute your edits, chat messages, and practice scores to yourself \u2014 you\u2019ll be asked automatically the first time you need it.'
+    body: 'Tap the round button in the top-right corner and type your name, so your edits, chat messages and practice carry it. You\u2019ll be asked automatically the first time you need it.'
   },
   {
-    title: 'Built for the team, not just you',
-    body: 'Team Chat supports @mentions and pinned announcements. Edits sync in real time and keep a history, so nothing gets silently overwritten if two people edit at once.'
+    title: 'Meet Dr. Smiley',
+    body: 'He stands just above the bottom buttons. Tap him to ask about a term or a doctor, or say \u201cI\u2019m covering oncology. Prep me.\u201d He answers from the team\u2019s own glossary first, and tells you when he doesn\u2019t.'
   },
   {
-    title: 'Study tools included',
-    body: 'CoreCHI Practice tracks your accuracy by exam domain over time. Term Review resurfaces glossary terms you\u2019ve missed using spaced repetition. Export any domain to PDF or CSV whenever you need it.'
+    title: 'Built for the team',
+    body: 'Anyone can add or fix a word, and every edit keeps a history. Team Chat has @mentions and pinned updates. Questions about the app? The User Guide, under More, has the answers.'
   }
 ];
 
@@ -14915,10 +14921,11 @@ const ETHICS_CONTENT = [
 
 const GUIDE_SECTIONS = [
   { id: 'start',   name: 'Getting started',        color: '#2E8BD0' },
+  { id: 'ask',     name: 'Asking Dr. Smiley',      color: '#252E6D' },
   { id: 'find',    name: 'Finding a word',         color: '#0F5FA6' },
+  { id: 'prep',    name: 'Before an appointment',  color: '#7C6A9C' },
   { id: 'change',  name: 'Adding and fixing words', color: '#B2456E' },
   { id: 'team',    name: 'Working with your team', color: '#35A97A' },
-  { id: 'prep',    name: 'Before an appointment',  color: '#7C6A9C' },
   { id: 'study',   name: 'Studying',               color: '#8B6D3F' },
   { id: 'trouble', name: 'When something goes wrong', color: '#C24E3A' },
   { id: 'out',     name: 'Getting your work out',  color: '#6F97AC' },
@@ -14926,14 +14933,14 @@ const GUIDE_SECTIONS = [
 ];
 
 const GUIDE_TOPICS = [
-  { id:'name', section:'start', k:'name who signature attribution credit initials identify myself', q:'How do I put my name on my work?', a:`
+  { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
     <ol>
-      <li>Tap the round person button in the <b>bottom-left corner</b>.</li>
+      <li>Tap the round button with your initial in the <b>top-right corner</b>. If there's no name yet, it shows a little person.</li>
       <li>Type your name.</li>
       <li>Tap <b>Save</b>.</li>
     </ol>
-    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice scores.</p>` },
+    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice. You can add a photo there too. It's optional, and your team sees it beside your messages in Team Chat.</p>` },
 
   { id:'invite', section:'start', k:'team code invite lock locked sign in login password access new phone get in join team only', q:'The Hub is asking for a team code', a:`
     <p>The Hub is only for the interpreter team, so it asks for the team code. Jose shares it, and any teammate can tell you what it is.</p>
@@ -14949,7 +14956,7 @@ const GUIDE_TOPICS = [
     <p><b>iPhone</b></p>
     <ol>
       <li>Open the app in Safari.</li>
-      <li>Tap the <b>Share</b> button at the bottom — the square with an arrow pointing up.</li>
+      <li>Tap the <b>Share</b> button at the bottom: the square with an arrow pointing up.</li>
       <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
       <li>Tap <b>Add</b>.</li>
     </ol>
@@ -14960,24 +14967,69 @@ const GUIDE_TOPICS = [
       <li>Tap <b>Install app</b>.</li>
     </ol>` },
 
-  { id:'around', section:'start', k:'lost navigate menu buttons where tabs bar bottom find my way', q:'Where is everything?', a:`
+  { id:'around', section:'start', k:'lost navigate menu buttons where tabs bar bottom find my way dark mode night moon top', q:'Where is everything?', a:`
     <p>Five buttons sit in a bar across the <b>bottom of the screen</b>, and they are always there:</p>
     <ol>
-      <li><b>Home</b> — the starting page.</li>
-      <li><b>Search</b> — looks through everything in the app.</li>
-      <li><b>Translate</b> — look up a word you don't have yet.</li>
-      <li><b>Chat</b> — your team.</li>
-      <li><b>More</b> — everything else: Doctor Prep, Practice, the doctor list, this guide.</li>
+      <li><b>Home</b>: the starting page.</li>
+      <li><b>Search</b>: looks through everything in the app.</li>
+      <li><b>Translate</b>: look up a word you don't have yet.</li>
+      <li><b>Chat</b>: your team.</li>
+      <li><b>More</b>: everything else, including every domain, Doctor Prep, practice and this guide.</li>
     </ol>
+    <p><b>Dr. Smiley</b> stands just above that bar on the right, with <b>Ask</b> under him. Tap him to ask a question.</p>
+    <p>Across the <b>top</b>: the moon switches dark mode on and off, the bell shows what the team changed, and your initial opens your name and settings.</p>
     <p>If you ever feel lost, tap <b>Home</b>. The arrow in the top-left corner takes you back one step.</p>` },
+
+  { id:'askwhat', section:'ask', k:'ask the hub dr smiley doctor smiley assistant ai question chatbot help character', q:'Who is Dr. Smiley, and what can I ask him?', a:`
+    <p>Dr. Smiley is the Hub's interpreter assistant. Ask him the way you'd ask a teammate: <i>How do I explain “ejection fraction”?</i> or <i>“Embarazada” or “embarrassed”?</i></p>
+    <p>To open him, tap him above the tab bar, tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b>.</p>
+    <p>He answers from the Hub first: your glossary, False Friends, the Doctor Directory, the Code of Ethics and this guide. Every answer is labeled:</p>
+    <ul>
+      <li><b>From the Hub</b>: it comes from your team's own entries. Tap a source under it to see the entry.</li>
+      <li><b>Not from the Hub</b>: general knowledge. It says <b>Double-check it</b>, and you should.</li>
+    </ul>
+    <p>He can also open things for you: a briefing, practice, a term. Tap the button he offers. He only says it's done once the screen is open.</p>` },
+
+  { id:'askexplain', section:'ask', k:'explain term plain spanish patient words simple dr smiley card menu', q:'How do I get a term explained in plain words?', a:`
+    <ol>
+      <li>Tap <b>⋯</b> on the term's card, then <b>Explain with Dr. Smiley</b>. On a computer it's a button on the card.</li>
+      <li>Ask opens with that term picked. You'll see it just above the box.</li>
+      <li>Tap <b>Explain</b>, or type your own question about it.</li>
+    </ol>
+    <p>You get the glossary entry, a plain way to say it to a patient, and where the entry came from.</p>` },
+
+  { id:'askcorrect', section:'ask', k:'wrong answer incorrect correct this fix dr smiley teach improve team note approve', q:'Dr. Smiley got something wrong', a:`
+    <p>Tap <b>Correct this</b> under the answer and write what works better. For example: <i>Many of our patients understand “azúcar en la sangre” better. Say that first.</i></p>
+    <p>Your note goes to Jose. Nothing changes until he approves it. Once he does, it becomes a <b>team note</b> that Dr. Smiley uses for everyone, with your name on it.</p>
+    <p>If the answer was useful, tap <b>Helpful</b>.</p>` },
+
+  { id:'askremember', section:'ask', k:'remember preferences settings spanish english brief short detailed answers focus forget memory what do you remember', q:'Can he remember how I like my answers?', a:`
+    <p>Yes. Just tell him:</p>
+    <ul>
+      <li><i>Remember I prefer brief answers.</i></li>
+      <li><i>From now on explain things in Spanish.</i></li>
+      <li><i>I'm studying oncology.</i></li>
+    </ul>
+    <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
+    <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
+
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+    <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
+    <ul>
+      <li><b>Lively</b>: expressions, eyes that follow your finger and reactions to the team.</li>
+      <li><b>Focused</b>: he blinks and reacts to what you're doing, nothing more.</li>
+      <li><b>Still</b>: he doesn't move.</li>
+    </ul>
+    <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
+    <p>If your phone is set to reduce motion, he's always still.</p>` },
 
   { id:'search', section:'find', k:'search look up find lookup word term', q:'How do I look up a word?', a:`
     <ol>
-      <li>Tap <b>Search</b> at the bottom.</li>
-      <li>Type any part of the word — English or Spanish, either one works.</li>
+      <li>Tap <b>Search</b> at the bottom, or the search box on Home.</li>
+      <li>Type any part of the word, in English or Spanish.</li>
       <li>Tap the result you want.</li>
     </ol>
-    <p>You don't need the whole word. Typing <b>hemo</b> will find <i>hemorragia</i>.</p>` },
+    <p>You don't need the whole word. Typing <b>hemo</b> will find <i>hemorragia</i>. Search also finds doctors and answers from this guide.</p>` },
 
   { id:'accents', section:'find', k:'accent accents acento tilde enye typing keyboard special characters', q:'Do I have to type the accents?', a:`
     <p><b>No.</b> Type it the easy way.</p>
@@ -14991,29 +15043,85 @@ const GUIDE_TOPICS = [
       <li><b>Try the other language.</b> If English isn't finding it, type the Spanish.</li>
       <li><b>Type less.</b> A shorter piece of the word matches more.</li>
     </ol>
-    <p>Still nothing? It may genuinely not be there yet — which means it's a good one to add.</p>` },
+    <p>Still nothing? It may not be there yet. That makes it a good one to add.</p>` },
+
+  { id:'subgroups', section:'find', k:'subgroup subgroups folder section heading collapsed open hematology leukemia closed hidden up to parent', q:'Where are the smaller groups inside a domain?', a:`
+    <p>Some domains have subgroups. Oncology, for example, has Hematology, Leukemia and Radiation. They're listed first, as headings, and start closed.</p>
+    <ul>
+      <li>Tap a <b>heading</b> to peek at its words right there.</li>
+      <li>Tap <b>Open</b> on the heading to go into that subgroup.</li>
+      <li>Inside one, <b>Up to Oncology</b> takes you to the parent. The arrow in the top-left still goes back one step.</li>
+    </ul>
+    <p>When you search, the groups with matches open by themselves.</p>` },
 
   { id:'hear', section:'find', k:'hear listen audio sound speak pronounce pronunciation voice out loud', q:'How do I hear a word out loud?', a:`
-    <p>Tap the small <b>speaker</b> button next to any term. English and Spanish each have their own.</p>` },
+    <p>Tap the small <b>speaker</b> button on the term's card. English and Spanish each have their own.</p>` },
+
+  { id:'slang', section:'find', k:'slang profanity curse swear bad words vulgar hidden blurred strong words reveal', q:'Why are some slang words blurred?', a:`
+    <p>In <b>Slang &amp; Profanity</b>, the strongest words are hidden until you tap them. That way the screen is safe to open next to a patient.</p>
+    <p>Tap a card to reveal it. To show them all, turn off <b>Hide strong words</b> at the top of that domain. The setting stays on this phone only.</p>` },
+
+  { id:'briefing', section:'prep', k:'briefing prep me prepare appointment specialty covering heading to words ready flashcards before', q:"I'm heading to an appointment. How do I prepare fast?", a:`
+    <p>Ask Dr. Smiley: <i>I'm covering oncology. Prep me.</i> Or tap <b>Prep me for an appointment</b> in Ask and pick the specialty. Adding the doctor is optional.</p>
+    <p>Your briefing has:</p>
+    <ul>
+      <li><b>Words to have ready</b>: about two minutes of cards. Tap a card to see the Spanish, then <b>Got it</b> or <b>Again</b>. The words you're still learning come first.</li>
+      <li><b>Traps to watch</b>: the False Friends most likely to come up.</li>
+      <li><b>Your doctor</b>: what Doctor Prep found, if you named one.</li>
+    </ul>
+    <p>Leave and come back and it picks up where you were.</p>` },
+
+  { id:'appt', section:'prep', k:'start the appointment in appointment screen awake timer quick lookup during done', q:'What does “Start the appointment” do?', a:`
+    <p>It turns the phone into a quick reference for while you're in the room:</p>
+    <ul>
+      <li>The screen stays on, as long as your phone allows it.</li>
+      <li>One box looks up any word in English or Spanish, starting with that specialty. It warns you when a word is a False Friend.</li>
+      <li>Dr. Smiley calms down and only blinks.</li>
+    </ul>
+    <p>Tap <b>Done</b> when you're finished. Afterwards, <b>Add new words</b> on the briefing is a good place to save anything you met in the room.</p>` },
+
+  { id:'docprep', section:'prep', k:'doctor prep prepare appointment unknown specialty research before', q:"I have an appointment with a doctor I don’t know", a:`
+    <p>Use <b>Doctor Prep</b>, on Home or under <b>More</b>.</p>
+    <ol>
+      <li>Type the doctor's name.</li>
+      <li>Add the hospital if you know it. It makes the answer faster and more accurate.</li>
+      <li>Tap search and give it a moment.</li>
+    </ol>
+    <p>You get their specialty and a list of terminology likely to come up, from the everyday words through to drug names and the false friends that catch people out. The doctor is saved in the Doctor Directory for the whole team.</p>` },
+
+  { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
+    <p>A shared list of every doctor your team has looked up, under <b>More</b>.</p>
+    <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
+
+  { id:'falsefriends', section:'prep', k:'false friends cognates traps embarazada constipado misleading similar words drill', q:'What are False Friends?', a:`
+    <p>Words that look like English but mean something else, like <i>embarazada</i> (pregnant, not embarrassed). Each one says what it looks like, what it really means and what to say instead.</p>
+    <p>Open <b>False Friends</b> from Home or <b>More</b>. <b>Study</b> lists them all, and <b>Drill</b> quizzes you on them.</p>` },
+
+  { id:'lookup', section:'prep', k:'look up source medlineplus reference link definition web check card button', q:'What does “Look up” on a card do?', a:`
+    <p>It searches trusted medical sites for that term right now, in English and Spanish, and shows the pages it found with a short preview. Use it to check a definition or find a patient-friendly page.</p>
+    <p>If a teammate saved a link on the term, <b>Source</b> opens that exact page.</p>` },
+
+  { id:'translate', section:'prep', k:'translate translation ai lookup unknown word', q:'What is Translate, and when should I not use it?', a:`
+    <p>It looks in your team's glossary first. If nothing's there, it gives you a breakdown: the clinical wording, a plain-language version for a patient, notes on how formal it sounds, how it changes by country, and a warning if it's a false friend.</p>
+    <p><b>Use it to prepare and to build the glossary.</b> It is a reference, not an interpreter, and it is never a substitute for you in the room.</p>` },
 
   { id:'add', section:'change', k:'add new create enter put in word term', q:'How do I add a word?', a:`
     <ol>
-      <li>Open the domain it belongs to, or <b>All domains</b>.</li>
-      <li>Tap <b>+ Add term</b> near the top.</li>
+      <li>Open the domain it belongs to and tap <b>+ Add</b> in its colored banner. Or tap <b>Add Term</b> on Home.</li>
       <li>Fill in the English, the Spanish, and a short definition.</li>
       <li>Check the domain is right, then tap <b>Save</b>.</li>
     </ol>
     <p>Everyone on the team sees it within a few seconds. You don't need to tell them.</p>` },
 
-  { id:'edit', section:'change', k:'edit change fix correct update wrong mistake', q:'How do I fix a word that is wrong?', a:`
-    <p>Tap the <b>pencil</b> on the term's card, make your change, tap <b>Save</b>.</p>
-    <p>Anyone on the team can fix anything. Nothing is locked.</p>` },
+  { id:'edit', section:'change', k:'edit change fix correct update wrong mistake pencil dots menu', q:'How do I fix a word that is wrong?', a:`
+    <p>Tap <b>⋯</b> on the term's card, then <b>Edit term</b>. Make your change and tap <b>Save</b>. On a computer, the pencil on the card does the same.</p>
+    <p>Anyone on the team can fix anything. Nothing is locked, and every change is kept in the term's history.</p>` },
 
   { id:'secondlook', section:'change', k:'second look warning popup box message appeared check suggestion false friend', q:'A box appeared after I saved. What is it?', a:`
-    <p>It's called <b>A second look</b>, and it only shows up when there might be something worth checking — a false friend, a word that already exists under another domain, or wording a patient wouldn't use.</p>
+    <p>It's called <b>A second look</b>. It only shows up when there might be something worth checking: a false friend, a word that already exists under another domain, or wording a patient wouldn't use.</p>
     <p><b>Your term is already saved.</b> The box cannot undo that and cannot change anything on its own.</p>
     <ul>
-      <li>Tap <b>Looks right</b> if you're happy — you're the interpreter, it isn't.</li>
+      <li>Tap <b>Looks right</b> if you're happy. You're the interpreter, it isn't.</li>
       <li>Tap <b>Edit the term</b> if it caught something real.</li>
     </ul>
     <p>Most of the time you'll never see it.</p>` },
@@ -15021,79 +15129,100 @@ const GUIDE_TOPICS = [
   { id:'history', section:'change', k:'history previous version old undo revert restore who changed', q:'Can I see what a word said before someone changed it?', a:`
     <p>Yes. The last ten versions of every term are kept.</p>
     <ol>
-      <li>Tap the <b>pencil</b> on the term.</li>
+      <li>Tap <b>⋯</b> on the term's card, then <b>Edit term</b>.</li>
       <li>Tap <b>View edit history</b>.</li>
       <li>You'll see who changed it and when. You can put an older version back.</li>
     </ol>` },
 
   { id:'deleted', section:'change', k:'delete deleted undo restore trash bin recover accident gone', q:'I deleted something by accident', a:`
     <p>It isn't gone.</p>
-    <p>Right after deleting, a small black bar appears at the bottom with an <b>Undo</b> button. That's the fastest way back.</p>
+    <p>Right after deleting, a small bar appears at the bottom with an <b>Undo</b> button. That's the fastest way back.</p>
     <p>If you missed it, open <b>More</b> → <b>Recently deleted</b>. Everything stays there for 30 days.</p>` },
 
   { id:'attach', section:'change', k:'attach attachment photo picture image pdf file document upload paperclip', q:'Can I attach a photo or a PDF to a word?', a:`
-    <p>Yes — a diagram, a consent form, a photo of a whiteboard.</p>
-    <p>Tap the <b>paperclip</b> on the term's card and pick the file. It appears on the card for everyone.</p>` },
+    <p>Yes. A diagram, a consent form, a photo of a whiteboard.</p>
+    <p>Tap <b>⋯</b> on the term's card, then <b>Attach photo or PDF</b>, and pick the file. It appears on the card for everyone.</p>` },
 
-  { id:'chat', section:'team', k:'chat message text team talk send', q:'How do I message the team?', a:`
+  { id:'domain', section:'change', k:'new domain create category list rename color pin icon edit domain specialty', q:'How do I start a new domain, or rename one?', a:`
+    <p><b>New domain:</b> tap <b>+ New</b> next to Medical Terminology on Home. Or, inside any domain, tap <b>⋯</b> in its colored banner, then <b>New domain</b>.</p>
+    <p><b>Rename it, or change its color or pin:</b> open the domain, tap <b>⋯</b> in its banner, then <b>Edit</b> and the domain's name.</p>` },
+
+  { id:'chat', section:'team', k:'chat message text team talk send photo', q:'How do I message the team?', a:`
     <p>Tap <b>Chat</b> at the bottom. Type and send, like any messaging app.</p>
-    <p>The <b>paperclip</b> sends a photo or a PDF.</p>` },
+    <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
 
-  { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person&rsquo;s attention?', a:`
+  { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`
     <ol>
       <li>Type <b>@</b> in the message box.</li>
-      <li>A list of names appears — tap the one you want.</li>
+      <li>A list of names appears. Tap the one you want.</li>
       <li>Finish your message and send.</li>
     </ol>
-    <p>Their name shows up highlighted, and they get a notification.</p>` },
+    <p>Their name shows up highlighted, and the message stands out for them when they open Chat.</p>` },
+
+  { id:'pin', section:'team', k:'pin pinned announcement important update top of chat keep notice', q:'How do I pin something important for everyone?', a:`
+    <p>In Team Chat, tap the <b>pin</b> at the top and write the update, like a new CE requirement or a changed protocol.</p>
+    <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Anyone can unpin one when it's no longer needed.</p>` },
 
   { id:'updates', section:'team', k:'bell notification updates activity feed what changed news', q:'What is the bell at the top of the screen?', a:`
-    <p>It tells you what your teammates have changed — terms added, terms edited, announcements posted.</p>
-    <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent updates</b>.</p>` },
+    <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
+    <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
 
-  { id:'docprep', section:'prep', k:'doctor prep prepare appointment unknown specialty research before', q:"I have an appointment with a doctor I don&rsquo;t know", a:`
-    <p>Use <b>Doctor Prep</b>, under <b>More</b>.</p>
-    <ol>
-      <li>Type the doctor's name.</li>
-      <li>Add the hospital if you know it — it makes the answer faster and more accurate.</li>
-      <li>Tap search and give it a moment.</li>
-    </ol>
-    <p>You get their specialty and a list of terminology likely to come up, grouped from the everyday words through to drug names and the false friends that catch people out.</p>` },
-
-  { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
-    <p>A shared list of every doctor your team has looked up, under <b>More</b>.</p>
-    <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
-
-  { id:'translate', section:'prep', k:'translate translation ai lookup unknown word', q:'What is Translate, and when should I not use it?', a:`
-    <p>It looks in your team's glossary first. If nothing's there, it gives you a breakdown: the clinical wording, a plain-language version for a patient, notes on how formal it sounds, how it changes by country, and a warning if it's a false friend.</p>
-    <p><b>Use it to prepare and to build the glossary.</b> It is a reference, not an interpreter, and it is never a substitute for you in the room.</p>` },
-
-  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification', q:'How do I practice for the CoreCHI exam?', a:`
+  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
-  { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill', q:'What is Term Review?', a:`
+  { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms', q:'What is Term Review?', a:`
     <p>Flashcards built from your own glossary, under <b>More</b>.</p>
-    <p>You see the English, try to remember the Spanish and the definition, then tap to check and tell it honestly whether you got it. Words you miss come back soon; words you know come back weeks later. Fifteen at a time.</p>` },
+    <p>You see the English, try to remember the Spanish and the definition, then tap to check and tell it honestly whether you got it. Words you miss come back soon. Words you know come back weeks later. Fifteen at a time.</p>
+    <p>Short on time? Ask Dr. Smiley to <i>practice five terms I'm still learning</i>. He opens Term Review with just those.</p>` },
+
+  { id:'warmup', section:'study', k:'warm up warmup daily question streak today home card one question', q:'What is the warm-up on Home?', a:`
+    <p>One quick question a day. Tap the <b>Warm-up</b> card on Home and pick an answer. Answer on the days you work and the dots fill in, so you can see your streak.</p>
+    <p>When the question is about a glossary term, your answer goes into your Term Review too.</p>` },
+
+  { id:'rank', section:'study', k:'level rank points dr smiley resident career team points score progress outfit hat', q:'Why does Dr. Smiley have a level?', a:`
+    <p>That's the <b>team's</b> score, not yours. Every term anyone adds and every practice question anyone answers earns a point, and as the points add up Dr. Smiley moves up a rank and gets something new to wear, like a scrub cap or a head mirror.</p>
+    <p>Tap his card on Home to see the ranks and who helped this week.</p>` },
+
+  { id:'ethics', section:'study', k:'code of ethics ncihc cchi principles confidentiality impartiality standards professional conduct', q:'Where is the Code of Ethics?', a:`
+    <p><b>More</b> → <b>Code of Ethics</b>. It has the key principles and the conduct that's not allowed, in plain words, most with an example of what it looks like in practice.</p>
+    <p>These are short summaries based on the NCIHC and CCHI codes, not the official text.</p>` },
+
+  { id:'events', section:'study', k:'training events ce continuing education credits webinar conference hours', q:'Where do I find CE and training opportunities?', a:`
+    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
+
+  { id:'body', section:'study', k:'3d body anatomy model organ muscle bone heart rotate zoom human atlas', q:'What is 3D Body?', a:`
+    <p>A model of the human body you can turn and zoom. Tap any part to see its name. It's handy when a doctor points to something you can't picture.</p>
+    <p>Open it from Home or <b>More</b> → <b>3D Body</b>. The first time, it downloads about 33&nbsp;MB, so Wi-Fi is best. It's quicker after that.</p>` },
 
   { id:'offline', section:'trouble', k:'offline no signal wifi data connection basement elevator internet down airplane', q:'Can I use it where there is no signal?', a:`
-    <p><b>Looking things up — yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
-    <p><b>Adding or changing something — also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
-    <p>The one thing that needs a connection is anything that asks the internet a question: Translate and Doctor Prep.</p>` },
+    <p><b>Looking things up: yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
+    <p><b>Adding or changing something: also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
+    <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online.</p>
+    <p>Translate, Doctor Prep and Look up need a connection.</p>` },
 
-  { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says &ldquo;Offline &mdash; 1 change waiting&rdquo;', a:`
+  { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline — 1 change waiting”', a:`
     <p>That's the app being honest with you. Your change is <b>saved on this phone</b> and is waiting for a connection.</p>
     <p>You don't need to do anything. When you're back on wifi or data it sends by itself and the message disappears.</p>
-    <p><b>Please don't retype it</b> — you'd end up with two copies.</p>` },
+    <p><b>Please don't retype it.</b> You'd end up with two copies.</p>` },
 
-  { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version', q:'The app looks out of date', a:`
+  { id:'unsent', section:'trouble', k:'didn’t sync didnt sync unsent failed error red warning storage full queue full review changes', q:'It says a change “didn’t sync”', a:`
+    <p>The team's database refused it, so it's being kept on this phone instead of lost.</p>
+    <ol>
+      <li>Tap the message at the top of the screen.</li>
+      <li>You'll see each change that's waiting, with what it was. Tap <b>Send again</b>, <b>Copy</b> to keep what you wrote, or <b>Discard</b>.</li>
+    </ol>
+    <p>If it says the phone's storage is full, or the browser won't let the Hub save, free some space or stop using a private window. Until then, new changes can't be kept offline.</p>` },
+
+  { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
     <p>Close it completely and open it again.</p>
-    <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>` },
+    <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>
+    <p>To see which version you have, open <b>More</b> and scroll to the very bottom. The build number is there.</p>` },
 
   { id:'noname', section:'trouble', k:'name missing anonymous someone unknown attribution blank', q:'My name is not showing on my edits', a:`
     <p>The app doesn't know who you are yet on this phone.</p>
-    <p>Tap the round person button in the <b>bottom-left corner</b>, type your name, tap <b>Save</b>. Edits from now on will carry it.</p>` },
+    <p>Tap the round button in the <b>top-right corner</b>, type your name and tap <b>Save</b>. Edits from now on will carry it.</p>` },
 
   { id:'print', section:'out', k:'print pdf paper printout export sheet handout', q:'How do I print a list, or save it as a PDF?', a:`
     <p>Open the domain you want, tap <b>⋯</b> in its colored banner, then <b>Export as PDF</b>. You get a clean printable sheet with none of the app's buttons on it.</p>
@@ -15109,12 +15238,12 @@ const GUIDE_TOPICS = [
 
   { id:'privacy', section:'rule', k:'hipaa privacy patient confidential phi private rules safety mrn', q:'What must never go in this app?', a:`
     <p><b>Anything that identifies a patient.</b> No names, no dates of birth, no medical record numbers, no room numbers tied to a person.</p>
-    <p>This applies everywhere — terms, definitions, notes, chat messages, doctor notes. All of it.</p>
+    <p>This applies everywhere: terms, definitions, notes, chat messages, doctor notes and questions to Dr. Smiley. If a question looks like it has patient details, Ask stops and warns you before sending, and Dr. Smiley won't remember them.</p>
     <p>Describe the situation if you need to. Never the person.</p>` },
 ];
 
 // Shown first, for someone opening the app for the very first time.
-const GUIDE_FIRST_STEPS = ['name', 'install', 'around', 'search'];
+const GUIDE_FIRST_STEPS = ['name', 'install', 'around', 'askwhat'];
 
 const DOMAIN_ICONS = {
   bag: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="10" width="24" height="17" rx="3" fill="#D69A54" stroke="#A96F22" stroke-width="1.2"/><path d="M11 10V7.6A2.6 2.6 0 0 1 13.6 5h4.8A2.6 2.6 0 0 1 21 7.6V10" fill="none" stroke="#A96F22" stroke-width="1.3"/><rect x="12.5" y="14.5" width="7" height="8" rx="1.2" fill="#FFFDF8" stroke="#A96F22" stroke-width=".9"/><path d="M15 16h2v1.7h1.7v2H17v1.7h-2v-1.7h-1.7v-2H15Z" fill="#E83A46"/></svg>',
@@ -18982,8 +19111,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1440';
-const BUILD_TIME = '2026-10-06 12:22 UTC';
+const BUILD_ID = 'b1007.1755';
+const BUILD_TIME = '2026-10-07 17:55 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
