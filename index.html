@@ -9748,7 +9748,7 @@ function doctorDirectoryKey(name){
    when the connection or the app comes back. Opening the screen before the
    database has started waits for it instead of giving up. */
 const DOCTOR_DIR_CACHE_KEY = 'ih_doctorDirectory';
-let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '';
+let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '', doctorDirRetries = 0;
 function doctorDirFromCache(){
   try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c : null; }catch(e){ return null; }
 }
@@ -9772,7 +9772,11 @@ async function loadDoctorDirectory(){
     console.error('Could not load doctor directory', err);
     DOCTOR_DIR_STATE = 'failed';
     DOCTOR_DIR_ERROR = (err && err.code) || 'unknown';
+    // The first try on hospital Wi-Fi often fails for a moment: again in
+    // 6 s, then 20 s, then only when the connection or the app comes back.
+    if(doctorDirRetries < 2) setTimeout(() => { if(DOCTOR_DIR_STATE === 'failed') loadDoctorDirectory(); }, [6000, 20000][doctorDirRetries++]);
   }
+  if(DOCTOR_DIR_STATE === 'ok') doctorDirRetries = 0;
   scheduleRender();
 }
 function doctorDirProblem(){
@@ -18148,7 +18152,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.0922';
+const BUILD_ID = 'b1007.0928';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -19133,7 +19137,7 @@ function renderDoctorDirectory(q){
     if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE !== 'ok')
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Loading the doctors&hellip;</div>`;
     const msg = DOCTOR_DIRECTORY.length===0
-      ? `${ICON_GRID} No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
+      ? `No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
       : 'No doctors match your search.';
     return `<div class="empty"><div class="glyph">${ICON_GRID}</div>${msg}</div>`;
   }
