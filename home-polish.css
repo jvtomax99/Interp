@@ -1069,3 +1069,15 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
   #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card{min-height:116px;}
   #content.is-home .home-sec-head h3{font-size:22px;}
 }
+
+/* Dr. Smiley breathes: a slow rise and fall and a slower drift, so he is
+   never quite still between expressions. On translate and rotate, not
+   transform, so it stacks on his leans (drFacePlay animates transform) and
+   on the press shrink instead of replacing them. Off with reduced motion. */
+@keyframes dsBreathe{0%,100%{translate:0 0;}50%{translate:0 -1.4%;}}
+@keyframes dsDrift{0%,100%{rotate:0deg;}30%{rotate:.7deg;}65%{rotate:-.5deg;}}
+@media (prefers-reduced-motion:no-preference){
+  .home-wave-pin,.dock-smiley-bob{animation:dsBreathe 3.8s ease-in-out infinite,dsDrift 11s ease-in-out infinite;}
+}
+/* Holding him to pet him must not bring up the phone's copy/save menu. */
+.home-wave-icon,.dock-smiley{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}

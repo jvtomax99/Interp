@@ -9837,7 +9837,7 @@ function startChatListener(){
         // No notification for your own message, and none while you're
         // already looking at the chat — the badge is enough there.
         if(mine) return;
-        smileyReact('wave');
+        smileyReact('message');
         if(document.visibilityState === 'visible' && activeCategory === 'chat') return;
         showChatNotification(m);
       });
@@ -12830,7 +12830,34 @@ const DR_FACE_SEQ = {
   // Looking around: one side, the other, back.
   around: { f: [['rest', 120], ['lookL', 760], ['rest', 140], ['lookR', 760], ['rest', 120], ['blink1', 45], ['blink2', 40], ['shut', 55], ['blink2', 45], ['blink1', 50], ['rest', 300]],
             head: [[0, 0, 0], [200, -1.5, 0], [880, -1.5, 0], [1100, 1.5, 0], [1780, 1.5, 0], [2000, 0, 0], [2435, 0, 0]] },
+  // He notices something you did: his eyes go to that side for a moment.
+  peekL: { f: [['lookL', 650], ['rest', 200]], head: [[0, 0, 0], [120, -1.2, 0], [650, -1.2, 0], [850, 0, 0]] },
+  peekR: { f: [['lookR', 650], ['rest', 200]], head: [[0, 0, 0], [120, 1.2, 0], [650, 1.2, 0], [850, 0, 0]] },
+  // A new chat message: a look to it, then a smile.
+  notice: { f: [['rest', 80], ['lookR', 520], ['rest', 90], ['smile1', 70], ['smile2', 70], ['smile', 800], ['smile2', 90], ['smile1', 100], ['rest', 300]],
+            head: [[0, 0, 0], [140, 1.4, 0], [600, 1.4, 0], [760, 0, -.6], [1560, 0, -.5], [1820, 0, 0], [2120, 0, 0]] },
+  // Pressed and held: a giggle and hearts.
+  pet:   { f: [['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 420], ['smile2', 80], ['smile1', 90], ['rest', 320]],
+           head: [[0, 0, 0], [120, -1.4, .3], [230, 1.4, .3], [340, -1.4, .3], [450, 1.4, .3], [560, -1, .2], [670, .8, .1], [1100, 0, -.4], [1530, 0, 0], [1850, 0, 0]], fx: 'hearts', fxAt: 120 },
 };
+/* Talking, while Ask the Hub's answer appears: his mouth opens and closes
+   through the smile frames in an uneven rhythm, with small nods. */
+function drFaceTalk(svg, head, ms, done){
+  const mouths = ['smile1', 'smile2', 'smile', 'smile2', 'smile1', 'rest'];
+  const f = [], h = [[0, 0, 0]];
+  let t = 0, prev = '';
+  while(t < ms){
+    let m = mouths[Math.floor(Math.random() * mouths.length)];
+    if(m === prev) m = m === 'rest' ? 'smile2' : 'rest';
+    const d = 80 + Math.round(Math.random() * 90);
+    f.push([m, d]); t += d; prev = m;
+    if(Math.random() < .12){ f.push(['rest', 160]); t += 160; }
+  }
+  f.push(['smile1', 90], ['rest', 260]); t += 350;
+  for(let k = 420; k < t - 400; k += 520 + Math.round(Math.random() * 300)) h.push([k, (Math.random() - .5) * 1.6, .5], [k + 180, 0, 0]);
+  h.push([t, 0, 0]);
+  drFacePlay(svg, { f, head: h }, head, done);
+}
 /* Small effects that float off his head for a moment: hearts, a heart, music
    notes, sparkles, a question mark. They go in the element that holds his
    lean (his pin on Home, the dock button), so they sit beside him without
@@ -12866,7 +12893,7 @@ function drFaceBusy(svg){ return drFaceRuns.has(svg); }
 function drFacePlay(svg, name, head, done){
   if(name === 'glance') name = Math.random() < .5 ? 'glanceL' : 'glanceR';
   const prev = svg && drFaceRuns.get(svg); if(prev) prev.cancel();
-  const seq = DR_FACE_SEQ[name];
+  const seq = typeof name === 'object' ? name : DR_FACE_SEQ[name];
   if(!svg || !seq){ if(done) done(); return; }
   let i = 0, timer = 0, anim = null, alive = true;
   const total = seq.f.reduce((t, s) => t + s[1], 0);
@@ -12891,7 +12918,10 @@ function drFacePlay(svg, name, head, done){
    every 5-8 s one of his expressions -- a smile, a laugh, a giggle, a nod, a
    think, heart eyes, a proud look, a hum, a look around, a wink or a blown
    kiss -- the first a second or so after he appears, none of his last three
-   again, at most one wink or kiss a minute. (Jose: he took too long.) Nothing moves between them. Nothing at all with
+   again, at most one wink or kiss a minute. (Jose: he took too long.) In the
+   morning he hums and smiles more; late at night he dozes now and then.
+   He pays attention: a tap on the screen to one side of him gets a glance
+   that way (at most every 4 s; opts.visible() says he can be seen). Nothing moves between them. Nothing at all with
    reduced motion, while the page is hidden, or while canPlay() says no.
    opts: canPlay(), quietMs (settle after this long without a touch, until the
    next one), dozeMs (doze once after this long), onAct(kind), expressions
@@ -12922,7 +12952,8 @@ function drFaceIdle(svg, head, opts){
     let kind = 'blink';
     if(opts.dozeMs && quiet > opts.dozeMs && last !== 'doze') kind = 'doze';
     else if(opts.expressions !== false && now - lastExpr > 2500 && Math.random() < .8){
-      const pool = [['smile', .16], ['laugh', .1], ['giggle', .1], ['nod', .1], ['think', .1], ['love', .09], ['proud', .08], ['sing', .08], ['around', .07], ['wink', .07], ['kiss', .05]]
+      const hour = new Date().getHours(), morning = hour >= 5 && hour < 11, late = hour >= 21 || hour < 5;
+      const pool = [['smile', morning ? .22 : .16], ['laugh', .1], ['giggle', .1], ['nod', .1], ['think', .1], ['love', .09], ['proud', .08], ['sing', morning ? .16 : .08], ['around', .07], ['wink', .07], ['kiss', .05], ...(late ? [['doze', .1]] : [])]
         .filter(([k]) => !recent.includes(k) && !((k === 'wink' || k === 'kiss') && now - lastWink < 60000));
       let r = Math.random() * pool.reduce((t, p) => t + p[1], 0);
       for(const [k, w] of pool){ if((r -= w) <= 0){ kind = k; break; } }
@@ -12936,7 +12967,21 @@ function drFaceIdle(svg, head, opts){
     }
     play(kind);
   }
-  const wake = () => { touched = performance.now(); if(settled && on){ settled = false; arm(1200); } };
+  let lastAttend = -1e9;
+  function attend(e){
+    if(!on || opts.expressions === false || e.type !== 'pointerdown' || reduceQ.matches || document.hidden) return;
+    const now = performance.now();
+    if(now - lastAttend < 4000 || drFaceBusy(svg) || !svg.isConnected) return;
+    if(opts.visible ? !opts.visible() : (opts.canPlay && !opts.canPlay())) return;
+    const r = svg.getBoundingClientRect();
+    if(!r.width || (head && head.parentElement && head.parentElement.contains(e.target))) return;
+    const dx = e.clientX - (r.left + r.width / 2);
+    if(Math.abs(dx) < 30) return;
+    lastAttend = now;
+    clearTimeout(timer); timer = 0;
+    drFacePlay(svg, dx < 0 ? 'peekL' : 'peekR', head, () => arm());
+  }
+  const wake = e => { touched = performance.now(); attend(e); if(settled && on){ settled = false; arm(1200); } };
   ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.addEventListener(t, wake, { passive: true, capture: true }));
   const api = {
     // An expression right now (a reaction), then back to the usual rhythm.
@@ -18014,7 +18059,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.0800';
+const BUILD_ID = 'b1007.0832';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -22228,11 +22273,18 @@ function renderAskMessages(scrollToEnd){
     face.classList.toggle('is-thinking', ASK.busy);
     const last = ASK.turns[ASK.turns.length - 1];
     const happy = !ASK.busy && last && last.status === 'done' && last.answer.fromHub;
-    // His smile, once, when an answer from the Hub lands.
+    // When an answer lands he talks it through (longer answers, longer
+    // talk), then smiles if it came from the Hub; a miss gets a think.
     const svg = face.querySelector('svg');
-    if(happy && face.dataset.smiled !== String(ASK.turns.length)){
-      face.dataset.smiled = String(ASK.turns.length);
-      drFacePlay(svg, 'smile', svg);
+    if(!ASK.busy && last && last.doneAt && Date.now() - last.doneAt < 4000 && face.dataset.talked !== last.id){
+      face.dataset.talked = last.id;
+      if(last.status === 'done'){
+        const words = [last.answer.headline, last.answer.say].filter(Boolean).join(' ').split(/\s+/).length;
+        drFaceTalk(svg, svg, Math.min(3600, 900 + words * 110), () => { if(happy) drFacePlay(svg, 'smile', svg); });
+      }else drFacePlay(svg, 'think', svg);
+    }else if(ASK.busy && face.dataset.nodded !== String(ASK.turns.length)){
+      face.dataset.nodded = String(ASK.turns.length);
+      drFacePlay(svg, 'nod', svg);
     }
   }
   askFaceSync();
@@ -22298,6 +22350,7 @@ async function submitAsk(preset, force){
     turn.status = 'error';
     turn.error = navigator.onLine === false ? "You're offline. Ask the Hub needs a connection." : "Couldn't reach the Hub. Try again.";
   }
+  turn.doneAt = Date.now();
   ASK.busy = false;
   if(activeCategory === 'ask') renderAskMessages(true);
 }
@@ -22576,14 +22629,40 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden) apptK
 // Whichever Dr. Smiley is on screen reacts: on Home the greeting smiley
 // (one of his own acts), elsewhere the one on the tab bar. Quiet during an
 // appointment.
-const SMILEY_HOME_ACT = { hop: 'bouncy', hearts: 'hearts', wave: 'hum', cheer: 'party', think: 'gleam' };
+const SMILEY_HOME_ACT = { hop: 'bouncy', hearts: 'hearts', wave: 'hum', cheer: 'party', think: 'gleam', message: 'notice' };
 function smileyReact(kind){
   if(apptActive() || document.hidden) return;
   // The dock's Dr. Smiley when he's showing (on Home too, once the greeting
-  // has scrolled away), otherwise the greeting's.
-  if(smileyFollows() && smileyRider.react(kind === 'think' ? 'wave' : kind)) return;
+  // has scrolled away), otherwise the greeting's. A wrong warm-up answer is
+  // 'think' in both (it used to be a smile in the dock).
+  if(smileyFollows() && smileyRider.react(kind)) return;
+  if(kind === 'hello') return;   // on Home the hello wave already greets you
   if(activeCategory === 'home' && window.homeSmileyAct) window.homeSmileyAct(SMILEY_HOME_ACT[kind] || 'bouncy');
 }
+
+// Back in the app after a minute or more away: he greets you with a nod.
+let smileyAwayAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){ smileyAwayAt = Date.now(); return; }
+  if(smileyAwayAt && Date.now() - smileyAwayAt > 60000) setTimeout(() => smileyReact('hello'), 700);
+  smileyAwayAt = 0;
+});
+/* Press and hold on Dr. Smiley to pet him. Returns a function the click
+   handler asks: true once, right after a hold, so that click is swallowed and
+   Ask doesn't open. Moving the finger cancels it (that's a scroll). */
+function smileyPettable(el, onPet){
+  let timer = 0, x = 0, y = 0, held = false;
+  const clear = () => { clearTimeout(timer); timer = 0; };
+  el.addEventListener('pointerdown', e => {
+    held = false; x = e.clientX; y = e.clientY; clear();
+    timer = setTimeout(() => { timer = 0; held = true; onPet(); }, 450);
+  });
+  el.addEventListener('pointermove', e => { if(timer && Math.hypot(e.clientX - x, e.clientY - y) > 10) clear(); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => el.addEventListener(t, clear));
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  return () => { const was = held; held = false; return was; };
+}
+window.smileyPettable = smileyPettable;
 
 /* ---------- Daily warm-up ----------
    One quick question a day on Home (card styled in home-polish.css): the
@@ -23224,7 +23303,10 @@ const smileyRider = (() => {
     btn.innerHTML = `<span class="dock-smiley-bob"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span></span><span class="dock-smiley-tag" aria-hidden="true">Ask</span>`
       + '<span class="dock-smiley-z" aria-hidden="true">z</span><span class="dock-smiley-z" aria-hidden="true">z</span>';
     face = btn.querySelector('.ask-face'); bob = btn.querySelector('.dock-smiley-bob');
-    btn.addEventListener('click', () => {
+    // Press and hold to pet him (a giggle and hearts); a tap opens Ask.
+    const petted = smileyPettable(btn, () => emote('pet'));
+    btn.addEventListener('click', e => {
+      if(petted()){ e.preventDefault(); return; }
       btn.classList.add('is-pressed');
       setTimeout(() => { btn.classList.remove('is-pressed'); openAskHub(); }, 140);
     });
@@ -23314,6 +23396,7 @@ const smileyRider = (() => {
     idle = drFaceIdle(svgOf(), bob, {
       first: 1500, quietMs: QUIET, dozeMs: DOZE_AFTER,
       canPlay: () => shown() && performance.now() >= busyUntil,
+      visible: () => shown(),
       onAct: kind => {
         if(kind !== 'doze') return;
         btn.classList.remove('is-dozing'); void btn.offsetWidth; btn.classList.add('is-dozing');
@@ -23324,7 +23407,7 @@ const smileyRider = (() => {
   function idleStopDock(){ if(idle){ idle.stop(); idle = null; } }
   // One expression now, by its old emote name. False if he can't show it.
   const EMOTE_FACE = { glance: 'glance', wink: 'wink', sway: 'sing', hop: 'proud', love: 'love', smile: 'smile', giggle: 'giggle', laugh: 'laugh', nod: 'nod', blink: 'blink', doze: 'doze',
-    think: 'think', proud: 'proud', sing: 'sing', kiss: 'kiss', around: 'around' };
+    think: 'think', proud: 'proud', sing: 'sing', kiss: 'kiss', around: 'around', notice: 'notice', pet: 'pet' };
   function emote(kind){
     const f = EMOTE_FACE[kind];
     if(!btn || reduce.matches || !f) return false;
@@ -23343,7 +23426,7 @@ const smileyRider = (() => {
   window.addEventListener('resize', () => { if(btn) requestAnimationFrame(sync); });
   document.addEventListener('visibilitychange', () => { if(!document.hidden && btn) sync(); });
   // A short reaction in the dock. False if he isn't showing.
-  const REACT_FACE = { hop: 'proud', wave: 'smile', hearts: 'love', cheer: 'laugh', think: 'think', nod: 'nod' };
+  const REACT_FACE = { hop: 'proud', wave: 'smile', hearts: 'love', cheer: 'laugh', think: 'think', nod: 'nod', message: 'notice', hello: 'nod' };
   function react(kind){
     if(!shown()) return false;
     const f = REACT_FACE[kind] || 'smile';

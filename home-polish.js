@@ -227,7 +227,7 @@
   const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);};
   // index.html's reactions (a term added, a quiz finished, the warm-up...) and
   // a new team rank ask for one of these by their old names.
-  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',giggle:'giggle',party:'laugh',nod:'nod',kiss:'kiss'};
+  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',giggle:'giggle',party:'laugh',nod:'nod',kiss:'kiss',notice:'notice',pet:'pet'};
   let idleStop=()=>{},idleRunning=false,forcedAct=null,idleCtl=null;
   const actNow=name=>{const f=ACT_FACE[name]||'smile';if(idleCtl){idleCtl.act(f);forcedAct=null;}else forcedAct=name;};
   window.homeSmileyCelebrate=()=>actNow('party');
@@ -761,7 +761,11 @@
     // Tapping the smiley opens Ask the Hub (index.html, window.openAskHub).
     // The hello still plays by itself when the app opens; if Ask the Hub is
     // missing, a tap replays the hello as it always did.
-    wave.addEventListener('click',()=>{
+    // Press and hold to pet him (index.html, smileyPettable): a giggle and
+    // hearts, and that press doesn't open Ask.
+    const petted=typeof window.smileyPettable==='function'?window.smileyPettable(wave,()=>actNow('pet')):()=>false;
+    wave.addEventListener('click',e=>{
+      if(petted()){e.preventDefault();return;}
       if(typeof window.openAskHub!=='function'){play();return;}
       wave.classList.add('home-wave-tap');
       setTimeout(()=>{wave.classList.remove('home-wave-tap');window.openAskHub();},reduced.matches?0:200);
