@@ -120,6 +120,18 @@ no error on screen. So when you add something:
   name. Never sync them to Firestore, never mix them into `hub-lessons`
   (approved team knowledge), never add a free-text field to them (no patient
   details), and never present team points as one person's progress.
+- **A conversation with Dr. Smiley is not a preference.** What "that" or
+  "the previous term" means, a language asked for with "Now in Spanish", the
+  briefing being talked about and the interpreter's own corrections live in
+  `ASK.convo` (in memory, bounded, cleared by New conversation), never in
+  `ih_smileyMemory` and never in Firestore. Only an explicit tap saves a
+  preference ("Use Spanish in every conversation"), and only an owner-approved
+  `hub-lessons` note is team knowledge: a correction is used for the rest of
+  the conversation, labelled "not checked", and never verified or a source.
+  A follow-up that can mean two things asks one question with a button per
+  option; one that refers to nothing says so. Never resolve a reference to an
+  entry the phone didn't send (`api/ask.js` drops such ids), and nothing from
+  a stopped request may change the screen or the record.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.

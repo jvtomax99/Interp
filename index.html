@@ -5524,6 +5524,30 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-dots span{ width:7px; height:7px; border-radius:50%; background:var(--ink-faint); animation:askBlink 1s infinite; }
 .ask-dots span:nth-child(2){ animation-delay:.15s; } .ask-dots span:nth-child(3){ animation-delay:.3s; }
 @keyframes askBlink{ 0%,100%{ opacity:.3; } 50%{ opacity:1; } }
+/* While an answer is on its way: the dots, and a Stop you can read (the send
+   button turns into one too). */
+.ask-wait{ align-self:flex-start; display:flex; align-items:center; gap:9px; }
+.ask-stop{ display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 17px 0 13px; border-radius:999px; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink); font:600 14px var(--sans); cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.ask-stop svg{ width:18px; height:18px; flex:none; }
+.ask-stop svg rect{ fill:currentColor; }
+.ask-stop:active, .ask-stop.is-pressed{ transform:scale(.97); }
+/* Ask's header: What I remember, and New conversation once there is one. */
+.ask-head{ flex-wrap:wrap; }
+.ask-head-acts{ flex:1 0 100%; display:flex; flex-wrap:wrap; gap:6px; margin-top:-4px; }
+.ask-head-acts .ask-mem-link{ margin-top:0; }
+.ask-new{ display:inline-flex; align-items:center; gap:6px; }
+.ask-new[hidden]{ display:none; }
+.ask-new svg{ width:16px; height:16px; flex:none; }
+/* Above the box: what "that" means now, and a language for this conversation only. */
+.ask-convo{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; margin:0 0 9px; min-width:0; font-size:13px; color:var(--ink-soft); }
+.ask-convo-topic{ flex:1 1 140px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-left:2px; }
+.ask-convo-topic small{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+.ask-convo-topic b{ color:var(--ink); font-weight:650; }
+.ask-convo-lang{ display:inline-flex; align-items:center; padding-left:13px; border-radius:999px; background:var(--accent-soft); color:var(--ink); font-weight:600; }
+.ask-convo-lang button{ width:44px; height:44px; border:0; border-radius:999px; background:none; color:var(--ink-soft); font-size:15px; cursor:pointer; }
+.ask-stop:focus-visible, .ask-convo-lang button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 .ask-card{ background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:13px; display:flex; flex-direction:column; gap:9px;
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
 .ask-card p{ margin:0; }
@@ -5597,7 +5621,7 @@ html[data-theme="dark"] .ask-do-btn.is-main{ background:#AFC0FF; border-color:#A
 .ask-ctx em{ font-style:normal; color:var(--ink-soft); }
 .ask-ctx.is-gone{ background:var(--danger-soft); color:var(--danger); }
 .ask-ctx button{ flex:none; width:44px; height:44px; border:0; border-radius:var(--r-sm); background:none; color:var(--ink-soft); font-size:16px; cursor:pointer; }
-@media (prefers-reduced-motion: reduce){ .ask-do-btn:active, .ask-do-btn.is-pressed{ transform:none; } }
+@media (prefers-reduced-motion: reduce){ .ask-do-btn:active, .ask-do-btn.is-pressed, .ask-stop:active, .ask-stop.is-pressed{ transform:none; } }
 .ask-src{ display:flex; flex-wrap:wrap; gap:6px; }
 .ask-src button{ min-height:32px; padding:4px 11px; border-radius:999px; border:0; background:var(--accent-soft); color:var(--ink);
   font:600 12px var(--sans); cursor:pointer; text-align:left; }
@@ -15411,9 +15435,21 @@ const GUIDE_TOPICS = [
     </ol>
     <p>You get the glossary entry, a plain way to say it to a patient, and where the entry came from.</p>` },
 
+  { id:'askfollow', section:'ask', k:'follow up follow-up that it previous simpler easier spanish english again difference compare go back prep conversation new start over stop cancel', q:'Can I ask a follow-up, or start over?', a:`
+    <p>Yes. Talk to him the way you would to a teammate:</p>
+    <ul>
+      <li><i>Make it simpler.</i> or <i>Now in Spanish.</i> He redoes his last answer.</li>
+      <li><i>What's the difference between that and the previous term?</i> He keeps track of the terms you've talked about.</li>
+      <li><i>Go back to my appointment prep.</i> He offers the briefing you were on.</li>
+    </ul>
+    <p>Above the box he shows what <b>that</b> means right now. If it could mean two things, he asks which one, with a button for each. If there's nothing to go on, he says so instead of guessing.</p>
+    <p><b>Now in Spanish</b> lasts for this conversation only. To keep it, tap <b>Use Spanish in every conversation</b>.</p>
+    <p><b>Stop</b>, next to the dots while he works, cancels a question. <b>New conversation</b> at the top starts fresh; what you asked him to remember stays.</p>` },
+
   { id:'askcorrect', section:'ask', k:'wrong answer incorrect correct this fix dr smiley teach improve team note approve', q:'Dr. Smiley got something wrong', a:`
     <p>Tap <b>Correct this</b> under the answer and write what works better. For example: <i>Many of our patients understand “azúcar en la sangre” better. Say that first.</i></p>
     <p>Your note goes to Jose. Nothing changes until he approves it. Once he does, it becomes a <b>team note</b> that Dr. Smiley uses for everyone, with your name on it.</p>
+    <p>You can also just tell him in the conversation: <i>No, here we say “eco”.</i> He uses it for the rest of the conversation and labels those answers <b>Your correction · not checked</b>. It reaches the team only if you tap <b>Send to Jose for review</b> and he approves it.</p>
     <p>If the answer was useful, tap <b>Helpful</b>.</p>` },
 
   { id:'askremember', section:'ask', k:'remember preferences settings spanish english brief short detailed answers focus forget memory what do you remember', q:'Can he remember how I like my answers?', a:`
@@ -19499,7 +19535,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ds-mode-seg button, .mem-opts button';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -19527,7 +19563,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.2132';
+const BUILD_ID = 'b1007.2226';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -23536,7 +23572,8 @@ const ASK_STOP = new Set(('the a an and or of to in on for is are was be how do 
   + 'decir dice digo significa palabra término patient paciente').split(' ').map(w => foldText(w)));
 
 const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {},
-  from: 'home', selected: null };   // the screen Ask was opened from; a glossary term picked to talk about ({ cat, term })
+  from: 'home', selected: null,    // the screen Ask was opened from; a glossary term picked to talk about ({ cat, term })
+  convo: askConvoEmpty(), gen: 0 }; // this conversation's record (askConvoEmpty); gen counts new conversations
 let askFaceSeq = 0;
 
 // The Hub's smiley (the lock screen's face), with its own gradient ids so
@@ -23618,7 +23655,7 @@ function askRetrieve(question){
     s += tokens.filter(t => lt.has(t)).length * 2;
     return { l, s };
   }).filter(x => x.s >= 4).sort((a, b) => b.s - a.s).slice(0, ASK_MAX_LESSONS).map(x => x.l);
-  return { picked, lessons };
+  return { picked, lessons, top: scored.slice(0, 5) };
 }
 
 function askLooksLikePatientInfo(q){
@@ -23657,14 +23694,16 @@ function renderAsk(){
     <div class="ask-head">
       <div class="ask-head-text"><h1>Ask the Hub</h1>
         <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p>
-        <button type="button" class="ask-mem-link" onclick="openMemory()">What I remember${(n => n ? ` · ${n}` : '')(Object.keys(drMemGet()).length)}</button></div>
+</div>
       <span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>
+      <div class="ask-head-acts"><button type="button" class="ask-mem-link" onclick="openMemory()">What I remember${(n => n ? ` · ${n}` : '')(Object.keys(drMemGet()).length)}</button>
+        <button type="button" class="ask-mem-link ask-new" id="askNew" onclick="askNewConversation()"${askHasConversation() ? '' : ' hidden'}>${ICON_ASK_NEW}New conversation</button></div>
     </div>
     <div id="askChrome">${askChromeHtml()}</div>
     <div class="hipaa-notice-inline">${ICON_SHIELD}<span>No patient names, dates of birth or record numbers here.</span></div>
     <div class="chat-panel ask-panel">
       <div class="chat-messages ask-messages" id="askMessages" aria-live="polite">${askMessagesHtml()}</div>
-      <div class="chat-input-wrap">${askContextChipHtml()}<div class="chat-input-row">
+      <div class="chat-input-wrap">${askContextChipHtml()}${askConvoHtml()}<div class="chat-input-row">
         <label for="askInput" class="sr-only">Ask a question</label>
         <input id="askInput" type="text" enterkeyhint="send" autocomplete="off" maxlength="500"
           placeholder="Ask about a term or a doctor" value="${escapeAttr(ASK.draft)}"
@@ -23691,8 +23730,9 @@ function askMessagesHtml(){
     const ex = ['How do I explain “ejection fraction”?', '“Embarazada” or “embarrassed”?'];
     return `<div class="ask-hello">
       <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
-      <p class="ask-hello-title">Hi${whoAmI() ? ' ' + escapeHtml(whoAmI().split(/\s+/)[0]) : ''}! What do you need?</p>
-      <p>I'm Dr. Smiley, your interpreter assistant. I answer from the Hub and can open your briefings and practice.</p>
+      ${ASK.fresh ? `<p class="ask-hello-title">New conversation. What do you need?</p>
+      <p>What you asked me to remember still applies.</p>` : `<p class="ask-hello-title">Hi${whoAmI() ? ' ' + escapeHtml(whoAmI().split(/\s+/)[0]) : ''}! What do you need?</p>
+      <p>I'm Dr. Smiley, your interpreter assistant. I answer from the Hub and can open your briefings and practice.</p>`}
       ${askNextHtml()}
       <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${askSelectedTerm() ? `<button type="button" class="ask-chip" onclick="submitAsk('Explain this term.')">Explain ${escapeHtml(askSelectedTerm().term.en)}</button>` : ''}<button type="button" class="ask-chip" onclick="submitAsk('Help me practice five terms I’m still learning.')">Practice 5 terms I’m still learning</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
     </div>`;
@@ -23707,8 +23747,9 @@ function askMessagesHtml(){
 
 function askTurnHtml(t){
   if(t.hidden) return '';
-  const q = `<div class="ask-q">${escapeHtml(t.q)}</div>`;
-  if(t.status === 'loading') return q + `<div class="ask-dots" aria-label="Looking it up"><span></span><span></span><span></span></div>`;
+  const q = `<div class="ask-q">${escapeHtml(t.qLabel || t.q)}</div>`;
+  if(t.status === 'loading') return q + `<div class="ask-wait"><div class="ask-dots" role="status" aria-label="Looking it up"><span></span><span></span><span></span></div>
+    <button type="button" class="ask-stop" onclick="askCancel()">${ICON_ASK_STOP}Stop</button></div>`;
   // Each way it can go wrong says what happened and offers the next step.
   if(t.status === 'cancelled') return q + `
     <div class="ask-card">
@@ -23738,17 +23779,19 @@ function askTurnHtml(t){
   const canAdd = !a.local && !a.fromHub && a.suggestTerm && a.suggestTerm.en;
   return q + `
     <div class="ask-card" id="ask-${t.id}">
-      ${a.mem ? `<span class="ask-tag is-local">On this device</span>` : a.local ? `<span class="ask-tag is-local">On this phone · offline</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`}
+      ${a.convo || a.clarify ? '' : a.mem ? `<span class="ask-tag is-local">On this device</span>` : a.local ? `<span class="ask-tag is-local">On this phone · offline</span>`
+        : a.usedCorrection ? `<span class="ask-tag is-off is-user">Your correction · not checked</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`}
       <p class="ask-headline">${escapeHtml(a.headline)}</p>
       ${a.say ? `<div><p class="ask-lab">${escapeHtml(a.sayLabel || 'Say')}</p><p class="ask-say">${escapeHtml(a.say)}</p></div>` : ''}
       ${notes.map(n => `<div class="ask-note"><p class="ask-lab">Team note</p><p>${escapeHtml(n.note)}</p>
         <small>${n.suggestedBy ? 'Suggested by ' + escapeHtml(n.suggestedBy) + ' · ' : ''}approved by ${escapeHtml(n.reviewedBy || askOwnerFirst())}</small></div>`).join('')}
       ${a.details ? `<p class="ask-details">${escapeHtml(a.details)}</p>` : ''}
-      ${a.fromHub || a.local || askHandoff(t) ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
+      ${a.usedCorrection ? `<p class="ask-details ask-check">This uses your correction. It isn’t team knowledge until ${escapeHtml(askOwnerFirst())} approves it.</p>`
+        : a.fromHub || a.local || a.clarify || askHandoff(t) ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
       ${askSourceLineHtml(t)}
       ${askActionsHtml(t)}
       ${sources.length ? `<div class="ask-src">${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${escapeAttr(s.id)}')">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
-      ${a.local ? '' : t.fixOpen ? `
+      ${a.local || a.clarify ? '' : t.fixOpen ? `
         <div class="ask-fix">
           <label class="ask-lab" for="askFix-${t.id}">What works better?</label>
           <textarea id="askFix-${t.id}" rows="3" maxlength="1000" oninput="askDraftFix('${t.id}', this.value)" placeholder="For example: many of our patients understand … better. Say that first.">${escapeHtml(t.fixDraft || '')}</textarea>
@@ -23771,6 +23814,7 @@ function renderAskMessages(scrollToEnd){
   // How he looks while it works and when it lands is his task state
   // (askReact): nothing to do for him here but be there.
   askSendSync();
+  askConvoSync();
   askFaceSync();
 }
 // Ask the Hub's Dr. Smiley blinks now and then while you're on the screen
@@ -23792,9 +23836,10 @@ function askFaceSync(){
 /* ---- Asking ---- */
 async function submitAsk(preset, force, opts){
   const input = document.getElementById('askInput');
+  opts = opts || {};
   // A retried question carries the term it was asked about (opts.sel), which
   // may not be the one picked now; your current pick is left alone.
-  const selNow = opts && 'sel' in opts ? opts.sel : ASK.selected;
+  const selNow = 'sel' in opts ? opts.sel : ASK.selected;
   const q = String(preset != null ? preset : (input ? input.value : ASK.draft)).trim().slice(0, 500);
   if(!q || ASK.busy) return;
   // "Remember / forget / what do you remember": answered here, nothing sent.
@@ -23817,21 +23862,34 @@ async function submitAsk(preset, force, opts){
   ASK.phi = null;
   ASK.draft = '';
   if(input) input.value = '';
+  // A follow-up ("make it simpler", "that", "go back to my prep"): what it
+  // means in this conversation, or a question back, or what's missing.
+  const plan = askPlan(q, selNow, opts);
+  if(plan.local){ askPushLocal(q, plan, opts); return; }
   const { picked, lessons } = askRetrieve(q);
-  // The term you picked to talk about goes first, so it can be a source.
-  const sel = selNow ? askTermById(selNow.term) : null, intent = askIntent(q);
-  if(sel){
-    const id = 't:' + sel.term.id;
-    for(let i = picked.length - 1; i >= 0; i--) if(picked[i].entry.id === id) picked.splice(i, 1);
-    picked.unshift({ entry: askTermEntry(sel), label: `Glossary · ${sel.term.en || sel.term.es}`, go: { cat: sel.cat.id, term: sel.term.id } });
-    picked.length = Math.min(picked.length, ASK_MAX_ENTRIES);
-  }
+  // The term you picked to talk about (or the one "that" means) goes first,
+  // so it can be a source; then what the follow-up is about; the
+  // conversation's topic and previous term go last.
+  // A question naming another entry moves on from the term you picked: it
+  // isn't sent as "this term", and the pick is let go once answered.
+  // (A request -- a briefing, practice -- isn't a new subject.)
+  const intent = askIntent(q), selTerm = selNow ? askTermById(selNow.term) : null;
+  const named = plan.fu || !selTerm || intent ? [] : askNamesSomething(q).filter(id => /^(t|ff):/.test(id));
+  const moved = !!(selTerm && named.length && !named.includes('t:' + selTerm.term.id) && !ASK_REF.test(foldText(q).toLowerCase()));
+  const sel = plan.sel !== undefined ? plan.sel : (moved ? null : selTerm);
+  const front = (sel ? ['t:' + sel.term.id] : []).concat((plan.ids || []).filter(id => !sel || id !== 't:' + sel.term.id));
+  const cur = askSubjectNow(), prev = askPrevTerm();
+  askPlaceEntries(picked, front, (cur ? cur.ids : []).concat(prev ? [prev] : []).filter(id => !front.includes(id)));
   const labels = {};
   picked.forEach(d => { labels[d.entry.id] = d.label; });
-  const turn = { id: 'q' + Date.now().toString(36), q, status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])),
-    sel: sel ? { ...selNow } : null, n: (intent && intent.n) || 5, actions: [] };
-  const history = ASK.turns.filter(x => x.status === 'done' && !x.answer.local).slice(-3)
-    .map(x => ({ q: x.q, a: [x.answer.headline, x.answer.say].filter(Boolean).join(' — ') }));
+  const turn = { id: askTurnId(), q, qLabel: opts.label || '', status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])),
+    sel: sel ? { cat: sel.cat.id, term: sel.term.id } : null, n: (intent && intent.n) || 5, actions: [],
+    about: plan.about || null, keepSubject: !!plan.keepSubject, correction: plan.correction || '', fixOf: plan.fixOf || '', langSwitch: plan.lang || '',
+    movedOn: moved && !('sel' in opts) && selNow ? selNow.term : '' };
+  // The conversation so far: question, answer and what it was about.
+  const history = ASK.turns.filter(x => x.status === 'done' && x.answer && !x.answer.local && !x.answer.clarify).slice(-4)
+    .map(x => ({ q: x.q, a: [x.answer.headline, x.answer.say, x.answer.details].filter(Boolean).join(' — ').slice(0, 400), about: x.subjectIds || [] }));
+  const gen = ASK.gen;
   ASK.turns.push(turn);
   ASK.busy = true;
   ASK.pending = turn.id;
@@ -23839,15 +23897,17 @@ async function submitAsk(preset, force, opts){
   // After the repaint, so the first question's thinking plays on the face
   // that stays (the header's), not the hello one it replaces.
   drTask('processing', { key: 'ask:' + turn.id, perform: 'ponder', keep: true });
+  // Stopped, or a new conversation started, meanwhile: nothing more from this one.
+  const stale = () => ASK.pending !== turn.id || ASK.gen !== gen;
   // Your Term Review record, for "practice the ones I'm still learning".
   const rec = await askLoadRecord();
-  if(ASK.pending !== turn.id) return;                     // stopped meanwhile
+  if(stale()) return;
   // No connection: what can be done on this phone is done here (the
   // briefing, practice, the glossary entry); anything else waits and goes
   // when the phone is back online.
   if(navigator.onLine === false){
     ASK.busy = false; ASK.pending = null;
-    if(intent){ turn.status = 'done'; turn.answer = askLocalAnswer(intent, rec, turn); turn.actions = askIntentActions(intent, rec, turn); }
+    if(intent){ turn.status = 'done'; turn.answer = askLocalAnswer(intent, rec, turn); turn.actions = askIntentActions(intent, rec, turn); askAfterAnswer(turn, plan); }
     else turn.status = 'waiting';
     turn.doneAt = Date.now();
     askSaveWaiting();
@@ -23869,9 +23929,10 @@ async function submitAsk(preset, force, opts){
         entries: picked.map(d => d.entry),
         lessons: lessons.map(l => ({ id: l.id, about: l.question, note: l.note })),
         history,
-        context: askContext(rec, sel)
+        context: { ...askContext(rec, sel), ...(c => c ? { conversation: c } : {})(askConvoContext(plan)) }
       })
     });
+    if(stale()) return;
     if(res.status === 401){ out.status = 'error'; out.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
     else if(res.status === 503){ out.status = 'error'; out.error = "Ask the Hub isn't switched on yet: the AI key is missing on the server."; }
     else if(!res.ok){ out.status = 'error'; out.error = "Couldn't get an answer just now. Try again in a moment."; }
@@ -23885,16 +23946,28 @@ async function submitAsk(preset, force, opts){
     if(navigator.onLine === false) out.status = 'waiting';
     else{ out.status = 'error'; out.error = "Couldn't reach the Hub. Try again."; }
   }
-  if(ASK.pending !== turn.id) return;                     // stopped: askCancel already moved on
+  if(stale()) return;                                      // stopped: askCancel already moved on
   Object.assign(turn, out);
-  // His suggestions, then what the phone itself recognised; the screen
-  // checks each again before it shows a button (askCheckAction).
-  turn.actions = askMergeActions(turn.answer ? turn.answer.actions : [], askIntentActions(intent, rec, turn));
-  // You named a specialty the Hub doesn't have: no briefing for some other one.
-  if(intent && intent.kind === 'prep' && intent.named && !intent.spec) turn.actions = turn.actions.filter(a => a.type !== 'open_prep');
+  if(turn.answer && turn.answer.clarify){
+    // He asked which one: a button per option he was sent, nothing else.
+    turn.actions = askPickActions(turn.answer.topicIds);
+  }else{
+    // His suggestions, then what the phone itself recognised; the screen
+    // checks each again before it shows a button (askCheckAction).
+    turn.actions = askMergeActions(turn.answer ? turn.answer.actions : [], askIntentActions(intent, rec, turn));
+    // You named a specialty the Hub doesn't have: no briefing for some other one.
+    if(intent && intent.kind === 'prep' && intent.named && !intent.spec) turn.actions = turn.actions.filter(a => a.type !== 'open_prep');
+    if(turn.status === 'done'){
+      // A language asked for here can be kept for every conversation; a
+      // correction can go to the team for review. Both only if you choose.
+      if(plan.lang && drPref('lang') !== plan.lang) turn.actions.push({ type: 'keep_lang', target: plan.lang });
+      if(plan.correction) turn.actions.push({ type: 'send_correction', target: 'review' });
+    }
+  }
   // A next step he's already suggested in an answer isn't offered again
   // unasked today.
   turn.actions.forEach(a => { if(/^(continue_|practice_learning|start_review)/.test(a.type)) drMemMarkShown(a.type + ':' + a.target); });
+  if(turn.status === 'done') askAfterAnswer(turn, plan);
   turn.doneAt = Date.now();
   askSaveWaiting();
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
@@ -23917,11 +23990,15 @@ function askOutcome(t){
   if(t.status === 'refused') return 'refused';
   if(t.status !== 'done' || !t.answer) return 'failed';
   const a = t.answer;
+  // He asked which one you mean, or what's missing: he waits for you.
+  if(a.clarify) return 'clarify';
   // Answered on this phone (offline): it did what was asked if it has something to offer.
   if(a.local) return (t.actions || []).some(x => askCheckAction(x, t).ok) ? 'verified' : 'general';
   if(askHandsOver(t)) return 'handoff';
   const sources = (a.sourceIds || []).filter(id => t.labels && t.labels[id]).length;
   const notes = (a.lessonIds || []).filter(id => ASK.lessons.some(l => l.id === id && l.status === 'approved')).length;
+  // Your correction was used: not verified, whatever the Hub says.
+  if(a.usedCorrection) return 'general';
   return a.fromHub && sources + notes > 0 ? 'verified' : 'general';
 }
 // About as long as it takes to read the answer on a phone.
@@ -23939,6 +24016,7 @@ function askReadMs(t){
      refused, failed, offline: composed (uncertain); the card offers the
                 way on (ask it another way, try again, it'll go when online)
      cancelled  an okay nod, nothing more
+     clarify    he asked which one you mean: attentive, waiting for you
    On another page when it lands: the dock's Dr. Smiley looks up, smiling
    only for a verified one. */
 function askReact(t){
@@ -23946,6 +24024,10 @@ function askReact(t){
   if(out === 'cancelled'){
     drTaskEnd(key);
     drPerform('okay', { priority: DR_P.TASK });
+    return;
+  }
+  if(out === 'clarify'){
+    drTask('attentive', { key, ms: 6000, perform: here ? 'listen' : null });
     return;
   }
   // A tool handed over: "got it", a moment to see the button, then a smile.
@@ -23975,13 +24057,17 @@ function askSendSync(){
   const b = document.getElementById('askSend');
   if(b && b.classList.contains('is-stop') !== !!ASK.busy) b.outerHTML = askSendBtnHtml();
 }
-function askCancel(){
+// Stop: the question stays on screen as stopped; whatever comes back for it
+// later is dropped (submitAsk checks ASK.pending), and nothing of it is
+// recorded in the conversation. quiet: a new conversation is replacing it.
+function askCancel(quiet){
   const t = ASK.turns.find(x => x.id === ASK.pending);
   if(!t) return;
   t.status = 'cancelled'; t.doneAt = Date.now();
   const ctl = ASK.abort;
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
   if(ctl) try{ ctl.abort(); }catch(e){}
+  if(quiet === true){ drTaskEnd('ask:' + t.id); return; }
   if(activeCategory === 'ask') renderAskMessages(true);
   askReact(t);
 }
@@ -24068,6 +24154,305 @@ function askRetry(id){
   drTaskEnd('ask:' + id);
   submitAsk(q, true, { sel });   // the same term it was about
 }
+/* ---------- Dr. Smiley: following a conversation ----------
+   What this conversation is about, kept in memory on this phone only and
+   bounded (ASK.convo). It is not what you asked him to remember
+   (ih_smileyMemory, drMem*): it is never saved, never sent to the team, and
+   "New conversation" clears it while saved preferences stay.
+     subjects     what the last few answers were about, newest first (at most
+                  4): Hub entry ids, or none when an answer wasn't about an
+                  entry, so "that" never skips back past it
+     task         the briefing this conversation is about (one)
+     lang         "Now in Spanish": this conversation only
+     corrections  what you corrected (at most 3): used until the conversation
+                  ends, never verified team knowledge; "Send for review" is
+                  the only way one reaches the team (hub-lessons, pending)
+   A follow-up is read here first (askFollowUp, then askPlan): which answer
+   "make it simpler" means, which term "that" or "the previous term" means,
+   which briefing "go back to my prep" means. One reading: it goes with the
+   question (CONTEXT.conversation; api/ask.js keeps only ids that were sent).
+   Several: one short question, a button per option. None: he says what's
+   missing. He never picks a resource for you. Nothing from a request that
+   was stopped or overtaken is recorded (askAfterAnswer runs only after the
+   checks in submitAsk). */
+const ASK_CONVO_MAX = { subjects: 4, corrections: 3 };
+const ASK_LANG_NAMES = { es: 'Spanish', en: 'English', both: 'both languages' };
+function askConvoEmpty(){ return { subjects: [], task: null, lang: '', corrections: [] }; }
+let askTurnSeq = 0;
+function askTurnId(){ return 'q' + Date.now().toString(36) + (++askTurnSeq).toString(36); }
+// A Hub entry by the id it's sent under, if it's still there.
+function askResource(id){
+  id = String(id || '');
+  if(id.startsWith('t:')){
+    const x = askTermById(id);
+    return x ? { id, name: x.term.en || x.term.es, entry: askTermEntry(x), label: `Glossary · ${x.term.en || x.term.es}`, go: { cat: x.cat.id, term: x.term.id } } : null;
+  }
+  if(id.startsWith('spec:')){ const d = askSpecialties().find(s => s.id === id.slice(5)); return d ? { id, name: d.name } : null; }
+  const d = askCorpus().find(x => x.entry.id === id);
+  return d ? { id, name: d.label.split(' · ').slice(1).join(' · '), entry: d.entry, label: d.label, go: d.go } : null;
+}
+function askSubjectNow(){ return ASK.convo.subjects[0] || null; }
+// The term talked about before the current one.
+function askPrevTerm(){
+  const [cur, ...rest] = ASK.convo.subjects, skip = new Set(cur ? cur.ids : []);
+  for(const s of rest) for(const id of s.ids) if(/^(t|ff):/.test(id) && !skip.has(id) && askResource(id)) return id;
+  return null;
+}
+// The latest real answer in this conversation (not a memory card, not a question back).
+function askLastAnswer(){
+  for(let i = ASK.turns.length - 1; i >= 0; i--){
+    const t = ASK.turns[i];
+    if(t.status === 'done' && t.answer && !t.answer.mem && !t.answer.clarify && !t.answer.convo && !t.hidden) return t;
+  }
+  return null;
+}
+// Things a question can name by themselves: glossary terms, False Friends,
+// doctors, providers. (Guide and ethics topics match on everyday words like
+// "difference" or "previous", so they never count as the thing named.)
+function askNamesSomething(q){ return askRetrieve(q).top.filter(s => s.score >= 8 && /^(t|ff|dr|pv):/.test(s.d.entry.id)).map(s => s.d.entry.id); }
+const ASK_FILLER = new Set(('now and ok okay so please again same thing it that this say tell me give put explain repeat write translate the answer can you could do '
+  + 'what about how also too then in into to en a al ahora y lo eso esto dilo dimelo dime explica explicalo explicame traducelo traduce otra vez por favor de nuevo la respuesta').split(' '));
+// "Now in Spanish." / "Explain it in English" -- and nothing else. "How do
+// you say heart attack in Spanish?" is a question, not a switch.
+function askLangSwitch(f){
+  const m = f.match(/\b(?:in|en|into|to|about|al?)\s+(spanish|espanol|english|ingles|both(?: languages)?|ambos(?: idiomas)?)\b/) || f.match(/^(spanish|espanol|english|ingles)\b/);
+  if(!m) return '';
+  const rest = f.replace(m[0], ' ').replace(/[^a-z ]/g, ' ').split(/\s+/).filter(w => w && !ASK_FILLER.has(w));
+  if(rest.length) return '';
+  return /^(spanish|espanol)/.test(m[1]) ? 'es' : /^(english|ingles)/.test(m[1]) ? 'en' : 'both';
+}
+function askRephraseStyle(f){
+  if(/\b(simpler|simplify|simply|plainer|easier|in plain (words|terms|language)|in simple (words|terms)|mas (simple|sencillo|facil)|simplific\w*|en palabras (simples|sencillas))\b/.test(f)) return 'simpler';
+  if(/\b(shorter|briefer|in short|mas corto|resume\w*)\b/.test(f)) return 'shorter';
+  if(/\b(more detail\w*|longer|elaborate|expand|go deeper|tell me more|mas detall\w*|mas largo)\b/.test(f)) return 'longer';
+  return '';
+}
+const ASK_REF = /\b(that|this|it|that one|this one|ese|esa|eso|este|esta|esto)\b/;
+function askFollowUp(q){
+  const f = foldText(q).toLowerCase().replace(/[’`]/g, "'");
+  const words = askTokens(q).length, named = askNamesSomething(q);
+  if(/\b(go(ing)? back|back to|return to|resume|pick up|where (was|did) i|regres\w*|vuelv\w*|volver|seguir con|continu\w*)\b/.test(f)
+    && /\b(prep|briefing|appointment|cita|repaso|preparacion|quiz|review|practice|practica)\b/.test(f))
+    return { kind: 'resume', task: /\bquiz\b/.test(f) ? 'quiz' : /\breview\b/.test(f) ? 'review' : /\b(practice|practica)\b/.test(f) && !/\b(prep|briefing|appointment|cita)\b/.test(f) ? 'any' : 'prep' };
+  if(/^(no\b|nope|not quite|actually|that'?s (not|wrong|incorrect)|you'?re wrong|wrong\b|incorrect|it'?s not\b|we (say|use|call)\b|we don'?t (say|use)|here we say|in our (hospital|team)|en realidad|no es\b|incorrecto|aqui (decimos|usamos)|nosotros decimos)/.test(f)
+    && !/\b(i meant|quise decir)\b/.test(f) && !/\?\s*$/.test(q)) return { kind: 'correction' };
+  const lang = askLangSwitch(f);
+  if(lang) return { kind: 'language', lang };
+  const style = askRephraseStyle(f);
+  if(style && !named.length && words <= 4) return { kind: 'rephrase', style };
+  if(/\b(difference|differ\w*|compare\w*|comparison|versus|vs|same (thing )?as|diferencia\w*|compar\w*|igual que)\b/.test(f)
+    && /\b(that|this|it|them|both|previous|last|earlier|before|first|other|anterior|ese|esa|eso|este|esta|esto|otro|otra|ambos)\b/.test(f)) return { kind: 'compare', named };
+  if(ASK_REF.test(f) && !named.length && words <= 3) return { kind: 'reference' };
+  return null;
+}
+// A question back: one short line, a button per option.
+function askClarify(ids, head){
+  const rs = ids.map(askResource).filter(Boolean).slice(0, 3);
+  return { local: { clarify: true, headline: head || `${rs.map(r => r.name).join(' or ')}?`, details: rs.length ? '' : 'Name it and I’ll go on from there.',
+    actions: rs.map(r => ({ type: 'pick_topic', target: r.id })) } };
+}
+function askMissing(headline, details, actions){ return { local: { clarify: true, headline, details, actions: actions || [] } }; }
+function askLastSel(last){ return last && last.sel ? askTermById(last.sel.term) : null; }
+function askRefPlan(id){
+  const x = id.startsWith('t:') ? askTermById(id) : null;
+  return { fu: { kind: 'reference' }, ids: [id], resolved: [{ word: 'that', id }], about: [id], ...(x ? { sel: x } : {}) };
+}
+function askPlan(q, selNow, opts){
+  const fu = askFollowUp(q), last = askLastAnswer();
+  // What "that" is now: the one you just picked, else the latest answer's
+  // subject, else the term picked to explain.
+  const cur = opts.pick ? { ids: [opts.pick] } : askSubjectNow() || (selNow && askTermById(selNow.term) ? { ids: ['t:' + selNow.term] } : null);
+  if(opts.pick && (!fu || fu.kind === 'reference')) return askRefPlan(opts.pick);
+  if(!fu) return {};
+  const ids = cur ? cur.ids.slice() : [];
+  switch(fu.kind){
+    case 'resume': return askPlanResume(fu.task);
+    case 'correction':
+      if(!last) return askMissing('What should I correct?', 'I haven’t answered anything in this conversation yet.');
+      return { fu: { kind: 'correction' }, ids, keepSubject: true, sel: askLastSel(last), correction: q.slice(0, 200), fixOf: last.q };
+    case 'language': {
+      const name = ASK_LANG_NAMES[fu.lang];
+      if(!last) return { local: { headline: `${name[0].toUpperCase() + name.slice(1)} for the rest of this conversation.`, details: '',
+        actions: [{ type: 'keep_lang', target: fu.lang }], commit: () => { ASK.convo.lang = fu.lang; } } };
+      return { fu: { kind: 'language' }, ids, keepSubject: true, sel: askLastSel(last), lang: fu.lang };
+    }
+    case 'rephrase':
+      if(!last) return askMissing({ simpler: 'What should I make simpler?', shorter: 'What should I make shorter?', longer: 'More detail about what?' }[fu.style],
+        'I haven’t answered anything in this conversation yet. Ask about a term first.');
+      return { fu: { kind: 'rephrase', style: fu.style }, ids, keepSubject: true, sel: askLastSel(last) };
+    case 'compare': return askPlanCompare(q, cur, fu.named, !!opts.pick);
+    case 'reference':
+      if(selNow && askTermById(selNow.term)) return {};          // the term you picked is "this term"
+      if(!cur) return askMissing('Which term do you mean?', 'Name it, or open it in the glossary and tap ⋯ → Explain with Dr. Smiley.');
+      if(!cur.ids.length) return {};                             // not a Hub entry: the conversation itself says what "that" is
+      if(cur.ids.length > 1) return askClarify(cur.ids);
+      return askRefPlan(cur.ids[0]);
+  }
+  return {};
+}
+// "What's the difference between that and the previous term?"
+function askPlanCompare(q, cur, named, picked){
+  const f = foldText(q).toLowerCase();
+  const curIds = cur ? cur.ids : [];
+  const both = /\b(them|both|those two|these two|ambos|los dos|las dos)\b/.test(f);
+  const wantsPrev = /\b(previous|last|earlier|before|first|other|anterior|otro|otra|primer\w*)\b/.test(f);
+  const others = (named || []).filter(id => !curIds.includes(id));
+  if(both && curIds.length === 2) return { fu: { kind: 'compare' }, ids: curIds.slice(), resolved: curIds.map(id => ({ word: 'them', id })), about: curIds.slice() };
+  if(!cur && !others.length) return askMissing('Compare which terms?', 'Name both, like “edema or ascites?”');
+  if(curIds.length > 1 && !picked && !both) return askClarify(curIds, `Which one do you mean by “that”: ${curIds.map(id => askResource(id)).filter(Boolean).map(r => r.name).join(' or ')}?`);
+  const a = curIds[0] || null;
+  const b = others[0] || askPrevTerm();
+  if(!b){
+    const r = a && askResource(a);
+    return askMissing(r ? `Compare ${r.name} with which term?` : 'Compare it with which term?',
+      r ? `${r.name} is the only term in this conversation so far.` : 'Name the term, like “the difference between that and edema”.');
+  }
+  const resolved = [], ids = [];
+  if(a){ resolved.push({ word: 'that', id: a }); ids.push(a); }
+  resolved.push({ word: others[0] ? 'the term named' : wantsPrev ? 'the previous term' : 'the earlier term', id: b }); ids.push(b);
+  return { fu: { kind: 'compare' }, ids, resolved, about: ids.slice() };
+}
+// "Go back to my appointment prep": the briefing it can only mean, or a
+// question if there's more than one, or what's missing.
+function askPlanResume(kind){
+  const cands = [], seen = new Set();
+  const add = (a, tier) => {
+    const k = a.type.startsWith('continue_') || a.type === 'open_prep' ? (a.target.startsWith('spec:') ? a.target : a.type) : a.type;
+    if(seen.has(k) || !askCheckAction(a, { n: 5 }).ok) return;
+    seen.add(k); cands.push({ a, tier });
+  };
+  const u = askUnfinished();
+  if(u && (kind === 'any' || u.kind === kind))
+    add({ type: 'continue_' + u.kind, target: u.kind === 'prep' ? 'spec:' + u.id : u.kind }, 1);
+  if(kind === 'prep' || kind === 'any'){
+    if(ASK.convo.task) add({ type: 'open_prep', target: ASK.convo.task.id }, 1);
+    if(APPT && APPT.domainId) add({ type: 'open_prep', target: 'spec:' + APPT.domainId }, 1);
+    const fromSpec = (ASK.from === 'prep' || ASK.from === 'appt') && askFromSpecialty();
+    if(fromSpec) add({ type: 'open_prep', target: 'spec:' + fromSpec }, 1);
+    if(PREP.domainId) add({ type: 'open_prep', target: 'spec:' + PREP.domainId }, 2);
+  }
+  const top = cands.some(c => c.tier === 1) ? cands.filter(c => c.tier === 1) : cands;
+  const what = kind === 'quiz' ? 'quiz' : kind === 'review' ? 'Term Review session' : kind === 'any' ? 'practice' : 'appointment prep';
+  if(!top.length){
+    return kind === 'prep' || kind === 'any'
+      ? askMissing(`I don’t see ${kind === 'any' ? 'any practice' : 'an appointment prep'} in progress.`, 'Pick a specialty and I’ll open its briefing.', [{ type: 'choose_prep', target: 'prep' }])
+      : askMissing(`I don’t see a ${what} in progress.`, '', kind === 'review' && whoAmI() && dueReviewCount() ? [{ type: 'start_review', target: 'review' }] : []);
+  }
+  const prepOf = c => c.a.target.startsWith('spec:') ? askResource(c.a.target) : null;
+  if(top.length === 1){
+    const c = top[0], r = prepOf(c), u2 = askUnfinished();
+    const where = c.a.type.startsWith('continue_') && u2 ? `You were on ${u2.kind === 'quiz' ? 'question' : 'card'} ${u2.done + 1} of ${u2.total}.` : '';
+    return { local: { headline: r ? `Your ${r.name} briefing` : c.a.type === 'continue_quiz' ? 'Your quiz' : 'Your Term Review',
+      details: where, actions: [c.a], commit: () => { if(r) ASK.convo.task = { kind: 'prep', id: r.id, name: r.name }; } } };
+  }
+  const names = top.slice(0, 3).map(c => (prepOf(c) || { name: c.a.type === 'continue_quiz' ? 'your quiz' : 'Term Review' }).name);
+  return { local: { clarify: true, headline: `${names.join(' or ')}?`, details: '', actions: top.slice(0, 3).map(c => c.a) } };
+}
+// What goes with the question about the conversation (bounded; api/ask.js
+// keeps only ids that were sent as entries).
+function askConvoContext(plan){
+  const c = ASK.convo, cur = askSubjectNow(), prev = askPrevTerm(), out = {};
+  if(cur && cur.ids.length) out.topic = cur.ids.map(id => ({ id }));
+  if(prev) out.previous = { id: prev };
+  if(c.task) out.task = { kind: 'prep', id: c.task.id };
+  const lang = plan.lang || c.lang;
+  if(lang) out.lang = lang;
+  if(plan.fu) out.followUp = plan.fu;
+  if(plan.resolved) out.resolved = plan.resolved.map(r => ({ word: r.word, id: r.id }));
+  const corr = c.corrections.concat(plan.correction ? [{ about: (cur && cur.ids[0]) || '', text: plan.correction }] : []).slice(-ASK_CONVO_MAX.corrections);
+  if(corr.length) out.corrections = corr;
+  return Object.keys(out).length ? out : null;
+}
+// The resources a question needs, in front (the ones it's about) and at the
+// end (the conversation's topic and previous term, so "that" can be named).
+function askPlaceEntries(picked, front, tail){
+  const docs = ids => ids.map(askResource).filter(r => r && r.entry).map(r => ({ entry: r.entry, label: r.label, go: r.go }));
+  const all = new Set(front.concat(tail));
+  for(let i = picked.length - 1; i >= 0; i--) if(all.has(picked[i].entry.id)) picked.splice(i, 1);
+  const f = docs(front), t = docs(tail);
+  picked.unshift(...f);
+  picked.length = Math.max(f.length, Math.min(picked.length, ASK_MAX_ENTRIES - t.length));
+  picked.push(...t);
+}
+// After an answer that wasn't stopped: what it was about, and anything this
+// question asked for that lasts the conversation.
+function askAfterAnswer(t, plan){
+  const a = t.answer, c = ASK.convo;
+  if(!a || a.clarify) return;
+  if(plan.lang) c.lang = plan.lang;
+  if(plan.correction){
+    const cur = askSubjectNow();
+    c.corrections.push({ about: (cur && cur.ids[0]) || '', text: plan.correction });
+    c.corrections = c.corrections.slice(-ASK_CONVO_MAX.corrections);
+  }
+  askNoteSubject(t);
+  if(t.movedOn && ASK.selected && ASK.selected.term === t.movedOn) askClearSelected();
+  const prep = (t.actions || []).find(x => (x.type === 'open_prep' || x.type === 'continue_prep') && askCheckAction(x, t).ok);
+  const r = prep && askResource(prep.target);
+  if(r) c.task = { kind: 'prep', id: r.id, name: r.name };
+}
+function askNoteSubject(t){
+  const c = ASK.convo, cur = c.subjects[0];
+  if(t.keepSubject && cur){ t.subjectIds = cur.ids.slice(); return; }
+  const ids = [], add = id => { if(id && ids.length < 2 && !ids.includes(id) && askResource(id)) ids.push(id); };
+  (t.about || []).forEach(add);
+  if(!ids.length && t.sel) add('t:' + t.sel.term);
+  if(!ids.length && t.answer) (t.answer.topicIds || []).forEach(add);
+  if(!ids.length && t.answer) add((t.answer.sourceIds || []).find(id => /^(t|ff):/.test(id)));
+  t.subjectIds = ids;
+  if(cur && ids.length && cur.ids.join('|') === ids.join('|')){ cur.turn = t.id; return; }
+  // Handing over a briefing or practice isn't a new subject to talk about.
+  if(!ids.length && askHandsOver(t)) return;
+  c.subjects.unshift({ ids, turn: t.id });
+  c.subjects.length = Math.min(c.subjects.length, ASK_CONVO_MAX.subjects);
+}
+// An answer from the phone itself (a question back, what's missing, a task to go back to).
+function askPushLocal(q, plan, opts){
+  const l = plan.local;
+  const a = { local: true, convo: true, clarify: !!l.clarify, fromHub: false, headline: l.headline, sayLabel: '', say: '', details: l.details || '',
+    sourceIds: [], lessonIds: [], actions: [], suggestTerm: { en: '', es: '', def: '' } };
+  const t = { id: askTurnId(), q, qLabel: opts.label || '', status: 'done', labels: {}, go: {}, n: 5, actions: l.actions || [], answer: a, doneAt: Date.now() };
+  if(l.commit) l.commit();
+  ASK.turns.push(t);
+  renderAskMessages(true);
+  askReact(t);
+}
+function askPickActions(ids){
+  return (ids || []).filter(id => askResource(id)).slice(0, 3).map(id => ({ type: 'pick_topic', target: id }));
+}
+/* Start new conversation: stops what's on its way, clears the conversation
+   and its record. What you asked him to remember stays. */
+function askNewConversation(){
+  if(ASK.busy) askCancel(true);
+  ASK.gen++;
+  ASK.turns.forEach(t => drTaskEnd('ask:' + t.id));
+  ASK.turns = []; ASK.phi = null; ASK.draft = ''; ASK.selected = null;
+  ASK.convo = askConvoEmpty(); ASK.fresh = true;
+  askSaveWaiting();
+  if(activeCategory === 'ask'){
+    renderContent();
+    const input = document.getElementById('askInput');
+    if(input && prefersAutoFocus()) input.focus();
+  }
+}
+function askHasConversation(){ return ASK.turns.some(t => !t.hidden) || !!ASK.phi; }
+// Above the box: what "that" means right now, and a language asked for in
+// this conversation (✕ drops it; it was never saved).
+function askConvoHtml(){
+  const c = ASK.convo, cur = askSubjectNow(), names = cur ? cur.ids.map(askResource).filter(Boolean).map(r => r.name) : [];
+  const topic = !askSelectedTerm() && names.length ? `<span class="ask-convo-topic"><small>Talking about</small> <b>${escapeHtml(names.join(' · '))}</b></span>` : '';
+  const lang = c.lang ? `<span class="ask-convo-lang">${escapeHtml(ASK_LANG_NAMES[c.lang][0].toUpperCase() + ASK_LANG_NAMES[c.lang].slice(1))} · this conversation<button type="button" onclick="askConvoLang('')" aria-label="Stop answering in ${escapeAttr(ASK_LANG_NAMES[c.lang])}">✕</button></span>` : '';
+  return topic || lang ? `<div class="ask-convo" id="askConvo">${topic}${lang}</div>` : '<div id="askConvo" hidden></div>';
+}
+function askConvoLang(l){ ASK.convo.lang = l; askConvoSync(); }
+function askConvoSync(){
+  const el = document.getElementById('askConvo');
+  if(el) el.outerHTML = askConvoHtml();
+  const nb = document.getElementById('askNew'), hide = !askHasConversation();
+  // Showing it can change the header's height: the box stays above the tab bar.
+  if(nb && nb.hidden !== hide){ nb.hidden = hide; if(!document.body.classList.contains('kb-open')) fitAskPanel(); }
+}
+
 /* ---------- Dr. Smiley: context and actions ----------
    Ask is how you talk to Dr. Smiley, and he can do things with the Hub's
    own tools, not just answer:
@@ -24092,7 +24477,8 @@ function askRetry(id){
    said only after the screen it opens is actually there (askRunAction). */
 const ICON_ASK_TERM = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 9.4a2 2 0 1 1 2.8 1.8c-.5.3-.8.6-.8 1.2M12 14.4v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ASK_ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source', 'ask_online',
-  'continue_prep', 'continue_quiz', 'continue_review', 'open_memory', 'mem_undo'];
+  'continue_prep', 'continue_quiz', 'continue_review', 'open_memory', 'mem_undo', 'pick_topic', 'keep_lang', 'send_correction'];
+const ICON_ASK_NEW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
 // The term you picked to talk about, if it's still in the glossary.
 function askSelectedTerm(){
@@ -24121,7 +24507,14 @@ function askAbout(catId, termId){
   const input = document.getElementById('askInput');
   if(input){ input.value = ASK.draft; if(prefersAutoFocus()) input.focus(); }
 }
-function askClearSelected(){
+// ✕ (fromUser): you let go of the term, so "this term" doesn't find it in
+// the conversation either.
+function askClearSelected(fromUser){
+  if(fromUser === true && ASK.selected){
+    const id = 't:' + ASK.selected.term;
+    ASK.convo.subjects.forEach(s => { s.ids = s.ids.filter(x => x !== id); });
+    askConvoSync();
+  }
   ASK.selected = null;
   const el = document.getElementById('askCtx');
   if(el) el.outerHTML = askContextChipHtml();
@@ -24130,7 +24523,7 @@ function askContextChipHtml(){
   const sel = askSelectedTerm();
   if(ASK.selected && !sel) return `<div class="ask-ctx is-gone" id="askCtx" role="status"><span>The term you picked is no longer in the glossary.</span><button type="button" onclick="askClearSelected()" aria-label="Clear">✕</button></div>`;
   if(!sel) return '<div id="askCtx" hidden></div>';
-  return `<div class="ask-ctx" id="askCtx"><span><small>Explaining</small><b>${escapeHtml(sel.term.en || sel.term.es)}</b><em>${escapeHtml(sel.cat.name)}</em></span><button type="button" onclick="askClearSelected()" aria-label="Stop explaining ${escapeAttr(sel.term.en)}">✕</button></div>`;
+  return `<div class="ask-ctx" id="askCtx"><span><small>Explaining</small><b>${escapeHtml(sel.term.en || sel.term.es)}</b><em>${escapeHtml(sel.cat.name)}</em></span><button type="button" onclick="askClearSelected(true)" aria-label="Stop explaining ${escapeAttr(sel.term.en)}">✕</button></div>`;
 }
 // Specialties with a briefing: the same list Appointment prep offers.
 function askSpecialties(){
@@ -24286,6 +24679,10 @@ function askCheckAction(a, t){
       return { ok: true, main: true, label: kind === 'quiz' ? `Continue your quiz (question ${left})` : `Continue Term Review (${left})` };
     }
     case 'open_memory': return { ok: true, label: 'What I remember' };
+    // Conversation only: which one you meant; keeping a language; sending a correction for review.
+    case 'pick_topic': { const r = askResource(a.target); return r ? { ok: true, label: r.name } : { ok: false, why: 'That’s no longer in the Hub.' }; }
+    case 'keep_lang': return ASK_LANG_NAMES[a.target] && drPref('lang') !== a.target ? { ok: true, label: `Use ${ASK_LANG_NAMES[a.target]} in every conversation` } : { ok: false, why: 'That’s already saved.' };
+    case 'send_correction': return t && t.correction && !t.fixSent && !t.fixOpen ? { ok: true, label: `Send to ${askOwnerFirst()} for review` } : { ok: false, why: 'Already on its way for review.' };
     case 'mem_undo': return t && t.undo && !t.undone ? { ok: true, label: 'Undo' } : { ok: false, why: 'Nothing to undo.' };
     case 'practice_learning': {
       if(!whoAmI()) return { ok: false, why: 'Set your name first: your review record is kept under it.' };
@@ -24450,6 +24847,26 @@ const ASK_RUN = {
     openTermLookup(x.cat.id, x.term.id);
     return document.getElementById('termLookup')?.classList.contains('show') ? { ok: true } : { ok: false, why: "The lookup didn't open." };
   },
+  async pick_topic(a, t){
+    if(ASK.busy) return { ok: false, why: 'One question at a time. Stop the one on its way first.' };
+    const r = askResource(a.target);
+    if(!r) return { ok: false, why: 'That’s no longer in the Hub.' };
+    submitAsk(t.q, true, { pick: a.target, label: r.name, sel: null });
+    return { ok: true };
+  },
+  // Saved only because you tapped it: the same store as "Remember…".
+  async keep_lang(a){
+    const r = drMemSet('lang', a.target);
+    return !r.ok ? { ok: false, why: 'That isn’t one of the choices.' } : r.saved ? { ok: true, msg: `Saved: ${ASK_LANG_NAMES[a.target]} in every conversation` }
+      : { ok: false, why: 'Couldn’t save on this phone. It still applies to this conversation.' };
+  },
+  async send_correction(a, t){
+    t.fixOpen = true; t.fixDraft = t.fixDraft || t.correction;
+    renderAskMessages(false);
+    const el = document.getElementById('askFix-' + t.id);
+    if(el){ el.scrollIntoView({ block: 'nearest' }); if(prefersAutoFocus()) el.focus(); }
+    return { ok: true };
+  },
   async ask_online(a, t){
     if(navigator.onLine !== false) return { ok: false, why: "You're online now. Ask again." };
     ASK.turns.push({ id: 'q' + Date.now().toString(36), q: t.q, status: 'waiting', labels: {}, go: {}, sel: t.sel ? { ...t.sel } : null, n: t.n, actions: [] });
@@ -24476,6 +24893,9 @@ async function askRunAction(turnId, i){
   else if(!res.ok) t.did[a.type + '|' + a.target] = { ok: false, msg: res.why };
   if(res.ok){
     if(res.msg){ showToast(res.msg); drPerform('nod', { priority: DR_P.REACT }); }
+    // The briefing you went to is what "go back to my prep" means later.
+    const r = /^(open_prep|continue_prep)$/.test(a.type) && askResource(a.target);
+    if(r) ASK.convo.task = { kind: 'prep', id: r.id, name: r.name };
   }else showToast(res.why);
   if(activeCategory === 'ask') renderAskMessages(false);
 }
@@ -24585,7 +25005,8 @@ function drMemNameChanged(before, after){
   if(drMemKey(before) === drMemKey(after)) return '';
   const want = drPref('mode');
   if(drModePref !== want){ drModePref = want; drModeChanged(); }
-  ASK.turns = []; ASK.selected = null; ASK.draft = '';
+  if(ASK.busy) askCancel(true);
+  ASK.turns = []; ASK.selected = null; ASK.draft = ''; ASK.convo = askConvoEmpty(); ASK.gen++;
   askSaveWaiting();   // the person before's waiting questions don't go out under the new name
   const n = Object.keys(drMemGet()).length;
   return n ? ` Dr. Smiley is using ${after ? after.split(/\s+/)[0] + "'s" : 'this phone’s'} preferences.` : '';
@@ -24818,9 +25239,9 @@ function askSendFix(id){
   requireName(async () => {
     try{
       await db.collection('hub-lessons').add({
-        question: t.q.slice(0, 500),
+        question: (t.fixOf || t.q).slice(0, 500),
         headline: (t.answer.headline || '').slice(0, 200),
-        termIds: (t.answer.sourceIds || []).slice(0, 20),
+        termIds: [...new Set((t.answer.sourceIds || []).concat(t.subjectIds || []))].slice(0, 20),
         note,
         status: 'pending',
         suggestedBy: whoAmI().slice(0, 60),

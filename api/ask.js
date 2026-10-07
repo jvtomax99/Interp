@@ -33,6 +33,20 @@
  * else is dropped here, and the app checks again before showing a button.
  * The app runs the action and only then says it's done.
  *
+ * FOLLOWING A CONVERSATION
+ * The app keeps a small record of the conversation on the phone (in memory,
+ * bounded) and sends it as CONTEXT.conversation: what the latest answer was
+ * about (entry ids), the term before that, the briefing this conversation is
+ * about, a language asked for in this conversation only, and the
+ * interpreter's own corrections. The phone has already worked out what
+ * "that" or "the previous term" means where it could (resolved), and asks
+ * the interpreter itself when it can't; the model may still ask one short
+ * question back (clarify) instead of guessing. Every id here must be an
+ * entry the app sent. A correction is the interpreter's word: used for the
+ * rest of the conversation, never a source, never "from the Hub"
+ * (usedCorrection makes fromHub false). Only the owner's approval of a
+ * "Correct this" note makes anything team knowledge.
+ *
  * PREFERENCES, NOT KNOWLEDGE
  * An interpreter can ask Dr. Smiley to remember a few choices on their own
  * phone (explanation language, brief or detailed, a study focus) and, if
@@ -65,7 +79,8 @@ const MAX_QUESTION = 500;
 const MAX_FIELD = 600;
 const MAX_ENTRIES = 30;
 const MAX_LESSONS = 8;
-const MAX_HISTORY = 3;
+const MAX_HISTORY = 4;
+const MAX_CORRECTIONS = 3;
 const MAX_SPECIALTIES = 40;
 const MAX_ACTIONS = 3;
 
@@ -84,7 +99,12 @@ const MAX_ACTIONS = 3;
 const ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source',
   'continue_prep', 'continue_quiz', 'continue_review'];
 
-const SYSTEM = `You are Dr. Smiley, the interpreter assistant inside the Interpreter Hub ("Ask the Hub"), used by the Spanish/English medical interpreter team at Hackensack University Medical Center. Interpreters ask between assignments, on a phone, often one-handed. You are friendly and brief, and you help them get ready and render language accurately.
+const SYSTEM = `You are Dr. Smiley, the interpreter assistant inside the Interpreter Hub ("Ask the Hub"), used by the Spanish/English medical interpreter team at Hackensack University Medical Center. Interpreters ask between assignments, on a phone, often one-handed. You help them get ready and render language accurately.
+
+Your voice:
+- Warm, concise and specific. Lead with the answer itself; a few words of acknowledgement only when they carry something ("Simpler:", "In Spanish:", "Got it: 'eco' then.").
+- No greetings once the conversation has started, no praise of the question ("Great question"), no thanking them for asking, no introducing yourself or describing your personality, no sign-offs. Exclamation marks rarely.
+- In a follow-up, don't repeat your previous answer's wording; say what is new or different.
 
 How to answer:
 - The message gives you HUB ENTRIES from the team's own glossary, False Friends list, Doctor Directory, provider list, Code of Ethics and User Guide, and TEAM NOTES the team lead has approved. They are the team's agreed knowledge: answer from them first. Put the id of every entry you relied on in sourceIds and every team note you followed in lessonIds.
@@ -99,7 +119,7 @@ How to answer:
 
 Context and actions:
 - CONTEXT says which screen the interpreter came from, which glossary term they selected (if any), which specialties have a briefing, and their Term Review record (whether a name is set on the phone and how many terms are still being learned).
-- "Explain this term" (or "this word", "it") means CONTEXT.selected. Explain that entry: headline is the term and its Spanish; say is a plain Spanish rendering a patient would understand, with sayLabel "In plain Spanish"; details is at most two short sentences. Put its id in sourceIds. If nothing is selected and the question doesn't name a term, ask which one in headline and leave say "".
+- "Explain this term" (or "this word", "it") means CONTEXT.selected. Explain that entry: headline is the term and its Spanish; say is a plain Spanish rendering a patient would understand, with sayLabel "In plain Spanish"; details is at most two short sentences. Put its id in sourceIds. If nothing is selected, CONTEXT.conversation doesn't settle it and the question doesn't name a term, ask which one (see clarify below).
 - You can't open anything yourself. To help someone do something, add up to 3 actions from this list, and only with a target given in CONTEXT or HUB ENTRIES:
   open_prep (target: a specialty id from CONTEXT.specialties) opens the appointment briefing for that specialty. Use it for "I'm covering X", "prep me", "heading to X". If the specialty isn't in the list, say so and use choose_prep (target "prep") instead.
   practice_learning (target "learning") starts Term Review on the terms the interpreter is still learning. Only when CONTEXT.learning.count is above 0. If it's 0, say there are none yet and offer start_review (target "review") when a name is set.
@@ -112,7 +132,20 @@ Preferences and practice (only when CONTEXT has them):
 - CONTEXT.prefs are this interpreter's own choices, saved on their phone. lang is the language for your explanation (headline and details): "auto" means the question's language, "es" Spanish, "en" English, "both" Spanish then English. Spanish terms stay Spanish and say stays the patient-facing words whatever lang is. length "brief": the headline and at most one short sentence of details; "detailed": up to four sentences of details. focus is the specialty they are studying: prefer it when they leave the specialty open ("prep me", "practice some terms").
 - Preferences are style, not knowledge. Never cite one as a source, never put one in sourceIds or lessonIds, and never let one override a HUB ENTRY or a TEAM NOTE.
 - CONTEXT.practice is the interpreter's own record: terms still learning (and how many in their focus), terms due, and practice they left unfinished. When it helps with what they asked, offer the matching action (continue_prep with its specialty id, continue_quiz "quiz", continue_review "review", practice_learning). Don't offer an unrelated next step when they asked about something else.
-- Team points belong to the whole team; they are not in CONTEXT and never describe them as this interpreter's progress.`;
+- Team points belong to the whole team; they are not in CONTEXT and never describe them as this interpreter's progress.
+
+This conversation (CONTEXT.conversation and EARLIER IN THIS CONVERSATION):
+- It belongs to this chat only. The phone keeps it until the interpreter starts a new conversation; it is never saved and it is not team knowledge. CONTEXT.prefs are the choices they explicitly saved; nothing in the conversation changes them.
+- topic is what your latest answer was about (ids in HUB ENTRIES); previous is the term talked about before that; task is the briefing this conversation is about.
+- References: "that", "it", "this one", "the previous term" mean what resolved says when it says so; otherwise topic; otherwise something the interpreter said earlier in this conversation. Resolve a reference only to an entry in HUB ENTRIES or to words the interpreter actually used. If two or more readings remain plausible, set clarify to true: headline is one short question naming the options ("Cardiomegaly or ejection fraction?"), topicIds lists those options' ids, say and details are "", no actions. If nothing fits, ask which one they mean the same way, with topicIds empty. Never guess, and never make up a term, entry or task they didn't mention.
+- followUp says what kind of follow-up this is:
+  rephrase: say your last answer again in the requested way, same subject and facts, nothing new added. style "simpler": everyday words and short sentences, about a sixth-grade level; "shorter": the headline and one short sentence; "longer": up to four sentences of details.
+  language: lang just changed; give your last answer again in that language.
+  compare: compare exactly the entries in resolved (with what the interpreter said, if one of them isn't an entry): what each means and the one difference that matters when interpreting. Cite the ids you used.
+  correction: the interpreter is correcting you; see corrections.
+- lang, when set, replaces CONTEXT.prefs.lang for this conversation only ("es" Spanish, "en" English, "both" Spanish then English). Don't mention saving it.
+- corrections are corrections the interpreter made in this conversation. Use them for the rest of it: when one is new, acknowledge it in a few words, then answer with it applied. They are the interpreter's word, not verified team knowledge: set usedCorrection to true whenever your answer relies on one, never put one in sourceIds or lessonIds, never call one the Hub's or the team's, and if a HUB ENTRY or TEAM NOTE says otherwise, say so in one short sentence. If a correction is clearly wrong or unsafe for a patient, say so kindly instead of using it.
+- topicIds: the ids of the HUB ENTRIES this answer is about, at most 2 ([] when none). They let the phone follow "that" in the next question.`;
 
 const ANSWER_SCHEMA = {
   type: 'object',
@@ -124,6 +157,9 @@ const ANSWER_SCHEMA = {
     details:   { type: 'string' },
     sourceIds: { type: 'array', items: { type: 'string' } },
     lessonIds: { type: 'array', items: { type: 'string' } },
+    topicIds:  { type: 'array', items: { type: 'string' } },
+    clarify:   { type: 'boolean' },
+    usedCorrection: { type: 'boolean' },
     actions: {
       type: 'array',
       items: {
@@ -140,7 +176,7 @@ const ANSWER_SCHEMA = {
       additionalProperties: false,
     },
   },
-  required: ['fromHub', 'headline', 'sayLabel', 'say', 'details', 'sourceIds', 'lessonIds', 'actions', 'suggestTerm'],
+  required: ['fromHub', 'headline', 'sayLabel', 'say', 'details', 'sourceIds', 'lessonIds', 'topicIds', 'clarify', 'usedCorrection', 'actions', 'suggestTerm'],
   additionalProperties: false,
 };
 
@@ -219,9 +255,67 @@ function cleanContext(c) {
   }
   return out;
 }
-// "Brief" is a promise: one sentence of details, whatever came back.
-function fitLength(details, prefs) {
-  if (!prefs || prefs.length !== 'brief' || !details) return details;
+/* The conversation record the app keeps (bounded, this chat only), cut down
+ * here again. Every id must be one of the entries sent with this question
+ * (or a specialty, for the task), so nothing can point at a resource the
+ * app didn't send. */
+const FOLLOW_KINDS = ['rephrase', 'language', 'compare', 'reference', 'correction'];
+const FOLLOW_STYLES = ['simpler', 'shorter', 'longer'];
+function cleanConversation(c, entries, ctx) {
+  if (!c || typeof c !== 'object') return null;
+  const byId = new Map(entries.map(e => [e.id, e]));
+  const nameOf = e => clip(e.en || e.spanish || e.name || e.title || e.question || e.id, 120);
+  const ref = id => {
+    id = String(id || '');
+    return ID_RE.test(id) && byId.has(id) ? { id, name: nameOf(byId.get(id)) } : null;
+  };
+  const out = {};
+  const topic = (Array.isArray(c.topic) ? c.topic : []).slice(0, 2).map(x => ref(x && x.id)).filter(Boolean);
+  if (topic.length) out.topic = topic;
+  const prev = c.previous && ref(c.previous.id);
+  if (prev && !topic.some(t => t.id === prev.id)) out.previous = prev;
+  const t = c.task && typeof c.task === 'object' ? c.task : null;
+  const spec = t && t.kind === 'prep' && ctx.specialties.find(s => s.id === String(t.id || ''));
+  if (spec) out.task = { kind: 'prep', id: spec.id, name: spec.name };
+  if (PREF_LANG.includes(c.lang) && c.lang !== 'auto') out.lang = c.lang;
+  const f = c.followUp && typeof c.followUp === 'object' ? c.followUp : null;
+  if (f && FOLLOW_KINDS.includes(f.kind)) out.followUp = { kind: f.kind, style: FOLLOW_STYLES.includes(f.style) ? f.style : '' };
+  const resolved = (Array.isArray(c.resolved) ? c.resolved : []).slice(0, 2)
+    .map(r => { const x = r && ref(r.id); return x ? { word: safeText(r.word, 30) || 'that', ...x } : null; }).filter(Boolean);
+  if (resolved.length) out.resolved = resolved;
+  const corrections = (Array.isArray(c.corrections) ? c.corrections : []).slice(-MAX_CORRECTIONS)
+    .map(x => x && { about: (ref(x.about) || {}).id || '', text: safeText(x.text, 200) }).filter(x => x && x.text);
+  if (corrections.length) out.corrections = corrections;
+  return Object.keys(out).length ? out : null;
+}
+/* His voice, enforced: a reply never opens with a greeting, praise for the
+ * question or an introduction, whatever came back. */
+const OPENERS = [
+  /^(?:¡\s*)?(hi|hello|hey|hola|buenas)(\s+(there|again|de nuevo))?(\s+[^\s,!.:]{1,20})?\s*[,!.:—]+\s*/i,
+  /^(?:¡\s*)?(great|good|excellent|nice|wonderful|buena|excelente|gran)\s+(question|one|pregunta)\s*[,!.:—]+\s*/i,
+  /^(?:¡\s*)?(sure thing|sure|of course|absolutely|certainly|claro que s[ií]|claro|por supuesto)\s*[,!.:—]+\s*/i,
+  /^(?:I(?:'|’)?m|I am|Soy)\s+(?:Dr\.?|el Dr\.?|Doctor)\s+Smiley\b[^.!?]*[.!?]\s*/i,
+  /^As (?:Dr\.?|Doctor) Smiley,?\s*/i,
+];
+function tidyVoice(text) {
+  let s = String(text || '').trim();
+  for (let i = 0; i < 3; i++) {
+    const before = s;
+    for (const re of OPENERS) s = s.replace(re, '');
+    if (s === before) break;
+  }
+  s = s.trim();
+  if (!s) return String(text || '').trim();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+// "Brief" is a promise: one sentence of details, whatever came back. A
+// request in this conversation wins for this answer: "shorter" is brief even
+// without the preference, "more detail" isn't cut to one sentence.
+function fitLength(details, prefs, followUp) {
+  const style = followUp && followUp.kind === 'rephrase' ? followUp.style : '';
+  if (style === 'longer') return details;
+  if (style !== 'shorter' && (!prefs || prefs.length !== 'brief')) return details;
+  if (!details) return details;
   const m = details.match(/^.+?[.!?](\s|$)/);
   return (m ? m[0] : details).trim().slice(0, 240);
 }
@@ -250,7 +344,7 @@ function allowedActions(parsed, ctx, entries) {
     .slice(0, MAX_ACTIONS);
 }
 
-export { cleanContext, allowedActions, fitLength, ACTION_TYPES };
+export { cleanContext, cleanConversation, tidyVoice, allowedActions, fitLength, ACTION_TYPES };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -278,9 +372,12 @@ export default async function handler(req, res) {
       .filter(l => l && l.id && l.note);
     const history = (Array.isArray(body.history) ? body.history : [])
       .slice(-MAX_HISTORY)
-      .map(h => h && ({ asked: clip(h.q, 300), answered: clip(h.a, 300) }))
+      .map(h => h && ({ asked: clip(h.q, 300), answered: clip(h.a, 400),
+        about: (Array.isArray(h.about) ? h.about : []).slice(0, 3).map(id => clip(id, 80)).filter(id => ID_RE.test(id)) }))
       .filter(h => h && h.asked);
     const context = cleanContext(body.context);
+    const conversation = cleanConversation(body.context && body.context.conversation, entries, context);
+    if (conversation) context.conversation = conversation;
 
     // Reference material first, the question last.
     const userContent =
@@ -373,17 +470,27 @@ export default async function handler(req, res) {
     const lessonIds = (Array.isArray(parsed.lessonIds) ? parsed.lessonIds : [])
       .map(id => clip(id, 80)).filter(id => sentLessons.has(id));
     const st = parsed.suggestTerm || {};
+    // What the answer is about, and the options of a question back: only
+    // entries the app sent.
+    const topicIds = [...new Set((Array.isArray(parsed.topicIds) ? parsed.topicIds : [])
+      .map(id => clip(id, 80)).filter(id => sentIds.has(id)))].slice(0, 3);
+    const clarify = parsed.clarify === true;
+    // Leaning on the interpreter's own correction: not the Hub's answer.
+    const usedCorrection = parsed.usedCorrection === true && !!(conversation && conversation.corrections);
 
     return res.status(200).json({
       answer: {
-        fromHub: !!parsed.fromHub && sourceIds.length + lessonIds.length > 0,
-        headline: clip(parsed.headline, 200),
+        fromHub: !!parsed.fromHub && !usedCorrection && !clarify && sourceIds.length + lessonIds.length > 0,
+        headline: tidyVoice(clip(parsed.headline, 200)),
         sayLabel: clip(parsed.sayLabel, 60),
-        say: clip(parsed.say),
-        details: fitLength(clip(parsed.details), context.prefs),
+        say: clarify ? '' : clip(parsed.say),
+        details: clarify ? '' : fitLength(tidyVoice(clip(parsed.details)), context.prefs, conversation && conversation.followUp),
         sourceIds,
         lessonIds,
-        actions: allowedActions(parsed, context, entries),
+        topicIds,
+        clarify,
+        usedCorrection,
+        actions: clarify ? [] : allowedActions(parsed, context, entries),
         suggestTerm: { en: clip(st.en, 120), es: clip(st.es, 120), def: clip(st.def, 300) },
       },
     });
