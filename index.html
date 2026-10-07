@@ -16573,7 +16573,9 @@ function closeOutboxSheet(){
   document.getElementById('outboxOverlay').classList.remove('show');
 }
 
-async function copyText(text, btn){
+// Its own name: as a second copyText(text, btn) it replaced the app-wide
+// copyText(btn, text), and every Copy button copied "[object HTMLButtonElement]".
+async function copyOutboxText(text, btn){
   try{
     await navigator.clipboard.writeText(text);
     showToast('Copied.');
@@ -16593,13 +16595,13 @@ async function copyText(text, btn){
 
 function copyOutboxEntry(qid, btn){
   const e = OUTBOX_HELD.find(x => x.qid === qid);
-  if(e) copyText(outboxEntryText(e), btn);
+  if(e) copyOutboxText(outboxEntryText(e), btn);
 }
 
 function copyOutboxUnreadable(btn){
   let raw = '';
   try{ raw = localStorage.getItem(OUTBOX_UNREADABLE_KEY) || ''; }catch(e){}
-  copyText(raw, btn);
+  copyOutboxText(raw, btn);
 }
 
 // Back into the queue, at the end, so it sends after anything newer that is
