@@ -9741,17 +9741,51 @@ function doctorDirectoryKey(name){
   return norm || null;
 }
 
+/* A failed load used to empty the list, so a weak connection or a sign-in
+   hiccup looked exactly like "no doctors" (Jose: "I don't see any doctor").
+   Now the last list is kept on this phone and shown while loading or when
+   the database can't be reached, the screen says why, and it tries again
+   when the connection or the app comes back. Opening the screen before the
+   database has started waits for it instead of giving up. */
+const DOCTOR_DIR_CACHE_KEY = 'ih_doctorDirectory';
+let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '';
+function doctorDirFromCache(){
+  try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c : null; }catch(e){ return null; }
+}
+function doctorDirToCache(list){
+  // Without the full research text (re-fetched when a doctor is opened), so
+  // the copy stays small next to the glossary's.
+  try{ localStorage.setItem(DOCTOR_DIR_CACHE_KEY, JSON.stringify(list.map(({ researchResult, ...d }) => d))); }catch(e){}
+}
 async function loadDoctorDirectory(){
+  if(DOCTOR_DIR_STATE === 'loading') return;
+  if(!DOCTOR_DIRECTORY.length){ const c = doctorDirFromCache(); if(c) DOCTOR_DIRECTORY = c; }
+  DOCTOR_DIR_STATE = 'loading';
   try{
-    if(!db){ DOCTOR_DIRECTORY = []; return; }
+    if(!db) await hubAuthReady;
+    if(!db) throw Object.assign(new Error('The database did not start.'), { code: 'no-db' });
     const snap = await db.collection('doctor-directory').get();
     DOCTOR_DIRECTORY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    DOCTOR_DIR_STATE = 'ok'; DOCTOR_DIR_ERROR = '';
+    doctorDirToCache(DOCTOR_DIRECTORY);
   }catch(err){
     console.error('Could not load doctor directory', err);
-    DOCTOR_DIRECTORY = [];
+    DOCTOR_DIR_STATE = 'failed';
+    DOCTOR_DIR_ERROR = (err && err.code) || 'unknown';
   }
   scheduleRender();
 }
+function doctorDirProblem(){
+  const why = DOCTOR_DIR_ERROR === 'permission-denied'
+    ? "This phone isn't signed in to the team. Enter the team code (Team access), then try again."
+    : DOCTOR_DIR_ERROR === 'unavailable' || navigator.onLine === false
+      ? 'No connection to the database right now.'
+      : "The database didn't answer (" + escapeHtml(String(DOCTOR_DIR_ERROR)) + ').';
+  return why;
+}
+['online', 'visibilitychange'].forEach(t => window.addEventListener(t, () => {
+  if(DOCTOR_DIR_STATE === 'failed' && !document.hidden) loadDoctorDirectory();
+}));
 
 async function persistDoctorDirectoryEntry(id, record){
   if(!db){ showToast('Not connected to the database.'); return false; }
@@ -18114,7 +18148,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.0853';
+const BUILD_ID = 'b1007.0922';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -19092,7 +19126,12 @@ function renderDoctorDirectory(q){
   }
   list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
 
+  const retry = `<button type="button" class="btn btn-ghost" onclick="loadDoctorDirectory()">Try again</button>`;
   if(list.length===0){
+    if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE === 'failed')
+      return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Couldn't load the doctors.<br>${doctorDirProblem()}<div style="margin-top:13px">${retry}</div></div>`;
+    if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE !== 'ok')
+      return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Loading the doctors&hellip;</div>`;
     const msg = DOCTOR_DIRECTORY.length===0
       ? `${ICON_GRID} No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
       : 'No doctors match your search.';
@@ -19103,6 +19142,8 @@ function renderDoctorDirectory(q){
   const searching = !!q;
 
   let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
+  if(DOCTOR_DIR_STATE === 'failed')
+    html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
   html += duplicateBannerHtml();
   html += backfillBannerHtml();
   html += groupControlsHtml('doctors', groups, searching);
