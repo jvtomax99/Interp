@@ -41,8 +41,21 @@ body easier to see:
   floor, platform and two rings are no longer added to the scene; and
   `controls.maxPolarAngle=Math.PI`, so the camera can look straight up at
   the soles of the feet.
-- `app/globals.css`: a block appended at the end — the dark navy stage, light
-  text for what sits straight on it, solid white panels.
+- `app/globals.css`: blocks appended at the end — the dark navy stage, light
+  text for what sits straight on it, solid white panels, a visible track on
+  the explode slider (it drew 0px tall), and a phone layout (under 768px):
+  no big title, one row of controls at the top, a slim dock, a short card
+  where the dock was when a part is tapped, one Reset and one About, and
+  `touch-action` so a pinch on the controls can't zoom the whole Hub.
+- `app/orbit-controls.js`: three.js r159's OrbitControls (MIT), copied so a
+  pinch zooms toward the point between the fingers (marked "Interpreter
+  Hub"); `scene.tsx` imports it and turns on `zoomToCursor`, which also makes
+  the mouse wheel zoom toward the pointer. `app/orbit-controls.d.ts` borrows
+  three's types for it.
+- `app/scene.tsx`, phones: the camera leaves room for the new top row and
+  dock (170px instead of 350px), so the body fills about 60% of the screen
+  instead of 40%; Isolate frames the part below the top row.
+- `app/page.tsx`: `has-detail` on `<main>` while a part's card is open.
 - Only the gzip models are shipped (33 MB); the raw `.bin` copies (another
   58 MB) are only used by browsers without `DecompressionStream`
   (iOS before 16.4), which then show "An anatomy file could not be loaded."
@@ -53,7 +66,8 @@ Needs Node 22.13+.
 
 ```sh
 git clone https://github.com/ashemag/human-atlas && cd human-atlas
-# re-apply the changes listed above, then:
+git apply ../Interp/atlas/hub-changes.patch   # every source change below
+# (models/atlas.json also needs its chunk paths made relative), then:
 npm ci && npm run build
 ```
 
