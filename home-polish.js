@@ -237,8 +237,15 @@
     if(reduced.matches||document.hidden||!button||!button.isConnected)return;
     const pin=button.querySelector('.home-wave-pin'),svg=button.querySelector('.home-face');
     if(!pin||!svg||typeof window.drFaceIdle!=='function')return;
-    let onScreen=true;
-    const io=new IntersectionObserver(entries=>{onScreen=entries[0].isIntersecting;});
+    let onScreen=true,goneAt=0,lastNotice=0;
+    // Scrolled back up to him after a while: he notices you with a nod.
+    const io=new IntersectionObserver(entries=>{
+      const was=onScreen;onScreen=entries[0].isIntersecting;
+      if(!onScreen&&was){goneAt=performance.now();return;}
+      const now=performance.now();
+      if(onScreen&&!was&&goneAt&&now-goneAt>4000&&now-lastNotice>15000&&idleCtl){lastNotice=now;setTimeout(()=>idleCtl&&idleCtl.act('nod'),350);}
+    });
+    if(typeof window.smileySway==='function')window.smileySway(button,'50% 85%');
     io.observe(button);
     pin.style.transformOrigin='50% 88%';
     const ctl=window.drFaceIdle(svg,pin,{canPlay:()=>onScreen&&button.isConnected,first:forcedAct?300:900+Math.random()*600});
@@ -763,7 +770,7 @@
     // missing, a tap replays the hello as it always did.
     // Press and hold to pet him (index.html, smileyPettable): a giggle and
     // hearts, and that press doesn't open Ask.
-    const petted=typeof window.smileyPettable==='function'?window.smileyPettable(wave,()=>actNow('pet')):()=>false;
+    const petted=typeof window.smileyPettable==='function'?window.smileyPettable(wave,()=>{if(window.drSetMood)window.drSetMood('happy',180000);actNow('pet');}):()=>false;
     wave.addEventListener('click',e=>{
       if(petted()){e.preventDefault();return;}
       if(typeof window.openAskHub!=='function'){play();return;}
