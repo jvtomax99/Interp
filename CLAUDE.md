@@ -228,8 +228,14 @@ guide's is in the search box; for a dock "Show me" it steps aside
 (`body.gd-coaching`, then `smileyRider.sync()`, since the rider's observer
 doesn't see body classes) and the tip has no face. "Copy link" gives
 `?guide=<id>`, opened at startup. The first-week list and "New" badges are
-on this phone only (`ih_firstWeek`, `ih_guideSeen`). When a button moves,
-update its answer, steps and Show me selector in the same push.
+on this phone only (`ih_firstWeek`, `ih_guideSeen`).
+
+**Every visible change updates the User Guide in the same commit** (Jose's
+standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
+for anything new, any answer it makes wrong rewritten, `GUIDE_STEPS` and
+`GUIDE_COACH` kept in step with the controls they draw or light up, and a
+"New lately" card (`GUIDE_NEWS`) for a new feature. Say in the report what
+changed in the guide; say so in the commit message when nothing needed to.
 
 **Team access (one team code).** Everyone types the same team code
 (`hub-invites/{CODE}`, kind `team`); the owner shares it and can change it on
@@ -388,6 +394,8 @@ extending the tail.
 
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
+- Every change someone can see ships with its User Guide update (see the
+  User Guide paragraph above). Jose asked for this on every change.
 - Scope each session to one feature or one bug. Commit with a real message
   saying what changed — the first 200 commits were all "Add files via upload"
   and none of them can be read back.

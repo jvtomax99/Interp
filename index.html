@@ -12321,10 +12321,11 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 
 /* ---- Answers people open most, and what changed lately ---- */
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
+// Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'askremember', tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Dr. Smiley',            title:'He remembers how you like your answers' },
-  { id:'briefing',    tone:'gd-n2', pin:'pins/doctor-prep.webp',         eyebrow:'Before an appointment', title:'A two-minute briefing for any specialty' },
-  { id:'askexplain',  tone:'gd-n3', pin:'pins/medical-terminology.webp', eyebrow:'Glossary',              title:'Any term, explained in plain Spanish' },
+  { id:'askfollow',   tone:'gd-n1', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Follow-ups: “make it simpler”, “now in Spanish”' },
+  { id:'askremember', tone:'gd-n2', pin:'pins/review.webp',              eyebrow:'Dr. Smiley',            title:'He remembers how you like your answers' },
+  { id:'briefing',    tone:'gd-n3', pin:'pins/doctor-prep.webp',         eyebrow:'Before an appointment', title:'A two-minute briefing for any specialty' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -19563,7 +19564,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.2226';
+const BUILD_ID = 'b1007.2258';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than

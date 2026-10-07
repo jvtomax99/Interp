@@ -70,11 +70,22 @@ CSS animation runs on the same element: on an iPhone that froze him tiny at
 the start of the Home greeting. Write the value each frame instead
 (`placeFace` in `home-polish.js`).
 
-**Moved or renamed a button? Update the User Guide in the same push.**
-Dr. Smiley answers "how do I…" from the guide's entries (`GUIDE_TOPICS`),
-so a stale answer becomes a wrong answer from him too; nine had drifted.
-An answer with drawn steps (`GUIDE_STEPS`) or a "Show me" (`GUIDE_COACH`
-selectors) has to change there as well.
+**Every change someone can see updates the User Guide in the same commit.**
+Jose's standing rule: a new feature, a changed behaviour, a new or moved or
+renamed button, a new message. Dr. Smiley answers "how do I…" from the
+guide's entries (`GUIDE_TOPICS`), so a stale answer becomes a wrong answer
+from him too; nine had drifted. In `index.html`:
+- `GUIDE_TOPICS`: add an answer for something new, rewrite any answer the
+  change makes wrong (search the guide for the old label or wording).
+- `GUIDE_STEPS` (drawn steps) and `GUIDE_COACH` (the "Show me" selectors):
+  change them when the control they draw or point at changes.
+- `GUIDE_NEWS` ("New lately", three cards): a new feature gets a card,
+  newest first; the oldest card drops off (its answer stays).
+- `GUIDE_SECTIONS` / `GUIDE_SECTION_PINS`: only when a new area of the app
+  needs its own tile.
+A fix nobody can notice needs no guide change; say so in the commit
+message. Changes to `home-polish.*` or `pin-icons.js` still update the
+guide, which lives in `index.html`.
 
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
 nothing for the glossary, terms, chat, Doctor Prep, study, quizzes, profile,
