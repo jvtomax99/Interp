@@ -1,4 +1,5 @@
-/* Vercel serverless function — "Ask the Hub", the team's assistant.
+/* Vercel serverless function — "Ask the Hub", where Dr. Smiley, the
+ * team's interpreter assistant, answers.
  *
  * WHAT IT DOES
  * An interpreter asks a question between assignments ("how do I explain
@@ -21,6 +22,16 @@
  * Hub is locked (allowTeam). No patient information: the app warns before
  * sending anything that looks like a name with a date of birth or a record
  * number, and the prompt tells Claude not to repeat any.
+ *
+ * WHAT HE CAN DO, NOT JUST SAY
+ * The app also sends a small CONTEXT: the screen the interpreter came from,
+ * a glossary term they picked ("explain this term"), the specialties that
+ * have a briefing, and how many terms their Term Review record marks as still
+ * learning -- never anything about a patient. Dr. Smiley may suggest a few
+ * ACTIONS from a fixed list (open a briefing, practice those terms, open a
+ * term or its source...). Each must name a target the app sent; anything
+ * else is dropped here, and the app checks again before showing a button.
+ * The app runs the action and only then says it's done.
  *
  * SETUP: none beyond the ANTHROPIC_API_KEY already configured for Translate.
  */
@@ -46,8 +57,21 @@ const MAX_FIELD = 600;
 const MAX_ENTRIES = 30;
 const MAX_LESSONS = 8;
 const MAX_HISTORY = 3;
+const MAX_SPECIALTIES = 40;
+const MAX_ACTIONS = 3;
 
-const SYSTEM = `You are "Ask the Hub", the assistant inside the Interpreter Hub, used by the Spanish/English medical interpreter team at Hackensack University Medical Center. Interpreters ask between assignments, on a phone, often one-handed.
+/* What Dr. Smiley may offer to do. The target each takes:
+ *   open_prep          a specialty id from CONTEXT.specialties ("spec:...")
+ *   choose_prep        "prep"     (the briefing's specialty picker)
+ *   practice_learning  "learning" (Term Review on the terms still being learned)
+ *   start_review       "review"   (Term Review on everything due)
+ *   set_name           "name"     (a review record needs the name on this phone)
+ *   open_term          a glossary entry id ("t:...") from HUB ENTRIES or CONTEXT.selected
+ *   look_up            the same: a live search for the term's sources
+ *   open_source        CONTEXT.selected's id, only when it has a saved source link */
+const ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source'];
+
+const SYSTEM = `You are Dr. Smiley, the interpreter assistant inside the Interpreter Hub ("Ask the Hub"), used by the Spanish/English medical interpreter team at Hackensack University Medical Center. Interpreters ask between assignments, on a phone, often one-handed. You are friendly and brief, and you help them get ready and render language accurately.
 
 How to answer:
 - The message gives you HUB ENTRIES from the team's own glossary, False Friends list, Doctor Directory, provider list, Code of Ethics and User Guide, and TEAM NOTES the team lead has approved. They are the team's agreed knowledge: answer from them first. Put the id of every entry you relied on in sourceIds and every team note you followed in lessonIds.
@@ -58,7 +82,18 @@ How to answer:
 - If the question is about a real medical term that is missing from the Hub and worth keeping, fill suggestTerm (English, Spanish, a one-line definition) so the interpreter can add it. Otherwise leave its fields as "".
 - Answer in the language of the question, with Spanish terms in Spanish.
 - Never ask for or repeat patient-identifying information (names, dates of birth, record numbers, addresses). If the question includes any, answer only the general question and add a short reminder in details.
-- You help interpreters render language accurately. You are not a clinician: don't give medical advice or interpret a patient's results.`;
+- You help interpreters render language accurately. You are not a clinician: don't give medical advice or interpret a patient's results.
+
+Context and actions:
+- CONTEXT says which screen the interpreter came from, which glossary term they selected (if any), which specialties have a briefing, and their Term Review record (whether a name is set on the phone and how many terms are still being learned).
+- "Explain this term" (or "this word", "it") means CONTEXT.selected. Explain that entry: headline is the term and its Spanish; say is a plain Spanish rendering a patient would understand, with sayLabel "In plain Spanish"; details is at most two short sentences. Put its id in sourceIds. If nothing is selected and the question doesn't name a term, ask which one in headline and leave say "".
+- You can't open anything yourself. To help someone do something, add up to 3 actions from this list, and only with a target given in CONTEXT or HUB ENTRIES:
+  open_prep (target: a specialty id from CONTEXT.specialties) opens the appointment briefing for that specialty. Use it for "I'm covering X", "prep me", "heading to X". If the specialty isn't in the list, say so and use choose_prep (target "prep") instead.
+  practice_learning (target "learning") starts Term Review on the terms the interpreter is still learning. Only when CONTEXT.learning.count is above 0. If it's 0, say there are none yet and offer start_review (target "review") when a name is set.
+  set_name (target "name") when CONTEXT.learning.hasName is false and they want to practice: a review record belongs to a name.
+  open_term (target: a glossary id) opens that term in the glossary. look_up (same target) searches live for its sources. open_source (target: CONTEXT.selected.id) opens the selected term's saved source; only when CONTEXT.selected.hasLink is true.
+- Never say you have opened, started or done something; the interpreter taps the button. Say what the button will do, for example "Your Oncology briefing is ready to open."
+- Keep it short: one headline, at most two short sentences of details.`;
 
 const ANSWER_SCHEMA = {
   type: 'object',
@@ -70,6 +105,15 @@ const ANSWER_SCHEMA = {
     details:   { type: 'string' },
     sourceIds: { type: 'array', items: { type: 'string' } },
     lessonIds: { type: 'array', items: { type: 'string' } },
+    actions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { type: { type: 'string', enum: ACTION_TYPES }, target: { type: 'string' } },
+        required: ['type', 'target'],
+        additionalProperties: false,
+      },
+    },
     suggestTerm: {
       type: 'object',
       properties: { en: { type: 'string' }, es: { type: 'string' }, def: { type: 'string' } },
@@ -77,7 +121,7 @@ const ANSWER_SCHEMA = {
       additionalProperties: false,
     },
   },
-  required: ['fromHub', 'headline', 'sayLabel', 'say', 'details', 'sourceIds', 'lessonIds', 'suggestTerm'],
+  required: ['fromHub', 'headline', 'sayLabel', 'say', 'details', 'sourceIds', 'lessonIds', 'actions', 'suggestTerm'],
   additionalProperties: false,
 };
 
@@ -98,6 +142,63 @@ function cleanEntry(e) {
   }
   return out;
 }
+
+// Anything that looks like a patient identifier: a date, a long number, a
+// record-number label. Context values come from the app's own data, but none
+// of these belongs in it either way.
+const PHI = /\b(mrn|dob|d\.o\.b|date of birth|fecha de nacimiento|social security|ssn|medical record|record number)\b|\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b|\b\d{6,}\b/i;
+const ID_RE = /^[\w:.-]{1,80}$/;
+function safeText(v, max) {
+  const s = clip(v, max);
+  return PHI.test(s) ? '' : s;
+}
+// The app's context, cut down to the fields and sizes listed here.
+function cleanContext(c) {
+  c = c && typeof c === 'object' ? c : {};
+  const scr = c.screen && typeof c.screen === 'object' ? c.screen : {};
+  const sel = c.selected && typeof c.selected === 'object' ? c.selected : null;
+  const lr = c.learning && typeof c.learning === 'object' ? c.learning : {};
+  const out = {
+    screen: { id: ID_RE.test(String(scr.id || '')) ? String(scr.id) : '', name: safeText(scr.name, 80) },
+    selected: null,
+    specialties: (Array.isArray(c.specialties) ? c.specialties : []).slice(0, MAX_SPECIALTIES)
+      .filter(s => s && ID_RE.test(String(s.id || '')) && String(s.id).startsWith('spec:'))
+      .map(s => ({ id: String(s.id), name: safeText(s.name, 80) })).filter(s => s.name),
+    learning: {
+      hasName: !!lr.hasName,
+      loaded: !!lr.loaded,
+      count: Math.max(0, Math.min(999, Math.floor(+lr.count || 0))),
+    },
+  };
+  if (sel && ID_RE.test(String(sel.id || '')) && String(sel.id).startsWith('t:')) {
+    out.selected = { id: String(sel.id), en: safeText(sel.en, 160), es: safeText(sel.es, 160), domain: safeText(sel.domain, 80),
+      source: safeText(sel.source, 120), hasLink: !!sel.hasLink };
+  }
+  return out;
+}
+// Only actions from the list, each with a target the app actually sent.
+function allowedActions(parsed, ctx, entries) {
+  const glossary = new Set(entries.map(e => e.id).filter(id => id.startsWith('t:')));
+  if (ctx.selected) glossary.add(ctx.selected.id);
+  const ok = {
+    open_prep: new Set(ctx.specialties.map(s => s.id)),
+    choose_prep: new Set(['prep']),
+    practice_learning: new Set(ctx.learning.count > 0 ? ['learning'] : []),
+    start_review: new Set(ctx.learning.hasName ? ['review'] : []),
+    set_name: new Set(ctx.learning.hasName ? [] : ['name']),
+    open_term: glossary,
+    look_up: glossary,
+    open_source: new Set(ctx.selected && ctx.selected.hasLink ? [ctx.selected.id] : []),
+  };
+  const seen = new Set();
+  return (Array.isArray(parsed.actions) ? parsed.actions : [])
+    .map(a => a && ({ type: clip(a.type, 40), target: clip(a.target, 80) }))
+    .filter(a => a && ACTION_TYPES.includes(a.type) && ok[a.type].has(a.target))
+    .filter(a => { const k = a.type + '|' + a.target; if (seen.has(k)) return false; seen.add(k); return true; })
+    .slice(0, MAX_ACTIONS);
+}
+
+export { cleanContext, allowedActions, ACTION_TYPES };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -127,11 +228,13 @@ export default async function handler(req, res) {
       .slice(-MAX_HISTORY)
       .map(h => h && ({ asked: clip(h.q, 300), answered: clip(h.a, 300) }))
       .filter(h => h && h.asked);
+    const context = cleanContext(body.context);
 
     // Reference material first, the question last.
     const userContent =
       `HUB ENTRIES (${entries.length}):\n${JSON.stringify(entries)}\n\n` +
       `TEAM NOTES (${lessons.length}):\n${JSON.stringify(lessons)}\n\n` +
+      `CONTEXT:\n${JSON.stringify(context)}\n\n` +
       (history.length ? `EARLIER IN THIS CONVERSATION (oldest first):\n${JSON.stringify(history)}\n\n` : '') +
       `QUESTION:\n${question}`;
 
@@ -228,6 +331,7 @@ export default async function handler(req, res) {
         details: clip(parsed.details),
         sourceIds,
         lessonIds,
+        actions: allowedActions(parsed, context, entries),
         suggestTerm: { en: clip(st.en, 120), es: clip(st.es, 120), def: clip(st.def, 300) },
       },
     });

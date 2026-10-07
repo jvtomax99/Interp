@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v176-smiley-states';
+const CACHE_VERSION = 'interpreter-hub-v177-smiley-actions';
 const PRECACHE = [
   './',
   './index.html',

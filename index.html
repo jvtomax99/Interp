@@ -5457,6 +5457,30 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-note p{ font-size:14px; line-height:1.45; color:var(--ink); }
 .ask-note .ask-lab{ color:var(--good); }
 .ask-note small{ font-size:12px; color:var(--ink-soft); }
+.ask-tag.is-local{ color:var(--ink-soft); background:var(--line-soft); }
+/* Dr. Smiley's actions on an answer: real buttons (the main one navy), then
+   a line saying what happened, only once it has. */
+.ask-do{ display:flex; flex-direction:column; gap:6px; }
+.ask-do-btn{ display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:9px 13px; border-radius:var(--r-sm);
+  border:1px solid var(--line); background:var(--bg-hi); color:var(--ink); font:600 15px var(--sans); text-align:center; text-decoration:none; cursor:pointer; }
+.ask-do-btn.is-main{ background:var(--navy); border-color:var(--navy); color:#fff; }
+.ask-do-btn svg{ width:15px; height:15px; flex:none; }
+.ask-do-btn:active, .ask-do-btn.is-pressed{ transform:scale(.97); }
+.ask-do-btn:focus-visible, .ask-ctx button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+html[data-theme="dark"] .ask-do-btn.is-main{ background:#AFC0FF; border-color:#AFC0FF; color:#0E1424; }
+.ask-done{ font-size:14px; color:var(--good); }
+.ask-fail{ font-size:14px; color:var(--danger); }
+.ask-srcline{ font-size:14px; color:var(--ink-soft); }
+/* The term being explained, above the box; ✕ lets it go. */
+.ask-ctx{ display:flex; align-items:center; gap:9px; margin:0 0 9px; padding:6px 6px 6px 13px; border-radius:var(--r-md);
+  background:var(--accent-soft); color:var(--ink); font-size:14px; }
+.ask-ctx > span{ flex:1; min-width:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:0 6px; }
+.ask-ctx small{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+.ask-ctx b{ font-weight:650; overflow-wrap:anywhere; }
+.ask-ctx em{ font-style:normal; color:var(--ink-soft); }
+.ask-ctx.is-gone{ background:var(--danger-soft); color:var(--danger); }
+.ask-ctx button{ flex:none; width:44px; height:44px; border:0; border-radius:var(--r-sm); background:none; color:var(--ink-soft); font-size:16px; cursor:pointer; }
+@media (prefers-reduced-motion: reduce){ .ask-do-btn:active, .ask-do-btn.is-pressed{ transform:none; } }
 .ask-src{ display:flex; flex-wrap:wrap; gap:6px; }
 .ask-src button{ min-height:32px; padding:4px 11px; border-radius:999px; border:0; background:var(--accent-soft); color:var(--ink);
   font:600 12px var(--sans); cursor:pointer; text-align:left; }
@@ -8362,6 +8386,7 @@ function weeklyBoard(){
 // a box, pushing the next review further out. Intervals are in days.
 const REVIEW_INTERVALS = [0, 1, 3, 7, 14, 30];
 let TERM_REVIEWS = {}; // termId -> { box, nextReviewAt, reviewCount }
+let termReviewsLoaded = false;   // true once this person's record actually came back (not just "no records")
 let reviewActive = false;
 let reviewQueue = [];
 let reviewIndex = 0;
@@ -9697,6 +9722,7 @@ function reviewDocId(who, termId){
 
 async function loadTermReviews(){
   TERM_REVIEWS = {};
+  termReviewsLoaded = false;
   if(!db) return;
   const me = whoAmI().trim().toLowerCase();
   if(!me) return;
@@ -9706,6 +9732,7 @@ async function loadTermReviews(){
       const d = doc.data();
       TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount };
     });
+    termReviewsLoaded = true;
   }catch(err){
     console.error('loadTermReviews failed:', err);
   }
@@ -15143,6 +15170,7 @@ function openCardMenu(e, btn, catId, termId){
   const item = (act, icon, label, cls = '') =>
     `<button type="button" role="menuitem" class="card-menu-item${cls}" data-act="${act}">${icon}<span>${label}</span></button>`;
   cardMenuEl.innerHTML =
+    item('explain', ICON_ASK_TERM, 'Explain with Dr. Smiley') +
     item('copy-en', ICON_COPY, 'Copy English') +
     (t.es ? item('copy-es', ICON_COPY, 'Copy Spanish') : '') +
     item('attach', ICON_PAPERCLIP, 'Attach photo or PDF') +
@@ -15162,6 +15190,7 @@ function openCardMenu(e, btn, catId, termId){
       await copyText(spare, text);
       if(spare.classList.contains('copied')) showToast('Copied “' + text + '”');
     }
+    else if(act === 'explain') askAbout(cat.id, t.id);
     else if(act === 'attach') attachToTerm(t.id);
     else if(act === 'edit') openEditModal(cat.id, t.id);
     else if(act === 'delete') deleteTerm(cat.id, t.id);
@@ -16707,6 +16736,7 @@ function renderContent(){
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._num).padStart(2,'0')}</span>
           </div>
           <div class="actions" style="position:absolute; top:16px; right:16px;">
+            <button class="attach-btn" title="Explain with Dr. Smiley" aria-label="Explain ${escapeAttr(t.en)} with Dr. Smiley" onclick="askAbout('${cat.id}', '${t.id}')">${ICON_ASK_TERM}</button>
             <button class="attach-btn" title="Attach a photo or PDF" onclick="attachToTerm('${t.id}')">${ICON_PAPERCLIP}</button>
             <button class="icon-btn" title="Edit" onclick="openEditModal('${cat.id}', '${t.id}')">✎</button>
             <button class="icon-btn danger" title="Delete" onclick="deleteTerm('${cat.id}', '${t.id}')">✕</button>
@@ -16838,6 +16868,8 @@ function setCategory(id, isBack){
     }
     try{ history.pushState({ ih: true }, ''); }catch(e){}
   }
+  // Dr. Smiley is told which screen you asked him from (askContext).
+  if(id === 'ask' && activeCategory !== 'ask') ASK.from = activeCategory;
   activeCategory = id;
   if(id === 'chat'){
     // ORDER MATTERS. markChatSeen() moves the marker to the newest message,
@@ -18869,7 +18901,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ds-mode-seg button';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -18897,7 +18929,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1101';
+const BUILD_ID = 'b1007.1245';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -22905,7 +22937,8 @@ const ASK_STOP = new Set(('the a an and or of to in on for is are was be how do 
   + 'el la los las un una unos unas y o de del al en por para con como que qué cómo cual cuál es son se lo le les mi su sus '
   + 'decir dice digo significa palabra término patient paciente').split(' ').map(w => foldText(w)));
 
-const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {} };
+const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {},
+  from: 'home', selected: null };   // the screen Ask was opened from; a glossary term picked to talk about ({ cat, term })
 let askFaceSeq = 0;
 
 // The Hub's smiley (the lock screen's face), with its own gradient ids so
@@ -23032,7 +23065,7 @@ function renderAsk(){
     <div class="hipaa-notice-inline">${ICON_SHIELD}<span>No patient names, dates of birth or record numbers here.</span></div>
     <div class="chat-panel ask-panel">
       <div class="chat-messages ask-messages" id="askMessages" aria-live="polite">${askMessagesHtml()}</div>
-      <div class="chat-input-wrap"><div class="chat-input-row">
+      <div class="chat-input-wrap">${askContextChipHtml()}<div class="chat-input-row">
         <label for="askInput" class="sr-only">Ask a question</label>
         <input id="askInput" type="text" enterkeyhint="send" autocomplete="off" maxlength="500"
           placeholder="Ask about a term or a doctor" value="${escapeAttr(ASK.draft)}"
@@ -23060,8 +23093,8 @@ function askMessagesHtml(){
     return `<div class="ask-hello">
       <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
       <p class="ask-hello-title">Hi! What do you need?</p>
-      <p>I answer from the Hub first and tell you when something isn't in it.</p>
-      <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
+      <p>I'm Dr. Smiley, your interpreter assistant. I answer from the Hub first, tell you when something isn't in it, and can open your briefings and practice for you.</p>
+      <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${askSelectedTerm() ? `<button type="button" class="ask-chip" onclick="submitAsk('Explain this term.')">Explain ${escapeHtml(askSelectedTerm().term.en)}</button>` : ''}<button type="button" class="ask-chip" onclick="submitAsk('Help me practice five terms I’m still learning.')">Practice 5 terms I’m still learning</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
     </div>`;
   }
   return ASK.turns.map(askTurnHtml).join('') + (ASK.phi ? `
@@ -23089,28 +23122,32 @@ function askTurnHtml(t){
   if(t.status === 'refused') return q + `
     <div class="ask-card ask-warn">
       <p class="ask-details">I can't help with that one. Try asking it a different way.</p>
+      ${askActionsHtml(t)}
       <div class="ask-acts"><button type="button" class="is-go" onclick="askEdit('${t.id}')">Ask it another way</button></div>
     </div>`;
   if(t.status === 'error') return q + `
     <div class="ask-card ask-warn">
       <p class="ask-details">${escapeHtml(t.error)}</p>
+      ${askActionsHtml(t)}
       <div class="ask-acts"><button type="button" onclick="askRetry('${t.id}')">Try again</button></div>
     </div>`;
   const a = t.answer;
   const notes = (a.lessonIds || []).map(id => ASK.lessons.find(l => l.id === id)).filter(Boolean);
   const sources = (a.sourceIds || []).map(id => t.labels[id] ? { id, label: t.labels[id] } : null).filter(Boolean);
-  const canAdd = !a.fromHub && a.suggestTerm && a.suggestTerm.en;
+  const canAdd = !a.local && !a.fromHub && a.suggestTerm && a.suggestTerm.en;
   return q + `
     <div class="ask-card" id="ask-${t.id}">
-      <span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>
+      ${a.local ? `<span class="ask-tag is-local">On this phone · offline</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`}
       <p class="ask-headline">${escapeHtml(a.headline)}</p>
       ${a.say ? `<div><p class="ask-lab">${escapeHtml(a.sayLabel || 'Say')}</p><p class="ask-say">${escapeHtml(a.say)}</p></div>` : ''}
       ${notes.map(n => `<div class="ask-note"><p class="ask-lab">Team note</p><p>${escapeHtml(n.note)}</p>
         <small>${n.suggestedBy ? 'Suggested by ' + escapeHtml(n.suggestedBy) + ' · ' : ''}approved by ${escapeHtml(n.reviewedBy || askOwnerFirst())}</small></div>`).join('')}
       ${a.details ? `<p class="ask-details">${escapeHtml(a.details)}</p>` : ''}
-      ${a.fromHub ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
+      ${a.fromHub || a.local || askHandoff(t) ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
+      ${askSourceLineHtml(t)}
+      ${askActionsHtml(t)}
       ${sources.length ? `<div class="ask-src">${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${escapeAttr(s.id)}')">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
-      ${t.fixOpen ? `
+      ${a.local ? '' : t.fixOpen ? `
         <div class="ask-fix">
           <label class="ask-lab" for="askFix-${t.id}">What works better?</label>
           <textarea id="askFix-${t.id}" rows="3" maxlength="1000" oninput="askDraftFix('${t.id}', this.value)" placeholder="For example: many of our patients understand … better. Say that first.">${escapeHtml(t.fixDraft || '')}</textarea>
@@ -23165,27 +23202,44 @@ async function submitAsk(preset, force){
   ASK.draft = '';
   if(input) input.value = '';
   const { picked, lessons } = askRetrieve(q);
+  // The term you picked to talk about goes first, so it can be a source.
+  const sel = askSelectedTerm(), intent = askIntent(q);
+  if(sel){
+    const id = 't:' + sel.term.id;
+    for(let i = picked.length - 1; i >= 0; i--) if(picked[i].entry.id === id) picked.splice(i, 1);
+    picked.unshift({ entry: askTermEntry(sel), label: `Glossary · ${sel.term.en || sel.term.es}`, go: { cat: sel.cat.id, term: sel.term.id } });
+    picked.length = Math.min(picked.length, ASK_MAX_ENTRIES);
+  }
   const labels = {};
   picked.forEach(d => { labels[d.entry.id] = d.label; });
-  const turn = { id: 'q' + Date.now().toString(36), q, status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])) };
-  const history = ASK.turns.filter(x => x.status === 'done').slice(-3)
+  const turn = { id: 'q' + Date.now().toString(36), q, status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])),
+    sel: ASK.selected ? { ...ASK.selected } : null, n: (intent && intent.n) || 5, actions: [] };
+  const history = ASK.turns.filter(x => x.status === 'done' && !x.answer.local).slice(-3)
     .map(x => ({ q: x.q, a: [x.answer.headline, x.answer.say].filter(Boolean).join(' — ') }));
   ASK.turns.push(turn);
-  // No connection: don't even try. It waits and goes when the phone is back online.
-  if(navigator.onLine === false){
-    turn.status = 'waiting';
-    askReact(turn);
-    renderAskMessages(true);
-    return;
-  }
   ASK.busy = true;
-  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
-  ASK.abort = ctl;
   ASK.pending = turn.id;
   renderAskMessages(true);
   // After the repaint, so the first question's thinking plays on the face
   // that stays (the header's), not the hello one it replaces.
   drTask('processing', { key: 'ask:' + turn.id, perform: 'ponder', keep: true });
+  // Your Term Review record, for "practice the ones I'm still learning".
+  const rec = await askLoadRecord();
+  if(ASK.pending !== turn.id) return;                     // stopped meanwhile
+  // No connection: what can be done on this phone is done here (the
+  // briefing, practice, the glossary entry); anything else waits and goes
+  // when the phone is back online.
+  if(navigator.onLine === false){
+    ASK.busy = false; ASK.pending = null;
+    if(intent){ turn.status = 'done'; turn.answer = askLocalAnswer(intent, rec, turn); turn.actions = askIntentActions(intent, rec, turn); }
+    else turn.status = 'waiting';
+    turn.doneAt = Date.now();
+    renderAskMessages(true);
+    askReact(turn);
+    return;
+  }
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  ASK.abort = ctl;
   // What came back, applied only if you haven't stopped it meanwhile.
   const out = {};
   try{
@@ -23197,7 +23251,8 @@ async function submitAsk(preset, force){
         question: q,
         entries: picked.map(d => d.entry),
         lessons: lessons.map(l => ({ id: l.id, about: l.question, note: l.note })),
-        history
+        history,
+        context: askContext(rec)
       })
     });
     if(res.status === 401){ out.status = 'error'; out.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
@@ -23215,6 +23270,9 @@ async function submitAsk(preset, force){
   }
   if(ASK.pending !== turn.id) return;                     // stopped: askCancel already moved on
   Object.assign(turn, out);
+  // His suggestions, then what the phone itself recognised; the screen
+  // checks each again before it shows a button (askCheckAction).
+  turn.actions = askMergeActions(turn.answer ? turn.answer.actions : [], askIntentActions(intent, rec, turn));
   turn.doneAt = Date.now();
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
   if(activeCategory === 'ask') renderAskMessages(true);
@@ -23236,6 +23294,8 @@ function askOutcome(t){
   if(t.status === 'refused') return 'refused';
   if(t.status !== 'done' || !t.answer) return 'failed';
   const a = t.answer;
+  // Answered on this phone (offline): it did what was asked if it has something to offer.
+  if(a.local) return (t.actions || []).some(x => askCheckAction(x, t).ok) ? 'verified' : 'general';
   const sources = (a.sourceIds || []).filter(id => t.labels && t.labels[id]).length;
   const notes = (a.lessonIds || []).filter(id => ASK.lessons.some(l => l.id === id && l.status === 'approved')).length;
   return a.fromHub && sources + notes > 0 ? 'verified' : 'general';
@@ -23349,10 +23409,332 @@ function askRetry(id){
   const i = ASK.turns.findIndex(t => t.id === id);
   if(i < 0 || ASK.busy) return;
   const q = ASK.turns[i].q;
+  if(ASK.turns[i].sel) ASK.selected = ASK.turns[i].sel;   // the same term it was about
   ASK.turns.splice(i, 1);
   drTaskEnd('ask:' + id);
   submitAsk(q, true);
 }
+/* ---------- Dr. Smiley: context and actions ----------
+   Ask is how you talk to Dr. Smiley, and he can do things with the Hub's
+   own tools, not just answer:
+     "I'm covering oncology. Prep me."   -> the appointment briefing for that
+                                            specialty (Appointment prep)
+     "Help me practice five terms I'm still learning."
+                                         -> Term Review on those terms, from
+                                            your review record
+     "Explain this term."                -> the glossary entry you picked
+                                            (⋯ on its card), in plain Spanish,
+                                            with its source
+   The phone sends a small context (askContext): the screen you came from,
+   the term you picked, the specialties that have a briefing, and how many
+   terms your record marks as still learning. Nothing about a patient, and
+   nothing free-form beyond the glossary entry itself.
+   He can suggest actions from a fixed list (api/ask.js checks each one's
+   target against what was sent); the phone recognises the same three
+   requests itself (askIntent), so they also work offline and when the
+   server fails. Every action is checked again when it's drawn and when it's
+   tapped (askCheckAction): a specialty or term that's gone, or a record with
+   nothing to practise, gives no button, or a message saying why. "Done" is
+   said only after the screen it opens is actually there (askRunAction). */
+const ICON_ASK_TERM = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 9.4a2 2 0 1 1 2.8 1.8c-.5.3-.8.6-.8 1.2M12 14.4v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ASK_ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source', 'ask_online'];
+
+// The term you picked to talk about, if it's still in the glossary.
+function askSelectedTerm(){
+  const s = ASK.selected;
+  if(!s) return null;
+  const cat = DATA.categories.find(c => c.id === s.cat);
+  const term = cat && cat.terms.find(t => t.id === s.term);
+  return term ? { cat, term } : null;
+}
+// A glossary id ("t:..." as sent to the server) back to its term.
+function askTermById(id){
+  const tid = String(id || '').replace(/^t:/, '');
+  for(const cat of DATA.categories){ const term = cat.terms.find(t => t.id === tid); if(term) return { cat, term }; }
+  return null;
+}
+function askTermEntry(x){
+  return { id: 't:' + x.term.id, type: 'Glossary term', domain: x.cat.name, en: x.term.en || '', es: x.term.es || '',
+    definition: x.term.def || '', notes: x.term.notes || '', source: x.term.source || '' };
+}
+// "Explain with Dr. Smiley" on a term card: Ask, about that term.
+function askAbout(catId, termId){
+  ASK.selected = { cat: catId, term: termId };
+  ASK.draft = 'Explain this term.';
+  ASK.view = 'chat';
+  setCategory('ask');
+  const input = document.getElementById('askInput');
+  if(input){ input.value = ASK.draft; if(prefersAutoFocus()) input.focus(); }
+}
+function askClearSelected(){
+  ASK.selected = null;
+  const el = document.getElementById('askCtx');
+  if(el) el.outerHTML = askContextChipHtml();
+}
+function askContextChipHtml(){
+  const sel = askSelectedTerm();
+  if(ASK.selected && !sel) return `<div class="ask-ctx is-gone" id="askCtx" role="status"><span>The term you picked is no longer in the glossary.</span><button type="button" onclick="askClearSelected()" aria-label="Clear">✕</button></div>`;
+  if(!sel) return '<div id="askCtx" hidden></div>';
+  return `<div class="ask-ctx" id="askCtx"><span><small>Explaining</small><b>${escapeHtml(sel.term.en || sel.term.es)}</b><em>${escapeHtml(sel.cat.name)}</em></span><button type="button" onclick="askClearSelected()" aria-label="Stop explaining ${escapeAttr(sel.term.en)}">✕</button></div>`;
+}
+// Specialties with a briefing: the same list Appointment prep offers.
+function askSpecialties(){
+  return getDomainTiles().filter(t => !t.parentId && DATA.categories.some(c => c.id === t.id));
+}
+// Terms your Term Review record marks as still learning (box 0-1, as the
+// briefing counts them): lowest box first, then the longest overdue.
+function askLearningTerms(){
+  const byId = new Map(allTermsFlat().map(t => [t.id, t]));
+  return Object.entries(TERM_REVIEWS).filter(([id, r]) => r && r.box <= 1 && byId.has(id))
+    .sort((a, b) => (a[1].box - b[1].box) || ((a[1].nextReviewAt || 0) - (b[1].nextReviewAt || 0)))
+    .map(([id]) => byId.get(id));
+}
+// Your record, loaded if it can be (a few seconds at most). loaded: false
+// means it couldn't be read (offline before it was ever loaded), not "empty".
+async function askLoadRecord(){
+  if(!whoAmI()) return { hasName: false, loaded: false };
+  const wait = p => Promise.race([p, new Promise(r => setTimeout(r, 4000))]);
+  try{ await wait(ensureLoaded('termReviews', loadTermReviews)); }catch(e){}
+  if(!termReviewsLoaded && db && navigator.onLine !== false){ try{ await wait(loadTermReviews()); }catch(e){} }
+  return { hasName: true, loaded: termReviewsLoaded };
+}
+const ASK_SCREEN_NAMES = { home: 'Home', review: 'Term Review', practice: 'CoreCHI Practice', prep: 'Appointment briefing', appt: 'Appointment',
+  translate: 'Translate', chat: 'Team Chat', all: 'All domains', falsefriends: 'False Friends', 'doctor-directory': 'Doctor Directory', userguide: 'User Guide' };
+// The small context sent with a question (bounded; api/ask.js cuts it down again).
+function askContext(rec){
+  const from = ASK.from || 'home', cat = DATA.categories.find(c => c.id === from), sel = askSelectedTerm();
+  return {
+    screen: { id: /^[\w:.-]{1,80}$/.test(from) ? from : '', name: cat ? cat.name : (ASK_SCREEN_NAMES[from] || '') },
+    selected: sel ? { id: 't:' + sel.term.id, en: sel.term.en || '', es: sel.term.es || '', domain: sel.cat.name,
+      source: sel.term.source || '', hasLink: /^https?:\/\//i.test(externalUrl(sel.term.url)) } : null,
+    specialties: askSpecialties().slice(0, 40).map(d => ({ id: 'spec:' + d.id, name: d.name })),
+    learning: { hasName: !!rec.hasName, loaded: !!rec.loaded, count: rec.loaded ? askLearningTerms().length : 0 },
+  };
+}
+/* The three requests, recognised on the phone. */
+const ASK_NUMBERS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10 };
+// Everyday words for a specialty, for when its name isn't used.
+const ASK_SPEC_WORDS = [[/\bcancer|\bchemo|\btumou?r|oncolog|\bonc\b|hem[ae]?[- ]?onc/, 'onco'], [/\bheart|cardi/, 'cardiac'],
+  [/\bob\b|obstet|gyn|pregnan|labor and delivery|prenatal/, 'obgyn'], [/\bkids?\b|\bchild|pediatr|\bpeds\b/, 'peds'], [/\ber\b|emergenc/, 'er'],
+  [/\beyes?\b|ophth/, 'ophth'], [/\bskin\b|dermat/, 'derm'], [/psych|mental/, 'mh'], [/\blungs?\b|pulmon|respirat/, 'pulm'], [/\bbones?\b|orthop/, 'ortho'],
+  [/stomach|gastro|\bgi\b/, 'gi'], [/surg|anesth/, 'surg'], [/infusion/, 'infusion'], [/\blabs?\b/, 'lab'], [/pharm|medication|\bmeds\b/, 'pharm'],
+  [/infectio/, 'id'], [/genetic/, 'genetics'], [/neuro|developmental/, 'neuro']];
+const ASK_SPEC_SKIP = new Set(['and', 'with', 'center', 'results', 'resources', 'general', 'professional', 'failure', 'recovery']);
+function askFindSpecialty(q){
+  const f = foldText(q).toLowerCase(), doms = askSpecialties(), has = id => doms.some(d => d.id === id);
+  const top = id => { const c = DATA.categories.find(x => x.id === id); return c && c.parentId ? c.parentId : id; };
+  // A word of a domain's or subgroup's own name (the first five letters are
+  // enough: "cardiology" finds "Cardiac", "radiation" finds Oncology's Radiation).
+  const words = f.match(/[a-z]{4,}/g) || [];
+  const stem = w => w.slice(0, 5);
+  for(const c of DATA.categories){
+    const names = (foldText(c.name).toLowerCase().match(/[a-z]{4,}/g) || []).filter(w => !ASK_SPEC_SKIP.has(w));
+    if(names.some(n => words.some(w => n.length >= 5 && w.length >= 5 ? stem(n) === stem(w) : n === w)) && has(top(c.id))) return top(c.id);
+  }
+  for(const [re, id] of ASK_SPEC_WORDS) if(re.test(f) && has(id)) return id;
+  return null;
+}
+function askIntent(q){
+  const f = foldText(q).toLowerCase();
+  if(/\b(prep|prepare|brief|briefing|covering|cover|heading to|going to|assigned to|get me ready)\b/.test(f) && !/\b(practice|practise|drill|quiz)\b/.test(f)){
+    // No specialty named: the domain you asked from, if you were in one.
+    const from = DATA.categories.find(c => c.id === ASK.from);
+    return { kind: 'prep', spec: askFindSpecialty(q) || (from ? (from.parentId || from.id) : null) };
+  }
+  if(/\b(practice|practise|drill|quiz me|study|flashcards?|review)\b/.test(f) && /\b(terms?|words?|learning|still|struggl\w*|weak|missed|review)\b/.test(f)){
+    const m = f.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/);
+    const n = m ? (+m[1] || ASK_NUMBERS[m[1]] || 5) : 5;
+    return { kind: 'practice', n: Math.max(1, Math.min(10, n)) };
+  }
+  if(/\b(explain|explicame|explica|this (term|word)|what does (this|it) mean|in plain spanish|que significa)\b/.test(f)) return { kind: 'explain' };
+  return null;
+}
+// What the phone itself would offer for a recognised request.
+function askIntentActions(intent, rec, t){
+  if(!intent) return [];
+  if(intent.kind === 'prep') return intent.spec ? [{ type: 'open_prep', target: 'spec:' + intent.spec }] : [{ type: 'choose_prep', target: 'prep' }];
+  if(intent.kind === 'practice'){
+    if(!rec.hasName) return [{ type: 'set_name', target: 'name' }];
+    if(rec.loaded && askLearningTerms().length) return [{ type: 'practice_learning', target: 'learning' }];
+    return rec.loaded && dueReviewCount() ? [{ type: 'start_review', target: 'review' }] : [];
+  }
+  if(intent.kind === 'explain'){
+    const sel = t && t.sel && askTermById(t.sel.term);
+    if(!sel) return [];
+    const id = 't:' + sel.term.id, out = [];
+    if(navigator.onLine === false) out.push({ type: 'ask_online', target: id });
+    out.push(/^https?:\/\//i.test(externalUrl(sel.term.url)) ? { type: 'open_source', target: id } : { type: 'look_up', target: id });
+    out.push({ type: 'open_term', target: id });
+    return out;
+  }
+  return [];
+}
+// His suggestions first; the phone's own fill in kinds he didn't suggest.
+function askMergeActions(model, local){
+  const out = [], seen = new Set();
+  const kinds = new Set((model || []).map(a => a && a.type));
+  (model || []).concat((local || []).filter(a => !kinds.has(a.type) || a.type === 'open_term')).forEach(a => {
+    if(!a || !ASK_ACTION_TYPES.includes(a.type)) return;
+    const k = a.type + '|' + a.target;
+    if(!seen.has(k)){ seen.add(k); out.push({ type: a.type, target: String(a.target || '') }); }
+  });
+  return out.slice(0, 4);
+}
+/* Is this action still possible, and what does its button say? Checked when
+   drawn and again when tapped. */
+function askCheckAction(a, t){
+  if(!a || !ASK_ACTION_TYPES.includes(a.type)) return { ok: false, why: "I can't do that from here." };
+  switch(a.type){
+    case 'open_prep': {
+      const id = String(a.target).replace(/^spec:/, ''), d = askSpecialties().find(x => x.id === id);
+      return d ? { ok: true, main: true, label: `Open the ${d.name} briefing` } : { ok: false, why: "That specialty isn't in the Hub any more." };
+    }
+    case 'choose_prep': return { ok: true, label: 'Choose a specialty' };
+    case 'practice_learning': {
+      if(!whoAmI()) return { ok: false, why: 'Set your name first: your review record is kept under it.' };
+      const n = Math.min((t && t.n) || 5, askLearningTerms().length);
+      return n ? { ok: true, main: true, label: `Practice ${n} term${n === 1 ? '' : 's'} I’m still learning` } : { ok: false, why: 'No terms are marked “still learning” right now.' };
+    }
+    case 'start_review': {
+      const due = dueReviewCount();
+      return whoAmI() && due ? { ok: true, label: `Review ${Math.min(due, 15)} due term${Math.min(due, 15) === 1 ? '' : 's'}` } : { ok: false, why: 'Nothing is due in Term Review right now.' };
+    }
+    case 'set_name': return whoAmI() ? { ok: false, why: 'Your name is already set.' } : { ok: true, main: true, label: 'Set your name' };
+    case 'open_term': case 'look_up': case 'open_source': case 'ask_online': {
+      const x = askTermById(a.target);
+      if(!x) return { ok: false, why: 'That term is no longer in the glossary.' };
+      const name = x.term.en || x.term.es;
+      if(a.type === 'open_term') return { ok: true, label: `Open “${name}” in the glossary` };
+      if(a.type === 'look_up') return { ok: true, label: x.term.source ? `Find the ${x.term.source.replace(/\s*\(.*\)\s*$/, '')} page` : 'Find a source' };
+      if(a.type === 'ask_online') return navigator.onLine === false ? { ok: true, main: true, label: 'Plain Spanish when I’m back online' } : { ok: false, why: "You're online now." };
+      const href = externalUrl(x.term.url);
+      if(!/^https?:\/\//i.test(href)) return { ok: false, why: 'No source link is saved for this term.' };
+      let host = ''; try{ host = new URL(href).hostname.replace(/^www\./, ''); }catch(e){}
+      return { ok: true, href, label: `Source: ${x.term.source || host}` };
+    }
+  }
+  return { ok: false, why: "I can't do that from here." };
+}
+// An answer that only hands you one of the Hub's own tools (a briefing,
+// Term Review) states no facts to double-check; its label stays as sent.
+function askHandoff(t){
+  const a = t.answer;
+  if(!a || a.say || (a.sourceIds || []).length) return false;
+  // A question back ("Which term do you mean?") states nothing either.
+  return !a.details || (t.actions || []).some(x => x.type !== 'open_term' && x.type !== 'look_up' && askCheckAction(x, t).ok);
+}
+function askActionsHtml(t){
+  const list = (t.actions || []).map((a, i) => ({ a, i, c: askCheckAction(a, t) })).filter(x => x.c.ok);
+  const did = t.did || {};
+  const notes = Object.values(did).map(d => `<p class="${d.ok ? 'ask-done' : 'ask-fail'}" role="status">${d.ok ? '✓ ' : ''}${escapeHtml(d.msg)}</p>`).join('');
+  if(!list.length && !notes) return '';
+  return `<div class="ask-do">${list.map(({ a, i, c }) => c.href
+    ? `<a class="ask-do-btn" href="${escapeAttr(c.href)}" target="_blank" rel="noopener">${escapeHtml(c.label)} ${ICON_EXTERNAL}</a>`
+    : `<button type="button" class="ask-do-btn${c.main ? ' is-main' : ''}" onclick="askRunAction('${t.id}', ${i})">${escapeHtml(c.label)}</button>`).join('')}</div>${notes}`;
+}
+// Explaining a term: where it comes from, as the glossary records it. A
+// source link only when one is saved (else "Find the ... page" looks it up).
+function askSourceLineHtml(t){
+  if(!t.sel || !t.answer) return '';
+  const x = askTermById(t.sel.term);
+  if(!x || !(t.answer.sourceIds || []).includes('t:' + x.term.id)) return '';
+  return x.term.source ? `<p class="ask-srcline"><span class="ask-lab">Source</span>${escapeHtml(x.term.source)}</p>` : `<p class="ask-srcline"><span class="ask-lab">Source</span>None saved for this term yet</p>`;
+}
+/* Offline: the answer for a recognised request, from what's on the phone. */
+function askLocalAnswer(intent, rec, t){
+  const a = { local: true, fromHub: false, headline: '', sayLabel: '', say: '', details: '', sourceIds: [], lessonIds: [], actions: [], suggestTerm: { en: '', es: '', def: '' } };
+  if(intent.kind === 'prep'){
+    const d = intent.spec && askSpecialties().find(x => x.id === intent.spec);
+    if(d){ a.headline = `Your ${d.name} briefing is ready`; a.details = 'It works offline: the words you’re still learning, the traps to watch and the appointment timer.'; }
+    else { a.headline = 'Which specialty are you covering?'; a.details = 'Pick it and I’ll open the briefing.'; }
+  }else if(intent.kind === 'practice'){
+    const n = rec.loaded ? askLearningTerms().length : 0;
+    if(!rec.hasName){ a.headline = 'Set your name first'; a.details = 'Your review record is kept under your name on this phone.'; }
+    else if(!rec.loaded){ a.headline = 'I can’t read your review record offline'; a.details = 'Try again when you’re back online.'; }
+    else if(!n){ a.headline = 'No terms marked “still learning” yet'; a.details = dueReviewCount() ? 'Term Review has terms due if you want to practise anyway.' : 'Terms you miss in Term Review, the warm-up or a briefing show up here.'; }
+    else{ const k = Math.min(t.n || 5, n); a.headline = `Practice ${k} term${k === 1 ? '' : 's'} you’re still learning`; a.details = k < (t.n || 5) ? `You have ${n} right now.` : 'From your Term Review record.'; }
+  }else{
+    const x = t.sel && askTermById(t.sel.term);
+    if(x){
+      a.headline = `${x.term.en}${x.term.es ? ' — ' + x.term.es : ''}`;
+      a.details = (x.term.def || '').slice(0, 220) + (x.term.def ? ' ' : '') + 'A plain Spanish version needs a connection.';
+      a.sourceIds = ['t:' + x.term.id];
+      t.labels['t:' + x.term.id] = `Glossary · ${x.term.en || x.term.es}`;
+      t.go['t:' + x.term.id] = { cat: x.cat.id, term: x.term.id };
+    }else{ a.headline = 'Which term?'; a.details = 'Open it in the glossary, tap ⋯ on its card, then Explain with Dr. Smiley.'; }
+  }
+  return a;
+}
+/* Doing it. Each says it's done only once the screen it opens is there. */
+const ASK_RUN = {
+  async open_prep(a){
+    const d = askSpecialties().find(x => x.id === String(a.target).replace(/^spec:/, ''));
+    if(!d) return { ok: false, why: "That specialty isn't in the Hub any more." };
+    PREP.domainId = d.id; PREP.doctor = '';
+    try{ localStorage.setItem('ih_prepLast', JSON.stringify(PREP)); }catch(e){}
+    setCategory('prep');
+    const h = document.querySelector('#content .prep-hero h1');
+    return activeCategory === 'prep' && h && h.textContent === d.name ? { ok: true, msg: `Your ${d.name} briefing is open` } : { ok: false, why: "The briefing didn't open. Try again." };
+  },
+  async choose_prep(){
+    openPrep();
+    return document.getElementById('prepOverlay')?.classList.contains('show') ? { ok: true } : { ok: false, why: "The specialty list didn't open." };
+  },
+  async practice_learning(a, t){
+    const rec = await askLoadRecord();
+    if(!rec.hasName) return { ok: false, why: 'Set your name first: your review record is kept under it.' };
+    if(!rec.loaded) return { ok: false, why: 'Your review record didn’t load. Check your connection and try again.' };
+    const terms = askLearningTerms().slice(0, (t && t.n) || 5);
+    if(!terms.length) return { ok: false, why: 'No terms are marked “still learning” right now.' };
+    reviewQueue = terms.slice(); reviewActive = true; reviewIndex = 0; reviewRevealed = false; reviewGotIt = 0; reviewMissed = 0;
+    setCategory('review');
+    const ok = activeCategory === 'review' && reviewActive && reviewQueue.length === terms.length && document.querySelector('#content .review-card');
+    return ok ? { ok: true, msg: `Practicing ${terms.length} term${terms.length === 1 ? '' : 's'} you’re still learning` } : { ok: false, why: "Term Review didn't start. Try again." };
+  },
+  async start_review(){
+    setCategory('review');
+    await startReview();
+    return reviewActive && document.querySelector('#content .review-card') ? { ok: true, msg: 'Term Review started' } : { ok: false, why: 'Nothing is due in Term Review right now.' };
+  },
+  async set_name(){
+    openNameModal();
+    return document.getElementById('nameOverlay')?.classList.contains('show') ? { ok: true } : { ok: false, why: "The name sheet didn't open." };
+  },
+  async open_term(a){
+    const x = askTermById(a.target);
+    if(!x) return { ok: false, why: 'That term is no longer in the glossary.' };
+    revealTerm(x.cat.id, x.term.id);
+    return document.querySelector(`#content .card[data-term-id="${CSS.escape(x.term.id)}"]`) ? { ok: true, msg: `Opened “${x.term.en || x.term.es}”` } : { ok: false, why: "That term didn't open. Try again." };
+  },
+  async look_up(a){
+    const x = askTermById(a.target);
+    if(!x) return { ok: false, why: 'That term is no longer in the glossary.' };
+    openTermLookup(x.cat.id, x.term.id);
+    return document.getElementById('termLookup')?.classList.contains('show') ? { ok: true } : { ok: false, why: "The lookup didn't open." };
+  },
+  async ask_online(a, t){
+    if(navigator.onLine !== false) return { ok: false, why: "You're online now. Ask again." };
+    ASK.turns.push({ id: 'q' + Date.now().toString(36), q: t.q, status: 'waiting', labels: {}, go: {}, sel: t.sel ? { ...t.sel } : null, n: t.n, actions: [] });
+    return { ok: true, msg: 'I’ll ask for the plain Spanish when you’re back online' };
+  },
+};
+async function askRunAction(turnId, i){
+  const t = ASK.turns.find(x => x.id === turnId), a = t && t.actions && t.actions[i];
+  if(!a) return;
+  const chk = askCheckAction(a, t);
+  let res;
+  if(!chk.ok) res = { ok: false, why: chk.why };
+  else{ try{ res = await ASK_RUN[a.type](a, t); }catch(e){ res = { ok: false, why: "That didn't work. Try again." }; } }
+  t.did = t.did || {};
+  if(res.ok && res.msg) t.did[a.type + '|' + a.target] = { ok: true, msg: res.msg };
+  else if(!res.ok) t.did[a.type + '|' + a.target] = { ok: false, msg: res.why };
+  if(res.ok){
+    if(res.msg){ showToast(res.msg); drPerform('nod', { priority: DR_P.REACT }); }
+  }else showToast(res.why);
+  if(activeCategory === 'ask') renderAskMessages(false);
+}
+
 function askEditPhi(){
   const q = ASK.phi; ASK.phi = null; ASK.draft = q || '';
   renderAskMessages(true);
