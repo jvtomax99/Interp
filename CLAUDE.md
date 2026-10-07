@@ -273,6 +273,14 @@ lost concurrent edits. Do not reintroduce that.
   is stopped). Interruptions walk through in-between frames (`DR_FACE_BACK`);
   a sequence whose consecutive frames aren't neighbours gets them filled in.
   Reduced motion, a hidden page and a detached svg are handled there.
+- **Don't move him with a paused animation you seek by hand.** The Home
+  greeting used to grow him in with a paused Web Animation whose
+  `currentTime` was set every frame, while his breathing (a CSS animation on
+  the same element) ran beside it. On an iPhone he could stay drawn at its
+  first frame, 8% of his size, for the rest of the hello (never seen in
+  Chromium). The entrance is now written straight onto him each frame
+  (`placeFace` in `home-polish.js`) and breathing waits until he has landed
+  (`.home-wave-entering`).
 - **His personality comes from task states, not timers.** `drTask(kind)`
   (available, attentive, processing, answering, celebrating, uncertain;
   offline, appointment and resting follow the phone) is one state for the

@@ -284,7 +284,7 @@
       const k=(t-1480)/1120,bounce=Math.abs(Math.sin(Math.PI*3*k))*(1-.6*k);
       y=-4*bounce;sx=1+.025*(1-bounce)*(1-k);sy=1-.025*(1-bounce)*(1-k);angle=3*Math.sin(TAU*1.5*k)*(1-k);
     }
-    return {opacity,transform:`translate3d(0,${y.toFixed(2)}px,0) rotate(${angle.toFixed(2)}deg) scale(${sx.toFixed(4)},${sy.toFixed(4)})`};
+    return {opacity,angle,transform:`translate3d(0,${y.toFixed(2)}px,0) rotate(${angle.toFixed(2)}deg) scale(${sx.toFixed(4)},${sy.toFixed(4)})`};
   }
 
   async function playGreeting(button, resume = null){
@@ -339,6 +339,8 @@
     activeSequence=sequence;
     const thought=createThought(button,sequence.message);
     let frame=0, animations=[], observer;
+    // His entrance (placeFace below); declared here so stop() can always call it.
+    let entered=true, landed=()=>{};
     const width=window.innerWidth;
     const resizeStop=()=>{if(window.innerWidth!==width)stop();};
     function stop(){
@@ -347,6 +349,7 @@
       if(activeSequence===sequence)activeSequence=null;
       animations.forEach(a=>{a.onfinish=null;a.cancel();});
       animations=[];
+      if(!entered)landed();
       if(!idleRunning)setFace(faceSvg,FACE_REST);
       canvas.remove();
       thought.remove();
@@ -381,8 +384,24 @@
     const desktop=window.innerWidth>=901;
     const dpr=desktop?1:Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
     // The face springs in, rests as drawn, then squishes and pops into a laugh.
-    const waveFrames=Array.from({length:166},(_,i)=>({offset:i/165,...faceBody(i/165*FACE_MS)}));
-    entranceWave=animate(art,waveFrames,{duration:FACE_MS,delay:FACE_AT,fill:'backwards',easing:'linear'});
+    // Written straight onto him every frame (placeFace, from draw). It used
+    // to be a paused browser animation moved along by setting its time; on an
+    // iPhone that could stay on its first frame -- him at 8% of his size --
+    // while the rest of the hello carried on, because his breathing (a CSS
+    // animation on the same layer) is drawn by the graphics chip and the
+    // paused one wasn't redrawn with it. Breathing waits until he has landed
+    // (.home-wave-entering, home-polish.css).
+    entranceWave=null;
+    entered=false;
+    button.classList.add('home-wave-entering');
+    landed=()=>{entered=true;art.style.transform='';art.style.opacity='';smileyTilt=0;button.classList.remove('home-wave-entering');};
+    const placeFace=t=>{
+      if(entered)return;
+      if(t>=FACE_AT+FACE_MS){landed();return;}
+      const f=faceBody(Math.max(0,t-FACE_AT));
+      art.style.transform=f.transform;art.style.opacity=String(f.opacity);smileyTilt=f.angle;
+    };
+    placeFace(sequence.elapsed);
     // Ask the Hub's entrance (picked by Jose: "Pendulum swing-in"). The ring
     // fades in with the face; once he has landed, the badge is released from
     // the side and swings to rest on its lanyard (askBadge, real physics).
@@ -498,6 +517,7 @@
       lastFrame=now;
       const elapsed=sequence.elapsed;
       animations.forEach(a=>{a.currentTime=elapsed;});
+      placeFace(elapsed);
       if(elapsed>=BADGE_AT&&button.classList.contains('home-ask-wait')){button.classList.remove('home-ask-wait');askBadge.swing(-38);}
       if(elapsed<FACE_AT+FACE_MS)setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
       else if(!idleRunning&&!sequence.idled){sequence.idled=true;setFace(faceSvg,FACE_REST);startIdle(button);}

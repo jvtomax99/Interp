@@ -65,6 +65,11 @@ subgroup is a collapsed heading: the heading opens it where it is, and its
 Open button navigates (`setCategory`, so Back retraces it). A new touch
 control that should show a press goes in the `LIFTS` list in `index.html`.
 
+**Dr. Smiley is never moved by a paused animation seeked by hand** while a
+CSS animation runs on the same element: on an iPhone that froze him tiny at
+the start of the Home greeting. Write the value each frame instead
+(`placeFace` in `home-polish.js`).
+
 **Moved or renamed a button? Update the User Guide in the same push.**
 Dr. Smiley answers "how do I…" from the guide's entries (`GUIDE_TOPICS`),
 so a stale answer becomes a wrong answer from him too; nine had drifted.
