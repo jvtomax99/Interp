@@ -23344,6 +23344,8 @@ async function submitAsk(preset, force, opts){
   // His suggestions, then what the phone itself recognised; the screen
   // checks each again before it shows a button (askCheckAction).
   turn.actions = askMergeActions(turn.answer ? turn.answer.actions : [], askIntentActions(intent, rec, turn));
+  // You named a specialty the Hub doesn't have: no briefing for some other one.
+  if(intent && intent.kind === 'prep' && intent.named && !intent.spec) turn.actions = turn.actions.filter(a => a.type !== 'open_prep');
   // A next step he's already suggested in an answer isn't offered again
   // unasked today.
   turn.actions.forEach(a => { if(/^(continue_|practice_learning|start_review)/.test(a.type)) drMemMarkShown(a.type + ':' + a.target); });
@@ -23674,7 +23676,7 @@ function askIntent(q){
     // swapped for the screen's or your focus: he asks which one instead.
     const found = askFindSpecialty(q);
     const named = /\b(covering|cover|heading to|going to|assigned to|(prep|prepare|brief) me (for|on)|briefing (for|on))\s+(?!(a|an|the|my|me|it|there|this|that|today|now)\b)[a-z]/.test(f);
-    return { kind: 'prep', spec: found || (named ? null : (askFromSpecialty() || drPref('focus') || null)) };
+    return { kind: 'prep', named, spec: found || (named ? null : (askFromSpecialty() || drPref('focus') || null)) };
   }
   if(/\b(practice|practise|drill|quiz me|study|flashcards?|review)\b/.test(f) && /\b(terms?|words?|learning|still|struggl\w*|weak|missed|review)\b/.test(f)){
     const m = f.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/);
