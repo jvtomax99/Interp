@@ -12407,7 +12407,7 @@ const GUIDE_STEPS = {
   askwhat: () => ({ steps: [`Tap ${GUIDE_UI.ask} beside the tab bar, the smiley in the Home greeting, or <b>More</b> → <b>Ask the Hub</b>.`,
     'Ask the way you’d ask a teammate: <i>How do I explain “ejection fraction”?</i>',
     `Check the label: ${GUIDE_UI.tag('From the Hub')} is your team’s own entries; ${GUIDE_UI.tag('Not from the Hub', true)} is general knowledge.`],
-    note: 'When it says Not from the Hub, double-check it. He can also open a briefing, practice or a term for you; he says it’s done only once it’s open.' }),
+    note: 'When it says Not from the Hub, double-check it. Follow up as you would with a teammate: “Make it simpler.” He can also open a briefing, practice or a term for you; he says it’s done only once it’s open.' }),
   askmoves: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>How Dr. Smiley moves</b>, pick one: ${GUIDE_UI.seg}.`,
     'To take him off every page, turn off <b>Dr. Smiley follows me</b>.'],
     note: 'Lively: expressions and reactions to the team. Focused: he blinks and reacts to what you’re doing. Still: he doesn’t move. If your phone is set to reduce motion, he’s always still.' }),
@@ -15425,7 +15425,9 @@ const GUIDE_TOPICS = [
     <ul>
       <li><b>From the Hub</b>: it comes from your team's own entries. Tap a source under it to see the entry.</li>
       <li><b>Not from the Hub</b>: general knowledge. It says <b>Double-check it</b>, and you should.</li>
+      <li><b>Your correction · not checked</b>: it uses something you told him in this conversation. The team hasn't checked it.</li>
     </ul>
+    <p>You can follow up the way you would with a teammate: <i>Make it simpler.</i> <i>Now in Spanish.</i> See <b>Can I ask a follow-up, or start over?</b></p>
     <p>He can also open things for you: a briefing, practice, a term. Tap the button he offers. He only says it's done once the screen is open.</p>` },
 
   { id:'askexplain', section:'ask', k:'explain term plain spanish patient words simple dr smiley card menu', q:'How do I get a term explained in plain words?', a:`
@@ -15646,10 +15648,14 @@ const GUIDE_TOPICS = [
     <p>A model of the human body you can turn and zoom. Tap any part to see its name. It's handy when a doctor points to something you can't picture.</p>
     <p>Open it from Home or <b>More</b> → <b>3D Body</b>. The first time, it downloads about 33&nbsp;MB, so Wi-Fi is best. It's quicker after that.</p>` },
 
+  { id:'zoom', section:'trouble', k:'zoom text small bigger larger font size magnify pinch double tap read see', q:'The text is too small. Can I zoom in?', a:`
+    <p>Yes: <b>pinch with two fingers</b> to zoom in, and pinch back to zoom out.</p>
+    <p>A double tap doesn't zoom. That way two quick taps on a button never jump the whole screen.</p>` },
+
   { id:'offline', section:'trouble', k:'offline no signal wifi data connection basement elevator internet down airplane', q:'Can I use it where there is no signal?', a:`
     <p><b>Looking things up: yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
     <p><b>Adding or changing something: also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
-    <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online.</p>
+    <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online. Tapping <b>New conversation</b> drops the ones still waiting.</p>
     <p>Translate, Doctor Prep and Look up need a connection.</p>` },
 
   { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline — 1 change waiting”', a:`
@@ -19564,7 +19570,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.2258';
+const BUILD_ID = 'b1007.2302';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
