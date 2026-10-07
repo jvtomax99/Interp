@@ -97,6 +97,11 @@ no error on screen. So when you add something:
   without `allow-same-origin`, and `vercel.json` sends the same sandbox as a
   header. Never add `allow-same-origin` or load its scripts into the Hub's
   own page: it would then reach the team sign-in and saved data.
+- **A write someone makes goes through `queuedWrite()` (the outbox), never a
+  bare `.set()`.** The app runs without Firestore's offline cache, so offline
+  a bare write just waits for the server: the screen stalls on it and the
+  change is lost if the app closes. The outbox keeps it on the phone and
+  sends it when the connection is back.
 - **There are no personal accounts.** The team code joins a *phone*; the name
   is whatever was typed on it. Dr. Smiley's remembered preferences
   (`ih_smileyMemory`: explanation language, brief/detailed, study focus, how

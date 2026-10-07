@@ -9781,10 +9781,14 @@ async function saveTermReview(termId, box, reviewCount){
   const nextReviewAt = Date.now() + REVIEW_INTERVALS[box] * 86400000;
   const record = { who: me, termId, box, nextReviewAt, reviewCount };
   TERM_REVIEWS[termId] = record;
+  // Through the outbox, like other writes: offline (this app runs without
+  // Firestore's offline cache, so a plain set() would wait for the server)
+  // the answer is kept on the phone and sent when the connection is back.
   try{
-    await db.collection('term-reviews').doc(reviewDocId(me, termId)).set(stripUndefined(record));
+    await queuedWrite({ collection: 'term-reviews', docId: reviewDocId(me, termId), op: 'set', data: stripUndefined(record) });
   }catch(err){
     console.error('saveTermReview failed:', err);
+    if(err && /^ih\/(storage|outbox)/.test(err.code || '')) showToast('This phone can’t store your answer right now. It’s kept until you close the app.');
   }
 }
 
@@ -12130,7 +12134,7 @@ async function answerReview(gotIt){
   const reviewCount = (prior ? prior.reviewCount : 0) + 1;
   if(gotIt) reviewGotIt++; else reviewMissed++;
   teamPoints(1);
-  await saveTermReview(term.id, newBox, reviewCount);
+  saveTermReview(term.id, newBox, reviewCount);   // not awaited: the next card doesn't wait for the network
 
   reviewIndex++;
   reviewRevealed = false;
@@ -18978,7 +18982,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1430';
+const BUILD_ID = 'b1007.1440';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -23241,8 +23245,11 @@ function askFaceSync(){
 }
 
 /* ---- Asking ---- */
-async function submitAsk(preset, force){
+async function submitAsk(preset, force, opts){
   const input = document.getElementById('askInput');
+  // A retried question carries the term it was asked about (opts.sel), which
+  // may not be the one picked now; your current pick is left alone.
+  const selNow = opts && 'sel' in opts ? opts.sel : ASK.selected;
   const q = String(preset != null ? preset : (input ? input.value : ASK.draft)).trim().slice(0, 500);
   if(!q || ASK.busy) return;
   // "Remember / forget / what do you remember": answered here, nothing sent.
@@ -23266,7 +23273,7 @@ async function submitAsk(preset, force){
   if(input) input.value = '';
   const { picked, lessons } = askRetrieve(q);
   // The term you picked to talk about goes first, so it can be a source.
-  const sel = askSelectedTerm(), intent = askIntent(q);
+  const sel = selNow ? askTermById(selNow.term) : null, intent = askIntent(q);
   if(sel){
     const id = 't:' + sel.term.id;
     for(let i = picked.length - 1; i >= 0; i--) if(picked[i].entry.id === id) picked.splice(i, 1);
@@ -23276,7 +23283,7 @@ async function submitAsk(preset, force){
   const labels = {};
   picked.forEach(d => { labels[d.entry.id] = d.label; });
   const turn = { id: 'q' + Date.now().toString(36), q, status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])),
-    sel: ASK.selected ? { ...ASK.selected } : null, n: (intent && intent.n) || 5, actions: [] };
+    sel: sel ? { ...selNow } : null, n: (intent && intent.n) || 5, actions: [] };
   const history = ASK.turns.filter(x => x.status === 'done' && !x.answer.local).slice(-3)
     .map(x => ({ q: x.q, a: [x.answer.headline, x.answer.say].filter(Boolean).join(' — ') }));
   ASK.turns.push(turn);
@@ -23297,6 +23304,7 @@ async function submitAsk(preset, force){
     if(intent){ turn.status = 'done'; turn.answer = askLocalAnswer(intent, rec, turn); turn.actions = askIntentActions(intent, rec, turn); }
     else turn.status = 'waiting';
     turn.doneAt = Date.now();
+    askSaveWaiting();
     renderAskMessages(true);
     askReact(turn);
     return;
@@ -23315,7 +23323,7 @@ async function submitAsk(preset, force){
         entries: picked.map(d => d.entry),
         lessons: lessons.map(l => ({ id: l.id, about: l.question, note: l.note })),
         history,
-        context: askContext(rec)
+        context: askContext(rec, sel)
       })
     });
     if(res.status === 401){ out.status = 'error'; out.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
@@ -23340,6 +23348,7 @@ async function submitAsk(preset, force){
   // unasked today.
   turn.actions.forEach(a => { if(/^(continue_|practice_learning|start_review)/.test(a.type)) drMemMarkShown(a.type + ':' + a.target); });
   turn.doneAt = Date.now();
+  askSaveWaiting();
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
   if(activeCategory === 'ask') renderAskMessages(true);
   askReact(turn);
@@ -23362,6 +23371,7 @@ function askOutcome(t){
   const a = t.answer;
   // Answered on this phone (offline): it did what was asked if it has something to offer.
   if(a.local) return (t.actions || []).some(x => askCheckAction(x, t).ok) ? 'verified' : 'general';
+  if(askHandsOver(t)) return 'handoff';
   const sources = (a.sourceIds || []).filter(id => t.labels && t.labels[id]).length;
   const notes = (a.lessonIds || []).filter(id => ASK.lessons.some(l => l.id === id && l.status === 'approved')).length;
   return a.fromHub && sources + notes > 0 ? 'verified' : 'general';
@@ -23388,6 +23398,11 @@ function askReact(t){
   if(out === 'cancelled'){
     drTaskEnd(key);
     drPerform('okay', { priority: DR_P.TASK });
+    return;
+  }
+  // A tool handed over: "got it", a moment to see the button, then a smile.
+  if(out === 'handoff'){
+    drTask('answering', { key, ms: 2600, perform: here ? 'answer' : 'notice', then: { perform: 'smile', where: 'ask' } });
     return;
   }
   if(out === 'verified' || out === 'general'){
@@ -23426,6 +23441,7 @@ function askDontWait(id){
   const t = ASK.turns.find(x => x.id === id);
   if(!t || t.status !== 'waiting') return;
   t.status = 'cancelled'; t.note = "Okay, I won't ask that one.";
+  askSaveWaiting();
   drTaskEnd('ask:' + t.id);
   renderAskMessages(false);
 }
@@ -23435,10 +23451,30 @@ function askEdit(id){
   if(i < 0) return;
   ASK.draft = ASK.turns[i].q;
   ASK.turns.splice(i, 1);
+  askSaveWaiting();
   drTaskEnd('ask:' + id);
   renderAskMessages(false);
   const input = document.getElementById('askInput');
   if(input){ input.value = ASK.draft; input.focus(); }
+}
+/* Questions waiting for a connection are kept on the phone (ih_askWaiting),
+   so closing the app doesn't lose them; they go once it's back online. Not
+   one that looked like it had patient details (sent anyway after the
+   warning): that stays in memory only. */
+const ASK_WAITING_KEY = 'ih_askWaiting';
+function askSaveWaiting(){
+  const w = ASK.turns.filter(t => t.status === 'waiting' && !askLooksLikePatientInfo(t.q)).slice(-10)
+    .map(t => ({ q: t.q, sel: t.sel || null, n: t.n || 5 }));
+  try{ w.length ? localStorage.setItem(ASK_WAITING_KEY, JSON.stringify(w)) : localStorage.removeItem(ASK_WAITING_KEY); }catch(e){}
+}
+function askRestoreWaiting(){
+  let w = [];
+  try{ w = JSON.parse(localStorage.getItem(ASK_WAITING_KEY) || '[]'); }catch(e){}
+  (Array.isArray(w) ? w : []).forEach((x, k) => {
+    if(!x || typeof x.q !== 'string' || !x.q.trim() || ASK.turns.some(t => t.status === 'waiting' && t.q === x.q)) return;
+    ASK.turns.push({ id: 'q' + (Date.now() + k).toString(36), q: x.q.slice(0, 500), status: 'waiting', labels: {}, go: {},
+      sel: x.sel && x.sel.term ? { cat: String(x.sel.cat || ''), term: String(x.sel.term) } : null, n: +x.n || 5, actions: [] });
+  });
 }
 // Back online: the oldest question waiting for a connection goes now (the
 // next one when that's answered).
@@ -23448,6 +23484,10 @@ function askResumeWaiting(){
   if(t) askRetry(t.id);
 }
 window.addEventListener('online', () => setTimeout(askResumeWaiting, 600));
+// Questions left waiting when the app was closed: back, and sent once the
+// Hub's sign-in is ready and there's a connection.
+askRestoreWaiting();
+hubAuthReady.then(() => setTimeout(askResumeWaiting, 1200));
 /* Attentive: tapping into the box, he looks to it (once in a while, not on
    every tap); typing keeps him attentive -- blinks only -- and typing again
    after a pause gets a quick look down. Never while a question is on its
@@ -23474,11 +23514,11 @@ function askTyping(){
 function askRetry(id){
   const i = ASK.turns.findIndex(t => t.id === id);
   if(i < 0 || ASK.busy) return;
-  const q = ASK.turns[i].q;
-  if(ASK.turns[i].sel) ASK.selected = ASK.turns[i].sel;   // the same term it was about
+  const q = ASK.turns[i].q, sel = ASK.turns[i].sel || null;
   ASK.turns.splice(i, 1);
+  askSaveWaiting();
   drTaskEnd('ask:' + id);
-  submitAsk(q, true);
+  submitAsk(q, true, { sel });   // the same term it was about
 }
 /* ---------- Dr. Smiley: context and actions ----------
    Ask is how you talk to Dr. Smiley, and he can do things with the Hub's
@@ -23570,10 +23610,20 @@ async function askLoadRecord(){
 const ASK_SCREEN_NAMES = { home: 'Home', review: 'Term Review', practice: 'CoreCHI Practice', prep: 'Appointment briefing', appt: 'Appointment',
   translate: 'Translate', chat: 'Team Chat', all: 'All domains', falsefriends: 'False Friends', 'doctor-directory': 'Doctor Directory', userguide: 'User Guide' };
 // The small context sent with a question (bounded; api/ask.js cuts it down again).
-function askContext(rec){
-  const from = ASK.from || 'home', cat = DATA.categories.find(c => c.id === from), sel = askSelectedTerm();
+// The specialty of the screen Ask was opened from: a domain (or its parent),
+// the briefing you were on, the appointment running.
+function askFromSpecialty(){
+  const from = ASK.from || '', cat = DATA.categories.find(c => c.id === from);
+  const id = cat ? (cat.parentId || cat.id) : from === 'prep' ? PREP.domainId : from === 'appt' && typeof APPT !== 'undefined' && APPT ? APPT.domainId : null;
+  return id && askSpecialties().some(d => d.id === id) ? id : null;
+}
+function askContext(rec, sel){
+  const from = ASK.from || 'home', cat = DATA.categories.find(c => c.id === from);
+  if(sel === undefined) sel = askSelectedTerm();
+  const fromSpec = (from === 'prep' || from === 'appt') && askFromSpecialty();
+  const fromName = fromSpec ? `${askSpecialties().find(d => d.id === fromSpec).name} ${from === 'prep' ? 'briefing' : 'appointment'}` : '';
   return {
-    screen: { id: /^[\w:.-]{1,80}$/.test(from) ? from : '', name: cat ? cat.name : (ASK_SCREEN_NAMES[from] || '') },
+    screen: { id: /^[\w:.-]{1,80}$/.test(from) ? from : '', name: fromName || (cat ? cat.name : (ASK_SCREEN_NAMES[from] || '')) },
     selected: sel ? { id: 't:' + sel.term.id, en: sel.term.en || '', es: sel.term.es || '', domain: sel.cat.name,
       source: sel.term.source || '', hasLink: /^https?:\/\//i.test(externalUrl(sel.term.url)) } : null,
     specialties: askSpecialties().slice(0, 40).map(d => ({ id: 'spec:' + d.id, name: d.name })),
@@ -23620,8 +23670,11 @@ function askIntent(q){
   if(/\b(prep|prepare|brief|briefing|covering|cover|heading to|going to|assigned to|get me ready)\b/.test(f) && !/\b(practice|practise|drill|quiz)\b/.test(f)){
     // No specialty named: the domain you asked from, if you were in one.
     // ... else your study focus, if you've set one.
-    const from = DATA.categories.find(c => c.id === ASK.from);
-    return { kind: 'prep', spec: askFindSpecialty(q) || (from ? (from.parentId || from.id) : null) || drPref('focus') || null };
+    // A specialty named that isn't in the Hub ("covering astrology") isn't
+    // swapped for the screen's or your focus: he asks which one instead.
+    const found = askFindSpecialty(q);
+    const named = /\b(covering|cover|heading to|going to|assigned to|(prep|prepare|brief) me (for|on)|briefing (for|on))\s+(?!(a|an|the|my|me|it|there|this|that|today|now)\b)[a-z]/.test(f);
+    return { kind: 'prep', spec: found || (named ? null : (askFromSpecialty() || drPref('focus') || null)) };
   }
   if(/\b(practice|practise|drill|quiz me|study|flashcards?|review)\b/.test(f) && /\b(terms?|words?|learning|still|struggl\w*|weak|missed|review)\b/.test(f)){
     const m = f.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/);
@@ -23713,6 +23766,12 @@ function askCheckAction(a, t){
 }
 // An answer that only hands you one of the Hub's own tools (a briefing,
 // Term Review) states no facts to double-check; its label stays as sent.
+// The answer's job was to hand over one of the Hub's tools (a briefing, Term
+// Review, a next step): a success, whatever its provenance label says.
+function askHandsOver(t){
+  const a = t.answer;
+  return !!a && !a.say && !(a.sourceIds || []).length && (t.actions || []).some(x => x.type !== 'open_term' && x.type !== 'look_up' && askCheckAction(x, t).ok);
+}
 function askHandoff(t){
   const a = t.answer;
   if(!a || a.say || (a.sourceIds || []).length) return false;
@@ -23808,8 +23867,9 @@ const ASK_RUN = {
     openPrep();
     return document.getElementById('prepOverlay')?.classList.contains('show') ? { ok: true } : { ok: false, why: "The specialty list didn't open." };
   },
-  async practice_learning(a, t){
+  async practice_learning(a, t, overtaken){
     const rec = await askLoadRecord();
+    if(overtaken && overtaken()) return { overtaken: true };
     if(!rec.hasName) return { ok: false, why: 'Set your name first: your review record is kept under it.' };
     if(!rec.loaded) return { ok: false, why: 'Your review record didn’t load. Check your connection and try again.' };
     const terms = askLearningTerms().slice(0, (t && t.n) || 5);
@@ -23819,7 +23879,9 @@ const ASK_RUN = {
     const ok = activeCategory === 'review' && reviewActive && reviewQueue.length === terms.length && document.querySelector('#content .review-card');
     return ok ? { ok: true, msg: `Practicing ${terms.length} term${terms.length === 1 ? '' : 's'} you’re still learning` } : { ok: false, why: "Term Review didn't start. Try again." };
   },
-  async start_review(){
+  async start_review(a, t, overtaken){
+    await ensureLoaded('termReviews', loadTermReviews);
+    if(overtaken && overtaken()) return { overtaken: true };
     setCategory('review');
     await startReview();
     return reviewActive && document.querySelector('#content .review-card') ? { ok: true, msg: 'Term Review started' } : { ok: false, why: 'Nothing is due in Term Review right now.' };
@@ -23843,16 +23905,24 @@ const ASK_RUN = {
   async ask_online(a, t){
     if(navigator.onLine !== false) return { ok: false, why: "You're online now. Ask again." };
     ASK.turns.push({ id: 'q' + Date.now().toString(36), q: t.q, status: 'waiting', labels: {}, go: {}, sel: t.sel ? { ...t.sel } : null, n: t.n, actions: [] });
+    askSaveWaiting();
     return { ok: true, msg: 'I’ll ask for the plain Spanish when you’re back online' };
   },
 };
+// Each tap gets a number; an action that has to wait (loading your record)
+// checks, before it opens anything, that it's still the latest tap and that
+// you're still where you tapped it. If not it does nothing and says nothing.
+let askActionSeq = 0;
 async function askRunAction(turnId, i){
   const t = ASK.turns.find(x => x.id === turnId), a = t && t.actions && t.actions[i];
   if(!a) return;
   const chk = askCheckAction(a, t);
+  const seq = ++askActionSeq, from = activeCategory;
+  const overtaken = () => seq !== askActionSeq || activeCategory !== from;
   let res;
   if(!chk.ok) res = { ok: false, why: chk.why };
-  else{ try{ res = await ASK_RUN[a.type](a, t); }catch(e){ res = { ok: false, why: "That didn't work. Try again." }; } }
+  else{ try{ res = await ASK_RUN[a.type](a, t, overtaken); }catch(e){ res = { ok: false, why: "That didn't work. Try again." }; } }
+  if(res && res.overtaken) return;
   t.did = t.did || {};
   if(res.ok && res.msg) t.did[a.type + '|' + a.target] = { ok: true, msg: res.msg };
   else if(!res.ok) t.did[a.type + '|' + a.target] = { ok: false, msg: res.why };
@@ -23968,6 +24038,7 @@ function drMemNameChanged(before, after){
   const want = drPref('mode');
   if(drModePref !== want){ drModePref = want; drModeChanged(); }
   ASK.turns = []; ASK.selected = null; ASK.draft = '';
+  askSaveWaiting();   // the person before's waiting questions don't go out under the new name
   const n = Object.keys(drMemGet()).length;
   return n ? ` Dr. Smiley is using ${after ? after.split(/\s+/)[0] + "'s" : 'this phone’s'} preferences.` : '';
 }
@@ -24051,7 +24122,7 @@ function askUnfinished(){
   if(quizActive && quizQuestions.length && quizIndex < quizQuestions.length) return { kind: 'quiz', done: quizIndex, total: quizQuestions.length };
   if(reviewActive && reviewIndex < reviewQueue.length) return { kind: 'review', done: reviewIndex, total: reviewQueue.length };
   try{
-    const st = JSON.parse(localStorage.getItem(PREP_DECK_KEY) || 'null');
+    const st = prepDeckStored();
     if(st && typeof st.key === 'string' && Array.isArray(st.queue)){
       const [dom, day] = st.key.split('|');
       if(day === warmupDay() && st.i > 0 && st.i < st.queue.length && askSpecialties().some(d => d.id === dom)) return { kind: 'prep', id: dom, done: st.i, total: st.queue.length };
@@ -24974,10 +25045,16 @@ function prepWords(dom, n){
    The day's deck for a specialty is kept on the phone (ih_prepDeck), so
    leaving and coming back carries on where you were. */
 const PREP_DECK_KEY = 'ih_prepDeck';
+// The last state saved, kept here too: when the phone won't store it, your
+// place in the deck lasts until the app closes instead of resetting.
+let prepDeckMem = null, prepDeckWarned = false;
+function prepDeckStored(){
+  if(prepDeckMem) return prepDeckMem;
+  try{ return JSON.parse(localStorage.getItem(PREP_DECK_KEY) || 'null'); }catch(e){ return null; }
+}
 function prepDeck(dom){
   const key = dom.id + '|' + warmupDay();
-  let st = null;
-  try{ st = JSON.parse(localStorage.getItem(PREP_DECK_KEY) || 'null'); }catch(e){}
+  let st = prepDeckStored();
   // Until you answer a card the picks keep up with your practice record,
   // which can arrive after the first paint; after that the day's deck holds.
   const untouched = st && st.key === key && !st.i && !st.flip && !Object.keys(st.marks || {}).length && !st.paid;
@@ -24989,7 +25066,11 @@ function prepDeck(dom){
   }
   return st;
 }
-function prepDeckSave(st){ try{ localStorage.setItem(PREP_DECK_KEY, JSON.stringify(st)); }catch(e){} }
+function prepDeckSave(st){
+  prepDeckMem = st;
+  try{ localStorage.setItem(PREP_DECK_KEY, JSON.stringify(st)); }
+  catch(e){ if(!prepDeckWarned){ prepDeckWarned = true; showToast('This phone isn’t saving right now. Your place in the deck lasts until you close the app.'); } }
+}
 function prepDeckTerms(dom, ids){
   const byId = new Map(prepWords(dom, 1e6).all.map(x => [x.t.id, x]));
   return ids.map(id => byId.get(id)).filter(Boolean);
