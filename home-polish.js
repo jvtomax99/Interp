@@ -225,20 +225,26 @@
      reduced motion, when the tab is hidden, and while he is scrolled out of
      view, so it costs nothing when nobody can see it. */
   const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);};
-  // index.html's reactions (a term added, a quiz finished, the warm-up...) and
-  // a new team rank ask for one of these by their old names.
-  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',giggle:'giggle',party:'laugh',nod:'nod',kiss:'kiss',notice:'notice',pet:'pet'};
+  // index.html's reactions and task states (drPerform: a study result, the
+  // warm-up, a new team rank...) ask for one of his sequences by name, with
+  // a priority; a few old names are still mapped.
+  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',party:'celebrate'};
+  const seqOf=name=>ACT_FACE[name]||(typeof DR_FACE_SEQ!=='undefined'&&DR_FACE_SEQ[name]?name:'smile');
+  const P=(k,d)=>typeof DR_P!=='undefined'?DR_P[k]:d;
+  // Still: the phone's reduced motion, or "Still" in his settings (index.html).
+  const still=()=>reduced.matches||(typeof window.drStill==='function'&&window.drStill());
   let idleStop=()=>{},idleRunning=false,forcedAct=null,idleCtl=null;
-  // With reduced motion there is no idle, but a reaction still shows: the
-  // engine (index.html, drFacePlay) holds its peak frame still, no movement.
-  const actNow=name=>{const f=ACT_FACE[name]||'smile';if(idleCtl){idleCtl.act(f);forcedAct=null;return;}
-    if(reduced.matches&&typeof window.drFacePlay==='function'){const b=document.querySelector('#content.is-home .home-wave-icon'),svg=b&&b.querySelector('.home-face');if(svg)window.drFacePlay(svg,f,b.querySelector('.home-wave-pin'),null,name==='pet'?4:3);return;}
-    forcedAct=name;};
-  window.homeSmileyCelebrate=()=>actNow('party');
-  window.homeSmileyAct=name=>actNow(name);
+  // Still has no idle, but a reaction still shows: the engine (index.html,
+  // drFacePlay) holds its peak frame still, no movement.
+  const actNow=(name,priority)=>{const f=seqOf(name),p=priority||(name==='pet'?P('DIRECT',5):P('REACT',3));
+    if(idleCtl){idleCtl.act(f,p);forcedAct=null;return;}
+    if(still()&&typeof window.drFacePlay==='function'){const b=document.querySelector('#content.is-home .home-wave-icon'),svg=b&&b.querySelector('.home-face');if(svg)window.drFacePlay(svg,f,b.querySelector('.home-wave-pin'),null,p);return;}
+    forcedAct=[name,p];};
+  window.homeSmileyCelebrate=()=>actNow('party',P('TASK',4));
+  window.homeSmileyAct=(name,priority)=>actNow(name,priority);
   function startIdle(button){
     idleStop();
-    if(reduced.matches||document.hidden||!button||!button.isConnected)return;
+    if(still()||document.hidden||!button||!button.isConnected)return;
     const pin=button.querySelector('.home-wave-pin'),svg=button.querySelector('.home-face');
     if(!pin||!svg||typeof window.drFaceIdle!=='function')return;
     let onScreen=true,goneAt=0,lastNotice=0;
@@ -254,7 +260,7 @@
     pin.style.transformOrigin='50% 88%';
     const ctl=window.drFaceIdle(svg,pin,{canPlay:()=>onScreen&&button.isConnected,first:forcedAct?300:900+Math.random()*600});
     idleCtl=ctl;idleRunning=true;
-    if(forcedAct){const f=ACT_FACE[forcedAct]||'smile';forcedAct=null;ctl.act(f);}
+    if(forcedAct){const [n,p]=forcedAct;forcedAct=null;ctl.act(seqOf(n),p);}
     idleStop=()=>{
       ctl.stop();io.disconnect();idleRunning=false;idleCtl=null;
       pin.style.transform='';pin.style.transformOrigin='';smileyTilt=0;setFace(svg,FACE_REST);
@@ -795,6 +801,9 @@
     }
   };
   reduced.addEventListener('change',()=>{clearTimeout(startupTimer);++requestId;stopGreeting();idleStop();if(!reduced.matches&&hasWavedHello&&lastGreetingWave)startIdle(lastGreetingWave.el);if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');});
+  // His mode changed (Lively / Focused / Still): Still stops his idle here,
+  // leaving it starts it again; Lively and Focused are the engine's business.
+  window.addEventListener('drmodechange',()=>{if(still()){idleStop();}else if(!idleRunning&&hasWavedHello&&lastGreetingWave&&lastGreetingWave.el.isConnected)startIdle(lastGreetingWave.el);});
 
   /* Reopening an installed PWA does not reload the page, so without this the
      wave fires once on the very first launch and never again -- which is not

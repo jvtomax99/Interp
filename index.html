@@ -5775,6 +5775,22 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
 @media (max-width:900px){ .tg-smiley{ display:none; } }
 .name-pref{ margin:13px 0 0; padding-top:13px; border-top:1px solid var(--line-soft); }
 .name-pref small{ display:block; color:var(--ink-soft); font-size:12px; }
+/* Dr. Smiley's mode: three choices in one capsule (the setting itself is
+   with the engine, setSmileyMode). */
+.ds-mode{ margin:13px 0 0; display:flex; flex-direction:column; gap:6px; }
+.ds-mode-lab{ font-size:14px; color:var(--ink); }
+.ds-mode-seg{ display:flex; gap:3px; padding:3px; border-radius:999px; background:var(--line-soft); }
+.ds-mode-seg button{ flex:1; min-height:44px; border:0; border-radius:999px; background:none; color:var(--ink-soft); font:600 14px var(--sans); cursor:pointer;
+  transition:background .2s var(--ease), color .2s var(--ease), box-shadow .2s var(--ease); }
+.ds-mode-seg button[aria-checked="true"]{ background:var(--paper); color:var(--ink);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.ds-mode-seg button:active, .ds-mode-seg button.is-pressed{ transform:scale(.97); }
+.ds-mode-seg button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.ds-mode-hint{ display:block; color:var(--ink-soft); font-size:12px; line-height:1.4; min-height:2.8em; }
+html[data-theme="dark"] .ds-mode-seg button[aria-checked="true"]{ background:#2A3350; color:#fff; }
+@media (prefers-reduced-motion: reduce){ .ds-mode-seg button{ transition:none; } }
+/* Still: none of his CSS motion either (his breathing is in home-polish.css). */
+html.ds-still .smiley-rider-bob{ animation:none; }
 .ta-switch.is-calm[aria-checked="true"]{ background:var(--navy); }
 html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(--cyan); }
 @media (prefers-reduced-motion: reduce){
@@ -6629,6 +6645,17 @@ body.pv-open{ overflow:hidden; }
     <div class="ta-switchrow name-pref">
       <span>Dr. Smiley follows me<small>On every page, above the tabs. Tap him to ask the Hub.</small></span>
       <button class="ta-switch is-calm" id="smileyFollowSwitch" type="button" role="switch" aria-checked="true" aria-label="Dr. Smiley follows me" onclick="setSmileyFollows(this.getAttribute('aria-checked') !== 'true')"></button>
+    </div>
+    <!-- How lively he is (setSmileyMode, ih_smileyMode). The phone's reduced
+         motion keeps him Still whatever is picked; the line under says so. -->
+    <div class="ds-mode">
+      <span class="ds-mode-lab" id="dsModeLab">How Dr. Smiley moves</span>
+      <div class="ds-mode-seg" role="radiogroup" aria-labelledby="dsModeLab" onkeydown="smileyModeKey(event)">
+        <button type="button" role="radio" data-mode="lively" aria-checked="true" onclick="setSmileyMode('lively')">Lively</button>
+        <button type="button" role="radio" data-mode="focused" aria-checked="false" tabindex="-1" onclick="setSmileyMode('focused')">Focused</button>
+        <button type="button" role="radio" data-mode="still" aria-checked="false" tabindex="-1" onclick="setSmileyMode('still')">Still</button>
+      </div>
+      <small class="ds-mode-hint" id="dsModeHint" aria-live="polite"></small>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="cancelNameModal()">Cancel</button>
@@ -12044,10 +12071,12 @@ async function answerReview(gotIt){
 
   reviewIndex++;
   reviewRevealed = false;
-  if(reviewIndex >= reviewQueue.length){
+  const sessionDone = reviewIndex >= reviewQueue.length;
+  if(sessionDone){
     reviewActive = false; // falls through to the session summary view
   }
   renderContent();
+  if(sessionDone) smileyStudy('review', reviewGotIt / Math.max(1, reviewGotIt + reviewMissed));
 }
 
 function exitReview(){
@@ -12882,6 +12911,38 @@ const DR_FACE_SEQ = {
   // Pressed and held: a giggle and hearts.
   pet:   { f: [['rest', 60], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
            head: [[0, 0, 0], [90, 0, .45], [180, -1.4, .3], [290, 1.4, .3], [400, -1.4, .3], [510, 1.4, .3], [620, -1, .2], [730, .8, .1], [1160, 0, -.4], [1620, 0, 0], [1880, 0, 0]], fx: 'hearts', fxAt: 180 },
+  /* For his task states (drTask). Each has a small wind-up, a peak you can
+     read and an unhurried way back. */
+  // Attentive: you tapped into Ask's box. A quick blink, a look down to it
+  // and a small lean in.
+  listen: { f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 60], ['lookD', 720], ['rest', 260]],
+            head: [[0, 0, 0], [110, 0, -.35], [300, 0, .7], [1010, 0, .6], [1300, 0, 0]] },
+  // Still attentive: typing again after a pause. Just the eyes, briefly.
+  peekDown: { f: [['lookD', 480], ['rest', 160]], head: [[0, 0, 0], [130, 0, .4], [480, 0, .4], [640, 0, 0]] },
+  // Processing starts: a slight lean the other way, a blink, then eyes up
+  // and to the side, where the thinking hold carries on.
+  ponder: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 50], ['lookUL', 900]],
+            head: [[0, 0, 0], [120, .6, .2], [360, -1.5, -.3], [1240, -1.5, -.3]] },
+  // An answer from the Hub: got it -- a lift, a smile and a nod -- then he reads it with you.
+  answer: { f: [['rest', 50], ['blink1', 45], ['rest', 40], ['smile1', 80], ['smile2', 80], ['smile', 760], ['smile2', 90], ['smile1', 110], ['rest', 220]],
+            head: [[0, 0, 0], [100, 0, -.45], [330, 0, .9], [520, 0, -.1], [700, 0, .7], [900, 0, 0], [1525, 0, 0]] },
+  // An answer from general knowledge: received, considered -- no smile.
+  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['halfL', 520], ['rest', 240]],
+                   head: [[0, 0, 0], [100, .4, 0], [320, -1.1, .2], [860, -1.1, .2], [1120, 0, 0]] },
+  // Uncertain or failed: composed. A slow blink, a considering look down to
+  // the side with a sympathetic tilt, then a small reassuring smile.
+  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+              head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
+  // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
+  encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
+               head: [[0, 0, 0], [140, 0, -.3], [360, 0, .9], [560, 0, 0], [760, 0, .8], [960, 0, 0], [1450, 0, 0]] },
+  // A great study result: a dip to wind up, then a laugh with sparkles and an easy settle.
+  celebrate: { f: [['rest', 70], ['blink1', 40], ['rest', 50], ['smile1', 60], ['smile2', 60], ['smile', 150], ['laugh1', 55], ['laugh2', 55], ['laugh', 240], ['laughB', 120],
+                   ['laugh', 200], ['laugh2', 70], ['laugh1', 80], ['smile', 380], ['smile2', 90], ['smile1', 110], ['rest', 380]],
+               head: [[0, 0, 0], [110, 0, .8], [320, -.6, -1.1], [540, 1.2, -1], [720, -1, -1], [900, .8, -.9], [1150, 0, -.6], [1600, 0, 0], [2000, 0, 0]], fx: 'sparkle', fxAt: 330 },
+  // You stopped a question: okay -- a blink and one nod.
+  okay: { still: 'rest', f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 320]],
+          head: [[0, 0, 0], [100, 0, -.3], [300, 0, .8], [560, 0, 0], [720, 0, 0]] },
 };
 /* His mood carries over for a few minutes: good moments (hearts, a new
    term, a level, a pet) make him happier -- more smiles, laughs, hums, heart
@@ -12902,7 +12963,7 @@ const DR_FX_GLYPH = {
 const DR_FX = { hearts: ['heart', 'heart', 'heart'], heart: ['heart'], notes: ['note', 'note', 'note'], sparkle: ['spark', 'spark', 'spark'], question: ['q'] };
 function drFaceFx(head, kind){
   const host = head && head.parentElement, glyphs = DR_FX[kind];
-  if(!host || !glyphs || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  if(!host || !glyphs || drStill()) return null;
   const fx = document.createElement('span');
   fx.className = 'ds-fx ds-fx-' + kind;
   fx.setAttribute('aria-hidden', 'true');
@@ -12923,22 +12984,25 @@ function drFaceFx(head, kind){
    Every request has a priority (DR_P):
      IDLE 1   his own blinks, eye darts and idle expressions
      GAZE 2   his eyes following your finger
-     REACT 3  reactions to the app: a message, hearts, a wrong answer...
-     DIRECT 4 something you did to him: petting him, Ask nodding and talking
+     REACT 3  reactions to the app: a message, a term added, back online...
+     TASK 4   what he's doing for you (task states, below): thinking while
+              Ask works, reading an answer with you, celebrating a quiz
+     DIRECT 5 something you did to him: petting him
    A request at or above the priority of what's playing takes over; a lower
    one is turned away (play() returns false). Taking over never snaps to his
    resting face: the face walks through the in-between frames (DR_FACE_BACK,
    drFacePath) into the new expression, the head eases on from where it is,
    and effects fade instead of vanishing. Sequences are walked the same way,
    so two frames that aren't neighbours always get their in-betweens.
-   Reduced motion: no idle, no gaze, no lean, no effects, no sway; a direct
-   reaction shows its peak frame, still, then his resting face.
+   Still (the phone's reduced motion, or "Still" in his settings, drStill):
+   no idle, no gaze, no lean, no effects, no sway; a reaction shows its peak
+   frame, still, then his resting face, and a task state its one still frame.
    Hidden page: everything pauses (timers cleared) and resumes on return. A
    controller whose svg leaves the page destroys itself (timers, lean,
    effects, listeners), checked on every timer and by a sweep every 4 s.
    Window listeners are shared (one set for all controllers), added while
    any controller follows the finger and removed when none does. */
-const DR_P = { IDLE: 1, GAZE: 2, REACT: 3, DIRECT: 4 };
+const DR_P = { IDLE: 1, GAZE: 2, REACT: 3, TASK: 4, DIRECT: 5 };
 const DR_STEP = 38;   // ms per in-between frame
 // The way back to rest from every frame, one in-between at a time.
 const DR_FACE_BACK = {
@@ -12992,7 +13056,7 @@ function drSeq(name){
     f.push([fr, Math.max(DR_STEP, ms - Math.min(take, ms / 2))]);
   });
   const total = f.reduce((t, s) => t + s[1], 0);
-  const peak = raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
+  const peak = raw.still ? [raw.still, 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
   const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
   drSeqCache.set(raw, seq);
@@ -13062,8 +13126,12 @@ class DrAnim{
   // the sequence already passed over; lead: ms of in-betweens before it.
   // The head never jumps: it eases from where it is onto the sequence's path,
   // meeting it DR_HEAD_BLEND ms in (or after the in-betweens, if longer).
-  headPlay(keys, skip, lead){
-    if(!this.head || !this.head.animate || drReduce.matches) return;
+  headPlay(keys, skip, lead, keep){
+    if(!this.head || !this.head.animate || drStill()) return;
+    // Played to the end (not kept), a lean that doesn't end upright eases
+    // back upright instead of snapping there when the animation ends.
+    const lk = keys && keys[keys.length - 1];
+    if(lk && !keep && (lk[1] || lk[2])) keys = keys.concat([[lk[0] + 320, 0, 0]]);
     const from = this.headNow();
     const total = (keys ? keys[keys.length - 1][0] : 0);
     const B = Math.max(0, DR_HEAD_BLEND - lead), meet = skip + B;
@@ -13085,15 +13153,15 @@ class DrAnim{
       if(t <= meet) return;
       kf.push({ offset: Math.min(1, (lead + t - skip) / dur), transform: `translateY(${y}%) rotate(${r}deg)`, easing: ease });
     });
-    if(kf[kf.length - 1].offset < 1) kf.push({ offset: 1, transform: 'translateY(0%) rotate(0deg)' });
+    if(kf[kf.length - 1].offset < 1 && !keep) kf.push({ offset: 1, transform: 'translateY(0%) rotate(0deg)' });
     kf[kf.length - 1].offset = 1;
     for(let i = 1; i < kf.length; i++) if(kf[i].offset < kf[i - 1].offset) kf[i].offset = kf[i - 1].offset;
-    try{ this.headSwap(this.head.animate(kf, { duration: dur })); }catch(e){}
+    try{ this.headSwap(this.head.animate(kf, { duration: dur, fill: keep ? 'forwards' : 'none' })); }catch(e){}
   }
   // Ease the head to a lean and hold it (gaze), or back to upright (and let go,
   // so CSS like Home's press shrink applies again).
   headTo(r, y, ms){
-    if(!this.head || !this.head.animate || drReduce.matches) return;
+    if(!this.head || !this.head.animate || drStill()) return;
     const upright = !r && !y;
     try{
       const a = this.head.animate([{ transform: this.headNow() }, { transform: `translateY(${y}%) rotate(${r}deg)` }],
@@ -13115,6 +13183,8 @@ class DrAnim{
   // ---- expressions ----
   // Play a sequence (a DR_FACE_SEQ name or a {f, head} object). Returns false
   // if something more important is playing. done(): only when it completes.
+  // keep: end on its last frame and lean instead of walking back to rest
+  // (an entry that a task state's hold carries on from).
   play(name, o){
     o = o || {};
     const p = o.priority || DR_P.REACT;
@@ -13123,9 +13193,9 @@ class DrAnim{
     const seq = drSeq(name);
     if(!seq) return false;
     if(this.run && this.run.p > p) return false;
-    if(drReduce.matches && p < DR_P.REACT) return false;
+    if(drStill() && p < DR_P.REACT) return false;
     this.stopRun(false);
-    if(drReduce.matches){
+    if(drStill()){
       return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done);
     }
     const run = { p, name: typeof name === 'string' ? name : 'custom', timers: [] };
@@ -13142,11 +13212,12 @@ class DrAnim{
     const skip = seq.f.slice(0, start).reduce((t, s) => t + s[1], 0);
     const lead = bridge.length * DR_STEP;
     const frames = bridge.map(f => [f, DR_STEP]).concat(seq.f.slice(start));
-    // Every sequence ends on his resting face (a blink ends on blink1).
+    // Every sequence ends on his resting face (a blink ends on blink1),
+    // unless a hold carries on from it.
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
-    if(last !== 'rest') drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
-    this.headPlay(seq.head, skip, lead);
-    if(seq.fx && this.head && !drReduce.matches){
+    if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
+    this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.fx && this.head && drFxOk()){
       run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
     }
     let i = 0;
@@ -13172,7 +13243,7 @@ class DrAnim{
     if(this.run !== run) return;
     this.run = null;
     if(done) done();
-    this.idleNext();
+    this.next();
   }
   // Stop what's playing. settle: walk the face back to rest and ease the head
   // upright (nothing new follows); otherwise the next request takes over from
@@ -13190,7 +13261,7 @@ class DrAnim{
   settle(then){
     const path = drFacePath(this.frame(), 'rest').concat(this.frame() === 'rest' ? [] : ['rest']);
     this.headTo(0, 0, Math.max(220, path.length * DR_STEP + 120));
-    if(!path.length){ if(then) then(); this.idleNext(); return; }
+    if(!path.length){ if(then) then(); this.next(); return; }
     const run = { p: .5, name: 'settle', timers: [] };
     this.run = run;
     let i = 0;
@@ -13202,12 +13273,14 @@ class DrAnim{
     };
     step();
   }
-  // Talking (Ask): the mouth through the smile frames in an uneven rhythm,
-  // with small nods; longer for longer answers.
+  // Talking: the mouth through the smile frames in an uneven rhythm, with
+  // small nods. Kept for real audio only (a voice, if one is added): a silent
+  // text answer gets a purposeful expression instead (task states), never a
+  // mouth moving to no sound. Nothing calls it today.
   talk(ms, o){
     o = o || {};
     const p = o.priority || DR_P.DIRECT;
-    if(drReduce.matches){
+    if(drStill()){
       if(!this.alive() || document.hidden || (this.run && this.run.p > p)) return false;
       this.stopRun(false);
       return this.still('smile1', Math.min(1200, ms), p, o.done);
@@ -13233,7 +13306,7 @@ class DrAnim{
   // a dead band, the "looking at you" circle is entered closer than it's left,
   // and a new direction must hold DR_GAZE_DWELL ms before he moves his eyes.
   gazeCan(){
-    return !!(this.idle && this.idle.opts.expressions !== false) && !drReduce.matches && !document.hidden && this.alive()
+    return !!(this.idle && this.idle.opts.expressions !== false) && this.policy().gaze && !document.hidden && this.alive()
       && (this.idle.opts.visible ? this.idle.opts.visible() : (!this.idle.opts.canPlay || this.idle.opts.canPlay()));
   }
   gazeStart(x, y, target){
@@ -13301,28 +13374,122 @@ class DrAnim{
       this.settle(() => this.play('blink', { priority: DR_P.IDLE }));
     }, 450);
   }
+  // ---- where he is, and what the task state allows here ----
+  get place(){
+    const s = this.svg;
+    return s.closest('.dock-smiley') ? 'dock' : s.closest('#tgSmiley') ? 'top' : s.closest('.access-face') ? 'lock'
+      : s.closest('.home-wave-icon') ? 'home' : s.closest('.ask-face') ? 'ask' : 'other';
+  }
+  // What he may do here now: idle level (0 none, 1 blinks, 2 calm: blinks,
+  // eye darts, glances and a doze, 3 full), gaze, effects. The task state
+  // and the mode (Lively, Focused, Still) both cap it. A task that belongs
+  // to one place (reading an answer, on Ask) leaves the others as they were.
+  policy(){
+    let name = drState();
+    if(this.place === 'lock') name = 'available';
+    else if(DR_STATES[name].where && this.place !== DR_STATES[name].where) name = drMindBase();
+    const st = DR_STATES[name], mode = drMode();
+    const level = Math.min(DR_IDLE_LEVEL[st.idle], DR_MODE_CAP[mode]);
+    return { state: name, level, slow: !!st.slow, gaze: mode === 'lively' && level >= 2, doze: level >= 2 && !st.slow };
+  }
+  visibleNow(){
+    const o = this.idle ? this.idle.opts : {};
+    return o.visible ? o.visible() : (!o.canPlay || o.canPlay());
+  }
+  // The hold this controller runs for the current task state, if any.
+  holdName(){
+    if(!this.idle || this.place === 'lock') return null;
+    const st = DR_STATES[drState()];
+    if(!st.hold || (st.where && this.place !== st.where)) return null;
+    return st.hold;
+  }
+  // After anything ends: the task state's hold if there is one, else idle.
+  next(){
+    if(this.run || this.dead) return;
+    const h = this.holdName();
+    if(h){ this.holdStart(h); return; }
+    if(this.idle) this.idleArm();
+  }
+  // The task state changed (drMindChanged): end a hold that no longer
+  // applies (back to rest through the in-betweens), start one that does
+  // (taking over from his idle or gaze, never from a reaction or something
+  // you did), and re-time the idle for the new state.
+  taskSync(){
+    if(!this.alive() || !this.idle) return;
+    const h = this.holdName(), run = this.run;
+    if(run && run.hold){
+      if(run.hold === h) return;
+      this.stopRun(false);
+      this.settle();
+      return;
+    }
+    if(run && h && run.p < DR_P.TASK) this.stopRun(false);
+    if(!this.run){ if(h) this.holdStart(h); else this.idleArm(); }
+  }
+  // ---- holds: a task state kept up for as long as it lasts ----
+  // At TASK priority, so his idle, his eyes following a finger and the app's
+  // small reactions can't interrupt it; petting him can, and it picks up
+  // again after. Still: the state's one frame, no timers.
+  holdStart(name){
+    if(this.run || !this.alive()) return;
+    const run = { p: DR_P.TASK, name: 'hold:' + name, hold: name, timers: [], beat: 0, since: performance.now() };
+    this.run = run;
+    if(this.idle) this.clear(this.idle.timer);
+    if(drStill()){ const f = DR_HOLD_STILL[name]; if(f) this.set(f); return; }
+    if(document.hidden) return;
+    this.holdBeat(run);
+  }
+  holdBeat(run){
+    if(this.run !== run || document.hidden) return;
+    if(!this.visibleNow()){ run.timers.push(this.later(() => this.holdBeat(run), 1500)); return; }
+    const beat = DR_HOLDS[run.hold](run);
+    run.beat++;
+    const [tilt, lift] = beat.lean || [0, 0];
+    if(run.lean !== tilt + ',' + lift){ run.lean = tilt + ',' + lift; this.headTo(tilt, lift, beat.leanMs || 480); }
+    // Each beat's frames, with the in-betweens from wherever the face is.
+    const frames = [];
+    let cur = this.frame();
+    beat.f.forEach(([f, ms]) => {
+      drFacePath(cur, f).forEach(m => frames.push([m, beat.step || 46]));
+      frames.push([f, ms]); cur = f;
+    });
+    let i = 0;
+    const step = () => {
+      if(this.run !== run) return;
+      if(i >= frames.length){ this.holdBeat(run); return; }
+      const [f, ms] = frames[i++];
+      this.set(f);
+      run.timers.push(this.later(step, ms));
+    };
+    step();
+  }
   // ---- idle: his own rhythm ----
   // Left alone: a blink every 2-6 s at irregular moments (now and then a
   // double blink or a longer pause), eye darts, and every 5-8 s one of his
   // expressions -- none of his last three again, at most one wink or kiss a
   // minute; more smiles and hums in the morning, a doze now and then late at
-  // night, tilted by his mood (drMoodNow). opts: canPlay(), visible(),
-  // quietMs (settle after this long without a touch), dozeMs, onAct(kind),
-  // expressions (false: blinks only), first (ms before the first).
+  // night, tilted by his mood (drMoodNow). How much of that he does is
+  // policy()'s idle level: the task state and the mode cap it. After 45 s
+  // without a touch he dozes once (resting); after two quiet minutes he
+  // settles until the next touch. opts: canPlay(), visible(), quietMs,
+  // dozeMs (null: never), onAct(kind), expressions (false: blinks only),
+  // first (ms before the first).
   startIdle(opts){
     opts = opts || {};
     if(this.idle){ this.idle.opts = opts; return this; }
     this.idle = { opts, timer: 0, settled: false, recent: [], lastExpr: -1e9, lastWink: -1e9, last: '' };
     drInputSync();
-    this.idleArm(opts.first == null ? 900 + Math.random() * 700 : opts.first);
+    // A task state already under way (Ask still thinking when you come back
+    // to it) is joined as it is, without its entry again.
+    if(this.holdName() && !this.run) this.holdStart(this.holdName());
+    else this.idleArm(opts.first == null ? 900 + Math.random() * 700 : opts.first);
     return this;
   }
   stopIdle(){
     if(!this.idle) return;
     this.clear(this.idle.timer);
     this.idle = null;
-    if(this.run && this.run.gaze) this.stopRun(false);
-    if(this.run && this.run.p <= DR_P.GAZE) this.stopRun(false);
+    if(this.run && (this.run.gaze || this.run.hold || this.run.p <= DR_P.GAZE)) this.stopRun(false);
     this.set('rest');
     if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
     drInputSync();
@@ -13331,23 +13498,31 @@ class DrAnim{
     const I = this.idle;
     if(!I || this.dead) return;
     this.clear(I.timer); I.timer = 0;
-    if(drReduce.matches || document.hidden) return;
-    const gap = Math.random() < .08 ? 4000 + Math.random() * 1500 : 1200 + Math.random() * 1800;
+    if(drStill() || document.hidden) return;
+    const P = this.policy();
+    if(!P.level) return;   // nothing of his own in this state; taskSync() re-arms when it changes
+    let gap = Math.random() < .08 ? 4000 + Math.random() * 1500 : 1200 + Math.random() * 1800;
+    if(P.level === 1) gap += 1200;
+    if(P.slow) gap *= 2;
     I.timer = this.later(() => { I.timer = 0; this.idleTick(); }, ms == null ? gap : ms);
   }
-  idleNext(){ if(this.idle && !this.run) this.idleArm(); }
+  idleNext(){ this.next(); }
   idleTick(){
     const I = this.idle;
     if(!I || !this.alive()) return;
     const o = I.opts;
     if(document.hidden || (o.canPlay && !o.canPlay())){ this.idleArm(1500); return; }
-    if(this.run) return;   // idleNext() re-arms when it ends
+    if(this.run) return;   // next() re-arms when it ends
+    const P = this.policy();
+    if(!P.level) return;
     const now = performance.now(), quiet = now - drInput.last;
-    if(o.quietMs && quiet > o.quietMs){ I.settled = true; return; }
+    const quietMs = o.quietMs === undefined ? 120000 : o.quietMs, dozeMs = o.dozeMs === undefined ? 45000 : o.dozeMs;
+    if(quietMs && quiet > quietMs){ I.settled = true; return; }
     const rnd = (a, b) => a + Math.random() * (b - a);
+    const lively = o.expressions !== false && P.level >= 3, calm = o.expressions !== false && P.level >= 2;
     let kind = 'blink';
-    if(o.dozeMs && quiet > o.dozeMs && I.last !== 'doze') kind = 'doze';
-    else if(o.expressions !== false && now - I.lastExpr > 2500 && Math.random() < .8){
+    if(P.doze && dozeMs && quiet > dozeMs && I.dozeFor !== drInput.last){ kind = 'doze'; I.dozeFor = drInput.last; }   // once per quiet spell
+    else if(lively && now - I.lastExpr > 2500 && Math.random() < .8){
       const hour = new Date().getHours(), morning = hour >= 5 && hour < 11, late = hour >= 21 || hour < 5;
       const mood = drMoodNow(), happy = mood === 'happy' ? 1.8 : 1, thoughtful = mood === 'thoughtful';
       const pool = [['smile', (morning ? .22 : .16) * happy], ['laugh', (thoughtful ? .03 : .1) * happy], ['giggle', (thoughtful ? .03 : .1) * happy], ['nod', .1], ['think', thoughtful ? .25 : .1],
@@ -13357,14 +13532,14 @@ class DrAnim{
       for(const [k, w] of pool){ if((r -= w) <= 0){ kind = k; break; } }
       if(kind === 'blink' && pool.length) kind = pool[0][0];
     }
-    if(kind === 'blink' && o.expressions !== false && I.last !== 'glance' && Math.random() < .16) kind = 'glance';
-    if(kind === 'blink' && o.expressions !== false && Math.random() < .22){
+    if(kind === 'blink' && calm && I.last !== 'glance' && Math.random() < .16) kind = 'glance';
+    if(kind === 'blink' && calm && Math.random() < .22){
       const darts = ['halfL', 'halfR', 'lookU', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'lookD'];
       this.play({ f: [[darts[Math.floor(Math.random() * darts.length)], Math.round(rnd(450, 1000))], ['rest', 60]] }, { priority: DR_P.IDLE });
       return;
     }
     if(kind === 'blink' && Math.random() < .18){ this.play(DR_DOUBLE_BLINK, { priority: DR_P.IDLE }); return; }
-    const expr = kind !== 'blink' && kind !== 'glance';
+    const expr = kind !== 'blink' && kind !== 'glance' && kind !== 'doze';
     if(kind !== 'blink'){ I.last = kind; if(kind === 'wink' || kind === 'kiss') I.lastWink = now; }
     if(expr){ I.recent.push(kind); if(I.recent.length > 3) I.recent.shift(); }
     if(o.onAct) o.onAct(kind);
@@ -13372,7 +13547,7 @@ class DrAnim{
   }
   wake(){
     const I = this.idle;
-    if(I && I.settled){ I.settled = false; this.idleArm(1200); }
+    if(I && I.settled){ I.settled = false; if(!this.run) this.idleArm(1200); }
   }
   // ---- page hidden / shown ----
   pause(){
@@ -13383,7 +13558,12 @@ class DrAnim{
     this.fx.forEach(el => el.remove()); this.fx.clear();
     this.set('rest');
   }
-  resume(){ if(this.idle) this.idleArm(900 + Math.random() * 700); }
+  // Back: the task state's hold straight away, else his idle after a moment.
+  resume(){
+    if(!this.idle || this.dead || this.run) return;
+    const h = this.holdName();
+    if(h) this.holdStart(h); else this.idleArm(900 + Math.random() * 700);
+  }
 }
 const DR_GAZE_HYST = 10, DR_GAZE_DWELL = 90, DR_HEAD_BLEND = 140;
 // How far the head leans with each gaze: [tilt deg, lift %].
@@ -13414,7 +13594,7 @@ function drInputEvent(e){
 }
 const DR_INPUT = ['touchstart', 'touchmove', 'touchend', 'touchcancel', 'mousedown', 'mousemove', 'mouseup', 'pointerdown', 'keydown', 'scroll', 'wheel'];
 function drInputSync(){
-  const want = [...drAnims].some(a => a.idle);
+  const want = !drStill() && [...drAnims].some(a => a.idle);
   if(want === drInput.on) return;
   drInput.on = want;
   DR_INPUT.forEach(t => want ? window.addEventListener(t, drInputEvent, { passive: true, capture: true })
@@ -13423,15 +13603,202 @@ function drInputSync(){
 document.addEventListener('visibilitychange', () => {
   drAnims.forEach(a => document.hidden ? a.pause() : a.resume());
 });
-drReduce.addEventListener('change', () => {
-  if(drReduce.matches) drAnims.forEach(a => a.pause());
-  else drAnims.forEach(a => a.resume());
+drReduce.addEventListener('change', drModeChanged);
+
+/* ---------- Dr. Smiley: how lively (Lively, Focused, Still) ----------
+   Set in the profile sheet under "Dr. Smiley follows me" (ih_smileyMode).
+     Lively   everything: his idle expressions, eyes that follow your finger,
+              little effects, reactions to the team's activity
+     Focused  only what he's doing for you (task states, study results);
+              blinks and small eye movements otherwise, no effects
+     Still    no movement at all; his face changes only to show a state
+   The phone's reduced-motion setting always means Still, whatever is chosen. */
+const DR_MODES = ['lively', 'focused', 'still'];
+const DR_MODE_CAP = { lively: 3, focused: 2, still: 0 };
+let drModePref = (() => { try{ const m = localStorage.getItem('ih_smileyMode'); return DR_MODES.includes(m) ? m : 'lively'; }catch(e){ return 'lively'; } })();
+function drMode(){ return drReduce.matches ? 'still' : drModePref; }
+function drStill(){ return drMode() === 'still'; }
+function setSmileyMode(m){
+  if(!DR_MODES.includes(m)) return;
+  drModePref = m;
+  try{ localStorage.setItem('ih_smileyMode', m); }catch(e){}
+  drModeChanged();
+}
+function drModeChanged(){
+  const still = drStill();
+  document.documentElement.classList.toggle('ds-still', still);
+  drAnims.forEach(a => { a.pause(); a.resume(); });
+  drInputSync();
+  if(typeof smileyModeSync === 'function') smileyModeSync();
+  window.dispatchEvent(new Event('drmodechange'));
+}
+document.documentElement.classList.toggle('ds-still', drStill());
+
+/* ---------- Dr. Smiley: what he's doing (task states) ----------
+   His personality -- cheerful, curious, attentive, capable -- comes from
+   what is actually happening in the app, the same on Home, Ask, study and
+   the dock. One state at a time, for the whole app:
+     available    nothing going on: his own idle (the mode decides how much)
+     attentive    you're typing in Ask: a quick look to the box, then quiet
+     processing   Ask is working on your question: eyes up, thinking, slow
+                  blinks; restrained, no effects, nothing else interrupts
+     answering    an answer arrived: an acknowledgment, then he reads it
+                  with you (eyes on the answer) for as long as it takes to read
+     celebrating  a good study result: a short performance, then back
+     uncertain    not from the Hub, declined, failed: a composed face, never
+                  a cheerful one, while the card shows what to do next
+     offline      calm: blinks and small eye movements
+     appointment  you're in an appointment: focused, blinks only, no effects
+     resting      nobody has touched the phone for a while: he dozes once
+   The first five are tasks (drTask); the last three follow the phone
+   (drMindBase). A task's entry plays on whichever Dr. Smiley you can see
+   (drPerform); its hold, if any, runs on every one it applies to, so a
+   Dr. Smiley that appears mid-task (you went back to Ask while it was still
+   thinking) joins it as it is. The controller times every frame. */
+const DR_STATES = {
+  available:   { idle: 'full' },
+  attentive:   { idle: 'blinks' },
+  processing:  { idle: 'none', hold: 'processing' },
+  answering:   { idle: 'none', hold: 'reading', where: 'ask' },
+  celebrating: { idle: 'none' },
+  uncertain:   { idle: 'blinks' },
+  offline:     { idle: 'calm' },
+  appointment: { idle: 'blinks', slow: true, fx: false },
+  resting:     { idle: 'calm' },
+};
+const DR_IDLE_LEVEL = { none: 0, blinks: 1, calm: 2, full: 3 };
+// Still: the one frame a hold shows.
+const DR_HOLD_STILL = { processing: 'lookUL' };
+const DR_BLINK = [['blink1', 45], ['blink2', 40], ['shut', 80], ['blink2', 45], ['blink1', 55], ['rest', 90]];
+// One beat of a hold at a time: frames (in-betweens are added), and the lean.
+const DR_HOLDS = {
+  // Thinking: up and to one side, up, the other side, a slow blink every
+  // other beat. Slower once it's taken a while.
+  processing(run){
+    const poses = ['lookUL', 'lookU', 'lookUR', 'lookU'], pose = poses[run.beat % 4];
+    const slow = performance.now() - run.since > 9000 ? 1.5 : 1;
+    const ms = Math.round((1000 + Math.random() * 800) * slow);
+    const lean = { lookUL: [-1.5, -.3], lookU: [-.2, -.45], lookUR: [1.2, -.3] }[pose];
+    return { f: run.beat % 2 ? [[pose, ms]].concat(DR_BLINK) : [[pose, ms]], lean, leanMs: 620, step: 52 };
+  },
+  // Reading the answer with you: eyes down on it, along a line and back,
+  // a blink every third beat.
+  reading(run){
+    const poses = ['lookD', 'lookDL', 'lookD', 'lookDR'], pose = poses[run.beat % 4];
+    const ms = Math.round(700 + Math.random() * 600);
+    const lean = { lookD: [0, .45], lookDL: [-.7, .45], lookDR: [.7, .45] }[pose];
+    return { f: run.beat % 3 === 2 ? [[pose, ms]].concat(DR_BLINK) : [[pose, ms]], lean, leanMs: 520, step: 46 };
+  },
+};
+const drMind = { task: null, timer: 0, offline: typeof navigator !== 'undefined' && navigator.onLine === false };
+// The state the phone puts him in when no task is running.
+function drMindBase(){
+  if(drMind.offline) return 'offline';
+  if(typeof apptActive === 'function' && apptActive()) return 'appointment';
+  if(performance.now() - drInput.last > 45000) return 'resting';
+  return 'available';
+}
+function drState(){ return drMind.task ? drMind.task.kind : drMindBase(); }
+function drFxOk(){ return drMode() === 'lively' && DR_STATES[drState()].fx !== false; }
+function drMindChanged(){
+  document.documentElement.dataset.drState = drState();
+  drAnims.forEach(a => a.taskSync());
+}
+/* Start a task state. o: key (who owns it, so only they end it), ms (how
+   long it lasts on its own), perform (a sequence to open with on the
+   Dr. Smiley you can see, at TASK priority; keep: a hold carries on from its
+   last frame), then (what follows when it runs out by itself: another
+   drTask's arguments, or { perform }). A new task replaces the one before. */
+function drTask(kind, o){
+  o = o || {};
+  if(!DR_STATES[kind]) return null;
+  clearTimeout(drMind.timer); drMind.timer = 0;
+  const t = { kind, key: o.key || kind, since: performance.now(), then: o.then || null };
+  drMind.task = t;
+  if(o.ms) drMind.timer = setTimeout(() => drTaskEnd(t.key, true), o.ms);
+  document.documentElement.dataset.drState = kind;
+  if(o.perform) drPerform(o.perform, { priority: o.priority || DR_P.TASK, keep: !!o.keep });
+  drAnims.forEach(a => a.taskSync());
+  return t;
+}
+// End the task (only if key still owns it). ranOut: it timed out by itself,
+// so its "then" follows.
+function drTaskEnd(key, ranOut){
+  const t = drMind.task;
+  if(!t || (key && t.key !== key)) return false;
+  drMind.task = null; clearTimeout(drMind.timer); drMind.timer = 0;
+  const then = ranOut ? t.then : null;
+  // where: its performance only on that page (an answer's closing smile
+  // belongs on Ask, not in the dock somewhere else).
+  const there = then && (!then.where || (typeof activeCategory !== 'undefined' && activeCategory === then.where));
+  if(then && then.kind){ drTask(then.kind, there ? then : { ...then, perform: null }); return true; }
+  drMindChanged();
+  if(then && then.perform && there) drPerform(then.perform, { priority: then.priority || DR_P.TASK });
+  return true;
+}
+// Keep a task going a little longer (typing keeps him attentive).
+function drTaskExtend(key, ms){
+  const t = drMind.task;
+  if(!t || t.key !== key) return false;
+  clearTimeout(drMind.timer);
+  drMind.timer = setTimeout(() => drTaskEnd(t.key, true), ms);
+  return true;
+}
+/* The Dr. Smiley you can see right now, and what holds him: Ask's face on
+   Ask; otherwise the dock (or the top bar on a computer) when he's showing
+   there; otherwise the Home greeting on Home. */
+function drStage(o){
+  if(document.hidden) return null;
+  if(typeof activeCategory !== 'undefined' && activeCategory === 'ask'){
+    const svg = document.querySelector('#content .ask-hello .ask-face svg') || document.querySelector('#askFace svg');
+    return svg ? { svg, head: svg } : null;
+  }
+  const dock = typeof smileyRider !== 'undefined' && smileyRider.stage();
+  if(dock) return dock;
+  if(typeof activeCategory !== 'undefined' && activeCategory === 'home' && !(o && o.noHome) && window.homeSmileyAct) return { home: true };
+  return null;
+}
+// Calmer versions when he should be calmer: Focused, and in an appointment.
+// null: nothing at all.
+const DR_TONE = {
+  focused:     { celebrate: 'proud', love: 'smile', giggle: 'smile', laugh: 'smile', kiss: 'smile', sing: 'smile' },
+  appointment: { celebrate: 'nod', proud: 'nod', love: 'nod', giggle: 'nod', laugh: 'nod', kiss: null, sing: null, notice: null, encourage: 'nod' },
+};
+function drTone(seq){
+  let s = seq;
+  if(drMindBase() === 'appointment' && s in DR_TONE.appointment) s = DR_TONE.appointment[s];
+  if(s && drMode() === 'focused' && s in DR_TONE.focused) s = DR_TONE.focused[s];
+  return s;
+}
+// Play a sequence on the Dr. Smiley you can see. o: priority (REACT),
+// keep, done, noHome. False when none is showing or something more
+// important is playing.
+function drPerform(seq, o){
+  o = o || {};
+  const s = drTone(seq);
+  if(!s) return false;
+  const st = drStage(o);
+  if(!st) return false;
+  const p = o.priority || DR_P.REACT;
+  if(st.home){ window.homeSmileyAct(s, p); return true; }
+  const a = drAnim(st.svg, { head: st.head });
+  return a ? a.play(s, { priority: p, keep: o.keep, done: o.done }) : false;
+}
+function drSeqMs(name){ const q = drSeq(name); return q ? q.total : 0; }
+window.addEventListener('offline', () => {
+  drMind.offline = true; drMindChanged();
+  drPerform('composed', { priority: DR_P.REACT });
+});
+window.addEventListener('online', () => {
+  drMind.offline = false; drMindChanged();
+  drPerform('smile', { priority: DR_P.REACT });
 });
 // For tests and the preview.
 function drAnimDebug(){
   let timers = 0, fx = 0;
-  drAnims.forEach(a => { timers += a.timers.size; fx += a.fx.size; });
-  return { controllers: drAnims.size, timers, fx, listening: drInput.on, sweeping: !!drSweepTimer };
+  const runs = [];
+  drAnims.forEach(a => { timers += a.timers.size; fx += a.fx.size; runs.push({ place: a.place, run: a.run ? a.run.name : '', p: a.run ? a.run.p : 0, frame: a.frame() }); });
+  return { controllers: drAnims.size, timers, fx, listening: drInput.on, sweeping: !!drSweepTimer, state: drState(), mode: drMode(), task: drMind.task ? drMind.task.key : '', runs };
 }
 
 /* ---- The names the rest of the app calls (kept, now on the engine) ---- */
@@ -13458,8 +13825,8 @@ function drFaceIdle(svg, head, opts){
   if(!a) return { act(){}, stop(){}, running: false };
   a.startIdle(opts || {});
   return {
-    // A reaction now: petting is DIRECT, everything else REACT.
-    act(kind){ return a.play(kind, { priority: kind === 'pet' ? DR_P.DIRECT : DR_P.REACT }); },
+    // A reaction now: petting is DIRECT, everything else REACT unless given.
+    act(kind, priority){ return a.play(kind, { priority: priority || (kind === 'pet' ? DR_P.DIRECT : DR_P.REACT) }); },
     stop(){ a.stopIdle(); },
     get running(){ return !!a.idle && !a.dead; },
   };
@@ -17029,6 +17396,7 @@ function openNameModal(){
   renderNamePhoto();
   renderNameAccess();
   document.getElementById('smileyFollowSwitch')?.setAttribute('aria-checked', String(smileyFollows()));
+  smileyModeSync();
   document.getElementById('nameOverlay').classList.add('show');
   if(prefersAutoFocus()) input.focus();
 }
@@ -17933,6 +18301,7 @@ function answerQuiz(i){
   quizHotStreak = right ? quizHotStreak + 1 : 0;
   if(quizHotStreak > quizBestStreak) quizBestStreak = quizHotStreak;
   renderContent();
+  if(right && (quizHotStreak === 3 || quizHotStreak === 5 || quizHotStreak === 10)) smileyStudy('streak', 1, quizHotStreak);
   // Feedback is applied AFTER the render, imperatively, rather than baked
   // into a class the markup carries. Rating your confidence re-renders this
   // same question, and a class in the markup would replay the shake every
@@ -18054,8 +18423,9 @@ function finishQuiz(){
   quizActive = false;
   saveQuizResult();
   teamPoints(total);
-  smileyReact('hearts');
   renderContent();
+  // After the results are on screen; how he reacts follows the score.
+  smileyStudy('quiz', total ? correct / total : 0);
   // After the results are on screen, so a badge lands on top of the score
   // rather than competing with the ring for attention.
   const won = checkBadges({ bestStreak: quizBestStreak, total, correct, wasExam });
@@ -18527,7 +18897,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1016';
+const BUILD_ID = 'b1007.1101';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -22666,8 +23036,9 @@ function renderAsk(){
         <label for="askInput" class="sr-only">Ask a question</label>
         <input id="askInput" type="text" enterkeyhint="send" autocomplete="off" maxlength="500"
           placeholder="Ask about a term or a doctor" value="${escapeAttr(ASK.draft)}"
-          oninput="ASK.draft=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitAsk();}">
-        <button class="chat-send-btn" type="button" onclick="submitAsk()" aria-label="Ask">${ICON_SEND}</button>
+          onfocus="askAttend(true)" onblur="askAttend(false)"
+          oninput="ASK.draft=this.value; askTyping()" onkeydown="if(event.key==='Enter'){event.preventDefault(); submitAsk();}">
+        ${askSendBtnHtml()}
       </div></div>
     </div>`;
 }
@@ -22704,9 +23075,25 @@ function askMessagesHtml(){
 function askTurnHtml(t){
   const q = `<div class="ask-q">${escapeHtml(t.q)}</div>`;
   if(t.status === 'loading') return q + `<div class="ask-dots" aria-label="Looking it up"><span></span><span></span><span></span></div>`;
-  if(t.status === 'error' || t.status === 'refused') return q + `
+  // Each way it can go wrong says what happened and offers the next step.
+  if(t.status === 'cancelled') return q + `
+    <div class="ask-card">
+      <p class="ask-details">${escapeHtml(t.note || 'Stopped. Ask again whenever you like.')}</p>
+      <div class="ask-acts"><button type="button" onclick="askEdit('${t.id}')">Edit question</button><button type="button" onclick="askRetry('${t.id}')">Ask again</button></div>
+    </div>`;
+  if(t.status === 'waiting') return q + `
+    <div class="ask-card ask-warn" role="status">
+      <p class="ask-details">You're offline. I'll ask as soon as you're back online.</p>
+      <div class="ask-acts"><button type="button" onclick="askDontWait('${t.id}')">Don't ask</button><button type="button" onclick="askRetry('${t.id}')">Try now</button></div>
+    </div>`;
+  if(t.status === 'refused') return q + `
     <div class="ask-card ask-warn">
-      <p class="ask-details">${escapeHtml(t.status === 'refused' ? "I can't help with that one. Try asking it a different way." : t.error)}</p>
+      <p class="ask-details">I can't help with that one. Try asking it a different way.</p>
+      <div class="ask-acts"><button type="button" class="is-go" onclick="askEdit('${t.id}')">Ask it another way</button></div>
+    </div>`;
+  if(t.status === 'error') return q + `
+    <div class="ask-card ask-warn">
+      <p class="ask-details">${escapeHtml(t.error)}</p>
       <div class="ask-acts"><button type="button" onclick="askRetry('${t.id}')">Try again</button></div>
     </div>`;
   const a = t.answer;
@@ -22743,29 +23130,14 @@ function renderAskMessages(scrollToEnd){
   if(!box) return;
   box.innerHTML = askMessagesHtml();
   if(scrollToEnd) box.scrollTop = box.scrollHeight;
-  const face = document.getElementById('askFace');
-  if(face){
-    face.classList.toggle('is-thinking', ASK.busy);
-    const last = ASK.turns[ASK.turns.length - 1];
-    const happy = !ASK.busy && last && last.status === 'done' && last.answer.fromHub;
-    // When an answer lands he talks it through (longer answers, longer
-    // talk), then smiles if it came from the Hub; a miss gets a think.
-    const svg = face.querySelector('svg');
-    if(!ASK.busy && last && last.doneAt && Date.now() - last.doneAt < 4000 && face.dataset.talked !== last.id){
-      face.dataset.talked = last.id;
-      if(last.status === 'done'){
-        const words = [last.answer.headline, last.answer.say].filter(Boolean).join(' ').split(/\s+/).length;
-        drFaceTalk(svg, svg, Math.min(3600, 900 + words * 110), () => { if(happy) drFacePlay(svg, 'smile', svg, null, DR_P.DIRECT); });
-      }else drFacePlay(svg, 'think', svg);
-    }else if(ASK.busy && face.dataset.nodded !== String(ASK.turns.length)){
-      face.dataset.nodded = String(ASK.turns.length);
-      drFacePlay(svg, 'nod', svg, null, DR_P.DIRECT);
-    }
-  }
+  // How he looks while it works and when it lands is his task state
+  // (askReact): nothing to do for him here but be there.
+  askSendSync();
   askFaceSync();
 }
 // Ask the Hub's Dr. Smiley blinks now and then while you're on the screen
-// (drFaceIdle, blinks only: his smile is kept for when an answer lands).
+// (drFaceIdle, blinks only: his expressions here come from what Ask is
+// doing -- his task states -- not from his idle).
 // Whichever face is showing gets it: the big hello one, or the header one
 // once a conversation has started. A repaint makes a new face; the old one's
 // timer stops by itself once its face is gone.
@@ -22775,7 +23147,7 @@ function askFaceSync(){
   const svg = document.querySelector('.ask-hello .ask-face svg') || document.querySelector('#askFace svg');
   if(!svg || (askIdle && askIdle.running && askIdle.svg === svg)) return;
   if(askIdle) askIdle.stop();
-  askIdle = drFaceIdle(svg, svg, { expressions: false, canPlay: () => activeCategory === 'ask' && !ASK.busy });
+  askIdle = drFaceIdle(svg, svg, { expressions: false, canPlay: () => activeCategory === 'ask' });
   askIdle.svg = svg;
 }
 
@@ -22799,11 +23171,27 @@ async function submitAsk(preset, force){
   const history = ASK.turns.filter(x => x.status === 'done').slice(-3)
     .map(x => ({ q: x.q, a: [x.answer.headline, x.answer.say].filter(Boolean).join(' — ') }));
   ASK.turns.push(turn);
+  // No connection: don't even try. It waits and goes when the phone is back online.
+  if(navigator.onLine === false){
+    turn.status = 'waiting';
+    askReact(turn);
+    renderAskMessages(true);
+    return;
+  }
   ASK.busy = true;
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+  ASK.abort = ctl;
+  ASK.pending = turn.id;
   renderAskMessages(true);
+  // After the repaint, so the first question's thinking plays on the face
+  // that stays (the header's), not the hello one it replaces.
+  drTask('processing', { key: 'ask:' + turn.id, perform: 'ponder', keep: true });
+  // What came back, applied only if you haven't stopped it meanwhile.
+  const out = {};
   try{
     const res = await fetch('/api/ask', {
       method: 'POST',
+      signal: ctl ? ctl.signal : undefined,
       headers: { 'Content-Type': 'application/json', ...(await hubAuthHeaders()) },
       body: JSON.stringify({
         question: q,
@@ -22812,29 +23200,157 @@ async function submitAsk(preset, force){
         history
       })
     });
-    if(res.status === 401){ turn.status = 'error'; turn.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
-    else if(res.status === 503){ turn.status = 'error'; turn.error = "Ask the Hub isn't switched on yet: the AI key is missing on the server."; }
-    else if(!res.ok){ turn.status = 'error'; turn.error = "Couldn't get an answer just now. Try again in a moment."; }
+    if(res.status === 401){ out.status = 'error'; out.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
+    else if(res.status === 503){ out.status = 'error'; out.error = "Ask the Hub isn't switched on yet: the AI key is missing on the server."; }
+    else if(!res.ok){ out.status = 'error'; out.error = "Couldn't get an answer just now. Try again in a moment."; }
     else{
       const data = await res.json();
-      if(data.refused) turn.status = 'refused';
-      else if(data.answer && data.answer.headline){ turn.status = 'done'; turn.answer = data.answer; }
-      else{ turn.status = 'error'; turn.error = "Couldn't read the answer. Try again."; }
+      if(data.refused) out.status = 'refused';
+      else if(data.answer && data.answer.headline){ out.status = 'done'; out.answer = data.answer; }
+      else{ out.status = 'error'; out.error = "Couldn't read the answer. Try again."; }
     }
   }catch(err){
-    turn.status = 'error';
-    turn.error = navigator.onLine === false ? "You're offline. Ask the Hub needs a connection." : "Couldn't reach the Hub. Try again.";
+    if(navigator.onLine === false) out.status = 'waiting';
+    else{ out.status = 'error'; out.error = "Couldn't reach the Hub. Try again."; }
   }
+  if(ASK.pending !== turn.id) return;                     // stopped: askCancel already moved on
+  Object.assign(turn, out);
   turn.doneAt = Date.now();
-  ASK.busy = false;
+  ASK.busy = false; ASK.abort = null; ASK.pending = null;
   if(activeCategory === 'ask') renderAskMessages(true);
+  askReact(turn);
+  setTimeout(askResumeWaiting, 400);
+}
+
+/* What an answer means, from what can be checked here -- not from fromHub
+   alone (the provenance label on the card stays exactly as the server sent
+   it):
+     verified   from the Hub, and at least one of its sources is an entry
+                this phone sent or a team note that is approved
+     general    from general knowledge (or a "from the Hub" none of whose
+                sources checks out)
+     refused / failed / offline / cancelled */
+function askOutcome(t){
+  if(t.status === 'cancelled') return 'cancelled';
+  if(t.status === 'waiting') return 'offline';
+  if(t.status === 'refused') return 'refused';
+  if(t.status !== 'done' || !t.answer) return 'failed';
+  const a = t.answer;
+  const sources = (a.sourceIds || []).filter(id => t.labels && t.labels[id]).length;
+  const notes = (a.lessonIds || []).filter(id => ASK.lessons.some(l => l.id === id && l.status === 'approved')).length;
+  return a.fromHub && sources + notes > 0 ? 'verified' : 'general';
+}
+// About as long as it takes to read the answer on a phone.
+function askReadMs(t){
+  const a = t.answer || {};
+  const words = [a.headline, a.say, a.details].filter(Boolean).join(' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(3000, Math.min(14000, 1800 + words * 260));
+}
+/* Dr. Smiley's side of an answer (task states, in the engine):
+     verified   "got it" (a smile and a nod), he reads it with you, then a
+                warm smile
+     general    received and considered, no smile; he reads it with you,
+                then a composed face (uncertain): the card says to
+                double-check it and offers Add to glossary / Correct this
+     refused, failed, offline: composed (uncertain); the card offers the
+                way on (ask it another way, try again, it'll go when online)
+     cancelled  an okay nod, nothing more
+   On another page when it lands: the dock's Dr. Smiley looks up, smiling
+   only for a verified one. */
+function askReact(t){
+  const key = 'ask:' + t.id, out = askOutcome(t), here = activeCategory === 'ask';
+  if(out === 'cancelled'){
+    drTaskEnd(key);
+    drPerform('okay', { priority: DR_P.TASK });
+    return;
+  }
+  if(out === 'verified' || out === 'general'){
+    const ok = out === 'verified';
+    drTask('answering', {
+      key, ms: askReadMs(t),
+      perform: here ? (ok ? 'answer' : 'answerGeneral') : (ok ? 'notice' : 'answerGeneral'),
+      then: ok ? { perform: 'smile', where: 'ask' } : { kind: 'uncertain', key, ms: 5000, perform: 'composed', where: 'ask' },
+    });
+    return;
+  }
+  drTask('uncertain', { key, ms: 6000, perform: 'composed' });
+}
+const ICON_ASK_STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2.4" fill="white"/></svg>';
+// The send button stops a question that's on its way.
+function askSendBtnHtml(){
+  return ASK.busy
+    ? `<button class="chat-send-btn is-stop" id="askSend" type="button" onclick="askCancel()" aria-label="Stop">${ICON_ASK_STOP}</button>`
+    : `<button class="chat-send-btn" id="askSend" type="button" onclick="submitAsk()" aria-label="Ask">${ICON_SEND}</button>`;
+}
+function askSendSync(){
+  const b = document.getElementById('askSend');
+  if(b && b.classList.contains('is-stop') !== !!ASK.busy) b.outerHTML = askSendBtnHtml();
+}
+function askCancel(){
+  const t = ASK.turns.find(x => x.id === ASK.pending);
+  if(!t) return;
+  t.status = 'cancelled'; t.doneAt = Date.now();
+  const ctl = ASK.abort;
+  ASK.busy = false; ASK.abort = null; ASK.pending = null;
+  if(ctl) try{ ctl.abort(); }catch(e){}
+  if(activeCategory === 'ask') renderAskMessages(true);
+  askReact(t);
+}
+function askDontWait(id){
+  const t = ASK.turns.find(x => x.id === id);
+  if(!t || t.status !== 'waiting') return;
+  t.status = 'cancelled'; t.note = "Okay, I won't ask that one.";
+  drTaskEnd('ask:' + t.id);
+  renderAskMessages(false);
+}
+// Put a question back in the box to change it.
+function askEdit(id){
+  const i = ASK.turns.findIndex(t => t.id === id);
+  if(i < 0) return;
+  ASK.draft = ASK.turns[i].q;
+  ASK.turns.splice(i, 1);
+  drTaskEnd('ask:' + id);
+  renderAskMessages(false);
+  const input = document.getElementById('askInput');
+  if(input){ input.value = ASK.draft; input.focus(); }
+}
+// Back online: the oldest question waiting for a connection goes now (the
+// next one when that's answered).
+function askResumeWaiting(){
+  if(ASK.busy || navigator.onLine === false) return;
+  const t = ASK.turns.find(x => x.status === 'waiting');
+  if(t) askRetry(t.id);
+}
+window.addEventListener('online', () => setTimeout(askResumeWaiting, 600));
+/* Attentive: tapping into the box, he looks to it (once in a while, not on
+   every tap); typing keeps him attentive -- blinks only -- and typing again
+   after a pause gets a quick look down. Never while a question is on its
+   way: thinking comes first. */
+let askAttnAt = 0, askKeyAt = 0;
+function askAttend(on){
+  if(ASK.busy) return;
+  if(!on){ drTaskExtend('ask-attn', 900); return; }
+  const now = Date.now(), fresh = now - askAttnAt > 8000;
+  askAttnAt = now;
+  if(drMind.task && drMind.task.key === 'ask-attn') drTaskExtend('ask-attn', 5000);
+  else drTask('attentive', { key: 'ask-attn', ms: 5000, perform: fresh ? 'listen' : null, priority: DR_P.REACT });
+}
+function askTyping(){
+  if(ASK.busy) return;
+  const now = Date.now(), gap = now - askKeyAt;
+  askKeyAt = now;
+  if(drMind.task && drMind.task.key === 'ask-attn'){
+    drTaskExtend('ask-attn', 3500);
+    if(gap > 4000) drPerform('peekDown', { priority: DR_P.REACT });
+  }else if(gap > 1500) askAttend(true);
 }
 
 function askRetry(id){
   const i = ASK.turns.findIndex(t => t.id === id);
-  if(i < 0) return;
+  if(i < 0 || ASK.busy) return;
   const q = ASK.turns[i].q;
   ASK.turns.splice(i, 1);
+  drTaskEnd('ask:' + id);
   submitAsk(q, true);
 }
 function askEditPhi(){
@@ -22849,7 +23365,11 @@ function askSendAnyway(){ const q = ASK.phi; ASK.phi = null; submitAsk(q, true);
 function askDraftFix(id, value){ const t = ASK.turns.find(x => x.id === id); if(t) t.fixDraft = value; }
 function askHelpful(id){
   const t = ASK.turns.find(x => x.id === id);
-  if(t){ t.helpful = true; renderAskMessages(false); }
+  if(!t || t.helpful) return;
+  t.helpful = true; renderAskMessages(false);
+  // You thanked him: he's pleased (done reading, too).
+  drTaskEnd('ask:' + id);
+  drPerform('love', { priority: DR_P.DIRECT });
 }
 
 function askToggleFix(id, open){
@@ -22883,7 +23403,10 @@ function askSendFix(id){
       t.fixOpen = false; t.fixSent = true;
       renderAskMessages(false);
       showToast(`Sent to ${askOwnerFirst()} for review.`);
+      drTaskEnd('ask:' + id);
+      drPerform('nod', { priority: DR_P.TASK });   // noted
     }catch(err){
+      drPerform('composed', { priority: DR_P.TASK });
       showToast(err && err.code === 'permission-denied'
         ? "Couldn't save it: the new Firebase rules aren't published yet."
         : "Couldn't save it. Check your connection and try again.");
@@ -23008,6 +23531,7 @@ async function apptKeepAwake(){
 function startAppt(){
   APPT = { start: Date.now(), domainId: PREP.domainId, doctor: PREP.doctor || '' };
   apptSave(); apptKeepAwake();
+  drMindChanged();   // Dr. Smiley turns focused: blinks only, no effects
   setCategory('appt');
 }
 function apptClockText(){ const m = apptMinutes(); return m < 1 ? 'just started' : m + (m === 1 ? ' minute' : ' minutes'); }
@@ -23061,6 +23585,7 @@ function endAppt(){
   if(!APPT) return;
   const mins = apptMinutes(), domainId = APPT.domainId;
   APPT = null; apptSave();
+  drMindChanged();
   try{ if(apptLock) apptLock.release(); }catch(e){}
   apptLock = null;
   if(mins >= 3) teamPoints(5);
@@ -23101,20 +23626,52 @@ function apptPillSync(){
 document.addEventListener('visibilitychange', () => { if(!document.hidden) apptKeepAwake(); });
 
 /* ---------- Dr. Smiley reacts ---------- */
-// Whichever Dr. Smiley is on screen reacts: on Home the greeting smiley
-// (one of his own acts), elsewhere the one on the tab bar. Quiet during an
-// appointment.
-const SMILEY_HOME_ACT = { hop: 'bouncy', hearts: 'hearts', wave: 'hum', cheer: 'party', think: 'gleam', message: 'notice' };
+// The team's activity and your study, by what it means (see the task states
+// in the engine). Plays on whichever Dr. Smiley you can see (drPerform).
+// minor: small news about the team -- only when he's Lively and nothing is
+// going on, and never in an appointment. A study result is a task
+// (celebrating), so his idle can't cut it short.
+const DR_REACTS = {
+  message: { seq: 'notice', minor: true },          // a teammate's chat message
+  hop:     { seq: 'proud', minor: true },           // a term added
+  hello:   { seq: 'nod', minor: true, noHome: true },   // back after a while (Home has its hello wave)
+  wave:    { seq: 'smile', minor: true },
+  hearts:  { seq: 'love', mood: 'happy' },
+  cheer:   { seq: 'celebrate', task: true, mood: 'happy' },   // the team reached a new rank
+  think:   { seq: 'encourage', mood: 'thoughtful' },   // a missed answer: encouragement, and a thoughtful minute
+};
 function smileyReact(kind){
-  if(apptActive() || document.hidden) return;
-  if(kind === 'hearts' || kind === 'hop' || kind === 'cheer') drSetMood('happy', 180000);
-  if(kind === 'think') drSetMood('thoughtful', 60000);
-  // The dock's Dr. Smiley when he's showing (on Home too, once the greeting
-  // has scrolled away), otherwise the greeting's. A wrong warm-up answer is
-  // 'think' in both (it used to be a smile in the dock).
-  if(smileyFollows() && smileyRider.react(kind)) return;
-  if(kind === 'hello') return;   // on Home the hello wave already greets you
-  if(activeCategory === 'home' && window.homeSmileyAct) window.homeSmileyAct(SMILEY_HOME_ACT[kind] || 'bouncy');
+  const r = DR_REACTS[kind];
+  if(!r || document.hidden) return false;
+  if(r.mood) drSetMood(r.mood, r.mood === 'thoughtful' ? 60000 : 180000);
+  const state = drState();
+  if(r.minor && (drMode() !== 'lively' || (state !== 'available' && state !== 'resting'))) return false;
+  if(state === 'appointment' && r.minor) return false;
+  if(r.task) return drCelebrate(r.seq);
+  return drPerform(r.seq, { priority: DR_P.REACT, noHome: r.noHome });
+}
+// A celebration is a task (celebrating) -- unless Ask is still working on a
+// question: then it plays over the thinking, which picks up again after.
+function drCelebrate(seq){
+  const s = drTone(seq);
+  if(!s) return false;
+  if(drMind.task && drMind.task.kind === 'processing') return drPerform(s, { priority: DR_P.TASK });
+  return !!drTask('celebrating', { perform: s, ms: drSeqMs(s) + 400 });
+}
+/* Study progress, from the verified result: a short joyful performance that
+   fits it. score: the share right (0-1). kind: 'quiz', 'review' (a Term
+   Review session), 'warmup' (the daily question), 'streak' (n in a row in a
+   practice quiz). A low score gets encouragement, never a cheer. */
+function smileyStudy(kind, score, n){
+  let seq;
+  if(kind === 'streak') seq = n >= 5 ? 'proud' : 'giggle';
+  else if(kind === 'warmup') seq = score >= 1 ? 'love' : 'encourage';
+  else seq = score >= .9 ? 'celebrate' : score >= .7 ? 'proud' : score >= .5 ? 'smile' : 'encourage';
+  if(score >= .7 || kind === 'streak') drSetMood('happy', 180000);
+  else if(score < .5) drSetMood('thoughtful', 60000);
+  if(document.hidden) return false;
+  if(seq === 'encourage') return drPerform(seq, { priority: DR_P.TASK });
+  return drCelebrate(seq);
 }
 
 // Back in the app after a minute or more away: he greets you with a nod.
@@ -23146,11 +23703,11 @@ window.smileyPettable = smileyPettable;
    stacks on everything else. One shared scroll listener for every swaying
    element (it used to add one per Home rebuild, never removed); elements
    that leave the page are dropped, and the listener goes when none is left.
-   Off with reduced motion. */
+   Off when he's Still (reduced motion, or his Still mode). */
 const drSways = new Set();
 let drSwayLast = new WeakMap(), drSwayOn = false;
 function drSwayScroll(e){
-  if(drReduce.matches) return;
+  if(drStill()) return;
   const t = e.target === document ? document.scrollingElement : e.target;
   if(!t || typeof t.scrollTop !== 'number') return;
   const y = t.scrollTop, was = drSwayLast.has(t) ? drSwayLast.get(t) : y;
@@ -23305,8 +23862,8 @@ function warmupAnswer(i){
     if(hidden){
       const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollTo({ top: 0, behavior: instant ? 'instant' : 'smooth' });
-      setTimeout(() => smileyReact(correct ? 'hearts' : 'think'), instant ? 0 : 450);
-    }else smileyReact(correct ? 'hearts' : 'think');
+      setTimeout(() => smileyStudy('warmup', correct ? 1 : 0), instant ? 0 : 450);
+    }else smileyStudy('warmup', correct ? 1 : 0);
   };
   const ov = document.getElementById('warmupSheet');
   if(ov && ov.classList.contains('show')){
@@ -23804,6 +24361,31 @@ function setSmileyFollows(on){
   document.getElementById('smileyFollowSwitch')?.setAttribute('aria-checked', String(on));
   smileyRider.sync();
 }
+// The Lively / Focused / Still control in the profile sheet.
+const DR_MODE_HINT = {
+  lively: 'Expressions, eyes that follow your finger, little effects, and reactions to the team.',
+  focused: 'Reacts to your own work only: answers, study, problems. No idle faces or effects.',
+  still: "No movement. His face changes only to show what he's doing.",
+};
+function smileyModeSync(){
+  const pref = drModePref;
+  document.querySelectorAll('.ds-mode-seg [data-mode]').forEach(b => {
+    const on = b.dataset.mode === pref;
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
+  const hint = document.getElementById('dsModeHint');
+  if(hint) hint.textContent = drReduce.matches ? "Your phone's Reduce Motion setting is on, so he stays still." : DR_MODE_HINT[pref];
+}
+// Arrow keys move the choice, as in any radio group.
+function smileyModeKey(e){
+  const k = e.key, i = DR_MODES.indexOf(drModePref);
+  const n = k === 'ArrowRight' || k === 'ArrowDown' ? i + 1 : k === 'ArrowLeft' || k === 'ArrowUp' ? i - 1 : null;
+  if(n === null) return;
+  e.preventDefault();
+  setSmileyMode(DR_MODES[(n + DR_MODES.length) % DR_MODES.length]);
+  e.currentTarget.querySelector(`[data-mode="${drModePref}"]`)?.focus();
+}
 const smileyRider = (() => {
   /* On a phone he lives in the dock: his own round button beside the tab
      capsule (.dock-smiley; looks in home-polish.css). Tapping him opens Ask
@@ -23811,7 +24393,6 @@ const smileyRider = (() => {
      (the Home greeting, Ask, the lock screen, a pop-up) he steps out and the
      capsule takes the room, so on Home he hops in once the greeting scrolls
      away. On a computer he is the round button in the top bar (#tgSmiley). */
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const phone = window.matchMedia('(max-width:900px)');
   let btn = null, face = null, bob = null, lastCat = null;
   function build(){
@@ -23888,11 +24469,9 @@ const smileyRider = (() => {
     document.body.classList.toggle('dock-has-smiley', want);
     btn.tabIndex = want ? 0 : -1;
     btn.setAttribute('aria-hidden', want ? 'false' : 'true');
-    // A new screen: he glances at it.
-    if(want && lastCat !== null && lastCat !== activeCategory && !reduce.matches){
-      face.classList.add('is-thinking');
-      setTimeout(() => face.classList.remove('is-thinking'), 1100);
-    }
+    // A new screen: he glances at it (his own idle, so anything more
+    // important -- a task state, a reaction -- goes first).
+    if(want && lastCat !== null && lastCat !== activeCategory && idle) drFacePlay(svgOf(), 'glance', bob, null, DR_P.IDLE);
     lastCat = activeCategory;
     // His face comes alive a few seconds after he arrives, and stops when he goes.
     if(want && !wasShown) idleStart();
@@ -23904,14 +24483,15 @@ const smileyRider = (() => {
      irregular moments, now and then a smile, a laugh or a wink, never while
      you're touching or scrolling, a doze after 45 s without a touch (with two
      z's), and after two quiet minutes he settles until the next touch, so a
-     phone left open between assignments isn't kept busy. Nothing with
-     reduced motion. */
+     phone left open between assignments isn't kept busy. Still (reduced
+     motion, or his Still mode): registered, so a task state's still frame
+     shows, but no timers. */
   const QUIET = 120000, DOZE_AFTER = 45000;
   let idle = null, busyUntil = 0;
   ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.addEventListener(t, () => { busyUntil = performance.now() + 1500; }, { passive: true, capture: true }));
   function svgOf(){ return face && face.querySelector('svg'); }
   function idleStart(){
-    if(idle || reduce.matches || !btn) return;
+    if(idle || !btn) return;
     idle = drFaceIdle(svgOf(), bob, {
       first: 1500, quietMs: QUIET, dozeMs: DOZE_AFTER,
       canPlay: () => shown() && performance.now() >= busyUntil,
@@ -23944,15 +24524,15 @@ const smileyRider = (() => {
   }
   window.addEventListener('resize', () => { if(btn) requestAnimationFrame(sync); });
   document.addEventListener('visibilitychange', () => { if(!document.hidden && btn) sync(); });
-  // A short reaction in the dock. False if he isn't showing.
-  const REACT_FACE = { hop: 'proud', wave: 'smile', hearts: 'love', cheer: 'laugh', think: 'think', nod: 'nod', message: 'notice', hello: 'nod' };
-  function react(kind){
-    if(!shown()) return false;
-    const f = REACT_FACE[kind] || 'smile';
-    if(idle) idle.act(f); else drFacePlay(svgOf(), f, bob);
-    return true;
+  // Where reactions and task states play when he's the one you can see
+  // (drStage): the dock on a phone, the top-bar button on a computer.
+  function stage(){
+    if(shown()) return { svg: svgOf(), head: bob };
+    const tg = document.getElementById('tgSmiley'), tsvg = tg && !tg.hidden && tg.querySelector('svg');
+    if(tsvg && tg.getClientRects().length && getComputedStyle(tg).visibility !== 'hidden') return { svg: tsvg, head: tsvg };
+    return null;
   }
-  return { sync, react, emote };
+  return { sync, emote, stage };
 })();
 
 /* ============ Init ============ */

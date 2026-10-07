@@ -205,6 +205,17 @@ lost concurrent edits. Do not reintroduce that.
   is stopped). Interruptions walk through in-between frames (`DR_FACE_BACK`);
   a sequence whose consecutive frames aren't neighbours gets them filled in.
   Reduced motion, a hidden page and a detached svg are handled there.
+- **His personality comes from task states, not timers.** `drTask(kind)`
+  (available, attentive, processing, answering, celebrating, uncertain;
+  offline, appointment and resting follow the phone) is one state for the
+  whole app; each controller runs that state's hold (thinking while Ask works,
+  reading an answer with you) at `DR_P.TASK`, so idle can't interrupt it.
+  React by meaning: `smileyReact(kind)` for team news, `smileyStudy()` for a
+  study result, `askReact()` for an Ask outcome (`askOutcome`: verified only
+  when a source checks out locally, never `fromHub` alone; the card's
+  provenance label is untouched). No mouth movement for silent text: `talk()`
+  is for real audio only. Lively / Focused / Still is `setSmileyMode`
+  (`ih_smileyMode`); the phone's reduced motion always means Still.
 
 ## Design system
 
