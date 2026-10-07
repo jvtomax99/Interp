@@ -29,12 +29,20 @@ The code was written outside the team, so it runs with no access to the Hub:
 
 ## What changed from the original
 
-Only what it takes to run from `/atlas/` instead of a site root:
+Small changes, to run from `/atlas/` instead of a site root and to make the
+body easier to see:
 
 - `app/page.tsx`: `fetch('/models/atlas.json')` → `fetch('models/atlas.json')`
 - `vite.config.ts`: `base:'./'`
 - `web/index.html`: relative favicon; title "3D Body · Human Atlas"
 - `models/atlas.json`: chunk paths made relative (`models/body-N.bin.gz`)
+- `app/scene.tsx`, for easier viewing (Jose): transparent canvas
+  (`alpha:true`, clear colour alpha 0) so a dark stage shows through; the
+  floor, platform and two rings are no longer added to the scene; and
+  `controls.maxPolarAngle=Math.PI`, so the camera can look straight up at
+  the soles of the feet.
+- `app/globals.css`: a block appended at the end — the dark navy stage, light
+  text for what sits straight on it, solid white panels.
 - Only the gzip models are shipped (33 MB); the raw `.bin` copies (another
   58 MB) are only used by browsers without `DecompressionStream`
   (iOS before 16.4), which then show "An anatomy file could not be loaded."
