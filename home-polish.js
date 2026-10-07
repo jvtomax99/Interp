@@ -241,7 +241,7 @@
     const io=new IntersectionObserver(entries=>{onScreen=entries[0].isIntersecting;});
     io.observe(button);
     pin.style.transformOrigin='50% 88%';
-    const ctl=window.drFaceIdle(svg,pin,{canPlay:()=>onScreen&&button.isConnected,first:forcedAct?300:1600+Math.random()*1200});
+    const ctl=window.drFaceIdle(svg,pin,{canPlay:()=>onScreen&&button.isConnected,first:forcedAct?300:900+Math.random()*600});
     idleCtl=ctl;idleRunning=true;
     if(forcedAct){const f=ACT_FACE[forcedAct]||'smile';forcedAct=null;ctl.act(f);}
     idleStop=()=>{

@@ -12888,10 +12888,10 @@ function drFacePlay(svg, name, head, done){
 }
 /* Left alone, one timer runs his face: a blink every 2-6 s at irregular
    moments (now and then a double blink, now and then a longer pause), and
-   every 12-15 s or so one of his expressions -- a smile, a laugh, a giggle, a
-   nod, a think, heart eyes, a proud look, a hum, a look around, a wink or a
-   blown kiss -- never the same twice in a row, at most one wink or kiss a
-   minute. Nothing moves between them. Nothing at all with
+   every 5-8 s one of his expressions -- a smile, a laugh, a giggle, a nod, a
+   think, heart eyes, a proud look, a hum, a look around, a wink or a blown
+   kiss -- the first a second or so after he appears, none of his last three
+   again, at most one wink or kiss a minute. (Jose: he took too long.) Nothing moves between them. Nothing at all with
    reduced motion, while the page is hidden, or while canPlay() says no.
    opts: canPlay(), quietMs (settle after this long without a touch, until the
    next one), dozeMs (doze once after this long), onAct(kind), expressions
@@ -12899,28 +12899,31 @@ function drFacePlay(svg, name, head, done){
 function drFaceIdle(svg, head, opts){
   opts = opts || {};
   const reduceQ = matchMedia('(prefers-reduced-motion: reduce)');
-  let timer = 0, on = true, settled = false, last = '', lastExpr = performance.now() - 4000, lastWink = -1e9, touched = performance.now();
+  let timer = 0, on = true, settled = false, last = '', recent = [], lastExpr = -1e9, lastWink = -1e9, touched = performance.now();
   const rnd = (a, b) => a + Math.random() * (b - a);
-  const gap = () => Math.random() < .2 ? rnd(6500, 9000) : rnd(2200, 5600);
+  const gap = () => Math.random() < .08 ? rnd(4000, 5500) : rnd(1200, 3000);
   function arm(ms){ clearTimeout(timer); timer = 0; if(on && !reduceQ.matches) timer = setTimeout(tick, ms == null ? gap() : ms); }
   function play(kind){
-    if(kind !== 'blink'){ if(kind !== 'glance') lastExpr = performance.now(); last = kind; if(kind === 'wink' || kind === 'kiss') lastWink = performance.now(); }
+    const expr = kind !== 'blink' && kind !== 'glance';
+    if(kind !== 'blink'){ last = kind; if(kind === 'wink' || kind === 'kiss') lastWink = performance.now(); }
+    if(expr){ recent.push(kind); if(recent.length > 3) recent.shift(); }
     if(opts.onAct) opts.onAct(kind);
-    drFacePlay(svg, kind, head, () => arm());
+    // The wait to the next expression counts from the end of this one.
+    drFacePlay(svg, kind, head, () => { if(expr) lastExpr = performance.now(); arm(); });
   }
   function tick(){
     timer = 0;
     if(!on) return;
     if(!svg.isConnected){ api.stop(); return; }
-    if(document.hidden || (opts.canPlay && !opts.canPlay())){ arm(3000); return; }
+    if(document.hidden || (opts.canPlay && !opts.canPlay())){ arm(1500); return; }
     if(drFaceBusy(svg)){ arm(1200); return; }
     const now = performance.now(), quiet = now - touched;
     if(opts.quietMs && quiet > opts.quietMs){ settled = true; return; }
     let kind = 'blink';
     if(opts.dozeMs && quiet > opts.dozeMs && last !== 'doze') kind = 'doze';
-    else if(opts.expressions !== false && now - lastExpr > 7000 && Math.random() < .55){
+    else if(opts.expressions !== false && now - lastExpr > 2500 && Math.random() < .8){
       const pool = [['smile', .16], ['laugh', .1], ['giggle', .1], ['nod', .1], ['think', .1], ['love', .09], ['proud', .08], ['sing', .08], ['around', .07], ['wink', .07], ['kiss', .05]]
-        .filter(([k]) => k !== last && !((k === 'wink' || k === 'kiss') && now - lastWink < 60000));
+        .filter(([k]) => !recent.includes(k) && !((k === 'wink' || k === 'kiss') && now - lastWink < 60000));
       let r = Math.random() * pool.reduce((t, p) => t + p[1], 0);
       for(const [k, w] of pool){ if((r -= w) <= 0){ kind = k; break; } }
       if(kind === 'blink' && pool.length) kind = pool[0][0];
@@ -12933,7 +12936,7 @@ function drFaceIdle(svg, head, opts){
     }
     play(kind);
   }
-  const wake = () => { touched = performance.now(); if(settled && on){ settled = false; arm(2500); } };
+  const wake = () => { touched = performance.now(); if(settled && on){ settled = false; arm(1200); } };
   ['pointerdown', 'keydown', 'scroll', 'wheel'].forEach(t => window.addEventListener(t, wake, { passive: true, capture: true }));
   const api = {
     // An expression right now (a reaction), then back to the usual rhythm.
@@ -12945,7 +12948,7 @@ function drFaceIdle(svg, head, opts){
     },
     get running(){ return on; },
   };
-  arm(opts.first == null ? rnd(1200, 2400) : opts.first);
+  arm(opts.first == null ? rnd(900, 1600) : opts.first);
   return api;
 }
 const ICON_EXTERNAL = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -18011,7 +18014,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.0736';
+const BUILD_ID = 'b1007.0800';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -23309,7 +23312,7 @@ const smileyRider = (() => {
   function idleStart(){
     if(idle || reduce.matches || !btn) return;
     idle = drFaceIdle(svgOf(), bob, {
-      first: 3500, quietMs: QUIET, dozeMs: DOZE_AFTER,
+      first: 1500, quietMs: QUIET, dozeMs: DOZE_AFTER,
       canPlay: () => shown() && performance.now() >= busyUntil,
       onAct: kind => {
         if(kind !== 'doze') return;
