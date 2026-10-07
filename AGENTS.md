@@ -65,6 +65,12 @@ subgroup is a collapsed heading: the heading opens it where it is, and its
 Open button navigates (`setCategory`, so Back retraces it). A new touch
 control that should show a press goes in the `LIFTS` list in `index.html`.
 
+**Moved or renamed a button? Update the User Guide in the same push.**
+Dr. Smiley answers "how do I…" from the guide's entries (`GUIDE_TOPICS`),
+so a stale answer becomes a wrong answer from him too; nine had drifted.
+An answer with drawn steps (`GUIDE_STEPS`) or a "Show me" (`GUIDE_COACH`
+selectors) has to change there as well.
+
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
 nothing for the glossary, terms, chat, Doctor Prep, study, quizzes, profile,
 settings or the guide — those exist only inside `index.html`. Say so rather

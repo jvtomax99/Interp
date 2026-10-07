@@ -2984,158 +2984,229 @@
   .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
 
   /* ---------- In-app guide ----------
-     A list of questions, not a slideshow. Everything here is sized for
-     someone reading one-handed on a phone between assignments: large tap
-     targets, one question per row, and an answer that opens in place rather
-     than on another screen. ---------- */
+     Search first. One box looks through every answer as you type and hands
+     the same question to Dr. Smiley; topics are tiles like Home; an answer
+     opens in a sheet from the bottom; "Show me" dims the app and points at
+     the real button. Section colours are picked for white cards, so any text
+     in one is mixed toward the ink, more so in dark mode. ---------- */
+  .user-guide, .gd-sheet{ --gd-mix:80%; }
+  html[data-theme="dark"] .user-guide, html[data-theme="dark"] .gd-sheet{ --gd-mix:50%; }
   .user-guide{ max-width:660px; margin:0 auto; }
+  .gd-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:13px; margin:0 0 9px; }
+  .gd-head h2{ font:700 28px/1.1 var(--sans); letter-spacing:-.025em; margin:0; color:var(--ink); }
+  .gd-head p{ margin:4px 0 0; font-size:13px; line-height:1.4; color:var(--ink-soft); }
+  .gd-tour{ flex:none; min-height:44px; padding:0 15px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
+    font:600 14px var(--sans); color:var(--ink); cursor:pointer; box-shadow:var(--sh-1); }
 
-  /* Install card — first thing on the guide, and impossible to miss. */
-  .guide-install{
-    background:linear-gradient(150deg, #0079BD, #252E6D);
-    border-radius:18px; padding:20px 18px; margin-bottom:26px; color:#fff;
-    box-shadow:0 12px 28px -14px rgba(37,46,109,0.75);
-  }
-  .guide-install-top{ display:flex; gap:13px; align-items:flex-start; }
-  .guide-install-badge{
-    width:40px; height:40px; border-radius:12px; flex-shrink:0;
-    background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center;
-  }
-  .guide-install-badge svg{ width:21px; height:21px; color:#fff; }
-  .guide-install h3{
-    font-family:var(--sans); font-size:17px; font-weight:700; margin:0 0 5px 0; color:#fff;
-  }
-  .guide-install-top p{
-    font-size:13.5px; line-height:1.55; margin:0; color:rgba(255,255,255,0.9);
-  }
-  .guide-install-tabs{ display:flex; gap:8px; margin:16px 0 14px 0; }
-  .guide-install-tabs button{
-    flex:1; font-family:var(--sans); font-size:13.5px; font-weight:650; cursor:pointer;
-    padding:10px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.32);
-    background:none; color:rgba(255,255,255,0.85);
-  }
-  .guide-install-tabs button.is-on{ background:#fff; color:#252E6D; border-color:#fff; }
-  .guide-install-steps{
-    margin:0; padding-left:22px; font-size:14px; line-height:1.6; color:#fff;
-  }
-  .guide-install-steps li{ margin-bottom:10px; }
-  .guide-install-steps li:last-child{ margin-bottom:0; }
-  .guide-install-steps b{ font-weight:700; }
-  .guide-install-foot{
-    font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.75); margin:14px 0 0 0;
-  }
-  .guide-search-clear.is-hidden{ display:none; }
+  /* The one box, docked under the app's top bar while you scroll. 16px on
+     the input is not a style choice: anything smaller makes iOS zoom. */
+  .gd-searchbar{ position:sticky; top:var(--dock-top, 0px); z-index:6; margin:0 -9px 4px; padding:6px 9px 9px; border-radius:0 0 22px 22px;
+    transition:background-color .2s var(--ease); }
+  .gd-searchbar.is-stuck{ background:color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px); }
+  .gd-stick{ height:1px; margin-bottom:-1px; }
+  .gd-search{ display:flex; align-items:center; gap:9px; min-height:56px; padding:0 6px 0 15px; border-radius:18px;
+    background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); }
+  .gd-search > svg{ width:20px; height:20px; color:var(--ink-faint); flex:none; }
+  .gd-search input{ flex:1; min-width:0; border:0; background:none; outline:none; font:500 16px var(--sans); color:var(--ink); padding:15px 0; }
+  .gd-search input::placeholder{ color:var(--ink-faint); }
+  .gd-search input::-webkit-search-cancel-button{ display:none; }
+  .gd-clear{ width:44px; height:44px; flex:none; border:0; background:none; border-radius:50%; color:var(--ink-faint); cursor:pointer; display:grid; place-items:center; }
+  .gd-clear svg{ width:16px; height:16px; }
+  .gd-clear.is-hidden{ display:none; }
+  .gd-face-btn{ width:44px; height:44px; flex:none; border:0; padding:0; background:none; border-radius:50%; cursor:pointer; display:grid; place-items:center; }
+  .gd-face-btn .ask-face{ width:40px; height:40px; margin:0; }
+  body.gd-coaching .gd-face{ visibility:hidden; }   /* one Dr. Smiley at a time: the dock steps in */
 
-  .guide-head h2{
-    font-family:var(--serif); font-size:26px; font-weight:400; color:var(--ink); margin:0 0 6px 0;
-  }
-  .guide-head p{ font-size:14px; line-height:1.6; color:var(--ink-soft); margin:0 0 18px 0; }
+  .gd-eyebrow{ font:650 12px/1 var(--sans); letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); margin:22px 2px 9px; }
+  .gd-eyebrow:first-child{ margin-top:6px; }
 
-  /* Search. 16px on the input is not a style choice - anything smaller makes
-     iOS Safari zoom the page the moment it is focused, and it never zooms
-     back out. */
-  .guide-search{
-    position:relative; display:flex; align-items:center; gap:10px;
-    background:var(--paper); border-radius:14px; padding:0 14px;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); margin-bottom:20px;
+  /* What's new: a sideways row of cards */
+  .gd-news{ display:flex; gap:11px; overflow-x:auto; scroll-snap-type:x mandatory; margin:0 -17px; padding:2px 17px 6px; scrollbar-width:none; }
+  .gd-news::-webkit-scrollbar{ display:none; }
+  .gd-news-card{ flex:0 0 min(78%, 300px); scroll-snap-align:start; min-height:148px; border:0; border-radius:var(--r-lg); padding:17px;
+    color:#fff; text-align:left; position:relative; overflow:hidden; cursor:pointer; font-family:var(--sans);
+    display:flex; flex-direction:column; justify-content:flex-end; gap:4px; box-shadow:0 14px 26px -16px rgba(20,40,90,.55); }
+  .gd-news-card small{ font-size:12px; letter-spacing:.06em; text-transform:uppercase; font-weight:650; opacity:.85; }
+  .gd-news-card b{ font-size:18px; line-height:1.25; letter-spacing:-.01em; font-weight:650; max-width:76%; text-wrap:balance; }
+  .gd-news-card > span:last-child{ font-size:13px; opacity:.88; }
+  .gd-news-card img{ position:absolute; right:-6px; top:-4px; width:92px; height:92px; object-fit:contain; transform:rotate(8deg);
+    filter:drop-shadow(0 8px 14px rgba(8,20,48,.3)); }
+  .gd-news-card small{ display:flex; align-items:center; gap:7px; }
+  .gd-new{ font-size:11px; font-weight:700; letter-spacing:.04em; padding:3px 8px; border-radius:999px; background:#fff; color:#252E6D; }
+  @media (min-width:700px){
+    .gd-news{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); overflow:visible; margin:0; padding:0; }
+    .gd-news-card{ min-height:200px; }
+    .gd-news-card img{ width:60px; height:60px; right:-2px; top:-2px; }
+    .gd-news-card b{ max-width:none; font-size:17px; }
+    .gd-news-card small{ max-width:calc(100% - 52px); }
   }
-  .guide-search svg{ width:18px; height:18px; color:var(--ink-faint); flex-shrink:0; }
-  .guide-search input{
-    flex:1; border:none; background:none; outline:none; font-family:var(--sans);
-    font-size:16px; color:var(--ink); padding:15px 0;
-  }
-  .guide-search input::placeholder{ color:var(--ink-faint); }
-  .guide-search-clear{
-    border:none; background:none; color:var(--ink-faint); font-size:15px;
-    cursor:pointer; padding:6px; line-height:1;
+  .gd-n1{ background:linear-gradient(140deg,#252E6D,#2E5FB0 70%,#2E8BD0); }
+  .gd-n2{ background:linear-gradient(140deg,#4E3F7A,#7C6A9C 80%); }
+  .gd-n3{ background:linear-gradient(140deg,#0F5FA6,#0189B3); }
+
+  /* Your first week */
+  .gd-week{ display:flex; flex-direction:column; padding:15px 15px 6px; border-radius:var(--r-lg); background:var(--paper);
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); }
+  .gd-week-top{ display:flex; align-items:center; gap:13px; margin-bottom:6px; }
+  .gd-week-top h3{ margin:0; font:650 17px/1.2 var(--sans); letter-spacing:-.01em; color:var(--ink); }
+  .gd-week-top p{ margin:2px 0 0; font-size:13px; color:var(--ink-soft); }
+  .gd-week-hide{ margin-left:auto; align-self:flex-start; width:44px; height:44px; margin-top:-9px; margin-right:-9px; border:0; background:none;
+    border-radius:50%; color:var(--ink-faint); cursor:pointer; display:grid; place-items:center; }
+  .gd-week-hide svg{ width:15px; height:15px; }
+  .gd-ring{ width:54px; height:54px; flex:none; position:relative; }
+  .gd-ring svg{ width:54px; height:54px; transform:rotate(-90deg); }
+  .gd-ring circle{ fill:none; stroke-width:6; }
+  .gd-ring .bg{ stroke:var(--line-soft); }
+  .gd-ring .fg{ stroke:var(--accent-2); stroke-linecap:round; transition:stroke-dashoffset .8s var(--ease); }
+  .gd-ring b{ position:absolute; inset:0; display:grid; place-items:center; font:700 14px var(--sans); font-variant-numeric:tabular-nums; color:var(--ink); }
+  .gd-wk{ display:flex; align-items:center; gap:11px; min-height:48px; font-size:15px; color:var(--ink); border-top:1px solid var(--line-soft); }
+  .gd-wk > i{ width:22px; height:22px; border-radius:50%; border:2px solid var(--line); flex:none; display:grid; place-items:center;
+    font-style:normal; font-size:12px; font-weight:700; color:#fff; }
+  .gd-wk.is-done > i{ background:#2F7D5B; border-color:#2F7D5B; }
+  .gd-wk.is-done > span{ color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--line); }
+  .gd-wk button{ margin-left:auto; flex:none; white-space:nowrap; min-height:40px; padding:0 15px; border-radius:999px;
+    border:1px solid var(--line); background:var(--paper); color:var(--navy); font:650 13px var(--sans); cursor:pointer; }
+  html[data-theme="dark"] .gd-wk button{ color:var(--ink); }
+
+  /* Topic tiles */
+  .gd-tiles{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:11px; }
+  @media (min-width:600px){ .gd-tiles{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
+  .gd-tile{ position:relative; overflow:hidden; text-align:left; min-height:118px; padding:13px; border-radius:var(--r-lg); cursor:pointer;
+    display:flex; flex-direction:column; justify-content:space-between; gap:9px; font-family:var(--sans);
+    background:linear-gradient(160deg, color-mix(in srgb, var(--c) 13%, var(--paper)), var(--paper) 75%);
+    border:1px solid color-mix(in srgb, var(--c) 20%, var(--line)); box-shadow:var(--sh-1); }
+  .gd-tile::after{ content:''; position:absolute; right:-30px; top:-30px; width:90px; height:90px; border-radius:50%;
+    background:color-mix(in srgb, var(--c) 10%, transparent); pointer-events:none; }
+  .gd-tile img{ width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 4px 6px rgba(20,40,80,.18)); }
+  .gd-tile b{ display:block; font-size:15px; line-height:1.2; font-weight:650; letter-spacing:-.005em; color:var(--ink); }
+  .gd-tile small{ display:block; margin-top:3px; font-size:12px; font-weight:650; color:color-mix(in srgb, var(--c) var(--gd-mix), var(--ink)); }
+
+  /* A list of questions */
+  .gd-rows{ display:flex; flex-direction:column; border-radius:var(--r-lg); background:var(--paper); overflow:hidden;
+    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); }
+  .gd-row{ display:flex; align-items:center; gap:11px; width:100%; min-height:56px; padding:9px 13px; text-align:left; cursor:pointer;
+    border:0; border-bottom:1px solid var(--line-soft); background:none; font:500 15px/1.35 var(--sans); color:var(--ink); }
+  .gd-row:last-child{ border-bottom:0; }
+  .gd-dot{ width:9px; height:9px; border-radius:50%; background:var(--c); flex:none; }
+  .gd-row-text{ flex:1; min-width:0; }
+  .gd-row-text small{ display:block; margin-top:2px; font-size:12px; color:var(--ink-faint); }
+  .gd-row > svg{ width:16px; height:16px; color:var(--ink-faint); flex:none; }
+  .gd-row mark{ background:color-mix(in srgb, var(--accent-2) 22%, transparent); color:inherit; border-radius:4px; padding:0 1px; }
+  .gd-none{ font-size:14px; color:var(--ink-soft); margin:6px 2px 0; }
+  .gd-ask{ display:flex; align-items:center; gap:12px; width:100%; margin-top:11px; min-height:64px; padding:11px 15px; border:0; border-radius:var(--r-lg);
+    text-align:left; cursor:pointer; font-family:var(--sans); color:#fff; background:linear-gradient(140deg,#252E6D,#2E5FB0);
+    box-shadow:0 14px 26px -16px rgba(20,40,90,.6); }
+  .gd-ask > svg:first-child{ width:26px; height:26px; flex:none; }
+  .gd-ask > svg:last-child{ width:16px; height:16px; flex:none; opacity:.8; }
+  .gd-ask span{ flex:1; min-width:0; }
+  .gd-ask b{ display:block; font-size:15px; font-weight:650; }
+  .gd-ask em{ display:block; font:italic 500 15px/1.35 var(--serif); opacity:.92; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* A topic opened in place (not navigation: Back still leaves the guide) */
+  .gd-sec-head{ display:flex; flex-direction:column; gap:9px; margin:6px 0 13px; }
+  .gd-all{ align-self:flex-start; display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 13px 0 7px; border-radius:999px;
+    border:1px solid var(--line); background:var(--paper); font:600 14px var(--sans); color:var(--ink); cursor:pointer; box-shadow:var(--sh-1); }
+  .gd-all svg{ width:18px; height:18px; }
+  .gd-sec-title{ display:flex; align-items:center; gap:13px; }
+  .gd-sec-title img{ width:56px; height:56px; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(20,40,80,.2)); }
+  .gd-sec-title h3{ margin:0; font:700 24px/1.15 var(--sans); letter-spacing:-.02em; color:var(--ink); text-wrap:balance; }
+  .gd-sec-title p{ margin:3px 0 0; font-size:13px; color:color-mix(in srgb, var(--c) var(--gd-mix), var(--ink)); font-weight:650; }
+
+  .gd-install{ display:flex; align-items:center; gap:11px; width:100%; margin-top:22px; min-height:52px; padding:9px 13px; border-radius:var(--r-md);
+    border:1px dashed var(--line); background:none; color:var(--ink-soft); font:500 14px var(--sans); text-align:left; cursor:pointer; }
+  .gd-install > svg:first-child{ width:20px; height:20px; flex:none; color:var(--accent-2); }
+  .gd-install > svg:last-child{ width:16px; height:16px; flex:none; margin-left:auto; color:var(--ink-faint); }
+  .gd-install b{ color:var(--ink); font-weight:650; }
+
+  .gd-tile, .gd-row, .gd-news-card, .gd-ask, .gd-wk button, .gd-install, .gd-all{ transition:transform .18s var(--ease); }
+  .gd-tile:active, .gd-row:active, .gd-news-card:active, .gd-ask:active, .gd-install:active{ transform:scale(.98); }
+  .gd-tile:focus-visible, .gd-row:focus-visible, .gd-news-card:focus-visible, .gd-ask:focus-visible, .gd-wk button:focus-visible,
+  .gd-install:focus-visible, .gd-all:focus-visible, .gd-tour:focus-visible, .gd-clear:focus-visible, .gd-face-btn:focus-visible,
+  .gd-week-hide:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .gd-row:focus-visible{ outline-offset:-3px; }
+
+  /* The answer sheet (an .overlay, so Back closes it like any sheet) */
+  .gd-sheet{ padding-top:9px; }
+  .gd-sheet-top{ display:flex; align-items:center; gap:9px; margin:0 -6px 2px 0; }
+  .gd-sec{ display:inline-flex; align-items:center; gap:7px; font:650 12px var(--sans); letter-spacing:.07em; text-transform:uppercase;
+    color:color-mix(in srgb, var(--c) var(--gd-mix), var(--ink)); }
+  .gd-sec i{ width:8px; height:8px; border-radius:50%; background:var(--c); }
+  .gd-x{ margin-left:auto; width:44px; height:44px; border:0; border-radius:50%; background:none; color:var(--ink-faint); cursor:pointer; display:grid; place-items:center; }
+  .gd-x svg{ width:16px; height:16px; }
+  .gd-sheet h2{ font:700 22px/1.2 var(--sans); letter-spacing:-.02em; margin:0 0 13px; color:var(--ink); text-wrap:balance; }
+  .gd-body{ overflow-y:auto; margin:0 -17px; padding:0 17px 4px; }
+  .gd-sheet .guide-a{ font-size:15px; line-height:1.65; color:var(--ink-soft); }
+  .gd-sheet .guide-a p{ margin:0 0 11px; font-size:15px; color:var(--ink-soft); }
+  .gd-sheet .guide-a b{ color:var(--ink); font-weight:650; }
+  .gd-sheet .guide-a i{ font-family:var(--serif); font-style:italic; color:var(--navy); }
+  .gd-sheet .guide-a ol, .gd-sheet .guide-a ul{ margin:0 0 11px; padding-left:22px; }
+  .gd-sheet .guide-a li{ margin-bottom:6px; }
+  .gd-steps{ list-style:none; margin:0 0 13px; padding:0; counter-reset:gds; }
+  .gd-steps li{ position:relative; padding:2px 0 17px 44px; font-size:16px; line-height:1.55; color:var(--ink); counter-increment:gds; }
+  .gd-steps li::before{ content:counter(gds); position:absolute; left:0; top:0; width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+    background:var(--navy); color:#fff; font:700 14px var(--sans); }
+  .gd-steps li::after{ content:''; position:absolute; left:14px; top:34px; bottom:4px; width:2px; border-radius:1px; background:var(--line-soft); }
+  .gd-steps li:last-child{ padding-bottom:6px; }
+  .gd-steps li:last-child::after{ display:none; }
+  .gd-steps i{ font-family:var(--serif); font-style:italic; color:var(--navy); }
+  .gd-steps b{ font-weight:650; }
+  .gd-note{ margin:0 0 13px; padding:11px 13px; border-radius:var(--r-md); background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft);
+    font-size:14px !important; line-height:1.5; color:var(--ink-soft) !important; }
+  /* Small copies of the real controls, inside the steps */
+  .gd-ui{ display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; margin:0 2px; font:650 13px/1 var(--sans); }
+  .gd-ui-av{ width:28px; height:28px; border-radius:50%; background:linear-gradient(150deg,#2E5FB0,#252E6D); color:#fff; }
+  .gd-ui-dots{ width:32px; height:26px; gap:3px; border-radius:9px; background:var(--paper); box-shadow:inset 0 0 0 1px var(--line); }
+  .gd-ui-dots i{ width:4px; height:4px; border-radius:50%; background:var(--ink); }
+  .gd-ui-pill{ min-height:28px; padding:0 11px; border-radius:999px; background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff; }
+  .gd-ui-menu{ min-height:28px; padding:0 11px; border-radius:9px; background:var(--paper); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line), var(--sh-1); }
+  .gd-ui-ask{ min-height:28px; padding:0 11px; border-radius:999px; background:var(--navy); color:#fff; }
+  html[data-theme="dark"] .gd-ui-ask{ color:#0E1420; }
+  .gd-ui-seg{ height:30px; padding:2px; gap:2px; border-radius:9px; background:var(--line-soft); }
+  .gd-ui-seg b{ padding:6px 8px; border-radius:7px; font-weight:600; color:var(--ink-soft); }
+  .gd-ui-seg b.is-on{ background:var(--paper); color:var(--ink); box-shadow:var(--sh-1); }
+  .gd-ui-tag{ min-height:24px; padding:0 9px; border-radius:999px; font-size:12px; background:#E7F5EE; color:#2F7D5B; }
+  html[data-theme="dark"] .gd-ui-tag{ background:#16302A; color:#6FC79C; }
+  .gd-ui-tag.is-off, html[data-theme="dark"] .gd-ui-tag.is-off{ background:var(--line-soft); color:var(--ink-soft); }
+  /* Dark mode's navy is a light periwinkle: white on it reads at 3:1, so
+     the text on navy turns dark there. */
+  html[data-theme="dark"] .gd-show, html[data-theme="dark"] .gd-tip-do, html[data-theme="dark"] .gd-steps li::before{ color:#0E1420; }
+  .gd-seg{ display:flex; gap:6px; padding:3px; margin:0 0 13px; border-radius:var(--r-md); background:var(--line-soft); }
+  .gd-seg button{ flex:1; min-height:40px; border:0; border-radius:11px; background:none; font:600 14px var(--sans); color:var(--ink-soft); cursor:pointer; }
+  .gd-seg button[aria-pressed="true"]{ background:var(--paper); color:var(--ink); box-shadow:var(--sh-1); }
+  .gd-acts{ display:flex; gap:9px; flex-wrap:wrap; padding-top:13px; }
+  .gd-acts button{ min-height:48px; padding:0 19px; border-radius:999px; display:inline-flex; align-items:center; gap:8px;
+    font:650 15px var(--sans); cursor:pointer; }
+  .gd-acts svg{ width:18px; height:18px; }
+  .gd-show{ flex:1; justify-content:center; border:0; background:var(--navy); color:#fff; }
+  .gd-link{ border:1px solid var(--line); background:var(--paper); color:var(--navy); }
+  html[data-theme="dark"] .gd-link{ color:var(--ink); }
+  .gd-acts button:focus-visible, .gd-x:focus-visible, .gd-seg button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+
+  /* Show me: everything dims except the real button */
+  .gd-coach{ position:fixed; inset:0; z-index:300; }
+  .gd-coach.is-free{ background:rgba(10,18,42,.62); }
+  .gd-spot{ position:fixed; border-radius:18px; box-shadow:0 0 0 200vmax rgba(10,18,42,.62); cursor:pointer; }
+  .gd-spot::after{ content:''; position:absolute; inset:-6px; border-radius:inherit; border:2px solid #fff; animation:gdPulse 1.6s var(--ease) infinite; }
+  @keyframes gdPulse{ 0%{ transform:scale(.96); opacity:.95; } 70%{ transform:scale(1.14); opacity:0; } 100%{ opacity:0; } }
+  .gd-tip{ position:fixed; left:max(16px, calc(50% - 230px)); right:max(16px, calc(50% - 230px)); display:flex; gap:11px; align-items:flex-start;
+    padding:15px; border-radius:var(--r-lg); background:var(--paper); box-shadow:var(--sh-2); }
+  .gd-tip .ask-face{ width:46px; height:46px; margin:0; flex:none; }
+  .gd-tip-text{ flex:1; min-width:0; }
+  .gd-tip p{ margin:0 0 11px; font:italic 500 16px/1.45 var(--serif); color:var(--ink); }
+  .gd-tip-acts{ display:flex; gap:9px; flex-wrap:wrap; }
+  .gd-tip-acts button{ min-height:44px; padding:0 19px; border-radius:999px; font:650 14px var(--sans); cursor:pointer; }
+  .gd-tip-do{ border:0; background:var(--navy); color:#fff; }
+  .gd-tip-ok{ border:1px solid var(--line); background:var(--paper); color:var(--navy); }
+  html[data-theme="dark"] .gd-tip-ok{ color:var(--ink); }
+  .gd-tip-acts button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .gd-spot::after{ animation:none; }
+    .gd-ring .fg, .gd-tile, .gd-row, .gd-news-card, .gd-ask, .gd-wk button, .gd-install, .gd-all{ transition:none; }
   }
 
-  /* First-run shortcut list */
-  .guide-first{
-    background:linear-gradient(140deg, var(--accent-soft), var(--paper));
-    border-radius:16px; padding:16px 14px 10px 14px; margin-bottom:24px;
-    box-shadow:inset 0 0 0 1px var(--line-soft);
-  }
-  .guide-first-label{
-    font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase;
-    color:var(--accent); margin:0 0 10px 2px;
-  }
-  .guide-first-row{
-    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
-    background:none; border:none; cursor:pointer; padding:10px 2px; font-family:var(--sans);
-    font-size:14.5px; color:var(--ink); line-height:1.4;
-  }
-  .guide-first-num{
-    width:24px; height:24px; border-radius:50%; flex-shrink:0;
-    background:var(--accent); color:#fff; font-size:12px; font-weight:700;
-    display:flex; align-items:center; justify-content:center;
-  }
-
-  /* Sections */
-  .guide-section{ margin-bottom:26px; }
-  .guide-section-head{
-    display:flex; align-items:center; gap:8px; margin:0 0 10px 2px;
-    font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
-    color:var(--ink-faint);
-  }
-  .guide-section-dot{
-    width:8px; height:8px; border-radius:50%; background:var(--guide-color); flex-shrink:0;
-  }
-
-  /* One question */
-  .guide-topic{
-    background:var(--paper); border-radius:14px; margin-bottom:8px;
-    box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); overflow:hidden;
-    transition:box-shadow .18s var(--ease);
-  }
-  .guide-topic.is-open{ box-shadow:var(--sh-2), inset 0 0 0 1px var(--guide-color); }
-  .guide-q{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    width:100%; text-align:left; background:none; border:none; cursor:pointer;
-    font-family:var(--sans); font-size:15px; font-weight:600; color:var(--ink);
-    line-height:1.4; padding:16px 15px;   /* a generous tap target */
-  }
-  .guide-q-text{ flex:1; }
-  .guide-q-chev{
-    display:flex; color:var(--ink-faint); flex-shrink:0;
-    transition:transform .2s var(--ease);
-  }
-  .guide-q-chev svg{ width:17px; height:17px; }
-  .guide-topic.is-open .guide-q{ color:var(--guide-color); }
-  .guide-topic.is-open .guide-q-chev{ transform:rotate(180deg); color:var(--guide-color); }
-  /* Section colors are picked for white cards; navy (Asking Dr. Smiley) or
-     teal (The one rule) on the dark card read at under 2.5:1. Lighten them
-     toward the dark ink so every open question stays readable. */
-  html[data-theme="dark"] .guide-topic.is-open .guide-q,
-  html[data-theme="dark"] .guide-topic.is-open .guide-q-chev{ color:color-mix(in srgb, var(--guide-color) 45%, var(--ink)); }
-  html[data-theme="dark"] .guide-topic.is-open{ box-shadow:var(--sh-2), inset 0 0 0 1px color-mix(in srgb, var(--guide-color) 60%, var(--ink)); }
-
-  .guide-a{
-    padding:0 15px 16px 15px; font-size:14px; line-height:1.7; color:var(--ink-soft);
-    animation:guideAnswerIn .22s var(--ease);
-  }
-  @keyframes guideAnswerIn{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:translateY(0); } }
-  @media (prefers-reduced-motion: reduce){ .guide-a{ animation:none; } }
-  .guide-a p{ margin:0 0 11px 0; }
-  .guide-a p:last-child{ margin-bottom:0; }
-  .guide-a b{ color:var(--ink); font-weight:650; }
-  .guide-a i{ font-family:var(--serif); font-style:italic; color:var(--accent); }
-  .guide-a ol, .guide-a ul{ margin:0 0 11px 0; padding-left:22px; }
-  .guide-a li{ margin-bottom:8px; }
-  .guide-a li:last-child{ margin-bottom:0; }
-
-  .guide-empty{
-    padding:26px 18px; text-align:center; font-size:14px; line-height:1.6;
-    color:var(--ink-soft); background:var(--paper); border-radius:14px;
-    box-shadow:inset 0 0 0 1px var(--line-soft); margin-bottom:22px;
-  }
-  .guide-empty p{ margin:0 0 8px 0; }
-  .guide-empty p:last-child{ margin-bottom:0; }
-
-  .guide-foot{
-    font-size:13px; line-height:1.6; color:var(--ink-faint);
-    text-align:center; margin:6px 0 8px 0;
-  }
+  .guide-foot{ font-size:13px; line-height:1.6; color:var(--ink-faint); text-align:center; margin:22px 0 8px; }
 
   /* Still used by the Code of Ethics screen. */
   .user-guide-note{
@@ -6708,7 +6779,7 @@ body.pv-open{ overflow:hidden; }
     <!-- The owner's way in to Team access, or a way to enter the code. Filled by renderNameAccess(). -->
     <div class="name-access" id="nameAccess" hidden></div>
     <div class="ta-switchrow name-pref">
-      <span>Dr. Smiley follows me<small>On every page, above the tabs. Tap him to ask the Hub.</small></span>
+      <span>Dr. Smiley follows me<small>On every page, beside the tabs. Tap him to ask the Hub.</small></span>
       <button class="ta-switch is-calm" id="smileyFollowSwitch" type="button" role="switch" aria-checked="true" aria-label="Dr. Smiley follows me" onclick="setSmileyFollows(this.getAttribute('aria-checked') !== 'true')"></button>
     </div>
     <!-- How lively he is (setSmileyMode, ih_smileyMode). The phone's reduced
@@ -8569,7 +8640,7 @@ const ONBOARDING_STEPS = [
   },
   {
     title: 'Meet Dr. Smiley',
-    body: 'He stands just above the bottom buttons. Tap him to ask about a term or a doctor, or say \u201cI\u2019m covering oncology. Prep me.\u201d He answers from the team\u2019s own glossary first, and tells you when he doesn\u2019t.'
+    body: 'He sits beside the bottom buttons. Tap him to ask about a term or a doctor, or say \u201cI\u2019m covering oncology. Prep me.\u201d He answers from the team\u2019s own glossary first, and tells you when he doesn\u2019t.'
   },
   {
     title: 'Built for the team',
@@ -11733,6 +11804,7 @@ function renderGlobalSearch(){
     box.innerHTML = `<div class="gs-empty">Search across terms, providers, the doctor directory, notes, chat, and practice questions.</div>`;
     return;
   }
+  if(q.trim().length >= 2) firstWeekMark('search');
   if(!gsMatches.length){
     box.innerHTML = `<div class="gs-empty">Nothing found for \u201c${escapeHtml(q)}\u201d.</div>`;
     return;
@@ -12160,38 +12232,20 @@ function exitReview(){
   renderContent();
 }
 
-// The in-app User Guide — a swipeable walkthrough of every screen, built so
-// it never needs a separate file format (PDF/PPTX) to look right on a
-// phone. Content mirrors the standalone navigation guide, condensed for
-// reading on-device rather than presenting.
+/* ---------- The guide: search, answer sheets, Show me ----------
+   Search first: one box looks through every answer as you type, and its last
+   row hands the same question to Dr. Smiley. Topics are tiles that open in
+   place (not navigation, like a subgroup heading). An answer opens in a
+   sheet from the bottom -- an .overlay, so Back closes it like any sheet --
+   and "Show me" dims the app and points at the real button. The answers
+   stay one list (GUIDE_TOPICS) because Dr. Smiley and global search read
+   them too: change a step there, not only in GUIDE_STEPS below. */
 
 let guideQuery = '';
-let guideOpenId = null;
+let guideSection = null;   // the topic tile opened in place, or null
+let guideOpenId = null;    // the answer showing in the sheet, or null
 
-function toggleGuideTopic(id){
-  guideOpenId = (guideOpenId === id) ? null : id;
-  renderContent();
-  // Keep the question the person just tapped in view — opening a long answer
-  // above the fold otherwise pushes it off the top of the screen.
-  if(guideOpenId){
-    setTimeout(()=>{
-      const el = document.getElementById('guide-topic-' + guideOpenId);
-      if(el && el.scrollIntoView) el.scrollIntoView({ block:'nearest', behavior:'smooth' });
-    }, 30);
-  }
-}
-
-// Used by search results, so a hit on a guide answer lands on that answer
-// already open rather than on the guide's front page.
-function openGuideTopic(id){
-  guideQuery = '';
-  guideOpenId = id;
-  setCategory('userguide');
-  setTimeout(()=>{
-    const el = document.getElementById('guide-topic-' + id);
-    if(el && el.scrollIntoView) el.scrollIntoView({ block:'center', behavior:'smooth' });
-  }, 120);
-}
+function guideTitle(t){ return String(t.q).replace(/<[^>]+>/g, ''); }
 
 /* Includes the hidden keyword list. People reach for different words than the
    guide happens to use — someone looking for the no-signal answer types
@@ -12201,11 +12255,318 @@ function guideTopicText(t){
   return foldText(t.q + ' ' + (t.k || '') + ' ' + String(t.a).replace(/<[^>]+>/g, ' '));
 }
 
+// Every word has to be somewhere in the answer; a word in the question
+// itself counts three times, so "name" ranks "How do I put my name..." first.
 function matchingGuideTopics(){
-  const q = foldText(guideQuery.trim());
-  if(!q) return GUIDE_TOPICS;
-  return GUIDE_TOPICS.filter(t => guideTopicText(t).includes(q));
+  const words = foldText(guideQuery).split(/\s+/).filter(Boolean);
+  if(!words.length) return GUIDE_TOPICS;
+  const hits = [];
+  GUIDE_TOPICS.forEach((t, i) => {
+    const q = foldText(guideTitle(t)), all = guideTopicText(t);
+    let score = 0;
+    for(const w of words){
+      if(q.includes(w)) score += 3;
+      else if(all.includes(w)) score += 1;
+      else return;
+    }
+    hits.push({ t, score, i });
+  });
+  return hits.sort((a, b) => b.score - a.score || a.i - b.i).map(h => h.t);
 }
+
+// Used by search results, Dr. Smiley's sources and "Copy link": the answer
+// opens in its sheet over the guide.
+function openGuideTopic(id){
+  const t = GUIDE_TOPICS.find(x => x.id === id);
+  if(!t) return;
+  if(activeCategory !== 'userguide'){ guideQuery = ''; guideSection = null; setCategory('userguide'); }
+  guideOpenSheet(t);
+}
+
+function openGuideSection(id){
+  guideSection = id;
+  refreshGuideList();
+  window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
+}
+function closeGuideSection(){ guideSection = null; refreshGuideList(); }
+
+/* ---- Answers people open most, and what changed lately ---- */
+const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
+const GUIDE_NEWS = [
+  { id:'askremember', tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Dr. Smiley',            title:'He remembers how you like your answers' },
+  { id:'briefing',    tone:'gd-n2', pin:'pins/doctor-prep.webp',         eyebrow:'Before an appointment', title:'A two-minute briefing for any specialty' },
+  { id:'askexplain',  tone:'gd-n3', pin:'pins/medical-terminology.webp', eyebrow:'Glossary',              title:'Any term, explained in plain Spanish' },
+];
+// The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
+// Smiley at a time, and the one on this page is in the search box.
+const GUIDE_SECTION_PINS = {
+  start:'pins/wave.webp', ask:'hmh-mark-square.png', find:'pins/medical-terminology.webp', prep:'pins/doctor-prep.webp',
+  change:'pins/practice.webp', team:'pins/chat.webp', study:'pins/review.webp', trouble:'pins/updates.webp',
+  out:'pins/resources.webp', rule:'pins/ethics.webp',
+};
+
+/* Which answers this phone has opened ("New" goes away), and what it has
+   done for the first-week list. On this phone only; if it won't store,
+   both last until the app closes. */
+const GUIDE_SEEN_KEY = 'ih_guideSeen', FIRST_WEEK_KEY = 'ih_firstWeek';
+let guideSeenMem = null, firstWeekMem = null;
+function guideSeen(){
+  if(guideSeenMem) return guideSeenMem;
+  try{ guideSeenMem = new Set(JSON.parse(localStorage.getItem(GUIDE_SEEN_KEY) || '[]')); }catch(e){ guideSeenMem = new Set(); }
+  return guideSeenMem;
+}
+function guideMarkSeen(id){
+  const s = guideSeen();
+  if(s.has(id)) return;
+  s.add(id);
+  try{ localStorage.setItem(GUIDE_SEEN_KEY, JSON.stringify([...s].slice(-60))); }catch(e){}
+}
+function firstWeekState(){
+  if(firstWeekMem) return firstWeekMem;
+  try{ firstWeekMem = JSON.parse(localStorage.getItem(FIRST_WEEK_KEY) || '{}') || {}; }catch(e){ firstWeekMem = {}; }
+  return firstWeekMem;
+}
+// search / ask / brief are marked where they happen; hidden by its ✕.
+function firstWeekMark(k){
+  const s = firstWeekState();
+  if(s[k]) return;
+  s[k] = Date.now();
+  try{ localStorage.setItem(FIRST_WEEK_KEY, JSON.stringify(s)); }catch(e){}
+}
+function firstWeekSteps(){
+  const s = firstWeekState();
+  return [
+    { label:'Put your name on your work',    done: !!whoAmI(),                      show:'name' },
+    { label:'Install the Hub on your phone', done: appIsInstalled(),                topic:'install' },
+    { label:'Look up a word',                done: !!s.search,                      show:'search' },
+    { label:'Ask Dr. Smiley something',      done: !!s.ask || ASK.turns.length > 0, show:'dock' },
+    { label:'Get an appointment briefing',   done: !!s.brief,                       show:'brief' },
+  ];
+}
+function hideFirstWeek(){ firstWeekMark('hidden'); refreshGuideList(); }
+
+/* ---- The answer sheet ---- */
+// Small copies of the real controls, so a step looks like what you'll tap.
+const GUIDE_UI = {
+  av:    () => `<span class="gd-ui gd-ui-av" role="img" aria-label="your initial">${escapeHtml(whoAmI() ? initialsOf(whoAmI()) : '?')}</span>`,
+  dots:  '<span class="gd-ui gd-ui-dots" role="img" aria-label="the three-dot button"><i></i><i></i><i></i></span>',
+  pill:  s => `<span class="gd-ui gd-ui-pill">${s}</span>`,
+  menu:  s => `<span class="gd-ui gd-ui-menu">${s}</span>`,
+  ask:   '<span class="gd-ui gd-ui-ask">Ask</span>',
+  tag:   (s, off) => `<span class="gd-ui gd-ui-tag${off ? ' is-off' : ''}">${s}</span>`,
+  seg:   '<span class="gd-ui gd-ui-seg"><b>Lively</b><b class="is-on">Focused</b><b>Still</b></span>',
+};
+// The same instructions as the answer text, drawn as steps. Keep them in
+// step with GUIDE_TOPICS; the text there is what search and Ask read.
+const GUIDE_STEPS = {
+  name: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
+    note: 'Your name goes on your chat messages, the terms you add or edit, and your practice. A photo is optional.' }),
+  noname: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
+    note: 'Edits from now on will carry it.' }),
+  add: () => ({ steps: [`Open the domain and tap ${GUIDE_UI.pill('+ Add')} in its colored banner. Or tap <b>Add Term</b> on Home.`,
+    'Fill in the English, the Spanish and a short definition.', `Check the domain is right, then tap ${GUIDE_UI.pill('Save')}.`],
+    note: 'Everyone on the team sees it within a few seconds.' }),
+  edit: () => ({ steps: [`Tap ${GUIDE_UI.dots} on the term’s card.`, `Tap ${GUIDE_UI.menu('Edit term')}.`, `Make your change and tap ${GUIDE_UI.pill('Save')}.`],
+    note: 'On a computer, the pencil on the card does the same. Anyone can fix anything, and every change is kept in the history.' }),
+  history: () => ({ steps: [`Tap ${GUIDE_UI.dots} on the term’s card, then ${GUIDE_UI.menu('Edit term')}.`, 'Tap <b>View edit history</b>.',
+    'You’ll see who changed it and when. You can put an older version back.'], note: 'The last ten versions of every term are kept.' }),
+  attach: () => ({ steps: [`Tap ${GUIDE_UI.dots} on the term’s card.`, `Tap ${GUIDE_UI.menu('Attach photo or PDF')}.`, 'Pick the file. It appears on the card for everyone.'] }),
+  askexplain: () => ({ steps: [`Tap ${GUIDE_UI.dots} on the term’s card, then ${GUIDE_UI.menu('Explain with Dr. Smiley')}.`,
+    'Ask opens with that term picked. You’ll see it just above the box.', `Tap ${GUIDE_UI.pill('Explain')}, or type your own question about it.`],
+    note: 'You get the glossary entry, a plain way to say it to a patient, and where the entry came from. On a computer, Explain is a button on the card.' }),
+  askwhat: () => ({ steps: [`Tap ${GUIDE_UI.ask} beside the tab bar, the smiley in the Home greeting, or <b>More</b> → <b>Ask the Hub</b>.`,
+    'Ask the way you’d ask a teammate: <i>How do I explain “ejection fraction”?</i>',
+    `Check the label: ${GUIDE_UI.tag('From the Hub')} is your team’s own entries; ${GUIDE_UI.tag('Not from the Hub', true)} is general knowledge.`],
+    note: 'When it says Not from the Hub, double-check it. He can also open a briefing, practice or a term for you; he says it’s done only once it’s open.' }),
+  askmoves: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>How Dr. Smiley moves</b>, pick one: ${GUIDE_UI.seg}.`,
+    'To take him off every page, turn off <b>Dr. Smiley follows me</b>.'],
+    note: 'Lively: expressions and reactions to the team. Focused: he blinks and reacts to what you’re doing. Still: he doesn’t move. If your phone is set to reduce motion, he’s always still.' }),
+  briefing: () => ({ steps: [`Tap ${GUIDE_UI.ask} and say <i>I’m covering oncology. Prep me.</i>`, `Tap ${GUIDE_UI.pill('Open the Oncology briefing')}.`,
+    `Go through the cards: tap one to see the Spanish, then ${GUIDE_UI.pill('Got it')} or ${GUIDE_UI.menu('Again')}.`],
+    note: 'Also in your briefing: the False Friends to watch, and your doctor if you named one. Leave and come back and it picks up where you were.' }),
+};
+// Which "Show me" each answer offers (keys of GUIDE_COACH).
+const GUIDE_SHOW = { name:'name', noname:'name', askmoves:'name', edit:'dots', history:'dots', attach:'dots', askexplain:'dots',
+  askwhat:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
+  chat:'chat', mention:'chat', pin:'chat', updates:'bell' };
+
+const ICON_GD_SHOW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" opacity=".55"/></svg>';
+
+function guideOpenSheet(t){
+  guideOpenId = t.id;
+  guideMarkSeen(t.id);
+  const sec = GUIDE_SECTIONS.find(s => s.id === t.section) || { name:'Guide', color:'#5B7FBF' };
+  const st = GUIDE_STEPS[t.id] ? GUIDE_STEPS[t.id]() : null, show = GUIDE_SHOW[t.id];
+  const body = t.id === 'install' ? guideInstallHtml()
+    : st ? `<ol class="gd-steps">${st.steps.map(s => `<li>${s}</li>`).join('')}</ol>${st.note ? `<p class="gd-note">${st.note}</p>` : ''}`
+    : `<div class="guide-a">${t.a}</div>`;
+  const ov = smSheet('guideSheet', `
+    <div class="gd-sheet-top" style="--c:${sec.color}">
+      <span class="gd-sec"><i aria-hidden="true"></i>${escapeHtml(sec.name)}</span>
+      <button type="button" class="gd-x" onclick="smSheetClose('guideSheet')" aria-label="Close">${ICON_X_TC}</button>
+    </div>
+    <h2 id="gdSheetTitle">${t.q}</h2>
+    <div class="gd-body">${body}</div>
+    <div class="gd-acts">
+      ${show ? `<button type="button" class="gd-show" onclick="guideShowMe('${show}')">${ICON_GD_SHOW}<span>Show me</span></button>` : ''}
+      <button type="button" class="gd-link" onclick="guideCopyLink('${t.id}')">${ICON_CHAIN}<span>Copy link</span></button>
+    </div>`);
+  const sheet = ov.firstElementChild;
+  sheet.classList.add('gd-sheet');
+  sheet.style.setProperty('--c', sec.color);
+  sheet.setAttribute('aria-labelledby', 'gdSheetTitle');
+  ov._after = () => { guideOpenId = null; };
+  if(prefersAutoFocus()) sheet.querySelector('.gd-show, .gd-x').focus({ preventScroll: true });
+}
+
+// A link straight to one answer, to paste into Team Chat.
+async function guideCopyLink(id){
+  const url = location.origin + location.pathname + '?guide=' + encodeURIComponent(id);
+  try{
+    await navigator.clipboard.writeText(url);
+    showToast('Link copied. Paste it in Chat.');
+  }catch(e){
+    showToast('Couldn’t copy it. The link is ' + url);
+  }
+}
+
+// The box's last row: the same words, asked of Dr. Smiley. Patient details
+// still stop for the warning first (submitAsk).
+function guideAsk(q){
+  q = String(q || '').trim();
+  ASK.view = 'chat';
+  setCategory('ask');
+  if(q) submitAsk(q);
+}
+
+/* ---- Show me ----
+   Dims everything but the real button and lets Dr. Smiley say what it's
+   for. "Try it" (or a tap on the lit button) does the real thing. Not an
+   .overlay: the tab bar and the dock have to stay on screen to be shown.
+   For the dock the guide's own Dr. Smiley steps aside (one at a time), and
+   the tip has no face, since the lit one is him. */
+const GUIDE_COACH = {
+  name:   { sel:['.topbar-global [onclick="openNameModal()"]', '[onclick="openNameModal()"]'], round:true,
+            text:'Tap your initial to set your name, add a photo, and choose how I move.' },
+  bell:   { sel:['.topbar-global [aria-label="Recent updates"]', '[aria-label="Recent updates"]'], round:true,
+            text:'This is what your teammates changed lately. Tap it to read them.' },
+  tabs:   { sel:['.tabbar', ['.topbar-global .tg-brand', 'On a computer, tap the Hub’s name to go Home. The arrow beside it goes back one step.']],
+            text:'These are always here. If you ever feel lost, tap Home.' },
+  search: { sel:['.tabbar-search', ['.topbar-global .tg-search-btn', 'Search looks everywhere: terms, doctors and these answers. English or Spanish, accents optional.']], round:true,
+            text:'Search looks everywhere, in English or Spanish. Accents are optional.' },
+  chat:   { sel:['.tabbar-btn[aria-label="Chat"]'], text:'Your team. Type @ in a message to get one person’s attention.',
+            alt:'On a computer, Team Chat is in the sidebar. Type @ in a message to get one person’s attention.' },
+  dock:   { sel:['.dock-smiley', '#tgSmiley'], round:true, me:true,
+            text:'Tap me and ask anything. Try “How do I explain ejection fraction?”',
+            alt:'Tap me anywhere you see me, or open More → Ask the Hub, and ask anything.' },
+  brief:  { sel:['.dock-smiley', '#tgSmiley'], round:true, me:true,
+            text:'Tap me and say “I’m covering oncology. Prep me.” I’ll open your briefing.',
+            alt:'Open More → Ask the Hub and say “I’m covering oncology. Prep me.” I’ll open your briefing.' },
+  dots:   { term:true, sel:['.card[data-term-id] .card-more', '.card[data-term-id] .card-actions', '.card[data-term-id]'],
+            text:'Every term card has this button. Edit the term, attach a file, or ask me to explain it.' },
+};
+let guideCoachEl = null, guideCoachTimer = 0;
+
+function guideVisible(el){
+  const r = el.getBoundingClientRect();
+  if(r.width < 4 || r.height < 4) return false;
+  const cs = getComputedStyle(el);
+  return cs.visibility !== 'hidden' && cs.display !== 'none' && parseFloat(cs.opacity) > 0.05;
+}
+// A selector can carry its own words: [selector, text].
+function guideCoachTarget(c){
+  for(const item of c.sel){
+    const [s, text] = Array.isArray(item) ? item : [item, c.text];
+    for(const el of document.querySelectorAll(s)){
+      if(!guideVisible(el)) continue;
+      const r = el.getBoundingClientRect();
+      if(r.bottom > 0 && r.top < window.innerHeight) return { el, text };
+    }
+  }
+  return null;
+}
+// A short, plain domain to point at a card in: no subgroups, not slang.
+function guideCoachDomain(){
+  const cats = (DATA && DATA.categories) || [];
+  return cats.find(c => !c.parentId && c.terms && c.terms.length && !cats.some(k => k.parentId === c.id) && !isSlangDomain(c)) || null;
+}
+
+function guideShowMe(key){
+  const c = GUIDE_COACH[key];
+  if(!c) return;
+  smSheetClose('guideSheet');
+  guideCoachClose();
+  let wait = 420;
+  if(c.term){
+    const dom = guideCoachDomain();
+    if(dom && activeCategory !== dom.id){ setCategory(dom.id); wait = 650; }
+  }
+  document.body.classList.add('gd-coaching');
+  smileyRider.sync();   // its observer doesn't see body classes; tell it the guide's Dr. Smiley stepped aside
+  clearTimeout(guideCoachTimer);
+  guideCoachTimer = setTimeout(() => {
+    if(c.term){
+      const el = document.querySelector(c.sel[0]) || document.querySelector(c.sel[1]);   // plain selectors
+      if(el) el.scrollIntoView({ block:'center', behavior:'auto' });
+      guideCoachTimer = setTimeout(() => guideCoachOpen(c), 120);
+    } else guideCoachOpen(c);
+  }, reducedMotion() ? 80 : wait);
+}
+
+function guideCoachOpen(c, tries){
+  if(!document.body.classList.contains('gd-coaching')) return;   // cancelled meanwhile
+  const hit = guideCoachTarget(c), el = hit && hit.el;
+  // The dock hops in once the guide's own Dr. Smiley steps aside; give him
+  // up to a second to land before pointing at him.
+  if(c.me && (!el || el.getBoundingClientRect().width < 36) && (tries || 0) < 10){
+    guideCoachTimer = setTimeout(() => guideCoachOpen(c, (tries || 0) + 1), 110);
+    return;
+  }
+  const layer = document.createElement('div');
+  layer.className = 'gd-coach' + (el ? '' : ' is-free');
+  layer.setAttribute('role', 'dialog');
+  layer.setAttribute('aria-modal', 'true');
+  layer.setAttribute('aria-label', 'Show me');
+  const text = el ? hit.text : (c.alt || c.text);
+  const face = c.me && el ? '' : `<span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>`;
+  layer.innerHTML = `<div class="gd-spot" ${el ? '' : 'hidden'}></div>
+    <div class="gd-tip">${face}<div class="gd-tip-text"><p>${escapeHtml(text)}</p>
+      <div class="gd-tip-acts">${el ? '<button type="button" class="gd-tip-do">Try it</button>' : ''}<button type="button" class="gd-tip-ok">Got it</button></div></div></div>`;
+  document.body.appendChild(layer);
+  guideCoachEl = layer;
+  const spot = layer.querySelector('.gd-spot'), tip = layer.querySelector('.gd-tip');
+  const th = tip.offsetHeight, vh = window.innerHeight;
+  if(el){
+    const r = el.getBoundingClientRect(), pad = 6;
+    spot.style.left = (r.left - pad) + 'px';
+    spot.style.top = (r.top - pad) + 'px';
+    spot.style.width = (r.width + pad * 2) + 'px';
+    spot.style.height = (r.height + pad * 2) + 'px';
+    spot.style.borderRadius = c.round ? '999px' : '18px';
+    const below = r.top + r.height / 2 < vh / 2;
+    const top = below ? r.bottom + pad + 16 : r.top - pad - 16 - th;
+    tip.style.top = Math.max(12, Math.min(vh - th - 12, top)) + 'px';
+  } else {
+    tip.style.top = Math.max(12, (vh - th) / 2) + 'px';
+  }
+  layer.addEventListener('click', e => {
+    if(e.target.closest('.gd-tip-ok')){ guideCoachClose(); return; }
+    if(e.target.closest('.gd-tip-do') || e.target === spot){ guideCoachClose(); if(el && el.isConnected) el.click(); return; }
+    if(!e.target.closest('.gd-tip')) guideCoachClose();
+  });
+  layer.querySelector('.gd-tip-do, .gd-tip-ok').focus({ preventScroll: true });
+}
+
+// True when there was one to close (Back closes it first).
+function guideCoachClose(){
+  clearTimeout(guideCoachTimer);
+  const was = !!guideCoachEl || document.body.classList.contains('gd-coaching');
+  if(guideCoachEl){ guideCoachEl.remove(); guideCoachEl = null; }
+  if(document.body.classList.contains('gd-coaching')){ document.body.classList.remove('gd-coaching'); smileyRider.sync(); }
+  return was;
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && guideCoachEl) guideCoachClose(); });
+window.addEventListener('resize', () => { if(guideCoachEl) guideCoachClose(); });
 
 // "Doctor Prep" — looks up a doctor's specialty via the /api/doctor-research
 // serverless endpoint (Claude with web search), then shows a prep list of
@@ -12597,24 +12958,10 @@ function renderDoctorResearch(){
 }
 
 
-function guideTopicCard(t, sectionColor){
-  const open = guideOpenId === t.id;
-  return `
-    <div class="guide-topic ${open ? 'is-open' : ''}" id="guide-topic-${t.id}" style="--guide-color:${sectionColor};">
-      <button class="guide-q" onclick="toggleGuideTopic('${t.id}')" aria-expanded="${open}">
-        <span class="guide-q-text">${t.q}</span>
-        <span class="guide-q-chev">${ICON_CHEVRON_DOWN}</span>
-      </button>
-      ${open ? `<div class="guide-a">${t.a}</div>` : ''}
-    </div>`;
-}
-
 /* ---- Installing on a phone ----
-   First thing on the guide, and deliberately not behind a tap: it is the one
-   instruction someone needs before they can follow any of the others, and the
-   person who needs it is the least likely to go looking. It shows the steps
-   for the phone they are actually holding, and disappears entirely once the
-   app is installed, so it never becomes furniture. */
+   Steps for the phone being held, in the answer sheet. The guide's front
+   page keeps only a one-line reminder, and only until the app is installed:
+   it used to fill the whole first screen and push search below the fold. */
 
 let guideInstallPlatform = null;   // null = detect it
 
@@ -12634,7 +12981,8 @@ function detectPhonePlatform(){
 
 function setGuidePlatform(p){
   guideInstallPlatform = p;
-  renderContent();
+  const t = GUIDE_TOPICS.find(x => x.id === 'install');
+  if(t) guideOpenSheet(t);
 }
 
 const GUIDE_INSTALL_STEPS = {
@@ -12647,36 +12995,100 @@ const GUIDE_INSTALL_STEPS = {
   android: [
     'Open this page in <b>Chrome</b>.',
     'Tap the <b>three dots</b> in the top-right corner.',
-    'Tap <b>Install app</b>, or <b>Add to Home screen</b> if you don\u2019t see that.',
+    'Tap <b>Install app</b>, or <b>Add to Home screen</b> if you don’t see that.',
     'Tap <b>Install</b> to confirm.',
   ],
 };
 
-function renderGuideInstall(){
-  if(appIsInstalled()) return '';
+function guideInstallHtml(){
   const detected = detectPhonePlatform();
-  const platform = guideInstallPlatform || (detected === 'other' ? 'ios' : detected);
-  const steps = GUIDE_INSTALL_STEPS[platform] || GUIDE_INSTALL_STEPS.ios;
-  return `
-    <div class="guide-install">
-      <div class="guide-install-top">
-        <span class="guide-install-badge">${ICON_PHONE}</span>
-        <div>
-          <h3>Put this on your phone first</h3>
-          <p>It takes about ten seconds. Afterwards it opens full screen with its own icon, like any other app &mdash; and it keeps working where there&rsquo;s no signal.</p>
+  const p = guideInstallPlatform || (detected === 'other' ? 'ios' : detected);
+  const note = appIsInstalled() ? 'This phone already has it. It opens from its own icon.'
+    : detected === 'other' ? 'You look like you’re on a computer right now. Do this on your phone when you have it to hand.'
+    : 'About ten seconds. Afterwards it opens full screen with its own icon, and keeps working where there’s no signal.';
+  return `<div class="gd-seg" role="group" aria-label="Your phone">
+      <button type="button" aria-pressed="${p === 'ios'}" onclick="setGuidePlatform('ios')">iPhone</button>
+      <button type="button" aria-pressed="${p === 'android'}" onclick="setGuidePlatform('android')">Android</button>
+    </div>
+    <ol class="gd-steps">${(GUIDE_INSTALL_STEPS[p] || GUIDE_INSTALL_STEPS.ios).map(s => `<li>${s}</li>`).join('')}</ol>
+    <p class="gd-note">${note}</p>`;
+}
+
+/* ---- The front page ---- */
+// The question with the words you typed marked. foldText keeps every
+// index where it was, so the marks land on the original letters.
+function guideMarkWords(text, words){
+  const f = foldText(text), ranges = [];
+  for(const w of words || []){
+    if(w.length < 2) continue;
+    const i = f.indexOf(w);
+    if(i >= 0) ranges.push([i, i + w.length]);
+  }
+  if(!ranges.length) return escapeHtml(text);
+  ranges.sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  for(const [s, e] of ranges){
+    if(s < at) continue;
+    out += escapeHtml(text.slice(at, s)) + '<mark>' + escapeHtml(text.slice(s, e)) + '</mark>';
+    at = e;
+  }
+  return out + escapeHtml(text.slice(at));
+}
+
+function guideRow(t, words){
+  const sec = GUIDE_SECTIONS.find(s => s.id === t.section) || { name:'', color:'#5B7FBF' };
+  return `<button type="button" class="gd-row" id="guide-topic-${t.id}" style="--c:${sec.color}" onclick="openGuideTopic('${t.id}')">
+    <i class="gd-dot" aria-hidden="true"></i><span class="gd-row-text">${guideMarkWords(guideTitle(t), words)}${words ? `<small>${escapeHtml(sec.name)}</small>` : ''}</span>${ICON_CHEVRON_RIGHT}</button>`;
+}
+
+function guideHomeHtml(){
+  const seen = guideSeen();
+  let html = `<p class="gd-eyebrow">New lately</p>
+    <div class="gd-news">${GUIDE_NEWS.filter(n => GUIDE_TOPICS.some(t => t.id === n.id)).map(n => `
+      <button type="button" class="gd-news-card ${n.tone}" onclick="openGuideTopic('${n.id}')">
+        <img src="${n.pin}" alt="" loading="lazy" decoding="async">
+        <small>${seen.has(n.id) ? '' : '<span class="gd-new">New</span>'}${escapeHtml(n.eyebrow)}</small><b>${escapeHtml(n.title)}</b><span>See how →</span></button>`).join('')}</div>`;
+
+  const steps = firstWeekSteps(), done = steps.filter(s => s.done).length;
+  if(done < steps.length && !firstWeekState().hidden){
+    const C = 2 * Math.PI * 22, left = steps.length - done;
+    html += `<p class="gd-eyebrow">Your first week</p>
+      <div class="gd-week">
+        <div class="gd-week-top">
+          <span class="gd-ring" role="img" aria-label="${done} of ${steps.length} done"><svg viewBox="0 0 54 54" aria-hidden="true"><circle class="bg" cx="27" cy="27" r="22"/><circle class="fg" cx="27" cy="27" r="22" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - done / steps.length)).toFixed(1)}"/></svg><b aria-hidden="true">${done}/${steps.length}</b></span>
+          <div><h3>Get to know the Hub</h3><p>${left === 1 ? '1 thing' : left + ' things'} left to try</p></div>
+          <button type="button" class="gd-week-hide" onclick="hideFirstWeek()" aria-label="Hide this list">${ICON_X_TC}</button>
         </div>
-      </div>
-      <div class="guide-install-tabs">
-        <button class="${platform === 'ios' ? 'is-on' : ''}" onclick="setGuidePlatform('ios')">iPhone</button>
-        <button class="${platform === 'android' ? 'is-on' : ''}" onclick="setGuidePlatform('android')">Android</button>
-      </div>
-      <ol class="guide-install-steps">
-        ${steps.map(t => `<li>${t}</li>`).join('')}
-      </ol>
-      <p class="guide-install-foot">${detected === 'other'
-        ? 'You look like you&rsquo;re on a computer right now &mdash; do this on your phone when you have it to hand.'
-        : 'Done it already? This box disappears once the app is installed.'}</p>
-    </div>`;
+        ${steps.map(s => `<div class="gd-wk${s.done ? ' is-done' : ''}"><i aria-hidden="true">${s.done ? '✓' : ''}</i><span>${escapeHtml(s.label)}${s.done ? '<span class="sr-only"> (done)</span>' : ''}</span>${s.done ? ''
+          : `<button type="button" onclick="${s.show ? `guideShowMe('${s.show}')` : `openGuideTopic('${s.topic}')`}">Show me</button>`}</div>`).join('')}
+      </div>`;
+  }
+
+  html += `<p class="gd-eyebrow">Browse</p>
+    <div class="gd-tiles">${GUIDE_SECTIONS.map(s => {
+      const n = GUIDE_TOPICS.filter(t => t.section === s.id).length;
+      return `<button type="button" class="gd-tile" style="--c:${s.color}" onclick="openGuideSection('${s.id}')">
+        <img src="${GUIDE_SECTION_PINS[s.id] || 'pins/userguide.webp'}" alt="" loading="lazy" decoding="async"><span><b>${escapeHtml(s.name)}</b><small>${n === 1 ? '1 answer' : n + ' answers'}</small></span></button>`;
+    }).join('')}</div>`;
+
+  html += `<p class="gd-eyebrow">Most asked</p>
+    <div class="gd-rows">${GUIDE_POPULAR.map(id => GUIDE_TOPICS.find(t => t.id === id)).filter(Boolean).map(t => guideRow(t)).join('')}</div>`;
+
+  if(!appIsInstalled()){
+    html += `<button type="button" class="gd-install" onclick="openGuideTopic('install')">${ICON_PHONE}<span><b>Install the Hub</b> on your phone · 10 seconds</span>${ICON_CHEVRON_RIGHT}</button>`;
+  }
+  html += `<p class="guide-foot">Still stuck? Ask Dr. Smiley in the box at the top, or ask in <b>Team Chat</b>. If the answer was useful, it probably belongs in here. Tell Jose.</p>`;
+  return html;
+}
+
+function guideSectionHtml(id){
+  const s = GUIDE_SECTIONS.find(x => x.id === id);
+  const list = GUIDE_TOPICS.filter(t => t.section === id);
+  return `<div class="gd-sec-head" style="--c:${s.color}">
+      <button type="button" class="gd-all" onclick="closeGuideSection()">${ICON_CHEVRON_LEFT}<span>All topics</span></button>
+      <div class="gd-sec-title"><img src="${GUIDE_SECTION_PINS[s.id] || 'pins/userguide.webp'}" alt=""><div><h3>${escapeHtml(s.name)}</h3><p>${list.length === 1 ? '1 answer' : list.length + ' answers'}</p></div></div>
+    </div>
+    <div class="gd-rows">${list.map(t => guideRow(t)).join('')}</div>`;
 }
 
 /* The list is rendered on its own, separately from the shell, so the search
@@ -12684,63 +13096,36 @@ function renderGuideInstall(){
    screen on each keystroke destroyed the field, which on a phone closes the
    keyboard mid-word. */
 function renderGuideList(){
-  const matches = matchingGuideTopics();
-  const searching = !!guideQuery.trim();
-  let html = '';
-
-  if(!searching){
-    const first = GUIDE_FIRST_STEPS.map(id => GUIDE_TOPICS.find(t => t.id === id)).filter(Boolean);
-    html += `
-      <div class="guide-first">
-        <div class="guide-first-label">New here? Start with these</div>
-        ${first.map((t, i) => `
-          <button class="guide-first-row" onclick="openGuideTopic('${t.id}')">
-            <span class="guide-first-num">${i + 1}</span>
-            <span>${t.q}</span>
-          </button>`).join('')}
-      </div>`;
+  const q = guideQuery.trim();
+  if(q){
+    const words = foldText(q).split(/\s+/).filter(Boolean);
+    const hits = matchingGuideTopics();
+    return (hits.length
+        ? `<p class="gd-eyebrow">${hits.length === 1 ? '1 answer' : hits.length + ' answers'}</p><div class="gd-rows">${hits.slice(0, 8).map(t => guideRow(t, words)).join('')}</div>`
+        : `<p class="gd-none">No answer uses those words.</p>`)
+      + `<button type="button" class="gd-ask" onclick="guideAsk(guideQuery)">${ICON_CHAT}<span><b>Ask Dr. Smiley</b><em>“${escapeHtml(q)}”</em></span>${ICON_CHEVRON_RIGHT}</button>`;
   }
-
-  if(searching && !matches.length){
-    html += `
-      <div class="guide-empty">
-        <p>Nothing here matches &ldquo;${escapeHtml(guideQuery.trim())}&rdquo;.</p>
-        <p>Try a shorter word &mdash; or just ask in <b>Team Chat</b>. Somebody will know.</p>
-      </div>`;
-  }
-
-  GUIDE_SECTIONS.forEach(sec=>{
-    const inSection = matches.filter(t => t.section === sec.id);
-    if(!inSection.length) return;
-    html += `
-      <div class="guide-section">
-        <div class="guide-section-head" style="--guide-color:${sec.color};">
-          <span class="guide-section-dot"></span>${escapeHtml(sec.name)}
-        </div>
-        ${inSection.map(t => guideTopicCard(t, sec.color)).join('')}
-      </div>`;
-  });
-
-  html += `
-    <p class="guide-foot">Still stuck? Ask in <b>Team Chat</b> &mdash; and if the answer was useful, it probably belongs in here. Tell Jose.</p>`;
-  return html;
+  if(guideSection && GUIDE_SECTIONS.some(s => s.id === guideSection)) return guideSectionHtml(guideSection);
+  return guideHomeHtml();
 }
 
 function renderUserGuide(){
   return `
     <div class="user-guide" id="userGuideRoot">
-      ${renderGuideInstall()}
-      <div class="guide-head">
-        <h2>How do I&hellip;</h2>
-        <p>Tap a question to see the answer. Nothing here can break anything &mdash; have a look around.</p>
-        <button type="button" class="btn btn-ghost" onclick="openOnboarding()">Take the tour</button>
+      <div class="gd-head">
+        <div><h2>Help</h2><p>${GUIDE_TOPICS.length} answers. Search, browse, or ask Dr. Smiley.</p></div>
+        <button type="button" class="gd-tour" onclick="openOnboarding()">Take the tour</button>
       </div>
-      <div class="guide-search">
-        ${ICON_SEARCH}
-        <input id="guideSearchInput" type="text" placeholder="Type what you need help with&hellip;"
-               value="${escapeAttr(guideQuery)}" autocomplete="off">
-        <button class="guide-search-clear ${guideQuery.trim() ? '' : 'is-hidden'}" id="guideSearchClear"
-                onclick="clearGuideSearch()" aria-label="Clear">&#10005;</button>
+      <div class="gd-stick" id="guideStick" aria-hidden="true"></div>
+      <div class="gd-searchbar" id="guideSearchbar">
+        <div class="gd-search">
+          ${ICON_SEARCH}
+          <label class="sr-only" for="guideSearchInput">Search help</label>
+          <input id="guideSearchInput" type="search" placeholder="Search help, or ask Dr. Smiley" value="${escapeAttr(guideQuery)}"
+                 autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+          <button type="button" class="gd-clear ${guideQuery.trim() ? '' : 'is-hidden'}" id="guideSearchClear" onclick="clearGuideSearch()" aria-label="Clear the search">${ICON_X_TC}</button>
+          <button type="button" class="gd-face-btn" onclick="guideAsk(guideQuery)" aria-label="Ask Dr. Smiley"><span class="ask-face gd-face" aria-hidden="true">${askFaceSvg()}</span></button>
+        </div>
       </div>
       <div id="guideList">${renderGuideList()}</div>
     </div>`;
@@ -12748,7 +13133,7 @@ function renderUserGuide(){
 
 /* Updates ONLY the list. The input keeps its identity, its focus and the
    keyboard. */
-let guideSearchTimer = null;
+let guideSearchTimer = null, guideStickObserver = null;
 function refreshGuideList(){
   const list = document.getElementById('guideList');
   if(list) list.innerHTML = renderGuideList();
@@ -12757,6 +13142,17 @@ function refreshGuideList(){
 }
 
 function setupGuideSearch(){
+  // The box docks under the app's top bar, like a domain's search row.
+  const bar = document.querySelector('.topbar-global');
+  const top = bar ? Math.round(bar.getBoundingClientRect().height) : 0;
+  document.documentElement.style.setProperty('--dock-top', top + 'px');
+  // Glass behind it only once it's docked; at rest it sits on the page.
+  if(guideStickObserver){ guideStickObserver.disconnect(); guideStickObserver = null; }
+  const stick = document.getElementById('guideStick'), sb = document.getElementById('guideSearchbar');
+  if(stick && sb && 'IntersectionObserver' in window){
+    guideStickObserver = new IntersectionObserver(en => sb.classList.toggle('is-stuck', !en[0].isIntersecting), { rootMargin: `-${top}px 0px 0px 0px` });
+    guideStickObserver.observe(stick);
+  }
   const input = document.getElementById('guideSearchInput');
   if(!input) return;
   input.addEventListener('input', (e)=>{
@@ -12764,12 +13160,24 @@ function setupGuideSearch(){
     clearTimeout(guideSearchTimer);
     guideSearchTimer = setTimeout(()=>{ guideSearchTimer = null; refreshGuideList(); }, 140);
   });
+  // Enter opens the best answer; with none, it asks Dr. Smiley.
+  input.addEventListener('keydown', (e)=>{
+    if(e.key !== 'Enter') return;
+    e.preventDefault();
+    guideQuery = input.value;
+    if(!guideQuery.trim()) return;
+    clearTimeout(guideSearchTimer); guideSearchTimer = null;
+    refreshGuideList();
+    input.blur();
+    const best = matchingGuideTopics()[0];
+    if(best) guideOpenSheet(best); else guideAsk(guideQuery);
+  });
 }
 
 function clearGuideSearch(){
   guideQuery = '';
   const input = document.getElementById('guideSearchInput');
-  if(input) input.value = '';
+  if(input){ input.value = ''; input.focus(); }
   refreshGuideList();
 }
 
@@ -14976,13 +15384,13 @@ const GUIDE_TOPICS = [
       <li><b>Chat</b>: your team.</li>
       <li><b>More</b>: everything else, including every domain, Doctor Prep, practice and this guide.</li>
     </ol>
-    <p><b>Dr. Smiley</b> stands just above that bar on the right, with <b>Ask</b> under him. Tap him to ask a question.</p>
+    <p><b>Dr. Smiley</b> sits beside that bar on the right, with <b>Ask</b> under him. Tap him to ask a question. On Home he’s in the greeting instead.</p>
     <p>Across the <b>top</b>: the moon switches dark mode on and off, the bell shows what the team changed, and your initial opens your name and settings.</p>
     <p>If you ever feel lost, tap <b>Home</b>. The arrow in the top-left corner takes you back one step.</p>` },
 
   { id:'askwhat', section:'ask', k:'ask the hub dr smiley doctor smiley assistant ai question chatbot help character', q:'Who is Dr. Smiley, and what can I ask him?', a:`
     <p>Dr. Smiley is the Hub's interpreter assistant. Ask him the way you'd ask a teammate: <i>How do I explain “ejection fraction”?</i> or <i>“Embarazada” or “embarrassed”?</i></p>
-    <p>To open him, tap him above the tab bar, tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b>.</p>
+    <p>To open him, tap him beside the tab bar, tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b>.</p>
     <p>He answers from the Hub first: your glossary, False Friends, the Doctor Directory, the Code of Ethics and this guide. Every answer is labeled:</p>
     <ul>
       <li><b>From the Hub</b>: it comes from your team's own entries. Tap a source under it to see the entry.</li>
@@ -15242,8 +15650,6 @@ const GUIDE_TOPICS = [
     <p>Describe the situation if you need to. Never the person.</p>` },
 ];
 
-// Shown first, for someone opening the app for the very first time.
-const GUIDE_FIRST_STEPS = ['name', 'install', 'around', 'askwhat'];
 
 const DOMAIN_ICONS = {
   bag: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="10" width="24" height="17" rx="3" fill="#D69A54" stroke="#A96F22" stroke-width="1.2"/><path d="M11 10V7.6A2.6 2.6 0 0 1 13.6 5h4.8A2.6 2.6 0 0 1 21 7.6V10" fill="none" stroke="#A96F22" stroke-width="1.3"/><rect x="12.5" y="14.5" width="7" height="8" rx="1.2" fill="#FFFDF8" stroke="#A96F22" stroke-width=".9"/><path d="M15 16h2v1.7h1.7v2H17v1.7h-2v-1.7h-1.7v-2H15Z" fill="#E83A46"/></svg>',
@@ -17021,6 +17427,7 @@ function closeAllOverlays(){
   if(document.getElementById('gsOverlay')?.classList.contains('show')) closeGlobalSearch();
   document.querySelectorAll('.overlay.show').forEach(el => el.classList.remove('show'));
   if(PV.open) closePhotoViewer({ instant:true });
+  guideCoachClose();
 }
 
 function setCategory(id, isBack){
@@ -17066,9 +17473,9 @@ function setCategory(id, isBack){
     if(!isBack && !whoAmI()) openNameModal();
   }
   if(id === 'updates'){ markActivitySeen(); }
-  // Arriving at the guide fresh: clear the last search so it opens on the
-  // full list rather than on whatever someone filtered to last time.
-  if(id === 'userguide' && guideOpenId === null) guideQuery = '';
+  // Arriving at the guide fresh: clear the last search and topic so it opens
+  // on its front page. Coming back to it (Back after Show me) keeps both.
+  if(id === 'userguide' && !isBack){ guideQuery = ''; guideSection = null; }
   if(id === 'events'){ lastSeenCeCount = CE_EVENTS.length; }
   if(id === 'doctor-directory' || id === 'doctors'){ loadDoctorDirectory(); }
   // Quiz history (up to 300 documents) and the spaced-repetition review state
@@ -17540,6 +17947,8 @@ function navigateBack(smooth){
   // Same reason as closeAllOverlays: the search panel is the top layer, so
   // Back closes it rather than navigating the screen behind it.
   if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
+  // So is the guide's Show me.
+  if(guideCoachClose()) return true;
   const behavior = smooth ? 'smooth' : 'auto';
 
   // An open overlay is the top layer, so Back closes that first — otherwise
@@ -19111,8 +19520,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1755';
-const BUILD_TIME = '2026-10-07 17:55 UTC';
+const BUILD_ID = 'b1007.1946';
+const BUILD_TIME = '2026-10-07 19:46 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -23397,6 +23806,7 @@ async function submitAsk(preset, force, opts){
     renderAskMessages(true);
     return;
   }
+  firstWeekMark('ask');
   ASK.phi = null;
   ASK.draft = '';
   if(input) input.value = '';
@@ -25123,6 +25533,7 @@ function prepTraps(dom){
 function renderPrep(){
   const dom = DATA.categories.find(c => c.id === PREP.domainId);
   if(!dom) return `<div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
+  firstWeekMark('brief');
   // Your practice record, loaded once; the screen repaints when it arrives.
   if(!prepReviewsAsked){ prepReviewsAsked = true; ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'prep') renderContent(); }).catch(() => {}); }
   const tile = getDomainTiles().find(t => t.id === dom.id);
@@ -25562,6 +25973,14 @@ accessBoot();
 // Paints from the glossary saved on this phone straight away; it waits for
 // the sign-in (hubAuthReady) itself before going to the network.
 loadData();
+// A link to one guide answer (?guide=offline, from its "Copy link") opens it.
+try{
+  const guideLink = new URLSearchParams(location.search).get('guide');
+  if(guideLink){
+    history.replaceState(history.state, '', location.pathname + location.hash);
+    if(GUIDE_TOPICS.some(t => t.id === guideLink)) setTimeout(() => openGuideTopic(guideLink), 0);
+  }
+}catch(e){}
 // Your own face from the local cache, before any round trip.
 applyMyPhotoCache(false);
 updateTopbarAvatar();
