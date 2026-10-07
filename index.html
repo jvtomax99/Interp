@@ -4918,6 +4918,11 @@
   /* Removes the ~300ms wait a browser holds before firing a tap, in case the
      tap turns out to be the first half of a double-tap zoom. */
   button, a, summary, .home-tile, .qa-tile, .qa-card{ touch-action:manipulation; }
+  /* And nowhere else either. Two quick taps on something that isn't a
+     button (the Home greeting while Dr. Smiley grows out of the logo is the
+     one people tap) zoomed the whole app in on an iPhone, and an installed
+     app has no reset for it. Pinch zoom still works. */
+  html{ touch-action:manipulation; }
 
   @media (max-width:760px){
     /* The keyboard covers the viewport rather than shrinking it, so an overlay
@@ -19522,8 +19527,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1946';
-const BUILD_TIME = '2026-10-07 19:46 UTC';
+const BUILD_ID = 'b1007.2004';
+const BUILD_TIME = '2026-10-07 20:04 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

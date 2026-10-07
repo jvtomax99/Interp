@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v181-guide-2';
+const CACHE_VERSION = 'interpreter-hub-v182-no-double-tap-zoom';
 const PRECACHE = [
   './',
   './index.html',
