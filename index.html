@@ -5389,6 +5389,30 @@ body.access-locked{ overflow:hidden; }
 /* The window his face shows through: its own size and clipping, whatever the
    rules for the svg around it say (.ask-face svg is 100% wide and shows
    overflow, which would stretch the strip and show every frame at once). */
+/* Effects that float off Dr. Smiley's head (drFaceFx). Sized from the
+   element that holds him: 58px in the dock, 64px on Home. */
+.ds-fx{ position:absolute; right:-4px; top:-6px; width:0; height:0; pointer-events:none; z-index:3; }
+.ds-fx-g{ position:absolute; left:0; top:0; width:15px; height:15px; opacity:0;
+  animation:dsFxFloat 2.1s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i) * .32s); }
+.ds-fx-g svg{ display:block; width:100%; height:100%; filter:drop-shadow(0 1px 1.5px rgba(20,43,67,.28)); }
+.ds-fx-g:nth-child(2){ left:-9px; width:11px; height:11px; }
+.ds-fx-g:nth-child(3){ left:5px; width:12px; height:12px; }
+.ds-fx-notes .ds-fx-g{ width:14px; height:16px; }
+.ds-fx-question .ds-fx-g{ width:19px; height:19px; left:-6px; top:-4px; animation:dsFxPop 2.3s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes dsFxFloat{
+  0%{ opacity:0; transform:translate(0,4px) scale(.4) rotate(-8deg); }
+  18%{ opacity:1; transform:translate(2px,-4px) scale(1) rotate(4deg); }
+  70%{ opacity:1; }
+  100%{ opacity:0; transform:translate(7px,-26px) scale(.9) rotate(-6deg); }
+}
+@keyframes dsFxPop{
+  0%{ opacity:0; transform:scale(.3) rotate(-14deg); }
+  14%{ opacity:1; transform:scale(1.12) rotate(4deg); }
+  24%{ transform:scale(1) rotate(0); }
+  80%{ opacity:1; transform:scale(1) rotate(0); }
+  100%{ opacity:0; transform:translateY(-6px) scale(.85); }
+}
+@media (prefers-reduced-motion: reduce){ .ds-fx{ display:none; } }
 svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
 .ask-face.is-thinking svg{ animation:askThink 1.1s ease-in-out infinite; transform-origin:50% 90%; }
 @keyframes askThink{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(-6deg); } 70%{ transform:rotate(5deg); } }
@@ -12780,10 +12804,55 @@ const DR_FACE_SEQ = {
   glanceR: { f: [['rest', 120], ['lookR', 950], ['rest', 110], ['blink1', 45], ['blink2', 40], ['shut', 55], ['blink2', 45], ['blink1', 50], ['rest', 300]],
              head: [[0, 0, 0], [180, 1.2, 0], [1070, 1.2, 0], [1400, 0, 0], [1715, 0, 0]] },
   love:  { f: [['rest', 100], ['smile1', 70], ['smile2', 80], ['love', 1300], ['smile2', 100], ['smile1', 110], ['rest', 380]],
-           head: [[0, 0, 0], [100, 0, .5], [250, -.8, -.8], [1550, -.6, -.6], [1760, 0, 0], [2140, 0, 0]] },
+           head: [[0, 0, 0], [100, 0, .5], [250, -.8, -.8], [1550, -.6, -.6], [1760, 0, 0], [2140, 0, 0]], fx: 'hearts', fxAt: 250 },
   doze:  { f: [['blink1', 160], ['blink2', 240], ['shut', 400], ['sleep', 2300], ['shut', 220], ['blink2', 160], ['blink1', 140], ['rest', 300]],
            head: [[0, 0, 0], [800, 4, .6], [3100, 4.5, .8], [3920, 0, 0]] },
+  /* Built from the same frames, with the lean doing more of the talking and,
+     for some, a small effect floating off his head (fx, drFaceFx). */
+  // "Yes": two small dips of the head with a smile.
+  nod:   { f: [['smile1', 80], ['smile2', 80], ['smile', 900], ['smile2', 90], ['smile1', 100], ['rest', 300]],
+           head: [[0, 0, 0], [160, 0, 1.1], [330, 0, -.2], [520, 0, 1.1], [700, 0, -.1], [900, 0, 0], [1550, 0, 0]] },
+  // "Hmm": eyes off to one side with his head on a slant, a blink, a look the other way.
+  think: { f: [['rest', 120], ['lookL', 1500], ['blink1', 45], ['blink2', 40], ['shut', 60], ['blink2', 45], ['blink1', 50], ['lookR', 700], ['rest', 360]],
+           head: [[0, 0, 0], [220, -2.6, -.3], [1620, -2.6, -.3], [1860, 1.2, 0], [2560, 1.2, 0], [2960, 0, 0]], fx: 'question', fxAt: 300 },
+  // A quick, short laugh with little shakes.
+  giggle: { f: [['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['smile', 320], ['smile2', 80], ['smile1', 90], ['rest', 320]],
+            head: [[0, 0, 0], [120, -1.1, .3], [230, 1.1, .3], [340, -1.1, .3], [450, 1.1, .3], [560, -.8, .2], [670, .6, .1], [990, 0, 0], [1480, 0, 0]] },
+  // Pleased with himself: a big smile, chin up.
+  proud: { f: [['smile1', 80], ['smile2', 80], ['smile', 1400], ['smile2', 90], ['smile1', 100], ['rest', 320]],
+           head: [[0, 0, 0], [160, 1, -.9], [1560, 1, -.9], [1760, 0, 0], [2070, 0, 0]], fx: 'sparkle', fxAt: 200 },
+  // Humming: lips moving to a beat, swaying.
+  sing:  { f: [['smile1', 160], ['smile2', 230], ['smile1', 190], ['smile2', 230], ['smile1', 190], ['smile2', 230], ['smile1', 170], ['rest', 320]],
+           head: [[0, 0, 0], [390, -2, 0], [810, 2, 0], [1230, -2, 0], [1600, 1, 0], [1720, 0, 0], [1720, 0, 0]], fx: 'notes', fxAt: 150 },
+  // A wink and a heart floating off.
+  kiss:  { f: [['rest', 160], ['wink1', 50], ['wink2', 45], ['wink', 520], ['wink2', 55], ['wink1', 75], ['smile1', 90], ['smile', 420], ['smile1', 100], ['rest', 340]],
+           head: [[0, 0, 0], [160, -1.6, 0], [260, -2.4, -.4], [780, -2.2, -.4], [920, .4, 0], [1855, 0, 0]], fx: 'heart', fxAt: 300 },
+  // Looking around: one side, the other, back.
+  around: { f: [['rest', 120], ['lookL', 760], ['rest', 140], ['lookR', 760], ['rest', 120], ['blink1', 45], ['blink2', 40], ['shut', 55], ['blink2', 45], ['blink1', 50], ['rest', 300]],
+            head: [[0, 0, 0], [200, -1.5, 0], [880, -1.5, 0], [1100, 1.5, 0], [1780, 1.5, 0], [2000, 0, 0], [2435, 0, 0]] },
 };
+/* Small effects that float off his head for a moment: hearts, a heart, music
+   notes, sparkles, a question mark. They go in the element that holds his
+   lean (his pin on Home, the dock button), so they sit beside him without
+   tilting with him, and remove themselves. Nothing with reduced motion. */
+const DR_FX_GLYPH = {
+  heart: '<svg viewBox="0 0 24 22"><path d="M12 21C6 16.6 1.5 12.8 1.5 7.6A5.6 5.6 0 0 1 12 4.6a5.6 5.6 0 0 1 10.5 3c0 5.2-4.5 9-10.5 13.4Z" fill="#E5484D"/><path d="M6.4 5.2c1.3-.4 2.6.1 3.3 1" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  note:  '<svg viewBox="0 0 20 24"><path d="M8 18.5V4l9-2.5v13" fill="none" stroke="#252E6D" stroke-width="2.2" stroke-linejoin="round"/><ellipse cx="5.2" cy="18.8" rx="3.8" ry="3" fill="#252E6D"/><ellipse cx="14.2" cy="15.6" rx="3.8" ry="3" fill="#252E6D"/></svg>',
+  spark: '<svg viewBox="0 0 24 24"><path d="M12 1.5c.7 4.9 2.6 8.8 10.5 10.5-7.9 1.7-9.8 5.6-10.5 10.5-.7-4.9-2.6-8.8-10.5-10.5C9.4 10.3 11.3 6.4 12 1.5Z" fill="#F5B83D"/></svg>',
+  q:     '<svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#fff"/><circle cx="13" cy="13" r="11.2" fill="none" stroke="#252E6D" stroke-opacity=".18" stroke-width="1.2"/><path d="M9.6 9.8a3.6 3.6 0 1 1 5.2 3.2c-1.1.6-1.8 1.3-1.8 2.6" fill="none" stroke="#252E6D" stroke-width="2.4" stroke-linecap="round"/><circle cx="13" cy="19.4" r="1.5" fill="#252E6D"/></svg>',
+};
+const DR_FX = { hearts: ['heart', 'heart', 'heart'], heart: ['heart'], notes: ['note', 'note', 'note'], sparkle: ['spark', 'spark', 'spark'], question: ['q'] };
+function drFaceFx(head, kind){
+  const host = head && head.parentElement, glyphs = DR_FX[kind];
+  if(!host || !glyphs || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  const fx = document.createElement('span');
+  fx.className = 'ds-fx ds-fx-' + kind;
+  fx.setAttribute('aria-hidden', 'true');
+  fx.innerHTML = glyphs.map((g, i) => `<span class="ds-fx-g" style="--i:${i}">${DR_FX_GLYPH[g]}</span>`).join('');
+  host.appendChild(fx);
+  setTimeout(() => fx.remove(), 2800);
+  return fx;
+}
 function drFaceSet(svg, name){
   const sheet = svg && svg.querySelector && svg.querySelector('.ds-sheet');
   if(!sheet) return;
@@ -12806,7 +12875,9 @@ function drFacePlay(svg, name, head, done){
     kf[kf.length - 1].offset = 1;
     try{ anim = head.animate(kf, { duration: total }); }catch(e){ anim = null; }
   }
-  const run = { cancel(){ alive = false; clearTimeout(timer); if(anim) anim.cancel(); drFaceSet(svg, 'rest'); drFaceRuns.delete(svg); } };
+  let fx = null, fxTimer = 0;
+  if(seq.fx && head) fxTimer = setTimeout(() => { if(alive) fx = drFaceFx(head, seq.fx); }, seq.fxAt || 0);
+  const run = { cancel(){ alive = false; clearTimeout(timer); clearTimeout(fxTimer); if(fx) fx.remove(); if(anim) anim.cancel(); drFaceSet(svg, 'rest'); drFaceRuns.delete(svg); } };
   drFaceRuns.set(svg, run);
   const step = () => {
     if(!alive) return;
@@ -12817,8 +12888,10 @@ function drFacePlay(svg, name, head, done){
 }
 /* Left alone, one timer runs his face: a blink every 2-6 s at irregular
    moments (now and then a double blink, now and then a longer pause), and
-   every so often a smile, a laugh or a wink -- never the same twice in a row,
-   at most one wink a minute. Nothing moves between them. Nothing at all with
+   every 12-15 s or so one of his expressions -- a smile, a laugh, a giggle, a
+   nod, a think, heart eyes, a proud look, a hum, a look around, a wink or a
+   blown kiss -- never the same twice in a row, at most one wink or kiss a
+   minute. Nothing moves between them. Nothing at all with
    reduced motion, while the page is hidden, or while canPlay() says no.
    opts: canPlay(), quietMs (settle after this long without a touch, until the
    next one), dozeMs (doze once after this long), onAct(kind), expressions
@@ -12831,7 +12904,7 @@ function drFaceIdle(svg, head, opts){
   const gap = () => Math.random() < .2 ? rnd(6500, 9000) : rnd(2200, 5600);
   function arm(ms){ clearTimeout(timer); timer = 0; if(on && !reduceQ.matches) timer = setTimeout(tick, ms == null ? gap() : ms); }
   function play(kind){
-    if(kind !== 'blink'){ if(kind !== 'glance') lastExpr = performance.now(); last = kind; if(kind === 'wink') lastWink = performance.now(); }
+    if(kind !== 'blink'){ if(kind !== 'glance') lastExpr = performance.now(); last = kind; if(kind === 'wink' || kind === 'kiss') lastWink = performance.now(); }
     if(opts.onAct) opts.onAct(kind);
     drFacePlay(svg, kind, head, () => arm());
   }
@@ -12845,8 +12918,9 @@ function drFaceIdle(svg, head, opts){
     if(opts.quietMs && quiet > opts.quietMs){ settled = true; return; }
     let kind = 'blink';
     if(opts.dozeMs && quiet > opts.dozeMs && last !== 'doze') kind = 'doze';
-    else if(opts.expressions !== false && now - lastExpr > 9000 && Math.random() < .45){
-      const pool = [['smile', .42], ['laugh', .2], ['wink', .24], ['love', .14]].filter(([k]) => k !== last && !(k === 'wink' && now - lastWink < 60000));
+    else if(opts.expressions !== false && now - lastExpr > 7000 && Math.random() < .55){
+      const pool = [['smile', .16], ['laugh', .1], ['giggle', .1], ['nod', .1], ['think', .1], ['love', .09], ['proud', .08], ['sing', .08], ['around', .07], ['wink', .07], ['kiss', .05]]
+        .filter(([k]) => k !== last && !((k === 'wink' || k === 'kiss') && now - lastWink < 60000));
       let r = Math.random() * pool.reduce((t, p) => t + p[1], 0);
       for(const [k, w] of pool){ if((r -= w) <= 0){ kind = k; break; } }
       if(kind === 'blink' && pool.length) kind = pool[0][0];
@@ -17937,7 +18011,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.0048';
+const BUILD_ID = 'b1007.0736';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -23246,7 +23320,8 @@ const smileyRider = (() => {
   }
   function idleStopDock(){ if(idle){ idle.stop(); idle = null; } }
   // One expression now, by its old emote name. False if he can't show it.
-  const EMOTE_FACE = { glance: 'glance', wink: 'wink', sway: 'smile', hop: 'smile', love: 'love', smile: 'smile', giggle: 'laugh', laugh: 'laugh', nod: 'blink', blink: 'blink', doze: 'doze' };
+  const EMOTE_FACE = { glance: 'glance', wink: 'wink', sway: 'sing', hop: 'proud', love: 'love', smile: 'smile', giggle: 'giggle', laugh: 'laugh', nod: 'nod', blink: 'blink', doze: 'doze',
+    think: 'think', proud: 'proud', sing: 'sing', kiss: 'kiss', around: 'around' };
   function emote(kind){
     const f = EMOTE_FACE[kind];
     if(!btn || reduce.matches || !f) return false;
@@ -23265,7 +23340,7 @@ const smileyRider = (() => {
   window.addEventListener('resize', () => { if(btn) requestAnimationFrame(sync); });
   document.addEventListener('visibilitychange', () => { if(!document.hidden && btn) sync(); });
   // A short reaction in the dock. False if he isn't showing.
-  const REACT_FACE = { hop: 'smile', wave: 'smile', hearts: 'love', cheer: 'laugh', think: 'glance' };
+  const REACT_FACE = { hop: 'proud', wave: 'smile', hearts: 'love', cheer: 'laugh', think: 'think', nod: 'nod' };
   function react(kind){
     if(!shown()) return false;
     const f = REACT_FACE[kind] || 'smile';

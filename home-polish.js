@@ -227,7 +227,7 @@
   const rnd=i=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);};
   // index.html's reactions (a term added, a quiz finished, the warm-up...) and
   // a new team rank ask for one of these by their old names.
-  const ACT_FACE={bouncy:'smile',hearts:'love',hum:'smile',gleam:'glance',giggle:'laugh',party:'laugh'};
+  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',giggle:'giggle',party:'laugh',nod:'nod',kiss:'kiss'};
   let idleStop=()=>{},idleRunning=false,forcedAct=null,idleCtl=null;
   const actNow=name=>{const f=ACT_FACE[name]||'smile';if(idleCtl){idleCtl.act(f);forcedAct=null;}else forcedAct=name;};
   window.homeSmileyCelebrate=()=>actNow('party');
