@@ -154,6 +154,22 @@ drawn and when tapped (`askCheckAction`); "done" is said only after the
 screen it opens is there (`askRunAction`). New action types go in both
 lists.
 
+**What Dr. Smiley remembers (on this device).** `ih_smileyMemory` holds, per
+name typed on this phone, a few allowlisted choices (`DR_MEM_FIELDS`: lang,
+length, focus = a specialty id, mode, practice on/off) and which next step was
+already offered today. "Remember… / Forget… / What do you remember?" are
+handled on the phone (`askMemoryIntent`, nothing sent); a confirmation only
+after the write reads back (`drMemStore`), otherwise it says the phone
+refused and keeps it in memory until the app closes. The screen is
+`openMemory()` (Ask's header, the profile sheet). Another name on the phone
+gets its own set, its own animation mode, and a cleared Ask conversation
+(`drMemNameChanged`). `api/ask.js` gets only lang/length/focus as
+`context.prefs` and, when practice is on, personal counts as
+`context.practice` (unfinished briefing/quiz/review, still learning, due) --
+style and personal choices, kept apart from team notes; "brief" is enforced
+server-side (`fitLength`). The practice next step is offered unasked at most
+once a day per step.
+
 **Team access (one team code).** Everyone types the same team code
 (`hub-invites/{CODE}`, kind `team`); the owner shares it and can change it on
 the Team access screen, optionally signing every other phone out. The owner

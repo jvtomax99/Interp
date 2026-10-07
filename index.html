@@ -5458,6 +5458,41 @@ img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-note .ask-lab{ color:var(--good); }
 .ask-note small{ font-size:12px; color:var(--ink-soft); }
 .ask-tag.is-local{ color:var(--ink-soft); background:var(--line-soft); }
+/* What Dr. Smiley remembers (on this device): the sheet, and the way in from
+   Ask's header and the profile sheet. */
+.ask-mem-link{ margin-top:6px; min-height:44px; padding:0 13px; border:1px solid var(--line); border-radius:999px; background:var(--paper);
+  color:var(--ink); font:600 14px var(--sans); cursor:pointer; }
+.ask-next{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:9px 0 0; padding:9px; border-radius:var(--r-md); background:var(--accent-soft); width:100%; }
+.ask-next > span{ flex:1 0 100%; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); text-align:left; }
+.ask-next .ask-do-btn{ flex:1; }
+.ask-next-x{ flex:none; width:44px; height:44px; border:0; border-radius:var(--r-sm); background:none; color:var(--ink-soft); font-size:16px; cursor:pointer; }
+.ds-mem-row{ display:flex; align-items:center; gap:9px; width:100%; margin:13px 0 0; padding:9px 0 0; min-height:44px; border:0; border-top:1px solid var(--line-soft);
+  background:none; color:var(--ink); font:500 14px/1.4 var(--sans); text-align:left; cursor:pointer; }
+.ds-mem-row span:first-child{ flex:1; }
+.ds-mem-row small{ display:block; color:var(--ink-soft); font-size:12px; }
+.mem-sheet{ max-height:88vh; overflow-y:auto; }
+.mem-where{ margin:0 0 13px; color:var(--ink-soft); font-size:14px; }
+.mem-where b{ color:var(--ink); font-weight:650; }
+.mem-warn{ margin:0 0 13px; padding:9px 13px; border-radius:var(--r-sm); background:var(--danger-soft); color:var(--danger); font-size:14px; }
+.mem-row{ display:flex; flex-direction:column; gap:6px; padding:9px 0; border-top:1px solid var(--line-soft); }
+.mem-row-head{ display:flex; align-items:center; justify-content:space-between; gap:9px; font-size:14px; font-weight:600; color:var(--ink); min-height:32px; }
+.mem-row-head small{ font-size:12px; font-weight:500; color:var(--ink-faint); }
+.mem-forget{ min-height:44px; margin:-6px 0; padding:0 9px; border:0; background:none; color:var(--danger); font:600 14px var(--sans); cursor:pointer; }
+.mem-opts{ display:flex; flex-wrap:wrap; gap:3px; padding:3px; border-radius:var(--r-md); background:var(--line-soft); }
+.mem-opts button{ flex:1 1 auto; min-height:44px; padding:0 9px; border:0; border-radius:11px; background:none; color:var(--ink-soft); font:600 14px var(--sans); cursor:pointer; }
+.mem-opts button[aria-checked="true"]{ background:var(--paper); color:var(--ink);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+html[data-theme="dark"] .mem-opts button[aria-checked="true"]{ background:#2A3350; color:#fff; }
+.mem-select{ min-height:44px; padding:0 13px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--paper); color:var(--ink); font:500 16px var(--sans); }
+.mem-help{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.45; }
+.mem-status{ margin:9px 0 0; min-height:1.4em; font-size:14px; color:var(--good); }
+.mem-note{ margin:6px 0 0; font-size:12px; color:var(--ink-soft); line-height:1.45; }
+.mem-others{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:9px 0 0; font-size:13px; color:var(--ink-soft); }
+.mem-others button{ min-height:44px; padding:0 13px; border:1px solid var(--line); border-radius:999px; background:none; color:var(--danger); font:600 13px var(--sans); cursor:pointer; }
+.ask-mem-link:focus-visible, .ask-next-x:focus-visible, .ds-mem-row:focus-visible, .mem-forget:focus-visible, .mem-opts button:focus-visible,
+.mem-select:focus-visible, .mem-others button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.mem-opts button:active, .mem-opts button.is-pressed{ transform:scale(.97); }
+@media (prefers-reduced-motion: reduce){ .mem-opts button:active, .mem-opts button.is-pressed{ transform:none; } }
 /* Dr. Smiley's actions on an answer: real buttons (the main one navy), then
    a line saying what happened, only once it has. */
 .ask-do{ display:flex; flex-direction:column; gap:6px; }
@@ -6681,6 +6716,7 @@ body.pv-open{ overflow:hidden; }
       </div>
       <small class="ds-mode-hint" id="dsModeHint" aria-live="polite"></small>
     </div>
+    <button type="button" class="ds-mem-row" onclick="openMemory()"><span>What Dr. Smiley remembers<small>On this device: language, answer length, study focus, practice</small></span><span aria-hidden="true">›</span></button>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="cancelNameModal()">Cancel</button>
       <button class="btn btn-primary" id="nameSaveBtn" onclick="saveMyName()">Save</button>
@@ -13642,13 +13678,21 @@ drReduce.addEventListener('change', drModeChanged);
    The phone's reduced-motion setting always means Still, whatever is chosen. */
 const DR_MODES = ['lively', 'focused', 'still'];
 const DR_MODE_CAP = { lively: 3, focused: 2, still: 0 };
-let drModePref = (() => { try{ const m = localStorage.getItem('ih_smileyMode'); return DR_MODES.includes(m) ? m : 'lively'; }catch(e){ return 'lively'; } })();
+// Remembered for the name on this phone (What Dr. Smiley remembers); an
+// older choice from before that, if there's none.
+let drModePref = (() => { try{
+  const who = (localStorage.getItem('ih_myName') || '').trim().toLowerCase() || '_';
+  const mem = JSON.parse(localStorage.getItem('ih_smileyMemory') || 'null');
+  const p = mem && mem.people && mem.people[who] && mem.people[who].prefs;
+  const m = (p && p.mode) || localStorage.getItem('ih_smileyMode');
+  return DR_MODES.includes(m) ? m : 'lively';
+}catch(e){ return 'lively'; } })();
 function drMode(){ return drReduce.matches ? 'still' : drModePref; }
 function drStill(){ return drMode() === 'still'; }
 function setSmileyMode(m){
   if(!DR_MODES.includes(m)) return;
   drModePref = m;
-  try{ localStorage.setItem('ih_smileyMode', m); }catch(e){}
+  drMemSet('mode', m);          // remembered for the name on this phone
   drModeChanged();
 }
 function drModeChanged(){
@@ -16477,6 +16521,7 @@ function renderContent(){
     content.innerHTML = renderAsk();
     fitAskPanel();
     askFaceSync();
+    askNextOfferSync();
     const box = document.getElementById('askMessages');
     // A conversation opens at its latest answer; the empty state opens at
     // the top, so the smiley and greeting are what you see first.
@@ -17563,8 +17608,12 @@ function cancelNameModal(){
 function saveMyName(){
   if(uploadingMyPhoto){ showToast('Still adding your photo \u2014 one moment.'); return; }
   const name = document.getElementById('fMyName').value.trim();
+  const before = whoAmI();
   window.__lastWho = name;
   persistMyName(name);
+  // Another person on this phone: their own Dr. Smiley preferences, and a
+  // clean Ask conversation (the one on screen was the person before's).
+  const memNote = drMemNameChanged(before, name);
   syncAccessWho();
   // Clearing your name does NOT delete the member document: other people's
   // messages still carry that name and should keep showing the face.
@@ -17575,7 +17624,7 @@ function saveMyName(){
   const whoEl = document.getElementById('whoInput');
   if(whoEl) whoEl.value = name;
   closeNameModal();
-  showToast(name ? `Attributing edits as ${name}` : 'Attribution cleared');
+  showToast((name ? `Attributing edits as ${name}.` : 'Attribution cleared.') + memNote);
   // Chat's own "set your name" prompt doesn't go through requireName() (it
   // fires automatically on entry, not from a click to gate) — refresh it
   // directly so saving swaps straight to the real message box.
@@ -18901,7 +18950,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ds-mode-seg button';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ds-mode-seg button, .mem-opts button';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -18929,7 +18978,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.1245';
+const BUILD_ID = 'b1007.1430';
 const BUILD_TIME = '2026-10-06 12:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -23058,7 +23107,8 @@ function renderAsk(){
   return `
     <div class="ask-head">
       <div class="ask-head-text"><h1>Ask the Hub</h1>
-        <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p></div>
+        <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p>
+        <button type="button" class="ask-mem-link" onclick="openMemory()">What I remember${(n => n ? ` · ${n}` : '')(Object.keys(drMemGet()).length)}</button></div>
       <span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>
     </div>
     <div id="askChrome">${askChromeHtml()}</div>
@@ -23092,8 +23142,9 @@ function askMessagesHtml(){
     const ex = ['How do I explain “ejection fraction”?', '“Embarazada” or “embarrassed”?'];
     return `<div class="ask-hello">
       <span class="ask-face" aria-hidden="true">${askFaceSvg()}</span>
-      <p class="ask-hello-title">Hi! What do you need?</p>
-      <p>I'm Dr. Smiley, your interpreter assistant. I answer from the Hub first, tell you when something isn't in it, and can open your briefings and practice for you.</p>
+      <p class="ask-hello-title">Hi${whoAmI() ? ' ' + escapeHtml(whoAmI().split(/\s+/)[0]) : ''}! What do you need?</p>
+      <p>I'm Dr. Smiley, your interpreter assistant. I answer from the Hub and can open your briefings and practice.</p>
+      ${askNextHtml()}
       <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${askSelectedTerm() ? `<button type="button" class="ask-chip" onclick="submitAsk('Explain this term.')">Explain ${escapeHtml(askSelectedTerm().term.en)}</button>` : ''}<button type="button" class="ask-chip" onclick="submitAsk('Help me practice five terms I’m still learning.')">Practice 5 terms I’m still learning</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
     </div>`;
   }
@@ -23106,6 +23157,7 @@ function askMessagesHtml(){
 }
 
 function askTurnHtml(t){
+  if(t.hidden) return '';
   const q = `<div class="ask-q">${escapeHtml(t.q)}</div>`;
   if(t.status === 'loading') return q + `<div class="ask-dots" aria-label="Looking it up"><span></span><span></span><span></span></div>`;
   // Each way it can go wrong says what happened and offers the next step.
@@ -23137,7 +23189,7 @@ function askTurnHtml(t){
   const canAdd = !a.local && !a.fromHub && a.suggestTerm && a.suggestTerm.en;
   return q + `
     <div class="ask-card" id="ask-${t.id}">
-      ${a.local ? `<span class="ask-tag is-local">On this phone · offline</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`}
+      ${a.mem ? `<span class="ask-tag is-local">On this device</span>` : a.local ? `<span class="ask-tag is-local">On this phone · offline</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`}
       <p class="ask-headline">${escapeHtml(a.headline)}</p>
       ${a.say ? `<div><p class="ask-lab">${escapeHtml(a.sayLabel || 'Say')}</p><p class="ask-say">${escapeHtml(a.say)}</p></div>` : ''}
       ${notes.map(n => `<div class="ask-note"><p class="ask-lab">Team note</p><p>${escapeHtml(n.note)}</p>
@@ -23193,6 +23245,17 @@ async function submitAsk(preset, force){
   const input = document.getElementById('askInput');
   const q = String(preset != null ? preset : (input ? input.value : ASK.draft)).trim().slice(0, 500);
   if(!q || ASK.busy) return;
+  // "Remember / forget / what do you remember": answered here, nothing sent.
+  const mi = askMemoryIntent(q);
+  if(mi){
+    ASK.phi = null; ASK.draft = '';
+    if(input) input.value = '';
+    const t = askMemoryTurn(q, mi);
+    ASK.turns.push(t);
+    renderAskMessages(true);
+    if(t.memSaved) drPerform('nod', { priority: DR_P.REACT });
+    return;
+  }
   if(!force && askLooksLikePatientInfo(q)){
     ASK.phi = q;
     renderAskMessages(true);
@@ -23273,6 +23336,9 @@ async function submitAsk(preset, force){
   // His suggestions, then what the phone itself recognised; the screen
   // checks each again before it shows a button (askCheckAction).
   turn.actions = askMergeActions(turn.answer ? turn.answer.actions : [], askIntentActions(intent, rec, turn));
+  // A next step he's already suggested in an answer isn't offered again
+  // unasked today.
+  turn.actions.forEach(a => { if(/^(continue_|practice_learning|start_review)/.test(a.type)) drMemMarkShown(a.type + ':' + a.target); });
   turn.doneAt = Date.now();
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
   if(activeCategory === 'ask') renderAskMessages(true);
@@ -23437,7 +23503,8 @@ function askRetry(id){
    nothing to practise, gives no button, or a message saying why. "Done" is
    said only after the screen it opens is actually there (askRunAction). */
 const ICON_ASK_TERM = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 9.4a2 2 0 1 1 2.8 1.8c-.5.3-.8.6-.8 1.2M12 14.4v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-const ASK_ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source', 'ask_online'];
+const ASK_ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source', 'ask_online',
+  'continue_prep', 'continue_quiz', 'continue_review', 'open_memory', 'mem_undo'];
 
 // The term you picked to talk about, if it's still in the glossary.
 function askSelectedTerm(){
@@ -23485,8 +23552,10 @@ function askSpecialties(){
 // briefing counts them): lowest box first, then the longest overdue.
 function askLearningTerms(){
   const byId = new Map(allTermsFlat().map(t => [t.id, t]));
+  // Your study focus first, if you've set one.
+  const focus = drPref('focus'), off = id => focus && askTopOf(byId.get(id).categoryId) !== focus ? 1 : 0;
   return Object.entries(TERM_REVIEWS).filter(([id, r]) => r && r.box <= 1 && byId.has(id))
-    .sort((a, b) => (a[1].box - b[1].box) || ((a[1].nextReviewAt || 0) - (b[1].nextReviewAt || 0)))
+    .sort((a, b) => (off(a[0]) - off(b[0])) || (a[1].box - b[1].box) || ((a[1].nextReviewAt || 0) - (b[1].nextReviewAt || 0)))
     .map(([id]) => byId.get(id));
 }
 // Your record, loaded if it can be (a few seconds at most). loaded: false
@@ -23509,7 +23578,18 @@ function askContext(rec){
       source: sel.term.source || '', hasLink: /^https?:\/\//i.test(externalUrl(sel.term.url)) } : null,
     specialties: askSpecialties().slice(0, 40).map(d => ({ id: 'spec:' + d.id, name: d.name })),
     learning: { hasName: !!rec.hasName, loaded: !!rec.loaded, count: rec.loaded ? askLearningTerms().length : 0 },
+    ...askPrefsContext(),
+    ...(drPref('practice') === 'on' ? { practice: askPractice(rec) } : {}),
   };
+}
+// The remembered preferences that shape an answer (not how he moves, not the
+// practice switch), only the ones actually remembered.
+function askPrefsContext(){
+  const m = drMemGet(), out = {};
+  if(m.lang) out.lang = m.lang;
+  if(m.length) out.length = m.length;
+  if(m.focus){ const d = askSpecialties().find(x => x.id === m.focus); if(d) out.focus = { id: 'spec:' + d.id, name: d.name }; }
+  return Object.keys(out).length ? { prefs: out } : {};
 }
 /* The three requests, recognised on the phone. */
 const ASK_NUMBERS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
@@ -23539,8 +23619,9 @@ function askIntent(q){
   const f = foldText(q).toLowerCase();
   if(/\b(prep|prepare|brief|briefing|covering|cover|heading to|going to|assigned to|get me ready)\b/.test(f) && !/\b(practice|practise|drill|quiz)\b/.test(f)){
     // No specialty named: the domain you asked from, if you were in one.
+    // ... else your study focus, if you've set one.
     const from = DATA.categories.find(c => c.id === ASK.from);
-    return { kind: 'prep', spec: askFindSpecialty(q) || (from ? (from.parentId || from.id) : null) };
+    return { kind: 'prep', spec: askFindSpecialty(q) || (from ? (from.parentId || from.id) : null) || drPref('focus') || null };
   }
   if(/\b(practice|practise|drill|quiz me|study|flashcards?|review)\b/.test(f) && /\b(terms?|words?|learning|still|struggl\w*|weak|missed|review)\b/.test(f)){
     const m = f.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/);
@@ -23548,6 +23629,7 @@ function askIntent(q){
     return { kind: 'practice', n: Math.max(1, Math.min(10, n)) };
   }
   if(/\b(explain|explicame|explica|this (term|word)|what does (this|it) mean|in plain spanish|que significa)\b/.test(f)) return { kind: 'explain' };
+  if(/\b(what should i (do|practice|study|review)( next| now)?|what('?s| is) next|where (was|did) i (stop|leave off)|continue|keep going|que (practico|sigue|hago))\b/.test(f)) return { kind: 'next' };
   return null;
 }
 // What the phone itself would offer for a recognised request.
@@ -23558,6 +23640,10 @@ function askIntentActions(intent, rec, t){
     if(!rec.hasName) return [{ type: 'set_name', target: 'name' }];
     if(rec.loaded && askLearningTerms().length) return [{ type: 'practice_learning', target: 'learning' }];
     return rec.loaded && dueReviewCount() ? [{ type: 'start_review', target: 'review' }] : [];
+  }
+  if(intent.kind === 'next'){
+    const step = askNextStep(rec);
+    return step ? [step] : [];
   }
   if(intent.kind === 'explain'){
     const sel = t && t.sel && askTermById(t.sel.term);
@@ -23591,6 +23677,15 @@ function askCheckAction(a, t){
       return d ? { ok: true, main: true, label: `Open the ${d.name} briefing` } : { ok: false, why: "That specialty isn't in the Hub any more." };
     }
     case 'choose_prep': return { ok: true, label: 'Choose a specialty' };
+    case 'continue_prep': case 'continue_quiz': case 'continue_review': {
+      const u = askUnfinished(), kind = a.type.slice(9);
+      if(!u || u.kind !== kind || (kind === 'prep' && 'spec:' + u.id !== a.target)) return { ok: false, why: 'That practice is already finished or was put away.' };
+      const left = `${u.done + 1} of ${u.total}`;
+      if(kind === 'prep') return { ok: true, main: true, label: `Continue your ${askSpecialties().find(d => d.id === u.id).name} briefing (${left})` };
+      return { ok: true, main: true, label: kind === 'quiz' ? `Continue your quiz (question ${left})` : `Continue Term Review (${left})` };
+    }
+    case 'open_memory': return { ok: true, label: 'What I remember' };
+    case 'mem_undo': return t && t.undo && !t.undone ? { ok: true, label: 'Undo' } : { ok: false, why: 'Nothing to undo.' };
     case 'practice_learning': {
       if(!whoAmI()) return { ok: false, why: 'Set your name first: your review record is kept under it.' };
       const n = Math.min((t && t.n) || 5, askLearningTerms().length);
@@ -23668,6 +23763,38 @@ function askLocalAnswer(intent, rec, t){
 }
 /* Doing it. Each says it's done only once the screen it opens is there. */
 const ASK_RUN = {
+  async continue_prep(a){
+    const u = askUnfinished(), d = u && askSpecialties().find(x => x.id === u.id);
+    if(!d) return { ok: false, why: 'That briefing is already finished.' };
+    PREP.domainId = d.id;
+    try{ localStorage.setItem('ih_prepLast', JSON.stringify(PREP)); }catch(e){}
+    setCategory('prep');
+    const st = prepDeck(d), ok = activeCategory === 'prep' && st.i === u.done && document.querySelector('#content .prep-hero h1')?.textContent === d.name;
+    return ok ? { ok: true, msg: `Back in your ${d.name} briefing, card ${u.done + 1} of ${u.total}` } : { ok: false, why: "The briefing didn't open. Try again." };
+  },
+  async continue_quiz(){
+    const u = askUnfinished();
+    if(!u || u.kind !== 'quiz') return { ok: false, why: 'That quiz is already finished.' };
+    setCategory('practice');
+    return quizActive && quizIndex === u.done && document.querySelector('#content .quiz-card') ? { ok: true, msg: `Back to your quiz, question ${u.done + 1} of ${u.total}` } : { ok: false, why: "The quiz didn't open." };
+  },
+  async continue_review(){
+    const u = askUnfinished();
+    if(!u || u.kind !== 'review') return { ok: false, why: 'That review is already finished.' };
+    setCategory('review');
+    return reviewActive && reviewIndex === u.done && document.querySelector('#content .review-card') ? { ok: true, msg: `Back to Term Review, ${u.done + 1} of ${u.total}` } : { ok: false, why: "Term Review didn't open." };
+  },
+  async open_memory(){
+    openMemory();
+    return document.getElementById('memOverlay')?.classList.contains('show') ? { ok: true } : { ok: false, why: "That didn't open." };
+  },
+  async mem_undo(a, t){
+    if(!t.undo || t.undone) return { ok: false, why: 'Nothing to undo.' };
+    let saved = true;
+    Object.entries(t.undo).forEach(([k, v]) => { const r = v == null ? drMemForget(k) : drMemSet(k, v).saved; saved = saved && r !== false; });
+    t.undone = true;
+    return saved ? { ok: true, msg: 'Undone. Back to what was there before.' } : { ok: false, why: 'Couldn’t update this phone’s storage.' };
+  },
   async open_prep(a){
     const d = askSpecialties().find(x => x.id === String(a.target).replace(/^spec:/, ''));
     if(!d) return { ok: false, why: "That specialty isn't in the Hub any more." };
@@ -23733,6 +23860,304 @@ async function askRunAction(turnId, i){
     if(res.msg){ showToast(res.msg); drPerform('nod', { priority: DR_P.REACT }); }
   }else showToast(res.why);
   if(activeCategory === 'ask') renderAskMessages(false);
+}
+
+/* ---------- Dr. Smiley: what he remembers (on this device) ----------
+   A few choices an interpreter can ask him to remember, kept ONLY on this
+   phone (localStorage ih_smileyMemory), filed under the name set on this
+   phone. The Hub has no personal accounts: the team code joins the phone,
+   and the name is whatever was typed in the profile sheet. So this is not
+   "you everywhere" -- it's "you on this phone", and the screens say so.
+     lang      the language he explains in (auto: the question's)
+     length    brief or detailed answers
+     focus     the specialty you're studying (a specialty id, nothing typed)
+     mode      how he moves (Lively / Focused / Still)
+     practice  use my practice record for a next step (off unless switched on)
+   Only these fields, only these values: there is nowhere for free text, so
+   nothing about a patient can be kept. Asking him "remember I prefer brief
+   answers" saves it here and says so only after reading it back; when the
+   phone won't store anything (private browsing, full storage) he says that
+   instead and keeps it until the app closes. "What I remember" (Ask's
+   header, the profile sheet) shows, changes and forgets them. Another name
+   typed on a shared phone gets its own set; the conversation on screen is
+   cleared, since it belonged to the person before.
+   Sent with a question: only lang, length and focus (style, not
+   knowledge), and -- when practice is on -- counts from your own record.
+   Never team points: they're the team's, not your mastery. */
+const DR_MEM_KEY = 'ih_smileyMemory';
+const DR_MEM_FIELDS = {
+  lang:     { label: 'Explanation language', options: [['auto', 'Same as my question'], ['es', 'Español'], ['en', 'English'], ['both', 'Both']], def: 'auto' },
+  length:   { label: 'Answers', options: [['brief', 'Brief'], ['detailed', 'Detailed']], def: 'brief' },
+  focus:    { label: 'Study focus', def: '' },
+  mode:     { label: 'How he moves', options: [['lively', 'Lively'], ['focused', 'Focused'], ['still', 'Still']], def: 'lively' },
+  practice: { label: 'Use my practice record', options: [['on', 'On'], ['off', 'Off']], def: 'off' },
+};
+let drMemSession = null;   // the last thing saved, kept in memory too (used when the phone refuses storage)
+let drMemFailed = false;   // the last read or write didn't reach the phone's storage
+function drMemKey(name){ const n = String(name == null ? whoAmI() : name).trim().toLowerCase(); return n || '_'; }
+function drMemLoad(){
+  // A save failed: what's in memory is newer than what the phone holds.
+  if(drMemFailed && drMemSession) return drMemSession;
+  try{
+    const raw = localStorage.getItem(DR_MEM_KEY), m = raw ? JSON.parse(raw) : null;
+    drMemFailed = false;
+    return m && m.people && typeof m.people === 'object' ? m : { v: 1, people: {} };
+  }catch(e){ drMemFailed = true; return drMemSession || { v: 1, people: {} }; }
+}
+function drMemStore(m){
+  drMemSession = m;
+  try{
+    const s = JSON.stringify(m);
+    localStorage.setItem(DR_MEM_KEY, s);
+    if(localStorage.getItem(DR_MEM_KEY) !== s) throw new Error('not saved');
+    drMemFailed = false; return true;
+  }catch(e){ drMemFailed = true; return false; }
+}
+function drMemValid(k, v){
+  const f = DR_MEM_FIELDS[k];
+  if(!f || typeof v !== 'string') return false;
+  if(k === 'focus') return v === '' || askSpecialties().some(d => d.id === v);
+  return f.options.some(o => o[0] === v);
+}
+// What was explicitly remembered for this name (or another one).
+function drMemGet(name){
+  const p = drMemLoad().people[drMemKey(name)], out = {};
+  Object.entries((p && p.prefs) || {}).forEach(([k, v]) => { if(drMemValid(k, v)) out[k] = v; });
+  return out;
+}
+function drPref(k){ const v = drMemGet()[k]; return v !== undefined ? v : DR_MEM_FIELDS[k].def; }
+function drPrefLabel(k, v){
+  if(k === 'focus'){ const d = askSpecialties().find(x => x.id === v); return d ? d.name : 'None'; }
+  const o = DR_MEM_FIELDS[k].options.find(x => x[0] === v); return o ? o[1] : v;
+}
+// Remember one choice for whoever's name is on this phone. ok: a valid
+// choice; saved: it reached the phone's storage (else kept until the app closes).
+function drMemSet(k, v){
+  if(!drMemValid(k, v)) return { ok: false, saved: false };
+  const m = drMemLoad(), who = drMemKey();
+  const p = m.people[who] = m.people[who] || { prefs: {}, shown: {} };
+  p.prefs = p.prefs || {}; p.prefs[k] = v; p.at = Date.now();
+  const saved = drMemStore(m);
+  if(k === 'mode' && drModePref !== v){ drModePref = v; drModeChanged(); }
+  return { ok: true, saved };
+}
+function drMemForget(k, name){
+  const m = drMemLoad(), who = drMemKey(name), p = m.people[who], mine = who === drMemKey();
+  if(p){ if(k === 'all') delete m.people[who]; else if(p.prefs) delete p.prefs[k]; }
+  if(mine && (k === 'mode' || k === 'all')) try{ localStorage.removeItem('ih_smileyMode'); }catch(e){}
+  const saved = drMemStore(m);
+  if(mine && (k === 'mode' || k === 'all') && drModePref !== 'lively'){ drModePref = 'lively'; drModeChanged(); }
+  return saved;
+}
+// Other names with something remembered on this phone.
+function drMemOthers(){
+  const me = drMemKey(), m = drMemLoad();
+  return Object.entries(m.people).filter(([k, p]) => k !== me && p && p.prefs && Object.keys(p.prefs).length)
+    .map(([k, p]) => ({ key: k, n: Object.keys(p.prefs).length }));
+}
+// A suggestion he made without being asked: once a day per thing.
+function drMemShownToday(key){ const p = drMemLoad().people[drMemKey()]; return !!(p && p.shown && p.shown[key] === warmupDay()); }
+function drMemMarkShown(key){
+  const m = drMemLoad(), who = drMemKey(), p = m.people[who] = m.people[who] || { prefs: {}, shown: {} };
+  p.shown = p.shown || {}; p.shown[key] = warmupDay(); drMemStore(m);
+}
+// Another name typed on this phone: their own preferences (and his way of
+// moving), and a clean conversation. Returns a line for the toast.
+function drMemNameChanged(before, after){
+  if(drMemKey(before) === drMemKey(after)) return '';
+  const want = drPref('mode');
+  if(drModePref !== want){ drModePref = want; drModeChanged(); }
+  ASK.turns = []; ASK.selected = null; ASK.draft = '';
+  const n = Object.keys(drMemGet()).length;
+  return n ? ` Dr. Smiley is using ${after ? after.split(/\s+/)[0] + "'s" : 'this phone’s'} preferences.` : '';
+}
+
+/* "Remember…", "Forget…", "What do you remember?" -- handled on the phone. */
+function askMemoryIntent(q){
+  const f = foldText(q).toLowerCase();
+  if(/\b(what do you remember|what have you (saved|remembered)|que recuerdas|my preferences|mis preferencias)\b/.test(f)) return { kind: 'show' };
+  const forget = /\b(forget|olvida|olvidate|stop remembering|borra)\b/.test(f);
+  const remember = /\b(remember|recuerda|recuerdalo|save (that|this)|from now on|de ahora en adelante)\b/.test(f);
+  if(!forget && !remember) return null;
+  if(forget && /\b(everything|all of it|todo)\b/.test(f)) return { kind: 'forget', keys: ['all'] };
+  const ch = {};
+  if(/\b(both languages|in both|ambos idiomas|bilingual)\b/.test(f)) ch.lang = 'both';
+  else if(/\b(in|en) (spanish|espanol)\b|\bexplain\w* (it |things |them )?in spanish|\bspanish explanations?\b/.test(f)) ch.lang = 'es';
+  else if(/\b(in|en) (english|ingles)\b|\bexplain\w* (it |things |them )?in english|\benglish explanations?\b/.test(f)) ch.lang = 'en';
+  else if(/\bsame language\b|\bexplanation language\b|\blanguage\b/.test(f)) ch.lang = 'auto';
+  if(/\b(brief|short|shorter|concise|breve|cortas?|cortos?)\b/.test(f)) ch.length = 'brief';
+  else if(/\b(detailed|more detail|longer|in depth|detallad\w*|mas detalle)\b/.test(f)) ch.length = 'detailed';
+  if(/\b(stay still|be still|keep still|still mode|don'?t move|stop moving|no animation|quieto)\b/.test(f)) ch.mode = 'still';
+  else if(/\b(focused mode|less animation|calmer|menos animad\w*)\b/.test(f)) ch.mode = 'focused';
+  else if(/\b(lively|more animation|animad\w*)\b/.test(f)) ch.mode = 'lively';
+  if(/\b(my )?(practice|progress|review) (record|history)|\b(use|track|follow|look at|check) my (practice|progress|record|reviews?)\b|usa mi (practica|progreso)/.test(f)) ch.practice = forget || /\b(don'?t|stop|no)\b/.test(f) ? 'off' : 'on';
+  if(/\b(study(ing)?|focus\w*|working on|estudi\w*|enfocad\w*)\b/.test(f)){
+    if(forget || /\b(no|clear|without a|sin) (study )?focus\b/.test(f)) ch.focus = '';
+    else { const sp = askFindSpecialty(q); if(sp) ch.focus = sp; else if(!forget) ch.focusUnknown = true; }
+  }
+  if(forget) return { kind: 'forget', keys: Object.keys(ch).filter(k => k in DR_MEM_FIELDS) };
+  return { kind: 'set', changes: ch };
+}
+// The answer card for a memory request: a confirmation only once it's
+// actually saved (read back), or why not.
+function askMemoryTurn(q, mi){
+  const name = whoAmI(), who = name ? name.split(/\s+/)[0] : '', where = name ? `On this device, for ${who}.` : 'On this device (no name set).';
+  const a = { local: true, mem: true, fromHub: false, headline: '', sayLabel: '', say: '', details: '', sourceIds: [], lessonIds: [], actions: [], suggestTerm: { en: '', es: '', def: '' } };
+  const t = { id: 'q' + Date.now().toString(36), q, status: 'done', labels: {}, go: {}, actions: [{ type: 'open_memory', target: 'memory' }], answer: a, doneAt: Date.now() };
+  const list = k => `${DR_MEM_FIELDS[k].label}: ${drPrefLabel(k, drPref(k))}`;
+  if(askLooksLikePatientInfo(q)){
+    a.headline = 'I don’t remember patient details';
+    a.details = 'Only a few preferences: explanation language, brief or detailed answers, study focus, how I move, and whether to use your practice record. Nothing was saved.';
+    return t;
+  }
+  if(mi.kind === 'show'){
+    const keys = Object.keys(drMemGet());
+    a.headline = keys.length ? 'Here’s what I remember' : 'I don’t remember anything for you yet';
+    a.details = (keys.length ? keys.map(list).join(' · ') + '. ' : 'Ask me to remember a preference, like “Remember I like brief answers.” ') + where;
+    return t;
+  }
+  if(mi.kind === 'forget'){
+    if(!mi.keys.length){ a.headline = 'What should I forget?'; a.details = 'Say which one, or “forget everything”. ' + where; return t; }
+    const all = mi.keys[0] === 'all', before = drMemGet();
+    const saved = drMemForget(all ? 'all' : mi.keys[0]);
+    if(!all) mi.keys.slice(1).forEach(k => drMemForget(k));
+    t.undo = all ? before : Object.fromEntries(mi.keys.filter(k => k in before).map(k => [k, before[k]]));
+    a.headline = saved ? (all ? 'Forgotten. I don’t remember anything for you now.' : `Forgotten: ${mi.keys.map(k => DR_MEM_FIELDS[k].label.toLowerCase()).join(', ')}`) : 'I couldn’t update this phone’s storage';
+    a.details = saved ? where : 'It’s forgotten until you close the app, but the phone may still have the old choice.';
+    if(Object.keys(t.undo).length) t.actions.unshift({ type: 'mem_undo', target: 'undo' });
+    return t;
+  }
+  const keys = Object.keys(mi.changes).filter(k => k in DR_MEM_FIELDS);
+  if(!keys.length){
+    a.headline = mi.changes.focusUnknown ? 'Which specialty are you studying?' : 'I can remember a few things';
+    a.details = mi.changes.focusUnknown ? 'Say it the way it’s named in the Hub, like “Remember I’m studying Oncology.”'
+      : 'Explanation language, brief or detailed answers, your study focus, how I move, and whether to use your practice record.';
+    return t;
+  }
+  const before = drMemGet(), res = keys.map(k => drMemSet(k, mi.changes[k]));
+  t.undo = Object.fromEntries(keys.map(k => [k, k in before ? before[k] : null]));
+  const saved = res.every(r => r.saved);
+  a.headline = saved ? 'Saved on this device' : 'I couldn’t save that on this phone';
+  a.details = keys.map(list).join(' · ') + '. ' + (saved ? where + ' Change or forget it in What I remember.'
+    : 'This phone isn’t letting the Hub store anything right now (private browsing or full storage). I’ll use it until you close the app.');
+  t.memSaved = saved;
+  t.actions.unshift({ type: 'mem_undo', target: 'undo' });
+  return t;
+}
+
+/* Your own practice, when you've switched it on: what's unfinished, what's
+   still learning (in your focus first), what's due. Counts only. */
+function askUnfinished(){
+  if(quizActive && quizQuestions.length && quizIndex < quizQuestions.length) return { kind: 'quiz', done: quizIndex, total: quizQuestions.length };
+  if(reviewActive && reviewIndex < reviewQueue.length) return { kind: 'review', done: reviewIndex, total: reviewQueue.length };
+  try{
+    const st = JSON.parse(localStorage.getItem(PREP_DECK_KEY) || 'null');
+    if(st && typeof st.key === 'string' && Array.isArray(st.queue)){
+      const [dom, day] = st.key.split('|');
+      if(day === warmupDay() && st.i > 0 && st.i < st.queue.length && askSpecialties().some(d => d.id === dom)) return { kind: 'prep', id: dom, done: st.i, total: st.queue.length };
+    }
+  }catch(e){}
+  return null;
+}
+function askPractice(rec){
+  if(drPref('practice') !== 'on') return null;
+  const focus = drPref('focus'), learning = rec.loaded ? askLearningTerms() : [];
+  const u = askUnfinished();
+  return { learning: learning.length, learningInFocus: focus ? learning.filter(t => askTopOf(t.categoryId) === focus).length : 0,
+    due: rec.loaded ? dueReviewCount() : 0, unfinished: u ? { ...u, id: u.kind === 'prep' ? 'spec:' + u.id : u.kind } : null };
+}
+function askTopOf(catId){ const c = DATA.categories.find(x => x.id === catId); return c ? (c.parentId || c.id) : ''; }
+// The one next step worth offering, from your own record.
+function askNextStep(rec){
+  const u = askUnfinished();
+  if(u) return { type: u.kind === 'prep' ? 'continue_prep' : u.kind === 'quiz' ? 'continue_quiz' : 'continue_review', target: u.kind === 'prep' ? 'spec:' + u.id : u.kind };
+  if(rec.loaded && askLearningTerms().length) return { type: 'practice_learning', target: 'learning' };
+  if(rec.loaded && dueReviewCount()) return { type: 'start_review', target: 'review' };
+  return null;
+}
+// On Ask's hello: one next step, at most once a day per step, only when
+// practice is switched on. ✕ puts it away for the day.
+let askNextOffer = null;
+async function askNextOfferSync(){
+  // Already offered and still possible: it stays put through repaints (it's
+  // the same offer, not a new one); otherwise at most one new one a day.
+  if(askNextOffer && drPref('practice') === 'on' && !ASK.turns.filter(t => !t.hidden).length && askCheckAction(askNextOffer.step, { n: 5 }).ok){
+    const el = document.getElementById('askNext'); if(el) el.outerHTML = askNextHtml(); return;
+  }
+  askNextOffer = null;
+  if(drPref('practice') !== 'on' || ASK.turns.length) return;
+  const rec = await askLoadRecord(), step = askNextStep(rec);
+  if(!step) return;
+  const key = step.type + ':' + step.target;
+  if(drMemShownToday(key)) return;
+  const fake = { n: 5 }, chk = askCheckAction(step, fake);
+  if(!chk.ok) return;
+  askNextOffer = { step, key, label: chk.label };
+  drMemMarkShown(key);
+  const el = document.getElementById('askNext');
+  if(el) el.outerHTML = askNextHtml();
+}
+function askNextHtml(){
+  if(!askNextOffer) return '<div id="askNext" hidden></div>';
+  return `<div class="ask-next" id="askNext"><span>Next for you</span><button type="button" class="ask-do-btn is-main" onclick="askNextGo()">${escapeHtml(askNextOffer.label)}</button>
+    <button type="button" class="ask-next-x" onclick="askNextOffer=null; this.parentElement.outerHTML=askNextHtml()" aria-label="Not now">✕</button></div>`;
+}
+async function askNextGo(){
+  if(!askNextOffer) return;
+  const t = { id: 'next' + Date.now().toString(36), q: '', status: 'done', labels: {}, go: {}, n: 5, actions: [askNextOffer.step], answer: null, hidden: true };
+  ASK.turns.push(t);
+  askNextOffer = null;
+  await askRunAction(t.id, 0);
+  ASK.turns = ASK.turns.filter(x => x !== t);
+}
+
+/* What I remember: view, change, forget. */
+function openMemory(){
+  let ov = document.getElementById('memOverlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.className = 'overlay'; ov.id = 'memOverlay';
+    ov.addEventListener('click', e => { if(e.target === ov) closeMemory(); });
+    document.body.appendChild(ov);
+  }
+  renderMemory();
+  ov.classList.add('show');
+}
+function closeMemory(){ document.getElementById('memOverlay')?.classList.remove('show'); }
+function renderMemory(status){
+  const ov = document.getElementById('memOverlay');
+  if(!ov) return;
+  const mine = drMemGet(), name = whoAmI(), others = drMemOthers();
+  const row = (k, body) => `<div class="mem-row"><div class="mem-row-head"><span>${DR_MEM_FIELDS[k].label}</span>${k in mine
+    ? `<button type="button" class="mem-forget" onclick="memForget('${k}')">Forget</button>` : '<small>Not remembered · default</small>'}</div>${body}</div>`;
+  const opts = k => `<div class="mem-opts" role="radiogroup" aria-label="${escapeAttr(DR_MEM_FIELDS[k].label)}">${DR_MEM_FIELDS[k].options.map(([v, l]) =>
+    `<button type="button" role="radio" aria-checked="${drPref(k) === v}" onclick="memSet('${k}','${v}')">${escapeHtml(l)}</button>`).join('')}</div>`;
+  const focus = `<select class="mem-select" aria-label="Study focus" onchange="memSet('focus', this.value)"><option value="">None</option>${askSpecialties().map(d =>
+    `<option value="${escapeAttr(d.id)}"${drPref('focus') === d.id ? ' selected' : ''}>${escapeHtml(d.name)}</option>`).join('')}</select>`;
+  ov.innerHTML = `<div class="modal mem-sheet" role="dialog" aria-modal="true" aria-labelledby="memTitle">
+    <h3 id="memTitle">What Dr. Smiley remembers</h3>
+    <p class="mem-where"><b>On this device</b> · ${name ? 'for ' + escapeHtml(name) : 'no name set on this phone'}</p>
+    ${drMemFailed ? `<p class="mem-warn" role="alert">This phone isn’t letting the Hub store anything right now (private browsing or full storage). Changes last until you close the app.</p>` : ''}
+    ${row('lang', opts('lang'))}${row('length', opts('length'))}${row('focus', focus)}${row('mode', opts('mode'))}
+    ${row('practice', `<p class="mem-help">He can suggest continuing practice you left unfinished, from your own record. Team points aren’t yours alone, so he never counts them.</p>${opts('practice')}`)}
+    <p class="mem-status" id="memStatus" role="status">${status ? escapeHtml(status) : ''}</p>
+    <p class="mem-note">Kept only on this phone, under the name set here. Not shared with the team, and never patient details. The ones that shape answers (language, length, focus, and your practice counts when on) go with your questions.</p>
+    ${others.length ? `<div class="mem-others"><span>Also on this phone</span>${others.map(o => `<button type="button" onclick="memForgetOther('${escapeAttr(o.key)}')">Forget ${escapeHtml(o.key === '_' ? 'no-name' : o.key)}’s (${o.n})</button>`).join('')}</div>` : ''}
+    <div class="modal-actions"><button type="button" class="btn btn-ghost mem-forget-all" onclick="memForget('all')"${Object.keys(mine).length ? '' : ' disabled'}>Forget everything</button>
+      <button type="button" class="btn btn-primary" onclick="closeMemory()">Done</button></div>
+  </div>`;
+}
+function memSet(k, v){
+  const r = drMemSet(k, v);
+  renderMemory(!r.ok ? 'That isn’t one of the choices.' : r.saved ? `Saved: ${DR_MEM_FIELDS[k].label.toLowerCase()} · ${drPrefLabel(k, v)}` : 'Couldn’t save on this phone. Kept until you close the app.');
+  if(k === 'practice' && activeCategory === 'ask') askNextOfferSync();
+}
+function memForget(k){
+  const saved = drMemForget(k);
+  renderMemory(saved ? (k === 'all' ? 'Forgotten. Everything is back to the defaults.' : `Forgotten: ${DR_MEM_FIELDS[k].label.toLowerCase()}`) : 'Couldn’t update this phone’s storage.');
+}
+function memForgetOther(key){
+  const saved = drMemForget('all', key === '_' ? '' : key);
+  renderMemory(saved ? 'Forgotten.' : 'Couldn’t update this phone’s storage.');
 }
 
 function askEditPhi(){

@@ -33,6 +33,15 @@
  * else is dropped here, and the app checks again before showing a button.
  * The app runs the action and only then says it's done.
  *
+ * PREFERENCES, NOT KNOWLEDGE
+ * An interpreter can ask Dr. Smiley to remember a few choices on their own
+ * phone (explanation language, brief or detailed, a study focus) and, if
+ * they switch it on, to use their own practice record (what they're still
+ * learning, what's due, practice left unfinished). These arrive as
+ * CONTEXT.prefs and CONTEXT.practice: style and personal choices only, kept
+ * apart from TEAM NOTES and never a source. Team points are the team's and
+ * are never sent. Nothing about a patient is stored or sent.
+ *
  * SETUP: none beyond the ANTHROPIC_API_KEY already configured for Translate.
  */
 
@@ -68,8 +77,12 @@ const MAX_ACTIONS = 3;
  *   set_name           "name"     (a review record needs the name on this phone)
  *   open_term          a glossary entry id ("t:...") from HUB ENTRIES or CONTEXT.selected
  *   look_up            the same: a live search for the term's sources
- *   open_source        CONTEXT.selected's id, only when it has a saved source link */
-const ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source'];
+ *   open_source        CONTEXT.selected's id, only when it has a saved source link
+ *   continue_prep      a specialty id: the briefing deck left part-way today (CONTEXT.practice.unfinished)
+ *   continue_quiz      "quiz"     (a practice quiz left part-way)
+ *   continue_review    "review"   (a Term Review session left part-way) */
+const ACTION_TYPES = ['open_prep', 'choose_prep', 'practice_learning', 'start_review', 'set_name', 'open_term', 'look_up', 'open_source',
+  'continue_prep', 'continue_quiz', 'continue_review'];
 
 const SYSTEM = `You are Dr. Smiley, the interpreter assistant inside the Interpreter Hub ("Ask the Hub"), used by the Spanish/English medical interpreter team at Hackensack University Medical Center. Interpreters ask between assignments, on a phone, often one-handed. You are friendly and brief, and you help them get ready and render language accurately.
 
@@ -93,7 +106,13 @@ Context and actions:
   set_name (target "name") when CONTEXT.learning.hasName is false and they want to practice: a review record belongs to a name.
   open_term (target: a glossary id) opens that term in the glossary. look_up (same target) searches live for its sources. open_source (target: CONTEXT.selected.id) opens the selected term's saved source; only when CONTEXT.selected.hasLink is true.
 - Never say you have opened, started or done something; the interpreter taps the button. Say what the button will do, for example "Your Oncology briefing is ready to open."
-- Keep it short: one headline, at most two short sentences of details.`;
+- Keep it short: one headline, at most two short sentences of details.
+
+Preferences and practice (only when CONTEXT has them):
+- CONTEXT.prefs are this interpreter's own choices, saved on their phone. lang is the language for your explanation (headline and details): "auto" means the question's language, "es" Spanish, "en" English, "both" Spanish then English. Spanish terms stay Spanish and say stays the patient-facing words whatever lang is. length "brief": the headline and at most one short sentence of details; "detailed": up to four sentences of details. focus is the specialty they are studying: prefer it when they leave the specialty open ("prep me", "practice some terms").
+- Preferences are style, not knowledge. Never cite one as a source, never put one in sourceIds or lessonIds, and never let one override a HUB ENTRY or a TEAM NOTE.
+- CONTEXT.practice is the interpreter's own record: terms still learning (and how many in their focus), terms due, and practice they left unfinished. When it helps with what they asked, offer the matching action (continue_prep with its specialty id, continue_quiz "quiz", continue_review "review", practice_learning). Don't offer an unrelated next step when they asked about something else.
+- Team points belong to the whole team; they are not in CONTEXT and never describe them as this interpreter's progress.`;
 
 const ANSWER_SCHEMA = {
   type: 'object',
@@ -153,6 +172,9 @@ function safeText(v, max) {
   return PHI.test(s) ? '' : s;
 }
 // The app's context, cut down to the fields and sizes listed here.
+const PREF_LANG = ['auto', 'es', 'en', 'both'];
+const PREF_LENGTH = ['brief', 'detailed'];
+const int = (v, max) => Math.max(0, Math.min(max, Math.floor(+v || 0)));
 function cleanContext(c) {
   c = c && typeof c === 'object' ? c : {};
   const scr = c.screen && typeof c.screen === 'object' ? c.screen : {};
@@ -170,11 +192,38 @@ function cleanContext(c) {
       count: Math.max(0, Math.min(999, Math.floor(+lr.count || 0))),
     },
   };
+  // The interpreter's own preferences: three choices from fixed lists.
+  const pr = c.prefs && typeof c.prefs === 'object' ? c.prefs : null;
+  if (pr) {
+    const focus = pr.focus && out.specialties.find(s => s.id === String(pr.focus.id || ''));
+    out.prefs = {
+      lang: PREF_LANG.includes(pr.lang) ? pr.lang : 'auto',
+      length: PREF_LENGTH.includes(pr.length) ? pr.length : 'brief',
+      focus: focus ? { id: focus.id, name: focus.name } : null,
+    };
+  }
+  // Their own practice record, when they've switched it on. Counts only.
+  const pc = c.practice && typeof c.practice === 'object' ? c.practice : null;
+  if (pc) {
+    const u = pc.unfinished && typeof pc.unfinished === 'object' ? pc.unfinished : null;
+    const kind = u && ['prep', 'quiz', 'review'].includes(u.kind) ? u.kind : '';
+    const spec = kind === 'prep' && out.specialties.find(s => s.id === String(u.id || ''));
+    out.practice = {
+      learning: int(pc.learning, 9999), learningInFocus: int(pc.learningInFocus, 9999), due: int(pc.due, 9999),
+      unfinished: kind && (kind !== 'prep' || spec) ? { kind, id: spec ? spec.id : kind, name: spec ? spec.name : '', done: int(u.done, 999), total: int(u.total, 999) } : null,
+    };
+  }
   if (sel && ID_RE.test(String(sel.id || '')) && String(sel.id).startsWith('t:')) {
     out.selected = { id: String(sel.id), en: safeText(sel.en, 160), es: safeText(sel.es, 160), domain: safeText(sel.domain, 80),
       source: safeText(sel.source, 120), hasLink: !!sel.hasLink };
   }
   return out;
+}
+// "Brief" is a promise: one sentence of details, whatever came back.
+function fitLength(details, prefs) {
+  if (!prefs || prefs.length !== 'brief' || !details) return details;
+  const m = details.match(/^.+?[.!?](\s|$)/);
+  return (m ? m[0] : details).trim().slice(0, 240);
 }
 // Only actions from the list, each with a target the app actually sent.
 function allowedActions(parsed, ctx, entries) {
@@ -189,6 +238,9 @@ function allowedActions(parsed, ctx, entries) {
     open_term: glossary,
     look_up: glossary,
     open_source: new Set(ctx.selected && ctx.selected.hasLink ? [ctx.selected.id] : []),
+    continue_prep: new Set(ctx.practice && ctx.practice.unfinished && ctx.practice.unfinished.kind === 'prep' ? [ctx.practice.unfinished.id] : []),
+    continue_quiz: new Set(ctx.practice && ctx.practice.unfinished && ctx.practice.unfinished.kind === 'quiz' ? ['quiz'] : []),
+    continue_review: new Set(ctx.practice && ctx.practice.unfinished && ctx.practice.unfinished.kind === 'review' ? ['review'] : []),
   };
   const seen = new Set();
   return (Array.isArray(parsed.actions) ? parsed.actions : [])
@@ -198,7 +250,7 @@ function allowedActions(parsed, ctx, entries) {
     .slice(0, MAX_ACTIONS);
 }
 
-export { cleanContext, allowedActions, ACTION_TYPES };
+export { cleanContext, allowedActions, fitLength, ACTION_TYPES };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -328,7 +380,7 @@ export default async function handler(req, res) {
         headline: clip(parsed.headline, 200),
         sayLabel: clip(parsed.sayLabel, 60),
         say: clip(parsed.say),
-        details: clip(parsed.details),
+        details: fitLength(clip(parsed.details), context.prefs),
         sourceIds,
         lessonIds,
         actions: allowedActions(parsed, context, entries),

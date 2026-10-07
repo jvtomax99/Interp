@@ -97,6 +97,13 @@ no error on screen. So when you add something:
   without `allow-same-origin`, and `vercel.json` sends the same sandbox as a
   header. Never add `allow-same-origin` or load its scripts into the Hub's
   own page: it would then reach the team sign-in and saved data.
+- **There are no personal accounts.** The team code joins a *phone*; the name
+  is whatever was typed on it. Dr. Smiley's remembered preferences
+  (`ih_smileyMemory`: explanation language, brief/detailed, study focus, how
+  he moves, use my practice record) live only on that phone, filed under that
+  name. Never sync them to Firestore, never mix them into `hub-lessons`
+  (approved team knowledge), never add a free-text field to them (no patient
+  details), and never present team points as one person's progress.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.
