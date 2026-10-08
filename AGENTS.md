@@ -70,6 +70,16 @@ CSS animation runs on the same element: on an iPhone that froze him tiny at
 the start of the Home greeting. Write the value each frame instead
 (`placeFace` in `home-polish.js`).
 
+**Dr. Smiley's size is one number per place**, in `home-polish.css`:
+`--ds-k` for his button beside the tab bar, `--hw-size` for the Home
+greeting (both against the size he's drawn at). Everything inside him is
+drawn for that old size and scaled, so change the number, never the
+pixel offsets inside him. His scroll sway pins his pivot (`smileySway` in
+`index.html`: 50% 92% in the dock, 50% 85% on Home), which is why both
+places move him back with `translate` or offsets after scaling; a scale
+without that pushes him up. In the greeting, `fitWave` in `home-polish.js`
+shrinks him only as much as a long first name needs to stay on one line.
+
 **Dr. Smiley's gestures use only his drawn frames, a tilt and a lift.** Never
 slide his picture sideways to fake a head turn, and never squash or stretch it
 to fake a bounce. A gesture the art can't draw needs new frames, not a trick.

@@ -382,6 +382,15 @@ lost concurrent edits. Do not reintroduce that.
   Chromium). The entrance is now written straight onto him each frame
   (`placeFace` in `home-polish.js`) and breathing waits until he has landed
   (`.home-wave-entering`).
+- **His size is one number per place** (`home-polish.css`): `--ds-k` for
+  the dock button (Jose picked 58/48: his disc is the tab bar's height,
+  centred on its middle line, 14px from the edge) and `--hw-size` for the
+  Home greeting (1.5: a 90px face, centred on the name). Inside him
+  everything is still drawn at the old size and scaled. His sway pins the
+  pivot (`smileySway`: 50% 92% dock, 50% 85% Home), so a scale must be
+  moved back (dock: the bob's left/top; Home: `translate`), or he drifts
+  up. `fitWave` (`home-polish.js`) shrinks the greeting one only as far as
+  a long first name needs to stay on one line.
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
   getters, so every play varies a little (side, amplitude, beats) with an

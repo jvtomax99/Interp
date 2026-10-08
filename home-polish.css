@@ -733,14 +733,15 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 
 /* Cinematic hello. A content-sized first column protects long names while
    keeping the hand centered for Jose's greeting. The button stays transparent. */
-/* His size: --hw-size, against the 64px he's drawn at (1 = 64px). All of
+/* His size: --hw-size, against the 64px he's drawn at (1 = 64px; Jose
+   picked B, 1.5, so his face is 90px instead of 60px). All of
    him (face, disc, ring, lanyard, badge) is scaled by --hw-k, which is
    --hw-size unless a long name needs the room: then home-polish.js
    (fitWave) sets the largest size at which the name still fits on one
    line, never below 1. His column widens to match; the scale pivots where
    his sway does (50% 85%, smileySway in index.html), and translate puts
    his centre back on the name's centre line. */
-#content.is-home .home-greeting-text{--hw-size:1;--hw-k:var(--hw-size);}
+#content.is-home .home-greeting-text{--hw-size:1.5;--hw-k:var(--hw-size);}
 #content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k)) minmax(0,1fr);gap:0;min-height:52px;}
 #content.is-home .home-greeting-name{grid-column:1;max-width:100%;}
 #content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));gap:8px;}
