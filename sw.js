@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v196-banner-lettering';
+const CACHE_VERSION = 'interpreter-hub-v197-banner-topline';
 const PRECACHE = [
   './',
   './index.html',

@@ -1263,7 +1263,7 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
 #content.is-home .home-greeting-quote{margin-top:calc(56px + 67px * (var(--hw-k) - 1));}
 @media (min-width:901px){#content.is-home .home-greeting-quote{margin-top:calc(52px + 67px * (var(--hw-k) - 1));}}
 #content.is-home .home-greeting-name{font-family:'Parisienne',cursive;font-weight:400;letter-spacing:0;line-height:1.12;padding-bottom:.06em;text-shadow:0 1px 2px rgba(4,14,28,.6),0 2px 6px rgba(4,14,28,.35),0 3px 22px rgba(4,14,28,.42);}
-#content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-family:var(--sans);font-weight:600;letter-spacing:.13em;text-shadow:0 1px 6px rgba(4,14,28,.6);}
+#content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-family:var(--sans);font-weight:600;letter-spacing:.13em;text-shadow:0 0 2px rgba(4,14,28,.7),0 1px 3px rgba(4,14,28,.65),0 0 12px rgba(4,14,28,.55);}
 #content.is-home .home-greeting-date{letter-spacing:.02em;}
 #content.is-home .home-greeting-quote{font-family:'Lora',Georgia,serif;font-style:italic;font-weight:500;letter-spacing:0;line-height:1.32;color:#fff;text-shadow:0 1px 2px rgba(4,14,28,.55),0 2px 16px rgba(4,14,28,.45);}
 #content.is-home .home-greeting-quote cite{font-family:var(--sans);font-style:normal;color:#fff;text-shadow:0 1px 3px rgba(4,14,28,.7);font-weight:650;text-transform:uppercase;letter-spacing:.16em;}
