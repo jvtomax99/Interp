@@ -279,7 +279,11 @@
      tab; scrolling up, or tapping the pill, opens it again (wireDock). */
   .tabbar{height:58px;padding:4px;border-radius:999px;border-color:var(--glass-edge);touch-action:pan-y;
     transition:right .42s var(--ease),height .3s var(--ease);}
-  body.dock-has-smiley .tabbar{right:calc(14px + 58px + 9px);}
+  /* His size (Jose picked B): --ds-k is his disc against the 48px disc he's
+     drawn at below, so 58/48 makes it 58px, the tab bar's own height. The
+     bar stops 9px before his disc. */
+  :root{--ds-k:calc(58 / 48);}
+  body.dock-has-smiley .tabbar{right:calc(14px + 48px * var(--ds-k) + 9px);}
   .tabbar-btn{min-height:0;height:48px;padding:5px 2px 4px;border-radius:999px;font-size:10.5px;font-weight:550;gap:2px;color:var(--ink-soft);z-index:1;
     transition:color .2s var(--ease),flex-grow .42s var(--ease),opacity .2s var(--ease);}
   .tabbar-btn.is-active,html[data-theme="dark"] .tabbar-btn.is-active{background:transparent;color:var(--accent);font-weight:650;}
@@ -295,19 +299,30 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 6px 16px -8px rgba(22,55,90,.45);}
 
   /* His head is the button: his face fills a light sky circle, no ring,
-     no gap (positioned below). */
-  .dock-smiley{position:fixed;z-index:60;right:14px;bottom:var(--dock-bottom);width:58px;height:58px;padding:0;border-radius:50%;
+     no gap (positioned below). Everything inside him is drawn for a 58px
+     button with a 48px disc; --ds-s scales it (--ds-k, or less while the bar
+     is tucked). The button itself really is that big, so his panel, its
+     pointer, the "Show me" light and his sway all follow it. Placed so his
+     disc's centre is on the bar's centre line (--ds-bar is the bar's height)
+     and its right edge is 14px from the screen edge, like the bar's left. */
+  .dock-smiley{--ds-s:var(--ds-k);--ds-bar:58px;position:fixed;z-index:60;
+    right:calc(14px - 5px * var(--ds-s));bottom:calc(var(--dock-bottom) + (var(--ds-bar) - 48px * var(--ds-s)) / 2);
+    width:calc(58px * var(--ds-s));height:calc(58px * var(--ds-s));padding:0;border-radius:50%;
     border:0;background:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
     opacity:0;transform:translateY(16px) scale(.4);pointer-events:none;
-    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),width .3s var(--ease),height .3s var(--ease);}
+    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),width .3s var(--ease),height .3s var(--ease),
+      right .3s var(--ease),bottom .3s var(--ease);}
   body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
   body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
   /* The shadow rides on the part that bobs, so no light gap opens under him. */
   /* Pop-out (option A): a glossy disc, smaller than the button, with his head
      coming out over its top edge; below his ears he is cut to the disc
-     (clip-path on .ask-face, whose box is 105.7% of the button at -9.4%, 3%). */
-  .dock-smiley-bob{position:relative;display:block;width:100%;height:100%;transform-origin:50% 100%;}
+     (clip-path on .ask-face svg). Drawn 58px and scaled by --ds-s about his
+     lean point (50% 88% = 29px, 51.04px), then moved so it fills the button
+     from its top-left corner. */
+  .dock-smiley-bob{position:absolute;left:calc(29px * (var(--ds-s) - 1));top:calc(51.04px * (var(--ds-s) - 1));display:block;width:58px;height:58px;
+    scale:var(--ds-s);transform-origin:50% 100%;transition:scale .3s var(--ease),left .3s var(--ease),top .3s var(--ease);}
   .dock-smiley-bob::before{content:"";position:absolute;left:5px;top:10px;width:48px;height:48px;border-radius:50%;
     background:radial-gradient(circle at 38% 28%,#ffffff 0,#e8f4ff 28%,#b9d8f5 62%,#7fb1e3 100%);
     box-shadow:inset 0 -5px 10px rgba(20,60,120,.35),inset 0 3px 5px rgba(255,255,255,.9),0 0 0 2px rgba(255,255,255,.9),0 1px 2px rgba(21,28,44,.28),0 10px 22px -8px rgba(21,28,44,.45);}
@@ -319,8 +334,6 @@
   .dock-smiley .ask-face{position:absolute;display:block;left:-.4%;top:-4.4%;width:88%;height:88%;margin:0;}
   .dock-smiley .ask-face svg{display:block;width:100%;height:100%;filter:none;clip-path:path('M-60 -90 H140 V37.55 H53.22 A24 24 0 0 1 5.26 37.55 H-60 Z');}
   .dock-smiley .ask-face{filter:drop-shadow(0 2px 3px rgba(5,15,40,.3));}
-  body.dock-mini .dock-smiley .ask-face svg{clip-path:path('M-60 -90 H140 V34.96 H49.55 A22.34 22.34 0 0 1 4.9 34.96 H-60 Z');}
-  body.dock-mini .dock-smiley-bob::before{left:4.66px;top:9.31px;width:44.69px;height:44.69px;}
   .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:750;line-height:14px;
     letter-spacing:.02em;color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
   .dock-smiley:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
@@ -361,7 +374,8 @@
   body.dock-mini .tabbar-btn.is-active .tabbar-icon,
   body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
   body.dock-mini .tabbar-badge{top:3px;left:auto;right:calc(50% + 3px);border-color:#1F78C6;}
-  body.dock-mini .dock-smiley{width:54px;height:54px;}
+  /* Tucked, he shrinks with the bar (58 to 54px), same middle line. */
+  body.dock-mini .dock-smiley{--ds-s:calc(var(--ds-k) * 54 / 58);--ds-bar:54px;}
   /* The Ask tag stays when the bar is tucked too (Jose). */
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
@@ -384,7 +398,8 @@
     -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));
     animation:dockSpin 1s linear infinite;}
   @keyframes dockSpin{to{rotate:1turn;}}
-  .dock-smiley.has-new::after,.dock-smiley.has-error::after{content:"";position:absolute;z-index:3;right:2px;top:6px;width:13px;height:13px;border-radius:50%;
+  .dock-smiley.has-new::after,.dock-smiley.has-error::after{content:"";position:absolute;z-index:3;right:calc(2px * var(--ds-s));top:calc(6px * var(--ds-s));
+    width:calc(13px * var(--ds-s));height:calc(13px * var(--ds-s));border-radius:50%;
     background:var(--accent-2);box-shadow:0 0 0 2px var(--paper);}
   .dock-smiley.has-error::after{background:var(--danger);}
 }
