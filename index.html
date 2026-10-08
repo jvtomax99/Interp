@@ -5541,7 +5541,26 @@ body.access-locked{ overflow:hidden; }
 .ds-fx-g:nth-child(2){ left:-9px; width:11px; height:11px; }
 .ds-fx-g:nth-child(3){ left:5px; width:12px; height:12px; }
 .ds-fx-notes .ds-fx-g{ width:14px; height:16px; }
-.ds-fx-question .ds-fx-g{ width:19px; height:19px; left:-6px; top:-4px; animation:dsFxPop 2.3s cubic-bezier(.2,.8,.2,1) both; }
+.ds-fx-question .ds-fx-g{ width:19px; height:19px; left:-6px; top:-4px; animation:dsFxPop 1.6s cubic-bezier(.2,.8,.2,1) both; }
+/* The cheer's burst: three sparks thrown out from his head at once, gone in
+   a second. The wink's glint: one small spark by the winking eye (his left,
+   your right), there and gone. */
+.ds-fx-burst .ds-fx-g{ animation:dsFxBurst 1s cubic-bezier(.15,.85,.25,1) both; animation-delay:calc(var(--i) * .05s); }
+.ds-fx-burst .ds-fx-g:nth-child(1){ --dx:6px; --dy:-16px; }
+.ds-fx-burst .ds-fx-g:nth-child(2){ --dx:-14px; --dy:-12px; left:-12px; top:4px; }
+.ds-fx-burst .ds-fx-g:nth-child(3){ --dx:13px; --dy:-4px; top:12px; }
+.ds-fx-glint{ top:42%; right:23%; }
+.ds-fx-glint .ds-fx-g{ width:10px; height:10px; animation:dsFxGlint .7s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes dsFxBurst{
+  0%{ opacity:0; transform:translate(0,0) scale(.3) rotate(0); }
+  20%{ opacity:1; transform:translate(calc(var(--dx) * .6),calc(var(--dy) * .6)) scale(1.1) rotate(30deg); }
+  100%{ opacity:0; transform:translate(var(--dx),var(--dy)) scale(.5) rotate(80deg); }
+}
+@keyframes dsFxGlint{
+  0%{ opacity:0; transform:scale(.2) rotate(-30deg); }
+  35%{ opacity:1; transform:scale(1.15) rotate(15deg); }
+  100%{ opacity:0; transform:scale(.4) rotate(60deg); }
+}
 @keyframes dsFxFloat{
   0%{ opacity:0; transform:translate(0,4px) scale(.4) rotate(-8deg); }
   18%{ opacity:1; transform:translate(2px,-4px) scale(1) rotate(4deg); }
@@ -12537,7 +12556,7 @@ async function reviewRecord(ok, self){
   teamPoints(1);
   // Proportional: a nod for a right answer, a smile when it's one you'd missed
   // before, calm encouragement after a miss. The session's end has its own.
-  drPerform(ok ? (RS.pending.wasMissed ? 'smile' : 'nod') : 'encourage', { priority: DR_P.REACT });
+  drPerform(ok ? (RS.pending.wasMissed ? 'smile' : 'ack') : 'encourage', { priority: DR_P.REACT });
   // "Show answer", then Got it: you've just seen it, so on to the next card.
   if(self && ok && RS.stage === 'result' && RS.check && RS.check.kind === 'self' && !RS.check.ans){ reviewNext(); return; }
   reviewStore();
@@ -12881,7 +12900,7 @@ const GUIDE_STEPS = {
     note: 'When it says Not from the Hub, double-check it. Follow up as you would with a teammate: “Make it simpler.” He can also open a briefing, practice or a term for you; he says it’s done only once it’s open.' }),
   askmoves: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>How Dr. Smiley moves</b>, pick one: ${GUIDE_UI.seg}.`,
     'To take him off every page, turn off <b>Dr. Smiley follows me</b>.'],
-    note: 'Lively: expressions and reactions to the team. Focused: he blinks and reacts to what you’re doing. Still: he doesn’t move. If your phone is set to reduce motion, he’s always still.' }),
+    note: 'Lively: his full expressions (a delighted hello, a nod, a laugh, a wink) and reactions to the team. Focused: the same gestures, smaller and calmer, only for what you’re doing. Still: he doesn’t move. If your phone is set to reduce motion, he’s always still.' }),
   briefing: () => ({ steps: [`Tap ${GUIDE_UI.ask} and say <i>I’m covering oncology. Prep me.</i>`, `Tap ${GUIDE_UI.pill('Open the Oncology briefing')}.`,
     `Go through the cards: tap one to see the Spanish, then ${GUIDE_UI.pill('Got it')} or ${GUIDE_UI.menu('Again')}.`],
     note: 'Also in your briefing: the False Friends to watch, and your doctor if you named one. Leave and come back and it picks up where you were.' }),
@@ -13772,8 +13791,6 @@ const ICON_WAVE = drSmileyArt('home-wave-art home-face');
    circle in the dock): a lean of a degree or two, never a bounce or a scale. */
 const DR_FACE_SEQ = {
   blink: { f: [['blink1', 45], ['blink2', 40], ['shut', 75], ['blink2', 45], ['blink1', 60]] },
-  wink:  { f: [['rest', 200], ['wink1', 50], ['wink2', 45], ['wink', 430], ['wink2', 55], ['wink1', 75], ['rest', 420]],
-           head: [[0, 0, 0], [200, -1.6, 0], [300, -2.6, -.4], [730, -2.4, -.4], [860, .5, 0], [1275, 0, 0]] },
   smile: { f: [['rest', 110], ['smile1', 70], ['smile2', 70], ['smile', 1150], ['smile2', 90], ['smile1', 120], ['rest', 380]],
            head: [[0, 0, 0], [110, 0, .5], [250, .8, -.8], [1400, .6, -.6], [1610, 0, 0], [1990, 0, 0]] },
   laugh: { f: [['rest', 90], ['smile1', 60], ['smile2', 60], ['smile', 120], ['laugh1', 55], ['laugh2', 55], ['laugh', 130], ['laughB', 110],
@@ -13794,9 +13811,6 @@ const DR_FACE_SEQ = {
   // "Yes": two small dips of the head with a smile.
   nod:   { f: [['smile1', 80], ['smile2', 80], ['smile', 900], ['smile2', 90], ['smile1', 100], ['rest', 300]],
            head: [[0, 0, 0], [160, 0, 1.1], [330, 0, -.2], [520, 0, 1.1], [700, 0, -.1], [900, 0, 0], [1550, 0, 0]] },
-  // "Hmm": eyes off to one side with his head on a slant, a blink, a look the other way.
-  think: { f: [['rest', 90], ['blink1', 45], ['rest', 40], ['lookUL', 1500], ['blink1', 45], ['blink2', 40], ['shut', 60], ['blink2', 45], ['blink1', 50], ['lookU', 700], ['rest', 380]],
-           head: [[0, 0, 0], [110, .5, .2], [330, -2.6, -.3], [1730, -2.6, -.3], [1970, 1.2, 0], [2670, 1.2, 0], [3050, 0, 0]], fx: 'question', fxAt: 380 },
   // A quick, short laugh with little shakes.
   giggle: { f: [['rest', 60], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['smile', 340], ['smile2', 90], ['smile1', 100], ['rest', 340]],
             head: [[0, 0, 0], [90, 0, .45], [180, -1.1, .3], [290, 1.1, .3], [400, -1.1, .3], [510, 1.1, .3], [620, -.8, .2], [730, .6, .1], [1080, 0, 0], [1600, 0, 0]] },
@@ -13846,14 +13860,178 @@ const DR_FACE_SEQ = {
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
                head: [[0, 0, 0], [140, 0, -.3], [360, 0, .9], [560, 0, 0], [760, 0, .8], [960, 0, 0], [1450, 0, 0]] },
-  // A great study result: a dip to wind up, then a laugh with sparkles and an easy settle.
-  celebrate: { f: [['rest', 70], ['blink1', 40], ['rest', 50], ['smile1', 60], ['smile2', 60], ['smile', 150], ['laugh1', 55], ['laugh2', 55], ['laugh', 240], ['laughB', 120],
-                   ['laugh', 200], ['laugh2', 70], ['laugh1', 80], ['smile', 380], ['smile2', 90], ['smile1', 110], ['rest', 380]],
-               head: [[0, 0, 0], [110, 0, .8], [320, -.6, -1.1], [540, 1.2, -1], [720, -1, -1], [900, .8, -.9], [1150, 0, -.6], [1600, 0, 0], [2000, 0, 0]], fx: 'sparkle', fxAt: 330 },
   // You stopped a question: okay -- a blink and one nod.
   okay: { still: 'rest', f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 320]],
           head: [[0, 0, 0], [100, 0, -.3], [300, 0, .8], [560, 0, 0], [720, 0, 0]] },
 };
+/* ---------- Dr. Smiley: performances ----------
+   Five gestures, each built fresh every time it plays (drPerfBuild), so no
+   two are quite the same: the side he leans to, how far, how long he holds
+   it and how many beats a laugh has all vary a little. Each has a small
+   anticipation (the opposite way first), one clear main gesture, and an
+   unhurried recovery that overshoots a touch before settling. Eyes, face
+   frame and lean are timed together so they read as one action.
+     greet   delighted hello: a dip and a blink as he sees you, up into an
+             open smile with a bright squint, a smaller counter-sway, settle
+     ack     attentive "got it": a lift, one decisive nod with a closed
+             smile (now and then a second, smaller "mm-hm")
+     think   thoughtful: a slow blink leaning back, eyes up to one side with
+             the head tilted the same way, eyes level, then a small smile
+             and nod as the thought lands
+     cheer   joyful: a crouch, a spring up into laughter that sways unevenly
+             and dies away, a landing dip, a lingering smile
+     wink    playful: a look away, back, a quick wink with the head tipped
+             toward the winking eye, the grin staying a moment after
+   Lively: as above. Focused: the same gestures, smaller and calmer, no
+   laughter and no effects. Still: the engine shows one still frame (still)
+   as it always has. Only the artwork's own frames are used, and the only
+   movement is the lean and lift of what holds him (never a sideways slide
+   or a stretch). The art has one wink (his left eye), so a wink always
+   tips that way. Effects are short and land on the moment: a quick burst
+   at the top of the cheer's spring, a glint as the wink closes, a "?" as
+   the thought starts. */
+let drPerfRand = Math.random;
+// For the preview and tests: the same variant every time from a seed (null: random again).
+function drPerfSeed(n){
+  if(n == null){ drPerfRand = Math.random; return; }
+  let a = n >>> 0;
+  drPerfRand = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+// A sequence from beats: each beat is [frames, ms it lasts, head key at its
+// end ([tilt, lift]) or null]. The head keys land where the beats do, so a
+// change of frame and the lean it goes with arrive together.
+function drPerfMake(beats, extra){
+  const f = [], head = [[0, 0, 0]];
+  let t = 0;
+  beats.forEach(([frames, ms, key]) => {
+    const per = frames.length ? frames : [];
+    if(per.length){
+      const each = per.map(x => Array.isArray(x) ? x : [x, 0]);
+      const fixed = each.reduce((s, x) => s + x[1], 0), free = each.filter(x => !x[1]).length;
+      each.forEach(([fr, d]) => f.push([fr, Math.round(d || Math.max(30, (ms - fixed) / Math.max(1, free)))]));
+    }
+    t += ms;
+    if(key) head.push([Math.round(t), +key[0].toFixed(2), +key[1].toFixed(2)]);
+  });
+  const last = head[head.length - 1];
+  if(last[1] || last[2]) head.push([Math.round(t) + 260, 0, 0]);
+  return Object.assign({ f, head }, extra || {});
+}
+const DR_PERF = {
+  greet(){
+    const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
+    if(drMode() === 'focused') return drPerfMake([
+      [['blink1', 'blink2', 'blink1'], j(150), [-side * .2, .35]],
+      [['smile1'], j(170), [side * .5, -.5]],
+      [['smile2'], j(950), [side * .6, -.55]],
+      [['smile1'], j(240), [0, .1]],
+      [['rest'], j(360), [0, 0]],
+    ], { still: 'smile', stillMs: 1000 });
+    const tilt = side * (1.9 + R() * .9), up = -(1.3 + R() * .5);
+    return drPerfMake([
+      // Anticipation: a dip and a blink -- he's just seen you.
+      [['blink1', 'blink2', 'blink1'], j(170, .2), [-side * .5, .75]],
+      // Up into the smile, leaning to one side.
+      [['smile1', 'smile2'], j(150), [tilt * .7, up * .7]],
+      [['smile'], j(160), [tilt, up]],
+      // The delight: a bright squint for a moment, then the smile again,
+      // with a smaller sway back (follow-through, not a repeat).
+      [['laugh1'], j(190, .25), [-tilt * .35, up * .8]],
+      [['smile'], j(560, .2), [tilt * .3, up * .6]],
+      // Recovery: the smile lingers as he comes down, a small settle past upright.
+      [['smile2'], j(110), [0, .3]],
+      [['smile1'], j(240), [-side * .25, .1]],
+      [['rest'], j(380), [0, 0]],
+    ], { still: 'smile', stillMs: 1000 });
+  },
+  ack(){
+    const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
+    const k = drMode() === 'focused' ? .6 : 1, again = drMode() !== 'focused' && R() < .35;
+    return drPerfMake([
+      // Anticipation: a small lift, eyes on you.
+      [['rest'], j(110), [side * .2 * k, -.45 * k]],
+      // The nod: down with a smile, eyes lowering at the bottom. Lively
+      // opens it a little (smile2) so it reads at dock size; Focused keeps
+      // it closed.
+      [['smile1'], j(170), [side * .7 * k, 1.3 * k]],
+      [['blink1', [drMode() === 'focused' ? 'smile1' : 'smile2', 0]], j(240), [side * .4 * k, .2 * k]],
+      ...(again ? [[['smile1'], j(150), [side * .3, .55]], [['smile1'], j(170), [0, -.15]]] : []),
+      // Recovery: back up a hair past upright, the smile fading.
+      [['smile1'], j(260), [0, -.2 * k]],
+      [['rest'], j(320), [0, 0]],
+    ], { still: 'smile1', stillMs: 700 });
+  },
+  think(){
+    const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
+    const calm = drMode() === 'focused', k = calm ? .6 : 1, L = side < 0 ? 'L' : 'R';
+    return drPerfMake([
+      // Anticipation: leaning back a little, the other way, with a slow blink.
+      [[['blink1', 60], ['blink2', 60], ['shut', 90], ['blink2', 55], ['blink1', 55]], 320, [-side * .5 * k, -.35 * k]],
+      // The thought: eyes up to one side, head tilted the same way.
+      [['look' + 'U' + L], j(calm ? 700 : 950, .2), [side * 2.3 * k, -.3 * k]],
+      [['look' + 'U' + L], j(320), [side * 2.6 * k, -.2 * k]],
+      // Eyes come level, still to that side: getting there.
+      [['half' + L], j(360), [side * 1.2 * k, 0]],
+      // It lands: eyes back to you, a small smile and a small nod.
+      [['rest'], 70, null],
+      [['smile1'], j(260), [-side * .3 * k, .6 * k]],
+      [['smile1'], j(260), [0, 0]],
+      [['rest'], j(320), [0, 0]],
+    ], { fx: calm ? null : 'question', fxAt: 420, still: 'look' + 'U' + L, stillMs: 1200 });
+  },
+  cheer(){
+    const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
+    if(drMode() === 'focused') return drPerfMake([
+      [['smile1'], j(160), [-side * .2, .4]],
+      [['smile2'], j(150), [side * .5, -.6]],
+      [['smile'], j(900), [side * .6, -.8]],
+      [['smile2'], j(120), [0, -.2]],
+      [['smile1'], j(200), [0, 0]],
+      [['rest'], j(340), [0, 0]],
+    ], { still: 'smile', stillMs: 1000 });
+    const up = -(1.8 + R() * .5), a = side * (1.4 + R() * .6);
+    // Laughter: two or three uneven "ha"s, each sway smaller than the last.
+    const has = 2 + (R() < .5 ? 1 : 0), ha = [];
+    for(let i = 0; i < has; i++){
+      const d = 1 - i / (has + .5), s = i % 2 ? 1 : -1;
+      ha.push([['laughB'], j(105, .3), [-a * s * .75 * d, up * (.85 - i * .08)]]);
+      ha.push([['laugh'], j(130 + i * 35, .3), [a * s * .45 * d, up * (.8 - i * .1)]]);
+    }
+    return drPerfMake([
+      // Anticipation: a crouch, the smile starting, leaning away.
+      [['smile1', 'smile2'], j(190), [-side * .5, 1.1]],
+      // The spring: up into the laugh.
+      [['smile', 'laugh1'], j(150), [a * .8, up]],
+      [['laugh'], j(170), [a, up]],
+      ...ha,
+      // Recovery: a landing dip as it subsides, a smile that lingers.
+      [['laugh2', 'laugh1'], j(160), [0, .45]],
+      [['smile'], j(360, .2), [side * .2, -.15]],
+      [['smile2', 'smile1'], j(230), [0, 0]],
+      [['rest'], j(360), [0, 0]],
+    ], { fx: 'burst', fxAt: 360, still: 'smile', stillMs: 1000 });
+  },
+  wink(){
+    const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14)));
+    const calm = drMode() === 'focused', k = calm ? .5 : 1, look = !calm && R() < .6;
+    return drPerfMake([
+      // Anticipation: a sideways look away (or a small smile), leaning away.
+      look ? [['halfL'], j(260, .25), [-.8, 0]] : [['smile1'], j(200), [-.6 * k, .2 * k]],
+      [['rest'], 60, null],
+      // The wink: quick to close, the head tipping toward the winking eye
+      // (his left, your right), a small lift.
+      [[['wink1', 35], ['wink2', 35], ['wink', 0]], j(calm ? 320 : 430, .2), [(2.2 + R() * .8) * k, -.6 * k]],
+      // Recovery: opens slower than it closed, the grin stays a moment,
+      // a small swing back past upright.
+      [[['wink2', 60], ['wink1', 70], ['smile1', 0]], j(380), [-.45 * k, 0]],
+      [['rest'], j(340), [0, 0]],
+    ], { fx: calm ? null : 'glint', fxAt: (look ? 330 : 270), still: 'wink', stillMs: 800 });
+  },
+};
+DR_PERF.celebrate = DR_PERF.cheer;   // the older name, used for study results and the team's rank
+function drPerfBuild(name){ return DR_PERF[name] ? DR_PERF[name]() : null; }
+// In the table like any other sequence, built each time it's asked for.
+Object.keys(DR_PERF).forEach(k => Object.defineProperty(DR_FACE_SEQ, k, { get: () => drPerfBuild(k), enumerable: true, configurable: true }));
 /* His mood carries over for a few minutes: good moments (hearts, a new
    term, a level, a pet) make him happier -- more smiles, laughs, hums, heart
    eyes -- and a wrong answer makes him thoughtful for a minute. */
@@ -13870,7 +14048,10 @@ const DR_FX_GLYPH = {
   spark: '<svg viewBox="0 0 24 24"><path d="M12 1.5c.7 4.9 2.6 8.8 10.5 10.5-7.9 1.7-9.8 5.6-10.5 10.5-.7-4.9-2.6-8.8-10.5-10.5C9.4 10.3 11.3 6.4 12 1.5Z" fill="#F5B83D"/></svg>',
   q:     '<svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#fff"/><circle cx="13" cy="13" r="11.2" fill="none" stroke="#252E6D" stroke-opacity=".18" stroke-width="1.2"/><path d="M9.6 9.8a3.6 3.6 0 1 1 5.2 3.2c-1.1.6-1.8 1.3-1.8 2.6" fill="none" stroke="#252E6D" stroke-width="2.4" stroke-linecap="round"/><circle cx="13" cy="19.4" r="1.5" fill="#252E6D"/></svg>',
 };
-const DR_FX = { hearts: ['heart', 'heart', 'heart'], heart: ['heart'], notes: ['note', 'note', 'note'], sparkle: ['spark', 'spark', 'spark'], question: ['q'] };
+const DR_FX = { hearts: ['heart', 'heart', 'heart'], heart: ['heart'], notes: ['note', 'note', 'note'], sparkle: ['spark', 'spark', 'spark'], question: ['q'],
+  burst: ['spark', 'spark', 'spark'], glint: ['spark'] };
+// How long each stays (the CSS animation's length, and a little more).
+const DR_FX_LIFE = { burst: 1100, glint: 750, question: 1700 };
 function drFaceFx(head, kind){
   const host = head && head.parentElement, glyphs = DR_FX[kind];
   if(!host || !glyphs || drStill()) return null;
@@ -13879,7 +14060,7 @@ function drFaceFx(head, kind){
   fx.setAttribute('aria-hidden', 'true');
   fx.innerHTML = glyphs.map((g, i) => `<span class="ds-fx-g" style="--i:${i}">${DR_FX_GLYPH[g]}</span>`).join('');
   host.appendChild(fx);
-  setTimeout(() => fx.remove(), 2800);
+  setTimeout(() => fx.remove(), DR_FX_LIFE[kind] || 2800);
   return fx;
 }
 /* ---------- Dr. Smiley: animation engine ----------
@@ -13966,7 +14147,7 @@ function drSeq(name){
     f.push([fr, Math.max(DR_STEP, ms - Math.min(take, ms / 2))]);
   });
   const total = f.reduce((t, s) => t + s[1], 0);
-  const peak = raw.still ? [raw.still, 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
+  const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
   const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
   drSeqCache.set(raw, seq);
@@ -14084,7 +14265,7 @@ class DrAnim{
     const el = drFaceFx(this.head, kind);
     if(!el) return;
     this.fx.add(el);
-    this.later(() => this.fx.delete(el), 2900);
+    this.later(() => this.fx.delete(el), (DR_FX_LIFE[kind] || 2800) + 100);
   }
   fadeEffects(){
     this.fx.forEach(el => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 220); });
@@ -14679,8 +14860,9 @@ function drStage(o){
 // Calmer versions when he should be calmer: Focused, and in an appointment.
 // null: nothing at all.
 const DR_TONE = {
-  focused:     { celebrate: 'proud', love: 'smile', giggle: 'smile', laugh: 'smile', kiss: 'smile', sing: 'smile' },
-  appointment: { celebrate: 'nod', proud: 'nod', love: 'nod', giggle: 'nod', laugh: 'nod', kiss: null, sing: null, notice: null, encourage: 'nod' },
+  // The five performances (DR_PERF) build their own calmer Focused versions.
+  focused:     { love: 'smile', giggle: 'smile', laugh: 'smile', kiss: 'smile', sing: 'smile' },
+  appointment: { celebrate: 'ack', cheer: 'ack', greet: 'ack', proud: 'ack', love: 'ack', giggle: 'ack', laugh: 'ack', kiss: null, wink: null, sing: null, notice: null, encourage: 'ack' },
 };
 function drTone(seq){
   let s = seq;
@@ -15864,12 +16046,12 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: expressions, eyes that follow your finger and reactions to the team.</li>
-      <li><b>Focused</b>: he blinks and reacts to what you're doing, nothing more.</li>
-      <li><b>Still</b>: he doesn't move.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. No laughing and no little sparkles.</li>
+      <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
     <p>If your phone is set to reduce motion, he's always still.</p>` },
@@ -19984,7 +20166,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1008.0056';
+const BUILD_ID = 'b1008.0151';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -23550,7 +23732,7 @@ function celebrateAccess(me){
     + (name ? '' : `<div>${ACCESS_CHECK_SVG}<span>Next: set your name for chat and edits.</span></div>`);
   lock.classList.add('is-happy');
   const lockFace = document.querySelector('#accessFace svg');
-  if(lockFace) drFacePlay(lockFace, 'smile');
+  if(lockFace) drFacePlay(lockFace, 'greet');
   document.activeElement && document.activeElement.blur && document.activeElement.blur();
   setTimeout(()=>{
     // Locked: the data listeners started as a stranger and were refused, so
@@ -24271,7 +24453,7 @@ async function submitAsk(preset, force, opts){
     const t = askMemoryTurn(q, mi);
     ASK.turns.push(t);
     renderAskMessages(true);
-    if(t.memSaved) drPerform('nod', { priority: DR_P.REACT });
+    if(t.memSaved) drPerform('ack', { priority: DR_P.REACT });
     return;
   }
   if(!force && askLooksLikePatientInfo(q)){
@@ -25314,7 +25496,7 @@ async function askRunAction(turnId, i){
   if(res.ok && res.msg) t.did[a.type + '|' + a.target] = { ok: true, msg: res.msg };
   else if(!res.ok) t.did[a.type + '|' + a.target] = { ok: false, msg: res.why };
   if(res.ok){
-    if(res.msg){ showToast(res.msg); drPerform('nod', { priority: DR_P.REACT }); }
+    if(res.msg){ showToast(res.msg); drPerform('ack', { priority: DR_P.REACT }); }
     // The briefing you went to is what "go back to my prep" means later.
     const r = /^(open_prep|continue_prep)$/.test(a.type) && askResource(a.target);
     if(r) ASK.convo.task = { kind: 'prep', id: r.id, name: r.name };
@@ -25674,7 +25856,7 @@ function askSendFix(id){
       renderAskMessages(false);
       showToast(`Sent to ${askOwnerFirst()} for review.`);
       drTaskEnd('ask:' + id);
-      drPerform('nod', { priority: DR_P.TASK });   // noted
+      drPerform('ack', { priority: DR_P.TASK });   // noted
     }catch(err){
       drPerform('composed', { priority: DR_P.TASK });
       showToast(err && err.code === 'permission-denied'
@@ -25904,10 +26086,10 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden) apptK
 const DR_REACTS = {
   message: { seq: 'notice', minor: true },          // a teammate's chat message
   hop:     { seq: 'proud', minor: true },           // a term added
-  hello:   { seq: 'nod', minor: true, noHome: true },   // back after a while (Home has its hello wave)
+  hello:   { seq: 'greet', minor: true, noHome: true },   // back after a while (Home has its own hello)
   wave:    { seq: 'smile', minor: true },
   hearts:  { seq: 'love', mood: 'happy' },
-  cheer:   { seq: 'celebrate', task: true, mood: 'happy' },   // the team reached a new rank
+  cheer:   { seq: 'cheer', task: true, mood: 'happy' },   // the team reached a new rank
   think:   { seq: 'encourage', mood: 'thoughtful' },   // a missed answer: encouragement, and a thoughtful minute
 };
 function smileyReact(kind){
@@ -25926,7 +26108,8 @@ function drCelebrate(seq){
   const s = drTone(seq);
   if(!s) return false;
   if(drMind.task && drMind.task.kind === 'processing') return drPerform(s, { priority: DR_P.TASK });
-  return !!drTask('celebrating', { perform: s, ms: drSeqMs(s) + 400 });
+  // A performance is built afresh each time (DR_PERF), so allow for a longer variant.
+  return !!drTask('celebrating', { perform: s, ms: Math.round(drSeqMs(s) * 1.15) + 400 });
 }
 /* Study progress, from the verified result: a short joyful performance that
    fits it. score: the share right (0-1). kind: 'quiz', 'review' (a Term
@@ -25936,7 +26119,7 @@ function smileyStudy(kind, score, n){
   let seq;
   if(kind === 'streak') seq = n >= 5 ? 'proud' : 'giggle';
   else if(kind === 'warmup') seq = score >= 1 ? 'love' : 'encourage';
-  else seq = score >= .9 ? 'celebrate' : score >= .7 ? 'proud' : score >= .5 ? 'smile' : 'encourage';
+  else seq = score >= .9 ? 'cheer' : score >= .7 ? 'proud' : score >= .5 ? 'smile' : 'encourage';
   if(score >= .7 || kind === 'streak') drSetMood('happy', 180000);
   else if(score < .5) drSetMood('thoughtful', 60000);
   if(document.hidden) return false;
@@ -25944,7 +26127,7 @@ function smileyStudy(kind, score, n){
   return drCelebrate(seq);
 }
 
-// Back in the app after a minute or more away: he greets you with a nod.
+// Back in the app after a minute or more away: he greets you (greet).
 let smileyAwayAt = 0;
 document.addEventListener('visibilitychange', () => {
   if(document.hidden){ smileyAwayAt = Date.now(); return; }
@@ -26787,7 +26970,7 @@ const smileyRider = (() => {
   function idleStopDock(){ if(idle){ idle.stop(); idle = null; } }
   // One expression now, by its old emote name. False if he can't show it.
   const EMOTE_FACE = { glance: 'glance', wink: 'wink', sway: 'sing', hop: 'proud', love: 'love', smile: 'smile', giggle: 'giggle', laugh: 'laugh', nod: 'nod', blink: 'blink', doze: 'doze',
-    think: 'think', proud: 'proud', sing: 'sing', kiss: 'kiss', around: 'around', notice: 'notice', pet: 'pet' };
+    think: 'think', proud: 'proud', sing: 'sing', kiss: 'kiss', around: 'around', notice: 'notice', pet: 'pet', greet: 'greet', ack: 'ack', cheer: 'cheer' };
   function emote(kind){
     const f = EMOTE_FACE[kind];
     if(!btn || !f) return false;

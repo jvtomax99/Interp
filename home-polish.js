@@ -139,21 +139,13 @@
       remove(){clearTimeout(announced);clearTimeout(expire);bubble.remove();if(status)status.textContent='';}};
   }
 
-  /* The greeting face (option D): it rests as drawn in index.html, then
-     squishes, bounces and breaks into a big open laugh, and settles back.
-     FACE_MS is the face's part of the sequence, starting when it appears. */
-  const FACE_MS=3300, FACE_AT=2380, CLOUD_AT=2880, SEQUENCE_END=9380;
-  const FACE_POSES=[[0,{}],[1000,{}],[1180,{blush:1.05}],[1480,{open:1,blush:1.25,gl:2}],
-    [1780,{open:.9,blush:1.25}],[2080,{open:1,blush:1.25}],[2600,{open:1,blush:1.2}],[3200,{}],[FACE_MS,{}]];
+  /* The greeting face: he arrives (ENTER_MS, faceBody), and once he has
+     landed his delighted hello (greet in index.html) plays on his animation
+     engine at GREET_AT, like every other gesture of his: a dip and a blink,
+     up into an open smile, a bright squint, a settle. FACE_MS is the face's
+     part of the sequence, starting when it appears; his idle starts after. */
+  const FACE_MS=3300, FACE_AT=2380, CLOUD_AT=2880, SEQUENCE_END=9380, ENTER_MS=460, GREET_AT=FACE_AT+ENTER_MS+80;
   const FACE_REST={open:0,blush:1,gl:0,sqL:0,sqR:0,heart:0,glint:-1};
-  function facePose(t){
-    let i=0;while(i<FACE_POSES.length-2&&t>FACE_POSES[i+1][0])i++;
-    const a=FACE_POSES[i],b=FACE_POSES[i+1];
-    let u=Math.max(0,Math.min(1,(t-a[0])/(b[0]-a[0])));u=u*u*(3-2*u);
-    const out={};
-    for(const k in FACE_REST){const va=k in a[1]?a[1][k]:FACE_REST[k],vb=k in b[1]?b[1][k]:FACE_REST[k];out[k]=va+(vb-va)*u;}
-    return out;
-  }
   // Dr. Smiley's current tilt in degrees, kept by the greeting loop that sets
   // it. The Ask badge's lanyard follows it; reading it back from the browser
   // (getComputedStyle) right after the loop had written it forced a full style
@@ -228,7 +220,7 @@
   // index.html's reactions and task states (drPerform: a study result, the
   // warm-up, a new team rank...) ask for one of his sequences by name, with
   // a priority; a few old names are still mapped.
-  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',party:'celebrate'};
+  const ACT_FACE={bouncy:'proud',hearts:'love',hum:'sing',gleam:'think',party:'cheer'};
   const seqOf=name=>ACT_FACE[name]||(typeof DR_FACE_SEQ!=='undefined'&&DR_FACE_SEQ[name]?name:'smile');
   const P=(k,d)=>typeof DR_P!=='undefined'?DR_P[k]:d;
   // Still: the phone's reduced motion, or "Still" in his settings (index.html).
@@ -253,7 +245,7 @@
       const was=onScreen;onScreen=entries[0].isIntersecting;
       if(!onScreen&&was){goneAt=performance.now();return;}
       const now=performance.now();
-      if(onScreen&&!was&&goneAt&&now-goneAt>4000&&now-lastNotice>15000&&idleCtl){lastNotice=now;setTimeout(()=>idleCtl&&idleCtl.act('nod'),350);}
+      if(onScreen&&!was&&goneAt&&now-goneAt>4000&&now-lastNotice>15000&&idleCtl){lastNotice=now;setTimeout(()=>idleCtl&&idleCtl.act('ack'),350);}
     });
     if(typeof window.smileySway==='function')window.smileySway(button,'50% 85%');
     io.observe(button);
@@ -267,24 +259,17 @@
       idleStop=()=>{};
     };
   }
-  // Squash, lift and tilt of the whole face, sampled for the Web Animation.
+  // His arrival as the logo collapses into him: he grows in whole (the same
+  // scale both ways -- never a squash or stretch of the portrait), turning
+  // upright as he lands. What he does once he's there is his greeting
+  // performance (greet, index.html), played by his animation engine.
   function faceBody(t){
-    const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
-    let sx=1,sy=1,y=0,angle=0,opacity=1;
-    if(t<440){
-      const p=t/440,spring=1-Math.exp(-6*p)*Math.cos(8*p),settle=Math.sin(Math.PI*p);
-      sx=.08+.92*spring+.09*settle;sy=.08+.92*spring-.07*settle;
-      angle=-14*(1-p)*(1-p);y=8*(1-p)-6*settle;opacity=Math.min(1,p*5);
-    }else if(t>=1000&&t<1180){
-      const a=smooth((t-1000)/180);sx=1+.08*a;sy=1-.08*a;y=2*a;
-    }else if(t>=1180&&t<1480){
-      const g=(t-1180)/300,e=smooth(g),arc=Math.sin(Math.PI*g);
-      sx=1+.08*(1-e)-.06*arc;sy=1-.08*(1-e)+.07*arc;y=2*(1-e)-9*arc;angle=4*arc;
-    }else if(t>=1480&&t<2600){
-      const k=(t-1480)/1120,bounce=Math.abs(Math.sin(Math.PI*3*k))*(1-.6*k);
-      y=-4*bounce;sx=1+.025*(1-bounce)*(1-k);sy=1-.025*(1-bounce)*(1-k);angle=3*Math.sin(TAU*1.5*k)*(1-k);
+    let s=1,y=0,angle=0,opacity=1;
+    if(t<ENTER_MS){
+      const p=t/ENTER_MS,spring=1-Math.exp(-6*p)*Math.cos(8*p);
+      s=.08+.92*Math.min(1.03,spring);angle=-10*(1-p)*(1-p);y=8*(1-p);opacity=Math.min(1,p*5);
     }
-    return {opacity,angle,transform:`translate3d(0,${y.toFixed(2)}px,0) rotate(${angle.toFixed(2)}deg) scale(${sx.toFixed(4)},${sy.toFixed(4)})`};
+    return {opacity,angle,transform:`translate3d(0,${y.toFixed(2)}px,0) rotate(${angle.toFixed(2)}deg) scale(${s.toFixed(4)})`};
   }
 
   async function playGreeting(button, resume = null){
@@ -350,7 +335,8 @@
       animations.forEach(a=>{a.onfinish=null;a.cancel();});
       animations=[];
       if(!entered)landed();
-      if(!idleRunning)setFace(faceSvg,FACE_REST);
+      // At rest unless his engine is still playing the hello (it walks him back itself).
+      if(!idleRunning&&!(window.drFaceBusy&&window.drFaceBusy(faceSvg)))setFace(faceSvg,FACE_REST);
       canvas.remove();
       thought.remove();
       if(observer)observer.disconnect();
@@ -397,7 +383,7 @@
     landed=()=>{entered=true;art.style.transform='';art.style.opacity='';smileyTilt=0;button.classList.remove('home-wave-entering');};
     const placeFace=t=>{
       if(entered)return;
-      if(t>=FACE_AT+FACE_MS){landed();return;}
+      if(t>=FACE_AT+ENTER_MS){landed();return;}
       const f=faceBody(Math.max(0,t-FACE_AT));
       art.style.transform=f.transform;art.style.opacity=String(f.opacity);smileyTilt=f.angle;
     };
@@ -519,8 +505,13 @@
       animations.forEach(a=>{a.currentTime=elapsed;});
       placeFace(elapsed);
       if(elapsed>=BADGE_AT&&button.classList.contains('home-ask-wait')){button.classList.remove('home-ask-wait');askBadge.swing(-38);}
-      if(elapsed<FACE_AT+FACE_MS)setFace(faceSvg,elapsed>FACE_AT?facePose(elapsed-FACE_AT):FACE_REST);
-      else if(!idleRunning&&!sequence.idled){sequence.idled=true;setFace(faceSvg,FACE_REST);startIdle(button);}
+      // His hello, once per greeting (a hello resumed after a repaint too
+      // late for the whole of it just carries on to his idle).
+      if(elapsed>=GREET_AT&&!sequence.greeted){
+        sequence.greeted=true;
+        if(elapsed<FACE_AT+FACE_MS-1600&&typeof window.drFacePlay==='function')window.drFacePlay(faceSvg,'greet',art,null,P('REACT',3));
+      }
+      if(elapsed>=FACE_AT+FACE_MS&&!idleRunning&&!sequence.idled){sequence.idled=true;startIdle(button);}
       // Asked once per hello and kept on the sequence, so a hello resumed
       // after a repaint shows the same news rather than the next one.
       if(elapsed>=CLOUD_AT-120&&!newsShown){

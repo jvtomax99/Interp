@@ -70,6 +70,12 @@ CSS animation runs on the same element: on an iPhone that froze him tiny at
 the start of the Home greeting. Write the value each frame instead
 (`placeFace` in `home-polish.js`).
 
+**Dr. Smiley's gestures use only his drawn frames, a tilt and a lift.** Never
+slide his picture sideways to fake a head turn, and never squash or stretch it
+to fake a bounce. A gesture the art can't draw needs new frames, not a trick.
+His five performances (`DR_PERF` in `index.html`) are built fresh each play,
+with their own calmer Focused versions; new gestures go there.
+
 **Every change someone can see updates the User Guide in the same commit.**
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
 renamed button, a new message. Dr. Smiley answers "how do I…" from the

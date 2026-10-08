@@ -319,8 +319,8 @@ lost concurrent edits. Do not reintroduce that.
   character (`drAnim(svg, {head})`) owns his face frame, gaze, lean and
   effects, with priorities (`DR_P`: IDLE < GAZE < REACT < DIRECT). Ask it to
   `play()` / `talk()`; don't set frames or animate his pin yourself (the Home
-  greeting's frame-by-frame `drFaceSet` is the one exception, while his idle
-  is stopped). Interruptions walk through in-between frames (`DR_FACE_BACK`);
+  greeting only places him while he grows in, then plays `greet` on the
+  engine). Interruptions walk through in-between frames (`DR_FACE_BACK`);
   a sequence whose consecutive frames aren't neighbours gets them filled in.
   Reduced motion, a hidden page and a detached svg are handled there.
 - **Don't move him with a paused animation you seek by hand.** The Home
@@ -331,6 +331,17 @@ lost concurrent edits. Do not reintroduce that.
   Chromium). The entrance is now written straight onto him each frame
   (`placeFace` in `home-polish.js`) and breathing waits until he has landed
   (`.home-wave-entering`).
+- **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
+  think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
+  getters, so every play varies a little (side, amplitude, beats) with an
+  anticipation, one main gesture and a recovery. Each builds its own Focused
+  version (smaller, no laughter, no effects); Still uses its `still` frame.
+  `drPerfSeed(n)` makes the variant repeatable for tests. Movement is only a
+  tilt and a lift of what holds him: never a sideways slide, never a squash or
+  stretch (the Home greeting's old squish was removed; he now grows in whole
+  and greets with `greet` on the engine). The one wink is his left eye, so a
+  wink always tips toward it. Effects are short and land on the moment
+  (`DR_FX_LIFE`: burst, glint, question).
 - **His personality comes from task states, not timers.** `drTask(kind)`
   (available, attentive, processing, answering, celebrating, uncertain;
   offline, appointment and resting follow the phone) is one state for the
