@@ -193,6 +193,27 @@ saved preferences stay). Nothing from a stopped or overtaken request is
 applied (`stale()` in `submitAsk`, `ASK.gen`). His voice is enforced
 server-side too (`tidyVoice`: no greeting, praise or introduction).
 
+**Term Review sessions (Dr. Smiley's teaching).** One record, the existing
+`term-reviews/{who__termId}`, now with `lastResult`, `misses`, `lastAt`
+(written by `saveTermReview`; older records read box 0 as "missed last
+time"). A session (`reviewBuild`): you pick the specialty and 5/10/15;
+missed first (most-missed first), then due, about one in five for variety
+(new to you, else a quick check), one card per English term, spread out,
+each with its reason (`RS.why`). Answers (`reviewCheck`): right when the
+glossary accepts it (`reviewAccepted`: the card's Spanish, "A / B" and
+"A (word)" parts, other entries for the same English; accents, capitals and
+a leading article ignored, with a "Written:" note); wrong only for blank /
+"no sé" / this term's false friend; everything else is self-review (compare,
+you decide). After a miss: `reviewDistinction` and "Try it again later"
+(back 4 cards on). `saveTermReview(..., { confirm: true })` returns
+`{ ok, how }`; the record, the session and the summary change only after
+ok, and a failure shows "Not saved" with Try saving again / Skip. Your place
+is in `ih_reviewSession` (ids, index past the last saved answer, reasons,
+results; never what was typed): Pause, a reload or Dr. Smiley's Resume
+(`askUnfinished`, `continue_review`) pick it up. Show answer → Got it still
+moves straight on. Reactions: a nod, a smile when a previously missed term
+is right, encourage after a miss, `smileyStudy` at the end.
+
 **Integration rules from the end-to-end journey audit** (each has a check in
 the journey test):
 - A handoff answer (it hands over a Hub tool: a briefing, Term Review, a next

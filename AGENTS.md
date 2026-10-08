@@ -143,6 +143,14 @@ no error on screen. So when you add something:
   option; one that refers to nothing says so. Never resolve a reference to an
   entry the phone didn't send (`api/ask.js` drops such ids), and nothing from
   a stopped request may change the screen or the record.
+- **Term Review is the one practice record** (`term-reviews/{who__termId}`:
+  box, nextReviewAt, reviewCount, lastResult, misses, lastAt). Don't start a
+  second one. Answers are judged only against the team's glossary
+  (`reviewAccepted`); one that differs but might be valid goes to the
+  person to compare (self-review), never to a guessed "wrong". A result
+  counts only once `saveTermReview` says it was stored, and a failed save
+  shows on the card. No claims of mastery, and team points are never
+  someone's own progress.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.

@@ -2983,6 +2983,66 @@
   .review-card-def{ font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0; }
   .review-card-prompt{ font-size:13px; color:var(--ink-faint); margin:20px 0 0 0; }
 
+  /* Dr. Smiley's practice sessions (Term Review): choose, answer, see why. */
+  .rv-card{ text-align:left; display:flex; flex-direction:column; gap:9px; padding:20px 17px; }
+  .rv-card .review-card-en{ margin:4px 0 0; }
+  .rv-card .review-card-prompt{ margin:6px 0 0; display:block; font-size:15px; color:var(--ink-soft); }
+  .rv-card .review-card-es{ margin:0; }
+  .rv-top{ display:flex; align-items:center; justify-content:space-between; gap:9px; flex-wrap:wrap; }
+  .rv-why{ font-size:12px; font-weight:650; letter-spacing:.02em; padding:4px 9px; border-radius:999px; background:var(--accent-soft); color:var(--navy); }
+  .rv-why.is-missed, .rv-why.is-retry{ background:var(--danger-soft); color:var(--danger); }
+  .rv-why.is-new{ background:#E7F5EE; color:#1E7F5C; }
+  .rv-input{ width:100%; min-height:48px; padding:0 13px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi);
+    font:500 17px var(--sans); color:var(--ink); }
+  .rv-input:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 3px var(--accent-soft); }
+  .rv-acts{ justify-content:flex-end; flex-wrap:wrap; gap:9px; margin:4px 0 0; }
+  .rv-acts .btn{ min-height:44px; }
+  .rv-miss-btn{ background:var(--danger-soft) !important; color:var(--danger) !important; }
+  .rv-foot{ justify-content:flex-start; margin-top:13px; gap:9px; }
+  .rv-result{ display:flex; flex-direction:column; gap:6px; padding:13px; border-radius:var(--r-md); background:var(--bg-hi); border:1px solid var(--line-soft); }
+  .rv-result.is-ok{ background:#E7F5EE; border-color:#C9E8D7; }
+  .rv-result.is-miss{ background:#FBF1DF; border-color:#EBD3A6; }
+  .rv-verdict{ margin:0; font-size:17px; font-weight:650; letter-spacing:-.01em; color:var(--ink); }
+  .rv-result.is-ok .rv-verdict{ color:#1E7F5C; }
+  .rv-result.is-miss .rv-verdict{ color:#8A5A0E; }
+  .rv-cmp{ display:grid; grid-template-columns:auto 1fr; gap:4px 13px; margin:0; font-size:15px; }
+  .rv-cmp dt{ color:var(--ink-faint); font-size:13px; padding-top:2px; }
+  .rv-cmp dd{ margin:0; color:var(--ink); overflow-wrap:anywhere; }
+  .rv-why-line, .rv-note, .rv-next, .rv-self-q{ margin:0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+  .rv-next{ color:var(--ink); }
+  .rv-retry{ align-self:flex-start; min-height:44px; }
+  .rv-save{ margin:0; font-size:13px; color:var(--ink-faint); }
+  .rv-save.is-ok{ color:#1E7F5C; }
+  .rv-save.is-error{ padding:9px 13px; border-radius:var(--r-md); background:var(--danger-soft); color:var(--danger); font-size:14px; }
+  .rv-save.is-error p{ margin:0; }
+  .rv-speak{ opacity:1 !important; position:relative; top:-2px; }
+  .rv-setup{ max-width:480px; display:flex; flex-direction:column; gap:9px; padding:17px; border-radius:var(--r-lg); background:var(--paper);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+  .rv-lab{ font-size:12px; font-weight:650; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+  .rv-select{ min-height:48px; padding:0 13px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi); color:var(--ink); font:500 16px var(--sans); }
+  .rv-mix{ margin:0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+  .rv-start{ min-height:48px; }
+  .rv-paused{ max-width:480px; display:flex; align-items:center; flex-wrap:wrap; gap:9px; padding:13px; margin:0 0 13px; border-radius:var(--r-lg); background:var(--accent-soft); }
+  .rv-paused > div{ flex:1 1 160px; display:flex; flex-direction:column; gap:2px; }
+  .rv-paused span{ font-size:13px; color:var(--ink-soft); }
+  .rv-paused .btn{ min-height:44px; }
+  .rv-mistakes{ max-width:480px; margin:13px 0 0; padding:13px 17px; border-radius:var(--r-lg); background:var(--paper); border:1px solid var(--line-soft); }
+  .rv-mistakes summary{ min-height:44px; display:flex; align-items:center; cursor:pointer; font-weight:650; }
+  .rv-mistakes ul{ list-style:none; margin:6px 0 13px; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .rv-mistakes li{ display:flex; flex-direction:column; gap:2px; font-size:15px; }
+  .rv-mistakes li span{ font-family:var(--serif); font-style:italic; color:var(--accent); }
+  .rv-mistakes li small{ font-size:13px; color:var(--ink-soft); }
+  .rv-sum{ max-width:480px; display:flex; flex-direction:column; gap:9px; }
+  .rv-sum p{ margin:0; font-size:15px; line-height:1.5; color:var(--ink); }
+  .rv-sum .rv-sum-line{ font-size:17px; font-weight:650; }
+  .rv-sum .rv-note{ color:var(--ink-soft); font-size:14px; }
+  html[data-theme="dark"] .rv-result.is-ok{ background:#16302A; border-color:#24493E; }
+  html[data-theme="dark"] .rv-result.is-ok .rv-verdict, html[data-theme="dark"] .rv-save.is-ok{ color:#6FC79C; }
+  html[data-theme="dark"] .rv-result.is-miss{ background:#3A2D16; border-color:#5A4521; }
+  html[data-theme="dark"] .rv-result.is-miss .rv-verdict{ color:#F1C37A; }
+  html[data-theme="dark"] .rv-why.is-new{ background:#16302A; color:#6FC79C; }
+  html[data-theme="dark"] .rv-why{ color:#C9D5FF; }
+
   /* ---------- In-app guide ----------
      Search first. One box looks through every answer as you type and hands
      the same question to Dr. Smiley; topics are tiles like Home; an answer
@@ -9872,7 +9932,8 @@ async function loadTermReviews(){
     const snap = await db.collection('term-reviews').where('who','==',me).get();
     snap.forEach(doc=>{
       const d = doc.data();
-      TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount };
+      TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount,
+        lastResult: d.lastResult, misses: d.misses, lastAt: d.lastAt };
     });
     termReviewsLoaded = true;
   }catch(err){
@@ -9880,21 +9941,35 @@ async function loadTermReviews(){
   }
 }
 
-async function saveTermReview(termId, box, reviewCount){
-  if(!db) return;
+/* Saves one answer to your record. Returns { ok, how: 'sent' | 'queued' } once
+   it is stored (on the server, or safely on this phone for later), or
+   { ok: false, why } when it couldn't be. opts.result: 'ok' or 'miss' (else
+   box 0 means a miss); opts.confirm: the record here changes only once it's
+   stored (Term Review sessions); without it, at once (briefing, warm-up). */
+async function saveTermReview(termId, box, reviewCount, opts){
+  opts = opts || {};
+  if(!db) return { ok: false, why: 'the Hub isn’t connected yet. Try again in a moment.' };
   const me = whoAmI().trim().toLowerCase();
-  if(!me) return;
+  if(!me) return { ok: false, why: 'set your name first: your record is kept under it.' };
+  const prior = TERM_REVIEWS[termId] || {};
+  const miss = opts.result ? opts.result === 'miss' : box === 0;
   const nextReviewAt = Date.now() + REVIEW_INTERVALS[box] * 86400000;
-  const record = { who: me, termId, box, nextReviewAt, reviewCount };
-  TERM_REVIEWS[termId] = record;
+  const record = { who: me, termId, box, nextReviewAt, reviewCount, lastResult: miss ? 'miss' : 'ok',
+    misses: (prior.misses || (prior.reviewCount && prior.box === 0 && !prior.lastResult ? 1 : 0)) + (miss ? 1 : 0), lastAt: Date.now() };
+  if(!opts.confirm) TERM_REVIEWS[termId] = record;
   // Through the outbox, like other writes: offline (this app runs without
   // Firestore's offline cache, so a plain set() would wait for the server)
   // the answer is kept on the phone and sent when the connection is back.
   try{
-    await queuedWrite({ collection: 'term-reviews', docId: reviewDocId(me, termId), op: 'set', data: stripUndefined(record) });
+    const how = await queuedWrite({ collection: 'term-reviews', docId: reviewDocId(me, termId), op: 'set', data: stripUndefined(record) });
+    TERM_REVIEWS[termId] = record;
+    return { ok: true, how };
   }catch(err){
     console.error('saveTermReview failed:', err);
-    if(err && /^ih\/(storage|outbox)/.test(err.code || '')) showToast('This phone can’t store your answer right now. It’s kept until you close the app.');
+    const storage = err && /^ih\/(storage|outbox)/.test(err.code || '');
+    if(storage && !opts.confirm) showToast('This phone can’t store your answer right now. It’s kept until you close the app.');
+    return { ok: false, why: storage ? 'this phone isn’t letting the Hub store anything (full storage or private browsing).'
+      : err && err.code === 'permission-denied' ? 'the Hub refused it. Open the Hub with the team code and try again.' : 'it didn’t go through. Check your connection and try again.' };
   }
 }
 
@@ -12194,72 +12269,465 @@ function dueReviewCount(){
   }).length;
 }
 
-function buildReviewQueue(){
-  const now = Date.now();
-  const due = allTermsFlat().filter(t=>{
-    const r = TERM_REVIEWS[t.id];
-    return !r || r.nextReviewAt <= now;
-  });
-  // Most-overdue first, then never-reviewed — the point is surfacing what's
-  // been forgotten longest, not a random grab-bag.
-  due.sort((a,b)=>{
-    const ra = TERM_REVIEWS[a.id], rb = TERM_REVIEWS[b.id];
-    const oa = ra ? ra.nextReviewAt : -Infinity;
-    const ob = rb ? rb.nextReviewAt : -Infinity;
-    return oa - ob;
-  });
-  return shuffle(due.slice(0, 15)); // capped per session so it stays a quick habit, not a chore
+/* ---------- Term Review: Dr. Smiley's practice sessions ----------
+   Built on the record Term Review already keeps (term-reviews/{who__termId}:
+   box, nextReviewAt, reviewCount, plus lastResult, misses and lastAt, written
+   by saveTermReview). No second practice system.
+     Choosing     you pick the specialty (or all) and the length (5, 10, 15).
+                  Terms you missed come first, then those due, with some
+                  variety: a term new to you, or a quick check on one you
+                  know. Each card says why it was picked (RS.why).
+     The answer   checked against the glossary itself, the team's verified
+                  entries (reviewAccepted): the Spanish on the card, its
+                  parts ("A / B", "A (B)"), and the Spanish of other entries
+                  for the same English term. Accents and capitals don't make
+                  an answer wrong; a spelling note says how it's written.
+                  Wrong for sure only when it is: left blank / "no sé", or
+                  the false friend for this very term. Anything else that
+                  differs (a near miss, a regional word, another entry's
+                  Spanish) is shown for you to compare (self-review), never
+                  scored by a guess.
+     After a miss the one distinction that matters, and "Try it again later"
+                  puts it back a few cards on. A term missed again says so.
+     Saving       a card's result counts (the record, the session, the
+                  summary) only once saveTermReview says it was stored, on the
+                  server or safely on this phone; otherwise the card says it
+                  wasn't saved and offers to try again.
+     Your place   kept on this phone (ih_reviewSession) after each saved
+                  answer: Pause, a reload or closing the app resume from it.
+   Team points still go to the team for every answer (teamPoints); they are
+   never shown as one person's progress. */
+const REVIEW_SESSION_KEY = 'ih_reviewSession';
+const REVIEW_PREFS_KEY = 'ih_reviewPrefs';
+const REVIEW_LENGTHS = [5, 10, 15];
+const RS = { spec: '', n: 10, why: {}, stage: 'ask', draft: '', check: null, saved: null, saveError: '', saving: false, results: [], done: false, keepFailed: false };
+const ICON_RS_SPEAK = (t, lang) => `<button class="copy-btn rv-speak" type="button" title="Hear it" aria-label="Hear it" onclick="speakText(this, ${escapeAttr(JSON.stringify(t))}, '${lang}')">${ICON_SPEAKER}</button>`;
+
+function reviewPrefs(){
+  let p = {};
+  try{ p = JSON.parse(localStorage.getItem(REVIEW_PREFS_KEY) || '{}') || {}; }catch(e){}
+  const spec = askSpecialties().some(d => d.id === p.spec) ? p.spec : '';
+  return { spec, n: REVIEW_LENGTHS.includes(+p.n) ? +p.n : 10 };
+}
+function reviewSetPrefs(spec, n){
+  const p = reviewPrefs();
+  if(spec !== undefined) p.spec = spec;
+  if(n !== undefined) p.n = n;
+  try{ localStorage.setItem(REVIEW_PREFS_KEY, JSON.stringify(p)); }catch(e){}
+  if(activeCategory === 'review' && !reviewActive) renderContent();
 }
 
-async function startReview(){
-  // TERM_REVIEWS is fetched when this screen opens. Building the queue before
-  // it lands would treat every term as never-reviewed, and answering one would
-  // then write a fresh box-1 record over that term's real progress. Tapping
-  // the button this fast is unlikely, but the cost of losing review history is
-  // high enough to just wait for the load.
-  await ensureLoaded('termReviews', loadTermReviews);
-  reviewQueue = buildReviewQueue();
-  if(!reviewQueue.length){ showToast('Nothing due for review right now — check back later.'); return; }
-  reviewActive = true;
-  reviewIndex = 0;
-  reviewRevealed = false;
-  reviewGotIt = 0;
-  reviewMissed = 0;
-  renderContent();
+/* ---- What to practise ---- */
+function rvLoose(s){ return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  .replace(/^(el|la|los|las|un|una|unos|unas|lo) /, ''); }
+function rvStrict(s){ return String(s || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/^(el|la|los|las|un|una|unos|unas|lo) /, ''); }
+function rvFirst(s){ const m = String(s || '').match(/^.*?[.!?](\s|$)/); return (m ? m[0] : String(s || '')).trim(); }
+const rvDay = 86400000;
+function reviewPool(spec){
+  return allTermsFlat().filter(t => t.en && t.es && (!spec || askTopOf(t.categoryId) === spec));
 }
-
-function revealReviewAnswer(){
-  reviewRevealed = true;
-  renderContent();
-}
-
-async function answerReview(gotIt){
-  const term = reviewQueue[reviewIndex];
-  const prior = TERM_REVIEWS[term.id];
-  const priorBox = prior ? prior.box : 0;
-  const newBox = gotIt ? Math.min(priorBox + 1, REVIEW_INTERVALS.length - 1) : 0;
-  const reviewCount = (prior ? prior.reviewCount : 0) + 1;
-  if(gotIt) reviewGotIt++; else reviewMissed++;
-  teamPoints(1);
-  saveTermReview(term.id, newBox, reviewCount);   // not awaited: the next card doesn't wait for the network
-
-  reviewIndex++;
-  reviewRevealed = false;
-  const sessionDone = reviewIndex >= reviewQueue.length;
-  if(sessionDone){
-    reviewActive = false; // falls through to the session summary view
+function reviewMissedRec(r){ return !!r && r.reviewCount > 0 && (r.lastResult ? r.lastResult === 'miss' : r.box === 0); }
+// Why a term is in the session, from your record.
+function reviewWhy(t){
+  const r = TERM_REVIEWS[t.id], now = Date.now();
+  if(!r) return { k: 'new', text: 'New to you' };
+  if(reviewMissedRec(r)) return { k: 'missed', text: (r.misses || 1) >= 2 ? `Missed ${r.misses} times` : 'Missed last time' };
+  if(r.nextReviewAt <= now){
+    const last = r.lastAt || (r.nextReviewAt - REVIEW_INTERVALS[r.box] * rvDay), days = Math.max(1, Math.round((now - last) / rvDay));
+    return { k: 'due', text: `Due: last seen ${days === 1 ? 'yesterday' : days + ' days ago'}` };
   }
-  renderContent();
-  if(sessionDone) smileyStudy('review', reviewGotIt / Math.max(1, reviewGotIt + reviewMissed));
+  return { k: 'check', text: `Quick check: right ${r.box} time${r.box === 1 ? '' : 's'} in a row` };
+}
+/* A session: missed first, then due, with some variety (about one in five:
+   new to you, else a quick check on one you know). One card per English
+   term. Spread so the hard ones aren't all at the start. */
+function reviewBuild(spec, n){
+  const now = Date.now(), pool = reviewPool(spec), rec = id => TERM_REVIEWS[id];
+  const missed = pool.filter(t => reviewMissedRec(rec(t.id)))
+    .sort((a, b) => ((rec(b.id).misses || 1) - (rec(a.id).misses || 1)) || (rec(a.id).nextReviewAt - rec(b.id).nextReviewAt));
+  const due = pool.filter(t => { const r = rec(t.id); return r && !reviewMissedRec(r) && r.nextReviewAt <= now; })
+    .sort((a, b) => rec(a.id).nextReviewAt - rec(b.id).nextReviewAt);
+  const fresh = shuffle(pool.filter(t => !rec(t.id)));
+  const known = shuffle(pool.filter(t => { const r = rec(t.id); return r && !reviewMissedRec(r) && r.nextReviewAt > now; }));
+  const variety = n >= 5 && (fresh.length || known.length) ? Math.max(1, Math.round(n / 5)) : 0;
+  const out = [], seen = new Set(), why = {};
+  const add = (t, cap) => {
+    const k = rvLoose(t.en);
+    if(out.length >= cap || seen.has(k)) return;
+    seen.add(k); out.push(t); why[t.id] = reviewWhy(t);
+  };
+  missed.forEach(t => add(t, n - variety));
+  due.forEach(t => add(t, n - variety));
+  fresh.forEach(t => add(t, n));
+  known.forEach(t => add(t, n));
+  missed.concat(due).forEach(t => add(t, n));
+  // Spread: one of each kind in turn.
+  const kinds = ['missed', 'due', 'new', 'check'], byKind = kinds.map(k => out.filter(t => why[t.id].k === k)), order = [];
+  while(order.length < out.length) byKind.forEach(list => { if(list.length) order.push(list.shift()); });
+  return { terms: order, why, counts: kinds.reduce((o, k) => (o[k] = out.filter(t => why[t.id].k === k).length, o), {}) };
 }
 
-function exitReview(){
-  reviewActive = false;
-  reviewQueue = [];
-  reviewIndex = 0;
-  reviewRevealed = false;
+/* ---- Starting, pausing, resuming ---- */
+function reviewBegin(terms, why, opts){
+  opts = opts || {};
+  reviewQueue = terms.slice(); reviewIndex = 0; reviewActive = true; reviewRevealed = false; reviewGotIt = 0; reviewMissed = 0;
+  Object.assign(RS, { spec: opts.spec || '', n: terms.length, why: why || {}, stage: 'ask', draft: '', check: null, saved: null, saveError: '', saving: false, results: [], done: false, label: opts.label || '' });
+  terms.forEach(t => { if(!RS.why[t.id]) RS.why[t.id] = opts.why || reviewWhy(t); });
+  reviewStore();
+}
+// Term Review's button (and Dr. Smiley's start_review): your specialty and length.
+async function startReview(opts){
+  await ensureLoaded('termReviews', loadTermReviews);
+  if(!whoAmI()){ showToast('Set your name first: your review record is kept under it.'); return; }
+  const p = { ...reviewPrefs(), ...(opts || {}) };
+  const s = reviewBuild(p.spec, p.n);
+  if(!s.terms.length){ showToast(p.spec ? 'No terms with Spanish in that specialty yet.' : 'No terms with Spanish to practise yet.'); return; }
+  reviewBegin(s.terms, s.why, { spec: p.spec });
   renderContent();
 }
+// Practise a given list (your mistakes, terms still learning).
+function reviewStartWith(ids, why, label){
+  const byId = new Map(allTermsFlat().map(t => [t.id, t]));
+  const terms = ids.map(id => byId.get(id)).filter(t => t && t.es);
+  if(!terms.length){ showToast('Those terms are no longer in the glossary.'); return false; }
+  reviewBegin(terms, Object.fromEntries(terms.map(t => [t.id, why || reviewWhy(t)])), { label });
+  if(activeCategory === 'review') renderContent(); else setCategory('review');
+  return true;
+}
+// Saved after each answer that was saved: where you are, never what you typed.
+function reviewStore(){
+  try{
+    if(!reviewQueue.length || RS.done){ localStorage.removeItem(REVIEW_SESSION_KEY); return true; }
+    // The card you're on counts as done once its answer is saved: a reload goes on from the next one.
+    const i = reviewIndex + (reviewActive && RS.stage === 'result' && RS.saved != null ? 1 : 0);
+    if(i >= reviewQueue.length && !reviewActive){ localStorage.removeItem(REVIEW_SESSION_KEY); return true; }
+    localStorage.setItem(REVIEW_SESSION_KEY, JSON.stringify({ v: 1, who: drMemKey(), ids: reviewQueue.map(t => t.id), i, spec: RS.spec, label: RS.label || '',
+      why: Object.fromEntries(reviewQueue.map(t => [t.id, RS.why[t.id]])), results: RS.results.map(r => ({ id: r.id, ok: r.ok, self: !!r.self })), at: Date.now() }));
+    RS.storeFailed = false; return true;
+  }catch(e){ RS.storeFailed = true; return false; }
+}
+function reviewStored(){
+  try{
+    const s = JSON.parse(localStorage.getItem(REVIEW_SESSION_KEY) || 'null');
+    if(!s || s.v !== 1 || s.who !== drMemKey() || !Array.isArray(s.ids)) return null;
+    if(Date.now() - (s.at || 0) > 7 * rvDay) return null;      // a week old: let it go
+    return s.i < s.ids.length ? s : null;
+  }catch(e){ return null; }
+}
+// A paused or interrupted session, back as it was.
+function reviewResume(){
+  if(reviewActive && reviewIndex < reviewQueue.length) return true;
+  const s = reviewStored();
+  if(!s) return false;
+  const byId = new Map(allTermsFlat().map(t => [t.id, t]));
+  const terms = s.ids.map(id => byId.get(id));
+  if(terms.some(t => !t)){
+    // Terms deleted since: keep the rest, from where you were.
+    const done = s.ids.slice(0, s.i).filter(id => byId.has(id)).length;
+    const left = terms.filter(Boolean);
+    if(done >= left.length){ reviewDiscard(); return false; }
+    s.i = done; s.ids = left.map(t => t.id);
+  }
+  reviewQueue = s.ids.map(id => byId.get(id)); reviewIndex = s.i; reviewActive = true; reviewRevealed = false;
+  Object.assign(RS, { spec: s.spec || '', n: reviewQueue.length, why: s.why || {}, stage: 'ask', draft: '', check: null, saved: null, saveError: '', saving: false,
+    results: (s.results || []).map(r => ({ ...r, term: byId.get(r.id) })).filter(r => r.term), done: false, label: s.label || '' });
+  reviewGotIt = RS.results.filter(r => r.ok).length; reviewMissed = RS.results.filter(r => !r.ok).length;
+  return true;
+}
+function reviewPause(){
+  if(RS.saving) return;
+  reviewActive = false; RS.stage = 'ask'; RS.check = null;
+  reviewStore();
+  renderContent();
+  showToast('Paused. Your place is kept on this phone.');
+}
+function reviewDiscard(){
+  try{ localStorage.removeItem(REVIEW_SESSION_KEY); }catch(e){}
+  reviewActive = false; reviewQueue = []; reviewIndex = 0; RS.done = false; RS.results = [];
+}
+
+/* ---- Checking an answer ---- */
+// What the glossary accepts for this term: normalized -> how it's written.
+function reviewAccepted(term){
+  const out = new Map();
+  const put = s => { s = String(s || '').trim(); const k = rvLoose(s); if(k && !out.has(k)) out.set(k, s); };
+  const addEs = es => String(es || '').split(/\s*[\/;|]\s*/).forEach(part => {
+    const m = part.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+    if(m){ put(m[1]); put(part); if(/[a-záéíóúñü]{4,}/.test(m[2])) put(m[2]); }   // "Guayabo (Resaca)": both; "(TOD)": an abbreviation alone isn't the term
+    else put(part);
+  });
+  addEs(term.es);
+  const en = rvLoose(term.en);
+  allTermsFlat().forEach(t => { if(t.id !== term.id && t.es && rvLoose(t.en) === en) addEs(t.es); });
+  return out;
+}
+function rvLev(a, b){
+  if(Math.abs(a.length - b.length) > 3) return 9;
+  const d = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for(let i = 1; i <= a.length; i++){
+    let prev = d[0]; d[0] = i;
+    for(let j = 1; j <= b.length; j++){ const tmp = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = tmp; }
+  }
+  return d[b.length];
+}
+/* correct     it's one the glossary accepts (accents and capitals aside)
+   incorrect   left blank / "no sé", or this term's own false friend
+   self        anything else: shown for you to compare */
+function reviewCheck(term, raw){
+  const ans = String(raw || '').trim(), key = String(term.es).trim();
+  if(!ans || /^(no s[eé]|no lo s[eé]|i don'?t know|idk|\?+|-+)$/i.test(ans)) return { v: 'incorrect', kind: 'blank', ans, key };
+  const acc = reviewAccepted(term), n = rvLoose(ans);
+  if(acc.has(n)){
+    const written = acc.get(n);
+    return { v: 'correct', ans, key, written, alt: rvLoose(written) !== rvLoose(key.replace(/\s*\([^)]*\)\s*$/, '')) && rvLoose(written) !== rvLoose(key) ? written : '',
+      spelling: rvStrict(ans) !== rvStrict(written) && rvStrict(ans) !== rvStrict(key) ? written : '' };
+  }
+  const ff = (typeof FALSE_FRIENDS !== 'undefined' ? FALSE_FRIENDS : []).find(f => rvLoose(f.es) === n);
+  if(ff && rvLoose(ff.looks).includes(rvLoose(term.en))) return { v: 'incorrect', kind: 'ff', ff, ans, key };
+  const other = allTermsFlat().find(t => t.es && t.id !== term.id && rvLoose(t.en) !== rvLoose(term.en) && reviewAccepted(t).has(n));
+  const near = [...acc.keys()].some(k => rvLev(k, n) <= Math.max(1, Math.floor(k.length / 8)));
+  const notes = n.length >= 4 && rvLoose(term.notes).includes(n);
+  return { v: 'self', kind: near ? 'near' : other ? 'other' : notes ? 'notes' : ff ? 'ffOther' : 'differs', other, ff, ans, key };
+}
+// The one distinction worth saying after a miss.
+function reviewDistinction(term, c){
+  const def = rvFirst(term.def);
+  if(c.kind === 'ff') return `“${c.ff.es}” means ${c.ff.means}. For “${term.en}”, say “${c.key}”.`;
+  if(c.kind === 'other' && c.other) return `“${c.ans}” is the glossary’s Spanish for “${c.other.en}”${c.other.def ? ': ' + rvFirst(c.other.def).replace(/\.$/, '') : ''}. “${term.en}” is different${def ? ': ' + def.replace(/\.$/, '') : ''}.`;
+  if(c.kind === 'near') return `Close. It’s written “${c.key}”.`;
+  return def ? `“${term.en}”: ${def}` : '';
+}
+
+/* ---- Answering ---- */
+function reviewSubmit(){
+  if(RS.stage !== 'ask' || RS.saving) return;
+  const term = reviewQueue[reviewIndex], el = document.getElementById('rvAnswer');
+  RS.draft = el ? el.value : RS.draft;
+  RS.check = reviewCheck(term, RS.draft);
+  RS.stage = 'result';
+  if(RS.check.v === 'self'){ renderContent(); return; }            // you decide; nothing saved yet
+  reviewRecord(RS.check.v === 'correct', false);
+}
+// "Show me": the answer, then you say whether you had it (the old way).
+function revealReviewAnswer(){
+  if(RS.saving) return;
+  reviewRevealed = true; RS.stage = 'reveal';
+  renderContent();
+}
+async function answerReview(gotIt){ return reviewRecord(!!gotIt, true); }
+function reviewSelfJudge(same){ return reviewRecord(!!same, true); }
+// Save the result; it counts only once it's stored.
+async function reviewRecord(ok, self){
+  const term = reviewQueue[reviewIndex];
+  if(!term || RS.saving) return;
+  const prior = TERM_REVIEWS[term.id];
+  const box = ok ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0;
+  RS.pending = { ok, self, box, wasMissed: reviewMissedRec(prior), misses: (prior && prior.misses || (reviewMissedRec(prior) ? 1 : 0)) + (ok ? 0 : 1) };
+  RS.stage = 'result'; RS.saving = true; RS.saveError = ''; RS.saved = null;
+  if(!RS.check) RS.check = { v: ok ? 'correct' : 'incorrect', kind: self ? 'self' : '', key: term.es, ans: '' };
+  if(self) RS.check = { ...RS.check, judged: ok };
+  renderContent();
+  const res = await saveTermReview(term.id, box, (prior ? prior.reviewCount : 0) + 1, { result: ok ? 'ok' : 'miss', confirm: true });
+  if(reviewQueue[reviewIndex] !== term) return;                   // left meanwhile
+  RS.saving = false;
+  if(!res.ok){ RS.saveError = res.why; renderContent(); return; }
+  RS.saved = res.how;
+  RS.results.push({ id: term.id, term, ok, self, wasMissed: RS.pending.wasMissed, box, misses: RS.pending.misses, ans: RS.check.ans, check: RS.check });
+  if(ok) reviewGotIt++; else reviewMissed++;
+  teamPoints(1);
+  // Proportional: a nod for a right answer, a smile when it's one you'd missed
+  // before, calm encouragement after a miss. The session's end has its own.
+  drPerform(ok ? (RS.pending.wasMissed ? 'smile' : 'nod') : 'encourage', { priority: DR_P.REACT });
+  // "Show answer", then Got it: you've just seen it, so on to the next card.
+  if(self && ok && RS.stage === 'result' && RS.check && RS.check.kind === 'self' && !RS.check.ans){ reviewNext(); return; }
+  reviewStore();
+  renderContent();
+  document.getElementById('rvNext')?.focus({ preventScroll: true });
+}
+function reviewRetrySave(){ RS.stage = 'result'; reviewRecord(RS.pending.ok, RS.pending.self); }
+// After a miss: the same term again a few cards on.
+function reviewRetryLater(){
+  const term = reviewQueue[reviewIndex];
+  if(!term || RS.retryQueued === reviewIndex) return;
+  const at = Math.min(reviewQueue.length, reviewIndex + 4);
+  reviewQueue.splice(at, 0, term);
+  RS.why[term.id] = { k: 'retry', text: 'Your retry from earlier' };
+  RS.retryQueued = reviewIndex;
+  reviewStore();
+  renderContent();
+}
+function reviewNext(skipUnsaved){
+  if(RS.saving || (RS.saved == null && !skipUnsaved)) return;
+  reviewIndex++;
+  Object.assign(RS, { stage: 'ask', draft: '', check: null, saved: null, saveError: '', pending: null, retryQueued: -1 });
+  reviewRevealed = false;
+  if(reviewIndex >= reviewQueue.length){
+    reviewActive = false; RS.done = true;
+    reviewStore();
+    renderContent();
+    const n = RS.results.length;
+    if(n) smileyStudy('review', RS.results.filter(r => r.ok).length / n);
+    return;
+  }
+  reviewStore();
+  renderContent();
+  if(prefersAutoFocus()) document.getElementById('rvAnswer')?.focus();
+}
+function exitReview(){
+  reviewDiscard();
+  RS.done = false;
+  renderContent();
+}
+
+/* ---- Screens ---- */
+function renderReview(){
+  if(reviewActive && reviewIndex < reviewQueue.length) return renderReviewCard();
+  if(RS.done) return renderReviewSummary();
+  const due = dueReviewCount();
+  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${due} due</span></div>`;
+  html += `<p class="practice-intro">Short sessions from your own record: what you missed comes first, then what’s due, with something new for variety. Type the Spanish and Dr. Smiley checks it against the glossary.</p>`;
+  if(!whoAmI()){
+    html += `<div class="progress-card"><p>Set your name so your review schedule is personal to you.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+    return html;
+  }
+  if(!termReviewsLoaded) ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'review' && !reviewActive) renderContent(); });
+  const paused = reviewStored();
+  if(paused){
+    const spec = paused.spec && askSpecialties().find(d => d.id === paused.spec);
+    html += `<div class="rv-paused"><div><b>Your session is paused</b><span>${paused.i} of ${paused.ids.length} done${spec ? ' · ' + escapeHtml(spec.name) : paused.label ? ' · ' + escapeHtml(paused.label) : ''}</span></div>
+      <button type="button" class="btn btn-primary" onclick="reviewResume(); renderContent()">Resume</button>
+      <button type="button" class="btn btn-ghost" onclick="reviewDiscard(); renderContent()">End it</button></div>`;
+  }
+  const p = reviewPrefs(), s = termReviewsLoaded ? reviewBuild(p.spec, p.n) : null;
+  const specs = askSpecialties();
+  html += `<div class="rv-setup">
+    <label class="rv-lab" for="rvSpec">Specialty</label>
+    <select id="rvSpec" class="rv-select" onchange="reviewSetPrefs(this.value)"><option value="">All specialties</option>${specs.map(d => `<option value="${escapeAttr(d.id)}"${d.id === p.spec ? ' selected' : ''}>${escapeHtml(d.name)}</option>`).join('')}</select>
+    <span class="rv-lab" id="rvLenLab">Length</span>
+    <div class="mem-opts rv-len" role="radiogroup" aria-labelledby="rvLenLab">${REVIEW_LENGTHS.map(n => `<button type="button" role="radio" aria-checked="${n === p.n}" onclick="reviewSetPrefs(undefined, ${n})">${n} terms</button>`).join('')}</div>
+    <p class="rv-mix" aria-live="polite">${!s ? 'Loading your record…' : !s.terms.length ? 'No terms with Spanish here yet.'
+      : reviewMixText(s.counts, Object.keys(TERM_REVIEWS).length === 0)}</p>
+    <button class="btn btn-primary rv-start" onclick="startReview()"${s && !s.terms.length ? ' disabled' : ''}>Start ${s ? s.terms.length : p.n} terms</button>
+  </div>`;
+  html += reviewMistakesHtml();
+  return html;
+}
+function reviewMixText(c, fresh){
+  if(fresh) return 'You haven’t practised yet, so these are new to you. After this, the ones you miss come back first.';
+  const bits = [[c.missed, 'you missed before'], [c.due, 'due for review'], [c.new, 'new to you'], [c.check, 'a quick check on one you know', 'quick checks on ones you know']]
+    .filter(x => x[0]).map(x => `${x[0]} ${x[0] === 1 || !x[2] ? x[1] : x[2]}`);
+  return 'In this session: ' + bits.join(', ') + '.';
+}
+// Your recent mistakes, from the record: look them over, practise them.
+function reviewMistakesHtml(){
+  const byId = new Map(allTermsFlat().map(t => [t.id, t]));
+  const list = Object.entries(TERM_REVIEWS).filter(([id, r]) => reviewMissedRec(r) && byId.get(id) && byId.get(id).es)
+    .sort((a, b) => (b[1].lastAt || 0) - (a[1].lastAt || 0)).slice(0, 12).map(([id, r]) => ({ t: byId.get(id), r }));
+  if(!list.length) return '';
+  return `<details class="rv-mistakes"><summary>Your recent mistakes (${list.length})</summary>
+    <ul>${list.map(({ t, r }) => `<li><b>${escapeHtml(t.en)}</b><span>${escapeHtml(t.es)}</span>${(r.misses || 1) >= 2 ? `<small>missed ${r.misses} times</small>` : ''}</li>`).join('')}</ul>
+    <button type="button" class="btn btn-primary" onclick='reviewStartWith(${escapeAttr(JSON.stringify(list.map(x => x.t.id)))}, null, "Your mistakes")'>Practise these ${list.length}</button></details>`;
+}
+
+function renderReviewCard(){
+  const term = reviewQueue[reviewIndex], why = RS.why[term.id] || reviewWhy(term), c = RS.check;
+  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${reviewIndex + 1} of ${reviewQueue.length}</span></div>`;
+  html += `<div class="review-card rv-card">
+    <div class="rv-top"><span class="rv-why is-${why.k}">${escapeHtml(why.text)}</span>
+      <span class="tag" style="--tag-color:${term.categoryColor};">${escapeHtml(term.categoryName.split(',')[0].split('&')[0].trim())}</span></div>
+    <div class="review-card-en">${escapeHtml(term.en)} ${ICON_RS_SPEAK(term.en, 'en-US')}</div>`;
+  if(RS.stage === 'ask'){
+    html += `<label class="review-card-prompt" for="rvAnswer">In Spanish?</label>
+      <input id="rvAnswer" class="rv-input" type="text" lang="es" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
+        placeholder="Type the Spanish" value="${escapeAttr(RS.draft)}" oninput="RS.draft=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault(); reviewSubmit();}">
+      <div class="quiz-actions rv-acts">
+        <button class="btn btn-ghost" onclick="revealReviewAnswer()">Show answer</button>
+        <button class="btn btn-primary" onclick="reviewSubmit()">Check</button>
+      </div>`;
+  }else if(RS.stage === 'reveal' && !c){
+    html += `<div class="review-card-es">${escapeHtml(term.es)} ${ICON_RS_SPEAK(term.es, 'es-ES')}</div>
+      <p class="review-card-def">${escapeHtml(term.def || '')}</p>
+      <p class="rv-self-q">Did you have it?</p>
+      <div class="quiz-actions rv-acts">
+        <button class="btn btn-ghost rv-miss-btn" onclick="answerReview(false)">Missed it</button>
+        <button class="btn btn-primary" onclick="answerReview(true)">Got it</button>
+      </div>`;
+  }else html += reviewResultHtml(term, c);
+  html += `</div>`;
+  html += `<div class="quiz-actions rv-foot">
+    <button class="btn btn-ghost" onclick="reviewPause()"${RS.saving ? ' disabled' : ''}>Pause</button>
+    <button class="btn btn-ghost" onclick="exitReview()"${RS.saving ? ' disabled' : ''}>End session</button>
+  </div>`;
+  return html;
+}
+function reviewResultHtml(term, c){
+  c = c || { v: 'self' };
+  const judged = 'judged' in c, ok = judged ? c.judged : c.v === 'correct';
+  const prior = RS.pending, saved = RS.saved != null;
+  let h = '';
+  if(c.v === 'self' && !judged){
+    // Can't be checked for sure: compare, then you decide.
+    h += `<div class="rv-result is-self" role="status"><p class="rv-verdict">Compare with the glossary</p>
+      <dl class="rv-cmp"><dt>You wrote</dt><dd>${escapeHtml(c.ans)}</dd><dt>Glossary</dt><dd>${escapeHtml(c.key)} ${ICON_RS_SPEAK(c.key, 'es-ES')}</dd></dl>
+      <p class="rv-why-line">${escapeHtml(c.kind === 'near' ? 'Close: it may be a typo.' : c.kind === 'notes' ? 'Your team’s notes on this term mention it.' : c.kind === 'other' ? reviewDistinction(term, c) : 'It isn’t the glossary’s wording, but it may mean the same.')}</p>
+      ${c.kind === 'notes' ? `<p class="rv-note">${escapeHtml(rvFirst(term.notes))}</p>` : ''}
+      <div class="quiz-actions rv-acts"><button class="btn btn-ghost rv-miss-btn" onclick="reviewSelfJudge(false)">I missed it</button>
+        <button class="btn btn-primary" onclick="reviewSelfJudge(true)">Same meaning, count it</button></div></div>`;
+    return h;
+  }
+  if(ok){
+    const r = TERM_REVIEWS[term.id];
+    const next = saved && r ? (REVIEW_INTERVALS[r.box] <= 1 ? 'Next review tomorrow.' : `Next review in ${REVIEW_INTERVALS[r.box]} days.`) : '';
+    h += `<div class="rv-result is-ok" role="status"><p class="rv-verdict">${judged ? (c.ans ? 'Counted' : 'Got it') : 'Right'}${prior && prior.wasMissed ? ', and you missed this one last time' : ''}.</p>
+      <div class="review-card-es">${escapeHtml(c.key)} ${ICON_RS_SPEAK(c.key, 'es-ES')}</div>
+      ${c.alt ? `<p class="rv-note">“${escapeHtml(c.alt)}” is in the glossary too.</p>` : ''}
+      ${c.spelling ? `<p class="rv-note">Written: ${escapeHtml(c.spelling)}</p>` : ''}
+      ${judged && c.ans ? `<p class="rv-note">You wrote “${escapeHtml(c.ans)}”; you counted it as the same.</p>` : ''}
+      ${next ? `<p class="rv-next">${next}</p>` : ''}</div>`;
+  }else{
+    const d = c.kind === 'self' ? rvFirst(term.def) && `“${term.en}”: ${rvFirst(term.def)}` : reviewDistinction(term, c);
+    const misses = prior ? prior.misses : 1;
+    h += `<div class="rv-result is-miss" role="status"><p class="rv-verdict">Not this time.</p>
+      ${c.ans ? `<dl class="rv-cmp"><dt>You wrote</dt><dd>${escapeHtml(c.ans)}</dd><dt>Glossary</dt><dd>${escapeHtml(term.es)} ${ICON_RS_SPEAK(term.es, 'es-ES')}</dd></dl>`
+        : `<div class="review-card-es">${escapeHtml(term.es)} ${ICON_RS_SPEAK(term.es, 'es-ES')}</div>`}
+      ${d ? `<p class="rv-why-line">${escapeHtml(d)}</p>` : ''}
+      ${misses >= 2 ? `<p class="rv-note">This one has slipped ${misses} times. ${term.notes ? escapeHtml(rvFirst(term.notes)) : 'Say it aloud once: it helps it stick.'}</p>` : ''}
+      ${RS.retryQueued === reviewIndex ? `<p class="rv-next">It’s coming back a few cards on.</p>`
+        : `<button type="button" class="btn btn-ghost rv-retry" onclick="reviewRetryLater()">Try it again later</button>`}</div>`;
+  }
+  // Saved, or not.
+  if(RS.saving) h += `<p class="rv-save" role="status">Saving…</p>`;
+  else if(RS.saveError) h += `<div class="rv-save is-error" role="alert"><p>Not saved: ${escapeHtml(RS.saveError)}</p>
+    <div class="quiz-actions rv-acts"><button class="btn btn-ghost" onclick="reviewNext(true)">Skip without saving</button><button class="btn btn-primary" onclick="reviewRetrySave()">Try saving again</button></div></div>`;
+  else if(saved) h += `<p class="rv-save is-ok" role="status">${RS.saved === 'queued' ? 'Saved on this phone. It goes up when you’re back online.' : 'Saved'}</p>`;
+  if(!RS.saveError) h += `<div class="quiz-actions rv-acts"><button id="rvNext" class="btn btn-primary" onclick="reviewNext()"${saved ? '' : ' disabled'}>${reviewIndex + 1 >= reviewQueue.length ? 'Finish' : 'Next'}</button></div>`;
+  if(RS.storeFailed) h += `<p class="rv-note">This phone isn’t keeping your place right now, so a reload would start over.</p>`;
+  return h;
+}
+
+function renderReviewSummary(){
+  const rs = RS.results, n = rs.length, right = rs.filter(r => r.ok);
+  const up = right.filter(r => r.box >= 2), back = right.filter(r => r.wasMissed);
+  // Each term missed, unless a later try in this session got it right.
+  const last = id => rs.filter(x => x.id === id).pop(), left = [], seenM = new Set();
+  rs.forEach(r => { if(!r.ok && !seenM.has(r.id) && !last(r.id).ok){ seenM.add(r.id); left.push(r); } });
+  let html = `<div class="section-head"><h2>Session done</h2><span class="sub">${right.length} of ${n} right</span></div>`;
+  html += `<div class="rv-sum">
+    <p class="rv-sum-line">${n ? `${right.length} right, ${n - right.length} to practise again.` : 'No answers were saved in this session.'}</p>
+    ${up.length ? `<p><b>Moved up a step:</b> ${up.map(r => escapeHtml(r.term.en)).join(', ')}. They come back later than before.</p>` : ''}
+    ${back.length ? `<p><b>Back on track:</b> ${back.map(r => escapeHtml(r.term.en)).join(', ')}: missed last time, right today.</p>` : ''}
+    ${rs.some(r => r.self) ? `<p class="rv-note">${rs.filter(r => r.self).length} you checked yourself.</p>` : ''}
+    <p class="rv-note">One right answer moves a term one step; it takes several reviews over days to really know one.</p>
+  </div>`;
+  if(left.length){
+    html += `<div class="rv-mistakes is-open"><p class="rv-lab">Your mistakes</p><ul>${left.map(r => `<li><b>${escapeHtml(r.term.en)}</b><span>${escapeHtml(r.term.es)}</span>
+      ${r.ans ? `<small>You wrote “${escapeHtml(r.ans)}”</small>` : ''}${(() => { const d = r.check && r.check.kind !== 'self' ? reviewDistinction(r.term, r.check) : ''; return d ? `<small>${escapeHtml(d)}</small>` : ''; })()}</li>`).join('')}</ul>
+      <button type="button" class="btn btn-primary" onclick='reviewStartWith(${escapeAttr(JSON.stringify(left.map(r => r.id)))}, { k: "missed", text: "From this session’s mistakes" }, "Your mistakes")'>Practise these ${left.length} again</button></div>`;
+  }
+  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:17px;"><button class="btn ${left.length ? 'btn-ghost' : 'btn-primary'}" onclick="exitReview()">Back to Term Review</button></div>`;
+  return html;
+}
+
 
 /* ---------- The guide: search, answer sheets, Show me ----------
    Search first: one box looks through every answer as you type, and its last
@@ -12323,9 +12791,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'askfollow',   tone:'gd-n1', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Follow-ups: “make it simpler”, “now in Spanish”' },
-  { id:'askremember', tone:'gd-n2', pin:'pins/review.webp',              eyebrow:'Dr. Smiley',            title:'He remembers how you like your answers' },
-  { id:'briefing',    tone:'gd-n3', pin:'pins/doctor-prep.webp',         eyebrow:'Before an appointment', title:'A two-minute briefing for any specialty' },
+  { id:'review',      tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Term Review',           title:'Type the Spanish: he checks it and explains misses' },
+  { id:'askfollow',   tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Follow-ups: “make it simpler”, “now in Spanish”' },
+  { id:'askremember', tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'Dr. Smiley',            title:'He remembers how you like your answers' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12389,6 +12857,9 @@ const GUIDE_UI = {
 // The same instructions as the answer text, drawn as steps. Keep them in
 // step with GUIDE_TOPICS; the text there is what search and Ask read.
 const GUIDE_STEPS = {
+  review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
+    `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
+    `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
   name: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
     note: 'Your name goes on your chat messages, the terms you add or edit, and your practice. A photo is optional.' }),
   noname: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
@@ -13211,78 +13682,6 @@ function clearGuideSearch(){
   refreshGuideList();
 }
 
-function renderReview(){
-  if(reviewActive) return renderReviewCard();
-  if(reviewQueue.length && reviewIndex >= reviewQueue.length) return renderReviewSummary();
-
-  const due = dueReviewCount();
-  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${due} due</span></div>`;
-  html += `<p class="practice-intro">Spaced repetition for the glossary itself — see a term, try to recall the translation and definition, then rate yourself. Terms you miss come back sooner; terms you know well come back less often.</p>`;
-
-  if(!whoAmI()){
-    html += `<div class="progress-card"><p>Set your name so your review schedule is personal to you.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
-    return html;
-  }
-
-  if(due === 0){
-    html += `<div class="empty"><div class="glyph">${ICON_REVIEW}</div>Nothing due right now.<br>Check back later, or come back tomorrow.</div>`;
-    return html;
-  }
-
-  html += `<div class="quiz-setup"><button class="btn btn-primary" onclick="startReview()">Review ${Math.min(due,15)} term${Math.min(due,15)===1?'':'s'}</button></div>`;
-  return html;
-}
-
-function renderReviewCard(){
-  const term = reviewQueue[reviewIndex];
-  const progress = `${reviewIndex+1} of ${reviewQueue.length}`;
-  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${progress}</span></div>`;
-  html += `<div class="review-card">
-    <span class="tag" style="--tag-color:${term.categoryColor};">${escapeHtml(term.categoryName.split(',')[0].split('&')[0].trim())}</span>
-    <div class="review-card-en">
-      ${escapeHtml(term.en)}
-      <button class="copy-btn" style="opacity:1; position:relative; top:-2px;" title="Hear this term" onclick="speakText(this, ${JSON.stringify(term.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
-    </div>`;
-  if(reviewRevealed){
-    html += `
-      ${term.es ? `<div class="review-card-es">${escapeHtml(term.es)} <button class="copy-btn" style="opacity:1; position:relative; top:-1px;" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(term.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button></div>` : `<div class="review-card-es" style="color:var(--ink-faint); font-style:normal;">No Spanish translation on file</div>`}
-      <p class="review-card-def">${escapeHtml(term.def || '')}</p>
-      <div class="quiz-actions" style="margin-top:18px;">
-        <button class="btn btn-ghost" style="background:var(--danger-soft); color:var(--danger);" onclick="answerReview(false)">Missed it</button>
-        <button class="btn btn-primary" onclick="answerReview(true)">Got it</button>
-      </div>`;
-  } else {
-    html += `
-      <p class="review-card-prompt">What's the Spanish translation and definition?</p>
-      <div class="quiz-actions" style="margin-top:18px;">
-        <button class="btn btn-primary" onclick="revealReviewAnswer()">Show answer</button>
-      </div>`;
-  }
-  html += `</div>`;
-  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:16px;">
-    <button class="btn btn-ghost" onclick="exitReview()">Exit review</button>
-  </div>`;
-  return html;
-}
-
-function renderReviewSummary(){
-  const total = reviewGotIt + reviewMissed;
-  const pct = total ? Math.round((reviewGotIt/total)*100) : 0;
-  let html = `<div class="section-head"><h2>Review Complete</h2><span class="sub">${reviewGotIt} of ${total}</span></div>`;
-  html += `<div class="results-head">
-    <div class="score-ring${pct >= 80 ? ' celebrate' : ''}" style="background:conic-gradient(#4E9E74 ${pct*3.6}deg, var(--line-soft) 0deg);">
-      <div class="score-ring-inner"><span class="score-pct">${pct}%</span><span class="score-label">Known</span></div>
-    </div>
-    <div class="results-summary">
-      <h3>${reviewGotIt} known, ${reviewMissed} to revisit</h3>
-      <p>Terms you missed will come back around sooner than the ones you knew well.</p>
-    </div>
-  </div>`;
-  html += `<div class="quiz-actions" style="justify-content:flex-start; margin-top:20px;">
-    <button class="btn btn-primary" onclick="exitReview()">Back to Term Review</button>
-  </div>`;
-  return html;
-}
 
 // Every tile derives its whole look from one domain color: a pale tint for
 // the card, a slightly stronger edge, and a glow for the hover ring. Kept
@@ -15624,10 +16023,25 @@ const GUIDE_TOPICS = [
     <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
-  { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms', q:'What is Term Review?', a:`
-    <p>Flashcards built from your own glossary, under <b>More</b>.</p>
-    <p>You see the English, try to remember the Spanish and the definition, then tap to check and tell it honestly whether you got it. Words you miss come back soon. Words you know come back weeks later. Fifteen at a time.</p>
-    <p>Short on time? Ask Dr. Smiley to <i>practice five terms I'm still learning</i>. He opens Term Review with just those.</p>` },
+  { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms session specialty pause resume mistakes', q:'What is Term Review?', a:`
+    <p>Short practice sessions from your own glossary, under <b>More</b> → <b>Term Review</b>.</p>
+    <ol>
+      <li>Pick a specialty (or all of them) and a length: 5, 10 or 15 terms.</li>
+      <li>Terms you missed come first, then the ones due for review, with something new for variety. Each card says why it's there, like <b>Missed last time</b> or <b>Due: last seen 4 days ago</b>.</li>
+      <li>Type the Spanish and tap <b>Check</b>, or tap <b>Show answer</b> and say whether you had it.</li>
+    </ol>
+    <p>Missed one? He says what tells it apart, and <b>Try it again later</b> brings it back a few cards on. At the end you see what moved up a step and your mistakes, with <b>Practise these again</b>. Your recent mistakes are also on the Term Review page.</p>
+    <p><b>Pause</b> keeps your place on this phone, even if the app closes. Ask Dr. Smiley to <i>practice five terms I'm still learning</i> and he opens Term Review with just those.</p>` },
+
+  { id:'reviewcheck', section:'study', k:'term review check answer accent accents capital wrong right spanish variant alternative regional compare self check saved not saved', q:'How does Term Review check my Spanish?', a:`
+    <p>Against your team's glossary, never a guess.</p>
+    <ul>
+      <li><b>Accents and capitals</b> don't make an answer wrong. If an accent is missing, he shows how it's written.</li>
+      <li><b>Other wordings in the glossary</b> count too: another entry for the same English term, or a word in brackets like <i>Guayabo (Resaca)</i>.</li>
+      <li><b>Not sure?</b> If your answer is close, is another entry's Spanish, or is a regional word, he shows yours next to the glossary's and you decide: <b>Same meaning, count it</b> or <b>I missed it</b>.</li>
+      <li><b>Wrong</b> only when it's blank, “no sé”, or the false friend for that term.</li>
+    </ul>
+    <p>An answer counts once it's saved. Offline it's kept on this phone and sent later. If it couldn't be saved, the card says so with <b>Try saving again</b>.</p>` },
 
   { id:'warmup', section:'study', k:'warm up warmup daily question streak today home card one question', q:'What is the warm-up on Home?', a:`
     <p>One quick question a day. Tap the <b>Warm-up</b> card on Home and pick an answer. Answer on the days you work and the dots fill in, so you can see your streak.</p>
@@ -19570,7 +19984,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1007.2302';
+const BUILD_ID = 'b1008.0056';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -24792,6 +25206,7 @@ const ASK_RUN = {
   async continue_review(){
     const u = askUnfinished();
     if(!u || u.kind !== 'review') return { ok: false, why: 'That review is already finished.' };
+    reviewResume();
     setCategory('review');
     return reviewActive && reviewIndex === u.done && document.querySelector('#content .review-card') ? { ok: true, msg: `Back to Term Review, ${u.done + 1} of ${u.total}` } : { ok: false, why: "Term Review didn't open." };
   },
@@ -24826,7 +25241,7 @@ const ASK_RUN = {
     if(!rec.loaded) return { ok: false, why: 'Your review record didn’t load. Check your connection and try again.' };
     const terms = askLearningTerms().slice(0, (t && t.n) || 5);
     if(!terms.length) return { ok: false, why: 'No terms are marked “still learning” right now.' };
-    reviewQueue = terms.slice(); reviewActive = true; reviewIndex = 0; reviewRevealed = false; reviewGotIt = 0; reviewMissed = 0;
+    reviewBegin(terms, null, { why: { k: 'missed', text: 'Still learning, from your record' }, label: 'Still learning' });
     setCategory('review');
     const ok = activeCategory === 'review' && reviewActive && reviewQueue.length === terms.length && document.querySelector('#content .review-card');
     return ok ? { ok: true, msg: `Practicing ${terms.length} term${terms.length === 1 ? '' : 's'} you’re still learning` } : { ok: false, why: "Term Review didn't start. Try again." };
@@ -25097,6 +25512,7 @@ function askMemoryTurn(q, mi){
 function askUnfinished(){
   if(quizActive && quizQuestions.length && quizIndex < quizQuestions.length) return { kind: 'quiz', done: quizIndex, total: quizQuestions.length };
   if(reviewActive && reviewIndex < reviewQueue.length) return { kind: 'review', done: reviewIndex, total: reviewQueue.length };
+  { const s = reviewStored(); if(s) return { kind: 'review', done: s.i, total: s.ids.length }; }   // paused, or left when the app closed
   try{
     const st = prepDeckStored();
     if(st && typeof st.key === 'string' && Array.isArray(st.queue)){
