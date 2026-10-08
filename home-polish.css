@@ -1148,3 +1148,95 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
 .home-wave-entering .home-wave-pin{animation:none;}
 /* Holding him to pet him must not bring up the phone's copy/save menu. */
 .home-wave-icon,.dock-smiley{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+
+/* ---------- Hello banner photo: tuned per mode ----------
+   Jose's brief: the tree prominent, at least half of the Hackensack sign
+   readable and never behind the fade, the words or Search, the pool where
+   there is room. In hero.jpg (1091x1125) the sign is at the bottom-left
+   (x 15-283, y 780 down past the edge: logo panel to 892, then "Cancer
+   Center", "Children's Hospital", "Pediatric Center"), the pool is behind
+   the fence at x 790-930, y 835-900. The words sit on the left too, so the
+   sign gets its own band under the quote: the padding below the text,
+   ending 8px above Search. The photo is pinned to the banner's bottom, so
+   a longer quote grows the banner instead of covering the sign. The .2016
+   and .11457 below are 220/1091 (logo to the end of "Children's
+   Hospital") and 125/1091 (from there to the photo's bottom edge). */
+/* Both: the photo layer ends at the banner's bottom edge (the scroll parallax
+   only moves it down, so it needs room above, not below), and no overscan,
+   so a position here is exactly where the photo lands. */
+#content.is-home .home-greeting-photo-inner{inset:-28% 0 0;}
+#content.is-home .home-greeting-photo-drift{transform:none;}
+
+/* Phone and tablet: the photo at least 545px wide (half its own size), from
+   its left edge, so the sign is at the bottom-left, below the quote, in a
+   band of its own (the padding under the text) that ends 8px above Search. */
+@media (max-width:900px){
+  #content.is-home .home-greeting{
+    --ph-w:max(545px,100vw);
+    padding-bottom:calc(43px + var(--ph-w) * .2016);
+  }
+  #content.is-home .home-greeting-photo-drift{
+    background-size:var(--ph-w) auto;
+    background-position:left 0 bottom calc(33px - var(--ph-w) * .11457);
+    -webkit-mask-image:linear-gradient(0deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 14px,#000 40px);
+            mask-image:linear-gradient(0deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 14px,#000 40px);
+  }
+  /* A shallow fade, under and just above Search: the sign stays whole. */
+  #content.is-home .home-greeting-photo{
+    -webkit-mask-image:radial-gradient(150% 10% at 50% 101%,rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
+            mask-image:radial-gradient(150% 10% at 50% 101%,rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
+  }
+  /* Shade behind the words, clear over the sign's band. */
+  #content.is-home .home-greeting-scrim{
+    -webkit-mask-image:none;mask-image:none;
+    background:linear-gradient(0deg,
+      rgba(10,34,56,0) 0,
+      rgba(10,34,56,0) calc(43px + var(--ph-w) * .2016 - 22px),
+      rgba(10,34,56,.66) calc(43px + var(--ph-w) * .2016 + 40px),
+      rgba(12,40,66,.6) 62%,
+      rgba(12,37,60,.2) 84%,
+      rgba(11,41,49,.46) 100%);
+  }
+}
+
+/* Computer: a taller banner; the photo at 80% from its left edge, so the
+   tree fills the middle, the pool sits right of it and the sign is at the
+   bottom-left, below the quote. Its right edge melts into a soft blur of
+   the same photo. */
+@media (min-width:901px){
+  /* Sized by its words plus the sign's band (like the phone), never shorter
+     than the clamp: a two-line quote makes it taller instead of covering
+     the sign. */
+  #content.is-home .home-greeting{height:auto;min-height:clamp(482px,54vh,530px);
+    padding-bottom:calc(43px + var(--dk-w) * .2016);
+    /* The photo's width: 80% of its own size (873px), growing to 1000px on
+       very wide screens so the blurred edge never takes over. */
+    --dk-w:clamp(873px,calc((100vw - 262px) * .6),1000px);}
+  #content.is-home .home-greeting-photo-drift{
+    background-size:var(--dk-w) auto;
+    background-position:left 0 bottom calc(33px - var(--dk-w) * .11457);
+    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(var(--dk-w) - 173px),rgba(0,0,0,0) var(--dk-w)),linear-gradient(0deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 14px,#000 44px);
+    -webkit-mask-composite:source-in;
+            mask-image:linear-gradient(90deg,#000 0,#000 calc(var(--dk-w) - 173px),rgba(0,0,0,0) var(--dk-w)),linear-gradient(0deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 14px,#000 44px);
+            mask-composite:intersect;
+  }
+  /* Past the photo's right edge: the same photo mirrored and blurred, so the
+     colours at the seam are the photo's own and it reads as depth of field. */
+  #content.is-home .home-greeting-photo::before{
+    content:"";position:absolute;top:-30px;bottom:-30px;left:calc(var(--dk-w) - 233px);right:-60px;
+    background:#3b4a3e url('./hero.jpg?v=blossom1') no-repeat right 233px bottom calc(63px - var(--dk-w) * .11457) / var(--dk-w) auto;
+    transform:scaleX(-1);filter:blur(11px) saturate(1.04) brightness(.88);
+  }
+  /* The fade: a shallow dome to the right of the sign. */
+  #content.is-home .home-greeting-photo{
+    -webkit-mask-image:radial-gradient(62% 15% at 62% 101%,rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
+            mask-image:radial-gradient(62% 15% at 62% 101%,rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 64%,rgba(0,0,0,.9) 80%,#000 92%);
+  }
+  #content.is-home .home-greeting-scrim{
+    -webkit-mask-image:radial-gradient(62% 15% at 62% 101%,rgba(0,0,0,0) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.9) 88%,#000 96%);
+            mask-image:radial-gradient(62% 15% at 62% 101%,rgba(0,0,0,0) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.9) 88%,#000 96%);
+    background:
+      radial-gradient(ellipse 58% 62% at 20% 30%,rgba(8,24,42,.6) 0%,rgba(8,24,42,.38) 48%,rgba(8,24,42,0) 80%),
+      linear-gradient(180deg,rgba(8,24,42,.22) 0%,rgba(8,24,42,0) 26%);
+  }
+}

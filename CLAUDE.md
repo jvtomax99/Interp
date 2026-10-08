@@ -391,6 +391,16 @@ lost concurrent edits. Do not reintroduce that.
   moved back (dock: the bob's left/top; Home: `translate`), or he drifts
   up. `fitWave` (`home-polish.js`) shrinks the greeting one only as far as
   a long first name needs to stay on one line.
+- **The Home banner photo is set per mode** (the block "Hello banner photo:
+  tuned per mode" at the end of `home-polish.css`). Jose's brief: tree
+  prominent, at least half the Hackensack sign readable and never behind
+  the fade, the words or Search, the pool where there's room. The sign is
+  at the photo's bottom-left, under where the words sit, so it gets its own
+  band: the banner's bottom padding, ending 8px above Search, with the photo
+  pinned to the banner's bottom (a longer quote grows the banner instead of
+  covering it). Phone: photo 545px wide (`--ph-w`). Computer: 873-1000px
+  (`--dk-w`), a mirrored blur past its right edge. Change the band and the
+  photo position together; both use the same fractions of the photo width.
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
   getters, so every play varies a little (side, amplitude, beats) with an
