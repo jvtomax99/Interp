@@ -12983,9 +12983,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'bodycard',    tone:'gd-n1', pin:'pins/anatomy.webp',             eyebrow:'3D Body',               title:'Tap a body part: its English and Spanish names, and what it is' },
+  { id:'namelight',   tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Home',                  title:'Your name, written in navy light when you open the app' },
+  { id:'bodycard',    tone:'gd-n3', pin:'pins/anatomy.webp',             eyebrow:'3D Body',               title:'Tap a body part: its English and Spanish names, and what it is' },
   { id:'askcards',    tone:'gd-n2', pin:'pins/medical-terminology.webp', eyebrow:'Dr. Smiley',            title:'Answers you can scan: English and Spanish, side by side' },
-  { id:'askquick',    tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Ask him right where you are: tap him, a panel opens' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -16290,6 +16290,11 @@ const GUIDE_TOPICS = [
     </ol>
     <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice. You can add a photo there too. It's optional, and your team sees it beside your messages in Team Chat.</p>` },
 
+  { id:'namelight', section:'start', k:'name written light ball pen navy glow home greeting hello animation writing signature turn off stop', q:'Why is my name written in light on Home?', a:`
+    <p>When you open the app, a small <b>navy light</b> writes your name in the Home greeting, letter by letter, the way a pen would, while Dr. Smiley says hello. It takes a few seconds, then your name stays as usual. With no name set, it writes <b>Welcome</b>.</p>
+    <p>It plays once each time the app opens, not every time you go back to Home.</p>
+    <p>To turn it off, tap your initial in the <b>top-right corner</b> and set <b>How Dr. Smiley moves</b> to <b>Still</b>. If your phone is set to reduce motion, it's always off.</p>` },
+
   { id:'invite', section:'start', k:'team code invite lock locked sign in login password access new phone get in join team only', q:'The Hub is asking for a team code', a:`
     <p>The Hub is only for the interpreter team, so it asks for the team code. Jose shares it, and any teammate can tell you what it is.</p>
     <ol>
@@ -16402,7 +16407,7 @@ const GUIDE_TOPICS = [
     <ul>
       <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team.</li>
       <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. No laughing and no little sparkles.</li>
-      <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one.</li>
+      <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
     <p>If your phone is set to reduce motion, he's always still.</p>` },
@@ -20527,7 +20532,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1008.2248';
+const BUILD_ID = 'b1008.2338';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than

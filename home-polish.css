@@ -1280,3 +1280,9 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
   #content.is-home .home-greeting-quote{font-size:22px;max-width:28em;}
   #content.is-home .home-greeting-quote cite{margin-top:10px;font-size:14px;}
 }
+
+/* ---------- The name, written in light (home-polish.js, namePen) ----------
+   While the navy light writes it, the real name keeps its place but is
+   invisible; the SVG copy being written sits over it and takes no taps. */
+#content.is-home .home-greeting-name.is-penning{color:transparent;text-shadow:none;}
+#content.is-home .home-name-pen{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:1;}

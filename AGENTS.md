@@ -58,7 +58,9 @@ stylesheet; Home's half is the block of the same name at the end of
 interface face is Inter; the serif is for quoted human speech only. The one
 exception is the Home hello banner (Jose's pick): the name in Parisienne, the
 quote in Lora italic (the block "Hello banner lettering" at the end of
-`home-polish.css`). Don't spread those two faces anywhere else.
+`home-polish.css`). Don't spread those two faces anywhere else. On the
+first hello the name is written by a navy ball of light (`namePen`,
+`home-polish.js`); Still and reduced motion turn it off.
 
 **Sidebar and tab bar switch at 900px**, both of them. Between 761 and 900px
 they used to show together.

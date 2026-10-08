@@ -283,6 +283,7 @@
     lastWaveAt = Date.now();
     if(document.hidden || !button.isConnected) return;
     if(reduced.matches || !button.animate){
+      namePen.release();
       const thought=createThought(button);
       thought.news(window.hubNews&&window.hubNews());thought.update(2500);thought.announce(0);
       const width=window.innerWidth;
@@ -304,13 +305,14 @@
     try {
       const artwork=button.querySelector('.home-wave-art');
       await Promise.all([mark.decode(), artwork && artwork.decode ? artwork.decode() : null]);
-    } catch(e) { if(request===requestId){activeSequence=null;button.classList.remove('home-wave-pending');}return; } // Keep the static hand when artwork is unavailable.
+    } catch(e) { if(request===requestId){activeSequence=null;button.classList.remove('home-wave-pending');namePen.release();}return; } // Keep the static hand when artwork is unavailable.
     if(request !== requestId || !button.isConnected || reduced.matches || document.hidden){
-      if(request === requestId)button.classList.remove('home-wave-pending');
+      if(request === requestId){button.classList.remove('home-wave-pending');namePen.release();}
       return;
     }
     const hero = button.closest('.home-greeting');
-    if(!hero) return;
+    if(!hero){namePen.release();return;}
+    namePen.start(button);
     const art = button.querySelector('.home-wave-pin');
     const faceSvg = button.querySelector('.home-face');
     const halo = button.querySelector('.home-wave-halo');
@@ -734,6 +736,236 @@
     };
   })();
 
+  /* ---------- The name, written in light ----------
+     The first time Home opens, a small navy ball of light writes the
+     greeting's name the way a pen would (Jose's pick: look A, navy, slow).
+     The pen's path comes from the letters themselves: the name is drawn on a
+     canvas in its own face, thinned to its centre line, and that line is
+     walked left to right, each letter finished before the next, the accent
+     and the i-dots last (penPathOf). Worked out once per name and kept on
+     this phone (ih_penPath). While it writes, the real name is in place but
+     invisible (.is-penning) and an SVG copy of it is revealed behind the
+     ball; at the end the real name is back. Reduced motion, Still, a hidden
+     page or anything going wrong: no pen, the name is simply there. */
+  const namePen=(()=>{
+    const KEY='ih_penPath', VER=1, NS='http://www.w3.org/2000/svg';
+    let used=false, run=null, held=null, safety=0;
+    // The pen's path through a name, in em units from the start of its baseline:
+    // [[x,y],...] per stroke, in writing order. null when it can't be worked out.
+    function penPathOf(txt,family){
+      const S=300, cv=document.createElement('canvas'), x=cv.getContext('2d',{willReadFrequently:true});
+      if(!x||!txt)return null;
+      const font=`400 ${S}px ${family}`;x.font=font;
+      const m=x.measureText(txt), pad=24;
+      const L=m.actualBoundingBoxLeft||0, R=m.actualBoundingBoxRight||m.width, A=m.actualBoundingBoxAscent||S*.8, D=m.actualBoundingBoxDescent||S*.35;
+      const W=Math.ceil(L+R+2*pad), H=Math.ceil(A+D+2*pad);
+      if(!(W>0&&H>0)||W*H>4e6)return null;
+      cv.width=W;cv.height=H;x.font=font;
+      const ox=pad+L, oy=pad+A;x.fillText(txt,ox,oy);
+      const px=x.getImageData(0,0,W,H).data, n=W*H;
+      let b=new Uint8Array(n);for(let i=0;i<n;i++)b[i]=px[i*4+3]>115?1:0;
+      // close hairline gaps, then thin the letters to their centre line (Zhang-Suen)
+      const grow=(src,on)=>{const out=new Uint8Array(n);for(let y=1;y<H-1;y++)for(let xx=1;xx<W-1;xx++){const i=y*W+xx;let v=on?0:1;
+        for(let dy=-1;dy<=1&&(on?!v:v);dy++)for(let dx=-1;dx<=1;dx++){const s=src[i+dy*W+dx];if(on&&s){v=1;break;}if(!on&&!s){v=0;break;}}out[i]=v;}return out;};
+      b=grow(grow(b,true),false);
+      const del=[];let changed=true;
+      while(changed){changed=false;
+        for(let pass=0;pass<2;pass++){del.length=0;
+          for(let y=1;y<H-1;y++)for(let xx=1;xx<W-1;xx++){const i=y*W+xx;if(!b[i])continue;
+            const p2=b[i-W],p3=b[i-W+1],p4=b[i+1],p5=b[i+W+1],p6=b[i+W],p7=b[i+W-1],p8=b[i-1],p9=b[i-W-1];
+            const B=p2+p3+p4+p5+p6+p7+p8+p9;if(B<2||B>6)continue;
+            const T=(!p2&&p3)+(!p3&&p4)+(!p4&&p5)+(!p5&&p6)+(!p6&&p7)+(!p7&&p8)+(!p8&&p9)+(!p9&&p2);if(T!==1)continue;
+            if(pass===0?(p2&&p4&&p6)||(p4&&p6&&p8):(p2&&p4&&p8)||(p2&&p6&&p8))continue;
+            del.push(i);}
+          if(del.length){changed=true;for(const i of del)b[i]=0;}}}
+      // the centre line as a graph of pixels (no diagonal shortcuts across a corner)
+      const id=new Int32Array(n).fill(-1), X=[], Y=[];
+      for(let i=0;i<n;i++)if(b[i]){id[i]=X.length;X.push(i%W);Y.push((i/W)|0);}
+      const N=X.length;if(!N||N>80000)return null;
+      const adj=[];for(let k=0;k<N;k++){const a=[];const i=Y[k]*W+X[k];
+        for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const j=id[i+dy*W+dx];if(j<0)continue;
+          if(dx&&dy&&(id[i+dx]>=0||id[i+dy*W]>=0))continue;a.push(j);}adj.push(a);}
+      const alive=new Uint8Array(N).fill(1), deg=k=>{let c=0;for(const j of adj[k])if(alive[j])c++;return c;};
+      const plen=p=>{let s=0;for(let i=1;i<p.length;i++)s+=Math.hypot(X[p[i]]-X[p[i-1]],Y[p[i]]-Y[p[i-1]]);return s;};
+      const chains=()=>{const out=[], seen=new Set(), key=[];
+        for(let k=0;k<N;k++)if(alive[k]&&deg(k)!==2)key.push(k);
+        const isKey=new Uint8Array(N);for(const k of key)isKey[k]=1;
+        const used=new Uint8Array(N);
+        for(const k of key)for(const nb of adj[k]){if(!alive[nb]||seen.has(k*N+nb))continue;
+          const p=[k,nb];seen.add(k*N+nb);seen.add(nb*N+k);
+          while(!isKey[p[p.length-1]]){const cur=p[p.length-1], prev=p[p.length-2];let nx=-1;for(const j of adj[cur])if(alive[j]&&j!==prev){nx=j;break;}
+            if(nx<0)break;seen.add(cur*N+nx);seen.add(nx*N+cur);p.push(nx);}
+          for(const q of p)used[q]=1;out.push(p);}
+        // closed loops with no ends or junctions (an "o" on its own)
+        for(let k=0;k<N;k++){if(!alive[k]||used[k])continue;
+          const p=[k];used[k]=1;let prev=-1,cur=k;
+          for(;;){let nx=-1;for(const j of adj[cur])if(alive[j]&&j!==prev&&!used[j]){nx=j;break;}if(nx<0)break;used[nx]=1;p.push(nx);prev=cur;cur=nx;}
+          p.push(k);out.push(p);}
+        return out;};
+      // trim the little whiskers thinning leaves at corners
+      for(let r=0;r<4;r++){let ch=false;
+        for(const c of chains()){const a=c[0],z=c[c.length-1],da=deg(a)===1,dz=deg(z)===1;
+          if(da!==dz&&plen(c)<.05*S){for(const q of(da?c.slice(0,-1):c.slice(1)))if(alive[q]&&deg(q)<=2){alive[q]=0;ch=true;}}}
+        if(!ch)break;}
+      for(let k=0;k<N;k++)if(alive[k]&&!deg(k))alive[k]=0;
+      const E=chains().filter(c=>plen(c)>2);
+      // pieces: letters, and marks (accent, i-dots) drawn last
+      const comp=new Int32Array(N).fill(-1), comps=[];
+      for(let k=0;k<N;k++){if(!alive[k]||comp[k]>=0)continue;const c={nodes:[],x0:1e9,x1:-1e9,y0:1e9,y1:-1e9},st=[k];comp[k]=comps.length;
+        while(st.length){const q=st.pop();c.nodes.push(q);c.x0=Math.min(c.x0,X[q]);c.x1=Math.max(c.x1,X[q]);c.y0=Math.min(c.y0,Y[q]);c.y1=Math.max(c.y1,Y[q]);
+          for(const j of adj[q])if(alive[j]&&comp[j]<0){comp[j]=comps.length;st.push(j);}}
+        c.mark=c.y1-c.y0<.22*S&&c.x1-c.x0<.3*S&&c.y1<oy-.2*S;comps.push(c);}
+      const order=comps.map((c,i)=>({c,i})).sort((a,b)=>(a.c.mark-b.c.mark)||(a.c.x0-b.c.x0));
+      const dir=(p,a,z)=>Math.atan2(Y[p[z]]-Y[p[a]],X[p[z]]-X[p[a]]);
+      const strokes=[];
+      for(const {c,i:ci} of order){
+        const Ec=E.filter(e=>comp[e[0]]===ci);if(!Ec.length)continue;
+        const unvis=new Set(Ec.map((_,k)=>k));
+        const ends=c.nodes.filter(k=>deg(k)===1);
+        let cur=(ends.length?ends:c.nodes).reduce((a,k)=>(X[k]<X[a]||(X[k]===X[a]&&Y[k]<Y[a]))?k:a);
+        let heading=0, stroke=[cur];
+        const H=new Map();Ec.forEach((e,k)=>{const w=plen(e);for(const[a,z]of[[e[0],e[e.length-1]],[e[e.length-1],e[0]]]){if(!H.has(a))H.set(a,[]);H.get(a).push({to:z,w,k});}});
+        while(unvis.size){
+          let best=null;
+          for(const k of unvis){const e=Ec[k];const p=e[0]===cur?e:e[e.length-1]===cur?e.slice().reverse():null;if(!p)continue;
+            const d=dir(p,0,Math.min(p.length-1,10)), t=Math.abs(((d-heading+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI);
+            let cx=0;for(const q of p)cx+=X[q];cx/=p.length;const s=t+3*Math.max(0,cx-X[cur])/S;
+            if(!best||s<best.s)best={s,k,p};}
+          if(best){unvis.delete(best.k);const p=best.p;for(let q=1;q<p.length;q++)stroke.push(p[q]);cur=p[p.length-1];heading=dir(p,Math.max(0,p.length-10),p.length-1);continue;}
+          // nothing left here: go back along what's drawn (a short way) or lift the pen
+          let nk=-1,nx=1e9;for(const k of unvis){let m=1e9;for(const q of Ec[k])m=Math.min(m,X[q]);if(m<nx){nx=m;nk=k;}}
+          const tg=[Ec[nk][0],Ec[nk][Ec[nk].length-1]];
+          const dist=new Map([[cur,0]]),prev=new Map(),todo=new Set([cur]);
+          while(todo.size){let u=-1,du=1e9;for(const q of todo){const d=dist.get(q);if(d<du){du=d;u=q;}}todo.delete(u);
+            for(const ed of H.get(u)||[]){const nd=du+ed.w;if(nd<(dist.has(ed.to)?dist.get(ed.to):1e9)){dist.set(ed.to,nd);prev.set(ed.to,{from:u,k:ed.k});todo.add(ed.to);}}}
+          const reach=tg.filter(t=>dist.has(t)).sort((a,z)=>dist.get(a)-dist.get(z));
+          if(reach.length&&dist.get(reach[0])<.6*S){const t=reach[0], route=[];let q=t;while(q!==cur){const pv=prev.get(q);route.unshift(pv);q=pv.from;}
+            for(const st of route){const e=Ec[st.k], p=e[0]===st.from?e:e.slice().reverse();for(let q2=1;q2<p.length;q2++)stroke.push(p[q2]);}
+            cur=t;}
+          else{strokes.push(stroke);cur=tg.reduce((a,t)=>Math.hypot(X[t]-X[cur],Y[t]-Y[cur])<Math.hypot(X[a]-X[cur],Y[a]-Y[cur])?t:a);stroke=[cur];}
+        }
+        strokes.push(stroke);
+      }
+      // smooth: drop near-straight points, then round the corners twice
+      const rdp=(p,eps)=>{if(p.length<3)return p;const[ax,ay]=p[0],[bx,by]=p[p.length-1],L2=Math.hypot(bx-ax,by-ay)||1e-9;let mi=0,md=-1;
+        for(let i=1;i<p.length-1;i++){const d=Math.abs((bx-ax)*(p[i][1]-ay)-(by-ay)*(p[i][0]-ax))/L2;if(d>md){md=d;mi=i;}}
+        return md>eps?rdp(p.slice(0,mi+1),eps).slice(0,-1).concat(rdp(p.slice(mi),eps)):[p[0],p[p.length-1]];};
+      const chaikin=p=>{const o=[p[0]];for(let i=0;i<p.length-1;i++){const[a,c]=p[i],[bq,d]=p[i+1];o.push([.75*a+.25*bq,.75*c+.25*d],[.25*a+.75*bq,.25*c+.75*d]);}o.push(p[p.length-1]);return o;};
+      const out=[];
+      for(const s of strokes){if(s.length<3)continue;let p=s.map(k=>[X[k],Y[k]]);p=chaikin(chaikin(rdp(p,.9)));
+        out.push(p.map(([a,c])=>[+((a-ox)/S).toFixed(3),+((c-oy)/S).toFixed(3)]));}
+      return out.length?out:null;
+    }
+    function pathFor(txt,family){
+      try{const c=JSON.parse(localStorage.getItem(KEY)||'{}'),v=c[txt];if(v&&v.v===VER&&v.f===family)return v.s;}catch(e){}
+      let s=null;try{s=penPathOf(txt,family);}catch(e){s=null;}
+      if(s)try{const c=JSON.parse(localStorage.getItem(KEY)||'{}');delete c[txt];c[txt]={v:VER,f:family,s};
+        const k=Object.keys(c);while(k.length>4)delete c[k.shift()];localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}
+      return s;
+    }
+    const show=name=>{if(name)name.classList.remove('is-penning');};
+    // Before the hello: keep the name back so it can be written, never longer than 6 s.
+    function hold(name){
+      if(used||!name||still())return;
+      held=name;name.classList.add('is-penning');
+      clearTimeout(safety);safety=setTimeout(()=>{if(!run)show(held);},6000);
+    }
+    function release(){clearTimeout(safety);if(run)run.stop();else show(held);held=null;}
+    function start(button){
+      const name=button&&button.parentElement&&button.parentElement.querySelector('.home-greeting-name');
+      if(used||!name||!name.classList.contains('is-penning'))return;
+      used=true;clearTimeout(safety);
+      if(still()||document.hidden){show(name);return;}
+      const txt=name.textContent.trim(), cs=getComputedStyle(name), family=cs.fontFamily, size=parseFloat(cs.fontSize);
+      const fail=()=>{run=null;show(name);};
+      const fontOk=document.fonts&&document.fonts.load?Promise.race([document.fonts.load(`400 ${size}px ${family}`,txt),new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
+      fontOk.then(()=>{
+        if(!name.isConnected||document.hidden||still())return fail();
+        if(document.fonts&&document.fonts.check&&!document.fonts.check(`400 ${size}px ${family}`,txt))return fail();
+        const strokes=pathFor(txt,family);
+        if(!strokes)return fail();
+        write(name,txt,family,size,strokes);
+      },fail);
+    }
+    function write(name,txt,family,size,strokes){
+      const row=name.parentElement;
+      // where the name's baseline starts, in the row's own coordinates
+      const mk=document.createElement('span');mk.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';
+      name.insertBefore(mk,name.firstChild);
+      const r=mk.getBoundingClientRect(), rr=row.getBoundingClientRect();mk.remove();
+      const ox=r.left-rr.left-row.clientLeft, oy=r.top-rr.top-row.clientTop, W=row.clientWidth, H=row.clientHeight;
+      const el=(tag,attrs,parent)=>{const n=document.createElementNS(NS,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;};
+      const svg=el('svg',{class:'home-name-pen','aria-hidden':'true',focusable:'false',width:W,height:H,viewBox:`0 0 ${W} ${H}`});
+      const defs=el('defs',{},svg);
+      // the name's own shadow (home-polish.css, the lettering block), as SVG
+      const sh=el('filter',{id:'hnpShadow',x:'-30%',y:'-60%',width:'160%',height:'220%'},defs);
+      [[1,1,.6],[2,3,.35],[3,11,.42]].forEach(([dy,sd,o])=>el('feDropShadow',{dx:0,dy,stdDeviation:sd,'flood-color':'#040e1c','flood-opacity':o},sh));
+      const glow=el('filter',{id:'hnpGlow',x:'-50%',y:'-50%',width:'200%',height:'200%'},defs);el('feGaussianBlur',{stdDeviation:size*.045},glow);
+      const rg=el('radialGradient',{id:'hnpBall'},defs);
+      [[0,'#ffffff',1],[.13,'#e6ebff',1],[.3,'#7686ea',.95],[.56,'#252E6D',.82],[1,'#252E6D',0]].forEach(([o,c,a])=>el('stop',{offset:o,'stop-color':c,'stop-opacity':a},rg));
+      const mask=el('mask',{id:'hnpInk',maskUnits:'userSpaceOnUse',x:-W,y:-H,width:W*3,height:H*3},defs);
+      el('rect',{x:-W,y:-H,width:W*3,height:H*3,fill:'#000'},mask);
+      const band=el('g',{fill:'none',stroke:'#fff','stroke-linecap':'round','stroke-linejoin':'round','stroke-width':size*.11},mask);
+      const paths=strokes.map(s=>el('path',{d:'M'+s.map(([x,y])=>(ox+x*size).toFixed(2)+' '+(oy+y*size).toFixed(2)).join('L')},band));
+      const full=el('rect',{x:-W,y:-H,width:W*3,height:H*3,fill:'#fff',opacity:0},mask);
+      const ink=el('g',{mask:'url(#hnpInk)'},el('g',{filter:'url(#hnpShadow)'},svg));
+      const t=el('text',{x:ox,y:oy,'font-size':size,fill:'#fff'},ink);t.style.fontFamily=family;t.textContent=txt;
+      const sparks=el('g',{},svg), ball=el('g',{opacity:0},svg);
+      el('circle',{r:size*.34,fill:'url(#hnpBall)'},ball);
+      el('circle',{r:size*.1,fill:'#3646b8',opacity:.5,filter:'url(#hnpGlow)'},ball);
+      el('circle',{r:size*.048,fill:'#fff'},ball);
+      row.appendChild(svg);
+      // timing: about 1.5 s of ink for "José", never more than 3 s, with a
+      // short pen lift between strokes (the speed Jose picked)
+      const lens=paths.map(p=>p.getTotalLength()), sum=lens.reduce((a,b)=>a+b,0)||1, em=sum/size;
+      const drawMs=Math.min(3000,1500*Math.pow(em/7.63,.6)), LIFT=150;
+      const phases=[];let t0=0;
+      lens.forEach((L,i)=>{const d=Math.max(130,drawMs*L/sum);phases.push({i,start:t0,dur:d});t0+=d+(i<lens.length-1?LIFT:0);});
+      const total=t0, ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+      paths.forEach((p,i)=>{p.style.strokeDasharray=`${lens[i]} ${lens[i]+1}`;p.style.strokeDashoffset=lens[i];});
+      let raf=0, lastSpark=0, start=0, done=false;
+      const spark=(x,y)=>{
+        const c=el('circle',{cx:x+(Math.random()-.5)*size*.06,cy:y+(Math.random()-.5)*size*.06,r:size*(.012+Math.random()*.016),fill:'#a7b3ff'},sparks);
+        if(!c.animate){c.remove();return;}
+        const a=c.animate([{opacity:.95,transform:'translate(0,0)'},{opacity:0,transform:`translate(${(Math.random()-.5)*size*.25}px,${size*(.05+Math.random()*.2)}px)`}],{duration:520+Math.random()*260,easing:'cubic-bezier(.2,.7,.3,1)'});
+        a.onfinish=()=>c.remove();
+      };
+      const resized=new ResizeObserver(()=>{if(row.clientWidth!==W)stop();});
+      function stop(){
+        if(done)return;done=true;cancelAnimationFrame(raf);resized.disconnect();
+        svg.remove();show(name);if(run&&run.stop===stop)run=null;
+      }
+      function tick(now){
+        if(!svg.isConnected||document.hidden)return stop();
+        if(!start)start=now;const tm=now-start;
+        for(const ph of phases){const u=Math.min(1,Math.max(0,(tm-ph.start)/ph.dur));paths[ph.i].style.strokeDashoffset=lens[ph.i]*(1-ease(u));}
+        const ph=phases.find(p=>tm>=p.start&&tm<p.start+p.dur);
+        if(ph){
+          const u=(tm-ph.start)/ph.dur, pt=paths[ph.i].getPointAtLength(lens[ph.i]*ease(u));
+          const edge=Math.min(1,(tm-ph.start)/80,(ph.start+ph.dur-tm)/80);
+          ball.setAttribute('transform',`translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`);
+          ball.setAttribute('opacity',(ph.i===phases.length-1?Math.min(1,(tm-ph.start)/80):edge).toFixed(3));
+          if(tm-lastSpark>30){spark(pt.x,pt.y);lastSpark=tm;}
+        }else ball.setAttribute('opacity',0);
+        if(tm>=total){
+          // the last of the ink settles in and the light flares out
+          const last=phases[phases.length-1], pt=paths[last.i].getPointAtLength(lens[last.i]);
+          ball.setAttribute('transform',`translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`);ball.setAttribute('opacity',1);
+          if(full.animate)full.animate([{opacity:0},{opacity:1}],{duration:380,fill:'forwards'});else full.setAttribute('opacity',1);
+          const inner=el('g',{},ball);while(ball.firstChild!==inner)inner.appendChild(ball.firstChild);
+          if(inner.animate)inner.animate([{transform:'scale(1)',opacity:1},{transform:'scale(1.7)',opacity:1,offset:.35},{transform:'scale(.4)',opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
+          setTimeout(stop,660);return;
+        }
+        raf=requestAnimationFrame(tick);
+      }
+      resized.observe(row);
+      run={stop};
+      // a breath after Dr. Smiley starts to appear
+      setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
+    }
+    return {hold,start,release,get busy(){return !!run;}};
+  })();
+
   window.initHomeGreeting = function(content){
     const wave=content && content.querySelector('.home-wave-icon');
     if(!wave || wave.dataset.waveReady)return;
@@ -787,6 +1019,7 @@
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     keepQuoteEnd(wave.closest('.home-greeting-text'));
+    if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
     fitWave(wave);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
     // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
@@ -817,10 +1050,10 @@
       startIdle(wave);
     }
   };
-  reduced.addEventListener('change',()=>{clearTimeout(startupTimer);++requestId;stopGreeting();idleStop();if(!reduced.matches&&hasWavedHello&&lastGreetingWave)startIdle(lastGreetingWave.el);if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');});
+  reduced.addEventListener('change',()=>{clearTimeout(startupTimer);++requestId;stopGreeting();idleStop();namePen.release();if(!reduced.matches&&hasWavedHello&&lastGreetingWave)startIdle(lastGreetingWave.el);if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');});
   // His mode changed (Lively / Focused / Still): Still stops his idle here,
   // leaving it starts it again; Lively and Focused are the engine's business.
-  window.addEventListener('drmodechange',()=>{if(still()){idleStop();}else if(!idleRunning&&hasWavedHello&&lastGreetingWave&&lastGreetingWave.el.isConnected)startIdle(lastGreetingWave.el);});
+  window.addEventListener('drmodechange',()=>{if(still()){idleStop();namePen.release();}else if(!idleRunning&&hasWavedHello&&lastGreetingWave&&lastGreetingWave.el.isConnected)startIdle(lastGreetingWave.el);});
 
   /* Reopening an installed PWA does not reload the page, so without this the
      wave fires once on the very first launch and never again -- which is not
@@ -872,7 +1105,7 @@
     fitQueued=requestAnimationFrame(()=>{fitQueued=0;if(lastGreetingWave&&lastGreetingWave.el.isConnected)fitWave(lastGreetingWave.el);});
   },{passive:true});
   document.addEventListener('visibilitychange', () => {
-    if(document.visibilityState !== 'visible'){clearTimeout(startupTimer);++requestId;stopGreeting();idleStop();if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');return;}
+    if(document.visibilityState !== 'visible'){clearTimeout(startupTimer);++requestId;stopGreeting();idleStop();namePen.release();if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');return;}
     const w = lastGreetingWave;
     if(!w || !w.el.isConnected) return;
     const now = Date.now();
