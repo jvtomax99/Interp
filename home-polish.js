@@ -663,11 +663,12 @@
       return `<svg viewBox="0 0 260 261" focusable="false"><defs>${defs}</defs>${g}</svg>`;
     }
     function glow(){
-      const btn=ring.parentElement,b=btn.getBoundingClientRect(),cx=b.left+32,cy=b.top+32;
-      // Visible: above his coat and outside his face (about 25px across the middle).
+      const btn=ring.parentElement,b=btn.getBoundingClientRect(),cx=(b.left+b.right)/2,cy=(b.top+b.bottom)/2,k=b.width/64;
+      // Visible: above his coat and outside his face (about 25px across the
+      // middle at his drawn size; k for his size in the greeting).
       const seen=[...ring.querySelectorAll('.home-ask-sq')].filter(q=>{
         const r=q.lastChild.getBoundingClientRect(),x=(r.left+r.right)/2-cx,y=(r.top+r.bottom)/2-cy;
-        return y<12&&Math.hypot(x,y)>27;
+        return y<12*k&&Math.hypot(x,y)>27*k;
       });
       const q=seen[Math.floor(Math.random()*seen.length)];
       if(!q)return;
@@ -785,6 +786,8 @@
     askBadge.attach(wave);
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
+    fitWave(wave);
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
     const play=()=>playGreeting(wave);
     // Tapping the smiley opens Ask the Hub (index.html, window.openAskHub).
     // The hello still plays by itself when the app opens; if Ask the Hub is
@@ -825,6 +828,33 @@
      not set the hand off again. */
   const WAVE_RESUME_GAP_MS = 45000;
   let lastGreetingWave = null, lastWaveAt = 0;
+
+  /* His size in the greeting is --hw-size (home-polish.css, a plain number:
+     1 is the 64px he's drawn at). A first name sits beside him, and a bigger
+     him leaves it less room, so when the name would no longer fit on one line
+     (it would break mid-word: "Guadalup / e") he takes the largest size at
+     which it does, never less than 1 (--hw-k on .home-greeting-text). Again
+     once the fonts are in, and when the screen changes size. */
+  function fitWave(wave){
+    const text=wave.closest('.home-greeting-text'),row=wave.parentElement,name=row&&row.querySelector('.home-greeting-name');
+    if(!text||!name)return;
+    text.style.removeProperty('--hw-k');
+    const size=parseFloat(getComputedStyle(text).getPropertyValue('--hw-size'))||1;
+    if(size<=1)return;
+    const ws=name.style.whiteSpace;name.style.whiteSpace='nowrap';
+    const r=document.createRange();r.selectNodeContents(name);
+    const need=Math.ceil(r.getBoundingClientRect().width)+1;
+    name.style.whiteSpace=ws;
+    const wide=row.classList.contains('home-wave-wide-name'),gap=parseFloat(getComputedStyle(row).columnGap)||0;
+    // Beside him (long names): name, gap, him. Centred: him between two equal columns.
+    const fit=wide?(row.clientWidth-gap-need)/64:(row.clientWidth-2*need)/64;
+    if(fit<size)text.style.setProperty('--hw-k',Math.max(1,fit).toFixed(3));
+  }
+  let fitQueued=0;
+  window.addEventListener('resize',()=>{
+    if(fitQueued)return;
+    fitQueued=requestAnimationFrame(()=>{fitQueued=0;if(lastGreetingWave&&lastGreetingWave.el.isConnected)fitWave(lastGreetingWave.el);});
+  },{passive:true});
   document.addEventListener('visibilitychange', () => {
     if(document.visibilityState !== 'visible'){clearTimeout(startupTimer);++requestId;stopGreeting();idleStop();if(lastGreetingWave)lastGreetingWave.el.classList.remove('home-wave-pending');return;}
     const w = lastGreetingWave;
