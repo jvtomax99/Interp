@@ -5716,6 +5716,96 @@ html[data-theme="dark"] .ask-do-btn.is-main{ background:#AFC0FF; border-color:#A
   font:500 16px/1.4 var(--sans); color:var(--ink); resize:vertical; }
 .ask-fix textarea:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 3px var(--accent-soft); }
 .ask-sent{ font-size:14px; color:var(--good); border-top:1px solid var(--line-soft); padding-top:9px; }
+/* ---- Reading an answer (askTurnHtml) ----
+   Hierarchy: who and how sure (Dr. Smiley · From the Hub), the headline,
+   one structured block when the data for it is checked (askLayout), what to
+   say, the details, then sources, the next steps and a quiet footer. Text
+   stays selectable; only messages that just arrived ease in. */
+:root{ --ask-amber:#8A5A0E; --ask-amber-soft:#FFF8EA; --ask-amber-line:#EBD3A6; }
+html[data-theme="dark"]{ --ask-amber:#F1C37A; --ask-amber-soft:#2E2617; --ask-amber-line:#5A4724; }
+.ask-card, .ask-q{ -webkit-user-select:text; user-select:text; }
+.ask-a{ gap:9px; padding:13px 17px 6px; }
+.ask-by{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; min-height:22px; }
+.ask-by-name{ font:650 13px/1 var(--sans); color:var(--navy); letter-spacing:-.005em; }
+html[data-theme="dark"] .ask-by-name{ color:var(--accent-2); }
+.ask-by .ask-tag{ align-self:center; }
+.ask-a .ask-headline{ font-size:17px; line-height:1.3; letter-spacing:-.015em; }
+.ask-sayblock{ padding:9px 13px; border-radius:var(--r-md); background:color-mix(in srgb, var(--accent-soft) 70%, var(--paper)); }
+.ask-sayblock .ask-lab{ margin-bottom:3px; }
+.ask-a .ask-details{ font-size:15px; line-height:1.55; }
+.ask-a .ask-details.ask-check{ font-size:13px; line-height:1.45; }
+/* Structured blocks */
+.ask-lay{ border-radius:var(--r-md); border:1px solid var(--line-soft); background:var(--bg-hi); padding:9px 13px; display:flex; flex-direction:column; gap:6px; }
+.ask-tl{ display:flex; align-items:baseline; gap:9px; min-width:0; }
+.ask-tl b{ font:650 17px/1.3 var(--sans); letter-spacing:-.01em; color:var(--ink); overflow-wrap:anywhere; }
+.ask-tl.is-es b{ font-weight:600; color:var(--good); }
+.ask-lang{ flex:none; width:26px; text-align:center; font:700 11px/18px var(--sans); letter-spacing:.06em; border-radius:6px; color:var(--ink-soft); background:var(--line-soft); }
+.ask-tl.is-es .ask-lang{ color:var(--good); background:var(--good-soft); }
+.ask-tmeta{ font-size:12px; color:var(--ink-faint); padding-left:35px; }
+.ask-cmp{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; padding:0; border:0; background:none; }
+.ask-cc{ display:flex; flex-direction:column; gap:3px; min-width:0; padding:9px 11px; border-radius:12px; border:1px solid var(--line-soft); background:var(--bg-hi); }
+.ask-cc b{ font:650 15px/1.3 var(--sans); color:var(--ink); overflow-wrap:anywhere; }
+.ask-cc .ask-es{ font:600 14px/1.3 var(--sans); color:var(--good); overflow-wrap:anywhere; }
+.ask-cc p{ font-size:13px; line-height:1.4; color:var(--ink-soft); }
+.ask-cc strong{ font-weight:650; color:var(--ink); }
+.ask-cl{ font:700 11px/1.2 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+.ask-cmp.is-ff .ask-cc.is-es{ background:var(--good-soft); border-color:transparent; }
+.ask-ll{ font:700 11px/1.3 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); }
+.ask-lay ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.ask-list li{ position:relative; padding-left:24px; font-size:14px; line-height:1.4; color:var(--ink); }
+.ask-list li::before{ content:""; position:absolute; left:2px; top:2px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent-2); }
+.ask-list li small{ display:block; font-size:12px; color:var(--ink-soft); }
+.ask-prac li{ display:flex; align-items:center; justify-content:space-between; gap:9px; border-top:1px solid var(--line-soft); }
+.ask-prac li:first-child{ border-top:0; }
+.ask-pr{ flex:1; min-width:0; min-height:44px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:1px; padding:4px 0;
+  border:0; background:none; color:var(--ink); text-align:left; cursor:pointer; font:inherit; }
+.ask-pr b{ font:600 15px/1.3 var(--sans); }
+.ask-pr-es{ font:600 14px/1.3 var(--sans); color:var(--good); }
+.ask-pr-show{ font:600 12px/1.3 var(--sans); color:var(--navy); }
+html[data-theme="dark"] .ask-pr-show{ color:var(--accent-2); }
+.ask-pr:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; border-radius:8px; }
+.ask-fb{ flex:none; font:600 12px/1 var(--sans); padding:5px 8px; border-radius:999px; color:var(--ink-soft); background:var(--line-soft); }
+.ask-fb.is-miss{ color:var(--danger); background:var(--danger-soft); }
+.ask-fb.is-due{ color:var(--ask-amber); background:var(--ask-amber-soft); }
+/* Sources: one compact row */
+.ask-a .ask-src{ align-items:center; gap:6px; }
+.ask-src-lab{ font:700 11px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); margin-right:2px; }
+.ask-a .ask-src button{ position:relative; min-height:30px; padding:4px 11px; font:600 13px/1.2 var(--sans); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ask-a .ask-src button::after{ content:""; position:absolute; inset:-7px -2px; }
+.ask-a .ask-src button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.ask-a .ask-do{ flex-direction:row; flex-wrap:wrap; }
+.ask-a .ask-do-btn{ flex:1 1 auto; }
+/* The footer: quiet, one row */
+.ask-foot{ gap:2px; padding-top:2px; margin:0 -9px; }
+.ask-foot button{ flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 9px; border:0; background:none;
+  color:var(--ink-soft); font:600 13px var(--sans); border-radius:var(--r-sm); }
+.ask-foot button svg{ width:16px; height:16px; flex:none; }
+.ask-foot button.is-on{ background:none; color:var(--good); }
+.ask-foot button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-2px; }
+/* States: loading, stopped, offline, failed, refused */
+.ask-wait{ gap:9px; padding:4px 4px 4px 13px; border-radius:999px; border:1px solid var(--line); background:var(--paper); }
+.ask-wait .ask-dots{ align-self:center; padding:0; border:0; background:none; }
+.ask-wait-l{ font-size:14px; color:var(--ink-soft); }
+.ask-state{ display:flex; align-items:center; gap:6px; font:650 14px/1.3 var(--sans); color:var(--ink-soft); }
+.ask-state svg{ width:18px; height:18px; flex:none; }
+.ask-card.is-stopped{ background:var(--bg-hi); box-shadow:none; border-style:dashed; }
+.ask-card.is-offline{ background:var(--ask-amber-soft); border-color:var(--ask-amber-line); }
+.ask-card.is-offline .ask-state{ color:var(--ask-amber); }
+.ask-card.is-failed{ background:color-mix(in srgb, var(--danger) 7%, var(--paper)); border-color:color-mix(in srgb, var(--danger) 38%, var(--line)); }
+.ask-card.is-failed .ask-state{ color:var(--danger); }
+.ask-card.is-refused .ask-state{ color:var(--ink); }
+/* Arriving: once, gently; nothing else moves. */
+.is-entering{ animation:askIn .24s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes askIn{ from{ opacity:0; transform:translateY(6px); } }
+.ask-jump{ position:sticky; bottom:9px; align-self:center; z-index:2; min-height:40px; padding:0 17px; border:0; border-radius:999px; cursor:pointer;
+  background:var(--navy); color:#fff; font:600 14px var(--sans); box-shadow:0 8px 20px -8px rgba(22,55,90,.5); }
+.ask-jump:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+@media (prefers-reduced-motion:reduce){ .is-entering{ animation:none; } }
+/* On a computer: one reading column, not the full width. */
+@media (min-width:901px){
+  #askMessages{ padding-inline:max(13px, calc((100% - 720px) / 2)); }
+  .ask-a .ask-headline{ font-size:18px; }
+}
 .ask-lesson{ display:flex; flex-direction:column; gap:6px; padding:13px 0; border-top:1px solid var(--line-soft); }
 .ask-lesson:first-of-type{ border-top:0; padding-top:4px; }
 .ask-lesson p{ margin:0; }
@@ -12893,9 +12983,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'askcards',    tone:'gd-n2', pin:'pins/medical-terminology.webp', eyebrow:'Dr. Smiley',            title:'Answers you can scan: English and Spanish, side by side' },
   { id:'askquick',    tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Ask him right where you are: tap him, a panel opens' },
   { id:'review',      tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Term Review',           title:'Type the Spanish: he checks it and explains misses' },
-  { id:'askfollow',   tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Follow-ups: “make it simpler”, “now in Spanish”' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12977,6 +13067,10 @@ const GUIDE_STEPS = {
   askexplain: () => ({ steps: [`Tap ${GUIDE_UI.dots} on the term’s card, then ${GUIDE_UI.menu('Explain with Dr. Smiley')}.`,
     'Ask opens with that term picked. You’ll see it just above the box.', `Tap ${GUIDE_UI.pill('Explain')}, or type your own question about it.`],
     note: 'You get the glossary entry, a plain way to say it to a patient, and where the entry came from. On a computer, Explain is a button on the card.' }),
+  askcards: () => ({ steps: [`Ask about a term, like <i>How do I explain “ejection fraction”?</i> The glossary’s English and Spanish show in a card, ${GUIDE_UI.tag('EN')} and ${GUIDE_UI.tag('ES')}.`,
+    'Ask the difference between two terms: they show side by side.',
+    `Tap a source under the answer, like ${GUIDE_UI.pill('Glossary · Ejection fraction')}, to open the entry.`],
+    note: 'The cards come only from the Hub’s own entries, your briefing and your practice record, never from guesses. Everything else is a plain answer.' }),
   askquick: () => ({ steps: [`Tap ${GUIDE_UI.ask} beside the tab bar (on a computer, his round button at the top right).`,
     'Type your question in the box just above him and tap the arrow.',
     `Read the answer there. Tap ${GUIDE_UI.pill('✕')} or tap outside to close; what you typed stays.`],
@@ -12994,7 +13088,7 @@ const GUIDE_STEPS = {
 };
 // Which "Show me" each answer offers (keys of GUIDE_COACH).
 const GUIDE_SHOW = { name:'name', noname:'name', askmoves:'name', edit:'dots', history:'dots', attach:'dots', askexplain:'dots',
-  askwhat:'dock', askquick:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
+  askwhat:'dock', askquick:'dock', askcards:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
   chat:'chat', mention:'chat', pin:'chat', updates:'bell' };
 
 const ICON_GD_SHOW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" opacity=".55"/></svg>';
@@ -16097,6 +16191,17 @@ const GUIDE_TOPICS = [
     </ul>
     <p>You can follow up the way you would with a teammate: <i>Make it simpler.</i> <i>Now in Spanish.</i> See <b>Can I ask a follow-up, or start over?</b></p>
     <p>He can also open things for you: a briefing, practice, a term. Tap the button he offers. He only says it's done once the screen is open.</p>` },
+
+  { id:'askcards', section:'ask', k:'answer card english spanish bilingual side by side compare comparison difference checklist practice sources source loading stopped offline failed error new answer scroll dr smiley', q:'What are the cards in Dr. Smiley’s answers?', a:`
+    <p>Each answer starts with <b>Dr. Smiley</b> and how sure it is (<b>From the Hub</b> or <b>Not from the Hub</b>), then the headline. When it fits, there's one card:</p>
+    <ul>
+      <li><b>A term</b>: the glossary's English (<b>EN</b>) and Spanish (<b>ES</b>), and its domain.</li>
+      <li><b>Two terms</b>: side by side, for “What's the difference between that and the previous term?” A False Friend shows the Spanish word next to the English it looks like.</li>
+      <li><b>A briefing</b>: a short checklist of what's in it.</li>
+      <li><b>Practice</b>: the terms you're still learning, with what your Term Review record says (<i>Missed last time</i>, <i>Due today</i>). Tap one to see its Spanish.</li>
+    </ul>
+    <p>The cards only use the Hub's own entries, your briefing and your record. Any other answer is plain text. Under the answer, <b>Sources</b> opens the entry it came from.</p>
+    <p>While he looks something up you'll see <b>Looking it up in the Hub…</b> and <b>Stop</b>. A stopped question, one waiting for a connection, or one that failed each says so, with what to do next. If you scroll up to reread while an answer arrives, you stay where you are and a <b>New answer</b> button takes you to it.</p>` },
 
   { id:'askquick', section:'ask', k:'ask quick panel dock bubble popup without leaving page close draft typing keyboard ring dot red blue busy dr smiley tap him', q:'How do I ask Dr. Smiley without leaving the page?', a:`
     <p>Tap Dr. Smiley beside the tab bar (on a computer, his round button at the top right). A small <b>Ask the Hub</b> panel opens just above him, over the page you're on.</p>
@@ -20263,7 +20368,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1008.0924';
+const BUILD_ID = 'b1008.0945';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -24445,44 +24550,66 @@ function askMessagesHtml(){
     </div>` : '');
 }
 
+// The little marks on state cards and the footer.
+const ASK_ICO = {
+  stop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5" fill="currentColor"/></svg>',
+  off: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3l18 18M8.5 8.6A5.5 5.5 0 0 0 6 13.2 4 4 0 0 0 7 21h10.5M11 6.2A5.5 5.5 0 0 1 17.6 10 4 4 0 0 1 20.5 17" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+  fail: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.5 2.8 19.5h18.4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg>',
+  no: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.9"/><path d="M6.2 17.8 17.8 6.2" stroke="currentColor" stroke-width="1.9"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11v9H4.5V11ZM7 11l4-7c1.6 0 2.5 1.2 2.1 2.8L12.6 10h5.2a2 2 0 0 1 2 2.4l-1.3 6A2 2 0 0 1 16.5 20H7" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+};
+// A state card's first line: what happened, with its mark.
+const askStateLine = (ico, text) => `<p class="ask-state">${ASK_ICO[ico]}<span>${text}</span></p>`;
 function askTurnHtml(t){
   if(t.hidden) return '';
-  const q = `<div class="ask-q">${escapeHtml(t.qLabel || t.q)}</div>`;
-  if(t.status === 'loading') return q + `<div class="ask-wait"><div class="ask-dots" role="status" aria-label="Looking it up"><span></span><span></span><span></span></div>
+  const q = `<div class="ask-q" data-k="${t.id}:q">${escapeHtml(t.qLabel || t.q)}</div>`;
+  const k = `data-k="${t.id}:${t.status}"`;
+  if(t.status === 'loading') return q + `<div class="ask-wait" ${k}><span class="ask-dots" role="status" aria-label="Looking it up"><span></span><span></span><span></span></span>
+    <span class="ask-wait-l" aria-hidden="true">Looking it up in the Hub…</span>
     <button type="button" class="ask-stop" onclick="askCancel()">${ICON_ASK_STOP}Stop</button></div>`;
   // Each way it can go wrong says what happened and offers the next step.
   if(t.status === 'cancelled') return q + `
-    <div class="ask-card">
+    <div class="ask-card is-stopped" ${k}>
+      ${askStateLine('stop', 'Stopped')}
       <p class="ask-details">${escapeHtml(t.note || 'Stopped. Ask again whenever you like.')}</p>
       <div class="ask-acts"><button type="button" onclick="askEdit('${t.id}')">Edit question</button><button type="button" onclick="askRetry('${t.id}')">Ask again</button></div>
     </div>`;
   if(t.status === 'waiting') return q + `
-    <div class="ask-card ask-warn" role="status">
+    <div class="ask-card ask-warn is-offline" role="status" ${k}>
+      ${askStateLine('off', 'Waiting for a connection')}
       <p class="ask-details">You're offline. I'll ask as soon as you're back online.</p>
       <div class="ask-acts"><button type="button" onclick="askDontWait('${t.id}')">Don't ask</button><button type="button" onclick="askRetry('${t.id}')">Try now</button></div>
     </div>`;
   if(t.status === 'refused') return q + `
-    <div class="ask-card ask-warn">
+    <div class="ask-card ask-warn is-refused" ${k}>
+      ${askStateLine('no', 'I can’t answer that one')}
       <p class="ask-details">I can't help with that one. Try asking it a different way.</p>
       ${askActionsHtml(t)}
       <div class="ask-acts"><button type="button" class="is-go" onclick="askEdit('${t.id}')">Ask it another way</button></div>
     </div>`;
   if(t.status === 'error') return q + `
-    <div class="ask-card ask-warn">
+    <div class="ask-card ask-warn is-failed" role="alert" ${k}>
+      ${askStateLine('fail', 'Couldn’t get an answer')}
       <p class="ask-details">${escapeHtml(t.error)}</p>
       ${askActionsHtml(t)}
-      <div class="ask-acts"><button type="button" onclick="askRetry('${t.id}')">Try again</button></div>
+      <div class="ask-acts"><button type="button" class="is-go" onclick="askRetry('${t.id}')">Try again</button></div>
     </div>`;
   const a = t.answer;
   const notes = (a.lessonIds || []).map(id => ASK.lessons.find(l => l.id === id)).filter(Boolean);
   const sources = (a.sourceIds || []).map(id => t.labels[id] ? { id, label: t.labels[id] } : null).filter(Boolean);
   const canAdd = !a.local && !a.fromHub && a.suggestTerm && a.suggestTerm.en;
+  const lay = askLayout(t);
+  const sayEs = /spanish|español|espanol/i.test(a.sayLabel || '');
+  const tag = a.convo || a.clarify ? '' : a.mem ? `<span class="ask-tag is-local">On this device</span>` : a.local ? `<span class="ask-tag is-local">On this phone · offline</span>`
+    : a.usedCorrection ? `<span class="ask-tag is-off is-user">Your correction · not checked</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`;
   return q + `
-    <div class="ask-card" id="ask-${t.id}">
-      ${a.convo || a.clarify ? '' : a.mem ? `<span class="ask-tag is-local">On this device</span>` : a.local ? `<span class="ask-tag is-local">On this phone · offline</span>`
-        : a.usedCorrection ? `<span class="ask-tag is-off is-user">Your correction · not checked</span>` : `<span class="ask-tag ${a.fromHub ? '' : 'is-off'}">${a.fromHub ? 'From the Hub' : 'Not from the Hub'}</span>`}
+    <div class="ask-card ask-a${lay ? ' has-lay is-' + lay.kind : ''}" id="ask-${t.id}" ${k} role="article" aria-label="Dr. Smiley’s answer">
+      <div class="ask-by"><span class="ask-by-name">Dr. Smiley</span>${tag}</div>
       <p class="ask-headline">${escapeHtml(a.headline)}</p>
-      ${a.say ? `<div><p class="ask-lab">${escapeHtml(a.sayLabel || 'Say')}</p><p class="ask-say">${escapeHtml(a.say)}</p></div>` : ''}
+      ${lay ? askLayoutSafe(lay, t) : ''}
+      ${a.say ? `<div class="ask-sayblock"><p class="ask-lab">${escapeHtml(a.sayLabel || 'Say')}</p><p class="ask-say"${sayEs ? ' lang="es"' : ''}>${escapeHtml(a.say)}</p></div>` : ''}
       ${notes.map(n => `<div class="ask-note"><p class="ask-lab">Team note</p><p>${escapeHtml(n.note)}</p>
         <small>${n.suggestedBy ? 'Suggested by ' + escapeHtml(n.suggestedBy) + ' · ' : ''}approved by ${escapeHtml(n.reviewedBy || askOwnerFirst())}</small></div>`).join('')}
       ${a.details ? `<p class="ask-details">${escapeHtml(a.details)}</p>` : ''}
@@ -24490,7 +24617,7 @@ function askTurnHtml(t){
         : a.fromHub || a.local || a.clarify || askHandoff(t) ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
       ${askSourceLineHtml(t)}
       ${askActionsHtml(t)}
-      ${sources.length ? `<div class="ask-src">${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${escapeAttr(s.id)}')">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
+      ${sources.length ? `<div class="ask-src" role="group" aria-label="Sources"><span class="ask-src-lab" aria-hidden="true">Sources</span>${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${escapeAttr(s.id)}')" aria-label="Open source: ${escapeAttr(s.label)}">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
       ${a.local || a.clarify ? '' : t.fixOpen ? `
         <div class="ask-fix">
           <label class="ask-lab" for="askFix-${t.id}">What works better?</label>
@@ -24498,25 +24625,202 @@ function askTurnHtml(t){
           <p class="ask-details">Your note goes to ${escapeHtml(askOwnerFirst())}. Nothing changes until it's approved.</p>
           <div class="ask-acts"><button type="button" onclick="askToggleFix('${t.id}', false)">Cancel</button><button type="button" class="is-go" onclick="askSendFix('${t.id}')">Send</button></div>
         </div>` : t.fixSent ? `<p class="ask-sent">Thanks! ${escapeHtml(askOwnerFirst())} will review your note.</p>` : `
-        <div class="ask-acts">
-          <button type="button" class="${t.helpful ? 'is-on' : ''}" onclick="askHelpful('${t.id}')">${t.helpful ? 'Thanks!' : 'Helpful'}</button>
-          ${canAdd ? `<button type="button" onclick="askAddTerm('${t.id}')">Add to glossary</button>` : ''}
-          <button type="button" onclick="askToggleFix('${t.id}', true)">Correct this</button>
+        <div class="ask-acts ask-foot">
+          <button type="button" class="${t.helpful ? 'is-on' : ''}" onclick="askHelpful('${t.id}')"${t.helpful ? ' aria-pressed="true"' : ''}>${ASK_ICO.up}${t.helpful ? 'Thanks!' : 'Helpful'}</button>
+          ${canAdd ? `<button type="button" onclick="askAddTerm('${t.id}')">${ASK_ICO.plus}Add to glossary</button>` : ''}
+          <button type="button" onclick="askToggleFix('${t.id}', true)">${ASK_ICO.pen}Correct this</button>
         </div>`}
     </div>`;
 }
 
+/* ---- How an answer is laid out ----
+   A structured layout only when the data for it is checked, never read out
+   of the answer's own words:
+     term      the one glossary entry the answer cites (one that was sent with
+               the question and is still in the glossary): its English and
+               Spanish as the glossary has them
+     ff        the one False Friend it cites: the Spanish word and the English
+               it looks like, side by side
+     compare   two entries side by side: a comparison follow-up ("the
+               difference between that and the previous term") whose two
+               terms the answer cites, or a question naming two entries the
+               answer cites both of
+     prep      a briefing it hands over (a checked open/continue action):
+               what's in it, from the briefing itself
+     practice  the still-learning terms it offers to practise, from your Term
+               Review record, with what the record says about each
+   Anything else is the plain card: headline, what to say, details. */
+const ASK_CMP_RE = /\b(difference|differ\w*|compare\w*|comparison|versus|vs|or|diferencia\w*|compar\w*|o)\b/;
+// Glossary entries and False Friends the answer cites, among those sent with the question.
+function askCited(t){
+  const a = t.answer || {};
+  return (a.sourceIds || []).filter((id, i, all) => all.indexOf(id) === i && t.labels && t.labels[id] && /^(t|ff):/.test(id) && askResource(id));
+}
+function askLayout(t){
+  const a = t.answer;
+  if(t.status !== 'done' || !a || a.clarify || a.mem || a.convo) return null;
+  const cited = askCited(t);
+  let pair = null;
+  if(t.fu === 'compare' && (t.about || []).length === 2 && t.about.every(id => cited.includes(id))) pair = t.about.slice();
+  else if(cited.length >= 2 && ASK_CMP_RE.test(foldText(t.q || '').toLowerCase())){
+    const named = askNamesSomething(t.q).filter(id => cited.includes(id));
+    if(named.length >= 2) pair = named.slice(0, 2);
+  }
+  if(pair) return { kind: 'compare', ids: pair };
+  const acts = (t.actions || []).filter(x => askCheckAction(x, t).ok);
+  const prep = acts.find(x => x.type === 'open_prep' || x.type === 'continue_prep');
+  if(prep){
+    const d = askSpecialties().find(s => s.id === String(prep.target).replace(/^spec:/, ''));
+    if(d) return { kind: 'prep', dom: d, cont: prep.type === 'continue_prep' };
+  }
+  if(acts.some(x => x.type === 'practice_learning') && typeof termReviewsLoaded !== 'undefined' && termReviewsLoaded){
+    const list = askLearningTerms().slice(0, t.n || 5);
+    if(list.length) return { kind: 'practice', list };
+  }
+  if(cited.length === 1){
+    const id = cited[0];
+    if(id.startsWith('t:')){ const x = askTermById(id); if(x && x.term.en && x.term.es) return { kind: 'term', x }; }
+    else{ const f = FALSE_FRIENDS[+id.slice(3)]; if(f && f.es && f.looks) return { kind: 'ff', f }; }
+  }
+  return null;
+}
+// The first sentence of a glossary definition, kept short.
+function askFirstLine(s){
+  s = String(s || '').trim();
+  const m = s.match(/^.{20,160}?[.!?](\s|$)/);
+  const one = m ? m[0].trim() : s;
+  return one.length > 150 ? one.slice(0, 147).replace(/\s+\S*$/, '') + '…' : one;
+}
+const askMeans = f => String(f.means || '').split(' —')[0];
+function askLayoutHtml(lay, t){
+  if(lay.kind === 'term'){
+    const { x } = lay;
+    return `<div class="ask-lay ask-term" role="group" aria-label="Glossary entry">
+      <div class="ask-tl"><span class="ask-lang" aria-hidden="true">EN</span><span class="sr-only">English: </span><b lang="en">${escapeHtml(x.term.en)}</b></div>
+      <div class="ask-tl is-es"><span class="ask-lang" aria-hidden="true">ES</span><span class="sr-only">Spanish: </span><b lang="es">${escapeHtml(x.term.es)}</b></div>
+      <p class="ask-tmeta">Glossary · ${escapeHtml(x.cat.name)}</p>
+    </div>`;
+  }
+  if(lay.kind === 'ff'){
+    const { f } = lay;
+    return `<div class="ask-lay ask-cmp is-ff" role="group" aria-label="False friend: ${escapeAttr(f.es)} and ${escapeAttr(f.looks)}">
+      <div class="ask-cc is-es"><span class="ask-cl">Spanish</span><b lang="es">${escapeHtml(f.es)}</b><p>means <strong>${escapeHtml(askMeans(f))}</strong></p></div>
+      <div class="ask-cc"><span class="ask-cl">Looks like</span><b lang="en">${escapeHtml(f.looks)}</b>${f.say ? `<p>say <strong lang="es">${escapeHtml(f.say)}</strong></p>` : ''}</div>
+    </div>`;
+  }
+  if(lay.kind === 'compare'){
+    const side = id => {
+      if(id.startsWith('t:')){
+        const x = askTermById(id);
+        return `<div class="ask-cc"><b lang="en">${escapeHtml(x.term.en || x.term.es)}</b>${x.term.es && x.term.en ? `<span class="ask-es" lang="es">${escapeHtml(x.term.es)}</span>` : ''}${x.term.def ? `<p>${escapeHtml(askFirstLine(x.term.def))}</p>` : ''}</div>`;
+      }
+      const f = FALSE_FRIENDS[+id.slice(3)];
+      return `<div class="ask-cc"><b lang="es">${escapeHtml(f.es)}</b><span class="ask-es">means ${escapeHtml(askMeans(f))}</span><p>Looks like “${escapeHtml(f.looks)}”.${f.say ? ` For that, say “${escapeHtml(f.say)}”.` : ''}</p></div>`;
+    };
+    const names = lay.ids.map(id => askResource(id).name);
+    return `<div class="ask-lay ask-cmp" role="group" aria-label="Side by side: ${escapeAttr(names.join(' and '))}">${lay.ids.map(side).join('')}</div>`;
+  }
+  if(lay.kind === 'prep'){
+    const d = DATA.categories.find(c => c.id === lay.dom.id);
+    if(!d) return '';
+    const w = prepWords(d), n = w.words.length;
+    const learning = w.words.filter(x => TERM_REVIEWS[x.t.id] && TERM_REVIEWS[x.t.id].box <= 1).length;
+    const traps = prepTraps(d), u = lay.cont && askUnfinished();
+    const items = [];
+    if(u) items.push(`You’re on card ${u.done + 1} of ${u.total}`);
+    if(n) items.push(`${n} word${n === 1 ? '' : 's'} to have ready${learning ? `<small>${learning} you’re still learning</small>` : ''}`);
+    if(traps.length) items.push(`Traps to watch: ${traps.map(f => `<span lang="es">${escapeHtml(f.es)}</span>`).join(', ')}`);
+    items.push(apptActive() ? 'Your appointment timer is running' : 'Start the appointment timer when you go in');
+    return `<div class="ask-lay ask-list" role="group" aria-label="In your ${escapeAttr(d.name)} briefing">
+      <p class="ask-ll">In your ${escapeHtml(d.name)} briefing</p>
+      <ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+  }
+  if(lay.kind === 'practice'){
+    const fb = r => !r ? ['', ''] : reviewMissedRec(r) ? ['is-miss', r.misses > 1 ? `Missed ${r.misses} times` : 'Missed last time']
+      : (r.nextReviewAt || 0) <= Date.now() ? ['is-due', 'Due today'] : ['', 'Still learning'];
+    return `<div class="ask-lay ask-prac" role="group" aria-label="Terms you’re still learning">
+      <p class="ask-ll">Still learning · from your Term Review</p>
+      <ul>${lay.list.map(term => {
+        const key = t.id + '|' + term.id, open = ASK.revealed && ASK.revealed.has(key), [c, label] = fb(TERM_REVIEWS[term.id]);
+        return `<li><button type="button" class="ask-pr" aria-expanded="${open}" onclick="askReveal('${t.id}','${escapeAttr(term.id)}', this)">
+          <b lang="en">${escapeHtml(term.en)}</b><span class="ask-pr-es" lang="es"${open ? '' : ' hidden'}>${escapeHtml(term.es || '—')}</span><span class="ask-pr-show"${open ? ' hidden' : ''}>Show Spanish</span></button>
+          ${label ? `<span class="ask-fb ${c}">${label}</span>` : ''}</li>`;
+      }).join('')}</ul></div>`;
+  }
+  return '';
+}
+// A layout that can't be drawn leaves the plain card; it never breaks the conversation.
+function askLayoutSafe(lay, t){ try{ return askLayoutHtml(lay, t); }catch(e){ console.warn('Ask layout:', e); return ''; } }
+// Practice card: tap a term to see its Spanish (kept for this conversation).
+function askReveal(turnId, termId, btn){
+  ASK.revealed = ASK.revealed || new Set();
+  const key = turnId + '|' + termId, open = !ASK.revealed.has(key);
+  if(open) ASK.revealed.add(key); else ASK.revealed.delete(key);
+  document.querySelectorAll('.ask-pr').forEach(b => {
+    if(b.getAttribute('onclick') !== btn.getAttribute('onclick')) return;
+    b.setAttribute('aria-expanded', String(open));
+    b.querySelector('.ask-pr-es').hidden = !open; b.querySelector('.ask-pr-show').hidden = open;
+  });
+}
+
+/* Redrawing the conversation keeps your place. New messages ease in once
+   (askEnter); the rest are left exactly as they were. It follows the
+   conversation only if you are at its end or just asked something: a new
+   answer then shows from its question, so a long one reads from the top.
+   If you were reading further up, you stay there and a "New answer" button
+   appears instead. */
 function renderAskMessages(scrollToEnd){
   drPanelSync();   // the dock's panel shows the same conversation
   const box = document.getElementById('askMessages');
   if(!box) return;
-  box.innerHTML = askMessagesHtml();
-  if(scrollToEnd) box.scrollTop = box.scrollHeight;
+  const atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  const justAsked = performance.now() - (ASK.sentAt || -1e9) < 1500;
+  const keep = box.scrollTop;
+  askEnter(box, askMessagesHtml());
+  askWatchScroll(box);
+  if(scrollToEnd && (atEnd || justAsked)) askScrollNewest(box);
+  else{
+    box.scrollTop = keep;
+    if(scrollToEnd && box.scrollHeight - box.scrollTop - box.clientHeight > 80) askJump(box, true);
+  }
   // How he looks while it works and when it lands is his task state
   // (askReact): nothing to do for him here but be there.
   askSendSync();
   askConvoSync();
   askFaceSync();
+}
+// Swap in new HTML; anything that wasn't there before (by data-k) eases in.
+// A container being filled for the first time doesn't animate.
+function askEnter(box, html){
+  const seen = new Set([...box.querySelectorAll('[data-k]')].map(e => e.dataset.k));
+  const first = !box.childElementCount;
+  box.innerHTML = html;
+  if(first) return;
+  box.querySelectorAll('[data-k]').forEach(e => { if(!seen.has(e.dataset.k)) e.classList.add('is-entering'); });
+}
+// The newest question and what came of it: from the question's top if it
+// doesn't all fit, else the very end.
+function askScrollNewest(box){
+  const qs = box.querySelectorAll('.ask-q'), q = qs[qs.length - 1];
+  askJump(box, false);
+  if(!q){ box.scrollTop = box.scrollHeight; return; }
+  const top = q.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 9;
+  box.scrollTop = box.scrollHeight - top > box.clientHeight ? top : box.scrollHeight;
+}
+function askJump(box, on){
+  let b = box.querySelector('.ask-jump');
+  if(!on){ if(b) b.remove(); return; }
+  if(!b){
+    b = document.createElement('button');
+    b.type = 'button'; b.className = 'ask-jump'; b.textContent = 'New answer ↓';
+    b.addEventListener('click', () => askScrollNewest(box));
+    box.appendChild(b);
+  }
+}
+function askWatchScroll(box){
+  if(box.dataset.watch) return;
+  box.dataset.watch = '1';
+  box.addEventListener('scroll', () => { if(box.scrollHeight - box.scrollTop - box.clientHeight < 40) askJump(box, false); }, { passive: true });
 }
 // Ask the Hub's Dr. Smiley blinks now and then while you're on the screen
 // (drFaceIdle, blinks only: his expressions here come from what Ask is
@@ -24543,6 +24847,7 @@ async function submitAsk(preset, force, opts){
   const selNow = 'sel' in opts ? opts.sel : ASK.selected;
   const q = String(preset != null ? preset : (input ? input.value : ASK.draft)).trim().slice(0, 500);
   if(!q || ASK.busy) return;
+  ASK.sentAt = performance.now();   // you just asked: the conversation follows to it
   // "Remember / forget / what do you remember": answered here, nothing sent.
   const mi = askMemoryIntent(q);
   if(mi){
@@ -24586,6 +24891,7 @@ async function submitAsk(preset, force, opts){
   const turn = { id: askTurnId(), q, qLabel: opts.label || '', status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])),
     sel: sel ? { cat: sel.cat.id, term: sel.term.id } : null, n: (intent && intent.n) || 5, actions: [],
     about: plan.about || null, keepSubject: !!plan.keepSubject, correction: plan.correction || '', fixOf: plan.fixOf || '', langSwitch: plan.lang || '',
+    fu: plan.fu ? plan.fu.kind : '',
     movedOn: moved && !('sel' in opts) && selNow ? selNow.term : '' };
   // The conversation so far: question, answer and what it was about.
   const history = ASK.turns.filter(x => x.status === 'done' && x.answer && !x.answer.local && !x.answer.clarify).slice(-4)
@@ -27393,7 +27699,7 @@ const drPanel = (() => {
     el.dataset.state = k;
     statusEl.textContent = label;
     const scrollTop = body.scrollTop, before = body.dataset.turn || '';
-    body.innerHTML = bodyHtml();
+    askEnter(body, bodyHtml());
     const last = ASK.turns.filter(t => !t.hidden).slice(-1)[0];
     const now = last ? last.id + ':' + last.status : '';
     body.dataset.turn = now;

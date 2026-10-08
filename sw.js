@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v189-dock-panel';
+const CACHE_VERSION = 'interpreter-hub-v190-answer-cards';
 const PRECACHE = [
   './',
   './index.html',
