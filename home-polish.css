@@ -817,6 +817,16 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   #content.is-home .home-greeting{padding:21px 25px 55px;}
   #content.is-home .home-greeting-photo-drift{background-position:30% calc(76% - 48px);}
 }
+/* 820-900px (a tablet, a phone turned sideways): still the phone layout,
+   but here the page has 26px padding (index.html, the 761-900px .main
+   rule) and nothing matched the banner to it. It kept the computer's pull
+   (-40px top, -48px sides), so it hung 22px past both edges -- the page
+   slid sideways -- and its top 14px sat under the top bar. Pull it out by
+   exactly the padding, as every other width does. */
+@media(min-width:820px) and (max-width:900px){
+  .main.home-layout{--home-inset:26px;}
+  #content.is-home .home-greeting{margin:-26px calc(-1 * var(--home-inset)) 0;}
+}
 @media(max-width:365px){
   #content.is-home .home-greeting{padding-left:20px;padding-right:20px;}
   #content.is-home .home-greeting-name{font-size:42px;}
