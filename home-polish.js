@@ -749,7 +749,7 @@
      page or anything going wrong: no pen, the name is simply there. */
   const namePen=(()=>{
     const KEY='ih_penPath', VER=1, NS='http://www.w3.org/2000/svg';
-    let used=false, run=null, held=null, safety=0;
+    let used=false, run=null, held=null, safety=0, waiting=null;
     // The pen's path through a name, in em units from the start of its baseline:
     // [[x,y],...] per stroke, in writing order. null when it can't be worked out.
     function penPathOf(txt,family){
@@ -870,30 +870,50 @@
       held=name;name.classList.add('is-penning');
       clearTimeout(safety);safety=setTimeout(()=>{if(!run)show(held);},6000);
     }
-    function release(){clearTimeout(safety);if(run)run.stop();else show(held);held=null;}
+    function release(){clearTimeout(safety);if(waiting){const w=waiting;waiting=null;show(w.name);}if(run)run.stop();else show(held);held=null;}
     function start(button){
       const name=button&&button.parentElement&&button.parentElement.querySelector('.home-greeting-name');
       if(used||!name||!name.classList.contains('is-penning'))return;
       used=true;clearTimeout(safety);
       if(still()||document.hidden){show(name);return;}
       const txt=name.textContent.trim(), cs=getComputedStyle(name), family=cs.fontFamily, size=parseFloat(cs.fontSize);
-      const fail=()=>{run=null;show(name);};
+      const w=waiting={name,txt};
+      const fail=()=>{if(waiting===w)waiting=null;run=null;show(w.name);};
       const fontOk=document.fonts&&document.fonts.load?Promise.race([document.fonts.load(`400 ${size}px ${family}`,txt),new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
       fontOk.then(()=>{
-        if(!name.isConnected||document.hidden||still())return fail();
+        if(waiting!==w)return;
+        const nm=w.name;
+        if(!nm.isConnected||document.hidden||still())return fail();
         if(document.fonts&&document.fonts.check&&!document.fonts.check(`400 ${size}px ${family}`,txt))return fail();
         const strokes=pathFor(txt,family);
         if(!strokes)return fail();
-        write(name,txt,family,size,strokes);
+        waiting=null;
+        write(nm,txt,family,parseFloat(getComputedStyle(nm).fontSize)||size,strokes,0);
       },fail);
     }
-    function write(name,txt,family,size,strokes){
+    /* Home builds a new greeting when its content changes while the app is
+       opening (data arriving: his outfit for the team's rank, say). The old
+       name and its half-written copy go with the old greeting; carry the
+       writing over to the new name, from the same moment, instead of letting
+       the complete name pop back in. */
+    function adopt(name){
+      if(!name)return;
+      const txt=name.textContent.trim();
+      if(waiting){ if(waiting.txt===txt){show(waiting.name);waiting.name=name;name.classList.add('is-penning');}else{const w=waiting;waiting=null;show(w.name);} return; }
+      if(!run)return;
+      const r=run;r.stop(true);
+      if(r.txt!==txt||still()||document.hidden)return;
+      name.classList.add('is-penning');
+      write(name,txt,r.family,parseFloat(getComputedStyle(name).fontSize)||r.size,r.strokes,r.elapsed());
+    }
+    function write(name,txt,family,size,strokes,from){
       const row=name.parentElement;
       // where the name's baseline starts, in the row's own coordinates
       const mk=document.createElement('span');mk.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';
       name.insertBefore(mk,name.firstChild);
       const r=mk.getBoundingClientRect(), rr=row.getBoundingClientRect();mk.remove();
       const ox=r.left-rr.left-row.clientLeft, oy=r.top-rr.top-row.clientTop, W=row.clientWidth, H=row.clientHeight;
+      const nr0=name.getBoundingClientRect(), at={x:nr0.left-rr.left,y:nr0.top-rr.top};
       const el=(tag,attrs,parent)=>{const n=document.createElementNS(NS,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n;};
       const svg=el('svg',{class:'home-name-pen','aria-hidden':'true',focusable:'false',width:W,height:H,viewBox:`0 0 ${W} ${H}`});
       const defs=el('defs',{},svg);
@@ -930,14 +950,19 @@
         const a=c.animate([{opacity:.95,transform:'translate(0,0)'},{opacity:0,transform:`translate(${(Math.random()-.5)*size*.25}px,${size*(.05+Math.random()*.2)}px)`}],{duration:520+Math.random()*260,easing:'cubic-bezier(.2,.7,.3,1)'});
         a.onfinish=()=>c.remove();
       };
-      const resized=new ResizeObserver(()=>{if(row.clientWidth!==W)stop();});
-      function stop(){
-        if(done)return;done=true;cancelAnimationFrame(raf);resized.disconnect();
-        svg.remove();show(name);if(run&&run.stop===stop)run=null;
+      // Stop: the copy goes and the real name shows. Handing over (adopt): the
+      // copy goes and the new greeting's name takes over the writing.
+      function stop(handover){
+        if(done)return;done=true;cancelAnimationFrame(raf);
+        svg.remove();if(!handover)show(name);if(run&&run.stop===stop)run=null;
       }
+      let dx=0, dy=0;
       function tick(now){
-        if(!svg.isConnected||document.hidden)return stop();
-        if(!start)start=now;const tm=now-start;
+        if(!svg.isConnected||document.hidden||!name.isConnected)return stop();
+        if(!start)start=now-(from||0);const tm=now-start;
+        // the name moved inside its row (he stepped beside a longer name): follow it
+        const nr=name.getBoundingClientRect(), rr2=row.getBoundingClientRect(), mx=nr.left-rr2.left-at.x, my=nr.top-rr2.top-at.y;
+        if(Math.abs(mx-dx)>.5||Math.abs(my-dy)>.5){dx=mx;dy=my;svg.style.transform=`translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;}
         for(const ph of phases){const u=Math.min(1,Math.max(0,(tm-ph.start)/ph.dur));paths[ph.i].style.strokeDashoffset=lens[ph.i]*(1-ease(u));}
         const ph=phases.find(p=>tm>=p.start&&tm<p.start+p.dur);
         if(ph){
@@ -958,12 +983,11 @@
         }
         raf=requestAnimationFrame(tick);
       }
-      resized.observe(row);
-      run={stop};
-      // a breath after Dr. Smiley starts to appear
-      setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
+      run={stop,txt,family,size,strokes,elapsed:()=>start?performance.now()-start:(from||0)};
+      // a breath after Dr. Smiley starts to appear (none when carrying on)
+      if(from)raf=requestAnimationFrame(tick);else setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
     }
-    return {hold,start,release,get busy(){return !!run;}};
+    return {hold,start,release,adopt,get busy(){return !!(run||waiting);}};
   })();
 
   window.initHomeGreeting = function(content){
@@ -1019,7 +1043,8 @@
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     keepQuoteEnd(wave.closest('.home-greeting-text'));
-    if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
+    if(namePen.busy)namePen.adopt(name);
+    else if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
     fitWave(wave);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
     // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
