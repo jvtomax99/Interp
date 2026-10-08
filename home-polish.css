@@ -366,12 +366,34 @@
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
   body.kb-open .dock-smiley,body:has(.overlay.show) .dock-smiley,body:has(.gs-overlay.show) .dock-smiley,body:has(.dm-overlay.show) .dock-smiley{visibility:hidden;}
+
+  /* His panel (drPanel in index.html). Open: a ring round his disc and no
+     "Ask" tag. Typing in it: he stays (the tab bar still steps aside) and
+     rides just above the keyboard with the panel (--drp-kb). Collapsed: a
+     turning ring while a question is out, a blue dot for an answer you
+     haven't seen, a red one for a problem. Pressed: the disc dips. */
+  body.drp-open.kb-open .dock-smiley{visibility:visible;}
+  body.drp-kb .dock-smiley{bottom:var(--drp-kb);transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),bottom .28s var(--ease);}
+  .dock-smiley-tag{transition:opacity .2s var(--ease),translate .3s var(--ease);}
+  body.drp-open .dock-smiley-tag{opacity:0;translate:-50% 4px;}
+  .dock-smiley-bob::before{transition:box-shadow .3s var(--ease),filter .12s var(--ease);}
+  body.drp-open .dock-smiley-bob::before{box-shadow:inset 0 -5px 10px rgba(20,60,120,.35),inset 0 3px 5px rgba(255,255,255,.9),0 0 0 2px rgba(255,255,255,.95),0 0 0 4.5px var(--accent-2),0 10px 22px -8px rgba(21,28,44,.45);}
+  .dock-smiley.is-pressed .dock-smiley-bob::before{filter:brightness(.92);}
+  .dock-smiley.is-busy .dock-smiley-bob::after{content:"";position:absolute;left:2px;top:7px;width:54px;height:54px;border-radius:50%;pointer-events:none;
+    background:conic-gradient(from 0deg,transparent 0 62%,var(--accent-2) 100%);
+    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));
+    animation:dockSpin 1s linear infinite;}
+  @keyframes dockSpin{to{rotate:1turn;}}
+  .dock-smiley.has-new::after,.dock-smiley.has-error::after{content:"";position:absolute;z-index:3;right:2px;top:6px;width:13px;height:13px;border-radius:50%;
+    background:var(--accent-2);box-shadow:0 0 0 2px var(--paper);}
+  .dock-smiley.has-error::after{background:var(--danger);}
 }
 @media(min-width:901px){.dock-smiley{display:none;}}
 @media(prefers-reduced-motion:reduce){
   .tabbar,.tabbar-btn,.tabbar-icon,.tabbar-lens,.tabbar::before,.tabbar::after,.dock-smiley,.dock-smiley-bob{transition:none !important;}
   body.dock-has-smiley .dock-smiley-bob{animation:none;}
   .dock-smiley.is-dozing .dock-smiley-z{animation:none;}
+  .dock-smiley.is-busy .dock-smiley-bob::after{animation:none;background:none;box-shadow:inset 0 0 0 3px var(--accent-2);-webkit-mask:none;mask:none;}
 }
 @media(max-width:819px){
   .main.home-layout{--home-inset:16px;padding:0 var(--home-inset) 26px;}

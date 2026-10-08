@@ -6017,6 +6017,89 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
 .tg-smiley.is-new svg{ animation:smileyPop .5s cubic-bezier(.3,1.5,.5,1) both; }
 @keyframes smileyPop{ 0%{ transform:translateY(22px) scale(.6); } 100%{ transform:none; } }
 @media (max-width:900px){ .tg-smiley{ display:none; } }
+/* His top-bar button, with the panel: a ring while it's open; a turning
+   ring while a question is out; an accent or red ring for an answer or a
+   problem you haven't seen (drPanel). */
+.tg-smiley{ transition:box-shadow .25s var(--ease); }
+.tg-smiley[aria-expanded="true"]{ box-shadow:0 0 0 2px var(--paper), 0 0 0 4.5px var(--accent-2); }
+.tg-smiley.is-busy{ animation:tgBusy 1.2s ease-in-out infinite; }
+.tg-smiley.has-new{ box-shadow:0 0 0 2px var(--paper), 0 0 0 4.5px var(--accent-2); }
+.tg-smiley.has-error{ box-shadow:0 0 0 2px var(--paper), 0 0 0 4.5px var(--danger); }
+@keyframes tgBusy{ 0%,100%{ box-shadow:0 0 0 2px var(--paper), 0 0 0 4px color-mix(in srgb, var(--accent-2) 30%, transparent); }
+  50%{ box-shadow:0 0 0 2px var(--paper), 0 0 0 5px var(--accent-2); } }
+
+/* ---------- Dr. Smiley's companion panel (drPanel) ----------
+   A glass card that grows out of his button: above him in the dock on a
+   phone, below him in the top bar on a computer. Its glass (.drp-bg) is a
+   separate layer so its edges can be animated from his button's box to the
+   panel's without stretching anything; the rows (.drp-in) come in after.
+   Where the glass would make text hard to read -- no blur support, or the
+   phone asks for less transparency -- it is solid. The answer area always
+   sits on a near-solid ground. */
+:root{ --drp-glass:rgba(250,251,253,.9); --drp-ground:rgba(244,246,250,.86); --drp-warn:#8A5A0E; --drp-ok:#1E7F5C; }
+html[data-theme="dark"]{ --drp-glass:rgba(24,32,50,.9); --drp-ground:rgba(14,20,36,.72); --drp-warn:#F1C37A; --drp-ok:#6FC79C; }
+.drp{ position:fixed; z-index:59; --drp-r:24px; display:flex; flex-direction:column; max-height:var(--drp-max, 70vh); outline:none; }
+.drp[hidden]{ display:none; }
+.drp-bg{ position:absolute; top:0; left:0; right:0; bottom:0; border-radius:var(--drp-r);
+  background:var(--drp-glass); -webkit-backdrop-filter:saturate(180%) blur(24px); backdrop-filter:saturate(180%) blur(24px);
+  border:1px solid var(--glass-edge);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.82), 0 1px 2px rgba(20,43,67,.06), 0 22px 44px -18px rgba(22,55,90,.42);
+  transition:border-color .3s var(--ease), box-shadow .3s var(--ease); }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .drp-bg, .drp-bridge{ background:var(--paper); } }
+@media (prefers-reduced-transparency:reduce){ .drp-bg, .drp-bridge{ background:var(--paper); -webkit-backdrop-filter:none; backdrop-filter:none; } }
+/* The bridge: a short glass tab from the panel to him. */
+.drp-bridge{ position:absolute; width:22px; height:9px; background:var(--drp-glass); pointer-events:none;
+  -webkit-backdrop-filter:saturate(180%) blur(24px); backdrop-filter:saturate(180%) blur(24px); }
+.drp[data-side="above"] .drp-bridge{ top:calc(100% - 1px); border-radius:0 0 11px 11px; box-shadow:0 4px 6px -3px rgba(22,55,90,.25); }
+.drp[data-side="below"] .drp-bridge{ bottom:calc(100% - 1px); border-radius:11px 11px 0 0; }
+.drp-in{ position:relative; display:flex; flex-direction:column; row-gap:9px; padding:13px; min-height:0; flex:1 1 auto; }
+.drp-head{ display:flex; align-items:center; gap:9px; }
+.drp-titles{ flex:1; min-width:0; }
+.drp-titles h2{ margin:0; font:650 17px/1.2 var(--sans); letter-spacing:-.015em; color:var(--ink); }
+.drp-status{ margin:3px 0 0; display:flex; align-items:center; gap:6px; font:550 13px/1.3 var(--sans); color:var(--ink-soft);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.drp-status::before{ content:""; width:7px; height:7px; border-radius:50%; flex:none; background:var(--drp-ok); }
+.drp[data-state="busy"] .drp-status{ color:var(--accent); }
+.drp[data-state="busy"] .drp-status::before{ background:var(--accent-2); animation:drpPulse 1s ease-in-out infinite; }
+.drp[data-state="warn"] .drp-status{ color:var(--drp-warn); }
+.drp[data-state="warn"] .drp-status::before{ background:var(--drp-warn); }
+.drp[data-state="error"] .drp-status{ color:var(--danger); }
+.drp[data-state="error"] .drp-status::before{ background:var(--danger); }
+.drp[data-state="busy"] .drp-bg{ border-color:color-mix(in srgb, var(--accent-2) 50%, transparent);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.82), 0 0 0 3px color-mix(in srgb, var(--accent-2) 16%, transparent), 0 22px 44px -18px rgba(22,55,90,.42); }
+.drp[data-state="error"] .drp-bg{ border-color:color-mix(in srgb, var(--danger) 60%, transparent);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.82), 0 0 0 3px color-mix(in srgb, var(--danger) 14%, transparent), 0 22px 44px -18px rgba(22,55,90,.42); }
+/* While a question is out: a light running along the top edge. */
+.drp[data-state="busy"] .drp-bg::after{ content:""; position:absolute; top:-1px; left:22px; right:22px; height:2px; border-radius:2px;
+  background:linear-gradient(90deg, transparent, var(--accent-2), transparent) 0 0 / 40% 100% no-repeat; animation:drpRun 1.3s ease-in-out infinite; }
+@keyframes drpRun{ from{ background-position:-40% 0; } to{ background-position:140% 0; } }
+@keyframes drpPulse{ 50%{ opacity:.35; } }
+.drp-icon{ width:44px; height:44px; flex:none; border-radius:50%; border:1px solid var(--line); background:var(--paper); color:var(--ink-soft);
+  display:grid; place-items:center; cursor:pointer; padding:0; -webkit-tap-highlight-color:transparent;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.82), 0 1px 2px rgba(20,43,67,.06), 0 8px 20px -12px rgba(22,55,90,.22);
+  transition:transform .12s var(--ease), background .15s var(--ease); }
+.drp-icon svg{ width:18px; height:18px; }
+.drp-close{ color:var(--ink); background:color-mix(in srgb, var(--ink) 7%, var(--paper)); }
+.drp-icon:active{ transform:scale(.92); background:color-mix(in srgb, var(--ink) 12%, var(--paper)); }
+.drp-icon:focus-visible, .drp-earlier:focus-visible, .drp .ask-chip:focus-visible, .drp .chat-send-btn:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.drp-body{ min-height:0; flex:0 1 auto; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  display:flex; flex-direction:column; gap:9px; padding:9px; border-radius:17px; background:var(--drp-ground); }
+.drp-body .ask-card, .drp-body .ask-q{ flex:none; }
+.drp-hint{ margin:0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+.drp-chips{ display:flex; flex-direction:column; gap:6px; }
+.drp-earlier{ align-self:center; min-height:36px; padding:0 13px; border:0; border-radius:999px; background:none; color:var(--navy);
+  font:600 13px var(--sans); cursor:pointer; }
+html[data-theme="dark"] .drp-earlier{ color:var(--accent-2); }
+.drp-compose{ display:flex; align-items:flex-end; gap:9px; }
+.drp-compose textarea{ flex:1; min-width:0; min-height:44px; max-height:112px; resize:none; overflow-y:auto; margin:0;
+  padding:11px 15px; border-radius:22px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font:16px/1.35 var(--sans); }
+.drp-compose textarea:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); }
+@media (prefers-reduced-motion:reduce){
+  .drp[data-state="busy"] .drp-status::before, .drp[data-state="busy"] .drp-bg::after, .tg-smiley.is-busy{ animation:none; }
+  .drp[data-state="busy"] .drp-bg::after{ background:linear-gradient(90deg, transparent, var(--accent-2), transparent); }
+  .tg-smiley.is-busy{ box-shadow:0 0 0 2px var(--paper), 0 0 0 4px var(--accent-2); }
+  .drp-icon{ transition:none; }
+}
 .name-pref{ margin:13px 0 0; padding-top:13px; border-top:1px solid var(--line-soft); }
 .name-pref small{ display:block; color:var(--ink-soft); font-size:12px; }
 /* Dr. Smiley's mode: three choices in one capsule (the setting itself is
@@ -6606,7 +6689,7 @@ body.pv-open{ overflow:hidden; }
   <div class="tg-right">
     <button type="button" class="tg-sync" id="tgSync" onclick="openOutboxSheet()"></button>
     <span class="sr-only" id="tgSyncLive" role="status" aria-live="polite"></span>
-    <button class="tg-icon-btn tg-smiley" id="tgSmiley" onclick="openAskHub()" title="Ask the Hub" aria-label="Ask the Hub" hidden></button>
+    <button class="tg-icon-btn tg-smiley" id="tgSmiley" onclick="drPanel.toggle(event)" title="Ask the Hub" aria-label="Ask the Hub" hidden></button>
     <button class="tg-icon-btn tg-search-btn" onclick="openGlobalSearch()" title="Search" aria-label="Search">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
@@ -12810,9 +12893,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'askquick',    tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Ask him right where you are: tap him, a panel opens' },
   { id:'review',      tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Term Review',           title:'Type the Spanish: he checks it and explains misses' },
   { id:'askfollow',   tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Follow-ups: “make it simpler”, “now in Spanish”' },
-  { id:'askremember', tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'Dr. Smiley',            title:'He remembers how you like your answers' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12894,6 +12977,10 @@ const GUIDE_STEPS = {
   askexplain: () => ({ steps: [`Tap ${GUIDE_UI.dots} on the term’s card, then ${GUIDE_UI.menu('Explain with Dr. Smiley')}.`,
     'Ask opens with that term picked. You’ll see it just above the box.', `Tap ${GUIDE_UI.pill('Explain')}, or type your own question about it.`],
     note: 'You get the glossary entry, a plain way to say it to a patient, and where the entry came from. On a computer, Explain is a button on the card.' }),
+  askquick: () => ({ steps: [`Tap ${GUIDE_UI.ask} beside the tab bar (on a computer, his round button at the top right).`,
+    'Type your question in the box just above him and tap the arrow.',
+    `Read the answer there. Tap ${GUIDE_UI.pill('✕')} or tap outside to close; what you typed stays.`],
+    note: 'It’s the same conversation as the Ask screen. The arrows at the top of the panel open the whole of it.' }),
   askwhat: () => ({ steps: [`Tap ${GUIDE_UI.ask} beside the tab bar, the smiley in the Home greeting, or <b>More</b> → <b>Ask the Hub</b>.`,
     'Ask the way you’d ask a teammate: <i>How do I explain “ejection fraction”?</i>',
     `Check the label: ${GUIDE_UI.tag('From the Hub')} is your team’s own entries; ${GUIDE_UI.tag('Not from the Hub', true)} is general knowledge.`],
@@ -12907,7 +12994,7 @@ const GUIDE_STEPS = {
 };
 // Which "Show me" each answer offers (keys of GUIDE_COACH).
 const GUIDE_SHOW = { name:'name', noname:'name', askmoves:'name', edit:'dots', history:'dots', attach:'dots', askexplain:'dots',
-  askwhat:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
+  askwhat:'dock', askquick:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
   chat:'chat', mention:'chat', pin:'chat', updates:'bell' };
 
 const ICON_GD_SHOW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" opacity=".55"/></svg>';
@@ -16001,7 +16088,7 @@ const GUIDE_TOPICS = [
 
   { id:'askwhat', section:'ask', k:'ask the hub dr smiley doctor smiley assistant ai question chatbot help character', q:'Who is Dr. Smiley, and what can I ask him?', a:`
     <p>Dr. Smiley is the Hub's interpreter assistant. Ask him the way you'd ask a teammate: <i>How do I explain “ejection fraction”?</i> or <i>“Embarazada” or “embarrassed”?</i></p>
-    <p>To open him, tap him beside the tab bar, tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b>.</p>
+    <p>To ask him, tap him beside the tab bar (or his round button at the top right on a computer): a small panel opens right there, over the page you're on. You can also tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b> for the full screen.</p>
     <p>He answers from the Hub first: your glossary, False Friends, the Doctor Directory, the Code of Ethics and this guide. Every answer is labeled:</p>
     <ul>
       <li><b>From the Hub</b>: it comes from your team's own entries. Tap a source under it to see the entry.</li>
@@ -16010,6 +16097,16 @@ const GUIDE_TOPICS = [
     </ul>
     <p>You can follow up the way you would with a teammate: <i>Make it simpler.</i> <i>Now in Spanish.</i> See <b>Can I ask a follow-up, or start over?</b></p>
     <p>He can also open things for you: a briefing, practice, a term. Tap the button he offers. He only says it's done once the screen is open.</p>` },
+
+  { id:'askquick', section:'ask', k:'ask quick panel dock bubble popup without leaving page close draft typing keyboard ring dot red blue busy dr smiley tap him', q:'How do I ask Dr. Smiley without leaving the page?', a:`
+    <p>Tap Dr. Smiley beside the tab bar (on a computer, his round button at the top right). A small <b>Ask the Hub</b> panel opens just above him, over the page you're on.</p>
+    <ol>
+      <li>Type your question in the box and tap the arrow.</li>
+      <li>The answer shows in the panel. A long one scrolls inside it.</li>
+      <li>To close it, tap <b>✕</b>, tap him again, or tap anywhere outside. What you typed stays in the box for next time.</li>
+    </ol>
+    <p>While he looks it up, the panel says <b>Looking it up…</b> and you can tap <b>Stop</b>. You can close the panel and keep working: a ring turns around him until the answer is in, then a <b>blue dot</b> means it's waiting for you. If something goes wrong, the panel's edge turns red and offers <b>Try again</b>.</p>
+    <p>It's the same conversation as the Ask screen. To see all of it, tap the arrows at the top of the panel, or go to <b>More</b> → <b>Ask the Hub</b>.</p>` },
 
   { id:'askexplain', section:'ask', k:'explain term plain spanish patient words simple dr smiley card menu', q:'How do I get a term explained in plain words?', a:`
     <ol>
@@ -20166,7 +20263,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1008.0151';
+const BUILD_ID = 'b1008.0924';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -20394,7 +20491,7 @@ function dockTabAt(bar, x){
     if(Math.abs(dy) < 8 && y > 80) return;
     lastY = y;
     if(!phone.matches || !document.querySelector('.tabbar')) return;
-    if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open')) dockTuck();
+    if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open') && !body().classList.contains('drp-open')) dockTuck();
     else if((dy < 0 || y <= 80) && activeCategory !== 'chat') dockOpen();
   }, { passive:true });
   // In Team Chat: your own scrolling of the thread does the same. A new
@@ -20422,7 +20519,7 @@ function dockTabAt(bar, x){
   const canTuck = () => {
     const bar = document.querySelector('.tabbar');
     return phone.matches && !!bar && getComputedStyle(bar).display !== 'none' && !document.hidden
-      && !body().classList.contains('kb-open')
+      && !body().classList.contains('kb-open') && !body().classList.contains('drp-open')   // not under Dr. Smiley's open panel
       && !document.querySelector('.overlay.show, .gs-overlay.show, .dm-overlay.show');
   };
   window.dockIdleRestart = () => {
@@ -24410,6 +24507,7 @@ function askTurnHtml(t){
 }
 
 function renderAskMessages(scrollToEnd){
+  drPanelSync();   // the dock's panel shows the same conversation
   const box = document.getElementById('askMessages');
   if(!box) return;
   box.innerHTML = askMessagesHtml();
@@ -24574,7 +24672,7 @@ async function submitAsk(preset, force, opts){
   turn.doneAt = Date.now();
   askSaveWaiting();
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
-  if(activeCategory === 'ask') renderAskMessages(true);
+  if(activeCategory === 'ask') renderAskMessages(true); else drPanelSync();
   askReact(turn);
   setTimeout(askResumeWaiting, 400);
 }
@@ -24671,7 +24769,7 @@ function askCancel(quiet){
   ASK.busy = false; ASK.abort = null; ASK.pending = null;
   if(ctl) try{ ctl.abort(); }catch(e){}
   if(quiet === true){ drTaskEnd('ask:' + t.id); return; }
-  if(activeCategory === 'ask') renderAskMessages(true);
+  if(activeCategory === 'ask') renderAskMessages(true); else drPanelSync();
   askReact(t);
 }
 function askDontWait(id){
@@ -25501,7 +25599,7 @@ async function askRunAction(turnId, i){
     const r = /^(open_prep|continue_prep)$/.test(a.type) && askResource(a.target);
     if(r) ASK.convo.task = { kind: 'prep', id: r.id, name: r.name };
   }else showToast(res.why);
-  if(activeCategory === 'ask') renderAskMessages(false);
+  if(activeCategory === 'ask') renderAskMessages(false); else drPanelSync();
 }
 
 /* ---------- Dr. Smiley: what he remembers (on this device) ----------
@@ -25810,6 +25908,7 @@ function askEditPhi(){
   renderAskMessages(true);
   const input = document.getElementById('askInput');
   if(input){ input.value = ASK.draft; input.focus(); }
+  else drPanel.focusInput();
 }
 function askSendAnyway(){ const q = ASK.phi; ASK.phi = null; submitAsk(q, true); }
 
@@ -26867,12 +26966,13 @@ const smileyRider = (() => {
       + '<span class="dock-smiley-z" aria-hidden="true">z</span><span class="dock-smiley-z" aria-hidden="true">z</span>';
     face = btn.querySelector('.ask-face'); bob = btn.querySelector('.dock-smiley-bob');
     smileySway(btn, '50% 92%');
-    // Press and hold to pet him (a giggle and hearts); a tap opens Ask.
+    // Press and hold to pet him (a giggle and hearts); a tap opens his
+    // panel (drPanel), a quick Ask the Hub right here; tapping him again closes it.
     const petted = smileyPettable(btn, () => { drSetMood('happy', 180000); emote('pet'); });
     btn.addEventListener('click', e => {
       if(petted()){ e.preventDefault(); return; }
       btn.classList.add('is-pressed');
-      setTimeout(() => { btn.classList.remove('is-pressed'); openAskHub(); }, 140);
+      setTimeout(() => { btn.classList.remove('is-pressed'); drPanel.toggle(e); }, 110);
     });
     document.body.append(btn);
     // Sheets, search and the keyboard come and go without a repaint; check
@@ -26984,6 +27084,7 @@ const smileyRider = (() => {
       topBar();
       smileyDressAll();
       place();
+      drPanel.check();
     }catch(e){ console.warn('Dr. Smiley companion:', e); }
   }
   window.addEventListener('resize', () => { if(btn) requestAnimationFrame(sync); });
@@ -26998,6 +27099,325 @@ const smileyRider = (() => {
   }
   return { sync, emote, stage };
 })();
+
+/* ---------- Dr. Smiley: the companion panel ----------
+   Tapping Dr. Smiley in the dock (or his button in a computer's top bar)
+   opens a small Ask the Hub panel instead of leaving the page. It is the
+   same conversation and the same draft as the Ask screen (ASK): what you
+   type here is still there on Ask, and the other way round; "Open in Ask"
+   goes to the full screen.
+     resting     his disc in the dock, "Ask" under him
+     pressed     the disc dips (.is-pressed)
+     expanded    a ring round his disc; the panel above him (phone) or below
+                 him (computer), joined to him by a small bridge
+     processing  "Looking it up" in the panel; collapsed, a turning ring
+                 round his disc (.is-busy)
+     error       the status and the panel's edge turn red; collapsed, a red
+                 dot on him (.has-error), or a blue one for an answer you
+                 haven't seen (.has-new)
+   He stays where he is. The panel's glass grows out of his own disc (its
+   edges animated from his button's box to the panel's), then the rows come
+   in one after another as the spacing opens; closing runs it back into him.
+   A new open or close takes over from wherever the last one was, so quick
+   taps never jump. With the keyboard up he and the panel ride just above it
+   together. Reduced motion: no growing, a short fade. Escape or the close
+   button closes it (focus back on him); so does tapping outside, changing
+   page, or a sheet opening. The draft stays. */
+const drPanel = (() => {
+  const phone = window.matchMedia('(max-width:900px)');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let el = null, bg = null, inner = null, bridge = null, body = null, input = null, statusEl = null, sendWrap = null;
+  let isOpen = false, anims = [], cat = null, seenTurn = '', placing = 0;
+  const EASE_OPEN = 'cubic-bezier(.32,.72,0,1)', EASE_CLOSE = 'cubic-bezier(.4,0,.6,1)';
+  const ICON_EXPAND = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ICON_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+  // The button he's in right now, if he's showing.
+  function anchor(){
+    if(phone.matches){
+      const b = document.querySelector('.dock-smiley');
+      return b && document.body.classList.contains('dock-has-smiley') ? b : null;
+    }
+    const t = document.getElementById('tgSmiley');
+    return t && !t.hidden && t.getClientRects().length ? t : null;
+  }
+  function build(){
+    el = document.createElement('div');
+    el.className = 'drp'; el.id = 'drPanel'; el.hidden = true; el.tabIndex = -1;
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'false'); el.setAttribute('aria-labelledby', 'drpTitle');
+    el.innerHTML = `<div class="drp-bg" aria-hidden="true"></div><div class="drp-bridge" aria-hidden="true"></div>
+      <div class="drp-in">
+        <div class="drp-head drp-row">
+          <div class="drp-titles"><h2 id="drpTitle">Ask the Hub</h2><p class="drp-status" id="drpStatus" role="status"></p></div>
+          <button type="button" class="drp-icon" id="drpFull" aria-label="Open the full Ask the Hub screen" title="Open in Ask">${ICON_EXPAND}</button>
+          <button type="button" class="drp-icon drp-close" id="drpClose" aria-label="Close" title="Close">${ICON_X}</button>
+        </div>
+        <div class="drp-body drp-row" id="drpBody" aria-live="polite"></div>
+        <div class="drp-compose drp-row">
+          <label for="drpInput" class="sr-only">Ask a question</label>
+          <textarea id="drpInput" rows="1" maxlength="500" enterkeyhint="send" autocomplete="off" placeholder="Ask about a term or a doctor"></textarea>
+          <span id="drpSendWrap"></span>
+        </div>
+      </div>`;
+    bg = el.querySelector('.drp-bg'); inner = el.querySelector('.drp-in'); bridge = el.querySelector('.drp-bridge');
+    body = el.querySelector('#drpBody'); input = el.querySelector('#drpInput'); statusEl = el.querySelector('#drpStatus'); sendWrap = el.querySelector('#drpSendWrap');
+    // Right after his button, so Tab goes from him into the panel.
+    const a = document.querySelector('.dock-smiley');
+    if(a && a.parentNode) a.after(el); else document.body.append(el);
+    el.querySelector('#drpClose').addEventListener('click', () => close({ focus: true }));
+    el.querySelector('#drpFull').addEventListener('click', () => { close({ instant: true }); openAskHub(); });
+    input.addEventListener('input', () => { ASK.draft = input.value; grow(); askTyping(); });
+    input.addEventListener('focus', () => { askAttend(true); requestAnimationFrame(place); });
+    input.addEventListener('blur', () => { askAttend(false); setTimeout(place, 80); });
+    input.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){ e.preventDefault(); send(); } });
+    el.addEventListener('keydown', e => { if(e.key === 'Escape'){ e.preventDefault(); close({ focus: true }); } });
+    // A tap anywhere else closes it (the tab bar still navigates).
+    document.addEventListener('pointerdown', e => {
+      if(!isOpen || el.contains(e.target)) return;
+      const a = anchor();
+      if(a && a.contains(e.target)) return;
+      close();
+    }, true);
+    const vv = window.visualViewport;
+    const re = () => { if(isOpen && !placing) placing = requestAnimationFrame(() => { placing = 0; place(); }); };
+    if(vv){ vv.addEventListener('resize', re, { passive: true }); vv.addEventListener('scroll', re, { passive: true }); }
+    window.addEventListener('resize', re, { passive: true });
+    window.addEventListener('scroll', () => { if(isOpen && !phone.matches) re(); }, { passive: true });
+  }
+  // The textarea grows with a long question, up to four lines.
+  function grow(){
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight + 2, 112) + 'px';
+  }
+  // How much of the screen the keyboard covers (0 when it's down).
+  function kbHeight(){
+    const vv = window.visualViewport;
+    if(!vv) return 0;
+    const h = window.innerHeight - vv.height - vv.offsetTop;
+    return h > 80 ? h : 0;
+  }
+  // Where it goes: above him in the dock on a phone (both above the
+  // keyboard when it's up), below his top-bar button on a computer.
+  function place(){
+    const a = anchor();
+    if(!el || !a) return;
+    const vv = window.visualViewport, vh = vv ? vv.height : window.innerHeight, vTop = vv ? vv.offsetTop : 0;
+    // Never over the top bar: the highest it goes is just under it.
+    const tb = document.querySelector('.topbar-global'), tr = tb && tb.getClientRects().length ? tb.getBoundingClientRect() : null;
+    const ceil = Math.max(vTop + 12, tr && tr.bottom > 0 ? tr.bottom + 8 : 0);
+    if(phone.matches){
+      const kb = document.body.classList.contains('kb-open') ? kbHeight() : 0;
+      document.documentElement.style.setProperty('--drp-kb', kb ? (kb + 8) + 'px' : '');
+      document.body.classList.toggle('drp-kb', !!kb);
+      const dockB = kb ? kb + 8 : parseFloat(getComputedStyle(a).bottom) || 38;
+      const h = a.offsetHeight || 58;
+      const bottom = dockB + h + 12;
+      el.style.left = '14px'; el.style.right = '14px'; el.style.top = 'auto'; el.style.width = '';
+      el.style.bottom = bottom + 'px';
+      // From the top of what you can see to just above him.
+      const room = (window.innerHeight - bottom) - ceil;
+      el.style.setProperty('--drp-max', Math.max(180, Math.min(room, 560)) + 'px');
+      const r = a.getBoundingClientRect(), pl = 14;
+      bridge.style.left = (r.left + r.width / 2 - pl - 11) + 'px';
+      el.dataset.side = 'above';
+    }else{
+      const r = a.getBoundingClientRect();
+      const w = Math.min(400, window.innerWidth - 32);
+      const right = Math.max(16, window.innerWidth - r.right);
+      el.style.top = (r.bottom + 12) + 'px'; el.style.bottom = 'auto';
+      el.style.left = 'auto'; el.style.right = right + 'px'; el.style.width = w + 'px';
+      el.style.setProperty('--drp-max', Math.max(220, Math.min(600, window.innerHeight - r.bottom - 36)) + 'px');
+      bridge.style.left = (r.left + r.width / 2 - (window.innerWidth - right - w) - 11) + 'px';
+      el.dataset.side = 'below';
+    }
+  }
+  // The panel's edges, as offsets from its own box, that put its glass
+  // exactly over his button.
+  function fromAnchor(a){
+    const p = el.getBoundingClientRect(), r = a.getBoundingClientRect();
+    return { top: r.top - p.top, left: r.left - p.left, right: p.right - r.right, bottom: p.bottom - r.bottom, radius: Math.min(r.width, r.height) / 2 };
+  }
+  // Where the glass is right now (mid-animation included).
+  function current(){
+    const s = getComputedStyle(bg), si = getComputedStyle(inner);
+    return { top: s.top, left: s.left, right: s.right, bottom: s.bottom, radius: s.borderTopLeftRadius, op: si.opacity };
+  }
+  function stopAnims(){ anims.forEach(x => { try{ x.cancel(); }catch(e){} }); anims = []; }
+  const px = v => typeof v === 'number' ? v + 'px' : v;
+  function open(e){
+    if(!el) build();
+    const a = anchor();
+    if(!a) { openAskHub(); return; }
+    const from = isOpen ? null : (el.hidden ? null : current());
+    isOpen = true; cat = activeCategory;
+    stopAnims();
+    el.hidden = false; el.classList.remove('is-closing');
+    document.body.classList.add('drp-open');
+    a.setAttribute('aria-expanded', 'true'); a.setAttribute('aria-controls', 'drPanel');
+    a.setAttribute('aria-label', 'Close Ask the Hub');
+    sync();
+    input.value = ASK.draft || '';
+    place(); grow();
+    if(reduce.matches){
+      anims.push(el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'linear' }));
+    }else{
+      const f = fromAnchor(a), start = from || { top: f.top, left: f.left, right: f.right, bottom: f.bottom, radius: f.radius, op: 0 };
+      const R = getComputedStyle(el).getPropertyValue('--drp-r').trim() || '22px';
+      // The glass grows out of his disc...
+      anims.push(bg.animate([
+        { top: px(start.top), left: px(start.left), right: px(start.right), bottom: px(start.bottom), borderRadius: px(start.radius) },
+        { top: '0px', left: '0px', right: '0px', bottom: '0px', borderRadius: R }],
+        { duration: 460, easing: EASE_OPEN }));
+      // ...the bridge to him settles in as it lands...
+      anims.push(bridge.animate([{ opacity: 0, transform: 'scale(.4)' }, { opacity: 0, offset: .55 }, { opacity: 1, transform: 'none' }], { duration: 460, easing: EASE_OPEN }));
+      // ...and the rows come in one after another as the spacing opens.
+      anims.push(inner.animate([{ opacity: +start.op || 0, rowGap: '0px', paddingTop: '6px' }, { opacity: 1, rowGap: '9px', paddingTop: '13px' }],
+        { duration: 360, delay: from ? 0 : 110, easing: EASE_OPEN, fill: 'backwards' }));
+      [...inner.querySelectorAll('.drp-row')].forEach((row, i) => anims.push(row.animate(
+        [{ opacity: 0, transform: `translateY(${el.dataset.side === 'below' ? -8 : 10}px)` }, { opacity: 1, transform: 'none' }],
+        { duration: 300, delay: from ? 0 : 150 + i * 45, easing: EASE_OPEN, fill: 'backwards' })));
+    }
+    // He looks up at it (or down, on a computer) -- a glance, nothing more.
+    const svg = a.querySelector('svg.ds-art');
+    if(svg && !ASK.busy) drFacePlay(svg, { f: [['rest', 60], [el.dataset.side === 'below' ? 'lookDL' : 'lookUL', 620], ['rest', 120]],
+      head: [[0, 0, 0], [140, -1, el.dataset.side === 'below' ? .3 : -.3], [700, -1, 0], [960, 0, 0]] },
+      a.querySelector('.dock-smiley-bob') || svg, null, DR_P.REACT);
+    a.classList.remove('has-new', 'has-error');
+    // Focus: straight into the box from a keyboard or on a computer; on a
+    // phone tap the panel itself, so the keyboard doesn't jump up unasked.
+    const fromKeys = e && e.detail === 0;
+    if(fromKeys || !phone.matches) input.focus({ preventScroll: true });
+    else el.focus({ preventScroll: true });
+  }
+  function close(o){
+    o = o || {};
+    if(!el || !isOpen) return;
+    isOpen = false;
+    const a = anchor();
+    ASK.draft = input.value;            // the draft stays
+    // Off the box (and the keyboard flag with it, now rather than after the
+    // page's own 50 ms check, so he never blinks out in between).
+    if(document.activeElement === input){ input.blur(); document.body.classList.remove('kb-open'); }
+    document.body.classList.remove('drp-open', 'drp-kb');
+    document.documentElement.style.removeProperty('--drp-kb');
+    document.querySelectorAll('.dock-smiley, #tgSmiley').forEach(b => {
+      b.removeAttribute('aria-expanded');
+      b.setAttribute('aria-label', 'Ask the Hub');
+    });
+    const done = () => { if(isOpen) return; stopAnims(); el.hidden = true; el.classList.remove('is-closing'); };
+    if(o.instant || !a || reduce.matches){
+      if(o.instant || !a){ done(); }
+      else{ const fade = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120 }); stopAnims(); anims.push(fade); fade.onfinish = done; }
+    }else{
+      const cur = current();
+      stopAnims();
+      el.classList.add('is-closing');
+      const f = fromAnchor(a);
+      anims.push(inner.animate([{ opacity: +cur.op }, { opacity: 0 }], { duration: 130, easing: 'linear', fill: 'forwards' }));
+      anims.push(bridge.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, fill: 'forwards' }));
+      const g = bg.animate([
+        { top: cur.top, left: cur.left, right: cur.right, bottom: cur.bottom, borderRadius: cur.radius },
+        { top: px(f.top), left: px(f.left), right: px(f.right), bottom: px(f.bottom), borderRadius: px(f.radius), opacity: 1, offset: .86 },
+        { top: px(f.top), left: px(f.left), right: px(f.right), bottom: px(f.bottom), borderRadius: px(f.radius), opacity: 0 }],
+        { duration: 340, easing: EASE_CLOSE, fill: 'forwards' });
+      anims.push(g);
+      g.onfinish = done;
+    }
+    if(o.focus && a) a.focus({ preventScroll: true });
+    syncAnchor();
+  }
+  function toggle(e){ if(isOpen) close({ focus: e && e.detail === 0 }); else open(e); }
+  function send(){
+    const q = input.value.trim();
+    if(!q) return;
+    if(ASK.busy) return;
+    input.value = ''; grow();
+    submitAsk(q);
+    if(!ASK.busy && !ASK.phi) ASK.draft = '';
+  }
+  // The newest question and its answer (a long one scrolls); the start of
+  // the conversation: what he can do.
+  function bodyHtml(){
+    if(ASK.phi) return `<div class="ask-card ask-warn" role="alert">
+      <p class="ask-headline">Check for patient details first</p>
+      <p class="ask-details">This question looks like it may include a patient's name, date of birth or record number. Ask about the term or situation without them.</p>
+      <div class="ask-acts"><button type="button" onclick="askEditPhi()">Edit my question</button><button type="button" onclick="askSendAnyway()">It's fine, ask</button></div></div>`;
+    const shown = ASK.turns.filter(t => !t.hidden);
+    if(!shown.length){
+      const sel = askSelectedTerm();
+      return `<p class="drp-hint">Answers come from your team’s glossary, False Friends, Doctor Directory and guide.</p>
+        <div class="drp-chips">
+          <button type="button" class="ask-chip prep-chip" onclick="drPanel.close({instant:true}); openPrep()">${ICON_PREP}Prep me for an appointment</button>
+          ${sel ? `<button type="button" class="ask-chip" onclick="submitAsk('Explain this term.')">Explain ${escapeHtml(sel.term.en || sel.term.es)}</button>` : ''}
+          <button type="button" class="ask-chip" onclick="submitAsk('Help me practice five terms I’m still learning.')">Practice 5 terms I’m still learning</button>
+        </div>`;
+    }
+    const last = shown[shown.length - 1], earlier = shown.length - 1;
+    return (earlier ? `<button type="button" class="drp-earlier" onclick="drPanel.close({instant:true}); openAskHub()">${earlier} earlier ${earlier === 1 ? 'question' : 'questions'} · see the whole conversation</button>` : '')
+      + askTurnHtml(last);
+  }
+  // What's happening, in a few words, and the state it puts the panel in.
+  function state(){
+    if(ASK.phi) return ['warn', 'Check for patient details'];
+    if(ASK.busy) return ['busy', 'Looking it up…'];
+    const t = [...ASK.turns].reverse().find(x => !x.hidden);
+    if(!t) return ['ready', 'Ready when you are'];
+    if(t.status === 'error') return ['error', 'Couldn’t get an answer'];
+    if(t.status === 'refused') return ['error', 'Can’t help with that one'];
+    if(t.status === 'waiting') return ['warn', 'Offline · I’ll ask when you’re back'];
+    if(t.status === 'cancelled') return ['ready', 'Stopped'];
+    const a = t.answer || {};
+    if(a.clarify) return ['ready', 'Which one do you mean?'];
+    if(a.local) return ['ready', 'Answered on this phone'];
+    return a.fromHub ? ['ready', 'From the Hub'] : ['warn', 'Not from the Hub · double-check'];
+  }
+  // His button, collapsed: busy ring, an answer you haven't seen, a problem.
+  function syncAnchor(){
+    const [k] = state();
+    const t = [...ASK.turns].reverse().find(x => !x.hidden);
+    const id = t ? t.id + ':' + t.status : '';
+    document.querySelectorAll('.dock-smiley, #tgSmiley').forEach(b => {
+      b.classList.toggle('is-busy', !!ASK.busy);
+      if(isOpen){ b.classList.remove('has-new', 'has-error'); return; }
+      if(id && id !== seenTurn && t && t.status !== 'loading'){
+        b.classList.toggle('has-error', k === 'error' || k === 'warn');
+        b.classList.toggle('has-new', k === 'ready' && t.status === 'done');
+      }
+    });
+    if(isOpen) seenTurn = id;
+  }
+  // Redraw from ASK (called whenever Ask redraws).
+  function sync(){
+    syncAnchor();
+    if(!el || !isOpen) return;
+    const [k, label] = state();
+    el.dataset.state = k;
+    statusEl.textContent = label;
+    const scrollTop = body.scrollTop, before = body.dataset.turn || '';
+    body.innerHTML = bodyHtml();
+    const last = ASK.turns.filter(t => !t.hidden).slice(-1)[0];
+    const now = last ? last.id + ':' + last.status : '';
+    body.dataset.turn = now;
+    // A new answer: from the top of the question, so a long one reads from
+    // its start. Otherwise the reader keeps their place.
+    if(now !== before){ const q = body.querySelector('.ask-q'); body.scrollTop = q ? q.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 9 : 0; }
+    else body.scrollTop = scrollTop;
+    sendWrap.innerHTML = ASK.busy
+      ? `<button class="chat-send-btn is-stop" type="button" onclick="askCancel()" aria-label="Stop">${ICON_ASK_STOP}</button>`
+      : `<button class="chat-send-btn" type="button" onclick="drPanel.send()" aria-label="Ask">${ICON_SEND}</button>`;
+    if(document.activeElement !== input && input.value !== (ASK.draft || '')){ input.value = ASK.draft || ''; grow(); }
+  }
+  // The page changed, a sheet opened or he left: it closes, draft kept.
+  function check(){
+    if(!isOpen) return;
+    const sheet = document.querySelector('.overlay.show, .gs-overlay.show, .dm-overlay.show');
+    if(activeCategory !== cat || sheet || !anchor()) close({ instant: !anchor() || activeCategory === 'ask' });
+    else place();
+  }
+  function focusInput(){ if(isOpen && input){ input.value = ASK.draft || ''; grow(); input.focus(); } }
+  phone.addEventListener('change', () => close({ instant: true }));
+  return { open, close, toggle, sync, check, send, focusInput, get isOpen(){ return isOpen; }, place };
+})();
+function drPanelSync(){ drPanel.sync(); }
 
 /* ============ Init ============ */
 loadNotifyPref();
