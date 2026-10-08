@@ -19,9 +19,15 @@
  */
 
 import { allowTeam } from './_hub-access.js';
+import { callRoutine } from './_routine.js';
 
-const MODEL = 'claude-sonnet-5';   // swap to 'claude-haiku-4-5' for lower cost
-                                   // (model ids take no date suffix)
+/* Every lookup is a short, routine job, so it goes to Claude Haiku 5.5 first
+ * (see _routine.js), at medium effort: it thinks before answering, which is
+ * what a false friend or an ambiguous term needs. BACKUP_MODEL, the model
+ * Translate used before, answers whenever Haiku declines, runs out of room
+ * or fails. */
+const EFFORT = 'medium';
+const BACKUP_MODEL = 'claude-sonnet-5';
 
 // Structured outputs: the response is constrained to this shape rather than
 // the prompt asking for JSON and this file hoping. Every field is a plain
@@ -104,52 +110,19 @@ Rules:
       ? `Translate from ${fromName} to ${toName}.\n\nTerm: "${text}"\n\nIt appeared in this sentence: "${context}"`
       : `Translate from ${fromName} to ${toName}.\n\nTerm: "${text}"`;
 
-    const post = (extra) => fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 700,
-        system,
-        messages: [{ role: 'user', content: userMsg }],
-        ...extra
-      })
+    // Room for the thinking as well as the answer: a cut-off answer is
+    // useless JSON, and the backup would then have to redo the whole job.
+    const result = await callRoutine(apiKey, {
+      body: { max_tokens: 4000, system, messages: [{ role: 'user', content: userMsg }] },
+      routine: { effort: EFFORT, format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } },
+      // The backup runs as Translate always did: default effort.
+      backup: { model: BACKUP_MODEL, output: { format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } } },
     });
-
-    // Ask for a schema-constrained response; if this deployment rejects the
-    // parameter, fall back to the old unconstrained call rather than failing
-    // the lookup. The tolerant parsing below still covers that path.
-    let usedSchema = true;
-    let upstream = await post({ output_config: { format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } } });
-
-    if (upstream.status === 400) {
-      const detail = await upstream.text();
-      if (/output_config|json_schema|\bformat\b/i.test(detail)) {
-        console.warn('Structured outputs rejected, retrying without a schema:', detail);
-        usedSchema = false;
-        upstream = await post({});
-      } else {
-        console.error('Anthropic API error:', upstream.status, detail);
-        return res.status(502).json({ error: 'upstream_error', status: upstream.status });
-      }
+    if (!result.ok) {
+      console.error('Anthropic API error:', result.model, result.status, result.detail);
+      return res.status(502).json({ error: 'upstream_error', status: result.status });
     }
-
-    if (!upstream.ok) {
-      const detail = await upstream.text();
-      console.error('Anthropic API error:', upstream.status, detail);
-      return res.status(502).json({ error: 'upstream_error', status: upstream.status });
-    }
-
-    const data = await upstream.json();
-    const raw = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim();
+    const raw = result.text, usedSchema = result.usedSchema;
 
     if (usedSchema) {
       // Constrained by TRANSLATE_SCHEMA — valid JSON by construction.

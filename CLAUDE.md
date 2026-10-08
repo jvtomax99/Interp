@@ -35,6 +35,7 @@ between assignments.
 | `api/check-events.js` | 224 | Cron job watching CE/training events |
 | `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
+| `api/_routine.js` | — | Haiku 5.5 first, then the endpoint's backup model, for Translate and the term check (not an endpoint itself) |
 | `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
 | `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |

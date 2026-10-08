@@ -28,14 +28,18 @@
  */
 
 import { allowTeam } from './_hub-access.js';
+import { callRoutine } from './_routine.js';
 
-const MODEL = 'claude-opus-5';
-
-// This runs on every term save, so it is deliberately a quick pass rather
-// than a deep one. If findings come back shallow — missing false friends you
-// would expect it to catch — raise this to 'medium' or 'high' first; that is
-// the knob that matters here, not the model.
-const EFFORT = 'low';
+// This runs on every term save -- routine, high-volume work -- so it goes to
+// Claude Haiku 5.5 first (see _routine.js). Medium effort, one step above the
+// quick pass Opus 5 ran, since Haiku is the smaller model. If findings come
+// back shallow -- missing false friends you would expect it to catch -- raise
+// EFFORT to 'high' first; that is the cheaper knob.
+const EFFORT = 'medium';
+// The model the check used before. It answers whenever Haiku declines, runs
+// out of room or fails, at the effort it always ran.
+const BACKUP_MODEL = 'claude-opus-5';
+const BACKUP_EFFORT = 'low';
 
 const MAX_FIELD = 600;      // guards against oversized or abusive requests
 const MAX_CANDIDATES = 5;   // matches CANDIDATE_LIMIT in the client
@@ -137,52 +141,17 @@ export default async function handler(req, res) {
         ? `Existing glossary entries with similar wording — judge whether any is the same concept:\n${JSON.stringify(nearby, null, 2)}`
         : 'No existing entries were close enough in wording to be duplicate candidates.');
 
-    const post = (extra) => fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1500,
-        system: SYSTEM,
-        messages: [{ role: 'user', content: userContent }],
-        ...extra,
-      }),
+    const format = { type: 'json_schema', schema: CHECK_SCHEMA };
+    const result = await callRoutine(apiKey, {
+      body: { max_tokens: 4000, system: SYSTEM, messages: [{ role: 'user', content: userContent }] },
+      routine: { effort: EFFORT, format },
+      backup: { model: BACKUP_MODEL, output: { effort: BACKUP_EFFORT, format } },
     });
-
-    // Same defensive shape as translate.js: prefer a schema-constrained
-    // response, but never fail the check because the parameter was rejected.
-    let usedSchema = true;
-    let upstream = await post({
-      output_config: { effort: EFFORT, format: { type: 'json_schema', schema: CHECK_SCHEMA } },
-    });
-
-    if (upstream.status === 400) {
-      const detail = await upstream.text();
-      if (/output_config|json_schema|\bformat\b|\beffort\b/i.test(detail)) {
-        console.warn('Structured outputs rejected, retrying without a schema:', detail);
-        usedSchema = false;
-        upstream = await post({});
-      } else {
-        console.error('Anthropic API error:', upstream.status, detail);
-        return res.status(502).json({ error: 'upstream_error' });
-      }
-    }
-
-    if (!upstream.ok) {
-      console.error('Anthropic API error:', upstream.status, await upstream.text());
+    if (!result.ok) {
+      console.error('Anthropic API error:', result.model, result.status, result.detail);
       return res.status(502).json({ error: 'upstream_error' });
     }
-
-    const data = await upstream.json();
-    const raw = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim();
+    const raw = result.text, usedSchema = result.usedSchema;
 
     let parsed;
     try {

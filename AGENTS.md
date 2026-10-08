@@ -133,6 +133,13 @@ no error on screen. So when you add something:
   source changes go in `atlas/hub-changes.patch` and are rebuilt, never
   edited in the minified bundle. A body part's Spanish name goes in
   `hub-catalogue.json` only with a source that supports it.
+- **Each AI job gets the cheapest model that does it well.** Judgment stays
+  on the strong models: Dr. Smiley (`api/ask.js`, Opus 5.5), Term lookup and
+  Doctor Prep (Sonnet, web search). Routine, high-volume jobs (Translate,
+  the term check) go to Claude Haiku 5.5 through `api/_routine.js`, which
+  retries once on the endpoint's previous model when Haiku declines, is cut
+  off or fails. Change a model in one place, and raise effort before
+  swapping to a bigger model.
 - **A write someone makes goes through `queuedWrite()` (the outbox), never a
   bare `.set()`.** The app runs without Firestore's offline cache, so offline
   a bare write just waits for the server: the screen stalls on it and the
