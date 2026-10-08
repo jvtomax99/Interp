@@ -48,7 +48,7 @@ So:
 | Domain folder / section overlay styling | `home-polish.css` |
 | Home behaviour — hello wave, rail dots, overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
-| 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first |
+| 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
 | Everything else | `index.html` |
 
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
@@ -125,6 +125,14 @@ no error on screen. So when you add something:
   without `allow-same-origin`, and `vercel.json` sends the same sandbox as a
   header. Never add `allow-same-origin` or load its scripts into the Hub's
   own page: it would then reach the team sign-in and saved data.
+  The Hub and the viewer talk only by `postMessage`, and the Hub checks every
+  message (`atlasOnMessage`: the frame on screen, opaque origin, agreed
+  shape, allowed action, a structure in its own catalogue). Never let a
+  message from the frame navigate, run code, write data or supply text the
+  Hub shows; the Hub uses its own catalogue and glossary. The viewer's
+  source changes go in `atlas/hub-changes.patch` and are rebuilt, never
+  edited in the minified bundle. A body part's Spanish name goes in
+  `hub-catalogue.json` only with a source that supports it.
 - **A write someone makes goes through `queuedWrite()` (the outbox), never a
   bare `.set()`.** The app runs without Firestore's offline cache, so offline
   a bare write just waits for the server: the screen stalls on it and the

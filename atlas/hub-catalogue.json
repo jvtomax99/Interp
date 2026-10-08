@@ -1,0 +1,1296 @@
+{
+ "version": 1,
+ "note": "Checked bilingual card text for the 3D Body. The Hub and the viewer both read this file. Edit it here; no rebuild needed. Spanish names and explanations come from the sources listed with each structure (supports: en = English name, es = Spanish name, about = the explanation). glossaryTermId stays null unless a teammate confirms the exact glossary entry; the Hub otherwise matches by exact name.",
+ "geometry": {
+  "title": "BodyParts3D 4.0",
+  "publisher": "The Database Center for Life Science (DBCLS)",
+  "licence": "CC BY 4.0",
+  "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "ids": "Concept ids are Foundational Model of Anatomy (FMA) identifiers, as used by BodyParts3D."
+ },
+ "structures": [
+  {
+   "id": "FMA7088",
+   "en": "Heart",
+   "es": "Corazón",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "A hollow muscular organ in the middle of the chest that pumps blood through the body. It has four chambers.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Structure of the Heart · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/cardiovascular/heart/structure.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Corazón · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/corazon",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA50801",
+   "en": "Brain",
+   "es": "Encéfalo",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "The part of the central nervous system inside the skull. It is made up of the cerebrum, the cerebellum and the brainstem.",
+   "esNote": "Encéfalo is the whole brain; cerebro is strictly the cerebrum, though many patients say cerebro for the whole brain.",
+   "sources": [
+    {
+     "title": "Brain · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/brain/tumors/anatomy/brain.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "brain · NCI Dictionary of Cancer Terms",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/brain",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Encéfalo · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/encefalo",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    },
+    {
+     "title": "Cerebro · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/cerebro",
+     "lang": "es",
+     "supports": [
+      "es"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7197",
+   "en": "Liver",
+   "es": "Hígado",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "The largest internal organ, in the upper right abdomen just under the diaphragm. It makes bile, stores glycogen and filters the blood.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Accessory Organs · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/digestive/regions/accessory.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Anatomy of the Liver & Gallbladder · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/biliary/anatomy/liver.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "liver · NCI Dictionary of Cancer Terms",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/liver",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Hígado · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/higado",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7148",
+   "en": "Stomach",
+   "es": "Estómago",
+   "enAlt": [],
+   "sides": [],
+   "members": false,
+   "about": "A hollow muscular organ in the upper left abdomen, between the esophagus and the small intestine. It stores food and mixes it with acid and enzymes.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Regions of the Digestive System · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/digestive/regions/",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "stomach · NCI Dictionary of Cancer Terms",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/stomach",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Estómago · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/estomago",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7196",
+   "en": "Spleen",
+   "es": "Bazo",
+   "enAlt": [],
+   "sides": [],
+   "members": false,
+   "about": "An organ of the lymphatic system in the upper left abdomen, under the ribs. It filters the blood and removes old red blood cells.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Spleen · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/lymphatic/components/spleen.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Enfermedades del bazo",
+     "publisher": "MedlinePlus en español (NLM)",
+     "url": "https://www.medlineplus.gov/spanish/spleendiseases.html",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    },
+    {
+     "title": "Bazo · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/bazo",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7198",
+   "en": "Pancreas",
+   "es": "Páncreas",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "A gland in the abdomen that makes digestive enzymes and hormones, including insulin. Its enzymes flow into the duodenum to help digest protein, starch and fat.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Accessory Organs · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/digestive/regions/accessory.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "pancreas · NCI Dictionary of Cancer Terms",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/pancreas",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Páncreas · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/pancreas",
+     "lang": "es",
+     "supports": [
+      "es"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7202",
+   "en": "Gallbladder",
+   "es": "Vesícula biliar",
+   "enAlt": [],
+   "sides": [],
+   "members": false,
+   "about": "A small pear-shaped organ under the liver. It stores bile, the fluid the liver makes to digest fat.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "gallbladder cancer · NCI Dictionary of Cancer Terms",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/gallbladder-cancer",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Anatomy of the Liver & Gallbladder · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/biliary/anatomy/liver.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Vesícula biliar · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/vesicula-biliar",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7131",
+   "en": "Esophagus",
+   "es": "Esófago",
+   "enAlt": [],
+   "sides": [],
+   "members": false,
+   "about": "The muscular tube that carries food and liquid from the throat to the stomach. It is about 25 cm (10 inches) long.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "What Is Esophageal Cancer?",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/types/esophageal/what-is-esophageal-cancer",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Anatomy of the Esophagus · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/ugi/anatomy/esophagus.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Esófago · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/esofago",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7200",
+   "en": "Small intestine",
+   "es": "Intestino delgado",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "The longest part of the digestive tract, from the stomach to the large intestine, where most nutrients are absorbed. Its three parts are the duodenum, jejunum and ileum.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Small & Large Intestine · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/digestive/regions/intestine.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Intestino delgado · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/intestino-delgado",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7201",
+   "en": "Large intestine",
+   "es": "Intestino grueso",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "The last part of the digestive tract, from the end of the small intestine to the anus. It includes the cecum, colon and rectum, and takes water back from what is left.",
+   "esNote": "Colon is only one part of the large intestine, although the two are often used as if they were the same.",
+   "sources": [
+    {
+     "title": "Small & Large Intestine · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/digestive/regions/intestine.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Intestino grueso · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/intestino-grueso",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA14542",
+   "en": "Appendix",
+   "es": "Apéndice",
+   "enAlt": [],
+   "sides": [],
+   "members": false,
+   "about": "A narrow, worm-shaped tube attached to the cecum, the first part of the large intestine. When it becomes inflamed, it is appendicitis.",
+   "esNote": "Full anatomical name: apéndice vermiforme.",
+   "sources": [
+    {
+     "title": "Colorectal Anatomy and ICD-O-3 · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/colorectal/anatomy/colorectal-anatomy-and-icdO3.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Apéndice vermiforme · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/apendice-vermiforme",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA15900",
+   "en": "Urinary bladder",
+   "es": "Vejiga urinaria",
+   "enAlt": [
+    "Bladder"
+   ],
+   "sides": [],
+   "members": false,
+   "about": "A hollow, stretchy organ in the pelvis, behind the pubic bone. It stores the urine that comes from the kidneys until it is passed.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Urinary Bladder · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/urinary/components/bladder.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Vejiga · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/vejiga",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7203",
+   "en": "Kidney",
+   "es": "Riñón",
+   "enAlt": [
+    "Kidneys"
+   ],
+   "sides": [
+    {
+     "id": "FMA7204",
+     "side": "right",
+     "en": "Right kidney",
+     "es": "Riñón derecho"
+    },
+    {
+     "id": "FMA7205",
+     "side": "left",
+     "en": "Left kidney",
+     "es": "Riñón izquierdo"
+    }
+   ],
+   "members": false,
+   "about": "One of two bean-shaped organs at the back of the abdomen, one on each side of the spine. They filter the blood and make urine.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Kidneys · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/urinary/components/kidney.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Riñón · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/rinon",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA9704",
+   "en": "Ureter",
+   "es": "Uréter",
+   "enAlt": [
+    "Ureters"
+   ],
+   "sides": [
+    {
+     "id": "FMA15571",
+     "side": "right",
+     "en": "Right ureter",
+     "es": "Uréter derecho"
+    },
+    {
+     "id": "FMA15572",
+     "side": "left",
+     "en": "Left ureter",
+     "es": "Uréter izquierdo"
+    }
+   ],
+   "members": false,
+   "about": "One of two muscular tubes, about 25 cm long, that carry urine from each kidney to the bladder.",
+   "esNote": "Not the urethra (uretra), which carries urine out of the bladder.",
+   "sources": [
+    {
+     "title": "Ureters · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/urinary/components/ureters.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Uréter · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/ureter",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA9600",
+   "en": "Prostate",
+   "es": "Próstata",
+   "enAlt": [
+    "Prostate gland"
+   ],
+   "sides": [],
+   "members": false,
+   "about": "A walnut-sized gland in males, just below the bladder, that surrounds the first part of the urethra. It makes part of the fluid in semen.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Prostate Anatomy · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/prostate/anatomy/",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Próstata · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/prostata",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7394",
+   "en": "Trachea",
+   "es": "Tráquea",
+   "enAlt": [
+    "Windpipe"
+   ],
+   "sides": [],
+   "members": false,
+   "about": "The windpipe: a tube held open by rings of cartilage that carries air from the larynx toward the lungs. In the chest it divides into the right and left bronchi.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Larynx & Trachea · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/respiratory/passages/larynx.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Tráquea · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/traquea",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7195",
+   "en": "Lung",
+   "es": "Pulmón",
+   "enAlt": [
+    "Lungs"
+   ],
+   "sides": [
+    {
+     "id": "FMA7309",
+     "side": "right",
+     "en": "Right lung",
+     "es": "Pulmón derecho"
+    },
+    {
+     "id": "FMA7310",
+     "side": "left",
+     "en": "Left lung",
+     "es": "Pulmón izquierdo"
+    }
+   ],
+   "members": true,
+   "about": "One of the two organs of breathing in the chest, where gases pass between the air and the blood. The right lung has three lobes and the left has two.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Bronchi, Bronchial Tree, & Lungs · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/respiratory/passages/bronchi.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Pulmón · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/pulmon",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA13295",
+   "en": "Diaphragm",
+   "es": "Diafragma",
+   "enAlt": [],
+   "sides": [],
+   "members": false,
+   "about": "The dome-shaped muscle that separates the chest from the abdomen. It is the main muscle of breathing: it contracts and moves down when you breathe in.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Muscles of the Trunk · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/muscular/groups/trunk.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Mechanics of Ventilation · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/respiratory/mechanics.html",
+     "lang": "en",
+     "supports": [
+      "about"
+     ]
+    },
+    {
+     "title": "Diafragma · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/diafragma",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA3734",
+   "en": "Aorta",
+   "es": "Aorta",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "The largest artery in the body. It leaves the left ventricle of the heart, arches, and runs down through the chest and abdomen.",
+   "esNote": "Sometimes heard as “vena aorta”, but it is an artery, not a vein.",
+   "sources": [
+    {
+     "title": "Circulatory Pathways · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/cardiovascular/blood/pathways.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Aorta · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/aorta",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7647",
+   "en": "Spinal cord",
+   "es": "Médula espinal",
+   "enAlt": [],
+   "sides": [],
+   "members": true,
+   "about": "The cord of nerve tissue that continues down from the brain inside the spine. It carries signals between the brain and the body and handles reflexes.",
+   "esNote": "Not médula ósea, which is bone marrow.",
+   "sources": [
+    {
+     "title": "Organization of the Nervous System · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/nervous/organization/",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Médula espinal · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/medula-espinal",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA9604",
+   "en": "Adrenal gland",
+   "es": "Glándula suprarrenal",
+   "enAlt": [
+    "Adrenal glands",
+    "Suprarenal gland"
+   ],
+   "sides": [
+    {
+     "id": "FMA15629",
+     "side": "right",
+     "en": "Right adrenal gland",
+     "es": "Glándula suprarrenal derecha"
+    },
+    {
+     "id": "FMA15630",
+     "side": "left",
+     "en": "Left adrenal gland",
+     "es": "Glándula suprarrenal izquierda"
+    }
+   ],
+   "members": false,
+   "about": "A small gland on top of each kidney. Its outer layer (cortex) makes hormones such as cortisol and aldosterone; its center (medulla) makes adrenaline.",
+   "esNote": "Also called glándula adrenal.",
+   "sources": [
+    {
+     "title": "Adrenal Gland · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/endocrine/glands/adrenal.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Glándula suprarrenal · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/glandula-suprarrenal",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7485",
+   "en": "Sternum",
+   "es": "Esternón",
+   "enAlt": [
+    "Breastbone"
+   ],
+   "sides": [],
+   "members": true,
+   "about": "The breastbone: a flat bone in the middle of the front of the chest. The collarbones and the upper ribs attach to it, and it shields the heart.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Axial Skeleton (80 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Introduction to the Skeletal System · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/",
+     "lang": "en",
+     "supports": [
+      "about"
+     ]
+    },
+    {
+     "title": "Esternón · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/esternon",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA7574",
+   "en": "Rib",
+   "es": "Costilla",
+   "enAlt": [
+    "Ribs"
+   ],
+   "sides": [],
+   "members": true,
+   "about": "One of the 24 curved bones (12 pairs) that form the sides of the rib cage. They protect the heart and lungs and move with breathing.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Axial Skeleton (80 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html",
+     "lang": "en",
+     "supports": [
+      "en",
+      "about"
+     ]
+    },
+    {
+     "title": "Introduction to the Skeletal System · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/",
+     "lang": "en",
+     "supports": [
+      "about"
+     ]
+    },
+    {
+     "title": "Costilla · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/costilla",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA13478",
+   "en": "Vertebral column",
+   "es": "Columna vertebral",
+   "enAlt": [
+    "Spine",
+    "Spinal column",
+    "Backbone"
+   ],
+   "sides": [],
+   "members": true,
+   "about": "The spine: the stack of vertebrae, separated by intervertebral discs, that forms the central axis of the trunk. It encloses and protects the spinal cord.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Axial Skeleton (80 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Introduction to the Skeletal System · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/",
+     "lang": "en",
+     "supports": [
+      "about"
+     ]
+    },
+    {
+     "title": "Columna vertebral · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/columna-vertebral",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA13321",
+   "en": "Clavicle",
+   "es": "Clavícula",
+   "enAlt": [
+    "Collarbone"
+   ],
+   "sides": [
+    {
+     "id": "FMA13322",
+     "side": "right",
+     "en": "Right clavicle",
+     "es": "Clavícula derecha"
+    },
+    {
+     "id": "FMA13323",
+     "side": "left",
+     "en": "Left clavicle",
+     "es": "Clavícula izquierda"
+    }
+   ],
+   "members": false,
+   "about": "The collarbone: an S-shaped bone at the base of the neck, between the breastbone and the shoulder blade. It holds the shoulder out from the trunk.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Appendicular Skeleton (126 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Clavícula · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/clavicula",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA13303",
+   "en": "Humerus",
+   "es": "Húmero",
+   "enAlt": [],
+   "sides": [
+    {
+     "id": "FMA23130",
+     "side": "right",
+     "en": "Right humerus",
+     "es": "Húmero derecho"
+    },
+    {
+     "id": "FMA23131",
+     "side": "left",
+     "en": "Left humerus",
+     "es": "Húmero izquierdo"
+    }
+   ],
+   "members": false,
+   "about": "The long bone of the upper arm, from the shoulder to the elbow. It is part of both joints.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Appendicular Skeleton (126 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Classification of Bones · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/classification.html",
+     "lang": "en",
+     "supports": [
+      "about"
+     ]
+    },
+    {
+     "title": "Húmero · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/humero",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA9611",
+   "en": "Femur",
+   "es": "Fémur",
+   "enAlt": [
+    "Thigh bone",
+    "Thighbone"
+   ],
+   "sides": [
+    {
+     "id": "FMA24474",
+     "side": "right",
+     "en": "Right femur",
+     "es": "Fémur derecho"
+    },
+    {
+     "id": "FMA24475",
+     "side": "left",
+     "en": "Left femur",
+     "es": "Fémur izquierdo"
+    }
+   ],
+   "members": false,
+   "about": "The thigh bone, the longest and strongest bone in the body. It forms the hip joint above and the knee joint below.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Appendicular Skeleton (126 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Fémur · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/femur",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA24476",
+   "en": "Tibia",
+   "es": "Tibia",
+   "enAlt": [
+    "Shinbone",
+    "Shin bone"
+   ],
+   "sides": [
+    {
+     "id": "FMA24477",
+     "side": "right",
+     "en": "Right tibia",
+     "es": "Tibia derecha"
+    },
+    {
+     "id": "FMA24478",
+     "side": "left",
+     "en": "Left tibia",
+     "es": "Tibia izquierda"
+    }
+   ],
+   "members": false,
+   "about": "The shinbone: the larger of the two bones of the lower leg, between the knee and the ankle. It carries the body’s weight from the femur to the foot.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Appendicular Skeleton (126 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Tibia · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/tibia",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA24485",
+   "en": "Patella",
+   "es": "Rótula",
+   "enAlt": [
+    "Kneecap",
+    "Knee cap"
+   ],
+   "sides": [
+    {
+     "id": "FMA24486",
+     "side": "right",
+     "en": "Right patella",
+     "es": "Rótula derecha"
+    },
+    {
+     "id": "FMA24487",
+     "side": "left",
+     "en": "Left patella",
+     "es": "Rótula izquierda"
+    }
+   ],
+   "members": false,
+   "about": "The kneecap: a flat, triangular bone at the front of the knee, inside the tendon of the quadriceps. It helps the thigh muscles straighten the knee.",
+   "esNote": "",
+   "sources": [
+    {
+     "title": "Appendicular Skeleton (126 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/appendicular.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Rótula · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/rotula",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  },
+  {
+   "id": "FMA52748",
+   "en": "Mandible",
+   "es": "Mandíbula",
+   "enAlt": [
+    "Lower jaw",
+    "Jawbone"
+   ],
+   "sides": [],
+   "members": false,
+   "about": "The lower jaw bone. It holds the lower teeth and is the only movable bone of the skull, used for chewing and speaking.",
+   "esNote": "Not maxilar, which today means the upper jaw.",
+   "sources": [
+    {
+     "title": "Axial Skeleton (80 bones) · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/skeletal/divisions/axial.html",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "mandible · NCI Dictionary of Cancer Terms",
+     "publisher": "National Cancer Institute",
+     "url": "https://www.cancer.gov/publications/dictionaries/cancer-terms/def/mandible",
+     "lang": "en",
+     "supports": [
+      "en"
+     ]
+    },
+    {
+     "title": "Muscles of the Head and Neck · SEER Training Modules",
+     "publisher": "National Cancer Institute",
+     "url": "https://training.seer.cancer.gov/anatomy/muscular/groups/head_neck.html",
+     "lang": "en",
+     "supports": [
+      "about"
+     ]
+    },
+    {
+     "title": "Mandíbula · Diccionario médico",
+     "publisher": "Clínica Universidad de Navarra",
+     "url": "https://www.cun.es/diccionario-medico/terminos/mandibula",
+     "lang": "es",
+     "supports": [
+      "es",
+      "about"
+     ]
+    }
+   ],
+   "glossaryTermId": null
+  }
+ ]
+}

@@ -25,7 +25,8 @@
  *
  * WHAT HE CAN DO, NOT JUST SAY
  * The app also sends a small CONTEXT: the screen the interpreter came from,
- * a glossary term they picked ("explain this term"), the specialties that
+ * a glossary term they picked ("explain this term"), a structure they
+ * tapped in the 3D Body (its checked card is sent as an entry), the specialties that
  * have a briefing, and how many terms their Term Review record marks as still
  * learning -- never anything about a patient. Dr. Smiley may suggest a few
  * ACTIONS from a fixed list (open a briefing, practice those terms, open a
@@ -119,6 +120,7 @@ How to answer:
 
 Context and actions:
 - CONTEXT says which screen the interpreter came from, which glossary term they selected (if any), which specialties have a briefing, and their Term Review record (whether a name is set on the phone and how many terms are still being learned).
+- CONTEXT.anatomy is a structure the interpreter tapped in the 3D Body. Its entry (id "an:...", type "3D Body structure (checked Hub card)") is in HUB ENTRIES with the English name, the Spanish name and a short explanation the Hub checked against medical dictionaries. "Explain the <structure>", "this structure" or "it" means it: headline is the English name and its Spanish name exactly as the entry gives them; say is a plain Spanish way to tell a patient what and where it is; details at most two short sentences. Put its id in sourceIds. Don't offer a different Spanish name as the standard one; if a patient might say it another way, say so as an alternative. When CONTEXT.selected is also set, it is the same structure's glossary entry: use both. When CONTEXT.anatomy.inGlossary is false, the structure isn't in the team's glossary; don't call it a glossary term and don't offer open_term for it.
 - "Explain this term" (or "this word", "it") means CONTEXT.selected. Explain that entry: headline is the term and its Spanish; say is a plain Spanish rendering a patient would understand, with sayLabel "In plain Spanish"; details is at most two short sentences. Put its id in sourceIds. If nothing is selected, CONTEXT.conversation doesn't settle it and the question doesn't name a term, ask which one (see clarify below).
 - You can't open anything yourself. To help someone do something, add up to 3 actions from this list, and only with a target given in CONTEXT or HUB ENTRIES:
   open_prep (target: a specialty id from CONTEXT.specialties) opens the appointment briefing for that specialty. Use it for "I'm covering X", "prep me", "heading to X". If the specialty isn't in the list, say so and use choose_prep (target "prep") instead.
@@ -248,6 +250,11 @@ function cleanContext(c) {
       learning: int(pc.learning, 9999), learningInFocus: int(pc.learningInFocus, 9999), due: int(pc.due, 9999),
       unfinished: kind && (kind !== 'prep' || spec) ? { kind, id: spec ? spec.id : kind, name: spec ? spec.name : '', done: int(u.done, 999), total: int(u.total, 999) } : null,
     };
+  }
+  // A structure tapped in the 3D Body: its checked card is one of the entries.
+  const an = c.anatomy && typeof c.anatomy === 'object' ? c.anatomy : null;
+  if (an && /^an:FMA\d{1,7}$/.test(String(an.id || '')) && safeText(an.en, 80)) {
+    out.anatomy = { id: String(an.id), en: safeText(an.en, 80), es: safeText(an.es, 80), inGlossary: !!an.inGlossary };
   }
   if (sel && ID_RE.test(String(sel.id || '')) && String(sel.id).startsWith('t:')) {
     out.selected = { id: String(sel.id), en: safeText(sel.en, 160), es: safeText(sel.es, 160), domain: safeText(sel.domain, 80),

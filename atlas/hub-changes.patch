@@ -1,7 +1,21 @@
-diff -ruN pa/app/globals.css pb/app/globals.css
---- a/app/globals.css	2026-10-07 00:50:02.768431304 +0000
-+++ b/app/globals.css	2026-10-07 00:50:02.769792012 +0000
-@@ -86,3 +86,63 @@
+diff --git a/app/anatomy.ts b/app/anatomy.ts
+index 031d084..f53f23c 100644
+--- a/app/anatomy.ts
++++ b/app/anatomy.ts
+@@ -20,7 +20,7 @@ export interface Part {id:string;name:string;conceptId:string;system:SystemId;ch
+ export interface Concept {id:string;name:string;elements:string[]}
+ export interface Atlas {version:string;sex?:'male';source?:string;scope?:string;parts:Part[];concepts:Concept[];chunks:{url:string;bytes:number;gzip?:string;gzipBytes?:number}[];triangles:number}
+ export type View = 'three-quarter'|'front'|'back'|'side';
+-export interface SceneState {inspectorOpen?:boolean;explode:number;visible:SystemId[];selected:string[];isolate:boolean;view:View;rotate:boolean;reset:number}
++export interface SceneState {inspectorOpen?:boolean|string;explode:number;visible:SystemId[];selected:string[];isolate:boolean;view:View;rotate:boolean;reset:number}
+ export const DEFAULT_VISIBLE:SystemId[] = ['cardiac','sensory','skeletal','muscular','arterial','venous','nervous','respiratory','digestive','urinary','lymphatic','endocrine','reproductive','connective'];
+ export const EXPLANATIONS:Record<string,string> = {
+  'heart':'A muscular pump in the chest. Its right side sends blood to the lungs; its left side sends blood through the systemic circulation.',
+diff --git a/app/globals.css b/app/globals.css
+index 91cbe15..6f3beda 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -86,3 +86,159 @@ h1 .edition{font-family:inherit;font-weight:500;font-size:10px;letter-spacing:.0
  @media(max-width:767px){body:has(.detail-sheet) .view-controls{visibility:hidden}}
  
  @media(max-height:600px) and (orientation:landscape){body:has(.detail-sheet) .bottom-dock{left:12px;right:324px;width:auto;transform:none;max-width:none;margin:0}}
@@ -65,14 +79,311 @@ diff -ruN pa/app/globals.css pb/app/globals.css
 +/* Interpreter Hub: the explode track drew 0px tall, so only the knob showed. */
 +.explode-control [data-slot=slider-track]{height:4px;border-radius:2px}
 +.explode-control [data-slot=slider-range]{height:100%;border-radius:2px}
-diff -ruN pa/app/orbit-controls.d.ts pb/app/orbit-controls.d.ts
---- a/app/orbit-controls.d.ts	1970-01-01 00:00:00.000000000 +0000
-+++ b/app/orbit-controls.d.ts	2026-10-07 00:50:02.780901417 +0000
++
++/* Interpreter Hub: the structure card (app/hub-card.tsx). The Hub's own
++   tokens and finish, so it reads as part of the Hub. Both names sit in a
++   fixed head beside Close; the rest scrolls. Wide screens: a panel on the
++   right, left of the camera buttons, everything shown. Phones: a rounded
++   card at the bottom that starts compact (names, what it is, the tools,
++   Isolate) and opens taller for the notes and sources. */
++.hub-card{--hc-ink:#151C2C;--hc-soft:#5A6478;--hc-faint:#98A1B3;--hc-line:#E2E7F0;--hc-bg:#F4F6FA;--hc-navy:#252E6D;
++ position:absolute;z-index:25;top:96px;right:92px;bottom:auto;max-height:calc(100% - 140px);width:340px;display:flex;flex-direction:column;min-height:0;
++ background:#fff;color:var(--hc-ink);border-radius:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
++ box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);
++ animation:hc-in .26s cubic-bezier(.2,.8,.2,1)}
++@keyframes hc-in{from{opacity:0;transform:translateY(9px)}}
++.hub-card button{font:inherit}
++.hub-card button:focus-visible,.hub-card a:focus-visible,.hub-card summary:focus-visible{outline:2px solid #2E8BD0;outline-offset:2px}
++.hc-head{display:flex;align-items:flex-start;gap:4px;padding:11px 9px 0 17px;flex-shrink:0}
++.hc-names{flex:1;min-width:0;display:flex;flex-direction:column}
++.hc-ctl{display:flex;flex-direction:column;flex-shrink:0}
++.hc-name{display:flex;align-items:center;gap:9px;min-height:44px}
++.hc-name h2{margin:0;min-width:0;font-size:22px;line-height:1.2;font-weight:650;letter-spacing:-.02em;color:var(--hc-ink);outline:none;text-transform:none;overflow-wrap:anywhere}
++.hc-name p{margin:0;min-width:0;font-size:21px;line-height:1.2;font-weight:550;letter-spacing:-.015em;color:var(--hc-navy);overflow-wrap:anywhere}
++.hc-name p.hc-missing{font-size:15px;font-weight:450;font-style:italic;color:var(--hc-soft);letter-spacing:0}
++.hc-say{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;min-height:44px;min-width:44px;padding:0 11px;border-radius:22px;border:1px solid var(--hc-line)!important;background:#fff!important;color:var(--hc-navy)!important;font-size:12px!important;font-weight:650;letter-spacing:.04em;transition:transform .15s cubic-bezier(.2,.8,.2,1)}
++.hc-say:hover{background:var(--hc-bg)!important}
++.hc-say:active{transform:scale(.96)}
++.hc-icon{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--hc-soft)!important}
++.hc-icon:hover{background:var(--hc-bg)!important}
++.hc-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:9px 17px 17px;display:flex;flex-direction:column;gap:13px;scrollbar-width:thin;scrollbar-color:#C9D1DE transparent}
++.hc-side{margin:-6px 0 0;font-size:13px;color:var(--hc-soft)}
++.hc-about{margin:0;font-size:15px;line-height:1.5;color:#2A3346}
++.hc-system span{display:block;font-size:12px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--hc-soft);margin-bottom:6px}
++.hc-system p{margin:0;font-size:15px;line-height:1.5;color:#2A3346}
++.hc-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
++.hc-tools button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:68px;padding:8px 6px;border-radius:14px;
++ background:var(--hc-bg)!important;border:1px solid var(--hc-line)!important;color:var(--hc-ink)!important;font-size:13px!important;font-weight:550;line-height:1.2;text-align:center;
++ box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);transition:transform .15s cubic-bezier(.2,.8,.2,1),background .15s}
++.hc-tools button svg{color:var(--hc-navy)}
++.hc-tools button:not(:disabled):active{transform:scale(.97)}
++.hc-tools button:disabled{opacity:.42}
++.hc-tools .hc-ask{background:var(--hc-navy)!important;border-color:var(--hc-navy)!important;color:#fff!important}
++.hc-tools .hc-ask svg{color:#fff}
++.hc-row{display:flex;align-items:center;gap:9px;margin-top:-4px}
++.hc-row>:first-child{flex:1;min-width:0}
++.hc-status{margin:0;font-size:13px;line-height:1.45;color:var(--hc-soft)}
++.hc-status b{font-weight:600;color:var(--hc-ink)}
++.hc-status.is-checking b{font-weight:450;color:var(--hc-soft)}
++.hc-note{margin:0;font-size:13px;line-height:1.45;color:var(--hc-soft)}
++.hc-iso{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:22px;background:var(--hc-bg)!important;color:var(--hc-ink)!important;font-size:13px!important;font-weight:550}
++.hc-iso[aria-pressed=true]{background:#E8F1FA!important;color:var(--hc-navy)!important}
++.hc-more{display:flex;flex-direction:column;gap:13px}
++.hc-esnote{margin:0;font-size:13px;line-height:1.45;color:#2A3346;display:flex;gap:8px;align-items:baseline}
++.hc-esnote b{flex-shrink:0;font-size:11px;font-weight:650;letter-spacing:.04em;color:var(--hc-navy);background:#E8F1FA;border-radius:6px;padding:2px 6px}
++.hc-via{margin:0;font-size:13px;line-height:1.45;color:var(--hc-soft)}
++.hc-via b{font-weight:550;color:var(--hc-ink);text-transform:capitalize}
++.hc-iso-wide{width:100%;justify-content:center;font-size:14px!important;border:1px solid var(--hc-line)!important}
++.hc-members summary,.hc-sources summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:13px;font-weight:650;color:var(--hc-ink);border-top:1px solid var(--hc-line);list-style:none}
++.hc-members summary::-webkit-details-marker,.hc-sources summary::-webkit-details-marker{display:none}
++.hc-members summary::after,.hc-sources summary::after{content:'';margin-left:auto;width:7px;height:7px;border-right:1.6px solid var(--hc-soft);border-bottom:1.6px solid var(--hc-soft);transform:rotate(45deg) translateY(-2px);transition:transform .2s}
++.hc-members[open] summary::after,.hc-sources[open] summary::after{transform:rotate(225deg) translateY(-2px)}
++.hc-members button{text-transform:capitalize}
++.hc-sources h3{margin:6px 0 4px;font-size:12px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--hc-soft)}
++.hc-sources ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
++.hc-sources li{display:flex;flex-direction:column;gap:2px}
++.hc-sources li a{display:inline-flex;align-items:center;gap:4px;font-size:14px;line-height:1.35;color:var(--hc-ink);text-decoration:underline;text-decoration-color:#C9D1DE;text-underline-offset:3px}
++.hc-sources li span,.hc-sources p{font-size:12px;line-height:1.45;color:var(--hc-soft);margin:0}
++.hc-sources p+p{margin-top:6px}
++.hc-ref b{font-weight:550;color:var(--hc-ink)}
++.hc-clear{align-self:flex-start;min-height:44px;font-size:13px!important;color:var(--hc-soft)!important;padding:0 2px}
++.hc-phone{display:none!important}
++body:has(.hub-card) [data-slot=sheet-overlay]{display:none}
++@media(max-width:767px){
++ .hub-card{top:auto;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));width:auto;max-height:calc(100dvh - 76px - env(safe-area-inset-top) - env(safe-area-inset-bottom));touch-action:pan-y}
++ .hc-phone{display:inline-flex!important}
++ .hc-wide{display:none}
++ .hc-head{padding:8px 6px 0 15px}
++ .hc-body{padding:6px 15px 13px;gap:11px}
++ .hub-card:not(.is-expanded) .hc-more{display:none}
++ .hub-card:not(.is-expanded) .hc-about,.hub-card:not(.is-expanded) .hc-system p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
++ .hub-card:not(.is-expanded) .hc-status span,.hub-card:not(.is-expanded) .hc-side{display:none}
++ .hc-name{min-height:40px}
++ .hc-name h2{font-size:20px}
++ .hc-name p{font-size:19px}
++ .hc-tools{gap:8px}
++ .hc-tools button{min-height:62px;padding:7px 5px}
++}
++@media(max-height:600px) and (orientation:landscape){
++ .hub-card{top:12px;right:12px;left:auto;bottom:12px;width:300px;max-height:none}
++ .hc-phone{display:none!important}
++ .hc-wide{display:block}
++ .hub-card .hc-more{display:flex!important}
++ .hub-card .hc-about{display:block!important}
++ body:has(.hub-card) .view-controls{visibility:hidden}
++ body:has(.hub-card) .bottom-dock{left:12px;right:324px;width:auto;transform:none;max-width:none;margin:0}
++ .hc-tools button{min-height:60px}
++}
++@media(prefers-reduced-motion:reduce){.hub-card{animation:none}.hc-tools button,.hc-say{transition:none}}
+diff --git a/app/hub-card.tsx b/app/hub-card.tsx
+new file mode 100644
+index 0000000..e7d3afe
+--- /dev/null
++++ b/app/hub-card.tsx
+@@ -0,0 +1,75 @@
++/* Interpreter Hub: the card for a tapped structure.
++   English name, Spanish name right under it, a speaker beside each, one or
++   two sentences on what it is, then the Hub tools and the sources. On a phone
++   it starts compact at the bottom and opens taller; on a wide screen it is a
++   side panel. Text comes only from the checked catalogue; a structure that
++   isn't in it says so instead of borrowing a description. */
++import {useEffect,useId,useRef} from 'react';
++import {ArrowUpRight,BookOpen,ChevronDown,ChevronRight,ChevronUp,Focus,GraduationCap,MessageCircleQuestion,Volume2,X} from 'lucide-react';
++import type {Concept,Part} from './anatomy';
++import {SYSTEMS} from './anatomy';
++import type {CardFor,GlossaryState,HubAction,HubCatalogue} from './hub';
++
++export interface Gloss {state:GlossaryState;domain:string}
++interface Props {
++ card:CardFor|null;chosen:Concept;piece:Part|undefined;pieces:Part[];onPiece:(id:string)=>void;catalogue:HubCatalogue|null;catalogueFailed:boolean;
++ gloss:Gloss|undefined;embedded:boolean;expanded:boolean;isolate:boolean;
++ onExpand:(open:boolean)=>void;onIsolate:()=>void;onClose:()=>void;onClear:()=>void;onAction:(a:HubAction,lang?:'en'|'es')=>void;
++}
++const SUPPORTS={en:'English name',es:'Spanish name',about:'explanation'} as const;
++const and=(xs:string[])=>xs.length>1?`${xs.slice(0,-1).join(', ')} and ${xs[xs.length-1]}`:xs.join('');
++
++export default function HubCard({card,chosen,piece,pieces,onPiece,catalogue,catalogueFailed,gloss,embedded,expanded,isolate,onExpand,onIsolate,onClose,onClear,onAction}:Props){
++ const uid=useId(),title=useRef<HTMLHeadingElement>(null),system=SYSTEMS.find(s=>s.id===piece?.system);
++ const s=card?.s,key=s?.id??chosen.id;
++ // A new structure: its name gets focus (as the old panel did), the card starts compact.
++ useEffect(()=>{title.current?.focus({preventScroll:true});},[key]);
++ const g=gloss?.state??'checking',hasTerm=g==='match'||g==='nospanish';
++ const status=!s?'':g==='checking'?'Checking the Hub glossary…':g==='match'?`In the Hub glossary${gloss?.domain?` · ${gloss.domain}`:''}`:
++  g==='nospanish'?`In the Hub glossary${gloss?.domain?` · ${gloss.domain}`:''}, without Spanish yet`:'Not in the Hub glossary yet';
++ const why=g==='none'?'Open glossary and Practice need a glossary entry. Dr. Smiley can still explain it.':g==='nospanish'?'Practice needs the Spanish in the glossary entry.':'';
++ const sideLine=card?.side?`${card.side.en} · ${card.side.es}`:'';
++ const name=s?.en??chosen.name;
++ const iso=(cls:string)=><button type="button" className={`hc-iso ${cls}`} aria-pressed={isolate} aria-label={isolate?'Show surrounding anatomy':'Isolate structure'} title={isolate?'Show surrounding anatomy':'Isolate structure'} onClick={onIsolate}><Focus size={16}/>{isolate?'Show all':'Isolate'}</button>;
++ return <section className={`hub-card ${expanded?'is-expanded':''} ${isolate?'is-isolated':''}`} aria-labelledby={`${uid}-t`} data-card={s?.id??''}>
++  <div className="hc-head">
++   <div className="hc-names">
++    <div className="hc-name"><h2 ref={title} tabIndex={-1} id={`${uid}-t`} lang="en">{name}</h2>{s&&embedded&&<button type="button" className="hc-say" aria-label={`Hear ${s.en} in English`} onClick={()=>onAction('pronounce','en')}><Volume2 size={17}/><span>EN</span></button>}</div>
++    <div className="hc-name hc-es">{s?.es?<><p lang="es">{s.es}</p>{embedded&&<button type="button" className="hc-say" aria-label={`Hear ${s.es} in Spanish`} onClick={()=>onAction('pronounce','es')}><Volume2 size={17}/><span>ES</span></button>}</>:<p className="hc-missing">Spanish name not added yet</p>}</div>
++   </div>
++   <div className="hc-ctl">
++    <button type="button" className="hc-icon" aria-label="Close" onClick={onClose}><X size={20}/></button>
++    <button type="button" className="hc-icon hc-phone" aria-expanded={expanded} aria-controls={`${uid}-more`} aria-label={expanded?'Show less':'Show more'} onClick={()=>onExpand(!expanded)}>{expanded?<ChevronDown size={20}/>:<ChevronUp size={20}/>}</button>
++   </div>
++  </div>
++  <div className="hc-body">
++   {sideLine&&<p className="hc-side">{sideLine}</p>}
++   {s?<p className="hc-about">{s.about}</p>:<div className="hc-system"><span>About this body system{system?` · ${system.name}`:''}</span><p>{system?.description??''}</p></div>}
++   {s&&embedded&&<div className="hc-tools" role="group" aria-label="Hub tools">
++     <button type="button" disabled={!hasTerm} aria-describedby={`${uid}-why`} onClick={()=>onAction('glossary')}><BookOpen size={21}/><span>Open glossary</span></button>
++     <button type="button" disabled={g!=='match'} aria-describedby={`${uid}-why`} onClick={()=>onAction('practice')}><GraduationCap size={21}/><span>Practice this term</span></button>
++     <button type="button" className="hc-ask" onClick={()=>onAction('ask')}><MessageCircleQuestion size={21}/><span>Ask Dr. Smiley</span></button>
++   </div>}
++   <div className="hc-row">
++    {s&&embedded?<p className={`hc-status is-${g}`} id={`${uid}-why`} role="status"><b>{status}</b>{why&&<span> {why}</span>}</p>:!s?<p className="hc-note">{catalogueFailed?'The Hub’s list of checked structures couldn’t be loaded, so there’s no Spanish name or Hub tools here right now.':'This structure isn’t in the Hub’s checked list yet, so there’s no Spanish name or Hub tools for it.'}</p>:<span/>}
++    {iso('hc-phone')}
++   </div>
++   <div className="hc-more" id={`${uid}-more`}>
++    {s?.esNote&&<p className="hc-esnote"><b lang="es">ES</b>{s.esNote}</p>}
++    {card?.via&&<p className="hc-via">Selected piece: <b>{card.via}</b> (part of the {s!.en.toLowerCase()})</p>}
++    <div className="hc-view hc-wide">
++     <button type="button" className="hc-iso hc-iso-wide" aria-pressed={isolate} onClick={onIsolate}><Focus size={18}/>{isolate?'Show surrounding anatomy':'Isolate structure'}</button>
++    </div>
++    {pieces.length>1&&<details className="member-list hc-members"><summary>Included structures ({pieces.length.toLocaleString()})</summary>{pieces.slice(0,50).map(p=><button type="button" key={p.id} onClick={()=>onPiece(p.id)}><span>{p.name}</span><ChevronRight size={14}/></button>)}{pieces.length>50&&<p>And {(pieces.length-50).toLocaleString()} more modeled pieces.</p>}</details>}
++    <details className="hc-sources">
++     <summary>Sources</summary>
++     {s&&<><h3>Card text</h3><ul>{s.sources.map(x=><li key={x.url}><a href={x.url} target="_blank" rel="noreferrer" lang={x.lang}>{x.title}<ArrowUpRight size={12}/></a><span>{x.publisher} · supports the {and(x.supports.map(k=>SUPPORTS[k]))}</span></li>)}</ul></>}
++     <h3>3D model</h3>
++     <p>{catalogue?.geometry.title||'BodyParts3D'}, © {catalogue?.geometry.publisher||'The Database Center for Life Science'}, {catalogue?.geometry.licence||'CC BY 4.0'}. The shapes come from it; the card text does not.</p>
++     <p className="hc-ref">Atlas reference <b>{chosen.id}</b>{s&&s.id!==chosen.id&&<> · card <b>{s.id}</b></>} · {pieces.length.toLocaleString()} {pieces.length===1?'piece':'pieces'}</p>
++    </details>
++    <button type="button" className="hc-clear" onClick={onClear}>Clear selection</button>
++   </div>
++  </div>
++ </section>;
++}
+diff --git a/app/hub.ts b/app/hub.ts
+new file mode 100644
+index 0000000..beea024
+--- /dev/null
++++ b/app/hub.ts
+@@ -0,0 +1,110 @@
++/* Interpreter Hub: the bilingual card and the small message bridge to the Hub.
++
++   The viewer runs in a sandboxed frame with no access to the Hub. It never
++   gets the glossary, a name, a sign-in or anything a teammate wrote. All it
++   can do is tell the Hub which catalogued structure is on screen and which
++   card button was tapped. The Hub checks every message and does the work
++   itself, using its own copy of the catalogue (never text from here).
++
++   Messages to the Hub ({source:'hub-atlas', v:1, ...}):
++     ready                                   the viewer is listening
++     card    id                              the card now shows this structure (or null)
++     action  id, action, lang?, view         a card button: glossary, practice, ask, pronounce
++   Messages from the Hub ({source:'hub', v:1, ...}):
++     glossary id, state, domain?             whether the Hub glossary has this structure
++     restore  view                           put the viewer back where it was */
++import type {Atlas,Concept,Part,SystemId,View} from './anatomy';
++import {SYSTEMS} from './anatomy';
++
++export interface HubSource {title:string;publisher:string;url:string;lang:'en'|'es';supports:('en'|'es'|'about')[]}
++export interface HubSide {id:string;side:'right'|'left';en:string;es:string}
++export interface HubStructure {id:string;en:string;es:string;enAlt:string[];sides:HubSide[];members:boolean;about:string;esNote:string;sources:HubSource[];glossaryTermId:string|null}
++export interface HubCatalogue {version:number;geometry:{title:string;publisher:string;licence:string;url:string;ids:string};structures:HubStructure[]}
++
++const FMA=/^FMA\d{1,7}$/,PIECE=/^FJ\d{1,7}M?$/;   // "M": a mirrored piece
++const str=(v:unknown,max:number)=>typeof v==='string'&&v.length<=max?v:'';
++const httpsUrl=(v:unknown)=>{const s=str(v,300);try{return s&&new URL(s).protocol==='https:'?s:'';}catch{return '';}};
++
++// The catalogue file, checked field by field: anything malformed is left out.
++export function readCatalogue(raw:unknown):HubCatalogue|null{
++ if(!raw||typeof raw!=='object')return null;const r=raw as Record<string,unknown>;
++ if(r.version!==1||!Array.isArray(r.structures))return null;
++ const g=(r.geometry&&typeof r.geometry==='object'?r.geometry:{}) as Record<string,unknown>;
++ const structures:HubStructure[]=[];
++ for(const x of r.structures as Record<string,unknown>[]){
++  if(!x||typeof x!=='object'||!FMA.test(String(x.id)))continue;
++  const en=str(x.en,80),es=str(x.es,80),about=str(x.about,400);if(!en||!about)continue;
++  const sides=(Array.isArray(x.sides)?x.sides:[]).filter((s:Record<string,unknown>)=>s&&FMA.test(String(s.id))&&(s.side==='right'||s.side==='left')).map((s:Record<string,unknown>)=>({id:String(s.id),side:s.side as 'right'|'left',en:str(s.en,80),es:str(s.es,80)}));
++  const sources=(Array.isArray(x.sources)?x.sources:[]).map((s:Record<string,unknown>)=>({title:str(s.title,160),publisher:str(s.publisher,120),url:httpsUrl(s.url),lang:(s.lang==='es'?'es':'en') as 'en'|'es',supports:(Array.isArray(s.supports)?s.supports:[]).filter((k:unknown)=>k==='en'||k==='es'||k==='about') as HubSource['supports']})).filter((s:HubSource)=>s.title&&s.url);
++  structures.push({id:String(x.id),en,es,enAlt:(Array.isArray(x.enAlt)?x.enAlt:[]).map(a=>str(a,80)).filter(Boolean),sides,members:x.members===true,about,esNote:str(x.esNote,300),sources,glossaryTermId:str(x.glossaryTermId,80)||null});
++ }
++ return {version:1,geometry:{title:str(g.title,120),publisher:str(g.publisher,160),licence:str(g.licence,40),url:httpsUrl(g.url),ids:str(g.ids,200)},structures};
++}
++
++/* Which card a tap opens.
++   1. The piece's own concept is catalogued (or is one side of a catalogued
++      pair): that card.
++   2. Otherwise, for structures marked "members" (heart, liver, lungs...),
++      a piece that belongs to exactly one of them: that card, saying which
++      piece you tapped. A piece in two of them (the ileocecal junction is in
++      both intestines) opens no card rather than a guess. */
++export interface CardIndex {byConcept:Map<string,{s:HubStructure;side?:HubSide}>;byPiece:Map<string,HubStructure>;byId:Map<string,HubStructure>}
++export function indexCatalogue(cat:HubCatalogue,atlas:Atlas):CardIndex{
++ const byConcept=new Map<string,{s:HubStructure;side?:HubSide}>(),byId=new Map<string,HubStructure>(),seen=new Map<string,Set<string>>();
++ const concepts=new Map(atlas.concepts.map(c=>[c.id,c]));
++ for(const s of cat.structures){
++  byId.set(s.id,s);byConcept.set(s.id,{s});s.sides.forEach(side=>byConcept.set(side.id,{s,side}));
++  if(s.members)for(const cid of [s.id,...s.sides.map(x=>x.id)])concepts.get(cid)?.elements.forEach(e=>{const m=seen.get(e)??new Set();m.add(s.id);seen.set(e,m);});
++ }
++ const byPiece=new Map<string,HubStructure>();
++ seen.forEach((ids,piece)=>{if(ids.size===1)byPiece.set(piece,byId.get([...ids][0])!);});
++ return {byConcept,byPiece,byId};
++}
++export interface CardFor {s:HubStructure;side?:HubSide;via?:string}
++// A tapped piece, or a concept chosen from Find a structure.
++export function cardFor(ix:CardIndex|null,chosen:Concept|null,parts:Map<string,Part>):CardFor|null{
++ if(!ix||!chosen)return null;
++ const direct=ix.byConcept.get(chosen.id);if(direct)return direct;
++ if(!chosen.elements.length)return null;
++ const cards=new Set(chosen.elements.map(e=>{const p=parts.get(e);return (p&&ix.byConcept.get(p.conceptId)?.s)??ix.byPiece.get(e);}));
++ if(cards.size!==1)return null;const s=[...cards][0];
++ return s?{s,via:chosen.name}:null;
++}
++
++/* ---- The bridge ---- */
++const HUB=typeof window!=='undefined'&&window.parent!==window?window.parent:null;
++export const embedded=!!HUB;
++// Our own address: the Hub serves this viewer, so only a Hub page at that
++// address receives what we send (location.origin is the address, even though
++// a sandboxed page has no origin of its own).
++const HUB_ORIGIN=typeof location!=='undefined'&&/^https?:$/.test(location.protocol)?location.origin:'*';
++export type HubAction='glossary'|'practice'|'ask'|'pronounce';
++export interface HubView {pick:{kind:'part'|'concept';id:string};cam:{p:number[];t:number[]}|null;explode:number;visible:SystemId[];isolate:boolean;view:View;expanded:boolean}
++export function toHub(msg:Record<string,unknown>){if(HUB)HUB.postMessage({source:'hub-atlas',v:1,...msg},HUB_ORIGIN);}
++
++export type GlossaryState='checking'|'match'|'nospanish'|'none';
++export interface FromHub {type:'glossary';id:string;state:GlossaryState;domain:string}
++export interface RestoreMsg {type:'restore';view:HubView}
++const SYSTEM_IDS=new Set(SYSTEMS.map(s=>s.id));
++const vec=(v:unknown)=>Array.isArray(v)&&v.length===3&&v.every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<1000)?v as number[]:null;
++export function readView(v:unknown):HubView|null{
++ if(!v||typeof v!=='object')return null;const r=v as Record<string,unknown>,pick=r.pick as Record<string,unknown>|undefined;
++ if(!pick||(pick.kind!=='part'&&pick.kind!=='concept'))return null;const id=String(pick.id);
++ if(pick.kind==='part'?!PIECE.test(id):!FMA.test(id))return null;
++ const c=r.cam as Record<string,unknown>|null|undefined,p=c&&vec(c.p),t=c&&vec(c.t);
++ const explode=typeof r.explode==='number'&&r.explode>=0&&r.explode<=1?r.explode:0;
++ const visible=(Array.isArray(r.visible)?r.visible:[]).filter((x:unknown):x is SystemId=>typeof x==='string'&&SYSTEM_IDS.has(x as SystemId)).slice(0,SYSTEMS.length);
++ const view=(['three-quarter','front','side','back'] as View[]).find(x=>x===r.view)??'three-quarter';
++ return {pick:{kind:pick.kind,id},cam:p&&t?{p,t}:null,explode,visible,isolate:r.isolate===true,view,expanded:r.expanded===true};
++}
++// Only the Hub page that holds this frame, only messages of the agreed shape.
++export function listenToHub(on:(m:FromHub|RestoreMsg)=>void){
++ if(!HUB)return ()=>{};
++ const handle=(e:MessageEvent)=>{
++  if(e.source!==HUB||(HUB_ORIGIN!=='*'&&e.origin!==HUB_ORIGIN))return;
++  const d=e.data;if(!d||typeof d!=='object'||d.source!=='hub'||d.v!==1)return;
++  if(d.type==='glossary'&&FMA.test(String(d.id))&&['checking','match','nospanish','none'].includes(d.state))on({type:'glossary',id:String(d.id),state:d.state,domain:str(d.domain,60)});
++  else if(d.type==='restore'){const view=readView(d.view);if(view)on({type:'restore',view});}
++ };
++ window.addEventListener('message',handle);return ()=>window.removeEventListener('message',handle);
++}
+diff --git a/app/orbit-controls.d.ts b/app/orbit-controls.d.ts
+new file mode 100644
+index 0000000..94ef6a3
+--- /dev/null
++++ b/app/orbit-controls.d.ts
 @@ -0,0 +1 @@
 +export {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
-diff -ruN pa/app/orbit-controls.js pb/app/orbit-controls.js
---- a/app/orbit-controls.js	1970-01-01 00:00:00.000000000 +0000
-+++ b/app/orbit-controls.js	2026-10-07 00:50:02.775197262 +0000
+diff --git a/app/orbit-controls.js b/app/orbit-controls.js
+new file mode 100644
+index 0000000..3c22544
+--- /dev/null
++++ b/app/orbit-controls.js
 @@ -0,0 +1,1411 @@
 +// OrbitControls from three.js r159 (MIT, https://github.com/mrdoob/three.js),
 +// copied so one change could be made: see "Interpreter Hub" below.
@@ -1485,31 +1796,102 @@ diff -ruN pa/app/orbit-controls.js pb/app/orbit-controls.js
 +}
 +
 +export { OrbitControls };
-diff -ruN pa/app/page.tsx pb/app/page.tsx
---- a/app/page.tsx	2026-10-07 00:50:02.752348798 +0000
-+++ b/app/page.tsx	2026-10-07 00:50:02.754027900 +0000
-@@ -14,7 +14,7 @@
+diff --git a/app/page.tsx b/app/page.tsx
+index 5b59ba1..630682d 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -1,20 +1,27 @@
+ import {flushSync} from 'react-dom';
+ import {registerAtlasTools} from './agent-tools';
+ import {useEffect,useMemo,useRef,useState} from 'react';
+-import {Activity,ArrowUpRight,ChevronRight,Focus,Info,Layers3,Pause,RotateCcw,RotateCw,Search,X} from 'lucide-react';
++import {Activity,ArrowUpRight,Info,Layers3,Pause,RotateCcw,RotateCw,Search,X} from 'lucide-react';
+ import {Button} from '@/components/ui/button';
+ import {Badge} from '@/components/ui/badge';
+ import {Slider} from '@/components/ui/slider';
+ import {Switch} from '@/components/ui/switch';
+ import {Sheet,SheetContent,SheetTitle,SheetDescription} from '@/components/ui/sheet';
+ import {Combobox,ComboboxInput,ComboboxContent,ComboboxList,ComboboxItem,ComboboxEmpty} from '@/components/ui/combobox';
+-import AnatomyScene from './scene';
+-import {DEFAULT_VISIBLE,SYSTEMS,EXPLANATIONS,explanation,type Atlas,type Concept,type SceneState,type SystemId,type View} from './anatomy';
++import AnatomyScene,{type CameraLink} from './scene';
++import {DEFAULT_VISIBLE,SYSTEMS,type Atlas,type Concept,type SceneState,type SystemId,type View} from './anatomy';
++import HubCard,{type Gloss} from './hub-card';
++import {cardFor,embedded,indexCatalogue,listenToHub,readCatalogue,toHub,type HubAction,type HubCatalogue,type HubView} from './hub';
+ const initial:SceneState={explode:0,visible:DEFAULT_VISIBLE,selected:[],isolate:false,view:'three-quarter',rotate:false,reset:0};
  export default function Home(){
-  const detailTitle=useRef<HTMLHeadingElement>(null);
+- const detailTitle=useRef<HTMLHeadingElement>(null);
++ // Interpreter Hub: the checked card list, what the Hub says about each card's
++ // glossary entry, a compact or taller card on phones, and a place to return to.
++ const [catalogue,setCatalogue]=useState<HubCatalogue|null>(null),[catalogueFailed,setCatalogueFailed]=useState(false),[gloss,setGloss]=useState<Record<string,Gloss>>({}),[expanded,setExpanded]=useState(false),[restore,setRestore]=useState<HubView|null>(null);
++ const cameraLink=useRef<CameraLink|null>(null),pendingCamera=useRef<HubView['cam']>(null);
   const [atlas,setAtlas]=useState<Atlas|null>(null),[state,setState]=useState(initial),[progress,setProgress]=useState(0),[error,setError]=useState(''),[panel,setPanel]=useState<'layers'|'search'|null>(null),[details,setDetails]=useState(false),[about,setAbout]=useState(false),[query,setQuery]=useState(''),[chosen,setChosen]=useState<Concept|null>(null);
 - useEffect(()=>{const abort=new AbortController();setProgress(0);setError('');setAtlas(null);setChosen(null);setDetails(false);setState({...initial,visible:DEFAULT_VISIBLE});fetch('/models/atlas.json',{signal:abort.signal}).then(r=>{if(!r.ok)throw new Error('The anatomy catalogue could not be loaded.');return r.json();}).then(data=>setAtlas(data as Atlas)).catch(e=>{if(e.name!=='AbortError')setError(e.message);});return()=>abort.abort();},[]);
 + useEffect(()=>{const abort=new AbortController();setProgress(0);setError('');setAtlas(null);setChosen(null);setDetails(false);setState({...initial,visible:DEFAULT_VISIBLE});fetch('models/atlas.json',{signal:abort.signal}).then(r=>{if(!r.ok)throw new Error('The anatomy catalogue could not be loaded.');return r.json();}).then(data=>setAtlas(data as Atlas)).catch(e=>{if(e.name!=='AbortError')setError(e.message);});return()=>abort.abort();},[]);
++ useEffect(()=>{const abort=new AbortController();fetch('hub-catalogue.json',{signal:abort.signal,cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('');return r.json();}).then(d=>{const c=readCatalogue(d);if(c)setCatalogue(c);else setCatalogueFailed(true);}).catch(e=>{if(e.name!=='AbortError')setCatalogueFailed(true);});return()=>abort.abort();},[]);
++ useEffect(()=>{const stop=listenToHub(m=>{if(m.type==='glossary')setGloss(g=>({...g,[m.id]:{state:m.state,domain:m.domain}}));else setRestore(m.view);});toHub({type:'ready'});return stop;},[]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='/'&&!(e.target instanceof HTMLInputElement)&&!(e.target instanceof HTMLTextAreaElement)){e.preventDefault();setPanel('search');setDetails(false);}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[]);
   const parts=useMemo(()=>new Map(atlas?.parts.map(p=>[p.id,p])),[atlas]);
   const counts=useMemo(()=>Object.fromEntries(SYSTEMS.map(s=>[s.id,atlas?.parts.filter(p=>p.system===s.id).length??0])),[atlas]);
-@@ -28,7 +28,7 @@
+@@ -22,14 +29,37 @@ export default function Home(){
+  const selectedParts=state.selected.map(id=>parts.get(id)).filter(p=>!!p),selected=selectedParts[0],system=SYSTEMS.find(s=>s.id===selected?.system);
+  const visibleCount=atlas?.parts.filter(p=>state.isolate?state.selected.includes(p.id):state.visible.includes(p.system)||state.selected.includes(p.id)).length??0;
+  const results=useMemo(()=>{if(!atlas)return[];const term=query.toLowerCase().trim();if(!term)return ['heart','brain','liver','stomach','spleen','pancreas','urinary bladder','trachea'].map(name=>atlas.concepts.find(c=>c.name.toLowerCase()===name)).filter((x):x is Concept=>!!x);return atlas.concepts.filter(c=>c.name.toLowerCase().includes(term)||c.id.toLowerCase().includes(term)).sort((a,b)=>a.name.length-b.name.length).slice(0,80);},[atlas,query]);
+- const choose=(c:Concept)=>{setChosen(c);setState(s=>({...s,selected:c.elements,isolate:false,rotate:false}));setDetails(true);setPanel(null);};
++ const choose=(c:Concept)=>{setChosen(c);setState(s=>({...s,selected:c.elements,isolate:false,rotate:false}));setDetails(true);setExpanded(false);setPanel(null);};
+  useEffect(()=>{if(!atlas)return;return registerAtlasTools(atlas,c=>flushSync(()=>choose(c)));},[atlas]);
+- const choosePart=(id:string)=>{const p=parts.get(id);if(!p)return;setChosen({id:p.conceptId,name:p.name,elements:[id]});setState(s=>({...s,selected:[id],isolate:false,rotate:false}));setDetails(true);setPanel(null);};
++ const choosePart=(id:string)=>{const p=parts.get(id);if(!p)return;setChosen({id:p.conceptId,name:p.name,elements:[id]});setState(s=>({...s,selected:[id],isolate:false,rotate:false}));setDetails(true);setExpanded(false);setPanel(null);};
++ const index=useMemo(()=>catalogue&&atlas?indexCatalogue(catalogue,atlas):null,[catalogue,atlas]);
++ const card=useMemo(()=>details&&chosen?cardFor(index,chosen,parts):null,[index,chosen,parts,details]);
++ const cardId=card?.s.id??null;
++ // The Hub answers with whether its glossary has this structure.
++ useEffect(()=>{toHub({type:'card',id:cardId});},[cardId]);
++ // Where you are, for coming back after a Hub tool.
++ const viewNow=():HubView|null=>{if(!chosen)return null;
++  // Chosen from Find a structure (the atlas's own concept), or one tapped piece.
++  const pick=atlas?.concepts.includes(chosen)?{kind:'concept' as const,id:chosen.id}:{kind:'part' as const,id:chosen.elements[0]};
++  return {pick,cam:cameraLink.current?.get()??null,explode:state.explode,visible:state.visible,isolate:state.isolate,view:state.view,expanded};};
++ const act=(action:HubAction,lang?:'en'|'es')=>{if(!cardId)return;toHub({type:'action',action,id:cardId,...(lang?{lang}:{}),...(action==='pronounce'?{}:{view:viewNow()})});};
++ // Back from a Hub tool: the same structure, layers, camera and card size.
++ useEffect(()=>{
++  if(!restore||!atlas)return;setRestore(null);
++  let next:Concept|null=null;
++  if(restore.pick.kind==='part'){const p=parts.get(restore.pick.id);if(p)next={id:p.conceptId,name:p.name,elements:[p.id]};}
++  else next=atlas.concepts.find(c=>c.id===restore.pick.id)??null;
++  if(!next)return;
++  setChosen(next);setState(s=>({...s,selected:next!.elements,isolate:restore.isolate,explode:restore.explode,visible:restore.visible,view:restore.view,rotate:false}));
++  setDetails(true);setExpanded(restore.expanded);setPanel(null);pendingCamera.current=restore.cam;
++ },[restore,atlas,parts]);
++ useEffect(()=>{if(pendingCamera.current&&cameraLink.current){cameraLink.current.set(pendingCamera.current);pendingCamera.current=null;}});
++ useEffect(()=>{if(!details)return;const esc=(e:KeyboardEvent)=>{if(e.key==='Escape'&&!(e.target instanceof HTMLInputElement))setDetails(false);};window.addEventListener('keydown',esc);return()=>window.removeEventListener('keydown',esc);},[details]);
   const toggle=(id:SystemId)=>{setDetails(false);setState(s=>({...s,selected:[],isolate:false,visible:s.visible.includes(id)?s.visible.filter(x=>x!==id):[...s.visible,id]}));};
-  const reset=()=>{setState(s=>({...initial,visible:DEFAULT_VISIBLE,reset:s.reset+1}));setChosen(null);setDetails(false);setPanel(null);};
+- const reset=()=>{setState(s=>({...initial,visible:DEFAULT_VISIBLE,reset:s.reset+1}));setChosen(null);setDetails(false);setPanel(null);};
++ const reset=()=>{setState(s=>({...initial,visible:DEFAULT_VISIBLE,reset:s.reset+1}));setChosen(null);setDetails(false);setExpanded(false);setPanel(null);};
   const openPanel=(next:'layers'|'search')=>{setDetails(false);setPanel(p=>p===next?null:next);};
 - return <main className="studio">
+-  {atlas&&<AnatomyScene atlas={atlas} state={{...state,inspectorOpen:details&&selectedParts.length>0}} onSelect={choosePart} onProgress={n=>{setProgress(n);if(n===100)setError('');}} onError={setError}/>}
 + return <main className={`studio ${details&&selectedParts.length>0?'has-detail':''}`}>
-   {atlas&&<AnatomyScene atlas={atlas} state={{...state,inspectorOpen:details&&selectedParts.length>0}} onSelect={choosePart} onProgress={n=>{setProgress(n);if(n===100)setError('');}} onError={setError}/>}
++  {atlas&&<AnatomyScene atlas={atlas} cameraLink={cameraLink} state={{...state,inspectorOpen:details&&selectedParts.length>0?(expanded?'tall':'compact'):false}} onSelect={choosePart} onProgress={n=>{setProgress(n);if(n===100)setError('');}} onError={setError}/>}
    <div className="vignette"/>
    <header className="identity"><div className="eyebrow"><span className="status-dot"/> INTERACTIVE ANATOMY</div><h1>Human Atlas<Badge variant="outline" className="edition">3D</Badge></h1><div className="identity-meta">{atlas?atlas.parts.length.toLocaleString():'2,234'} modeled pieces <span>·</span> BodyParts3D</div></header>
-diff -ruN pa/app/scene.tsx pb/app/scene.tsx
---- a/app/scene.tsx	2026-10-07 00:50:02.760943964 +0000
-+++ b/app/scene.tsx	2026-10-07 00:50:02.762595613 +0000
-@@ -1,6 +1,6 @@
+   <nav className="top-actions" aria-label="Explorer panels"><Button variant="ghost" className={panel==='search'?'active':''} onClick={()=>openPanel('search')} aria-label="Search anatomy"><Search size={18}/><span>Find a structure</span><kbd>/</kbd></Button><Button variant="ghost" className="icon-button" aria-label="About this atlas" onClick={()=>{setDetails(false);setPanel(null);setAbout(true);}}><Info size={18}/></Button></nav>
+@@ -46,7 +76,8 @@ export default function Home(){
+   <footer className="studio-footer"><span>{state.explode>.8?'Drag to pan':'Drag to orbit'} <b>·</b> Pinch to zoom <b>·</b> Tap to inspect</span><Button variant="ghost" onClick={()=>{setDetails(false);setPanel(null);setAbout(true);}}>Source & credits <ArrowUpRight size={12}/></Button></footer>
+   {progress<100&&!error&&<div className="loading glass" role="status"><Activity size={18}/><div><strong>Preparing the anatomy</strong><span>{progress}% · Loading {atlas?.parts.length.toLocaleString()??'2,234'} pieces</span><div className="loading-track"><i style={{width:`${progress}%`}}/></div></div></div>}
+   {error&&<div className="loading glass error" role="alert"><p>{error}</p><Button variant="ghost" onClick={()=>location.reload()}>Reload viewer</Button></div>}
+-  <Sheet open={details&&selectedParts.length>0} modal={false} disablePointerDismissal onOpenChange={setDetails}><SheetContent initialFocus={detailTitle} className={`detail-sheet glass ${state.isolate?'is-isolated':''}`} showCloseButton={true}><div className="detail-header"><div className="detail-accent" style={{background:system?.color}}/><div className="eyebrow">{system?.name??'ANATOMY'}</div><SheetTitle ref={detailTitle} tabIndex={-1} className="structure-title">{chosen?.name}</SheetTitle></div><div className="detail-scroll" key={`${chosen?.id}-${state.isolate}`}><SheetDescription className="structure-description">{chosen&&selected?explanation(chosen.name,selected.system):''}</SheetDescription>{chosen&&!EXPLANATIONS[chosen.name.toLowerCase()]&&<span className="context-note">System overview · structure identified from source anatomy</span>}<div className="structure-meta"><span>Atlas reference<strong>{chosen?.id}</strong></span><span>Selected pieces<strong>{state.selected.length.toLocaleString()}</strong></span></div>{selectedParts.length>1&&<div className="member-list"><h3>Included structures</h3>{selectedParts.slice(0,50).map(p=><Button variant="ghost" key={p.id} onClick={()=>choosePart(p.id)}><span>{p.name}</span><ChevronRight size={14}/></Button>)}{selectedParts.length>50&&<p>And {selectedParts.length-50} more modeled pieces.</p>}</div>}<a className="source-link" href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noreferrer">View anatomical source <ArrowUpRight size={14}/></a></div><div className="detail-actions"><Button className={`primary-action ${state.isolate?'active':''}`} onClick={()=>setState(s=>({...s,isolate:!s.isolate,explode:0}))}><Focus size={18}/>{state.isolate?'Show surrounding anatomy':'Isolate structure'}<ChevronRight size={16}/></Button><Button variant="ghost" className="secondary-action" onClick={()=>{setState(s=>({...s,selected:[],isolate:false}));setDetails(false);}}>Clear selection</Button></div></SheetContent></Sheet>
+-  <Sheet open={about} onOpenChange={setAbout}><SheetContent className="about-sheet glass"><div className="eyebrow">SOURCE & SCOPE</div><SheetTitle className="structure-title">A body, revealed.</SheetTitle><SheetDescription>Explore the adult male reference anatomy from BodyParts3D.</SheetDescription><div className="about-copy"><p><strong>Male · BodyParts3D</strong><br/>2,234 individual meshes and 3,432 named concepts from an adult male reference anatomy.</p><p>This reference does not contain every human structure or variation. Named concepts can contain multiple pieces; each source mesh is rendered once.</p><p>Colors and system groupings are designed for exploration. The geometry is simplified for the web, and short explanations provide general educational context. This is an anatomical reference, not a diagnostic or surgical tool.</p><h3>Source</h3><p>BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International.</p><a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noreferrer">Dataset license <ArrowUpRight size={14}/></a><a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html" target="_blank" rel="noreferrer">Original geometry & metadata <ArrowUpRight size={14}/></a><a href="https://academic.oup.com/nar/article/37/suppl_1/D782/1000752" target="_blank" rel="noreferrer">Read the source publication <ArrowUpRight size={14}/></a></div></SheetContent></Sheet>
++  {details&&selectedParts.length>0&&chosen&&<HubCard card={card} chosen={chosen} piece={selected} pieces={selectedParts} onPiece={choosePart} catalogue={catalogue} catalogueFailed={catalogueFailed} gloss={cardId?gloss[cardId]:undefined} embedded={embedded} expanded={expanded} isolate={state.isolate}
++   onExpand={setExpanded} onIsolate={()=>setState(s=>({...s,isolate:!s.isolate,explode:0}))} onClose={()=>setDetails(false)} onClear={()=>{setState(s=>({...s,selected:[],isolate:false}));setDetails(false);}} onAction={act}/>}
++  <Sheet open={about} onOpenChange={setAbout}><SheetContent className="about-sheet glass"><div className="eyebrow">SOURCE & SCOPE</div><SheetTitle className="structure-title">A body, revealed.</SheetTitle><SheetDescription>Explore the adult male reference anatomy from BodyParts3D.</SheetDescription><div className="about-copy"><p><strong>Male · BodyParts3D</strong><br/>2,234 individual meshes and 3,432 named concepts from an adult male reference anatomy.</p><p>This reference does not contain every human structure or variation. Named concepts can contain multiple pieces; each source mesh is rendered once.</p><p>Colors and system groupings are designed for exploration. The geometry is simplified for the web, and short explanations provide general educational context. This is an anatomical reference, not a diagnostic or surgical tool.</p><h3>Source</h3><p>BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International. The 3D shapes and the atlas reference numbers come from it.</p><a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noreferrer">Dataset license <ArrowUpRight size={14}/></a><a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html" target="_blank" rel="noreferrer">Original geometry & metadata <ArrowUpRight size={14}/></a><a href="https://academic.oup.com/nar/article/37/suppl_1/D782/1000752" target="_blank" rel="noreferrer">Read the source publication <ArrowUpRight size={14}/></a><h3>Card text (Interpreter Hub)</h3><p>The English and Spanish names and the short explanations on the cards are not from BodyParts3D. The Interpreter Hub checked them against the Clínica Universidad de Navarra medical dictionary, the National Cancer Institute (SEER Training Modules, Dictionary of Cancer Terms) and MedlinePlus. Each card lists its own sources under Sources. Structures not in that list show no Spanish name.</p></div></SheetContent></Sheet>
+  </main>;
+ }
+diff --git a/app/scene.tsx b/app/scene.tsx
+index 553f1db..bd5d463 100644
+--- a/app/scene.tsx
++++ b/app/scene.tsx
+@@ -1,34 +1,38 @@
  import {useEffect,useRef} from 'react';
  import * as T from 'three';
 -import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
@@ -1517,8 +1899,22 @@ diff -ruN pa/app/scene.tsx pb/app/scene.tsx
  import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
  import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
  import {createExplosionLayout} from './explosion-layout';
-@@ -16,19 +16,19 @@
-   let lastState:SceneState|null=null;
+ import {decodeModelResponse} from './model-download';
+ import {PointerTap} from './pointer-tap';
+ import {SYSTEMS,type Atlas,type SceneState} from './anatomy';
+-interface Props {atlas:Atlas;state:SceneState;onSelect:(id:string)=>void;onProgress:(n:number)=>void;onError:(s:string)=>void}
+-export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:Props){
++// Interpreter Hub: read the camera, or put it back (when you return to the
++// 3D Body from a Hub tool). A restore waits until the canvas has its size.
++export interface CameraLink {get:()=>{p:number[];t:number[]};set:(c:{p:number[];t:number[]})=>void}
++interface Props {atlas:Atlas;state:SceneState;onSelect:(id:string)=>void;onProgress:(n:number)=>void;onError:(s:string)=>void;cameraLink?:{current:CameraLink|null}}
++export default function AnatomyScene({atlas,state,onSelect,onProgress,onError,cameraLink}:Props){
+  const host=useRef<HTMLDivElement>(null),latest=useRef(state),select=useRef(onSelect);
+  latest.current=state;select.current=onSelect;
+  useEffect(()=>{
+   const el=host.current!;let disposed=false,frame=0,dirty=true,ready=false,lastView='',lastReset=-1,lastIsolate='',layoutKey='',amount=0;
+-  let lastState:SceneState|null=null;
++  let lastState:SceneState|null=null,pendingCamera:{p:number[];t:number[]}|null=null,sized=false;
    const abort=new AbortController();
    let renderer:T.WebGLRenderer;
 -  try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch{onError('This browser could not start the 3D viewer. Please try a browser with WebGL enabled.');return;}
@@ -1528,7 +1924,8 @@ diff -ruN pa/app/scene.tsx pb/app/scene.tsx
    renderer.domElement.setAttribute('aria-label','Interactive human anatomy. Drag to orbit, pinch or scroll to zoom, and tap a structure to inspect it.');
    const scene=new T.Scene(),camera=new T.PerspectiveCamera(34,1,.005,100),controls=new OrbitControls(camera,renderer.domElement);
 -  camera.position.set(1.4,1.05,3.6);controls.target.set(0,.85,0);controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=.07;controls.maxDistance=40;controls.maxPolarAngle=Math.PI*.96;controls.addEventListener('change',()=>{dirty=true;});
-+  camera.position.set(1.4,1.05,3.6);controls.target.set(0,.85,0);controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=.07;controls.maxDistance=40;controls.maxPolarAngle=Math.PI;controls.zoomToCursor=true;controls.addEventListener('change',()=>{dirty=true;});
++  camera.position.set(1.4,1.05,3.6);controls.target.set(0,.85,0);
++  if(cameraLink)cameraLink.current={get:()=>({p:camera.position.toArray(),t:controls.target.toArray()}),set:c=>{pendingCamera=c;dirty=true;}};controls.enableDamping=true;controls.dampingFactor=.085;controls.minDistance=.07;controls.maxDistance=40;controls.maxPolarAngle=Math.PI;controls.zoomToCursor=true;controls.addEventListener('change',()=>{dirty=true;});
    const pmrem=new T.PMREMGenerator(renderer),room=new RoomEnvironment(),env=pmrem.fromScene(room,.04);scene.environment=env.texture;room.dispose();pmrem.dispose();
    scene.add(new T.HemisphereLight(0xffffff,0xa7acb2,1.05));
    const key=new T.DirectionalLight(0xfffaf4,2.3);key.position.set(-2,4,3);scene.add(key);
@@ -1544,7 +1941,7 @@ diff -ruN pa/app/scene.tsx pb/app/scene.tsx
    const width=T.MathUtils.ceilPowerOfTwo(atlas.parts.length),data=new Float32Array(width*4),partTexture=new T.DataTexture(data,width,1,T.RGBAFormat,T.FloatType);partTexture.needsUpdate=true;
    const selectedData=new Uint8Array(width*4),selectionTexture=new T.DataTexture(selectedData,width,1);selectionTexture.needsUpdate=true;
    const materials:T.Material[]=[],geometries:T.BufferGeometry[]=[],pickers:(T.Mesh|undefined)[]=[],centers=atlas.parts.map(p=>new T.Vector3().fromArray(p.bounds[0]).add(new T.Vector3().fromArray(p.bounds[1])).multiplyScalar(.5));
-@@ -76,8 +76,8 @@
+@@ -76,13 +80,13 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
    };
    (async()=>{try{let cursor=0;await Promise.all(Array.from({length:3},async()=>{while(cursor<atlas.chunks.length){const i=cursor++;await loadChunk(i);}}));if(!disposed){ready=true;dirty=true;}}catch(e){if(!disposed)onError(e instanceof Error?e.message:'Could not load the anatomy.');}})();
    const fit=(view:string,extent=0)=>{
@@ -1555,27 +1952,46 @@ diff -ruN pa/app/scene.tsx pb/app/scene.tsx
     const distance=T.MathUtils.lerp(normalDistance,Math.max(.2,atlasDistance),extent);if(extent>.8)view='front';
     const direction=view==='front'?new T.Vector3(0,.02,1):view==='back'?new T.Vector3(0,.02,-1):view==='side'?new T.Vector3(1,.02,0):new T.Vector3(.35,.06,1).normalize();
     controls.target.set(extent>.1&&el.clientWidth>767?-packingWidth*.12:0,extent>.1||mobile?.85:.68,0);camera.position.copy(controls.target).addScaledVector(direction,distance);controls.update();dirty=true;
-@@ -119,7 +119,7 @@
+   };
+-  const resize=()=>{layoutKey='';lastState=null;renderer.setPixelRatio(Math.min(devicePixelRatio,el.clientWidth<768||el.clientHeight<600?1.5:2));camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight);fit(latest.current.view,amount);};const observer=new ResizeObserver(resize);observer.observe(el);
++  const resize=()=>{sized=true;layoutKey='';lastState=null;renderer.setPixelRatio(Math.min(devicePixelRatio,el.clientWidth<768||el.clientHeight<600?1.5:2));camera.aspect=el.clientWidth/el.clientHeight;camera.updateProjectionMatrix();renderer.setSize(el.clientWidth,el.clientHeight);fit(latest.current.view,amount);};const observer=new ResizeObserver(resize);observer.observe(el);
+   const raycaster=new T.Raycaster(),pointer=new T.Vector2(),tap=new PointerTap(),worldBox=new T.Box3(),hitPoint=new T.Vector3();
+   const down=(e:PointerEvent)=>{hover.hidden=true;tap.down(e.pointerId,e.clientX,e.clientY,e.pointerType==='touch'?12:5);};
+   const move=(e:PointerEvent)=>{tap.move(e.pointerId,e.clientX,e.clientY);if(e.buttons||amount<.5||e.pointerType==='touch'){hover.hidden=true;return;}const rect=el.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top,index=findTarget(x,y,12);hover.hidden=index<0;renderer.domElement.style.cursor=index<0?'grab':'pointer';if(index>=0){hover.textContent=atlas.parts[index].name;hover.style.left=`${Math.max(8,Math.min(x+14,el.clientWidth-260))}px`;hover.style.top=`${Math.max(8,Math.min(y+18,el.clientHeight-55))}px`;}};
+@@ -119,16 +123,17 @@ export default function AnatomyScene({atlas,state,onSelect,onProgress,onError}:P
     const isolateKey=s.isolate?s.selected.join(',')+':'+s.reset+':'+s.inspectorOpen+':'+camera.aspect:'';
     if(isolateKey!==lastIsolate||(s.isolate&&moving)){
      if(s.isolate){const box=new T.Box3();atlas.parts.forEach((p,i)=>{if(s.selected.includes(p.id))box.union(bounds[i].clone().translate(new T.Vector3(data[i*4],data[i*4+1],data[i*4+2])));});
 -     if(!box.isEmpty()){const center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());const w=el.clientWidth,h=el.clientHeight,mobile=w<768,landscape=w>h&&h<=600;let left=20,right=w-20,top=mobile?175:110,bottom=h-170;if(s.inspectorOpen){if(landscape){right=w-335;top=100;bottom=h-125;}else if(mobile){const sheet=document.querySelector('.detail-sheet')?.getBoundingClientRect(),header=document.querySelector('.identity')?.getBoundingClientRect();top=(header?.bottom??94)+16;bottom=(sheet?.top??h*.58-139)-16;}else{right=w-370;left=w>1100?285:25;}}const availableWidth=Math.max(150,right-left),availableHeight=Math.max(40,bottom-top);camera.setViewOffset(w,h,w/2-(left+right)/2,h/2-(top+bottom)/2,w,h);const distance=Math.max(.07,Math.max(size.y*h/availableHeight,size.x*w/availableWidth/camera.aspect,size.z)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.35);controls.maxDistance=Math.max(40,distance*2);controls.target.copy(center);camera.position.copy(center).add(new T.Vector3(.2,.1,1).normalize().multiplyScalar(distance));controls.update();dirty=true;}
-+     if(!box.isEmpty()){const center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());const w=el.clientWidth,h=el.clientHeight,mobile=w<768,landscape=w>h&&h<=600;let left=20,right=w-20,top=mobile?70:110,bottom=mobile?h-110:h-170;if(s.inspectorOpen){if(landscape){right=w-335;top=100;bottom=h-125;}else if(mobile){const sheet=document.querySelector('.detail-sheet')?.getBoundingClientRect(),header=document.querySelector('.view-controls')?.getBoundingClientRect();top=(header?.bottom??60)+12;bottom=(sheet?.top??h*.58-139)-16;}else{right=w-370;left=w>1100?285:25;}}const availableWidth=Math.max(150,right-left),availableHeight=Math.max(40,bottom-top);camera.setViewOffset(w,h,w/2-(left+right)/2,h/2-(top+bottom)/2,w,h);const distance=Math.max(.07,Math.max(size.y*h/availableHeight,size.x*w/availableWidth/camera.aspect,size.z)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.35);controls.maxDistance=Math.max(40,distance*2);controls.target.copy(center);camera.position.copy(center).add(new T.Vector3(.2,.1,1).normalize().multiplyScalar(distance));controls.update();dirty=true;}
++     if(!box.isEmpty()){const center=box.getCenter(new T.Vector3()),size=box.getSize(new T.Vector3());const w=el.clientWidth,h=el.clientHeight,mobile=w<768,landscape=w>h&&h<=600;let left=20,right=w-20,top=mobile?70:110,bottom=mobile?h-110:h-170;if(s.inspectorOpen){if(landscape){right=w-335;top=100;bottom=h-125;}else if(mobile){const sheet=(document.querySelector('.hub-card')??document.querySelector('.detail-sheet'))?.getBoundingClientRect(),header=document.querySelector('.view-controls')?.getBoundingClientRect();top=(header?.bottom??60)+12;bottom=(sheet?.top??h*.58-139)-16;}else{const card=document.querySelector('.hub-card')?.getBoundingClientRect();right=(card?card.left:w-370)-20;left=w>1100?285:25;}}const availableWidth=Math.max(150,right-left),availableHeight=Math.max(40,bottom-top);camera.setViewOffset(w,h,w/2-(left+right)/2,h/2-(top+bottom)/2,w,h);const distance=Math.max(.07,Math.max(size.y*h/availableHeight,size.x*w/availableWidth/camera.aspect,size.z)/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2)))*1.35);controls.maxDistance=Math.max(40,distance*2);controls.target.copy(center);camera.position.copy(center).add(new T.Vector3(.2,.1,1).normalize().multiplyScalar(distance));controls.update();dirty=true;}
      }else if(lastIsolate){camera.clearViewOffset();fit(s.view,amount);}
      lastIsolate=isolateKey;
     }
-diff -ruN pa/vite.config.ts pb/vite.config.ts
---- a/vite.config.ts	2026-10-07 00:50:02.786575812 +0000
-+++ b/vite.config.ts	2026-10-07 00:50:02.787896393 +0000
-@@ -3,4 +3,4 @@
++   if(pendingCamera&&sized&&lastView){if(Math.abs(amount-s.explode)>.0001){amount=s.explode;lastState=null;}camera.position.fromArray(pendingCamera.p);controls.target.fromArray(pendingCamera.t);controls.update();pendingCamera=null;dirty=true;}
+    controls.enableRotate=amount<.8;controls.mouseButtons.LEFT=amount<.8?T.MOUSE.ROTATE:T.MOUSE.PAN;controls.touches.ONE=amount<.8?T.TOUCH.ROTATE:T.TOUCH.PAN;ground.visible=platform.visible=ring.visible=innerRing.visible=amount<.5&&!s.isolate;markers.visible=amount>.75;controls.autoRotate=s.rotate&&!s.isolate&&amount<.4;controls.autoRotateSpeed=.65;controls.update();if(controls.autoRotate)dirty=true;
+    if(dirty){renderer.render(scene,camera);targets=[];if(amount>.45){const hasSolid=atlas.parts.some((p,i)=>p.system!=='integumentary'&&data[i*4+3]>.5);atlas.parts.forEach((p,i)=>{if(data[i*4+3]<.5||(hasSolid&&p.system==='integumentary'))return;let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;for(let corner=0;corner<8;corner++){projected.set(p.bounds[(corner&1)?1:0][0]+data[i*4],p.bounds[(corner&2)?1:0][1]+data[i*4+1],p.bounds[(corner&4)?1:0][2]+data[i*4+2]).project(camera);const x=(projected.x+1)*el.clientWidth/2,y=(1-projected.y)*el.clientHeight/2;left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}projected.copy(centers[i]).add(new T.Vector3(data[i*4],data[i*4+1],data[i*4+2])).project(camera);if(projected.z< -1||projected.z>1)return;targets.push({index:i,x:(projected.x+1)*el.clientWidth/2,y:(1-projected.y)*el.clientHeight/2,left,right,top,bottom});});}dirty=false;}
+ 
+   };animate();
+   const contextLost=(e:Event)=>{e.preventDefault();onError('The 3D session was paused by your device. Reload to continue.');};renderer.domElement.addEventListener('webglcontextlost',contextLost);
+-  return()=>{disposed=true;abort.abort();cancelAnimationFrame(frame);observer.disconnect();controls.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o instanceof T.Mesh&&!geometries.includes(o.geometry)){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});env.dispose();partTexture.dispose();selectionTexture.dispose();markerGeometry.dispose();markerMaterial.dispose();hover.remove();renderer.dispose();renderer.domElement.remove();};
++  return()=>{disposed=true;if(cameraLink)cameraLink.current=null;abort.abort();cancelAnimationFrame(frame);observer.disconnect();controls.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o instanceof T.Mesh&&!geometries.includes(o.geometry)){o.geometry.dispose();const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.dispose());}});env.dispose();partTexture.dispose();selectionTexture.dispose();markerGeometry.dispose();markerMaterial.dispose();hover.remove();renderer.dispose();renderer.domElement.remove();};
+  },[atlas]);
+  return <div className="scene" ref={host}/>;
+ }
+diff --git a/vite.config.ts b/vite.config.ts
+index b6dc300..3d1c723 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -3,4 +3,4 @@ import {defineConfig} from 'vite';
  import react from '@vitejs/plugin-react';
  import tailwindcss from '@tailwindcss/postcss';
  const path=(relative:string)=>fileURLToPath(new URL(relative,import.meta.url));
 -export default defineConfig({root:path('./web'),publicDir:path('./public'),plugins:[react()],resolve:{alias:{'@':path('./')}},css:{postcss:{plugins:[tailwindcss()]}},server:{watch:{usePolling:true}},build:{outDir:path('./dist'),emptyOutDir:true}});
 +export default defineConfig({base:'./',root:path('./web'),publicDir:path('./public'),plugins:[react()],resolve:{alias:{'@':path('./')}},css:{postcss:{plugins:[tailwindcss()]}},server:{watch:{usePolling:true}},build:{outDir:path('./dist'),emptyOutDir:true}});
-diff -ruN pa/web/index.html pb/web/index.html
---- a/web/index.html	2026-10-07 00:50:02.793728529 +0000
-+++ b/web/index.html	2026-10-07 00:50:02.795040387 +0000
+diff --git a/web/index.html b/web/index.html
+index 5f2ae6f..030d8db 100644
+--- a/web/index.html
++++ b/web/index.html
 @@ -1 +1 @@
 -<!doctype html><html lang="en" ><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#f3f4f4"/><meta name="description" content="An interactive atlas of the human body. Explore named anatomical structures, reveal organ systems, and inspect individual parts in 3D."/><title>Human Atlas</title><link rel="icon" href="/favicon.svg"/></head><body><div id="root"></div><script type="module" src="/main.tsx"></script></body></html>
 +<!doctype html><html lang="en" ><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#f3f4f4"/><meta name="description" content="An interactive atlas of the human body. Explore named anatomical structures, reveal organ systems, and inspect individual parts in 3D."/><title>3D Body · Human Atlas</title><link rel="icon" href="./favicon.svg"/></head><body><div id="root"></div><script type="module" src="/main.tsx"></script></body></html>

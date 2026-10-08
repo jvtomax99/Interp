@@ -12983,9 +12983,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'bodycard',    tone:'gd-n1', pin:'pins/anatomy.webp',             eyebrow:'3D Body',               title:'Tap a body part: its English and Spanish names, and what it is' },
   { id:'askcards',    tone:'gd-n2', pin:'pins/medical-terminology.webp', eyebrow:'Dr. Smiley',            title:'Answers you can scan: English and Spanish, side by side' },
   { id:'askquick',    tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Dr. Smiley',            title:'Ask him right where you are: tap him, a panel opens' },
-  { id:'review',      tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Term Review',           title:'Type the Spanish: he checks it and explains misses' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13049,6 +13049,10 @@ const GUIDE_UI = {
 // The same instructions as the answer text, drawn as steps. Keep them in
 // step with GUIDE_TOPICS; the text there is what search and Ask read.
 const GUIDE_STEPS = {
+  bodycard: () => ({ steps: ['Open <b>More</b> → <b>3D Body</b> and tap a part, or tap the magnifier and type its name.',
+    `Read the English and the Spanish under it. Tap ${GUIDE_UI.pill('EN')} or ${GUIDE_UI.pill('ES')} to hear it.`,
+    `Tap ${GUIDE_UI.pill('Open glossary')}, ${GUIDE_UI.pill('Practice this term')} or ${GUIDE_UI.pill('Ask Dr. Smiley')}.`],
+    note: 'Back brings you to the same part and view. Sources are under ⌃ on the card.' }),
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
@@ -15203,6 +15207,7 @@ function anatomySync(){
   document.body.classList.toggle('anat-open', want);
   if(!want){ if(layer) layer.remove(); return; }
   anatomyPlace();
+  atlasLoadCatalogue();            // the cards' text, read only once the 3D Body is opened
   if(layer) return;
   layer = document.createElement('div');
   layer.id = 'anatLayer';
@@ -15222,6 +15227,149 @@ function anatomyPlace(){
   document.documentElement.style.setProperty('--anat-top', top + 'px');
 }
 window.addEventListener('resize', () => { if(activeCategory === 'anatomy') anatomyPlace(); });
+
+/* ---- 3D Body cards: the Hub's side ----
+   Tapping a structure in the viewer shows its card: English and Spanish
+   names, a speaker for each, what it is, and Open glossary / Practice this
+   term / Ask Dr. Smiley. The card text is atlas/hub-catalogue.json (30
+   structures checked against the CUN dictionary and NCI/MedlinePlus, each
+   with its sources), read when the 3D Body opens; nothing asks an AI to
+   draw a card.
+   The viewer stays walled off. It can only send these messages, and each is
+   checked here before anything happens:
+     from    the frame on screen right now (event.source), with the opaque
+             origin a sandboxed frame always has ("null")
+     shape   { source:'hub-atlas', v:1, type } and nothing large
+     type    ready | card | action; action is glossary | practice | ask | pronounce
+     id      a structure in the Hub's own copy of the catalogue
+   The Hub then uses its own catalogue and its own glossary: no text,
+   address or command from the frame is ever used. Back to the frame go only
+   whether the glossary has the structure (and its domain's name) and the
+   viewer's own place when you come back.
+   ATLAS.mem is where you were (structure, camera, layers, card size), kept
+   in memory only, so returning from a Hub tool puts you back there. */
+const ATLAS = { cat: null, loading: null, byId: new Map(), mem: null, lastAct: 0 };
+const ATLAS_FMA = /^FMA\d{1,7}$/, ATLAS_PIECE = /^FJ\d{1,7}M?$/;
+const ATLAS_SYSTEMS = new Set(['skeletal', 'muscular', 'arterial', 'venous', 'nervous', 'digestive', 'respiratory', 'urinary', 'reproductive',
+  'lymphatic', 'endocrine', 'integumentary', 'connective', 'sensory', 'cardiac']);
+const ATLAS_VIEWS = ['three-quarter', 'front', 'side', 'back'];
+const ATLAS_MEM_MS = 30 * 60000;
+function atlasLoadCatalogue(){
+  if(ATLAS.cat) return Promise.resolve(ATLAS.cat);
+  if(!ATLAS.loading) ATLAS.loading = fetch('./atlas/hub-catalogue.json').then(r => r.ok ? r.json() : null).then(d => {
+    const list = d && d.version === 1 && Array.isArray(d.structures) ? d.structures : [];
+    const str = (v, max) => typeof v === 'string' && v.length <= max ? v : '';
+    ATLAS.byId = new Map(list.filter(s => s && ATLAS_FMA.test(s.id) && str(s.en, 80) && str(s.about, 400)).map(s => [s.id, {
+      id: s.id, en: s.en, es: str(s.es, 80), enAlt: (Array.isArray(s.enAlt) ? s.enAlt : []).map(a => str(a, 80)).filter(Boolean),
+      about: s.about, esNote: str(s.esNote, 300), glossaryTermId: str(s.glossaryTermId, 80) || null }]));
+    ATLAS.cat = ATLAS.byId.size ? d : null;
+    return ATLAS.cat;
+  }).catch(() => null).finally(() => { ATLAS.loading = null; });
+  return ATLAS.loading;
+}
+// The glossary entry for a structure: the one the catalogue names, else an
+// exact name match (English, or an everyday name the catalogue lists, as
+// Term Review compares: accents, capitals and a leading article aside; an
+// entry's "A / B" and "A (note)" parts count). Never a partial match.
+function atlasGlossaryMatch(s){
+  if(s.glossaryTermId){ const x = askTermById(s.glossaryTermId); if(x) return x; }
+  const want = new Set([s.en, ...s.enAlt].map(rvLoose).filter(Boolean)), hits = [];
+  (DATA.categories || []).forEach(cat => (cat.terms || []).forEach(term => {
+    const names = String(term.en || '').split(/\s*[\/;|]\s*/).flatMap(p => { const m = p.match(/^(.*?)\s*\(([^)]+)\)\s*$/); return m ? [m[1], p] : [p]; });
+    if(names.some(n => want.has(rvLoose(n)))) hits.push({ cat, term });
+  }));
+  return hits.find(h => h.term.es) || hits[0] || null;
+}
+function atlasFrame(){ const f = document.querySelector('#anatLayer iframe'); return f ? f.contentWindow : null; }
+// '*': a sandboxed frame has no origin of its own to name. Nothing private
+// goes this way (see above), and only that frame's window is posted to.
+function atlasPost(msg){ const w = atlasFrame(); if(w) w.postMessage({ source: 'hub', v: 1, ...msg }, '*'); }
+function atlasReadView(v){
+  if(!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const p = v.pick, kind = p && p.kind, id = p && String(p.id);
+  if(!(kind === 'part' && ATLAS_PIECE.test(id)) && !(kind === 'concept' && ATLAS_FMA.test(id))) return null;
+  const vec = a => Array.isArray(a) && a.length === 3 && a.every(n => typeof n === 'number' && isFinite(n) && Math.abs(n) < 1000) ? a.slice() : null;
+  const cp = v.cam && vec(v.cam.p), ct = v.cam && vec(v.cam.t);
+  return { pick: { kind, id }, cam: cp && ct ? { p: cp, t: ct } : null,
+    explode: typeof v.explode === 'number' && v.explode >= 0 && v.explode <= 1 ? v.explode : 0,
+    visible: (Array.isArray(v.visible) ? v.visible : []).filter(x => ATLAS_SYSTEMS.has(x)).slice(0, ATLAS_SYSTEMS.size),
+    isolate: v.isolate === true, view: ATLAS_VIEWS.includes(v.view) ? v.view : 'three-quarter', expanded: v.expanded === true };
+}
+async function atlasSendGlossary(id, tries){
+  await atlasLoadCatalogue();
+  const s = ATLAS.byId.get(id);
+  if(!s || activeCategory !== 'anatomy') return;
+  // The glossary paints from this phone's copy at startup; if it isn't there yet, say "checking" and look again.
+  if(!(DATA.categories || []).length){
+    atlasPost({ type: 'glossary', id, state: 'checking', domain: '' });
+    if((tries || 0) < 6) setTimeout(() => atlasSendGlossary(id, (tries || 0) + 1), 1500);
+    return;
+  }
+  const m = atlasGlossaryMatch(s);
+  atlasPost({ type: 'glossary', id, state: !m ? 'none' : m.term.es ? 'match' : 'nospanish', domain: m ? String(m.cat.name || '').slice(0, 60) : '' });
+}
+function atlasOnMessage(e){
+  const w = atlasFrame();
+  if(!w || e.source !== w || e.origin !== 'null' || activeCategory !== 'anatomy') return;
+  const d = e.data;
+  if(!d || typeof d !== 'object' || Array.isArray(d) || d.source !== 'hub-atlas' || d.v !== 1 || Object.keys(d).length > 7) return;
+  if(d.type === 'ready') return atlasReady();
+  if(d.type === 'card'){ if(typeof d.id === 'string' && ATLAS_FMA.test(d.id)) atlasSendGlossary(d.id); return; }
+  if(d.type === 'action') return atlasAction(d);
+}
+window.addEventListener('message', atlasOnMessage);
+// The viewer is listening: the card list, and your place if you're coming back.
+function atlasReady(){
+  atlasLoadCatalogue();
+  const mem = ATLAS.mem;
+  ATLAS.mem = null;
+  if(mem && Date.now() - mem.at < ATLAS_MEM_MS) atlasPost({ type: 'restore', view: mem.view });
+}
+const ATLAS_ACTIONS = ['glossary', 'practice', 'ask', 'pronounce'];
+async function atlasAction(d){
+  if(!ATLAS_ACTIONS.includes(d.action) || typeof d.id !== 'string' || !ATLAS_FMA.test(d.id)) return;
+  await atlasLoadCatalogue();
+  const s = ATLAS.byId.get(d.id);
+  if(!s || activeCategory !== 'anatomy') return;            // only structures in the Hub's own list
+  if(d.action === 'pronounce'){
+    if(d.lang !== 'en' && d.lang !== 'es') return;
+    const text = d.lang === 'es' ? s.es : s.en;
+    if(text) speakText(null, text, d.lang === 'es' ? 'es-US' : 'en-US');
+    return;
+  }
+  // One tap, one action (a double tap doesn't open two screens).
+  if(Date.now() - ATLAS.lastAct < 700) return;
+  ATLAS.lastAct = Date.now();
+  const view = atlasReadView(d.view), m = atlasGlossaryMatch(s);
+  const keep = () => { ATLAS.mem = view ? { view, at: Date.now() } : null; };
+  if(d.action === 'glossary'){
+    if(!m){ showToast(`“${s.en}” isn’t in the Hub glossary yet.`); return; }
+    keep(); revealTerm(m.cat.id, m.term.id);
+  }else if(d.action === 'practice'){
+    if(!m || !m.term.es){ showToast(m ? 'That glossary entry has no Spanish yet.' : `“${s.en}” isn’t in the Hub glossary yet.`); return; }
+    if(!whoAmI()){ showToast('Set your name first: your review record is kept under it.'); return; }
+    // Practising one term replaces a paused session's place (its saved answers stay in your record).
+    const paused = (reviewActive && reviewIndex < reviewQueue.length) || reviewStored();
+    if(paused && !confirm(`You have a Term Review session in progress. Practise “${m.term.en}” instead? Your place in that session will be let go; answers you already saved stay in your record.`)) return;
+    keep(); reviewStartWith([m.term.id], null, '3D Body');
+  }else if(d.action === 'ask'){
+    keep(); atlasAsk(s, m);
+  }
+}
+// Ask Dr. Smiley about the structure: its checked card goes with the question.
+function atlasAsk(s, m){
+  ASK.anatomy = { id: s.id, withTerm: !!m };
+  ASK.selected = m ? { cat: m.cat.id, term: m.term.id } : null;
+  ASK.draft = `Explain the ${s.en.toLowerCase()}.`;
+  ASK.view = 'chat';
+  setCategory('ask');
+  const input = document.getElementById('askInput');
+  if(input){ input.value = ASK.draft; if(prefersAutoFocus()) input.focus(); }
+}
+function atlasEntry(id){
+  const s = ATLAS.byId.get(id);
+  return s ? { id: 'an:' + s.id, type: '3D Body structure (checked Hub card)', en: s.en, es: s.es, definition: s.about, notes: s.esNote } : null;
+}
 
 /* ---------- False Friends (falsos amigos) ---------- */
 
@@ -16218,6 +16366,7 @@ const GUIDE_TOPICS = [
       <li>Tap <b>⋯</b> on the term's card, then <b>Explain with Dr. Smiley</b>. On a computer it's a button on the card.</li>
       <li>Ask opens with that term picked. You'll see it just above the box.</li>
       <li>Tap <b>Explain</b>, or type your own question about it.</li>
+      <li>In the 3D Body, a part's card has <b>Ask Dr. Smiley</b> too: he gets that part's checked names and explanation.</li>
     </ol>
     <p>You get the glossary entry, a plain way to say it to a patient, and where the entry came from.</p>` },
 
@@ -16443,8 +16592,18 @@ const GUIDE_TOPICS = [
     <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
 
   { id:'body', section:'study', k:'3d body anatomy model organ muscle bone heart rotate zoom human atlas', q:'What is 3D Body?', a:`
-    <p>A model of the human body you can turn and zoom. Tap any part to see its name. It's handy when a doctor points to something you can't picture.</p>
-    <p>Open it from Home or <b>More</b> → <b>3D Body</b>. The first time, it downloads about 33&nbsp;MB, so Wi-Fi is best. It's quicker after that.</p>` },
+    <p>A model of the human body you can turn and zoom. Tap any part to see its card. It's handy when a doctor points to something you can't picture.</p>
+    <p>Open it from Home or <b>More</b> → <b>3D Body</b>. The first time, it downloads about 33&nbsp;MB, so Wi-Fi is best. It's quicker after that.</p>
+    <p>For 30 common structures (the heart, liver, kidney, femur and others) the card gives the English and Spanish names and what it is. See “What does a body part’s card show?”</p>` },
+  { id:'bodycard', section:'study', k:'3d body card spanish name body part organ bone anatomy pronounce hear practice glossary dr smiley sources riñón corazón', q:'What does a body part’s card show?', a:`
+    <ol>
+      <li>In the 3D Body, tap a part, or tap the magnifier and type its name.</li>
+      <li>The card shows the <b>English name</b>, the <b>Spanish name</b> under it, and one or two sentences on what it is. Tap <b>EN</b> or <b>ES</b> to hear it.</li>
+      <li><b>Open glossary</b> and <b>Practice this term</b> work when the Hub glossary has that word. <b>Ask Dr. Smiley</b> always works; he gets the card with your question.</li>
+      <li>Tap <b>⌃</b> for more: notes on the Spanish, and <b>Sources</b>. Tap <b>Isolate</b> to see the part on its own.</li>
+    </ol>
+    <p>The names and explanations were checked against the Clínica Universidad de Navarra medical dictionary and the National Cancer Institute; each card lists its own sources. Parts outside those 30 show <b>Spanish name not added yet</b> and a note <b>About this body system</b> instead.</p>
+    <p>Tapping Practice doesn't count as an answer: only what you answer in Term Review is saved. Back brings you to the same part, view and card.</p>` },
 
   { id:'zoom', section:'trouble', k:'zoom text small bigger larger font size magnify pinch double tap read see', q:'The text is too small. Can I zoom in?', a:`
     <p>Yes: <b>pinch with two fingers</b> to zoom in, and pinch back to zoom out.</p>
@@ -20368,7 +20527,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1008.0945';
+const BUILD_ID = 'b1008.1038';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -24378,6 +24537,7 @@ const ASK_STOP = new Set(('the a an and or of to in on for is are was be how do 
 
 const ASK = { turns: [], busy: false, draft: '', view: 'chat', lessons: [], lessonsStarted: false, lessonsBlocked: false, phi: null, edits: {},
   from: 'home', selected: null,    // the screen Ask was opened from; a glossary term picked to talk about ({ cat, term })
+  anatomy: null,                   // a 3D Body structure picked to talk about ({ id: 'FMA…', withTerm })
   convo: askConvoEmpty(), gen: 0 }; // this conversation's record (askConvoEmpty); gen counts new conversations
 let askFaceSeq = 0;
 
@@ -24424,6 +24584,8 @@ function askCorpus(){
   (typeof GUIDE_TOPICS !== 'undefined' ? GUIDE_TOPICS : []).forEach(g => add(
     { id: 'g:' + g.id, type: 'User Guide', question: stripTags(g.q), answer: stripTags(g.a) },
     `User Guide · ${stripTags(g.q)}`, [stripTags(g.q), g.k], [stripTags(g.a)], { guide: g.id }));
+  // The 3D Body's checked cards, once the 3D Body has been opened.
+  ATLAS.byId.forEach(st => add(atlasEntry(st.id), `3D Body · ${st.en}`, [st.en, st.es, ...st.enAlt], [st.about, st.esNote], { cat: 'anatomy' }));
   return docs;
 }
 
@@ -24539,7 +24701,7 @@ function askMessagesHtml(){
       <p>What you asked me to remember still applies.</p>` : `<p class="ask-hello-title">Hi${whoAmI() ? ' ' + escapeHtml(whoAmI().split(/\s+/)[0]) : ''}! What do you need?</p>
       <p>I'm Dr. Smiley, your interpreter assistant. I answer from the Hub and can open your briefings and practice.</p>`}
       ${askNextHtml()}
-      <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${askSelectedTerm() ? `<button type="button" class="ask-chip" onclick="submitAsk('Explain this term.')">Explain ${escapeHtml(askSelectedTerm().term.en)}</button>` : ''}<button type="button" class="ask-chip" onclick="submitAsk('Help me practice five terms I’m still learning.')">Practice 5 terms I’m still learning</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
+      <div class="ask-chips"><button type="button" class="ask-chip prep-chip" onclick="openPrep()">${ICON_PREP}Prep me for an appointment</button>${(st => st ? `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(`Explain the ${st.en.toLowerCase()}.`))})">Explain the ${escapeHtml(st.en.toLowerCase())}</button>` : askSelectedTerm() ? `<button type="button" class="ask-chip" onclick="submitAsk('Explain this term.')">Explain ${escapeHtml(askSelectedTerm().term.en)}</button>` : '')(ASK.anatomy && ATLAS.byId.get(ASK.anatomy.id))}<button type="button" class="ask-chip" onclick="submitAsk('Help me practice five terms I’m still learning.')">Practice 5 terms I’m still learning</button>${ex.map(q => `<button type="button" class="ask-chip" onclick="submitAsk(${escapeAttr(JSON.stringify(q))})">${escapeHtml(q)}</button>`).join('')}</div>
     </div>`;
   }
   return ASK.turns.map(askTurnHtml).join('') + (ASK.phi ? `
@@ -24883,7 +25045,8 @@ async function submitAsk(preset, force, opts){
   const named = plan.fu || !selTerm || intent ? [] : askNamesSomething(q).filter(id => /^(t|ff):/.test(id));
   const moved = !!(selTerm && named.length && !named.includes('t:' + selTerm.term.id) && !ASK_REF.test(foldText(q).toLowerCase()));
   const sel = plan.sel !== undefined ? plan.sel : (moved ? null : selTerm);
-  const front = (sel ? ['t:' + sel.term.id] : []).concat((plan.ids || []).filter(id => !sel || id !== 't:' + sel.term.id));
+  const anat = ASK.anatomy && askResource('an:' + ASK.anatomy.id) ? 'an:' + ASK.anatomy.id : '';
+  const front = (sel ? ['t:' + sel.term.id] : []).concat(anat ? [anat] : [], (plan.ids || []).filter(id => (!sel || id !== 't:' + sel.term.id) && id !== anat));
   const cur = askSubjectNow(), prev = askPrevTerm();
   askPlaceEntries(picked, front, (cur ? cur.ids : []).concat(prev ? [prev] : []).filter(id => !front.includes(id)));
   const labels = {};
@@ -24891,7 +25054,7 @@ async function submitAsk(preset, force, opts){
   const turn = { id: askTurnId(), q, qLabel: opts.label || '', status: 'loading', labels, go: Object.fromEntries(picked.map(d => [d.entry.id, d.go])),
     sel: sel ? { cat: sel.cat.id, term: sel.term.id } : null, n: (intent && intent.n) || 5, actions: [],
     about: plan.about || null, keepSubject: !!plan.keepSubject, correction: plan.correction || '', fixOf: plan.fixOf || '', langSwitch: plan.lang || '',
-    fu: plan.fu ? plan.fu.kind : '',
+    fu: plan.fu ? plan.fu.kind : '', anat: anat ? ASK.anatomy.id : '',
     movedOn: moved && !('sel' in opts) && selNow ? selNow.term : '' };
   // The conversation so far: question, answer and what it was about.
   const history = ASK.turns.filter(x => x.status === 'done' && x.answer && !x.answer.local && !x.answer.clarify).slice(-4)
@@ -25290,6 +25453,7 @@ function askPlan(q, selNow, opts){
     case 'compare': return askPlanCompare(q, cur, fu.named, !!opts.pick);
     case 'reference':
       if(selNow && askTermById(selNow.term)) return {};          // the term you picked is "this term"
+      if(!cur && ASK.anatomy && askResource('an:' + ASK.anatomy.id)) return askRefPlan('an:' + ASK.anatomy.id);   // ... or the 3D Body structure
       if(!cur) return askMissing('Which term do you mean?', 'Name it, or open it in the glossary and tap ⋯ → Explain with Dr. Smiley.');
       if(!cur.ids.length) return {};                             // not a Hub entry: the conversation itself says what "that" is
       if(cur.ids.length > 1) return askClarify(cur.ids);
@@ -25433,7 +25597,7 @@ function askNewConversation(){
   if(ASK.busy) askCancel(true);
   ASK.gen++;
   ASK.turns.forEach(t => drTaskEnd('ask:' + t.id));
-  ASK.turns = []; ASK.phi = null; ASK.draft = ''; ASK.selected = null;
+  ASK.turns = []; ASK.phi = null; ASK.draft = ''; ASK.selected = null; ASK.anatomy = null;
   ASK.convo = askConvoEmpty(); ASK.fresh = true;
   askSaveWaiting();
   if(activeCategory === 'ask'){
@@ -25508,6 +25672,7 @@ function askTermEntry(x){
 // "Explain with Dr. Smiley" on a term card: Ask, about that term.
 function askAbout(catId, termId){
   ASK.selected = { cat: catId, term: termId };
+  ASK.anatomy = null;
   ASK.draft = 'Explain this term.';
   ASK.view = 'chat';
   setCategory('ask');
@@ -25517,6 +25682,13 @@ function askAbout(catId, termId){
 // ✕ (fromUser): you let go of the term, so "this term" doesn't find it in
 // the conversation either.
 function askClearSelected(fromUser){
+  // The 3D Body structure goes too (and the glossary term it brought along).
+  if(fromUser === true && ASK.anatomy){
+    const id = 'an:' + ASK.anatomy.id;
+    ASK.convo.subjects.forEach(s => { s.ids = s.ids.filter(x => x !== id); });
+    if(!ASK.anatomy.withTerm) askConvoSync();
+    ASK.anatomy = null;
+  }
   if(fromUser === true && ASK.selected){
     const id = 't:' + ASK.selected.term;
     ASK.convo.subjects.forEach(s => { s.ids = s.ids.filter(x => x !== id); });
@@ -25527,6 +25699,8 @@ function askClearSelected(fromUser){
   if(el) el.outerHTML = askContextChipHtml();
 }
 function askContextChipHtml(){
+  const st = ASK.anatomy && ATLAS.byId.get(ASK.anatomy.id);
+  if(st) return `<div class="ask-ctx" id="askCtx"><span><small>Explaining</small><b>${escapeHtml(st.en)}</b><em>3D Body${ASK.anatomy.withTerm ? ' · in the glossary' : ''}</em></span><button type="button" onclick="askClearSelected(true)" aria-label="Stop explaining ${escapeAttr(st.en)}">✕</button></div>`;
   const sel = askSelectedTerm();
   if(ASK.selected && !sel) return `<div class="ask-ctx is-gone" id="askCtx" role="status"><span>The term you picked is no longer in the glossary.</span><button type="button" onclick="askClearSelected()" aria-label="Clear">✕</button></div>`;
   if(!sel) return '<div id="askCtx" hidden></div>';
@@ -25555,7 +25729,7 @@ async function askLoadRecord(){
   if(!termReviewsLoaded && db && navigator.onLine !== false){ try{ await wait(loadTermReviews()); }catch(e){} }
   return { hasName: true, loaded: termReviewsLoaded };
 }
-const ASK_SCREEN_NAMES = { home: 'Home', review: 'Term Review', practice: 'CoreCHI Practice', prep: 'Appointment briefing', appt: 'Appointment',
+const ASK_SCREEN_NAMES = { home: 'Home', anatomy: '3D Body', review: 'Term Review', practice: 'CoreCHI Practice', prep: 'Appointment briefing', appt: 'Appointment',
   translate: 'Translate', chat: 'Team Chat', all: 'All domains', falsefriends: 'False Friends', 'doctor-directory': 'Doctor Directory', userguide: 'User Guide' };
 // The small context sent with a question (bounded; api/ask.js cuts it down again).
 // The specialty of the screen Ask was opened from: a domain (or its parent),
@@ -25574,6 +25748,7 @@ function askContext(rec, sel){
     screen: { id: /^[\w:.-]{1,80}$/.test(from) ? from : '', name: fromName || (cat ? cat.name : (ASK_SCREEN_NAMES[from] || '')) },
     selected: sel ? { id: 't:' + sel.term.id, en: sel.term.en || '', es: sel.term.es || '', domain: sel.cat.name,
       source: sel.term.source || '', hasLink: /^https?:\/\//i.test(externalUrl(sel.term.url)) } : null,
+    ...(st => st ? { anatomy: { id: 'an:' + st.id, en: st.en, es: st.es, inGlossary: !!(ASK.anatomy && ASK.anatomy.withTerm) } } : {})(ASK.anatomy && ATLAS.byId.get(ASK.anatomy.id)),
     specialties: askSpecialties().slice(0, 40).map(d => ({ id: 'spec:' + d.id, name: d.name })),
     learning: { hasName: !!rec.hasName, loaded: !!rec.loaded, count: rec.loaded ? askLearningTerms().length : 0 },
     ...askPrefsContext(),
@@ -25768,6 +25943,13 @@ function askLocalAnswer(intent, rec, t){
       a.sourceIds = ['t:' + x.term.id];
       t.labels['t:' + x.term.id] = `Glossary · ${x.term.en || x.term.es}`;
       t.go['t:' + x.term.id] = { cat: x.cat.id, term: x.term.id };
+    }else if(t.anat && ATLAS.byId.get(t.anat)){
+      const st = ATLAS.byId.get(t.anat), id = 'an:' + st.id;
+      a.headline = `${st.en}${st.es ? ' — ' + st.es : ''}`;
+      a.details = st.about + ' A plain Spanish version needs a connection.';
+      a.sourceIds = [id];
+      t.labels[id] = `3D Body · ${st.en}`;
+      t.go[id] = { cat: 'anatomy' };
     }else{ a.headline = 'Which term?'; a.details = 'Open it in the glossary, tap ⋯ on its card, then Explain with Dr. Smiley.'; }
   }
   return a;
@@ -26014,7 +26196,7 @@ function drMemNameChanged(before, after){
   const want = drPref('mode');
   if(drModePref !== want){ drModePref = want; drModeChanged(); }
   if(ASK.busy) askCancel(true);
-  ASK.turns = []; ASK.selected = null; ASK.draft = ''; ASK.convo = askConvoEmpty(); ASK.gen++;
+  ASK.turns = []; ASK.selected = null; ASK.anatomy = null; ASK.draft = ''; ASK.convo = askConvoEmpty(); ASK.gen++;
   askSaveWaiting();   // the person before's waiting questions don't go out under the new name
   const n = Object.keys(drMemGet()).length;
   return n ? ` Dr. Smiley is using ${after ? after.split(/\s+/)[0] + "'s" : 'this phone’s'} preferences.` : '';
