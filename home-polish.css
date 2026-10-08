@@ -1240,3 +1240,43 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
       linear-gradient(180deg,rgba(8,24,42,.22) 0%,rgba(8,24,42,0) 26%);
   }
 }
+
+/* ---------- Hello banner lettering (Jose's pick, style 8) ----------
+   The name in Parisienne, the quote in Lora italic, the author in small Inter capitals
+   behind a short rule. Same style on phone and computer, sized for each. The shading is
+   two soft local pools (behind the words, behind the date), never a card, so the photo
+   stays open. home-polish.js keeps the quote's last two words together and moves a
+   script name beside Dr. Smiley when it would reach him (fitWave). */
+#content.is-home .home-greeting-quote{text-wrap:balance;}
+#content.is-home .home-greeting-quote cite{display:flex;align-items:center;gap:9px;font-style:normal;}
+#content.is-home .home-greeting-quote cite::before{content:"";flex:none;width:18px;height:2px;border-radius:2px;background:currentColor;opacity:.85;}
+@media (max-width:900px){
+  #content.is-home .home-greeting-scrim{background:
+    radial-gradient(ellipse 120% 34% at 22% 47%,rgba(6,20,38,.5) 0%,rgba(6,20,38,.3) 52%,rgba(6,20,38,0) 100%),
+    radial-gradient(ellipse 80% 16% at 20% 3%,rgba(6,20,38,.42) 0%,rgba(6,20,38,0) 100%);}
+}
+@media (min-width:901px){
+  #content.is-home .home-greeting-scrim{background:
+    radial-gradient(ellipse 50% 40% at 20% 46%,rgba(6,20,38,.6) 0%,rgba(6,20,38,.36) 52%,rgba(6,20,38,0) 100%),
+    radial-gradient(ellipse 34% 12% at 12% 4%,rgba(6,20,38,.35) 0%,rgba(6,20,38,0) 100%);}
+}
+#content.is-home .home-greeting-quote{margin-top:calc(56px + 67px * (var(--hw-k) - 1));}
+@media (min-width:901px){#content.is-home .home-greeting-quote{margin-top:calc(52px + 67px * (var(--hw-k) - 1));}}
+#content.is-home .home-greeting-name{font-family:'Parisienne',cursive;font-weight:400;letter-spacing:0;line-height:1.12;padding-bottom:.06em;text-shadow:0 1px 2px rgba(4,14,28,.6),0 2px 6px rgba(4,14,28,.35),0 3px 22px rgba(4,14,28,.42);}
+#content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-family:var(--sans);font-weight:600;letter-spacing:.13em;text-shadow:0 1px 6px rgba(4,14,28,.6);}
+#content.is-home .home-greeting-date{letter-spacing:.02em;}
+#content.is-home .home-greeting-quote{font-family:'Lora',Georgia,serif;font-style:italic;font-weight:500;letter-spacing:0;line-height:1.32;color:#fff;text-shadow:0 1px 2px rgba(4,14,28,.55),0 2px 16px rgba(4,14,28,.45);}
+#content.is-home .home-greeting-quote cite{font-family:var(--sans);font-style:normal;color:#fff;text-shadow:0 1px 3px rgba(4,14,28,.7);font-weight:650;text-transform:uppercase;letter-spacing:.16em;}
+@media (max-width:900px){
+  #content.is-home .home-greeting-name{font-size:56px;}
+  #content.is-home .home-greeting-name.is-long{font-size:38px;}
+  #content.is-home .home-greeting-quote{font-size:20px;max-width:24em;}
+  #content.is-home .home-greeting-quote cite{margin-top:9px;font-size:13px;}
+}
+@media (max-width:365px){#content.is-home .home-greeting-name{font-size:50px;}#content.is-home .home-greeting-name.is-long{font-size:34px;}}
+@media (min-width:901px){
+  #content.is-home .home-greeting-name{font-size:80px;}
+  #content.is-home .home-greeting-name.is-long{font-size:52px;}
+  #content.is-home .home-greeting-quote{font-size:22px;max-width:28em;}
+  #content.is-home .home-greeting-quote cite{margin-top:10px;font-size:14px;}
+}

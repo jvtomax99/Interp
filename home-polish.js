@@ -786,8 +786,11 @@
     askBadge.attach(wave);
     const name=wave.parentElement.querySelector('.home-greeting-name');
     if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
+    keepQuoteEnd(wave.closest('.home-greeting-text'));
     fitWave(wave);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
+    // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
+    if(document.fonts&&document.fonts.load&&name)document.fonts.load('400 56px Parisienne',name.textContent).then(()=>{if(wave.isConnected)fitWave(wave);},()=>{});
     const play=()=>playGreeting(wave);
     // Tapping the smiley opens Ask the Hub (index.html, window.openAskHub).
     // The hello still plays by itself when the app opens; if Ask the Hub is
@@ -835,16 +838,29 @@
      (it would break mid-word: "Guadalup / e") he takes the largest size at
      which it does, never less than 1 (--hw-k on .home-greeting-text). Again
      once the fonts are in, and when the screen changes size. */
+  // The quote's last two words travel together, so its last line is never one lone word.
+  function keepQuoteEnd(text){
+    const q=text&&text.querySelector('.home-greeting-quote'),tn=q&&q.firstChild;
+    if(!tn||tn.nodeType!==3)return;
+    const s=tn.data.replace(/\s+$/,''),i=s.lastIndexOf(' ');
+    if(i>0)tn.data=s.slice(0,i)+'\u00a0'+s.slice(i+1);
+  }
   function fitWave(wave){
     const text=wave.closest('.home-greeting-text'),row=wave.parentElement,name=row&&row.querySelector('.home-greeting-name');
     if(!text||!name)return;
     text.style.removeProperty('--hw-k');
     const size=parseFloat(getComputedStyle(text).getPropertyValue('--hw-size'))||1;
-    if(size<=1)return;
     const ws=name.style.whiteSpace;name.style.whiteSpace='nowrap';
     const r=document.createRange();r.selectNodeContents(name);
     const need=Math.ceil(r.getBoundingClientRect().width)+1;
     name.style.whiteSpace=ws;
+    // A short name sits centred, in a column on each side of him; if it is
+    // too wide for that column at his size (a wide or script face), it
+    // moves beside him like a long name does, rather than shrinking him.
+    // 12px spare: his ring reaches past his button, and a script letter's
+    // swash past its own width.
+    if(!row.classList.contains('home-wave-wide-name')&&need+12>(row.clientWidth-64*Math.max(1,size))/2)row.classList.add('home-wave-wide-name');
+    if(size<=1)return;
     const wide=row.classList.contains('home-wave-wide-name'),gap=parseFloat(getComputedStyle(row).columnGap)||0;
     // Beside him (long names): name, gap, him. Centred: him between two equal columns.
     const fit=wide?(row.clientWidth-gap-need)/64:(row.clientWidth-2*need)/64;

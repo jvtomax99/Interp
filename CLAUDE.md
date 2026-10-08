@@ -467,8 +467,14 @@ banner titles and section heads used to be serif. Scale, as tokens in the
 15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`). Spacing
 6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
 cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
-weights 550 and 650. IBM Plex Serif is reserved for quoted human speech (the
-greeting quote, Ask answers, review lines).
+weights 550 and 650. IBM Plex Serif is reserved for quoted human speech (Ask
+answers, review lines). The Home hello banner is the one exception, Jose's
+pick ("style 8"): the name in Parisienne, the quote in Lora italic, the author
+in small Inter capitals behind a short rule, over two soft local shadings
+(never a card). Block "Hello banner lettering" at the end of
+`home-polish.css`; `keepQuoteEnd` (no lone last word) and `fitWave` (a script
+name too wide to sit centred moves beside Dr. Smiley) in `home-polish.js`.
+Don't use those two faces anywhere else.
 
 Rules that hold across the whole app:
 
