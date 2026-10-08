@@ -5664,6 +5664,41 @@ html[data-theme="dark"] .ask-do-btn.is-main{ background:#AFC0FF; border-color:#A
 }
 
 
+/* ---------- Dr. Smiley: during my shift ----------
+   His shortcuts (shiftPanel). On a phone they take the tab capsule's place
+   (looks in home-polish.css, Split dock); on a computer they drop down under
+   his button. The one suggestion sits just above him. */
+.shift-bar[hidden], .shift-hint[hidden]{ display:none !important; }
+.shift-btn{ border:0; background:none; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+.shift-btn .shift-icon{ display:block; width:24px; height:24px; }
+.shift-btn .shift-icon svg{ display:block; width:100%; height:100%; }
+.shift-btn[aria-disabled="true"]{ color:var(--ink-faint); }
+.shift-btn:focus-visible, .shift-hint button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+@media (min-width:901px){
+  .shift-bar{ position:fixed; z-index:120; width:240px; display:flex; flex-direction:column; gap:2px; padding:6px; border-radius:var(--r-lg);
+    background:var(--paper); border:1px solid var(--line);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+  .shift-btn{ display:flex; align-items:center; gap:9px; min-height:44px; padding:0 13px; border-radius:var(--r-sm); color:var(--ink); font:550 15px var(--sans); text-align:left; }
+  .shift-btn:hover{ background:var(--accent-soft); }
+  .shift-hint{ top:72px; right:17px; bottom:auto !important; }
+}
+.shift-hint{ position:fixed; z-index:61; right:14px; bottom:calc(var(--dock-bottom) + 58px + 9px); max-width:min(320px, calc(100vw - 28px));
+  display:flex; align-items:center; gap:6px; padding:6px 6px 6px 13px; border-radius:var(--r-md); background:var(--paper); border:1px solid var(--line); color:var(--ink);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); font-size:14px; line-height:1.35; }
+.shift-hint p{ margin:0; flex:1; min-width:0; }
+.shift-hint-acts{ display:flex; align-items:center; flex:none; }
+.shift-hint-go{ min-height:44px; padding:0 15px; border:0; border-radius:999px; background:var(--navy); color:#fff; font:650 14px var(--sans); cursor:pointer; }
+.shift-hint-x{ width:44px; height:44px; border:0; border-radius:var(--r-sm); background:none; color:var(--ink-soft); font-size:16px; cursor:pointer; }
+html[data-theme="dark"] .shift-hint-go{ background:#AFC0FF; color:#0E1424; }
+.shift-hint-go:active, .shift-hint-go.is-pressed{ transform:scale(.97); }
+body.kb-open .shift-hint, body:has(.overlay.show) .shift-hint, body:has(.gs-overlay.show) .shift-hint, body:has(.dm-overlay.show) .shift-hint,
+body.kb-open .shift-bar, body:has(.overlay.show) .shift-bar, body:has(.gs-overlay.show) .shift-bar, body:has(.dm-overlay.show) .shift-bar{ visibility:hidden; }
+@media (prefers-reduced-motion: no-preference){
+  .shift-bar:not([hidden]), .shift-hint:not([hidden]){ animation:shiftIn .22s var(--ease) both; }
+  @keyframes shiftIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+}
+@media (prefers-reduced-motion: reduce){ .shift-hint-go:active, .shift-hint-go.is-pressed{ transform:none; } }
+
 /* ---------- Appointment prep ----------
    "Prep me for an appointment" (first suggestion on Ask): pick a specialty
    and, if known, the doctor; Dr. Smiley returns one screen to read on the
@@ -6527,7 +6562,7 @@ body.pv-open{ overflow:hidden; }
   <div class="tg-right">
     <button type="button" class="tg-sync" id="tgSync" onclick="openOutboxSheet()"></button>
     <span class="sr-only" id="tgSyncLive" role="status" aria-live="polite"></span>
-    <button class="tg-icon-btn tg-smiley" id="tgSmiley" onclick="openAskHub()" title="Ask the Hub" aria-label="Ask the Hub" hidden></button>
+    <button class="tg-icon-btn tg-smiley" id="tgSmiley" onclick="smileyCompanionTap(event)" title="Ask the Hub" aria-label="Ask the Hub" hidden></button>
     <button class="tg-icon-btn tg-search-btn" onclick="openGlobalSearch()" title="Search" aria-label="Search">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="M15.8 15.8L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
@@ -6821,6 +6856,11 @@ body.pv-open{ overflow:hidden; }
         <button type="button" role="radio" data-mode="still" aria-checked="false" tabindex="-1" onclick="setSmileyMode('still')">Still</button>
       </div>
       <small class="ds-mode-hint" id="dsModeHint" aria-live="polite"></small>
+    </div>
+    <!-- During my shift (shiftPanel): calm and attentive, and tapping him gives his shortcuts. Never switched on by itself. -->
+    <div class="ta-switchrow name-pref">
+      <span>During my shift<small>He stays calm and attentive. Tap him for Find, Prep and Resume instead of Ask.</small></span>
+      <button class="ta-switch is-calm" id="smileyShiftSwitch" type="button" role="switch" aria-checked="false" aria-label="During my shift" onclick="setShiftMode(this.getAttribute('aria-checked') !== 'true')"></button>
     </div>
     <button type="button" class="ds-mem-row" onclick="openMemory()"><span>What Dr. Smiley remembers<small>On this device: language, answer length, study focus, practice</small></span><span aria-hidden="true">›</span></button>
     <div class="modal-actions">
@@ -12596,6 +12636,12 @@ function guideCoachClose(){
   return was;
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && guideCoachEl) guideCoachClose(); });
+document.addEventListener('keydown', e => {
+  // Not an Escape meant for a sheet, search or a text field (they close first, then it reaches here).
+  if(e.key !== 'Escape' || !shiftPanel.isOpen() || document.querySelector('.overlay.show, .gs-overlay.show')) return;
+  if(e.target && e.target.closest && e.target.closest('input, textarea, .overlay, .gs-overlay, .dm-overlay')) return;
+  shiftPanel.close(true);
+});
 window.addEventListener('resize', () => { if(guideCoachEl) guideCoachClose(); });
 
 // "Doctor Prep" — looks up a doctor's specialty via the /api/doctor-research
@@ -14135,6 +14181,13 @@ let drModePref = (() => { try{
   const m = (p && p.mode) || localStorage.getItem('ih_smileyMode');
   return DR_MODES.includes(m) ? m : 'lively';
 }catch(e){ return 'lively'; } })();
+// During my shift (shiftPanel): on only when you switch it on, for the name on this phone.
+let drShiftOn = (() => { try{
+  const who = (localStorage.getItem('ih_myName') || '').trim().toLowerCase() || '_';
+  const mem = JSON.parse(localStorage.getItem('ih_smileyMemory') || 'null');
+  const p = mem && mem.people && mem.people[who] && mem.people[who].prefs;
+  return !!p && p.shift === 'on';
+}catch(e){ return false; } })();
 function drMode(){ return drReduce.matches ? 'still' : drModePref; }
 function drStill(){ return drMode() === 'still'; }
 function setSmileyMode(m){
@@ -14168,6 +14221,8 @@ document.documentElement.classList.toggle('ds-still', drStill());
                   a cheerful one, while the card shows what to do next
      offline      calm: blinks and small eye movements
      appointment  you're in an appointment: focused, blinks only, no effects
+     shift        you switched on During my shift: attentive and composed,
+                  blinks only, no doze, no effects, calm reactions
      resting      nobody has touched the phone for a while: he dozes once
    The first five are tasks (drTask); the last three follow the phone
    (drMindBase). A task's entry plays on whichever Dr. Smiley you can see
@@ -14183,6 +14238,7 @@ const DR_STATES = {
   uncertain:   { idle: 'blinks' },
   offline:     { idle: 'calm' },
   appointment: { idle: 'blinks', slow: true, fx: false },
+  shift:       { idle: 'blinks', slow: true, fx: false },
   resting:     { idle: 'calm' },
 };
 const DR_IDLE_LEVEL = { none: 0, blinks: 1, calm: 2, full: 3 };
@@ -14212,8 +14268,9 @@ const DR_HOLDS = {
 const drMind = { task: null, timer: 0, offline: typeof navigator !== 'undefined' && navigator.onLine === false };
 // The state the phone puts him in when no task is running.
 function drMindBase(){
-  if(drMind.offline) return 'offline';
   if(typeof apptActive === 'function' && apptActive()) return 'appointment';
+  if(drShiftOn) return 'shift';             // attentive through a shift, offline or not
+  if(drMind.offline) return 'offline';
   if(performance.now() - drInput.last > 45000) return 'resting';
   return 'available';
 }
@@ -14285,7 +14342,7 @@ const DR_TONE = {
 };
 function drTone(seq){
   let s = seq;
-  if(drMindBase() === 'appointment' && s in DR_TONE.appointment) s = DR_TONE.appointment[s];
+  if(['appointment', 'shift'].includes(drMindBase()) && s in DR_TONE.appointment) s = DR_TONE.appointment[s];
   if(s && drMode() === 'focused' && s in DR_TONE.focused) s = DR_TONE.focused[s];
   return s;
 }
@@ -17505,6 +17562,8 @@ function setCategory(id, isBack){
   }
   // Dr. Smiley is told which screen you asked him from (askContext).
   if(id === 'ask' && activeCategory !== 'ask') ASK.from = activeCategory;
+  // Going somewhere closes Dr. Smiley's shift shortcuts (Back retraces it).
+  if(activeCategory !== id){ shiftPanel.close(false); shiftPanel.leaving(activeCategory); }
   activeCategory = id;
   if(id === 'chat'){
     // ORDER MATTERS. markChatSeen() moves the marker to the newest message,
@@ -17997,8 +18056,9 @@ function navigateBack(smooth){
   // Same reason as closeAllOverlays: the search panel is the top layer, so
   // Back closes it rather than navigating the screen behind it.
   if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
-  // So is the guide's Show me.
+  // So is the guide's Show me, and Dr. Smiley's shift shortcuts.
   if(guideCoachClose()) return true;
+  if(shiftPanel.close(true)) return true;
   const behavior = smooth ? 'smooth' : 'auto';
 
   // An open overlay is the top layer, so Back closes that first — otherwise
@@ -18065,6 +18125,7 @@ function openNameModal(){
   renderNamePhoto();
   renderNameAccess();
   document.getElementById('smileyFollowSwitch')?.setAttribute('aria-checked', String(smileyFollows()));
+  document.getElementById('smileyShiftSwitch')?.setAttribute('aria-checked', String(drShiftOn));
   smileyModeSync();
   document.getElementById('nameOverlay').classList.add('show');
   if(prefersAutoFocus()) input.focus();
@@ -19542,7 +19603,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .shift-btn, .shift-hint-go, .ds-mode-seg button, .mem-opts button';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -24936,6 +24997,7 @@ const DR_MEM_FIELDS = {
   focus:    { label: 'Study focus', def: '' },
   mode:     { label: 'How he moves', options: [['lively', 'Lively'], ['focused', 'Focused'], ['still', 'Still']], def: 'lively' },
   practice: { label: 'Use my practice record', options: [['on', 'On'], ['off', 'Off']], def: 'off' },
+  shift:    { label: 'During my shift', options: [['on', 'On'], ['off', 'Off']], def: 'off' },
 };
 let drMemSession = null;   // the last thing saved, kept in memory too (used when the phone refuses storage)
 let drMemFailed = false;   // the last read or write didn't reach the phone's storage
@@ -24984,6 +25046,7 @@ function drMemSet(k, v){
   p.prefs = p.prefs || {}; p.prefs[k] = v; p.at = Date.now();
   const saved = drMemStore(m);
   if(k === 'mode' && drModePref !== v){ drModePref = v; drModeChanged(); }
+  if(k === 'shift') shiftChanged();
   return { ok: true, saved };
 }
 function drMemForget(k, name){
@@ -24992,6 +25055,7 @@ function drMemForget(k, name){
   if(mine && (k === 'mode' || k === 'all')) try{ localStorage.removeItem('ih_smileyMode'); }catch(e){}
   const saved = drMemStore(m);
   if(mine && (k === 'mode' || k === 'all') && drModePref !== 'lively'){ drModePref = 'lively'; drModeChanged(); }
+  if(mine && (k === 'shift' || k === 'all')) shiftChanged();
   return saved;
 }
 // Other names with something remembered on this phone.
@@ -25012,6 +25076,7 @@ function drMemNameChanged(before, after){
   if(drMemKey(before) === drMemKey(after)) return '';
   const want = drPref('mode');
   if(drModePref !== want){ drModePref = want; drModeChanged(); }
+  shiftChanged();                       // their own During my shift
   if(ASK.busy) askCancel(true);
   ASK.turns = []; ASK.selected = null; ASK.draft = ''; ASK.convo = askConvoEmpty(); ASK.gen++;
   askSaveWaiting();   // the person before's waiting questions don't go out under the new name
@@ -25185,6 +25250,7 @@ function renderMemory(status){
     <p class="mem-where"><b>On this device</b> · ${name ? 'for ' + escapeHtml(name) : 'no name set on this phone'}</p>
     ${drMemFailed ? `<p class="mem-warn" role="alert">This phone isn’t letting the Hub store anything right now (private browsing or full storage). Changes last until you close the app.</p>` : ''}
     ${row('lang', opts('lang'))}${row('length', opts('length'))}${row('focus', focus)}${row('mode', opts('mode'))}
+    ${row('shift', `<p class="mem-help">Calm and attentive, and tapping him gives Find, Prep and Resume. Only ever on because you switched it on.</p>${opts('shift')}`)}
     ${row('practice', `<p class="mem-help">He can suggest continuing practice you left unfinished, from your own record. Team points aren’t yours alone, so he never counts them.</p>${opts('practice')}`)}
     <p class="mem-status" id="memStatus" role="status">${status ? escapeHtml(status) : ''}</p>
     <p class="mem-note">Kept only on this phone, under the name set here. Not shared with the team, and never patient details. The ones that shape answers (language, length, focus, and your practice counts when on) go with your questions.</p>
@@ -25910,7 +25976,9 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden) smile
 const ICON_PREP = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M9 4h6v3H9zM8.5 12l2.2 2.2L15.5 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PREP = { domainId: null, doctor: '' };
 try{ Object.assign(PREP, JSON.parse(localStorage.getItem('ih_prepLast') || '{}')); }catch(e){}
-function openPrep(){
+// opts.fresh (Dr. Smiley's shift shortcuts): nothing picked in advance; you choose the specialty.
+function openPrep(opts){
+  const fresh = !!(opts && opts.fresh);
   let ov = document.getElementById('prepOverlay');
   if(!ov){
     ov = document.createElement('div');
@@ -25923,19 +25991,21 @@ function openPrep(){
   ov.innerHTML = `<div class="prep-sheet" role="dialog" aria-modal="true" aria-labelledby="prepTitle">
     <h2 id="prepTitle">Where are you heading?</h2>
     <p>Pick the specialty. I’ll pull together what you’ll need.</p>
-    <div class="prep-doms" role="group" aria-label="Specialty">${doms.map(d => `<button type="button" class="prep-dom" data-id="${escapeAttr(d.id)}" aria-pressed="${d.id === PREP.domainId}"><i style="background:${escapeAttr(d.color)}"></i>${escapeHtml(d.name)}</button>`).join('')}</div>
+    <div class="prep-doms" role="group" aria-label="Specialty">${doms.map(d => `<button type="button" class="prep-dom" data-id="${escapeAttr(d.id)}" aria-pressed="${!fresh && d.id === PREP.domainId}"><i style="background:${escapeAttr(d.color)}"></i>${escapeHtml(d.name)}</button>`).join('')}</div>
     <label for="prepDoctor">Doctor (optional)</label>
-    <input id="prepDoctor" type="text" list="prepDoctors" autocomplete="off" enterkeyhint="go" placeholder="e.g. Dr. Andre Goy" value="${escapeAttr(PREP.doctor || '')}">
+    <input id="prepDoctor" type="text" list="prepDoctors" autocomplete="off" enterkeyhint="go" placeholder="e.g. Dr. Andre Goy" value="${escapeAttr(fresh ? '' : PREP.doctor || '')}">
     <datalist id="prepDoctors">${names.map(n => `<option value="${escapeAttr(n)}">`).join('')}</datalist>
-    <button type="button" class="prep-go" id="prepGo" ${PREP.domainId && doms.some(d => d.id === PREP.domainId) ? '' : 'disabled'}>Get my briefing</button>
+    <button type="button" class="prep-go" id="prepGo" ${!fresh && PREP.domainId && doms.some(d => d.id === PREP.domainId) ? '' : 'disabled'}>Get my briefing</button>
   </div>`;
+  let picked = fresh ? null : PREP.domainId;
   ov.querySelectorAll('.prep-dom').forEach(b => b.addEventListener('click', () => {
     ov.querySelectorAll('.prep-dom').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    PREP.domainId = b.dataset.id;
+    picked = b.dataset.id;
     ov.querySelector('#prepGo').disabled = false;
   }));
   const go = () => {
-    if(!PREP.domainId) return;
+    if(!picked) return;
+    PREP.domainId = picked;
     PREP.doctor = ov.querySelector('#prepDoctor').value.trim();
     try{ localStorage.setItem('ih_prepLast', JSON.stringify(PREP)); }catch(e){}
     closePrep();
@@ -26251,6 +26321,188 @@ function smileyModeKey(e){
   setSmileyMode(DR_MODES[(n + DR_MODES.length) % DR_MODES.length]);
   e.currentTarget.querySelector(`[data-mode="${drModePref}"]`)?.focus();
 }
+/* ---------- Dr. Smiley: during my shift ----------
+   An optional mode, switched on in the profile sheet beside How Dr. Smiley
+   moves ("During my shift", remembered for the name on this phone like his
+   mode: ih_smileyMemory 'shift'). Nothing turns it on or off by itself: the
+   Hub knows nothing about schedules, appointments or how anyone feels.
+     - He stays attentive and composed: the 'shift' state (blinks, no doze,
+       no effects, calm reactions), still capped by Lively / Focused / Still
+       and by the phone's reduced motion.
+     - Tapping him (the dock, the Home greeting, the top-bar button) opens
+       his shortcuts instead of Ask: Find a term (global search), Prep (the
+       specialty picker, nothing preselected: you pick), Resume (practice you
+       started and left part-way: askUnfinished), Ask. On a phone they take
+       the tab capsule's place, so they cover nothing the tabs didn't; on a
+       computer they drop down under his button.
+     - Your place is kept: opening and closing them never scrolls or moves
+       you; a sheet opened from them (search, the picker) hides them and they
+       come back when it closes; going somewhere closes them, and Back
+       retraces it as usual (navStack keeps the scroll). With the keyboard up
+       they step aside with the tabs and come back after.
+     - At most one suggestion, and only for a concrete reason: practice you
+       explicitly started and left unfinished. ✕ dismisses it for the rest of
+       the session (sessionStorage); so does acting on it or opening that
+       practice yourself. */
+const SHIFT_HINTS_KEY = 'ih_shiftHints';
+const ICON_RESUME = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.8h3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.5 9.3v5.4l4.3-2.7-4.3-2.7Z" fill="currentColor"/></svg>';
+function setShiftMode(on){
+  const r = drMemSet('shift', on ? 'on' : 'off');
+  if(r.ok && !r.saved) showToast('Couldn’t save on this phone. It stays on until you close the app.');
+}
+function shiftChanged(){
+  drShiftOn = drPref('shift') === 'on';
+  document.getElementById('smileyShiftSwitch')?.setAttribute('aria-checked', String(drShiftOn));
+  if(!drShiftOn) shiftPanel.close(false);
+  drMindChanged();
+  if(typeof smileyRider !== 'undefined') smileyRider.sync();
+}
+// What the Resume shortcut would continue, in words.
+function shiftResumeText(u){
+  if(!u) return '';
+  if(u.kind === 'prep'){ const d = askSpecialties().find(x => x.id === u.id); return d ? `your ${d.name} briefing, card ${u.done + 1} of ${u.total}` : ''; }
+  return u.kind === 'quiz' ? `your quiz, question ${u.done + 1} of ${u.total}` : `Term Review, ${u.done + 1} of ${u.total}`;
+}
+// Tapping Dr. Smiley: his shortcuts during a shift, Ask otherwise.
+function smileyCompanionTap(e){
+  if(!drShiftOn){ openAskHub(); return; }
+  shiftPanel.toggle(!!(e && e.detail === 0));
+}
+window.smileyCompanionTap = smileyCompanionTap;
+const shiftPanel = (() => {
+  const phone = window.matchMedia('(max-width:900px)');
+  let bar = null, hint = null, open = false, hintKey = '';
+  const used = new Set();
+  try{ JSON.parse(sessionStorage.getItem(SHIFT_HINTS_KEY) || '[]').forEach(k => used.add(String(k))); }catch(e){}
+  function remember(key){
+    used.add(key);
+    try{ sessionStorage.setItem(SHIFT_HINTS_KEY, JSON.stringify([...used].slice(-20))); }catch(e){}   // in memory if the phone refuses
+  }
+  function build(){
+    bar = document.createElement('div');
+    bar.id = 'shiftBar'; bar.className = 'shift-bar'; bar.hidden = true;
+    bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', 'Shift shortcuts');
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if(b) act(b.dataset.act); });
+    bar.addEventListener('keydown', e => { if(e.key === 'Escape'){ e.preventDefault(); close(true); } });
+    hint = document.createElement('div');
+    hint.id = 'shiftHint'; hint.className = 'shift-hint'; hint.hidden = true;
+    hint.setAttribute('role', 'status');
+    hint.addEventListener('click', e => {
+      if(e.target.closest('.shift-hint-x')){ remember(hintKey); hideHint(); return; }
+      if(e.target.closest('.shift-hint-go')){ remember(hintKey); hideHint(); resume(); }
+    });
+    document.body.append(bar, hint);
+    // A computer: a click outside the drop-down closes it.
+    document.addEventListener('pointerdown', e => {
+      if(open && !phone.matches && !e.target.closest('#shiftBar, #tgSmiley, .home-wave-icon')) close(false);
+    }, true);
+  }
+  function buttons(){
+    const u = askUnfinished(), what = shiftResumeText(u);
+    const b = (act, label, full, icon, off) => `<button type="button" class="shift-btn" data-act="${act}" aria-label="${escapeAttr(full)}"${off ? ' aria-disabled="true"' : ''}>`
+      + `<span class="shift-icon">${icon}</span><span>${label}</span></button>`;
+    return b('find', 'Find', 'Find a term', ICON_SEARCH)
+      + b('prep', 'Prep', 'Prepare for a specialty', ICON_PREP)
+      + b('resume', 'Resume', what ? 'Resume ' + what : 'Resume: nothing unfinished right now', ICON_RESUME, !what)
+      + b('ask', 'Ask', 'Ask Dr. Smiley', ICON_ASK_TERM);
+  }
+  function triggers(){ return [document.querySelector('.dock-smiley'), document.getElementById('tgSmiley')].filter(Boolean); }
+  function triggerSync(){
+    triggers().forEach(t => {
+      if(drShiftOn){ t.setAttribute('aria-expanded', String(open)); t.setAttribute('aria-label', open ? 'Close shift shortcuts' : 'Shift shortcuts: find, prep, resume, ask'); }
+      else { t.removeAttribute('aria-expanded'); t.setAttribute('aria-label', 'Ask the Hub'); }
+    });
+    const tag = document.querySelector('.dock-smiley-tag');
+    if(tag) tag.textContent = !drShiftOn ? 'Ask' : open ? 'Close' : 'Shift';
+  }
+  function openBar(byKeyboard){
+    if(!bar) build();
+    open = true;
+    bar.innerHTML = buttons();
+    bar.hidden = false;
+    // A computer: under the button you tapped (the top bar's, or the greeting's on Home).
+    if(!phone.matches){
+      const t = [document.getElementById('tgSmiley'), document.querySelector('.home-wave-icon')].find(x => x && x.getClientRects().length && !x.hidden);
+      const r = t ? t.getBoundingClientRect() : null;
+      bar.style.top = Math.round(r ? r.bottom + 9 : 72) + 'px';
+      bar.style.left = r ? Math.round(Math.max(13, Math.min(innerWidth - 253, r.right - 240))) + 'px' : '';
+    }else{ bar.style.top = ''; bar.style.left = ''; }
+    document.body.classList.add('shift-open');
+    if(typeof dockOpen === 'function') dockOpen();          // the capsule comes back to full size first
+    hideHint();
+    triggerSync();
+    if(byKeyboard) bar.querySelector('.shift-btn')?.focus();
+  }
+  function close(restoreFocus){
+    if(!open) return false;
+    open = false;
+    const had = bar && bar.contains(document.activeElement);
+    if(bar) bar.hidden = true;
+    document.body.classList.remove('shift-open');
+    triggerSync();
+    if(restoreFocus || had){
+      const t = triggers().find(x => x.getClientRects().length && getComputedStyle(x).visibility !== 'hidden');
+      if(t) t.focus({ preventScroll: true });
+    }
+    sync();
+    return true;
+  }
+  function toggle(byKeyboard){ open ? close(true) : openBar(byKeyboard); }
+  async function resume(){
+    const u = askUnfinished();
+    if(!u){ showToast('Nothing unfinished right now.'); return; }
+    remember(u.kind + ':' + (u.id || u.kind));
+    close(false);
+    const res = await ASK_RUN['continue_' + u.kind]({ target: u.kind === 'prep' ? 'spec:' + u.id : u.kind });
+    if(res && !res.ok) showToast(res.why);
+  }
+  function act(a){
+    if(a === 'find'){ openGlobalSearch(); return; }                   // the shortcuts wait behind it
+    if(a === 'prep'){ openPrep({ fresh: true }); return; }             // you pick the specialty
+    if(a === 'resume'){ resume(); return; }
+    if(a === 'ask'){ close(false); openAskHub(); }
+  }
+  // The one suggestion: practice you started and left part-way, once a session.
+  function hintReason(){
+    if(!drShiftOn || open || apptActive()) return null;
+    const u = askUnfinished();
+    if(!u) return null;
+    const key = u.kind + ':' + (u.id || u.kind);
+    if(used.has(key)) return null;
+    // You're on it already: that counts as seen.
+    const here = u.kind === 'prep' ? activeCategory === 'prep' && PREP.domainId === u.id : activeCategory === (u.kind === 'quiz' ? 'practice' : 'review');
+    if(here){ remember(key); return null; }
+    return { key, u };
+  }
+  function hideHint(){ if(hint){ hint.hidden = true; hintKey = ''; } }
+  function sync(){
+    triggerSync();
+    if(open && bar && !bar.hidden){
+      // Resume's state can change while they're open (you finished it elsewhere).
+      const r = bar.querySelector('[data-act="resume"]'), on = !!askUnfinished();
+      if(r && (r.getAttribute('aria-disabled') === 'true') === on) bar.innerHTML = buttons();
+    }
+    const why = hintReason();
+    if(!why){ hideHint(); return; }
+    if(!hint) build();
+    if(hintKey === why.key && !hint.hidden) return;
+    hintKey = why.key;
+    hint.innerHTML = `<p>Pick up ${escapeHtml(shiftResumeText(why.u))}?</p>
+      <div class="shift-hint-acts"><button type="button" class="shift-hint-go">Resume</button>
+      <button type="button" class="shift-hint-x" aria-label="Dismiss this suggestion">✕</button></div>`;
+    hint.hidden = false;
+  }
+  // Leaving the practice's own screen with it unfinished: you know where it
+  // is, so that counts as seen too.
+  function leaving(cat){
+    const u = askUnfinished();
+    if(!u) return;
+    const there = u.kind === 'prep' ? cat === 'prep' && PREP.domainId === u.id : cat === (u.kind === 'quiz' ? 'practice' : 'review');
+    if(there) remember(u.kind + ':' + (u.id || u.kind));
+  }
+  return { toggle, close, sync, leaving, isOpen: () => open, hintShown: () => !!hint && !hint.hidden, used };
+})();
+
 const smileyRider = (() => {
   /* On a phone he lives in the dock: his own round button beside the tab
      capsule (.dock-smiley; looks in home-polish.css). Tapping him opens Ask
@@ -26273,7 +26525,8 @@ const smileyRider = (() => {
     btn.addEventListener('click', e => {
       if(petted()){ e.preventDefault(); return; }
       btn.classList.add('is-pressed');
-      setTimeout(() => { btn.classList.remove('is-pressed'); openAskHub(); }, 140);
+      const byKeyboard = e.detail === 0;
+      setTimeout(() => { btn.classList.remove('is-pressed'); smileyCompanionTap({ detail: byKeyboard ? 0 : 1 }); }, 140);
     });
     document.body.append(btn);
     // Sheets, search and the keyboard come and go without a repaint; check
@@ -26385,6 +26638,7 @@ const smileyRider = (() => {
       topBar();
       smileyDressAll();
       place();
+      shiftPanel.sync();
     }catch(e){ console.warn('Dr. Smiley companion:', e); }
   }
   window.addEventListener('resize', () => { if(btn) requestAnimationFrame(sync); });

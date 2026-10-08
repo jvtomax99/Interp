@@ -364,6 +364,17 @@
   body.dock-mini .dock-smiley{width:54px;height:54px;}
   /* The Ask tag stays when the bar is tucked too (Jose). */
 
+  /* During my shift: his shortcuts take the capsule's place, same size and
+     spot, so they cover nothing the tabs didn't (shiftPanel in index.html). */
+  .shift-bar{position:fixed;z-index:60;left:14px;right:14px;bottom:var(--dock-bottom);height:58px;padding:4px;display:flex;gap:2px;border-radius:999px;
+    background:var(--glass-bg);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:1px solid var(--glass-edge);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);}
+  body.dock-has-smiley .shift-bar{right:calc(14px + 58px + 9px);}
+  body.shift-open .tabbar{visibility:hidden;}
+  .shift-btn{flex:1 1 0;min-width:0;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:999px;
+    color:var(--ink);font:650 10.5px/1.1 var(--sans);}
+  .shift-btn:active,.shift-btn.is-pressed{background:color-mix(in srgb,var(--accent) 12%,transparent);}
+
   /* He steps aside whenever the bar does: typing, sheets, search. */
   body.kb-open .dock-smiley,body:has(.overlay.show) .dock-smiley,body:has(.gs-overlay.show) .dock-smiley,body:has(.dm-overlay.show) .dock-smiley{visibility:hidden;}
 }
