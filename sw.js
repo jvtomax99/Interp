@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v201-name-light-ink';
+const CACHE_VERSION = 'interpreter-hub-v202-app-code-fresh';
 const PRECACHE = [
   './',
   './index.html',
@@ -163,6 +163,31 @@ self.addEventListener('fetch', event => {
         })
         .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
     );
+    return;
+  }
+
+  /* The app's own code beside the page (Home behaviour and its styles, the
+   * pins wiring): network-first like the page, so a deploy's page and its
+   * Home code always arrive together. As stale-while-revalidate these were
+   * one open behind: the first open after a deploy ran the new page with the
+   * old Home code. Offline, or the network taking over 3 s: the saved copy. */
+  if (/\/(?:home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+    event.respondWith((async () => {
+      const network = fetch(req).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      });
+      network.catch(() => {});
+      try {
+        return await Promise.race([network, new Promise((_, no) => setTimeout(() => no(new Error('slow')), 3000))]);
+      } catch (e) {
+        const hit = await caches.match(req);
+        return hit || network;
+      }
+    })());
     return;
   }
 
