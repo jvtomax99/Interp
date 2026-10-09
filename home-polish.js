@@ -943,7 +943,10 @@
       lens.forEach((L,i)=>{const d=Math.max(130,drawMs*L/sum);phases.push({i,start:t0,dur:d});t0+=d+(i<lens.length-1?LIFT:0);});
       const total=t0, ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
       paths.forEach((p,i)=>{p.style.strokeDasharray=`${lens[i]} ${lens[i]+1}`;p.style.strokeDashoffset=lens[i];});
-      let raf=0, lastSpark=0, start=0, done=false;
+      // Its own clock: each frame moves it on by at most 64 ms, so when the
+      // phone is busy opening the app (a frame late by a second or more) the
+      // pen carries on from where it was instead of jumping to the end.
+      let raf=0, lastSpark=0, clock=from||0, last=0, done=false;
       const spark=(x,y)=>{
         const c=el('circle',{cx:x+(Math.random()-.5)*size*.06,cy:y+(Math.random()-.5)*size*.06,r:size*(.012+Math.random()*.016),fill:'#a7b3ff'},sparks);
         if(!c.animate){c.remove();return;}
@@ -959,7 +962,7 @@
       let dx=0, dy=0;
       function tick(now){
         if(!svg.isConnected||document.hidden||!name.isConnected)return stop();
-        if(!start)start=now-(from||0);const tm=now-start;
+        clock+=last?Math.min(64,Math.max(0,now-last)):0;last=now;const tm=clock;
         // the name moved inside its row (he stepped beside a longer name): follow it
         const nr=name.getBoundingClientRect(), rr2=row.getBoundingClientRect(), mx=nr.left-rr2.left-at.x, my=nr.top-rr2.top-at.y;
         if(Math.abs(mx-dx)>.5||Math.abs(my-dy)>.5){dx=mx;dy=my;svg.style.transform=`translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;}
@@ -983,7 +986,7 @@
         }
         raf=requestAnimationFrame(tick);
       }
-      run={stop,txt,family,size,strokes,elapsed:()=>start?performance.now()-start:(from||0)};
+      run={stop,txt,family,size,strokes,elapsed:()=>clock};
       // a breath after Dr. Smiley starts to appear (none when carrying on)
       if(from)raf=requestAnimationFrame(tick);else setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
     }
