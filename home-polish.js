@@ -748,7 +748,7 @@
      ball; at the end the real name is back. Reduced motion, Still, a hidden
      page or anything going wrong: no pen, the name is simply there. */
   const namePen=(()=>{
-    const KEY='ih_penPath', VER=1, NS='http://www.w3.org/2000/svg';
+    const KEY='ih_penPath', VER=2, NS='http://www.w3.org/2000/svg';
     let used=false, run=null, held=null, safety=0, waiting=null;
     // The pen's path through a name, in em units from the start of its baseline:
     // [[x,y],...] per stroke, in writing order. null when it can't be worked out.
@@ -839,7 +839,7 @@
           while(todo.size){let u=-1,du=1e9;for(const q of todo){const d=dist.get(q);if(d<du){du=d;u=q;}}todo.delete(u);
             for(const ed of H.get(u)||[]){const nd=du+ed.w;if(nd<(dist.has(ed.to)?dist.get(ed.to):1e9)){dist.set(ed.to,nd);prev.set(ed.to,{from:u,k:ed.k});todo.add(ed.to);}}}
           const reach=tg.filter(t=>dist.has(t)).sort((a,z)=>dist.get(a)-dist.get(z));
-          if(reach.length&&dist.get(reach[0])<.6*S){const t=reach[0], route=[];let q=t;while(q!==cur){const pv=prev.get(q);route.unshift(pv);q=pv.from;}
+          if(reach.length&&dist.get(reach[0])<.12*S){const t=reach[0], route=[];let q=t;while(q!==cur){const pv=prev.get(q);route.unshift(pv);q=pv.from;}
             for(const st of route){const e=Ec[st.k], p=e[0]===st.from?e:e.slice().reverse();for(let q2=1;q2<p.length;q2++)stroke.push(p[q2]);}
             cur=t;}
           else{strokes.push(stroke);cur=tg.reduce((a,t)=>Math.hypot(X[t]-X[cur],Y[t]-Y[cur])<Math.hypot(X[a]-X[cur],Y[a]-Y[cur])?t:a);stroke=[cur];}
@@ -926,7 +926,21 @@
       const mask=el('mask',{id:'hnpInk',maskUnits:'userSpaceOnUse',x:-W,y:-H,width:W*3,height:H*3},defs);
       el('rect',{x:-W,y:-H,width:W*3,height:H*3,fill:'#000'},mask);
       const band=el('g',{fill:'none',stroke:'#fff','stroke-linecap':'round','stroke-linejoin':'round','stroke-width':size*.11},mask);
-      const paths=strokes.map(s=>el('path',{d:'M'+s.map(([x,y])=>(ox+x*size).toFixed(2)+' '+(oy+y*size).toFixed(2)).join('L')},band));
+      // The ink is drawn from the very points the light is placed on, a little
+      // more each frame, so the two can't drift apart (SVG dashes did, on iPhone).
+      const pts=strokes.map(s=>s.map(([x,y])=>[ox+x*size,oy+y*size]));
+      const cum=pts.map(p=>{const c=[0];for(let i=1;i<p.length;i++)c.push(c[i-1]+Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]));return c;});
+      const paths=pts.map(()=>el('path',{d:''},band)), drawn=pts.map(()=>-1);
+      // the point a distance along stroke i, and the ink up to it
+      const pointAt=(i,dist)=>{const p=pts[i],c=cum[i];let lo=1,hi=c.length-1;
+        if(dist>=c[hi])return{x:p[hi][0],y:p[hi][1],k:hi,f:1};
+        while(lo<hi){const m=(lo+hi)>>1;if(c[m]<dist)lo=m+1;else hi=m;}
+        const f=(dist-c[lo-1])/((c[lo]-c[lo-1])||1);return{x:p[lo-1][0]+(p[lo][0]-p[lo-1][0])*f,y:p[lo-1][1]+(p[lo][1]-p[lo-1][1])*f,k:lo,f};};
+      const inkTo=(i,dist)=>{if(dist===drawn[i])return;drawn[i]=dist;
+        if(dist<=0){paths[i].setAttribute('d','');return;}
+        const q=pointAt(i,dist),p=pts[i];let d='M'+p[0][0].toFixed(1)+' '+p[0][1].toFixed(1);
+        for(let j=1;j<q.k;j++)d+='L'+p[j][0].toFixed(1)+' '+p[j][1].toFixed(1);
+        paths[i].setAttribute('d',d+'L'+q.x.toFixed(1)+' '+q.y.toFixed(1));};
       const full=el('rect',{x:-W,y:-H,width:W*3,height:H*3,fill:'#fff',opacity:0},mask);
       const ink=el('g',{mask:'url(#hnpInk)'},el('g',{filter:'url(#hnpShadow)'},svg));
       const t=el('text',{x:ox,y:oy,'font-size':size,fill:'#fff'},ink);t.style.fontFamily=family;t.textContent=txt;
@@ -935,14 +949,19 @@
       el('circle',{r:size*.1,fill:'#3646b8',opacity:.5,filter:'url(#hnpGlow)'},ball);
       el('circle',{r:size*.048,fill:'#fff'},ball);
       row.appendChild(svg);
-      // timing: about 1.5 s of ink for "José", never more than 3 s, with a
-      // short pen lift between strokes (the speed Jose picked)
-      const lens=paths.map(p=>p.getTotalLength()), sum=lens.reduce((a,b)=>a+b,0)||1, em=sum/size;
-      const drawMs=Math.min(3000,1500*Math.pow(em/7.63,.6)), LIFT=150;
-      const phases=[];let t0=0;
-      lens.forEach((L,i)=>{const d=Math.max(130,drawMs*L/sum);phases.push({i,start:t0,dur:d});t0+=d+(i<lens.length-1?LIFT:0);});
+      // timing: about 1.5 s of ink for "José", never more than 3 s (the speed
+      // Jose picked). Between strokes the pen lifts: the light glides to the
+      // next one, dimming only for a longer hop (to an accent or an i-dot);
+      // all the lifts together take under a second.
+      const lens=cum.map(c=>c[c.length-1]), sum=lens.reduce((a,b)=>a+b,0)||1, em=sum/size;
+      const drawMs=Math.min(3000,1500*Math.pow(em/7.63,.6));
+      const gaps=pts.slice(1).map((p,i)=>{const a=pts[i][pts[i].length-1],b=p[0],dist=Math.hypot(b[0]-a[0],b[1]-a[1]);
+        return{a,b,dur:Math.min(160,40+dist/size*120),dip:Math.min(.85,dist/(size*.6))};});
+      const gapSum=gaps.reduce((t,g)=>t+g.dur,0), gk=gapSum>900?900/gapSum:1;
+      const phases=[], lifts=[];let t0=0;
+      lens.forEach((L,i)=>{const d=Math.max(60,drawMs*L/sum);phases.push({i,start:t0,dur:d});t0+=d;
+        if(i<gaps.length){const g=gaps[i];lifts.push({...g,start:t0,dur:g.dur*gk});t0+=g.dur*gk;}});
       const total=t0, ease=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
-      paths.forEach((p,i)=>{p.style.strokeDasharray=`${lens[i]} ${lens[i]+1}`;p.style.strokeDashoffset=lens[i];});
       // Its own clock: each frame moves it on by at most 64 ms, so when the
       // phone is busy opening the app (a frame late by a second or more) the
       // pen carries on from where it was instead of jumping to the end.
@@ -966,18 +985,23 @@
         // the name moved inside its row (he stepped beside a longer name): follow it
         const nr=name.getBoundingClientRect(), rr2=row.getBoundingClientRect(), mx=nr.left-rr2.left-at.x, my=nr.top-rr2.top-at.y;
         if(Math.abs(mx-dx)>.5||Math.abs(my-dy)>.5){dx=mx;dy=my;svg.style.transform=`translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;}
-        for(const ph of phases){const u=Math.min(1,Math.max(0,(tm-ph.start)/ph.dur));paths[ph.i].style.strokeDashoffset=lens[ph.i]*(1-ease(u));}
+        for(const ph of phases){const u=Math.min(1,Math.max(0,(tm-ph.start)/ph.dur));inkTo(ph.i,lens[ph.i]*ease(u));}
         const ph=phases.find(p=>tm>=p.start&&tm<p.start+p.dur);
+        const lf=!ph&&lifts.find(l=>tm>=l.start&&tm<l.start+l.dur);
         if(ph){
-          const u=(tm-ph.start)/ph.dur, pt=paths[ph.i].getPointAtLength(lens[ph.i]*ease(u));
-          const edge=Math.min(1,(tm-ph.start)/80,(ph.start+ph.dur-tm)/80);
+          const u=(tm-ph.start)/ph.dur, pt=pointAt(ph.i,lens[ph.i]*ease(u));
           ball.setAttribute('transform',`translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`);
-          ball.setAttribute('opacity',(ph.i===phases.length-1?Math.min(1,(tm-ph.start)/80):edge).toFixed(3));
+          ball.setAttribute('opacity',(ph.i===0?Math.min(1,(tm-ph.start)/80):1).toFixed(3));
           if(tm-lastSpark>30){spark(pt.x,pt.y);lastSpark=tm;}
+        }else if(lf){
+          // the pen lifted: glide to the next stroke, dimming for a longer hop
+          const u=(tm-lf.start)/lf.dur, e=ease(u);
+          ball.setAttribute('transform',`translate(${(lf.a[0]+(lf.b[0]-lf.a[0])*e).toFixed(2)} ${(lf.a[1]+(lf.b[1]-lf.a[1])*e).toFixed(2)})`);
+          ball.setAttribute('opacity',(1-lf.dip*Math.sin(Math.PI*u)).toFixed(3));
         }else ball.setAttribute('opacity',0);
         if(tm>=total){
           // the last of the ink settles in and the light flares out
-          const last=phases[phases.length-1], pt=paths[last.i].getPointAtLength(lens[last.i]);
+          const last=phases[phases.length-1], pt=pointAt(last.i,lens[last.i]);
           ball.setAttribute('transform',`translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`);ball.setAttribute('opacity',1);
           if(full.animate)full.animate([{opacity:0},{opacity:1}],{duration:380,fill:'forwards'});else full.setAttribute('opacity',1);
           const inner=el('g',{},ball);while(ball.firstChild!==inner)inner.appendChild(ball.firstChild);
