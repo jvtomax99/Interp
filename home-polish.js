@@ -312,7 +312,7 @@
     }
     const hero = button.closest('.home-greeting');
     if(!hero){namePen.release();return;}
-    namePen.start(button);
+    if(!resume)namePen.start(button);
     const art = button.querySelector('.home-wave-pin');
     const faceSvg = button.querySelector('.home-face');
     const halo = button.querySelector('.home-wave-halo');
@@ -749,7 +749,7 @@
      page or anything going wrong: no pen, the name is simply there. */
   const namePen=(()=>{
     const KEY='ih_penPath', VER=2, NS='http://www.w3.org/2000/svg';
-    let used=false, run=null, held=null, safety=0, waiting=null;
+    let lastTxt=null, run=null, held=null, safety=0, waiting=null;
     // The pen's path through a name, in em units from the start of its baseline:
     // [[x,y],...] per stroke, in writing order. null when it can't be worked out.
     function penPathOf(txt,family){
@@ -866,17 +866,21 @@
     const show=name=>{if(name)name.classList.remove('is-penning');};
     // Before the hello: keep the name back so it can be written, never longer than 6 s.
     function hold(name){
-      if(used||!name||still())return;
+      if(run||waiting||!name||still())return;
       held=name;name.classList.add('is-penning');
       clearTimeout(safety);safety=setTimeout(()=>{if(!run)show(held);},6000);
     }
     function release(){clearTimeout(safety);if(waiting){const w=waiting;waiting=null;show(w.name);}if(run)run.stop();else show(held);held=null;}
+    /* Write the name: with every hello (the app opening, or coming back to
+       it, which replays the hello), and when the name itself changes. */
     function start(button){
       const name=button&&button.parentElement&&button.parentElement.querySelector('.home-greeting-name');
-      if(used||!name||!name.classList.contains('is-penning'))return;
-      used=true;clearTimeout(safety);
+      if(!name||run||waiting)return;
+      clearTimeout(safety);
       if(still()||document.hidden){show(name);return;}
+      name.classList.add('is-penning');
       const txt=name.textContent.trim(), cs=getComputedStyle(name), family=cs.fontFamily, size=parseFloat(cs.fontSize);
+      lastTxt=txt;
       const w=waiting={name,txt};
       const fail=()=>{if(waiting===w)waiting=null;run=null;show(w.name);};
       const fontOk=document.fonts&&document.fonts.load?Promise.race([document.fonts.load(`400 ${size}px ${family}`,txt),new Promise(r=>setTimeout(r,1500))]):Promise.resolve();
@@ -1014,7 +1018,9 @@
       // a breath after Dr. Smiley starts to appear (none when carrying on)
       if(from)raf=requestAnimationFrame(tick);else setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
     }
-    return {hold,start,release,adopt,get busy(){return !!(run||waiting);}};
+    // a greeting showing a different name from the one last written (set or changed since)
+    const changed=name=>!!name&&lastTxt!==null&&name.textContent.trim()!==lastTxt;
+    return {hold,start,release,adopt,changed,get busy(){return !!(run||waiting);}};
   })();
 
   window.initHomeGreeting = function(content){
@@ -1072,6 +1078,7 @@
     keepQuoteEnd(wave.closest('.home-greeting-text'));
     if(namePen.busy)namePen.adopt(name);
     else if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
+    else if(namePen.changed(name))namePen.start(wave);
     fitWave(wave);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
     // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
