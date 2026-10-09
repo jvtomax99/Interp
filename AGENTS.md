@@ -85,8 +85,9 @@ places move him back with `translate` or offsets after scaling; a scale
 without that pushes him up. In the greeting he has one fixed place, whatever
 the name (block "Dr. Smiley's own place" at the end of `home-polish.css`):
 on a phone the name has the line under the greeting to itself and he stands
-under it at the right edge, his thought cloud opening to his left; on a
-computer he is at the right end of the name's line. He is never resized
+under it near the right edge (`--hw-left`, 48px in), his thought cloud
+opening to his left; on a
+computer he is 48px in from the right end of the name's line. He is never resized
 for a name: `fitWave` in `home-polish.js` shrinks a name too wide for its
 line instead.
 

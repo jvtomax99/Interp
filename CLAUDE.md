@@ -393,8 +393,9 @@ lost concurrent edits. Do not reintroduce that.
   "Dr. Smiley's own place", end of `home-polish.css`; Jose's call): on a
   phone the name has the line under "Good morning" to itself (`--hw-line`,
   so a long name's smaller face sits on the same baseline) and he stands
-  under it at the right edge, his thought cloud opening to his left
-  (`createThought`, `is-left`); on a computer he is at the right end of the
+  under it near the right edge (`--hw-left`: 48px in, Jose's pick B, clear
+  of the lamp post), his thought cloud opening to his left
+  (`createThought`, `is-left`); on a computer he is 48px in from the right end of the
   name's line, the cloud to his right. He is never resized for a name:
   `fitWave` shrinks a name too wide for its line instead.
 - **The Home banner photo is set per mode** (the block "Hello banner photo:

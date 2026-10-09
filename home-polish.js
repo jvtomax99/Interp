@@ -36,7 +36,7 @@
   const cloudShapes='<rect x="14" y="34" width="112" height="36" rx="18"/>'+CLOUD_BUMPS.map(b=>`<circle cx="${b[0]}" cy="${b[1]}" r="${b[2]}"/>`).join('');
   const CLOUD_DOTS=[{x:-15,y:37,r:3.2},{x:-5,y:27,r:5}];
   // How far below his top a cloud opened to his left sits: level with his face, clear of the name above.
-  const LEFT_DROP=14;
+  const LEFT_DROP=22;
   const CLOUD_SPARKS=[[8,8],[132,14],[124,74],[58,-4]];
   const CLOUD_MARKS=[[4,10],[136,6],[128,78],[64,-10],[100,-8]];
   let cloudSeq=0;

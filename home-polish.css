@@ -1302,6 +1302,11 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
 @media (min-width:901px){#content.is-home .home-greeting-text{--hw-line:95px;}}
 #content.is-home .home-greeting-name{grid-column:1 / -1;grid-row:1;align-self:end;white-space:nowrap;}
 #content.is-home .home-wave-icon{grid-column:2;grid-row:2;margin:0 0 -6px;}
+/* --hw-left: how far in from the right edge he stands (Jose picked B, 48px:
+   clear of the lamp post, still at the side). His Ask badge, lanyard and
+   thought cloud all follow him. */
+#content.is-home .home-greeting-text{--hw-left:48px;}
+#content.is-home .home-wave-icon{left:calc(-1 * var(--hw-left,0px));}
 /* A computer has the width and not the height: the name and he share one
    line, he at its right end (the same place for every name; the column is
    wide enough for any name beside him), and the cloud opens to his right. */
