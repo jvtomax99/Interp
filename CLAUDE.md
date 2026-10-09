@@ -389,8 +389,14 @@ lost concurrent edits. Do not reintroduce that.
   everything is still drawn at the old size and scaled. His sway pins the
   pivot (`smileySway`: 50% 92% dock, 50% 85% Home), so a scale must be
   moved back (dock: the bob's left/top; Home: `translate`), or he drifts
-  up. `fitWave` (`home-polish.js`) shrinks the greeting one only as far as
-  a long first name needs to stay on one line.
+  up. In the greeting he has one fixed place whatever the name (block
+  "Dr. Smiley's own place", end of `home-polish.css`; Jose's call): on a
+  phone the name has the line under "Good morning" to itself (`--hw-line`,
+  so a long name's smaller face sits on the same baseline) and he stands
+  under it at the right edge, his thought cloud opening to his left
+  (`createThought`, `is-left`); on a computer he is at the right end of the
+  name's line, the cloud to his right. He is never resized for a name:
+  `fitWave` shrinks a name too wide for its line instead.
 - **The Home banner photo is set per mode** (the block "Hello banner photo:
   tuned per mode" at the end of `home-polish.css`). Jose's brief: tree
   prominent, at least half the Hackensack sign readable and never behind
@@ -472,8 +478,8 @@ answers, review lines). The Home hello banner is the one exception, Jose's
 pick ("style 8"): the name in Parisienne, the quote in Lora italic, the author
 in small Inter capitals behind a short rule, over two soft local shadings
 (never a card). Block "Hello banner lettering" at the end of
-`home-polish.css`; `keepQuoteEnd` (no lone last word) and `fitWave` (a script
-name too wide to sit centred moves beside Dr. Smiley) in `home-polish.js`.
+`home-polish.css`; `keepQuoteEnd` (no lone last word) and `fitWave` (a name
+too wide for its line shrinks; Dr. Smiley never moves) in `home-polish.js`.
 Don't use those two faces anywhere else. The first hello after the app
 opens has the name written by a small navy ball of light (`namePen` in
 `home-polish.js`, Jose's pick "look A"): the pen path is worked out on the

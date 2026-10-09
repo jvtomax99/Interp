@@ -1283,3 +1283,31 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    invisible; the SVG copy being written sits over it and takes no taps. */
 #content.is-home .home-greeting-name.is-penning{color:transparent;text-shadow:none;}
 #content.is-home .home-name-pen{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:1;}
+
+/* ---------- Hello: Dr. Smiley's own place ----------
+   Jose: keep Dr. Smiley always in the same position, whatever the name.
+   The name has the line under "Good morning" to itself, the full width; he
+   stands on the line below it at the right edge, always at his full size
+   (fitWave in home-polish.js shrinks a name that is too wide, never him).
+   The heart line runs under the name, beside him, and his thought cloud
+   opens to his left (createThought). Same selectors as the rules above, so
+   nothing here outranks a press or focus state. */
+#content.is-home .home-greeting-name-row,
+#content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));grid-template-rows:var(--hw-line) auto;gap:0;margin-top:9px;}
+/* --hw-line: the name's line, as tall as a full-size name (font size x 1.18),
+   so a long name in the smaller face, or one fitWave shrank, sits on the
+   same baseline and he never moves up. */
+#content.is-home .home-greeting-text{--hw-line:66px;}
+@media (max-width:365px){#content.is-home .home-greeting-text{--hw-line:59px;}}
+@media (min-width:901px){#content.is-home .home-greeting-text{--hw-line:95px;}}
+#content.is-home .home-greeting-name{grid-column:1 / -1;grid-row:1;align-self:end;white-space:nowrap;}
+#content.is-home .home-wave-icon{grid-column:2;grid-row:2;margin:0 0 -6px;}
+/* A computer has the width and not the height: the name and he share one
+   line, he at its right end (the same place for every name; the column is
+   wide enough for any name beside him), and the cloud opens to his right. */
+@media (min-width:901px){
+  #content.is-home .home-greeting-name-row,
+  #content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}
+  #content.is-home .home-greeting-name{grid-column:1;}
+  #content.is-home .home-wave-icon{grid-row:1;align-self:center;margin:-6px 0;}
+}

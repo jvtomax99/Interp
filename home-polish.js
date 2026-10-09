@@ -35,6 +35,8 @@
   const CLOUD_BUMPS=[[26,46,19],[46,30,22],[72,24,25],[99,31,21],[117,47,16],[96,56,19],[64,59,20],[34,58,15]];
   const cloudShapes='<rect x="14" y="34" width="112" height="36" rx="18"/>'+CLOUD_BUMPS.map(b=>`<circle cx="${b[0]}" cy="${b[1]}" r="${b[2]}"/>`).join('');
   const CLOUD_DOTS=[{x:-15,y:37,r:3.2},{x:-5,y:27,r:5}];
+  // How far below his top a cloud opened to his left sits: level with his face, clear of the name above.
+  const LEFT_DROP=14;
   const CLOUD_SPARKS=[[8,8],[132,14],[124,74],[58,-4]];
   const CLOUD_MARKS=[[4,10],[136,6],[128,78],[64,-10],[100,-8]];
   let cloudSeq=0;
@@ -81,16 +83,23 @@
     // zooms out. On a narrow phone (iPhone SE) the clamp alone would put the
     // cloud over the smiley, so it starts just past the face and shrinks to
     // fit -- but only when 75% or more fits there.
-    // When the name sits beside him (on a phone, almost every name in the
-    // script face) he is at the right edge and there is no room: the cloud
-    // goes above him instead, its dots coming down to his head, a little
-    // smaller if the banner needs it. Only if even that can't fit does it
-    // stay clamped over him, as it used to.
+    // On a phone he stands at the right edge, under the name (his own
+    // place, home-polish.css), so there is no room: the cloud opens to his
+    // left instead, beside his face, in the space under the name, its dots
+    // trailing to his cheek. If that can't fit either, it goes above him,
+    // a little smaller if the banner needs it, and only then does it stay
+    // clamped over him, as it used to.
     const CLOUD_W=150,room=document.documentElement.clientWidth-4;
     let left=Math.min(b.left+88,room-CLOUD_W), top=b.top-10;
     let dotsAt=CLOUD_DOTS, grow0=[20,64];
     const fit=(room-b.right-2)/CLOUD_W;
     if(left<b.right+2&&fit>=.75){left=b.right+2;bubble.style.transformOrigin='0 50%';bubble.style.scale=Math.min(1,fit).toFixed(3);}
+    else if(left<b.right+2&&b.left-158>=8){
+      // mirrored: dots on the cloud's right, growing from its right side
+      left=b.left-158;top=b.top+LEFT_DROP;
+      dotsAt=CLOUD_DOTS.map(d=>({x:140-d.x,y:d.y,r:d.r}));grow0=[120,64];
+      bubble.classList.add('is-left');
+    }
     else if(left<b.right+2){
       // 98px from the bubble's top to the last dot; the face's top must stay clear
       const hr=hero.getBoundingClientRect(), sc=Math.min(1,(b.top-4-hr.top)/98);
@@ -1106,7 +1115,6 @@
     pin.append(tag);
     askBadge.attach(wave);
     const name=wave.parentElement.querySelector('.home-greeting-name');
-    if(name && name.textContent.trim().length>4)wave.parentElement.classList.add('home-wave-wide-name');
     keepQuoteEnd(wave.closest('.home-greeting-text'));
     if(namePen.busy)namePen.adopt(name);
     else if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
@@ -1170,26 +1178,21 @@
     if(i>0)tn.data=s.slice(0,i)+'\u00a0'+s.slice(i+1);
   }
   function fitWave(wave){fitWave0(wave);heartline.place();}
+  // He keeps his own place and size (home-polish.css, "Dr. Smiley's own
+  // place"); the name has the line above him to itself. A name too wide for
+  // that line, even in the smaller face long names get, shrinks to fit
+  // rather than wrapping or pushing him.
   function fitWave0(wave){
     const text=wave.closest('.home-greeting-text'),row=wave.parentElement,name=row&&row.querySelector('.home-greeting-name');
     if(!text||!name)return;
     text.style.removeProperty('--hw-k');
-    const size=parseFloat(getComputedStyle(text).getPropertyValue('--hw-size'))||1;
+    name.style.removeProperty('font-size');
     const ws=name.style.whiteSpace;name.style.whiteSpace='nowrap';
     const r=document.createRange();r.selectNodeContents(name);
-    const need=Math.ceil(r.getBoundingClientRect().width)+1;
+    // 12px spare: a script letter's swash reaches past its own width.
+    const need=Math.ceil(r.getBoundingClientRect().width)+12,room=row.clientWidth;
     name.style.whiteSpace=ws;
-    // A short name sits centred, in a column on each side of him; if it is
-    // too wide for that column at his size (a wide or script face), it
-    // moves beside him like a long name does, rather than shrinking him.
-    // 12px spare: his ring reaches past his button, and a script letter's
-    // swash past its own width.
-    if(!row.classList.contains('home-wave-wide-name')&&need+12>(row.clientWidth-64*Math.max(1,size))/2)row.classList.add('home-wave-wide-name');
-    if(size<=1)return;
-    const wide=row.classList.contains('home-wave-wide-name'),gap=parseFloat(getComputedStyle(row).columnGap)||0;
-    // Beside him (long names): name, gap, him. Centred: him between two equal columns.
-    const fit=wide?(row.clientWidth-gap-need)/64:(row.clientWidth-2*need)/64;
-    if(fit<size)text.style.setProperty('--hw-k',Math.max(1,fit).toFixed(3));
+    if(need>room)name.style.fontSize=Math.floor((parseFloat(getComputedStyle(name).fontSize)||56)*room/need)+'px';
   }
   let fitQueued=0;
   window.addEventListener('resize',()=>{

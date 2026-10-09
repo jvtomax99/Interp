@@ -82,8 +82,13 @@ drawn for that old size and scaled, so change the number, never the
 pixel offsets inside him. His scroll sway pins his pivot (`smileySway` in
 `index.html`: 50% 92% in the dock, 50% 85% on Home), which is why both
 places move him back with `translate` or offsets after scaling; a scale
-without that pushes him up. In the greeting, `fitWave` in `home-polish.js`
-shrinks him only as much as a long first name needs to stay on one line.
+without that pushes him up. In the greeting he has one fixed place, whatever
+the name (block "Dr. Smiley's own place" at the end of `home-polish.css`):
+on a phone the name has the line under the greeting to itself and he stands
+under it at the right edge, his thought cloud opening to his left; on a
+computer he is at the right end of the name's line. He is never resized
+for a name: `fitWave` in `home-polish.js` shrinks a name too wide for its
+line instead.
 
 **Dr. Smiley's gestures use only his drawn frames, a tilt and a lift.** Never
 slide his picture sideways to fake a head turn, and never squash or stretch it
