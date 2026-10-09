@@ -193,6 +193,10 @@ no error on screen. So when you add something:
   counts only once `saveTermReview` says it was stored, and a failed save
   shows on the card. No claims of mastery, and team points are never
   someone's own progress.
+- **The Daily Drill (Home's warm-up card) uses only written, checked
+  material**: the False Friends' own lines (`heard`, `trap`, `truth`), the
+  glossary, and the CoreCHI seed questions. Never generate a line, a
+  rendering or a question for it, and never store what someone typed.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.

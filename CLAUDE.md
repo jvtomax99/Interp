@@ -249,6 +249,23 @@ results; never what was typed): Pause, a reload or Dr. Smiley's Resume
 moves straight on. Reactions: a nod, a smile when a previously missed term
 is right, encourage after a miss, `smileyStudy` at the end.
 
+**The Daily Drill (Home's warm-up card).** Jose found the one-question
+warm-up too easy; it is now three rounds a day in the same sheet
+(`openWarmupSheet`, `#warmupSheet`; the card is still `#warmup`):
+1 *Catch the trap*, a False Friend's patient line (`heard`), rendered in
+English by the interpreter; using the trap word (`drillTrapRe`, from
+`looks`, only for lines where it's in `trap` and not in `truth`) is a miss,
+anything else is compared with `truth` and judged by them. 2 *Hear it,
+write it*, a glossary term (still learning, else due), Spanish checked by
+`reviewCheck` and saved to Term Review. 3 *The judgment call*, a
+`SEED_QUESTIONS` item from ethics / encounter / cultural, with its
+explanation. Levels (`DRILL_LEVELS`: Reading, Listening, Consecutive, Under
+pressure) move up on 3/3 and down on 0-1; from Listening the words are a tap
+away (never when the phone can't speak), Under pressure adds `DRILL_SECS`.
+Nothing plays by itself. State in `ih_warmup` (drill built once a day,
+`run` = your place, verdicts only, never what was typed; `seenFF`/`seenQ`
+avoid repeats; `last`, `best`, `lvl`, `streak`).
+
 **Integration rules from the end-to-end journey audit** (each has a check in
 the journey test):
 - A handoff answer (it hands over a Hub tool: a briefing, Term Review, a next

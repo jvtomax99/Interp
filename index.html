@@ -5991,6 +5991,51 @@ html[data-theme="dark"] .sm-thanks{ color:var(--cyan); }
 .sm-ranks li.is-now{ background:var(--accent-soft); }
 .sm-ranks li.is-now span{ background:radial-gradient(circle at 35% 30%, #2E8BD0, #252E6D); color:#fff; }
 @media (prefers-reduced-motion: reduce){ .sm-opt{ transition:none; } .sm-opt:active{ transform:none; } }
+/* The Daily Drill (openWarmupSheet): three rounds in the same sheet. */
+.sm-sheet .dd-body{ min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:0 -4px; padding:0 4px 2px; display:flex; flex-direction:column; gap:9px; }
+.sm-sheet .dd-body > p, .sm-sheet .dd-body > div{ margin:0; }
+.dd-pips{ display:flex; gap:6px; margin:9px 0 0; }
+.dd-pips i{ flex:1; height:6px; border-radius:999px; background:var(--line-soft); }
+.dd-pips i.is-now{ background:var(--accent-2); }
+.dd-pips i.is-ok{ background:#2FA36B; }
+.dd-pips i.is-miss{ background:#E0A23A; }
+.sm-sheet .dd-lead{ font-size:15px; line-height:1.45; color:var(--ink-soft); }
+.dd-why{ display:inline-block; margin-left:6px; padding:2px 9px; border-radius:999px; background:var(--danger-soft); color:var(--danger); font-size:12px; font-weight:650; }
+.dd-line{ display:flex; align-items:center; flex-wrap:wrap; gap:9px 13px; padding:13px; border-radius:var(--r-md); background:var(--bg-hi); border:1px solid var(--line-soft); }
+.sm-sheet .dd-heard{ margin:0; flex:1 1 180px; font:italic 500 18px/1.4 var(--serif); color:var(--ink); }
+.sm-sheet .dd-term{ margin:0; flex:1 1 140px; font-size:20px; font-weight:650; letter-spacing:-.02em; color:var(--ink); overflow-wrap:anywhere; }
+.dd-play{ display:inline-flex; align-items:center; gap:6px; min-height:44px; flex:none; }
+.dd-play svg{ width:20px; height:20px; }
+.dd-play.speaking{ box-shadow:0 0 0 3px var(--accent-soft); }
+.dd-reveal{ min-height:44px; padding:0 13px; border-radius:999px; border:1px dashed var(--ink-faint); background:transparent; color:var(--ink-soft); font:550 15px var(--sans); cursor:pointer; }
+.dd-reveal:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.sm-sheet .dd-ask{ display:block; margin:4px 0 -3px; font-size:15px; font-weight:600; color:var(--ink); }
+.sm-sheet .dd-q{ font-size:16px; line-height:1.45; color:var(--ink); }
+.dd-timer{ display:flex; align-items:center; gap:9px; font:650 13px var(--sans); color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.dd-timer i{ flex:1; height:6px; border-radius:999px; background:var(--line-soft); overflow:hidden; }
+.dd-timer b{ display:block; width:100%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#FFB547,#FF7A3D); transition:width .25s linear; }
+.dd-timer.is-low{ color:var(--danger); }
+.dd-trap{ text-decoration:line-through; text-decoration-color:var(--danger); color:var(--ink-soft) !important; }
+.sm-opt.is-right{ background:#E7F5EE; border-color:#9FD6B8; color:#1E7F5C; }
+.sm-opt.is-wrong{ background:var(--danger-soft); border-color:#E7B3BE; color:var(--danger); }
+.sm-opt:disabled{ cursor:default; transform:none; }
+.dd-score{ display:flex; align-items:baseline; gap:6px; }
+.dd-score b{ font-size:44px; line-height:1; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
+.dd-score span{ font-size:17px; color:var(--ink-soft); }
+.dd-score em{ margin-left:auto; font-style:normal; font-size:17px; font-weight:600; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+.sm-sheet .dd-best{ font-size:14px; font-weight:650; color:#B4480F; }
+.dd-sum{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.dd-sum li{ display:flex; gap:9px; align-items:baseline; font-size:15px; line-height:1.4; color:var(--ink-soft); }
+.dd-sum li > span{ width:18px; flex:none; font-weight:700; text-align:center; }
+.dd-sum li.is-ok > span{ color:#1E7F5C; }
+.dd-sum li.is-miss > span{ color:#B4610E; }
+.dd-sum li b{ color:var(--ink); font-weight:650; margin-right:4px; }
+.sm-sheet .dd-lvl{ font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); }
+.sm-sheet .dd-lvl.is-up{ color:#1E7F5C; }
+html[data-theme="dark"] .sm-opt.is-right{ background:#16302A; border-color:#24493E; color:#6FC79C; }
+html[data-theme="dark"] .sm-sheet .dd-lvl.is-up, html[data-theme="dark"] .dd-sum li.is-ok > span{ color:#6FC79C; }
+html[data-theme="dark"] .dd-sum li.is-miss > span, html[data-theme="dark"] .sm-sheet .dd-best{ color:#F1C37A; }
+@media (prefers-reduced-motion: reduce){ .dd-timer b{ transition:none; } }
 /* ---------- Appointment mode ----------
    Started from the briefing. A quiet screen: a big lookup over the whole
    glossary (that specialty first) plus False Friends, the briefing's words,
@@ -10137,7 +10182,7 @@ async function loadTermReviews(){
    it is stored (on the server, or safely on this phone for later), or
    { ok: false, why } when it couldn't be. opts.result: 'ok' or 'miss' (else
    box 0 means a miss); opts.confirm: the record here changes only once it's
-   stored (Term Review sessions); without it, at once (briefing, warm-up). */
+   stored (Term Review sessions); without it, at once (briefing, Daily Drill). */
 async function saveTermReview(termId, box, reviewCount, opts){
   opts = opts || {};
   if(!db) return { ok: false, why: 'the Hub isn’t connected yet. Try again in a moment.' };
@@ -12983,9 +13028,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'warmup',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Home',                  title:'The Daily Drill: catch the trap, hear it, make the call' },
   { id:'namelight',   tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Home',                  title:'Your name, written in navy light when you open the app' },
   { id:'bodycard',    tone:'gd-n3', pin:'pins/anatomy.webp',             eyebrow:'3D Body',               title:'Tap a body part: its English and Spanish names, and what it is' },
-  { id:'askcards',    tone:'gd-n2', pin:'pins/medical-terminology.webp', eyebrow:'Dr. Smiley',            title:'Answers you can scan: English and Spanish, side by side' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -16581,9 +16626,15 @@ const GUIDE_TOPICS = [
     </ul>
     <p>An answer counts once it's saved. Offline it's kept on this phone and sent later. If it couldn't be saved, the card says so with <b>Try saving again</b>.</p>` },
 
-  { id:'warmup', section:'study', k:'warm up warmup daily question streak today home card one question', q:'What is the warm-up on Home?', a:`
-    <p>One quick question a day. Tap the <b>Warm-up</b> card on Home and pick an answer. Answer on the days you work and the dots fill in, so you can see your streak.</p>
-    <p>When the question is about a glossary term, your answer goes into your Term Review too.</p>` },
+  { id:'warmup', section:'study', k:'daily drill warm up warmup daily question streak today home card rounds level trap false friend listen hear write judgment call timer score personal best', q:'What is the Daily Drill on Home?', a:`
+    <p>Three short rounds a day, about two minutes. Tap the <b>Daily Drill</b> card on Home.</p>
+    <ol>
+      <li><b>Catch the trap</b>: a patient's line in Spanish with a false friend in it (“Mi hijo está intoxicado…”). Type how you'd say it in English. Using the trap word (“intoxicated”) is a miss; otherwise compare yours with the accurate rendering and decide.</li>
+      <li><b>Hear it, write it</b>: a glossary term, one you're still learning when there is one. Write the Spanish. It's checked like Term Review and goes into your record.</li>
+      <li><b>The judgment call</b>: a CoreCHI question on your role, the encounter or culture, with the explanation after.</li>
+    </ol>
+    <p>Then your score and time. Get all three right and tomorrow moves up a level: <b>Reading</b>, <b>Listening</b> (the term is heard first), <b>Consecutive</b> (the patient's line too) and <b>Under pressure</b> (a clock on every round). Miss two and it eases back. Nothing plays out loud until you tap <b>Play</b>, and the words are always a tap away.</p>
+    <p>Close it halfway and it keeps your place. Finish on the days you work and the dots fill in, so you can see your streak.</p>` },
 
   { id:'rank', section:'study', k:'level rank points dr smiley resident career team points score progress outfit hat', q:'Why does Dr. Smiley have a level?', a:`
     <p>That's the <b>team's</b> score, not yours. Every term anyone adds and every practice question anyone answers earns a point, and as the points add up Dr. Smiley moves up a rank and gets something new to wear, like a scrub cap or a head mirror.</p>
@@ -20532,7 +20583,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1009.1437';
+const BUILD_ID = 'b1009.1509';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
@@ -25938,7 +25989,7 @@ function askLocalAnswer(intent, rec, t){
     const n = rec.loaded ? askLearningTerms().length : 0;
     if(!rec.hasName){ a.headline = 'Set your name first'; a.details = 'Your review record is kept under your name on this phone.'; }
     else if(!rec.loaded){ a.headline = 'I can’t read your review record offline'; a.details = 'Try again when you’re back online.'; }
-    else if(!n){ a.headline = 'No terms marked “still learning” yet'; a.details = dueReviewCount() ? 'Term Review has terms due if you want to practise anyway.' : 'Terms you miss in Term Review, the warm-up or a briefing show up here.'; }
+    else if(!n){ a.headline = 'No terms marked “still learning” yet'; a.details = dueReviewCount() ? 'Term Review has terms due if you want to practise anyway.' : 'Terms you miss in Term Review, the Daily Drill or a briefing show up here.'; }
     else{ const k = Math.min(t.n || 5, n); a.headline = `Practice ${k} term${k === 1 ? '' : 's'} you’re still learning`; a.details = k < (t.n || 5) ? `You have ${n} right now.` : 'From your Term Review record.'; }
   }else{
     const x = t.sel && askTermById(t.sel.term);
@@ -26705,8 +26756,8 @@ function drCelebrate(seq){
 }
 /* Study progress, from the verified result: a short joyful performance that
    fits it. score: the share right (0-1). kind: 'quiz', 'review' (a Term
-   Review session), 'warmup' (the daily question), 'streak' (n in a row in a
-   practice quiz). A low score gets encouragement, never a cheer. */
+   Review session), 'drill' (the Daily Drill on Home), 'warmup' (the old
+   daily question), 'streak' (n in a row in a practice quiz). A low score gets encouragement, never a cheer. */
 function smileyStudy(kind, score, n){
   let seq;
   if(kind === 'streak') seq = n >= 5 ? 'proud' : 'giggle';
@@ -26784,54 +26835,124 @@ function smileySway(el, origin){
 }
 window.smileySway = smileySway;
 
-/* ---------- Daily warm-up ----------
-   One quick question a day on Home (card styled in home-polish.css): the
-   Spanish for a word (one you're still learning when your Term Review
-   record is loaded), or what a False Friend really means. Answering keeps a
-   streak (days in a row), updates your Term Review record for that word,
-   adds a team point, and the Home smiley reacts. Today's question is saved
-   when first shown, so it can't change during the day. ih_warmup. */
+/* ---------- Daily Drill (the warm-up on Home) ----------
+   Jose: the one-question warm-up was too easy. Now three rounds a day, about
+   two minutes, each one asking you to produce or judge, not just recognise:
+     1 Catch the trap      a patient's line in Spanish with a False Friend in it
+                           (FALSE_FRIENDS: heard, trap, truth). You type how
+                           you'd render it in English. Using the trap word is a
+                           miss; anything else you compare with the accurate
+                           rendering and decide, as in Term Review.
+     2 Hear it, write it   a glossary term (one you're still learning, else one
+                           that's due), in English; you write the Spanish,
+                           checked like Term Review (reviewCheck), and your
+                           Term Review record is updated.
+     3 The judgment call   one CoreCHI question (SEED_QUESTIONS), choices
+                           shuffled, the explanation after.
+   Levels (DRILL_LEVELS) adapt: 3/3 moves you up one, 0 or 1 moves you down
+   one. From Listening up, a line is heard before it's read (the words are a
+   tap away); Under pressure adds a clock to every round. Nothing plays by
+   itself: you might be in a patient's room. Only written, checked material
+   is used, nothing generated, and what you type is never stored. Today's
+   drill is built once (ih_warmup: drill, run), so it can't change during the
+   day and closing the sheet keeps your place. The card and sheet keep the
+   ids #warmup / #warmupSheet and openWarmupSheet(). */
+const DRILL_LEVELS = [
+  { name: 'Reading',        about: 'everything on screen, no clock' },
+  { name: 'Listening',      about: 'the term is heard before it’s read' },
+  { name: 'Consecutive',    about: 'the patient’s line and the term are heard before they’re read' },
+  { name: 'Under pressure', about: 'heard first, with a clock on every round' },
+];
+const DRILL_ROUNDS = ['Catch the trap', 'Hear it, write it', 'The judgment call'];
+const DRILL_SECS = { trap: 60, hear: 25, call: 40 };   // the clock, at Under pressure
+// In memory only: what you typed, whether the words are shown, the clock.
+const DD = { st: null, ans: '', shown: false, c: null, t0: 0, timer: 0, left: 0 };
+
 function warmupDay(offset){ const d = new Date(); d.setDate(d.getDate() + (offset || 0)); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
 function warmupState(){ try{ return JSON.parse(localStorage.getItem('ih_warmup') || '{}') || {}; }catch(e){ return {}; } }
 function warmupSaveState(st){ try{ localStorage.setItem('ih_warmup', JSON.stringify(st)); }catch(e){} }
-function warmupQuestion(){
-  const today = warmupDay(), st = warmupState();
-  if(st.qDay === today && st.q) return st.q;
+// The phone may refuse to store: then today's drill and your place last until the app closes.
+function drillSave(st){ DD.st = st; warmupSaveState(st); }
+function drillState(){
+  const st = warmupState(), today = warmupDay();
+  if(st.drill && st.drill.day === today) return st;
+  return DD.st && DD.st.drill && DD.st.drill.day === today ? DD.st : st;
+}
+function drillCanSpeak(){ return 'speechSynthesis' in window; }
+// The English word a False Friend tempts you into ("to attend (an event)" -> "attend"),
+// matched by its start so "constipation" counts for "constipated".
+function drillTrapRe(f){
+  const k = String(f.looks || '').replace(/\([^)]*\)/g, '').replace(/\bonly\b/g, '').replace(/^\s*to\s+/, '').split(/[,\/;]/)[0].trim().toLowerCase();
+  if(!k) return null;
+  const stem = k.length >= 7 ? k.slice(0, -2) : k;
+  return new RegExp('(^|[^a-z])' + stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+}
+// Only lines where the trap word is in the wrong rendering and not in the right one.
+function drillTrapUsable(f){ const re = f && f.heard && f.trap && f.truth && drillTrapRe(f); return !!re && re.test(f.trap) && !re.test(f.truth); }
+function drillFF(es){ return FALSE_FRIENDS.find(f => f.es === es); }
+function drillTerm(r){ return allTermsFlat().find(t => t.id === r.termId) || { id: r.termId, en: r.en, es: r.es, notes: '', def: '', categoryName: r.cat }; }
+function drillClock(ms){ const s = Math.max(0, Math.round((ms || 0) / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+function drillBuild(st){
+  const today = warmupDay();
   let h = 2166136261; for(const ch of today + (whoAmI() || '')){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
   const rnd = () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
   const pick = a => a[Math.floor(rnd() * a.length)];
   const shuffle = a => a.map(x => [rnd(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
-  const short = x => String(x.means).split(' —')[0];
-  const terms = allTermsFlat().filter(t => t.en && t.es && t.en.length < 40 && t.es.length < 40);
-  let q;
-  if(terms.length < 3 || rnd() < .3){
-    const f = pick(FALSE_FRIENDS), other = pick(FALSE_FRIENDS.filter(x => x !== f));
-    q = { kind: 'ff', prompt: `“${f.es}” means…`, options: shuffle([...new Set([short(f), f.looks, short(other)])]), answer: short(f),
-          note: `For “${f.looks}”, say “${f.say}”.` };
+  const seenFF = st.seenFF || [], seenQ = st.seenQ || [];
+  const ffs = FALSE_FRIENDS.filter(drillTrapUsable), freshFF = ffs.filter(f => !seenFF.includes(f.es));
+  const f = pick(freshFF.length ? freshFF : ffs);
+  const rounds = [{ k: 'trap', es: f.es }];
+  const terms = (DATA && DATA.categories ? allTermsFlat() : []).filter(t => t.id && t.en && t.es && t.en.length < 40 && t.es.length < 40 && !/^slang/.test(t.categoryId || ''));
+  const now = Date.now();
+  const learning = terms.filter(t => TERM_REVIEWS[t.id] && TERM_REVIEWS[t.id].box <= 1);
+  const due = terms.filter(t => TERM_REVIEWS[t.id] && TERM_REVIEWS[t.id].nextReviewAt <= now);
+  if(terms.length){
+    const t = pick(learning.length ? learning : due.length ? due : terms);
+    rounds.push({ k: 'hear', termId: t.id, en: t.en, es: t.es, cat: t.categoryName || '', why: learning.includes(t) ? 'Still learning' : due.includes(t) ? 'Due for review' : '' });
   }else{
-    const learning = terms.filter(t => TERM_REVIEWS[t.id] && TERM_REVIEWS[t.id].box <= 1);
-    const t = pick(learning.length ? learning : terms);
-    const same = terms.filter(x => x.id !== t.id && x.es !== t.es && x.categoryId === t.categoryId);
-    const pool = (same.length >= 2 ? same : terms.filter(x => x.id !== t.id && x.es !== t.es)).slice();
-    const wrong = [];
-    while(wrong.length < 2 && pool.length){ const x = pool.splice(Math.floor(rnd() * pool.length), 1)[0]; if(!wrong.includes(x.es)) wrong.push(x.es); }
-    q = { kind: 'term', termId: t.id, prompt: `The Spanish for “${t.en}”`, options: shuffle([t.es, ...wrong]), answer: t.es, note: t.categoryName };
+    // No glossary on this phone yet: a second patient's line instead.
+    rounds.push({ k: 'trap', es: pick(ffs.filter(x => x !== f)).es });
   }
-  warmupSaveState({ ...st, qDay: today, q });
-  return q;
+  // A judgment call: the written, checked CoreCHI questions on your role, the
+  // encounter and culture (not vocabulary or regulations; not the team's own
+  // additions), each with its explanation.
+  const qs = SEED_QUESTIONS.filter(q => q && /^(ethics|encounter|cultural)$/.test(q.d) && q.q && Array.isArray(q.o) && q.o.length >= 2 && q.o[q.a] != null && q.e);
+  const freshQ = qs.filter(q => !seenQ.includes(q.q.slice(0, 60)));
+  const q = pick(freshQ.length ? freshQ : qs), order = shuffle(q.o.map((_, i) => i));
+  rounds.push({ k: 'call', q: q.q, o: order.map(i => q.o[i]), a: order.indexOf(q.a), e: q.e || '' });
+  return { day: today, lvl: Math.min(DRILL_LEVELS.length - 1, Math.max(0, st.lvl | 0)), rounds };
 }
+// Today's drill, built and saved the first time it's asked for.
+function drillToday(){
+  const st = drillState(), today = warmupDay();
+  if(st.drill && st.drill.day === today && Array.isArray(st.drill.rounds) && st.drill.rounds.length === 3) return st;
+  const next = { ...st, drill: drillBuild(st), run: { i: 0, res: [] } };
+  delete next.q; delete next.qDay;   // the old one-question warm-up
+  drillSave(next);
+  return next;
+}
+function drillDone(st){ return st.day === warmupDay(); }
+// Words hidden behind a tap at this level (never when the phone can't read aloud).
+function drillHidden(st, r){
+  if(!drillCanSpeak()) return false;
+  const lv = st.drill.lvl;
+  return r.k === 'hear' ? lv >= 1 : r.k === 'trap' ? lv >= 2 : false;
+}
+function drillTimed(st){ return st.drill.lvl >= 3; }
+
 // Home shows two widgets side by side (styled in home-polish.css): today's
-// warm-up (amber until done, then green, with the week's streak as dots) and
+// drill (amber until done, then green, with the week's streak as dots) and
 // Dr. Smiley's rank (a dark card with a glowing ring). The details open in a
 // sheet. A widget redrawn in place gets .smw-still so it doesn't replay its
 // entrance.
 const SM_FLAME = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5c.6 2.2 3.8 3.6 3.8 7.1A3.8 3.8 0 0 1 8 12.4a3.8 3.8 0 0 1-3.8-3.8c0-1.6.8-2.6 1.6-3.4.1 1 .6 1.8 1.4 2.1C7 5.4 7.3 3.3 8 1.5z" fill="#FF7A3D"/><path d="M8 7.6c.4 1 1.7 1.6 1.7 2.9A1.7 1.7 0 0 1 8 12.2a1.7 1.7 0 0 1-1.7-1.7c0-.9.6-1.3 1-1.8.2.4.4.6.7.7 0-.6-.2-1.2 0-1.8z" fill="#FFC14D"/></svg>';
 const SM_CHECK = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function smileyWidgetsHtml(){
-  return `<section class="home-sec sm-widgets" aria-label="Warm-up and Dr. Smiley">${warmupHtml()}${smileyCareerHtml()}</section>`;
+  return `<section class="home-sec sm-widgets" aria-label="Daily Drill and Dr. Smiley">${warmupHtml()}${smileyCareerHtml()}</section>`;
 }
 function warmupStreak(){
-  const st = warmupState();
+  const st = drillState();
   return st.day === warmupDay() || st.day === warmupDay(-1) ? (st.streak || 0) : 0;
 }
 // The last seven days, today last; a dot is lit for each day of the current
@@ -26847,13 +26968,31 @@ function warmupWeekHtml(done, streak){
 }
 function warmupHtml(still){
   if(!DATA || !DATA.categories || !DATA.categories.length) return '';
-  const q = warmupQuestion(), st = warmupState(), done = st.day === warmupDay(), streak = warmupStreak();
-  const body = done
-    ? `<span class="smw-big"><span class="smw-ok">${SM_CHECK}</span>${st.correct ? 'Right!' : 'Done'}</span><span class="smw-sub">${escapeHtml(q.answer)}</span>`
-    : `<span class="smw-big"><span class="smw-q" aria-hidden="true">?</span>1 question</span><span class="smw-sub">Tap to start</span>`;
+  const st = drillToday(), done = drillDone(st), streak = warmupStreak(), lvl = st.drill.lvl;
+  const answered = ((st.run && st.run.res) || []).filter(Boolean).length;
+  let body, label;
+  if(done && st.last && st.last.day === warmupDay()){
+    body = `<span class="smw-big"><span class="smw-ok">${SM_CHECK}</span>${st.last.s} of 3</span><span class="smw-sub">${drillClock(st.last.ms)} · Level ${st.last.from + 1}</span>`;
+    label = `, done, ${st.last.s} of 3`;
+  }else if(done){
+    // Done today with the old one-question warm-up.
+    body = `<span class="smw-big"><span class="smw-ok">${SM_CHECK}</span>Done</span><span class="smw-sub">New drill tomorrow</span>`;
+    label = ', done';
+  }else if(answered){
+    const n = Math.min(3, answered + 1);
+    body = `<span class="smw-big"><span class="smw-q" aria-hidden="true">${n}</span>Round ${n} of 3</span><span class="smw-sub">${answered >= 3 ? 'Tap for your score' : 'Tap to carry on'}</span>`;
+    label = `, round ${n} of 3`;
+  }else{
+    body = `<span class="smw-big"><span class="smw-q" aria-hidden="true">3</span>rounds</span><span class="smw-sub">Level ${lvl + 1} · ${DRILL_LEVELS[lvl].name}</span>`;
+    label = `, level ${lvl + 1}, ${DRILL_LEVELS[lvl].name}`;
+  }
   const run = streak === 1 ? '1 day' : streak + ' days';
-  return `<button type="button" class="smw smw-warm${done ? ' is-done' : ''}${still ? ' smw-still' : ''}" id="warmup" onclick="openWarmupSheet()" aria-label="Today’s warm-up${done ? ', done' : ''}${streak ? ', ' + run + ' in a row' : ''}">
-    <span class="smw-top"><span class="smw-eyebrow">Warm-up</span>${streak ? `<span class="smw-flame">${SM_FLAME}${streak}</span>` : ''}</span>${body}${warmupWeekHtml(done, streak)}</button>`;
+  return `<button type="button" class="smw smw-warm${done ? ' is-done' : ''}${still ? ' smw-still' : ''}" id="warmup" onclick="openWarmupSheet()" aria-label="Today’s Daily Drill${label}${streak ? ', ' + run + ' in a row' : ''}">
+    <span class="smw-top"><span class="smw-eyebrow">Daily Drill</span>${streak ? `<span class="smw-flame">${SM_FLAME}${streak}</span>` : ''}</span>${body}${warmupWeekHtml(done, streak)}</button>`;
+}
+function drillRefreshCard(){
+  const el = document.getElementById('warmup');
+  if(el){ const t = document.createElement('div'); t.innerHTML = warmupHtml(true); if(t.firstElementChild) el.replaceWith(t.firstElementChild); }
 }
 function smSheet(id, html){
   let ov = document.getElementById(id);
@@ -26872,33 +27011,201 @@ function smSheetClose(id){
   ov.classList.remove('show');
   if(ov._after){ const f = ov._after; ov._after = null; f(); }
 }
+
+/* ---- The sheet ---- */
 function openWarmupSheet(){
-  const q = warmupQuestion(), st = warmupState(), done = st.day === warmupDay(), streak = warmupStreak();
-  const head = `<div class="sm-sheet-top"><span class="sm-eyebrow">Today’s warm-up</span>${streak ? `<span class="smw-streak">${streak === 1 ? '1 day' : streak + ' days in a row'}</span>` : ''}</div>
-    <h2 id="smWarmTitle">${escapeHtml(q.prompt)}</h2>`;
-  const ov = smSheet('warmupSheet', done
-    ? `${head}<p class="sm-result ${st.correct ? 'is-right' : ''}" role="status">${st.correct ? 'Right!' : 'The answer:'} <b>${escapeHtml(q.answer)}</b></p>
-       <p class="sm-note">${q.note ? escapeHtml(q.note) + ' · ' : ''}Back tomorrow with a new one.</p>
-       <button type="button" class="prep-go" onclick="smSheetClose('warmupSheet')">Done</button>`
-    : `${head}<div class="sm-opts">${q.options.map((o, i) => `<button type="button" class="sm-opt" onclick="warmupAnswer(${i})">${escapeHtml(o)}</button>`).join('')}</div>`);
-  ov.firstElementChild.setAttribute('aria-labelledby', 'smWarmTitle');
+  DD.ans = ''; DD.shown = false; DD.c = null;
+  drillRender();
 }
-function warmupAnswer(i){
-  const q = warmupQuestion(), st = warmupState(), today = warmupDay();
-  if(st.day === today) return;
-  const correct = q.options[i] === q.answer;
-  const streak = st.day === warmupDay(-1) ? (st.streak || 0) + 1 : 1;
-  warmupSaveState({ ...st, day: today, correct, streak });
-  teamPoints(1);
-  if(q.kind === 'term' && whoAmI()){
-    const prior = TERM_REVIEWS[q.termId];
-    const box = correct ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0;
-    saveTermReview(q.termId, box, (prior ? prior.reviewCount : 0) + 1);
+function drillOpen(){ const ov = document.getElementById('warmupSheet'); return !!(ov && ov.classList.contains('show')); }
+function drillHead(st, title){
+  const streak = warmupStreak(), lvl = st.drill.lvl, res = (st.run && st.run.res) || [], i = st.run ? st.run.i : 0, done = drillDone(st);
+  const pips = st.drill.rounds.map((_, k) => `<i class="${res[k] ? (res[k].ok ? 'is-ok' : 'is-miss') : !done && k === i ? 'is-now' : ''}"></i>`).join('');
+  return `<div class="sm-sheet-top"><span class="sm-eyebrow">Daily Drill · Level ${lvl + 1} · ${DRILL_LEVELS[lvl].name}</span>${streak ? `<span class="smw-streak">${streak === 1 ? '1 day' : streak + ' days in a row'}</span>` : ''}</div>
+    <div class="dd-pips" aria-hidden="true">${pips}</div>
+    <h2 id="smWarmTitle">${title}</h2>`;
+}
+function drillRender(){
+  drillStopClock();
+  const st = drillToday(), done = drillDone(st);
+  let html;
+  if(done) html = drillSummaryHtml(st);
+  else{
+    const i = Math.min(2, st.run.i | 0), r = st.drill.rounds[i], res = st.run.res[i];
+    html = drillHead(st, `Round ${i + 1} · ${DRILL_ROUNDS[r.k === 'trap' ? 0 : r.k === 'hear' ? 1 : 2]}`)
+      + `<div class="dd-body">${res ? drillResultHtml(st, r, res) : DD.c ? drillCompareHtml(st, r) : drillAskHtml(st, r)}</div>`;
   }
-  const el = document.getElementById('warmup');
-  if(el){ const t = document.createElement('div'); t.innerHTML = warmupHtml(true); el.replaceWith(t.firstElementChild); }
-  // The sheet shows the result, then closes; today's dot pops in, he reacts
-  // on the greeting, and the page glides up first when he's out of view.
+  const ov = smSheet('warmupSheet', html);
+  ov.firstElementChild.setAttribute('aria-labelledby', 'smWarmTitle');
+  const input = document.getElementById('ddAnswer');
+  if(input && window.matchMedia && matchMedia('(pointer: fine)').matches) input.focus();
+  if(!done && !st.run.res[st.run.i] && !DD.c){
+    DD.t0 = Date.now();
+    if(drillTimed(st)) drillStartClock(DRILL_SECS[st.drill.rounds[st.run.i].k] || 30);
+  }
+}
+function drillPlayBtn(label){
+  return `<button type="button" class="btn btn-ghost dd-play" onclick="drillSpeak(this)">${ICON_SPEAKER}<span>${label}</span></button>`;
+}
+function drillSpeak(btn){
+  const st = drillToday(), r = st.drill.rounds[Math.min(2, st.run.i | 0)];
+  if(r.k === 'trap'){ const f = drillFF(r.es); if(f) speakText(btn, f.heard, 'es-ES'); }
+  else if(r.k === 'hear') speakText(btn, r.en, 'en-US');
+}
+function drillReveal(){ DD.shown = true; const el = document.getElementById('ddWords'); if(el){ el.outerHTML = drillWordsHtml(drillToday()); } }
+function drillWordsHtml(st){
+  const r = st.drill.rounds[Math.min(2, st.run.i | 0)];
+  if(drillHidden(st, r) && !DD.shown) return `<button type="button" id="ddWords" class="dd-reveal" onclick="drillReveal()">${r.k === 'trap' ? 'Show the words' : 'Show the word'}</button>`;
+  if(r.k === 'trap'){ const f = drillFF(r.es); return `<p id="ddWords" class="dd-heard" lang="es">“${escapeHtml(f ? f.heard : '')}”</p>`; }
+  return `<p id="ddWords" class="dd-term">${escapeHtml(r.en)}</p>`;
+}
+function drillClockHtml(st){ return drillTimed(st) ? `<div class="dd-timer" id="ddTimer" role="timer" aria-label="Time left"><i><b></b></i><span></span></div>` : ''; }
+function drillAskHtml(st, r){
+  const acts = `<div class="quiz-actions rv-acts"><button class="btn btn-ghost" onclick="drillCheck(true)">I don’t know</button><button class="btn btn-primary" onclick="drillCheck()">Check</button></div>`;
+  const field = (lang, ph) => `<input id="ddAnswer" class="rv-input" type="text" lang="${lang}" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done"
+      placeholder="${ph}" value="${escapeAttr(DD.ans)}" oninput="DD.ans=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault(); drillCheck();}">`;
+  if(r.k === 'trap'){
+    const hidden = drillHidden(st, r);
+    return `<p class="dd-lead">${hidden ? 'Listen to the patient. The words are a tap away.' : 'The patient says:'}</p>
+      <div class="dd-line">${drillPlayBtn('Play')}${drillWordsHtml(st)}</div>
+      <label class="dd-ask" for="ddAnswer">How would you say it in English?</label>${field('en', 'Your English rendering')}${drillClockHtml(st)}${acts}`;
+  }
+  if(r.k === 'hear'){
+    const hidden = drillHidden(st, r);
+    return `<p class="dd-lead">${hidden ? 'Listen, then write it in Spanish.' : 'Write it in Spanish.'}${r.why ? ` <span class="dd-why">${escapeHtml(r.why)}</span>` : ''}</p>
+      <div class="dd-line">${drillPlayBtn('Hear it')}${drillWordsHtml(st)}</div>
+      <label class="dd-ask" for="ddAnswer">In Spanish?</label>${field('es', 'Type the Spanish')}${drillClockHtml(st)}${acts}`;
+  }
+  return `<p class="dd-q">${escapeHtml(r.q)}</p>${drillClockHtml(st)}
+    <div class="sm-opts">${r.o.map((o, k) => `<button type="button" class="sm-opt" onclick="drillChoose(${k})">${escapeHtml(o)}</button>`).join('')}</div>`;
+}
+
+/* ---- Answering ---- */
+function drillCheck(dontKnow, timeUp){
+  const st = drillToday(), i = Math.min(2, st.run.i | 0), r = st.drill.rounds[i];
+  if(drillDone(st) || st.run.res[i] || r.k === 'call') return;
+  const input = document.getElementById('ddAnswer');
+  const ans = dontKnow ? '' : String(input ? input.value : DD.ans).trim();
+  DD.ans = ans;
+  if(r.k === 'trap'){
+    const f = drillFF(r.es), re = f && drillTrapRe(f);
+    if(!ans || /^(no s[eé]|i don'?t know|idk|\?+|-+)$/i.test(ans)) return drillVerdict(false, timeUp ? 'time' : 'blank');
+    if(re && re.test(ans)) return drillVerdict(false, 'trap');
+    // Can't be checked for sure: you compare and decide.
+    DD.c = { ans, ms: Date.now() - DD.t0 }; drillStopClock(); drillRender();
+    return;
+  }
+  const c = reviewCheck(drillTerm(r), ans);
+  if(c.v === 'correct') return drillVerdict(true, 'right', { alt: c.alt, spelling: c.spelling });
+  if(c.v === 'incorrect') return drillVerdict(false, timeUp && !ans ? 'time' : c.kind === 'ff' ? 'ff' : 'blank');
+  DD.c = { ans, ms: Date.now() - DD.t0, kind: c.kind, other: c.other ? c.other.id : '' }; drillStopClock(); drillRender();
+}
+function drillCompareHtml(st, r){
+  const c = DD.c;
+  let body;
+  if(r.k === 'trap'){
+    const f = drillFF(r.es) || {};
+    body = `<dl class="rv-cmp"><dt>You said</dt><dd>${escapeHtml(c.ans)}</dd><dt>Accurate</dt><dd>${escapeHtml(f.truth)}</dd><dt>The trap</dt><dd class="dd-trap">${escapeHtml(f.trap)}</dd></dl>
+      <p class="rv-why-line">Did yours carry the accurate meaning, without the trap?</p>`;
+  }else{
+    const t = drillTerm(r);
+    const cc = { kind: c.kind, ans: c.ans, key: t.es, other: c.other ? allTermsFlat().find(x => x.id === c.other) : null };
+    body = `<dl class="rv-cmp"><dt>You wrote</dt><dd>${escapeHtml(c.ans)}</dd><dt>Glossary</dt><dd>${escapeHtml(t.es)} ${ICON_RS_SPEAK(t.es, 'es-ES')}</dd></dl>
+      <p class="rv-why-line">${escapeHtml(c.kind === 'near' ? 'Close: it may be a typo.' : c.kind === 'other' && cc.other ? reviewDistinction(t, cc) : 'It isn’t the glossary’s wording, but it may mean the same.')}</p>`;
+  }
+  return `<div class="rv-result is-self" role="status"><p class="rv-verdict">Compare</p>${body}
+    <div class="quiz-actions rv-acts"><button class="btn btn-ghost rv-miss-btn" onclick="drillJudge(false)">I missed it</button>
+      <button class="btn btn-primary" onclick="drillJudge(true)">Same meaning, count it</button></div></div>`;
+}
+function drillJudge(same){
+  if(!DD.c) return;
+  const ms = DD.c.ms; DD.c = null;
+  drillVerdict(!!same, same ? 'counted' : 'self-miss', null, ms);
+}
+function drillChoose(k){
+  const st = drillToday(), i = Math.min(2, st.run.i | 0), r = st.drill.rounds[i];
+  if(drillDone(st) || st.run.res[i] || r.k !== 'call') return;
+  drillVerdict(k === r.a, k === r.a ? 'right' : 'wrong', { pick: k });
+}
+function drillTimeUp(){
+  const st = drillToday(), i = Math.min(2, st.run.i | 0), r = st.drill.rounds[i];
+  if(drillDone(st) || st.run.res[i] || DD.c) return;
+  if(r.k === 'call') drillVerdict(false, 'time', { pick: -1 });
+  else drillCheck(false, true);
+}
+// One round answered: stored (never what you typed), the Term Review record
+// updated for a glossary term, and the result shown.
+function drillVerdict(ok, how, extra, ms){
+  drillStopClock();
+  const st = drillToday(), i = Math.min(2, st.run.i | 0), r = st.drill.rounds[i];
+  const res = { ok, how, ms: ms != null ? ms : Date.now() - DD.t0, ...(extra || {}) };
+  const run = { ...st.run, res: st.run.res.slice() }; run.res[i] = res;
+  drillSave({ ...st, run });
+  if(r.k === 'hear' && whoAmI() && db){
+    const prior = TERM_REVIEWS[r.termId];
+    const box = ok ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0;
+    saveTermReview(r.termId, box, (prior ? prior.reviewCount : 0) + 1, { result: ok ? 'ok' : 'miss' });
+  }
+  drillRefreshCard();
+  if(drillOpen()) drillRender();
+}
+function drillResultHtml(st, r, res){
+  const last = st.run.i >= 2;
+  const next = `<div class="quiz-actions rv-acts"><button type="button" class="btn btn-primary" id="ddNext" onclick="drillNext()">${last ? 'See your score' : 'Next round'}</button></div>`;
+  const verdict = res.ok ? (res.how === 'counted' ? 'Counted.' : 'Right.')
+    : res.how === 'trap' ? 'Caught by the trap.' : res.how === 'time' ? 'Time’s up.' : 'Not this time.';
+  const box = (inner) => `<div class="rv-result ${res.ok ? 'is-ok' : 'is-miss'}" role="status"><p class="rv-verdict">${verdict}</p>${inner}</div>${next}`;
+  if(r.k === 'trap'){
+    const f = drillFF(r.es) || {};
+    const mine = DD.ans && res.how !== 'blank' && res.how !== 'time' ? `<dt>You said</dt><dd>${escapeHtml(DD.ans)}</dd>` : '';
+    return `<div class="dd-line">${drillPlayBtn('Play')}<p class="dd-heard" lang="es">“${escapeHtml(f.heard)}”</p></div>`
+      + box(`<dl class="rv-cmp">${mine}<dt>Accurate</dt><dd>${escapeHtml(f.truth)}</dd>${res.ok ? '' : `<dt>The trap</dt><dd class="dd-trap">${escapeHtml(f.trap)}</dd>`}</dl>
+        <p class="rv-why-line"><b>${escapeHtml(f.es)}</b> means ${escapeHtml(f.means)}. For “${escapeHtml(String(f.looks).replace(/\s*\([^)]*\)/g, ''))}”, say <b>${escapeHtml(f.say)}</b>.</p>
+        ${f.note ? `<p class="rv-note">${escapeHtml(rvFirst(f.note))}</p>` : ''}`);
+  }
+  if(r.k === 'hear'){
+    const t = drillTerm(r);
+    const mine = DD.ans && !res.ok && res.how !== 'time' ? `<dl class="rv-cmp"><dt>You wrote</dt><dd>${escapeHtml(DD.ans)}</dd><dt>Glossary</dt><dd>${escapeHtml(t.es)} ${ICON_RS_SPEAK(t.es, 'es-ES')}</dd></dl>` : '';
+    const ff = res.how === 'ff' ? (FALSE_FRIENDS.find(x => rvLoose(x.es) === rvLoose(DD.ans)) || null) : null;
+    return `<div class="dd-line">${drillPlayBtn('Hear it')}<p class="dd-term">${escapeHtml(t.en)}</p></div>`
+      + box(`${mine || `<div class="review-card-es">${escapeHtml(t.es)} ${ICON_RS_SPEAK(t.es, 'es-ES')}</div>`}
+        ${res.alt ? `<p class="rv-note">“${escapeHtml(res.alt)}” is in the glossary too.</p>` : ''}
+        ${res.spelling ? `<p class="rv-note">Written: ${escapeHtml(res.spelling)}</p>` : ''}
+        ${ff ? `<p class="rv-why-line">“${escapeHtml(ff.es)}” means ${escapeHtml(ff.means)}.</p>` : ''}
+        ${t.categoryName ? `<p class="rv-note">${escapeHtml(t.categoryName)}${res.ok ? '' : ' · it’s in your Term Review now'}</p>` : ''}`);
+  }
+  const opts = r.o.map((o, k) => `<button type="button" class="sm-opt${k === r.a ? ' is-right' : k === res.pick ? ' is-wrong' : ''}" disabled>${escapeHtml(o)}</button>`).join('');
+  return `<p class="dd-q">${escapeHtml(r.q)}</p><div class="sm-opts dd-opts">${opts}</div>`
+    + box(r.e ? `<p class="rv-why-line">${escapeHtml(r.e)}</p>` : '');
+}
+function drillNext(){
+  const st = drillToday();
+  if(drillDone(st)) return drillRender();
+  const i = st.run.i | 0;
+  if(!st.run.res[i]) return drillRender();
+  DD.ans = ''; DD.shown = false; DD.c = null;
+  if(i < 2){ drillSave({ ...st, run: { ...st.run, i: i + 1 } }); drillRefreshCard(); drillRender(); return; }
+  drillFinish();
+}
+// All three answered: the score, the level for tomorrow, the streak, a team
+// point, and his reaction on the greeting.
+function drillFinish(){
+  const st = drillToday(), today = warmupDay();
+  if(drillDone(st)) return drillRender();
+  const res = st.run.res;
+  const s = res.filter(r => r && r.ok).length, ms = res.reduce((a, r) => a + ((r && r.ms) || 0), 0);
+  const from = st.drill.lvl, to = s === 3 ? Math.min(DRILL_LEVELS.length - 1, from + 1) : s <= 1 ? Math.max(0, from - 1) : from;
+  const streak = st.day === warmupDay(-1) ? (st.streak || 0) + 1 : 1;
+  const better = !st.best || s > st.best.s || (s === st.best.s && ms < st.best.ms);
+  const seenFF = [...(st.seenFF || []), ...st.drill.rounds.filter(r => r.k === 'trap').map(r => r.es)].slice(-40);
+  const seenQ = [...(st.seenQ || []), ...st.drill.rounds.filter(r => r.k === 'call').map(r => r.q.slice(0, 60))].slice(-60);
+  drillSave({ ...st, day: today, correct: s === 3, streak, lvl: to, best: better ? { s, ms } : st.best, seenFF, seenQ,
+    last: { day: today, s, ms, from, to, best: better && !!st.best } });
+  teamPoints(1);
+  drillRefreshCard();
+  drillRender();
+  // Today's dot pops in and he reacts on the greeting, once the sheet closes;
+  // the page glides up first when he's out of view.
   const react = () => {
     const dot = document.querySelector('#warmup .is-today i.on');
     if(dot) dot.classList.add('is-new');
@@ -26907,16 +27214,53 @@ function warmupAnswer(i){
     if(hidden){
       const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollTo({ top: 0, behavior: instant ? 'instant' : 'smooth' });
-      setTimeout(() => smileyStudy('warmup', correct ? 1 : 0), instant ? 0 : 450);
-    }else smileyStudy('warmup', correct ? 1 : 0);
+      setTimeout(() => smileyStudy('drill', s / 3), instant ? 0 : 450);
+    }else smileyStudy('drill', s / 3);
   };
   const ov = document.getElementById('warmupSheet');
-  if(ov && ov.classList.contains('show')){
-    openWarmupSheet();
-    ov._after = react;
-    clearTimeout(ov._t); ov._t = setTimeout(() => smSheetClose('warmupSheet'), 1600);
-  }else react();
+  if(ov && ov.classList.contains('show')) ov._after = react; else react();
 }
+function drillSummaryHtml(st){
+  const L = st.last && st.last.day === warmupDay() ? st.last : null;
+  if(!L) return `<div class="sm-sheet-top"><span class="sm-eyebrow">Daily Drill</span></div><h2 id="smWarmTitle">You did today’s warm-up</h2>
+    <p class="sm-note">Tomorrow it’s the new Daily Drill: three rounds, a little harder each time you ace it.</p>
+    <button type="button" class="prep-go" onclick="smSheetClose('warmupSheet')">Done</button>`;
+  const res = st.run.res, lv = DRILL_LEVELS[L.to];
+  const lvlLine = L.to > L.from ? `Level up. Tomorrow: Level ${L.to + 1} · ${lv.name}, ${lv.about}.`
+    : L.to < L.from ? `Tomorrow eases to Level ${L.to + 1} · ${lv.name}.` : `Tomorrow stays at Level ${L.to + 1} · ${lv.name}.`;
+  const items = st.drill.rounds.map((r, k) => {
+    const ok = res[k] && res[k].ok;
+    const what = r.k === 'trap' ? `“${(drillFF(r.es) || {}).es || r.es}”` : r.k === 'hear' ? `${r.en} → ${r.es}` : (r.q.length > 52 ? r.q.slice(0, 50).replace(/\s+\S*$/, '') + '…' : r.q);
+    return `<li class="${ok ? 'is-ok' : 'is-miss'}"><span aria-hidden="true">${ok ? '✓' : '✗'}</span><div><b>${DRILL_ROUNDS[r.k === 'trap' ? 0 : r.k === 'hear' ? 1 : 2]}</b> ${escapeHtml(what)}<i class="sr-only">${ok ? ', right' : ', missed'}</i></div></li>`;
+  }).join('');
+  const missedTerm = st.drill.rounds.some((r, k) => r.k === 'hear' && res[k] && !res[k].ok);
+  return `${drillHead(st, L.s === 3 ? 'Clean sweep' : L.s === 2 ? 'Two out of three' : L.s === 1 ? 'One out of three' : 'A tough one today')}
+    <div class="dd-body"><div class="dd-score"><b>${L.s}</b><span>of 3</span><em>${drillClock(L.ms)}</em></div>
+    ${L.best ? `<p class="dd-best">New personal best.</p>` : ''}
+    <ul class="dd-sum">${items}</ul>
+    <p class="dd-lvl${L.to > L.from ? ' is-up' : ''}">${escapeHtml(lvlLine)}</p>
+    ${missedTerm ? `<p class="sm-note">The word you missed is in your Term Review now.</p>` : ''}
+    <p class="sm-note">Back tomorrow with a new drill.</p>
+    <button type="button" class="prep-go" onclick="smSheetClose('warmupSheet')">Done</button></div>`;
+}
+
+/* ---- The clock (Under pressure) ---- */
+function drillStartClock(secs){
+  drillStopClock();
+  const end = Date.now() + secs * 1000;
+  const tick = () => {
+    const el = document.getElementById('ddTimer');
+    if(!el || !drillOpen()){ drillStopClock(); return; }   // closed: the round starts over when reopened
+    const left = Math.max(0, end - Date.now());
+    el.querySelector('b').style.width = (left / (secs * 1000) * 100).toFixed(1) + '%';
+    el.querySelector('span').textContent = drillClock(left + 999);
+    el.classList.toggle('is-low', left < 6000);
+    if(!left){ drillStopClock(); drillTimeUp(); }
+  };
+  tick();
+  DD.timer = setInterval(tick, 250);
+}
+function drillStopClock(){ if(DD.timer){ clearInterval(DD.timer); DD.timer = 0; } }
 
 /* ---------- Dr. Smiley's career ---------- */
 // Styles and the idea are with the .lv-acc rules; the Home card's look is in
