@@ -711,10 +711,11 @@
   })();
 
   /* Heartline Signature (picked by Jose: idea 5 of the heartbeat set). A
-     pink heart-monitor line above his ring draws itself -- a beat, a loop
-     into a heart, another beat -- holds, fades, and comes back every few
-     seconds. It waits for the hello to finish, steps aside while his thought
-     cloud is up, and sits behind him so a party jump passes in front of it.
+     pink heart-monitor line under the greeting's name (Jose moved it there
+     from above Dr. Smiley) draws itself -- a beat, a loop into a heart,
+     another beat -- holds, fades, and comes back every few seconds. It waits
+     for the hello to finish and for the name to be written, and steps aside
+     while his thought cloud is up.
      Under Reduce Motion it is simply there, drawn and still. The drawing
      itself is in home-polish.css (.home-heartline). */
   const heartline=(()=>{
@@ -725,14 +726,14 @@
     // start a second piece drawing at the same time as the first.
     const TOP='C44 -10 58 -12 60 -2 C62 -12 76 -10 76 2';
     const D=`M-14 2 H6 ${BEAT} H44 ${TOP} C76 12 64 18 60 24 C56 18 44 12 44 2 ${TOP} H84 ${BEAT} H134`;
-    let el=null,timer=0;
-    const busy=()=>!hasWavedHello||!!activeSequence||el.parentElement.classList.contains('home-wave-pending')
+    let el=null,btn=null,timer=0;
+    const busy=()=>!hasWavedHello||!!activeSequence||btn.classList.contains('home-wave-pending')||!!el.parentElement.querySelector('.home-name-pen')
       ||[...document.querySelectorAll('.home-wave-thought')].some(t=>+getComputedStyle(t).opacity>.02);
     function tick(){
       timer=0;
       if(!el||!el.isConnected){el=null;return;}
       if(busy())el.classList.remove('is-draw');
-      else if(el.parentElement.offsetParent){el.classList.remove('is-draw');void el.getBoundingClientRect();el.classList.add('is-draw');}
+      else if(el.offsetParent||el.getBoundingClientRect().width){el.classList.remove('is-draw');void el.getBoundingClientRect();el.classList.add('is-draw');}
       schedule();
     }
     function schedule(wait){
@@ -741,14 +742,27 @@
     }
     document.addEventListener('visibilitychange',()=>schedule(1500));
     reduced.addEventListener('change',()=>schedule(1500));
+    // Centred under the name's letters, sized to the name (two letter-heights
+    // wide), just below them. Again whenever the greeting's layout changes (fitWave).
+    function place(){
+      if(!el||!el.isConnected)return;
+      const row=el.parentElement,name=row.querySelector('.home-greeting-name');if(!name)return;
+      const rg=document.createRange();rg.selectNodeContents(name);
+      const r=rg.getBoundingClientRect(),rr=row.getBoundingClientRect();if(!r.width)return;
+      const fs=parseFloat(getComputedStyle(name).fontSize)||56,w=Math.max(96,Math.min(170,fs*2)),h=w*43/152;
+      el.style.width=w+'px';el.style.height=h+'px';
+      el.style.left=Math.max(0,(r.left+r.right)/2-rr.left-row.clientLeft-w/2).toFixed(1)+'px';
+      el.style.top=(r.bottom-rr.top-row.clientTop-h*.22).toFixed(1)+'px';
+    }
     return {
       attach(button){
         el=document.createElementNS('http://www.w3.org/2000/svg','svg');
         el.setAttribute('class','home-heartline');el.setAttribute('viewBox','-16 -16 152 43');
         el.setAttribute('aria-hidden','true');el.setAttribute('focusable','false');
         el.innerHTML=`<path class="hl-glow" pathLength="100" d="${D}"/><path class="hl-core" pathLength="100" d="${D}"/>`;
-        button.prepend(el);schedule(1500);
+        btn=button;button.parentElement.appendChild(el);place();schedule(1500);
       },
+      place,
       // The hello is starting again: clear the line now rather than at the next beat.
       hide(){if(el)el.classList.remove('is-draw');schedule(1500);}
     };
@@ -1155,7 +1169,8 @@
     const s=tn.data.replace(/\s+$/,''),i=s.lastIndexOf(' ');
     if(i>0)tn.data=s.slice(0,i)+'\u00a0'+s.slice(i+1);
   }
-  function fitWave(wave){
+  function fitWave(wave){fitWave0(wave);heartline.place();}
+  function fitWave0(wave){
     const text=wave.closest('.home-greeting-text'),row=wave.parentElement,name=row&&row.querySelector('.home-greeting-name');
     if(!text||!name)return;
     text.style.removeProperty('--hw-k');

@@ -950,25 +950,22 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   #content.is-home .home-ask-ring,#content.is-home .home-ask-sq,#content.is-home .home-ask-lanyard,#content.is-home .home-ask-tag{animation:none;transition:none;}
 }
 
-/* Heartline Signature: a heart-monitor line above his ring that draws itself
-   (a beat, a loop into a heart, another beat), holds, and fades. home-polish.js
-   adds the drawing and replays .is-draw every few seconds once the hello is
-   over. A thin navy edge under the pink glow keeps it clear of the blossoms in
-   the photo. It sits behind the face (z-index -1) and catches no taps. pathLength
-   is 100, so the dash numbers are percentages of the line. */
-#content.is-home .home-heartline{position:absolute;left:50%;top:-36px;width:112px;height:32px;margin-left:-56px;overflow:visible;z-index:-1;pointer-events:none;
+/* Heartline Signature: a heart-monitor line under the greeting's name that
+   draws itself (a beat, a loop into a heart, another beat), holds, and fades.
+   home-polish.js adds the drawing to the name row, places and sizes it under
+   the name's letters (heartline.place) and replays .is-draw every few seconds
+   once the hello is over. A thin navy edge under the pink glow keeps it clear
+   of the blossoms in the photo. It catches no taps. pathLength is 100, so the
+   dash numbers are percentages of the line. */
+#content.is-home .home-heartline{position:absolute;left:0;top:0;width:112px;height:32px;overflow:visible;z-index:0;pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);
-  filter:drop-shadow(0 0 1px rgba(8,22,48,.9)) drop-shadow(0 0 2px rgba(255,92,122,.95)) drop-shadow(0 0 7px rgba(255,92,122,.5));
-  /* The same size whatever his size, just above his head (it would reach the "Good afternoon" line). */
-  scale:calc(1 / var(--hw-k));transform-origin:50% 100%;}
-/* A long name puts him at the right edge: a slightly smaller line keeps it on screen. */
-#content.is-home .home-wave-wide-name .home-heartline{top:-31px;width:92px;height:26px;margin-left:-46px;}
+  filter:drop-shadow(0 0 1px rgba(8,22,48,.9)) drop-shadow(0 0 2px rgba(255,92,122,.95)) drop-shadow(0 0 7px rgba(255,92,122,.5));}
 #content.is-home .home-heartline path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100 100;stroke-dashoffset:100;}
 #content.is-home .home-heartline .hl-glow{stroke:#FF5C7A;stroke-width:3.4;}
 #content.is-home .home-heartline .hl-core{stroke:#FFE1E8;stroke-width:1.2;}
 #content.is-home .home-heartline.is-draw path{animation:homeHeartDraw 4.2s cubic-bezier(.45,0,.35,1) both;}
 @keyframes homeHeartDraw{0%{stroke-dashoffset:100;opacity:1;}55%{stroke-dashoffset:0;opacity:1;}84%{stroke-dashoffset:0;opacity:1;}100%{stroke-dashoffset:0;opacity:0;}}
-#content.is-home .home-wave-pending .home-heartline{opacity:0;}
+#content.is-home .home-greeting-name-row:has(.home-wave-pending) .home-heartline{opacity:0;}
 @media (prefers-reduced-motion:reduce){
   #content.is-home .home-heartline path{stroke-dashoffset:0;animation:none;}
 }
