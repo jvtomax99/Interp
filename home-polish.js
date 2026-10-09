@@ -80,16 +80,34 @@
     // edge: past it, the whole page widens, shifts sideways, and on a phone
     // zooms out. On a narrow phone (iPhone SE) the clamp alone would put the
     // cloud over the smiley, so it starts just past the face and shrinks to
-    // fit -- but only when 75% or more fits there. A long name ("Welcome",
-    // "Guadalupe") pushes the face so far right that it can't; then the cloud
-    // stays clamped on screen, over the face, as it always has.
+    // fit -- but only when 75% or more fits there.
+    // When the name sits beside him (on a phone, almost every name in the
+    // script face) he is at the right edge and there is no room: the cloud
+    // goes above him instead, its dots coming down to his head, a little
+    // smaller if the banner needs it. Only if even that can't fit does it
+    // stay clamped over him, as it used to.
     const CLOUD_W=150,room=document.documentElement.clientWidth-4;
-    let left=Math.min(b.left+88,room-CLOUD_W);
+    let left=Math.min(b.left+88,room-CLOUD_W), top=b.top-10;
+    let dotsAt=CLOUD_DOTS, grow0=[20,64];
     const fit=(room-b.right-2)/CLOUD_W;
     if(left<b.right+2&&fit>=.75){left=b.right+2;bubble.style.transformOrigin='0 50%';bubble.style.scale=Math.min(1,fit).toFixed(3);}
+    else if(left<b.right+2){
+      // 98px from the bubble's top to the last dot; the face's top must stay clear
+      const hr=hero.getBoundingClientRect(), sc=Math.min(1,(b.top-4-hr.top)/98);
+      if(sc>=.7){
+        const cx=(b.left+b.right)/2;
+        left=Math.max(8,Math.min(room-CLOUD_W*sc,cx-70*sc));
+        top=b.top-2-98*sc;
+        const fx=(cx-left)/sc;
+        dotsAt=[{x:fx+3,y:94,r:3.2},{x:fx-5,y:84,r:5}];grow0=[fx,78];
+        bubble.style.transformOrigin='0 0';bubble.style.scale=sc.toFixed(3);bubble.classList.add('is-above');
+      }
+    }
     left=Math.max(8,left);
     bubble.style.left=(left+window.scrollX)+'px';
-    bubble.style.top=(b.top+window.scrollY-10)+'px';
+    bubble.style.top=(top+window.scrollY)+'px';
+    // the dots sit where this cloud's own placement needs them
+    bubble.querySelectorAll('.hc-dot').forEach((el,i)=>{el.setAttribute('cx',dotsAt[i].x);el.setAttribute('cy',dotsAt[i].y);});
     const q=sel=>[...bubble.querySelectorAll(sel)];
     const body=bubble.querySelector('.hc-body'),dots=q('.hc-dot'),sparks=q('.hc-spark'),marks=q('.hc-mark');
     const l1=bubble.querySelector('.hc-l1'),l2=bubble.querySelector('.hc-l2');
@@ -104,10 +122,10 @@
       const op=(a<0?0:1)*(1-sm(out));
       bubble.style.opacity=op>0||t<.4?'1':'0';
       bubble.style.pointerEvents=op>.3?'':'none';
-      body.setAttribute('transform',`translate(0 ${ty.toFixed(2)}) translate(20 64) scale(${Math.max(0,grow+.1*jig).toFixed(4)} ${Math.max(0,grow-.1*jig).toFixed(4)}) translate(-20 -64)`);
+      body.setAttribute('transform',`translate(0 ${ty.toFixed(2)}) translate(${grow0[0]} ${grow0[1]}) scale(${Math.max(0,grow+.1*jig).toFixed(4)} ${Math.max(0,grow-.1*jig).toFixed(4)}) translate(${-grow0[0]} ${-grow0[1]})`);
       body.setAttribute('opacity',op.toFixed(3));
       [back(win(t,0,.2),2.2),back(win(t,.1,.3),2.2)].forEach((v,i)=>{
-        v*=1-sm(win(t,5.2,5.5));const d=CLOUD_DOTS[i];
+        v*=1-sm(win(t,5.2,5.5));const d=dotsAt[i];
         dots[i].setAttribute('transform',`translate(${d.x} ${d.y}) scale(${Math.max(0,v).toFixed(3)}) translate(${-d.x} ${-d.y})`);
       });
       const total=lines[0].length+lines[1].length,chars=Math.floor(clamp((t-.75)/.8)*total);
