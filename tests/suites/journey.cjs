@@ -47,7 +47,7 @@ function fakeModel(user) {
 }
 let mod;
 async function serve(body, headers) {
-  mod = mod || await import('/home/user/Interp/api/ask.js');
+  mod = mod || await import(require('url').pathToFileURL(require('../support/harness.cjs').ROOT + 'api/ask.js').href);
   process.env.ANTHROPIC_API_KEY = 'test-key';
   const real = globalThis.fetch;
   globalThis.fetch = async (url, init) => {
