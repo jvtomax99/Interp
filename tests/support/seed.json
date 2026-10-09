@@ -1,0 +1,3244 @@
+{
+"categories": [
+{
+"id": "genetics",
+"name": "Genetics",
+"color": "#8B7BAE",
+"icon": "dna",
+"terms": [
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "muvcxfc1a67hrs"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "muvcxfc1idd4yl"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "muvcxfc10epi98"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "muvcxfc1q126km"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "muvcxfc1701uje"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "muvcxfc1brmal5"
+},
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "muvcxfc1hpqq13"
+}
+]
+},
+{
+"id": "onco",
+"name": "Oncology",
+"color": "#B5707D",
+"icon": "ribbon",
+"terms": [
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "muvcxfc1t3msqb"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "muvcxfc11dsfbp"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "muvcxfc1vqpmd4"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "muvcxfc12oxvhx"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "muvcxfc1rfbe0z"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "muvcxfc1ry858w"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "muvcxfc1dlrvzv"
+},
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "muvcxfc1j9rrcb"
+},
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "muvcxfc1gea4r5"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "muvcxfc1zc54bx"
+}
+]
+},
+{
+"id": "onco-hematology",
+"name": "Hematology",
+"color": "#9C5A72",
+"icon": "flask",
+"parentId": "onco",
+"terms": [
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "muvcxfc1n2nd0m"
+},
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "muvcxfc1b5yirm"
+},
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "muvcxfc1i3dl7y"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "muvcxfc1phahq6"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "muvcxfc1erlmj0"
+},
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "muvcxfc14cfm0k"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "muvcxfc1id16fw"
+}
+]
+},
+{
+"id": "onco-leukemia",
+"name": "Leukemia",
+"color": "#C78A9B",
+"icon": "dna",
+"parentId": "onco",
+"terms": [
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "muvcxfc1xbjwwp"
+}
+]
+},
+{
+"id": "cardiac",
+"name": "Heart Failure & Cardiac",
+"color": "#C98FA0",
+"icon": "heart",
+"terms": [
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "muvcxfc1m71kz4"
+},
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "muvcxfc1vhm366"
+},
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "muvcxfc1dojseg"
+}
+]
+},
+{
+"id": "ent",
+"name": "Peds ENT, Urology, Endocrinology & Nephrology",
+"color": "#6F97AC",
+"icon": "ear",
+"terms": [
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "muvcxfc1ctyeu0"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "muvcxfc1mjxsyd"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "muvcxfc1c4fkhb"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "muvcxfc11z4gyh"
+},
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "muvcxfc1hhwtdy"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "muvcxfc11y7g4f"
+},
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "muvcxfc1raba7r"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "muvcxfc19pcys0"
+},
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "muvcxfc10b8giy"
+},
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "muvcxfc10pzg18"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "muvcxfc19ru6jl"
+},
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "muvcxfc1w7ftpq"
+}
+]
+},
+{
+"id": "neuro",
+"name": "Developmental & Neurology",
+"color": "#7FA173",
+"icon": "brain",
+"terms": [
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "muvcxfc13asvzz"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "muvcxfc1u6kf3e"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "muvcxfc15muywq"
+},
+{
+"en": "Oppositional Defiant Disorder (ODD)",
+"es": "Trastorno de Oposición Desafiante (TOD)",
+"def": "Behavioral pattern discussed in professional terminology contexts.",
+"source": "",
+"id": "muvcxfc1fgqkij"
+},
+{
+"en": "Splinter skills",
+"es": "",
+"def": "Exceptional abilities often associated with Autism.",
+"source": "",
+"id": "muvcxfc1w4sa8d"
+},
+{
+"en": "Synesthesia",
+"es": "Sinestesia",
+"def": "A neurological condition affecting sensory pathways.",
+"source": "",
+"id": "muvcxfc11pbw5h"
+},
+{
+"en": "Vasovagal syncope",
+"es": "Síncope vasovagal",
+"def": "Fainting response to triggers; requires quick recognition when a physician speaks fast.",
+"source": "",
+"id": "muvcxfc1kgp358"
+}
+]
+},
+{
+"id": "resources",
+"name": "Professional Resources",
+"color": "#BFA05E",
+"icon": "book",
+"terms": [
+{
+"en": "Memory Exercises",
+"es": "",
+"def": "Recommended by a professor for interpreter training.",
+"source": "",
+"id": "muvcxfc1waf318"
+},
+{
+"en": "Interpreting and Autism (Webinar, 2025)",
+"es": "",
+"def": "Continuing education webinar on interpreting in autism-related encounters.",
+"source": "",
+"id": "muvcxfc1dnz9k2"
+},
+{
+"en": "Interpreter Resource Library",
+"es": "",
+"def": "General collection of webinar recordings for interpreters.",
+"source": "",
+"id": "muvcxfc19k3cxc"
+},
+{
+"en": "Interpreter Mental Fatigue",
+"es": "",
+"def": "Session: \"Strategies and Scripts for Addressing Interpreter Mental Fatigue.\"",
+"source": "",
+"id": "muvcxfc138rvqg"
+}
+]
+},
+{
+"id": "pulm",
+"name": "Pulmonology",
+"color": "#4F8FBF",
+"icon": "lungs",
+"parentId": null,
+"terms": [
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "x1_0"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "x2_1"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "x3_2"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "x4_3"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "x5_4"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "x6_5"
+}
+]
+},
+{
+"id": "ortho",
+"name": "Orthopedics",
+"color": "#9C7A5B",
+"icon": "bone",
+"parentId": null,
+"terms": [
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "x7_0"
+},
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "x8_1"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "x9_2"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "x10_3"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "x11_4"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "x12_5"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "x13_6"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "x14_7"
+},
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "x15_8"
+},
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "x16_9"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "x17_10"
+},
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "x18_11"
+},
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "x19_12"
+}
+]
+},
+{
+"id": "infusion",
+"name": "Infusion Center",
+"color": "#5B9AA0",
+"icon": "iv",
+"parentId": null,
+"terms": [
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "x20_0"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "x21_1"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "x22_2"
+},
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "x23_3"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "x24_4"
+},
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "x25_5"
+},
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "x26_6"
+},
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "x27_7"
+},
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "x28_8"
+},
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "x29_9"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "x30_10"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "x31_11"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "x32_12"
+},
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "x33_13"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "x34_14"
+},
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "x35_15"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "x36_16"
+},
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "x37_17"
+},
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "x38_18"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "x39_19"
+}
+]
+},
+{
+"id": "lab",
+"name": "Lab Results",
+"color": "#6E8B3D",
+"icon": "flask",
+"parentId": null,
+"terms": [
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "x40_0"
+},
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "x41_1"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "x42_2"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "x43_3"
+},
+{
+"en": "Oppositional Defiant Disorder (ODD)",
+"es": "Trastorno de Oposición Desafiante (TOD)",
+"def": "Behavioral pattern discussed in professional terminology contexts.",
+"source": "",
+"id": "x44_4"
+},
+{
+"en": "Splinter skills",
+"es": "",
+"def": "Exceptional abilities often associated with Autism.",
+"source": "",
+"id": "x45_5"
+},
+{
+"en": "Synesthesia",
+"es": "Sinestesia",
+"def": "A neurological condition affecting sensory pathways.",
+"source": "",
+"id": "x46_6"
+},
+{
+"en": "Vasovagal syncope",
+"es": "Síncope vasovagal",
+"def": "Fainting response to triggers; requires quick recognition when a physician speaks fast.",
+"source": "",
+"id": "x47_7"
+},
+{
+"en": "Memory Exercises",
+"es": "",
+"def": "Recommended by a professor for interpreter training.",
+"source": "",
+"id": "x48_8"
+},
+{
+"en": "Interpreting and Autism (Webinar, 2025)",
+"es": "",
+"def": "Continuing education webinar on interpreting in autism-related encounters.",
+"source": "",
+"id": "x49_9"
+},
+{
+"en": "Interpreter Resource Library",
+"es": "",
+"def": "General collection of webinar recordings for interpreters.",
+"source": "",
+"id": "x50_10"
+},
+{
+"en": "Interpreter Mental Fatigue",
+"es": "",
+"def": "Session: \"Strategies and Scripts for Addressing Interpreter Mental Fatigue.\"",
+"source": "",
+"id": "x51_11"
+},
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "x52_12"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "x53_13"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "x54_14"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "x55_15"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "x56_16"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "x57_17"
+},
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "x58_18"
+},
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "x59_19"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "x60_20"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "x61_21"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "x62_22"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "x63_23"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "x64_24"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "x65_25"
+},
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "x66_26"
+}
+]
+},
+{
+"id": "pharm",
+"name": "Pharmacy & Medications",
+"color": "#7D6BB0",
+"icon": "pill",
+"parentId": null,
+"terms": [
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "x67_0"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "x68_1"
+},
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "x69_2"
+},
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "x70_3"
+},
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "x71_4"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "x72_5"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "x73_6"
+},
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "x74_7"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "x75_8"
+},
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "x76_9"
+},
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "x77_10"
+}
+]
+},
+{
+"id": "er",
+"name": "Emergency",
+"color": "#C25B4E",
+"icon": "ambulance",
+"parentId": null,
+"terms": [
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "x78_0"
+},
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "x79_1"
+},
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "x80_2"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "x81_3"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "x82_4"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "x83_5"
+},
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "x84_6"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "x85_7"
+},
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "x86_8"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "x87_9"
+},
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "x88_10"
+},
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "x89_11"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "x90_12"
+},
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "x91_13"
+},
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "x92_14"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "x93_15"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "x94_16"
+},
+{
+"en": "Oppositional Defiant Disorder (ODD)",
+"es": "Trastorno de Oposición Desafiante (TOD)",
+"def": "Behavioral pattern discussed in professional terminology contexts.",
+"source": "",
+"id": "x95_17"
+}
+]
+},
+{
+"id": "peds",
+"name": "Pediatrics",
+"color": "#E08A5A",
+"icon": "heart",
+"parentId": null,
+"terms": [
+{
+"en": "Splinter skills",
+"es": "",
+"def": "Exceptional abilities often associated with Autism.",
+"source": "",
+"id": "x96_0"
+},
+{
+"en": "Synesthesia",
+"es": "Sinestesia",
+"def": "A neurological condition affecting sensory pathways.",
+"source": "",
+"id": "x97_1"
+},
+{
+"en": "Vasovagal syncope",
+"es": "Síncope vasovagal",
+"def": "Fainting response to triggers; requires quick recognition when a physician speaks fast.",
+"source": "",
+"id": "x98_2"
+},
+{
+"en": "Memory Exercises",
+"es": "",
+"def": "Recommended by a professor for interpreter training.",
+"source": "",
+"id": "x99_3"
+},
+{
+"en": "Interpreting and Autism (Webinar, 2025)",
+"es": "",
+"def": "Continuing education webinar on interpreting in autism-related encounters.",
+"source": "",
+"id": "x100_4"
+},
+{
+"en": "Interpreter Resource Library",
+"es": "",
+"def": "General collection of webinar recordings for interpreters.",
+"source": "",
+"id": "x101_5"
+},
+{
+"en": "Interpreter Mental Fatigue",
+"es": "",
+"def": "Session: \"Strategies and Scripts for Addressing Interpreter Mental Fatigue.\"",
+"source": "",
+"id": "x102_6"
+},
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "x103_7"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "x104_8"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "x105_9"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "x106_10"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "x107_11"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "x108_12"
+},
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "x109_13"
+},
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "x110_14"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "x111_15"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "x112_16"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "x113_17"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "x114_18"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "x115_19"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "x116_20"
+},
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "x117_21"
+},
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "x118_22"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "x119_23"
+},
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "x120_24"
+}
+]
+},
+{
+"id": "id",
+"name": "Infectious Disease",
+"color": "#3E8E7E",
+"icon": "shield",
+"parentId": null,
+"terms": [
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "x121_0"
+},
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "x122_1"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "x123_2"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "x124_3"
+},
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "x125_4"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "x126_5"
+},
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "x127_6"
+},
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "x128_7"
+},
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "x129_8"
+}
+]
+},
+{
+"id": "derm",
+"name": "Dermatology",
+"color": "#C98A6B",
+"icon": "sparkle",
+"parentId": null,
+"terms": [
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "x130_0"
+},
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "x131_1"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "x132_2"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "x133_3"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "x134_4"
+},
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "x135_5"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "x136_6"
+},
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "x137_7"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "x138_8"
+},
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "x139_9"
+},
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "x140_10"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "x141_11"
+},
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "x142_12"
+},
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "x143_13"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "x144_14"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "x145_15"
+}
+]
+},
+{
+"id": "ophth",
+"name": "Ophthalmology",
+"color": "#3C78A8",
+"icon": "search",
+"parentId": null,
+"terms": [
+{
+"en": "Oppositional Defiant Disorder (ODD)",
+"es": "Trastorno de Oposición Desafiante (TOD)",
+"def": "Behavioral pattern discussed in professional terminology contexts.",
+"source": "",
+"id": "x146_0"
+},
+{
+"en": "Splinter skills",
+"es": "",
+"def": "Exceptional abilities often associated with Autism.",
+"source": "",
+"id": "x147_1"
+},
+{
+"en": "Synesthesia",
+"es": "Sinestesia",
+"def": "A neurological condition affecting sensory pathways.",
+"source": "",
+"id": "x148_2"
+},
+{
+"en": "Vasovagal syncope",
+"es": "Síncope vasovagal",
+"def": "Fainting response to triggers; requires quick recognition when a physician speaks fast.",
+"source": "",
+"id": "x149_3"
+},
+{
+"en": "Memory Exercises",
+"es": "",
+"def": "Recommended by a professor for interpreter training.",
+"source": "",
+"id": "x150_4"
+},
+{
+"en": "Interpreting and Autism (Webinar, 2025)",
+"es": "",
+"def": "Continuing education webinar on interpreting in autism-related encounters.",
+"source": "",
+"id": "x151_5"
+},
+{
+"en": "Interpreter Resource Library",
+"es": "",
+"def": "General collection of webinar recordings for interpreters.",
+"source": "",
+"id": "x152_6"
+},
+{
+"en": "Interpreter Mental Fatigue",
+"es": "",
+"def": "Session: \"Strategies and Scripts for Addressing Interpreter Mental Fatigue.\"",
+"source": "",
+"id": "x153_7"
+},
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "x154_8"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "x155_9"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "x156_10"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "x157_11"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "x158_12"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "x159_13"
+},
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "x160_14"
+},
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "x161_15"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "x162_16"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "x163_17"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "x164_18"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "x165_19"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "x166_20"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "x167_21"
+},
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "x168_22"
+}
+]
+},
+{
+"id": "surg",
+"name": "Surgery & Anesthesia",
+"color": "#5E6F8C",
+"icon": "pulse",
+"parentId": null,
+"terms": [
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "x169_0"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "x170_1"
+},
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "x171_2"
+},
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "x172_3"
+},
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "x173_4"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "x174_5"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "x175_6"
+}
+]
+},
+{
+"id": "obgyn",
+"name": "OB/GYN",
+"color": "#C0607E",
+"icon": "heart",
+"parentId": null,
+"terms": [
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "x176_0"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "x177_1"
+},
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "x178_2"
+},
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "x179_3"
+},
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "x180_4"
+},
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "x181_5"
+},
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "x182_6"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "x183_7"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "x184_8"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "x185_9"
+},
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "x186_10"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "x187_11"
+},
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "x188_12"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "x189_13"
+}
+]
+},
+{
+"id": "gi",
+"name": "Gastroenterology",
+"color": "#A0784A",
+"icon": "apple",
+"parentId": null,
+"terms": [
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "x190_0"
+},
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "x191_1"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "x192_2"
+},
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "x193_3"
+},
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "x194_4"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "x195_5"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "x196_6"
+},
+{
+"en": "Oppositional Defiant Disorder (ODD)",
+"es": "Trastorno de Oposición Desafiante (TOD)",
+"def": "Behavioral pattern discussed in professional terminology contexts.",
+"source": "",
+"id": "x197_7"
+},
+{
+"en": "Splinter skills",
+"es": "",
+"def": "Exceptional abilities often associated with Autism.",
+"source": "",
+"id": "x198_8"
+},
+{
+"en": "Synesthesia",
+"es": "Sinestesia",
+"def": "A neurological condition affecting sensory pathways.",
+"source": "",
+"id": "x199_9"
+},
+{
+"en": "Vasovagal syncope",
+"es": "Síncope vasovagal",
+"def": "Fainting response to triggers; requires quick recognition when a physician speaks fast.",
+"source": "",
+"id": "x200_10"
+},
+{
+"en": "Memory Exercises",
+"es": "",
+"def": "Recommended by a professor for interpreter training.",
+"source": "",
+"id": "x201_11"
+},
+{
+"en": "Interpreting and Autism (Webinar, 2025)",
+"es": "",
+"def": "Continuing education webinar on interpreting in autism-related encounters.",
+"source": "",
+"id": "x202_12"
+},
+{
+"en": "Interpreter Resource Library",
+"es": "",
+"def": "General collection of webinar recordings for interpreters.",
+"source": "",
+"id": "x203_13"
+},
+{
+"en": "Interpreter Mental Fatigue",
+"es": "",
+"def": "Session: \"Strategies and Scripts for Addressing Interpreter Mental Fatigue.\"",
+"source": "",
+"id": "x204_14"
+},
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "x205_15"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "x206_16"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "x207_17"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "x208_18"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "x209_19"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "x210_20"
+}
+]
+},
+{
+"id": "mh",
+"name": "Mental Health",
+"color": "#6C7BB5",
+"icon": "brain",
+"parentId": null,
+"terms": [
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "x211_0"
+},
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "x212_1"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "x213_2"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "x214_3"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "x215_4"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "x216_5"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "x217_6"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "x218_7"
+},
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "x219_8"
+},
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "x220_9"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "x221_10"
+},
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "x222_11"
+},
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "x223_12"
+},
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "x224_13"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "x225_14"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "x226_15"
+},
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "x227_16"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "x228_17"
+},
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "x229_18"
+},
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "x230_19"
+},
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "x231_20"
+},
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "x232_21"
+},
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "x233_22"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "x234_23"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "x235_24"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "x236_25"
+},
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "x237_26"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "x238_27"
+}
+]
+},
+{
+"id": "onco-rad",
+"name": "Radiation",
+"color": "#B5707D",
+"icon": "ribbon",
+"parentId": "onco",
+"terms": [
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "x239_0"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "x240_1"
+},
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "x241_2"
+}
+]
+},
+{
+"id": "peds-nicu",
+"name": "NICU",
+"color": "#E08A5A",
+"icon": "heart",
+"parentId": "peds",
+"terms": [
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "x242_0"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "x243_1"
+},
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "x244_2"
+},
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "x245_3"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "x246_4"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "x247_5"
+},
+{
+"en": "Oppositional Defiant Disorder (ODD)",
+"es": "Trastorno de Oposición Desafiante (TOD)",
+"def": "Behavioral pattern discussed in professional terminology contexts.",
+"source": "",
+"id": "x248_6"
+},
+{
+"en": "Splinter skills",
+"es": "",
+"def": "Exceptional abilities often associated with Autism.",
+"source": "",
+"id": "x249_7"
+}
+]
+},
+{
+"id": "peds-dev",
+"name": "Developmental Milestones",
+"color": "#E08A5A",
+"icon": "heart",
+"parentId": "peds",
+"terms": [
+{
+"en": "Synesthesia",
+"es": "Sinestesia",
+"def": "A neurological condition affecting sensory pathways.",
+"source": "",
+"id": "x250_0"
+},
+{
+"en": "Vasovagal syncope",
+"es": "Síncope vasovagal",
+"def": "Fainting response to triggers; requires quick recognition when a physician speaks fast.",
+"source": "",
+"id": "x251_1"
+},
+{
+"en": "Memory Exercises",
+"es": "",
+"def": "Recommended by a professor for interpreter training.",
+"source": "",
+"id": "x252_2"
+},
+{
+"en": "Interpreting and Autism (Webinar, 2025)",
+"es": "",
+"def": "Continuing education webinar on interpreting in autism-related encounters.",
+"source": "",
+"id": "x253_3"
+},
+{
+"en": "Interpreter Resource Library",
+"es": "",
+"def": "General collection of webinar recordings for interpreters.",
+"source": "",
+"id": "x254_4"
+},
+{
+"en": "Interpreter Mental Fatigue",
+"es": "",
+"def": "Session: \"Strategies and Scripts for Addressing Interpreter Mental Fatigue.\"",
+"source": "",
+"id": "x255_5"
+},
+{
+"en": "Alpha Fetoprotein (AFP) test",
+"es": "Prueba Alfa-fetoproteína (AFP)",
+"def": "A tumor marker test often used in prenatal screening or oncology.",
+"source": "",
+"id": "x256_6"
+},
+{
+"en": "Aicardi-Goutières Syndrome",
+"es": "Síndrome de Aicardi-Goutières",
+"def": "A rare genetic condition affecting the brain, immune system, and skin.",
+"source": "",
+"id": "x257_7"
+},
+{
+"en": "Fragile X premutation (FMR1 gene)",
+"es": "",
+"def": "Associated with alterations in the FMR1 gene on the X chromosome.",
+"source": "",
+"id": "x258_8"
+},
+{
+"en": "Neurofibromatosis type 1 (NF1)",
+"es": "",
+"def": "A genetic disorder causing tumors on nerve tissue.",
+"source": "",
+"id": "x259_9"
+},
+{
+"en": "Phenylketonuria (PKU)",
+"es": "Fenilcetonuria",
+"def": "An inherited disorder requiring a low-phenylalanine diet.",
+"source": "NIH (Spanish)",
+"id": "x260_10"
+},
+{
+"en": "Rett syndrome",
+"es": "",
+"def": "A neurodevelopmental disorder, discussed in the context of genetics test reviews.",
+"source": "",
+"id": "x261_11"
+},
+{
+"en": "Simpson-Golabi-Behmel syndrome (SGBS)",
+"es": "",
+"def": "A condition identified in genetics consultations.",
+"source": "",
+"id": "x262_12"
+}
+]
+},
+{
+"id": "surg-pre",
+"name": "Pre-op",
+"color": "#5E6F8C",
+"icon": "pulse",
+"parentId": "surg",
+"terms": [
+{
+"en": "AC-T Chemotherapy regimen",
+"es": "",
+"def": "Standard regimen including Adriamycin (doxorubicin), Cyclophosphamide (Cytoxan), and Taxol (paclitaxel).",
+"source": "",
+"id": "x263_0"
+},
+{
+"en": "Breast fibroadenoma",
+"es": "Fibroadenoma de mama",
+"def": "Noncancerous breast lumps.",
+"source": "NCI (Spanish)",
+"id": "x264_1"
+},
+{
+"en": "Clear cell sarcoma of the kidney",
+"es": "Sarcoma renal de células claras",
+"def": "Differentiated from carcinoma in clinical terminology.",
+"source": "",
+"id": "x265_2"
+},
+{
+"en": "Diffuse Leptomeningeal Glioneuronal Tumor (DLGNT)",
+"es": "Tumor glioneuronal leptomeníngeo difuso (TGLD)",
+"def": "Rare CNS tumor.",
+"source": "",
+"id": "x266_3"
+},
+{
+"en": "Glioblastoma",
+"es": "Glioblastoma",
+"def": "Aggressive brain cancer treated in radiation oncology.",
+"source": "",
+"id": "x267_4"
+},
+{
+"en": "Hepatocellular carcinoma (HCC)",
+"es": "Carcinoma hepatocelular",
+"def": "Primary liver cancer.",
+"source": "",
+"id": "x268_5"
+},
+{
+"en": "LEEP biopsy",
+"es": "",
+"def": "Loop Electrosurgical Excision Procedure used in OB/GYN oncology.",
+"source": "",
+"id": "x269_6"
+}
+]
+},
+{
+"id": "surg-post",
+"name": "Post-op & Recovery",
+"color": "#5E6F8C",
+"icon": "pulse",
+"parentId": "surg",
+"terms": [
+{
+"en": "Myofibroblastic stromal hyperplasia",
+"es": "Hiperplasia estromal miofibroblástica mamaria",
+"def": "Proliferative breast lesion.",
+"source": "",
+"id": "x270_0"
+},
+{
+"en": "Testicular Rhabdomyosarcoma",
+"es": "Rabdomiosarcoma",
+"def": "Pediatric soft tissue cancer.",
+"source": "",
+"id": "x271_1"
+},
+{
+"en": "Tumor markers",
+"es": "",
+"def": "Trended over time to monitor treatment response.",
+"source": "",
+"id": "x272_2"
+},
+{
+"en": "Autoimmune Hemolytic Anemia (AIHA)",
+"es": "Anemia Hemolítica Autoinmunitaria",
+"def": "Condition where the immune system destroys red blood cells.",
+"source": "",
+"id": "x273_3"
+},
+{
+"en": "Diffuse Large B-Cell Lymphoma (DLBCL)",
+"es": "Linfoma Difuso de células B Grandes",
+"def": "Aggressive lymphoma type discussed at the cancer center.",
+"source": "",
+"id": "x274_4"
+},
+{
+"en": "Donor chimerism",
+"es": "Quimerismo",
+"def": "Often relevant in post-transplant monitoring.",
+"source": "NCI (Spanish)",
+"id": "x275_5"
+},
+{
+"en": "Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"es": "GMSI",
+"def": "Precursor plasma cell condition.",
+"source": "",
+"id": "x276_6"
+},
+{
+"en": "Paroxysmal nocturnal hemoglobinuria (PNH)",
+"es": "Hemoglobinuria paroxística nocturna",
+"def": "Rare blood disorder.",
+"source": "",
+"id": "x277_7"
+},
+{
+"en": "Smoldering Multiple Myeloma (SMM)",
+"es": "Mieloma Múltiple Quiescente",
+"def": "Precursor condition to myeloma.",
+"source": "Sergas.gal (Spanish)",
+"id": "x278_8"
+},
+{
+"en": "Xerocytosis (Dehydrated hereditary stomatocytosis)",
+"es": "Xerocitosis congénita",
+"def": "A red blood cell disorder.",
+"source": "",
+"id": "x279_9"
+},
+{
+"en": "HPV & Myelodysplastic Syndromes (MDS)",
+"es": "",
+"def": "A case where HPV was triggered by an immune system affected by MDS, involving cervical intraepithelial neoplasia (CIN 1, 2, or 3).",
+"source": "",
+"id": "x280_10"
+},
+{
+"en": "Breast Arterial Calcification (BAC)",
+"es": "Calcificaciones mamarias",
+"def": "Calcium deposits found in breast arteries.",
+"source": "",
+"id": "x281_11"
+}
+]
+},
+{
+"id": "obgyn-ld",
+"name": "Labor & Delivery",
+"color": "#C0607E",
+"icon": "heart",
+"parentId": "obgyn",
+"terms": [
+{
+"en": "Hypertrophic cardiomyopathy",
+"es": "Cardiopatía hipertrófica",
+"def": "Heart muscle thickening.",
+"source": "",
+"id": "x282_0"
+},
+{
+"en": "Peripartum cardiomyopathy (PPCM)",
+"es": "Miocardiopatía periparto",
+"def": "Heart failure occurring around the time of pregnancy.",
+"source": "",
+"id": "x283_1"
+},
+{
+"en": "Avascular necrosis (osteonecrosis)",
+"es": "Necrosis avascular",
+"def": "Bone tissue death.",
+"source": "",
+"id": "x284_2"
+},
+{
+"en": "BAHA (Bone-anchored hearing aid)",
+"es": "Implante auditivo oseointegrado",
+"def": "Used in Peds ENT cases.",
+"source": "EarPros (Spanish)",
+"id": "x285_3"
+},
+{
+"en": "Cholesteatoma surgery",
+"es": "Colesteatoma",
+"def": "Abnormal ear growth.",
+"source": "",
+"id": "x286_4"
+},
+{
+"en": "Gamma Knife surgery",
+"es": "Cirugía con bisturí de rayos gamma",
+"def": "Neurosurgical precision procedure.",
+"source": "UHealth (Spanish)",
+"id": "x287_5"
+}
+]
+},
+{
+"id": "obgyn-pre",
+"name": "Prenatal",
+"color": "#C0607E",
+"icon": "heart",
+"parentId": "obgyn",
+"terms": [
+{
+"en": "Laryngomalacia",
+"es": "Laringomalacia",
+"def": "Congenital abnormality of laryngeal cartilage; associated with \"noisy breathing.\"",
+"source": "",
+"id": "x288_0"
+},
+{
+"en": "Multinodular goiter",
+"es": "Bocio multinodular",
+"def": "Thyroid enlargement.",
+"source": "",
+"id": "x289_1"
+},
+{
+"en": "Navicular fossa",
+"es": "Fosa navicular",
+"def": "Urogenital anatomy term.",
+"source": "",
+"id": "x290_2"
+},
+{
+"en": "Patulous Eustachian tube dysfunction",
+"es": "Disfunción de las trompas de Eustaquio patulosas",
+"def": "ENT condition.",
+"source": "",
+"id": "x291_3"
+},
+{
+"en": "Primary ciliary dyskinesia",
+"es": "Discinesia ciliar primaria",
+"def": "Respiratory tract cilia disorder.",
+"source": "",
+"id": "x292_4"
+},
+{
+"en": "Prune Belly syndrome",
+"es": "",
+"def": "Rare abdominal muscle disorder.",
+"source": "",
+"id": "x293_5"
+},
+{
+"en": "Rhabdomyolysis",
+"es": "Rabdomiolisis",
+"def": "Skeletal muscle breakdown.",
+"source": "",
+"id": "x294_6"
+},
+{
+"en": "Severe Combined Immunodeficiency (SCID)",
+"es": "IDCG",
+"def": "Rare genetic immune disorder.",
+"source": "",
+"id": "x295_7"
+},
+{
+"en": "AAC device (Augmentative and Alternative Communication)",
+"es": "",
+"def": "Used for patients on the spectrum or with speech/hearing challenges.",
+"source": "",
+"id": "x296_8"
+},
+{
+"en": "Duffy-null associated neutrophil count (DANC)",
+"es": "",
+"def": "Not a disease — a common variation causing low neutrophil counts.",
+"source": "",
+"id": "x297_9"
+},
+{
+"en": "Lesch-Nyhan Syndrome (LNS)",
+"es": "Síndrome de Lesch-Nyhan",
+"def": "Genetic neurological disorder.",
+"source": "",
+"id": "x298_10"
+}
+]
+},
+{
+"id": "slang",
+"name": "Slang & Profanity",
+"color": "#B0505E",
+"icon": "chat",
+"parentId": null,
+"terms": []
+},
+{
+"id": "slang-latam",
+"name": "Latin America",
+"color": "#C26A74",
+"icon": "chat",
+"parentId": "slang",
+"terms": [
+{
+"id": "slang-0",
+"en": "Numb",
+"es": "Amortiguar",
+"def": "Vulgarity: Neutral. Muy común en Ecuador."
+},
+{
+"id": "slang-1",
+"en": "Overwhelmed",
+"es": "Avergado",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-2",
+"en": "Testicles",
+"es": "Bolas",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-3",
+"en": "Bastard, asshole, jerk",
+"es": "Cabrón",
+"def": "Vulgarity: High. Puede ser amistoso entre conocidos o muy ofensivo."
+},
+{
+"id": "slang-4",
+"en": "Shit",
+"es": "Cagar",
+"def": "Vulgarity: High. Muy frecuente en urgencias."
+},
+{
+"id": "slang-5",
+"en": "Damn you",
+"es": "Carajo",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-6",
+"en": "Fuck, screw",
+"es": "Chingar",
+"def": "Vulgarity: High. Tiene muchos significados según el contexto."
+},
+{
+"id": "slang-7",
+"en": "Crooked, bent",
+"es": "Chueco",
+"def": "Vulgarity: Neutral."
+},
+{
+"id": "slang-8",
+"en": "Vagina",
+"es": "Chucha",
+"def": "Vulgarity: High. Muy común en Ecuador."
+},
+{
+"id": "slang-9",
+"en": "Butt",
+"es": "Cola",
+"def": "Vulgarity: Low. Depende del país."
+},
+{
+"id": "slang-10",
+"en": "Ass",
+"es": "Culo",
+"def": "Vulgarity: High. Anatómico o insulto."
+},
+{
+"id": "slang-11",
+"en": "Throw up",
+"es": "Echar la pota",
+"def": "Vulgarity: Medium. Coloquial."
+},
+{
+"id": "slang-12",
+"en": "Under the influence of pills",
+"es": "Empastillado",
+"def": "Vulgarity: Neutral. Coloquial."
+},
+{
+"id": "slang-13",
+"en": "Very angry",
+"es": "Encabronado",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-14",
+"en": "I'm really messed up",
+"es": "Estoy bien jodido",
+"def": "Vulgarity: High. Dolor o situación grave."
+},
+{
+"id": "slang-15",
+"en": "I'm fed up.",
+"es": "Estoy hasta la madre",
+"def": "Vulgarity: Medium. Expresa cansancio o hartazgo."
+},
+{
+"id": "slang-16",
+"en": "I'm beat up",
+"es": "Estoy madreado",
+"def": "Vulgarity: Medium. Trauma."
+},
+{
+"id": "slang-17",
+"en": "I'm drunk",
+"es": "Estoy pedo",
+"def": "Vulgarity: Medium. No significa \"I have gas\"."
+},
+{
+"id": "slang-18",
+"en": "Shortness of breath",
+"es": "Falta de aire",
+"def": "Vulgarity: Low. Muy frecuente."
+},
+{
+"id": "slang-19",
+"en": "Hangover",
+"es": "Guayabo (Resaca)",
+"def": "Vulgarity: Neutral. Propio de Colombia."
+},
+{
+"id": "slang-20",
+"en": "Use the bathroom",
+"es": "Hacer del baño",
+"def": "Vulgarity: Low. Eufemismo."
+},
+{
+"id": "slang-21",
+"en": "Son of a bitch",
+"es": "Hijo de puta",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-22",
+"en": "Fuck, screw",
+"es": "Joder",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-23",
+"en": "Drunk, to be fed up of something",
+"es": "Mamado",
+"def": "Vulgarity: Varies."
+},
+{
+"id": "slang-24",
+"en": "Had a seizure / Had an attack",
+"es": "Le dio un ataque",
+"def": "Vulgarity: Low. Confirmar significado."
+},
+{
+"id": "slang-25",
+"en": "Dizzy",
+"es": "Mareado",
+"def": "Vulgarity: Low."
+},
+{
+"id": "slang-26",
+"en": "I'm choking / I can't breathe",
+"es": "Me ahogo",
+"def": "Vulgarity: Low. Confirmar contexto."
+},
+{
+"id": "slang-27",
+"en": "It hurts like hell",
+"es": "Me duele un chingo",
+"def": "Vulgarity: Medium. Expresa intensidad."
+},
+{
+"id": "slang-28",
+"en": "I'm dying / I'm in really bad shape",
+"es": "Me está llevando la chingada",
+"def": "Vulgarity: High. Muy frecuente en urgencias."
+},
+{
+"id": "slang-29",
+"en": "I got badly hurt",
+"es": "Me rompí la madre",
+"def": "Vulgarity: High. Muy común en trauma."
+},
+{
+"id": "slang-30",
+"en": "I feel like hell",
+"es": "Me siento de la chingada",
+"def": "Vulgarity: High."
+},
+{
+"id": "slang-31",
+"en": "I feel awful",
+"es": "Me siento de la fregada",
+"def": "Vulgarity: Medium."
+},
+{
+"id": "slang-32",
+"en": "I don't care",
+"es": "Me vale madre",
+"def": "Vulgarity: Medium. Muy común en México."
+},
+{
+"id": "slang-33",
+"en": "Pee",
+"es": "Mear",
+"def": "Vulgarity: High. Frecuente en pacientes."
+},
+{
+"id": "slang-34",
+"en": "Buttocks",
+"es": "Nalgas",
+"def": "Vulgarity: Low. Preferible a \"ass\" en contexto clínico."
+},
+{
+"id": "slang-35",
+"en": "Give me a break! / Don't mess with me!",
+"es": "No me chingues",
+"def": "Vulgarity: High. No siempre se traduce con \"fuck\"."
+},
+{
+"id": "slang-36",
+"en": "I can't breathe",
+"es": "No puedo respirar",
+"def": "Vulgarity: Low. Emergencia."
+},
+{
+"id": "slang-37",
+"en": "Urinate",
+"es": "Orinar",
+"def": "Vulgarity: Low. Registro clínico."
+},
+{
+"id": "slang-38",
+"en": "Jerk",
+"es": "Pajuelo",
+"def": "Vulgarity: Medium."
+},
+{
+"id": "slang-39",
+"en": "Fart / Problem / Drunk",
+"es": "Pedo",
+"def": "Vulgarity: Varies. Depende totalmente del contexto."
+},
+{
+"id": "slang-40",
+"en": "Idiot, asshole, dumbass",
+"es": "Pendejo",
+"def": "Vulgarity: High. Depende del contexto y del país."
+},
+{
+"id": "slang-41",
+"en": "Damn, freaking",
+"es": "Pinche",
+"def": "Vulgarity: Medium. No siempre es un insulto directo."
+},
+{
+"id": "slang-42",
+"en": "Pee",
+"es": "Pipí",
+"def": "Vulgarity: Low. Pediatría."
+},
+{
+"id": "slang-43",
+"en": "Poop",
+"es": "Popó",
+"def": "Vulgarity: Low. Pediatría."
+},
+{
+"id": "slang-44",
+"en": "Screw it/to hell with it",
+"es": "Que se joda",
+"def": "Vulgarity: Medium-high."
+},
+{
+"id": "slang-45",
+"en": "I was bleeding a lot",
+"es": "Sangré un chingo",
+"def": "Vulgarity: Medium. Emergencias."
+},
+{
+"id": "slang-46",
+"en": "Passed out / Fainted",
+"es": "Se desmayó",
+"def": "Vulgarity: Low. Ambas son válidas."
+},
+{
+"id": "slang-47",
+"en": "Buttocks",
+"es": "Trasero",
+"def": "Vulgarity: Low. Término profesional."
+},
+{
+"id": "slang-48",
+"en": "A hard hit",
+"es": "Un madrazo",
+"def": "Vulgarity: Medium. Lesiones."
+},
+{
+"id": "slang-49",
+"en": "Big hit, punch",
+"es": "Vergazo",
+"def": "Vulgarity: High. Trauma físico."
+},
+{
+"id": "slang-50",
+"en": "Vomit",
+"es": "Vomitar",
+"def": "Vulgarity: Low. Registro clínico."
+}
+]
+},
+{
+"id": "slang-caribbean",
+"name": "Caribbean",
+"color": "#C9826A",
+"icon": "chat",
+"parentId": "slang",
+"terms": [
+{
+"id": "slang-51",
+"en": "Penis",
+"es": "Bicho",
+"def": "Vulgarity: High. Region: Puerto Rico."
+},
+{
+"id": "slang-52",
+"en": "Vagina",
+"es": "Chocha",
+"def": "Vulgarity: High. Region: Puerto Rico."
+},
+{
+"id": "slang-53",
+"en": "Testicles",
+"es": "Cojones",
+"def": "Vulgarity: High. Region: Caribbean."
+},
+{
+"id": "slang-54",
+"en": "Piece of shit",
+"es": "Come mierda",
+"def": "Vulgarity: High. Region: Cuba."
+},
+{
+"id": "slang-55",
+"en": "Vagina",
+"es": "Cuca",
+"def": "Vulgarity: High. Region: Caribbean."
+},
+{
+"id": "slang-56",
+"en": "Ass",
+"es": "Culo",
+"def": "Vulgarity: High. Region: Caribbean."
+},
+{
+"id": "slang-57",
+"en": "Damn",
+"es": "Diablo",
+"def": "Vulgarity: Low. Region: Dominican Republic."
+},
+{
+"id": "slang-58",
+"en": "It burns",
+"es": "Estoy ardiendo",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-59",
+"en": "I'm very sick",
+"es": "Estoy bien malo",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-60",
+"en": "I'm bleeding heavily",
+"es": "Estoy botando sangre",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-61",
+"en": "I'm worn out",
+"es": "Estoy esbaratao",
+"def": "Vulgarity: Neutral. Region: Dominican Republic."
+},
+{
+"id": "slang-62",
+"en": "I'm exhausted",
+"es": "Estoy explotao",
+"def": "Vulgarity: Neutral. Region: Dominican Republic."
+},
+{
+"id": "slang-63",
+"en": "I'm really sick",
+"es": "Estoy jodío",
+"def": "Vulgarity: Medium. Region: Caribbean."
+},
+{
+"id": "slang-64",
+"en": "I have a very high fever",
+"es": "Estoy prendío en fiebre",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-65",
+"en": "I'm fucked/messed up",
+"es": "Estoy vuelto mierda",
+"def": "Vulgarity: High. Region: Caribbean."
+},
+{
+"id": "slang-66",
+"en": "Butt",
+"es": "Fundillo",
+"def": "Vulgarity: Low. Region: Puerto Rico, Cuba. Informal."
+},
+{
+"id": "slang-67",
+"en": "He/she collapsed",
+"es": "Le dio un jamacuco",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-68",
+"en": "He/She passed out",
+"es": "Le dio un patatús",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-69",
+"en": "Cocksucker",
+"es": "Mamabicho",
+"def": "Vulgarity: High. Region: Puerto Rico."
+},
+{
+"id": "slang-70",
+"en": "I shit myself",
+"es": "Me cagué",
+"def": "Vulgarity: High. Region: Caribbean."
+},
+{
+"id": "slang-71",
+"en": "I hit myself hard",
+"es": "Me di un cantazo",
+"def": "Vulgarity: Neutral. Region: Puerto Rico."
+},
+{
+"id": "slang-72",
+"en": "I hit myself hard",
+"es": "Me di un fuetazo",
+"def": "Vulgarity: Low. Region: Dominican Republic."
+},
+{
+"id": "slang-73",
+"en": "I nearly fainted",
+"es": "Me dio un soponcio",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-74",
+"en": "I fainted/I passed out",
+"es": "Me dio un yeyo",
+"def": "Vulgarity: Neutral. Region: Puerto Rico."
+},
+{
+"id": "slang-75",
+"en": "It hurts like hell",
+"es": "Me duele bien cabrón",
+"def": "Vulgarity: High. Region: Puerto Rico."
+},
+{
+"id": "slang-76",
+"en": "It hurts like hell",
+"es": "Me duele del carajo",
+"def": "Vulgarity: Medium. Region: Caribbean."
+},
+{
+"id": "slang-77",
+"en": "I peed myself",
+"es": "Me meé",
+"def": "Vulgarity: High. Region: Caribbean."
+},
+{
+"id": "slang-78",
+"en": "I urinated on myself",
+"es": "Me oriné",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-79",
+"en": "I got hurt badly",
+"es": "Me partí",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-80",
+"en": "Buttock",
+"es": "Nalga",
+"def": "Vulgarity: Low. Region: Caribbean."
+},
+{
+"id": "slang-81",
+"en": "Fuck",
+"es": "Puñeta",
+"def": "Vulgarity: High. Region: Puerto Rico."
+},
+{
+"id": "slang-82",
+"en": "He/She split his/her head open",
+"es": "Se abrió la cabeza",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-83",
+"en": "I have fever",
+"es": "Tengo calentura",
+"def": "Vulgarity: Neutral. Region: Caribbean."
+},
+{
+"id": "slang-84",
+"en": "Vagina",
+"es": "Toto",
+"def": "Vulgarity: High. Region: Puerto Rico, Dominican Republic."
+},
+{
+"id": "slang-85",
+"en": "Go to hell",
+"es": "Vete pa'l carajo",
+"def": "Vulgarity: Medium-high. Region: Caribbean."
+}
+]
+}
+]
+}

@@ -1,0 +1,56 @@
+# Runs the app's checks (tests/) in a headless browser on every push and pull
+# request, whichever tool made the change (Claude, ChatGPT/Codex, an upload).
+# A red X next to a commit on GitHub means a check failed; the screenshots
+# and logs are attached to the run as "test-output".
+name: App checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the test browser
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Syntax of the app's own scripts
+        working-directory: .
+        run: |
+          node -e "
+            const s = require('fs').readFileSync('index.html', 'utf8');
+            const blocks = [...s.matchAll(/<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+            require('fs').writeFileSync('/tmp/inline.js', blocks.join('\n;\n'));
+          "
+          node --check /tmp/inline.js
+          node --check home-polish.js
+          node --check pin-icons.js
+          node --check sw.js
+          for f in api/*.js; do node --check "$f"; done
+      - name: Run every suite
+        run: node run.cjs
+      - name: Keep the screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: tests/out
+          retention-days: 7

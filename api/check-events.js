@@ -17,15 +17,19 @@
  *   1. Add a CRON_SECRET environment variable in Vercel (any long random
  *      string). Vercel sends it automatically when it triggers the cron, and
  *      it stops anyone else from hitting this endpoint.
- *   2. Add this Firestore rule so the watcher can remember what it has seen:
- *        match /watcher-state/{docId} { allow read, write: if true; }
- *        match /ce-events/{docId} { allow read, write: if true; }
+ *   2. Its own login, so it keeps working once the owner locks the Hub: add
+ *      FIREBASE_SERVICE_ACCOUNT in Vercel, the whole JSON key of a Google
+ *      service account allowed to use Firestore (api/_service-login.js).
+ *      Without it the watcher goes in unsigned, which firestore.rules allows
+ *      only while practice mode is on. Each run's report says which it used
+ *      ("login").
  *
  * FIRST RUN records the current state silently — it will not announce the
  * entire existing backlog. Announcements begin from the next change onward.
  */
 
 import { createHash } from 'node:crypto';
+import { serviceToken } from './_service-login.js';
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'language-specialist';
 const FIREBASE_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg';
@@ -65,10 +69,16 @@ const SOURCES = [
   }
 ];
 
-/* ---------- Firestore REST helpers (works with the app's open rules) ---------- */
+/* ---------- Firestore REST helpers ----------
+   With the service account's token every call carries it (and the lock
+   doesn't apply); without one they go in unsigned with the app's public key,
+   as they always did. TOKEN is set at the start of each run. */
+let TOKEN = null;
+const fsUrl = (path) => TOKEN ? `${FS}/${path}` : `${FS}/${path}?key=${FIREBASE_KEY}`;
+const fsHeaders = (extra) => ({ ...(extra || {}), ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}) });
 
 async function readState(id) {
-  const res = await fetch(`${FS}/watcher-state/${id}?key=${FIREBASE_KEY}`);
+  const res = await fetch(fsUrl(`watcher-state/${id}`), { headers: fsHeaders() });
   if (res.status === 404) return null;            // never seen before
   if (!res.ok) throw new Error(`state read failed: ${res.status}`);
   const doc = await res.json();
@@ -87,9 +97,9 @@ async function writeState(id, state) {
       updatedAt: { integerValue: String(Date.now()) }
     }
   };
-  const res = await fetch(`${FS}/watcher-state/${id}?key=${FIREBASE_KEY}`, {
+  const res = await fetch(fsUrl(`watcher-state/${id}`), {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: fsHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`state write failed: ${res.status}`);
@@ -109,9 +119,9 @@ async function announce(summary, source, link, title) {
       timestamp: { integerValue: String(Date.now()) }
     }
   };
-  const res = await fetch(`${FS}/ce-events?key=${FIREBASE_KEY}`, {
+  const res = await fetch(fsUrl('ce-events'), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: fsHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`announce failed: ${res.status}`);
@@ -164,6 +174,16 @@ export default async function handler(req, res) {
   if (secret && auth !== `Bearer ${secret}`) {
     return res.status(401).json({ error: 'unauthorized' });
   }
+
+  // Its own login when one is set up; a key that's there but refused stops
+  // the run here, with the reason, rather than failing every source below.
+  try { TOKEN = await serviceToken(); }
+  catch (err) {
+    TOKEN = null;
+    console.error('watcher login failed:', err.message);
+    return res.status(500).json({ ok: false, login: 'service account refused', error: String(err.message || err) });
+  }
+  const login = TOKEN ? 'service account' : 'none (works only while practice mode is on)';
 
   const report = [];
 
@@ -220,5 +240,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(200).json({ ok: true, checkedAt: new Date().toISOString(), report });
+  return res.status(200).json({ ok: true, login, checkedAt: new Date().toISOString(), report });
 }

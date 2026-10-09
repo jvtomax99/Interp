@@ -35,6 +35,8 @@ between assignments.
 | `api/check-events.js` | 224 | Cron job watching CE/training events |
 | `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
+| `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
+| `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
 | `api/_routine.js` | — | Haiku 5.5 first, then the endpoint's backup model, for Translate and the term check (not an endpoint itself) |
 | `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
 | `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
@@ -108,6 +110,14 @@ After pushing, verify: load the live URL headless and confirm the new
 `BUILD_ID` is present. Do not ask Jose to check something you can check.
 
 ## Verifying before you push
+
+**The suites are in `tests/`** (`cd tests && node run.cjs`, about 8
+minutes; `tests/README.md`): events-watcher login, Daily Drill, User Guide,
+the end-to-end journey, Dr. Smiley's gaze and his five performances, all
+against this checkout in headless Chromium with Firebase and the AI
+endpoints stood in for (`tests/support/`). GitHub runs them on every push
+(`.github/workflows/tests.yml`), so ChatGPT's pushes to `main` get checked
+too. `.vercelignore` keeps `tests/` and `.github/` out of the deployed site.
 
 Never push `index.html` without running all four:
 
@@ -546,10 +556,14 @@ extending the tail.
 
 - **Team access is built but only enforced once Jose locks it.** Until
   practice mode is off, the rules behave as they used to (open).
-- **The events watcher (`api/check-events.js`) has no sign-in.** It works in
-  practice mode only; once locked it can't save new events until it gets its
-  own credentials (a Firebase service account in Vercel is the usual fix).
-  Putting a shared secret inside the documents it writes was rejected as a
-  credential leak.
+- **The events watcher (`api/check-events.js`) has its own login, once the
+  key is set.** `api/_service-login.js` signs a JWT with the service account
+  in `FIREBASE_SERVICE_ACCOUNT` (Vercel setting, the whole JSON key; role
+  Cloud Datastore User), trades it for a one-hour token and sends that with
+  every Firestore call, which the lock doesn't apply to. Without the key it
+  goes in unsigned, as before (practice mode only); each run's report says
+  which ("login"), and a refused key stops the run with the reason. Lock the
+  Hub only after a run reports "service account". Putting a shared secret
+  inside the documents it writes was rejected as a credential leak.
 - `index.html` is one 1.1 MB file. Splitting CSS and JS out is the main
   structural cleanup available.

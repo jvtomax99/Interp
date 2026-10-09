@@ -197,6 +197,10 @@ no error on screen. So when you add something:
   material**: the False Friends' own lines (`heard`, `trap`, `truth`), the
   glossary, and the CoreCHI seed questions. Never generate a line, a
   rendering or a question for it, and never store what someone typed.
+- **The events watcher has its own login**: `FIREBASE_SERVICE_ACCOUNT` in
+  Vercel (a Google service account's JSON key; `api/_service-login.js`), so
+  it keeps working once the Hub is locked. The key lives only in Vercel's
+  settings: never in the repo, the database, a chat or a log.
 - **A new `api/*.js` endpoint that spends money** starts with
   `if (!(await allowTeam(req, res))) return;` (from `api/_hub-access.js`),
   and the app calls it with `...(await hubAuthHeaders())` in its headers.
@@ -217,6 +221,12 @@ https://interp-six.vercel.app before reporting success.
 
 It is one ~21,000-line, 1.1 MB file with all CSS and JS inline, used mostly on
 phones in a hospital. Do not push it unverified.
+
+**The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
+install && node run.cjs`. GitHub runs the same suites on every push
+(`.github/workflows/tests.yml`), whoever made the change; a red X on a commit
+means something broke. Add or update a check with any change to what a suite
+covers, and never weaken one to get green.
 
 1. Syntax-check the inline scripts.
 2. Run them once against a browser-globals stub — catch runtime errors.

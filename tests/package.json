@@ -1,0 +1,11 @@
+{
+  "name": "interpreter-hub-tests",
+  "private": true,
+  "description": "Checks run against the real app in a headless browser. See README.md.",
+  "scripts": {
+    "test": "node run.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

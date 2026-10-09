@@ -1,0 +1,34 @@
+const L=require('../support/harness.cjs');
+const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1;};
+(async()=>{const b=await L.chromium.launch();const {ctx,page:P}=await L.boot(b,{device:'iphone',settle:6000});
+ ok(await P.evaluate(()=>DR_FACE_FRAMES.length===26),'26 face frames');
+ const img=await P.evaluate(()=>new Promise(r=>{const i=new Image();i.onload=()=>r([i.naturalWidth,i.naturalHeight]);i.onerror=()=>r(null);i.src='./drsmiley/face.webp';}));
+ ok(img&&img[0]===302*26,'face strip is 26 frames wide: '+JSON.stringify(img));
+ await P.evaluate(()=>setCategory('translate'));await P.waitForTimeout(2500);
+ const free=async()=>{for(let i=0;i<60;i++){if(!(await P.evaluate(()=>drFaceBusy(document.querySelector('.dock-smiley svg.ds-art')))))return;await P.waitForTimeout(100);}};
+ const frame=()=>P.evaluate(()=>{const s=document.querySelector('.dock-smiley .ds-sheet');return DR_FACE_FRAMES[Math.round(-(+s.getAttribute('x'))/DR_FACE_W)]});
+ const cdp=await ctx.newCDPSession(P);
+ const touch=(type,x,y)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x,y,id:1}]});
+ await free();
+ await touch('touchStart',60,150);await P.waitForTimeout(260);const f1=await frame();
+ await touch('touchMove',60,700);await P.waitForTimeout(260);const f2=await frame();
+ await touch('touchMove',350,300);await P.waitForTimeout(260);const f3=await frame();
+ await touch('touchMove',150,690);await P.waitForTimeout(260);const f4=await frame();
+ await touch('touchEnd');await P.waitForTimeout(250);const held=await frame();await P.waitForTimeout(900);const after=await frame();
+ ok(f1==='lookUL','touch up-left: he looks up-left ('+f1+')');
+ ok(f2==='lookL'||f2==='halfL','finger moved level with him on the left: he looks left ('+f2+')');
+ ok(f3==='lookU','finger straight above him: he looks up ('+f3+')');
+ ok(['halfL','lookL','lookDL'].includes(f4),'finger near him, low left: he looks that way ('+f4+')');
+ ok(held!=='rest'&&after==='rest','after you let go he holds a moment, then looks back with a blink ('+held+' → '+after+')');
+ // think now looks up
+ await free();await P.evaluate(()=>{window.__f=[];const s=document.querySelector('.dock-smiley .ds-sheet');window.__mo=new MutationObserver(()=>window.__f.push(DR_FACE_FRAMES[Math.round(-(+s.getAttribute('x'))/DR_FACE_W)]));window.__mo.observe(s,{attributes:true});smileyReact('think');drPerform('think');});
+ await P.waitForTimeout(2200);const th=await P.evaluate(()=>{window.__mo.disconnect();return window.__f});
+ ok(th.some(f=>/^lookU[LR]$/.test(f))&&th.some(f=>/^half[LR]$/.test(f)),'thinking (the sequence, as idle plays it): he looks up and away ('+th.join(',')+')');
+ ok(await P.evaluate(()=>drMoodNow()==='thoughtful'),'a wrong answer leaves him thoughtful for a minute');
+ await P.evaluate(()=>smileyReact('hearts'));ok(await P.evaluate(()=>drMoodNow()==='happy'),'good moments make him happy for a few minutes');
+ // sway on scroll
+ await P.evaluate(()=>setCategory('all'));await P.waitForTimeout(1500);
+ const sway=await P.evaluate(async()=>{const btn=document.querySelector('.dock-smiley');const seen=[];for(let i=0;i<10;i++){window.scrollBy(0,60);await new Promise(r=>requestAnimationFrame(r));seen.push(btn.style.rotate);}await new Promise(r=>setTimeout(r,1800));return {during:seen.filter(Boolean).slice(-3),after:btn.style.rotate}});
+ ok(sway.during.length>0&&sway.after==='','scrolling leans him and he springs back upright: '+JSON.stringify(sway));
+ ok(P.__errors.length===0,'page errors: '+JSON.stringify(P.__errors.slice(0,3)));
+ await ctx.close();await b.close();})();

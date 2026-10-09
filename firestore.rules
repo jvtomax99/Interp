@@ -29,10 +29,12 @@ rules_version = '2';
  * used to be, so nobody is locked out while codes are handed out. Turning it
  * off is what actually locks the database; there is nothing else to publish.
  *
- * THE EVENTS WATCHER (api/check-events.js) runs on Vercel without a sign-in,
- * so for now it gets through only while practice mode is on. Once the Hub is
- * locked it can no longer save new events until it is given its own way in
- * (a Firebase service account in Vercel is the usual answer). Open item.
+ * THE EVENTS WATCHER (api/check-events.js) runs on Vercel, not on a phone.
+ * With a service account key in Vercel's settings (FIREBASE_SERVICE_ACCOUNT,
+ * api/_service-login.js) it signs in as that account, and Google Cloud
+ * permissions, not these rules, decide what it may do -- so the lock below
+ * doesn't stop it. Without the key it goes in unsigned and gets through only
+ * while practice mode is on. Lock after a run reports "service account".
  *
  * Firestore denies any collection that no rule matches, so a new collection
  * needs a line here or its reads and writes fail silently at the client.
