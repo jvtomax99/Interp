@@ -240,5 +240,8 @@ export default async function handler(req, res) {
     }
   }
 
+  // One line in Vercel's logs per run, so a run started from the dashboard
+  // shows which login it used and how each source went (never the key).
+  console.log(`events watcher: login = ${login}; ` + report.map(r => `${r.source} ${r.status}`).join(', '));
   return res.status(200).json({ ok: true, login, checkedAt: new Date().toISOString(), report });
 }

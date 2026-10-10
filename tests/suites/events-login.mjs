@@ -29,6 +29,8 @@ globalThis.fetch = async (url, opts = {}) => {
   if (url.includes('RSS')) return new Response('<rss><channel><item><title>Webinar A</title><link>https://x/a</link><guid>a</guid></item></channel></rss>', { status: 200 });
   return new Response('<html><body>Upcoming events list</body></html>', { status: 200 });
 };
+const LOGS = []; const log0 = console.log;
+console.log = (...a) => { const l = a.join(' '); if (l.startsWith('events watcher:')) LOGS.push(l); else log0(...a); };
 const run = async () => { let out = {}; const res = { status(c) { out.code = c; return this; }, json(o) { out.body = o; return this; } }; await handler({ headers: {} }, res); return out; };
 const fsCalls = () => calls.filter(c => c.url.startsWith('https://firestore'));
 
@@ -50,6 +52,8 @@ ok(tok && tok.jwt.claims.iss === SA.client_email && tok.jwt.claims.aud === 'http
 ok(fsCalls().length > 0 && fsCalls().every(c => !/\?key=/.test(c.url) && (c.opts.headers || {}).Authorization === 'Bearer ya29.test-token'), 'every database call carries the token, no public key', fsCalls().map(c => c.url).slice(0, 3));
 ok(calls.filter(c => c.url.includes('oauth2')).length === 1, 'one login per run');
 ok(!JSON.stringify(o.body).includes('PRIVATE KEY') && !JSON.stringify(o.body).includes('ya29'), 'the report never shows the key or the token');
+ok(LOGS.some(l => /^events watcher: login = service account; chia /.test(l)), 'the log line names the login and each source', LOGS.slice(-1));
+ok(!LOGS.join('\n').includes('PRIVATE KEY') && !LOGS.join('\n').includes('ya29'), 'the logs never show the key or the token');
 calls.length = 0; o = await run();
 ok(!calls.some(c => c.url.includes('oauth2')), 'a second run on a warm instance reuses the token');
 
