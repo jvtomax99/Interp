@@ -86,42 +86,49 @@ o = await run(); ok(o.code === 500 && /not a service account key/.test(o.body.er
 process.env.FIREBASE_SERVICE_ACCOUNT = 'not json'; forgetServiceToken();
 o = await run(); ok(o.code === 500 && /not the JSON key file/.test(o.body.error) && !o.body.error.includes('not json'), 'a non-JSON value is reported without echoing it', o.body);
 
-console.log('== sources: addresses, first runs, failures');
+console.log('== sources: addresses, first runs, failures, a disabled source');
 {
   process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify(SA); forgetServiceToken();
-  const src = await import('node:fs').then(fs => fs.readFileSync(ROOT + '/api/check-events.js', 'utf8'));
-  const CCC = 'https://cultureandlanguage.net/upcoming-events/';
-  ok(src.includes(`url: '${CCC}'`) && !src.includes("cultureandlanguage.net/training/'"), 'Cross-Cultural Communications is watched at /upcoming-events/, not the retired /training/');
   const line = () => LOGS[LOGS.length - 1] || '';
   const st = (id) => STORE['watcher-state/' + id];
+  const NCIHC = 'https://www.ncihc.org/upcoming-live-events';
+  const fetched = (host) => calls.some(c => c.url.includes(host));
+  // Cross-Cultural Communications refuses the watcher (403): off, never contacted, said so every run.
+  STORE = {}; ANN.length = 0; calls.length = 0;
+  o = await run();
+  ok(!fetched('cultureandlanguage.net'), 'the disabled source (CCC) is never fetched');
+  ok(/ ccc disabled$/.test(line()), 'the log line says "ccc disabled", never ok/unchanged', line());
+  const cr = o.body.report.find(r => r.source === 'ccc');
+  ok(cr && cr.status === 'disabled' && /403/.test(cr.reason), 'the report gives the reason', cr);
+  ok(!st('ccc'), 'nothing saved for it');
   // State as it was before addresses were remembered: an old hash, no url.
-  STORE = { 'watcher-state/ccc': { hash: { stringValue: 'old-training-page' }, seen: { stringValue: '' } },
+  STORE = { 'watcher-state/ncihc': { hash: { stringValue: 'old' }, seen: { stringValue: '' } },
             'watcher-state/cchi': { hash: { stringValue: 'old' }, seen: { stringValue: '' } } };
-  ANN.length = 0; PAGES[CCC] = { body: '<html><body><h2>Webinar: Pediatric Oncology</h2></body></html>' };
+  ANN.length = 0; PAGES[NCIHC] = { body: '<html><body><h2>Live event: Ethics</h2></body></html>' };
   o = await run();
-  ok(/ ccc seeded/.test(line()) && / cchi seeded/.test(line()), 'old state without an address starts over silently', line());
+  ok(/ ncihc seeded/.test(line()) && / cchi seeded/.test(line()), 'old state without an address starts over silently', line());
   ok(!ANN.length, 'nothing announced when a source is new or has a new address', ANN.map(a => a.summary.stringValue));
-  ok(st('ccc').url.stringValue === CCC && st('ccc').hash.stringValue && st('ccc').hash.stringValue !== 'old-training-page', 'state now remembers the address it came from');
+  ok(st('ncihc').url.stringValue === NCIHC && st('ncihc').hash.stringValue !== 'old', 'state now remembers the address it came from');
   o = await run();
-  ok(/ ccc unchanged/.test(line()) && / chia ok/.test(line()) && !ANN.length, 'same page next run: unchanged, nothing announced', line());
-  PAGES[CCC] = { body: '<html><body><h2>Webinar: Pediatric Oncology</h2><h2>Training of Trainers, Fall 2026</h2></body></html>' };
+  ok(/ ncihc unchanged/.test(line()) && / chia ok/.test(line()) && !ANN.length, 'same page next run: unchanged, nothing announced', line());
+  PAGES[NCIHC] = { body: '<html><body><h2>Live event: Ethics</h2><h2>Live event: Pediatrics</h2></body></html>' };
   o = await run();
-  ok(/ ccc changed/.test(line()) && ANN.length === 1 && /Cross-Cultural Communications page updated/.test(ANN[0].summary.stringValue) && ANN[0].link.stringValue === CCC, 'page changes: one announcement, linking the new page', ANN.map(a => a.link.stringValue));
-  // The address moves again: the new page is not compared with the old one.
-  STORE['watcher-state/ccc'].url = { stringValue: 'https://cultureandlanguage.net/training/' };
+  ok(/ ncihc changed/.test(line()) && ANN.length === 1 && /NCIHC page updated/.test(ANN[0].summary.stringValue) && ANN[0].link.stringValue === NCIHC, 'page changes: one announcement, linking the page', ANN.map(a => a.link.stringValue));
+  // The address moves: the new page is not compared with the old one.
+  STORE['watcher-state/ncihc'].url = { stringValue: 'https://www.ncihc.org/old-events' };
   ANN.length = 0; o = await run();
-  ok(/ ccc seeded/.test(line()) && !ANN.length, 'state from another address: starts over silently, no "updated"', line());
+  ok(/ ncihc seeded/.test(line()) && !ANN.length, 'state from another address: starts over silently, no "updated"', line());
   // A source that answers with an error: the code is in the report and the log line; the others carry on.
-  PAGES[CCC] = { status: 403, body: 'Forbidden' }; ANN.length = 0; o = await run();
-  ok(/ ccc fetch_failed 403(,|$)/.test(line()), 'the log line shows the HTTP status of a failed source', line());
-  ok(o.body.report.find(r => r.source === 'ccc').code === 403, 'the report carries the code');
-  ok(/ chia ok/.test(line()) && / cchi unchanged/.test(line()) && / ncihc unchanged/.test(line()), 'the other sources still run', line());
-  ok(st('ccc').hash && st('ccc').url.stringValue === CCC, 'a failed fetch leaves the saved state alone');
-  ok(!/ (chia|cchi|ncihc) \S+ \d/.test(line()), 'sources that worked show no code', line());
-  PAGES[CCC] = 'throw'; o = await run();
-  ok(/ ccc error/.test(line()) && / ncihc unchanged/.test(line()), 'a source that cannot be reached at all: error, the rest carry on', line());
+  PAGES[NCIHC] = { status: 403, body: 'Forbidden' }; ANN.length = 0; o = await run();
+  ok(/ ncihc fetch_failed 403(,|$)/.test(line()), 'the log line shows the HTTP status of a failed source', line());
+  ok(o.body.report.find(r => r.source === 'ncihc').code === 403, 'the report carries the code');
+  ok(/ chia ok/.test(line()) && / cchi unchanged/.test(line()) && / ccc disabled/.test(line()), 'the other sources still run', line());
+  ok(st('ncihc').hash && st('ncihc').url.stringValue === NCIHC, 'a failed fetch leaves the saved state alone');
+  ok(!/ (chia|cchi) \S+ \d/.test(line()), 'sources that worked show no code', line());
+  PAGES[NCIHC] = 'throw'; o = await run();
+  ok(/ ncihc error/.test(line()) && / cchi unchanged/.test(line()), 'a source that cannot be reached at all: error, the rest carry on', line());
   ok(!line().includes('ya29') && !line().includes('PRIVATE KEY'), 'still no secrets in the log line');
-  delete PAGES[CCC]; STORE = null;
+  delete PAGES[NCIHC]; STORE = null;
 }
 
 console.log('== cron secret still required');

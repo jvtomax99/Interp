@@ -12218,7 +12218,8 @@ document.addEventListener('keydown', (e)=>{
 /* ============ Global search end ============ */
 
 /* ---------- Training & Events ----------
-   Fed by the daily watcher (CHIA, CCHI, NCIHC, Cross-Cultural Communications)
+   Fed by the daily watcher (CHIA, CCHI, NCIHC; Cross-Cultural Communications
+   refuses automated checks, so it is added by hand: api/check-events.js)
    and by anyone on the team adding something they spotted elsewhere. Kept in
    its own collection and its own section so CE opportunities aren't buried
    under everyday glossary edits. */
@@ -12273,7 +12274,7 @@ function renderEvents(){
       : ''
   }<button class="head-action" onclick="openAddEventModal()">+ Add</button></div>`;
 
-  html += `<p class="practice-intro">Checked daily across CHIA, CCHI, NCIHC, and Cross-Cultural Communications. Anyone can add something they spotted elsewhere \u2014 a hospital in-service, a conference, a newsletter item.</p>`;
+  html += `<p class="practice-intro">Checked daily across CHIA, CCHI and NCIHC. Cross-Cultural Communications blocks automated checks, so add their trainings yourself, along with anything you spot elsewhere \u2014 an in-service, a conference, a newsletter item.</p>`;
 
   if(!sorted.length){
     html += `<div class="empty"><div class="glyph">${ICON_CALENDAR}</div>Nothing yet.<br>The watcher checks once a day, or add something manually.</div>`;
@@ -16645,7 +16646,7 @@ const GUIDE_TOPICS = [
     <p>These are short summaries based on the NCIHC and CCHI codes, not the official text.</p>` },
 
   { id:'events', section:'study', k:'training events ce continuing education credits webinar conference hours', q:'Where do I find CE and training opportunities?', a:`
-    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
+    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. CHIA, CCHI and NCIHC are checked once a day and new items appear on their own. Cross-Cultural Communications blocks automated checks, so their trainings show up only when someone adds them with <b>+ Add</b>. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
 
   { id:'body', section:'study', k:'3d body anatomy model organ muscle bone heart rotate zoom human atlas', q:'What is 3D Body?', a:`
     <p>A model of the human body you can turn and zoom. Tap any part to see its card. It's handy when a doctor points to something you can't picture.</p>
@@ -20583,7 +20584,7 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1009.1509';
+const BUILD_ID = 'b1010.1950';
 const BUILD_TIME = '2026-10-07 21:32 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
