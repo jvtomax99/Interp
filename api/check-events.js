@@ -9,6 +9,12 @@
  *           changes. Their "upcoming" page can sit unchanged for many months,
  *           which makes a change genuinely meaningful signal.
  *   NCIHC — no feed either; same fingerprint approach.
+ *   CCC   — Cross-Cultural Communications, same fingerprint approach. Their
+ *           site was rebuilt (WordPress, 2025) and the old /training/ address
+ *           stopped answering: every run logged "ccc fetch_failed" and nothing
+ *           of theirs was ever announced. The events list is now at
+ *           /upcoming-events/ (the address the site's own pages and search
+ *           listings point to in October 2026).
  *
  * Findings are written to the existing activity-log collection, so the app's
  * notification system announces them with no extra wiring.
@@ -26,6 +32,11 @@
  *
  * FIRST RUN records the current state silently — it will not announce the
  * entire existing backlog. Announcements begin from the next change onward.
+ * The same goes for a source whose address changes: the saved state remembers
+ * the address it was taken from, and a different one starts over silently,
+ * so a new page is never announced as "updated" against the old one's
+ * fingerprint. (State saved before addresses were remembered starts over
+ * once, the same way.)
  */
 
 import { createHash } from 'node:crypto';
@@ -64,8 +75,8 @@ const SOURCES = [
     id: 'ccc',
     name: 'Cross-Cultural Communications',
     mode: 'page',
-    url: 'https://cultureandlanguage.net/training/',
-    link: 'https://cultureandlanguage.net/training/'
+    url: 'https://cultureandlanguage.net/upcoming-events/',
+    link: 'https://cultureandlanguage.net/upcoming-events/'
   }
 ];
 
@@ -84,6 +95,7 @@ async function readState(id) {
   const doc = await res.json();
   const f = doc.fields || {};
   return {
+    url: f.url?.stringValue || '',
     hash: f.hash?.stringValue || '',
     seen: (f.seen?.stringValue || '').split('\n').filter(Boolean)
   };
@@ -92,6 +104,7 @@ async function readState(id) {
 async function writeState(id, state) {
   const body = {
     fields: {
+      url: { stringValue: state.url || '' },
       hash: { stringValue: state.hash || '' },
       seen: { stringValue: (state.seen || []).slice(-MAX_REMEMBERED).join('\n') },
       updatedAt: { integerValue: String(Date.now()) }
@@ -198,7 +211,8 @@ export default async function handler(req, res) {
       }
       const body = await resp.text();
       const prior = await readState(src.id);
-      const firstRun = prior === null;
+      // Never seen, or seen at another address: start over silently.
+      const firstRun = prior === null || prior.url !== src.url;
 
       if (src.mode === 'rss') {
         const items = parseRss(body);
@@ -218,6 +232,7 @@ export default async function handler(req, res) {
           }
         }
         await writeState(src.id, {
+          url: src.url,
           hash: '',
           seen: [...(prior?.seen || []), ...items.map(i => i.id)]
         });
@@ -225,11 +240,11 @@ export default async function handler(req, res) {
 
       } else {
         const hash = fingerprintPage(body);
-        const changed = !firstRun && prior.hash && prior.hash !== hash;
+        const changed = !firstRun && !!prior.hash && prior.hash !== hash;
         if (changed) {
           await announce(`${src.name} page updated`, src.name, src.link, `${src.name}'s events page has changed \u2014 worth a look`);
         }
-        await writeState(src.id, { hash, seen: [] });
+        await writeState(src.id, { url: src.url, hash, seen: [] });
         report.push({ source: src.id, status: firstRun ? 'seeded' : (changed ? 'changed' : 'unchanged') });
       }
 
@@ -241,7 +256,10 @@ export default async function handler(req, res) {
   }
 
   // One line in Vercel's logs per run, so a run started from the dashboard
-  // shows which login it used and how each source went (never the key).
-  console.log(`events watcher: login = ${login}; ` + report.map(r => `${r.source} ${r.status}`).join(', '));
+  // shows which login it used and how each source went (never the key). A
+  // source that answered with an error shows its HTTP status ("ccc
+  // fetch_failed 404"): 404/410 means the page moved, 403/429/503 usually a
+  // block on automated visits.
+  console.log(`events watcher: login = ${login}; ` + report.map(r => `${r.source} ${r.status}${r.code ? ' ' + r.code : ''}`).join(', '));
   return res.status(200).json({ ok: true, login, checkedAt: new Date().toISOString(), report });
 }
