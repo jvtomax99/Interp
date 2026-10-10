@@ -9,12 +9,9 @@
  *           changes. Their "upcoming" page can sit unchanged for many months,
  *           which makes a change genuinely meaningful signal.
  *   NCIHC — no feed either; same fingerprint approach.
- *   CCC   — Cross-Cultural Communications, same fingerprint approach. Their
- *           site was rebuilt (WordPress, 2025) and the old /training/ address
- *           stopped answering: every run logged "ccc fetch_failed" and nothing
- *           of theirs was ever announced. The events list is now at
- *           /upcoming-events/ (the address the site's own pages and search
- *           listings point to in October 2026).
+ *   CCC   — Cross-Cultural Communications. DISABLED: their site refuses the
+ *           watcher (see the source below). Not fetched; each run logs
+ *           "ccc disabled" so it is never mistaken for a working source.
  *
  * Findings are written to the existing activity-log collection, so the app's
  * notification system announces them with no extra wiring.
@@ -75,6 +72,16 @@ const SOURCES = [
     id: 'ccc',
     name: 'Cross-Cultural Communications',
     mode: 'page',
+    // Their site answers the watcher with 403 Forbidden: first at the old
+    // /training/ address, then, on 2026-10-10 after the move to the events
+    // page below, at this one too ("ccc fetch_failed 403", run from Vercel's
+    // iad1). A firewall decision on their side, not a wrong address. Getting
+    // round it (posing as a browser) would defeat a block the site's owner
+    // chose, so the source is off. The team adds CCC trainings by hand, and
+    // the app's Training & Events screen says so. To try again (say CCC
+    // allow-lists the watcher), delete this line: the first run after that
+    // records the page silently, as with any new source.
+    disabled: 'site refuses automated visits (HTTP 403, checked 2026-10-10)',
     url: 'https://cultureandlanguage.net/upcoming-events/',
     link: 'https://cultureandlanguage.net/upcoming-events/'
   }
@@ -201,6 +208,10 @@ export default async function handler(req, res) {
   const report = [];
 
   for (const src of SOURCES) {
+    if (src.disabled) {
+      report.push({ source: src.id, status: 'disabled', reason: src.disabled });
+      continue;
+    }
     try {
       const resp = await fetch(src.url, {
         headers: { 'User-Agent': 'InterpreterHub/1.0 (team CE watcher)' }
