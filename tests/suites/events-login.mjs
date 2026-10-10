@@ -12,6 +12,10 @@ const pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
 const SA = { type: 'service_account', project_id: 'language-specialist', client_email: 'ce-watcher@language-specialist.iam.gserviceaccount.com', private_key: pem };
 const calls = [];
 let tokenStatus = 200;
+// STORE: when set, the fake Firestore remembers watcher-state between runs and
+// keeps what was announced. PAGES: per-address answers ({ status, body } or
+// 'throw') for the source checks.
+let STORE = null; const ANN = []; const PAGES = {};
 globalThis.fetch = async (url, opts = {}) => {
   url = String(url); calls.push({ url, opts });
   const J = (status, obj) => new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
@@ -23,9 +27,17 @@ globalThis.fetch = async (url, opts = {}) => {
     return tokenStatus === 200 ? J(200, { access_token: 'ya29.test-token', expires_in: 3599, token_type: 'Bearer' }) : J(tokenStatus, { error: 'invalid_grant' });
   }
   if (url.startsWith('https://firestore.googleapis.com/')) {
-    if ((opts.method || 'GET') === 'GET') return J(404, { error: { code: 404 } });
+    const doc = url.split('/documents/')[1].split('?')[0]; const m = opts.method || 'GET';
+    if (STORE) {
+      if (m === 'GET') return STORE[doc] ? J(200, { fields: STORE[doc] }) : J(404, { error: { code: 404 } });
+      if (m === 'PATCH') { STORE[doc] = JSON.parse(opts.body).fields; return J(200, { name: doc }); }
+      if (m === 'POST') { ANN.push(JSON.parse(opts.body).fields); return J(200, { name: doc + '/x' }); }
+    }
+    if (m === 'GET') return J(404, { error: { code: 404 } });
     return J(200, { name: 'x' });
   }
+  if (PAGES[url] === 'throw') throw new TypeError('fetch failed');
+  if (PAGES[url]) return new Response(PAGES[url].body || '', { status: PAGES[url].status || 200 });
   if (url.includes('RSS')) return new Response('<rss><channel><item><title>Webinar A</title><link>https://x/a</link><guid>a</guid></item></channel></rss>', { status: 200 });
   return new Response('<html><body>Upcoming events list</body></html>', { status: 200 });
 };
@@ -73,6 +85,44 @@ process.env.FIREBASE_SERVICE_ACCOUNT = '{"hello":1}'; forgetServiceToken();
 o = await run(); ok(o.code === 500 && /not a service account key/.test(o.body.error), 'a wrong value is reported', o.body);
 process.env.FIREBASE_SERVICE_ACCOUNT = 'not json'; forgetServiceToken();
 o = await run(); ok(o.code === 500 && /not the JSON key file/.test(o.body.error) && !o.body.error.includes('not json'), 'a non-JSON value is reported without echoing it', o.body);
+
+console.log('== sources: addresses, first runs, failures');
+{
+  process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify(SA); forgetServiceToken();
+  const src = await import('node:fs').then(fs => fs.readFileSync(ROOT + '/api/check-events.js', 'utf8'));
+  const CCC = 'https://cultureandlanguage.net/upcoming-events/';
+  ok(src.includes(`url: '${CCC}'`) && !src.includes("cultureandlanguage.net/training/'"), 'Cross-Cultural Communications is watched at /upcoming-events/, not the retired /training/');
+  const line = () => LOGS[LOGS.length - 1] || '';
+  const st = (id) => STORE['watcher-state/' + id];
+  // State as it was before addresses were remembered: an old hash, no url.
+  STORE = { 'watcher-state/ccc': { hash: { stringValue: 'old-training-page' }, seen: { stringValue: '' } },
+            'watcher-state/cchi': { hash: { stringValue: 'old' }, seen: { stringValue: '' } } };
+  ANN.length = 0; PAGES[CCC] = { body: '<html><body><h2>Webinar: Pediatric Oncology</h2></body></html>' };
+  o = await run();
+  ok(/ ccc seeded/.test(line()) && / cchi seeded/.test(line()), 'old state without an address starts over silently', line());
+  ok(!ANN.length, 'nothing announced when a source is new or has a new address', ANN.map(a => a.summary.stringValue));
+  ok(st('ccc').url.stringValue === CCC && st('ccc').hash.stringValue && st('ccc').hash.stringValue !== 'old-training-page', 'state now remembers the address it came from');
+  o = await run();
+  ok(/ ccc unchanged/.test(line()) && / chia ok/.test(line()) && !ANN.length, 'same page next run: unchanged, nothing announced', line());
+  PAGES[CCC] = { body: '<html><body><h2>Webinar: Pediatric Oncology</h2><h2>Training of Trainers, Fall 2026</h2></body></html>' };
+  o = await run();
+  ok(/ ccc changed/.test(line()) && ANN.length === 1 && /Cross-Cultural Communications page updated/.test(ANN[0].summary.stringValue) && ANN[0].link.stringValue === CCC, 'page changes: one announcement, linking the new page', ANN.map(a => a.link.stringValue));
+  // The address moves again: the new page is not compared with the old one.
+  STORE['watcher-state/ccc'].url = { stringValue: 'https://cultureandlanguage.net/training/' };
+  ANN.length = 0; o = await run();
+  ok(/ ccc seeded/.test(line()) && !ANN.length, 'state from another address: starts over silently, no "updated"', line());
+  // A source that answers with an error: the code is in the report and the log line; the others carry on.
+  PAGES[CCC] = { status: 403, body: 'Forbidden' }; ANN.length = 0; o = await run();
+  ok(/ ccc fetch_failed 403(,|$)/.test(line()), 'the log line shows the HTTP status of a failed source', line());
+  ok(o.body.report.find(r => r.source === 'ccc').code === 403, 'the report carries the code');
+  ok(/ chia ok/.test(line()) && / cchi unchanged/.test(line()) && / ncihc unchanged/.test(line()), 'the other sources still run', line());
+  ok(st('ccc').hash && st('ccc').url.stringValue === CCC, 'a failed fetch leaves the saved state alone');
+  ok(!/ (chia|cchi|ncihc) \S+ \d/.test(line()), 'sources that worked show no code', line());
+  PAGES[CCC] = 'throw'; o = await run();
+  ok(/ ccc error/.test(line()) && / ncihc unchanged/.test(line()), 'a source that cannot be reached at all: error, the rest carry on', line());
+  ok(!line().includes('ya29') && !line().includes('PRIVATE KEY'), 'still no secrets in the log line');
+  delete PAGES[CCC]; STORE = null;
+}
 
 console.log('== cron secret still required');
 process.env.CRON_SECRET = 's3cret'; o = await run(); ok(o.code === 401, 'no secret, no run'); delete process.env.CRON_SECRET;

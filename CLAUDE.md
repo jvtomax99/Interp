@@ -32,7 +32,7 @@ between assignments.
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
 | `api/translate.js` | 168 | Translate tool — Claude API |
 | `api/doctor-research.js` | 379 | Doctor Prep — Claude API + web search |
-| `api/check-events.js` | 224 | Cron job watching CE/training events |
+| `api/check-events.js` | 265 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC, CCC pages) |
 | `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
