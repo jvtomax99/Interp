@@ -12047,7 +12047,7 @@ function collectSearchMatches(q){
 
   PROVIDERS.forEach(p=>{
     if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.notes)){
-      out.push({ group:'Provider Photos', icon:ICON_PERSON, color:'#6F97AC',
+      out.push({ group:'Provider Pictures', icon:ICON_PERSON, color:'#6F97AC',
         title:p.name, sub:[p.role, p.facility].filter(Boolean).join(' \u00b7 '),
         target:'providers', rank: starts(p.name) ? 0 : 1 });
     }
@@ -12471,10 +12471,11 @@ function getToolTiles(){
     { id:'review',    name:'Term Review',          color:'#4E9E74', icon: DOMAIN_ICONS.review, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
     { id:'falsefriends', name:'False Friends',     color:'#A85468', icon: DOMAIN_ICONS.book,   count: FALSE_FRIENDS.length, label:'traps' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: DOMAIN_ICONS.chat,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
-    { id:'providers', name:'Pictures of Healthcare Providers', color:'#6F97AC', icon: DOMAIN_ICONS.person, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
+    { id:'providers', name:'Provider Pictures',     color:'#6F97AC', icon: DOMAIN_ICONS.person, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: DOMAIN_ICONS.search, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
     { id:'medifind',  name:'MediFind',              color:'#35A97A', icon: DOMAIN_ICONS.search, count: null, label: '', externalUrl: 'https://www.medifind.com/' },
     { id:'doctor-research', name:'Doctor Prep',     color:'#B08D2A', icon: DOMAIN_ICONS.doctor,  count: null, label: '' },
+    { id:'doctors',   name:'Doctors',              color:'#7C6A9C', icon: DOMAIN_ICONS.grid, count: null, label: '' },
     { id:'doctor-directory', name:'Doctor Directory', color:'#7C6A9C', icon: DOMAIN_ICONS.grid, count: DOCTOR_DIRECTORY.length, label: DOCTOR_DIRECTORY.length===1?'doctor':'doctors' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: DOMAIN_ICONS.link,  count: totalLinks, label:'links' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: DOMAIN_ICONS.bell,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
@@ -13135,11 +13136,24 @@ const GUIDE_STEPS = {
   briefing: () => ({ steps: [`Tap ${GUIDE_UI.ask} and say <i>I’m covering oncology. Prep me.</i>`, `Tap ${GUIDE_UI.pill('Open the Oncology briefing')}.`,
     `Go through the cards: tap one to see the Spanish, then ${GUIDE_UI.pill('Got it')} or ${GUIDE_UI.menu('Again')}.`],
     note: 'Also in your briefing: the False Friends to watch, and your doctor if you named one. Leave and come back and it picks up where you were.' }),
+  docprep: () => ({ steps: [`Tap ${GUIDE_UI.pill('Doctor Prep')} on Home or under ${GUIDE_UI.pill('More')}. It opens the research screen directly.`,
+    'Type the doctor’s name. Add the specialty or hospital if you know it.', `Tap ${GUIDE_UI.pill('Research')}.`],
+    note: 'Doctors is the broader hub for Doctor Prep and the Doctor Directory. A specialty-based appointment briefing is separate: ask Dr. Smiley to prep you for that specialty.' }),
+  doctors: () => ({ steps: [`On a phone, open ${GUIDE_UI.pill('More')} → ${GUIDE_UI.pill('Doctors')}. On a computer, choose ${GUIDE_UI.pill('Doctors')} in the sidebar.`,
+    `Choose ${GUIDE_UI.pill('Doctor Prep')} to research someone new, or ${GUIDE_UI.pill('Doctor Directory')} to open what the team has saved.`,
+    'Use the Back arrow to retrace your route and return to where you were.'],
+    note: 'Every Doctor Prep button opens research directly. A specialty-based appointment briefing remains separate in Ask Dr. Smiley.' }),
+  directory: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctors')} → ${GUIDE_UI.pill('Doctor Directory')}, or choose ${GUIDE_UI.pill('Doctor Directory')} under ${GUIDE_UI.pill('More')}.`,
+    'Find the doctor and open their card.', 'Tap the pencil to add notes your teammates would want before walking in.'],
+    note: 'Doctor Prep saves its research here. Your team’s notes stay separate from that research.' }),
+  providers: () => ({ steps: [`Open ${GUIDE_UI.pill('Provider Pictures')} from Home or under ${GUIDE_UI.pill('More')}.`,
+    'Search by name, specialty or facility. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with.`],
+    note: 'Provider Pictures helps you put a face to a name. Use Doctor Prep for research, or the Doctor Directory for saved research and team notes.' }),
 };
 // Which "Show me" each answer offers (keys of GUIDE_COACH).
 const GUIDE_SHOW = { name:'name', noname:'name', askmoves:'name', edit:'dots', history:'dots', attach:'dots', askexplain:'dots',
   askwhat:'dock', askquick:'dock', askcards:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
-  chat:'chat', mention:'chat', pin:'chat', updates:'bell' };
+  chat:'chat', mention:'chat', pin:'chat', updates:'bell', docprep:'docprep', doctors:'doctors', directory:'directory', providers:'providers' };
 
 const ICON_GD_SHOW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" opacity=".55"/></svg>';
 
@@ -13215,6 +13229,15 @@ const GUIDE_COACH = {
             alt:'Open More → Ask the Hub and say “I’m covering oncology. Prep me.” I’ll open your briefing.' },
   dots:   { term:true, sel:['.card[data-term-id] .card-more', '.card[data-term-id] .card-actions', '.card[data-term-id]'],
             text:'Every term card has this button. Edit the term, attach a file, or ask me to explain it.' },
+  docprep: { page:'home', scroll:true, sel:[`.qa-tile[onclick="setCategory('doctor-research')"]`, `.qa-card[onclick="setCategory('doctor-research')"]`],
+            text:'Doctor Prep opens the research screen directly. Type the doctor’s name, add a specialty or hospital if you know it, then tap Research.' },
+  doctors: { page:'home', scroll:true, sel:[[`.side-row[onclick="setCategory('doctors')"]`, 'Doctors brings Doctor Prep and the Doctor Directory together. Choose it to research someone new or open what the team has saved.'],
+              ['.tabbar-btn[aria-label="More"]', 'Tap More, then Doctors. Doctor Prep researches someone new; Doctor Directory opens what the team has saved.']],
+            text:'Open More → Doctors on a phone, or Doctors in the sidebar on a computer.' },
+  directory: { page:'doctors', scroll:true, sel:[`.qa-card[onclick="setCategory('doctor-directory')"]`],
+            text:'Doctor Directory opens the research your team has saved, together with their notes about each doctor.' },
+  providers: { page:'home', scroll:true, sel:[`.qa-card[onclick="setCategory('providers')"]`],
+            text:'Provider Pictures helps you put a face to a name. Search by name, specialty or facility, or add a provider.' },
 };
 let guideCoachEl = null, guideCoachTimer = 0;
 
@@ -13252,12 +13275,13 @@ function guideShowMe(key){
     const dom = guideCoachDomain();
     if(dom && activeCategory !== dom.id){ setCategory(dom.id); wait = 650; }
   }
+  if(c.page && activeCategory !== c.page){ setCategory(c.page); wait = 650; }
   document.body.classList.add('gd-coaching');
   smileyRider.sync();   // its observer doesn't see body classes; tell it the guide's Dr. Smiley stepped aside
   clearTimeout(guideCoachTimer);
   guideCoachTimer = setTimeout(() => {
-    if(c.term){
-      const el = document.querySelector(c.sel[0]) || document.querySelector(c.sel[1]);   // plain selectors
+    if(c.term || c.scroll){
+      const el = c.sel.flatMap(item => [...document.querySelectorAll(Array.isArray(item) ? item[0] : item)]).find(guideVisible);
       if(el) el.scrollIntoView({ block:'center', behavior:'auto' });
       guideCoachTimer = setTimeout(() => guideCoachOpen(c), 120);
     } else guideCoachOpen(c);
@@ -16373,7 +16397,7 @@ const GUIDE_TOPICS = [
       <li><b>Search</b>: looks through everything in the app.</li>
       <li><b>Translate</b>: look up a word you don't have yet.</li>
       <li><b>Chat</b>: your team.</li>
-      <li><b>More</b>: everything else, including every domain, Doctor Prep, practice and this guide.</li>
+      <li><b>More</b>: everything else, including every domain, Doctors, Doctor Prep, Provider Pictures, practice and this guide.</li>
     </ol>
     <p><b>Dr. Smiley</b> sits beside that bar on the right, with <b>Ask</b> under him. Tap him to ask a question. On Home he’s in the greeting instead.</p>
     <p>Across the <b>top</b>: the moon switches dark mode on and off, the bell shows what the team changed, and your initial opens your name and settings.</p>
@@ -16516,17 +16540,31 @@ const GUIDE_TOPICS = [
     <p>Tap <b>Done</b> when you're finished. Afterwards, <b>Add new words</b> on the briefing is a good place to save anything you met in the room.</p>` },
 
   { id:'docprep', section:'prep', k:'doctor prep prepare appointment unknown specialty research before', q:"I have an appointment with a doctor I don’t know", a:`
-    <p>Use <b>Doctor Prep</b>, on Home or under <b>More</b>.</p>
+    <p>Use <b>Doctor Prep</b>, on Home or under <b>More</b>. Every Doctor Prep button opens the research screen directly.</p>
     <ol>
       <li>Type the doctor's name.</li>
-      <li>Add the hospital if you know it. It makes the answer faster and more accurate.</li>
-      <li>Tap search and give it a moment.</li>
+      <li>Add the specialty or hospital if you know it. It helps find the right person.</li>
+      <li>Tap <b>Research</b> and give it a moment.</li>
     </ol>
-    <p>You get their specialty and a list of terminology likely to come up, from the everyday words through to drug names and the false friends that catch people out. The doctor is saved in the Doctor Directory for the whole team.</p>` },
+    <p>You get their specialty and a list of terminology likely to come up, from the everyday words through to drug names and the false friends that catch people out. The doctor is saved in the Doctor Directory for the whole team.</p>
+    <p><b>Doctors</b> is the broader hub for Doctor Prep and the Doctor Directory. A specialty-based appointment briefing is separate: ask Dr. Smiley to prep you for that specialty.</p>` },
+
+  { id:'doctors', section:'prep', k:'doctors hub doctor prep research directory saved doctor tools menu', q:'What is Doctors?', a:`
+    <p>Open <b>More</b> → <b>Doctors</b> on a phone, or choose <b>Doctors</b> in the sidebar on a computer. It brings the two doctor tools together:</p>
+    <ul>
+      <li><b>Doctor Prep</b>: research a provider by name and prepare the terminology likely to come up.</li>
+      <li><b>Doctor Directory</b>: open the research the team has saved, with their notes and photos.</li>
+    </ul>
+    <p>If you want to research someone now, choose <b>Doctor Prep</b> directly on Home or under <b>More</b>. For a specialty-based appointment briefing, ask Dr. Smiley to prep you for that specialty.</p>` },
 
   { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
-    <p>A shared list of every doctor your team has looked up, under <b>More</b>.</p>
+    <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
     <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
+
+  { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital', q:'What is Provider Pictures?', a:`
+    <p><b>Provider Pictures</b> helps you put a face to a name. Open it from Home or under <b>More</b>.</p>
+    <p>Search by name, specialty or facility. Tap a photo to see it full screen. To add someone your team works with, tap <b>+ Add provider</b>.</p>
+    <p>Use <b>Doctor Prep</b> to research a doctor. Use <b>Doctor Directory</b> for the research and notes your team has already saved.</p>` },
 
   { id:'falsefriends', section:'prep', k:'false friends cognates traps embarazada constipado misleading similar words drill', q:'What are False Friends?', a:`
     <p>Words that look like English but mean something else, like <i>embarazada</i> (pregnant, not embarrassed). Each one says what it looks like, what it really means and what to say instead.</p>
@@ -18494,27 +18532,20 @@ function closeAllOverlays(){
   guideCoachClose();
 }
 
-function setCategory(id, isBack){
+function setCategory(id, isBack, returnState){
   const movedForward = !isBack && activeCategory !== id;
+  const previousView = { id: activeCategory, query: searchQuery, termRenderLimit };
   // The search box above a domain filters that domain only. It used to keep
   // its text when you moved on, so the next domain opened already filtered
   // (often to "No terms match") with no sign of why.
-  if(activeCategory !== id) searchQuery = '';
+  if(activeCategory !== id) searchQuery = isBack && returnState ? returnState.query || '' : '';
   closeAllOverlays();
-  termRenderLimit = 120;
+  termRenderLimit = isBack && returnState ? returnState.termRenderLimit || 120 : 120;
   if(!isBack && activeCategory !== id){
-    // If this destination is already somewhere behind us, the trip is a
-    // return, not a new step — cut the stack back to it. Without this,
-    // bouncing between a domain and its subgroup (Oncology -> Breast ->
-    // Oncology -> Breast) piled up four entries and Back just ping-ponged
-    // between the same two screens instead of unwinding towards Home.
-    const seen = navStack.findIndex(e => e.id === id);
-    if(seen !== -1){
-      navStack.length = seen;
-    } else {
-      navStack.push({ id: activeCategory, scroll: window.scrollY || 0 });
-      if(navStack.length > 40) navStack.shift();   // don't grow without bound
-    }
+    // A repeated destination is still a new visit. Record the screen we
+    // actually left so Back retraces the route, including its filtered list.
+    navStack.push({ ...previousView, scroll: window.scrollY || 0 });
+    if(navStack.length > 40) navStack.shift();   // don't grow without bound
     try{ history.pushState({ ih: true }, ''); }catch(e){}
   }
   // Dr. Smiley is told which screen you asked him from (askContext).
@@ -18552,8 +18583,8 @@ function setCategory(id, isBack){
   // this pair and deliberately does NOT come through here: it restores the
   // scroll position recorded on the nav stack, so you return to the line you
   // were reading. goHome() passes isBack too and does its own smooth scroll.
-  // 'instant' because a forward jump should not animate a whole page of
-  // travel; Back is the one that animates.
+  // Restore navigation positions immediately instead of animating a whole
+  // page of travel. Home's explicit scroll-to-top control is separate.
   if(movedForward) window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -19006,14 +19037,14 @@ function goHome(){
 // One implementation, two callers. The in-app Back button and the phone's
 // own back gesture used to carry separate copies of this logic, which is
 // exactly how they drifted apart — fix one, the other kept the old bug.
-// `smooth` is the only thing that legitimately differs between them.
-function navigateBack(smooth){
+// Both restore the saved position immediately. A smooth scroll can stop
+// short of its target while the restored screen is being drawn.
+function navigateBack(){
   // Same reason as closeAllOverlays: the search panel is the top layer, so
   // Back closes it rather than navigating the screen behind it.
   if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
   // So is the guide's Show me.
   if(guideCoachClose()) return true;
-  const behavior = smooth ? 'smooth' : 'auto';
 
   // An open overlay is the top layer, so Back closes that first — otherwise
   // it navigates the screen behind the panel and the panel stays put, which
@@ -19031,10 +19062,10 @@ function navigateBack(smooth){
   // top of a subgroup page is for; this arrow only ever retraces your steps.
   if(navStack.length){
     const prev = navStack.pop();
-    setCategory(prev.id, true);
+    setCategory(prev.id, true, prev);
     // Return people to where they were reading, not to the top of a list
     // they'd already scrolled halfway down.
-    window.scrollTo({ top: prev.scroll || 0, behavior });
+    window.scrollTo({ top: prev.scroll || 0, behavior: 'instant' });
     return true;
   }
 
@@ -19045,7 +19076,7 @@ function navigateBack(smooth){
 }
 
 function goBack(){
-  navigateBack(true);
+  navigateBack();
 }
 
 // The phone's own back gesture should do the same thing. Each navigation
@@ -19053,10 +19084,12 @@ function goBack(){
 // leaving the app entirely — which is what it did before. The entry is put
 // back afterwards so there's always one left to consume.
 window.addEventListener('popstate', () => {
-  const moved = navigateBack(false);
+  const moved = navigateBack();
   if(moved){ try{ history.pushState({ ih: true }, ''); }catch(e){} }
 });
-try{ history.replaceState({ ih: true }, ''); }catch(e){}
+// The app restores the view's saved scroll in navigateBack. Native browser
+// restoration otherwise runs after popstate and can overwrite that position.
+try{ history.scrollRestoration = 'manual'; history.replaceState({ ih: true }, ''); }catch(e){}
 
 // Lets someone set or change their attribution name from any screen,
 // including the focused views where the sidebar (and its own name field)
@@ -20584,8 +20617,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1010.1950';
-const BUILD_TIME = '2026-10-07 21:32 UTC';
+const BUILD_ID = 'b1011.1615';
+const BUILD_TIME = '2026-10-11 16:15 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21023,7 +21056,7 @@ function renderHome(){
     </button>`;
   const quickActions = [
     qaTile('#2E8BD0', DOMAIN_ICONS.globe,  'Translate',  `setCategory('translate')`),
-    qaTile('#7C6A9C', DOMAIN_ICONS.doctor, 'Doctor Prep',`setCategory('doctors')`),
+    qaTile('#7C6A9C', DOMAIN_ICONS.doctor, 'Doctor Prep',`setCategory('doctor-research')`),
     qaTile('#35A97A', DOMAIN_ICONS.chat,  'Team Chat',  `setCategory('chat')`),
     qaTile('#B08D2A', DOMAIN_ICONS.clipboard,  'Add Term',   `openAddModal()`),
   ].join('');
@@ -21060,7 +21093,7 @@ function renderHome(){
     qaCard('#B08D2A', DOMAIN_ICONS.doctor,  'Doctor Prep',        'AI research on a provider',     `setCategory('doctor-research')`),
     qaCard('#7C6A9C', DOMAIN_ICONS.grid,   'Doctor Directory',   'Saved doctors and their terms', `setCategory('doctor-directory')`),
     qaCard('#6F97AC', DOMAIN_ICONS.person, 'Provider Pictures',  'Put a face to a name',          `setCategory('providers')`),
-    qaCard('#2E8BD0', DOMAIN_ICONS.search, 'Find a Doctor',      'Hackensack Meridian directory', `window.open('https://www.hackensackmeridianhealth.org/en/doctors','_blank')`),
+    qaCard('#2E8BD0', DOMAIN_ICONS.search, 'Find a Doctor',      'Hackensack Meridian directory', `window.open('https://doctors.hackensackmeridianhealth.org/','_blank')`),
     qaCard('#35A97A', DOMAIN_ICONS.search, 'MediFind',           'Nationwide, by condition',      `window.open('https://www.medifind.com/','_blank')`),
   ].join('');
 
@@ -21180,7 +21213,7 @@ function renderProviders(q){
   const groups = groupByLocation(list, p => p.facility);
   const searching = !!q;
 
-  let html = `<div class="section-head"><h2>Pictures of Healthcare Providers</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
+  let html = `<div class="section-head"><h2>Provider Pictures</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
   html += groupControlsHtml('providers', groups, searching);
   let cardIdx = -1;
   groups.forEach(group=>{
@@ -21224,10 +21257,6 @@ function renderProviders(q){
   return html;
 }
 
-// A two-door landing screen for the doctor tooling. The Home tile used to
-// drop straight into Doctor Prep, which meant the Doctor Directory — the
-// thing you want when the research already exists — was only reachable by
-// scrolling Home or opening the nav. Both now sit one tap from the same tile.
 function renderTrash(){
   if(!TRASH.length){
     return `<div class="section-head"><h2>Recently deleted</h2></div>
@@ -21248,6 +21277,8 @@ function renderTrash(){
     </div>`;
 }
 
+// The Doctors navigation entry opens this hub. Doctor Prep controls open
+// the research screen directly; Home's Doctors rail keeps its existing tools.
 function renderDoctorsHub(){
   const n = DOCTOR_DIRECTORY.length;
   return `
@@ -24634,7 +24665,7 @@ function askCorpus(){
     `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, d.notes], { cat: 'doctor-directory' }));
   (PROVIDERS || []).forEach(p => add(
     { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: p.facility, notes: p.notes },
-    `Providers · ${p.name}`, [p.name], [p.role, p.facility, p.notes], { cat: 'providers' }));
+    `Provider Pictures · ${p.name}`, [p.name], [p.role, p.facility, p.notes], { cat: 'providers' }));
   (typeof ETHICS_CONTENT !== 'undefined' ? ETHICS_CONTENT : []).forEach(e => add(
     { id: 'eth:' + e.id, type: 'Code of Ethics', title: e.title, summary: stripTags(e.summary), inPractice: stripTags(e.practice), source: e.org },
     `Code of Ethics · ${e.title}`, [e.title], [stripTags(e.summary), stripTags(e.practice), e.tag], { cat: 'ethics' }));

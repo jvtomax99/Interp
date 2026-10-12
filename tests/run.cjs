@@ -14,6 +14,7 @@ const SUITES = [
   ['events-login.mjs',    'Events watcher login (no browser)'],
   ['daily-drill.cjs',     'Daily Drill: rounds, levels, score, Home card'],
   ['guide.cjs',           'User Guide: search, answers, Show me'],
+  ['destination-labels.cjs', 'Doctor tools: labels, entrances, Back, guide targets'],
   ['journey.cjs',         'End-to-end journey: Ask, briefing, review, offline'],
   ['smiley-gaze.cjs',     'Dr. Smiley: eyes, lean, moods'],
   ['smiley-gestures.cjs', 'Dr. Smiley: the five performances'],

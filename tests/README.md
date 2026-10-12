@@ -12,6 +12,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `events-login.mjs` | The events watcher's own login (`api/_service-login.js`), with a throwaway key; no browser |
 | `daily-drill.cjs` | Daily Drill: the three rounds at every level, the trap, compare, the clock, your place kept, score, level up/down, Home card |
 | `guide.cjs` | User Guide: search, answers, steps, Show me, deep links |
+| `destination-labels.cjs` | Doctor Prep and Doctors entrances, Provider Pictures labels, route and scroll restoration, glossary state, separate appointment briefing, guide targets |
 | `journey.cjs` | End to end: Ask the Hub, briefing, Term Review, offline and storage-refused cases |
 | `smiley-gaze.cjs` | Dr. Smiley's eyes, lean and moods |
 | `smiley-gestures.cjs` | Dr. Smiley's five performances, frame by frame |

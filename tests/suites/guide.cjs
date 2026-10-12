@@ -21,7 +21,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     newsMissing: GUIDE_NEWS.filter(n => !GUIDE_TOPICS.some(t => t.id === n.id)).map(n => n.id),
     pins: Object.values(GUIDE_SECTION_PINS),
   }));
-  ok(data.n === 55 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
+  ok(data.n === 57 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
   const broken = await page.evaluate(async pins => { const bad = []; for (const p of pins) { const i = new Image(); i.src = p; try { await i.decode(); } catch (e) { bad.push(p); } } return bad; }, data.pins);
   ok(!broken.length, 'all tile pictures load', broken);
 
@@ -76,7 +76,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     await page.evaluate(() => navigateBack(false)); await wait(30);
     if (await page.evaluate(() => document.getElementById('guideSheet').classList.contains('show') || activeCategory !== 'userguide')) sheetProbs.push({ id, err: 'Back did not just close the sheet' });
   }
-  ok(!sheetProbs.length, 'all 53 answers open in a sheet that fits, has text, the right Show me, 40px+ buttons; Back closes it and stays on the guide', sheetProbs);
+  ok(!sheetProbs.length, 'all 57 answers open in a sheet that fits, has text, the right Show me, 40px+ buttons; Back closes it and stays on the guide', sheetProbs);
 
   // visual steps show the real controls
   await page.evaluate(() => openGuideTopic('edit')); await wait(300);
@@ -126,7 +126,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
 
   // Show me on every target (phone)
   const coachProbs = [];
-  for (const key of ['name', 'bell', 'tabs', 'search', 'chat', 'dock', 'brief', 'dots']) {
+  for (const key of ['name', 'bell', 'tabs', 'search', 'chat', 'dock', 'brief', 'dots', 'doctors', 'docprep', 'directory', 'providers']) {
     await go(page, 'userguide', 600);
     await page.evaluate(k => guideShowMe(k), key); await wait(key === 'dots' ? 1500 : 1500);
     const c = await coachState(page);
@@ -137,8 +137,8 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     await page.keyboard.press('Escape'); await wait(150);
     if (await page.evaluate(() => !!document.querySelector('.gd-coach') || document.body.classList.contains('gd-coaching'))) coachProbs.push({ key, err: 'Escape did not close' });
   }
-  ok(!coachProbs.length, 'Show me lights the real control for all 8 targets on a phone; for the dock he steps in and the tip has no second face; Escape closes', coachProbs);
-  ok(await page.evaluate(() => activeCategory !== 'userguide'), 'Show me on ⋯ opened a real domain');
+  ok(!coachProbs.length, 'Show me lights the real control for all 12 targets on a phone; for the dock he steps in and the tip has no second face; Escape closes', coachProbs);
+  ok(await page.evaluate(() => activeCategory !== 'userguide'), 'Show me moved to the screen containing its real target');
   await page.evaluate(() => navigateBack(false)); await wait(600);
   ok(await page.evaluate(() => activeCategory) === 'userguide', 'Back from that domain returns to the guide');
 
@@ -211,7 +211,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     await go(p5, 'userguide', 1000);
     await p5.screenshot({ path: O + 't-desktop.png' });
     const probs = [];
-    for (const key of ['name', 'bell', 'tabs', 'dock', 'dots', 'search']) {
+    for (const key of ['name', 'bell', 'tabs', 'dock', 'dots', 'search', 'docprep', 'directory', 'providers', 'doctors']) {
       await go(p5, 'userguide', 500);
       await p5.evaluate(k => guideShowMe(k), key); await wait(1500);
       const c = await coachState(p5);
@@ -219,7 +219,8 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
       if (key === 'dock') await p5.screenshot({ path: O + 't-desktop-dock.png' });
       await p5.keyboard.press('Escape'); await wait(150);
     }
-    ok(!probs.length, 'desktop: Show me finds the name, bell, Home link, search button, top-bar Dr. Smiley and a card', probs);
+    ok(!probs.length, 'desktop: Show me finds the name, bell, Home link, search button, Dr. Smiley, a term card and all four doctor-tool targets', probs);
+    await go(p5, 'userguide', 500);
     const hs2 = await p5.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     ok(hs2 <= 0 && p5.__errors.length === 0, 'desktop: no sideways scroll, no errors', { hs2, e: p5.__errors });
     await c5.close(); }
