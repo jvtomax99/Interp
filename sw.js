@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v210-feature-destinations';
+const CACHE_VERSION = 'interpreter-hub-v211-cleanup';
 const PRECACHE = [
   './',
   './index.html',
@@ -38,8 +38,6 @@ const PRECACHE = [
   './hmh-mark.png',
   // The same mark, trimmed so it centres: the Ask tag on the smiley uses it.
   './hmh-mark-square.png',
-  // The greeting hand. Same reason: it is on the first screen of a cold start.
-  './wave-hand.png',
   // Dr. Smiley (drSmileyArt in index.html): his picture and the strip of
   // frames his face moves through. On Home, the dock, Ask the Hub and the
   // lock screen, so they must work offline from the start.

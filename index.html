@@ -9247,35 +9247,6 @@ function ensureTermIds(){
 // the Genetics import, this domain doesn't exist yet, so the migration
 // creates it first if needed.
 
-async function ensureDomainExists(name, color, icon, parentId){
-  let cat = DATA.categories.find(c=>c.name===name);
-  if(cat) return cat;
-  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide','anatomy'];
-  const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
-  const base = slugify(name);
-  let id = base, n = 2;
-  while(existingIds.includes(id)){ id = `${base}-${n}`; n++; }
-  cat = { id, name, color, icon, parentId: parentId || null, terms: [] };
-  DATA.categories.push(cat);
-  await saveCategoriesMeta();
-  return cat;
-}
-
-async function bulkAddTerms(domainCat, wordList){
-  const existingEnglish = new Set(domainCat.terms.map(t=>(t.en||'').trim().toLowerCase()));
-  const toAdd = wordList.filter(([en]) => !existingEnglish.has(en.trim().toLowerCase()));
-  const batchSize = 400;
-  for(let i=0; i<toAdd.length; i+=batchSize){
-    const batch = db.batch();
-    toAdd.slice(i, i+batchSize).forEach(([en, es, def])=>{
-      const id = genId();
-      batch.set(db.collection('terms').doc(id), stripUndefined({ id, categoryId: domainCat.id, en, es, def }));
-    });
-    await batch.commit();
-  }
-  return toAdd.length;
-}
-
 // "Emergency & Trauma" — covers trauma mechanisms, triage, common ED
 // presentations, resuscitation, wound care, toxicology, burns, and the
 // behavioral-health/safety terms that come up constantly in the ED.
@@ -10491,30 +10462,6 @@ function closeAnnouncementModal(){
   document.getElementById('announcementOverlay').classList.remove('show');
 }
 
-function renderAnnouncements(){
-  let html = `<div class="announcements-block">
-    <div class="announcements-head">
-      <span>${ICON_PIN} Pinned</span>
-      <button class="link-btn" onclick="openAnnouncementModal()">+ Pin something</button>
-    </div>`;
-  if(!ANNOUNCEMENTS.length){
-    html += `<p class="announcements-empty">Nothing pinned — important updates (a new CE requirement, an updated protocol) go here instead of getting lost in the chat scroll.</p>`;
-  } else {
-    ANNOUNCEMENTS.forEach(a=>{
-      html += `
-        <div class="announcement-row">
-          <p>${escapeHtml(a.text)}</p>
-          <div class="announcement-meta">
-            <span>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}</span>
-            <button class="chat-delete" title="Unpin" onclick="deleteAnnouncement('${a.id}')">Unpin</button>
-          </div>
-        </div>`;
-    });
-  }
-  html += `</div>`;
-  return html;
-}
-
 /* Team Chat's pinned strip: one line with the newest pin until it is opened.
    Two pins used to take 300px, the whole phone screen above the thread. */
 let tcPinnedOpen = false;
@@ -10999,13 +10946,6 @@ function removeChatTrayItem(id){
   done.forEach(fn => fn());
 }
 
-// Called after a message is sent: the files now belong to it.
-function clearChatTray(){
-  pendingChatAttachments.forEach(i => { if(i.preview) setTimeout(()=> URL.revokeObjectURL(i.preview), 4000); });
-  pendingChatAttachments = [];
-  renderChatAttachPreview(); updateChatSendState();
-}
-
 // Resolves when nothing in the tray is still uploading.
 let chatTrayWaiters = [];
 function chatTraySettled(){
@@ -11060,27 +11000,6 @@ function renderChatAttachPreview(){
 window.addEventListener('online', ()=>{
   pendingChatAttachments.filter(i => i.status === 'waiting').forEach(startChatUpload);
 });
-
-/* Under "Oncology, Hematology & Leukemia" every child was labelled
-   "… Oncology" — the word carried no information there, but it doubled the
-   length of every label and forced ragged wrapping. Drop a trailing word
-   that the parent's own name already establishes, so the grid reads
-   "Breast / Radiation / Neuro" instead of thirteen variations on Oncology.
-   Only trailing words, only words the parent actually contains, and never
-   down to something too short to recognise. */
-function subgroupShortLabel(parentName, childName){
-  const child = (childName || '').trim();
-  const words = (parentName || '').split(/[^A-Za-z]+/).filter(w => w.length > 3);
-  for(const w of words){
-    // Matches both "Breast Oncology" and "Neuro-Oncology".
-    const re = new RegExp('[\\s-]+' + w + '$', 'i');
-    if(re.test(child)){
-      const short = child.replace(re, '').trim();
-      if(short.length >= 3) return short;
-    }
-  }
-  return child;
-}
 
 /* ============ Utilities ============ */
 function whoAmI(){
@@ -11175,7 +11094,6 @@ const PV = { open:false, items:[], i:0, s:1, x:0, y:0, w:0, h:0, nw:0, nh:0,
              opener:null, scroll:null, inerted:[], busy:false, lastTap:null };
 const PV_MAX = 4;
 const pvReduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-function pvIsOpen(){ return PV.open; }
 
 function openChatPhotos(mid, index, originEl){
   const m = CHAT_MESSAGES.find(x => x.id === mid);
@@ -11194,7 +11112,6 @@ function openLightbox(url, filename){
   const origin = ev && ev.target && ev.target.closest ? ev.target.closest('button, img') : null;
   openPhotoViewer([{ url, w:0, h:0, title:filename || 'Photo', sub:'', caption:'', key:'' }], 0, origin);
 }
-function closeLightbox(){ closePhotoViewer(); }
 
 function openPhotoViewer(items, index, originEl){
   const pv = document.getElementById('pv');
@@ -13965,18 +13882,6 @@ function tileVars(color){
   return `--tile-color:${color}; --tile-tint:${color}1F; --tile-edge:${color}45; --tile-glow:${color}66;`;
 }
 
-function tileHtml(t, i, onclickCall, opts){
-  opts = opts || {};
-  return `
-      <button class="home-tile" style="${tileVars(t.color)} animation-delay:${Math.min(i*0.03,0.3).toFixed(2)}s;" onclick="${onclickCall}">
-        ${opts.editAction ? `<span class="home-tile-edit" title="Edit domain" onclick="event.stopPropagation(); ${opts.editAction}">${ICON_EDIT}</span>` : ''}
-        ${t.externalUrl ? `<span class="home-tile-external" title="Opens in your browser">${ICON_EXTERNAL}</span>` : ''}
-        <span class="home-tile-icon">${t.icon}</span>
-        <span class="home-tile-name">${escapeHtml(t.name)}</span>
-        <span class="home-tile-count">${t.count===null ? '' : t.count + ' ' + t.label}</span>
-      </button>`;
-}
-
 function escapeHtml(s){
   return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -15169,10 +15074,6 @@ function drFacePlay(svg, name, head, done, priority){
   const a = drAnim(svg, { head: head || null });
   if(!a){ if(done) done(); return false; }
   return a.play(name, { priority: priority || DR_P.REACT, done });
-}
-function drFaceTalk(svg, head, ms, done){
-  const a = drAnim(svg, { head: head || null });
-  return a ? a.talk(ms, { priority: DR_P.DIRECT, done }) : false;
 }
 // His own rhythm on this face. Returns { act(kind), stop(), running }.
 function drFaceIdle(svg, head, opts){
@@ -17941,9 +17842,6 @@ function scheduleSearchRender(){
   clearTimeout(searchRenderTimer);
   searchRenderTimer = setTimeout(()=>{ searchRenderTimer = null; renderContent(); }, 120);
 }
-function flushSearchRender(){
-  if(searchRenderTimer){ clearTimeout(searchRenderTimer); searchRenderTimer = null; renderContent(); }
-}
 
 /* A re-render of the SAME screen is a data refresh, not an arrival. Entry
    animations and count-ups belong to arriving; replaying them on every data
@@ -18486,28 +18384,6 @@ function toggleTheme(){
 function toggleDomainsCollapsed(){
   domainsCollapsed = !domainsCollapsed;
   try{ localStorage.setItem('ih_domainsCollapsed', domainsCollapsed ? '1' : '0'); }catch(e){}
-  render();
-}
-
-function toggleDomainGroup(parentId){
-  const idx = collapsedDomainGroups.indexOf(parentId);
-  if(idx === -1) collapsedDomainGroups.push(parentId); else collapsedDomainGroups.splice(idx, 1);
-  try{ localStorage.setItem('ih_collapsedDomainGroups', JSON.stringify(collapsedDomainGroups)); }catch(e){}
-  render();
-}
-
-function toggleToolGroup(groupId){
-  let collapsed = [];
-  try{ collapsed = JSON.parse(localStorage.getItem('ih_collapsedToolGroups') || '[]'); }catch(e){}
-  const idx = collapsed.indexOf(groupId);
-  if(idx === -1) collapsed.push(groupId); else collapsed.splice(idx, 1);
-  try{ localStorage.setItem('ih_collapsedToolGroups', JSON.stringify(collapsed)); }catch(e){}
-  render();
-}
-
-function toggleToolsCollapsed(){
-  toolsCollapsed = !toolsCollapsed;
-  try{ localStorage.setItem('ih_toolsCollapsed', toolsCollapsed ? '1' : '0'); }catch(e){}
   render();
 }
 
@@ -20617,8 +20493,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1011.1615';
-const BUILD_TIME = '2026-10-11 16:15 UTC';
+const BUILD_ID = 'b1013.2338';
+const BUILD_TIME = '2026-10-13 23:38 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21898,28 +21774,6 @@ function toggleSection(id){
     const b = document.querySelector(`#domain-${CSS.escape(id)} .sec-fold-toggle`);
     if(b) b.focus({ preventScroll:true });
   }
-}
-
-function jumpToDomain(id){
-  // Scrolling is only right when the target is already part of the page
-  // you're on — that's the parent's own "General terms" section.
-  //
-  // For a subgroup it was wrong, and wrong *intermittently*, which is what
-  // made Back feel broken. On a parent page every subgroup's section is in
-  // the DOM, so tapping "Radiation" used to just scroll: the heading filled
-  // the screen, it looked like you'd arrived somewhere, but activeCategory
-  // was still the parent and nothing went on the stack — so Back skipped
-  // straight past it. And because the render budget caps how many term
-  // cards get built, the target section often *wasn't* in the DOM yet, in
-  // which case the same tap fell through to a real navigation and Back
-  // behaved correctly. Same gesture, two outcomes, decided by how many
-  // terms happened to be rendered.
-  if(id === activeCategory){
-    const el = document.getElementById('domain-' + id);
-    if(el){ el.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
-  }
-  setCategory(id);
-  window.scrollTo({ top:0, behavior:'auto' });
 }
 
 function showMoreTerms(){
@@ -23557,23 +23411,6 @@ async function saveDomain(){
   logActivity(`created the "${name}" domain`);
   successBurst();
   showToast('Domain created.');
-  render();
-}
-
-async function deleteDomain(id){
-  const cat = DATA.categories.find(c=>c.id===id);
-  if(!cat) return;
-  if(cat.terms.length>0){ showToast('Remove all terms from a domain before deleting it.'); return; }
-  if(DATA.categories.some(c=>c.parentId===id)){ showToast('Move or delete this domain\u2019s subgroups first.'); return; }
-  if(!confirm(`Delete the empty "${cat.name}" domain?`)) return;
-  const previousCategories = DATA.categories;
-  DATA.categories = DATA.categories.filter(c=>c.id!==id);
-  if(activeCategory===id) activeCategory = 'all';
-  const ok = await saveCategoriesMeta();
-  if(!ok){ DATA.categories = previousCategories; return; }
-  const trashId = await trashItem('domain', `the "${cat.name}" domain`, { ...categoryMeta(cat), terms: [] });
-  logActivity(`deleted the "${cat.name}" domain`);
-  showUndoToast('Domain deleted.', trashId);
   render();
 }
 
@@ -27710,9 +27547,6 @@ function prepDeckRestart(onlyAgain){
   Object.assign(st, { queue, i: 0, flip: false });
   prepDeckSave(st);
   prepDeckPaint('prepFront');
-}
-function prepOpenTerm(catId, termId){
-  revealTerm(catId, termId);
 }
 function prepResearch(){
   const entry = prepDoctorEntry(PREP.doctor);
