@@ -210,8 +210,8 @@ no error on screen. So when you add something:
 Vercel auto-deploys on push to `main`. No build step. Three things move
 together or returning users get a stale app:
 
-1. `BUILD_ID` in `index.html` (~line 16080, format `bMMDD.HHMM`) — bump it.
-2. `CACHE_VERSION` in `sw.js` (~line 29) — bump it.
+1. `BUILD_ID` in `index.html` (search for `const BUILD_ID`; format `bMMDD.HHMM`, UTC) — bump it.
+2. `CACHE_VERSION` in `sw.js` (search for `const CACHE_VERSION`) — bump it.
 3. Any changed `api/*.js` ships in the same push.
 
 Then confirm the new `BUILD_ID` is actually live at

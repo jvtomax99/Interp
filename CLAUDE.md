@@ -19,21 +19,22 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 20,894 | The whole app (1.1 MB). All CSS and JS inline |
-| `home-polish.css` | 894 | Overlay layer. Loads right after `</style>`, so it wins |
-| `home-polish.js` | 1,220 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
+| `index.html` | 28,341 | The whole app (1.6 MB). All CSS and JS inline |
+| `home-polish.css` | 1,318 | Overlay layer. Loads right after `</style>`, so it wins |
+| `home-polish.js` | 1,558 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
 | `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 5 files | Dr. Smiley: `base` (his calm head and shoulders), `face` (a strip of 18 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
-| `sw.js` | 175 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
+| `sw.js` | 212 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/` |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
-| `api/translate.js` | 168 | Translate tool — Claude API |
-| `api/doctor-research.js` | 379 | Doctor Prep — Claude API + web search |
+| `api/translate.js` | 145 | Translate tool — Claude API |
+| `api/doctor-research.js` | 383 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
-| `api/term-lookup.js` | 293 | Term reference lookup — Claude API + web search |
+| `api/term-lookup.js` | 297 | Term reference lookup — Claude API + web search |
+| `api/term-check.js` | 185 | Checks a glossary entry before it is saved — Haiku 5.5 first (`_routine.js`), then its backup model |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
 | `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
@@ -41,7 +42,7 @@ between assignments.
 | `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
 | `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
-| `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more; the files above were cut from them |
+| `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more and not deployed (`.vercelignore`); the files above were cut from them |
 
 Inside `index.html`, sections are marked with banner comments
 (`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
@@ -91,7 +92,9 @@ afterwards — measure them, do not assume.
 **Never resolve a merge with `git checkout --ours`.** It once discarded the
 `pin-icons` and `home-polish` wiring out of `index.html` in a single command.
 Resolve conflicts hunk by hunk, then confirm all three files are still loaded
-(`index.html` lines ~5685, ~5686, ~20892) before pushing.
+(in `index.html`: the `<link>` to `home-polish.css` and `<script>` for
+`home-polish.js` near the end of `<head>`, and the `<script>` for
+`pin-icons.js` just before `</body>`) before pushing.
 
 ## Deploying
 
@@ -99,9 +102,10 @@ Vercel auto-deploys on push to the default branch. There is no build step.
 
 **Three things must stay in sync on every deploy that changes `index.html`:**
 
-1. **`BUILD_ID`** (`index.html`, ~line 16080, format `bMMDD.HHMM`) — bump it.
+1. **`BUILD_ID`** (`index.html`, search for `const BUILD_ID`; format
+   `bMMDD.HHMM` in UTC, with `BUILD_TIME` on the next line) — bump it.
    This is the only reliable way to confirm what is actually live.
-2. **`CACHE_VERSION`** (`sw.js` line 29) —
+2. **`CACHE_VERSION`** (`sw.js`, search for `const CACHE_VERSION`) —
    bump it whenever `index.html` changes meaningfully, or returning users
    keep the stale cached app.
 3. If an `api/*.js` file changed, it ships in the same push.

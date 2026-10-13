@@ -2,3 +2,18 @@
 # the deployed site.
 tests
 .github
+
+# Notes for the people and tools that work on the app, and the database
+# rules (applied by hand in the Firebase console): never loaded by the app,
+# so not served either.
+CLAUDE.md
+AGENTS.md
+firestore.rules
+storage.rules
+firebase.json
+
+# Jose's original artwork sheets (9 MB). The app uses the pre-cut files in
+# pins/ and pin-icons-sheet.webp; these stay in git as the source art.
+pin-icons-source-hd-upload.png
+medical-pins.png.PNG
+specialty-pins.png.PNG
