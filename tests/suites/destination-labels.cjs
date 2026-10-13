@@ -20,6 +20,10 @@ async function menu(page, name, desktop) {
   await pause(page);
 }
 async function openPhoneMenu(page) {
+  // A preceding card click may have scrolled Home and queued dockTuck.
+  // Let that scroll event and the dock's .42s transition finish before
+  // deciding whether the visible capsule needs to be expanded.
+  await pause(page, 450);
   // The existing dock tucks when scrolling. Tap its capsule to expand it,
   // exactly as a person does, before selecting a nonactive tab.
   if (await page.evaluate(() => document.body.classList.contains('dock-mini'))) {
@@ -257,7 +261,7 @@ async function search(page, query) {
         const context = await page.evaluate(() => ({ category: activeCategory,
           body: document.body.className, focus: document.activeElement?.id || document.activeElement?.tagName,
           moreOpen: document.getElementById('moreSheetOverlay')?.classList.contains('show') }));
-        ok(false, device + ' journey completed', { message: error.message, context });
+        ok(false, device + ' journey completed', { context, message: error.message });
       } finally { await ctx.close(); }
     }
   } finally { await browser.close(); }
