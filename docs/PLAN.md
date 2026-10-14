@@ -34,35 +34,10 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
-Regions (Jose, 2026-10-14): the South region uses the app too. Decided:
-two regions, North (HUMC side) and South; regions are a view, not a wall
-(everyone reads everything, region only sets defaults and which chat
-notifies); each phone picks its region (asked once, changeable in
-Settings), same single team code; Jose stays the only owner (no region
-lead). Open question for phase R1: which HMH sites are South (ask Jose,
-don't guess).
-
-R1. **Regions foundation.** `REGIONS` list (North, South). Phone's region in
-   `localStorage` (`ih_region`) and on `hub-members/{uid}` (rules: allow
-   `region` in the self-update key list; paste rules before shipping).
-   Ask once, change in Settings. Each `HMH_LOCATIONS` entry gets a
-   `region`. User Guide.
-R2. **Doctor directory by region.** Region derived from the doctor's
-   location (`HMH_LOCATIONS`), override on the edit sheet. Opens on my
-   region, "All regions" chip; search always spans all. Fix the key:
-   `doctorDirectoryKey` is name-only, so two Dr. Garcias in two regions
-   overwrite each other; key on name + region for new entries, existing
-   ids kept. One-time migration (flag in `terminology-meta/migrations`)
-   sets `region` on existing entries from their location. Duplicate
-   doctors check compares within a region.
-R3. **Chat channels.** Tabs: Everyone (= today's `team-chat`, untouched,
-   no migration) + one per region in `region-chat/{region}/messages`
-   (new rules line, pasted before the app ships or posts fail silently).
-   Listen to Everyone + my region only (reads); other channels load when
-   opened. Unread badge and notifications per channel; typing marker per
-   channel. Check every `team-chat` use (42 places: delete, retry,
-   attachments, search, notifications).
-R4. Later, if asked: region tags on announcements and Training & Events.
+R4. **Regions, later, if Jose asks:** region tags on announcements and on
+   Training & Events. The top bar still says "Hackensack University Medical
+   Center" under the title for South users too (Jose's call whether to change).
+   Doctor Prep's default location is "Hackensack Meridian Health" for both.
 
 Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
@@ -117,6 +92,10 @@ come from this alone.
 - 2026-10-14 Doctor Prep on Sonnet 5.5: effort `medium` set explicitly,
   max_tokens 8000 → 16000, refusals answered plainly, JSON read from the
   last text block. Smoke-tested with a mocked API. #30.
+- 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
+  channels (Everyone, North, South), Doctor Directory by region, namesake
+  fix. No rules change, no migration. `docs/features/regions.md`. PR (this
+  branch).
 - 2026-10-14 Term lookup on Sonnet 5.5: effort stays `medium`, refusals
   logged and answered as "nothing found", JSON read from the last text
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
@@ -161,5 +140,9 @@ come from this alone.
   answers in `doctor-research-cache`: test with a doctor not looked up before.
   Term lookup caches per term for 90 days (`term-link-cache`): test with a
   term nobody has opened reading for.
+- Regions decided by Jose (2026-10-14): North + South; a view, not a
+  wall (all chats open to all); each phone picks (`ih_region`); Jose stays
+  the only owner. South sites: the Shore hospitals, Raritan Bay, Carrier;
+  JFK is North. Details: `docs/features/regions.md`.
 - Weekly code report: Routine "Weekly code cleanup report", Mondays 11:51
   New York, report-only, phone notification.

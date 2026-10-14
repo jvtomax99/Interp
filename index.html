@@ -5795,6 +5795,40 @@ html[data-theme="dark"] .drp-earlier{ color:var(--accent-2); }
 .ds-mode-hint{ display:block; color:var(--ink-soft); font-size:12px; line-height:1.4; min-height:2.8em; }
 html[data-theme="dark"] .ds-mode-seg button[aria-checked="true"]{ background:#2A3350; color:#fff; }
 @media (prefers-reduced-motion: reduce){ .ds-mode-seg button{ transition:none; } }
+
+/* ---------- Regions (setMyRegion, docs/features/regions.md) ----------
+   The North / South picker reuses Dr. Smiley's segmented control; the hint
+   under each name is the only addition. */
+.rg-seg button{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; line-height:1.15; }
+.rg-seg button small{ font-size:var(--fs-cap); font-weight:550; color:var(--ink-faint); }
+.rg-seg button[aria-checked="true"] small{ color:var(--ink-soft); }
+.rg-ask{ margin:0 0 var(--sp-3); padding:var(--sp-2) var(--sp-3) var(--sp-3); border-radius:var(--r-md); background:var(--accent-soft); }
+.rg-ask p{ margin:0 0 var(--sp-2); font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.rg-ask p b{ color:var(--ink); font-weight:650; }
+html[data-theme="dark"] .rg-ask{ background:rgba(46,139,208,.14); }
+.rg-filter{ margin:0 0 var(--sp-3); max-width:460px; }
+.rg-filter button span{ font-weight:550; color:var(--ink-faint); margin-left:2px; }
+.rg-note{ margin:0 0 var(--sp-3); font-size:var(--fs-foot); color:var(--ink-soft); }
+
+/* Team Chat channel tabs: Everyone, North, South. */
+.tc-channels{ margin:0 0 var(--sp-2); }
+.tc-channels .rg-ask{ margin:var(--sp-2) 0 0; }
+.tc-chans{ display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:2px; margin:-2px; }
+.tc-chans::-webkit-scrollbar{ display:none; }
+.tc-chan{ flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:0 14px; border:0; border-radius:999px;
+  background:var(--line-soft); color:var(--ink-soft); font:600 14px var(--sans); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition:background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease); }
+.tc-chan small{ font-size:var(--fs-cap); font-weight:550; color:var(--ink-faint); }
+.tc-chan.is-on{ background:var(--paper); color:var(--ink);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.tc-chan-n{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--danger); color:#fff;
+  font-size:var(--fs-cap); font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
+.tc-chan:active, .tc-chan.is-pressed{ transform:scale(.96); }
+.tc-chan:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+html[data-theme="dark"] .tc-chan.is-on{ background:#2A3350; color:#fff; }
+@media (max-width:900px){ .tc-channels{ margin-top:var(--sp-2); } }
+@media (max-height:500px) and (max-width:1000px){ .tc-channels .rg-ask{ display:none; } }
+@media (prefers-reduced-motion: reduce){ .tc-chan{ transition:none; } }
 .ta-switch.is-calm[aria-checked="true"]{ background:var(--navy); }
 html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(--cyan); }
 @media (prefers-reduced-motion: reduce){
@@ -6528,6 +6562,10 @@ body.pv-open{ overflow:hidden; }
       <input id="fDDGroupOther" type="text" placeholder="e.g. Englewood Health">
     </div>
     <div class="field"><label>Hospital / location as written (optional)</label><input id="fDDLocation" type="text" placeholder="e.g. Hackensack Meridian Health" oninput="updateDDGroupHint()"></div>
+    <div class="field">
+      <label for="fDDRegion">Region</label>
+      <select id="fDDRegion"><option value="">From the location</option><option value="north">North</option><option value="south">South</option></select>
+    </div>
     <div class="field"><label>Location details (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. JTCC, 4th floor, Suite 401"></div>
     <div class="field"><label>Notes (optional)</label><textarea id="fDDNotes" placeholder="Scheduling notes, quirks, best way to reach, etc."></textarea></div>
     <div class="field">
@@ -6645,6 +6683,13 @@ body.pv-open{ overflow:hidden; }
     <p class="name-photo-hint">A photo is optional \u2014 your team sees it beside your messages in Team Chat.</p>
     <!-- The owner's way in to Team access, or a way to enter the code. Filled by renderNameAccess(). -->
     <div class="name-access" id="nameAccess" hidden></div>
+    <!-- Region (setMyRegion, ih_region): what the Doctor Directory opens on
+         and which Team Chat channel notifies. Saved on tap. -->
+    <div class="ds-mode rg-pref">
+      <span class="ds-mode-lab" id="rgLab">My region</span>
+      <div id="rgPrefSeg"></div>
+      <small class="ds-mode-hint">Opens the Doctor Directory on your region, and your region’s chat channel notifies you. Everyone still sees everything.</small>
+    </div>
     <div class="ta-switchrow name-pref">
       <span>Dr. Smiley follows me<small>On every page, beside the tabs. Tap him to ask the Hub.</small></span>
       <button class="ta-switch is-calm" id="smileyFollowSwitch" type="button" role="switch" aria-checked="true" aria-label="Dr. Smiley follows me" onclick="setSmileyFollows(this.getAttribute('aria-checked') !== 'true')"></button>
@@ -7596,33 +7641,35 @@ const HMH_NETWORK_LABEL = 'Hackensack Meridian Health \u2014 site not specified'
    contains them, and the campus before the network name, so "John Theurer
    Cancer Center at Hackensack University Medical Center" files under the
    cancer center rather than under HUMC or under HMH. */
+// `region` (Jose, 2026-10-14): which interpreter region covers the site. It
+// sets what the Doctor Directory opens on; the network name has none.
 const HMH_LOCATIONS = [
   // Hackensack campus — the sites Language Services covers most.
-  { name:'John Theurer Cancer Center',              match:['john theurer','theurer','jtcc'] },
-  { name:"Joseph M. Sanzari Children's Hospital",   match:['sanzari','jmsch',"children's hospital at hackensack",'childrens hospital at hackensack'] },
-  { name:'Hackensack University Medical Center',    match:['hackensack university','hackensack umc','hackensackumc','humc'] },
+  { name:'John Theurer Cancer Center',              match:['john theurer','theurer','jtcc'], region:'north' },
+  { name:"Joseph M. Sanzari Children's Hospital",   match:['sanzari','jmsch',"children's hospital at hackensack",'childrens hospital at hackensack'], region:'north' },
+  { name:'Hackensack University Medical Center',    match:['hackensack university','hackensack umc','hackensackumc','humc'], region:'north' },
   // Academic and research sites on or near that campus.
-  { name:'Hackensack Meridian School of Medicine',  match:['school of medicine','hmsom'] },
-  { name:'Center for Discovery and Innovation',     match:['discovery and innovation','cdi'] },
+  { name:'Hackensack Meridian School of Medicine',  match:['school of medicine','hmsom'], region:'north' },
+  { name:'Center for Discovery and Innovation',     match:['discovery and innovation','cdi'], region:'north' },
   // Academic medical centers and children's hospitals elsewhere in the network.
-  { name:'Jersey Shore University Medical Center',  match:['jersey shore','jsumc'] },
-  { name:"K. Hovnanian Children's Hospital",        match:['hovnanian','khch'] },
+  { name:'Jersey Shore University Medical Center',  match:['jersey shore','jsumc'], region:'south' },
+  { name:"K. Hovnanian Children's Hospital",        match:['hovnanian','khch'], region:'south' },
   // Community hospitals.
-  { name:'Ocean University Medical Center (Brick)', match:['ocean university','ocean medical'] },
-  { name:'Southern Ocean Medical Center (Manahawkin)', match:['southern ocean'] },
-  { name:'Riverview Medical Center (Red Bank)',     match:['riverview'] },
-  { name:'Bayshore Medical Center (Holmdel)',       match:['bayshore'] },
-  { name:'Mountainside Medical Center (Montclair)', match:['mountainside'] },
-  { name:'Palisades Medical Center (North Bergen)', match:['palisades'] },
-  { name:'Pascack Valley Medical Center (Westwood)',match:['pascack'] },
-  { name:'Raritan Bay Medical Center (Perth Amboy)',match:['raritan bay perth','raritan bay medical center perth','perth amboy'] },
-  { name:'Raritan Bay Medical Center (Old Bridge)', match:['old bridge'] },
-  { name:'Raritan Bay Medical Center',              match:['raritan bay','raritan'] },
-  { name:'JFK University Medical Center (Edison)',  match:['jfk university','jfk medical','jfk umc'] },
+  { name:'Ocean University Medical Center (Brick)', match:['ocean university','ocean medical'], region:'south' },
+  { name:'Southern Ocean Medical Center (Manahawkin)', match:['southern ocean'], region:'south' },
+  { name:'Riverview Medical Center (Red Bank)',     match:['riverview'], region:'south' },
+  { name:'Bayshore Medical Center (Holmdel)',       match:['bayshore'], region:'south' },
+  { name:'Mountainside Medical Center (Montclair)', match:['mountainside'], region:'north' },
+  { name:'Palisades Medical Center (North Bergen)', match:['palisades'], region:'north' },
+  { name:'Pascack Valley Medical Center (Westwood)',match:['pascack'], region:'north' },
+  { name:'Raritan Bay Medical Center (Perth Amboy)',match:['raritan bay perth','raritan bay medical center perth','perth amboy'], region:'south' },
+  { name:'Raritan Bay Medical Center (Old Bridge)', match:['old bridge'], region:'south' },
+  { name:'Raritan Bay Medical Center',              match:['raritan bay','raritan'], region:'south' },
+  { name:'JFK University Medical Center (Edison)',  match:['jfk university','jfk medical','jfk umc'], region:'north' },
   // Rehabilitation and behavioral health.
-  { name:'JFK Johnson Rehabilitation Institute',    match:['jfk johnson','johnson rehab'] },
-  { name:'Shore Rehabilitation Institute (Brick)',  match:['shore rehab'] },
-  { name:'Carrier Clinic (Belle Mead)',             match:['carrier clinic','carrier'] },
+  { name:'JFK Johnson Rehabilitation Institute',    match:['jfk johnson','johnson rehab'], region:'north' },
+  { name:'Shore Rehabilitation Institute (Brick)',  match:['shore rehab'], region:'south' },
+  { name:'Carrier Clinic (Belle Mead)',             match:['carrier clinic','carrier'], region:'south' },
   // Network name with no site attached — tested last so it never swallows a
   // string that actually names a building.
   { name:HMH_NETWORK_LABEL,                         match:['hackensack meridian','hmh network','hmh'] }
@@ -7646,6 +7693,64 @@ function canonicalLocation(raw){
   // Somewhere outside the network, or a site this list doesn't know yet.
   // Keep it under its own name rather than dropping it into a catch-all.
   return text;
+}
+
+/* ---------- Regions ----------
+   Interpreters from the North region (the HUMC side) and the South region
+   share one Hub. A region is a view, not a wall: everyone reads everything.
+   It only decides what the Doctor Directory opens on and which Team Chat
+   channel notifies you. Each phone picks its own (ih_region): asked once in
+   chat or the directory, changed any time in the name sheet. Nothing about
+   it is stored in the database except on doctors and chat messages.
+   docs/features/regions.md. */
+const REGIONS = [
+  { id:'north', name:'North', hint:'HUMC side' },
+  { id:'south', name:'South', hint:'Shore side' },
+];
+const REGION_KEY = 'ih_region';
+function isRegion(id){ return REGIONS.some(r => r.id === id); }
+function regionName(id){ const r = REGIONS.find(x => x.id === id); return r ? r.name : ''; }
+function myRegion(){
+  try{ const r = localStorage.getItem(REGION_KEY) || ''; return isRegion(r) ? r : ''; }catch(e){ return ''; }
+}
+// The region a site belongs to, from its canonical name ('' when unknown).
+function regionOfGroup(groupName){
+  const loc = HMH_LOCATIONS.find(l => l.name === groupName);
+  return (loc && loc.region) || '';
+}
+function regionOfLocation(raw){ return regionOfGroup(canonicalLocation(raw)); }
+// A doctor's region: the one set by hand on the edit sheet, else the one
+// their location implies. '' = not placed (shown in every region).
+function doctorRegion(d){
+  if(d && isRegion(d.region)) return d.region;
+  return regionOfGroup(locationGroupName(d, d && d.hospitalLocation));
+}
+
+function setMyRegion(id){
+  if(!isRegion(id)) return;
+  const first = !myRegion();
+  try{ localStorage.setItem(REGION_KEY, id); }catch(e){}
+  doctorRegionPick = null;          // the directory follows your region again
+  syncRegionControls();
+  updateChatBadge();
+  if(activeCategory === 'chat'){ renderChatChannels(); }
+  else if(activeCategory === 'doctor-directory') renderContent();
+  showToast(first ? `Region set: ${regionName(id)}. Change it any time under your name.` : `Your region: ${regionName(id)}.`);
+}
+// The North / South buttons, wherever a region is picked. Same look and
+// press as Dr. Smiley's Lively / Focused / Still.
+function regionSegHtml(current, labelId){
+  return `<div class="ds-mode-seg rg-seg" role="radiogroup"${labelId ? ` aria-labelledby="${labelId}"` : ' aria-label="Your region"'}>`
+    + REGIONS.map(r => `<button type="button" role="radio" data-region="${r.id}" aria-checked="${r.id === current}" onclick="setMyRegion('${r.id}')">${escapeHtml(r.name)}<small>${escapeHtml(r.hint)}</small></button>`).join('')
+    + `</div>`;
+}
+// Asked once, inline, where the region first matters (chat, directory).
+function regionAskHtml(why){
+  return `<div class="rg-ask"><p><b>Which region do you work in?</b> ${escapeHtml(why)}</p>${regionSegHtml('')}</div>`;
+}
+function syncRegionControls(){
+  const mine = myRegion();
+  document.querySelectorAll('.rg-seg [data-region]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.region === mine)));
 }
 
 // The wording on file, shown on the card only when it adds something the
@@ -8394,7 +8499,6 @@ const CHAT_HISTORY_LIMIT = 200;
 let CHAT_MESSAGES = [];
 let chatListenerStarted = false;
 let isInitialChatLoad = true;
-let lastSeenChatId = null;
 let chatSeenSeeded = false;
 
 let chatUnreadAnchor = null;   // id of the first message you have not seen
@@ -8405,21 +8509,44 @@ let chatUnreadAnchor = null;   // id of the first message you have not seen
    otherwise walk down the thread while you were still reading. */
 function setChatUnreadAnchor(){
   chatUnreadAnchor = null;
-  if(!chatSeenSeeded || !lastSeenChatId) return;
-  const i = CHAT_MESSAGES.findIndex(m => m.id === lastSeenChatId);
-  if(i >= 0 && i < CHAT_MESSAGES.length - 1) chatUnreadAnchor = CHAT_MESSAGES[i + 1].id;
+  const list = chatInChannel(chatChannel), last = chatSeen[chatChannel];
+  if(!chatSeenSeeded || !last) return;
+  const i = list.findIndex(m => m.id === last);
+  if(i >= 0 && i < list.length - 1) chatUnreadAnchor = list[i + 1].id;
 }
 
-function markChatSeen(){
+/* Channels (2026-10-14, regions): Everyone, plus one per region. All of
+   them live in team-chat, one stream, so a launch reads no more than it did;
+   a message's `channel` says where it belongs, and a message without one
+   (every message from before) is Everyone's. Every channel is open to
+   everyone; only Everyone and your own region badge and notify (all of them
+   until you pick a region). Unread is tracked per channel. */
+const CHAT_CHANNEL_KEY = 'ih_chatChannel';
+let chatChannel = (()=>{ try{ const c = localStorage.getItem(CHAT_CHANNEL_KEY) || ''; return isRegion(c) ? c : 'all'; }catch(e){ return 'all'; } })();
+let chatSeen = {};                     // channel -> id of the last message seen there
+function chatChannels(){ return ['all', ...REGIONS.map(r => r.id)]; }
+function chatChannelOf(m){ return m && isRegion(m.channel) ? m.channel : 'all'; }
+function chatChannelName(ch){ return ch === 'all' ? 'Everyone' : regionName(ch); }
+function chatInChannel(ch){ return CHAT_MESSAGES.filter(m => chatChannelOf(m) === ch); }
+function chatFollowed(ch){ const mine = myRegion(); return ch === 'all' || !mine || ch === mine; }
+
+function markChatSeen(ch = chatChannel){
   chatSeenSeeded = true;
-  lastSeenChatId = CHAT_MESSAGES.length ? CHAT_MESSAGES[CHAT_MESSAGES.length - 1].id : null;
+  const list = chatInChannel(ch);
+  chatSeen[ch] = list.length ? list[list.length - 1].id : null;
 }
-function unreadChatCount(){
+function markAllChatSeen(){ chatChannels().forEach(ch => markChatSeen(ch)); }
+function unreadInChannel(ch){
   if(!chatSeenSeeded) return 0;              // first load is never "unread"
-  if(!lastSeenChatId) return CHAT_MESSAGES.length;  // seen while the chat was empty
-  const i = CHAT_MESSAGES.findIndex(m => m.id === lastSeenChatId);
+  const list = chatInChannel(ch), last = chatSeen[ch];
+  if(!last) return list.length;              // seen while the channel was empty
+  const i = list.findIndex(m => m.id === last);
   // Scrolled out of the window entirely: everything visible is newer.
-  return i === -1 ? CHAT_MESSAGES.length : CHAT_MESSAGES.length - 1 - i;
+  return i === -1 ? list.length : list.length - 1 - i;
+}
+// The tab bar's badge: the channels you follow.
+function unreadChatCount(){
+  return chatChannels().filter(chatFollowed).reduce((n, ch) => n + unreadInChannel(ch), 0);
 }
 let notifiedMessageIds = new Set();
 let notifyEnabled = false;
@@ -9472,6 +9599,19 @@ async function deleteProviderRemote(id){
 // "JTCC, 4th floor" or a scheduling quirk. Keyed on normalized name only
 // (not name+specialty+location like the cache) since it's about the real
 // person, not any one search combination.
+/* Two doctors with one name in two regions must not share a record: before
+   regions, the second one's save merged into (and overwrote) the first.
+   The first keeps the plain key; another region's namesake gets
+   "<key>--<region>". Same region, or a record with no region yet, is
+   treated as the same person, as before. */
+function doctorDirIdFor(name, region){
+  const base = doctorDirectoryKey(name);
+  if(!base || !isRegion(region)) return base;
+  const same = DOCTOR_DIRECTORY.find(d => d.id === base);
+  const theirs = same ? doctorRegion(same) : '';
+  return (!theirs || theirs === region) ? base : base + '--' + region;
+}
+
 function doctorDirectoryKey(name){
   const norm = (name || '')
     .toLowerCase()
@@ -9553,11 +9693,14 @@ async function deleteDoctorDirectoryEntryRemote(id){
 // floor number or photo someone added by hand.
 async function upsertDoctorDirectoryFromResearch(name, specialty, location, researchResult){
   if(!db) return;
-  const id = doctorDirectoryKey(name);
+  // A search under the network name places nobody; the searcher's region does.
+  const region = regionOfLocation(location) || myRegion();
+  const id = doctorDirIdFor(name, region);
   if(!id) return;
   const existing = DOCTOR_DIRECTORY.find(d => d.id === id);
   const record = {
     ...(existing || {}),
+    ...(!existing && region && !regionOfLocation(location) ? { region } : {}),
     name: (existing && existing.name) || name,
     specialty: specialty || (existing && existing.specialty) || '',
     hospitalLocation: location || (existing && existing.hospitalLocation) || '',
@@ -9602,7 +9745,7 @@ function startChatListener(){
     CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data(), _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
     if(isInitialChatLoad){
       isInitialChatLoad = false;
-      markChatSeen(); // don't flag pre-existing history as "unread"
+      markAllChatSeen(); // don't flag pre-existing history as "unread"
       // Seed the seen-set so opening the app never fires a burst of
       // notifications for the entire message history.
       CHAT_MESSAGES.forEach(m => notifiedMessageIds.add(m.id));
@@ -9613,10 +9756,13 @@ function startChatListener(){
         notifiedMessageIds.add(m.id);
         const mine = me && (m.author||'').trim().toLowerCase() === me;
         // No notification for your own message, and none while you're
-        // already looking at the chat — the badge is enough there.
+        // already looking at that channel — the badge is enough there.
         if(mine) return;
+        // Another region's channel stays quiet unless it names you.
+        const ch = chatChannelOf(m);
+        if(!chatFollowed(ch) && !(me && messageMentions(m.text).includes(me))) return;
         smileyReact('message');
-        if(document.visibilityState === 'visible' && activeCategory === 'chat') return;
+        if(document.visibilityState === 'visible' && activeCategory === 'chat' && chatChannel === ch) return;
         showChatNotification(m);
       });
     }
@@ -10968,7 +11114,9 @@ async function showChatNotification(msg){
   const body = msg.text ? msg.text
     : photos ? (photos === 1 ? 'Sent a photo' : `Sent ${photos} photos`)
     : files.length ? 'Sent an attachment' : 'New message';
-  const title = mentionsMe ? `${author} mentioned you — Interpreter Hub` : `${author} — Interpreter Hub`;
+  const ch = chatChannelOf(msg);
+  const where = ch === 'all' ? 'Interpreter Hub' : `${regionName(ch)} · Interpreter Hub`;
+  const title = mentionsMe ? `${author} mentioned you — ${where}` : `${author} — ${where}`;
   await sendNotification(title, body, 'chat', 'interpreter-hub-chat');
 }
 
@@ -11012,6 +11160,7 @@ function refreshTypingUsers(){
   const names = typingEntries
     .filter(v => (now - v.at) < TYPING_TTL)
     .filter(v => v.name.trim().toLowerCase() !== me)
+    .filter(v => (isRegion(v.channel) ? v.channel : 'all') === chatChannel)
     .map(v => v.name);
   if(names.join('\n') === TYPING_USERS.join('\n')) return;
   TYPING_USERS = names;
@@ -11025,7 +11174,7 @@ function publishTyping(){
   if(now - typingLastSent < 2000) return;   // throttle writes
   typingLastSent = now;
   db.collection('chat-typing').doc(slugify(me) || 'anon')
-    .set({ name: me, at: now })
+    .set({ name: me, at: now, channel: chatChannel })
     .catch(()=>{});   // silent if the rule isn't set up
 }
 
@@ -12203,9 +12352,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'regions',     tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat & Doctors',   title:'North and South: chat channels, and doctors by region' },
   { id:'warmup',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Home',                  title:'The Daily Drill: catch the trap, hear it, make the call' },
   { id:'namelight',   tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Home',                  title:'Your name, written in navy light when you open the app' },
-  { id:'bodycard',    tone:'gd-n3', pin:'pins/anatomy.webp',             eyebrow:'3D Body',               title:'Tap a body part: its English and Spanish names, and what it is' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12276,6 +12425,8 @@ const GUIDE_STEPS = {
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
+  regions: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>My region</b>, tap ${GUIDE_UI.pill('North')} or ${GUIDE_UI.pill('South')}.`,
+    'Chat and the Doctor Directory follow it straight away.'], note: 'Saved on this phone. Change it any time; nothing is hidden from anyone.' }),
   name: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
     note: 'Your name goes on your chat messages, the terms you add or edit, and your practice. A photo is optional.' }),
   noname: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
@@ -15716,6 +15867,7 @@ const GUIDE_TOPICS = [
 
   { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
     <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
+    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All regions</b> above the list to switch; a search always looks through every region. A doctor's region comes from their hospital; if the hospital doesn't say, pick it on the doctor's edit sheet.</p>
     <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
   { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital', q:'What is Provider Pictures?', a:`
@@ -15777,8 +15929,13 @@ const GUIDE_TOPICS = [
     <p><b>New domain:</b> tap <b>+ New</b> next to Medical Terminology on Home. Or, inside any domain, tap <b>⋯</b> in its colored banner, then <b>New domain</b>.</p>
     <p><b>Rename it, or change its color or pin:</b> open the domain, tap <b>⋯</b> in its banner, then <b>Edit</b> and the domain's name.</p>` },
 
-  { id:'chat', section:'team', k:'chat message text team talk send photo', q:'How do I message the team?', a:`
-    <p>Tap <b>Chat</b> at the bottom. Type and send, like any messaging app.</p>
+  { id:'regions', section:'team', k:'region regions north south shore humc channel channels everyone separate group team doctors directory my region', q:'What are North and South?', a:`
+    <p>The Hub is shared by two interpreter teams: the <b>North</b> region (the HUMC side) and the <b>South</b> region (the Shore side). Nobody is walled off: everyone can read everything.</p>
+    <p>Your region decides two things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All regions</b> to see every doctor, and a search always looks through all of them.</p>
+    <p>Pick your region under your initial in the top-right corner, or when Chat or the Doctor Directory asks.</p>` },
+
+  { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
+    <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
     <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
 
   { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`
@@ -17351,6 +17508,7 @@ function renderContent(){
           ${notificationsSupported() ? `<button type="button" class="tc-icon-btn" id="chatNotifyBtn" onclick="toggleNotifications()"></button>` : ''}
         </div>
         <div id="tcPinned"></div>
+        <div class="tc-channels" id="tcChannels"></div>
         <div class="chat-panel tc-panel" id="tcPanel">
           <div class="chat-messages" id="chatMessages" onscroll="handleChatScroll()" role="log" aria-label="Team messages" aria-live="polite" aria-relevant="additions"></div>
           <!-- Floats over the bottom of the thread, so a message arriving while
@@ -17369,7 +17527,7 @@ function renderContent(){
                 <div class="tc-row">
                   <button type="button" class="tc-attach" onclick="document.getElementById('chatFileInput').click()" aria-label="Add photos" title="Add photos">${ICON_PHOTOS_TC}</button>
                   <input class="file-input-hidden" id="chatFileInput" type="file" accept="image/*,application/pdf" multiple onchange="handleChatFileSelected(event)">
-                  <textarea id="chatInput" rows="1" placeholder="Message the team…" aria-label="Message the team" enterkeyhint="send"
+                  <textarea id="chatInput" rows="1" placeholder="${escapeAttr(chatPlaceholder())}" aria-label="${escapeAttr(chatPlaceholder().replace('…', ''))}" enterkeyhint="send"
                     oninput="handleChatTyping(); autosizeChatInput(); chatDraft = this.value; updateChatSendState(); setChatNote('');" onkeydown="handleChatKeydown(event)"></textarea>
                   <button type="button" class="tc-send" id="chatSendBtn" onclick="sendChatMessage()" aria-label="Send" disabled>${ICON_SEND}</button>
                 </div>
@@ -18245,6 +18403,8 @@ function openNameModal(){
   renderNameAccess();
   document.getElementById('smileyFollowSwitch')?.setAttribute('aria-checked', String(smileyFollows()));
   smileyModeSync();
+  const rg = document.getElementById('rgPrefSeg');
+  if(rg) rg.innerHTML = regionSegHtml(myRegion(), 'rgLab');
   document.getElementById('nameOverlay').classList.add('show');
   if(prefersAutoFocus()) input.focus();
 }
@@ -19721,7 +19881,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -19749,8 +19909,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1014.1017';
-const BUILD_TIME = '2026-10-14 10:17 UTC';
+const BUILD_ID = 'b1014.1226';
+const BUILD_TIME = '2026-10-14 12:26 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20459,13 +20619,19 @@ function looksLikeSamePerson(a, b){
   return initialMatch(pa.first, pb.first) || initialMatch(pb.first, pa.first);
 }
 
+// Two regions' namesakes are two people (see doctorDirIdFor).
+function sameRegionOrUnknown(a, b){
+  const ra = doctorRegion(a), rb = doctorRegion(b);
+  return !ra || !rb || ra === rb;
+}
+
 function duplicateDoctorGroups(){
   const groups = [];
   const used = new Set();
   DOCTOR_DIRECTORY.forEach((d, i) => {
     if(used.has(d.id)) return;
     const matches = DOCTOR_DIRECTORY.filter((other, j) =>
-      j > i && !used.has(other.id) && looksLikeSamePerson(d.name, other.name));
+      j > i && !used.has(other.id) && looksLikeSamePerson(d.name, other.name) && sameRegionOrUnknown(d, other));
     if(matches.length){
       [d, ...matches].forEach(x => used.add(x.id));
       groups.push([d, ...matches]);
@@ -20712,8 +20878,27 @@ function backfillBannerHtml(){
   </div>`;
 }
 
+/* Which region the directory shows. It opens on yours (all of them until
+   you pick one); a chip picks another for this visit. Searching always looks
+   through every region. A doctor with no region (no site on file, or just
+   "Hackensack Meridian Health") shows in every region rather than none. */
+let doctorRegionPick = null;
+function doctorRegionView(){ return doctorRegionPick || myRegion() || 'all'; }
+function setDoctorRegionView(v){ doctorRegionPick = v; renderContent(); }
+function doctorRegionChipsHtml(view, searching){
+  if(searching) return `<p class="rg-note">Searching every region.</p>`;
+  const count = r => r === 'all' ? DOCTOR_DIRECTORY.length
+    : DOCTOR_DIRECTORY.filter(d => { const x = doctorRegion(d); return !x || x === r; }).length;
+  const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All regions' }]
+    .map(c => `<button type="button" role="radio" aria-checked="${c.id === view}" onclick="setDoctorRegionView('${c.id}')">${escapeHtml(c.name)} <span>${count(c.id)}</span></button>`).join('');
+  return `<div class="ds-mode-seg rg-filter" role="radiogroup" aria-label="Show doctors from">${chips}</div>`
+    + (myRegion() ? '' : regionAskHtml('The directory will open on it.'));
+}
+
 function renderDoctorDirectory(q){
   let list = DOCTOR_DIRECTORY.slice();
+  const view = q ? 'all' : doctorRegionView();
+  if(view !== 'all') list = list.filter(d => { const r = doctorRegion(d); return !r || r === view; });
   if(q){
     list = list.filter(d =>
       foldText(d.name).includes(q) ||
@@ -20731,6 +20916,9 @@ function renderDoctorDirectory(q){
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Couldn't load the doctors.<br>${doctorDirProblem()}<div style="margin-top:13px">${retry}</div></div>`;
     if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE !== 'ok')
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Loading the doctors&hellip;</div>`;
+    if(DOCTOR_DIRECTORY.length && !q && view !== 'all')
+      return `<div class="section-head"><h2>Doctor Directory</h2></div>${doctorRegionChipsHtml(view, false)}`
+        + `<div class="empty"><div class="glyph">${ICON_GRID}</div>No doctors in the ${escapeHtml(regionName(view))} region yet.<br>Add one, or run a Doctor Prep search.</div>`;
     const msg = DOCTOR_DIRECTORY.length===0
       ? `No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
       : 'No doctors match your search.';
@@ -20741,6 +20929,7 @@ function renderDoctorDirectory(q){
   const searching = !!q;
 
   let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
+  html += doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
   html += duplicateBannerHtml();
@@ -21375,8 +21564,21 @@ function renderChatMessages(){
   const tc = !!document.getElementById('tcPanel');
 
   renderChatHeader();
+  renderChatChannels();
+  const msgs = chatInChannel(chatChannel);
 
-  if(CHAT_MESSAGES.length===0){
+  if(msgs.length===0 && chatChannel !== 'all'){
+    const rn = regionName(chatChannel);
+    container.innerHTML = `<div class="tc-empty">
+        <div class="tc-empty-wave" aria-hidden="true">👋</div>
+        <h3>Nothing in ${escapeHtml(rn)} yet</h3>
+        <p>This channel is for the ${escapeHtml(rn)} region. Everyone can read it; ${chatFollowed(chatChannel) ? 'it notifies you.' : 'it doesn’t notify you, Everyone and your region do.'}</p>
+      </div>`;
+    renderedChatIds = new Set();
+    setChatUnseen(0);
+    return;
+  }
+  if(msgs.length===0){
     container.innerHTML = tc
       ? `<div class="tc-empty">
           <div class="tc-empty-wave" aria-hidden="true">👋</div>
@@ -21413,9 +21615,9 @@ function renderChatMessages(){
   const nextIds = new Set();
   let appended = 0, appendedMine = false;
   let prev = null;
-  const lastMsg = CHAT_MESSAGES[CHAT_MESSAGES.length - 1];
+  const lastMsg = msgs[msgs.length - 1];
 
-  CHAT_MESSAGES.forEach((m, idx)=>{
+  msgs.forEach((m, idx)=>{
     if(unreadBefore && m.id === unreadBefore){
       const key = 'u:' + unreadBefore;
       let line = existing.get(key);
@@ -21445,7 +21647,7 @@ function renderChatMessages(){
       wanted.push(sep); existing.delete(key);
     }
 
-    const next = CHAT_MESSAGES[idx+1];
+    const next = msgs[idx+1];
     const gapOk = (a, b) => !tc || (b.timestamp - a.timestamp) < 60 * 60 * 1000;
     const runWithPrev = !!prev && (prev.author||'') === (m.author||'')
       && chatDayKey(prev.timestamp) === dk
@@ -21523,14 +21725,64 @@ function useChatStarter(text){
 }
 
 /* Header: the faces of the people talking lately, and who they are. */
+/* The channel tabs above the thread. A tab you don't follow still shows its
+   unread count, so nothing is hidden; it just doesn't buzz. */
+function renderChatChannels(){
+  const el = document.getElementById('tcChannels');
+  if(!el) return;
+  const mine = myRegion();
+  const tabs = chatChannels().map(ch => {
+    const on = ch === chatChannel;
+    const n = on ? 0 : unreadInChannel(ch);
+    return `<button type="button" role="tab" class="tc-chan${on ? ' is-on' : ''}" aria-selected="${on}" data-ch="${ch}" onclick="setChatChannel('${ch}')">`
+      + `<span>${escapeHtml(chatChannelName(ch))}</span>`
+      + (ch !== 'all' && ch === mine ? `<small>yours</small>` : '')
+      + (n ? `<b class="tc-chan-n" aria-label="${n} unread">${n > 99 ? '99+' : n}</b>` : '')
+      + `</button>`;
+  }).join('');
+  const sig = tabs + (mine ? '' : 'ask');
+  if(el.dataset.sig === sig) return;
+  el.dataset.sig = sig;
+  el.innerHTML = `<div class="tc-chans" role="tablist" aria-label="Channels">${tabs}</div>`
+    + (mine ? '' : regionAskHtml('Pick your region and its channel will notify you, along with Everyone.'));
+}
+
+function setChatChannel(ch){
+  if(!chatChannels().includes(ch) || ch === chatChannel) return;
+  clearTimeout(typingHeartbeat);
+  clearTyping();
+  chatChannel = ch;
+  try{ localStorage.setItem(CHAT_CHANNEL_KEY, ch); }catch(e){}
+  // A reply or an edit belongs to the channel it was started in.
+  if(replyingTo || editingChatId){
+    replyingTo = null;
+    if(editingChatId){ editingChatId = null; const box = document.getElementById('chatInput'); if(box){ box.value = ''; chatDraft = ''; autosizeChatInput(); updateChatSendState(); } }
+    renderChatComposeBar();
+  }
+  const box = document.getElementById('chatInput');
+  if(box){ box.placeholder = chatPlaceholder(); box.setAttribute('aria-label', chatPlaceholder().replace('…', '')); }
+  // A new thread, not new messages: no rows animate in.
+  const container = document.getElementById('chatMessages');
+  if(container) container.innerHTML = '';
+  TYPING_USERS = []; refreshTypingUsers(); renderTypingIndicator();
+  setChatUnreadAnchor();
+  markChatSeen();
+  renderChatMessages();
+  updateChatBadge();
+}
+function chatPlaceholder(){
+  return chatChannel === 'all' ? 'Message the team…' : `Message ${regionName(chatChannel)}…`;
+}
+
 function renderChatHeader(){
   const faces = document.getElementById('tcFaces');
   const sub = document.getElementById('chatCount');
   if(!faces && !sub) return;
   const me = whoAmI().trim().toLowerCase();
   const seen = [], keys = new Set();
-  for(let i = CHAT_MESSAGES.length - 1; i >= 0 && seen.length < 12; i--){
-    const a = (CHAT_MESSAGES[i].author || '').trim();
+  const msgs = chatInChannel(chatChannel);
+  for(let i = msgs.length - 1; i >= 0 && seen.length < 12; i--){
+    const a = (msgs[i].author || '').trim();
     const k = a.toLowerCase();
     if(!a || k === me || keys.has(k)) continue;
     keys.add(k); seen.push(a);
@@ -21548,7 +21800,7 @@ function renderChatHeader(){
   if(sub){
     const names = seen.slice(0, 3).map(n => n.split(' ')[0]);
     const more = seen.length - names.length;
-    sub.textContent = !seen.length ? 'Your interpreter team'
+    sub.textContent = !seen.length ? (chatChannel === 'all' ? 'Your interpreter team' : `${regionName(chatChannel)} region`)
       : names.join(', ') + (more > 0 ? ` and ${more} other${more === 1 ? '' : 's'}` : '');
   }
 }
@@ -22036,6 +22288,7 @@ async function sendChatMessageOnce(){
     const message = { text: sentText, author, attachment: atts[0] || null, timestamp: Date.now(),
                       replyTo: replyingTo ? Object.assign({ id:replyingTo.id, author:replyingTo.author, text:replyingTo.text }, replyingTo.photo ? { photo: replyingTo.photo } : {}) : null };
     if(atts.length > 1) message.attachments = atts;
+    if(chatChannel !== 'all') message.channel = chatChannel;
     const reply = replyingTo;
     replyingTo = null; renderChatComposeBar();
     sendingReply = reply;
@@ -22911,6 +23164,7 @@ function _openAddDoctorDirModal(){
   document.getElementById('fDDLocationDetails').value = '';
   document.getElementById('fDDNotes').value = '';
   document.getElementById('fDDPhoto').value = '';
+  document.getElementById('fDDRegion').value = '';
   populateDDGroupSelect('');
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
@@ -22933,6 +23187,7 @@ function _openEditDoctorDirModal(id){
   document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
   document.getElementById('fDDNotes').value = d.notes || '';
   document.getElementById('fDDPhoto').value = '';
+  document.getElementById('fDDRegion').value = isRegion(d.region) ? d.region : '';
   populateDDGroupSelect(d.locationGroup || '');
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
@@ -23000,7 +23255,12 @@ async function saveDoctorDirEntry(){
   // record even if the display name is tweaked); adding fresh derives a
   // new ID from the name so a later Doctor Prep search on the same person
   // lands on — and merges into — this same entry rather than duplicating it.
-  const id = editingDoctorDirId || doctorDirectoryKey(name);
+  const regionPick = (document.getElementById('fDDRegion') || {}).value || '';
+  const siteRegion = regionOfGroup(selectedDDGroup() || canonicalLocation(hospitalLocation));
+  // A new doctor at a site that doesn't say goes in the adder's region.
+  const regionField = regionPick || (!editingDoctorDirId && !siteRegion ? myRegion() : '') || null;
+  const placed = regionField || siteRegion;
+  const id = editingDoctorDirId || doctorDirIdFor(name, placed);
   if(!id){ showToast('Could not generate an entry for that name.'); return; }
   const existing = editingDoctorDirId ? DOCTOR_DIRECTORY.find(d=>d.id===editingDoctorDirId) : DOCTOR_DIRECTORY.find(d=>d.id===id);
 
@@ -23008,6 +23268,9 @@ async function saveDoctorDirEntry(){
     ...(existing || {}),
     name, specialty, hospitalLocation, locationDetails, notes,
     locationGroup: selectedDDGroup(),
+    // Set by hand, or the adder's region when the site doesn't say. Empty =
+    // follow the location.
+    region: regionField,
     photo: pendingDDPhotoDataUrl || null,
     photoPath: pendingDDPhotoPath || null,
     source: (existing && existing.source) || 'manual',
