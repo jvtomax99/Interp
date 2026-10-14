@@ -34,6 +34,40 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
+Regions (Jose, 2026-10-14): the South region uses the app too. Decided:
+two regions, North (HUMC side) and South; regions are a view, not a wall
+(everyone reads everything, region only sets defaults and which chat
+notifies); each phone picks its region (asked once, changeable in
+Settings), same single team code; Jose stays the only owner (no region
+lead). Open question for phase R1: which HMH sites are South (ask Jose,
+don't guess).
+
+R1. **Regions foundation.** `REGIONS` list (North, South). Phone's region in
+   `localStorage` (`ih_region`) and on `hub-members/{uid}` (rules: allow
+   `region` in the self-update key list; paste rules before shipping).
+   Ask once, change in Settings. Each `HMH_LOCATIONS` entry gets a
+   `region`. User Guide.
+R2. **Doctor directory by region.** Region derived from the doctor's
+   location (`HMH_LOCATIONS`), override on the edit sheet. Opens on my
+   region, "All regions" chip; search always spans all. Fix the key:
+   `doctorDirectoryKey` is name-only, so two Dr. Garcias in two regions
+   overwrite each other; key on name + region for new entries, existing
+   ids kept. One-time migration (flag in `terminology-meta/migrations`)
+   sets `region` on existing entries from their location. Duplicate
+   doctors check compares within a region.
+R3. **Chat channels.** Tabs: Everyone (= today's `team-chat`, untouched,
+   no migration) + one per region in `region-chat/{region}/messages`
+   (new rules line, pasted before the app ships or posts fail silently).
+   Listen to Everyone + my region only (reads); other channels load when
+   opened. Unread badge and notifications per channel; typing marker per
+   channel. Check every `team-chat` use (42 places: delete, retry,
+   attachments, search, notifications).
+R4. Later, if asked: region tags on announcements and Training & Events.
+
+Watch after South joins: Firestore reads (Usage page) a week later. More
+people = more reads at every launch; the 50K/day trigger under Later may
+come from this alone.
+
 1. **AI models.** `claude-sonnet-5` (translate backup) →
    `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
    `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
