@@ -5829,6 +5829,78 @@ html[data-theme="dark"] .tc-chan.is-on{ background:#2A3350; color:#fff; }
 @media (max-width:900px){ .tc-channels{ margin-top:var(--sp-2); } }
 @media (max-height:500px) and (max-width:1000px){ .tc-channels .rg-ask{ display:none; } }
 @media (prefers-reduced-motion: reduce){ .tc-chan{ transition:none; } }
+
+/* ---------- Places (savePlace, openPlacePicker; docs/features/places.md) ----------
+   Jose's pin artwork marks each place: a 44px tap target on the group
+   heading, the pin itself at 34px with no tinted tile (the pins carry their
+   own colour). */
+.group-mark{ width:44px; height:44px; border-radius:var(--r-md); background:transparent; margin:-4px 0; }
+@media (hover:hover){ .group-mark:hover{ background:var(--line-soft); } }
+.group-mark:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
+.group-pin{ width:34px; height:34px; object-fit:contain; display:block; }
+.group-mark .group-mark-logo{ width:26px; height:26px; }
+.group-icon-grid{ grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:var(--sp-2); max-height:min(56vh, 520px); overflow-y:auto; padding:2px; }
+.group-icon-pick{ padding:var(--sp-3) var(--sp-1) var(--sp-2); border-radius:var(--r-md); min-height:44px; }
+.group-icon-art{ width:52px; height:52px; }
+.group-icon-art .group-pin{ width:52px; height:52px; }
+.group-icon-art .group-mark-logo{ width:36px; height:36px; }
+.group-icon-label{ font-size:var(--fs-cap); font-weight:550; color:var(--ink-soft); }
+.group-icon-pick.is-on{ border-color:var(--accent-2); background:var(--accent-soft); }
+.group-icon-pick.is-on .group-icon-label{ color:var(--ink); }
+.group-icon-pick:active, .group-icon-pick.is-pressed{ transform:scale(.96); }
+.group-icon-pick:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
+html[data-theme="dark"] .group-icon-pick.is-on{ background:rgba(46,139,208,.16); }
+
+/* The doctor sheet's "Where" button: looks like the place it names. */
+.place-field{ display:flex; align-items:center; gap:var(--sp-3); width:100%; min-height:60px; padding:var(--sp-2) var(--sp-3);
+  border:1px solid var(--line); border-radius:var(--r-md); background:var(--paper); color:var(--ink); text-align:left; cursor:pointer;
+  font-family:var(--sans); transition:border-color .15s var(--ease), transform .15s var(--ease); -webkit-tap-highlight-color:transparent; }
+.place-field:active, .place-field.is-pressed{ transform:scale(.99); }
+.place-field:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
+.place-field-icon{ flex:0 0 40px; display:flex; align-items:center; justify-content:center; }
+.place-field-icon .group-pin{ width:40px; height:40px; }
+.place-field-icon .group-mark-logo{ width:30px; height:30px; }
+.place-field-icon.is-empty{ opacity:.45; filter:grayscale(1); }
+.place-field-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+.place-field-text b{ font-size:var(--fs-sub); font-weight:650; line-height:1.25; overflow-wrap:anywhere; }
+.place-field-text small{ font-size:var(--fs-cap); color:var(--ink-soft); }
+.place-field-chev{ font-size:22px; color:var(--ink-faint); line-height:1; }
+
+/* The "Where?" sheet. */
+.place-modal{ max-width:520px; }
+.place-search{ width:100%; font-size:16px; min-height:44px; padding:0 var(--sp-3); margin:0 0 var(--sp-2);
+  border:1px solid var(--line); border-radius:var(--r-md); background:var(--bg-hi); color:var(--ink); font-family:var(--sans); }
+.place-search:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
+.place-list{ max-height:min(58vh, 560px); overflow-y:auto; margin:0 calc(-1 * var(--sp-2)); padding:0 var(--sp-2); }
+.place-sec{ margin:0 0 var(--sp-2); }
+.place-sec-head{ margin:var(--sp-3) 0 var(--sp-1); font-size:var(--fs-cap); font-weight:650; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); }
+.place-row{ display:flex; align-items:center; gap:var(--sp-3); width:100%; min-height:52px; padding:var(--sp-1) var(--sp-2);
+  border:0; border-radius:var(--r-md); background:none; color:var(--ink); text-align:left; cursor:pointer; font-family:var(--sans);
+  -webkit-tap-highlight-color:transparent; transition:background .15s var(--ease), transform .15s var(--ease); }
+.place-row:active, .place-row.is-pressed{ transform:scale(.99); background:var(--line-soft); }
+@media (hover:hover){ .place-row:hover{ background:var(--line-soft); } }
+.place-row:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-2px; }
+.place-row.is-on{ background:var(--accent-soft); }
+.place-row-icon{ flex:0 0 36px; display:flex; align-items:center; justify-content:center; }
+.place-row-icon .group-pin{ width:36px; height:36px; }
+.place-row-icon .group-mark-logo{ width:26px; height:26px; }
+.place-row-text{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.place-row-text b{ font-size:var(--fs-sub); font-weight:550; line-height:1.3; overflow-wrap:anywhere; }
+.place-row-text small{ font-size:var(--fs-cap); color:var(--ink-soft); }
+.place-row-tick{ color:var(--accent); display:flex; }
+.place-row-tick svg{ width:20px; height:20px; }
+.place-none{ margin:var(--sp-3) var(--sp-2); font-size:var(--fs-foot); color:var(--ink-soft); }
+.place-add{ display:flex; align-items:center; gap:var(--sp-2); width:100%; min-height:48px; margin:var(--sp-1) 0 var(--sp-2); padding:0 var(--sp-3);
+  border:1px dashed var(--line); border-radius:var(--r-md); background:none; color:var(--accent); font:600 var(--fs-sub) var(--sans); cursor:pointer; }
+.place-add span{ font-size:20px; line-height:1; }
+.place-add:active, .place-add.is-pressed{ transform:scale(.99); }
+.place-add:focus-visible{ outline:3px solid var(--accent-2); outline-offset:1px; }
+.place-addform{ display:flex; flex-direction:column; gap:var(--sp-2); padding:var(--sp-2) 0; }
+.place-addform label, .place-addlab{ font-size:var(--fs-foot); font-weight:600; color:var(--ink-soft); }
+.place-addform input{ font-size:16px; min-height:44px; padding:0 var(--sp-3); border:1px solid var(--line); border-radius:var(--r-md); background:var(--bg-hi); color:var(--ink); font-family:var(--sans); }
+.place-addbtns{ display:flex; justify-content:flex-end; gap:var(--sp-2); }
+html[data-theme="dark"] .place-row.is-on{ background:rgba(46,139,208,.16); }
+@media (prefers-reduced-motion: reduce){ .place-field, .place-row, .place-add, .group-icon-pick{ transition:none; } }
 .ta-switch.is-calm[aria-checked="true"]{ background:var(--navy); }
 html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(--cyan); }
 @media (prefers-reduced-motion: reduce){
@@ -6553,20 +6625,10 @@ body.pv-open{ overflow:hidden; }
     <div class="field"><label>Name</label><input id="fDDName" type="text" placeholder="e.g. Dr. Lori A. Leslie"></div>
     <div class="field"><label>Specialty (optional)</label><input id="fDDSpecialty" type="text" placeholder="e.g. Lymphoma \u2014 John Theurer Cancer Center"></div>
     <div class="field">
-      <label>Location group</label>
-      <select id="fDDGroup" onchange="onDDGroupChange()"></select>
-      <p class="field-hint" id="fDDGroupHint"></p>
+      <label id="fDDPlaceLab">Where</label>
+      <button type="button" class="place-field" id="fDDPlace" aria-labelledby="fDDPlaceLab fDDPlace" onclick="openPlacePicker()"></button>
     </div>
-    <div class="field" id="fDDGroupOtherField" style="display:none;">
-      <label>Group name</label>
-      <input id="fDDGroupOther" type="text" placeholder="e.g. Englewood Health">
-    </div>
-    <div class="field"><label>Hospital / location as written (optional)</label><input id="fDDLocation" type="text" placeholder="e.g. Hackensack Meridian Health" oninput="updateDDGroupHint()"></div>
-    <div class="field">
-      <label for="fDDRegion">Region</label>
-      <select id="fDDRegion"><option value="">From the location</option><option value="north">North</option><option value="south">South</option></select>
-    </div>
-    <div class="field"><label>Location details (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. JTCC, 4th floor, Suite 401"></div>
+    <div class="field"><label for="fDDLocationDetails">Floor, suite or room (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. 4th floor, Suite 401"></div>
     <div class="field"><label>Notes (optional)</label><textarea id="fDDNotes" placeholder="Scheduling notes, quirks, best way to reach, etc."></textarea></div>
     <div class="field">
       <label>Photo (optional)</label>
@@ -6654,12 +6716,24 @@ body.pv-open{ overflow:hidden; }
   </div>
 </div>
 
+<!-- Where a doctor works (openPlacePicker): search, places by region, add one. -->
+<div class="overlay" id="placeOverlay" onclick="if(event.target===this) closePlacePicker()">
+  <div class="modal place-modal" role="dialog" aria-labelledby="placeTitle">
+    <h3 id="placeTitle">Where?</h3>
+    <input class="place-search" id="placeSearch" type="search" placeholder="Search places" aria-label="Search places" autocomplete="off" oninput="renderPlaceList()">
+    <div class="place-list" id="placeList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closePlacePicker()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="groupIconOverlay" onclick="if(event.target===this) closeGroupIconPicker()">
   <div class="modal">
     <h3>Choose an icon</h3>
     <p class="field-hint" id="groupIconTitle" style="margin:-6px 0 14px;"></p>
     <div class="group-icon-grid" id="groupIconGrid"></div>
-    <p class="field-hint" style="margin-top:14px;">Saved on this device. Teammates keep their own choices.</p>
+    <p class="field-hint" style="margin-top:14px;">Changes it for the whole team, here and in Provider Pictures.</p>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeGroupIconPicker()">Cancel</button>
     </div>
@@ -7716,7 +7790,9 @@ function myRegion(){
 // The region a site belongs to, from its canonical name ('' when unknown).
 function regionOfGroup(groupName){
   const loc = HMH_LOCATIONS.find(l => l.name === groupName);
-  return (loc && loc.region) || '';
+  if(loc) return loc.region || '';
+  const p = PLACES[placeId(groupName)];     // a place the team added
+  return (p && isRegion(p.region)) ? p.region : '';
 }
 function regionOfLocation(raw){ return regionOfGroup(canonicalLocation(raw)); }
 // A doctor's region: the one set by hand on the edit sheet, else the one
@@ -7772,72 +7848,124 @@ function locationSortRank(name){
   return 0;
 }
 
-/* Which icon marks each location. Keyed by group name rather than by screen,
-   so John Theurer looks the same in the Doctor Directory and in Providers.
-   Stored per device — see the note in the picker copy. */
-const GROUP_ICON_KEY = 'ih_groupIcons';
-let groupIcons = {};
-try{ groupIcons = JSON.parse(localStorage.getItem(GROUP_ICON_KEY) || '{}') || {}; }catch(e){ groupIcons = {}; }
-
-const GROUP_ICON_CHOICES = [
-  { key:'logo',        label:'HMH mark' },
-  { key:'hospital',    label:'Hospital' },
-  { key:'ribbon',      label:'Cancer' },
-  { key:'heart',       label:'Heart' },
-  { key:'brain',       label:'Brain' },
-  { key:'lungs',       label:'Lungs' },
-  { key:'bone',        label:'Bone' },
-  { key:'ear',         label:'ENT' },
-  { key:'dna',         label:'Genetics' },
-  { key:'stethoscope', label:'Primary care' },
-  { key:'nurse',       label:'Nursing' },
-  { key:'doctor',      label:'Physician' },
-  { key:'iv',          label:'Infusion' },
-  { key:'pill',        label:'Pharmacy' },
-  { key:'flask',       label:'Lab' },
-  { key:'monitor',     label:'Imaging' },
-  { key:'ambulance',   label:'Emergency' },
-  { key:'helicopter',  label:'Air transport' },
-  { key:'apple',       label:'Pediatrics' },
-  { key:'book',        label:'Teaching' },
-  { key:'shield',      label:'Behavioral' },
-  { key:'calendar',    label:'Clinic' },
-  { key:'person',      label:'Outpatient' }
+/* ---------- Places (shared) ----------
+   Every place a doctor or provider can be filed under, and the icon that
+   marks it, the same for the whole team (Jose, 2026-10-14; icons used to be
+   per phone). Built-in sites come from HMH_LOCATIONS; places someone adds,
+   and every icon picked, live in one document, terminology-meta/places:
+     { places: { <placeId>: { name, region, icon, custom, by, at } } }
+   written key by key with merge, so two people changing two places never
+   overwrite each other. Icons are Jose's pin artwork (pins/*.webp), plus the
+   HMH mark for hospitals with no specialty of their own.
+   docs/features/places.md. */
+const PLACE_ICONS = [
+  { key:'logo',               label:'Hospital (HMH)' },
+  { key:'medifind',           label:'Clinic / office' },
+  { key:'oncology',           label:'Cancer' },
+  { key:'leukemia',           label:'Blood cancer' },
+  { key:'pediatrics',         label:'Children' },
+  { key:'developmental',      label:'Child development' },
+  { key:'emergency',          label:'Emergency' },
+  { key:'cardiology',         label:'Heart' },
+  { key:'heart-failure',      label:'Cardiac care' },
+  { key:'neurology',          label:'Brain / behavioral' },
+  { key:'orthopedics',        label:'Bone / rehab' },
+  { key:'pulmonology',        label:'Lungs' },
+  { key:'nephrology',         label:'Kidney' },
+  { key:'urology',            label:'Urology' },
+  { key:'ent',                label:'Ear, nose, throat' },
+  { key:'ophthalmology',      label:'Eye' },
+  { key:'dermatology',        label:'Skin' },
+  { key:'endocrinology',      label:'Endocrine' },
+  { key:'hematology',         label:'Blood' },
+  { key:'genetics',           label:'Genetics' },
+  { key:'infectious-disease', label:'Infectious disease' },
+  { key:'infusion',           label:'Infusion' },
+  { key:'surgery-anesthesia', label:'Surgery' },
+  { key:'laboratory',         label:'Lab / research' },
+  { key:'pharmacy',           label:'Pharmacy' },
+  { key:'events',             label:'Teaching' },
 ];
+let PLACES = {};                        // placeId -> shared entry
+let placesListenerStarted = false;
+
+function placeId(name){
+  return (name || '').toLowerCase().replace(/[‘’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+}
+function isHmhSite(name){ return HMH_LOCATIONS.some(l => l.name === name); }
 
 // A sensible starting icon so nothing has to be picked by hand to look right.
 function defaultGroupIcon(name){
   const t = (name || '').toLowerCase();
   if(t === HMH_NETWORK_LABEL.toLowerCase()) return 'logo';
-  if(t.includes('cancer') || t.includes('theurer') || t.includes('oncolog')) return 'ribbon';
-  if(t.includes('children') || t.includes('sanzari') || t.includes('hovnanian') || t.includes('pediat')) return 'apple';
-  if(t.includes('rehab')) return 'bone';
-  if(t.includes('carrier') || t.includes('behavioral') || t.includes('psych')) return 'brain';
-  if(t.includes('school of medicine')) return 'book';
-  if(t.includes('discovery') || t.includes('innovation') || t.includes('research')) return 'flask';
-  if(t.includes('heart') || t.includes('cardi')) return 'heart';
-  if(t === NO_LOCATION_LABEL.toLowerCase()) return 'person';
-  return 'hospital';
+  if(t === NO_LOCATION_LABEL.toLowerCase()) return 'medifind';
+  if(t.includes('cancer') || t.includes('theurer') || t.includes('oncolog')) return 'oncology';
+  if(t.includes('children') || t.includes('sanzari') || t.includes('hovnanian') || t.includes('pediat')) return 'pediatrics';
+  if(t.includes('rehab')) return 'orthopedics';
+  if(t.includes('carrier') || t.includes('behavioral') || t.includes('psych')) return 'neurology';
+  if(t.includes('school of medicine')) return 'events';
+  if(t.includes('discovery') || t.includes('innovation') || t.includes('research')) return 'laboratory';
+  if(t.includes('heart') || t.includes('cardi')) return 'cardiology';
+  return isHmhSite(name) ? 'logo' : 'medifind';
 }
 
 function groupIconKeyFor(name){
-  const chosen = groupIcons[name];
-  if(chosen === 'logo') return 'logo';
-  if(chosen && DOMAIN_ICONS[chosen]) return chosen;
+  const p = PLACES[placeId(name)];
+  if(p && PLACE_ICONS.some(i => i.key === p.icon)) return p.icon;
   return defaultGroupIcon(name);
 }
 
 function markLogoFallback(img){
-  const span = document.createElement('span');
-  span.innerHTML = DOMAIN_ICONS.hospital;
-  img.replaceWith(span.firstChild);
+  img.onerror = null;
+  img.src = 'pins/medifind.webp';
 }
 
 function groupIconHtml(key){
-  // If the mark asset is missing the img would render as a broken-image box,
-  // so fall back to the hospital glyph rather than showing a torn icon.
+  // A missing file falls back to the clinic pin rather than a torn image.
   if(key === 'logo') return `<img class="group-mark-logo" src="./hmh-mark.png" alt="" onerror="markLogoFallback(this)">`;
-  return DOMAIN_ICONS[key] || DOMAIN_ICONS.hospital;
+  return `<img class="group-pin" src="pins/${PLACE_ICONS.some(i => i.key === key) ? key : 'medifind'}.webp" alt="" loading="lazy" onerror="markLogoFallback(this)">`;
+}
+
+// Every place to choose from: the network's sites, places the team added,
+// and any group name already in use on a doctor or provider.
+function placeList(){
+  const out = new Map();
+  HMH_LOCATIONS.forEach(l => { if(l.name !== HMH_NETWORK_LABEL) out.set(l.name, { name: l.name, region: l.region || '', builtIn: true }); });
+  Object.values(PLACES).forEach(p => {
+    if(!p || !p.custom || !p.name || out.has(p.name)) return;
+    out.set(p.name, { name: p.name, region: isRegion(p.region) ? p.region : '' });
+  });
+  const inUse = name => { if(name && name !== NO_LOCATION_LABEL && name !== HMH_NETWORK_LABEL && !out.has(name)) out.set(name, { name, region: '' }); };
+  DOCTOR_DIRECTORY.forEach(d => inUse(locationGroupName(d, d.hospitalLocation)));
+  (PROVIDERS || []).forEach(p => inUse(locationGroupName(p, p.facility)));
+  return [...out.values()];
+}
+
+function startPlacesListener(){
+  if(placesListenerStarted || !db) return;
+  placesListenerStarted = true;
+  db.collection('terminology-meta').doc('places').onSnapshot(snap => {
+    PLACES = ((snap.exists && snap.data()) || {}).places || {};
+    if(['doctor-directory', 'providers'].includes(activeCategory)) renderContent();
+    if(document.getElementById('placeOverlay')?.classList.contains('show')) renderPlaceList();
+  }, err => console.warn('Shared places unavailable', err));
+}
+
+// One place's shared details. Only this place's key is written.
+async function savePlace(name, patch){
+  const id = placeId(name);
+  if(!id) return false;
+  const entry = Object.assign({}, PLACES[id] || {}, patch, { name, by: whoAmI() || 'Someone', at: Date.now() });
+  PLACES = Object.assign({}, PLACES, { [id]: entry });     // shows at once
+  if(!db){ showToast('Not connected to the database.'); return false; }
+  try{
+    await trackWrite(db.collection('terminology-meta').doc('places').set({ places: { [id]: stripUndefined(entry) } }, { merge: true }));
+    return true;
+  }catch(err){
+    console.error('savePlace failed', err);
+    showToast(err && err.code === 'permission-denied' ? 'The Hub refused it. Open the Hub with the team code and try again.' : 'Couldn’t save that for the team. Check your connection.');
+    return false;
+  }
 }
 
 let pickingIconForGroup = '';
@@ -7846,9 +7974,8 @@ function openGroupIconPicker(encodedName){
   pickingIconForGroup = decodeURIComponent(encodedName);
   const current = groupIconKeyFor(pickingIconForGroup);
   document.getElementById('groupIconTitle').textContent = pickingIconForGroup;
-  document.getElementById('groupIconGrid').innerHTML = GROUP_ICON_CHOICES.map(c=>`
-    <button class="group-icon-pick${c.key === current ? ' is-on' : ''}"
-        style="--group-accent:${nameToColor(pickingIconForGroup)};"
+  document.getElementById('groupIconGrid').innerHTML = PLACE_ICONS.map(c=>`
+    <button type="button" class="group-icon-pick${c.key === current ? ' is-on' : ''}" aria-pressed="${c.key === current}"
         onclick="setGroupIcon('${c.key}')" title="${escapeAttr(c.label)}">
       <span class="group-icon-art">${groupIconHtml(c.key)}</span>
       <span class="group-icon-label">${escapeHtml(c.label)}</span>
@@ -7861,13 +7988,18 @@ function closeGroupIconPicker(){
   pickingIconForGroup = '';
 }
 
-function setGroupIcon(key){
-  if(!pickingIconForGroup) return;
-  if(key === defaultGroupIcon(pickingIconForGroup)) delete groupIcons[pickingIconForGroup];
-  else groupIcons[pickingIconForGroup] = key;
-  try{ localStorage.setItem(GROUP_ICON_KEY, JSON.stringify(groupIcons)); }catch(e){}
+async function setGroupIcon(key){
+  const name = pickingIconForGroup;
+  if(!name) return;
   closeGroupIconPicker();
+  if(key === groupIconKeyFor(name)) return;
+  const ok = savePlace(name, { icon: key });
   renderContent();
+  if(await ok){
+    const label = (PLACE_ICONS.find(i => i.key === key) || {}).label || key;
+    logActivity(`changed the icon for ${name} to ${label}`);
+    showToast('Icon changed for the whole team.');
+  }
 }
 
 /* encodeURIComponent deliberately leaves ! ' ( ) * alone, and these names go
@@ -12352,9 +12484,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'places',      tone:'gd-n2', pin:'pins/medifind.webp',            eyebrow:'Doctor Directory',      title:'Pick where a doctor works in one tap, with icons the whole team sees' },
   { id:'regions',     tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat & Doctors',   title:'North and South: chat channels, and doctors by region' },
   { id:'warmup',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Home',                  title:'The Daily Drill: catch the trap, hear it, make the call' },
-  { id:'namelight',   tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Home',                  title:'Your name, written in navy light when you open the app' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12425,6 +12557,9 @@ const GUIDE_STEPS = {
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
+  places: () => ({ steps: [`On a doctor’s card, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add doctor')}.`,
+    `Tap <b>Where</b>, then tap the place. Search, or tap ${GUIDE_UI.pill('Add a place')} if it isn’t there.`,
+    'To change a place’s icon, tap the icon beside its name in the list.'], note: 'Places you add and icons you pick show for everyone, in Provider Pictures too.' }),
   regions: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>My region</b>, tap ${GUIDE_UI.pill('North')} or ${GUIDE_UI.pill('South')}.`,
     'Chat and the Doctor Directory follow it straight away.'], note: 'Saved on this phone. Change it any time; nothing is hidden from anyone.' }),
   name: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, 'Type your name.', `Tap ${GUIDE_UI.pill('Save')}.`],
@@ -15867,8 +16002,12 @@ const GUIDE_TOPICS = [
 
   { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
     <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
-    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All regions</b> above the list to switch; a search always looks through every region. A doctor's region comes from their hospital; if the hospital doesn't say, pick it on the doctor's edit sheet.</p>
+    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All regions</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
     <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
+
+  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory floor suite', q:'How do I set where a doctor works?', a:`
+    <p>On the doctor’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room goes in the box under it.</p>
+    <p>Each place has a picture, from the same set as the Home pins. Tap the picture beside a place’s name in the Doctor Directory to change it. The places and pictures are shared: what you add or change, the whole team sees, in Provider Pictures too.</p>` },
 
   { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital', q:'What is Provider Pictures?', a:`
     <p><b>Provider Pictures</b> helps you put a face to a name. Open it from Home or under <b>More</b>.</p>
@@ -19881,7 +20020,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -19909,8 +20048,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1014.1226';
-const BUILD_TIME = '2026-10-14 12:26 UTC';
+const BUILD_ID = 'b1014.1320';
+const BUILD_TIME = '2026-10-14 13:20 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -23081,73 +23220,111 @@ async function deleteProvider(id){
 
 let editingDoctorDirId = null;
 
-const DD_GROUP_AUTO = '';
-const DD_GROUP_OTHER = '__other__';
+/* The doctor sheet's "Where" (2026-10-14). One button opens a sheet of
+   places: search, your region first, then the other, then places with no
+   region; tap one and it's set. "Add a place" makes a new one for the whole
+   team (savePlace). Replaces the old group dropdown, "Other", "location as
+   written" and Region fields. ddPlace: a place name, HMH_NETWORK_LABEL for
+   "no specific site", or '' for not set. */
+let ddPlace = '';
+let placeAdding = null;          // { name, region } while the add form is open
 
-// Every group currently in use, so a doctor can be dropped into a heading
-// that already exists — including ones typed by hand that aren't in the
-// Hackensack Meridian table.
-function knownLocationGroups(){
-  const names = new Set(HMH_LOCATIONS.map(l => l.name));
-  DOCTOR_DIRECTORY.forEach(d=>{
-    const n = locationGroupName(d, d.hospitalLocation);
-    if(n && n !== NO_LOCATION_LABEL) names.add(n);
+function renderDDPlaceField(){
+  const btn = document.getElementById('fDDPlace');
+  if(!btn) return;
+  if(!ddPlace){
+    btn.innerHTML = `<span class="place-field-icon is-empty">${groupIconHtml('medifind')}</span><span class="place-field-text"><b>Choose a place</b><small>Hospital, center or office</small></span><span class="place-field-chev" aria-hidden="true">›</span>`;
+    return;
+  }
+  const r = regionOfGroup(ddPlace);
+  btn.innerHTML = `<span class="place-field-icon">${groupIconHtml(groupIconKeyFor(ddPlace))}</span><span class="place-field-text"><b>${escapeHtml(ddPlace === HMH_NETWORK_LABEL ? 'Hackensack Meridian Health' : ddPlace)}</b><small>${ddPlace === HMH_NETWORK_LABEL ? 'No specific site' : r ? escapeHtml(regionName(r)) + ' region' : 'No region'}</small></span><span class="place-field-chev" aria-hidden="true">›</span>`;
+}
+
+function openPlacePicker(){
+  placeAdding = null;
+  const q = document.getElementById('placeSearch');
+  if(q) q.value = '';
+  renderPlaceList();
+  document.getElementById('placeOverlay').classList.add('show');
+  if(q && prefersAutoFocus()) q.focus();
+}
+function closePlacePicker(){
+  document.getElementById('placeOverlay').classList.remove('show');
+  placeAdding = null;
+}
+function pickPlace(encodedName){
+  ddPlace = decodeURIComponent(encodedName);
+  closePlacePicker();
+  renderDDPlaceField();
+}
+
+function placeCount(name){
+  return DOCTOR_DIRECTORY.filter(d => locationGroupName(d, d.hospitalLocation) === name).length;
+}
+function placeRowHtml(p){
+  const on = p.name === ddPlace;
+  const n = placeCount(p.name);
+  const sub = p.sub || (n ? `${n} doctor${n === 1 ? '' : 's'}` : '');
+  return `<button type="button" class="place-row${on ? ' is-on' : ''}" aria-pressed="${on}" onclick="pickPlace('${encGroup(p.name)}')">
+      <span class="place-row-icon">${groupIconHtml(groupIconKeyFor(p.name))}</span>
+      <span class="place-row-text"><b>${escapeHtml(p.label || p.name)}</b>${sub ? `<small>${escapeHtml(sub)}</small>` : ''}</span>
+      ${on ? `<span class="place-row-tick" aria-hidden="true">${ICON_CHECK}</span>` : ''}
+    </button>`;
+}
+
+function renderPlaceList(){
+  const box = document.getElementById('placeList');
+  if(!box) return;
+  if(placeAdding){ box.innerHTML = placeAddHtml(); return; }
+  const q = foldText((document.getElementById('placeSearch') || {}).value || '').trim();
+  const all = placeList().filter(p => !q || foldText(p.name).includes(q));
+  const mine = myRegion();
+  const order = mine ? [mine, ...REGIONS.map(r => r.id).filter(r => r !== mine)] : REGIONS.map(r => r.id);
+  let html = '';
+  if(!q) html += `<div class="place-sec">${placeRowHtml({ name: HMH_NETWORK_LABEL, label: 'No specific site', sub: 'Hackensack Meridian Health, site not known' })}</div>`;
+  [...order, ''].forEach(r => {
+    const list = all.filter(p => (p.region || '') === r).sort((a, b) => a.name.localeCompare(b.name));
+    if(!list.length) return;
+    const head = r ? `${regionName(r)}${r === mine ? ' · your region' : ''}` : 'Other places';
+    html += `<div class="place-sec"><h4 class="place-sec-head">${escapeHtml(head)}</h4>${list.map(placeRowHtml).join('')}</div>`;
   });
-  return [...names].sort((a, b) => locationSortRank(a) - locationSortRank(b) || a.localeCompare(b));
+  if(q && !all.length) html += `<p class="place-none">No place called “${escapeHtml((document.getElementById('placeSearch') || {}).value.trim())}” yet.</p>`;
+  const typed = ((document.getElementById('placeSearch') || {}).value || '').trim();
+  html += `<button type="button" class="place-add" onclick="startAddPlace()"><span aria-hidden="true">+</span>${typed && !all.some(p => foldText(p.name) === q) ? `Add “${escapeHtml(typed)}” as a place` : 'Add a place'}</button>`;
+  box.innerHTML = html;
 }
 
-function populateDDGroupSelect(current){
-  const sel = document.getElementById('fDDGroup');
-  if(!sel) return;
-  const groups = knownLocationGroups();
-  const manual = (current || '').trim();
-  const isKnown = !manual || groups.includes(manual);
-  sel.innerHTML = `<option value="">Detect from the location text</option>`
-    + groups.map(g => `<option value="${escapeAttr(g)}"${manual === g ? ' selected' : ''}>${escapeHtml(g)}</option>`).join('')
-    + `<option value="${DD_GROUP_OTHER}"${!isKnown ? ' selected' : ''}>Other\u2026</option>`;
-  const otherField = document.getElementById('fDDGroupOtherField');
-  const otherInput = document.getElementById('fDDGroupOther');
-  if(otherField) otherField.style.display = isKnown ? 'none' : '';
-  if(otherInput) otherInput.value = isKnown ? '' : manual;
-  updateDDGroupHint();
+function startAddPlace(){
+  const typed = ((document.getElementById('placeSearch') || {}).value || '').trim();
+  placeAdding = { name: typed, region: myRegion() || '' };
+  renderPlaceList();
+  const inp = document.getElementById('placeAddName');
+  if(inp) inp.focus();
 }
-
-// Says what will actually happen, because "Detect" is invisible otherwise.
-function updateDDGroupHint(){
-  const sel = document.getElementById('fDDGroup');
-  const hint = document.getElementById('fDDGroupHint');
-  if(!sel || !hint) return;
-  if(sel.value === DD_GROUP_AUTO){
-    const raw = (document.getElementById('fDDLocation')||{}).value || '';
-    const detected = canonicalLocation(raw);
-    hint.textContent = detected === NO_LOCATION_LABEL
-      ? 'With no location text, this doctor sits under \u201cNo location listed\u201d.'
-      : `Currently groups under \u201c${detected}\u201d.`;
-  } else if(sel.value === DD_GROUP_OTHER){
-    hint.textContent = 'Creates a new group with the name you type below.';
-  } else {
-    hint.textContent = 'Always groups here, whatever the location text says.';
-  }
+function placeAddHtml(){
+  const a = placeAdding;
+  return `<div class="place-addform">
+      <label for="placeAddName">Name</label>
+      <input id="placeAddName" type="text" value="${escapeAttr(a.name)}" placeholder="e.g. Bergen Eye Associates" oninput="placeAdding.name=this.value">
+      <span class="place-addlab" id="placeAddRegLab">Region</span>
+      <div class="ds-mode-seg" role="radiogroup" aria-labelledby="placeAddRegLab">${REGIONS.map(r => `<button type="button" role="radio" aria-checked="${a.region === r.id}" onclick="placeAdding.region='${r.id}'; renderPlaceList()">${escapeHtml(r.name)}</button>`).join('')}</div>
+      <p class="field-hint">Everyone on the team will see it. Pick its icon from the group heading afterwards.</p>
+      <div class="place-addbtns">
+        <button type="button" class="btn btn-ghost" onclick="placeAdding=null; renderPlaceList()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="addPlace()">Add place</button>
+      </div>
+    </div>`;
 }
-
-function onDDGroupChange(){
-  const sel = document.getElementById('fDDGroup');
-  const otherField = document.getElementById('fDDGroupOtherField');
-  if(otherField) otherField.style.display = (sel.value === DD_GROUP_OTHER) ? '' : 'none';
-  if(sel.value === DD_GROUP_OTHER){
-    const inp = document.getElementById('fDDGroupOther');
-    if(inp) inp.focus();
-  }
-  updateDDGroupHint();
-}
-
-function selectedDDGroup(){
-  const sel = document.getElementById('fDDGroup');
-  if(!sel) return '';
-  if(sel.value === DD_GROUP_OTHER){
-    return ((document.getElementById('fDDGroupOther')||{}).value || '').trim();
-  }
-  return sel.value;
+async function addPlace(){
+  const name = normLoc(placeAdding && placeAdding.name);
+  if(!name){ showToast('Type the place’s name.'); return; }
+  if(!isRegion(placeAdding.region)){ showToast('Pick North or South.'); return; }
+  const existing = placeList().find(p => p.name.toLowerCase() === name.toLowerCase());
+  if(existing){ pickPlace(encGroup(existing.name)); return; }
+  const region = placeAdding.region;
+  const saving = savePlace(name, { custom: true, region });   // known locally at once
+  pickPlace(encGroup(name));
+  if(await saving) logActivity(`added the place ${name} (${regionName(region)})`);
 }
 
 function openAddDoctorDirModal(){
@@ -23160,12 +23337,11 @@ function _openAddDoctorDirModal(){
   document.getElementById('doctorDirModalTitle').textContent = 'Add doctor';
   document.getElementById('fDDName').value = '';
   document.getElementById('fDDSpecialty').value = '';
-  document.getElementById('fDDLocation').value = '';
   document.getElementById('fDDLocationDetails').value = '';
   document.getElementById('fDDNotes').value = '';
   document.getElementById('fDDPhoto').value = '';
-  document.getElementById('fDDRegion').value = '';
-  populateDDGroupSelect('');
+  ddPlace = '';
+  renderDDPlaceField();
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
   document.getElementById('fDDName').focus();
@@ -23183,12 +23359,12 @@ function _openEditDoctorDirModal(id){
   document.getElementById('doctorDirModalTitle').textContent = 'Edit doctor';
   document.getElementById('fDDName').value = d.name || '';
   document.getElementById('fDDSpecialty').value = d.specialty || '';
-  document.getElementById('fDDLocation').value = d.hospitalLocation || '';
   document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
   document.getElementById('fDDNotes').value = d.notes || '';
   document.getElementById('fDDPhoto').value = '';
-  document.getElementById('fDDRegion').value = isRegion(d.region) ? d.region : '';
-  populateDDGroupSelect(d.locationGroup || '');
+  const g = locationGroupName(d, d.hospitalLocation);
+  ddPlace = g === NO_LOCATION_LABEL ? '' : g;
+  renderDDPlaceField();
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
   document.getElementById('fDDName').focus();
@@ -23246,7 +23422,6 @@ async function saveDoctorDirEntry(){
   const name = document.getElementById('fDDName').value.trim();
   if(!name){ showToast('Doctor\u2019s name is required.'); return; }
   const specialty = document.getElementById('fDDSpecialty').value.trim();
-  const hospitalLocation = document.getElementById('fDDLocation').value.trim();
   const locationDetails = document.getElementById('fDDLocationDetails').value.trim();
   const notes = document.getElementById('fDDNotes').value.trim();
   const editor = whoAmI();
@@ -23255,21 +23430,25 @@ async function saveDoctorDirEntry(){
   // record even if the display name is tweaked); adding fresh derives a
   // new ID from the name so a later Doctor Prep search on the same person
   // lands on — and merges into — this same entry rather than duplicating it.
-  const regionPick = (document.getElementById('fDDRegion') || {}).value || '';
-  const siteRegion = regionOfGroup(selectedDDGroup() || canonicalLocation(hospitalLocation));
-  // A new doctor at a site that doesn't say goes in the adder's region.
-  const regionField = regionPick || (!editingDoctorDirId && !siteRegion ? myRegion() : '') || null;
-  const placed = regionField || siteRegion;
+  const siteRegion = regionOfGroup(ddPlace);
+  // The place decides the region. Only a doctor with no specific site keeps
+  // one of their own: what they had, or for a new one the adder's.
+  const keep = editingDoctorDirId ? (DOCTOR_DIRECTORY.find(d => d.id === editingDoctorDirId) || {}).region : myRegion();
+  const regionField = siteRegion ? null : (isRegion(keep) ? keep : null);
+  const placed = siteRegion || regionField || '';
   const id = editingDoctorDirId || doctorDirIdFor(name, placed);
   if(!id){ showToast('Could not generate an entry for that name.'); return; }
   const existing = editingDoctorDirId ? DOCTOR_DIRECTORY.find(d=>d.id===editingDoctorDirId) : DOCTOR_DIRECTORY.find(d=>d.id===id);
 
   const record = {
     ...(existing || {}),
-    name, specialty, hospitalLocation, locationDetails, notes,
-    locationGroup: selectedDDGroup(),
-    // Set by hand, or the adder's region when the site doesn't say. Empty =
-    // follow the location.
+    name, specialty, locationDetails, notes,
+    // The wording Doctor Prep found stays on file while the place is unchanged;
+    // a moved or new doctor's wording is the place itself, so the card never
+    // shows the old building under the new heading.
+    hospitalLocation: (existing && ddPlace === locationGroupName(existing, existing.hospitalLocation))
+      ? (existing.hospitalLocation || '') : (ddPlace !== HMH_NETWORK_LABEL ? ddPlace : ''),
+    locationGroup: ddPlace,
     region: regionField,
     photo: pendingDDPhotoDataUrl || null,
     photoPath: pendingDDPhotoPath || null,
@@ -27677,6 +27856,7 @@ hubAuthReady.then(()=>{
   startMembersListener();
   startActivityListener();
   startSmileyCareer();
+  startPlacesListener();
   startAnnouncementsListener();
   startTypingListener();
 

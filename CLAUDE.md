@@ -166,6 +166,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - The User Guide screen (`GUIDE_TOPICS`, `guideShowMe`): `user-guide.md`
 - Team access, team code, practice mode (`hub-invites`, `hub-members`, `team()`): `team-access.md`
 - Regions, North and South: chat channels, directory by region, `ih_region`, `HMH_LOCATIONS` regions: `regions.md`
+- Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
@@ -317,6 +318,24 @@ then a tail of 7/8/13/14/15/16. Type has 11 sizes with no ratio, and
 to five values covers 86% of current uses: **6 / 9 / 13 / 17 / 26**. When
 adjusting spacing on a component, move it onto that scale rather than
 extending the tail.
+
+## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
+
+The main conversation (Opus 5.5) plans, decides, writes the real code and
+reviews. Repetitive work goes to the agents in `.claude/agents/`:
+
+| Agent | Model | Use for |
+|---|---|---|
+| `scout` | Haiku 5.5 | Finding code and usages, reading a long file or log for the few lines that matter |
+| `test-runner` | Haiku 5.5 | Running suites and syntax checks, reporting only failures |
+| `builder` | Sonnet 5.5 | Exactly specified mechanical edits: guide copy, renames, expected counts |
+
+Delegate when the job would pour a lot of text into the main conversation
+(a full test run, sweeping `index.html` for every use of a name). Don't
+delegate a one-line `grep` or a single small read: a subagent starts cold
+and re-reads context, so for small jobs it costs more than doing it
+directly. Check what a helper reports before relying on it; decisions,
+design and anything touching data or rules stay with the main model.
 
 ## Working agreement
 

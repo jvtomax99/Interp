@@ -8,6 +8,7 @@ tests
 # so not served either.
 CLAUDE.md
 AGENTS.md
+.claude
 firestore.rules
 storage.rules
 firebase.json
