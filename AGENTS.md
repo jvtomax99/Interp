@@ -241,3 +241,6 @@ Jose Vazquez, staff medical interpreter at Hackensack University Medical
 Center, and his interpreter team. Spanish/English, installable PWA, used
 one-handed between hospital assignments. He directs the product and reviews
 from a phone: one step at a time, screenshots over description.
+
+**Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
+(His standing rule.)
