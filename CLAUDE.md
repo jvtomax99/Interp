@@ -550,6 +550,8 @@ extending the tail.
 
 ## Working agreement
 
+- **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
+  (His standing rule.)
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the
