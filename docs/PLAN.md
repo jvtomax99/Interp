@@ -34,29 +34,28 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
-1. **Dead CSS.** ~125 rules (~14 KB) in `index.html`'s styles target classes
-   nothing produces (old top bar `tg-*`, old greeting `home-greeting-brand*`,
-   `lightbox-*`, `nav-section-*`, `subgroup-bar*`, `whoami*`, …). Remove in
-   one PR; prove nothing changed with before/after screenshots of every
-   screen, phone and computer, plus the suites.
-2. **AI models.** `claude-sonnet-5` (doctor-research, term-lookup,
+1. **AI models.** `claude-sonnet-5` (doctor-research, term-lookup,
    translate backup) → `claude-sonnet-5-5`; `claude-opus-5` (term-check
    backup) → `claude-opus-5-5`. One endpoint per PR; compare a few real
    answers before/after (effort levels were recalibrated). Read the
    claude-api skill first.
-3. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
+2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
    helper; move one endpoint per PR.
-4. **Home styles in layers.** In `home-polish.css` the greeting name is
+3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
-5. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
+4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
    old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
    ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
    gap" paragraph says there are no spacing or font-size variables, but the
    Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
    text, both files.
+5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
+   `index.html`. `home-polish.css` still styles classes nothing makes
+   (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
+   file, so fetch `main` right before.
 
 ## Later (only when the trigger happens)
 
@@ -96,6 +95,14 @@ Don't repeat it in every reply.
   1 day for canceled, errored and pre-production, 1 week for production;
   `vercel.json` no longer deploys `claude/` branches, so a PR has no
   preview link. If it nears 100% again, check Usage before anything else.
+- Dead CSS method (2026-10-14): a class counts as used if its name appears
+  anywhere outside the stylesheet (`index.html` markup and scripts,
+  `home-polish.js`, `pin-icons.js`). Names built in code (`em-${role}`,
+  `dm-${tone}`, `'ds-fx-' + kind`, `is-${why.k}`, `is-b${n}`, `n${n}`,
+  `sev-${sev}`) look dead to a plain search and are live: check prefixes.
+  `id="domain-${cat.id}"` is an id, not a class. Proof = every element's
+  computed style (and ::before/::after) identical before/after on every
+  screen and sheet, phone and computer, light and dark.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
