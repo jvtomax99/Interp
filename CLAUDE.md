@@ -319,6 +319,24 @@ to five values covers 86% of current uses: **6 / 9 / 13 / 17 / 26**. When
 adjusting spacing on a component, move it onto that scale rather than
 extending the tail.
 
+## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
+
+The main conversation (Opus 5.5) plans, decides, writes the real code and
+reviews. Repetitive work goes to the agents in `.claude/agents/`:
+
+| Agent | Model | Use for |
+|---|---|---|
+| `scout` | Haiku 5.5 | Finding code and usages, reading a long file or log for the few lines that matter |
+| `test-runner` | Haiku 5.5 | Running suites and syntax checks, reporting only failures |
+| `builder` | Sonnet 5.5 | Exactly specified mechanical edits: guide copy, renames, expected counts |
+
+Delegate when the job would pour a lot of text into the main conversation
+(a full test run, sweeping `index.html` for every use of a name). Don't
+delegate a one-line `grep` or a single small read: a subagent starts cold
+and re-reads context, so for small jobs it costs more than doing it
+directly. Check what a helper reports before relying on it; decisions,
+design and anything touching data or rules stay with the main model.
+
 ## Working agreement
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
