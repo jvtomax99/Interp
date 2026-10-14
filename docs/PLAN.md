@@ -72,7 +72,7 @@ Coming back hours later: start a new session, not the old chat.
   files no longer served. #24.
 - 2026-10-14 Startup: 2 finished migrations + old blob code removed. #25.
 - 2026-10-14 `CLAUDE.md` slimmed 584 → 350 lines: 11 feature write-ups
-  moved verbatim to `docs/features/`, one pointer line each. PR: see below.
+  moved verbatim to `docs/features/`, one pointer line each. #27.
 
 ## Facts (so nobody re-checks)
 
