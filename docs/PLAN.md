@@ -44,18 +44,6 @@ to read. Nothing in a doctor's research is lost: all five tiers (core,
 procedures, drugs, anatomy, falsefriends), hand-added `customTerms` and
 photos stay. One PR per step; User Guide in each.
 
-D1. **Doctor page** (replaces `openDoctorDirDetail` / `renderDoctorDirDetail`
-   modal content). Header card: specialty pin in a soft tile with the
-   initials badge (photo instead when there is one), name 22/650,
-   specialty dot in `specialtyColor()`. Bento: navy tile = term count +
-   one bar per tier (false friends red); Where tile (place pin, floor);
-   Team tip tile (latest tip + count). Tier tabs (`ds-mode-seg`, counts).
-   Term rows: English 17/650, Spanish 17/550 navy, definition 14
-   ink-soft, 🔊 EN / 🔊 ES buttons (`speakText(btn, text, lang)`).
-   Hand-added terms as their own tab. Old flat research: one list plus the
-   re-research prompt. Glass bottom bar: Start appointment (`startAppt`
-   with this doctor), Flashcards (the briefing's), Add tip. Scrolls on a
-   phone, 44px targets, 16px inputs.
 D2. **Team tips.** `tips: [{id, text, by, at}]` on the doctor-directory
    document; add, edit and delete your own; activity log. The old single
    `notes` shows as the first tip (by `updatedBy`) until someone edits it,
@@ -135,11 +123,22 @@ come from this alone.
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
   fix. No rules change, no migration. `docs/features/regions.md`. #31.
+- 2026-10-14 Doctors D1, the doctor's page: header with specialty pin,
+  bento (count, Where, tip), tier tabs, terms read aloud, glass bar (Start
+  appointment, Flashcards, Add tip). `docs/features/doctor-page.md`. PR link
+  in the merge.
 - 2026-10-14 Term lookup on Sonnet 5.5: effort stays `medium`, refusals
   logged and answered as "nothing found", JSON read from the last text
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- Doctor page, D1: "Add tip" edits the doctor's single `notes` until D2
+  builds `tips`; D2 should point that button and the tip tile at the new
+  sheet. `SPECIALTY_PINS` already exists for D3's list.
+- Test fixtures: doctors pushed straight into `DOCTOR_DIRECTORY` vanish when
+  the directory listener reloads; also write them to `window.__DB`
+  (`seed()` in `tests/suites/doctor-page.cjs`).
 
 - Firebase plan: Blaze. Reads ~23K/day, cost ~$0.17/month (2026-10-13).
 - `terminology-meta/migrations`: `oncologySplit`, `slangGlossary` done.
