@@ -40,18 +40,21 @@ export const config = {
  * "find the page about this concept and say which sense it covers", and
  * Sonnet does that well at roughly 40% of the cost.
  *
- * Sonnet 5 at two searches works out around $0.04 a lookup against $0.09 on
+ * Sonnet at two searches works out around $0.04 a lookup against $0.09 on
  * Opus, and each term is only paid for once per 90 days for the whole team.
  * If results start coming back thin, raise EFFORT before reaching for a
- * bigger model — that is the cheaper knob and usually the right one. */
-const MODEL = 'claude-sonnet-5';
+ * bigger model — that is the cheaper knob and usually the right one.
+ *
+ * Sonnet 5.5 since 2026-10-14 (was claude-sonnet-5, same price). */
+const MODEL = 'claude-sonnet-5-5';
 
 /* Medium, not low. The judgment this endpoint actually has to get right is
  * which SENSE of a term a page covers — a cardiac term must not come back
  * with the orthopedic page, and a wrong-sense page looks perfectly
  * legitimate to someone skimming. That is the kind of care effort buys, and
  * Sonnet at low effort was the thin combination. Costs about half a cent
- * more per lookup; far better value than paying double for a bigger model. */
+ * more per lookup; far better value than paying double for a bigger model.
+ * Sonnet 5.5 recalibrated its levels; medium kept for the same reason. */
 const EFFORT = 'medium';
 
 /* Each search is a round trip — the model searches, reads results, decides
@@ -257,15 +260,22 @@ export default async function handler(req, res) {
       }
     }
 
+    // A safety decline is a normal 200 with no answer. The app treats it like
+    // "nothing found"; the log says why.
+    if (data.stop_reason === 'refusal') {
+      console.error('Model declined:', JSON.stringify(data.stop_details || null));
+      return res.status(200).json({ sources: [], note: '' });
+    }
+
     if (data.stop_reason === 'max_tokens') {
       console.error('Response truncated at max_tokens before finishing.');
     }
 
-    const raw = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim();
+    // With the schema, the answer is the LAST text block: a short remark
+    // before a search ("Let me look that up.") can be a text block of its own,
+    // and joining it in front of the JSON would break the parse.
+    const texts = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
+    const raw = (usedSchema ? texts.slice(-1) : texts).join('').trim();
 
     let parsed;
     try {

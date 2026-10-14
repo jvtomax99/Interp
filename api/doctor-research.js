@@ -83,11 +83,12 @@ function findInDirectory(inputName) {
   return JTCC_DIRECTORY.find(d => lastNameOf(d.name) === inputLast) || null;
 }
 
-// Claude Sonnet 5. Was claude-sonnet-4-6, which is previous-generation and
-// costs MORE per token ($3/$15 per million vs $2/$10) — this is cheaper and
-// newer at once. translate.js was already on Sonnet 5; this file was left
-// behind.
-const MODEL = 'claude-sonnet-5';
+// Claude Sonnet 5.5 (2026-10-14; was claude-sonnet-5, same price). Its
+// effort levels were recalibrated, so the level is set explicitly below
+// rather than left to the default: `medium` is the starting point for a
+// search-then-write job, and this one has to finish inside the 60 s limit.
+const MODEL = 'claude-sonnet-5-5';
+const EFFORT = 'medium';
 
 // Structured outputs: the response is constrained to this schema instead of
 // the prompt asking nicely for JSON. `specialty` is a plain string ("" when
@@ -157,6 +158,14 @@ function textOf(data) {
   return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
 }
 
+// With the schema, the answer is the LAST text block. A short remark before
+// a web search ("Let me look that up.") can come back as its own text block,
+// and joining it in front of the JSON would break the parse.
+function lastTextOf(data) {
+  const texts = (data.content || []).filter(b => b.type === 'text');
+  return texts.length ? texts[texts.length - 1].text.trim() : '';
+}
+
 async function postMessages(apiKey, body) {
   return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -166,10 +175,14 @@ async function postMessages(apiKey, body) {
 }
 
 async function callClaude(apiKey, systemPrompt, userContent, tools) {
-  // max_tokens raised from 4096 long ago: five tiers is more output than the
-  // old flat list, and hitting max_tokens throws the whole response away
-  // rather than truncating gracefully.
-  const base = { model: MODEL, max_tokens: 8000, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
+  // max_tokens: five tiers is a lot of output, hitting the cap throws the
+  // whole response away, and the model's thinking counts toward it too
+  // (8000 until Sonnet 5.5; 16000 is room, not a target).
+  const base = {
+    model: MODEL, max_tokens: 16000, system: systemPrompt,
+    output_config: { effort: EFFORT },
+    messages: [{ role: 'user', content: userContent }],
+  };
   if (tools) base.tools = tools;
 
   // Ask for a schema-constrained response first. If this deployment or this
@@ -179,7 +192,7 @@ async function callClaude(apiKey, systemPrompt, userContent, tools) {
   let usedSchema = true;
   let response = await postMessages(apiKey, {
     ...base,
-    output_config: { format: { type: 'json_schema', schema: RESEARCH_SCHEMA } },
+    output_config: { ...base.output_config, format: { type: 'json_schema', schema: RESEARCH_SCHEMA } },
   });
 
   if (response.status === 400) {
@@ -201,13 +214,18 @@ async function callClaude(apiKey, systemPrompt, userContent, tools) {
   }
 
   const data = await response.json();
+  // A safety decline is a normal 200 with no answer in it. Say so, instead of
+  // failing to parse an empty reply.
+  if (data.stop_reason === 'refusal') {
+    console.error('Model declined:', JSON.stringify(data.stop_details || null));
+    throw new Error('refused');
+  }
   if (data.stop_reason === 'max_tokens') {
     console.error('Response was truncated at max_tokens before finishing.');
     throw new Error('truncated');
   }
 
-  const rawText = textOf(data);
-  return usedSchema ? JSON.parse(rawText) : parseLoosely(rawText);
+  return usedSchema ? JSON.parse(lastTextOf(data)) : parseLoosely(textOf(data));
 }
 
 // Render order, easiest to hardest. The client reads `label` straight off
@@ -357,7 +375,7 @@ ${TIER_BRIEF}
 ${RESPONSE_SHAPE}
 If you cannot find reliable, specific information about this named individual, set "found" to false, leave "specialty" as an empty string, explain briefly in "note", and still populate the tiers with widely-useful medical interpreting terminology as a fallback so the response is never empty.`;
 
-    // web_search_20260209 adds dynamic filtering and is supported on Sonnet 5.
+    // web_search_20260209 adds dynamic filtering and is supported on Sonnet 5.5.
     // Worth having here specifically: this tool's whole job is finding the
     // RIGHT Dr. Gutierrez rather than any of them.
     const webSearchTool = { type: 'web_search_20260209', name: 'web_search', max_uses: 2 };
@@ -372,6 +390,8 @@ If you cannot find reliable, specific information about this named individual, s
     console.error('doctor-research handler failed:', err);
     if (err.message === 'api_error') {
       res.status(502).json({ error: 'Research service is temporarily unavailable. Please try again.' });
+    } else if (err.message === 'refused') {
+      res.status(502).json({ error: 'The research service declined this request.' });
     } else if (err.message === 'truncated') {
       res.status(502).json({ error: 'The response was cut off before finishing. Please try again.' });
     } else if (err instanceof SyntaxError) {
