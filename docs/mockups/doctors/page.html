@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset=utf-8><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800"><link rel=stylesheet href=base.css><style>
+body{position:relative}
+.top{display:flex;align-items:center;gap:10px;padding:54px 16px 6px}
+.top .ttl{flex:1;font-size:17px;font-weight:650;letter-spacing:-.01em;text-align:center;margin-right:50px;color:var(--ink-soft)}
+.wrap{padding:0 16px}
+.card{background:var(--paper);border-radius:20px;box-shadow:var(--fin)}
+.hero{display:flex;gap:13px;align-items:center;padding:16px;position:relative;overflow:hidden}
+.hero:before{content:'';position:absolute;left:0;top:0;bottom:0;width:120px;background:radial-gradient(80% 70% at 20% 40%,rgba(142,107,176,.16),transparent 70%)}
+.ph{position:relative;flex:0 0 76px;height:76px;border-radius:20px;background:#F1ECF7;display:flex;align-items:center;justify-content:center}
+.ph img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(40,30,70,.18))}
+.ph .ini{position:absolute;right:-6px;bottom:-6px;width:30px;height:30px;border-radius:10px;background:#8E6BB0;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff}
+.hero h1{margin:0;font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
+.spec{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:600;color:#6E4F94}
+.spec:before{content:'';width:8px;height:8px;border-radius:50%;background:#8E6BB0}
+.bento{display:grid;grid-template-columns:1.15fr 1fr;gap:10px;margin-top:10px}
+.navy{background:linear-gradient(160deg,#2B3580,#252E6D);color:#fff;border-radius:20px;padding:14px;box-shadow:0 8px 20px -12px rgba(22,55,90,.5)}
+.navy .n{font-size:34px;font-weight:750;letter-spacing:-.04em;line-height:1}.navy .l{font-size:12px;opacity:.75;font-weight:600;margin-top:2px}
+.bars{display:flex;flex-direction:column;gap:5px;margin-top:11px}.bar{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}.bar i{height:5px;border-radius:3px;background:#01B8E6;display:block}.bar.ff i{background:#FF8FA3}.bar.ff{color:#FFC2CD}
+.side{display:flex;flex-direction:column;gap:10px}
+.mini{padding:12px}.k{font-size:12px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint)}
+.where{display:flex;gap:8px;align-items:center;margin-top:6px}.where img{width:30px;height:30px}.where b{font-size:14px;font-weight:650;display:block;line-height:1.2}.where small{font-size:12px;color:var(--ink-soft)}
+.tip{background:#FFF7E6;box-shadow:none;border:1px solid #F3E2BC}.tip .k{color:#8A6F3F}.tip p{margin:5px 0 0;font-size:13.5px;line-height:1.35;font-weight:550}.tip small{color:#8A6F3F;font-size:12px;font-weight:600}
+.seg{display:flex;gap:3px;padding:3px;border-radius:999px;background:var(--line-soft);margin:16px 0 10px;overflow:hidden}
+.seg span{flex:0 0 auto;min-height:40px;padding:0 13px;border-radius:999px;font-size:14px;font-weight:600;color:var(--ink-soft);display:flex;align-items:center;gap:5px}
+.seg span b{font-weight:550;color:var(--ink-faint)}
+.seg .on{background:var(--paper);color:var(--ink);box-shadow:var(--fin)}.seg .ff{color:var(--danger)}
+.terms{padding:2px 0}
+.tr{display:flex;gap:12px;padding:14px 16px;border-top:1px solid var(--line-soft);align-items:flex-start}.tr:first-child{border:0}
+.tr .t{flex:1;min-width:0}
+.tr .en{font-size:17px;font-weight:650;letter-spacing:-.01em}
+.tr .es{font-size:17px;font-weight:550;color:var(--navy);margin-top:2px}
+.tr .df{font-size:14px;color:var(--ink-soft);line-height:1.45;margin-top:5px}
+.say{flex:0 0 auto;display:flex;flex-direction:column;gap:6px}
+.say span{width:44px;height:30px;border-radius:999px;background:var(--line-soft);font-size:11.5px;font-weight:700;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;gap:3px}
+.dock{position:fixed;left:12px;right:12px;bottom:22px;display:flex;gap:8px;padding:7px;border-radius:30px;background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);box-shadow:var(--fin),0 12px 30px -14px rgba(22,55,90,.4)}
+.go{flex:1;height:52px;border-radius:24px;background:var(--navy);color:#fff;font-weight:650;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+.rb{width:52px;height:52px;border-radius:24px;background:var(--paper);box-shadow:var(--fin);display:flex;align-items:center;justify-content:center}
+.rb img{width:30px;height:30px}
+</style></head><body>
+<div class=top><div class=ib>‹</div><div class=ttl>Doctor</div></div>
+<div class=wrap>
+<div class="card hero"><div class=ph><img src="../../../pins/leukemia.webp"><span class=ini>LL</span></div>
+<div><h1>Dr. Lori A. Leslie</h1><div class=spec>Lymphoma · Hematology/Oncology</div></div></div>
+<div class=bento>
+<div class=navy><div class=n>28</div><div class=l>prep terms</div>
+<div class=bars><div class=bar><i style="width:56px"></i>Core 8</div><div class=bar><i style="width:42px"></i>Procedures 6</div><div class=bar><i style="width:42px"></i>Drugs 6</div><div class=bar><i style="width:28px"></i>Anatomy 4</div><div class="bar ff"><i style="width:28px"></i>False friends 4</div></div></div>
+<div class=side>
+<div class="card mini"><div class=k>Where</div><div class=where><img src="../../../pins/oncology.webp"><div><b>John Theurer</b><small>4th fl · Suite 401</small></div></div></div>
+<div class="card mini tip"><div class=k>Team tip · 2</div><p>“Explains staging with a drawing.”</p><small>Maria</small></div>
+</div></div>
+<div class=seg><span class=on>Core <b>8</b></span><span>Procedures <b>6</b></span><span>Drugs <b>6</b></span><span>Anatomy <b>4</b></span><span class=ff>False friends <b>4</b></span></div>
+<div class="card terms">
+<div class=tr><div class=t><div class=en>staging</div><div class=es>estadificación</div><div class=df>How far the lymphoma has spread, stages I to IV.</div></div><div class=say><span>🔊 EN</span><span>🔊 ES</span></div></div>
+<div class=tr><div class=t><div class=en>remission</div><div class=es>remisión</div><div class=df>No signs of disease; not the same as cured.</div></div><div class=say><span>🔊 EN</span><span>🔊 ES</span></div></div>
+<div class=tr><div class=t><div class=en>R-CHOP</div><div class=es>R-CHOP</div><div class=df>Standard chemo regimen for large B-cell lymphoma. Said as letters.</div></div><div class=say><span>🔊 EN</span><span>🔊 ES</span></div></div>
+</div>
+</div>
+<div class=dock><div class=go>▶ Start appointment</div><div class=rb><img src="../../../pins/practice.webp"></div><div class=rb>✎</div></div>
+</body></html>

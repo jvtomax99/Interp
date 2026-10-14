@@ -35,6 +35,40 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
+**Doctors redesign (Jose approved 2026-10-14).** Mockups:
+`docs/mockups/doctors/list.png` and `page.png` (HTML beside them). Rule from
+Jose: it must look like the rest of the app (light background and mesh,
+white cards with the standard finish, navy, glass bars, `ds-mode-seg` tabs,
+Inter at the `--fs-*` scale), never a different app; and terms must be easy
+to read. Nothing in a doctor's research is lost: all five tiers (core,
+procedures, drugs, anatomy, falsefriends), hand-added `customTerms` and
+photos stay. One PR per step; User Guide in each.
+
+D1. **Doctor page** (replaces `openDoctorDirDetail` / `renderDoctorDirDetail`
+   modal content). Header card: specialty pin in a soft tile with the
+   initials badge (photo instead when there is one), name 22/650,
+   specialty dot in `specialtyColor()`. Bento: navy tile = term count +
+   one bar per tier (false friends red); Where tile (place pin, floor);
+   Team tip tile (latest tip + count). Tier tabs (`ds-mode-seg`, counts).
+   Term rows: English 17/650, Spanish 17/550 navy, definition 14
+   ink-soft, 🔊 EN / 🔊 ES buttons (`speakText(btn, text, lang)`).
+   Hand-added terms as their own tab. Old flat research: one list plus the
+   re-research prompt. Glass bottom bar: Start appointment (`startAppt`
+   with this doctor), Flashcards (the briefing's), Add tip. Scrolls on a
+   phone, 44px targets, 16px inputs.
+D2. **Team tips.** `tips: [{id, text, by, at}]` on the doctor-directory
+   document; add, edit and delete your own; activity log. The old single
+   `notes` shows as the first tip (by `updatedBy`) until someone edits it,
+   then it is written into `tips`; no migration on startup.
+D3. **Doctor list.** Two-column cards (mockup `list.png`): pin tile or
+   photo with initials badge, name, specialty dot, floor, labels for
+   terms / traps (false friends count, red) / tips, "+ Prep terms" when no
+   research. North / South / All as `ds-mode-seg`; navy "+ Add"; the
+   duplicate and old-terminology banners become one "N things to tidy"
+   button opening a sheet. Place headings with pins stay. Specialty to pin:
+   a `SPECIALTY_PINS` map (cancer, children, heart...), fallback the
+   place's pin.
+
 R5. **Provider Pictures on the Where picker.** Providers share the places
    and icons but still type a facility. Same sheet, if Jose wants it.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
