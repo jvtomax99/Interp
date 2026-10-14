@@ -54,3 +54,30 @@ jobs:
           name: test-output
           path: tests/out
           retention-days: 7
+
+  # The team is on iPhones: the doctor page also runs in WebKit, Safari's
+  # engine. (Speech is stood in for; real voices need a real phone.)
+  webkit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install WebKit
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps webkit
+      - name: Doctor page in WebKit
+        run: BROWSER=webkit node run.cjs doctor-page
+      - name: Keep the screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output-webkit
+          path: tests/out
+          retention-days: 7

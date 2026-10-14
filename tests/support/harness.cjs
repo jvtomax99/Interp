@@ -9,10 +9,14 @@
    else external is recorded on page.__external and answered empty.
 
    ROOT   the app folder to test (default: the repo this file is in)
-   INDEX  a different index.html to serve, for before/after comparisons */
+   INDEX  a different index.html to serve, for before/after comparisons
+   BROWSER  chromium (default) or webkit */
 const path = require('path');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
-const { chromium, devices } = pw;
+// BROWSER=webkit runs a suite in Safari's engine (CI's webkit job); the
+// name stays `chromium` so suites don't change.
+const chromium = pw[process.env.BROWSER || 'chromium'] || pw.chromium;
+const { devices } = pw;
 const fs = require('fs');
 const SUP = __dirname + '/';
 const R = process.env.ROOT ? path.resolve(process.env.ROOT) + '/' : path.resolve(__dirname, '..', '..') + '/';

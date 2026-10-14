@@ -766,7 +766,7 @@
   }
 
   /* Any other surface that renders a domain icon needs the same two vars. */
-  .domain-chip-icon, .side-row-icon, .qa-tile-icon, .qa-icon, .icon-pick, .card .tag, .dd-detail-header, .home-feed-icon, .tabbar-btn, .tg-icon-btn{
+  .domain-chip-icon, .side-row-icon, .qa-tile-icon, .qa-icon, .icon-pick, .card .tag, .home-feed-icon, .tabbar-btn, .tg-icon-btn{
     --ic-fill:var(--tile-color, var(--accent));
     --ic-line:var(--ink);
   }
@@ -1273,13 +1273,6 @@
   .provider-phone svg{ width:12px; height:12px; }
 
   /* ---------- Doctor Directory ---------- */
-  .doc-dir-location-pin{
-    display:flex; align-items:flex-start; gap:6px; font-size:12.5px; color:var(--ink);
-    background:var(--accent-soft); border-radius:8px; padding:8px 10px; margin:9px 0; line-height:1.5;
-  }
-  .doc-dir-location-pin svg{ width:13px; height:13px; flex-shrink:0; margin-top:1px; color:var(--accent); }
-  .doc-dir-source-tag{ color:#8C6E4F; background:#F3ECE3; }
-  .doc-dir-source-tag.is-manual{ color:#4E6E9E; background:#E8EEF6; }
   .ethics-filter-row{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
   .ethics-filter-pill{
     font-family:var(--sans); font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:999px;
@@ -1523,38 +1516,12 @@
   }
   html[data-theme="dark"] .doc-card{ background:var(--paper); }
   html[data-theme="dark"] .doc-card-foot{ background:rgba(255,255,255,0.03); }
-  .dd-detail-header{ display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; padding-right:28px; }
-  /* Named back control. The bare ✕ said "close" but not what you'd return
-     to, and on a full-height sheet it reads as leaving the section entirely. */
-  .dd-detail-back{
-    display:inline-flex; align-items:center; gap:5px; margin:0 0 14px 0;
-    padding:7px 13px 7px 9px; border-radius:999px; cursor:pointer;
-    border:1px solid var(--line-soft); background:var(--paper);
-    font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink-soft);
-    transition:border-color .15s var(--ease), color .15s var(--ease);
-  }
-  .dd-detail-back:hover{ border-color:var(--accent-2); color:var(--ink); }
-  .dd-detail-back svg{ width:15px; height:15px; flex-shrink:0; }
   .dd-detail-close{
     position:absolute; top:20px; right:20px; border:none; background:transparent; cursor:pointer;
     color:var(--ink-faint); font-size:16px; line-height:1; padding:4px; border-radius:8px;
     transition:color .15s var(--ease), background .15s var(--ease);
   }
   .dd-detail-close:hover{ color:var(--ink); background:var(--bg-hi); }
-  .dd-detail-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-  .dd-detail-section-label{
-    display:flex; align-items:center; gap:6px;
-    font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-faint);
-    text-transform:uppercase; margin:20px 0 10px 0; padding-top:16px; border-top:1px solid var(--line-soft);
-  }
-  /* Inline SVGs default to the full width of their container without this,
-     which was rendering these labels' icons at several hundred pixels. */
-  .dd-detail-section-label svg{ width:13px; height:13px; flex-shrink:0; }
-  #doctorDirDetailModal .btn svg{ width:14px; height:14px; flex-shrink:0; vertical-align:-2px; }
-  .dd-detail-empty-research{
-    font-size:13px; color:var(--ink-soft); line-height:1.6; background:var(--bg-hi); border-radius:12px;
-    padding:14px 16px;
-  }
 
   .photo-field{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
   .photo-preview{ width:54px; height:54px; border-radius:50%; object-fit:cover; box-shadow:inset 0 0 0 1px var(--line); flex-shrink:0; }
@@ -5796,6 +5763,160 @@ html[data-theme="dark"] .drp-earlier{ color:var(--accent-2); }
 html[data-theme="dark"] .ds-mode-seg button[aria-checked="true"]{ background:#2A3350; color:#fff; }
 @media (prefers-reduced-motion: reduce){ .ds-mode-seg button{ transition:none; } }
 
+/* ---------- Doctor page (openDoctorDirDetail, docs/features/doctor-page.md) ----------
+   Jose's approved mockup, docs/mockups/doctors/page.png: the light mesh, white
+   cards with the standard finish, a navy bento tile, ds-mode-seg tabs and a
+   glass bar at the bottom. Full screen on a phone (the old modal sat over the
+   list); a wide sheet on a computer. Still an .overlay, so Back, Escape and
+   navigation close it like every other sheet. */
+.overlay.dp-overlay{ padding-top:48px; }
+.dp-overlay .dp-page{
+  position:relative; max-width:640px; padding:0; overflow:clip;
+  background:radial-gradient(120% 60% at 0 0, #E6EEF8 0, transparent 60%), radial-gradient(90% 50% at 100% 10%, #EEE8F6 0, transparent 60%), var(--bg);
+  color:var(--ink); font-family:var(--sans);
+}
+html[data-theme="dark"] .dp-overlay .dp-page{
+  background:radial-gradient(120% 60% at 0 0, rgba(76,159,224,.10) 0, transparent 60%), radial-gradient(90% 50% at 100% 10%, rgba(142,107,176,.10) 0, transparent 60%), var(--bg);
+}
+@media (max-width:760px){
+  .overlay.dp-overlay{ padding:0; align-items:stretch; }
+  .dp-overlay .dp-page{
+    max-width:none; height:100%; max-height:100%; border-radius:0; overflow-x:hidden; overflow-y:auto;
+    padding-top:env(safe-area-inset-top); scroll-padding-block:70px 100px;
+  }
+}
+.dp-top{ position:sticky; top:0; z-index:4; display:grid; grid-template-columns:44px 1fr 44px; align-items:center; gap:var(--sp-2);
+  padding:var(--sp-2) 16px; background:rgba(244,246,250,.86); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur); }
+html[data-theme="dark"] .dp-top{ background:rgba(14,20,32,.86); }
+.dp-top-title{ margin:0; text-align:center; font-size:var(--fs-head); font-weight:650; letter-spacing:-.01em; color:var(--ink-soft); }
+.dp-ib{ width:44px; height:44px; border:0; border-radius:50%; background:var(--paper); color:var(--ink-soft); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.dp-ib svg{ width:22px; height:22px; }
+.dp-ib.is-edit svg{ width:19px; height:19px; }
+.dp-body{ padding:var(--sp-1) 16px 110px; }
+.dp-card{ background:var(--paper); border-radius:var(--r-lg);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+html[data-theme="dark"] .dp-card, html[data-theme="dark"] .dp-ib{ box-shadow:var(--sh-1); }
+
+/* Header: the specialty's pin in a soft tile with the initials, or the photo. */
+.dp-hero{ position:relative; overflow:hidden; display:flex; align-items:center; gap:var(--sp-3); padding:16px; }
+.dp-hero::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:120px; pointer-events:none;
+  background:radial-gradient(80% 70% at 20% 40%, color-mix(in srgb, var(--dp-sp) 18%, transparent), transparent 70%); }
+.dp-ph{ position:relative; flex:0 0 76px; width:76px; height:76px; border-radius:var(--r-lg); border:0; padding:0;
+  background:color-mix(in srgb, var(--dp-sp) 13%, var(--paper)); display:flex; align-items:center; justify-content:center; }
+.dp-ph img{ width:60px; height:60px; object-fit:contain; filter:drop-shadow(0 4px 6px rgba(40,30,70,.18)); }
+.dp-ph.is-photo{ cursor:zoom-in; overflow:hidden; }
+.dp-ph.is-photo img{ width:100%; height:100%; object-fit:cover; filter:none; }
+.dp-ini{ position:absolute; right:-6px; bottom:-6px; width:30px; height:30px; border-radius:var(--r-sm); background:var(--dp-sp); color:#fff;
+  font-size:var(--fs-cap); font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 3px var(--paper); }
+.dp-id{ position:relative; min-width:0; }
+.dp-name{ margin:0; font-size:var(--fs-t2); font-weight:650; letter-spacing:-.02em; line-height:1.15; color:var(--ink); overflow-wrap:anywhere; }
+.dp-spec{ display:flex; align-items:baseline; gap:var(--sp-1); margin-top:var(--sp-1); font-size:var(--fs-foot); font-weight:600;
+  color:color-mix(in srgb, var(--dp-sp) 72%, var(--ink)); }
+.dp-spec::before{ content:""; flex:0 0 8px; height:8px; border-radius:50%; background:var(--dp-sp); transform:translateY(-1px); }
+
+/* Bento: the navy count, Where and the team tip. */
+.dp-bento{ display:grid; grid-template-columns:1.15fr 1fr; gap:10px; margin-top:10px; }
+.dp-navy{ background:linear-gradient(160deg, #2B3580, #252E6D); color:#fff; border-radius:var(--r-lg); padding:14px;
+  box-shadow:0 8px 20px -12px rgba(22,55,90,.5); }
+.dp-navy-n{ font-size:34px; font-weight:750; letter-spacing:-.04em; line-height:1; }
+.dp-navy-l{ font-size:var(--fs-cap); font-weight:600; opacity:.78; margin-top:2px; }
+.dp-bars{ display:flex; flex-direction:column; gap:var(--sp-1); margin:11px 0 0; padding:0; list-style:none; }
+.dp-bars li{ display:flex; align-items:center; gap:8px; font-size:var(--fs-cap); font-weight:600; }
+.dp-bars i{ display:block; flex:0 0 auto; height:5px; border-radius:3px; background:#01B8E6; }
+.dp-bars li.is-ff{ color:#FFC2CD; } .dp-bars li.is-ff i{ background:#FF8FA3; }
+.dp-bars li.is-team i{ background:#fff; opacity:.7; }
+.dp-navy p{ margin:var(--sp-2) 0 0; font-size:var(--fs-foot); line-height:1.4; opacity:.85; }
+.dp-navy-btn{ margin-top:var(--sp-3); min-height:44px; width:100%; border:0; border-radius:999px; background:#fff; color:#252E6D;
+  font:650 var(--fs-foot) var(--sans); cursor:pointer; }
+.dp-side{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+.dp-mini{ padding:12px; min-width:0; }
+.dp-k{ font-size:var(--fs-cap); font-weight:650; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
+.dp-where{ display:flex; gap:8px; align-items:center; margin-top:var(--sp-1); }
+.dp-where-pin{ flex:0 0 30px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
+.dp-where-pin img{ width:30px; height:30px; object-fit:contain; }
+.dp-where b{ display:block; font-size:14px; font-weight:650; line-height:1.25; overflow-wrap:anywhere; }
+.dp-where small{ display:block; font-size:var(--fs-cap); color:var(--ink-soft); margin-top:2px; }
+.dp-tip{ display:block; width:100%; text-align:left; font-family:var(--sans); cursor:pointer; color:var(--ink);
+  background:#FFF7E6; border:1px solid #F3E2BC; box-shadow:none; }
+.dp-tip .dp-k, .dp-tip small{ color:#7A5F30; }
+.dp-tip p{ margin:5px 0 0; font-size:14px; line-height:1.35; font-weight:550;
+  display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+.dp-tip p.is-empty{ font-weight:450; color:var(--ink-soft); }
+.dp-tip small{ display:block; margin-top:4px; font-size:var(--fs-cap); font-weight:600; }
+html[data-theme="dark"] .dp-tip{ background:#2C2617; border-color:#4A3D22; }
+html[data-theme="dark"] .dp-tip .dp-k, html[data-theme="dark"] .dp-tip small{ color:#D9BF8A; }
+.dp-note{ margin:var(--sp-3) 2px 0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+
+/* Tier tabs: Dr. Smiley's segmented control, scrolling sideways when the
+   five tiers and the team's own terms don't fit. */
+.dp-tabs.ds-mode-seg{ margin:16px 0 10px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.dp-tabs.ds-mode-seg::-webkit-scrollbar{ display:none; }
+.dp-tabs.ds-mode-seg button{ flex:0 0 auto; padding:0 13px; white-space:nowrap; display:flex; align-items:center; gap:5px; }
+.dp-tabs.ds-mode-seg button b{ font-weight:550; color:var(--ink-soft); }
+.dp-tabs.ds-mode-seg button.is-ff{ color:color-mix(in srgb, var(--danger) 85%, var(--ink)); }
+.dp-blurb{ margin:0 2px 10px; font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.dp-old{ margin:0 0 10px; padding:14px 16px; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+.dp-old b{ color:var(--ink); }
+
+/* Term rows: built to be read at a glance. English and Spanish both 17px. */
+.dp-terms{ padding:2px 0; }
+.dp-row{ display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-top:1px solid var(--line-soft); }
+.dp-row:first-child{ border-top:0; }
+.dp-row.is-ff{ box-shadow:inset 3px 0 0 var(--danger); }
+.dp-row-text{ flex:1; min-width:0; }
+.dp-en{ font-size:var(--fs-head); font-weight:650; letter-spacing:-.01em; line-height:1.3; color:var(--ink); overflow-wrap:anywhere; }
+.dp-es{ font-size:var(--fs-head); font-weight:550; line-height:1.3; color:var(--navy); margin-top:2px; overflow-wrap:anywhere; }
+.dp-def{ font-size:14px; line-height:1.45; color:var(--ink-soft); margin-top:5px; }
+.dp-row-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:0 var(--sp-3); margin-top:2px; font-size:var(--fs-foot); color:var(--ink-soft); }
+.dp-have{ display:inline-flex; align-items:center; gap:4px; min-height:32px; }
+.dp-have svg{ width:13px; height:13px; }
+.dp-link{ position:relative; min-height:32px; padding:0; border:0; background:none; cursor:pointer;
+  font:600 var(--fs-foot) var(--sans); color:var(--navy); }
+.dp-link::after{ content:""; position:absolute; inset:-6px -4px; }
+.dp-link.is-quiet{ color:var(--ink-soft); font-weight:550; }
+.dp-link:disabled{ color:var(--ink-faint); cursor:default; }
+/* 34px to look at, 44px to hit; the two never overlap. */
+.dp-say-col{ flex:0 0 auto; display:flex; flex-direction:column; gap:12px; }
+.dp-say{ position:relative; width:56px; height:34px; border:0; border-radius:999px; background:var(--line-soft); color:var(--ink-soft); cursor:pointer;
+  font:700 var(--fs-cap) var(--sans); display:flex; align-items:center; justify-content:center; gap:3px; }
+.dp-say::after{ content:""; position:absolute; inset:-5px 0; }
+.dp-say svg{ width:15px; height:15px; }
+.dp-say.speaking{ background:var(--accent-soft); color:var(--ink); }
+.dp-say.speaking svg{ animation:speakPulse 1s ease-in-out infinite; }
+.dp-empty{ padding:16px; font-size:14px; line-height:1.5; color:var(--ink-soft); }
+.dp-wide{ display:flex; align-items:center; justify-content:center; gap:var(--sp-1); width:100%; min-height:44px; margin-top:10px;
+  border:0; border-radius:999px; background:var(--paper); color:var(--ink); font:650 14px var(--sans); cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.dp-wide svg{ width:15px; height:15px; }
+.dp-meta{ margin:var(--sp-4) 2px 0; font-size:var(--fs-cap); color:var(--ink-soft); text-align:center; }
+
+/* The glass bar: Start appointment, the briefing's flashcards, Add tip. */
+.dp-bar{ position:sticky; bottom:max(14px, env(safe-area-inset-bottom)); z-index:4; display:flex; gap:8px; margin:-96px 12px 14px; padding:7px;
+  border-radius:30px; background:var(--glass-bg); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 12px 30px -14px rgba(22,55,90,.4); }
+html[data-theme="dark"] .dp-bar{ background:rgba(26,34,51,.78); box-shadow:var(--sh-2); }
+.dp-go{ flex:1; min-width:0; height:56px; border:0; border-radius:24px; background:#252E6D; color:#fff; cursor:pointer;
+  font:650 16px var(--sans); display:flex; align-items:center; justify-content:center; gap:8px; }
+.dp-go svg{ width:16px; height:16px; flex:0 0 auto; }
+.dp-rb{ flex:0 0 64px; height:56px; border:0; border-radius:24px; background:var(--paper); color:var(--ink-soft); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font:600 11px var(--sans);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+.dp-rb img{ width:28px; height:28px; object-fit:contain; }
+html[data-theme="dark"] .dp-rb{ box-shadow:none; }
+
+.dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip{ transition:transform .18s var(--ease), background .2s var(--ease); }
+.dp-ib:active, .dp-ib.is-pressed, .dp-go:active, .dp-go.is-pressed, .dp-rb:active, .dp-rb.is-pressed,
+.dp-say:active, .dp-say.is-pressed, .dp-wide:active, .dp-wide.is-pressed, .dp-navy-btn:active, .dp-navy-btn.is-pressed{ transform:scale(.95); }
+.dp-tip:active, .dp-tip.is-pressed{ transform:scale(.98); }
+.dp-ib:focus-visible, .dp-go:focus-visible, .dp-rb:focus-visible, .dp-say:focus-visible, .dp-wide:focus-visible,
+.dp-navy-btn:focus-visible, .dp-tip:focus-visible, .dp-link:focus-visible, .dp-ph:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){
+  .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip{ transition:none; }
+  .dp-overlay .dp-page{ animation:none; }
+  .dp-say.speaking svg{ animation:none; }
+}
+
 /* ---------- Regions (setMyRegion, docs/features/regions.md) ----------
    The North / South picker reuses Dr. Smiley's segmented control; the hint
    under each name is the only addition. */
@@ -6646,8 +6767,8 @@ body.pv-open{ overflow:hidden; }
   </div>
 </div>
 
-<div class="overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
-  <div class="modal" id="doctorDirDetailModal" style="max-width:520px;"></div>
+<div class="overlay dp-overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
+  <div class="modal dp-page" id="doctorDirDetailModal" role="dialog" aria-modal="true" aria-label="Doctor"></div>
 </div>
 
 <div class="overlay" id="doctorTermOverlay" onclick="if(event.target===this) closeDoctorTermModal()">
@@ -9790,6 +9911,8 @@ async function loadDoctorDirectory(){
   }
   if(DOCTOR_DIR_STATE === 'ok') doctorDirRetries = 0;
   scheduleRender();
+  // An open doctor page was drawn from the saved copy, without research.
+  if(DOCTOR_DIR_STATE === 'ok' && document.getElementById('doctorDirDetailOverlay')?.classList.contains('show')) refreshDoctorDirDetail();
 }
 function doctorDirProblem(){
   const why = DOCTOR_DIR_ERROR === 'permission-denied'
@@ -11867,6 +11990,10 @@ function initialsOf(name){
   let words = trimmed.split(/\s+/);
   const titles = ['dr','dr.','doctor','prof','prof.','professor','mr','mr.','mrs','mrs.','ms','ms.'];
   if(words.length > 1 && titles.includes(words[0].toLowerCase())) words = words.slice(1);
+  // Nor a middle initial or the letters after a name: Dr. Lori A. Leslie, MD is LL.
+  words = words.map(w => w.replace(/,$/, '')).filter(w => w && !/^(md|do|phd|np|pa|rn|aprn|dnp|facs|facp|jr\.?|sr\.?)$/i.test(w));
+  const named = words.filter((w, i) => i === 0 || i === words.length - 1 || !/^[A-Za-z]\.?$/.test(w));
+  if(named.length) words = named;
   return words.map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase() || '?';
 }
 
@@ -12484,9 +12611,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
   { id:'places',      tone:'gd-n2', pin:'pins/medifind.webp',            eyebrow:'Doctor Directory',      title:'Pick where a doctor works in one tap, with icons the whole team sees' },
   { id:'regions',     tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat & Doctors',   title:'North and South: chat channels, and doctors by region' },
-  { id:'warmup',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Home',                  title:'The Daily Drill: catch the trap, hear it, make the call' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12557,7 +12684,7 @@ const GUIDE_STEPS = {
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
-  places: () => ({ steps: [`On a doctor’s card, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add doctor')}.`,
+  places: () => ({ steps: [`On a doctor’s card or page, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add doctor')}.`,
     `Tap <b>Where</b>, then tap the place. Search, or tap ${GUIDE_UI.pill('Add a place')} if it isn’t there.`,
     'To change a place’s icon, tap the icon beside its name in the list.'], note: 'Places you add and icons you pick show for everyone, in Provider Pictures too.' }),
   regions: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>My region</b>, tap ${GUIDE_UI.pill('North')} or ${GUIDE_UI.pill('South')}.`,
@@ -12603,8 +12730,12 @@ const GUIDE_STEPS = {
     'Use the Back arrow to retrace your route and return to where you were.'],
     note: 'Every Doctor Prep button opens research directly. A specialty-based appointment briefing remains separate in Ask Dr. Smiley.' }),
   directory: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctors')} → ${GUIDE_UI.pill('Doctor Directory')}, or choose ${GUIDE_UI.pill('Doctor Directory')} under ${GUIDE_UI.pill('More')}.`,
-    'Find the doctor and open their card.', 'Tap the pencil to add notes your teammates would want before walking in.'],
-    note: 'Doctor Prep saves its research here. Your team’s notes stay separate from that research.' }),
+    'Tap a doctor to open their page.', `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in.`],
+    note: 'Doctor Prep saves its research here. Your team’s tips and terms stay separate from that research.' }),
+  doctorpage: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctor Directory')} and tap a doctor.`,
+    'Tap a tab (Core, Procedures, Drugs, Anatomy, False friends, Team terms) to see those terms. Tap EN or ES to hear one.',
+    `At the bottom: ${GUIDE_UI.pill('Start appointment')}, ${GUIDE_UI.pill('Flashcards')} for the briefing, or ${GUIDE_UI.pill('Add tip')}.`],
+    note: 'The pencil at the top right edits the doctor: name, specialty, where, photo.' }),
   providers: () => ({ steps: [`Open ${GUIDE_UI.pill('Provider Pictures')} from Home or under ${GUIDE_UI.pill('More')}.`,
     'Search by name, specialty or facility. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with.`],
     note: 'Provider Pictures helps you put a face to a name. Use Doctor Prep for research, or the Doctor Directory for saved research and team notes.' }),
@@ -13026,8 +13157,7 @@ function syncTierRail(){
 function setResearchTier(scope, key){
   activeResearchTier[scope] = key;
   if(scope === 'detail'){
-    const d = DOCTOR_DIRECTORY.find(x => x.id === currentDoctorDetailId);
-    if(d) document.getElementById('doctorDirDetailModal').innerHTML = renderDoctorDirDetail(d);
+    refreshDoctorDirDetail();
   } else {
     renderContent();
   }
@@ -13074,8 +13204,7 @@ async function addAllInTier(scope, tierKey, specialtyOverride){
     ? `Added ${added} to ${domain.name}.`
     : `Added ${added} of ${missing.length}. Try the rest again.`);
   if(scope === 'detail'){
-    const d = DOCTOR_DIRECTORY.find(x => x.id === currentDoctorDetailId);
-    if(d) document.getElementById('doctorDirDetailModal').innerHTML = renderDoctorDirDetail(d);
+    refreshDoctorDirDetail();
   } else {
     renderContent();
   }
@@ -16003,7 +16132,13 @@ const GUIDE_TOPICS = [
   { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
     <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
     <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All regions</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
-    <p>The useful part is what you add by hand: tap the pencil on a doctor and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
+    <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
+
+  { id:'doctorpage', section:'prep', k:'doctor page terms tabs core procedures drugs anatomy false friends team terms hear listen speak english spanish start appointment flashcards tip research again glossary', q:'What is on a doctor’s page?', a:`
+    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, how many prep terms there are, <b>Where</b> they work, and the latest <b>Team tip</b>.</p>
+    <p>The tabs show the terms one group at a time: <b>Core</b>, <b>Procedures</b>, <b>Drugs</b>, <b>Anatomy</b>, <b>False friends</b> (in red) and <b>Team terms</b>, the ones your team added by hand. Tap <b>EN</b> or <b>ES</b> on a term to hear it, or <b>Add to glossary</b> to keep it. <b>Research again</b> updates what Doctor Prep found; your tips, photo and team terms are kept.</p>
+    <p>The bar at the bottom: <b>Start appointment</b> (with this doctor; if you’re already in one with them, it takes you back to it), <b>Flashcards</b> (the briefing for their specialty) and <b>Add tip</b>. The pencil at the top edits the doctor.</p>
+    <p>No connection? The page shows what this phone has saved; the doctor’s prep terms come back once the directory loads.</p>` },
 
   { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory floor suite', q:'How do I set where a doctor works?', a:`
     <p>On the doctor’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room goes in the box under it.</p>
@@ -20020,7 +20155,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20048,8 +20183,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1014.1320';
-const BUILD_TIME = '2026-10-14 13:20 UTC';
+const BUILD_ID = 'b1014.1521';
+const BUILD_TIME = '2026-10-14 15:21 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21181,7 +21316,7 @@ async function saveDoctorTerm(){
     successBurst();
     showToast('Term added.');
     render();
-    openDoctorDirDetail(d.id);   // keep the detail view open on the same doctor
+    openDoctorDirDetail(d.id, 'team');   // keep the doctor page open, on the team's terms
   }catch(err){
     showToast(saveErrorMessage(err, 'doctor-directory'));
   }
@@ -21201,25 +21336,10 @@ async function deleteDoctorTerm(doctorId, termId){
     DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
     showToast('Term removed.');
     render();
-    openDoctorDirDetail(d.id);
+    openDoctorDirDetail(d.id, 'team');
   }catch(err){
     showToast('Could not remove — check your connection.');
   }
-}
-
-function closeDoctorDirDetail(){
-  document.getElementById('doctorDirDetailOverlay').classList.remove('show');
-}
-
-let currentDoctorDetailId = null;
-
-function openDoctorDirDetail(id){
-  const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
-  if(!d) return;
-  currentDoctorDetailId = id;
-  activeResearchTier.detail = '';
-  document.getElementById('doctorDirDetailModal').innerHTML = renderDoctorDirDetail(d);
-  document.getElementById('doctorDirDetailOverlay').classList.add('show');
 }
 
 // Jumps to the Doctor Prep screen with the name/specialty/location already
@@ -21238,92 +21358,303 @@ function researchThisDoctorFromDirectory(id){
   setCategory('doctor-research');
 }
 
-function renderDoctorDirDetail(d){
-  const initials = initialsOf(d.name);
-  const avatarColor = nameToColor(d.name);
-  const attribution = d.updatedBy
-    ? `Updated by ${escapeHtml(d.updatedBy)}`
-    : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
+/* ---------- Doctor page ----------
+   One doctor on one screen (docs/features/doctor-page.md; Jose's mockup
+   docs/mockups/doctors/page.png): who and where, how much prep there is,
+   the team's tip, then the terms one tier at a time, each with its English
+   and Spanish read aloud. Nothing from the old detail view is gone: every
+   tier, the team's own terms, Add to glossary, Research again, the photo. */
 
+// A specialty's pin, by name. Anything without its own pin uses the pin of
+// the place the doctor works.
+const SPECIALTY_PINS = [
+  [/leuk|lymph|myelom/, 'leukemia'],
+  [/onc|cancer|tumou?r|radiation/, 'oncology'],
+  [/hemat|blood|coagul|thromb/, 'hematology'],
+  [/heart fail|advanced heart/, 'heart-failure'],
+  [/cardi|heart|vascular|electrophys/, 'cardiology'],
+  [/develop|autis/, 'developmental'],
+  [/pediat|paediat|child|neonat/, 'pediatrics'],
+  [/neuro|brain|stroke|epilep|psych|behavio/, 'neurology'],
+  [/ortho|bone|spine|sports|rehab|physiat|rheum/, 'orthopedics'],
+  [/pulm|lung|respir|sleep|thorac/, 'pulmonology'],
+  [/nephr|kidney|renal|dialys/, 'nephrology'],
+  [/urolog/, 'urology'],
+  [/otolar|\bent\b|\bear\b|throat/, 'ent'],
+  [/ophthal|\beye|retina/, 'ophthalmology'],
+  [/dermat|\bskin/, 'dermatology'],
+  [/endocr|diabet|thyroid/, 'endocrinology'],
+  [/genet/, 'genetics'],
+  [/infect|\bhiv\b/, 'infectious-disease'],
+  [/infusion/, 'infusion'],
+  [/surg|anesth/, 'surgery-anesthesia'],
+  [/emergen|trauma|urgent/, 'emergency'],
+  [/patholog|\blab(orator)/, 'laboratory'],
+  [/pharm/, 'pharmacy'],
+];
+function specialtyPinKey(specialty, place){
+  const s = (specialty || '').toLowerCase();
+  const hit = s && SPECIALTY_PINS.find(([re]) => re.test(s));
+  return hit ? hit[1] : groupIconKeyFor(place);
+}
+function pinImgHtml(key){
+  if(key === 'logo') return `<img src="./hmh-mark.png" alt="" onerror="markLogoFallback(this)">`;
+  return `<img src="pins/${PLACE_ICONS.some(i => i.key === key) ? key : 'medifind'}.webp" alt="" onerror="markLogoFallback(this)">`;
+}
+
+const DP_TAB_LABELS = { core:'Core', procedures:'Procedures', drugs:'Drugs', anatomy:'Anatomy', falsefriends:'False friends' };
+// The rows on screen, so a button passes a number rather than the text.
+let DP_ROWS = [];
+
+// The tabs: each research tier, then the team's hand-added terms. Research
+// from before the tiers is one list ("Terms").
+function doctorPageTabs(d){
   const r = d.researchResult;
-  const allTerms = allGlossaryTermsFlat();
-  const specialtyForMatch = (r && r.specialty) || d.specialty || null;
+  const tiers = researchTiers(r);
+  const flat = !!tiers.length && !(Array.isArray(r.tiers) && r.tiers.length);
+  const tabs = tiers.map(t => ({ key: t.key, label: flat ? 'Terms' : (DP_TAB_LABELS[t.key] || t.label), blurb: flat ? '' : t.blurb, terms: t.terms, tier: true }));
+  tabs.push({ key: 'team', label: 'Team terms', blurb: '', terms: Array.isArray(d.customTerms) ? d.customTerms : [], tier: false });
+  return { tabs, flat };
+}
 
-  let researchSection = '';
-  const detailTiers = researchTiers(r);
-  if(detailTiers.length){
-    const domainMatch = findBestDomainMatch(specialtyForMatch);
-    researchSection = `
-      <div class="dd-detail-section-label">${ICON_SPARK} Doctor Prep results</div>
-      ${r.note ? `<div class="doc-research-summary ${r.found ? '' : 'is-fallback'}"><p>${escapeHtml(r.note)}</p></div>` : ''}
-      <div class="doc-research-terms-label">Terminology (${researchTermCount(r)})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
-      ${renderResearchTierBlocks(detailTiers, specialtyForMatch || '', 'detail')}
-      <button class="btn btn-ghost" style="width:100%; margin-top:14px;" onclick="researchThisDoctorFromDirectory('${d.id}')">Research again</button>
-    `;
-  } else {
-    researchSection = `
-      <div class="dd-detail-section-label">${ICON_SPARK} Doctor Prep results</div>
-      <div class="dd-detail-empty-research">No Doctor Prep research on file for this doctor yet.</div>
-      <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="researchThisDoctorFromDirectory('${d.id}')">Research this doctor</button>
-    `;
+function closeDoctorDirDetail(){
+  document.getElementById('doctorDirDetailOverlay').classList.remove('show');
+}
+
+let currentDoctorDetailId = null;
+
+function openDoctorDirDetail(id, tab){
+  const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
+  if(!d) return;
+  currentDoctorDetailId = id;
+  activeResearchTier.detail = tab || '';
+  const page = document.getElementById('doctorDirDetailModal');
+  page.innerHTML = renderDoctorDirDetail(d);
+  document.getElementById('doctorDirDetailOverlay').classList.add('show');
+  page.scrollTop = 0;
+  if(tab === 'team') doctorPageTabIntoView(false);
+  if(!d.researchResult && DOCTOR_DIR_STATE !== 'ok') doctorPageFetch(id);
+}
+
+// The phone's saved copy of the directory leaves out the research (it would
+// crowd the glossary's space). Until the directory has loaded, fetch this one
+// doctor so a researched doctor never looks unresearched.
+async function doctorPageFetch(id){
+  try{
+    if(!db) await hubAuthReady;
+    if(!db) return;
+    const snap = await db.collection('doctor-directory').doc(id).get();
+    if(!snap.exists) return;
+    const i = DOCTOR_DIRECTORY.findIndex(x => x.id === id);
+    if(i > -1 && !DOCTOR_DIRECTORY[i].researchResult) DOCTOR_DIRECTORY[i] = { id, ...snap.data() };
+    if(currentDoctorDetailId === id && document.getElementById('doctorDirDetailOverlay').classList.contains('show')) refreshDoctorDirDetail();
+  }catch(e){}
+}
+
+// Re-draws the open page in place (a tab, a term added), keeping the scroll.
+function refreshDoctorDirDetail(){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === currentDoctorDetailId);
+  const page = document.getElementById('doctorDirDetailModal'), ov = document.getElementById('doctorDirDetailOverlay');
+  if(!d || !page) return;
+  const y = page.scrollTop, oy = ov.scrollTop;
+  page.innerHTML = renderDoctorDirDetail(d);
+  page.scrollTop = y; ov.scrollTop = oy;
+}
+
+function doctorPageTabIntoView(smooth){
+  requestAnimationFrame(() => {
+    const on = document.querySelector('#doctorDirDetailModal .dp-tabs button[aria-checked="true"]');
+    const rail = on && on.parentElement;
+    if(rail) rail.scrollTo({ left: on.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2, behavior: smooth && !prepCalm() ? 'smooth' : 'auto' });
+  });
+}
+
+function doctorPageTab(key){
+  activeResearchTier.detail = key;
+  refreshDoctorDirDetail();
+  doctorPageTabIntoView(true);
+}
+
+function doctorPageSay(btn, i, lang){
+  const t = DP_ROWS[i];
+  if(t) speakText(btn, lang === 'es' ? t.es : t.en, lang === 'es' ? 'es-US' : 'en-US');
+}
+function doctorPageAddOne(i, btn){
+  const t = DP_ROWS[i], d = DOCTOR_DIRECTORY.find(x => x.id === currentDoctorDetailId);
+  if(!t || !d) return;
+  addSuggestedTermToGlossary(t.en || '', t.es || '', t.def || '', btn, (d.researchResult && d.researchResult.specialty) || d.specialty || '');
+}
+
+// The briefing and the appointment both work from a glossary domain. Word
+// overlap alone (findBestDomainMatch) missed 17 of 37 common specialties:
+// "Cardiology" vs "Heart Failure & Cardiac", Psychiatry vs Mental Health. So:
+// these hints first (most specific first), then word overlap.
+const SPECIALTY_DOMAINS = [
+  [/onc|cancer|hemat|lymph|leuk|myelom/, /oncolog/],
+  [/cardi|heart|electrophys/, /cardi|heart/],
+  [/neuro|epilep|stroke/, /neurolog/],
+  [/psych|behavio|mental/, /\bmental health/],   // not "Develop-mental"
+  [/obstet|gyn|matern|fetal/, /ob\/?gyn|obstet/],
+  [/pulm|lung|respir|critical care/, /pulmon/],
+  [/gastro|hepat|liver|digest|colorect/, /gastro/],
+  [/otolar|\bent\b|nephr|kidney|urolog|endocr|diabet/, /nephr|urolog|endocr|\bent\b/],
+  [/ortho|sports|spine/, /ortho/],
+  [/infect/, /infect/],
+  [/emergen|trauma/, /emergen/],
+  [/surg|anesth/, /surg|anesth/],
+  [/dermat/, /dermat/],
+  [/ophthal|retina/, /ophthal/],
+  [/genet/, /genet/],
+  [/pediat|paediat|neonat|child/, /^pediatrics$/],
+];
+function doctorDomainFor(specialty){
+  const s = (specialty || '').toLowerCase();
+  const tops = DATA.categories.filter(c => !c.parentId);
+  for(const [want, dom] of SPECIALTY_DOMAINS){
+    if(!want.test(s)) continue;
+    const hit = tops.find(c => dom.test(c.name.toLowerCase()));
+    if(hit) return hit;
   }
+  const m = findBestDomainMatch(specialty);
+  return m && m.parentId ? (DATA.categories.find(c => c.id === m.parentId) || m) : m;
+}
+function doctorPagePrep(d){
+  const top = doctorDomainFor(d.specialty) || doctorDomainFor(d.researchResult && d.researchResult.specialty);
+  PREP.domainId = top ? top.id : null;
+  PREP.doctor = d.name || '';
+  try{ localStorage.setItem('ih_prepLast', JSON.stringify(PREP)); }catch(e){}
+  return !!top;
+}
+function doctorPageFlashcards(id){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === id);
+  if(!d) return;
+  closeDoctorDirDetail();
+  if(doctorPagePrep(d)) setCategory('prep');
+  else openPrep();
+}
+function doctorPageStartAppt(id){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === id);
+  if(!d) return;
+  // Already in an appointment with this doctor: go back to it.
+  if(APPT && APPT.doctor === d.name){ closeDoctorDirDetail(); setCategory('appt'); return; }
+  if(APPT && !confirm(`An appointment is already running. Start a new one with ${d.name}?`)) return;
+  closeDoctorDirDetail();
+  doctorPagePrep(d);
+  startAppt();
+}
+// Edit (and, until team tips, Add tip: the doctor's notes) open the doctor's
+// sheet; closing it comes back to this page.
+let doctorPageReturnTo = null;
+function doctorPageEdit(id, field){
+  closeDoctorDirDetail();
+  requireName(() => { doctorPageReturnTo = id; _openEditDoctorDirModal(id, field); });
+}
 
-  // Terms the team has attached to this specific doctor by hand — the phrases
-  // this provider actually uses in the room, which no general search returns.
-  // Kept on the doctor record and never touched by a Doctor Prep re-search.
-  const custom = Array.isArray(d.customTerms) ? d.customTerms : [];
-  const customTermsSection = `
-    <div class="dd-detail-section-label">${ICON_EDIT} Team terms for this doctor</div>
-    ${custom.length ? `<div class="doc-research-terms">
-      ${custom.map(t => {
-        const exists = allTerms.some(e => (e.en||'').trim().toLowerCase() === (t.en||'').trim().toLowerCase());
-        const enS = escapeHtml(t.en).replace(/'/g,"\\'");
-        const esS = escapeHtml(t.es||'').replace(/'/g,"\\'");
-        const dfS = escapeHtml(t.def||'').replace(/'/g,"\\'");
-        const spS = escapeHtml(specialtyForMatch||'').replace(/'/g,"\\'");
-        return `
-          <div class="doc-research-term-card">
-            <div class="doc-research-term-main">
-              <div class="doc-research-term-en">${escapeHtml(t.en)}</div>
-              ${t.es ? `<div class="doc-research-term-es">${escapeHtml(t.es)}</div>` : ''}
-              ${t.def ? `<div class="doc-research-term-def">${escapeHtml(t.def)}</div>` : ''}
-              ${t.addedBy ? `<div class="doc-research-term-def" style="opacity:.65; margin-top:4px;">Added by ${escapeHtml(t.addedBy)}</div>` : ''}
-            </div>
-            <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
-              ${exists
-                ? `<span class="doc-research-badge is-existing">${ICON_CHECK} In glossary</span>`
-                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enS}', '${esS}', '${dfS}', this, '${spS}')">${ICON_PLUS} Add</button>`}
-              <button class="doc-research-badge" style="background:transparent; color:var(--ink-faint);" onclick="deleteDoctorTerm('${d.id}','${t.id}')" title="Remove this term">Remove</button>
-            </div>
-          </div>`;
-      }).join('')}
-    </div>` : `<div class="dd-detail-empty-research">No team terms yet for ${escapeHtml(d.name)}. Add the phrases this provider actually uses.</div>`}
-    <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="openDoctorTermModal('${d.id}')">${ICON_PLUS} Add a term for this doctor</button>
-  `;
+function renderDoctorDirDetail(d){
+  const id = escapeAttr(d.id);
+  const sp = specialtyColor(d.specialty);
+  const r = d.researchResult;
+  const { tabs, flat } = doctorPageTabs(d);
+  const researched = tabs.filter(t => t.tier);
+  const custom = tabs[tabs.length - 1].terms;
+  const total = tabs.reduce((n, t) => n + t.terms.length, 0);
+  const place = locationGroupName(d, d.hospitalLocation);
+  const placeName = place === NO_LOCATION_LABEL || place === HMH_NETWORK_LABEL ? 'No specific site' : place;
+  const floor = (d.locationDetails || '').trim();
+  const specialtyForMatch = (r && r.specialty) || d.specialty || '';
+  const domainMatch = findBestDomainMatch(specialtyForMatch);
+  const allTerms = allGlossaryTermsFlat();
 
-  return `
-    <button class="dd-detail-back" onclick="closeDoctorDirDetail()">
-      ${ICON_CHEVRON_LEFT}<span>All doctors</span>
-    </button>
-    <button class="dd-detail-close" title="Close" onclick="closeDoctorDirDetail()">✕</button>
-    <div class="dd-detail-header">
-      ${d.photo
-        ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
-        : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
-      <div>
-        <h3 style="margin:0 0 4px 0;">${escapeHtml(d.name)}</h3>
-        <div class="dd-detail-tags">
-          ${d.specialty ? `<span class="tag" style="--tag-color:#7C6A9C;">${escapeHtml(d.specialty)}</span>` : ''}
-          <span class="tag doc-dir-source-tag ${d.source==='manual'?'is-manual':''}">${d.source==='manual'?'Manually added':'From Doctor Prep'}</span>
+  const photo = d.photo
+    ? `<button type="button" class="dp-ph is-photo" aria-label="View photo of ${escapeAttr(d.name)}" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})"><img src="${escapeAttr(d.photo)}" alt=""></button>`
+    : `<div class="dp-ph" aria-hidden="true">${pinImgHtml(specialtyPinKey(d.specialty || specialtyForMatch, place))}<span class="dp-ini">${escapeHtml(initialsOf(d.name))}</span></div>`;
+
+  const most = Math.max(1, ...tabs.map(t => t.terms.length));
+  const bars = tabs.filter(t => t.terms.length).map(t =>
+    `<li class="${t.key === 'falsefriends' ? 'is-ff' : t.key === 'team' ? 'is-team' : ''}"><i style="width:${Math.max(8, Math.round(t.terms.length / most * 64))}px"></i>${escapeHtml(t.label)} ${t.terms.length}</li>`).join('');
+  const navy = `<div class="dp-navy">
+      <div class="dp-navy-n">${total}</div><div class="dp-navy-l">prep term${total === 1 ? '' : 's'}</div>
+      ${bars ? `<ul class="dp-bars">${bars}</ul>` : ''}
+      ${researched.length ? '' : DOCTOR_DIR_STATE !== 'ok' ? `<p>Prep terms show once the directory loads. They need a connection.</p>`
+        : `<p>Not looked up yet. About half a minute.</p>
+        <button type="button" class="dp-navy-btn" onclick="researchThisDoctorFromDirectory('${id}')">Research this doctor</button>`}
+    </div>`;
+
+  const notes = (d.notes || '').trim();
+  const tip = `<button type="button" class="dp-card dp-mini dp-tip" onclick="doctorPageEdit('${id}', 'fDDNotes')" aria-label="${notes ? 'Team tip. Tap to change it' : 'Add a team tip'}">
+      <div class="dp-k">Team tip${notes ? ' · 1' : ''}</div>
+      ${notes ? `<p>“${escapeHtml(notes)}”</p>${d.updatedBy ? `<small>${escapeHtml(d.updatedBy)}</small>` : ''}`
+        : `<p class="is-empty">None yet. Add what a teammate should know before walking in.</p>`}
+    </button>`;
+
+  const on = tabs.find(t => t.key === activeResearchTier.detail) || tabs.find(t => t.terms.length) || tabs[tabs.length - 1];
+  const seg = `<div class="ds-mode-seg dp-tabs" role="radiogroup" aria-label="Terms to show">${tabs.map(t =>
+    `<button type="button" role="radio" aria-checked="${t === on}" class="${t.key === 'falsefriends' ? 'is-ff' : ''}" onclick="doctorPageTab('${t.key}')">${escapeHtml(t.label)} <b>${t.terms.length}</b></button>`).join('')}</div>`;
+
+  DP_ROWS = on.terms;
+  const rows = on.terms.map((t, i) => {
+    const have = termInGlossary(allTerms, t);
+    return `<div class="dp-row${on.key === 'falsefriends' ? ' is-ff' : ''}">
+      <div class="dp-row-text">
+        <div class="dp-en" lang="en">${escapeHtml(t.en || '')}</div>
+        ${t.es ? `<div class="dp-es" lang="es">${escapeHtml(t.es)}</div>` : ''}
+        ${t.def ? `<div class="dp-def">${escapeHtml(t.def)}</div>` : ''}
+        <div class="dp-row-foot">
+          ${have ? `<span class="dp-have">${ICON_CHECK} In glossary</span>`
+            : `<button type="button" class="dp-link" onclick="doctorPageAddOne(${i}, this)">+ Add to glossary</button>`}
+          ${on.key === 'team' ? `<button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm('${id}','${escapeAttr(t.id)}')">Remove</button>` : ''}
+          ${on.key === 'team' && t.addedBy ? `<span>Added by ${escapeHtml(t.addedBy)}</span>` : ''}
         </div>
       </div>
+      <div class="dp-say-col">
+        ${t.en ? `<button type="button" class="dp-say" aria-label="Hear it in English" onclick="doctorPageSay(this, ${i}, 'en')">${ICON_SPEAKER}EN</button>` : ''}
+        ${t.es ? `<button type="button" class="dp-say" aria-label="Hear it in Spanish" onclick="doctorPageSay(this, ${i}, 'es')">${ICON_SPEAKER}ES</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  const missing = on.tier ? on.terms.filter(t => !termInGlossary(allTerms, t)).length : 0;
+
+  const panel = on.key === 'team'
+    ? `<div class="dp-card dp-terms">${rows || `<div class="dp-empty">No team terms yet for ${escapeHtml(d.name)}. Add the phrases this doctor actually uses in the room.</div>`}</div>
+       <button type="button" class="dp-wide" onclick="openDoctorTermModal('${id}')">${ICON_PLUS} Add a term for this doctor</button>`
+    : `${flat ? `<div class="dp-card dp-old"><b>Older research: one list.</b> Research again to get drugs, procedures and false friends in their own tabs. Your tips, photo and team terms are kept.</div>`
+        : (on.blurb ? `<p class="dp-blurb">${escapeHtml(on.blurb)}</p>` : '')}
+       <div class="dp-card dp-terms">${rows}</div>
+       ${missing > 1 ? `<button type="button" class="dp-wide" onclick="addAllInTier('detail', '${on.key}')">${ICON_PLUS} Add all ${missing} new to the glossary</button>` : ''}
+       ${domainMatch && missing ? `<p class="dp-meta">New terms go to ${escapeHtml(domainMatch.name)}.</p>` : ''}`;
+
+  const by = d.updatedBy ? `Updated by ${escapeHtml(d.updatedBy)}` : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
+  const meta = [d.source === 'manual' ? 'Added by hand' : 'From Doctor Prep', by].filter(Boolean).join(' · ');
+
+  return `
+    <div class="dp-top">
+      <button type="button" class="dp-ib" aria-label="Back to all doctors" onclick="closeDoctorDirDetail()">${ICON_CHEVRON_LEFT}</button>
+      <h2 class="dp-top-title">Doctor</h2>
+      <button type="button" class="dp-ib is-edit" aria-label="Edit ${escapeAttr(d.name)}" onclick="doctorPageEdit('${id}')">${ICON_EDIT}</button>
     </div>
-    ${d.hospitalLocation ? `<p class="provider-facility">${escapeHtml(d.hospitalLocation)}</p>` : ''}
-    ${d.locationDetails ? `<div class="doc-dir-location-pin">${ICON_PIN}<span>${escapeHtml(d.locationDetails)}</span></div>` : ''}
-    ${d.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(d.notes)}</p>` : ''}
-    ${attribution ? `<div class="meta"><span class="source"></span><span class="source">${attribution}</span></div>` : ''}
-    ${customTermsSection}
-    ${researchSection}
+    <div class="dp-body" style="--dp-sp:${sp}">
+      <div class="dp-card dp-hero">${photo}
+        <div class="dp-id"><h1 class="dp-name">${escapeHtml(d.name)}</h1>${d.specialty ? `<div class="dp-spec">${escapeHtml(d.specialty)}</div>` : ''}</div>
+      </div>
+      <div class="dp-bento">${navy}
+        <div class="dp-side">
+          <div class="dp-card dp-mini"><div class="dp-k">Where</div>
+            <div class="dp-where"><span class="dp-where-pin" aria-hidden="true">${pinImgHtml(groupIconKeyFor(place))}</span>
+              <div><b>${escapeHtml(placeName)}</b>${floor ? `<small>${escapeHtml(floor)}</small>` : ''}</div></div></div>
+          ${tip}
+        </div>
+      </div>
+      ${r && r.note ? `<p class="dp-note">${escapeHtml(r.note)}</p>` : ''}
+      ${seg}
+      ${panel}
+      ${researched.length ? `<button type="button" class="dp-wide" onclick="researchThisDoctorFromDirectory('${id}')">Research again</button>` : ''}
+      ${meta ? `<p class="dp-meta">${meta}</p>` : ''}
+    </div>
+    <div class="dp-bar">
+      <button type="button" class="dp-go" onclick="doctorPageStartAppt('${id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Start appointment</button>
+      <button type="button" class="dp-rb" onclick="doctorPageFlashcards('${id}')"><img src="pins/practice.webp" alt="">Flashcards</button>
+      <button type="button" class="dp-rb" onclick="doctorPageEdit('${id}', 'fDDNotes')"><img src="pins/chat.webp" alt="">Add tip</button>
+    </div>
   `;
 }
 
@@ -23350,7 +23681,7 @@ function _openAddDoctorDirModal(){
 function openEditDoctorDirModal(id){
   requireName(()=>_openEditDoctorDirModal(id));
 }
-function _openEditDoctorDirModal(id){
+function _openEditDoctorDirModal(id, focusId){
   const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
   if(!d) return;
   editingDoctorDirId = id;
@@ -23367,7 +23698,9 @@ function _openEditDoctorDirModal(id){
   renderDDPlaceField();
   renderDDPhotoPreview();
   document.getElementById('doctorDirOverlay').classList.add('show');
-  document.getElementById('fDDName').focus();
+  const f = document.getElementById(focusId || 'fDDName');
+  f.focus();
+  if(focusId) f.scrollIntoView({ block: 'center' });
 }
 
 function closeDoctorDirModal(){
@@ -23375,6 +23708,10 @@ function closeDoctorDirModal(){
   editingDoctorDirId = null;
   pendingDDPhotoDataUrl = null;
   pendingDDPhotoPath = null;
+  // Opened from a doctor's page: back to that page, saved or not.
+  const back = doctorPageReturnTo;
+  doctorPageReturnTo = null;
+  if(back) openDoctorDirDetail(back);
 }
 
 function renderDDPhotoPreview(){

@@ -166,6 +166,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - The User Guide screen (`GUIDE_TOPICS`, `guideShowMe`): `user-guide.md`
 - Team access, team code, practice mode (`hub-invites`, `hub-members`, `team()`): `team-access.md`
 - Regions, North and South: chat channels, directory by region, `ih_region`, `HMH_LOCATIONS` regions: `regions.md`
+- The doctor's page (`renderDoctorDirDetail`, `SPECIALTY_PINS`, tabs, glass bar): `doctor-page.md`
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 
