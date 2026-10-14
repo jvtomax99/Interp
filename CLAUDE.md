@@ -138,8 +138,8 @@ Project `language-specialist`. Collections in use:
 
 ```
 terms/{id}              one document per term  <-- never a single shared blob
-terminology-meta/       categories + migration flags; smiley = team points (Dr. Smiley's rank)
-terminology-hub/        legacy
+terminology-meta/       categories; migrations = finished one-time updates' flags; smiley = team points (Dr. Smiley's rank)
+terminology-hub/        legacy single-blob glossary; nothing reads or writes it any more
 team-chat/              chat-typing/  term-attachments/  term-reviews/
 healthcare-providers/   doctor-directory/  doctor-research-cache/
 ce-events/  announcements/  practice-questions/  quiz-history/
@@ -355,9 +355,14 @@ calls wait for `hubAuthReady`. Rules are tested against the Firebase emulator
 proxy variables unset or cross-service Storage lookups silently fail).
 
 **Migrations:** new domains/terms are added by idempotent migration functions
-gated on a unique boolean flag in `terminology-meta/categories`, each awaited
-in the `loadData()` init chain. Follow that pattern — never write a migration
-that runs twice.
+gated on a unique boolean flag in `terminology-meta/migrations` (written with
+`{merge:true}`; never on `terminology-meta/categories`, which
+`saveCategoriesMeta()` overwrites whole, so a flag there would be erased and
+the migration would run again), each awaited in the `loadData()` init chain.
+Follow that pattern — never write a migration that runs twice. Once its flag
+reads `true` in the live database, delete the migration: every launch waits
+on it otherwise. `oncologySplit` and `slangGlossary` were removed that way
+(2026-10-14; their code is in git history).
 
 **Terms are individual documents.** They used to be one shared blob, which
 lost concurrent edits. Do not reintroduce that.

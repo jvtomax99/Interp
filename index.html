@@ -7249,10 +7249,9 @@ body.pv-open{ overflow:hidden; }
 
 <!-- ===================================================================
      CLOUD STORAGE SETUP
-     This app was originally built in Claude, where "window.storage" is
-     provided automatically. Outside Claude (e.g. here on Vercel), it
-     doesn't exist — so this block replaces it with a real, free backend
-     (Firebase Firestore + Cloud Storage) that has the exact same shape.
+     The app's backend is Firebase (Firestore + Cloud Storage). An empty
+     database is filled with the built-in starter set on first launch
+     (seedDatabase).
 
      1. Create a project at https://console.firebase.google.com
      2. Build a Firestore Database (Start in test mode is fine to begin)
@@ -7322,30 +7321,6 @@ body.pv-open{ overflow:hidden; }
     console.error('Firebase failed to initialize — check firebaseConfig above.', e);
   }
   }
-
-  // Mimics the same shape Claude's built-in window.storage provided,
-  // so nothing else in the app below needs to change.
-  window.storage = {
-    async get(key){
-      if(!db) return null;
-      const snap = await db.collection('terminology-hub').doc(key).get();
-      if(!snap.exists) return null;
-      return { key, value: snap.data().value, shared:true };
-    },
-    async set(key, value){
-      if(!db) return null;
-      await db.collection('terminology-hub').doc(key).set({ value, updatedAt: Date.now() });
-      return { key, value, shared:true };
-    },
-    async delete(key){
-      if(!db) return null;
-      await db.collection('terminology-hub').doc(key).delete();
-      return { key, deleted:true, shared:true };
-    },
-    async list(){
-      return { keys: [] };
-    }
-  };
 </script>
 
 <script>
@@ -8509,7 +8484,6 @@ function startMembersListener(){
 }
 let searchQuery = '';
 let editingContext = null; // {categoryId, termId} or null for new
-const STORAGE_KEY = 'terminology-db-v1';
 
 let PROVIDERS = [];
 let DOCTOR_DIRECTORY = [];
@@ -9370,25 +9344,16 @@ async function loadData(){
       // the glossary saved on this phone if there is one; otherwise show the
       // built-in starter set so the app still shows something.
       if(fromCache) return;
-      const result = await window.storage.get(STORAGE_KEY, true);
-      DATA = (result && result.value) ? JSON.parse(result.value) : DEFAULT_DATA;
+      DATA = DEFAULT_DATA;
       ensureTermIds();
       render();
       return;
     }
     const metaSnap = await db.collection('terminology-meta').doc('categories').get();
 
-    if(!metaSnap.exists){
-      // First run on the new schema — migrate once from the old single-blob
-      // storage (or seed fresh) so nobody's existing content is lost.
-      let legacyData = null;
-      try{
-        const result = await window.storage.get(STORAGE_KEY, true);
-        if(result && result.value) legacyData = JSON.parse(result.value);
-      }catch(e){}
-      const source = legacyData || DEFAULT_DATA;
-      await migrateToPerTermStorage(source);
-    }
+    // An empty database (a brand-new Firebase project): fill it with the
+    // built-in starter set, one document per term.
+    if(!metaSnap.exists) await seedDatabase(DEFAULT_DATA);
 
     // The glossary used to be downloaded TWICE on every launch: once by an
     // explicit .get() here, and again by the realtime listener's first
@@ -9400,12 +9365,8 @@ async function loadData(){
     if(metaSnap.exists){
       applyCategoriesMeta(metaSnap.data().categories || []);
     }else{
-      await loadCategoriesMeta();   // re-read: the migration just wrote it
+      await loadCategoriesMeta();   // re-read: seedDatabase just wrote it
     }
-    // One-time, flagged, and safe to call on every launch: once it has run
-    // it returns after a single small document read.
-    await migrateOncologySplit();
-    await migrateSlangGlossary();
 
     startTermsListener();
     startCategoriesMetaListener();
@@ -9420,245 +9381,6 @@ async function loadData(){
     DATA = DEFAULT_DATA;
     render();
   }
-}
-
-// One-time migration from the old "one giant document" model to one
-// Firestore document per term (plus a small shared doc for domain
-// metadata). This is what actually fixes concurrent editing: two people
-// saving different terms at the same time now write to different
-// documents instead of both overwriting the same blob.
-/* ---------- Oncology split ----------
- * "Oncology, Hematology & Leukemia" was one domain holding three different
- * conversations. It is now "Oncology" with Hematology and Leukemia as
- * subdomains beneath it, and the terms are filed accordingly.
- *
- * The sorting is done by rule rather than by a hand-written list of term ids,
- * because the seed is only a fraction of the glossary -- the team has added
- * terms to this domain in Firestore that this file has never seen, and those
- * have to be filed too.
- *
- * Acronyms are matched against the ORIGINAL case, not the lowercased text.
- * "ALL" for acute lymphoblastic leukemia is deliberately absent: lowercased,
- * it matches the ordinary English word in any definition, and a term about
- * "all patients" would have landed in Leukemia.
- */
-const ONCO_LEUKEMIA_WORDS = /leukemi|leukaemi|myelodysplas|myeloproliferat|blast crisis|polycythemia vera|essential thrombocythemia|myelofibrosis/;
-const ONCO_LEUKEMIA_ACRONYMS = /\b(AML|CLL|CML|APL|JMML|MDS|MPN)\b/;
-const ONCO_HEMATOLOGY_WORDS = /anemi|anaemi|h[ae]moglobin|sickle|thalass|h[ae]mophil|platelet|thrombocytopen|thrombophil|neutropen|pancytopen|leukopen|coagul|clotting|von willebrand|h[ae]molytic|h[ae]molysis|bone marrow|marrow transplant|chimerism|transfus|ferritin|iron deficiency|spherocytos|stomatocytos|xerocytos|h[ae]mochromatos|porphyri|aplastic|erythrocyt|reticulocyt|myeloma|gammopathy|lymphoma|hodgkin|red blood cell|white blood cell|blood disorder|blood count|sideroblast/;
-const ONCO_HEMATOLOGY_ACRONYMS = /\b(MGUS|SMM|PNH|AIHA|ITP|TTP|DIC|DLBCL|CBC|INR|VWD|G6PD)\b/;
-
-function oncologyBucketFor(term){
-  const raw = [term && term.en, term && term.es, term && term.def].filter(Boolean).join(' ');
-  const low = raw.toLowerCase();
-  if(ONCO_LEUKEMIA_WORDS.test(low) || ONCO_LEUKEMIA_ACRONYMS.test(raw)) return 'onco-leukemia';
-  if(ONCO_HEMATOLOGY_WORDS.test(low) || ONCO_HEMATOLOGY_ACRONYMS.test(raw)) return 'onco-hematology';
-  return 'onco';                     // solid tumours, regimens, procedures
-}
-
-const ONCO_CHILDREN = [
-  { id:'onco-hematology', name:'Hematology', color:'#9C5A72', icon:'flask', parentId:'onco' },
-  { id:'onco-leukemia',   name:'Leukemia',   color:'#C78A9B', icon:'dna',   parentId:'onco' },
-];
-
-/* The flag lives in terminology-meta/migrations, NOT on the categories doc
- * that CLAUDE.md points at. saveCategoriesMeta() writes that document with a
- * plain .set({categories, updatedAt}), so any flag stored beside the category
- * list is destroyed the next time somebody renames a domain -- and the
- * migration would then run a second time. A separate document written with
- * {merge:true} cannot be clobbered that way. */
-async function migrateOncologySplit(){
-  if(!db) return;
-  const FLAG = 'oncologySplit';
-  const flagRef = db.collection('terminology-meta').doc('migrations');
-
-  let flags = {};
-  try{
-    const snap = await flagRef.get();
-    if(snap.exists) flags = snap.data() || {};
-  }catch(err){ return; }               // offline: try again next launch
-  if(flags[FLAG]) return;
-
-  const metaRef = db.collection('terminology-meta').doc('categories');
-  const metaSnap = await metaRef.get();
-  if(!metaSnap.exists) return;         // nothing seeded yet; loadData handles that path
-  const cats = (metaSnap.data().categories || []).slice();
-
-  const parent = cats.find(c => c.id === 'onco');
-  if(!parent){
-    // Nothing to split -- record that so this does not re-read every launch.
-    await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now() }, { merge:true });
-    return;
-  }
-
-  parent.name = 'Oncology';
-  ONCO_CHILDREN.forEach(child=>{
-    const at = cats.findIndex(c => c.id === child.id);
-    if(at === -1) cats.push({ ...child });
-    else cats[at] = { ...cats[at], ...child };
-  });
-  await metaRef.set({ categories: cats, updatedAt: Date.now() }, { merge:true });
-
-  // Re-file the terms. Only ones still sitting on the parent are touched, so
-  // anything a colleague has already moved by hand is left alone.
-  const termsSnap = await db.collection('terms').where('categoryId', '==', 'onco').get();
-  const moves = [];
-  termsSnap.forEach(doc=>{
-    const want = oncologyBucketFor(doc.data());
-    if(want !== 'onco') moves.push({ ref: doc.ref, categoryId: want });
-  });
-  for(let i=0; i<moves.length; i+=400){   // Firestore caps a batch at 500 writes
-    const batch = db.batch();
-    moves.slice(i, i+400).forEach(m => batch.update(m.ref, { categoryId: m.categoryId }));
-    await batch.commit();
-  }
-
-  await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now(), [FLAG + 'Moved']: moves.length }, { merge:true });
-  console.log('Oncology split: moved ' + moves.length + ' of ' + termsSnap.size + ' terms');
-}
-
-/* ---------- Slang & Profanity ----------
- * Fabiola Grijalva's "Glosario para intérpretes profesionales: vulgarismos,
- * coloquialismos, insultos y caló" — 51 words from her Latin America list and
- * 35 from her Caribbean list, filed as one domain with two subdomains.
- *
- * Each entry is [list, Spanish, English, description]. The description opens
- * with "Vulgarity: <level>." — that sentence IS the level: the card reads its
- * badge from it (slangLevel), so it survives editing and moving, and a teammate
- * changes a level by editing the text. Nothing new is stored on the term.
- *
- * Term ids are fixed (slang-001…), so if the migration is ever interrupted and
- * re-runs, it rewrites the same documents instead of adding duplicates. The
- * flag lives in terminology-meta/migrations for the reason given above
- * migrateOncologySplit. */
-const SLANG_SOURCE = 'Fabiola Grijalva, Glosario para intérpretes profesionales';
-const SLANG_SEED = [
-  ["L", "Amortiguar", "Numb", "Vulgarity: Neutral. Muy común en Ecuador."],
-  ["L", "Avergado", "Overwhelmed", "Vulgarity: High."],
-  ["L", "Bolas", "Testicles", "Vulgarity: High."],
-  ["L", "Cabrón", "Bastard, asshole, jerk", "Vulgarity: High. Puede ser amistoso entre conocidos o muy ofensivo."],
-  ["L", "Cagar", "Shit", "Vulgarity: High. Muy frecuente en urgencias."],
-  ["L", "Carajo", "Damn you", "Vulgarity: High."],
-  ["L", "Chingar", "Fuck, screw", "Vulgarity: High. Tiene muchos significados según el contexto."],
-  ["L", "Chueco", "Crooked, bent", "Vulgarity: Neutral."],
-  ["L", "Chucha", "Vagina", "Vulgarity: High. Muy común en Ecuador."],
-  ["L", "Cola", "Butt", "Vulgarity: Low. Depende del país."],
-  ["L", "Culo", "Ass", "Vulgarity: High. Anatómico o insulto."],
-  ["L", "Echar la pota", "Throw up", "Vulgarity: Medium. Coloquial."],
-  ["L", "Empastillado", "Under the influence of pills", "Vulgarity: Neutral. Coloquial."],
-  ["L", "Encabronado", "Very angry", "Vulgarity: High."],
-  ["L", "Estoy bien jodido", "I'm really messed up", "Vulgarity: High. Dolor o situación grave."],
-  ["L", "Estoy hasta la madre", "I'm fed up.", "Vulgarity: Medium. Expresa cansancio o hartazgo."],
-  ["L", "Estoy madreado", "I'm beat up", "Vulgarity: Medium. Trauma."],
-  ["L", "Estoy pedo", "I'm drunk", "Vulgarity: Medium. No significa \"I have gas\"."],
-  ["L", "Falta de aire", "Shortness of breath", "Vulgarity: Low. Muy frecuente."],
-  ["L", "Guayabo (Resaca)", "Hangover", "Vulgarity: Neutral. Propio de Colombia."],
-  ["L", "Hacer del baño", "Use the bathroom", "Vulgarity: Low. Eufemismo."],
-  ["L", "Hijo de puta", "Son of a bitch", "Vulgarity: High."],
-  ["L", "Joder", "Fuck, screw", "Vulgarity: High."],
-  ["L", "Mamado", "Drunk, to be fed up of something", "Vulgarity: Varies."],
-  ["L", "Le dio un ataque", "Had a seizure / Had an attack", "Vulgarity: Low. Confirmar significado."],
-  ["L", "Mareado", "Dizzy", "Vulgarity: Low."],
-  ["L", "Me ahogo", "I'm choking / I can't breathe", "Vulgarity: Low. Confirmar contexto."],
-  ["L", "Me duele un chingo", "It hurts like hell", "Vulgarity: Medium. Expresa intensidad."],
-  ["L", "Me está llevando la chingada", "I'm dying / I'm in really bad shape", "Vulgarity: High. Muy frecuente en urgencias."],
-  ["L", "Me rompí la madre", "I got badly hurt", "Vulgarity: High. Muy común en trauma."],
-  ["L", "Me siento de la chingada", "I feel like hell", "Vulgarity: High."],
-  ["L", "Me siento de la fregada", "I feel awful", "Vulgarity: Medium."],
-  ["L", "Me vale madre", "I don't care", "Vulgarity: Medium. Muy común en México."],
-  ["L", "Mear", "Pee", "Vulgarity: High. Frecuente en pacientes."],
-  ["L", "Nalgas", "Buttocks", "Vulgarity: Low. Preferible a \"ass\" en contexto clínico."],
-  ["L", "No me chingues", "Give me a break! / Don't mess with me!", "Vulgarity: High. No siempre se traduce con \"fuck\"."],
-  ["L", "No puedo respirar", "I can't breathe", "Vulgarity: Low. Emergencia."],
-  ["L", "Orinar", "Urinate", "Vulgarity: Low. Registro clínico."],
-  ["L", "Pajuelo", "Jerk", "Vulgarity: Medium."],
-  ["L", "Pedo", "Fart / Problem / Drunk", "Vulgarity: Varies. Depende totalmente del contexto."],
-  ["L", "Pendejo", "Idiot, asshole, dumbass", "Vulgarity: High. Depende del contexto y del país."],
-  ["L", "Pinche", "Damn, freaking", "Vulgarity: Medium. No siempre es un insulto directo."],
-  ["L", "Pipí", "Pee", "Vulgarity: Low. Pediatría."],
-  ["L", "Popó", "Poop", "Vulgarity: Low. Pediatría."],
-  ["L", "Que se joda", "Screw it/to hell with it", "Vulgarity: Medium-high."],
-  ["L", "Sangré un chingo", "I was bleeding a lot", "Vulgarity: Medium. Emergencias."],
-  ["L", "Se desmayó", "Passed out / Fainted", "Vulgarity: Low. Ambas son válidas."],
-  ["L", "Trasero", "Buttocks", "Vulgarity: Low. Término profesional."],
-  ["L", "Un madrazo", "A hard hit", "Vulgarity: Medium. Lesiones."],
-  ["L", "Vergazo", "Big hit, punch", "Vulgarity: High. Trauma físico."],
-  ["L", "Vomitar", "Vomit", "Vulgarity: Low. Registro clínico."],
-  ["C", "Bicho", "Penis", "Vulgarity: High. Region: Puerto Rico."],
-  ["C", "Chocha", "Vagina", "Vulgarity: High. Region: Puerto Rico."],
-  ["C", "Cojones", "Testicles", "Vulgarity: High. Region: Caribbean."],
-  ["C", "Come mierda", "Piece of shit", "Vulgarity: High. Region: Cuba."],
-  ["C", "Cuca", "Vagina", "Vulgarity: High. Region: Caribbean."],
-  ["C", "Culo", "Ass", "Vulgarity: High. Region: Caribbean."],
-  ["C", "Diablo", "Damn", "Vulgarity: Low. Region: Dominican Republic."],
-  ["C", "Estoy ardiendo", "It burns", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Estoy bien malo", "I'm very sick", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Estoy botando sangre", "I'm bleeding heavily", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Estoy esbaratao", "I'm worn out", "Vulgarity: Neutral. Region: Dominican Republic."],
-  ["C", "Estoy explotao", "I'm exhausted", "Vulgarity: Neutral. Region: Dominican Republic."],
-  ["C", "Estoy jodío", "I'm really sick", "Vulgarity: Medium. Region: Caribbean."],
-  ["C", "Estoy prendío en fiebre", "I have a very high fever", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Estoy vuelto mierda", "I'm fucked/messed up", "Vulgarity: High. Region: Caribbean."],
-  ["C", "Fundillo", "Butt", "Vulgarity: Low. Region: Puerto Rico, Cuba. Informal."],
-  ["C", "Le dio un jamacuco", "He/she collapsed", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Le dio un patatús", "He/She passed out", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Mamabicho", "Cocksucker", "Vulgarity: High. Region: Puerto Rico."],
-  ["C", "Me cagué", "I shit myself", "Vulgarity: High. Region: Caribbean."],
-  ["C", "Me di un cantazo", "I hit myself hard", "Vulgarity: Neutral. Region: Puerto Rico."],
-  ["C", "Me di un fuetazo", "I hit myself hard", "Vulgarity: Low. Region: Dominican Republic."],
-  ["C", "Me dio un soponcio", "I nearly fainted", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Me dio un yeyo", "I fainted/I passed out", "Vulgarity: Neutral. Region: Puerto Rico."],
-  ["C", "Me duele bien cabrón", "It hurts like hell", "Vulgarity: High. Region: Puerto Rico."],
-  ["C", "Me duele del carajo", "It hurts like hell", "Vulgarity: Medium. Region: Caribbean."],
-  ["C", "Me meé", "I peed myself", "Vulgarity: High. Region: Caribbean."],
-  ["C", "Me oriné", "I urinated on myself", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Me partí", "I got hurt badly", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Nalga", "Buttock", "Vulgarity: Low. Region: Caribbean."],
-  ["C", "Puñeta", "Fuck", "Vulgarity: High. Region: Puerto Rico."],
-  ["C", "Se abrió la cabeza", "He/She split his/her head open", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Tengo calentura", "I have fever", "Vulgarity: Neutral. Region: Caribbean."],
-  ["C", "Toto", "Vagina", "Vulgarity: High. Region: Puerto Rico, Dominican Republic."],
-  ["C", "Vete pa'l carajo", "Go to hell", "Vulgarity: Medium-high. Region: Caribbean."]
-];
-const SLANG_DOMAINS = [
-  { id:'slang',           name:'Slang & Profanity', color:'#B0505E', icon:'chat', parentId:null },
-  { id:'slang-latam',     name:'Latin America',     color:'#C26A74', icon:'chat', parentId:'slang' },
-  { id:'slang-caribbean', name:'Caribbean',         color:'#C9826A', icon:'chat', parentId:'slang' },
-];
-
-async function migrateSlangGlossary(){
-  if(!db) return;
-  const FLAG = 'slangGlossary';
-  const flagRef = db.collection('terminology-meta').doc('migrations');
-  let flags = {};
-  try{
-    const snap = await flagRef.get();
-    if(snap.exists) flags = snap.data() || {};
-  }catch(err){ return; }               // offline: try again next launch
-  if(flags[FLAG]) return;
-
-  const metaRef = db.collection('terminology-meta').doc('categories');
-  const metaSnap = await metaRef.get();
-  if(!metaSnap.exists) return;         // nothing seeded yet; loadData handles that path
-
-  // Terms first, domains second, flag last: an interrupted run leaves either
-  // nothing visible or a complete domain, never a domain with half its words.
-  const terms = SLANG_SEED.map(([list, es, en, def], i) => ({
-    id: 'slang-' + String(i + 1).padStart(3, '0'),
-    categoryId: list === 'C' ? 'slang-caribbean' : 'slang-latam',
-    en, es, def, source: SLANG_SOURCE
-  }));
-  const batch = db.batch();            // 86 writes, well under the 500 cap
-  terms.forEach(t => batch.set(db.collection('terms').doc(t.id), t));
-  await batch.commit();
-
-  const cats = (metaSnap.data().categories || []).slice();
-  SLANG_DOMAINS.forEach(d=>{
-    if(!cats.some(c => c.id === d.id)) cats.push(categoryMeta(d));
-  });
-  await metaRef.set({ categories: cats, updatedAt: Date.now() }, { merge:true });
-
-  await flagRef.set({ [FLAG]: true, [FLAG + 'At']: Date.now(), [FLAG + 'Count']: terms.length }, { merge:true });
-  console.log('Slang glossary: added ' + terms.length + ' terms');
 }
 
 /* Display rules for this domain only: Spanish first, a level badge, no
@@ -9770,7 +9492,9 @@ function categoryMeta(c){
            ...(c.pin ? { pin: c.pin } : {}) };
 }
 
-async function migrateToPerTermStorage(source){
+// Fills an empty database: the domains in terminology-meta/categories and
+// one document per term (never one shared blob: that lost concurrent edits).
+async function seedDatabase(source){
   const categoriesMeta = source.categories.map(categoryMeta);
   await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
 
@@ -10087,15 +9811,6 @@ async function saveCategoriesMeta(){
   }catch(err){
     showToast('Could not save. Check connection and retry.');
     return false;
-  }
-}
-
-async function persist(){
-  try{
-    const res = await window.storage.set(STORAGE_KEY, JSON.stringify(DATA), true);
-    if(!res){ showToast('Saved locally — sync failed, try again.'); }
-  }catch(err){
-    showToast('Could not save. Check connection and retry.');
   }
 }
 
@@ -20493,8 +20208,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1013.2338';
-const BUILD_TIME = '2026-10-13 23:38 UTC';
+const BUILD_ID = 'b1014.0747';
+const BUILD_TIME = '2026-10-14 07:47 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
