@@ -78,6 +78,9 @@ Don't repeat it in every reply.
 - 2026-10-14 Startup: 2 finished migrations + old blob code removed. #25.
 - 2026-10-14 `CLAUDE.md` slimmed 584 → 350 lines: 11 feature write-ups
   moved verbatim to `docs/features/`, one pointer line each. #27.
+- 2026-10-14 Dead CSS: 163 rules (24 KB) removed from `index.html`;
+  computed styles identical before/after on 40 screens and sheets x phone,
+  computer, light, dark; all suites pass. #29.
 
 ## Facts (so nobody re-checks)
 
