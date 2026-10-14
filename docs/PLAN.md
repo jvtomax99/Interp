@@ -19,7 +19,8 @@ written here.
    line, PR link), add what you learned under **Facts**, add new work you
    found under **Next** or **Later**.
 6. Push a branch, open a pull request, report to Jose in 2-4 lines.
-   He says "merge"; nothing merges without him. Never delete anything he
+   He says "push" (or "merge") when a green PR should go live: that means
+   merge it into `main`, which deploys. Nothing merges without him. Never delete anything he
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
@@ -96,7 +97,7 @@ come from this alone.
   last text block. Smoke-tested with a mocked API. #30.
 - 2026-10-14 Places: one "Where" picker on the doctor sheet (search,
   by region, add a place), shared place icons from the pin artwork in
-  `terminology-meta/places`. `docs/features/places.md`. PR (this branch).
+  `terminology-meta/places`. `docs/features/places.md`. #32.
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
   fix. No rules change, no migration. `docs/features/regions.md`. #31.
