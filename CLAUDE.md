@@ -3,6 +3,10 @@
 Read this before changing anything. It is the source of truth for how this
 project is built and shipped.
 
+**How work is run:** one session = one phase from `docs/PLAN.md` (plan,
+do, test, update the plan, open a pull request, stop). New work starts a
+new session that reads the docs, not an old chat. Details: `docs/PLAN.md`.
+
 ## What this is
 
 A Spanish/English medical-interpreting tool for the interpreter team at

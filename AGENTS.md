@@ -5,6 +5,10 @@ Claude, or anything else. Claude also reads `CLAUDE.md`, which has the long
 version. This file is the short shared contract. If the two ever disagree,
 this file wins.
 
+**How work is run:** one session = one phase from `docs/PLAN.md` (plan,
+do, test, update the plan, open a pull request, stop). New work starts a
+new session that reads the docs, not an old chat. Details: `docs/PLAN.md`.
+
 ## The one thing that keeps going wrong
 
 **More than one tool writes to this repo, and both push straight to `main`.**
