@@ -44,6 +44,10 @@ to read. Nothing in a doctor's research is lost: all five tiers (core,
 procedures, drugs, anatomy, falsefriends), hand-added `customTerms` and
 photos stay. One PR per step; User Guide in each.
 
+D1b. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): layout A (as
+   built) or B (terms first, `d1-layouts.png`); the "From Doctor Prep, not
+   checked by the team" line; the real-data replay (he sends `doctors.json`,
+   steps in the review); the 5-minute interpreter test on iPhones.
 D2. **Team tips.** `tips: [{id, text, by, at}]` on the doctor-directory
    document; add, edit and delete your own; activity log. The old single
    `notes` shows as the first tip (by `updatedBy`) until someone edits it,
@@ -136,6 +140,13 @@ come from this alone.
 - Doctor page, D1: "Add tip" edits the doctor's single `notes` until D2
   builds `tips`; D2 should point that button and the tip tile at the new
   sheet. `SPECIALTY_PINS` already exists for D3's list.
+- Add to glossary's domain matcher (`findBestDomainMatch`) misses
+  Cardiology, Psychiatry, OB/GYN, ENT and more (word overlap only). The
+  doctor page uses `doctorDomainFor` (hints first). Moving Add to glossary
+  onto it is a small follow-up; it changes where new terms are filed.
+- This container has no WebKit (and must not run `playwright install`); the
+  `webkit` CI job runs the doctor page suite in it. `BROWSER=webkit` in
+  `tests/support/harness.cjs`.
 - Test fixtures: doctors pushed straight into `DOCTOR_DIRECTORY` vanish when
   the directory listener reloads; also write them to `window.__DB`
   (`seed()` in `tests/suites/doctor-page.cjs`).

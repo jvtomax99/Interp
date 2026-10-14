@@ -33,11 +33,28 @@ whichever of the two scrolls.
   glossary, or Add to glossary; team terms add Remove and who added it.
   Add all N new, the target domain, Research again, source and who updated.
 - Glass bar: Start appointment (`doctorPagePrep` sets `PREP` from the
-  doctor's specialty, then `startAppt`; asks first if one is running),
+  doctor's specialty, then `startAppt`; with this doctor already running it
+  just goes back to it; with another, it asks first),
   Flashcards (the briefing deck, `setCategory('prep')`; `openPrep` if no
   domain matches), Add tip (the doctor's sheet focused on Notes).
 - Edit (pencil, top right) and Add tip close the page, open the doctor's
   sheet, and `closeDoctorDirModal` reopens the page (`doctorPageReturnTo`).
+
+**Specialty to domain** (`doctorDomainFor`): `SPECIALTY_DOMAINS` hints
+first (specialty regex to domain-name regex, most specific first; Mental
+Health is matched as `\bmental health` because "Develop-mental &
+Neurology" contains "mental"), then `findBestDomainMatch`. No domain:
+Flashcards opens the specialty picker, the appointment runs without one.
+Add to glossary still uses `findBestDomainMatch` alone.
+
+**The saved copy has no research.** `doctorDirToCache` leaves out
+`researchResult`. Opening a doctor before the directory has loaded fetches
+that one document (`doctorPageFetch`); a finished load redraws an open page;
+offline the navy tile says the terms need a connection, never "Research
+this doctor" (that costs an API call).
+
+**Measured** (`docs/mockups/doctors/d1-review.md`): above the fold, axe,
+speed, open questions for Jose (layout A or B, the "not checked" label).
 
 **Redraws** go through `refreshDoctorDirDetail()` (keeps the scroll);
 buttons pass a row number, `DP_ROWS` holds the rows on screen.

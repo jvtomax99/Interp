@@ -188,6 +188,55 @@ async function targets(page) {
         ok(ap.cat === 'appt' && ap.doctor === 'Dr. Lori A. Leslie' && ap.dom, 'Start appointment starts one with this doctor', ap);
         await page.evaluate(() => { APPT = null; try { localStorage.removeItem('ih_appt'); } catch (e) {} });
 
+        // Specialty to glossary domain, for Flashcards and the appointment.
+        const doms = await page.evaluate(() => Object.fromEntries(['Cardiology', 'Psychiatry', 'Obstetrics and Gynecology', 'Neonatology', 'Hepatology', 'Lymphoma · Hematology/Oncology', 'Allergy and Immunology']
+          .map(sp => [sp, (doctorDomainFor(sp) || {}).name || null])));
+        ok(doms['Cardiology'] === 'Heart Failure & Cardiac' && doms['Psychiatry'] === 'Mental Health' && doms['Obstetrics and Gynecology'] === 'OB/GYN'
+          && doms['Neonatology'] === 'Pediatrics' && doms['Hepatology'] === 'Gastroenterology' && doms['Lymphoma · Hematology/Oncology'] === 'Oncology'
+          && doms['Allergy and Immunology'] === null, 'specialties reach the right glossary domain (none rather than a wrong one)', doms);
+        await page.evaluate(() => { const d = DOCTOR_DIRECTORY.find(x => x.id === 'dp-none'); window.__spec = d.specialty; d.specialty = 'Allergy and Immunology'; });
+        await openDoctor(page, 'dp-none');
+        await page.locator('#doctorDirDetailModal .dp-go').click();
+        await pause(page, 600);
+        const plain = await page.evaluate(() => ({ cat: activeCategory, doctor: APPT && APPT.doctor, dom: APPT && APPT.domainId, text: document.getElementById('content').innerText.slice(0, 80) }));
+        ok(plain.cat === 'appt' && plain.doctor === 'Dr. Barry Love' && !plain.dom, 'a specialty with no domain still starts the appointment', plain);
+        await page.evaluate(() => { APPT = null; try { localStorage.removeItem('ih_appt'); } catch (e) {} DOCTOR_DIRECTORY.find(x => x.id === 'dp-none').specialty = window.__spec; });
+
+        // Already in an appointment with this doctor: Start goes back to it, no question.
+        let asked = 0; const onDialog = d => { asked++; d.dismiss(); }; page.on('dialog', onDialog);
+        await page.evaluate(() => { APPT = { start: Date.now() - 60000, domainId: PREP.domainId, doctor: 'Dr. Lori A. Leslie' }; });
+        await go(page, 'doctor-directory');
+        await openDoctor(page, 'dp-tiered');
+        await page.locator('#doctorDirDetailModal .dp-go').click();
+        await pause(page, 600);
+        const same = await page.evaluate(() => ({ cat: activeCategory, age: Date.now() - APPT.start }));
+        ok(same.cat === 'appt' && same.age >= 60000 && asked === 0, 'Start appointment with the same doctor reopens the running one', { ...same, asked });
+        page.off('dialog', onDialog);
+        await page.evaluate(() => { APPT = null; try { localStorage.removeItem('ih_appt'); } catch (e) {} });
+
+        // The saved copy of the directory has no research: the page fetches it
+        // instead of offering a paid re-research; offline it says so.
+        await go(page, 'doctor-directory');
+        await seed(page);
+        const recovered = await page.evaluate(async () => {
+          const i = DOCTOR_DIRECTORY.findIndex(x => x.id === 'dp-tiered');
+          const { researchResult, ...rest } = DOCTOR_DIRECTORY[i]; DOCTOR_DIRECTORY[i] = rest;
+          DOCTOR_DIR_STATE = 'idle';
+          openDoctorDirDetail('dp-tiered');
+          await new Promise(r => setTimeout(r, 1000));   // the stand-in answers this collection in 480 ms
+          const total = document.querySelector('#doctorDirDetailModal .dp-navy-n').textContent;
+          const { researchResult: rr, ...bare } = DOCTOR_DIRECTORY[i]; DOCTOR_DIRECTORY[i] = bare;
+          const fetchFn = doctorPageFetch; doctorPageFetch = () => {};
+          DOCTOR_DIR_STATE = 'failed';
+          openDoctorDirDetail('dp-tiered');
+          const offline = { text: document.querySelector('#doctorDirDetailModal .dp-navy p')?.textContent || '', button: !!document.querySelector('#doctorDirDetailModal .dp-navy-btn') };
+          doctorPageFetch = fetchFn; DOCTOR_DIR_STATE = 'ok'; DOCTOR_DIRECTORY[i] = { ...bare, researchResult: rr };
+          closeDoctorDirDetail();
+          return { total, offline };
+        });
+        ok(recovered.total === '10', 'opened from the saved copy, the page fetches the research', recovered);
+        ok(/need a connection/.test(recovered.offline.text) && !recovered.offline.button, 'offline, no "Research this doctor" for a doctor already researched', recovered.offline);
+
         // Add tip: the doctor's sheet at the notes, and back to the page after.
         await go(page, 'doctor-directory');
         await openDoctor(page, 'dp-tiered');
