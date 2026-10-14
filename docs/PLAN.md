@@ -34,6 +34,15 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
+R4. **Regions, later, if Jose asks:** region tags on announcements and on
+   Training & Events. The top bar still says "Hackensack University Medical
+   Center" under the title for South users too (Jose's call whether to change).
+   Doctor Prep's default location is "Hackensack Meridian Health" for both.
+
+Watch after South joins: Firestore reads (Usage page) a week later. More
+people = more reads at every launch; the 50K/day trigger under Later may
+come from this alone.
+
 1. **AI models.** `claude-sonnet-5` (translate backup) →
    `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
    `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
@@ -83,6 +92,10 @@ Don't repeat it in every reply.
 - 2026-10-14 Doctor Prep on Sonnet 5.5: effort `medium` set explicitly,
   max_tokens 8000 → 16000, refusals answered plainly, JSON read from the
   last text block. Smoke-tested with a mocked API. #30.
+- 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
+  channels (Everyone, North, South), Doctor Directory by region, namesake
+  fix. No rules change, no migration. `docs/features/regions.md`. PR (this
+  branch).
 - 2026-10-14 Term lookup on Sonnet 5.5: effort stays `medium`, refusals
   logged and answered as "nothing found", JSON read from the last text
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
@@ -127,5 +140,9 @@ Don't repeat it in every reply.
   answers in `doctor-research-cache`: test with a doctor not looked up before.
   Term lookup caches per term for 90 days (`term-link-cache`): test with a
   term nobody has opened reading for.
+- Regions decided by Jose (2026-10-14): North + South; a view, not a
+  wall (all chats open to all); each phone picks (`ih_region`); Jose stays
+  the only owner. South sites: the Shore hospitals, Raritan Bay, Carrier;
+  JFK is North. Details: `docs/features/regions.md`.
 - Weekly code report: Routine "Weekly code cleanup report", Mondays 11:51
   New York, report-only, phone notification.
