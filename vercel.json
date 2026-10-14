@@ -1,4 +1,9 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "claude/**": false
+    }
+  },
   "crons": [
     {
       "path": "/api/check-events",

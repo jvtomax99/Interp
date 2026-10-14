@@ -90,6 +90,12 @@ been compacted (older parts summarized). Don't wait to be asked.
 - This cloud container can't reach the live site, Firebase or third-party
   sites, and the Vercel connector can't read team logs. Ask Jose for
   screenshots.
+- Vercel Deployment Storage (free tier 10 GB) hit 75% on 2026-10-14: each
+  deployment is ~38 MB (34 MB is `atlas/`) and every push to any branch
+  made one. Fixed: retention policy (Settings, Build and Deployment) set to
+  1 day for canceled, errored and pre-production, 1 week for production;
+  `vercel.json` no longer deploys `claude/` branches, so a PR has no
+  preview link. If it nears 100% again, check Usage before anything else.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
