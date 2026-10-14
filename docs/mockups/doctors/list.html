@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset=utf-8><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800"><link rel=stylesheet href=base.css><style>
+body{position:relative}
+.top{display:flex;align-items:center;gap:10px;padding:54px 16px 4px}.top h1{flex:1;margin:0;font-size:28px;font-weight:650;letter-spacing:-.025em}
+.add{height:40px;padding:0 14px;border-radius:999px;background:var(--navy);color:#fff;font-size:14px;font-weight:650;display:flex;align-items:center;gap:6px;box-shadow:var(--fin)}
+.search{margin:8px 16px 10px}
+.seg{display:flex;gap:3px;padding:3px;border-radius:999px;background:var(--line-soft);margin:0 16px 8px}
+.seg span{flex:1;min-height:40px;border-radius:999px;font-size:14px;font-weight:600;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;gap:5px}.seg span b{font-weight:550;color:var(--ink-faint)}
+.seg .on{background:var(--paper);color:var(--ink);box-shadow:var(--fin)}
+.tidy{display:inline-flex;margin:2px 16px 6px;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:999px;background:#FFF7E6;border:1px solid #F3E2BC;color:#7A5D28;font-size:12.5px;font-weight:600}
+.sec{display:flex;align-items:center;gap:10px;padding:12px 16px 8px}.sec img{width:34px;height:34px}.sec b{font-size:15px;font-weight:650;flex:1}.sec small{font-size:12px;color:var(--ink-faint);font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.dc{background:var(--paper);border-radius:20px;box-shadow:var(--fin);padding:12px;position:relative}
+.dc .ph{position:relative;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center}
+.dc .ph img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 3px 5px rgba(40,30,70,.16))}
+.dc .ph .ini{position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:8px;color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2.5px #fff}
+.dc .ph.photo{background-size:cover;background-position:center 30%}
+.dc .n{margin-top:10px;font-size:15.5px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.dc .sp{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;font-weight:600}
+.dc .sp:before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+.dc .fl{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.dc .ft{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+.c{height:24px;padding:0 8px;border-radius:999px;font-size:11.5px;font-weight:650;display:inline-flex;align-items:center}
+.c.t{background:#E8EAF5;color:var(--navy)}.c.ff{background:#FBECEF;color:var(--danger)}.c.tp{background:#FFF7E6;color:#8A6F3F}.c.pp{background:none;color:var(--accent-2);padding:0}
+.tab{position:fixed;left:16px;right:84px;bottom:22px;height:64px;border-radius:32px;background:rgba(255,255,255,.72);backdrop-filter:saturate(180%) blur(20px);box-shadow:var(--fin);display:flex;align-items:center;justify-content:space-around;font-size:11px;color:var(--ink-soft)}
+</style></head><body>
+<div class=top><div class=ib>‹</div><h1>Doctors</h1><div class=add>＋ Add</div></div>
+<div class=search style="margin:8px 16px 10px;height:46px;border-radius:14px;background:var(--paper);box-shadow:var(--fin);display:flex;align-items:center;gap:9px;padding:0 14px;color:var(--ink-faint);font-size:16px">⌕ <span>Search name, specialty, place</span></div>
+<div class=seg><span>North <b>61</b></span><span class=on>South <b>24</b></span><span>All <b>85</b></span></div>
+<div class=tidy>⚑ 2 things to tidy</div>
+<div class=sec><img src="../../../pins/oncology.webp"><b>John Theurer Cancer Center</b><small>4</small></div>
+<div class=grid>
+<div class=dc><div class=ph style="background:#F1ECF7"><img src="../../../pins/leukemia.webp"><span class=ini style="background:#8E6BB0">LL</span></div><div class=n>Dr. Lori A. Leslie</div><div class=sp style="color:#7B57A6">Lymphoma</div><div class=fl>4th fl · Suite 401</div><div class=ft><span class="c t">28 terms</span><span class="c ff">4 traps</span><span class="c tp">2 tips</span></div></div>
+<div class=dc><div class=ph style="background:#FBEAF0"><img src="../../../pins/oncology.webp"><span class=ini style="background:#B2456E">AI</span></div><div class=n>Dr. Anthony Ingenito</div><div class=sp style="color:#B2456E">Radiation Oncology</div><div class=fl>Lower level</div><div class=ft><span class="c t">31 terms</span><span class="c ff">5 traps</span></div></div>
+<div class=dc><div class="ph photo" style="background-image:url(../../../hero.jpg)"><span class=ini style="background:#3F7D6E">PK</span></div><div class=n>Dr. Priya Kumar</div><div class=sp style="color:#3F7D6E">Hematology</div><div class=fl>Infusion, 2nd fl</div><div class=ft><span class="c t">24 terms</span><span class="c tp">1 tip</span></div></div>
+<div class=dc><div class=ph style="background:#EDF0F5"><img src="../../../pins/oncology.webp"><span class=ini style="background:#556B8D">GG</span></div><div class=n>Dr. Glen Gejerman</div><div class=sp style="color:#556B8D">Radiation Oncology</div><div class=fl>No floor yet</div><div class=ft><span class="c pp">＋ Prep terms</span></div></div>
+</div>
+<div class=sec><img src="../../../pins/pediatrics.webp"><b>K. Hovnanian Children's Hospital</b><small>2</small></div>
+<div class=tab><span>🏠<br>Home</span><span>🔍<br>Search</span><span>💬<br>Chat</span><span>☰<br>More</span></div>
+</body></html>
