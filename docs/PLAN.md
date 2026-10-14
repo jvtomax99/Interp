@@ -1,7 +1,7 @@
 # PLAN — what's done, what's next
 
 The working list for every session. Read this, `AGENTS.md` and `CLAUDE.md`,
-then do **one** phase. Don't reread old chats: anything worth keeping is
+then do the next phase, one per pull request. Don't reread old chats: anything worth keeping is
 written here.
 
 ## How a session runs
@@ -21,42 +21,41 @@ written here.
 6. Push a branch, open a pull request, report to Jose in 2-4 lines.
    He says "merge"; nothing merges without him. Never delete anything he
    hasn't approved.
-7. Session over. A new phase is a new session.
+7. Next phase: in the same chat while it's still light (see below).
 
-Short follow-ups on the same pull request can stay in the same session.
-Coming back hours later: start a new session, not the old chat.
-
-**Tell Jose when to move to a new chat** (his rule, to save tokens). Say
-"Start a new chat" and give the exact message to paste when: the phase is
-done (PR opened or merged); the chat is getting heavy (many big file
-reads, long test output, several fix rounds on one PR); or the chat has
-been compacted (older parts summarized). Don't wait to be asked.
+**When to move to a new chat** (Jose's rule: save tokens, but don't make
+him start chats often). Finishing a phase is not a reason; carry on with
+the next one in the same chat. Say "Start a new chat" once, with the exact
+message to paste, only when the chat is heavy: it has been compacted
+(older parts summarized), or it holds several big file reads, long test
+output or many fix rounds, and the next phase would add a lot more.
+Before saying it, make sure everything worth keeping is in this file.
+Don't repeat it in every reply.
 
 ## Next (in order)
 
-1. **Dead CSS.** ~125 rules (~14 KB) in `index.html`'s styles target classes
-   nothing produces (old top bar `tg-*`, old greeting `home-greeting-brand*`,
-   `lightbox-*`, `nav-section-*`, `subgroup-bar*`, `whoami*`, …). Remove in
-   one PR; prove nothing changed with before/after screenshots of every
-   screen, phone and computer, plus the suites.
-2. **AI models.** `claude-sonnet-5` (doctor-research, term-lookup,
+1. **AI models.** `claude-sonnet-5` (doctor-research, term-lookup,
    translate backup) → `claude-sonnet-5-5`; `claude-opus-5` (term-check
    backup) → `claude-opus-5-5`. One endpoint per PR; compare a few real
    answers before/after (effort levels were recalibrated). Read the
    claude-api skill first.
-3. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
+2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
    helper; move one endpoint per PR.
-4. **Home styles in layers.** In `home-polish.css` the greeting name is
+3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
-5. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
+4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
    old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
    ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
    gap" paragraph says there are no spacing or font-size variables, but the
    Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
    text, both files.
+5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
+   `index.html`. `home-polish.css` still styles classes nothing makes
+   (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
+   file, so fetch `main` right before.
 
 ## Later (only when the trigger happens)
 
@@ -79,6 +78,9 @@ been compacted (older parts summarized). Don't wait to be asked.
 - 2026-10-14 Startup: 2 finished migrations + old blob code removed. #25.
 - 2026-10-14 `CLAUDE.md` slimmed 584 → 350 lines: 11 feature write-ups
   moved verbatim to `docs/features/`, one pointer line each. #27.
+- 2026-10-14 Dead CSS: 163 rules (24 KB) removed from `index.html`;
+  computed styles identical before/after on 40 screens and sheets x phone,
+  computer, light, dark; all suites pass. #29.
 
 ## Facts (so nobody re-checks)
 
@@ -96,6 +98,14 @@ been compacted (older parts summarized). Don't wait to be asked.
   1 day for canceled, errored and pre-production, 1 week for production;
   `vercel.json` no longer deploys `claude/` branches, so a PR has no
   preview link. If it nears 100% again, check Usage before anything else.
+- Dead CSS method (2026-10-14): a class counts as used if its name appears
+  anywhere outside the stylesheet (`index.html` markup and scripts,
+  `home-polish.js`, `pin-icons.js`). Names built in code (`em-${role}`,
+  `dm-${tone}`, `'ds-fx-' + kind`, `is-${why.k}`, `is-b${n}`, `n${n}`,
+  `sev-${sev}`) look dead to a plain search and are live: check prefixes.
+  `id="domain-${cat.id}"` is an id, not a class. Proof = every element's
+  computed style (and ::before/::after) identical before/after on every
+  screen and sheet, phone and computer, light and dark.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
