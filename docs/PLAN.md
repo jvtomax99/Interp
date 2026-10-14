@@ -1,7 +1,7 @@
 # PLAN — what's done, what's next
 
 The working list for every session. Read this, `AGENTS.md` and `CLAUDE.md`,
-then do **one** phase. Don't reread old chats: anything worth keeping is
+then do the next phase, one per pull request. Don't reread old chats: anything worth keeping is
 written here.
 
 ## How a session runs
@@ -21,16 +21,16 @@ written here.
 6. Push a branch, open a pull request, report to Jose in 2-4 lines.
    He says "merge"; nothing merges without him. Never delete anything he
    hasn't approved.
-7. Session over. A new phase is a new session.
+7. Next phase: in the same chat while it's still light (see below).
 
-Short follow-ups on the same pull request can stay in the same session.
-Coming back hours later: start a new session, not the old chat.
-
-**Tell Jose when to move to a new chat** (his rule, to save tokens). Say
-"Start a new chat" and give the exact message to paste when: the phase is
-done (PR opened or merged); the chat is getting heavy (many big file
-reads, long test output, several fix rounds on one PR); or the chat has
-been compacted (older parts summarized). Don't wait to be asked.
+**When to move to a new chat** (Jose's rule: save tokens, but don't make
+him start chats often). Finishing a phase is not a reason; carry on with
+the next one in the same chat. Say "Start a new chat" once, with the exact
+message to paste, only when the chat is heavy: it has been compacted
+(older parts summarized), or it holds several big file reads, long test
+output or many fix rounds, and the next phase would add a lot more.
+Before saying it, make sure everything worth keeping is in this file.
+Don't repeat it in every reply.
 
 ## Next (in order)
 

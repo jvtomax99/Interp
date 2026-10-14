@@ -3,9 +3,10 @@
 Read this before changing anything. It is the source of truth for how this
 project is built and shipped.
 
-**How work is run:** one session = one phase from `docs/PLAN.md` (plan,
-do, test, update the plan, open a pull request, stop). New work starts a
-new session that reads the docs, not an old chat. Details: `docs/PLAN.md`.
+**How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
+do, test, update the plan, open a pull request). A chat can run several
+phases in a row; it moves to a new chat only when it gets heavy, and the
+new chat reads the docs, not the old chat. Details: `docs/PLAN.md`.
 
 ## What this is
 
