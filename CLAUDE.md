@@ -64,7 +64,6 @@ directly to `main` under Jose's name, so `main` moves between sessions with
 no notice. That has already caused work to be reviewed against a stale copy
 for an entire session.
 
-
 **Jose works on this app with other tools too, and their edits land in
 `home-polish.css`, `home-polish.js` and `pin-icons.js`. Put changes in those
 files wherever they can hold them.** Two people editing the same thing in two
@@ -152,190 +151,20 @@ hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team ac
 hub-lessons/{id}                                                     <-- Ask the Hub team notes
 ```
 
-**Ask the Hub.** The phone picks up to 24 matching entries (glossary, False
-Friends, Doctor Directory, providers, Code of Ethics, User Guide) with
-`askRetrieve()` and sends them, plus approved `hub-lessons`, to `api/ask.js`.
-The model never changes; "learning" is teammates' corrections (status
-`pending`) that the owner approves on the review view. Tapping the greeting
-smiley opens it (`window.openAskHub`, called from `home-polish.js`).
+**Feature notes live in `docs/features/`.** Read the one for the feature you
+touch before changing it; update it in the same commit when the behaviour changes.
 
-**Dr. Smiley's actions.** Ask also sends a small `context` (`askContext`:
-the screen Ask was opened from, the glossary term picked with "Explain with
-Dr. Smiley" on a card's ⋯ menu, the specialties with a briefing, and how many
-terms the Term Review record marks still learning: box 0-1). No patient data
-and nothing free-form; `api/ask.js` cuts it down again (`cleanContext`). He may
-suggest actions only from `ACTION_TYPES` (open_prep, choose_prep,
-practice_learning, start_review, set_name, open_term, look_up, open_source),
-each with a target the app sent (`allowedActions`). The phone recognises the
-same three requests itself (`askIntent`: prep, practice, explain), so they
-also work offline and when the server fails. Every action is re-checked when
-drawn and when tapped (`askCheckAction`); "done" is said only after the
-screen it opens is there (`askRunAction`). New action types go in both
-lists.
-
-**What Dr. Smiley remembers (on this device).** `ih_smileyMemory` holds, per
-name typed on this phone, a few allowlisted choices (`DR_MEM_FIELDS`: lang,
-length, focus = a specialty id, mode, practice on/off) and which next step was
-already offered today. "Remember… / Forget… / What do you remember?" are
-handled on the phone (`askMemoryIntent`, nothing sent); a confirmation only
-after the write reads back (`drMemStore`), otherwise it says the phone
-refused and keeps it in memory until the app closes. The screen is
-`openMemory()` (Ask's header, the profile sheet). Another name on the phone
-gets its own set, its own animation mode, and a cleared Ask conversation
-(`drMemNameChanged`). `api/ask.js` gets only lang/length/focus as
-`context.prefs` and, when practice is on, personal counts as
-`context.practice` (unfinished briefing/quiz/review, still learning, due) --
-style and personal choices, kept apart from team notes; "brief" is enforced
-server-side (`fitLength`). The practice next step is offered unasked at most
-once a day per step.
-
-**Following a conversation (follow-ups).** "Make it simpler", "Now in
-Spanish", "What's the difference between that and the previous term?", "Go
-back to my appointment prep" are read on the phone first (`askFollowUp`, then
-`askPlan`). `ASK.convo` is this conversation's record, in memory only and
-bounded (`ASK_CONVO_MAX`): the last 4 subjects (entry ids, or none when an
-answer wasn't about a Hub entry, so "that" never skips back past it), the
-briefing it's about, a language for this conversation, and up to 3 of the
-interpreter's corrections. One reading: sent as `context.conversation`
-(followUp, resolved, topic, previous, task, lang, corrections) with those
-entries first; `api/ask.js` (`cleanConversation`) keeps only ids that were
-sent. Several readings: one short question, a `pick_topic` button per option
-(the model can ask too: `clarify` + `topicIds`). None: he says what's missing,
-nothing sent. "Go back to my prep" is answered on the phone from the
-unfinished deck, the running appointment, this conversation's briefing, the
-screen Ask came from, then the last briefing (`askPlanResume`). A correction
-(`usedCorrection`) is never "from the Hub" and never a verified outcome; "Send
-to … for review" opens the usual Correct this note (pending). "Use Spanish in
-every conversation" is the only way a conversation language becomes a saved
-preference. Visible Stop (`.ask-stop`) and New conversation (`askNewConversation`,
-saved preferences stay). Nothing from a stopped or overtaken request is
-applied (`stale()` in `submitAsk`, `ASK.gen`). His voice is enforced
-server-side too (`tidyVoice`: no greeting, praise or introduction).
-
-**The companion panel (`drPanel`).** Tapping Dr. Smiley in the dock (or his
-`#tgSmiley` top-bar button on a computer) no longer leaves the page: a small
-Ask the Hub panel grows out of his disc, above him on a phone and below him on
-a computer. It is the same `ASK` state as the Ask screen (same turns, same
-`ASK.draft`, `submitAsk`), shows the newest question and answer (long ones
-scroll), and "Open in Ask" goes to the full screen. Its glass (`.drp-bg`) is a
-separate layer whose edges are animated from his button's box; each new
-open/close starts from wherever the last one was (`current()`), so quick taps
-never jump. He never moves, except that with the keyboard up he and the panel
-ride above it together (`--drp-kb`, `body.drp-kb`; `body.drp-open` keeps him
-visible through `kb-open`). It closes on Escape, ✕, tapping him or outside, a
-page change, a sheet, or him leaving (`drPanel.check()` from
-`smileyRider.sync()`); the draft stays. The tab bar doesn't tuck while it's
-open. Collapsed states on his button: `.is-busy` (a question out), `.has-new`,
-`.has-error`. `renderAskMessages()` redraws it (`drPanelSync`).
-
-**How an answer is drawn (`askTurnHtml`).** Dr. Smiley's byline and the
-provenance tag, the headline, then at most one structured block from
-`askLayout(t)`, built only from checked data, never from the answer's words:
-`term` (the one glossary entry cited, among those sent: EN/ES as the glossary
-has them), `ff` (one False Friend: the Spanish word and the English it looks
-like), `compare` (a comparison follow-up, `t.fu === 'compare'`, whose two
-`t.about` ids are both cited; or a question naming two cited entries), `prep`
-(a checked open/continue briefing action: the briefing's own counts and
-traps) and `practice` (a practice action: still-learning terms from
-`TERM_REVIEWS`, tap to reveal the Spanish). `askLayoutSafe` falls back to the
-plain card on any error. Sources are one compact row; Helpful / Correct this a
-quiet footer. States: `.ask-wait` (loading + Stop), `is-stopped`,
-`is-offline`, `is-failed`, `is-refused`. `renderAskMessages` keeps your place:
-it follows only if you're at the end or just asked (`ASK.sentAt`), shows a new
-answer from its question (`askScrollNewest`), otherwise leaves you where you
-were with a "New answer" button (`askJump`). Only elements with a new `data-k`
-ease in (`askEnter`), never on a repaint. Desktop: a 720 px reading column.
-
-**Term Review sessions (Dr. Smiley's teaching).** One record, the existing
-`term-reviews/{who__termId}`, now with `lastResult`, `misses`, `lastAt`
-(written by `saveTermReview`; older records read box 0 as "missed last
-time"). A session (`reviewBuild`): you pick the specialty and 5/10/15;
-missed first (most-missed first), then due, about one in five for variety
-(new to you, else a quick check), one card per English term, spread out,
-each with its reason (`RS.why`). Answers (`reviewCheck`): right when the
-glossary accepts it (`reviewAccepted`: the card's Spanish, "A / B" and
-"A (word)" parts, other entries for the same English; accents, capitals and
-a leading article ignored, with a "Written:" note); wrong only for blank /
-"no sé" / this term's false friend; everything else is self-review (compare,
-you decide). After a miss: `reviewDistinction` and "Try it again later"
-(back 4 cards on). `saveTermReview(..., { confirm: true })` returns
-`{ ok, how }`; the record, the session and the summary change only after
-ok, and a failure shows "Not saved" with Try saving again / Skip. Your place
-is in `ih_reviewSession` (ids, index past the last saved answer, reasons,
-results; never what was typed): Pause, a reload or Dr. Smiley's Resume
-(`askUnfinished`, `continue_review`) pick it up. Show answer → Got it still
-moves straight on. Reactions: a nod, a smile when a previously missed term
-is right, encourage after a miss, `smileyStudy` at the end.
-
-**The Daily Drill (Home's warm-up card).** Jose found the one-question
-warm-up too easy; it is now three rounds a day in the same sheet
-(`openWarmupSheet`, `#warmupSheet`; the card is still `#warmup`):
-1 *Catch the trap*, a False Friend's patient line (`heard`), rendered in
-English by the interpreter; using the trap word (`drillTrapRe`, from
-`looks`, only for lines where it's in `trap` and not in `truth`) is a miss,
-anything else is compared with `truth` and judged by them. 2 *Hear it,
-write it*, a glossary term (still learning, else due), Spanish checked by
-`reviewCheck` and saved to Term Review. 3 *The judgment call*, a
-`SEED_QUESTIONS` item from ethics / encounter / cultural, with its
-explanation. Levels (`DRILL_LEVELS`: Reading, Listening, Consecutive, Under
-pressure) move up on 3/3 and down on 0-1; from Listening the words are a tap
-away (never when the phone can't speak), Under pressure adds `DRILL_SECS`.
-Nothing plays by itself. State in `ih_warmup` (drill built once a day,
-`run` = your place, verdicts only, never what was typed; `seenFF`/`seenQ`
-avoid repeats; `last`, `best`, `lvl`, `streak`).
-
-**Integration rules from the end-to-end journey audit** (each has a check in
-the journey test):
-- A handoff answer (it hands over a Hub tool: a briefing, Term Review, a next
-  step) is a success for his face (`askHandsOver` -> outcome `handoff`),
-  whatever its provenance label says.
-- Ask opened from the briefing or an appointment knows that specialty
-  (`askFromSpecialty`): the context names it and "Prep me." uses it.
-- An action that has to wait (loading the review record) re-checks that it's
-  still the latest tap and you're still where you tapped
-  (`askActionSeq`); otherwise it does nothing and says nothing.
-- A retried question carries its own term (`submitAsk(q, true, { sel })`);
-  it never changes the term picked since.
-- Questions waiting for a connection are kept on the phone
-  (`ih_askWaiting`, not ones that looked like patient details) and sent after
-  a reload once online.
-- Term Review answers go through the outbox and the card never waits for
-  the network (`saveTermReview`).
-- The briefing deck keeps your place in memory when the phone refuses
-  storage (`prepDeckMem`).
-
-**3D Body cards.** Tapping a structure in the viewer shows a card (the
-viewer's `app/hub-card.tsx`): English name, Spanish under it, a speaker for
-each (the Hub's `speakText`), what it is, Open glossary / Practice this term /
-Ask Dr. Smiley, and Sources. The text is `atlas/hub-catalogue.json` (FMA ids,
-names, explanation, sources with what each supports; read when the 3D Body
-opens, never generated). Anything not listed shows "Spanish name not added
-yet" and "About this body system". The bridge (`ATLAS`, `atlasOnMessage`,
-`atlasAction` in `index.html`; `app/hub.ts` in the viewer) accepts only
-ready / card / action from the frame on screen; the Hub resolves the glossary
-match itself (`atlasGlossaryMatch`: exact name, never partial), runs the
-action, and sends back only the match state and, on return, your place
-(`ATLAS.mem`, memory only). Practice opens Term Review on that one term and
-records nothing until answered (asks first if a session is in progress). Ask
-gets the structure as `context.anatomy` plus its card as an `an:` entry
-(`api/ask.js` `cleanContext`); offline, he answers from the card.
-
-**The User Guide (Guide 2.0).** The answers are one list, `GUIDE_TOPICS`;
-Dr. Smiley (`askRetrieve`) and global search read it, so it has to match the
-app. The guide screen is search-first: the box filters answers (every word
-required, words in the question count most), and its last row hands the
-same words to Ask (`guideAsk`, patient-detail warning still applies). Topic
-tiles open in place (`guideSection`, not navigation). An answer opens in a
-sheet (`guideOpenSheet`, an `.overlay`, so Back closes it); some draw their
-steps with small copies of the real controls (`GUIDE_STEPS`, keep in step
-with the text). "Show me" (`guideShowMe`, `GUIDE_COACH`) dims the app and
-lights the real button; it is not an `.overlay`, so the tab bar and the
-dock stay visible, and Back/Escape close it. One Dr. Smiley at a time: the
-guide's is in the search box; for a dock "Show me" it steps aside
-(`body.gd-coaching`, then `smileyRider.sync()`, since the rider's observer
-doesn't see body classes) and the tip has no face. "Copy link" gives
-`?guide=<id>`, opened at startup. The first-week list and "New" badges are
-on this phone only (`ih_firstWeek`, `ih_guideSeen`).
+- Ask the Hub, retrieval, `context`, his actions (`ACTION_TYPES`; new action types go in both lists): `ask-the-hub.md`
+- What he remembers on the phone (`ih_smileyMemory`) and follow-ups (`ASK.convo`): `ask-memory-followups.md`
+- The companion panel from the dock (`drPanel`): `companion-panel.md`
+- How an answer is drawn (`askTurnHtml`, `askLayout`): `ask-answer-layout.md`
+- Term Review sessions (`reviewBuild`, `reviewCheck`, `saveTermReview`): `term-review.md`
+- The Daily Drill, Home's warm-up (`openWarmupSheet`, `ih_warmup`): `daily-drill.md`
+- Integration rules from the journey audit (each has a check in the journey test): `journey-rules.md`
+- 3D Body cards and the frame bridge (`ATLAS`, `atlasOnMessage`): `3d-body.md`
+- The User Guide screen (`GUIDE_TOPICS`, `guideShowMe`): `user-guide.md`
+- Team access, team code, practice mode (`hub-invites`, `hub-members`, `team()`): `team-access.md`
+- Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
@@ -343,20 +172,6 @@ for anything new, any answer it makes wrong rewritten, `GUIDE_STEPS` and
 `GUIDE_COACH` kept in step with the controls they draw or light up, and a
 "New lately" card (`GUIDE_NEWS`) for a new feature. Say in the report what
 changed in the guide; say so in the commit message when nothing needed to.
-
-**Team access (one team code).** Everyone types the same team code
-(`hub-invites/{CODE}`, kind `team`); the owner shares it and can change it on
-the Team access screen, optionally signing every other phone out. The owner
-has a separate owner code (kind `owner`) for their own phones. Entering a code
-signs the phone in anonymously and creates `hub-members/{uid}`, with `who` =
-the name set on that phone (self-reported). Every rule is `if team()` = joined phone OR practice
-mode. Practice mode (`hub-access/settings.practice`) is the owner's switch;
-while it's on nothing is enforced. The first owner is claimed once via
-`?setup=owner`. The AI endpoints check the same thing through
-`api/_hub-access.js`, and the app sends `hubAuthHeaders()`. Startup database
-calls wait for `hubAuthReady`. Rules are tested against the Firebase emulator
-(firebase-tools + `@firebase/rules-unit-testing`; run the emulators with the
-proxy variables unset or cross-service Storage lookups silently fail).
 
 **Migrations:** new domains/terms are added by idempotent migration functions
 gated on a unique boolean flag in `terminology-meta/migrations` (written with
@@ -406,38 +221,9 @@ lost concurrent edits. Do not reintroduce that.
   and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
   each pin is `pins/<key>.webp`; to change one, replace its file.
 - `localStorage` key `ih_myName` holds the user's display name.
-- **Dr. Smiley moves only through his controller.** One `DrAnim` per
-  character (`drAnim(svg, {head})`) owns his face frame, gaze, lean and
-  effects, with priorities (`DR_P`: IDLE < GAZE < REACT < DIRECT). Ask it to
-  `play()` / `talk()`; don't set frames or animate his pin yourself (the Home
-  greeting only places him while he grows in, then plays `greet` on the
-  engine). Interruptions walk through in-between frames (`DR_FACE_BACK`);
-  a sequence whose consecutive frames aren't neighbours gets them filled in.
-  Reduced motion, a hidden page and a detached svg are handled there.
-- **Don't move him with a paused animation you seek by hand.** The Home
-  greeting used to grow him in with a paused Web Animation whose
-  `currentTime` was set every frame, while his breathing (a CSS animation on
-  the same element) ran beside it. On an iPhone he could stay drawn at its
-  first frame, 8% of his size, for the rest of the hello (never seen in
-  Chromium). The entrance is now written straight onto him each frame
-  (`placeFace` in `home-polish.js`) and breathing waits until he has landed
-  (`.home-wave-entering`).
-- **His size is one number per place** (`home-polish.css`): `--ds-k` for
-  the dock button (Jose picked 58/48: his disc is the tab bar's height,
-  centred on its middle line, 14px from the edge) and `--hw-size` for the
-  Home greeting (1.5: a 90px face, centred on the name). Inside him
-  everything is still drawn at the old size and scaled. His sway pins the
-  pivot (`smileySway`: 50% 92% dock, 50% 85% Home), so a scale must be
-  moved back (dock: the bob's left/top; Home: `translate`), or he drifts
-  up. In the greeting he has one fixed place whatever the name (block
-  "Dr. Smiley's own place", end of `home-polish.css`; Jose's call): on a
-  phone the name has the line under "Good morning" to itself (`--hw-line`,
-  so a long name's smaller face sits on the same baseline) and he stands
-  under it near the right edge (`--hw-left`: 48px in, Jose's pick B, clear
-  of the lamp post), his thought cloud opening to his left
-  (`createThought`, `is-left`); on a computer he is 48px in from the right end of the
-  name's line, the cloud to his right. He is never resized for a name:
-  `fitWave` shrinks a name too wide for its line instead.
+- **Dr. Smiley's movement rules** (his controller, the iPhone entrance freeze,
+  his size per place, the five performances, task states) are in
+  `docs/features/dr-smiley.md`. Read it before touching his face, size or motion.
 - **The Home banner photo is set per mode** (the block "Hello banner photo:
   tuned per mode" at the end of `home-polish.css`). Jose's brief: tree
   prominent, at least half the Hackensack sign readable and never behind
@@ -448,28 +234,6 @@ lost concurrent edits. Do not reintroduce that.
   covering it). Phone: photo 545px wide (`--ph-w`). Computer: 873-1000px
   (`--dk-w`), a mirrored blur past its right edge. Change the band and the
   photo position together; both use the same fractions of the photo width.
-- **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
-  think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
-  getters, so every play varies a little (side, amplitude, beats) with an
-  anticipation, one main gesture and a recovery. Each builds its own Focused
-  version (smaller, no laughter, no effects); Still uses its `still` frame.
-  `drPerfSeed(n)` makes the variant repeatable for tests. Movement is only a
-  tilt and a lift of what holds him: never a sideways slide, never a squash or
-  stretch (the Home greeting's old squish was removed; he now grows in whole
-  and greets with `greet` on the engine). The one wink is his left eye, so a
-  wink always tips toward it. Effects are short and land on the moment
-  (`DR_FX_LIFE`: burst, glint, question).
-- **His personality comes from task states, not timers.** `drTask(kind)`
-  (available, attentive, processing, answering, celebrating, uncertain;
-  offline, appointment and resting follow the phone) is one state for the
-  whole app; each controller runs that state's hold (thinking while Ask works,
-  reading an answer with you) at `DR_P.TASK`, so idle can't interrupt it.
-  React by meaning: `smileyReact(kind)` for team news, `smileyStudy()` for a
-  study result, `askReact()` for an Ask outcome (`askOutcome`: verified only
-  when a source checks out locally, never `fromHub` alone; the card's
-  provenance label is untouched). No mouth movement for silent text: `talk()`
-  is for real audio only. Lively / Focused / Still is `setSmileyMode`
-  (`ih_smileyMode`); the phone's reduced motion always means Still.
 
 ## Design system
 

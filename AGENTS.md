@@ -9,6 +9,11 @@ this file wins.
 do, test, update the plan, open a pull request, stop). New work starts a
 new session that reads the docs, not an old chat. Details: `docs/PLAN.md`.
 
+**Feature notes** (Ask the Hub, Dr. Smiley's memory and movement, Term Review,
+the Daily Drill, 3D Body, the User Guide, Team access, …) are in
+`docs/features/`, one file each. Read the one for what you touch; update it
+in the same commit when the behaviour changes.
+
 ## The one thing that keeps going wrong
 
 **More than one tool writes to this repo, and both push straight to `main`.**
