@@ -34,11 +34,10 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
-1. **AI models.** `claude-sonnet-5` (doctor-research, term-lookup,
-   translate backup) → `claude-sonnet-5-5`; `claude-opus-5` (term-check
-   backup) → `claude-opus-5-5`. One endpoint per PR; compare a few real
-   answers before/after (effort levels were recalibrated). Read the
-   claude-api skill first.
+1. **AI models.** `claude-sonnet-5` (term-lookup, translate backup) →
+   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
+   `claude-opus-5-5`. One endpoint per PR, same recipe as doctor-research
+   (see Facts). Read the claude-api skill first. Next: term-lookup.
 2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
@@ -81,6 +80,9 @@ Don't repeat it in every reply.
 - 2026-10-14 Dead CSS: 163 rules (24 KB) removed from `index.html`;
   computed styles identical before/after on 40 screens and sheets x phone,
   computer, light, dark; all suites pass. #29.
+- 2026-10-14 Doctor Prep on Sonnet 5.5: effort `medium` set explicitly,
+  max_tokens 8000 → 16000, refusals answered plainly, JSON read from the
+  last text block. Smoke-tested with a mocked API. PR (this branch).
 
 ## Facts (so nobody re-checks)
 
@@ -109,5 +111,16 @@ Don't repeat it in every reply.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
+- Sonnet 5.5 recipe (from the claude-api skill's migration guide): same
+  price as Sonnet 5; effort levels recalibrated, so set `output_config.effort`
+  explicitly (`medium` for search-then-write, `low` for chat/extraction);
+  thinking counts toward `max_tokens`; `thinking: {type:"disabled"}` and
+  forced `tool_choice` are 400s; a decline is `stop_reason: "refusal"` (HTTP
+  200, empty content). Server-side fallback only retries cyber/frontier_llm
+  declines, useless for medical text, so it's not used. Opus 5.5: effort
+  default is `medium` (not `high`), thinking can't be turned off.
+- This container has no Anthropic key for the app, so before/after answers
+  are compared by Jose on the live app after merge. Doctor Prep caches
+  answers in `doctor-research-cache`: test with a doctor not looked up before.
 - Weekly code report: Routine "Weekly code cleanup report", Mondays 11:51
   New York, report-only, phone notification.
