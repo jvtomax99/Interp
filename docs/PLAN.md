@@ -34,6 +34,8 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
+R5. **Provider Pictures on the Where picker.** Providers share the places
+   and icons but still type a facility. Same sheet, if Jose wants it.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
@@ -92,10 +94,12 @@ come from this alone.
 - 2026-10-14 Doctor Prep on Sonnet 5.5: effort `medium` set explicitly,
   max_tokens 8000 → 16000, refusals answered plainly, JSON read from the
   last text block. Smoke-tested with a mocked API. #30.
+- 2026-10-14 Places: one "Where" picker on the doctor sheet (search,
+  by region, add a place), shared place icons from the pin artwork in
+  `terminology-meta/places`. `docs/features/places.md`. PR (this branch).
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
-  fix. No rules change, no migration. `docs/features/regions.md`. PR (this
-  branch).
+  fix. No rules change, no migration. `docs/features/regions.md`. #31.
 - 2026-10-14 Term lookup on Sonnet 5.5: effort stays `medium`, refusals
   logged and answered as "nothing found", JSON read from the last text
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).

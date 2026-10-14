@@ -217,7 +217,13 @@
         // Real Firestore REPLACES the document unless {merge:true} is passed.
         // The stub always replaced, which hid the very hazard the oncology
         // migration keeps its flag in a separate document to avoid.
-        map[id] = (opts && opts.merge) ? Object.assign({}, map[id] || {}, next) : next;
+        // And merge is deep: nested maps merge key by key (terminology-meta/places
+        // relies on it), they are not replaced whole.
+        const deep = (base, add) => { const out = Object.assign({}, base);
+          Object.keys(add).forEach(k => { const v = add[k];
+            out[k] = (v && typeof v === 'object' && !Array.isArray(v) && out[k] && typeof out[k] === 'object' && !Array.isArray(out[k])) ? deep(out[k], v) : v; });
+          return out; };
+        map[id] = (opts && opts.merge) ? deep(map[id] || {}, next) : next;
         notify(coll);
       }),
       update: (data) => window.__gate(coll, id, 'update').then(()=>{
