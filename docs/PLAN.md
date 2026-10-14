@@ -34,10 +34,10 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
-1. **AI models.** `claude-sonnet-5` (term-lookup, translate backup) →
+1. **AI models.** `claude-sonnet-5` (translate backup) →
    `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
-   `claude-opus-5-5`. One endpoint per PR, same recipe as doctor-research
-   (see Facts). Read the claude-api skill first. Next: term-lookup.
+   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
+   claude-api skill first. Next: translate backup.
 2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
@@ -82,7 +82,10 @@ Don't repeat it in every reply.
   computer, light, dark; all suites pass. #29.
 - 2026-10-14 Doctor Prep on Sonnet 5.5: effort `medium` set explicitly,
   max_tokens 8000 → 16000, refusals answered plainly, JSON read from the
-  last text block. Smoke-tested with a mocked API. PR (this branch).
+  last text block. Smoke-tested with a mocked API. #30.
+- 2026-10-14 Term lookup on Sonnet 5.5: effort stays `medium`, refusals
+  logged and answered as "nothing found", JSON read from the last text
+  block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
 
@@ -122,5 +125,7 @@ Don't repeat it in every reply.
 - This container has no Anthropic key for the app, so before/after answers
   are compared by Jose on the live app after merge. Doctor Prep caches
   answers in `doctor-research-cache`: test with a doctor not looked up before.
+  Term lookup caches per term for 90 days (`term-link-cache`): test with a
+  term nobody has opened reading for.
 - Weekly code report: Routine "Weekly code cleanup report", Mondays 11:51
   New York, report-only, phone notification.
