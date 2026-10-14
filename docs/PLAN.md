@@ -26,6 +26,12 @@ written here.
 Short follow-ups on the same pull request can stay in the same session.
 Coming back hours later: start a new session, not the old chat.
 
+**Tell Jose when to move to a new chat** (his rule, to save tokens). Say
+"Start a new chat" and give the exact message to paste when: the phase is
+done (PR opened or merged); the chat is getting heavy (many big file
+reads, long test output, several fix rounds on one PR); or the chat has
+been compacted (older parts summarized). Don't wait to be asked.
+
 ## Next (in order)
 
 1. **Dead CSS.** ~125 rules (~14 KB) in `index.html`'s styles target classes
