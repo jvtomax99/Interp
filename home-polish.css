@@ -967,7 +967,16 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-heartline .hl-core{stroke:#FFE1E8;stroke-width:1.2;}
 #content.is-home .home-heartline.is-draw path{animation:homeHeartDraw 4.2s cubic-bezier(.45,0,.35,1) both;}
 @keyframes homeHeartDraw{0%{stroke-dashoffset:100;opacity:1;}55%{stroke-dashoffset:0;opacity:1;}84%{stroke-dashoffset:0;opacity:1;}100%{stroke-dashoffset:0;opacity:0;}}
-#content.is-home .home-greeting-name-row:has(.home-wave-pending) .home-heartline{opacity:0;}
+#content.is-home .home-greeting-name-row:has(.home-wave-pending) .home-heartline,
+#content.is-home .home-greeting-name-row:has(.home-wave-pending) .home-hello-title{opacity:0;}
+/* The title under the name (helloTitle in home-polish.js): Team Chat's
+   ribbon, smaller, centred under the heart line. It catches no taps. */
+#content.is-home .home-hello-title{position:absolute;z-index:2;display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px 3px 8px;border-radius:12px;font-family:var(--sans);font-size:11px;font-weight:650;letter-spacing:0;
+  line-height:1.3;text-align:center;white-space:nowrap;color:#fff;pointer-events:none;transition:opacity .3s var(--ease);
+  background:linear-gradient(120deg,#252E6D,#2E8BD0 70%,#01B8E6);
+  box-shadow:0 5px 14px -6px rgba(4,14,28,.7),0 0 0 1px rgba(255,255,255,.25) inset;}
+#content.is-home .home-hello-title svg{width:10px;height:10px;flex:none;}
 @media (prefers-reduced-motion:reduce){
   #content.is-home .home-heartline path{stroke-dashoffset:0;animation:none;}
 }
