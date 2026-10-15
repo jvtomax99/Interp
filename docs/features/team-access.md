@@ -40,4 +40,9 @@ Dr. Smiley or past the banner's edge; one line when it fits, else two even
 lines (`helloTitle` in `home-polish.js`, placed by `heartline.place`; who has
 one: `window.myHubTitle` in `index.html`, which counts this phone's own owner
 code or its line in `hub-admins`, never a name match against that list).
+*Developer* (Jose, 2026-10-15): Jose's title, over Administrator. By name,
+"Jose V…"/"José V…" with any last name from V (plain "Jose" doesn't count),
+and by phone: the Hub owner's phone (`hub-access/owner.uid`, read into
+`ACCESS.ownerUid`, through `hubOwnerUid()` because `ACCESS` is declared later
+in the script). Names are compared without accents (`titleKey`).
 
