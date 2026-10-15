@@ -36,3 +36,8 @@ a change from any tool gets a green check or a red X on its commit.
 
 `ROOT=/other/checkout node run.cjs` tests another copy of the app;
 `INDEX=/path/to/index.html` serves a different `index.html` (before/after).
+
+## Tools (run by hand, not part of `run.cjs`)
+
+- `tools/perf.cjs`: smoothness numbers (idle busy %, tap waits, startup, layout shift, animations that aren't transform/opacity) at iPhone size with the CPU slowed 4x. The S-phases in `docs/PLAN.md` are judged by it.
+- `tools/doctor-replay.cjs`: replays a `doctors.json` export through the doctor page and reports anything lost.
