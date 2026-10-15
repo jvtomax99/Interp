@@ -16229,9 +16229,9 @@ const GUIDE_TOPICS = [
     <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
     <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
 
-  { id:'chattitles', section:'team', k:'admin administrator supervisor title tag badge name leader owner liz lind fabiola language services who runs chat ribbon star', q:'What are the Administrator and Supervisor tags in Chat?', a:`
+  { id:'chattitles', section:'team', k:'admin administrator developer supervisor title tag badge name leader owner liz lind fabiola jose language services who runs chat ribbon star', q:'What are the Administrator and Supervisor tags in Chat?', a:`
     <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>
-    <p><b>Administrator</b> (a small outlined tag) is Fabiola, and anyone who joined the Hub with the <b>owner code</b>. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
+    <p><b>Administrator</b> (a small outlined tag) is Fabiola, and anyone who joined the Hub with the <b>owner code</b>. <b>Developer</b> is Jose Vazquez, who builds the app. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
     <p>In Chat, titles show above other people’s messages, not your own. Your own title shows on <b>Home</b>, in a ribbon under the heart line beneath your name.</p>` },
 
   { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`
@@ -20205,8 +20205,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1015.1612';
-const BUILD_TIME = '2026-10-15 16:12 UTC';
+const BUILD_ID = 'b1015.1658';
+const BUILD_TIME = '2026-10-15 16:58 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21925,15 +21925,28 @@ function tcPhotoTap(btn, mid, index, ev){
 const NAME_TITLES = [
   { names: ['liz lind', 'elizabeth lind', 'liz lind-smith', 'elizabeth lind-smith'],
     title: 'Supervisor of Language Services', kind: 'supervisor' },
-  { first: 'fabiola', title: 'Administrator', kind: 'admin' }
+  { first: 'fabiola', title: 'Administrator', kind: 'admin' },
+  // Jose (2026-10-15): "Developer" for him, owner or not. "Jose V…" / "José
+  // V…" with any last name from V; plain "Jose" doesn't count (another Jose
+  // could join). His Hub-owner phone also gets it whatever its name says.
+  { test: key => /^jose v/.test(key), title: 'Developer', kind: 'admin' }
 ];
+const DEVELOPER_TITLE = NAME_TITLES[NAME_TITLES.length - 1];
+// The Hub owner's phone (hub-access/owner). ACCESS is declared further down
+// this script; a title asked for before that line has run reads nothing.
+function hubOwnerUid(){ try{ return ACCESS.ownerUid || ''; }catch(e){ return ''; } }
+function nameTitle(key){
+  return key ? NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first) || (t.test && t.test(key))) || null : null;
+}
 const HUB_ADMINS = { uids: new Set(), names: new Set(), started: false };
 const ICON_TITLE_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
-function titleKey(name){ return String(name || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+// Capitals, extra spaces and accents ignored ("José" = "jose").
+function titleKey(name){ return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/\s+/g, ' '); }
 function chatTitleFor(m){
   const key = titleKey(m && m.author);
-  const named = NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first));
+  const named = nameTitle(key);
   if(named) return named;
+  if(m && m.uid && m.uid === hubOwnerUid()) return DEVELOPER_TITLE;
   const admin = m && m.uid ? HUB_ADMINS.uids.has(m.uid) : !!key && HUB_ADMINS.names.has(key);
   return admin ? { title: 'Administrator', kind: 'admin' } : null;
 }
@@ -21964,9 +21977,9 @@ function startHubAdmins(){
 // own owner code (or its line in that list) does.
 window.myHubTitle = function(){
   const user = hubAuth && hubAuth.currentUser;
-  const key = titleKey(whoAmI());
-  const named = key && NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first));
+  const named = nameTitle(titleKey(whoAmI()));
   if(named) return named;
+  if(user && user.uid === hubOwnerUid()) return DEVELOPER_TITLE;
   return isHubOwner() || (user && HUB_ADMINS.uids.has(user.uid)) ? { title: 'Administrator', kind: 'admin' } : null;
 };
 // An owner phone keeps its own line current: on launch and when its name
@@ -24055,6 +24068,9 @@ async function loadAccessState(){
     const owner = ownerSnap.exists ? (ownerSnap.data() || {}) : null;
     ACCESS.ownerUid = owner ? owner.uid || '' : '';
     ACCESS.ownerName = owner ? owner.name || '' : '';
+    // The Hub owner's phone carries "Developer" (chatTitleFor): redraw titles.
+    document.dispatchEvent(new Event('ih:titles'));
+    if(activeCategory === 'chat') renderChatMessages();
     try{ localStorage.setItem(ACCESS_OWNER_KEY, ACCESS.ownerName); }catch(e){}
     setAccessState(!owner ? 'none' : (setSnap.exists && setSnap.data().practice === false ? 'locked' : 'practice'));
   }catch(err){
