@@ -164,7 +164,28 @@ service cloud.firestore {
     match /doctor-research-cache/{docId} { allow read, write: if team(); }
 
     // ---- Team ----
-    match /team-chat/{docId}      { allow read, write: if team(); }
+    // A message may carry the phone that sent it (`uid`), which is what an
+    // Admin title under the name follows; if it does, it must be this phone,
+    // and an edit can't change it.
+    match /team-chat/{docId} {
+      allow read, delete: if team();
+      allow create: if team() && ownSender(request.resource.data);
+      allow update: if team() && request.resource.data.get('uid', null) == resource.data.get('uid', null);
+    }
+    function ownSender(d) {
+      return !('uid' in d) || (signedIn() && d.uid == request.auth.uid);
+    }
+    // Admin titles in Team Chat: one line per phone that joined with the
+    // owner code, holding the name it goes by. Only that phone writes it;
+    // the owner can remove any.
+    match /hub-admins/{uid} {
+      allow read: if team();
+      allow create, update: if signedIn() && request.auth.uid == uid && isOwner()
+        && request.resource.data.keys().hasOnly(['name', 'at'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60;
+      allow delete: if signedIn() && (request.auth.uid == uid || isOwner());
+    }
     // Ephemeral "someone is typing" markers, written constantly while a
     // message is being composed.
     match /chat-typing/{docId}    { allow read, write: if team(); }
