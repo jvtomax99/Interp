@@ -67,8 +67,40 @@ async function targets(page) {
   });
 }
 
+// TEMP diag (S1b webkit crash): crashes per petal variant, computer layout.
+async function webkitDiag(browser) {
+  const fs = require('fs'), path = require('path'), L = require('../support/harness.cjs');
+  const OLD = { js: fs.readFileSync(path.join(__dirname, '../support/_old-home-polish.js'), 'utf8'), css: fs.readFileSync(path.join(__dirname, '../support/_old-home-polish.css'), 'utf8') };
+  const tally = {};
+  for (let i = 0; i < 6; i++) for (const v of ['worker', 'pagepath', 'oldcss']) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, serviceWorkers: 'block' });
+    const page = await ctx.newPage(); let crashed = false; page.on('crash', () => { crashed = true; });
+    await L.route(page, {});
+    if (v === 'oldcss') {
+      await page.route(/home-polish\.js/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: OLD.js }));
+      await page.route(/home-polish\.css/, r => r.fulfill({ status: 200, contentType: 'text/css', body: OLD.css }));
+    }
+    await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' }; try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); } catch (e) {} if (o.v === 'pagepath') delete window.OffscreenCanvas; }, { seed: L.SEED, v });
+    let err = '';
+    try {
+      await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(4200);
+      await page.evaluate(() => { window.scrollTo(0, 0); setCategory('doctor-directory'); });
+      await page.waitForTimeout(900);
+      await page.evaluate(() => { window.scrollTo(0, 0); setCategory('home'); });
+      await page.waitForTimeout(1500);
+    } catch (e) { err = String(e.message).split('\n')[0].slice(0, 60); }
+    tally[v] = tally[v] || { runs: 0, crashed: 0, errors: 0 };
+    tally[v].runs++; if (crashed) tally[v].crashed++; else if (err) tally[v].errors++;
+    if (crashed || err) console.log('DIAG', i, v, crashed ? 'CRASH' : '', err);
+    await ctx.close().catch(() => {});
+  }
+  console.log('DIAG tally', JSON.stringify(tally));
+}
+
 (async () => {
   const browser = await chromium.launch();
+  if (process.env.BROWSER === 'webkit' || process.env.DIAG) { await webkitDiag(browser); await browser.close(); process.exit(1); }
   try {
     for (const device of ['iphone', 'desktop']) {
       console.log('== ' + device);
