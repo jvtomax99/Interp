@@ -592,7 +592,9 @@
      lanyard sits around a neck; only the clip is drawn above, with the badge.
      Coordinates are the smiley button's (64px; the neck pivot is 32,56; the
      clip sits 15px below it). Runs only while Home's greeting is on screen;
-     under Reduce Motion it hangs still. */
+     under Reduce Motion it hangs still. The breeze blows for a few seconds
+     after he lands (or is petted, swing()), then dies down; once the badge
+     hangs still the loop ends (S1 in docs/PLAN.md: Home rests). */
   const askBadge=(()=>{
     const f=n=>(Math.round(n*100)/100);
     // A and B are behind his head, either side of the neck; the face hides
@@ -603,6 +605,7 @@
     const SV=112/60,sx=x=>f((x-2)*SV+4),sy=y=>f((y-2)*SV+4);
     const K=42,C=3.2,G=.5;           // spring stiffness, friction, how much it hangs down when he tilts
     const REST_LIMIT=8;              // swing limit in everyday motion: keeps the badge's corner clear of the quote
+    const BREEZE_S=3,BREEZE_FADE=.8;   // seconds of breeze after he lands or is petted, then how fast it dies
     let btn=null,pin=null,tag=null,cords=[],clip=null,raf=0,last=0,theta=0,omega=0,t0=0,released=-1e9;
     // Off screen (scrolled down Home) nobody sees it swing, so it stops.
     let onScreen=true;
@@ -641,10 +644,13 @@
       raf=0;
       if(!btn||!btn.isConnected||!pin||!pin.isConnected){btn=null;return;}
       const dt=last?Math.min(.033,Math.max(0,(now-last)/1000)):0;last=now;
-      const t=(now-t0)/1000;
-      const breeze=2.2*Math.sin(t*1.745)+.8*Math.sin(t*3.3+1);
-      const target=breeze-G*tilt();
+      const t=(now-t0)/1000,calm=(now-Math.max(t0,released))/1000-BREEZE_S;
+      const gust=calm<=0?1:Math.exp(-calm/BREEZE_FADE);
+      const breeze=gust*(2.2*Math.sin(t*1.745)+.8*Math.sin(t*3.3+1));
+      const lean=tilt(),target=breeze-G*lean;
       omega+=(-K*(theta-target)-C*omega)*dt;theta+=omega*dt;
+      // Hanging still: the breeze is gone, he isn't leaning, the badge has stopped.
+      if(gust<.005&&!lean&&Math.abs(theta)<.02&&Math.abs(omega)<.05){theta=0;omega=0;deg=0;draw();return;}
       deg=shown(now);draw();
       if(!document.hidden&&onScreen)raf=requestAnimationFrame(frame);
     }
@@ -673,13 +679,14 @@
 
   /* Dr. Smiley's halo: the real Hackensack mark turning slowly behind his
      head (styled in home-polish.css), cut into its sixteen squares so any one
-     of them can light up. Every 2-4 s one square he isn't covering glows
-     once. Only while the greeting is on screen; never under Reduce Motion. */
+     of them can light up. 2-4 s after Home appears one square he isn't
+     covering glows, once; then it rests (S1 in docs/PLAN.md). Only while the
+     greeting is on screen; never under Reduce Motion. */
   const askHalo=(()=>{
     // Each square's box in hmh-mark.png (314 x 261; the art is 260 x 261).
     const SQ=[[60,0,113,53],[152,9,193,44],[109,45,151,78],[54,55,107,108],[152,55,205,108],[207,61,259,113],[9,67,43,109],[44,109,78,151],
       [182,109,216,151],[0,147,52,200],[217,152,251,194],[54,153,107,206],[152,153,205,206],[109,182,151,216],[147,207,199,261],[66,217,108,251]];
-    let ring=null,timer=0,uid=0;
+    let ring=null,timer=0,uid=0,glowed=false;
     function svg(){
       const id='hq'+(++uid)+'-';let defs='',g='';
       SQ.forEach((q,i)=>{
@@ -701,7 +708,7 @@
       });
       const q=seen[Math.floor(Math.random()*seen.length)];
       if(!q)return;
-      q.classList.remove('is-glow');void q.getBBox();q.classList.add('is-glow');
+      q.classList.remove('is-glow');void q.getBBox();q.classList.add('is-glow');glowed=true;
       setTimeout(()=>q.classList.remove('is-glow'),1550);
     }
     function tick(){
@@ -712,19 +719,20 @@
     }
     function schedule(){
       clearTimeout(timer);timer=0;
-      if(ring&&!reduced.matches&&!document.hidden)timer=setTimeout(tick,2000+Math.random()*2000);
+      if(ring&&!glowed&&!reduced.matches&&!document.hidden)timer=setTimeout(tick,2000+Math.random()*2000);
     }
     document.addEventListener('visibilitychange',schedule);
     reduced.addEventListener('change',schedule);
-    return {attach(el){ring=el;el.innerHTML=svg();schedule();}};
+    return {attach(el){ring=el;glowed=false;el.innerHTML=svg();schedule();}};
   })();
 
   /* Heartline Signature (picked by Jose: idea 5 of the heartbeat set). A
      pink heart-monitor line under the greeting's name (Jose moved it there
      from above Dr. Smiley) draws itself -- a beat, a loop into a heart,
-     another beat -- holds, fades, and comes back every few seconds. It waits
-     for the hello to finish and for the name to be written, and steps aside
-     while his thought cloud is up.
+     another beat -- once, and stays (S1 in docs/PLAN.md: Home rests; it used
+     to fade and come back every few seconds). It waits for the hello to
+     finish and for the name to be written, and steps aside while his thought
+     cloud is up.
      Under Reduce Motion it is simply there, drawn and still. The drawing
      itself is in home-polish.css (.home-heartline). */
   const heartline=(()=>{
@@ -735,19 +743,19 @@
     // start a second piece drawing at the same time as the first.
     const TOP='C44 -10 58 -12 60 -2 C62 -12 76 -10 76 2';
     const D=`M-14 2 H6 ${BEAT} H44 ${TOP} C76 12 64 18 60 24 C56 18 44 12 44 2 ${TOP} H84 ${BEAT} H134`;
-    let el=null,btn=null,timer=0;
+    let el=null,btn=null,timer=0,drawn=false;
     const busy=()=>!hasWavedHello||!!activeSequence||btn.classList.contains('home-wave-pending')||!!el.parentElement.querySelector('.home-name-pen')
       ||[...document.querySelectorAll('.home-wave-thought')].some(t=>+getComputedStyle(t).opacity>.02);
     function tick(){
       timer=0;
       if(!el||!el.isConnected){el=null;return;}
-      if(busy())el.classList.remove('is-draw');
-      else if(el.offsetParent||el.getBoundingClientRect().width){el.classList.remove('is-draw');void el.getBoundingClientRect();el.classList.add('is-draw');}
-      schedule();
+      if(busy())el.classList.remove('is-draw','is-drawn');
+      else if(el.offsetParent||el.getBoundingClientRect().width){el.classList.remove('is-draw','is-drawn');void el.getBoundingClientRect();el.classList.add('is-draw');drawn=true;return;}
+      schedule(1500);
     }
     function schedule(wait){
       clearTimeout(timer);timer=0;
-      if(el&&!reduced.matches&&!document.hidden)timer=setTimeout(tick,wait||5200+Math.random()*1300);
+      if(el&&!drawn&&!reduced.matches&&!document.hidden)timer=setTimeout(tick,wait||1500);
     }
     document.addEventListener('visibilitychange',()=>schedule(1500));
     reduced.addEventListener('change',()=>schedule(1500));
@@ -769,11 +777,12 @@
         el.setAttribute('class','home-heartline');el.setAttribute('viewBox','-16 -16 152 43');
         el.setAttribute('aria-hidden','true');el.setAttribute('focusable','false');
         el.innerHTML=`<path class="hl-glow" pathLength="100" d="${D}"/><path class="hl-core" pathLength="100" d="${D}"/>`;
-        btn=button;button.parentElement.appendChild(el);place();schedule(1500);
+        const line=el;line.addEventListener('animationend',e=>{if(e.target.classList.contains('hl-core')&&line.classList.contains('is-draw')){line.classList.remove('is-draw');line.classList.add('is-drawn');}});
+        btn=button;drawn=false;button.parentElement.appendChild(el);place();schedule(1500);
       },
       place,
       // The hello is starting again: clear the line now rather than at the next beat.
-      hide(){if(el)el.classList.remove('is-draw');schedule(1500);}
+      hide(){if(el)el.classList.remove('is-draw','is-drawn');drawn=false;schedule(1500);}
     };
   })();
 
@@ -1249,14 +1258,56 @@
     document.body.appendChild(wrap.firstChild);
   }
 
-  function buildPetals(hero){
+  /* A shower on arrival, then rest (S1 in docs/PLAN.md). Each petal falls
+     once: SHOWER_END[0]-[1] s after arrival it has left, so Home is still
+     ~8 s in. Most start part-way down (a negative delay), so the sky is
+     already full when Home appears and drains from there. Endless petals
+     kept Chrome redrawing every frame: idle Home was 95% busy. */
+  const SHOWER_END = [2.6, 8];
+  function petalHtml(rand, i, count, o){
+    const range = (a, b) => a + rand() * (b - a);
+    const size = range(o.size[0], o.size[1]);
+    const dur = range(o.dur[0], o.dur[1]);
+    // Ends spread evenly through the shower, shuffled by the seed.
+    const end = SHOWER_END[0] + ((i * 7 + 3) % count + rand()) / count * (SHOWER_END[1] - SHOWER_END[0]);
+    // Every draw is taken even for a petal that has already fallen, so a
+    // rebuild mid-shower puts the others exactly where they were.
+    const left = ((i + rand()) / count) * 104 - 4, op = range(o.op[0], o.op[1]);
+    const sway = range(-o.sway, o.sway), r0 = range(0, 360), rest = range(o.rest[0], o.rest[1]);
+    const delay = end - dur - (o.played || 0);
+    if(delay + dur <= 0) return '';
+    return '<div class="home-petal ' + (o.cls || '') + '" style="' +
+      // Spread evenly across the width (with jitter) so they don't bunch
+      // up behind the glass card.
+      'left:' + left.toFixed(1) + '%;' +
+      'width:' + size.toFixed(1) + 'px;height:' + (size * 1.2).toFixed(1) + 'px;' +
+      '--fill:' + o.fill + ';' +
+      '--o:' + op.toFixed(2) + ';' +
+      '--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;' +
+      '--sway:' + sway.toFixed(0) + 'px;' +
+      '--r0:' + r0.toFixed(0) + 'deg;' +
+      (o.fall ? '--fall:' + o.fall + 'px;' : '') +
+      '--rest:' + rest.toFixed(0) + '%' +
+      '"><svg><use href="#hpSakura"/></svg></div>';
+  }
+  // The layer goes once its last petal has fallen (or at once if none is left).
+  function dropWhenFallen(layer){
+    let left = layer.children.length;
+    if(!left){ layer.remove(); return; }
+    if(reduced.matches) return;           // resting petals: nothing ends
+    layer.addEventListener('animationend', e => {
+      if(e.target.parentNode === layer && --left <= 0) layer.remove();
+    });
+  }
+
+  function buildPetals(hero, played){
     const layer = document.createElement('div');
     layer.className = 'home-petals';
     layer.setAttribute('aria-hidden', 'true');
     const rand = seeded(1917);
     const wide = hero.clientWidth > 560;
     const desktopSpeed = window.innerWidth >= 901 ? .8 : 1;
-    const count = wide ? 28 : 20;
+    const count = wide ? 12 : 8;
     const palette = ['url(#hpBlue)', 'url(#hpBlue)', 'url(#hpLav)', 'url(#hpPink)'];
     // [share, size px, opacity, fall seconds, class]
     const tiers = [
@@ -1264,68 +1315,65 @@
       [.45, [13, 19], [.72, .9],  [10, 14], ''],
       [.15, [24, 32], [.34, .46], [8, 11],  'is-near']
     ];
-    const range = (a, b) => a + rand() * (b - a);
-    // Continue the flow from wherever it was: re-rendering Home must not
-    // restart every petal at the top.
-    const elapsed = (performance.now() / 1000);
     layer.style.setProperty('--fall', Math.round(hero.clientHeight * 1.05) + 'px');
     let html = '';
     for(let i = 0; i < count; i++){
       const roll = rand();
       const t = roll < tiers[0][0] ? tiers[0] : (roll < tiers[0][0] + tiers[1][0] ? tiers[1] : tiers[2]);
-      const size = range(t[1][0], t[1][1]);
-      const dur = range(t[3][0], t[3][1]) * desktopSpeed;
-      const delay = -((range(0, 20) + elapsed) % dur);
-      html += '<div class="home-petal ' + t[4] + '" style="' +
-        // Spread evenly across the width (with jitter) so they don't bunch
-        // up behind the glass card.
-        'left:' + (((i + rand()) / count) * 104 - 4).toFixed(1) + '%;' +
-        'width:' + size.toFixed(1) + 'px;height:' + (size * 1.2).toFixed(1) + 'px;' +
-        '--fill:' + palette[i % palette.length] + ';' +
-        '--o:' + range(t[2][0], t[2][1]).toFixed(2) + ';' +
-        '--dur:' + dur.toFixed(2) + 's;--delay:' + delay.toFixed(2) + 's;' +
-        '--flip:' + (range(1.8, 3.4) * desktopSpeed).toFixed(2) + 's;' +
-        '--sway:' + range(-60, 60).toFixed(0) + 'px;' +
-        '--r0:' + range(0, 360).toFixed(0) + 'deg;' +
-        '--rest:' + range(20, 70).toFixed(0) + '%' +
-        '"><svg><use href="#hpSakura"/></svg></div>';
+      html += petalHtml(rand, i, count, { size: t[1], op: t[2], dur: [t[3][0] * desktopSpeed, t[3][1] * desktopSpeed],
+        cls: t[4], fill: palette[i % palette.length], sway: 60, rest: [20, 70], played });
     }
     layer.innerHTML = html;
     return layer;
   }
 
   function initHeroDecor(content){
-    // index.html keeps the same greeting across repaints of Home; its petals
-    // are already falling, so leave them be.
-    const kept = content && content.querySelector('.home-greeting');
-    if(kept && kept.dataset.decorReady && kept.querySelector('.home-petals')) return;
-    decorObservers.forEach(o => o.disconnect());
-    decorObservers = [];
     const hero = content && content.querySelector('.home-greeting');
     if(!hero) return;
+    // index.html keeps the same greeting across repaints of Home, but puts
+    // it back into the new markup, and a CSS animation put back starts over:
+    // the shower would fall again on every repaint. Rebuild what's left of
+    // it from the clock instead (nothing, once it's over).
+    if(hero.dataset.decorReady){
+      const old = hero.querySelector('.home-petals');
+      if(!old) return;
+      const petals = buildPetals(hero, (performance.now() - +hero.dataset.decorReady) / 1000);
+      petals.className = old.className;
+      petals.style.animation = 'none';    // no second fade-in
+      old.replaceWith(petals);
+      dropWhenFallen(petals);
+      return;
+    }
+    decorObservers.forEach(o => o.disconnect());
+    decorObservers = [];
     // .home-arc-marks is still swept up here on purpose: an installed PWA can
     // resume on a cached page that still has the old layer in the DOM.
     hero.querySelectorAll('.home-petals, .home-arc-marks').forEach(n => n.remove());
     ensurePetalDefs();
 
-    const petals = buildPetals(hero);
-    hero.dataset.decorReady = '1';
+    const petals = buildPetals(hero, 0);
+    hero.dataset.decorReady = String(performance.now());
     const scrim = hero.querySelector('.home-greeting-scrim');
     hero.insertBefore(petals, scrim ? scrim.nextSibling : hero.firstChild);
+    dropWhenFallen(petals);
+    if(!petals.isConnected) return;
+    const layer = () => hero.querySelector('.home-petals');
 
     if(typeof ResizeObserver !== 'undefined'){
       let lastH = hero.clientHeight;
       const ro = new ResizeObserver(() => {
         if(hero.clientHeight === lastH) return;
         lastH = hero.clientHeight;
-        petals.style.setProperty('--fall', Math.round(lastH * 1.05) + 'px');
+        const l = layer();
+        if(l) l.style.setProperty('--fall', Math.round(lastH * 1.05) + 'px');
       });
       ro.observe(hero);
       decorObservers.push(ro);
     }
     if(typeof IntersectionObserver !== 'undefined'){
       const io = new IntersectionObserver(entries => {
-        entries.forEach(e => petals.classList.toggle('is-offscreen', !e.isIntersecting));
+        const l = layer();
+        if(l) entries.forEach(e => l.classList.toggle('is-offscreen', !e.isIntersecting));
       });
       io.observe(hero);
       decorObservers.push(io);
@@ -1479,7 +1527,7 @@
     if(widgetWatch){ widgetWatch.disconnect(); widgetWatch = null; }
     const host = document.getElementById('content');
     const sec = host && host.querySelector('.sm-widgets');
-    watchCardPetals(sec);
+    watchCardPetals(sec, !host.classList.contains('no-enter'));
     if(!sec || host.classList.contains('no-enter') || typeof IntersectionObserver === 'undefined') return;
     sec.classList.add('is-waiting');
     const io = widgetWatch = new IntersectionObserver(entries => {
@@ -1493,44 +1541,39 @@
 
   /* ---- Sakura on Dr. Smiley's card -----------------------------------
      The banner's petals (same #hpSakura shape, same pink/blue/lavender
-     fills, same fall and flutter keyframes) drifting behind the words on
-     his rank card. index.html redraws the card whenever team points
-     arrive, so a watcher puts the petals back on each new card; their
-     delays come from the clock, so a redraw carries on mid-fall instead of
-     restarting them all at the top. Styles in home-polish.css. */
+     fills, same fall) drifting behind the words on his rank card: one
+     shower when you arrive on Home, like the banner's, then rest.
+     index.html redraws the card whenever team points arrive, so a watcher
+     puts the petals back on each new card, carried on from where the shower
+     had got to (only the time the card was on screen counts: it waits while
+     scrolled away). Styles in home-polish.css. */
   let cardPetalWatch = [];
+  const cardShower = { played: 0, since: 0 };
+  const cardPlayed = () => (cardShower.played + (cardShower.since ? performance.now() - cardShower.since : 0)) / 1000;
   function addCardPetals(card){
     if(!card || !card.classList.contains('smw-dark') || card.querySelector('.smw-petals')) return;
+    const played = cardPlayed();
+    if(played > SHOWER_END[1]) return;
     ensurePetalDefs();
     const rand = seeded(250);
-    const count = 8, fall = Math.round((card.clientHeight || 130) * 1.15);
+    const count = 4, fall = Math.round((card.clientHeight || 130) * 1.15);
     const palette = ['url(#hpPink)', 'url(#hpBlue)', 'url(#hpLav)', 'url(#hpPink)'];
-    const range = (a, b) => a + rand() * (b - a);
-    const elapsed = performance.now() / 1000;
     let html = '';
-    for(let i = 0; i < count; i++){
-      const size = range(9, 16), dur = range(6, 9.5);
-      html += '<div class="home-petal" style="' +
-        'left:' + (((i + rand()) / count) * 104 - 4).toFixed(1) + '%;' +
-        'width:' + size.toFixed(1) + 'px;height:' + (size * 1.2).toFixed(1) + 'px;' +
-        '--fill:' + palette[i % palette.length] + ';' +
-        '--o:' + range(.7, .95).toFixed(2) + ';' +
-        '--dur:' + dur.toFixed(2) + 's;--delay:' + (-((range(0, 20) + elapsed) % dur)).toFixed(2) + 's;' +
-        '--flip:' + range(1.8, 3.4).toFixed(2) + 's;' +
-        '--sway:' + range(-30, 30).toFixed(0) + 'px;' +
-        '--r0:' + range(0, 360).toFixed(0) + 'deg;' +
-        '--fall:' + fall + 'px;--rest:' + range(15, 85).toFixed(0) + '%' +
-        '"><svg><use href="#hpSakura"/></svg></div>';
-    }
+    for(let i = 0; i < count; i++)
+      html += petalHtml(rand, i, count, { size: [9, 16], op: [.7, .95], dur: [6, 9.5], played,
+        fill: palette[i % palette.length], sway: 30, fall, rest: [15, 85] });
     const layer = document.createElement('div');
     layer.className = 'smw-petals';
     layer.setAttribute('aria-hidden', 'true');
     layer.innerHTML = html;
     card.prepend(layer);
+    dropWhenFallen(layer);
   }
-  function watchCardPetals(sec){
+  function watchCardPetals(sec, arrived){
     cardPetalWatch.forEach(o => o.disconnect());
     cardPetalWatch = [];
+    if(cardShower.since){ cardShower.played += performance.now() - cardShower.since; cardShower.since = 0; }
+    if(arrived) cardShower.played = 0;
     if(!sec) return;
     addCardPetals(sec.querySelector('#smileyCareer'));
     if(typeof MutationObserver !== 'undefined'){
@@ -1541,7 +1584,11 @@
     // Battery: still while the card is scrolled away, like the banner's.
     if(typeof IntersectionObserver !== 'undefined'){
       const io = new IntersectionObserver(entries => {
-        entries.forEach(e => sec.classList.toggle('is-offscreen', !e.isIntersecting));
+        entries.forEach(e => {
+          sec.classList.toggle('is-offscreen', !e.isIntersecting);
+          if(e.isIntersecting && !cardShower.since) cardShower.since = performance.now();
+          else if(!e.isIntersecting && cardShower.since){ cardShower.played += performance.now() - cardShower.since; cardShower.since = 0; }
+        });
       });
       io.observe(sec);
       cardPetalWatch.push(io);
@@ -1553,6 +1600,6 @@
     initHomeGreeting(content);
     initHomeRails(content);
     // Home may have painted before this file loaded, missing ih:home-paint.
-    watchCardPetals(content.querySelector('.sm-widgets'));
+    watchCardPetals(content.querySelector('.sm-widgets'), true);
   }
 })();
