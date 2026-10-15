@@ -12628,7 +12628,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Admin and Supervisor tags under the team’s leaders in Chat' },
+  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor tags under the team’s leaders in Chat' },
   { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
   { id:'places',      tone:'gd-n2', pin:'pins/medifind.webp',            eyebrow:'Doctor Directory',      title:'Pick where a doctor works in one tap, with icons the whole team sees' },
 ];
@@ -16229,10 +16229,10 @@ const GUIDE_TOPICS = [
     <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
     <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
 
-  { id:'chattitles', section:'team', k:'admin supervisor title tag badge name leader owner liz lind language services who runs chat ribbon star', q:'What are the Admin and Supervisor tags in Chat?', a:`
+  { id:'chattitles', section:'team', k:'admin administrator supervisor title tag badge name leader owner liz lind fabiola language services who runs chat ribbon star', q:'What are the Administrator and Supervisor tags in Chat?', a:`
     <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>
-    <p><b>Admin</b> (a small outlined tag) is anyone who joined the Hub with the <b>owner code</b>. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
-    <p>Titles show above other people’s messages, not your own. You can’t give yourself one by changing your name: an Admin title follows the phone that joined with the owner code.</p>` },
+    <p><b>Administrator</b> (a small outlined tag) is Fabiola, and anyone who joined the Hub with the <b>owner code</b>. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
+    <p>Titles show above other people’s messages, not your own.</p>` },
 
   { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`
     <ol>
@@ -20205,8 +20205,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1015.1325';
-const BUILD_TIME = '2026-10-15 13:25 UTC';
+const BUILD_ID = 'b1015.1527';
+const BUILD_TIME = '2026-10-15 15:27 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21918,21 +21918,24 @@ function tcPhotoTap(btn, mid, index, ev){
    carries the sender's phone (`uid`, held to that phone by the rules), so
    the title follows the phone, not a typed name; older messages without
    one are matched by name.
-   Supervisor of Language Services: given by name (Jose, 2026-10-15), any
-   of the spellings below, capitals and spaces ignored. Wins over Admin. */
+   Titles given by name (Jose, 2026-10-15), capitals and spaces ignored;
+   they win over the owner-code title. `names`: these full names only.
+   `first`: anyone whose first name is this, with or without a last name.
+   The tag reads "Administrator" (the owner-code one too). */
 const NAME_TITLES = [
   { names: ['liz lind', 'elizabeth lind', 'liz lind-smith', 'elizabeth lind-smith'],
-    title: 'Supervisor of Language Services', kind: 'supervisor' }
+    title: 'Supervisor of Language Services', kind: 'supervisor' },
+  { first: 'fabiola', title: 'Administrator', kind: 'admin' }
 ];
 const HUB_ADMINS = { uids: new Set(), names: new Set(), started: false };
 const ICON_TITLE_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
 function titleKey(name){ return String(name || '').trim().toLowerCase().replace(/\s+/g, ' '); }
 function chatTitleFor(m){
   const key = titleKey(m && m.author);
-  const named = NAME_TITLES.find(t => t.names.includes(key));
+  const named = NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first));
   if(named) return named;
   const admin = m && m.uid ? HUB_ADMINS.uids.has(m.uid) : !!key && HUB_ADMINS.names.has(key);
-  return admin ? { title: 'Admin', kind: 'admin' } : null;
+  return admin ? { title: 'Administrator', kind: 'admin' } : null;
 }
 function chatTitleHtml(m){
   const t = chatTitleFor(m);

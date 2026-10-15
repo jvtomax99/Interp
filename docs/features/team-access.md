@@ -25,9 +25,12 @@ only when the name differs from `ih_adminName`). Everyone listens to that
 collection (`startHubAdmins`). New messages carry `uid` (the sending phone);
 the rules hold it to that phone and stop an edit changing it, so the title
 follows the phone, not a typed name. Older messages without `uid` are matched
-by name. *Supervisor of Language Services*: by name, `NAME_TITLES` (Liz Lind,
-Elizabeth Lind, Liz Lind-Smith, Elizabeth Lind-Smith; case and spaces
-ignored), so anyone typing that name gets it; it wins over Admin. Rules
+by name. The owner-code tag reads *Administrator*. Titles by name,
+`NAME_TITLES` (case and spaces ignored; anyone typing the name gets it; they
+win over the owner-code one): *Supervisor of Language Services* for Liz Lind,
+Elizabeth Lind, Liz Lind-Smith, Elizabeth Lind-Smith; *Administrator* for
+anyone whose first name is Fabiola, with or without a last name (Jose,
+2026-10-15). Rules
 tested in the emulator (38 cases: owner/member/stranger, locked and practice).
 Without the published rules the collection is refused and there are simply
 no Admin tags.

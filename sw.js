@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v219-chat-titles';
+const CACHE_VERSION = 'interpreter-hub-v220-administrator';
 const PRECACHE = [
   './',
   './index.html',
