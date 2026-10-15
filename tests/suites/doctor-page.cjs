@@ -78,16 +78,22 @@ async function webkitDiag(browser) {
   };
   const W = `self.onmessage = e => { const c = e.data.c; const x = c.getContext('2d'); let n = 0; const later = self.requestAnimationFrame ? f => self.requestAnimationFrame(f) : f => setTimeout(f, 16);
     const go = () => { x.clearRect(0, 0, c.width, c.height); x.fillStyle = 'red'; x.fillRect(n % 50, 10, 20, 20); if (e.data.bmp) x.drawImage(e.data.bmp, 0, 0); n++; if (n < 120) later(go); else self.postMessage({ n, raf: !!self.requestAnimationFrame }); }; go(); };`;
-  await step('features', p => p.evaluate(() => ({ off: typeof OffscreenCanvas, xfer: !!HTMLCanvasElement.prototype.transferControlToOffscreen, cib: typeof createImageBitmap })));
-  await step('worker offscreen 2d loop', p => p.evaluate(W => new Promise(r => { const c = document.createElement('canvas'); c.width = 300; c.height = 300; document.body.appendChild(c); const o = c.transferControlToOffscreen(); const w = new Worker(URL.createObjectURL(new Blob([W], { type: 'text/javascript' }))); w.onmessage = e => r(e.data); w.onerror = e => r('worker error ' + e.message); w.postMessage({ c: o }, [o]); setTimeout(() => r('timeout'), 5000); }), W));
-  await step('svg sheet -> canvas -> bitmap', p => p.evaluate(() => new Promise(r => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 1400; c.height = 630; c.getContext('2d').drawImage(img, 0, 0, 1400, 630); createImageBitmap(c).then(b => r('bitmap ' + b.width), e => r('cib fail ' + e)); }; img.onerror = () => r('img error'); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="630" viewBox="0 0 233 105"><defs><linearGradient id="g"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#36c"/></linearGradient><filter id="b" x="-1" y="-1" width="3" height="3" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="2"/></filter></defs><g filter="url(#b)"><path d="M20 47C9 41 2 30 3 19 4 9 11 2 17 2c1.6 0 2.4 3.2 3 6.5.6-3.3 1.4-6.5 3-6.5 6 0 13 7 14 17 1 11-6 22-17 28z" fill="url(#g)"/></g></svg>'); setTimeout(() => r('timeout'), 5000); })));
-  await step('worker + bitmap transfer', p => p.evaluate(W => new Promise(r => { const k = document.createElement('canvas'); k.width = 100; k.height = 100; k.getContext('2d').fillRect(0, 0, 50, 50); createImageBitmap(k).then(bmp => { const c = document.createElement('canvas'); document.body.appendChild(c); const o = c.transferControlToOffscreen(); const w = new Worker(URL.createObjectURL(new Blob([W], { type: 'text/javascript' }))); w.onmessage = e => r(e.data); w.postMessage({ c: o, bmp }, [o, bmp]); setTimeout(() => r('timeout'), 5000); }); }), W));
-  for (const [label, init] of [['app, worker path', null], ['app, page path (no OffscreenCanvas)', () => { delete window.OffscreenCanvas; }]]) {
-    const { ctx, page } = await boot(browser, { device: 'iphone', init: init || undefined });
+  const fps = page => page.evaluate(() => new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 2000) requestAnimationFrame(f); else r(n / 2); }; requestAnimationFrame(f); }));
+  for (const [label, opts] of [['before-like: reduced motion (no petal loop)', { reducedMotion: true }], ['worker path', {}], ['page path', { init: () => { delete window.OffscreenCanvas; } }]]) {
+    const { ctx, page } = await boot(browser, { device: 'iphone', ...opts });
     let crashed = false; page.on('crash', () => { crashed = true; });
-    await page.waitForTimeout(3000);
-    let res; try { res = await page.evaluate(async () => { const H = window.__homePetals; return { worker: H && H.worker(), probe: H ? await Promise.race([H.probe(), new Promise(r => setTimeout(() => r('no reply'), 1500))]) : null }; }); } catch (e) { res = 'ERR ' + String(e.message).split('\n')[0]; }
-    console.log('DIAG', label, crashed ? 'CRASHED' : 'ok', JSON.stringify(res));
+    page.setDefaultTimeout(9000);
+    const out = {};
+    try {
+      out.homeFps = await fps(page);
+      out.worker = await page.evaluate(() => window.__homePetals && window.__homePetals.worker());
+      await go(page, 'doctor-directory');
+      out.dirFps = await fps(page);
+      const t0 = Date.now();
+      await page.locator('#content .doc-card').first().click();
+      out.clickMs = Date.now() - t0;
+    } catch (e) { out.err = String(e.message).split('\n')[0]; }
+    console.log('DIAG', label, crashed ? 'CRASHED' : '', JSON.stringify(out));
     await ctx.close().catch(() => {});
   }
 }
