@@ -35,6 +35,52 @@ Don't repeat it in every reply.
 
 ## Next (in order)
 
+**Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
+Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
+stand-in for Safari; compare the median of 3 runs, startup varies 2x between
+runs). One PR per step, re-measure after each, User Guide only where something
+visible changes. Order approved; S1 approved ("Home rests after arrival").
+Baseline 2026-10-15: idle Home 95% busy (reduced motion: 6%); taps on Home wait
+109-251 ms before their handler runs (View all 312-440 ms to paint, name sheet
+392-456, More 360-408, a domain 288-368); startup worst task 395-676 ms,
+40-73 long tasks; 30 animations not transform/opacity.
+
+S1. **Home rests after arrival.** Ablation, idle Home busy: baseline 95%;
+   petals hidden 61%; JS loops stopped (lanyard pendulum, halo, heartline,
+   `home-polish.js`) 63%; both 19%; all CSS + JS motion 7%. Cause (trace):
+   141 composited layers, 128 `will-change`, so Chrome's layer update runs
+   every frame (1,019 ms per 3 s) plus style 580 ms. Not the petals' blur or
+   var() keyframes (measured). Do: decorative motion plays on arrival, then
+   stops (petals fall ~8 s, pendulum's loop ends when it settles, halo and
+   heartline once); petals 28 -> ~12, no inner 3D flutter, no per-petal
+   `will-change`. Target: idle Home < 10%, Home taps wait < 20 ms.
+S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
+   flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
+   the pill animates width; the top bar is 12 px taller on some screens, so
+   every Home <-> screen change shifts the app 6 px. Target: layout shift 0,
+   no layout during scroll.
+S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
+   `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
+   Defer decorative work past first paint (requestIdleCallback + timeout),
+   split the worst task. Target: no task > 200 ms.
+S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
+   forced layout (`getClientRects`, `getBoundingClientRect` right after
+   `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
+   before write. Target: handler < 50 ms, tap to paint < 150 ms.
+S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
+   (stiffness = (2π/duration)², damping ratio = 1 - bounce); WWDC18
+   "Designing Fluid Interfaces" (start at 100% damping; 80% only when a gesture
+   carries momentum). Every bounce-0 spring has one shape:
+   `linear(0, 0.094, 0.274, 0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945,
+   0.964, 0.977, 0.985, 0.99, 0.994, 0.996, 0.998, 0.998, 1)`; CSS duration =
+   1.47 x Apple duration. Press 0.25 s (368 ms CSS), screen 0.4 s (588 ms),
+   sheet 0.45 s (662 ms); swipe-dismiss bounce 0.2 (607 ms, overshoot 1.5%).
+   The 10 overshooting cubic-beziers on plain taps go to bounce 0. Fallback
+   `--ease` where `linear()` is unsupported (iOS < 17.2; Safari 17.2 notes).
+   Later, sheets only: a JS spring that keeps the finger's speed (CSS can't).
+S6. **Real-iPhone check.** A small frame-drop meter under Settings -> Updates
+   (no Mac needed), so Jose can compare before/after on his phone.
+
 **Doctors redesign (Jose approved 2026-10-14).** Mockups:
 `docs/mockups/doctors/list.png` and `page.png` (HTML beside them). Rule from
 Jose: it must look like the rest of the app (light background and mesh,
@@ -127,10 +173,11 @@ come from this alone.
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
   fix. No rules change, no migration. `docs/features/regions.md`. #31.
+- 2026-10-15 Smoothness measured (no app change): baseline, causes and the
+  S1-S6 plan above; `tests/tools/perf.cjs`.
 - 2026-10-14 Doctors D1, the doctor's page: header with specialty pin,
   bento (count, Where, tip), tier tabs, terms read aloud, glass bar (Start
-  appointment, Flashcards, Add tip). `docs/features/doctor-page.md`. PR link
-  in the merge.
+  appointment, Flashcards, Add tip). `docs/features/doctor-page.md`. #35.
 - 2026-10-14 Term lookup on Sonnet 5.5: effort stays `medium`, refusals
   logged and answered as "nothing found", JSON read from the last text
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
