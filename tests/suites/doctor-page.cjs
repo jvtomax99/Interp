@@ -76,7 +76,19 @@ async function targets(page) {
       const { ctx, page } = await boot(browser, { device });
       page.setDefaultTimeout(7000);
       try {
+        // TEMP diag (S1b webkit): what the petal painter does here.
+        console.log('DIAG', JSON.stringify(await page.evaluate(async () => {
+          const H = window.__homePetals; const out = { offscreen: typeof OffscreenCanvas, xfer: !!HTMLCanvasElement.prototype.transferControlToOffscreen, worker: H && H.worker(), states: H && Object.fromEntries(Object.entries(H.fields).map(([k, f]) => [k, f.state])) };
+          out.probe = H ? await Promise.race([H.probe(), new Promise(r => setTimeout(() => r('no reply'), 1500))]) : null;
+          out.raf = await new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 1000) requestAnimationFrame(f); else r(n); }; requestAnimationFrame(f); });
+          return out;
+        })));
         await go(page, 'doctor-directory');
+        console.log('DIAG2', JSON.stringify(await page.evaluate(async () => {
+          const H = window.__homePetals; const c = document.querySelector('#content .doc-card');
+          const rs = []; for (let i = 0; i < 5; i++) { await new Promise(r => requestAnimationFrame(r)); const b = c && c.getBoundingClientRect(); rs.push(b ? [b.x, b.y, b.width, b.height].map(v => Math.round(v * 10) / 10).join(',') : null); }
+          return { states: H && Object.fromEntries(Object.entries(H.fields).map(([k, f]) => [k, f.state + ':' + f.canvas.isConnected])), probe: H ? await Promise.race([H.probe(), new Promise(r => setTimeout(() => r('no reply'), 1500))]) : null, rects: rs, anims: document.getAnimations().filter(a => a.playState === 'running').map(a => (a.animationName || a.transitionProperty) + '@' + (a.effect.target && a.effect.target.className)).slice(0, 12) };
+        })));
         // The list's own cards still open the page.
         await page.locator('#content .doc-card').first().click();
         await pause(page, 400);
