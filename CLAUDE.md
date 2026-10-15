@@ -150,6 +150,7 @@ ce-events/  announcements/  practice-questions/  quiz-history/
 activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 hub-lessons/{id}                                                     <-- Ask the Hub team notes
+hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you

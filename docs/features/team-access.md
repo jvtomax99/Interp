@@ -16,3 +16,19 @@ while it's on nothing is enforced. The first owner is claimed once via
 calls wait for `hubAuthReady`. Rules are tested against the Firebase emulator
 (firebase-tools + `@firebase/rules-unit-testing`; run the emulators with the
 proxy variables unset or cross-service Storage lookups silently fail).
+
+**Titles in Team Chat** (`chatTitleHtml`, 2026-10-15). Under a sender's name
+above their messages. *Admin*: each phone that joined with the owner code
+writes its own `hub-admins/{uid}` = `{ name, at }` (`publishHubAdmin`, on
+launch from `checkMyMembership` and on a name change from `syncAccessWho`;
+only when the name differs from `ih_adminName`). Everyone listens to that
+collection (`startHubAdmins`). New messages carry `uid` (the sending phone);
+the rules hold it to that phone and stop an edit changing it, so the title
+follows the phone, not a typed name. Older messages without `uid` are matched
+by name. *Supervisor of Language Services*: by name, `NAME_TITLES` (Liz Lind,
+Elizabeth Lind, Liz Lind-Smith, Elizabeth Lind-Smith; case and spaces
+ignored), so anyone typing that name gets it; it wins over Admin. Rules
+tested in the emulator (38 cases: owner/member/stranger, locked and practice).
+Without the published rules the collection is refused and there are simply
+no Admin tags.
+

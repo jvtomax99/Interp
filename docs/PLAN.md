@@ -164,6 +164,12 @@ come from this alone.
 
 ## Done
 
+- 2026-10-15 Team Chat titles (Jose asked): "Admin" under the names of
+  owner-code phones (`hub-admins/{uid}`; messages now carry the sending
+  phone, held to it by the rules) and a "Supervisor of Language Services"
+  ribbon for Liz Lind (by name; Elizabeth Lind, Liz Lind-Smith too).
+  Rules tested in the emulator; Jose pastes `firestore.rules` into the
+  console. `docs/features/team-access.md`, suite `chat-titles.cjs`.
 - 2026-10-10 CCC watcher source: moved, then switched off (site answers
   403 to the watcher). jvtomax99/Interp#22, #23.
 - 2026-10-13 Phase 1 cleanup: 16 dead functions, 6 unused files, internal

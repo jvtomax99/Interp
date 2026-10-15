@@ -6252,6 +6252,23 @@ html[data-theme="dark"] .tc-text-btn{ color:#E3C88D; }
 .tc-panel .chat-avatar{ width:28px; height:28px; margin-bottom:0; font-size:11px; flex-shrink:0; }
 .tc-panel .chat-avatar-gap{ width:28px; }
 .tc-panel .chat-author{ font-size:var(--fs-cap); font-weight:600; margin:0 var(--sp-3) 3px; color:var(--ink-soft); }
+/* Titles under a name (chatTitleHtml): Admin, a small outlined capital
+   tag; the Supervisor of Language Services, Jose's pick "A", a navy to
+   cyan ribbon with a star. */
+.chat-title{ display:flex; width:max-content; max-width:100%; margin-top:3px; }
+.chat-title.is-admin{
+  padding:1px 6px; border:1px solid rgba(37,46,109,.35); border-radius:6px;
+  font-size:10px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; line-height:1.4; color:var(--navy);
+}
+.chat-title.is-supervisor{
+  align-items:center; gap:5px; padding:3px 9px 3px 7px; border-radius:999px;
+  font-size:11px; font-weight:650; letter-spacing:0; line-height:1.3; color:#fff;
+  background:linear-gradient(120deg, #252E6D, #2E8BD0 70%, #01B8E6);
+  box-shadow:0 4px 10px -6px rgba(37,46,109,.6);
+}
+.chat-title.is-supervisor span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.chat-title.is-supervisor svg{ width:11px; height:11px; flex:none; }
+html[data-theme="dark"] .chat-title.is-admin{ color:#B9C6FF; border-color:rgba(185,198,255,.4); }
 .tc-panel .chat-bubble-col{ gap:2px; min-width:0; }
 
 /* Bubbles */
@@ -12611,9 +12628,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Admin and Supervisor tags under the team’s leaders in Chat' },
   { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
   { id:'places',      tone:'gd-n2', pin:'pins/medifind.webp',            eyebrow:'Doctor Directory',      title:'Pick where a doctor works in one tap, with icons the whole team sees' },
-  { id:'regions',     tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat & Doctors',   title:'North and South: chat channels, and doctors by region' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -16211,6 +16228,11 @@ const GUIDE_TOPICS = [
   { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
     <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
     <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
+
+  { id:'chattitles', section:'team', k:'admin supervisor title tag badge name leader owner liz lind language services who runs chat ribbon star', q:'What are the Admin and Supervisor tags in Chat?', a:`
+    <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>
+    <p><b>Admin</b> (a small outlined tag) is anyone who joined the Hub with the <b>owner code</b>. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
+    <p>Titles show above other people’s messages, not your own. You can’t give yourself one by changing your name: an Admin title follows the phone that joined with the owner code.</p>` },
 
   { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`
     <ol>
@@ -20183,8 +20205,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1015.1020';
-const BUILD_TIME = '2026-10-15 10:20 UTC';
+const BUILD_ID = 'b1015.1325';
+const BUILD_TIME = '2026-10-15 13:25 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21888,6 +21910,65 @@ function tcPhotoTap(btn, mid, index, ev){
   openChatPhotos(mid, index, btn);
 }
 
+/* ---------- Titles under names (Team Chat) ----------
+   Two titles, shown under a sender's name above their messages.
+   Admin: anyone whose phone joined with the owner code. Each owner phone
+   writes its own line in hub-admins/{uid} (the name it goes by) and every
+   phone reads that list (publishHubAdmin, startHubAdmins). A new message
+   carries the sender's phone (`uid`, held to that phone by the rules), so
+   the title follows the phone, not a typed name; older messages without
+   one are matched by name.
+   Supervisor of Language Services: given by name (Jose, 2026-10-15), any
+   of the spellings below, capitals and spaces ignored. Wins over Admin. */
+const NAME_TITLES = [
+  { names: ['liz lind', 'elizabeth lind', 'liz lind-smith', 'elizabeth lind-smith'],
+    title: 'Supervisor of Language Services', kind: 'supervisor' }
+];
+const HUB_ADMINS = { uids: new Set(), names: new Set(), started: false };
+const ICON_TITLE_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
+function titleKey(name){ return String(name || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+function chatTitleFor(m){
+  const key = titleKey(m && m.author);
+  const named = NAME_TITLES.find(t => t.names.includes(key));
+  if(named) return named;
+  const admin = m && m.uid ? HUB_ADMINS.uids.has(m.uid) : !!key && HUB_ADMINS.names.has(key);
+  return admin ? { title: 'Admin', kind: 'admin' } : null;
+}
+function chatTitleHtml(m){
+  const t = chatTitleFor(m);
+  if(!t) return '';
+  return t.kind === 'supervisor'
+    ? `<span class="chat-title is-supervisor">${ICON_TITLE_STAR}<span>${escapeHtml(t.title)}</span></span>`
+    : `<span class="chat-title is-admin">${escapeHtml(t.title)}</span>`;
+}
+function startHubAdmins(){
+  if(HUB_ADMINS.started || !db) return;
+  HUB_ADMINS.started = true;
+  db.collection('hub-admins').onSnapshot(snap => {
+    HUB_ADMINS.uids = new Set(snap.docs.map(d => d.id));
+    HUB_ADMINS.names = new Set(snap.docs.map(d => titleKey((d.data() || {}).name)).filter(Boolean));
+    if(activeCategory === 'chat') renderChatMessages();
+  }, () => {
+    // Titles are decoration: a refused or missing collection (rules not
+    // published yet) just means no Admin tags, never a broken chat.
+    HUB_ADMINS.started = false;
+  });
+}
+// An owner phone keeps its own line current: on launch and when its name
+// changes. Written only when the name differs from what it last wrote.
+function publishHubAdmin(){
+  const user = hubAuth && hubAuth.currentUser;
+  if(!user || !db || !isHubOwner()) return;
+  const name = (whoAmI() || '').trim().slice(0, 60);
+  if(!name) return;
+  let last = '';
+  try{ last = localStorage.getItem('ih_adminName') || ''; }catch(e){}
+  if(last === user.uid + '|' + name) return;
+  db.collection('hub-admins').doc(user.uid).set({ name, at: Date.now() })
+    .then(() => { try{ localStorage.setItem('ih_adminName', user.uid + '|' + name); }catch(e){} })
+    .catch(() => {});
+}
+
 function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
   const who = m.author || 'Teammate';
   const avatarColor = nameToColor(who);
@@ -21987,7 +22068,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
       : '';
     return `${avTc}
         <div class="chat-bubble-col">
-          ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
+          ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}${chatTitleHtml(m)}</div>` : ''}
           ${replyQuote}
           ${media}
           ${textBubble}
@@ -22000,7 +22081,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
 
   return `${avatar}
         <div class="chat-bubble-col">
-          ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}</div>` : ''}
+          ${(!mine && first) ? `<div class="chat-author">${escapeHtml(who)}${chatTitleHtml(m)}</div>` : ''}
           ${quote}
           ${m.text ? `<div class="chat-bubble">${linkifyChat(highlightMentions(m.text))}</div>` : ''}
           ${m.attachment ? `<div class="attach-row" style="margin-top:${m.text?'6px':'0'};">${attachmentChipHtml(m.attachment, null)}</div>` : ''}
@@ -22759,6 +22840,9 @@ async function sendChatMessageOnce(){
                       replyTo: replyingTo ? Object.assign({ id:replyingTo.id, author:replyingTo.author, text:replyingTo.text }, replyingTo.photo ? { photo: replyingTo.photo } : {}) : null };
     if(atts.length > 1) message.attachments = atts;
     if(chatChannel !== 'all') message.channel = chatChannel;
+    // The sending phone, so a title under the name can't be borrowed by
+    // typing someone else's name (chatTitleFor).
+    if(hubAuth && hubAuth.currentUser) message.uid = hubAuth.currentUser.uid;
     const reply = replyingTo;
     replyingTo = null; renderChatComposeBar();
     sendingReply = reply;
@@ -24164,6 +24248,7 @@ async function checkMyMembership(){
     if(!snap.exists){ await rejoin(); return; }
     const d = snap.data() || {};
     if(d.role !== me.role) writeAccessMe({ ...me, role: d.role });
+    if(d.role === 'owner') publishHubAdmin();
     const who = accessWho();
     if(Date.now() - (d.lastSeen || 0) > ACCESS_HEARTBEAT_MS || (who && who !== d.who)){
       snap.ref.update({ lastSeen: Date.now(), device: deviceLabel(), who }).catch(()=>{});
@@ -24470,6 +24555,7 @@ function syncAccessWho(){
   const user = hubAuth && hubAuth.currentUser;
   if(!me || !me.member || !user || !db) return;
   db.collection('hub-members').doc(user.uid).update({ who: accessWho(), lastSeen: Date.now() }).catch(()=>{});
+  publishHubAdmin();
 }
 
 /* ============ Ask the Hub ============
@@ -28191,6 +28277,7 @@ hubAuthReady.then(()=>{
   loadQuestions();
   startChatListener();
   startMembersListener();
+  startHubAdmins();
   startActivityListener();
   startSmileyCareer();
   startPlacesListener();

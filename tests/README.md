@@ -18,6 +18,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `smiley-gaze.cjs` | Dr. Smiley's eyes, lean and moods |
 | `smiley-gestures.cjs` | Dr. Smiley's five performances, frame by frame |
 | `home-rest.cjs` | Home decor: petals (no will-change) and heartline loop; the badge loop ends; the card ring glows on arrival only |
+| `chat-titles.cjs` | Team Chat titles: Admin follows the owner-code phone (a typed name can't borrow it), Supervisor of Language Services by name and spellings, new messages carry the phone |
 
 ## Run them
 
