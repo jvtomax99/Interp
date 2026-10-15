@@ -64,6 +64,21 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    task 497 -> 438 ms. Still open here: taps wait ~80 ms against < 20 ms;
    left for S3/S4 (arrival work, `ih:home-paint`'s forced layout, the
    pointer handlers), then re-check.
+   **#40 status (2026-10-15, not merged): WebKit crashes.** The worker
+   painter (OffscreenCanvas) crashed the WebKit page in CI: 1 of 6 cold
+   loads on the computer layout, and in earlier runs; the page-thread
+   painter 0/6, the old CSS petals 0/6. Jose's call: **iPhones and Safari
+   keep the old CSS petals; Chromium (Android, computers) gets the worker
+   painter.** To do on this branch: (1) revert the TEMP diagnostic in
+   `tests/suites/doctor-page.cjs` and delete `tests/support/_old-home-polish.*`
+   (last TEMP commit d957465); (2) put the old DOM petals (`buildPetals` /
+   `addCardPetals` / the `.home-petal` CSS and keyframes from b970868) back
+   as the WebKit path, chosen by engine (`/AppleWebKit/` and not
+   `/Chrome\/|Chromium|Edg\//` in the user agent: all iOS browsers are
+   WebKit); keep the canvas painter for the rest; (3) home-rest checks both
+   paths (BROWSER=webkit runs only doctor-page in CI); (4) merge main
+   (has #41: sw.js cache name, BUILD_ID, guide count 61). The sheet now
+   rasterises at k = dpr (max 3): same pixels, a quarter of the work.
 S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
    flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
    the pill animates width; the top bar is 12 px taller on some screens, so
