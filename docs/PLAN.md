@@ -40,6 +40,9 @@ Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
 stand-in for Safari; compare the median of 3 runs, startup varies 2x between
 runs). One PR per step, re-measure after each, User Guide only where something
 visible changes. Order approved; S1 approved ("Home rests after arrival").
+**Rule (Jose, after S1): visuals never suffer.** Every S-step keeps the
+look and motion identical; anything that would change what he sees (S5's
+new springs included) is shown to him first.
 Baseline 2026-10-15: idle Home 95% busy (reduced motion: 6%); taps on Home wait
 109-251 ms before their handler runs (View all 312-440 ms to paint, name sheet
 392-456, More 360-408, a domain 288-368); startup worst task 395-676 ms,

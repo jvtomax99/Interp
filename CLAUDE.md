@@ -300,6 +300,10 @@ the name is simply there.
 
 Rules that hold across the whole app:
 
+- **Speed never costs the look** (Jose, 2026-10-15; `AGENTS.md`). Make a
+  visual cheaper, never smaller, shorter or stopped. Ask him first if a gain
+  needs a visible change.
+
 - Accent is an SVG fill, never a button or link color. `#0F5FA6` appears as
   a background on exactly 1 element.
 - A rounded child inside a rounded parent always takes the smaller radius:

@@ -107,6 +107,14 @@ to fake a bounce. A gesture the art can't draw needs new frames, not a trick.
 His five performances (`DR_PERF` in `index.html`) are built fresh each play,
 with their own calmer Focused versions; new gestures go there.
 
+**Speed never costs the look** (Jose, 2026-10-15). A speed or battery fix
+must leave every screen looking and moving the same: same animations, same
+counts, same loops, same timing. Make the same thing cheaper (fewer layers,
+transform/opacity, work moved off the first paint); never remove, shorten,
+thin out or stop a visual to win a number. If a gain is only possible by
+changing what Jose sees, ask him first with the numbers and a screenshot.
+He reversed S1's stopped petals and one-shot heartline for this reason.
+
 **Every change someone can see updates the User Guide in the same commit.**
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
 renamed button, a new message. Dr. Smiley answers "how do I…" from the
