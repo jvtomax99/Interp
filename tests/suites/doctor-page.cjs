@@ -78,22 +78,35 @@ async function webkitDiag(browser) {
   };
   const W = `self.onmessage = e => { const c = e.data.c; const x = c.getContext('2d'); let n = 0; const later = self.requestAnimationFrame ? f => self.requestAnimationFrame(f) : f => setTimeout(f, 16);
     const go = () => { x.clearRect(0, 0, c.width, c.height); x.fillStyle = 'red'; x.fillRect(n % 50, 10, 20, 20); if (e.data.bmp) x.drawImage(e.data.bmp, 0, 0); n++; if (n < 120) later(go); else self.postMessage({ n, raf: !!self.requestAnimationFrame }); }; go(); };`;
-  const fps = page => page.evaluate(() => new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 2000) requestAnimationFrame(f); else r(n / 2); }; requestAnimationFrame(f); }));
-  for (const [label, opts] of [['before-like: reduced motion (no petal loop)', { reducedMotion: true }], ['worker path', {}], ['page path', { init: () => { delete window.OffscreenCanvas; } }]]) {
-    const { ctx, page } = await boot(browser, { device: 'iphone', ...opts });
-    let crashed = false; page.on('crash', () => { crashed = true; });
-    page.setDefaultTimeout(9000);
+  const fs = require('fs'), path = require('path');
+  const OLD = { js: fs.readFileSync(path.join(__dirname, '../support/_old-home-polish.js'), 'utf8'), css: fs.readFileSync(path.join(__dirname, '../support/_old-home-polish.css'), 'utf8') };
+  for (const round of [1, 2]) for (const variant of ['old', 'new']) {
+    const ctx = await browser.newContext({ viewport: { width: 393, height: 759 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
+    const page = await ctx.newPage(); let crashed = false; page.on('crash', () => { crashed = true; });
+    page.setDefaultTimeout(7000);
+    const L = require('../support/harness.cjs');
+    await L.route(page, {});
+    if (variant === 'old') {
+      await page.route(/home-polish\.js/, r => r.fulfill({ status: 200, contentType: 'text/javascript', body: OLD.js }));
+      await page.route(/home-polish\.css/, r => r.fulfill({ status: 200, contentType: 'text/css', body: OLD.css }));
+    }
+    await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' }; try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); } catch (e) {} }, { seed: L.SEED });
+    await page.addInitScript(() => { window.__frames = []; const f = t => { window.__frames.push(t); requestAnimationFrame(f); }; requestAnimationFrame(f); });
     const out = {};
     try {
-      out.homeFps = await fps(page);
-      out.worker = await page.evaluate(() => window.__homePetals && window.__homePetals.worker());
-      await go(page, 'doctor-directory');
-      out.dirFps = await fps(page);
+      await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(4200);
+      out.framesBy4s = await page.evaluate(() => window.__frames.length);
+      out.petals = await page.evaluate(() => document.querySelectorAll('.home-petal').length + ' els, ' + document.querySelectorAll('.home-petals-canvas').length + ' canvases');
+      out.gaps = await page.evaluate(() => { const g = []; for (let i = 1; i < window.__frames.length; i++) g.push(window.__frames[i] - window.__frames[i - 1]); return { over100: g.filter(x => x > 100).length, worst: Math.round(Math.max(0, ...g)), lastGapEnd: Math.round(window.__frames[window.__frames.length - 1] || 0) }; });
+      await page.evaluate(() => { window.scrollTo(0, 0); setCategory('doctor-directory'); });
+      await page.waitForTimeout(900);
       const t0 = Date.now();
       await page.locator('#content .doc-card').first().click();
       out.clickMs = Date.now() - t0;
     } catch (e) { out.err = String(e.message).split('\n')[0]; }
-    console.log('DIAG', label, crashed ? 'CRASHED' : '', JSON.stringify(out));
+    out.fpsAfter = await page.evaluate(() => { const f = window.__frames, n = f.length; return n > 30 ? Math.round(30000 / (f[n - 1] - f[n - 31])) : n; }).catch(() => 'n/a');
+    console.log('DIAG', round, variant, crashed ? 'CRASHED' : '', JSON.stringify(out));
     await ctx.close().catch(() => {});
   }
 }
