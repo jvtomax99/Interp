@@ -62,14 +62,18 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
 - **Home's decor: what loops, what settles** (S1 in `docs/PLAN.md`, then
   Jose's call, 2026-10-15). The petals and the heartline are part of the
   look and loop forever; everything else settles. Petals: one canvas per
-  place (banner, rank card) and one frame loop (`petalFrame`,
-  home-polish.js, S1b), drawn from the old keyframes' math with the same
-  seeded values and artwork; the loop stops while hidden, scrolled away or
-  under reduced motion. They used to be one animated element each, and
-  Chrome re-layered Home every frame for them. Settles: the Ask badge's breeze
+  place (banner, rank card), painted from a Web Worker on an
+  OffscreenCanvas (`petalPainter`, home-polish.js, S1b; the same painter
+  runs on the page where a phone lacks OffscreenCanvas), drawn from the old
+  keyframes' math with the same seeded values and artwork. The page only
+  tells it sizes and whether each place is seen (`syncPetals`); it stops
+  while hidden, scrolled away, and rests under reduced motion. They used to
+  be one animated element each (Chrome re-layered Home every frame); a
+  frame loop on the page was worse still (a full Home frame 60 times a
+  second), hence the worker. Settles: the Ask badge's breeze
   (`BREEZE_S`, then `askBadge`'s loop ends once it hangs still; a pet or a
   new hello swings it again), one halo glow per arrival (`askHalo`), the
   rank card ring glows on arrival only. Breathing, drift and the halo's turn
-  are compositor-only. Don't add an endless JS loop (the petals' is the one,
-  and it only runs while they are seen) or per-item `will-change` on Home;
+  are compositor-only. Don't add an endless JS loop on the page (the petals'
+  runs in their worker, only while they are seen) or per-item `will-change` on Home;
   `tests/suites/home-rest.cjs` checks it.

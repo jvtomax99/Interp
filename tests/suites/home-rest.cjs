@@ -14,12 +14,11 @@ const COUNT_RAF = () => {
   const raf = window.requestAnimationFrame.bind(window);
   window.requestAnimationFrame = cb => { if (cb && cb.name === 'petalFrame') window.__petalRaf++; else window.__raf++; return raf(cb); };
 };
-// What the petal canvases show: a cheap fingerprint of their pixels.
-const PETAL_PIXELS = () => [...document.querySelectorAll('.home-petals-canvas')].map(c => {
-  const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0, sum = 0;
-  for (let i = 3; i < d.length; i += 4) if (d[i]) { n++; sum = (sum + d[i] * (i % 9973)) % 1e9; }
-  return n + ':' + sum;
-}).join('|');
+// What the petal painter reports: frames drawn per place (it may run in a
+// worker, whose canvas the page can't read back).
+const PROBE = page => page.evaluate(() => window.__homePetals.probe());
+const frames = p => Object.values(p).reduce((n, f) => n + f.frames, 0);
+
 const state = page => page.evaluate(() => {
   const hero = document.querySelector('.home-petals');
   const hl = document.querySelector('#content .home-heartline');
@@ -40,9 +39,10 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
   const s1 = await state(page);
   ok(s1.petals >= 20, 'the banner draws its 20+ petals', s1);
   ok(s1.canvases === 2 && s1.elements === 0, 'one canvas each for the banner and the rank card, no element per petal', s1);
-  const px1 = await page.evaluate(PETAL_PIXELS); await page.waitForTimeout(600);
-  const px2 = await page.evaluate(PETAL_PIXELS);
-  ok(/^[1-9]/.test(px1) && px1 !== px2, 'the petals keep falling long after arrival (the canvas changes)', [px1, px2]);
+  const p1 = await PROBE(page); await page.waitForTimeout(600);
+  const p2 = await PROBE(page);
+  ok(p1.hero && p1.card && frames(p2) > frames(p1) + 10 && p2.hero.drawn && p2.card.drawn, 'the petals keep falling long after arrival (frames drawn: ' + (frames(p2) - frames(p1)) + ' in 0.6 s)', p2);
+  ok(await page.evaluate(() => window.__homePetals.worker()), 'they are painted from a worker, not on the page');
   // The heartline replays: watch it come back at least once in ~8 s.
   const seen = await page.evaluate(() => new Promise(r => {
     const hl = document.querySelector('#content .home-heartline'); let n = 0;
@@ -57,7 +57,8 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
   // Battery: scrolled away from both places, the petal loop stops.
   await page.evaluate(() => { const r = document.querySelector('.sm-widgets').getBoundingClientRect(); window.scrollTo(0, window.scrollY + r.bottom + 40); });
   await page.waitForTimeout(800);
-  const off = await page.evaluate(() => { const n = window.__petalRaf; return new Promise(r => setTimeout(() => r(window.__petalRaf - n), 1000)); });
+  const o1 = await PROBE(page); await page.waitForTimeout(1000);
+  const off = frames(await PROBE(page)) - frames(o1);
   ok(off === 0, 'scrolled past the banner and the card, the petals stop drawing (' + off + ' frames in 1 s)');
 
   // A repaint of Home redraws the rank card: its ring doesn't glow again.
@@ -68,9 +69,8 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
 
   console.log('== phone, reduced motion');
   const { page: rp } = await L.boot(b, { device: 'iphone', settle: 3000, reducedMotion: true, init: COUNT_RAF });
-  const r1 = await rp.evaluate(PETAL_PIXELS); await rp.waitForTimeout(800);
-  const r2 = await rp.evaluate(PETAL_PIXELS);
-  const rf = await rp.evaluate(() => { const n = window.__petalRaf; return new Promise(r => setTimeout(() => r(window.__petalRaf - n), 1000)); });
-  ok(/^[1-9]/.test(r1) && r1 === r2 && rf === 0, 'reduced motion: the petals rest in place, nothing falls, no frame loop', [r1, r2, rf]);
+  const r1 = await PROBE(rp); await rp.waitForTimeout(800);
+  const r2 = await PROBE(rp);
+  ok(r2.hero && r2.hero.state === 'still' && r2.hero.drawn && r2.card && r2.card.drawn && frames(r2) === frames(r1) && frames(r2) === 0, 'reduced motion: the petals rest in place, nothing falls, no frame loop', [r1, r2]);
   await b.close();
 })();

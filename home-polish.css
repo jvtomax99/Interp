@@ -612,8 +612,9 @@
   -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 68%,transparent 96%);
           mask-image:linear-gradient(to bottom,#000 0%,#000 68%,transparent 96%);
 }
-/* One canvas per place draws every petal (S1b; home-polish.js, "The petals
-   are drawn"). Their motion, pause and reduced-motion rest live there now. */
+/* One canvas per place draws every petal, painted from a worker (S1b;
+   home-polish.js, "The petals are drawn"). Their motion, pause and
+   reduced-motion rest live there now. */
 .home-petals-canvas{
   position:absolute; inset:0; width:100%; height:100%; display:block;
 }

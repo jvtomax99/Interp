@@ -1237,8 +1237,8 @@
 
   /* The petals are drawn, not animated (S1b). They used to be one animated
      <div><svg> each (28 on the banner, 8 on the rank card), and Chrome redid
-     Home's layers every frame for them. Now each place has one <canvas> and
-     one frame loop draws them all. Nothing visible changed: the same seeded
+     Home's layers every frame for them. Now each place has one <canvas>,
+     painted from a worker (petalPainter below). Nothing visible changed: the same seeded
      values, the same artwork (the SVG below, drawn once into a sprite sheet)
      and the motion of the old keyframes, worked out here per frame:
        fall (linear): spin r0 -> +120deg -> +260deg and sway 0 -> sway ->
@@ -1259,18 +1259,6 @@
     '<path d="' + PETAL_SHAPE + '" fill="url(#hpShine)"/>' +
     '<path d="M20 44C19 32 19.5 20 20 10" stroke="#fff" stroke-opacity=".45" stroke-width=".9" fill="none" stroke-linecap="round"/>' +
     '<path d="M20 30c-3-3-7-5-10-5M20 30c3-3 7-5 10-5" stroke="#fff" stroke-opacity=".25" stroke-width=".6" fill="none"/>';
-
-  // CSS ease-in-out, cubic-bezier(.42,0,.58,1): x(t) solved by Newton, then y.
-  function easeInOut(x){
-    let t = x;
-    for(let i = 0; i < 6; i++){
-      const cx = 3 * t * (1 - t) * (1 - t) * .42 + 3 * t * t * (1 - t) * .58 + t * t * t - x;
-      const d = 3 * (1 - t) * (1 - t) * .42 + 6 * t * (1 - t) * (.58 - .42) + 3 * t * t * (1 - .58);
-      if(Math.abs(cx) < 1e-6 || !d) break;
-      t -= cx / d;
-    }
-    return 3 * t * t * (1 - t) + t * t * t;
-  }
 
   // One sprite sheet per set of petals (cached: the same seed draws the
   // same sheet every time Home rebuilds, so a redraw never flickers).
@@ -1315,28 +1303,188 @@
     return sheet;
   }
 
+  /* The drawing itself. This function runs inside a Web Worker on an
+     OffscreenCanvas, so the page's own thread does nothing per frame: a
+     frame loop on the page made Chrome redo a whole Home frame (style,
+     paint, commit) 60 times a second, which cost more than the old
+     animated elements. Where a phone has no OffscreenCanvas, the same
+     function runs on the page instead. It must stay self-contained (it is
+     sent to the worker as text): no names from outside it. */
+  function petalPainter(self){
+    const fields = {};
+    let raf = 0;
+    const later = self.requestAnimationFrame ? cb => self.requestAnimationFrame(cb) : cb => setTimeout(() => cb(performance.now()), 16);
+    // CSS ease-in-out, cubic-bezier(.42,0,.58,1): x(t) solved by Newton, then y.
+    function easeInOut(x){
+      let t = x;
+      for(let i = 0; i < 6; i++){
+        const cx = 3 * t * (1 - t) * (1 - t) * .42 + 3 * t * t * (1 - t) * .58 + t * t * t - x;
+        const d = 3 * (1 - t) * (1 - t) * .42 + 6 * t * (1 - t) * (.58 - .42) + 3 * t * t * (1 - .58);
+        if(Math.abs(cx) < 1e-6 || !d) break;
+        t -= cx / d;
+      }
+      return 3 * t * t * (1 - t) + t * t * t;
+    }
+    function draw(f, still){
+      const c = f.ctx, sheet = f.sheet, k = f.k, d = f.dpr;
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.clearRect(0, 0, f.canvas.width, f.canvas.height);
+      c.imageSmoothingEnabled = true;
+      c.imageSmoothingQuality = 'high';
+      for(const p of f.petals){
+        const cx = p.left / 100 * f.w + p.w / 2;
+        let x, y, ang, a, cosX = 1, sinX = 0, cosY = 1, sinY = 0;
+        if(still){
+          x = cx; y = p.rest / 100 * f.h + p.h / 2; ang = p.r0; a = p.o * .7;
+        } else {
+          const lt = f.t - p.delay, fall = p.fall || f.fall;
+          const q = (lt % p.dur) / p.dur;
+          let tx, ty;
+          if(q < .5){ const u = q / .5; tx = p.sway * u; ty = fall * .5 * u; ang = p.r0 + 120 * u; }
+          else { const u = (q - .5) / .5; tx = p.sway - 1.4 * p.sway * u; ty = fall * .5 * (1 + u); ang = p.r0 + 120 + 140 * u; }
+          a = q < .1 ? p.o * q / .1 : q < .85 ? p.o * (1 - .4 * (q - .1) / .75) : p.o * .6 * (1 - (q - .85) / .15);
+          x = cx + tx; y = -26 + p.h / 2 + ty;
+          const n = Math.floor(lt / p.flip);
+          let e = lt / p.flip - n;
+          if(n % 2) e = 1 - e;
+          e = easeInOut(e);
+          const rx = 62 * e * Math.PI / 180, ry = 28 * e * Math.PI / 180;
+          cosX = Math.cos(rx); sinX = Math.sin(rx); cosY = Math.cos(ry); sinY = Math.sin(ry);
+        }
+        if(a <= .002) continue;
+        const r = ang * Math.PI / 180, cr = Math.cos(r), sr = Math.sin(r);
+        // translate(x,y) rotate(r), then the flattened rotateX(.) rotateY(.)
+        // about the petal's centre: x' = cosY x, y' = sinX sinY x + cosX y.
+        const m11 = cosY, m21 = sinX * sinY, m22 = cosX;
+        c.globalAlpha = a;
+        c.setTransform(d * (cr * m11 - sr * m21), d * (sr * m11 + cr * m21), d * (-sr * m22), d * (cr * m22), d * x, d * y);
+        c.drawImage(sheet, p.sx * k, p.sy * k, p.cw * k, p.ch * k, -p.cw / 2, -p.ch / 2, p.cw, p.ch);
+      }
+      c.globalAlpha = 1;
+      f.drawn = true;
+    }
+    // 'run' advances the clock and draws every frame; 'paused' (hidden,
+    // scrolled away) keeps the last frame and stops the clock, as a paused
+    // animation did; 'still' is reduced motion: each petal at rest.
+    function petalFrame(ts){
+      raf = 0;
+      let live = false;
+      for(const kind in fields){
+        const f = fields[kind];
+        if(!f.sheet || !f.w || !f.h){ f.last = 0; continue; }
+        if(f.state !== 'run'){ f.last = 0; if(!f.drawn) draw(f, f.state === 'still'); continue; }
+        if(f.last) f.t += (ts - f.last) / 1000;
+        f.last = ts;
+        draw(f, false);
+        f.frames++;
+        live = true;
+      }
+      if(live) raf = later(petalFrame);
+    }
+    self.onmessage = e => {
+      const m = e.data;
+      if(m.type === 'probe'){
+        const out = {};
+        for(const kind in fields) out[kind] = { frames: fields[kind].frames, t: fields[kind].t, drawn: !!fields[kind].drawn, state: fields[kind].state };
+        self.postMessage({ type: 'probe', id: m.id, fields: out });
+        return;
+      }
+      if(m.type === 'field'){
+        let ctx = null;
+        try { ctx = m.canvas.getContext('2d'); } catch(err) {}
+        if(!ctx){ self.postMessage({ type: 'fail', kind: m.kind }); return; }
+        fields[m.kind] = { canvas: m.canvas, ctx, petals: m.petals, k: m.k, sheet: null, t: 0, last: 0, w: 0, h: 0, dpr: 1, fall: 0, state: 'paused', frames: 0, drawn: false };
+      }
+      const f = fields[m.kind];
+      if(!f) return;
+      if(m.type === 'sheet'){ f.sheet = m.sheet; f.drawn = false; }
+      else if(m.type === 'size'){
+        f.w = m.w; f.h = m.h; f.dpr = m.dpr; f.fall = m.fall;
+        f.canvas.width = Math.max(1, Math.round(m.w * m.dpr));
+        f.canvas.height = Math.max(1, Math.round(m.h * m.dpr));
+        f.drawn = false;
+      }
+      else if(m.type === 'state'){ if((m.state === 'still') !== (f.state === 'still')) f.drawn = false; f.state = m.state; }
+      else if(m.type === 'freeze'){   // tests only: hold one exact moment
+        f.state = m.still ? 'still' : 'frozen'; f.t = m.t;
+        if(m.delays) m.delays.forEach((v, i) => { if(f.petals[i]) f.petals[i].delay = v; });
+        f.drawn = false;
+      }
+      if(!raf) raf = later(petalFrame);
+    };
+  }
+
+  // The painter: a worker when the phone can hand a canvas to one,
+  // otherwise the same painter on this page.
+  let petalPort = null, petalProbeId = 0;
+  const petalProbes = {};
+  function onPetalMessage(e){
+    const m = e.data;
+    if(m.type === 'probe' && petalProbes[m.id]){ petalProbes[m.id](m.fields); delete petalProbes[m.id]; }
+    if(m.type === 'fail'){
+      // This phone can't draw in a worker after all: start again on the page.
+      if(petalPort && petalPort.remote) petalPort = localPetalPort();
+      const f = petalFields[m.kind];
+      if(f && f.remote) f.rebuild();
+    }
+  }
+  function localPetalPort(){
+    const local = { requestAnimationFrame: cb => requestAnimationFrame(cb), postMessage: m => onPetalMessage({ data: m }), onmessage: null };
+    petalPainter(local);
+    return { remote: false, post: m => local.onmessage({ data: m }) };
+  }
+  function getPetalPort(){
+    if(petalPort) return petalPort;
+    try {
+      if(window.Worker && window.OffscreenCanvas && HTMLCanvasElement.prototype.transferControlToOffscreen){
+        const url = URL.createObjectURL(new Blob(['(' + petalPainter + ')(self);'], { type: 'text/javascript' }));
+        const w = new Worker(url);
+        w.onmessage = onPetalMessage;
+        petalPort = { remote: true, post: (m, transfer) => w.postMessage(m, transfer || []) };
+        return petalPort;
+      }
+    } catch(err) {}
+    petalPort = localPetalPort();
+    return petalPort;
+  }
+
   const petalFields = {};            // 'hero' and 'card': the one field drawn in each place
   const reducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
-  let petalRaf = 0;
-  function makePetalField(kind, layer, petals, isOff){
+  function makePetalField(kind, layer, petals, isOff, fallFor){
+    const old = petalFields[kind];
+    if(old && old.ro) old.ro.disconnect();
+    let port = getPetalPort();
     const canvas = document.createElement('canvas');
     canvas.className = 'home-petals-canvas';
+    layer.querySelectorAll('.home-petals-canvas').forEach(n => n.remove());
     layer.appendChild(canvas);
+    let target = canvas;
+    if(port.remote){
+      try { target = canvas.transferControlToOffscreen(); }
+      catch(err){ port = petalPort = localPetalPort(); }
+    }
     layer.dataset.petals = petals.length;
-    const f = { layer, canvas, ctx: canvas.getContext('2d'), petals, isOff, t: 0, last: 0, w: 0, h: 0, dpr: 1, fall: 0, sheet: petalSheet(petals) };
-    if(petalFields[kind] && petalFields[kind].ro) petalFields[kind].ro.disconnect();
+    const sheet = petalSheet(petals);
+    const f = { kind, layer, canvas, petals, isOff, fallFor, sheet, w: 0, h: 0, dpr: 0, state: null };
+    f.remote = port.remote;
+    f.rebuild = () => makePetalField(kind, layer, petals, isOff, fallFor);
     petalFields[kind] = f;
-    f.sheet.ready.then(() => { if(petalFields[kind] === f) kickPetals(); }, () => {});
+    port.post({ type: 'field', kind, canvas: target, petals, k: sheet.k }, port.remote ? [target] : []);
+    sheet.ready.then(() => {
+      if(petalFields[kind] !== f) return;
+      if(!port.remote){ port.post({ type: 'sheet', kind, sheet: sheet.canvas }); return; }
+      createImageBitmap(sheet.canvas).then(bmp => { if(petalFields[kind] === f) port.post({ type: 'sheet', kind, sheet: bmp }, [bmp]); });
+    }, () => {});
+    watchPetalSize(f);
+    syncPetals();
     return f;
   }
-  // Sizes are read when they change, never in the frame loop (no forced layout).
+  // Sizes are read when they change, never per frame (no forced layout).
   function sizePetalField(f, w, h){
     const dpr = window.devicePixelRatio || 1;
     if(w === f.w && h === f.h && dpr === f.dpr) return;
     f.w = w; f.h = h; f.dpr = dpr;
-    f.canvas.width = Math.max(1, Math.round(w * dpr));
-    f.canvas.height = Math.max(1, Math.round(h * dpr));
-    f.drawn = false;
+    getPetalPort().post({ type: 'size', kind: f.kind, w, h, dpr, fall: f.fallFor ? f.fallFor(h) : 0 });
   }
   function watchPetalSize(f){
     sizePetalField(f, f.layer.clientWidth, f.layer.clientHeight);
@@ -1344,72 +1492,30 @@
     f.ro = new ResizeObserver(entries => {
       const r = entries[entries.length - 1].contentRect;
       sizePetalField(f, Math.round(r.width), Math.round(r.height));
-      if(f.onResize) f.onResize();
-      kickPetals();
     });
     f.ro.observe(f.layer);
   }
-  function drawPetalField(f, still){
-    const c = f.ctx, sheet = f.sheet.canvas, k = f.sheet.k, d = f.dpr;
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.clearRect(0, 0, f.canvas.width, f.canvas.height);
-    c.imageSmoothingEnabled = true;
-    c.imageSmoothingQuality = 'high';
-    for(const p of f.petals){
-      const cx = p.left / 100 * f.w + p.w / 2;
-      let x, y, ang, a, cosX = 1, sinX = 0, cosY = 1, sinY = 0;
-      if(still){
-        x = cx; y = p.rest / 100 * f.h + p.h / 2; ang = p.r0; a = p.o * .7;
-      } else {
-        const lt = f.t - p.delay, fall = p.fall || f.fall;
-        const q = (lt % p.dur) / p.dur;
-        let tx, ty;
-        if(q < .5){ const u = q / .5; tx = p.sway * u; ty = fall * .5 * u; ang = p.r0 + 120 * u; }
-        else { const u = (q - .5) / .5; tx = p.sway - 1.4 * p.sway * u; ty = fall * .5 * (1 + u); ang = p.r0 + 120 + 140 * u; }
-        a = q < .1 ? p.o * q / .1 : q < .85 ? p.o * (1 - .4 * (q - .1) / .75) : p.o * .6 * (1 - (q - .85) / .15);
-        x = cx + tx; y = -26 + p.h / 2 + ty;
-        const n = Math.floor(lt / p.flip);
-        let e = lt / p.flip - n;
-        if(n % 2) e = 1 - e;
-        e = easeInOut(e);
-        const rx = 62 * e * Math.PI / 180, ry = 28 * e * Math.PI / 180;
-        cosX = Math.cos(rx); sinX = Math.sin(rx); cosY = Math.cos(ry); sinY = Math.sin(ry);
-      }
-      if(a <= .002) continue;
-      const r = ang * Math.PI / 180, cr = Math.cos(r), sr = Math.sin(r);
-      // translate(x,y) rotate(r) then the flattened rotateX(.)rotateY(.):
-      // x' = cosY x, y' = sinX sinY x + cosX y.
-      const m11 = cosY, m21 = sinX * sinY, m22 = cosX;
-      c.globalAlpha = a;
-      c.setTransform(d * (cr * m11 - sr * m21), d * (sr * m11 + cr * m21), d * (-sr * m22), d * (cr * m22), d * x, d * y);
-      c.drawImage(sheet, p.sx * k, p.sy * k, p.cw * k, p.ch * k, -p.cw / 2, -p.ch / 2, p.cw, p.ch);
-    }
-    c.globalAlpha = 1;
-    f.drawn = true;
-  }
-  function petalFrame(ts){
-    petalRaf = 0;
-    let live = false;
+  // Tells the painter whether each place is seen. Called when that may change.
+  function syncPetals(){
     const hidden = document.hidden;
     for(const kind in petalFields){
       const f = petalFields[kind];
-      if(!f.sheet.canvas || !f.canvas.isConnected || !f.w || !f.h){ f.last = 0; continue; }
-      if(reducedMotion.matches){ if(!f.drawn) drawPetalField(f, true); f.last = 0; continue; }
-      if(hidden || f.isOff()){ f.last = 0; if(!f.drawn) drawPetalField(f, false); continue; }
-      if(f.last) f.t += (ts - f.last) / 1000;
-      f.last = ts;
-      drawPetalField(f, false);
-      live = true;
+      if(f.frozen) continue;
+      const s = reducedMotion.matches ? 'still' : (hidden || !f.canvas.isConnected || f.isOff()) ? 'paused' : 'run';
+      if(s === f.state) continue;
+      f.state = s;
+      getPetalPort().post({ type: 'state', kind, state: s });
     }
-    if(live) petalRaf = requestAnimationFrame(petalFrame);
   }
-  function kickPetals(){
-    if(!petalRaf) petalRaf = requestAnimationFrame(petalFrame);
-  }
+  document.addEventListener('visibilitychange', syncPetals);
+  if(reducedMotion.addEventListener) reducedMotion.addEventListener('change', syncPetals);
   // For the checks in tests/ (home-rest, the frame-by-frame comparison).
-  window.__homePetals = { fields: petalFields, draw: drawPetalField };
-  document.addEventListener('visibilitychange', kickPetals);
-  if(reducedMotion.addEventListener) reducedMotion.addEventListener('change', () => { for(const k in petalFields) petalFields[k].drawn = false; kickPetals(); });
+  window.__homePetals = {
+    fields: petalFields,
+    worker: () => !!(petalPort && petalPort.remote),
+    probe: () => new Promise(r => { const id = ++petalProbeId; petalProbes[id] = r; getPetalPort().post({ type: 'probe', id }); }),
+    freeze: (kind, t, delays, still) => { const f = petalFields[kind]; if(!f) return; f.frozen = true; getPetalPort().post({ type: 'freeze', kind, t, delays, still }); }
+  };
 
   function buildPetals(hero){
     const layer = document.createElement('div');
@@ -1449,16 +1555,14 @@
         r0: fix(range(0, 360), 0), rest: fix(range(20, 70), 0)
       });
     }
-    const f = makePetalField('hero', layer, petals, () => layer.classList.contains('is-offscreen'));
-    f.onResize = () => { f.fall = Math.round(f.h * 1.05); };
-    return { layer, field: f };
+    return { layer, petals };
   }
 
   function initHeroDecor(content){
     // index.html keeps the same greeting across repaints of Home; its petals
     // are already falling, so leave them be.
     const kept = content && content.querySelector('.home-greeting');
-    if(kept && kept.dataset.decorReady && kept.querySelector('.home-petals')){ kickPetals(); return; }
+    if(kept && kept.dataset.decorReady && kept.querySelector('.home-petals')){ syncPetals(); return; }
     decorObservers.forEach(o => o.disconnect());
     decorObservers = [];
     const hero = content && content.querySelector('.home-greeting');
@@ -1467,18 +1571,16 @@
     // resume on a cached page that still has the old layer in the DOM.
     hero.querySelectorAll('.home-petals, .home-arc-marks').forEach(n => n.remove());
 
-    const { layer: petals, field } = buildPetals(hero);
+    const { layer: petals, petals: list } = buildPetals(hero);
     hero.dataset.decorReady = '1';
     const scrim = hero.querySelector('.home-greeting-scrim');
     hero.insertBefore(petals, scrim ? scrim.nextSibling : hero.firstChild);
-    watchPetalSize(field);
-    field.onResize();
-    kickPetals();
+    makePetalField('hero', petals, list, () => petals.classList.contains('is-offscreen'), h => Math.round(h * 1.05));
 
     if(typeof IntersectionObserver !== 'undefined'){
       const io = new IntersectionObserver(entries => {
         entries.forEach(e => petals.classList.toggle('is-offscreen', !e.isIntersecting));
-        kickPetals();
+        syncPetals();
       });
       io.observe(hero);
       decorObservers.push(io);
@@ -1675,16 +1777,14 @@
     layer.setAttribute('aria-hidden', 'true');
     card.prepend(layer);
     const sec = card.closest('.sm-widgets');
-    const f = makePetalField('card', layer, petals, () => !!sec && sec.classList.contains('is-offscreen'));
-    watchPetalSize(f);
-    kickPetals();
+    makePetalField('card', layer, petals, () => !!sec && sec.classList.contains('is-offscreen'));
   }
   function watchCardPetals(sec){
     cardPetalWatch.forEach(o => o.disconnect());
     cardPetalWatch = [];
     if(!sec) return;
     addCardPetals(sec.querySelector('#smileyCareer'));
-    kickPetals();
+    syncPetals();
     if(typeof MutationObserver !== 'undefined'){
       const mo = new MutationObserver(() => addCardPetals(sec.querySelector('#smileyCareer')));
       mo.observe(sec, { childList: true });
@@ -1694,7 +1794,7 @@
     if(typeof IntersectionObserver !== 'undefined'){
       const io = new IntersectionObserver(entries => {
         entries.forEach(e => sec.classList.toggle('is-offscreen', !e.isIntersecting));
-        kickPetals();
+        syncPetals();
       });
       io.observe(sec);
       cardPetalWatch.push(io);
