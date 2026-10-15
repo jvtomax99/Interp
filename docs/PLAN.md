@@ -40,6 +40,9 @@ Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
 stand-in for Safari; compare the median of 3 runs, startup varies 2x between
 runs). One PR per step, re-measure after each, User Guide only where something
 visible changes. Order approved; S1 approved ("Home rests after arrival").
+**Rule (Jose, after S1): visuals never suffer.** Every S-step keeps the
+look and motion identical; anything that would change what he sees (S5's
+new springs included) is shown to him first.
 Baseline 2026-10-15: idle Home 95% busy (reduced motion: 6%); taps on Home wait
 109-251 ms before their handler runs (View all 312-440 ms to paint, name sheet
 392-456, More 360-408, a domain 288-368); startup worst task 395-676 ms,
@@ -52,6 +55,15 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    handlers (`drInputEvent` and two `pointerdown` listeners: ~38 ms from
    pointerdown to click on a fully rested Home) are what's left. Goes with
    S3 and S4; re-check the target after them.
+   Since #38 the endless petals are back (Jose: visuals never suffer), so
+   idle Home is 78% busy again (perf.cjs settled, median of 3) and taps
+   wait 109-218 ms. First try, same look: draw all banner and card petals
+   on one layer instead of 28 animated elements (one canvas or one SVG
+   driven by a single animation), identical shapes, fills, sizes, speeds,
+   sway, spin and flutter; compare screenshots/video frame by frame with
+   the current petals before shipping, then perf.cjs median of 3. Tools in
+   this chat's notes: a trace of the idle window (RunTask, Layerize per
+   frame) is what showed the cost; perf.cjs "settled" is the number.
 S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
    flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
    the pill animates width; the top bar is 12 px taller on some screens, so
