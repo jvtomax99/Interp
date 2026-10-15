@@ -1293,14 +1293,11 @@
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="' + sheetW * k + '" height="' + sheetH * k +
       '" viewBox="0 0 ' + sheetW + ' ' + sheetH + '"><defs>' + PETAL_DEFS + '</defs>' + svg + '</svg>');
-    const t0 = performance.now();
     sheet.ready = loaded.then(() => {
-      const t1 = performance.now();
       const c = document.createElement('canvas');
       c.width = sheetW * k; c.height = sheetH * k;
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
       sheet.canvas = c;
-      sheet.ms = [Math.round(t1 - t0), Math.round(performance.now() - t1), c.width + 'x' + c.height];
     });
     petalSheets.set(key, sheet);
     return sheet;
@@ -1515,7 +1512,6 @@
   // For the checks in tests/ (home-rest, the frame-by-frame comparison).
   window.__homePetals = {
     fields: petalFields,
-    sheets: () => [...petalSheets.values()].map(x => x.ms),
     worker: () => !!(petalPort && petalPort.remote),
     probe: () => new Promise(r => { const id = ++petalProbeId; petalProbes[id] = r; getPetalPort().post({ type: 'probe', id }); }),
     freeze: (kind, t, delays, still) => { const f = petalFields[kind]; if(!f) return; f.frozen = true; getPetalPort().post({ type: 'freeze', kind, t, delays, still }); }
