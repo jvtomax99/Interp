@@ -34,4 +34,10 @@ anyone whose first name is Fabiola, with or without a last name (Jose,
 tested in the emulator (38 cases: owner/member/stranger, locked and practice).
 Without the published rules the collection is refused and there are simply
 no Admin tags.
+*On Home*: your own title shows in the hello, a smaller copy of the Chat ribbon
+centred under the heart line (Jose: "in alignment with the heart"), never into
+Dr. Smiley or past the banner's edge; one line when it fits, else two even
+lines (`helloTitle` in `home-polish.js`, placed by `heartline.place`; who has
+one: `window.myHubTitle` in `index.html`, which counts this phone's own owner
+code or its line in `hub-admins`, never a name match against that list).
 

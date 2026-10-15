@@ -50,6 +50,25 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(sent && typeof sent === 'object' && (sent.signedIn ? !!sent.uid : sent.uid === null), 'a new message carries this phone (when signed in)', sent);
   ok(!page.__errors.length, 'no page errors', page.__errors);
 
+  console.log('== the hello on Home');
+  const hello = async (name, device) => {
+    const { page: hp } = await L.boot(b, { device: device || 'iphone', name, settle: 9000, reducedMotion: true });
+    const r = await hp.evaluate(() => { const box = s => { const e = document.querySelector('#content ' + s); return e && e.getBoundingClientRect(); };
+      const t = box('.home-hello-title'), h = box('.home-heartline'), p = box('.home-wave-pin'), q = box('.home-greeting-quote'), g = box('.home-greeting');
+      return { text: (document.querySelector('#content .home-hello-title') || {}).textContent || '',
+        clear: !t || (t.right <= p.left + 1 && t.bottom <= q.top - 4 && t.left >= g.left + 8 && t.top >= h.bottom - 2),
+        under: !t || (t.left <= (h.left + h.right) / 2 && t.right >= (h.left + h.right) / 2) }; });
+    await hp.context().close(); return r;
+  };
+  const f = await hello('Fabiola Grijalva');
+  ok(f.text === 'Administrator' && f.clear && f.under, 'Fabiola: Administrator under the heart line, clear of Dr. Smiley and the quote', f);
+  const lz = await hello('Liz Lind', 'narrow');
+  ok(lz.text === 'Supervisor ofLanguage Services' && lz.clear && lz.under, 'Liz on a small phone: two lines, clear of Dr. Smiley and the quote', lz);
+  const ld = await hello('Liz Lind', 'desktop');
+  ok(ld.text === 'Supervisor of Language Services' && ld.clear && ld.under, 'Liz on a computer: one line, clear', ld);
+  const mr = await hello('Maria Ruiz');
+  ok(mr.text === '', 'no title: nothing under the heart line', mr);
+
   console.log('== phone, joined with the team code');
   const { page: jp } = await L.boot(b, { device: 'iphone', name: 'Ana Torres', settle: 5000, access: { mode: 'locked', member: true, signedIn: true, uid: 'u1' } });
   const j = await jp.evaluate(async () => {

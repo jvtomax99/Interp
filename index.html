@@ -12628,7 +12628,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor tags under the team’s leaders in Chat' },
+  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
   { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
   { id:'places',      tone:'gd-n2', pin:'pins/medifind.webp',            eyebrow:'Doctor Directory',      title:'Pick where a doctor works in one tap, with icons the whole team sees' },
 ];
@@ -16232,7 +16232,7 @@ const GUIDE_TOPICS = [
   { id:'chattitles', section:'team', k:'admin administrator supervisor title tag badge name leader owner liz lind fabiola language services who runs chat ribbon star', q:'What are the Administrator and Supervisor tags in Chat?', a:`
     <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>
     <p><b>Administrator</b> (a small outlined tag) is Fabiola, and anyone who joined the Hub with the <b>owner code</b>. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
-    <p>Titles show above other people’s messages, not your own.</p>` },
+    <p>In Chat, titles show above other people’s messages, not your own. Your own title shows on <b>Home</b>, in a ribbon under the heart line beneath your name.</p>` },
 
   { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`
     <ol>
@@ -20205,8 +20205,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1015.1527';
-const BUILD_TIME = '2026-10-15 15:27 UTC';
+const BUILD_ID = 'b1015.1612';
+const BUILD_TIME = '2026-10-15 16:12 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21951,12 +21951,24 @@ function startHubAdmins(){
     HUB_ADMINS.uids = new Set(snap.docs.map(d => d.id));
     HUB_ADMINS.names = new Set(snap.docs.map(d => titleKey((d.data() || {}).name)).filter(Boolean));
     if(activeCategory === 'chat') renderChatMessages();
+    document.dispatchEvent(new Event('ih:titles'));
   }, () => {
     // Titles are decoration: a refused or missing collection (rules not
     // published yet) just means no Admin tags, never a broken chat.
     HUB_ADMINS.started = false;
   });
 }
+// This phone's own title, for the hello on Home (home-polish.js, helloTitle):
+// the same rules as Chat, plus an owner-code phone before the list arrives.
+// A name match against the owner list doesn't count here: only this phone's
+// own owner code (or its line in that list) does.
+window.myHubTitle = function(){
+  const user = hubAuth && hubAuth.currentUser;
+  const key = titleKey(whoAmI());
+  const named = key && NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first));
+  if(named) return named;
+  return isHubOwner() || (user && HUB_ADMINS.uids.has(user.uid)) ? { title: 'Administrator', kind: 'admin' } : null;
+};
 // An owner phone keeps its own line current: on launch and when its name
 // changes. Written only when the name differs from what it last wrote.
 function publishHubAdmin(){
