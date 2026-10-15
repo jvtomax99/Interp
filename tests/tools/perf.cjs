@@ -7,7 +7,8 @@
      JSON=out/perf.json node tools/perf.cjs   also save the raw numbers
 
    What it reports (baseline 2026-10-15 in docs/PLAN.md):
-   - idle Home busy %: main thread busy while Home sits untouched, 5 s
+   - idle Home busy %: main thread busy while Home sits untouched, 5 s;
+     then again once the hello has ended ("settled")
    - taps: tap-to-paint and the wait before the handler ran (Event Timing)
    - startup: first paint, largest paint, long tasks, worst task
    - layout shift per screen change, and animations that are not
@@ -30,7 +31,9 @@ const COLLECT = () => {
   obs('largest-contentful-paint', e => { P.marks.lcp = Math.round(e.startTime); });
   const ok = p => ['transform', 'opacity', 'translate', 'scale', 'rotate'].includes(p);
   const tick = () => {
-    try {
+    // Held while busy() measures: walking every animation 16 times a second
+    // cost ~10% of an idle Home at 4x, so idle numbers measured the tool too.
+    if (!window.__P.hold) try {
       for (const a of document.getAnimations()) {
         const t = a.effect && a.effect.target; if (!t) continue;
         let props = a.transitionProperty ? [a.transitionProperty] : [];
@@ -60,7 +63,9 @@ async function phone(browser) {
 const phase = (page, p) => page.evaluate(p => { window.__phase = p; }, p);
 async function busy(page, cdp, ms = 5000) {
   const m = async () => Object.fromEntries((await cdp.send('Performance.getMetrics')).metrics.map(x => [x.name, x.value]));
+  await page.evaluate(() => { window.__P.hold = true; });
   const a = await m(); await page.waitForTimeout(ms); const z = await m();
+  await page.evaluate(() => { window.__P.hold = false; });
   return Math.round((z.TaskDuration - a.TaskDuration) / (z.Timestamp - a.Timestamp) * 100);
 }
 
@@ -79,6 +84,10 @@ async function busy(page, cdp, ms = 5000) {
     if (run === 'first visit') {
       await page.evaluate(() => { goHome(); window.scrollTo(0, 0); }); await page.waitForTimeout(1500);
       out.idleHomeBusy = await busy(page, cdp);
+      // At 4x the hello (thought cloud) is still playing in that window; this
+      // one waits for it to end: Home at rest, as someone leaves it (S1).
+      await page.waitForTimeout(8000);
+      out.idleHomeSettled = await busy(page, cdp);
       await page.evaluate(() => setCategory('all')); await page.waitForTimeout(1500);
       out.idleGlossaryBusy = await busy(page, cdp);
       const taps = {};
@@ -122,6 +131,7 @@ async function busy(page, cdp, ms = 5000) {
   const t = out.taps || {};
   console.log(`Smoothness at ${RATE}x CPU, 393x759 (lower is better)`);
   console.log(`  idle Home busy            ${out.idleHomeBusy}%   (glossary ${out.idleGlossaryBusy}%)`);
+  console.log(`  idle Home busy, settled   ${out.idleHomeSettled}%   (after the hello has ended)`);
   for (const [k, v] of Object.entries(t)) console.log(`  tap: ${k.padEnd(26)} ${v ? `${v.d} ms to paint, waited ${v.wait} ms, handler ${v.run} ms` : 'no event recorded'}`);
   for (const [k, v] of Object.entries(runs)) console.log(`  startup, ${k.padEnd(12)} first paint ${v.fcp} ms, largest paint ${v.lcp} ms, ${v.longTasks} long tasks (${v.longMs} ms), worst ${v.worst} ms`);
   console.log(`  layout shift per screen change ${out.shiftPerScreenChange}  ${out.shiftSources.join(', ')}`);

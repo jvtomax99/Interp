@@ -45,15 +45,13 @@ Baseline 2026-10-15: idle Home 95% busy (reduced motion: 6%); taps on Home wait
 392-456, More 360-408, a domain 288-368); startup worst task 395-676 ms,
 40-73 long tasks; 30 animations not transform/opacity.
 
-S1. **Home rests after arrival.** Ablation, idle Home busy: baseline 95%;
-   petals hidden 61%; JS loops stopped (lanyard pendulum, halo, heartline,
-   `home-polish.js`) 63%; both 19%; all CSS + JS motion 7%. Cause (trace):
-   141 composited layers, 128 `will-change`, so Chrome's layer update runs
-   every frame (1,019 ms per 3 s) plus style 580 ms. Not the petals' blur or
-   var() keyframes (measured). Do: decorative motion plays on arrival, then
-   stops (petals fall ~8 s, pendulum's loop ends when it settles, halo and
-   heartline once); petals 28 -> ~12, no inner 3D flutter, no per-petal
-   `will-change`. Target: idle Home < 10%, Home taps wait < 20 ms.
+S1b. **Home taps, still slow (found in S1).** With Home at rest, taps still
+   wait 59-90 ms (median, 4x) against the < 20 ms target. They are timed
+   ~2 s after an arrival on Home, so arrival work (render, the shower's
+   start, `ih:home-paint`'s forced layout) and the tap's own pointer/touch
+   handlers (`drInputEvent` and two `pointerdown` listeners: ~38 ms from
+   pointerdown to click on a fully rested Home) are what's left. Goes with
+   S3 and S4; re-check the target after them.
 S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
    flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
    the pill animates width; the top bar is 12 px taller on some screens, so
@@ -173,6 +171,13 @@ come from this alone.
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
   fix. No rules change, no migration. `docs/features/regions.md`. #31.
+- 2026-10-15 S1 Home rests after arrival: one petal shower (12 on a
+  phone, one fall each, no flutter, no will-change), badge breeze ends, one
+  halo glow, heartline draws once and stays, card ring glows on arrival
+  only. Medians of 3 (perf.cjs, 4x) main -> this: idle Home settled 94% ->
+  4%; idle at load+9.5 s 91% -> 52% (the hello still playing); tap waits
+  View all 116 -> 90, domain 117 -> 60, name 100 -> 73, More 113 -> 59 ms;
+  long tasks at startup 56 -> 37. Suite `home-rest.cjs`.
 - 2026-10-15 Smoothness measured (no app change): baseline, causes and the
   S1-S6 plan above; `tests/tools/perf.cjs`.
 - 2026-10-14 Doctors D1, the doctor's page: header with specialty pin,
@@ -183,6 +188,17 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- `perf.cjs` used to measure itself: its animation collector (every 60 ms)
+  cost ~10% of an idle Home at 4x. It now holds during the idle windows; the
+  2026-10-15 baseline idle numbers include that overhead. Its first "idle
+  Home" window (load + 9.5 s) still catches the hello's thought cloud at 4x,
+  so "settled" (load + 22.5 s) is the rest number.
+- A kept greeting put back on a repaint of Home restarts every CSS animation
+  inside it. Anything one-shot in the greeting must end in a static class
+  (heartline `.is-drawn`) or be rebuilt from a clock (petals).
+- Breathing, drift, the halo's turn and the streak flame are compositor-only:
+  Home at rest with them running is ~0.5% main-thread busy (trace).
 
 - Doctor page, D1: "Add tip" edits the doctor's single `notes` until D2
   builds `tips`; D2 should point that button and the tip tile at the new

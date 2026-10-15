@@ -17,6 +17,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `journey.cjs` | End to end: Ask the Hub, briefing, Term Review, offline and storage-refused cases |
 | `smiley-gaze.cjs` | Dr. Smiley's eyes, lean and moods |
 | `smiley-gestures.cjs` | Dr. Smiley's five performances, frame by frame |
+| `home-rest.cjs` | Home rests after arrival: one petal shower, loops end, no new shower on a repaint |
 
 ## Run them
 

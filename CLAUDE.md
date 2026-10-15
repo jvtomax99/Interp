@@ -121,7 +121,7 @@ After pushing, verify: load the live URL headless and confirm the new
 
 **The suites are in `tests/`** (`cd tests && node run.cjs`, about 8
 minutes; `tests/README.md`): events-watcher login, Daily Drill, User Guide,
-the end-to-end journey, Dr. Smiley's gaze and his five performances, all
+the end-to-end journey, Dr. Smiley's gaze and his five performances, Home at rest, all
 against this checkout in headless Chromium with Firebase and the AI
 endpoints stood in for (`tests/support/`). GitHub runs them on every push
 (`.github/workflows/tests.yml`), so ChatGPT's pushes to `main` get checked
