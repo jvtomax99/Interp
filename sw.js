@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v219-petals-canvas';
+const CACHE_VERSION = 'interpreter-hub-v223-petals';
 const PRECACHE = [
   './',
   './index.html',

@@ -734,6 +734,41 @@
      while his thought cloud is up.
      Under Reduce Motion it is simply there, drawn and still. The drawing
      itself is in home-polish.css (.home-heartline). */
+  /* ---------- A title under the name (Jose, 2026-10-15) ----------
+     Administrator, or Supervisor of Language Services: the ribbon from Team
+     Chat, smaller, centred under the heart line (Jose: "in alignment with
+     the heart"), never into Dr. Smiley or past the banner's edge. Who has one
+     comes from index.html (window.myHubTitle, the same rules as Chat). A long
+     title goes on two even lines. Placed by heartline.place, so it follows
+     the name whenever the greeting's layout changes. */
+  const helloTitle=(()=>{
+    const STAR='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
+    const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    function lines(t){
+      const w=String(t).split(' ');if(w.length<2)return esc(t);
+      let best=1,diff=1e9;
+      for(let i=1;i<w.length;i++){const d=Math.abs(w.slice(0,i).join(' ').length-w.slice(i).join(' ').length);if(d<diff){diff=d;best=i;}}
+      return esc(w.slice(0,best).join(' '))+'<br>'+esc(w.slice(best).join(' '));
+    }
+    function place(row,cx,below){
+      let tag=row.querySelector('.home-hello-title');
+      const t=typeof window.myHubTitle==='function'?window.myHubTitle():null;
+      if(!t){if(tag)tag.remove();return;}
+      if(!tag){tag=document.createElement('span');tag.className='home-hello-title';row.appendChild(tag);}
+      const rr=row.getBoundingClientRect(),pin=row.querySelector('.home-wave-pin');
+      const limit=pin?pin.getBoundingClientRect().left-rr.left-row.clientLeft-8:row.clientWidth;
+      // One line when it fits beside Dr. Smiley, else two even lines.
+      if(tag.dataset.t!==t.title||tag.dataset.w!==String(Math.round(limit))){
+        tag.innerHTML=STAR+'<span>'+esc(t.title)+'</span>';
+        if(tag.offsetWidth>limit)tag.innerHTML=STAR+'<span>'+lines(t.title)+'</span>';
+        tag.dataset.t=t.title;tag.dataset.w=String(Math.round(limit));
+      }
+      const tw=tag.offsetWidth;
+      tag.style.left=Math.max(0,Math.min(cx-tw/2,limit-tw)).toFixed(1)+'px';
+      tag.style.top=(below+10).toFixed(1)+'px';
+    }
+    return {place};
+  })();
   const heartline=(()=>{
     const BEAT='h5.4 q1.8 -3 3.6 0 h2.7 l1.35 2 l2.25 -16 l2.7 22 l1.8 -8 h3.6 q2.7 -5 5.4 0 h7.2';
     // One unbroken stroke, so it draws strictly left to right: after closing
@@ -767,8 +802,10 @@
       const r=rg.getBoundingClientRect(),rr=row.getBoundingClientRect();if(!r.width)return;
       const fs=parseFloat(getComputedStyle(name).fontSize)||56,w=Math.max(96,Math.min(170,fs*2)),h=w*43/152;
       el.style.width=w+'px';el.style.height=h+'px';
-      el.style.left=Math.max(0,(r.left+r.right)/2-rr.left-row.clientLeft-w/2).toFixed(1)+'px';
-      el.style.top=(r.bottom-rr.top-row.clientTop-h*.22).toFixed(1)+'px';
+      const left=Math.max(0,(r.left+r.right)/2-rr.left-row.clientLeft-w/2),top=r.bottom-rr.top-row.clientTop-h*.22;
+      el.style.left=left.toFixed(1)+'px';
+      el.style.top=top.toFixed(1)+'px';
+      helloTitle.place(row,left+w/2,top+h);
     }
     return {
       attach(button){
@@ -1220,6 +1257,8 @@
     initGreetingWithDecor(content);
     initHeroDecor(content);
   };
+  // A title arriving or changing (index.html, ih:titles) redraws the one under the name.
+  document.addEventListener('ih:titles',()=>heartline.place());
 
   /* ---------- Hero decor: falling petals + arc of mini marks ----------
      Styles live in home-polish.css under the same heading. */

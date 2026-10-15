@@ -17,7 +17,8 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `journey.cjs` | End to end: Ask the Hub, briefing, Term Review, offline and storage-refused cases |
 | `smiley-gaze.cjs` | Dr. Smiley's eyes, lean and moods |
 | `smiley-gestures.cjs` | Dr. Smiley's five performances, frame by frame |
-| `home-rest.cjs` | Home decor: petals (one canvas per place, still falling, stop when scrolled away, rest under reduced motion) and heartline loop; the badge loop ends; the card ring glows on arrival only |
+| `home-rest.cjs` | Home decor: petals (Chromium: one canvas per place from a worker; iPhone Safari: the old animated elements, no will-change; both keep falling, stop when scrolled away, rest under reduced motion) and heartline loop; the badge loop ends; the card ring glows on arrival only |
+| `chat-titles.cjs` | Team Chat titles: Admin follows the owner-code phone (a typed name can't borrow it), Supervisor of Language Services by name and spellings, new messages carry the phone |
 
 ## Run them
 

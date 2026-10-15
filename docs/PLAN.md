@@ -64,21 +64,17 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    task 497 -> 438 ms. Still open here: taps wait ~80 ms against < 20 ms;
    left for S3/S4 (arrival work, `ih:home-paint`'s forced layout, the
    pointer handlers), then re-check.
-   **#40 status (2026-10-15, not merged): WebKit crashes.** The worker
-   painter (OffscreenCanvas) crashed the WebKit page in CI: 1 of 6 cold
-   loads on the computer layout, and in earlier runs; the page-thread
-   painter 0/6, the old CSS petals 0/6. Jose's call: **iPhones and Safari
-   keep the old CSS petals; Chromium (Android, computers) gets the worker
-   painter.** To do on this branch: (1) revert the TEMP diagnostic in
-   `tests/suites/doctor-page.cjs` and delete `tests/support/_old-home-polish.*`
-   (last TEMP commit d957465); (2) put the old DOM petals (`buildPetals` /
-   `addCardPetals` / the `.home-petal` CSS and keyframes from b970868) back
-   as the WebKit path, chosen by engine (`/AppleWebKit/` and not
-   `/Chrome\/|Chromium|Edg\//` in the user agent: all iOS browsers are
-   WebKit); keep the canvas painter for the rest; (3) home-rest checks both
-   paths (BROWSER=webkit runs only doctor-page in CI); (4) merge main
-   (has #41: sw.js cache name, BUILD_ID, guide count 61). The sheet now
-   rasterises at k = dpr (max 3): same pixels, a quarter of the work.
+   **#40 (merged 2026-10-15): WebKit keeps the old petals.** The worker
+   painter (OffscreenCanvas) crashed the WebKit page in CI (1 cold load in
+   6; the old CSS petals 0 in 6). Jose's call: iPhones and Safari keep the
+   old CSS petals, Chromium (Android, computers) gets the worker painter.
+   `PETALS_AS_DOM` in `home-polish.js` picks by engine (`AppleWebKit` and
+   not `Chrome/`, `Chromium`, `Edg/`; every iOS browser is WebKit); the
+   DOM path writes the same seeded petals with the old inline styles and the
+   old `.home-petal` CSS. Same look: styles identical to b970868, reduced
+   motion pixel-identical, moving frames within run-to-run noise. home-rest
+   checks both (an iPhone Safari user agent in Chromium takes the old path).
+   So the S1b numbers above are Chromium's; iPhones are as before S1b.
 S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
    flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
    the pill animates width; the top bar is 12 px taller on some screens, so
@@ -179,6 +175,12 @@ come from this alone.
 
 ## Done
 
+- 2026-10-15 Team Chat titles (Jose asked): "Admin" under the names of
+  owner-code phones (`hub-admins/{uid}`; messages now carry the sending
+  phone, held to it by the rules) and a "Supervisor of Language Services"
+  ribbon for Liz Lind (by name; Elizabeth Lind, Liz Lind-Smith too).
+  Rules tested in the emulator; Jose pastes `firestore.rules` into the
+  console. `docs/features/team-access.md`, suite `chat-titles.cjs`.
 - 2026-10-10 CCC watcher source: moved, then switched off (site answers
   403 to the watcher). jvtomax99/Interp#22, #23.
 - 2026-10-13 Phase 1 cleanup: 16 dead functions, 6 unused files, internal
