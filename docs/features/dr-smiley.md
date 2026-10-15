@@ -61,8 +61,10 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   (`ih_smileyMode`); the phone's reduced motion always means Still.
 - **Home's decor: what loops, what settles** (S1 in `docs/PLAN.md`, then
   Jose's call, 2026-10-15). The petals and the heartline are part of the
-  look and loop forever; everything else settles. Petals: one canvas per
-  place (banner, rank card), painted from a Web Worker on an
+  look and loop forever; everything else settles. Petals on iPhones and
+  Safari (WebKit): the old animated elements, one per petal, no
+  `will-change` (`PETALS_AS_DOM`: the worker painter crashed WebKit in CI).
+  Elsewhere: one canvas per place (banner, rank card), painted from a Web Worker on an
   OffscreenCanvas (`petalPainter`, home-polish.js, S1b; the same painter
   runs on the page where a phone lacks OffscreenCanvas), drawn from the old
   keyframes' math with the same seeded values and artwork. The page only
