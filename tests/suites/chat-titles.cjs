@@ -20,19 +20,25 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
     await add('t5', 'elizabeth  LIND', 4);
     await add('t6', 'Liz Lind-Smith', 3);
     await add('t7', 'Jose Vazquez', 2);
+    await add('t8', 'Fabiola', 1.5);
+    await add('t9', 'fabiola  Grijalva', 1, 'her-phone');
+    await add('t10', 'Fabiolas Bistro', 0.5);
   });
   await page.evaluate(() => setCategory('chat')); await page.waitForTimeout(1200);
-  const rows = await page.evaluate(() => [...document.querySelectorAll('.chat-author')].slice(-7).map(a => ({
+  const rows = await page.evaluate(() => [...document.querySelectorAll('.chat-author')].slice(-10).map(a => ({
     name: a.firstChild.textContent, title: (a.querySelector('.chat-title') || {}).textContent || '',
     kind: (a.querySelector('.chat-title') || { className: '' }).className })));
   const by = i => rows[i] || {};
   ok(by(0).title === 'Supervisor of Language Services' && /is-supervisor/.test(by(0).kind), 'Liz Lind: Supervisor of Language Services ribbon', by(0));
-  ok(by(1).title === 'Admin', 'the owner phone\'s message: Admin', by(1));
+  ok(by(1).title === 'Administrator', 'the owner phone\'s message: Administrator', by(1));
   ok(by(2).title === '', 'a teammate: no title', by(2));
   ok(by(3).title === '', 'the same name from another phone: no Admin title', by(3));
   ok(by(4).title === 'Supervisor of Language Services', 'Elizabeth Lind, any capitals and spaces: Supervisor', by(4));
   ok(by(5).title === 'Supervisor of Language Services', 'Liz Lind-Smith: Supervisor', by(5));
-  ok(by(6).title === 'Admin', 'an older message with no phone on it: Admin by name', by(6));
+  ok(by(6).title === 'Administrator', 'an older message with no phone on it: Administrator by name', by(6));
+  ok(by(7).title === 'Administrator', 'Fabiola, first name only: Administrator', by(7));
+  ok(by(8).title === 'Administrator', 'Fabiola Grijalva, any capitals, any phone: Administrator', by(8));
+  ok(by(9).title === '', 'a name that only starts with the letters: no title', by(9));
   const sent = await page.evaluate(async () => {
     const input = document.getElementById('chatInput') || document.querySelector('#tcPanel textarea, #tcPanel input[type=text]');
     if (!input) return 'no input';
