@@ -55,15 +55,26 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    handlers (`drInputEvent` and two `pointerdown` listeners: ~38 ms from
    pointerdown to click on a fully rested Home) are what's left. Goes with
    S3 and S4; re-check the target after them.
-   Since #38 the endless petals are back (Jose: visuals never suffer), so
-   idle Home is 78% busy again (perf.cjs settled, median of 3) and taps
-   wait 109-218 ms. First try, same look: draw all banner and card petals
-   on one layer instead of 28 animated elements (one canvas or one SVG
-   driven by a single animation), identical shapes, fills, sizes, speeds,
-   sway, spin and flutter; compare screenshots/video frame by frame with
-   the current petals before shipping, then perf.cjs median of 3. Tools in
-   this chat's notes: a trace of the idle window (RunTask, Layerize per
-   frame) is what showed the cost; perf.cjs "settled" is the number.
+   Petals done (S1b PR): one canvas per place, painted from a worker, same
+   look (frame-by-frame comparison in the PR). Medians of 6 interleaved
+   perf.cjs runs, before -> after: idle Home settled 75% -> 24%, first
+   window 95% -> 53%; tap waits View all 185 -> 84 ms, domain 165 -> 84,
+   name sheet 143 -> 82, More 140 -> 81 (More was missed in 2 of 6
+   before runs, 0 after); startup long tasks 76 -> 39 (first visit), worst
+   task 497 -> 438 ms. Still open here: taps wait ~80 ms against < 20 ms;
+   left for S3/S4 (arrival work, `ih:home-paint`'s forced layout, the
+   pointer handlers), then re-check.
+   **#40 (merged 2026-10-15): WebKit keeps the old petals.** The worker
+   painter (OffscreenCanvas) crashed the WebKit page in CI (1 cold load in
+   6; the old CSS petals 0 in 6). Jose's call: iPhones and Safari keep the
+   old CSS petals, Chromium (Android, computers) gets the worker painter.
+   `PETALS_AS_DOM` in `home-polish.js` picks by engine (`AppleWebKit` and
+   not `Chrome/`, `Chromium`, `Edg/`; every iOS browser is WebKit); the
+   DOM path writes the same seeded petals with the old inline styles and the
+   old `.home-petal` CSS. Same look: styles identical to b970868, reduced
+   motion pixel-identical, moving frames within run-to-run noise. home-rest
+   checks both (an iPhone Safari user agent in Chromium takes the old path).
+   So the S1b numbers above are Chromium's; iPhones are as before S1b.
 S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
    flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
    the pill animates width; the top bar is 12 px taller on some screens, so
@@ -189,6 +200,11 @@ come from this alone.
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
   fix. No rules change, no migration. `docs/features/regions.md`. #31.
+- 2026-10-15 S1b petals: banner and rank-card petals drawn on one canvas
+  per place from a Web Worker (OffscreenCanvas; same painter on the page
+  where unsupported). Same seeded values, artwork and keyframe math: every
+  petal's box matches the old computed transform to 0.01 px. Idle settled
+  75% -> 24%, tap waits ~160 -> ~82 ms (medians of 6). Taps stay in S1b.
 - 2026-10-15 S1 Home rests after arrival: #37 stopped the petals (one
   shower), the heartline (draw once), the badge breeze, halo glow and card
   ring after arrival. Idle settled 94% -> 4%. Jose then asked for the
@@ -218,6 +234,17 @@ come from this alone.
   Home's look. Don't stop them for speed; make them cheaper instead. The
   endless petals run mostly on the compositor (trace: main thread ~14% at
   rest with them, ~0.5% without).
+- A frame loop on the page (requestAnimationFrame drawing a canvas) costs
+  far more than its own work: Chrome then produces a whole Home frame
+  (style, paint, commit) every vsync. The petals' drawing is 0.14 ms a
+  frame, yet a page loop took idle Home to 99% busy at 4x. A worker on an
+  OffscreenCanvas hands frames to the compositor with no page frame: 24%.
+- Comparing two versions frame by frame: freeze both at the same moment
+  (CSS: pause each animation and set currentTime; the painter:
+  `__homePetals.freeze`) and diff the pixels. A paused CSS animation with
+  a negative delay shows nothing while currentTime < 0, so pick moments
+  every petal has already reached. Run perf.cjs before/after interleaved
+  (before, after, before, ...), not in blocks: the machine's load drifts.
 - Breathing, drift, the halo's turn and the streak flame are compositor-only:
   Home at rest with them running is ~0.5% main-thread busy (trace).
 
