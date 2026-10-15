@@ -590,7 +590,8 @@
       two-tone fill, soft highlight and vein, in three depth tiers: small
       hazy far petals, crisp mid petals, a few large blurred near ones. They
       fade out before they reach Search.
-      All drawn on one canvas (home-polish.js). It pauses when the app is in
+      One canvas per place in Chromium, one animated element per petal on
+      iPhones and Safari (home-polish.js). It pauses when the app is in
       the background or Home is scrolled away, and is off entirely under
       prefers-reduced-motion (petals are shown resting instead).
 
@@ -612,9 +613,46 @@
   -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 68%,transparent 96%);
           mask-image:linear-gradient(to bottom,#000 0%,#000 68%,transparent 96%);
 }
-/* One canvas per place draws every petal, painted from a worker (S1b;
-   home-polish.js, "The petals are drawn"). Their motion, pause and
-   reduced-motion rest live there now. */
+/* iPhones and Safari (WebKit): one animated element per petal, the rules
+   below (home-polish.js, PETALS_AS_DOM). */
+.home-petal{
+  /* No will-change: a permanent layer per petal had Chrome re-layering Home
+     every frame (S1). The fall still runs on the compositor. */
+  position:absolute; top:-26px; opacity:0;
+  animation:homePetalFall var(--dur) linear var(--delay) infinite;
+}
+.home-petal svg{
+  display:block; width:100%; height:100%; overflow:visible;
+  animation:homePetalFlutter var(--flip) ease-in-out var(--delay) infinite alternate;
+}
+.home-petal.is-far{ filter:blur(.6px); }
+.home-petal.is-near{ filter:blur(1.4px); }
+@keyframes homePetalFall{
+  0%  { transform:translate3d(0,0,0) rotate(var(--r0)); opacity:0; }
+  10% { opacity:var(--o); }
+  50% { transform:translate3d(var(--sway),calc(var(--fall) * .5),0) rotate(calc(var(--r0) + 120deg)); }
+  85% { opacity:calc(var(--o) * .6); }
+  100%{ transform:translate3d(calc(var(--sway) * -.4),var(--fall),0) rotate(calc(var(--r0) + 260deg)); opacity:0; }
+}
+@keyframes homePetalFlutter{
+  from{ transform:rotateX(0) rotateY(0); }
+  to  { transform:rotateX(62deg) rotateY(28deg); }
+}
+/* Battery: nothing animates in a backgrounded app or with Home scrolled off. */
+html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
+.home-petals.is-offscreen .home-petal, .home-petals.is-offscreen .home-petal svg{
+  animation-play-state:paused;
+}
+
+
+@media (prefers-reduced-motion:reduce){
+  .home-petal, .home-petal svg{ animation:none; }
+  .home-petal{ top:var(--rest); opacity:calc(var(--o) * .7); transform:rotate(var(--r0)); }
+}
+
+/* Chromium: one canvas per place draws every petal, painted from a worker
+   (S1b; home-polish.js, "The petals are drawn"). Its motion, pause and
+   reduced-motion rest live there. */
 .home-petals-canvas{
   position:absolute; inset:0; width:100%; height:100%; display:block;
 }
@@ -1000,6 +1038,7 @@
 #content.is-home .smw-dark{overflow:hidden;isolation:isolate;}
 #content.is-home .smw-dark > :not(.smw-petals){position:relative;z-index:1;}
 #content.is-home .smw-petals{position:absolute;inset:0;z-index:0;border-radius:inherit;overflow:hidden;pointer-events:none;}
+#content.is-home .sm-widgets.is-offscreen .home-petal,#content.is-home .sm-widgets.is-offscreen .home-petal svg{animation-play-state:paused;}
 
 /* Arriving on Home: the widgets rise in, his ring fills, the streak dots pop
    in one by one. Not on a repaint of Home (.no-enter) or a widget redrawn in

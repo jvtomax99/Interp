@@ -1,7 +1,8 @@
 /* Home's decor: what loops and what settles (S1 in docs/PLAN.md, then
    Jose's call: the petals and the heartline are part of the look and keep
-   looping). The petals fall forever, drawn on one canvas per place (S1b),
-   not one animated element each. The heartline replays every few seconds. What settles:
+   looping). The petals fall forever: in Chromium drawn on one canvas per
+   place from a worker (S1b); on iPhones and Safari (WebKit) one animated
+   element each, as before, since the worker crashed WebKit. The heartline replays every few seconds. What settles:
    the Ask badge's breeze (its loop ends once it hangs still), one halo glow,
    the rank card ring glows on arrival only. */
 const L = require('../support/harness.cjs');
@@ -72,5 +73,38 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
   const r1 = await PROBE(rp); await rp.waitForTimeout(800);
   const r2 = await PROBE(rp);
   ok(r2.hero && r2.hero.state === 'still' && r2.hero.drawn && r2.card && r2.card.drawn && frames(r2) === frames(r1) && frames(r2) === 0, 'reduced motion: the petals rest in place, nothing falls, no frame loop', [r1, r2]);
+
+  // An iPhone's Safari user agent (CI's WebKit job runs only the doctor
+  // page, so the WebKit path is checked here, picked by the same test).
+  console.log('== iPhone Safari: the old petals');
+  const { page: ip } = await L.boot(b, { settle: 6000, init: COUNT_RAF });
+  const dom = () => [...document.querySelectorAll('.home-petal')].map(p => ({
+    hero: !!p.closest('.home-petals'), card: !!p.closest('.smw-petals'),
+    falling: p.getAnimations().some(a => a.animationName === 'homePetalFall' && a.playState === 'running' && a.effect.getComputedTiming().iterations === Infinity),
+    flutter: p.querySelector('svg').getAnimations().some(a => a.animationName === 'homePetalFlutter' && a.playState === 'running'),
+    willChange: getComputedStyle(p).willChange !== 'auto', w: p.getBoundingClientRect().width,
+    anim: getComputedStyle(p).animationName,
+  }));
+  const d1 = await ip.evaluate(dom);
+  const hero = d1.filter(p => p.hero), card = d1.filter(p => p.card);
+  ok(await ip.evaluate(() => window.__homePetals.dom() && !window.__homePetals.worker() && !document.querySelector('.home-petals-canvas')), 'Safari gets the old petals: no canvas, no worker');
+  ok(hero.length >= 20 && card.length === 8, 'one element per petal: ' + hero.length + ' on the banner, ' + card.length + ' on the rank card');
+  ok(hero.every(p => p.falling && p.flutter && p.w > 0), 'every banner petal falls and flutters, forever', hero.filter(p => !p.falling || !p.flutter));
+  await ip.evaluate(() => document.querySelector('.sm-widgets').scrollIntoView({ block: 'center' }));
+  await ip.waitForTimeout(800);
+  const d2 = (await ip.evaluate(dom)).filter(p => p.card);
+  ok(d2.length === 8 && d2.every(p => p.falling && p.flutter && p.w > 0), 'the rank card\'s petals fall and flutter once it is on screen', d2.filter(p => !p.falling || !p.flutter));
+  ok(!d1.some(p => p.willChange), 'no petal holds a layer of its own (no will-change)');
+  ok(await ip.evaluate(() => !!document.querySelector('#homePetalDefs #hpSakura')), 'the petal artwork is defined once');
+  ok(await ip.evaluate(() => window.__petalRaf) === 0, 'no petal frame loop on the page');
+  await ip.evaluate(() => { const r = document.querySelector('.sm-widgets').getBoundingClientRect(); window.scrollTo(0, window.scrollY + r.bottom + 40); });
+  await ip.waitForTimeout(800);
+  ok(await ip.evaluate(() => [...document.querySelectorAll('.home-petal')].every(p => p.getAnimations().every(a => a.playState === 'paused'))), 'scrolled past the banner and the card, the petals pause');
+  ok(!ip.__errors.length, 'no page errors', ip.__errors);
+
+  console.log('== iPhone Safari, reduced motion');
+  const { page: irp } = await L.boot(b, { settle: 3000, reducedMotion: true });
+  const ir = await irp.evaluate(dom);
+  ok(ir.length > 0 && ir.every(p => p.anim === 'none'), 'reduced motion: the petals rest in place, nothing falls', ir.map(p => p.anim));
   await b.close();
 })();

@@ -1514,8 +1514,44 @@
     fields: petalFields,
     worker: () => !!(petalPort && petalPort.remote),
     probe: () => new Promise(r => { const id = ++petalProbeId; petalProbes[id] = r; getPetalPort().post({ type: 'probe', id }); }),
-    freeze: (kind, t, delays, still) => { const f = petalFields[kind]; if(!f) return; f.frozen = true; getPetalPort().post({ type: 'freeze', kind, t, delays, still }); }
+    freeze: (kind, t, delays, still) => { const f = petalFields[kind]; if(!f) return; f.frozen = true; getPetalPort().post({ type: 'freeze', kind, t, delays, still }); },
+    dom: () => PETALS_AS_DOM
   };
+
+  /* iPhones and Safari keep the old petals: one animated <div><svg> each,
+     moved by the CSS keyframes in home-polish.css (.home-petal). The worker
+     painter crashed the WebKit page in CI (1 cold load in 6; the old petals
+     0 in 6), so WebKit never gets it. Every iOS browser is WebKit, Chrome
+     and Edge there included (CriOS, EdgiOS). Same seeded values, same look.
+     window.__petalsDom (tests only) forces this path in Chromium. */
+  const PETALS_AS_DOM = typeof window.__petalsDom === 'boolean' ? window.__petalsDom
+    : /AppleWebKit/.test(navigator.userAgent) && !/Chrome\/|Chromium|Edg\//.test(navigator.userAgent);
+  function ensurePetalDefs(){
+    if(document.getElementById('homePetalDefs')) return;
+    const wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<svg id="homePetalDefs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">' +
+      '<defs>' + PETAL_DEFS +
+      '<symbol id="hpSakura" viewBox="0 0 40 48">' +
+        '<path d="' + PETAL_SHAPE + '" style="fill:var(--fill)" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>' +
+        '<path d="' + PETAL_SHAPE + '" fill="url(#hpShine)"/>' +
+        '<path d="M20 44C19 32 19.5 20 20 10" stroke="#fff" stroke-opacity=".45" stroke-width=".9" fill="none" stroke-linecap="round"/>' +
+        '<path d="M20 30c-3-3-7-5-10-5M20 30c3-3 7-5 10-5" stroke="#fff" stroke-opacity=".25" stroke-width=".6" fill="none"/>' +
+      '</symbol></defs></svg>';
+    document.body.appendChild(wrap.firstChild);
+  }
+  // The same petals as elements, written as the old inline styles were.
+  function domPetals(layer, petals){
+    ensurePetalDefs();
+    layer.dataset.petals = petals.length;
+    layer.innerHTML = petals.map(p =>
+      '<div class="home-petal' + (p.blur === .6 ? ' is-far' : p.blur === 1.4 ? ' is-near' : '') + '" style="' +
+      'left:' + p.left.toFixed(1) + '%;width:' + p.w.toFixed(1) + 'px;height:' + p.h.toFixed(1) + 'px;' +
+      '--fill:url(#' + p.fill + ');--o:' + p.o.toFixed(2) + ';' +
+      '--dur:' + p.dur.toFixed(2) + 's;--delay:' + p.delay.toFixed(2) + 's;--flip:' + p.flip.toFixed(2) + 's;' +
+      '--sway:' + p.sway + 'px;--r0:' + p.r0 + 'deg;' + (p.fall ? '--fall:' + p.fall + 'px;' : '') + '--rest:' + p.rest + '%' +
+      '"><svg><use href="#hpSakura"/></svg></div>').join('');
+  }
 
   function buildPetals(hero){
     const layer = document.createElement('div');
@@ -1575,7 +1611,21 @@
     hero.dataset.decorReady = '1';
     const scrim = hero.querySelector('.home-greeting-scrim');
     hero.insertBefore(petals, scrim ? scrim.nextSibling : hero.firstChild);
-    makePetalField('hero', petals, list, () => petals.classList.contains('is-offscreen'), h => Math.round(h * 1.05));
+    if(PETALS_AS_DOM){
+      domPetals(petals, list);
+      petals.style.setProperty('--fall', Math.round(hero.clientHeight * 1.05) + 'px');
+      if(typeof ResizeObserver !== 'undefined'){
+        let lastH = hero.clientHeight;
+        const ro = new ResizeObserver(() => {
+          if(hero.clientHeight === lastH) return;
+          lastH = hero.clientHeight;
+          petals.style.setProperty('--fall', Math.round(lastH * 1.05) + 'px');
+        });
+        ro.observe(hero);
+        decorObservers.push(ro);
+      }
+    }
+    else makePetalField('hero', petals, list, () => petals.classList.contains('is-offscreen'), h => Math.round(h * 1.05));
 
     if(typeof IntersectionObserver !== 'undefined'){
       const io = new IntersectionObserver(entries => {
@@ -1777,7 +1827,8 @@
     layer.setAttribute('aria-hidden', 'true');
     card.prepend(layer);
     const sec = card.closest('.sm-widgets');
-    makePetalField('card', layer, petals, () => !!sec && sec.classList.contains('is-offscreen'));
+    if(PETALS_AS_DOM) domPetals(layer, petals);
+    else makePetalField('card', layer, petals, () => !!sec && sec.classList.contains('is-offscreen'));
   }
   function watchCardPetals(sec){
     cardPetalWatch.forEach(o => o.disconnect());
