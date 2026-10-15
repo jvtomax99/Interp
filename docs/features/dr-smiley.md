@@ -59,13 +59,13 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   provenance label is untouched). No mouth movement for silent text: `talk()`
   is for real audio only. Lively / Focused / Still is `setSmileyMode`
   (`ih_smileyMode`); the phone's reduced motion always means Still.
-- **Home rests after arrival** (S1 in `docs/PLAN.md`). On Home his decor
-  plays when you arrive, then stops: the petal shower (12 on a phone, one
-  fall each, `SHOWER_END`; a repaint rebuilds what's left of it from the
-  clock, because a greeting put back restarts its CSS), the Ask badge's
-  breeze (`BREEZE_S`, then `askBadge`'s loop ends once the badge hangs
-  still; a pet or a new hello swings it again), one halo glow (`askHalo`),
-  one heartline draw that stays drawn. His breathing, drift and the halo's
-  slow turn stay: they are compositor-only and cost ~nothing. Never add an
-  endless JS loop, an `infinite` CSS animation that repaints, or
-  `will-change` per item on Home; `tests/suites/home-rest.cjs` checks it.
+- **Home's decor: what loops, what settles** (S1 in `docs/PLAN.md`, then
+  Jose's call, 2026-10-15). The petals and the heartline are part of the
+  look and loop forever; everything else settles. Petals: no `will-change`
+  (a permanent layer per petal had Chrome re-layering Home every frame);
+  the fall runs on the compositor. Settles: the Ask badge's breeze
+  (`BREEZE_S`, then `askBadge`'s loop ends once it hangs still; a pet or a
+  new hello swings it again), one halo glow per arrival (`askHalo`), the
+  rank card ring glows on arrival only. Breathing, drift and the halo's turn
+  are compositor-only. Don't add an endless JS loop or per-item
+  `will-change` on Home; `tests/suites/home-rest.cjs` checks it.

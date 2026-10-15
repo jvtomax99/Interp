@@ -45,7 +45,7 @@ Baseline 2026-10-15: idle Home 95% busy (reduced motion: 6%); taps on Home wait
 392-456, More 360-408, a domain 288-368); startup worst task 395-676 ms,
 40-73 long tasks; 30 animations not transform/opacity.
 
-S1b. **Home taps, still slow (found in S1).** With Home at rest, taps still
+S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps still
    wait 59-90 ms (median, 4x) against the < 20 ms target. They are timed
    ~2 s after an arrival on Home, so arrival work (render, the shower's
    start, `ih:home-paint`'s forced layout) and the tap's own pointer/touch
@@ -171,13 +171,12 @@ come from this alone.
 - 2026-10-14 Regions R1-R3 (South joins): North/South picker, Team Chat
   channels (Everyone, North, South), Doctor Directory by region, namesake
   fix. No rules change, no migration. `docs/features/regions.md`. #31.
-- 2026-10-15 S1 Home rests after arrival: one petal shower (12 on a
-  phone, one fall each, no flutter, no will-change), badge breeze ends, one
-  halo glow, heartline draws once and stays, card ring glows on arrival
-  only. Medians of 3 (perf.cjs, 4x) main -> this: idle Home settled 94% ->
-  4%; idle at load+9.5 s 91% -> 52% (the hello still playing); tap waits
-  View all 116 -> 90, domain 117 -> 60, name 100 -> 73, More 113 -> 59 ms;
-  long tasks at startup 56 -> 37. Suite `home-rest.cjs`.
+- 2026-10-15 S1 Home rests after arrival: #37 stopped the petals (one
+  shower), the heartline (draw once), the badge breeze, halo glow and card
+  ring after arrival. Idle settled 94% -> 4%. Jose then asked for the
+  petals and the heartline looping again (part of the look): restored as
+  before but with no per-petal `will-change`; badge, halo and ring stay
+  settled. Numbers for this in the PR.
 - 2026-10-15 Smoothness measured (no app change): baseline, causes and the
   S1-S6 plan above; `tests/tools/perf.cjs`.
 - 2026-10-14 Doctors D1, the doctor's page: header with specialty pin,
@@ -195,8 +194,12 @@ come from this alone.
   Home" window (load + 9.5 s) still catches the hello's thought cloud at 4x,
   so "settled" (load + 22.5 s) is the rest number.
 - A kept greeting put back on a repaint of Home restarts every CSS animation
-  inside it. Anything one-shot in the greeting must end in a static class
-  (heartline `.is-drawn`) or be rebuilt from a clock (petals).
+  inside it. Anything one-shot in the greeting must end in a static class or
+  be rebuilt from a clock.
+- Jose (2026-10-15): the endless petals and the looping heartline are part of
+  Home's look. Don't stop them for speed; make them cheaper instead. The
+  endless petals run mostly on the compositor (trace: main thread ~14% at
+  rest with them, ~0.5% without).
 - Breathing, drift, the halo's turn and the streak flame are compositor-only:
   Home at rest with them running is ~0.5% main-thread busy (trace).
 
