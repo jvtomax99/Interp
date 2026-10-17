@@ -20538,21 +20538,23 @@ function dockMorph(tuck, apply){
     { translate: `${(H - Hb) / 2}px 0`, scale: `${(W - H) / (Wb - Hb)} ${H / Hb}` },
     { translate: `${W - Wb}px 0`, scale: `${H / Hb}` }
   ];
-  const shapeOpen = shape(Wo, Ho), shapeMini = shape(Wm, Hm);
-  const t0 = dockTimeFor(from) * DOCK_MS, left = DOCK_MS - t0;
+  // A move turned around starts from the shape the last one had reached
+  // (written into its first keyframe, not by seeking: WebKit has not always
+  // honoured a seek on an animation that hasn't started) and takes the time
+  // that move had left.
+  const lerp = (a, b) => a + (b - a) * from;
+  const startW = tuck ? lerp(Wo, Wm) : lerp(Wm, Wo), startH = tuck ? lerp(Ho, Hm) : lerp(Hm, Ho);
+  const shapeFrom = shape(startW, startH), shapeTo = tuck ? shape(Wm, Hm) : shape(Wo, Ho);
+  const left = DOCK_MS * (1 - dockTimeFor(from));
   const anims = [];
-  const run = (el, kf, o) => { const a = el.animate(kf, Object.assign({ duration: DOCK_MS, easing: 'cubic-bezier(' + DOCK_EASE + ')', fill: 'both' }, o)); anims.push(a); return a; };
+  const run = (el, kf, o) => { const a = el.animate(kf, Object.assign({ duration: left, easing: 'cubic-bezier(' + DOCK_EASE + ')', fill: 'both' }, o)); anims.push(a); return a; };
   const sh = skin.querySelectorAll('.dk-sh'), pc = skin.querySelectorAll('.dk-pc'), cp = skin.querySelectorAll('.dk-cp');
   let clock = null;
-  [sh, pc, cp].forEach(list => list.forEach((el, i) => {
-    const a = run(el, tuck ? [shapeOpen[i], shapeMini[i]] : [shapeMini[i], shapeOpen[i]]);
-    a.currentTime = t0;
-    clock = clock || a;
-  }));
+  [sh, pc, cp].forEach(list => list.forEach((el, i) => { const a = run(el, [shapeFrom[i], shapeTo[i]]); clock = clock || a; }));
   // The capsule's colours fade in as it tucks, out as it opens (300 ms, as
-  // the bar's own ::before/::after did).
-  const fade = run(skin.querySelector('.dk-cap'), [{ opacity: tuck ? 0 : 1 }, { opacity: tuck ? 1 : 0 }], { duration: 300 });
-  fade.currentTime = Math.min(300, t0);
+  // the bar's own ::before/::after did), from wherever they were.
+  const capFrom = tuck ? Math.min(1, from * DOCK_MS / 300) : 1 - Math.min(1, from * DOCK_MS / 300);
+  run(skin.querySelector('.dk-cap'), [{ opacity: capFrom }, { opacity: tuck ? 1 : 0 }], { duration: Math.max(1, 300 * Math.abs((tuck ? 1 : 0) - capFrom)) });
   // FLIP: from where it was to where the new layout put it.
   const flip = (n, r0) => {
     const r1 = R(n);
@@ -20601,11 +20603,16 @@ function dockMorph(tuck, apply){
       }
     });
   }
+  // How far the outline has got, 0 to 1 of this whole move (for a move
+  // that turns around).
   const me = dockRun = {
     bar, skin, anims,
-    progress: () => { const t = clock && clock.currentTime != null ? Math.min(DOCK_MS, clock.currentTime) : DOCK_MS; return dockBezier(t / DOCK_MS); }
+    progress: () => { const t = clock && clock.currentTime != null ? Math.min(left, clock.currentTime) : left; return from + (1 - from) * dockBezier(t / left); }
   };
-  clock.finished.then(() => { if(dockRun === me) dockStop(); }, () => {});
+  const done = () => { if(dockRun === me) dockStop(); };
+  clock.finished.then(done, () => {});
+  setTimeout(done, left + 250);      // in case a browser never settles the promise
+  
 }
 function dockRefitChat(){
   if(activeCategory !== 'chat' || typeof fitChatPanel !== 'function') return;

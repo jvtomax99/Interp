@@ -81,13 +81,15 @@ const settle = page => page.evaluate(() => new Promise(r => {
     // Timed in the page, so the browser's round trips don't move the moment.
     jumps.push(await page.evaluate(gap => new Promise(r => {
       dockTuck();
-      setTimeout(() => {
+      // Read inside an animation frame: WebKit only brings animated styles
+      // up to date at a rendering update.
+      setTimeout(() => requestAnimationFrame(() => {
         const piece = () => document.querySelector('.dk-skin .dk-pc.dk-r');
         if (!piece()) return r('no move running at ' + gap + ' ms');
         const run = dockRun, t = run.anims[0].currentTime, p = run.progress();
         const a = piece().getBoundingClientRect().right; dockOpen(); const b = piece().getBoundingClientRect().right;
         r(+(b - a).toFixed(2) + ' (at ' + Math.round(t) + ' ms, ' + Math.round(p * 100) + '% tucked)');
-      }, gap);
+      }), gap);
     }), gap));
   }
   ok(jumps.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
