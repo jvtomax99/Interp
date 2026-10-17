@@ -86,7 +86,8 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    scrolling; a visible change if the trigger moves: ask Jose); each tuck's
    body-class change restyles ~490 elements (~49 ms at 4x); Team Chat's
    thread tuck still reads scrollTop inside the scroll event. Re-measure on
-   Jose's phone after each.
+   Jose's phone after each. Don't move the tuck's scroll read into a frame
+   callback without a WebKit check (see part 1).
 S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
    `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
    Defer decorative work past first paint (requestIdleCallback + timeout),
@@ -182,10 +183,10 @@ come from this alone.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
-  computed styles identical, 12 states). The page's scroll position read
-  once per frame for the photo drift, tuck and sway (`onPageScroll`,
-  `nextPageFrame`). Late frames while scrolling, `scroll.cjs` UA=chromium
-  4x: median 9.9% (4 runs) -> 7.9% (6 runs), noisy. Jose's phone decides.
+  computed styles identical, 12 states). Numbers in the PR; Jose's phone
+  decides. Tried and reverted: reading the scroll position once per frame
+  for the photo drift, tuck and sway (no gain measured on its own; in CI's
+  WebKit the tuck then landed after the dock-tuck test moved on).
   jvtomax99/Interp#47.
 - 2026-10-17 S6 smoothness meter (Jose asked; before S3): bottom of More
   (the app has no Settings screen), above the build. Timer pill, results
