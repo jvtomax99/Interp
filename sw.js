@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v225-frame-meter';
+const CACHE_VERSION = 'interpreter-hub-v226-home-scroll';
 const PRECACHE = [
   './',
   './index.html',
