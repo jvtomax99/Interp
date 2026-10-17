@@ -17635,7 +17635,6 @@ let keptGreeting = null, keptGreetingSig = '';
 const HERO_DRIFT_RATE = 0.3;    // fraction of scroll distance
 const HERO_DRIFT_MAX = 30;      // px; inner layer has ~28% of 232px to give
 let heroPhotoEl = null;
-let heroDriftFrame = null;
 let heroMotionOff = null;
 
 function heroMotionDisabled(){
@@ -17647,18 +17646,42 @@ function heroMotionDisabled(){
   return heroMotionOff;
 }
 
-function applyHeroDrift(){
-  heroDriftFrame = null;
+/* The page's scroll position, read once per frame for everything that moves
+   with it (this photo, the tab bar tuck, Dr. Smiley's sway), before any of
+   them writes. Each used to read it on its own (two inside the scroll event,
+   one in a frame callback), after something had moved, so the phone worked
+   out the page's styles up to three times a frame while scrolling. Same frame as the scroll event, so
+   nothing moves later than before.
+   nextPageFrame(fn) runs fn once in that same frame callback, after them,
+   for motion that carries on when the scrolling stops (his spring). */
+const pageScroll = { fns: [], raf: 0, moved: false, then: new Set() };
+function onPageScroll(fn){ pageScroll.fns.push(fn); }
+function nextPageFrame(fn){
+  pageScroll.then.add(fn);
+  if(!pageScroll.raf) pageScroll.raf = requestAnimationFrame(pageScrollFrame);
+}
+function pageScrollFrame(){
+  pageScroll.raf = 0;
+  if(pageScroll.moved){
+    pageScroll.moved = false;
+    const y = window.scrollY || window.pageYOffset || 0;
+    pageScroll.fns.forEach(fn => fn(y));
+  }
+  const then = [...pageScroll.then]; pageScroll.then.clear();
+  then.forEach(fn => fn());
+}
+window.addEventListener('scroll', () => {
+  pageScroll.moved = true;
+  if(!pageScroll.raf) pageScroll.raf = requestAnimationFrame(pageScrollFrame);
+}, { passive: true });
+
+function applyHeroDrift(y){
   if(!heroPhotoEl || !heroPhotoEl.isConnected || heroMotionDisabled()) return;
-  const y = window.scrollY || window.pageYOffset || 0;
+  if(y === undefined) y = window.scrollY || window.pageYOffset || 0;
   const drift = Math.min(y * HERO_DRIFT_RATE, HERO_DRIFT_MAX);
   heroPhotoEl.style.transform = 'translate3d(0,' + drift.toFixed(1) + 'px,0)';
 }
-
-window.addEventListener('scroll', ()=>{
-  if(!heroPhotoEl) return;                    // not on Home: costs one check
-  if(heroDriftFrame === null) heroDriftFrame = requestAnimationFrame(applyHeroDrift);
-}, { passive: true });
+onPageScroll(y => { if(heroPhotoEl) applyHeroDrift(y); });   // not on Home: costs one check
 
 function renderContent(){
   const content = document.getElementById('content');
@@ -20891,15 +20914,16 @@ function dockTabAt(bar, x){
   // Scrolling down tucks the bar into a capsule; up (or the top) opens it.
   // Team Chat scrolls its own thread rather than the page, so that is
   // watched below.
+  // Given the position by onPageScroll, read once per frame (see there).
   let lastY = window.scrollY;
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY, dy = y - lastY;
+  onPageScroll(y => {
+    const dy = y - lastY;
     if(Math.abs(dy) < 8 && y > 80) return;
     lastY = y;
     if(!phone.matches || !document.querySelector('.tabbar')) return;
     if(dy > 0 && y > 160 && activeCategory !== 'chat' && !body().classList.contains('kb-open') && !body().classList.contains('drp-open')) dockTuck();
     else if((dy < 0 || y <= 80) && activeCategory !== 'chat') dockOpen();
-  }, { passive:true });
+  });
   // In Team Chat: your own scrolling of the thread does the same. A new
   // message scrolling it for you doesn't count (no touch just before).
   let threadY = null, touchedAt = 0;
@@ -20994,7 +21018,7 @@ function renderTabBar(){
     { id:'__more',    name:'More',      icon:ICON_GRID,   action:`openMoreSheet()` },
   ];
   const at = tabs.findIndex(t => t.id === activeCategory);
-  return `<nav class="tabbar" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
+  return `<nav class="tabbar${at < 0 ? ' no-current' : ''}" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
     <span class="tabbar-lens" aria-hidden="true"></span>
     ${tabs.map(t=>`
       <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>
@@ -27285,39 +27309,61 @@ window.smileyPettable = smileyPettable;
    stacks on everything else. One shared scroll listener for every swaying
    element (it used to add one per Home rebuild, never removed); elements
    that leave the page are dropped, and the listener goes when none is left.
-   Off when he's Still (reduced motion, or his Still mode). */
+   Off when he's Still (reduced motion, or his Still mode).
+   The page's own scroll comes from onPageScroll (read once per frame, before
+   anything moves); a scroll inside a panel (the chat thread) is read in the
+   same frame. Reading positions inside the scroll event made the phone work
+   out the whole page's styles again each time. */
 const drSways = new Set();
-let drSwayLast = new WeakMap(), drSwayOn = false;
+let drSwayLast = new WeakMap(), drSwayOn = false, drSwayHit = new Set(), drSwayPush = 0, drSwayPageY = null;
 function drSwayScroll(e){
-  if(drStill()) return;
-  const t = e.target === document ? document.scrollingElement : e.target;
-  if(!t || typeof t.scrollTop !== 'number') return;
-  const y = t.scrollTop, was = drSwayLast.has(t) ? drSwayLast.get(t) : y;
-  drSwayLast.set(t, y);
-  const push = Math.max(-1.1, Math.min(1.1, -(y - was) * .03));
+  if(drStill() || e.target === document) return;   // the page: drSwayPage
+  drSwayHit.add(e.target);
+  nextPageFrame(drSwayTick);
+}
+function drSwayPage(y){
+  if(drStill() || !drSways.size) return;
+  const was = drSwayPageY === null ? y : drSwayPageY;
+  drSwayPageY = y;
+  drSwayPush += Math.max(-1.1, Math.min(1.1, -(y - was) * .03));
+  nextPageFrame(drSwayTick);
+}
+// One step a frame for every swaying element: what scrolled, then move each.
+function drSwayTick(){
+  let push = drSwayPush; drSwayPush = 0;
+  drSwayHit.forEach(t => {
+    if(typeof t.scrollTop !== 'number') return;
+    const y = t.scrollTop, was = drSwayLast.has(t) ? drSwayLast.get(t) : y;
+    drSwayLast.set(t, y);
+    push += Math.max(-1.1, Math.min(1.1, -(y - was) * .03));
+  });
+  drSwayHit.clear();
+  let moving = false;
   drSways.forEach(s => {
     if(!s.el.isConnected){ drSways.delete(s); return; }
-    s.push += push;
-    if(!s.raf) s.raf = requestAnimationFrame(s.step);
+    if(s.step(push)) moving = true;
   });
+  if(moving) nextPageFrame(drSwayTick);
   if(!drSways.size){ document.removeEventListener('scroll', drSwayScroll, { capture: true }); drSwayOn = false; }
 }
 function smileySway(el, origin){
   if(!el || el.__sway) return;
   el.__sway = true;
   if(origin) el.style.transformOrigin = origin;
-  const s = { el, ang: 0, vel: 0, push: 0, raf: 0 };
-  s.step = () => {
-    s.raf = 0;
-    if(!el.isConnected){ drSways.delete(s); return; }
-    s.vel = (s.vel + s.push - s.ang * .14) * .78; s.push = 0;
+  const s = { el, ang: 0, vel: 0, rest: true };
+  // One step of his spring; true while he is still moving.
+  s.step = push => {
+    if(s.rest && !push) return false;
+    s.vel = (s.vel + push - s.ang * .14) * .78;
     s.ang = Math.max(-5, Math.min(5, s.ang + s.vel));
-    if(Math.abs(s.ang) < .03 && Math.abs(s.vel) < .03){ s.ang = s.vel = 0; el.style.rotate = ''; return; }
+    if(Math.abs(s.ang) < .03 && Math.abs(s.vel) < .03){ s.ang = s.vel = 0; s.rest = true; el.style.rotate = ''; return false; }
+    s.rest = false;
     el.style.rotate = s.ang.toFixed(2) + 'deg';
-    s.raf = requestAnimationFrame(s.step);
+    return true;
   };
   drSways.add(s);
   if(!drSwayOn){ drSwayOn = true; document.addEventListener('scroll', drSwayScroll, { passive: true, capture: true }); }
+  if(!drSwayPage.on){ drSwayPage.on = true; drSwayPageY = window.scrollY; onPageScroll(drSwayPage); }
 }
 window.smileySway = smileySway;
 
