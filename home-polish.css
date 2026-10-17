@@ -294,7 +294,12 @@
     background:color-mix(in srgb,var(--accent) 12%,transparent);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.75),0 1px 2px rgba(20,43,67,.06);
     transform:translateX(calc(var(--tab-i,0) * 100%));transition:transform .46s cubic-bezier(.3,1.3,.5,1),opacity .2s,scale .2s;}
   html[data-theme="dark"] .tabbar-lens{background:rgba(255,255,255,.13);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.18);}
-  .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-lens{opacity:0;}
+  /* .no-current: no tab is this screen (set when the bar is drawn). It was
+     :not(:has(.tabbar-btn.is-active)), which the browser re-checked on every
+     frame the bar or its icons animated, scrolling included. The class is
+     doubled to keep that selector's weight (three classes), so every rule
+     wins or loses exactly as before. */
+  .tabbar.no-current.no-current .tabbar-lens{opacity:0;}
   .tabbar.is-dragging .tabbar-lens{transition:scale .2s;scale:1.06 1.1;background:color-mix(in srgb,var(--accent) 18%,var(--paper));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 6px 16px -8px rgba(22,55,90,.45);}
 
@@ -363,15 +368,15 @@
   body.dock-mini .tabbar{right:calc(100% - 14px - var(--mini-w, 120px));height:54px;padding:0;border-radius:999px;border-color:transparent;}
   body.dock-mini .tabbar-btn{height:52px;padding:0;}
   body.dock-mini .tabbar-btn:not(.is-active){flex-grow:0;flex-basis:0;opacity:0;overflow:hidden;pointer-events:none;}
-  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{flex-grow:1;opacity:1;pointer-events:auto;}
+  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{flex-grow:1;opacity:1;pointer-events:auto;}
   body.dock-mini .tabbar-btn.is-active,
-  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child{display:grid;grid-template-columns:1fr 1fr;align-items:center;justify-items:center;
+  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{display:grid;grid-template-columns:1fr 1fr;align-items:center;justify-items:center;
     padding:0;font-size:14px;font-weight:700;letter-spacing:-.01em;color:#0F5FA6;white-space:nowrap;}
   body.dock-mini .tabbar-btn:not(.is-active) > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
-  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child > span:not(.tabbar-icon):not(.tabbar-badge){display:inline;}
+  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child > span:not(.tabbar-icon):not(.tabbar-badge){display:inline;}
   body.dock-mini .tabbar-lens{opacity:0;}
   body.dock-mini .tabbar-btn.is-active .tabbar-icon,
-  body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
+  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
   body.dock-mini .tabbar-badge{top:3px;left:auto;right:calc(50% + 3px);border-color:#1F78C6;}
   /* Tucked, he shrinks with the bar (58 to 54px), same middle line, his
      disc's right edge where it was. A scale and a nudge, not a new size

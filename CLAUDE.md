@@ -348,6 +348,10 @@ design and anything touching data or rules stay with the main model.
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
   (His standing rule.)
+- **Ambiguous request: one clarifying question first. Evidence before
+  confidence** (Jose, 2026-10-17; `AGENTS.md`): nothing stated as true
+  without a measurement, test, primary source or the code behind it; say
+  what is unproven.
 - **Every finished job: a preview, then a phone notification** (Jose,
   2026-10-17; `AGENTS.md`). Screenshots of what changed (before/after,
   phone size first) sent as files with `SendUserFile` (status

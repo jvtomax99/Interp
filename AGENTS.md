@@ -263,6 +263,11 @@ from a phone: one step at a time, screenshots over description.
 **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
 (His standing rule.)
 
+**Ambiguous request: ask one clarifying question before doing anything.**
+**Evidence before confidence:** state something as true only with evidence
+for it (a measurement, a test, a primary source, the code). Say plainly what
+is unproven, and don't round a lead up to a result (Jose, 2026-10-17).
+
 **Every finished job comes with a preview and a phone notification**
 (Jose, 2026-10-17). When a job is done (a PR ready, CI green, something
 merged or live, or you're blocked on him), send him a preview he can look at

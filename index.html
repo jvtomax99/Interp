@@ -20259,8 +20259,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1017.1752';
-const BUILD_TIME = '2026-10-17 17:52 UTC';
+const BUILD_ID = 'b1017.2034';
+const BUILD_TIME = '2026-10-17 20:34 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20322,9 +20322,10 @@ function screenReport(){
    Web Inspector). Started from the bottom of More; a small timer at the top
    stops it. Every frame's gap is timed with requestAnimationFrame: a gap of
    about two refresh intervals is one dropped frame, and the time beyond one
-   interval is "hitch time". Apple's yardstick for that (WWDC20, "Explore UI
-   animation hitches and the render loop"): hitch time per second of use,
-   under 5 ms/s good, 5-10 noticeable, over 10 bad.
+   interval is "hitch time". Apple's yardstick for that (WWDC20, "Eliminate
+   animation hitches with XCTest", developer.apple.com/videos/play/wwdc2020/
+   10077): hitch time per second, under 5 ms/s good, 5-10 noticed, 10 or
+   more distracting. Apple times frames on screen; this times the page's.
    It sees the page's own frames: what the main thread delays (handlers,
    layout, style, paint). An animation Safari hands to Core Animation can
    stay smooth through a stall the meter reports, so a drop of hitches after
@@ -20994,7 +20995,7 @@ function renderTabBar(){
     { id:'__more',    name:'More',      icon:ICON_GRID,   action:`openMoreSheet()` },
   ];
   const at = tabs.findIndex(t => t.id === activeCategory);
-  return `<nav class="tabbar" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
+  return `<nav class="tabbar${at < 0 ? ' no-current' : ''}" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
     <span class="tabbar-lens" aria-hidden="true"></span>
     ${tabs.map(t=>`
       <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>

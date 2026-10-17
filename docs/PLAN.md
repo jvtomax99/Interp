@@ -75,6 +75,19 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    motion pixel-identical, moving frames within run-to-run noise. home-rest
    checks both (an iPhone Safari user agent in Chromium takes the old path).
    So the S1b numbers above are Chromium's; iPhones are as before S1b.
+S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
+   in Done. Left, measured with `tests/tools/scroll.cjs` (UA=chromium):
+   `body:has(.overlay.show)` and its siblings in `index.html` and
+   `home-polish.css` (~25% of style time while scrolling; replace with a body
+   class set where overlays open and close, same weight, computed-style
+   proof as in part 1); the pin tap burst starts on `pointerdown`, so a
+   scroll that starts on a card plays it (pin-icons.js `TAP_CARDS`), and 28
+   of its 64 keyframes animate width/height/margin (half the layouts while
+   scrolling; a visible change if the trigger moves: ask Jose); each tuck's
+   body-class change restyles ~490 elements (~49 ms at 4x); Team Chat's
+   thread tuck still reads scrollTop inside the scroll event. Re-measure on
+   Jose's phone after each. Don't move the tuck's scroll read into a frame
+   callback without a WebKit check (see part 1).
 S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
    `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
    Defer decorative work past first paint (requestIdleCallback + timeout),
@@ -167,6 +180,16 @@ come from this alone.
 
 ## Done
 
+- 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
+  `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
+  set at draw (doubled class, same weight; all 69 tab bar elements'
+  computed styles identical, 12 states). `scroll.cjs` UA=chromium 4x,
+  8+8 interleaved, bad runs left out: late frames while scrolling 9.1% ->
+  6.7% median (every after run below every before run), style time 10.6 ->
+  9.2 s. Jose's phone decides. Tried and reverted: reading the scroll position once per frame
+  for the photo drift, tuck and sway (no gain measured on its own; in CI's
+  WebKit the tuck then landed after the dock-tuck test moved on).
+  jvtomax99/Interp#47.
 - 2026-10-17 S6 smoothness meter (Jose asked; before S3): bottom of More
   (the app has no Settings screen), above the build. Timer pill, results
   in Apple's hitch ms/s, per screen and while scrolling, runs kept with
@@ -222,6 +245,25 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- Jose's iPhone (iOS 18.7, installed, 60 Hz), build b1017.1752: scrolling
+  Home 12 s: 10.5% late frames, 85 ms/s, worst 57 ms, none over 100 ms.
+  Home still 17 s: 1%, 7.4 ms/s. So Home's cost is scrolling, not rest.
+- `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
+  number (~10% late at 4x). With the iPhone user agent it does not: Home at
+  rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main
+  thread), the phone 1%. CDP `synthesizeScrollGesture` doesn't scroll Home;
+  touch drags (`Input.dispatchTouchEvent`) do.
+- In this app a style pass costs ~1.2 ms at 4x even for under 10 elements;
+  `:has()` rules were ~45% of style time while scrolling (all removed:
+  11 -> 6 s). The first scroll position read in a frame pays the frame's
+  style work; later reads are cheap unless something was written between.
+- `scroll.cjs` sometimes goes bad from load (~35% late overall, ~45% while
+  scrolling, main thread less busy): seen on the old code and the new, in
+  streaks (3 runs in a row once). The machine or headless Chromium, not the
+  app change; leave such runs out and say so.
+- The hitch thresholds (under 5 ms/s good, 5-10 noticed, 10+ distracting)
+  are from WWDC20 "Eliminate animation hitches with XCTest" (transcript).
 
 - The smoothness meter (S6) times page frames with requestAnimationFrame;
   Safari's Core Animation work isn't in it. Its numbers compare runs on one

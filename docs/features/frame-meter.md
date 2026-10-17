@@ -21,9 +21,12 @@ block of the same name next to the More sheet styles, overlay
   (30 = Low Power Mode; the results say so). A gap rounding to n intervals
   is n - 1 dropped frames; anything past one interval in such a gap is
   hitch time.
-- The headline is Apple's hitch-time ratio (WWDC20, "Explore UI animation
-  hitches and the render loop"): ms of hitches per second, under 5 smooth,
-  5-10 some hitches, over 10 choppy. Below it: dropped %, worst stall,
+- The headline is Apple's hitch-time ratio (WWDC20, "Eliminate animation
+  hitches with XCTest", https://developer.apple.com/videos/play/wwdc2020/10077/,
+  checked against the transcript 2026-10-17): ms of hitches per second, under
+  5 good, 5-10 users notice, 10 or more distracting. Apple times frames late
+  on screen; the meter times the page's own frames, so its number is for
+  comparing runs, not a reading of Apple's. Below it: dropped %, worst stall,
   stalls over 100 ms, then the same per screen and "While scrolling".
 - Time with the app hidden is left out (visibilitychange). Runs under 30
   frames are not saved.
