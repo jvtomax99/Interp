@@ -21,6 +21,15 @@ const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a 
   return { el: n.className && String(n.className.baseVal === undefined ? n.className : n.className.baseVal).split(' ')[0], props };
 }));
 const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
+// Waits (in the page) until nothing on the dock is moving any more, his
+// endless breathing aside: WebKit's round trips are slow, so a fixed wait
+// can land mid-transition.
+const settle = page => page.evaluate(() => new Promise(r => {
+  const t0 = performance.now();
+  const moving = () => document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
+  const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
+  check();
+}));
 
 (async () => {
   const b = await L.chromium.launch();
@@ -31,7 +40,7 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
   await page.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); });
   await page.waitForTimeout(600);
   await page.evaluate(() => { dockOpen(); dockIdleRestart(); });
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(300); await settle(page);
   const open = await rects(page);
   // The page's animation clock against the wall clock (WebKit on CI has run
   // it at a different pace), and anything still moving on Dr. Smiley.
@@ -53,7 +62,7 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
   ok(Math.abs(midBar.bar.w - midBar2.bar.w) < .01, 'the bar\'s own size does not animate (no layout per frame)', [midBar.bar.w, midBar2.bar.w]);
 
   // At rest, tucked: same sizes as the old CSS gave.
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(300); await settle(page);
   const mini = await rects(page);
   const left = await page.evaluate(() => ({ skins: document.querySelectorAll('.dk-skin').length, morph: !!document.querySelector('.is-morph, .dk-lead'), running: document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.tabbar') && a.playState === 'running').length }));
   ok(!left.skins && !left.morph && !left.running, 'after the move nothing is left behind', left);
@@ -68,18 +77,21 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
   // Reversed halfway (scroll down, then straight back up): no jump.
   const jumps = [];
   for (const gap of [60, 200]) {
-    await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await page.waitForTimeout(700);
-    await page.evaluate(() => dockTuck()); await page.waitForTimeout(gap);
-    jumps.push(await page.evaluate(() => {
-      const edge = () => document.querySelector('.dk-skin .dk-pc.dk-r').getBoundingClientRect().right;
-      const run = dockRun, t = run && run.anims[0] && run.anims[0].currentTime, p = run && run.progress();
-      const a = edge(); dockOpen(); const b = edge();
-      const nr = dockRun, nt = nr && nr.anims[0] && nr.anims[0].currentTime;
-      return +(b - a).toFixed(2) + ' (old t ' + Math.round(t) + ' p ' + (p == null ? '-' : p.toFixed(2)) + ', new t ' + Math.round(nt) + ')';
-    }));
+    await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await page.waitForTimeout(300); await settle(page);
+    // Timed in the page, so the browser's round trips don't move the moment.
+    jumps.push(await page.evaluate(gap => new Promise(r => {
+      dockTuck();
+      setTimeout(() => {
+        const piece = () => document.querySelector('.dk-skin .dk-pc.dk-r');
+        if (!piece()) return r('no move running at ' + gap + ' ms');
+        const run = dockRun, t = run.anims[0].currentTime, p = run.progress();
+        const a = piece().getBoundingClientRect().right; dockOpen(); const b = piece().getBoundingClientRect().right;
+        r(+(b - a).toFixed(2) + ' (at ' + Math.round(t) + ' ms, ' + Math.round(p * 100) + '% tucked)');
+      }, gap);
+    }), gap));
   }
   ok(jumps.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(300); await settle(page);
   const back = await rects(page);
   ok(Math.abs(back.bar.w - open.bar.w) < .5 && !(await page.evaluate(() => document.querySelector('.dk-skin'))), 'and lands open, as before', back.bar);
   ok(!page.__errors.length, 'no page errors', page.__errors);
