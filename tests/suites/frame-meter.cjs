@@ -31,6 +31,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     ok(pill && pill.sheetShut && pill.hit && pill.centred && pill.h >= 36 && pill.w < 260 && pill.top < 110 && pill.clearOfBar, 'Start: More closes, a small timer under the top bar takes its own taps', pill);
 
     // Steady frames on Home, then one 400 ms stall, a scroll, and another screen.
+    // A frame's time is when it was scheduled, not when it ran, so the stall
+    // can read shorter than 400 (367 once on CI); 300 still sets it apart
+    // from a normal frame (~17 ms).
     await wait(1500);
     await page.evaluate(() => { const t = performance.now(); while (performance.now() - t < 400) {} });
     await wait(600);
@@ -47,7 +50,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
         rows: [...document.querySelectorAll('#frameMeterBody .fm-table tr')].slice(1).map(r => r.firstChild.textContent), run: runs[0], n: runs.length }; });
     const r = res.run || {};
     ok(res.shown && !res.pill && !res.on, 'Stop: the timer goes, the results open, nothing left running', res);
-    ok(r.build === build && [60, 30].includes(r.hz) && r.worst >= 380 && r.dropped >= 20 && r.stalls >= 1 && r.ratio > 0, 'the run: this build, a real refresh rate, the stall as the worst frame and as dropped frames', r);
+    ok(r.build === build && [60, 30].includes(r.hz) && r.worst >= 300 && r.dropped >= 20 && r.stalls >= 1 && r.ratio > 0, 'the run: this build, a real refresh rate, the stall as the worst frame and as dropped frames', r);
     ok(res.rows.includes('Home') && res.rows.includes('Translate') && res.rows.includes('While scrolling') && r.scroll && r.scroll.ms > 0, 'split by screen (Home, Translate) and while scrolling', res.rows);
     ok(/ms of hitches per second/.test(res.big) && /Smooth|Some hitches|Choppy/.test(res.head), 'the headline: a grade and the hitch number', { h: res.head, b: res.big });
     await page.screenshot({ path: O + tag + '-results.png' });
