@@ -20205,8 +20205,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1015.1658';
-const BUILD_TIME = '2026-10-15 16:58 UTC';
+const BUILD_ID = 'b1017.1407';
+const BUILD_TIME = '2026-10-17 14:07 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20400,7 +20400,7 @@ function dockTuck(){
       b.style.setProperty('--mini-w', Math.min(half * 2, Math.round(window.innerWidth * .62)) + 'px');
     }catch(e){}
   }
-  b.classList.add('dock-mini');
+  dockMorph(true, () => b.classList.add('dock-mini'));
   dockRefitChat();
 }
 // Opens the tucked bar. In Team Chat the message box sits on the bar, so
@@ -20408,8 +20408,223 @@ function dockTuck(){
 function dockOpen(){
   const b = document.body;
   if(!b.classList.contains('dock-mini')) return;
-  b.classList.remove('dock-mini');
+  dockMorph(false, () => b.classList.remove('dock-mini'));
   dockRefitChat();
+}
+/* The tuck moves on the compositor (S2). It used to be CSS transitions of
+   the bar's size and each tab's width, which made the browser redo style,
+   layout and paint on every frame while you scrolled (~260 ms of work per
+   tuck at 4x CPU). Now the bar takes its new layout at once and the move is
+   played with transforms and opacity only (dockMorph):
+   - the bar's outline is drawn for the move by three pieces (.dk-skin: two
+     round caps and a middle that stretches, so the ends stay round), each
+     with its glass, its capsule colours and, behind, its share of the shadow;
+   - the tab's icon and name glide from where they were to where they land
+     (FLIP), and so do the lens and the chat badge;
+   - tucking, the other tabs fade where they stood (copies); opening, they
+     slide out from the capsule as they fade in.
+   The bar at rest, open or tucked, is the same CSS as before; so is the
+   timing (420 ms, --ease). Dr. Smiley's shrink is a scale, in home-polish.css. */
+const DOCK_MS = 420;
+const DOCK_EASE = [.2, .8, .2, 1];                 // --ease
+let dockRun = null;
+function dockBezier(x){                          // progress at time fraction x
+  const [a, b, c, d] = DOCK_EASE;
+  let t = x;
+  for(let i = 0; i < 8; i++){
+    const f = 3 * a * t * (1 - t) * (1 - t) + 3 * c * t * t * (1 - t) + t * t * t - x;
+    const df = 3 * a * (1 - t) * (1 - 4 * t + 3 * t * t) + 3 * c * t * (2 - 3 * t) + 3 * t * t;
+    if(Math.abs(f) < 1e-6 || !df) break;
+    t = Math.min(1, Math.max(0, t - f / df));
+  }
+  return 3 * b * t * (1 - t) * (1 - t) + 3 * d * t * t * (1 - t) + t * t * t;
+}
+function dockTimeFor(p){                         // time fraction where progress is p
+  let lo = 0, hi = 1;
+  for(let i = 0; i < 24; i++){ const m = (lo + hi) / 2; if(dockBezier(m) < p) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+function dockStop(){
+  const r = dockRun;
+  dockRun = null;
+  if(!r) return;
+  r.anims.forEach(a => { try{ a.cancel(); }catch(e){} });
+  r.skin.remove();
+  r.bar.classList.remove('is-morph', 'is-tuck');
+  r.bar.querySelectorAll('.dk-lead').forEach(n => n.classList.remove('dk-lead'));
+}
+function dockMorph(tuck, apply){
+  const bar = document.querySelector('.tabbar');
+  const still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!bar || still || !bar.animate || document.hidden || getComputedStyle(bar).display === 'none'){ dockStop(); apply(); return; }
+  const R = n => n.getBoundingClientRect();
+  const btns = [...bar.querySelectorAll('.tabbar-btn')];
+  const lead = bar.querySelector('.tabbar-btn.is-active') || btns[btns.length - 1];
+  const bits = b => [b.querySelector('.tabbar-icon'), b.querySelector(':scope > span:not(.tabbar-icon):not(.tabbar-badge)'), b.querySelector('.tabbar-badge')].filter(Boolean);
+  const lens = bar.querySelector('.tabbar-lens');
+  // Where everything is now, as you see it (mid-move included). A move
+  // still running the other way hands over at the shape it had reached.
+  const first = new Map();
+  btns.forEach(b => { first.set(b, R(b)); bits(b).forEach(n => first.set(n, R(n))); });
+  if(lens) first.set(lens, R(lens));
+  const lensOn = lens && +getComputedStyle(lens).opacity > .01;
+  // Dr. Smiley shrinks and grows with the bar (scale and translate in
+  // home-polish.css), played here as an animation that removes itself.
+  const dr = document.querySelector('.dock-smiley'), tag = dr && dr.querySelector('.dock-smiley-tag');
+  const drFrom = dr && { scale: getComputedStyle(dr).scale, translate: getComputedStyle(dr).translate };
+  const tagFrom = tag && getComputedStyle(tag).scale;
+  let from = 0;
+  if(dockRun && dockRun.bar === bar) from = 1 - dockRun.progress();
+  dockStop();
+  const f0 = R(bar);
+  // Tucking: copies of the other tabs (and the lens) stay where they stood
+  // and fade, since the tabs themselves fold to nothing at once.
+  const ghosts = [];
+  if(tuck){
+    btns.forEach(b => {
+      if(b === lead) return;
+      const r = first.get(b), cs = getComputedStyle(b);
+      if(r.width < 1 || +cs.opacity < .01) return;
+      const g = b.cloneNode(true);
+      g.removeAttribute('onclick'); g.removeAttribute('aria-current'); g.removeAttribute('aria-label');
+      g.classList.remove('is-active', 'is-pressed', 'is-under');
+      g.setAttribute('aria-hidden', 'true'); g.setAttribute('tabindex', '-1');
+      // It takes the tucked tab's look (as the tab itself did the moment the
+      // bar tucked: name hidden, icon centred) where the tab stood.
+      g.style.cssText = `position:absolute;left:${r.left - f0.left}px;bottom:1px;width:${r.width}px;` +
+        `margin:0;flex:none;overflow:visible;opacity:${cs.opacity};transition:none;pointer-events:none;`;
+      ghosts.push({ g, b, r, o: +cs.opacity });
+    });
+    if(lensOn){
+      const r = first.get(lens), g = lens.cloneNode(false);
+      g.style.cssText = `position:absolute;left:${r.left - f0.left}px;bottom:${f0.bottom - r.bottom}px;top:auto;width:${r.width}px;height:${r.height}px;transform:none;translate:none;scale:none;transition:none;opacity:${getComputedStyle(lens).opacity};`;
+      ghosts.push({ g, o: +getComputedStyle(lens).opacity });
+    }
+  }
+  bar.classList.add('is-morph');
+  bar.classList.toggle('is-tuck', tuck);
+  lead.classList.add('dk-lead');
+  apply();
+  const f1 = R(bar);
+  const drAnims = [];
+  if(dr && dr.animate){
+    const ease = 'cubic-bezier(' + DOCK_EASE + ')', c = getComputedStyle(dr);
+    drAnims.push(dr.animate([drFrom, { scale: c.scale, translate: c.translate }], { duration: 300, easing: ease }));
+    if(tag) drAnims.push(tag.animate([{ scale: tagFrom }, { scale: getComputedStyle(tag).scale }], { duration: 300, easing: ease }));
+  }
+  // The outline: open and tucked sizes (border boxes, same bottom-left).
+  // The pieces are built at the size the bar is going to, so the last frame
+  // is the bar itself, unscaled, and the hand-over at the end is seamless.
+  const open = tuck ? f0 : f1, mini = tuck ? f1 : f0, base = tuck ? mini : open;
+  const Wo = open.width, Ho = open.height, Wm = mini.width, Hm = mini.height, Wb = base.width, Hb = base.height;
+  if(Wo - Ho < 1 || Wm - Hm < 1 || Hm < 1){ bar.classList.remove('is-morph', 'is-tuck'); lead.classList.remove('dk-lead'); return; }
+  const X = 120;
+  const skin = document.createElement('span');
+  skin.className = 'dk-skin' + (tuck ? ' is-tuck' : '');
+  skin.setAttribute('aria-hidden', 'true');
+  skin.innerHTML =
+    `<i class="dk-sh dk-l" style="left:0;width:${Hb / 2 + X}px;height:${Hb}px;clip-path:inset(-80px ${X}px -80px -80px)"></i>` +
+    `<i class="dk-sh dk-m" style="left:${Hb / 2 - X}px;width:${Wb - Hb + 2 * X}px;height:${Hb}px;transform-origin:${X}px 100%;clip-path:inset(-80px ${X}px -80px ${X}px)"></i>` +
+    `<i class="dk-sh dk-r" style="left:${Wb - Hb / 2 - X}px;width:${Hb / 2 + X}px;height:${Hb}px;clip-path:inset(-80px -80px -80px ${X}px)"></i>` +
+    `<i class="dk-pc dk-l" style="left:0;width:${Hb / 2}px;height:${Hb}px"></i>` +
+    `<i class="dk-pc dk-m" style="left:${Hb / 2}px;width:${Wb - Hb}px;height:${Hb}px"></i>` +
+    `<i class="dk-pc dk-r" style="left:${Wb - Hb / 2}px;width:${Hb / 2}px;height:${Hb}px"></i>` +
+    // The capsule's colours: the same three pieces again, faded as one group,
+    // so where they overlap (the middle reaches 2px over each cap, so no
+    // hairline opens) never shows as a darker band. The middle is drawn at
+    // its tucked size, so its 2px seam is never thinned or thickened.
+    `<u class="dk-cap">` +
+      `<i class="dk-cp dk-l" style="left:0;width:${Hb / 2}px;height:${Hb}px"><b></b></i>` +
+      `<i class="dk-cp dk-m" style="left:${Hb / 2}px;width:${Wb - Hb}px;height:${Hb}px"><b style="left:${(Wb - Hb - (Wm - Hm + 4)) / 2}px;width:${Wm - Hm + 4}px;height:${Hm - 2}px;scale:${(Wb - Hb) / (Wm - Hm)} ${(Hb - 2) / (Hm - 2)}"></b></i>` +
+      `<i class="dk-cp dk-r" style="left:${Wb - Hb / 2}px;width:${Hb / 2}px;height:${Hb}px"><b></b></i>` +
+    `</u>`;
+  ghosts.forEach(x => skin.appendChild(x.g));
+  skin.appendChild(document.createElement('i')).className = 'dk-end';  // keeps a copy from being :last-child
+  bar.prepend(skin);
+  // Each piece's shape for an outline W x H, against the size it is built
+  // at. All linear in the same eased progress, so the seams between the
+  // pieces stay closed the whole way.
+  const shape = (W, H) => [
+    { translate: '0 0', scale: `${H / Hb}` },
+    { translate: `${(H - Hb) / 2}px 0`, scale: `${(W - H) / (Wb - Hb)} ${H / Hb}` },
+    { translate: `${W - Wb}px 0`, scale: `${H / Hb}` }
+  ];
+  // A move turned around starts from the shape the last one had reached
+  // (written into its first keyframe, not by seeking: WebKit has not always
+  // honoured a seek on an animation that hasn't started) and takes the time
+  // that move had left.
+  const lerp = (a, b) => a + (b - a) * from;
+  const startW = tuck ? lerp(Wo, Wm) : lerp(Wm, Wo), startH = tuck ? lerp(Ho, Hm) : lerp(Hm, Ho);
+  const shapeFrom = shape(startW, startH), shapeTo = tuck ? shape(Wm, Hm) : shape(Wo, Ho);
+  const left = DOCK_MS * (1 - dockTimeFor(from));
+  const anims = [];
+  const run = (el, kf, o) => { const a = el.animate(kf, Object.assign({ duration: left, easing: 'cubic-bezier(' + DOCK_EASE + ')', fill: 'both' }, o)); anims.push(a); return a; };
+  const sh = skin.querySelectorAll('.dk-sh'), pc = skin.querySelectorAll('.dk-pc'), cp = skin.querySelectorAll('.dk-cp');
+  let clock = null;
+  [sh, pc, cp].forEach(list => list.forEach((el, i) => { const a = run(el, [shapeFrom[i], shapeTo[i]]); clock = clock || a; }));
+  // The capsule's colours fade in as it tucks, out as it opens (300 ms, as
+  // the bar's own ::before/::after did), from wherever they were.
+  const capFrom = tuck ? Math.min(1, from * DOCK_MS / 300) : 1 - Math.min(1, from * DOCK_MS / 300);
+  run(skin.querySelector('.dk-cap'), [{ opacity: capFrom }, { opacity: tuck ? 1 : 0 }], { duration: Math.max(1, 300 * Math.abs((tuck ? 1 : 0) - capFrom)) });
+  // FLIP: from where it was to where the new layout put it.
+  const flip = (n, r0) => {
+    const r1 = R(n);
+    if(!r0 || !r1.width) return;
+    const k = r0.width && r1.width ? r0.width / r1.width : 1;
+    const dx = (r0.left + r0.width / 2) - (r1.left + r1.width / 2), dy = (r0.top + r0.height / 2) - (r1.top + r1.height / 2);
+    run(n, [{ translate: `${dx}px ${dy}px`, scale: `${k}` }, { translate: '0 0', scale: '1' }], { duration: left, fill: 'none' });
+  };
+  bits(lead).forEach(n => {
+    // The icon keeps its size (its own scale is a CSS transition); the name
+    // changes size between the two layouts, so it scales.
+    const r0 = first.get(n);
+    if(n.classList.contains('tabbar-icon')){
+      const r1 = R(n), c0 = { left: r0.left, top: r0.top, width: r1.width, height: r1.height };
+      c0.left += (r0.width - r1.width) / 2; c0.top += (r0.height - r1.height) / 2;
+      flip(n, c0);
+    } else flip(n, r0);
+  });
+  if(!tuck){
+    // Opening: the other tabs slide out from the capsule as they fade in
+    // (their own opacity transition, 200 ms).
+    btns.forEach(b => {
+      if(b === lead) return;
+      const r0 = first.get(b), r1 = R(b), dx = (r0.left + r0.width / 2) - (r1.left + r1.width / 2);
+      bits(b).forEach(n => run(n, [{ translate: `${dx}px 0` }, { translate: '0 0' }], { duration: left, fill: 'none' }));
+    });
+    // The lens grows with the bar from its tucked place. Its resting
+    // transform is translateX(tab), so the keyframes say the whole thing.
+    if(lens && first.get(lens).width){
+      const r0 = first.get(lens), r1 = R(lens), m = new DOMMatrix(getComputedStyle(lens).transform);
+      const bx = r1.left - m.m41, w = lens.offsetWidth, h = lens.offsetHeight;
+      lens.style.transformOrigin = '0 0';
+      const a = run(lens, [{ transform: `translate(${r0.left - bx}px, ${r0.top - r1.top}px) scale(${r0.width / w}, ${r0.height / h})` },
+                           { transform: `translate(${m.m41}px, 0px) scale(1, 1)` }], { duration: left, fill: 'none' });
+      const back = () => { lens.style.transformOrigin = ''; };
+      a.finished.then(back, back);
+    }
+  } else {
+    // Tucking: the copies fade out in 200 ms (as the tabs did) while they
+    // slide toward the capsule for the whole move.
+    ghosts.forEach(x => {
+      run(x.g, [{ opacity: x.o }, { opacity: 0 }], { duration: 200 });
+      if(x.b){
+        const r1 = R(x.b), dx = (r1.left + r1.width / 2) - (x.r.left + x.r.width / 2);
+        run(x.g, [{ translate: '0 0' }, { translate: `${dx}px 0` }], { duration: left });
+      }
+    });
+  }
+  // How far the outline has got, 0 to 1 of this whole move (for a move
+  // that turns around).
+  anims.push(...drAnims);
+  const me = dockRun = {
+    bar, skin, anims,
+    progress: () => { const t = clock && clock.currentTime != null ? Math.min(left, clock.currentTime) : left; return from + (1 - from) * dockBezier(t / left); }
+  };
+  const done = () => { if(dockRun === me) dockStop(); };
+  clock.finished.then(done, () => {});
+  setTimeout(done, left + 250);      // in case a browser never settles the promise
+  
 }
 function dockRefitChat(){
   if(activeCategory !== 'chat' || typeof fitChatPanel !== 'function') return;

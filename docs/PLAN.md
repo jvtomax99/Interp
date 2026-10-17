@@ -80,6 +80,29 @@ S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
    the pill animates width; the top bar is 12 px taller on some screens, so
    every Home <-> screen change shifts the app 6 px. Target: layout shift 0,
    no layout during scroll.
+   **S2 PR (2026-10-17, waiting on Jose's look at the side-by-side):** the
+   tuck and open now move with transform and opacity only (`dockMorph` in
+   `index.html`, `.dk-skin` pieces in `home-polish.css`): the bar takes its
+   new layout at once, its outline is drawn for the move by three pieces
+   (caps + stretching middle; capsule colours faded as one group so seams
+   never show), icon/name/lens/badge glide (FLIP), the other tabs fade as
+   copies. Dr. Smiley's shrink is `scale` + `translate` for his 50% 92%
+   pivot. At rest open and tucked are pixel-identical to before (0 px in
+   the bar area, light and dark); the last frame hands over seamlessly
+   (24-181 px of 127k); the first-frame jump is smaller than before.
+   Turned around mid-move: no jump. Layout per move 19 -> 6-8 ms. Kept on
+   purpose: the bar's `right` transition when Dr. Smiley first appears
+   (once at startup); the tab's colour fade (one element, 200 ms).
+   Top bar 6 px: Jose's call (2026-10-17) "leave it" (Back button makes
+   "Hackensack University Medical Center" wrap off Home; all fixes are
+   visible). It is 87% of the remaining shift (0.0115 of 0.0127). The rail
+   dot "pill" (`.home-rail-dots span.is-current` width) is left: one 7px
+   dot in its own row, once per swipe.
+   **Not proven yet:** headless Chromium still runs a main-thread frame per
+   animation frame for composited animations (one plain WAAPI `translate`
+   costs ~30 ms at 4x over 420 ms), so total main-thread time per move
+   reads ~300 ms before and after. The saving is Safari handing transform
+   and opacity to Core Animation; only S6 (or a real iPhone) can show it.
 S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
    `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
    Defer decorative work past first paint (requestIdleCallback + timeout),
@@ -221,6 +244,25 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- Headless Chromium (our Safari stand-in) does not show compositor gains:
+  any running animation, composited or not, gets main-thread frames (one
+  WAAPI `translate` on a div: ~30 ms of main thread at 4x over 420 ms;
+  `transform` 70-90 ms). Compare layout and paint counts, not total
+  task time, for transform-only work. Per-frame style recalc in this app
+  costs ~150 us per animated element at 4x (the big stylesheet), so the
+  number of animated elements matters. To see what fails to composite:
+  trace with `blink.animations` and read `compositeFailed` on "Animation"
+  events (8192 unsupported property, 131072 no visible change).
+- WebKit (CI): don't start a Web Animation part-way by setting
+  `currentTime` before it has started; on a turn-around the tab bar's
+  pieces were never cleaned up (its `finished` never settled). Put the
+  start state in the first keyframe instead, and keep a timer fallback for
+  cleanup. Headless WebKit on CI also renders rarely: read animated
+  positions inside `requestAnimationFrame`, and time steps in the page,
+  not with Playwright waits (its round trips are slow).
+- `smileySway()` sets Dr. Smiley's dock button `transform-origin: 50% 92%`
+  inline; any scale on him has to account for that pivot.
 
 - `perf.cjs` used to measure itself: its animation collector (every 60 ms)
   cost ~10% of an idle Home at 4x. It now holds during the idle windows; the
