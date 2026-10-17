@@ -23,10 +23,14 @@ const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a 
 const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
 // Waits (in the page) until nothing on the dock is moving any more, his
 // endless breathing aside: WebKit's round trips are slow, so a fixed wait
-// can land mid-transition.
+// can land mid-transition. His scroll sway counts as moving: it is an inline
+// rotate written each frame, not an animation, and a 1-2 degree lean makes
+// his box 2-3% bigger (CI's WebKit, rendering slowly, was still swaying from
+// the scroll at the start, so the size checks failed now and then).
 const settle = page => page.evaluate(() => new Promise(r => {
   const t0 = performance.now();
-  const moving = () => document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
+  const swaying = () => [...document.querySelectorAll('.dock-smiley')].some(e => e.style.rotate);
+  const moving = () => swaying() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
   const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
   check();
 }));
