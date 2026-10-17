@@ -85,6 +85,15 @@ async function targets(page) {
         await page.evaluate(() => { window.__spoken = []; window.speakText = (b, t, l) => window.__spoken.push([t, l]); });
         await openDoctor(page, 'dp-tiered');
         await page.screenshot({ path: O + device + '-top.png' });
+        // Let the page's entrance finish before measuring it: CI's WebKit
+        // renders slowly and twice measured the sheet mid-way (385 x 734 at
+        // x 3.9 on a 393 x 759 phone). Endless loops don't count; 3 s at most.
+        await page.evaluate(() => new Promise(r => {
+          const t0 = performance.now(), ov = document.getElementById('doctorDirDetailOverlay');
+          const moving = () => ov.getAnimations({ subtree: true }).some(a => a.playState === 'running' && a.effect && a.effect.getComputedTiming().iterations !== Infinity);
+          const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
+          check();
+        }));
 
         const head = await page.evaluate(() => {
           const q = s => document.querySelector('#doctorDirDetailModal ' + s);
