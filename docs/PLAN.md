@@ -171,7 +171,7 @@ come from this alone.
   (the app has no Settings screen), above the build. Timer pill, results
   in Apple's hitch ms/s, per screen and while scrolling, runs kept with
   their build (`ih_frameMeter`). `docs/features/frame-meter.md`, suite
-  `frame-meter.cjs`. PR_LINK_S6
+  `frame-meter.cjs`. jvtomax99/Interp#46.
 - 2026-10-17 S2 tab bar tuck, transform only (`dockMorph`, `.dk-skin`
   pieces): at rest pixel-identical, layout per move 19 -> 6-8 ms; top bar's
   6 px shift left on Jose's call. Gain on Safari unproven in Chromium; S6
