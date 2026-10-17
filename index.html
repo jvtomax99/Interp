@@ -1189,6 +1189,42 @@
   @keyframes sheetUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
   @media (prefers-reduced-motion:reduce){ .more-sheet{ animation:none; } }
 
+  /* ---------- Smoothness meter (More, at the bottom) ---------- */
+  .fm-more{ margin-top:26px; display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .fm-runs{ width:100%; display:flex; flex-direction:column; gap:6px; }
+  .fm-run{ display:flex; align-items:center; gap:9px; width:100%; min-height:44px; padding:6px 13px; border:0; border-radius:var(--r-sm);
+    background:var(--bg-hi, var(--bg)); box-shadow:inset 0 0 0 1px var(--line-soft); color:var(--ink-soft); font:inherit; font-size:13px; text-align:left; white-space:nowrap; cursor:pointer; }
+  .fm-run b{ color:var(--ink); font-weight:650; font-variant-numeric:tabular-nums; }
+  .fm-run span:last-child{ margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
+  .fm-run:focus-visible, .fm-pill:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .fm-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--good); }
+  .fm-dot.is-warn{ background:#B08D2A; } .fm-dot.is-bad{ background:var(--danger); }
+  /* Under the top bar, not on it: its title and buttons stay readable and
+     tappable while a run records. Solid, so nothing shows through. */
+  .fm-pill{ position:fixed; z-index:330; top:calc(env(safe-area-inset-top, 0px) + 60px); left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:9px; min-height:36px; padding:0 13px; border:0; border-radius:999px; cursor:pointer;
+    background:var(--paper);
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22), inset 0 0 0 1px var(--line);
+    color:var(--ink); font:inherit; font-size:13px; font-weight:550; font-variant-numeric:tabular-nums; white-space:nowrap; contain:layout paint; }
+  @media (min-width:901px){ .fm-pill{ top:72px; } }
+  .fm-pill::before{ content:''; position:absolute; inset:-4px; }
+  .fm-pill .fm-dot{ background:var(--danger); animation:fmRec 1.2s ease-in-out infinite; }
+  .fm-pill .fm-stop{ color:var(--ink-soft); }
+  @keyframes fmRec{ 50%{ opacity:.35; } }
+  @media (prefers-reduced-motion:reduce){ .fm-pill .fm-dot{ animation:none; } }
+  .fm-head{ display:flex; align-items:center; gap:9px; margin:0 0 6px; font-size:var(--fs-headline, 17px); font-weight:650; color:var(--ink); }
+  .fm-big{ font-size:var(--fs-title1, 28px); font-weight:650; letter-spacing:-.02em; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .fm-big small{ font-size:15px; font-weight:550; color:var(--ink-soft); letter-spacing:0; }
+  .fm-sub{ margin:2px 0 13px; font-size:13px; color:var(--ink-soft); }
+  .fm-table{ width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; margin-bottom:13px; }
+  .fm-table th, .fm-table td{ padding:6px 4px; text-align:right; border-bottom:1px solid var(--line-soft); color:var(--ink); }
+  .fm-table th{ font-weight:550; color:var(--ink-faint); font-size:12px; }
+  .fm-table th:first-child, .fm-table td:first-child{ text-align:left; }
+  .fm-note{ font-size:13px; color:var(--ink-soft); background:var(--bg); border-radius:var(--r-sm); padding:9px 13px; margin:0 0 13px; }
+  .fm-meta{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:13px; word-break:break-word; }
+  .fm-btns{ display:flex; gap:9px; flex-wrap:wrap; }
+  .fm-btns .btn{ flex:1 1 auto; }
+
   /* ---------- Icon picker (Add Domain) ---------- */  .icon-picker-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .icon-pick{
     width:36px; height:36px; border-radius:10px; border:none; background:var(--bg-hi);
@@ -6822,6 +6858,14 @@ body.pv-open{ overflow:hidden; }
     <div class="more-sheet-grip"></div>
     <button class="dd-detail-close" title="Close" onclick="closeMoreSheet()">✕</button>
     <div id="moreSheetBody"></div>
+  </div>
+</div>
+
+<div class="overlay more-sheet-overlay" id="frameMeterOverlay" onclick="if(event.target===this) frameMeterClose()">
+  <div class="modal more-sheet" role="dialog" aria-modal="true" aria-label="Smoothness results">
+    <div class="more-sheet-grip"></div>
+    <button class="dd-detail-close" title="Close" onclick="frameMeterClose()">✕</button>
+    <div id="frameMeterBody"></div>
   </div>
 </div>
 
@@ -12628,9 +12672,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'smoothness',  tone:'gd-n1', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
   { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
   { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
-  { id:'places',      tone:'gd-n2', pin:'pins/medifind.webp',            eyebrow:'Doctor Directory',      title:'Pick where a doctor works in one tap, with icons the whole team sees' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -16333,6 +16377,16 @@ const GUIDE_TOPICS = [
     </ol>
     <p>If it says the phone's storage is full, or the browser won't let the Hub save, free some space or stop using a private window. Until then, new changes can't be kept offline.</p>` },
 
+  { id:'smoothness', section:'trouble', k:'smooth smoothness slow laggy lag choppy stutter jerky jank frames fps dropped meter measure speed performance hitch hitches', q:'The app feels choppy. Can I measure it?', a:`
+    <p>Yes, on your own phone. It counts the frames the app shows late.</p>
+    <ol>
+      <li>Open <b>More</b> and scroll to the very bottom.</li>
+      <li>Tap <b>Measure smoothness</b>. A small timer appears at the top of the screen.</li>
+      <li>Use the app the way that feels choppy: scroll Home, open a domain, open the chat.</li>
+      <li>Tap the timer to stop. The results open.</li>
+    </ol>
+    <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling.</p>
+    <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
   { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
     <p>Close it completely and open it again.</p>
     <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>
@@ -20205,8 +20259,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1017.1407';
-const BUILD_TIME = '2026-10-17 14:07 UTC';
+const BUILD_ID = 'b1017.1752';
+const BUILD_TIME = '2026-10-17 17:52 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20260,6 +20314,201 @@ function screenReport(){
     const fixedH = vpProbe ? Math.round(vpProbe.getBoundingClientRect().height) : '?';
     return `Screen ${screen.height} · app ${innerHeight}${vv ? ' / ' + Math.round(vv.height) : ''} · fixed ${fixedH} · safe ${t}/${b} · gap ${gap}`;
   }catch(e){ return ''; }
+}
+
+/* ---------- Smoothness meter ----------
+   Measures, on the phone itself, how many frames the app delivers late, so
+   a speed change can be compared before/after on a real iPhone (no Mac, no
+   Web Inspector). Started from the bottom of More; a small timer at the top
+   stops it. Every frame's gap is timed with requestAnimationFrame: a gap of
+   about two refresh intervals is one dropped frame, and the time beyond one
+   interval is "hitch time". Apple's yardstick for that (WWDC20, "Explore UI
+   animation hitches and the render loop"): hitch time per second of use,
+   under 5 ms/s good, 5-10 noticeable, over 10 bad.
+   It sees the page's own frames: what the main thread delays (handlers,
+   layout, style, paint). An animation Safari hands to Core Animation can
+   stay smooth through a stall the meter reports, so a drop of hitches after
+   a transform-only change is the main thread being freed. Runs are kept on
+   this phone only (ih_frameMeter, last 8) with the build they ran on. */
+const FM_KEY = 'ih_frameMeter';
+const FM_MAX_MS = 5 * 60 * 1000;
+const FM = { on:false, raf:0, last:0, t0:0, gaps:[], key:'', keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, pill:null, uiAt:0, T:1000 / 60, live:0 };
+
+function fmRuns(){ try{ return JSON.parse(localStorage.getItem(FM_KEY) || '[]'); }catch(e){ return []; } }
+function fmScreenName(id){
+  if(id === 'home') return 'Home';
+  try{
+    const t = getToolTiles().find(x => x.id === id) || DATA.categories.find(x => x.id === id);
+    if(t && t.name) return t.name;
+  }catch(e){}
+  return id || '?';
+}
+function fmOnScroll(){ FM.scrollAt = performance.now(); }
+function fmOnVis(){
+  if(!FM.on) return;
+  if(document.visibilityState === 'hidden'){ FM.hideAt = performance.now(); FM.last = 0; }
+  else if(FM.hideAt){ FM.hiddenMs += performance.now() - FM.hideAt; FM.hideAt = 0; FM.last = 0; }
+}
+function fmFrame(now){
+  if(!FM.on) return;
+  FM.raf = requestAnimationFrame(fmFrame);
+  // The screen is read 4 times a second, not every frame: cheap, and a
+  // screen change lands within a frame or two of the tap anyway.
+  if(now - FM.keyAt > 250){ FM.keyAt = now; FM.key = typeof activeCategory !== 'undefined' ? String(activeCategory) : '?'; }
+  if(FM.last && document.visibilityState === 'visible'){
+    const dt = now - FM.last;
+    FM.gaps.push([dt, FM.key, now - FM.scrollAt < 200 ? 1 : 0]);
+    // The timer's count only; the results are worked out again at the end.
+    if(FM.gaps.length === 120) FM.T = 1000 / fmHz(FM.gaps);
+    FM.live += Math.max(0, Math.round(dt / FM.T) - 1);
+  }
+  FM.last = now;
+  if(now - FM.uiAt > 500){ FM.uiAt = now; fmPillText(now); }
+  if(now - FM.t0 - FM.hiddenMs > FM_MAX_MS) frameMeterStop();
+}
+function fmPillText(now){
+  if(!FM.pill) return;
+  const s = Math.floor((now - FM.t0 - FM.hiddenMs) / 1000);
+  FM.pill.querySelector('.fm-time').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  FM.pill.querySelector('.fm-live').textContent = `${FM.live} dropped`;
+}
+
+// The refresh interval is read from the run itself (the middle gap, snapped
+// to a real rate): 60 Hz, 120 Hz on ProMotion, 30 in Low Power Mode.
+function fmHz(gaps){
+  if(!gaps.length) return 60;
+  const d = gaps.map(g => g[0]).sort((a, b) => a - b)[Math.floor(gaps.length / 2)];
+  return [120, 90, 60, 30].reduce((best, hz) => Math.abs(1000 / hz - d) < Math.abs(1000 / best - d) ? hz : best, 60);
+}
+function fmTally(gaps, T){
+  let ms = 0, frames = 0, dropped = 0, hitch = 0, worst = 0, stalls = 0;
+  for(const g of gaps){
+    const dt = g[0], n = Math.max(0, Math.round(dt / T) - 1);
+    ms += dt; frames++; dropped += n;
+    if(n){ hitch += dt - T; }
+    if(dt > worst) worst = dt;
+    if(dt > 100) stalls++;
+  }
+  return { ms, frames, dropped, worst:Math.round(worst), stalls,
+    ratio: ms ? hitch / (ms / 1000) : 0, pct: frames + dropped ? 100 * dropped / (frames + dropped) : 0 };
+}
+function fmSummarise(gaps){
+  const hz = fmHz(gaps), T = 1000 / hz;
+  const all = fmTally(gaps, T);
+  const by = {};
+  for(const g of gaps) (by[g[1]] = by[g[1]] || []).push(g);
+  const screens = Object.keys(by).map(k => Object.assign({ id:k, name:fmScreenName(k) }, fmTally(by[k], T))).sort((a, b) => b.ms - a.ms);
+  const scroll = fmTally(gaps.filter(g => g[2]), T);
+  return Object.assign(all, { hz, screens, scroll });
+}
+function fmGrade(ratio){ return ratio < 5 ? ['Smooth', ''] : ratio <= 10 ? ['Some hitches', 'is-warn'] : ['Choppy', 'is-bad']; }
+const fmR = n => n < 10 ? n.toFixed(1) : String(Math.round(n));
+
+function frameMeterStart(){
+  if(FM.on) return;
+  try{ closeMoreSheet(); }catch(e){}
+  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0 });
+  const p = document.createElement('button');
+  p.className = 'fm-pill';
+  p.type = 'button';
+  p.setAttribute('aria-label', 'Measuring smoothness. Tap to stop and see the results.');
+  p.innerHTML = '<span class="fm-dot" aria-hidden="true"></span><span class="fm-time">0:00</span><span class="fm-live">0 dropped</span><span class="fm-stop">Stop</span>';
+  p.addEventListener('click', () => frameMeterStop());
+  document.body.appendChild(p);
+  FM.pill = p;
+  document.addEventListener('scroll', fmOnScroll, { capture:true, passive:true });
+  document.addEventListener('visibilitychange', fmOnVis);
+  FM.raf = requestAnimationFrame(fmFrame);
+}
+
+function frameMeterStop(){
+  if(!FM.on) return null;
+  FM.on = false;
+  cancelAnimationFrame(FM.raf);
+  document.removeEventListener('scroll', fmOnScroll, { capture:true });
+  document.removeEventListener('visibilitychange', fmOnVis);
+  if(FM.pill){ FM.pill.remove(); FM.pill = null; }
+  const r = fmSummarise(FM.gaps);
+  const run = { at:Date.now(), build:BUILD_ID, hz:r.hz, ms:Math.round(r.ms), frames:r.frames, dropped:r.dropped,
+    pct:+r.pct.toFixed(1), ratio:+r.ratio.toFixed(1), worst:r.worst, stalls:r.stalls,
+    scroll:{ ms:Math.round(r.scroll.ms), ratio:+r.scroll.ratio.toFixed(1), pct:+r.scroll.pct.toFixed(1), worst:r.scroll.worst },
+    screens:r.screens.slice(0, 8).map(s => ({ name:s.name, ms:Math.round(s.ms), ratio:+s.ratio.toFixed(1), pct:+s.pct.toFixed(1), worst:s.worst })),
+    motion: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : (typeof drStill === 'function' && drStill()) ? 'Dr. Smiley still' : 'full',
+    device: fmDevice() };
+  FM.gaps = [];
+  if(run.frames < 30){ showToast('Too short to measure. Use the app for a few seconds, then stop.'); return null; }
+  try{ localStorage.setItem(FM_KEY, JSON.stringify([run].concat(fmRuns()).slice(0, 8))); }catch(e){}
+  frameMeterShow(run);
+  return run;
+}
+
+function fmDevice(){
+  const ua = navigator.userAgent;
+  const ios = ua.match(/OS (\d+)_(\d+)[_ ].*like Mac OS X/);
+  const where = navigator.standalone === true ? 'installed' : 'browser';
+  return (ios ? `iOS ${ios[1]}.${ios[2]}` : /Android/.test(ua) ? 'Android' : 'computer') + ` · ${where} · ${screen.width}x${screen.height}`;
+}
+
+function fmRunText(run){
+  const d = new Date(run.at);
+  const lines = [
+    `Smoothness ${run.build} · ${d.toLocaleString()}`,
+    `${run.device} · ${run.hz} Hz · motion ${run.motion}`,
+    `Hitches ${run.ratio} ms/s · dropped ${run.dropped} (${run.pct}%) · worst ${run.worst} ms · stalls over 100 ms ${run.stalls} · ${Math.round(run.ms / 1000)} s`,
+    run.scroll.ms ? `While scrolling: ${run.scroll.ratio} ms/s · ${run.scroll.pct}% dropped · worst ${run.scroll.worst} ms · ${Math.round(run.scroll.ms / 1000)} s` : 'No scrolling',
+  ].concat(run.screens.map(s => `  ${s.name}: ${s.ratio} ms/s · ${s.pct}% · worst ${s.worst} ms · ${Math.round(s.ms / 1000)} s`));
+  return lines.join('\n');
+}
+
+function frameMeterShow(run){
+  const [grade, cls] = fmGrade(run.ratio);
+  const secs = s => `${Math.max(1, Math.round(s / 1000))} s`;
+  const row = (name, s) => `<tr><td>${escapeHtml(name)}</td><td>${secs(s.ms)}</td><td>${fmR(s.ratio)}</td><td>${fmR(s.pct)}%</td><td>${s.worst} ms</td></tr>`;
+  const low = run.hz === 30 ? `<p class="fm-note">This phone drew 30 frames a second: Low Power Mode is probably on. Turn it off and measure again for a fair comparison.</p>` : '';
+  document.getElementById('frameMeterBody').innerHTML = `
+    <div class="fm-head"><span class="fm-dot ${cls}" aria-hidden="true"></span>${grade}</div>
+    <div class="fm-big">${fmR(run.ratio)} <small>ms of hitches per second</small></div>
+    <p class="fm-sub">Apple's mark: under 5 is smooth, over 10 feels choppy. ${run.dropped} of ${run.frames + run.dropped} frames dropped (${fmR(run.pct)}%), worst stall ${run.worst} ms, ${run.stalls} over 100 ms.</p>
+    ${low}
+    <table class="fm-table">
+      <tr><th>Where</th><th>Time</th><th>ms/s</th><th>Dropped</th><th>Worst</th></tr>
+      ${run.scroll.ms ? row('While scrolling', run.scroll) : ''}
+      ${run.screens.map(s => row(s.name, s)).join('')}
+    </table>
+    <div class="fm-meta">Build ${escapeHtml(run.build)} · ${escapeHtml(new Date(run.at).toLocaleString())}<br>${escapeHtml(run.device)} · ${run.hz} Hz · motion ${run.motion}</div>
+    <div class="fm-btns">
+      <button class="btn btn-ghost" onclick="frameMeterCopy(${run.at})">Copy numbers</button>
+      <button class="btn btn-primary" onclick="frameMeterClose(); frameMeterStart()">Measure again</button>
+    </div>`;
+  document.getElementById('frameMeterOverlay').classList.add('show');
+}
+
+function frameMeterClose(){ document.getElementById('frameMeterOverlay').classList.remove('show'); }
+
+function frameMeterOpen(at){
+  const run = fmRuns().find(r => r.at === at);
+  if(run){ try{ closeMoreSheet(); }catch(e){} frameMeterShow(run); }
+}
+
+function frameMeterCopy(at){
+  const run = fmRuns().find(r => r.at === at);
+  if(!run) return;
+  const text = fmRunText(run);
+  const done = () => showToast('Copied. Paste it into a chat or a note.');
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => showToast('Could not copy on this phone.'));
+  else showToast('Could not copy on this phone.');
+}
+
+// The button and the last runs, at the bottom of More above the build.
+function frameMeterMoreHtml(){
+  const runs = fmRuns().slice(0, 4);
+  return `<div class="fm-more">
+    <button class="btn btn-ghost" onclick="${FM.on ? 'closeMoreSheet(); frameMeterStop()' : 'frameMeterStart()'}">${FM.on ? 'Stop measuring and see results' : 'Measure smoothness'}</button>
+    ${runs.length ? `<div class="fm-runs">${runs.map(r => { const [g, c] = fmGrade(r.ratio);
+      return `<button class="fm-run" onclick="frameMeterOpen(${r.at})" aria-label="${escapeAttr(g + ', ' + r.ratio + ' milliseconds of hitches per second, build ' + r.build)}">
+        <span class="fm-dot ${c}" aria-hidden="true"></span><span><b>${fmR(r.ratio)} ms/s</b> · ${fmR(r.pct)}% dropped</span>
+        <span>${escapeHtml(r.build)}</span></button>`; }).join('')}</div>` : ''}
+  </div>`;
 }
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -20775,6 +21024,7 @@ function openMoreSheet(){
     <div class="home-sec-head" style="margin-bottom:10px;"><h3>Terminology domains</h3>
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
+    ${frameMeterMoreHtml()}
     <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
       Build ${BUILD_ID} · ${BUILD_TIME}<br>${screenReport()}
     </div>`;

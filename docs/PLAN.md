@@ -75,34 +75,6 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    motion pixel-identical, moving frames within run-to-run noise. home-rest
    checks both (an iPhone Safari user agent in Chromium takes the old path).
    So the S1b numbers above are Chromium's; iPhones are as before S1b.
-S2. **Tab bar, pill, top bar: transform only.** The tuck on scroll animates
-   flex-grow/right/width/height/top/left (300-420 ms, layout every frame);
-   the pill animates width; the top bar is 12 px taller on some screens, so
-   every Home <-> screen change shifts the app 6 px. Target: layout shift 0,
-   no layout during scroll.
-   **S2 PR (2026-10-17, waiting on Jose's look at the side-by-side):** the
-   tuck and open now move with transform and opacity only (`dockMorph` in
-   `index.html`, `.dk-skin` pieces in `home-polish.css`): the bar takes its
-   new layout at once, its outline is drawn for the move by three pieces
-   (caps + stretching middle; capsule colours faded as one group so seams
-   never show), icon/name/lens/badge glide (FLIP), the other tabs fade as
-   copies. Dr. Smiley's shrink is `scale` + `translate` for his 50% 92%
-   pivot. At rest open and tucked are pixel-identical to before (0 px in
-   the bar area, light and dark); the last frame hands over seamlessly
-   (24-181 px of 127k); the first-frame jump is smaller than before.
-   Turned around mid-move: no jump. Layout per move 19 -> 6-8 ms. Kept on
-   purpose: the bar's `right` transition when Dr. Smiley first appears
-   (once at startup); the tab's colour fade (one element, 200 ms).
-   Top bar 6 px: Jose's call (2026-10-17) "leave it" (Back button makes
-   "Hackensack University Medical Center" wrap off Home; all fixes are
-   visible). It is 87% of the remaining shift (0.0115 of 0.0127). The rail
-   dot "pill" (`.home-rail-dots span.is-current` width) is left: one 7px
-   dot in its own row, once per swipe.
-   **Not proven yet:** headless Chromium still runs a main-thread frame per
-   animation frame for composited animations (one plain WAAPI `translate`
-   costs ~30 ms at 4x over 420 ms), so total main-thread time per move
-   reads ~300 ms before and after. The saving is Safari handing transform
-   and opacity to Core Animation; only S6 (or a real iPhone) can show it.
 S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
    `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
    Defer decorative work past first paint (requestIdleCallback + timeout),
@@ -122,9 +94,6 @@ S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
    The 10 overshooting cubic-beziers on plain taps go to bounce 0. Fallback
    `--ease` where `linear()` is unsupported (iOS < 17.2; Safari 17.2 notes).
    Later, sheets only: a JS spring that keeps the finger's speed (CSS can't).
-S6. **Real-iPhone check.** A small frame-drop meter under Settings -> Updates
-   (no Mac needed), so Jose can compare before/after on his phone.
-
 **Doctors redesign (Jose approved 2026-10-14).** Mockups:
 `docs/mockups/doctors/list.png` and `page.png` (HTML beside them). Rule from
 Jose: it must look like the rest of the app (light background and mesh,
@@ -198,6 +167,15 @@ come from this alone.
 
 ## Done
 
+- 2026-10-17 S6 smoothness meter (Jose asked; before S3): bottom of More
+  (the app has no Settings screen), above the build. Timer pill, results
+  in Apple's hitch ms/s, per screen and while scrolling, runs kept with
+  their build (`ih_frameMeter`). `docs/features/frame-meter.md`, suite
+  `frame-meter.cjs`. jvtomax99/Interp#46.
+- 2026-10-17 S2 tab bar tuck, transform only (`dockMorph`, `.dk-skin`
+  pieces): at rest pixel-identical, layout per move 19 -> 6-8 ms; top bar's
+  6 px shift left on Jose's call. Gain on Safari unproven in Chromium; S6
+  measures it on the phone. jvtomax99/Interp#45.
 - 2026-10-15 Team Chat titles (Jose asked): "Admin" under the names of
   owner-code phones (`hub-admins/{uid}`; messages now carry the sending
   phone, held to it by the rules) and a "Supervisor of Language Services"
@@ -244,6 +222,10 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- The smoothness meter (S6) times page frames with requestAnimationFrame;
+  Safari's Core Animation work isn't in it. Its numbers compare runs on one
+  phone; they are not comparable to perf.cjs (Chromium, 4x CPU).
 
 - Headless Chromium (our Safari stand-in) does not show compositor gains:
   any running animation, composited or not, gets main-thread frames (one
