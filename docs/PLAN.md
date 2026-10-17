@@ -186,7 +186,7 @@ come from this alone.
   once per frame for the photo drift, tuck and sway (`onPageScroll`,
   `nextPageFrame`). Late frames while scrolling, `scroll.cjs` UA=chromium
   4x: median 9.9% (4 runs) -> 7.9% (6 runs), noisy. Jose's phone decides.
-  PR_LINK_S7
+  jvtomax99/Interp#47.
 - 2026-10-17 S6 smoothness meter (Jose asked; before S3): bottom of More
   (the app has no Settings screen), above the build. Timer pill, results
   in Apple's hitch ms/s, per screen and while scrolling, runs kept with
