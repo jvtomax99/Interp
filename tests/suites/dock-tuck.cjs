@@ -64,6 +64,11 @@ const settle = page => page.evaluate(() => new Promise(r => {
   // At rest, tucked: same sizes as the old CSS gave.
   await page.waitForTimeout(300); await settle(page);
   const mini = await rects(page);
+  // The pieces go when the move's promise settles (WebKit: at its next
+  // rendering update) or, at the latest, 250 ms later by a timer; until then
+  // they hold the last frame, which is the bar itself.
+  const goneIn = () => page.evaluate(() => new Promise(r => { const t0 = performance.now(); const c = () => !document.querySelector('.dk-skin') ? r(Math.round(performance.now() - t0)) : performance.now() - t0 > 1500 ? r(-1) : setTimeout(c, 25); c(); }));
+  await goneIn();
   const left = await page.evaluate(() => ({ skins: document.querySelectorAll('.dk-skin').length, morph: !!document.querySelector('.is-morph, .dk-lead'), running: document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.tabbar') && a.playState === 'running').length }));
   ok(!left.skins && !left.morph && !left.running, 'after the move nothing is left behind', left);
   ok(Math.abs(mini.bar.h - 54) < .5 && Math.abs(mini.bar.l - open.bar.l) < .5 && Math.abs(mini.bar.b - open.bar.b) < .5, 'tucked: a 54px capsule on the same corner', mini.bar);
@@ -99,9 +104,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
   ok(measured.length > 0 && measured.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
   await page.waitForTimeout(300); await settle(page);
   const back = await rects(page);
-  // The pieces go when the move's promise settles (WebKit: at its next
-  // rendering update) or, at the latest, 250 ms later by a timer.
-  const gone = await page.evaluate(() => new Promise(r => { const t0 = performance.now(); const c = () => !document.querySelector('.dk-skin') ? r(Math.round(performance.now() - t0)) : performance.now() - t0 > 1500 ? r(-1) : setTimeout(c, 25); c(); }));
+  const gone = await goneIn();
   ok(Math.abs(back.bar.w - open.bar.w) < .5 && gone >= 0, 'and lands open, as before, the pieces gone (' + gone + ' ms after it settled)', back.bar);
   ok(!page.__errors.length, 'no page errors', page.__errors);
 
