@@ -1,0 +1,87 @@
+/* The tab bar's tuck and open (S2 in docs/PLAN.md): it moves with transform
+   and opacity only (dockMorph in index.html; its pieces in home-polish.css).
+   The bar takes its new layout at once, the outline and the tab glide on
+   the compositor, and at rest the bar is the same as before. Runs in WebKit
+   too (CI's webkit job): Safari is where the team uses it. */
+const L = require('../support/harness.cjs');
+const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
+
+const rects = page => page.evaluate(() => {
+  const q = s => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
+  return { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+});
+// Every running animation on the dock, and what it animates.
+const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a => {
+  const n = a.effect && a.effect.target;
+  return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running';
+}).map(a => {
+  const n = a.effect.target;
+  let props = a.transitionProperty ? [a.transitionProperty] : [];
+  if (!props.length) props = [...new Set(a.effect.getKeyframes().flatMap(k => Object.keys(k)))].filter(p => !['offset', 'easing', 'composite', 'computedOffset'].includes(p));
+  return { el: n.className && String(n.className.baseVal === undefined ? n.className : n.className.baseVal).split(' ')[0], props };
+}));
+const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
+
+(async () => {
+  const b = await L.chromium.launch();
+  console.log('== phone, a glossary screen');
+  const { page } = await L.boot(b, { device: 'iphone', settle: 5000 });
+  // Scrolled down first (the scroll itself tucks the bar), then opened;
+  // the 4 s idle tuck is restarted before each step so it never fires mid-check.
+  await page.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); });
+  await page.waitForTimeout(600);
+  await page.evaluate(() => { dockOpen(); dockIdleRestart(); });
+  await page.waitForTimeout(900);
+  const open = await rects(page);
+
+  // Mid-tuck: the bar already has its tucked layout; only transform and
+  // opacity move (the tab's colour fade aside).
+  await page.evaluate(() => { dockIdleRestart(); dockTuck(); });
+  await page.waitForTimeout(120);
+  const mid = await dockAnims(page);
+  const midBar = await rects(page);
+  const bad = mid.filter(a => a.props.some(p => !LAYOUT_FREE.includes(p) && !(p === 'color' && /tabbar-btn/.test(a.el))));
+  ok(mid.length > 5 && !bad.length, 'mid-tuck, ' + mid.length + ' animations, all transform or opacity', bad);
+  ok(await page.evaluate(() => !!document.querySelector('.tabbar.is-morph .dk-skin')), 'the outline is drawn by the moving pieces while it tucks');
+  await page.waitForTimeout(100);
+  const midBar2 = await rects(page);
+  ok(Math.abs(midBar.bar.w - midBar2.bar.w) < .01, 'the bar\'s own size does not animate (no layout per frame)', [midBar.bar.w, midBar2.bar.w]);
+
+  // At rest, tucked: same sizes as the old CSS gave.
+  await page.waitForTimeout(700);
+  const mini = await rects(page);
+  const left = await page.evaluate(() => ({ skins: document.querySelectorAll('.dk-skin').length, morph: !!document.querySelector('.is-morph, .dk-lead'), running: document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.tabbar') && a.playState === 'running').length }));
+  ok(!left.skins && !left.morph && !left.running, 'after the move nothing is left behind', left);
+  ok(Math.abs(mini.bar.h - 54) < .5 && Math.abs(mini.bar.l - open.bar.l) < .5 && Math.abs(mini.bar.b - open.bar.b) < .5, 'tucked: a 54px capsule on the same corner', mini.bar);
+  // Dr. Smiley: scaled 54/58, his disc's right edge and bottom where they were.
+  const k = d => d.w / 58;                     // his scale, from his button's width
+  const disc = d => ({ right: d.r - 5 * k(d), bottom: d.b });
+  ok(Math.abs(mini.dr.w / open.dr.w - 54 / 58) < .002 && Math.abs(disc(mini.dr).right - disc(open.dr).right) < .1 && Math.abs(disc(mini.dr).bottom - disc(open.dr).bottom) < .1,
+    'Dr. Smiley shrinks with the bar, his disc\'s right edge and bottom kept', { open: open.dr, mini: mini.dr });
+  ok(Math.abs(mini.tag.h - open.tag.h) < .1 && Math.abs(mini.tag.b - open.tag.b) < .1, 'his "Ask" tag keeps its size and hangs where it did', { open: open.tag, mini: mini.tag });
+
+  // Reversed halfway (scroll down, then straight back up): no jump.
+  const jumps = [];
+  for (const gap of [60, 200]) {
+    await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await page.waitForTimeout(700);
+    await page.evaluate(() => dockTuck()); await page.waitForTimeout(gap);
+    jumps.push(await page.evaluate(() => {
+      const edge = () => document.querySelector('.dk-skin .dk-pc.dk-r').getBoundingClientRect().right;
+      const a = edge(); dockOpen(); return +(edge() - a).toFixed(2);
+    }));
+  }
+  ok(jumps.every(j => Math.abs(j) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join(', ') + ' px)');
+  await page.waitForTimeout(800);
+  const back = await rects(page);
+  ok(Math.abs(back.bar.w - open.bar.w) < .5 && !(await page.evaluate(() => document.querySelector('.dk-skin'))), 'and lands open, as before', back.bar);
+  ok(!page.__errors.length, 'no page errors', page.__errors);
+
+  console.log('== phone, reduced motion');
+  const { page: rp } = await L.boot(b, { device: 'iphone', settle: 3000, reducedMotion: true });
+  await rp.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); }); await rp.waitForTimeout(500);
+  await rp.evaluate(() => { dockOpen(); dockIdleRestart(); }); await rp.waitForTimeout(300);
+  const r = await rp.evaluate(() => { dockTuck(); return { skin: !!document.querySelector('.dk-skin'), mini: document.body.classList.contains('dock-mini') }; });
+  ok(!r.skin && r.mini, 'reduced motion: it tucks at once, nothing moves', r);
+  ok(!rp.__errors.length, 'no page errors', rp.__errors);
+  await b.close();
+})();

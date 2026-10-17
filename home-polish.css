@@ -311,8 +311,7 @@
     border:0;background:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
     opacity:0;transform:translateY(16px) scale(.4);pointer-events:none;
-    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),width .3s var(--ease),height .3s var(--ease),
-      right .3s var(--ease),bottom .3s var(--ease);}
+    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),scale .3s var(--ease),translate .3s var(--ease);}
   body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
   body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
   /* The shadow rides on the part that bobs, so no light gap opens under him. */
@@ -374,8 +373,62 @@
   body.dock-mini .tabbar-btn.is-active .tabbar-icon,
   body.dock-mini .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
   body.dock-mini .tabbar-badge{top:3px;left:auto;right:calc(50% + 3px);border-color:#1F78C6;}
-  /* Tucked, he shrinks with the bar (58 to 54px), same middle line. */
-  body.dock-mini .dock-smiley{--ds-s:calc(var(--ds-k) * 54 / 58);--ds-bar:54px;}
+  /* Tucked, he shrinks with the bar (58 to 54px), same middle line, his
+     disc's right edge where it was. A scale and a nudge, not a new size
+     (S2: nothing on the dock changes layout while it moves). He scales
+     about 50% 92% (the origin his sway uses, smileySway in index.html); the
+     nudge moves the scale's fixed point to his disc's right edge (24k right
+     of and 19.36k above that origin), then 2px down to the tucked bar's
+     middle. His "Ask" tag keeps its size and hangs where it did. */
+  .dock-smiley{transform-origin:50% 92%;}
+  body.dock-mini .dock-smiley{scale:calc(54 / 58);
+    translate:calc(24px * var(--ds-k) * 4 / 58) calc(2px - 19.36px * var(--ds-k) * 4 / 58);}
+  body.dock-mini .dock-smiley-tag{scale:calc(58 / 54);transform-origin:50% calc(100% - 5px);}
+
+  /* The move between open and tucked (dockMorph in index.html): the bar
+     takes its new layout at once, with its own transitions off, and the
+     outline is drawn by .dk-skin while it moves. Only transform and opacity
+     animate. The pieces copy the bar: glass, edge, shadow, capsule colours. */
+  .tabbar.is-morph{transition:none;}
+  .tabbar.is-morph .tabbar-btn{transition:color .2s var(--ease),opacity .2s var(--ease);}
+  body .tabbar.is-morph{background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;}
+  .tabbar.is-morph::before,.tabbar.is-morph::after,.tabbar.is-morph.is-tuck > .tabbar-lens{visibility:hidden;}
+  body .tabbar.is-morph .tabbar-btn.dk-lead{overflow:visible;}
+  .dk-skin{position:absolute;left:-1px;bottom:-1px;width:0;height:0;z-index:0;pointer-events:none;}
+  .dk-skin i{position:absolute;bottom:0;display:block;box-sizing:border-box;transform-origin:0 100%;}
+  .dk-skin .dk-r{transform-origin:100% 100%;}
+  .dk-skin .dk-l{border-radius:999px 0 0 999px;}
+  .dk-skin .dk-r{border-radius:0 999px 999px 0;}
+  .dk-cap{position:absolute;left:0;bottom:0;display:block;opacity:0;}
+  .dk-cp{border:1px solid transparent;}
+  .dk-cp.dk-l{border-right-width:0;}
+  .dk-cp.dk-m{border-left-width:0;border-right-width:0;}
+  .dk-cp.dk-r{border-left-width:0;}
+  .dk-sh{box-shadow:0 10px 28px -8px rgba(21,28,44,0.30),0 2px 6px -2px rgba(21,28,44,0.18);}
+  .dk-pc{background:var(--glass-bg);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 rgba(255,255,255,0.65);}
+  .dk-pc.dk-l{border-right-width:0;}
+  .dk-pc.dk-m{border-left-width:0;border-right-width:0;}
+  .dk-pc.dk-r{border-left-width:0;}
+  .dk-skin.is-tuck .dk-pc{border-color:transparent;}
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .dk-pc{background:var(--paper);} }
+  /* The capsule (the bar's ::before and ::after, cut in three): blue and
+     white halves, the seam, the shine, the thin outline. */
+  .dk-cp > b{position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;transform-origin:0 0;
+    border:1px solid rgba(8,32,70,.14);
+    background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%) border-box;}
+  .dk-cp.dk-l > b{border-right-width:0;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%),
+      linear-gradient(180deg,#5CB2EC 0%,#1F78C6 52%,#0D5A9E 100%);background-origin:border-box;}
+  .dk-cp.dk-r > b{border-left-width:0;
+    background-image:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%),
+      linear-gradient(180deg,#FFFFFF 0%,#F2F5FA 55%,#D9E1EC 100%);background-origin:border-box;}
+  .dk-cp.dk-m > b{border-left-width:0;border-right-width:0;right:auto;bottom:auto;transform-origin:50% 0;
+    background:
+      linear-gradient(90deg,transparent calc(50% - 1.5px),rgba(8,32,70,.30) calc(50% - 1.5px),rgba(8,32,70,.30) calc(50% - .5px),rgba(255,255,255,.75) calc(50% - .5px),rgba(255,255,255,.75) calc(50% + .5px),transparent calc(50% + .5px)) border-box,
+      linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%) border-box,
+      linear-gradient(180deg,#FFFFFF 0%,#F2F5FA 55%,#D9E1EC 100%) right/50% 100% no-repeat border-box,
+      linear-gradient(180deg,#5CB2EC 0%,#1F78C6 52%,#0D5A9E 100%) left/50% 100% no-repeat border-box;}
   /* The Ask tag stays when the bar is tucked too (Jose). */
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
@@ -388,7 +441,7 @@
      haven't seen, a red one for a problem. Pressed: the disc dips. */
   body.drp-open.kb-open .dock-smiley{visibility:visible;}
   body.drp-kb .dock-smiley{bottom:var(--drp-kb);transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),bottom .28s var(--ease);}
-  .dock-smiley-tag{transition:opacity .2s var(--ease),translate .3s var(--ease);}
+  .dock-smiley-tag{transition:opacity .2s var(--ease),translate .3s var(--ease),scale .3s var(--ease);}
   body.drp-open .dock-smiley-tag{opacity:0;translate:-50% 4px;}
   .dock-smiley-bob::before{transition:box-shadow .3s var(--ease),filter .12s var(--ease);}
   body.drp-open .dock-smiley-bob::before{box-shadow:inset 0 -5px 10px rgba(20,60,120,.35),inset 0 3px 5px rgba(255,255,255,.9),0 0 0 2px rgba(255,255,255,.95),0 0 0 4.5px var(--accent-2),0 10px 22px -8px rgba(21,28,44,.45);}

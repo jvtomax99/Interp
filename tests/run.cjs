@@ -21,6 +21,7 @@ const SUITES = [
   ['smiley-gestures.cjs', 'Dr. Smiley: the five performances'],
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
+  ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
 ];
 const only = process.argv.slice(2);
 const pick = only.length ? SUITES.filter(([f]) => only.some(o => f.startsWith(o))) : SUITES;

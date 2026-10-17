@@ -72,8 +72,8 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npx playwright install --with-deps webkit
-      - name: Doctor page in WebKit
-        run: BROWSER=webkit node run.cjs doctor-page
+      - name: Doctor page and the tab bar tuck in WebKit
+        run: BROWSER=webkit node run.cjs doctor-page dock-tuck
       - name: Keep the screenshots and logs
         if: always()
         uses: actions/upload-artifact@v4

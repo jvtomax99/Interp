@@ -28,7 +28,11 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   everything is still drawn at the old size and scaled. His sway pins the
   pivot (`smileySway`: 50% 92% dock, 50% 85% Home), so a scale must be
   moved back (dock: the bob's left/top; Home: `translate`), or he drifts
-  up. In the greeting he has one fixed place whatever the name (block
+  up. When the tab bar tucks (54px) he shrinks by `scale: 54/58` and a
+  `translate` worked out for that 50% 92% pivot, not by a new `--ds-s`
+  (S2: nothing on the dock changes layout while it moves); his "Ask" tag is
+  scaled back so it keeps its size. `tests/suites/dock-tuck.cjs` checks his
+  disc's right edge and bottom stay put. In the greeting he has one fixed place whatever the name (block
   "Dr. Smiley's own place", end of `home-polish.css`; Jose's call): on a
   phone the name has the line under "Good morning" to itself (`--hw-line`,
   so a long name's smaller face sits on the same baseline) and he stands
