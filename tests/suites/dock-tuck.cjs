@@ -33,6 +33,11 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
   await page.evaluate(() => { dockOpen(); dockIdleRestart(); });
   await page.waitForTimeout(900);
   const open = await rects(page);
+  // The page's animation clock against the wall clock (WebKit on CI has run
+  // it at a different pace), and anything still moving on Dr. Smiley.
+  const clock = await page.evaluate(() => new Promise(r => { const t0 = document.timeline.currentTime, w0 = performance.now(); setTimeout(() => r({ timeline: Math.round(document.timeline.currentTime - t0), wall: Math.round(performance.now() - w0) }), 500); }));
+  const drMoving = await page.evaluate(() => document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.dock-smiley')).map(a => (a.transitionProperty || a.animationName || 'waapi') + ' ' + a.playState + ' ' + Math.round(a.currentTime)));
+  console.log('  info: animation clock ' + clock.timeline + ' ms in ' + clock.wall + ' ms of wall time; on Dr. Smiley: ' + (drMoving.join(', ') || 'nothing'));
 
   // Mid-tuck: the bar already has its tucked layout; only transform and
   // opacity move (the tab's colour fade aside).
@@ -57,7 +62,7 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
   const k = d => d.w / 58;                     // his scale, from his button's width
   const disc = d => ({ right: d.r - 5 * k(d), bottom: d.b });
   ok(Math.abs(mini.dr.w / open.dr.w - 54 / 58) < .002 && Math.abs(disc(mini.dr).right - disc(open.dr).right) < .1 && Math.abs(disc(mini.dr).bottom - disc(open.dr).bottom) < .1,
-    'Dr. Smiley shrinks with the bar, his disc\'s right edge and bottom kept', { open: open.dr, mini: mini.dr });
+    'Dr. Smiley shrinks with the bar, his disc\'s right edge and bottom kept', { open: open.dr, mini: mini.dr, clock, drMoving });
   ok(Math.abs(mini.tag.h - open.tag.h) < .1 && Math.abs(mini.tag.b - open.tag.b) < .1, 'his "Ask" tag keeps its size and hangs where it did', { open: open.tag, mini: mini.tag });
 
   // Reversed halfway (scroll down, then straight back up): no jump.
@@ -67,10 +72,13 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
     await page.evaluate(() => dockTuck()); await page.waitForTimeout(gap);
     jumps.push(await page.evaluate(() => {
       const edge = () => document.querySelector('.dk-skin .dk-pc.dk-r').getBoundingClientRect().right;
-      const a = edge(); dockOpen(); return +(edge() - a).toFixed(2);
+      const run = dockRun, t = run && run.anims[0] && run.anims[0].currentTime, p = run && run.progress();
+      const a = edge(); dockOpen(); const b = edge();
+      const nr = dockRun, nt = nr && nr.anims[0] && nr.anims[0].currentTime;
+      return +(b - a).toFixed(2) + ' (old t ' + Math.round(t) + ' p ' + (p == null ? '-' : p.toFixed(2)) + ', new t ' + Math.round(nt) + ')';
     }));
   }
-  ok(jumps.every(j => Math.abs(j) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join(', ') + ' px)');
+  ok(jumps.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
   await page.waitForTimeout(800);
   const back = await rects(page);
   ok(Math.abs(back.bar.w - open.bar.w) < .5 && !(await page.evaluate(() => document.querySelector('.dk-skin'))), 'and lands open, as before', back.bar);
