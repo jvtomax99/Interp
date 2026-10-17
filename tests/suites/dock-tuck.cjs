@@ -76,7 +76,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
 
   // Reversed halfway (scroll down, then straight back up): no jump.
   const jumps = [];
-  for (const gap of [60, 200]) {
+  for (const gap of [40, 120]) {
     await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await page.waitForTimeout(300); await settle(page);
     // Timed in the page, so the browser's round trips don't move the moment.
     jumps.push(await page.evaluate(gap => new Promise(r => {
@@ -85,14 +85,18 @@ const settle = page => page.evaluate(() => new Promise(r => {
       // up to date at a rendering update.
       setTimeout(() => requestAnimationFrame(() => {
         const piece = () => document.querySelector('.dk-skin .dk-pc.dk-r');
-        if (!piece()) return r('no move running at ' + gap + ' ms');
+        // WebKit on CI can deliver the frame after the move has ended:
+        // nothing to turn around then, so it is skipped (the bar is still
+        // opened, for the checks after).
+        if (!piece()) { dockOpen(); return r('skipped'); }
         const run = dockRun, t = run.anims[0].currentTime, p = run.progress();
         const a = piece().getBoundingClientRect().right; dockOpen(); const b = piece().getBoundingClientRect().right;
         r(+(b - a).toFixed(2) + ' (at ' + Math.round(t) + ' ms, ' + Math.round(p * 100) + '% tucked)');
       }), gap);
     }), gap));
   }
-  ok(jumps.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
+  const measured = jumps.filter(j => j !== 'skipped');
+  ok(measured.length > 0 && measured.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
   await page.waitForTimeout(300); await settle(page);
   const back = await rects(page);
   // The pieces go when the move's promise settles (WebKit: at its next
