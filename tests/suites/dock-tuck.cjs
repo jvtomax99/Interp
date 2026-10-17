@@ -21,19 +21,24 @@ const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a 
   return { el: n.className && String(n.className.baseVal === undefined ? n.className : n.className.baseVal).split(' ')[0], props };
 }));
 const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
-// Waits (in the page) until nothing on the dock is moving any more, his
-// endless breathing aside: WebKit's round trips are slow, so a fixed wait
-// can land mid-transition. His scroll sway counts as moving: it is an inline
+// Waits (in the page) at least `after` ms, then until nothing on the dock
+// is moving any more, his endless breathing aside: WebKit's round trips are
+// slow, so a fixed wait can land mid-transition. His scroll sway counts as moving: it is an inline
 // rotate written each frame, not an animation, and a 1-2 degree lean makes
 // his box 2-3% bigger (CI's WebKit, rendering slowly, was still swaying from
 // the scroll at the start, so the size checks failed now and then).
-const settle = page => page.evaluate(() => new Promise(r => {
+// While it waits it keeps restarting the bar's 4 s idle count, as a touch
+// would: dockOpen() doesn't restart it, so on a slow runner the idle tuck
+// fired between the last open and the "lands open" read, and the bar
+// measured tucked (132 x 54). The first `after` ms are waited here too, not
+// in Node, so no round trip falls outside the held count.
+const settle = (page, after = 0) => page.evaluate(after => new Promise(r => {
   const t0 = performance.now();
   const swaying = () => [...document.querySelectorAll('.dock-smiley')].some(e => e.style.rotate);
   const moving = () => swaying() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
-  const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
+  const check = () => { dockIdleRestart(); const t = performance.now() - t0; (t >= after && (!moving() || t > after + 3000)) ? r() : setTimeout(check, 50); };
   check();
-}));
+}), after);
 
 (async () => {
   const b = await L.chromium.launch();
@@ -44,7 +49,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
   await page.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); });
   await page.waitForTimeout(600);
   await page.evaluate(() => { dockOpen(); dockIdleRestart(); });
-  await page.waitForTimeout(300); await settle(page);
+  await settle(page, 300);
   const open = await rects(page);
   // The page's animation clock against the wall clock (WebKit on CI has run
   // it at a different pace), and anything still moving on Dr. Smiley.
@@ -66,7 +71,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
   ok(Math.abs(midBar.bar.w - midBar2.bar.w) < .01, 'the bar\'s own size does not animate (no layout per frame)', [midBar.bar.w, midBar2.bar.w]);
 
   // At rest, tucked: same sizes as the old CSS gave.
-  await page.waitForTimeout(300); await settle(page);
+  await settle(page, 300);
   const mini = await rects(page);
   // The pieces go when the move's promise settles (WebKit: at its next
   // rendering update) or, at the latest, 250 ms later by a timer; until then
@@ -86,7 +91,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
   // Reversed halfway (scroll down, then straight back up): no jump.
   const jumps = [];
   for (const gap of [40, 120]) {
-    await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await page.waitForTimeout(300); await settle(page);
+    await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await settle(page, 300);
     // Timed in the page, so the browser's round trips don't move the moment.
     jumps.push(await page.evaluate(gap => new Promise(r => {
       dockTuck();
@@ -97,19 +102,20 @@ const settle = page => page.evaluate(() => new Promise(r => {
         // WebKit on CI can deliver the frame after the move has ended:
         // nothing to turn around then, so it is skipped (the bar is still
         // opened, for the checks after).
-        if (!piece()) { dockOpen(); return r('skipped'); }
+        if (!piece()) { dockOpen(); dockIdleRestart(); return r('skipped'); }
         const run = dockRun, t = run.anims[0].currentTime, p = run.progress();
-        const a = piece().getBoundingClientRect().right; dockOpen(); const b = piece().getBoundingClientRect().right;
+        const a = piece().getBoundingClientRect().right; dockOpen(); dockIdleRestart(); const b = piece().getBoundingClientRect().right;
         r(+(b - a).toFixed(2) + ' (at ' + Math.round(t) + ' ms, ' + Math.round(p * 100) + '% tucked)');
       }), gap);
     }), gap));
   }
   const measured = jumps.filter(j => j !== 'skipped');
   ok(measured.length > 0 && measured.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
-  await page.waitForTimeout(300); await settle(page);
+  await settle(page, 300);
   const back = await rects(page);
+  const tucked = await page.evaluate(() => document.body.classList.contains('dock-mini'));
   const gone = await goneIn();
-  ok(Math.abs(back.bar.w - open.bar.w) < .5 && gone >= 0, 'and lands open, as before, the pieces gone (' + gone + ' ms after it settled)', back.bar);
+  ok(Math.abs(back.bar.w - open.bar.w) < .5 && gone >= 0, 'and lands open, as before, the pieces gone (' + gone + ' ms after it settled)', { bar: back.bar, open: open.bar.w, tucked });
   ok(!page.__errors.length, 'no page errors', page.__errors);
 
   console.log('== phone, reduced motion');
