@@ -81,6 +81,11 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    UA=chromium 8+8 interleaved before/after, the suites, then Jose's phone
    (meter, Copy, same 12 s scroll + 15 s still). Don't move the tuck's
    scroll read into a frame callback without a WebKit check (part 1).
+   Lab baseline on main (2026-10-17, RUNS=6): all 6 runs in the bad-load
+   band (35-42% late while scrolling, busy 53-55%), so unusable; S7a
+   starts by getting good before-runs. Listener times there: drSwayScroll
+   1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
+   pays the frame's pending style (Facts), not its own work.
    S7a. **Overlay `:has()` -> body classes (invisible).** 6 rules:
       `index.html` 2129, 4606, 4611-4613, 5638, 5688 and `home-polish.css`
       444, on `.overlay.show`, `.gs-overlay.show`, `.dm-overlay.show`
