@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v224-dock-tuck';
+const CACHE_VERSION = 'interpreter-hub-v225-frame-meter';
 const PRECACHE = [
   './',
   './index.html',
