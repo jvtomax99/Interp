@@ -380,7 +380,11 @@
      nudge moves the scale's fixed point to his disc's right edge (24k right
      of and 19.36k above that origin), then 2px down to the tucked bar's
      middle. His "Ask" tag keeps its size and hangs where it did. */
-  .dock-smiley{transform-origin:50% 92%;}
+  /* scale and translate are declared at rest, so the transition back from
+     tucked runs number to number: WebKit, going back to "none", stopped at
+     98% of his size. */
+  .dock-smiley{transform-origin:50% 92%;scale:1;translate:0 0;}
+  .dock-smiley-tag{scale:1;}
   body.dock-mini .dock-smiley{scale:calc(54 / 58);
     translate:calc(24px * var(--ds-k) * 4 / 58) calc(2px - 19.36px * var(--ds-k) * 4 / 58);}
   body.dock-mini .dock-smiley-tag{scale:calc(58 / 54);transform-origin:50% calc(100% - 5px);}

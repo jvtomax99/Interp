@@ -95,7 +95,10 @@ const settle = page => page.evaluate(() => new Promise(r => {
   ok(jumps.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
   await page.waitForTimeout(300); await settle(page);
   const back = await rects(page);
-  ok(Math.abs(back.bar.w - open.bar.w) < .5 && !(await page.evaluate(() => document.querySelector('.dk-skin'))), 'and lands open, as before', back.bar);
+  // The pieces go when the move's promise settles (WebKit: at its next
+  // rendering update) or, at the latest, 250 ms later by a timer.
+  const gone = await page.evaluate(() => new Promise(r => { const t0 = performance.now(); const c = () => !document.querySelector('.dk-skin') ? r(Math.round(performance.now() - t0)) : performance.now() - t0 > 1500 ? r(-1) : setTimeout(c, 25); c(); }));
+  ok(Math.abs(back.bar.w - open.bar.w) < .5 && gone >= 0, 'and lands open, as before, the pieces gone (' + gone + ' ms after it settled)', back.bar);
   ok(!page.__errors.length, 'no page errors', page.__errors);
 
   console.log('== phone, reduced motion');
