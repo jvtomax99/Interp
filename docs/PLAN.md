@@ -183,8 +183,10 @@ come from this alone.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
-  computed styles identical, 12 states). Numbers in the PR; Jose's phone
-  decides. Tried and reverted: reading the scroll position once per frame
+  computed styles identical, 12 states). `scroll.cjs` UA=chromium 4x,
+  8+8 interleaved, bad runs left out: late frames while scrolling 9.1% ->
+  6.7% median (every after run below every before run), style time 10.6 ->
+  9.2 s. Jose's phone decides. Tried and reverted: reading the scroll position once per frame
   for the photo drift, tuck and sway (no gain measured on its own; in CI's
   WebKit the tuck then landed after the dock-tuck test moved on).
   jvtomax99/Interp#47.
@@ -256,9 +258,10 @@ come from this alone.
   `:has()` rules were ~45% of style time while scrolling (all removed:
   11 -> 6 s). The first scroll position read in a frame pays the frame's
   style work; later reads are cheap unless something was written between.
-- Once in ~37 runs of part 1's code, a `scroll.cjs` run went bad from load
-  (35% late overall, busy lower); never in ~16 runs of the old code; not
-  reproduced in 20 tries. Unexplained; watch for it.
+- `scroll.cjs` sometimes goes bad from load (~35% late overall, ~45% while
+  scrolling, main thread less busy): seen on the old code and the new, in
+  streaks (3 runs in a row once). The machine or headless Chromium, not the
+  app change; leave such runs out and say so.
 - The hitch thresholds (under 5 ms/s good, 5-10 noticed, 10+ distracting)
   are from WWDC20 "Eliminate animation hitches with XCTest" (transcript).
 
