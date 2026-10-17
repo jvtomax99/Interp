@@ -254,6 +254,13 @@ come from this alone.
   number of animated elements matters. To see what fails to composite:
   trace with `blink.animations` and read `compositeFailed` on "Animation"
   events (8192 unsupported property, 131072 no visible change).
+- WebKit (CI): don't start a Web Animation part-way by setting
+  `currentTime` before it has started; on a turn-around the tab bar's
+  pieces were never cleaned up (its `finished` never settled). Put the
+  start state in the first keyframe instead, and keep a timer fallback for
+  cleanup. Headless WebKit on CI also renders rarely: read animated
+  positions inside `requestAnimationFrame`, and time steps in the page,
+  not with Playwright waits (its round trips are slow).
 - `smileySway()` sets Dr. Smiley's dock button `transform-origin: 50% 92%`
   inline; any scale on him has to account for that pivot.
 
