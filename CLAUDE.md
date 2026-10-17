@@ -347,6 +347,12 @@ design and anything touching data or rules stay with the main model.
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
   (His standing rule.)
+- **Every finished job: a preview, then a phone notification** (Jose,
+  2026-10-17; `AGENTS.md`). Screenshots of what changed (before/after,
+  phone size first) sent as files with `SendUserFile` (status
+  `proactive`), then `PushNotification` with one line saying what's ready
+  and what he needs to do. Only when there is something to review or
+  decide, never for routine progress.
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the

@@ -262,3 +262,12 @@ from a phone: one step at a time, screenshots over description.
 
 **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
 (His standing rule.)
+
+**Every finished job comes with a preview and a phone notification**
+(Jose, 2026-10-17). When a job is done (a PR ready, CI green, something
+merged or live, or you're blocked on him), send him a preview he can look at
+on his phone: screenshots of what changed (before/after when the look
+changed; phone size first), or for work with nothing to see, a short
+summary of what changed and what it needs from him. Then notify his phone
+so he can come back and review. Not for routine progress, only when there
+is something to review or decide.
