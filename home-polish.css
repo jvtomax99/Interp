@@ -311,7 +311,7 @@
     border:0;background:none;
     display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
     opacity:0;transform:translateY(16px) scale(.4);pointer-events:none;
-    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),scale .3s var(--ease),translate .3s var(--ease);}
+    transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1);}
   body.dock-has-smiley .dock-smiley{opacity:1;transform:none;pointer-events:auto;}
   body.dock-has-smiley .dock-smiley.is-pressed{transform:scale(.9);transition-duration:.12s;}
   /* The shadow rides on the part that bobs, so no light gap opens under him. */
@@ -380,14 +380,14 @@
      nudge moves the scale's fixed point to his disc's right edge (24k right
      of and 19.36k above that origin), then 2px down to the tucked bar's
      middle. His "Ask" tag keeps its size and hangs where it did. */
-  /* scale and translate are declared at rest, so the transition back from
-     tucked runs number to number: WebKit, going back to "none", stopped at
-     98% of his size. */
+  /* No CSS transition on these: dockMorph (index.html) plays the change as a
+     Web Animation that removes itself, so he always rests on exactly these
+     values. WebKit ended a scale transition short of them (98% of his size). */
   .dock-smiley{transform-origin:50% 92%;scale:1;translate:0 0;}
-  .dock-smiley-tag{scale:1;}
+  .dock-smiley-tag{scale:1;transform-origin:50% calc(100% - 5px);}
   body.dock-mini .dock-smiley{scale:calc(54 / 58);
     translate:calc(24px * var(--ds-k) * 4 / 58) calc(2px - 19.36px * var(--ds-k) * 4 / 58);}
-  body.dock-mini .dock-smiley-tag{scale:calc(58 / 54);transform-origin:50% calc(100% - 5px);}
+  body.dock-mini .dock-smiley-tag{scale:calc(58 / 54);}
 
   /* The move between open and tucked (dockMorph in index.html): the bar
      takes its new layout at once, with its own transitions off, and the
@@ -445,7 +445,7 @@
      haven't seen, a red one for a problem. Pressed: the disc dips. */
   body.drp-open.kb-open .dock-smiley{visibility:visible;}
   body.drp-kb .dock-smiley{bottom:var(--drp-kb);transition:opacity .22s var(--ease),transform .5s cubic-bezier(.3,1.45,.5,1),bottom .28s var(--ease);}
-  .dock-smiley-tag{transition:opacity .2s var(--ease),translate .3s var(--ease),scale .3s var(--ease);}
+  .dock-smiley-tag{transition:opacity .2s var(--ease),translate .3s var(--ease);}
   body.drp-open .dock-smiley-tag{opacity:0;translate:-50% 4px;}
   .dock-smiley-bob::before{transition:box-shadow .3s var(--ease),filter .12s var(--ease);}
   body.drp-open .dock-smiley-bob::before{box-shadow:inset 0 -5px 10px rgba(20,60,120,.35),inset 0 3px 5px rgba(255,255,255,.9),0 0 0 2px rgba(255,255,255,.95),0 0 0 4.5px var(--accent-2),0 10px 22px -8px rgba(21,28,44,.45);}

@@ -20468,6 +20468,11 @@ function dockMorph(tuck, apply){
   btns.forEach(b => { first.set(b, R(b)); bits(b).forEach(n => first.set(n, R(n))); });
   if(lens) first.set(lens, R(lens));
   const lensOn = lens && +getComputedStyle(lens).opacity > .01;
+  // Dr. Smiley shrinks and grows with the bar (scale and translate in
+  // home-polish.css), played here as an animation that removes itself.
+  const dr = document.querySelector('.dock-smiley'), tag = dr && dr.querySelector('.dock-smiley-tag');
+  const drFrom = dr && { scale: getComputedStyle(dr).scale, translate: getComputedStyle(dr).translate };
+  const tagFrom = tag && getComputedStyle(tag).scale;
   let from = 0;
   if(dockRun && dockRun.bar === bar) from = 1 - dockRun.progress();
   dockStop();
@@ -20501,6 +20506,12 @@ function dockMorph(tuck, apply){
   lead.classList.add('dk-lead');
   apply();
   const f1 = R(bar);
+  const drAnims = [];
+  if(dr && dr.animate){
+    const ease = 'cubic-bezier(' + DOCK_EASE + ')', c = getComputedStyle(dr);
+    drAnims.push(dr.animate([drFrom, { scale: c.scale, translate: c.translate }], { duration: 300, easing: ease }));
+    if(tag) drAnims.push(tag.animate([{ scale: tagFrom }, { scale: getComputedStyle(tag).scale }], { duration: 300, easing: ease }));
+  }
   // The outline: open and tucked sizes (border boxes, same bottom-left).
   // The pieces are built at the size the bar is going to, so the last frame
   // is the bar itself, unscaled, and the hand-over at the end is seamless.
@@ -20605,6 +20616,7 @@ function dockMorph(tuck, apply){
   }
   // How far the outline has got, 0 to 1 of this whole move (for a move
   // that turns around).
+  anims.push(...drAnims);
   const me = dockRun = {
     bar, skin, anims,
     progress: () => { const t = clock && clock.currentTime != null ? Math.min(left, clock.currentTime) : left; return from + (1 - from) * dockBezier(t / left); }
