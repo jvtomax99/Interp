@@ -136,6 +136,61 @@ def mline(name, start, dur, txt, size, x, y, t_in, t_out, color=None, face='xbol
     return group(nid(), name, start, dur, [T, M], matte=M['id'])
 
 
+FACE = {'xbold': 'ExtraBold', 'semi': 'SemiBold', 'med': 'Medium', 'bold': 'Bold'}
+
+
+def kline(name, start, dur, txt, size, x, y, t_in, t_out=None, color=None, face='xbold', just='left', track=-30,
+          stagger=70, marker=None, ink=None):
+    """A line of type, word by word: each word rises out of a mask with a small
+    tilt, 70 ms after the one before. marker: a colour bar that wipes in behind
+    the line first (the words then take ink). Exits the same way, upward."""
+    words = txt.split(' ')
+    ww = [width(wd, size, FACE[face]) + track / 1000 * size * len(wd) for wd in words]
+    gap = width(' ', size, FACE[face])
+    total = sum(ww) + gap * (len(words) - 1)
+    x0 = x if just == 'left' else x - total / 2
+    h = size * 1.3
+    padx = size * .24 if marker else 10
+    kids, cx = [], x0
+    for j, (wd, wwd) in enumerate(zip(words, ww)):
+        T = blur(text(nid(), f'{name}: {wd}', 0, dur, wd, size, (cx, y + h), font=face, color=ink if marker else color,
+                      just='left', box=(wwd + size, h), tracking=track, anchor=(0, h)))
+        t = t_in + j * stagger
+        ky = [(t, y + h * 2.05, None), (t + 480, y + h, SNAP)]
+        kr = [(t, 9, None), (t + 480, 0, SNAP)]
+        if t_out:
+            to = t_out + j * 40
+            ky += [(to, y + h, LIN), (to + 300, y - h * .1, WHIP)]
+        ko = [(0, 0, None)] + ([(t, 0, LIN)] if t > 0 else []) + [(t + 160, 100, LIN)]
+        if t_out: ko += [(t_out + j * 40 + 120, 100, LIN), (t_out + j * 40 + 300, 0, LIN)]
+        A.append(kf(T['id'], 'positionY', ky)); A.append(kf(T['id'], 'rotation', kr)); fade(T, ko)
+        kids.append(T); cx += wwd + gap
+    if marker:
+        bh = size * 1.12
+        B = rect(nid(), name + ' marker', 0, dur, (total + 2 * padx, bh), marker, (x0 - padx, y + (h - bh) / 2), roundness=bh * .22)
+        A.append(kf(B['id'], 'scaleX', [(0, 0, None), (max(1, t_in - 120), 0, LIN), (t_in + 260, 100, SNAP)]))
+        if t_out:
+            A.append(kf(B['id'], 'positionY', [(t_out + 60, y + (h - bh) / 2, None), (t_out + 400, y - h, WHIP)]))
+        kids.append(B)
+    M = rect(nid(), name + ' mask', 0, dur, (total + 2 * padx + 40, h + 12), WHITE, (x0 - padx - 20, y - 6))
+    return group(nid(), name, start, dur, kids + [M], matte=M['id'])
+
+
+def stack(name, start, dur, lines, size, x, ytop, leading, t_in, stagger=110, color=None, pos=None, instant=False):
+    """Big stacked words that slam in line by line (scale 135 -> 100)."""
+    kids = []
+    for j, ln in enumerate(lines):
+        T = blur(text(nid(), f'{name}: {ln}', 0, dur, ln, size, (x, ytop + j * leading + leading / 2), font='xbold', color=color,
+                      just='left', box=(1000, leading * 1.2), tracking=-40, anchor=(0, leading / 2)))
+        t = t_in + j * stagger
+        scale_keys(T, [(t, 135, None), (t + 380, 100, SNAP)])
+        fade(T, [(t, 100 if instant and not j else 0, None), (t + 90, 100, LIN)])
+        A.append(kf(T['id'], 'positionY', [(t, ytop + j * leading + leading / 2 + 40, None), (t + 380, ytop + j * leading + leading / 2, SNAP)]))
+        kids.append(T)
+    p = pos or (0, 0)
+    return group(nid(), name, start, dur, kids[::-1], pos=p, anchor=p)
+
+
 def sticker(label, x, y, start, dur, t_in, t_out=None, fill=WHITE, ink=None, rot=0, size=36):
     w = int(width(label, size, 'SemiBold') + 64); h = int(size * 2.3)
     pill = rect(nid(), 'Sticker pill', 0, dur, (w, h), fill, (0, 0), roundness=h / 2, shadow=shadow(40, 16, .35))
@@ -184,9 +239,7 @@ for row, (y, x0, x1) in enumerate([(250, 0, -2600), (1640, -2600, 0)]):
 HX = 90
 DROP = 6000
 OUT_HOOK = DROP - 260                               # everything whips out, a beat of silence, the drop
-says = add(blur(text(nid(), 'The doctor says', 0, T_HF + 400, 'The doctor\nsays:', 150, (HX, 960), font='xbold', just='left',
-                     box=(1000, 320), tracking=-40, leading=150, anchor=(0, 160))))
-scale_keys(says, [(0, 108, None), (380, 100, SNAP)])
+says = add(blur(stack('The doctor says', 0, T_HF + 400, ['The doctor', 'says:'], 150, HX, 810, 150, 0, instant=True, pos=(HX, 960))))
 fade(says, [(T_HF - 120, 100, None), (T_HF + 120, 0, LIN)])
 A.append(kf(says['id'], 'positionY', [(T_HF - 120, 960, None), (T_HF + 200, 700, WHIP)]))
 # a barrage of the words a cardiology visit throws at you, one per beat behind the type
@@ -201,10 +254,8 @@ for j, (w, x, y, r) in enumerate(BARRAGE):
     scale_keys(b, [(0, 120, None), (520, 96, OUT)])
 tag_dr = add(text(nid(), 'DOCTOR tag', T_HF - 100, 3550 - T_HF, 'THE DOCTOR', 34, (HX, 560), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300))
 fade(tag_dr, [(0, 0, None), (200, 100, OUT), (3150 - T_HF, 100, LIN), (3400 - T_HF, 0, LIN)])
-hf = add(blur(text(nid(), 'heart failure', T_HF - 100, OUT_HOOK - T_HF + 100, 'heart\nfailure', 200, (HX, 830), font='xbold',
-                   just='left', box=(1000, 420), tracking=-40, leading=190, anchor=(0, 210))))
-scale_keys(hf, [(0, 150, None), (300, 100, SNAP), (1950 - T_HF, 103, LIN), (2250 - T_HF, 58, SNAP)])
-fade(hf, [(0, 0, None), (90, 100, LIN)])
+hf = add(blur(stack('heart failure', T_HF - 100, OUT_HOOK - T_HF + 100, ['heart', 'failure'], 200, HX, 620, 190, 0, stagger=150, pos=(HX, 830))))
+scale_keys(hf, [(0, 100, None), (1950 - T_HF, 103, LIN), (2250 - T_HF, 58, SNAP)])
 A.append(kf(hf['id'], 'positionY', [(1950 - T_HF, 830, None), (2250 - T_HF, 520, SNAP)]))
 A.append(kf(hf['id'], 'positionX', [(OUT_HOOK - T_HF - 200, HX, None), (OUT_HOOK - T_HF + 60, HX - 1300, WHIP)]))
 add(flash(T_HF - 100, 30))
@@ -230,8 +281,8 @@ A.append({'type': 'setFxPropertyAnimator', 'compositionId': 'main', 'property': 
 # "¿fallo cardíaco?" (the wrong word, in the interpreter's voice), then "Nope."
 FA0 = NARR[2]['start_ms'] - 80
 FY = 1140
-tag_es = text(nid(), 'YOU tag', 0, OUT_HOOK - FA0, 'YOU, IN SPANISH', 34, (HX, FY - 130), font='semi', color=DANGER, just='left', box=(700, 50), tracking=300)
-fallo = text(nid(), 'fallo cardiaco', 0, OUT_HOOK - FA0, '¿fallo\ncardíaco?', 170, (HX, FY), font='xbold', just='left', box=(1000, 360), tracking=-40, leading=165)
+tag_es = text(nid(), 'YOU tag', 0, OUT_HOOK - FA0, 'THE INTERPRETER', 34, (HX, FY - 130), font='semi', color=DANGER, just='left', box=(700, 50), tracking=300)
+fallo = stack('fallo cardiaco', 0, OUT_HOOK - FA0, ['¿fallo', 'cardíaco?'], 170, HX, FY, 165, 60, stagger=120)
 ts = T_NOPE - FA0                                  # strike on "Nope", on the fallo block's clock
 bars = []
 for j, word in enumerate(['¿fallo', 'cardíaco?']):
@@ -239,9 +290,9 @@ for j, word in enumerate(['¿fallo', 'cardíaco?']):
     b = rect(nid(), 'Strike ' + word, 0, OUT_HOOK - FA0, (w, 20), DANGER, (HX - 15, FY + 98 + j * 165), roundness=10)
     A.append(kf(b['id'], 'scaleX', [(ts + j * 110, 0, None), (ts + j * 110 + 240, 100, SNAP)]))
     bars.append(b)
-fade(fallo, [(0, 0, None), (160, 100, OUT), (ts, 100, LIN), (ts + 250, 45, LIN)])
+fade(fallo, [(ts, 100, None), (ts + 250, 45, LIN)])
 fade(tag_es, [(0, 0, None), (200, 100, OUT)])
-nope = sticker('Nope.', 800, FY + 470, 0, OUT_HOOK - FA0, ts + 40, rot=8, fill=DANGER, ink=WHITE, size=72)
+nope = sticker('Not for patients.', 640, FY + 470, 0, OUT_HOOK - FA0, ts + 40, rot=-5, fill=DANGER, ink=WHITE, size=56)
 fb = add(blur(group(nid(), 'Fallo block', FA0, OUT_HOOK - FA0 + 300, [nope] + bars + [fallo, tag_es])))
 A.append(kf(fb['id'], 'positionY', [(0, 110, None), (380, 0, SNAP)]))
 A.append(kf(fb['id'], 'positionX', [(OUT_HOOK - FA0 - 200, 0, None), (OUT_HOOK - FA0 + 60, -1300, WHIP)]))
@@ -249,9 +300,8 @@ A.append(kf(fb['id'], 'positionX', [(OUT_HOOK - FA0 - 200, 0, None), (OUT_HOOK -
 # the answer, on the drop
 ANS = DROP
 AD = 8450 - ANS
-ins = text(nid(), 'insuficiencia cardiaca', 0, AD, 'insuficiencia\ncardíaca', 150, (HX, 880), font='xbold', just='left',
-           box=(1000, 320), tracking=-40, leading=150)
-tag_ok = text(nid(), 'YOU, AGAIN tag', 0, AD, 'YOU, AGAIN', 34, (HX, 770), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300)
+ins = stack('insuficiencia cardiaca', 0, AD, ['insuficiencia', 'cardíaca'], 150, HX, 880, 150, 0, stagger=140, instant=True)
+tag_ok = text(nid(), 'YOU, AGAIN tag', 0, AD, 'THE RIGHT WORD', 34, (HX, 770), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300)
 ul = rect(nid(), 'Answer underline', 0, AD, (width('insuficiencia', 150) * .72, 16), CYAN, (HX, 1220), roundness=8)
 there = sticker('There it is.', 760, 1340, 0, AD, NARR[5]['start_ms'] - ANS, rot=-6, fill=CYAN, ink=hexc('#06123A'), size=56)
 A.append(kf(ul['id'], 'scaleX', [(150, 0, None), (550, 100, SNAP)]))
@@ -269,9 +319,9 @@ icon = image(nid(), 'Hub icon', 0, TD, 'hub-icon', (240, 240), (540, 760), ancho
 pop(icon, 0, s0=10, d=520)
 A.append(kf(icon['id'], 'rotation', [(0, -120, None), (600, 0, SNAP)]))
 t_meet = NARR[5]['start_ms'] + 700 - T0              # "Meet Interpreter Hub"
-tl = mline('Title', 0, TD, 'Interpreter Hub', 124, 40, 930, t_meet, None, just='center', w=1000, track=-35)
-tsub = mline('Title sub', 0, TD, 'for the HUMC interpreter team', 46, 40, 1110, t_meet + 150, None, face='med', just='center', w=1000, track=0)
-tsub['layers'][0]['sourceText']['fillColor'] = hexc('#FFFFFF', .75)
+tl = kline('Title', 0, TD, 'Interpreter Hub', 124, 540, 930, t_meet, None, just='center', track=-35, stagger=110)
+tsub = kline('Title sub', 0, TD, 'for the HUMC interpreter team', 46, 540, 1110, t_meet + 300, None, face='med', just='center',
+             track=0, stagger=40, color=hexc('#FFFFFF', .75))
 titleG = add(blur(group(nid(), 'Title', T0, TD, [tsub, tl, icon], pos=(540, 960), anchor=(540, 960))))
 scale_keys(titleG, [(TD - 650, 100, None), (TD - 300, 70, WHIP)])
 A.append(kf(titleG['id'], 'positionY', [(TD - 650, 960, None), (TD - 300, 520, WHIP)]))
@@ -287,9 +337,9 @@ FOCUS = [(.5, .80, 145, .02, .755, .98, .875), (.5, .60, 150, .03, .545, .97, .6
          (.5, .54, 150, .04, .42, .96, .655), (.5, .72, 148, .02, .585, .98, .9),
          (.5, .40, 145, .03, .245, .97, .545), (.5, .52, 140, .02, .30, .98, .71),
          (.5, .58, 150, .05, .47, .95, .69)]
-HEAD = [('Your whole shift.', 'One app.'), ('Written by', 'the team.'), ('Glossary first.', 'AI second.'),
-        ('Know the doctor', 'first.'), ('101 false friends.', 'Flagged.'), ('Daily Drill.', 'Warm up first.'),
-        ('CoreCHI prep.', '145 questions.'), ('The whole team.', 'One chat.'), ('Stuck?', 'Ask Dr. Smiley.')]
+HEAD = [('Built by our', 'own interpreters.'), ('One glossary.', 'Every specialty.'), ('Glossary first.', 'AI second.'),
+        ('Ready for', 'every physician.'), ('101 false friends.', 'Flagged.'), ('Daily drills.', 'Sharp skills.'),
+        ('National certification.', 'Prep built in.'), ('One team.', 'One channel.'), ('Stuck?', 'Ask Dr. Smiley.')]
 
 pid = nid()
 body = rect(nid(), 'Phone body', 0, PHD, (SW + 34, SH + 34), hexc('#060918'), (PX, PY), roundness=84,
@@ -342,9 +392,7 @@ sm = add(image(nid(), 'Smiley peek', ta, BEAT, 'smiley', (360, 450), (870, 1960)
 pop(sm, 300, 2650, s0=30, d=520)
 A.append(kf(sm['id'], 'positionY', [(300, 2200, None), (800, 1900, SNAP)]))
 A.append(kf(sm['id'], 'rotation', [(300, -16, None), (900, 5, OUT), (1600, -3, INOUT), (2300, 3, INOUT)]))
-add(sticker("I'm a cartoon. I don't sleep.", 500, 1600, ta, BEAT, 1500, 2650, rot=-4, size=40))
-# a callback to the hook on the Translate beat
-add(sticker('Told you.', 800, 790, BEATS[2], BEAT, 1650, 2650, fill=CYAN, ink=hexc('#06123A'), rot=6, size=38))
+add(sticker('Available 24/7.', 520, 1600, ta, BEAT, 1500, 2650, rot=-4, size=44))
 # the false friend everyone knows, on the False Friends beat
 add(sticker('constipado = a cold', 700, 1640, BEATS[4], BEAT, 1650, 2650, fill=WHITE, ink=hexc('#B3263B'), rot=-5, size=40))
 
@@ -355,8 +403,8 @@ scrim = add(rect(nid(), 'Top scrim', BEATS[0] - 300, END - BEATS[0] + 400, (1080
                                   {'offset': 1, 'color': hexc('#0E1438', 0)}]}))
 fade(scrim, [(0, 0, None), (400, 100, LIN), (END - BEATS[0], 100, LIN), (END - BEATS[0] + 300, 0, LIN)])
 for i, (l1, l2) in enumerate(HEAD):
-    add(mline(f'Head {i + 1}a', BEATS[i], BEAT, l1, 92, 80, 130, 120, 2620))
-    add(mline(f'Head {i + 1}b', BEATS[i], BEAT, l2, 92, 80, 250, 220, 2680, color=CYAN))
+    add(kline(f'Head {i + 1}a', BEATS[i], BEAT, l1, 84, 80, 118, 100, 2600, face='semi', track=-20, color=hexc('#FFFFFF', .92)))
+    add(kline(f'Head {i + 1}b', BEATS[i], BEAT, l2, 96, 92, 232, 330, 2660, marker=CYAN, ink=hexc('#06123A')))
 # story bar: one segment per screen, each fills over its beat
 NS = len(SHOTS)
 SEGW = (920 - (NS - 1) * 10) / NS
@@ -371,47 +419,33 @@ for i in range(NS):
 # layers were added back to front; the story bar and headlines must sit above the phone: they do (added later)
 
 # ---------- D. end card ----------
-# "Interpreter Hub. Built by our team, for our team." / "Open it on your phone. Tap Share,
-# then Add to Home Screen." / "See you on the floor."
+# "Interpreter Hub. Built here, for our patients." / "It's live today, on any phone." /
+# "Better words. Safer care."
 ED = DUR - END
 L15, L16, L17 = (NARR[i]['start_ms'] - END for i in (15, 16, 17))
 big = image(nid(), 'Smiley end', 0, ED, 'smiley', (400, 500), (540, 860), anchor=(200, 500), fit='contain')
 pop(big, 120, s0=20, d=560)
-A.append(kf(big['id'], 'positionY', [(120, 1000, None), (680, 860, SNAP), (2400, 872, INOUT), (4200, 860, INOUT), (L17, 868, INOUT),
-                                      (L17 + 250, 830, OUT), (L17 + 600, 860, POP), (ED, 866, INOUT)]))
-A.append(kf(big['id'], 'rotation', [(120, -10, None), (800, 3, OUT), (1500, 0, INOUT), (L17, 0, LIN), (L17 + 200, -7, OUT),
-                                     (L17 + 450, 6, INOUT), (L17 + 700, -4, INOUT), (L17 + 950, 0, INOUT)]))
-et = mline('End title', 0, ED, 'Interpreter Hub', 112, 40, 900, 350, None, just='center', w=1000, track=-35)
-es = mline('End sub', 0, ED, 'Built by our team, for our team.', 46, 40, 1050, L15 + 1150, None, face='med', just='center', w=1000, track=0)
-es['layers'][0]['sourceText']['fillColor'] = hexc('#FFFFFF', .8)
+A.append(kf(big['id'], 'positionY', [(120, 1000, None), (680, 860, SNAP), (2400, 872, INOUT), (4200, 860, INOUT), (ED, 868, INOUT)]))
+A.append(kf(big['id'], 'rotation', [(120, -10, None), (800, 3, OUT), (1500, 0, INOUT)]))
+et = kline('End title', 0, ED, 'Interpreter Hub', 112, 540, 900, 350, None, just='center', track=-35, stagger=110)
+es = kline('End sub', 0, ED, 'Built here, for our patients.', 46, 540, 1050, L15 + 1150, None, face='med', just='center',
+           track=0, stagger=45, color=hexc('#FFFFFF', .8))
 uw = 640
 url = group(nid(), 'Address', 0, ED, [
     text(nid(), 'Address text', 0, ED, 'interp-six.vercel.app', 44, (0, 0), font='semi', color=NAVY, box=(uw, 96)),
     rect(nid(), 'Address pill', 0, ED, (uw, 96), WHITE, (0, 0), roundness=48, shadow=shadow(50, 20, .4))],
-    pos=(540, 1230), anchor=(uw / 2, 48))
+    pos=(540, 1210), anchor=(uw / 2, 48))
 url['layers'][0]['sourceText']['verticalAlign'] = 'center'
 pop(url, L16, s0=70)
-# the three steps, each as it is said
-steps, x = [], 0
-SPEC = [('1', 'Open it', 0), ('2', 'Tap Share', 1450), ('3', 'Add to Home Screen', 2050)]
-ws = [int(width(lab, 34, 'SemiBold') + 110) for _, lab, _ in SPEC]
-x0 = 540 - (sum(ws) + 2 * 18) / 2
-for (n, lab, dt), w in zip(SPEC, ws):
-    h = 78
-    num = rect(nid(), 'Step dot', 0, ED, (50, 50), CYAN, (14, 14), roundness=25)
-    nt = text(nid(), 'Step number', 0, ED, n, 28, (14, 14), font='xbold', color=hexc('#06123A'), box=(50, 50))
-    nt['sourceText']['verticalAlign'] = 'center'
-    lt = text(nid(), 'Step label', 0, ED, lab, 34, (78, 0), font='semi', just='left', box=(w - 84, h))
-    lt['sourceText']['verticalAlign'] = 'center'
-    pill = rect(nid(), 'Step pill', 0, ED, (w, h), hexc('#FFFFFF', .12), (0, 0), roundness=h / 2, stroke=(hexc('#FFFFFF', .28), 2))
-    G = group(nid(), 'Step ' + lab, 0, ED, [nt, num, lt, pill], pos=(x0 + w / 2, 1370), anchor=(w / 2, h / 2))
-    pop(G, L16 + dt, s0=50)
-    steps.append(G); x0 += w + 18
+live = kline('Live', 0, ED, 'Live today, on any phone.', 38, 540, 1290, L16 + 350, None, face='med', just='center',
+             track=0, stagger=40, color=hexc('#FFFFFF', .72))
+tag1 = kline('Tagline 1', 0, ED, 'Better words.', 96, 540, 1400, L17, None, just='center', track=-35, stagger=110)
+tag2 = kline('Tagline 2', 0, ED, 'Safer care.', 96, 540, 1525, L17 + 620, None, just='center', track=-35, stagger=110,
+             marker=CYAN, ink=hexc('#06123A'))
 logo = text(nid(), 'Made at HUMC', 0, ED, 'MADE BY THE HUMC INTERPRETER TEAM', 26, (540, 1760), font='semi',
             color=hexc('#01B8E6', .9), box=(1000, 50), anchor=(500, 0), tracking=240)
-fade(logo, [(L17, 0, None), (L17 + 500, 100, OUT)])
-see = sticker('See you on the floor.', 540, 1560, 0, ED, L17 + 100, fill=CYAN, ink=hexc('#06123A'), size=44)
-add(group(nid(), 'End card', END, ED, [see, logo] + steps + [url, es, et, big]))
+fade(logo, [(L17 + 900, 0, None), (L17 + 1400, 100, OUT)])
+add(group(nid(), 'End card', END, ED, [logo, tag2, tag1, live, url, es, et, big]))
 add(flash(END + 80, 40))
 
 # ---------- sound ----------
@@ -422,8 +456,7 @@ cues = [('impact', T_HF - 120, .55), ('click', T_NOPE + 40, .8), ('pop', T_NOPE 
         ('whoosh1', OUT_HOOK - 250, .55), ('impact', DROP - 20, .85), ('pop', NARR[5]['start_ms'] - 20, .45),
         ('whoosh2', ANS + AD - 300, .5),
         ('whoosh1', PH0 - 100, .5), ('down', END - 60, .7), ('ping', END + L16, .45),
-        ('pop', BEATS[8] + 300, .45), ('tap', BEATS[2] + 1650, .5), ('tap', BEATS[4] + 1650, .5), ('pop', END + L17 + 100, .5)]
-cues += [('tap', END + L16 + dt, .4) for _, _, dt in SPEC[1:]]
+        ('pop', BEATS[8] + 300, .45), ('tap', BEATS[4] + 1650, .5), ('tap', END + L17 + 620, .5)]
 cues += [('whoosh2' if i % 2 else 'whoosh1', BEATS[i] - 300, .35) for i in range(1, len(SHOTS))]
 cues += [('tap', BEATS[i] + 1150, .3) for i in range(len(SHOTS))]
 for name, at, v in cues:

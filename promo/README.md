@@ -5,8 +5,34 @@ Tesseract (installed in every cloud session by `.claude/hooks/session-start.sh`)
 Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
-30 s), `v4` (45 s, new intro), `hub-promo-v5.mp4` (current: v4 with the voice warmed up). `build.py` builds v5; older builds are
+30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `hub-promo-v6.mp4` (current: for the CEO pitch). `build.py` builds v6; older builds are
 in git history.
+
+## v6: for the pitch to the hospital's CEO (2026-10-18)
+
+Jose: better word graphics, better voice acting; the audience is now HUMC's CEO.
+Tone picked: confident, a little wit. Same 45 s structure as v4 (below), changed:
+
+- **Script** (`narration.json`): staff-built, glossary first, physician prep,
+  false friends caught before a patient, daily practice, national certification
+  prep, one team channel with no patient details, Dr. Smiley answering from the
+  team's own glossary; ends "Interpreter Hub. Built here, for our patients. /
+  It's live today, on any phone. / Better words. Safer care." No numbers or
+  outcomes are claimed that the app doesn't show. Cut as too flip for a CEO:
+  "You're welcome", "A.I. gets the leftovers", "Cartoons don't sleep", "Told you."
+- **Type**: `kline()` sets a line word by word (each word rises out of a mask
+  with a small tilt, 70 ms apart, fading in as it goes; the mask alone did not
+  hide words before they moved). Second headline lines sit on a cyan marker bar
+  that wipes in first. `stack()` slams the hook's big words in line by line.
+  Hook tags: THE DOCTOR / THE INTERPRETER / THE RIGHT WORD. End card: address,
+  "Live today, on any phone", tagline with "Safer care." on the marker.
+- **Voice**: still Kokoro (warmed) as a stand-in. Jose chose **Chatterbox**;
+  it needs `huggingface.co` allowed in the environment's network settings
+  (blocked on 2026-10-18). Next session: `voice_chatterbox.py` (UNTESTED,
+  instructions at its top) regenerates `voice/` and keeps the Kokoro takes in
+  `voice/kokoro/`; check each line still fits its `max_ms` (Chatterbox may run
+  slower: shorten text or nudge `start_ms`), decide whether the `WARM` filter in
+  `build.py` still helps (probably drop it for Chatterbox), rebuild, export.
 
 ## What's in it (v4, 2026-10-18)
 

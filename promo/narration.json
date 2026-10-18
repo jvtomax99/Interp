@@ -1,5 +1,5 @@
 {
- "note": "v4 script (45 s). One line per beat. start_ms is where the line begins; max_ms is the room it has. voice defaults to am_puck (the narrator); em_alex is Kokoro's native Spanish voice, playing the interpreter in the hook.",
+ "note": "v6 script (45 s), for the pitch to the hospital's CEO: confident, a little wit. One line per beat; start_ms is where it begins, max_ms the room it has. voice defaults to am_puck (narrator); em_alex (native Spanish) plays the interpreter in the hook. Kokoro is the stand-in until Chatterbox can run (README).",
  "lines": [
   {
    "start_ms": 100,
@@ -19,7 +19,7 @@
    "start_ms": 2000,
    "max_ms": 1450,
    "lang": "en",
-   "text": "You've got half a second."
+   "text": "Half a second to get it right."
   },
   {
    "start_ms": 3450,
@@ -29,10 +29,10 @@
    "text": "¿Fallo cardíaco?"
   },
   {
-   "start_ms": 4700,
+   "start_ms": 4750,
    "max_ms": 1290,
    "lang": "en",
-   "text": "Nope. Not with patients."
+   "text": "Not for patients."
   },
   {
    "start_ms": 6000,
@@ -51,73 +51,73 @@
    "start_ms": 10050,
    "max_ms": 2850,
    "lang": "en",
-   "text": "Your whole shift, one app. No tab juggling."
+   "text": "Built by HUMC's own medical interpreters."
   },
   {
    "start_ms": 12950,
    "max_ms": 2900,
    "lang": "en",
-   "text": "A glossary by the people who actually say these words."
+   "text": "One shared glossary, for every specialty."
   },
   {
    "start_ms": 15950,
    "max_ms": 2900,
    "lang": "en",
-   "text": "Glossary speaks first. A.I. gets the leftovers."
+   "text": "Translation checks our glossary first, then A.I."
   },
   {
    "start_ms": 19000,
    "max_ms": 2850,
    "lang": "en",
-   "text": "Know the doctor before the doctor knows you."
+   "text": "Ready for each physician's terms, before the visit."
   },
   {
    "start_ms": 22000,
    "max_ms": 2850,
    "lang": "en",
-   "text": "A hundred and one false friends, flagged. You're welcome."
+   "text": "It flags false friends before they reach a patient."
   },
   {
    "start_ms": 25000,
    "max_ms": 2850,
    "lang": "en",
-   "text": "Daily Drill. Warm up before the real thing."
+   "text": "Daily drills keep skills sharp between assignments."
   },
   {
    "start_ms": 28000,
    "max_ms": 2850,
    "lang": "en",
-   "text": "Prepping for Core C.H.I.? It's built in."
+   "text": "And it prepares staff for national certification."
   },
   {
    "start_ms": 31000,
    "max_ms": 2850,
    "lang": "en",
-   "text": "And a team chat, for when the E.D. needs a hand."
+   "text": "The whole team, one channel. No patient details."
   },
   {
    "start_ms": 34000,
    "max_ms": 2850,
    "lang": "en",
-   "text": "Stuck? Ask Doctor Smiley. Cartoons don't sleep."
+   "text": "Stuck? Doctor Smiley answers from our own glossary."
   },
   {
    "start_ms": 37200,
    "max_ms": 2700,
    "lang": "en",
-   "text": "Interpreter Hub. Built by our team, for our team."
+   "text": "Interpreter Hub. Built here, for our patients."
   },
   {
-   "start_ms": 40000,
+   "start_ms": 40300,
    "max_ms": 3000,
    "lang": "en",
-   "text": "Open it on your phone. Tap Share, then Add to Home Screen."
+   "text": "It's live today, on any phone."
   },
   {
-   "start_ms": 43100,
-   "max_ms": 1400,
+   "start_ms": 42700,
+   "max_ms": 1900,
    "lang": "en",
-   "text": "See you on the floor."
+   "text": "Better words. Safer care."
   }
  ]
 }
