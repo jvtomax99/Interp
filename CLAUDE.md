@@ -297,8 +297,8 @@ too wide for its line shrinks; Dr. Smiley never moves) in `home-polish.js`.
 Don't use those two faces anywhere else. The first hello after the app
 opens has the name written by a small navy ball of light (`namePen` in
 `home-polish.js`, Jose's pick "look A"): the pen path is worked out on the
-phone from the letters themselves (`penPathOf`: canvas, thinning, a left-to-right
-walk, accent and i-dots last), kept per name in `ih_penPath`; the real name
+phone from the letters themselves (`penPathOf`: canvas on the page, then `penTrace` in
+a worker: thinning, a left-to-right walk, accent and i-dots last), kept per name in `ih_penPath`; the real name
 waits invisible (`.is-penning`, at most 6 s) under an SVG copy that is
 revealed behind the ball. Reduced motion, Still, a hidden page or any failure:
 the name is simply there.

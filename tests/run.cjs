@@ -24,6 +24,7 @@ const SUITES = [
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
+  ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
 ];
 const only = process.argv.slice(2);
 const pick = only.length ? SUITES.filter(([f]) => only.some(o => f.startsWith(o))) : SUITES;

@@ -43,4 +43,5 @@ a change from any tool gets a green check or a red X on its commit.
 ## Tools (run by hand, not part of `run.cjs`)
 
 - `tools/perf.cjs`: smoothness numbers (idle busy %, tap waits, startup, layout shift, animations that aren't transform/opacity) at iPhone size with the CPU slowed 4x. The S-phases in `docs/PLAN.md` are judged by it.
+- `tools/startup.cjs`: the app opening, task by task (S3): each long task's biggest pieces, the script lines that forced a layout, and the functions that took the time. `UA=chromium`, `RETURNING=1`, `RUNS=n`, `ROOT=` another checkout for before/after.
 - `tools/doctor-replay.cjs`: replays a `doctors.json` export through the doctor page and reports anything lost.

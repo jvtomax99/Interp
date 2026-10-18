@@ -92,10 +92,16 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
-S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
-   `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
-   Defer decorative work past first paint (requestIdleCallback + timeout),
-   split the worst task. Target: no task > 200 ms.
+S3b. **Startup, what's left (S3 in Done).** Target still no task > 200 ms
+   at 4x; after S3 the worst are ~210-380 ms. They are whole-screen costs:
+   a Home render's script (~150-200 ms) plus the style of the new screen
+   (~130 ms, forced on purpose by `dockAfterRender` so the tab lens glides),
+   and the next frame's layout + paint + `heroPetals`. Options, each needs a
+   measurement first: fewer elements in Home's first render (its own style
+   cost), the lens glide as a Web Animation (no forced style; check Still
+   and reduced motion), `pin-icons.js` `applyExactPins` (30-120 ms).
+   `drawOpening` is per frame of the opening (30-70 ms a frame at 4x), not
+   a long task; only worth it if the opening stutters on the phone.
 S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
@@ -183,6 +189,25 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-18 S3 startup (invisible). Measured with the new
+  `tests/tools/startup.cjs` (each long task's pieces, the lines that forced
+  layout, CPU profile). The plan's "top CPU" list was mostly forced layout
+  billed to whoever measured first. Changes: the name pen's path is traced
+  in a worker (`penTrace`, plain worker, no OffscreenCanvas; same path to
+  the byte for Jose, Moisés, Elizabeth Lind-Smith); the categories
+  listener's first snapshot (the document `loadData` just read) no longer
+  repaints Home; Home's measuring moved to the next frame before it paints
+  (`beforePaint` in `home-polish.js`: heartline/name fit, fonts.ready,
+  hero and rank-card petals, rail dots; `applyHeroDrift`,
+  `smileyRider.syncSoon`); `dockAfterRender` settles the lens with a style
+  read, not a layout. 4x, iPhone UA, 4+4 interleaved: first visit worst
+  task 428-623 -> 279-379 ms (every after below every before), tasks over
+  200 ms 3-5 -> 1-3, `render()` CPU 715-1108 -> 346-519 ms. Returning visit:
+  no clear change in the worst task (192-283 -> 201-314, overlapping);
+  total long-task time unchanged on both (work moved, not removed, apart
+  from the repaint and the pen). New suite `startup-work.cjs` (also in the
+  WebKit CI job). No User Guide change (nothing visible).
 
 - 2026-10-18 S7c, pin burst stops when a scroll takes the touch (visible,
   Jose's pick). Jose first picked option 1 (burst on lift); measured first:
@@ -292,6 +317,24 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- `destination-labels` "Back ... restores scroll" can miss by ~7 px
+  (1130 vs 1137) on main too (2026-10-18, this container); seen once
+  each side, then passing. Not a regression when it shows alone.
+- A CPU profile bills a forced layout to the script line that read first,
+  so "self time" of `place`, `addCardPetals`, `applyHeroDrift` and the like
+  is really the whole new screen's style + layout (~150-250 ms at 4x after
+  a Home render). Moving one read only moves the bill to the next reader;
+  use `tests/tools/startup.cjs`, which names the line behind each forced
+  layout. In Chromium `window.scrollY`, `document.fonts.ready` and
+  `document.fonts.load` all force layout.
+- Startup repaints of Home (returning visit, stand-ins): the cache paint,
+  loadData's (identical, skipped by `lastHomeHtml`), then real changes:
+  Dr. Smiley's rank (`data-lv`, team points aren't cached) and the
+  activity feed ("No team activity yet" until it loads). So on every open
+  his outfit and the feed swap in after the first paint. Caching both
+  would remove a full repaint and the swap; it changes what the first
+  frame shows (better, but visible): Jose's call.
 
 - Home's tap cards open their screen at once on the click (22-56 ms to
   the next screen), so anything a tap shows on the card itself is only
