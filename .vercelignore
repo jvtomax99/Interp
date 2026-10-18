@@ -13,6 +13,9 @@ firestore.rules
 storage.rules
 firebase.json
 
+# The team promo video's project (promo/README.md): not part of the app.
+promo
+
 # Jose's original artwork sheets (9 MB). The app uses the pre-cut files in
 # pins/ and pin-icons-sheet.webp; these stay in git as the source art.
 pin-icons-source-hd-upload.png
