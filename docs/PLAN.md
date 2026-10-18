@@ -208,6 +208,7 @@ come from this alone.
   total long-task time unchanged on both (work moved, not removed, apart
   from the repaint and the pen). New suite `startup-work.cjs` (also in the
   WebKit CI job). No User Guide change (nothing visible).
+  jvtomax99/Interp#52.
 
 - 2026-10-18 S7c, pin burst stops when a scroll takes the touch (visible,
   Jose's pick). Jose first picked option 1 (burst on lift); measured first:
