@@ -1,7 +1,11 @@
-"""UNTESTED. Narration with Chatterbox (Resemble AI, MIT licence): a more natural,
+"""UNTESTED (no audio made yet). Narration with Chatterbox (Resemble AI, MIT licence): a more natural,
 expressive open voice than Kokoro, with native Spanish in its multilingual model.
 Written 2026-10-18 in a session where huggingface.co (where its weights live) was
-blocked, so it has never been run. Expect to fix small API details on first run.
+blocked, so it has never been run. 2026-10-18, second session: the imports and every
+call here match chatterbox-tts 0.1.7 (from_pretrained, generate, language_id 'es'
+supported); the weight download still got 403 from the proxy. Allow huggingface.co
+AND its file hosts (cas-bridge.xethub.hf.co, cdn-lfs.huggingface.co; or *.hf.co and
+*.huggingface.co), then start a new session: a running one keeps its old policy.
 
 Needs: huggingface.co allowed in the environment's network settings, then
   python3 -m venv /tmp/cb && /tmp/cb/bin/pip install chatterbox-tts soundfile
