@@ -210,7 +210,7 @@ come from this alone.
   16 runs in the bad band; ~280 ms saved per run is under the spread).
   dock-tuck: new guard, rules on body state classes must not end on a
   bare tag (fails on the old code). Harness `POLISH_DIR` for before/after
-  of the Home files. Jose's phone decides. PR link: see the branch's PR.
+  of the Home files. Jose's phone decides. jvtomax99/Interp#50.
 - 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
   / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
   `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
