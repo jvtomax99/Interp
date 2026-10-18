@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v228-tuck-restyle';
+const CACHE_VERSION = 'interpreter-hub-v229-burst-scroll-stop';
 const PRECACHE = [
   './',
   './index.html',

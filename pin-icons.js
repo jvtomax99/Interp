@@ -909,7 +909,15 @@
      The tab bar is deliberately not in the list. Its four pins are the same
      on every screen, so animating them would fire on every single navigation
      rather than being an occasional moment. */
+  /* It starts on touch-down, because a tap opens the next screen at once:
+     every burst frame you see plays while the finger is down (measured,
+     S7c). A scroll that starts on a card used to play the whole burst too,
+     ~0.7-1 s of layout every frame while you scroll (its keyframes animate
+     sizes). Now, when the browser takes the touch for a scroll it sends
+     pointercancel, and the burst stops there (Jose's pick, 2026-10-18).
+     A tap ends in pointerup instead, so taps look exactly as before. */
   const TAP_CARDS = '.home-tile, .domain-family, .qa-card, .qa-tile, .domain-chip, .side-row, .folder-tile';
+  let burstTouch = null;                            // { id, end }: the burst a touch started
   document.addEventListener('pointerdown', (e) => {
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const card = e.target.closest && e.target.closest(TAP_CARDS);
@@ -919,11 +927,21 @@
     const holder = pinEl.closest('[data-pin]');
     pinEl.classList.add('is-tapped');
     if(holder) holder.classList.add('is-tapped');   // the burst rides on this
-    pinEl.addEventListener('animationend', () => {
+    const end = () => {
+      pinEl.removeEventListener('animationend', end);
       pinEl.classList.remove('is-tapped');
       if(holder) holder.classList.remove('is-tapped');
-    }, { once:true });
+      if(burstTouch && burstTouch.end === end) burstTouch = null;
+    };
+    pinEl.addEventListener('animationend', end);
+    burstTouch = { id: e.pointerId, end };
   }, { passive:true });
+  document.addEventListener('pointerup', (e) => {
+    if(burstTouch && burstTouch.id === e.pointerId) burstTouch = null;   // a tap: let it play
+  }, { passive:true, capture:true });
+  document.addEventListener('pointercancel', (e) => {
+    if(burstTouch && burstTouch.id === e.pointerId) burstTouch.end();    // a scroll: stop it
+  }, { passive:true, capture:true });
 
   const specialtyNames = ['infectious-disease','dermatology','ophthalmology','surgery-anesthesia'];
   [...medicalNames, ...specialtyNames].forEach(key => { medicalArtwork[key] = './pins/' + key + '.webp'; });
