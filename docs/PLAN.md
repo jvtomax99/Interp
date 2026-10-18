@@ -86,22 +86,7 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a. **Overlay `:has()` -> body classes (invisible).** 6 rules:
-      `index.html` 2129, 4606, 4611-4613, 5638, 5688 and `home-polish.css`
-      444, on `.overlay.show`, `.gs-overlay.show`, `.dm-overlay.show`
-      (~25% of style time while scrolling). There is no shared open/close:
-      ~28 overlays each add and remove `show` themselves, and other tools
-      add more, so don't patch 28 call sites. One small watcher in
-      `index.html` keeps `body.ov-open`, `.gs-open`, `.dm-open` in step
-      with "any such overlay has `show`" (a MutationObserver on class
-      changes of those overlays, plus new ones added to the page; its
-      cost while scrolling measured, it must be near zero). Each rule
-      swaps `body:has(.overlay.show)` (0,2,1) for `body.ov-open.ov-open`
-      (0,2,1): same weight. Proof as part 1: computed styles of the tab
-      bar, dock, appt pill, rider identical with each overlay kind open
-      and closed; a journey check that opening and closing each kind sets
-      and clears the class. The Team Chat `:has(#content > .tc)` group (7
-      rules) is not on Home: left alone unless the trace shows it.
+   S7a is in Done (overlay classes); its phone check is pending.
    S7b. **Tuck restyle (invisible).** Each tuck/untuck restyles ~490
       elements (~49 ms at 4x), likely the 49-53 ms worst frames on the
       phone (unproven). The 14 `body.dock-mini` rules (`home-polish.css`
@@ -216,6 +201,19 @@ come from this alone.
 
 ## Done
 
+- 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
+  / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
+  `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
+  (`overlayFlags`, `index.html`, by `closeAllOverlays`), so new overlays
+  need nothing. Computed styles old vs new identical: 398,040 values, 24
+  states (phone + computer, each kind open and closed;
+  `tests/tools/overlay-styles.cjs`). dock-tuck checks the classes follow
+  each kind before the next frame. `scroll.cjs` UA=chromium 4x, 8+8
+  interleaved: style time 5232 -> 3728 ms median (every after run below
+  every before run), late while scrolling 26.7 -> 23.8% (runs overlap),
+  script +160 ms (the observer: at most ~90 ms a run, counted). Rule added
+  to `AGENTS.md`: no `:has()` for state on big containers. Jose's phone
+  decides. PR link: see the branch's PR.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
@@ -281,6 +279,14 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- 2026-10-18 `scroll.cjs` came out in a third band: ~20-30% late while
+  scrolling for all 16 runs, between the good (~7-9%) and bad (35-45%)
+  bands seen 2026-10-17. Interleaving still makes before/after fair;
+  compare only within one session's runs.
+- An observer of class and child changes on `body` sees ~240 callbacks in
+  a scroll run (frame meter text, tuck, pin taps); with 3 querySelectors
+  each, ~90 ms at 4x per ~35 s run. Cheap enough for state flags.
 
 - Jose's iPhone (iOS 18.7, installed, 60 Hz), build b1017.1752: scrolling
   Home 12 s: 10.5% late frames, 85 ms/s, worst 57 ms, none over 100 ms.
