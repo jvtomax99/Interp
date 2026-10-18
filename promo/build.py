@@ -86,7 +86,17 @@ if not os.path.exists(HERE + '/sfx/music.wav'):
 run('project', 'import-asset', '--project', P, '--file', HERE + '/sfx/music.wav', '--asset-id', 'music', '--kind', 'audio')
 
 NARR = json.load(open(HERE + '/narration.json'))['lines']
-VOICE = [(L['start_ms'], wav_ms(f'{HERE}/voice/line{i:02d}.wav')) for i, L in enumerate(NARR)]
+# the voice "warmed up" (Jose's pick, voice #2 of the comparison): a little low
+# warmth, softer 3 kHz, gentle compression, a touch of room. Made from voice/,
+# kept in voice/warm/; the raw Kokoro files stay as they are.
+WARM = ('highpass=f=70,equalizer=f=180:t=q:w=1:g=2.5,equalizer=f=3000:t=q:w=1.2:g=-2,'
+        'acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120,aecho=0.8:0.5:24|37:0.10|0.06')
+os.makedirs(HERE + '/voice/warm', exist_ok=True)
+for i in range(len(NARR)):
+    src, dst = f'{HERE}/voice/line{i:02d}.wav', f'{HERE}/voice/warm/line{i:02d}.wav'
+    if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
+        os.system(f'ffmpeg -nostdin -loglevel error -y -i {src} -af "{WARM}" {dst}')
+VOICE = [(L['start_ms'], wav_ms(f'{HERE}/voice/warm/line{i:02d}.wav')) for i, L in enumerate(NARR)]
 # "heart failure" slams in after the pause in "The doctor says:"; the strike lands on "Nope"
 T_HF = NARR[0]['start_ms'] + part_gap_ms(HERE + '/voice/line00.wav')
 T_NOPE = NARR[3]['start_ms'] + 80
@@ -406,7 +416,7 @@ add(flash(END + 80, 40))
 
 # ---------- sound ----------
 for i, (st, n) in enumerate(VOICE):
-    run('project', 'import-asset', '--project', P, '--file', f'{HERE}/voice/line{i:02d}.wav', '--asset-id', f'voice-{i:02d}', '--kind', 'audio')
+    run('project', 'import-asset', '--project', P, '--file', f'{HERE}/voice/warm/line{i:02d}.wav', '--asset-id', f'voice-{i:02d}', '--kind', 'audio')
     add(audio(nid(), f'Voice {i + 1}', st, n, f'voice-{i:02d}', vol=1.0))
 cues = [('impact', T_HF - 120, .55), ('click', T_NOPE + 40, .8), ('pop', T_NOPE + 40, .5),
         ('whoosh1', OUT_HOOK - 250, .55), ('impact', DROP - 20, .85), ('pop', NARR[5]['start_ms'] - 20, .45),

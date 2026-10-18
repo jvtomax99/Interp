@@ -5,7 +5,7 @@ Tesseract (installed in every cloud session by `.claude/hooks/session-start.sh`)
 Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
-30 s), `hub-promo-v4.mp4` (current, 45 s). `build.py` builds v4; older builds are
+30 s), `v4` (45 s, new intro), `hub-promo-v5.mp4` (current: v4 with the voice warmed up). `build.py` builds v5; older builds are
 in git history.
 
 ## What's in it (v4, 2026-10-18)
@@ -86,6 +86,13 @@ mkdir -p /tmp/kkm && cd /tmp/kkm && for f in kokoro-v1.0.onnx voices-v1.0.bin; d
 `-t 30 -af "loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000"`: v2 measures
 v4 measures -15.4 LUFS, true peak -1.3 dBTP. v3's Spanish words were the English voice reading Spanish and sounded off;
 v4 gives them to `em_alex` and keeps the ending English only.
+
+**v5, the voice warmed up** (Jose's pick from a comparison of seven, 2026-10-18):
+`build.py` passes every line through a light EQ, compression and a touch of
+room (`WARM` in `build.py`) into `voice/warm/`, which is what the edit uses.
+The raw Kokoro files in `voice/` are unchanged. v5 measures -14.7 LUFS,
+-1.3 dBTP. A more natural voice (Chatterbox, native Spanish too) needs
+`huggingface.co` allowed in the environment's network settings; it was blocked.
 
 Unheard by Claude: the checks above prove level and timing, not how it sounds.
 
