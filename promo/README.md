@@ -52,20 +52,30 @@ layer and keyframe helpers. The editable `.tsrct` is rebuilt, never committed.
 - Daily Drill: `tests/out/drill/390-L1-light-ace-r1-result.png` after
   `node run.cjs daily-drill`, cropped to its bottom 2259 px
 
-## Next: the AI voice (Jose's pick, 2026-10-18)
+## The voice (v2, 2026-10-18)
 
-`narration.json` is the script: one line per beat, with where it starts and
-how long it may run. One voice reads both the English and the Spanish.
+`hub-promo-v2.mp4` adds narration. The voice is Kokoro (an open voice model
+that runs on this machine, no account or key), voice `am_puck`, speed 1.0:
+the same narrator as Jose's CPA/EA guide video. That was measured, not
+guessed: every Kokoro English voice read the guide's first two captions word
+for word, and `am_puck` matched the real recording far closer than any other
+(MFCC distance 0.14 vs 0.32 for the next; same length and pitch).
 
-Plan: ElevenLabs, model `eleven_multilingual_v2` (one voice that handles
-English and Spanish). It needs, in the cloud environment's settings:
+`narration.json` is the script, one line per beat (`start_ms`, `max_ms`).
+`voice/` holds one WAV per line, made by `voice.py`:
 
-1. An ElevenLabs API key as the environment variable `ELEVENLABS_API_KEY`.
-2. `api.elevenlabs.io` allowed under Network access.
+```
+python3 -m venv /tmp/kk && /tmp/kk/bin/pip install kokoro-onnx soundfile
+mkdir -p /tmp/kkm && cd /tmp/kkm && for f in kokoro-v1.0.onnx voices-v1.0.bin; do \
+  curl -fsSLO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/$f; done
+/tmp/kk/bin/python promo/voice.py /tmp/kkm     # prints each line's length against its max
+```
 
-Then, in a new session: list a few voices and send Jose short samples to
-pick from; generate each line; trim silence; if a line runs past `max_ms`,
-rephrase it rather than speed it up; import each as an Audio layer at its
-`start_ms`; lower the sound accents under the voice (about −6 dB); measure
-loudness (aim −16 to −14 LUFS, true peak under −1 dBTP); export v2 and send
-it to Jose before anything else.
+`build.py` adds the voice lines when `voice/` exists and lowers the sound
+accents about 6 dB under them. The share copy is encoded with
+`-t 30 -af "loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000"`: v2 measures
+-15.6 LUFS, true peak -1.3 dBTP. The Spanish line is the same English voice
+reading Spanish; if it sounds accented, `em_alex` is Kokoro's native Spanish
+male voice for that one line.
+
+Unheard by Claude: the checks above prove level and timing, not how it sounds.

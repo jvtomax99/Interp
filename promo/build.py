@@ -209,11 +209,22 @@ logo = add(text(nid(), 'Made at HUMC', E, DUR - E, 'MADE BY THE HUMC INTERPRETER
 A.append(kf(logo['id'], 'opacity', [(1600, 0, None), (2100, 100, OUT)]))
 
 # ---------- sound ----------
+# ---------- narration (voice.py: Kokoro am_puck), sound accents sit under it ----------
+NARR = json.load(open(HERE + '/narration.json'))['lines']
+VOICED = os.path.exists(HERE + '/voice/line00.wav')
+if VOICED:
+    for i, L in enumerate(NARR):
+        f = f'{HERE}/voice/line{i:02d}.wav'
+        with wave.open(f) as w: n = int(w.getnframes() * 1000 / w.getframerate())
+        run('project', 'import-asset', '--project', P, '--file', f, '--asset-id', f'voice-{i:02d}', '--kind', 'audio')
+        add(audio(nid(), f'Voice {i + 1}', L['start_ms'], n, f'voice-{i:02d}', vol=1.0))
+SFXV, POPV = (0.8, 0.45) if VOICED else (1.6, 0.9)        # about -6 dB under the voice
+
 for name, at in [('whoosh1', 1380), ('riser', T0 - SFXLEN['riser'] + 60), ('impact', T0), ('whoosh2', PH0 + 100),
                  ('down', E - 50), ('ping', E + 950)]:
-    add(audio(nid(), 'SFX ' + name, at, SFXLEN[name], 'sfx-' + name, vol=1.6))
+    add(audio(nid(), 'SFX ' + name, at, SFXLEN[name], 'sfx-' + name, vol=SFXV))
 for i in range(1, len(SHOTS)):
-    add(audio(nid(), f'SFX slide {i}', BEAT0 + i * BEAT - 330, SFXLEN['pop'], 'sfx-pop', vol=.9))
+    add(audio(nid(), f'SFX slide {i}', BEAT0 + i * BEAT - 330, SFXLEN['pop'], 'sfx-pop', vol=POPV))
 
 save(P, WK, DUR / 1000, layers[::-1], A)
 print('built', len(layers), 'layers,', len(A), 'actions')
