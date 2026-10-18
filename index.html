@@ -20285,8 +20285,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1018.0223';
-const BUILD_TIME = '2026-10-18 02:23 UTC';
+const BUILD_ID = 'b1018.1643';
+const BUILD_TIME = '2026-10-18 16:43 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21026,7 +21026,7 @@ function renderTabBar(){
     ${tabs.map(t=>`
       <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>
         <span class="tabbar-icon">${t.icon}</span>
-        <span>${escapeHtml(t.name)}</span>
+        <span class="tabbar-name">${escapeHtml(t.name)}</span>
         ${t.badge ? `<span class="tabbar-badge">${t.badge > 9 ? '9+' : t.badge}</span>` : ''}
       </button>`).join('')}
   </nav>`;

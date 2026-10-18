@@ -351,6 +351,10 @@ design and anything touching data or rules stay with the main model.
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
   (His standing rule.)
+- **A question with options gets buttons** (Jose, 2026-10-18): ask it
+  with `AskUserQuestion`, one button per option (recommended first), not
+  as a numbered list in text. Where that tool is missing (a scheduled
+  run), list the options plainly.
 - **Ambiguous request: one clarifying question first. Evidence before
   confidence** (Jose, 2026-10-17; `AGENTS.md`): nothing stated as true
   without a measurement, test, primary source or the code behind it; say

@@ -141,6 +141,25 @@ const settle = page => page.evaluate(() => new Promise(r => {
   const want = { rest: '-=- -=- -=-', more: 'overlay=ov-open -=- -=-', 'more closed': '-=- -=- -=-', search: '-=- gs-overlay=gs-open -=-', 'search closed': '-=- -=- -=-',
     'made sheet': 'overlay=ov-open -=- -=-', 'made sheet removed': '-=- -=- -=-', 'domain menu': '-=- -=- dm-overlay=dm-open', 'domain menu gone': '-=- -=- -=-' };
   ok(JSON.stringify(flags) === JSON.stringify(want), 'overlay classes follow each kind of overlay, before the next frame', flags);
+
+  // A rule keyed on one of these body classes must end on a class, id or
+  // attribute, never a bare tag (S7b): Chrome then restyles every element
+  // of that tag on the page each time the class changes. "> span:not(...)"
+  // made each tuck restyle ~270 spans.
+  const bare = await rp.evaluate(() => {
+    const STATE = /\.(dock-mini|ov-open|gs-open|dm-open)\b/, out = [];
+    const strip = s => { let d = 0, o = ''; for (const ch of s) { if (ch === '(') d++; if (!d) o += ch; if (ch === ')') d--; } return o; };
+    // last compound, with pseudo-classes, pseudo-elements and :not(...) arguments taken off
+    const last = sel => strip(sel).replace(/::?[\w-]+/g, '').trim().split(/\s*[\s>+~]\s*/).pop();
+    const walk = rules => { for (const r of rules) {
+      if (r.cssRules && !r.selectorText) { walk(r.cssRules); continue; }
+      if (!r.selectorText || !STATE.test(r.selectorText)) continue;
+      for (const sel of r.selectorText.split(/,(?![^(]*\))/)) if (STATE.test(sel) && !/[.#[]/.test(last(sel))) out.push(sel.trim());
+    } };
+    for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} }
+    return out;
+  });
+  ok(!bare.length, 'rules on body state classes end on a class, id or attribute (no bare tag)', bare);
   ok(!rp.__errors.length, 'no page errors', rp.__errors);
   await b.close();
 })();
