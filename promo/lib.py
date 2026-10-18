@@ -87,6 +87,8 @@ _kid = [0]
 
 def kf(layer, prop, keys):
     """keys: [(ms, value, easing)] on the layer's own clock."""
+    ts = [k[0] for k in keys]
+    assert all(a < b for a, b in zip(ts, ts[1:])), f"keys not increasing on {layer}/{prop}: {ts}"
     out = []
     for t, v, e in keys:
         _kid[0] += 1
@@ -103,12 +105,13 @@ def run(*args):
     return r.stdout
 
 
-def save(project, work, duration, layers, actions, bg=None):
+def save(project, work, duration, layers, actions, bg=None, comp=None):
     run('project', 'checkout', '--project', project, '--output', work + '/editable.json')
     doc = json.load(open(work + '/editable.json'))
     doc['duration'] = duration
     doc['composition']['layers'] = layers
     if bg: doc['backgroundColor'] = bg
+    if comp: doc['composition'].update(comp)
     json.dump(doc, open(work + '/editable.json', 'w'))
     run('project', 'commit', '--project', project, '--file', work + '/editable.json')
     if actions:

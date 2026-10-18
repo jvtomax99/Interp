@@ -1,15 +1,87 @@
 {
-  "note": "One line per beat. start_ms is where the line should begin; max_ms is the room it has before the next beat. English lines in English, the Spanish term in Spanish, one voice for both.",
+  "note": "v3 script. One line per beat. start_ms is where the line begins; max_ms is the room it has before the next beat. A line is either text+lang or parts (each [lang, text]), joined with a short breath, so Spanish words inside an English line are read as Spanish. One voice for all.",
   "lines": [
-    {"start_ms": 250,   "max_ms": 1150, "lang": "en", "text": "Heart failure."},
-    {"start_ms": 1550,  "max_ms": 1900, "lang": "es", "text": "Insuficiencia cardíaca."},
-    {"start_ms": 3700,  "max_ms": 2000, "lang": "en", "text": "This is Interpreter Hub."},
-    {"start_ms": 6000,  "max_ms": 2900, "lang": "en", "text": "Everything for your shift, in one app."},
-    {"start_ms": 9200,  "max_ms": 2900, "lang": "en", "text": "A glossary our whole team builds."},
-    {"start_ms": 12400, "max_ms": 2900, "lang": "en", "text": "Your glossary first. Then AI."},
-    {"start_ms": 15600, "max_ms": 2900, "lang": "en", "text": "Prep for every doctor you work with."},
-    {"start_ms": 18800, "max_ms": 2900, "lang": "en", "text": "Stuck? Ask Doctor Smiley."},
-    {"start_ms": 22000, "max_ms": 2900, "lang": "en", "text": "And warm up with the Daily Drill."},
-    {"start_ms": 25600, "max_ms": 4200, "lang": "en", "text": "Interpreter Hub. Open it on your phone, and add it to your Home Screen."}
+    {
+      "start_ms": 150,
+      "max_ms": 1050,
+      "lang": "en",
+      "text": "Heart failure."
+    },
+    {
+      "start_ms": 1150,
+      "max_ms": 1800,
+      "parts": [
+        [
+          "en",
+          "Not"
+        ],
+        [
+          "es",
+          "fallo cardíaco."
+        ]
+      ]
+    },
+    {
+      "start_ms": 3000,
+      "max_ms": 1500,
+      "lang": "es",
+      "text": "Insuficiencia cardíaca."
+    },
+    {
+      "start_ms": 4600,
+      "max_ms": 1800,
+      "lang": "en",
+      "text": "Meet Interpreter Hub."
+    },
+    {
+      "start_ms": 6650,
+      "max_ms": 2800,
+      "lang": "en",
+      "text": "Your whole shift, one app. No tab juggling."
+    },
+    {
+      "start_ms": 9550,
+      "max_ms": 2950,
+      "lang": "en",
+      "text": "A glossary by the people who actually say these words."
+    },
+    {
+      "start_ms": 12550,
+      "max_ms": 2950,
+      "lang": "en",
+      "text": "Glossary speaks first. A.I. gets the leftovers."
+    },
+    {
+      "start_ms": 15650,
+      "max_ms": 2800,
+      "lang": "en",
+      "text": "Know the doctor before the doctor knows you."
+    },
+    {
+      "start_ms": 18650,
+      "max_ms": 2800,
+      "lang": "en",
+      "text": "Stuck? Ask Doctor Smiley. Cartoons don't sleep."
+    },
+    {
+      "start_ms": 21650,
+      "max_ms": 2800,
+      "lang": "en",
+      "text": "Daily Drill. Catch false friends before they catch you."
+    },
+    {
+      "start_ms": 24800,
+      "max_ms": 4700,
+      "parts": [
+        [
+          "en",
+          "Interpreter Hub. Add it to your Home Screen. Your future self says"
+        ],
+        [
+          "es",
+          "¡gracias!"
+        ]
+      ]
+    }
   ]
 }
