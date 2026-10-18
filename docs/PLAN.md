@@ -198,7 +198,7 @@ come from this alone.
   below every before), raster tasks 275-294 -> 128-144 (time overlaps),
   paint time unchanged. New suite `pin-burst.cjs` (old code fails it). No
   User Guide entry mentions the burst, so none changed. Jose's phone
-  decides. PR link: see the branch's PR.
+  decides. jvtomax99/Interp#51.
 - 2026-10-18 S7b, tuck restyle (invisible). Cause, from a Chrome trace
   with invalidation tracking (`tests/tools/tuck-trace.cjs`): the two
   `body.dock-mini` rules for the tab's name ended on a bare `span`, so
