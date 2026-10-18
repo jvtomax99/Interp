@@ -1,11 +1,14 @@
-"""HUMC Interpreter Hub team promo, v3: 30 s, 1080x1920, cut to a 120 BPM bed.
-0-4.4 s    hook: "heart failure", not "fallo cardíaco" (struck out), then
-           "insuficiencia cardíaca" slams in on the drop at 3.0 s
-4.4-6.6    title: Hub icon, Interpreter Hub
-6.5-24.5   the phone: six real screens, 3 s each. Each beat slides in its
+"""HUMC Interpreter Hub team promo, v4: 45 s, 1080x1920, cut to a 120 BPM bed.
+0-8.4 s    hook: "The doctor says: heart failure." A word barrage, a half-second
+           countdown, the interpreter's voice (em_alex) tries "¿fallo
+           cardíaco?", struck out ("Nope."), then "insuficiencia cardíaca"
+           slams in on the drop at 6.0 s. "There it is."
+8.3-10     title: Hub icon, Interpreter Hub
+10-37      the phone: nine real screens, 3 s each. Each beat slides in its
            screen, pushes in on the one detail that proves the line, rings
            it, and pulls back out. Big masked headlines, a story bar on top.
-24.5-30    end card: Dr. Smiley, the address, Add to Home Screen, ¡gracias!
+37-45      end card: Dr. Smiley, the address, the three Add to Home Screen
+           steps as they're said, "See you on the floor."
 Voice: voice/ (voice.py). Music: sfx/music.wav (music.py)."""
 import sys, json, wave, os
 import numpy as np
@@ -16,11 +19,11 @@ from PIL import ImageFont
 
 P = HERE + '/edit/promo.tsrct'
 WK = HERE + '/edit/.tesseract-work'
-DUR = 30000
+DUR = 45000
 SW, SH = 600, int(600 * 2277 / 1179)
 PX, PY = 540, 1190
-BEATS = [6500 + i * 3000 for i in range(6)]
-BEAT, END = 3000, 24500
+BEATS = [10000 + i * 3000 for i in range(9)]
+BEAT, END = 3000, 37000
 DANGER = hexc('#FF5A6E')
 TTF = HERE + '/fonts/inter/extras/ttf/Inter-'
 
@@ -50,6 +53,7 @@ def part_gap_ms(f):
     with wave.open(f) as w:
         sr = w.getframerate(); a = np.frombuffer(w.readframes(w.getnframes()), '<i2')
     quiet = np.abs(a) < 30
+    m = int(.1 * sr); quiet[:m] = False; quiet[-m:] = False      # not the edges
     best, run_, at = 0, 0, 0
     for i, q in enumerate(quiet):
         run_ = run_ + 1 if q else 0
@@ -58,7 +62,7 @@ def part_gap_ms(f):
 
 
 # ---------- assets ----------
-SHOTS = ['home', 'domain', 'translate', 'doctor', 'ask', 'drill']
+SHOTS = ['home', 'domain', 'translate', 'doctor', 'falsefriends', 'drill', 'practice', 'chat', 'ask']
 SFX = {'whoosh1': ('air-whoosh', 1), 'impact': ('soft-impact', 3), 'whoosh2': ('air-whoosh', 4),
        'pop': ('soft-pop', 5), 'down': ('downlifter', 6), 'ping': ('clear-ping', 7),
        'click': ('dry-click', 8), 'tap': ('soft-tap', 9)}
@@ -83,9 +87,9 @@ run('project', 'import-asset', '--project', P, '--file', HERE + '/sfx/music.wav'
 
 NARR = json.load(open(HERE + '/narration.json'))['lines']
 VOICE = [(L['start_ms'], wav_ms(f'{HERE}/voice/line{i:02d}.wav')) for i, L in enumerate(NARR)]
-# the strike lands as "fallo" is said; the ¡gracias! sticker as it's said
-T_FALLO = NARR[1]['start_ms'] + part_gap_ms(HERE + '/voice/line01.wav')
-T_GRACIAS = NARR[10]['start_ms'] + part_gap_ms(HERE + '/voice/line10.wav')
+# "heart failure" slams in after the pause in "The doctor says:"; the strike lands on "Nope"
+T_HF = NARR[0]['start_ms'] + part_gap_ms(HERE + '/voice/line00.wav')
+T_NOPE = NARR[3]['start_ms'] + 80
 
 
 # ---------- helpers (times are on the layer's own clock) ----------
@@ -165,62 +169,103 @@ for row, (y, x0, x1) in enumerate([(250, 0, -2600), (1640, -2600, 0)]):
     A.append(kf(m['id'], 'positionX', [(0, x0, None), (DUR, x1, LIN)]))
 
 # ---------- A. hook ----------
+# "The doctor says: heart failure." / "You've got half a second." / ES: "¿Fallo cardíaco?" /
+# "Nope. Not with patients." / ES: "Insuficiencia cardíaca." (the drop) / "There it is."
 HX = 90
-tag_en = add(text(nid(), 'ENGLISH tag', 0, 1350, 'ENGLISH', 34, (HX, 550), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300))
-fade(tag_en, [(0, 100, None), (1000, 100, LIN), (1300, 0, LIN)])
-hf = add(blur(text(nid(), 'heart failure', 0, 3000, 'heart\nfailure', 200, (HX, 820), font='xbold', just='left',
-                   box=(1000, 420), tracking=-40, leading=190, anchor=(0, 210))))
-scale_keys(hf, [(0, 112, None), (420, 100, SNAP), (1150, 102, LIN), (1600, 62, SNAP), (2800, 62, LIN)])
-A.append(kf(hf['id'], 'positionY', [(1150, 820, None), (1600, 570, SNAP)]))
-A.append(kf(hf['id'], 'positionX', [(2800, HX, None), (3050, HX - 1300, WHIP)]))
+DROP = 6000
+OUT_HOOK = DROP - 260                               # everything whips out, a beat of silence, the drop
+says = add(blur(text(nid(), 'The doctor says', 0, T_HF + 400, 'The doctor\nsays:', 150, (HX, 960), font='xbold', just='left',
+                     box=(1000, 320), tracking=-40, leading=150, anchor=(0, 160))))
+scale_keys(says, [(0, 108, None), (380, 100, SNAP)])
+fade(says, [(T_HF - 120, 100, None), (T_HF + 120, 0, LIN)])
+A.append(kf(says['id'], 'positionY', [(T_HF - 120, 960, None), (T_HF + 200, 700, WHIP)]))
+# a barrage of the words a cardiology visit throws at you, one per beat behind the type
+BARRAGE = [('dyspnea', 120, 300, -8), ('ejection fraction', 500, 1500, 5), ('BNP', 760, 380, -4), ('edema', 180, 1700, 6),
+           ('diuretic', 560, 260, 3), ('echo', 820, 1350, -6), ('stent', 300, 1560, 4), ('NPO', 700, 520, -3),
+           ('A-fib', 140, 1240, 7), ('beta blocker', 520, 1720, -5)]
+for j, (w, x, y, r) in enumerate(BARRAGE):
+    at = j * 250
+    b = add(text(nid(), 'Barrage ' + w, at, 520, w, 64, (x, y), font='bold', color=hexc('#9FD8FF'), just='left', box=(700, 90)))
+    b['transform']['rotation'] = r
+    fade(b, [(0, 0, None), (60, 34, LIN), (300, 22, LIN), (520, 0, LIN)])
+    scale_keys(b, [(0, 120, None), (520, 96, OUT)])
+tag_dr = add(text(nid(), 'DOCTOR tag', T_HF - 100, 3550 - T_HF, 'THE DOCTOR', 34, (HX, 560), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300))
+fade(tag_dr, [(0, 0, None), (200, 100, OUT), (3150 - T_HF, 100, LIN), (3400 - T_HF, 0, LIN)])
+hf = add(blur(text(nid(), 'heart failure', T_HF - 100, OUT_HOOK - T_HF + 100, 'heart\nfailure', 200, (HX, 830), font='xbold',
+                   just='left', box=(1000, 420), tracking=-40, leading=190, anchor=(0, 210))))
+scale_keys(hf, [(0, 150, None), (300, 100, SNAP), (1950 - T_HF, 103, LIN), (2250 - T_HF, 58, SNAP)])
+fade(hf, [(0, 0, None), (90, 100, LIN)])
+A.append(kf(hf['id'], 'positionY', [(1950 - T_HF, 830, None), (2250 - T_HF, 520, SNAP)]))
+A.append(kf(hf['id'], 'positionX', [(OUT_HOOK - T_HF - 200, HX, None), (OUT_HOOK - T_HF + 60, HX - 1300, WHIP)]))
+add(flash(T_HF - 100, 30))
 
-FY = 1140                                          # "fallo cardíaco" block, local clock from 1150
-ff = []
-tag_es = text(nid(), 'ESPAÑOL? tag', 0, 1850, 'ESPAÑOL?', 34, (HX, FY - 130), font='semi', color=DANGER, just='left', box=(600, 50), tracking=300)
-fallo = text(nid(), 'fallo cardiaco', 0, 1850, 'fallo\ncardíaco', 170, (HX, FY), font='xbold', just='left', box=(1000, 360), tracking=-40, leading=165)
-ts = T_FALLO - 1150 + 250                          # strike, on the fallo block's clock
+# the countdown: half a second, slowed down so you can watch it run out
+CD0, CD1 = 2050, 3250
+cd = text(nid(), 'Countdown', 0, CD1 - CD0 + 200, '0.50s', 260, (HX, 900), font='xbold', just='left', box=(1000, 320), tracking=-30)
+cdl = text(nid(), 'Countdown label', 0, CD1 - CD0 + 200, 'TO FIND THE WORD', 34, (HX + 8, 840), font='semi', color=hexc('#FFFFFF', .7), just='left', box=(800, 50), tracking=300)
+cdb0 = rect(nid(), 'Countdown track', 0, CD1 - CD0 + 200, (900, 14), hexc('#FFFFFF', .18), (HX, 1250), roundness=7)
+cdb = rect(nid(), 'Countdown bar', 0, CD1 - CD0 + 200, (900, 14), CYAN, (HX, 1250), roundness=7)
+A.append(kf(cdb['id'], 'scaleX', [(0, 100, None), (CD1 - CD0, 0, LIN)]))
+cdG = add(blur(group(nid(), 'Countdown', CD0, CD1 - CD0 + 200, [cdb, cdb0, cdl, cd], pos=(540, 1000), anchor=(540, 1000))))
+scale_keys(cdG, [(0, 70, None), (300, 100, POP), (CD1 - CD0, 100, LIN), (CD1 - CD0 + 200, 40, WHIP)])
+fade(cdG, [(0, 0, None), (120, 100, LIN), (CD1 - CD0, 100, LIN), (CD1 - CD0 + 200, 0, LIN)])
+A.append({'type': 'setFxPropertyAnimator', 'compositionId': 'main', 'property': {'layerId': cd['id'], 'propertyType': 'textContent'},
+          'animator': {'type': 'jsScript', 'layerTimeJsCode':
+                       f'var v=Math.max(0,0.5-input.time.milliseconds/{CD1 - CD0}*0.5);return v.toFixed(2)+"s";'}, 'dependencies': []})
+A.append({'type': 'setFxPropertyAnimator', 'compositionId': 'main', 'property': {'layerId': cd['id'], 'propertyType': 'fillColor'},
+          'animator': {'type': 'jsScript', 'layerTimeJsCode':
+                       f'var p=Math.min(1,Math.max(0,(input.time.milliseconds-{(CD1 - CD0) * .6:.0f})/{(CD1 - CD0) * .4:.0f}));'
+                       f'return [1,1-p*0.65,1-p*0.57,1];'}, 'dependencies': []})
+
+# "¿fallo cardíaco?" (the wrong word, in the interpreter's voice), then "Nope."
+FA0 = NARR[2]['start_ms'] - 80
+FY = 1140
+tag_es = text(nid(), 'YOU tag', 0, OUT_HOOK - FA0, 'YOU, IN SPANISH', 34, (HX, FY - 130), font='semi', color=DANGER, just='left', box=(700, 50), tracking=300)
+fallo = text(nid(), 'fallo cardiaco', 0, OUT_HOOK - FA0, '¿fallo\ncardíaco?', 170, (HX, FY), font='xbold', just='left', box=(1000, 360), tracking=-40, leading=165)
+ts = T_NOPE - FA0                                  # strike on "Nope", on the fallo block's clock
 bars = []
-for j, word in enumerate(['fallo', 'cardíaco']):
+for j, word in enumerate(['¿fallo', 'cardíaco?']):
     w = width(word, 170) + 30
-    b = rect(nid(), 'Strike ' + word, 0, 1850, (w, 20), DANGER, (HX - 15, FY + 98 + j * 165), roundness=10)
+    b = rect(nid(), 'Strike ' + word, 0, OUT_HOOK - FA0, (w, 20), DANGER, (HX - 15, FY + 98 + j * 165), roundness=10)
     A.append(kf(b['id'], 'scaleX', [(ts + j * 110, 0, None), (ts + j * 110 + 240, 100, SNAP)]))
     bars.append(b)
-fade(fallo, [(0, 0, None), (200, 100, OUT), (ts, 100, LIN), (ts + 250, 45, LIN)])
+fade(fallo, [(0, 0, None), (160, 100, OUT), (ts, 100, LIN), (ts + 250, 45, LIN)])
 fade(tag_es, [(0, 0, None), (200, 100, OUT)])
-avoid = sticker('Avoid with patients', 760, FY + 420, 0, 1850, ts + 150, rot=-5, fill=DANGER, ink=WHITE, size=38)
-fb = add(blur(group(nid(), 'Fallo block', 1150, 1850, [avoid] + bars + [fallo, tag_es])))
-A.append(kf(fb['id'], 'positionY', [(0, 90, None), (420, 0, SNAP)]))
-A.append(kf(fb['id'], 'positionX', [(1650, 0, None), (1900, -1300, WHIP)]))
+nope = sticker('Nope.', 800, FY + 470, 0, OUT_HOOK - FA0, ts + 40, rot=8, fill=DANGER, ink=WHITE, size=72)
+fb = add(blur(group(nid(), 'Fallo block', FA0, OUT_HOOK - FA0 + 300, [nope] + bars + [fallo, tag_es])))
+A.append(kf(fb['id'], 'positionY', [(0, 110, None), (380, 0, SNAP)]))
+A.append(kf(fb['id'], 'positionX', [(OUT_HOOK - FA0 - 200, 0, None), (OUT_HOOK - FA0 + 60, -1300, WHIP)]))
 
-# the answer, on the drop at 3.0 s
-ANS = 3000
-ins = text(nid(), 'insuficiencia cardiaca', 0, 1500, 'insuficiencia\ncardíaca', 150, (HX, 880), font='xbold', just='left',
+# the answer, on the drop
+ANS = DROP
+AD = 8450 - ANS
+ins = text(nid(), 'insuficiencia cardiaca', 0, AD, 'insuficiencia\ncardíaca', 150, (HX, 880), font='xbold', just='left',
            box=(1000, 320), tracking=-40, leading=150)
-tag_ok = text(nid(), 'ESPAÑOL tag', 0, 1500, 'ESPAÑOL', 34, (HX, 770), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300)
-ul = rect(nid(), 'Answer underline', 0, 1500, (width('insuficiencia', 150) * .72, 16), CYAN, (HX, 1220), roundness=8)
-sub = text(nid(), 'Hook line', 0, 1500, 'The right word. Right now.', 52, (HX, 1290), font='med', color=hexc('#FFFFFF', .78), just='left', box=(1000, 80))
+tag_ok = text(nid(), 'YOU, AGAIN tag', 0, AD, 'YOU, AGAIN', 34, (HX, 770), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300)
+ul = rect(nid(), 'Answer underline', 0, AD, (width('insuficiencia', 150) * .72, 16), CYAN, (HX, 1220), roundness=8)
+there = sticker('There it is.', 760, 1340, 0, AD, NARR[5]['start_ms'] - ANS, rot=-6, fill=CYAN, ink=hexc('#06123A'), size=56)
 A.append(kf(ul['id'], 'scaleX', [(150, 0, None), (550, 100, SNAP)]))
 fade(tag_ok, [(80, 0, None), (300, 100, OUT)])
-fade(sub, [(350, 0, None), (650, 100, OUT)])
-A.append(kf(sub['id'], 'positionY', [(350, 1330, None), (750, 1290, SNAP)]))
-ansG = add(blur(group(nid(), 'Hook answer', ANS, 1500, [sub, ul, tag_ok, ins], pos=(540, 960), anchor=(540, 960))))
+ansG = add(blur(group(nid(), 'Hook answer', ANS, AD, [there, ul, tag_ok, ins], pos=(540, 960), anchor=(540, 960))))
 A.append(kf(ansG['id'], 'positionX', [(0, 1140, None), (380, 540, SNAP)]))
-scale_keys(ansG, [(0, 125, None), (450, 100, POP), (1180, 104, LIN), (1480, 190, WHIP)])
-fade(ansG, [(1180, 100, None), (1480, 0, LIN)])
-add(flash(ANS, 50))
+scale_keys(ansG, [(0, 125, None), (450, 100, POP), (AD - 300, 104, LIN), (AD, 190, WHIP)])
+fade(ansG, [(AD - 300, 100, None), (AD, 0, LIN)])
+add(flash(ANS, 55))
 
 # ---------- B. title ----------
-T0 = 4400
-icon = image(nid(), 'Hub icon', 0, 2300, 'hub-icon', (240, 240), (540, 760), anchor=(120, 120), radius=58, shadow=shadow(60, 24, .45))
+T0 = 8300
+TD = BEATS[0] - T0 + 100
+icon = image(nid(), 'Hub icon', 0, TD, 'hub-icon', (240, 240), (540, 760), anchor=(120, 120), radius=58, shadow=shadow(60, 24, .45))
 pop(icon, 0, s0=10, d=520)
 A.append(kf(icon['id'], 'rotation', [(0, -120, None), (600, 0, SNAP)]))
-tl = mline('Title', 0, 2300, 'Interpreter Hub', 124, 40, 930, 180, None, just='center', w=1000, track=-35)
-tsub = mline('Title sub', 0, 2300, 'for the HUMC interpreter team', 46, 40, 1110, 330, None, face='med', just='center', w=1000, track=0)
+t_meet = NARR[5]['start_ms'] + 700 - T0              # "Meet Interpreter Hub"
+tl = mline('Title', 0, TD, 'Interpreter Hub', 124, 40, 930, t_meet, None, just='center', w=1000, track=-35)
+tsub = mline('Title sub', 0, TD, 'for the HUMC interpreter team', 46, 40, 1110, t_meet + 150, None, face='med', just='center', w=1000, track=0)
 tsub['layers'][0]['sourceText']['fillColor'] = hexc('#FFFFFF', .75)
-titleG = add(blur(group(nid(), 'Title', T0, 2300, [tsub, tl, icon], pos=(540, 960), anchor=(540, 960))))
-scale_keys(titleG, [(1450, 100, None), (1800, 70, WHIP)])
-A.append(kf(titleG['id'], 'positionY', [(1450, 960, None), (1800, 520, WHIP)]))
-fade(titleG, [(1500, 100, None), (1800, 0, LIN)])
+titleG = add(blur(group(nid(), 'Title', T0, TD, [tsub, tl, icon], pos=(540, 960), anchor=(540, 960))))
+scale_keys(titleG, [(TD - 650, 100, None), (TD - 300, 70, WHIP)])
+A.append(kf(titleG['id'], 'positionY', [(TD - 650, 960, None), (TD - 300, 520, WHIP)]))
+fade(titleG, [(TD - 600, 100, None), (TD - 300, 0, LIN)])
 
 # ---------- C. the phone ----------
 PH0 = BEATS[0] - 350
@@ -229,9 +274,12 @@ WIDE, WY = 88, 1250
 # (focus x, focus y as a fraction of the screen, push scale, ring box x0, y0, x1, y1)
 FOCUS = [(.5, .80, 145, .02, .755, .98, .875), (.5, .60, 150, .03, .545, .97, .675),
          (.5, .815, 150, .03, .74, .97, .865), (.5, .38, 145, .02, .24, .98, .53),
-         (.5, .58, 150, .05, .47, .95, .69), (.5, .72, 148, .02, .585, .98, .9)]
+         (.5, .54, 150, .04, .42, .96, .655), (.5, .72, 148, .02, .585, .98, .9),
+         (.5, .40, 145, .03, .245, .97, .545), (.5, .52, 140, .02, .30, .98, .71),
+         (.5, .58, 150, .05, .47, .95, .69)]
 HEAD = [('Your whole shift.', 'One app.'), ('Written by', 'the team.'), ('Glossary first.', 'AI second.'),
-        ('Know the doctor', 'first.'), ('Stuck?', 'Ask Dr. Smiley.'), ('False friends?', 'Caught.')]
+        ('Know the doctor', 'first.'), ('101 false friends.', 'Flagged.'), ('Daily Drill.', 'Warm up first.'),
+        ('CoreCHI prep.', '145 questions.'), ('The whole team.', 'One chat.'), ('Stuck?', 'Ask Dr. Smiley.')]
 
 pid = nid()
 body = rect(nid(), 'Phone body', 0, PHD, (SW + 34, SH + 34), hexc('#060918'), (PX, PY), roundness=84,
@@ -261,7 +309,7 @@ phone = add(blur(group(pid, 'Phone', PH0, PHD, [scr, matte, body], pos=(PX, WY),
 # camera: arrive, then per beat: wide -> push in on the detail -> pull back out
 px, py, ps, rx, ry = [(0, PX, None)], [(0, WY + 1500, None), (650, WY, SNAP)], [(0, WIDE, None)], \
     [(0, 35, None), (800, 0, SNAP)], [(0, -16, None), (800, -6, SNAP)]
-for i in range(6):
+for i in range(len(SHOTS)):
     fx, fy, sc, *_ = FOCUS[i]
     t = BEATS[i] - PH0
     tx, ty = 540 - sc / 100 * (fx - .5) * SW, 1210 - sc / 100 * (fy - .5) * SH
@@ -279,7 +327,7 @@ A.append(kf(pid, 'rotationX', rx)); A.append(kf(pid, 'rotationY', ry))
 A.append(kf(pid, 'rotation', [(te - 50, 0, None), (te + 380, -18, WHIP)]))
 
 # Dr. Smiley pops up out of the Ask beat, and says the joke
-ta = BEATS[4]
+ta = BEATS[8]
 sm = add(image(nid(), 'Smiley peek', ta, BEAT, 'smiley', (360, 450), (870, 1960), anchor=(180, 450), fit='contain'))
 pop(sm, 300, 2650, s0=30, d=520)
 A.append(kf(sm['id'], 'positionY', [(300, 2200, None), (800, 1900, SNAP)]))
@@ -287,6 +335,8 @@ A.append(kf(sm['id'], 'rotation', [(300, -16, None), (900, 5, OUT), (1600, -3, I
 add(sticker("I'm a cartoon. I don't sleep.", 500, 1600, ta, BEAT, 1500, 2650, rot=-4, size=40))
 # a callback to the hook on the Translate beat
 add(sticker('Told you.', 800, 790, BEATS[2], BEAT, 1650, 2650, fill=CYAN, ink=hexc('#06123A'), rot=6, size=38))
+# the false friend everyone knows, on the False Friends beat
+add(sticker('constipado = a cold', 700, 1640, BEATS[4], BEAT, 1650, 2650, fill=WHITE, ink=hexc('#B3263B'), rot=-5, size=40))
 
 # top scrim keeps the headlines readable over the pushed-in screen
 scrim = add(rect(nid(), 'Top scrim', BEATS[0] - 300, END - BEATS[0] + 400, (1080, 640), DEEP, (0, 0),
@@ -297,10 +347,11 @@ fade(scrim, [(0, 0, None), (400, 100, LIN), (END - BEATS[0], 100, LIN), (END - B
 for i, (l1, l2) in enumerate(HEAD):
     add(mline(f'Head {i + 1}a', BEATS[i], BEAT, l1, 92, 80, 130, 120, 2620))
     add(mline(f'Head {i + 1}b', BEATS[i], BEAT, l2, 92, 80, 250, 220, 2680, color=CYAN))
-# story bar: six segments, each fills over its beat
-SEGW = (920 - 5 * 12) / 6
-for i in range(6):
-    x = 80 + i * (SEGW + 12)
+# story bar: one segment per screen, each fills over its beat
+NS = len(SHOTS)
+SEGW = (920 - (NS - 1) * 10) / NS
+for i in range(NS):
+    x = 80 + i * (SEGW + 10)
     bg = add(rect(nid(), f'Story bar {i + 1}', BEATS[0], END - BEATS[0], (SEGW, 8), hexc('#FFFFFF', .22), (x, 64), roundness=4))
     fl = add(rect(nid(), f'Story fill {i + 1}', BEATS[0], END - BEATS[0], (SEGW, 8), WHITE, (x, 64), roundness=4))
     t = BEATS[i] - BEATS[0]
@@ -310,40 +361,61 @@ for i in range(6):
 # layers were added back to front; the story bar and headlines must sit above the phone: they do (added later)
 
 # ---------- D. end card ----------
+# "Interpreter Hub. Built by our team, for our team." / "Open it on your phone. Tap Share,
+# then Add to Home Screen." / "See you on the floor."
 ED = DUR - END
-big = image(nid(), 'Smiley end', 0, ED, 'smiley', (480, 600), (540, 1040), anchor=(240, 600), fit='contain')
+L15, L16, L17 = (NARR[i]['start_ms'] - END for i in (15, 16, 17))
+big = image(nid(), 'Smiley end', 0, ED, 'smiley', (400, 500), (540, 860), anchor=(200, 500), fit='contain')
 pop(big, 120, s0=20, d=560)
-A.append(kf(big['id'], 'positionY', [(120, 1180, None), (680, 1040, SNAP), (2200, 1054, INOUT), (3600, 1040, INOUT), (5000, 1052, INOUT)]))
-A.append(kf(big['id'], 'rotation', [(120, -10, None), (800, 3, OUT), (1500, 0, INOUT)]))
-et = mline('End title', 0, ED, 'Interpreter Hub', 112, 40, 1080, 450, None, just='center', w=1000, track=-35)
+A.append(kf(big['id'], 'positionY', [(120, 1000, None), (680, 860, SNAP), (2400, 872, INOUT), (4200, 860, INOUT), (L17, 868, INOUT),
+                                      (L17 + 250, 830, OUT), (L17 + 600, 860, POP), (ED, 866, INOUT)]))
+A.append(kf(big['id'], 'rotation', [(120, -10, None), (800, 3, OUT), (1500, 0, INOUT), (L17, 0, LIN), (L17 + 200, -7, OUT),
+                                     (L17 + 450, 6, INOUT), (L17 + 700, -4, INOUT), (L17 + 950, 0, INOUT)]))
+et = mline('End title', 0, ED, 'Interpreter Hub', 112, 40, 900, 350, None, just='center', w=1000, track=-35)
+es = mline('End sub', 0, ED, 'Built by our team, for our team.', 46, 40, 1050, L15 + 1150, None, face='med', just='center', w=1000, track=0)
+es['layers'][0]['sourceText']['fillColor'] = hexc('#FFFFFF', .8)
 uw = 640
 url = group(nid(), 'Address', 0, ED, [
     text(nid(), 'Address text', 0, ED, 'interp-six.vercel.app', 44, (0, 0), font='semi', color=NAVY, box=(uw, 96)),
     rect(nid(), 'Address pill', 0, ED, (uw, 96), WHITE, (0, 0), roundness=48, shadow=shadow(50, 20, .4))],
-    pos=(540, 1300), anchor=(uw / 2, 48))
+    pos=(540, 1230), anchor=(uw / 2, 48))
 url['layers'][0]['sourceText']['verticalAlign'] = 'center'
-t_add = NARR[10]['start_ms'] - END + 900          # "Add it to your Home Screen"
-pop(url, t_add, s0=70)
-how = text(nid(), 'Add to Home Screen', 0, ED, 'Open it on your phone, then Add to Home Screen', 38, (540, 1390),
-           font='med', color=hexc('#FFFFFF', .78), box=(960, 120), anchor=(480, 0))
-fade(how, [(t_add + 250, 0, None), (t_add + 550, 100, OUT)])
-A.append(kf(how['id'], 'positionY', [(t_add + 250, 1420, None), (t_add + 650, 1390, SNAP)]))
-grac = sticker('¡gracias!', 800, 520, 0, ED, T_GRACIAS - END, rot=-8, fill=CYAN, ink=hexc('#06123A'), size=46)
+pop(url, L16, s0=70)
+# the three steps, each as it is said
+steps, x = [], 0
+SPEC = [('1', 'Open it', 0), ('2', 'Tap Share', 1450), ('3', 'Add to Home Screen', 2050)]
+ws = [int(width(lab, 34, 'SemiBold') + 110) for _, lab, _ in SPEC]
+x0 = 540 - (sum(ws) + 2 * 18) / 2
+for (n, lab, dt), w in zip(SPEC, ws):
+    h = 78
+    num = rect(nid(), 'Step dot', 0, ED, (50, 50), CYAN, (14, 14), roundness=25)
+    nt = text(nid(), 'Step number', 0, ED, n, 28, (14, 14), font='xbold', color=hexc('#06123A'), box=(50, 50))
+    nt['sourceText']['verticalAlign'] = 'center'
+    lt = text(nid(), 'Step label', 0, ED, lab, 34, (78, 0), font='semi', just='left', box=(w - 84, h))
+    lt['sourceText']['verticalAlign'] = 'center'
+    pill = rect(nid(), 'Step pill', 0, ED, (w, h), hexc('#FFFFFF', .12), (0, 0), roundness=h / 2, stroke=(hexc('#FFFFFF', .28), 2))
+    G = group(nid(), 'Step ' + lab, 0, ED, [nt, num, lt, pill], pos=(x0 + w / 2, 1370), anchor=(w / 2, h / 2))
+    pop(G, L16 + dt, s0=50)
+    steps.append(G); x0 += w + 18
 logo = text(nid(), 'Made at HUMC', 0, ED, 'MADE BY THE HUMC INTERPRETER TEAM', 26, (540, 1760), font='semi',
             color=hexc('#01B8E6', .9), box=(1000, 50), anchor=(500, 0), tracking=240)
-fade(logo, [(1600, 0, None), (2100, 100, OUT)])
-add(group(nid(), 'End card', END, ED, [grac, logo, how, url, et, big]))
+fade(logo, [(L17, 0, None), (L17 + 500, 100, OUT)])
+see = sticker('See you on the floor.', 540, 1560, 0, ED, L17 + 100, fill=CYAN, ink=hexc('#06123A'), size=44)
+add(group(nid(), 'End card', END, ED, [see, logo] + steps + [url, es, et, big]))
 add(flash(END + 80, 40))
 
 # ---------- sound ----------
 for i, (st, n) in enumerate(VOICE):
     run('project', 'import-asset', '--project', P, '--file', f'{HERE}/voice/line{i:02d}.wav', '--asset-id', f'voice-{i:02d}', '--kind', 'audio')
     add(audio(nid(), f'Voice {i + 1}', st, n, f'voice-{i:02d}', vol=1.0))
-cues = [('click', T_FALLO + 240, .7), ('whoosh1', 2700, .55), ('impact', ANS - 20, .8), ('whoosh2', 4180, .5),
-        ('whoosh1', PH0 - 100, .5), ('down', END - 60, .7), ('ping', END + t_add, .45), ('pop', T_GRACIAS - 20, .6),
-        ('pop', BEATS[4] + 300, .45), ('tap', BEATS[2] + 1650, .5)]
-cues += [('whoosh2' if i % 2 else 'whoosh1', BEATS[i] - 300, .35) for i in range(1, 6)]
-cues += [('tap', BEATS[i] + 1150, .35) for i in range(6)]
+cues = [('impact', T_HF - 120, .55), ('click', T_NOPE + 40, .8), ('pop', T_NOPE + 40, .5),
+        ('whoosh1', OUT_HOOK - 250, .55), ('impact', DROP - 20, .85), ('pop', NARR[5]['start_ms'] - 20, .45),
+        ('whoosh2', ANS + AD - 300, .5),
+        ('whoosh1', PH0 - 100, .5), ('down', END - 60, .7), ('ping', END + L16, .45),
+        ('pop', BEATS[8] + 300, .45), ('tap', BEATS[2] + 1650, .5), ('tap', BEATS[4] + 1650, .5), ('pop', END + L17 + 100, .5)]
+cues += [('tap', END + L16 + dt, .4) for _, _, dt in SPEC[1:]]
+cues += [('whoosh2' if i % 2 else 'whoosh1', BEATS[i] - 300, .35) for i in range(1, len(SHOTS))]
+cues += [('tap', BEATS[i] + 1150, .3) for i in range(len(SHOTS))]
 for name, at, v in cues:
     add(audio(nid(), 'SFX ' + name, at, SFXLEN[name], 'sfx-' + name, vol=v))
 
@@ -366,4 +438,4 @@ A.append({'type': 'setFxPropertyAnimator', 'compositionId': 'main',
 
 save(P, WK, DUR / 1000, layers[::-1], A,
      comp={'motionBlur': {'enabled': True, 'shutterAngle': 180, 'samplesPerFrame': 12, 'shutterPhase': -90}})
-print('built', len(layers), 'layers,', len(A), 'actions; strike at', T_FALLO, 'gracias at', T_GRACIAS)
+print('built', len(layers), 'layers,', len(A), 'actions; heart failure at', T_HF)

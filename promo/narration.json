@@ -1,87 +1,123 @@
 {
-  "note": "v3 script. One line per beat. start_ms is where the line begins; max_ms is the room it has before the next beat. A line is either text+lang or parts (each [lang, text]), joined with a short breath, so Spanish words inside an English line are read as Spanish. One voice for all.",
-  "lines": [
-    {
-      "start_ms": 150,
-      "max_ms": 1050,
-      "lang": "en",
-      "text": "Heart failure."
-    },
-    {
-      "start_ms": 1150,
-      "max_ms": 1800,
-      "parts": [
-        [
-          "en",
-          "Not"
-        ],
-        [
-          "es",
-          "fallo cardíaco."
-        ]
-      ]
-    },
-    {
-      "start_ms": 3000,
-      "max_ms": 1500,
-      "lang": "es",
-      "text": "Insuficiencia cardíaca."
-    },
-    {
-      "start_ms": 4600,
-      "max_ms": 1800,
-      "lang": "en",
-      "text": "Meet Interpreter Hub."
-    },
-    {
-      "start_ms": 6650,
-      "max_ms": 2800,
-      "lang": "en",
-      "text": "Your whole shift, one app. No tab juggling."
-    },
-    {
-      "start_ms": 9550,
-      "max_ms": 2950,
-      "lang": "en",
-      "text": "A glossary by the people who actually say these words."
-    },
-    {
-      "start_ms": 12550,
-      "max_ms": 2950,
-      "lang": "en",
-      "text": "Glossary speaks first. A.I. gets the leftovers."
-    },
-    {
-      "start_ms": 15650,
-      "max_ms": 2800,
-      "lang": "en",
-      "text": "Know the doctor before the doctor knows you."
-    },
-    {
-      "start_ms": 18650,
-      "max_ms": 2800,
-      "lang": "en",
-      "text": "Stuck? Ask Doctor Smiley. Cartoons don't sleep."
-    },
-    {
-      "start_ms": 21650,
-      "max_ms": 2800,
-      "lang": "en",
-      "text": "Daily Drill. Catch false friends before they catch you."
-    },
-    {
-      "start_ms": 24800,
-      "max_ms": 4700,
-      "parts": [
-        [
-          "en",
-          "Interpreter Hub. Add it to your Home Screen. Your future self says"
-        ],
-        [
-          "es",
-          "¡gracias!"
-        ]
-      ]
-    }
-  ]
+ "note": "v4 script (45 s). One line per beat. start_ms is where the line begins; max_ms is the room it has. voice defaults to am_puck (the narrator); em_alex is Kokoro's native Spanish voice, playing the interpreter in the hook.",
+ "lines": [
+  {
+   "start_ms": 100,
+   "max_ms": 1880,
+   "parts": [
+    [
+     "en",
+     "The doctor says:"
+    ],
+    [
+     "en",
+     "heart failure."
+    ]
+   ]
+  },
+  {
+   "start_ms": 2000,
+   "max_ms": 1450,
+   "lang": "en",
+   "text": "You've got half a second."
+  },
+  {
+   "start_ms": 3450,
+   "max_ms": 1200,
+   "lang": "es",
+   "voice": "em_alex",
+   "text": "¿Fallo cardíaco?"
+  },
+  {
+   "start_ms": 4700,
+   "max_ms": 1290,
+   "lang": "en",
+   "text": "Nope. Not with patients."
+  },
+  {
+   "start_ms": 6000,
+   "max_ms": 1750,
+   "lang": "es",
+   "voice": "em_alex",
+   "text": "Insuficiencia cardíaca."
+  },
+  {
+   "start_ms": 7800,
+   "max_ms": 1750,
+   "lang": "en",
+   "text": "There it is. Meet Interpreter Hub."
+  },
+  {
+   "start_ms": 10050,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "Your whole shift, one app. No tab juggling."
+  },
+  {
+   "start_ms": 12950,
+   "max_ms": 2900,
+   "lang": "en",
+   "text": "A glossary by the people who actually say these words."
+  },
+  {
+   "start_ms": 15950,
+   "max_ms": 2900,
+   "lang": "en",
+   "text": "Glossary speaks first. A.I. gets the leftovers."
+  },
+  {
+   "start_ms": 19000,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "Know the doctor before the doctor knows you."
+  },
+  {
+   "start_ms": 22000,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "A hundred and one false friends, flagged. You're welcome."
+  },
+  {
+   "start_ms": 25000,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "Daily Drill. Warm up before the real thing."
+  },
+  {
+   "start_ms": 28000,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "Prepping for Core C.H.I.? It's built in."
+  },
+  {
+   "start_ms": 31000,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "And a team chat, for when the E.D. needs a hand."
+  },
+  {
+   "start_ms": 34000,
+   "max_ms": 2850,
+   "lang": "en",
+   "text": "Stuck? Ask Doctor Smiley. Cartoons don't sleep."
+  },
+  {
+   "start_ms": 37200,
+   "max_ms": 2700,
+   "lang": "en",
+   "text": "Interpreter Hub. Built by our team, for our team."
+  },
+  {
+   "start_ms": 40000,
+   "max_ms": 3000,
+   "lang": "en",
+   "text": "Open it on your phone. Tap Share, then Add to Home Screen."
+  },
+  {
+   "start_ms": 43100,
+   "max_ms": 1400,
+   "lang": "en",
+   "text": "See you on the floor."
+  }
+ ]
 }

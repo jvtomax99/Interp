@@ -1,5 +1,6 @@
 """Narration for the promo: Kokoro (open model, runs locally), voice am_puck,
-the same narrator as the CPA/EA guide video. One WAV per line in narration.json.
+the same narrator as the CPA/EA guide video. A line can name another voice
+("voice": "em_alex", Kokoro's native Spanish male). One WAV per line in narration.json.
 A line with "parts" is read part by part ([lang, text]) and joined with a short
 breath, so a Spanish word inside an English line gets Spanish pronunciation.
 Needs: a venv with kokoro-onnx + soundfile, and the two model files from
@@ -16,8 +17,8 @@ k = Kokoro(MODEL + '/kokoro-v1.0.onnx', MODEL + '/voices-v1.0.bin')
 lines = json.load(open(HERE + '/narration.json'))['lines']
 
 
-def say(text, lang):
-    a, sr = k.create(text, voice=VOICE, speed=SPEED, lang='es' if lang == 'es' else 'en-us')
+def say(text, lang, voice=VOICE):
+    a, sr = k.create(text, voice=voice, speed=SPEED, lang='es' if lang == 'es' else 'en-us')
     nz = np.nonzero(np.abs(a) > 0.01)[0]                      # trim silence at both ends
     return a[max(0, nz[0] - int(.03 * sr)): nz[-1] + int(.08 * sr)], sr
 
@@ -29,7 +30,7 @@ for i, L in enumerate(lines):
     parts = L.get('parts') or [[L['lang'], L['text']]]
     out = []
     for j, (lang, txt) in enumerate(parts):
-        a, sr = say(txt, lang)
+        a, sr = say(txt, lang, L.get('voice', VOICE))
         if j: out.append(np.zeros(int(.12 * sr), dtype=a.dtype))
         out.append(a)
     a = np.concatenate(out)

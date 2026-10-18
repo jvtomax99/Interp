@@ -1,16 +1,19 @@
-"""The v3 music bed: synthesized here (numpy only, no samples, no service), so
-it is ours to use. 120 BPM, 30 s, C - G - Am - F, one chord per bar (2 s).
-0-3 s    intro: pad and a filtered pulse building into the drop
-3 s      drop on "insuficiencia cardíaca": drums and bass come in
-3-24.5   groove under the six screens (a beat every 500 ms; cuts land on them)
-24.5-28  end card: drums thin out to kick and hats
-28-30    last chord rings out
+"""The music bed: synthesized here (numpy only, no samples, no service), so
+it is ours to use. 120 BPM, 45 s, C - G - Am - F, one chord per bar (2 s).
+0-6 s      intro: pad and a filtered pulse; a clock ticks under the
+           "half a second" countdown (2-3.5 s); silence for 250 ms, then
+6 s        the drop on "insuficiencia cardíaca": drums and bass come in
+6-37       groove under the nine screens (a beat every 500 ms; cuts land on them),
+           a clap fill into 25
+37-44      end card: kick and hats only
+44-45      last hit, on "floor",, the chord rings out
 Writes sfx/music.wav (48 kHz stereo). Mixed and ducked in build.py."""
 import os, wave
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SR, DUR, BPM = 48000, 30.0, 120
+SR, DUR, BPM = 48000, 45.0, 120
+DROP, END, LAST = 6.0, 37.0, 44.0
 BEAT = 60 / BPM
 N = int(SR * DUR)
 t = np.arange(N) / SR
@@ -34,7 +37,7 @@ def add(sig, at, gain=1.0, pan=0.0):
     R[i:i + n] += sig[:n] * gain * (1 + pan) ** .5
 
 # ---- pad: soft detuned saws, low-passed, one chord per bar
-for bar in range(15):
+for bar in range(23):
     root, notes = CHORDS[bar % 4]
     n = int(2.2 * SR); tt = np.arange(n) / SR
     env = np.minimum(1, tt / .25) * np.minimum(1, (2.2 - tt) / .35)
@@ -72,16 +75,16 @@ def bass(m, d=.22):
     return np.tanh(1.4 * s) * np.minimum(1, tt / .006) * np.exp(-tt / .14)
 
 K, C = kick(), clap()
-for b in range(60):
+for b in range(int(DUR / BEAT)):
     at = b * BEAT
     bar = int(at // 2); root = CHORDS[bar % 4][0]
-    if at < 3.0:
+    if at < DROP:
         # intro: a muted pulse on the beat, rising toward the drop
-        add(bass(root + 12, .12), at, .10 + .10 * at / 3)
+        if at < DROP - .5: add(bass(root + 12, .12), at, .10 + .10 * at / DROP)
         continue
-    if at >= 28.0:
+    if at >= LAST:
         continue
-    end = at >= 24.5
+    end = at >= END
     add(K, at, .85)
     if not end and b % 2 == 1: add(C, at, .32, .1)
     add(hat(), at + BEAT / 2, .16 if not end else .12, -.3)
@@ -89,13 +92,19 @@ for b in range(60):
     if not end:
         add(bass(root), at + BEAT / 2, .32)
         add(bass(root + 12, .12), at + BEAT * .75, .12)
-# the drop: a long low hit at 3.0 s and at the end card, last kick at 28 s
-add(K, 3.0, .5); add(K, 24.5, .4); add(K, 28.0, .9)
-# intro riser: filtered noise swelling into 3.0 s
-n = int(1.4 * SR); tt = np.arange(n) / SR
+# the countdown clock: a tick every 250 ms, 2.0-3.5 s
+for i in range(6): add(hat(), 2.0 + i * .25, .30 if i % 2 else .45, .4 if i % 2 else -.4)
+# a clap roll into 25 s
+for i in range(8): add(C, 24.0 + i * .125, .10 + .03 * i, .1)
+# the drop, the end card, the last hit
+add(K, DROP, .5); add(K, END, .4); add(K, LAST, .9)
+# riser: filtered noise swelling into the drop, cut 250 ms early for a beat of silence
+n = int(1.5 * SR); tt = np.arange(n) / SR
 noise = rng.standard_normal(n)
-sw = (noise - lowpass(noise, 1500)) * (tt / 1.4) ** 2.5 * .22
-add(sw, 1.6, 1, -.2)
+sw = (noise - lowpass(noise, 1500)) * (tt / 1.5) ** 2.5 * .22
+add(sw, DROP - .25 - 1.5, 1, -.2)
+i0, i1 = int((DROP - .25) * SR), int(DROP * SR)
+for ch in (L, R): ch[i0:i1] *= np.linspace(1, 0, i1 - i0) ** 8   # the gap before the drop
 
 mix = np.stack([L, R], 1)
 mix /= np.max(np.abs(mix)) / .5                   # peak -6 dBFS; level set in the mix

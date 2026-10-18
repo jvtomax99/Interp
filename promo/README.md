@@ -1,23 +1,23 @@
 # Team promo video
 
-A 30-second vertical (1080×1920) promo for the interpreter team, made with
+A 45-second vertical (1080×1920) promo for the interpreter team, made with
 Tesseract (installed in every cloud session by `.claude/hooks/session-start.sh`).
 Not part of the app: `.vercelignore` keeps this folder off the live site.
 
-`hub-promo-v1.mp4` is version 1 (no voice, sound accents only), `hub-promo-v2.mp4`
-adds the narration, `hub-promo-v3.mp4` (current) is the re-edit below. `build.py`
-now builds v3; v1 and v2 are in git history.
+Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
+30 s), `hub-promo-v4.mp4` (current, 45 s). `build.py` builds v4; older builds are
+in git history.
 
-## What's in it (v3, 2026-10-18)
+## What's in it (v4, 2026-10-18)
 
 Cut to a 120 BPM music bed: every change lands on a beat (500 ms grid).
 
 | Time | Scene |
 |---|---|
-| 0–4.4 s | Hook: "heart failure"; "fallo cardíaco" is struck out ("Avoid with patients", the app's own caution on that term); "insuficiencia cardíaca" slams in on the drop at 3.0 s |
-| 4.4–6.4 | Hub icon spins in, "Interpreter Hub", "for the HUMC interpreter team" |
-| 6.5–24.5 | Phone with six real screens, 3 s each: Home, Emergency glossary, Translate, doctor page, Ask the Hub, Daily Drill. Each beat whips in its screen, pushes in on the one detail that backs the line, rings it in cyan and pulls out. Two-line masked headlines, a story-style progress bar. Stickers: "Told you." on Translate (callback to the hook), Dr. Smiley's "I'm a cartoon. I don't sleep." on Ask |
-| 24.5–30 | End card: Dr. Smiley, the address, "Add to Home Screen", a "¡gracias!" sticker on the last word |
+| 0–8.4 s | Hook. "The doctor says: heart failure", with a barrage of cardiology words behind it. "You've got half a second": a countdown runs 0.50s to 0.00s. The interpreter (a second voice, Kokoro's native Spanish `em_alex`) tries "¿Fallo cardíaco?"; struck out, "Nope. Not with patients." (the app's own caution on that term). A beat of silence, then "insuficiencia cardíaca" slams in on the drop at 6.0 s. "There it is." |
+| 8.3–10 | Hub icon spins in, "Meet Interpreter Hub" |
+| 10–37 | Phone with nine real screens, 3 s each: Home, Emergency glossary, Translate, doctor page, False Friends, Daily Drill, CoreCHI Practice, Team Chat, Ask the Hub. Each beat whips in its screen, pushes in on the detail that backs the line, rings it in cyan and pulls out. Two-line masked headlines, a story-style progress bar. Stickers: "Told you." (Translate, a callback to the hook), "constipado = a cold" (False Friends), Dr. Smiley's "I'm a cartoon. I don't sleep." (Ask) |
+| 37–45 | End card: Dr. Smiley, "Built by our team, for our team", the address, the three Add to Home Screen steps popping in as they're said, "See you on the floor." on the last hit. English only |
 
 Motion blur is on (composition setting plus the moving layers).
 
@@ -48,7 +48,7 @@ layer and keyframe helpers. The editable `.tsrct` is rebuilt, never committed.
 
 ## Re-capturing the screens
 
-`shots/` holds the six screens at iPhone size (393×759 at 3×). From `tests/`
+`shots/` holds the nine screens (plus spares) at iPhone size (393×759 at 3×). From `tests/`
 (after `npm install`):
 
 - Home: `node ../promo/capture-home.cjs ../promo/shots`
@@ -57,6 +57,8 @@ layer and keyframe helpers. The editable `.tsrct` is rebuilt, never committed.
 - Ask the Hub: `tests/out/journey/2-prep.png` after `node run.cjs journey`
 - Daily Drill: `tests/out/drill/390-L1-light-ace-r1-result.png` after
   `node run.cjs daily-drill`, cropped to its bottom 2259 px
+- Practice and False Friends: `capture-more.cjs ../promo/shots practice,falsefriends`
+- Team Chat with five made-up messages (no patient details): `capture-chat.cjs`
 
 ## The voice (v2, rewritten for v3)
 
@@ -68,9 +70,9 @@ for word, and `am_puck` matched the real recording far closer than any other
 (MFCC distance 0.14 vs 0.32 for the next; same length and pitch).
 
 `narration.json` is the script, one line per beat (`start_ms`, `max_ms`). A line
-with `parts` mixes languages: "Not" in English, "fallo cardíaco" in Spanish,
-joined with a 120 ms breath. `build.py` finds that join in the WAV to time the
-strike-out and the ¡gracias! sticker to the spoken word.
+with `parts` is read part by part, joined with a 120 ms breath; `build.py` finds
+that join in the WAV (line 1: "heart failure" slams in on it). A line can name
+another `voice`: the two Spanish lines are `em_alex`.
 `voice/` holds one WAV per line, made by `voice.py`:
 
 ```
@@ -82,9 +84,8 @@ mkdir -p /tmp/kkm && cd /tmp/kkm && for f in kokoro-v1.0.onnx voices-v1.0.bin; d
 
  The share copy is encoded with
 `-t 30 -af "loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000"`: v2 measures
-v3 measures -15.5 LUFS, true peak -1.4 dBTP. The Spanish line is the same English voice
-reading Spanish; if it sounds accented, `em_alex` is Kokoro's native Spanish
-male voice for that one line.
+v4 measures -15.4 LUFS, true peak -1.3 dBTP. v3's Spanish words were the English voice reading Spanish and sounded off;
+v4 gives them to `em_alex` and keeps the ending English only.
 
 Unheard by Claude: the checks above prove level and timing, not how it sounds.
 
@@ -92,9 +93,11 @@ Unheard by Claude: the checks above prove level and timing, not how it sounds.
 
 `sfx/music.wav` is synthesized by `music.py` (numpy only: no samples, no
 service, so nothing to license): 120 BPM, C–G–Am–F, pad and a pulse for the
-hook, drums and bass from the 3.0 s drop, thinning out on the end card.
+hook with a clock ticking under the countdown, 250 ms of silence, drums and
+bass from the 6.0 s drop, a clap fill into 25 s, thinning out on the end card,
+a last hit on "floor".
 `build.py` puts it under everything at 0.7 and ducks it to 0.35 (-6 dB)
 while the voice talks (a `volume` animator built from the voice timings), so
 the voice sits about 10 dB above the bed.
 
-The export takes about 145 s with motion blur.
+The 45 s export takes about 215 s with motion blur.
