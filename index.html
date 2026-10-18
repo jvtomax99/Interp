@@ -2126,7 +2126,7 @@
   .dm-sep{ height:1px; background:var(--line-soft); margin:6px 8px; }
   .dm-cancel{ width:100%; height:50px; margin-top:8px; border:0; border-radius:14px; background:var(--bg); font:600 15px var(--sans); color:var(--ink); cursor:pointer; }
   .dm-cancel:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
-  body:has(.dm-overlay.show) .tabbar{ display:none; }
+  body.dm-open.dm-open .tabbar{ display:none; }
   @media (min-width:901px){
     .dm-sheet{ bottom:auto; top:50%; border-radius:22px; padding-bottom:16px; opacity:0; transform:translateY(-46%) scale(.98); transition:transform .24s var(--ease), opacity .2s var(--ease); }
     .dm-overlay.show .dm-sheet{ opacity:1; transform:translateY(-50%); }
@@ -4603,14 +4603,14 @@
     .gs-inputrow{ flex-shrink:0; }
 
     /* The page behind a sheet should not scroll with it. */
-    body:has(.overlay.show), body:has(.gs-overlay.show){ overflow:hidden; }
+    body.ov-open.ov-open, body.gs-open.gs-open{ overflow:hidden; }
 
     /* The tab bar is the one thing that should give way to the keyboard: it
        is fixed to the bottom, which is exactly where the keyboard arrives.
        body.kb-open is already set by the keyboard watcher further down. */
     body.kb-open .tabbar,
-    body:has(.overlay.show) .tabbar,
-    body:has(.gs-overlay.show) .tabbar{ display:none; }
+    body.ov-open.ov-open .tabbar,
+    body.gs-open.gs-open .tabbar{ display:none; }
 
     /* A phone held in landscape puts the notch on one side. */
     .main{
@@ -5635,7 +5635,7 @@ html[data-theme="dark"] .appt-done, html[data-theme="dark"] .prep-start{ backgro
   box-shadow:0 8px 20px -8px rgba(22,55,90,.55); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .appt-pill.is-on{ display:inline-flex; }
 @media (min-width:901px){ .appt-pill{ left:auto; right:26px; translate:none; bottom:26px; } }
-body:has(.overlay.show) .appt-pill, body:has(.gs-overlay.show) .appt-pill{ display:none; }
+body.ov-open.ov-open .appt-pill, body.gs-open.gs-open .appt-pill{ display:none; }
 @media (max-width:900px){ body.kb-open .appt-pill{ display:none; } }   /* the on-screen keyboard covers it */
 @media (prefers-reduced-motion: reduce){ .appt-hd small i, .appt-pill i{ animation:none; } .prep-start{ transition:none; } .prep-start:active{ transform:none; } }
 /* ---------- Dr. Smiley's career ----------
@@ -5685,7 +5685,7 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
   .smiley-rider .ask-face svg{ transition:none; filter:drop-shadow(0 2px 2px rgba(11,35,64,.28)) drop-shadow(0 6px 8px rgba(7,43,69,.2)); }
   .smiley-rider.is-pressed .ask-face{ scale:.9; }
   /* Same moments the tab bar itself steps aside: typing, sheets, search. */
-  body.kb-open .smiley-rider, body:has(.overlay.show) .smiley-rider, body:has(.gs-overlay.show) .smiley-rider{ visibility:hidden; }
+  body.kb-open .smiley-rider, body.ov-open.ov-open .smiley-rider, body.gs-open.gs-open .smiley-rider{ visibility:hidden; }
   /* In Team Chat he steps aside too, so the message box can sit right on
      the tab bar instead of leaving room for his head. */
   body:has(#content > .tc) .smiley-rider{ visibility:hidden; }
@@ -18172,6 +18172,32 @@ function closeAllOverlays(){
   guideCoachClose();
 }
 
+// Which kinds of overlay are open, as body classes: ov-open (.overlay),
+// gs-open (global search), dm-open (the domain menu). The CSS that steps the
+// tab bar, the dock, the rider and the appt pill aside reads these. It used
+// to be body:has(.overlay.show), which the browser re-checks on class
+// changes anywhere in the page, scrolling Home included (about a quarter of
+// its style work). One watcher rather than a line in each of the ~28
+// open/close functions, so an overlay added later is covered too. The
+// rules double the class (body.ov-open.ov-open) to keep :has()'s weight.
+(function overlayFlags(){
+  const KINDS = [['overlay', 'ov-open'], ['gs-overlay', 'gs-open'], ['dm-overlay', 'dm-open']];
+  const isOv = n => n.nodeType === 1 && KINDS.some(([k]) => n.classList.contains(k));
+  const sync = () => {
+    const b = document.body;
+    for(const [k, c] of KINDS){
+      const on = !!document.querySelector('.' + k + '.show');
+      if(b.classList.contains(c) !== on) b.classList.toggle(c, on);
+    }
+  };
+  // Class changes count only on an overlay itself; any insert or removal
+  // re-checks (an open overlay can leave inside a bigger subtree).
+  new MutationObserver(recs => {
+    if(recs.some(r => r.type === 'childList' || isOv(r.target))) sync();
+  }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  sync();
+})();
+
 function setCategory(id, isBack, returnState){
   const movedForward = !isBack && activeCategory !== id;
   const previousView = { id: activeCategory, query: searchQuery, termRenderLimit };
@@ -20259,8 +20285,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1017.2034';
-const BUILD_TIME = '2026-10-17 20:34 UTC';
+const BUILD_ID = 'b1018.0223';
+const BUILD_TIME = '2026-10-18 02:23 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

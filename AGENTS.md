@@ -115,6 +115,14 @@ thin out or stop a visual to win a number. If a gain is only possible by
 changing what Jose sees, ask him first with the numbers and a screenshot.
 He reversed S1's stopped petals and one-shot heartline for this reason.
 
+**No `:has()` for app state on `body` or other big containers.** The
+browser re-checks such a rule whenever a class changes anywhere under it,
+scrolling included; these rules were most of Home's style work while
+scrolling. Set a class where the state changes instead, with the same
+selector weight (doubled class: `body.ov-open.ov-open`). Examples: the tab
+bar's `.no-current`, the overlay classes kept by `overlayFlags` in
+`index.html` (`ov-open`, `gs-open`, `dm-open`).
+
 **Every change someone can see updates the User Guide in the same commit.**
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
 renamed button, a new message. Dr. Smiley answers "how do I…" from the

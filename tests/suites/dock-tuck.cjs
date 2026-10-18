@@ -118,6 +118,29 @@ const settle = page => page.evaluate(() => new Promise(r => {
   await rp.evaluate(() => { dockOpen(); dockIdleRestart(); }); await rp.waitForTimeout(300);
   const r = await rp.evaluate(() => { dockTuck(); return { skin: !!document.querySelector('.dk-skin'), mini: document.body.classList.contains('dock-mini') }; });
   ok(!r.skin && r.mini, 'reduced motion: it tucks at once, nothing moves', r);
+
+  // The bar steps aside for overlays by body classes (overlayFlags in
+  // index.html; S7a). Each must follow its overlay before the next frame:
+  // set on open, cleared on close, also when an open one is removed or is
+  // a sheet created on the spot.
+  const flags = await rp.evaluate(async () => {
+    const out = {}, tick = () => Promise.resolve();
+    // which overlay kinds have .show, and which classes say so
+    const read = () => [['overlay', 'ov-open'], ['gs-overlay', 'gs-open'], ['dm-overlay', 'dm-open']]
+      .map(([k, c]) => (document.querySelector('.' + k + '.show') ? k : '-') + '=' + (document.body.classList.contains(c) ? c : '-')).join(' ');
+    const step = async (name, f) => { f(); await tick(); out[name] = read(); };
+    setCategory('home'); await new Promise(r => setTimeout(r, 300));
+    await step('rest', () => {});
+    await step('more', () => openMoreSheet()); await step('more closed', () => closeMoreSheet());
+    await step('search', () => openGlobalSearch()); await step('search closed', () => closeGlobalSearch());
+    await step('made sheet', () => smSheet('flagsTest', '<p>x</p>')); await step('made sheet removed', () => document.getElementById('flagsTest').remove());
+    setCategory(window.__SEED_CATS[0].id); await new Promise(r => setTimeout(r, 300));
+    openDomainMenu(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); await step('domain menu', () => {}); await step('domain menu gone', () => closeDomainMenu(true));
+    return out;
+  });
+  const want = { rest: '-=- -=- -=-', more: 'overlay=ov-open -=- -=-', 'more closed': '-=- -=- -=-', search: '-=- gs-overlay=gs-open -=-', 'search closed': '-=- -=- -=-',
+    'made sheet': 'overlay=ov-open -=- -=-', 'made sheet removed': '-=- -=- -=-', 'domain menu': '-=- -=- dm-overlay=dm-open', 'domain menu gone': '-=- -=- -=-' };
+  ok(JSON.stringify(flags) === JSON.stringify(want), 'overlay classes follow each kind of overlay, before the next frame', flags);
   ok(!rp.__errors.length, 'no page errors', rp.__errors);
   await b.close();
 })();
