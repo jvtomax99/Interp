@@ -212,8 +212,8 @@ come from this alone.
   interleaved: style time 5232 -> 3728 ms median (every after run below
   every before run), late while scrolling 26.7 -> 23.8% (runs overlap),
   script +160 ms (the observer: at most ~90 ms a run, counted). Rule added
-  to `AGENTS.md`: no `:has()` for state on big containers. Jose's phone
-  decides. PR link: see the branch's PR.
+  to `AGENTS.md`: no `:has()` for state on big containers. Merged
+  2026-10-18. jvtomax99/Interp#49.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
@@ -298,6 +298,16 @@ come from this alone.
   ~7.4 ms/s, unchanged. One run each side, so the size is rough. On
   Apple's scale (frame-meter.md) 67 ms/s while scrolling is still far into
   "distracting" (10+).
+- Same phone after S7a (#49), build b1018.0223, one 29 s run on Home (13 s
+  scrolling): scrolling 9.5% late, 76.7 ms/s, worst 61 ms (part 1's run:
+  8.6%, 66.9, 49; before part 1: 10.5%, 85, 57). So no gain from S7a seen
+  on the phone; one run each side, run-to-run spread unknown. The still
+  part, from the totals (16 s): ~3% late, ~29 ms/s, and the run's worst
+  frame (124 ms, the first over 100 ms on this phone) was in it; earlier
+  runs ~1%, 7.4 ms/s. Cause unknown; S7a adds little at rest (the
+  observer). Needs a repeat before reading anything into it. Lab gains in
+  Chromium's style engine have twice not shown clearly on the iPhone, so
+  only the phone decides an S-step.
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main

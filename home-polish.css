@@ -372,8 +372,14 @@
   body.dock-mini .tabbar-btn.is-active,
   body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{display:grid;grid-template-columns:1fr 1fr;align-items:center;justify-items:center;
     padding:0;font-size:14px;font-weight:700;letter-spacing:-.01em;color:#0F5FA6;white-space:nowrap;}
-  body.dock-mini .tabbar-btn:not(.is-active) > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
-  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child > span:not(.tabbar-icon):not(.tabbar-badge){display:inline;}
+  /* The tab's name. Aimed by its class, never a bare span (S7b): a rule
+     whose last part is only "span" made every tuck restyle every span on
+     the page (~270 of ~490 elements restyled per tuck, Chrome trace).
+     span.tabbar-name:not(.tabbar-icon) weighs what the old
+     span:not(.tabbar-icon):not(.tabbar-badge) did (0,2,1); the :not keeps
+     the weight, the name is never the icon. */
+  body.dock-mini .tabbar-btn:not(.is-active) > span.tabbar-name:not(.tabbar-icon){display:none;}
+  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child > span.tabbar-name:not(.tabbar-icon){display:inline;}
   body.dock-mini .tabbar-lens{opacity:0;}
   body.dock-mini .tabbar-btn.is-active .tabbar-icon,
   body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
