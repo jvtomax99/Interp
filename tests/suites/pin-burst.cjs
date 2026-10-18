@@ -47,18 +47,20 @@ const state = page => page.evaluate(() => ({ pin: window.__pin.classList.contain
   // A scroll that starts on a card: the burst stops at pointercancel.
   await L.go(page, 'home', 900);
   box = await pick(page);
-  await page.evaluate(() => { const T = window.__bt = { cancel: null, off: null }; const t0 = performance.now();
-    document.addEventListener('pointercancel', () => { if (T.cancel === null) T.cancel = performance.now() - t0; }, { capture: true });
-    const tick = () => { const t = performance.now() - t0; if (T.cancel !== null && T.off === null && !window.__pin.classList.contains('is-tapped')) T.off = t; if (t < 1500) requestAnimationFrame(tick); };
-    requestAnimationFrame(tick); });
+  // The check sits in a pointercancel listener added after the app's own
+  // (same phase, so it runs next): no frame timing, which a slow CI machine
+  // can stretch.
+  await page.evaluate(() => { const T = window.__bt = { cancel: false, offAtCancel: null };
+    document.addEventListener('pointercancel', () => { if (T.cancel) return; T.cancel = true;
+      T.offAtCancel = !window.__pin.classList.contains('is-tapped') && !(window.__holder && window.__holder.classList.contains('is-tapped')); }, { capture: true }); });
   const y0 = await page.evaluate(() => scrollY);
   await touch('touchStart', box);
   for (let y = box.y; y >= box.y - 300; y -= 18) { await touch('touchMove', { x: box.x, y }); await page.waitForTimeout(16); }
   await touch('touchEnd'); await page.waitForTimeout(900);
   const T = await page.evaluate(() => window.__bt), after = await state(page), y1 = await page.evaluate(() => scrollY);
   ok(y1 - y0 > 100 && await page.evaluate(() => activeCategory === 'home'), 'scroll from a card: the page scrolls and nothing opens', { moved: y1 - y0 });
-  ok(T.cancel !== null, 'scroll from a card: the browser cancels the touch (pointercancel)', T);
-  ok(T.off !== null && T.off - T.cancel < 40 && !after.pin && !after.holder, 'scroll from a card: the burst stops within two frames of the cancel', { ...T, after });
+  ok(T.cancel, 'scroll from a card: the browser cancels the touch (pointercancel)', T);
+  ok(T.offAtCancel === true && !after.pin && !after.holder, 'scroll from a card: the burst stops at the cancel and stays off', { ...T, after });
   ok(!page.__errors.length, 'no page errors', page.__errors);
   await ctx.close();
 
