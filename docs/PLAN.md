@@ -89,18 +89,22 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    S7a and S7b are in Done. S7a's phone run (Facts) showed no clear gain;
    S7b's phone check is pending (Jose: 2-3 runs per build, same protocol,
    so the spread is known).
-   S7c. **Pin burst while scrolling (visible: Jose decides; waiting on his
-      pick, 2026-10-18).** The burst
+   S7c. **Pin burst while scrolling (visible: Jose decides).** Jose picked
+      (1) on 2026-10-18, then it was measured: a tap navigates at once (card
+      gone 22-56 ms after the click), so every burst frame you see today is
+      during the finger's hold (117-234 ms for a 110-200 ms tap, 0-1 frames
+      after lift). (1) would remove the burst from taps, not delay it. Asked
+      him again with that. The burst
       starts on `pointerdown` (pin-icons.js 913), so a scroll that starts
       on a card plays it, and all 26 burst keyframes animate
       width/height/margin (layout every frame; 26 of 64, not 28 as noted
       earlier). Swapping to transform isn't pixel-identical (the rings'
       box-shadow and gradients scale with it). Options for Jose: (1) start
       it on lift (a tap still bursts, a scroll never does; starts ~0.1 s
-      later), (2) keep touch-down, stop it the moment a scroll begins
+      later; WRONG, see above), (2) keep touch-down, stop it the moment a scroll begins
       (`pointercancel`; a scroll shows a cut-off flash), (3) keep it as is,
       redraw the rings so transform looks the same (frame-by-frame check;
-      cheaper but not zero). Recommended: (1).
+      cheaper but not zero). Recommended before measuring: (1); now (2).
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
