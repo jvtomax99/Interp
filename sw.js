@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v227-overlay-flags';
+const CACHE_VERSION = 'interpreter-hub-v228-tuck-restyle';
 const PRECACHE = [
   './',
   './index.html',

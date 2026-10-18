@@ -123,6 +123,12 @@ selector weight (doubled class: `body.ov-open.ov-open`). Examples: the tab
 bar's `.no-current`, the overlay classes kept by `overlayFlags` in
 `index.html` (`ov-open`, `gs-open`, `dm-open`).
 
+**A rule on a body state class ends on a class, never a bare tag.**
+`body.dock-mini .tabbar-btn > span:not(.x)` made every tab bar tuck
+restyle every span on the page (S7b); `> span.tabbar-name` touches only
+the tab names. Give the element a class instead. The dock-tuck suite
+checks rules on `dock-mini`, `ov-open`, `gs-open` and `dm-open`.
+
 **Every change someone can see updates the User Guide in the same commit.**
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
 renamed button, a new message. Dr. Smiley answers "how do I…" from the

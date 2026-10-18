@@ -86,16 +86,11 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a is in Done (overlay classes); its phone check is pending.
-   S7b. **Tuck restyle (invisible).** Each tuck/untuck restyles ~490
-      elements (~49 ms at 4x), likely the 49-53 ms worst frames on the
-      phone (unproven). The 14 `body.dock-mini` rules (`home-polish.css`
-      367-395) only style the tab bar and dock, so 490 is more than they
-      explain: find the cause first (Chrome trace with style invalidation
-      tracking: which rule pulls in the rest), then fix that, e.g. move
-      the class onto `.tabbar` and `.dock-smiley` with the same weight.
-      Same proof as S7a, plus the dock-tuck test.
-   S7c. **Pin burst while scrolling (visible: Jose decides).** The burst
+   S7a and S7b are in Done. S7a's phone run (Facts) showed no clear gain;
+   S7b's phone check is pending (Jose: 2-3 runs per build, same protocol,
+   so the spread is known).
+   S7c. **Pin burst while scrolling (visible: Jose decides; waiting on his
+      pick, 2026-10-18).** The burst
       starts on `pointerdown` (pin-icons.js 913), so a scroll that starts
       on a card plays it, and all 26 burst keyframes animate
       width/height/margin (layout every frame; 26 of 64, not 28 as noted
@@ -201,6 +196,21 @@ come from this alone.
 
 ## Done
 
+- 2026-10-18 S7b, tuck restyle (invisible). Cause, from a Chrome trace
+  with invalidation tracking (`tests/tools/tuck-trace.cjs`): the two
+  `body.dock-mini` rules for the tab's name ended on a bare `span`, so
+  each tuck/open restyled every span on the page (471-510 of 1,420
+  elements, 269 spans). The name span now has class `tabbar-name`; rules
+  read `span.tabbar-name:not(.tabbar-icon)`, same weight (0,2,1).
+  Restyled per tuck/open 93-120; style work at 4x median 54 -> 19 ms,
+  worst 105 -> 28 ms (5 tucks + 5 opens each). Computed styles identical,
+  656,806 values incl. ::before/::after, 13 states (`tests/tools/tuck-styles.cjs`);
+  screenshots 0 px different (Home and a domain, open and tucked).
+  `scroll.cjs` UA=chromium 8+8 interleaved: no difference measurable (all
+  16 runs in the bad band; ~280 ms saved per run is under the spread).
+  dock-tuck: new guard, rules on body state classes must not end on a
+  bare tag (fails on the old code). Harness `POLISH_DIR` for before/after
+  of the Home files. Jose's phone decides. PR link: see the branch's PR.
 - 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
   / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
   `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
@@ -279,6 +289,19 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- Chrome keys a class change's restyle on the last part of each rule that
+  uses the class: a class or id there limits it to those elements, a bare
+  tag (`> span:not(.x)`, the `:not` doesn't count) means every element of
+  that tag on the page. Rules on body classes that change while you use
+  the app (`dock-mini`, `ov-open`, `gs-open`, `dm-open`) must end on a
+  class; dock-tuck checks it. Safari's engine may not pay this the same
+  way (unproven); the trace is Chromium's.
+- To see what a class change restyles: `tests/tools/tuck-trace.cjs` (trace
+  categories `devtools.timeline` and
+  `disabled-by-default-devtools.timeline.invalidationTracking`; events
+  `UpdateLayoutTree` elementCount, `StyleInvalidatorInvalidationTracking`
+  with the selectors). Adapt it for any other toggle.
 
 - 2026-10-18 `scroll.cjs` came out in a third band: ~20-30% late while
   scrolling for all 16 runs, between the good (~7-9%) and bad (35-45%)
