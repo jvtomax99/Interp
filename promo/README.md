@@ -5,7 +5,7 @@ Tesseract (installed in every cloud session by `.claude/hooks/session-start.sh`)
 Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
-30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `hub-promo-v6.mp4` (current: for the CEO pitch). `build.py` builds v6; older builds are
+30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `hub-promo-v6.mp4` (current: for the CEO pitch; -14.7 LUFS, -1.3 dBTP). `build.py` builds v6; older builds are
 in git history.
 
 ## v6: for the pitch to the hospital's CEO (2026-10-18)
