@@ -1,3 +1,4 @@
 edit/
 fonts/
 *.tsrct
+__pycache__/
