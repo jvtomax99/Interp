@@ -86,25 +86,9 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a and S7b are in Done. S7a's phone run (Facts) showed no clear gain;
-   S7b's phone check is pending (Jose: 2-3 runs per build, same protocol,
-   so the spread is known).
-   S7c. **Pin burst while scrolling (visible: Jose decides).** Jose picked
-      (1) on 2026-10-18, then it was measured: a tap navigates at once (card
-      gone 22-56 ms after the click), so every burst frame you see today is
-      during the finger's hold (117-234 ms for a 110-200 ms tap, 0-1 frames
-      after lift). (1) would remove the burst from taps, not delay it. Asked
-      him again with that. The burst
-      starts on `pointerdown` (pin-icons.js 913), so a scroll that starts
-      on a card plays it, and all 26 burst keyframes animate
-      width/height/margin (layout every frame; 26 of 64, not 28 as noted
-      earlier). Swapping to transform isn't pixel-identical (the rings'
-      box-shadow and gradients scale with it). Options for Jose: (1) start
-      it on lift (a tap still bursts, a scroll never does; starts ~0.1 s
-      later; WRONG, see above), (2) keep touch-down, stop it the moment a scroll begins
-      (`pointercancel`; a scroll shows a cut-off flash), (3) keep it as is,
-      redraw the rings so transform looks the same (frame-by-frame check;
-      cheaper but not zero). Recommended before measuring: (1); now (2).
+   S7a, S7b and S7c are in Done. S7a's phone run (Facts) showed no clear
+   gain; S7b and S7c phone checks pending (Jose: 2-3 runs per build, same
+   protocol, so the spread is known). Part 2 is finished once those are in.
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
@@ -200,6 +184,21 @@ come from this alone.
 
 ## Done
 
+- 2026-10-18 S7c, pin burst stops when a scroll takes the touch (visible,
+  Jose's pick). Jose first picked option 1 (burst on lift); measured first:
+  a tap navigates at once (card gone 22-56 ms after the click), so every
+  burst frame seen today plays while the finger is down (117-234 ms for a
+  110-200 ms tap, 0-1 frames after lift); on lift would have removed it
+  from taps. Asked again: option 2. The burst still starts on
+  `pointerdown`; on `pointercancel` for that touch it stops (`pin-icons.js`).
+  Taps: same burst frames before/after (9/9/9 at 110 ms, 13-14 at 200 ms).
+  Drag from a card: burst on screen 650-735 ms -> 46 ms (3 frames, the
+  cancel comes ~50 ms in). Trace at 4x on a card with burst rings, 3
+  drags x 3 runs each side: layout 31-41 -> 9-17 ms per drag (every after
+  below every before), raster tasks 275-294 -> 128-144 (time overlaps),
+  paint time unchanged. New suite `pin-burst.cjs` (old code fails it). No
+  User Guide entry mentions the burst, so none changed. Jose's phone
+  decides. PR link: see the branch's PR.
 - 2026-10-18 S7b, tuck restyle (invisible). Cause, from a Chrome trace
   with invalidation tracking (`tests/tools/tuck-trace.cjs`): the two
   `body.dock-mini` rules for the tab's name ended on a bare `span`, so
@@ -293,6 +292,16 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- Home's tap cards open their screen at once on the click (22-56 ms to
+  the next screen), so anything a tap shows on the card itself is only
+  seen while the finger is down. Start such feedback on `pointerdown`,
+  never on lift or click. A scroll that starts on a card sends
+  `pointercancel` ~50 ms in (Chromium, 18 px steps).
+- The burst rings ride on the pin's `[data-pin]` holder; not every card
+  has one (Home: 16 of 20 domain cards, 14 of 15 quick cards, 3 of 4
+  tiles). Pick a card with a holder when measuring the burst: on one
+  without, the burst costs nothing measurable.
 
 - Chrome keys a class change's restyle on the last part of each rule that
   uses the class: a class or id there limits it to those elements, a bare
