@@ -142,24 +142,24 @@ const settle = page => page.evaluate(() => new Promise(r => {
     'made sheet': 'overlay=ov-open -=- -=-', 'made sheet removed': '-=- -=- -=-', 'domain menu': '-=- -=- dm-overlay=dm-open', 'domain menu gone': '-=- -=- -=-' };
   ok(JSON.stringify(flags) === JSON.stringify(want), 'overlay classes follow each kind of overlay, before the next frame', flags);
 
-  // S7b: a rule under body.dock-mini that ends in a bare tag (`> span`)
-  // restyles every such tag on the page at each tuck (~270 spans, 435
-  // elements in one pass). Its last part must name a class or an id.
+  // A rule keyed on one of these body classes must end on a class, id or
+  // attribute, never a bare tag (S7b): Chrome then restyles every element
+  // of that tag on the page each time the class changes. "> span:not(...)"
+  // made each tuck restyle ~270 spans.
   const bare = await rp.evaluate(() => {
-    const out = [];
+    const STATE = /\.(dock-mini|ov-open|gs-open|dm-open)\b/, out = [];
+    const strip = s => { let d = 0, o = ''; for (const ch of s) { if (ch === '(') d++; if (!d) o += ch; if (ch === ')') d--; } return o; };
+    // last compound, with pseudo-classes, pseudo-elements and :not(...) arguments taken off
+    const last = sel => strip(sel).replace(/::?[\w-]+/g, '').trim().split(/\s*[\s>+~]\s*/).pop();
     const walk = rules => { for (const r of rules) {
       if (r.cssRules && !r.selectorText) { walk(r.cssRules); continue; }
-      if (!r.selectorText) continue;
-      for (const s of r.selectorText.split(/,(?![^(]*\))/)) {
-        if (!/^\s*body\.dock-mini\b/.test(s)) continue;
-        const last = s.trim().split(/\s*[\s>+~]\s*(?![^(]*\))/).pop().replace(/:not\([^)]*\)/g, '').replace(/::?[\w-]+(\([^)]*\))?/g, '');
-        if (!/[.#\[]/.test(last)) out.push(s.trim());
-      }
+      if (!r.selectorText || !STATE.test(r.selectorText)) continue;
+      for (const sel of r.selectorText.split(/,(?![^(]*\))/)) if (STATE.test(sel) && !/[.#[]/.test(last(sel))) out.push(sel.trim());
     } };
     for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} }
     return out;
   });
-  ok(!bare.length, 'tucking restyles only the dock: no body.dock-mini rule ends in a bare tag', bare);
+  ok(!bare.length, 'rules on body state classes end on a class, id or attribute (no bare tag)', bare);
   ok(!rp.__errors.length, 'no page errors', rp.__errors);
   await b.close();
 })();

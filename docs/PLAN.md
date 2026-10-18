@@ -86,8 +86,11 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a and S7b are in Done; S7a's phone run is in Facts (no gain seen).
-   S7c. **Pin burst while scrolling (visible: Jose decides).** The burst
+   S7a and S7b are in Done. S7a's phone run (Facts) showed no clear gain;
+   S7b's phone check is pending (Jose: 2-3 runs per build, same protocol,
+   so the spread is known).
+   S7c. **Pin burst while scrolling (visible; Jose picked (1), burst on
+      lift, 2026-10-18).** The burst
       starts on `pointerdown` (pin-icons.js 913), so a scroll that starts
       on a card plays it, and all 26 burst keyframes animate
       width/height/margin (layout every frame; 26 of 64, not 28 as noted
@@ -97,7 +100,8 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
       later), (2) keep touch-down, stop it the moment a scroll begins
       (`pointercancel`; a scroll shows a cut-off flash), (3) keep it as is,
       redraw the rings so transform looks the same (frame-by-frame check;
-      cheaper but not zero). Recommended: (1).
+      cheaper but not zero). Doing (1); User Guide if any answer says
+      the pin bursts on touch.
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
@@ -193,20 +197,21 @@ come from this alone.
 
 ## Done
 
-- 2026-10-18 S7b, tuck restyle (invisible). Cause (trace with style
-  invalidation tracking, `tests/tools/tuck-trace.cjs`): the two
-  `body.dock-mini ... > span:not(.tabbar-icon):not(.tabbar-badge)` rules
-  end in a bare tag, so each tuck and open restyled every span on the page
-  (~270; one pass of 435-446 elements, 8-56 ms at 4x). The tab's name span
-  now has `.tabbar-name` and the rules read `span.tabbar-name:not(.tabbar-badge)`
-  (same weight). 4+4 interleaved traces: that pass 435-446 -> 45-49
-  elements, style per tuck ~161 -> ~116 ms median (open overlapped).
-  Computed styles identical (464,800 values, 28 states, tucked ones added
-  to `overlay-styles.cjs`); phone screenshots pixel-identical. `scroll.cjs`
-  UA=chromium 8+8: all 16 runs in the bad band (30-44% late while
-  scrolling), whole-run numbers flat within noise; worst frame 108 -> 83 ms
-  median (6 of 8 after runs at 83, 1 of 8 before). dock-tuck checks no
-  `body.dock-mini` rule ends in a bare tag. Jose's phone decides.
+- 2026-10-18 S7b, tuck restyle (invisible). Cause, from a Chrome trace
+  with invalidation tracking (`tests/tools/tuck-trace.cjs`): the two
+  `body.dock-mini` rules for the tab's name ended on a bare `span`, so
+  each tuck/open restyled every span on the page (471-510 of 1,420
+  elements, 269 spans). The name span now has class `tabbar-name`; rules
+  read `span.tabbar-name:not(.tabbar-icon)`, same weight (0,2,1).
+  Restyled per tuck/open 93-120; style work at 4x median 54 -> 19 ms,
+  worst 105 -> 28 ms (5 tucks + 5 opens each). Computed styles identical,
+  656,806 values incl. ::before/::after, 13 states (`tests/tools/tuck-styles.cjs`);
+  screenshots 0 px different (Home and a domain, open and tucked).
+  `scroll.cjs` UA=chromium 8+8 interleaved: no difference measurable (all
+  16 runs in the bad band; ~280 ms saved per run is under the spread).
+  dock-tuck: new guard, rules on body state classes must not end on a
+  bare tag (fails on the old code). Harness `POLISH_DIR` for before/after
+  of the Home files. Jose's phone decides. jvtomax99/Interp#50.
 - 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
   / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
   `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
@@ -218,8 +223,8 @@ come from this alone.
   interleaved: style time 5232 -> 3728 ms median (every after run below
   every before run), late while scrolling 26.7 -> 23.8% (runs overlap),
   script +160 ms (the observer: at most ~90 ms a run, counted). Rule added
-  to `AGENTS.md`: no `:has()` for state on big containers. Jose's phone
-  decides. jvtomax99/Interp#49.
+  to `AGENTS.md`: no `:has()` for state on big containers. Merged
+  2026-10-18. jvtomax99/Interp#49.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
@@ -286,19 +291,19 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
-- Jose's iPhone after S7a (#49), build b1018.0223, one 29 s run (13 s
-  scrolling): scrolling 9.5% late, 76.7 ms/s, worst 61 ms (part 1 was
-  8.6%, 66.9, 49): no gain from S7a, slightly worse, inside what one run
-  each can't tell apart. The still part, from the totals (16 s): ~3% late,
-  ~29 ms/s, one 124 ms stall (was ~1.2%, ~7.4); the stall alone is ~7 ms/s
-  of that. Cause unknown (unproven: a sync, a Dr. Smiley play); one run, so
-  rerun before chasing it. Lab gain for S7a (style time -29%) was
-  Chromium's; WebKit's own `:has()` handling may never have paid that cost.
-- A rule that ends in a bare tag (`body.dock-mini ... > span`) makes Chrome
-  restyle every element of that tag under `body` when the class changes:
-  its invalidation set falls back to the tag name. The tuck restyled 435
-  elements in one pass for 4 name spans (trace, `tests/tools/tuck-trace.cjs`).
-  End such rules with a class.
+- Chrome keys a class change's restyle on the last part of each rule that
+  uses the class: a class or id there limits it to those elements, a bare
+  tag (`> span:not(.x)`, the `:not` doesn't count) means every element of
+  that tag on the page. Rules on body classes that change while you use
+  the app (`dock-mini`, `ov-open`, `gs-open`, `dm-open`) must end on a
+  class; dock-tuck checks it. Safari's engine may not pay this the same
+  way (unproven); the trace is Chromium's.
+- To see what a class change restyles: `tests/tools/tuck-trace.cjs` (trace
+  categories `devtools.timeline` and
+  `disabled-by-default-devtools.timeline.invalidationTracking`; events
+  `UpdateLayoutTree` elementCount, `StyleInvalidatorInvalidationTracking`
+  with the selectors). Adapt it for any other toggle.
+
 - 2026-10-18 `scroll.cjs` came out in a third band: ~20-30% late while
   scrolling for all 16 runs, between the good (~7-9%) and bad (35-45%)
   bands seen 2026-10-17. Interleaving still makes before/after fair;
@@ -317,6 +322,16 @@ come from this alone.
   ~7.4 ms/s, unchanged. One run each side, so the size is rough. On
   Apple's scale (frame-meter.md) 67 ms/s while scrolling is still far into
   "distracting" (10+).
+- Same phone after S7a (#49), build b1018.0223, one 29 s run on Home (13 s
+  scrolling): scrolling 9.5% late, 76.7 ms/s, worst 61 ms (part 1's run:
+  8.6%, 66.9, 49; before part 1: 10.5%, 85, 57). So no gain from S7a seen
+  on the phone; one run each side, run-to-run spread unknown. The still
+  part, from the totals (16 s): ~3% late, ~29 ms/s, and the run's worst
+  frame (124 ms, the first over 100 ms on this phone) was in it; earlier
+  runs ~1%, 7.4 ms/s. Cause unknown; S7a adds little at rest (the
+  observer). Needs a repeat before reading anything into it. Lab gains in
+  Chromium's style engine have twice not shown clearly on the iPhone, so
+  only the phone decides an S-step.
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main

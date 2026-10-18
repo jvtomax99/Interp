@@ -10,6 +10,8 @@
 
    ROOT   the app folder to test (default: the repo this file is in)
    INDEX  a different index.html to serve, for before/after comparisons
+   POLISH_DIR  a folder holding other home-polish.css / .js or pin-icons.js
+          to serve (each only if present there), with INDEX for the same
    BROWSER  chromium (default) or webkit */
 const path = require('path');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
@@ -72,7 +74,7 @@ async function route(page, opts = {}) {
       gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json' }[ext], body: fs.readFileSync(p) });
   });
   for (const f of ['home-polish.css', 'home-polish.js', 'pin-icons.js'])
-    await page.route('**/' + f, r => r.fulfill({ status: 200, contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', body: fs.readFileSync(R + f) }));
+    await page.route('**/' + f, r => r.fulfill({ status: 200, contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', body: fs.readFileSync(process.env.POLISH_DIR && fs.existsSync(path.join(process.env.POLISH_DIR, f)) ? path.join(process.env.POLISH_DIR, f) : R + f) }));
   // Anything else external is recorded, not silently dropped.
   page.__external = [];
   await page.route(/^https?:\/\/(?!interp\.test)/, r => {
