@@ -7,6 +7,8 @@ project is built and shipped.
 do, test, update the plan, open a pull request). A chat can run several
 phases in a row; it moves to a new chat only when it gets heavy, and the
 new chat reads the docs, not the old chat. Details: `docs/PLAN.md`.
+When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
+in `docs/PLAN.md`).
 
 ## What this is
 

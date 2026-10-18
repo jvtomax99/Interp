@@ -33,6 +33,14 @@ output or many fix rounds, and the next phase would add a lot more.
 Before saying it, make sure everything worth keeping is in this file.
 Don't repeat it in every reply.
 
+**When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
+wants to stay organized). A chat is done when nothing in it is still
+waiting: its PRs are merged or closed, no question to Jose is open, no
+check-in is pending, and everything worth keeping is in this file. Say it
+once, at the end of that reply, with a one-line reason ("PR #52 merged,
+nothing open"). A chat left for a new one ("Start a new chat") is done
+too: say both. Not when a phase finishes but the next phase continues here.
+
 ## Next (in order)
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
