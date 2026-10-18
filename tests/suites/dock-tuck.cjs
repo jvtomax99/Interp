@@ -141,6 +141,25 @@ const settle = page => page.evaluate(() => new Promise(r => {
   const want = { rest: '-=- -=- -=-', more: 'overlay=ov-open -=- -=-', 'more closed': '-=- -=- -=-', search: '-=- gs-overlay=gs-open -=-', 'search closed': '-=- -=- -=-',
     'made sheet': 'overlay=ov-open -=- -=-', 'made sheet removed': '-=- -=- -=-', 'domain menu': '-=- -=- dm-overlay=dm-open', 'domain menu gone': '-=- -=- -=-' };
   ok(JSON.stringify(flags) === JSON.stringify(want), 'overlay classes follow each kind of overlay, before the next frame', flags);
+
+  // S7b: a rule under body.dock-mini that ends in a bare tag (`> span`)
+  // restyles every such tag on the page at each tuck (~270 spans, 435
+  // elements in one pass). Its last part must name a class or an id.
+  const bare = await rp.evaluate(() => {
+    const out = [];
+    const walk = rules => { for (const r of rules) {
+      if (r.cssRules && !r.selectorText) { walk(r.cssRules); continue; }
+      if (!r.selectorText) continue;
+      for (const s of r.selectorText.split(/,(?![^(]*\))/)) {
+        if (!/^\s*body\.dock-mini\b/.test(s)) continue;
+        const last = s.trim().split(/\s*[\s>+~]\s*(?![^(]*\))/).pop().replace(/:not\([^)]*\)/g, '').replace(/::?[\w-]+(\([^)]*\))?/g, '');
+        if (!/[.#\[]/.test(last)) out.push(s.trim());
+      }
+    } };
+    for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} }
+    return out;
+  });
+  ok(!bare.length, 'tucking restyles only the dock: no body.dock-mini rule ends in a bare tag', bare);
   ok(!rp.__errors.length, 'no page errors', rp.__errors);
   await b.close();
 })();

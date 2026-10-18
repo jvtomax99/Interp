@@ -86,15 +86,7 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a is in Done (overlay classes); its phone check is pending.
-   S7b. **Tuck restyle (invisible).** Each tuck/untuck restyles ~490
-      elements (~49 ms at 4x), likely the 49-53 ms worst frames on the
-      phone (unproven). The 14 `body.dock-mini` rules (`home-polish.css`
-      367-395) only style the tab bar and dock, so 490 is more than they
-      explain: find the cause first (Chrome trace with style invalidation
-      tracking: which rule pulls in the rest), then fix that, e.g. move
-      the class onto `.tabbar` and `.dock-smiley` with the same weight.
-      Same proof as S7a, plus the dock-tuck test.
+   S7a and S7b are in Done; S7a's phone run is in Facts (no gain seen).
    S7c. **Pin burst while scrolling (visible: Jose decides).** The burst
       starts on `pointerdown` (pin-icons.js 913), so a scroll that starts
       on a card plays it, and all 26 burst keyframes animate
@@ -201,6 +193,20 @@ come from this alone.
 
 ## Done
 
+- 2026-10-18 S7b, tuck restyle (invisible). Cause (trace with style
+  invalidation tracking, `tests/tools/tuck-trace.cjs`): the two
+  `body.dock-mini ... > span:not(.tabbar-icon):not(.tabbar-badge)` rules
+  end in a bare tag, so each tuck and open restyled every span on the page
+  (~270; one pass of 435-446 elements, 8-56 ms at 4x). The tab's name span
+  now has `.tabbar-name` and the rules read `span.tabbar-name:not(.tabbar-badge)`
+  (same weight). 4+4 interleaved traces: that pass 435-446 -> 45-49
+  elements, style per tuck ~161 -> ~116 ms median (open overlapped).
+  Computed styles identical (464,800 values, 28 states, tucked ones added
+  to `overlay-styles.cjs`); phone screenshots pixel-identical. `scroll.cjs`
+  UA=chromium 8+8: all 16 runs in the bad band (30-44% late while
+  scrolling), whole-run numbers flat within noise; worst frame 108 -> 83 ms
+  median (6 of 8 after runs at 83, 1 of 8 before). dock-tuck checks no
+  `body.dock-mini` rule ends in a bare tag. Jose's phone decides.
 - 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
   / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
   `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
@@ -213,7 +219,7 @@ come from this alone.
   every before run), late while scrolling 26.7 -> 23.8% (runs overlap),
   script +160 ms (the observer: at most ~90 ms a run, counted). Rule added
   to `AGENTS.md`: no `:has()` for state on big containers. Jose's phone
-  decides. PR link: see the branch's PR.
+  decides. jvtomax99/Interp#49.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
@@ -280,6 +286,19 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- Jose's iPhone after S7a (#49), build b1018.0223, one 29 s run (13 s
+  scrolling): scrolling 9.5% late, 76.7 ms/s, worst 61 ms (part 1 was
+  8.6%, 66.9, 49): no gain from S7a, slightly worse, inside what one run
+  each can't tell apart. The still part, from the totals (16 s): ~3% late,
+  ~29 ms/s, one 124 ms stall (was ~1.2%, ~7.4); the stall alone is ~7 ms/s
+  of that. Cause unknown (unproven: a sync, a Dr. Smiley play); one run, so
+  rerun before chasing it. Lab gain for S7a (style time -29%) was
+  Chromium's; WebKit's own `:has()` handling may never have paid that cost.
+- A rule that ends in a bare tag (`body.dock-mini ... > span`) makes Chrome
+  restyle every element of that tag under `body` when the class changes:
+  its invalidation set falls back to the tag name. The tuck restyled 435
+  elements in one pass for 4 name spans (trace, `tests/tools/tuck-trace.cjs`).
+  End such rules with a class.
 - 2026-10-18 `scroll.cjs` came out in a third band: ~20-30% late while
   scrolling for all 16 runs, between the good (~7-9%) and bad (35-45%)
   bands seen 2026-10-17. Interleaving still makes before/after fair;

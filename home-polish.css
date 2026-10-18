@@ -372,8 +372,11 @@
   body.dock-mini .tabbar-btn.is-active,
   body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{display:grid;grid-template-columns:1fr 1fr;align-items:center;justify-items:center;
     padding:0;font-size:14px;font-weight:700;letter-spacing:-.01em;color:#0F5FA6;white-space:nowrap;}
-  body.dock-mini .tabbar-btn:not(.is-active) > span:not(.tabbar-icon):not(.tabbar-badge){display:none;}
-  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child > span:not(.tabbar-icon):not(.tabbar-badge){display:inline;}
+  /* The tab's name by its class, not a bare span: a rule ending in a tag
+     makes every span on the page restyle when dock-mini changes (S7b,
+     ~270). span.tabbar-name:not(.tabbar-badge) keeps the old weight. */
+  body.dock-mini .tabbar-btn:not(.is-active) > span.tabbar-name:not(.tabbar-badge){display:none;}
+  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child > span.tabbar-name:not(.tabbar-badge){display:inline;}
   body.dock-mini .tabbar-lens{opacity:0;}
   body.dock-mini .tabbar-btn.is-active .tabbar-icon,
   body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
