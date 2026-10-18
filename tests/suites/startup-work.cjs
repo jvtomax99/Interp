@@ -20,7 +20,10 @@ const init = () => {
   const U = URL.createObjectURL; const pens = new Set();
   URL.createObjectURL = function (b) { const u = U.call(URL, b); if (b && b.__pen) pens.add(u); return u; };
   const W = window.Worker;
-  window.Worker = function (u, o) { if (pens.has(String(u))) window.__pen.workers++; return new W(u, o); };
+  window.__pen.log = [];
+  window.Worker = function (u, o) { const w = new W(u, o); if (pens.has(String(u))) { window.__pen.workers++;
+    w.addEventListener('message', e => window.__pen.log.push('message ' + (e.data ? e.data.length + ' strokes' : 'null')));
+    w.addEventListener('error', e => window.__pen.log.push('error ' + (e.message || 'load'))); } return w; };
   window.Worker.prototype = W.prototype;
   window.__meta = 0;
   const hook = () => { if (typeof applyCategoriesMeta !== 'function') return setTimeout(hook, 5);
@@ -46,6 +49,7 @@ const init = () => {
     const st = await page.evaluate(() => { const c = JSON.parse(localStorage.getItem('ih_penPath') || '{}'); const v = c['Moisés']; return { workers: window.__pen.workers, strokes: v && v.s && v.s.length }; });
     ok(st.workers === 1, 'its path is traced in a worker', st);
     ok(st.strokes > 2, 'the path is kept on the phone (ih_penPath)', st);
+    if (!wrote) console.log('  info: ' + JSON.stringify(await page.evaluate(() => ({ log: window.__pen.log, fonts: document.fonts && document.fonts.check('400 56px Parisienne', 'Moisés'), still: document.documentElement.className }))));
     const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 20000 }).then(() => true, () => false);
     ok(shown, 'afterwards the name itself is shown');
     ok(!errors.length, 'no page errors', errors);
@@ -97,13 +101,15 @@ const init = () => {
     const r = await page.evaluate(() => new Promise(res => {
       const tab = [...document.querySelectorAll('.tabbar-btn')].find(t => /translate/i.test(t.getAttribute('aria-label') || t.textContent));
       tab.click();
-      const xs = []; let n = 0;
+      // Sampled by the clock, not by frames: WebKit on CI renders rarely.
+      // The computed transform of a running transition is its current value.
+      const xs = [], t0 = performance.now();
       const f = () => { const l = document.querySelector('.tabbar-lens');
-        xs.push(l ? { x: Math.round(new DOMMatrix(getComputedStyle(l).transform).m41), a: l.getAnimations().some(a => a.transitionProperty === 'transform') } : null);
-        if (++n < 40) requestAnimationFrame(f);
-        else { const mid = xs.filter(p => p && p.a && p.x > 0); const end = xs[xs.length - 1];
-          res({ lens: !!end, gliding: mid.length >= 5 && end.x > 0 && mid.some(p => p.x < end.x / 2), cat: activeCategory, steps: mid.length, end: end && end.x }); } };
-      requestAnimationFrame(f);
+        if (l) xs.push(Math.round(new DOMMatrix(getComputedStyle(l).transform).m41));
+        if (performance.now() - t0 < 900) setTimeout(f, 20);
+        else { const end = xs[xs.length - 1];
+          res({ lens: !!l, gliding: end > 0 && xs.some(x => x > 2 && x < end * .9), cat: activeCategory, xs: xs.filter((x, k) => !k || x !== xs[k - 1]).join(' ') }); } };
+      f();
     }));
     ok(r.cat === 'translate' && r.lens && r.gliding, 'changing tab: the lens glides over several frames to the new tab', r);
     await ctx.close();

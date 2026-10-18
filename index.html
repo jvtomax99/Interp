@@ -16912,7 +16912,7 @@ function render(){
   syncTopBar();
   renderContent();
   anatomySync();
-  smileyRider.syncSoon();   // it measures the page: in the frame, not in this task (S3)
+  smileyRider.sync();
   dockAfterRender();
   apptPillSync();
 }
@@ -28455,11 +28455,7 @@ const smileyRider = (() => {
     if(tsvg && tg.getClientRects().length && getComputedStyle(tg).visibility !== 'hidden') return { svg: tsvg, head: tsvg };
     return null;
   }
-  // The same check in the next frame, before it paints: a render calls this,
-  // and measuring right after it laid out the whole new screen in its task.
-  let soon = 0;
-  function syncSoon(){ if(!soon) soon = requestAnimationFrame(() => { soon = 0; sync(); }); }
-  return { sync, syncSoon, emote, stage };
+  return { sync, emote, stage };
 })();
 
 /* ---------- Dr. Smiley: the companion panel ----------

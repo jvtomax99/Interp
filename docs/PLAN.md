@@ -199,8 +199,7 @@ come from this alone.
   listener's first snapshot (the document `loadData` just read) no longer
   repaints Home; Home's measuring moved to the next frame before it paints
   (`beforePaint` in `home-polish.js`: heartline/name fit, fonts.ready,
-  hero and rank-card petals, rail dots; `applyHeroDrift`,
-  `smileyRider.syncSoon`); `dockAfterRender` settles the lens with a style
+  hero and rank-card petals, rail dots; `applyHeroDrift`); `dockAfterRender` settles the lens with a style
   read, not a layout. 4x, iPhone UA, 4+4 interleaved: first visit worst
   task 428-623 -> 279-379 ms (every after below every before), tasks over
   200 ms 3-5 -> 1-3, `render()` CPU 715-1108 -> 346-519 ms. Returning visit:

@@ -960,7 +960,7 @@
       const here=()=>{try{return penTrace(d);}catch(e){return null;}};
       if(tracer===undefined)try{
         const url=URL.createObjectURL(new Blob(['const penTrace='+penTrace+';onmessage=e=>{let r=null;try{r=penTrace(e.data);}catch(x){}postMessage(r);};'],{type:'text/javascript'}));
-        tracer=new Worker(url);URL.revokeObjectURL(url);
+        tracer=new Worker(url);   // its URL stays: WebKit may load it after this returns
       }catch(e){tracer=false;}
       if(!tracer)return Promise.resolve(here());
       return new Promise(res=>{
