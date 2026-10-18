@@ -441,7 +441,7 @@
   /* The Ask tag stays when the bar is tucked too (Jose). */
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
-  body.kb-open .dock-smiley,body:has(.overlay.show) .dock-smiley,body:has(.gs-overlay.show) .dock-smiley,body:has(.dm-overlay.show) .dock-smiley{visibility:hidden;}
+  body.kb-open .dock-smiley,body.ov-open.ov-open .dock-smiley,body.gs-open.gs-open .dock-smiley,body.dm-open.dm-open .dock-smiley{visibility:hidden;}
 
   /* His panel (drPanel in index.html). Open: a ring round his disc and no
      "Ask" tag. Typing in it: he stays (the tab bar still steps aside) and

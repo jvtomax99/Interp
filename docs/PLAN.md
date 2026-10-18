@@ -76,18 +76,39 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    checks both (an iPhone Safari user agent in Chromium takes the old path).
    So the S1b numbers above are Chromium's; iPhones are as before S1b.
 S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
-   in Done. Left, measured with `tests/tools/scroll.cjs` (UA=chromium):
-   `body:has(.overlay.show)` and its siblings in `index.html` and
-   `home-polish.css` (~25% of style time while scrolling; replace with a body
-   class set where overlays open and close, same weight, computed-style
-   proof as in part 1); the pin tap burst starts on `pointerdown`, so a
-   scroll that starts on a card plays it (pin-icons.js `TAP_CARDS`), and 28
-   of its 64 keyframes animate width/height/margin (half the layouts while
-   scrolling; a visible change if the trigger moves: ask Jose); each tuck's
-   body-class change restyles ~490 elements (~49 ms at 4x); Team Chat's
-   thread tuck still reads scrollTop inside the scroll event. Re-measure on
-   Jose's phone after each. Don't move the tuck's scroll read into a frame
-   callback without a WebKit check (see part 1).
+   in Done; on the phone it took scrolling from 10.5% to 8.6% late (Facts).
+   Three steps, one PR each, invisible ones first. Each: `scroll.cjs`
+   UA=chromium 8+8 interleaved before/after, the suites, then Jose's phone
+   (meter, Copy, same 12 s scroll + 15 s still). Don't move the tuck's
+   scroll read into a frame callback without a WebKit check (part 1).
+   Lab baseline on main (2026-10-17, RUNS=6): all 6 runs in the bad-load
+   band (35-42% late while scrolling, busy 53-55%), so unusable; S7a
+   starts by getting good before-runs. Listener times there: drSwayScroll
+   1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
+   pays the frame's pending style (Facts), not its own work.
+   S7a is in Done (overlay classes); its phone check is pending.
+   S7b. **Tuck restyle (invisible).** Each tuck/untuck restyles ~490
+      elements (~49 ms at 4x), likely the 49-53 ms worst frames on the
+      phone (unproven). The 14 `body.dock-mini` rules (`home-polish.css`
+      367-395) only style the tab bar and dock, so 490 is more than they
+      explain: find the cause first (Chrome trace with style invalidation
+      tracking: which rule pulls in the rest), then fix that, e.g. move
+      the class onto `.tabbar` and `.dock-smiley` with the same weight.
+      Same proof as S7a, plus the dock-tuck test.
+   S7c. **Pin burst while scrolling (visible: Jose decides).** The burst
+      starts on `pointerdown` (pin-icons.js 913), so a scroll that starts
+      on a card plays it, and all 26 burst keyframes animate
+      width/height/margin (layout every frame; 26 of 64, not 28 as noted
+      earlier). Swapping to transform isn't pixel-identical (the rings'
+      box-shadow and gradients scale with it). Options for Jose: (1) start
+      it on lift (a tap still bursts, a scroll never does; starts ~0.1 s
+      later), (2) keep touch-down, stop it the moment a scroll begins
+      (`pointercancel`; a scroll shows a cut-off flash), (3) keep it as is,
+      redraw the rings so transform looks the same (frame-by-frame check;
+      cheaper but not zero). Recommended: (1).
+   Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
+   scroll event (index.html ~20912); cheap while layout is clean, measure
+   in Team Chat before touching.
 S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
    `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
    Defer decorative work past first paint (requestIdleCallback + timeout),
@@ -180,6 +201,19 @@ come from this alone.
 
 ## Done
 
+- 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
+  / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
+  `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
+  (`overlayFlags`, `index.html`, by `closeAllOverlays`), so new overlays
+  need nothing. Computed styles old vs new identical: 398,040 values, 24
+  states (phone + computer, each kind open and closed;
+  `tests/tools/overlay-styles.cjs`). dock-tuck checks the classes follow
+  each kind before the next frame. `scroll.cjs` UA=chromium 4x, 8+8
+  interleaved: style time 5232 -> 3728 ms median (every after run below
+  every before run), late while scrolling 26.7 -> 23.8% (runs overlap),
+  script +160 ms (the observer: at most ~90 ms a run, counted). Rule added
+  to `AGENTS.md`: no `:has()` for state on big containers. Jose's phone
+  decides. PR link: see the branch's PR.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
@@ -246,9 +280,24 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- 2026-10-18 `scroll.cjs` came out in a third band: ~20-30% late while
+  scrolling for all 16 runs, between the good (~7-9%) and bad (35-45%)
+  bands seen 2026-10-17. Interleaving still makes before/after fair;
+  compare only within one session's runs.
+- An observer of class and child changes on `body` sees ~240 callbacks in
+  a scroll run (frame meter text, tuck, pin taps); with 3 querySelectors
+  each, ~90 ms at 4x per ~35 s run. Cheap enough for state flags.
+
 - Jose's iPhone (iOS 18.7, installed, 60 Hz), build b1017.1752: scrolling
   Home 12 s: 10.5% late frames, 85 ms/s, worst 57 ms, none over 100 ms.
   Home still 17 s: 1%, 7.4 ms/s. So Home's cost is scrolling, not rest.
+- Same phone after part 1 (#47), build b1017.2034, one 31 s run (13 s
+  scrolling): scrolling 8.6% late, 66.9 ms/s, worst 49 ms, none over
+  100 ms (was 10.5%, 85, 57: about a fifth less, same direction as the lab's
+  9.1 -> 6.7%). The still part, worked out from the totals (18 s): ~1.2%,
+  ~7.4 ms/s, unchanged. One run each side, so the size is rough. On
+  Apple's scale (frame-meter.md) 67 ms/s while scrolling is still far into
+  "distracting" (10+).
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main

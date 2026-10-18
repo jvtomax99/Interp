@@ -226,6 +226,9 @@ lost concurrent edits. Do not reintroduce that.
 - **Pins are pre-cut files.** `pin-icons.js` used to download 9 MB of sheets
   and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
   each pin is `pins/<key>.webp`; to change one, replace its file.
+- **No `body:has(...)` for state** (`AGENTS.md`): it made scrolling Home
+  restyle. Overlays open set `body.ov-open` / `.gs-open` / `.dm-open`
+  (`overlayFlags` in `index.html`, a watcher, so new overlays need nothing).
 - `localStorage` key `ih_myName` holds the user's display name.
 - **Dr. Smiley's movement rules** (his controller, the iPhone entrance freeze,
   his size per place, the five performances, task states) are in
