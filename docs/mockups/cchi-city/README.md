@@ -20,3 +20,18 @@ streak; cars = questions due; Dr. Smiley stands at the weakest district;
 tap a district to practise it. Next: model HUMC buildings from Jose's
 photos, then build it in (sprites per district per height, composited in
 CSS), User Guide, tests.
+
+## HUMC version (2026-10-19, from Jose's 4 campus photos)
+
+`humc.html` (render with `node shoot2.cjs "e=.64&n=.54&t=.24&s=.64&c=.63" out.png`;
+`=1` everywhere for the finished campus). Domain → building:
+Ethics → main hospital, 30 Prospect Ave (brick, cream bands, glass crown with
+the HMH mark); Encounter → Helena Theurer Pavilion (9 stories: 3-storey base +
+white/glass tower; ENR/Becker's); Terminology → John Theurer Cancer Center,
+92 Second St (5 stories, glass rotunda in a white frame, brick wing with sun
+shades, flags, skybridge; Tradeline 2010); US Systems → the patient pavilion on
+the circle (porte-cochère); Culture → Children's (white panels, teal glass,
+running kids, cherry trees). Circle drive with fountain, parking deck.
+Mastery = floors built; the rest is orange scaffolding with a crane.
+Footprints are from the photos, not survey data: OpenStreetMap (Overpass) and
+most sites are blocked from this container.
