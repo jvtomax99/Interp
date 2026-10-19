@@ -72,10 +72,18 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   take a 4th item, a brow pose from that beat); `pet` opens with a
   startled take before the giggle; `worry` (the connection drops) and
   `surprise` are new; `composed` goes worried, then caring;
-  `answerGeneral` raises one brow. Still to come, and needing Jose: new
-  drawn face shapes (an "O" mouth, a sad and a worried mouth; his
-  expression sheets are not in the repo) and squash and stretch, which he
-  had removed before (see `docs/PLAN.md`).
+  `answerGeneral` raises one brow. Still to come, and needing Jose: squash
+  and stretch, which he had removed before (see `docs/PLAN.md`).
+- **Four drawn faces (E2, 2026-10-19)**: `surprised` (eyes wide, an "O"
+  mouth), `sad` (heavy lids, corners down), `worried` (eyes aside, a tight
+  wavy mouth), `doubt` (his left eye squinted, a side smirk). Jose made them
+  in ChatGPT from his calm face; source, prompts and how they were cut are
+  in `docs/art/dr-smiley-faces/`. Used by `surprise` and `pet`'s startled
+  take (surprised), `worry` (worried), `answerGeneral` (doubt, with the
+  `doubt` brow pose) and `composed` (sad: the only sequence that uses it,
+  so it stays rare; `smiley-brows.cjs` checks that). Each brings its brow
+  pose in `DR_BROW_OF` and has a neighbour in `DR_FACE_BACK` (rest, blink1,
+  halfL, wink1), so an interruption walks back through a real frame.
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
   getters, so every play varies a little (side, amplitude, beats) with an

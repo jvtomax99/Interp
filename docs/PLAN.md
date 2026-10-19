@@ -53,11 +53,9 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**Dr. Smiley acting, E2 and E3 (Jose, 2026-10-19: "expressive like Disney
-characters"; E1 done).** E2 needs Jose: new drawn face frames, cut and fitted
-like the 26 (an "O" mouth for surprise, a sad mouth, a worried mouth, a
-squint of doubt). His expression sheets are not in the repo; ask him to send
-them. E3 needs his yes: squash and stretch on the head as he springs and
+**Dr. Smiley acting, E3 (Jose, 2026-10-19: "expressive like Disney
+characters"; E1 and E2 done: E2 is the four drawn faces, surprised, sad,
+worried, doubt, in `docs/features/dr-smiley.md`).** E3 needs his yes: squash and stretch on the head as he springs and
 lands (he had the Home greeting's squish removed; show him first).
 
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
@@ -244,6 +242,11 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-19 Campus: each building's badge names its exam area; first tap
+  picks it (windows lit, scene dimmed, a card with the area's name,
+  questions, share of the exam, Practise), second tap starts (Jose: "we are
+  clicking on the building without knowing which content"). Suite
+  `campus-pick.cjs`; note `docs/features/practice-dashboard.md`.
 - 2026-10-19 Your HUMC campus on CoreCHI Practice (Jose: a game look,
   then "make it look like Hackensack", from his photos and Google 3D
   screenshots, then "alive"). The main entrance at dusk, pre-rendered 3D

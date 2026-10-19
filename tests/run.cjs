@@ -27,6 +27,7 @@ const SUITES = [
   ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
   ['memory-trainer.cjs',  'Memory trainer: way in, a round with the words hidden, chunks, longer/shorter, notes, flags, leaving'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
+  ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
 ];
 const only = process.argv.slice(2);
