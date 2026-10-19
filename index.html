@@ -1221,6 +1221,9 @@
   .fm-table th{ font-weight:550; color:var(--ink-faint); font-size:12px; }
   .fm-table th:first-child, .fm-table td:first-child{ text-align:left; }
   .fm-note{ font-size:13px; color:var(--ink-soft); background:var(--bg); border-radius:var(--r-sm); padding:9px 13px; margin:0 0 13px; }
+  .fm-stalls{ font-size:12px; color:var(--ink-soft); margin-bottom:13px; font-variant-numeric:tabular-nums; }
+  .fm-stalls b{ display:block; font-weight:550; color:var(--ink-faint); margin-bottom:3px; }
+  .fm-stalls div{ padding:3px 0; border-bottom:1px solid var(--line-soft); }
   .fm-meta{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:13px; word-break:break-word; }
   .fm-btns{ display:flex; gap:9px; flex-wrap:wrap; }
   .fm-btns .btn{ flex:1 1 auto; }
@@ -8423,6 +8426,7 @@ function startMembersListener(){
   if(membersListenerStarted || !db) return;
   membersListenerStarted = true;
   db.collection(TEAM_MEMBER_COLL).onSnapshot(snap=>{
+    fmNote('data: team');
     membersBlocked = false;
     const next = {};
     snap.docs.forEach(d=>{ const v = d.data() || {}; next[d.id] = v; });
@@ -9507,6 +9511,7 @@ async function seedDatabase(source){
 const GLOSSARY_CACHE_KEY = 'ih_glossary_cache_v1';
 
 function saveGlossaryCache(){
+  fmNote('glossary saved');
   try{
     localStorage.setItem(GLOSSARY_CACHE_KEY, JSON.stringify({
       savedAt: Date.now(),
@@ -9611,6 +9616,7 @@ function startTermsListener(){
   // and cheap — it touches the documents that actually changed.
   let termsSnapTimer = null;
   db.collection('terms').onSnapshot(snap=>{
+    fmNote('data: terms');
     snap.docChanges().forEach(change=>{
       const doc = change.doc;
       if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
@@ -9635,6 +9641,7 @@ function startCategoriesMetaListener(){
   if(categoriesMetaListenerStarted || !db) return;
   categoriesMetaListenerStarted = true;
   db.collection('terminology-meta').doc('categories').onSnapshot(snap=>{
+    fmNote('data: domains');
     if(!snap.exists) return;
     // Its first snapshot is the document loadData() just read and painted:
     // nothing to redo. That repaint was a whole Home render at startup (S3).
@@ -10064,6 +10071,7 @@ function startChatListener(){
   // server confirms it. That second call is what turns "Sending" into "Sent";
   // without it the chat could only guess.
   db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot({ includeMetadataChanges: true }, snap=>{
+    fmNote('data: chat');
     CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data(), _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
     if(isInitialChatLoad){
       isInitialChatLoad = false;
@@ -10318,6 +10326,7 @@ function startActivityListener(){
   // Same unbounded-growth problem as team chat. The Recent Updates feed only
   // ever shows the newest entries anyway.
   db.collection('activity-log').orderBy('timestamp').limitToLast(ACTIVITY_HISTORY_LIMIT).onSnapshot(snap=>{
+    fmNote('data: activity');
     ACTIVITY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if(isInitialActivityLoad){
       isInitialActivityLoad = false;
@@ -14178,6 +14187,7 @@ class DrAnim{
     o = o || {};
     const p = o.priority || DR_P.REACT;
     if(!this.alive() || document.hidden) return false;
+    fmNote('Dr. Smiley ' + name);
     if(name === 'glance') name = Math.random() < .5 ? 'glanceL' : 'glanceR';
     const seq = drSeq(name);
     if(!seq) return false;
@@ -16391,7 +16401,7 @@ const GUIDE_TOPICS = [
       <li>Use the app the way that feels choppy: scroll Home, open a domain, open the chat.</li>
       <li>Tap the timer to stop. The results open.</li>
     </ol>
-    <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling.</p>
+    <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
   { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
     <p>Close it completely and open it again.</p>
@@ -16779,6 +16789,7 @@ function domainMenuKeys(e){ if(e.key === 'Escape') closeDomainMenu(); }
 
 function render(){
   if(!DATA) return;
+  fmNote('render');
   const app = document.getElementById('app');
   // Creating a domain lived only in the sidebar, which on a phone means two
   // taps into the More sheet. It belongs next to "Add term" on the screens
@@ -20137,6 +20148,7 @@ function relativeTime(ts){
 }
 
 function refreshRelativeTimes(){
+  fmNote('time labels');
   document.querySelectorAll('[data-ts]').forEach(el=>{
     const ts = Number(el.getAttribute('data-ts'));
     if(ts) el.textContent = relativeTime(ts);
@@ -20147,6 +20159,7 @@ function refreshRelativeTimes(){
    than a render, and it crosses fade-in-fade-out because the overlay
    transitions. */
 function syncTimeOfDay(){
+  fmNote('time of day');
   const el = document.getElementById('homeGreeting');
   if(!el) return;
   const now = new Date();
@@ -20237,6 +20250,7 @@ function startGreetingRotation(){
     if(wordEl) wordEl.classList.add('out');
     setTimeout(()=>{
       greetIndex = (greetIndex + 1) % GREETINGS.length;
+      fmNote('greeting word');
       paint(greetIndex, true);
     }, 320);
   }, 2800);
@@ -20293,8 +20307,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1018.2012';
-const BUILD_TIME = '2026-10-18 20:12 UTC';
+const BUILD_ID = 'b1019.1228';
+const BUILD_TIME = '2026-10-19 12:28 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20367,7 +20381,20 @@ function screenReport(){
    this phone only (ih_frameMeter, last 8) with the build they ran on. */
 const FM_KEY = 'ih_frameMeter';
 const FM_MAX_MS = 5 * 60 * 1000;
-const FM = { on:false, raf:0, last:0, t0:0, gaps:[], key:'', keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, pill:null, uiAt:0, T:1000 / 60, live:0 };
+const FM = { on:false, raf:0, last:0, t0:0, gaps:[], key:'', keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, pill:null, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[], stalls:[] };
+const FM_STALL_MS = 50;      // a frame this late is listed with what ran in it
+
+/* What ran in a stall. Safari has no long-task timing, so the app's own
+   jobs that can run while you leave a screen alone (a render, the greeting's
+   next word, the heartline, the tab bar's tuck, Dr. Smiley, the data
+   listeners...) say their name here, with the time; a stall lists the
+   names said in it or in the frame just before: a frame held up by a block
+   still carries the time it was due, a moment after the block began, so
+   the stall shows up one frame later. Nothing is kept while the meter is
+   off. The try covers a call before this block has run (FM not made yet).
+   A stall with no names was the browser's own work: style, layout, paint,
+   memory. */
+function fmNote(tag){ try{ if(FM.on) FM.notes.push([performance.now(), tag]); }catch(e){} }
 
 function fmRuns(){ try{ return JSON.parse(localStorage.getItem(FM_KEY) || '[]'); }catch(e){ return []; } }
 function fmScreenName(id){
@@ -20382,7 +20409,7 @@ function fmOnScroll(){ FM.scrollAt = performance.now(); }
 function fmOnVis(){
   if(!FM.on) return;
   if(document.visibilityState === 'hidden'){ FM.hideAt = performance.now(); FM.last = 0; }
-  else if(FM.hideAt){ FM.hiddenMs += performance.now() - FM.hideAt; FM.hideAt = 0; FM.last = 0; }
+  else if(FM.hideAt){ FM.hiddenMs += performance.now() - FM.hideAt; FM.hideAt = 0; FM.last = 0; FM.notes = []; }
 }
 function fmFrame(now){
   if(!FM.on) return;
@@ -20396,13 +20423,22 @@ function fmFrame(now){
     // The timer's count only; the results are worked out again at the end.
     if(FM.gaps.length === 120) FM.T = 1000 / fmHz(FM.gaps);
     FM.live += Math.max(0, Math.round(dt / FM.T) - 1);
+    // [time into the run, length, since the last scroll, screen, since the
+    // app opened, what ran]
+    if(dt > FM_STALL_MS){
+      const what = [...new Set(FM.notes.filter(n => n[0] > FM.prev && n[0] <= now).map(n => n[1]))].join(', ');
+      FM.stalls.push([Math.round(now - FM.t0 - FM.hiddenMs), Math.round(dt), Math.round(now - FM.scrollAt), FM.key, Math.round(now), what]);
+      if(FM.stalls.length > 400) FM.stalls = FM.stalls.sort((a, b) => b[1] - a[1]).slice(0, 100);   // a long run: keep the longest
+    }
   }
-  FM.last = now;
+  FM.prev = FM.last; FM.last = now;
+  if(FM.notes.length) FM.notes = FM.notes.filter(n => n[0] > FM.prev);
   if(now - FM.uiAt > 500){ FM.uiAt = now; fmPillText(now); }
   if(now - FM.t0 - FM.hiddenMs > FM_MAX_MS) frameMeterStop();
 }
 function fmPillText(now){
   if(!FM.pill) return;
+  fmNote('meter');               // its own write, so a stall it causes says so
   const s = Math.floor((now - FM.t0 - FM.hiddenMs) / 1000);
   FM.pill.querySelector('.fm-time').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   FM.pill.querySelector('.fm-live').textContent = `${FM.live} dropped`;
@@ -20442,7 +20478,7 @@ const fmR = n => n < 10 ? n.toFixed(1) : String(Math.round(n));
 function frameMeterStart(){
   if(FM.on) return;
   try{ closeMoreSheet(); }catch(e){}
-  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0 });
+  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[[performance.now(), 'More closing']], stalls:[] });
   const p = document.createElement('button');
   p.className = 'fm-pill';
   p.type = 'button';
@@ -20469,8 +20505,11 @@ function frameMeterStop(){
     scroll:{ ms:Math.round(r.scroll.ms), ratio:+r.scroll.ratio.toFixed(1), pct:+r.scroll.pct.toFixed(1), worst:r.scroll.worst },
     screens:r.screens.slice(0, 8).map(s => ({ name:s.name, ms:Math.round(s.ms), ratio:+s.ratio.toFixed(1), pct:+s.pct.toFixed(1), worst:s.worst })),
     motion: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : (typeof drStill === 'function' && drStill()) ? 'Dr. Smiley still' : 'full',
-    device: fmDevice() };
-  FM.gaps = [];
+    device: fmDevice(),
+    // The six longest stalls, in the order they happened.
+    stallList: FM.stalls.slice().sort((a, b) => b[1] - a[1]).slice(0, 6).sort((a, b) => a[0] - b[0])
+      .map(([at, ms, sc, key, up, what]) => ({ at, ms, scroll:sc, screen:fmScreenName(key), up, what })) };
+  FM.gaps = []; FM.stalls = []; FM.notes = [];
   if(run.frames < 30){ showToast('Too short to measure. Use the app for a few seconds, then stop.'); return null; }
   try{ localStorage.setItem(FM_KEY, JSON.stringify([run].concat(fmRuns()).slice(0, 8))); }catch(e){}
   frameMeterShow(run);
@@ -20492,7 +20531,14 @@ function fmRunText(run){
     `Hitches ${run.ratio} ms/s · dropped ${run.dropped} (${run.pct}%) · worst ${run.worst} ms · stalls over 100 ms ${run.stalls} · ${Math.round(run.ms / 1000)} s`,
     run.scroll.ms ? `While scrolling: ${run.scroll.ratio} ms/s · ${run.scroll.pct}% dropped · worst ${run.scroll.worst} ms · ${Math.round(run.scroll.ms / 1000)} s` : 'No scrolling',
   ].concat(run.screens.map(s => `  ${s.name}: ${s.ratio} ms/s · ${s.pct}% · worst ${s.worst} ms · ${Math.round(s.ms / 1000)} s`));
+  if(run.stallList && run.stallList.length) lines.push(`Longest stalls (over ${FM_STALL_MS} ms):`, ...run.stallList.map(x => '  ' + fmStallText(x)));
   return lines.join('\n');
+}
+// "0:14 · 120 ms · Home · 4.2 s after a scroll · 31 s after opening · heartline"
+function fmStallText(x){
+  const t = Math.floor(x.at / 1000);
+  const sc = x.scroll < 200 ? 'while scrolling' : x.scroll > 3e5 ? 'no scroll yet' : `${(x.scroll / 1000).toFixed(1)} s after a scroll`;
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')} · ${x.ms} ms · ${x.screen} · ${sc} · ${Math.round(x.up / 1000)} s after opening · ${x.what || 'nothing named'}`;
 }
 
 function frameMeterShow(run){
@@ -20510,6 +20556,7 @@ function frameMeterShow(run){
       ${run.scroll.ms ? row('While scrolling', run.scroll) : ''}
       ${run.screens.map(s => row(s.name, s)).join('')}
     </table>
+    ${run.stallList && run.stallList.length ? `<div class="fm-stalls"><b>Longest stalls</b>${run.stallList.map(x => `<div>${escapeHtml(fmStallText(x))}</div>`).join('')}</div>` : ''}
     <div class="fm-meta">Build ${escapeHtml(run.build)} · ${escapeHtml(new Date(run.at).toLocaleString())}<br>${escapeHtml(run.device)} · ${run.hz} Hz · motion ${run.motion}</div>
     <div class="fm-btns">
       <button class="btn btn-ghost" onclick="frameMeterCopy(${run.at})">Copy numbers</button>
@@ -20675,6 +20722,7 @@ let dockMeasure = null;
 function dockTuck(){
   const b = document.body;
   if(b.classList.contains('dock-mini')) return;
+  fmNote('tab bar tuck');
   const bar = document.querySelector('.tabbar');
   if(bar){
     const btn = bar.querySelector('.tabbar-btn.is-active') || [...bar.querySelectorAll('.tabbar-btn')].pop();
@@ -20695,6 +20743,7 @@ function dockTuck(){
 function dockOpen(){
   const b = document.body;
   if(!b.classList.contains('dock-mini')) return;
+  fmNote('tab bar open');
   dockMorph(false, () => b.classList.remove('dock-mini'));
   dockRefitChat();
 }
@@ -27852,6 +27901,7 @@ function startSmileyCareer(){
   if(smileyCareerStarted || !db) return;
   smileyCareerStarted = true;
   db.collection('terminology-meta').doc('smiley').onSnapshot(snap => {
+    fmNote('data: team points');
     const before = SMILEY_POINTS;
     SMILEY_DATA = (snap.exists && snap.data()) || {};
     SMILEY_POINTS = +SMILEY_DATA.points || 0;

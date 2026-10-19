@@ -788,6 +788,7 @@
     function tick(){
       timer=0;
       if(!el||!el.isConnected){el=null;return;}
+      if(window.fmNote)fmNote('heartline');   // the smoothness meter's list of what ran
       if(busy())el.classList.remove('is-draw');
       else if(el.offsetParent||el.getBoundingClientRect().width){el.classList.remove('is-draw');void el.getBoundingClientRect();el.classList.add('is-draw');}
       schedule();
