@@ -13,7 +13,10 @@
      "en",
      "heart failure."
     ]
-   ]
+   ],
+   "cb": {
+    "seed": 2
+   }
   },
   {
    "start_ms": 2000,
@@ -42,10 +45,13 @@
    "text": "Insuficiencia cardíaca."
   },
   {
-   "start_ms": 7800,
-   "max_ms": 1750,
+   "start_ms": 7700,
+   "max_ms": 1850,
    "lang": "en",
-   "text": "There it is. Meet Interpreter Hub."
+   "text": "There it is. Meet Interpreter Hub.",
+   "cb": {
+    "seed": 13
+   }
   },
   {
    "start_ms": 10050,
