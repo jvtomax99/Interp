@@ -228,6 +228,14 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 The 45-second video in the app (Jose's ask): User Guide answer
+  `promo` (video in the answer, "New lately" card, oldest card dropped) and a
+  "Watch 0:45" button bottom-right of Home's hello banner, beside the sign,
+  until watched once on the phone (`ih_promoSeen`: the end or past 15 s). Web
+  copy `media/hub-promo.mp4` (720p, 8 MB, tap to play); `sw.js` leaves
+  `media/` alone. Not on the members-only screen yet: Jose to decide after
+  the CEO pitch (anyone with the link sees that screen).
+
 - 2026-10-19 CoreCHI Pixar finish (stacked on the dashboard PR): clay tiles,
   glossy donut, candy buttons, glossy beads, lean-toward-finger, squash
   landings. CSS + one small pointer handler; nothing runs at rest.
@@ -408,6 +416,13 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- The tests' Chromium has no H.264 (`canPlayType` is empty), so no suite can
+  play `media/hub-promo.mp4`; only an iPhone or desktop Chrome/Safari proves
+  playback. The suites check the button, the sheet and the "watched" rule.
+- `sw.js` must never cache video: `caches.match` ignores Range headers, and
+  iPhones play `<video>` only through Range (206) responses. `media/` is
+  passed straight to the network, like `atlas/`.
 
 - The practice screen re-renders on any data arrival (`ensureLoaded` ->
   `scheduleRender`), so entrance motion there must survive a re-render:
