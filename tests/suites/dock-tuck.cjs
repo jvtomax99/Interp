@@ -123,10 +123,13 @@ const settle = page => page.evaluate(() => new Promise(r => {
       }), gap);
     }), gap));
   }
+  // The bar tucks itself after 4 s idle. The loop's last restart of that
+  // count is followed by two settle() waits (each up to 3 s while Dr. Smiley
+  // sways), so a slow CI runner read the bar tucked (132 x 54). Restart it
+  // here: what follows (300 ms, one settle) stays under 4 s.
+  await page.evaluate(() => dockIdleRestart());
   const measured = jumps.filter(j => j !== 'skipped');
   ok(measured.length > 0 && measured.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
-  // The idle tuck restarted here too: two settles can outlast its 4 s.
-  await page.evaluate(() => dockIdleRestart());
   await page.waitForTimeout(300); await settle(page);
   const back = await rects(page);
   const gone = await goneIn();

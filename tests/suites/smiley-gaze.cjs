@@ -1,9 +1,9 @@
 const L=require('../support/harness.cjs');
 const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1;};
 (async()=>{const b=await L.chromium.launch();const {ctx,page:P}=await L.boot(b,{device:'iphone',settle:6000});
- ok(await P.evaluate(()=>DR_FACE_FRAMES.length===26),'26 face frames');
+ ok(await P.evaluate(()=>DR_FACE_FRAMES.length===30),'30 face frames');
  const img=await P.evaluate(()=>new Promise(r=>{const i=new Image();i.onload=()=>r([i.naturalWidth,i.naturalHeight]);i.onerror=()=>r(null);i.src='./drsmiley/face.webp';}));
- ok(img&&img[0]===302*26,'face strip is 26 frames wide: '+JSON.stringify(img));
+ ok(img&&img[0]===302*30,'face strip is 30 frames wide: '+JSON.stringify(img));
  await P.evaluate(()=>setCategory('translate'));await P.waitForTimeout(2500);
  const free=async()=>{for(let i=0;i<60;i++){if(!(await P.evaluate(()=>drFaceBusy(document.querySelector('.dock-smiley svg.ds-art')))))return;await P.waitForTimeout(100);}};
  const frame=()=>P.evaluate(()=>{const s=document.querySelector('.dock-smiley .ds-sheet');return DR_FACE_FRAMES[Math.round(-(+s.getAttribute('x'))/DR_FACE_W)]});
