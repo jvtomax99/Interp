@@ -1,28 +1,28 @@
-"""UNTESTED (no audio made yet). Narration with Chatterbox (Resemble AI, MIT licence): a more natural,
-expressive open voice than Kokoro, with native Spanish in its multilingual model.
-Written 2026-10-18 in a session where huggingface.co (where its weights live) was
-blocked, so it has never been run. 2026-10-18, second session: the imports and every
-call here match chatterbox-tts 0.1.7 (from_pretrained, generate, language_id 'es'
-supported); the weight download still got 403 from the proxy. Allow huggingface.co
-AND its file hosts (cas-bridge.xethub.hf.co, cdn-lfs.huggingface.co; or *.hf.co and
-*.huggingface.co), then start a new session: a running one keeps its old policy.
+"""Narration with Chatterbox (Resemble AI, MIT licence): a more natural, expressive
+open voice than Kokoro, with native Spanish in its multilingual model.
 
-Needs: huggingface.co allowed in the environment's network settings, then
-  python3 -m venv /tmp/cb && /tmp/cb/bin/pip install chatterbox-tts soundfile
-  /tmp/cb/bin/python promo/voice_chatterbox.py
+Needs huggingface.co, *.huggingface.co and *.hf.co under the environment's Allowed
+domains (the weights, about 3 GB, download on first run), then
+  python3 -m venv /tmp/cb && /tmp/cb/bin/pip install chatterbox-tts soundfile "setuptools<81"
+  /tmp/cb/bin/python promo/voice_chatterbox.py              # every line
+  /tmp/cb/bin/python promo/voice_chatterbox.py 3 7          # only lines 3 and 7
+(setuptools 81+ has no pkg_resources, which its watermarker still imports.)
+Each line is seeded (its "cb" "seed", default its index), so a take is repeatable and
+a line that runs long can be retried with another seed.
 Writes voice/lineNN.wav like voice.py (so build.py picks them up), after keeping the
 Kokoro takes in voice/kokoro/. English lines use ChatterboxTTS; lines with
 "lang": "es" use ChatterboxMultilingualTTS (language_id "es"). Runs on CPU; slow.
 
 Delivery: exaggeration ~0.5 is neutral, higher is more animated; cfg_weight lower
 slows and steadies the pace. A line can set "cb": {"exaggeration": .., "cfg_weight": ..}.
-Optional: a clean 10 s recording of a real voice as REF (audio_prompt_path) makes
+Optional: CB_REF=<a clean 10 s recording of a real voice> (audio_prompt_path) makes
 Chatterbox speak in that voice. Only with that person's consent."""
 import json, os, shutil, sys
-import numpy as np, soundfile as sf
+import numpy as np, soundfile as sf, torch
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REF = sys.argv[1] if len(sys.argv) > 1 else None
+REF = os.environ.get('CB_REF')
+ONLY = {int(a) for a in sys.argv[1:]}
 lines = json.load(open(HERE + '/narration.json'))['lines']
 
 os.makedirs(HERE + '/voice/kokoro', exist_ok=True)
@@ -52,6 +52,8 @@ def say(text, lang, opts):
 
 
 for i, L in enumerate(lines):
+    if ONLY and i not in ONLY: continue
+    torch.manual_seed(L.get('cb', {}).get('seed', i))
     parts = L.get('parts') or [[L['lang'], L['text']]]
     out = []
     for j, (lang, txt) in enumerate(parts):
