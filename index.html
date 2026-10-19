@@ -16740,7 +16740,7 @@ const GUIDE_TOPICS = [
 
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: each exam area is a campus building (Ethics the main hospital, Encounter the Helena Theurer Pavilion, Terminology the Cancer Center, U.S. Health Systems the pavilion on the circle, Cultural Responsiveness the Children's Hospital). The floors you've mastered are built; the rest is scaffolding with a crane, and the building grows as you learn. The big number is how ready you are. Tap a building or its label to practise that area; Dr. Smiley points at the one worth finishing first, and <b>Play</b> starts what's next. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: each exam area is a campus building laid out like the real campus (Ethics the main hospital on Prospect Avenue, Encounter the Helena Theurer Pavilion, Terminology the Cancer Center across Second Street, U.S. Health Systems the north building, Cultural Responsiveness the south building). The floors you've mastered are built; the rest is scaffolding with a crane, and the building grows as you learn. The big number is how ready you are. Tap a building or its label to practise that area; Dr. Smiley points at the one worth finishing first, and <b>Play</b> starts what's next. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
     <p><b>Your domains</b> further down shows, for each area, how much of the question bank you've learned and how often you got it right in your sessions. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
@@ -20072,8 +20072,8 @@ function renderFocusTile(worst){
 
 /* ---------- Your HUMC campus (CoreCHI Practice) ----------
    Jose, 2026-10-19: "make it look like a game", then "like Hackensack
-   University Medical Center", from his campus photos. Each exam domain is a
-   real campus building; the floors you have mastered are built, the rest is
+   University Medical Center", from his photos and satellite imagery of the
+   campus (traced, never drawn). Each exam domain is a real campus building; the floors you have mastered are built, the rest is
    scaffolding with a crane. The art is pre-rendered 3D (docs/mockups/
    cchi-city: three.js scene and the script that renders city/*.webp): the
    ground once, and every building at every floor count with its shadow, so
@@ -20081,12 +20081,12 @@ function renderFocusTile(worst){
    960 x 960 render; CAMPUS_MAP is its manifest (scripts' city.json):
    g ground [x,y,w,h]; b[key] = [[floors, x,y,w,h, shadow x,y,w,h, label x,y], ...];
    car = [x,y,w,h, at x,y, from x,y, to x,y]; f fountain [x,y]. */
-const CAMPUS_MAP = {"w":960,"h":960,"g":[0,242,960,615],"f":[249,504],"b":{"e":[[2,365,78,190,371,369,343,356,112,460,105],[3,365,78,190,371,369,345,356,110,460,105],[4,365,78,190,371,369,345,356,110,460,105],[5,365,78,190,371,369,345,356,110,460,105],[6,365,78,190,371,369,345,356,110,460,105],[7,365,78,190,371,369,345,356,110,460,105],[8,365,78,190,371,369,345,356,110,460,105],[9,365,78,190,371,369,346,356,109,460,105],[10,366,152,188,297,369,346,313,109,460,172]],"n":[[2,526,231,248,281,528,446,432,103,661,224],[3,526,231,248,281,528,453,432,97,661,224],[4,526,231,248,281,528,453,432,97,661,224],[5,526,231,248,281,528,453,432,97,661,224],[6,526,231,248,281,528,453,432,97,661,224],[7,526,231,248,281,528,453,432,97,661,224],[8,526,231,248,281,528,452,432,98,661,224],[9,526,282,240,230,528,447,340,103,661,310]],"t":[[1,420,452,313,236,434,585,376,111,553,419],[2,420,452,313,236,434,585,376,111,553,419],[3,420,452,313,236,434,585,376,111,553,419],[4,420,452,313,236,434,585,376,111,553,419],[5,420,463,296,225,434,585,348,110,553,498]],"s":[[2,192,203,187,317,196,418,324,108,279,227],[3,192,203,187,317,196,418,324,108,279,227],[4,192,203,187,317,196,418,324,108,279,227],[5,192,203,187,317,196,418,324,108,279,227],[6,192,203,187,317,196,418,324,108,279,227],[7,192,294,187,226,196,419,259,107,279,313]],"c":[[2,41,348,210,247,45,510,362,98,133,339],[3,41,348,210,247,45,529,362,79,133,339],[4,41,348,210,247,45,529,362,79,133,339],[5,41,348,210,247,45,529,362,79,133,339],[6,43,404,180,191,45,530,256,74,133,431]]},"car":{"carE":[318,570,32,28,334,591,70,456,598,726],"carW":[298,581,32,27,314,601,50,467,578,736]}};
-const CAMPUS = [   // back to front, the order they are drawn
+const CAMPUS_MAP = {"w":960,"h":960,"g":[0,223,960,700],"f":[352,400],"b":{"e":[[2,288,261,176,230,329,443,228,49,376,261],[3,288,261,176,230,329,433,228,60,376,261],[4,288,261,176,230,329,423,228,70,376,261],[5,288,261,176,230,329,415,228,79,376,261],[6,288,261,176,230,329,415,228,80,376,261],[7,288,261,176,230,329,415,228,80,376,261],[8,288,261,176,230,329,415,228,81,376,261],[9,289,295,174,196,329,415,206,82,376,318]],"n":[[2,351,344,274,245,376,512,311,117,483,343],[3,351,344,274,245,376,512,311,118,483,343],[4,351,344,274,245,376,512,311,118,483,343],[5,351,344,274,245,376,512,312,119,483,343],[6,351,344,274,245,376,512,320,120,483,343],[7,351,344,274,245,376,512,328,120,483,343],[8,351,344,274,245,376,512,336,121,483,343],[9,350,364,274,225,376,512,344,122,483,400]],"t":[[1,736,467,168,204,818,546,142,125,824,466],[2,736,467,168,204,818,604,142,68,824,466],[3,736,467,168,204,818,604,142,69,824,466],[4,736,467,168,204,818,604,142,69,824,466],[5,736,485,168,186,818,598,125,76,824,524]],"s":[[2,448,247,201,211,514,397,192,62,549,247],[3,448,247,201,211,514,397,192,62,549,247],[4,448,247,201,211,514,390,192,70,549,247],[5,448,247,201,211,514,379,192,82,549,247],[6,449,270,200,188,514,369,182,93,549,304]],"c":[[2,168,425,198,199,236,562,180,63,267,424],[3,168,425,198,199,236,565,180,61,267,424],[4,168,425,198,199,236,557,180,70,267,424],[5,169,448,196,176,236,547,169,80,267,482]]},"car":{"carE":[750,611,13,13,757,619,669,521,844,717],"carW":[764,608,13,13,771,616,858,714,683,518]}};
+const CAMPUS = [   // back to front, the order they are drawn (camera from the south-east)
+  { key:'s', id:'systems',     short:'US Systems',  place:'the north building' },
   { key:'e', id:'ethics',      short:'Ethics',      place:'the main hospital' },
-  { key:'s', id:'systems',     short:'US Systems',  place:'the pavilion on the circle' },
   { key:'n', id:'encounter',   short:'Encounter',   place:'the Helena Theurer Pavilion' },
-  { key:'c', id:'cultural',    short:'Culture',     place:'the Children’s Hospital' },
+  { key:'c', id:'cultural',    short:'Culture',     place:'the south building' },
   { key:'t', id:'terminology', short:'Terminology', place:'the Cancer Center' }
 ];
 // How many floors stand: the same coverage the domain bars show (learned,
@@ -20099,7 +20099,24 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   const M = CAMPUS_MAP, W = M.w;
   const mast = domainMastery();
   const cover = id => { const m = mast[id]; return m && m.total ? (m.known + m.shaky*0.5)/m.total : 0; };
-  const top = 18, bottom = M.g[1] + M.g[3];             // crop: the tallest label down to the ground's edge
+  // Which floors stand, and where each label goes (render pixels).
+  const LV = {}; CAMPUS.forEach(b => { LV[b.key] = campusLevel(b.key, cover(b.id)); });
+  // Labels: a chip ~ (letters x 7.5 + 34) css px at the phone's ~0.37 css px per render px; nudge any
+  // that would overlap upward, keep all inside the picture.
+  const K = 0.37, tagsAt = {};
+  const order = CAMPUS.map(b => b.key).sort((a, b) => LV[b][10] - LV[a][10]);   // lowest on screen first
+  const placed = [];
+  order.forEach(key => {
+    const b = CAMPUS.find(x => x.key === key), w = ((b.short.length + 4) * 7.5 + 34) / K, h = 30 / K;
+    let x = Math.max(w/2 + 4, Math.min(W - w/2 - 4, LV[key][9])), y = LV[key][10];
+    for (let guard = 0; guard < 12; guard++){
+      const hit = placed.find(p => Math.abs(p.x - x) < (p.w + w)/2 + 6 && Math.abs(p.y - y) < h + 4);
+      if (!hit) break; y = hit.y - h - 6;
+    }
+    placed.push({ x, y, w }); tagsAt[key] = [x, y];
+  });
+  const top = Math.max(0, Math.min(Math.min(...placed.map(p => p.y)) - 34/K - 8, Math.min(...CAMPUS.map(b => LV[b.key][2])) - 10));
+  const bottom = M.g[1] + M.g[3];                       // crop: the highest label down to the ground's edge
   const H = bottom - top;
   const pos = (x, y, w, h) => `left:${(x/W*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/W*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`;
   const at = (x, y) => `left:${(x/W*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%`;
@@ -20107,13 +20124,13 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   let layers = `<img class="cp-ground" src="./city/ground.webp" alt="" decoding="async" style="${pos(...M.g)}">`;
   let shadows = '', blds = '', tags = '', sig = [];
   CAMPUS.forEach((b, i)=>{
-    const c = cover(b.id), L = campusLevel(b.key, c), pct = Math.round(c*100);
+    const c = cover(b.id), L = LV[b.key], pct = Math.round(c*100);
     const d = CCHI_DOMAINS.find(x=> x.id === b.id) || {};
     sig.push(b.key + L[0]);
     shadows += `<img class="cp-sh" src="./city/${b.key}${L[0]}-sh.webp" alt="" decoding="async" style="${pos(L[5],L[6],L[7],L[8])}">`;
     blds += `<button class="cp-bld dash-in" style="${pos(L[1],L[2],L[3],L[4])};--i:${i}" tabindex="-1" aria-hidden="true"
         onclick="requireName(()=>startStudy('domain','${b.id}'))"><img src="./city/${b.key}${L[0]}.webp" alt="" decoding="async"></button>`;
-    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}" style="${at(L[9], L[10])};--dom:${d.color||'#888'}"
+    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}" style="${at(...tagsAt[b.key])};--dom:${d.color||'#888'}"
         onclick="requireName(()=>startStudy('domain','${b.id}'))" aria-label="Practise ${escapeAttr(d.name||b.short)}, ${pct}% covered">
         ${escapeHtml(b.short)} <i>${pct}%</i></button>`;
   });

@@ -45,15 +45,18 @@ motion turns the lean and squashes off.
 **Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`; Jose,
 2026-10-19: "look like a game", then "like Hackensack University Medical
 Center", from his four campus photos). Replaced the navy readiness card.
-Each domain is a campus building (Ethics main hospital, Encounter Helena
-Theurer Pavilion, Terminology Cancer Center, US Systems the pavilion on the
-circle, Culture Children's); floors built = coverage (learned + shaky/2),
+Each domain is a campus building, laid out from satellite imagery of the
+real campus (traced only; none of it is drawn): Ethics the main hospital on
+Prospect Ave (circle drive, fountain), Encounter the Helena Theurer Pavilion
+(curved glass tower, lit sign), Terminology the Cancer Center across Second
+St (skybridge), US Systems the north building, Culture the south building;
+the utility plant with its fans and three parking decks are context. floors built = coverage (learned + shaky/2),
 from its fewest floors to all (`campusLevel`), the rest scaffolding + crane.
 Art is pre-rendered 3D in `city/` (ground, every building at every floor
 count, its shadow, two cars): stacked back to front in `CAMPUS` order, each
 placed by pixel boxes from the 960x960 render (`CAMPUS_MAP`, from the
 render script's city.json). To change the art: `docs/mockups/cchi-city/`
-(`build.html` + `buildassets.cjs`, then paste the compact manifest).
+(`humc2.html` + `buildassets2.cjs`, then paste the compact manifest).
 Labels (`.cp-tag`) and buildings (`.cp-bld`) start that domain; Play
 starts the next mode. Dr. Smiley in the card is an `ask-face`, so the dock's
 Dr. Smiley steps aside (one at a time). Cars and the fountain run only
