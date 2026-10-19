@@ -251,8 +251,26 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     const sheet = await p7.evaluate(() => { const v = document.querySelector('.gd-video video');
       return v && { src: v.getAttribute('src'), poster: v.getAttribute('poster'), inline: v.playsInline, controls: v.controls, cat: activeCategory,
         searchHasTag: foldText(String(GUIDE_TOPICS.find(t => t.id === 'promo').a).replace(/<[^>]+>/g, ' ')).includes('video src') }; });
-    ok(sheet && sheet.src === 'media/hub-promo.mp4' && sheet.inline && sheet.controls && sheet.cat === 'home' && !sheet.searchHasTag,
-      'Watch opens the answer over Home with the video (inline, controls); search reads no tags', sheet);
+    ok(sheet && sheet.src === 'media/hub-promo.mp4' && sheet.inline && !sheet.controls && sheet.cat === 'home' && !sheet.searchHasTag,
+      'Watch opens the answer over Home with the video (inline, our controls not the phone\'s); search reads no tags', sheet);
+    // Our full screen: an X that never hides (the iPhone's own player hides its X while playing).
+    const tapsOn = s => p7.evaluate(s => { const e = document.querySelector(s), q = e && e.getBoundingClientRect(); if (!q || !q.width) return false;
+      const h = document.elementFromPoint(q.x + q.width / 2, q.y + q.height / 2); return !!(h && h.closest(s)) && q.width >= 44 && q.height >= 44; }, s);
+    const ctl = await Promise.all(['.pp-play', '.pp-snd-b', '.pp-full-b'].map(tapsOn));
+    ok(ctl.every(Boolean), 'the video\'s play, sound and full-screen buttons take their own taps, 44px', ctl);
+    await p7.click('.pp-full-b'); await wait(300);
+    const th = await p7.evaluate(() => { const w = document.querySelector('.gd-video'), r = w.getBoundingClientRect();
+      return { on: w.classList.contains('is-theatre'), cover: Math.round(r.width) === innerWidth && Math.round(r.height) === innerHeight }; });
+    await p7.evaluate(() => document.querySelector('.gd-video').classList.add('is-idle')); await wait(350);
+    const xIdle = await tapsOn('.pp-x');
+    ok(th.on && th.cover && xIdle, 'full screen covers the phone and its X stays tappable while the controls are hidden', { ...th, xIdle });
+    await p7.evaluate(() => goBack()); await wait(300);
+    const back = await p7.evaluate(() => { const w = document.querySelector('.gd-video');
+      return [w.classList.contains('is-theatre'), document.getElementById('guideSheet').classList.contains('show'), w.classList.contains('is-idle'), w.querySelector('.pp-full-b').getAttribute('aria-label')]; });
+    ok(!back[0] && back[1] && !back[2] && back[3] === 'Full screen', 'Back leaves full screen, keeps the answer open and shows the controls again', back);
+    await p7.click('.pp-full-b'); await wait(200); await p7.click('.pp-x'); await wait(200);
+    ok(await p7.evaluate(() => !document.querySelector('.gd-video').classList.contains('is-theatre') && !document.body.classList.contains('pp-open')),
+      'the X leaves full screen');
     const fs = require('fs'), R = require('../support/harness.cjs').ROOT;
     const files = ['media/hub-promo.mp4', 'media/hub-promo.jpg'].map(f => [f, fs.existsSync(R + f) ? fs.statSync(R + f).size : 0]);
     ok(files.every(([, n]) => n > 10000), 'the video and its still are there', files);

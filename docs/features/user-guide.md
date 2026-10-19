@@ -23,7 +23,13 @@ on this phone only (`ih_firstWeek`, `ih_guideSeen`).
 **The 45-second video** (answer `promo`, first in "Getting started"). Its
 `<video>` (`media/hub-promo.mp4`, poster `media/hub-promo.jpg`, made from
 `promo/hub-promo-v12.mp4`) sits in the answer's text; tags are stripped for
-search and Ask, so it doesn't pollute them. `promoWatch` marks it watched
+search and Ask, so it doesn't pollute them. `promoPlayer` gives it our own
+controls (play, time, seek, sound, full screen; the phone's are off because
+the iPhone's full-screen player hides its X while playing, Jose: "no X to
+exit"). Full screen (`.is-theatre`) is the same element fixed over the page
+(never moved in the page, so playback is never interrupted), with an X that never
+hides; Back, Escape, the X or the end leave it, and closing the sheet pauses
+the video. It marks it watched
 (`ih_promoSeen`) at the end or past 15 s; Home's bubble stays (Jose, 2026-10-19:
 he watched it and the bubble vanished) and its ring stops turning (`.is-seen`).
 `watchPromo()` opens the answer over Home (no navigation, Back closes it) and
