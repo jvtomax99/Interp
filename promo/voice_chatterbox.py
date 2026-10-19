@@ -37,8 +37,8 @@ es = None
 
 def trim(a, sr):
     """Speech only: from the first 20 ms window within 25 dB of the loudest (less 50 ms),
-    to the last within 35 dB before a gap of 450 ms or more (the multilingual model can
-    trail a second of noise or mumble; takes can open on a quarter second of hiss)."""
+    to the last within 35 dB, dropping anything after a 450 ms gap that stays 20 dB under
+    the peak (the multilingual model can trail a second of noise; takes can open on a quarter second of hiss)."""
     w = int(.02 * sr)
     rms = np.sqrt([np.mean(a[k:k + w] ** 2) for k in range(0, len(a) - w + 1, w)])
     start = np.nonzero(rms > rms.max() * 10 ** (-25 / 20))[0][0]
@@ -46,7 +46,7 @@ def trim(a, sr):
     on = on[on >= start]
     end = start
     for k in on[1:]:
-        if (k - end) * w > .45 * sr: break
+        if (k - end) * w > .45 * sr and rms[k:].max() < rms.max() / 10: break   # only a quiet tail
         end = k
     return a[max(0, start * w - int(.05 * sr)): (end + 1) * w + int(.08 * sr)]
 

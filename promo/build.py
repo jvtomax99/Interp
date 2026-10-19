@@ -86,11 +86,13 @@ if not os.path.exists(HERE + '/sfx/music.wav'):
 run('project', 'import-asset', '--project', P, '--file', HERE + '/sfx/music.wav', '--asset-id', 'music', '--kind', 'audio')
 
 NARR = json.load(open(HERE + '/narration.json'))['lines']
-# the voice "warmed up" (Jose's pick, voice #2 of the comparison): a little low
-# warmth, softer 3 kHz, gentle compression, a touch of room. Made from voice/,
-# kept in voice/warm/; the raw Kokoro files stay as they are.
-WARM = ('highpass=f=70,equalizer=f=180:t=q:w=1:g=2.5,equalizer=f=3000:t=q:w=1.2:g=-2,'
-        'acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120,aecho=0.8:0.5:24|37:0.10|0.06')
+# the voice's finishing chain (v7, Chatterbox). v5/v6 warmed Kokoro (Jose's pick): +2.5 dB
+# at 180 Hz, -2 dB at 3 kHz, compression, a touch of room. Measured on Chatterbox: its
+# 60-300 Hz already matches that warmed Kokoro (within 0.3 dB), its 1-5 kHz runs 5 dB
+# hotter, its loud/soft spread is 15 dB against 11.5. So the low boost and the room go;
+# the 3 kHz cut and the compression stay. Made from voice/ into voice/warm/.
+WARM = ('highpass=f=70,equalizer=f=3000:t=q:w=1.2:g=-2,'
+        'acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120')
 os.makedirs(HERE + '/voice/warm', exist_ok=True)
 for i in range(len(NARR)):
     src, dst = f'{HERE}/voice/line{i:02d}.wav', f'{HERE}/voice/warm/line{i:02d}.wav'
