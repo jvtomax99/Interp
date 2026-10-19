@@ -228,6 +228,12 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 CoreCHI dashboard + motion (Jose's ask, options picked:
+  regroup + trend, native animation). Score-trend tile (last 12 sessions,
+  tap a point), Focus next tile, "My progress" card folded into the trend
+  tile and the domain rows, staggered arrival, count-ups, self-drawing
+  line, resumable motion. Note: `docs/features/practice-dashboard.md`.
+
 - 2026-10-19 Dr. Smiley's brows move (Jose's pick of four ideas for more
   expression; the others were an Expression Studio page, new drawn frames
   and 3D with face shapes). Brows cut out of his own art into
@@ -399,10 +405,14 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- The practice screen re-renders on any data arrival (`ensureLoaded` ->
+  `scheduleRender`), so entrance motion there must survive a re-render:
+  `data-motion`/`data-sig` + `playPracticeMotion` resume it.
 - `dock-tuck` measured Dr. Smiley while `dsBreathe`/`dsDrift` (infinite, on
   `.dock-smiley-bob` around him) ran, so WebKit failed his scale check by
   ~0.003 depending on the breath's phase (#57-#60, 2026-10-19). `rects()`
-  now holds those loops at 0 for the read. Measure him that way elsewhere.
+  now holds those loops at 0 for the read, and `settle()` waits for his
+  scale to reach rest (WebKit read him mid-grow after a tuck). Measure him that way elsewhere.
 - Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
   around one eye patch (seen over the original base too, so it predates
   the brows). A clean-up of those three frames is open (Later).

@@ -2621,10 +2621,6 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
   }
   .progress-card p{ font-size:13px; color:var(--ink-soft); margin:0 0 10px 0; line-height:1.55; }
-  .progress-head{ display:flex; gap:28px; flex-wrap:wrap; }
-  .progress-head div{ display:flex; flex-direction:column; }
-  .progress-head b{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); }
-  .progress-head span{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
 
   .review-card{
     max-width:480px; padding:32px 28px; border-radius:var(--r-lg); text-align:center;
@@ -3082,9 +3078,9 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft); }
   .board-row{ display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:10px;
     font-family:var(--sans); animation:modeIn .3s var(--ease) backwards; }
-  .board-row:nth-child(1){ animation-delay:.03s } .board-row:nth-child(2){ animation-delay:.07s }
-  .board-row:nth-child(3){ animation-delay:.11s } .board-row:nth-child(4){ animation-delay:.15s }
-  .board-row:nth-child(n+5){ animation-delay:.19s }
+  .board-row:nth-child(1){ animation-delay:calc(.03s + var(--motion-skip, 0s)) } .board-row:nth-child(2){ animation-delay:calc(.07s + var(--motion-skip, 0s)) }
+  .board-row:nth-child(3){ animation-delay:calc(.11s + var(--motion-skip, 0s)) } .board-row:nth-child(4){ animation-delay:calc(.15s + var(--motion-skip, 0s)) }
+  .board-row:nth-child(n+5){ animation-delay:calc(.19s + var(--motion-skip, 0s)) }
   .board-row.is-me{ background:var(--accent-soft); }
   .board-rank{ width:22px; flex-shrink:0; text-align:center; font-size:13px; font-weight:650; color:var(--ink-faint); }
   .board-face{ width:28px; height:28px; border-radius:50%; flex-shrink:0; color:#fff;
@@ -3210,10 +3206,10 @@
   /* The four ways in, arriving in sequence rather than all at once. */
   @keyframes modeIn{ from{ opacity:0; transform:translateY(7px); } to{ opacity:1; transform:none; } }
   .study-mode{ animation:modeIn .30s var(--ease) backwards; }
-  .study-mode:nth-child(1){ animation-delay:.02s }
-  .study-mode:nth-child(2){ animation-delay:.07s }
-  .study-mode:nth-child(3){ animation-delay:.12s }
-  .study-mode:nth-child(4){ animation-delay:.17s }
+  .study-mode:nth-child(1){ animation-delay:calc(.02s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(2){ animation-delay:calc(.07s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(3){ animation-delay:calc(.12s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(4){ animation-delay:calc(.17s + var(--motion-skip, 0s)) }
 
   /* The last minute of an exam. */
   @keyframes clockUrge{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
@@ -3401,6 +3397,92 @@
   }
   .mastery-go::after{ content:''; position:absolute; inset:-4px -3px; }
   .mastery-go:hover{ background:color-mix(in srgb, var(--dom) 16%, var(--bg-hi)); }
+
+  /* ---------- Practice dashboard ----------
+     The readiness card leads; under it, your scores over time and the one
+     domain worth working on next. Blocks arrive in sequence, the score line
+     draws itself and its points pop as the pen reaches them. A block that
+     has finished moving carries .is-still (playPracticeMotion), and
+     --motion-skip lets a re-render resume motion instead of restarting it. */
+  @keyframes dashIn{ from{ opacity:0; transform:translateY(9px) scale(.985); } to{ opacity:1; transform:none; } }
+  .dash-in{
+    animation:dashIn .42s var(--ease) backwards;
+    animation-delay:calc(var(--i, 0) * 60ms + var(--motion-skip, 0s));
+  }
+  .is-still:not(.study-flame), .is-still *:not(.study-flame){ animation:none !important; }
+
+  .dash-row{ display:grid; grid-template-columns:1fr; gap:9px; max-width:760px; margin:0 0 26px 0; }
+  @media (min-width:600px){ .dash-row{ grid-template-columns:1.6fr 1fr; align-items:start; } }
+  .dash-tile{
+    position:relative; display:flex; flex-direction:column; min-width:0;
+    padding:13px 17px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+  }
+  .dash-label{
+    font-family:var(--sans); font-size:12px; font-weight:650; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .dash-empty{ font-size:13px; line-height:1.5; color:var(--ink-soft); margin:6px 0 9px 0; }
+  .dash-tile .btn{ align-self:flex-start; }
+
+  .trend-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:9px; margin-top:6px; }
+  .trend-now b{
+    display:block; font-family:var(--sans); font-size:28px; font-weight:650; letter-spacing:-.04em;
+    line-height:1; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .trend-cap{ display:block; font-size:12px; color:var(--ink-soft); margin-top:4px; }
+  .trend-delta{
+    flex-shrink:0; font-family:var(--sans); font-size:12px; font-weight:650; white-space:nowrap;
+    padding:3px 9px; border-radius:999px;
+  }
+  .trend-delta.is-up{ color:#3F7D58; background:color-mix(in srgb, #3F7D58 12%, transparent); }
+  .trend-delta.is-down{ color:var(--danger); background:var(--danger-soft); }
+  html[data-theme="dark"] .trend-delta.is-up{ color:#8FD8B0; background:rgba(143,216,176,0.12); }
+  .trend-svg{ display:block; width:100%; height:auto; max-height:132px; margin:9px 0 6px 0; color:var(--accent-2); overflow:visible; }
+  .trend-grid{ stroke:var(--line); stroke-width:1; stroke-dasharray:3 4; }
+  .trend-base{ stroke:var(--line); stroke-width:1; }
+  .trend-glabel{ font-family:var(--sans); font-size:9px; font-weight:550; fill:var(--ink-faint); }
+  .trend-line{
+    fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:1; stroke-dashoffset:0;
+    animation:trendDraw .9s var(--ease) backwards; animation-delay:calc(.18s + var(--motion-skip, 0s));
+  }
+  @keyframes trendDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
+  .trend-area{ animation:trendFade .6s ease-out backwards; animation-delay:calc(.7s + var(--motion-skip, 0s)); }
+  @keyframes trendFade{ from{ opacity:0; } to{ opacity:1; } }
+  .trend-dot{
+    fill:var(--paper); stroke:currentColor; stroke-width:2;
+    transform-box:fill-box; transform-origin:center;
+    animation:dotPop .34s var(--ease) backwards; animation-delay:calc(var(--d, 0ms) + var(--motion-skip, 0s));
+    transition:stroke-width .2s var(--ease);
+  }
+  .trend-dot.is-last{ fill:currentColor; }
+  .trend-dot.is-picked{ fill:currentColor; stroke-width:5; }
+  @keyframes dotPop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
+  /* One ripple off the newest score once the line arrives, then nothing. */
+  .trend-ping{
+    fill:currentColor; opacity:0; pointer-events:none;
+    transform-box:fill-box; transform-origin:center;
+    animation:trendPing .9s ease-out 1; animation-delay:calc(1.15s + var(--motion-skip, 0s));
+  }
+  @keyframes trendPing{ from{ opacity:.45; transform:scale(1); } to{ opacity:0; transform:scale(3.4); } }
+  .trend-hit{ fill:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .trend-foot{ display:flex; flex-wrap:wrap; gap:6px 17px; font-family:var(--sans); font-size:12px; color:var(--ink-soft); }
+  .trend-foot b{ color:var(--ink); font-weight:650; font-variant-numeric:tabular-nums; }
+
+  .focus-tile{
+    --dom:var(--accent); gap:6px;
+    background:radial-gradient(130% 90% at 100% 0%, color-mix(in srgb, var(--dom) 14%, transparent), transparent 62%), var(--paper);
+  }
+  .focus-name{ font-family:var(--sans); font-size:17px; font-weight:650; letter-spacing:-.02em; line-height:1.25; color:var(--ink); }
+  .focus-why{ font-family:var(--sans); font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .focus-track{ margin:3px 0 6px 0; }
+  .focus-go{ align-self:flex-start; margin-top:auto; }
+
+  @media (prefers-reduced-motion: reduce){
+    .dash-in, .trend-line, .trend-area, .trend-dot, .trend-ping{ animation:none !important; }
+    .trend-dot{ transition:none; }
+  }
 
   /* Exam mode */
   .exam-bar{ display:flex; align-items:center; gap:13px; flex-wrap:wrap; margin-bottom:13px;
@@ -6116,7 +6198,6 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
 .section-head .sub{ font-size:var(--fs-foot); font-weight:500; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
 .hub-head h1{ font-family:var(--sans); font-weight:700; letter-spacing:-.028em; }
 .modal h3, .onboarding-modal h3, .results-summary h3{ font-family:var(--sans); font-weight:650; letter-spacing:-.02em; }
-.progress-head b{ font-family:var(--sans); font-weight:700; letter-spacing:-.02em; }
 .doc-card-name{ font-family:var(--sans); font-weight:650; font-size:16px; letter-spacing:-.015em; }
 .doc-research-specialty{ font-family:var(--sans); font-weight:650; letter-spacing:-.015em; }
 @media (min-width:901px){
@@ -8638,8 +8719,9 @@ function animateReadyRing(){
     num.textContent = Math.round(v) + '%';
     ring.style.background = `conic-gradient(var(--cyan) ${v*3.6}deg, rgba(255,255,255,0.13) 0deg)`;
   };
-  if(reducedMotion()){ paint(pct); return; }
-  const dur = 950, t0 = performance.now();
+  const dur = 950, age = motionAge(ring);
+  if(reducedMotion() || age >= dur){ paint(pct); return; }
+  const t0 = performance.now() - age;
   const tick = now => {
     const k = Math.min(1, (now - t0)/dur);
     paint(pct * (1 - Math.pow(1 - k, 3)));
@@ -12709,9 +12791,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
-  { id:'smoothness',  tone:'gd-n2', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
-  { id:'chattitles',  tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
+  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A dashboard: your scores as a line over time, and the area to focus on next' },
+  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
+  { id:'smoothness',  tone:'gd-n3', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -16405,9 +16487,10 @@ const GUIDE_TOPICS = [
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
     <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
 
-  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness', q:'How do I practice for the CoreCHI exam?', a:`
+  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it.</p>
+    <p><b>Your domains</b> further down shows, for each area, how much of the question bank you've learned and how often you got it right in your sessions. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
   { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms session specialty pause resume mistakes', q:'What is Term Review?', a:`
@@ -17859,9 +17942,9 @@ function renderContent(){
   }
 
   if(activeCategory === 'practice'){
+    const motionPrev = practiceMotionKeys(content);
     content.innerHTML = renderPractice();
-    animateBars();
-    animateReadyRing();
+    playPracticeMotion(content, motionPrev);
     if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
       const ring = content.querySelector('.score-ring');
       if(ring) animateScore(Number(ring.dataset.pct) || 0);
@@ -19386,7 +19469,7 @@ function renderPractice(){
 
   // ---- how ready you are ----
   const ready = examReadiness();
-  html += `<div class="ready-card">
+  html += `<div class="ready-card dash-in" data-motion="ready" data-sig="${ready.pct}|${st.days||0}|${todayCount}|${due}">
     <div class="ready-main">
       <div class="ready-ring" data-pct="${ready.pct}">
         <div class="ready-ring-in"><b class="ready-pct">0%</b><span class="ready-cap">ready</span></div>
@@ -19398,20 +19481,23 @@ function renderPractice(){
     </div>
     <div class="ready-stats">
       <div class="ready-stat study-streak">
-        <i>${ICON_FLAME}</i><b><span class="study-flame">${st.days||0}</span></b>
+        <i>${ICON_FLAME}</i><b><span class="study-flame js-count" data-to="${st.days||0}">${st.days||0}</span></b>
         <span>day${(st.days||0)===1?'':'s'} in a row</span>
       </div>
       <div class="ready-stat study-goal${todayCount >= DAILY_GOAL ? ' is-met' : ''}">
         <i>${ICON_TARGET}</i>
-        <span class="study-goal-top"><b>${todayCount} / ${DAILY_GOAL}</b></span>
+        <span class="study-goal-top"><b><span class="js-count" data-to="${todayCount}">${todayCount}</span> / ${DAILY_GOAL}</b></span>
         <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'today — goal met' : 'answered today'}</span>
         <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
       </div>
       <div class="ready-stat">
-        <i>${ICON_CLOCK}</i><b>${due}</b><span>due for review</span>
+        <i>${ICON_CLOCK}</i><b class="js-count" data-to="${due}">${due}</b><span>due for review</span>
       </div>
     </div>
   </div>`;
+
+  // ---- your scores over time, and the one domain to work on ----
+  html += `<div class="dash-row">${renderScoreTrend()}${renderFocusTile(ready.worst)}</div>`;
 
   // ---- the four ways in ----
   // DOM order stays review / mistakes / new / exam; CSS `order` promotes
@@ -19429,7 +19515,7 @@ function renderPractice(){
   ];
   const nextKey = (MODES.find(m=> m.n > 0) || {}).key || 'exam';
 
-  html += `<div class="study-modes">`;
+  html += `<div class="study-modes" data-motion="modes" data-sig="${due}|${shaky}|${unseen}">`;
   MODES.forEach(m=>{
     const isNext = m.key === nextKey;
     html += `<button class="study-mode${isNext?' is-next':''}" style="--mode:${m.color}"
@@ -19471,23 +19557,23 @@ function renderPractice(){
   }).join('') + `</div>`;
 
   // ---- where you stand ----
-  html += renderMyProgress();
-
   const mast = domainMastery();
+  const acc = domainAccuracy();
   html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
-  html += `<div class="mastery-list">`;
-  CCHI_DOMAINS.forEach(d=>{
+  html += `<div class="mastery-list" data-motion="mastery" data-sig="${escapeAttr(JSON.stringify(mast))}">`;
+  CCHI_DOMAINS.forEach((d, i)=>{
     const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
+    const a = acc[d.id];
     const t = m.total || 1;
     html += `
-      <div class="mastery-row" style="--dom:${d.color}">
+      <div class="mastery-row dash-in" style="--dom:${d.color}; --i:${i}">
         <div class="mastery-top">
           <span class="mastery-dot"></span>
           <span class="mastery-id">
             <span class="mastery-name">${escapeHtml(d.name)}</span>
-            <span class="mastery-weight">${d.weight}% of the exam</span>
+            <span class="mastery-weight">${d.weight}% of the exam${a ? ` \u00b7 ${Math.round((a.right/a.total)*100)}% right in sessions` : ''}</span>
           </span>
-          <span class="mastery-pct">${Math.round(((m.known + m.shaky*0.5)/t)*100)}%</span>
+          <span class="mastery-pct"><span class="js-count" data-to="${Math.round(((m.known + m.shaky*0.5)/t)*100)}">${Math.round(((m.known + m.shaky*0.5)/t)*100)}</span>%</span>
         </div>
         <span class="mastery-track">
           <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
@@ -19607,7 +19693,7 @@ function renderWeeklyBoard(){
   }
   const top = rows[0].q || 1;
   let html = `<div class="section-head"><h2>This week</h2><span class="sub">by questions practised</span></div>`;
-  html += `<div class="board">`;
+  html += `<div class="board" data-motion="board" data-sig="${escapeAttr(rows.slice(0, 8).map(r=> r.who + ':' + r.q).join(','))}">`;
   rows.slice(0, 8).forEach((r, i)=>{
     const mine = me && r.who.trim().toLowerCase() === me;
     const acc = r.q ? Math.round((r.right/r.q)*100) : 0;
@@ -19629,50 +19715,192 @@ function renderWeeklyBoard(){
   return html;
 }
 
-function renderMyProgress(){
-  const mine = myQuizHistory();
+/* ---------- Practice dashboard tiles ----------
+   Your scores: every finished session as a point, oldest to newest, the last
+   twelve so the line stays readable on a phone. Built from quiz-history,
+   which every session already writes. Focus next: the domain costing the
+   most exam weight, with a way straight into it. */
+let TREND_POINTS = [];
+// TREND_GUT keeps the 100% / 50% labels in their own column, clear of the newest point.
+const TREND_W = 300, TREND_H = 96, TREND_TOP = 9, TREND_BOT = 87, TREND_PAD = 9, TREND_GUT = 30;
+
+function domainAccuracy(){
+  const out = {};
+  myQuizHistory().forEach(h=>{
+    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
+      if(!s || !s.total) return;
+      if(!out[d]) out[d] = { right:0, total:0 };
+      out[d].right += s.right;
+      out[d].total += s.total;
+    });
+  });
+  return out;
+}
+
+function trendDate(at){
+  try{ return new Date(at).toLocaleDateString(undefined, { month:'short', day:'numeric' }); }catch(e){ return ''; }
+}
+
+function renderScoreTrend(){
   if(!whoAmI()){
-    return `<div class="progress-card"><p>Set your name to start tracking your practice results over time.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+    TREND_POINTS = [];
+    return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="noname">
+      <span class="dash-label">Your scores</span>
+      <p class="dash-empty">Set your name to start tracking your scores over time.</p>
+      <button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
   }
+  const mine = myQuizHistory().filter(h=> h.total);
   if(!mine.length){
-    return `<div class="progress-card"><p>No practice sessions yet — your results will start building a personal accuracy record here.</p></div>`;
+    TREND_POINTS = [];
+    return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="none">
+      <span class="dash-label">Your scores</span>
+      <p class="dash-empty">Finish a session and your scores start drawing a line here.</p></div>`;
   }
 
   const totalQ = mine.reduce((n,h)=>n+h.total, 0);
-  const totalRight = mine.reduce((n,h)=>n+h.correct, 0);
-  const overallPct = totalQ ? Math.round((totalRight/totalQ)*100) : 0;
-  const best = Math.max(...mine.map(h=> h.total ? Math.round((h.correct/h.total)*100) : 0));
+  const totalRight = mine.reduce((n,h)=>n+(h.correct||0), 0);
+  const overall = Math.round((totalRight/totalQ)*100);
+  const scoreOf = h => Math.round(((h.correct||0)/h.total)*100);
+  const best = Math.max(...mine.map(scoreOf));
 
-  const domainTotals = {};
-  mine.forEach(h=>{
-    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
-      if(!domainTotals[d]) domainTotals[d] = { right:0, total:0 };
-      domainTotals[d].right += s.right;
-      domainTotals[d].total += s.total;
-    });
+  // History is newest first; the line reads left to right, oldest to newest.
+  const pts = mine.slice(0, 12).reverse().map(h=>({ pct:scoreOf(h), at:h.timestamp }));
+  const n = pts.length;
+  pts.forEach((p, i)=>{
+    p.x = n === 1 ? (TREND_W - TREND_GUT)/2 : TREND_PAD + i*(TREND_W - TREND_GUT - 2*TREND_PAD)/(n - 1);
+    p.y = TREND_TOP + (1 - p.pct/100)*(TREND_BOT - TREND_TOP);
   });
+  TREND_POINTS = pts;
+  const last = pts[n - 1];
+  const before = pts.slice(0, -1);
+  const avg = before.length ? Math.round(before.reduce((s,p)=>s+p.pct, 0)/before.length) : null;
+  const delta = avg === null ? null : last.pct - avg;
 
-  let html = `<div class="progress-card">
-    <div class="progress-head">
-      <div><b>${mine.length}</b><span>session${mine.length===1?'':'s'}</span></div>
-      <div><b>${overallPct}%</b><span>all-time accuracy</span></div>
-      <div><b>${best}%</b><span>best session</span></div>
+  const line = pts.map((p,i)=> `${i?'L':'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  const area = n > 1 ? `${line} L${last.x.toFixed(1)} ${TREND_BOT} L${pts[0].x.toFixed(1)} ${TREND_BOT} Z` : '';
+  const gy = v => (TREND_TOP + (1 - v/100)*(TREND_BOT - TREND_TOP)).toFixed(1);
+  // The dots follow the pen: each pops as the line reaches it.
+  const dots = pts.map((p,i)=> `<circle class="trend-dot${i===n-1?' is-last':''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4"
+      style="--d:${Math.round(180 + (n === 1 ? 0 : (i/(n-1))*900))}ms"></circle>`).join('');
+  const hits = pts.map((p,i)=> `<circle class="trend-hit" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="15" onclick="trendPick(${i})"><title>${p.pct}% · ${escapeHtml(trendDate(p.at))}</title></circle>`).join('');
+
+  return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="${mine.length}|${last.at}">
+    <span class="dash-label">Your scores</span>
+    <div class="trend-head">
+      <div class="trend-now"><b><span class="js-count" data-to="${last.pct}">${last.pct}</span>%</b>
+        <span class="trend-cap">last session · ${escapeHtml(trendDate(last.at))}</span></div>
+      ${delta === null ? '' : `<span class="trend-delta ${delta >= 0 ? 'is-up' : 'is-down'}">${delta === 0 ? 'same as your average' : `${delta > 0 ? '+' : '−'}${Math.abs(delta)} vs your average`}</span>`}
     </div>
-    <div class="domain-bars" style="margin-top:14px;">`;
-  CCHI_DOMAINS.forEach(d=>{
-    const s = domainTotals[d.id];
-    if(!s) return;
-    const dpct = Math.round((s.right/s.total)*100);
-    html += `
-      <div class="domain-bar-row">
-        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
-        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${dpct}%; background:${d.color};"></span></span>
-        <span class="domain-bar-pct">${dpct}%</span>
-        <span class="domain-bar-pct">${s.right}/${s.total}</span>
-      </div>`;
+    <svg class="trend-svg" viewBox="0 0 ${TREND_W} ${TREND_H}" role="img" aria-label="Your last ${n} session score${n===1?'':'s'}, from ${pts[0].pct}% to ${last.pct}%">
+      <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+      </linearGradient></defs>
+      <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(100)}" y2="${gy(100)}"/>
+      <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(50)}" y2="${gy(50)}"/>
+      <line class="trend-base" x1="0" x2="${TREND_W - TREND_GUT}" y1="${TREND_BOT}" y2="${TREND_BOT}"/>
+      <text class="trend-glabel" x="${TREND_W}" y="${(Number(gy(100)) + 3).toFixed(1)}" text-anchor="end">100%</text>
+      <text class="trend-glabel" x="${TREND_W}" y="${(Number(gy(50)) + 3).toFixed(1)}" text-anchor="end">50%</text>
+      ${area ? `<path class="trend-area" d="${area}" fill="url(#trendFill)"/>` : ''}
+      ${n > 1 ? `<path class="trend-line" d="${line}" pathLength="1"/>` : ''}
+      <circle class="trend-ping" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4"></circle>
+      ${dots}${hits}
+    </svg>
+    <div class="trend-foot">
+      <span><b>${mine.length}</b> session${mine.length===1?'':'s'}</span>
+      <span><b>${overall}%</b> all-time</span>
+      <span><b>${best}%</b> best</span>
+    </div>
+  </div>`;
+}
+
+// Tap a point to read that session; tap it again to go back to the latest.
+function trendPick(i){
+  const tile = document.querySelector('.trend-tile');
+  const p = TREND_POINTS[i];
+  if(!tile || !p) return;
+  const dots = tile.querySelectorAll('.trend-dot');
+  const again = dots[i] && dots[i].classList.contains('is-picked');
+  const show = again ? TREND_POINTS[TREND_POINTS.length - 1] : p;
+  dots.forEach((d, k)=> d.classList.toggle('is-picked', !again && k === i));
+  const b = tile.querySelector('.trend-now b');
+  const cap = tile.querySelector('.trend-cap');
+  if(b) b.textContent = show.pct + '%';
+  if(cap) cap.textContent = (show === TREND_POINTS[TREND_POINTS.length - 1] ? 'last session' : 'that session') + ' · ' + trendDate(show.at);
+}
+
+function renderFocusTile(worst){
+  if(!worst) return '';
+  const d = worst.d;
+  const cover = Math.round(worst.cover*100);
+  return `<div class="dash-tile focus-tile dash-in" style="--dom:${d.color}; --i:2" data-motion="focus" data-sig="${d.id}|${cover}">
+    <span class="dash-label">Focus next</span>
+    <b class="focus-name">${escapeHtml(d.name)}</b>
+    <span class="focus-why">${d.weight}% of the exam · <span class="js-count" data-to="${cover}">${cover}</span>% covered</span>
+    <span class="mastery-track focus-track"><span class="mastery-seg is-known" style="width:${cover}%"></span></span>
+    <button class="mastery-go focus-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise it</button>
+  </div>`;
+}
+
+/* ---------- Practice dashboard motion ----------
+   Each block that moves carries data-motion (its name) and data-sig (what it
+   shows). The screen re-renders for reasons that change nothing here (quiz
+   history arriving, a chat message elsewhere), so a block showing the same
+   thing picks its motion up where it was instead of starting over, and once
+   finished it stays still. Anything new, or the screen opened again, plays. */
+const MOTION_SPAN = 1500;
+const MOTION_BORN = {};
+
+function practiceMotionKeys(root){
+  const keys = {};
+  if(root) root.querySelectorAll('[data-motion]').forEach(el=>{ keys[el.dataset.motion] = el.dataset.sig; });
+  return keys;
+}
+
+function playPracticeMotion(root, prev){
+  const now = performance.now();
+  const still = reducedMotion();
+  root.querySelectorAll('[data-motion]').forEach(el=>{
+    const id = el.dataset.motion;
+    if(prev[id] !== el.dataset.sig || MOTION_BORN[id] == null) MOTION_BORN[id] = now;
+    const age = now - MOTION_BORN[id];
+    if(still || age > MOTION_SPAN) el.classList.add('is-still');
+    else if(age > 0) el.style.setProperty('--motion-skip', `-${Math.round(age)}ms`);
   });
-  html += `</div></div>`;
-  return html;
+  animateBars(root);
+  animateCounts(root);
+  animateReadyRing();
+}
+
+// How far into its motion an element already is: 0 for a fresh block (or
+// one outside any block, like the results screen), Infinity once settled.
+function motionAge(el){
+  const host = el.closest('[data-motion]');
+  if(!host) return 0;
+  if(host.classList.contains('is-still')) return Infinity;
+  const born = MOTION_BORN[host.dataset.motion];
+  return born == null ? 0 : performance.now() - born;
+}
+
+// Numbers arrive rather than appear. The markup already holds the final
+// value, so with no script, reduced motion or a settled block it just reads.
+function animateCounts(root){
+  if(reducedMotion()) return;
+  const DUR = 900;
+  const items = Array.from(root.querySelectorAll('.js-count'))
+    .map(el=>({ el, to:Number(el.dataset.to) || 0, age:motionAge(el) }))
+    .filter(c=> c.to > 0 && c.age < DUR);
+  if(!items.length) return;
+  const t0 = performance.now();
+  const tick = now=>{
+    let live = false;
+    items.forEach(c=>{
+      const k = Math.min(1, (now - t0 + c.age)/DUR);
+      c.el.textContent = Math.round(c.to * (1 - Math.pow(1 - k, 3)));
+      if(k < 1) live = true;
+    });
+    if(live) requestAnimationFrame(tick);
+  };
+  tick(t0);
 }
 
 function shuffleOptions(q){
@@ -19867,15 +20095,14 @@ function animateScore(pct){
 /* Bars start at zero and grow to their real width on the first paint after a
    render. Without this they are simply present, which reads as a static
    report rather than progress you are making. */
-function animateBars(){
+function animateBars(root){
   if(reducedMotion()) return;
-  requestAnimationFrame(()=>{
-    document.querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill').forEach(el=>{
-      const target = el.style.width;
-      if(!target || target === '0%') return;
-      el.style.width = '0%';
-      requestAnimationFrame(()=>{ el.style.width = target; });
-    });
+  (root || document).querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill, .board-fill').forEach(el=>{
+    const target = el.style.width;
+    const age = motionAge(el);
+    if(!target || target === '0%' || age >= 620 || !el.animate) return;
+    const grow = el.animate([{ width:'0%' }, { width:target }], { duration:620, easing:'cubic-bezier(.2,.8,.2,1)' });
+    grow.currentTime = age;
   });
 }
 
@@ -20410,8 +20637,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1547';
-const BUILD_TIME = '2026-10-19 15:47 UTC';
+const BUILD_ID = 'b1019.1723';
+const BUILD_TIME = '2026-10-19 17:23 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
