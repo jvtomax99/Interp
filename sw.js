@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v232-voice-check';
+const CACHE_VERSION = 'interpreter-hub-v234-voice-check';
 const PRECACHE = [
   './',
   './index.html',

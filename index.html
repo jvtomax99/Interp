@@ -20331,8 +20331,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1442';
-const BUILD_TIME = '2026-10-19 14:42 UTC';
+const BUILD_ID = 'b1019.1506';
+const BUILD_TIME = '2026-10-19 15:06 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20968,7 +20968,7 @@ function dockAfterRender(){
 /* Tucked, the bar is a medicine capsule: the tab's icon in one half, its
    name in the other. Its width is worked out from the name before it
    shrinks, so the shrink can animate to the exact size. */
-let dockMeasure = null;
+let dockMeasure = null, dockMiniW = '';
 function dockTuck(){
   const b = document.body;
   if(b.classList.contains('dock-mini')) return;
@@ -20981,8 +20981,11 @@ function dockTuck(){
       dockMeasure = dockMeasure || document.createElement('canvas').getContext('2d');
       dockMeasure.font = '700 14px ' + (getComputedStyle(b).fontFamily || 'system-ui');
       // Two equal halves, like a capsule: the icon's half and the name's half.
+      // On the bar, not the body: a new value on the body restyled most of
+      // the page (911 of 1,420 elements), ~350 ms at 4x on the first tuck (S3b).
       const half = Math.max(56, Math.ceil(15 + dockMeasure.measureText(name).width + 15));
-      b.style.setProperty('--mini-w', Math.min(half * 2, Math.round(window.innerWidth * .62)) + 'px');
+      dockMiniW = Math.min(half * 2, Math.round(window.innerWidth * .62)) + 'px';
+      bar.style.setProperty('--mini-w', dockMiniW);
     }catch(e){}
   }
   dockMorph(true, () => b.classList.add('dock-mini'));
@@ -21331,7 +21334,7 @@ function renderTabBar(){
     { id:'__more',    name:'More',      icon:ICON_GRID,   action:`openMoreSheet()` },
   ];
   const at = tabs.findIndex(t => t.id === activeCategory);
-  return `<nav class="tabbar${at < 0 ? ' no-current' : ''}" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
+  return `<nav class="tabbar${at < 0 ? ' no-current' : ''}" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}${dockMiniW ? ';--mini-w:' + dockMiniW : ''}">
     <span class="tabbar-lens" aria-hidden="true"></span>
     ${tabs.map(t=>`
       <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>
