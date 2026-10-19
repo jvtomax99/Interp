@@ -247,7 +247,7 @@ A.append(kf(says['id'], 'positionY', [(T_HF - 120, 960, None), (T_HF + 200, 700,
 # a barrage of the words a cardiology visit throws at you, one per beat behind the type
 BARRAGE = [('dyspnea', 120, 300, -8), ('ejection fraction', 500, 1500, 5), ('BNP', 760, 380, -4), ('edema', 180, 1700, 6),
            ('diuretic', 560, 260, 3), ('echo', 820, 1350, -6), ('stent', 300, 1560, 4), ('NPO', 700, 520, -3),
-           ('A-fib', 140, 1240, 7), ('beta blocker', 520, 1720, -5)]
+           ('A-fib', 140, 1240, 7), ('beta-blocker', 520, 1720, -5)]
 for j, (w, x, y, r) in enumerate(BARRAGE):
     at = j * 250
     b = add(text(nid(), 'Barrage ' + w, at, 520, w, 64, (x, y), font='bold', color=hexc('#9FD8FF'), just='left', box=(700, 90)))
@@ -256,7 +256,7 @@ for j, (w, x, y, r) in enumerate(BARRAGE):
     scale_keys(b, [(0, 120, None), (520, 96, OUT)])
 tag_dr = add(text(nid(), 'DOCTOR tag', T_HF - 100, 3550 - T_HF, 'THE DOCTOR', 34, (HX, 560), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300))
 fade(tag_dr, [(0, 0, None), (200, 100, OUT), (3150 - T_HF, 100, LIN), (3400 - T_HF, 0, LIN)])
-hf = add(blur(stack('heart failure', T_HF - 100, OUT_HOOK - T_HF + 100, ['heart', 'failure'], 200, HX, 620, 190, 0, stagger=150, pos=(HX, 830))))
+hf = add(blur(stack('heart failure', T_HF - 100, OUT_HOOK - T_HF + 100, ['Heart', 'failure'], 200, HX, 620, 190, 0, stagger=150, pos=(HX, 830))))
 scale_keys(hf, [(0, 100, None), (1950 - T_HF, 103, LIN), (2250 - T_HF, 58, SNAP)])
 A.append(kf(hf['id'], 'positionY', [(1950 - T_HF, 830, None), (2250 - T_HF, 520, SNAP)]))
 A.append(kf(hf['id'], 'positionX', [(OUT_HOOK - T_HF - 200, HX, None), (OUT_HOOK - T_HF + 60, HX - 1300, WHIP)]))
@@ -284,10 +284,10 @@ A.append({'type': 'setFxPropertyAnimator', 'compositionId': 'main', 'property': 
 FA0 = NARR[2]['start_ms'] - 80
 FY = 1140
 tag_es = text(nid(), 'YOU tag', 0, OUT_HOOK - FA0, 'THE INTERPRETER', 34, (HX, FY - 130), font='semi', color=DANGER, just='left', box=(700, 50), tracking=300)
-fallo = stack('fallo cardiaco', 0, OUT_HOOK - FA0, ['¿fallo', 'cardíaco?'], 170, HX, FY, 165, 60, stagger=120)
+fallo = stack('fallo cardiaco', 0, OUT_HOOK - FA0, ['¿Fallo', 'cardíaco?'], 170, HX, FY, 165, 60, stagger=120)
 ts = T_NOPE - FA0                                  # strike on "Nope", on the fallo block's clock
 bars = []
-for j, word in enumerate(['¿fallo', 'cardíaco?']):
+for j, word in enumerate(['¿Fallo', 'cardíaco?']):
     w = width(word, 170) + 30
     b = rect(nid(), 'Strike ' + word, 0, OUT_HOOK - FA0, (w, 20), DANGER, (HX - 15, FY + 98 + j * 165), roundness=10)
     A.append(kf(b['id'], 'scaleX', [(ts + j * 110, 0, None), (ts + j * 110 + 240, 100, SNAP)]))
@@ -302,9 +302,9 @@ A.append(kf(fb['id'], 'positionX', [(OUT_HOOK - FA0 - 200, 0, None), (OUT_HOOK -
 # the answer, on the drop
 ANS = DROP
 AD = 8450 - ANS
-ins = stack('insuficiencia cardiaca', 0, AD, ['insuficiencia', 'cardíaca'], 150, HX, 880, 150, 0, stagger=140, instant=True)
+ins = stack('insuficiencia cardiaca', 0, AD, ['Insuficiencia', 'cardíaca'], 150, HX, 880, 150, 0, stagger=140, instant=True)
 tag_ok = text(nid(), 'YOU, AGAIN tag', 0, AD, 'THE RIGHT WORD', 34, (HX, 770), font='semi', color=CYAN, just='left', box=(600, 50), tracking=300)
-ul = rect(nid(), 'Answer underline', 0, AD, (width('insuficiencia', 150) * .72, 16), CYAN, (HX, 1220), roundness=8)
+ul = rect(nid(), 'Answer underline', 0, AD, (width('Insuficiencia', 150) * .72, 16), CYAN, (HX, 1220), roundness=8)
 there = sticker('There it is.', 760, 1340, 0, AD, NARR[5]['start_ms'] - ANS, rot=-6, fill=CYAN, ink=hexc('#06123A'), size=56)
 A.append(kf(ul['id'], 'scaleX', [(150, 0, None), (550, 100, SNAP)]))
 fade(tag_ok, [(80, 0, None), (300, 100, OUT)])

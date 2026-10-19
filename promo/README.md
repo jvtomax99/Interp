@@ -6,8 +6,8 @@ Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
 30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `v6` (for the CEO pitch), `v7` (v6 with the
-Chatterbox voice), `v8` (v7, "Safer care." retaken), `v9` (Jose's pick of take), `hub-promo-v10.mp4` (current: the Spanish lines
-with a Latino accent). `build.py` builds v10; older builds are in git history.
+Chatterbox voice), `v8` (v7, "Safer care." retaken), `v9` (Jose's pick of take), `v10` (the Spanish lines
+with a Latino accent), `hub-promo-v11.mp4` (current: on-screen capitals fixed). `build.py` builds v11; older builds are in git history.
 
 ## How the chats run (Jose, 2026-10-19)
 
@@ -58,6 +58,11 @@ say the accent of the reference clip carries over. Now both Spanish lines take
 at 0.98 (v9's read as Italian, 0.35), line 4 at 0.93. Line 4 ran 30 ms long, so it is sped
 up 4.5% (`cb.tempo`, ffmpeg atempo, pitch kept) and line 5 starts at 7.71 s. The interpreter
 is now audibly a different man from the narrator. -15.1 LUFS, -1.2 dBTP.
+
+**v11** (2026-10-19): Jose: "Insuficiencia" was lower case; check all the grammar. The hook's
+quoted words now start with a capital: "Heart failure", "¿Fallo cardíaco?" (Spanish capitalises
+after ¿), "Insuficiencia cardíaca". The barrage's "beta blocker" is now "beta-blocker". Every other
+line on screen and in `narration.json` was read and left as is. Audio unchanged.
 
 ## v6: for the pitch to the hospital's CEO (2026-10-18)
 
