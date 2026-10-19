@@ -6,7 +6,8 @@ Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
 30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `v6` (for the CEO pitch), `v7` (v6 with the
-Chatterbox voice), `v8` (v7, "Safer care." retaken), `hub-promo-v9.mp4` (current: Jose's pick of take). `build.py` builds v9; older builds are in git history.
+Chatterbox voice), `v8` (v7, "Safer care." retaken), `v9` (Jose's pick of take), `hub-promo-v10.mp4` (current: the Spanish lines
+with a Latino accent). `build.py` builds v10; older builds are in git history.
 
 ## v7: the Chatterbox voice (2026-10-19)
 
@@ -40,6 +41,16 @@ Automatic pitch tracking is shaky on this voice (pyin marks few frames voiced, Y
 octaves), so his ear is the test; seeds 33 and 35 were the runners-up. -15.0 LUFS, -1.0 dBTP.
 
 **v9** (2026-10-19): Jose picked seed 33 by ear (1790 ms). Nothing else changed.
+
+**v10** (2026-10-19): Jose: the Spanish didn't sound right, make it more Latino. Cause:
+the multilingual model was copying its built-in English voice, and Resemble's own notes
+say the accent of the reference clip carries over. Now both Spanish lines take
+`voice/ref_es_ald.wav` as their reference: 14 s of Mexican Spanish from Piper's
+`es_MX-ald-medium` (public-domain dataset, es-419 pronunciation; how to remake it is in
+`voice_chatterbox.py`). He heard four options and picked it ("C"). Whisper: line 2 Spanish
+at 0.98 (v9's read as Italian, 0.35), line 4 at 0.93. Line 4 ran 30 ms long, so it is sped
+up 4.5% (`cb.tempo`, ffmpeg atempo, pitch kept) and line 5 starts at 7.71 s. The interpreter
+is now audibly a different man from the narrator. -15.1 LUFS, -1.2 dBTP.
 
 ## v6: for the pitch to the hospital's CEO (2026-10-18)
 

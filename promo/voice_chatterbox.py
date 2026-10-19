@@ -14,10 +14,17 @@ Kokoro takes in voice/kokoro/. English lines use ChatterboxTTS; lines with
 "lang": "es" use ChatterboxMultilingualTTS (language_id "es"). Runs on CPU; slow.
 
 Delivery: exaggeration ~0.5 is neutral, higher is more animated; cfg_weight lower
-slows and steadies the pace. A line can set "cb": {"exaggeration": .., "cfg_weight": ..}.
+slows and steadies the pace. A line can set "cb": {"exaggeration": .., "cfg_weight": ..,
+"seed": .., "ref": <reference clip, relative to promo/>, "tempo": <atempo factor>}.
+The Spanish lines use voice/ref_es_ald.wav: 14 s of Mexican Spanish from Piper's
+es_MX-ald-medium (its dataset is public domain, Unlicense; espeak es-419, so seseo), so
+the model speaks Spanish as a Latino speaker instead of carrying the English accent of
+its built-in voice. Remake it with
+  pip install piper-tts; curl -LO https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/medium/es_MX-ald-medium.onnx{,.json}
+  echo "Buenos días. Soy su intérprete médico. El doctor le va a explicar los resultados de sus análisis, y yo le voy a interpretar todo lo que diga. Si tiene alguna pregunta, con toda confianza me la puede hacer." | piper -m es_MX-ald-medium.onnx -f voice/ref_es_ald.wav
 Optional: CB_REF=<a clean 10 s recording of a real voice> (audio_prompt_path) makes
 Chatterbox speak in that voice. Only with that person's consent."""
-import json, os, shutil, sys
+import json, os, shutil, subprocess, sys
 import numpy as np, soundfile as sf, torch
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +61,8 @@ def trim(a, sr):
 def say(text, lang, opts):
     global es
     kw = {'exaggeration': opts.get('exaggeration', .55), 'cfg_weight': opts.get('cfg_weight', .5)}
-    if REF: kw['audio_prompt_path'] = REF
+    ref = HERE + '/' + opts['ref'] if 'ref' in opts else REF
+    if ref: kw['audio_prompt_path'] = ref
     if lang == 'es':
         if es is None:
             from chatterbox.mtl_tts import ChatterboxMultilingualTTS
@@ -62,8 +70,13 @@ def say(text, lang, opts):
         wav, sr = es.generate(text, language_id='es', **kw), es.sr
     else:
         wav, sr = en.generate(text, **kw), en.sr
-    a = wav.squeeze().cpu().numpy()
-    return trim(a, sr), sr
+    a = trim(wav.squeeze().cpu().numpy(), sr)
+    if 'tempo' in opts:                                       # ffmpeg's atempo keeps the pitch
+        a = np.frombuffer(subprocess.run(
+            ['ffmpeg', '-loglevel', 'error', '-f', 'f32le', '-ar', str(sr), '-ac', '1', '-i', '-',
+             '-af', f'atempo={opts["tempo"]}', '-f', 'f32le', '-'],
+            input=a.astype(np.float32).tobytes(), capture_output=True, check=True).stdout, np.float32)
+    return a, sr
 
 
 for i, L in enumerate(lines):

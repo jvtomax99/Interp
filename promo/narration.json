@@ -31,7 +31,8 @@
    "voice": "em_alex",
    "text": "¿Fallo cardíaco?",
    "cb": {
-    "seed": 20
+    "seed": 40,
+    "ref": "voice/ref_es_ald.wav"
    }
   },
   {
@@ -42,13 +43,18 @@
   },
   {
    "start_ms": 6000,
-   "max_ms": 1750,
+   "max_ms": 1705,
    "lang": "es",
    "voice": "em_alex",
-   "text": "Insuficiencia cardíaca."
+   "text": "Insuficiencia cardíaca.",
+   "cb": {
+    "seed": 41,
+    "ref": "voice/ref_es_ald.wav",
+    "tempo": 1.045
+   }
   },
   {
-   "start_ms": 7700,
+   "start_ms": 7710,
    "max_ms": 1850,
    "lang": "en",
    "text": "There it is. Meet Interpreter Hub.",
