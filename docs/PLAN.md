@@ -32,6 +32,13 @@ message to paste, only when the chat is heavy: it has been compacted
 output or many fix rounds, and the next phase would add a lot more.
 Before saying it, make sure everything worth keeping is in this file.
 Don't repeat it in every reply.
+**Claude opens the new chat itself** (Jose, 2026-10-19): with
+`create_session` (claude-code-remote tools), same repo, titled with the
+next phase, its first message the handoff. That message tells it to read
+`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
+next, then stop and wait for Jose's go. In the old chat, give Jose the new
+session's title and say "Archive this chat" (archive it only when he says
+so). If `create_session` isn't available, fall back to the message to paste.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
