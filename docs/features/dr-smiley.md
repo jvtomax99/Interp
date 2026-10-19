@@ -52,7 +52,9 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   with `brow: [[ms, pose or null], ...]` (`composed` and `encourage` hold
   `caring`, inner ends up). The hold ends when the run finishes or is
   interrupted. A pose is a lift and a turn about each brow's middle, never a
-  stretch, eased by a CSS transition (.17 s); Focused moves them 60%, Still
+  stretch, eased by a CSS transition (.17 s). Sizes were doubled after Jose
+  saw the first ones on his phone ("they don't move much"; looking up is now
+  4.2 drawing units, about 3.4 px on Home, and still clears every rank hat); Focused moves them 60%, Still
   and reduced motion change them without gliding. At rest there is no
   transform, so he looks exactly as drawn. `tests/suites/smiley-brows.cjs`.
   How the cut was made (re-run it if the base art changes): a dark-brown

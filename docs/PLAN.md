@@ -234,6 +234,11 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 Dr. Smiley's brows, bigger (Jose on his phone: "the brows
+  don't move much"). Every `DR_BROWS` pose about 2x (looking up 2 to 4.2
+  drawing units, caring 6 to 11 degrees); his pick of 1.5x / 2x / 3x was 2x.
+  Raised brows still clear the cap brim, mirror band and grad cap.
+
 - 2026-10-19 CoreCHI Pixar finish (stacked on the dashboard PR): clay tiles,
   glossy donut, candy buttons, glossy beads, lean-toward-finger, squash
   landings. CSS + one small pointer handler; nothing runs at rest.
