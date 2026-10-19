@@ -46,12 +46,16 @@ motion turns the lean and squashes off.
 2026-10-19: "look like a game", then "like Hackensack University Medical
 Center"; after a generic city, a satellite-traced campus and a box model he
 said "still not it", he sent photos of the main entrance, day and night).
-Replaced the readiness card. The scene is the main entrance at dusk: the
-entry drive with lamps on its median, the fountain circle, maroon-brick
-towers with cream bands, the dark glass tower, the main building with its
-glass top and the HMH mark. Each domain is one building (Ethics the main
-building, Encounter the tower on the left, Terminology the glass tower, US
-Systems the entrance pavilion, Culture the tower on the right); its windows
+Replaced the readiness card. The scene is the main entrance at dusk, laid
+out from his Google 3D screenshots: the drive off the street (crosswalk,
+turn-arrow lanes, a pill median with the flower bed and evergreen, the
+keyhole median with the fountain), the brown-brick building with the two
+banners at its end, the white tower with the HMH mark behind, the brick
+building with cream bands and glass lower floors on the left, the parking
+deck and dark tower on the right, the Helena Theurer Pavilion back right
+with its lettering. Each domain is one building (Ethics the banner
+building, Terminology the white tower, US Systems the left building,
+Encounter Helena Theurer, Culture the dark tower); its windows
 light up in tenths of coverage (`campusLevel`). Art: `city/entrance.webp`
 plus `city/<key>-lit<1..10>.webp` (only the lit windows, occluded by the
 scene), made by `docs/mockups/cchi-city/entrance.html` + `buildentr.cjs`;

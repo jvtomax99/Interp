@@ -15,8 +15,8 @@ renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.typ
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-const cam = new THREE.PerspectiveCamera(31, W/H, 0.5, 300);
-cam.position.set(0, 30, 50); cam.lookAt(0, 3.6, -4); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+const cam = new THREE.PerspectiveCamera(34, W/H, 0.5, 300);
+cam.position.set(1.5, 29, 47); cam.lookAt(1.5, 2.6, -4); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
 scene.add(new THREE.HemisphereLight(0xb7c4ff, 0x4a3d52, 1.35));
 const moon = new THREE.DirectionalLight(0xc9c6ff, 1.0); moon.position.set(-18, 26, 14); moon.castShadow = true;
 moon.shadow.mapSize.set(4096,4096); Object.assign(moon.shadow.camera,{left:-24,right:24,top:24,bottom:-24,near:1,far:90}); moon.shadow.bias=-0.0006; moon.shadow.radius=4; scene.add(moon);
@@ -44,7 +44,7 @@ const LIT = new THREE.MeshBasicMaterial({ color:0xffcf7a });
 // a tower: body, a cream cornice, rooftop units, and windows on the faces the camera sees
 const WINDOWS = {}; const LABEL_AT = {}; const BOX = {};
 function tower(key, x, z, w, d, floors, style){
-  const h = floors*FL, y0 = 0.3;
+  const h = floors*FL, y0 = key === 'n' ? 0.3 + 3*FL : 0.3;
   const mats = style === 'glass' ? GLASSWALL : BRICK(style||{})(Math.max(w,d), h);
   box(w, h, d, mats, x, y0 + h/2, z, 0.08);
   box(w+0.15, 0.22, d+0.15, M(0xd9cdb8), x, y0 + h + 0.11, z, 0.05);
@@ -67,60 +67,88 @@ function tower(key, x, z, w, d, floors, style){
   BOX[key] = { x, z, w, d, h: h + 0.8 };
 }
 
-// ---- ground: the diorama slab, lawns, the drive with its median and the fountain circle ----
-box(34, 1.6, 40, M(0x7a4f36), 0, -0.8, -3, 0.3, false);
-box(33.9, 0.3, 39.9, M(0x5d9a6b), 0, 0.02, -3, 0.15, false);
-const asphalt = M(0x3b3a46, { r:0.9 }), curb = M(0xe7d36a, { r:0.6 }), walk = M(0x8d8c99), grass = M(0x6fb07c);
-box(6.2, 0.06, 26, asphalt, 0, 0.2, 7, 0.02, false);                        // the entry drive
-box(1.5, 0.12, 22, grass, 0, 0.24, 8.5, 0.05, false); box(1.6, 0.1, 22.1, curb, 0, 0.22, 8.5, 0.05, false);   // median
-// the circle
-add(new THREE.CylinderGeometry(4.2, 4.2, 0.06, 48), asphalt, 0, 0.21, -4.5, false);
-add(new THREE.CylinderGeometry(2.6, 2.6, 0.14, 48), grass, 0, 0.26, -4.5, false);
-add(new THREE.CylinderGeometry(2.66, 2.66, 0.12, 48), curb, 0, 0.24, -4.5, false);
-add(new THREE.CylinderGeometry(0.95, 1.05, 0.3, 32), M(0xbdb6c8), 0, 0.42, -4.5);
-add(new THREE.CylinderGeometry(0.8, 0.8, 0.04, 32), new THREE.MeshBasicMaterial({ color:0x9fe8ff }), 0, 0.58, -4.5, false);
-add(new THREE.CylinderGeometry(0.1, 0.14, 0.7, 12), M(0xd5d1de), 0, 0.85, -4.5);
-add(new THREE.SphereGeometry(0.22, 16, 12), new THREE.MeshBasicMaterial({ color:0xd8f6ff }), 0, 1.25, -4.5, false);
-for (let i=0;i<14;i++){ const a = i/14*Math.PI*2; box(0.3,0.16,0.3, M([0xe0516b,0xf2b84b,0xb06ad0,0xffffff][i%4]), Math.cos(a)*1.9, 0.38, -4.5+Math.sin(a)*1.9, 0.08, false); }
-// side roads from the circle to the entrances
-box(16, 0.06, 3.2, asphalt, -8, 0.2, -6.8, 0.02, false); box(14, 0.06, 3.2, asphalt, 9, 0.2, -6.8, 0.02, false);
-// sidewalks along the drive
-box(1.0, 0.1, 26, walk, -3.7, 0.22, 7, 0.03, false); box(1.0, 0.1, 26, walk, 3.7, 0.22, 7, 0.03, false);
-// lamps along the drive and around the circle (lit heads)
+// ---- ground: slab, lawns, the street across the front, the drive with its two medians ----
+box(40, 1.6, 46, M(0x7a4f36), 0, -0.8, -4, 0.3, false);
+box(39.9, 0.3, 45.9, M(0x5d9a6b), 0, 0.02, -4, 0.15, false);
+const asphalt = M(0x3d3c48, { r:0.9 }), curb = M(0xe7d36a, { r:0.6 }), walk = M(0x9a99a6), grass = M(0x6fb07c), paint = new THREE.MeshBasicMaterial({ color:0xe9e9f0 });
+box(39.5, 0.06, 3.4, asphalt, 0, 0.2, 15, 0.02, false);                                   // the street in front
+box(39.5, 0.02, 0.06, curb, 0, 0.24, 14.9, 0.01, false); box(39.5, 0.02, 0.06, curb, 0, 0.24, 15.1, 0.01, false);
+box(39.5, 0.1, 1.2, walk, 0, 0.22, 12.7, 0.03, false);                                    // sidewalk
+box(10, 0.06, 20, asphalt, 0, 0.21, 2.5, 0.02, false);                                    // the drive
+for (let i=0;i<20;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48, 0.25, 12.6, 0.01, false); // crosswalk
+box(26, 0.06, 2.8, asphalt, 0, 0.21, -7.6, 0.02, false);                                  // the road across the end
+// lane lines and turn arrows
+for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4) box(0.06, 0.02, 0.7, paint, x, 0.25, z, 0.01, false);
+function arrow(x, z, turn){ box(0.12, 0.02, 0.8, paint, x, 0.25, z, 0.01, false);
+  const h = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.4, 3), paint); h.rotation.x = -Math.PI/2; h.rotation.z = turn ? (turn>0 ? -Math.PI/2 : Math.PI/2) : Math.PI; h.position.set(x + (turn||0)*0.25, 0.26, z - 0.5); G.add(h); }
+arrow(-3.8, 10.2, 1); arrow(-2.2, 10.2, -1); arrow(-3.8, 7.6, 1); arrow(-2.2, 7.6, -1); arrow(2.0, 9.0, 0); arrow(3.1, 9.0, 0); arrow(4.2, 9.0, 0);
+// the front median: a pill with a flower bed and an evergreen
+function pill(cx, cz, w, l, mat, y=0.27, h=0.12){ const sh = new THREE.Shape(); const r = w/2;
+  sh.absarc(0, l/2 - r, r, 0, Math.PI, false); sh.absarc(0, -l/2 + r, r, Math.PI, Math.PI*2, false);
+  const g = new THREE.ExtrudeGeometry(sh, { depth:h, bevelEnabled:false, curveSegments:24 }); g.rotateX(-Math.PI/2); return add(g, mat, cx, y - h/2, cz, false); }
+pill(-0.1, 7.8, 2.1, 7.2, curb, 0.24, 0.1); pill(-0.1, 7.8, 1.8, 6.9, grass, 0.3, 0.12);
+for (let i=0;i<22;i++){ const a = i/22*Math.PI, r = 0.62; box(0.22,0.18,0.22, M([0xe0414b,0xf2c14e,0xf28c28][i%3]), -0.1 + Math.cos(a)*r*(i%2?0.55:1), 0.42, 10.6 + Math.sin(a)*0.5, 0.06, false); }
+box(1.0, 0.3, 0.5, M(0xd9cdb8), -0.1, 0.45, 10.0, 0.05);                                  // the little sign in the bed
+// the back median: a keyhole, the fountain in its bulb
+pill(-0.1, -0.5, 1.6, 5.0, curb, 0.24, 0.1); pill(-0.1, -0.5, 1.3, 4.7, grass, 0.3, 0.12);
+add(new THREE.CylinderGeometry(1.5, 1.5, 0.1, 40), curb, -0.1, 0.24, -3.4, false); add(new THREE.CylinderGeometry(1.32, 1.32, 0.12, 40), grass, -0.1, 0.3, -3.4, false);
+add(new THREE.CylinderGeometry(0.7, 0.8, 0.28, 32), M(0xbdb6c8), -0.1, 0.48, -3.4);
+add(new THREE.CylinderGeometry(0.58, 0.58, 0.04, 32), new THREE.MeshBasicMaterial({ color:0x9fe8ff }), -0.1, 0.63, -3.4, false);
+add(new THREE.CylinderGeometry(0.08, 0.11, 0.6, 12), M(0xd5d1de), -0.1, 0.9, -3.4);
+add(new THREE.SphereGeometry(0.18, 16, 12), new THREE.MeshBasicMaterial({ color:0xd8f6ff }), -0.1, 1.25, -3.4, false);
+// lamps along the drive's edges and the street
 const lampHead = new THREE.MeshBasicMaterial({ color:0xfff1c8 });
-function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.6, 8), M(0x2c2c36), x, 1.1, z); add(new THREE.SphereGeometry(0.15, 12, 10), lampHead, x, 1.95, z, false);
-  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.7, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0.18 })); glow.rotation.x = -Math.PI/2; glow.position.set(x, 0.25, z); G.add(glow); }
-for (let z = 19; z > -1; z -= 3.2){ lamp(-0.55, z); lamp(0.55, z); lamp(-3.5, z - 1.6); lamp(3.5, z - 1.6); }
-for (let i=0;i<8;i++){ const a = i/8*Math.PI*2 + 0.2; lamp(Math.cos(a)*4.6, -4.5 + Math.sin(a)*4.6); }
-// trees: dark evergreens and a few round ones
-function tree(x, z, s=1, cone=true){
-  add(new THREE.CylinderGeometry(0.08*s,0.1*s,0.5*s,6), M(0x4a3426), x, 0.5+0.25*s, z);
-  if (cone){ add(new THREE.ConeGeometry(0.75*s, 1.9*s, 8), M(0x2f5e44, {r:0.9}), x, 0.5+1.3*s, z); }
-  else add(new THREE.IcosahedronGeometry(0.85*s, 1), M(0x3c7a52, {r:0.9}), x, 0.5+1.1*s, z);
+function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.8, 8), M(0x2c2c36), x, 1.2, z); add(new THREE.SphereGeometry(0.16, 12, 10), lampHead, x, 2.15, z, false);
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0.16 })); glow.rotation.x = -Math.PI/2; glow.position.set(x, 0.26, z); G.add(glow); }
+for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }
+for (let x = -18; x <= 18; x += 6) lamp(x, 13.4);
+// trees: the big street trees in front, evergreens and red maples along the drive
+function tree(x, z, s=1, kind='round'){
+  add(new THREE.CylinderGeometry(0.09*s,0.12*s,0.6*s,6), M(0x4a3426), x, 0.5+0.3*s, z);
+  if (kind === 'cone') add(new THREE.ConeGeometry(0.7*s, 2.0*s, 8), M(0x2f5e44, {r:0.9}), x, 0.5+1.4*s, z);
+  else add(new THREE.IcosahedronGeometry(0.95*s, 1), M(kind === 'red' ? 0x9c3b45 : 0x3c7a52, {r:0.9}), x, 0.5+1.2*s, z);
 }
-for (const [x,z,s,c] of [[-6,12,1.2,1],[-7.5,15,1,0],[6.5,13,1.3,1],[8,16.5,1,0],[-5.2,17.5,1,1],[5.4,8,0.9,0],[-12,9,1.2,1],[12,7,1.1,1],[-2.1,13,0.6,0],[2.1,10,0.6,0],[-2.1,4,0.6,0],[2.1,1,0.6,0],[-14,2,1.3,1],[14,-10,1.2,1],[-15,-12,1.1,0]]) tree(x, z, s, !!c);
-// the HMH sign between brick pillars, at the start of the drive
-box(0.5, 1.0, 0.5, BRICK({})(0.5,1), -3.0, 0.8, 17.5, 0.05); box(0.5, 1.0, 0.5, BRICK({})(0.5,1), 3.0, 0.8, 17.5, 0.05);
-box(5.0, 0.7, 0.2, M(0xe8eaef), 0, 0.75, 17.5, 0.05);
+for (const [x,z,s,k] of [[-10,18,1.6],[-3,18.5,1.8],[5,18.2,1.7],[12,18.5,1.5],[-16,17.5,1.3],[17,17.6,1.4],
+  [-5.6,4,0.7,'red'],[-5.6,1.2,0.7,'red'],[-5.6,7,0.7,'red'],[0.3,6.5,0.9,'cone'],[-0.5,-1.3,0.7,'cone'],[5.8,11.2,0.8,'cone'],[6.6,10.6,0.7,'red']]) tree(x, z, s, k);
+// lawns at the drive's mouth
+box(9, 0.12, 4.5, grass, -10, 0.24, 10.2, 0.05, false); box(8, 0.12, 4.5, grass, 10.5, 0.24, 10.2, 0.05, false);
 let TEX = null; const pend = [];
-// ---- the five buildings (domain keys) ----
-tower('t', -9.8, -12.5, 6.0, 6.0, 15, 'glass');                                           // the dark mirrored-glass tower
-tower('n', -10.5, 0.5, 6.4, 7.0, 13, {});                                                // the brick tower on the left
-tower('s', -4.8, -9.6, 5.6, 4.2, 4, { glass:'#2b3550' });                                 // the entrance pavilion (with the porte-cochere)
-tower('c', 10.0, -2.5, 6.0, 9.0, 12, { glass:'#2b3550' });                                 // the tower on the right
-tower('e', 5.6, -14.0, 9.0, 5.5, 7, {});                                                 // the main building at the end of the drive
-// porte-cochere: brick columns and a flat canopy reaching toward the circle
-for (const dx of [-2.2, -0.2, 1.8]) box(0.45, 2.2, 0.45, BRICK({})(0.5, 2.2), -4.8+dx, 1.4, -5.6, 0.05);
-box(6.0, 0.35, 2.4, M(0x7e3b37), -4.8, 2.6, -6.4, 0.06);
-// the main building's glass top with the HMH mark (lit) and its banners
-box(5.6, 1.6, 3.6, GLASSWALL, 5.6, 0.3+7*FL+0.9, -14.2, 0.06);
-pend.push(() => { const logo = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.1), new THREE.MeshBasicMaterial({ color:0xffffff })); logo.position.set(5.6, 0.3+7*FL+0.9, -12.38); BASE.add(logo);
-  const l2 = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l2.position.set(5.6, 0.3+7*FL+0.9, -12.37); BASE.add(l2); });
-for (const [x,c] of [[2.4,0x2c5aa0],[3.3,0xe8eaef],[8.6,0x2c5aa0]]) box(0.6, 2.0, 0.06, M(c), x, 0.3+2.2, -11.2, 0.03);
-// the white sign panel on the right tower's corner, as in the aerial photo
-box(0.06, 2.4, 2.6, M(0xf4f5f8), 6.95, 0.3+9*FL, 1.0, 0.04);
-pend.push(() => { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.4), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(6.91, 0.3+9*FL, 1.0); l.rotation.y = -Math.PI/2; BASE.add(l); });
-
+// ---- the buildings (domain keys) ----
+// Ethics: the brown-brick building at the end of the drive, two big banners on its face, evergreens in its planter
+tower('e', 0, -12.4, 9.5, 5.0, 7, { col:'#6e3a33', band:'#7a4239' });
+pend.push(() => { const b1 = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 3.4), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); b1.position.set(-2.6, 2.6, -9.86); BASE.add(b1);
+  const l1 = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l1.position.set(-2.6, 3.4, -9.85); BASE.add(l1);
+  const b2 = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 3.4), new THREE.MeshBasicMaterial({ color:0x1f3f7a })); b2.position.set(2.8, 2.6, -9.86); BASE.add(b2);
+  const s2 = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.6), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); s2.position.set(2.8, 3.4, -9.85); BASE.add(s2); });
+pill(0, -9.2, 1.4, 9.5, curb, 0.26, 0.2).rotation.y = Math.PI/2;
+for (const x of [-3.6,-1.4,0.8,3.4]) tree(x, -9.3, 0.6, 'cone');
+// Terminology: the tall white tower behind, the HMH mark near its top
+tower('t', 0.6, -20.5, 4.6, 4.6, 14, { col:'#e9e6df', band:'#d9d4ca' });
+pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ color:0x3a4f8a })); p.position.set(0.6, 0.3+12.2*FL, -18.17); BASE.add(p);
+  const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(0.6, 0.3+12.2*FL, -18.16); BASE.add(l); });
+// no windows under the two banners
+WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position, under = p.z > -10 && p.y > 0.8 && p.y < 4.4 && ((p.x > -3.55 && p.x < -1.65) || (p.x > 1.85 && p.x < 3.75)); if (under) BASE.remove(m); return !under; });
+// the long glass buildings either side of it (context)
+box(9, 7*FL, 4.5, GLASSWALL, -7.8, 0.3+3.5*FL, -20.5, 0.06); box(9, 7*FL, 4.5, M(0x7a5a7a,{r:0.2,m:0.4}), 9.4, 0.3+3.5*FL, -20.5, 0.06);
+// US Systems: the brick building on the left: cream bands, a white roof, glass on its lower floors
+tower('s', -10.2, 1.0, 7.0, 12.0, 8, {});
+box(7.1, 2*FL, 12.1, GLASSWALL, -10.2, 0.3+FL, 1.0, 0.04);
+box(7.2, 0.25, 12.2, M(0xf1f2f4), -10.2, 0.3+8*FL+0.12, 1.0, 0.04);
+// the dark parking deck on the right (context): open levels
+for (let l=0;l<7;l++){ box(6.4, 0.25, 8.2, M(0x3f4352), 9.6, 0.3+l*0.95+0.12, 6.2, 0.04); }
+for (const [dx,dz] of [[-3,-4],[3,-4],[-3,4],[3,4],[0,-4],[0,4],[-3,0],[3,0]]) box(0.28, 6.6, 0.28, M(0x3a3e4c), 9.6+dx, 0.3+3.3, 6.2+dz, 0.03);
+// Culture: the dark stepped tower behind the deck
+tower('c', 10.6, -5.2, 7.0, 8.0, 11, 'glass');
+box(5.4, 1.2*FL, 6.2, GLASSWALL, 10.6, 0.3+11*FL+0.4, -5.6, 0.05);
+// Encounter: the Helena Theurer Pavilion, back right: glass tower with the lettering, on a brick base with slit windows
+box(10, 3*FL, 7, M(0x9a5444), 15.5, 0.3+1.5*FL, -16, 0.06);
+for (let i=0;i<9;i++) box(0.16, 3*FL*0.7, 0.04, M(0xf3efe6), 11.2+i*1.05, 0.3+1.6*FL, -12.47, 0.02, false);
+tower('n', 15.5, -16.6, 9.0, 6.0, 9, 'glass');
+WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, top = p.y > 0.3 + 3*FL + 8*FL; if (top) BASE.remove(m); return !top; });
+pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#e8f0ff'; g.font = 'bold 44px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('HACKENSACK UNIVERSITY MEDICAL CENTER', 512, 34);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 0.52), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(15.5, 0.3 + 3*FL + 9*FL - 0.33, -13.56); BASE.add(p); });
 // ---- capture pipeline ----
 const depthOnly = new THREE.MeshBasicMaterial({ colorWrite:false });
 const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tctx = tmp.getContext('2d', { willReadFrequently:true });
@@ -153,8 +181,8 @@ window.__run = async () => {
     }
     all.forEach(o => { o.material = keep.get(o); });
   }
-  out.fountain = proj(0, 1.3, -4.5);
-  out.drive = [proj(-1.8, 0.4, 18), proj(-1.8, 0.4, -1.2), proj(1.8, 0.4, -1.2), proj(1.8, 0.4, 18)];
+  out.fountain = proj(-0.1, 1.3, -3.4);
+  out.drive = [proj(-2.8, 0.4, 15.5), proj(-2.8, 0.4, -6), proj(3.2, 0.4, -6), proj(3.2, 0.4, 15.5)];
   return out;
 };
 window.__done = true;

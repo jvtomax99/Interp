@@ -16754,7 +16754,7 @@ const GUIDE_TOPICS = [
 
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance at dusk, with the drive, the fountain and the towers. Each exam area is one building (Ethics the main building, Encounter the tower on the left, Terminology the glass tower, U.S. Health Systems the entrance pavilion, Cultural Responsiveness the tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Tap a building or its label to practise that area; Dr. Smiley points at the one worth lighting next, and <b>Play</b> starts what's next. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Tap a building or its label to practise that area; Dr. Smiley points at the one worth lighting next, and <b>Play</b> starts what's next. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
     <p><b>Your domains</b> further down shows, for each area, how much of the question bank you've learned and how often you got it right in your sessions. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
@@ -20093,13 +20093,13 @@ function renderFocusTile(worst){
    building its lit windows at 1..10 tenths, occluded by everything in front. CAMPUS_MAP: w,h render size;
    g scene box [x,y,w,h]; b[key] = { label [x,y], box (tap area), lv: boxes of the 10 lit layers };
    f fountain [x,y]; drive: the two lanes' ends. */
-const CAMPUS_MAP = {"w":960,"h":760,"g":[0,164,960,596],"f":[480,421],"drive":[[421,791],[438,475],[522,475],[539,791]],"b":{"t":{"label":[272,170],"box":[197,153,153,238],"lv":[[201,187,148,191],[201,187,149,202],[201,187,149,202],[201,177,149,212],[201,177,149,212],[201,174,149,215],[201,174,149,215],[201,174,149,215],[201,174,150,215],[201,174,150,215]]},"n":{"label":[211,301],"box":[108,270,207,273],"lv":[[163,334,153,194],[135,328,181,213],[126,315,190,226],[126,294,190,247],[126,294,190,247],[114,294,202,247],[114,294,202,247],[114,294,202,247],[114,294,202,247],[114,294,202,247]]},"s":{"label":[379,327],"box":[315,311,125,99],"lv":[[319,354,121,54],[319,343,122,65],[319,331,122,77],[319,331,122,77],[319,331,122,77],[319,331,122,77],[319,331,122,77],[319,331,122,77],[319,331,122,77],[319,331,122,77]]},"c":{"label":[722,286],"box":[629,250,190,267],"lv":[[629,343,149,171],[629,305,182,209],[629,292,182,222],[629,292,182,222],[629,278,182,236],[629,278,182,236],[629,272,182,242],[629,272,182,242],[629,272,184,242],[629,272,184,242]]},"e":{"label":[592,257],"box":[501,240,189,136],"lv":[[500,264,170,98],[500,264,170,110],[500,264,170,110],[500,264,170,110],[500,259,186,115],[500,259,186,115],[500,259,186,115],[500,259,186,115],[500,259,186,115],[500,259,186,115]]}}};
+const CAMPUS_MAP = {"w":960,"h":760,"g":[0,125,960,635],"f":[445,411],"drive":[[350,710],[391,401],[515,401],[531,710]],"b":{"e":{"label":[451,253],"box":[353,238,193,129],"lv":[[356,267,85,98],[354,261,188,104],[354,261,188,104],[354,261,189,104],[354,261,189,104],[354,261,189,104],[354,261,189,104],[354,256,189,109],[354,256,189,109],[354,256,189,109]]},"t":{"label":[464,126],"box":[420,116,86,186],"lv":[[421,169,68,121],[420,154,83,136],[420,138,83,162],[420,138,83,162],[420,138,83,162],[420,138,83,162],[420,138,83,162],[420,138,83,162],[420,138,83,162],[420,134,84,166]]},"s":{"label":[197,359],"box":[70,303,238,258],"lv":[[92,389,217,170],[92,362,217,197],[77,336,232,223],[77,331,232,228],[77,331,232,228],[77,324,232,235],[77,324,232,235],[77,324,232,235],[77,324,232,235],[77,324,232,235]]},"c":{"label":[682,261],"box":[590,232,188,222],"lv":[[596,273,176,179],[591,273,181,179],[591,273,183,179],[590,252,184,200],[590,252,184,200],[590,252,184,200],[590,252,184,200],[590,252,184,200],[590,252,184,200],[590,252,184,200]]},"n":{"label":[744,169],"box":[643,187,196,149],"lv":[[645,203,190,100],[645,194,190,109],[645,186,190,117],[645,186,190,117],[645,186,190,117],[645,186,190,117],[645,186,190,117],[645,183,191,120],[645,183,193,120],[645,183,193,120]]}}};
 const CAMPUS = [
-  { key:'e', id:'ethics',      short:'Ethics',      place:'the main building' },
-  { key:'t', id:'terminology', short:'Terminology', place:'the glass tower' },
-  { key:'s', id:'systems',     short:'US Systems',  place:'the entrance pavilion' },
-  { key:'n', id:'encounter',   short:'Encounter',   place:'the tower on the left' },
-  { key:'c', id:'cultural',    short:'Culture',     place:'the tower on the right' }
+  { key:'e', id:'ethics',      short:'Ethics',      place:'the building with the banners' },
+  { key:'t', id:'terminology', short:'Terminology', place:'the white tower' },
+  { key:'s', id:'systems',     short:'US Systems',  place:'the building on the left' },
+  { key:'n', id:'encounter',   short:'Encounter',   place:'the Helena Theurer Pavilion' },
+  { key:'c', id:'cultural',    short:'Culture',     place:'the dark tower' }
 ];
 // How lit a building is: the same coverage the domain bars show (learned, plus half for shaky), in tenths.
 const campusLevel = cover => Math.max(0, Math.min(10, Math.round(cover * 10)));
@@ -21013,8 +21013,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1845';
-const BUILD_TIME = '2026-10-19 18:45 UTC';
+const BUILD_ID = 'b1019.1924';
+const BUILD_TIME = '2026-10-19 19:24 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
