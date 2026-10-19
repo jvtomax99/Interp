@@ -33,8 +33,11 @@ output or many fix rounds, and the next phase would add a lot more.
 Before saying it, make sure everything worth keeping is in this file.
 Don't repeat it in every reply.
 **Claude opens the new chat itself** (Jose, 2026-10-19): with
-`create_session` (claude-code-remote tools), same repo, titled with the
-next phase, its first message the handoff. That message tells it to read
+`create_session` (claude-code-remote tools), same repo, its first message
+the handoff. **The title says what the chat works on** (Jose, 2026-10-19),
+in plain words, never a generic name like "main inter hub": e.g. "S4
+Glossary taps faster". A chat whose work changes gets renamed
+(`set_session_title`). That message tells it to read
 `AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
 next, then stop and wait for Jose's go. In the old chat, give Jose the new
 session's title and say "Archive this chat" (archive it only when he says
