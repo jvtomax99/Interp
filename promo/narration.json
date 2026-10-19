@@ -132,7 +132,10 @@
    "start_ms": 42700,
    "max_ms": 1900,
    "lang": "en",
-   "text": "Better words. Safer care."
+   "text": "Better words. Safer care.",
+   "cb": {
+    "seed": 32
+   }
   }
  ]
 }
