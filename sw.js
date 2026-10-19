@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v237-cchi-pixar';
+const CACHE_VERSION = 'interpreter-hub-v238-brows-bigger';
 const PRECACHE = [
   './',
   './index.html',
