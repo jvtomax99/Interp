@@ -104,6 +104,7 @@
   }
 
   function applyExactPins(){
+    if (window.fmNote) fmNote('pins');   // the smoothness meter's list of what ran
     /* The greeting hand is NOT a sheet pin. index.html ships a drawn SVG for
        .home-wave-icon; the sheet's 'wave' tile is a raster cartoon hand with a
        skin tone and a leftover halo, and it was the only saturated sticker on a

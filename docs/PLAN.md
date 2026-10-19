@@ -94,12 +94,15 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a, S7b and S7c are in Done. Phone runs in Facts: S7a no clear gain;
-   S7b + S7c (b1018.1746) the best scrolling yet, one run. Still to do: 1-2
-   more runs on b1018.1746 (Jose: 2-3 per build, so the spread is known),
-   and the stall while Home sits still (~27 ms/s, worst 120 ms, two
-   builds in a row; was ~7 ms/s): find what runs then. Part 2 is finished
-   once those are in.
+   S7a, S7b, S7c and S7d are in Done. Phone runs in Facts: S7a no clear
+   gain; S7b + S7c (b1018.1746) the best scrolling yet, one run. Still to
+   do: (1) Jose's runs on b1018.2012 (asked 2026-10-19; the message had a
+   placeholder, no numbers), 2-3 per build so the spread is known; (2) the
+   stall while Home sits still (~27 ms/s, worst 120 ms, two builds in a
+   row; was ~7 ms/s). Chromium doesn't show it (Facts, 2026-10-19), so
+   S7d made the meter list each stall with when it came and what ran:
+   Jose runs the same steps on the S7d build, Copy, paste; fix what the
+   list names. Part 2 is finished once both are in.
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
@@ -200,6 +203,20 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 S7d, the meter names its stalls (diagnostic; visible only in
+  the meter's results). Every frame over 50 ms is kept with its time into
+  the run, time since the last scroll, screen, time since opening and the
+  app jobs that ran in it (`fmNote(tag)`: render, greeting word, heartline,
+  pins, tab bar tuck/open, Dr. Smiley's performances, time labels, time of
+  day, glossary saved, the six data listeners, the meter itself, More
+  closing). The six longest show under the table and in Copy numbers.
+  Names are matched by time over the stall and the frame before it (a held
+  frame carries its due time, so the stall lands one frame late; the first
+  version missed every name). New lab tool `tests/tools/idle.cjs` (Home
+  left still, optional scroll first, trace of every task over 50 ms with
+  what ran). frame-meter suite checks the list, the sheet and the copy
+  text. User Guide: the smoothness answer explains the list.
 
 - 2026-10-18 S3 startup (invisible). Measured with the new
   `tests/tools/startup.cjs` (each long task's pieces, the lines that forced
@@ -421,6 +438,28 @@ come from this alone.
   Cause unknown (a timer, the greeting or the meter's own start are
   candidates; untested). One run each build, so the spread is still
   unknown: Jose asked for 2-3 runs per build.
+- 2026-10-19, Home left still (`tests/tools/idle.cjs`, UA=chromium, 4x,
+  SCROLL=1): after the opening (~5.5 s from load) and after a scroll, no
+  main-thread task over 50 ms in 27 s except one minor GC; the idle tab bar
+  tuck (4 s after the last touch, `dockIdleRestart`) ran with no long task.
+  So the phone's still-part stall (~27 ms/s, 120 ms) doesn't show in
+  Chromium. With a fresh start the opening is busy until ~5.5 s at 4x (name
+  pen, greeting sequence, badge pendulum, a 105 ms idle tuck at 5.3 s
+  whose time is mostly forced style), so a run started within a few
+  seconds of opening carries the opening's tail.
+- The phone's "still" number is total minus scrolling, so it holds the
+  meter's start (More closing), frames over 200 ms after a scroll and the
+  idle tuck. The only app change between the ~7 ms/s build (b1017.2034)
+  and the ~29 ms/s one (b1018.0223) was S7a (the `overlayFlags` observer,
+  plus part 1's per-frame scroll read taken back out). Unproven as cause.
+- Home's jobs at rest (2026-10-19): greeting word (`innerHTML`, every
+  2.8 s), heartline (every 5.2-6.5 s: forced layout, then a 4.2 s
+  `stroke-dashoffset` draw, not a compositor property), Dr. Smiley's idle
+  (every 1.2-3 s, steps every 38 ms, a `getComputedStyle`), time labels
+  (30 s), time of day (60 s), the idle tab bar tuck (once, 4 s after the
+  last touch). Two body observers react to inserts anywhere: `overlayFlags`
+  (3 querySelectors) and `pin-icons.js`'s, which re-runs `applyExactPins`
+  in the next frame; the meter's own pill text (2 a second) sets off both.
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main
