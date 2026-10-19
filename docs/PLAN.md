@@ -243,6 +243,15 @@ come from this alone.
   which hides it while playing). Closing the sheet now pauses the video (Back
   used to leave it playing behind Home).
 
+- 2026-10-19 Your HUMC campus on CoreCHI Practice (Jose: a game look,
+  then "make it look like Hackensack", from his photos and Google 3D
+  screenshots, then "alive"). The main entrance at dusk, pre-rendered 3D
+  (`city/`); each exam area is a building whose windows light up with
+  mastery; the glossy readiness donut in the card; cars, an ambulance, a
+  helicopter, flags, the fountain, people walking and street traffic, all
+  paused off screen; Dr. Smiley pinned by the area to focus on; Your domains
+  rows right under. Note: `docs/features/practice-dashboard.md`; pipeline
+  `docs/mockups/cchi-city/` (`buildentr.cjs`, `NOLIT` to keep the lit layers).
 - 2026-10-19 Watch button became a story bubble (Jose's pick of three):
   the video's still in a turning ring of the promo's colours, a play badge,
   "Watch" on a dark chip. Same corner, same rules; 3 KB thumbnail.
@@ -449,6 +458,9 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
+  (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
+  buildings were modelled from Jose's photos plus WebSearch facts.
 - The tests' Chromium has no H.264 (`canPlayType` is empty), so no suite can
   play `media/hub-promo.mp4`; only an iPhone or desktop Chrome/Safari proves
   playback. The suites check the button, the sheet and the "watched" rule.
