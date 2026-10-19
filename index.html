@@ -9539,7 +9539,9 @@ function loadGlossaryCache(){
    next line. Now that the listener supplies terms asynchronously, wiping them
    here would blank the glossary between the cached paint and the first
    snapshot. */
+let lastCategoriesMeta = null;
 function applyCategoriesMeta(meta){
+  lastCategoriesMeta = JSON.stringify(meta || []);
   const existingTerms = {};
   ((DATA && DATA.categories) || []).forEach(c=>{ existingTerms[c.id] = c.terms; });
   DATA = { categories: (meta || []).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
@@ -9634,7 +9636,11 @@ function startCategoriesMetaListener(){
   categoriesMetaListenerStarted = true;
   db.collection('terminology-meta').doc('categories').onSnapshot(snap=>{
     if(!snap.exists) return;
-    applyCategoriesMeta(snap.data().categories || []);
+    // Its first snapshot is the document loadData() just read and painted:
+    // nothing to redo. That repaint was a whole Home render at startup (S3).
+    const meta = snap.data().categories || [];
+    if(JSON.stringify(meta) === lastCategoriesMeta) return;
+    applyCategoriesMeta(meta);
     render();
   }, err=> console.error('categories-meta listener error:', err));
 }
@@ -17711,9 +17717,11 @@ function renderContent(){
     animateCountUps(!sameScreen);
     // Re-cache the photo layer (the old node was just thrown away) and put it
     // straight back where the current scroll position says it belongs, so a
-    // re-render mid-scroll doesn't snap the image back to the top.
+    // re-render mid-scroll doesn't snap the image back to the top. In the
+    // next frame, before it paints: reading the scroll position here forced
+    // the whole new screen's layout inside this task (S3).
     heroPhotoEl = content.querySelector('.home-greeting-photo-inner');
-    applyHeroDrift();
+    if(heroDriftFrame === null) heroDriftFrame = requestAnimationFrame(applyHeroDrift);
     return;
   }
   heroPhotoEl = null;     // off Home: the scroll handler does nothing
@@ -20285,8 +20293,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1018.1746';
-const BUILD_TIME = '2026-10-18 17:46 UTC';
+const BUILD_ID = 'b1018.2012';
+const BUILD_TIME = '2026-10-18 20:12 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20647,7 +20655,10 @@ function dockAfterRender(){
   if(!bar) return;
   const i = [...bar.querySelectorAll('.tabbar-btn')].findIndex(b => b.classList.contains('is-active'));
   if(i >= 0){
-    bar.getBoundingClientRect();                 // settle the old spot first
+    // Settle the old spot first. Style only: a layout here laid out the whole
+    // new screen inside the render's task (S3); the frame does that now.
+    const lens = bar.querySelector('.tabbar-lens');
+    getComputedStyle(lens || bar).transform;
     bar.style.setProperty('--tab-i', i);
     dockLensAt = i;
   }

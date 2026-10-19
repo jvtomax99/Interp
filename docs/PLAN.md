@@ -94,16 +94,25 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a, S7b and S7c are in Done. S7a's phone run (Facts) showed no clear
-   gain; S7b and S7c phone checks pending (Jose: 2-3 runs per build, same
-   protocol, so the spread is known). Part 2 is finished once those are in.
+   S7a, S7b and S7c are in Done. Phone runs in Facts: S7a no clear gain;
+   S7b + S7c (b1018.1746) the best scrolling yet, one run. Still to do: 1-2
+   more runs on b1018.1746 (Jose: 2-3 per build, so the spread is known),
+   and the stall while Home sits still (~27 ms/s, worst 120 ms, two
+   builds in a row; was ~7 ms/s): find what runs then. Part 2 is finished
+   once those are in.
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
-S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
-   `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
-   Defer decorative work past first paint (requestIdleCallback + timeout),
-   split the worst task. Target: no task > 200 ms.
+S3b. **Startup, what's left (S3 in Done).** Target still no task > 200 ms
+   at 4x; after S3 the worst are ~240-460 ms. They are whole-screen costs:
+   a Home render's script (~150-200 ms) plus the style of the new screen
+   (~130 ms, forced on purpose by `dockAfterRender` so the tab lens glides),
+   and the next frame's layout + paint + `heroPetals`. Options, each needs a
+   measurement first: fewer elements in Home's first render (its own style
+   cost), the lens glide as a Web Animation (no forced style; check Still
+   and reduced motion), `pin-icons.js` `applyExactPins` (30-120 ms).
+   `drawOpening` is per frame of the opening (30-70 ms a frame at 4x), not
+   a long task; only worth it if the opening stutters on the phone.
 S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
@@ -191,6 +200,29 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-18 S3 startup (invisible). Measured with the new
+  `tests/tools/startup.cjs` (each long task's pieces, the lines that forced
+  layout, CPU profile). The plan's "top CPU" list was mostly forced layout
+  billed to whoever measured first. Changes: the name pen's path is traced
+  in a worker (`penTrace`, plain worker, no OffscreenCanvas; same path to
+  the byte for Jose, Moisés, Elizabeth Lind-Smith; WebKit needs the blob
+  URL kept, CI caught it); the categories listener's first snapshot (the
+  document `loadData` just read) no longer repaints Home; the petals (hero
+  and rank card), the heartline's placing, `fonts.ready`/`fonts.load` and
+  `applyHeroDrift` run in the next frame, before it paints (`beforePaint`
+  in `home-polish.js`); `dockAfterRender` settles the lens with a style
+  read, not a layout. Kept immediate on purpose: anything that changes
+  Home's height (rail dots, the name fit `fitWave`), since Back restores
+  the scroll right after the render (destination-labels caught a 7 px miss),
+  and Dr. Smiley's dock check (WebKit's dock-tuck). 4x, iPhone UA, 3+3
+  interleaved: `render()` CPU first visit 909-1152 -> 568-627 ms,
+  returning 841-1102 -> 599-765 (every after below every before); tasks
+  over 200 ms first visit 4-6 -> 1-3; worst task 441-610 -> 418-462 and
+  238-388 -> 238-290 (overlapping, so not proven). Total long-task time
+  unchanged. Target (no task over 200 ms) not reached: S3b. New suite
+  `startup-work.cjs` (also in the WebKit CI job). No User Guide change.
+  jvtomax99/Interp#52.
 
 - 2026-10-18 S7c, pin burst stops when a scroll takes the touch (visible,
   Jose's pick). Jose first picked option 1 (burst on lift); measured first:
@@ -301,6 +333,31 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- Back to Home restores the scroll right after the render, so anything
+  that changes Home's height must happen in the render, not in a later
+  frame: the rail dots row is 7 px (`destination-labels` fails 1130 vs
+  1137 when they come late). The same check missed once on main in this
+  container, so a single miss alone isn't proof; twice on CI was.
+- WebKit (CI and so iPhones): a Worker made from a blob URL needs that URL
+  until it has loaded; revoking it right after `new Worker()` lost the
+  worker silently. Its computed style also reports a running transform
+  transition's end value, so test a glide with `getAnimations()`, not by
+  sampling positions.
+- A CPU profile bills a forced layout to the script line that read first,
+  so "self time" of `place`, `addCardPetals`, `applyHeroDrift` and the like
+  is really the whole new screen's style + layout (~150-250 ms at 4x after
+  a Home render). Moving one read only moves the bill to the next reader;
+  use `tests/tools/startup.cjs`, which names the line behind each forced
+  layout. In Chromium `window.scrollY`, `document.fonts.ready` and
+  `document.fonts.load` all force layout.
+- Startup repaints of Home (returning visit, stand-ins): the cache paint,
+  loadData's (identical, skipped by `lastHomeHtml`), then real changes:
+  Dr. Smiley's rank (`data-lv`, team points aren't cached) and the
+  activity feed ("No team activity yet" until it loads). So on every open
+  his outfit and the feed swap in after the first paint. Caching both
+  would remove a full repaint and the swap; it changes what the first
+  frame shows (better, but visible): Jose's call.
+
 - Home's tap cards open their screen at once on the click (22-56 ms to
   the next screen), so anything a tap shows on the card itself is only
   seen while the finger is down. Start such feedback on `pointerdown`,
@@ -352,6 +409,18 @@ come from this alone.
   observer). Needs a repeat before reading anything into it. Lab gains in
   Chromium's style engine have twice not shown clearly on the iPhone, so
   only the phone decides an S-step.
+- Same phone after S7b + S7c (#50, #51), build b1018.1746, one 28 s run
+  on Home (12 s scrolling): scrolling 8.2% late, 53.5 ms/s, worst 47 ms.
+  Best of the four builds on all three (before part 1: 10.5%, 85, 57;
+  part 1: 8.6%, 66.9, 49; S7a: 9.5%, 76.7, 61). From before part 1 to
+  now: hitches while scrolling down by about 37%. Still far into Apple's
+  "distracting" (10+ ms/s). The still part, from the totals (16 s): ~2.7%
+  late, ~27 ms/s, and again the run's worst frame (120 ms) was in it.
+  Second build in a row with that (S7a: ~3%, ~29 ms/s, 124 ms), so it is
+  likely real and not from S7b/S7c; before S7a still was ~1%, 7.4 ms/s.
+  Cause unknown (a timer, the greeting or the meter's own start are
+  candidates; untested). One run each build, so the spread is still
+  unknown: Jose asked for 2-3 runs per build.
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main

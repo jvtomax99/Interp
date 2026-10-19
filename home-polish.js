@@ -7,6 +7,11 @@
   const mark = new Image();
   mark.src = './hmh-mark.png';
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Work that measures the page, run in the next frame before it paints (S3).
+  // Measuring right after Home's markup is written made the browser lay out
+  // the whole new screen inside that task; here the frame's own layout pays
+  // it, and the first frame shown is the same.
+  const beforePaint = fn => requestAnimationFrame(fn);
   const TAU = Math.PI * 2;
   let stopGreeting = () => {};
   let requestId = 0;
@@ -813,7 +818,7 @@
         el.setAttribute('class','home-heartline');el.setAttribute('viewBox','-16 -16 152 43');
         el.setAttribute('aria-hidden','true');el.setAttribute('focusable','false');
         el.innerHTML=`<path class="hl-glow" pathLength="100" d="${D}"/><path class="hl-core" pathLength="100" d="${D}"/>`;
-        btn=button;button.parentElement.appendChild(el);place();schedule(1500);
+        btn=button;button.parentElement.appendChild(el);schedule(1500);   // placed by fitWave, right after
       },
       place,
       // The hello is starting again: clear the line now rather than at the next beat.
@@ -837,6 +842,9 @@
     let lastTxt=null, run=null, held=null, safety=0, waiting=null;
     // The pen's path through a name, in em units from the start of its baseline:
     // [[x,y],...] per stroke, in writing order. null when it can't be worked out.
+    // The letters are drawn here (it needs the page's fonts); the rest, a few
+    // hundred ms of pixel work on a phone, runs in a worker (S3), or here if
+    // there is none. A promise either way.
     function penPathOf(txt,family){
       const S=300, cv=document.createElement('canvas'), x=cv.getContext('2d',{willReadFrequently:true});
       if(!x||!txt)return null;
@@ -848,7 +856,13 @@
       cv.width=W;cv.height=H;x.font=font;
       const ox=pad+L, oy=pad+A;x.fillText(txt,ox,oy);
       const px=x.getImageData(0,0,W,H).data, n=W*H;
-      let b=new Uint8Array(n);for(let i=0;i<n;i++)b[i]=px[i*4+3]>115?1:0;
+      const b=new Uint8Array(n);for(let i=0;i<n;i++)b[i]=px[i*4+3]>115?1:0;
+      return traceInWorker({b,W,H,S,ox,oy});
+    }
+    // Self-contained (it is sent to the worker as text): no names from outside.
+    function penTrace(d){
+      const {W,H,S,ox,oy}=d, n=W*H;
+      let b=d.b;
       // close hairline gaps, then thin the letters to their centre line (Zhang-Suen)
       const grow=(src,on)=>{const out=new Uint8Array(n);for(let y=1;y<H-1;y++)for(let xx=1;xx<W-1;xx++){const i=y*W+xx;let v=on?0:1;
         for(let dy=-1;dy<=1&&(on?!v:v);dy++)for(let dx=-1;dx<=1;dx++){const s=src[i+dy*W+dx];if(on&&s){v=1;break;}if(!on&&!s){v=0;break;}}out[i]=v;}return out;};
@@ -941,12 +955,30 @@
         out.push(p.map(([a,c])=>[+((a-ox)/S).toFixed(3),+((c-oy)/S).toFixed(3)]));}
       return out.length?out:null;
     }
+    let tracer;   // the worker, made once; false when it can't be
+    function traceInWorker(d){
+      const here=()=>{try{return penTrace(d);}catch(e){return null;}};
+      if(tracer===undefined)try{
+        const url=URL.createObjectURL(new Blob(['const penTrace='+penTrace+';onmessage=e=>{let r=null;try{r=penTrace(e.data);}catch(x){}postMessage(r);};'],{type:'text/javascript'}));
+        tracer=new Worker(url);   // its URL stays: WebKit may load it after this returns
+      }catch(e){tracer=false;}
+      if(!tracer)return Promise.resolve(here());
+      return new Promise(res=>{
+        const w=tracer;
+        const done=e=>{w.removeEventListener('message',done);w.removeEventListener('error',fail);res(e.data);};
+        const fail=e=>{if(e&&e.preventDefault)e.preventDefault();w.removeEventListener('message',done);w.removeEventListener('error',fail);tracer=false;res(here());};
+        w.addEventListener('message',done);w.addEventListener('error',fail);
+        try{w.postMessage(d,[d.b.buffer]);}catch(e){fail();}
+      });
+    }
     function pathFor(txt,family){
-      try{const c=JSON.parse(localStorage.getItem(KEY)||'{}'),v=c[txt];if(v&&v.v===VER&&v.f===family)return v.s;}catch(e){}
-      let s=null;try{s=penPathOf(txt,family);}catch(e){s=null;}
-      if(s)try{const c=JSON.parse(localStorage.getItem(KEY)||'{}');delete c[txt];c[txt]={v:VER,f:family,s};
-        const k=Object.keys(c);while(k.length>4)delete c[k.shift()];localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}
-      return s;
+      try{const c=JSON.parse(localStorage.getItem(KEY)||'{}'),v=c[txt];if(v&&v.v===VER&&v.f===family)return Promise.resolve(v.s);}catch(e){}
+      let p;try{p=penPathOf(txt,family);}catch(e){p=null;}
+      return Promise.resolve(p).then(s=>{
+        if(s)try{const c=JSON.parse(localStorage.getItem(KEY)||'{}');delete c[txt];c[txt]={v:VER,f:family,s};
+          const k=Object.keys(c);while(k.length>4)delete c[k.shift()];localStorage.setItem(KEY,JSON.stringify(c));}catch(e){}
+        return s;
+      },()=>null);
     }
     const show=name=>{if(name)name.classList.remove('is-penning');};
     // Before the hello: keep the name back so it can be written, never longer than 6 s.
@@ -974,11 +1006,15 @@
         const nm=w.name;
         if(!nm.isConnected||document.hidden||still())return fail();
         if(document.fonts&&document.fonts.check&&!document.fonts.check(`400 ${size}px ${family}`,txt))return fail();
-        const strokes=pathFor(txt,family);
-        if(!strokes)return fail();
-        waiting=null;
-        write(nm,txt,family,parseFloat(getComputedStyle(nm).fontSize)||size,strokes,0);
-      },fail);
+        return pathFor(txt,family).then(strokes=>{
+          if(waiting!==w)return;
+          // adopt() may have moved the writing to a newer greeting meanwhile
+          const nm2=w.name;
+          if(!strokes||!nm2.isConnected||document.hidden||still())return fail();
+          waiting=null;
+          write(nm2,txt,family,parseFloat(getComputedStyle(nm2).fontSize)||size,strokes,0);
+        });
+      }).catch(fail);
     }
     /* Home builds a new greeting when its content changes while the app is
        opening (data arriving: his outfit for the team's rank, say). The old
@@ -1163,10 +1199,16 @@
     if(namePen.busy)namePen.adopt(name);
     else if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
     else if(namePen.changed(name))namePen.start(wave);
+    // Now, not before paint: a shrunk name changes the page's height, which a
+    // Back's scroll restore counts on. fonts.ready and fonts.load lay the page
+    // out too and only matter later, so they wait for the frame.
     fitWave(wave);
-    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
-    // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
-    if(document.fonts&&document.fonts.load&&name)document.fonts.load('400 56px Parisienne',name.textContent).then(()=>{if(wave.isConnected)fitWave(wave);},()=>{});
+    beforePaint(()=>{
+      if(!wave.isConnected)return;
+      if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
+      // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
+      if(document.fonts&&document.fonts.load&&name)document.fonts.load('400 56px Parisienne',name.textContent).then(()=>{if(wave.isConnected)fitWave(wave);},()=>{});
+    });
     const play=()=>playGreeting(wave);
     // Tapping the smiley opens Ask the Hub (index.html, window.openAskHub).
     // The hello still plays by itself when the app opens; if Ask the Hub is
@@ -1645,9 +1687,13 @@
     // .home-arc-marks is still swept up here on purpose: an installed PWA can
     // resume on a cached page that still has the old layer in the DOM.
     hero.querySelectorAll('.home-petals, .home-arc-marks').forEach(n => n.remove());
-
-    const { layer: petals, petals: list } = buildPetals(hero);
     hero.dataset.decorReady = '1';
+    const token = ++decorToken;
+    beforePaint(() => { if(token === decorToken && hero.isConnected) heroPetals(hero); });
+  }
+  let decorToken = 0;
+  function heroPetals(hero){
+    const { layer: petals, petals: list } = buildPetals(hero);
     const scrim = hero.querySelector('.home-greeting-scrim');
     hero.insertBefore(petals, scrim ? scrim.nextSibling : hero.firstChild);
     if(PETALS_AS_DOM){
@@ -1709,7 +1755,7 @@
       railObserver = new ResizeObserver(refresh);
       content.querySelectorAll('.home-rail').forEach(rail => railObserver.observe(rail));
     }
-    refresh();
+    refresh();   // now, not before paint: the dots row is 7px of height a Back's scroll restore counts on
   };
 
   /* Medical Terminology "View all": one card per domain, in the same sheet
@@ -1844,6 +1890,9 @@
   let cardPetalWatch = [];
   function addCardPetals(card){
     if(!card || !card.classList.contains('smw-dark') || card.querySelector('.smw-petals')) return;
+    beforePaint(() => { if(card.isConnected && !card.querySelector('.smw-petals')) cardPetals(card); });
+  }
+  function cardPetals(card){
     const rand = seeded(250);
     const count = 8, fall = Math.round((card.clientHeight || 130) * 1.15);
     const palette = ['hpPink', 'hpBlue', 'hpLav', 'hpPink'];
