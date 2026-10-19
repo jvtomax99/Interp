@@ -228,6 +228,10 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 CoreCHI Pixar finish (stacked on the dashboard PR): clay tiles,
+  glossy donut, candy buttons, glossy beads, lean-toward-finger, squash
+  landings. CSS + one small pointer handler; nothing runs at rest.
+
 - 2026-10-19 CoreCHI dashboard + motion (Jose's ask, options picked:
   regroup + trend, native animation). Score-trend tile (last 12 sessions,
   tap a point), Focus next tile, "My progress" card folded into the trend

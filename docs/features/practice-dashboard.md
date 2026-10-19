@@ -27,3 +27,17 @@ line reaches them, one ripple off the newest point. Each moving block has
 (quiz history arriving, chat), so a block whose sig is unchanged resumes
 its motion (`--motion-skip`, `MOTION_BORN`) instead of restarting, and is
 `.is-still` once 1.5 s old. Reduced motion: everything final, no animation.
+
+**The Pixar finish** (block "Practice: the Pixar finish" in `index.html`,
+Jose 2026-10-19: "3D world, inspired by Disney and Pixar"; he picked light
+and material over real 3D). Clay tiles (`--clay-*` tokens, own dark
+values): warm key light top-left, sheen, a lip above and a shade below,
+contact + far shadow; this screen deliberately steps past the app-wide
+finish shadow. Readiness ring is a glossy donut (`.ready-ring::before`,
+masked to the band; radii assume 104 px ring / 70 px hole, change them
+together). Candy buttons (`.mastery-go`, in `LIFTS`) squash on press.
+Score dots are glossy beads (`#trendBall`). Arrivals land with a squash
+(`dashIn`). The lean: an IIFE after `animateCounts` sets `--rx/--ry/--mx/--my`
+on the pressed tile (touch) or hovered tile (mouse), only on the practice
+screen; release springs back via `--spring`. Nothing runs at rest; reduced
+motion turns the lean and squashes off.
