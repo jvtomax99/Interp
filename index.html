@@ -1227,6 +1227,14 @@
   .fm-meta{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:13px; word-break:break-word; }
   .fm-btns{ display:flex; gap:9px; flex-wrap:wrap; }
   .fm-btns .btn{ flex:1 1 auto; }
+  /* ---------- Voice and mic check (More, under the smoothness meter) ---------- */
+  .vc-more{ margin-top:13px; display:flex; justify-content:center; }
+  .vc-step{ padding:9px 0 13px; border-bottom:1px solid var(--line-soft); }
+  .vc-step h4{ margin:0 0 3px; font-size:15px; font-weight:650; color:var(--ink); }
+  .vc-step p{ margin:0 0 9px; font-size:13px; color:var(--ink-soft); }
+  .vc-step .fm-btns{ margin-bottom:6px; }
+  .vc-state{ font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; min-height:1.4em; }
+  .vc-state q{ font-family:'IBM Plex Serif', Georgia, serif; }
 
   /* ---------- Icon picker (Add Domain) ---------- */  .icon-picker-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .icon-pick{
@@ -5220,6 +5228,12 @@ body.access-locked{ overflow:hidden; }
 }
 @media (prefers-reduced-motion: reduce){ .ds-fx{ display:none; } }
 svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
+/* His brows (DR_BROWS): each turns about its own middle and eases to the
+   next pose, so they glide while the eyes and mouth step frame to frame. */
+svg.ds-art .ds-brow{ transform-box:fill-box; transition:transform .17s cubic-bezier(.3,0,.2,1); }
+svg.ds-art .ds-brow-l{ transform-origin:53.85% 46.15%; }
+svg.ds-art .ds-brow-r{ transform-origin:44% 44.44%; }
+@media (prefers-reduced-motion: reduce){ svg.ds-art .ds-brow{ transition:none; } }
 @keyframes askThink{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(-6deg); } 70%{ transform:rotate(5deg); } }
 img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
@@ -6950,6 +6964,14 @@ body.pv-open{ overflow:hidden; }
     <div class="more-sheet-grip"></div>
     <button class="dd-detail-close" title="Close" onclick="frameMeterClose()">✕</button>
     <div id="frameMeterBody"></div>
+  </div>
+</div>
+
+<div class="overlay more-sheet-overlay" id="voiceCheckOverlay" onclick="if(event.target===this) voiceCheckClose()">
+  <div class="modal more-sheet" role="dialog" aria-modal="true" aria-label="Voice and mic check">
+    <div class="more-sheet-grip"></div>
+    <button class="dd-detail-close" title="Close" onclick="voiceCheckClose()">✕</button>
+    <div id="voiceCheckBody"></div>
   </div>
 </div>
 
@@ -12770,8 +12792,8 @@ const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
   { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A dashboard: your scores as a line over time, and the area to focus on next' },
-  { id:'smoothness',  tone:'gd-n2', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
-  { id:'chattitles',  tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
+  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
+  { id:'smoothness',  tone:'gd-n3', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13745,7 +13767,7 @@ function externalUrl(raw){
    Home "Ask" tag; on Home his lanyard is live cords drawn by home-polish.js.
 
    His face moves frame by frame. drsmiley/base.webp is his calm picture;
-   drsmiley/face.webp is a strip of 18 frames of the part that moves (eyes and
+   drsmiley/face.webp is a strip of 26 frames of the part that moves (eyes and
    mouth), every frame built on that same calm face, so his hair, outline,
    nose and shoulders never shift: only lids come down, eyes look and lips
    part. Most frames are cut from Jose's drawn expression sheets and fitted
@@ -13762,7 +13784,13 @@ function externalUrl(raw){
    to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR.
    In picture units (240 x 300 base) the window is x 40, y 106, 151 x 111; the
    strip is see-through except where frames change, so the picture's own
-   edge shows wherever the window crosses his outline. */
+   edge shows wherever the window crosses his outline.
+
+   His brows are their own pictures (drsmiley/brow-l.webp, brow-r.webp), cut
+   out of that same calm face and drawn over the window; the forehead behind
+   them in base.webp, and the few frames that reached up to them, were
+   repainted as skin. They move smoothly (a lift and a tilt, never a stretch)
+   while the eyes and mouth step through frames: see DR_BROWS. */
 const DR_FACE_FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
   'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR'];
 const DR_FACE_W = 151, DR_FACE_H = 111;
@@ -13771,6 +13799,8 @@ function drSmileyArt(cls){
     + '<image class="ds-base" href="./drsmiley/base.webp" x="14" y=".8" width="106" height="132.5" preserveAspectRatio="none"/>'
     + `<svg class="ds-face" x="31.667" y="47.617" width="66.692" height="49.025" viewBox="0 0 ${DR_FACE_W} ${DR_FACE_H}" preserveAspectRatio="none">`
     +   `<image class="ds-sheet" href="./drsmiley/face.webp" x="0" y="0" width="${DR_FACE_W * DR_FACE_FRAMES.length}" height="${DR_FACE_H}" preserveAspectRatio="none"/></svg>`
+    + '<image class="ds-brow ds-brow-l" href="./drsmiley/brow-l.webp" x="33.875" y="39.446" width="28.708" height="14.354" preserveAspectRatio="none"/>'
+    + '<image class="ds-brow ds-brow-r" href="./drsmiley/brow-r.webp" x="73.625" y="42.758" width="27.604" height="19.875" preserveAspectRatio="none"/>'
     + '</svg>';
 }
 const ICON_WAVE = drSmileyArt('home-wave-art home-face');
@@ -13845,9 +13875,11 @@ const DR_FACE_SEQ = {
   // Uncertain or failed: composed. A slow blink, a considering look down to
   // the side with a sympathetic tilt, then a small reassuring smile.
   composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+              brow: [[480, 'caring'], [2050, null]],
               head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
+               brow: [[220, 'caring'], [1120, null]],
                head: [[0, 0, 0], [140, 0, -.3], [360, 0, .9], [560, 0, 0], [760, 0, .8], [960, 0, 0], [1450, 0, 0]] },
   // You stopped a question: okay -- a blink and one nod.
   okay: { still: 'rest', f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 320]],
@@ -14094,6 +14126,52 @@ const DR_FACE_BACK = {
   halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
   lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
 };
+/* His brows. Each pose: [left lift, left turn, right lift, right turn] for
+   the brow on your left and the one on your right; lift in his drawing's
+   units (minus is up), turn in degrees (plus is clockwise). The inner end of
+   a brow is the end by his nose, so a worried look turns the left brow
+   anticlockwise and the right one clockwise. By default the brows follow
+   the face frame (DR_BROW_OF); a sequence can hold a pose instead (brow:
+   [[ms, pose or null], ...], null handing back to the frames), for meanings
+   the frames alone can't carry (caring when he's unsure or encouraging you).
+   Focused moves them a little less; Still shows the pose without gliding. */
+const DR_BROWS = {
+  rest:   [0, 0, 0, 0],
+  relax:  [.4, 0, .4, 0],          // eyes closed, asleep
+  lift:   [-.6, 0, -.6, 0],        // a small smile
+  glad:   [-.9, 0, -.9, 0],        // a smile
+  laugh:  [-1.3, 0, -1.3, 0],
+  up:     [-2, 0, -2, 0],          // looking up, surprised
+  quizL:  [.22, -4, -1.77, -3],    // eyes up to your left: the other brow goes up
+  quizR:  [-1.77, 3, .22, 4],
+  down:   [.35, 0, .35, 0],        // looking down, reading
+  love:   [-.9, -3, -.9, 3],
+  wink:   [-.5, 0, .6, -2],        // his left eye (your right)
+  caring: [-.44, -6, -.44, 6],     // inner ends up: sympathy, encouragement
+  worried:[-.66, -9, -.66, 9],
+  focused:[.66, 6, .66, -6],
+};
+const DR_BROW_OF = {
+  shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad',
+  laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
+  lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down',
+  love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+};
+function drBrowSet(svg, pose){
+  if(!svg || !svg.querySelector) return;
+  pose = DR_BROWS[pose] ? pose : 'rest';
+  const key = pose + (drMode() === 'focused' ? ':f' : '');
+  if(svg._brow === key) return;
+  const l = svg.querySelector('.ds-brow-l'), r = svg.querySelector('.ds-brow-r');
+  if(!l || !r) return;
+  svg._brow = key;
+  const v = DR_BROWS[pose], k = drMode() === 'focused' ? .6 : 1, glide = drStill() ? 'none' : '';
+  l.style.transition = r.style.transition = glide;
+  l.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[0] * k).toFixed(2)}px) rotate(${(v[1] * k).toFixed(2)}deg)`;
+  r.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[2] * k).toFixed(2)}px) rotate(${(v[3] * k).toFixed(2)}deg)`;
+}
+// The pose for this svg now: the sequence's hold if it has one, else the frame's.
+function drBrowSync(svg, frame){ drBrowSet(svg, svg._browHold || DR_BROW_OF[frame] || 'rest'); }
 // Neighbours: each frame and its way back, plus the steps the drawn
 // sequences take on purpose (a smile breaking into a laugh, a laugh's
 // "ha-ha" mouth, squinting straight into laughter).
@@ -14138,7 +14216,8 @@ function drSeq(name){
   const total = f.reduce((t, s) => t + s[1], 0);
   const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
-  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
+  const brow = raw.brow || null, browPeak = brow ? (brow.find(b => b[1]) || [0, null])[1] : null;
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak };
   drSeqCache.set(raw, seq);
   return seq;
 }
@@ -14193,6 +14272,8 @@ class DrAnim{
     return DR_FACE_FRAMES[Math.round(x / DR_FACE_W)] || 'rest';
   }
   set(name){ drFaceSet(this.svg, name); }
+  // Hold the brows in a pose (null: back to following the face frames).
+  browHold(pose){ this.svg._browHold = pose || null; drBrowSync(this.svg, this.frame()); }
   get busy(){ return !!this.run; }
   get priority(){ return this.run ? this.run.p : 0; }
   // ---- the head ----
@@ -14277,7 +14358,7 @@ class DrAnim{
     if(drStill() && p < DR_P.REACT) return false;
     this.stopRun(false);
     if(drStill()){
-      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done);
+      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done, seq.browPeak);
     }
     const run = { p, name: typeof name === 'string' ? name : 'custom', timers: [] };
     this.run = run;
@@ -14298,6 +14379,16 @@ class DrAnim{
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
     if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
     this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.brow){
+      // Keys already passed (joining part-way) leave the latest one in force.
+      let now;
+      seq.brow.forEach(([t, pose]) => {
+        const at = t - skip + lead;
+        if(at <= 0) now = pose;
+        else run.timers.push(this.later(() => { if(this.run === run) this.browHold(pose); }, at));
+      });
+      if(now !== undefined) this.browHold(now);
+    }
     if(seq.fx && this.head && drFxOk()){
       run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
     }
@@ -14313,9 +14404,10 @@ class DrAnim{
     return true;
   }
   // Reduced motion: the expression's peak, still, then rest. No lean, no effects.
-  still(frame, ms, p, done){
+  still(frame, ms, p, done, brow){
     const run = { p, name: 'still', timers: [] };
     this.run = run;
+    if(brow) this.svg._browHold = brow;
     this.set(frame);
     run.timers.push(this.later(() => { if(this.run !== run) return; this.set('rest'); this.finish(run, done); }, ms));
     return true;
@@ -14323,6 +14415,7 @@ class DrAnim{
   finish(run, done){
     if(this.run !== run) return;
     this.run = null;
+    if(this.svg._browHold) this.browHold(null);
     if(done) done();
     this.next();
   }
@@ -14335,6 +14428,7 @@ class DrAnim{
     run.timers.forEach(t => this.clear(t));
     if(run.gazeTimer) this.clear(run.gazeTimer);
     this.run = null;
+    this.svg._browHold = null;
     this.fadeEffects();
     if(settle) this.settle();
   }
@@ -14897,6 +14991,7 @@ function drFaceSet(svg, name){
   if(!sheet) return;
   const x = String(-DR_FACE_W * Math.max(0, DR_FACE_FRAMES.indexOf(name)));
   if(sheet.getAttribute('x') !== x) sheet.setAttribute('x', x);
+  drBrowSync(svg, name);
 }
 function drFaceBusy(svg){ const a = svg && drAnimOf.get(svg); return !!(a && a.busy); }
 // An expression as a reaction (REACT unless given), e.g. the lock screen's smile.
@@ -16203,11 +16298,11 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team.</li>
-      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. No laughing and no little sparkles.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
@@ -16486,6 +16581,14 @@ const GUIDE_TOPICS = [
     </ol>
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
+  { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
+    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It's getting things ready for a memory trainer for consecutive interpreting.</p>
+    <ol>
+      <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
+      <li>Do the four steps on the sheet. The phone asks before it uses the microphone.</li>
+      <li>Tap <b>Copy results</b> and paste them into a chat.</li>
+    </ol>
+    <p>The Hub saves nothing and sends nothing: the recording is dropped when you close the sheet. The speech-to-text step may send what you say to Apple, so do it away from patients.</p>` },
   { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
     <p>Close it completely and open it again.</p>
     <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>
@@ -20534,8 +20637,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1455';
-const BUILD_TIME = '2026-10-19 14:55 UTC';
+const BUILD_ID = 'b1019.1723';
+const BUILD_TIME = '2026-10-19 17:23 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20818,6 +20921,232 @@ function frameMeterMoreHtml(){
         <span class="fm-dot ${c}" aria-hidden="true"></span><span><b>${fmR(r.ratio)} ms/s</b> · ${fmR(r.pct)}% dropped</span>
         <span>${escapeHtml(r.build)}</span></button>`; }).join('')}</div>` : ''}
   </div>`;
+}
+
+/* ---------- Voice and mic check ----------
+   Step M0 of the memory trainer (docs/PLAN.md). Before building on the
+   phone's voices, microphone and speech-to-text, find out which of them
+   work on an iPhone, in the installed app and in a Safari tab: Apple said
+   in 2021 that speech-to-text is off in Home Screen apps, and nobody has
+   checked since. Nothing is saved or sent by the Hub; the recording stays
+   in memory and is dropped on close. Copy results gives a report to paste
+   into a chat. Note: docs/features/memory-trainer.md. */
+const VC = { voices: null, play: {}, rec: null, sr: {} };
+let vcStream = null, vcRecog = null, vcUrl = null, vcAudio = null, vcTick = 0;
+const VC_LINES = {
+  es: 'Tome una tableta dos veces al día, con comida, durante diez días.',
+  en: 'Take one tablet twice a day, with food, for ten days.',
+};
+
+function vcMode(){
+  const sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  return sa ? 'installed app' : 'browser tab';
+}
+function vcSR(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+function vcLang(v){ return String(v.lang || '').replace('_', '-'); }
+
+function vcLoadVoices(){
+  return new Promise(res => {
+    if(!('speechSynthesis' in window)) return res([]);
+    const now = speechSynthesis.getVoices();
+    if(now.length) return res(now);
+    let done = false;
+    const finish = () => { if(done) return; done = true; speechSynthesis.removeEventListener('voiceschanged', finish); res(speechSynthesis.getVoices()); };
+    speechSynthesis.addEventListener('voiceschanged', finish);
+    setTimeout(finish, 2000);
+  });
+}
+
+function vcVoicesText(){
+  if(!('speechSynthesis' in window)) return 'No speech on this browser.';
+  if(!VC.voices) return 'Looking for voices…';
+  const of = p => VC.voices.filter(v => vcLang(v).toLowerCase().startsWith(p));
+  return `${of('es').length} Spanish and ${of('en').length} English voices on this phone.`;
+}
+
+function vcSet(id, text){
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = text;
+}
+function vcPaint(){
+  vcSet('vcVoices', escapeHtml(vcVoicesText()));
+  vcSet('vcPlay', ['es', 'en'].filter(l => VC.play[l]).map(l => `${l === 'es' ? 'Spanish' : 'English'}: ${escapeHtml(VC.play[l])}`).join('<br>'));
+  const R = VC.rec;
+  vcSet('vcRec', R ? escapeHtml(R.state) : '');
+  const pb = document.getElementById('vcPlayBack');
+  if(pb) pb.hidden = !vcUrl;
+  const rb = document.getElementById('vcRecBtn');
+  if(rb) rb.disabled = !!(R && R.busy);
+  vcSet('vcSr', ['en', 'es'].filter(l => VC.sr[l]).map(l => { const S = VC.sr[l];
+    return `${l === 'es' ? 'Spanish' : 'English'}: ${escapeHtml(S.state)}${S.text ? ` · <q>${escapeHtml(S.text)}</q>` : ''}`; }).join('<br>'));
+}
+
+function voiceCheckOpen(){
+  try{ closeMoreSheet(); }catch(e){}
+  const sr = vcSR();
+  document.getElementById('voiceCheckBody').innerHTML = `
+    <div class="fm-head">Voice and mic check</div>
+    <p class="fm-sub">What this phone can do for the memory trainer. Do the four steps, then tap <b>Copy results</b> and paste them into a chat. Running as: <b id="vcMode">${vcMode()}</b>.</p>
+    <div class="vc-step"><h4>1. Hear the voices</h4>
+      <p id="vcVoices"></p>
+      <div class="fm-btns"><button class="btn btn-ghost" onclick="vcPlay('es')">Play Spanish</button><button class="btn btn-ghost" onclick="vcPlay('en')">Play English</button></div>
+      <div class="vc-state" id="vcPlay" aria-live="polite"></div></div>
+    <div class="vc-step"><h4>2. Record yourself</h4>
+      <p>Records 5 seconds. Then tap Play back.</p>
+      <div class="fm-btns"><button class="btn btn-ghost" id="vcRecBtn" onclick="vcRecord()">Record 5 seconds</button><button class="btn btn-ghost" id="vcPlayBack" hidden onclick="vcPlayBack()">Play back</button></div>
+      <div class="vc-state" id="vcRec" aria-live="polite"></div></div>
+    <div class="vc-step"><h4>3. Voices after the mic</h4>
+      <p>Tap Play Spanish again. Is it as loud as before? Add yes or no when you paste.</p></div>
+    <div class="vc-step"><h4>4. Speech to text</h4>
+      <p>${sr ? 'Tap one and say a sentence. It may send what you say to Apple to turn it into text, so do this away from patients.' : 'Not available here.'}</p>
+      ${sr ? `<div class="fm-btns"><button class="btn btn-ghost" onclick="vcListen('en')">Listen in English</button><button class="btn btn-ghost" onclick="vcListen('es')">Escuchar en español</button></div>` : ''}
+      <div class="vc-state" id="vcSr" aria-live="polite"></div></div>
+    <div class="fm-meta">Build ${escapeHtml(BUILD_ID)} · ${escapeHtml(navigator.userAgent)}</div>
+    <div class="fm-btns">
+      <button class="btn btn-ghost" onclick="voiceCheckClose()">Close</button>
+      <button class="btn btn-primary" onclick="vcCopy()">Copy results</button>
+    </div>`;
+  document.getElementById('voiceCheckOverlay').classList.add('show');
+  vcPaint();
+  if(!VC.voices) vcLoadVoices().then(v => { VC.voices = v; vcPaint(); });
+}
+
+// Lets go of everything the check holds: speech, the mic, the recording.
+function voiceCheckClose(){
+  document.getElementById('voiceCheckOverlay').classList.remove('show');
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  if(vcRecog){ try{ vcRecog.abort(); }catch(e){} vcRecog = null; }
+  clearInterval(vcTick);
+  if(vcStream){ vcStream.getTracks().forEach(t => t.stop()); vcStream = null; }
+  if(vcAudio){ try{ vcAudio.pause(); }catch(e){} vcAudio = null; }
+  if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
+  if(VC.rec && VC.rec.busy){ VC.rec.busy = false; VC.rec.state = 'stopped (closed)'; }
+}
+
+function vcPlay(lang){
+  if(!('speechSynthesis' in window)){ VC.play[lang] = 'no speech on this browser'; return vcPaint(); }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(VC_LINES[lang]);
+  u.lang = lang === 'es' ? 'es-US' : 'en-US';
+  u.rate = 0.92;
+  const t0 = performance.now();
+  VC.play[lang] = 'starting…'; vcPaint();
+  u.onstart = () => { VC.play[lang] = 'playing…'; vcPaint(); };
+  u.onend = () => { VC.play[lang] = `played, ${((performance.now() - t0) / 1000).toFixed(1)} s`; vcPaint(); };
+  u.onerror = e => { VC.play[lang] = 'error: ' + (e.error || 'unknown'); vcPaint(); };
+  speechSynthesis.speak(u);
+}
+
+async function vcRecord(){
+  if(VC.rec && VC.rec.busy) return;
+  if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
+  const R = VC.rec = { busy: true, state: 'asking for the microphone…' };
+  vcPaint();
+  const gum = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if(!gum || !window.MediaRecorder){
+    Object.assign(R, { busy: false, state: `not available here (microphone ${gum ? 'yes' : 'no'}, recorder ${window.MediaRecorder ? 'yes' : 'no'})` });
+    return vcPaint();
+  }
+  try{ vcStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch(e){ Object.assign(R, { busy: false, state: 'microphone refused: ' + (e.name || e.message) }); return vcPaint(); }
+  const stream = vcStream;
+  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  let rec;
+  try{ rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined); }
+  catch(e){ stream.getTracks().forEach(t => t.stop()); vcStream = null; Object.assign(R, { busy: false, state: 'recorder failed: ' + (e.name || e.message) }); return vcPaint(); }
+  const chunks = [];
+  rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    if(vcStream === stream) vcStream = null;
+    if(!R.busy) return; // closed while recording
+    const blob = new Blob(chunks, { type: rec.mimeType || type || 'audio/mp4' });
+    R.busy = false;
+    R.type = blob.type; R.kb = Math.round(blob.size / 1024);
+    if(!blob.size){ R.state = 'recorded nothing'; return vcPaint(); }
+    vcUrl = URL.createObjectURL(blob);
+    R.state = `recorded 5 s (${R.type}, ${R.kb} KB). Tap Play back.`;
+    vcPaint();
+  };
+  rec.start();
+  let n = 5;
+  R.state = `recording, say something… ${n}`; vcPaint();
+  clearInterval(vcTick);
+  vcTick = setInterval(() => {
+    n--;
+    if(n > 0){ R.state = `recording, say something… ${n}`; vcPaint(); return; }
+    clearInterval(vcTick);
+    if(rec.state !== 'inactive') rec.stop();
+  }, 1000);
+}
+
+// A tap, not automatic: iPhones only let sound start from a tap, and the
+// trainer will play your take back the same way.
+function vcPlayBack(){
+  if(!vcUrl || !VC.rec) return;
+  const R = VC.rec;
+  if(vcAudio){ try{ vcAudio.pause(); }catch(e){} }
+  const a = vcAudio = new Audio(vcUrl);
+  R.state = 'playing back…'; vcPaint();
+  a.onended = () => { R.state = `played back (${R.type}, ${R.kb} KB)`; vcPaint(); };
+  a.onerror = () => { R.state = 'recorded, but it would not play back'; vcPaint(); };
+  a.play().catch(e => { R.state = 'recorded, playback refused: ' + (e.name || e.message); vcPaint(); });
+}
+
+function vcListen(lang){
+  const SR = vcSR();
+  if(!SR){ VC.sr[lang] = { state: 'not available here' }; return vcPaint(); }
+  if(vcRecog){ try{ vcRecog.abort(); }catch(e){} }
+  const r = vcRecog = new SR();
+  r.lang = lang === 'es' ? 'es-US' : 'en-US';
+  r.interimResults = true;
+  r.continuous = false;
+  const S = VC.sr[lang] = { state: 'starting…', text: '', t0: performance.now() };
+  vcPaint();
+  r.onstart = () => { S.state = 'listening, speak now'; vcPaint(); };
+  r.onresult = e => {
+    S.text = [...e.results].map(x => x[0].transcript).join('');
+    if(!S.first) S.first = Math.round(performance.now() - S.t0);
+    S.state = 'hearing…'; vcPaint();
+  };
+  r.onerror = e => { S.err = e.error || 'unknown'; S.state = 'error: ' + S.err; vcPaint(); };
+  r.onend = () => {
+    if(!S.err) S.state = S.text ? `done, first words after ${(S.first / 1000).toFixed(1)} s` : 'heard nothing';
+    if(vcRecog === r) vcRecog = null;
+    vcPaint();
+  };
+  try{ r.start(); }
+  catch(e){ S.err = e.name || e.message; S.state = 'could not start: ' + S.err; vcPaint(); }
+  setTimeout(() => { if(vcRecog === r){ try{ r.stop(); }catch(e){} } }, 10000);
+}
+
+function vcText(){
+  const sr = vcSR();
+  const names = p => (VC.voices || []).filter(v => vcLang(v).toLowerCase().startsWith(p)).map(v => `${v.name} (${vcLang(v)}${v.localService === false ? ', online' : ''})`).join('; ') || 'none';
+  const R = VC.rec;
+  return [
+    `Voice and mic check · build ${BUILD_ID} · ${new Date().toLocaleString()}`,
+    `Running as: ${vcMode()}`,
+    navigator.userAgent,
+    `Voices: ${vcVoicesText()}`,
+    `  Spanish: ${names('es')}`,
+    `  English: ${names('en')}`,
+    `Play Spanish: ${VC.play.es || 'not tried'} · Play English: ${VC.play.en || 'not tried'}`,
+    `Record: ${R ? R.state : 'not tried'}`,
+    `Speech to text: ${sr ? (window.SpeechRecognition ? 'yes' : 'yes (webkit)') + (sr.prototype && 'processLocally' in sr.prototype ? ', on-device option' : '') : 'not available'}`,
+    ...['en', 'es'].map(l => `  ${l === 'es' ? 'Spanish' : 'English'}: ${VC.sr[l] ? VC.sr[l].state + (VC.sr[l].text ? ` · "${VC.sr[l].text}"` : '') : 'not tried'}`),
+    'Voice as loud after the mic? (yes/no): ',
+  ].join('\n');
+}
+
+function vcCopy(){
+  const done = () => showToast('Copied. Paste it into a chat or a note.');
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(vcText()).then(done, () => showToast('Could not copy on this phone.'));
+  else showToast('Could not copy on this phone.');
+}
+
+function voiceCheckMoreHtml(){
+  return `<div class="vc-more"><button class="btn btn-ghost" onclick="voiceCheckOpen()">Voice and mic check</button></div>`;
 }
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -21342,6 +21671,7 @@ function openMoreSheet(){
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
     ${frameMeterMoreHtml()}
+    ${voiceCheckMoreHtml()}
     <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
       Build ${BUILD_ID} · ${BUILD_TIME}<br>${screenReport()}
     </div>`;

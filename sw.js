@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v234-cchi-dashboard';
+const CACHE_VERSION = 'interpreter-hub-v236-cchi-dashboard';
 const PRECACHE = [
   './',
   './index.html',
@@ -43,6 +43,8 @@ const PRECACHE = [
   // lock screen, so they must work offline from the start.
   './drsmiley/base.webp',
   './drsmiley/face.webp',
+  './drsmiley/brow-l.webp',
+  './drsmiley/brow-r.webp',
   // His rank outfits (smileyAccessory in index.html).
   './drsmiley/hat-cap.webp',
   './drsmiley/hat-mirror.webp',

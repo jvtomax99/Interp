@@ -16,6 +16,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `doctor-page.cjs` | The doctor's page: header, bento, tier tabs, terms read aloud, 44px targets, the glass bar's three buttons, Back, dark mode |
 | `journey.cjs` | End to end: Ask the Hub, briefing, Term Review, offline and storage-refused cases |
 | `smiley-gaze.cjs` | Dr. Smiley's eyes, lean and moods |
+| `smiley-brows.cjs` | Dr. Smiley's brows: follow the face, held poses, Focused, Still |
 | `smiley-gestures.cjs` | Dr. Smiley's five performances, frame by frame |
 | `home-rest.cjs` | Home decor: petals (Chromium: one canvas per place from a worker; iPhone Safari: the old animated elements, no will-change; both keep falling, stop when scrolled away, rest under reduced motion) and heartline loop; the badge loop ends; the card ring glows on arrival only |
 | `dock-tuck.cjs` | Tab bar tuck and open: only transform and opacity move, the bar's own size never animates, nothing left behind, tucked sizes as before (Dr. Smiley's disc and tag included), turns around mid-move without a jump, instant under reduced motion. Also runs in WebKit in CI |

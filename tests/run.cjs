@@ -18,11 +18,13 @@ const SUITES = [
   ['doctor-page.cjs',     'Doctor page: header, bento, tabs, terms aloud, glass bar'],
   ['journey.cjs',         'End-to-end journey: Ask, briefing, review, offline'],
   ['smiley-gaze.cjs',     'Dr. Smiley: eyes, lean, moods'],
+  ['smiley-brows.cjs',    'Dr. Smiley: brows follow, hold, settle'],
   ['smiley-gestures.cjs', 'Dr. Smiley: the five performances'],
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],
+  ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
 ];
