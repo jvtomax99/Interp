@@ -233,6 +233,10 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 Watch button became a story bubble (Jose's pick of three):
+  the video's still in a turning ring of the promo's colours, a play badge,
+  "Watch" on a dark chip. Same corner, same rules; 3 KB thumbnail.
+
 - 2026-10-19 Dr. Smiley acting, E1 (Jose: "expressive like Disney
   characters"; plan below under Next). Code only, his own art: brows that
   never mirror, anticipate big raises and overshoot as they settle; an
