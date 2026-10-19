@@ -19686,7 +19686,7 @@ function renderScoreTrend(){
     <div class="trend-head">
       <div class="trend-now"><b><span class="js-count" data-to="${last.pct}">${last.pct}</span>%</b>
         <span class="trend-cap">last session · ${escapeHtml(trendDate(last.at))}</span></div>
-      ${delta === null ? '' : `<span class="trend-delta ${delta >= 0 ? 'is-up' : 'is-down'}">${delta >= 0 ? '+' : '−'}${Math.abs(delta)} vs your average</span>`}
+      ${delta === null ? '' : `<span class="trend-delta ${delta >= 0 ? 'is-up' : 'is-down'}">${delta === 0 ? 'same as your average' : `${delta > 0 ? '+' : '−'}${Math.abs(delta)} vs your average`}</span>`}
     </div>
     <svg class="trend-svg" viewBox="0 0 ${TREND_W} ${TREND_H}" role="img" aria-label="Your last ${n} session score${n===1?'':'s'}, from ${pts[0].pct}% to ${last.pct}%">
       <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">

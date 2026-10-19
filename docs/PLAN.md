@@ -203,6 +203,7 @@ come from this alone.
   tap a point), Focus next tile, "My progress" card folded into the trend
   tile and the domain rows, staggered arrival, count-ups, self-drawing
   line, resumable motion. Note: `docs/features/practice-dashboard.md`.
+
 - 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
   `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
   ~7 s after opening at 4x in 5/5 runs); now on the tab bar, kept in its
