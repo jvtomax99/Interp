@@ -127,15 +127,6 @@ D1b. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): layout A (as
    built) or B (terms first, `d1-layouts.png`); the "From Doctor Prep, not
    checked by the team" line; the real-data replay (he sends `doctors.json`,
    steps in the review); the 5-minute interpreter test on iPhones.
-D3. **Doctor list.** Two-column cards (mockup `list.png`): pin tile or
-   photo with initials badge, name, specialty dot, floor, labels for
-   terms / traps (false friends count, red) / tips, "+ Prep terms" when no
-   research. North / South / All as `ds-mode-seg`; navy "+ Add"; the
-   duplicate and old-terminology banners become one "N things to tidy"
-   button opening a sheet. Place headings with pins stay. Specialty to pin:
-   a `SPECIALTY_PINS` map (cancer, children, heart...), fallback the
-   place's pin.
-
 R5. **Provider Pictures on the Where picker.** Providers share the places
    and icons but still type a facility. Same sheet, if Jose wants it.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
@@ -193,6 +184,16 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 D3, Doctor list (Doctors redesign; mockup `list.png`). Cards
+  two to a row on a phone (`doctorListCard`): photo or specialty pin with
+  initials, name, specialty dot, floor or "No floor yet", labels terms
+  (research + team) / traps / tips, "+ Prep terms" with no research (only
+  once the directory has loaded). Navy "+ Add" by the title (the topbar's
+  "+ Add doctor" gone); "All regions" is "All"; duplicates and old
+  terminology are one "N things to tidy" button opening a sheet. Delete moved
+  from the card to the doctor's sheet. The saved copy keeps `_n` counts for
+  the labels (never written to the database). Place headings unchanged.
 
 - 2026-10-19 D2, Team tips (Doctors redesign). `tips` on the doctor's
   document, a sheet from Add tip and the tip tile: everyone's tips, add,
@@ -587,8 +588,6 @@ come from this alone.
 - Breathing, drift, the halo's turn and the streak flame are compositor-only:
   Home at rest with them running is ~0.5% main-thread busy (trace).
 
-- Doctor page: `SPECIALTY_PINS` already exists for D3's list. D3's tips
-  label reads `doctorTips(d).length` (old note included).
 - Add to glossary's domain matcher (`findBestDomainMatch`) misses
   Cardiology, Psychiatry, OB/GYN, ENT and more (word overlap only). The
   doctor page uses `doctorDomainFor` (hints first). Moving Add to glossary

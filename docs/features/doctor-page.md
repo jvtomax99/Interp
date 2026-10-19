@@ -82,3 +82,26 @@ by, at, uid, editedAt?}]` on the doctor's document; `#doctorTipsOverlay`
 - Search, the list card and Ask the Hub read the tips (`doctorTipsText`).
 - Back closes the top overlay (the last `.overlay.show`), so it closes the
   tips sheet before the page under it.
+
+**The list** (D3, 2026-10-19; `docs/mockups/doctors/list.png`). In
+`renderDoctorDirectory`: `doctorListCard` per doctor in `.dl-grid` (two
+columns on a phone, `auto-fill` 200px on a computer), the standard finish.
+- Card: the photo, else `specialtyPinKey` in a tile tinted by
+  `specialtyColor`, the initials badge; name 17/650; specialty with its dot;
+  the floor (`locationDetails`) or "No floor yet"; labels from
+  `doctorListCounts`: terms (research + `customTerms`), traps (the
+  falsefriends tier), tips (`doctorTips`, old note included). No research:
+  "+ Prep terms" (`researchThisDoctorFromDirectory`, Doctor Prep filled in),
+  shown only when `DOCTOR_DIR_STATE` is ok.
+- The saved copy has no research, so `doctorDirToCache` keeps `_n:{terms,
+  traps}` for the labels. `persistDoctorDirectoryEntry` drops `_n`.
+- The whole card opens the page (role=button, Enter/Space). Edit is the
+  page's pencil; Delete is in the doctor's sheet (`deleteDoctorFromSheet`,
+  hidden when adding).
+- Navy "+ Add" (`DOCTOR_ADD_BTN`) at the end of the section head; the
+  topbar has no add button on this screen.
+- Duplicates and old terminology: one "N things to tidy" button
+  (`doctorTidyCount`: each duplicate group, plus 1 if any doctor is on the
+  old terminology) opening `#doctorTidyOverlay` with the same banners. A
+  running update shows on the list instead. The sheet redraws after a merge
+  and closes when nothing is left.

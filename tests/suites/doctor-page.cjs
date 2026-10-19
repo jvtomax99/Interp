@@ -78,9 +78,71 @@ async function targets(page) {
       try {
         await go(page, 'doctor-directory');
         // The list's own cards still open the page.
-        await page.locator('#content .doc-card').first().click();
+        await page.locator('#content .dl-card').first().click();
         await pause(page, 400);
         ok(await page.locator('#doctorDirDetailOverlay.show .dp-hero').count() === 1, 'a doctor card opens the doctor page');
+        await page.evaluate(() => closeDoctorDirDetail()); await pause(page);
+
+        // The list (D3): cards two to a row on a phone, labels, + Prep terms,
+        // the navy Add by the title, one "things to tidy" button.
+        await seed(page);
+        await page.evaluate(() => { DOCTOR_DIR_STATE = 'ok'; doctorRegionPick = 'all'; renderContent(); });
+        await pause(page, 400);
+        const list = await page.evaluate(() => {
+          const card = name => [...document.querySelectorAll('#content .dl-card')].find(c => c.querySelector('.dl-name').textContent === name);
+          const tags = c => c ? [...c.querySelectorAll('.dl-tag')].map(t => t.textContent) : null;
+          const leslie = card('Dr. Lori A. Leslie'), love = card('Dr. Barry Love');
+          const row = [...document.querySelectorAll('#content .dl-grid')].map(g => [...g.children].slice(0, 2).map(c => c.getBoundingClientRect()))
+            .find(r => r.length === 2);
+          const owns = (el, x, y) => { const h = document.elementFromPoint(x, y); return !!h && (h === el || el.contains(h)); };
+          const prep = love && love.querySelector('.dl-prep');
+          if (prep) prep.scrollIntoView({ block: 'center', behavior: 'instant' });
+          const pr = prep && prep.getBoundingClientRect();
+          const prepHit = pr ? [owns(prep, pr.left + pr.width / 2, pr.top + pr.height / 2 - 20), owns(prep, pr.left + pr.width / 2, pr.top + pr.height / 2 + 20)] : null;
+          const add = document.querySelector('#content .dl-add');
+          window.scrollTo(0, 0);
+          const ar = add && add.getBoundingClientRect();
+          const tidy = document.querySelector('#content .dl-tidy');
+          return { leslie: tags(leslie), lesliePin: leslie && leslie.querySelector('.dl-ph img').getAttribute('src'), ini: leslie && leslie.querySelector('.dl-ini').textContent,
+            floor: leslie && leslie.querySelector('.dl-floor').textContent, loveFloor: love && love.querySelector('.dl-floor').textContent,
+            loveTags: tags(love), prep: !!prep, prepHit,
+            sameRow: row ? Math.abs(row[0].top - row[1].top) < 2 && row[1].left > row[0].right : null,
+            add: add && { h: Math.round(ar.height), bg: getComputedStyle(add).backgroundColor, own: owns(add, ar.left + ar.width / 2, ar.top + ar.height / 2) },
+            topbarAdd: [...document.querySelectorAll('button')].some(b => b.textContent.trim() === '+ Add doctor'),
+            tidy: tidy && tidy.textContent.trim(), banners: document.querySelectorAll('#content .dupe-banner, #content .backfill-banner:not(.is-running)').length,
+            hs: document.documentElement.scrollWidth - innerWidth };
+        });
+        ok(JSON.stringify(list.leslie) === JSON.stringify(['10 terms', '1 trap', '1 tip']) && /leukemia/.test(list.lesliePin) && list.ini === 'LL',
+          'a card: pin tile, initials, terms (research + team), traps, tips', list);
+        ok(list.floor === '4th fl · Suite 401' && list.loveFloor === 'No floor yet', 'the floor, or "No floor yet"', list);
+        ok(list.prep && list.loveTags.length === 0 && list.prepHit.every(Boolean), 'no research: "+ Prep terms", 44px to hit', list);
+        if (!desktop) ok(list.sameRow, 'two cards to a row on a phone', list.sameRow);
+        ok(list.add && list.add.h >= 44 && list.add.bg === 'rgb(37, 46, 109)' && list.add.own && !list.topbarAdd, 'navy "+ Add" by the title, the old "+ Add doctor" gone', list);
+        ok(/^\d+ things? to tidy$/.test(list.tidy || '') && list.banners === 0, 'duplicates and old terminology: one "things to tidy" button, no banners on the list', list);
+        ok(list.hs <= 0, 'no sideways scroll', list.hs);
+        await page.screenshot({ path: O + device + '-list.png' });
+
+        await page.click('#content .dl-tidy'); await pause(page);
+        const tidy = await page.evaluate(() => ({ open: document.getElementById('doctorTidyOverlay').classList.contains('show'),
+          dupes: document.querySelectorAll('#dtyBody .dupe-banner').length }));
+        ok(tidy.open && tidy.dupes >= 1, 'the tidy button opens the fixes in a sheet', tidy);
+        await page.evaluate(() => navigateBack()); await pause(page);
+        ok(await page.evaluate(() => !document.getElementById('doctorTidyOverlay').classList.contains('show') && activeCategory === 'doctor-directory'), 'Back closes the tidy sheet');
+
+        await page.locator('#content .dl-card', { hasText: 'Dr. Barry Love' }).locator('.dl-prep').click(); await pause(page);
+        ok(await page.evaluate(() => activeCategory === 'doctor-research' && doctorResearchState.doctorName === 'Dr. Barry Love'
+          && !document.getElementById('doctorDirDetailOverlay').classList.contains('show')), '"+ Prep terms" opens Doctor Prep for that doctor, not the page');
+        await go(page, 'doctor-directory');
+
+        // The saved copy keeps the counts for the labels; they never reach the database.
+        const cache = await page.evaluate(async () => {
+          doctorDirToCache(DOCTOR_DIRECTORY);
+          const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY)).find(d => d.id === 'dp-tiered');
+          await persistDoctorDirectoryEntry('dp-tiered', { ...c, id: undefined });
+          return { n: c._n, research: 'researchResult' in c, db: '_n' in __DB['doctor-directory']['dp-tiered'], kept: !!__DB['doctor-directory']['dp-tiered'].researchResult };
+        });
+        ok(cache.n && cache.n.terms === 8 && cache.n.traps === 1 && !cache.research && !cache.db && cache.kept,
+          'the saved copy carries the counts; saving from it keeps the research and writes no counts', cache);
 
         await page.evaluate(() => { window.__spoken = []; window.speakText = (b, t, l) => window.__spoken.push([t, l]); });
         await openDoctor(page, 'dp-tiered');
@@ -326,6 +388,18 @@ async function targets(page) {
         await page.evaluate(() => doctorPageEdit('dp-tiered')); await pause(page);
         await page.evaluate(() => closeDoctorDirModal()); await pause(page);
         ok(await page.evaluate(() => document.getElementById('doctorDirDetailOverlay').classList.contains('show') && currentDoctorDetailId === 'dp-tiered'), 'closing the sheet comes back to the doctor page');
+
+        // Delete moved from the card to the doctor's sheet.
+        await page.evaluate(() => { doctorPageEdit('dp-flat'); }); await pause(page);
+        const delShown = await page.evaluate(() => !document.getElementById('fDDDelete').hidden);
+        await page.evaluate(() => { window.confirm = () => true; return deleteDoctorFromSheet(); }); await pause(page, 500);
+        const gone = await page.evaluate(() => ({ db: 'dp-flat' in __DB['doctor-directory'], local: DOCTOR_DIRECTORY.some(d => d.id === 'dp-flat'),
+          sheet: document.getElementById('doctorDirOverlay').classList.contains('show'), page: document.getElementById('doctorDirDetailOverlay').classList.contains('show') }));
+        ok(delShown && !gone.db && !gone.local && !gone.sheet && !gone.page, 'Delete in the doctor sheet removes them and lands on the list', { delShown, gone });
+        await page.evaluate(() => _openAddDoctorDirModal()); await pause(page);
+        ok(await page.evaluate(() => document.getElementById('fDDDelete').hidden), 'a new doctor has no Delete');
+        await page.evaluate(() => closeDoctorDirModal()); await pause(page);
+        await openDoctor(page, 'dp-tiered');
 
         // Back closes the page, and the list is still there.
         await page.evaluate(() => navigateBack());

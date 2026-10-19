@@ -5909,6 +5909,55 @@ html[data-theme="dark"] .dt-act{ color:#C9D3FF; }
 html[data-theme="dark"] .dt-act.is-del{ color:#F08A9B; }
 @media (prefers-reduced-motion: reduce){ .dt-act{ transition:none; } }
 
+/* Doctor list (D3; mockup docs/mockups/doctors/list.png). Two columns on a
+   phone, the standard finish, the page's pin tile and initials. */
+.dl-head{ align-items:center; }
+.dl-add{ order:2; flex:0 0 auto; min-height:44px; padding:0 17px; border:0; border-radius:999px; background:var(--navy); color:#fff;
+  font:650 var(--fs-sub) var(--sans); cursor:pointer; white-space:nowrap; box-shadow:0 8px 20px -12px rgba(22,55,90,.5);
+  transition:transform .18s var(--ease); }
+.dl-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:13px; margin-bottom:var(--sp-4); }
+@media (min-width:901px){ .dl-grid{ grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); } }
+.dl-card{ position:relative; display:flex; flex-direction:column; align-items:flex-start; min-width:0; padding:13px 13px 13px;
+  background:var(--paper); border-radius:var(--r-lg); cursor:pointer; color:var(--ink);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .18s var(--ease); -webkit-tap-highlight-color:transparent; }
+.dl-ph{ position:relative; width:56px; height:56px; margin-bottom:var(--sp-3); border-radius:var(--r-md);
+  background:color-mix(in srgb, var(--dp-sp) 13%, var(--paper)); display:flex; align-items:center; justify-content:center; }
+.dl-ph img{ width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 3px 5px rgba(40,30,70,.16)); }
+.dl-ph.is-photo img{ width:100%; height:100%; object-fit:cover; border-radius:var(--r-md); filter:none; }
+.dl-ini{ position:absolute; right:-6px; bottom:-6px; min-width:26px; height:26px; padding:0 4px; border-radius:var(--r-sm);
+  background:var(--dp-sp); color:#fff; font-size:var(--fs-cap); font-weight:700; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 3px var(--paper); }
+.dl-name{ font-size:var(--fs-head); font-weight:650; letter-spacing:-.015em; line-height:1.2; overflow-wrap:anywhere; }
+.dl-spec{ display:flex; align-items:baseline; gap:6px; margin-top:4px; font-size:var(--fs-foot); font-weight:600; line-height:1.3;
+  color:color-mix(in srgb, var(--dp-sp) 72%, var(--ink)); overflow-wrap:anywhere; }
+.dl-spec::before{ content:""; flex:0 0 8px; height:8px; border-radius:50%; background:var(--dp-sp); transform:translateY(-1px); }
+.dl-floor{ margin-top:2px; font-size:var(--fs-foot); line-height:1.3; color:var(--ink-soft); overflow-wrap:anywhere; }
+.dl-floor.is-none{ color:var(--ink-faint); }
+.dl-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:var(--sp-2); }
+.dl-tag{ padding:4px 9px; border-radius:999px; font-size:var(--fs-foot); font-weight:650; line-height:1.3;
+  background:color-mix(in srgb, var(--navy) 9%, var(--paper)); color:var(--navy); }
+.dl-tag.is-ff{ background:var(--danger-soft); color:#A63A4E; }
+.dl-tag.is-tip{ background:#FFF4DC; color:#7A5F30; }
+.dl-prep{ position:relative; margin:-4px 0 0 -2px; min-height:32px; padding:0 2px; border:0; background:none; color:var(--accent-2);
+  font:650 var(--fs-foot) var(--sans); cursor:pointer; }
+.dl-prep::after{ content:""; position:absolute; inset:-6px -6px; }
+.dl-tidy{ display:inline-flex; align-items:center; gap:6px; min-height:44px; margin:0 0 var(--sp-3); padding:0 15px; border-radius:999px;
+  border:1px solid #F3E2BC; background:#FFF7E6; color:#7A5F30; font:650 var(--fs-sub) var(--sans); cursor:pointer;
+  transition:transform .18s var(--ease); }
+.dl-tidy svg{ width:16px; height:16px; }
+.dty-sheet #dtyBody{ max-height:min(60vh, 520px); overflow-y:auto; overscroll-behavior:contain; }
+.dl-del{ margin-right:auto; color:var(--danger); }
+.dl-card:active, .dl-card.is-pressed{ transform:scale(.98); }
+.dl-add:active, .dl-add.is-pressed, .dl-tidy:active, .dl-tidy.is-pressed{ transform:scale(.96); }
+.dl-card:focus-visible, .dl-add:focus-visible, .dl-tidy:focus-visible, .dl-prep:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+html[data-theme="dark"] .dl-card{ box-shadow:var(--sh-1); }
+html[data-theme="dark"] .dl-tag{ background:rgba(201,211,255,.12); color:#C9D3FF; }
+html[data-theme="dark"] .dl-tag.is-ff{ background:rgba(240,138,155,.14); color:#F08A9B; }
+html[data-theme="dark"] .dl-tag.is-tip, html[data-theme="dark"] .dl-tidy{ background:#2C2617; border-color:#4A3D22; color:#D9BF8A; }
+html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #fff); }
+@media (prefers-reduced-motion: reduce){ .dl-card, .dl-add, .dl-tidy{ transition:none; } }
+
 /* Tier tabs: Dr. Smiley's segmented control, scrolling sideways when the
    five tiers and the team's own terms don't fit. */
 .dp-tabs.ds-mode-seg{ margin:16px 0 10px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
@@ -6838,6 +6887,7 @@ body.pv-open{ overflow:hidden; }
       </div>
     </div>
     <div class="modal-actions">
+      <button class="btn btn-ghost dl-del" id="fDDDelete" onclick="deleteDoctorFromSheet()" hidden>Delete</button>
       <button class="btn btn-ghost" onclick="closeDoctorDirModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveDoctorDirEntry()">Save doctor</button>
     </div>
@@ -6857,6 +6907,14 @@ body.pv-open{ overflow:hidden; }
       <button class="btn btn-ghost" id="dtCancel" onclick="doctorTipsCancel()">Close</button>
       <button class="btn btn-primary" id="dtSave" onclick="saveDoctorTip()">Add tip</button>
     </div>
+  </div>
+</div>
+
+<div class="overlay" id="doctorTidyOverlay" onclick="if(event.target===this) closeDoctorTidy()">
+  <div class="modal dty-sheet" role="dialog" aria-modal="true" aria-labelledby="dtyTitle">
+    <h3 id="dtyTitle">Things to tidy</h3>
+    <div id="dtyBody"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeDoctorTidy()">Close</button></div>
   </div>
 </div>
 
@@ -9995,7 +10053,10 @@ function doctorDirFromCache(){
 function doctorDirToCache(list){
   // Without the full research text (re-fetched when a doctor is opened), so
   // the copy stays small next to the glossary's.
-  try{ localStorage.setItem(DOCTOR_DIR_CACHE_KEY, JSON.stringify(list.map(({ researchResult, ...d }) => d))); }catch(e){}
+  // The list's labels still need the counts (`_n`, this phone only; never saved
+  // to the database: persistDoctorDirectoryEntry drops it).
+  try{ localStorage.setItem(DOCTOR_DIR_CACHE_KEY, JSON.stringify(list.map(({ researchResult, ...d }) =>
+    researchResult ? { ...d, _n: doctorResearchCounts(researchResult) } : d))); }catch(e){}
 }
 async function loadDoctorDirectory(){
   if(DOCTOR_DIR_STATE === 'loading') return;
@@ -10042,6 +10103,7 @@ async function persistDoctorDirectoryEntry(id, record, whole){
   if(!db){ showToast('Not connected to the database.'); return false; }
   const ref = db.collection('doctor-directory').doc(id);
   const data = stripUndefined(record);
+  delete data._n;
   if(whole){ await trackWrite(ref.set(data)); return true; }
   delete data.tips; delete data.notes;
   await trackWrite(ref.set(data, { mergeFields: Object.keys(data) }));
@@ -12729,9 +12791,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'directory',   tone:'gd-n2', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor list: terms, traps and tips at a glance, two to a row' },
   { id:'teamtips',    tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'Team tips: everyone can add their own tip on a doctor’s page' },
   { id:'smoothness',  tone:'gd-n1', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
-  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12802,7 +12864,7 @@ const GUIDE_STEPS = {
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
-  places: () => ({ steps: [`On a doctor’s card or page, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add doctor')}.`,
+  places: () => ({ steps: [`On a doctor’s page, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add')} beside Doctor Directory.`,
     `Tap <b>Where</b>, then tap the place. Search, or tap ${GUIDE_UI.pill('Add a place')} if it isn’t there.`,
     'To change a place’s icon, tap the icon beside its name in the list.'], note: 'Places you add and icons you pick show for everyone, in Provider Pictures too.' }),
   regions: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>My region</b>, tap ${GUIDE_UI.pill('North')} or ${GUIDE_UI.pill('South')}.`,
@@ -12947,7 +13009,7 @@ const GUIDE_COACH = {
               ['.tabbar-btn[aria-label="More"]', 'Tap More, then Doctors. Doctor Prep researches someone new; Doctor Directory opens what the team has saved.']],
             text:'Open More → Doctors on a phone, or Doctors in the sidebar on a computer.' },
   directory: { page:'doctors', scroll:true, sel:[`.qa-card[onclick="setCategory('doctor-directory')"]`],
-            text:'Doctor Directory opens the research your team has saved, together with their notes about each doctor.' },
+            text:'Doctor Directory opens the research your team has saved, together with their tips about each doctor.' },
   providers: { page:'home', scroll:true, sel:[`.qa-card[onclick="setCategory('providers')"]`],
             text:'Provider Pictures helps you put a face to a name. Search by name, specialty or facility, or add a provider.' },
 };
@@ -14916,6 +14978,7 @@ const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_CAMERA_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5C4 7.67 4.67 7 5.5 7H8L9.6 5h4.8L16 7h2.5c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.7"/></svg>';
 const ICON_PHOTOS_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4 16.5l4.5-4 3.5 3 3-2.5 5 4" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>';
 const ICON_X_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+const ICON_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>';
 const ICON_RETRY_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4.5V8h-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CLOCK_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const ICON_CHEV_L_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -16254,7 +16317,9 @@ const GUIDE_TOPICS = [
 
   { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
     <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
-    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All regions</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
+    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
+    <p>Doctors are grouped by where they work, two to a row. Each card shows their picture (or their specialty’s pin with their initials), specialty, floor, and how many <b>terms</b>, <b>traps</b> (false friends, in red) and <b>tips</b> they have. No research yet? Tap <b>+ Prep terms</b> to look them up in Doctor Prep.</p>
+    <p>Tap <b>+ Add</b> beside the title to add a doctor. If the list finds possible duplicates or doctors on the old terminology, a yellow <b>things to tidy</b> button opens them in one place. To delete a doctor, open their page, tap the pencil, then <b>Delete</b>.</p>
     <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
   { id:'doctorpage', section:'prep', k:'doctor page terms tabs core procedures drugs anatomy false friends team terms hear listen speak english spanish start appointment flashcards tip research again glossary', q:'What is on a doctor’s page?', a:`
@@ -16334,7 +16399,7 @@ const GUIDE_TOPICS = [
 
   { id:'regions', section:'team', k:'region regions north south shore humc channel channels everyone separate group team doctors directory my region', q:'What are North and South?', a:`
     <p>The Hub is shared by two interpreter teams: the <b>North</b> region (the HUMC side) and the <b>South</b> region (the Shore side). Nobody is walled off: everyone can read everything.</p>
-    <p>Your region decides two things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All regions</b> to see every doctor, and a search always looks through all of them.</p>
+    <p>Your region decides two things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All</b> to see every doctor, and a search always looks through all of them.</p>
     <p>Pick your region under your initial in the top-right corner, or when Chat or the Doctor Directory asks.</p>` },
 
   { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
@@ -16854,7 +16919,7 @@ function render(){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
     searchPlaceholder = 'Search provider photos, specialties, facilities…';
   } else if(activeCategory === 'doctor-directory'){
-    addBtnHtml = `<button class="btn btn-primary" onclick="openAddDoctorDirModal()">+ Add doctor</button>`;
+    addBtnHtml = '';   // the navy "+ Add" sits by the title (renderDoctorDirectory)
     searchPlaceholder = 'Search doctors, specialties, locations…';
   } else if(activeCategory === 'ethics'){
     addBtnHtml = '';
@@ -20332,7 +20397,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .dt-act';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .dt-act, .dl-card, .dl-add, .dl-tidy';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20360,8 +20425,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1506';
-const BUILD_TIME = '2026-10-19 15:06 UTC';
+const BUILD_ID = 'b1019.1525';
+const BUILD_TIME = '2026-10-19 15:25 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21638,7 +21703,7 @@ function duplicateBannerHtml(){
     return `<div class="dupe-banner">
       <div class="backfill-banner-text">
         <b>Possible duplicate</b>
-        <span>${names} look like the same person. Merging keeps every note, photo and term from both.</span>
+        <span>${names} look like the same person. Merging keeps every tip, photo and term from both.</span>
       </div>
       <div class="dupe-banner-actions">${options}</div>
     </div>`;
@@ -21783,7 +21848,7 @@ function backfillBannerHtml(){
   return `<div class="backfill-banner">
     <div class="backfill-banner-text">
       <b>${n} doctor${n === 1 ? '' : 's'} on the old terminology</b>
-      <span>Re-research ${n === 1 ? 'this one' : 'them'} to get drugs, procedures and false friends grouped separately. Takes about half a minute each; your notes and photos are kept.</span>
+      <span>Re-research ${n === 1 ? 'this one' : 'them'} to get drugs, procedures and false friends grouped separately. Takes about half a minute each; tips and photos are kept.</span>
     </div>
     <button class="backfill-banner-btn is-primary" onclick="runTierBackfill()">Update ${n === 1 ? '' : 'all'}</button>
   </div>`;
@@ -21800,12 +21865,13 @@ function doctorRegionChipsHtml(view, searching){
   if(searching) return `<p class="rg-note">Searching every region.</p>`;
   const count = r => r === 'all' ? DOCTOR_DIRECTORY.length
     : DOCTOR_DIRECTORY.filter(d => { const x = doctorRegion(d); return !x || x === r; }).length;
-  const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All regions' }]
+  const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All' }]
     .map(c => `<button type="button" role="radio" aria-checked="${c.id === view}" onclick="setDoctorRegionView('${c.id}')">${escapeHtml(c.name)} <span>${count(c.id)}</span></button>`).join('');
   return `<div class="ds-mode-seg rg-filter" role="radiogroup" aria-label="Show doctors from">${chips}</div>`
     + (myRegion() ? '' : regionAskHtml('The directory will open on it.'));
 }
 
+const DOCTOR_ADD_BTN = `<button type="button" class="dl-add" onclick="openAddDoctorDirModal()" aria-label="Add a doctor">+ Add</button>`;
 function renderDoctorDirectory(q){
   let list = DOCTOR_DIRECTORY.slice();
   const view = q ? 'all' : doctorRegionView();
@@ -21828,7 +21894,7 @@ function renderDoctorDirectory(q){
     if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE !== 'ok')
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Loading the doctors&hellip;</div>`;
     if(DOCTOR_DIRECTORY.length && !q && view !== 'all')
-      return `<div class="section-head"><h2>Doctor Directory</h2></div>${doctorRegionChipsHtml(view, false)}`
+      return `<div class="section-head dl-head"><h2>Doctor Directory</h2>${DOCTOR_ADD_BTN}</div>${doctorRegionChipsHtml(view, false)}`
         + `<div class="empty"><div class="glyph">${ICON_GRID}</div>No doctors in the ${escapeHtml(regionName(view))} region yet.<br>Add one, or run a Doctor Prep search.</div>`;
     const msg = DOCTOR_DIRECTORY.length===0
       ? `No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
@@ -21839,73 +21905,83 @@ function renderDoctorDirectory(q){
   const groups = groupByLocation(list, d => d.hospitalLocation);
   const searching = !!q;
 
-  let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
+  let html = `<div class="section-head dl-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span>${DOCTOR_ADD_BTN}</div>`;
   html += doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
-  html += duplicateBannerHtml();
-  html += backfillBannerHtml();
+  html += doctorTidyButtonHtml();
   html += groupControlsHtml('doctors', groups, searching);
-  let cardIdx = -1;
+  if(document.getElementById('doctorTidyOverlay')?.classList.contains('show')) setTimeout(renderDoctorTidy);
   groups.forEach(group=>{
     html += groupHeaderHtml('doctors', group, searching);
     if(!searching && isGroupCollapsed('doctors', group.name)) return;
-    html += `<div class="grid">`;
-    group.items.forEach(d=>{
-    cardIdx++;
-    const initials = initialsOf(d.name);
-    // Tinted by specialty rather than one colour for the whole directory, so
-    // the same field always looks the same and the grid groups itself.
-    const accent = specialtyColor(d.specialty);
-    const delay = Math.min(cardIdx * 0.03, 0.3);
-    const termCount = researchTermCount(d.researchResult);
-    // "From Doctor Prep" used to sit on the card as a tag. It was on nearly
-    // every one, so it separated nothing — and the prep-terms line below
-    // already says whether research exists. Source stays in the detail view.
-    const by = d.updatedBy ? `Updated by ${escapeHtml(d.updatedBy)}`
-      : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
-    const photo = d.photo
-      ? `<img class="doc-card-photo" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo"
-           onclick="event.stopPropagation(); openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
-      : `<div class="doc-card-photo doc-card-photo-fallback" style="background:linear-gradient(150deg, ${accent}, ${darkenHex(accent, 34)});">${escapeHtml(initials||'?')}</div>`;
-
-    html += `
-      <div class="doc-card" style="--doc-accent:${accent}; animation-delay:${delay.toFixed(2)}s;"
-           onclick="openDoctorDirDetail('${d.id}')">
-        <div class="doc-card-actions">
-          <button class="icon-btn" title="Edit" onclick="event.stopPropagation(); openEditDoctorDirModal('${d.id}')">\u270E</button>
-          <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation(); deleteDoctorDirEntry('${d.id}')">\u2715</button>
-        </div>
-        <div class="doc-card-top">
-          ${photo}
-          <div class="doc-card-id">
-            <div class="doc-card-name">${escapeHtml(d.name)}</div>
-            ${d.specialty ? `<div class="doc-card-specialty">${escapeHtml(d.specialty)}</div>` : ''}
-            ${/* The group heading carries the canonical facility, so repeating
-                  it on every card in that group is noise. But when the record
-                  says something different from the heading — "JTCC", or a
-                  pavilion the heading doesn't mention — that's the wording
-                  actually on file, and it's worth keeping visible. */''}
-            ${rawLocationNote(d.hospitalLocation, locationGroupName(d, d.hospitalLocation))
-              ? `<p class="doc-card-facility">${escapeHtml(rawLocationNote(d.hospitalLocation, locationGroupName(d, d.hospitalLocation)))}</p>` : ''}
-          </div>
-        </div>
-        ${/* .trim() matters: a field holding only a space is truthy, which
-              drew an empty pin row with no text beside it. */''}
-        ${(d.locationDetails||'').trim() ? `<div class="doc-card-where">${ICON_PIN}<span>${escapeHtml(d.locationDetails.trim())}</span></div>` : ''}
-        ${doctorTips(d).length ? `<p class="doc-card-note">${escapeHtml(doctorTips(d)[0].text)}</p>` : ''}
-        <div class="doc-card-foot">
-          ${termCount
-            ? `<span class="doc-card-terms">${ICON_SPARK}${termCount} prep term${termCount===1?'':'s'}</span>`
-            : `<span class="doc-card-terms" style="color:var(--ink-faint);">No prep research yet</span>`}
-          ${by ? `<span class="doc-card-by">${by}</span>` : ''}
-        </div>
-      </div>
-    `;
-    });
-    html += `</div>`;
+    html += `<div class="dl-grid">${group.items.map(doctorListCard).join('')}</div>`;
   });
   return html;
+}
+
+/* One doctor in the list (D3; mockup docs/mockups/doctors/list.png): the
+   photo, or the specialty's pin in a soft tile with the initials; name,
+   specialty, floor; labels for terms, traps (false friends) and tips. No
+   research yet: "+ Prep terms" (Doctor Prep, filled in). The whole card
+   opens the doctor's page; edit and delete are on the page's pencil. */
+function doctorListCounts(d){
+  const n = d.researchResult ? doctorResearchCounts(d.researchResult) : (d._n || { terms: 0, traps: 0 });
+  return { terms: n.terms + (Array.isArray(d.customTerms) ? d.customTerms.length : 0), traps: n.traps,
+    researched: !!(d.researchResult ? n.terms : (d._n && d._n.terms)), tips: doctorTips(d).length };
+}
+function doctorResearchCounts(r){
+  const tiers = researchTiers(r);
+  return { terms: tiers.reduce((n, t) => n + t.terms.length, 0), traps: (tiers.find(t => t.key === 'falsefriends') || { terms: [] }).terms.length };
+}
+function doctorListCard(d){
+  const id = escapeAttr(d.id);
+  const place = locationGroupName(d, d.hospitalLocation);
+  const c = doctorListCounts(d);
+  const floor = (d.locationDetails || '').trim();
+  const ph = d.photo
+    ? `<div class="dl-ph is-photo" aria-hidden="true"><img src="${escapeAttr(d.photo)}" alt="" loading="lazy"><span class="dl-ini">${escapeHtml(initialsOf(d.name))}</span></div>`
+    : `<div class="dl-ph" aria-hidden="true">${pinImgHtml(specialtyPinKey(d.specialty, place))}<span class="dl-ini">${escapeHtml(initialsOf(d.name))}</span></div>`;
+  const tags = [
+    c.terms ? `<span class="dl-tag">${c.terms} term${c.terms === 1 ? '' : 's'}</span>` : '',
+    c.traps ? `<span class="dl-tag is-ff">${c.traps} trap${c.traps === 1 ? '' : 's'}</span>` : '',
+    c.tips ? `<span class="dl-tag is-tip">${c.tips} tip${c.tips === 1 ? '' : 's'}</span>` : '',
+  ].join('');
+  // "+ Prep terms" only when the directory has loaded: the saved copy can't
+  // tell an unresearched doctor from one whose research hasn't arrived.
+  const prep = !c.researched && DOCTOR_DIR_STATE === 'ok'
+    ? `<button type="button" class="dl-prep" onclick="event.stopPropagation(); researchThisDoctorFromDirectory('${id}')">+ Prep terms</button>` : '';
+  return `<div class="dl-card" role="button" tabindex="0" style="--dp-sp:${specialtyColor(d.specialty)}"
+      aria-label="${escapeAttr(d.name)}${d.specialty ? ', ' + escapeAttr(d.specialty) : ''}"
+      onclick="openDoctorDirDetail('${id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openDoctorDirDetail('${id}')}">
+      ${ph}
+      <div class="dl-name">${escapeHtml(d.name)}</div>
+      ${d.specialty ? `<div class="dl-spec">${escapeHtml(d.specialty)}</div>` : ''}
+      <div class="dl-floor${floor ? '' : ' is-none'}">${floor ? escapeHtml(floor) : 'No floor yet'}</div>
+      ${tags || prep ? `<div class="dl-tags">${tags}${prep}</div>` : ''}
+    </div>`;
+}
+
+/* Duplicates and doctors on the old terminology: one "N things to tidy"
+   button, the fixes in a sheet. A running update stays on the list. */
+function doctorTidyCount(){ return duplicateDoctorGroups().length + (doctorsNeedingTiers().length ? 1 : 0); }
+function doctorTidyButtonHtml(){
+  if(tierBackfill.running) return backfillBannerHtml();
+  const n = doctorTidyCount();
+  return n ? `<button type="button" class="dl-tidy" onclick="openDoctorTidy()">${ICON_FLAG}${n} thing${n === 1 ? '' : 's'} to tidy</button>` : '';
+}
+function openDoctorTidy(){
+  renderDoctorTidy();
+  document.getElementById('doctorTidyOverlay').classList.add('show');
+}
+function closeDoctorTidy(){ document.getElementById('doctorTidyOverlay').classList.remove('show'); }
+function renderDoctorTidy(){
+  const body = document.getElementById('dtyBody');
+  if(!body) return;
+  const n = doctorTidyCount();
+  if(!n || tierBackfill.running){ closeDoctorTidy(); return; }
+  document.getElementById('dtyTitle').textContent = `${n} thing${n === 1 ? '' : 's'} to tidy`;
+  body.innerHTML = duplicateBannerHtml() + backfillBannerHtml();
 }
 
 let doctorTermTargetId = null;
@@ -24539,6 +24615,7 @@ function _openAddDoctorDirModal(){
   pendingDDPhotoDataUrl = null;
   pendingDDPhotoPath = null;
   document.getElementById('doctorDirModalTitle').textContent = 'Add doctor';
+  document.getElementById('fDDDelete').hidden = true;
   document.getElementById('fDDName').value = '';
   document.getElementById('fDDSpecialty').value = '';
   document.getElementById('fDDLocationDetails').value = '';
@@ -24560,6 +24637,7 @@ function _openEditDoctorDirModal(id, focusId){
   pendingDDPhotoDataUrl = d.photo || null;
   pendingDDPhotoPath = d.photoPath || null;
   document.getElementById('doctorDirModalTitle').textContent = 'Edit doctor';
+  document.getElementById('fDDDelete').hidden = false;
   document.getElementById('fDDName').value = d.name || '';
   document.getElementById('fDDSpecialty').value = d.specialty || '';
   document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
@@ -24687,6 +24765,15 @@ async function saveDoctorDirEntry(){
   }
 }
 
+// Delete lives in the doctor's sheet now (the list cards have no buttons).
+// Deleted, there is no page to go back to.
+async function deleteDoctorFromSheet(){
+  const id = editingDoctorDirId;
+  if(!id) return;
+  if(!await deleteDoctorDirEntry(id)) return;
+  doctorPageReturnTo = null;
+  closeDoctorDirModal();
+}
 async function deleteDoctorDirEntry(id){
   const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
   if(!d) return;
@@ -24701,6 +24788,7 @@ async function deleteDoctorDirEntry(id){
     logActivity(`removed ${d.name} from the doctor directory`);
     showUndoToast('Doctor deleted.', trashId);
     render();
+    return true;
   }catch(err){
     showToast('Could not delete — check your connection.');
   }
