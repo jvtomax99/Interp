@@ -72,3 +72,20 @@ The legend chips are gone: the live screen's Your domains rows
 naming its building (`CAMPUS[].place`). The HUD keeps the live screen's glossy readiness donut (`.ready-ring`,
 `animateReadyRing`; Jose, 2026-10-19: "a combination" of the two looks).
 Dr. Smiley in the card is an `ask-face`, so the dock's Dr. Smiley steps aside.
+
+**Alive** (Jose, 2026-10-19: "beautiful and alive"; he picked the living
+scene). The render also captures, each on its own and hidden from the base:
+clouds (screen-blended, drifting), three flag frames and four fountain-spray
+frames (cycled with CSS steps), and four vehicles (a car in, a car out, an
+ambulance with two light-bar frames, a helicopter with two rotor frames),
+each rendered once at a reference point with its path as screen points +
+scale per point (`CAMPUS_MAP.live`). `campusLife(root)` moves them with the
+Web Animations API (`campusAnims`): cars loop the lanes, the ambulance pulls
+in and holds flashing, the helicopter lands on the white tower's helipad
+(added to the scene) and later lifts off; `watchCampus` pauses them off
+screen. Lit windows flicker (`.cp-lit`, inside a `.cp-litw` that carries the
+entrance fade). Dr. Smiley's pin (`.cp-dr`, an `ask-face`) stands beside the
+badge of the building to light next; the HUD bubble is text only. Reduced
+motion: vehicles hidden, first frame of flags and spray, no flicker.
+Re-render with `NOLIT=<old entrance.json> node buildentr.cjs out` to keep
+the 50 lit layers (the live things take ~3 min, the lit set ~25).

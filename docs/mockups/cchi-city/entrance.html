@@ -32,7 +32,7 @@ const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.from
 scene.traverse(()=>{});
 const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;
 // soft additive glows (lamps, fountain): hidden while the lit-window layers are captured
-const GLOWS = [];
+const GLOWS = [], CLOUDS = [], FLAGS = [], LIVE = [];   // LIVE: things captured on their own, hidden from the base
 const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
   const r = g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,236,190,1)'); r.addColorStop(.25,'rgba(255,200,120,.55)'); r.addColorStop(1,'rgba(255,170,80,0)');
   g.fillStyle = r; g.fillRect(0,0,128,128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
@@ -67,7 +67,7 @@ function noiseTex(base, spot, n=2600, size=256, rep=8){ const c = document.creat
     for (let i=0;i<9;i++){ const x = 60+Math.random()*136, y = 110+Math.random()*60, r = 40+Math.random()*50; const rg = g.createRadialGradient(x,y,0,x,y,r); rg.addColorStop(0,'rgba(255,225,235,.55)'); rg.addColorStop(1,'rgba(255,225,235,0)'); g.fillStyle = rg; g.fillRect(0,0,256,256); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
   for (const [x,y,z,sx] of [[-70,14,-150,70],[20,17,-170,85],[85,12,-150,65],[-30,20,-180,95],[55,23,-190,100]]){
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:puff, transparent:true, depthWrite:false, opacity:0.9 })); sp.position.set(x,y,z); sp.scale.set(sx, sx*0.5, 1); scene.add(sp); }
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:puff, transparent:true, depthWrite:false, opacity:0.9 })); sp.position.set(x,y,z); sp.scale.set(sx, sx*0.5, 1); scene.add(sp); CLOUDS.push(sp); }
   // the far skyline: dark blocks with a few lit windows, behind the campus
   let sd = 3; const srnd = () => (sd = (sd*16807)%2147483647)/2147483647;
   for (let i=0;i<60;i++){ const x = -135 + i*4.6 + srnd()*2, z = -105 - srnd()*35, w = 2.5+srnd()*4, h = (srnd() < 0.15 ? 9 : 2.5) + srnd()*5;
@@ -188,17 +188,20 @@ for (const [x,z,s,k] of [[14.2,9.0,0.9,'round'],[16.4,11.4,0.8,'cone'],[17.6,8.2
 // three flagpoles by the mouth of the drive, flags caught in a breeze
 for (const [x, col] of [[-7.4, 0xf4f6fa], [-6.4, 0x1f3f7a], [-5.4, 0xf4f6fa]]){
   add(new THREE.CylinderGeometry(0.035, 0.045, 4.2, 8), M(0xd8dbe3, {r:0.4, m:0.6}), x, 2.35, 12.0);
-  const fg = new THREE.PlaneGeometry(0.9, 0.55, 12, 4); const pos = fg.attributes.position; for (let i=0;i<pos.count;i++){ const u = (pos.getX(i)+0.45)/0.9; pos.setZ(i, Math.sin(u*6.0)*0.07*u); } fg.computeVertexNormals();
-  const fl = new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ color:col, side:THREE.DoubleSide, roughness:0.8 })); fl.position.set(x+0.47, 4.15, 12.0); fl.castShadow = true; G.add(fl); }
+  const fg = new THREE.PlaneGeometry(0.9, 0.55, 12, 4);
+  const fl = new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ color:col, side:THREE.DoubleSide, roughness:0.8 })); fl.position.set(x+0.47, 4.15, 12.0); fl.castShadow = true; G.add(fl); FLAGS.push(fl); }
+function waveFlags(ph){ for (const fl of FLAGS){ const pos = fl.geometry.attributes.position; for (let i=0;i<pos.count;i++){ const u = (pos.getX(i)+0.45)/0.9; pos.setZ(i, Math.sin(u*6.0 + ph)*0.07*u); } pos.needsUpdate = true; fl.geometry.computeVertexNormals(); } }
+waveFlags(0);
 // a glass canopy over the banner building's doors, lit underneath
 box(5.0, 0.12, 2.2, new THREE.MeshStandardMaterial({ color:0x9fc4dd, roughness:0.1, metalness:0.3, transparent:true, opacity:0.55 }), 0, 2.4, -8.8, 0.03);
 for (const x of [-2.2, 2.2]) add(new THREE.CylinderGeometry(0.06,0.06,2.1,8), M(0xd8dbe3,{r:0.4,m:0.6}), x, 1.35, -7.8);
 glow(0, 2.1, -8.6, 3.0, 0xffe0b0);
 // the fountain's spray: a cone of droplets
-{ const n = 260, pos = new Float32Array(n*3); let r = 9; const rr = () => (r = (r*16807)%2147483647)/2147483647;
+let SPRAY = null;
+function spray(seed){ if (SPRAY) scene.remove(SPRAY); const n = 260, pos = new Float32Array(n*3); let r = seed; const rr = () => (r = (r*16807)%2147483647)/2147483647;
   for (let i=0;i<n;i++){ const a = rr()*Math.PI*2, t = rr(), rad = 0.05 + t*0.55; pos[i*3] = -0.1 + Math.cos(a)*rad; pos[i*3+1] = 1.25 + Math.sin(t*Math.PI)*0.9 - t*0.3; pos[i*3+2] = -3.4 + Math.sin(a)*rad; }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const pts = new THREE.Points(g, new THREE.PointsMaterial({ color:0xdff6ff, size:0.07, transparent:true, opacity:0.85, depthWrite:false })); scene.add(pts); GLOWS.push(pts); }
+  SPRAY = new THREE.Points(g, new THREE.PointsMaterial({ color:0xdff6ff, size:0.08, transparent:true, opacity:0.9, depthWrite:false })); scene.add(SPRAY); return SPRAY; }
 // benches along the sidewalk
 for (const x of [-9, 9]) { box(1.2, 0.08, 0.4, M(0x8a5a3c), x, 0.55, 12.4, 0.02); box(1.2, 0.35, 0.06, M(0x8a5a3c), x, 0.75, 12.2, 0.02); for (const dx of [-0.5,0.5]) box(0.08,0.3,0.4, M(0x2c2c36), x+dx, 0.4, 12.4, 0.01); }
 let TEX = null; const pend = [];
@@ -239,6 +242,42 @@ pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.
   g.fillStyle = '#e8f0ff'; g.font = 'bold 44px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('HACKENSACK UNIVERSITY MEDICAL CENTER', 512, 34);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   const p = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 0.52), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(15.5, 0.3 + 3*FL + 9*FL - 0.33, -13.56); BASE.add(p); });
+// ---- the helipad on the white tower's roof: pad, lit H, edge lights ----
+const PAD = { x:0.6, y:0.3 + 14*FL + 0.22 + 0.06, z:-20.5 };
+add(new THREE.CylinderGeometry(1.7, 1.7, 0.06, 32), M(0x3a3d4c, {r:0.9}), PAD.x, PAD.y, PAD.z, false);
+add(new THREE.RingGeometry(1.35, 1.5, 32), new THREE.MeshBasicMaterial({ color:0xf4f6fa, side:THREE.DoubleSide }), PAD.x, PAD.y+0.035, PAD.z, false).rotation.x = -Math.PI/2;
+for (const [w,h,dx] of [[0.14,0.9,-0.3],[0.14,0.9,0.3],[0.5,0.14,0]]){ const hm = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); hm.rotation.x = -Math.PI/2; hm.position.set(PAD.x+dx, PAD.y+0.04, PAD.z); G.add(hm); }
+for (let i=0;i<8;i++){ const a = i/8*Math.PI*2; glow(PAD.x+Math.cos(a)*1.55, PAD.y+0.08, PAD.z+Math.sin(a)*1.55, 0.6, i%2 ? 0x8fe3ff : 0xffb070); }
+
+// ---- the living things, built once each, captured on their own (hidden from the base) ----
+function vehicle(kind, col){ const g = new THREE.Group();
+  const paint = new THREE.MeshStandardMaterial({ color:col, roughness:0.3, metalness:0.45, envMapIntensity:0.6 }), glassM = new THREE.MeshStandardMaterial({ color:0x1f2633, roughness:0.1, metalness:0.6, envMapIntensity:1.5 });
+  if (kind === 'amb'){ const b1 = new THREE.Mesh(new RoundedBoxGeometry(0.62,0.42,1.3,2,0.06), paint); b1.position.y = 0.36; b1.castShadow = true; g.add(b1);
+    const cab = new THREE.Mesh(new RoundedBoxGeometry(0.58,0.3,0.42,2,0.06), paint); cab.position.set(0,0.3,0.78); cab.castShadow = true; g.add(cab);
+    const ws = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.16,0.04), glassM); ws.position.set(0,0.4,0.99); g.add(ws);
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.63,0.08,1.3), M(0xd43a3a)); stripe.position.y = 0.3; g.add(stripe);
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.07,0.12), M(0x2b2f3a)); bar.position.set(0,0.6,0.55); g.add(bar);
+    g.userData.lights = [[-0.17,0.63,0.55],[0.17,0.63,0.55]]; }
+  else if (kind === 'heli'){ const body = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), paint); body.scale.set(1,0.7,1.6); body.castShadow = true; g.add(body);
+    const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.1,1.5,8), paint); tail.rotation.x = Math.PI/2; tail.position.set(0,0.08,-1.2); g.add(tail);
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.04,0.4,0.3), paint); fin.position.set(0,0.3,-1.9); g.add(fin);
+    const can = new THREE.Mesh(new THREE.SphereGeometry(0.3,12,10), glassM); can.scale.set(0.9,0.7,1); can.position.set(0,0.1,0.35); g.add(can);
+    for (const dx of [-0.25,0.25]){ const sk = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.04,1.1), M(0x2b2f3a)); sk.position.set(dx,-0.4,0); g.add(sk); }
+    const rotor = new THREE.Group(); for (let k=0;k<4;k++){ const bl = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.02,2.6), M(0x1b1e26)); bl.rotation.y = k*Math.PI/4; rotor.add(bl); } rotor.position.y = 0.42; g.add(rotor); g.userData.rotor = rotor;
+    g.userData.lights = [[0,-0.1,0.9]]; }
+  else { const b1 = new THREE.Mesh(new RoundedBoxGeometry(0.5,0.2,1.0,2,0.07), paint); b1.position.y = 0.2; b1.castShadow = true; g.add(b1);
+    const b2 = new THREE.Mesh(new RoundedBoxGeometry(0.44,0.16,0.52,2,0.06), glassM); b2.position.set(0,0.36,-0.05); g.add(b2);
+    g.userData.lights = [[-0.17,0.2,0.5],[0.17,0.2,0.5]]; }
+  for (const [lx,ly,lz] of g.userData.lights){ const h = new THREE.Mesh(new THREE.SphereGeometry(0.045,8,6), new THREE.MeshBasicMaterial({ color:0xfff6dc })); h.position.set(lx,ly,lz); g.add(h);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xfff1c8, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx,ly,lz+0.05); gl.scale.set(0.5,0.5,1); g.add(gl); }
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
+const CAR_IN = vehicle('car', 0xf2c94c), CAR_OUT = vehicle('car', 0xc9ccd6), AMB = vehicle('amb', 0xf4f6fa), HELI = vehicle('heli', 0x2f5fa6);
+// ambulance light bar: two frames, red and blue
+function ambLights(frame){ AMB.children.filter(c => c.userData.lamp).forEach(c => AMB.remove(c));
+  for (const [i,[lx,ly,lz]] of [[-0.17,0.63,0.55],[0.17,0.63,0.55]].entries()){ const on = (i === frame);
+    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.08,0.1), new THREE.MeshBasicMaterial({ color: on ? (i ? 0x3b7bff : 0xff3b3b) : 0x55303a })); lamp.position.set(lx,ly,lz); lamp.userData.lamp = true; AMB.add(lamp);
+    if (on){ const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color: i ? 0x6fa0ff : 0xff5a5a, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx,ly+0.05,lz); gl.scale.set(1.3,1.3,1); gl.userData.lamp = true; AMB.add(gl); } } }
+
 // ---- capture pipeline ----
 const depthOnly = new THREE.MeshBasicMaterial({ colorWrite:false });
 const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tctx = tmp.getContext('2d', { willReadFrequently:true });
@@ -257,6 +296,7 @@ function pack(img, q){ let x0=W,y0=H,x1=-1,y1=-1; const d = img.data;
   if(x1<0) return null; const w=x1-x0+1, h=y1-y0+1, c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').putImageData(img, -x0, -y0);
   return { x:x0, y:y0, w, h, data:c.toDataURL('image/webp', q) }; }
 function capBase(){ full.render(); const img = grab(); return pack(img, 0.9); }
+function capAlpha(q=0.86){ renderer.render(scene, cam); const img = grab(); return pack(img, q); }
 function capLit(){ litC.render(); const img = grab(), d = img.data;
   for (let i=0;i<d.length;i+=4){ const l = Math.max(d[i], d[i+1], d[i+2]); d[i+3] = l < 5 ? 0 : Math.min(255, Math.round(l*1.1)); }
   return pack(img, 0.72); }
@@ -264,14 +304,40 @@ const proj = (x,y,z) => { const v = new THREE.Vector3(x,y,z).project(cam); retur
 function bbox(key){ const b = BOX[key]; let x0=W,y0=H,x1=0,y1=0;
   for (const dx of [-1,1]) for (const dz of [-1,1]) for (const y of [0.3, 0.3+b.h]){ const [px,py] = proj(b.x+dx*b.w/2, y, b.z+dz*b.d/2); x0=Math.min(x0,px); x1=Math.max(x1,px); y0=Math.min(y0,py); y1=Math.max(y1,py); }
   return [x0, y0, x1-x0, y1-y0]; }
-window.__run = async () => {
+window.__run = async (nolit) => {
   TEX = await new Promise(r => { const t = new THREE.TextureLoader().load('hmh-mark-square.png', () => r(t)); }); TEX.colorSpace = THREE.SRGBColorSpace; pend.forEach(f => f());
-  const out = { W, H, base: capBase(), b:{} };
+  CLOUDS.forEach(c => c.visible = false); FLAGS.forEach(f => f.visible = false); if (SPRAY) SPRAY.visible = false;
+  const out = { W, H, base: capBase(), b:{}, live:{} };
+  // everything but the subject writes depth only; the subject keeps its look
+  const everything = []; scene.traverse(o => { if (o.isMesh || o.isSprite || o.isPoints) everything.push(o); });
+  const matOf = new Map(everything.map(o => [o, o.material]));
+  const fogKeep0 = scene.fog;
+  const alone = (subject, fn) => { scene.fog = null; scene.background = null; everything.forEach(o => { o.material = depthOnly; }); GLOWS.forEach(g => g.visible = false);
+    const show = []; subject.traverse(o => { if (matOf.has(o)) { o.material = matOf.get(o); } show.push([o, o.visible]); o.visible = true; });
+    const r = fn(); show.forEach(([o,v]) => o.visible = v); everything.forEach(o => { o.material = matOf.get(o); }); GLOWS.forEach(g => g.visible = true); scene.fog = fogKeep0; return r; };
+  const aloneLit = (subject, fn) => { scene.fog = null; scene.background = new THREE.Color(0x000000); everything.forEach(o => { o.material = depthOnly; }); GLOWS.forEach(g => g.visible = false);
+    const show = []; subject.traverse(o => { if (matOf.has(o)) { o.material = matOf.get(o); } show.push([o, o.visible]); o.visible = true; });
+    const r = fn(); show.forEach(([o,v]) => o.visible = v); everything.forEach(o => { o.material = matOf.get(o); }); GLOWS.forEach(g => g.visible = true); scene.fog = fogKeep0; scene.background = null; return r; };
+  const cloudsG = new THREE.Group(); CLOUDS.forEach(c => cloudsG.add(c)); scene.add(cloudsG);
+  out.live.clouds = aloneLit(cloudsG, () => capLit());
+  const flagsG = new THREE.Group(); FLAGS.forEach(f => flagsG.add(f)); scene.add(flagsG);
+  out.live.flags = [0, 2.1, 4.2].map(ph => { waveFlags(ph); return alone(flagsG, () => capAlpha(0.8)); });
+  out.live.spray = [9, 31, 57, 83].map(seed => { const p = spray(seed); const r = aloneLit(p, () => capLit()); return r; });
+  // vehicles: each rendered once at a reference point; the app moves and scales it along its path
+  const P3 = (x,y,z) => { const v = new THREE.Vector3(x,y,z); const d = v.distanceTo(cam.position); const pr = v.project(cam); return [Math.round((pr.x+1)/2*W), Math.round((1-pr.y)/2*H), d]; };
+  const path = (pts, ref) => { const r = P3(...ref); return { ref:[r[0], r[1]], pts: pts.map(p => { const q = P3(...p); return [q[0], q[1], +(r[2]/q[2]).toFixed(3)]; }) }; };
+  const place = (g, x, y, z, ry) => { g.position.set(x, y, z); g.rotation.y = ry; g.visible = true; };
+  place(CAR_IN, 3.1, 0.2, 4.5, Math.PI); out.live.carIn = { img: alone(CAR_IN, () => capAlpha()), ...path([[3.1,0.4,15.5],[3.1,0.4,10],[3.1,0.4,4.5],[3.1,0.4,-1],[3.1,0.4,-6.5]], [3.1,0.4,4.5]) }; CAR_IN.visible = false;
+  place(CAR_OUT, -2.8, 0.2, 4.5, 0); out.live.carOut = { img: alone(CAR_OUT, () => capAlpha()), ...path([[-2.8,0.4,-6.5],[-2.8,0.4,-1],[-2.8,0.4,4.5],[-2.8,0.4,10],[-2.8,0.4,15.5]], [-2.8,0.4,4.5]) }; CAR_OUT.visible = false;
+  place(AMB, 4.2, 0.2, 4.5, Math.PI); out.live.amb = { img: [0,1].map(f => { ambLights(f); return alone(AMB, () => capAlpha()); }), ...path([[4.2,0.5,15.5],[4.2,0.5,9],[4.2,0.5,2],[4.4,0.5,-4],[5.4,0.5,-7.2],[6.4,0.5,-8.2]], [4.2,0.5,4.5]) }; AMB.visible = false;
+  place(HELI, PAD.x, PAD.y + 0.5, PAD.z, Math.PI*0.15); out.live.heli = { img: [0, Math.PI/8].map(a => { HELI.userData.rotor.rotation.y = a; return alone(HELI, () => capAlpha()); }), pad: P3(PAD.x, PAD.y+0.5, PAD.z).slice(0,2),
+    ...path([[26,16,-34],[14,11,-28],[5,PAD.y+4.5,-23],[PAD.x,PAD.y+1.6,PAD.z],[PAD.x,PAD.y+0.5,PAD.z]], [PAD.x, PAD.y+0.5, PAD.z]) }; HELI.visible = false;
+  CLOUDS.forEach(c => c.visible = true); FLAGS.forEach(f => f.visible = true);
   // lit layers: only the chosen windows draw (warm), everything else writes depth only
   const all = []; scene.traverse(o => { if (o.isMesh || o.isSprite || o.isPoints) all.push(o); });
   const fogKeep = scene.fog; scene.fog = null; scene.background = new THREE.Color(0x000000);
   const keep = new Map(all.map(o => [o, o.material]));
-  for (const key of Object.keys(WINDOWS)){
+  for (const key of (nolit ? [] : Object.keys(WINDOWS))){
     const wins = WINDOWS[key].slice(); for (let i = wins.length - 1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [wins[i], wins[j]] = [wins[j], wins[i]]; }
     out.b[key] = { label: proj(...LABEL_AT[key]), box: bbox(key), lv: [] };
     GLOWS.forEach(g => g.visible = false);
