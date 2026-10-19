@@ -53,6 +53,12 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**CCHI City (Jose, 2026-10-19; waiting on his campus photos).** CoreCHI
+Practice as a game: an isometric city of HUMC buildings, districts = the 5
+domains, heights = mastery, at the top of CoreCHI, pre-rendered 3D. Mockup,
+render script and decisions: `docs/mockups/cchi-city/README.md`. Next step:
+model the buildings from his photos, show a new mockup, then build it in.
+
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
 you missed, the line length follows your span, your span is charted over
