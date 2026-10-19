@@ -70,11 +70,14 @@ first; notes toggle, memory-only default. One PR each:
 M0. **Voice and mic check** (this PR): a sheet at the bottom of More.
    **Needs Jose:** run it in the installed app and in a Safari tab on his
    iPhone, Copy results, paste both. Write them into the note's Results.
-M1. **Lines.** The 101 False Friends `heard`/`truth` pairs as short
-   Spanish-to-English starters, plus ~60 new lines of 10-45 words both
-   ways (discharge, meds, consent, ED, OB, peds), each split into chunks,
-   in a file of their own (not `index.html`). Jose checks the Spanish
-   (a review list he can tick on the phone) before anything ships.
+M1. **Lines** (PR: claude/trainer-lines, built 2026-10-19). `trainer-lines.js`:
+   94 False Friends starters + 64 long lines (10-45 words, 32 each way,
+   six topics), each cut into chunks; suite `trainer-lines.cjs`.
+   **Needs Jose:** tick every line on the review page
+   (https://claude.ai/artifact/XadvfK1P1ZimbMen18ppso; his ticks are in its
+   store, collection `reviews`, read with ArtifactData). Fold his fixes into
+   the file before M2 loads it. Rebuild the page after any line change:
+   `node tests/tools/trainer-review.cjs <out.html>`, publish to that link.
 M2. **The trainer.** Screen under Practice, playback with the text
    hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
    Dr. Smiley's listening/thinking states, progress in `localStorage`
@@ -87,6 +90,13 @@ M4. **Span chart** (weeks) and the span number on the Practice tile.
 M5. **Auto-marking** from speech to text. Only if M0 shows it works in
    the installed app. Matching on the phone; Haiku (`_routine.js`) only
    for the chunks that look like paraphrases; text only, never audio.
+
+**Campus life, round 2 (Jose picked 2026-10-19).** A car backing out of the
+lot, the ambulance bay doors opening when the ambulance pulls in, people
+sitting on benches, birds crossing the sky. Same pipeline as the living
+scene (`buildentr.cjs` with `NOLIT`, ~3 min); note
+`docs/features/practice-dashboard.md`. Parallax tilt and day-to-night not
+picked (motion permission on iPhone; a full lit re-render, heavier files).
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
@@ -449,6 +459,18 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **The live site can't be fetched from a cloud session** (2026-10-19): the
+  proxy answers 403 for interp-six.vercel.app and Vercel's file API refused.
+  What works: `list_deployments` (Vercel tools) shows the production
+  deployment's commit and state; that commit's `BUILD_ID` is the live one.
+  For a real page check, Jose adds the host under Allowed domains.
+- **Trainer lines** (2026-10-19): starters are the False Friends `heard` with
+  `truth` as the rendering; desorden, estómago and severo get a cleaned
+  rendering; aborto, argumento, bizarro, seno, derrame, ataque and pecho are
+  left out (their truth is "ask which one"). The suite fails if a starter
+  drifts from `FALSE_FRIENDS`. Chunks are `[in text, in render]` in the
+  rendering's order and must cover both sentences word for word.
 
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC

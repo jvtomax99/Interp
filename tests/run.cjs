@@ -27,6 +27,7 @@ const SUITES = [
   ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
+  ['trainer-lines.cjs',   'Memory trainer lines: match False Friends, chunks cover each line, 10-45 words'],
 ];
 const only = process.argv.slice(2);
 const pick = only.length ? SUITES.filter(([f]) => only.some(o => f.startsWith(o))) : SUITES;

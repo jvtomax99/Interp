@@ -34,6 +34,26 @@ Screen web apps (WebKit bug 225298); a 2024 developer report says the same
 trainer must work without it (self-marking); recording and auto-marking
 are built only if M0 shows they work in the installed app.
 
+## M1: the lines
+
+`trainer-lines.js` at the root sets `self.TRAINER_LINES`; not loaded by the
+app until M2 (fetch it when the trainer opens). Each line: `id`, `from`
+(language read aloud), `who`, `topic`, `text`, `render`, `chunks` (meaning
+chunks in the rendering's order, each `[in text, in render]`; after your
+turn you tap the ones you dropped). 94 starters from False Friends
+(`ff-<word>`, Spanish to English, 2-7 words) and 64 long lines (`en-NN`
+provider lines to Spanish, `es-NN` patient or family lines to English;
+10-45 words, median 24; 2-8 chunks) in ED, meds, consent, discharge, OB
+and peds. Span can be counted in words or chunks; M2 decides.
+`tests/suites/trainer-lines.cjs` checks the starters against
+`FALSE_FRIENDS`, that chunks cover both sentences, lengths and topics.
+
+Jose's check: https://claude.ai/artifact/XadvfK1P1ZimbMen18ppso, one card
+per line, Spanish OK or Needs a fix with a note, Hear it (es-US voice).
+Ticks are kept in the page's store (`reviews/<line id>`: `status`, `note`).
+Page source: `tests/tools/trainer-review.html`, built with
+`node tests/tools/trainer-review.cjs <out.html>`.
+
 ## Results
 
 (Jose's pasted reports go here, one per mode: installed app, Safari.)

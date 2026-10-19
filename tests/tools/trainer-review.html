@@ -1,0 +1,211 @@
+<title>Trainer Lines Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap">
+<style>
+/* Layout: one column of line cards under a sticky glass bar (progress + filters), the Hub's own tokens */
+:root{
+  --bg:#F4F6FA; --paper:#FFFFFF; --ink:#151C2C; --ink-soft:#5A6478; --ink-faint:#98A1B3;
+  --navy:#252E6D; --accent:#0F5FA6; --accent-soft:#E8F1FA; --line:#E2E7F0;
+  --ok:#1F7A55; --ok-soft:#E3F3EB; --fix:#C2485C; --fix-soft:#FBECEF;
+  --glass:rgba(244,246,250,.82);
+  --shadow:0 1px 0 0 inset rgba(255,255,255,.82),0 1px 2px rgba(20,43,67,.06),0 8px 20px -12px rgba(22,55,90,.22);
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"IBM Plex Serif",Georgia,serif;
+  --r-sm:10px; --r-md:14px; --r-lg:20px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1424; --paper:#172036; --ink:#E8ECF5; --ink-soft:#A3ADC2; --ink-faint:#6B7690;
+  --navy:#AFC0FF; --accent:#6FB3F0; --accent-soft:#1B2D4A; --line:#26314B;
+  --ok:#5CC99A; --ok-soft:#163327; --fix:#F08A9B; --fix-soft:#3A1E27;
+  --glass:rgba(14,20,36,.82);
+  --shadow:0 1px 0 0 inset rgba(255,255,255,.04),0 1px 2px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1424; --paper:#172036; --ink:#E8ECF5; --ink-soft:#A3ADC2; --ink-faint:#6B7690;
+  --navy:#AFC0FF; --accent:#6FB3F0; --accent-soft:#1B2D4A; --line:#26314B;
+  --ok:#5CC99A; --ok-soft:#163327; --fix:#F08A9B; --fix-soft:#3A1E27;
+  --glass:rgba(14,20,36,.82);
+  --shadow:0 1px 0 0 inset rgba(255,255,255,.04),0 1px 2px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.6);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--glass)}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+header .wrap{padding-block:13px 9px;display:grid;gap:9px}
+h1{margin:0;font-size:20px;font-weight:650;letter-spacing:-.01em;color:var(--navy);text-wrap:balance}
+.sub{margin:0;font-size:13px;color:var(--ink-soft)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%;transition:width .3s cubic-bezier(.2,.8,.2,1)}
+.bar .b-ok{background:var(--ok)} .bar .b-fix{background:var(--fix)}
+.count{font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.count b{color:var(--ink);font-weight:650}
+.segs{display:flex;gap:6px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;color:var(--ink-soft);font:550 13px var(--sans);padding:6px 9px;border-radius:999px;cursor:pointer;font-variant-numeric:tabular-nums}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+main .wrap{padding-block:13px 40px;display:grid;gap:13px}
+.note{margin:0;font-size:13px;color:var(--ink-soft);background:var(--accent-soft);border-radius:var(--r-md);padding:9px 13px}
+.warn{background:var(--fix-soft);color:var(--fix)}
+.card{background:var(--paper);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:13px 13px 13px 17px;display:grid;gap:9px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--line)}
+.card.is-ok::before{background:var(--ok)} .card.is-fix::before{background:var(--fix)}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--ink-soft)}
+.chip{font:650 12px var(--sans);letter-spacing:.02em;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums}
+.dir{text-transform:uppercase;letter-spacing:.06em;font-weight:550}
+.es{margin:0;font:400 17px/1.5 var(--serif);color:var(--ink)}
+.en{margin:0;font-size:15px;color:var(--ink-soft)}
+.lbl{display:block;font:650 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px}
+details{border-top:1px solid var(--line);padding-top:6px}
+summary{cursor:pointer;font:550 13px var(--sans);color:var(--accent);list-style:none;padding:3px 0}
+summary::-webkit-details-marker{display:none}
+.chunks{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.chunks li{display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:13px;background:var(--bg);border-radius:var(--r-sm);padding:6px 9px}
+.chunks li span{min-width:0}
+.chunks .c-es{font-family:var(--serif)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);font:550 15px var(--sans);padding:9px 13px;border-radius:12px;cursor:pointer;min-height:44px}
+.btn:active{transform:scale(.97)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.btn.fix{color:var(--fix);border-color:var(--fix)}
+.btn.ghost{border-color:transparent;color:var(--accent);padding-inline:9px}
+.btn:disabled{opacity:.45;cursor:default}
+.state{font:650 13px var(--sans)}
+.state.ok{color:var(--ok)} .state.fix{color:var(--fix)}
+.saved{font-size:13px;color:var(--ink);background:var(--fix-soft);border-radius:var(--r-sm);padding:6px 9px;white-space:pre-wrap}
+textarea{width:100%;font:400 16px/1.4 var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px;min-height:84px;resize:vertical}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.empty{text-align:center;color:var(--ink-soft);padding:26px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.btn:active{transform:none}}
+</style>
+
+<header><div class="wrap">
+  <h1>Trainer lines: Spanish check</h1>
+  <div class="bar" aria-hidden="true"><i class="b-ok" id="barOk"></i><i class="b-fix" id="barFix"></i></div>
+  <div class="count" id="count">Loading your ticks…</div>
+  <div class="segs">
+    <div class="seg" role="group" aria-label="Which lines">
+      <button id="g-long" aria-pressed="true">Long lines</button>
+      <button id="g-ff" aria-pressed="false">Starters</button>
+    </div>
+    <div class="seg" role="group" aria-label="Show">
+      <button id="f-todo" aria-pressed="true">To check</button>
+      <button id="f-fix" aria-pressed="false">To fix</button>
+      <button id="f-all" aria-pressed="false">All</button>
+    </div>
+  </div>
+</div></header>
+<main><div class="wrap" id="list"></div></main>
+
+<script>
+const LINES = __LINES__;
+const state = { group: 'long', filter: 'todo', reviews: {}, store: undefined, uid: null, editing: null, live: false };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const words = s => (s.match(/[\p{L}\p{N}']+/gu) || []).length;
+const isFF = l => l.id.startsWith('ff-');
+const spanishOf = l => l.from === 'es' ? l.text : l.render;
+const englishOf = l => l.from === 'es' ? l.render : l.text;
+
+function render() {
+  const all = LINES.filter(l => state.group === 'ff' ? isFF(l) : !isFF(l));
+  const st = l => (state.reviews[l.id] || {}).status;
+  const nOk = LINES.filter(l => st(l) === 'ok').length, nFix = LINES.filter(l => st(l) === 'fix').length;
+  $('barOk').style.width = (100 * nOk / LINES.length) + '%';
+  $('barFix').style.width = (100 * nFix / LINES.length) + '%';
+  $('count').innerHTML = state.live
+    ? `<b>${nOk + nFix}</b> of ${LINES.length} checked · <b>${nOk}</b> OK · <b>${nFix}</b> to fix`
+    : state.store === undefined ? 'Loading your ticks…' : `${LINES.length} lines · ticks are not saved in this view`;
+  const left = all.filter(l => !st(l)).length, fixes = all.filter(l => st(l) === 'fix').length;
+  $('f-todo').textContent = `To check ${left}`;
+  $('f-fix').textContent = `To fix ${fixes}`;
+  $('f-all').textContent = `All ${all.length}`;
+  const shown = all.filter(l => state.filter === 'all' || (state.filter === 'todo' ? !st(l) : st(l) === 'fix'));
+  const head = state.group === 'ff'
+    ? `<p class="note">These Spanish lines are already in the app (False Friends). Check the English model rendering and how each line is cut into chunks.</p>`
+    : `<p class="note">Mark each line Spanish OK, or Needs a fix and write what to change. New lines. English lines are what a provider says (the Spanish is the model rendering); Spanish lines are what a patient or family member says.</p>`;
+  const warn = state.store !== null ? '' : `<p class="note warn">Ticks can't be saved here. Open this page signed in to claude.ai to mark lines.</p>`;
+  $('list').innerHTML = warn + head + (shown.length ? shown.map(card).join('') : `<p class="empty">${state.filter === 'fix' ? 'Nothing marked to fix.' : 'All checked in this group.'}</p>`);
+}
+
+function card(l) {
+  const r = state.reviews[l.id] || {};
+  const dir = l.from === 'es' ? 'Spanish → English' : 'English → Spanish';
+  const edit = state.editing === l.id;
+  const pairs = l.chunks.map(c => {
+    const es = l.from === 'es' ? c[0] : c[1], en = l.from === 'es' ? c[1] : c[0];
+    return `<li><span class="c-es" lang="es">${esc(es)}</span><span>${esc(en)}</span></li>`;
+  }).join('');
+  const off = state.store ? '' : ' disabled';
+  let acts;
+  if (edit) acts = `<textarea id="t-${esc(l.id)}" aria-label="What to change">${esc(r.note || '')}</textarea>
+      <div class="acts"><button class="btn fix" data-act="save" data-id="${esc(l.id)}">Save fix</button><button class="btn ghost" data-act="cancel">Cancel</button></div>`;
+  else if (r.status) acts = `<div class="acts"><span class="state ${r.status}">${r.status === 'ok' ? 'Spanish OK' : 'Needs a fix'}</span>
+      <button class="btn ghost" data-act="${r.status === 'fix' ? 'edit' : 'undo'}" data-id="${esc(l.id)}"${off}>${r.status === 'fix' ? 'Edit note' : 'Undo'}</button>
+      ${r.status === 'fix' ? `<button class="btn ghost" data-act="undo" data-id="${esc(l.id)}"${off}>Clear</button>` : ''}</div>
+      ${r.status === 'fix' && r.note ? `<div class="saved">${esc(r.note)}</div>` : ''}`;
+  else acts = `<div class="acts"><button class="btn ok" data-act="ok" data-id="${esc(l.id)}"${off}>Spanish OK</button>
+      <button class="btn fix" data-act="edit" data-id="${esc(l.id)}"${off}>Needs a fix</button>
+      <button class="btn ghost" data-act="say" data-id="${esc(l.id)}">Hear it</button></div>`;
+  return `<article class="card${r.status ? ' is-' + r.status : ''}" id="c-${esc(l.id)}">
+    <div class="meta"><span class="chip">${esc(l.id)}</span><span class="dir">${dir}</span><span>${esc(l.topic)} · ${esc(l.who)} · ${words(l.text)} words</span></div>
+    <div><span class="lbl">Spanish${l.from === 'es' ? ' (read aloud)' : ' (model rendering)'}</span><p class="es" lang="es">${esc(spanishOf(l))}</p></div>
+    <div><span class="lbl">English${l.from === 'en' ? ' (read aloud)' : ' (model rendering)'}</span><p class="en">${esc(englishOf(l))}</p></div>
+    <details><summary>${l.chunks.length} chunk${l.chunks.length > 1 ? 's' : ''}</summary><ul class="chunks">${pairs}</ul></details>
+    ${acts}
+  </article>`;
+}
+
+async function mark(id, data) {
+  if (!state.store) return;
+  const prev = state.reviews[id];
+  if (data) state.reviews[id] = data; else delete state.reviews[id];
+  state.editing = null; render();
+  try {
+    const ref = state.store.collection('reviews').doc(id);
+    if (data) await ref.set({ ...data, by: state.uid || '', at: Date.now() }); else await ref.delete();
+  } catch (e) {
+    if (prev) state.reviews[id] = prev; else delete state.reviews[id];
+    render();
+    $('count').textContent = `Not saved (${e && e.code || 'error'}). Try again.`;
+  }
+}
+
+function say(l) {
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(spanishOf(l));
+    u.lang = 'es-US'; u.rate = 0.92; speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id && b.id.startsWith('g-')) { state.group = b.id.slice(2); ['g-long', 'g-ff'].forEach(x => $(x).setAttribute('aria-pressed', x === b.id)); render(); return; }
+  if (b.id && b.id.startsWith('f-')) { state.filter = b.id.slice(2); ['f-todo', 'f-fix', 'f-all'].forEach(x => $(x).setAttribute('aria-pressed', x === b.id)); render(); return; }
+  const id = b.dataset.id, l = LINES.find(x => x.id === id), act = b.dataset.act;
+  if (act === 'ok') mark(id, { status: 'ok' });
+  else if (act === 'undo') mark(id, null);
+  else if (act === 'edit') { state.editing = id; render(); const t = $('t-' + id); if (t) t.focus(); }
+  else if (act === 'cancel') { state.editing = null; render(); }
+  else if (act === 'save') { const t = $('t-' + id); const note = t ? t.value.trim() : ''; mark(id, { status: 'fix', note }); }
+  else if (act === 'say' && l) say(l);
+});
+
+render();
+(async () => {
+  try {
+    const db = await window.claude?.use?.('db');
+    if (!db) { state.store = null; render(); return; }
+    state.store = db;
+    try { const u = await window.claude.use('user'); state.uid = u ? await u.id() : null; } catch (e) {}
+    db.collection('reviews').onSnapshot(snap => {
+      const next = {};
+      snap.docs.forEach(d => { const v = d.data() || {}; if (v.status === 'ok' || v.status === 'fix') next[d.id] = { status: v.status, note: typeof v.note === 'string' ? v.note : '' }; });
+      state.reviews = next; state.live = true;
+      if (!state.editing) render(); else { const t = $('t-' + state.editing); const keep = t ? t.value : ''; render(); const t2 = $('t-' + state.editing); if (t2) t2.value = keep; }
+    }, () => { state.live = false; render(); });
+  } catch (e) { state.store = null; render(); }
+})();
+</script>
