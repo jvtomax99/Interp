@@ -56,10 +56,14 @@ deck and dark tower on the right, the Helena Theurer Pavilion back right
 with its lettering. Each domain is one building (Ethics the banner
 building, Terminology the white tower, US Systems the left building,
 Encounter Helena Theurer, Culture the dark tower); its windows
-light up in tenths of coverage (`campusLevel`). Art: `city/entrance.webp`
-plus `city/<key>-lit<1..10>.webp` (only the lit windows, occluded by the
-scene), made by `docs/mockups/cchi-city/entrance.html` + `buildentr.cjs`;
-paste the printed manifest into `CAMPUS_MAP`. On the scene: a small % badge
+light up in tenths of coverage (`campusLevel`). Art: `city/entrance.webp` (the whole picture, sky included: a gradient dome
+with stars, cloud puffs, a far skyline and the town's ground, fog; rendered
+through an EffectComposer with ambient occlusion, bloom, SMAA at 2x) plus
+`city/<key>-lit<1..10>.webp` (only that building's lit windows with their
+own bloom, on black turned to alpha; drawn with `mix-blend-mode:screen` so
+the glow adds light), made by `docs/mockups/cchi-city/entrance.html` +
+`buildentr.cjs` (~25 min headless on SwiftShader); paste the printed
+manifest into `CAMPUS_MAP`. Phone loads the picture + 5 layers (~300 KB). On the scene: a small % badge
 per roof (`.cp-tag`, nudged apart), tap areas (`.cp-bld`), headlights on the
 drive and the fountain sparkle (only while on screen: `watchCampus`). Under
 it a legend of names (`.cp-key`), streak/goal/due chips, Play and Exam sim.

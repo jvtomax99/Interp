@@ -3682,7 +3682,8 @@
   .cp-say p{ margin:0; background:#fff; color:#151C2C; border-radius:4px 14px 14px 14px; padding:7px 10px;
     font-size:12px; line-height:1.35; box-shadow:0 6px 16px rgba(10,6,30,.35); }
   .cp-say p b{ color:#B5577A; font-weight:650; }
-  .cp-world{ position:relative; margin:9px -13px 0; container-type:inline-size; }
+  .cp-world{ position:relative; margin:9px -13px 0; container-type:inline-size; isolation:isolate;
+    -webkit-mask-image:linear-gradient(#000 88%, transparent); mask-image:linear-gradient(#000 88%, transparent); }
   .cp-world > img, .cp-bld{ position:absolute; display:block; }
   .cp-world img{ width:100%; height:100%; }
   .cp-sh{ opacity:.95; pointer-events:none; }
@@ -3710,7 +3711,7 @@
   .cp-key.is-focus{ background:#FFB443; color:#2a1a08; } .cp-key.is-focus i{ color:#7a3d00; }
   .cp-dot{ width:9px; height:9px; border-radius:50%; background:var(--dom); box-shadow:0 0 0 2px rgba(255,255,255,.5); }
   @keyframes cpBob{ 50%{ transform:translate(-50%,-100%) translateY(-3px); } }
-  .cp-lit{ pointer-events:none; filter:drop-shadow(0 0 2px rgba(255,180,70,.85)); animation:cpLight .9s ease-out backwards; animation-delay:calc(.25s + var(--i,0) * .12s + var(--motion-skip, 0s)); }
+  .cp-lit{ pointer-events:none; mix-blend-mode:screen; animation:cpLight .9s ease-out backwards; animation-delay:calc(.25s + var(--i,0) * .12s + var(--motion-skip, 0s)); }
   @keyframes cpLight{ from{ opacity:0; } to{ opacity:1; } }
   .cp-lights{ position:absolute; width:0; height:0; pointer-events:none; animation:cpDrive 7s linear infinite; }
   .cp-lights.is-out{ animation-duration:9s; animation-delay:-3s; }
@@ -20093,7 +20094,7 @@ function renderFocusTile(worst){
    building its lit windows at 1..10 tenths, occluded by everything in front. CAMPUS_MAP: w,h render size;
    g scene box [x,y,w,h]; b[key] = { label [x,y], box (tap area), lv: boxes of the 10 lit layers };
    f fountain [x,y]; drive: the two lanes' ends. */
-const CAMPUS_MAP = {"w":960,"h":760,"g":[0,125,960,635],"f":[445,411],"drive":[[350,710],[391,401],[515,401],[531,710]],"b":{"e":{"label":[451,253],"box":[353,238,193,129],"lv":[[356,266,85,99],[353,261,189,104],[353,261,189,104],[353,261,190,104],[353,261,190,104],[353,261,190,104],[353,261,190,104],[353,256,190,109],[353,256,190,109],[353,256,190,109]]},"t":{"label":[464,126],"box":[420,116,86,186],"lv":[[421,169,68,121],[420,154,83,136],[420,138,84,162],[420,138,84,162],[420,138,84,162],[420,138,84,162],[420,138,84,162],[420,138,84,162],[420,138,84,162],[420,134,84,166]]},"s":{"label":[197,359],"box":[70,303,238,258],"lv":[[92,389,217,170],[92,362,217,197],[77,336,232,223],[77,331,232,228],[77,331,232,228],[77,324,232,235],[77,324,232,235],[77,324,232,235],[77,324,232,235],[77,324,232,235]]},"c":{"label":[682,261],"box":[590,232,188,222],"lv":[[596,273,176,179],[590,273,182,179],[590,273,184,179],[590,252,184,200],[590,252,184,200],[590,252,184,200],[590,252,184,200],[589,252,185,200],[589,252,185,200],[589,252,185,200]]},"n":{"label":[744,169],"box":[643,187,196,149],"lv":[[645,203,190,100],[645,194,190,109],[645,186,190,117],[644,186,191,117],[644,186,191,117],[644,186,191,117],[644,186,191,117],[644,183,192,120],[644,183,194,120],[644,183,194,120]]}}};
+const CAMPUS_MAP = {"w":960,"h":760,"g":[0,0,960,760],"f":[451,480],"drive":[[368,738],[405,472],[510,472],[524,738]],"b":{"e":{"label":[455,348],"box":[374,334,161,109],"lv":[[366,357,90,98],[348,348,198,116],[343,344,206,132],[332,335,225,150],[324,326,240,165],[316,319,255,182],[313,310,267,196],[309,305,276,207],[305,300,284,219],[302,296,289,227]]},"t":{"label":[466,242],"box":[430,234,72,154],"lv":[[411,267,91,125],[398,251,128,152],[389,242,148,169],[379,226,175,190],[372,221,188,208],[362,214,203,228],[356,208,214,241],[350,200,227,255],[346,197,234,260],[341,191,246,271]]},"s":{"label":[242,436],"box":[134,389,201,219],"lv":[[121,452,232,181],[108,426,258,231],[89,406,292,264],[84,392,310,290],[76,388,326,303],[72,379,339,324],[61,374,355,341],[57,368,365,352],[54,364,376,362],[47,359,391,374]]},"c":{"label":[649,354],"box":[573,329,157,187],"lv":[[558,364,189,178],[537,353,215,209],[519,336,262,241],[509,323,282,264],[501,314,298,280],[492,304,312,299],[485,294,325,317],[476,288,338,331],[467,282,354,345],[459,275,369,359]]},"n":{"label":[700,278],"box":[617,292,163,125],"lv":[[613,301,178,104],[597,286,205,137],[582,262,234,179],[571,254,254,198],[562,245,268,213],[555,237,282,231],[548,228,292,248],[543,219,304,264],[538,209,313,283],[534,200,323,302]]}}};
 const CAMPUS = [
   { key:'e', id:'ethics',      short:'Ethics',      place:'the building with the banners' },
   { key:'t', id:'terminology', short:'Terminology', place:'the white tower' },
