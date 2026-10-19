@@ -96,21 +96,6 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
-S3b. **Startup, what's left (S3 in Done).** 2026-10-19 so far (Facts, "S3b
-   measurements"): first tuck's body restyle fixed (branch
-   `claude/s3b-startup`); lens-glide idea and "split Home's draw" measured
-   no gain / worse, dropped. Open: Jose's pick between "draw less at first"
-   (projected ~1/3 off the worst task, not under 200 ms) and stopping S3b.
-   Original note: target still no task > 200 ms
-   at 4x; after S3 the worst are ~240-460 ms. They are whole-screen costs:
-   a Home render's script (~150-200 ms) plus the style of the new screen
-   (~130 ms, forced on purpose by `dockAfterRender` so the tab lens glides),
-   and the next frame's layout + paint + `heroPetals`. Options, each needs a
-   measurement first: fewer elements in Home's first render (its own style
-   cost), the lens glide as a Web Animation (no forced style; check Still
-   and reduced motion), `pin-icons.js` `applyExactPins` (30-120 ms).
-   `drawOpening` is per frame of the opening (30-70 ms a frame at 4x), not
-   a long task; only worth it if the opening stutters on the phone.
 S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
@@ -187,6 +172,17 @@ come from this alone.
 
 ## Later (only when the trigger happens)
 
+- **Startup, draw less at first (from S3b).** Trigger: Jose finds opening
+  the app slow on his phone. Home's first draw is the worst startup task
+  (~720-890 ms at 4x on the S3b machine): script ~half, style + layout of
+  the new Home ~half, both over 200 ms. Draw what's on the first screen
+  first, the rails more than 1.5 screens down (284 of Home's 669 elements)
+  a frame later; projected ~1/3 off, not under 200 ms. Don't retry moving
+  the layout reads to the frame (Facts, "S3b measurements"). Other leads,
+  unmeasured as fixes: `watchDomainDock` writes `--dock-top` on `<html>`
+  every render (a new value restyles the page); the name pen's `tick`
+  reads two rects per frame (20-45 ms frames at 4x during the opening).
+
 - **Glossary changes-only sync.** Each cold start reads every term (~1,700
   reads; persistence is off on purpose, iPhone crashes). Do it only if
   Firestore reads near 50K/day (Usage page). Was 23K on 2026-10-13.
@@ -198,6 +194,15 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
+  `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
+  ~7 s after opening at 4x in 5/5 runs); now on the tab bar, kept in its
+  markup: 0/5. Bar sizes identical (Home, Chat, redraw while tucked).
+  Lens glide as a Web Animation and moving Home's layout reads to the frame
+  were measured (no gain; worse) and dropped; "draw less at first" moved
+  to Later. Facts: "S3b measurements". Rules added: always say the
+  recommendation; a chat's title says what it works on.
 
 - 2026-10-19 S7 Home scroll part 2 closed (Jose). S7a-S7d below. On his
   iPhone (393x852), scrolling Home went from 85 ms/s, 10.5% late (before
