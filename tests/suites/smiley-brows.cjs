@@ -26,10 +26,26 @@ const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1
  ok(seen[seen.length-1][2]==='','after it, the brows go back to following his face: '+seen[seen.length-1].join(' '));
  // Focused: the same pose, smaller.
  await free();
- const amp=await P.evaluate(()=>{const s=document.querySelector('.dock-smiley svg.ds-art'),v=m=>{setSmileyMode(m);s._brow='';drFaceSet(s,'lookU');return parseFloat(s.querySelector('.ds-brow-l').style.transform.split(',')[1]);};const a=v('lively'),b=v('focused');setSmileyMode('lively');drFaceSet(s,'rest');return [a,b];});
+ const amp=await P.evaluate(async()=>{const s=document.querySelector('.dock-smiley svg.ds-art'),w=ms=>new Promise(r=>setTimeout(r,ms)),v=async m=>{setSmileyMode(m);s._brow='';s._browLift=0;drFaceSet(s,'lookU');await w(150);return parseFloat(s.querySelector('.ds-brow-l').style.transform.split(',')[1]);};const a=await v('lively'),b=await v('focused');setSmileyMode('lively');drFaceSet(s,'rest');return [a,b];});
  ok(amp[1]<0&&Math.abs(amp[1])<Math.abs(amp[0]),'Focused lifts the brows less: '+JSON.stringify(amp));
  // Still: no gliding.
  const still=await P.evaluate(()=>{const s=document.querySelector('.dock-smiley svg.ds-art');setSmileyMode('still');s._brow='';drFaceSet(s,'lookU');const t=getComputedStyle(s.querySelector('.ds-brow-l')).transitionDuration;setSmileyMode('lively');drFaceSet(s,'rest');return t;});
  ok(still==='0s','Still: the brows change without gliding ('+still+')');
+ // The Disney touches: follow-through, no twins, anticipation.
+ await P.waitForTimeout(200);
+ const ease=await P.evaluate(()=>{const c=getComputedStyle(document.querySelector('.dock-smiley .ds-brow-l'));return [c.transitionTimingFunction,c.transitionDelay];});
+ ok(/1\.45/.test(ease[0])&&ease[1]==='0.03s','follow-through: the brows start a beat after the eyes and overshoot before settling '+JSON.stringify(ease));
+ const take=await P.evaluate(async()=>{const s=document.querySelector('.dock-smiley svg.ds-art'),w=ms=>new Promise(r=>setTimeout(r,ms)),y=c=>parseFloat(s.querySelector(c).style.transform.split(',')[1]||0);
+   s._brow='';s._browLift=0;drFaceSet(s,'rest');await w(50);drFaceSet(s,'lookU');const dip=y('.ds-brow-l');await w(150);const l=y('.ds-brow-l'),r=y('.ds-brow-r');drFaceSet(s,'rest');return {dip,l,r};});
+ ok(take.dip>0&&take.l<0,'anticipation: a big raise dips first, then goes up '+JSON.stringify(take));
+ ok(take.r<take.l,'no twins: his expressive brow (your right) goes further than the other '+JSON.stringify(take));
+ ok(await P.evaluate(()=>{const g=DR_FACE_SEQ.greet;return !!(g.brow&&g.brow.some(b=>b[1]==='up')&&g.brow.some(b=>b[1]===null));}),'hello: an eyebrow flash, then the brows follow his face again');
+ ok(await P.evaluate(()=>{const t=DR_FACE_SEQ.think;return !!(t.brow&&t.brow.some(b=>b[1]==='focused')&&t.brow.some(b=>b[1]==='up'));}),'thinking: brows knit as he starts, an "aha" lift as it lands');
+ await free();
+ const pet=await P.evaluate(()=>new Promise(r=>{const s=document.querySelector('.dock-smiley svg.ds-art'),a=drAnim(s);a.play('pet',{priority:DR_P.DIRECT});setTimeout(()=>r({f:a.frame(),hold:s._browHold}),220);}));
+ ok(pet.f==='lookU'&&pet.hold==='up','held: a startled take (eyes and brows up) before the giggle '+JSON.stringify(pet));
+ await free();
+ const off=await P.evaluate(()=>new Promise(r=>{window.dispatchEvent(new Event('offline'));setTimeout(()=>{const s=document.querySelector('.dock-smiley svg.ds-art'),a=drAnim(s);const out={run:a.run&&a.run.name,hold:s._browHold};window.dispatchEvent(new Event('online'));r(out);},400);}));
+ ok(off.run==='worry'&&off.hold==='worried','the connection drops: he looks worried, then reassuring '+JSON.stringify(off));
  ok(P.__errors.length===0,'page errors: '+JSON.stringify(P.__errors.slice(0,3)));
  await ctx.close();await b.close();})();

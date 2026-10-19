@@ -60,6 +60,22 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   How the cut was made (re-run it if the base art changes): a dark-brown
   mask per brow, a smooth fill of the skin under it, the brow's own colour
   and edge recovered by unmixing against that fill.
+- **He acts after the Disney principles** (Jose, 2026-10-19: "expressive
+  like Disney characters"; *The Illusion of Life*). No twins: his left brow
+  (your right, the winking side) goes a fifth further than the other
+  (`DR_BROW_SIDE`), so no pose is a mirror image. Anticipation: a big raise
+  from nearly level dips first for 70 ms (`DR_BROW_DIP`, Lively only).
+  Follow-through: the brow glide starts .03 s after the eyes and overshoots
+  before it settles (`cubic-bezier(.34,1.45,.64,1)`, .3 s). Acting beats:
+  `greet` flashes the brows as he sees you; `think` knits them, the frames
+  give the quizzical look, an "aha" lift as it lands (`drPerfMake` beats
+  take a 4th item, a brow pose from that beat); `pet` opens with a
+  startled take before the giggle; `worry` (the connection drops) and
+  `surprise` are new; `composed` goes worried, then caring;
+  `answerGeneral` raises one brow. Still to come, and needing Jose: new
+  drawn face shapes (an "O" mouth, a sad and a worried mouth; his
+  expression sheets are not in the repo) and squash and stretch, which he
+  had removed before (see `docs/PLAN.md`).
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
   getters, so every play varies a little (side, amplitude, beats) with an
