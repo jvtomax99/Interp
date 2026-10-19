@@ -3476,6 +3476,177 @@
     .trend-dot{ transition:none; }
   }
 
+  /* ---------- Practice: the Pixar finish ----------
+     Jose, 2026-10-19: "make it look like a 3D world, inspired by Disney
+     and Pixar". The look comes from light and material, not geometry: soft
+     clay surfaces lit warm from the top-left, a lip of thickness on every
+     tile, a glossy donut for readiness, candy buttons that squash when
+     pressed, tiles that lean toward the finger and spring back, arrivals
+     that land with a little squash. Practice screen only, by design: these
+     tiles deliberately step past the app-wide finish shadow. Nothing here
+     runs at rest; the lean exists only while a finger is down. */
+  :root{
+    --clay-hi:rgba(255,255,255,.95); --clay-sheen:rgba(255,255,255,.7);
+    --clay-shade:rgba(22,40,90,.08); --clay-drop:rgba(24,48,104,.17);
+    --clay-warm:rgba(255,186,112,.13); --clay-spec:rgba(255,255,255,.42);
+    --spring:cubic-bezier(.34,1.56,.64,1);
+  }
+  html[data-theme="dark"]{
+    --clay-hi:rgba(255,255,255,.11); --clay-sheen:rgba(255,255,255,.045);
+    --clay-shade:rgba(2,6,22,.4); --clay-drop:rgba(2,6,22,.6);
+    --clay-warm:rgba(255,170,90,.06); --clay-spec:rgba(255,255,255,.12);
+  }
+
+  /* Landing: drop in, squash on contact, settle. */
+  @keyframes dashIn{
+    0%  { opacity:0; transform:translateY(22px) scale(.93); }
+    55% { opacity:1; transform:translateY(-4px) scale(1.015,.985); }
+    78% { transform:translateY(1px) scale(.996,1.006); }
+    100%{ opacity:1; transform:none; }
+  }
+  .dash-in{ animation-duration:.62s; animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+  .study-mode{ animation-name:dashIn; animation-duration:.62s; animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+
+  /* Clay: a sheen across the top, warm key light from the top-left, a
+     bright lip above and a shaded one below (the tile's thickness), a tight
+     contact shadow and a soft one far below. */
+  .dash-tile, .mastery-row, .study-mode:not(.is-exam){
+    position:relative; border-radius:var(--r-lg); border-color:transparent;
+    background:
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+    box-shadow:
+      inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 var(--clay-shade),
+      inset 0 0 0 1px var(--line-soft),
+      0 2px 3px var(--clay-drop), 0 20px 32px -16px var(--clay-drop);
+  }
+  .focus-tile{
+    background:
+      radial-gradient(130% 90% at 100% 0%, color-mix(in srgb, var(--dom) 16%, transparent), transparent 62%),
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+  }
+  .study-mode.is-next{
+    background:
+      radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--mode) 14%, transparent), transparent 64%),
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+    box-shadow:
+      inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 color-mix(in srgb, var(--mode) 16%, transparent),
+      inset 0 0 0 1.5px color-mix(in srgb, var(--mode) 34%, transparent),
+      0 2px 3px var(--clay-drop), 0 22px 34px -16px color-mix(in srgb, var(--mode) 32%, transparent);
+  }
+  .study-mode.is-exam, .ready-card{ border-radius:var(--r-lg); }
+  .study-mode.is-exam{
+    background:
+      radial-gradient(90% 120% at 0% 0%, rgba(255,186,112,.16), transparent 55%),
+      linear-gradient(135deg,#2C3680,#1A2250);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(4,8,30,.35),
+      0 2px 3px rgba(18,28,70,.3), 0 20px 32px -16px rgba(18,28,70,.7);
+  }
+
+  /* The lean: toward the finger while it is down, a spring back after. */
+  .dash-tile, .mastery-row, .study-mode, .ready-card{
+    transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:transform .6s var(--spring), box-shadow .3s var(--ease), border-color .14s var(--ease);
+  }
+  .study-mode:not(:disabled):active{ transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .is-tilting{ transition:transform .14s ease-out, box-shadow .3s var(--ease); }
+  .dash-tile::after, .mastery-row::after, .study-mode::after{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(circle at var(--mx, 50%) var(--my, 0%), var(--clay-spec), transparent 58%);
+    opacity:0; transition:opacity .35s var(--ease);
+  }
+  .is-tilting::after{ opacity:1; }
+
+  /* Readiness: a chunky glossy donut sitting in the card. */
+  .ready-card{
+    background:
+      radial-gradient(80% 70% at 0% 0%, rgba(255,186,112,.17), transparent 60%),
+      linear-gradient(150deg,#2E3A82 0%,#1B2356 55%,#141B45 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -4px 0 rgba(4,8,30,.35),
+      0 3px 5px rgba(20,43,67,.14), 0 26px 46px -20px rgba(18,28,70,.62);
+  }
+  .ready-ring{
+    position:relative; width:104px; height:104px;
+    filter:drop-shadow(0 9px 9px rgba(4,8,30,.45));
+  }
+  .ready-ring::before{
+    content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:
+      radial-gradient(circle at 34% 24%, rgba(255,255,255,.5), rgba(255,255,255,0) 32%),
+      radial-gradient(circle, rgba(4,8,30,0) 33px, rgba(4,8,30,.38) 35px, rgba(255,255,255,.22) 43px, rgba(255,255,255,0) 46px, rgba(4,8,30,.42) 52px);
+    -webkit-mask:radial-gradient(circle, transparent 34.5px, #000 35.5px);
+            mask:radial-gradient(circle, transparent 34.5px, #000 35.5px);
+  }
+  .ready-ring-in{
+    position:relative; z-index:1; width:70px; height:70px;
+    background:radial-gradient(circle at 50% 30%, #222B5E, #151C47 70%);
+    box-shadow:inset 0 6px 10px rgba(4,8,30,.6), inset 0 -1px 0 rgba(255,255,255,.12);
+  }
+  /* Stat icons as small glossy bubbles. */
+  .ready-stat i{
+    width:26px; height:26px; padding:6px; box-sizing:border-box; border-radius:9px; margin-bottom:4px;
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.4), rgba(1,184,230,.22) 62%, rgba(1,184,230,.12));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 0 rgba(4,8,30,.25), 0 3px 6px -2px rgba(4,8,30,.5);
+  }
+  .sm-icon{
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.95), color-mix(in srgb, var(--mode) 24%, var(--paper)) 66%);
+    box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--mode) 22%, transparent), 0 3px 6px -2px color-mix(in srgb, var(--mode) 40%, transparent);
+  }
+  .study-mode.is-exam .sm-icon{
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.4), rgba(255,255,255,.1) 66%);
+    box-shadow:inset 0 -2px 0 rgba(4,8,30,.3), 0 3px 6px -2px rgba(4,8,30,.5);
+  }
+
+  /* Bars as glossy tubes sunk into a groove. */
+  .mastery-track{ height:9px; box-shadow:inset 0 2px 2px var(--clay-shade), inset 0 -1px 0 var(--clay-hi); }
+  .mastery-seg.is-known{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--dom) 50%, #fff) 0%, var(--dom) 55%, color-mix(in srgb, var(--dom) 82%, #1A2250) 100%);
+  }
+  .mastery-seg.is-known:first-child, .mastery-seg:first-child{ border-radius:999px 0 0 999px; }
+  .mastery-dot{
+    width:11px; height:11px; margin-top:3px;
+    background:radial-gradient(circle at 30% 28%, rgba(255,255,255,.85), var(--dom) 58%, color-mix(in srgb, var(--dom) 75%, #1A2250));
+    box-shadow:0 2px 3px color-mix(in srgb, var(--dom) 45%, transparent);
+  }
+
+  /* Candy buttons: a raised face on a darker lip, squashed flat on press. */
+  .mastery-go{
+    --face:color-mix(in srgb, var(--dom) 22%, #fff); --face-lo:color-mix(in srgb, var(--dom) 40%, #fff);
+    --lip:color-mix(in srgb, var(--dom) 70%, #fff);
+    border:none; color:color-mix(in srgb, var(--dom) 58%, #151C2C); font-weight:650;
+    background:linear-gradient(180deg, var(--face), var(--face-lo));
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.75), 0 3px 0 var(--lip),
+      0 7px 12px -5px color-mix(in srgb, var(--dom) 55%, transparent);
+    transform:translateY(0); transition:transform .32s var(--spring), box-shadow .2s var(--ease);
+  }
+  html[data-theme="dark"] .mastery-go{
+    --face:color-mix(in srgb, var(--dom) 34%, var(--paper)); --face-lo:color-mix(in srgb, var(--dom) 24%, var(--paper));
+    --lip:color-mix(in srgb, var(--dom) 40%, #050A1C); color:color-mix(in srgb, var(--dom) 35%, #fff);
+  }
+  html[data-theme="dark"] .mastery-go{ box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), 0 3px 0 var(--lip), 0 7px 12px -5px rgba(2,6,22,.6); }
+  .mastery-go:hover{ background:linear-gradient(180deg, var(--face), var(--face-lo)); filter:brightness(1.03); }
+  .mastery-go:active, .mastery-go.is-pressed{
+    transform:translateY(2px) scale(1.03,.96); transition:transform .08s ease-out;
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 var(--lip), 0 3px 6px -4px color-mix(in srgb, var(--dom) 55%, transparent);
+  }
+  .mastery-go:focus-visible{ outline:2px solid var(--accent-2); outline-offset:3px; }
+
+  /* The score line as a lit tube with glossy beads. */
+  .trend-line{ stroke-width:3; filter:drop-shadow(0 3px 3px color-mix(in srgb, currentColor 35%, transparent)); }
+  .trend-dot{ fill:url(#trendBall); stroke:var(--paper); stroke-width:1.5; transition:transform .3s var(--spring); }
+  .trend-dot.is-last{ fill:url(#trendBall); }
+  .trend-dot.is-picked{ fill:url(#trendBall); stroke-width:1.5; transform:scale(1.4); }
+
+  @media (prefers-reduced-motion: reduce){
+    .dash-tile, .mastery-row, .study-mode, .ready-card, .mastery-go, .trend-dot{ transition:none; }
+    .mastery-go:active, .mastery-go.is-pressed{ transform:none; }
+  }
+
   /* Exam mode */
   .exam-bar{ display:flex; align-items:center; gap:13px; flex-wrap:wrap; margin-bottom:13px;
     padding:9px 17px; border-radius:var(--r-md); background:var(--navy); color:#EAF0FF; }
@@ -12769,7 +12940,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A dashboard: your scores as a line over time, and the area to focus on next' },
+  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
   { id:'smoothness',  tone:'gd-n2', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
   { id:'chattitles',  tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
 ];
@@ -16394,7 +16565,7 @@ const GUIDE_TOPICS = [
 
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
     <p><b>Your domains</b> further down shows, for each area, how much of the question bank you've learned and how often you got it right in your sessions. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
@@ -19677,7 +19848,7 @@ function renderScoreTrend(){
   const area = n > 1 ? `${line} L${last.x.toFixed(1)} ${TREND_BOT} L${pts[0].x.toFixed(1)} ${TREND_BOT} Z` : '';
   const gy = v => (TREND_TOP + (1 - v/100)*(TREND_BOT - TREND_TOP)).toFixed(1);
   // The dots follow the pen: each pops as the line reaches it.
-  const dots = pts.map((p,i)=> `<circle class="trend-dot${i===n-1?' is-last':''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4"
+  const dots = pts.map((p,i)=> `<circle class="trend-dot${i===n-1?' is-last':''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${i===n-1 ? 6.5 : 5}"
       style="--d:${Math.round(180 + (n === 1 ? 0 : (i/(n-1))*900))}ms"></circle>`).join('');
   const hits = pts.map((p,i)=> `<circle class="trend-hit" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="15" onclick="trendPick(${i})"><title>${p.pct}% · ${escapeHtml(trendDate(p.at))}</title></circle>`).join('');
 
@@ -19691,7 +19862,10 @@ function renderScoreTrend(){
     <svg class="trend-svg" viewBox="0 0 ${TREND_W} ${TREND_H}" role="img" aria-label="Your last ${n} session score${n===1?'':'s'}, from ${pts[0].pct}% to ${last.pct}%">
       <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/>
-      </linearGradient></defs>
+      </linearGradient>
+      <radialGradient id="trendBall" cx=".36" cy=".3" r=".75">
+        <stop offset="0" stop-color="#fff"/><stop offset=".38" stop-color="currentColor"/><stop offset="1" stop-color="#1A4F86"/>
+      </radialGradient></defs>
       <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(100)}" y2="${gy(100)}"/>
       <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(50)}" y2="${gy(50)}"/>
       <line class="trend-base" x1="0" x2="${TREND_W - TREND_GUT}" y1="${TREND_BOT}" y2="${TREND_BOT}"/>
@@ -19799,6 +19973,44 @@ function animateCounts(root){
   };
   tick(t0);
 }
+
+/* The Pixar finish's lean: a practice tile tips toward the finger pressing
+   it and springs back on release (the spring is in CSS). With a mouse it
+   follows the pointer while hovering. Nothing runs unless a pointer is on a
+   tile; scrolling cancels the touch and so releases it. */
+(function(){
+  const SEL = '.ready-card, .dash-tile, .mastery-row, .study-mode:not(:disabled)';
+  let held = null;
+  const lean = e=>{
+    const r = held.getBoundingClientRect();
+    const x = (e.clientX - r.left)/r.width - .5, y = (e.clientY - r.top)/r.height - .5;
+    const k = Math.min(1, 280/Math.max(r.width, 1));   // a wide tile leans less
+    held.style.setProperty('--rx', (-y*10*k).toFixed(2) + 'deg');
+    held.style.setProperty('--ry', (x*12*k).toFixed(2) + 'deg');
+    held.style.setProperty('--mx', Math.round((x + .5)*100) + '%');
+    held.style.setProperty('--my', Math.round((y + .5)*100) + '%');
+  };
+  const release = ()=>{
+    if(!held) return;
+    held.classList.remove('is-tilting');
+    held.style.setProperty('--rx', '0deg'); held.style.setProperty('--ry', '0deg');
+    held = null;
+  };
+  const take = (t, e)=>{
+    if(t === held){ if(held) lean(e); return; }
+    release();
+    if(!t || activeCategory !== 'practice' || reducedMotion()) return;
+    held = t; held.classList.add('is-tilting'); lean(e);
+  };
+  const tileAt = e=> e.target && e.target.closest ? e.target.closest(SEL) : null;
+  document.addEventListener('pointerdown', e=>{ if(e.pointerType !== 'mouse') take(tileAt(e), e); }, { passive:true });
+  document.addEventListener('pointermove', e=>{
+    if(e.pointerType === 'mouse') take(tileAt(e), e);
+    else if(held) lean(e);
+  }, { passive:true });
+  document.addEventListener('pointerup', e=>{ if(e.pointerType !== 'mouse') release(); }, { passive:true });
+  document.addEventListener('pointercancel', release, { passive:true });
+})();
 
 function shuffleOptions(q){
   const order = shuffle(q.o.map((_, i) => i));
@@ -20506,7 +20718,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
+  const LIFTS = '.mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20534,8 +20746,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1455';
-const BUILD_TIME = '2026-10-19 14:55 UTC';
+const BUILD_ID = 'b1019.1458';
+const BUILD_TIME = '2026-10-19 14:58 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
