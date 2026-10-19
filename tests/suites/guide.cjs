@@ -258,8 +258,9 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     ok(files.every(([, n]) => n > 10000), 'the video and its still are there', files);
     await p7.evaluate(() => document.querySelector('.gd-video video').dispatchEvent(new Event('ended'))); await wait(200);
     await p7.evaluate(() => smSheetClose('guideSheet')); await go(p7, 'userguide', 600); await go(p7, 'home', 1200);
-    const after = await p7.evaluate(() => [localStorage.getItem('ih_promoSeen'), !!document.querySelector('.home-promo-btn')]);
-    ok(after[0] === '1' && !after[1], 'once watched, the Watch button is gone, also after Home paints again', after);
+    const after = await p7.evaluate(() => { const btn = document.querySelector('.home-promo-btn'), ring = btn && btn.querySelector('.home-promo-ring');
+      return [localStorage.getItem('ih_promoSeen'), !!btn, btn && btn.classList.contains('is-seen'), ring && getComputedStyle(ring).animationName]; });
+    ok(after[0] === '1' && after[1] && after[2] && after[3] === 'none', 'once watched, the Watch bubble stays and its ring holds still, also after Home paints again', after);
     ok(p7.__errors.length === 0, 'video: no errors', p7.__errors);
     await c7.close(); }
 

@@ -13135,16 +13135,17 @@ function guideOpenSheet(t){
 }
 
 /* ---- The 45-second video (media/hub-promo.mp4, made in promo/) ----
-   Its answer is 'promo'. Home's hello banner has a "Watch" button until the
-   video has been watched on this phone (ih_promoSeen): played to the end or
-   past 15 s. The button opens the answer over Home and starts it with sound
+   Its answer is 'promo'. Home's hello banner always has a "Watch" bubble
+   (Jose, 2026-10-19); once the video has been watched on this phone
+   (ih_promoSeen: played to the end or past 15 s) its ring stops turning
+   (.is-seen). The bubble opens the answer over Home and starts it with sound
    (the tap allows that); from the guide it waits for a tap on play. */
 function promoSeen(){ try{ return localStorage.getItem('ih_promoSeen') === '1'; }catch(e){ return false; } }
 function promoWatch(vid){
   const done = () => {
     if(promoSeen()) return;
     try{ localStorage.setItem('ih_promoSeen', '1'); }catch(e){}
-    document.querySelectorAll('.home-promo-btn').forEach(b => b.remove());
+    document.querySelectorAll('.home-promo-btn').forEach(b => b.classList.add('is-seen'));
   };
   vid.addEventListener('ended', done);
   vid.addEventListener('timeupdate', () => { if(vid.currentTime >= 15) done(); });
@@ -16423,7 +16424,7 @@ const GUIDE_TOPICS = [
     <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" controls playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
     <p>A short film about the Hub: why the right word matters, then the glossary, Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice, Team Chat and Dr. Smiley. It plays with sound; tap the screen for full screen.</p>
     <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
-    <p>On Home, the hello banner has a round <b>Watch</b> bubble in its bottom-right corner, with a ring of colours around it, until you've watched the video once. After that it's only here.</p>` },
+    <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
 
   { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
@@ -20926,8 +20927,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.2028';
-const BUILD_TIME = '2026-10-19 20:28 UTC';
+const BUILD_ID = 'b1019.2140';
+const BUILD_TIME = '2026-10-19 21:40 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

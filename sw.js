@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v241-watch-bubble';
+const CACHE_VERSION = 'interpreter-hub-v242-watch-always';
 const PRECACHE = [
   './',
   './index.html',

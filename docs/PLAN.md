@@ -235,6 +235,10 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 Watch bubble always on Home (Jose couldn't find it: he had
+  watched the video, and the once-only rule had hidden it). After watching,
+  the ring stops turning (`.is-seen`). Guide: `promo` answer reworded.
+
 - 2026-10-19 Watch button became a story bubble (Jose's pick of three):
   the video's still in a turning ring of the promo's colours, a play badge,
   "Watch" on a dark chip. Same corner, same rules; 3 KB thumbnail.

@@ -24,7 +24,8 @@ on this phone only (`ih_firstWeek`, `ih_guideSeen`).
 `<video>` (`media/hub-promo.mp4`, poster `media/hub-promo.jpg`, made from
 `promo/hub-promo-v12.mp4`) sits in the answer's text; tags are stripped for
 search and Ask, so it doesn't pollute them. `promoWatch` marks it watched
-(`ih_promoSeen`) at the end or past 15 s and removes Home's button.
+(`ih_promoSeen`) at the end or past 15 s; Home's bubble stays (Jose, 2026-10-19:
+he watched it and the bubble vanished) and its ring stops turning (`.is-seen`).
 `watchPromo()` opens the answer over Home (no navigation, Back closes it) and
 starts it with sound, which the tap allows. The button itself is
 `addPromoBtn` in `home-polish.js`, styled at the end of `home-polish.css`:
