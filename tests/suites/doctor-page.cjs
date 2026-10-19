@@ -246,17 +246,85 @@ async function targets(page) {
         ok(recovered.total === '10', 'opened from the saved copy, the page fetches the research', recovered);
         ok(/need a connection/.test(recovered.offline.text) && !recovered.offline.button, 'offline, no "Research this doctor" for a doctor already researched', recovered.offline);
 
-        // Add tip: the doctor's sheet at the notes, and back to the page after.
+        // Team tips (D2): Add tip opens the tips sheet over the page.
         await go(page, 'doctor-directory');
         await openDoctor(page, 'dp-tiered');
         await page.locator('#doctorDirDetailModal .dp-rb', { hasText: 'Add tip' }).click();
         await pause(page);
-        const tipSheet = await page.evaluate(() => ({ sheet: document.getElementById('doctorDirOverlay').classList.contains('show'),
-          focus: document.activeElement && document.activeElement.id, notesFont: getComputedStyle(document.getElementById('fDDNotes')).fontSize }));
-        ok(tipSheet.sheet && tipSheet.focus === 'fDDNotes', 'Add tip opens the doctor sheet at the notes', tipSheet);
-        if (!desktop) ok(parseFloat(tipSheet.notesFont) >= 16, 'the notes box is 16px or more (no iOS zoom)', tipSheet.notesFont);
-        await page.evaluate(() => closeDoctorDirModal());
-        await pause(page);
+        const tipSheet = await page.evaluate(() => ({ sheet: document.getElementById('doctorTipsOverlay').classList.contains('show'),
+          page: document.getElementById('doctorDirDetailOverlay').classList.contains('show'),
+          tips: [...document.querySelectorAll('#dtList .dt-tip')].map(t => t.textContent.replace(/\s+/g, ' ').trim()),
+          font: getComputedStyle(document.getElementById('fDTip')).fontSize, notesBox: !!document.getElementById('fDDNotes') }));
+        ok(tipSheet.sheet && tipSheet.page, 'Add tip opens the tips sheet over the page', tipSheet);
+        ok(tipSheet.tips.length === 1 && /Explains staging/.test(tipSheet.tips[0]) && /Maria/.test(tipSheet.tips[0]) && /Edit/.test(tipSheet.tips[0]),
+          'the old note is the first tip, by updatedBy, editable', tipSheet.tips);
+        ok(!tipSheet.notesBox, 'the doctor sheet has no Notes box any more');
+        if (!desktop) ok(parseFloat(tipSheet.font) >= 16, 'the tip box is 16px or more (no iOS zoom)', tipSheet.font);
+
+        // Add one: written to the document as a tip, the tile counts 2.
+        await page.fill('#fDTip', 'Likes the interpreter beside the patient.');
+        await page.click('#dtSave'); await pause(page, 500);
+        const added = await page.evaluate(() => ({ db: __DB['doctor-directory']['dp-tiered'].tips, notes: __DB['doctor-directory']['dp-tiered'].notes,
+          tile: document.querySelector('#doctorDirDetailModal .dp-tip').textContent.replace(/\s+/g, ' ').trim(),
+          log: Object.values(__DB['activity-log'] || {}).map(a => a.summary) }));
+        ok(added.db && added.db.length === 1 && added.db[0].text === 'Likes the interpreter beside the patient.' && added.db[0].by === 'Jose' && added.db[0].id && added.db[0].at,
+          'a new tip is saved as {id, text, by, at}', added.db);
+        ok(added.notes === 'Explains staging with a drawing.' && /Team tips · 2/.test(added.tile), 'the old note stays until edited; the tile counts 2', added);
+        ok(added.log.includes('added a tip for Dr. Lori A. Leslie'), 'adding a tip goes in the activity log', added.log);
+        await page.screenshot({ path: O + device + '-tips.png' });
+
+        // A teammate adds one on their phone; a whole-doctor save from this
+        // phone's older copy must not erase it.
+        const kept = await page.evaluate(async () => {
+          const doc = __DB['doctor-directory']['dp-tiered'];
+          doc.tips = [...doc.tips, { id: 'luis1', text: 'Speaks fast; ask him to pause.', by: 'Luis', at: Date.now() - 3600e3, uid: 'other-phone' }];
+          const d = DOCTOR_DIRECTORY.find(x => x.id === 'dp-tiered');
+          const stale = { ...d, specialty: 'Hematology', tips: [], notes: '' }; delete stale.id;
+          await persistDoctorDirectoryEntry('dp-tiered', stale);
+          const now = __DB['doctor-directory']['dp-tiered'];
+          d.tips = JSON.parse(JSON.stringify(now.tips)); renderDoctorTips();
+          const luis = [...document.querySelectorAll('#dtList .dt-tip')].find(t => /Speaks fast/.test(t.textContent));
+          return { tips: now.tips.map(t => t.id), notes: now.notes, specialty: now.specialty, luisButtons: luis ? luis.querySelectorAll('button').length : -1 };
+        });
+        ok(kept.tips.length === 2 && kept.tips.includes('luis1') && kept.notes === 'Explains staging with a drawing.' && kept.specialty === 'Hematology',
+          'saving the doctor keeps everyone\'s tips and the old note, and still saves the rest', kept);
+        ok(kept.luisButtons === 0, 'a teammate\'s tip has no Edit or Delete', kept);
+
+        // Edit and Delete are 44px to hit and own their point.
+        const hits = await page.evaluate(() => [...document.querySelectorAll('#dtList .dt-act')].map(b => { const r = b.getBoundingClientRect();
+          const h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { h: Math.round(r.height), w: Math.round(r.width), own: h === b }; }));
+        ok(hits.length >= 4 && hits.every(x => x.h >= 44 && x.w >= 44 && x.own), 'Edit and Delete: 44px, nothing on top', hits);
+
+        // Edit your own: same tip, new text.
+        const mineId = await page.evaluate(() => DOCTOR_DIRECTORY.find(x => x.id === 'dp-tiered').tips.find(t => t.by === 'Jose').id);
+        await page.evaluate(id => editDoctorTip(id), mineId);
+        await page.fill('#fDTip', 'Likes the interpreter beside the patient, never behind.');
+        await page.click('#dtSave'); await pause(page, 500);
+        const edited = await page.evaluate(() => __DB['doctor-directory']['dp-tiered'].tips);
+        ok(edited.length === 2 && edited.some(t => t.id === mineId && /never behind/.test(t.text) && t.editedAt) && edited.some(t => t.id === 'luis1'),
+          'editing your tip changes only that one', edited);
+
+        // Edit the old note: it becomes a tip and `notes` goes.
+        await page.evaluate(() => editDoctorTip('notes'));
+        await page.fill('#fDTip', 'Explains staging with a drawing. Bring paper.');
+        await page.click('#dtSave'); await pause(page, 500);
+        const moved = await page.evaluate(() => ({ db: __DB['doctor-directory']['dp-tiered'], n: document.querySelectorAll('#dtList .dt-tip').length }));
+        ok(!('notes' in moved.db) && moved.db.tips.length === 3 && moved.db.tips.some(t => /Bring paper/.test(t.text)) && moved.n === 3,
+          'editing the old note writes it into tips and drops notes', moved);
+
+        // Delete your own.
+        await page.evaluate(id => { window.confirm = () => true; deleteDoctorTip(id); }, mineId); await pause(page, 500);
+        const left = await page.evaluate(() => __DB['doctor-directory']['dp-tiered'].tips.map(t => t.id));
+        ok(left.length === 2 && !left.includes(mineId) && left.includes('luis1'), 'deleting your tip removes only it', left);
+
+        // Back closes the tips sheet first, the page stays.
+        await page.evaluate(() => navigateBack()); await pause(page);
+        ok(await page.evaluate(() => !document.getElementById('doctorTipsOverlay').classList.contains('show') && document.getElementById('doctorDirDetailOverlay').classList.contains('show')),
+          'Back closes the tips sheet, onto the doctor page');
+
+        // Edit (the pencil) still goes to the sheet and back.
+        await page.evaluate(() => doctorPageEdit('dp-tiered')); await pause(page);
+        await page.evaluate(() => closeDoctorDirModal()); await pause(page);
         ok(await page.evaluate(() => document.getElementById('doctorDirDetailOverlay').classList.contains('show') && currentDoctorDetailId === 'dp-tiered'), 'closing the sheet comes back to the doctor page');
 
         // Back closes the page, and the list is still there.

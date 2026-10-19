@@ -76,7 +76,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     await page.evaluate(() => navigateBack(false)); await wait(30);
     if (await page.evaluate(() => document.getElementById('guideSheet').classList.contains('show') || activeCategory !== 'userguide')) sheetProbs.push({ id, err: 'Back did not just close the sheet' });
   }
-  ok(!sheetProbs.length, 'all 57 answers open in a sheet that fits, has text, the right Show me, 40px+ buttons; Back closes it and stays on the guide', sheetProbs);
+  ok(!sheetProbs.length, 'all 58 answers open in a sheet that fits, has text, the right Show me, 40px+ buttons; Back closes it and stays on the guide', sheetProbs);
 
   // visual steps show the real controls
   await page.evaluate(() => openGuideTopic('edit')); await wait(300);

@@ -5887,6 +5887,28 @@ html[data-theme="dark"] .dp-tip{ background:#2C2617; border-color:#4A3D22; }
 html[data-theme="dark"] .dp-tip .dp-k, html[data-theme="dark"] .dp-tip small{ color:#D9BF8A; }
 .dp-note{ margin:var(--sp-3) 2px 0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
 
+/* Team tips sheet (D2): the tip tile's cream, one card per tip, newest last.
+   Edit and Delete only on your own; 44px to hit. */
+.dt-list{ display:flex; flex-direction:column; gap:var(--sp-2); max-height:min(52vh, 420px); overflow-y:auto;
+  margin:var(--sp-2) 0 var(--sp-3); overscroll-behavior:contain; }
+.dt-tip{ background:#FFF7E6; border:1px solid #F3E2BC; border-radius:var(--r-md); padding:12px 13px 4px; }
+.dt-tip.is-editing{ border-color:var(--accent-2); }
+.dt-tip p{ margin:0; font-size:15px; line-height:1.4; font-weight:550; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
+.dt-meta{ display:flex; align-items:center; gap:4px; min-height:44px; }
+.dt-meta small{ flex:1; min-width:0; font-size:var(--fs-cap); font-weight:600; color:#7A5F30; }
+.dt-act{ min-height:44px; min-width:44px; padding:0 9px; border:0; background:none; font:650 var(--fs-foot) var(--sans);
+  color:var(--navy); cursor:pointer; border-radius:var(--r-sm); transition:transform .18s var(--ease), background .2s var(--ease); }
+.dt-act.is-del{ color:var(--danger); }
+.dt-act:active, .dt-act.is-pressed{ transform:scale(.96); background:rgba(37,46,109,.07); }
+.dt-act:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-2px; }
+.dt-empty{ margin:0; font-size:15px; line-height:1.45; color:var(--ink-soft); }
+html[data-theme="dark"] .dt-tip{ background:#2C2617; border-color:#4A3D22; }
+html[data-theme="dark"] .dt-tip p{ color:var(--ink); }
+html[data-theme="dark"] .dt-meta small{ color:#D9BF8A; }
+html[data-theme="dark"] .dt-act{ color:#C9D3FF; }
+html[data-theme="dark"] .dt-act.is-del{ color:#F08A9B; }
+@media (prefers-reduced-motion: reduce){ .dt-act{ transition:none; } }
+
 /* Tier tabs: Dr. Smiley's segmented control, scrolling sideways when the
    five tiers and the team's own terms don't fit. */
 .dp-tabs.ds-mode-seg{ margin:16px 0 10px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
@@ -6806,7 +6828,6 @@ body.pv-open{ overflow:hidden; }
       <button type="button" class="place-field" id="fDDPlace" aria-labelledby="fDDPlaceLab fDDPlace" onclick="openPlacePicker()"></button>
     </div>
     <div class="field"><label for="fDDLocationDetails">Floor, suite or room (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. 4th floor, Suite 401"></div>
-    <div class="field"><label>Notes (optional)</label><textarea id="fDDNotes" placeholder="Scheduling notes, quirks, best way to reach, etc."></textarea></div>
     <div class="field">
       <label>Photo (optional)</label>
       <div class="photo-field">
@@ -6825,6 +6846,18 @@ body.pv-open{ overflow:hidden; }
 
 <div class="overlay dp-overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
   <div class="modal dp-page" id="doctorDirDetailModal" role="dialog" aria-modal="true" aria-label="Doctor"></div>
+</div>
+
+<div class="overlay" id="doctorTipsOverlay" onclick="if(event.target===this) closeDoctorTips()">
+  <div class="modal dt-sheet" role="dialog" aria-modal="true" aria-labelledby="dtTitle">
+    <h3 id="dtTitle">Team tips</h3>
+    <div class="dt-list" id="dtList"></div>
+    <div class="field"><label id="dtFieldLabel" for="fDTip">Add a tip</label><textarea id="fDTip" maxlength="1000" placeholder="What should a teammate know before walking in?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="dtCancel" onclick="doctorTipsCancel()">Close</button>
+      <button class="btn btn-primary" id="dtSave" onclick="saveDoctorTip()">Add tip</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="doctorTermOverlay" onclick="if(event.target===this) closeDoctorTermModal()">
@@ -9742,7 +9775,7 @@ async function restoreTrashItem(id){
       ok = await saveTermDoc({ ...p, id: p.id, categoryId });
       if(ok && !cat.terms.some(t => t.id === p.id)) cat.terms.push({ ...p });
     } else if(entry.type === 'doctor'){
-      await persistDoctorDirectoryEntry(p.id, p);
+      await persistDoctorDirectoryEntry(p.id, p, true);
       if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...p });
       ok = true;
     } else if(entry.type === 'provider'){
@@ -10000,9 +10033,18 @@ function doctorDirProblem(){
   if(DOCTOR_DIR_STATE === 'failed' && !document.hidden) loadDoctorDirectory();
 }));
 
-async function persistDoctorDirectoryEntry(id, record){
+// Team tips (`tips`, and the old single `notes`) belong to the database copy:
+// every other save leaves those two fields alone, so a sheet saved from a copy
+// loaded an hour ago can't erase a tip a teammate just added. Tips are added
+// and removed one at a time (doctorTipWrite). `whole` writes everything, for a
+// restore, where the document is gone.
+async function persistDoctorDirectoryEntry(id, record, whole){
   if(!db){ showToast('Not connected to the database.'); return false; }
-  await trackWrite(db.collection('doctor-directory').doc(id).set(stripUndefined(record)));
+  const ref = db.collection('doctor-directory').doc(id);
+  const data = stripUndefined(record);
+  if(whole){ await trackWrite(ref.set(data)); return true; }
+  delete data.tips; delete data.notes;
+  await trackWrite(ref.set(data, { mergeFields: Object.keys(data) }));
   return true;
 }
 
@@ -11708,7 +11750,7 @@ function collectSearchMatches(q){
 
   DOCTOR_DIRECTORY.forEach(d=>{
     const customHit = (d.customTerms||[]).some(t => hit(t.en) || hit(t.es) || hit(t.def));
-    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(d.notes) || customHit){
+    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(doctorTipsText(d)) || customHit){
       out.push({ group:'Doctor Directory', icon:ICON_GRID, color:'#7C6A9C',
         title:d.name, sub:[d.specialty, d.locationDetails].filter(Boolean).join(' \u00b7 '),
         target:'doctor-directory', rank: starts(d.name) ? 0 : 1 });
@@ -12687,9 +12729,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'teamtips',    tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'Team tips: everyone can add their own tip on a doctor’s page' },
   { id:'smoothness',  tone:'gd-n1', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
   { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
-  { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12806,12 +12848,16 @@ const GUIDE_STEPS = {
     'Use the Back arrow to retrace your route and return to where you were.'],
     note: 'Every Doctor Prep button opens research directly. A specialty-based appointment briefing remains separate in Ask Dr. Smiley.' }),
   directory: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctors')} → ${GUIDE_UI.pill('Doctor Directory')}, or choose ${GUIDE_UI.pill('Doctor Directory')} under ${GUIDE_UI.pill('More')}.`,
-    'Tap a doctor to open their page.', `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in.`],
+    'Tap a doctor to open their page.', `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in. Every teammate can add their own.`],
     note: 'Doctor Prep saves its research here. Your team’s tips and terms stay separate from that research.' }),
   doctorpage: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctor Directory')} and tap a doctor.`,
     'Tap a tab (Core, Procedures, Drugs, Anatomy, False friends, Team terms) to see those terms. Tap EN or ES to hear one.',
     `At the bottom: ${GUIDE_UI.pill('Start appointment')}, ${GUIDE_UI.pill('Flashcards')} for the briefing, or ${GUIDE_UI.pill('Add tip')}.`],
     note: 'The pencil at the top right edits the doctor: name, specialty, where, photo.' }),
+  teamtips: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctor Directory')} and tap a doctor.`,
+    `Tap ${GUIDE_UI.pill('Add tip')} at the bottom, or the yellow Team tip card.`,
+    `Write your tip and tap ${GUIDE_UI.pill('Add tip')}. On your own tips, ${GUIDE_UI.pill('Edit')} and ${GUIDE_UI.pill('Delete')}.`],
+    note: 'Everyone on the team sees every tip, with who wrote it and when.' }),
   providers: () => ({ steps: [`Open ${GUIDE_UI.pill('Provider Pictures')} from Home or under ${GUIDE_UI.pill('More')}.`,
     'Search by name, specialty or facility. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with.`],
     note: 'Provider Pictures helps you put a face to a name. Use Doctor Prep for research, or the Doctor Directory for saved research and team notes.' }),
@@ -16202,7 +16248,7 @@ const GUIDE_TOPICS = [
     <p>Open <b>More</b> → <b>Doctors</b> on a phone, or choose <b>Doctors</b> in the sidebar on a computer. It brings the two doctor tools together:</p>
     <ul>
       <li><b>Doctor Prep</b>: research a provider by name and prepare the terminology likely to come up.</li>
-      <li><b>Doctor Directory</b>: open the research the team has saved, with their notes and photos.</li>
+      <li><b>Doctor Directory</b>: open the research the team has saved, with their tips and photos.</li>
     </ul>
     <p>If you want to research someone now, choose <b>Doctor Prep</b> directly on Home or under <b>More</b>. For a specialty-based appointment briefing, ask Dr. Smiley to prep you for that specialty.</p>` },
 
@@ -16212,10 +16258,16 @@ const GUIDE_TOPICS = [
     <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
   { id:'doctorpage', section:'prep', k:'doctor page terms tabs core procedures drugs anatomy false friends team terms hear listen speak english spanish start appointment flashcards tip research again glossary', q:'What is on a doctor’s page?', a:`
-    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, how many prep terms there are, <b>Where</b> they work, and the latest <b>Team tip</b>.</p>
+    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, how many prep terms there are, <b>Where</b> they work, and the first <b>Team tip</b> with how many there are (tap it to read them all).</p>
     <p>The tabs show the terms one group at a time: <b>Core</b>, <b>Procedures</b>, <b>Drugs</b>, <b>Anatomy</b>, <b>False friends</b> (in red) and <b>Team terms</b>, the ones your team added by hand. Tap <b>EN</b> or <b>ES</b> on a term to hear it, or <b>Add to glossary</b> to keep it. <b>Research again</b> updates what Doctor Prep found; your tips, photo and team terms are kept.</p>
-    <p>The bar at the bottom: <b>Start appointment</b> (with this doctor; if you’re already in one with them, it takes you back to it), <b>Flashcards</b> (the briefing for their specialty) and <b>Add tip</b>. The pencil at the top edits the doctor.</p>
+    <p>The bar at the bottom: <b>Start appointment</b> (with this doctor; if you’re already in one with them, it takes you back to it), <b>Flashcards</b> (the briefing for their specialty) and <b>Add tip</b>. The pencil at the top edits the doctor: name, specialty, where, photo.</p>
     <p>No connection? The page shows what this phone has saved; the doctor’s prep terms come back once the directory loads.</p>` },
+
+  { id:'teamtips', section:'prep', k:'team tips tip notes note doctor directory add edit delete my own quirks phrase before walking in', q:'How do team tips on a doctor work?', a:`
+    <p>A tip is what a teammate should know before walking in with this doctor: how they phrase things, what they always explain, how they like the interpreter to stand. Open the doctor’s page and tap <b>Add tip</b> at the bottom, or the yellow <b>Team tip</b> card.</p>
+    <p>The sheet shows every tip, oldest first, with who wrote it and when. Write yours in the box and tap <b>Add tip</b>. Your own tips have <b>Edit</b> and <b>Delete</b>; other people’s you can read but not change. If two of you add a tip at the same moment, both are kept.</p>
+    <p>A doctor’s old single note shows as the first tip. Anyone can edit or delete that one, as before. Notes are no longer on the doctor’s edit sheet; tips are where they live now.</p>
+    <p>Tips are shared with the whole team. Never put patient details in one.</p>` },
 
   { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory floor suite', q:'How do I set where a doctor works?', a:`
     <p>On the doctor’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room goes in the box under it.</p>
@@ -16426,7 +16478,7 @@ const GUIDE_TOPICS = [
 
   { id:'privacy', section:'rule', k:'hipaa privacy patient confidential phi private rules safety mrn', q:'What must never go in this app?', a:`
     <p><b>Anything that identifies a patient.</b> No names, no dates of birth, no medical record numbers, no room numbers tied to a person.</p>
-    <p>This applies everywhere: terms, definitions, notes, chat messages, doctor notes and questions to Dr. Smiley. If a question looks like it has patient details, Ask stops and warns you before sending, and Dr. Smiley won't remember them.</p>
+    <p>This applies everywhere: terms, definitions, notes, chat messages, doctor tips and questions to Dr. Smiley. If a question looks like it has patient details, Ask stops and warns you before sending, and Dr. Smiley won't remember them.</p>
     <p>Describe the situation if you need to. Never the person.</p>` },
 ];
 
@@ -18735,7 +18787,8 @@ function navigateBack(){
   // it navigates the screen behind the panel and the panel stays put, which
   // reads as the button doing nothing.
   if(PV.open){ closePhotoViewer(); return true; }
-  const openOverlay = document.querySelector('.overlay.show');
+  // The last one open is on top (a doctor's tips over the doctor's page).
+  const openOverlay = [...document.querySelectorAll('.overlay.show')].pop();
   if(openOverlay){ openOverlay.classList.remove('show'); return true; }
 
   // Back is history, full stop. It used to try to be clever: on a subgroup
@@ -20279,7 +20332,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
+  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .dt-act';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20307,8 +20360,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1228';
-const BUILD_TIME = '2026-10-19 12:28 UTC';
+const BUILD_ID = 'b1019.1445';
+const BUILD_TIME = '2026-10-19 14:45 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21507,7 +21560,7 @@ function mergeDoctorRecords(records, preferredId){
     }
     return undefined;
   };
-  ['specialty','hospitalLocation','locationDetails','locationGroup','notes','photo','photoPath','source','lastResearchedBy']
+  ['specialty','hospitalLocation','locationDetails','locationGroup','photo','photoPath','source','lastResearchedBy']
     .forEach(f => { const v = firstNonEmpty(f); if(v !== undefined) keep[f] = v; });
 
   // Keep whichever research is richest, not whichever is newest.
@@ -21546,6 +21599,13 @@ async function mergeDuplicateDoctors(keepId){
 
   try{
     await persistDoctorDirectoryEntry(merged.id, merged);
+    // Every tip moves to the doctor kept, the others' old notes as real tips.
+    const moved = group.filter(o => o.id !== merged.id).flatMap(o => doctorTips(o).map(t =>
+      t.legacy ? { id: genId(), text: t.text, by: t.by || 'Someone', at: t.at || Date.now() } : t));
+    if(moved.length){
+      await trackWrite(db.collection('doctor-directory').doc(merged.id).update({ tips: firebase.firestore.FieldValue.arrayUnion(...moved) }));
+      merged.tips = [...(Array.isArray(merged.tips) ? merged.tips : []), ...moved];
+    }
     for(const other of group){
       if(other.id === merged.id) continue;
       // Trashed rather than dropped — a bad merge is recoverable.
@@ -21753,7 +21813,7 @@ function renderDoctorDirectory(q){
       foldText(d.specialty).includes(q) ||
       foldText(d.hospitalLocation).includes(q) ||
       foldText(d.locationDetails).includes(q) ||
-      foldText(d.notes).includes(q)
+      foldText(doctorTipsText(d)).includes(q)
     );
   }
   list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
@@ -21830,7 +21890,7 @@ function renderDoctorDirectory(q){
         ${/* .trim() matters: a field holding only a space is truthy, which
               drew an empty pin row with no text beside it. */''}
         ${(d.locationDetails||'').trim() ? `<div class="doc-card-where">${ICON_PIN}<span>${escapeHtml(d.locationDetails.trim())}</span></div>` : ''}
-        ${(d.notes||'').trim() ? `<p class="doc-card-note">${escapeHtml(d.notes.trim())}</p>` : ''}
+        ${doctorTips(d).length ? `<p class="doc-card-note">${escapeHtml(doctorTips(d)[0].text)}</p>` : ''}
         <div class="doc-card-foot">
           ${termCount
             ? `<span class="doc-card-terms">${ICON_SPARK}${termCount} prep term${termCount===1?'':'s'}</span>`
@@ -22116,12 +22176,158 @@ function doctorPageStartAppt(id){
   doctorPagePrep(d);
   startAppt();
 }
-// Edit (and, until team tips, Add tip: the doctor's notes) open the doctor's
-// sheet; closing it comes back to this page.
+// Edit opens the doctor's sheet; closing it comes back to this page.
 let doctorPageReturnTo = null;
 function doctorPageEdit(id, field){
   closeDoctorDirDetail();
   requireName(() => { doctorPageReturnTo = id; _openEditDoctorDirModal(id, field); });
+}
+
+/* ---------- Team tips (D2) ----------
+   `tips: [{id, text, by, at, uid}]` on the doctor's document. The old single
+   `notes` shows as the first tip (by `updatedBy`) until someone edits or
+   deletes it; then it is written into `tips` and `notes` goes. No migration.
+   Each change is one arrayUnion / arrayRemove, so two phones adding tips at
+   once both keep theirs (whole-doctor saves leave `tips` alone). */
+function doctorTips(d){
+  const tips = (Array.isArray(d && d.tips) ? d.tips : []).filter(t => t && (t.text || '').trim());
+  const old = ((d && d.notes) || '').trim();
+  return old ? [{ id: 'notes', text: old, by: d.updatedBy || '', at: d.updatedAt || 0, legacy: true }, ...tips] : tips;
+}
+function doctorTipsText(d){ return doctorTips(d).map(t => t.text).join('\n'); }
+// Yours: this phone wrote it, or (a tip with no phone on it) your name did.
+// The old note was anyone's to change before, so it still is.
+function isMyTip(t){
+  if(t.legacy) return true;
+  const u = hubAuth && hubAuth.currentUser;
+  if(t.uid) return !!u && u.uid === t.uid;
+  const me = (whoAmI() || '').trim().toLowerCase();
+  return !!me && (t.by || '').trim().toLowerCase() === me;
+}
+async function doctorTipWrite(id, { add, remove, dropNotes }){
+  if(!db){ showToast('Not connected to the database.'); return false; }
+  const FV = firebase.firestore.FieldValue;
+  const ref = db.collection('doctor-directory').doc(id);
+  const batch = db.batch();
+  if(remove) batch.update(ref, { tips: FV.arrayRemove(remove) });
+  const up = {};
+  if(add) up.tips = FV.arrayUnion(add);
+  if(dropNotes) up.notes = FV.delete();
+  if(Object.keys(up).length) batch.update(ref, up);
+  await trackWrite(batch.commit());
+  return true;
+}
+
+const DT = { id: null, editing: null };
+function openDoctorTips(id){
+  requireName(() => {
+    const d = DOCTOR_DIRECTORY.find(x => x.id === id);
+    if(!d) return;
+    DT.id = id; DT.editing = null;
+    document.getElementById('dtTitle').textContent = `Team tips · ${d.name}`;
+    document.getElementById('fDTip').value = '';
+    renderDoctorTips();
+    document.getElementById('doctorTipsOverlay').classList.add('show');
+    const list = document.getElementById('dtList');
+    list.scrollTop = list.scrollHeight;
+    if(!doctorTips(d).length) document.getElementById('fDTip').focus();
+  });
+}
+function closeDoctorTips(){
+  document.getElementById('doctorTipsOverlay').classList.remove('show');
+  DT.id = null; DT.editing = null;
+}
+function renderDoctorTips(){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  if(!d) return;
+  const tips = doctorTips(d);
+  document.getElementById('dtList').innerHTML = tips.length ? tips.map(t => {
+    const mine = isMyTip(t);
+    const meta = [t.by || 'Someone', relativeTime(t.at)].filter(Boolean).join(' · ') + (t.editedAt ? ' · edited' : '');
+    return `<div class="dt-tip${DT.editing === t.id ? ' is-editing' : ''}">
+      <p>${escapeHtml(t.text)}</p>
+      <div class="dt-meta"><small>${escapeHtml(meta)}</small>${mine ? `
+        <button type="button" class="dt-act" onclick="editDoctorTip('${escapeAttr(t.id)}')" aria-label="Edit this tip">Edit</button>
+        <button type="button" class="dt-act is-del" onclick="deleteDoctorTip('${escapeAttr(t.id)}')" aria-label="Delete this tip">Delete</button>` : ''}</div>
+    </div>`;
+  }).join('') : `<p class="dt-empty">No tips yet. How do they phrase things? What do they always explain? What should a newer interpreter know before walking in?</p>`;
+  const editing = DT.editing && tips.find(t => t.id === DT.editing);
+  document.getElementById('dtFieldLabel').textContent = editing ? 'Edit your tip' : 'Add a tip';
+  document.getElementById('dtSave').textContent = editing ? 'Save' : 'Add tip';
+  document.getElementById('dtCancel').textContent = editing ? 'Cancel edit' : 'Close';
+}
+function editDoctorTip(tipId){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  const t = d && doctorTips(d).find(x => x.id === tipId);
+  if(!t || !isMyTip(t)) return;
+  DT.editing = tipId;
+  const f = document.getElementById('fDTip');
+  f.value = t.text;
+  renderDoctorTips();
+  f.focus();
+}
+function doctorTipsCancel(){
+  if(!DT.editing){ closeDoctorTips(); return; }
+  DT.editing = null;
+  document.getElementById('fDTip').value = '';
+  renderDoctorTips();
+}
+// The local copy follows what was written, then the tips, the page and the
+// list redraw.
+function doctorTipsApply(d, { add, remove, dropNotes }){
+  let tips = Array.isArray(d.tips) ? d.tips.slice() : [];
+  if(remove) tips = tips.filter(t => t.id !== remove.id);
+  if(add) tips.push(add);
+  d.tips = tips;
+  if(dropNotes) delete d.notes;
+  doctorDirToCache(DOCTOR_DIRECTORY);
+  renderDoctorTips();
+  if(currentDoctorDetailId === d.id && document.getElementById('doctorDirDetailOverlay').classList.contains('show')) refreshDoctorDirDetail();
+  render();
+}
+async function saveDoctorTip(){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  if(!d) return;
+  const text = document.getElementById('fDTip').value.trim();
+  if(!text){ showToast('Write the tip first.'); return; }
+  const old = DT.editing && doctorTips(d).find(t => t.id === DT.editing);
+  if(old && old.text === text){ doctorTipsCancel(); return; }
+  const u = hubAuth && hubAuth.currentUser;
+  const tip = old && !old.legacy
+    ? { ...old, text, editedAt: Date.now() }
+    : { id: genId(), text, by: whoAmI() || 'Someone', at: Date.now(), ...(u ? { uid: u.uid } : {}) };
+  const change = { add: tip, remove: old && !old.legacy ? old : null, dropNotes: !!(old && old.legacy) };
+  const btn = document.getElementById('dtSave');
+  btn.disabled = true;
+  try{
+    if(!await doctorTipWrite(d.id, change)) return;
+    doctorTipsApply(d, change);
+    logActivity(old ? `edited a tip for ${d.name}` : `added a tip for ${d.name}`);
+    DT.editing = null;
+    document.getElementById('fDTip').value = '';
+    renderDoctorTips();
+    const list = document.getElementById('dtList');
+    if(!old) list.scrollTop = list.scrollHeight;
+    showToast(old ? 'Tip saved.' : 'Tip added.');
+  }catch(err){
+    showToast(saveErrorMessage(err, 'doctor-directory'));
+  }finally{ btn.disabled = false; }
+}
+async function deleteDoctorTip(tipId){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  const t = d && doctorTips(d).find(x => x.id === tipId);
+  if(!t || !isMyTip(t)) return;
+  if(!confirm('Delete this tip?')) return;
+  const change = t.legacy ? { dropNotes: true } : { remove: t };
+  try{
+    if(!await doctorTipWrite(d.id, change)) return;
+    if(DT.editing === tipId){ DT.editing = null; document.getElementById('fDTip').value = ''; }
+    doctorTipsApply(d, change);
+    logActivity(`removed a tip for ${d.name}`);
+    showToast('Tip deleted.');
+  }catch(err){
+    showToast('Could not delete. Check your connection.');
+  }
 }
 
 function renderDoctorDirDetail(d){
@@ -22154,10 +22360,10 @@ function renderDoctorDirDetail(d){
         <button type="button" class="dp-navy-btn" onclick="researchThisDoctorFromDirectory('${id}')">Research this doctor</button>`}
     </div>`;
 
-  const notes = (d.notes || '').trim();
-  const tip = `<button type="button" class="dp-card dp-mini dp-tip" onclick="doctorPageEdit('${id}', 'fDDNotes')" aria-label="${notes ? 'Team tip. Tap to change it' : 'Add a team tip'}">
-      <div class="dp-k">Team tip${notes ? ' · 1' : ''}</div>
-      ${notes ? `<p>“${escapeHtml(notes)}”</p>${d.updatedBy ? `<small>${escapeHtml(d.updatedBy)}</small>` : ''}`
+  const tips = doctorTips(d), first = tips[0];
+  const tip = `<button type="button" class="dp-card dp-mini dp-tip" onclick="openDoctorTips('${id}')" aria-label="${tips.length ? `Team tips, ${tips.length}. Tap to read or add` : 'Add a team tip'}">
+      <div class="dp-k">Team tip${tips.length > 1 ? 's' : ''}${tips.length ? ` · ${tips.length}` : ''}</div>
+      ${first ? `<p>“${escapeHtml(first.text)}”</p>${first.by ? `<small>${escapeHtml(first.by)}</small>` : ''}`
         : `<p class="is-empty">None yet. Add what a teammate should know before walking in.</p>`}
     </button>`;
 
@@ -22227,7 +22433,7 @@ function renderDoctorDirDetail(d){
     <div class="dp-bar">
       <button type="button" class="dp-go" onclick="doctorPageStartAppt('${id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Start appointment</button>
       <button type="button" class="dp-rb" onclick="doctorPageFlashcards('${id}')"><img src="pins/practice.webp" alt="">Flashcards</button>
-      <button type="button" class="dp-rb" onclick="doctorPageEdit('${id}', 'fDDNotes')"><img src="pins/chat.webp" alt="">Add tip</button>
+      <button type="button" class="dp-rb" onclick="openDoctorTips('${id}')"><img src="pins/chat.webp" alt="">Add tip</button>
     </div>
   `;
 }
@@ -24333,7 +24539,6 @@ function _openAddDoctorDirModal(){
   document.getElementById('fDDName').value = '';
   document.getElementById('fDDSpecialty').value = '';
   document.getElementById('fDDLocationDetails').value = '';
-  document.getElementById('fDDNotes').value = '';
   document.getElementById('fDDPhoto').value = '';
   ddPlace = '';
   renderDDPlaceField();
@@ -24355,7 +24560,6 @@ function _openEditDoctorDirModal(id, focusId){
   document.getElementById('fDDName').value = d.name || '';
   document.getElementById('fDDSpecialty').value = d.specialty || '';
   document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
-  document.getElementById('fDDNotes').value = d.notes || '';
   document.getElementById('fDDPhoto').value = '';
   const g = locationGroupName(d, d.hospitalLocation);
   ddPlace = g === NO_LOCATION_LABEL ? '' : g;
@@ -24424,7 +24628,6 @@ async function saveDoctorDirEntry(){
   if(!name){ showToast('Doctor\u2019s name is required.'); return; }
   const specialty = document.getElementById('fDDSpecialty').value.trim();
   const locationDetails = document.getElementById('fDDLocationDetails').value.trim();
-  const notes = document.getElementById('fDDNotes').value.trim();
   const editor = whoAmI();
 
   // Editing keeps the existing doc ID (so it stays the same physical
@@ -24443,7 +24646,7 @@ async function saveDoctorDirEntry(){
 
   const record = {
     ...(existing || {}),
-    name, specialty, locationDetails, notes,
+    name, specialty, locationDetails,
     // The wording Doctor Prep found stays on file while the place is unchanged;
     // a moved or new doctor's wording is the place itself, so the card never
     // shows the old building under the new heading.
@@ -25202,8 +25405,8 @@ function askCorpus(){
     { id: 'ff:' + i, type: 'False friend', spanish: f.es, looksLike: f.looks, means: f.means, sayInstead: f.say, note: f.note },
     `False Friends · ${f.es}`, [f.es, f.looks], [f.means, f.say, f.note, f.heard], { cat: 'falsefriends' }));
   (DOCTOR_DIRECTORY || []).forEach(d => add(
-    { id: 'dr:' + d.id, type: 'Doctor Directory', name: d.name, specialty: d.specialty, location: d.hospitalLocation, locationDetails: d.locationDetails, notes: d.notes },
-    `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, d.notes], { cat: 'doctor-directory' }));
+    { id: 'dr:' + d.id, type: 'Doctor Directory', name: d.name, specialty: d.specialty, location: d.hospitalLocation, locationDetails: d.locationDetails, notes: doctorTipsText(d) },
+    `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, doctorTipsText(d)], { cat: 'doctor-directory' }));
   (PROVIDERS || []).forEach(p => add(
     { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: p.facility, notes: p.notes },
     `Provider Pictures · ${p.name}`, [p.name], [p.role, p.facility, p.notes], { cat: 'providers' }));

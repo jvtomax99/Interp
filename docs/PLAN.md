@@ -151,10 +151,6 @@ D1b. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): layout A (as
    built) or B (terms first, `d1-layouts.png`); the "From Doctor Prep, not
    checked by the team" line; the real-data replay (he sends `doctors.json`,
    steps in the review); the 5-minute interpreter test on iPhones.
-D2. **Team tips.** `tips: [{id, text, by, at}]` on the doctor-directory
-   document; add, edit and delete your own; activity log. The old single
-   `notes` shows as the first tip (by `updatedBy`) until someone edits it,
-   then it is written into `tips`; no migration on startup.
 D3. **Doctor list.** Two-column cards (mockup `list.png`): pin tile or
    photo with initials badge, name, specialty dot, floor, labels for
    terms / traps (false friends count, red) / tips, "+ Prep terms" when no
@@ -210,6 +206,14 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 D2, Team tips (Doctors redesign). `tips` on the doctor's
+  document, a sheet from Add tip and the tip tile: everyone's tips, add,
+  edit and delete your own (by phone, else name), activity log. Old `notes`
+  is the first tip until edited. Notes box gone from the edit sheet (Jose's
+  pick). Whole-doctor saves no longer write `tips`/`notes` (`mergeFields`),
+  so a stale save can't erase a teammate's tip. Back closes the top sheet.
+  `docs/features/doctor-page.md`; checks in `doctor-page.cjs`.
 
 - 2026-10-19 S7d, the meter names its stalls (diagnostic; visible only in
   the meter's results). Every frame over 50 ms is kept with its time into
@@ -542,9 +546,8 @@ come from this alone.
 - Breathing, drift, the halo's turn and the streak flame are compositor-only:
   Home at rest with them running is ~0.5% main-thread busy (trace).
 
-- Doctor page, D1: "Add tip" edits the doctor's single `notes` until D2
-  builds `tips`; D2 should point that button and the tip tile at the new
-  sheet. `SPECIALTY_PINS` already exists for D3's list.
+- Doctor page: `SPECIALTY_PINS` already exists for D3's list. D3's tips
+  label reads `doctorTips(d).length` (old note included).
 - Add to glossary's domain matcher (`findBestDomainMatch`) misses
   Cardiology, Psychiatry, OB/GYN, ENT and more (word overlap only). The
   doctor page uses `doctorDomainFor` (hints first). Moving Add to glossary

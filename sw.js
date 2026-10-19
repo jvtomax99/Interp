@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v231-meter-stalls';
+const CACHE_VERSION = 'interpreter-hub-v232-team-tips';
 const PRECACHE = [
   './',
   './index.html',

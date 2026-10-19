@@ -21,8 +21,8 @@ whichever of the two scrolls.
   the tint come from `specialtyColor()`.
 - Bento: navy tile = every term (research + team terms), one bar per tab
   (false friends pink, team terms white); no research = "Research this
-  doctor". Where = place pin, place name, floor. Team tip = the doctor's
-  `notes` with `updatedBy` (count 0 or 1) until D2 adds `tips`.
+  doctor". Where = place pin, place name, floor. Team tip = the first
+  tip, who wrote it and the count; tap = the Team tips sheet.
 - Tabs (`ds-mode-seg dp-tabs`, scrolls sideways): one per research tier
   (`researchTiers`), then Team terms (`customTerms`). Old flat research
   (`terms` with no `tiers`) is one "Terms" tab plus the "Older research"
@@ -36,9 +36,8 @@ whichever of the two scrolls.
   doctor's specialty, then `startAppt`; with this doctor already running it
   just goes back to it; with another, it asks first),
   Flashcards (the briefing deck, `setCategory('prep')`; `openPrep` if no
-  domain matches), Add tip (the doctor's sheet focused on Notes).
-- Edit (pencil, top right) and Add tip close the page, open the doctor's
-  sheet, and `closeDoctorDirModal` reopens the page (`doctorPageReturnTo`).
+  domain matches), Add tip (the Team tips sheet, over the page).
+- Edit (pencil, top right) closes the page, opens the doctor's sheet, and `closeDoctorDirModal` reopens the page (`doctorPageReturnTo`).
 
 **Specialty to domain** (`doctorDomainFor`): `SPECIALTY_DOMAINS` hints
 first (specialty regex to domain-name regex, most specific first; Mental
@@ -61,3 +60,25 @@ buttons pass a row number, `DP_ROWS` holds the rows on screen.
 
 `initialsOf` now skips middle initials and trailing credentials
 ("Dr. Lori A. Leslie, MD" is LL); it is shared with chat avatars.
+
+**Team tips** (D2, 2026-10-19; banner "Team tips (D2)"). `tips: [{id, text,
+by, at, uid, editedAt?}]` on the doctor's document; `#doctorTipsOverlay`
+(`openDoctorTips`, `renderDoctorTips`, `saveDoctorTip`, `deleteDoctorTip`).
+- The old single `notes` shows as the first tip (`doctorTips`, by
+  `updatedBy`, `id:'notes'`, `legacy`) until someone edits or deletes it;
+  then it's written into `tips` and `notes` is deleted. No migration.
+  Anyone may edit that one (the note was always open to everyone).
+- Yours (`isMyTip`): the tip's `uid` is this phone's; a tip with no `uid`,
+  your name. Others' tips show no Edit or Delete. Client-side only: the
+  rules give `team()` the whole document, as before.
+- Writes are one `arrayUnion` / `arrayRemove` each (`doctorTipWrite`), so
+  two phones adding at once both keep theirs. `persistDoctorDirectoryEntry`
+  saves with `mergeFields` minus `tips` and `notes`, so the sheet, Doctor
+  Prep, team terms and merges never write a stale copy of them back (it
+  also keeps research that a copy without it would have erased). `whole`
+  (restore from Recently deleted) writes everything. Merging duplicates
+  moves the others' tips and old notes onto the kept doctor.
+- The doctor's edit sheet has no Notes box any more (Jose, 2026-10-19).
+- Search, the list card and Ask the Hub read the tips (`doctorTipsText`).
+- Back closes the top overlay (the last `.overlay.show`), so it closes the
+  tips sheet before the page under it.
