@@ -173,6 +173,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
+- The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`

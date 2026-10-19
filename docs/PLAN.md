@@ -50,6 +50,34 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
+practice: the phone reads a line, you render it, you tap the meaning chunks
+you missed, the line length follows your span, your span is charted over
+weeks on your phone. Design and decisions: `docs/features/memory-trainer.md`.
+Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
+first; notes toggle, memory-only default. One PR each:
+
+M0. **Voice and mic check** (this PR): a sheet at the bottom of More.
+   **Needs Jose:** run it in the installed app and in a Safari tab on his
+   iPhone, Copy results, paste both. Write them into the note's Results.
+M1. **Lines.** The 101 False Friends `heard`/`truth` pairs as short
+   Spanish-to-English starters, plus ~60 new lines of 10-45 words both
+   ways (discharge, meds, consent, ED, OB, peds), each split into chunks,
+   in a file of their own (not `index.html`). Jose checks the Spanish
+   (a review list he can tick on the phone) before anything ships.
+M2. **The trainer.** Screen under Practice, playback with the text
+   hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
+   Dr. Smiley's listening/thinking states, progress in `localStorage`
+   only, notes toggle. User Guide, a suite.
+M3. **Record yourself, play it back beside the model.** Only if M0's
+   record and play back work in the installed app; also only if the voice
+   stays loud after the mic (M0 step 3), or the trainer must play before
+   it opens the mic.
+M4. **Span chart** (weeks) and the span number on the Practice tile.
+M5. **Auto-marking** from speech to text. Only if M0 shows it works in
+   the installed app. Matching on the phone; Haiku (`_routine.js`) only
+   for the chunks that look like paraphrases; text only, never audio.
+
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
 stand-in for Safari; compare the median of 3 runs, startup varies 2x between
