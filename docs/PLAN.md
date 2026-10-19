@@ -53,11 +53,6 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**Dr. Smiley acting, E3 (Jose, 2026-10-19: "expressive like Disney
-characters"; E1 and E2 done: E2 is the four drawn faces, surprised, sad,
-worried, doubt, in `docs/features/dr-smiley.md`).** E3 needs his yes: squash and stretch on the head as he springs and
-lands (he had the Home greeting's squish removed; show him first).
-
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
 you missed, the line length follows your span, your span is charted over
@@ -241,6 +236,12 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
+  phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
+  spring, Lively only, on his picture, worked out from the head keys
+  (`drSquashKeys`). AGENTS.md's "never squash" rule rewritten to this one
+  exception. Suite `smiley-squash.cjs`; note `docs/features/dr-smiley.md`.
+  Guide: `askmoves` answer and its news card.
 - 2026-10-19 Campus: each building's badge names its exam area; first tap
   picks it (windows lit, scene dimmed, a card with the area's name,
   questions, share of the exam, Practise), second tap starts (Jose: "we are
@@ -461,6 +462,14 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Facts (so nobody re-checks)
 
+- Recording a smooth, sharp clip of an animation from the tests' Chromium:
+  `recordVideo` and the CDP screencast give CSS-pixel frames (blurry), and
+  screenshots in a loop run at about 4 fps. What works: CSS `zoom: 3` on
+  the element (re-rendered sharp), then slow time: `page.clock.install()`,
+  CDP `Animation.setPlaybackRate` 0, and for each frame a cropped
+  screenshot, every animation's `currentTime` moved on 1/60 s and
+  `page.clock.runFor(17)` (the engine's timers). Every beat is caught.
+  Pinch zoom is refused by the app's viewport.
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
   buildings were modelled from Jose's photos plus WebSearch facts.
