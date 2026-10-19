@@ -278,6 +278,49 @@ function ambLights(frame){ AMB.children.filter(c => c.userData.lamp).forEach(c =
     const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.08,0.1), new THREE.MeshBasicMaterial({ color: on ? (i ? 0x3b7bff : 0xff3b3b) : 0x55303a })); lamp.position.set(lx,ly,lz); lamp.userData.lamp = true; AMB.add(lamp);
     if (on){ const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color: i ? 0x6fa0ff : 0xff5a5a, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx,ly+0.05,lz); gl.scale.set(1.3,1.3,1); gl.userData.lamp = true; AMB.add(gl); } } }
 
+// ---- people: small rounded figures, the same from any side, two walk frames (legs apart / together) ----
+const SKIN = [0xf1c9a5, 0xc68642, 0x8d5524, 0xffdbac, 0xe0ac69];
+function person(kind, i=0){ const g = new THREE.Group(); g.scale.setScalar(1.75); const skin = M(SKIN[i % SKIN.length], {r:0.9});
+  const C = { patient:[0xa9d3f0,0xa9d3f0], visitor:[0xc9583a,0x2b2f3a], nurse:[0x3aa6a0,0x3aa6a0], doctor:[0xf4f6fa,0x2f5fa6], kid:[0xf2c94c,0x2f5fa6], elder:[0x8a7cb3,0x4a4a5a] }[kind] || [0x999999,0x444444];
+  const sc = kind === 'kid' ? 0.68 : 1, H = 0.62*sc;
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.1*sc, 0.22*sc, 4, 10), M(C[0], {r:0.85})); body.position.y = 0.31*sc + 0.1; body.castShadow = true; g.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.085*sc, 12, 10), skin); head.position.y = 0.58*sc + 0.1; g.add(head);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.088*sc, 12, 8, 0, Math.PI*2, 0, Math.PI*0.5), M([0x2b1d14,0x5a3a1a,0x1a1a1a,0xd9c27a,0x8a8a8a][i%5], {r:0.9})); hair.position.y = 0.6*sc + 0.1; g.add(hair);
+  const legs = []; for (const dx of [-0.045, 0.045]){ const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035*sc, 0.035*sc, 0.2*sc, 8), M(C[1], {r:0.9})); l.position.set(dx*sc, 0.1*sc + 0.1, 0); g.add(l); legs.push(l); }
+  g.userData.legs = legs; g.userData.h = H;
+  if (kind === 'wheel'){ // a seated figure in a wheelchair, pushed by another
+    g.clear(); const seat = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.05, 0.26), M(0x2b2f3a)); seat.position.y = 0.26; g.add(seat);
+    for (const dx of [-0.15, 0.15]){ const w = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.03, 16), M(0x3a3e4c, {r:0.6, m:0.3})); w.rotation.z = Math.PI/2; w.position.set(dx, 0.13, -0.05); g.add(w); }
+    const sb = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.16, 4, 10), M(0xa9d3f0)); sb.position.set(0, 0.44, 0); g.add(sb);
+    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 10), skin); sh.position.set(0, 0.66, 0); g.add(sh);
+    const pb = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.22, 4, 10), M(0x3aa6a0)); pb.position.set(0, 0.41, -0.32); pb.castShadow = true; g.add(pb);
+    const ph = new THREE.Mesh(new THREE.SphereGeometry(0.085, 12, 10), M(SKIN[(i+2)%5])); ph.position.set(0, 0.68, -0.32); g.add(ph);
+    for (const dx of [-0.045, 0.045]){ const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.2, 8), M(0x3aa6a0)); l.position.set(dx, 0.2, -0.32); g.add(l); legs.length = 0; legs.push(l); }
+    g.userData.legs = legs; g.userData.h = 0.75; }
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
+function stride(g, f){ g.userData.legs.forEach((l, k) => { l.rotation.x = f ? (k ? 0.45 : -0.45) : 0; }); }
+function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandardMaterial({ color:0xf4f6fa, roughness:0.35, metalness:0.3 });
+  const b1 = new THREE.Mesh(new RoundedBoxGeometry(0.62,0.5,2.2,2,0.08), paint); b1.position.y = 0.42; b1.castShadow = true; g.add(b1);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.63,0.1,2.2), M(0x2f5fa6)); stripe.position.y = 0.3; g.add(stripe);
+  const win = new THREE.Mesh(new THREE.BoxGeometry(0.64,0.16,1.9), new THREE.MeshStandardMaterial({ color:0x1f2633, roughness:0.1, metalness:0.6, envMapIntensity:1.5 })); win.position.y = 0.5; g.add(win);
+  for (const dz of [0.7, -0.7]) for (const dx of [-0.3, 0.3]){ const w = new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.08,12), M(0x2b2b36)); w.rotation.z = Math.PI/2; w.position.set(dx, 0.11, dz); g.add(w); }
+  for (const lx of [-0.2, 0.2]){ const h = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,6), new THREE.MeshBasicMaterial({ color:0xfff6dc })); h.position.set(lx, 0.3, 1.1); g.add(h);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xfff1c8, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx, 0.3, 1.15); gl.scale.set(0.6,0.6,1); g.add(gl); }
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
+const STREET = [ { g: vehicle('car', 0x6fb3e0), ry: -Math.PI/2, z: 15.9, dir: 1, dur: 11000 }, { g: vehicle('car', 0xb83a3a), ry: Math.PI/2, z: 14.1, dir: -1, dur: 9500 },
+  { g: bus(), ry: -Math.PI/2, z: 15.9, dir: 1, dur: 16000 }, { g: vehicle('car', 0xf3f5fb), ry: Math.PI/2, z: 14.1, dir: -1, dur: 12500 } ];
+const CAR_IN2 = vehicle('car', 0x2b2f3a);
+const WALKS = [
+  { g: person('visitor', 0), pts: [[-18,0.1,12.7],[-6,0.1,12.7],[4.5,0.1,12.7],[18,0.1,12.7]], dur: 42000 },
+  { g: person('patient', 1), pts: [[18,0.1,12.2],[6,0.1,12.2],[-6,0.1,12.2],[-18,0.1,12.2]], dur: 48000 },
+  { g: person('nurse', 2), pts: [[-14,0.1,9.2],[-5.2,0.1,9.0],[-3.7,0.1,4],[-3.7,0.1,-4],[-2.4,0.1,-7.4]], dur: 34000 },
+  { g: person('doctor', 3), pts: [[2.4,0.1,-7.4],[3.7,0.1,-4],[3.7,0.1,4],[5.6,0.1,9.2],[12,0.1,9.6]], dur: 36000 },
+  { g: person('wheel', 4), pts: [[-13,0.1,9.6],[-6.5,0.1,9.6],[-3.7,0.1,5],[-3.7,0.1,-3],[-2.6,0.1,-7.2]], dur: 52000 },
+  { g: person('kid', 0), pts: [[7,0.1,12.9],[4.5,0.1,12.9],[-4.5,0.1,12.9],[-7.5,0.1,12.9]], dur: 20000 },
+  { g: person('elder', 1), pts: [[1.4,0.1,-7.3],[-1.6,0.1,-7.3],[1.4,0.1,-7.3]], dur: 22000 },
+  { g: person('patient', 2), pts: [[3.7,0.1,-5.5],[3.7,0.1,2],[3.7,0.1,-5.5]], dur: 30000 },
+];
+
 // ---- capture pipeline ----
 const depthOnly = new THREE.MeshBasicMaterial({ colorWrite:false });
 const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tctx = tmp.getContext('2d', { willReadFrequently:true });
@@ -323,6 +366,7 @@ window.__run = async (nolit) => {
   const flagsG = new THREE.Group(); FLAGS.forEach(f => flagsG.add(f)); scene.add(flagsG);
   out.live.flags = [0, 2.1, 4.2].map(ph => { waveFlags(ph); return alone(flagsG, () => capAlpha(0.8)); });
   out.live.spray = [9, 31, 57, 83].map(seed => { const p = spray(seed); const r = aloneLit(p, () => capLit()); return r; });
+  scene.remove(SPRAY); SPRAY = null;
   // vehicles: each rendered once at a reference point; the app moves and scales it along its path
   const P3 = (x,y,z) => { const v = new THREE.Vector3(x,y,z); const d = v.distanceTo(cam.position); const pr = v.project(cam); return [Math.round((pr.x+1)/2*W), Math.round((1-pr.y)/2*H), d]; };
   const path = (pts, ref) => { const r = P3(...ref); return { ref:[r[0], r[1]], pts: pts.map(p => { const q = P3(...p); return [q[0], q[1], +(r[2]/q[2]).toFixed(3)]; }) }; };
@@ -332,6 +376,10 @@ window.__run = async (nolit) => {
   place(AMB, 4.2, 0.2, 4.5, Math.PI); out.live.amb = { img: [0,1].map(f => { ambLights(f); return alone(AMB, () => capAlpha()); }), ...path([[4.2,0.5,15.5],[4.2,0.5,9],[4.2,0.5,2],[4.4,0.5,-4],[5.4,0.5,-7.2],[6.4,0.5,-8.2]], [4.2,0.5,4.5]) }; AMB.visible = false;
   place(HELI, PAD.x, PAD.y + 0.5, PAD.z, Math.PI*0.15); out.live.heli = { img: [0, Math.PI/8].map(a => { HELI.userData.rotor.rotation.y = a; return alone(HELI, () => capAlpha()); }), pad: P3(PAD.x, PAD.y+0.5, PAD.z).slice(0,2),
     ...path([[26,16,-34],[14,11,-28],[5,PAD.y+4.5,-23],[PAD.x,PAD.y+1.6,PAD.z],[PAD.x,PAD.y+0.5,PAD.z]], [PAD.x, PAD.y+0.5, PAD.z]) }; HELI.visible = false;
+  place(CAR_IN2, 2.0, 0.2, 2.0, Math.PI); out.live.carIn2 = { img: alone(CAR_IN2, () => capAlpha()), ...path([[2.0,0.4,15.5],[2.0,0.4,9],[2.0,0.4,2.0],[2.0,0.4,-3],[2.0,0.4,-6.5]], [2.0,0.4,2.0]) }; CAR_IN2.visible = false;
+  out.live.street = STREET.map(o => { place(o.g, 0, 0.2, o.z, o.ry); const r = { img: alone(o.g, () => capAlpha()), dur: o.dur, ...path(o.dir > 0 ? [[-19.5,0.4,o.z],[-7,0.4,o.z],[7,0.4,o.z],[19.5,0.4,o.z]] : [[19.5,0.4,o.z],[7,0.4,o.z],[-7,0.4,o.z],[-19.5,0.4,o.z]], [0,0.4,o.z]) }; o.g.visible = false; return r; });
+  out.live.walkers = WALKS.map(w => { const mid = w.pts[Math.floor(w.pts.length/2)]; place(w.g, mid[0], mid[1], mid[2], 0);
+    const img = [0,1].map(f => { stride(w.g, f); return alone(w.g, () => capAlpha(0.8)); }); const hh = w.g.userData.h*1.75/2; const r = { img, dur: w.dur, ...path(w.pts.map(p => [p[0], p[1] + hh, p[2]]), [mid[0], mid[1] + hh, mid[2]]) }; w.g.visible = false; return r; });
   CLOUDS.forEach(c => c.visible = true); FLAGS.forEach(f => f.visible = true);
   // lit layers: only the chosen windows draw (warm), everything else writes depth only
   const all = []; scene.traverse(o => { if (o.isMesh || o.isSprite || o.isPoints) all.push(o); });

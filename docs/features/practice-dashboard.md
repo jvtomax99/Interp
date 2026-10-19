@@ -87,5 +87,13 @@ screen. Lit windows flicker (`.cp-lit`, inside a `.cp-litw` that carries the
 entrance fade). Dr. Smiley's pin (`.cp-dr`, an `ask-face`) stands beside the
 badge of the building to light next; the HUD bubble is text only. Reduced
 motion: vehicles hidden, first frame of flags and spray, no flicker.
+People and traffic (Jose: "patients walking around and cars moving"):
+`person(kind)` builds small rounded figures (patient, visitor, nurse, doctor,
+kid, elder, a wheelchair with its pusher) at 1.75x toy scale with two walk
+frames; `WALKS` holds their paths (street sidewalks both ways, the crosswalk,
+parking lot to the entrance, entrance to the far lawn, a pacer at the doors);
+`STREET` four vehicles on the front street both ways incl. a shuttle bus; a
+third car on the drive. All are `.cp-mv` movers (`data-dur`, `data-delay`)
+run by `campusLife`; walkers blink two frames (`.cp-walk`).
 Re-render with `NOLIT=<old entrance.json> node buildentr.cjs out` to keep
 the 50 lit layers (the live things take ~3 min, the lit set ~25).

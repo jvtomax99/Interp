@@ -17,7 +17,9 @@ const srv = http.createServer((q,r)=>{ const f = path.join(root, decodeURICompon
   if (process.env.NOLIT){ const old = JSON.parse(fs.readFileSync(process.env.NOLIT, 'utf8')); man.b = old.b; }
   const L = out.live; man.live = { clouds: save('clouds.webp', L.clouds), flags: L.flags.map((im,i) => save(`flag${i}.webp`, im)), spray: L.spray.map((im,i) => save(`spray${i}.webp`, im)),
     carIn: { img: save('car-in.webp', L.carIn.img), ref: L.carIn.ref, pts: L.carIn.pts }, carOut: { img: save('car-out.webp', L.carOut.img), ref: L.carOut.ref, pts: L.carOut.pts },
-    amb: { img: L.amb.img.map((im,i) => save(`amb${i}.webp`, im)), ref: L.amb.ref, pts: L.amb.pts }, heli: { img: L.heli.img.map((im,i) => save(`heli${i}.webp`, im)), ref: L.heli.ref, pts: L.heli.pts, pad: L.heli.pad } };
+    amb: { img: L.amb.img.map((im,i) => save(`amb${i}.webp`, im)), ref: L.amb.ref, pts: L.amb.pts }, carIn2: { img: save('car-in2.webp', L.carIn2.img), ref: L.carIn2.ref, pts: L.carIn2.pts },
+    street: L.street.map((o,i) => ({ img: save(`street${i}.webp`, o.img), ref: o.ref, pts: o.pts, dur: o.dur })),
+    walkers: L.walkers.map((o,i) => ({ img: o.img.map((im,f) => save(`walk${i}-${f}.webp`, im)), ref: o.ref, pts: o.pts, dur: o.dur })), heli: { img: L.heli.img.map((im,i) => save(`heli${i}.webp`, im)), ref: L.heli.ref, pts: L.heli.pts, pad: L.heli.pad } };
   fs.writeFileSync(path.join(OUT, 'entrance.json'), JSON.stringify(man));
   console.log('files', fs.readdirSync(OUT).length, 'bytes', total, 'base', man.g);
   await b.close(); srv.close();
