@@ -73,7 +73,11 @@ const init = () => {
   }
 
   console.log('== Home measures before its first paint');
-  for (const ua of ['iPhone petals', 'worker petals']) {
+  // WebKit only takes the iPhone path: the worker painter (OffscreenCanvas)
+  // crashes WebKit's page now and then, which is why the app never picks it
+  // there (PETALS_AS_DOM; PLAN Facts, #40). Forcing it in WebKit tested a
+  // path no iPhone runs and once took the page down.
+  for (const ua of process.env.BROWSER === 'webkit' ? ['iPhone petals'] : ['iPhone petals', 'worker petals']) {
     const { page, ctx } = await L.boot(b, { device: 'iphone', settle: 5000, init: ua === 'iPhone petals' ? 'window.__petalsDom = true;' : 'window.__petalsDom = false;' });
     await L.go(page, 'all', 600);
     const r = await page.evaluate(() => new Promise(res => {
