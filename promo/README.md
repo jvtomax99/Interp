@@ -6,7 +6,7 @@ Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
 30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `v6` (for the CEO pitch), `v7` (v6 with the
-Chatterbox voice), `hub-promo-v8.mp4` (current: v7, "Safer care." retaken). `build.py` builds v8; older builds are in git history.
+Chatterbox voice), `v8` (v7, "Safer care." retaken), `hub-promo-v9.mp4` (current: Jose's pick of take). `build.py` builds v9; older builds are in git history.
 
 ## v7: the Chatterbox voice (2026-10-19)
 
@@ -38,6 +38,8 @@ natural it sounds.
 30-39, and 30-33 at exaggeration 0.4): seed 32, 1530 ms, falls 4.6 semitones on "care".
 Automatic pitch tracking is shaky on this voice (pyin marks few frames voiced, YIN jumps
 octaves), so his ear is the test; seeds 33 and 35 were the runners-up. -15.0 LUFS, -1.0 dBTP.
+
+**v9** (2026-10-19): Jose picked seed 33 by ear (1790 ms). Nothing else changed.
 
 ## v6: for the pitch to the hospital's CEO (2026-10-18)
 
