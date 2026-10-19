@@ -93,7 +93,12 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
-S3b. **Startup, what's left (S3 in Done).** Target still no task > 200 ms
+S3b. **Startup, what's left (S3 in Done).** 2026-10-19 so far (Facts, "S3b
+   measurements"): first tuck's body restyle fixed (branch
+   `claude/s3b-startup`); lens-glide idea and "split Home's draw" measured
+   no gain / worse, dropped. Open: Jose's pick between "draw less at first"
+   (projected ~1/3 off the worst task, not under 200 ms) and stopping S3b.
+   Original note: target still no task > 200 ms
    at 4x; after S3 the worst are ~240-460 ms. They are whole-screen costs:
    a Home render's script (~150-200 ms) plus the style of the new screen
    (~130 ms, forced on purpose by `dockAfterRender` so the tab lens glides),
@@ -344,6 +349,26 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **S3b measurements (2026-10-19, `tests/tools/startup.cjs`, iPhone UA,
+  4x, interleaved 5+5).** This session's machine is ~2x slower than S3's:
+  the S3 merge (22a28b8) itself scored worst task ~1,000-1,240 ms here, so
+  compare only runs from the same session. (1) The first idle tuck set
+  `--mini-w` on `<body>`: 911 of 1,420 elements restyled (`tuck-trace.cjs`
+  MODE=var), a 290-550 ms task ~7 s after opening in 5/5 runs; on the bar
+  instead, 0/5 (commit eaf3395). (2) `dockAfterRender`'s style read costs
+  nothing in Home's render: `fitWave0`'s range rect (home-polish.js) forces
+  the whole style + layout first, so the lens-glide-as-Web-Animation idea
+  saves nothing at startup. (3) Forced reads in Home's render, in order:
+  `watchDomainDock` (topbar height), `fitWave0`, `heartline.place`, the
+  rail dots' `refresh`, `smileyInView`; all are synchronous on purpose
+  (Back's scroll restore needs the final height). Moving them all to the
+  frame (a `layoutSoon` queue, `navigateBack` flushing it before
+  `scrollTo`) cut the render task to 290-450 ms but made the next frame
+  1,040-1,340 ms (it already carries paint, `heroPetals`, pins; plus a
+  second full restyle from `--dock-top`'s first write on `<html>`), worse
+  than the 720-890 ms before. Dropped. (4) Home at rest: 1,586 elements on
+  the page, 669 in Home's content, 284 of those more than 1.5 screens down.
 
 - Back to Home restores the scroll right after the render, so anything
   that changes Home's height must happen in the render, not in a later
