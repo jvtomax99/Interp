@@ -72,16 +72,14 @@ M0. **Voice and mic check** (#60, merged). Installed-app results in the
    speech to text works in a Safari tab (English) but gave no words yet in
    the installed app. **Needs Jose:** installed app, speech to text in
    English and Spanish, waiting for "done" before Copy.
-M1. **Lines** (drafted 2026-10-19, `memory/lines.json`; Jose reviewing on
-   the review page linked in the note). The 101 False Friends `heard`/`truth` pairs as short
-   Spanish-to-English starters, plus ~60 new lines of 10-45 words both
-   ways (discharge, meds, consent, ED, OB, peds), each split into chunks,
-   in a file of their own (not `index.html`). Jose checks the Spanish
-   (a review list he can tick on the phone) before anything ships.
+M1. **Lines** (this PR): `memory/lines.json`, 60 lines approved by Jose
+   without a line-by-line read (see the note); the trainer flags mistakes.
 M2. **The trainer.** Screen under Practice, playback with the text
    hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
    Dr. Smiley's listening/thinking states, progress in `localStorage`
-   only, notes toggle. User Guide, a suite.
+   only, notes toggle, a **Flag this line** button (saves line id + what's
+   wrong, read back before editing lines). Voices by name: Paulina (es-MX),
+   Samantha (en-US). User Guide, a suite.
 M3. **Record yourself, play it back beside the model.** Record and play
    back work in the installed app (M0). The voice is quieter after the
    mic: first test `navigator.audioSession.type = 'playback'` after each

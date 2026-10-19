@@ -76,5 +76,13 @@ spans run long.
 Jose reviews the Spanish on a private claude.ai page (Memory Lines Review,
 https://claude.ai/artifact/36Jn3pPjbDuxQZ3tkTAm4A): Good, or a written fix
 per line, saved in its `reviews` collection (doc id = line id, `verdict`
-ok|fix, `fix`, `at`). Claude reads it back, applies the fixes and sets
-`reviewed: true`. Nothing ships to the app until every line is reviewed.
+ok|fix, `fix`, `at`). The first version of the page lost Jose's first pass
+(it showed marks before the save was confirmed); it now keeps marks on the
+phone, says per line whether it saved, and has Copy my review as a fallback.
+
+**Outcome (Jose, 2026-10-19):** all 60 marked Good, then the 12 riskiest
+(`reviews2`) Good, both at under a second per line, so not read line by
+line. Jose's call: ship them as approved-unread (`status` in the file,
+`reviewed` stays false) and catch mistakes in use with a **Flag this line**
+button in the trainer (M2): it saves the line id and what's wrong, and the
+flags are read back before lines are edited.

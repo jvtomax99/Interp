@@ -1,6 +1,7 @@
 {
  "about": "Memory trainer practice lines (docs/features/memory-trainer.md). dir en-es: provider in English, render Spanish; es-en: patient or family in Spanish, render English. u: meaning chunks [source, model rendering]; src/tgt are the chunks joined. reviewed: Jose checked the Spanish. The False Friends lines (heard/truth in index.html) are the short Spanish-to-English starters and are not repeated here.",
  "version": 1,
+ "status": "Approved by Jose 2026-10-19 without a line-by-line read (the review page timed every tap under a second). The trainer's Flag this line button (M2) is how mistakes get caught; reviewed stays false until a line has been read.",
  "lines": [
   {
    "id": "dc01",
