@@ -6,9 +6,21 @@
 const L = require('../support/harness.cjs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 
+// Dr. Smiley never stops breathing: dsBreathe and dsDrift loop forever on
+// .dock-smiley-bob, around him, and the drift's tilt widens his box. Read
+// with those loops held at their start, so his size compares like for like
+// (WebKit failed here by 0.0026 of scale, depending on where in the breath
+// the frame landed), then let them run on from where they were.
 const rects = page => page.evaluate(() => {
+  const dr = document.querySelector('.dock-smiley');
+  const loops = document.getAnimations().filter(a => { const n = a.effect && a.effect.target;
+    return n && dr && (n === dr || n.contains(dr) || dr.contains(n)) && a.effect.getComputedTiming().iterations === Infinity; });
+  const was = loops.map(a => [a, a.currentTime, a.playState]);
+  loops.forEach(a => { a.pause(); a.currentTime = 0; });
   const q = s => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
-  return { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  const out = { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  was.forEach(([a, t, st]) => { a.currentTime = t; if (st === 'running') a.play(); });
+  return out;
 });
 // Every running animation on the dock, and what it animates.
 const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a => {

@@ -399,6 +399,10 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- `dock-tuck` measured Dr. Smiley while `dsBreathe`/`dsDrift` (infinite, on
+  `.dock-smiley-bob` around him) ran, so WebKit failed his scale check by
+  ~0.003 depending on the breath's phase (#57-#60, 2026-10-19). `rects()`
+  now holds those loops at 0 for the read. Measure him that way elsewhere.
 - Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
   around one eye patch (seen over the original base too, so it predates
   the brows). A clean-up of those three frames is open (Later).
