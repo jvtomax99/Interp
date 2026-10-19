@@ -241,6 +241,11 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-19 Campus: each building's badge names its exam area; first tap
+  picks it (windows lit, scene dimmed, a card with the area's name,
+  questions, share of the exam, Practise), second tap starts (Jose: "we are
+  clicking on the building without knowing which content"). Suite
+  `campus-pick.cjs`; note `docs/features/practice-dashboard.md`.
 - 2026-10-19 Your HUMC campus on CoreCHI Practice (Jose: a game look,
   then "make it look like Hackensack", from his photos and Google 3D
   screenshots, then "alive"). The main entrance at dusk, pre-rendered 3D
