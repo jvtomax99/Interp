@@ -357,6 +357,10 @@ design and anything touching data or rules stay with the main model.
   with `AskUserQuestion`, one button per option (recommended first), not
   as a numbered list in text. Where that tool is missing (a scheduled
   run), list the options plainly.
+- **Always say your recommendation** (Jose, 2026-10-19; `AGENTS.md`):
+  with options, a next step or a trade-off, name your pick and why, in
+  plain words, unasked. If the buttons are refused, list the options in
+  plain language with the pick marked.
 - **Ambiguous request: one clarifying question first. Evidence before
   confidence** (Jose, 2026-10-17; `AGENTS.md`): nothing stated as true
   without a measurement, test, primary source or the code behind it; say

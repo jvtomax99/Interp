@@ -33,8 +33,11 @@ output or many fix rounds, and the next phase would add a lot more.
 Before saying it, make sure everything worth keeping is in this file.
 Don't repeat it in every reply.
 **Claude opens the new chat itself** (Jose, 2026-10-19): with
-`create_session` (claude-code-remote tools), same repo, titled with the
-next phase, its first message the handoff. That message tells it to read
+`create_session` (claude-code-remote tools), same repo, its first message
+the handoff. **A chat opened from another keeps its exact title** (Jose,
+2026-10-19): read it with `get_session` and pass it to `create_session`.
+The main line of chats is called "Main inter Hub"; every chat opened from
+it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
 `AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
 next, then stop and wait for Jose's go. In the old chat, give Jose the new
 session's title and say "Archive this chat" (archive it only when he says
@@ -90,40 +93,13 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    motion pixel-identical, moving frames within run-to-run noise. home-rest
    checks both (an iPhone Safari user agent in Chromium takes the old path).
    So the S1b numbers above are Chromium's; iPhones are as before S1b.
-S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
-   in Done; on the phone it took scrolling from 10.5% to 8.6% late (Facts).
-   Three steps, one PR each, invisible ones first. Each: `scroll.cjs`
-   UA=chromium 8+8 interleaved before/after, the suites, then Jose's phone
-   (meter, Copy, same 12 s scroll + 15 s still). Don't move the tuck's
-   scroll read into a frame callback without a WebKit check (part 1).
-   Lab baseline on main (2026-10-17, RUNS=6): all 6 runs in the bad-load
-   band (35-42% late while scrolling, busy 53-55%), so unusable; S7a
-   starts by getting good before-runs. Listener times there: drSwayScroll
-   1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
-   pays the frame's pending style (Facts), not its own work.
-   S7a, S7b, S7c and S7d are in Done. Phone runs in Facts: S7a no clear
-   gain; S7b + S7c (b1018.1746) the best scrolling yet, one run. Still to
-   do: (1) more runs per build (b1018.2012 has one, Facts), 2-3 each so
-   the spread is known; (2) the
-   stall while Home sits still (~27 ms/s, worst 120 ms, two builds in a
-   row; was ~7 ms/s). Chromium doesn't show it (Facts, 2026-10-19), so
-   S7d made the meter list each stall with when it came and what ran:
-   Jose runs the same steps on the S7d build, Copy, paste; fix what the
-   list names. Part 2 is finished once both are in.
-   Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
-   scroll event (index.html ~20912); cheap while layout is clean, measure
-   in Team Chat before touching.
-S3b. **Startup, what's left (S3 in Done).** Target still no task > 200 ms
-   at 4x; after S3 the worst are ~240-460 ms. They are whole-screen costs:
-   a Home render's script (~150-200 ms) plus the style of the new screen
-   (~130 ms, forced on purpose by `dockAfterRender` so the tab lens glides),
-   and the next frame's layout + paint + `heroPetals`. Options, each needs a
-   measurement first: fewer elements in Home's first render (its own style
-   cost), the lens glide as a Web Animation (no forced style; check Still
-   and reduced motion), `pin-icons.js` `applyExactPins` (30-120 ms).
-   `drawOpening` is per frame of the opening (30-70 ms a frame at 4x), not
-   a long task; only worth it if the opening stutters on the phone.
-S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
+Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
+   the scroll event (index.html ~20912); cheap while layout is clean,
+   measure in Team Chat before touching.
+S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
+   handler's forced layouts only moves the cost to the next reader or the
+   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
+   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
    before write. Target: handler < 50 ms, tap to paint < 150 ms.
@@ -199,6 +175,17 @@ come from this alone.
 
 ## Later (only when the trigger happens)
 
+- **Startup, draw less at first (from S3b).** Trigger: Jose finds opening
+  the app slow on his phone. Home's first draw is the worst startup task
+  (~720-890 ms at 4x on the S3b machine): script ~half, style + layout of
+  the new Home ~half, both over 200 ms. Draw what's on the first screen
+  first, the rails more than 1.5 screens down (284 of Home's 669 elements)
+  a frame later; projected ~1/3 off, not under 200 ms. Don't retry moving
+  the layout reads to the frame (Facts, "S3b measurements"). Other leads,
+  unmeasured as fixes: `watchDomainDock` writes `--dock-top` on `<html>`
+  every render (a new value restyles the page); the name pen's `tick`
+  reads two rects per frame (20-45 ms frames at 4x during the opening).
+
 - **Glossary changes-only sync.** Each cold start reads every term (~1,700
   reads; persistence is off on purpose, iPhone crashes). Do it only if
   Firestore reads near 50K/day (Usage page). Was 23K on 2026-10-13.
@@ -210,6 +197,22 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
+  `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
+  ~7 s after opening at 4x in 5/5 runs); now on the tab bar, kept in its
+  markup: 0/5. Bar sizes identical (Home, Chat, redraw while tucked).
+  Lens glide as a Web Animation and moving Home's layout reads to the frame
+  were measured (no gain; worse) and dropped; "draw less at first" moved
+  to Later. Facts: "S3b measurements". Rules added: always say the
+  recommendation; a chat's title says what it works on.
+
+- 2026-10-19 S7 Home scroll part 2 closed (Jose). S7a-S7d below. On his
+  iPhone (393x852), scrolling Home went from 85 ms/s, 10.5% late (before
+  part 1) to 62-78 ms/s, 7.9-8.9% (3 runs on b1019.1228); still Apple's
+  "distracting" (10+). The still-Home stall (120-141 ms, ~26-29 ms/s) did
+  not come back in those 3 runs (~3-8 ms/s, nothing over 51 ms); cause
+  never found. The meter lists any stall with what ran, if it returns.
 
 - 2026-10-19 S7d, the meter names its stalls (diagnostic; visible only in
   the meter's results). Every frame over 50 ms is kept with its time into
@@ -358,6 +361,41 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
+  Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,
+  tap to paint 770-1,130 ms on this session's slow machine. Forced layout
+  inside the click, in order: `watchDomainDock` (topbar height, every
+  render), `smileyElsewhere` in `smileyRider` `topBar` (`getClientRects`
+  on the lock screen's face, hidden under `#accessLock[hidden]`; ~170 ms),
+  `void b.offsetWidth` restarting `#tgSmiley`'s pop, then `dockMorph`'s
+  FLIP reads when the tucked bar opens. Skipping `[hidden]` faces and
+  restarting the pop by alternating two keyframe names removed the first
+  two; `dockMorph` then paid the same layout. 5+5 alternated: tap to paint
+  median 848 ms before, 928 after (noise). Reverted. Like S3b (3): the
+  whole new screen's layout is paid once by whoever reads first; only less
+  work per screen shortens a tap. The click's "wait" (200-420 ms) is mostly
+  how headless Chromium stamps a tap; viewport and `touch-action` are fine.
+
+- **S3b measurements (2026-10-19, `tests/tools/startup.cjs`, iPhone UA,
+  4x, interleaved 5+5).** This session's machine is ~2x slower than S3's:
+  the S3 merge (22a28b8) itself scored worst task ~1,000-1,240 ms here, so
+  compare only runs from the same session. (1) The first idle tuck set
+  `--mini-w` on `<body>`: 911 of 1,420 elements restyled (`tuck-trace.cjs`
+  MODE=var), a 290-550 ms task ~7 s after opening in 5/5 runs; on the bar
+  instead, 0/5 (commit eaf3395). (2) `dockAfterRender`'s style read costs
+  nothing in Home's render: `fitWave0`'s range rect (home-polish.js) forces
+  the whole style + layout first, so the lens-glide-as-Web-Animation idea
+  saves nothing at startup. (3) Forced reads in Home's render, in order:
+  `watchDomainDock` (topbar height), `fitWave0`, `heartline.place`, the
+  rail dots' `refresh`, `smileyInView`; all are synchronous on purpose
+  (Back's scroll restore needs the final height). Moving them all to the
+  frame (a `layoutSoon` queue, `navigateBack` flushing it before
+  `scrollTo`) cut the render task to 290-450 ms but made the next frame
+  1,040-1,340 ms (it already carries paint, `heroPetals`, pins; plus a
+  second full restyle from `--dock-top`'s first write on `<html>`), worse
+  than the 720-890 ms before. Dropped. (4) Home at rest: 1,586 elements on
+  the page, 669 in Home's content, 284 of those more than 1.5 screens down.
+
 - Back to Home restores the scroll right after the render, so anything
   that changes Home's height must happen in the render, not in a later
   frame: the rail dots row is 7 px (`destination-labels` fails 1130 vs
@@ -446,15 +484,19 @@ come from this alone.
   Cause unknown (a timer, the greeting or the meter's own start are
   candidates; untested). One run each build, so the spread is still
   unknown: Jose asked for 2-3 runs per build.
-- Same phone, build b1018.2012 (after S3), one 30 s run on Home (12 s
-  scrolling; the screen now reads 402x874): scrolling 11.3% late, 86.9
-  ms/s, worst 53 ms. Worse than b1018.1746's one run (8.2%, 53.5, 47),
-  back at the level before part 1 (10.5%, 85, 57). S3 changed startup,
-  not scrolling, so this is likely run-to-run spread, which one run per
-  build can't measure: why Jose wants 2-3. The still part, from the totals
-  (18 s): ~2.9% late, ~26 ms/s, and both stalls over 100 ms (worst 141 ms)
-  were in it. Third build in a row (~29, ~27, ~26 ms/s; 124, 120, 141 ms),
-  so the still-Home stall is real. The S7d build's stall list should name it.
+- Build b1018.2012 (after S3), one 30 s run on Home, on a **different
+  iPhone** (402x874; Jose's usual one reads 393x852): scrolling 11.3%
+  late, 86.9 ms/s, worst 53 ms; still part (from the totals, 18 s) ~26
+  ms/s, worst 141 ms. Not comparable with the runs on his phone.
+- Jose's iPhone (393x852), build b1019.1228 (S7d), 3 runs of ~31-37 s on
+  Home (14-22 s scrolling), not reopened between them (run 3 began 138 s
+  after opening): scrolling 69.7 / 62.2 / 78.3 ms/s, 8.1 / 7.9 / 8.9%
+  late, worst 50 / 40 / 51 ms; still part (from the totals) ~7.3 / ~3.3 /
+  ~7.5 ms/s, nothing over 51 ms. So one build's scrolling spreads ~62-78
+  ms/s: single runs per build (S7a 76.7, S7b+c 53.5) were within or near
+  that noise. The still-Home stall seen on b1018.0223 and b1018.1746 (one
+  run each, 120-124 ms) didn't recur. Untested guess: it comes with a run
+  started soon after a fresh open (data arriving, the opening's tail).
 - 2026-10-19, Home left still (`tests/tools/idle.cjs`, UA=chromium, 4x,
   SCROLL=1): after the opening (~5.5 s from load) and after a scroll, no
   main-thread task over 50 ms in 27 s except one minor GC; the idle tab bar
