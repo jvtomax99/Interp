@@ -26,3 +26,13 @@ add them to `face.webp` as new frames, name them in `DR_FACE_FRAMES`, give
 them neighbours in `DR_FACE_BACK`, brow poses in `DR_BROW_OF`, and use them:
 `surprise` (surprised), `worry` (worried), `encourage`/`composed` or a low
 score (sad, sparingly), `answerGeneral` (doubtful).
+
+**Done (E2, 2026-10-19).** Cut into `drsmiley/face.webp` as frames 27-30
+(`surprised`, `sad`, `worried`, `doubt`). How: each picture scaled to
+480 x 600 (base.webp pixels), the face window cropped with the existing
+frames' own alpha (the same three patches, both eyes and the mouth); the
+generated brows found as their own dark shapes and filled in with the skin
+around them; a soft colour correction toward the calm frame where the two
+agree (Gaussian, 10 px); and the last 10 px inside each patch eased into the
+calm frame wherever both are skin, so no edge shows (mean difference at the
+edge 0.2-0.9 of 255). Strip re-encoded at WebP quality 90 (171 KB).

@@ -12969,7 +12969,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley acts more: an eyebrow-flash hello, a startled giggle, a worried look when you go offline' },
+  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley has new faces: surprised, worried, doubtful and, rarely, sad' },
   { id:'promo',       tone:'gd-n2', pin:'pins/userguide.webp',           eyebrow:'Video',                 title:'Interpreter Hub in 45 seconds: watch it, or show it to someone new' },
   { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
 ];
@@ -13970,7 +13970,7 @@ function externalUrl(raw){
    Home "Ask" tag; on Home his lanyard is live cords drawn by home-polish.js.
 
    His face moves frame by frame. drsmiley/base.webp is his calm picture;
-   drsmiley/face.webp is a strip of 26 frames of the part that moves (eyes and
+   drsmiley/face.webp is a strip of 30 frames of the part that moves (eyes and
    mouth), every frame built on that same calm face, so his hair, outline,
    nose and shoulders never shift: only lids come down, eyes look and lips
    part. Most frames are cut from Jose's drawn expression sheets and fitted
@@ -13984,7 +13984,11 @@ function externalUrl(raw){
    lookL/lookR (eyes to the viewer's left/right); love (heart eyes); sleep;
    then eight gazes made from rest by moving the irises inside the drawn
    eye openings (whites taken from the drawn glances): halfL/halfR (a little
-   to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR.
+   to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR;
+   then four drawn by Jose in 2026-10 from this same face (source and how
+   they were cut: docs/art/dr-smiley-faces/): surprised (eyes wide, an "O"
+   mouth), sad (heavy lids, corners down), worried (eyes aside, a tight
+   wavy mouth) and doubt (his left eye squinted, a side smirk).
    In picture units (240 x 300 base) the window is x 40, y 106, 151 x 111; the
    strip is see-through except where frames change, so the picture's own
    edge shows wherever the window crosses his outline.
@@ -13995,7 +13999,7 @@ function externalUrl(raw){
    repainted as skin. They move smoothly (a lift and a tilt, never a stretch)
    while the eyes and mouth step through frames: see DR_BROWS. */
 const DR_FACE_FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
-  'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR'];
+  'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'surprised', 'sad', 'worried', 'doubt'];
 const DR_FACE_W = 151, DR_FACE_H = 111;
 function drSmileyArt(cls){
   return `<svg class="ds-art${cls ? ' ' + cls : ''}" viewBox="4 4 112 112" aria-hidden="true" focusable="false">`
@@ -14057,17 +14061,17 @@ const DR_FACE_SEQ = {
   // Pressed and held: a giggle and hearts.
   // A startled take first (a blink, eyes and brows up, the head pulled
   // back), then the giggle: the beat that makes a cartoon reaction read.
-  pet:   { f: [['blink1', 40], ['lookU', 260], ['rest', 50], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
+  pet:   { f: [['blink1', 40], ['surprised', 260], ['rest', 50], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
            brow: [[40, 'up'], [330, null]],
            head: [[0, 0, 0], [40, 0, .4], [150, 0, -1.5], [300, 0, -1.2], [390, 0, .45], [480, -1.4, .3], [590, 1.4, .3], [700, -1.4, .3], [810, 1.4, .3], [920, -1, .2], [1030, .8, .1], [1460, 0, -.4], [1920, 0, 0], [2180, 0, 0]], fx: 'hearts', fxAt: 480 },
-  // Surprised: a blink, eyes and brows up with the head pulled back, a beat
-  // held, then it softens into a smile.
-  surprise: { f: [['blink1', 40], ['blink2', 35], ['blink1', 35], ['lookU', 650], ['rest', 160], ['smile1', 380], ['rest', 300]],
+  // Surprised: a blink, eyes wide, an "O" mouth and brows up with the head
+  // pulled back, a beat held, then it softens into a smile.
+  surprise: { f: [['blink1', 40], ['blink2', 35], ['blink1', 35], ['surprised', 650], ['rest', 160], ['smile1', 380], ['rest', 300]],
               brow: [[110, 'up'], [900, 'glad'], [1300, null]],
               head: [[0, 0, 0], [110, 0, .5], [240, 0, -1.6], [860, -.6, -1.2], [1100, 0, -.3], [1500, 0, 0]] },
-  // Worried: eyes down and away with the brows turned up in the middle, a
-  // tilt; then he looks back to you with a small reassuring smile.
-  worry: { f: [['rest', 60], ['blink1', 50], ['blink2', 45], ['blink1', 50], ['lookDL', 700], ['halfL', 400], ['rest', 200], ['smile1', 500], ['rest', 300]],
+  // Worried: eyes away, a tight wavy mouth and the brows turned up in the
+  // middle, a tilt; then he looks back to you with a small reassuring smile.
+  worry: { f: [['rest', 60], ['blink1', 50], ['blink2', 45], ['blink1', 50], ['worried', 700], ['halfL', 400], ['rest', 200], ['smile1', 500], ['rest', 300]],
            brow: [[100, 'worried'], [1350, 'caring'], [2100, null]],
            head: [[0, 0, 0], [200, -2, .4], [1300, -2.2, .5], [1600, -.8, .1], [2400, 0, 0]] },
   /* For his task states (drTask). Each has a small wind-up, a peak you can
@@ -14085,13 +14089,15 @@ const DR_FACE_SEQ = {
   // An answer from the Hub: got it -- a lift, a smile and a nod -- then he reads it with you.
   answer: { f: [['rest', 50], ['blink1', 45], ['rest', 40], ['smile1', 80], ['smile2', 80], ['smile', 760], ['smile2', 90], ['smile1', 110], ['rest', 220]],
             head: [[0, 0, 0], [100, 0, -.45], [330, 0, .9], [520, 0, -.1], [700, 0, .7], [900, 0, 0], [1525, 0, 0]] },
-  // An answer from general knowledge: received, considered -- no smile.
-  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['halfL', 520], ['rest', 240]],
-                   brow: [[260, 'quizR'], [860, null]],
+  // An answer from general knowledge: received, considered -- a doubtful
+  // squint and one brow up (check it), no smile.
+  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['doubt', 520], ['rest', 240]],
+                   brow: [[260, 'doubt'], [860, null]],
                    head: [[0, 0, 0], [100, .4, 0], [320, -1.1, .2], [860, -1.1, .2], [1120, 0, 0]] },
-  // Uncertain or failed: composed. A slow blink, a considering look down to
-  // the side with a sympathetic tilt, then a small reassuring smile.
-  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+  // Uncertain or failed: composed. A slow blink, a moment of sad (the one
+  // place the sad face is used, so it stays rare), a look to the side with
+  // a sympathetic tilt, then a small reassuring smile.
+  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['sad', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
               brow: [[480, 'worried'], [1300, 'caring'], [2050, null]],
               head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
@@ -14348,6 +14354,7 @@ const DR_FACE_BACK = {
   love: 'smile2',
   halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
   lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
+  surprised: 'rest', sad: 'blink1', worried: 'halfL', doubt: 'wink1',
 };
 /* His brows. Each pose: [left lift, left turn, right lift, right turn] for
    the brow on your left and the one on your right; lift in his drawing's
@@ -14373,12 +14380,14 @@ const DR_BROWS = {
   caring: [-1, -11, -1, 11],       // inner ends up: sympathy, encouragement
   worried:[-1.4, -15, -1.4, 15],
   focused:[1.2, 10, 1.2, -10],
+  doubt:  [-3, -4, 1, 2],          // one up over the open eye, the squinting side down
 };
 const DR_BROW_OF = {
   shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad',
   laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
   lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down',
   love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+  surprised: 'up', sad: 'caring', worried: 'worried', doubt: 'doubt',
 };
 /* How he acts with them, after the Disney principles (The Illusion of
    Life): no twins -- his left brow (yours on the right, the side he winks)
@@ -16546,10 +16555,10 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help.</li>
       <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
@@ -20926,8 +20935,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1907';
-const BUILD_TIME = '2026-10-19 19:07 UTC';
+const BUILD_ID = 'b1019.2028';
+const BUILD_TIME = '2026-10-19 20:28 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
