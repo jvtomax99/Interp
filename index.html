@@ -5399,9 +5399,10 @@ body.access-locked{ overflow:hidden; }
 }
 @media (prefers-reduced-motion: reduce){ .ds-fx{ display:none; } }
 svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
-/* His brows (DR_BROWS): each turns about its own middle and eases to the
-   next pose, so they glide while the eyes and mouth step frame to frame. */
-svg.ds-art .ds-brow{ transform-box:fill-box; transition:transform .17s cubic-bezier(.3,0,.2,1); }
+/* His brows (DR_BROWS): each turns about its own middle and springs to the
+   next pose a beat after the eyes (follow-through: a small overshoot, then
+   settle), so they glide while the eyes and mouth step frame to frame. */
+svg.ds-art .ds-brow{ transform-box:fill-box; transition:transform .3s cubic-bezier(.34,1.45,.64,1) .03s; }
 svg.ds-art .ds-brow-l{ transform-origin:53.85% 46.15%; }
 svg.ds-art .ds-brow-r{ transform-origin:44% 44.44%; }
 @media (prefers-reduced-motion: reduce){ svg.ds-art .ds-brow{ transition:none; } }
@@ -12962,8 +12963,8 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
-  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
+  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley acts more: an eyebrow-flash hello, a startled giggle, a worried look when you go offline' },
+  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
   { id:'smoothness',  tone:'gd-n3', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
@@ -14023,8 +14024,21 @@ const DR_FACE_SEQ = {
   notice: { f: [['rest', 60], ['blink1', 50], ['rest', 40], ['lookR', 560], ['rest', 90], ['smile1', 70], ['smile2', 70], ['smile', 800], ['smile2', 90], ['smile1', 110], ['rest', 340]],
             head: [[0, 0, 0], [90, -.4, .3], [260, 1.4, 0], [710, 1.4, 0], [870, 0, -.6], [1670, 0, -.5], [1930, 0, 0], [2280, 0, 0]] },
   // Pressed and held: a giggle and hearts.
-  pet:   { f: [['rest', 60], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
-           head: [[0, 0, 0], [90, 0, .45], [180, -1.4, .3], [290, 1.4, .3], [400, -1.4, .3], [510, 1.4, .3], [620, -1, .2], [730, .8, .1], [1160, 0, -.4], [1620, 0, 0], [1880, 0, 0]], fx: 'hearts', fxAt: 180 },
+  // A startled take first (a blink, eyes and brows up, the head pulled
+  // back), then the giggle: the beat that makes a cartoon reaction read.
+  pet:   { f: [['blink1', 40], ['lookU', 260], ['rest', 50], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
+           brow: [[40, 'up'], [330, null]],
+           head: [[0, 0, 0], [40, 0, .4], [150, 0, -1.5], [300, 0, -1.2], [390, 0, .45], [480, -1.4, .3], [590, 1.4, .3], [700, -1.4, .3], [810, 1.4, .3], [920, -1, .2], [1030, .8, .1], [1460, 0, -.4], [1920, 0, 0], [2180, 0, 0]], fx: 'hearts', fxAt: 480 },
+  // Surprised: a blink, eyes and brows up with the head pulled back, a beat
+  // held, then it softens into a smile.
+  surprise: { f: [['blink1', 40], ['blink2', 35], ['blink1', 35], ['lookU', 650], ['rest', 160], ['smile1', 380], ['rest', 300]],
+              brow: [[110, 'up'], [900, 'glad'], [1300, null]],
+              head: [[0, 0, 0], [110, 0, .5], [240, 0, -1.6], [860, -.6, -1.2], [1100, 0, -.3], [1500, 0, 0]] },
+  // Worried: eyes down and away with the brows turned up in the middle, a
+  // tilt; then he looks back to you with a small reassuring smile.
+  worry: { f: [['rest', 60], ['blink1', 50], ['blink2', 45], ['blink1', 50], ['lookDL', 700], ['halfL', 400], ['rest', 200], ['smile1', 500], ['rest', 300]],
+           brow: [[100, 'worried'], [1350, 'caring'], [2100, null]],
+           head: [[0, 0, 0], [200, -2, .4], [1300, -2.2, .5], [1600, -.8, .1], [2400, 0, 0]] },
   /* For his task states (drTask). Each has a small wind-up, a peak you can
      read and an unhurried way back. */
   // Attentive: you tapped into Ask's box. A quick blink, a look down to it
@@ -14042,11 +14056,12 @@ const DR_FACE_SEQ = {
             head: [[0, 0, 0], [100, 0, -.45], [330, 0, .9], [520, 0, -.1], [700, 0, .7], [900, 0, 0], [1525, 0, 0]] },
   // An answer from general knowledge: received, considered -- no smile.
   answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['halfL', 520], ['rest', 240]],
+                   brow: [[260, 'quizR'], [860, null]],
                    head: [[0, 0, 0], [100, .4, 0], [320, -1.1, .2], [860, -1.1, .2], [1120, 0, 0]] },
   // Uncertain or failed: composed. A slow blink, a considering look down to
   // the side with a sympathetic tilt, then a small reassuring smile.
   composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
-              brow: [[480, 'caring'], [2050, null]],
+              brow: [[480, 'worried'], [1300, 'caring'], [2050, null]],
               head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
@@ -14090,12 +14105,14 @@ function drPerfSeed(n){
   drPerfRand = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 // A sequence from beats: each beat is [frames, ms it lasts, head key at its
-// end ([tilt, lift]) or null]. The head keys land where the beats do, so a
-// change of frame and the lean it goes with arrive together.
+// end ([tilt, lift]) or null, and optionally a brow pose held from its start
+// (null: the brows follow the frames again)]. The head keys land where the
+// beats do, so a change of frame and the lean it goes with arrive together.
 function drPerfMake(beats, extra){
-  const f = [], head = [[0, 0, 0]];
+  const f = [], head = [[0, 0, 0]], brow = [];
   let t = 0;
-  beats.forEach(([frames, ms, key]) => {
+  beats.forEach(([frames, ms, key, bp]) => {
+    if(bp !== undefined) brow.push([Math.round(t), bp]);
     const per = frames.length ? frames : [];
     if(per.length){
       const each = per.map(x => Array.isArray(x) ? x : [x, 0]);
@@ -14107,7 +14124,7 @@ function drPerfMake(beats, extra){
   });
   const last = head[head.length - 1];
   if(last[1] || last[2]) head.push([Math.round(t) + 260, 0, 0]);
-  return Object.assign({ f, head }, extra || {});
+  return Object.assign({ f, head }, brow.length ? { brow } : {}, extra || {});
 }
 const DR_PERF = {
   greet(){
@@ -14123,12 +14140,13 @@ const DR_PERF = {
     return drPerfMake([
       // Anticipation: a dip and a blink -- he's just seen you.
       [['blink1', 'blink2', 'blink1'], j(170, .2), [-side * .5, .75]],
-      // Up into the smile, leaning to one side.
-      [['smile1', 'smile2'], j(150), [tilt * .7, up * .7]],
+      // Up into the smile, leaning to one side, with an eyebrow flash:
+      // the quick up-and-down people give someone they're glad to see.
+      [['smile1', 'smile2'], j(150), [tilt * .7, up * .7], 'up'],
       [['smile'], j(160), [tilt, up]],
       // The delight: a bright squint for a moment, then the smile again,
       // with a smaller sway back (follow-through, not a repeat).
-      [['laugh1'], j(190, .25), [-tilt * .35, up * .8]],
+      [['laugh1'], j(190, .25), [-tilt * .35, up * .8], null],
       [['smile'], j(560, .2), [tilt * .3, up * .6]],
       // Recovery: the smile lingers as he comes down, a small settle past upright.
       [['smile2'], j(110), [0, .3]],
@@ -14157,16 +14175,19 @@ const DR_PERF = {
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
     const calm = drMode() === 'focused', k = calm ? .6 : 1, L = side < 0 ? 'L' : 'R';
     return drPerfMake([
-      // Anticipation: leaning back a little, the other way, with a slow blink.
-      [[['blink1', 60], ['blink2', 60], ['shut', 90], ['blink2', 55], ['blink1', 55]], 320, [-side * .5 * k, -.35 * k]],
-      // The thought: eyes up to one side, head tilted the same way.
-      [['look' + 'U' + L], j(calm ? 700 : 950, .2), [side * 2.3 * k, -.3 * k]],
+      // Anticipation: leaning back a little, the other way, with a slow
+      // blink and the brows drawn together.
+      [[['blink1', 60], ['blink2', 60], ['shut', 90], ['blink2', 55], ['blink1', 55]], 320, [-side * .5 * k, -.35 * k], 'focused'],
+      // The thought: eyes up to one side, head tilted the same way (the
+      // frame raises the far brow: quizzical).
+      [['look' + 'U' + L], j(calm ? 700 : 950, .2), [side * 2.3 * k, -.3 * k], null],
       [['look' + 'U' + L], j(320), [side * 2.6 * k, -.2 * k]],
       // Eyes come level, still to that side: getting there.
       [['half' + L], j(360), [side * 1.2 * k, 0]],
-      // It lands: eyes back to you, a small smile and a small nod.
-      [['rest'], 70, null],
-      [['smile1'], j(260), [-side * .3 * k, .6 * k]],
+      // It lands: eyes back to you with an "aha" lift of the brows, a small
+      // smile and a small nod.
+      [['rest'], 70, null, 'up'],
+      [['smile1'], j(260), [-side * .3 * k, .6 * k], null],
       [['smile1'], j(260), [0, 0]],
       [['rest'], j(320), [0, 0]],
     ], { fx: calm ? null : 'question', fxAt: 420, still: 'look' + 'U' + L, stillMs: 1200 });
@@ -14328,6 +14349,19 @@ const DR_BROW_OF = {
   lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down',
   love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
 };
+/* How he acts with them, after the Disney principles (The Illusion of
+   Life): no twins -- his left brow (yours on the right, the side he winks)
+   is his expressive one and goes a fifth further, the other a little less,
+   so a pose is never a mirror image; anticipation -- a big raise from
+   nearly level dips first for a moment; follow-through -- the glide (CSS,
+   .ds-brow) starts a beat after the eyes and overshoots before it settles. */
+const DR_BROW_SIDE = [.9, 1.2];     // [your left, your right]
+const DR_BROW_DIP = 70;             // ms of the dip before a big raise
+function drBrowApply(l, r, v, k){
+  const [a, b] = DR_BROW_SIDE;
+  l.style.transform = v ? `translate(0px,${(v[0] * k * a).toFixed(2)}px) rotate(${(v[1] * k * a).toFixed(2)}deg)` : '';
+  r.style.transform = v ? `translate(0px,${(v[2] * k * b).toFixed(2)}px) rotate(${(v[3] * k * b).toFixed(2)}deg)` : '';
+}
 function drBrowSet(svg, pose){
   if(!svg || !svg.querySelector) return;
   pose = DR_BROWS[pose] ? pose : 'rest';
@@ -14336,10 +14370,16 @@ function drBrowSet(svg, pose){
   const l = svg.querySelector('.ds-brow-l'), r = svg.querySelector('.ds-brow-r');
   if(!l || !r) return;
   svg._brow = key;
-  const v = DR_BROWS[pose], k = drMode() === 'focused' ? .6 : 1, glide = drStill() ? 'none' : '';
-  l.style.transition = r.style.transition = glide;
-  l.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[0] * k).toFixed(2)}px) rotate(${(v[1] * k).toFixed(2)}deg)`;
-  r.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[2] * k).toFixed(2)}px) rotate(${(v[3] * k).toFixed(2)}deg)`;
+  clearTimeout(svg._browT);
+  const v = DR_BROWS[pose], k = drMode() === 'focused' ? .6 : 1, still = drStill();
+  const lift = (v[0] + v[2]) / 2 * k, was = svg._browLift || 0;
+  svg._browLift = lift;
+  l.style.transition = r.style.transition = still ? 'none' : '';
+  const set = () => drBrowApply(l, r, pose === 'rest' ? null : v, k);
+  if(!still && drMode() === 'lively' && lift <= -2 && was > -.6){
+    drBrowApply(l, r, [.6, 0, .6, 0], 1);
+    svg._browT = setTimeout(set, DR_BROW_DIP);
+  } else set();
 }
 // The pose for this svg now: the sequence's hold if it has one, else the frame's.
 function drBrowSync(svg, frame){ drBrowSet(svg, svg._browHold || DR_BROW_OF[frame] || 'rest'); }
@@ -15142,7 +15182,7 @@ function drPerform(seq, o){
 function drSeqMs(name){ const q = drSeq(name); return q ? q.total : 0; }
 window.addEventListener('offline', () => {
   drMind.offline = true; drMindChanged();
-  drPerform('composed', { priority: DR_P.REACT });
+  drPerform('worry', { priority: DR_P.REACT });
 });
 window.addEventListener('online', () => {
   drMind.offline = false; drMindChanged();
@@ -16472,7 +16512,7 @@ const GUIDE_TOPICS = [
   { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops.</li>
       <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
@@ -20849,8 +20889,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1751';
-const BUILD_TIME = '2026-10-19 17:51 UTC';
+const BUILD_ID = 'b1019.1851';
+const BUILD_TIME = '2026-10-19 18:51 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

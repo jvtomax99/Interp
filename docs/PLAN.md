@@ -53,6 +53,13 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**Dr. Smiley acting, E2 and E3 (Jose, 2026-10-19: "expressive like Disney
+characters"; E1 done).** E2 needs Jose: new drawn face frames, cut and fitted
+like the 26 (an "O" mouth for surprise, a sad mouth, a worried mouth, a
+squint of doubt). His expression sheets are not in the repo; ask him to send
+them. E3 needs his yes: squash and stretch on the head as he springs and
+lands (he had the Home greeting's squish removed; show him first).
+
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
 you missed, the line length follows your span, your span is charted over
@@ -227,6 +234,14 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 Dr. Smiley acting, E1 (Jose: "expressive like Disney
+  characters"; plan below under Next). Code only, his own art: brows that
+  never mirror, anticipate big raises and overshoot as they settle; an
+  eyebrow-flash hello, knit-then-aha thinking, a startled take before the
+  giggle when held, worried-then-reassuring when the connection drops, a
+  raised brow on general-knowledge answers, a new `surprise`. Guide:
+  `askmoves` answer and its news card.
 
 - 2026-10-19 Dr. Smiley's brows, bigger (Jose on his phone: "the brows
   don't move much"). Every `DR_BROWS` pose about 2x (looking up 2 to 4.2
