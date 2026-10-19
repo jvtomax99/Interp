@@ -446,6 +446,15 @@ come from this alone.
   Cause unknown (a timer, the greeting or the meter's own start are
   candidates; untested). One run each build, so the spread is still
   unknown: Jose asked for 2-3 runs per build.
+- Same phone, build b1018.2012 (after S3), one 30 s run on Home (12 s
+  scrolling; the screen now reads 402x874): scrolling 11.3% late, 86.9
+  ms/s, worst 53 ms. Worse than b1018.1746's one run (8.2%, 53.5, 47),
+  back at the level before part 1 (10.5%, 85, 57). S3 changed startup,
+  not scrolling, so this is likely run-to-run spread, which one run per
+  build can't measure: why Jose wants 2-3. The still part, from the totals
+  (18 s): ~2.9% late, ~26 ms/s, and both stalls over 100 ms (worst 141 ms)
+  were in it. Third build in a row (~29, ~27, ~26 ms/s; 124, 120, 141 ms),
+  so the still-Home stall is real. The S7d build's stall list should name it.
 - 2026-10-19, Home left still (`tests/tools/idle.cjs`, UA=chromium, 4x,
   SCROLL=1): after the opening (~5.5 s from load) and after a scroll, no
   main-thread task over 50 ms in 27 s except one minor GC; the idle tab bar
