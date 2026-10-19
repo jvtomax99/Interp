@@ -53,12 +53,12 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**HUMC campus look (Jose, 2026-10-19).** The campus game on CoreCHI is built
-(branch `claude/cchi-city`, full suite green) but Jose says the 3D-from-boxes
-model doesn't look like Hackensack. Chosen next: an AI-drawn illustration he
-generates from `docs/mockups/cchi-city/illustration-prompt.md` + his photos;
-then make it the game (tappable buildings, progress as lit windows, flags,
-badges, Dr. Smiley) in place of the rendered layers.
+**Dr. Smiley acting, E2 and E3 (Jose, 2026-10-19: "expressive like Disney
+characters"; E1 done).** E2 needs Jose: new drawn face frames, cut and fitted
+like the 26 (an "O" mouth for surprise, a sad mouth, a worried mouth, a
+squint of doubt). His expression sheets are not in the repo; ask him to send
+them. E3 needs his yes: squash and stretch on the head as he springs and
+lands (he had the Home greeting's squish removed; show him first).
 
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
@@ -235,10 +235,34 @@ come from this alone.
 
 ## Done
 
-- 2026-10-19 Your HUMC campus on CoreCHI Practice (Jose: game look, then
-  HUMC from his photos). Pre-rendered 3D buildings in `city/` grow floor by
-  floor with mastery; replaces the readiness card. Note:
-  `docs/features/practice-dashboard.md`; art pipeline `docs/mockups/cchi-city/`.
+- 2026-10-19 Your HUMC campus on CoreCHI Practice (Jose: a game look,
+  then "make it look like Hackensack", from his photos and Google 3D
+  screenshots, then "alive"). The main entrance at dusk, pre-rendered 3D
+  (`city/`); each exam area is a building whose windows light up with
+  mastery; the glossy readiness donut in the card; cars, an ambulance, a
+  helicopter, flags, the fountain, people walking and street traffic, all
+  paused off screen; Dr. Smiley pinned by the area to focus on; Your domains
+  rows right under. Note: `docs/features/practice-dashboard.md`; pipeline
+  `docs/mockups/cchi-city/` (`buildentr.cjs`, `NOLIT` to keep the lit layers).
+- 2026-10-19 Watch button became a story bubble (Jose's pick of three):
+  the video's still in a turning ring of the promo's colours, a play badge,
+  "Watch" on a dark chip. Same corner, same rules; 3 KB thumbnail.
+
+- 2026-10-19 Dr. Smiley acting, E1 (Jose: "expressive like Disney
+  characters"; plan below under Next). Code only, his own art: brows that
+  never mirror, anticipate big raises and overshoot as they settle; an
+  eyebrow-flash hello, knit-then-aha thinking, a startled take before the
+  giggle when held, worried-then-reassuring when the connection drops, a
+  raised brow on general-knowledge answers, a new `surprise`. Guide:
+  `askmoves` answer and its news card.
+
+- 2026-10-19 The 45-second video in the app (Jose's ask): User Guide answer
+  `promo` (video in the answer, "New lately" card, oldest card dropped) and a
+  "Watch 0:45" button bottom-right of Home's hello banner, beside the sign,
+  until watched once on the phone (`ih_promoSeen`: the end or past 15 s). Web
+  copy `media/hub-promo.mp4` (720p, 8 MB, tap to play); `sw.js` leaves
+  `media/` alone. Not on the members-only screen yet: Jose to decide after
+  the CEO pitch (anyone with the link sees that screen).
 
 - 2026-10-19 Dr. Smiley's brows, bigger (Jose on his phone: "the brows
   don't move much"). Every `DR_BROWS` pose about 2x (looking up 2 to 4.2
@@ -429,6 +453,13 @@ come from this alone.
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
   buildings were modelled from Jose's photos plus WebSearch facts.
+- The tests' Chromium has no H.264 (`canPlayType` is empty), so no suite can
+  play `media/hub-promo.mp4`; only an iPhone or desktop Chrome/Safari proves
+  playback. The suites check the button, the sheet and the "watched" rule.
+- `sw.js` must never cache video: `caches.match` ignores Range headers, and
+  iPhones play `<video>` only through Range (206) responses. `media/` is
+  passed straight to the network, like `atlas/`.
+
 - The practice screen re-renders on any data arrival (`ensureLoaded` ->
   `scheduleRender`), so entrance motion there must survive a re-render:
   `data-motion`/`data-sig` + `playPracticeMotion` resume it.

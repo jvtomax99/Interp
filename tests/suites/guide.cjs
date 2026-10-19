@@ -21,7 +21,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     newsMissing: GUIDE_NEWS.filter(n => !GUIDE_TOPICS.some(t => t.id === n.id)).map(n => n.id),
     pins: Object.values(GUIDE_SECTION_PINS),
   }));
-  ok(data.n === 63 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
+  ok(data.n === 64 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
   const broken = await page.evaluate(async pins => { const bad = []; for (const p of pins) { const i = new Image(); i.src = p; try { await i.decode(); } catch (e) { bad.push(p); } } return bad; }, data.pins);
   ok(!broken.length, 'all tile pictures load', broken);
 
@@ -235,6 +235,33 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     const hs3 = await p6.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     ok(hs3 <= 0 && p6.__errors.length === 0, '360px: no sideways scroll, no errors', { hs3, e: p6.__errors });
     await c6.close(); }
+
+  { console.log('== the 45-second video (Home Watch button, answer promo)');
+    const { ctx: c7, page: p7 } = await boot(b, { device: 'iphone', name: 'Jose', settle: 3500 });
+    const home = await p7.evaluate(() => {
+      const r = e => e.getBoundingClientRect(), btn = document.querySelector('.home-promo-btn'), s = document.querySelector('.home-search');
+      if (!btn) return null;
+      const B = r(btn), hit = document.elementFromPoint(B.x + B.width / 2, B.y + B.height / 2);
+      return { h: Math.round(B.height), gap: Math.round(r(s).top - B.bottom), right: Math.round(r(s).right - B.right),
+        hit: !!(hit && hit.closest('.home-promo-btn')), inBanner: !!btn.closest('#homeGreeting') };
+    });
+    ok(home && home.inBanner && home.hit && home.h >= 44 && home.gap >= 8 && home.right === 0,
+      'Home: Watch sits in the banner, takes its own taps, 44px tall, above Search and lined up with it', home);
+    await p7.click('.home-promo-btn'); await wait(500);
+    const sheet = await p7.evaluate(() => { const v = document.querySelector('.gd-video video');
+      return v && { src: v.getAttribute('src'), poster: v.getAttribute('poster'), inline: v.playsInline, controls: v.controls, cat: activeCategory,
+        searchHasTag: foldText(String(GUIDE_TOPICS.find(t => t.id === 'promo').a).replace(/<[^>]+>/g, ' ')).includes('video src') }; });
+    ok(sheet && sheet.src === 'media/hub-promo.mp4' && sheet.inline && sheet.controls && sheet.cat === 'home' && !sheet.searchHasTag,
+      'Watch opens the answer over Home with the video (inline, controls); search reads no tags', sheet);
+    const fs = require('fs'), R = require('../support/harness.cjs').ROOT;
+    const files = ['media/hub-promo.mp4', 'media/hub-promo.jpg'].map(f => [f, fs.existsSync(R + f) ? fs.statSync(R + f).size : 0]);
+    ok(files.every(([, n]) => n > 10000), 'the video and its still are there', files);
+    await p7.evaluate(() => document.querySelector('.gd-video video').dispatchEvent(new Event('ended'))); await wait(200);
+    await p7.evaluate(() => smSheetClose('guideSheet')); await go(p7, 'userguide', 600); await go(p7, 'home', 1200);
+    const after = await p7.evaluate(() => [localStorage.getItem('ih_promoSeen'), !!document.querySelector('.home-promo-btn')]);
+    ok(after[0] === '1' && !after[1], 'once watched, the Watch button is gone, also after Home paints again', after);
+    ok(p7.__errors.length === 0, 'video: no errors', p7.__errors);
+    await c7.close(); }
 
   console.log(`\n${pass} passed, ${fail} failed`);
   await b.close();
