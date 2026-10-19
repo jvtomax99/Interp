@@ -5138,6 +5138,12 @@ body.access-locked{ overflow:hidden; }
 }
 @media (prefers-reduced-motion: reduce){ .ds-fx{ display:none; } }
 svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
+/* His brows (DR_BROWS): each turns about its own middle and eases to the
+   next pose, so they glide while the eyes and mouth step frame to frame. */
+svg.ds-art .ds-brow{ transform-box:fill-box; transition:transform .17s cubic-bezier(.3,0,.2,1); }
+svg.ds-art .ds-brow-l{ transform-origin:53.85% 46.15%; }
+svg.ds-art .ds-brow-r{ transform-origin:44% 44.44%; }
+@media (prefers-reduced-motion: reduce){ svg.ds-art .ds-brow{ transition:none; } }
 @keyframes askThink{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(-6deg); } 70%{ transform:rotate(5deg); } }
 img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
@@ -12687,9 +12693,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'smoothness',  tone:'gd-n1', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
-  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
-  { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
+  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
+  { id:'smoothness',  tone:'gd-n2', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
+  { id:'chattitles',  tone:'gd-n3', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13663,7 +13669,7 @@ function externalUrl(raw){
    Home "Ask" tag; on Home his lanyard is live cords drawn by home-polish.js.
 
    His face moves frame by frame. drsmiley/base.webp is his calm picture;
-   drsmiley/face.webp is a strip of 18 frames of the part that moves (eyes and
+   drsmiley/face.webp is a strip of 26 frames of the part that moves (eyes and
    mouth), every frame built on that same calm face, so his hair, outline,
    nose and shoulders never shift: only lids come down, eyes look and lips
    part. Most frames are cut from Jose's drawn expression sheets and fitted
@@ -13680,7 +13686,13 @@ function externalUrl(raw){
    to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR.
    In picture units (240 x 300 base) the window is x 40, y 106, 151 x 111; the
    strip is see-through except where frames change, so the picture's own
-   edge shows wherever the window crosses his outline. */
+   edge shows wherever the window crosses his outline.
+
+   His brows are their own pictures (drsmiley/brow-l.webp, brow-r.webp), cut
+   out of that same calm face and drawn over the window; the forehead behind
+   them in base.webp, and the few frames that reached up to them, were
+   repainted as skin. They move smoothly (a lift and a tilt, never a stretch)
+   while the eyes and mouth step through frames: see DR_BROWS. */
 const DR_FACE_FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
   'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR'];
 const DR_FACE_W = 151, DR_FACE_H = 111;
@@ -13689,6 +13701,8 @@ function drSmileyArt(cls){
     + '<image class="ds-base" href="./drsmiley/base.webp" x="14" y=".8" width="106" height="132.5" preserveAspectRatio="none"/>'
     + `<svg class="ds-face" x="31.667" y="47.617" width="66.692" height="49.025" viewBox="0 0 ${DR_FACE_W} ${DR_FACE_H}" preserveAspectRatio="none">`
     +   `<image class="ds-sheet" href="./drsmiley/face.webp" x="0" y="0" width="${DR_FACE_W * DR_FACE_FRAMES.length}" height="${DR_FACE_H}" preserveAspectRatio="none"/></svg>`
+    + '<image class="ds-brow ds-brow-l" href="./drsmiley/brow-l.webp" x="33.875" y="39.446" width="28.708" height="14.354" preserveAspectRatio="none"/>'
+    + '<image class="ds-brow ds-brow-r" href="./drsmiley/brow-r.webp" x="73.625" y="42.758" width="27.604" height="19.875" preserveAspectRatio="none"/>'
     + '</svg>';
 }
 const ICON_WAVE = drSmileyArt('home-wave-art home-face');
@@ -13763,9 +13777,11 @@ const DR_FACE_SEQ = {
   // Uncertain or failed: composed. A slow blink, a considering look down to
   // the side with a sympathetic tilt, then a small reassuring smile.
   composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+              brow: [[480, 'caring'], [2050, null]],
               head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
+               brow: [[220, 'caring'], [1120, null]],
                head: [[0, 0, 0], [140, 0, -.3], [360, 0, .9], [560, 0, 0], [760, 0, .8], [960, 0, 0], [1450, 0, 0]] },
   // You stopped a question: okay -- a blink and one nod.
   okay: { still: 'rest', f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 320]],
@@ -14012,6 +14028,52 @@ const DR_FACE_BACK = {
   halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
   lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
 };
+/* His brows. Each pose: [left lift, left turn, right lift, right turn] for
+   the brow on your left and the one on your right; lift in his drawing's
+   units (minus is up), turn in degrees (plus is clockwise). The inner end of
+   a brow is the end by his nose, so a worried look turns the left brow
+   anticlockwise and the right one clockwise. By default the brows follow
+   the face frame (DR_BROW_OF); a sequence can hold a pose instead (brow:
+   [[ms, pose or null], ...], null handing back to the frames), for meanings
+   the frames alone can't carry (caring when he's unsure or encouraging you).
+   Focused moves them a little less; Still shows the pose without gliding. */
+const DR_BROWS = {
+  rest:   [0, 0, 0, 0],
+  relax:  [.4, 0, .4, 0],          // eyes closed, asleep
+  lift:   [-.6, 0, -.6, 0],        // a small smile
+  glad:   [-.9, 0, -.9, 0],        // a smile
+  laugh:  [-1.3, 0, -1.3, 0],
+  up:     [-2, 0, -2, 0],          // looking up, surprised
+  quizL:  [.22, -4, -1.77, -3],    // eyes up to your left: the other brow goes up
+  quizR:  [-1.77, 3, .22, 4],
+  down:   [.35, 0, .35, 0],        // looking down, reading
+  love:   [-.9, -3, -.9, 3],
+  wink:   [-.5, 0, .6, -2],        // his left eye (your right)
+  caring: [-.44, -6, -.44, 6],     // inner ends up: sympathy, encouragement
+  worried:[-.66, -9, -.66, 9],
+  focused:[.66, 6, .66, -6],
+};
+const DR_BROW_OF = {
+  shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad',
+  laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
+  lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down',
+  love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+};
+function drBrowSet(svg, pose){
+  if(!svg || !svg.querySelector) return;
+  pose = DR_BROWS[pose] ? pose : 'rest';
+  const key = pose + (drMode() === 'focused' ? ':f' : '');
+  if(svg._brow === key) return;
+  const l = svg.querySelector('.ds-brow-l'), r = svg.querySelector('.ds-brow-r');
+  if(!l || !r) return;
+  svg._brow = key;
+  const v = DR_BROWS[pose], k = drMode() === 'focused' ? .6 : 1, glide = drStill() ? 'none' : '';
+  l.style.transition = r.style.transition = glide;
+  l.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[0] * k).toFixed(2)}px) rotate(${(v[1] * k).toFixed(2)}deg)`;
+  r.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[2] * k).toFixed(2)}px) rotate(${(v[3] * k).toFixed(2)}deg)`;
+}
+// The pose for this svg now: the sequence's hold if it has one, else the frame's.
+function drBrowSync(svg, frame){ drBrowSet(svg, svg._browHold || DR_BROW_OF[frame] || 'rest'); }
 // Neighbours: each frame and its way back, plus the steps the drawn
 // sequences take on purpose (a smile breaking into a laugh, a laugh's
 // "ha-ha" mouth, squinting straight into laughter).
@@ -14056,7 +14118,8 @@ function drSeq(name){
   const total = f.reduce((t, s) => t + s[1], 0);
   const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
-  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
+  const brow = raw.brow || null, browPeak = brow ? (brow.find(b => b[1]) || [0, null])[1] : null;
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak };
   drSeqCache.set(raw, seq);
   return seq;
 }
@@ -14111,6 +14174,8 @@ class DrAnim{
     return DR_FACE_FRAMES[Math.round(x / DR_FACE_W)] || 'rest';
   }
   set(name){ drFaceSet(this.svg, name); }
+  // Hold the brows in a pose (null: back to following the face frames).
+  browHold(pose){ this.svg._browHold = pose || null; drBrowSync(this.svg, this.frame()); }
   get busy(){ return !!this.run; }
   get priority(){ return this.run ? this.run.p : 0; }
   // ---- the head ----
@@ -14195,7 +14260,7 @@ class DrAnim{
     if(drStill() && p < DR_P.REACT) return false;
     this.stopRun(false);
     if(drStill()){
-      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done);
+      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done, seq.browPeak);
     }
     const run = { p, name: typeof name === 'string' ? name : 'custom', timers: [] };
     this.run = run;
@@ -14216,6 +14281,16 @@ class DrAnim{
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
     if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
     this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.brow){
+      // Keys already passed (joining part-way) leave the latest one in force.
+      let now;
+      seq.brow.forEach(([t, pose]) => {
+        const at = t - skip + lead;
+        if(at <= 0) now = pose;
+        else run.timers.push(this.later(() => { if(this.run === run) this.browHold(pose); }, at));
+      });
+      if(now !== undefined) this.browHold(now);
+    }
     if(seq.fx && this.head && drFxOk()){
       run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
     }
@@ -14231,9 +14306,10 @@ class DrAnim{
     return true;
   }
   // Reduced motion: the expression's peak, still, then rest. No lean, no effects.
-  still(frame, ms, p, done){
+  still(frame, ms, p, done, brow){
     const run = { p, name: 'still', timers: [] };
     this.run = run;
+    if(brow) this.svg._browHold = brow;
     this.set(frame);
     run.timers.push(this.later(() => { if(this.run !== run) return; this.set('rest'); this.finish(run, done); }, ms));
     return true;
@@ -14241,6 +14317,7 @@ class DrAnim{
   finish(run, done){
     if(this.run !== run) return;
     this.run = null;
+    if(this.svg._browHold) this.browHold(null);
     if(done) done();
     this.next();
   }
@@ -14253,6 +14330,7 @@ class DrAnim{
     run.timers.forEach(t => this.clear(t));
     if(run.gazeTimer) this.clear(run.gazeTimer);
     this.run = null;
+    this.svg._browHold = null;
     this.fadeEffects();
     if(settle) this.settle();
   }
@@ -14815,6 +14893,7 @@ function drFaceSet(svg, name){
   if(!sheet) return;
   const x = String(-DR_FACE_W * Math.max(0, DR_FACE_FRAMES.indexOf(name)));
   if(sheet.getAttribute('x') !== x) sheet.setAttribute('x', x);
+  drBrowSync(svg, name);
 }
 function drFaceBusy(svg){ const a = svg && drAnimOf.get(svg); return !!(a && a.busy); }
 // An expression as a reaction (REACT unless given), e.g. the lock screen's smile.
@@ -16121,11 +16200,11 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team.</li>
-      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. No laughing and no little sparkles.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
@@ -20307,8 +20386,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1228';
-const BUILD_TIME = '2026-10-19 12:28 UTC';
+const BUILD_ID = 'b1019.1407';
+const BUILD_TIME = '2026-10-19 14:07 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

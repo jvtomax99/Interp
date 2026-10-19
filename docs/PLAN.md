@@ -206,11 +206,20 @@ come from this alone.
   its own multi-phase effort, coordinated with ChatGPT's edits.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
+- **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
+  see Facts). Trim the eye patch's edge in `face.webp`. When Jose wants it.
 - **Training & Events listener has no limit.** Fine while small; a cap
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
 
+- 2026-10-19 Dr. Smiley's brows move (Jose's pick of four ideas for more
+  expression; the others were an Expression Studio page, new drawn frames
+  and 3D with face shapes). Brows cut out of his own art into
+  `drsmiley/brow-l.webp`/`brow-r.webp`, forehead repainted, a pose per
+  face frame plus caring holds on `composed`/`encourage`
+  (`docs/features/dr-smiley.md`). Art total 334 KB to 324 KB. Guide:
+  `askmoves` answer and a news card.
 - 2026-10-19 S7d, the meter names its stalls (diagnostic; visible only in
   the meter's results). Every frame over 50 ms is kept with its time into
   the run, time since the last scroll, screen, time since opening and the
@@ -358,6 +367,13 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
+  around one eye patch (seen over the original base too, so it predates
+  the brows). A clean-up of those three frames is open (Later).
+- Meshy AI (3D) was looked at for Dr. Smiley on 2026-10-19: its auto-rig is
+  a body skeleton for full-body, two-legged textured models; no face rig
+  was found in its docs, and api.meshy.ai is blocked from cloud sessions
+  unless added to the environment's allowed domains.
 - Back to Home restores the scroll right after the render, so anything
   that changes Home's height must happen in the render, not in a later
   frame: the rail dots row is 7 px (`destination-labels` fails 1130 vs
