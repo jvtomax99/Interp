@@ -39,8 +39,8 @@ the handoff. **A chat opened from another keeps its exact title** (Jose,
 The main line of chats is called "Main inter Hub"; every chat opened from
 it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
 `AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, give Jose the new
-session's title and say "Archive this chat" (archive it only when he says
+next, then stop and wait for Jose's go. In the old chat, tell Jose the new
+session carries the same title and say "Archive this chat" (archive it only when he says
 so). If `create_session` isn't available, fall back to the message to paste.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
@@ -193,10 +193,20 @@ come from this alone.
   its own multi-phase effort, coordinated with ChatGPT's edits.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
+- **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
+  see Facts). Trim the eye patch's edge in `face.webp`. When Jose wants it.
 - **Training & Events listener has no limit.** Fine while small; a cap
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 Dr. Smiley's brows move (Jose's pick of four ideas for more
+  expression; the others were an Expression Studio page, new drawn frames
+  and 3D with face shapes). Brows cut out of his own art into
+  `drsmiley/brow-l.webp`/`brow-r.webp`, forehead repainted, a pose per
+  face frame plus caring holds on `composed`/`encourage`
+  (`docs/features/dr-smiley.md`). Art total 334 KB to 324 KB. Guide:
+  `askmoves` answer and a news card.
 
 - 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
   `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
@@ -360,6 +370,14 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
+  around one eye patch (seen over the original base too, so it predates
+  the brows). A clean-up of those three frames is open (Later).
+- Meshy AI (3D) was looked at for Dr. Smiley on 2026-10-19: its auto-rig is
+  a body skeleton for full-body, two-legged textured models; no face rig
+  was found in its docs, and api.meshy.ai is blocked from cloud sessions
+  unless added to the environment's allowed domains.
 
 - **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
   Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,
