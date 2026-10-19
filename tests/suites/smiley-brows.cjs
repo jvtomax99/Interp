@@ -21,7 +21,7 @@ const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1
  // A held pose: composed (he's unsure) turns the inner ends up while he looks down.
  const seen=await P.evaluate(()=>new Promise(r=>{const s=document.querySelector('.dock-smiley svg.ds-art'),a=drAnim(s),out=[];a.play('composed',{priority:DR_P.TASK});
    const t0=performance.now();const tick=()=>{const l=s.querySelector('.ds-brow-l').style.transform,f=a.frame();out.push([Math.round(performance.now()-t0),f,l]);if(performance.now()-t0<3400)setTimeout(tick,100);else r(out);};tick();}));
- const look=seen.filter(x=>x[1]==='lookDL');
+ const look=seen.filter(x=>x[1]==='sad');
  ok(look.length&&look.every(x=>/rotate\(-[1-9]/.test(x[2])),'unsure (composed): while he looks down his brows turn up at the middle, caring ('+(look[0]||[]).join(' ')+')');
  ok(seen[seen.length-1][2]==='','after it, the brows go back to following his face: '+seen[seen.length-1].join(' '));
  // Focused: the same pose, smaller.
@@ -43,9 +43,14 @@ const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1
  ok(await P.evaluate(()=>{const t=DR_FACE_SEQ.think;return !!(t.brow&&t.brow.some(b=>b[1]==='focused')&&t.brow.some(b=>b[1]==='up'));}),'thinking: brows knit as he starts, an "aha" lift as it lands');
  await free();
  const pet=await P.evaluate(()=>new Promise(r=>{const s=document.querySelector('.dock-smiley svg.ds-art'),a=drAnim(s);a.play('pet',{priority:DR_P.DIRECT});setTimeout(()=>r({f:a.frame(),hold:s._browHold}),220);}));
- ok(pet.f==='lookU'&&pet.hold==='up','held: a startled take (eyes and brows up) before the giggle '+JSON.stringify(pet));
+ ok(pet.f==='surprised'&&pet.hold==='up','held: a startled take (eyes and brows up) before the giggle '+JSON.stringify(pet));
  await free();
  const off=await P.evaluate(()=>new Promise(r=>{window.dispatchEvent(new Event('offline'));setTimeout(()=>{const s=document.querySelector('.dock-smiley svg.ds-art'),a=drAnim(s);const out={run:a.run&&a.run.name,hold:s._browHold};window.dispatchEvent(new Event('online'));r(out);},400);}));
  ok(off.run==='worry'&&off.hold==='worried','the connection drops: he looks worried, then reassuring '+JSON.stringify(off));
+ // E2: the drawn faces, each where it belongs.
+ const uses=await P.evaluate(()=>{const has=(n,f)=>DR_FACE_SEQ[n].f.some(x=>x[0]===f);return {surprise:has('surprise','surprised'),pet:has('pet','surprised'),worry:has('worry','worried'),general:has('answerGeneral','doubt'),composed:has('composed','sad'),sadOnce:Object.keys(DR_FACE_SEQ).filter(n=>{try{return DR_FACE_SEQ[n].f.some(x=>x[0]==='sad');}catch(e){return false;}}),brows:['surprised','sad','worried','doubt'].map(f=>DR_BROW_OF[f])};});
+ ok(uses.surprise&&uses.pet&&uses.worry&&uses.general&&uses.composed,'the drawn faces: surprised (surprise, the startled take), worried (worry), doubt (a general answer), sad (composed) '+JSON.stringify(uses));
+ ok(uses.sadOnce.length===1,'sad stays rare: one sequence uses it '+JSON.stringify(uses.sadOnce));
+ ok(uses.brows.join()==='up,caring,worried,doubt','each drawn face brings its brow pose '+JSON.stringify(uses.brows));
  ok(P.__errors.length===0,'page errors: '+JSON.stringify(P.__errors.slice(0,3)));
  await ctx.close();await b.close();})();
