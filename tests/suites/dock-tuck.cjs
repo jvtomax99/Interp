@@ -42,7 +42,14 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
 const settle = page => page.evaluate(() => new Promise(r => {
   const t0 = performance.now();
   const swaying = () => [...document.querySelectorAll('.dock-smiley')].some(e => e.style.rotate);
-  const moving = () => swaying() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
+  // His grow back to full size after a tuck: on CI's WebKit the open reading
+  // came 65.9-69.9 px wide (full: 70.1) with nothing counted as moving, so
+  // also wait until his computed scale is the one the bar's state asks for.
+  const growing = () => { const d = document.querySelector('.dock-smiley'); if (!d) return false;
+    const want = document.body.classList.contains('dock-mini') ? 54 / 58 : 1;
+    const sc = getComputedStyle(d).scale; const v = sc === 'none' ? 1 : parseFloat(sc);
+    return Math.abs(v - want) > .0005; };
+  const moving = () => swaying() || growing() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
   const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
   check();
 }));
