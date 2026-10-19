@@ -1950,7 +1950,12 @@
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'home-promo-btn';
     b.setAttribute('aria-label', 'Watch Interpreter Hub in 45 seconds');
-    b.innerHTML = '<span class="home-promo-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10-6.4a1 1 0 0 0 0-1.7l-10-6.4A1 1 0 0 0 8 5.6z"/></svg></span><span>Watch</span><small aria-hidden="true">0:45</small>';
+    // A story bubble: the video's still in a ring of its colours, a play
+    // badge, "Watch" under it.
+    b.innerHTML = '<span class="home-promo-bubble" aria-hidden="true"><span class="home-promo-ring"></span>'
+      + '<img class="home-promo-thumb" src="media/hub-promo-thumb.webp" alt="" width="84" height="84" decoding="async">'
+      + '<span class="home-promo-play"><svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10-6.4a1 1 0 0 0 0-1.7l-10-6.4A1 1 0 0 0 8 5.6z"/></svg></span></span>'
+      + '<span class="home-promo-label" aria-hidden="true">Watch</span>';
     b.addEventListener('click', () => window.watchPromo());
     g.appendChild(b);
   }
