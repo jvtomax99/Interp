@@ -44,21 +44,19 @@ motion turns the lean and squashes off.
 
 **Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`; Jose,
 2026-10-19: "look like a game", then "like Hackensack University Medical
-Center", from his four campus photos). Replaced the navy readiness card.
-Each domain is a campus building, laid out from satellite imagery of the
-real campus (traced only; none of it is drawn): Ethics the main hospital on
-Prospect Ave (circle drive, fountain), Encounter the Helena Theurer Pavilion
-(curved glass tower, lit sign), Terminology the Cancer Center across Second
-St (skybridge), US Systems the north building, Culture the south building;
-the utility plant with its fans and three parking decks are context. floors built = coverage (learned + shaky/2),
-from its fewest floors to all (`campusLevel`), the rest scaffolding + crane.
-Art is pre-rendered 3D in `city/` (ground, every building at every floor
-count, its shadow, two cars): stacked back to front in `CAMPUS` order, each
-placed by pixel boxes from the 960x960 render (`CAMPUS_MAP`, from the
-render script's city.json). To change the art: `docs/mockups/cchi-city/`
-(`humc2.html` + `buildassets2.cjs`, then paste the compact manifest).
-Labels (`.cp-tag`) and buildings (`.cp-bld`) start that domain; Play
-starts the next mode. Dr. Smiley in the card is an `ask-face`, so the dock's
-Dr. Smiley steps aside (one at a time). Cars and the fountain run only
-while the card is on screen (`watchCampus`, `.is-away`); `.is-still` spares
-them; reduced motion: no cars, no sparkle.
+Center"; after a generic city, a satellite-traced campus and a box model he
+said "still not it", he sent photos of the main entrance, day and night).
+Replaced the readiness card. The scene is the main entrance at dusk: the
+entry drive with lamps on its median, the fountain circle, maroon-brick
+towers with cream bands, the dark glass tower, the main building with its
+glass top and the HMH mark. Each domain is one building (Ethics the main
+building, Encounter the tower on the left, Terminology the glass tower, US
+Systems the entrance pavilion, Culture the tower on the right); its windows
+light up in tenths of coverage (`campusLevel`). Art: `city/entrance.webp`
+plus `city/<key>-lit<1..10>.webp` (only the lit windows, occluded by the
+scene), made by `docs/mockups/cchi-city/entrance.html` + `buildentr.cjs`;
+paste the printed manifest into `CAMPUS_MAP`. On the scene: a small % badge
+per roof (`.cp-tag`, nudged apart), tap areas (`.cp-bld`), headlights on the
+drive and the fountain sparkle (only while on screen: `watchCampus`). Under
+it a legend of names (`.cp-key`), streak/goal/due chips, Play and Exam sim.
+Dr. Smiley in the card is an `ask-face`, so the dock's Dr. Smiley steps aside.

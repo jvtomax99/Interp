@@ -1,0 +1,161 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+/* HUMC main entrance at dusk, from Jose's photos: the entry drive with its lit median and lamps, the fountain
+   circle, maroon-brick towers with cream bands, the dark mirrored-glass tower, the main building with its glass
+   top and the HMH mark. Progress lights each building's windows. */
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+const P = new URLSearchParams(location.search);
+const W = +P.get('w')||960, H = +P.get('h')||760;
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
+renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(31, W/H, 0.5, 300);
+cam.position.set(0, 30, 50); cam.lookAt(0, 3.6, -4); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+scene.add(new THREE.HemisphereLight(0xb7c4ff, 0x4a3d52, 1.35));
+const moon = new THREE.DirectionalLight(0xc9c6ff, 1.0); moon.position.set(-18, 26, 14); moon.castShadow = true;
+moon.shadow.mapSize.set(4096,4096); Object.assign(moon.shadow.camera,{left:-24,right:24,top:24,bottom:-24,near:1,far:90}); moon.shadow.bias=-0.0006; moon.shadow.radius=4; scene.add(moon);
+const warm = new THREE.DirectionalLight(0xffb27a, 0.9); warm.position.set(22, 6, 18); scene.add(warm);
+const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;
+const M = (c,o={}) => new THREE.MeshStandardMaterial({ color:c, roughness:o.r??0.8, metalness:o.m??0, ...(o.x||{}) });
+const add = (geo, mat, x,y,z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast; m.receiveShadow=true; G.add(m); return m; };
+const box = (w,h,d,mat,x,y,z,r=0.06,cast=true) => add(new RoundedBoxGeometry(w,h,d,2,Math.min(r,w/2-.001,h/2-.001,d/2-.001)), mat, x,y,z,cast);
+let seed = 5; const rnd = () => (seed = (seed*16807)%2147483647)/2147483647;
+const FL = 0.62;
+
+// ---- facades: maroon brick with a cream band per floor (no windows: windows are their own meshes) ----
+function brickTex(col='#7e3b37', band='#e6d8c2', glassBand=null){
+  const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = col; g.fillRect(0,0,64,64); g.fillStyle = 'rgba(0,0,0,.06)'; for (let y=0;y<64;y+=4) g.fillRect(0,y,64,1);
+  g.fillStyle = band; g.fillRect(0,50,64,10);
+  if (glassBand){ g.fillStyle = glassBand; g.fillRect(0,14,64,30); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const BRICK = (o={}) => { const t = brickTex(o.col, o.band, o.glass); return (w,h) => { const m = new THREE.MeshStandardMaterial({ map:t.clone(), roughness:0.85 }); m.map.needsUpdate = true; m.map.repeat.set(w/0.9, h/FL); return m; }; };
+const GLASSWALL = new THREE.MeshStandardMaterial({ color:0x4a5f86, roughness:0.18, metalness:0.45 });
+const ROOF = M(0x6e6a78), WIN_DARK = M(0x27324d, { r:0.25, m:0.3 });
+const LIT = new THREE.MeshBasicMaterial({ color:0xffcf7a });
+
+// a tower: body, a cream cornice, rooftop units, and windows on the faces the camera sees
+const WINDOWS = {}; const LABEL_AT = {}; const BOX = {};
+function tower(key, x, z, w, d, floors, style){
+  const h = floors*FL, y0 = 0.3;
+  const mats = style === 'glass' ? GLASSWALL : BRICK(style||{})(Math.max(w,d), h);
+  box(w, h, d, mats, x, y0 + h/2, z, 0.08);
+  box(w+0.15, 0.22, d+0.15, M(0xd9cdb8), x, y0 + h + 0.11, z, 0.05);
+  box(w*0.35, 0.4, d*0.3, M(0x8a8796), x - w*0.15, y0 + h + 0.42, z - d*0.1, 0.06);
+  box(w*0.18, 0.3, d*0.2, M(0x9a97a6), x + w*0.25, y0 + h + 0.37, z + d*0.1, 0.05);
+  const wins = WINDOWS[key] = WINDOWS[key] || [];
+  const faces = [['z', z + d/2 + 0.02, w]];                          // front, facing the drive
+  faces.push(x < 0 ? ['x', x + w/2 + 0.02, d] : ['x', x - w/2 - 0.02, d]);   // the side towards the middle
+  for (const [ax, at, len] of faces){
+    const cols = Math.max(3, Math.round(len / (style === 'glass' ? 0.55 : 0.75)));
+    for (let f = 0; f < floors; f++) for (let c = 0; c < cols; c++){
+      const t = -len/2 + (c + 0.5)*len/cols, y = y0 + f*FL + FL*0.45;
+      const gw = len/cols*0.62, gh = FL*0.42;
+      const geo = ax === 'z' ? new THREE.BoxGeometry(gw, gh, 0.03) : new THREE.BoxGeometry(0.03, gh, gw);
+      const m = add(geo, WIN_DARK, ax === 'z' ? x + t : at, y, ax === 'z' ? at : z + t, false);
+      m.userData.win = true; wins.push(m);
+    }
+  }
+  LABEL_AT[key] = [x, y0 + h + 0.9, z];
+  BOX[key] = { x, z, w, d, h: h + 0.8 };
+}
+
+// ---- ground: the diorama slab, lawns, the drive with its median and the fountain circle ----
+box(34, 1.6, 40, M(0x7a4f36), 0, -0.8, -3, 0.3, false);
+box(33.9, 0.3, 39.9, M(0x5d9a6b), 0, 0.02, -3, 0.15, false);
+const asphalt = M(0x3b3a46, { r:0.9 }), curb = M(0xe7d36a, { r:0.6 }), walk = M(0x8d8c99), grass = M(0x6fb07c);
+box(6.2, 0.06, 26, asphalt, 0, 0.2, 7, 0.02, false);                        // the entry drive
+box(1.5, 0.12, 22, grass, 0, 0.24, 8.5, 0.05, false); box(1.6, 0.1, 22.1, curb, 0, 0.22, 8.5, 0.05, false);   // median
+// the circle
+add(new THREE.CylinderGeometry(4.2, 4.2, 0.06, 48), asphalt, 0, 0.21, -4.5, false);
+add(new THREE.CylinderGeometry(2.6, 2.6, 0.14, 48), grass, 0, 0.26, -4.5, false);
+add(new THREE.CylinderGeometry(2.66, 2.66, 0.12, 48), curb, 0, 0.24, -4.5, false);
+add(new THREE.CylinderGeometry(0.95, 1.05, 0.3, 32), M(0xbdb6c8), 0, 0.42, -4.5);
+add(new THREE.CylinderGeometry(0.8, 0.8, 0.04, 32), new THREE.MeshBasicMaterial({ color:0x9fe8ff }), 0, 0.58, -4.5, false);
+add(new THREE.CylinderGeometry(0.1, 0.14, 0.7, 12), M(0xd5d1de), 0, 0.85, -4.5);
+add(new THREE.SphereGeometry(0.22, 16, 12), new THREE.MeshBasicMaterial({ color:0xd8f6ff }), 0, 1.25, -4.5, false);
+for (let i=0;i<14;i++){ const a = i/14*Math.PI*2; box(0.3,0.16,0.3, M([0xe0516b,0xf2b84b,0xb06ad0,0xffffff][i%4]), Math.cos(a)*1.9, 0.38, -4.5+Math.sin(a)*1.9, 0.08, false); }
+// side roads from the circle to the entrances
+box(16, 0.06, 3.2, asphalt, -8, 0.2, -6.8, 0.02, false); box(14, 0.06, 3.2, asphalt, 9, 0.2, -6.8, 0.02, false);
+// sidewalks along the drive
+box(1.0, 0.1, 26, walk, -3.7, 0.22, 7, 0.03, false); box(1.0, 0.1, 26, walk, 3.7, 0.22, 7, 0.03, false);
+// lamps along the drive and around the circle (lit heads)
+const lampHead = new THREE.MeshBasicMaterial({ color:0xfff1c8 });
+function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.6, 8), M(0x2c2c36), x, 1.1, z); add(new THREE.SphereGeometry(0.15, 12, 10), lampHead, x, 1.95, z, false);
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.7, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0.18 })); glow.rotation.x = -Math.PI/2; glow.position.set(x, 0.25, z); G.add(glow); }
+for (let z = 19; z > -1; z -= 3.2){ lamp(-0.55, z); lamp(0.55, z); lamp(-3.5, z - 1.6); lamp(3.5, z - 1.6); }
+for (let i=0;i<8;i++){ const a = i/8*Math.PI*2 + 0.2; lamp(Math.cos(a)*4.6, -4.5 + Math.sin(a)*4.6); }
+// trees: dark evergreens and a few round ones
+function tree(x, z, s=1, cone=true){
+  add(new THREE.CylinderGeometry(0.08*s,0.1*s,0.5*s,6), M(0x4a3426), x, 0.5+0.25*s, z);
+  if (cone){ add(new THREE.ConeGeometry(0.75*s, 1.9*s, 8), M(0x2f5e44, {r:0.9}), x, 0.5+1.3*s, z); }
+  else add(new THREE.IcosahedronGeometry(0.85*s, 1), M(0x3c7a52, {r:0.9}), x, 0.5+1.1*s, z);
+}
+for (const [x,z,s,c] of [[-6,12,1.2,1],[-7.5,15,1,0],[6.5,13,1.3,1],[8,16.5,1,0],[-5.2,17.5,1,1],[5.4,8,0.9,0],[-12,9,1.2,1],[12,7,1.1,1],[-2.1,13,0.6,0],[2.1,10,0.6,0],[-2.1,4,0.6,0],[2.1,1,0.6,0],[-14,2,1.3,1],[14,-10,1.2,1],[-15,-12,1.1,0]]) tree(x, z, s, !!c);
+// the HMH sign between brick pillars, at the start of the drive
+box(0.5, 1.0, 0.5, BRICK({})(0.5,1), -3.0, 0.8, 17.5, 0.05); box(0.5, 1.0, 0.5, BRICK({})(0.5,1), 3.0, 0.8, 17.5, 0.05);
+box(5.0, 0.7, 0.2, M(0xe8eaef), 0, 0.75, 17.5, 0.05);
+let TEX = null; const pend = [];
+// ---- the five buildings (domain keys) ----
+tower('t', -9.8, -12.5, 6.0, 6.0, 15, 'glass');                                           // the dark mirrored-glass tower
+tower('n', -10.5, 0.5, 6.4, 7.0, 13, {});                                                // the brick tower on the left
+tower('s', -4.8, -9.6, 5.6, 4.2, 4, { glass:'#2b3550' });                                 // the entrance pavilion (with the porte-cochere)
+tower('c', 10.0, -2.5, 6.0, 9.0, 12, { glass:'#2b3550' });                                 // the tower on the right
+tower('e', 5.6, -14.0, 9.0, 5.5, 7, {});                                                 // the main building at the end of the drive
+// porte-cochere: brick columns and a flat canopy reaching toward the circle
+for (const dx of [-2.2, -0.2, 1.8]) box(0.45, 2.2, 0.45, BRICK({})(0.5, 2.2), -4.8+dx, 1.4, -5.6, 0.05);
+box(6.0, 0.35, 2.4, M(0x7e3b37), -4.8, 2.6, -6.4, 0.06);
+// the main building's glass top with the HMH mark (lit) and its banners
+box(5.6, 1.6, 3.6, GLASSWALL, 5.6, 0.3+7*FL+0.9, -14.2, 0.06);
+pend.push(() => { const logo = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.1), new THREE.MeshBasicMaterial({ color:0xffffff })); logo.position.set(5.6, 0.3+7*FL+0.9, -12.38); BASE.add(logo);
+  const l2 = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l2.position.set(5.6, 0.3+7*FL+0.9, -12.37); BASE.add(l2); });
+for (const [x,c] of [[2.4,0x2c5aa0],[3.3,0xe8eaef],[8.6,0x2c5aa0]]) box(0.6, 2.0, 0.06, M(c), x, 0.3+2.2, -11.2, 0.03);
+// the white sign panel on the right tower's corner, as in the aerial photo
+box(0.06, 2.4, 2.6, M(0xf4f5f8), 6.95, 0.3+9*FL, 1.0, 0.04);
+pend.push(() => { const l = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.4), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(6.91, 0.3+9*FL, 1.0); l.rotation.y = -Math.PI/2; BASE.add(l); });
+
+// ---- capture pipeline ----
+const depthOnly = new THREE.MeshBasicMaterial({ colorWrite:false });
+const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tctx = tmp.getContext('2d', { willReadFrequently:true });
+function cap(q=0.86){
+  renderer.render(scene, cam);
+  tctx.clearRect(0,0,W,H); tctx.drawImage(renderer.domElement, 0, 0);
+  const d = tctx.getImageData(0,0,W,H).data; let x0=W,y0=H,x1=-1,y1=-1;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(d[(y*W+x)*4+3] > 3){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
+  if(x1<0) return null;
+  const w=x1-x0+1, h=y1-y0+1, c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(tmp, x0,y0,w,h, 0,0,w,h);
+  return { x:x0, y:y0, w, h, data:c.toDataURL('image/webp', q) };
+}
+const proj = (x,y,z) => { const v = new THREE.Vector3(x,y,z).project(cam); return [Math.round((v.x+1)/2*W), Math.round((1-v.y)/2*H)]; };
+function bbox(key){ const b = BOX[key]; let x0=W,y0=H,x1=0,y1=0;
+  for (const dx of [-1,1]) for (const dz of [-1,1]) for (const y of [0.3, 0.3+b.h]){ const [px,py] = proj(b.x+dx*b.w/2, y, b.z+dz*b.d/2); x0=Math.min(x0,px); x1=Math.max(x1,px); y0=Math.min(y0,py); y1=Math.max(y1,py); }
+  return [x0, y0, x1-x0, y1-y0]; }
+window.__run = async () => {
+  TEX = await new Promise(r => { const t = new THREE.TextureLoader().load('hmh-mark-square.png', () => r(t)); }); TEX.colorSpace = THREE.SRGBColorSpace; pend.forEach(f => f());
+  const out = { W, H, base: cap(0.86), b:{} };
+  // lit layers: only the chosen windows draw (warm), everything else writes depth only
+  const all = []; scene.traverse(o => { if (o.isMesh) all.push(o); });
+  const keep = new Map(all.map(o => [o, o.material]));
+  for (const key of Object.keys(WINDOWS)){
+    const wins = WINDOWS[key].slice(); for (let i = wins.length - 1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [wins[i], wins[j]] = [wins[j], wins[i]]; }
+    out.b[key] = { label: proj(...LABEL_AT[key]), box: bbox(key), lv: [] };
+    for (let lv = 1; lv <= 10; lv++){
+      const on = new Set(wins.slice(0, Math.round(wins.length * lv / 10)));
+      all.forEach(o => { o.material = on.has(o) ? LIT : depthOnly; });
+      out.b[key].lv.push(cap(0.82));
+    }
+    all.forEach(o => { o.material = keep.get(o); });
+  }
+  out.fountain = proj(0, 1.3, -4.5);
+  out.drive = [proj(-1.8, 0.4, 18), proj(-1.8, 0.4, -1.2), proj(1.8, 0.4, -1.2), proj(1.8, 0.4, 18)];
+  return out;
+};
+window.__done = true;
+</script></body></html>
