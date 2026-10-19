@@ -9,6 +9,13 @@ Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a be
 Chatterbox voice), `v8` (v7, "Safer care." retaken), `v9` (Jose's pick of take), `hub-promo-v10.mp4` (current: the Spanish lines
 with a Latino accent). `build.py` builds v10; older builds are in git history.
 
+## How the chats run (Jose, 2026-10-19)
+
+The promo work lives in chats named **Inter hub video guide ( Tesseract )**, on branch
+`claude/voice-chatterbox-v7-0ks20a`. When a chat gets heavy, Claude starts the next one
+under that same name (pointing it at this README), then archives the old one. Jose gave
+standing permission for that.
+
 ## v7: the Chatterbox voice (2026-10-19)
 
 v6's edit, script and timings, read by Chatterbox (`voice_chatterbox.py`) instead of
