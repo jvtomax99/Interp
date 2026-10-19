@@ -10,6 +10,16 @@ Chatterbox voice), `v8` (v7, "Safer care." retaken), `v9` (Jose's pick of take),
 with a Latino accent), `v11` (on-screen capitals fixed), `hub-promo-v12.mp4` (current: more colour,
 motion and Hackensack). `build.py` builds v12; older builds are in git history.
 
+## In the app (live, 2026-10-19)
+
+v12 is in the app: `media/hub-promo.mp4` on `main` (720p, 8 MB: `ffmpeg -i hub-promo-v12.mp4
+-vf scale=720:1280:flags=lanczos -c:v libx264 -crf 25 -preset slow -profile:v high -pix_fmt yuv420p
+-c:a aac -b:a 128k -movflags +faststart`), its still `media/hub-promo.jpg` (frame at 9.45 s) and
+`media/hub-promo-thumb.webp`. Shown in the User Guide (answer `promo`, PR #63) and by the Watch
+story bubble on Home's banner (PR #65). Details: `docs/features/user-guide.md` on `main`. A new cut
+means replacing those three files on a branch from `main` (never this branch: it carries 189 MB of
+drafts that must not reach `main`). Not on the members-only screen: Jose decides after the CEO pitch.
+
 ## How the chats run (Jose, 2026-10-19)
 
 The promo work lives in chats named **Inter hub video guide ( Tesseract )**, on branch
