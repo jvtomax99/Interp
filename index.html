@@ -1221,9 +1221,20 @@
   .fm-table th{ font-weight:550; color:var(--ink-faint); font-size:12px; }
   .fm-table th:first-child, .fm-table td:first-child{ text-align:left; }
   .fm-note{ font-size:13px; color:var(--ink-soft); background:var(--bg); border-radius:var(--r-sm); padding:9px 13px; margin:0 0 13px; }
+  .fm-stalls{ font-size:12px; color:var(--ink-soft); margin-bottom:13px; font-variant-numeric:tabular-nums; }
+  .fm-stalls b{ display:block; font-weight:550; color:var(--ink-faint); margin-bottom:3px; }
+  .fm-stalls div{ padding:3px 0; border-bottom:1px solid var(--line-soft); }
   .fm-meta{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:13px; word-break:break-word; }
   .fm-btns{ display:flex; gap:9px; flex-wrap:wrap; }
   .fm-btns .btn{ flex:1 1 auto; }
+  /* ---------- Voice and mic check (More, under the smoothness meter) ---------- */
+  .vc-more{ margin-top:13px; display:flex; justify-content:center; }
+  .vc-step{ padding:9px 0 13px; border-bottom:1px solid var(--line-soft); }
+  .vc-step h4{ margin:0 0 3px; font-size:15px; font-weight:650; color:var(--ink); }
+  .vc-step p{ margin:0 0 9px; font-size:13px; color:var(--ink-soft); }
+  .vc-step .fm-btns{ margin-bottom:6px; }
+  .vc-state{ font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; min-height:1.4em; }
+  .vc-state q{ font-family:'IBM Plex Serif', Georgia, serif; }
 
   /* ---------- Icon picker (Add Domain) ---------- */  .icon-picker-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .icon-pick{
@@ -2126,7 +2137,7 @@
   .dm-sep{ height:1px; background:var(--line-soft); margin:6px 8px; }
   .dm-cancel{ width:100%; height:50px; margin-top:8px; border:0; border-radius:14px; background:var(--bg); font:600 15px var(--sans); color:var(--ink); cursor:pointer; }
   .dm-cancel:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
-  body:has(.dm-overlay.show) .tabbar{ display:none; }
+  body.dm-open.dm-open .tabbar{ display:none; }
   @media (min-width:901px){
     .dm-sheet{ bottom:auto; top:50%; border-radius:22px; padding-bottom:16px; opacity:0; transform:translateY(-46%) scale(.98); transition:transform .24s var(--ease), opacity .2s var(--ease); }
     .dm-overlay.show .dm-sheet{ opacity:1; transform:translateY(-50%); }
@@ -2610,10 +2621,6 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
   }
   .progress-card p{ font-size:13px; color:var(--ink-soft); margin:0 0 10px 0; line-height:1.55; }
-  .progress-head{ display:flex; gap:28px; flex-wrap:wrap; }
-  .progress-head div{ display:flex; flex-direction:column; }
-  .progress-head b{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); }
-  .progress-head span{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
 
   .review-card{
     max-width:480px; padding:32px 28px; border-radius:var(--r-lg); text-align:center;
@@ -3071,9 +3078,9 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft); }
   .board-row{ display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:10px;
     font-family:var(--sans); animation:modeIn .3s var(--ease) backwards; }
-  .board-row:nth-child(1){ animation-delay:.03s } .board-row:nth-child(2){ animation-delay:.07s }
-  .board-row:nth-child(3){ animation-delay:.11s } .board-row:nth-child(4){ animation-delay:.15s }
-  .board-row:nth-child(n+5){ animation-delay:.19s }
+  .board-row:nth-child(1){ animation-delay:calc(.03s + var(--motion-skip, 0s)) } .board-row:nth-child(2){ animation-delay:calc(.07s + var(--motion-skip, 0s)) }
+  .board-row:nth-child(3){ animation-delay:calc(.11s + var(--motion-skip, 0s)) } .board-row:nth-child(4){ animation-delay:calc(.15s + var(--motion-skip, 0s)) }
+  .board-row:nth-child(n+5){ animation-delay:calc(.19s + var(--motion-skip, 0s)) }
   .board-row.is-me{ background:var(--accent-soft); }
   .board-rank{ width:22px; flex-shrink:0; text-align:center; font-size:13px; font-weight:650; color:var(--ink-faint); }
   .board-face{ width:28px; height:28px; border-radius:50%; flex-shrink:0; color:#fff;
@@ -3199,10 +3206,10 @@
   /* The four ways in, arriving in sequence rather than all at once. */
   @keyframes modeIn{ from{ opacity:0; transform:translateY(7px); } to{ opacity:1; transform:none; } }
   .study-mode{ animation:modeIn .30s var(--ease) backwards; }
-  .study-mode:nth-child(1){ animation-delay:.02s }
-  .study-mode:nth-child(2){ animation-delay:.07s }
-  .study-mode:nth-child(3){ animation-delay:.12s }
-  .study-mode:nth-child(4){ animation-delay:.17s }
+  .study-mode:nth-child(1){ animation-delay:calc(.02s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(2){ animation-delay:calc(.07s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(3){ animation-delay:calc(.12s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(4){ animation-delay:calc(.17s + var(--motion-skip, 0s)) }
 
   /* The last minute of an exam. */
   @keyframes clockUrge{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
@@ -3390,6 +3397,263 @@
   }
   .mastery-go::after{ content:''; position:absolute; inset:-4px -3px; }
   .mastery-go:hover{ background:color-mix(in srgb, var(--dom) 16%, var(--bg-hi)); }
+
+  /* ---------- Practice dashboard ----------
+     The readiness card leads; under it, your scores over time and the one
+     domain worth working on next. Blocks arrive in sequence, the score line
+     draws itself and its points pop as the pen reaches them. A block that
+     has finished moving carries .is-still (playPracticeMotion), and
+     --motion-skip lets a re-render resume motion instead of restarting it. */
+  @keyframes dashIn{ from{ opacity:0; transform:translateY(9px) scale(.985); } to{ opacity:1; transform:none; } }
+  .dash-in{
+    animation:dashIn .42s var(--ease) backwards;
+    animation-delay:calc(var(--i, 0) * 60ms + var(--motion-skip, 0s));
+  }
+  .is-still:not(.study-flame), .is-still *:not(.study-flame){ animation:none !important; }
+
+  .dash-row{ display:grid; grid-template-columns:1fr; gap:9px; max-width:760px; margin:0 0 26px 0; }
+  @media (min-width:600px){ .dash-row{ grid-template-columns:1.6fr 1fr; align-items:start; } }
+  .dash-tile{
+    position:relative; display:flex; flex-direction:column; min-width:0;
+    padding:13px 17px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+  }
+  .dash-label{
+    font-family:var(--sans); font-size:12px; font-weight:650; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .dash-empty{ font-size:13px; line-height:1.5; color:var(--ink-soft); margin:6px 0 9px 0; }
+  .dash-tile .btn{ align-self:flex-start; }
+
+  .trend-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:9px; margin-top:6px; }
+  .trend-now b{
+    display:block; font-family:var(--sans); font-size:28px; font-weight:650; letter-spacing:-.04em;
+    line-height:1; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .trend-cap{ display:block; font-size:12px; color:var(--ink-soft); margin-top:4px; }
+  .trend-delta{
+    flex-shrink:0; font-family:var(--sans); font-size:12px; font-weight:650; white-space:nowrap;
+    padding:3px 9px; border-radius:999px;
+  }
+  .trend-delta.is-up{ color:#3F7D58; background:color-mix(in srgb, #3F7D58 12%, transparent); }
+  .trend-delta.is-down{ color:var(--danger); background:var(--danger-soft); }
+  html[data-theme="dark"] .trend-delta.is-up{ color:#8FD8B0; background:rgba(143,216,176,0.12); }
+  .trend-svg{ display:block; width:100%; height:auto; max-height:132px; margin:9px 0 6px 0; color:var(--accent-2); overflow:visible; }
+  .trend-grid{ stroke:var(--line); stroke-width:1; stroke-dasharray:3 4; }
+  .trend-base{ stroke:var(--line); stroke-width:1; }
+  .trend-glabel{ font-family:var(--sans); font-size:9px; font-weight:550; fill:var(--ink-faint); }
+  .trend-line{
+    fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:1; stroke-dashoffset:0;
+    animation:trendDraw .9s var(--ease) backwards; animation-delay:calc(.18s + var(--motion-skip, 0s));
+  }
+  @keyframes trendDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
+  .trend-area{ animation:trendFade .6s ease-out backwards; animation-delay:calc(.7s + var(--motion-skip, 0s)); }
+  @keyframes trendFade{ from{ opacity:0; } to{ opacity:1; } }
+  .trend-dot{
+    fill:var(--paper); stroke:currentColor; stroke-width:2;
+    transform-box:fill-box; transform-origin:center;
+    animation:dotPop .34s var(--ease) backwards; animation-delay:calc(var(--d, 0ms) + var(--motion-skip, 0s));
+    transition:stroke-width .2s var(--ease);
+  }
+  .trend-dot.is-last{ fill:currentColor; }
+  .trend-dot.is-picked{ fill:currentColor; stroke-width:5; }
+  @keyframes dotPop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
+  /* One ripple off the newest score once the line arrives, then nothing. */
+  .trend-ping{
+    fill:currentColor; opacity:0; pointer-events:none;
+    transform-box:fill-box; transform-origin:center;
+    animation:trendPing .9s ease-out 1; animation-delay:calc(1.15s + var(--motion-skip, 0s));
+  }
+  @keyframes trendPing{ from{ opacity:.45; transform:scale(1); } to{ opacity:0; transform:scale(3.4); } }
+  .trend-hit{ fill:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .trend-foot{ display:flex; flex-wrap:wrap; gap:6px 17px; font-family:var(--sans); font-size:12px; color:var(--ink-soft); }
+  .trend-foot b{ color:var(--ink); font-weight:650; font-variant-numeric:tabular-nums; }
+
+  .focus-tile{
+    --dom:var(--accent); gap:6px;
+    background:radial-gradient(130% 90% at 100% 0%, color-mix(in srgb, var(--dom) 14%, transparent), transparent 62%), var(--paper);
+  }
+  .focus-name{ font-family:var(--sans); font-size:17px; font-weight:650; letter-spacing:-.02em; line-height:1.25; color:var(--ink); }
+  .focus-why{ font-family:var(--sans); font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .focus-track{ margin:3px 0 6px 0; }
+  .focus-go{ align-self:flex-start; margin-top:auto; }
+
+  @media (prefers-reduced-motion: reduce){
+    .dash-in, .trend-line, .trend-area, .trend-dot, .trend-ping{ animation:none !important; }
+    .trend-dot{ transition:none; }
+  }
+
+  /* ---------- Practice: the Pixar finish ----------
+     Jose, 2026-10-19: "make it look like a 3D world, inspired by Disney
+     and Pixar". The look comes from light and material, not geometry: soft
+     clay surfaces lit warm from the top-left, a lip of thickness on every
+     tile, a glossy donut for readiness, candy buttons that squash when
+     pressed, tiles that lean toward the finger and spring back, arrivals
+     that land with a little squash. Practice screen only, by design: these
+     tiles deliberately step past the app-wide finish shadow. Nothing here
+     runs at rest; the lean exists only while a finger is down. */
+  :root{
+    --clay-hi:rgba(255,255,255,.95); --clay-sheen:rgba(255,255,255,.7);
+    --clay-shade:rgba(22,40,90,.08); --clay-drop:rgba(24,48,104,.17);
+    --clay-warm:rgba(255,186,112,.13); --clay-spec:rgba(255,255,255,.42);
+    --spring:cubic-bezier(.34,1.56,.64,1);
+  }
+  html[data-theme="dark"]{
+    --clay-hi:rgba(255,255,255,.11); --clay-sheen:rgba(255,255,255,.045);
+    --clay-shade:rgba(2,6,22,.4); --clay-drop:rgba(2,6,22,.6);
+    --clay-warm:rgba(255,170,90,.06); --clay-spec:rgba(255,255,255,.12);
+  }
+
+  /* Landing: drop in, squash on contact, settle. */
+  @keyframes dashIn{
+    0%  { opacity:0; transform:translateY(22px) scale(.93); }
+    55% { opacity:1; transform:translateY(-4px) scale(1.015,.985); }
+    78% { transform:translateY(1px) scale(.996,1.006); }
+    100%{ opacity:1; transform:none; }
+  }
+  .dash-in{ animation-duration:.62s; animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+  .study-mode{ animation-name:dashIn; animation-duration:.62s; animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+
+  /* Clay: a sheen across the top, warm key light from the top-left, a
+     bright lip above and a shaded one below (the tile's thickness), a tight
+     contact shadow and a soft one far below. */
+  .dash-tile, .mastery-row, .study-mode:not(.is-exam){
+    position:relative; border-radius:var(--r-lg); border-color:transparent;
+    background:
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+    box-shadow:
+      inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 var(--clay-shade),
+      inset 0 0 0 1px var(--line-soft),
+      0 2px 3px var(--clay-drop), 0 20px 32px -16px var(--clay-drop);
+  }
+  .focus-tile{
+    background:
+      radial-gradient(130% 90% at 100% 0%, color-mix(in srgb, var(--dom) 16%, transparent), transparent 62%),
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+  }
+  .study-mode.is-next{
+    background:
+      radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--mode) 14%, transparent), transparent 64%),
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+    box-shadow:
+      inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 color-mix(in srgb, var(--mode) 16%, transparent),
+      inset 0 0 0 1.5px color-mix(in srgb, var(--mode) 34%, transparent),
+      0 2px 3px var(--clay-drop), 0 22px 34px -16px color-mix(in srgb, var(--mode) 32%, transparent);
+  }
+  .study-mode.is-exam, .ready-card{ border-radius:var(--r-lg); }
+  .study-mode.is-exam{
+    background:
+      radial-gradient(90% 120% at 0% 0%, rgba(255,186,112,.16), transparent 55%),
+      linear-gradient(135deg,#2C3680,#1A2250);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(4,8,30,.35),
+      0 2px 3px rgba(18,28,70,.3), 0 20px 32px -16px rgba(18,28,70,.7);
+  }
+
+  /* The lean: toward the finger while it is down, a spring back after. */
+  .dash-tile, .mastery-row, .study-mode, .ready-card{
+    transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:transform .6s var(--spring), box-shadow .3s var(--ease), border-color .14s var(--ease);
+  }
+  .study-mode:not(:disabled):active{ transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .is-tilting{ transition:transform .14s ease-out, box-shadow .3s var(--ease); }
+  .dash-tile::after, .mastery-row::after, .study-mode::after{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(circle at var(--mx, 50%) var(--my, 0%), var(--clay-spec), transparent 58%);
+    opacity:0; transition:opacity .35s var(--ease);
+  }
+  .is-tilting::after{ opacity:1; }
+
+  /* Readiness: a chunky glossy donut sitting in the card. */
+  .ready-card{
+    background:
+      radial-gradient(80% 70% at 0% 0%, rgba(255,186,112,.17), transparent 60%),
+      linear-gradient(150deg,#2E3A82 0%,#1B2356 55%,#141B45 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -4px 0 rgba(4,8,30,.35),
+      0 3px 5px rgba(20,43,67,.14), 0 26px 46px -20px rgba(18,28,70,.62);
+  }
+  .ready-ring{
+    position:relative; width:104px; height:104px;
+    filter:drop-shadow(0 9px 9px rgba(4,8,30,.45));
+  }
+  .ready-ring::before{
+    content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:
+      radial-gradient(circle at 34% 24%, rgba(255,255,255,.5), rgba(255,255,255,0) 32%),
+      radial-gradient(circle, rgba(4,8,30,0) 33px, rgba(4,8,30,.38) 35px, rgba(255,255,255,.22) 43px, rgba(255,255,255,0) 46px, rgba(4,8,30,.42) 52px);
+    -webkit-mask:radial-gradient(circle, transparent 34.5px, #000 35.5px);
+            mask:radial-gradient(circle, transparent 34.5px, #000 35.5px);
+  }
+  .ready-ring-in{
+    position:relative; z-index:1; width:70px; height:70px;
+    background:radial-gradient(circle at 50% 30%, #222B5E, #151C47 70%);
+    box-shadow:inset 0 6px 10px rgba(4,8,30,.6), inset 0 -1px 0 rgba(255,255,255,.12);
+  }
+  /* Stat icons as small glossy bubbles. */
+  .ready-stat i{
+    width:26px; height:26px; padding:6px; box-sizing:border-box; border-radius:9px; margin-bottom:4px;
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.4), rgba(1,184,230,.22) 62%, rgba(1,184,230,.12));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 0 rgba(4,8,30,.25), 0 3px 6px -2px rgba(4,8,30,.5);
+  }
+  .sm-icon{
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.95), color-mix(in srgb, var(--mode) 24%, var(--paper)) 66%);
+    box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--mode) 22%, transparent), 0 3px 6px -2px color-mix(in srgb, var(--mode) 40%, transparent);
+  }
+  .study-mode.is-exam .sm-icon{
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.4), rgba(255,255,255,.1) 66%);
+    box-shadow:inset 0 -2px 0 rgba(4,8,30,.3), 0 3px 6px -2px rgba(4,8,30,.5);
+  }
+
+  /* Bars as glossy tubes sunk into a groove. */
+  .mastery-track{ height:9px; box-shadow:inset 0 2px 2px var(--clay-shade), inset 0 -1px 0 var(--clay-hi); }
+  .mastery-seg.is-known{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--dom) 50%, #fff) 0%, var(--dom) 55%, color-mix(in srgb, var(--dom) 82%, #1A2250) 100%);
+  }
+  .mastery-seg.is-known:first-child, .mastery-seg:first-child{ border-radius:999px 0 0 999px; }
+  .mastery-dot{
+    width:11px; height:11px; margin-top:3px;
+    background:radial-gradient(circle at 30% 28%, rgba(255,255,255,.85), var(--dom) 58%, color-mix(in srgb, var(--dom) 75%, #1A2250));
+    box-shadow:0 2px 3px color-mix(in srgb, var(--dom) 45%, transparent);
+  }
+
+  /* Candy buttons: a raised face on a darker lip, squashed flat on press. */
+  .mastery-go{
+    --face:color-mix(in srgb, var(--dom) 22%, #fff); --face-lo:color-mix(in srgb, var(--dom) 40%, #fff);
+    --lip:color-mix(in srgb, var(--dom) 70%, #fff);
+    border:none; color:color-mix(in srgb, var(--dom) 58%, #151C2C); font-weight:650;
+    background:linear-gradient(180deg, var(--face), var(--face-lo));
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.75), 0 3px 0 var(--lip),
+      0 7px 12px -5px color-mix(in srgb, var(--dom) 55%, transparent);
+    transform:translateY(0); transition:transform .32s var(--spring), box-shadow .2s var(--ease);
+  }
+  html[data-theme="dark"] .mastery-go{
+    --face:color-mix(in srgb, var(--dom) 34%, var(--paper)); --face-lo:color-mix(in srgb, var(--dom) 24%, var(--paper));
+    --lip:color-mix(in srgb, var(--dom) 40%, #050A1C); color:color-mix(in srgb, var(--dom) 35%, #fff);
+  }
+  html[data-theme="dark"] .mastery-go{ box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), 0 3px 0 var(--lip), 0 7px 12px -5px rgba(2,6,22,.6); }
+  .mastery-go:hover{ background:linear-gradient(180deg, var(--face), var(--face-lo)); filter:brightness(1.03); }
+  .mastery-go:active, .mastery-go.is-pressed{
+    transform:translateY(2px) scale(1.03,.96); transition:transform .08s ease-out;
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 var(--lip), 0 3px 6px -4px color-mix(in srgb, var(--dom) 55%, transparent);
+  }
+  .mastery-go:focus-visible{ outline:2px solid var(--accent-2); outline-offset:3px; }
+
+  /* The score line as a lit tube with glossy beads. */
+  .trend-line{ stroke-width:3; filter:drop-shadow(0 3px 3px color-mix(in srgb, currentColor 35%, transparent)); }
+  .trend-dot{ fill:url(#trendBall); stroke:var(--paper); stroke-width:1.5; transition:transform .3s var(--spring); }
+  .trend-dot.is-last{ fill:url(#trendBall); }
+  .trend-dot.is-picked{ fill:url(#trendBall); stroke-width:1.5; transform:scale(1.4); }
+
+  @media (prefers-reduced-motion: reduce){
+    .dash-tile, .mastery-row, .study-mode, .ready-card, .mastery-go, .trend-dot{ transition:none; }
+    .mastery-go:active, .mastery-go.is-pressed{ transform:none; }
+  }
 
   /* Exam mode */
   .exam-bar{ display:flex; align-items:center; gap:13px; flex-wrap:wrap; margin-bottom:13px;
@@ -4603,14 +4867,14 @@
     .gs-inputrow{ flex-shrink:0; }
 
     /* The page behind a sheet should not scroll with it. */
-    body:has(.overlay.show), body:has(.gs-overlay.show){ overflow:hidden; }
+    body.ov-open.ov-open, body.gs-open.gs-open{ overflow:hidden; }
 
     /* The tab bar is the one thing that should give way to the keyboard: it
        is fixed to the bottom, which is exactly where the keyboard arrives.
        body.kb-open is already set by the keyboard watcher further down. */
     body.kb-open .tabbar,
-    body:has(.overlay.show) .tabbar,
-    body:has(.gs-overlay.show) .tabbar{ display:none; }
+    body.ov-open.ov-open .tabbar,
+    body.gs-open.gs-open .tabbar{ display:none; }
 
     /* A phone held in landscape puts the notch on one side. */
     .main{
@@ -5135,6 +5399,12 @@ body.access-locked{ overflow:hidden; }
 }
 @media (prefers-reduced-motion: reduce){ .ds-fx{ display:none; } }
 svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
+/* His brows (DR_BROWS): each turns about its own middle and eases to the
+   next pose, so they glide while the eyes and mouth step frame to frame. */
+svg.ds-art .ds-brow{ transform-box:fill-box; transition:transform .17s cubic-bezier(.3,0,.2,1); }
+svg.ds-art .ds-brow-l{ transform-origin:53.85% 46.15%; }
+svg.ds-art .ds-brow-r{ transform-origin:44% 44.44%; }
+@media (prefers-reduced-motion: reduce){ svg.ds-art .ds-brow{ transition:none; } }
 @keyframes askThink{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(-6deg); } 70%{ transform:rotate(5deg); } }
 img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
@@ -5635,7 +5905,7 @@ html[data-theme="dark"] .appt-done, html[data-theme="dark"] .prep-start{ backgro
   box-shadow:0 8px 20px -8px rgba(22,55,90,.55); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .appt-pill.is-on{ display:inline-flex; }
 @media (min-width:901px){ .appt-pill{ left:auto; right:26px; translate:none; bottom:26px; } }
-body:has(.overlay.show) .appt-pill, body:has(.gs-overlay.show) .appt-pill{ display:none; }
+body.ov-open.ov-open .appt-pill, body.gs-open.gs-open .appt-pill{ display:none; }
 @media (max-width:900px){ body.kb-open .appt-pill{ display:none; } }   /* the on-screen keyboard covers it */
 @media (prefers-reduced-motion: reduce){ .appt-hd small i, .appt-pill i{ animation:none; } .prep-start{ transition:none; } .prep-start:active{ transform:none; } }
 /* ---------- Dr. Smiley's career ----------
@@ -5685,7 +5955,7 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
   .smiley-rider .ask-face svg{ transition:none; filter:drop-shadow(0 2px 2px rgba(11,35,64,.28)) drop-shadow(0 6px 8px rgba(7,43,69,.2)); }
   .smiley-rider.is-pressed .ask-face{ scale:.9; }
   /* Same moments the tab bar itself steps aside: typing, sheets, search. */
-  body.kb-open .smiley-rider, body:has(.overlay.show) .smiley-rider, body:has(.gs-overlay.show) .smiley-rider{ visibility:hidden; }
+  body.kb-open .smiley-rider, body.ov-open.ov-open .smiley-rider, body.gs-open.gs-open .smiley-rider{ visibility:hidden; }
   /* In Team Chat he steps aside too, so the message box can sit right on
      the tab bar instead of leaving room for his head. */
   body:has(#content > .tc) .smiley-rider{ visibility:hidden; }
@@ -6099,7 +6369,6 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
 .section-head .sub{ font-size:var(--fs-foot); font-weight:500; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
 .hub-head h1{ font-family:var(--sans); font-weight:700; letter-spacing:-.028em; }
 .modal h3, .onboarding-modal h3, .results-summary h3{ font-family:var(--sans); font-weight:650; letter-spacing:-.02em; }
-.progress-head b{ font-family:var(--sans); font-weight:700; letter-spacing:-.02em; }
 .doc-card-name{ font-family:var(--sans); font-weight:650; font-size:16px; letter-spacing:-.015em; }
 .doc-research-specialty{ font-family:var(--sans); font-weight:650; letter-spacing:-.015em; }
 @media (min-width:901px){
@@ -6866,6 +7135,14 @@ body.pv-open{ overflow:hidden; }
     <div class="more-sheet-grip"></div>
     <button class="dd-detail-close" title="Close" onclick="frameMeterClose()">✕</button>
     <div id="frameMeterBody"></div>
+  </div>
+</div>
+
+<div class="overlay more-sheet-overlay" id="voiceCheckOverlay" onclick="if(event.target===this) voiceCheckClose()">
+  <div class="modal more-sheet" role="dialog" aria-modal="true" aria-label="Voice and mic check">
+    <div class="more-sheet-grip"></div>
+    <button class="dd-detail-close" title="Close" onclick="voiceCheckClose()">✕</button>
+    <div id="voiceCheckBody"></div>
   </div>
 </div>
 
@@ -8423,6 +8700,7 @@ function startMembersListener(){
   if(membersListenerStarted || !db) return;
   membersListenerStarted = true;
   db.collection(TEAM_MEMBER_COLL).onSnapshot(snap=>{
+    fmNote('data: team');
     membersBlocked = false;
     const next = {};
     snap.docs.forEach(d=>{ const v = d.data() || {}; next[d.id] = v; });
@@ -8612,8 +8890,9 @@ function animateReadyRing(){
     num.textContent = Math.round(v) + '%';
     ring.style.background = `conic-gradient(var(--cyan) ${v*3.6}deg, rgba(255,255,255,0.13) 0deg)`;
   };
-  if(reducedMotion()){ paint(pct); return; }
-  const dur = 950, t0 = performance.now();
+  const dur = 950, age = motionAge(ring);
+  if(reducedMotion() || age >= dur){ paint(pct); return; }
+  const t0 = performance.now() - age;
   const tick = now => {
     const k = Math.min(1, (now - t0)/dur);
     paint(pct * (1 - Math.pow(1 - k, 3)));
@@ -9507,6 +9786,7 @@ async function seedDatabase(source){
 const GLOSSARY_CACHE_KEY = 'ih_glossary_cache_v1';
 
 function saveGlossaryCache(){
+  fmNote('glossary saved');
   try{
     localStorage.setItem(GLOSSARY_CACHE_KEY, JSON.stringify({
       savedAt: Date.now(),
@@ -9539,7 +9819,9 @@ function loadGlossaryCache(){
    next line. Now that the listener supplies terms asynchronously, wiping them
    here would blank the glossary between the cached paint and the first
    snapshot. */
+let lastCategoriesMeta = null;
 function applyCategoriesMeta(meta){
+  lastCategoriesMeta = JSON.stringify(meta || []);
   const existingTerms = {};
   ((DATA && DATA.categories) || []).forEach(c=>{ existingTerms[c.id] = c.terms; });
   DATA = { categories: (meta || []).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
@@ -9609,6 +9891,7 @@ function startTermsListener(){
   // and cheap — it touches the documents that actually changed.
   let termsSnapTimer = null;
   db.collection('terms').onSnapshot(snap=>{
+    fmNote('data: terms');
     snap.docChanges().forEach(change=>{
       const doc = change.doc;
       if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
@@ -9633,8 +9916,13 @@ function startCategoriesMetaListener(){
   if(categoriesMetaListenerStarted || !db) return;
   categoriesMetaListenerStarted = true;
   db.collection('terminology-meta').doc('categories').onSnapshot(snap=>{
+    fmNote('data: domains');
     if(!snap.exists) return;
-    applyCategoriesMeta(snap.data().categories || []);
+    // Its first snapshot is the document loadData() just read and painted:
+    // nothing to redo. That repaint was a whole Home render at startup (S3).
+    const meta = snap.data().categories || [];
+    if(JSON.stringify(meta) === lastCategoriesMeta) return;
+    applyCategoriesMeta(meta);
     render();
   }, err=> console.error('categories-meta listener error:', err));
 }
@@ -10058,6 +10346,7 @@ function startChatListener(){
   // server confirms it. That second call is what turns "Sending" into "Sent";
   // without it the chat could only guess.
   db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot({ includeMetadataChanges: true }, snap=>{
+    fmNote('data: chat');
     CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data(), _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
     if(isInitialChatLoad){
       isInitialChatLoad = false;
@@ -10312,6 +10601,7 @@ function startActivityListener(){
   // Same unbounded-growth problem as team chat. The Recent Updates feed only
   // ever shows the newest entries anyway.
   db.collection('activity-log').orderBy('timestamp').limitToLast(ACTIVITY_HISTORY_LIMIT).onSnapshot(snap=>{
+    fmNote('data: activity');
     ACTIVITY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if(isInitialActivityLoad){
       isInitialActivityLoad = false;
@@ -12672,9 +12962,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'smoothness',  tone:'gd-n1', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
-  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
-  { id:'doctorpage',  tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor page: terms by tab, read aloud, start the appointment from it' },
+  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
+  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
+  { id:'smoothness',  tone:'gd-n3', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13648,7 +13938,7 @@ function externalUrl(raw){
    Home "Ask" tag; on Home his lanyard is live cords drawn by home-polish.js.
 
    His face moves frame by frame. drsmiley/base.webp is his calm picture;
-   drsmiley/face.webp is a strip of 18 frames of the part that moves (eyes and
+   drsmiley/face.webp is a strip of 26 frames of the part that moves (eyes and
    mouth), every frame built on that same calm face, so his hair, outline,
    nose and shoulders never shift: only lids come down, eyes look and lips
    part. Most frames are cut from Jose's drawn expression sheets and fitted
@@ -13665,7 +13955,13 @@ function externalUrl(raw){
    to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR.
    In picture units (240 x 300 base) the window is x 40, y 106, 151 x 111; the
    strip is see-through except where frames change, so the picture's own
-   edge shows wherever the window crosses his outline. */
+   edge shows wherever the window crosses his outline.
+
+   His brows are their own pictures (drsmiley/brow-l.webp, brow-r.webp), cut
+   out of that same calm face and drawn over the window; the forehead behind
+   them in base.webp, and the few frames that reached up to them, were
+   repainted as skin. They move smoothly (a lift and a tilt, never a stretch)
+   while the eyes and mouth step through frames: see DR_BROWS. */
 const DR_FACE_FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
   'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR'];
 const DR_FACE_W = 151, DR_FACE_H = 111;
@@ -13674,6 +13970,8 @@ function drSmileyArt(cls){
     + '<image class="ds-base" href="./drsmiley/base.webp" x="14" y=".8" width="106" height="132.5" preserveAspectRatio="none"/>'
     + `<svg class="ds-face" x="31.667" y="47.617" width="66.692" height="49.025" viewBox="0 0 ${DR_FACE_W} ${DR_FACE_H}" preserveAspectRatio="none">`
     +   `<image class="ds-sheet" href="./drsmiley/face.webp" x="0" y="0" width="${DR_FACE_W * DR_FACE_FRAMES.length}" height="${DR_FACE_H}" preserveAspectRatio="none"/></svg>`
+    + '<image class="ds-brow ds-brow-l" href="./drsmiley/brow-l.webp" x="33.875" y="39.446" width="28.708" height="14.354" preserveAspectRatio="none"/>'
+    + '<image class="ds-brow ds-brow-r" href="./drsmiley/brow-r.webp" x="73.625" y="42.758" width="27.604" height="19.875" preserveAspectRatio="none"/>'
     + '</svg>';
 }
 const ICON_WAVE = drSmileyArt('home-wave-art home-face');
@@ -13748,9 +14046,11 @@ const DR_FACE_SEQ = {
   // Uncertain or failed: composed. A slow blink, a considering look down to
   // the side with a sympathetic tilt, then a small reassuring smile.
   composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+              brow: [[480, 'caring'], [2050, null]],
               head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
+               brow: [[220, 'caring'], [1120, null]],
                head: [[0, 0, 0], [140, 0, -.3], [360, 0, .9], [560, 0, 0], [760, 0, .8], [960, 0, 0], [1450, 0, 0]] },
   // You stopped a question: okay -- a blink and one nod.
   okay: { still: 'rest', f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 320]],
@@ -13997,6 +14297,52 @@ const DR_FACE_BACK = {
   halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
   lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
 };
+/* His brows. Each pose: [left lift, left turn, right lift, right turn] for
+   the brow on your left and the one on your right; lift in his drawing's
+   units (minus is up), turn in degrees (plus is clockwise). The inner end of
+   a brow is the end by his nose, so a worried look turns the left brow
+   anticlockwise and the right one clockwise. By default the brows follow
+   the face frame (DR_BROW_OF); a sequence can hold a pose instead (brow:
+   [[ms, pose or null], ...], null handing back to the frames), for meanings
+   the frames alone can't carry (caring when he's unsure or encouraging you).
+   Focused moves them a little less; Still shows the pose without gliding. */
+const DR_BROWS = {
+  rest:   [0, 0, 0, 0],
+  relax:  [.4, 0, .4, 0],          // eyes closed, asleep
+  lift:   [-.6, 0, -.6, 0],        // a small smile
+  glad:   [-.9, 0, -.9, 0],        // a smile
+  laugh:  [-1.3, 0, -1.3, 0],
+  up:     [-2, 0, -2, 0],          // looking up, surprised
+  quizL:  [.22, -4, -1.77, -3],    // eyes up to your left: the other brow goes up
+  quizR:  [-1.77, 3, .22, 4],
+  down:   [.35, 0, .35, 0],        // looking down, reading
+  love:   [-.9, -3, -.9, 3],
+  wink:   [-.5, 0, .6, -2],        // his left eye (your right)
+  caring: [-.44, -6, -.44, 6],     // inner ends up: sympathy, encouragement
+  worried:[-.66, -9, -.66, 9],
+  focused:[.66, 6, .66, -6],
+};
+const DR_BROW_OF = {
+  shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad',
+  laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
+  lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down',
+  love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+};
+function drBrowSet(svg, pose){
+  if(!svg || !svg.querySelector) return;
+  pose = DR_BROWS[pose] ? pose : 'rest';
+  const key = pose + (drMode() === 'focused' ? ':f' : '');
+  if(svg._brow === key) return;
+  const l = svg.querySelector('.ds-brow-l'), r = svg.querySelector('.ds-brow-r');
+  if(!l || !r) return;
+  svg._brow = key;
+  const v = DR_BROWS[pose], k = drMode() === 'focused' ? .6 : 1, glide = drStill() ? 'none' : '';
+  l.style.transition = r.style.transition = glide;
+  l.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[0] * k).toFixed(2)}px) rotate(${(v[1] * k).toFixed(2)}deg)`;
+  r.style.transform = pose === 'rest' ? '' : `translate(0px,${(v[2] * k).toFixed(2)}px) rotate(${(v[3] * k).toFixed(2)}deg)`;
+}
+// The pose for this svg now: the sequence's hold if it has one, else the frame's.
+function drBrowSync(svg, frame){ drBrowSet(svg, svg._browHold || DR_BROW_OF[frame] || 'rest'); }
 // Neighbours: each frame and its way back, plus the steps the drawn
 // sequences take on purpose (a smile breaking into a laugh, a laugh's
 // "ha-ha" mouth, squinting straight into laughter).
@@ -14041,7 +14387,8 @@ function drSeq(name){
   const total = f.reduce((t, s) => t + s[1], 0);
   const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
-  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
+  const brow = raw.brow || null, browPeak = brow ? (brow.find(b => b[1]) || [0, null])[1] : null;
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak };
   drSeqCache.set(raw, seq);
   return seq;
 }
@@ -14096,6 +14443,8 @@ class DrAnim{
     return DR_FACE_FRAMES[Math.round(x / DR_FACE_W)] || 'rest';
   }
   set(name){ drFaceSet(this.svg, name); }
+  // Hold the brows in a pose (null: back to following the face frames).
+  browHold(pose){ this.svg._browHold = pose || null; drBrowSync(this.svg, this.frame()); }
   get busy(){ return !!this.run; }
   get priority(){ return this.run ? this.run.p : 0; }
   // ---- the head ----
@@ -14172,6 +14521,7 @@ class DrAnim{
     o = o || {};
     const p = o.priority || DR_P.REACT;
     if(!this.alive() || document.hidden) return false;
+    fmNote('Dr. Smiley ' + name);
     if(name === 'glance') name = Math.random() < .5 ? 'glanceL' : 'glanceR';
     const seq = drSeq(name);
     if(!seq) return false;
@@ -14179,7 +14529,7 @@ class DrAnim{
     if(drStill() && p < DR_P.REACT) return false;
     this.stopRun(false);
     if(drStill()){
-      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done);
+      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done, seq.browPeak);
     }
     const run = { p, name: typeof name === 'string' ? name : 'custom', timers: [] };
     this.run = run;
@@ -14200,6 +14550,16 @@ class DrAnim{
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
     if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
     this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.brow){
+      // Keys already passed (joining part-way) leave the latest one in force.
+      let now;
+      seq.brow.forEach(([t, pose]) => {
+        const at = t - skip + lead;
+        if(at <= 0) now = pose;
+        else run.timers.push(this.later(() => { if(this.run === run) this.browHold(pose); }, at));
+      });
+      if(now !== undefined) this.browHold(now);
+    }
     if(seq.fx && this.head && drFxOk()){
       run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
     }
@@ -14215,9 +14575,10 @@ class DrAnim{
     return true;
   }
   // Reduced motion: the expression's peak, still, then rest. No lean, no effects.
-  still(frame, ms, p, done){
+  still(frame, ms, p, done, brow){
     const run = { p, name: 'still', timers: [] };
     this.run = run;
+    if(brow) this.svg._browHold = brow;
     this.set(frame);
     run.timers.push(this.later(() => { if(this.run !== run) return; this.set('rest'); this.finish(run, done); }, ms));
     return true;
@@ -14225,6 +14586,7 @@ class DrAnim{
   finish(run, done){
     if(this.run !== run) return;
     this.run = null;
+    if(this.svg._browHold) this.browHold(null);
     if(done) done();
     this.next();
   }
@@ -14237,6 +14599,7 @@ class DrAnim{
     run.timers.forEach(t => this.clear(t));
     if(run.gazeTimer) this.clear(run.gazeTimer);
     this.run = null;
+    this.svg._browHold = null;
     this.fadeEffects();
     if(settle) this.settle();
   }
@@ -14799,6 +15162,7 @@ function drFaceSet(svg, name){
   if(!sheet) return;
   const x = String(-DR_FACE_W * Math.max(0, DR_FACE_FRAMES.indexOf(name)));
   if(sheet.getAttribute('x') !== x) sheet.setAttribute('x', x);
+  drBrowSync(svg, name);
 }
 function drFaceBusy(svg){ const a = svg && drAnimOf.get(svg); return !!(a && a.busy); }
 // An expression as a reaction (REACT unless given), e.g. the lock screen's smile.
@@ -16105,11 +16469,11 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team.</li>
-      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. No laughing and no little sparkles.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
@@ -16294,9 +16658,10 @@ const GUIDE_TOPICS = [
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
     <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
 
-  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness', q:'How do I practice for the CoreCHI exam?', a:`
+  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
+    <p><b>Your domains</b> further down shows, for each area, how much of the question bank you've learned and how often you got it right in your sessions. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
   { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms session specialty pause resume mistakes', q:'What is Term Review?', a:`
@@ -16385,8 +16750,16 @@ const GUIDE_TOPICS = [
       <li>Use the app the way that feels choppy: scroll Home, open a domain, open the chat.</li>
       <li>Tap the timer to stop. The results open.</li>
     </ol>
-    <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling.</p>
+    <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
+  { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
+    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It's getting things ready for a memory trainer for consecutive interpreting.</p>
+    <ol>
+      <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
+      <li>Do the four steps on the sheet. The phone asks before it uses the microphone.</li>
+      <li>Tap <b>Copy results</b> and paste them into a chat.</li>
+    </ol>
+    <p>The Hub saves nothing and sends nothing: the recording is dropped when you close the sheet. The speech-to-text step may send what you say to Apple, so do it away from patients.</p>` },
   { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
     <p>Close it completely and open it again.</p>
     <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>
@@ -16773,6 +17146,7 @@ function domainMenuKeys(e){ if(e.key === 'Escape') closeDomainMenu(); }
 
 function render(){
   if(!DATA) return;
+  fmNote('render');
   const app = document.getElementById('app');
   // Creating a domain lived only in the sidebar, which on a phone means two
   // taps into the More sheet. It belongs next to "Add term" on the screens
@@ -17711,9 +18085,11 @@ function renderContent(){
     animateCountUps(!sameScreen);
     // Re-cache the photo layer (the old node was just thrown away) and put it
     // straight back where the current scroll position says it belongs, so a
-    // re-render mid-scroll doesn't snap the image back to the top.
+    // re-render mid-scroll doesn't snap the image back to the top. In the
+    // next frame, before it paints: reading the scroll position here forced
+    // the whole new screen's layout inside this task (S3).
     heroPhotoEl = content.querySelector('.home-greeting-photo-inner');
-    applyHeroDrift();
+    if(heroDriftFrame === null) heroDriftFrame = requestAnimationFrame(applyHeroDrift);
     return;
   }
   heroPhotoEl = null;     // off Home: the scroll handler does nothing
@@ -17737,9 +18113,9 @@ function renderContent(){
   }
 
   if(activeCategory === 'practice'){
+    const motionPrev = practiceMotionKeys(content);
     content.innerHTML = renderPractice();
-    animateBars();
-    animateReadyRing();
+    playPracticeMotion(content, motionPrev);
     if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
       const ring = content.querySelector('.score-ring');
       if(ring) animateScore(Number(ring.dataset.pct) || 0);
@@ -18171,6 +18547,32 @@ function closeAllOverlays(){
   if(PV.open) closePhotoViewer({ instant:true });
   guideCoachClose();
 }
+
+// Which kinds of overlay are open, as body classes: ov-open (.overlay),
+// gs-open (global search), dm-open (the domain menu). The CSS that steps the
+// tab bar, the dock, the rider and the appt pill aside reads these. It used
+// to be body:has(.overlay.show), which the browser re-checks on class
+// changes anywhere in the page, scrolling Home included (about a quarter of
+// its style work). One watcher rather than a line in each of the ~28
+// open/close functions, so an overlay added later is covered too. The
+// rules double the class (body.ov-open.ov-open) to keep :has()'s weight.
+(function overlayFlags(){
+  const KINDS = [['overlay', 'ov-open'], ['gs-overlay', 'gs-open'], ['dm-overlay', 'dm-open']];
+  const isOv = n => n.nodeType === 1 && KINDS.some(([k]) => n.classList.contains(k));
+  const sync = () => {
+    const b = document.body;
+    for(const [k, c] of KINDS){
+      const on = !!document.querySelector('.' + k + '.show');
+      if(b.classList.contains(c) !== on) b.classList.toggle(c, on);
+    }
+  };
+  // Class changes count only on an overlay itself; any insert or removal
+  // re-checks (an open overlay can leave inside a bigger subtree).
+  new MutationObserver(recs => {
+    if(recs.some(r => r.type === 'childList' || isOv(r.target))) sync();
+  }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] });
+  sync();
+})();
 
 function setCategory(id, isBack, returnState){
   const movedForward = !isBack && activeCategory !== id;
@@ -19238,7 +19640,7 @@ function renderPractice(){
 
   // ---- how ready you are ----
   const ready = examReadiness();
-  html += `<div class="ready-card">
+  html += `<div class="ready-card dash-in" data-motion="ready" data-sig="${ready.pct}|${st.days||0}|${todayCount}|${due}">
     <div class="ready-main">
       <div class="ready-ring" data-pct="${ready.pct}">
         <div class="ready-ring-in"><b class="ready-pct">0%</b><span class="ready-cap">ready</span></div>
@@ -19250,20 +19652,23 @@ function renderPractice(){
     </div>
     <div class="ready-stats">
       <div class="ready-stat study-streak">
-        <i>${ICON_FLAME}</i><b><span class="study-flame">${st.days||0}</span></b>
+        <i>${ICON_FLAME}</i><b><span class="study-flame js-count" data-to="${st.days||0}">${st.days||0}</span></b>
         <span>day${(st.days||0)===1?'':'s'} in a row</span>
       </div>
       <div class="ready-stat study-goal${todayCount >= DAILY_GOAL ? ' is-met' : ''}">
         <i>${ICON_TARGET}</i>
-        <span class="study-goal-top"><b>${todayCount} / ${DAILY_GOAL}</b></span>
+        <span class="study-goal-top"><b><span class="js-count" data-to="${todayCount}">${todayCount}</span> / ${DAILY_GOAL}</b></span>
         <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'today — goal met' : 'answered today'}</span>
         <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
       </div>
       <div class="ready-stat">
-        <i>${ICON_CLOCK}</i><b>${due}</b><span>due for review</span>
+        <i>${ICON_CLOCK}</i><b class="js-count" data-to="${due}">${due}</b><span>due for review</span>
       </div>
     </div>
   </div>`;
+
+  // ---- your scores over time, and the one domain to work on ----
+  html += `<div class="dash-row">${renderScoreTrend()}${renderFocusTile(ready.worst)}</div>`;
 
   // ---- the four ways in ----
   // DOM order stays review / mistakes / new / exam; CSS `order` promotes
@@ -19281,7 +19686,7 @@ function renderPractice(){
   ];
   const nextKey = (MODES.find(m=> m.n > 0) || {}).key || 'exam';
 
-  html += `<div class="study-modes">`;
+  html += `<div class="study-modes" data-motion="modes" data-sig="${due}|${shaky}|${unseen}">`;
   MODES.forEach(m=>{
     const isNext = m.key === nextKey;
     html += `<button class="study-mode${isNext?' is-next':''}" style="--mode:${m.color}"
@@ -19323,23 +19728,23 @@ function renderPractice(){
   }).join('') + `</div>`;
 
   // ---- where you stand ----
-  html += renderMyProgress();
-
   const mast = domainMastery();
+  const acc = domainAccuracy();
   html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
-  html += `<div class="mastery-list">`;
-  CCHI_DOMAINS.forEach(d=>{
+  html += `<div class="mastery-list" data-motion="mastery" data-sig="${escapeAttr(JSON.stringify(mast))}">`;
+  CCHI_DOMAINS.forEach((d, i)=>{
     const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
+    const a = acc[d.id];
     const t = m.total || 1;
     html += `
-      <div class="mastery-row" style="--dom:${d.color}">
+      <div class="mastery-row dash-in" style="--dom:${d.color}; --i:${i}">
         <div class="mastery-top">
           <span class="mastery-dot"></span>
           <span class="mastery-id">
             <span class="mastery-name">${escapeHtml(d.name)}</span>
-            <span class="mastery-weight">${d.weight}% of the exam</span>
+            <span class="mastery-weight">${d.weight}% of the exam${a ? ` \u00b7 ${Math.round((a.right/a.total)*100)}% right in sessions` : ''}</span>
           </span>
-          <span class="mastery-pct">${Math.round(((m.known + m.shaky*0.5)/t)*100)}%</span>
+          <span class="mastery-pct"><span class="js-count" data-to="${Math.round(((m.known + m.shaky*0.5)/t)*100)}">${Math.round(((m.known + m.shaky*0.5)/t)*100)}</span>%</span>
         </div>
         <span class="mastery-track">
           <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
@@ -19459,7 +19864,7 @@ function renderWeeklyBoard(){
   }
   const top = rows[0].q || 1;
   let html = `<div class="section-head"><h2>This week</h2><span class="sub">by questions practised</span></div>`;
-  html += `<div class="board">`;
+  html += `<div class="board" data-motion="board" data-sig="${escapeAttr(rows.slice(0, 8).map(r=> r.who + ':' + r.q).join(','))}">`;
   rows.slice(0, 8).forEach((r, i)=>{
     const mine = me && r.who.trim().toLowerCase() === me;
     const acc = r.q ? Math.round((r.right/r.q)*100) : 0;
@@ -19481,51 +19886,234 @@ function renderWeeklyBoard(){
   return html;
 }
 
-function renderMyProgress(){
-  const mine = myQuizHistory();
+/* ---------- Practice dashboard tiles ----------
+   Your scores: every finished session as a point, oldest to newest, the last
+   twelve so the line stays readable on a phone. Built from quiz-history,
+   which every session already writes. Focus next: the domain costing the
+   most exam weight, with a way straight into it. */
+let TREND_POINTS = [];
+// TREND_GUT keeps the 100% / 50% labels in their own column, clear of the newest point.
+const TREND_W = 300, TREND_H = 96, TREND_TOP = 9, TREND_BOT = 87, TREND_PAD = 9, TREND_GUT = 30;
+
+function domainAccuracy(){
+  const out = {};
+  myQuizHistory().forEach(h=>{
+    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
+      if(!s || !s.total) return;
+      if(!out[d]) out[d] = { right:0, total:0 };
+      out[d].right += s.right;
+      out[d].total += s.total;
+    });
+  });
+  return out;
+}
+
+function trendDate(at){
+  try{ return new Date(at).toLocaleDateString(undefined, { month:'short', day:'numeric' }); }catch(e){ return ''; }
+}
+
+function renderScoreTrend(){
   if(!whoAmI()){
-    return `<div class="progress-card"><p>Set your name to start tracking your practice results over time.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+    TREND_POINTS = [];
+    return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="noname">
+      <span class="dash-label">Your scores</span>
+      <p class="dash-empty">Set your name to start tracking your scores over time.</p>
+      <button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
   }
+  const mine = myQuizHistory().filter(h=> h.total);
   if(!mine.length){
-    return `<div class="progress-card"><p>No practice sessions yet — your results will start building a personal accuracy record here.</p></div>`;
+    TREND_POINTS = [];
+    return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="none">
+      <span class="dash-label">Your scores</span>
+      <p class="dash-empty">Finish a session and your scores start drawing a line here.</p></div>`;
   }
 
   const totalQ = mine.reduce((n,h)=>n+h.total, 0);
-  const totalRight = mine.reduce((n,h)=>n+h.correct, 0);
-  const overallPct = totalQ ? Math.round((totalRight/totalQ)*100) : 0;
-  const best = Math.max(...mine.map(h=> h.total ? Math.round((h.correct/h.total)*100) : 0));
+  const totalRight = mine.reduce((n,h)=>n+(h.correct||0), 0);
+  const overall = Math.round((totalRight/totalQ)*100);
+  const scoreOf = h => Math.round(((h.correct||0)/h.total)*100);
+  const best = Math.max(...mine.map(scoreOf));
 
-  const domainTotals = {};
-  mine.forEach(h=>{
-    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
-      if(!domainTotals[d]) domainTotals[d] = { right:0, total:0 };
-      domainTotals[d].right += s.right;
-      domainTotals[d].total += s.total;
-    });
+  // History is newest first; the line reads left to right, oldest to newest.
+  const pts = mine.slice(0, 12).reverse().map(h=>({ pct:scoreOf(h), at:h.timestamp }));
+  const n = pts.length;
+  pts.forEach((p, i)=>{
+    p.x = n === 1 ? (TREND_W - TREND_GUT)/2 : TREND_PAD + i*(TREND_W - TREND_GUT - 2*TREND_PAD)/(n - 1);
+    p.y = TREND_TOP + (1 - p.pct/100)*(TREND_BOT - TREND_TOP);
   });
+  TREND_POINTS = pts;
+  const last = pts[n - 1];
+  const before = pts.slice(0, -1);
+  const avg = before.length ? Math.round(before.reduce((s,p)=>s+p.pct, 0)/before.length) : null;
+  const delta = avg === null ? null : last.pct - avg;
 
-  let html = `<div class="progress-card">
-    <div class="progress-head">
-      <div><b>${mine.length}</b><span>session${mine.length===1?'':'s'}</span></div>
-      <div><b>${overallPct}%</b><span>all-time accuracy</span></div>
-      <div><b>${best}%</b><span>best session</span></div>
+  const line = pts.map((p,i)=> `${i?'L':'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  const area = n > 1 ? `${line} L${last.x.toFixed(1)} ${TREND_BOT} L${pts[0].x.toFixed(1)} ${TREND_BOT} Z` : '';
+  const gy = v => (TREND_TOP + (1 - v/100)*(TREND_BOT - TREND_TOP)).toFixed(1);
+  // The dots follow the pen: each pops as the line reaches it.
+  const dots = pts.map((p,i)=> `<circle class="trend-dot${i===n-1?' is-last':''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${i===n-1 ? 6.5 : 5}"
+      style="--d:${Math.round(180 + (n === 1 ? 0 : (i/(n-1))*900))}ms"></circle>`).join('');
+  const hits = pts.map((p,i)=> `<circle class="trend-hit" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="15" onclick="trendPick(${i})"><title>${p.pct}% · ${escapeHtml(trendDate(p.at))}</title></circle>`).join('');
+
+  return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="${mine.length}|${last.at}">
+    <span class="dash-label">Your scores</span>
+    <div class="trend-head">
+      <div class="trend-now"><b><span class="js-count" data-to="${last.pct}">${last.pct}</span>%</b>
+        <span class="trend-cap">last session · ${escapeHtml(trendDate(last.at))}</span></div>
+      ${delta === null ? '' : `<span class="trend-delta ${delta >= 0 ? 'is-up' : 'is-down'}">${delta === 0 ? 'same as your average' : `${delta > 0 ? '+' : '−'}${Math.abs(delta)} vs your average`}</span>`}
     </div>
-    <div class="domain-bars" style="margin-top:14px;">`;
-  CCHI_DOMAINS.forEach(d=>{
-    const s = domainTotals[d.id];
-    if(!s) return;
-    const dpct = Math.round((s.right/s.total)*100);
-    html += `
-      <div class="domain-bar-row">
-        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
-        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${dpct}%; background:${d.color};"></span></span>
-        <span class="domain-bar-pct">${dpct}%</span>
-        <span class="domain-bar-pct">${s.right}/${s.total}</span>
-      </div>`;
-  });
-  html += `</div></div>`;
-  return html;
+    <svg class="trend-svg" viewBox="0 0 ${TREND_W} ${TREND_H}" role="img" aria-label="Your last ${n} session score${n===1?'':'s'}, from ${pts[0].pct}% to ${last.pct}%">
+      <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="trendBall" cx=".36" cy=".3" r=".75">
+        <stop offset="0" stop-color="#fff"/><stop offset=".38" stop-color="currentColor"/><stop offset="1" stop-color="#1A4F86"/>
+      </radialGradient></defs>
+      <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(100)}" y2="${gy(100)}"/>
+      <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(50)}" y2="${gy(50)}"/>
+      <line class="trend-base" x1="0" x2="${TREND_W - TREND_GUT}" y1="${TREND_BOT}" y2="${TREND_BOT}"/>
+      <text class="trend-glabel" x="${TREND_W}" y="${(Number(gy(100)) + 3).toFixed(1)}" text-anchor="end">100%</text>
+      <text class="trend-glabel" x="${TREND_W}" y="${(Number(gy(50)) + 3).toFixed(1)}" text-anchor="end">50%</text>
+      ${area ? `<path class="trend-area" d="${area}" fill="url(#trendFill)"/>` : ''}
+      ${n > 1 ? `<path class="trend-line" d="${line}" pathLength="1"/>` : ''}
+      <circle class="trend-ping" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4"></circle>
+      ${dots}${hits}
+    </svg>
+    <div class="trend-foot">
+      <span><b>${mine.length}</b> session${mine.length===1?'':'s'}</span>
+      <span><b>${overall}%</b> all-time</span>
+      <span><b>${best}%</b> best</span>
+    </div>
+  </div>`;
 }
+
+// Tap a point to read that session; tap it again to go back to the latest.
+function trendPick(i){
+  const tile = document.querySelector('.trend-tile');
+  const p = TREND_POINTS[i];
+  if(!tile || !p) return;
+  const dots = tile.querySelectorAll('.trend-dot');
+  const again = dots[i] && dots[i].classList.contains('is-picked');
+  const show = again ? TREND_POINTS[TREND_POINTS.length - 1] : p;
+  dots.forEach((d, k)=> d.classList.toggle('is-picked', !again && k === i));
+  const b = tile.querySelector('.trend-now b');
+  const cap = tile.querySelector('.trend-cap');
+  if(b) b.textContent = show.pct + '%';
+  if(cap) cap.textContent = (show === TREND_POINTS[TREND_POINTS.length - 1] ? 'last session' : 'that session') + ' · ' + trendDate(show.at);
+}
+
+function renderFocusTile(worst){
+  if(!worst) return '';
+  const d = worst.d;
+  const cover = Math.round(worst.cover*100);
+  return `<div class="dash-tile focus-tile dash-in" style="--dom:${d.color}; --i:2" data-motion="focus" data-sig="${d.id}|${cover}">
+    <span class="dash-label">Focus next</span>
+    <b class="focus-name">${escapeHtml(d.name)}</b>
+    <span class="focus-why">${d.weight}% of the exam · <span class="js-count" data-to="${cover}">${cover}</span>% covered</span>
+    <span class="mastery-track focus-track"><span class="mastery-seg is-known" style="width:${cover}%"></span></span>
+    <button class="mastery-go focus-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise it</button>
+  </div>`;
+}
+
+/* ---------- Practice dashboard motion ----------
+   Each block that moves carries data-motion (its name) and data-sig (what it
+   shows). The screen re-renders for reasons that change nothing here (quiz
+   history arriving, a chat message elsewhere), so a block showing the same
+   thing picks its motion up where it was instead of starting over, and once
+   finished it stays still. Anything new, or the screen opened again, plays. */
+const MOTION_SPAN = 1500;
+const MOTION_BORN = {};
+
+function practiceMotionKeys(root){
+  const keys = {};
+  if(root) root.querySelectorAll('[data-motion]').forEach(el=>{ keys[el.dataset.motion] = el.dataset.sig; });
+  return keys;
+}
+
+function playPracticeMotion(root, prev){
+  const now = performance.now();
+  const still = reducedMotion();
+  root.querySelectorAll('[data-motion]').forEach(el=>{
+    const id = el.dataset.motion;
+    if(prev[id] !== el.dataset.sig || MOTION_BORN[id] == null) MOTION_BORN[id] = now;
+    const age = now - MOTION_BORN[id];
+    if(still || age > MOTION_SPAN) el.classList.add('is-still');
+    else if(age > 0) el.style.setProperty('--motion-skip', `-${Math.round(age)}ms`);
+  });
+  animateBars(root);
+  animateCounts(root);
+  animateReadyRing();
+}
+
+// How far into its motion an element already is: 0 for a fresh block (or
+// one outside any block, like the results screen), Infinity once settled.
+function motionAge(el){
+  const host = el.closest('[data-motion]');
+  if(!host) return 0;
+  if(host.classList.contains('is-still')) return Infinity;
+  const born = MOTION_BORN[host.dataset.motion];
+  return born == null ? 0 : performance.now() - born;
+}
+
+// Numbers arrive rather than appear. The markup already holds the final
+// value, so with no script, reduced motion or a settled block it just reads.
+function animateCounts(root){
+  if(reducedMotion()) return;
+  const DUR = 900;
+  const items = Array.from(root.querySelectorAll('.js-count'))
+    .map(el=>({ el, to:Number(el.dataset.to) || 0, age:motionAge(el) }))
+    .filter(c=> c.to > 0 && c.age < DUR);
+  if(!items.length) return;
+  const t0 = performance.now();
+  const tick = now=>{
+    let live = false;
+    items.forEach(c=>{
+      const k = Math.min(1, (now - t0 + c.age)/DUR);
+      c.el.textContent = Math.round(c.to * (1 - Math.pow(1 - k, 3)));
+      if(k < 1) live = true;
+    });
+    if(live) requestAnimationFrame(tick);
+  };
+  tick(t0);
+}
+
+/* The Pixar finish's lean: a practice tile tips toward the finger pressing
+   it and springs back on release (the spring is in CSS). With a mouse it
+   follows the pointer while hovering. Nothing runs unless a pointer is on a
+   tile; scrolling cancels the touch and so releases it. */
+(function(){
+  const SEL = '.ready-card, .dash-tile, .mastery-row, .study-mode:not(:disabled)';
+  let held = null;
+  const lean = e=>{
+    const r = held.getBoundingClientRect();
+    const x = (e.clientX - r.left)/r.width - .5, y = (e.clientY - r.top)/r.height - .5;
+    const k = Math.min(1, 280/Math.max(r.width, 1));   // a wide tile leans less
+    held.style.setProperty('--rx', (-y*10*k).toFixed(2) + 'deg');
+    held.style.setProperty('--ry', (x*12*k).toFixed(2) + 'deg');
+    held.style.setProperty('--mx', Math.round((x + .5)*100) + '%');
+    held.style.setProperty('--my', Math.round((y + .5)*100) + '%');
+  };
+  const release = ()=>{
+    if(!held) return;
+    held.classList.remove('is-tilting');
+    held.style.setProperty('--rx', '0deg'); held.style.setProperty('--ry', '0deg');
+    held = null;
+  };
+  const take = (t, e)=>{
+    if(t === held){ if(held) lean(e); return; }
+    release();
+    if(!t || activeCategory !== 'practice' || reducedMotion()) return;
+    held = t; held.classList.add('is-tilting'); lean(e);
+  };
+  const tileAt = e=> e.target && e.target.closest ? e.target.closest(SEL) : null;
+  document.addEventListener('pointerdown', e=>{ if(e.pointerType !== 'mouse') take(tileAt(e), e); }, { passive:true });
+  document.addEventListener('pointermove', e=>{
+    if(e.pointerType === 'mouse') take(tileAt(e), e);
+    else if(held) lean(e);
+  }, { passive:true });
+  document.addEventListener('pointerup', e=>{ if(e.pointerType !== 'mouse') release(); }, { passive:true });
+  document.addEventListener('pointercancel', release, { passive:true });
+})();
 
 function shuffleOptions(q){
   const order = shuffle(q.o.map((_, i) => i));
@@ -19719,15 +20307,14 @@ function animateScore(pct){
 /* Bars start at zero and grow to their real width on the first paint after a
    render. Without this they are simply present, which reads as a static
    report rather than progress you are making. */
-function animateBars(){
+function animateBars(root){
   if(reducedMotion()) return;
-  requestAnimationFrame(()=>{
-    document.querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill').forEach(el=>{
-      const target = el.style.width;
-      if(!target || target === '0%') return;
-      el.style.width = '0%';
-      requestAnimationFrame(()=>{ el.style.width = target; });
-    });
+  (root || document).querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill, .board-fill').forEach(el=>{
+    const target = el.style.width;
+    const age = motionAge(el);
+    if(!target || target === '0%' || age >= 620 || !el.animate) return;
+    const grow = el.animate([{ width:'0%' }, { width:target }], { duration:620, easing:'cubic-bezier(.2,.8,.2,1)' });
+    grow.currentTime = age;
   });
 }
 
@@ -20103,6 +20690,7 @@ function relativeTime(ts){
 }
 
 function refreshRelativeTimes(){
+  fmNote('time labels');
   document.querySelectorAll('[data-ts]').forEach(el=>{
     const ts = Number(el.getAttribute('data-ts'));
     if(ts) el.textContent = relativeTime(ts);
@@ -20113,6 +20701,7 @@ function refreshRelativeTimes(){
    than a render, and it crosses fade-in-fade-out because the overlay
    transitions. */
 function syncTimeOfDay(){
+  fmNote('time of day');
   const el = document.getElementById('homeGreeting');
   if(!el) return;
   const now = new Date();
@@ -20203,6 +20792,7 @@ function startGreetingRotation(){
     if(wordEl) wordEl.classList.add('out');
     setTimeout(()=>{
       greetIndex = (greetIndex + 1) % GREETINGS.length;
+      fmNote('greeting word');
       paint(greetIndex, true);
     }, 320);
   }, 2800);
@@ -20231,7 +20821,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
+  const LIFTS = '.mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20259,8 +20849,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1017.2034';
-const BUILD_TIME = '2026-10-17 20:34 UTC';
+const BUILD_ID = 'b1019.1726';
+const BUILD_TIME = '2026-10-19 17:26 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20333,7 +20923,20 @@ function screenReport(){
    this phone only (ih_frameMeter, last 8) with the build they ran on. */
 const FM_KEY = 'ih_frameMeter';
 const FM_MAX_MS = 5 * 60 * 1000;
-const FM = { on:false, raf:0, last:0, t0:0, gaps:[], key:'', keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, pill:null, uiAt:0, T:1000 / 60, live:0 };
+const FM = { on:false, raf:0, last:0, t0:0, gaps:[], key:'', keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, pill:null, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[], stalls:[] };
+const FM_STALL_MS = 50;      // a frame this late is listed with what ran in it
+
+/* What ran in a stall. Safari has no long-task timing, so the app's own
+   jobs that can run while you leave a screen alone (a render, the greeting's
+   next word, the heartline, the tab bar's tuck, Dr. Smiley, the data
+   listeners...) say their name here, with the time; a stall lists the
+   names said in it or in the frame just before: a frame held up by a block
+   still carries the time it was due, a moment after the block began, so
+   the stall shows up one frame later. Nothing is kept while the meter is
+   off. The try covers a call before this block has run (FM not made yet).
+   A stall with no names was the browser's own work: style, layout, paint,
+   memory. */
+function fmNote(tag){ try{ if(FM.on) FM.notes.push([performance.now(), tag]); }catch(e){} }
 
 function fmRuns(){ try{ return JSON.parse(localStorage.getItem(FM_KEY) || '[]'); }catch(e){ return []; } }
 function fmScreenName(id){
@@ -20348,7 +20951,7 @@ function fmOnScroll(){ FM.scrollAt = performance.now(); }
 function fmOnVis(){
   if(!FM.on) return;
   if(document.visibilityState === 'hidden'){ FM.hideAt = performance.now(); FM.last = 0; }
-  else if(FM.hideAt){ FM.hiddenMs += performance.now() - FM.hideAt; FM.hideAt = 0; FM.last = 0; }
+  else if(FM.hideAt){ FM.hiddenMs += performance.now() - FM.hideAt; FM.hideAt = 0; FM.last = 0; FM.notes = []; }
 }
 function fmFrame(now){
   if(!FM.on) return;
@@ -20362,13 +20965,22 @@ function fmFrame(now){
     // The timer's count only; the results are worked out again at the end.
     if(FM.gaps.length === 120) FM.T = 1000 / fmHz(FM.gaps);
     FM.live += Math.max(0, Math.round(dt / FM.T) - 1);
+    // [time into the run, length, since the last scroll, screen, since the
+    // app opened, what ran]
+    if(dt > FM_STALL_MS){
+      const what = [...new Set(FM.notes.filter(n => n[0] > FM.prev && n[0] <= now).map(n => n[1]))].join(', ');
+      FM.stalls.push([Math.round(now - FM.t0 - FM.hiddenMs), Math.round(dt), Math.round(now - FM.scrollAt), FM.key, Math.round(now), what]);
+      if(FM.stalls.length > 400) FM.stalls = FM.stalls.sort((a, b) => b[1] - a[1]).slice(0, 100);   // a long run: keep the longest
+    }
   }
-  FM.last = now;
+  FM.prev = FM.last; FM.last = now;
+  if(FM.notes.length) FM.notes = FM.notes.filter(n => n[0] > FM.prev);
   if(now - FM.uiAt > 500){ FM.uiAt = now; fmPillText(now); }
   if(now - FM.t0 - FM.hiddenMs > FM_MAX_MS) frameMeterStop();
 }
 function fmPillText(now){
   if(!FM.pill) return;
+  fmNote('meter');               // its own write, so a stall it causes says so
   const s = Math.floor((now - FM.t0 - FM.hiddenMs) / 1000);
   FM.pill.querySelector('.fm-time').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   FM.pill.querySelector('.fm-live').textContent = `${FM.live} dropped`;
@@ -20408,7 +21020,7 @@ const fmR = n => n < 10 ? n.toFixed(1) : String(Math.round(n));
 function frameMeterStart(){
   if(FM.on) return;
   try{ closeMoreSheet(); }catch(e){}
-  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0 });
+  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[[performance.now(), 'More closing']], stalls:[] });
   const p = document.createElement('button');
   p.className = 'fm-pill';
   p.type = 'button';
@@ -20435,8 +21047,11 @@ function frameMeterStop(){
     scroll:{ ms:Math.round(r.scroll.ms), ratio:+r.scroll.ratio.toFixed(1), pct:+r.scroll.pct.toFixed(1), worst:r.scroll.worst },
     screens:r.screens.slice(0, 8).map(s => ({ name:s.name, ms:Math.round(s.ms), ratio:+s.ratio.toFixed(1), pct:+s.pct.toFixed(1), worst:s.worst })),
     motion: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : (typeof drStill === 'function' && drStill()) ? 'Dr. Smiley still' : 'full',
-    device: fmDevice() };
-  FM.gaps = [];
+    device: fmDevice(),
+    // The six longest stalls, in the order they happened.
+    stallList: FM.stalls.slice().sort((a, b) => b[1] - a[1]).slice(0, 6).sort((a, b) => a[0] - b[0])
+      .map(([at, ms, sc, key, up, what]) => ({ at, ms, scroll:sc, screen:fmScreenName(key), up, what })) };
+  FM.gaps = []; FM.stalls = []; FM.notes = [];
   if(run.frames < 30){ showToast('Too short to measure. Use the app for a few seconds, then stop.'); return null; }
   try{ localStorage.setItem(FM_KEY, JSON.stringify([run].concat(fmRuns()).slice(0, 8))); }catch(e){}
   frameMeterShow(run);
@@ -20458,7 +21073,14 @@ function fmRunText(run){
     `Hitches ${run.ratio} ms/s · dropped ${run.dropped} (${run.pct}%) · worst ${run.worst} ms · stalls over 100 ms ${run.stalls} · ${Math.round(run.ms / 1000)} s`,
     run.scroll.ms ? `While scrolling: ${run.scroll.ratio} ms/s · ${run.scroll.pct}% dropped · worst ${run.scroll.worst} ms · ${Math.round(run.scroll.ms / 1000)} s` : 'No scrolling',
   ].concat(run.screens.map(s => `  ${s.name}: ${s.ratio} ms/s · ${s.pct}% · worst ${s.worst} ms · ${Math.round(s.ms / 1000)} s`));
+  if(run.stallList && run.stallList.length) lines.push(`Longest stalls (over ${FM_STALL_MS} ms):`, ...run.stallList.map(x => '  ' + fmStallText(x)));
   return lines.join('\n');
+}
+// "0:14 · 120 ms · Home · 4.2 s after a scroll · 31 s after opening · heartline"
+function fmStallText(x){
+  const t = Math.floor(x.at / 1000);
+  const sc = x.scroll < 200 ? 'while scrolling' : x.scroll > 3e5 ? 'no scroll yet' : `${(x.scroll / 1000).toFixed(1)} s after a scroll`;
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')} · ${x.ms} ms · ${x.screen} · ${sc} · ${Math.round(x.up / 1000)} s after opening · ${x.what || 'nothing named'}`;
 }
 
 function frameMeterShow(run){
@@ -20476,6 +21098,7 @@ function frameMeterShow(run){
       ${run.scroll.ms ? row('While scrolling', run.scroll) : ''}
       ${run.screens.map(s => row(s.name, s)).join('')}
     </table>
+    ${run.stallList && run.stallList.length ? `<div class="fm-stalls"><b>Longest stalls</b>${run.stallList.map(x => `<div>${escapeHtml(fmStallText(x))}</div>`).join('')}</div>` : ''}
     <div class="fm-meta">Build ${escapeHtml(run.build)} · ${escapeHtml(new Date(run.at).toLocaleString())}<br>${escapeHtml(run.device)} · ${run.hz} Hz · motion ${run.motion}</div>
     <div class="fm-btns">
       <button class="btn btn-ghost" onclick="frameMeterCopy(${run.at})">Copy numbers</button>
@@ -20510,6 +21133,232 @@ function frameMeterMoreHtml(){
         <span class="fm-dot ${c}" aria-hidden="true"></span><span><b>${fmR(r.ratio)} ms/s</b> · ${fmR(r.pct)}% dropped</span>
         <span>${escapeHtml(r.build)}</span></button>`; }).join('')}</div>` : ''}
   </div>`;
+}
+
+/* ---------- Voice and mic check ----------
+   Step M0 of the memory trainer (docs/PLAN.md). Before building on the
+   phone's voices, microphone and speech-to-text, find out which of them
+   work on an iPhone, in the installed app and in a Safari tab: Apple said
+   in 2021 that speech-to-text is off in Home Screen apps, and nobody has
+   checked since. Nothing is saved or sent by the Hub; the recording stays
+   in memory and is dropped on close. Copy results gives a report to paste
+   into a chat. Note: docs/features/memory-trainer.md. */
+const VC = { voices: null, play: {}, rec: null, sr: {} };
+let vcStream = null, vcRecog = null, vcUrl = null, vcAudio = null, vcTick = 0;
+const VC_LINES = {
+  es: 'Tome una tableta dos veces al día, con comida, durante diez días.',
+  en: 'Take one tablet twice a day, with food, for ten days.',
+};
+
+function vcMode(){
+  const sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  return sa ? 'installed app' : 'browser tab';
+}
+function vcSR(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+function vcLang(v){ return String(v.lang || '').replace('_', '-'); }
+
+function vcLoadVoices(){
+  return new Promise(res => {
+    if(!('speechSynthesis' in window)) return res([]);
+    const now = speechSynthesis.getVoices();
+    if(now.length) return res(now);
+    let done = false;
+    const finish = () => { if(done) return; done = true; speechSynthesis.removeEventListener('voiceschanged', finish); res(speechSynthesis.getVoices()); };
+    speechSynthesis.addEventListener('voiceschanged', finish);
+    setTimeout(finish, 2000);
+  });
+}
+
+function vcVoicesText(){
+  if(!('speechSynthesis' in window)) return 'No speech on this browser.';
+  if(!VC.voices) return 'Looking for voices…';
+  const of = p => VC.voices.filter(v => vcLang(v).toLowerCase().startsWith(p));
+  return `${of('es').length} Spanish and ${of('en').length} English voices on this phone.`;
+}
+
+function vcSet(id, text){
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = text;
+}
+function vcPaint(){
+  vcSet('vcVoices', escapeHtml(vcVoicesText()));
+  vcSet('vcPlay', ['es', 'en'].filter(l => VC.play[l]).map(l => `${l === 'es' ? 'Spanish' : 'English'}: ${escapeHtml(VC.play[l])}`).join('<br>'));
+  const R = VC.rec;
+  vcSet('vcRec', R ? escapeHtml(R.state) : '');
+  const pb = document.getElementById('vcPlayBack');
+  if(pb) pb.hidden = !vcUrl;
+  const rb = document.getElementById('vcRecBtn');
+  if(rb) rb.disabled = !!(R && R.busy);
+  vcSet('vcSr', ['en', 'es'].filter(l => VC.sr[l]).map(l => { const S = VC.sr[l];
+    return `${l === 'es' ? 'Spanish' : 'English'}: ${escapeHtml(S.state)}${S.text ? ` · <q>${escapeHtml(S.text)}</q>` : ''}`; }).join('<br>'));
+}
+
+function voiceCheckOpen(){
+  try{ closeMoreSheet(); }catch(e){}
+  const sr = vcSR();
+  document.getElementById('voiceCheckBody').innerHTML = `
+    <div class="fm-head">Voice and mic check</div>
+    <p class="fm-sub">What this phone can do for the memory trainer. Do the four steps, then tap <b>Copy results</b> and paste them into a chat. Running as: <b id="vcMode">${vcMode()}</b>.</p>
+    <div class="vc-step"><h4>1. Hear the voices</h4>
+      <p id="vcVoices"></p>
+      <div class="fm-btns"><button class="btn btn-ghost" onclick="vcPlay('es')">Play Spanish</button><button class="btn btn-ghost" onclick="vcPlay('en')">Play English</button></div>
+      <div class="vc-state" id="vcPlay" aria-live="polite"></div></div>
+    <div class="vc-step"><h4>2. Record yourself</h4>
+      <p>Records 5 seconds. Then tap Play back.</p>
+      <div class="fm-btns"><button class="btn btn-ghost" id="vcRecBtn" onclick="vcRecord()">Record 5 seconds</button><button class="btn btn-ghost" id="vcPlayBack" hidden onclick="vcPlayBack()">Play back</button></div>
+      <div class="vc-state" id="vcRec" aria-live="polite"></div></div>
+    <div class="vc-step"><h4>3. Voices after the mic</h4>
+      <p>Tap Play Spanish again. Is it as loud as before? Add yes or no when you paste.</p></div>
+    <div class="vc-step"><h4>4. Speech to text</h4>
+      <p>${sr ? 'Tap one and say a sentence. It may send what you say to Apple to turn it into text, so do this away from patients.' : 'Not available here.'}</p>
+      ${sr ? `<div class="fm-btns"><button class="btn btn-ghost" onclick="vcListen('en')">Listen in English</button><button class="btn btn-ghost" onclick="vcListen('es')">Escuchar en español</button></div>` : ''}
+      <div class="vc-state" id="vcSr" aria-live="polite"></div></div>
+    <div class="fm-meta">Build ${escapeHtml(BUILD_ID)} · ${escapeHtml(navigator.userAgent)}</div>
+    <div class="fm-btns">
+      <button class="btn btn-ghost" onclick="voiceCheckClose()">Close</button>
+      <button class="btn btn-primary" onclick="vcCopy()">Copy results</button>
+    </div>`;
+  document.getElementById('voiceCheckOverlay').classList.add('show');
+  vcPaint();
+  if(!VC.voices) vcLoadVoices().then(v => { VC.voices = v; vcPaint(); });
+}
+
+// Lets go of everything the check holds: speech, the mic, the recording.
+function voiceCheckClose(){
+  document.getElementById('voiceCheckOverlay').classList.remove('show');
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  if(vcRecog){ try{ vcRecog.abort(); }catch(e){} vcRecog = null; }
+  clearInterval(vcTick);
+  if(vcStream){ vcStream.getTracks().forEach(t => t.stop()); vcStream = null; }
+  if(vcAudio){ try{ vcAudio.pause(); }catch(e){} vcAudio = null; }
+  if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
+  if(VC.rec && VC.rec.busy){ VC.rec.busy = false; VC.rec.state = 'stopped (closed)'; }
+}
+
+function vcPlay(lang){
+  if(!('speechSynthesis' in window)){ VC.play[lang] = 'no speech on this browser'; return vcPaint(); }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(VC_LINES[lang]);
+  u.lang = lang === 'es' ? 'es-US' : 'en-US';
+  u.rate = 0.92;
+  const t0 = performance.now();
+  VC.play[lang] = 'starting…'; vcPaint();
+  u.onstart = () => { VC.play[lang] = 'playing…'; vcPaint(); };
+  u.onend = () => { VC.play[lang] = `played, ${((performance.now() - t0) / 1000).toFixed(1)} s`; vcPaint(); };
+  u.onerror = e => { VC.play[lang] = 'error: ' + (e.error || 'unknown'); vcPaint(); };
+  speechSynthesis.speak(u);
+}
+
+async function vcRecord(){
+  if(VC.rec && VC.rec.busy) return;
+  if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
+  const R = VC.rec = { busy: true, state: 'asking for the microphone…' };
+  vcPaint();
+  const gum = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if(!gum || !window.MediaRecorder){
+    Object.assign(R, { busy: false, state: `not available here (microphone ${gum ? 'yes' : 'no'}, recorder ${window.MediaRecorder ? 'yes' : 'no'})` });
+    return vcPaint();
+  }
+  try{ vcStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch(e){ Object.assign(R, { busy: false, state: 'microphone refused: ' + (e.name || e.message) }); return vcPaint(); }
+  const stream = vcStream;
+  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  let rec;
+  try{ rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined); }
+  catch(e){ stream.getTracks().forEach(t => t.stop()); vcStream = null; Object.assign(R, { busy: false, state: 'recorder failed: ' + (e.name || e.message) }); return vcPaint(); }
+  const chunks = [];
+  rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    if(vcStream === stream) vcStream = null;
+    if(!R.busy) return; // closed while recording
+    const blob = new Blob(chunks, { type: rec.mimeType || type || 'audio/mp4' });
+    R.busy = false;
+    R.type = blob.type; R.kb = Math.round(blob.size / 1024);
+    if(!blob.size){ R.state = 'recorded nothing'; return vcPaint(); }
+    vcUrl = URL.createObjectURL(blob);
+    R.state = `recorded 5 s (${R.type}, ${R.kb} KB). Tap Play back.`;
+    vcPaint();
+  };
+  rec.start();
+  let n = 5;
+  R.state = `recording, say something… ${n}`; vcPaint();
+  clearInterval(vcTick);
+  vcTick = setInterval(() => {
+    n--;
+    if(n > 0){ R.state = `recording, say something… ${n}`; vcPaint(); return; }
+    clearInterval(vcTick);
+    if(rec.state !== 'inactive') rec.stop();
+  }, 1000);
+}
+
+// A tap, not automatic: iPhones only let sound start from a tap, and the
+// trainer will play your take back the same way.
+function vcPlayBack(){
+  if(!vcUrl || !VC.rec) return;
+  const R = VC.rec;
+  if(vcAudio){ try{ vcAudio.pause(); }catch(e){} }
+  const a = vcAudio = new Audio(vcUrl);
+  R.state = 'playing back…'; vcPaint();
+  a.onended = () => { R.state = `played back (${R.type}, ${R.kb} KB)`; vcPaint(); };
+  a.onerror = () => { R.state = 'recorded, but it would not play back'; vcPaint(); };
+  a.play().catch(e => { R.state = 'recorded, playback refused: ' + (e.name || e.message); vcPaint(); });
+}
+
+function vcListen(lang){
+  const SR = vcSR();
+  if(!SR){ VC.sr[lang] = { state: 'not available here' }; return vcPaint(); }
+  if(vcRecog){ try{ vcRecog.abort(); }catch(e){} }
+  const r = vcRecog = new SR();
+  r.lang = lang === 'es' ? 'es-US' : 'en-US';
+  r.interimResults = true;
+  r.continuous = false;
+  const S = VC.sr[lang] = { state: 'starting…', text: '', t0: performance.now() };
+  vcPaint();
+  r.onstart = () => { S.state = 'listening, speak now'; vcPaint(); };
+  r.onresult = e => {
+    S.text = [...e.results].map(x => x[0].transcript).join('');
+    if(!S.first) S.first = Math.round(performance.now() - S.t0);
+    S.state = 'hearing…'; vcPaint();
+  };
+  r.onerror = e => { S.err = e.error || 'unknown'; S.state = 'error: ' + S.err; vcPaint(); };
+  r.onend = () => {
+    if(!S.err) S.state = S.text ? `done, first words after ${(S.first / 1000).toFixed(1)} s` : 'heard nothing';
+    if(vcRecog === r) vcRecog = null;
+    vcPaint();
+  };
+  try{ r.start(); }
+  catch(e){ S.err = e.name || e.message; S.state = 'could not start: ' + S.err; vcPaint(); }
+  setTimeout(() => { if(vcRecog === r){ try{ r.stop(); }catch(e){} } }, 10000);
+}
+
+function vcText(){
+  const sr = vcSR();
+  const names = p => (VC.voices || []).filter(v => vcLang(v).toLowerCase().startsWith(p)).map(v => `${v.name} (${vcLang(v)}${v.localService === false ? ', online' : ''})`).join('; ') || 'none';
+  const R = VC.rec;
+  return [
+    `Voice and mic check · build ${BUILD_ID} · ${new Date().toLocaleString()}`,
+    `Running as: ${vcMode()}`,
+    navigator.userAgent,
+    `Voices: ${vcVoicesText()}`,
+    `  Spanish: ${names('es')}`,
+    `  English: ${names('en')}`,
+    `Play Spanish: ${VC.play.es || 'not tried'} · Play English: ${VC.play.en || 'not tried'}`,
+    `Record: ${R ? R.state : 'not tried'}`,
+    `Speech to text: ${sr ? (window.SpeechRecognition ? 'yes' : 'yes (webkit)') + (sr.prototype && 'processLocally' in sr.prototype ? ', on-device option' : '') : 'not available'}`,
+    ...['en', 'es'].map(l => `  ${l === 'es' ? 'Spanish' : 'English'}: ${VC.sr[l] ? VC.sr[l].state + (VC.sr[l].text ? ` · "${VC.sr[l].text}"` : '') : 'not tried'}`),
+    'Voice as loud after the mic? (yes/no): ',
+  ].join('\n');
+}
+
+function vcCopy(){
+  const done = () => showToast('Copied. Paste it into a chat or a note.');
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(vcText()).then(done, () => showToast('Could not copy on this phone.'));
+  else showToast('Could not copy on this phone.');
+}
+
+function voiceCheckMoreHtml(){
+  return `<div class="vc-more"><button class="btn btn-ghost" onclick="voiceCheckOpen()">Voice and mic check</button></div>`;
 }
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -20621,7 +21470,10 @@ function dockAfterRender(){
   if(!bar) return;
   const i = [...bar.querySelectorAll('.tabbar-btn')].findIndex(b => b.classList.contains('is-active'));
   if(i >= 0){
-    bar.getBoundingClientRect();                 // settle the old spot first
+    // Settle the old spot first. Style only: a layout here laid out the whole
+    // new screen inside the render's task (S3); the frame does that now.
+    const lens = bar.querySelector('.tabbar-lens');
+    getComputedStyle(lens || bar).transform;
     bar.style.setProperty('--tab-i', i);
     dockLensAt = i;
   }
@@ -20634,10 +21486,11 @@ function dockAfterRender(){
 /* Tucked, the bar is a medicine capsule: the tab's icon in one half, its
    name in the other. Its width is worked out from the name before it
    shrinks, so the shrink can animate to the exact size. */
-let dockMeasure = null;
+let dockMeasure = null, dockMiniW = '';
 function dockTuck(){
   const b = document.body;
   if(b.classList.contains('dock-mini')) return;
+  fmNote('tab bar tuck');
   const bar = document.querySelector('.tabbar');
   if(bar){
     const btn = bar.querySelector('.tabbar-btn.is-active') || [...bar.querySelectorAll('.tabbar-btn')].pop();
@@ -20646,8 +21499,11 @@ function dockTuck(){
       dockMeasure = dockMeasure || document.createElement('canvas').getContext('2d');
       dockMeasure.font = '700 14px ' + (getComputedStyle(b).fontFamily || 'system-ui');
       // Two equal halves, like a capsule: the icon's half and the name's half.
+      // On the bar, not the body: a new value on the body restyled most of
+      // the page (911 of 1,420 elements), ~350 ms at 4x on the first tuck (S3b).
       const half = Math.max(56, Math.ceil(15 + dockMeasure.measureText(name).width + 15));
-      b.style.setProperty('--mini-w', Math.min(half * 2, Math.round(window.innerWidth * .62)) + 'px');
+      dockMiniW = Math.min(half * 2, Math.round(window.innerWidth * .62)) + 'px';
+      bar.style.setProperty('--mini-w', dockMiniW);
     }catch(e){}
   }
   dockMorph(true, () => b.classList.add('dock-mini'));
@@ -20658,6 +21514,7 @@ function dockTuck(){
 function dockOpen(){
   const b = document.body;
   if(!b.classList.contains('dock-mini')) return;
+  fmNote('tab bar open');
   dockMorph(false, () => b.classList.remove('dock-mini'));
   dockRefitChat();
 }
@@ -20995,12 +21852,12 @@ function renderTabBar(){
     { id:'__more',    name:'More',      icon:ICON_GRID,   action:`openMoreSheet()` },
   ];
   const at = tabs.findIndex(t => t.id === activeCategory);
-  return `<nav class="tabbar${at < 0 ? ' no-current' : ''}" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}">
+  return `<nav class="tabbar${at < 0 ? ' no-current' : ''}" role="navigation" aria-label="Main" style="--tab-n:${tabs.length};--tab-i:${dockLensAt >= 0 ? dockLensAt : Math.max(0, at)}${dockMiniW ? ';--mini-w:' + dockMiniW : ''}">
     <span class="tabbar-lens" aria-hidden="true"></span>
     ${tabs.map(t=>`
       <button class="tabbar-btn ${activeCategory===t.id?'is-active':''} ${t.id==='__search'?'tabbar-search':''}" onclick="${t.action}" aria-label="${escapeAttr(t.name)}" ${activeCategory===t.id?'aria-current="page"':''}>
         <span class="tabbar-icon">${t.icon}</span>
-        <span>${escapeHtml(t.name)}</span>
+        <span class="tabbar-name">${escapeHtml(t.name)}</span>
         ${t.badge ? `<span class="tabbar-badge">${t.badge > 9 ? '9+' : t.badge}</span>` : ''}
       </button>`).join('')}
   </nav>`;
@@ -21026,6 +21883,7 @@ function openMoreSheet(){
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
     ${frameMeterMoreHtml()}
+    ${voiceCheckMoreHtml()}
     <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
       Build ${BUILD_ID} · ${BUILD_TIME}<br>${screenReport()}
     </div>`;
@@ -27815,6 +28673,7 @@ function startSmileyCareer(){
   if(smileyCareerStarted || !db) return;
   smileyCareerStarted = true;
   db.collection('terminology-meta').doc('smiley').onSnapshot(snap => {
+    fmNote('data: team points');
     const before = SMILEY_POINTS;
     SMILEY_DATA = (snap.exists && snap.data()) || {};
     SMILEY_POINTS = +SMILEY_DATA.points || 0;

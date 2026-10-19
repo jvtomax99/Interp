@@ -7,6 +7,8 @@ project is built and shipped.
 do, test, update the plan, open a pull request). A chat can run several
 phases in a row; it moves to a new chat only when it gets heavy, and the
 new chat reads the docs, not the old chat. Details: `docs/PLAN.md`.
+When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
+in `docs/PLAN.md`).
 
 ## What this is
 
@@ -30,7 +32,7 @@ between assignments.
 | `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
-| `drsmiley/*.webp` | 5 files | Dr. Smiley: `base` (his calm head and shoulders), `face` (a strip of 18 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
+| `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 26 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
 | `sw.js` | 212 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
@@ -171,6 +173,8 @@ touch before changing it; update it in the same commit when the behaviour change
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
+- The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
+- CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
@@ -226,6 +230,9 @@ lost concurrent edits. Do not reintroduce that.
 - **Pins are pre-cut files.** `pin-icons.js` used to download 9 MB of sheets
   and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
   each pin is `pins/<key>.webp`; to change one, replace its file.
+- **No `body:has(...)` for state** (`AGENTS.md`): it made scrolling Home
+  restyle. Overlays open set `body.ov-open` / `.gs-open` / `.dm-open`
+  (`overlayFlags` in `index.html`, a watcher, so new overlays need nothing).
 - `localStorage` key `ih_myName` holds the user's display name.
 - **Dr. Smiley's movement rules** (his controller, the iPhone entrance freeze,
   his size per place, the five performances, task states) are in
@@ -294,8 +301,8 @@ too wide for its line shrinks; Dr. Smiley never moves) in `home-polish.js`.
 Don't use those two faces anywhere else. The first hello after the app
 opens has the name written by a small navy ball of light (`namePen` in
 `home-polish.js`, Jose's pick "look A"): the pen path is worked out on the
-phone from the letters themselves (`penPathOf`: canvas, thinning, a left-to-right
-walk, accent and i-dots last), kept per name in `ih_penPath`; the real name
+phone from the letters themselves (`penPathOf`: canvas on the page, then `penTrace` in
+a worker: thinning, a left-to-right walk, accent and i-dots last), kept per name in `ih_penPath`; the real name
 waits invisible (`.is-penning`, at most 6 s) under an SVG copy that is
 revealed behind the ball. Reduced motion, Still, a hidden page or any failure:
 the name is simply there.
@@ -348,6 +355,14 @@ design and anything touching data or rules stay with the main model.
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
   (His standing rule.)
+- **A question with options gets buttons** (Jose, 2026-10-18): ask it
+  with `AskUserQuestion`, one button per option (recommended first), not
+  as a numbered list in text. Where that tool is missing (a scheduled
+  run), list the options plainly.
+- **Always say your recommendation** (Jose, 2026-10-19; `AGENTS.md`):
+  with options, a next step or a trade-off, name your pick and why, in
+  plain words, unasked. If the buttons are refused, list the options in
+  plain language with the pick marked.
 - **Ambiguous request: one clarifying question first. Evidence before
   confidence** (Jose, 2026-10-17; `AGENTS.md`): nothing stated as true
   without a measurement, test, primary source or the code behind it; say

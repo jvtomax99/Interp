@@ -9,6 +9,8 @@ this file wins.
 do, test, update the plan, open a pull request). A chat can run several
 phases in a row; it moves to a new chat only when it gets heavy, and the
 new chat reads the docs, not the old chat. Details: `docs/PLAN.md`.
+When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
+in `docs/PLAN.md`).
 
 **Feature notes** (Ask the Hub, Dr. Smiley's memory and movement, Term Review,
 the Daily Drill, 3D Body, the User Guide, Team access, …) are in
@@ -114,6 +116,20 @@ transform/opacity, work moved off the first paint); never remove, shorten,
 thin out or stop a visual to win a number. If a gain is only possible by
 changing what Jose sees, ask him first with the numbers and a screenshot.
 He reversed S1's stopped petals and one-shot heartline for this reason.
+
+**No `:has()` for app state on `body` or other big containers.** The
+browser re-checks such a rule whenever a class changes anywhere under it,
+scrolling included; these rules were most of Home's style work while
+scrolling. Set a class where the state changes instead, with the same
+selector weight (doubled class: `body.ov-open.ov-open`). Examples: the tab
+bar's `.no-current`, the overlay classes kept by `overlayFlags` in
+`index.html` (`ov-open`, `gs-open`, `dm-open`).
+
+**A rule on a body state class ends on a class, never a bare tag.**
+`body.dock-mini .tabbar-btn > span:not(.x)` made every tab bar tuck
+restyle every span on the page (S7b); `> span.tabbar-name` touches only
+the tab names. Give the element a class instead. The dock-tuck suite
+checks rules on `dock-mini`, `ov-open`, `gs-open` and `dm-open`.
 
 **Every change someone can see updates the User Guide in the same commit.**
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
@@ -262,6 +278,11 @@ from a phone: one step at a time, screenshots over description.
 
 **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
 (His standing rule.)
+
+**Always say your recommendation** (Jose, 2026-10-19). Whenever there are
+options, a next step or a trade-off, name the one you would pick and why,
+in plain words, without being asked. Options in plain language, not code
+names.
 
 **Ambiguous request: ask one clarifying question before doing anything.**
 **Evidence before confidence:** state something as true only with evidence

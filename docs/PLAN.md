@@ -32,8 +32,54 @@ message to paste, only when the chat is heavy: it has been compacted
 output or many fix rounds, and the next phase would add a lot more.
 Before saying it, make sure everything worth keeping is in this file.
 Don't repeat it in every reply.
+**Claude opens the new chat itself** (Jose, 2026-10-19): with
+`create_session` (claude-code-remote tools), same repo, its first message
+the handoff. **A chat opened from another keeps its exact title** (Jose,
+2026-10-19): read it with `get_session` and pass it to `create_session`.
+The main line of chats is called "Main inter Hub"; every chat opened from
+it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
+`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
+next, then stop and wait for Jose's go. In the old chat, tell Jose the new
+session carries the same title and say "Archive this chat" (archive it only when he says
+so). If `create_session` isn't available, fall back to the message to paste.
+
+**When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
+wants to stay organized). A chat is done when nothing in it is still
+waiting: its PRs are merged or closed, no question to Jose is open, no
+check-in is pending, and everything worth keeping is in this file. Say it
+once, at the end of that reply, with a one-line reason ("PR #52 merged,
+nothing open"). A chat left for a new one ("Start a new chat") is done
+too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
+
+**Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
+practice: the phone reads a line, you render it, you tap the meaning chunks
+you missed, the line length follows your span, your span is charted over
+weeks on your phone. Design and decisions: `docs/features/memory-trainer.md`.
+Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
+first; notes toggle, memory-only default. One PR each:
+
+M0. **Voice and mic check** (this PR): a sheet at the bottom of More.
+   **Needs Jose:** run it in the installed app and in a Safari tab on his
+   iPhone, Copy results, paste both. Write them into the note's Results.
+M1. **Lines.** The 101 False Friends `heard`/`truth` pairs as short
+   Spanish-to-English starters, plus ~60 new lines of 10-45 words both
+   ways (discharge, meds, consent, ED, OB, peds), each split into chunks,
+   in a file of their own (not `index.html`). Jose checks the Spanish
+   (a review list he can tick on the phone) before anything ships.
+M2. **The trainer.** Screen under Practice, playback with the text
+   hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
+   Dr. Smiley's listening/thinking states, progress in `localStorage`
+   only, notes toggle. User Guide, a suite.
+M3. **Record yourself, play it back beside the model.** Only if M0's
+   record and play back work in the installed app; also only if the voice
+   stays loud after the mic (M0 step 3), or the trainer must play before
+   it opens the mic.
+M4. **Span chart** (weeks) and the span number on the Practice tile.
+M5. **Auto-marking** from speech to text. Only if M0 shows it works in
+   the installed app. Matching on the phone; Haiku (`_routine.js`) only
+   for the chunks that look like paraphrases; text only, never audio.
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
@@ -75,24 +121,13 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
    motion pixel-identical, moving frames within run-to-run noise. home-rest
    checks both (an iPhone Safari user agent in Chromium takes the old path).
    So the S1b numbers above are Chromium's; iPhones are as before S1b.
-S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
-   in Done. Left, measured with `tests/tools/scroll.cjs` (UA=chromium):
-   `body:has(.overlay.show)` and its siblings in `index.html` and
-   `home-polish.css` (~25% of style time while scrolling; replace with a body
-   class set where overlays open and close, same weight, computed-style
-   proof as in part 1); the pin tap burst starts on `pointerdown`, so a
-   scroll that starts on a card plays it (pin-icons.js `TAP_CARDS`), and 28
-   of its 64 keyframes animate width/height/margin (half the layouts while
-   scrolling; a visible change if the trigger moves: ask Jose); each tuck's
-   body-class change restyles ~490 elements (~49 ms at 4x); Team Chat's
-   thread tuck still reads scrollTop inside the scroll event. Re-measure on
-   Jose's phone after each. Don't move the tuck's scroll read into a frame
-   callback without a WebKit check (see part 1).
-S3. **Startup.** Top CPU: `drawOpening` 420 ms, name pen (`tick` 291 +
-   `penPathOf` 109), `addCardPetals` 243, `place` 238 (all `home-polish.js`).
-   Defer decorative work past first paint (requestIdleCallback + timeout),
-   split the worst task. Target: no task > 200 ms.
-S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
+Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
+   the scroll event (index.html ~20912); cheap while layout is clean,
+   measure in Team Chat before touching.
+S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
+   handler's forced layouts only moves the cost to the next reader or the
+   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
+   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
    before write. Target: handler < 50 ms, tap to paint < 150 ms.
@@ -168,6 +203,17 @@ come from this alone.
 
 ## Later (only when the trigger happens)
 
+- **Startup, draw less at first (from S3b).** Trigger: Jose finds opening
+  the app slow on his phone. Home's first draw is the worst startup task
+  (~720-890 ms at 4x on the S3b machine): script ~half, style + layout of
+  the new Home ~half, both over 200 ms. Draw what's on the first screen
+  first, the rails more than 1.5 screens down (284 of Home's 669 elements)
+  a frame later; projected ~1/3 off, not under 200 ms. Don't retry moving
+  the layout reads to the frame (Facts, "S3b measurements"). Other leads,
+  unmeasured as fixes: `watchDomainDock` writes `--dock-top` on `<html>`
+  every render (a new value restyles the page); the name pen's `tick`
+  reads two rects per frame (20-45 ms frames at 4x during the opening).
+
 - **Glossary changes-only sync.** Each cold start reads every term (~1,700
   reads; persistence is off on purpose, iPhone crashes). Do it only if
   Firestore reads near 50K/day (Usage page). Was 23K on 2026-10-13.
@@ -175,11 +221,128 @@ come from this alone.
   its own multi-phase effort, coordinated with ChatGPT's edits.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
+- **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
+  see Facts). Trim the eye patch's edge in `face.webp`. When Jose wants it.
 - **Training & Events listener has no limit.** Fine while small; a cap
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
 
+- 2026-10-19 CoreCHI Pixar finish (stacked on the dashboard PR): clay tiles,
+  glossy donut, candy buttons, glossy beads, lean-toward-finger, squash
+  landings. CSS + one small pointer handler; nothing runs at rest.
+
+- 2026-10-19 CoreCHI dashboard + motion (Jose's ask, options picked:
+  regroup + trend, native animation). Score-trend tile (last 12 sessions,
+  tap a point), Focus next tile, "My progress" card folded into the trend
+  tile and the domain rows, staggered arrival, count-ups, self-drawing
+  line, resumable motion. Note: `docs/features/practice-dashboard.md`.
+
+- 2026-10-19 Dr. Smiley's brows move (Jose's pick of four ideas for more
+  expression; the others were an Expression Studio page, new drawn frames
+  and 3D with face shapes). Brows cut out of his own art into
+  `drsmiley/brow-l.webp`/`brow-r.webp`, forehead repainted, a pose per
+  face frame plus caring holds on `composed`/`encourage`
+  (`docs/features/dr-smiley.md`). Art total 334 KB to 324 KB. Guide:
+  `askmoves` answer and a news card.
+
+- 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
+  `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
+  ~7 s after opening at 4x in 5/5 runs); now on the tab bar, kept in its
+  markup: 0/5. Bar sizes identical (Home, Chat, redraw while tucked).
+  Lens glide as a Web Animation and moving Home's layout reads to the frame
+  were measured (no gain; worse) and dropped; "draw less at first" moved
+  to Later. Facts: "S3b measurements". Rules added: always say the
+  recommendation; a chat's title says what it works on.
+
+- 2026-10-19 S7 Home scroll part 2 closed (Jose). S7a-S7d below. On his
+  iPhone (393x852), scrolling Home went from 85 ms/s, 10.5% late (before
+  part 1) to 62-78 ms/s, 7.9-8.9% (3 runs on b1019.1228); still Apple's
+  "distracting" (10+). The still-Home stall (120-141 ms, ~26-29 ms/s) did
+  not come back in those 3 runs (~3-8 ms/s, nothing over 51 ms); cause
+  never found. The meter lists any stall with what ran, if it returns.
+
+- 2026-10-19 S7d, the meter names its stalls (diagnostic; visible only in
+  the meter's results). Every frame over 50 ms is kept with its time into
+  the run, time since the last scroll, screen, time since opening and the
+  app jobs that ran in it (`fmNote(tag)`: render, greeting word, heartline,
+  pins, tab bar tuck/open, Dr. Smiley's performances, time labels, time of
+  day, glossary saved, the six data listeners, the meter itself, More
+  closing). The six longest show under the table and in Copy numbers.
+  Names are matched by time over the stall and the frame before it (a held
+  frame carries its due time, so the stall lands one frame late; the first
+  version missed every name). New lab tool `tests/tools/idle.cjs` (Home
+  left still, optional scroll first, trace of every task over 50 ms with
+  what ran). frame-meter suite checks the list, the sheet and the copy
+  text. User Guide: the smoothness answer explains the list.
+  jvtomax99/Interp#54.
+
+- 2026-10-18 S3 startup (invisible). Measured with the new
+  `tests/tools/startup.cjs` (each long task's pieces, the lines that forced
+  layout, CPU profile). The plan's "top CPU" list was mostly forced layout
+  billed to whoever measured first. Changes: the name pen's path is traced
+  in a worker (`penTrace`, plain worker, no OffscreenCanvas; same path to
+  the byte for Jose, Moisés, Elizabeth Lind-Smith; WebKit needs the blob
+  URL kept, CI caught it); the categories listener's first snapshot (the
+  document `loadData` just read) no longer repaints Home; the petals (hero
+  and rank card), the heartline's placing, `fonts.ready`/`fonts.load` and
+  `applyHeroDrift` run in the next frame, before it paints (`beforePaint`
+  in `home-polish.js`); `dockAfterRender` settles the lens with a style
+  read, not a layout. Kept immediate on purpose: anything that changes
+  Home's height (rail dots, the name fit `fitWave`), since Back restores
+  the scroll right after the render (destination-labels caught a 7 px miss),
+  and Dr. Smiley's dock check (WebKit's dock-tuck). 4x, iPhone UA, 3+3
+  interleaved: `render()` CPU first visit 909-1152 -> 568-627 ms,
+  returning 841-1102 -> 599-765 (every after below every before); tasks
+  over 200 ms first visit 4-6 -> 1-3; worst task 441-610 -> 418-462 and
+  238-388 -> 238-290 (overlapping, so not proven). Total long-task time
+  unchanged. Target (no task over 200 ms) not reached: S3b. New suite
+  `startup-work.cjs` (also in the WebKit CI job). No User Guide change.
+  jvtomax99/Interp#52.
+
+- 2026-10-18 S7c, pin burst stops when a scroll takes the touch (visible,
+  Jose's pick). Jose first picked option 1 (burst on lift); measured first:
+  a tap navigates at once (card gone 22-56 ms after the click), so every
+  burst frame seen today plays while the finger is down (117-234 ms for a
+  110-200 ms tap, 0-1 frames after lift); on lift would have removed it
+  from taps. Asked again: option 2. The burst still starts on
+  `pointerdown`; on `pointercancel` for that touch it stops (`pin-icons.js`).
+  Taps: same burst frames before/after (9/9/9 at 110 ms, 13-14 at 200 ms).
+  Drag from a card: burst on screen 650-735 ms -> 46 ms (3 frames, the
+  cancel comes ~50 ms in). Trace at 4x on a card with burst rings, 3
+  drags x 3 runs each side: layout 31-41 -> 9-17 ms per drag (every after
+  below every before), raster tasks 275-294 -> 128-144 (time overlaps),
+  paint time unchanged. New suite `pin-burst.cjs` (old code fails it). No
+  User Guide entry mentions the burst, so none changed. Jose's phone
+  decides. jvtomax99/Interp#51.
+- 2026-10-18 S7b, tuck restyle (invisible). Cause, from a Chrome trace
+  with invalidation tracking (`tests/tools/tuck-trace.cjs`): the two
+  `body.dock-mini` rules for the tab's name ended on a bare `span`, so
+  each tuck/open restyled every span on the page (471-510 of 1,420
+  elements, 269 spans). The name span now has class `tabbar-name`; rules
+  read `span.tabbar-name:not(.tabbar-icon)`, same weight (0,2,1).
+  Restyled per tuck/open 93-120; style work at 4x median 54 -> 19 ms,
+  worst 105 -> 28 ms (5 tucks + 5 opens each). Computed styles identical,
+  656,806 values incl. ::before/::after, 13 states (`tests/tools/tuck-styles.cjs`);
+  screenshots 0 px different (Home and a domain, open and tucked).
+  `scroll.cjs` UA=chromium 8+8 interleaved: no difference measurable (all
+  16 runs in the bad band; ~280 ms saved per run is under the spread).
+  dock-tuck: new guard, rules on body state classes must not end on a
+  bare tag (fails on the old code). Harness `POLISH_DIR` for before/after
+  of the Home files. Jose's phone decides. jvtomax99/Interp#50.
+- 2026-10-18 S7a, overlay rules (invisible). The 6 `body:has(.overlay.show)`
+  / `.gs-overlay` / `.dm-overlay` rules now read `body.ov-open.ov-open`,
+  `.gs-open`, `.dm-open` (same weight), kept by one MutationObserver
+  (`overlayFlags`, `index.html`, by `closeAllOverlays`), so new overlays
+  need nothing. Computed styles old vs new identical: 398,040 values, 24
+  states (phone + computer, each kind open and closed;
+  `tests/tools/overlay-styles.cjs`). dock-tuck checks the classes follow
+  each kind before the next frame. `scroll.cjs` UA=chromium 4x, 8+8
+  interleaved: style time 5232 -> 3728 ms median (every after run below
+  every before run), late while scrolling 26.7 -> 23.8% (runs overlap),
+  script +160 ms (the observer: at most ~90 ms a run, counted). Rule added
+  to `AGENTS.md`: no `:has()` for state on big containers. Merged
+  2026-10-18. jvtomax99/Interp#49.
 - 2026-10-17 Home scroll, part 1 (Jose: before S3). Tab bar's 5
   `:not(:has(.tabbar-btn.is-active))` rules replaced by `.tabbar.no-current`
   set at draw (doubled class, same weight; all 69 tab bar elements'
@@ -246,9 +409,180 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- The practice screen re-renders on any data arrival (`ensureLoaded` ->
+  `scheduleRender`), so entrance motion there must survive a re-render:
+  `data-motion`/`data-sig` + `playPracticeMotion` resume it.
+- `dock-tuck` measured Dr. Smiley while `dsBreathe`/`dsDrift` (infinite, on
+  `.dock-smiley-bob` around him) ran, so WebKit failed his scale check by
+  ~0.003 depending on the breath's phase (#57-#60, 2026-10-19). `rects()`
+  now holds those loops at 0 for the read, and `settle()` waits for his
+  scale to reach rest (WebKit read him mid-grow after a tuck). Measure him that way elsewhere.
+- Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
+  around one eye patch (seen over the original base too, so it predates
+  the brows). A clean-up of those three frames is open (Later).
+- Meshy AI (3D) was looked at for Dr. Smiley on 2026-10-19: its auto-rig is
+  a body skeleton for full-body, two-legged textured models; no face rig
+  was found in its docs, and api.meshy.ai is blocked from cloud sessions
+  unless added to the environment's allowed domains.
+
+- **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
+  Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,
+  tap to paint 770-1,130 ms on this session's slow machine. Forced layout
+  inside the click, in order: `watchDomainDock` (topbar height, every
+  render), `smileyElsewhere` in `smileyRider` `topBar` (`getClientRects`
+  on the lock screen's face, hidden under `#accessLock[hidden]`; ~170 ms),
+  `void b.offsetWidth` restarting `#tgSmiley`'s pop, then `dockMorph`'s
+  FLIP reads when the tucked bar opens. Skipping `[hidden]` faces and
+  restarting the pop by alternating two keyframe names removed the first
+  two; `dockMorph` then paid the same layout. 5+5 alternated: tap to paint
+  median 848 ms before, 928 after (noise). Reverted. Like S3b (3): the
+  whole new screen's layout is paid once by whoever reads first; only less
+  work per screen shortens a tap. The click's "wait" (200-420 ms) is mostly
+  how headless Chromium stamps a tap; viewport and `touch-action` are fine.
+
+- **S3b measurements (2026-10-19, `tests/tools/startup.cjs`, iPhone UA,
+  4x, interleaved 5+5).** This session's machine is ~2x slower than S3's:
+  the S3 merge (22a28b8) itself scored worst task ~1,000-1,240 ms here, so
+  compare only runs from the same session. (1) The first idle tuck set
+  `--mini-w` on `<body>`: 911 of 1,420 elements restyled (`tuck-trace.cjs`
+  MODE=var), a 290-550 ms task ~7 s after opening in 5/5 runs; on the bar
+  instead, 0/5 (commit eaf3395). (2) `dockAfterRender`'s style read costs
+  nothing in Home's render: `fitWave0`'s range rect (home-polish.js) forces
+  the whole style + layout first, so the lens-glide-as-Web-Animation idea
+  saves nothing at startup. (3) Forced reads in Home's render, in order:
+  `watchDomainDock` (topbar height), `fitWave0`, `heartline.place`, the
+  rail dots' `refresh`, `smileyInView`; all are synchronous on purpose
+  (Back's scroll restore needs the final height). Moving them all to the
+  frame (a `layoutSoon` queue, `navigateBack` flushing it before
+  `scrollTo`) cut the render task to 290-450 ms but made the next frame
+  1,040-1,340 ms (it already carries paint, `heroPetals`, pins; plus a
+  second full restyle from `--dock-top`'s first write on `<html>`), worse
+  than the 720-890 ms before. Dropped. (4) Home at rest: 1,586 elements on
+  the page, 669 in Home's content, 284 of those more than 1.5 screens down.
+
+- Back to Home restores the scroll right after the render, so anything
+  that changes Home's height must happen in the render, not in a later
+  frame: the rail dots row is 7 px (`destination-labels` fails 1130 vs
+  1137 when they come late). The same check missed once on main in this
+  container, so a single miss alone isn't proof; twice on CI was.
+- WebKit (CI and so iPhones): a Worker made from a blob URL needs that URL
+  until it has loaded; revoking it right after `new Worker()` lost the
+  worker silently. Its computed style also reports a running transform
+  transition's end value, so test a glide with `getAnimations()`, not by
+  sampling positions.
+- A CPU profile bills a forced layout to the script line that read first,
+  so "self time" of `place`, `addCardPetals`, `applyHeroDrift` and the like
+  is really the whole new screen's style + layout (~150-250 ms at 4x after
+  a Home render). Moving one read only moves the bill to the next reader;
+  use `tests/tools/startup.cjs`, which names the line behind each forced
+  layout. In Chromium `window.scrollY`, `document.fonts.ready` and
+  `document.fonts.load` all force layout.
+- Startup repaints of Home (returning visit, stand-ins): the cache paint,
+  loadData's (identical, skipped by `lastHomeHtml`), then real changes:
+  Dr. Smiley's rank (`data-lv`, team points aren't cached) and the
+  activity feed ("No team activity yet" until it loads). So on every open
+  his outfit and the feed swap in after the first paint. Caching both
+  would remove a full repaint and the swap; it changes what the first
+  frame shows (better, but visible): Jose's call.
+
+- Home's tap cards open their screen at once on the click (22-56 ms to
+  the next screen), so anything a tap shows on the card itself is only
+  seen while the finger is down. Start such feedback on `pointerdown`,
+  never on lift or click. A scroll that starts on a card sends
+  `pointercancel` ~50 ms in (Chromium, 18 px steps).
+- The burst rings ride on the pin's `[data-pin]` holder; not every card
+  has one (Home: 16 of 20 domain cards, 14 of 15 quick cards, 3 of 4
+  tiles). Pick a card with a holder when measuring the burst: on one
+  without, the burst costs nothing measurable.
+
+- Chrome keys a class change's restyle on the last part of each rule that
+  uses the class: a class or id there limits it to those elements, a bare
+  tag (`> span:not(.x)`, the `:not` doesn't count) means every element of
+  that tag on the page. Rules on body classes that change while you use
+  the app (`dock-mini`, `ov-open`, `gs-open`, `dm-open`) must end on a
+  class; dock-tuck checks it. Safari's engine may not pay this the same
+  way (unproven); the trace is Chromium's.
+- To see what a class change restyles: `tests/tools/tuck-trace.cjs` (trace
+  categories `devtools.timeline` and
+  `disabled-by-default-devtools.timeline.invalidationTracking`; events
+  `UpdateLayoutTree` elementCount, `StyleInvalidatorInvalidationTracking`
+  with the selectors). Adapt it for any other toggle.
+
+- 2026-10-18 `scroll.cjs` came out in a third band: ~20-30% late while
+  scrolling for all 16 runs, between the good (~7-9%) and bad (35-45%)
+  bands seen 2026-10-17. Interleaving still makes before/after fair;
+  compare only within one session's runs.
+- An observer of class and child changes on `body` sees ~240 callbacks in
+  a scroll run (frame meter text, tuck, pin taps); with 3 querySelectors
+  each, ~90 ms at 4x per ~35 s run. Cheap enough for state flags.
+
 - Jose's iPhone (iOS 18.7, installed, 60 Hz), build b1017.1752: scrolling
   Home 12 s: 10.5% late frames, 85 ms/s, worst 57 ms, none over 100 ms.
   Home still 17 s: 1%, 7.4 ms/s. So Home's cost is scrolling, not rest.
+- Same phone after part 1 (#47), build b1017.2034, one 31 s run (13 s
+  scrolling): scrolling 8.6% late, 66.9 ms/s, worst 49 ms, none over
+  100 ms (was 10.5%, 85, 57: about a fifth less, same direction as the lab's
+  9.1 -> 6.7%). The still part, worked out from the totals (18 s): ~1.2%,
+  ~7.4 ms/s, unchanged. One run each side, so the size is rough. On
+  Apple's scale (frame-meter.md) 67 ms/s while scrolling is still far into
+  "distracting" (10+).
+- Same phone after S7a (#49), build b1018.0223, one 29 s run on Home (13 s
+  scrolling): scrolling 9.5% late, 76.7 ms/s, worst 61 ms (part 1's run:
+  8.6%, 66.9, 49; before part 1: 10.5%, 85, 57). So no gain from S7a seen
+  on the phone; one run each side, run-to-run spread unknown. The still
+  part, from the totals (16 s): ~3% late, ~29 ms/s, and the run's worst
+  frame (124 ms, the first over 100 ms on this phone) was in it; earlier
+  runs ~1%, 7.4 ms/s. Cause unknown; S7a adds little at rest (the
+  observer). Needs a repeat before reading anything into it. Lab gains in
+  Chromium's style engine have twice not shown clearly on the iPhone, so
+  only the phone decides an S-step.
+- Same phone after S7b + S7c (#50, #51), build b1018.1746, one 28 s run
+  on Home (12 s scrolling): scrolling 8.2% late, 53.5 ms/s, worst 47 ms.
+  Best of the four builds on all three (before part 1: 10.5%, 85, 57;
+  part 1: 8.6%, 66.9, 49; S7a: 9.5%, 76.7, 61). From before part 1 to
+  now: hitches while scrolling down by about 37%. Still far into Apple's
+  "distracting" (10+ ms/s). The still part, from the totals (16 s): ~2.7%
+  late, ~27 ms/s, and again the run's worst frame (120 ms) was in it.
+  Second build in a row with that (S7a: ~3%, ~29 ms/s, 124 ms), so it is
+  likely real and not from S7b/S7c; before S7a still was ~1%, 7.4 ms/s.
+  Cause unknown (a timer, the greeting or the meter's own start are
+  candidates; untested). One run each build, so the spread is still
+  unknown: Jose asked for 2-3 runs per build.
+- Build b1018.2012 (after S3), one 30 s run on Home, on a **different
+  iPhone** (402x874; Jose's usual one reads 393x852): scrolling 11.3%
+  late, 86.9 ms/s, worst 53 ms; still part (from the totals, 18 s) ~26
+  ms/s, worst 141 ms. Not comparable with the runs on his phone.
+- Jose's iPhone (393x852), build b1019.1228 (S7d), 3 runs of ~31-37 s on
+  Home (14-22 s scrolling), not reopened between them (run 3 began 138 s
+  after opening): scrolling 69.7 / 62.2 / 78.3 ms/s, 8.1 / 7.9 / 8.9%
+  late, worst 50 / 40 / 51 ms; still part (from the totals) ~7.3 / ~3.3 /
+  ~7.5 ms/s, nothing over 51 ms. So one build's scrolling spreads ~62-78
+  ms/s: single runs per build (S7a 76.7, S7b+c 53.5) were within or near
+  that noise. The still-Home stall seen on b1018.0223 and b1018.1746 (one
+  run each, 120-124 ms) didn't recur. Untested guess: it comes with a run
+  started soon after a fresh open (data arriving, the opening's tail).
+- 2026-10-19, Home left still (`tests/tools/idle.cjs`, UA=chromium, 4x,
+  SCROLL=1): after the opening (~5.5 s from load) and after a scroll, no
+  main-thread task over 50 ms in 27 s except one minor GC; the idle tab bar
+  tuck (4 s after the last touch, `dockIdleRestart`) ran with no long task.
+  So the phone's still-part stall (~27 ms/s, 120 ms) doesn't show in
+  Chromium. With a fresh start the opening is busy until ~5.5 s at 4x (name
+  pen, greeting sequence, badge pendulum, a 105 ms idle tuck at 5.3 s
+  whose time is mostly forced style), so a run started within a few
+  seconds of opening carries the opening's tail.
+- The phone's "still" number is total minus scrolling, so it holds the
+  meter's start (More closing), frames over 200 ms after a scroll and the
+  idle tuck. The only app change between the ~7 ms/s build (b1017.2034)
+  and the ~29 ms/s one (b1018.0223) was S7a (the `overlayFlags` observer,
+  plus part 1's per-frame scroll read taken back out). Unproven as cause.
+- Home's jobs at rest (2026-10-19): greeting word (`innerHTML`, every
+  2.8 s), heartline (every 5.2-6.5 s: forced layout, then a 4.2 s
+  `stroke-dashoffset` draw, not a compositor property), Dr. Smiley's idle
+  (every 1.2-3 s, steps every 38 ms, a `getComputedStyle`), time labels
+  (30 s), time of day (60 s), the idle tab bar tuck (once, 4 s after the
+  last touch). Two body observers react to inserts anywhere: `overlayFlags`
+  (3 querySelectors) and `pin-icons.js`'s, which re-runs `applyExactPins`
+  in the next frame; the meter's own pill text (2 a second) sets off both.
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main

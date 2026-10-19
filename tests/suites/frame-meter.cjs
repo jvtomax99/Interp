@@ -35,7 +35,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     // can read shorter than 400 (367 once on CI); 300 still sets it apart
     // from a normal frame (~17 ms).
     await wait(1500);
-    await page.evaluate(() => { const t = performance.now(); while (performance.now() - t < 400) {} });
+    await page.evaluate(() => { fmNote('test job'); const t = performance.now(); while (performance.now() - t < 400) {} });
     await wait(600);
     await page.evaluate(async () => { for (let i = 0; i < 20; i++) { window.scrollBy(0, 30); document.dispatchEvent(new Event('scroll')); await new Promise(r => requestAnimationFrame(r)); } });
     await page.evaluate(() => setCategory('translate')); await wait(1500);
@@ -47,11 +47,16 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     const res = await page.evaluate(() => { const runs = JSON.parse(localStorage.getItem('ih_frameMeter') || '[]');
       return { shown: document.getElementById('frameMeterOverlay').classList.contains('show'), pill: !!document.querySelector('.fm-pill'),
         on: FM.on, head: (document.querySelector('#frameMeterBody .fm-head') || {}).textContent, big: (document.querySelector('#frameMeterBody .fm-big') || {}).textContent,
-        rows: [...document.querySelectorAll('#frameMeterBody .fm-table tr')].slice(1).map(r => r.firstChild.textContent), run: runs[0], n: runs.length }; });
+        rows: [...document.querySelectorAll('#frameMeterBody .fm-table tr')].slice(1).map(r => r.firstChild.textContent), stalls: [...document.querySelectorAll('#frameMeterBody .fm-stalls div')].map(d => d.textContent), run: runs[0], n: runs.length }; });
     const r = res.run || {};
     ok(res.shown && !res.pill && !res.on, 'Stop: the timer goes, the results open, nothing left running', res);
     ok(r.build === build && [60, 30].includes(r.hz) && r.worst >= 300 && r.dropped >= 20 && r.stalls >= 1 && r.ratio > 0, 'the run: this build, a real refresh rate, the stall as the worst frame and as dropped frames', r);
     ok(res.rows.includes('Home') && res.rows.includes('Translate') && res.rows.includes('While scrolling') && r.scroll && r.scroll.ms > 0, 'split by screen (Home, Translate) and while scrolling', res.rows);
+    // The stall is listed with when it came and what said its name in it.
+    const st = (r.stallList || []).find(x => x.ms >= 300) || {};
+    ok(st.screen === 'Home' && /test job/.test(st.what) && st.at >= 1000 && st.at < 4000 && st.up > st.at && st.scroll > 3e5 && r.stallList.length <= 6,
+      'the longest stalls are listed: time into the run, screen, no scroll yet, and the job that ran (test job)', r.stallList);
+    ok(res.stalls.some(t => /test job/.test(t)), 'the results sheet shows the stall list', res.stalls);
     ok(/ms of hitches per second/.test(res.big) && /Smooth|Some hitches|Choppy/.test(res.head), 'the headline: a grade and the hitch number', { h: res.head, b: res.big });
     await page.screenshot({ path: O + tag + '-results.png' });
 
@@ -63,7 +68,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
     await page.evaluate(() => [...document.querySelectorAll('#frameMeterBody .btn')].find(x => /Copy/.test(x.textContent)).click()); await wait(300);
     const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(e => 'error ' + e.message);
-    ok(/^Smoothness b\d{4}\.\d{4}/.test(copied) && /Hitches .* ms\/s/.test(copied) && /Home:/.test(copied), 'Copy numbers: plain text with the build, hitches and screens', copied.slice(0, 200));
+    ok(/^Smoothness b\d{4}\.\d{4}/.test(copied) && /Hitches .* ms\/s/.test(copied) && /Home:/.test(copied) && /Longest stalls[\s\S]*\d+ ms · Home · no scroll yet · \d+ s after opening · [^\n]*test job/.test(copied), 'Copy numbers: plain text with the build, hitches, screens and the stall list', copied.slice(0, 600));
 
     await page.evaluate(() => frameMeterClose()); await page.evaluate(() => openMoreSheet()); await wait(400);
     const listed = await page.evaluate(() => [...document.querySelectorAll('#moreSheetBody .fm-run')].map(x => x.textContent.replace(/\s+/g, ' ').trim()));

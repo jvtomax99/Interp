@@ -6,9 +6,21 @@
 const L = require('../support/harness.cjs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 
+// Dr. Smiley never stops breathing: dsBreathe and dsDrift loop forever on
+// .dock-smiley-bob, around him, and the drift's tilt widens his box. Read
+// with those loops held at their start, so his size compares like for like
+// (WebKit failed here by 0.0026 of scale, depending on where in the breath
+// the frame landed), then let them run on from where they were.
 const rects = page => page.evaluate(() => {
+  const dr = document.querySelector('.dock-smiley');
+  const loops = document.getAnimations().filter(a => { const n = a.effect && a.effect.target;
+    return n && dr && (n === dr || n.contains(dr) || dr.contains(n)) && a.effect.getComputedTiming().iterations === Infinity; });
+  const was = loops.map(a => [a, a.currentTime, a.playState]);
+  loops.forEach(a => { a.pause(); a.currentTime = 0; });
   const q = s => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
-  return { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  const out = { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  was.forEach(([a, t, st]) => { a.currentTime = t; if (st === 'running') a.play(); });
+  return out;
 });
 // Every running animation on the dock, and what it animates.
 const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a => {
@@ -30,7 +42,14 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
 const settle = page => page.evaluate(() => new Promise(r => {
   const t0 = performance.now();
   const swaying = () => [...document.querySelectorAll('.dock-smiley')].some(e => e.style.rotate);
-  const moving = () => swaying() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
+  // His grow back to full size after a tuck: on CI's WebKit the open reading
+  // came 65.9-69.9 px wide (full: 70.1) with nothing counted as moving, so
+  // also wait until his computed scale is the one the bar's state asks for.
+  const growing = () => { const d = document.querySelector('.dock-smiley'); if (!d) return false;
+    const want = document.body.classList.contains('dock-mini') ? 54 / 58 : 1;
+    const sc = getComputedStyle(d).scale; const v = sc === 'none' ? 1 : parseFloat(sc);
+    return Math.abs(v - want) > .0005; };
+  const moving = () => swaying() || growing() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
   const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
   check();
 }));
@@ -118,6 +137,48 @@ const settle = page => page.evaluate(() => new Promise(r => {
   await rp.evaluate(() => { dockOpen(); dockIdleRestart(); }); await rp.waitForTimeout(300);
   const r = await rp.evaluate(() => { dockTuck(); return { skin: !!document.querySelector('.dk-skin'), mini: document.body.classList.contains('dock-mini') }; });
   ok(!r.skin && r.mini, 'reduced motion: it tucks at once, nothing moves', r);
+
+  // The bar steps aside for overlays by body classes (overlayFlags in
+  // index.html; S7a). Each must follow its overlay before the next frame:
+  // set on open, cleared on close, also when an open one is removed or is
+  // a sheet created on the spot.
+  const flags = await rp.evaluate(async () => {
+    const out = {}, tick = () => Promise.resolve();
+    // which overlay kinds have .show, and which classes say so
+    const read = () => [['overlay', 'ov-open'], ['gs-overlay', 'gs-open'], ['dm-overlay', 'dm-open']]
+      .map(([k, c]) => (document.querySelector('.' + k + '.show') ? k : '-') + '=' + (document.body.classList.contains(c) ? c : '-')).join(' ');
+    const step = async (name, f) => { f(); await tick(); out[name] = read(); };
+    setCategory('home'); await new Promise(r => setTimeout(r, 300));
+    await step('rest', () => {});
+    await step('more', () => openMoreSheet()); await step('more closed', () => closeMoreSheet());
+    await step('search', () => openGlobalSearch()); await step('search closed', () => closeGlobalSearch());
+    await step('made sheet', () => smSheet('flagsTest', '<p>x</p>')); await step('made sheet removed', () => document.getElementById('flagsTest').remove());
+    setCategory(window.__SEED_CATS[0].id); await new Promise(r => setTimeout(r, 300));
+    openDomainMenu(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); await step('domain menu', () => {}); await step('domain menu gone', () => closeDomainMenu(true));
+    return out;
+  });
+  const want = { rest: '-=- -=- -=-', more: 'overlay=ov-open -=- -=-', 'more closed': '-=- -=- -=-', search: '-=- gs-overlay=gs-open -=-', 'search closed': '-=- -=- -=-',
+    'made sheet': 'overlay=ov-open -=- -=-', 'made sheet removed': '-=- -=- -=-', 'domain menu': '-=- -=- dm-overlay=dm-open', 'domain menu gone': '-=- -=- -=-' };
+  ok(JSON.stringify(flags) === JSON.stringify(want), 'overlay classes follow each kind of overlay, before the next frame', flags);
+
+  // A rule keyed on one of these body classes must end on a class, id or
+  // attribute, never a bare tag (S7b): Chrome then restyles every element
+  // of that tag on the page each time the class changes. "> span:not(...)"
+  // made each tuck restyle ~270 spans.
+  const bare = await rp.evaluate(() => {
+    const STATE = /\.(dock-mini|ov-open|gs-open|dm-open)\b/, out = [];
+    const strip = s => { let d = 0, o = ''; for (const ch of s) { if (ch === '(') d++; if (!d) o += ch; if (ch === ')') d--; } return o; };
+    // last compound, with pseudo-classes, pseudo-elements and :not(...) arguments taken off
+    const last = sel => strip(sel).replace(/::?[\w-]+/g, '').trim().split(/\s*[\s>+~]\s*/).pop();
+    const walk = rules => { for (const r of rules) {
+      if (r.cssRules && !r.selectorText) { walk(r.cssRules); continue; }
+      if (!r.selectorText || !STATE.test(r.selectorText)) continue;
+      for (const sel of r.selectorText.split(/,(?![^(]*\))/)) if (STATE.test(sel) && !/[.#[]/.test(last(sel))) out.push(sel.trim());
+    } };
+    for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} }
+    return out;
+  });
+  ok(!bare.length, 'rules on body state classes end on a class, id or attribute (no bare tag)', bare);
   ok(!rp.__errors.length, 'no page errors', rp.__errors);
   await b.close();
 })();

@@ -28,6 +28,23 @@ block of the same name next to the More sheet styles, overlay
   on screen; the meter times the page's own frames, so its number is for
   comparing runs, not a reading of Apple's. Below it: dropped %, worst stall,
   stalls over 100 ms, then the same per screen and "While scrolling".
+- **Longest stalls** (S7, 2026-10-19): every frame over 50 ms
+  (`FM_STALL_MS`) is kept with its time into the run, time since the last
+  scroll, screen, time since the app opened, and what ran in it. The six
+  longest go in the results and in Copy numbers, in the order they came.
+  "What ran": Safari has no long-task timing, so the app's jobs that can run
+  while a screen is left alone say their name with `fmNote(tag)` (a no-op
+  while the meter is off): `render`, `greeting word`, `heartline`
+  (`home-polish.js`), `pins` (`applyExactPins`, `pin-icons.js`, runs after
+  any insert on the page, the meter's own pill text included), `tab bar
+  tuck` / `open`, `Dr. Smiley <performance>`, `time labels`, `time of day`,
+  `glossary saved`, `data: terms` / `domains` / `team points` / `chat` /
+  `activity` / `team`, `meter` (its own pill update), `More closing` (the
+  start). A stall lists the names said in it or in the frame just before
+  (a frame held up by a block still carries the time it was due, so the
+  stall shows one frame late). "Nothing named": the browser's own work
+  (style, layout, paint, memory) or a job without a name yet; add an
+  `fmNote` where a new suspect runs.
 - Time with the app hidden is left out (visibilitychange). Runs under 30
   frames are not saved.
 - Runs are kept on the phone only, `ih_frameMeter` (last 8, each with

@@ -41,6 +41,23 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   (`createThought`, `is-left`); on a computer he is 48px in from the right end of the
   name's line, the cloud to his right. He is never resized for a name:
   `fitWave` shrinks a name too wide for its line instead.
+- **His brows are separate pictures and glide** (`DR_BROWS`, Jose's pick
+  2026-10-19, "movable brows"). `brow-l.webp`/`brow-r.webp` were cut out of
+  his calm face; the forehead in `base.webp` and the bits of brow baked into
+  the top of some face frames were repainted as skin. They sit over the face
+  window (drawn after `.ds-face`), so a lowered brow covers the lid instead
+  of hiding under the eye patch. By default each face frame picks a pose
+  (`DR_BROW_OF`: up for lookU and laughs, one raised for lookUL/lookUR, a
+  little down for reading and closed eyes); a sequence can hold one instead
+  with `brow: [[ms, pose or null], ...]` (`composed` and `encourage` hold
+  `caring`, inner ends up). The hold ends when the run finishes or is
+  interrupted. A pose is a lift and a turn about each brow's middle, never a
+  stretch, eased by a CSS transition (.17 s); Focused moves them 60%, Still
+  and reduced motion change them without gliding. At rest there is no
+  transform, so he looks exactly as drawn. `tests/suites/smiley-brows.cjs`.
+  How the cut was made (re-run it if the base art changes): a dark-brown
+  mask per brow, a smooth fill of the skin under it, the brow's own colour
+  and edge recovered by unmixing against that fill.
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
   getters, so every play varies a little (side, amplitude, beats) with an
