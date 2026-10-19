@@ -67,10 +67,12 @@ weeks on your phone. Design and decisions: `docs/features/memory-trainer.md`.
 Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
 first; notes toggle, memory-only default. One PR each:
 
-M0. **Voice and mic check** (this PR): a sheet at the bottom of More.
-   **Needs Jose:** run it in the installed app and in a Safari tab on his
-   iPhone, Copy results, paste both. Write them into the note's Results.
-M1. **Lines.** The 101 False Friends `heard`/`truth` pairs as short
+M0. **Voice and mic check** (#60, merged). Installed-app results in the
+   note: recording works, voice quieter after the mic, speech to text
+   unclear. **Needs Jose:** Safari tab run; Play Spanish; wait for speech
+   to text before Copy.
+M1. **Lines** (drafted 2026-10-19, `memory/lines.json`; Jose reviewing on
+   the review page linked in the note). The 101 False Friends `heard`/`truth` pairs as short
    Spanish-to-English starters, plus ~60 new lines of 10-45 words both
    ways (discharge, meds, consent, ED, OB, peds), each split into chunks,
    in a file of their own (not `index.html`). Jose checks the Spanish
@@ -79,10 +81,11 @@ M2. **The trainer.** Screen under Practice, playback with the text
    hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
    Dr. Smiley's listening/thinking states, progress in `localStorage`
    only, notes toggle. User Guide, a suite.
-M3. **Record yourself, play it back beside the model.** Only if M0's
-   record and play back work in the installed app; also only if the voice
-   stays loud after the mic (M0 step 3), or the trainer must play before
-   it opens the mic.
+M3. **Record yourself, play it back beside the model.** Record and play
+   back work in the installed app (M0). The voice is quieter after the
+   mic: first test `navigator.audioSession.type = 'playback'` after each
+   recording (a button in the check); if it fails, play every line before
+   opening the mic and tell people to use earbuds.
 M4. **Span chart** (weeks) and the span number on the Practice tile.
 M5. **Auto-marking** from speech to text. Only if M0 shows it works in
    the installed app. Matching on the phone; Haiku (`_routine.js`) only
@@ -207,6 +210,12 @@ come from this alone.
    `index.html`. `home-polish.css` still styles classes nothing makes
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
    file, so fetch `main` right before.
+
+**Flaky test: dock-tuck in WebKit.** "Dr. Smiley shrinks with the bar"
+failed once on PR #60 (run 39281179430) and passed on the same commit's
+other run and on its re-run: his size was read while `dsBreathe` was
+scaling him (54/58 expected, 0.954 measured). Measure him with the breathe
+paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Later (only when the trigger happens)
 

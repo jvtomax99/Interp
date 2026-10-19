@@ -1,0 +1,1526 @@
+{
+ "about": "Memory trainer practice lines (docs/features/memory-trainer.md). dir en-es: provider in English, render Spanish; es-en: patient or family in Spanish, render English. u: meaning chunks [source, model rendering]; src/tgt are the chunks joined. reviewed: Jose checked the Spanish. The False Friends lines (heard/truth in index.html) are the short Spanish-to-English starters and are not repeated here.",
+ "version": 1,
+ "lines": [
+  {
+   "id": "dc01",
+   "set": "discharge",
+   "dir": "en-es",
+   "words": 11,
+   "u": [
+    [
+     "Keep the dressing dry",
+     "Mantenga el vendaje seco"
+    ],
+    [
+     "for forty-eight hours,",
+     "durante cuarenta y ocho horas,"
+    ],
+    [
+     "then you can shower.",
+     "y después se puede bañar."
+    ]
+   ],
+   "note": "Number: forty-eight.",
+   "reviewed": false
+  },
+  {
+   "id": "dc02",
+   "set": "discharge",
+   "dir": "en-es",
+   "words": 22,
+   "u": [
+    [
+     "If your fever goes above one hundred and one,",
+     "Si la fiebre le sube a más de ciento uno,"
+    ],
+    [
+     "or the pain gets worse,",
+     "o el dolor empeora,"
+    ],
+    [
+     "come back to the emergency room right away.",
+     "regrese a la sala de emergencias de inmediato."
+    ]
+   ],
+   "note": "Fahrenheit number; keep it as said.",
+   "reviewed": false
+  },
+  {
+   "id": "dc03",
+   "set": "discharge",
+   "dir": "es-en",
+   "words": 16,
+   "u": [
+    [
+     "¿Y cuándo puedo volver a trabajar?",
+     "And when can I go back to work?"
+    ],
+    [
+     "Es que yo trabajo en construcción",
+     "I work in construction"
+    ],
+    [
+     "y cargo cosas pesadas.",
+     "and I lift heavy things."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "dc04",
+   "set": "discharge",
+   "dir": "en-es",
+   "words": 32,
+   "u": [
+    [
+     "You have a follow-up appointment with your primary care doctor",
+     "Tiene una cita de seguimiento con su médico de atención primaria"
+    ],
+    [
+     "next Tuesday at ten thirty.",
+     "el próximo martes a las diez y media."
+    ],
+    [
+     "Bring all your medications with you,",
+     "Traiga todos sus medicamentos,"
+    ],
+    [
+     "including the ones you buy at the pharmacy without a prescription.",
+     "incluso los que compra en la farmacia sin receta."
+    ]
+   ],
+   "note": "Day and time.",
+   "reviewed": false
+  },
+  {
+   "id": "dc05",
+   "set": "discharge",
+   "dir": "es-en",
+   "words": 23,
+   "u": [
+    [
+     "Me dijeron que me cambiara la gasa,",
+     "They told me to change the gauze,"
+    ],
+    [
+     "pero no sé si tengo que lavar la herida primero",
+     "but I don't know if I have to wash the wound first"
+    ],
+    [
+     "o nada más ponerle la crema.",
+     "or just put the cream on it."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "dc06",
+   "set": "discharge",
+   "dir": "en-es",
+   "words": 31,
+   "u": [
+    [
+     "You can walk as much as you feel comfortable,",
+     "Puede caminar todo lo que se sienta cómodo,"
+    ],
+    [
+     "but don't lift anything heavier than ten pounds",
+     "pero no levante nada que pese más de diez libras"
+    ],
+    [
+     "for the next six weeks,",
+     "durante las próximas seis semanas,"
+    ],
+    [
+     "and don't drive while you're taking the pain medicine.",
+     "y no maneje mientras esté tomando el medicamento para el dolor."
+    ]
+   ],
+   "note": "Two numbers: ten pounds, six weeks.",
+   "reviewed": false
+  },
+  {
+   "id": "dc07",
+   "set": "discharge",
+   "dir": "es-en",
+   "words": 32,
+   "u": [
+    [
+     "Mire, yo vivo sola",
+     "Look, I live alone"
+    ],
+    [
+     "y no tengo quién me ayude en la casa.",
+     "and I don't have anyone to help me at home."
+    ],
+    [
+     "Mi hija trabaja todo el día",
+     "My daughter works all day"
+    ],
+    [
+     "y no sé cómo voy a subir las escaleras",
+     "and I don't know how I'm going to get up the stairs"
+    ],
+    [
+     "con esta pierna así.",
+     "with my leg like this."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "dc08",
+   "set": "discharge",
+   "dir": "en-es",
+   "words": 42,
+   "u": [
+    [
+     "The nurse is going to give you a printout with all these instructions in Spanish.",
+     "La enfermera le va a dar una hoja impresa con todas estas instrucciones en español."
+    ],
+    [
+     "If you notice redness, swelling or pus around the incision,",
+     "Si nota enrojecimiento, hinchazón o pus alrededor de la incisión,"
+    ],
+    [
+     "or if it starts to open,",
+     "o si se empieza a abrir,"
+    ],
+    [
+     "call the surgery clinic at the number on the first page.",
+     "llame a la clínica de cirugía al número que aparece en la primera página."
+    ]
+   ],
+   "note": "A list of three signs.",
+   "reviewed": false
+  },
+  {
+   "id": "dc09",
+   "set": "discharge",
+   "dir": "en-es",
+   "words": 39,
+   "u": [
+    [
+     "We stopped your blood pressure pill, the lisinopril,",
+     "Le suspendimos la pastilla para la presión, el lisinopril,"
+    ],
+    [
+     "because your kidneys were a little irritated.",
+     "porque los riñones estaban un poco irritados."
+    ],
+    [
+     "Don't start taking it again on your own.",
+     "No la vuelva a tomar por su cuenta."
+    ],
+    [
+     "Your doctor will check your blood work in one week",
+     "Su médico le va a revisar los análisis de sangre en una semana"
+    ],
+    [
+     "and decide whether you need it.",
+     "y va a decidir si la necesita."
+    ]
+   ],
+   "note": "Drug name stays as said.",
+   "reviewed": false
+  },
+  {
+   "id": "dc10",
+   "set": "discharge",
+   "dir": "es-en",
+   "words": 36,
+   "u": [
+    [
+     "Doctor, la última vez que me dieron de alta",
+     "Doctor, the last time I was discharged"
+    ],
+    [
+     "me mandaron a casa con muchos papeles",
+     "they sent me home with a lot of papers"
+    ],
+    [
+     "y no entendí nada.",
+     "and I didn't understand anything."
+    ],
+    [
+     "Terminé otra vez aquí a los tres días.",
+     "I ended up back here three days later."
+    ],
+    [
+     "¿Me puede explicar despacio qué tengo que hacer?",
+     "Can you explain slowly what I need to do?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "md01",
+   "set": "meds",
+   "dir": "en-es",
+   "words": 10,
+   "u": [
+    [
+     "Take one tablet by mouth",
+     "Tome una pastilla por la boca"
+    ],
+    [
+     "twice a day",
+     "dos veces al día"
+    ],
+    [
+     "with food.",
+     "con comida."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "md02",
+   "set": "meds",
+   "dir": "es-en",
+   "words": 18,
+   "u": [
+    [
+     "Yo me tomo la de la azúcar en la mañana",
+     "I take the one for my sugar in the morning"
+    ],
+    [
+     "y la de la presión en la noche.",
+     "and the one for my blood pressure at night."
+    ]
+   ],
+   "note": "\"La azúcar\" is how many patients say it; \"sugar\" means diabetes.",
+   "reviewed": false
+  },
+  {
+   "id": "md03",
+   "set": "meds",
+   "dir": "en-es",
+   "words": 22,
+   "u": [
+    [
+     "This antibiotic can upset your stomach,",
+     "Este antibiótico le puede caer mal al estómago,"
+    ],
+    [
+     "so take it after you eat,",
+     "así que tómelo después de comer,"
+    ],
+    [
+     "and finish the whole bottle",
+     "y termínese todo el frasco"
+    ],
+    [
+     "even if you feel better.",
+     "aunque se sienta mejor."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "md04",
+   "set": "meds",
+   "dir": "en-es",
+   "words": 25,
+   "u": [
+    [
+     "Check your sugar before breakfast and before dinner.",
+     "Mídase el azúcar antes del desayuno y antes de la cena."
+    ],
+    [
+     "If it's under seventy,",
+     "Si está por debajo de setenta,"
+    ],
+    [
+     "drink half a cup of juice",
+     "tome media taza de jugo"
+    ],
+    [
+     "and check it again in fifteen minutes.",
+     "y vuelva a medirse el azúcar en quince minutos."
+    ]
+   ],
+   "note": "Three numbers.",
+   "reviewed": false
+  },
+  {
+   "id": "md05",
+   "set": "meds",
+   "dir": "es-en",
+   "words": 22,
+   "u": [
+    [
+     "A mí me recetaron otra pastilla en México",
+     "They prescribed me another pill in Mexico"
+    ],
+    [
+     "para los nervios,",
+     "for my nerves,"
+    ],
+    [
+     "pero no me acuerdo cómo se llama.",
+     "but I don't remember what it's called."
+    ],
+    [
+     "Es una blanquita, chiquita.",
+     "It's a little white one."
+    ]
+   ],
+   "note": "\"Los nervios\" stays \"nerves\"; don't diagnose it as anxiety.",
+   "reviewed": false
+  },
+  {
+   "id": "md06",
+   "set": "meds",
+   "dir": "en-es",
+   "words": 27,
+   "u": [
+    [
+     "The blood thinner means you'll bruise more easily.",
+     "Con el anticoagulante le van a salir moretones con más facilidad."
+    ],
+    [
+     "Avoid ibuprofen and aspirin,",
+     "Evite el ibuprofeno y la aspirina,"
+    ],
+    [
+     "and tell any dentist or doctor",
+     "y avísele a cualquier dentista o médico"
+    ],
+    [
+     "that you're taking it before they do any procedure.",
+     "que lo está tomando antes de que le hagan cualquier procedimiento."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "md07",
+   "set": "meds",
+   "dir": "en-es",
+   "words": 33,
+   "u": [
+    [
+     "Inject the insulin in your belly,",
+     "Inyéctese la insulina en la barriga,"
+    ],
+    [
+     "at least two inches away from your belly button.",
+     "por lo menos a dos pulgadas del ombligo."
+    ],
+    [
+     "Change the spot every time,",
+     "Cambie de lugar cada vez,"
+    ],
+    [
+     "and keep the pens you're not using in the refrigerator,",
+     "y guarde las plumas que no esté usando en el refrigerador,"
+    ],
+    [
+     "not the freezer.",
+     "no en el congelador."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "md08",
+   "set": "meds",
+   "dir": "es-en",
+   "words": 29,
+   "u": [
+    [
+     "Es que la insulina me sale muy cara",
+     "The thing is, the insulin is really expensive for me"
+    ],
+    [
+     "y el mes pasado no me alcanzó el dinero,",
+     "and last month I didn't have enough money,"
+    ],
+    [
+     "entonces me ponía nada más la mitad",
+     "so I was only injecting half"
+    ],
+    [
+     "para que me durara más.",
+     "so it would last longer."
+    ]
+   ],
+   "note": "Safety: the doctor must hear \"half\".",
+   "reviewed": false
+  },
+  {
+   "id": "md09",
+   "set": "meds",
+   "dir": "en-es",
+   "words": 37,
+   "u": [
+    [
+     "Your new dose of metoprolol is twenty-five milligrams,",
+     "Su nueva dosis de metoprolol es de veinticinco miligramos,"
+    ],
+    [
+     "not fifty.",
+     "no de cincuenta."
+    ],
+    [
+     "That's half of the old pill.",
+     "Es la mitad de la pastilla de antes."
+    ],
+    [
+     "If you still have the old fifty-milligram pills at home,",
+     "Si todavía tiene en casa las pastillas viejas de cincuenta miligramos,"
+    ],
+    [
+     "cut them in half",
+     "pártalas a la mitad"
+    ],
+    [
+     "until you pick up the new prescription.",
+     "hasta que recoja la receta nueva."
+    ]
+   ],
+   "note": "Doses: 25 vs 50.",
+   "reviewed": false
+  },
+  {
+   "id": "md10",
+   "set": "meds",
+   "dir": "es-en",
+   "words": 37,
+   "u": [
+    [
+     "Mi esposo se toma como seis pastillas en la mañana",
+     "My husband takes about six pills in the morning"
+    ],
+    [
+     "y a veces se le olvida si ya se las tomó o no,",
+     "and sometimes he forgets whether he's already taken them or not,"
+    ],
+    [
+     "entonces se las vuelve a tomar.",
+     "so he takes them again."
+    ],
+    [
+     "¿Hay algo que le pueda ayudar a acordarse?",
+     "Is there something that could help him remember?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "cs01",
+   "set": "consent",
+   "dir": "en-es",
+   "words": 12,
+   "u": [
+    [
+     "This procedure is to look inside your stomach",
+     "Este procedimiento es para ver por dentro del estómago"
+    ],
+    [
+     "with a small camera.",
+     "con una cámara pequeña."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "cs02",
+   "set": "consent",
+   "dir": "en-es",
+   "words": 21,
+   "u": [
+    [
+     "The most common risks are bleeding and infection.",
+     "Los riesgos más comunes son sangrado e infección."
+    ],
+    [
+     "A rare risk is a small tear",
+     "Un riesgo poco común es una pequeña perforación"
+    ],
+    [
+     "that might need surgery to repair.",
+     "que podría necesitar cirugía para repararla."
+    ]
+   ],
+   "note": "Common vs rare.",
+   "reviewed": false
+  },
+  {
+   "id": "cs03",
+   "set": "consent",
+   "dir": "es-en",
+   "words": 16,
+   "u": [
+    [
+     "¿Y me van a dormir completamente,",
+     "And are you going to put me completely to sleep,"
+    ],
+    [
+     "o voy a estar despierto",
+     "or am I going to be awake"
+    ],
+    [
+     "cuando me metan la cámara?",
+     "when you put the camera in?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "cs04",
+   "set": "consent",
+   "dir": "en-es",
+   "words": 27,
+   "u": [
+    [
+     "You don't have to sign today.",
+     "No tiene que firmar hoy."
+    ],
+    [
+     "You can take the form home,",
+     "Se puede llevar el formulario a casa,"
+    ],
+    [
+     "talk it over with your family,",
+     "hablarlo con su familia"
+    ],
+    [
+     "and call us with any questions",
+     "y llamarnos si tiene alguna pregunta"
+    ],
+    [
+     "before you decide.",
+     "antes de decidir."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "cs05",
+   "set": "consent",
+   "dir": "es-en",
+   "words": 23,
+   "u": [
+    [
+     "Mi mamá no sabe leer,",
+     "My mother can't read,"
+    ],
+    [
+     "entonces yo quiero estar con ella",
+     "so I want to be with her"
+    ],
+    [
+     "cuando le expliquen todo,",
+     "when you explain everything to her,"
+    ],
+    [
+     "porque luego firma lo que le pongan enfrente.",
+     "because otherwise she signs whatever they put in front of her."
+    ]
+   ],
+   "note": "Literacy: the provider needs to know.",
+   "reviewed": false
+  },
+  {
+   "id": "cs06",
+   "set": "consent",
+   "dir": "en-es",
+   "words": 33,
+   "u": [
+    [
+     "During the surgery you'll be under general anesthesia,",
+     "Durante la cirugía va a estar bajo anestesia general,"
+    ],
+    [
+     "so you won't feel anything.",
+     "así que no va a sentir nada."
+    ],
+    [
+     "You'll have a breathing tube,",
+     "Va a tener un tubo para respirar,"
+    ],
+    [
+     "and when you wake up your throat may be sore for a day or two.",
+     "y cuando despierte, le puede doler la garganta por uno o dos días."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "cs07",
+   "set": "consent",
+   "dir": "en-es",
+   "words": 30,
+   "u": [
+    [
+     "There is an alternative to surgery, which is physical therapy and injections.",
+     "Hay una alternativa a la cirugía, que es la terapia física y las inyecciones."
+    ],
+    [
+     "It's less risky,",
+     "Tiene menos riesgos,"
+    ],
+    [
+     "but it may take months to work,",
+     "pero puede tardar meses en hacer efecto,"
+    ],
+    [
+     "and it may not fix the problem completely.",
+     "y puede que no resuelva el problema por completo."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "cs08",
+   "set": "consent",
+   "dir": "es-en",
+   "words": 30,
+   "u": [
+    [
+     "Yo no quiero sangre.",
+     "I don't want blood."
+    ],
+    [
+     "Soy testigo de Jehová,",
+     "I'm a Jehovah's Witness,"
+    ],
+    [
+     "y aunque me pase algo durante la operación,",
+     "and even if something happens to me during the operation,"
+    ],
+    [
+     "no quiero que me pongan sangre de nadie.",
+     "I don't want anyone's blood put in me."
+    ],
+    [
+     "Eso quiero que quede por escrito.",
+     "I want that in writing."
+    ]
+   ],
+   "note": "A refusal: every word counts.",
+   "reviewed": false
+  },
+  {
+   "id": "cs09",
+   "set": "consent",
+   "dir": "en-es",
+   "words": 43,
+   "u": [
+    [
+     "By signing, you're saying that we explained the procedure, the risks, the benefits and the alternatives,",
+     "Al firmar, usted dice que le explicamos el procedimiento, los riesgos, los beneficios y las alternativas,"
+    ],
+    [
+     "that you had a chance to ask questions,",
+     "que tuvo la oportunidad de hacer preguntas"
+    ],
+    [
+     "and that you agree to have it done.",
+     "y que está de acuerdo en que se lo hagan."
+    ],
+    [
+     "You can change your mind at any time before the procedure.",
+     "Puede cambiar de opinión en cualquier momento antes del procedimiento."
+    ]
+   ],
+   "note": "A list of four.",
+   "reviewed": false
+  },
+  {
+   "id": "cs10",
+   "set": "consent",
+   "dir": "es-en",
+   "words": 37,
+   "u": [
+    [
+     "Le voy a ser sincero,",
+     "I'm going to be honest with you,"
+    ],
+    [
+     "yo no entiendo para qué me quieren operar si ya no me duele.",
+     "I don't understand why you want to operate on me if it doesn't hurt anymore."
+    ],
+    [
+     "El otro doctor me dijo que con las pastillas iba a estar bien.",
+     "The other doctor told me I would be fine with the pills."
+    ],
+    [
+     "¿Qué pasa si no me opero?",
+     "What happens if I don't have the surgery?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ed01",
+   "set": "ed",
+   "dir": "es-en",
+   "words": 10,
+   "u": [
+    [
+     "Me duele aquí,",
+     "It hurts here,"
+    ],
+    [
+     "en la boca del estómago,",
+     "in the pit of my stomach,"
+    ],
+    [
+     "desde anoche.",
+     "since last night."
+    ]
+   ],
+   "note": "\"Boca del estómago\": the pit of the stomach, not the mouth.",
+   "reviewed": false
+  },
+  {
+   "id": "ed02",
+   "set": "ed",
+   "dir": "en-es",
+   "words": 22,
+   "u": [
+    [
+     "On a scale from zero to ten,",
+     "En una escala del cero al diez,"
+    ],
+    [
+     "with ten being the worst pain you can imagine,",
+     "donde diez es el peor dolor que se pueda imaginar,"
+    ],
+    [
+     "how bad is it right now?",
+     "¿qué tan fuerte es ahorita?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ed03",
+   "set": "ed",
+   "dir": "es-en",
+   "words": 20,
+   "u": [
+    [
+     "Me caí de la escalera",
+     "I fell off the ladder"
+    ],
+    [
+     "y me pegué en la cabeza,",
+     "and hit my head,"
+    ],
+    [
+     "pero no perdí el conocimiento,",
+     "but I didn't lose consciousness,"
+    ],
+    [
+     "nada más me mareé.",
+     "I just got dizzy."
+    ]
+   ],
+   "note": "\"Escalera\": ladder or stairs. Ask if unclear; it changes the injury.",
+   "reviewed": false
+  },
+  {
+   "id": "ed04",
+   "set": "ed",
+   "dir": "en-es",
+   "words": 26,
+   "u": [
+    [
+     "We're going to give you fluids through the IV",
+     "Le vamos a poner suero por la vena"
+    ],
+    [
+     "and something for the nausea.",
+     "y algo para las náuseas."
+    ],
+    [
+     "Please don't eat or drink anything",
+     "Por favor, no coma ni beba nada"
+    ],
+    [
+     "until the doctor sees the results.",
+     "hasta que el médico vea los resultados."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ed05",
+   "set": "ed",
+   "dir": "es-en",
+   "words": 26,
+   "u": [
+    [
+     "Tengo diabetes y presión alta,",
+     "I have diabetes and high blood pressure,"
+    ],
+    [
+     "y desde hace como dos horas",
+     "and for about two hours"
+    ],
+    [
+     "siento como una presión en el pecho",
+     "I've been feeling something like pressure in my chest"
+    ],
+    [
+     "que se me corre para el brazo izquierdo.",
+     "that spreads to my left arm."
+    ]
+   ],
+   "note": "Left arm: say the side.",
+   "reviewed": false
+  },
+  {
+   "id": "ed06",
+   "set": "ed",
+   "dir": "en-es",
+   "words": 28,
+   "u": [
+    [
+     "Are you allergic to any medications?",
+     "¿Es alérgico a algún medicamento?"
+    ],
+    [
+     "Have you ever had a reaction to contrast dye,",
+     "¿Alguna vez ha tenido una reacción al medio de contraste,"
+    ],
+    [
+     "the dye we use for CT scans?",
+     "el tinte que usamos para las tomografías?"
+    ],
+    [
+     "Any chance you could be pregnant?",
+     "¿Hay alguna posibilidad de que esté embarazada?"
+    ]
+   ],
+   "note": "Three questions in a row.",
+   "reviewed": false
+  },
+  {
+   "id": "ed07",
+   "set": "ed",
+   "dir": "es-en",
+   "words": 31,
+   "u": [
+    [
+     "Mi hijo se tomó no sé cuántas pastillas de las mías,",
+     "My son took I don't know how many of my pills,"
+    ],
+    [
+     "lo encontré dormido en el baño",
+     "I found him asleep in the bathroom"
+    ],
+    [
+     "y no lo podía despertar.",
+     "and I couldn't wake him up."
+    ],
+    [
+     "Ahorita ya abre los ojos pero no me habla.",
+     "Now he opens his eyes but he doesn't talk to me."
+    ]
+   ],
+   "note": "Overdose: urgent, render it whole.",
+   "reviewed": false
+  },
+  {
+   "id": "ed08",
+   "set": "ed",
+   "dir": "en-es",
+   "words": 30,
+   "u": [
+    [
+     "The CT scan shows a small bleed in your brain.",
+     "La tomografía muestra un pequeño sangrado en el cerebro."
+    ],
+    [
+     "We're going to transfer you to the neurosurgery team",
+     "Lo vamos a trasladar al equipo de neurocirugía"
+    ],
+    [
+     "at our main hospital,",
+     "de nuestro hospital principal,"
+    ],
+    [
+     "and they'll decide whether you need surgery.",
+     "y ellos van a decidir si necesita cirugía."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ed09",
+   "set": "ed",
+   "dir": "en-es",
+   "words": 35,
+   "u": [
+    [
+     "I know you've been waiting a long time, and I'm sorry.",
+     "Sé que ha estado esperando mucho tiempo, y lo siento."
+    ],
+    [
+     "The emergency room is very busy tonight,",
+     "La sala de emergencias está muy llena esta noche,"
+    ],
+    [
+     "and we see the sickest patients first.",
+     "y atendemos primero a los pacientes más graves."
+    ],
+    [
+     "Your tests are normal so far,",
+     "Hasta ahora sus pruebas salieron normales,"
+    ],
+    [
+     "which is good news.",
+     "lo cual es una buena noticia."
+    ]
+   ],
+   "note": "Keep the apology and the tone.",
+   "reviewed": false
+  },
+  {
+   "id": "ed10",
+   "set": "ed",
+   "dir": "es-en",
+   "words": 34,
+   "u": [
+    [
+     "Ya llevo tres días con diarrea y vómito,",
+     "I've had diarrhea and vomiting for three days,"
+    ],
+    [
+     "no aguanto nada en el estómago, ni el agua.",
+     "I can't keep anything down, not even water."
+    ],
+    [
+     "Hoy en la mañana me levanté y casi me desmayo,",
+     "This morning I got up and almost fainted,"
+    ],
+    [
+     "y orino muy poquito y muy oscuro.",
+     "and I pee very little and it is very dark."
+    ]
+   ],
+   "note": "Signs of dehydration: four of them.",
+   "reviewed": false
+  },
+  {
+   "id": "ob01",
+   "set": "ob",
+   "dir": "es-en",
+   "words": 15,
+   "u": [
+    [
+     "Tengo treinta y dos semanas",
+     "I'm thirty-two weeks"
+    ],
+    [
+     "y desde hoy no siento que el bebé se mueva.",
+     "and since today I don't feel the baby moving."
+    ]
+   ],
+   "note": "Number: thirty-two.",
+   "reviewed": false
+  },
+  {
+   "id": "ob02",
+   "set": "ob",
+   "dir": "en-es",
+   "words": 13,
+   "u": [
+    [
+     "When did your last period start?",
+     "¿Cuándo le empezó la última regla?"
+    ],
+    [
+     "Was it a normal period for you?",
+     "¿Fue una regla normal para usted?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ob03",
+   "set": "ob",
+   "dir": "en-es",
+   "words": 20,
+   "u": [
+    [
+     "Your water has broken,",
+     "Se le rompió la fuente,"
+    ],
+    [
+     "so we're going to admit you.",
+     "así que la vamos a internar."
+    ],
+    [
+     "The baby is head down,",
+     "El bebé está de cabeza,"
+    ],
+    [
+     "and the heartbeat looks good.",
+     "y el latido del corazón se ve bien."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ob04",
+   "set": "ob",
+   "dir": "es-en",
+   "words": 23,
+   "u": [
+    [
+     "Con mi primer niño me hicieron cesárea,",
+     "With my first child I had a C-section,"
+    ],
+    [
+     "y ahorita quiero intentar tenerlo normal,",
+     "and now I want to try to have a vaginal birth,"
+    ],
+    [
+     "pero me da miedo que se me abra la herida.",
+     "but I'm scared the scar will open."
+    ]
+   ],
+   "note": "\"Tenerlo normal\": vaginal birth.",
+   "reviewed": false
+  },
+  {
+   "id": "ob05",
+   "set": "ob",
+   "dir": "en-es",
+   "words": 31,
+   "u": [
+    [
+     "Your blood pressure is high,",
+     "Tiene la presión alta,"
+    ],
+    [
+     "and there's protein in your urine.",
+     "y tiene proteína en la orina."
+    ],
+    [
+     "This is called preeclampsia.",
+     "Esto se llama preeclampsia."
+    ],
+    [
+     "It can be dangerous for you and the baby,",
+     "Puede ser peligroso para usted y para el bebé,"
+    ],
+    [
+     "so we need to watch you closely.",
+     "así que tenemos que vigilarla de cerca."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ob06",
+   "set": "ob",
+   "dir": "en-es",
+   "words": 34,
+   "u": [
+    [
+     "We recommend an epidural for the pain.",
+     "Le recomendamos la epidural para el dolor."
+    ],
+    [
+     "We'll place a small tube in your lower back.",
+     "Le vamos a poner un tubito en la parte baja de la espalda."
+    ],
+    [
+     "You'll feel a pinch and some pressure,",
+     "Va a sentir un piquete y un poco de presión,"
+    ],
+    [
+     "and you'll need to stay very still while we do it.",
+     "y va a tener que quedarse muy quieta mientras lo hacemos."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ob07",
+   "set": "ob",
+   "dir": "es-en",
+   "words": 27,
+   "u": [
+    [
+     "Mi suegra dice que no me bañe en cuarenta días",
+     "My mother-in-law says I shouldn't bathe for forty days"
+    ],
+    [
+     "y que no coma cosas frías",
+     "and that I shouldn't eat cold things"
+    ],
+    [
+     "porque se me va a bajar la leche.",
+     "because my milk will dry up."
+    ],
+    [
+     "¿Eso es cierto?",
+     "Is that true?"
+    ]
+   ],
+   "note": "La cuarentena: render the belief as said; no comment.",
+   "reviewed": false
+  },
+  {
+   "id": "ob08",
+   "set": "ob",
+   "dir": "en-es",
+   "words": 31,
+   "u": [
+    [
+     "The baby's heart rate has dropped several times,",
+     "El ritmo cardíaco del bebé ha bajado varias veces,"
+    ],
+    [
+     "and labor isn't progressing.",
+     "y el parto no está avanzando."
+    ],
+    [
+     "We think the safest thing is a C-section now.",
+     "Creemos que lo más seguro es hacer una cesárea ahora."
+    ],
+    [
+     "Your husband can come into the operating room with you.",
+     "Su esposo puede entrar con usted al quirófano."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "ob09",
+   "set": "ob",
+   "dir": "en-es",
+   "words": 36,
+   "u": [
+    [
+     "For the next six weeks,",
+     "Durante las próximas seis semanas,"
+    ],
+    [
+     "nothing in the vagina:",
+     "no se ponga nada en la vagina:"
+    ],
+    [
+     "no tampons, no douching and no sex.",
+     "ni tampones, ni duchas vaginales, ni relaciones sexuales."
+    ],
+    [
+     "Call us if you're soaking more than one pad an hour,",
+     "Llámenos si empapa más de una toalla sanitaria por hora,"
+    ],
+    [
+     "or if you have a fever or bad-smelling discharge.",
+     "o si tiene fiebre o un flujo con mal olor."
+    ]
+   ],
+   "note": "Plain words for intimate topics.",
+   "reviewed": false
+  },
+  {
+   "id": "ob10",
+   "set": "ob",
+   "dir": "es-en",
+   "words": 34,
+   "u": [
+    [
+     "Desde que nació la niña",
+     "Since the baby girl was born"
+    ],
+    [
+     "no tengo ganas de nada,",
+     "I don't feel like doing anything,"
+    ],
+    [
+     "lloro todo el día",
+     "I cry all day"
+    ],
+    [
+     "y a veces pienso que estarían mejor sin mí.",
+     "and sometimes I think they'd be better off without me."
+    ],
+    [
+     "No le he dicho a mi esposo porque me da vergüenza.",
+     "I haven't told my husband because I'm ashamed."
+    ]
+   ],
+   "note": "Safety: \"better off without me\" must reach the provider word for word.",
+   "reviewed": false
+  },
+  {
+   "id": "pd01",
+   "set": "peds",
+   "dir": "es-en",
+   "words": 11,
+   "u": [
+    [
+     "La niña tiene calentura desde ayer",
+     "She has had a fever since yesterday"
+    ],
+    [
+     "y no quiere comer nada.",
+     "and she won't eat anything."
+    ]
+   ],
+   "note": "\"Calentura\": fever.",
+   "reviewed": false
+  },
+  {
+   "id": "pd02",
+   "set": "peds",
+   "dir": "en-es",
+   "words": 12,
+   "u": [
+    [
+     "How many wet diapers has he had",
+     "¿Cuántos pañales mojados ha tenido"
+    ],
+    [
+     "in the last twenty-four hours?",
+     "en las últimas veinticuatro horas?"
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "pd03",
+   "set": "peds",
+   "dir": "en-es",
+   "words": 23,
+   "u": [
+    [
+     "Give him five milliliters of the liquid ibuprofen",
+     "Dele cinco mililitros del ibuprofeno líquido"
+    ],
+    [
+     "every six hours as needed for fever.",
+     "cada seis horas si tiene fiebre."
+    ],
+    [
+     "Use the syringe that comes in the box.",
+     "Use la jeringa que viene en la caja."
+    ]
+   ],
+   "note": "Dose and interval.",
+   "reviewed": false
+  },
+  {
+   "id": "pd04",
+   "set": "peds",
+   "dir": "es-en",
+   "words": 19,
+   "u": [
+    [
+     "Le di un té de manzanilla",
+     "I gave him chamomile tea"
+    ],
+    [
+     "porque tenía empacho,",
+     "because he had empacho,"
+    ],
+    [
+     "y también le sobé la pancita",
+     "and I also rubbed his tummy"
+    ],
+    [
+     "como hacía mi abuela.",
+     "like my grandmother used to do."
+    ]
+   ],
+   "note": "\"Empacho\": a folk illness. Keep the word; let the provider ask.",
+   "reviewed": false
+  },
+  {
+   "id": "pd05",
+   "set": "peds",
+   "dir": "en-es",
+   "words": 30,
+   "u": [
+    [
+     "His ear infection should get better in two or three days with the antibiotic.",
+     "La infección del oído debería mejorar en dos o tres días con el antibiótico."
+    ],
+    [
+     "If he's still pulling at his ear or has a fever after that,",
+     "Si después de eso todavía se jala la oreja o tiene fiebre,"
+    ],
+    [
+     "bring him back.",
+     "tráigalo de nuevo."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "pd06",
+   "set": "peds",
+   "dir": "es-en",
+   "words": 30,
+   "u": [
+    [
+     "En la escuela me dicen que no pone atención",
+     "At school they tell me he doesn't pay attention"
+    ],
+    [
+     "y que no se está quieto,",
+     "and that he can't sit still,"
+    ],
+    [
+     "pero en la casa es muy tranquilo.",
+     "but at home he's very calm."
+    ],
+    [
+     "Yo creo que la maestra no lo quiere.",
+     "I think the teacher doesn't like him."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "pd07",
+   "set": "peds",
+   "dir": "en-es",
+   "words": 33,
+   "u": [
+    [
+     "She's due for her vaccines today:",
+     "Hoy le tocan sus vacunas:"
+    ],
+    [
+     "measles, mumps and rubella, and chickenpox.",
+     "sarampión, paperas y rubéola, y varicela."
+    ],
+    [
+     "She may have a low fever or a rash in a week or so.",
+     "Puede que tenga un poco de fiebre o un sarpullido en más o menos una semana."
+    ],
+    [
+     "That's normal and goes away by itself.",
+     "Es normal y se quita solo."
+    ]
+   ],
+   "note": "Four diseases by name.",
+   "reviewed": false
+  },
+  {
+   "id": "pd08",
+   "set": "peds",
+   "dir": "en-es",
+   "words": 36,
+   "u": [
+    [
+     "Babies should always sleep on their backs,",
+     "Los bebés siempre deben dormir boca arriba,"
+    ],
+    [
+     "alone in their own crib,",
+     "solos en su propia cuna,"
+    ],
+    [
+     "with no pillows, blankets or stuffed animals.",
+     "sin almohadas, cobijas ni peluches."
+    ],
+    [
+     "This lowers the risk of sudden infant death.",
+     "Esto reduce el riesgo de muerte súbita del bebé."
+    ],
+    [
+     "Please don't sleep with the baby in your bed.",
+     "Por favor, no duerma con el bebé en su cama."
+    ]
+   ],
+   "note": "",
+   "reviewed": false
+  },
+  {
+   "id": "pd09",
+   "set": "peds",
+   "dir": "es-en",
+   "words": 35,
+   "u": [
+    [
+     "Tiene tos desde hace dos semanas,",
+     "He has had a cough for two weeks,"
+    ],
+    [
+     "pero ahora en la noche le da como un silbido en el pecho",
+     "but now at night he gets like a whistling in his chest"
+    ],
+    [
+     "y se le hunden aquí las costillas cuando respira.",
+     "and his ribs sink in here when he breathes."
+    ],
+    [
+     "Me asusté y por eso lo traje.",
+     "I got scared and that's why I brought him."
+    ]
+   ],
+   "note": "\"Aquí\": the parent is pointing; say so.",
+   "reviewed": false
+  },
+  {
+   "id": "pd10",
+   "set": "peds",
+   "dir": "en-es",
+   "words": 41,
+   "u": [
+    [
+     "We need to do a lumbar puncture, a spinal tap.",
+     "Tenemos que hacerle una punción lumbar."
+    ],
+    [
+     "We put a thin needle in his lower back",
+     "Le ponemos una aguja delgada en la parte baja de la espalda"
+    ],
+    [
+     "to take a little fluid from around the spinal cord.",
+     "para sacar un poco del líquido que rodea la médula espinal."
+    ],
+    [
+     "It's the only way to know for sure",
+     "Es la única manera de saber con seguridad"
+    ],
+    [
+     "whether he has meningitis.",
+     "si tiene meningitis."
+    ]
+   ],
+   "note": "Two names for one test: keep one.",
+   "reviewed": false
+  }
+ ]
+}

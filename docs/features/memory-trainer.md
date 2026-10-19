@@ -36,4 +36,37 @@ are built only if M0 shows they work in the installed app.
 
 ## Results
 
-(Jose's pasted reports go here, one per mode: installed app, Safari.)
+**Installed app, 2026-10-19** (Jose's iPhone, build b1019.2028; the user agent
+says iPhone OS 18_7 with Safari Version/27.0.1, so the OS number in it is
+frozen and not the real iOS version):
+- Voices: Spanish only es-ES (Mónica) and es-MX (Paulina), no es-US; 28
+  English, novelty voices included (Bubbles, Bad News...). The trainer must
+  pick by name: Paulina for Spanish, Samantha for English; never rely on the
+  default for a lang tag.
+- English played (4.0 s for the 11-word line). Spanish not tried in this run.
+- Record + play back: works (audio/mp4 AAC, 122 KB for 5 s). M3 can go ahead.
+- After the mic: the voice is quieter (Jose: "no", not as loud). Likely iOS
+  keeping the audio route on the earpiece after getUserMedia. Unproven fix:
+  `navigator.audioSession.type = 'playback'` after recording; test before M3.
+- Speech to text: the API is there (`webkitSpeechRecognition`), English got
+  "listening, speak now" and nothing after. Unclear whether it stalled or the
+  report was copied within the 10 s window. M5 stays on hold.
+
+**Still to run:** a Safari tab; Play Spanish in both; speech to text waiting
+until the line changes before Copy.
+
+## M1: the lines
+
+`memory/lines.json` (60 lines, 10 per setting: discharge, meds, consent, ed,
+ob, peds; 36 en-es, 24 es-en; 10 to 43 source words). Each: `id`, `set`,
+`dir`, `words`, `u` (meaning chunks `[source, model]`), `note` (what the line
+tests), `reviewed`. The 101 False Friends `heard`/`truth` pairs in
+`index.html` are the short starters and are not repeated. Thin spots: only 3
+lines over 40 words and 2 at 10; add longer ones after the first review if
+spans run long.
+
+Jose reviews the Spanish on a private claude.ai page (Memory Lines Review,
+https://claude.ai/artifact/36Jn3pPjbDuxQZ3tkTAm4A): Good, or a written fix
+per line, saved in its `reviews` collection (doc id = line id, `verdict`
+ok|fix, `fix`, `at`). Claude reads it back, applies the fixes and sets
+`reviewed: true`. Nothing ships to the app until every line is reviewed.
