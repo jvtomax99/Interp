@@ -16757,7 +16757,7 @@ const GUIDE_TOPICS = [
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
     <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Tap a building or its label to practise that area; Dr. Smiley points at the one worth lighting next, and <b>Play</b> starts what's next. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
-    <p><b>Your domains</b> further down shows, for each area, how much of the question bank you've learned and how often you got it right in your sessions. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>Right under the campus, <b>Your domains</b> lists one row per building: how much of its question bank you've learned, how often you got it right in your sessions, and a <b>Practise</b> button. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
   { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms session specialty pause resume mistakes', q:'What is Term Review?', a:`
@@ -19738,6 +19738,37 @@ function renderPractice(){
   const ready = examReadiness();
   html += renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen);
 
+  // ---- your domains: the campus's buildings, one row each (the live screen's rows) ----
+  const mast = domainMastery();
+  const acc = domainAccuracy();
+  html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
+  html += `<div class="mastery-list" data-motion="mastery" data-sig="${escapeAttr(JSON.stringify(mast))}">`;
+  CCHI_DOMAINS.forEach((d, i)=>{
+    const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
+    const a = acc[d.id];
+    const t = m.total || 1;
+    html += `
+      <div class="mastery-row dash-in" style="--dom:${d.color}; --i:${i}">
+        <div class="mastery-top">
+          <span class="mastery-dot"></span>
+          <span class="mastery-id">
+            <span class="mastery-name">${escapeHtml(d.name)}</span>
+            <span class="mastery-weight">${d.weight}% of the exam \u00b7 ${escapeHtml((CAMPUS.find(x=> x.id === d.id) || {}).place || '')}${a ? ` \u00b7 ${Math.round((a.right/a.total)*100)}% right` : ''}</span>
+          </span>
+          <span class="mastery-pct"><span class="js-count" data-to="${Math.round(((m.known + m.shaky*0.5)/t)*100)}">${Math.round(((m.known + m.shaky*0.5)/t)*100)}</span>%</span>
+        </div>
+        <span class="mastery-track">
+          <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
+          <span class="mastery-seg is-shaky" style="width:${(m.shaky/t)*100}%"></span>
+        </span>
+        <div class="mastery-foot">
+          <span class="mastery-stats">${m.known} learned · ${m.shaky} shaky · ${m.unseen} unseen</span>
+          <button class="mastery-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise</button>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+
   // ---- your scores over time, and the one domain to work on ----
   html += `<div class="dash-row">${renderScoreTrend()}${renderFocusTile(ready.worst)}</div>`;
 
@@ -19797,37 +19828,6 @@ function renderPractice(){
       <span class="badge-note">${escapeHtml(bd.note)}</span>
     </div>`;
   }).join('') + `</div>`;
-
-  // ---- where you stand ----
-  const mast = domainMastery();
-  const acc = domainAccuracy();
-  html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
-  html += `<div class="mastery-list" data-motion="mastery" data-sig="${escapeAttr(JSON.stringify(mast))}">`;
-  CCHI_DOMAINS.forEach((d, i)=>{
-    const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
-    const a = acc[d.id];
-    const t = m.total || 1;
-    html += `
-      <div class="mastery-row dash-in" style="--dom:${d.color}; --i:${i}">
-        <div class="mastery-top">
-          <span class="mastery-dot"></span>
-          <span class="mastery-id">
-            <span class="mastery-name">${escapeHtml(d.name)}</span>
-            <span class="mastery-weight">${d.weight}% of the exam${a ? ` \u00b7 ${Math.round((a.right/a.total)*100)}% right in sessions` : ''}</span>
-          </span>
-          <span class="mastery-pct"><span class="js-count" data-to="${Math.round(((m.known + m.shaky*0.5)/t)*100)}">${Math.round(((m.known + m.shaky*0.5)/t)*100)}</span>%</span>
-        </div>
-        <span class="mastery-track">
-          <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
-          <span class="mastery-seg is-shaky" style="width:${(m.shaky/t)*100}%"></span>
-        </span>
-        <div class="mastery-foot">
-          <span class="mastery-stats">${m.known} learned · ${m.shaky} shaky · ${m.unseen} unseen</span>
-          <button class="mastery-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise</button>
-        </div>
-      </div>`;
-  });
-  html += `</div>`;
 
   // ---- the custom setup, kept for anyone who wants to choose ----
   html += `<div class="section-head"><h2>Custom session</h2></div>`;
@@ -20160,7 +20160,6 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
       <img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">
       ${lit}${sparkle}${cars}${hits}${tags}
     </div>
-    <div class="cp-legend">${legend}</div>
     <div class="cp-chips">
       <span class="cp-chip study-streak"><i>${ICON_FLAME}</i><b class="study-flame js-count" data-to="${st.days||0}">${st.days||0}</b> day${(st.days||0)===1?'':'s'}</span>
       <span class="cp-chip${todayCount >= DAILY_GOAL ? ' is-met' : ''}"><i>${ICON_TARGET}</i><b class="js-count" data-to="${todayCount}">${todayCount}</b>&#8202;/&#8202;${DAILY_GOAL} today</span>

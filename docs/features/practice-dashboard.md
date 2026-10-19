@@ -67,6 +67,8 @@ manifest into `CAMPUS_MAP`. Phone loads the picture + 5 layers (~300 KB). On the
 per roof (`.cp-tag`, nudged apart), tap areas (`.cp-bld`), headlights on the
 drive and the fountain sparkle (only while on screen: `watchCampus`). Under
 it a legend of names (`.cp-key`), streak/goal/due chips, Play and Exam sim.
-The HUD keeps the live screen's glossy readiness donut (`.ready-ring`,
+The legend chips are gone: the live screen's Your domains rows
+(`.mastery-row`, candy Practise buttons) sit right under the card, each
+naming its building (`CAMPUS[].place`). The HUD keeps the live screen's glossy readiness donut (`.ready-ring`,
 `animateReadyRing`; Jose, 2026-10-19: "a combination" of the two looks).
 Dr. Smiley in the card is an `ask-face`, so the dock's Dr. Smiley steps aside.
