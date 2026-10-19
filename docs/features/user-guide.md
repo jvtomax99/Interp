@@ -28,5 +28,8 @@ search and Ask, so it doesn't pollute them. `promoWatch` marks it watched
 `watchPromo()` opens the answer over Home (no navigation, Back closes it) and
 starts it with sound, which the tap allows. The button itself is
 `addPromoBtn` in `home-polish.js`, styled at the end of `home-polish.css`:
-bottom-right of the banner, its right edge on Search's, 9px above it, in the
+a story bubble (Jose's pick, 2026-10-19): `media/hub-promo-thumb.webp` in a
+slowly turning ring of the promo's colours (paused with the petals when the
+banner is off screen, still for reduced motion), a play badge, "Watch" on a
+dark glass chip (the banner's bottom fades pale there). Bottom-right of the banner, its right edge on Search's, 9px above it, in the
 band beside the Hackensack sign (never over it).

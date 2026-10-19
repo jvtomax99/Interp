@@ -1409,32 +1409,47 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
   #content.is-home .home-wave-icon{grid-row:1;align-self:center;margin:-6px 0;}
 }
 
-/* ---------- "Watch" on the hello banner ----------
-   The 45-second video (addPromoBtn in home-polish.js). Bottom-right of the
-   banner, in the band beside the Hackensack sign and 9px above Search (the
-   banner runs 25px under it), its right edge lined up with Search's. Glass
-   like the greeting's own buttons. Gone once the video has been watched. */
+/* ---------- "Watch" on the hello banner: a story bubble ----------
+   The 45-second video (addPromoBtn in home-polish.js), Jose's pick: the
+   video's still in a ring of its colours (the promo's coral, gold, mint and
+   pink over the hospital blues), a play badge, "Watch" under it. Bottom-right
+   of the banner, in the band beside the Hackensack sign, 9px above Search
+   (the banner runs 25px under it), its right edge on Search's. The ring
+   turns slowly while the banner is on screen (paused with the petals when
+   it isn't), stills for reduced motion. Gone once the video is watched. */
 #content.is-home .home-promo-btn{
   position:absolute; right:16px; bottom:34px; z-index:6;
-  display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 15px 0 6px;
-  font-family:var(--sans); font-size:13px; font-weight:650; letter-spacing:-.005em; color:#fff;
-  border-radius:999px; border:1px solid rgba(255,255,255,0.34); cursor:pointer;
-  background:rgba(14,20,56,0.38); backdrop-filter:blur(12px) saturate(160%); -webkit-backdrop-filter:blur(12px) saturate(160%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 20px -12px rgba(6,18,58,0.6);
-  text-shadow:0 1px 6px rgba(8,14,26,0.5);
-  transition:transform .18s var(--ease), background .18s var(--ease);
-  animation:homePromoIn .6s var(--ease) 1.2s both;
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:0; margin:0;
+  background:none; border:0; cursor:pointer; color:#fff; font-family:var(--sans);
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .18s var(--ease);
+  animation:homePromoIn .7s var(--ease) 1.2s both;
 }
-#content.is-home .home-promo-btn small{ font-size:12px; font-weight:550; opacity:.78; font-variant-numeric:tabular-nums; }
-#content.is-home .home-promo-play{
-  width:32px; height:32px; border-radius:50%; display:grid; place-items:center; flex:none;
-  background:linear-gradient(140deg,#01B8E6,#2E8BD0); box-shadow:0 2px 8px rgba(1,120,170,0.45);
-}
-#content.is-home .home-promo-play svg{ width:15px; height:15px; fill:#fff; margin-left:2px; }
+#content.is-home .home-promo-bubble{ position:relative; width:62px; height:62px; display:block; border-radius:50%;
+  filter:drop-shadow(0 6px 12px rgba(6,18,58,0.45)); }
+#content.is-home .home-promo-ring{ position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(from 0deg,#FF6B5A,#FFC23D,#2ED3A0,#01B8E6,#2E8BD0,#9B8CFF,#FF7AB6,#FF6B5A);
+  animation:homePromoSpin 9s linear infinite; }
+#content.is-home .home-promo-thumb{ position:absolute; inset:4px; width:54px; height:54px; border-radius:50%;
+  object-fit:cover; border:2.5px solid #0E1438; background:#0E1438; box-sizing:border-box; }
+#content.is-home .home-promo-play{ position:absolute; right:-3px; bottom:-2px; width:24px; height:24px; border-radius:50%;
+  display:grid; place-items:center; background:linear-gradient(140deg,#01B8E6,#2E8BD0);
+  border:2px solid #fff; box-shadow:0 2px 6px rgba(1,90,140,0.5); }
+#content.is-home .home-promo-play svg{ width:11px; height:11px; fill:#fff; margin-left:1.5px; }
+/* on a dark glass chip: the banner's bottom fades pale here, too light for white type alone */
+#content.is-home .home-promo-label{ font-size:12px; font-weight:650; letter-spacing:.01em; line-height:1;
+  padding:3px 9px 4px; border-radius:999px; background:rgba(14,20,56,0.62);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.16); }
 #content.is-home .home-promo-btn:active,
-#content.is-home .home-promo-btn.is-pressed{ transform:scale(.95); background:rgba(14,20,56,0.55); }
-#content.is-home .home-promo-btn:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
-@media (hover:hover){ #content.is-home .home-promo-btn:hover{ background:rgba(14,20,56,0.5); } }
+#content.is-home .home-promo-btn.is-pressed{ transform:scale(.92); }
+#content.is-home .home-promo-btn:focus-visible{ outline:none; }
+#content.is-home .home-promo-btn:focus-visible .home-promo-bubble{ outline:2px solid #fff; outline-offset:3px; }
+@media (hover:hover){ #content.is-home .home-promo-btn:hover{ transform:translateY(-2px); } }
 @media (min-width:901px){ #content.is-home .home-promo-btn{ right:38px; } }
-@keyframes homePromoIn{ from{ opacity:0; translate:0 8px; } to{ opacity:1; translate:0 0; } }
-@media (prefers-reduced-motion:reduce){ #content.is-home .home-promo-btn{ animation:none; transition:none; } }
+#content.is-home .home-petals.is-offscreen ~ .home-promo-btn .home-promo-ring{ animation-play-state:paused; }
+@keyframes homePromoIn{ 0%{ opacity:0; scale:.4; } 60%{ opacity:1; scale:1.08; } 100%{ opacity:1; scale:1; } }
+@keyframes homePromoSpin{ to{ rotate:360deg; } }
+@media (prefers-reduced-motion:reduce){
+  #content.is-home .home-promo-btn{ animation:none; transition:none; }
+  #content.is-home .home-promo-ring{ animation:none; }
+}
