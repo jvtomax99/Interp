@@ -89,18 +89,37 @@ BUILD['e'] = (LV) => { // ---- Ethics: the main hospital, 30 Prospect Ave (brick
   label('e', x, 0.3 + F*FL + (b>=F?1.4:3.6), z);
 }
  };
-BUILD['n'] = (LV) => { // ---- Encounter: Helena Theurer Pavilion (9 stories: 3-storey surgical base + glass patient tower, spans the road) ----
-{ const F = 9, b = LV; const x=2.0, z=-4.6;
-  const base = Math.min(3,b); box(6.0, base*FL, 3.6, BRICK2, x, 0.3+base*FL/2, z, 0.05); windows(x, z, 6.0, 3.6, 0.3, base, GLASS_D, 0.7);
-  for (let f=1; f<=base; f++) box(6.04, 0.07, 3.64, CREAM, x, 0.3+f*FL-0.04, z, 0.02, false);
-  let top = 0.3 + base*FL;
-  if (b > 3){ const up = b-3; box(4.4, up*FL, 2.6, WHITE, x+0.4, top+up*FL/2, z-0.2, 0.06);
-    for (let f=0; f<up; f++){ box(4.0, FL*0.62, 0.04, GLASS, x+0.4, top+f*FL+FL*0.5, z+1.11, 0.01, false); box(0.04, FL*0.62, 2.2, GLASS, x+2.61, top+f*FL+FL*0.5, z-0.2, 0.01, false); }
-    top += up*FL; }
-  if (b < F){ scaffold(x+0.4, z-0.2, 4.4, 2.6, top, F-b); crane(x+1.6, z-0.8, top+(F-b)*FL); } else box(4.6, 0.12, 2.8, STEEL, x+0.4, top+0.06, z-0.2, 0.04);
+BUILD['n'] = (LV) => { // ---- Encounter: Helena Theurer Pavilion (from Jose's photo: a curved glass tower with the
+  // lit "Hackensack University Medical Center" sign along its top edge, on a brick base with tall slit windows and a
+  // drive-through entrance under it; 9 stories: 3-storey base + 6-storey tower)
+  const F = 9, b = LV; const x=2.0, z=-4.6;
+  const base = Math.min(3,b), bh = base*FL;
+  box(6.0, bh, 3.6, M(0x9a5444), x, 0.3+bh/2, z, 0.05);
+  // tall slit windows on the two faces we see
+  for (let i=0;i<11;i++){ box(0.12, bh*0.7, 0.04, M(0xf3efe6), x-2.7+i*0.54, 0.3+bh*0.55, z+1.81, 0.01, false); }
+  for (let i=0;i<6;i++){ box(0.04, bh*0.7, 0.12, M(0xf3efe6), x+3.01, 0.3+bh*0.55, z-1.4+i*0.56, 0.01, false); }
+  // the drive-through: a dark portal with a lit soffit and the grey band above it
+  if (base >= 2){ box(2.6, 1.0, 0.1, M(0x2a2630), x-0.6, 0.3+0.5, z+1.79, 0.02, false);
+    box(2.6, 0.06, 0.1, M(0xffe2a8,{x:{emissive:new THREE.Color(0xffc870), emissiveIntensity:0.9}}), x-0.6, 0.3+0.98, z+1.8, 0.01, false);
+    box(3.4, 0.3, 0.12, M(0x8d8a94), x-0.6, 0.3+1.22, z+1.82, 0.02, false); }
+  let top = 0.3 + bh;
+  // the tower: plan with a flat back and a curved front, extruded floor by floor (glass + white slab lines)
+  const up = Math.max(0, b-3);
+  const plan = new THREE.Shape(); const TW = 4.6, TD = 2.5, bulge = 0.9;
+  plan.moveTo(-TW/2, TD/2); plan.lineTo(TW/2, TD/2); plan.lineTo(TW/2, -TD/2 + 0.2);
+  plan.quadraticCurveTo(0, -TD/2 - bulge, -TW/2, -TD/2 + 0.2); plan.lineTo(-TW/2, TD/2);   // y is -z after the turn: the curve faces the street
+  const slab = (y, h, mat) => { const g = new THREE.ExtrudeGeometry(plan, { depth:h, bevelEnabled:false, curveSegments:24 });
+    g.rotateX(-Math.PI/2); const m = add(g, mat, x+0.4, y, z-0.3); m.rotation.y = -0.18; return m; };
+  for (let f=0; f<up; f++){ slab(top + f*FL, FL*0.86, GLASS); slab(top + f*FL + FL*0.86, FL*0.14, M(0xeef1f6)); }
+  top += up*FL;
+  if (b >= F){ slab(top, 0.12, M(0xdfe3ea));
+    // the lit sign along the curved top edge
+    const pts = []; for (let i=0;i<=24;i++){ const t = i/24, px = -TW/2 + t*TW, pz = (TD/2 - 0.2) + bulge*2*t*(1-t) + 0.04; pts.push(new THREE.Vector3(px, 0, pz)); }
+    const curve = new THREE.CatmullRomCurve3(pts); const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.11, 8, false), new THREE.MeshBasicMaterial({ color:0x8f6bff }));
+    tube.position.set(x+0.4, top + 0.16, z-0.3); tube.rotation.y = -0.18; tube.castShadow = false; G.add(tube);
+  } else { scaffold(x+0.4, z-0.2, 4.6, 2.8, top, F-b); crane(x+1.6, z-0.8, top+(F-b)*FL); }
   label('n', x+0.4, 0.3 + F*FL + (b>=F?0.8:3.6), z-0.2);
-}
- };
+};
 BUILD['t'] = (LV) => { // ---- Terminology: John Theurer Cancer Center, 92 Second St (5 stories, glass rotunda in a white frame, brick wing with sun shades, skybridge) ----
 { const F = 5, b = LV; const x=4.4, z=2.0;
   const h = b*FL;
