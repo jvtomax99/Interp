@@ -3415,7 +3415,7 @@
     animation:dashIn .42s var(--ease) backwards;
     animation-delay:calc(var(--i, 0) * 60ms + var(--motion-skip, 0s));
   }
-  .is-still:not(.study-flame), .is-still *:not(.study-flame, .cp-lit, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus){ animation:none !important; }
+  .is-still:not(.study-flame), .is-still *:not(.study-flame, .cp-lit, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-litsel, .cp-pick-in){ animation:none !important; }
 
   .dash-row{ display:grid; grid-template-columns:1fr; gap:9px; max-width:760px; margin:0 0 26px 0; }
   @media (min-width:600px){ .dash-row{ grid-template-columns:1.6fr 1fr; align-items:start; } }
@@ -3709,8 +3709,45 @@
   .cp-tag.is-focus i{ color:#7a3d00; } .cp-tag.is-focus::after{ border-top-color:#FFB443; }
   .cp-tag:focus-visible, .cp-key:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   .cp-tag{ padding:4px 7px; border-radius:999px; font-size:11.5px; border:2px solid var(--dom); }
-  .cp-tag i{ margin:0; color:#fff; }
-  .cp-tag.is-focus i{ color:#2a1a08; }
+  .cp-tag b{ font-weight:650; }
+  .cp-tag i{ margin:0 0 0 4px; color:#FFC86B; }
+  .cp-tag.is-focus i{ color:#7a3d00; }
+  /* Picking a building (campusPick): its badge grows, the others step back, the scene dims around it */
+  .cp-tag{ transition:opacity .25s var(--ease), scale .3s var(--spring, cubic-bezier(.34,1.56,.64,1)); }
+  .cp-world.has-sel .cp-tag:not(.is-sel){ opacity:.55; }
+  .cp-tag.is-sel{ scale:1.12; z-index:3; background:#fff; color:#151C2C; }
+  .cp-tag.is-sel i{ color:#B5577A; } .cp-tag.is-sel::after{ border-top-color:#fff; }
+  .cp-tag.is-sel.is-focus{ background:#FFB443; color:#2a1a08; } .cp-tag.is-sel.is-focus::after{ border-top-color:#FFB443; } .cp-tag.is-sel.is-focus i{ color:#7a3d00; }
+  .cp-shade{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .3s var(--ease); background:rgba(10,6,30,.5);
+    -webkit-mask-image:radial-gradient(var(--rw,10%) var(--rh,10%) at var(--cx,50%) var(--cy,50%), transparent 55%, #000 100%);
+    mask-image:radial-gradient(var(--rw,10%) var(--rh,10%) at var(--cx,50%) var(--cy,50%), transparent 55%, #000 100%); }
+  .cp-world.has-sel .cp-shade{ opacity:1; }
+  .cp-litsel{ animation:cpLight .4s ease-out backwards; }
+  .cp-litsel .cp-lit{ animation:cpSelGlow 1.6s ease-in-out infinite; }
+  @keyframes cpSelGlow{ 50%{ opacity:.72; } }
+  /* the card takes the place of the chips and Play row (same box, nothing below moves) */
+  .cp-foot{ position:relative; }
+  .cp-foot.has-sel > .cp-chips, .cp-foot.has-sel > .cp-go{ visibility:hidden; }
+  .cp-pick{ position:absolute; left:0; right:0; top:6px; bottom:0; z-index:4; pointer-events:none; display:flex; align-items:center; }
+  .cp-pick-in{ flex:1; pointer-events:auto; display:flex; align-items:center; gap:9px; padding:9px 13px; border-radius:16px;
+    background:rgba(255,255,255,.94); color:#151C2C; box-shadow:0 10px 26px -8px rgba(10,6,30,.6); animation:cpPickIn .35s var(--ease) backwards; }
+  .cp-pick-in p{ margin:0; flex:1; min-width:0; font-size:13px; line-height:1.3; }
+  .cp-pick-in p b{ display:flex; align-items:center; gap:6px; font-size:15px; font-weight:650; line-height:1.25; }
+  .cp-pick-in .cp-dot{ flex-shrink:0; box-shadow:0 0 0 2px color-mix(in srgb, var(--dom) 30%, #fff); }
+  .cp-pick-in small{ display:block; margin-top:2px; font-size:12px; color:#5A6478; }
+  .cp-pick-go{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .cp-pick .cp-play{ border:0; cursor:pointer; min-height:44px; padding:0 13px; border-radius:14px; font-family:var(--sans); font-size:15px; font-weight:650;
+    transition:transform .3s var(--spring, cubic-bezier(.34,1.56,.64,1)), box-shadow .2s; }
+  .cp-pick .cp-play:active, .cp-pick .cp-play.is-pressed{ transform:translateY(3px) scale(1.02,.96); transition-duration:.08s;
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 #C9801E, 0 4px 8px -4px rgba(255,170,60,.6); }
+  .cp-pick .cp-play{ flex:none; }
+  .cp-pick-in{ position:relative; }
+  .cp-pick-x{ position:absolute; top:-9px; right:-6px; width:28px; height:28px; border:0; border-radius:50%; background:#fff; color:#5A6478; cursor:pointer;
+    display:grid; place-items:center; box-shadow:0 1px 2px rgba(20,43,67,.12), 0 4px 10px -4px rgba(10,6,30,.5); }
+  .cp-pick-x::before{ content:''; position:absolute; inset:-8px; }
+  .cp-pick-x svg{ width:14px; height:14px; }
+  .cp-pick button:focus-visible{ outline:2px solid #0F5FA6; outline-offset:2px; }
+  @keyframes cpPickIn{ from{ opacity:0; transform:translateY(10px); } }
   .cp-legend{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
   .cp-key{ display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 11px; border-radius:999px; cursor:pointer;
     border:0; background:rgba(255,255,255,.12); color:#fff; font-family:var(--sans); font-size:12px; font-weight:600; }
@@ -3757,7 +3794,7 @@
   .cp-go button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
   @media (prefers-reduced-motion: reduce){
-    .cp-lit, .cp-litw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus{ animation:none !important; } .cp-veh{ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
+    .cp-lit, .cp-litw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh{ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
     .cp-go button{ transition:none; }
   }
 
@@ -13069,7 +13106,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus, alive at dusk: buildings light up as you master each exam area; cars, an ambulance and a helicopter come and go' },
+  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
   { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley acts more: an eyebrow-flash hello, a startled giggle, a worried look when you go offline' },
   { id:'promo',       tone:'gd-n3', pin:'pins/userguide.webp',           eyebrow:'Video',                 title:'Interpreter Hub in 45 seconds: watch it, or show it to someone new' },
 ];
@@ -16837,7 +16874,7 @@ const GUIDE_TOPICS = [
 
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Tap a building or its badge to practise that area; Dr. Smiley stands by the one worth lighting next, and <b>Play</b> starts what's next. The campus is alive: cars come and go up the drive, an ambulance pulls in with its lights going, a helicopter lands on the white tower's helipad, the flags wave and the fountain plays. It all pauses while the campus is off screen. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Each building's badge shows its exam area and how lit it is. Tap a building or its badge to pick it: its windows all light up, the rest of the campus dims, and a card under the picture names the exam area with its number of questions and its share of the exam. Tap <b>Practise</b> (or the same building again) to start; tap the empty campus or the × to put it back. Dr. Smiley stands by the one worth lighting next, and <b>Play</b> starts what's next. The campus is alive: cars come and go up the drive, an ambulance pulls in with its lights going, a helicopter lands on the white tower's helipad, the flags wave and the fountain plays. It all pauses while the campus is off screen. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
     <p>Right under the campus, <b>Your domains</b> lists one row per building: how much of its question bank you've learned, how often you got it right in your sessions, and a <b>Practise</b> button. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
@@ -20190,17 +20227,18 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   const M = CAMPUS_MAP, W = M.w;
   const mast = domainMastery();
   const cover = id => { const m = mast[id]; return m && m.total ? (m.known + m.shaky*0.5)/m.total : 0; };
-  // Labels: a chip ~ (letters x 7.5 + 34) css px at the phone's ~0.37 css px per render px; nudge any that
-  // would overlap upward, keep all inside the picture.
+  // Labels: name + % in a chip ~ (letters x 6.6 + 24) css px at the phone's ~0.37 css px per render px;
+  // nudge any that would overlap upward, keep all inside the picture.
   const K = 0.37, tagsAt = {}, placed = [];
+  if (!document.querySelector('#content .cp-card')) CAMPUS_PICK.key = null;   // a fresh arrival starts with nothing picked
   CAMPUS.map(b => b.key).sort((a, b) => M.b[b].label[1] - M.b[a].label[1]).forEach(key => {
-    const w = 46 / K, h = 30 / K;
+    const w = ((CAMPUS.find(b => b.key === key).short.length + 5) * 6.6 + 24) / K, h = 30 / K;
     let x = Math.max(w/2 + 4, Math.min(W - w/2 - 4, M.b[key].label[0])), y = M.b[key].label[1];
     for (let guard = 0; guard < 12; guard++){
       const hit = placed.find(p => Math.abs(p.x - x) < (p.w + w)/2 + 6 && Math.abs(p.y - y) < h + 4);
       if (!hit) break; y = hit.y - h - 6;
     }
-    placed.push({ x, y, w }); tagsAt[key] = [x, y];
+    placed.push({ x, y, w }); tagsAt[key] = [x, y, w];
   });
   const top = Math.max(0, Math.min(Math.min(...placed.map(p => p.y)) - 34/K - 8, M.g[1]));
   const bottom = M.g[1] + M.g[3], H = bottom - top;
@@ -20212,10 +20250,10 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     const c = cover(b.id), lv = campusLevel(c), pct = Math.round(c*100), d = CCHI_DOMAINS.find(x => x.id === b.id) || {};
     sig.push(b.key + lv);
     if (lv) lit += `<span class="cp-litw" style="${pos(...M.b[b.key].lv[lv-1])};--i:${i}"><img class="cp-lit" src="./city/${b.key}-lit${lv}.webp" alt="" decoding="async" style="--fl:${(3.2 + i*0.7).toFixed(1)}s"></span>`;
-    hits += `<button class="cp-bld" style="${pos(...M.b[b.key].box)}" tabindex="-1" aria-hidden="true"
-        onclick="requireName(()=>startStudy('domain','${b.id}'))"></button>`;
-    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}" style="${at(...tagsAt[b.key])};--dom:${d.color||'#888'}"
-        onclick="requireName(()=>startStudy('domain','${b.id}'))" aria-label="Practise ${escapeAttr(d.name||b.short)}, ${pct}% lit"><i>${pct}%</i></button>`;
+    hits += `<button class="cp-bld" data-k="${b.key}" style="${pos(...M.b[b.key].box)}" tabindex="-1" aria-hidden="true"
+        onclick="campusPick('${b.key}')"></button>`;
+    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}${CAMPUS_PICK.key === b.key ? ' is-sel' : ''}" data-k="${b.key}" style="${at(...tagsAt[b.key])};--dom:${d.color||'#888'}"
+        onclick="campusPick('${b.key}')" aria-label="${escapeAttr(d.name||b.short)}, ${pct}% lit" aria-pressed="${CAMPUS_PICK.key === b.key}"><b>${escapeHtml(b.short)}</b><i>${pct}%</i></button>`;
     legend += `<button class="cp-key${b.id === worst ? ' is-focus' : ''}" style="--dom:${d.color||'#888'}" onclick="requireName(()=>startStudy('domain','${b.id}'))">
         <span class="cp-dot"></span>${escapeHtml(b.short)} <i>${pct}%</i></button>`;
   });
@@ -20233,7 +20271,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     <span class="cp-veh cp-heli" ${data(L.heli)} style="${pos(...L.heli.img[0])};${origin(L.heli, L.heli.img[0])}"><img src="./city/heli0.webp" alt="" decoding="async"><img src="./city/heli1.webp" alt="" decoding="async"></span>`;
   // Dr. Smiley stands at the building to light next
   const wk = worst ? CAMPUS.find(x => x.id === worst).key : null;
-  const dr = wk ? `<span class="cp-dr" style="${at(tagsAt[wk][0] - 46/K, tagsAt[wk][1] - 2/K)}">${drSmileyArt('ask-face')}</span>` : '';
+  const dr = wk ? `<span class="cp-dr" style="${at(Math.max(22/K, tagsAt[wk][0] - tagsAt[wk][2]/2 - 24/K), tagsAt[wk][1] - 2/K)}">${drSmileyArt('ask-face')}</span>` : '';
   let say;
   if (!worst) say = 'Every window is lit. Sit an exam simulation to prove it!';
   else { const b = CAMPUS.find(x => x.id === worst); say = `Light up <b>${escapeHtml(b ? b.place : '')}</b>: ${escapeHtml(b ? b.short : ready.worst.d.name)} is ${ready.worst.d.weight}% of the exam.`; }
@@ -20247,10 +20285,12 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
       <span>${escapeHtml(ready.title)}</span>
     </div>
     <div class="cp-say"><p><small>Dr. Smiley</small>${say}</p></div>
-    <div class="cp-world" style="aspect-ratio:${W} / ${H}">
+    <div class="cp-world${CAMPUS_PICK.key ? ' has-sel' : ''}" style="aspect-ratio:${W} / ${H}" data-top="${top}" onclick="campusTapOut(event)">
       <img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">
-      ${lit}${live}${hits}${tags}${dr}
+      ${lit}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelLit(CAMPUS_PICK.key, top) : ''}${hits}${tags}${dr}
     </div>
+    <div class="cp-foot${CAMPUS_PICK.key ? ' has-sel' : ''}">
+    <div class="cp-pick" role="region" aria-live="polite" aria-label="Picked building">${CAMPUS_PICK.key ? campusPickCard(CAMPUS_PICK.key) : ''}</div>
     <div class="cp-chips">
       <span class="cp-chip study-streak"><i>${ICON_FLAME}</i><b class="study-flame js-count" data-to="${st.days||0}">${st.days||0}</b> day${(st.days||0)===1?'':'s'}</span>
       <span class="cp-chip${todayCount >= DAILY_GOAL ? ' is-met' : ''}"><i>${ICON_TARGET}</i><b class="js-count" data-to="${todayCount}">${todayCount}</b>&#8202;/&#8202;${DAILY_GOAL} today</span>
@@ -20260,8 +20300,52 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
       <button class="cp-play" onclick="requireName(()=>startStudy('${next[0]}'))">${escapeHtml(next[1])}</button>
       <button class="cp-exam" onclick="requireName(()=>startStudy('exam'))">Exam sim</button>
     </div>
+    </div>
   </div>`;
 }
+
+/* Picking a building: the first tap on a building or its badge picks it (its windows all light, the
+   rest of the scene dims, a card names the exam area with Practise); a second tap, or Practise,
+   starts. A tap on the empty scene, the card's close or Escape puts it back. Kept across the
+   screen's re-renders, dropped on a fresh arrival (renderCampus). */
+const CAMPUS_PICK = { key: null };
+function campusPos(top){ const M = CAMPUS_MAP, H = M.g[1] + M.g[3] - top;
+  return { box: (x, y, w, h) => `left:${(x/M.w*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/M.w*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`,
+    pt: (x, y) => [(x/M.w*100).toFixed(2) + '%', ((y-top)/H*100).toFixed(2) + '%'], H }; }
+function campusShadeAt(key, top){
+  const [x, y, w, h] = CAMPUS_MAP.b[key].box, P = campusPos(top), [cx, cy] = P.pt(x + w/2, y + h/2);
+  return `--cx:${cx};--cy:${cy};--rw:${(w/CAMPUS_MAP.w*100*0.85).toFixed(2)}%;--rh:${(h/P.H*100*0.8).toFixed(2)}%`;
+}
+const campusSelLit = (key, top) => `<span class="cp-litw cp-litsel" style="${campusPos(top).box(...CAMPUS_MAP.b[key].lv[9])}"><img class="cp-lit" src="./city/${key}-lit10.webp" alt="" decoding="async"></span>`;
+function campusPickCard(key){
+  const b = CAMPUS.find(x => x.key === key), d = CCHI_DOMAINS.find(x => x.id === b.id) || {}, m = domainMastery()[b.id];
+  const pct = Math.round((m && m.total ? (m.known + m.shaky*0.5)/m.total : 0) * 100), n = allQuestions().filter(q => q.d === b.id).length;
+  return `<div class="cp-pick-in" style="--dom:${d.color||'#888'}">
+    <p><b><span class="cp-dot"></span>${escapeHtml(d.name || b.short)}</b>
+      <small>${n} question${n === 1 ? '' : 's'} · ${d.weight}% of exam</small></p>
+    <div class="cp-pick-go"><button class="cp-play" onclick="campusGo('${key}')" aria-label="Practise ${escapeAttr(b.short)}, ${pct}% lit">Practise</button>
+      <button class="cp-pick-x" onclick="campusPick(null)" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+  </div>`;
+}
+function campusPick(key){
+  if (key && CAMPUS_PICK.key === key) return campusGo(key);
+  CAMPUS_PICK.key = key;
+  const world = document.querySelector('#content .cp-world'), pick = document.querySelector('#content .cp-pick');
+  if (!world || !pick) return;
+  const top = +world.dataset.top || 0, shade = world.querySelector('.cp-shade');
+  world.classList.toggle('has-sel', !!key);
+  const foot = document.querySelector('#content .cp-foot'); if (foot) foot.classList.toggle('has-sel', !!key);
+  world.querySelectorAll('.cp-tag').forEach(t => { const on = t.dataset.k === key; t.classList.toggle('is-sel', on); t.setAttribute('aria-pressed', on); });
+  const old = world.querySelector('.cp-litsel'); if (old) old.remove();
+  if (key){ shade.setAttribute('style', campusShadeAt(key, top)); shade.insertAdjacentHTML('afterend', campusSelLit(key, top)); }
+  pick.innerHTML = key ? campusPickCard(key) : '';
+}
+function campusGo(key){
+  const b = CAMPUS.find(x => x.key === key); CAMPUS_PICK.key = null;
+  if (b) requireName(() => startStudy('domain', b.id));
+}
+function campusTapOut(e){ if (CAMPUS_PICK.key && !e.target.closest('.cp-bld, .cp-tag')) campusPick(null); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && CAMPUS_PICK.key && document.querySelector('#content .cp-world.has-sel')) campusPick(null); });
 
 /* ---------- Practice dashboard motion ----------
    Each block that moves carries data-motion (its name) and data-sig (what it
@@ -21136,8 +21220,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.2137';
-const BUILD_TIME = '2026-10-19 21:37 UTC';
+const BUILD_ID = 'b1019.2238';
+const BUILD_TIME = '2026-10-19 22:38 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
