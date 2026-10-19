@@ -35,6 +35,22 @@ en = ChatterboxTTS.from_pretrained(device='cpu')
 es = None
 
 
+def trim(a, sr):
+    """Speech only: from the first 20 ms window within 25 dB of the loudest (less 50 ms),
+    to the last within 35 dB before a gap of 450 ms or more (the multilingual model can
+    trail a second of noise or mumble; takes can open on a quarter second of hiss)."""
+    w = int(.02 * sr)
+    rms = np.sqrt([np.mean(a[k:k + w] ** 2) for k in range(0, len(a) - w + 1, w)])
+    start = np.nonzero(rms > rms.max() * 10 ** (-25 / 20))[0][0]
+    on = np.nonzero(rms > rms.max() * 10 ** (-35 / 20))[0]
+    on = on[on >= start]
+    end = start
+    for k in on[1:]:
+        if (k - end) * w > .45 * sr: break
+        end = k
+    return a[max(0, start * w - int(.05 * sr)): (end + 1) * w + int(.08 * sr)]
+
+
 def say(text, lang, opts):
     global es
     kw = {'exaggeration': opts.get('exaggeration', .55), 'cfg_weight': opts.get('cfg_weight', .5)}
@@ -47,8 +63,7 @@ def say(text, lang, opts):
     else:
         wav, sr = en.generate(text, **kw), en.sr
     a = wav.squeeze().cpu().numpy()
-    nz = np.nonzero(np.abs(a) > 0.01)[0]                      # trim silence at both ends
-    return a[max(0, nz[0] - int(.03 * sr)): nz[-1] + int(.08 * sr)], sr
+    return trim(a, sr), sr
 
 
 for i, L in enumerate(lines):
