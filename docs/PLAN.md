@@ -198,6 +198,11 @@ come from this alone.
 
 ## Done
 
+- 2026-10-19 CoreCHI dashboard + motion (Jose's ask, options picked:
+  regroup + trend, native animation). Score-trend tile (last 12 sessions,
+  tap a point), Focus next tile, "My progress" card folded into the trend
+  tile and the domain rows, staggered arrival, count-ups, self-drawing
+  line, resumable motion. Note: `docs/features/practice-dashboard.md`.
 - 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
   `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
   ~7 s after opening at 4x in 5/5 runs); now on the tab bar, kept in its
@@ -361,6 +366,9 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+- The practice screen re-renders on any data arrival (`ensureLoaded` ->
+  `scheduleRender`), so entrance motion there must survive a re-render:
+  `data-motion`/`data-sig` + `playPracticeMotion` resume it.
 - **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
   Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,
   tap to paint 770-1,130 ms on this session's slow machine. Forced layout
