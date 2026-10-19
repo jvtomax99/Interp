@@ -96,7 +96,10 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
-S4. **Glossary taps.** A domain tap's handler is 117-207 ms, ~144 ms of it
+S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
+   handler's forced layouts only moves the cost to the next reader or the
+   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
+   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
    before write. Target: handler < 50 ms, tap to paint < 150 ms.
@@ -357,6 +360,21 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
+  Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,
+  tap to paint 770-1,130 ms on this session's slow machine. Forced layout
+  inside the click, in order: `watchDomainDock` (topbar height, every
+  render), `smileyElsewhere` in `smileyRider` `topBar` (`getClientRects`
+  on the lock screen's face, hidden under `#accessLock[hidden]`; ~170 ms),
+  `void b.offsetWidth` restarting `#tgSmiley`'s pop, then `dockMorph`'s
+  FLIP reads when the tucked bar opens. Skipping `[hidden]` faces and
+  restarting the pop by alternating two keyframe names removed the first
+  two; `dockMorph` then paid the same layout. 5+5 alternated: tap to paint
+  median 848 ms before, 928 after (noise). Reverted. Like S3b (3): the
+  whole new screen's layout is paid once by whoever reads first; only less
+  work per screen shortens a tap. The click's "wait" (200-420 ms) is mostly
+  how headless Chromium stamps a tap; viewport and `touch-action` are fine.
 
 - **S3b measurements (2026-10-19, `tests/tools/startup.cjs`, iPhone UA,
   4x, interleaved 5+5).** This session's machine is ~2x slower than S3's:
