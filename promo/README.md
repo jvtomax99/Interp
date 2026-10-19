@@ -7,7 +7,8 @@ Not part of the app: `.vercelignore` keeps this folder off the live site.
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
 30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `v6` (for the CEO pitch), `v7` (v6 with the
 Chatterbox voice), `v8` (v7, "Safer care." retaken), `v9` (Jose's pick of take), `v10` (the Spanish lines
-with a Latino accent), `hub-promo-v11.mp4` (current: on-screen capitals fixed). `build.py` builds v11; older builds are in git history.
+with a Latino accent), `v11` (on-screen capitals fixed), `hub-promo-v12.mp4` (current: more colour,
+motion and Hackensack). `build.py` builds v12; older builds are in git history.
 
 ## How the chats run (Jose, 2026-10-19)
 
@@ -62,7 +63,28 @@ is now audibly a different man from the narrator. -15.1 LUFS, -1.2 dBTP.
 **v11** (2026-10-19): Jose: "Insuficiencia" was lower case; check all the grammar. The hook's
 quoted words now start with a capital: "Heart failure", "¿Fallo cardíaco?" (Spanish capitalises
 after ¿), "Insuficiencia cardíaca". The barrage's "beta blocker" is now "beta-blocker". Every other
-line on screen and in `narration.json` was read and left as is. Audio unchanged.
+line on screen and in `narration.json` was read and left as is. Audio unchanged. (First encoded
+without `loudnorm`, at -20.7 LUFS; re-encoded at -15.1.)
+
+**v12** (2026-10-19): Jose: more dynamic, more Hackensack, more exciting, more colours. His picks:
+the campus photo, the hospital's blues with bright pops, more motion graphics (not faster cuts,
+music or type). Same script, voice, music and timing as v11. Added in `build.py`:
+
+- **Colour.** `BRIGHT`: one colour per phone beat (coral, gold, mint, pink, violet, orange, sky,
+  lime, cyan) on that beat's headline bar, detail ring and a glow behind the phone. The hook gets a
+  coral glow on the wrong word, mint on the right one, gold on the title. `BLUES` are the HMH blues.
+- **Shapes.** Sixteen squares and diamonds (the HMH mark's two pieces, not the logo) drift round
+  the edges, dim until the drop, then pulse every half bar. Bursts of them on "Heart failure",
+  on the drop and on "Safer care." The Hub icon gets twelve that fly in and form a ring.
+- **Wipes and streaks.** Five slanted colour bands cover the frame at the two scene changes (into
+  the title, into the end card). Three light streaks cross on each phone screen change.
+- **Hackensack.** The end card is the campus photo (`hero.jpg`, the pink tree and the HUMC sign)
+  on "Built here, for our patients", with a HACKENSACK UNIVERSITY MEDICAL CENTER caption, a strip of
+  the blues under it, Dr. Smiley standing on it, the text below. The sign stays clear of words and
+  fades; the photo pulls back from its corner. The background marquee now reads Hackensack
+  University Medical Center.
+
+-15.1 LUFS, -1.2 dBTP.
 
 ## v6: for the pitch to the hospital's CEO (2026-10-18)
 
@@ -118,7 +140,8 @@ $T filmstrip --project edit/promo.tsrct --start-ms 0 --duration-ms 30000 --inter
 $T export --project edit/promo.tsrct --encoder-backend external-ffmpeg-command \
    --ffmpeg-path "$(which ffmpeg)" --output edit/master.mp4
 ffmpeg -i edit/master.mp4 -c:v libx264 -crf 20 -preset slow -pix_fmt yuv420p \
-   -c:a aac -b:a 160k -movflags +faststart hub-promo-vN.mp4
+   -af "loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000" -c:a aac -b:a 160k \
+   -movflags +faststart hub-promo-vN.mp4
 ```
 
 On Linux, MP4 export needs the system FFmpeg (the flags above); Tesseract's

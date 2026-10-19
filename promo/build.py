@@ -1,4 +1,4 @@
-"""HUMC Interpreter Hub team promo, v4: 45 s, 1080x1920, cut to a 120 BPM bed.
+"""HUMC Interpreter Hub team promo, v12 (v4's cut, more colour and motion): 45 s, 1080x1920, cut to a 120 BPM bed.
 0-8.4 s    hook: "The doctor says: heart failure." A word barrage, a half-second
            countdown, the interpreter's voice (em_alex) tries "¿fallo
            cardíaco?", struck out ("Nope."), then "insuficiencia cardíaca"
@@ -25,6 +25,10 @@ PX, PY = 540, 1190
 BEATS = [10000 + i * 3000 for i in range(9)]
 BEAT, END = 3000, 37000
 DANGER = hexc('#FF5A6E')
+# v12: one bright per phone beat (headline bar, ring, glow) over the hospital's blues
+BRIGHT = ['#FF6B5A', '#FFC23D', '#2ED3A0', '#FF7AB6', '#9B8CFF', '#FF9142', '#4FD1FF', '#B8E34A', '#01B8E6']
+BLUES = ['#0F5FA6', '#2E8BD0', '#01B8E6', '#3A4CB8']
+INK = hexc('#06123A')
 TTF = HERE + '/fonts/inter/extras/ttf/Inter-'
 
 if not os.path.exists(TTF + 'Bold.ttf'):
@@ -74,6 +78,7 @@ for s in SHOTS:
     run('project', 'import-asset', '--project', P, '--file', f'{HERE}/shots/{s}.png', '--asset-id', 'shot-' + s, '--kind', 'image')
 run('project', 'import-asset', '--project', P, '--file', '/home/user/Interp/icon-512.png', '--asset-id', 'hub-icon', '--kind', 'image')
 run('project', 'import-asset', '--project', P, '--file', '/home/user/Interp/drsmiley/base.webp', '--asset-id', 'smiley', '--kind', 'image')
+run('project', 'import-asset', '--project', P, '--file', '/home/user/Interp/hero.jpg', '--asset-id', 'campus', '--kind', 'image')
 SFXLEN = {}
 for name, (preset, seed) in SFX.items():
     f = f'{HERE}/sfx/{name}.wav'
@@ -216,6 +221,64 @@ def radial(id, name, cx, cy, r, color):
                        'stops': [{'offset': 0, 'color': color}, {'offset': 1, 'color': color[:3] + [0]}]})
 
 
+def shape(name, start, dur, size, color, pos, diamond=False):
+    """A square, or a diamond (the square turned 45 degrees): the HMH mark's two pieces."""
+    L = rect(nid(), name, start, dur, (size, size), color, pos, roundness=size * .08, anchor=(size / 2, size / 2))
+    L['transform']['rotation'] = 45 if diamond else 0
+    return L
+
+
+def burst(at, cx, cy, n=12, dist=520, size=34, d=750):
+    """Squares and diamonds flying out from a point, on a hit."""
+    out = []
+    for j in range(n):
+        a = 2 * np.pi * j / n + .2
+        r = dist * (.75 + .5 * ((j * 7) % 5) / 4)
+        col = hexc(BRIGHT[j % len(BRIGHT)]) if j % 2 else hexc(BLUES[j % len(BLUES)])
+        L = shape('Burst', at, d + 60, size * (1 + .5 * (j % 3) / 2), col, (cx, cy), diamond=j % 2)
+        ex, ey = cx + r * np.cos(a), cy + r * np.sin(a)
+        A.append(kf(L['id'], 'positionX', [(0, cx, None), (d, ex, OUT)]))
+        A.append(kf(L['id'], 'positionY', [(0, cy, None), (d, ey, OUT)]))
+        r0 = L['transform']['rotation']
+        A.append(kf(L['id'], 'rotation', [(0, r0, None), (d, r0 + (200 if j % 2 else -200), OUT)]))
+        scale_keys(L, [(0, 30, None), (180, 110, OUT), (d, 50, LIN)])
+        fade(L, [(0, 100, None), (d * .55, 100, LIN), (d, 0, LIN)])
+        out.append(L)
+    return out
+
+
+def wipe(cut, lead):
+    """Five slanted bands sweep across and fully cover the frame at `cut`: a scene change."""
+    cols = [lead, '#01B8E6', '#2E8BD0', '#0F5FA6', '#1E2A6E']
+    out = []
+    for k, c in enumerate(cols):
+        L = rect(nid(), 'Wipe band', cut - 420, 900, (450, 2900), hexc(c), (0, 960), anchor=(225, 1450))
+        L['transform']['rotation'] = 15
+        off = -k * 330
+        A.append(kf(L['id'], 'positionX', [(0, -600 + off, None), (400, 1200 + off, SNAP), (440, 1250 + off, LIN),
+                                           (840, 3000 + off, WHIP)]))
+        out.append(L)
+    return out
+
+
+def streak(at, y, color, rot=-18, d=480):
+    """A thin light streak zipping across."""
+    L = rect(nid(), 'Streak', at, d + 20, (900, 12), color, (0, y), roundness=6, anchor=(450, 6),
+             paint={'type': 'gradient', 'gradientType': 'linear', 'start': [0, 0], 'end': [900, 0],
+                    'stops': [{'offset': 0, 'color': color[:3] + [0]}, {'offset': .8, 'color': color},
+                              {'offset': 1, 'color': hexc('#FFFFFF')}]})
+    L['transform']['rotation'] = rot
+    A.append(kf(L['id'], 'positionX', [(0, -700, None), (d, 1800, INOUT)]))
+    return L
+
+
+def glow(name, start, dur, cx, cy, r, color, fin=400, fout=400):
+    G = radial(nid(), name, cx, cy, r, color)
+    G['activeRange'] = rng(start, dur)
+    fade(G, [(0, 0, None), (fin, 100, LIN), (dur - fout, 100, LIN), (dur, 0, LIN)])
+    return G
+
+
 layers = []                                       # built back to front, reversed at save
 add = lambda L: layers.append(L) or L
 
@@ -229,7 +292,28 @@ A.append(kf(o1['id'], 'positionX', [(0, 160, None), (10000, 820, INOUT), (20000,
 A.append(kf(o1['id'], 'positionY', [(0, 380, None), (10000, 700, INOUT), (20000, 1200, INOUT), (30000, 420, INOUT)]))
 A.append(kf(o2['id'], 'positionX', [(0, 980, None), (10000, 300, INOUT), (20000, 900, INOUT), (30000, 400, INOUT)]))
 A.append(kf(o2['id'], 'positionY', [(0, 1560, None), (10000, 1300, INOUT), (20000, 700, INOUT), (30000, 1500, INOUT)]))
-MQ = 'HEART FAILURE · INSUFICIENCIA CARDÍACA · TERMINOLOGY · TERMINOLOGÍA · '
+add(glow('Glow wrong word', NARR[2]['start_ms'] - 200, 5900 - NARR[2]['start_ms'], 300, 1350, 820, hexc('#FF6B5A', .34)))
+add(glow('Glow right word', 6000, 2450, 540, 1000, 900, hexc('#2ED3A0', .30), fin=120))
+add(glow('Glow title', 8250, 1600, 540, 700, 800, hexc('#FFC23D', .24), fin=150, fout=300))
+for i in range(9):
+    add(glow(f'Glow beat {i + 1}', BEATS[i] - 400, BEAT + 400, 540, 1250, 1000, hexc(BRIGHT[i], .36)))
+# squares and diamonds, the HMH mark's pieces, around the edges: dim until the drop, then pulse
+# on every half bar
+SHAPES = [(70, 180, 70, 1), (980, 150, 56, 0), (1010, 520, 90, 1), (60, 700, 48, 0), (130, 1050, 84, 1),
+          (1000, 880, 44, 0), (950, 1280, 72, 0), (80, 1450, 60, 1), (1010, 1700, 96, 1), (180, 1820, 50, 0),
+          (560, 90, 40, 1), (760, 1860, 58, 0), (300, 330, 36, 0), (840, 400, 30, 1), (240, 1620, 34, 1), (880, 1520, 38, 0)]
+for j, (x, y, sz, dm) in enumerate(SHAPES):
+    col = hexc(BRIGHT[(j * 3) % 9], .75) if j % 3 == 2 else hexc(BLUES[j % 4], .6)
+    L = add(blur(shape(f'Shape {j + 1}', 0, DUR, sz, col, (x, y), diamond=dm)))
+    A.append(kf(L['id'], 'positionY', [(0, y, None), (DUR, y - 160 - 60 * (j % 3), LIN)]))
+    r0 = 45 if dm else 0
+    A.append(kf(L['id'], 'rotation', [(0, r0, None), (6000, r0 + 20, LIN), (DUR, r0 + (110 if j % 2 else -110), LIN)]))
+    fade(L, [(0, 35, None), (5900, 35, LIN), (6050, 100, LIN)])
+    sk = [(0, 100, None), (6000, 100, LIN), (6200, 165, OUT), (6600, 100, INOUT)]
+    for t in range(7000, DUR - 400, 1000):
+        sk += [(t, 100, LIN), (t + 90, 122, OUT), (t + 420, 100, INOUT)]
+    scale_keys(L, sk)
+MQ = 'HEART FAILURE · INSUFICIENCIA CARDÍACA · HACKENSACK UNIVERSITY MEDICAL CENTER · '
 for row, (y, x0, x1) in enumerate([(250, 0, -2600), (1640, -2600, 0)]):
     m = add(text(nid(), f'Marquee {row + 1}', 0, DUR, MQ * 2, 230, (x0, y), font='xbold', color=hexc('#FFFFFF', .045),
                  just='left', box=(9000, 300), tracking=-20))
@@ -313,18 +397,35 @@ A.append(kf(ansG['id'], 'positionX', [(0, 1140, None), (380, 540, SNAP)]))
 scale_keys(ansG, [(0, 125, None), (450, 100, POP), (AD - 300, 104, LIN), (AD, 190, WHIP)])
 fade(ansG, [(AD - 300, 100, None), (AD, 0, LIN)])
 add(flash(ANS, 55))
+for L in burst(ANS, 540, 960, n=14, dist=620, size=38): add(L)
+for L in burst(T_HF - 100, 540, 900, n=10, dist=480, size=28, d=650): add(L)
 
 # ---------- B. title ----------
 T0 = 8300
 TD = BEATS[0] - T0 + 100
-icon = image(nid(), 'Hub icon', 0, TD, 'hub-icon', (240, 240), (540, 760), anchor=(120, 120), radius=58, shadow=shadow(60, 24, .45))
+IC = (540, 680)
+icon = image(nid(), 'Hub icon', 0, TD, 'hub-icon', (240, 240), IC, anchor=(120, 120), radius=58, shadow=shadow(60, 24, .45))
+ringk = []
+for j in range(12):
+    a = 2 * np.pi * j / 12 - np.pi / 2
+    col = hexc(BRIGHT[j // 2 % 9]) if j % 4 == 3 else hexc(BLUES[j % 4])
+    L = shape('Mark piece', 0, TD, 46, col, IC, diamond=j % 2)
+    fx, fy = IC[0] + 215 * np.cos(a), IC[1] + 215 * np.sin(a)
+    sx_, sy_ = IC[0] + 700 * np.cos(a + 1), IC[1] + 700 * np.sin(a + 1)
+    t = 60 + j * 35
+    A.append(kf(L['id'], 'positionX', [(t, sx_, None), (t + 520, fx, SNAP)]))
+    A.append(kf(L['id'], 'positionY', [(t, sy_, None), (t + 520, fy, SNAP)]))
+    fade(L, [(t, 0, None), (t + 150, 100, LIN)])
+    ringk.append(L)
+markG = blur(group(nid(), 'Mark ring', 0, TD, ringk, pos=IC, anchor=IC))
+A.append(kf(markG['id'], 'rotation', [(0, -40, None), (700, 0, SNAP), (TD, 18, LIN)]))
 pop(icon, 0, s0=10, d=520)
 A.append(kf(icon['id'], 'rotation', [(0, -120, None), (600, 0, SNAP)]))
 t_meet = NARR[5]['start_ms'] + 700 - T0              # "Meet Interpreter Hub"
-tl = kline('Title', 0, TD, 'Interpreter Hub', 124, 540, 930, t_meet, None, just='center', track=-35, stagger=110)
-tsub = kline('Title sub', 0, TD, 'for the HUMC interpreter team', 46, 540, 1110, t_meet + 300, None, face='med', just='center',
+tl = kline('Title', 0, TD, 'Interpreter Hub', 124, 540, 960, t_meet, None, just='center', track=-35, stagger=110)
+tsub = kline('Title sub', 0, TD, 'for the HUMC interpreter team', 46, 540, 1140, t_meet + 300, None, face='med', just='center',
              track=0, stagger=40, color=hexc('#FFFFFF', .75))
-titleG = add(blur(group(nid(), 'Title', T0, TD, [tsub, tl, icon], pos=(540, 960), anchor=(540, 960))))
+titleG = add(blur(group(nid(), 'Title', T0, TD, [tsub, tl, icon, markG], pos=(540, 960), anchor=(540, 960))))
 scale_keys(titleG, [(TD - 650, 100, None), (TD - 300, 70, WHIP)])
 A.append(kf(titleG['id'], 'positionY', [(TD - 650, 960, None), (TD - 300, 520, WHIP)]))
 fade(titleG, [(TD - 600, 100, None), (TD - 300, 0, LIN)])
@@ -351,9 +452,9 @@ strip = []
 for i, s in enumerate(SHOTS):
     fx, fy, sc, x0, y0, x1, y1 = FOCUS[i]
     t = BEATS[i] - PH0
-    ring = rect(nid(), 'Ring ' + s, 0, PHD, ((x1 - x0) * SW, (y1 - y0) * SH), hexc('#01B8E6', .10),
+    ring = rect(nid(), 'Ring ' + s, 0, PHD, ((x1 - x0) * SW, (y1 - y0) * SH), hexc(BRIGHT[i], .12),
                 (i * SW + (x0 + x1) / 2 * SW, (y0 + y1) / 2 * SH), roundness=22,
-                anchor=((x1 - x0) * SW / 2, (y1 - y0) * SH / 2), stroke=(CYAN, 5))
+                anchor=((x1 - x0) * SW / 2, (y1 - y0) * SH / 2), stroke=(hexc(BRIGHT[i]), 6))
     scale_keys(ring, [(t + 1150, 112, None), (t + 1500, 100, SNAP), (t + 2550, 100, LIN), (t + 2800, 106, LIN)])
     fade(ring, [(0, 0, None), (t + 1150, 0, LIN), (t + 1300, 100, LIN), (t + 2550, 100, LIN), (t + 2800, 0, LIN)])
     strip.append(ring)
@@ -406,7 +507,10 @@ scrim = add(rect(nid(), 'Top scrim', BEATS[0] - 300, END - BEATS[0] + 400, (1080
 fade(scrim, [(0, 0, None), (400, 100, LIN), (END - BEATS[0], 100, LIN), (END - BEATS[0] + 300, 0, LIN)])
 for i, (l1, l2) in enumerate(HEAD):
     add(kline(f'Head {i + 1}a', BEATS[i], BEAT, l1, 84, 80, 118, 100, 2600, face='semi', track=-20, color=hexc('#FFFFFF', .92)))
-    add(kline(f'Head {i + 1}b', BEATS[i], BEAT, l2, 96, 92, 232, 330, 2660, marker=CYAN, ink=hexc('#06123A')))
+    add(kline(f'Head {i + 1}b', BEATS[i], BEAT, l2, 96, 92, 232, 330, 2660, marker=hexc(BRIGHT[i]), ink=INK))
+for i in range(1, len(SHOTS)):
+    for k, (y, rot) in enumerate([(820, -18), (1380, -14), (1720, -20)]):
+        add(blur(streak(BEATS[i] - 330 + k * 60, y, hexc(BRIGHT[i]) if k != 1 else hexc('#FFFFFF', .8), rot)))
 # story bar: one segment per screen, each fills over its beat
 NS = len(SHOTS)
 SEGW = (920 - (NS - 1) * 10) / NS
@@ -425,30 +529,49 @@ for i in range(NS):
 # "Better words. Safer care."
 ED = DUR - END
 L15, L16, L17 = (NARR[i]['start_ms'] - END for i in (15, 16, 17))
-big = image(nid(), 'Smiley end', 0, ED, 'smiley', (400, 500), (540, 860), anchor=(200, 500), fit='contain')
-pop(big, 120, s0=20, d=560)
-A.append(kf(big['id'], 'positionY', [(120, 1000, None), (680, 860, SNAP), (2400, 872, INOUT), (4200, 860, INOUT), (ED, 868, INOUT)]))
-A.append(kf(big['id'], 'rotation', [(120, -10, None), (800, 3, OUT), (1500, 0, INOUT)]))
-et = kline('End title', 0, ED, 'Interpreter Hub', 112, 540, 900, 350, None, just='center', track=-35, stagger=110)
-es = kline('End sub', 0, ED, 'Built here, for our patients.', 46, 540, 1050, L15 + 1150, None, face='med', just='center',
+PH_H = 1114                                       # hero.jpg at full width
+photo = image(nid(), 'Campus', 0, ED, 'campus', (1080, PH_H), (0, PH_H), anchor=(0, PH_H))
+scale_keys(photo, [(0, 112, None), (ED, 100, OUT)])     # slow pull back from the sign's corner
+band = []
+for k, c in enumerate(BLUES + ['#FF6B5A', '#FFC23D']):
+    band.append(rect(nid(), 'Brand band', 0, ED, (180, 12), hexc(c), (k * 180, PH_H)))
+bandG = group(nid(), 'Brand band', 0, ED, band, pos=(0, PH_H), anchor=(0, PH_H))
+A.append(kf(bandG['id'], 'scaleX', [(250, 0, None), (750, 100, SNAP)]))
+cw = int(width('HACKENSACK UNIVERSITY MEDICAL CENTER', 28, 'SemiBold') + 28 * .2 * 36 + 70)
+cap = group(nid(), 'Campus caption', 0, ED, [
+    text(nid(), 'Campus caption text', 0, ED, 'HACKENSACK UNIVERSITY MEDICAL CENTER', 28, (0, 0), font='semi', color=WHITE,
+         box=(cw, 64), tracking=200),
+    rect(nid(), 'Campus caption pill', 0, ED, (cw, 64), hexc('#0E1438', .72), (0, 0), roundness=32)],
+    pos=(540, 96), anchor=(cw / 2, 32))
+cap['layers'][0]['sourceText']['verticalAlign'] = 'center'
+pop(cap, L15 + 900, s0=70)
+big = image(nid(), 'Smiley end', 0, ED, 'smiley', (300, 375), (880, PH_H), anchor=(150, 375), fit='contain')
+pop(big, 500, s0=20, d=560)
+A.append(kf(big['id'], 'rotation', [(500, -10, None), (1200, 3, OUT), (1900, 0, INOUT), (4000, 2, INOUT), (ED, -1, INOUT)]))
+TY = 1160
+et = kline('End title', 0, ED, 'Interpreter Hub', 112, 540, TY, 350, None, just='center', track=-35, stagger=110)
+es = kline('End sub', 0, ED, 'Built here, for our patients.', 46, 540, TY + 148, L15 + 1150, None, face='med', just='center',
            track=0, stagger=45, color=hexc('#FFFFFF', .8))
 uw = 640
 url = group(nid(), 'Address', 0, ED, [
     text(nid(), 'Address text', 0, ED, 'interp-six.vercel.app', 44, (0, 0), font='semi', color=NAVY, box=(uw, 96)),
     rect(nid(), 'Address pill', 0, ED, (uw, 96), WHITE, (0, 0), roundness=48, shadow=shadow(50, 20, .4))],
-    pos=(540, 1210), anchor=(uw / 2, 48))
+    pos=(540, TY + 285), anchor=(uw / 2, 48))
 url['layers'][0]['sourceText']['verticalAlign'] = 'center'
 pop(url, L16, s0=70)
-live = kline('Live', 0, ED, 'Live today, on any phone.', 38, 540, 1290, L16 + 350, None, face='med', just='center',
+live = kline('Live', 0, ED, 'Live today, on any phone.', 38, 540, TY + 345, L16 + 350, None, face='med', just='center',
              track=0, stagger=40, color=hexc('#FFFFFF', .72))
-tag1 = kline('Tagline 1', 0, ED, 'Better words.', 96, 540, 1400, L17, None, just='center', track=-35, stagger=110)
-tag2 = kline('Tagline 2', 0, ED, 'Safer care.', 96, 540, 1525, L17 + 620, None, just='center', track=-35, stagger=110,
-             marker=CYAN, ink=hexc('#06123A'))
-logo = text(nid(), 'Made at HUMC', 0, ED, 'MADE BY THE HUMC INTERPRETER TEAM', 26, (540, 1760), font='semi',
+tag1 = kline('Tagline 1', 0, ED, 'Better words.', 96, 540, TY + 420, L17, None, just='center', track=-35, stagger=110)
+tag2 = kline('Tagline 2', 0, ED, 'Safer care.', 96, 540, TY + 540, L17 + 620, None, just='center', track=-35, stagger=110,
+             marker=CYAN, ink=INK)
+logo = text(nid(), 'Made at HUMC', 0, ED, 'MADE BY THE HUMC INTERPRETER TEAM', 26, (540, TY + 695), font='semi',
             color=hexc('#01B8E6', .9), box=(1000, 50), anchor=(500, 0), tracking=240)
 fade(logo, [(L17 + 900, 0, None), (L17 + 1400, 100, OUT)])
-add(group(nid(), 'End card', END, ED, [logo, tag2, tag1, live, url, es, et, big]))
-add(flash(END + 80, 40))
+add(group(nid(), 'End card', END, ED, [logo, tag2, tag1, live, url, es, et, big, cap, bandG, photo]))
+for L in burst(END + L17 + 620, 540, TY + 610, n=12, dist=460, size=30): add(L)
+# colour wipes over everything at the two scene changes
+for L in wipe(T0, '#FFC23D'): add(L)
+for L in wipe(END + 40, '#FF7AB6'): add(L)
 
 # ---------- sound ----------
 for i, (st, n) in enumerate(VOICE):
