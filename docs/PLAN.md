@@ -471,6 +471,13 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Facts (so nobody re-checks)
 
+- **Then two chats did M2 at once, the same evening (2026-10-19).** #73 and
+  `claude/m2-memory-trainer-alt` (dropped, Jose's call; the branch stays
+  on the remote, unmerged). Both chats checked the remote branches before
+  starting and found nothing: the check only catches a chat that has
+  already pushed. **So: push the phase's branch (an empty commit is fine)
+  the moment you take the phase**, before reading code, and look at
+  `git ls-remote --heads origin 'claude/*'` right before that push.
 - **Two chats did M1 at once (2026-10-19).** #69 (`memory/lines.json`,
   approved) and #70 (closed, a second set with its own review page) were
   built in parallel from the same PLAN. Before taking a phase: fetch
