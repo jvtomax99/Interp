@@ -72,7 +72,7 @@ M0. **Voice and mic check** (#60, merged). Installed-app results in the
    speech to text works in a Safari tab (English) but gave no words yet in
    the installed app. **Needs Jose:** installed app, speech to text in
    English and Spanish, waiting for "done" before Copy.
-M1. **Lines** (this PR): `memory/lines.json`, 60 lines approved by Jose
+M1. **Lines** (#69, merged): `memory/lines.json`, 60 lines approved by Jose
    without a line-by-line read (see the note); the trainer flags mistakes.
 M2. **The trainer.** Screen under Practice, playback with the text
    hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
@@ -89,6 +89,14 @@ M4. **Span chart** (weeks) and the span number on the Practice tile.
 M5. **Auto-marking** from speech to text. Only if M0 shows it works in
    the installed app. Matching on the phone; Haiku (`_routine.js`) only
    for the chunks that look like paraphrases; text only, never audio.
+
+**Campus life, round 2 (Jose picked 2026-10-19).** A car backing out of the
+lot, the ambulance bay doors opening when the ambulance pulls in, people
+sitting on benches, birds crossing the sky. Same pipeline as the living
+scene (`docs/mockups/cchi-city/buildentr.cjs` with `NOLIT=<old
+entrance.json>`, ~3 min; the lit set stays); note
+`docs/features/practice-dashboard.md`. Not picked: parallel tilt (motion
+permission on iPhone) and day-to-night (a full lit re-render, heavier files).
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
@@ -462,6 +470,21 @@ paused or read his layout box, not his painted box. Not this PR's code.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **Two chats did M1 at once (2026-10-19).** #69 (`memory/lines.json`,
+  approved) and #70 (closed, a second set with its own review page) were
+  built in parallel from the same PLAN. Before taking a phase: fetch
+  `main`, then look at the open PRs and the remote `claude/*` branches
+  (`git ls-remote --heads origin 'claude/*'`); a branch named for the phase
+  means another chat has it. Remote `claude/*` branches can't be deleted
+  from a cloud session (the proxy drops delete pushes); Jose deletes them
+  on GitHub or they stay.
+- **The live site can't be fetched from a cloud session** (2026-10-19): the
+  proxy answers 403 for interp-six.vercel.app and Vercel's file API refuses.
+  What works: `list_deployments` (Vercel tools) gives the production
+  deployment's commit and state; that commit's `BUILD_ID` is the live one.
+  For a real page check, Jose adds the host under the environment's
+  Allowed domains.
 
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
