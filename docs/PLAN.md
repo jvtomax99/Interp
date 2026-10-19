@@ -103,8 +103,8 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    pays the frame's pending style (Facts), not its own work.
    S7a, S7b, S7c and S7d are in Done. Phone runs in Facts: S7a no clear
    gain; S7b + S7c (b1018.1746) the best scrolling yet, one run. Still to
-   do: (1) Jose's runs on b1018.2012 (asked 2026-10-19; the message had a
-   placeholder, no numbers), 2-3 per build so the spread is known; (2) the
+   do: (1) more runs per build (b1018.2012 has one, Facts), 2-3 each so
+   the spread is known; (2) the
    stall while Home sits still (~27 ms/s, worst 120 ms, two builds in a
    row; was ~7 ms/s). Chromium doesn't show it (Facts, 2026-10-19), so
    S7d made the meter list each stall with when it came and what ran:
