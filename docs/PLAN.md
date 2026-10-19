@@ -53,6 +53,13 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**HUMC campus look (Jose, 2026-10-19).** The campus game on CoreCHI is built
+(branch `claude/cchi-city`, full suite green) but Jose says the 3D-from-boxes
+model doesn't look like Hackensack. Chosen next: an AI-drawn illustration he
+generates from `docs/mockups/cchi-city/illustration-prompt.md` + his photos;
+then make it the game (tappable buildings, progress as lit windows, flags,
+badges, Dr. Smiley) in place of the rendered layers.
+
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
 you missed, the line length follows your span, your span is charted over
