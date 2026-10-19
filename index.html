@@ -1236,6 +1236,100 @@
   .vc-state{ font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; min-height:1.4em; }
   .vc-state q{ font-family:'IBM Plex Serif', Georgia, serif; }
 
+  /* ---------- Memory trainer (Practice -> Memory trainer) ----------
+     The stage is one white card with the finish; the line itself is never
+     drawn while it plays. The play button's ring fills on the line's
+     estimated length (a CSS transition, no frame loop). Chunks are plain
+     17px buttons: a tapped one is struck through in the danger tint. */
+  .mt-wrap{ max-width:760px; display:flex; flex-direction:column; gap:13px; }
+  .mt-stats{ display:grid; grid-template-columns:repeat(3, 1fr); gap:9px; }
+  .mt-stat{ display:flex; flex-direction:column; gap:2px; padding:9px 13px; border-radius:var(--r-md); background:var(--paper); border:1px solid var(--line);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow); }
+  .mt-stat b{ font-size:22px; font-weight:650; letter-spacing:-.03em; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.1; }
+  .mt-stat span{ font-size:12px; line-height:1.3; color:var(--ink-soft); }
+  .mt-stage{ display:flex; flex-direction:column; gap:13px; padding:17px; border-radius:var(--r-lg); background:var(--paper); border:1px solid var(--line);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow); }
+  .mt-top{ display:flex; align-items:center; justify-content:space-between; gap:9px; flex-wrap:wrap; }
+  .mt-eyebrow{ font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
+  .mt-dir{ font-size:12px; font-weight:650; color:var(--accent); background:var(--accent-soft); border-radius:999px; padding:3px 9px; white-space:nowrap; }
+  .mt-stage .mt-lead{ margin:0; font-size:17px; line-height:1.4; font-weight:550; color:var(--ink); }
+  .mt-lead small{ display:block; margin-top:3px; font-size:14px; font-weight:400; color:var(--ink-soft); }
+  .mt-play-row{ display:flex; justify-content:center; padding:6px 0; }
+  .mt-play{ position:relative; width:104px; height:104px; border-radius:50%; border:0; padding:0; cursor:pointer; display:grid; place-items:center;
+    background:var(--bg-hi); color:var(--accent); box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow); transition:transform .15s var(--ease); }
+  .mt-play:disabled{ cursor:default; color:var(--ink-soft); }
+  .mt-play:not(:disabled):active, .mt-play.is-pressed{ transform:scale(.96); }
+  .mt-play:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+  .mt-ring{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+  .mt-ring circle{ fill:none; stroke-width:5; }
+  .mt-ring-bg{ stroke:var(--line-soft); }
+  .mt-ring-fg{ stroke:var(--accent-2); stroke-linecap:round; stroke-dasharray:289; stroke-dashoffset:289; }  /* 2 * pi * 46 */
+  .mt-play.is-playing .mt-ring-fg{ stroke-dashoffset:0; transition:stroke-dashoffset var(--mt-dur, 3s) linear; }
+  .mt-play.is-full .mt-ring-fg{ stroke-dashoffset:0; }
+  .mt-play-in{ display:flex; flex-direction:column; align-items:center; gap:1px; font:650 13px var(--sans); color:var(--ink); }
+  .mt-play-in svg{ width:30px; height:30px; }
+  .mt-stage .mt-shown{ margin:0; padding:13px; border-radius:var(--r-md); background:var(--bg-hi); font:italic 500 18px/1.45 var(--serif); color:var(--ink); }
+  .mt-acts{ display:flex; gap:9px; flex-wrap:wrap; justify-content:flex-end; }
+  .mt-acts .btn{ min-height:44px; }
+  .mt-chunks{ display:flex; flex-wrap:wrap; gap:6px; }
+  .mt-chunk{ min-height:44px; padding:9px 13px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--bg-hi); color:var(--ink);
+    font:500 17px/1.35 var(--sans); text-align:left; cursor:pointer; transition:transform .14s var(--ease), background .14s var(--ease), border-color .14s var(--ease); }
+  .mt-chunk[aria-pressed="true"]{ background:var(--danger-soft); border-color:#E7B3BE; color:var(--danger); text-decoration:line-through; text-decoration-thickness:1.5px; }
+  button.mt-chunk:active, .mt-chunk.is-pressed{ transform:scale(.97); }
+  .mt-chunk:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .mt-chunk.is-still{ cursor:default; display:inline-flex; align-items:center; }
+  .mt-hear{ display:inline-flex; align-items:center; gap:6px; min-height:44px; align-self:flex-start; }
+  .mt-hear svg{ width:20px; height:20px; }
+  .mt-hear.speaking{ box-shadow:0 0 0 3px var(--accent-soft); }
+  .mt-said summary{ display:flex; align-items:center; min-height:44px; cursor:pointer; font-size:14px; font-weight:600; color:var(--ink-soft); list-style:none; }
+  .mt-said summary::-webkit-details-marker{ display:none; }
+  .mt-said summary::before{ content:''; width:7px; height:7px; margin:0 9px 0 3px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(-45deg); transition:transform .2s var(--ease); }
+  .mt-said[open] summary::before{ transform:rotate(45deg); }
+  .mt-said p{ margin:3px 0 0; font:italic 500 16px/1.45 var(--serif); color:var(--ink); }
+  .mt-stage .mt-verdict{ margin:0; font-size:22px; font-weight:650; letter-spacing:-.03em; color:var(--ink); }
+  .mt-verdict.is-clean{ color:#1E7F5C; }
+  .mt-stage .mt-note{ margin:-6px 0 0; font-size:15px; line-height:1.45; color:var(--ink-soft); }
+  .mt-foot{ display:flex; align-items:center; justify-content:space-between; gap:9px; flex-wrap:wrap; }
+  .mt-link{ border:0; background:none; min-height:44px; padding:0 6px; color:var(--accent); font:600 14px var(--sans); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+  .mt-link:disabled{ color:var(--ink-faint); text-decoration:none; cursor:default; }
+  .mt-link:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; border-radius:6px; }
+  .mt-flag{ display:flex; flex-direction:column; gap:9px; width:100%; padding:13px; border-radius:var(--r-md); background:var(--bg-hi); border:1px solid var(--line-soft); }
+  .mt-flag p{ margin:0; font-size:15px; font-weight:600; color:var(--ink); }
+  .mt-flag-opts{ display:flex; flex-wrap:wrap; gap:6px; }
+  .mt-flag-opt{ min-height:44px; padding:6px 13px; border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font:550 14px var(--sans); cursor:pointer; }
+  .mt-flag-opt[aria-pressed="true"]{ border-color:var(--accent-2); background:var(--accent-soft); color:var(--accent); }
+  .mt-flag-opt:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .mt-flag input{ min-height:44px; padding:9px 13px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--paper); color:var(--ink); font:400 16px var(--sans); }
+  .mt-notes{ max-width:360px; }
+  .mt-notes button:disabled{ opacity:.5; cursor:default; }
+  .mt-hint{ margin:-4px 0 0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+  .mt-notice{ margin:0; padding:9px 13px; border-radius:var(--r-sm); font-size:13px; line-height:1.45; color:#8A5200; background:#FFF2DC; }
+  html[data-theme="dark"] .mt-chunk[aria-pressed="true"]{ background:rgba(194,72,92,.2); border-color:rgba(226,138,156,.5); color:#F2A9B6; }
+  html[data-theme="dark"] .mt-verdict.is-clean{ color:#5FCB94; }
+  html[data-theme="dark"] .mt-notice{ color:#FFD9A3; background:rgba(255,181,71,.14); }
+  /* The way in, on the Practice dashboard. */
+  .mt-entry{ display:flex; align-items:center; gap:13px; width:100%; max-width:760px; margin-bottom:26px; padding:13px 17px; text-align:left; cursor:pointer;
+    border-radius:var(--r-md); border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow); transition:transform .14s var(--ease); }
+  .mt-entry:active, .mt-entry.is-pressed{ transform:translateY(-2px); }
+  .mt-entry:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+  .mt-entry-icon{ width:38px; height:38px; border-radius:12px; flex:none; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent); }
+  .mt-entry-icon svg{ width:22px; height:22px; }
+  .mt-entry-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .mt-entry-text b{ font-size:15px; font-weight:650; letter-spacing:-.02em; }
+  .mt-entry-text span{ font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .mt-entry-go{ flex:none; display:flex; flex-direction:column; align-items:center; color:var(--accent); }
+  .mt-entry-go b{ font-size:22px; line-height:1; font-weight:650; letter-spacing:-.035em; font-variant-numeric:tabular-nums; }
+  .mt-entry-go small{ font-size:10px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; }
+  .mt-entry-go svg{ width:20px; height:20px; }
+  @media (max-width:360px){ .mt-stats{ grid-template-columns:1fr 1fr; } .mt-stats .mt-stat:last-child{ grid-column:1 / -1; } }
+  @media (prefers-reduced-motion: reduce){
+    .mt-play.is-playing .mt-ring-fg{ transition:none; }
+    .mt-play, .mt-chunk, .mt-entry, .mt-said summary::before{ transition:none; }
+    .mt-play:not(:disabled):active, button.mt-chunk:active, .mt-entry:active{ transform:none; }
+  }
+
+
   /* ---------- Icon picker (Add Domain) ---------- */  .icon-picker-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .icon-pick{
     width:36px; height:36px; border-radius:10px; border:none; background:var(--bg-hi);
@@ -13106,9 +13200,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
-  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley acts more: an eyebrow-flash hello, a startled giggle, a worried look when you go offline' },
-  { id:'promo',       tone:'gd-n3', pin:'pins/userguide.webp',           eyebrow:'Video',                 title:'Interpreter Hub in 45 seconds: watch it, or show it to someone new' },
+  { id:'memtrainer',  tone:'gd-n1', pin:'pins/review.webp',              eyebrow:'Memory trainer',        title:'Hear a line, say it in the other language, tap what you dropped: the lines grow with your span' },
+  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
+  { id:'askmoves',    tone:'gd-n3', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley acts more: an eyebrow-flash hello, a startled giggle, a worried look when you go offline' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13176,6 +13270,10 @@ const GUIDE_STEPS = {
     `Read the English and the Spanish under it. Tap ${GUIDE_UI.pill('EN')} or ${GUIDE_UI.pill('ES')} to hear it.`,
     `Tap ${GUIDE_UI.pill('Open glossary')}, ${GUIDE_UI.pill('Practice this term')} or ${GUIDE_UI.pill('Ask Dr. Smiley')}.`],
     note: 'Back brings you to the same part and view. Sources are under ⌃ on the card.' }),
+  memtrainer: () => ({ steps: ['Open <b>CoreCHI Practice</b> and tap <b>Memory trainer</b>.',
+    `Tap ${GUIDE_UI.pill('Play')}. Listen with the words hidden, then say it in the other language.`,
+    `Tap ${GUIDE_UI.pill('Done, show me')}, tap the chunks you dropped, then ${GUIDE_UI.pill('All clean')} or ${GUIDE_UI.pill('Save')}.`],
+    note: 'Three clean in a row: a longer line. Two with misses: a shorter one. A line that sounds wrong: Flag this line.' }),
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
@@ -13238,7 +13336,7 @@ const GUIDE_STEPS = {
 // Which "Show me" each answer offers (keys of GUIDE_COACH).
 const GUIDE_SHOW = { name:'name', noname:'name', askmoves:'name', edit:'dots', history:'dots', attach:'dots', askexplain:'dots',
   askwhat:'dock', askquick:'dock', askcards:'dock', askremember:'dock', askcorrect:'dock', briefing:'brief', around:'tabs', search:'search', notfound:'search', accents:'search',
-  chat:'chat', mention:'chat', pin:'chat', updates:'bell', docprep:'docprep', doctors:'doctors', directory:'directory', providers:'providers' };
+  chat:'chat', mention:'chat', pin:'chat', updates:'bell', docprep:'docprep', doctors:'doctors', directory:'directory', providers:'providers', memtrainer:'trainer' };
 
 const ICON_GD_SHOW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" opacity=".55"/></svg>';
 
@@ -13348,6 +13446,8 @@ const GUIDE_COACH = {
             text:'Doctor Directory opens the research your team has saved, together with their notes about each doctor.' },
   providers: { page:'home', scroll:true, sel:[`.qa-card[onclick="setCategory('providers')"]`],
             text:'Provider Pictures helps you put a face to a name. Search by name, specialty or facility, or add a provider.' },
+  trainer: { page:'practice', scroll:true, sel:['.mt-entry'],
+            text:'The Memory trainer reads a line with the words hidden. Say it in the other language, then tap what you dropped.' },
 };
 let guideCoachEl = null, guideCoachTimer = 0;
 
@@ -16888,6 +16988,16 @@ const GUIDE_TOPICS = [
     <p>Missed one? He says what tells it apart, and <b>Try it again later</b> brings it back a few cards on. At the end you see what moved up a step and your mistakes, with <b>Practise these again</b>. Your recent mistakes are also on the Term Review page.</p>
     <p><b>Pause</b> keeps your place on this phone, even if the app closes. Ask Dr. Smiley to <i>practice five terms I'm still learning</i> and he opens Term Review with just those.</p>` },
 
+  { id:'memtrainer', section:'study', k:'memory trainer consecutive interpreting practice span listen render chunks notes flag line hear voice paulina samantha retention short term memory', q:'What is the Memory trainer?', a:`
+    <p>Consecutive practice for your memory: the phone reads a line out loud with the words hidden, you say it in the other language, then you mark what you dropped. Open <b>CoreCHI Practice</b> and tap <b>Memory trainer</b>.</p>
+    <ol>
+      <li>Tap <b>Play</b>. A provider speaks in English, or a patient in Spanish. The ring fills while the line plays; the words stay hidden.</li>
+      <li>Say it in the other language, out loud. Tap <b>Done, show me</b>.</li>
+      <li>The model rendering appears in meaning chunks. Tap each chunk you dropped or changed, then <b>All clean</b> or <b>Save</b>. <b>Hear the model</b> reads it to you.</li>
+    </ol>
+    <p>Three clean lines in a row make the next line a few words longer; two lines with misses in a row make it shorter. Your <b>span</b> is the longest line you held clean. <b>Memory only</b> is the default; switch to <b>With notes</b> when you write while listening, and those spans are kept apart. Everything stays on this phone.</p>
+    <p>The lines were written for practice and are being checked in use. If one sounds wrong, tap <b>Flag this line</b> and say what's off: it goes to the team so the line gets fixed. The voices are the phone's own (Paulina for Spanish, Samantha for English where the phone has them); if the trainer is silent, run the <b>Voice and mic check</b> at the bottom of More.</p>` },
+
   { id:'reviewcheck', section:'study', k:'term review check answer accent accents capital wrong right spanish variant alternative regional compare self check saved not saved', q:'How does Term Review check my Spanish?', a:`
     <p>Against your team's glossary, never a guess.</p>
     <ul>
@@ -16967,7 +17077,7 @@ const GUIDE_TOPICS = [
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
-    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It's getting things ready for a memory trainer for consecutive interpreting.</p>
+    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It's how the Memory trainer's voices were checked; run it if the trainer is silent on your phone.</p>
     <ol>
       <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
       <li>Do the four steps on the sheet. The phone asks before it uses the microphone.</li>
@@ -17394,6 +17504,8 @@ function render(){
   } else if(activeCategory === 'practice'){
     showTopbar = false;
   } else if(activeCategory === 'review'){
+    showTopbar = false;
+  } else if(activeCategory === 'memory-trainer'){
     showTopbar = false;
   } else if(activeCategory === 'userguide'){
     showTopbar = false;
@@ -18349,6 +18461,11 @@ function renderContent(){
     return;
   }
 
+  if(activeCategory === 'memory-trainer'){
+    content.innerHTML = renderMemoryTrainer();
+    return;
+  }
+
   if(activeCategory === 'userguide'){
     content.innerHTML = renderUserGuide();
     setupGuideSearch();
@@ -18791,6 +18908,8 @@ function closeAllOverlays(){
 function setCategory(id, isBack, returnState){
   const movedForward = !isBack && activeCategory !== id;
   const previousView = { id: activeCategory, query: searchQuery, termRenderLimit };
+  // Leaving the memory trainer: the line stops, Dr. Smiley is let go.
+  if(activeCategory === 'memory-trainer' && id !== 'memory-trainer' && typeof mtLeave === 'function') mtLeave();
   // The search box above a domain filters that domain only. It used to keep
   // its text when you moved on, so the next domain opened already filtered
   // (often to "No terms match") with no sign of why.
@@ -18834,6 +18953,7 @@ function setCategory(id, isBack, returnState){
   // launch whether or not anyone opened them. Fetched on first visit instead.
   if(id === 'practice') ensureLoaded('quizHistory', loadQuizHistory);
   if(id === 'review')   ensureLoaded('termReviews', loadTermReviews);
+  if(id === 'memory-trainer') mtEnsureLines();
   render();
   // Going somewhere new starts at the top of it. Back is the other half of
   // this pair and deliberately does NOT come through here: it restores the
@@ -19930,6 +20050,9 @@ function renderPractice(){
       <span class="sm-count">100</span>
     </button>`;
   html += `</div>`;
+
+  // ---- consecutive practice: the memory trainer ----
+  html += mtEntryHtml();
 
   // ---- this week, across the team ----
   html += renderWeeklyBoard();
@@ -21192,7 +21315,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .mt-entry, .mt-play, button.mt-chunk, .mt-flag-opt';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -21220,8 +21343,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.2238';
-const BUILD_TIME = '2026-10-19 22:38 UTC';
+const BUILD_ID = 'b1019.2335';
+const BUILD_TIME = '2026-10-19 23:35 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21730,6 +21853,334 @@ function vcCopy(){
 
 function voiceCheckMoreHtml(){
   return `<div class="vc-more"><button class="btn btn-ghost" onclick="voiceCheckOpen()">Voice and mic check</button></div>`;
+}
+
+/* ---------- Memory trainer ----------
+   Step M2 of the memory trainer (docs/PLAN.md; docs/features/memory-trainer.md).
+   Consecutive practice: the phone reads a line with the words hidden, you
+   render it aloud in the other language, then tap the meaning chunks you
+   dropped or changed. Three clean lines in a row make the next one longer,
+   two lines with misses in a row make it shorter. Lines: memory/lines.json
+   (the longer ones, approved unread) and the False Friends' patient lines as
+   the short starters. Your record stays on this phone (ih_memTrainer); a
+   flag on a line goes to the team (memory-flags), so the lines get fixed. */
+const MT_KEY = 'ih_memTrainer', MT_FLAGS_KEY = 'ih_memFlags';
+const MT_STEP = 3, MT_MIN = 4, MT_MAX = 45, MT_START = 8, MT_UP = 3, MT_DOWN = 2;
+// Voices by name (M0: the phone's own pick for a lang tag can be a novelty voice).
+const MT_VOICES = { es: ['Paulina', 'Mónica', 'Monica'], en: ['Samantha'] };
+const MT_SETS = { discharge: 'Discharge', meds: 'Medications', consent: 'Consent', ed: 'Emergency', ob: 'OB', peds: 'Pediatrics', falsefriends: 'False Friend' };
+const MT_FLAG_KINDS = [['spanish', 'The Spanish sounds off'], ['meaning', 'The meaning is off'], ['chunks', 'The chunks split oddly'], ['other', 'Something else']];
+const ICON_MT = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h2.5M8 8v8M12 5v14M16 8v8M19.5 12H22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="10" y="3" width="4" height="18" rx="2" fill="currentColor" opacity=".22"/></svg>';
+const ICON_MT_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4c0 .8.9 1.3 1.6.9l9.6-6.2c.6-.4.6-1.4 0-1.8L9.6 4.9C8.9 4.5 8 5 8 5.8z" fill="currentColor"/></svg>';
+const ICON_MT_EAR = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 10a5.5 5.5 0 0 1 11 0c0 2.2-1.2 3.2-2.3 4.3-1 1-1.7 1.9-1.7 3.4a2.5 2.5 0 0 1-5 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9.5 10a2.5 2.5 0 0 1 5 0c0 1.2-.7 1.8-1.5 2.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const MT = { lines: null, loading: null, loadErr: false, st: null, line: null, phase: 'ready', misses: [], replays: 0, utter: null, endTimer: 0, thinkTimer: 0, flag: null, result: null };
+
+/* ---- Your record, on this phone ---- */
+function mtState(){
+  if(MT.st) return MT.st;
+  let s = {};
+  try{ s = JSON.parse(localStorage.getItem(MT_KEY) || '{}') || {}; }catch(e){}
+  MT.st = Object.assign({ len: MT_START, notes: false, clean: 0, missed: 0, seen: [], best: { mem: 0, notes: 0 }, hist: [], lastDir: '' }, s);
+  if(!MT.st.best) MT.st.best = { mem: 0, notes: 0 };
+  return MT.st;
+}
+function mtSave(){ try{ localStorage.setItem(MT_KEY, JSON.stringify(MT.st)); }catch(e){} }
+
+/* ---- The lines ---- */
+function mtWords(s){ return String(s || '').trim().split(/\s+/).filter(Boolean).length; }
+// A False Friend's accurate English in clauses (after , ; :), each at least two words.
+function mtClauses(text){
+  const raw = (String(text).match(/[^,;:]+[,;:]?/g) || [String(text)]).map(s => s.trim()).filter(Boolean);
+  const out = [];
+  raw.forEach(p => { if(out.length && (mtWords(p) < 2 || mtWords(out[out.length - 1]) < 2)) out[out.length - 1] += ' ' + p; else out.push(p); });
+  return out;
+}
+function mtEnsureLines(){
+  if(MT.lines) return Promise.resolve(MT.lines);
+  if(MT.loading) return MT.loading;
+  MT.loading = fetch('memory/lines.json').then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(d => { MT.lines = Array.isArray(d && d.lines) ? d.lines : []; MT.loadErr = !MT.lines.length; })
+    .catch(() => { MT.lines = null; MT.loadErr = true; })
+    .then(() => { MT.loading = null; if(activeCategory === 'memory-trainer' && !MT.line) renderContent(); return MT.lines; });
+  return MT.loading;
+}
+// Every line the trainer can play: the file's, then the False Friends' patient lines as starters.
+function mtPool(){
+  const pool = [];
+  (MT.lines || []).forEach(l => {
+    if(!l || !l.id || !Array.isArray(l.u) || !l.u.length || (l.dir !== 'en-es' && l.dir !== 'es-en')) return;
+    pool.push({ id: String(l.id), set: l.set || '', dir: l.dir, words: l.words || mtWords(l.u.map(x => x[0]).join(' ')), u: l.u, note: l.note || '' });
+  });
+  FALSE_FRIENDS.forEach(f => {
+    if(!f.heard || !f.truth) return;
+    pool.push({ id: 'ff:' + f.es, set: 'falsefriends', dir: 'es-en', words: mtWords(f.heard), u: mtClauses(f.truth).map((t, i) => [i ? '' : f.heard, t]), note: f.es });
+  });
+  return pool;
+}
+function mtSrc(line){ return line.u.map(x => x[0]).filter(Boolean).join(' '); }
+function mtTgt(line){ return line.u.map(x => x[1]).join(' '); }
+function mtSrcLang(line){ return line.dir === 'en-es' ? 'en' : 'es'; }
+function mtTgtLang(line){ return line.dir === 'en-es' ? 'es' : 'en'; }
+function mtLangName(l){ return l === 'es' ? 'Spanish' : 'English'; }
+// The next line: near your length, not one you've had lately, the other direction more often than not.
+function mtPick(st, id){
+  const pool = mtPool();
+  if(id){ const l = pool.find(x => x.id === id); if(l) return l; }
+  const seen = st.seen || [], want = st.len;
+  let c = [];
+  for(const w of [2, 4, 7, 12, 99]){ c = pool.filter(l => Math.abs(l.words - want) <= w && !seen.includes(l.id)); if(c.length) break; }
+  if(!c.length) c = pool.filter(l => Math.abs(l.words - want) <= 7);
+  if(!c.length) c = pool;
+  const other = c.filter(l => l.dir !== st.lastDir);
+  if(other.length && Math.random() < .6) c = other;
+  return c[Math.floor(Math.random() * c.length)] || null;
+}
+
+/* ---- Voices ---- */
+function mtCanSpeak(){ return !!window.speechSynthesis; }
+function mtVoice(lang){
+  if(!mtCanSpeak()) return null;
+  let vs = []; try{ vs = speechSynthesis.getVoices() || []; }catch(e){}
+  const L = v => String(v.lang || '').replace('_', '-').toLowerCase();
+  for(const name of MT_VOICES[lang] || []){
+    const v = vs.find(x => String(x.name || '').toLowerCase().startsWith(name.toLowerCase()) && L(x).startsWith(lang));
+    if(v) return v;
+  }
+  for(const p of (lang === 'es' ? ['es-mx', 'es-us', 'es'] : ['en-us', 'en'])){
+    const v = vs.find(x => L(x).startsWith(p) && x.localService !== false) || vs.find(x => L(x).startsWith(p));
+    if(v) return v;
+  }
+  return null;
+}
+function mtUtter(text, lang){
+  const u = new SpeechSynthesisUtterance(text);
+  const v = mtVoice(lang);
+  if(v){ try{ u.voice = v; }catch(e){} }
+  u.lang = v ? String(v.lang || '').replace('_', '-') : (lang === 'es' ? 'es-MX' : 'en-US');
+  u.rate = 0.92;
+  return u;
+}
+// How long a line takes to say, roughly: the ring is drawn on it.
+function mtDur(text){ return Math.max(1600, Math.round(String(text).length / 12 * 1000)); }
+function mtSay(text, lang, btn){
+  if(!mtCanSpeak()){ showToast('This phone can’t read aloud.'); return; }
+  speechSynthesis.cancel();
+  const u = mtUtter(text, lang);
+  if(btn){ btn.classList.add('speaking'); u.onend = u.onerror = () => btn.classList.remove('speaking'); }
+  speechSynthesis.speak(u);
+}
+
+/* ---- One line, start to finish ---- */
+function mtStop(keepTask){
+  clearTimeout(MT.endTimer); clearTimeout(MT.thinkTimer); MT.endTimer = MT.thinkTimer = 0;
+  if(MT.utter){ MT.utter.onend = MT.utter.onerror = null; MT.utter = null; }
+  if(mtCanSpeak()){ try{ speechSynthesis.cancel(); }catch(e){} }
+  if(!keepTask) drTaskEnd('mt');
+}
+// Leaving the screen: nothing keeps playing, Dr. Smiley goes back to his own business.
+function mtLeave(){
+  mtStop();
+  if(MT.phase === 'playing' || MT.phase === 'turn' || MT.phase === 'thinking') MT.phase = 'ready';
+}
+function mtPickNew(id){
+  mtStop();
+  MT.line = mtPick(mtState(), id); MT.phase = 'ready'; MT.misses = []; MT.replays = 0; MT.flag = null; MT.result = null;
+}
+function mtNext(id){
+  mtPickNew(id);
+  if(activeCategory === 'memory-trainer') renderContent();
+}
+function mtPlay(again){
+  const line = MT.line;
+  if(!line || MT.phase === 'playing' || MT.phase === 'thinking') return;
+  if(again) MT.replays++;
+  mtStop(true);
+  MT.phase = 'playing';
+  const text = mtSrc(line), dur = mtDur(text);
+  drTask('attentive', { key: 'mt' });   // listening
+  renderContent();
+  const btn = document.getElementById('mtPlay');
+  if(btn){ btn.style.setProperty('--mt-dur', dur + 'ms'); requestAnimationFrame(() => requestAnimationFrame(() => { if(MT.phase === 'playing') btn.classList.add('is-playing'); })); }
+  const end = () => {
+    if(MT.phase !== 'playing') return;
+    clearTimeout(MT.endTimer); MT.endTimer = 0; MT.utter = null;
+    MT.phase = 'turn';
+    renderContent();
+  };
+  if(mtCanSpeak()){
+    speechSynthesis.cancel();
+    const u = MT.utter = mtUtter(text, mtSrcLang(line));
+    u.onend = end; u.onerror = end;
+    speechSynthesis.speak(u);
+    MT.endTimer = setTimeout(end, dur * 2 + 2500);   // Safari sometimes never says it ended
+  }else{
+    MT.endTimer = setTimeout(end, dur + 1200);         // no voice: the words show for as long as they'd take to say
+  }
+}
+function mtDone(){
+  if(MT.phase !== 'turn') return;
+  MT.phase = 'thinking';
+  drTask('processing', { key: 'mt', ms: 1200 });   // thinking
+  renderContent();
+  clearTimeout(MT.thinkTimer);
+  MT.thinkTimer = setTimeout(() => { if(MT.phase !== 'thinking') return; MT.phase = 'mark'; drTaskEnd('mt'); renderContent(); }, 700);
+}
+function mtToggle(i, btn){
+  if(MT.phase !== 'mark') return;
+  const k = MT.misses.indexOf(i);
+  if(k >= 0) MT.misses.splice(k, 1); else MT.misses.push(i);
+  if(btn) btn.setAttribute('aria-pressed', k >= 0 ? 'false' : 'true');
+  const save = document.getElementById('mtSave');
+  if(save) save.textContent = mtSaveLabel();
+}
+function mtSaveLabel(){ const n = MT.misses.length; return n ? `Save: ${n} missed` : 'All clean'; }
+function mtLostAll(){ if(MT.phase !== 'mark' || !MT.line) return; MT.misses = MT.line.u.map((_, i) => i); mtSaveLine(); }
+// The line is judged: your record moves, the length follows, Dr. Smiley reacts.
+function mtSaveLine(){
+  if(MT.phase !== 'mark' || !MT.line) return;
+  const st = mtState(), line = MT.line, n = line.u.length, miss = Math.min(n, MT.misses.length), clean = miss === 0;
+  const key = st.notes ? 'notes' : 'mem', prevBest = st.best[key] || 0;
+  if(clean){ st.clean++; st.missed = 0; } else { st.missed++; st.clean = 0; }
+  let step = 0;
+  if(st.clean >= MT_UP){ st.len = Math.min(MT_MAX, st.len + MT_STEP); st.clean = 0; step = 1; }
+  else if(st.missed >= MT_DOWN){ st.len = Math.max(MT_MIN, st.len - MT_STEP); st.missed = 0; step = -1; }
+  if(clean && line.words > prevBest) st.best[key] = line.words;
+  st.hist = (st.hist || []).concat([{ at: Date.now(), id: line.id, w: line.words, n, miss, notes: !!st.notes, re: MT.replays }]).slice(-500);
+  st.seen = (st.seen || []).concat([line.id]).slice(-60);
+  st.lastDir = line.dir;
+  mtSave();
+  MT.result = { clean, miss, n, step, len: st.len, newBest: clean && line.words > prevBest, clean_run: st.clean, miss_run: st.missed };
+  MT.phase = 'done';
+  renderContent();
+  if(document.hidden) return;
+  if(clean) drCelebrate(step > 0 ? 'cheer' : 'smile');
+  else if(step < 0) drPerform('encourage', { priority: DR_P.TASK });
+}
+function mtNotes(on){
+  if(MT.phase !== 'ready' && MT.phase !== 'done') return;
+  const st = mtState(); st.notes = !!on; mtSave(); renderContent();
+}
+
+/* ---- Flag this line: the line id and what's wrong, to the team ---- */
+function mtFlagOpen(){ if(!MT.line || MT.line.flagged || MT.flag) return; MT.flag = { kind: '' }; renderContent(); const f = document.getElementById('mtFlag'); if(f) f.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' }); }
+function mtFlagKind(k){
+  if(!MT.flag) return;
+  MT.flag.kind = k;
+  document.querySelectorAll('#mtFlag .mt-flag-opt').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'));
+  const s = document.getElementById('mtFlagSend'); if(s) s.disabled = false;
+}
+function mtFlagCancel(){ MT.flag = null; renderContent(); }
+async function mtFlagSend(){
+  const f = MT.flag, line = MT.line;
+  if(!f || !f.kind || !line) return;
+  const input = document.getElementById('mtFlagNote');
+  const note = String(input ? input.value : '').trim().slice(0, 240), at = Date.now();
+  const data = { lineId: line.id, kind: f.kind, note, by: whoAmI() || 'Someone', at, dir: line.dir, set: line.set, words: line.words,
+    src: mtSrc(line).slice(0, 300), tgt: mtTgt(line).slice(0, 300), build: BUILD_ID };
+  // Kept on the phone whatever happens to the send.
+  try{ const l = JSON.parse(localStorage.getItem(MT_FLAGS_KEY) || '[]'); l.push(data); localStorage.setItem(MT_FLAGS_KEY, JSON.stringify(l.slice(-100))); }catch(e){}
+  line.flagged = true; MT.flag = null; renderContent();
+  try{
+    const how = await queuedWrite({ collection: 'memory-flags', docId: line.id.replace(/[^\w:-]/g, '_') + '__' + at.toString(36), op: 'set', data });
+    showToast(how === 'queued' ? queuedNotice('Flag kept') : 'Flagged. Thank you: the line will be checked.');
+  }catch(e){ showToast('The flag stayed on this phone; it could not be sent.'); }
+}
+
+/* ---- The screen ---- */
+function mtDirText(line){ return `${mtLangName(mtSrcLang(line))} → ${mtLangName(mtTgtLang(line))}`; }
+function mtWho(line){ return line.dir === 'en-es' ? 'The provider speaks in English.' : 'The patient speaks in Spanish.'; }
+function mtChunksHtml(line, still){
+  const lang = mtTgtLang(line);
+  return `<div class="mt-chunks" lang="${lang}" aria-label="The model rendering, in chunks">${line.u.map((c, i) => {
+    const miss = MT.misses.includes(i);
+    return still ? `<span class="mt-chunk is-still" aria-pressed="${miss}">${escapeHtml(c[1])}</span>`
+      : `<button type="button" class="mt-chunk" aria-pressed="${miss}" onclick="mtToggle(${i}, this)">${escapeHtml(c[1])}</button>`;
+  }).join('')}</div>`;
+}
+function mtHear(btn){ if(MT.line) mtSay(mtTgt(MT.line), mtTgtLang(MT.line), btn); }
+function mtHearHtml(){
+  return `<button type="button" class="btn btn-ghost mt-hear" onclick="mtHear(this)">${ICON_SPEAKER}<span>Hear the model</span></button>`;
+}
+function mtSaidHtml(line){
+  return `<details class="mt-said"><summary>What was said</summary><p lang="${mtSrcLang(line)}">“${escapeHtml(mtSrc(line))}”</p></details>`;
+}
+function mtFlagHtml(line){
+  if(line.flagged) return `<button type="button" class="mt-link" disabled>Flagged ✓</button>`;
+  if(!MT.flag) return `<button type="button" class="mt-link" onclick="mtFlagOpen()">Flag this line</button>`;
+  return `<div class="mt-flag" id="mtFlag" role="group" aria-label="Flag this line">
+    <p>What’s wrong with this line?</p>
+    <div class="mt-flag-opts">${MT_FLAG_KINDS.map(([k, t]) => `<button type="button" class="mt-flag-opt" data-k="${k}" aria-pressed="${MT.flag.kind === k}" onclick="mtFlagKind('${k}')">${t}</button>`).join('')}</div>
+    <input id="mtFlagNote" type="text" maxlength="240" placeholder="A word about it (optional)" autocomplete="off">
+    <div class="mt-acts"><button type="button" class="btn btn-ghost" onclick="mtFlagCancel()">Cancel</button><button type="button" class="btn btn-primary" id="mtFlagSend" onclick="mtFlagSend()" ${MT.flag.kind ? '' : 'disabled'}>Send the flag</button></div>
+  </div>`;
+}
+function mtStageHtml(){
+  const line = MT.line, st = mtState();
+  if(!line){
+    if(MT.loading && !MT.lines) return `<p class="mt-lead">Getting the lines…</p>`;
+    return `<p class="mt-lead">No lines to play right now.</p>`;
+  }
+  const n = (st.hist || []).length + 1, tgt = mtLangName(mtTgtLang(line));
+  const top = `<div class="mt-top"><span class="mt-eyebrow">Line ${n} · ${escapeHtml(MT_SETS[line.set] || line.set || 'Line')} · ${line.words} words</span><span class="mt-dir">${mtDirText(line)}</span></div>`;
+  const playBtn = (label, disabled, full) => `<div class="mt-play-row"><button type="button" id="mtPlay" class="mt-play${full ? ' is-full' : ''}" onclick="mtPlay()" ${disabled ? 'disabled' : ''} aria-label="${label}">
+      <svg class="mt-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="mt-ring-bg" cx="50" cy="50" r="46"/><circle class="mt-ring-fg" cx="50" cy="50" r="46"/></svg>
+      <span class="mt-play-in">${disabled ? ICON_MT_EAR : ICON_MT_PLAY}<span>${label}</span></span></button></div>`;
+  if(MT.phase === 'ready') return top + `<p class="mt-lead">${mtWho(line)}<small>Listen once, then say it in ${tgt}.${st.notes ? ' Notes are allowed.' : ''}</small></p>${playBtn('Play', false)}
+    <div class="mt-foot"><button type="button" class="mt-link" onclick="mtNext()">Another line</button></div>`;
+  if(MT.phase === 'playing') return top + `<p class="mt-lead">${mtCanSpeak() ? 'Listening…' : 'Read it, then look away.'}<small>${mtCanSpeak() ? 'The words stay hidden.' : 'This phone can’t read aloud, so the line shows for as long as it would take to say.'}</small></p>
+    ${mtCanSpeak() ? '' : `<p class="mt-shown" lang="${mtSrcLang(line)}">“${escapeHtml(mtSrc(line))}”</p>`}${playBtn('Listening', true)}`;
+  if(MT.phase === 'turn') return top + `<p class="mt-lead">Your turn.<small>Say it in ${tgt}, out loud. Then tap Done.</small></p>${playBtn('Played', true, true)}
+    <div class="mt-acts"><button type="button" class="btn btn-ghost" onclick="mtPlay(true)">Play again</button><button type="button" class="btn btn-primary" onclick="mtDone()">Done, show me</button></div>`;
+  if(MT.phase === 'thinking') return top + `<p class="mt-lead">One moment…</p>${playBtn('Played', true, true)}`;
+  if(MT.phase === 'mark') return top + `<p class="mt-lead">Tap what you dropped or changed.<small>The model rendering, in meaning chunks. Nothing tapped means a clean line.</small></p>
+    ${mtChunksHtml(line)}${mtHearHtml()}${mtSaidHtml(line)}
+    <div class="mt-acts"><button type="button" class="btn btn-ghost" onclick="mtLostAll()">I lost it</button><button type="button" class="btn btn-primary" id="mtSave" onclick="mtSaveLine()">${mtSaveLabel()}</button></div>
+    <div class="mt-foot">${mtFlagHtml(line)}</div>`;
+  // done
+  const r = MT.result || { clean: true, miss: 0, n: line.u.length, step: 0, len: st.len };
+  let note;
+  if(r.step > 0) note = `Three clean in a row: the next line is longer, about ${r.len} words.`;
+  else if(r.step < 0) note = `Two in a row with misses: the next line is shorter, about ${r.len} words.`;
+  else if(r.clean) note = r.newBest ? `New span: ${line.words} words${st.notes ? ', with notes' : ', memory only'}.` : `${r.clean_run} clean in a row. ${MT_UP - r.clean_run} more and the line grows.`;
+  else note = r.miss_run >= 1 && MT_DOWN - r.miss_run === 1 ? 'Another line with misses and the next one gets shorter.' : `${MT_DOWN - r.miss_run} more with misses and the line gets shorter.`;
+  return top + `<p class="mt-verdict${r.clean ? ' is-clean' : ''}">${r.clean ? 'Clean.' : `${r.miss} of ${r.n} missed.`}</p><p class="mt-note">${note}</p>
+    ${mtChunksHtml(line, true)}${mtHearHtml()}${mtSaidHtml(line)}
+    <div class="mt-acts"><button type="button" class="btn btn-primary" onclick="mtNext()">Next line</button></div>
+    <div class="mt-foot">${mtFlagHtml(line)}</div>`;
+}
+function renderMemoryTrainer(){
+  const st = mtState();
+  if(!MT.line && !(MT.loading && !MT.lines)) mtPickNew();
+  const settled = MT.phase === 'ready' || MT.phase === 'done';
+  const best = st.best || {}, hist = st.hist || [];
+  return `<div class="section-head"><h2>Memory trainer</h2><span class="sub">consecutive practice</span></div>
+    <div class="mt-wrap">
+      <div class="mt-stats" aria-label="Your record on this phone">
+        <div class="mt-stat"><b>${best.mem || '—'}</b><span>span, memory only</span></div>
+        <div class="mt-stat"><b>${best.notes || '—'}</b><span>span, with notes</span></div>
+        <div class="mt-stat"><b>${hist.length}</b><span>${hist.length === 1 ? 'line so far' : 'lines so far'}</span></div>
+      </div>
+      <section class="mt-stage" aria-live="polite">${mtStageHtml()}</section>
+      <div class="mt-notes ds-mode-seg" role="radiogroup" aria-label="Notes">
+        <button type="button" role="radio" aria-checked="${!st.notes}" onclick="mtNotes(false)" ${settled ? '' : 'disabled'}>Memory only</button>
+        <button type="button" role="radio" aria-checked="${!!st.notes}" onclick="mtNotes(true)" ${settled ? '' : 'disabled'}>With notes</button>
+      </div>
+      <p class="mt-hint">Memory only is the default. With notes, you may write while you listen; those spans are kept apart.</p>
+      ${MT.loadErr && !MT.lines ? `<p class="mt-notice">The longer lines didn’t load, so only the short starters play for now. They’ll come once you’re online.</p>` : ''}
+      <details class="tool-note"><summary>${ICON_SHIELD}<span>How the trainer works</span><em>Read more</em></summary>
+        <p>The phone reads a line with the words hidden: a provider in English or a patient in Spanish. You say it in the other language, then tap the meaning chunks you dropped or changed. Three clean lines in a row make the next one longer; two lines with misses in a row make it shorter. Your span is the longest line you held clean. Everything stays on this phone. The lines were written for practice and are being checked in use: <b>Flag this line</b> tells the team when one is off.</p>
+      </details>
+    </div>`;
+}
+// The way in, on the Practice dashboard.
+function mtEntryHtml(){
+  const st = mtState(), span = (st.best && st.best.mem) || 0;
+  return `<div class="section-head"><h2>Memory trainer</h2><span class="sub">consecutive practice</span></div>
+    <button type="button" class="mt-entry" onclick="setCategory('memory-trainer')">
+      <span class="mt-entry-icon">${ICON_MT}</span>
+      <span class="mt-entry-text"><b>Hear a line, say it in the other language</b><span>${span ? `Your span: ${span} words, memory only. The lines grow with you.` : 'The phone reads a line; you render it, then tap what you dropped. The lines grow with you.'}</span></span>
+      <span class="mt-entry-go">${span ? `<b>${span}</b><small>words</small>` : ICON_ARROW_R}</span>
+    </button>`;
 }
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -25182,7 +25633,7 @@ async function saveDomain(){
     return;
   }
 
-  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide','anatomy'];
+  const reserved = ['home','all','directory','providers','chat','notes','updates','practice','translate','events','review','userguide','anatomy','memory-trainer'];
   const existingIds = DATA.categories.map(c=>c.id).concat(reserved);
   const base = slugify(name);
   let id = base, n = 2;

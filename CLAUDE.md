@@ -34,6 +34,7 @@ between assignments.
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 26 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
 | `city/*.webp` | 51 files | Your HUMC campus on CoreCHI Practice: the main entrance at dusk + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
+| `memory/lines.json` | — | The memory trainer's 60 practice lines (Practice → Memory trainer), approved unread; flags from the trainer (`memory-flags`) are read before editing them. `docs/features/memory-trainer.md` |
 | `media/` | 8 MB | The 45-second video (`hub-promo.mp4`, 720p) and its still; made from `promo/`, shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `sw.js` | 212 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
@@ -155,6 +156,7 @@ activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 hub-lessons/{id}                                                     <-- Ask the Hub team notes
 hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
+memory-flags/{lineId__time}                                          <-- Memory trainer "Flag this line" (memory-trainer.md)
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you
@@ -175,7 +177,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
-- The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
+- The memory trainer (Practice → Memory trainer: `renderMemoryTrainer`, `MT`, `ih_memTrainer`, Flag this line) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 - CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's

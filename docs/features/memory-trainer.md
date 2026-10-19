@@ -86,3 +86,62 @@ line. Jose's call: ship them as approved-unread (`status` in the file,
 `reviewed` stays false) and catch mistakes in use with a **Flag this line**
 button in the trainer (M2): it saves the line id and what's wrong, and the
 flags are read back before lines are edited.
+
+## M2: the trainer
+
+Block "Memory trainer" in `index.html` (JS after the Voice and mic check,
+CSS of the same name after its CSS), screen id `memory-trainer`
+(`renderMemoryTrainer`; `showTopbar` off; `setCategory` calls `mtLeave()`
+when you leave it and `mtEnsureLines()` when you arrive). The way in is a
+card on the CoreCHI Practice dashboard after the four ways in
+(`mtEntryHtml`, `.mt-entry`; it shows your memory-only span once you have
+one). `sw.js` precaches `memory/lines.json`.
+
+**The pool** (`mtPool`): the file's 60 lines plus the 101 False Friends'
+patient lines as starters (`id` `ff:<es>`, Spanish to English, `heard` as
+the one source chunk, `truth` cut into clauses after `, ; :` with at least
+two words each, `mtClauses`). `mtPick` takes a line within 2, then 4, 7,
+12 words of your length that you haven't had in your last 60, the other
+direction than last time 60% of the time. `mtNext('dc01')` forces a line
+(tests). If the file doesn't load (`MT.loadErr`), the starters play and a
+notice says so; the next open retries.
+
+**One line** (`MT.phase`): `ready` (who speaks, Play, Another line) ->
+`playing` (the words never drawn; `drTask('attentive', {key:'mt'})`; the
+ring is a CSS transition of `stroke-dashoffset` over `--mt-dur`, the
+line's length / 12 chars per second, at least 1.6 s, no frame loop; a
+phone without `speechSynthesis` shows the line to read for that long
+instead) -> `turn` (Play again counts a replay; Done) -> `thinking`
+(`drTask('processing')`, 0.7 s) -> `mark` (the model in chunks,
+`button.mt-chunk` toggled in place with `aria-pressed`; Hear the model;
+What was said folded; I lost it = every chunk; All clean / Save: n missed)
+-> `done` (verdict, what the record did, the chunks still, Next line).
+Voices by name (`mtVoice`): Paulina, then Mónica for Spanish; Samantha for
+English; else the first local voice for es-MX / es-US / es or en-US / en;
+else the lang tag alone. Rate 0.92 like `speakText`. Safari sometimes never
+fires `onend`, so a timer at twice the estimate ends the line anyway.
+Leaving the screen cancels speech, ends his task and puts the line back to
+`ready`.
+
+**The record** (`ih_memTrainer`, this phone only, `mtState`/`mtSave`):
+`len` (starts at 8 words; `MT_STEP` 3, between 4 and 45), `clean` and
+`missed` runs (3 clean -> longer, 2 with misses -> shorter, the run resets
+on a step), `notes` (the toggle, locked while a line is in play), `best`
+(`mem` and `notes` spans, the longest line held clean in each mode, kept
+apart), `hist` (last 500: `at, id, w, n, miss, notes, re`; M4 charts it),
+`seen` (last 60 ids), `lastDir`. Nothing anyone says is stored. Dr. Smiley:
+`cheer` on the step up, `smile` on a clean line, `encourage` on the step
+down, nothing on a plain miss.
+
+**Flag this line** (`mtFlagSend`): a reason (`spanish`, `meaning`,
+`chunks`, `other`) plus an optional note (240 chars) goes through
+`queuedWrite` to `memory-flags/{lineId}__{time}` with `lineId, kind, note,
+by, at, dir, set, words, src, tgt, build`, and is kept on the phone too
+(`ih_memFlags`, last 100). `firestore.rules`: team may read and create,
+nobody edits or deletes from the app. **Read the flags back before editing
+`memory/lines.json`.** Until the rules are pasted into the console the
+write is refused and the toast says the flag stayed on the phone.
+
+Suite `tests/suites/memory-trainer.cjs` (the voices stood in for, as in
+M0). Guide: `memtrainer` (study), drawn steps, Show me -> the Practice
+card, the first New lately card.

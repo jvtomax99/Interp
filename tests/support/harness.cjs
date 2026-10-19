@@ -73,6 +73,9 @@ async function route(page, opts = {}) {
     r.fulfill({ status: 200, contentType: { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml',
       gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json' }[ext], body: fs.readFileSync(p) });
   });
+  // The memory trainer's lines, from this checkout (LINES=missing serves a 404).
+  await page.route('**/memory/lines.json', r => process.env.LINES === 'missing' ? r.fulfill({ status: 404, body: '' })
+    : r.fulfill({ status: 200, contentType: 'application/json', body: fs.readFileSync(R + 'memory/lines.json') }));
   for (const f of ['home-polish.css', 'home-polish.js', 'pin-icons.js'])
     await page.route('**/' + f, r => r.fulfill({ status: 200, contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', body: fs.readFileSync(process.env.POLISH_DIR && fs.existsSync(path.join(process.env.POLISH_DIR, f)) ? path.join(process.env.POLISH_DIR, f) : R + f) }));
   // Anything else external is recorded, not silently dropped.

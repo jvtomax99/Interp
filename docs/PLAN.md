@@ -74,12 +74,16 @@ M0. **Voice and mic check** (#60, merged). Installed-app results in the
    English and Spanish, waiting for "done" before Copy.
 M1. **Lines** (#69, merged): `memory/lines.json`, 60 lines approved by Jose
    without a line-by-line read (see the note); the trainer flags mistakes.
-M2. **The trainer.** Screen under Practice, playback with the text
-   hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
-   Dr. Smiley's listening/thinking states, progress in `localStorage`
-   only, notes toggle, a **Flag this line** button (saves line id + what's
-   wrong, read back before editing lines). Voices by name: Paulina (es-MX),
-   Samantha (en-US). User Guide, a suite.
+M2. **The trainer** (this PR). Screen under Practice (`memory-trainer`,
+   a card on the dashboard after the four ways in), the line played with
+   the words hidden and a ring, your turn, the chunks to tap, three clean
+   up / two with misses down by 3 words, Dr. Smiley listening (attentive)
+   then thinking (processing), the record in `ih_memTrainer`, notes toggle,
+   **Flag this line** to `memory-flags` (rule added; **Jose pastes
+   `firestore.rules`** or flags stay on the phone). Paulina (es-MX) and
+   Samantha (en-US) by name. Suite `memory-trainer.cjs`. **Needs Jose on
+   his phone:** the voices really speak in the installed app (M0 found
+   English does), the ring's pace against the real voice, the tap targets.
 M3. **Record yourself, play it back beside the model.** Record and play
    back work in the installed app (M0). The voice is quieter after the
    mic: first test `navigator.audioSession.type = 'playback'` after each
@@ -251,6 +255,13 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-19 Memory trainer M2, the trainer screen (this PR): Practice ->
+  Memory trainer. A line (memory/lines.json, or a False Friend's patient
+  line as a starter) read by Paulina or Samantha with the words hidden and
+  a ring; your turn; the model in chunks to tap; three clean in a row
+  +3 words, two with misses -3; span kept memory-only and with-notes apart;
+  Flag this line to `memory-flags` and the phone. Suite `memory-trainer.cjs`;
+  note `docs/features/memory-trainer.md`.
 - 2026-10-19 Campus: each building's badge names its exam area; first tap
   picks it (windows lit, scene dimmed, a card with the area's name,
   questions, share of the exam, Practise), second tap starts (Jose: "we are
@@ -471,6 +482,11 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Facts (so nobody re-checks)
 
+- **A new Firestore collection fails silently until its rule is pasted
+  (2026-10-19, M2).** `memory-flags` has its line in `firestore.rules`; until
+  Jose pastes the file into the console, a flag's write is refused and the
+  trainer says it stayed on the phone (`ih_memFlags`). The suite's stub
+  accepts any collection, so only the live console shows this.
 - **Two chats did M1 at once (2026-10-19).** #69 (`memory/lines.json`,
   approved) and #70 (closed, a second set with its own review page) were
   built in parallel from the same PLAN. Before taking a phase: fetch

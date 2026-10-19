@@ -200,6 +200,20 @@ service cloud.firestore {
     // ---- Study ----
     match /practice-questions/{docId} { allow read, write: if team(); }
     match /quiz-history/{docId}       { allow read, write: if team(); }
+    // Memory trainer: "Flag this line" (the line id, what's wrong, who, when).
+    // Read back before the lines in memory/lines.json are edited. Nobody
+    // edits or deletes a flag from the app.
+    match /memory-flags/{docId} {
+      allow read: if team();
+      allow create: if team() && validFlag();
+    }
+    function validFlag() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['lineId', 'kind', 'note', 'by', 'at', 'dir', 'set', 'words', 'src', 'tgt', 'build'])
+        && d.lineId is string && d.lineId.size() > 0 && d.lineId.size() <= 80
+        && d.kind in ['spanish', 'meaning', 'chunks', 'other']
+        && d.note is string && d.note.size() <= 240;
+    }
 
     // ---- Events ----
     // The watcher's own memory of what it has already seen on public event

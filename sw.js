@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v243-campus-pick';
+const CACHE_VERSION = 'interpreter-hub-v244-memory-trainer';
 const PRECACHE = [
   './',
   './index.html',
@@ -96,6 +96,9 @@ const PRECACHE = [
   './pins/ophthalmology.webp',
   './pins/surgery-anesthesia.webp',
   './pins/anatomy.webp',
+  // The memory trainer's lines (Practice -> Memory trainer), so it plays
+  // offline from the first open.
+  './memory/lines.json',
   './manifest.webmanifest'
 ];
 

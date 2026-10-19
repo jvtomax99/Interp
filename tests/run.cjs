@@ -25,6 +25,7 @@ const SUITES = [
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],
   ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
+  ['memory-trainer.cjs',  'Memory trainer: entrance, hidden line, voices by name, chunks, length steps, flag, leaving'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
   ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
