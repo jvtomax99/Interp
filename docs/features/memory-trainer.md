@@ -36,4 +36,53 @@ are built only if M0 shows they work in the installed app.
 
 ## Results
 
-(Jose's pasted reports go here, one per mode: installed app, Safari.)
+**Installed app, 2026-10-19** (Jose's iPhone, build b1019.2028; the user agent
+says iPhone OS 18_7 with Safari Version/27.0.1, so the OS number in it is
+frozen and not the real iOS version):
+- Voices: Spanish only es-ES (Mónica) and es-MX (Paulina), no es-US; 28
+  English, novelty voices included (Bubbles, Bad News...). The trainer must
+  pick by name: Paulina for Spanish, Samantha for English; never rely on the
+  default for a lang tag.
+- English played (4.0 s for the 11-word line). Spanish not tried in this run.
+- Record + play back: works (audio/mp4 AAC, 122 KB for 5 s). M3 can go ahead.
+- After the mic: the voice is quieter (Jose: "no", not as loud). Likely iOS
+  keeping the audio route on the earpiece after getUserMedia. Unproven fix:
+  `navigator.audioSession.type = 'playback'` after recording; test before M3.
+- Speech to text: the API is there (`webkitSpeechRecognition`), English got
+  "listening, speak now" and nothing after. Unclear whether it stalled or the
+  report was copied within the 10 s window. M5 stays on hold.
+
+**Safari tab, 2026-10-19** (same phone, same build): same voices. Spanish
+played (3.9 s; es-US asked, the phone chose a voice itself), English 5.3 s.
+Record + play back works (128 KB). Speech to text in English **works**:
+"Hello hello hello", first words after 3.4 s. Spanish still read "listening"
+when copied. Loudness after the mic not answered.
+
+So far: speech to text works in a Safari tab; in the installed app it has
+not produced words yet (one run, possibly copied early). **Still to run:**
+in the installed app, Listen in English, speak, wait until the line says
+"done" or an error, then Copy; Spanish the same way in either mode.
+
+## M1: the lines
+
+`memory/lines.json` (60 lines, 10 per setting: discharge, meds, consent, ed,
+ob, peds; 36 en-es, 24 es-en; 10 to 43 source words). Each: `id`, `set`,
+`dir`, `words`, `u` (meaning chunks `[source, model]`), `note` (what the line
+tests), `reviewed`. The 101 False Friends `heard`/`truth` pairs in
+`index.html` are the short starters and are not repeated. Thin spots: only 3
+lines over 40 words and 2 at 10; add longer ones after the first review if
+spans run long.
+
+Jose reviews the Spanish on a private claude.ai page (Memory Lines Review,
+https://claude.ai/artifact/36Jn3pPjbDuxQZ3tkTAm4A): Good, or a written fix
+per line, saved in its `reviews` collection (doc id = line id, `verdict`
+ok|fix, `fix`, `at`). The first version of the page lost Jose's first pass
+(it showed marks before the save was confirmed); it now keeps marks on the
+phone, says per line whether it saved, and has Copy my review as a fallback.
+
+**Outcome (Jose, 2026-10-19):** all 60 marked Good, then the 12 riskiest
+(`reviews2`) Good, both at under a second per line, so not read line by
+line. Jose's call: ship them as approved-unread (`status` in the file,
+`reviewed` stays false) and catch mistakes in use with a **Flag this line**
+button in the trainer (M2): it saves the line id and what's wrong, and the
+flags are read back before lines are edited.
