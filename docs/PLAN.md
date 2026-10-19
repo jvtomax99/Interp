@@ -243,6 +243,14 @@ come from this alone.
   raised brow on general-knowledge answers, a new `surprise`. Guide:
   `askmoves` answer and its news card.
 
+- 2026-10-19 The 45-second video in the app (Jose's ask): User Guide answer
+  `promo` (video in the answer, "New lately" card, oldest card dropped) and a
+  "Watch 0:45" button bottom-right of Home's hello banner, beside the sign,
+  until watched once on the phone (`ih_promoSeen`: the end or past 15 s). Web
+  copy `media/hub-promo.mp4` (720p, 8 MB, tap to play); `sw.js` leaves
+  `media/` alone. Not on the members-only screen yet: Jose to decide after
+  the CEO pitch (anyone with the link sees that screen).
+
 - 2026-10-19 Dr. Smiley's brows, bigger (Jose on his phone: "the brows
   don't move much"). Every `DR_BROWS` pose about 2x (looking up 2 to 4.2
   drawing units, caring 6 to 11 degrees); his pick of 1.5x / 2x / 3x was 2x.
@@ -428,6 +436,13 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- The tests' Chromium has no H.264 (`canPlayType` is empty), so no suite can
+  play `media/hub-promo.mp4`; only an iPhone or desktop Chrome/Safari proves
+  playback. The suites check the button, the sheet and the "watched" rule.
+- `sw.js` must never cache video: `caches.match` ignores Range headers, and
+  iPhones play `<video>` only through Range (206) responses. `media/` is
+  passed straight to the network, like `atlas/`.
 
 - The practice screen re-renders on any data arrival (`ensureLoaded` ->
   `scheduleRender`), so entrance motion there must survive a re-render:

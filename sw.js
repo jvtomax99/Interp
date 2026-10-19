@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v239-smiley-acting';
+const CACHE_VERSION = 'interpreter-hub-v240-smiley-acting';
 const PRECACHE = [
   './',
   './index.html',
@@ -148,6 +148,10 @@ self.addEventListener('fetch', event => {
   // (vercel.json). Its 33 MB of models must never go through the cache below,
   // which would fetch every one of them again in the background on each visit.
   if (url.pathname.startsWith('/atlas/')) return;
+  // Videos (media/) stream from the network in pieces (Range requests, which
+  // iPhones need to play and skip). The cache below would hand back the whole
+  // 8 MB file instead, so they never go through it.
+  if (url.pathname.startsWith('/media/')) return;
 
   const isDocument = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
