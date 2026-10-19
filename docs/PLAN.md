@@ -39,8 +39,8 @@ the handoff. **A chat opened from another keeps its exact title** (Jose,
 The main line of chats is called "Main inter Hub"; every chat opened from
 it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
 `AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, give Jose the new
-session's title and say "Archive this chat" (archive it only when he says
+next, then stop and wait for Jose's go. In the old chat, tell Jose the new
+session carries the same title and say "Archive this chat" (archive it only when he says
 so). If `create_session` isn't available, fall back to the message to paste.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
@@ -52,6 +52,34 @@ nothing open"). A chat left for a new one ("Start a new chat") is done
 too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
+
+**Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
+practice: the phone reads a line, you render it, you tap the meaning chunks
+you missed, the line length follows your span, your span is charted over
+weeks on your phone. Design and decisions: `docs/features/memory-trainer.md`.
+Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
+first; notes toggle, memory-only default. One PR each:
+
+M0. **Voice and mic check** (this PR): a sheet at the bottom of More.
+   **Needs Jose:** run it in the installed app and in a Safari tab on his
+   iPhone, Copy results, paste both. Write them into the note's Results.
+M1. **Lines.** The 101 False Friends `heard`/`truth` pairs as short
+   Spanish-to-English starters, plus ~60 new lines of 10-45 words both
+   ways (discharge, meds, consent, ED, OB, peds), each split into chunks,
+   in a file of their own (not `index.html`). Jose checks the Spanish
+   (a review list he can tick on the phone) before anything ships.
+M2. **The trainer.** Screen under Practice, playback with the text
+   hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
+   Dr. Smiley's listening/thinking states, progress in `localStorage`
+   only, notes toggle. User Guide, a suite.
+M3. **Record yourself, play it back beside the model.** Only if M0's
+   record and play back work in the installed app; also only if the voice
+   stays loud after the mic (M0 step 3), or the trainer must play before
+   it opens the mic.
+M4. **Span chart** (weeks) and the span number on the Practice tile.
+M5. **Auto-marking** from speech to text. Only if M0 shows it works in
+   the installed app. Matching on the phone; Haiku (`_routine.js`) only
+   for the chunks that look like paraphrases; text only, never audio.
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
@@ -193,6 +221,8 @@ come from this alone.
   its own multi-phase effort, coordinated with ChatGPT's edits.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
+- **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
+  see Facts). Trim the eye patch's edge in `face.webp`. When Jose wants it.
 - **Training & Events listener has no limit.** Fine while small; a cap
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
@@ -207,6 +237,14 @@ come from this alone.
   tap a point), Focus next tile, "My progress" card folded into the trend
   tile and the domain rows, staggered arrival, count-ups, self-drawing
   line, resumable motion. Note: `docs/features/practice-dashboard.md`.
+
+- 2026-10-19 Dr. Smiley's brows move (Jose's pick of four ideas for more
+  expression; the others were an Expression Studio page, new drawn frames
+  and 3D with face shapes). Brows cut out of his own art into
+  `drsmiley/brow-l.webp`/`brow-r.webp`, forehead repainted, a pose per
+  face frame plus caring holds on `composed`/`encourage`
+  (`docs/features/dr-smiley.md`). Art total 334 KB to 324 KB. Guide:
+  `askmoves` answer and a news card.
 
 - 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
   `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
@@ -374,6 +412,14 @@ come from this alone.
 - The practice screen re-renders on any data arrival (`ensureLoaded` ->
   `scheduleRender`), so entrance motion there must survive a re-render:
   `data-motion`/`data-sig` + `playPracticeMotion` resume it.
+- Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
+  around one eye patch (seen over the original base too, so it predates
+  the brows). A clean-up of those three frames is open (Later).
+- Meshy AI (3D) was looked at for Dr. Smiley on 2026-10-19: its auto-rig is
+  a body skeleton for full-body, two-legged textured models; no face rig
+  was found in its docs, and api.meshy.ai is blocked from cloud sessions
+  unless added to the environment's allowed domains.
+
 - **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
   Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,
   tap to paint 770-1,130 ms on this session's slow machine. Forced layout
