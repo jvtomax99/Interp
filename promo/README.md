@@ -5,8 +5,34 @@ Tesseract (installed in every cloud session by `.claude/hooks/session-start.sh`)
 Not part of the app: `.vercelignore` keeps this folder off the live site.
 
 Versions: `hub-promo-v1.mp4` (no voice), `v2` (narration), `v3` (re-edit to a beat,
-30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `hub-promo-v6.mp4` (current: for the CEO pitch; -14.7 LUFS, -1.3 dBTP). `build.py` builds v6; older builds are
-in git history.
+30 s), `v4` (45 s, new intro), `v5` (v4, voice warmed up), `v6` (for the CEO pitch), `hub-promo-v7.mp4` (current: v6 with the
+Chatterbox voice). `build.py` builds v7; older builds are in git history.
+
+## v7: the Chatterbox voice (2026-10-19)
+
+v6's edit, script and timings, read by Chatterbox (`voice_chatterbox.py`) instead of
+Kokoro. The Kokoro takes stay in `voice/kokoro/`.
+
+- **Fitting.** 13 of 18 lines fit `max_ms` on the first take. A line's `cb.seed` in
+  `narration.json` picks its take; seeds repeat exactly, so a rerun gives the same
+  audio. Lines 0 and 5 got shorter seeds; line 5 also starts 100 ms earlier (7.7 s, still
+  ending by 9.55 s) and line 1 10 ms earlier.
+- **Word check.** Every take was transcribed with Whisper (`small`). Retaken for that:
+  line 2 ("¿Fallo cardíaco?" came out "Fayo caliaco"), line 6 ("HUMC's" came out
+  "ITUMC's"; now written `H.U.M.C.'s`, which read right in 3 of 3 seeds against 2 of 4)
+  and line 12 ("staff" came out "stuff").
+- **Trim.** The multilingual model can trail up to 2 s of low noise and open on a
+  quarter second of hiss; `trim()` now works on a loudness envelope (see its docstring).
+- **WARM, measured.** Chatterbox's 60-300 Hz already matches v6's warmed Kokoro (within
+  0.3 dB), its 1-5 kHz runs 5 dB hotter and its loud/soft spread is 15 dB against 11.5.
+  So the chain keeps the 3 kHz cut and the compression and drops the 180 Hz boost and the
+  room echo (`WARM` in `build.py`).
+- **Voices.** Both are Chatterbox's built-in male voice: English at a 115 Hz median, as
+  `am_puck`; Spanish at 142-200 Hz, so the interpreter still sounds like a second person.
+  Line 2 now rises at the end (204 to 222 Hz); Kokoro's fell.
+
+Unheard by Claude: Whisper and the measurements prove words, timing and level, not how
+natural it sounds.
 
 ## v6: for the pitch to the hospital's CEO (2026-10-18)
 
