@@ -52,8 +52,16 @@ frozen and not the real iOS version):
   "listening, speak now" and nothing after. Unclear whether it stalled or the
   report was copied within the 10 s window. M5 stays on hold.
 
-**Still to run:** a Safari tab; Play Spanish in both; speech to text waiting
-until the line changes before Copy.
+**Safari tab, 2026-10-19** (same phone, same build): same voices. Spanish
+played (3.9 s; es-US asked, the phone chose a voice itself), English 5.3 s.
+Record + play back works (128 KB). Speech to text in English **works**:
+"Hello hello hello", first words after 3.4 s. Spanish still read "listening"
+when copied. Loudness after the mic not answered.
+
+So far: speech to text works in a Safari tab; in the installed app it has
+not produced words yet (one run, possibly copied early). **Still to run:**
+in the installed app, Listen in English, speak, wait until the line says
+"done" or an error, then Copy; Spanish the same way in either mode.
 
 ## M1: the lines
 

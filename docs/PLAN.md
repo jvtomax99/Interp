@@ -68,9 +68,10 @@ Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
 first; notes toggle, memory-only default. One PR each:
 
 M0. **Voice and mic check** (#60, merged). Installed-app results in the
-   note: recording works, voice quieter after the mic, speech to text
-   unclear. **Needs Jose:** Safari tab run; Play Spanish; wait for speech
-   to text before Copy.
+   note: recording works in both, voice quieter after the mic (app),
+   speech to text works in a Safari tab (English) but gave no words yet in
+   the installed app. **Needs Jose:** installed app, speech to text in
+   English and Spanish, waiting for "done" before Copy.
 M1. **Lines** (drafted 2026-10-19, `memory/lines.json`; Jose reviewing on
    the review page linked in the note). The 101 False Friends `heard`/`truth` pairs as short
    Spanish-to-English starters, plus ~60 new lines of 10-45 words both
