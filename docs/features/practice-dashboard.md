@@ -73,6 +73,22 @@ naming its building (`CAMPUS[].place`). The HUD keeps the live screen's glossy r
 `animateReadyRing`; Jose, 2026-10-19: "a combination" of the two looks).
 Dr. Smiley in the card is an `ask-face`, so the dock's Dr. Smiley steps aside.
 
+**Picking a building** (Jose, 2026-10-19: "we are clicking on the building
+without knowing which content is being clicked"; he picked names on the
+badges plus tap to pick). Each badge reads `<short> <pct>%`; the label
+placement estimates each chip's width from its name (`tagsAt[key][2]`) and
+Dr. Smiley's pin stands left of that width. The first tap on a building
+(`.cp-bld`) or badge calls `campusPick(key)`: `.has-sel` on `.cp-world`, the
+badge `.is-sel` (grows, white), the others step back; `.cp-shade` dims the
+scene with a radial hole over the building (`campusShadeAt`); its `lit10`
+layer goes on top and breathes (`.cp-litsel`); `campusPickCard` fills
+`.cp-pick`, which sits over the chips and Play row (`.cp-foot.has-sel` hides
+them, same box, nothing moves): full area name, questions, share of the exam,
+Practise and a corner ×. A second tap on the same one, or Practise, calls
+`campusGo` (startStudy). The empty scene, × and Escape put it back.
+`CAMPUS_PICK.key` survives the screen's re-renders and is dropped on a fresh
+arrival. Suite: `campus-pick.cjs`.
+
 **Alive** (Jose, 2026-10-19: "beautiful and alive"; he picked the living
 scene). The render also captures, each on its own and hidden from the base:
 clouds (screen-blended, drifting), three flag frames and four fountain-spray
