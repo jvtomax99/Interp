@@ -2752,6 +2752,12 @@
   .gd-n1{ background:linear-gradient(140deg,#252E6D,#2E5FB0 70%,#2E8BD0); }
   .gd-n2{ background:linear-gradient(140deg,#4E3F7A,#7C6A9C 80%); }
   .gd-n3{ background:linear-gradient(140deg,#0F5FA6,#0189B3); }
+  /* The 45-second video, upright (9:16), in the answer sheet. */
+  .gd-video{ margin:0 auto 13px; width:min(100%, 300px); aspect-ratio:9/16; max-height:62vh; border-radius:var(--r-md);
+    overflow:hidden; background:#0E1438;
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+  .gd-video video{ display:block; width:100%; height:100%; object-fit:contain; background:#0E1438; }
+  @media (max-height:700px){ .gd-video{ width:auto; height:62vh; } }
 
   /* Your first week */
   .gd-week{ display:flex; flex-direction:column; padding:15px 15px 6px; border-radius:var(--r-lg); background:var(--paper);
@@ -12962,9 +12968,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
-  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
-  { id:'smoothness',  tone:'gd-n3', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
+  { id:'promo',       tone:'gd-n1', pin:'pins/userguide.webp',           eyebrow:'Video',                 title:'Interpreter Hub in 45 seconds: watch it, or show it to someone new' },
+  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'A 3D dashboard: your scores as a line over time, and the area to focus on next' },
+  { id:'askmoves',    tone:'gd-n3', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley’s brows move now: up when he laughs, soft when he’s reassuring you' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13122,7 +13128,32 @@ function guideOpenSheet(t){
   sheet.style.setProperty('--c', sec.color);
   sheet.setAttribute('aria-labelledby', 'gdSheetTitle');
   ov._after = () => { guideOpenId = null; };
+  const vid = sheet.querySelector('.gd-video video');
+  if(vid) promoWatch(vid);
   if(prefersAutoFocus()) sheet.querySelector('.gd-show, .gd-x').focus({ preventScroll: true });
+}
+
+/* ---- The 45-second video (media/hub-promo.mp4, made in promo/) ----
+   Its answer is 'promo'. Home's hello banner has a "Watch" button until the
+   video has been watched on this phone (ih_promoSeen): played to the end or
+   past 15 s. The button opens the answer over Home and starts it with sound
+   (the tap allows that); from the guide it waits for a tap on play. */
+function promoSeen(){ try{ return localStorage.getItem('ih_promoSeen') === '1'; }catch(e){ return false; } }
+function promoWatch(vid){
+  const done = () => {
+    if(promoSeen()) return;
+    try{ localStorage.setItem('ih_promoSeen', '1'); }catch(e){}
+    document.querySelectorAll('.home-promo-btn').forEach(b => b.remove());
+  };
+  vid.addEventListener('ended', done);
+  vid.addEventListener('timeupdate', () => { if(vid.currentTime >= 15) done(); });
+}
+function watchPromo(){
+  const t = GUIDE_TOPICS.find(x => x.id === 'promo');
+  if(!t) return;
+  guideOpenSheet(t);
+  const vid = document.querySelector('#guideSheet .gd-video video, .gd-sheet .gd-video video');
+  if(vid){ const p = vid.play(); if(p && p.catch) p.catch(() => {}); }
 }
 
 // A link straight to one answer, to paste into Team Chat.
@@ -16348,6 +16379,12 @@ const GUIDE_SECTIONS = [
 ];
 
 const GUIDE_TOPICS = [
+  { id:'promo', section:'start', k:'video promo watch film movie clip 45 seconds introduction intro overview what is show someone new hire ceo explain the app', q:'What is Interpreter Hub? Watch the 45-second video', a:`
+    <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" controls playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
+    <p>A short film about the Hub: why the right word matters, then the glossary, Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice, Team Chat and Dr. Smiley. It plays with sound; tap the screen for full screen.</p>
+    <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
+    <p>On Home, the hello banner has a <b>Watch</b> button in its bottom-right corner until you've watched the video once. After that it's only here.</p>` },
+
   { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
     <ol>
@@ -20821,7 +20858,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip';
+  const LIFTS = '.mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20849,8 +20886,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1751';
-const BUILD_TIME = '2026-10-19 17:51 UTC';
+const BUILD_ID = 'b1019.1839';
+const BUILD_TIME = '2026-10-19 18:39 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
