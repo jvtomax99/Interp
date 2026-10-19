@@ -224,6 +224,7 @@ come from this alone.
   left still, optional scroll first, trace of every task over 50 ms with
   what ran). frame-meter suite checks the list, the sheet and the copy
   text. User Guide: the smoothness answer explains the list.
+  jvtomax99/Interp#54.
 
 - 2026-10-18 S3 startup (invisible). Measured with the new
   `tests/tools/startup.cjs` (each long task's pieces, the lines that forced
