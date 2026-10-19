@@ -86,9 +86,12 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    starts by getting good before-runs. Listener times there: drSwayScroll
    1.2 s of 620 calls, the first `scrollTop` read in each frame, so it
    pays the frame's pending style (Facts), not its own work.
-   S7a, S7b and S7c are in Done. S7a's phone run (Facts) showed no clear
-   gain; S7b and S7c phone checks pending (Jose: 2-3 runs per build, same
-   protocol, so the spread is known). Part 2 is finished once those are in.
+   S7a, S7b and S7c are in Done. Phone runs in Facts: S7a no clear gain;
+   S7b + S7c (b1018.1746) the best scrolling yet, one run. Still to do: 1-2
+   more runs on b1018.1746 (Jose: 2-3 per build, so the spread is known),
+   and the stall while Home sits still (~27 ms/s, worst 120 ms, two
+   builds in a row; was ~7 ms/s): find what runs then. Part 2 is finished
+   once those are in.
    Later, not Home: Team Chat's thread tuck reads `scrollTop` in the
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
@@ -398,6 +401,18 @@ come from this alone.
   observer). Needs a repeat before reading anything into it. Lab gains in
   Chromium's style engine have twice not shown clearly on the iPhone, so
   only the phone decides an S-step.
+- Same phone after S7b + S7c (#50, #51), build b1018.1746, one 28 s run
+  on Home (12 s scrolling): scrolling 8.2% late, 53.5 ms/s, worst 47 ms.
+  Best of the four builds on all three (before part 1: 10.5%, 85, 57;
+  part 1: 8.6%, 66.9, 49; S7a: 9.5%, 76.7, 61). From before part 1 to
+  now: hitches while scrolling down by about 37%. Still far into Apple's
+  "distracting" (10+ ms/s). The still part, from the totals (16 s): ~2.7%
+  late, ~27 ms/s, and again the run's worst frame (120 ms) was in it.
+  Second build in a row with that (S7a: ~3%, ~29 ms/s, 124 ms), so it is
+  likely real and not from S7b/S7c; before S7a still was ~1%, 7.4 ms/s.
+  Cause unknown (a timer, the greeting or the meter's own start are
+  candidates; untested). One run each build, so the spread is still
+  unknown: Jose asked for 2-3 runs per build.
 - `tests/tools/scroll.cjs` with UA=chromium reproduces the phone's scroll
   number (~10% late at 4x). With the iPhone user agent it does not: Home at
   rest is ~96% busy there (Chromium runs the iPhone's CSS petals on its main
