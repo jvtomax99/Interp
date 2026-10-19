@@ -818,7 +818,7 @@
         el.setAttribute('class','home-heartline');el.setAttribute('viewBox','-16 -16 152 43');
         el.setAttribute('aria-hidden','true');el.setAttribute('focusable','false');
         el.innerHTML=`<path class="hl-glow" pathLength="100" d="${D}"/><path class="hl-core" pathLength="100" d="${D}"/>`;
-        btn=button;button.parentElement.appendChild(el);schedule(1500);   // placed by fitWave
+        btn=button;button.parentElement.appendChild(el);schedule(1500);   // placed by fitWave, right after
       },
       place,
       // The hello is starting again: clear the line now rather than at the next beat.
@@ -1199,10 +1199,12 @@
     if(namePen.busy)namePen.adopt(name);
     else if(!hasWavedHello&&!(resume&&resume.elapsed<SEQUENCE_END))namePen.hold(name);
     else if(namePen.changed(name))namePen.start(wave);
-    // (fonts.ready and fonts.load lay the page out too, so they wait with it)
+    // Now, not before paint: a shrunk name changes the page's height, which a
+    // Back's scroll restore counts on. fonts.ready and fonts.load lay the page
+    // out too and only matter later, so they wait for the frame.
+    fitWave(wave);
     beforePaint(()=>{
       if(!wave.isConnected)return;
-      fitWave(wave);
       if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(wave.isConnected)fitWave(wave);});
       // The name's script face can arrive after that (it swaps in), and is wider than the fallback.
       if(document.fonts&&document.fonts.load&&name)document.fonts.load('400 56px Parisienne',name.textContent).then(()=>{if(wave.isConnected)fitWave(wave);},()=>{});
@@ -1753,7 +1755,7 @@
       railObserver = new ResizeObserver(refresh);
       content.querySelectorAll('.home-rail').forEach(rail => railObserver.observe(rail));
     }
-    beforePaint(refresh);
+    refresh();   // now, not before paint: the dots row is 7px of height a Back's scroll restore counts on
   };
 
   /* Medical Terminology "View all": one card per domain, in the same sheet

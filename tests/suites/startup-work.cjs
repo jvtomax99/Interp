@@ -101,17 +101,16 @@ const init = () => {
     const r = await page.evaluate(() => new Promise(res => {
       const tab = [...document.querySelectorAll('.tabbar-btn')].find(t => /translate/i.test(t.getAttribute('aria-label') || t.textContent));
       tab.click();
-      // Sampled by the clock, not by frames: WebKit on CI renders rarely.
-      // The computed transform of a running transition is its current value.
-      const xs = [], t0 = performance.now();
-      const f = () => { const l = document.querySelector('.tabbar-lens');
-        if (l) xs.push(Math.round(new DOMMatrix(getComputedStyle(l).transform).m41));
-        if (performance.now() - t0 < 900) setTimeout(f, 20);
-        else { const end = xs[xs.length - 1];
-          res({ lens: !!l, gliding: end > 0 && xs.some(x => x > 2 && x < end * .9), cat: activeCategory, xs: xs.filter((x, k) => !k || x !== xs[k - 1]).join(' ') }); } };
-      f();
+      // Right after the click the lens has a running transform transition
+      // (without the settle a fresh lens would just sit at the new spot), and
+      // it ends there. Not sampled position by position: WebKit's computed
+      // style reports a running transform transition's end value (main too).
+      const l0 = document.querySelector('.tabbar-lens');
+      const started = !!l0 && l0.getAnimations().some(a => a.transitionProperty === 'transform' && a.playState === 'running');
+      setTimeout(() => { const l = document.querySelector('.tabbar-lens'), x = l ? Math.round(new DOMMatrix(getComputedStyle(l).transform).m41) : 0;
+        res({ lens: !!l, gliding: started && x > 0, cat: activeCategory, end: x }); }, 900);
     }));
-    ok(r.cat === 'translate' && r.lens && r.gliding, 'changing tab: the lens glides over several frames to the new tab', r);
+    ok(r.cat === 'translate' && r.lens && r.gliding, 'changing tab: the lens starts its transition and ends on the new tab', r);
     await ctx.close();
   }
   await b.close();

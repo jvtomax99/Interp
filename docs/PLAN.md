@@ -93,7 +93,7 @@ S7. **Home scroll, part 2 (Jose: "scroll first", 2026-10-17).** Part 1 is
    scroll event (index.html ~20912); cheap while layout is clean, measure
    in Team Chat before touching.
 S3b. **Startup, what's left (S3 in Done).** Target still no task > 200 ms
-   at 4x; after S3 the worst are ~210-380 ms. They are whole-screen costs:
+   at 4x; after S3 the worst are ~240-460 ms. They are whole-screen costs:
    a Home render's script (~150-200 ms) plus the style of the new screen
    (~130 ms, forced on purpose by `dockAfterRender` so the tab lens glides),
    and the next frame's layout + paint + `heroPetals`. Options, each needs a
@@ -195,18 +195,22 @@ come from this alone.
   layout, CPU profile). The plan's "top CPU" list was mostly forced layout
   billed to whoever measured first. Changes: the name pen's path is traced
   in a worker (`penTrace`, plain worker, no OffscreenCanvas; same path to
-  the byte for Jose, Moisés, Elizabeth Lind-Smith); the categories
-  listener's first snapshot (the document `loadData` just read) no longer
-  repaints Home; Home's measuring moved to the next frame before it paints
-  (`beforePaint` in `home-polish.js`: heartline/name fit, fonts.ready,
-  hero and rank-card petals, rail dots; `applyHeroDrift`); `dockAfterRender` settles the lens with a style
-  read, not a layout. 4x, iPhone UA, 4+4 interleaved: first visit worst
-  task 428-623 -> 279-379 ms (every after below every before), tasks over
-  200 ms 3-5 -> 1-3, `render()` CPU 715-1108 -> 346-519 ms. Returning visit:
-  no clear change in the worst task (192-283 -> 201-314, overlapping);
-  total long-task time unchanged on both (work moved, not removed, apart
-  from the repaint and the pen). New suite `startup-work.cjs` (also in the
-  WebKit CI job). No User Guide change (nothing visible).
+  the byte for Jose, Moisés, Elizabeth Lind-Smith; WebKit needs the blob
+  URL kept, CI caught it); the categories listener's first snapshot (the
+  document `loadData` just read) no longer repaints Home; the petals (hero
+  and rank card), the heartline's placing, `fonts.ready`/`fonts.load` and
+  `applyHeroDrift` run in the next frame, before it paints (`beforePaint`
+  in `home-polish.js`); `dockAfterRender` settles the lens with a style
+  read, not a layout. Kept immediate on purpose: anything that changes
+  Home's height (rail dots, the name fit `fitWave`), since Back restores
+  the scroll right after the render (destination-labels caught a 7 px miss),
+  and Dr. Smiley's dock check (WebKit's dock-tuck). 4x, iPhone UA, 3+3
+  interleaved: `render()` CPU first visit 909-1152 -> 568-627 ms,
+  returning 841-1102 -> 599-765 (every after below every before); tasks
+  over 200 ms first visit 4-6 -> 1-3; worst task 441-610 -> 418-462 and
+  238-388 -> 238-290 (overlapping, so not proven). Total long-task time
+  unchanged. Target (no task over 200 ms) not reached: S3b. New suite
+  `startup-work.cjs` (also in the WebKit CI job). No User Guide change.
   jvtomax99/Interp#52.
 
 - 2026-10-18 S7c, pin burst stops when a scroll takes the touch (visible,
@@ -318,9 +322,16 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
-- `destination-labels` "Back ... restores scroll" can miss by ~7 px
-  (1130 vs 1137) on main too (2026-10-18, this container); seen once
-  each side, then passing. Not a regression when it shows alone.
+- Back to Home restores the scroll right after the render, so anything
+  that changes Home's height must happen in the render, not in a later
+  frame: the rail dots row is 7 px (`destination-labels` fails 1130 vs
+  1137 when they come late). The same check missed once on main in this
+  container, so a single miss alone isn't proof; twice on CI was.
+- WebKit (CI and so iPhones): a Worker made from a blob URL needs that URL
+  until it has loaded; revoking it right after `new Worker()` lost the
+  worker silently. Its computed style also reports a running transform
+  transition's end value, so test a glide with `getAnimations()`, not by
+  sampling positions.
 - A CPU profile bills a forced layout to the script line that read first,
   so "self time" of `place`, `addCardPetals`, `applyHeroDrift` and the like
   is really the whole new screen's style + layout (~150-250 ms at 4x after
