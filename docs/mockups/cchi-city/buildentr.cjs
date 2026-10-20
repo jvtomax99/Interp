@@ -13,6 +13,8 @@ const srv = http.createServer((q,r)=>{ const f = path.join(root, decodeURICompon
   fs.mkdirSync(OUT, { recursive:true }); let total = 0;
   const save = (name, im) => { if(!im) return null; const buf = Buffer.from(im.data.split(',')[1], 'base64'); fs.writeFileSync(path.join(OUT, name), buf); total += buf.length; return [im.x, im.y, im.w, im.h]; };
   const man = { w: out.W, h: out.H, g: save('entrance.webp', out.base), f: out.fountain, drive: out.drive, b:{} };
+  // the depth layers for the parallax (F3): sky at the back, the town and skyline, the campus in front
+  man.layers = { sky: save('sky.webp', out.layers.sky), far: save('far.webp', out.layers.far), near: save('near.webp', out.layers.near) };
   for (const k in out.b) man.b[k] = { label: out.b[k].label, box: out.b[k].box, lv: out.b[k].lv.map((im, i) => save(`${k}-lit${i+1}.webp`, im)) };
   if (process.env.NOLIT){ const old = JSON.parse(fs.readFileSync(process.env.NOLIT, 'utf8')); man.b = old.b; }
   const L = out.live; man.live = { clouds: save('clouds.webp', L.clouds), flags: L.flags.map((im,i) => save(`flag${i}.webp`, im)), spray: L.spray.map((im,i) => save(`spray${i}.webp`, im)),
