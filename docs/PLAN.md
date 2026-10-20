@@ -143,13 +143,11 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
-S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
-   handler's forced layouts only moves the cost to the next reader or the
-   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
-   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
-   forced layout (`getClientRects`, `getBoundingClientRect` right after
-   `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
-   before write. Target: handler < 50 ms, tap to paint < 150 ms.
+S4. **Glossary taps** (this PR): off-screen term cards skip layout
+   (`content-visibility`), with `#content.cv-all` wherever a guessed height
+   could move what you read. Handler -37%, tap to paint -23% on real-size
+   domains; the targets (< 50 ms, < 150 ms at 4x) are not met. Next, if
+   wanted: draw fewer than 120 cards up front (a visible change: ask Jose).
 S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
    (stiffness = (2π/duration)², damping ratio = 1 - bounce); WWDC18
    "Designing Fluid Interfaces" (start at 100% damping; 80% only when a gesture
@@ -243,6 +241,21 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 S4 glossary taps. Profiled a domain tap (`tap-trace.cjs`
+  PROFILE=1): ~150 of the handler's ~220 ms was the browser laying out the
+  new screen, forced early by `smileyElsewhere`/`watchDomainDock`; ~38 ms
+  building the HTML. A screen draws up to 120 cards (~6,600 elements on a
+  real domain; the test seed has 28), so term cards now skip layout and
+  paint off screen (`content-visibility:auto`, guessed 172 px). Same look:
+  cards already clip, and every box on screen sits where it did to 0.05 px
+  (pixels differ only by one device pixel of text snapping). Guessed
+  heights above the screen would move what you read in Safari (no scroll
+  anchoring), so `#content.cv-all` lays every card out for a redraw in
+  place while scrolled down (`cvFresh`), Back's restore, `revealTerm` and
+  Show me; removing either guard makes the suite fail. Interleaved 6+6 taps
+  on 150-term domains (`BIG=150`, 4x, this session's slow machine): handler
+  median 783 -> 494 ms, tap to paint 1,564 -> 1,212 ms. Suite
+  `glossary-cv.cjs`. Not measured on an iPhone.
 - 2026-10-20 F3 campus golden hour + depth (Jose's film brief). The scene
   re-lit in `entrance.html`: a low warm sun from the left with long shadows,
   lavender fill, a pink rim backlight, a peach-to-lavender sky with the sun's

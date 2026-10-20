@@ -128,8 +128,9 @@ only `docs/`, `tests/`, `.github/`, `.claude/`, `*.md` or the Firebase
 rules get no bump (nothing deployed changed). If an `api/*.js` file
 changed, it ships in the same push.
 
-After merging, verify: the bump commit lands on `main` within a minute or
-two, and its `BUILD_ID` is the one to find live. From a cloud session the
+After merging, verify: the bump commit lands on `main` (a minute when the
+runners are free; ~10 min on 2026-10-20 behind the merge's own test runs),
+and its `BUILD_ID` is the one to find live. From a cloud session the
 site itself is blocked; read Vercel's status on that commit instead
 (`curl -sS https://api.github.com/repos/jvtomax99/Interp/commits/<sha>/status`,
 context "Vercel", "Deployment has completed"). Do not ask Jose to check
@@ -246,6 +247,11 @@ lost concurrent edits. Do not reintroduce that.
 - **Pins are pre-cut files.** `pin-icons.js` used to download 9 MB of sheets
   and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
   each pin is `pins/<key>.webp`; to change one, replace its file.
+- **Term cards skip layout off screen** (S4, `content-visibility:auto`;
+  heights are guesses until drawn). Anything that jumps into the card list
+  (a scroll restore, `scrollIntoView` on a card) adds `cv-all` to
+  `#content` first, or it lands on a guess; iPhone Safari has no scroll
+  anchoring to fix it. `renderContent` does this itself for redraws.
 - **No `body:has(...)` for state** (`AGENTS.md`): it made scrolling Home
   restyle. Overlays open set `body.ov-open` / `.gs-open` / `.dm-open`
   (`overlayFlags` in `index.html`, a watcher, so new overlays need nothing).
