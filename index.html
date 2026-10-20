@@ -6316,28 +6316,35 @@ html[data-theme="dark"] .dp-card, html[data-theme="dark"] .dp-ib{ box-shadow:var
   color:color-mix(in srgb, var(--dp-sp) 72%, var(--ink)); }
 .dp-spec::before{ content:""; flex:0 0 8px; height:8px; border-radius:50%; background:var(--dp-sp); transform:translateY(-1px); }
 
-/* Layout B (Jose, 2026-10-20): Where on one line with the term count, the
-   tip as a full-width strip, the terms right after. No research: one card. */
-.dp-where{ display:flex; align-items:center; gap:var(--sp-3); margin-top:10px; padding:12px 14px; }
-.dp-where-pin{ flex:0 0 32px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
-.dp-where-pin img{ width:32px; height:32px; object-fit:contain; }
-.dp-where-t{ flex:1; min-width:0; }
-.dp-where-t b{ display:block; font-size:var(--fs-sub); font-weight:650; line-height:1.25; overflow-wrap:anywhere; }
-.dp-where-t small{ display:block; font-size:var(--fs-foot); color:var(--ink-soft); margin-top:1px; }
-.dp-count{ flex:0 0 auto; padding:6px 11px; border-radius:999px; background:var(--navy); color:#fff; font-size:var(--fs-foot); font-weight:650; white-space:nowrap; }
-html[data-theme="dark"] .dp-count{ background:#3A469E; }
-.dp-nores{ margin-top:10px; padding:14px 16px; background:linear-gradient(160deg, #2B3580, #252E6D); color:#fff; box-shadow:0 8px 20px -12px rgba(22,55,90,.5); }
-.dp-nores p{ margin:0; font-size:var(--fs-foot); line-height:1.4; opacity:.9; }
-.dp-nores-btn{ margin-top:var(--sp-3); min-height:44px; width:100%; border:0; border-radius:999px; background:#fff; color:#252E6D;
+/* Bento: the navy count, Where and the team tip. */
+.dp-bento{ display:grid; grid-template-columns:1.15fr 1fr; gap:10px; margin-top:10px; }
+.dp-navy{ background:linear-gradient(160deg, #2B3580, #252E6D); color:#fff; border-radius:var(--r-lg); padding:14px;
+  box-shadow:0 8px 20px -12px rgba(22,55,90,.5); }
+.dp-navy-n{ font-size:34px; font-weight:750; letter-spacing:-.04em; line-height:1; }
+.dp-navy-l{ font-size:var(--fs-cap); font-weight:600; opacity:.78; margin-top:2px; }
+.dp-bars{ display:flex; flex-direction:column; gap:var(--sp-1); margin:11px 0 0; padding:0; list-style:none; }
+.dp-bars li{ display:flex; align-items:center; gap:8px; font-size:var(--fs-cap); font-weight:600; }
+.dp-bars i{ display:block; flex:0 0 auto; height:5px; border-radius:3px; background:#01B8E6; }
+.dp-bars li.is-ff{ color:#FFC2CD; } .dp-bars li.is-ff i{ background:#FF8FA3; }
+.dp-bars li.is-team i{ background:#fff; opacity:.7; }
+.dp-navy p{ margin:var(--sp-2) 0 0; font-size:var(--fs-foot); line-height:1.4; opacity:.85; }
+.dp-navy-btn{ margin-top:var(--sp-3); min-height:44px; width:100%; border:0; border-radius:999px; background:#fff; color:#252E6D;
   font:650 var(--fs-foot) var(--sans); cursor:pointer; }
+.dp-side{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+.dp-mini{ padding:12px; min-width:0; }
 .dp-k{ font-size:var(--fs-cap); font-weight:650; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); }
-.dp-tip{ display:block; width:100%; margin-top:10px; padding:12px 14px; text-align:left; font-family:var(--sans); cursor:pointer; color:var(--ink);
+.dp-where{ display:flex; gap:8px; align-items:center; margin-top:var(--sp-1); }
+.dp-where-pin{ flex:0 0 30px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
+.dp-where-pin img{ width:30px; height:30px; object-fit:contain; }
+.dp-where b{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; font-size:14px; font-weight:650; line-height:1.25; overflow-wrap:anywhere; }
+.dp-where small{ display:block; font-size:var(--fs-cap); color:var(--ink-soft); margin-top:2px; }
+.dp-tip{ display:block; width:100%; text-align:left; font-family:var(--sans); cursor:pointer; color:var(--ink);
   background:#FFF7E6; border:1px solid #F3E2BC; box-shadow:none; }
 .dp-tip .dp-k, .dp-tip small{ color:#7A5F30; }
 .dp-tip p{ margin:5px 0 0; font-size:14px; line-height:1.35; font-weight:550;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .dp-tip p.is-empty{ font-weight:450; color:var(--ink-soft); }
-.dp-tip .dp-k small{ font-size:inherit; font-weight:600; letter-spacing:0; text-transform:none; }
+.dp-tip small{ display:block; margin-top:4px; font-size:var(--fs-cap); font-weight:600; }
 html[data-theme="dark"] .dp-tip{ background:#2C2617; border-color:#4A3D22; }
 html[data-theme="dark"] .dp-tip .dp-k, html[data-theme="dark"] .dp-tip small{ color:#D9BF8A; }
 .dp-note{ margin:var(--sp-3) 2px 0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
@@ -6421,7 +6428,7 @@ html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #ff
 .dp-tabs.ds-mode-seg button{ flex:0 0 auto; padding:0 13px; white-space:nowrap; display:flex; align-items:center; gap:5px; }
 .dp-tabs.ds-mode-seg button b{ font-weight:550; color:var(--ink-soft); }
 .dp-tabs.ds-mode-seg button.is-ff{ color:color-mix(in srgb, var(--danger) 85%, var(--ink)); }
-.dp-trust{ display:flex; align-items:center; gap:6px; margin:0 2px 9px; font-size:var(--fs-cap); font-weight:600; color:#7A5F30; }
+.dp-trust{ display:flex; align-items:center; gap:6px; margin:2px 0 0; font-size:var(--fs-cap); font-weight:600; color:#7A5F30; }
 .dp-trust svg{ flex:0 0 14px; width:14px; height:14px; }
 html[data-theme="dark"] .dp-trust{ color:#D9BF8A; }
 .dp-gl{ position:relative; width:76px; min-height:30px; margin-top:2px; padding:0 4px; border:0; border-radius:999px; background:color-mix(in srgb, var(--navy) 9%, var(--paper));
@@ -6434,6 +6441,7 @@ html[data-theme="dark"] .dp-gl:not(.is-have){ background:rgba(201,211,255,.12); 
 .dp-gl:active, .dp-gl.is-pressed{ transform:scale(.95); }
 .dp-gl:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 .dp-blurb{ margin:0 2px 10px; font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.dp-blurb p{ margin:0; }
 .dp-old{ margin:0 0 10px; padding:14px 16px; font-size:14px; line-height:1.45; color:var(--ink-soft); }
 .dp-old b{ color:var(--ink); }
 
@@ -6483,14 +6491,14 @@ html[data-theme="dark"] .dp-bar{ background:rgba(26,34,51,.78); box-shadow:var(-
 .dp-rb img{ width:28px; height:28px; object-fit:contain; }
 html[data-theme="dark"] .dp-rb{ box-shadow:none; }
 
-.dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-nores-btn, .dp-tip{ transition:transform .18s var(--ease), background .2s var(--ease); }
+.dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip{ transition:transform .18s var(--ease), background .2s var(--ease); }
 .dp-ib:active, .dp-ib.is-pressed, .dp-go:active, .dp-go.is-pressed, .dp-rb:active, .dp-rb.is-pressed,
-.dp-say:active, .dp-say.is-pressed, .dp-wide:active, .dp-wide.is-pressed, .dp-nores-btn:active, .dp-nores-btn.is-pressed{ transform:scale(.95); }
+.dp-say:active, .dp-say.is-pressed, .dp-wide:active, .dp-wide.is-pressed, .dp-navy-btn:active, .dp-navy-btn.is-pressed{ transform:scale(.95); }
 .dp-tip:active, .dp-tip.is-pressed{ transform:scale(.98); }
 .dp-ib:focus-visible, .dp-go:focus-visible, .dp-rb:focus-visible, .dp-say:focus-visible, .dp-wide:focus-visible,
-.dp-nores-btn:focus-visible, .dp-tip:focus-visible, .dp-link:focus-visible, .dp-ph:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.dp-navy-btn:focus-visible, .dp-tip:focus-visible, .dp-link:focus-visible, .dp-ph:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 @media (prefers-reduced-motion: reduce){
-  .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-nores-btn, .dp-tip{ transition:none; }
+  .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip{ transition:none; }
   .dp-overlay .dp-page{ animation:none; }
   .dp-say.speaking svg{ animation:none; }
 }
@@ -17037,7 +17045,7 @@ const GUIDE_TOPICS = [
     <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
   { id:'doctorpage', section:'prep', k:'doctor page terms tabs core procedures drugs anatomy false friends team terms hear listen speak english spanish start appointment flashcards tip research again glossary', q:'What is on a doctor’s page?', a:`
-    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, where they work with how many prep terms there are, then the first <b>Team tip</b> and how many there are (tap it to read them all).</p>
+    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, how many prep terms there are, <b>Where</b> they work, and the first <b>Team tip</b> with how many there are (tap it to read them all).</p>
     <p>The tabs show the terms one group at a time: <b>Core</b>, <b>Procedures</b>, <b>Drugs</b>, <b>Anatomy</b>, <b>False friends</b> (in red) and <b>Team terms</b>, the ones your team added by hand. The tabs stay at the top while you scroll. Tap <b>EN</b> or <b>ES</b> on a term to hear it, or <b>+ Glossary</b> to keep it. Terms Doctor Prep found say <b>From Doctor Prep, not checked by the team</b>: check them before you rely on them. <b>Research again</b> updates what Doctor Prep found; your tips, photo and team terms are kept.</p>
     <p>The bar at the bottom: <b>Start appointment</b> (with this doctor; if you’re already in one with them, it takes you back to it), <b>Flashcards</b> (the briefing for their specialty) and <b>Add tip</b>. The pencil at the top edits the doctor: name, specialty, where, photo.</p>
     <p>No connection? The page shows what this phone has saved; the doctor’s prep terms come back once the directory loads.</p>` },
@@ -21464,7 +21472,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-nores-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dp-gl';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dp-gl';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -21492,8 +21500,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0820';
-const BUILD_TIME = '2026-10-20 08:20 UTC';
+const BUILD_ID = 'b1020.0828';
+const BUILD_TIME = '2026-10-20 08:28 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -23722,17 +23730,21 @@ function renderDoctorDirDetail(d){
     ? `<button type="button" class="dp-ph is-photo" aria-label="View photo of ${escapeAttr(d.name)}" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})"><img src="${escapeAttr(d.photo)}" alt=""></button>`
     : `<div class="dp-ph" aria-hidden="true">${pinImgHtml(specialtyPinKey(d.specialty || specialtyForMatch, place))}<span class="dp-ini">${escapeHtml(initialsOf(d.name))}</span></div>`;
 
-  // No research yet: one card before the tabs (layout B; the counts are on the tabs).
-  const noResearch = researched.length ? '' : `<div class="dp-card dp-nores">
-      ${DOCTOR_DIR_STATE !== 'ok' ? `<p>Prep terms show once the directory loads. They need a connection.</p>`
+  const most = Math.max(1, ...tabs.map(t => t.terms.length));
+  const bars = tabs.filter(t => t.terms.length).map(t =>
+    `<li class="${t.key === 'falsefriends' ? 'is-ff' : t.key === 'team' ? 'is-team' : ''}"><i style="width:${Math.max(8, Math.round(t.terms.length / most * 64))}px"></i>${escapeHtml(t.label)} ${t.terms.length}</li>`).join('');
+  const navy = `<div class="dp-navy">
+      <div class="dp-navy-n">${total}</div><div class="dp-navy-l">prep term${total === 1 ? '' : 's'}</div>
+      ${bars ? `<ul class="dp-bars">${bars}</ul>` : ''}
+      ${researched.length ? '' : DOCTOR_DIR_STATE !== 'ok' ? `<p>Prep terms show once the directory loads. They need a connection.</p>`
         : `<p>Not looked up yet. About half a minute.</p>
-        <button type="button" class="dp-nores-btn" onclick="researchThisDoctorFromDirectory('${id}')">Research this doctor</button>`}
+        <button type="button" class="dp-navy-btn" onclick="researchThisDoctorFromDirectory('${id}')">Research this doctor</button>`}
     </div>`;
 
   const tips = doctorTips(d), first = tips[0];
-  const tip = `<button type="button" class="dp-card dp-tip" onclick="openDoctorTips('${id}')" aria-label="${tips.length ? `Team tips, ${tips.length}. Tap to read or add` : 'Add a team tip'}">
-      <div class="dp-k">Team tip${tips.length > 1 ? 's' : ''}${tips.length ? ` · ${tips.length}` : ''}${first && first.by ? `<small> · ${escapeHtml(first.by)}</small>` : ''}</div>
-      ${first ? `<p>“${escapeHtml(first.text)}”</p>`
+  const tip = `<button type="button" class="dp-card dp-mini dp-tip" onclick="openDoctorTips('${id}')" aria-label="${tips.length ? `Team tips, ${tips.length}. Tap to read or add` : 'Add a team tip'}">
+      <div class="dp-k">Team tip${tips.length > 1 ? 's' : ''}${tips.length ? ` · ${tips.length}` : ''}</div>
+      ${first ? `<p>“${escapeHtml(first.text)}”</p>${first.by ? `<small>${escapeHtml(first.by)}</small>` : ''}`
         : `<p class="is-empty">None yet. Tap to add one.</p>`}
     </button>`;
 
@@ -23767,8 +23779,7 @@ function renderDoctorDirDetail(d){
     ? `<div class="dp-card dp-terms">${rows || `<div class="dp-empty">No team terms yet for ${escapeHtml(d.name)}. Add the phrases this doctor actually uses in the room.</div>`}</div>
        <button type="button" class="dp-wide" onclick="openDoctorTermModal('${id}')">${ICON_PLUS} Add a term for this doctor</button>`
     : `${flat ? `<div class="dp-card dp-old"><b>Older research: one list.</b> Research again to get drugs, procedures and false friends in their own tabs. Your tips, photo and team terms are kept.</div>`
-        : (on.blurb ? `<p class="dp-blurb">${escapeHtml(on.blurb)}</p>` : '')}
-       ${rows ? `<p class="dp-trust">${ICON_ALERT}From Doctor Prep, not checked by the team.</p>` : ''}
+        : (on.blurb || rows ? `<div class="dp-blurb">${on.blurb ? `<p>${escapeHtml(on.blurb)}</p>` : ''}${rows ? `<p class="dp-trust">${ICON_ALERT}From Doctor Prep, not checked by the team.</p>` : ''}</div>` : '')}
        <div class="dp-card dp-terms">${rows}</div>
        ${missing > 1 ? `<button type="button" class="dp-wide" onclick="addAllInTier('detail', '${on.key}')">${ICON_PLUS} Add all ${missing} new to the glossary</button>` : ''}
        ${domainMatch && missing ? `<p class="dp-meta">New terms go to ${escapeHtml(domainMatch.name)}.</p>` : ''}`;
@@ -23786,12 +23797,14 @@ function renderDoctorDirDetail(d){
       <div class="dp-card dp-hero">${photo}
         <div class="dp-id"><h1 class="dp-name">${escapeHtml(d.name)}</h1>${d.specialty ? `<div class="dp-spec">${escapeHtml(d.specialty)}</div>` : ''}</div>
       </div>
-      <div class="dp-card dp-where"><span class="dp-where-pin" aria-hidden="true">${pinImgHtml(groupIconKeyFor(place))}</span>
-        <div class="dp-where-t"><span class="sr-only">Where: </span><b>${escapeHtml(placeName)}</b>${floor ? `<small>${escapeHtml(floor)}</small>` : ''}</div>
-        ${total ? `<span class="dp-count">${total} prep term${total === 1 ? '' : 's'}</span>` : ''}
+      <div class="dp-bento">${navy}
+        <div class="dp-side">
+          <div class="dp-card dp-mini"><div class="dp-k">Where</div>
+            <div class="dp-where"><span class="dp-where-pin" aria-hidden="true">${pinImgHtml(groupIconKeyFor(place))}</span>
+              <div><b>${escapeHtml(placeName)}</b>${floor ? `<small>${escapeHtml(floor)}</small>` : ''}</div></div></div>
+          ${tip}
+        </div>
       </div>
-      ${tip}
-      ${noResearch}
       ${r && r.note ? `<p class="dp-note">${escapeHtml(r.note)}</p>` : ''}
       ${seg}
       ${panel}

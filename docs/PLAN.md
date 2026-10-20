@@ -245,12 +245,14 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
-- 2026-10-20 D1b, doctor page layout B + smaller rows and the trust line
-  (Jose's picks). Where on one line with the term count, tip as a strip,
-  no navy tile; sticky tabs; "+ Glossary" pill under EN / ES (no foot line
-  on research rows); "From Doctor Prep, not checked by the team." over
-  research rows. Typical doctor at 393x759: first term 562 to 456px, 1 full
-  row on open (was 0). `docs/features/doctor-page.md`.
+- 2026-10-20 D1b, doctor page: terms sooner, layout A kept. Jose picked B
+  plus smaller rows, saw it, and kept A for its look ("find another way").
+  So: A's bento made compact (hero 64px, place and tip up to 3 lines, short
+  empty-tip text), sticky tabs, "+ Glossary" pill under EN / ES (no foot
+  line on research rows), and "From Doctor Prep, not checked by the team."
+  with the tab's description over research rows (his yes). Typical doctor
+  at 393x759: first term 562 to 503px, 1 full row on open (was 0).
+  `docs/features/doctor-page.md`.
 
 - 2026-10-19 D3, Doctor list (Doctors redesign; mockup `list.png`). Cards
   two to a row on a phone (`doctorListCard`): photo or specialty pin with

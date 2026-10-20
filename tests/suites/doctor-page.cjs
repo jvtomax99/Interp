@@ -164,7 +164,7 @@ async function targets(page) {
           return { name: q('.dp-name').textContent, nameSize: cs(q('.dp-name')).fontSize, nameWeight: cs(q('.dp-name')).fontWeight,
             ini: q('.dp-ini').textContent, pin: q('.dp-ph img').getAttribute('src'), spec: q('.dp-spec').textContent,
             dot: cs(q('.dp-spec'), '::before').backgroundColor, want: specialtyColor('Lymphoma · Hematology/Oncology'),
-            total: q('.dp-count').textContent, navy: !!q('.dp-navy, .dp-nores'),
+            total: q('.dp-navy-n').textContent, bars: [...document.querySelectorAll('#doctorDirDetailModal .dp-bars li')].map(l => l.className + ':' + l.textContent.trim()),
             where: q('.dp-where').textContent.replace(/\s+/g, ' ').trim(), wherePin: q('.dp-where img').getAttribute('src'),
             tip: q('.dp-tip').textContent.replace(/\s+/g, ' ').trim(),
             full: { w: ov.width, h: ov.height, x: ov.left, vw: innerWidth, vh: innerHeight },
@@ -174,8 +174,9 @@ async function targets(page) {
         ok(head.ini === 'LL' && /pins\/leukemia\.webp$/.test(head.pin), 'specialty pin in its tile, with the initials', head);
         const hex = h => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
         ok(head.dot === hex(head.want), 'specialty dot in specialtyColor()', head);
-        ok(head.total === '10 prep terms' && !head.navy, 'layout B: the count on the Where line (8 researched + 2 team), no navy tile', head);
-        ok(/John Theurer Cancer Center/.test(head.where) && /4th fl · Suite 401/.test(head.where), 'Where line: place and floor', head.where);
+        ok(head.total === '10', 'navy tile counts every term (8 researched + 2 team)', head.total);
+        ok(head.bars.length === 6 && head.bars[4] === 'is-ff:False friends 1' && head.bars[5] === 'is-team:Team terms 2', 'one bar per tier, false friends marked', head.bars);
+        ok(/John Theurer Cancer Center/.test(head.where) && /4th fl · Suite 401/.test(head.where), 'Where tile: place and floor', head.where);
         ok(/Explains staging with a drawing/.test(head.tip) && /Maria/.test(head.tip) && /· 1/.test(head.tip), 'Team tip tile: the tip, who, the count', head.tip);
         ok(head.hScroll <= 0, 'nothing runs off sideways', head.hScroll);
         if (!desktop) ok(head.full.w === head.full.vw && Math.abs(head.full.h - head.full.vh) <= 1 && head.full.x === 0, 'full screen on a phone', head.full);
@@ -194,8 +195,8 @@ async function targets(page) {
         ok(row.es === 'estadificación' && row.esF === '17px/550' && row.esC === hex(row.navy), 'Spanish 17/550 navy', row);
         ok(row.defF === '14px' && row.defC === hex(row.soft), 'definition 14 ink-soft', row);
 
-        // Layout B (Jose, 2026-10-20): the trust line over research rows, the
-        // glossary as a pill under EN / ES, the tabs stay under the top bar.
+        // D1b (Jose, 2026-10-20; layout A kept): the trust line over research
+        // rows, the glossary as a pill under EN / ES, the tabs stay under the top bar.
         const b = await page.evaluate(() => {
           const pg = document.getElementById('doctorDirDetailModal'), q = s => pg.querySelector(s);
           const r0 = q('.dp-row'), gl = r0.querySelector('.dp-say-col .dp-gl');
@@ -256,11 +257,11 @@ async function targets(page) {
 
         // No research yet.
         await openDoctor(page, 'dp-none');
-        const none = await page.evaluate(() => ({ btn: document.querySelector('#doctorDirDetailModal .dp-nores-btn')?.textContent,
+        const none = await page.evaluate(() => ({ btn: document.querySelector('#doctorDirDetailModal .dp-navy-btn')?.textContent,
           on: document.querySelector('#doctorDirDetailModal .dp-tabs [aria-checked="true"]').textContent.trim(),
           tip: document.querySelector('#doctorDirDetailModal .dp-tip').textContent.replace(/\s+/g, ' ').trim(),
           where: document.querySelector('#doctorDirDetailModal .dp-where b').textContent }));
-        ok(none.btn === 'Research this doctor' && /^Team terms/.test(none.on), 'no research: one card offers it; team terms open', none);
+        ok(none.btn === 'Research this doctor' && /^Team terms/.test(none.on), 'no research: the navy tile offers it; team terms open', none);
         ok(/None yet/.test(none.tip) && none.where === 'No specific site', 'empty tip and place read plainly', none);
 
         // Flashcards: the briefing for this doctor's specialty.
@@ -315,17 +316,17 @@ async function targets(page) {
           DOCTOR_DIR_STATE = 'idle';
           openDoctorDirDetail('dp-tiered');
           await new Promise(r => setTimeout(r, 1000));   // the stand-in answers this collection in 480 ms
-          const total = document.querySelector('#doctorDirDetailModal .dp-count').textContent;
+          const total = document.querySelector('#doctorDirDetailModal .dp-navy-n').textContent;
           const { researchResult: rr, ...bare } = DOCTOR_DIRECTORY[i]; DOCTOR_DIRECTORY[i] = bare;
           const fetchFn = doctorPageFetch; doctorPageFetch = () => {};
           DOCTOR_DIR_STATE = 'failed';
           openDoctorDirDetail('dp-tiered');
-          const offline = { text: document.querySelector('#doctorDirDetailModal .dp-nores p')?.textContent || '', button: !!document.querySelector('#doctorDirDetailModal .dp-nores-btn') };
+          const offline = { text: document.querySelector('#doctorDirDetailModal .dp-navy p')?.textContent || '', button: !!document.querySelector('#doctorDirDetailModal .dp-navy-btn') };
           doctorPageFetch = fetchFn; DOCTOR_DIR_STATE = 'ok'; DOCTOR_DIRECTORY[i] = { ...bare, researchResult: rr };
           closeDoctorDirDetail();
           return { total, offline };
         });
-        ok(recovered.total === '10 prep terms', 'opened from the saved copy, the page fetches the research', recovered);
+        ok(recovered.total === '10', 'opened from the saved copy, the page fetches the research', recovered);
         ok(/need a connection/.test(recovered.offline.text) && !recovered.offline.button, 'offline, no "Research this doctor" for a doctor already researched', recovered.offline);
 
         // Team tips (D2): Add tip opens the tips sheet over the page.

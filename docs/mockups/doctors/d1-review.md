@@ -27,7 +27,7 @@ every count); the tabs stick under the top bar while scrolling. A term row is
 about 175px, so no header layout gets three rows on screen: the rest is row
 height. The biggest single cost is the "+ Add to glossary" line (about 40px
 per row), which the mockup didn't have; it could become a third small pill
-under EN / ES. **Jose decided (2026-10-20): B plus the smaller row.** Built in D1b.
+under EN / ES. **Jose (2026-10-20): picked B plus the smaller row, saw it built, and kept A for its look.** D1b keeps A, compacts its bento and keeps the smaller row: 1 full row on open for a typical doctor.
 
 ## Fixed in this PR, from the review
 

@@ -19,17 +19,18 @@ whichever of the two scrolls.
   the `SPECIALTY_PINS` list (regex to pin key), fallback the place's pin
   (`groupIconKeyFor`). D3 reuses it for the list. Name 22/650; the dot and
   the tint come from `specialtyColor()`.
-- Layout B (Jose's pick, 2026-10-20; was a bento with a navy count tile):
-  Where on one line (place pin, place, floor) with the navy count pill
-  (`.dp-count`, research + team terms); the team tip as a full-width strip
-  (count and who on the label line, the text clamped to 2 lines; tap = the
-  Team tips sheet); no research = one navy card (`.dp-nores`) with
-  "Research this doctor", or offline, that the terms need a connection.
-  Hero tile 64px. Measured at 393x759 (typical: 7 terms, 10-word
-  definitions, no tip): first term at 456px (was 562), row 149px (was
-  171), 1 full row above the glass bar (was 0). Worst (37 terms, 25-word
-  definitions, long name, tip, place): 0 rows, but the first term's text
-  shows (was hidden).
+- Bento: navy tile = every term (research + team terms), one bar per tab
+  (false friends pink, team terms white); no research = "Research this
+  doctor". Where = place pin, place name (up to 3 lines), floor. Team tip =
+  the first tip (up to 3 lines), who wrote it and the count; tap = the Team
+  tips sheet. Jose tried layout B (one-line Where, tip strip, no navy tile)
+  on 2026-10-20 and kept this one for its look; it was made compact
+  instead: hero tile 64px, the short empty-tip text, the tab's description
+  and the trust line in one block. Measured at 393x759 (typical: 7 terms,
+  10-word definitions, no tip): first term at 503px (was 562), row 149px
+  (was 171), 1 full row above the glass bar (was 0). Worst (37 terms,
+  25-word definitions, long name, tip, place): 0 rows, the first term's
+  text at 564px shows above the bar (was 576px).
 - Tabs (`ds-mode-seg dp-tabs`, scrolls sideways): one per research tier
   (`researchTiers`), then Team terms (`customTerms`). Old flat research
   (`terms` with no `tiers`) is one "Terms" tab plus the "Older research"
