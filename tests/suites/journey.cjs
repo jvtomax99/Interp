@@ -174,9 +174,14 @@ async function listeners(P) {
   console.log('== 5. term practice: answer one, leave, come back');
   await L.go(P, 'ask', 900);
   await ask(P, "Help me practice five terms I'm still learning.");
-  await tap(P, 'Practice 5'); await P.waitForTimeout(2200);
+  // Practice 5 loads the reviews lazily and then opens the review: wait for
+  // that state rather than a fixed 2.2 s, which a loaded CI runner can miss
+  // (it failed that way on two PRs on 2026-10-20 while passing on main).
+  ok(await tap(P, 'Practice 5'), 'the Practice button is there to tap (step 5)');
+  await P.waitForFunction(() => activeCategory === 'review' && reviewQueue.length >= 5, null, { timeout: 10000 }).catch(() => {});
+  await P.waitForTimeout(400);
   const started = await P.evaluate(() => ({ cat: activeCategory, ids: reviewQueue.map(t => t.id), i: reviewIndex }));
-  ok(started.cat === 'review' && started.i === 0 && started.ids.length === 5 && started.ids.every(id => seeded.includes(id)), 'Term Review on 5 of your still-learning terms');
+  ok(started.cat === 'review' && started.i === 0 && started.ids.length === 5 && started.ids.every(id => seeded.includes(id)), 'Term Review on 5 of your still-learning terms', started);
   await P.evaluate(() => revealReviewAnswer()); await P.waitForTimeout(200);
   await P.screenshot({ path: shots + '5-review.png' });
   await P.evaluate(() => [...document.querySelectorAll('.review-card .btn-primary, .quiz-actions .btn-primary')].find(b => /Got it/.test(b.textContent)).click());
