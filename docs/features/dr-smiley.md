@@ -126,3 +126,26 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   are compositor-only. Don't add an endless JS loop on the page (the petals'
   runs in their worker, only while they are seen) or per-item `will-change` on Home;
   `tests/suites/home-rest.cjs` checks it.
+
+## In a quiz (F1, 2026-10-20)
+
+Jose's film brief: a happy bounce on correct answers, a small wince on wrong
+ones, a celebration at streak milestones. `answerQuiz` calls
+`smileyAnswer(right)`: `bounce` (a crouch, a hop up with a brow flash, a
+smaller second hop, a settle; about 1.2 s) or `wince` (a fast blink, drawn
+back, down and turned away on the E2 `worried` face, then `caring` brows
+and a small smile; about 1.35 s). Both are `DR_PERF` entries, built fresh,
+half size in Focused, one frame in Still; in an appointment `bounce` becomes
+`ack` and `wince` nothing (`DR_TONE`). A 3/5/10 run of right answers keeps
+its bigger `smileyStudy('streak')` instead of a bounce; exam mode has no
+feedback, so no reaction. The first answer of a day that makes the study
+streak 3, 7, 14, 30, 60 or 100 days plays `cheer` (`STREAK_DAYS`,
+`bumpStreak`, `smileyStudy('days')`).
+
+**He was never on screen in a quiz before this.** The dock steps aside on
+Practice for the campus's own Dr. Smiley, and starting a quiz redraws
+`#content` in place, which the dock's observer doesn't see, so he stayed
+away. `renderContent` now queues one `smileyRider.sync()` per frame.
+Suite: `tests/suites/smiley-quiz.cjs`. Upgrades wait on Jose's art: head
+and shoulders as separate layers, two arm poses, happy eyes-closed and
+wince faces.

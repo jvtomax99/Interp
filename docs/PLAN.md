@@ -60,7 +60,7 @@ lands (he had the Home greeting's squish removed; show him first).
 
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
-F1. **Dr. Smiley reacts in quizzes** with current art: a bounce on a right
+F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right
    answer, a small wince (E2 worried face) on a wrong one (`DR_REACTS.think`
    exists but nothing calls it), a cheer at streak milestones. Upgrade when
    Jose sends: head and shoulders as separate layers (base.webp canvas, neck
