@@ -207,10 +207,14 @@ come from this alone.
    `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
    `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
    claude-api skill first. Next: translate backup.
-2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
-   `doctor-research.js`, `term-lookup.js` each build their own request and
-   retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
-   helper; move one endpoint per PR.
+2. **One Claude helper in `api/`.** `_routine.js` is the helper now
+   (`callClaude`, `parseAnswer`, `clip`; `callRoutine` built on it), with
+   Term lookup moved onto it and a no-browser suite (`api-helper.mjs`,
+   the API faked). Still on their own requests: `ask.js` next (needs a
+   headers option for its `server-side-fallback` beta and its two-step
+   retry), then `doctor-research.js` (throws `api_error`/`refused`/
+   `truncated`; keep those for its callers). One endpoint per PR; every
+   move adds its cases to `api-helper.mjs`.
 3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
@@ -258,6 +262,13 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 One Claude helper, first move (this PR): `_routine.js` grew
+  `callClaude` (one request, the retry without `output_config`, the
+  web-search failure log, `answer` = the last text block under a schema),
+  `parseAnswer` and `clip`; `callRoutine` is built on it, same behaviour
+  (Translate and the term check untouched). Term lookup uses it: same
+  requests, same answers, its own `clip` and request code gone. New suite
+  `tests/suites/api-helper.mjs` (64 checks, no browser).
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys
