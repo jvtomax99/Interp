@@ -202,6 +202,12 @@
     };
   }
 
+  // Firestore compares maps by content, not key order.
+  function sortKeys(v){
+    if (Array.isArray(v)) return v.map(sortKeys);
+    if (v && typeof v === 'object') { const o = {}; Object.keys(v).sort().forEach(k => { o[k] = sortKeys(v[k]); }); return o; }
+    return v;
+  }
   function docRef(coll, id){
     return {
       id,
@@ -223,13 +229,28 @@
           Object.keys(add).forEach(k => { const v = add[k];
             out[k] = (v && typeof v === 'object' && !Array.isArray(v) && out[k] && typeof out[k] === 'object' && !Array.isArray(out[k])) ? deep(out[k], v) : v; });
           return out; };
-        map[id] = (opts && opts.merge) ? deep(map[id] || {}, next) : next;
+        // mergeFields: only the named top-level fields change, each replaced whole.
+        if (opts && opts.mergeFields) {
+          const out = Object.assign({}, map[id] || {});
+          opts.mergeFields.forEach(f => { out[f] = next[f]; });
+          map[id] = out;
+        } else map[id] = (opts && opts.merge) ? deep(map[id] || {}, next) : next;
         notify(coll);
       }),
       update: (data) => window.__gate(coll, id, 'update').then(()=>{
         window.__srvLog({ coll, id, op: 'update' });
         const map = (DB[coll] = DB[coll] || {});
-        map[id] = Object.assign({}, map[id] || {}, JSON.parse(JSON.stringify(data)));
+        // Real Firestore refuses an update to a missing document, and resolves
+        // arrayUnion / arrayRemove / delete against what is stored.
+        if (!(id in map)) { const e = new Error('No document to update'); e.code = 'not-found'; throw e; }
+        const out = Object.assign({}, map[id]), add = JSON.parse(JSON.stringify(data));
+        const same = (a, b) => JSON.stringify(sortKeys(a)) === JSON.stringify(sortKeys(b));
+        Object.keys(add).forEach(k => { const v = add[k], fv = v && v.__fv;
+          if (fv === 'delete') delete out[k];
+          else if (fv === 'arrayUnion') { const arr = Array.isArray(out[k]) ? out[k].slice() : []; v.vals.forEach(x => { if (!arr.some(y => same(x, y))) arr.push(x); }); out[k] = arr; }
+          else if (fv === 'arrayRemove') out[k] = (Array.isArray(out[k]) ? out[k] : []).filter(y => !v.vals.some(x => same(x, y)));
+          else out[k] = v; });
+        map[id] = out;
         notify(coll);
       }),
       delete: () => window.__gate(coll, id, 'delete').then(()=>{
@@ -339,5 +360,7 @@
       return { ref: () => ({ child }) };
     },
   };
-  window.firebase.firestore.FieldValue = { serverTimestamp: () => Date.now(), increment: n => n };
+  window.firebase.firestore.FieldValue = { serverTimestamp: () => Date.now(), increment: n => n,
+    arrayUnion: (...vals) => ({ __fv: 'arrayUnion', vals }), arrayRemove: (...vals) => ({ __fv: 'arrayRemove', vals }),
+    delete: () => ({ __fv: 'delete' }) };
 })();
