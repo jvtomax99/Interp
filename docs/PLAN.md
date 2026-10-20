@@ -248,6 +248,12 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 Journey flake (this PR): "Term Review on 5 of your
+  still-learning terms" failed on two PR runs within 30 minutes (#94,
+  #98; neither touches that path) while passing on main's head and
+  locally: Practice 5 loads the reviews lazily, and the check read the
+  state after a fixed 2.2 s. It now waits for the review screen (up to
+  10 s) and prints the state it found when it fails.
 - 2026-10-20 Version lines bump themselves (Jose's pick, before S1b). Every
   PR edited `BUILD_ID`/`BUILD_TIME` (`index.html`) and `CACHE_VERSION`
   (`sw.js`), so every open PR conflicted with the next merge. Now
