@@ -24,24 +24,25 @@ written here.
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
-**Don't ask to start a new chat** (Jose, 2026-10-20: "Let's not ask to
-start a new chat anymore", his plan has the usage). Carry on in the same
-chat phase after phase, and keep everything worth keeping in this file
-anyway, so a chat that does end (compaction, a crash) loses nothing. The
-old rule, for the record: a new chat only when the chat was heavy
-(compacted, or full of big file reads, long test output or fix rounds).
-If a chat has to move anyway, the paragraph below says how.
-Don't repeat it in every reply.
-**Claude opens the new chat itself** (Jose, 2026-10-19): with
-`create_session` (claude-code-remote tools), same repo, its first message
-the handoff. **A chat opened from another keeps its exact title** (Jose,
-2026-10-19): read it with `get_session` and pass it to `create_session`.
-The main line of chats is called "Main inter Hub"; every chat opened from
-it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
-`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, tell Jose the new
-session carries the same title and say "Archive this chat" (archive it only when he says
-so). If `create_session` isn't available, fall back to the message to paste.
+**A heavy chat hands over with `docs/handoff.md`** (Jose, 2026-10-20:
+"Whenever a chat gets extremely heavy and expensive, hand me a handoff.md
+to start in a new chat. It's to be able to use you for long period of
+time"; this replaces "don't ask to start a new chat"). Carry on phase
+after phase while the chat is light. When it gets extremely heavy (it has
+been compacted, or holds many big file reads, long test runs or fix
+rounds, and the next phase would add a lot more):
+1. Write everything worth keeping into this file as usual.
+2. Overwrite `docs/handoff.md`: where things stand (merged, open PRs and
+   what each waits on, pending check-ins), what's next with the pick, open
+   questions for Jose, what this chat learned that isn't in the docs yet,
+   and at the top the exact message to paste into the new chat.
+3. Commit and push it, send it to Jose with `SendUserFile`, and say
+   "Start a new chat" with the message to paste. Once, not every reply.
+4. Leave nothing half-done: an open PR is fine (the handoff names it), an
+   uncommitted change is not. Cancel this chat's check-ins; the new chat
+   re-arms what it needs. Then "Archive this chat" (below).
+The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
+says in 2-3 lines what it will do, and waits for Jose's go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
