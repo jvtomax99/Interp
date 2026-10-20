@@ -308,9 +308,9 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
       S.lift("proof", 0.25 * outBack(prog(u, 0.1, 0.45)), 0.3 * prog(u, 0.1, 0.45));
       // the campus stands up out of the phone: sky, then the city behind, then the hospital
       [[campusSky, 0.05], [campusFar, 0.15], [campusNear, 0.28]].forEach(([h, t0]) => {
-        const p = outBack(prog(u, t0, t0 + 0.6), 1.25);
+        const p = outBack(prog(u, t0, t0 + 0.6), 1.25) * (1 - inOutCubic(prog(u, 1.75, 2.0))); // folds shut before he hops on
         h.rotation.x = lerp(-Math.PI / 2, -0.08, p);
-        h.visible = u > t0;
+        h.visible = u > t0 && p > 0.01;
       });
       // 0 to 145, in fives, then the exact number
       const n = Math.round(145 * outCubic(prog(u, 0.45, 1.3)) / 5) * 5;
