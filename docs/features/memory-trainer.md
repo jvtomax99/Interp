@@ -158,6 +158,13 @@ the fix stays as a guard (it only sets the audio session back to playback).
 Same voices, now each listed twice (Paulina and Samantha both there). Speech
 to text still not tried in the installed app: M5 stays on hold.
 
+**Speech to text in the installed app, 2026-10-20** (build b1020.0955):
+English **works**, "This is a test test", first words after 3.5 s, then
+done. Spanish: the first try read "error: aborted" (most likely the check
+itself: starting one Listen aborts the other while it's still listening);
+alone, it **works**, "Esto es un examen" (copied while still "hearing").
+So both languages give words in the installed app: M5 can go ahead.
+
 ## M4: span chart
 
 **Your span, by week** on the trainer's start card, under Start (Jose
@@ -172,3 +179,27 @@ Tap a bead (`memSpanPick`) to read its week; again for this week. Look and
 motion are Practice's score line (`trend-*` classes, `data-motion="span"`,
 plays once per change, then still). The span number on the Practice tile
 is the M2 one (Jose: nothing more).
+
+## M5: auto-mark
+
+**Auto-mark** on the start card (`p.auto`, off by default, Jose
+2026-10-20; shown only where the phone has `webkitSpeechRecognition`).
+On: at Your turn `memSRStart` listens (continuous, interim results, es-US
+or en-US for the language you render into; restarted up to 4 times when
+iOS ends it after a pause), "Auto-mark: 12 words heard" on screen. Show the
+rendering stops it (`memSRFinish`, waits for the last words or 1.5 s), then
+`memAutoMarks` pre-marks each chunk it didn't hear and tags it "not heard";
+the card shows what it heard (`memAutoLine`). Your taps win (`MEM.touched`:
+once you tap, late results don't re-mark). The log keeps `am`, the number
+the phone marked, next to your `miss`, to tune the matching later.
+
+Matching, phone only (Jose's pick; Haiku later if needed): words folded
+(accents, case, punctuation), small words skipped (`MEM_STOP`), a chunk is
+heard when half its content words are in the transcript, a word matches on
+its first 5 letters too (tome/toma, puede/pueden), every number word and
+digit counts as one "number" token (48 = cuarenta y ocho). A paraphrase
+gets marked; you untap it. If listening can't start without a tap
+(unproven on iPhone; `not-allowed`), a **Start listening** button starts
+it. Unproven too: Record me and Auto-mark both on at once (two users of the
+mic). Apple may process the speech on its servers: the switch says to
+practise away from patients.

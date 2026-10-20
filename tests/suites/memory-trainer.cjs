@@ -34,6 +34,15 @@ function standIns(){
   window.Audio = class { constructor(u){ this.src = u; window.__mt.played.push(u); } play(){ return Promise.resolve(); } pause(){} };
   Object.defineProperty(navigator, 'audioSession', { value: { type: 'auto' }, configurable: true });
   const rv = URL.revokeObjectURL.bind(URL); URL.revokeObjectURL = u => { window.__mt.revoked++; rv(u); };
+  // Speech to text: says window.__mtSay (a list of phrases) as final
+  // results, then waits for stop(); counts starts and aborts.
+  Object.assign(window.__mt, { srStarts: 0, srAborts: 0, srLang: '' });
+  delete window.SpeechRecognition;
+  window.webkitSpeechRecognition = class { start(){ window.__mt.srStarts++; window.__mt.srLang = this.lang; this._on = true;
+      const say = window.__mtSay || []; setTimeout(() => { if (!this._on || !say.length) return;
+        const res = say.map(t => { const r = [{ transcript: t }]; r.isFinal = true; return r; }); this.onresult && this.onresult({ results: res }); }, 80); }
+    stop(){ if (!this._on) return; this._on = false; setTimeout(() => this.onend && this.onend(), 60); }
+    abort(){ window.__mt.srAborts++; this._on = false; setTimeout(() => { this.onerror && this.onerror({ error: 'aborted' }); this.onend && this.onend(); }, 10); } };
   window.SpeechSynthesisUtterance = class { constructor(t){ this.text = t; this.voice = null; this.lang = ''; this.rate = 1; } };
 }
 
@@ -166,7 +175,7 @@ function standIns(){
     await page.route('**/memory/lines.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: LINES }));
     await page.evaluate(() => openMemoryTrainer()); await wait(800);
     const off = await page.evaluate(() => { const i = document.querySelectorAll('.mem-notes input'); return { n: i.length, rec: i[1] && i[1].checked }; });
-    ok(off.n === 2 && off.rec === false, 'Record me is there and off by default', off);
+    ok(off.n === 3 && off.rec === false, 'Record me is there and off by default', off);
     await page.evaluate(() => { window.__mtHold = true; document.querySelectorAll('.mem-seg button')[1].click(); }); await wait(150);
     await page.evaluate(() => document.querySelectorAll('.mem-notes input')[1].click()); await wait(150);
     await page.evaluate(() => document.querySelector('.mem-start').click()); await wait(200);
@@ -203,6 +212,68 @@ function standIns(){
     await page.evaluate(() => { const u = speechSynthesis._u; speechSynthesis._u = null; u.onend(); }); await wait(300);
     const den = await page.evaluate(() => ({ t: (document.querySelector('.mem-rec') || {}).textContent, show: !!document.querySelector('.mem-go'), type: navigator.audioSession.type }));
     ok(/mic was refused/.test(den.t) && den.show && den.type === 'playback', 'mic refused: says so, Show the rendering still there', den);
+    ok(page.__errors.length === 0, 'no page errors', page.__errors);
+    await ctx.close(); }
+
+  console.log('== Auto-mark (M5)');
+  { const { ctx, page } = await L.boot(b, { device: 'iphone', settle: 4000, init: standIns });
+    await page.route('**/memory/lines.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: LINES }));
+    await page.evaluate(() => openMemoryTrainer()); await wait(800);
+    const sw = await page.evaluate(() => { const i = document.querySelectorAll('.mem-notes input'); return { n: i.length, auto: i[2] && i[2].checked,
+      label: i[2] && i[2].closest('label').textContent.replace(/\s+/g, ' ').trim() }; });
+    ok(sw.n === 3 && sw.auto === false && /Auto-mark\s*Off: you mark every part yourself/.test(sw.label), 'Auto-mark is there and off by default', sw);
+    await page.evaluate(() => document.querySelectorAll('.mem-notes input')[2].click()); await wait(150);
+    ok(/Apple may process what you say/.test(await page.evaluate(() => document.querySelectorAll('.mem-notes')[2].textContent)), 'turned on, it says Apple may process the speech');
+    await page.screenshot({ path: O + 'auto-home.png' });
+    // A line to Spanish; say every chunk but the second.
+    const play = async (id, say) => { await page.evaluate(([id, say]) => { window.__mtHold = true; window.__mtSay = say;
+      memPlay(MEM.lines.find(l => l.id === id)); const u = speechSynthesis._u; speechSynthesis._u = null; u.onend(); }, [id, say]); await wait(300); };
+    const dc02 = await page.evaluate(() => MEM.lines.find(l => l.id === 'dc02').u.map(c => c[1]));
+    await play('dc02', [dc02[0], dc02[2]]);
+    const turn = await page.evaluate(() => ({ lang: __mt.srLang, starts: __mt.srStarts, n: (document.getElementById('memHeardN') || {}).textContent }));
+    ok(turn.starts === 1 && turn.lang === 'es-US' && /^\d+ words heard$/.test(turn.n || ''), 'your turn: listens in Spanish, counts the words it hears', turn);
+    await page.screenshot({ path: O + 'auto-turn.png' });
+    await page.evaluate(() => memReveal()); await wait(400);
+    const chk = await page.evaluate(() => ({ pressed: [...document.querySelectorAll('.mem-chunk')].map(b => b.getAttribute('aria-pressed')),
+      tags: [...document.querySelectorAll('.mem-chunk')].map(b => !!b.querySelector('.mem-tag')), line: (document.querySelector('.mem-auto') || {}).textContent, next: document.getElementById('memNext').textContent }));
+    ok(chk.pressed.join() === 'false,true,false' && chk.tags.join() === 'false,true,false', 'Show the rendering: only the unsaid chunk is marked, tagged "not heard"', chk);
+    ok(/Auto-marked: 1 part not heard/.test(chk.line) && chk.line.includes(dc02[0]) && chk.next === 'Next line · 1 missed', 'it says so and shows what it heard', chk);
+    await page.evaluate(() => scrollTo(0, 0)); await page.screenshot({ path: O + 'auto-check.png' });
+    // You overrule it: untap, then Next logs your mark and the phone's.
+    await page.evaluate(() => document.querySelectorAll('.mem-chunk')[1].click()); await wait(50);
+    await page.evaluate(() => { window.__mtHold = true; document.getElementById('memNext').click(); }); await wait(100);
+    const lg = await page.evaluate(() => JSON.parse(localStorage.getItem('ih_memory')).log.slice(-1)[0]);
+    ok(lg.miss === 0 && lg.am === 1, 'your untap wins (scored clean); the log keeps what the phone marked', lg);
+    // Numbers said as digits, a different form of a word, small words left out: all heard.
+    await play('dc01', ['Mantenga el vendaje seco 48 horas', 'y después se pueden bañar']);
+    await page.evaluate(() => memReveal()); await wait(400);
+    const num = await page.evaluate(() => ({ marks: MEM.auto && MEM.auto.marks, line: document.querySelector('.mem-auto').textContent }));
+    ok(num.marks && num.marks.length === 0 && /every part heard/.test(num.line), 'digits match number words, "pueden" matches "puede", small words skipped', num);
+    // A paraphrase it can't know: marked, and the guide says to check.
+    await play('dc02', ['Si la temperatura pasa de ciento uno', 'o le duele más', 'vuelva a emergencias enseguida']);
+    await page.evaluate(() => memReveal()); await wait(400);
+    const para = await page.evaluate(() => MEM.auto.marks);
+    ok(para.length >= 1, 'a paraphrase is marked (you check and untap it)', para);
+    // Heard nothing.
+    await play('dc01', []);
+    await page.evaluate(() => memReveal()); await wait(1700);
+    const none = await page.evaluate(() => ({ t: document.querySelector('.mem-auto').textContent, pressed: document.querySelectorAll('.mem-chunk[aria-pressed="true"]').length }));
+    ok(/heard nothing/.test(none.t) && none.pressed === 0, 'heard nothing: says so, marks nothing', none);
+    // The phone refuses to start listening without a tap: a button does it.
+    await page.evaluate(() => { const S = window.webkitSpeechRecognition; window.__srOrig = S;
+      window.webkitSpeechRecognition = class extends S { start(){ if (!window.__srTap) { setTimeout(() => this.onerror({ error: 'not-allowed' }), 10); setTimeout(() => this.onend(), 20); return; } super.start(); } }; });
+    await play('dc01', ['Mantenga el vendaje seco']);
+    const btn = await page.evaluate(() => [...document.querySelectorAll('.mem-btns .btn')].map(b => b.textContent).join('|'));
+    ok(/Start listening/.test(btn), 'refused without a tap: a Start listening button', btn);
+    await page.evaluate(() => { window.__srTap = true; [...document.querySelectorAll('.mem-btns .btn')].find(b => /Start listening/.test(b.textContent)).click(); }); await wait(300);
+    ok(await page.evaluate(() => MEMSR.state === 'on' && /words? heard/.test(document.getElementById('memHeardN').textContent)), 'the tap starts listening');
+    await page.evaluate(() => { window.webkitSpeechRecognition = window.__srOrig; });
+    // Leaving during your turn stops the listening.
+    await play('dc01', ['Mantenga']);
+    const a0 = await page.evaluate(() => __mt.srAborts);
+    await page.evaluate(() => goBack()); await wait(300);
+    const left = await page.evaluate(() => ({ aborts: __mt.srAborts, r: MEMSR.r }));
+    ok(left.aborts > a0 && left.r === null, 'Back during your turn stops the listening', { a0, ...left });
     ok(page.__errors.length === 0, 'no page errors', page.__errors);
     await ctx.close(); }
 
