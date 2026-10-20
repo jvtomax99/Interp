@@ -68,8 +68,11 @@ F2. **Squash and stretch: Practice buttons and the streak flame only**
 F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
    r3f declined: no build step, weight, unproven 60 fps). Re-render golden
    hour, peach to lavender sky, warm rim light, more haze toward the
-   horizon, nothing pure black or gray; tilt parallax from layers
-   (device tilt, reduced-motion off). Full re-render (~25 min, lit set too).
+   horizon, nothing pure black or gray; depth parallax from the layers
+   driven by scroll and drag (Jose, 2026-10-20: not device tilt, which
+   needs an iPhone motion permission prompt; off with reduced motion).
+   Full re-render (~30 min) including round 2's benches, birds and bay
+   doors (#78). Order: F2 before F3 (Jose).
 
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
