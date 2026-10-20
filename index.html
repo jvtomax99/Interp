@@ -9252,8 +9252,11 @@ function bumpStreak(){
     st.last = today;
   }
   try{ localStorage.setItem(STREAK_KEY, JSON.stringify(st)); }catch(e){}
+  // The first answer that makes it 3, 7, 14, 30... days in a row: a celebration.
+  if(st.answered === 1 && STREAK_DAYS.includes(st.days) && typeof smileyStudy === 'function') smileyStudy('days', 1, st.days);
   return st;
 }
+const STREAK_DAYS = [3, 7, 14, 30, 60, 100];
 const DAILY_GOAL = 15;
 
 /* ---- Badges ----------------------------------------------------------
@@ -13281,8 +13284,8 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'memory',      tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'Memory trainer',        title:'Train your memory for consecutive: hear a line, say it in the other language, and the lines grow as you do' },
-  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley springs when he cheers, and has new faces: surprised, worried, doubtful and, rarely, sad' },
+  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley reacts in your quiz: a bounce when you\'re right, a small wince when you\'re wrong, a cheer for your streak' },
+  { id:'memory',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Memory trainer',        title:'Train your memory for consecutive: hear a line, say it in the other language, and the lines grow as you do' },
   { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
@@ -14705,6 +14708,40 @@ const DR_PERF = {
     ], { fx: calm ? null : 'glint', fxAt: (look ? 330 : 270), still: 'wink', stillMs: 800 });
   },
 };
+/* Quiz answers (F1, Jose's film brief, 2026-10-19): a happy bounce on a
+   right one, a small wince on a wrong one. Short (under a second and a
+   half) because they play on every answer; the 3/5/10 streaks and the
+   session's end keep their bigger reactions (smileyStudy). */
+DR_PERF.bounce = function(){
+  const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
+  const k = drMode() === 'focused' ? .5 : 1, up = -(2.3 + R() * .5) * k;
+  return drPerfMake([
+    // Anticipation: a quick crouch as the smile starts.
+    [['smile1'], j(120), [-side * .2 * k, 1.2 * k]],
+    // The bounce: up, a little lean, a bright smile and a brow flash.
+    [['smile2'], j(130), [side * .6 * k, up], k < 1 ? null : 'up'],
+    [['smile'], j(200), [side * .8 * k, up * .9], null],
+    // A smaller second hop: follow-through, not a repeat.
+    [['smile'], j(120), [side * .2 * k, .35 * k]],
+    [['smile'], j(130), [-side * .2 * k, up * .4]],
+    // Landing: a small settle past upright, the smile lingering.
+    [['smile2', 'smile1'], j(200), [0, .2 * k]],
+    [['rest'], j(300), [0, 0]],
+  ], { still: 'smile', stillMs: 700 });
+};
+DR_PERF.wince = function(){
+  const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
+  const k = drMode() === 'focused' ? .5 : 1;
+  return drPerfMake([
+    // The flinch: a fast blink, drawn back and a little down, turned away.
+    [['blink1', 'blink2'], 90, [-side * .9 * k, .9 * k]],
+    [['worried'], j(380), [-side * 1.4 * k, 1.2 * k], 'worried'],
+    // Then back to you, caring: it's fine, keep going.
+    [['halfL'], j(200), [-side * .4 * k, .3 * k], 'caring'],
+    [['smile1'], j(380), [side * .2 * k, 0]],
+    [['rest'], j(300), [0, 0], null],
+  ], { still: 'worried', stillMs: 600 });
+};
 DR_PERF.celebrate = DR_PERF.cheer;   // the older name, used for study results and the team's rank
 function drPerfBuild(name){ return DR_PERF[name] ? DR_PERF[name]() : null; }
 // In the table like any other sequence, built each time it's asked for.
@@ -15649,7 +15686,7 @@ function drStage(o){
 const DR_TONE = {
   // The five performances (DR_PERF) build their own calmer Focused versions.
   focused:     { love: 'smile', giggle: 'smile', laugh: 'smile', kiss: 'smile', sing: 'smile' },
-  appointment: { celebrate: 'ack', cheer: 'ack', greet: 'ack', proud: 'ack', love: 'ack', giggle: 'ack', laugh: 'ack', kiss: null, wink: null, sing: null, notice: null, encourage: 'ack' },
+  appointment: { celebrate: 'ack', cheer: 'ack', greet: 'ack', proud: 'ack', love: 'ack', giggle: 'ack', laugh: 'ack', kiss: null, wink: null, sing: null, notice: null, encourage: 'ack', bounce: 'ack', wince: null },
 };
 function drTone(seq){
   let s = seq;
@@ -17007,10 +17044,10 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful squash stretch spring bounce cheer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful squash stretch spring bounce cheer quiz bounce wince streak right wrong answer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: when he cheers or says hello he crouches and springs, squashing a little as he dips and stretching as he goes up, a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: when he cheers or says hello he crouches and springs, squashing a little as he dips and stretching as he goes up, a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help. In a CoreCHI quiz he sits in the dock and reacts to each answer: a little bounce when you're right, a small wince and then a kind smile when you're wrong, a laugh at 3, 5 and 10 right in a row, and a cheer on the first answer of a 3-, 7-, 14- or 30-day streak.</li>
       <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing, no squash and stretch and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
@@ -18589,6 +18626,12 @@ window.addEventListener('scroll', ()=>{
 }, { passive: true });
 
 function renderContent(){
+  // A screen redrawn in place (a quiz starting over the campus, whose own
+  // Dr. Smiley then goes) can change which Dr. Smiley shows: the dock checks
+  // again once the new screen is in (its observer misses these redraws).
+  if(!renderContent.dockQueued && typeof smileyRider !== 'undefined'){
+    renderContent.dockQueued = requestAnimationFrame(() => { renderContent.dockQueued = 0; smileyRider.sync(); });
+  }
   const content = document.getElementById('content');
   if(content){
     content.classList.toggle('is-home', activeCategory === 'home');
@@ -21006,6 +21049,7 @@ function answerQuiz(i){
   if(quizHotStreak > quizBestStreak) quizBestStreak = quizHotStreak;
   renderContent();
   if(right && (quizHotStreak === 3 || quizHotStreak === 5 || quizHotStreak === 10)) smileyStudy('streak', 1, quizHotStreak);
+  else smileyAnswer(right);
   // Feedback is applied AFTER the render, imperatively, rather than baked
   // into a class the markup carries. Rating your confidence re-renders this
   // same question, and a class in the markup would replay the shake every
@@ -21603,8 +21647,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0922';
-const BUILD_TIME = '2026-10-20 09:22 UTC';
+const BUILD_ID = 'b1020.0955';
+const BUILD_TIME = '2026-10-20 09:55 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -29407,6 +29451,7 @@ function drCelebrate(seq){
 function smileyStudy(kind, score, n){
   let seq;
   if(kind === 'streak') seq = n >= 5 ? 'proud' : 'giggle';
+  else if(kind === 'days') seq = 'cheer';
   else if(kind === 'warmup') seq = score >= 1 ? 'love' : 'encourage';
   else seq = score >= .9 ? 'cheer' : score >= .7 ? 'proud' : score >= .5 ? 'smile' : 'encourage';
   if(score >= .7 || kind === 'streak') drSetMood('happy', 180000);
@@ -29414,6 +29459,13 @@ function smileyStudy(kind, score, n){
   if(document.hidden) return false;
   if(seq === 'encourage') return drPerform(seq, { priority: DR_P.TASK });
   return drCelebrate(seq);
+}
+
+// One quiz answer: a bounce when it's right, a small wince when it's
+// wrong. Mood follows a run of them, not one (smileyStudy sets it at the end).
+function smileyAnswer(right){
+  if(document.hidden) return false;
+  return drPerform(right ? 'bounce' : 'wince', { priority: DR_P.REACT });
 }
 
 // Back in the app after a minute or more away: he greets you (greet).
