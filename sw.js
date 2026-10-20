@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v246-memory-trainer';
+const CACHE_VERSION = 'interpreter-hub-v247-campus-life-2';
 const PRECACHE = [
   './',
   './index.html',
