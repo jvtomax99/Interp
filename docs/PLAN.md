@@ -39,8 +39,8 @@ the handoff. **A chat opened from another keeps its exact title** (Jose,
 The main line of chats is called "Main inter Hub"; every chat opened from
 it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
 `AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, give Jose the new
-session's title and say "Archive this chat" (archive it only when he says
+next, then stop and wait for Jose's go. In the old chat, tell Jose the new
+session carries the same title and say "Archive this chat" (archive it only when he says
 so). If `create_session` isn't available, fall back to the message to paste.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
@@ -52,6 +52,59 @@ nothing open"). A chat left for a new one ("Start a new chat") is done
 too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
+
+**Dr. Smiley acting, E3 (Jose, 2026-10-19: "expressive like Disney
+characters"; E1 and E2 done: E2 is the four drawn faces, surprised, sad,
+worried, doubt, in `docs/features/dr-smiley.md`).** E3 needs his yes: squash and stretch on the head as he springs and
+lands (he had the Home greeting's squish removed; show him first).
+
+**Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
+One PR each, after M2 (#73):
+F1. **Dr. Smiley reacts in quizzes** with current art: a bounce on a right
+   answer, a small wince (E2 worried face) on a wrong one (`DR_REACTS.think`
+   exists but nothing calls it), a cheer at streak milestones. Upgrade when
+   Jose sends: head and shoulders as separate layers (base.webp canvas, neck
+   pivot), two arm poses (both up; one fist pump), two face frames (happy
+   eyes-closed, wince). Layers, not Rive.
+F2. **Squash and stretch: Practice buttons and the streak flame only**
+   (spring press, overshoot and settle on pills and cards). Dr. Smiley's
+   own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
+   Inter (rounded face declined).
+F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
+   r3f declined: no build step, weight, unproven 60 fps). Re-render golden
+   hour, peach to lavender sky, warm rim light, more haze toward the
+   horizon, nothing pure black or gray; tilt parallax from layers
+   (device tilt, reduced-motion off). Full re-render (~25 min, lit set too).
+
+**Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
+practice: the phone reads a line, you render it, you tap the meaning chunks
+you missed, the line length follows your span, your span is charted over
+weeks on your phone. Design and decisions: `docs/features/memory-trainer.md`.
+Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
+first; notes toggle, memory-only default. One PR each:
+
+M0. **Voice and mic check** (#60, merged). Installed-app results in the
+   note: recording works in both, voice quieter after the mic (app),
+   speech to text works in a Safari tab (English) but gave no words yet in
+   the installed app. **Needs Jose:** installed app, speech to text in
+   English and Spanish, waiting for "done" before Copy.
+M1. **Lines** (this PR): `memory/lines.json`, 60 lines approved by Jose
+   without a line-by-line read (see the note); the trainer flags mistakes.
+M2. **The trainer.** Screen under Practice, playback with the text
+   hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
+   Dr. Smiley's listening/thinking states, progress in `localStorage`
+   only, notes toggle, a **Flag this line** button (saves line id + what's
+   wrong, read back before editing lines). Voices by name: Paulina (es-MX),
+   Samantha (en-US). User Guide, a suite.
+M3. **Record yourself, play it back beside the model.** Record and play
+   back work in the installed app (M0). The voice is quieter after the
+   mic: first test `navigator.audioSession.type = 'playback'` after each
+   recording (a button in the check); if it fails, play every line before
+   opening the mic and tell people to use earbuds.
+M4. **Span chart** (weeks) and the span number on the Practice tile.
+M5. **Auto-marking** from speech to text. Only if M0 shows it works in
+   the installed app. Matching on the phone; Haiku (`_routine.js`) only
+   for the chunks that look like paraphrases; text only, never audio.
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
@@ -160,6 +213,12 @@ come from this alone.
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
    file, so fetch `main` right before.
 
+**Flaky test: dock-tuck in WebKit.** "Dr. Smiley shrinks with the bar"
+failed once on PR #60 (run 39281179430) and passed on the same commit's
+other run and on its re-run: his size was read while `dsBreathe` was
+scaling him (54/58 expected, 0.954 measured). Measure him with the breathe
+paused or read his layout box, not his painted box. Not this PR's code.
+
 ## Later (only when the trigger happens)
 
 - **Startup, draw less at first (from S3b).** Trigger: Jose finds opening
@@ -180,6 +239,8 @@ come from this alone.
   its own multi-phase effort, coordinated with ChatGPT's edits.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
+- **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
+  see Facts). Trim the eye patch's edge in `face.webp`. When Jose wants it.
 - **Training & Events listener has no limit.** Fine while small; a cap
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
@@ -202,6 +263,72 @@ come from this alone.
   pick). Whole-doctor saves no longer write `tips`/`notes` (`mergeFields`),
   so a stale save can't erase a teammate's tip. Back closes the top sheet.
   `docs/features/doctor-page.md`; checks in `doctor-page.cjs`.
+
+- 2026-10-19 Watch bubble always on Home (Jose couldn't find it: he had
+  watched the video, and the once-only rule had hidden it). After watching,
+  the ring stops turning (`.is-seen`). Guide: `promo` answer reworded.
+  Same PR: the video has its own controls and full screen with an X that
+  never hides (Jose: full screen had no X; that was the iPhone's own player,
+  which hides it while playing). Closing the sheet now pauses the video (Back
+  used to leave it playing behind Home).
+
+- 2026-10-19 Campus: each building's badge names its exam area; first tap
+  picks it (windows lit, scene dimmed, a card with the area's name,
+  questions, share of the exam, Practise), second tap starts (Jose: "we are
+  clicking on the building without knowing which content"). Suite
+  `campus-pick.cjs`; note `docs/features/practice-dashboard.md`.
+- 2026-10-19 Your HUMC campus on CoreCHI Practice (Jose: a game look,
+  then "make it look like Hackensack", from his photos and Google 3D
+  screenshots, then "alive"). The main entrance at dusk, pre-rendered 3D
+  (`city/`); each exam area is a building whose windows light up with
+  mastery; the glossy readiness donut in the card; cars, an ambulance, a
+  helicopter, flags, the fountain, people walking and street traffic, all
+  paused off screen; Dr. Smiley pinned by the area to focus on; Your domains
+  rows right under. Note: `docs/features/practice-dashboard.md`; pipeline
+  `docs/mockups/cchi-city/` (`buildentr.cjs`, `NOLIT` to keep the lit layers).
+- 2026-10-19 Watch button became a story bubble (Jose's pick of three):
+  the video's still in a turning ring of the promo's colours, a play badge,
+  "Watch" on a dark chip. Same corner, same rules; 3 KB thumbnail.
+
+- 2026-10-19 Dr. Smiley acting, E1 (Jose: "expressive like Disney
+  characters"; plan below under Next). Code only, his own art: brows that
+  never mirror, anticipate big raises and overshoot as they settle; an
+  eyebrow-flash hello, knit-then-aha thinking, a startled take before the
+  giggle when held, worried-then-reassuring when the connection drops, a
+  raised brow on general-knowledge answers, a new `surprise`. Guide:
+  `askmoves` answer and its news card.
+
+- 2026-10-19 The 45-second video in the app (Jose's ask): User Guide answer
+  `promo` (video in the answer, "New lately" card, oldest card dropped) and a
+  "Watch 0:45" button bottom-right of Home's hello banner, beside the sign,
+  until watched once on the phone (`ih_promoSeen`: the end or past 15 s). Web
+  copy `media/hub-promo.mp4` (720p, 8 MB, tap to play); `sw.js` leaves
+  `media/` alone. Not on the members-only screen yet: Jose to decide after
+  the CEO pitch (anyone with the link sees that screen).
+
+- 2026-10-19 Dr. Smiley's brows, bigger (Jose on his phone: "the brows
+  don't move much"). Every `DR_BROWS` pose about 2x (looking up 2 to 4.2
+  drawing units, caring 6 to 11 degrees); his pick of 1.5x / 2x / 3x was 2x.
+  Raised brows still clear the cap brim, mirror band and grad cap.
+
+- 2026-10-19 CoreCHI Pixar finish (stacked on the dashboard PR): clay tiles,
+  glossy donut, candy buttons, glossy beads, lean-toward-finger, squash
+  landings. CSS + one small pointer handler; nothing runs at rest.
+
+- 2026-10-19 CoreCHI dashboard + motion (Jose's ask, options picked:
+  regroup + trend, native animation). Score-trend tile (last 12 sessions,
+  tap a point), Focus next tile, "My progress" card folded into the trend
+  tile and the domain rows, staggered arrival, count-ups, self-drawing
+  line, resumable motion. Note: `docs/features/practice-dashboard.md`.
+
+- 2026-10-19 Dr. Smiley's brows move (Jose's pick of four ideas for more
+  expression; the others were an Expression Studio page, new drawn frames
+  and 3D with face shapes). Brows cut out of his own art into
+  `drsmiley/brow-l.webp`/`brow-r.webp`, forehead repainted, a pose per
+  face frame plus caring holds on `composed`/`encourage`
+  (`docs/features/dr-smiley.md`). Art total 334 KB to 324 KB. Guide:
+  `askmoves` answer and a news card.
+
 - 2026-10-19 S3b startup, what's left (invisible). The first idle tuck set
   `--mini-w` on `<body>` (911 of 1,420 elements restyled, a 290-550 ms task
   ~7 s after opening at 4x in 5/5 runs); now on the tab bar, kept in its
@@ -364,6 +491,32 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
+  (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
+  buildings were modelled from Jose's photos plus WebSearch facts.
+- The tests' Chromium has no H.264 (`canPlayType` is empty), so no suite can
+  play `media/hub-promo.mp4`; only an iPhone or desktop Chrome/Safari proves
+  playback. The suites check the button, the sheet and the "watched" rule.
+- `sw.js` must never cache video: `caches.match` ignores Range headers, and
+  iPhones play `<video>` only through Range (206) responses. `media/` is
+  passed straight to the network, like `atlas/`.
+
+- The practice screen re-renders on any data arrival (`ensureLoaded` ->
+  `scheduleRender`), so entrance motion there must survive a re-render:
+  `data-motion`/`data-sig` + `playPracticeMotion` resume it.
+- `dock-tuck` measured Dr. Smiley while `dsBreathe`/`dsDrift` (infinite, on
+  `.dock-smiley-bob` around him) ran, so WebKit failed his scale check by
+  ~0.003 depending on the breath's phase (#57-#60, 2026-10-19). `rects()`
+  now holds those loops at 0 for the read, and `settle()` waits for his
+  scale to reach rest (WebKit read him mid-grow after a tuck). Measure him that way elsewhere.
+- Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
+  around one eye patch (seen over the original base too, so it predates
+  the brows). A clean-up of those three frames is open (Later).
+- Meshy AI (3D) was looked at for Dr. Smiley on 2026-10-19: its auto-rig is
+  a body skeleton for full-body, two-legged textured models; no face rig
+  was found in its docs, and api.meshy.ai is blocked from cloud sessions
+  unless added to the environment's allowed domains.
 
 - **S4 first look (2026-10-19, `tests/tools/tap-trace.cjs`, domain tile on
   Home, iPhone UA, 4x, bar tucked after 9 s on Home).** Handler 330-520 ms,

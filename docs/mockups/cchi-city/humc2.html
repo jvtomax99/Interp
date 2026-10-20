@@ -1,0 +1,244 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+/* HUMC campus, traced from satellite imagery (used only as a tracing reference; nothing of it is drawn).
+   Positions are pixels of the zoom-19 tile mosaic (x 154288.., y 196788..), north up. */
+import * as THREE from 'three';
+const P = new URLSearchParams(location.search);
+const W = +P.get('w')||960, H = +P.get('h')||960, TOP = P.get('top') === '1';
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
+renderer.setSize(W,H); renderer.shadowMap.enabled = !TOP; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08; renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const CX = 1475, CY = 1275, SC = 0.0122;                       // px -> world
+const wx = px => (px-CX)*SC, wz = py => (py-CY)*SC;
+const zoom = +P.get('zoom')||12.2;
+let cam;
+if (TOP){ const hw = 1800*SC/2; cam = new THREE.OrthographicCamera(-hw, hw, hw*H/W, -hw*H/W, 0.1, 300); cam.position.set(0, 100, 0); cam.up.set(0,0,-1); cam.lookAt(0,0,0); }
+else { cam = new THREE.OrthographicCamera(-zoom, zoom, zoom*H/W, -zoom*H/W, 0.1, 400); cam.position.set(34-2.2, 30, 34+0.4); cam.lookAt(-2.2, 1.2, 0.4); }
+cam.updateMatrixWorld(); cam.updateProjectionMatrix();
+scene.add(new THREE.HemisphereLight(0xf6f2ff, 0x806c78, 1.25));
+const sun = new THREE.DirectionalLight(0xfff0d8, 2.4); sun.position.set(-14, 30, 10); sun.castShadow = true;
+sun.shadow.mapSize.set(4096,4096); Object.assign(sun.shadow.camera,{left:-16,right:16,top:16,bottom:-16,near:1,far:90}); sun.shadow.bias=-0.0005; sun.shadow.radius=3; scene.add(sun);
+const fill = new THREE.DirectionalLight(0xc8d8ff, 0.5); fill.position.set(22, 12, -8); scene.add(fill);
+const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;
+const M = (c,o={}) => new THREE.MeshStandardMaterial({ color:c, roughness:o.r??0.8, metalness:o.m??0, ...(o.x||{}) });
+const FL = 0.36;                                                 // one storey (heights exaggerated ~1.8x, toy style)
+
+// ---- facade textures: one tile = one storey tall x one bay wide ----
+function facade(kind){
+  const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
+  const F = { brick:['#9a5444','#e8dcc6','#5d7393'], white:['#eef0f3','#dfe3ea','#5aa3b6'], glass:['#7fb3cc','#eef2f7','#9fd0e4'],
+    dark:['#6b5a55','#8a7a72','#4c5f80'], tan:['#c99d7c','#eadfcd','#5d7393'], deck:['#c9c9d1','#b4b4be','#3b3b48'], cup:['#a6a9b4','#c9ccd6','#7d808d'] }[kind];
+  g.fillStyle = F[0]; g.fillRect(0,0,64,64);
+  if (kind === 'deck'){ g.fillStyle = F[2]; g.fillRect(0,14,64,38); g.fillStyle = F[1]; g.fillRect(28,14,8,38); }
+  else if (kind === 'glass'){ g.fillStyle = F[2]; g.fillRect(3,6,58,48); g.fillStyle = F[1]; g.fillRect(0,54,64,10); g.fillRect(31,6,2,48); }
+  else if (kind === 'cup'){ g.fillStyle = F[2]; for (let i=0;i<8;i++) g.fillRect(0,8+i*6,64,2); }
+  else if (kind === 'white'){ g.fillStyle = F[2]; g.fillRect(0,18,64,26); g.fillStyle = F[1]; g.fillRect(0,56,64,8); }
+  else { g.fillStyle = F[1]; g.fillRect(0,54,64,10); g.fillStyle = F[2]; g.fillRect(14,14,36,32); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  t.repeat.set(1/0.34, 1/FL); return t;
+}
+const WALL = {}; for (const k of ['brick','white','glass','dark','tan','deck','cup']) WALL[k] = new THREE.MeshStandardMaterial({ map:facade(k), roughness: k==='glass'?0.25:0.8, metalness: k==='glass'?0.25:0 });
+const ROOF = { brick:M(0x8d8f99), white:M(0xe9eaee), glass:M(0xdfe3ea), dark:M(0x5d5f6a), tan:M(0xd8d2c8), deck:M(0xbdbdc6), cup:M(0xa9acb6) };
+
+// a prism from a footprint (px points), y0..y1
+function prism(pts, y0, h, kind, cast=true){
+  const s = new THREE.Shape(pts.map(([x,y]) => new THREE.Vector2(wx(x), -wz(y))));
+  const g = new THREE.ExtrudeGeometry(s, { depth:h, bevelEnabled:false, curveSegments:16 });
+  g.rotateX(-Math.PI/2); g.translate(0, y0, 0);
+  const m = new THREE.Mesh(g, [ROOF[kind], WALL[kind]]); m.castShadow = cast; m.receiveShadow = true; G.add(m); return m;
+}
+// a rectangle on the street grid: centre, width across (WNW-ESE), length along (NNE), turned with the grid
+const ANG = 24.6 * Math.PI/180;
+function rect(cx, cy, w, l, a = ANG){
+  const u = [Math.cos(a), Math.sin(a)], v = [-Math.sin(a), Math.cos(a)];        // u: across (ESE), v: along (SSW)
+  return [[-1,-1],[1,-1],[1,1],[-1,1]].map(([i,j]) => [cx + u[0]*w/2*i + v[0]*l/2*j, cy + u[1]*w/2*i + v[1]*l/2*j]);
+}
+const ground = (y=0.0) => y;
+
+// ---- the ground: a painted map (streets, lots, grass) on the slab ----
+const GW = 1800, GH = 1800;   // px area painted, centred on CX,CY
+function groundTexture(){
+  const S2 = 2048, k = S2/GW, c = document.createElement('canvas'); c.width = c.height = S2; const g = c.getContext('2d');
+  const X = x => (x - (CX-GW/2))*k, Y = y => (y - (CY-GH/2))*k;
+  g.fillStyle = '#a8dcb0'; g.fillRect(0,0,S2,S2);
+  const road = (pts, w) => { g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = '#dcdde5'; g.lineWidth = (w+26)*k; g.beginPath(); pts.forEach(([x,y],i)=> i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))); g.stroke();
+    g.strokeStyle = '#5f5e6c'; g.lineWidth = w*k; g.stroke(); g.setLineDash([22*k, 22*k]); g.strokeStyle = '#f2c14e'; g.lineWidth = 3*k; g.stroke(); g.setLineDash([]); };
+  const lot = (pts, col='#7d7c88') => { g.fillStyle = col; g.beginPath(); pts.forEach(([x,y],i)=> i?g.lineTo(X(x),Y(y)):g.moveTo(X(x),Y(y))); g.closePath(); g.fill(); };
+  lot(rect(1100,1300,760,1200), '#cfd0d8');      // the hospital block's plazas and service yards
+  lot(rect(2060,1080,520,320), '#cfd0d8');
+  for (const L of [rect(1290,770,330,170), rect(2230,1640,260,330), rect(1900,1760,230,260), rect(600,1250,170,300), rect(2000,820,240,200)]){ lot(L, '#8a8996');
+    g.fillStyle = 'rgba(255,255,255,.55)'; const [cx,cy] = [L.reduce((s,p)=>s+p[0],0)/4, L.reduce((s,p)=>s+p[1],0)/4]; for (let i=0;i<14;i++){ g.fillRect(X(cx-90+(i%7)*28), Y(cy-40+Math.floor(i/7)*60), 14*k, 30*k); } }
+  for (const R of ROADS) road(R, 74);
+  // the main entrance's circle drive off Prospect Ave
+  g.strokeStyle = '#5f5e6c'; g.lineWidth = 44*k; g.beginPath(); g.arc(X(790), Y(1180), 78*k, 0, Math.PI*2); g.stroke();
+  g.fillStyle = '#8fd19e'; g.beginPath(); g.arc(X(790), Y(1180), 56*k, 0, Math.PI*2); g.fill();
+  g.fillStyle = '#e0516b'; for (let i=0;i<10;i++){ const a = i/10*Math.PI*2; g.beginPath(); g.arc(X(790)+Math.cos(a)*44*k, Y(1180)+Math.sin(a)*44*k, 6*k, 0, 7); g.fill(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+}
+const ROADS = [
+  [[1060,300],[700,1120],[520,1560],[300,2100]],                // Prospect Ave (west)
+  [[1930,300],[1730,1000],[1620,1330],[1380,2200]],             // Second St
+  [[1560,1020],[1760,1080],[2450,1350]],                        // Atlantic St (past the Cancer Center)
+  [[2420,500],[2150,1300],[1900,2200]],                         // the east avenue
+  [[200,1520],[1500,2180]],                                     // the south street
+];
+{ const slabW = GW*SC + 0.6;
+  const base = new THREE.Mesh(new THREE.BoxGeometry(slabW, 1.6, slabW), M(0xc48d60)); base.position.y = -0.8; G.add(base);
+  const top = new THREE.Mesh(new THREE.BoxGeometry(GW*SC, 0.08, GH*SC), [M(0x9cd8a6),M(0x9cd8a6),new THREE.MeshStandardMaterial({ map:groundTexture(), roughness:0.9 }),M(0x9cd8a6),M(0x9cd8a6),M(0x9cd8a6)]);
+  top.position.y = 0.04; top.receiveShadow = true; G.add(top); }
+
+// ---- context: the buildings that are not exam domains ----
+const CTX = [
+  // parking decks
+  { pts: rect(815,1690,230,390), fl:5, k:'deck' },
+  { pts: rect(1650,1650,220,400), fl:5, k:'deck' },
+  { pts: rect(1390,760,700,200, 24.6*Math.PI/180 + 0.05), fl:4, k:'deck' },
+  // central utility plant (4 storeys, round fans on the roof) and its neighbour
+  { pts: rect(1880,1240,330,150), fl:4, k:'cup', fans:true },
+  { pts: rect(1760,1370,220,210), fl:5, k:'dark' },
+  // the low parts of the core
+  { pts: rect(1100,1100,380,200), fl:4, k:'dark' },
+  { pts: rect(1170,1330,250,360), fl:7, k:'brick' },
+  { pts: rect(1220,1080,260,200), fl:6, k:'white' },
+  { pts: rect(1020,1510,200,190), fl:5, k:'dark' },
+  { pts: rect(860,1440,150,170), fl:4, k:'tan' },
+  { pts: rect(1350,1520,240,180), fl:3, k:'tan' },
+  // the platform under the Helena Theurer Pavilion
+  { pts: [[1300,1290],[1660,1300],[1650,1480],[1305,1480]], fl:3, k:'brick' },
+];
+for (const b of CTX){ prism(b.pts, 0.08, b.fl*FL, b.k);
+  if (b.fans){ const cx = b.pts.reduce((s,p)=>s+p[0],0)/4, cy = b.pts.reduce((s,p)=>s+p[1],0)/4;
+    for (let i=-2;i<=2;i++){ const f = new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.17,0.12,20), M(0xdfe2ea)); f.position.set(wx(cx)+i*0.36*Math.cos(ANG), 0.08+b.fl*FL+0.06, wz(cy)+i*0.36*Math.sin(ANG)); f.castShadow=true; G.add(f);
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.14,10), M(0x6d707c)); hub.position.copy(f.position); G.add(hub); } }
+  if (b.k === 'deck'){ const cx = b.pts.reduce((s,p)=>s+p[0],0)/4, cy = b.pts.reduce((s,p)=>s+p[1],0)/4;
+    for (let i=0;i<10;i++){ const car = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.08,0.09), M([0xef8f8f,0x6fb3e0,0xf2c94c,0xf3f5fb,0x8fd19e,0x6d6f7c][i%6]));
+      car.position.set(wx(cx)+((i%5)-2)*0.3*Math.cos(ANG) - (i<5?0.25:-0.25)*Math.sin(ANG), 0.08+b.fl*FL+0.04, wz(cy)+((i%5)-2)*0.3*Math.sin(ANG) + (i<5?0.25:-0.25)*Math.cos(ANG)); car.rotation.y = -ANG; G.add(car); } }
+}
+{ const f = new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.26,0.1,24), M(0xd5d1de)); f.position.set(wx(790), 0.13, wz(1180)); G.add(f);
+  const w = new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.03,24), M(0x7fd2f0,{r:0.1})); w.position.set(wx(790), 0.19, wz(1180)); G.add(w);
+  const j = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.03,0.22,8), M(0xd5d1de)); j.position.set(wx(790), 0.27, wz(1180)); G.add(j);
+  // the HMH sign between brick pillars at the drive
+  for (const d of [-0.18, 0.18]){ const p = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.2,0.08), M(0x9a5444)); p.position.set(wx(720)+d, 0.18, wz(1290)); G.add(p); }
+  const sg = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.12,0.04), M(0xf1f2f4)); sg.position.set(wx(720), 0.2, wz(1290)); G.add(sg); }
+// skybridge over Second St from the Cancer Center to the deck
+{ const a = [1700,890], b = [1850,935]; const len = Math.hypot(b[0]-a[0], b[1]-a[1])*SC, mid = [(a[0]+b[0])/2, (a[1]+b[1])/2];
+  const br = new THREE.Mesh(new THREE.BoxGeometry(len, 0.3, 0.22), [WALL.glass,WALL.glass,ROOF.white,ROOF.white,WALL.glass,WALL.glass]);
+  br.position.set(wx(mid[0]), 0.08+2*FL+0.15, wz(mid[1])); br.rotation.y = -Math.atan2(b[1]-a[1], b[0]-a[0]); br.castShadow = true; G.add(br); }
+// street trees and a few houses at the edges
+function tree(px, py, s=1){ const x = wx(px), z = wz(py);
+  const t = new THREE.Mesh(new THREE.CylinderGeometry(0.03*s,0.04*s,0.2*s,6), M(0x7b4f36)); t.position.set(x,0.18*s,z); G.add(t);
+  const c = new THREE.Mesh(new THREE.IcosahedronGeometry(0.2*s,1), M(0x4fae6e,{r:0.9})); c.position.set(x,0.38*s,z); c.castShadow = true; G.add(c); }
+for (const [x,y] of [[860,1010],[900,1160],[640,1350],[600,1460],[1460,1880],[1520,1760],[1930,1450],[2010,1500],[2100,1630],[1960,1690],[1810,760],[2060,820],[2140,1000],[700,1960],[1100,1990],[1220,2020],[2240,1450],[560,1100],[600,860],[1980,960]]) tree(x,y,1.1);
+function house(px, py, a=ANG){ const g = new THREE.Group(); const b = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.32,0.38), M(0xe9e2d6)); b.position.y = 0.24; b.castShadow = true; g.add(b);
+  const r = new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.32,0.22,4,1), M(0x7a6a6a)); r.rotation.y = Math.PI/4; r.scale.set(1,1,0.75); r.position.y = 0.51; r.castShadow = true; g.add(r);
+  g.position.set(wx(px), 0, wz(py)); g.rotation.y = -a; G.add(g); }
+for (const [x,y] of [[560,1900],[700,1940],[440,1700],[2280,1560],[2300,1700],[2200,1840],[2080,1900],[640,640],[540,800]]) house(x,y);
+
+// ---- the five exam buildings: built floors + scaffolding and a crane for the rest ----
+const SCAF = M(0xf0a43a, {r:0.6}), CRANE = M(0xf6c445, {r:0.5});
+function scaffoldOn(pts, y0, n){
+  for (let f=0; f<n; f++){ const y = y0 + f*FL;
+    for (let i=0;i<pts.length;i++){ const [x1,y1] = pts[i], [x2,y2] = pts[(i+1)%pts.length];
+      const len = Math.hypot(x2-x1,y2-y1)*SC; const bar = new THREE.Mesh(new THREE.BoxGeometry(len, 0.03, 0.03), SCAF);
+      bar.position.set(wx((x1+x2)/2), y+FL, wz((y1+y2)/2)); bar.rotation.y = -Math.atan2(y2-y1, x2-x1); G.add(bar);
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.03, FL, 0.03), SCAF); post.position.set(wx(x1), y+FL/2, wz(y1)); G.add(post); } }
+}
+function crane(px, py, y0){ const x = wx(px), z = wz(py);
+  const mast = new THREE.Mesh(new THREE.BoxGeometry(0.09, 2.0, 0.09), CRANE); mast.position.set(x, y0+1.0, z); mast.castShadow = true; G.add(mast);
+  const jib = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.08, 0.08), CRANE); jib.position.set(x+0.5, y0+2.0, z); jib.castShadow = true; G.add(jib);
+  const cw = new THREE.Mesh(new THREE.BoxGeometry(0.25,0.18,0.18), M(0x6d6a78)); cw.position.set(x-0.35, y0+1.92, z); G.add(cw); }
+const labels = {};
+function label(key, px, py, y){ const v = new THREE.Vector3(wx(px), y, wz(py)).project(cam); labels[key] = [Math.round((v.x+1)/2*W), Math.round((1-v.y)/2*H)]; }
+const centre = pts => [pts.reduce((s,p)=>s+p[0],0)/pts.length, pts.reduce((s,p)=>s+p[1],0)/pts.length];
+const BUILD = {}, MINF = {e:2,n:2,t:1,s:2,c:2}, MAXF = {e:9,n:9,t:5,s:6,c:5};
+const SPEC = {
+  // Ethics: the main hospital tower in the core (brick, cream bands, the glass crown with the HMH mark)
+  e: { pts: rect(950,1270,230,300), k:'brick', crown:true },
+  // Encounter: the Helena Theurer Pavilion, the long curved white-and-glass tower (on its 3-storey platform)
+  n: { pts: [[1400,1160],[1525,1115],[1528,1300],[1556,1480],[1530,1690],[1470,1745],[1310,1700],[1316,1460],[1396,1420]], k:'glass', y0:3, lit:true },
+  // Terminology: the John Theurer Cancer Center across Second St (brick and white, terraces, glass rotunda at its west end)
+  t: { pts: rect(2060,1060,470,190, ANG + 0.03), k:'tan', rotunda:[1840,960] },
+  // US Systems: the white north building with the green roof
+  s: { pts: rect(1060,870,380,300), k:'white', green:true },
+  // Culture: the south building around a courtyard garden
+  c: { pts: rect(1120,1760,390,290), k:'brick', court:true },
+};
+for (const key of Object.keys(SPEC)) BUILD[key] = (LV) => {
+  const S = SPEC[key], F = MAXF[key], b = Math.max(MINF[key], Math.min(F, LV)), y0 = 0.08 + (S.y0||0)*FL;
+  const [cx, cy] = centre(S.pts);
+  const body = prism(S.pts, y0, b*FL, S.k);
+  let top = y0 + b*FL;
+  if (b >= F){
+    if (S.crown){ const cr = rect(cx, cy, 200, 150); prism(cr, top, 0.5, 'glass');
+      const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.42), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }));
+      logo.position.set(wx(cx) + 0.95*Math.sin(ANG)*0.0 + 0.0, top+0.25, wz(cy) + 0.92); G.add(logo); }
+    if (S.lit){ const edge = S.pts.slice(4, 9).map(([x,y]) => new THREE.Vector3(wx(x), top+0.05, wz(y)));
+      G.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(edge), 40, 0.05, 6, false), new THREE.MeshBasicMaterial({ color:0x8f6bff }))); }
+    if (S.green){ prism(rect(cx-30, cy+10, 180, 140), top, 0.04, 'white').material = [M(0x6fb36a), WALL.white]; }
+    if (S.court){ prism(rect(cx, cy+20, 110, 120), top, 0.03, 'tan').material = [M(0xd9b98c), WALL.tan]; }
+  } else { scaffoldOn(S.pts, top, F-b); crane(cx+20, cy-40, top+(F-b)*FL); }
+  if (S.rotunda){ const [rx, ry] = S.rotunda; const r = new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,Math.min(b,4)*FL,32,1,false,Math.PI*0.6,Math.PI*1.1), WALL.glass);
+    r.position.set(wx(rx), 0.08+Math.min(b,4)*FL/2, wz(ry)); r.castShadow = true; G.add(r);
+    for (const [dx,c] of [[-0.25,0xe8e8f0],[0,0x1f7a4d],[0.25,0xd8dce6]]){ const pole = new THREE.Mesh(new THREE.BoxGeometry(0.02,0.9,0.02), M(0xc9ccd4)); pole.position.set(wx(rx)-0.9+dx, 0.53, wz(ry)+0.5); G.add(pole);
+      const fl = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.11,0.01), M(c)); fl.position.set(wx(rx)-0.81+dx, 0.9, wz(ry)+0.5); G.add(fl); } }
+  label(key, cx, cy, y0 + F*FL + (b>=F ? 0.7 : 2.4));
+};
+let TEX = null;
+window.__ready = (async () => { TEX = await new Promise(r => { const t = new THREE.TextureLoader().load('hmh-mark-square.png', () => r(t)); }); TEX.colorSpace = THREE.SRGBColorSpace; })();
+window.__preview = async (lv) => { await window.__ready; for (const k of Object.keys(SPEC)){ G = new THREE.Group(); scene.add(G); BUILD[k](lv ? lv[k] : MAXF[k]); } renderer.render(scene, cam); return labels; };
+window.__parts = { scene, cam, renderer, BASE, BUILD, MINF, MAXF, setG: g => { G = g; }, labels, W, H, THREE };
+
+const depthOnly = new THREE.MeshBasicMaterial({ colorWrite:false });
+const swap = (root, on) => root.traverse(o => { if(!o.isMesh) return; if(on){ o.userData.m = o.material; o.material = depthOnly; } else if(o.userData.m){ o.material = o.userData.m; } });
+const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(30,30), new THREE.ShadowMaterial({ opacity:0.3 }));
+shadowPlane.rotation.x = -Math.PI/2; shadowPlane.position.y = 0.085; shadowPlane.receiveShadow = true; shadowPlane.visible = false; scene.add(shadowPlane);
+const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tctx = tmp.getContext('2d', { willReadFrequently:true });
+function cap(q=0.86){
+  renderer.render(scene, cam);
+  tctx.clearRect(0,0,W,H); tctx.drawImage(renderer.domElement, 0, 0);
+  const d = tctx.getImageData(0,0,W,H).data; let x0=W,y0=H,x1=-1,y1=-1;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(d[(y*W+x)*4+3] > 3){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
+  if(x1<0) return null;
+  const w=x1-x0+1, h=y1-y0+1, c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(tmp, x0,y0,w,h, 0,0,w,h);
+  return { x:x0, y:y0, w, h, data:c.toDataURL('image/webp', q) };
+}
+const proj = (px,y,py) => { const v = new THREE.Vector3(wx(px),y,wz(py)).project(cam); return [Math.round((v.x+1)/2*W), Math.round((1-v.y)/2*H)]; };
+function carMesh(col, ang){ const g = new THREE.Group();
+  const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.11,0.18), M(col)); b1.position.y=0.15; b1.castShadow=true; g.add(b1);
+  const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.09,0.16), M(0xf3f5fb)); b2.position.set(-0.02,0.24,0); g.add(b2);
+  g.rotation.y = ang; return g; }
+window.__run = async () => {
+  await window.__ready;
+  const out = { W, H, base: cap(0.84), b:{} };
+  for (const k of ['e','n','t','s','c']){
+    out.b[k] = [];
+    for (let lv = MINF[k]; lv <= MAXF[k]; lv++){
+      G = new THREE.Group(); scene.add(G); BUILD[k](lv);
+      swap(BASE, true); const img = cap();
+      BASE.visible = false; shadowPlane.visible = true; swap(G, true); const sh = cap(0.8);
+      swap(G, false); shadowPlane.visible = false; BASE.visible = true; swap(BASE, false);
+      scene.remove(G);
+      out.b[k].push({ lv, img, sh, label: labels[k] });
+    }
+  }
+  // two cars on Atlantic St, one each way (px points along the street, offset to their lanes)
+  BASE.visible = false;
+  const A = [1600,1035], B = [2420,1340], dir = Math.atan2(B[1]-A[1], B[0]-A[0]), nx = -Math.sin(dir), ny = Math.cos(dir);
+  for (const [key, side, col, rev] of [['carE', 16, 0xf2c94c, 0], ['carW', -16, 0xef8f8f, 1]]){
+    const a = [A[0]+nx*side, A[1]+ny*side], b = [B[0]+nx*side, B[1]+ny*side], m = [(a[0]+b[0])/2, (a[1]+b[1])/2];
+    G = new THREE.Group(); scene.add(G); const c = carMesh(col, -dir + (rev?Math.PI:0)); c.position.set(wx(m[0]), 0.08, wz(m[1])); G.add(c);
+    out[key] = { img: cap(), at: proj(m[0],0.2,m[1]), from: proj(...(rev?b:a).slice(0,1), 0.2, (rev?b:a)[1]), to: proj((rev?a:b)[0], 0.2, (rev?a:b)[1]) };
+    scene.remove(G);
+  }
+  BASE.visible = true;
+  out.fountain = proj(790, 0.3, 1180);
+  return out;
+};
+
+window.__done = true;
+</script></body></html>
