@@ -112,4 +112,23 @@ parking lot to the entrance, entrance to the far lawn, a pacer at the doors);
 third car on the drive. All are `.cp-mv` movers (`data-dur`, `data-delay`)
 run by `campusLife`; walkers blink two frames (`.cp-walk`).
 Re-render with `NOLIT=<old entrance.json> node buildentr.cjs out` to keep
-the 50 lit layers (the live things take ~3 min, the lit set ~25).
+the 50 lit layers (the live things take ~3 min, the lit set ~25). There is
+no old `entrance.json` in the repo: write one from `CAMPUS_MAP` first
+(`JSON.parse` of the line in `index.html`).
+**Round 2** (Jose's picks, 2026-10-19): an ambulance bay on the banner
+building's right flank (`BAY`, brick, a warm-lit opening; its two sliding
+doors captured apart as `bay0..2.webp`, closed/half/open, `.cp-bay`), which
+`campusLife` opens on the ambulance's own 34 s clock as it arrives and
+closes after it fades; the car that backs out of the surface lot
+(`LOT_A`/`LOT_B`: the same car parked in the empty spot with its reverse
+lights, then nosed east; `lot0/1.webp`, `.cp-lot` with `data-pts2`; it
+reverses into the lane, drives the lane to the drive and out to the
+street, fades, and is back in its spot); people on the benches (`sitter`,
+`sit<i>-<f>.webp`, `.cp-sit`: an elder and a kid on the left bench, a
+visitor on the right; the second frame turns the head for 1.5 s every 7 s,
+staggered by `--i`; they stay under reduced motion, first frame); a flock
+of birds (`flock`, five Vs with two wing frames, `birds0/1.webp`,
+`.cp-birds`) crossing the sky above the towers once every 64 s. Round 1's
+street cars drove nose-backwards (a vehicle's front is its local +z, so
+`rotation.y = +pi/2` faces +x); fixed in the same render. Suite
+`campus-life.cjs`.
