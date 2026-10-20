@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v249-doctor-page-a';
+const CACHE_VERSION = 'interpreter-hub-v252-doctor-page';
 const PRECACHE = [
   './',
   './index.html',
@@ -38,6 +38,8 @@ const PRECACHE = [
   './hmh-mark.png',
   // The same mark, trimmed so it centres: the Ask tag on the smiley uses it.
   './hmh-mark-square.png',
+  // The memory trainer's lines, so it works offline from the start.
+  './memory/lines.json',
   // Dr. Smiley (drSmileyArt in index.html): his picture and the strip of
   // frames his face moves through. On Home, the dock, Ask the Hub and the
   // lock screen, so they must work offline from the start.
