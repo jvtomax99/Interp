@@ -13270,7 +13270,7 @@ const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
   { id:'memory',      tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'Memory trainer',        title:'Train your memory for consecutive: hear a line, say it in the other language, and the lines grow as you do' },
-  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley has new faces: surprised, worried, doubtful and, rarely, sad' },
+  { id:'askmoves',    tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley springs when he cheers, and has new faces: surprised, worried, doubtful and, rarely, sad' },
   { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
@@ -14518,9 +14518,10 @@ const DR_FACE_SEQ = {
    Lively: as above. Focused: the same gestures, smaller and calmer, no
    laughter and no effects. Still: the engine shows one still frame (still)
    as it always has. Only the artwork's own frames are used, and the only
-   movement is the lean and lift of what holds him (never a sideways slide
-   or a stretch). The art has one wink (his left eye), so a wink always
-   tips that way. Effects are short and land on the moment: a quick burst
+   movement is the lean and lift of what holds him (never a sideways slide),
+   plus, for the cheer's and the greet's spring in Lively only, a small
+   squash and stretch of his picture (drSquashKeys). The art has one wink
+   (his left eye), so a wink always tips that way. Effects are short and land on the moment: a quick burst
    at the top of the cheer's spring, a glint as the wink closes, a "?" as
    the thought starts. */
 let drPerfRand = Math.random;
@@ -14552,6 +14553,31 @@ function drPerfMake(beats, extra){
   if(last[1] || last[2]) head.push([Math.round(t) + 260, 0, 0]);
   return Object.assign({ f, head }, brow.length ? { brow } : {}, extra || {});
 }
+/* Squash and stretch, worked out from a sequence's head keys (lift: + is
+   down). A spring up stretches him on the way (tall and narrow), the top is
+   his drawn shape, a crouch or a landing squashes him (short and wide). His
+   volume stays the same, as for a round body (width 1/sqrt(height), the
+   usual rule), and he scales from his shoulders. k is the most it changes
+   his height: DR_SQUASH, Jose's pick of 0 / 4% / 9% from a preview (E3, 2026-10-19). */
+const DR_SQUASH = .04, DR_SQUASH_AT = '50% 90%';
+function drSquashKeys(keys, k){
+  const T = keys[keys.length - 1][0];
+  if(!k || !(T > 0)) return null;
+  const c = x => Math.max(0, Math.min(1, x));
+  const at = (offset, sy, easing) => Object.assign({ offset, transform: `scale(${(1 / Math.sqrt(sy)).toFixed(4)},${sy.toFixed(4)})`, transformOrigin: DR_SQUASH_AT }, easing ? { easing } : {});
+  const kf = [at(0, 1, 'cubic-bezier(.3,0,.3,1)')];
+  let moved = false;
+  for(let i = 1; i < keys.length; i++){
+    const [t0, , y0] = keys[i - 1], [t1, , y1] = keys[i], yn = i + 1 < keys.length ? keys[i + 1][2] : y1;
+    const rise = y0 - y1;
+    if(rise > .9){ kf.push(at((t0 + (t1 - t0) * .45) / T, 1 + k * c(rise / 2.6), 'cubic-bezier(.3,0,.4,1)')); moved = true; }
+    const depth = y1 - Math.min(y0, yn), low = y1 > .3 && y1 >= y0 && y1 >= yn && depth > .7;
+    if(low) moved = true;
+    kf.push(at(t1 / T, low ? 1 - k * c(depth / 2.2) : 1, 'cubic-bezier(.3,0,.3,1)'));
+  }
+  kf[kf.length - 1] = at(1, 1);
+  return moved ? kf : null;
+}
 const DR_PERF = {
   greet(){
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
@@ -14578,7 +14604,7 @@ const DR_PERF = {
       [['smile2'], j(110), [0, .3]],
       [['smile1'], j(240), [-side * .25, .1]],
       [['rest'], j(380), [0, 0]],
-    ], { still: 'smile', stillMs: 1000 });
+    ], { still: 'smile', stillMs: 1000, squash: DR_SQUASH });
   },
   ack(){
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
@@ -14648,7 +14674,7 @@ const DR_PERF = {
       [['smile'], j(360, .2), [side * .2, -.15]],
       [['smile2', 'smile1'], j(230), [0, 0]],
       [['rest'], j(360), [0, 0]],
-    ], { fx: 'burst', fxAt: 360, still: 'smile', stillMs: 1000 });
+    ], { fx: 'burst', fxAt: 360, still: 'smile', stillMs: 1000, squash: DR_SQUASH });
   },
   wink(){
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14)));
@@ -14857,7 +14883,7 @@ function drSeq(name){
   const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
   const brow = raw.brow || null, browPeak = brow ? (brow.find(b => b[1]) || [0, null])[1] : null;
-  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak };
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak, squash: raw.squash || 0 };
   drSeqCache.set(raw, seq);
   return seq;
 }
@@ -14881,7 +14907,7 @@ class DrAnim{
     this.svg = svg; this.sheet = svg.querySelector('.ds-sheet');
     this.head = o.head || null;
     this.timers = new Set(); this.fx = new Set();
-    this.run = null; this.headAnim = null; this.idle = null; this.g = null; this.dead = false;
+    this.run = null; this.headAnim = null; this.sq = null; this.idle = null; this.g = null; this.dead = false;
     drAnims.add(this); drAnimOf.set(svg, this);
     if(!drSweepTimer) drSweepTimer = setInterval(drSweep, 4000);
   }
@@ -14902,6 +14928,7 @@ class DrAnim{
     this.dead = true;
     this.timers.forEach(t => clearTimeout(t)); this.timers.clear();
     if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    if(this.sq){ this.sq.cancel(); this.sq = null; }
     this.fx.forEach(el => el.remove()); this.fx.clear();
     this.run = null; this.idle = null; this.g = null;
     drAnims.delete(this); drInputSync();
@@ -14970,6 +14997,27 @@ class DrAnim{
       this.headSwap(a);
     }catch(e){}
   }
+  /* Squash and stretch (E3, Jose's pick B, 2026-10-19): on his own picture,
+     not what holds him, so the lean and lift stay as they are. Only for a
+     sequence that asks (squash: cheer and greet, Lively), only from its
+     start, and never where the picture is also what leans (Ask's face). */
+  squashPlay(keys, k, lead){
+    if(!keys || !this.head || this.head === this.svg || !this.svg.animate || drStill() || drMode() !== 'lively') return;
+    const kf = drSquashKeys(keys, k);
+    if(!kf) return;
+    this.squashStop(true);
+    try{ this.sq = this.svg.animate(kf, { duration: keys[keys.length - 1][0], delay: lead }); }catch(e){ this.sq = null; }
+  }
+  // Interrupted: ease back to his drawn shape rather than snap (quick: at once).
+  squashStop(quick){
+    const a = this.sq;
+    if(!a) return;
+    this.sq = null;
+    if(quick || a.playState === 'finished'){ a.cancel(); return; }
+    const now = getComputedStyle(this.svg).transform;
+    a.cancel();
+    if(now && now !== 'none') try{ this.svg.animate([{ transform: now, transformOrigin: DR_SQUASH_AT }, { transform: 'none', transformOrigin: DR_SQUASH_AT }], { duration: 140, easing: 'ease-out' }); }catch(e){}
+  }
   // ---- effects ----
   effect(kind){
     const el = drFaceFx(this.head, kind);
@@ -15019,6 +15067,7 @@ class DrAnim{
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
     if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
     this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.squash && !skip) this.squashPlay(seq.head, seq.squash, lead);
     if(seq.brow){
       // Keys already passed (joining part-way) leave the latest one in force.
       let now;
@@ -15069,6 +15118,7 @@ class DrAnim{
     if(run.gazeTimer) this.clear(run.gazeTimer);
     this.run = null;
     this.svg._browHold = null;
+    this.squashStop();
     this.fadeEffects();
     if(settle) this.settle();
   }
@@ -15370,6 +15420,7 @@ class DrAnim{
     if(this.idle) this.idle.timer = 0;
     this.run = null; this.g = null;
     if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    if(this.sq){ this.sq.cancel(); this.sq = null; }
     this.fx.forEach(el => el.remove()); this.fx.clear();
     this.set('rest');
   }
@@ -16944,11 +16995,11 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful squash stretch spring bounce cheer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help.</li>
-      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: when he cheers or says hello he crouches and springs, squashing a little as he dips and stretching as he goes up, a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing, no squash and stretch and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
@@ -21538,8 +21589,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0837';
-const BUILD_TIME = '2026-10-20 08:37 UTC';
+const BUILD_ID = 'b1020.0903';
+const BUILD_TIME = '2026-10-20 09:03 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
