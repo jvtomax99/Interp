@@ -8,6 +8,8 @@
      SEL='.tabbar-btn[aria-label="Chat"]' node tools/tap-trace.cjs
      RUNS=3 ...                                    runs (medians printed)
      UA=chromium ...                               Chromium's own paths
+     PROFILE=1 ...                                 + the click's script time by function
+     CSS='...' ...                                 extra CSS in the page (an experiment, A/B)
 
    Per run: the click's wait and handler time (Event Timing), tap to next
    paint, and every task over 16 ms in the 1.5 s after the tap with its
@@ -27,6 +29,7 @@ async function once(browser) {
     try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     window.__ev = []; try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'click') window.__ev.push({ d: Math.round(e.duration), wait: Math.round(e.processingStart - e.startTime), run: Math.round(e.processingEnd - e.processingStart) }); })).observe({ type: 'event', buffered: true, durationThreshold: 16 }); } catch (e) {} }, { seed: SEED });
   await page.goto('https://interp.test/', { waitUntil: 'load' });
+  if (process.env.CSS) await page.addStyleTag({ content: process.env.CSS });
   await page.waitForTimeout(9000);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: RATE });
   await page.waitForTimeout(1000);
@@ -35,9 +38,10 @@ async function once(browser) {
   const done = new Promise(r => cdp.once('Tracing.tracingComplete', r));
   await cdp.send('Tracing.start', { categories: 'devtools.timeline,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.stack', transferMode: 'ReportEvents' });
   await page.waitForTimeout(300);
-  const t0 = Date.now();
+  if (process.env.PROFILE) { await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', { interval: 100 }); await cdp.send('Profiler.start'); }
   await page.locator(SEL).first().tap({ timeout: 8000 });
   await page.waitForTimeout(1500);
+  const prof = process.env.PROFILE ? (await cdp.send('Profiler.stop')).profile : null;
   await cdp.send('Tracing.end'); await done;
   const ev = await page.evaluate(() => window.__ev.slice(-1)[0] || null);
   const errors = await page.evaluate(() => (window.__errs || []).length);
@@ -63,7 +67,21 @@ async function once(browser) {
     }).filter(Boolean);
     return { at: Math.round((t.ts - (click ? click.ts : from)) / 1000), ms: Math.round(t.dur / 1000), top, forced, hasClick: kids.includes(click) };
   });
-  return { ev, tasks };
+  // PROFILE: samples inside the click, self and total time per function (a function's total counts once per sample)
+  let fns = null;
+  if (prof && click) {
+    const node = new Map(prof.nodes.map(n => [n.id, n])), parent = new Map();
+    prof.nodes.forEach(n => (n.children || []).forEach(c => parent.set(c, n.id)));
+    const name = n => `${n.callFrame.functionName || '(anon)'} ${short(n.callFrame.url)}:${n.callFrame.lineNumber + 1}`;
+    const self = new Map(), total = new Map(); let t = prof.startTime;
+    prof.samples.forEach((id, i) => { t += prof.timeDeltas[i]; const dt = (prof.timeDeltas[i + 1] || 100) / 1000;
+      if (t < click.ts || t > click.ts + click.dur) return;
+      const n = node.get(id); self.set(name(n), (self.get(name(n)) || 0) + dt);
+      const seen = new Set(); for (let k = id; k != null; k = parent.get(k)) { const nm = name(node.get(k)); if (seen.has(nm)) continue; seen.add(nm); total.set(nm, (total.get(nm) || 0) + dt); } });
+    const top = m => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 18).map(([k, v]) => `${v.toFixed(1)} ${k}`);
+    fns = { self: top(self), total: top(total) };
+  }
+  return { ev, tasks, fns };
 }
 
 (async () => {
@@ -78,4 +96,6 @@ async function once(browser) {
   const r = runs[runs.length - 1];
   console.log('  tasks of the last run (ms after the click, duration, pieces, forced):');
   r.tasks.forEach(t => { console.log(`    @${t.at} ${t.ms} ms${t.hasClick ? ' (click)' : ''}: ${t.top.join(' | ')}`); t.forced.forEach(f => console.log(`        F ${f}`)); });
+  if (r.fns) { console.log('  click, self ms by function:'); r.fns.self.forEach(l => console.log('    ' + l));
+    console.log('  click, total ms by function:'); r.fns.total.forEach(l => console.log('    ' + l)); }
 })();
