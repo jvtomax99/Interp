@@ -246,14 +246,17 @@ no error on screen. So when you add something:
 
 ## Every deploy that touches `index.html`
 
-Vercel auto-deploys on push to `main`. No build step. Three things move
-together or returning users get a stale app:
+Vercel auto-deploys on push to `main`. No build step.
 
-1. `BUILD_ID` in `index.html` (search for `const BUILD_ID`; format `bMMDD.HHMM`, UTC) — bump it.
-2. `CACHE_VERSION` in `sw.js` (search for `const CACHE_VERSION`) — bump it.
-3. Any changed `api/*.js` ships in the same push.
+**Do not edit `const BUILD_ID`, `const BUILD_TIME` (`index.html`) or
+`const CACHE_VERSION` (`sw.js`) yourself, in a pull request or in a push
+to `main`.** After each push to `main` that changes the app, the GitHub
+Action `.github/workflows/bump-version.yml` moves all three and pushes a
+commit "Bump version to bMMDD.HHMM", which Vercel deploys. (When every
+change bumped them by hand, every open pull request conflicted with every
+other on those lines.) Any changed `api/*.js` ships in the same push.
 
-Then confirm the new `BUILD_ID` is actually live at
+Then confirm that bump commit's `BUILD_ID` is actually live at
 https://interp-six.vercel.app before reporting success.
 
 ## Before pushing `index.html`
