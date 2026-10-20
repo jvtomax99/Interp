@@ -3756,6 +3756,13 @@
   .mem-notes b{ font-size:15px; font-weight:650; color:var(--ink); }
   .mem-notes small{ font-size:13px; color:var(--ink-soft); }
   .mem-start{ align-self:stretch; }
+  .mem-rec{ margin:0; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:550; color:var(--ink-soft); text-align:center; }
+  .mem-rec.is-on{ color:var(--danger); font-variant-numeric:tabular-nums; }
+  .mem-rec i{ width:9px; height:9px; border-radius:50%; background:var(--danger); animation:memRecDot 1.2s ease-in-out infinite; }
+  @keyframes memRecDot{ 50%{ opacity:.35; } }
+  .mem-back{ display:flex; align-items:center; justify-content:center; gap:9px; flex-wrap:wrap; }
+  .mem-back span{ font-size:13px; font-weight:650; color:var(--ink-soft); }
+  .mem-back .btn{ min-height:44px; min-width:88px; }
   .mem-small{ margin:0; font-size:12px; color:var(--ink-faint); text-align:center; }
 
   .mem-top{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
@@ -3807,6 +3814,7 @@
   @media (prefers-reduced-motion: reduce){
     .mem-ring-arc, .mem-chunk, .mem-switch, .mem-switch::after, .mem-seg button{ transition:none !important; }
     .mem-chunk:active, .mem-chunk.is-pressed{ transform:none; }
+    .mem-rec i{ animation:none; }
   }
 
   /* ---------- Your HUMC campus (renderCampus) ----------
@@ -13329,7 +13337,7 @@ const GUIDE_UI = {
 const GUIDE_STEPS = {
   memory: () => ({ steps: ['Open <b>CoreCHI Practice</b>, scroll to <b>Consecutive</b> and tap <b>Start</b>.',
     `Listen. At ${GUIDE_UI.pill('Your turn')}, say it in the other language, then tap ${GUIDE_UI.pill('Show the rendering')}.`,
-    `Tap the parts you missed, then ${GUIDE_UI.pill('Next line')}.`], note: 'Three clean in a row: longer. Two misses: shorter. Saved on this phone.' }),
+    `Tap the parts you missed, then ${GUIDE_UI.pill('Next line')}. Recording? Tap ${GUIDE_UI.pill('Mine')} and ${GUIDE_UI.pill('Model')} first.`], note: 'Three clean in a row: longer. Two misses: shorter. Saved on this phone.' }),
   bodycard: () => ({ steps: ['Open <b>More</b> → <b>3D Body</b> and tap a part, or tap the magnifier and type its name.',
     `Read the English and the Spanish under it. Tap ${GUIDE_UI.pill('EN')} or ${GUIDE_UI.pill('ES')} to hear it.`,
     `Tap ${GUIDE_UI.pill('Open glossary')}, ${GUIDE_UI.pill('Practice this term')} or ${GUIDE_UI.pill('Ask Dr. Smiley')}.`],
@@ -17274,19 +17282,20 @@ const GUIDE_TOPICS = [
     <p>Practice for consecutive interpreting. The phone reads a line out loud, a provider in English or a patient in Spanish, with the words hidden. You say it in the other language, out loud, then check yourself.</p>
     <ol>
       <li>Open <b>CoreCHI Practice</b> and scroll to <b>Consecutive</b>. Tap <b>Start</b> on the Memory trainer.</li>
-      <li>Pick <b>Both ways</b>, <b>To Spanish</b> or <b>To English</b>. Turn <b>Notes</b> on if you want to use your notepad.</li>
+      <li>Pick <b>Both ways</b>, <b>To Spanish</b> or <b>To English</b>. Turn <b>Notes</b> on if you want to use your notepad, and <b>Record me</b> on to hear yourself afterwards.</li>
       <li>Tap <b>Start</b> and listen. The ring fills while the line plays.</li>
       <li>When it says <b>Your turn</b>, say the whole line in the other language. Then tap <b>Show the rendering</b>.</li>
       <li>The model rendering comes in parts. Tap every part you dropped or changed, then tap <b>Next line</b>.</li>
     </ol>
+    <p>With <b>Record me</b> on, the mic records only during your turn. After the rendering, tap <b>Mine</b> to hear yourself and <b>Model</b> to hear the model rendering read aloud. Your take is dropped when the next line starts and is never sent anywhere.</p>
     <p>Three clean lines in a row and the next one is a few words longer. Two misses in a row and it gets shorter. Your <b>span</b> is the longest line you've held clean; lines done with notes count apart from memory only.</p>
     <p>If a line is wrong or sounds odd, tap <b>Flag this line</b> after the rendering and say why. Flags are read before the lines are changed.</p>
-    <p>Your progress stays on this phone. Nothing is recorded. Near patients, use earbuds.</p>` },
+    <p>Your progress stays on this phone. Record me is off unless you turn it on. Near patients, use earbuds.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
     <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It shows what the <b>Memory trainer</b> can use on your phone, and what it may add later.</p>
     <ol>
       <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
-      <li>Do the four steps on the sheet. The phone asks before it uses the microphone.</li>
+      <li>Do the four steps on the sheet. The phone asks before it uses the microphone. If the voice is quieter after recording, tap <b>Try the volume fix</b>.</li>
       <li>Tap <b>Copy results</b> and paste them into a chat.</li>
     </ol>
     <p>The Hub saves nothing and sends nothing: the recording is dropped when you close the sheet. The speech-to-text step may send what you say to Apple, so do it away from patients.</p>` },
@@ -21580,8 +21589,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0834';
-const BUILD_TIME = '2026-10-20 08:34 UTC';
+const BUILD_ID = 'b1020.0903';
+const BUILD_TIME = '2026-10-20 09:03 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21939,7 +21948,9 @@ function voiceCheckOpen(){
       <div class="fm-btns"><button class="btn btn-ghost" id="vcRecBtn" onclick="vcRecord()">Record 5 seconds</button><button class="btn btn-ghost" id="vcPlayBack" hidden onclick="vcPlayBack()">Play back</button></div>
       <div class="vc-state" id="vcRec" aria-live="polite"></div></div>
     <div class="vc-step"><h4>3. Voices after the mic</h4>
-      <p>Tap Play Spanish again. Is it as loud as before? Add yes or no when you paste.</p></div>
+      <p>Tap Play Spanish again. Is it as loud as before? If not, tap <b>Try the volume fix</b>. Add yes or no for each when you paste.</p>
+      <div class="fm-btns"><button class="btn btn-ghost" onclick="vcLoudFix()">Try the volume fix</button></div>
+      <div class="vc-state" id="vcFix" aria-live="polite"></div></div>
     <div class="vc-step"><h4>4. Speech to text</h4>
       <p>${sr ? 'Tap one and say a sentence. It may send what you say to Apple to turn it into text, so do this away from patients.' : 'Not available here.'}</p>
       ${sr ? `<div class="fm-btns"><button class="btn btn-ghost" onclick="vcListen('en')">Listen in English</button><button class="btn btn-ghost" onclick="vcListen('es')">Escuchar en español</button></div>` : ''}
@@ -21964,6 +21975,19 @@ function voiceCheckClose(){
   if(vcAudio){ try{ vcAudio.pause(); }catch(e){} vcAudio = null; }
   if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
   if(VC.rec && VC.rec.busy){ VC.rec.busy = false; VC.rec.state = 'stopped (closed)'; }
+}
+
+/* After the mic, iPhones can keep sound on the quiet earpiece route. Setting
+   the page's audio session back to playback is the fix being tried (M3);
+   navigator.audioSession is Safari 16.4+, absent elsewhere. */
+function audioMode(type){
+  try{ if(navigator.audioSession){ navigator.audioSession.type = type; return navigator.audioSession.type === type; } }catch(e){}
+  return false;
+}
+function vcLoudFix(){
+  VC.fix = !navigator.audioSession ? 'not on this phone (no audioSession)' : audioMode('playback') ? 'audio session set to playback' : 'could not set the audio session';
+  vcSet('vcFix', escapeHtml(VC.fix));
+  vcPlay('es');
 }
 
 function vcPlay(lang){
@@ -22079,6 +22103,8 @@ function vcText(){
     `Speech to text: ${sr ? (window.SpeechRecognition ? 'yes' : 'yes (webkit)') + (sr.prototype && 'processLocally' in sr.prototype ? ', on-device option' : '') : 'not available'}`,
     ...['en', 'es'].map(l => `  ${l === 'es' ? 'Spanish' : 'English'}: ${VC.sr[l] ? VC.sr[l].state + (VC.sr[l].text ? ` · "${VC.sr[l].text}"` : '') : 'not tried'}`),
     'Voice as loud after the mic? (yes/no): ',
+    `Volume fix: ${VC.fix || 'not tried'}`,
+    'Voice as loud after the fix? (yes/no): ',
   ].join('\n');
 }
 
@@ -22112,13 +22138,16 @@ const ICON_MEM = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path 
 const MEM = { p: null, lines: null, loading: null, err: '', stage: 'home', line: null, missed: {}, flagOpen: false, flagged: {},
   msg: '', run: 0, ringAt: 0, ringMs: 0, html: '' };
 let memUtter = null, memTimer = 0;
+// Your take (M3): the mic is open only during your turn, the take lives in
+// memory and is dropped when the next line starts or you leave.
+const MEMREC = { stream: null, rec: null, url: '', state: '', t0: 0, tick: 0, audio: null };
 
 function memRead(){
   let p = null;
   try{ p = JSON.parse(localStorage.getItem(MEM_KEY) || 'null'); }catch(e){}
   p = p && typeof p === 'object' ? p : {};
   return { level: Math.min(MEM_MAX, Math.max(MEM_MIN, +p.level || MEM_START)), clean: +p.clean || 0, miss: +p.miss || 0,
-    notes: !!p.notes, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
+    notes: !!p.notes, rec: !!p.rec, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
     seen: p.seen && typeof p.seen === 'object' ? p.seen : {}, log: Array.isArray(p.log) ? p.log : [],
     best: p.best && typeof p.best === 'object' ? p.best : {} };
 }
@@ -22200,11 +22229,94 @@ function memLeave(){
   memUtter = null; clearTimeout(memTimer);
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
   drTaskEnd('memory');
+  memRecDrop();
   MEM.stage = 'home'; MEM.flagOpen = false; MEM.msg = '';
 }
 
 function memSetDir(d){ memProg().dir = d; memSave(); renderContent(); }
 function memSetNotes(on){ memProg().notes = !!on; memSave(); renderContent(); }
+function memSetRec(on){ memProg().rec = !!on; memSave(); renderContent(); }
+
+async function memRecStart(){
+  memRecDrop();
+  const gum = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if(!gum || !window.MediaRecorder){ MEMREC.state = 'off'; return memRecPaint(); }
+  MEMREC.state = 'asking';
+  memRecPaint();
+  audioMode('play-and-record');
+  let stream;
+  try{ stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch(e){ MEMREC.state = 'refused'; audioMode('playback'); return memRecPaint(); }
+  // The turn may have ended while the phone was asking.
+  if(MEM.stage !== 'turn' || activeCategory !== 'memory'){ stream.getTracks().forEach(t => t.stop()); audioMode('playback'); MEMREC.state = ''; return; }
+  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  let rec;
+  try{ rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined); }
+  catch(e){ stream.getTracks().forEach(t => t.stop()); audioMode('playback'); MEMREC.state = 'off'; return memRecPaint(); }
+  const chunks = [];
+  rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    if(MEMREC.rec !== rec) return;            // dropped: memRecDrop let go already
+    stream.getTracks().forEach(t => t.stop());
+    audioMode('playback');
+    MEMREC.rec = null; MEMREC.stream = null;
+    const blob = new Blob(chunks, { type: rec.mimeType || type || 'audio/mp4' });
+    if(blob.size){ MEMREC.url = URL.createObjectURL(blob); MEMREC.state = 'done'; } else MEMREC.state = 'empty';
+    if(activeCategory === 'memory') renderContent();
+  };
+  MEMREC.stream = stream; MEMREC.rec = rec; MEMREC.t0 = performance.now(); MEMREC.state = 'on';
+  rec.start();
+  clearInterval(MEMREC.tick);
+  // A minute at most; the seconds on screen are the only thing that ticks.
+  MEMREC.tick = setInterval(() => {
+    const s = Math.floor((performance.now() - MEMREC.t0) / 1000), el = document.getElementById('memRecTime');
+    if(el) el.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    if(s >= 60) memRecStop();
+  }, 250);
+  memRecPaint();
+}
+function memRecStop(){
+  clearInterval(MEMREC.tick);
+  const r = MEMREC.rec;
+  if(r && r.state !== 'inactive'){ MEMREC.state = 'saving'; try{ r.stop(); }catch(e){} }
+}
+// Let go of everything: the mic, the recorder, the take.
+function memRecDrop(){
+  clearInterval(MEMREC.tick);
+  const r = MEMREC.rec; MEMREC.rec = null;
+  if(r && r.state !== 'inactive'){ try{ r.stop(); }catch(e){} }
+  if(MEMREC.stream){ MEMREC.stream.getTracks().forEach(t => t.stop()); MEMREC.stream = null; audioMode('playback'); }
+  if(MEMREC.audio){ try{ MEMREC.audio.pause(); }catch(e){} MEMREC.audio = null; }
+  if(MEMREC.url){ URL.revokeObjectURL(MEMREC.url); MEMREC.url = ''; }
+  MEMREC.state = '';
+}
+function memRecPaint(){ if(activeCategory === 'memory' && (MEM.stage === 'turn' || MEM.stage === 'check')) renderContent(); }
+function memRecLine(){
+  const s = MEMREC.state;
+  if(s === 'on') return `<p class="mem-rec is-on" role="status"><i aria-hidden="true"></i>Recording <span id="memRecTime">0:00</span></p>`;
+  if(s === 'asking') return `<p class="mem-rec" role="status">Opening the mic…</p>`;
+  if(s === 'refused') return `<p class="mem-rec" role="status">The mic was refused. Practise without it, or allow it in Settings.</p>`;
+  if(s === 'off') return `<p class="mem-rec" role="status">This phone can’t record here. Practise without it.</p>`;
+  return '';
+}
+// Your take, then the model in the voice of the language you rendered into.
+function memPlayMine(){
+  if(!MEMREC.url) return;
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  if(MEMREC.audio){ try{ MEMREC.audio.pause(); }catch(e){} }
+  audioMode('playback');
+  const a = MEMREC.audio = new Audio(MEMREC.url);
+  a.play().catch(() => showToast('Couldn’t play your take on this phone.'));
+}
+function memPlayModel(){
+  const L = MEM.line; if(!L || !('speechSynthesis' in window)) return;
+  if(MEMREC.audio){ try{ MEMREC.audio.pause(); }catch(e){} }
+  speechSynthesis.cancel();
+  const into = L.dir === 'en-es' ? 'es' : 'en', u = new SpeechSynthesisUtterance(memModel(L)), v = memVoice(into);
+  if(v){ try{ u.voice = v; }catch(e){} u.lang = vcLang(v); } else u.lang = into === 'es' ? 'es-US' : 'en-US';
+  u.rate = 0.92;
+  speechSynthesis.speak(u);
+}
 
 function memStart(){
   if(!MEM.lines){ memLoad().then(() => renderContent(), () => renderContent()); return; }
@@ -22216,6 +22328,7 @@ function memStart(){
 function memPlay(L){
   if(!L){ showToast('No lines to practise in that direction.'); return; }
   MEM.line = L; MEM.missed = {}; MEM.flagOpen = false; MEM.run++;
+  memRecDrop();
   clearTimeout(memTimer);
   if(!('speechSynthesis' in window)){ MEM.stage = 'read'; renderContent(); return; }
   speechSynthesis.cancel();
@@ -22241,6 +22354,7 @@ function memTurn(){
   MEM.stage = 'turn';
   drTask('processing', { key: 'memory', ms: 90000, perform: 'ponder', keep: true });
   if(activeCategory === 'memory') renderContent();
+  if(memProg().rec && activeCategory === 'memory') memRecStart();
 }
 
 function memReveal(){
@@ -22248,6 +22362,7 @@ function memReveal(){
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
   MEM.stage = 'check';
   drTaskEnd('memory');
+  if(MEMREC.rec) memRecStop(); else if(MEMREC.state !== 'done') MEMREC.state = '';
   renderContent();
 }
 
@@ -22267,6 +22382,7 @@ function memNextLabel(){
 // your score: the marking is already yours).
 function memHearAgain(){
   if(!MEM.line || !('speechSynthesis' in window)) return;
+  if(MEMREC.audio){ try{ MEMREC.audio.pause(); }catch(e){} }
   speechSynthesis.cancel();
   const L = MEM.line, u = new SpeechSynthesisUtterance(memSrc(L)), v = memVoice(L.dir === 'en-es' ? 'en' : 'es');
   if(v){ try{ u.voice = v; }catch(e){} u.lang = vcLang(v); } else u.lang = L.dir === 'en-es' ? 'en-US' : 'es-US';
@@ -22366,9 +22482,12 @@ function renderMemTrainer(){
       <label class="mem-notes"><input type="checkbox" ${p.notes ? 'checked' : ''} onchange="memSetNotes(this.checked)">
         <span class="mem-switch" aria-hidden="true"></span>
         <span><b>Notes</b><small>${p.notes ? 'On: use your notepad. Spans with notes are kept apart.' : 'Off: memory only.'}</small></span></label>
+      <label class="mem-notes"><input type="checkbox" ${p.rec ? 'checked' : ''} onchange="memSetRec(this.checked)">
+        <span class="mem-switch" aria-hidden="true"></span>
+        <span><b>Record me</b><small>${p.rec ? 'On: the mic records your turn, so you can play it beside the model. Dropped after each line.' : 'Off: nothing is recorded.'}</small></span></label>
       <button type="button" class="mastery-go mem-go mem-start" ${go}>${ready ? 'Start' : MEM.err ? 'Try again' : 'Loading lines…'}</button>
       ${MEM.err ? `<p class="mem-small">Couldn’t load the lines. Check the connection, then tap <b>Try again</b>.</p>` : ''}
-      <p class="mem-small">Nothing is recorded. Near patients, use earbuds.</p>
+      <p class="mem-small">${p.rec ? 'Your take stays on this phone and is never sent.' : 'Nothing is recorded.'} Near patients, use earbuds.</p>
     </div>`;
     return html;
   }
@@ -22384,7 +22503,7 @@ function renderMemTrainer(){
       <p class="mem-hint">This phone can’t read aloud. Read it once, then tap Hide.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memTurn()">Hide, my turn</button></div>`;
   } else if(MEM.stage === 'turn'){
-    html += memRingHtml('turn') + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
+    html += memRingHtml('turn') + memRecLine() + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memReveal()">Show the rendering</button></div>`;
   } else {
     const flagged = MEM.flagged[L.id];
@@ -22393,6 +22512,8 @@ function renderMemTrainer(){
         `<button type="button" class="mem-chunk" data-i="${i}" aria-pressed="${MEM.missed[i] ? 'true' : 'false'}" onclick="memToggleChunk(${i})">
           <span class="mem-model">${escapeHtml(c[1])}</span><span class="mem-srcx" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(c[0])}</span></button>`).join('')}</div>
       ${L.note ? `<p class="mem-watch"><b>Watch</b> ${escapeHtml(L.note)}</p>` : ''}
+      ${MEMREC.url ? `<div class="mem-back"><span>Listen back</span><button type="button" class="btn btn-ghost" onclick="memPlayMine()">Mine</button><button type="button" class="btn btn-ghost" onclick="memPlayModel()">Model</button></div>`
+        : MEMREC.state === 'saving' ? `<p class="mem-rec" role="status">Saving your take…</p>` : MEMREC.state === 'empty' ? `<p class="mem-rec" role="status">Nothing was recorded that time.</p>` : ''}
       <div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memHearAgain()">Hear it again</button>
         <button type="button" class="mastery-go mem-go" id="memNext" onclick="memNext()">${memNextLabel()}</button></div>
       <div class="mem-foot"><button type="button" class="link-btn mem-flag-btn" onclick="memFlagOpen(${MEM.flagOpen ? 'false' : 'true'})" ${flagged ? 'disabled' : ''}>${flagged ? 'Flagged, thanks' : 'Flag this line'}</button>

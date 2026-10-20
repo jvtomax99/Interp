@@ -92,7 +92,7 @@ M2. **The trainer** (this PR; built as in the note's M2 section; flags go
    only, notes toggle, a **Flag this line** button (saves line id + what's
    wrong, read back before editing lines). Voices by name: Paulina (es-MX),
    Samantha (en-US). User Guide, a suite.
-M3. **Record yourself, play it back beside the model.** Record and play
+M3. **Record yourself, play it back beside the model** (built, PR on top of M2; Record me off by default; see the note's M3 section. Voice as loud after the mic on Jose's second run, 2026-10-20, without the fix; the fix stays as a guard). Record and play
    back work in the installed app (M0). The voice is quieter after the
    mic: first test `navigator.audioSession.type = 'playback'` after each
    recording (a button in the check); if it fails, play every line before
