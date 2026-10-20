@@ -61,6 +61,7 @@
  */
 
 import { allowTeam } from './_hub-access.js';
+import { callClaude, clipLine as clip, parseAnswer } from './_routine.js';
 
 // One model turn with a short answer; well inside the limit, but a slow
 // moment on the API should not cut an interpreter off mid-answer.
@@ -77,7 +78,6 @@ const MODEL = 'claude-opus-5-5';
 const EFFORT = 'low';
 
 const MAX_QUESTION = 500;
-const MAX_FIELD = 600;
 const MAX_ENTRIES = 30;
 const MAX_LESSONS = 8;
 const MAX_HISTORY = 4;
@@ -181,10 +181,6 @@ const ANSWER_SCHEMA = {
   required: ['fromHub', 'headline', 'sayLabel', 'say', 'details', 'sourceIds', 'lessonIds', 'topicIds', 'clarify', 'usedCorrection', 'actions', 'suggestTerm'],
   additionalProperties: false,
 };
-
-function clip(value, max = MAX_FIELD) {
-  return String(value == null ? '' : value).replace(/\s+/g, ' ').trim().slice(0, max);
-}
 
 // Entries arrive as small flat objects built by the app. Keep only short
 // string fields so nothing unexpected (or enormous) reaches the prompt.
@@ -394,77 +390,37 @@ export default async function handler(req, res) {
       (history.length ? `EARLIER IN THIS CONVERSATION (oldest first):\n${JSON.stringify(history)}\n\n` : '') +
       `QUESTION:\n${question}`;
 
-    const request = {
+    // The request, the retries without an option this deployment rejects
+    // (the fallback beta first, then the schema) and the refusal check are
+    // the shared helper's (_routine.js). The beta: if a safety check declines
+    // a medical question, the API retries it on another model inside the
+    // same call instead of failing it.
+    const result = await callClaude(apiKey, {
       model: MODEL,
-      max_tokens: 8000,
-      system: SYSTEM,
-      messages: [{ role: 'user', content: userContent }],
-    };
-
-    const post = (extra, withFallback) => fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        // If a safety check declines a medical question, the API retries it
-        // on another model inside the same call instead of failing it.
-        ...(withFallback ? { 'anthropic-beta': 'server-side-fallback-2026-07-01' } : {}),
-      },
-      body: JSON.stringify({ ...request, ...(withFallback ? { fallbacks: 'default' } : {}), ...extra }),
+      body: { max_tokens: 8000, system: SYSTEM, messages: [{ role: 'user', content: userContent }] },
+      output: { effort: EFFORT, format: { type: 'json_schema', schema: ANSWER_SCHEMA } },
+      beta: { header: 'server-side-fallback-2026-07-01', body: { fallbacks: 'default' } },
     });
-
-    // Same defensive shape as the other endpoints: prefer the fallback and a
-    // schema-constrained answer, but never fail a question because the API
-    // rejected one of those options.
-    let withFallback = true;
-    let usedSchema = true;
-    let extra = { output_config: { effort: EFFORT, format: { type: 'json_schema', schema: ANSWER_SCHEMA } } };
-    let upstream = await post(extra, withFallback);
-    for (let attempt = 0; attempt < 2 && upstream.status === 400; attempt++) {
-      const detail = await upstream.text();
-      if (withFallback && /fallback|anthropic-beta|beta/i.test(detail)) {
-        console.warn('Fallback option rejected, retrying without it:', detail);
-        withFallback = false;
-      } else if (usedSchema && /output_config|json_schema|\bformat\b|\beffort\b/i.test(detail)) {
-        console.warn('Structured outputs rejected, retrying without a schema:', detail);
-        usedSchema = false;
-        extra = {};
-      } else {
-        console.error('Anthropic API error:', upstream.status, detail);
-        return res.status(502).json({ error: 'upstream_error' });
-      }
-      upstream = await post(extra, withFallback);
-    }
-
-    if (!upstream.ok) {
-      console.error('Anthropic API error:', upstream.status, await upstream.text());
+    if (!result.ok) {
+      console.error('Anthropic API error:', result.status, result.detail);
       return res.status(502).json({ error: 'upstream_error' });
     }
-
-    const data = await upstream.json();
+    const data = result.data;
     if (data.usage) console.log('ask usage', JSON.stringify(data.usage));
 
     // A decline arrives as a normal 200 with stop_reason "refusal"; check it
     // before reading the answer.
-    if (data.stop_reason === 'refusal') {
+    if (result.stopReason === 'refusal') {
       return res.status(200).json({ refused: true });
     }
-    if (data.stop_reason === 'max_tokens') {
+    if (result.stopReason === 'max_tokens') {
       console.error('Ask answer truncated at max_tokens.');
     }
 
-    const raw = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim();
-
-    let parsed;
-    try {
-      parsed = JSON.parse(usedSchema ? raw : raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim());
-    } catch (err) {
-      console.error('Could not parse ask response:', raw.slice(0, 400));
+    // No tools here, so the answer is every text block joined, as before.
+    const parsed = parseAnswer(result, result.text);
+    if (!parsed) {
+      console.error('Could not parse ask response:', result.text.slice(0, 400));
       return res.status(502).json({ error: 'unreadable_answer' });
     }
 

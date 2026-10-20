@@ -190,13 +190,13 @@ come from this alone.
    `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
    claude-api skill first. Next: translate backup.
 2. **One Claude helper in `api/`.** `_routine.js` is the helper now
-   (`callClaude`, `parseAnswer`, `clip`; `callRoutine` built on it), with
-   Term lookup moved onto it and a no-browser suite (`api-helper.mjs`,
-   the API faked). Still on their own requests: `ask.js` next (needs a
-   headers option for its `server-side-fallback` beta and its two-step
-   retry), then `doctor-research.js` (throws `api_error`/`refused`/
-   `truncated`; keep those for its callers). One endpoint per PR; every
-   move adds its cases to `api-helper.mjs`.
+   (`callClaude` with its `beta` option, `parseAnswer`, `clip`,
+   `clipLine`; `callRoutine` built on it); Term lookup and Ask the Hub are
+   on it, each with its cases in `api-helper.mjs` (the API faked). Last
+   one: `doctor-research.js` (throws `api_error`/`refused`/`truncated`;
+   keep those for its callers; its request has `output_config.effort`
+   even on the retry without a schema, so the helper needs to keep
+   `effort` when only `format` is rejected, or the move changes that).
 3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
@@ -272,6 +272,13 @@ then read the log; it names the suite and the check.
   `--fs-title1`, `--fs-footnote`, index.html ~1215, ~1216, ~2005) and run
   on their px fallbacks; same sizes, so nothing shows. Rename them to
   `--fs-head`/`--fs-t1`/`--fs-foot` in the next PR that bumps the build.
+- 2026-10-20 One Claude helper, second move (this PR, on top of the
+  first): Ask the Hub on `callClaude`, which learned a `beta` option
+  (header + body; dropped first on a 400 naming it, then `output_config`,
+  one retry each, as Ask's own loop did) and `parseAnswer(result, text)`
+  for a caller without tools; `clipLine` (whitespace folded) is Ask's
+  clip. Same requests, same answers; 27 Ask cases added to
+  `api-helper.mjs` (91 checks).
 - 2026-10-20 One Claude helper, first move (this PR): `_routine.js` grew
   `callClaude` (one request, the retry without `output_config`, the
   web-search failure log, `answer` = the last text block under a schema),
