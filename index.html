@@ -2321,6 +2321,15 @@
   /* Colored accent bar tinted to whichever domain the card belongs to (set
      inline as --card-accent) — visible at rest so a card reads as "which
      domain" at a glance, and fills in fully on hover/focus. */
+  /* S4 (glossary taps): a term card off screen skips its layout and paint until it nears the screen, so
+     opening a domain lays out only what you see. The card already clips (overflow:hidden), so nothing
+     looks different. Its height off screen is a guess (172px) until it has been drawn once, so wherever a
+     card above the screen could change height under you, #content.cv-all lays every card out as before:
+     any redraw in place while scrolled down, Back's scroll restore and a jump to one term (renderContent,
+     cvFresh, revealTerm). */
+  #content .card[data-term-id]{ content-visibility:auto; contain-intrinsic-size:auto 172px; }
+  #content.cv-all .card[data-term-id]{ content-visibility:visible; }
+  @media print{ #content .card[data-term-id]{ content-visibility:visible; } }
   .card::before{
     content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
     background:var(--card-accent, var(--accent));
@@ -8629,6 +8638,7 @@ let ethicsFilter = 'all';
 // How many term cards a single render may build. Raised by "show more", and
 // reset whenever the view changes so a big domain can't slow the next screen.
 let termRenderLimit = 120;
+let cvFresh = false;   // S4: the next renderContent draws a screen just opened (at its top), so off-screen cards may skip layout
 // Subgroup (and All-domains) sections opened in place this session; they all
 // start collapsed. justOpenedSection lets the one just opened fade in.
 const openSections = new Set();
@@ -13840,7 +13850,7 @@ function guideShowMe(key){
   guideCoachTimer = setTimeout(() => {
     if(c.term || c.scroll){
       const el = c.sel.flatMap(item => [...document.querySelectorAll(Array.isArray(item) ? item[0] : item)]).find(guideVisible);
-      if(el) el.scrollIntoView({ block:'center', behavior:'auto' });
+      if(el){ document.getElementById('content').classList.add('cv-all'); el.scrollIntoView({ block:'center', behavior:'auto' }); }
       guideCoachTimer = setTimeout(() => guideCoachOpen(c), 120);
     } else guideCoachOpen(c);
   }, reducedMotion() ? 80 : wait);
@@ -18840,6 +18850,10 @@ function renderContent(){
     renderContent.dockQueued = requestAnimationFrame(() => { renderContent.dockQueued = 0; smileyRider.sync(); });
   }
   const content = document.getElementById('content');
+  // S4: off-screen term cards may skip layout only where no card above the screen can change height under
+  // you: a screen just opened (it starts at the top) or a redraw at the very top. Anything else lays them out.
+  if(content) content.classList.toggle('cv-all', !(cvFresh || (window.scrollY || 0) < 2));
+  cvFresh = false;
   if(content){
     content.classList.toggle('is-home', activeCategory === 'home');
     const main = content.closest('.main');
@@ -19437,6 +19451,7 @@ function setCategory(id, isBack, returnState){
   // launch whether or not anyone opened them. Fetched on first visit instead.
   if(id === 'practice') ensureLoaded('quizHistory', loadQuizHistory);
   if(id === 'review')   ensureLoaded('termReviews', loadTermReviews);
+  cvFresh = movedForward;
   render();
   // Going somewhere new starts at the top of it. Back is the other half of
   // this pair and deliberately does NOT come through here: it restores the
@@ -19487,6 +19502,8 @@ function revealTerm(catId, termId){
     card = find();
   }
   if(!card) return;
+  // every card above it at its real height, so the scroll lands on it (S4)
+  document.getElementById('content').classList.add('cv-all');
   requestAnimationFrame(() => {
     card.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
     card.classList.add('ask-flash');
@@ -19926,7 +19943,9 @@ function navigateBack(){
     const prev = navStack.pop();
     setCategory(prev.id, true, prev);
     // Return people to where they were reading, not to the top of a list
-    // they'd already scrolled halfway down.
+    // they'd already scrolled halfway down. Every card above that line at its
+    // real height first, or the restore lands on a guess (S4).
+    if(prev.scroll) document.getElementById('content').classList.add('cv-all');
     window.scrollTo({ top: prev.scroll || 0, behavior: 'instant' });
     return true;
   }
