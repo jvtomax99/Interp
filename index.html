@@ -7493,7 +7493,11 @@ body.pv-open{ overflow:hidden; }
     <h3 id="providerModalTitle">Add provider</h3>
     <div class="field"><label>Name</label><input id="fPName" type="text" placeholder="e.g. Dr. Angela Waintrub"></div>
     <div class="field"><label>Specialty / role (optional)</label><input id="fPRole" type="text" placeholder="e.g. Pediatric Oncology"></div>
-    <div class="field"><label>Facility / department (optional)</label><input id="fPFacility" type="text" placeholder="e.g. HUMC — Joseph M. Sanzari Children's Hospital"></div>
+    <div class="field">
+      <label id="fPPlaceLab">Where</label>
+      <button type="button" class="place-field" id="fPPlace" aria-labelledby="fPPlaceLab fPPlace" onclick="openPlacePicker('pp')"></button>
+    </div>
+    <div class="field"><label for="fPUnit">Department or unit (optional)</label><input id="fPUnit" type="text" placeholder="e.g. Infusion, 2nd floor"></div>
     <div class="field"><label>Phone (optional)</label><input id="fPPhone" type="text" placeholder="e.g. (551) 555-0123"></div>
     <div class="field"><label>Notes (optional)</label><textarea id="fPNotes" placeholder="Scheduling notes, best way to reach, languages, etc."></textarea></div>
     <div class="field">
@@ -12460,7 +12464,7 @@ function collectSearchMatches(q){
   });
 
   PROVIDERS.forEach(p=>{
-    if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.notes)){
+    if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.unit) || hit(p.notes)){
       out.push({ group:'Provider Pictures', icon:ICON_PERSON, color:'#6F97AC',
         title:p.name, sub:[p.role, p.facility].filter(Boolean).join(' \u00b7 '),
         target:'providers', rank: starts(p.name) ? 0 : 1 });
@@ -13448,9 +13452,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'providers',   tone:'gd-n1', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
   { id:'directory',   tone:'gd-n2', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor list: terms, traps and tips at a glance, two to a row' },
   { id:'teamtips',    tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'Team tips: everyone can add their own tip on a doctor’s page' },
-  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley reacts in your quiz: a bounce when you\'re right, a small wince when you\'re wrong, a cheer for your streak' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13581,7 +13585,7 @@ const GUIDE_STEPS = {
     `Write your tip and tap ${GUIDE_UI.pill('Add tip')}. On your own tips, ${GUIDE_UI.pill('Edit')} and ${GUIDE_UI.pill('Delete')}.`],
     note: 'Everyone on the team sees every tip, with who wrote it and when.' }),
   providers: () => ({ steps: [`Open ${GUIDE_UI.pill('Provider Pictures')} from Home or under ${GUIDE_UI.pill('More')}.`,
-    'Search by name, specialty or facility. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with.`],
+    'Search by name, specialty, place or unit. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with; tap ${GUIDE_UI.pill('Where')} to pick their place from the shared list.`],
     note: 'Provider Pictures helps you put a face to a name. Use Doctor Prep for research, or the Doctor Directory for saved research and team notes.' }),
 };
 // Which "Show me" each answer offers (keys of GUIDE_COACH).
@@ -17317,13 +17321,14 @@ const GUIDE_TOPICS = [
     <p>A doctor’s old single note shows as the first tip. Anyone can edit or delete that one, as before. Notes are no longer on the doctor’s edit sheet; tips are where they live now.</p>
     <p>Tips are shared with the whole team. Never put patient details in one.</p>` },
 
-  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory floor suite', q:'How do I set where a doctor works?', a:`
-    <p>On the doctor’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room goes in the box under it.</p>
+  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory provider pictures floor suite unit', q:'How do I set where a doctor or provider works?', a:`
+    <p>On the doctor’s or the provider’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room (for a provider, the department or unit) goes in the box under it.</p>
     <p>Each place has a picture, from the same set as the Home pins. Tap the picture beside a place’s name in the Doctor Directory to change it. The places and pictures are shared: what you add or change, the whole team sees, in Provider Pictures too.</p>` },
 
-  { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital', q:'What is Provider Pictures?', a:`
+  { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital where place unit department', q:'What is Provider Pictures?', a:`
     <p><b>Provider Pictures</b> helps you put a face to a name. Open it from Home or under <b>More</b>.</p>
-    <p>Search by name, specialty or facility. Tap a photo to see it full screen. To add someone your team works with, tap <b>+ Add provider</b>.</p>
+    <p>Search by name, specialty, place or unit. Tap a photo to see it full screen. To add someone your team works with, tap <b>+ Add provider</b>.</p>
+    <p>Where they work is picked from the same list of places as the doctors (tap <b>Where</b>, then the place, or <b>Add a place</b>), so a hospital's doctors and providers sit under the same heading with the same icon. <b>Department or unit</b> is a line of your own, like "Infusion, 2nd floor".</p>
     <p>Use <b>Doctor Prep</b> to research a doctor. Use <b>Doctor Directory</b> for the research and notes your team has already saved.</p>` },
 
   { id:'falsefriends', section:'prep', k:'false friends cognates traps embarazada constipado misleading similar words drill', q:'What are False Friends?', a:`
@@ -17925,7 +17930,7 @@ function render(){
   let showTopbar = true;
   if(activeCategory === 'providers'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
-    searchPlaceholder = 'Search provider photos, specialties, facilities…';
+    searchPlaceholder = 'Search providers, specialties, places…';
   } else if(activeCategory === 'doctor-directory'){
     addBtnHtml = '';   // the navy "+ Add" sits by the title (renderDoctorDirectory)
     searchPlaceholder = 'Search doctors, specialties, locations…';
@@ -21827,8 +21832,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.1311';
-const BUILD_TIME = '2026-10-20 13:11 UTC';
+const BUILD_ID = 'b1020.1319';
+const BUILD_TIME = '2026-10-20 13:19 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -23740,6 +23745,7 @@ function renderProviders(q){
       foldText(p.name).includes(q) ||
       foldText(p.role).includes(q) ||
       foldText(p.facility).includes(q) ||
+      foldText(p.unit).includes(q) ||
       foldText(p.notes).includes(q)
     );
   }
@@ -23785,8 +23791,8 @@ function renderProviders(q){
             ${p.role ? `<span class="tag provider-role-tag">${escapeHtml(p.role)}</span>` : ''}
           </div>
         </div>
-        ${rawLocationNote(p.facility, locationGroupName(p, p.facility))
-          ? `<p class="provider-facility">${escapeHtml(rawLocationNote(p.facility, locationGroupName(p, p.facility)))}</p>` : ''}
+        ${rawLocationNote(p.facility, locationGroupName(p, p.facility)) || (p.unit || '').trim()
+          ? `<p class="provider-facility">${escapeHtml([rawLocationNote(p.facility, locationGroupName(p, p.facility)), (p.unit || '').trim()].filter(Boolean).join(' · '))}</p>` : ''}
         ${p.phone ? `<a class="provider-phone" href="tel:${escapeAttr(phoneDigits)}">${ICON_PHONE}${escapeHtml(p.phone)}</a>` : ''}
         ${p.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(p.notes)}</p>` : ''}
         ${p.addedBy ? `<div class="meta">
@@ -26636,7 +26642,9 @@ function _openAddProviderModal(){
   document.getElementById('providerModalTitle').textContent = 'Add provider';
   document.getElementById('fPName').value = '';
   document.getElementById('fPRole').value = '';
-  document.getElementById('fPFacility').value = '';
+  ppPlace = '';
+  renderPPPlaceField();
+  document.getElementById('fPUnit').value = '';
   document.getElementById('fPPhone').value = '';
   document.getElementById('fPNotes').value = '';
   document.getElementById('fPPhoto').value = '';
@@ -26657,7 +26665,10 @@ function _openEditProviderModal(id){
   document.getElementById('providerModalTitle').textContent = 'Edit provider';
   document.getElementById('fPName').value = p.name || '';
   document.getElementById('fPRole').value = p.role || '';
-  document.getElementById('fPFacility').value = p.facility || '';
+  const g = locationGroupName(p, p.facility);
+  ppPlace = g === NO_LOCATION_LABEL ? '' : g;
+  renderPPPlaceField();
+  document.getElementById('fPUnit').value = p.unit || '';
   document.getElementById('fPPhone').value = p.phone || '';
   document.getElementById('fPNotes').value = p.notes || '';
   document.getElementById('fPPhoto').value = '';
@@ -26722,14 +26733,18 @@ async function saveProvider(){
   const name = document.getElementById('fPName').value.trim();
   if(!name){ showToast('Provider name is required.'); return; }
   const role = document.getElementById('fPRole').value.trim();
-  const facility = document.getElementById('fPFacility').value.trim();
+  const unit = document.getElementById('fPUnit').value.trim();
   const phone = document.getElementById('fPPhone').value.trim();
   const notes = document.getElementById('fPNotes').value.trim();
   const editor = whoAmI();
   const existing = editingProviderId ? PROVIDERS.find(p=>p.id===editingProviderId) : null;
+  // As for doctors: the wording on file stays while the place is unchanged;
+  // a moved or new provider's wording is the place itself.
+  const facility = (existing && ppPlace === locationGroupName(existing, existing.facility))
+    ? (existing.facility || '') : (ppPlace && ppPlace !== HMH_NETWORK_LABEL ? ppPlace : '');
 
   const record = {
-    name, role, facility, phone, notes,
+    name, role, facility, unit, locationGroup: ppPlace, phone, notes,
     photo: pendingPhotoDataUrl || null,
     photoPath: pendingPhotoPath || null,
     addedBy: editor || (existing && existing.addedBy) || '',
@@ -26792,8 +26807,14 @@ let editingDoctorDirId = null;
 let ddPlace = '';
 let placeAdding = null;          // { name, region } while the add form is open
 
-function renderDDPlaceField(){
-  const btn = document.getElementById('fDDPlace');
+// The picker serves two sheets (R5, 2026-10-20): the doctor's (ddPlace,
+// fDDPlace) and the provider's (ppPlace, fPPlace). placePickFor says which.
+let ppPlace = '', placePickFor = 'dd';
+function placePicked(){ return placePickFor === 'pp' ? ppPlace : ddPlace; }
+function renderPPPlaceField(){ renderPlaceField('fPPlace', ppPlace); }
+function renderDDPlaceField(){ renderPlaceField('fDDPlace', ddPlace); }
+function renderPlaceField(id, ddPlace){
+  const btn = document.getElementById(id);
   if(!btn) return;
   if(!ddPlace){
     btn.innerHTML = `<span class="place-field-icon is-empty">${groupIconHtml('medifind')}</span><span class="place-field-text"><b>Choose a place</b><small>Hospital, center or office</small></span><span class="place-field-chev" aria-hidden="true">›</span>`;
@@ -26803,7 +26824,8 @@ function renderDDPlaceField(){
   btn.innerHTML = `<span class="place-field-icon">${groupIconHtml(groupIconKeyFor(ddPlace))}</span><span class="place-field-text"><b>${escapeHtml(ddPlace === HMH_NETWORK_LABEL ? 'Hackensack Meridian Health' : ddPlace)}</b><small>${ddPlace === HMH_NETWORK_LABEL ? 'No specific site' : r ? escapeHtml(regionName(r)) + ' region' : 'No region'}</small></span><span class="place-field-chev" aria-hidden="true">›</span>`;
 }
 
-function openPlacePicker(){
+function openPlacePicker(target){
+  placePickFor = target === 'pp' ? 'pp' : 'dd';
   placeAdding = null;
   const q = document.getElementById('placeSearch');
   if(q) q.value = '';
@@ -26816,18 +26838,21 @@ function closePlacePicker(){
   placeAdding = null;
 }
 function pickPlace(encodedName){
-  ddPlace = decodeURIComponent(encodedName);
+  const name = decodeURIComponent(encodedName);
+  if(placePickFor === 'pp'){ ppPlace = name; closePlacePicker(); renderPPPlaceField(); return; }
+  ddPlace = name;
   closePlacePicker();
   renderDDPlaceField();
 }
 
 function placeCount(name){
-  return DOCTOR_DIRECTORY.filter(d => locationGroupName(d, d.hospitalLocation) === name).length;
+  const d = DOCTOR_DIRECTORY.filter(d => locationGroupName(d, d.hospitalLocation) === name).length;
+  const v = (PROVIDERS || []).filter(p => locationGroupName(p, p.facility) === name).length;
+  return [d ? `${d} doctor${d === 1 ? '' : 's'}` : '', v ? `${v} provider${v === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
 }
 function placeRowHtml(p){
-  const on = p.name === ddPlace;
-  const n = placeCount(p.name);
-  const sub = p.sub || (n ? `${n} doctor${n === 1 ? '' : 's'}` : '');
+  const on = p.name === placePicked();
+  const sub = p.sub || placeCount(p.name);
   return `<button type="button" class="place-row${on ? ' is-on' : ''}" aria-pressed="${on}" onclick="pickPlace('${encGroup(p.name)}')">
       <span class="place-row-icon">${groupIconHtml(groupIconKeyFor(p.name))}</span>
       <span class="place-row-text"><b>${escapeHtml(p.label || p.name)}</b>${sub ? `<small>${escapeHtml(sub)}</small>` : ''}</span>
@@ -27782,8 +27807,8 @@ function askCorpus(){
     { id: 'dr:' + d.id, type: 'Doctor Directory', name: d.name, specialty: d.specialty, location: d.hospitalLocation, locationDetails: d.locationDetails, notes: doctorTipsText(d) },
     `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, doctorTipsText(d)], { cat: 'doctor-directory' }));
   (PROVIDERS || []).forEach(p => add(
-    { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: p.facility, notes: p.notes },
-    `Provider Pictures · ${p.name}`, [p.name], [p.role, p.facility, p.notes], { cat: 'providers' }));
+    { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: [p.facility, p.unit].filter(Boolean).join(' · '), notes: p.notes },
+    `Provider Pictures · ${p.name}`, [p.name], [p.role, p.facility, p.unit, p.notes], { cat: 'providers' }));
   (typeof ETHICS_CONTENT !== 'undefined' ? ETHICS_CONTENT : []).forEach(e => add(
     { id: 'eth:' + e.id, type: 'Code of Ethics', title: e.title, summary: stripTags(e.summary), inPractice: stripTags(e.practice), source: e.org },
     `Code of Ethics · ${e.title}`, [e.title], [stripTags(e.summary), stripTags(e.practice), e.tag], { cat: 'ethics' }));
