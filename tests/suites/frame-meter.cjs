@@ -53,7 +53,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     ok(r.build === build && [60, 30].includes(r.hz) && r.worst >= 300 && r.dropped >= 20 && r.stalls >= 1 && r.ratio > 0, 'the run: this build, a real refresh rate, the stall as the worst frame and as dropped frames', r);
     ok(res.rows.includes('Home') && res.rows.includes('Translate') && res.rows.includes('While scrolling') && r.scroll && r.scroll.ms > 0, 'split by screen (Home, Translate) and while scrolling', res.rows);
     // The stall is listed with when it came and what said its name in it.
-    const st = (r.stallList || []).find(x => x.ms >= 300) || {};
+    // the injected stall by its label: on a slow machine Home's own start (meter, pins) can stall 300+ ms first
+    const st = (r.stallList || []).find(x => x.ms >= 300 && /test job/.test(x.what)) || {};
     ok(st.screen === 'Home' && /test job/.test(st.what) && st.at >= 1000 && st.at < 4000 && st.up > st.at && st.scroll > 3e5 && r.stallList.length <= 6,
       'the longest stalls are listed: time into the run, screen, no scroll yet, and the job that ran (test job)', r.stallList);
     ok(res.stalls.some(t => /test job/.test(t)), 'the results sheet shows the stall list', res.stalls);
