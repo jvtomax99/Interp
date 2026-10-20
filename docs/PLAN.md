@@ -237,6 +237,12 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 The three type tokens that didn't exist (this PR, on top of
+  S5): `--fs-headline`, `--fs-title1`, `--fs-footnote` (the frame meter's
+  heading and big number, 3D Body's waiting line) renamed to the real
+  `--fs-head`, `--fs-t1`, `--fs-foot`; same sizes, the px fallbacks gone.
+  Proof: computed font-size identical before/after on each. Found in the
+  stale-numbers pass (#90).
 - 2026-10-20 S5 springs (this PR; Jose's pick: S5, keep F2's buttons).
   `--spring0`, Apple's bounce-0 spring as one `linear()` shape (`--ease`
   where unsupported), on the plain taps: tab bar icon (.368s) and lens

@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v262-s5-springs';
+const CACHE_VERSION = 'interpreter-hub-v263-fs-tokens';
 const PRECACHE = [
   './',
   './index.html',
