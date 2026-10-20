@@ -130,3 +130,30 @@ trainer opens. Read them before editing `memory/lines.json`.
 
 `memory/lines.json` is precached by `sw.js`. Suite:
 `tests/suites/memory-trainer.cjs`.
+
+## M3: record yourself
+
+**Record me** on the start card (`p.rec` in `ih_memory`, off by default,
+Jose 2026-10-19). On: the mic opens only at Your turn (`memRecStart`, after
+the line has played, so the voice is never played with the mic open) and
+closes at Show the rendering (`memRecStop`); 60 s cap; "Recording 0:07" on
+screen. The check stage then has **Listen back: Mine** (your take,
+`MEMREC.url`) and **Model** (the model rendering read by the voice of the
+language you rendered into). The take is in memory only and dropped
+(`memRecDrop`) when the next line starts or you leave; never sent. Mic
+refused or no recorder: it says so and the round goes on.
+
+The quieter voice after the mic: `audioMode()` sets
+`navigator.audioSession.type` to `play-and-record` before the mic and back
+to `playback` after it (Safari 16.4+; nothing elsewhere). Unproven on
+Jose's phone: the Voice and mic check has **Try the volume fix** (step 3),
+which sets playback and plays Spanish; the report has "Volume fix" and a
+yes/no line. If it doesn't help, the fallback in `docs/PLAN.md` stands
+(earbuds).
+
+**Second installed-app run, 2026-10-20** (build b1020.0830, before M3, so
+without the fix): Jose: "it sounds fine", the voice as loud after the mic
+this time. So the quiet voice of the first run doesn't happen every time;
+the fix stays as a guard (it only sets the audio session back to playback).
+Same voices, now each listed twice (Paulina and Samantha both there). Speech
+to text still not tried in the installed app: M5 stays on hold.
