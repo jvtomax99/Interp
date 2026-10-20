@@ -181,10 +181,6 @@ Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
 come from this alone.
 
-1. **AI models.** `claude-sonnet-5` (translate backup) →
-   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
-   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
-   claude-api skill first. Next: translate backup.
 2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
@@ -248,6 +244,12 @@ then read the log; it names the suite and the check.
   locally: Practice 5 loads the reviews lazily, and the check read the
   state after a fixed 2.2 s. It now waits for the review screen (up to
   10 s) and prints the state it found when it fails.
+- 2026-10-20 AI backup models (this PR): Translate's backup
+  `claude-sonnet-5` -> `claude-sonnet-5-5` (effort set explicitly, medium);
+  the term check's backup `claude-opus-5` -> `claude-opus-5-5` (effort
+  low, set explicitly: its default is medium and thinking can't be turned
+  off). The backups only answer when Haiku 5.5 declines or fails, so
+  nothing to see in the app; Jose can't test it on purpose.
 - 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
   sky violet instead of night navy, no stars, a warm glow top left. Lower
   colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim
