@@ -72,8 +72,20 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   take a 4th item, a brow pose from that beat); `pet` opens with a
   startled take before the giggle; `worry` (the connection drops) and
   `surprise` are new; `composed` goes worried, then caring;
-  `answerGeneral` raises one brow. Still to come, and needing Jose: squash
-  and stretch, which he had removed before (see `docs/PLAN.md`).
+  `answerGeneral` raises one brow.
+- **Squash and stretch (E3, 2026-10-19)**: Jose picked B (4%) from a
+  preview of 0 / 4% / 9% (his Home greeting's old squish had been removed
+  before, so it was shown first). Only `cheer` and `greet` ask for it
+  (`squash: DR_SQUASH` in their Lively builds); `drSquashKeys` works it out
+  from their head keys: a spring up (a rise of more than .9%) stretches him
+  on the way, the top is his drawn shape, a low point (crouch, landing)
+  squashes him. Width is 1/sqrt(height), so his volume stays the same, about
+  his shoulders (`50% 90%`). It is a Web Animation on his picture
+  (`svg.ds-art`), not on what holds him, so it never fights the lean; none
+  where the picture is itself what leans (Ask's face), none joining part
+  way, none in Focused or Still. Interrupted, he eases back in 140 ms
+  (`squashStop`). His spring is only 1-2% of his height, so even 4% of
+  squash is the larger movement: keep it at 4%. `tests/suites/smiley-squash.cjs`.
 - **Four drawn faces (E2, 2026-10-19)**: `surprised` (eyes wide, an "O"
   mouth), `sad` (heavy lids, corners down), `worried` (eyes aside, a tight
   wavy mouth), `doubt` (his left eye squinted, a side smirk). Jose made them
@@ -90,9 +102,9 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   anticipation, one main gesture and a recovery. Each builds its own Focused
   version (smaller, no laughter, no effects); Still uses its `still` frame.
   `drPerfSeed(n)` makes the variant repeatable for tests. Movement is only a
-  tilt and a lift of what holds him: never a sideways slide, never a squash or
-  stretch (the Home greeting's old squish was removed; he now grows in whole
-  and greets with `greet` on the engine). The one wink is his left eye, so a
+  tilt and a lift of what holds him: never a sideways slide; the only squash
+  and stretch is E3's, on his picture (above). The Home greeting's old squish
+  stays removed: he grows in whole and greets with `greet` on the engine. The one wink is his left eye, so a
   wink always tips toward it. Effects are short and land on the moment
   (`DR_FX_LIFE`: burst, glint, question).
 - **His personality comes from task states, not timers.** `drTask(kind)`
