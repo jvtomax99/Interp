@@ -158,6 +158,19 @@ distinct on screen.
    shots, the end card wider); Title Case on everything drawn (captions, hook,
    pill, drill words, the card back, the end lines). 40.5 s now (10 features);
    music re-cut to match (v11 0-37 s into its ending).
+   Third round (2026-10-20): Jose found the opener too fast and wanted
+   Dr. Smiley in it, in 3D, and the 3D Body coming apart like his
+   screenshot. Seven opener ideas were previewed (`tools/opener-lab.html`,
+   `tools/clip.cjs`); he picked "carousel": 5 s, Dr. Smiley centre stage,
+   the five photos circling behind him one at a time. Dr. Smiley is now a
+   rounded 3D figure everywhere (`createSmiley({ round: true })`, his outline
+   inflated into a smooth body). The 3D Body shot (3.5 s) plays 14 frames of
+   the real viewer coming apart (Explode 0-65%, `tools/capture-explode.cjs`)
+   before the dive to the heart. After the After Effects reference he chose
+   "Smiley links the shots": between features he hops phone to phone, the
+   camera riding with him, with motion blur (7 moments in a 0.35-frame
+   shutter, only on hops and fly-throughs). 44.5 s; music is v11's whole
+   track. A full draft renders in about 13 min.
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.
