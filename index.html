@@ -3755,6 +3755,18 @@
   .mem-notes > span:last-child{ display:flex; flex-direction:column; gap:1px; }
   .mem-notes b{ font-size:15px; font-weight:650; color:var(--ink); }
   .mem-notes small{ font-size:13px; color:var(--ink-soft); }
+  .mem-span{ display:flex; flex-direction:column; padding:13px; border-radius:var(--r-md); background:color-mix(in srgb, var(--dom) 5%, var(--bg-hi)); }
+  .mem-span-cap{ margin:3px 0 0; font-size:13px; color:var(--ink-soft); }
+  .mem-span-cap b{ color:var(--ink); font-weight:650; font-variant-numeric:tabular-nums; }
+  .mem-span-svg{ color:var(--dom); }
+  .mem-span .trend-dot{ fill:url(#memSpanBall); }
+  .mem-span .trend-dot.is-notes{ fill:var(--paper); stroke:color-mix(in srgb, var(--dom) 60%, var(--accent-2)); stroke-width:2; }
+  .mem-span .trend-dot.is-picked{ transform:scale(1.4); }
+  .mem-notes-line{ stroke:color-mix(in srgb, var(--dom) 60%, var(--accent-2)); stroke-dasharray:none; stroke-width:2; opacity:.75; filter:none; }
+  .mem-span-key{ display:flex; gap:13px; margin-top:6px; font-size:12px; color:var(--ink-soft); }
+  .mem-span-key span{ display:flex; align-items:center; gap:6px; }
+  .mem-span-key i{ width:14px; height:3px; border-radius:2px; background:var(--dom); }
+  .mem-span-key i.is-notes{ background:color-mix(in srgb, var(--dom) 60%, var(--accent-2)); opacity:.75; }
   .mem-start{ align-self:stretch; }
   .mem-rec{ margin:0; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:550; color:var(--ink-soft); text-align:center; }
   .mem-rec.is-on{ color:var(--danger); font-variant-numeric:tabular-nums; }
@@ -17367,6 +17379,7 @@ const GUIDE_TOPICS = [
     </ol>
     <p>With <b>Record me</b> on, the mic records only during your turn. After the rendering, tap <b>Mine</b> to hear yourself and <b>Model</b> to hear the model rendering read aloud. Your take is dropped when the next line starts and is never sent anywhere.</p>
     <p>Three clean lines in a row and the next one is a few words longer. Two misses in a row and it gets shorter. Your <b>span</b> is the longest line you've held clean; lines done with notes count apart from memory only.</p>
+    <p>Under <b>Start</b>, <b>Your span, by week</b> draws your longest clean line each week for the last 8 weeks. Tap a point to read that week. With notes shows as a second, lighter line.</p>
     <p>If a line is wrong or sounds odd, tap <b>Flag this line</b> after the rendering and say why. Flags are read before the lines are changed.</p>
     <p>Your progress stays on this phone. Record me is off unless you turn it on. Near patients, use earbuds.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
@@ -18743,8 +18756,9 @@ function renderContent(){
     const html = renderMemTrainer();
     if(sameScreen && html === MEM.html && content.querySelector('.mem-card')) return;
     MEM.html = html;
+    const motionPrev = practiceMotionKeys(content);
     content.innerHTML = html;
-    memAfterPaint(content);
+    memAfterPaint(content, motionPrev);
     return;
   }
 
@@ -21674,8 +21688,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0954';
-const BUILD_TIME = '2026-10-20 09:54 UTC';
+const BUILD_ID = 'b1020.1002';
+const BUILD_TIME = '2026-10-20 10:02 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -22573,6 +22587,7 @@ function renderMemTrainer(){
       <button type="button" class="mastery-go mem-go mem-start" ${go}>${ready ? 'Start' : MEM.err ? 'Try again' : 'Loading lines…'}</button>
       ${MEM.err ? `<p class="mem-small">Couldn’t load the lines. Check the connection, then tap <b>Try again</b>.</p>` : ''}
       <p class="mem-small">${p.rec ? 'Your take stays on this phone and is never sent.' : 'Nothing is recorded.'} Near patients, use earbuds.</p>
+      ${renderSpanChart()}
     </div>`;
     return html;
   }
@@ -22614,7 +22629,15 @@ function renderMemTrainer(){
 
 // After a paint: the ring picks up where the voice is (a repaint for some
 // other reason mustn't restart it), then runs to full in the time left.
-function memAfterPaint(root){
+function memAfterPaint(root, prev){
+  const now = performance.now(), still = reducedMotion();
+  root.querySelectorAll('.mem-card [data-motion]').forEach(el => {
+    const id = el.dataset.motion;
+    if((prev || {})[id] !== el.dataset.sig || MOTION_BORN[id] == null) MOTION_BORN[id] = now;
+    const age = now - MOTION_BORN[id];
+    if(still || age > MOTION_SPAN) el.classList.add('is-still');
+    else if(age > 0) el.style.setProperty('--motion-skip', `-${Math.round(age)}ms`);
+  });
   const arc = MEM.stage === 'listen' && root.querySelector('.mem-ring-arc');
   if(!arc) return;
   const left = Math.max(0, MEM.ringMs - (performance.now() - MEM.ringAt)), done = 1 - left / MEM.ringMs;
@@ -22623,6 +22646,93 @@ function memAfterPaint(root){
   arc.getBoundingClientRect();
   arc.style.transition = `stroke-dashoffset ${Math.round(left)}ms linear`;
   arc.style.strokeDashoffset = '0';
+}
+
+/* Your span over weeks (M4): the last 8 weeks, Monday to Sunday, one bead
+   per week at the longest line you held clean; memory only is the main
+   line, with notes a lighter one. Weeks with nothing clean are left out.
+   Drawn like Practice's score line (renderScoreTrend), in the trainer's
+   colour; its motion plays once per change (data-motion="span"). */
+const SPAN_W = 300, SPAN_H = 96, SPAN_TOP = 9, SPAN_BOT = 87, SPAN_PAD = 9, SPAN_GUT = 30, SPAN_WEEKS = 8;
+let SPAN_POINTS = [];
+function memWeekStart(at){ const d = new Date(at); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return +d; }
+function memSpanWeeks(log, now){
+  const w0 = memWeekStart(now), WEEK = 7 * 864e5;
+  const weeks = [];
+  for(let i = SPAN_WEEKS - 1; i >= 0; i--){
+    // Seven days back from this Monday's midnight, rounded to the nearest
+    // midnight so a clock change doesn't shift a week.
+    const start = memWeekStart(w0 - i * WEEK + 432e5);
+    weeks.push({ start, mem: 0, notes: 0, lines: 0 });
+  }
+  (log || []).forEach(x => {
+    const wk = memWeekStart(x.at), W = weeks.find(w => w.start === wk);
+    if(!W) return;
+    W.lines++;
+    if(!x.miss){ const k = x.notes ? 'notes' : 'mem'; if(x.w > W[k]) W[k] = x.w; }
+  });
+  return weeks;
+}
+function renderSpanChart(){
+  const p = memProg(), weeks = memSpanWeeks(p.log, Date.now());
+  const lines = weeks.reduce((n, w) => n + w.lines, 0);
+  const hasNotes = weeks.some(w => w.notes);
+  const top = Math.max(20, Math.ceil(Math.max(...weeks.map(w => Math.max(w.mem, w.notes))) / 10) * 10);
+  const x = i => SPAN_PAD + i * (SPAN_W - SPAN_GUT - 2 * SPAN_PAD) / (SPAN_WEEKS - 1);
+  const y = v => SPAN_TOP + (1 - v / top) * (SPAN_BOT - SPAN_TOP);
+  const sig = weeks.map(w => w.mem + '.' + w.notes).join(',');
+  if(!weeks.some(w => w.mem || w.notes)){
+    SPAN_POINTS = [];
+    return `<div class="mem-span" data-motion="span" data-sig="none"><span class="dash-label">Your span, by week</span>
+      <p class="dash-empty">Hold a line clean and your span starts drawing here, one point a week.</p></div>`;
+  }
+  const series = k => weeks.map((w, i) => ({ i, v: w[k], at: w.start, k })).filter(q => q.v);
+  const mem = series('mem'), notes = series('notes');
+  SPAN_POINTS = mem.concat(notes);
+  const path = pts => pts.map((q, j) => `${j ? 'L' : 'M'}${x(q.i).toFixed(1)} ${y(q.v).toFixed(1)}`).join(' ');
+  const lastMem = mem[mem.length - 1];
+  const area = mem.length > 1 ? `${path(mem)} L${x(lastMem.i).toFixed(1)} ${SPAN_BOT} L${x(mem[0].i).toFixed(1)} ${SPAN_BOT} Z` : '';
+  const dot = (q, n, all) => `<circle class="trend-dot mem-dot${q.k === 'notes' ? ' is-notes' : ''}${q === all[all.length - 1] ? ' is-last' : ''}" cx="${x(q.i).toFixed(1)}" cy="${y(q.v).toFixed(1)}" r="${q === all[all.length - 1] ? 6.5 : 5}"
+      style="--d:${Math.round(180 + (q.i / (SPAN_WEEKS - 1)) * 900)}ms"></circle>`;
+  const hits = SPAN_POINTS.map((q, j) => `<circle class="trend-hit" cx="${x(q.i).toFixed(1)}" cy="${y(q.v).toFixed(1)}" r="15" onclick="memSpanPick(${j})"><title>${q.v} words · week of ${escapeHtml(trendDate(q.at))}</title></circle>`).join('');
+  const now = weeks[SPAN_WEEKS - 1], best = p.best.mem || 0;
+  const label = (v, t) => `<text class="trend-glabel" x="${SPAN_W}" y="${(y(v) + 3).toFixed(1)}" text-anchor="end">${t}</text>`;
+  return `<div class="mem-span" data-motion="span" data-sig="${sig}">
+    <span class="dash-label">Your span, by week</span>
+    <p class="mem-span-cap" id="memSpanCap">${now.mem ? `This week: <b>${now.mem}</b> words held clean` : 'Nothing held clean this week yet'}</p>
+    <svg class="trend-svg mem-span-svg" viewBox="0 0 ${SPAN_W} ${SPAN_H}" role="img" aria-label="Your longest clean line each week for the last ${SPAN_WEEKS} weeks${lastMem ? `, latest ${lastMem.v} words` : ''}">
+      <defs><linearGradient id="memSpanFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient>
+      <radialGradient id="memSpanBall" cx=".36" cy=".3" r=".75">
+        <stop offset="0" stop-color="#fff"/><stop offset=".38" stop-color="currentColor"/><stop offset="1" stop-color="#4A3D66"/></radialGradient></defs>
+      <line class="trend-grid" x1="0" x2="${SPAN_W - SPAN_GUT}" y1="${y(top).toFixed(1)}" y2="${y(top).toFixed(1)}"/>
+      <line class="trend-grid" x1="0" x2="${SPAN_W - SPAN_GUT}" y1="${y(top / 2).toFixed(1)}" y2="${y(top / 2).toFixed(1)}"/>
+      <line class="trend-base" x1="0" x2="${SPAN_W - SPAN_GUT}" y1="${SPAN_BOT}" y2="${SPAN_BOT}"/>
+      ${label(top, top + ' w')}${label(top / 2, (top / 2) + ' w')}
+      ${area ? `<path class="trend-area" d="${area}" fill="url(#memSpanFill)"/>` : ''}
+      ${mem.length > 1 ? `<path class="trend-line" d="${path(mem)}" pathLength="1"/>` : ''}
+      ${notes.length > 1 ? `<path class="trend-line mem-notes-line" d="${path(notes)}" pathLength="1"/>` : ''}
+      ${lastMem ? `<circle class="trend-ping" cx="${x(lastMem.i).toFixed(1)}" cy="${y(lastMem.v).toFixed(1)}" r="4"></circle>` : ''}
+      ${mem.map(q => dot(q, 0, mem)).join('')}${notes.map(q => dot(q, 0, notes)).join('')}${hits}
+    </svg>
+    <div class="trend-foot"><span><b>${best || 0}</b> best ever${hasNotes ? ', memory only' : ''}</span>${hasNotes ? `<span><b>${p.best.notes || 0}</b> best with notes</span>` : ''}<span><b>${lines}</b> line${lines === 1 ? '' : 's'} in ${SPAN_WEEKS} weeks</span></div>
+    ${hasNotes ? `<div class="mem-span-key"><span><i></i>Memory only</span><span><i class="is-notes"></i>With notes</span></div>` : ''}
+  </div>`;
+}
+// Tap a point to read its week; tap it again for this week.
+function memSpanPick(j){
+  const q = SPAN_POINTS[j], cap = document.getElementById('memSpanCap');
+  if(!q || !cap) return;
+  const dots = document.querySelectorAll('.mem-span .mem-dot');
+  const again = dots[j] && dots[j].classList.contains('is-picked');
+  dots.forEach(d => d.classList.remove('is-picked'));
+  if(again){
+    const now = memSpanWeeks(memProg().log, Date.now())[SPAN_WEEKS - 1];
+    cap.innerHTML = now.mem ? `This week: <b>${now.mem}</b> words held clean` : 'Nothing held clean this week yet';
+    return;
+  }
+  if(dots[j]) dots[j].classList.add('is-picked');
+  cap.innerHTML = `Week of ${escapeHtml(trendDate(q.at))}: <b>${q.v}</b> words${q.k === 'notes' ? ' with notes' : ''}`;
 }
 
 // The Practice screen's way in.

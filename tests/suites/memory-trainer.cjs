@@ -206,6 +206,47 @@ function standIns(){
     ok(page.__errors.length === 0, 'no page errors', page.__errors);
     await ctx.close(); }
 
+  console.log('== span chart (M4)');
+  { const { ctx, page } = await L.boot(b, { device: 'iphone', settle: 4000, init: standIns });
+    await page.route('**/memory/lines.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: LINES }));
+    await page.evaluate(() => openMemoryTrainer()); await wait(800);
+    const empty = await page.evaluate(() => ({ t: (document.querySelector('.mem-span .dash-empty') || {}).textContent, svg: !!document.querySelector('.mem-span svg') }));
+    ok(/starts drawing here/.test(empty.t || '') && !empty.svg, 'no clean lines yet: the chart says how it fills, no empty axes', empty);
+    // Six weeks of history: clean and missed, memory only and with notes; one week left empty.
+    await page.evaluate(() => {
+      const W = 7 * 864e5, at = (wk, h) => memWeekStart(Date.now()) - wk * W + 864e5 + h * 36e5, log = [];
+      [[7, 8], [6, 11], [5, 14], [3, 17], [1, 20], [0, 23]].forEach(([wk, w]) => { log.push({ at: at(wk, 1), id: 'x', w, n: 3, miss: 0, notes: false }); log.push({ at: at(wk, 2), id: 'y', w: w + 9, n: 3, miss: 1, notes: false }); });
+      log.push({ at: at(3, 3), id: 'z', w: 26, n: 4, miss: 0, notes: true }); log.push({ at: at(0, 3), id: 'z', w: 30, n: 4, miss: 0, notes: true });
+      log.push({ at: at(9, 1), id: 'old', w: 40, n: 4, miss: 0, notes: false });   // older than 8 weeks: not drawn
+      localStorage.setItem('ih_memory', JSON.stringify({ level: 23, log, best: { mem: 40, notes: 30 } }));
+      MEM.p = null; renderContent(); });
+    await wait(2600);
+    const ch = await page.evaluate(() => { const dots = [...document.querySelectorAll('.mem-span .mem-dot')], vb = document.querySelector('.mem-span svg').viewBox.baseVal;
+      return { mem: dots.filter(d => !d.classList.contains('is-notes')).map(d => +d.getAttribute('cx')), notes: dots.filter(d => d.classList.contains('is-notes')).length,
+        cap: document.getElementById('memSpanCap').textContent, lines: document.querySelectorAll('.mem-span .trend-line').length, key: !!document.querySelector('.mem-span-key'),
+        foot: document.querySelector('.mem-span .trend-foot').textContent.replace(/\s+/g, ' '), top: document.querySelector('.mem-span .trend-glabel').textContent,
+        still: document.querySelector('.mem-span').getAnimations({ subtree: true }).filter(a => a.playState === 'running').map(a => a.animationName || a.id), vbw: vb.width, w: Math.round(document.querySelector('.mem-span svg').getBoundingClientRect().width),
+        sideways: document.documentElement.scrollWidth - innerWidth }; });
+    ok(ch.mem.length === 6 && ch.mem.every((x, i, a) => !i || x > a[i - 1]) && ch.notes === 2, 'six weekly points, oldest left, the empty week and the 9-week-old line left out; two with notes', ch);
+    ok(ch.cap === 'This week: 23 words held clean' && ch.top === '30 w', 'caption: this week\'s span; the scale tops out at 30 words', ch);
+    ok(ch.lines === 2 && ch.key && /2 best with notes|30 best with notes/.test(ch.foot) && /14 lines in 8 weeks/.test(ch.foot) && /40 best ever, memory only/.test(ch.foot), 'a line each for memory and notes, a key, the foot counts', ch.foot);
+    ok(!ch.still.length && ch.sideways <= 0 && ch.w > 250, 'its motion is over within 2.6 s (nothing left running), fits the phone width', ch);
+    await page.evaluate(() => document.querySelector('.mem-span').scrollIntoView({ block: 'center' })); await page.screenshot({ path: O + 'span-chart.png' });
+    // Tap the oldest point, then again.
+    await page.evaluate(() => memSpanPick(0)); await wait(100);
+    const pick = await page.evaluate(() => ({ cap: document.getElementById('memSpanCap').textContent, picked: document.querySelectorAll('.mem-span .is-picked').length }));
+    ok(/^Week of .+: 8 words$/.test(pick.cap) && pick.picked === 1, 'tapping a point reads its week', pick);
+    await page.evaluate(() => memSpanPick(0)); await wait(100);
+    ok(await page.evaluate(() => document.getElementById('memSpanCap').textContent === 'This week: 23 words held clean' && !document.querySelector('.mem-span .is-picked')), 'tapping it again goes back to this week');
+    // A repaint for another reason doesn't replay the draw.
+    await page.evaluate(() => { MEM.html = ''; renderContent(); }); await wait(100);
+    ok(await page.evaluate(() => document.querySelector('.mem-span').classList.contains('is-still')), 'a repaint with the same weeks stays still');
+    // Hit targets: each point's tap circle is the one that takes the tap.
+    const hits = await page.evaluate(() => { document.querySelector('.mem-span svg').scrollIntoView({ block: 'center' }); return [...document.querySelectorAll('.mem-span .trend-hit')].map(c => { const r = c.getBoundingClientRect(), h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return h === c; }); });
+    ok(hits.length === 8 && hits.every(Boolean), 'every point takes its own tap', hits);
+    ok(page.__errors.length === 0, 'no page errors', page.__errors);
+    await ctx.close(); }
+
   console.log('== no speech on this browser');
   { const { ctx, page } = await L.boot(b, { device: 'iphone', settle: 4000, init: () => { delete window.speechSynthesis; delete Window.prototype.speechSynthesis; } });
     await page.route('**/memory/lines.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: LINES }));
