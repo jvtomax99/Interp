@@ -214,12 +214,6 @@ come from this alone.
 3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
-4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
-   old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
-   ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
-   gap" paragraph says there are no spacing or font-size variables, but the
-   Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
-   text, both files.
 5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
    `index.html`. `home-polish.css` still styles classes nothing makes
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
@@ -258,6 +252,17 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 Stale numbers in `CLAUDE.md` / `AGENTS.md` (this PR): file
+  map counts re-measured (`index.html` 31,214 lines, 1.8 MB; the city has
+  99 files; rules 213/33), a line under the table saying counts drift and
+  to re-measure; the "Known gap" paragraph rewritten from a measurement
+  (tokens exist, 65 font-size and 99 spacing uses against ~900 and 1,737
+  px values; the 6/9/13/17/26 scale covers 42% of px spacing); AGENTS.md's
+  "~21,000-line, 1.1 MB" and the Open item's 1.1 MB fixed. Found on the
+  way: three rules use token names that don't exist (`--fs-headline`,
+  `--fs-title1`, `--fs-footnote`, index.html ~1215, ~1216, ~2005) and run
+  on their px fallbacks; same sizes, so nothing shows. Rename them to
+  `--fs-head`/`--fs-t1`/`--fs-foot` in the next PR that bumps the build.
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys
