@@ -196,6 +196,16 @@ come from this alone.
    `index.html`. `home-polish.css` still styles classes nothing makes
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
    file, so fetch `main` right before.
+3. **Home styles in layers.** The greeting name is in one block now (its
+   PR); next the quote (12 rules, with its `cite`), then the name row (7).
+   Method that worked: list every rule for the element with its media
+   context (comments stripped first), work out the winner per breakpoint,
+   write one block at the lettering block's place, delete the rest, then
+   prove it: computed styles and boxes of everything under `#homeGreeting`
+   identical at 11 widths x short/long name x light/dark x penning
+   (`Math.random` pinned, the quote is random per session), and the
+   banner's pixels identical at phone and computer size. Jose signs off on
+   the look.
 4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
    old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
    ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
@@ -295,6 +305,13 @@ then read the log; it names the suite and the check.
   (Translate and the term check untouched). Term lookup uses it: same
   requests, same answers, its own `clip` and request code gone. New suite
   `tests/suites/api-helper.mjs` (64 checks, no browser).
+- 2026-10-20 Home styles in layers, the greeting name (this PR, on top
+  of the dead-CSS PR): 21 rules (13 for the name, 8 for `.is-long`) in
+  six places folded into one commented block with three breakpoints;
+  the dead layers (42/31/39/48/52 px, weight 600 then 500, the old
+  letter-spacing) gone. Proof: every computed property and box under
+  `#homeGreeting` identical before/after in 30 states, and 0 differing
+  pixels in the banner at phone and computer size, short and long name.
 - 2026-10-20 Dead CSS in `home-polish.css` (this PR): the 2026-10-14 method
   (a class is live if its name appears anywhere outside the stylesheet;
   names built in code checked by prefix) finds three classes nothing

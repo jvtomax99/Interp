@@ -25,11 +25,6 @@
 #content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;line-height:1.3;letter-spacing:.1em;color:#e9f7ff;margin:0;}
 #content.is-home .home-greeting-date{white-space:nowrap;font-size:11px;line-height:1.3;letter-spacing:-.015em;color:#f3f9ff;}
 #content.is-home .home-greeting-name-row{display:flex;align-items:center;gap:9px;margin-top:3px;position:relative;}
-#content.is-home .home-greeting-name{
-  min-width:0;font-size:42px;font-weight:600;line-height:1.15;letter-spacing:-.045em;
-  margin:0;color:#fff;text-shadow:none;overflow-wrap:anywhere;
-}
-#content.is-home .home-greeting-name.is-long{font-size:32px;}
 #content.is-home .home-greeting-quote{
   font:italic 400 13px/1.35 var(--serif);color:#f5faff;max-width:none;margin:9px 0 0;padding:0;border:0;
   letter-spacing:0;text-shadow:none;display:block;overflow:visible;
@@ -600,7 +595,6 @@
   .main.home-layout{--home-inset:13px;}
   #content.is-home .home-greeting-text{padding-left:12px;padding-right:12px;}
   #content.is-home .home-greeting-eyebrow{letter-spacing:.05em;}
-  #content.is-home .home-greeting-name{font-size:39px;}
   #content.is-home .qa-grid{gap:5px;}
   #content.is-home .qa-tile-label{font-size:11px;}
   #content.is-home .home-sec-head h3{font-size:16px;}
@@ -633,8 +627,6 @@
     width:min(234px,calc(100% - 36px));
     padding:9px 12px 10px; border-radius:18px;
   }
-  #content.is-home .home-greeting-name{ font-size:31px; }
-  #content.is-home .home-greeting-name.is-long{ font-size:26px; }
   #content.is-home .home-greeting-name-row{ gap:6px; margin-top:2px; }
   /* The wave keeps a 44px hit area while the glyph inside shrinks with the
      name. A first pass took the whole button to 34px, which measured 36px in
@@ -823,7 +815,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    his centre back on the name's centre line. */
 #content.is-home .home-greeting-text{--hw-size:1.5;--hw-k:var(--hw-size);}
 #content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k)) minmax(0,1fr);gap:0;min-height:52px;}
-#content.is-home .home-greeting-name{grid-column:1;max-width:100%;}
 #content.is-home .home-wave-icon{justify-self:center;scale:var(--hw-k);transform-origin:50% 85%;translate:0 calc(22.4px * (var(--hw-k) - 1));}
 #content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:64px;height:64px;flex:none;margin:-6px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
 #content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
@@ -875,10 +866,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   background:linear-gradient(180deg,#0b293145 0%,#0c253c20 18%,#0c2c4ac9 56%,#102f4aeb 80%,transparent 100%);
 }
 #content.is-home .home-greeting-name-row{margin-top:73px;}
-#content.is-home .home-greeting-name{
-  font-size:48px;font-weight:500;line-height:1.1;letter-spacing:-.04em;
-}
-#content.is-home .home-greeting-name.is-long{font-size:34px;}
 /* 50px clears his badge at size 1; it hangs 67px below his centre, so a
    bigger him moves the quote down by exactly the extra drop. */
 #content.is-home .home-greeting-quote{
@@ -904,8 +891,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 }
 @media(max-width:365px){
   #content.is-home .home-greeting{padding-left:20px;padding-right:20px;}
-  #content.is-home .home-greeting-name{font-size:42px;}
-  #content.is-home .home-greeting-name.is-long{font-size:30px;}
   #content.is-home .home-greeting-quote{font-size:20px;}
 }
 /* Keep the desktop composition and raise its reading size. Phone rules stay as is. */
@@ -928,8 +913,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
             mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.9) 88%,#000 96%);
   }
-  #content.is-home .home-greeting-name{font-size:52px;}
-  #content.is-home .home-greeting-name.is-long{font-size:38px;}
   #content.is-home .home-greeting-quote{font-size:23px;}
   #content.is-home .home-greeting-quote cite{font-size:12px;}
   #content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-size:13px;}
@@ -1344,21 +1327,43 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
 }
 #content.is-home .home-greeting-quote{margin-top:calc(56px + 67px * (var(--hw-k) - 1));}
 @media (min-width:901px){#content.is-home .home-greeting-quote{margin-top:calc(52px + 67px * (var(--hw-k) - 1));}}
-#content.is-home .home-greeting-name{font-family:'Parisienne',cursive;font-weight:400;letter-spacing:0;line-height:1.12;padding-bottom:.06em;text-shadow:0 1px 2px rgba(4,14,28,.6),0 2px 6px rgba(4,14,28,.35),0 3px 22px rgba(4,14,28,.42);}
+/* ---------- The greeting name, in one place (docs/PLAN.md, Home styles in layers) ----------
+   Every rule for the name is here; the row, the quote and the rest of the
+   banner keep their own blocks. Where each value came from: the script
+   face, size, weight and shadow from "Hello banner lettering" (Jose's
+   style 8); its place on the grid, the whole first line with Dr. Smiley on
+   the line below (phone) or beside it (computer), from "Dr. Smiley's own
+   place"; the colour, margin and wrapping from the first banner rules.
+   The older layers set 42, 31, 39, 48 and 52 px before the lettering's
+   56 (phone), 50 (narrow) and 80 (computer) won; only the winners are
+   kept, and the 48 is what a width between 900 and 901 px still gets. A
+   name over 10 letters is .is-long (index.html). */
+#content.is-home .home-greeting-name{min-width:0;max-width:100%;margin:0;padding-bottom:.06em;color:#fff;overflow-wrap:anywhere;white-space:nowrap;
+  font-family:'Parisienne',cursive;font-size:48px;font-weight:400;line-height:1.12;letter-spacing:0;
+  text-shadow:0 1px 2px rgba(4,14,28,.6),0 2px 6px rgba(4,14,28,.35),0 3px 22px rgba(4,14,28,.42);
+  grid-column:1 / -1;grid-row:1;align-self:end;}
+#content.is-home .home-greeting-name.is-long{font-size:34px;}
+@media (max-width:900px){
+  #content.is-home .home-greeting-name{font-size:56px;}
+  #content.is-home .home-greeting-name.is-long{font-size:38px;}
+}
+@media (max-width:365px){
+  #content.is-home .home-greeting-name{font-size:50px;}
+  #content.is-home .home-greeting-name.is-long{font-size:34px;}
+}
+@media (min-width:901px){
+  #content.is-home .home-greeting-name{font-size:80px;grid-column:1;}
+  #content.is-home .home-greeting-name.is-long{font-size:52px;}
+}
 #content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-family:var(--sans);font-weight:600;letter-spacing:.13em;text-shadow:0 0 2px rgba(4,14,28,.7),0 1px 3px rgba(4,14,28,.65),0 0 12px rgba(4,14,28,.55);}
 #content.is-home .home-greeting-date{letter-spacing:.02em;}
 #content.is-home .home-greeting-quote{font-family:'Lora',Georgia,serif;font-style:italic;font-weight:500;letter-spacing:0;line-height:1.32;color:#fff;text-shadow:0 1px 2px rgba(4,14,28,.55),0 2px 16px rgba(4,14,28,.45);}
 #content.is-home .home-greeting-quote cite{font-family:var(--sans);font-style:normal;color:#fff;text-shadow:0 1px 3px rgba(4,14,28,.7);font-weight:650;text-transform:uppercase;letter-spacing:.16em;}
 @media (max-width:900px){
-  #content.is-home .home-greeting-name{font-size:56px;}
-  #content.is-home .home-greeting-name.is-long{font-size:38px;}
   #content.is-home .home-greeting-quote{font-size:20px;max-width:24em;}
   #content.is-home .home-greeting-quote cite{margin-top:9px;font-size:13px;}
 }
-@media (max-width:365px){#content.is-home .home-greeting-name{font-size:50px;}#content.is-home .home-greeting-name.is-long{font-size:34px;}}
 @media (min-width:901px){
-  #content.is-home .home-greeting-name{font-size:80px;}
-  #content.is-home .home-greeting-name.is-long{font-size:52px;}
   #content.is-home .home-greeting-quote{font-size:22px;max-width:28em;}
   #content.is-home .home-greeting-quote cite{margin-top:10px;font-size:14px;}
 }
@@ -1384,7 +1389,6 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
 #content.is-home .home-greeting-text{--hw-line:66px;}
 @media (max-width:365px){#content.is-home .home-greeting-text{--hw-line:59px;}}
 @media (min-width:901px){#content.is-home .home-greeting-text{--hw-line:95px;}}
-#content.is-home .home-greeting-name{grid-column:1 / -1;grid-row:1;align-self:end;white-space:nowrap;}
 #content.is-home .home-wave-icon{grid-column:2;grid-row:2;margin:0 0 -6px;}
 /* --hw-left: how far in from the right edge he stands (Jose picked B, 48px:
    clear of the lamp post, still at the side). His Ask badge, lanyard and
@@ -1396,7 +1400,6 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    wide enough for any name beside him), and the cloud opens to his right. */
 @media (min-width:901px){
   #content.is-home .home-greeting-name-row{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}
-  #content.is-home .home-greeting-name{grid-column:1;}
   #content.is-home .home-wave-icon{grid-row:1;align-self:center;margin:-6px 0;}
 }
 
