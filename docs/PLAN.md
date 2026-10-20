@@ -24,24 +24,25 @@ written here.
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
-**Don't ask to start a new chat** (Jose, 2026-10-20: "Let's not ask to
-start a new chat anymore", his plan has the usage). Carry on in the same
-chat phase after phase, and keep everything worth keeping in this file
-anyway, so a chat that does end (compaction, a crash) loses nothing. The
-old rule, for the record: a new chat only when the chat was heavy
-(compacted, or full of big file reads, long test output or fix rounds).
-If a chat has to move anyway, the paragraph below says how.
-Don't repeat it in every reply.
-**Claude opens the new chat itself** (Jose, 2026-10-19): with
-`create_session` (claude-code-remote tools), same repo, its first message
-the handoff. **A chat opened from another keeps its exact title** (Jose,
-2026-10-19): read it with `get_session` and pass it to `create_session`.
-The main line of chats is called "Main inter Hub"; every chat opened from
-it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
-`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, tell Jose the new
-session carries the same title and say "Archive this chat" (archive it only when he says
-so). If `create_session` isn't available, fall back to the message to paste.
+**A heavy chat hands over with `docs/handoff.md`** (Jose, 2026-10-20:
+"Whenever a chat gets extremely heavy and expensive, hand me a handoff.md
+to start in a new chat. It's to be able to use you for long period of
+time"; this replaces "don't ask to start a new chat"). Carry on phase
+after phase while the chat is light. When it gets extremely heavy (it has
+been compacted, or holds many big file reads, long test runs or fix
+rounds, and the next phase would add a lot more):
+1. Write everything worth keeping into this file as usual.
+2. Overwrite `docs/handoff.md`: where things stand (merged, open PRs and
+   what each waits on, pending check-ins), what's next with the pick, open
+   questions for Jose, what this chat learned that isn't in the docs yet,
+   and at the top the exact message to paste into the new chat.
+3. Commit and push it, send it to Jose with `SendUserFile`, and say
+   "Start a new chat" with the message to paste. Once, not every reply.
+4. Leave nothing half-done: an open PR is fine (the handoff names it), an
+   uncommitted change is not. Cancel this chat's check-ins; the new chat
+   re-arms what it needs. Then "Archive this chat" (below).
+The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
+says in 2-3 lines what it will do, and waits for Jose's go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -143,13 +144,11 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
-S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
-   handler's forced layouts only moves the cost to the next reader or the
-   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
-   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
-   forced layout (`getClientRects`, `getBoundingClientRect` right after
-   `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
-   before write. Target: handler < 50 ms, tap to paint < 150 ms.
+S4. **Glossary taps** (this PR): off-screen term cards skip layout
+   (`content-visibility`), with `#content.cv-all` wherever a guessed height
+   could move what you read. Handler -37%, tap to paint -23% on real-size
+   domains; the targets (< 50 ms, < 150 ms at 4x) are not met. Next, if
+   wanted: draw fewer than 120 cards up front (a visible change: ask Jose).
 S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
    (stiffness = (2π/duration)², damping ratio = 1 - bounce); WWDC18
    "Designing Fluid Interfaces" (start at 100% damping; 80% only when a gesture
@@ -278,6 +277,25 @@ then read the log; it names the suite and the check.
   of a selector list hands its selector to the next rule; the first pass
   did exactly that and the proof caught it (the greeting row lost its
   grid), so delete whole rules, never lines.
+- 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
+  sky violet instead of night navy, no stars, a warm glow top left. Lower
+  colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim
+  (2.9:1) were already under the 4.5:1 text contrast minimum before this.
+- 2026-10-20 S4 glossary taps. Profiled a domain tap (`tap-trace.cjs`
+  PROFILE=1): ~150 of the handler's ~220 ms was the browser laying out the
+  new screen, forced early by `smileyElsewhere`/`watchDomainDock`; ~38 ms
+  building the HTML. A screen draws up to 120 cards (~6,600 elements on a
+  real domain; the test seed has 28), so term cards now skip layout and
+  paint off screen (`content-visibility:auto`, guessed 172 px). Same look:
+  cards already clip, and every box on screen sits where it did to 0.05 px
+  (pixels differ only by one device pixel of text snapping). Guessed
+  heights above the screen would move what you read in Safari (no scroll
+  anchoring), so `#content.cv-all` lays every card out for a redraw in
+  place while scrolled down (`cvFresh`), Back's restore, `revealTerm` and
+  Show me; removing either guard makes the suite fail. Interleaved 6+6 taps
+  on 150-term domains (`BIG=150`, 4x, this session's slow machine): handler
+  median 783 -> 494 ms, tap to paint 1,564 -> 1,212 ms. Suite
+  `glossary-cv.cjs`. Not measured on an iPhone.
 - 2026-10-20 F3 campus golden hour + depth (Jose's film brief). The scene
   re-lit in `entrance.html`: a low warm sun from the left with long shadows,
   lavender fill, a pink rim backlight, a peach-to-lavender sky with the sun's
