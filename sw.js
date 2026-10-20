@@ -17,7 +17,9 @@
  * Firebase traffic (Firestore, Cloud Storage, gstatic) is never intercepted —
  * it is cross-origin and realtime, and caching it would serve stale glossary
  * data or break the live chat listener.
- * IMPORTANT: bump CACHE_VERSION on every deploy that matters. Browsers only
+ * IMPORTANT: CACHE_VERSION must change on every deploy that matters. It does
+ * by itself: .github/workflows/bump-version.yml moves it after each push to
+ * main that changes the app, so never edit the line by hand. Browsers only
  * re-check this file for changes occasionally (less often on an installed
  * PWA that's suspended/resumed rather than freshly loaded), so an unchanged
  * version string here means an unchanged precache — a stale, possibly very
@@ -26,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v262-s5-springs';
+const CACHE_VERSION = 'interpreter-hub-v262-b1020.1359';
 const PRECACHE = [
   './',
   './index.html',

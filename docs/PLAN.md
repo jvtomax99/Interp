@@ -249,6 +249,18 @@ then read the log; it names the suite and the check.
   follow-through), which the S5 question to Jose had listed as changing;
   his motion rules won. Suite `springs.cjs` (frame-by-frame: no swing past
   the target, settled within the press time). Guide: nothing to change.
+- 2026-10-20 Version lines bump themselves (Jose's pick, before S1b). Every
+  PR edited `BUILD_ID`/`BUILD_TIME` (`index.html`) and `CACHE_VERSION`
+  (`sw.js`), so every open PR conflicted with the next merge. Now
+  `.github/workflows/bump-version.yml` runs `.github/bump-version.cjs`
+  after each push to `main` that changes the app. It pushes one commit,
+  "Bump version to bMMDD.HHMM" (cache name `interpreter-hub-v<n>-<BUILD_ID>`),
+  and retries on the new `main` if another push landed first (tested
+  against a local remote with a race). PRs and direct pushes leave those
+  lines alone (`AGENTS.md`, `CLAUDE.md`, comments at both lines). Each
+  merge now deploys twice, about a minute apart: the merge with the old
+  version lines, then the bump.
+
 - 2026-10-20 Dr. Smiley E4, his drawn faces seen (Jose: "what happened to
   these faces?"; they showed 0.26-0.7 s at rare moments). Each now holds
   about a second (pet's startle 0.6 s, the quiz wince 0.65 s), and a
@@ -556,8 +568,12 @@ then read the log; it names the suite and the check.
   proxy answers 403 for interp-six.vercel.app and Vercel's file API refuses.
   What works: `list_deployments` (Vercel tools) gives the production
   deployment's commit and state; that commit's `BUILD_ID` is the live one.
-  For a real page check, Jose adds the host under the environment's
-  Allowed domains.
+  On 2026-10-20 `list_deployments` refused too (403, team scope
+  "language-services"). What still worked then: GitHub's status API through
+  curl (`https://api.github.com/repos/jvtomax99/Interp/commits/<sha>/status`),
+  where the context "Vercel" with "Deployment has completed" means that
+  commit is live. For a real page check, Jose adds the host under the
+  environment's Allowed domains.
 
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
