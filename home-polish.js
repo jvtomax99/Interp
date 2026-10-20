@@ -1942,13 +1942,13 @@
   }
   /* ---- "Watch" on the hello banner ----
      Bottom-right of the banner, in the band beside the Hackensack sign,
-     until the 45-second video has been watched on this phone
-     (promoSeen/watchPromo in index.html, answer 'promo'). */
+     always; its ring holds still once the 45-second video has been watched
+     on this phone (promoSeen/watchPromo in index.html, answer 'promo'). */
   function addPromoBtn(host){
     const g = host && host.querySelector('#homeGreeting');
-    if(!g || g.querySelector('.home-promo-btn') || typeof window.watchPromo !== 'function' || window.promoSeen()) return;
+    if(!g || g.querySelector('.home-promo-btn') || typeof window.watchPromo !== 'function') return;
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'home-promo-btn';
+    b.type = 'button'; b.className = 'home-promo-btn' + (window.promoSeen() ? ' is-seen' : '');
     b.setAttribute('aria-label', 'Watch Interpreter Hub in 45 seconds');
     // A story bubble: the video's still in a ring of its colours, a play
     // badge, "Watch" under it.
