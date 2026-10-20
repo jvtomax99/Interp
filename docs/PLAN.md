@@ -53,6 +53,13 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**Promo v12, the 3D remake (Jose, 2026-10-20).** v11's feature-by-feature
+story and copy, with the look of his four reference reels. Plan, shot table
+and the 7 steps: `promo/hub-blend/BRIEF.md`. Step 1 done (project and brief
+committed); next is step 2 (real screens in layers). One step at a time,
+Jose reviews each. Nothing in the app changes until he picks the final cut.
+
+
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
 F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right

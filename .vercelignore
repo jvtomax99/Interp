@@ -19,3 +19,7 @@ pin-icons-source-hd-upload.png
 medical-pins.png.PNG
 specialty-pins.png.PNG
 docs
+
+# The promo video's source project (HyperFrames + Three.js, 11 MB). Only its
+# rendered MP4 ships, copied into media/.
+promo
