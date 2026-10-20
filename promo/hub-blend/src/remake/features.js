@@ -20,7 +20,7 @@ export const FEATURES = [
   // every word capitalised (Jose, 2026-10-20)
   { g: "home", a: "Built By Our", b: "Own Interpreters." },
   { g: "glossary", a: "One Glossary.", b: "Every Specialty." },
-  { g: "body", a: "Explore The 3D Body.", b: "English And Spanish." },
+  { g: "body", a: "Explore The 3D Body.", b: "English And Spanish.", len: 3.5 }, // longer: the body comes apart first
   { g: "translate", a: "Glossary First.", b: "AI Second." },
   { g: "physician", a: "Ready For", b: "Every Physician." },
   { g: "falsefriends", a: "101 False Friends.", b: "Flagged." },
@@ -30,6 +30,10 @@ export const FEATURES = [
   { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley." },
 ];
 export const FEATURE_LEN = 2.5;
+export const featureLen = (f) => f.len || FEATURE_LEN;
+// when each feature starts, in the clock after the opener (the hook and logo take the first 9.5 s)
+export const FEATURE_STARTS = FEATURES.reduce((a, f, i) => (a.push(i ? a[i - 1] + featureLen(FEATURES[i - 1]) : 9.5), a), []);
+export const FEATURES_END = FEATURE_STARTS.at(-1) + featureLen(FEATURES.at(-1));
 const ZOOM = 1.28; // every camera this much farther from what it looks at
 
 const PX = 0.01;             // world units per CSS pixel of the 390 x 844 screen
@@ -120,6 +124,9 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   tapRing.position.copy(HEART_AT).add(new THREE.Vector3(0, 0.004, 0));
   tapRing.renderOrder = 7;
   shots.body.group.add(tapRing);
+  // the body coming apart: frames recorded from the real viewer (tools/capture-explode.cjs)
+  const exMeta = await fetch("assets/layers/explode/frames.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const exTex = exMeta ? await Promise.all(exMeta.frames.map((f) => loadTex(`assets/layers/explode/${f.file}`))) : [];
 
   // ---- glossary: the field of specialty pins ----
   const pinTex = await Promise.all(PINS.map((p) => loadTex(`assets/pins/${p}.webp`)));
@@ -156,7 +163,7 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   ffL.pivot.add(back);
 
   // ---- Dr. Smiley ----
-  const smiley = await createSmiley({ root: "assets/drsmiley/" });
+  const smiley = await createSmiley({ root: "assets/drsmiley/", round: true }); // his rounded 3D body (Jose's pick)
   smiley.group.scale.setScalar(0.9);
   scene.add(smiley.group);
   // nothing of him shows below the glass, so he can rise out of a screen (Ask)
@@ -319,19 +326,25 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
       smiley.pose(u < 0.7 ? MOVES.land(1) : u < 1.2 ? MOVES.hop(a) : { ...MOVES.point(prog(u, 1.2, 1.7)), face: "smile", brows: "glad" });
     },
     body(u, S) {
-      // the whole body; a tap on the chest; the view dives in to the heart; its card lifts
-      const tap = prog(u, 0.45, 0.8);
+      // the body turns and comes apart (Explode anatomy, the real viewer's frames), a tap on the
+      // chest, the view dives in to the heart, its Heart / Corazon card lifts
+      if (exTex.length) {
+        const k = Math.min(exTex.length - 1, Math.floor(prog(u, 0.1, 1.7) * exTex.length));
+        if (bodyFull.material.map !== exTex[k]) { bodyFull.material.map = exTex[k]; bodyFull.material.needsUpdate = true; }
+      }
+      const tap = prog(u, 1.75, 2.1);
       tapRing.visible = tap > 0 && tap < 1;
       tapRing.scale.setScalar(1 + 2.2 * outCubic(tap));
       tapRing.material.opacity = 1 - tap;
-      const dive = inOutCubic(prog(u, 0.7, 1.15));
+      const dive = inOutCubic(prog(u, 1.95, 2.4));
       bodyPivot.scale.set(1 + 3 * dive, 1, 1 + 3 * dive);
-      bodyFull.material.opacity = 1 - outCubic(prog(u, 0.85, 1.15));
+      bodyFull.material.opacity = 1 - outCubic(prog(u, 2.1, 2.4));
       bodyFull.visible = bodyFull.material.opacity > 0.01;
-      S.layers.proof.mesh.visible = u > 1.1;
-      const p = outBack(prog(u, 1.2, 1.75), 1.5);
+      S.layers.proof.mesh.visible = u > 2.35;
+      const p = outBack(prog(u, 2.45, 3.0), 1.5);
       S.lift("proof", 0.22 * p, 0.3 * p);
     },
+
     team(u, S) {
       S.lift("channels", 0.1 * outBack(prog(u, 0.05, 0.35)));
       S.lift("msg1", 0.16 * outBack(prog(u, 0.2, 0.55), 1.4), 0.12);
@@ -369,7 +382,7 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     ask: [[0.9, 2.4, 7.0], [-0.2, 2.9, 6.4], [-0.2, 0.7, 0.8], [0, 0.6, 0.6], [-0.4, 0.8, 2.3]],
   };
   function view(g, u) {
-    const c = CAMS[g], e = inOutSine(clamp(u / FEATURE_LEN)), o = groups[g].position;
+    const c = CAMS[g], e = inOutSine(clamp(u / featureLen(FEATURES.find((f) => f.g === g)))), o = groups[g].position;
     const v = (a, b) => new THREE.Vector3(lerp(a[0], b[0], e) + o.x, lerp(a[1], b[1], e) + o.y, lerp(a[2], b[2], e) + o.z);
     const look = v(c[2], c[3]);
     // pulled back from the first cut (Jose: "it gets cut off, too zoomed in")

@@ -12,15 +12,16 @@ import { UnrealBloomPass } from "../../vendor/addons/postprocessing/UnrealBloomP
 import { OutputPass } from "../../vendor/addons/postprocessing/OutputPass.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
-import { buildFeatures, FEATURES, FEATURE_LEN } from "./features.js";
+import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen } from "./features.js";
+import { createSmiley } from "../smiley.js";
 import { buildEnd } from "./end.js";
-import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine } from "../util.js";
+import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
 const W = +root.dataset.width, H = +root.dataset.height;
 const DURATION = +root.dataset.duration;
 // the HUMC opener runs first; everything after it keeps its own clock (t = time - OPEN)
-const OPEN = 2.0;
+const OPEN = 5.0;
 
 const C = { navy0: 0x03061a, navy1: 0x0b1640, navy2: 0x1a3a96, cyan: 0x3fc6ee, red: 0xf0436a, white: 0xffffff };
 
@@ -34,9 +35,9 @@ const SHOTS = [
   [5.98, 7.5, "right"],
   [7.5, 9.5, "logo"],
   // features 1-5 (features.js), 2.5 s each
-  ...FEATURES.map((f, i) => [9.5 + i * FEATURE_LEN, 9.5 + (i + 1) * FEATURE_LEN, f.g]),
+  ...FEATURES.map((f, i) => [FEATURE_STARTS[i], FEATURE_STARTS[i] + featureLen(f), f.g]),
   // the end card (end.js)
-  [9.5 + FEATURES.length * FEATURE_LEN, DURATION - OPEN, "end"],
+  [FEATURES_END, DURATION - OPEN, "end"],
 ];
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
 
@@ -248,7 +249,7 @@ async function build() {
 
   // ---------- features 1-5 ----------
   const feat = await buildFeatures(scene, groups, { word, label });
-  const END_AT = 9.5 + FEATURES.length * FEATURE_LEN;
+  const END_AT = FEATURES_END;
   groups.end = new THREE.Group();
   groups.end.position.set(0, 0, -58 - FEATURES.length * 12 - 2);
   scene.add(groups.end);
@@ -264,63 +265,69 @@ async function build() {
   root.appendChild(caps);
   const l1 = caps.querySelector(".l1"), l2 = caps.querySelector(".l2"), dashes = [...caps.querySelectorAll(".dash b")];
   function captionsAt(t) {
-    const fi = FEATURES.findIndex((f, i) => t >= 9.5 + i * FEATURE_LEN && t < 9.5 + (i + 1) * FEATURE_LEN);
+    const fi = FEATURES.findIndex((f, i) => t >= FEATURE_STARTS[i] && t < FEATURE_STARTS[i] + featureLen(f));
     caps.style.opacity = fi < 0 ? "0" : "1";
     if (fi < 0) return;
-    const f = FEATURES[fi], t0 = 9.5 + fi * FEATURE_LEN;
+    const f = FEATURES[fi], t0 = FEATURE_STARTS[fi];
     if (l1.textContent !== f.a) { l1.textContent = f.a; l2.textContent = f.b; }
     const a = outExpo(prog(t, t0 + 0.04, t0 + 0.34));
     l1.style.opacity = String(a);
     l1.style.transform = `translateY(${(1 - a) * capFont * 0.5}px)`;
     const w = outExpo(prog(t, t0 + 0.3, t0 + 0.62));
     l2.style.clipPath = `inset(0 ${(1 - w) * 100}% 0 0 round ${capFont * 0.1}px)`;
-    dashes.forEach((d, i) => { d.style.width = i < fi ? "100%" : i === fi ? `${100 * prog(t, t0, t0 + FEATURE_LEN)}%` : "0"; });
+    dashes.forEach((d, i) => { d.style.width = i < fi ? "100%" : i === fi ? `${100 * prog(t, t0, t0 + featureLen(f))}%` : "0"; });
   }
 
-  // ---------- the HUMC opener: the hospital's photos as glass panels the camera flies past ----------
+  // ---------- the HUMC opener (Jose's pick, "carousel"): Dr. Smiley centre stage, the five
+  // hospital photos circling behind him one at a time; he looks at each, then winks at you ----------
   const opener = new THREE.Group();
-  opener.position.set(0, 0, 40);
+  opener.position.set(0, 0, 18);
   scene.add(opener);
   groups.opener = opener; // hidden by cameraAt once the hook starts
-  const PHOTOS = [["entrance", -1.45, 6.0, 0.42], ["tower", 1.5, 3.6, -0.42], ["pavilion-dusk", -1.4, 1.2, 0.38], ["aerial", 0, -1.6, 0]];
-  const panels = [];
-  for (const [name, x, z, ry] of PHOTOS) {
+  const oFloor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x0a1233, roughness: 0.35, metalness: 0.35 }));
+  oFloor.rotation.x = -Math.PI / 2; oFloor.receiveShadow = true; opener.add(oFloor);
+  const ring = new THREE.Group(); ring.position.z = -3.0; opener.add(ring); // behind him, so a photo never covers him
+  const PHOTOS = ["entrance", "tower", "pavilion-dusk", "skybridge-sunset", "aerial"];
+  const RING_R = 2.6;
+  for (const [i, name] of PHOTOS.entries()) {
     const tex = await new Promise((res) => new THREE.TextureLoader().load(`assets/humc/${name}.jpg`, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; res(t); }));
-    const hgt = name === "aerial" ? 2.3 : 1.75, wdt = (hgt * tex.image.width) / tex.image.height;
-    const g = new THREE.Group();
-    const frame = new THREE.Mesh(new THREE.PlaneGeometry(wdt + 0.06, hgt + 0.06), new THREE.MeshBasicMaterial({ color: 0xbfe9fa, transparent: true, opacity: 0.55, toneMapped: false }));
-    frame.position.z = -0.005;
-    const photo = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, color: 0xe6e6e6 }));
-    g.add(frame, photo);
-    g.position.set(x, 1.55, z);
-    g.rotation.y = ry;
-    g.userData.home = g.position.clone();
-    opener.add(g);
-    panels.push(g);
+    const hgt = 1.7, a = tex.image.width / tex.image.height, wdt = Math.min(2.6, hgt * a);
+    // cover-fit: crop the photo to the panel instead of squashing it
+    const fa = wdt / hgt;
+    if (a > fa) { tex.repeat.set(fa / a, 1); tex.offset.set((1 - fa / a) / 2, 0); } else { tex.repeat.set(1, a / fa); tex.offset.set(0, (1 - a / fa) / 2); }
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, side: THREE.DoubleSide, color: 0xd2d2d2 })); // under white: no bloom on bright skies
+    const ang = (i / PHOTOS.length) * Math.PI * 2;
+    m.position.set(Math.sin(ang) * RING_R, 1.45, Math.cos(ang) * RING_R); m.rotation.y = ang;
+    ring.add(m);
   }
+  const host = await createSmiley({ root: "assets/drsmiley/", round: true });
+  host.group.scale.setScalar(1.35); host.group.position.z = 0.9;
+  host.group.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+  opener.add(host.group);
+  const warm = new THREE.PointLight(0xffd2b0, 2.5, 6, 1.5); warm.position.set(0, 1.4, 3.1); opener.add(warm);
   const openerTitle = document.createElement("div");
   openerTitle.style.cssText = `position:absolute;left:0;right:0;bottom:${H * 0.1}px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;opacity:0;pointer-events:none;text-shadow:0 2px 22px rgba(3,6,26,.85)`;
   openerTitle.innerHTML = `<div style="font-weight:800;font-size:${Math.round(H * 0.026)}px;letter-spacing:-0.01em;white-space:nowrap">Hackensack University Medical Center</div><div style="margin-top:${H * 0.008}px;font:500 ${Math.round(H * 0.017)}px 'JetBrains Mono',monospace;letter-spacing:.3em;color:#bfe9fa">HACKENSACK, NJ</div>`;
   root.appendChild(openerTitle);
+  const HOLD = 0.9; // seconds per photo
   function openerAt(t) {
     for (const g in groups) groups[g].visible = g === "opener";
-    // each panel swings in as the camera nears it
-    panels.forEach((g, i) => {
-      const p = outExpo(prog(t, i * 0.32, i * 0.32 + 0.5));
-      g.position.y = g.userData.home.y - (1 - p) * 0.8;
-      g.scale.setScalar(Math.max(0.001, 0.75 + 0.25 * p));
-      g.children.forEach((m) => { m.material.transparent = true; m.material.opacity = (m === g.children[0] ? 0.55 : 1) * p; });
-    });
-    const e = inOutSine(prog(t, 0, OPEN));
-    const z = lerp(9.2, 2.7, 1 - Math.pow(1 - e, 1.6));
-    camera.position.set(Math.sin(t * 1.4) * 0.25, 1.6 + 0.15 * Math.sin(t * 2), opener.position.z + z);
-    camera.lookAt(0, 1.55, opener.position.z + z - 4);
+    const N = PHOTOS.length, step = Math.min(N - 1, Math.floor(t / HOLD)), f = t / HOLD - step;
+    const turn = inOutCubic(clamp((f - 0.55) / 0.45));
+    ring.rotation.y = -((step + (step < N - 1 ? turn : 0)) / N) * Math.PI * 2;
+    // he looks round at each photo as it passes, then at you with a wink
+    const looking = t < 4.2;
+    host.pose({ face: t > 4.4 ? "wink" : looking ? (f < 0.5 ? "halfL" : "lookL") : "smile", brows: t > 4.4 ? "wink" : "glad", turn: looking ? -18 : 0, y: 0.02 * Math.abs(Math.sin(t * 6)), glow: 0.5 });
+    const e = inOutSine(t / OPEN);
+    camera.position.set(0.4 * Math.sin(t * 0.5), lerp(2.1, 1.8, e), opener.position.z + lerp(6.6, 5.8, e));
+    camera.lookAt(0, 1.35, opener.position.z - 1.0);
     camera.rotation.z += Math.sin(t * 1.3) * 0.012;
-    bokeh.uniforms.focus.value = 3.2;
+    spot.position.set(-2.5, 6.5, opener.position.z + 4); spot.target.position.set(0, 0.8, opener.position.z + 0.5); spot.target.updateMatrixWorld(); spot.intensity = 90;
+    bokeh.uniforms.focus.value = camera.position.distanceTo(new THREE.Vector3(0, 1.3, opener.position.z + 0.9));
     bokeh.uniforms.aperture.value = 0.0005;
     tint.visible = false;
-    openerTitle.style.opacity = String(outCubic(prog(t, 0.6, 1.0)) * (1 - prog(t, OPEN - 0.15, OPEN)));
-    openerTitle.style.transform = `translateY(${(1 - outExpo(prog(t, 0.6, 1.1))) * H * 0.02}px)`;
+    openerTitle.style.opacity = String(outCubic(prog(t, 3.9, 4.4)) * (1 - prog(t, OPEN - 0.15, OPEN)));
+    openerTitle.style.transform = `translateY(${(1 - outExpo(prog(t, 3.9, 4.5))) * H * 0.02}px)`;
   }
 
   // ---------- timing ----------
