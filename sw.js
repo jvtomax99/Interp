@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v247-record-yourself';
+const CACHE_VERSION = 'interpreter-hub-v248-span-chart';
 const PRECACHE = [
   './',
   './index.html',

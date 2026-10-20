@@ -24,32 +24,12 @@ written here.
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
-**When to move to a new chat** (Jose's rule: save tokens, but don't make
-him start chats often). Finishing a phase is not a reason; carry on with
-the next one in the same chat. Say "Start a new chat" once, with the exact
-message to paste, only when the chat is heavy: it has been compacted
-(older parts summarized), or it holds several big file reads, long test
-output or many fix rounds, and the next phase would add a lot more.
-Before saying it, make sure everything worth keeping is in this file.
-Don't repeat it in every reply.
-**Claude opens the new chat itself** (Jose, 2026-10-19): with
-`create_session` (claude-code-remote tools), same repo, its first message
-the handoff. **A chat opened from another keeps its exact title** (Jose,
-2026-10-19): read it with `get_session` and pass it to `create_session`.
-The main line of chats is called "Main inter Hub"; every chat opened from
-it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
-`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, tell Jose the new
-session carries the same title and say "Archive this chat" (archive it only when he says
-so). If `create_session` isn't available, fall back to the message to paste.
-
-**When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
-wants to stay organized). A chat is done when nothing in it is still
-waiting: its PRs are merged or closed, no question to Jose is open, no
-check-in is pending, and everything worth keeping is in this file. Say it
-once, at the end of that reply, with a one-line reason ("PR #52 merged,
-nothing open"). A chat left for a new one ("Start a new chat") is done
-too: say both. Not when a phase finishes but the next phase continues here.
+**One chat, no handoffs** (Jose, 2026-10-20: "no new chat anymore"; and
+earlier the same day: he doesn't archive chats). Finish a phase, carry on
+with the next one in the same chat. Never say "Start a new chat" or
+"Archive this chat", and don't open a new session to hand work over. The
+docs still carry everything worth keeping (a long chat gets compacted, and
+other tools read them).
 
 ## Next (in order)
 
@@ -102,7 +82,7 @@ M3. **Record yourself, play it back beside the model** (built, PR on top of M2; 
    mic: first test `navigator.audioSession.type = 'playback'` after each
    recording (a button in the check); if it fails, play every line before
    opening the mic and tell people to use earbuds.
-M4. **Span chart** (weeks) and the span number on the Practice tile.
+M4. **Span chart** (weeks) and the span number on the Practice tile (built, PR on top of M3; chart on the trainer's start card under Start, the tile's span is M2's; see the note).
 M5. **Auto-marking** from speech to text. Only if M0 shows it works in
    the installed app. Matching on the phone; Haiku (`_routine.js`) only
    for the chunks that look like paraphrases; text only, never audio.
