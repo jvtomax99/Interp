@@ -53,9 +53,9 @@ const next = page => page.evaluate(() => { rateConfidence('sure'); nextQuestion(
     await page.evaluate(() => startStudy('new')); await wait(500);
     await answer(page, true);
     const acts = await page.evaluate(() => { __acts = []; rateConfidence('sure'); return { acts: __acts.slice(), st: readStreak() }; });
-    ok(acts.st.days === 7 && acts.acts.includes('celebrate:cheer'), '7 days in a row: a cheer on the first answer of the day', acts);
+    ok(acts.st.days === 7 && acts.acts.includes('celebrate:wow'), '7 days in a row: a surprised take, then a cheer, on the first answer of the day', acts);
     const again = await page.evaluate(() => { nextQuestion(); const q = quizQuestions[quizIndex]; answerQuiz(q.a); __acts = []; rateConfidence('sure'); return __acts.slice(); });
-    ok(!again.includes('celebrate:cheer'), 'only once that day', again);
+    ok(!again.includes('celebrate:wow'), 'only once that day', again);
     ok(page.__errors.length === 0, 'no page errors', page.__errors);
   }
 
@@ -85,7 +85,7 @@ const next = page => page.evaluate(() => { rateConfidence('sure'); nextQuestion(
     const bf = await measure('bounce', 'focused'), wf = await measure('wince', 'focused');
     ok(!bl.err && bl.total > 600 && bl.total < 1500 && bl.frames.includes('smile') && bl.end === 'rest', 'bounce: under 1.5 s, smiles, ends at rest', bl);
     ok(bl.up < -1.3 && bl.down > .15, 'bounce: a crouch, then up', bl);
-    ok(!wl.err && wl.total > 600 && wl.total < 1600 && wl.frames.includes('worried') && wl.frames.includes('smile1') && wl.end === 'rest', 'wince: under 1.6 s, the worried face then a small smile, ends at rest', wl);
+    ok(!wl.err && wl.total > 600 && wl.total < 1900 && wl.frames.includes('worried') && wl.frames.includes('smile1') && wl.end === 'rest', 'wince: under 1.9 s (the worried face held long enough to see, E4), the worried face then a small smile, ends at rest', wl);
     ok(wl.down > .6 && wl.rot > .8, 'wince: drawn back and down, turned away', wl);
     ok([bl, wl].every(x => x.slide < 1.5 && x.stretch < .002), 'no sideways slide, no stretch', [bl.slide, wl.slide, bl.stretch, wl.stretch]);
     ok(bf.up > bl.up && wf.rot < wl.rot, 'Focused: smaller', { bf: bf.up, bl: bl.up, wf: wf.rot, wl: wl.rot });

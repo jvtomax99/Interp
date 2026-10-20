@@ -101,7 +101,7 @@ M3. **Record yourself, play it back beside the model** (built, PR on top of M2; 
    recording (a button in the check); if it fails, play every line before
    opening the mic and tell people to use earbuds.
 M4. **Span chart** (weeks) and the span number on the Practice tile (built, PR on top of M3; chart on the trainer's start card under Start, the tile's span is M2's; see the note).
-M5. **Auto-marking** from speech to text. Only if M0 shows it works in
+M5. **Auto-marking** from speech to text (built; speech to text works in the installed app in both languages, 2026-10-20; phone-only matching, off by default, Jose's picks; see the note. **Needs Jose:** one round with Auto-mark on, and one with Record me on too). Only if M0 shows it works in
    the installed app. Matching on the phone; Haiku (`_routine.js`) only
    for the chunks that look like paraphrases; text only, never audio.
 
@@ -175,25 +175,9 @@ to read. Nothing in a doctor's research is lost: all five tiers (core,
 procedures, drugs, anatomy, falsefriends), hand-added `customTerms` and
 photos stay. One PR per step; User Guide in each.
 
-D1b. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): layout A (as
-   built) or B (terms first, `d1-layouts.png`); the "From Doctor Prep, not
-   checked by the team" line; the real-data replay (he sends `doctors.json`,
-   steps in the review); the 5-minute interpreter test on iPhones.
-D2. **Team tips.** `tips: [{id, text, by, at}]` on the doctor-directory
-   document; add, edit and delete your own; activity log. The old single
-   `notes` shows as the first tip (by `updatedBy`) until someone edits it,
-   then it is written into `tips`; no migration on startup.
-D3. **Doctor list.** Two-column cards (mockup `list.png`): pin tile or
-   photo with initials badge, name, specialty dot, floor, labels for
-   terms / traps (false friends count, red) / tips, "+ Prep terms" when no
-   research. North / South / All as `ds-mode-seg`; navy "+ Add"; the
-   duplicate and old-terminology banners become one "N things to tidy"
-   button opening a sheet. Place headings with pins stay. Specialty to pin:
-   a `SPECIALTY_PINS` map (cancer, children, heart...), fallback the
-   place's pin.
-
-R5. **Provider Pictures on the Where picker.** Providers share the places
-   and icons but still type a facility. Same sheet, if Jose wants it.
+D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
+   replay (he sends `doctors.json`, steps in the review); the 5-minute
+   interpreter test on iPhones (Spanish voice on ES included).
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
@@ -229,11 +213,17 @@ come from this alone.
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
    file, so fetch `main` right before.
 
-**Flaky test: dock-tuck in WebKit.** "Dr. Smiley shrinks with the bar"
-failed once on PR #60 (run 39281179430) and passed on the same commit's
-other run and on its re-run: his size was read while `dsBreathe` was
-scaling him (54/58 expected, 0.954 measured). Measure him with the breathe
-paused or read his layout box, not his painted box. Not this PR's code.
+**Flaky WebKit tests, fixed.** dock-tuck's "Dr. Smiley shrinks with the
+bar" read his size mid-breath (fixed 2026-10-19: the loops are held at their
+start while he is measured, and the read waits for his scale to rest).
+startup-work's "afterwards the name itself is shown" failed twice on
+2026-10-20 (runs 39394492541, 39397824186) on PRs that don't touch Home:
+the pen moves 64 ms a frame at most, so a CI browser drawing ~3 frames a
+second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
+pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
+that shows the name whatever the frames do, and the test waits up to 40 s
+and prints how long it took. A WebKit red on an unrelated PR: re-run once,
+then read the log; it names the suite and the check.
 
 ## Later (only when the trigger happens)
 
@@ -269,6 +259,47 @@ paused or read his layout box, not his painted box. Not this PR's code.
   (Translate and the term check untouched). Term lookup uses it: same
   requests, same answers, its own `clip` and request code gone. New suite
   `tests/suites/api-helper.mjs` (64 checks, no browser).
+- 2026-10-20 Dr. Smiley E4, his drawn faces seen (Jose: "what happened to
+  these faces?"; they showed 0.26-0.7 s at rare moments). Each now holds
+  about a second (pet's startle 0.6 s, the quiz wince 0.65 s), and a
+  study-streak milestone opens with the surprised face (`wow`) before the
+  cheer. Note `docs/features/dr-smiley.md`; checks in `smiley-brows.cjs`,
+  `smiley-quiz.cjs`. Guide: `askmoves` answer and card.
+- 2026-10-20 R5, Provider Pictures on the Where picker (Jose's pick). The
+  provider sheet's facility text became the doctors' Where button plus a
+  "Department or unit" line; one picker serves both sheets (`placePickFor`),
+  its rows count doctors and providers. Saved: `locationGroup`, `unit`;
+  `facility` follows the doctors' rule. Guide: the Provider Pictures answer
+  and steps, a New lately card. `docs/features/places.md`.
+
+- 2026-10-20 D1b, doctor page: terms sooner, layout A kept. Jose picked B
+  plus smaller rows, saw it, and kept A for its look ("find another way").
+  So: A's bento made compact (hero 64px, place and tip up to 3 lines, short
+  empty-tip text), sticky tabs, "+ Glossary" pill under EN / ES (no foot
+  line on research rows), and "From Doctor Prep, not checked by the team."
+  with the tab's description over research rows (his yes). Typical doctor
+  at 393x759: first term 562 to 503px, 1 full row on open (was 0).
+  `docs/features/doctor-page.md`.
+
+- 2026-10-19 D3, Doctor list (Doctors redesign; mockup `list.png`). Cards
+  two to a row on a phone (`doctorListCard`): photo or specialty pin with
+  initials, name, specialty dot, floor or "No floor yet", labels terms
+  (research + team) / traps / tips, "+ Prep terms" with no research (only
+  once the directory has loaded). Navy "+ Add" by the title (the topbar's
+  "+ Add doctor" gone); "All regions" is "All"; duplicates and old
+  terminology are one "N things to tidy" button opening a sheet. Delete moved
+  from the card to the doctor's sheet. The saved copy keeps `_n` counts for
+  the labels (never written to the database). Place headings unchanged.
+
+- 2026-10-19 D2, Team tips (Doctors redesign). `tips` on the doctor's
+  document, a sheet from Add tip and the tip tile: everyone's tips, add,
+  edit and delete your own (by phone, else name), activity log. Old `notes`
+  is the first tip until edited. Notes box gone from the edit sheet (Jose's
+  pick). Whole-doctor saves no longer write `tips`/`notes` (`mergeFields`),
+  so a stale save can't erase a teammate's tip. Back closes the top sheet.
+  `docs/features/doctor-page.md`; checks in `doctor-page.cjs`.
+
+- 2026-10-20 Campus life round 2 (this PR): the car backing out of the lot,
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys
@@ -787,9 +818,6 @@ paused or read his layout box, not his painted box. Not this PR's code.
 - Breathing, drift, the halo's turn and the streak flame are compositor-only:
   Home at rest with them running is ~0.5% main-thread busy (trace).
 
-- Doctor page, D1: "Add tip" edits the doctor's single `notes` until D2
-  builds `tips`; D2 should point that button and the tip tile at the new
-  sheet. `SPECIALTY_PINS` already exists for D3's list.
 - Add to glossary's domain matcher (`findBestDomainMatch`) misses
   Cardiology, Psychiatry, OB/GYN, ENT and more (word overlap only). The
   doctor page uses `doctorDomainFor` (hints first). Moving Add to glossary

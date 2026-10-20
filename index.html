@@ -3767,6 +3767,12 @@
   .mem-span-key span{ display:flex; align-items:center; gap:6px; }
   .mem-span-key i{ width:14px; height:3px; border-radius:2px; background:var(--dom); }
   .mem-span-key i.is-notes{ background:color-mix(in srgb, var(--dom) 60%, var(--accent-2)); opacity:.75; }
+  .mem-auto{ margin:0; display:flex; flex-direction:column; gap:3px; padding:9px 13px; border-radius:var(--r-md); font-size:13px; color:var(--ink-soft);
+    background:color-mix(in srgb, var(--dom) 7%, var(--bg-hi)); }
+  .mem-auto p{ margin:0; }
+  .mem-auto b{ color:var(--ink); }
+  .mem-auto q{ font-family:'IBM Plex Serif', Georgia, serif; font-size:15px; color:var(--ink); overflow-wrap:anywhere; }
+  .mem-tag{ align-self:flex-start; padding:1px 7px; border-radius:999px; font-size:12px; font-weight:650; color:var(--danger); background:color-mix(in srgb, var(--danger) 12%, var(--paper)); }
   .mem-start{ align-self:stretch; }
   .mem-rec{ margin:0; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:550; color:var(--ink-soft); text-align:center; }
   .mem-rec.is-on{ color:var(--danger); font-variant-numeric:tabular-nums; }
@@ -6424,12 +6430,12 @@ html[data-theme="dark"] .dp-top{ background:rgba(14,20,32,.86); }
 html[data-theme="dark"] .dp-card, html[data-theme="dark"] .dp-ib{ box-shadow:var(--sh-1); }
 
 /* Header: the specialty's pin in a soft tile with the initials, or the photo. */
-.dp-hero{ position:relative; overflow:hidden; display:flex; align-items:center; gap:var(--sp-3); padding:16px; }
+.dp-hero{ position:relative; overflow:hidden; display:flex; align-items:center; gap:var(--sp-3); padding:13px 16px; }
 .dp-hero::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:120px; pointer-events:none;
   background:radial-gradient(80% 70% at 20% 40%, color-mix(in srgb, var(--dp-sp) 18%, transparent), transparent 70%); }
-.dp-ph{ position:relative; flex:0 0 76px; width:76px; height:76px; border-radius:var(--r-lg); border:0; padding:0;
+.dp-ph{ position:relative; flex:0 0 64px; width:64px; height:64px; border-radius:var(--r-lg); border:0; padding:0;
   background:color-mix(in srgb, var(--dp-sp) 13%, var(--paper)); display:flex; align-items:center; justify-content:center; }
-.dp-ph img{ width:60px; height:60px; object-fit:contain; filter:drop-shadow(0 4px 6px rgba(40,30,70,.18)); }
+.dp-ph img{ width:50px; height:50px; object-fit:contain; filter:drop-shadow(0 4px 6px rgba(40,30,70,.18)); }
 .dp-ph.is-photo{ cursor:zoom-in; overflow:hidden; }
 .dp-ph.is-photo img{ width:100%; height:100%; object-fit:cover; filter:none; }
 .dp-ini{ position:absolute; right:-6px; bottom:-6px; width:30px; height:30px; border-radius:var(--r-sm); background:var(--dp-sp); color:#fff;
@@ -6460,27 +6466,112 @@ html[data-theme="dark"] .dp-card, html[data-theme="dark"] .dp-ib{ box-shadow:var
 .dp-where{ display:flex; gap:8px; align-items:center; margin-top:var(--sp-1); }
 .dp-where-pin{ flex:0 0 30px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
 .dp-where-pin img{ width:30px; height:30px; object-fit:contain; }
-.dp-where b{ display:block; font-size:14px; font-weight:650; line-height:1.25; overflow-wrap:anywhere; }
+.dp-where b{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; font-size:14px; font-weight:650; line-height:1.25; overflow-wrap:anywhere; }
 .dp-where small{ display:block; font-size:var(--fs-cap); color:var(--ink-soft); margin-top:2px; }
 .dp-tip{ display:block; width:100%; text-align:left; font-family:var(--sans); cursor:pointer; color:var(--ink);
   background:#FFF7E6; border:1px solid #F3E2BC; box-shadow:none; }
 .dp-tip .dp-k, .dp-tip small{ color:#7A5F30; }
 .dp-tip p{ margin:5px 0 0; font-size:14px; line-height:1.35; font-weight:550;
-  display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .dp-tip p.is-empty{ font-weight:450; color:var(--ink-soft); }
 .dp-tip small{ display:block; margin-top:4px; font-size:var(--fs-cap); font-weight:600; }
 html[data-theme="dark"] .dp-tip{ background:#2C2617; border-color:#4A3D22; }
 html[data-theme="dark"] .dp-tip .dp-k, html[data-theme="dark"] .dp-tip small{ color:#D9BF8A; }
 .dp-note{ margin:var(--sp-3) 2px 0; font-size:14px; line-height:1.45; color:var(--ink-soft); }
 
+/* Team tips sheet (D2): the tip tile's cream, one card per tip, newest last.
+   Edit and Delete only on your own; 44px to hit. */
+.dt-list{ display:flex; flex-direction:column; gap:var(--sp-2); max-height:min(52vh, 420px); overflow-y:auto;
+  margin:var(--sp-2) 0 var(--sp-3); overscroll-behavior:contain; }
+.dt-tip{ background:#FFF7E6; border:1px solid #F3E2BC; border-radius:var(--r-md); padding:12px 13px 4px; }
+.dt-tip.is-editing{ border-color:var(--accent-2); }
+.dt-tip p{ margin:0; font-size:15px; line-height:1.4; font-weight:550; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
+.dt-meta{ display:flex; align-items:center; gap:4px; min-height:44px; }
+.dt-meta small{ flex:1; min-width:0; font-size:var(--fs-cap); font-weight:600; color:#7A5F30; }
+.dt-act{ min-height:44px; min-width:44px; padding:0 9px; border:0; background:none; font:650 var(--fs-foot) var(--sans);
+  color:var(--navy); cursor:pointer; border-radius:var(--r-sm); transition:transform .18s var(--ease), background .2s var(--ease); }
+.dt-act.is-del{ color:var(--danger); }
+.dt-act:active, .dt-act.is-pressed{ transform:scale(.96); background:rgba(37,46,109,.07); }
+.dt-act:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-2px; }
+.dt-empty{ margin:0; font-size:15px; line-height:1.45; color:var(--ink-soft); }
+html[data-theme="dark"] .dt-tip{ background:#2C2617; border-color:#4A3D22; }
+html[data-theme="dark"] .dt-tip p{ color:var(--ink); }
+html[data-theme="dark"] .dt-meta small{ color:#D9BF8A; }
+html[data-theme="dark"] .dt-act{ color:#C9D3FF; }
+html[data-theme="dark"] .dt-act.is-del{ color:#F08A9B; }
+@media (prefers-reduced-motion: reduce){ .dt-act{ transition:none; } }
+
+/* Doctor list (D3; mockup docs/mockups/doctors/list.png). Two columns on a
+   phone, the standard finish, the page's pin tile and initials. */
+.dl-head{ align-items:center; }
+.dl-add{ order:2; flex:0 0 auto; min-height:44px; padding:0 17px; border:0; border-radius:999px; background:var(--navy); color:#fff;
+  font:650 var(--fs-sub) var(--sans); cursor:pointer; white-space:nowrap; box-shadow:0 8px 20px -12px rgba(22,55,90,.5);
+  transition:transform .18s var(--ease); }
+.dl-grid{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:13px; margin-bottom:var(--sp-4); }
+@media (min-width:901px){ .dl-grid{ grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); } }
+.dl-card{ position:relative; display:flex; flex-direction:column; align-items:flex-start; min-width:0; padding:13px 13px 13px;
+  background:var(--paper); border-radius:var(--r-lg); cursor:pointer; color:var(--ink);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .18s var(--ease); -webkit-tap-highlight-color:transparent; }
+.dl-ph{ position:relative; width:56px; height:56px; margin-bottom:var(--sp-3); border-radius:var(--r-md);
+  background:color-mix(in srgb, var(--dp-sp) 13%, var(--paper)); display:flex; align-items:center; justify-content:center; }
+.dl-ph img{ width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 3px 5px rgba(40,30,70,.16)); }
+.dl-ph.is-photo img{ width:100%; height:100%; object-fit:cover; border-radius:var(--r-md); filter:none; }
+.dl-ini{ position:absolute; right:-6px; bottom:-6px; min-width:26px; height:26px; padding:0 4px; border-radius:var(--r-sm);
+  background:var(--dp-sp); color:#fff; font-size:var(--fs-cap); font-weight:700; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 3px var(--paper); }
+.dl-name{ font-size:var(--fs-head); font-weight:650; letter-spacing:-.015em; line-height:1.2; overflow-wrap:anywhere; }
+.dl-spec{ display:flex; align-items:baseline; gap:6px; margin-top:4px; font-size:var(--fs-foot); font-weight:600; line-height:1.3;
+  color:color-mix(in srgb, var(--dp-sp) 72%, var(--ink)); overflow-wrap:anywhere; }
+.dl-spec::before{ content:""; flex:0 0 8px; height:8px; border-radius:50%; background:var(--dp-sp); transform:translateY(-1px); }
+.dl-floor{ margin-top:2px; font-size:var(--fs-foot); line-height:1.3; color:var(--ink-soft); overflow-wrap:anywhere; }
+.dl-floor.is-none{ color:var(--ink-faint); }
+.dl-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:var(--sp-2); }
+.dl-tag{ padding:4px 9px; border-radius:999px; font-size:var(--fs-foot); font-weight:650; line-height:1.3;
+  background:color-mix(in srgb, var(--navy) 9%, var(--paper)); color:var(--navy); }
+.dl-tag.is-ff{ background:var(--danger-soft); color:#A63A4E; }
+.dl-tag.is-tip{ background:#FFF4DC; color:#7A5F30; }
+.dl-prep{ position:relative; margin:-4px 0 0 -2px; min-height:32px; padding:0 2px; border:0; background:none; color:var(--accent-2);
+  font:650 var(--fs-foot) var(--sans); cursor:pointer; }
+.dl-prep::after{ content:""; position:absolute; inset:-6px -6px; }
+.dl-tidy{ display:inline-flex; align-items:center; gap:6px; min-height:44px; margin:0 0 var(--sp-3); padding:0 15px; border-radius:999px;
+  border:1px solid #F3E2BC; background:#FFF7E6; color:#7A5F30; font:650 var(--fs-sub) var(--sans); cursor:pointer;
+  transition:transform .18s var(--ease); }
+.dl-tidy svg{ width:16px; height:16px; }
+.dty-sheet #dtyBody{ max-height:min(60vh, 520px); overflow-y:auto; overscroll-behavior:contain; }
+.dl-del{ margin-right:auto; color:var(--danger); }
+.dl-card:active, .dl-card.is-pressed{ transform:scale(.98); }
+.dl-add:active, .dl-add.is-pressed, .dl-tidy:active, .dl-tidy.is-pressed{ transform:scale(.96); }
+.dl-card:focus-visible, .dl-add:focus-visible, .dl-tidy:focus-visible, .dl-prep:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+html[data-theme="dark"] .dl-card{ box-shadow:var(--sh-1); }
+html[data-theme="dark"] .dl-tag{ background:rgba(201,211,255,.12); color:#C9D3FF; }
+html[data-theme="dark"] .dl-tag.is-ff{ background:rgba(240,138,155,.14); color:#F08A9B; }
+html[data-theme="dark"] .dl-tag.is-tip, html[data-theme="dark"] .dl-tidy{ background:#2C2617; border-color:#4A3D22; color:#D9BF8A; }
+html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #fff); }
+@media (prefers-reduced-motion: reduce){ .dl-card, .dl-add, .dl-tidy{ transition:none; } }
+
 /* Tier tabs: Dr. Smiley's segmented control, scrolling sideways when the
    five tiers and the team's own terms don't fit. */
-.dp-tabs.ds-mode-seg{ margin:16px 0 10px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.dp-tabs.ds-mode-seg{ margin:13px 0 9px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;
+  position:sticky; top:62px; z-index:3; box-shadow:0 0 0 6px var(--bg); }
 .dp-tabs.ds-mode-seg::-webkit-scrollbar{ display:none; }
 .dp-tabs.ds-mode-seg button{ flex:0 0 auto; padding:0 13px; white-space:nowrap; display:flex; align-items:center; gap:5px; }
 .dp-tabs.ds-mode-seg button b{ font-weight:550; color:var(--ink-soft); }
 .dp-tabs.ds-mode-seg button.is-ff{ color:color-mix(in srgb, var(--danger) 85%, var(--ink)); }
+.dp-trust{ display:flex; align-items:center; gap:6px; margin:2px 0 0; font-size:var(--fs-cap); font-weight:600; color:#7A5F30; }
+.dp-trust svg{ flex:0 0 14px; width:14px; height:14px; }
+html[data-theme="dark"] .dp-trust{ color:#D9BF8A; }
+.dp-gl{ position:relative; width:76px; min-height:30px; margin-top:2px; padding:0 4px; border:0; border-radius:999px; background:color-mix(in srgb, var(--navy) 9%, var(--paper));
+  color:var(--navy); font:650 var(--fs-cap) var(--sans); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:3px; white-space:nowrap; }
+.dp-gl::after{ content:""; position:absolute; inset:-7px 0; }
+.dp-gl.is-have{ background:none; color:var(--ink-soft); font-weight:600; cursor:default; }
+.dp-gl.is-have svg{ width:12px; height:12px; }
+.dp-gl:disabled{ color:var(--ink-soft); background:none; cursor:default; }
+html[data-theme="dark"] .dp-gl:not(.is-have){ background:rgba(201,211,255,.12); color:#C9D3FF; }
+.dp-gl:active, .dp-gl.is-pressed{ transform:scale(.95); }
+.dp-gl:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 .dp-blurb{ margin:0 2px 10px; font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.dp-blurb p{ margin:0; }
 .dp-old{ margin:0 0 10px; padding:14px 16px; font-size:14px; line-height:1.45; color:var(--ink-soft); }
 .dp-old b{ color:var(--ink); }
 
@@ -6503,7 +6594,7 @@ html[data-theme="dark"] .dp-tip .dp-k, html[data-theme="dark"] .dp-tip small{ co
 .dp-link:disabled{ color:var(--ink-faint); cursor:default; }
 /* 34px to look at, 44px to hit; the two never overlap. */
 .dp-say-col{ flex:0 0 auto; display:flex; flex-direction:column; gap:12px; }
-.dp-say{ position:relative; width:56px; height:34px; border:0; border-radius:999px; background:var(--line-soft); color:var(--ink-soft); cursor:pointer;
+.dp-say{ position:relative; width:76px; height:34px; border:0; border-radius:999px; background:var(--line-soft); color:var(--ink-soft); cursor:pointer;
   font:700 var(--fs-cap) var(--sans); display:flex; align-items:center; justify-content:center; gap:3px; }
 .dp-say::after{ content:""; position:absolute; inset:-5px 0; }
 .dp-say svg{ width:15px; height:15px; }
@@ -7402,7 +7493,11 @@ body.pv-open{ overflow:hidden; }
     <h3 id="providerModalTitle">Add provider</h3>
     <div class="field"><label>Name</label><input id="fPName" type="text" placeholder="e.g. Dr. Angela Waintrub"></div>
     <div class="field"><label>Specialty / role (optional)</label><input id="fPRole" type="text" placeholder="e.g. Pediatric Oncology"></div>
-    <div class="field"><label>Facility / department (optional)</label><input id="fPFacility" type="text" placeholder="e.g. HUMC — Joseph M. Sanzari Children's Hospital"></div>
+    <div class="field">
+      <label id="fPPlaceLab">Where</label>
+      <button type="button" class="place-field" id="fPPlace" aria-labelledby="fPPlaceLab fPPlace" onclick="openPlacePicker('pp')"></button>
+    </div>
+    <div class="field"><label for="fPUnit">Department or unit (optional)</label><input id="fPUnit" type="text" placeholder="e.g. Infusion, 2nd floor"></div>
     <div class="field"><label>Phone (optional)</label><input id="fPPhone" type="text" placeholder="e.g. (551) 555-0123"></div>
     <div class="field"><label>Notes (optional)</label><textarea id="fPNotes" placeholder="Scheduling notes, best way to reach, languages, etc."></textarea></div>
     <div class="field">
@@ -7431,7 +7526,6 @@ body.pv-open{ overflow:hidden; }
       <button type="button" class="place-field" id="fDDPlace" aria-labelledby="fDDPlaceLab fDDPlace" onclick="openPlacePicker()"></button>
     </div>
     <div class="field"><label for="fDDLocationDetails">Floor, suite or room (optional)</label><input id="fDDLocationDetails" type="text" placeholder="e.g. 4th floor, Suite 401"></div>
-    <div class="field"><label>Notes (optional)</label><textarea id="fDDNotes" placeholder="Scheduling notes, quirks, best way to reach, etc."></textarea></div>
     <div class="field">
       <label>Photo (optional)</label>
       <div class="photo-field">
@@ -7442,6 +7536,7 @@ body.pv-open{ overflow:hidden; }
       </div>
     </div>
     <div class="modal-actions">
+      <button class="btn btn-ghost dl-del" id="fDDDelete" onclick="deleteDoctorFromSheet()" hidden>Delete</button>
       <button class="btn btn-ghost" onclick="closeDoctorDirModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveDoctorDirEntry()">Save doctor</button>
     </div>
@@ -7450,6 +7545,26 @@ body.pv-open{ overflow:hidden; }
 
 <div class="overlay dp-overlay" id="doctorDirDetailOverlay" onclick="if(event.target===this) closeDoctorDirDetail()">
   <div class="modal dp-page" id="doctorDirDetailModal" role="dialog" aria-modal="true" aria-label="Doctor"></div>
+</div>
+
+<div class="overlay" id="doctorTipsOverlay" onclick="if(event.target===this) closeDoctorTips()">
+  <div class="modal dt-sheet" role="dialog" aria-modal="true" aria-labelledby="dtTitle">
+    <h3 id="dtTitle">Team tips</h3>
+    <div class="dt-list" id="dtList"></div>
+    <div class="field"><label id="dtFieldLabel" for="fDTip">Add a tip</label><textarea id="fDTip" maxlength="1000" placeholder="What should a teammate know before walking in?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="dtCancel" onclick="doctorTipsCancel()">Close</button>
+      <button class="btn btn-primary" id="dtSave" onclick="saveDoctorTip()">Add tip</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="doctorTidyOverlay" onclick="if(event.target===this) closeDoctorTidy()">
+  <div class="modal dty-sheet" role="dialog" aria-modal="true" aria-labelledby="dtyTitle">
+    <h3 id="dtyTitle">Things to tidy</h3>
+    <div id="dtyBody"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeDoctorTidy()">Close</button></div>
+  </div>
 </div>
 
 <div class="overlay" id="doctorTermOverlay" onclick="if(event.target===this) closeDoctorTermModal()">
@@ -10379,7 +10494,7 @@ async function restoreTrashItem(id){
       ok = await saveTermDoc({ ...p, id: p.id, categoryId });
       if(ok && !cat.terms.some(t => t.id === p.id)) cat.terms.push({ ...p });
     } else if(entry.type === 'doctor'){
-      await persistDoctorDirectoryEntry(p.id, p);
+      await persistDoctorDirectoryEntry(p.id, p, true);
       if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...p });
       ok = true;
     } else if(entry.type === 'provider'){
@@ -10599,7 +10714,10 @@ function doctorDirFromCache(){
 function doctorDirToCache(list){
   // Without the full research text (re-fetched when a doctor is opened), so
   // the copy stays small next to the glossary's.
-  try{ localStorage.setItem(DOCTOR_DIR_CACHE_KEY, JSON.stringify(list.map(({ researchResult, ...d }) => d))); }catch(e){}
+  // The list's labels still need the counts (`_n`, this phone only; never saved
+  // to the database: persistDoctorDirectoryEntry drops it).
+  try{ localStorage.setItem(DOCTOR_DIR_CACHE_KEY, JSON.stringify(list.map(({ researchResult, ...d }) =>
+    researchResult ? { ...d, _n: doctorResearchCounts(researchResult) } : d))); }catch(e){}
 }
 async function loadDoctorDirectory(){
   if(DOCTOR_DIR_STATE === 'loading') return;
@@ -10637,9 +10755,19 @@ function doctorDirProblem(){
   if(DOCTOR_DIR_STATE === 'failed' && !document.hidden) loadDoctorDirectory();
 }));
 
-async function persistDoctorDirectoryEntry(id, record){
+// Team tips (`tips`, and the old single `notes`) belong to the database copy:
+// every other save leaves those two fields alone, so a sheet saved from a copy
+// loaded an hour ago can't erase a tip a teammate just added. Tips are added
+// and removed one at a time (doctorTipWrite). `whole` writes everything, for a
+// restore, where the document is gone.
+async function persistDoctorDirectoryEntry(id, record, whole){
   if(!db){ showToast('Not connected to the database.'); return false; }
-  await trackWrite(db.collection('doctor-directory').doc(id).set(stripUndefined(record)));
+  const ref = db.collection('doctor-directory').doc(id);
+  const data = stripUndefined(record);
+  delete data._n;
+  if(whole){ await trackWrite(ref.set(data)); return true; }
+  delete data.tips; delete data.notes;
+  await trackWrite(ref.set(data, { mergeFields: Object.keys(data) }));
   return true;
 }
 
@@ -12336,7 +12464,7 @@ function collectSearchMatches(q){
   });
 
   PROVIDERS.forEach(p=>{
-    if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.notes)){
+    if(hit(p.name) || hit(p.role) || hit(p.facility) || hit(p.unit) || hit(p.notes)){
       out.push({ group:'Provider Pictures', icon:ICON_PERSON, color:'#6F97AC',
         title:p.name, sub:[p.role, p.facility].filter(Boolean).join(' \u00b7 '),
         target:'providers', rank: starts(p.name) ? 0 : 1 });
@@ -12345,7 +12473,7 @@ function collectSearchMatches(q){
 
   DOCTOR_DIRECTORY.forEach(d=>{
     const customHit = (d.customTerms||[]).some(t => hit(t.en) || hit(t.es) || hit(t.def));
-    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(d.notes) || customHit){
+    if(hit(d.name) || hit(d.specialty) || hit(d.hospitalLocation) || hit(d.locationDetails) || hit(doctorTipsText(d)) || customHit){
       out.push({ group:'Doctor Directory', icon:ICON_GRID, color:'#7C6A9C',
         title:d.name, sub:[d.specialty, d.locationDetails].filter(Boolean).join(' \u00b7 '),
         target:'doctor-directory', rank: starts(d.name) ? 0 : 1 });
@@ -13324,9 +13452,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley reacts in your quiz: a bounce when you\'re right, a small wince when you\'re wrong, a cheer for your streak' },
-  { id:'memory',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Memory trainer',        title:'Train your memory for consecutive: hear a line, say it in the other language, and the lines grow as you do' },
-  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
+  { id:'providers',   tone:'gd-n1', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
+  { id:'directory',   tone:'gd-n2', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor list: terms, traps and tips at a glance, two to a row' },
+  { id:'teamtips',    tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'Team tips: everyone can add their own tip on a doctor’s page' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13400,7 +13528,7 @@ const GUIDE_STEPS = {
   review: () => ({ steps: ['Open <b>More</b> → <b>Term Review</b>. Pick a specialty and how many terms.',
     `Type the Spanish, then ${GUIDE_UI.pill('Check')}. Accents and capitals don’t count against you.`,
     `Missed it? Read why, then ${GUIDE_UI.menu('Try it again later')}.`], note: 'Pause any time: your place is kept on this phone.' }),
-  places: () => ({ steps: [`On a doctor’s card or page, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add doctor')}.`,
+  places: () => ({ steps: [`On a doctor’s page, tap the pencil. Or tap ${GUIDE_UI.pill('+ Add')} beside Doctor Directory.`,
     `Tap <b>Where</b>, then tap the place. Search, or tap ${GUIDE_UI.pill('Add a place')} if it isn’t there.`,
     'To change a place’s icon, tap the icon beside its name in the list.'], note: 'Places you add and icons you pick show for everyone, in Provider Pictures too.' }),
   regions: () => ({ steps: [`Tap your initial ${GUIDE_UI.av()} in the top-right corner.`, `Under <b>My region</b>, tap ${GUIDE_UI.pill('North')} or ${GUIDE_UI.pill('South')}.`,
@@ -13446,14 +13574,18 @@ const GUIDE_STEPS = {
     'Use the Back arrow to retrace your route and return to where you were.'],
     note: 'Every Doctor Prep button opens research directly. A specialty-based appointment briefing remains separate in Ask Dr. Smiley.' }),
   directory: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctors')} → ${GUIDE_UI.pill('Doctor Directory')}, or choose ${GUIDE_UI.pill('Doctor Directory')} under ${GUIDE_UI.pill('More')}.`,
-    'Tap a doctor to open their page.', `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in.`],
+    'Tap a doctor to open their page.', `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in. Every teammate can add their own.`],
     note: 'Doctor Prep saves its research here. Your team’s tips and terms stay separate from that research.' }),
   doctorpage: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctor Directory')} and tap a doctor.`,
     'Tap a tab (Core, Procedures, Drugs, Anatomy, False friends, Team terms) to see those terms. Tap EN or ES to hear one.',
     `At the bottom: ${GUIDE_UI.pill('Start appointment')}, ${GUIDE_UI.pill('Flashcards')} for the briefing, or ${GUIDE_UI.pill('Add tip')}.`],
     note: 'The pencil at the top right edits the doctor: name, specialty, where, photo.' }),
+  teamtips: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctor Directory')} and tap a doctor.`,
+    `Tap ${GUIDE_UI.pill('Add tip')} at the bottom, or the yellow Team tip card.`,
+    `Write your tip and tap ${GUIDE_UI.pill('Add tip')}. On your own tips, ${GUIDE_UI.pill('Edit')} and ${GUIDE_UI.pill('Delete')}.`],
+    note: 'Everyone on the team sees every tip, with who wrote it and when.' }),
   providers: () => ({ steps: [`Open ${GUIDE_UI.pill('Provider Pictures')} from Home or under ${GUIDE_UI.pill('More')}.`,
-    'Search by name, specialty or facility. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with.`],
+    'Search by name, specialty, place or unit. Tap a photo to see it full screen.', `Tap ${GUIDE_UI.pill('+ Add provider')} to add someone your team works with; tap ${GUIDE_UI.pill('Where')} to pick their place from the shared list.`],
     note: 'Provider Pictures helps you put a face to a name. Use Doctor Prep for research, or the Doctor Directory for saved research and team notes.' }),
 };
 // Which "Show me" each answer offers (keys of GUIDE_COACH).
@@ -13652,7 +13784,7 @@ const GUIDE_COACH = {
               ['.tabbar-btn[aria-label="More"]', 'Tap More, then Doctors. Doctor Prep researches someone new; Doctor Directory opens what the team has saved.']],
             text:'Open More → Doctors on a phone, or Doctors in the sidebar on a computer.' },
   directory: { page:'doctors', scroll:true, sel:[`.qa-card[onclick="setCategory('doctor-directory')"]`],
-            text:'Doctor Directory opens the research your team has saved, together with their notes about each doctor.' },
+            text:'Doctor Directory opens the research your team has saved, together with their tips about each doctor.' },
   providers: { page:'home', scroll:true, sel:[`.qa-card[onclick="setCategory('providers')"]`],
             text:'Provider Pictures helps you put a face to a name. Search by name, specialty or facility, or add a provider.' },
 };
@@ -14505,19 +14637,19 @@ const DR_FACE_SEQ = {
   // Pressed and held: a giggle and hearts.
   // A startled take first (a blink, eyes and brows up, the head pulled
   // back), then the giggle: the beat that makes a cartoon reaction read.
-  pet:   { f: [['blink1', 40], ['surprised', 260], ['rest', 50], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
-           brow: [[40, 'up'], [330, null]],
-           head: [[0, 0, 0], [40, 0, .4], [150, 0, -1.5], [300, 0, -1.2], [390, 0, .45], [480, -1.4, .3], [590, 1.4, .3], [700, -1.4, .3], [810, 1.4, .3], [920, -1, .2], [1030, .8, .1], [1460, 0, -.4], [1920, 0, 0], [2180, 0, 0]], fx: 'hearts', fxAt: 480 },
+  pet:   { f: [['blink1', 40], ['surprised', 600], ['rest', 50], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
+           brow: [[40, 'up'], [670, null]],
+           head: [[0, 0, 0], [40, 0, .4], [150, 0, -1.5], [640, 0, -1.2], [730, 0, .45], [820, -1.4, .3], [930, 1.4, .3], [1040, -1.4, .3], [1150, 1.4, .3], [1260, -1, .2], [1370, .8, .1], [1800, 0, -.4], [2260, 0, 0], [2520, 0, 0]], fx: 'hearts', fxAt: 820 },
   // Surprised: a blink, eyes wide, an "O" mouth and brows up with the head
   // pulled back, a beat held, then it softens into a smile.
-  surprise: { f: [['blink1', 40], ['blink2', 35], ['blink1', 35], ['surprised', 650], ['rest', 160], ['smile1', 380], ['rest', 300]],
-              brow: [[110, 'up'], [900, 'glad'], [1300, null]],
-              head: [[0, 0, 0], [110, 0, .5], [240, 0, -1.6], [860, -.6, -1.2], [1100, 0, -.3], [1500, 0, 0]] },
+  surprise: { f: [['blink1', 40], ['blink2', 35], ['blink1', 35], ['surprised', 1000], ['rest', 160], ['smile1', 380], ['rest', 300]],
+              brow: [[110, 'up'], [1250, 'glad'], [1650, null]],
+              head: [[0, 0, 0], [110, 0, .5], [240, 0, -1.6], [1210, -.6, -1.2], [1450, 0, -.3], [1850, 0, 0]] },
   // Worried: eyes away, a tight wavy mouth and the brows turned up in the
   // middle, a tilt; then he looks back to you with a small reassuring smile.
-  worry: { f: [['rest', 60], ['blink1', 50], ['blink2', 45], ['blink1', 50], ['worried', 700], ['halfL', 400], ['rest', 200], ['smile1', 500], ['rest', 300]],
-           brow: [[100, 'worried'], [1350, 'caring'], [2100, null]],
-           head: [[0, 0, 0], [200, -2, .4], [1300, -2.2, .5], [1600, -.8, .1], [2400, 0, 0]] },
+  worry: { f: [['rest', 60], ['blink1', 50], ['blink2', 45], ['blink1', 50], ['worried', 1100], ['halfL', 400], ['rest', 200], ['smile1', 500], ['rest', 300]],
+           brow: [[100, 'worried'], [1750, 'caring'], [2500, null]],
+           head: [[0, 0, 0], [200, -2, .4], [1700, -2.2, .5], [2000, -.8, .1], [2800, 0, 0]] },
   /* For his task states (drTask). Each has a small wind-up, a peak you can
      read and an unhurried way back. */
   // Attentive: you tapped into Ask's box. A quick blink, a look down to it
@@ -14535,15 +14667,15 @@ const DR_FACE_SEQ = {
             head: [[0, 0, 0], [100, 0, -.45], [330, 0, .9], [520, 0, -.1], [700, 0, .7], [900, 0, 0], [1525, 0, 0]] },
   // An answer from general knowledge: received, considered -- a doubtful
   // squint and one brow up (check it), no smile.
-  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['doubt', 520], ['rest', 240]],
-                   brow: [[260, 'doubt'], [860, null]],
-                   head: [[0, 0, 0], [100, .4, 0], [320, -1.1, .2], [860, -1.1, .2], [1120, 0, 0]] },
+  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['doubt', 1000], ['rest', 240]],
+                   brow: [[260, 'doubt'], [1340, null]],
+                   head: [[0, 0, 0], [100, .4, 0], [320, -1.1, .2], [1340, -1.1, .2], [1600, 0, 0]] },
   // Uncertain or failed: composed. A slow blink, a moment of sad (the one
   // place the sad face is used, so it stays rare), a look to the side with
   // a sympathetic tilt, then a small reassuring smile.
-  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['sad', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
-              brow: [[480, 'worried'], [1300, 'caring'], [2050, null]],
-              head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
+  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['sad', 1000], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+              brow: [[480, 'worried'], [1650, 'caring'], [2400, null]],
+              head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1650, -1.8, .3], [2050, -.6, 0], [2650, 0, 0], [2970, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
                brow: [[220, 'caring'], [1120, null]],
@@ -14775,12 +14907,26 @@ DR_PERF.wince = function(){
   return drPerfMake([
     // The flinch: a fast blink, drawn back and a little down, turned away.
     [['blink1', 'blink2'], 90, [-side * .9 * k, .9 * k]],
-    [['worried'], j(380), [-side * 1.4 * k, 1.2 * k], 'worried'],
+    [['worried'], j(650), [-side * 1.4 * k, 1.2 * k], 'worried'],
     // Then back to you, caring: it's fine, keep going.
     [['halfL'], j(200), [-side * .4 * k, .3 * k], 'caring'],
     [['smile1'], j(380), [side * .2 * k, 0]],
     [['rest'], j(300), [0, 0], null],
   ], { still: 'worried', stillMs: 600 });
+};
+/* A streak-day milestone (E4, 2026-10-20): a take first (a blink, eyes
+   wide on the drawn surprised face, brows up, pulled back), held a second
+   so it reads, then the cheer. Focused: just its calmer cheer. */
+DR_PERF.wow = function(){
+  const c = DR_PERF.cheer();
+  if(drMode() === 'focused') return c;
+  const T = 1100;
+  return Object.assign({}, c, {
+    f: [['blink1', 40], ['surprised', 900], ['rest', 160]].concat(c.f),
+    head: [[0, 0, 0], [40, 0, .4], [160, 0, -1.4], [940, -.4, -1.1], [T, 0, 0]].concat(c.head.slice(1).map(([t, r, y]) => [t + T, r, y])),
+    brow: [[40, 'up'], [T, null]].concat((c.brow || []).map(([t, p]) => [t + T, p])),
+    fxAt: (c.fxAt || 0) + T,
+  });
 };
 DR_PERF.celebrate = DR_PERF.cheer;   // the older name, used for study results and the team's rank
 function drPerfBuild(name){ return DR_PERF[name] ? DR_PERF[name]() : null; }
@@ -15726,7 +15872,7 @@ function drStage(o){
 const DR_TONE = {
   // The five performances (DR_PERF) build their own calmer Focused versions.
   focused:     { love: 'smile', giggle: 'smile', laugh: 'smile', kiss: 'smile', sing: 'smile' },
-  appointment: { celebrate: 'ack', cheer: 'ack', greet: 'ack', proud: 'ack', love: 'ack', giggle: 'ack', laugh: 'ack', kiss: null, wink: null, sing: null, notice: null, encourage: 'ack', bounce: 'ack', wince: null },
+  appointment: { celebrate: 'ack', cheer: 'ack', greet: 'ack', proud: 'ack', love: 'ack', giggle: 'ack', laugh: 'ack', kiss: null, wink: null, sing: null, notice: null, encourage: 'ack', bounce: 'ack', wince: null, wow: 'ack' },
 };
 function drTone(seq){
   let s = seq;
@@ -15827,6 +15973,7 @@ const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.or
 const ICON_CAMERA_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5C4 7.67 4.67 7 5.5 7H8L9.6 5h4.8L16 7h2.5c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-13C4.67 19 4 18.33 4 17.5v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.7"/></svg>';
 const ICON_PHOTOS_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4 16.5l4.5-4 3.5 3 3-2.5 5 4" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/></svg>';
 const ICON_X_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+const ICON_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>';
 const ICON_RETRY_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4.5V8h-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CLOCK_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const ICON_CHEV_L_TC = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -17087,7 +17234,7 @@ const GUIDE_TOPICS = [
   { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful squash stretch spring bounce cheer quiz bounce wince streak right wrong answer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: when he cheers or says hello he crouches and springs, squashing a little as he dips and stretching as he goes up, a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help. In a CoreCHI quiz he sits in the dock and reacts to each answer: a little bounce when you're right, a small wince and then a kind smile when you're wrong, a laugh at 3, 5 and 10 right in a row, and a cheer on the first answer of a 3-, 7-, 14- or 30-day streak.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: when he cheers or says hello he crouches and springs, squashing a little as he dips and stretching as he goes up, a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help. In a CoreCHI quiz he sits in the dock and reacts to each answer: a little bounce when you're right, a small wince and then a kind smile when you're wrong, a laugh at 3, 5 and 10 right in a row, and a surprised look, then a cheer, on the first answer of a 3-, 7-, 14- or 30-day streak.</li>
       <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing, no squash and stretch and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
@@ -17165,28 +17312,37 @@ const GUIDE_TOPICS = [
     <p>Open <b>More</b> → <b>Doctors</b> on a phone, or choose <b>Doctors</b> in the sidebar on a computer. It brings the two doctor tools together:</p>
     <ul>
       <li><b>Doctor Prep</b>: research a provider by name and prepare the terminology likely to come up.</li>
-      <li><b>Doctor Directory</b>: open the research the team has saved, with their notes and photos.</li>
+      <li><b>Doctor Directory</b>: open the research the team has saved, with their tips and photos.</li>
     </ul>
     <p>If you want to research someone now, choose <b>Doctor Prep</b> directly on Home or under <b>More</b>. For a specialty-based appointment briefing, ask Dr. Smiley to prep you for that specialty.</p>` },
 
   { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
     <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
-    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All regions</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
+    <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
+    <p>Doctors are grouped by where they work, two to a row. Each card shows their picture (or their specialty’s pin with their initials), specialty, floor, and how many <b>terms</b>, <b>traps</b> (false friends, in red) and <b>tips</b> they have. No research yet? Tap <b>+ Prep terms</b> to look them up in Doctor Prep.</p>
+    <p>Tap <b>+ Add</b> beside the title to add a doctor. If the list finds possible duplicates or doctors on the old terminology, a yellow <b>things to tidy</b> button opens them in one place. To delete a doctor, open their page, tap the pencil, then <b>Delete</b>.</p>
     <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
   { id:'doctorpage', section:'prep', k:'doctor page terms tabs core procedures drugs anatomy false friends team terms hear listen speak english spanish start appointment flashcards tip research again glossary', q:'What is on a doctor’s page?', a:`
-    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, how many prep terms there are, <b>Where</b> they work, and the latest <b>Team tip</b>.</p>
-    <p>The tabs show the terms one group at a time: <b>Core</b>, <b>Procedures</b>, <b>Drugs</b>, <b>Anatomy</b>, <b>False friends</b> (in red) and <b>Team terms</b>, the ones your team added by hand. Tap <b>EN</b> or <b>ES</b> on a term to hear it, or <b>Add to glossary</b> to keep it. <b>Research again</b> updates what Doctor Prep found; your tips, photo and team terms are kept.</p>
-    <p>The bar at the bottom: <b>Start appointment</b> (with this doctor; if you’re already in one with them, it takes you back to it), <b>Flashcards</b> (the briefing for their specialty) and <b>Add tip</b>. The pencil at the top edits the doctor.</p>
+    <p>Tap a doctor in the <b>Doctor Directory</b>. At the top: their name, specialty and picture (or their specialty’s pin with their initials). Under it, how many prep terms there are, <b>Where</b> they work, and the first <b>Team tip</b> with how many there are (tap it to read them all).</p>
+    <p>The tabs show the terms one group at a time: <b>Core</b>, <b>Procedures</b>, <b>Drugs</b>, <b>Anatomy</b>, <b>False friends</b> (in red) and <b>Team terms</b>, the ones your team added by hand. The tabs stay at the top while you scroll. Tap <b>EN</b> or <b>ES</b> on a term to hear it, or <b>+ Glossary</b> to keep it. Terms Doctor Prep found say <b>From Doctor Prep, not checked by the team</b>: check them before you rely on them. <b>Research again</b> updates what Doctor Prep found; your tips, photo and team terms are kept.</p>
+    <p>The bar at the bottom: <b>Start appointment</b> (with this doctor; if you’re already in one with them, it takes you back to it), <b>Flashcards</b> (the briefing for their specialty) and <b>Add tip</b>. The pencil at the top edits the doctor: name, specialty, where, photo.</p>
     <p>No connection? The page shows what this phone has saved; the doctor’s prep terms come back once the directory loads.</p>` },
 
-  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory floor suite', q:'How do I set where a doctor works?', a:`
-    <p>On the doctor’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room goes in the box under it.</p>
+  { id:'teamtips', section:'prep', k:'team tips tip notes note doctor directory add edit delete my own quirks phrase before walking in', q:'How do team tips on a doctor work?', a:`
+    <p>A tip is what a teammate should know before walking in with this doctor: how they phrase things, what they always explain, how they like the interpreter to stand. Open the doctor’s page and tap <b>Add tip</b> at the bottom, or the yellow <b>Team tip</b> card.</p>
+    <p>The sheet shows every tip, oldest first, with who wrote it and when. Write yours in the box and tap <b>Add tip</b>. Your own tips have <b>Edit</b> and <b>Delete</b>; other people’s you can read but not change. If two of you add a tip at the same moment, both are kept.</p>
+    <p>A doctor’s old single note shows as the first tip. Anyone can edit or delete that one, as before. Notes are no longer on the doctor’s edit sheet; tips are where they live now.</p>
+    <p>Tips are shared with the whole team. Never put patient details in one.</p>` },
+
+  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory provider pictures floor suite unit', q:'How do I set where a doctor or provider works?', a:`
+    <p>On the doctor’s or the provider’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room (for a provider, the department or unit) goes in the box under it.</p>
     <p>Each place has a picture, from the same set as the Home pins. Tap the picture beside a place’s name in the Doctor Directory to change it. The places and pictures are shared: what you add or change, the whole team sees, in Provider Pictures too.</p>` },
 
-  { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital', q:'What is Provider Pictures?', a:`
+  { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital where place unit department', q:'What is Provider Pictures?', a:`
     <p><b>Provider Pictures</b> helps you put a face to a name. Open it from Home or under <b>More</b>.</p>
-    <p>Search by name, specialty or facility. Tap a photo to see it full screen. To add someone your team works with, tap <b>+ Add provider</b>.</p>
+    <p>Search by name, specialty, place or unit. Tap a photo to see it full screen. To add someone your team works with, tap <b>+ Add provider</b>.</p>
+    <p>Where they work is picked from the same list of places as the doctors (tap <b>Where</b>, then the place, or <b>Add a place</b>), so a hospital's doctors and providers sit under the same heading with the same icon. <b>Department or unit</b> is a line of your own, like "Infusion, 2nd floor".</p>
     <p>Use <b>Doctor Prep</b> to research a doctor. Use <b>Doctor Directory</b> for the research and notes your team has already saved.</p>` },
 
   { id:'falsefriends', section:'prep', k:'false friends cognates traps embarazada constipado misleading similar words drill', q:'What are False Friends?', a:`
@@ -17245,7 +17401,7 @@ const GUIDE_TOPICS = [
 
   { id:'regions', section:'team', k:'region regions north south shore humc channel channels everyone separate group team doctors directory my region', q:'What are North and South?', a:`
     <p>The Hub is shared by two interpreter teams: the <b>North</b> region (the HUMC side) and the <b>South</b> region (the Shore side). Nobody is walled off: everyone can read everything.</p>
-    <p>Your region decides two things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All regions</b> to see every doctor, and a search always looks through all of them.</p>
+    <p>Your region decides two things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All</b> to see every doctor, and a search always looks through all of them.</p>
     <p>Pick your region under your initial in the top-right corner, or when Chat or the Doctor Directory asks.</p>` },
 
   { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
@@ -17380,6 +17536,7 @@ const GUIDE_TOPICS = [
     <p>With <b>Record me</b> on, the mic records only during your turn. After the rendering, tap <b>Mine</b> to hear yourself and <b>Model</b> to hear the model rendering read aloud. Your take is dropped when the next line starts and is never sent anywhere.</p>
     <p>Three clean lines in a row and the next one is a few words longer. Two misses in a row and it gets shorter. Your <b>span</b> is the longest line you've held clean; lines done with notes count apart from memory only.</p>
     <p>Under <b>Start</b>, <b>Your span, by week</b> draws your longest clean line each week for the last 8 weeks. Tap a point to read that week. With notes shows as a second, lighter line.</p>
+    <p>With <b>Auto-mark</b> on, the phone listens to your turn and, when you tap Show the rendering, marks the parts it didn't hear ("not heard") and shows what it heard. It can be wrong, a synonym for example, so check the marks and tap to change any. Apple may process what you say, so practise away from patients. It's off unless you turn it on.</p>
     <p>If a line is wrong or sounds odd, tap <b>Flag this line</b> after the rendering and say why. Flags are read before the lines are changed.</p>
     <p>Your progress stays on this phone. Record me is off unless you turn it on. Near patients, use earbuds.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
@@ -17413,7 +17570,7 @@ const GUIDE_TOPICS = [
 
   { id:'privacy', section:'rule', k:'hipaa privacy patient confidential phi private rules safety mrn', q:'What must never go in this app?', a:`
     <p><b>Anything that identifies a patient.</b> No names, no dates of birth, no medical record numbers, no room numbers tied to a person.</p>
-    <p>This applies everywhere: terms, definitions, notes, chat messages, doctor notes and questions to Dr. Smiley. If a question looks like it has patient details, Ask stops and warns you before sending, and Dr. Smiley won't remember them.</p>
+    <p>This applies everywhere: terms, definitions, notes, chat messages, doctor tips and questions to Dr. Smiley. If a question looks like it has patient details, Ask stops and warns you before sending, and Dr. Smiley won't remember them.</p>
     <p>Describe the situation if you need to. Never the person.</p>` },
 ];
 
@@ -17787,9 +17944,9 @@ function render(){
   let showTopbar = true;
   if(activeCategory === 'providers'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
-    searchPlaceholder = 'Search provider photos, specialties, facilities…';
+    searchPlaceholder = 'Search providers, specialties, places…';
   } else if(activeCategory === 'doctor-directory'){
-    addBtnHtml = `<button class="btn btn-primary" onclick="openAddDoctorDirModal()">+ Add doctor</button>`;
+    addBtnHtml = '';   // the navy "+ Add" sits by the title (renderDoctorDirectory)
     searchPlaceholder = 'Search doctors, specialties, locations…';
   } else if(activeCategory === 'ethics'){
     addBtnHtml = '';
@@ -19745,7 +19902,8 @@ function navigateBack(){
   // it navigates the screen behind the panel and the panel stays put, which
   // reads as the button doing nothing.
   if(PV.open){ closePhotoViewer(); return true; }
-  const openOverlay = document.querySelector('.overlay.show');
+  // The last one open is on top (a doctor's tips over the doctor's page).
+  const openOverlay = [...document.querySelectorAll('.overlay.show')].pop();
   if(openOverlay){ openOverlay.classList.remove('show'); return true; }
 
   // Back is history, full stop. It used to try to be clever: on a subgroup
@@ -21660,7 +21818,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dp-gl';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -21688,8 +21846,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.1002';
-const BUILD_TIME = '2026-10-20 10:02 UTC';
+const BUILD_ID = 'b1020.1324';
+const BUILD_TIME = '2026-10-20 13:24 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -22246,7 +22404,7 @@ function memRead(){
   try{ p = JSON.parse(localStorage.getItem(MEM_KEY) || 'null'); }catch(e){}
   p = p && typeof p === 'object' ? p : {};
   return { level: Math.min(MEM_MAX, Math.max(MEM_MIN, +p.level || MEM_START)), clean: +p.clean || 0, miss: +p.miss || 0,
-    notes: !!p.notes, rec: !!p.rec, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
+    notes: !!p.notes, rec: !!p.rec, auto: !!p.auto, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
     seen: p.seen && typeof p.seen === 'object' ? p.seen : {}, log: Array.isArray(p.log) ? p.log : [],
     best: p.best && typeof p.best === 'object' ? p.best : {} };
 }
@@ -22328,13 +22486,14 @@ function memLeave(){
   memUtter = null; clearTimeout(memTimer);
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
   drTaskEnd('memory');
-  memRecDrop();
+  memRecDrop(); memSRDrop();
   MEM.stage = 'home'; MEM.flagOpen = false; MEM.msg = '';
 }
 
 function memSetDir(d){ memProg().dir = d; memSave(); renderContent(); }
 function memSetNotes(on){ memProg().notes = !!on; memSave(); renderContent(); }
 function memSetRec(on){ memProg().rec = !!on; memSave(); renderContent(); }
+function memSetAuto(on){ memProg().auto = !!on; memSave(); renderContent(); }
 
 async function memRecStart(){
   memRecDrop();
@@ -22427,7 +22586,8 @@ function memStart(){
 function memPlay(L){
   if(!L){ showToast('No lines to practise in that direction.'); return; }
   MEM.line = L; MEM.missed = {}; MEM.flagOpen = false; MEM.run++;
-  memRecDrop();
+  MEM.auto = null; MEM.autoDone = false; MEM.touched = false;
+  memRecDrop(); memSRDrop();
   clearTimeout(memTimer);
   if(!('speechSynthesis' in window)){ MEM.stage = 'read'; renderContent(); return; }
   speechSynthesis.cancel();
@@ -22448,13 +22608,110 @@ function memPlay(L){
   speechSynthesis.speak(u);
 }
 
+/* Auto-mark (M5): while it's your turn the phone turns what you say into
+   text (webkitSpeechRecognition, in the language you render into) and,
+   when you tap Show the rendering, pre-marks every chunk it didn't hear.
+   Matching is on the phone only (Jose, 2026-10-20): a chunk counts as heard
+   when at least half of its content words are in what you said (accents,
+   case and punctuation ignored, small words skipped, the first 5 letters
+   enough so "toma"/"tome" and "dressing"/"dressings" match, any number
+   matches a number). You can change every mark. Off by default: Apple may
+   process the speech on its servers. */
+const MEMSR = { r: null, text: '', final: '', state: '', done: null, tries: 0 };
+const MEM_STOP = new Set(('el la los las lo le les un una unos unas de del al a y e o u en que se me te mi mis su sus tu tus es son por para con sin ' +
+  'the a an of to and or in on at is are be it its my your his her their for with by as this that was').split(' '));
+const MEM_NUM = new Set(('cero uno una dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis diecisiete dieciocho diecinueve veinte ' +
+  'veintiuno veintidos veintitres veinticuatro veinticinco treinta cuarenta cincuenta sesenta setenta ochenta noventa cien ciento doscientos quinientos mil ' +
+  'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred thousand').split(' '));
+function memWords(t){
+  return foldText(String(t || '')).toLowerCase().replace(/[^a-z0-9ñ\s-]/g, ' ').split(/[\s-]+/).filter(Boolean)
+    .map(w => /^\d+$/.test(w) || MEM_NUM.has(w) ? '#' : w);
+}
+function memHeardSet(text){ const s = new Set(); memWords(text).forEach(w => { s.add(w); s.add(w.slice(0, 5)); }); return s; }
+// Which chunks the phone didn't hear (indexes).
+function memAutoMarks(L, text){
+  const heard = memHeardSet(text);
+  if(!heard.size) return null;
+  const out = [];
+  L.u.forEach((c, i) => {
+    const ws = memWords(c[1]).filter(w => !MEM_STOP.has(w));
+    if(!ws.length) return;
+    const got = ws.filter(w => heard.has(w) || heard.has(w.slice(0, 5))).length;
+    if(got / ws.length < .5) out.push(i);
+  });
+  return out;
+}
+function memSRStart(){
+  memSRDrop();
+  const SR = vcSR();
+  if(!SR){ MEMSR.state = 'off'; return; }
+  const r = MEMSR.r = new SR();
+  r.lang = MEM.line.dir === 'en-es' ? 'es-US' : 'en-US';
+  r.interimResults = true; r.continuous = true;
+  MEMSR.text = ''; MEMSR.final = ''; MEMSR.state = 'on'; MEMSR.tries = 0;
+  r.onresult = e => {
+    let fin = '', live = '';
+    for(const x of e.results){ if(x.isFinal) fin += x[0].transcript + ' '; else live += x[0].transcript + ' '; }
+    MEMSR.text = (MEMSR.final + ' ' + fin + live).trim();
+    const el = document.getElementById('memHeardN');
+    if(el){ const n = memWords(MEMSR.text).length; el.textContent = n ? `${n} word${n === 1 ? '' : 's'} heard` : 'listening'; }
+  };
+  r.onerror = e => { if(MEMSR.r !== r) return; const err = e && e.error || 'unknown';
+    if(err !== 'no-speech' && err !== 'aborted'){ MEMSR.state = 'error'; MEMSR.err = err; if(MEM.stage === 'turn') memRecPaint(); } };
+  // iPhones end a continuous listen after a pause: start again while it's
+  // still your turn (keeping what was heard), a few times at most.
+  r.onend = () => {
+    if(MEMSR.r !== r) return;
+    MEMSR.final = MEMSR.text;
+    if(MEM.stage === 'turn' && MEMSR.state === 'on' && MEMSR.tries < 4){ MEMSR.tries++; try{ r.start(); return; }catch(e){} }
+    MEMSR.r = null;
+    if(MEMSR.done){ const f = MEMSR.done; MEMSR.done = null; f(); }
+  };
+  try{ r.start(); }catch(e){ MEMSR.r = null; MEMSR.state = 'error'; MEMSR.err = e.name || 'start'; }
+}
+// Stop listening, then mark from what was heard (once the phone has handed
+// over its last words, or after 1.5 s).
+function memSRFinish(){
+  const r = MEMSR.r, run = MEM.run;
+  const apply = () => {
+    if(MEM.run !== run || MEM.stage !== 'check' || MEM.autoDone) return;
+    MEM.autoDone = true;
+    const marks = MEMSR.state === 'on' || MEMSR.text ? memAutoMarks(MEM.line, MEMSR.text) : null;
+    MEM.auto = { text: MEMSR.text, marks, err: MEMSR.state === 'error' ? MEMSR.err : '' };
+    if(marks && !MEM.touched) { MEM.missed = {}; marks.forEach(i => { MEM.missed[i] = true; }); }
+    if(activeCategory === 'memory') renderContent();
+  };
+  if(!r){ apply(); return; }
+  MEMSR.done = apply;
+  try{ r.stop(); }catch(e){ apply(); }
+  setTimeout(apply, 1500);
+}
+function memSRDrop(){
+  const r = MEMSR.r; MEMSR.r = null; MEMSR.done = null;
+  if(r){ try{ r.abort(); }catch(e){} }
+  MEMSR.state = '';
+}
+function memAutoLine(){
+  const A = MEM.auto;
+  if(!memProg().auto) return '';
+  if(!A) return `<p class="mem-rec" role="status">Checking what the phone heard…</p>`;
+  if(A.err === 'not-allowed' || A.err === 'service-not-allowed') return `<p class="mem-auto">Speech to text was refused. Mark it yourself, or allow it in Settings.</p>`;
+  if(!A.text) return `<p class="mem-auto">The phone heard nothing. Mark it yourself.</p>`;
+  const n = (A.marks || []).length;
+  return `<div class="mem-auto"><p>${n ? `Auto-marked: <b>${n}</b> part${n === 1 ? '' : 's'} not heard. Check ${n === 1 ? 'it' : 'them'}.` : 'Auto-marked: every part heard. Check it.'}</p>
+    <q>${escapeHtml(A.text)}</q></div>`;
+}
+
 function memTurn(){
   memUtter = null; clearTimeout(memTimer);
   MEM.stage = 'turn';
   drTask('processing', { key: 'memory', ms: 90000, perform: 'ponder', keep: true });
+  if(memProg().auto && activeCategory === 'memory' && MEM.line) memSRStart();
   if(activeCategory === 'memory') renderContent();
   if(memProg().rec && activeCategory === 'memory') memRecStart();
 }
+// If the phone only lets listening start from a tap.
+function memSRTap(){ memSRStart(); renderContent(); }
 
 function memReveal(){
   memUtter = null; clearTimeout(memTimer);
@@ -22462,10 +22719,13 @@ function memReveal(){
   MEM.stage = 'check';
   drTaskEnd('memory');
   if(MEMREC.rec) memRecStop(); else if(MEMREC.state !== 'done') MEMREC.state = '';
+  MEM.auto = null; MEM.autoDone = false;
   renderContent();
+  if(memProg().auto) memSRFinish();
 }
 
 function memToggleChunk(i){
+  MEM.touched = true;
   if(MEM.missed[i]) delete MEM.missed[i]; else MEM.missed[i] = true;
   const b = document.querySelector(`.mem-chunk[data-i="${i}"]`);
   if(b) b.setAttribute('aria-pressed', MEM.missed[i] ? 'true' : 'false');
@@ -22493,7 +22753,8 @@ function memHearAgain(){
 function memScore(){
   const p = memProg(), L = MEM.line, miss = Object.keys(MEM.missed).length, kind = p.notes ? 'notes' : 'mem';
   p.seen[L.id] = (p.seen[L.id] || 0) + 1;
-  p.log.push({ at: Date.now(), id: L.id, w: L.words, n: L.u.length, miss, notes: p.notes });
+  const A = MEM.auto && MEM.auto.marks;
+  p.log.push({ at: Date.now(), id: L.id, w: L.words, n: L.u.length, miss, notes: p.notes, ...(A ? { am: A.length } : {}) });
   if(p.log.length > 600) p.log = p.log.slice(-600);
   let moved = 0, best = false;
   if(!miss){
@@ -22584,6 +22845,9 @@ function renderMemTrainer(){
       <label class="mem-notes"><input type="checkbox" ${p.rec ? 'checked' : ''} onchange="memSetRec(this.checked)">
         <span class="mem-switch" aria-hidden="true"></span>
         <span><b>Record me</b><small>${p.rec ? 'On: the mic records your turn, so you can play it beside the model. Dropped after each line.' : 'Off: nothing is recorded.'}</small></span></label>
+      ${vcSR() ? `<label class="mem-notes"><input type="checkbox" ${p.auto ? 'checked' : ''} onchange="memSetAuto(this.checked)">
+        <span class="mem-switch" aria-hidden="true"></span>
+        <span><b>Auto-mark</b><small>${p.auto ? 'On: the phone listens to your turn and marks what it didn’t hear. Apple may process what you say: practise away from patients.' : 'Off: you mark every part yourself.'}</small></span></label>` : ''}
       <button type="button" class="mastery-go mem-go mem-start" ${go}>${ready ? 'Start' : MEM.err ? 'Try again' : 'Loading lines…'}</button>
       ${MEM.err ? `<p class="mem-small">Couldn’t load the lines. Check the connection, then tap <b>Try again</b>.</p>` : ''}
       <p class="mem-small">${p.rec ? 'Your take stays on this phone and is never sent.' : 'Nothing is recorded.'} Near patients, use earbuds.</p>
@@ -22603,14 +22867,15 @@ function renderMemTrainer(){
       <p class="mem-hint">This phone can’t read aloud. Read it once, then tap Hide.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memTurn()">Hide, my turn</button></div>`;
   } else if(MEM.stage === 'turn'){
-    html += memRingHtml('turn') + memRecLine() + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
+    html += memRingHtml('turn') + memRecLine() + (p.auto && MEMSR.state === 'on' ? `<p class="mem-rec" role="status">Auto-mark: <span id="memHeardN">listening</span></p>`
+      : p.auto && MEMSR.state === 'error' && !MEMSR.text ? `<div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memSRTap()">Start listening</button></div>` : '') + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memReveal()">Show the rendering</button></div>`;
   } else {
     const flagged = MEM.flagged[L.id];
-    html += `<p class="mem-hint">Tap any part you dropped or changed.</p>
+    html += memAutoLine() + `<p class="mem-hint">Tap any part you dropped or changed.</p>
       <div class="mem-chunks" lang="${L.dir === 'en-es' ? 'es' : 'en'}">${L.u.map((c, i) =>
         `<button type="button" class="mem-chunk" data-i="${i}" aria-pressed="${MEM.missed[i] ? 'true' : 'false'}" onclick="memToggleChunk(${i})">
-          <span class="mem-model">${escapeHtml(c[1])}</span><span class="mem-srcx" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(c[0])}</span></button>`).join('')}</div>
+          ${MEM.auto && MEM.auto.marks && MEM.auto.marks.includes(i) ? '<span class="mem-tag">not heard</span>' : ''}<span class="mem-model">${escapeHtml(c[1])}</span><span class="mem-srcx" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(c[0])}</span></button>`).join('')}</div>
       ${L.note ? `<p class="mem-watch"><b>Watch</b> ${escapeHtml(L.note)}</p>` : ''}
       ${MEMREC.url ? `<div class="mem-back"><span>Listen back</span><button type="button" class="btn btn-ghost" onclick="memPlayMine()">Mine</button><button type="button" class="btn btn-ghost" onclick="memPlayModel()">Model</button></div>`
         : MEMREC.state === 'saving' ? `<p class="mem-rec" role="status">Saving your take…</p>` : MEMREC.state === 'empty' ? `<p class="mem-rec" role="status">Nothing was recorded that time.</p>` : ''}
@@ -23494,6 +23759,7 @@ function renderProviders(q){
       foldText(p.name).includes(q) ||
       foldText(p.role).includes(q) ||
       foldText(p.facility).includes(q) ||
+      foldText(p.unit).includes(q) ||
       foldText(p.notes).includes(q)
     );
   }
@@ -23539,8 +23805,8 @@ function renderProviders(q){
             ${p.role ? `<span class="tag provider-role-tag">${escapeHtml(p.role)}</span>` : ''}
           </div>
         </div>
-        ${rawLocationNote(p.facility, locationGroupName(p, p.facility))
-          ? `<p class="provider-facility">${escapeHtml(rawLocationNote(p.facility, locationGroupName(p, p.facility)))}</p>` : ''}
+        ${rawLocationNote(p.facility, locationGroupName(p, p.facility)) || (p.unit || '').trim()
+          ? `<p class="provider-facility">${escapeHtml([rawLocationNote(p.facility, locationGroupName(p, p.facility)), (p.unit || '').trim()].filter(Boolean).join(' · '))}</p>` : ''}
         ${p.phone ? `<a class="provider-phone" href="tel:${escapeAttr(phoneDigits)}">${ICON_PHONE}${escapeHtml(p.phone)}</a>` : ''}
         ${p.notes ? `<p class="def" style="margin-top:6px;">${escapeHtml(p.notes)}</p>` : ''}
         ${p.addedBy ? `<div class="meta">
@@ -23665,7 +23931,7 @@ function mergeDoctorRecords(records, preferredId){
     }
     return undefined;
   };
-  ['specialty','hospitalLocation','locationDetails','locationGroup','notes','photo','photoPath','source','lastResearchedBy']
+  ['specialty','hospitalLocation','locationDetails','locationGroup','photo','photoPath','source','lastResearchedBy']
     .forEach(f => { const v = firstNonEmpty(f); if(v !== undefined) keep[f] = v; });
 
   // Keep whichever research is richest, not whichever is newest.
@@ -23704,6 +23970,13 @@ async function mergeDuplicateDoctors(keepId){
 
   try{
     await persistDoctorDirectoryEntry(merged.id, merged);
+    // Every tip moves to the doctor kept, the others' old notes as real tips.
+    const moved = group.filter(o => o.id !== merged.id).flatMap(o => doctorTips(o).map(t =>
+      t.legacy ? { id: genId(), text: t.text, by: t.by || 'Someone', at: t.at || Date.now() } : t));
+    if(moved.length){
+      await trackWrite(db.collection('doctor-directory').doc(merged.id).update({ tips: firebase.firestore.FieldValue.arrayUnion(...moved) }));
+      merged.tips = [...(Array.isArray(merged.tips) ? merged.tips : []), ...moved];
+    }
     for(const other of group){
       if(other.id === merged.id) continue;
       // Trashed rather than dropped — a bad merge is recoverable.
@@ -23733,7 +24006,7 @@ function duplicateBannerHtml(){
     return `<div class="dupe-banner">
       <div class="backfill-banner-text">
         <b>Possible duplicate</b>
-        <span>${names} look like the same person. Merging keeps every note, photo and term from both.</span>
+        <span>${names} look like the same person. Merging keeps every tip, photo and term from both.</span>
       </div>
       <div class="dupe-banner-actions">${options}</div>
     </div>`;
@@ -23878,7 +24151,7 @@ function backfillBannerHtml(){
   return `<div class="backfill-banner">
     <div class="backfill-banner-text">
       <b>${n} doctor${n === 1 ? '' : 's'} on the old terminology</b>
-      <span>Re-research ${n === 1 ? 'this one' : 'them'} to get drugs, procedures and false friends grouped separately. Takes about half a minute each; your notes and photos are kept.</span>
+      <span>Re-research ${n === 1 ? 'this one' : 'them'} to get drugs, procedures and false friends grouped separately. Takes about half a minute each; tips and photos are kept.</span>
     </div>
     <button class="backfill-banner-btn is-primary" onclick="runTierBackfill()">Update ${n === 1 ? '' : 'all'}</button>
   </div>`;
@@ -23895,12 +24168,13 @@ function doctorRegionChipsHtml(view, searching){
   if(searching) return `<p class="rg-note">Searching every region.</p>`;
   const count = r => r === 'all' ? DOCTOR_DIRECTORY.length
     : DOCTOR_DIRECTORY.filter(d => { const x = doctorRegion(d); return !x || x === r; }).length;
-  const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All regions' }]
+  const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All' }]
     .map(c => `<button type="button" role="radio" aria-checked="${c.id === view}" onclick="setDoctorRegionView('${c.id}')">${escapeHtml(c.name)} <span>${count(c.id)}</span></button>`).join('');
   return `<div class="ds-mode-seg rg-filter" role="radiogroup" aria-label="Show doctors from">${chips}</div>`
     + (myRegion() ? '' : regionAskHtml('The directory will open on it.'));
 }
 
+const DOCTOR_ADD_BTN = `<button type="button" class="dl-add" onclick="openAddDoctorDirModal()" aria-label="Add a doctor">+ Add</button>`;
 function renderDoctorDirectory(q){
   let list = DOCTOR_DIRECTORY.slice();
   const view = q ? 'all' : doctorRegionView();
@@ -23911,7 +24185,7 @@ function renderDoctorDirectory(q){
       foldText(d.specialty).includes(q) ||
       foldText(d.hospitalLocation).includes(q) ||
       foldText(d.locationDetails).includes(q) ||
-      foldText(d.notes).includes(q)
+      foldText(doctorTipsText(d)).includes(q)
     );
   }
   list.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
@@ -23923,7 +24197,7 @@ function renderDoctorDirectory(q){
     if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE !== 'ok')
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Loading the doctors&hellip;</div>`;
     if(DOCTOR_DIRECTORY.length && !q && view !== 'all')
-      return `<div class="section-head"><h2>Doctor Directory</h2></div>${doctorRegionChipsHtml(view, false)}`
+      return `<div class="section-head dl-head"><h2>Doctor Directory</h2>${DOCTOR_ADD_BTN}</div>${doctorRegionChipsHtml(view, false)}`
         + `<div class="empty"><div class="glyph">${ICON_GRID}</div>No doctors in the ${escapeHtml(regionName(view))} region yet.<br>Add one, or run a Doctor Prep search.</div>`;
     const msg = DOCTOR_DIRECTORY.length===0
       ? `No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
@@ -23934,73 +24208,83 @@ function renderDoctorDirectory(q){
   const groups = groupByLocation(list, d => d.hospitalLocation);
   const searching = !!q;
 
-  let html = `<div class="section-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span></div>`;
+  let html = `<div class="section-head dl-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span>${DOCTOR_ADD_BTN}</div>`;
   html += doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
-  html += duplicateBannerHtml();
-  html += backfillBannerHtml();
+  html += doctorTidyButtonHtml();
   html += groupControlsHtml('doctors', groups, searching);
-  let cardIdx = -1;
+  if(document.getElementById('doctorTidyOverlay')?.classList.contains('show')) setTimeout(renderDoctorTidy);
   groups.forEach(group=>{
     html += groupHeaderHtml('doctors', group, searching);
     if(!searching && isGroupCollapsed('doctors', group.name)) return;
-    html += `<div class="grid">`;
-    group.items.forEach(d=>{
-    cardIdx++;
-    const initials = initialsOf(d.name);
-    // Tinted by specialty rather than one colour for the whole directory, so
-    // the same field always looks the same and the grid groups itself.
-    const accent = specialtyColor(d.specialty);
-    const delay = Math.min(cardIdx * 0.03, 0.3);
-    const termCount = researchTermCount(d.researchResult);
-    // "From Doctor Prep" used to sit on the card as a tag. It was on nearly
-    // every one, so it separated nothing — and the prep-terms line below
-    // already says whether research exists. Source stays in the detail view.
-    const by = d.updatedBy ? `Updated by ${escapeHtml(d.updatedBy)}`
-      : (d.lastResearchedBy ? `Researched by ${escapeHtml(d.lastResearchedBy)}` : '');
-    const photo = d.photo
-      ? `<img class="doc-card-photo" src="${escapeAttr(d.photo)}" alt="${escapeAttr(d.name)}" title="View photo"
-           onclick="event.stopPropagation(); openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})">`
-      : `<div class="doc-card-photo doc-card-photo-fallback" style="background:linear-gradient(150deg, ${accent}, ${darkenHex(accent, 34)});">${escapeHtml(initials||'?')}</div>`;
-
-    html += `
-      <div class="doc-card" style="--doc-accent:${accent}; animation-delay:${delay.toFixed(2)}s;"
-           onclick="openDoctorDirDetail('${d.id}')">
-        <div class="doc-card-actions">
-          <button class="icon-btn" title="Edit" onclick="event.stopPropagation(); openEditDoctorDirModal('${d.id}')">\u270E</button>
-          <button class="icon-btn danger" title="Delete" onclick="event.stopPropagation(); deleteDoctorDirEntry('${d.id}')">\u2715</button>
-        </div>
-        <div class="doc-card-top">
-          ${photo}
-          <div class="doc-card-id">
-            <div class="doc-card-name">${escapeHtml(d.name)}</div>
-            ${d.specialty ? `<div class="doc-card-specialty">${escapeHtml(d.specialty)}</div>` : ''}
-            ${/* The group heading carries the canonical facility, so repeating
-                  it on every card in that group is noise. But when the record
-                  says something different from the heading — "JTCC", or a
-                  pavilion the heading doesn't mention — that's the wording
-                  actually on file, and it's worth keeping visible. */''}
-            ${rawLocationNote(d.hospitalLocation, locationGroupName(d, d.hospitalLocation))
-              ? `<p class="doc-card-facility">${escapeHtml(rawLocationNote(d.hospitalLocation, locationGroupName(d, d.hospitalLocation)))}</p>` : ''}
-          </div>
-        </div>
-        ${/* .trim() matters: a field holding only a space is truthy, which
-              drew an empty pin row with no text beside it. */''}
-        ${(d.locationDetails||'').trim() ? `<div class="doc-card-where">${ICON_PIN}<span>${escapeHtml(d.locationDetails.trim())}</span></div>` : ''}
-        ${(d.notes||'').trim() ? `<p class="doc-card-note">${escapeHtml(d.notes.trim())}</p>` : ''}
-        <div class="doc-card-foot">
-          ${termCount
-            ? `<span class="doc-card-terms">${ICON_SPARK}${termCount} prep term${termCount===1?'':'s'}</span>`
-            : `<span class="doc-card-terms" style="color:var(--ink-faint);">No prep research yet</span>`}
-          ${by ? `<span class="doc-card-by">${by}</span>` : ''}
-        </div>
-      </div>
-    `;
-    });
-    html += `</div>`;
+    html += `<div class="dl-grid">${group.items.map(doctorListCard).join('')}</div>`;
   });
   return html;
+}
+
+/* One doctor in the list (D3; mockup docs/mockups/doctors/list.png): the
+   photo, or the specialty's pin in a soft tile with the initials; name,
+   specialty, floor; labels for terms, traps (false friends) and tips. No
+   research yet: "+ Prep terms" (Doctor Prep, filled in). The whole card
+   opens the doctor's page; edit and delete are on the page's pencil. */
+function doctorListCounts(d){
+  const n = d.researchResult ? doctorResearchCounts(d.researchResult) : (d._n || { terms: 0, traps: 0 });
+  return { terms: n.terms + (Array.isArray(d.customTerms) ? d.customTerms.length : 0), traps: n.traps,
+    researched: !!(d.researchResult ? n.terms : (d._n && d._n.terms)), tips: doctorTips(d).length };
+}
+function doctorResearchCounts(r){
+  const tiers = researchTiers(r);
+  return { terms: tiers.reduce((n, t) => n + t.terms.length, 0), traps: (tiers.find(t => t.key === 'falsefriends') || { terms: [] }).terms.length };
+}
+function doctorListCard(d){
+  const id = escapeAttr(d.id);
+  const place = locationGroupName(d, d.hospitalLocation);
+  const c = doctorListCounts(d);
+  const floor = (d.locationDetails || '').trim();
+  const ph = d.photo
+    ? `<div class="dl-ph is-photo" aria-hidden="true"><img src="${escapeAttr(d.photo)}" alt="" loading="lazy"><span class="dl-ini">${escapeHtml(initialsOf(d.name))}</span></div>`
+    : `<div class="dl-ph" aria-hidden="true">${pinImgHtml(specialtyPinKey(d.specialty, place))}<span class="dl-ini">${escapeHtml(initialsOf(d.name))}</span></div>`;
+  const tags = [
+    c.terms ? `<span class="dl-tag">${c.terms} term${c.terms === 1 ? '' : 's'}</span>` : '',
+    c.traps ? `<span class="dl-tag is-ff">${c.traps} trap${c.traps === 1 ? '' : 's'}</span>` : '',
+    c.tips ? `<span class="dl-tag is-tip">${c.tips} tip${c.tips === 1 ? '' : 's'}</span>` : '',
+  ].join('');
+  // "+ Prep terms" only when the directory has loaded: the saved copy can't
+  // tell an unresearched doctor from one whose research hasn't arrived.
+  const prep = !c.researched && DOCTOR_DIR_STATE === 'ok'
+    ? `<button type="button" class="dl-prep" onclick="event.stopPropagation(); researchThisDoctorFromDirectory('${id}')">+ Prep terms</button>` : '';
+  return `<div class="dl-card" role="button" tabindex="0" style="--dp-sp:${specialtyColor(d.specialty)}"
+      aria-label="${escapeAttr(d.name)}${d.specialty ? ', ' + escapeAttr(d.specialty) : ''}"
+      onclick="openDoctorDirDetail('${id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openDoctorDirDetail('${id}')}">
+      ${ph}
+      <div class="dl-name">${escapeHtml(d.name)}</div>
+      ${d.specialty ? `<div class="dl-spec">${escapeHtml(d.specialty)}</div>` : ''}
+      <div class="dl-floor${floor ? '' : ' is-none'}">${floor ? escapeHtml(floor) : 'No floor yet'}</div>
+      ${tags || prep ? `<div class="dl-tags">${tags}${prep}</div>` : ''}
+    </div>`;
+}
+
+/* Duplicates and doctors on the old terminology: one "N things to tidy"
+   button, the fixes in a sheet. A running update stays on the list. */
+function doctorTidyCount(){ return duplicateDoctorGroups().length + (doctorsNeedingTiers().length ? 1 : 0); }
+function doctorTidyButtonHtml(){
+  if(tierBackfill.running) return backfillBannerHtml();
+  const n = doctorTidyCount();
+  return n ? `<button type="button" class="dl-tidy" onclick="openDoctorTidy()">${ICON_FLAG}${n} thing${n === 1 ? '' : 's'} to tidy</button>` : '';
+}
+function openDoctorTidy(){
+  renderDoctorTidy();
+  document.getElementById('doctorTidyOverlay').classList.add('show');
+}
+function closeDoctorTidy(){ document.getElementById('doctorTidyOverlay').classList.remove('show'); }
+function renderDoctorTidy(){
+  const body = document.getElementById('dtyBody');
+  if(!body) return;
+  const n = doctorTidyCount();
+  if(!n || tierBackfill.running){ closeDoctorTidy(); return; }
+  document.getElementById('dtyTitle').textContent = `${n} thing${n === 1 ? '' : 's'} to tidy`;
+  body.innerHTML = duplicateBannerHtml() + backfillBannerHtml();
 }
 
 let doctorTermTargetId = null;
@@ -24274,12 +24558,158 @@ function doctorPageStartAppt(id){
   doctorPagePrep(d);
   startAppt();
 }
-// Edit (and, until team tips, Add tip: the doctor's notes) open the doctor's
-// sheet; closing it comes back to this page.
+// Edit opens the doctor's sheet; closing it comes back to this page.
 let doctorPageReturnTo = null;
 function doctorPageEdit(id, field){
   closeDoctorDirDetail();
   requireName(() => { doctorPageReturnTo = id; _openEditDoctorDirModal(id, field); });
+}
+
+/* ---------- Team tips (D2) ----------
+   `tips: [{id, text, by, at, uid}]` on the doctor's document. The old single
+   `notes` shows as the first tip (by `updatedBy`) until someone edits or
+   deletes it; then it is written into `tips` and `notes` goes. No migration.
+   Each change is one arrayUnion / arrayRemove, so two phones adding tips at
+   once both keep theirs (whole-doctor saves leave `tips` alone). */
+function doctorTips(d){
+  const tips = (Array.isArray(d && d.tips) ? d.tips : []).filter(t => t && (t.text || '').trim());
+  const old = ((d && d.notes) || '').trim();
+  return old ? [{ id: 'notes', text: old, by: d.updatedBy || '', at: d.updatedAt || 0, legacy: true }, ...tips] : tips;
+}
+function doctorTipsText(d){ return doctorTips(d).map(t => t.text).join('\n'); }
+// Yours: this phone wrote it, or (a tip with no phone on it) your name did.
+// The old note was anyone's to change before, so it still is.
+function isMyTip(t){
+  if(t.legacy) return true;
+  const u = hubAuth && hubAuth.currentUser;
+  if(t.uid) return !!u && u.uid === t.uid;
+  const me = (whoAmI() || '').trim().toLowerCase();
+  return !!me && (t.by || '').trim().toLowerCase() === me;
+}
+async function doctorTipWrite(id, { add, remove, dropNotes }){
+  if(!db){ showToast('Not connected to the database.'); return false; }
+  const FV = firebase.firestore.FieldValue;
+  const ref = db.collection('doctor-directory').doc(id);
+  const batch = db.batch();
+  if(remove) batch.update(ref, { tips: FV.arrayRemove(remove) });
+  const up = {};
+  if(add) up.tips = FV.arrayUnion(add);
+  if(dropNotes) up.notes = FV.delete();
+  if(Object.keys(up).length) batch.update(ref, up);
+  await trackWrite(batch.commit());
+  return true;
+}
+
+const DT = { id: null, editing: null };
+function openDoctorTips(id){
+  requireName(() => {
+    const d = DOCTOR_DIRECTORY.find(x => x.id === id);
+    if(!d) return;
+    DT.id = id; DT.editing = null;
+    document.getElementById('dtTitle').textContent = `Team tips · ${d.name}`;
+    document.getElementById('fDTip').value = '';
+    renderDoctorTips();
+    document.getElementById('doctorTipsOverlay').classList.add('show');
+    const list = document.getElementById('dtList');
+    list.scrollTop = list.scrollHeight;
+    if(!doctorTips(d).length) document.getElementById('fDTip').focus();
+  });
+}
+function closeDoctorTips(){
+  document.getElementById('doctorTipsOverlay').classList.remove('show');
+  DT.id = null; DT.editing = null;
+}
+function renderDoctorTips(){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  if(!d) return;
+  const tips = doctorTips(d);
+  document.getElementById('dtList').innerHTML = tips.length ? tips.map(t => {
+    const mine = isMyTip(t);
+    const meta = [t.by || 'Someone', relativeTime(t.at)].filter(Boolean).join(' · ') + (t.editedAt ? ' · edited' : '');
+    return `<div class="dt-tip${DT.editing === t.id ? ' is-editing' : ''}">
+      <p>${escapeHtml(t.text)}</p>
+      <div class="dt-meta"><small>${escapeHtml(meta)}</small>${mine ? `
+        <button type="button" class="dt-act" onclick="editDoctorTip('${escapeAttr(t.id)}')" aria-label="Edit this tip">Edit</button>
+        <button type="button" class="dt-act is-del" onclick="deleteDoctorTip('${escapeAttr(t.id)}')" aria-label="Delete this tip">Delete</button>` : ''}</div>
+    </div>`;
+  }).join('') : `<p class="dt-empty">No tips yet. How do they phrase things? What do they always explain? What should a newer interpreter know before walking in?</p>`;
+  const editing = DT.editing && tips.find(t => t.id === DT.editing);
+  document.getElementById('dtFieldLabel').textContent = editing ? 'Edit your tip' : 'Add a tip';
+  document.getElementById('dtSave').textContent = editing ? 'Save' : 'Add tip';
+  document.getElementById('dtCancel').textContent = editing ? 'Cancel edit' : 'Close';
+}
+function editDoctorTip(tipId){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  const t = d && doctorTips(d).find(x => x.id === tipId);
+  if(!t || !isMyTip(t)) return;
+  DT.editing = tipId;
+  const f = document.getElementById('fDTip');
+  f.value = t.text;
+  renderDoctorTips();
+  f.focus();
+}
+function doctorTipsCancel(){
+  if(!DT.editing){ closeDoctorTips(); return; }
+  DT.editing = null;
+  document.getElementById('fDTip').value = '';
+  renderDoctorTips();
+}
+// The local copy follows what was written, then the tips, the page and the
+// list redraw.
+function doctorTipsApply(d, { add, remove, dropNotes }){
+  let tips = Array.isArray(d.tips) ? d.tips.slice() : [];
+  if(remove) tips = tips.filter(t => t.id !== remove.id);
+  if(add) tips.push(add);
+  d.tips = tips;
+  if(dropNotes) delete d.notes;
+  doctorDirToCache(DOCTOR_DIRECTORY);
+  renderDoctorTips();
+  if(currentDoctorDetailId === d.id && document.getElementById('doctorDirDetailOverlay').classList.contains('show')) refreshDoctorDirDetail();
+  render();
+}
+async function saveDoctorTip(){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  if(!d) return;
+  const text = document.getElementById('fDTip').value.trim();
+  if(!text){ showToast('Write the tip first.'); return; }
+  const old = DT.editing && doctorTips(d).find(t => t.id === DT.editing);
+  if(old && old.text === text){ doctorTipsCancel(); return; }
+  const u = hubAuth && hubAuth.currentUser;
+  const tip = old && !old.legacy
+    ? { ...old, text, editedAt: Date.now() }
+    : { id: genId(), text, by: whoAmI() || 'Someone', at: Date.now(), ...(u ? { uid: u.uid } : {}) };
+  const change = { add: tip, remove: old && !old.legacy ? old : null, dropNotes: !!(old && old.legacy) };
+  const btn = document.getElementById('dtSave');
+  btn.disabled = true;
+  try{
+    if(!await doctorTipWrite(d.id, change)) return;
+    doctorTipsApply(d, change);
+    logActivity(old ? `edited a tip for ${d.name}` : `added a tip for ${d.name}`);
+    DT.editing = null;
+    document.getElementById('fDTip').value = '';
+    renderDoctorTips();
+    const list = document.getElementById('dtList');
+    if(!old) list.scrollTop = list.scrollHeight;
+    showToast(old ? 'Tip saved.' : 'Tip added.');
+  }catch(err){
+    showToast(saveErrorMessage(err, 'doctor-directory'));
+  }finally{ btn.disabled = false; }
+}
+async function deleteDoctorTip(tipId){
+  const d = DOCTOR_DIRECTORY.find(x => x.id === DT.id);
+  const t = d && doctorTips(d).find(x => x.id === tipId);
+  if(!t || !isMyTip(t)) return;
+  if(!confirm('Delete this tip?')) return;
+  const change = t.legacy ? { dropNotes: true } : { remove: t };
+  try{
+    if(!await doctorTipWrite(d.id, change)) return;
+    if(DT.editing === tipId){ DT.editing = null; document.getElementById('fDTip').value = ''; }
+    doctorTipsApply(d, change);
+    logActivity(`removed a tip for ${d.name}`);
+    showToast('Tip deleted.');
+  }catch(err){
+    showToast('Could not delete. Check your connection.');
+  }
 }
 
 function renderDoctorDirDetail(d){
@@ -24312,11 +24742,11 @@ function renderDoctorDirDetail(d){
         <button type="button" class="dp-navy-btn" onclick="researchThisDoctorFromDirectory('${id}')">Research this doctor</button>`}
     </div>`;
 
-  const notes = (d.notes || '').trim();
-  const tip = `<button type="button" class="dp-card dp-mini dp-tip" onclick="doctorPageEdit('${id}', 'fDDNotes')" aria-label="${notes ? 'Team tip. Tap to change it' : 'Add a team tip'}">
-      <div class="dp-k">Team tip${notes ? ' · 1' : ''}</div>
-      ${notes ? `<p>“${escapeHtml(notes)}”</p>${d.updatedBy ? `<small>${escapeHtml(d.updatedBy)}</small>` : ''}`
-        : `<p class="is-empty">None yet. Add what a teammate should know before walking in.</p>`}
+  const tips = doctorTips(d), first = tips[0];
+  const tip = `<button type="button" class="dp-card dp-mini dp-tip" onclick="openDoctorTips('${id}')" aria-label="${tips.length ? `Team tips, ${tips.length}. Tap to read or add` : 'Add a team tip'}">
+      <div class="dp-k">Team tip${tips.length > 1 ? 's' : ''}${tips.length ? ` · ${tips.length}` : ''}</div>
+      ${first ? `<p>“${escapeHtml(first.text)}”</p>${first.by ? `<small>${escapeHtml(first.by)}</small>` : ''}`
+        : `<p class="is-empty">None yet. Tap to add one.</p>`}
     </button>`;
 
   const on = tabs.find(t => t.key === activeResearchTier.detail) || tabs.find(t => t.terms.length) || tabs[tabs.length - 1];
@@ -24331,16 +24761,16 @@ function renderDoctorDirDetail(d){
         <div class="dp-en" lang="en">${escapeHtml(t.en || '')}</div>
         ${t.es ? `<div class="dp-es" lang="es">${escapeHtml(t.es)}</div>` : ''}
         ${t.def ? `<div class="dp-def">${escapeHtml(t.def)}</div>` : ''}
-        <div class="dp-row-foot">
-          ${have ? `<span class="dp-have">${ICON_CHECK} In glossary</span>`
-            : `<button type="button" class="dp-link" onclick="doctorPageAddOne(${i}, this)">+ Add to glossary</button>`}
-          ${on.key === 'team' ? `<button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm('${id}','${escapeAttr(t.id)}')">Remove</button>` : ''}
-          ${on.key === 'team' && t.addedBy ? `<span>Added by ${escapeHtml(t.addedBy)}</span>` : ''}
-        </div>
+        ${on.key === 'team' ? `<div class="dp-row-foot">
+          <button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm('${id}','${escapeAttr(t.id)}')">Remove</button>
+          ${t.addedBy ? `<span>Added by ${escapeHtml(t.addedBy)}</span>` : ''}
+        </div>` : ''}
       </div>
       <div class="dp-say-col">
         ${t.en ? `<button type="button" class="dp-say" aria-label="Hear it in English" onclick="doctorPageSay(this, ${i}, 'en')">${ICON_SPEAKER}EN</button>` : ''}
         ${t.es ? `<button type="button" class="dp-say" aria-label="Hear it in Spanish" onclick="doctorPageSay(this, ${i}, 'es')">${ICON_SPEAKER}ES</button>` : ''}
+        ${have ? `<span class="dp-gl is-have" title="Already in the glossary">${ICON_CHECK}Glossary</span>`
+          : `<button type="button" class="dp-gl" aria-label="Add ${escapeAttr(t.en || t.es || 'this term')} to the glossary" onclick="doctorPageAddOne(${i}, this)">+ Glossary</button>`}
       </div>
     </div>`;
   }).join('');
@@ -24350,7 +24780,7 @@ function renderDoctorDirDetail(d){
     ? `<div class="dp-card dp-terms">${rows || `<div class="dp-empty">No team terms yet for ${escapeHtml(d.name)}. Add the phrases this doctor actually uses in the room.</div>`}</div>
        <button type="button" class="dp-wide" onclick="openDoctorTermModal('${id}')">${ICON_PLUS} Add a term for this doctor</button>`
     : `${flat ? `<div class="dp-card dp-old"><b>Older research: one list.</b> Research again to get drugs, procedures and false friends in their own tabs. Your tips, photo and team terms are kept.</div>`
-        : (on.blurb ? `<p class="dp-blurb">${escapeHtml(on.blurb)}</p>` : '')}
+        : (on.blurb || rows ? `<div class="dp-blurb">${on.blurb ? `<p>${escapeHtml(on.blurb)}</p>` : ''}${rows ? `<p class="dp-trust">${ICON_ALERT}From Doctor Prep, not checked by the team.</p>` : ''}</div>` : '')}
        <div class="dp-card dp-terms">${rows}</div>
        ${missing > 1 ? `<button type="button" class="dp-wide" onclick="addAllInTier('detail', '${on.key}')">${ICON_PLUS} Add all ${missing} new to the glossary</button>` : ''}
        ${domainMatch && missing ? `<p class="dp-meta">New terms go to ${escapeHtml(domainMatch.name)}.</p>` : ''}`;
@@ -24385,7 +24815,7 @@ function renderDoctorDirDetail(d){
     <div class="dp-bar">
       <button type="button" class="dp-go" onclick="doctorPageStartAppt('${id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Start appointment</button>
       <button type="button" class="dp-rb" onclick="doctorPageFlashcards('${id}')"><img src="pins/practice.webp" alt="">Flashcards</button>
-      <button type="button" class="dp-rb" onclick="doctorPageEdit('${id}', 'fDDNotes')"><img src="pins/chat.webp" alt="">Add tip</button>
+      <button type="button" class="dp-rb" onclick="openDoctorTips('${id}')"><img src="pins/chat.webp" alt="">Add tip</button>
     </div>
   `;
 }
@@ -26226,7 +26656,9 @@ function _openAddProviderModal(){
   document.getElementById('providerModalTitle').textContent = 'Add provider';
   document.getElementById('fPName').value = '';
   document.getElementById('fPRole').value = '';
-  document.getElementById('fPFacility').value = '';
+  ppPlace = '';
+  renderPPPlaceField();
+  document.getElementById('fPUnit').value = '';
   document.getElementById('fPPhone').value = '';
   document.getElementById('fPNotes').value = '';
   document.getElementById('fPPhoto').value = '';
@@ -26247,7 +26679,10 @@ function _openEditProviderModal(id){
   document.getElementById('providerModalTitle').textContent = 'Edit provider';
   document.getElementById('fPName').value = p.name || '';
   document.getElementById('fPRole').value = p.role || '';
-  document.getElementById('fPFacility').value = p.facility || '';
+  const g = locationGroupName(p, p.facility);
+  ppPlace = g === NO_LOCATION_LABEL ? '' : g;
+  renderPPPlaceField();
+  document.getElementById('fPUnit').value = p.unit || '';
   document.getElementById('fPPhone').value = p.phone || '';
   document.getElementById('fPNotes').value = p.notes || '';
   document.getElementById('fPPhoto').value = '';
@@ -26312,14 +26747,18 @@ async function saveProvider(){
   const name = document.getElementById('fPName').value.trim();
   if(!name){ showToast('Provider name is required.'); return; }
   const role = document.getElementById('fPRole').value.trim();
-  const facility = document.getElementById('fPFacility').value.trim();
+  const unit = document.getElementById('fPUnit').value.trim();
   const phone = document.getElementById('fPPhone').value.trim();
   const notes = document.getElementById('fPNotes').value.trim();
   const editor = whoAmI();
   const existing = editingProviderId ? PROVIDERS.find(p=>p.id===editingProviderId) : null;
+  // As for doctors: the wording on file stays while the place is unchanged;
+  // a moved or new provider's wording is the place itself.
+  const facility = (existing && ppPlace === locationGroupName(existing, existing.facility))
+    ? (existing.facility || '') : (ppPlace && ppPlace !== HMH_NETWORK_LABEL ? ppPlace : '');
 
   const record = {
-    name, role, facility, phone, notes,
+    name, role, facility, unit, locationGroup: ppPlace, phone, notes,
     photo: pendingPhotoDataUrl || null,
     photoPath: pendingPhotoPath || null,
     addedBy: editor || (existing && existing.addedBy) || '',
@@ -26382,8 +26821,14 @@ let editingDoctorDirId = null;
 let ddPlace = '';
 let placeAdding = null;          // { name, region } while the add form is open
 
-function renderDDPlaceField(){
-  const btn = document.getElementById('fDDPlace');
+// The picker serves two sheets (R5, 2026-10-20): the doctor's (ddPlace,
+// fDDPlace) and the provider's (ppPlace, fPPlace). placePickFor says which.
+let ppPlace = '', placePickFor = 'dd';
+function placePicked(){ return placePickFor === 'pp' ? ppPlace : ddPlace; }
+function renderPPPlaceField(){ renderPlaceField('fPPlace', ppPlace); }
+function renderDDPlaceField(){ renderPlaceField('fDDPlace', ddPlace); }
+function renderPlaceField(id, ddPlace){
+  const btn = document.getElementById(id);
   if(!btn) return;
   if(!ddPlace){
     btn.innerHTML = `<span class="place-field-icon is-empty">${groupIconHtml('medifind')}</span><span class="place-field-text"><b>Choose a place</b><small>Hospital, center or office</small></span><span class="place-field-chev" aria-hidden="true">›</span>`;
@@ -26393,7 +26838,8 @@ function renderDDPlaceField(){
   btn.innerHTML = `<span class="place-field-icon">${groupIconHtml(groupIconKeyFor(ddPlace))}</span><span class="place-field-text"><b>${escapeHtml(ddPlace === HMH_NETWORK_LABEL ? 'Hackensack Meridian Health' : ddPlace)}</b><small>${ddPlace === HMH_NETWORK_LABEL ? 'No specific site' : r ? escapeHtml(regionName(r)) + ' region' : 'No region'}</small></span><span class="place-field-chev" aria-hidden="true">›</span>`;
 }
 
-function openPlacePicker(){
+function openPlacePicker(target){
+  placePickFor = target === 'pp' ? 'pp' : 'dd';
   placeAdding = null;
   const q = document.getElementById('placeSearch');
   if(q) q.value = '';
@@ -26406,18 +26852,21 @@ function closePlacePicker(){
   placeAdding = null;
 }
 function pickPlace(encodedName){
-  ddPlace = decodeURIComponent(encodedName);
+  const name = decodeURIComponent(encodedName);
+  if(placePickFor === 'pp'){ ppPlace = name; closePlacePicker(); renderPPPlaceField(); return; }
+  ddPlace = name;
   closePlacePicker();
   renderDDPlaceField();
 }
 
 function placeCount(name){
-  return DOCTOR_DIRECTORY.filter(d => locationGroupName(d, d.hospitalLocation) === name).length;
+  const d = DOCTOR_DIRECTORY.filter(d => locationGroupName(d, d.hospitalLocation) === name).length;
+  const v = (PROVIDERS || []).filter(p => locationGroupName(p, p.facility) === name).length;
+  return [d ? `${d} doctor${d === 1 ? '' : 's'}` : '', v ? `${v} provider${v === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
 }
 function placeRowHtml(p){
-  const on = p.name === ddPlace;
-  const n = placeCount(p.name);
-  const sub = p.sub || (n ? `${n} doctor${n === 1 ? '' : 's'}` : '');
+  const on = p.name === placePicked();
+  const sub = p.sub || placeCount(p.name);
   return `<button type="button" class="place-row${on ? ' is-on' : ''}" aria-pressed="${on}" onclick="pickPlace('${encGroup(p.name)}')">
       <span class="place-row-icon">${groupIconHtml(groupIconKeyFor(p.name))}</span>
       <span class="place-row-text"><b>${escapeHtml(p.label || p.name)}</b>${sub ? `<small>${escapeHtml(sub)}</small>` : ''}</span>
@@ -26488,10 +26937,10 @@ function _openAddDoctorDirModal(){
   pendingDDPhotoDataUrl = null;
   pendingDDPhotoPath = null;
   document.getElementById('doctorDirModalTitle').textContent = 'Add doctor';
+  document.getElementById('fDDDelete').hidden = true;
   document.getElementById('fDDName').value = '';
   document.getElementById('fDDSpecialty').value = '';
   document.getElementById('fDDLocationDetails').value = '';
-  document.getElementById('fDDNotes').value = '';
   document.getElementById('fDDPhoto').value = '';
   ddPlace = '';
   renderDDPlaceField();
@@ -26510,10 +26959,10 @@ function _openEditDoctorDirModal(id, focusId){
   pendingDDPhotoDataUrl = d.photo || null;
   pendingDDPhotoPath = d.photoPath || null;
   document.getElementById('doctorDirModalTitle').textContent = 'Edit doctor';
+  document.getElementById('fDDDelete').hidden = false;
   document.getElementById('fDDName').value = d.name || '';
   document.getElementById('fDDSpecialty').value = d.specialty || '';
   document.getElementById('fDDLocationDetails').value = d.locationDetails || '';
-  document.getElementById('fDDNotes').value = d.notes || '';
   document.getElementById('fDDPhoto').value = '';
   const g = locationGroupName(d, d.hospitalLocation);
   ddPlace = g === NO_LOCATION_LABEL ? '' : g;
@@ -26582,7 +27031,6 @@ async function saveDoctorDirEntry(){
   if(!name){ showToast('Doctor\u2019s name is required.'); return; }
   const specialty = document.getElementById('fDDSpecialty').value.trim();
   const locationDetails = document.getElementById('fDDLocationDetails').value.trim();
-  const notes = document.getElementById('fDDNotes').value.trim();
   const editor = whoAmI();
 
   // Editing keeps the existing doc ID (so it stays the same physical
@@ -26601,7 +27049,7 @@ async function saveDoctorDirEntry(){
 
   const record = {
     ...(existing || {}),
-    name, specialty, locationDetails, notes,
+    name, specialty, locationDetails,
     // The wording Doctor Prep found stays on file while the place is unchanged;
     // a moved or new doctor's wording is the place itself, so the card never
     // shows the old building under the new heading.
@@ -26639,6 +27087,15 @@ async function saveDoctorDirEntry(){
   }
 }
 
+// Delete lives in the doctor's sheet now (the list cards have no buttons).
+// Deleted, there is no page to go back to.
+async function deleteDoctorFromSheet(){
+  const id = editingDoctorDirId;
+  if(!id) return;
+  if(!await deleteDoctorDirEntry(id)) return;
+  doctorPageReturnTo = null;
+  closeDoctorDirModal();
+}
 async function deleteDoctorDirEntry(id){
   const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
   if(!d) return;
@@ -26653,6 +27110,7 @@ async function deleteDoctorDirEntry(id){
     logActivity(`removed ${d.name} from the doctor directory`);
     showUndoToast('Doctor deleted.', trashId);
     render();
+    return true;
   }catch(err){
     showToast('Could not delete — check your connection.');
   }
@@ -27360,11 +27818,11 @@ function askCorpus(){
     { id: 'ff:' + i, type: 'False friend', spanish: f.es, looksLike: f.looks, means: f.means, sayInstead: f.say, note: f.note },
     `False Friends · ${f.es}`, [f.es, f.looks], [f.means, f.say, f.note, f.heard], { cat: 'falsefriends' }));
   (DOCTOR_DIRECTORY || []).forEach(d => add(
-    { id: 'dr:' + d.id, type: 'Doctor Directory', name: d.name, specialty: d.specialty, location: d.hospitalLocation, locationDetails: d.locationDetails, notes: d.notes },
-    `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, d.notes], { cat: 'doctor-directory' }));
+    { id: 'dr:' + d.id, type: 'Doctor Directory', name: d.name, specialty: d.specialty, location: d.hospitalLocation, locationDetails: d.locationDetails, notes: doctorTipsText(d) },
+    `Doctor Directory · ${d.name}`, [d.name], [d.specialty, d.hospitalLocation, d.locationDetails, doctorTipsText(d)], { cat: 'doctor-directory' }));
   (PROVIDERS || []).forEach(p => add(
-    { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: p.facility, notes: p.notes },
-    `Provider Pictures · ${p.name}`, [p.name], [p.role, p.facility, p.notes], { cat: 'providers' }));
+    { id: 'pv:' + p.id, type: 'Healthcare provider', name: p.name, role: p.role, facility: [p.facility, p.unit].filter(Boolean).join(' · '), notes: p.notes },
+    `Provider Pictures · ${p.name}`, [p.name], [p.role, p.facility, p.unit, p.notes], { cat: 'providers' }));
   (typeof ETHICS_CONTENT !== 'undefined' ? ETHICS_CONTENT : []).forEach(e => add(
     { id: 'eth:' + e.id, type: 'Code of Ethics', title: e.title, summary: stripTags(e.summary), inPractice: stripTags(e.practice), source: e.org },
     `Code of Ethics · ${e.title}`, [e.title], [stripTags(e.summary), stripTags(e.practice), e.tag], { cat: 'ethics' }));
@@ -29488,11 +29946,12 @@ function drCelebrate(seq){
 /* Study progress, from the verified result: a short joyful performance that
    fits it. score: the share right (0-1). kind: 'quiz', 'review' (a Term
    Review session), 'drill' (the Daily Drill on Home), 'warmup' (the old
-   daily question), 'streak' (n in a row in a practice quiz). A low score gets encouragement, never a cheer. */
+   daily question), 'streak' (n in a row in a practice quiz), 'days' (a
+   study-streak milestone: wow). A low score gets encouragement, never a cheer. */
 function smileyStudy(kind, score, n){
   let seq;
   if(kind === 'streak') seq = n >= 5 ? 'proud' : 'giggle';
-  else if(kind === 'days') seq = 'cheer';
+  else if(kind === 'days') seq = 'wow';
   else if(kind === 'warmup') seq = score >= 1 ? 'love' : 'encourage';
   else seq = score >= .9 ? 'cheer' : score >= .7 ? 'proud' : score >= .5 ? 'smile' : 'encourage';
   if(score >= .7 || kind === 'streak') drSetMood('happy', 180000);

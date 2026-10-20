@@ -1101,9 +1101,15 @@
       // Stop: the copy goes and the real name shows. Handing over (adopt): the
       // copy goes and the new greeting's name takes over the writing.
       function stop(handover){
-        if(done)return;done=true;cancelAnimationFrame(raf);
+        if(done)return;done=true;cancelAnimationFrame(raf);clearTimeout(cap);
         svg.remove();if(!handover)show(name);if(run&&run.stop===stop)run=null;
       }
+      // The pen keeps its own pace (64 ms a frame at most), so a page drawing
+      // very few frames a second (a CI browser under load; a phone that has
+      // all but stopped painting) can take many times `total`. A wall clock
+      // ends it: the name is never kept back longer than this, whatever the
+      // frames do. Generous enough never to cut a pen that is visibly moving.
+      const cap=setTimeout(()=>stop(),Math.max(12000,total*4));
       let dx=0, dy=0;
       function tick(now){
         if(!svg.isConnected||document.hidden||!name.isConnected)return stop();

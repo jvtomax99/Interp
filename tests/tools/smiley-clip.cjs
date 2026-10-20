@@ -12,7 +12,7 @@
 const { chromium, boot } = require('../support/harness.cjs');
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const OUT = path.resolve(process.argv[2] || 'out/clip'), NAMES = process.argv.slice(3).length ? process.argv.slice(3) : ['cheer', 'greet'];
-const STEP = 1000 / 60, DUR = 2700;
+const STEP = 1000 / 60, DUR = +process.env.MS || 2700;   // MS=3600 for a longer one
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const b = await chromium.launch();
