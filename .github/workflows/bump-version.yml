@@ -1,0 +1,55 @@
+# After each push to main that changes the app, moves BUILD_ID (index.html)
+# and CACHE_VERSION (sw.js) and pushes that as its own small commit, which
+# Vercel then deploys. Pull requests leave those lines alone: they used to
+# bump them by hand, so every open PR conflicted with every other one.
+# The bump commit is pushed with the workflow's own token, so it does not
+# start this workflow (or the checks) again.
+name: Bump version
+
+on:
+  push:
+    branches: [main]
+    # Pushes that change nothing deployed (.vercelignore) need no new version.
+    paths-ignore:
+      - 'docs/**'
+      - 'tests/**'
+      - '.github/**'
+      - '.claude/**'
+      - '**/*.md'
+      - 'firestore.rules'
+      - 'storage.rules'
+      - 'firebase.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# One at a time, in order; never cancel a bump halfway.
+concurrency:
+  group: bump-version
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Bump and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          for try in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            node .github/bump-version.cjs
+            id=$(grep -o "const BUILD_ID = '[^']*'" index.html | cut -d"'" -f2)
+            git commit -qa -m "Bump version to $id" \
+              -m "Automatic, after $(git rev-parse --short origin/main) on main (.github/workflows/bump-version.yml)."
+            if git push -q origin HEAD:main; then exit 0; fi
+            echo "main moved during the bump; again on the new main"
+            sleep $((try * 5))
+          done
+          exit 1
