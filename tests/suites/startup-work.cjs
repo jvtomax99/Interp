@@ -50,9 +50,38 @@ const init = () => {
     ok(st.workers === 1, 'its path is traced in a worker', st);
     ok(st.strokes > 2, 'the path is kept on the phone (ih_penPath)', st);
     if (!wrote) console.log('  info: ' + JSON.stringify(await page.evaluate(() => ({ log: window.__pen.log, fonts: document.fonts && document.fonts.check('400 56px Parisienne', 'Moisés'), still: document.documentElement.className }))));
-    const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 20000 }).then(() => true, () => false);
-    ok(shown, 'afterwards the name itself is shown');
+    // The pen moves 64 ms a frame at most, so a slow CI frame rate (WebKit here,
+    // 3 fps under load) stretches a 4 s pen past 20 s; the app's own wall clock
+    // (home-polish.js, `cap`) ends it by 16 s in any case. Wait for that.
+    const t0 = Date.now();
+    const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 40000 }).then(() => true, () => false);
+    ok(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)');
     ok(!errors.length, 'no page errors', errors);
+    await ctx.close();
+  }
+
+  console.log('== the name pen on a page drawing 2 frames a second');
+  {
+    // The pen advances 64 ms a frame at most, so at 2 fps a 4 s pen would take
+    // half a minute; its wall clock (`cap`, max 12 s / 4 x its length) must
+    // show the name long before that. A starved frame rate, as CI's WebKit has.
+    const ctx = await b.newContext({ viewport: { width: 393, height: 759 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, userAgent: UA, serviceWorkers: 'block' });
+    const page = await ctx.newPage();
+    await L.route(page, {});
+    await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
+      try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
+    await page.addInitScript(init);
+    await page.addInitScript(() => {
+      // Only the pen's frames: it asks for them from inside the greeting's row.
+      const raf = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = cb => { const st = new Error().stack || ''; return /tick/.test(st) || document.querySelector('.home-name-pen') ? setTimeout(() => cb(performance.now()), 500) : raf(cb); };
+    });
+    await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
+    const wrote = await page.waitForFunction(() => document.querySelector('.home-name-pen'), null, { timeout: 20000 }).then(() => true, () => false);
+    const t0 = Date.now();
+    const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 30000 }).then(() => true, () => false);
+    const took = (Date.now() - t0) / 1000;
+    ok(wrote && shown && took < 22, 'starved of frames, the wall clock still shows the name within the cap (' + Math.round(took * 10) / 10 + ' s)');
     await ctx.close();
   }
 

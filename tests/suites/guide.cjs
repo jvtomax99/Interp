@@ -21,7 +21,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     newsMissing: GUIDE_NEWS.filter(n => !GUIDE_TOPICS.some(t => t.id === n.id)).map(n => n.id),
     pins: Object.values(GUIDE_SECTION_PINS),
   }));
-  ok(data.n === 65 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
+  ok(data.n === 66 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
   const broken = await page.evaluate(async pins => { const bad = []; for (const p of pins) { const i = new Image(); i.src = p; try { await i.decode(); } catch (e) { bad.push(p); } } return bad; }, data.pins);
   ok(!broken.length, 'all tile pictures load', broken);
 
@@ -76,7 +76,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     await page.evaluate(() => navigateBack(false)); await wait(30);
     if (await page.evaluate(() => document.getElementById('guideSheet').classList.contains('show') || activeCategory !== 'userguide')) sheetProbs.push({ id, err: 'Back did not just close the sheet' });
   }
-  ok(!sheetProbs.length, 'all 57 answers open in a sheet that fits, has text, the right Show me, 40px+ buttons; Back closes it and stays on the guide', sheetProbs);
+  ok(!sheetProbs.length, 'all 66 answers open in a sheet that fits, has text, the right Show me, 40px+ buttons; Back closes it and stays on the guide', sheetProbs);
 
   // visual steps show the real controls
   await page.evaluate(() => openGuideTopic('edit')); await wait(300);

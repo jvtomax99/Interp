@@ -42,8 +42,8 @@ const SAMPLE = () => {
   ok(keys.first === 'scale(1.0000,1.0000)' && keys.last === 'scale(1.0000,1.0000)', 'the shape starts and ends as drawn ' + JSON.stringify([keys.first, keys.last]));
   ok(keys.min < .99 && keys.min >= .96 - 1e-9 && keys.max > 1.01 && keys.max <= 1.04 + 1e-9, 'a crouch squashes and a spring stretches, at most 4% ' + JSON.stringify([keys.min, keys.max]));
   ok(keys.none === null && keys.off === null, 'a lean with no spring, or a strength of 0, adds nothing');
-  ok(await P.evaluate(() => DR_FACE_SEQ.cheer.squash === DR_SQUASH && DR_FACE_SEQ.greet.squash === DR_SQUASH && !DR_FACE_SEQ.ack.squash && !DR_FACE_SEQ.think.squash && !DR_FACE_SEQ.wink.squash && !DR_FACE_SEQ.nod.squash),
-     'only the cheer and the greet ask for it');
+  ok(await P.evaluate(() => DR_FACE_SEQ.cheer.squash === DR_SQUASH && DR_FACE_SEQ.greet.squash === DR_SQUASH && DR_FACE_SEQ.wow.squash === DR_SQUASH && !DR_FACE_SEQ.ack.squash && !DR_FACE_SEQ.think.squash && !DR_FACE_SEQ.wink.squash && !DR_FACE_SEQ.nod.squash),
+     'only the cheer (and the wow that leads into it) and the greet ask for it');
 
   // In the dock (Translate screen).
   await P.evaluate(() => setCategory('translate')); await P.waitForTimeout(2500);
