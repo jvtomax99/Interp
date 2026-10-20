@@ -185,6 +185,16 @@ distinct on screen.
    camera fly swept the proof cards through his path). `tools/check-smiley.cjs`
    checks every frame: in frame, not over the proof (nor the next one in a
    hop); 0 failures at 10 fps.
+   Fifth round (2026-10-20): the carousel opener is gone. The hospital photos
+   are backdrops (`PHOTO_OF` in main.js): one behind each word shot and each
+   phone, softened, dimmed and tinted navy on a canvas, hung 12 units beyond
+   what the shot looks at and square to its camera at mid-shot, drifting a
+   little; the floor is hidden in phone shots so the photo shows around the
+   phone. Skybridge only in the end card window. A navy fade sits behind the
+   captions. `tools/check-contrast.cjs` measures white-caption contrast with
+   and without the photos: every caption 13.4:1 or better (AAA is 7). First
+   frame: straight on the hook, or 1.5 s "sign" (the entrance) or "arrive"
+   (the aerial) via `?first=`, previews in out/first-*.mp4, Jose to pick.
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.

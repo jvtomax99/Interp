@@ -14,7 +14,7 @@ import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
 import { FullScreenQuad } from "../../vendor/addons/postprocessing/Pass.js";
 import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen } from "./features.js";
-import { createSmiley, MOVES } from "../smiley.js";
+import { MOVES } from "../smiley.js";
 import { createOverlay, SMILEY_SHARE } from "./overlay.js";
 import { buildEnd } from "./end.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
@@ -22,8 +22,11 @@ import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, in
 const root = document.getElementById("root");
 const W = +root.dataset.width, H = +root.dataset.height;
 const DURATION = +root.dataset.duration;
-// the HUMC opener runs first; everything after it keeps its own clock (t = time - OPEN)
-const OPEN = 5.0;
+/* The reel starts on the hook (Jose, 2026-10-20: the carousel opener is gone), or, while he
+   chooses, on a short first frame that sets the place (?first=sign or ?first=arrive, previews
+   only). Everything after it keeps its own clock (t = time - OPEN). */
+const FIRST = new URLSearchParams(location.search).get("first") || "none";
+const OPEN = FIRST === "none" ? 0 : 1.5;
 
 const C = { navy0: 0x03061a, navy1: 0x0b1640, navy2: 0x1a3a96, cyan: 0x3fc6ee, red: 0xf0436a, white: 0xffffff };
 
@@ -262,6 +265,11 @@ async function build() {
   // ---------- captions: v11's two lines (white, then navy on a cyan box wiping in) and its progress dashes ----------
   const capFont = Math.round(H * 0.044); // 84 px at 1920: each line box is over 64 px tall
   const caps = document.createElement("div");
+  // a soft navy fade behind the caption area, so white text stays readable whatever sits behind it
+  const scrim = document.createElement("div");
+  scrim.style.cssText = `position:absolute;left:0;right:0;top:0;height:${H * 0.3}px;pointer-events:none;opacity:0;background:linear-gradient(180deg, rgba(3,6,26,0.86) 0%, rgba(3,6,26,0.72) 55%, rgba(3,6,26,0) 100%)`;
+  root.appendChild(scrim);
+  caps.id = "caps";
   caps.style.cssText = `position:absolute;left:${W * 0.075}px;top:${H * 0.085}px;right:${W * 0.075}px;font-family:"Inter Tight",sans-serif;font-weight:800;pointer-events:none`;
   caps.innerHTML = `<div class="dash" style="display:flex;gap:${W * 0.012}px;margin-bottom:${H * 0.022}px">${('<i style="flex:1;height:' + Math.max(2, H * 0.0035) + 'px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden"><b style="display:block;height:100%;width:0;background:#fff"></b></i>').repeat(FEATURES.length)}</div>
     <div class="l1" style="color:#fff;font-size:${capFont}px;line-height:1.12;letter-spacing:-0.02em;text-shadow:0 2px 18px rgba(3,6,26,.6)"></div>
@@ -271,6 +279,7 @@ async function build() {
   function captionsAt(t) {
     const fi = FEATURES.findIndex((f, i) => t >= FEATURE_STARTS[i] && t < FEATURE_STARTS[i] + featureLen(f));
     caps.style.opacity = fi < 0 ? "0" : "1";
+    scrim.style.opacity = caps.style.opacity;
     if (fi < 0) return;
     const f = FEATURES[fi], t0 = FEATURE_STARTS[fi];
     if (l1.textContent !== f.a) { l1.textContent = f.a; l2.textContent = f.b; }
@@ -282,58 +291,89 @@ async function build() {
     dashes.forEach((d, i) => { d.style.width = i < fi ? "100%" : i === fi ? `${100 * prog(t, t0, t0 + featureLen(f))}%` : "0"; });
   }
 
-  // ---------- the HUMC opener (Jose's pick, "carousel"): Dr. Smiley centre stage, the five
-  // hospital photos circling behind him one at a time; he looks at each, then winks at you ----------
-  const opener = new THREE.Group();
-  opener.position.set(0, 0, 18);
-  scene.add(opener);
-  groups.opener = opener; // hidden by cameraAt once the hook starts
-  const oFloor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x0a1233, roughness: 0.35, metalness: 0.35 }));
-  oFloor.rotation.x = -Math.PI / 2; oFloor.receiveShadow = true; opener.add(oFloor);
-  const ring = new THREE.Group(); ring.position.z = -3.0; opener.add(ring); // behind him, so a photo never covers him
-  const PHOTOS = ["entrance", "tower", "pavilion-dusk", "skybridge-sunset", "aerial"];
-  const RING_R = 2.6;
-  for (const [i, name] of PHOTOS.entries()) {
-    const tex = await new Promise((res) => new THREE.TextureLoader().load(`assets/humc/${name}.jpg`, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; res(t); }));
-    const hgt = 1.7, a = tex.image.width / tex.image.height, wdt = Math.min(2.6, hgt * a);
-    // cover-fit: crop the photo to the panel instead of squashing it
-    const fa = wdt / hgt;
-    if (a > fa) { tex.repeat.set(fa / a, 1); tex.offset.set((1 - fa / a) / 2, 0); } else { tex.repeat.set(1, a / fa); tex.offset.set(0, (1 - a / fa) / 2); }
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, side: THREE.DoubleSide, color: 0xd2d2d2 })); // under white: no bloom on bright skies
-    const ang = (i / PHOTOS.length) * Math.PI * 2;
-    m.position.set(Math.sin(ang) * RING_R, 1.45, Math.cos(ang) * RING_R); m.rotation.y = ang;
-    ring.add(m);
+  // ---------- HUMC behind everything: one hospital photo as a large backdrop behind each word
+  // shot and each phone, dimmed, tinted navy, out of focus, drifting slowly (Jose, 2026-10-20).
+  // The skybridge stays in the end card's window. ----------
+  const PHOTO_OF = {
+    says: "entrance", doctor: "entrance", timer: "tower", wrong: "pavilion-dusk", right: "aerial", logo: "pavilion-dusk-2",
+    home: "entrance", glossary: "tower", body: "pavilion-dusk", translate: "aerial", physician: "pavilion-dusk-2",
+    falsefriends: "entrance", drills: "tower", cert: "aerial", team: "pavilion-dusk", ask: "pavilion-dusk-2",
+  };
+  const photoImg = {};
+  await Promise.all([...new Set(Object.values(PHOTO_OF))].map((n) => new Promise((res) => { const im = new Image(); im.onload = () => { photoImg[n] = im; res(); }; im.src = `assets/humc/${n}.jpg`; })));
+  const backdropTex = {};
+  const BACK = { w: 30, h: 22 }; // world size, enough to fill the frame from every camera
+  function backdropTexture(n) {
+    if (backdropTex[n]) return backdropTex[n];
+    const c = document.createElement("canvas"); c.width = 1040; c.height = 760;
+    const g = c.getContext("2d"), im = photoImg[n];
+    // cover-fit, softened, darkened, then pulled toward the reel's navy
+    const k = Math.max(c.width / im.width, c.height / im.height), w = im.width * k, h = im.height * k;
+    g.filter = "blur(6px) saturate(0.9) brightness(0.86)";
+    g.drawImage(im, (c.width - w) / 2, (c.height - h) / 2, w, h);
+    g.filter = "none";
+    g.globalCompositeOperation = "multiply"; g.fillStyle = "#5b6fa8"; g.fillRect(0, 0, c.width, c.height);
+    g.globalCompositeOperation = "source-over"; g.fillStyle = "rgba(3,6,26,0.24)"; g.fillRect(0, 0, c.width, c.height);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+    return (backdropTex[n] = t);
   }
-  const host = await createSmiley({ root: "assets/drsmiley/", round: true });
-  host.group.scale.setScalar(1.35); host.group.position.z = 0.9;
-  host.group.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-  opener.add(host.group);
-  host.group.visible = false; // drawn flat by the overlay instead
-  const warm = new THREE.PointLight(0xffd2b0, 2.5, 6, 1.5); warm.position.set(0, 1.4, 3.1); opener.add(warm);
-  const openerTitle = document.createElement("div");
-  openerTitle.style.cssText = `position:absolute;left:0;right:0;bottom:${H * 0.1}px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;opacity:0;pointer-events:none;text-shadow:0 2px 22px rgba(3,6,26,.85)`;
-  openerTitle.innerHTML = `<div style="font-weight:800;font-size:${Math.round(H * 0.026)}px;letter-spacing:-0.01em;white-space:nowrap">Hackensack University Medical Center</div><div style="margin-top:${H * 0.008}px;font:500 ${Math.round(H * 0.017)}px 'JetBrains Mono',monospace;letter-spacing:.3em;color:#bfe9fa">HACKENSACK, NJ</div>`;
-  root.appendChild(openerTitle);
-  const HOLD = 0.9; // seconds per photo
-  function openerAt(t) {
-    camera.clearViewOffset();
-    for (const g in groups) groups[g].visible = g === "opener";
-    const N = PHOTOS.length, step = Math.min(N - 1, Math.floor(t / HOLD)), f = t / HOLD - step;
-    const turn = inOutCubic(clamp((f - 0.55) / 0.45));
-    ring.rotation.y = -((step + (step < N - 1 ? turn : 0)) / N) * Math.PI * 2;
-    // he looks round at each photo as it passes, then at you with a wink
-    const looking = t < 4.2;
-    openerSmiley = { x: W / 2, base: H * 0.8, lift: H * 0.008 * Math.abs(Math.sin(t * 6)), face: t > 4.4 ? "wink" : looking ? (f < 0.5 ? "halfL" : "lookL") : "smile", brows: t > 4.4 ? "wink" : "glad" };
-    const e = inOutSine(t / OPEN);
-    camera.position.set(0.4 * Math.sin(t * 0.5), lerp(2.1, 1.8, e), opener.position.z + lerp(6.6, 5.8, e));
-    camera.lookAt(0, 1.35, opener.position.z - 1.0);
-    camera.rotation.z += Math.sin(t * 1.3) * 0.012;
-    spot.position.set(-2.5, 6.5, opener.position.z + 4); spot.target.position.set(0, 0.8, opener.position.z + 0.5); spot.target.updateMatrixWorld(); spot.intensity = 90;
-    bokeh.uniforms.focus.value = camera.position.distanceTo(new THREE.Vector3(0, 1.3, opener.position.z + 0.9));
-    bokeh.uniforms.aperture.value = 0.0005;
-    tint.visible = false;
-    openerTitle.style.opacity = String(outCubic(prog(t, 3.9, 4.4)) * (1 - prog(t, OPEN - 0.15, OPEN)));
-    openerTitle.style.transform = `translateY(${(1 - outExpo(prog(t, 3.9, 4.5))) * H * 0.02}px)`;
+  const backdrops = [];
+  for (const [g, n] of Object.entries(PHOTO_OF)) {
+    if (!groups[g]) continue;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(BACK.w, BACK.h), new THREE.MeshBasicMaterial({ map: backdropTexture(n), toneMapped: false, fog: false, depthWrite: false }));
+    m.position.set(0, 6.5, -15);
+    m.renderOrder = -1;
+    m.userData.phase = backdrops.length * 1.7;
+    m.userData.g = g;
+    groups[g].add(m);
+    backdrops.push(m);
+    if (new URLSearchParams(location.search).has("nobackdrop")) m.visible = false; // for before/after measurements
+  }
+  /* each hangs 12 units beyond what its shot looks at, square to the camera at mid-shot (so it fills
+     the frame behind a phone seen from above too), then drifts a little on its own; the camera's own
+     movement gives the parallax */
+  function aimBackdrops() {
+    for (const m of backdrops) {
+      const sh = SHOTS.find((x) => x[2] === m.userData.g), v = view(m.userData.g, (sh[0] + sh[1]) / 2);
+      const dir = v.look.clone().sub(v.pos).normalize();
+      const at = v.look.clone().add(dir.multiplyScalar(12)).sub(groups[m.userData.g].position);
+      m.userData.home = at;
+      m.position.copy(at);
+      m.lookAt(v.pos); // lookAt takes world space: the groups are only translated, so this holds
+    }
+  }
+  const driftBackdrops = (t) => backdrops.forEach((m) => {
+    const h = m.userData.home; if (!h) return;
+    m.position.set(h.x + Math.sin(t * 0.22 + m.userData.phase) * 0.9, h.y + Math.cos(t * 0.17 + m.userData.phase) * 0.35, h.z);
+  });
+
+  // ---------- the first frame, while Jose picks one (previews: ?first=sign | ?first=arrive) ----------
+  const first = document.createElement("div");
+  first.style.cssText = "position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none";
+  const firstImg = document.createElement("img");
+  firstImg.src = FIRST === "arrive" ? "assets/humc/aerial.jpg" : "assets/humc/entrance.jpg";
+  firstImg.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 60%";
+  const firstTitle = document.createElement("div");
+  firstTitle.style.cssText = `position:absolute;left:0;right:0;bottom:${H * 0.1}px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;text-shadow:0 2px 22px rgba(3,6,26,.9)`;
+  firstTitle.innerHTML = `<div style="font-weight:800;font-size:${Math.round(H * 0.026)}px;letter-spacing:-0.01em;white-space:nowrap">Hackensack University Medical Center</div><div style="margin-top:${H * 0.008}px;font:500 ${Math.round(H * 0.017)}px 'JetBrains Mono',monospace;letter-spacing:.3em;color:#bfe9fa">HACKENSACK, NJ</div>`;
+  first.append(firstImg, firstTitle);
+  root.appendChild(first);
+  function firstAt(T0) {
+    if (FIRST === "none" || T0 >= OPEN) { first.style.opacity = "0"; return; }
+    const p = T0 / OPEN, out = prog(T0, OPEN - 0.55, OPEN);
+    first.style.opacity = String(1 - out);
+    // the photo goes soft and dark as it hands over to the same photo blurred behind the words
+    const blur = 7 * out, dim = lerp(1, 0.55, out);
+    if (FIRST === "arrive") {
+      // a drone coming down over the campus
+      firstImg.style.transform = `scale(${lerp(1.35, 1.08, outCubic(p))}) rotate(${lerp(-4, 0, outCubic(p))}deg)`;
+    } else {
+      // the entrance and its sign, a slow push
+      firstImg.style.transform = `scale(${lerp(1.0, 1.1, p)})`;
+    }
+    firstImg.style.filter = `blur(${blur}px) brightness(${dim})`;
+    firstTitle.style.opacity = String(outCubic(prog(T0, 0.15, 0.5)) * (1 - out));
+    firstTitle.style.transform = `translateY(${(1 - outExpo(prog(T0, 0.15, 0.6))) * H * 0.02}px)`;
   }
 
   // ---------- timing ----------
@@ -497,6 +537,7 @@ async function build() {
     return { s, next, i, hopping };
   }
 
+  aimBackdrops();
   // ---------- Dr. Smiley's spot in each shot: about 25% of the frame tall, fully in frame,
   // never over the proof item at any moment of the shot (measured here, checked per frame) ----------
   // the dip through navy during a hop: over the picture and the captions, under Dr. Smiley
@@ -504,7 +545,7 @@ async function build() {
   dip.style.cssText = "position:absolute;inset:0;background:#03061a;opacity:0;pointer-events:none";
   root.appendChild(dip);
   const overlay = await createOverlay(root, W, H);
-  let smileyState = null, openerSmiley = null;
+  let smileyState = null;
   const _v = new THREE.Vector3();
   function proofRect(g) {
     const m = feat.proofMesh(g);
@@ -556,9 +597,10 @@ async function build() {
   }
   function drawScene(time) {
     const T0 = clamp(time, 0, DURATION - 1e-4);
-    if (T0 < OPEN) { openerAt(T0); captionsAt(-1); composer.render(); dip.style.opacity = "0"; overlay.draw(openerSmiley); window.__smileyCheck = { t: time, shot: "opener", smiley: overlay.box() }; return; }
-    openerTitle.style.opacity = "0";
-    const t = T0 - OPEN;
+    firstAt(T0);
+    const t = Math.max(0, T0 - OPEN); // during the first frame the hook waits at its start, the photo behind it
+    driftBackdrops(t);
+    floor.visible = !isFeature(shotAt(t).s[2]); // phones float in front of their photo; the words keep their floor
     partsAt(t);
     logoAt(t);
     const { s, next, hopping } = shotAt(t);

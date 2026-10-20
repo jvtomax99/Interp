@@ -17,7 +17,7 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.webp': 'image/
   const page = await browser.newPage({ viewport: { width: 540, height: 960 } });
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.goto(`http://localhost:${server.address().port}/${pageRel}`);
-  await page.waitForFunction(() => document.title === 'ready', null, { timeout: 90000 });
+  await page.waitForFunction(() => document.title === 'ready' || typeof window.__renderAt === 'function', null, { timeout: 120000 });
   const out = path.resolve(PROJ, outRel); fs.mkdirSync(path.dirname(out), { recursive: true });
   const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', '30', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', out]);
   const n = Math.round(+secs * 30);
