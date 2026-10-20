@@ -28,33 +28,36 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 28,341 | The whole app (1.6 MB). All CSS and JS inline |
-| `home-polish.css` | 1,318 | Overlay layer. Loads right after `</style>`, so it wins |
-| `home-polish.js` | 1,558 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
-| `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
+| `index.html` | 31,214 | The whole app (1.8 MB). All CSS and JS inline |
+| `home-polish.css` | 1,456 | Overlay layer. Loads right after `</style>`, so it wins |
+| `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
+| `pin-icons.js` | 987 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 30 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face; the last four, surprised, sad, worried and doubt, from `docs/art/dr-smiley-faces/`), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
-| `city/*.webp` | 51 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
+| `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
 | `media/` | 8 MB | The 45-second video (`hub-promo.mp4`, 720p) and its still; made from `promo/`, shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
-| `sw.js` | 212 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
+| `sw.js` | 220 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
 | `api/translate.js` | 145 | Translate tool — Claude API |
-| `api/doctor-research.js` | 383 | Doctor Prep — Claude API + web search |
+| `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
-| `api/term-lookup.js` | 297 | Term reference lookup — Claude API + web search |
+| `api/term-lookup.js` | 307 | Term reference lookup — Claude API + web search |
 | `api/term-check.js` | 185 | Checks a glossary entry before it is saved — Haiku 5.5 first (`_routine.js`), then its backup model |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
 | `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
 | `api/_routine.js` | — | Haiku 5.5 first, then the endpoint's backup model, for Translate and the term check (not an endpoint itself) |
-| `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
-| `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
+| `api/ask.js` | 508 | Ask the Hub — answers from the entries the app sends, plus approved team notes |
+| `firestore.rules`, `storage.rules` | 213 / 33 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
 | `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more and not deployed (`.vercelignore`); the files above were cut from them |
+
+Line counts are `wc -l` on 2026-10-20. They drift with every PR; the names
+and roles don't. Re-measure before quoting one.
 
 Inside `index.html`, sections are marked with banner comments
 (`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
@@ -347,14 +350,20 @@ Rules that hold across the whole app:
   only for the four `.qa-tile` buttons.
 - Keep `:focus-visible` and the `prefers-reduced-motion` guard on anything new.
 
-**Known gap.** The look is tokenized (34 `:root` vars); the rhythm is not.
-There are no spacing or font-size variables, and 12 hard-coded spacing values
-crowd into 6-17px: 9px (113 uses), 17px (66), 11px (57), 10px (38), 6px (22),
-then a tail of 7/8/13/14/15/16. Type has 11 sizes with no ratio, and
-12/12.5/13 and 14/14.5/15 are distinctions the eye cannot resolve. Collapsing
-to five values covers 86% of current uses: **6 / 9 / 13 / 17 / 26**. When
-adjusting spacing on a component, move it onto that scale rather than
-extending the tail.
+**Known gap.** The look is tokenized (69 `:root` vars); the rhythm mostly
+is not. The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
+but little uses them. Measured in `index.html`'s CSS on 2026-10-20:
+font-size is set with a token 65 times and with a plain px value about 900
+times, over 36 distinct sizes (12/12.5/13 and 14/14.5/15 all still there,
+distinctions the eye cannot resolve); padding, margin and gap use a token
+99 times against 1,737 px values, 12 of them crowding into 6-17px: 9px (251
+uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each),
+then 12/11/16/7/15. The scale **6 / 9 / 13 / 17 / 26** covers 42% of the
+px spacing uses as they stand. Three rules name tokens that don't exist
+(`--fs-headline`, `--fs-title1`, `--fs-footnote`) and run on their px
+fallbacks; the real names are `--fs-head`, `--fs-t1`, `--fs-foot`. When
+adjusting spacing or type on a component, move it onto the tokens rather
+than extending the tail.
 
 ## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
 
@@ -420,5 +429,5 @@ design and anything touching data or rules stay with the main model.
   which ("login"), and a refused key stops the run with the reason. Lock the
   Hub only after a run reports "service account". Putting a shared secret
   inside the documents it writes was rejected as a credential leak.
-- `index.html` is one 1.1 MB file. Splitting CSS and JS out is the main
+- `index.html` is one 1.8 MB file. Splitting CSS and JS out is the main
   structural cleanup available.

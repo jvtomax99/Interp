@@ -262,7 +262,7 @@ https://interp-six.vercel.app before reporting success.
 
 ## Before pushing `index.html`
 
-It is one ~21,000-line, 1.1 MB file with all CSS and JS inline, used mostly on
+It is one ~31,000-line, 1.8 MB file with all CSS and JS inline, used mostly on
 phones in a hospital. Do not push it unverified.
 
 **The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
