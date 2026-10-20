@@ -150,3 +150,10 @@ Jose's phone: the Voice and mic check has **Try the volume fix** (step 3),
 which sets playback and plays Spanish; the report has "Volume fix" and a
 yes/no line. If it doesn't help, the fallback in `docs/PLAN.md` stands
 (earbuds).
+
+**Second installed-app run, 2026-10-20** (build b1020.0830, before M3, so
+without the fix): Jose: "it sounds fine", the voice as loud after the mic
+this time. So the quiet voice of the first run doesn't happen every time;
+the fix stays as a guard (it only sets the audio session back to playback).
+Same voices, now each listed twice (Paulina and Samantha both there). Speech
+to text still not tried in the installed app: M5 stays on hold.
