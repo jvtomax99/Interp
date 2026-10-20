@@ -69,7 +69,42 @@ const ELENA = { name: 'Dr. Elena Marin', specialty: 'Hematology/Oncology', hospi
 /* A region: css selector, optionally the one whose text includes `text`,
    `nth` among matches, `all` (up to n matches, keys key1..keyN), or
    `point` (the element there, widened while its parent stays under maxH). */
+/* The 3D Body is a separate viewer (atlas/) in a sandboxed frame: serve its
+   files, open it, and for "heart" search the heart, isolate it and keep its
+   card (Heart / Corazón), which becomes the proof layer. */
+const ATLAS_TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.glb': 'model/gltf-binary', '.bin': 'application/octet-stream', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2' };
+async function openAtlas(page, heart) {
+  await page.context().route('**/atlas/**', r => {
+    const f = path.join(L.ROOT, decodeURIComponent(new URL(r.request().url()).pathname));
+    if (!fs.existsSync(f) || fs.statSync(f).isDirectory()) return r.fulfill({ status: 404, body: '' });
+    r.fulfill({ status: 200, contentType: ATLAS_TYPES[path.extname(f)] || 'application/octet-stream', body: fs.readFileSync(f) });
+  });
+  await page.evaluate(() => setCategory('anatomy'));
+  await page.waitForTimeout(20000);
+  if (!heart) return;
+  const fr = page.frameLocator('#anatLayer iframe');
+  const tap = async (loc) => { const bb = await loc.boundingBox(); if (bb) await page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2); };
+  await page.mouse.click(358, 83); await page.waitForTimeout(800);
+  await fr.locator('input[type=search], input[type=text], input:not([type])').first().fill('heart'); await page.waitForTimeout(1200);
+  await tap(fr.getByText('83 pieces').first()); await page.waitForTimeout(5000);
+  await tap(fr.getByText('Isolate').first()); await page.waitForTimeout(6000);
+  // the card: the smallest box holding both names and its buttons
+  const frame = page.frames().find(f => /atlas/.test(f.url()));
+  const box = await frame.evaluate(() => {
+    // from the "Heart" title up to the first box that also holds the card's buttons
+    let e = [...document.querySelectorAll('*')].find(x => x.children.length === 0 && x.textContent.trim() === 'Heart');
+    while (e && !e.textContent.includes('Show all')) e = e.parentElement;
+    e.setAttribute('data-layer-frame', 'proof');
+    const r = e.getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height, radius: parseFloat(getComputedStyle(e).borderTopLeftRadius) || 24 };
+  });
+  const off = await page.locator('#anatLayer iframe').boundingBox();
+  page.__rects = [{ key: 'proof', proof: true, x: box.x + off.x, y: box.y + off.y, w: box.w, h: box.h, radius: box.radius }];
+}
+
 const STATES = [
+  { name: 'body', caption: 'Explore The 3D Body.', prep: async p => openAtlas(p, false), regions: [['topbar', '.topbar-global']] },
+  { name: 'heart', caption: 'Names In English And Spanish.', prep: async p => openAtlas(p, true), regions: [['topbar', '.topbar-global']] },
   { name: 'home', caption: 'Built by our own interpreters.', prep: async () => {},
     regions: [['banner', '.home-greeting'], ['search', 'button.home-search'], ['tiles', '.qa-grid', { proof: 1 }],
       ['drill', '#warmup'], ['tabbar', 'nav.tabbar']] },
@@ -176,25 +211,30 @@ async function capture(page, st) {
   const dir = path.join(OUT, st.name); fs.mkdirSync(dir, { recursive: true });
   const { found, missing } = await markRegions(page, st.regions);
   await setStyle(page, '');
+  // regions inside the 3D Body's frame, found by the state's prep (page.__rects); cut from the screen like the tab bar
+  for (const r of page.__rects || []) found.push({ ...r, crop: true });
+  const frameHide = (on) => Promise.all(page.frames().map(f => f.evaluate(on => document.querySelectorAll('[data-layer-frame]').forEach(e => { e.style.visibility = on ? 'hidden' : ''; }), on).catch(() => {})));
   await page.screenshot({ path: path.join(dir, 'full.png') });
   await setStyle(page, '[data-layer]{visibility:hidden!important}');
+  await frameHide(true);
   await page.screenshot({ path: path.join(dir, 'bg.png') });
+  await frameHide(false);
   await setStyle(page, '');
-  for (const l of found.filter(l => l.key === 'tabbar')) {
+  for (const l of found.filter(l => l.key === 'tabbar' || l.crop)) {
     const pad = 12, x = Math.max(0, l.x - pad), y = Math.max(0, l.y - pad);
     const clip = { x, y, width: Math.min(W, l.x + l.w + pad) - x, height: Math.min(H, l.y + l.h + pad) - y };
     const shot = await page.screenshot({ clip });
     const png = await page.evaluate(async ([b64, l, clip, dpr]) => {
       const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
       const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d');
-      const rad = parseFloat(getComputedStyle(document.querySelector('[data-layer="tabbar"]')).borderTopLeftRadius) || 0;
+      const rad = l.radius ?? (parseFloat(getComputedStyle(document.querySelector('[data-layer="tabbar"]')).borderTopLeftRadius) || 0);
       g.beginPath(); g.roundRect((l.x - clip.x) * dpr, (l.y - clip.y) * dpr, l.w * dpr, l.h * dpr, rad * dpr); g.clip(); g.drawImage(img, 0, 0);
       return c.toDataURL('image/png').split(',')[1];
     }, [shot.toString('base64'), l, clip, DPR]);
-    fs.writeFileSync(path.join(dir, 'tabbar.png'), Buffer.from(png, 'base64'));
-    Object.assign(l, { file: 'tabbar.png', clip, note: 'cut from the screen, corners masked' });
+    fs.writeFileSync(path.join(dir, l.key + '.png'), Buffer.from(png, 'base64'));
+    Object.assign(l, { file: l.key + '.png', clip, note: 'cut from the screen, corners masked' });
   }
-  for (const l of found.filter(l => l.key !== 'tabbar')) {
+  for (const l of found.filter(l => l.key !== 'tabbar' && !l.crop)) {
     await setStyle(page, `html,body{background:transparent!important}
       body *{visibility:hidden!important}
       [data-layer="${l.key}"],[data-layer="${l.key}"] *{visibility:visible!important}
@@ -249,7 +289,7 @@ async function sheet(browser, report) {
 
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
-  const browser = await L.chromium.launch();
+  const browser = await L.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] }); // WebGL for the 3D Body
   const report = [];
   for (const st of STATES) {
     if (ONLY && st.name !== ONLY) continue;

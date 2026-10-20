@@ -143,6 +143,21 @@ distinct on screen.
    light through it); his picture on the screen is now composed whole
    (`composeSmiley` in `src/smiley.js`: base, face frame, both brows).
    He chose the window only (not an opener, word walls or an aerial shot).
+   Jose's second round (2026-10-20): feature the CoreCHI campus and the 3D
+   Body, pull the cameras back (things were cut off), all the hospital
+   photos, every word capitalised. Done: a 2 s HUMC opener (entrance, tower,
+   pavilion at dusk, aerial as glass panels the camera flies past, "Hackensack
+   University Medical Center"; the skybridge stays in the end card window);
+   a 3D Body shot after the glossary ("Explore The 3D Body. / English And
+   Spanish.": the body on the phone, a tap on the chest, the dive to the
+   isolated heart, its Heart / Corazon card lifting; captured by
+   `capture-layers.cjs body|heart`, which serves `atlas/` to the frame); the
+   CoreCHI shot is now the app's own campus render (`city/` sky, far, near)
+   standing up out of the phone like a pop-up book, 145 counting beside it;
+   every camera pulled back (`ZOOM` 1.28 in features.js, 1.12 on the word
+   shots, the end card wider); Title Case on everything drawn (captions, hook,
+   pill, drill words, the card back, the end lines). 40.5 s now (10 features);
+   music re-cut to match (v11 0-37 s into its ending).
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.

@@ -1,0 +1,30 @@
+{
+  "state": "body",
+  "caption": "Explore The 3D Body.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

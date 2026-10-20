@@ -19,6 +19,8 @@ import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine } f
 const root = document.getElementById("root");
 const W = +root.dataset.width, H = +root.dataset.height;
 const DURATION = +root.dataset.duration;
+// the HUMC opener runs first; everything after it keeps its own clock (t = time - OPEN)
+const OPEN = 2.0;
 
 const C = { navy0: 0x03061a, navy1: 0x0b1640, navy2: 0x1a3a96, cyan: 0x3fc6ee, red: 0xf0436a, white: 0xffffff };
 
@@ -34,7 +36,7 @@ const SHOTS = [
   // features 1-5 (features.js), 2.5 s each
   ...FEATURES.map((f, i) => [9.5 + i * FEATURE_LEN, 9.5 + (i + 1) * FEATURE_LEN, f.g]),
   // the end card (end.js)
-  [9.5 + FEATURES.length * FEATURE_LEN, DURATION, "end"],
+  [9.5 + FEATURES.length * FEATURE_LEN, DURATION - OPEN, "end"],
 ];
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
 
@@ -163,11 +165,11 @@ async function build() {
   }
 
   // 0-1 s
-  place("says", "says", word("The doctor says:", { fit: 2.5, maxSize: 0.5 }), 0, 1.15, 0, 0.05);
+  place("says", "says", word("The Doctor Says:", { fit: 2.5, maxSize: 0.5 }), 0, 1.15, 0, 0.05);
   // 1-2.4 s
   place("docLabel", "doctor", label("THE DOCTOR"), 0, 2.95, 0, 1.0, "fade");
   place("heart", "doctor", word("Heart", { fit: 2.2, maxSize: 0.95 }), 0, 1.75, 0, 1.0);
-  place("failure", "doctor", word("failure", { fit: 2.2, maxSize: 0.95 }), 0, 0.6, 0, 1.415);
+  place("failure", "doctor", word("Failure", { fit: 2.2, maxSize: 0.95 }), 0, 0.6, 0, 1.415);
   wallIn("doctor", "HEART FAILURE");
   // 2.4-3.4 s: the timer
   place("timerLabel", "timer", label("TO FIND THE WORD"), 0, 2.55, 0, 2.4, "fade");
@@ -178,19 +180,19 @@ async function build() {
   // 3.4-6 s: the wrong word, struck
   place("wrongLabel", "wrong", label("THE INTERPRETER", "#ff8aa3"), 0, 2.95, 0, 3.335, "fade");
   place("fallo", "wrong", word("¿Fallo", { fit: 2.4, maxSize: 0.85, face: "red" }), 0, 1.85, 0, 3.335);
-  place("cardiaco", "wrong", word("cardíaco?", { fit: 2.5, maxSize: 0.85, face: "red" }), 0, 0.8, 0, 3.835);
+  place("cardiaco", "wrong", word("Cardíaco?", { fit: 2.5, maxSize: 0.85, face: "red" }), 0, 0.8, 0, 3.835);
   const strikeMat = new THREE.MeshStandardMaterial({ color: 0xff8aa3, emissive: C.red, emissiveIntensity: 2.2 });
   for (const [n, y, w] of [["strike1", 2.12, 2.5], ["strike2", 1.07, 2.7]]) {
     const s = new THREE.Mesh(new THREE.BoxGeometry(w, 0.075, 0.09), strikeMat);
     s.rotation.z = -0.05;
     place(n, "wrong", s, 0, y, 0.25, 4.855, "wipe");
   }
-  place("pill", "wrong", pill("Not for patients."), 0.35, 0.22, 0.6, 5.0, "pop");
+  place("pill", "wrong", pill("Not For Patients."), 0.35, 0.22, 0.6, 5.0, "pop");
   wallIn("wrong", "¿FALLO CARDÍACO?");
   // 6-7.5 s: the right word
   place("rightLabel", "right", label("THE RIGHT WORD"), 0, 2.95, 0, 5.985, "fade");
   place("insuf", "right", word("Insuficiencia", { fit: 2.6, maxSize: 0.8, face: "cyan" }), 0, 1.85, 0, 5.985);
-  place("cardiaca", "right", word("cardíaca", { fit: 2.3, maxSize: 0.8, face: "cyan" }), 0, 0.85, 0, 6.505);
+  place("cardiaca", "right", word("Cardíaca", { fit: 2.3, maxSize: 0.8, face: "cyan" }), 0, 0.85, 0, 6.505);
   const under = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.06, 0.06), new THREE.MeshBasicMaterial({ color: C.cyan, toneMapped: false }));
   place("under", "right", under, 0, 0.55, 0.15, 7.0, "wipe");
   wallIn("right", "INSUFICIENCIA CARDÍACA");
@@ -256,7 +258,7 @@ async function build() {
   const capFont = Math.round(H * 0.044); // 84 px at 1920: each line box is over 64 px tall
   const caps = document.createElement("div");
   caps.style.cssText = `position:absolute;left:${W * 0.075}px;top:${H * 0.085}px;right:${W * 0.075}px;font-family:"Inter Tight",sans-serif;font-weight:800;pointer-events:none`;
-  caps.innerHTML = `<div class="dash" style="display:flex;gap:${W * 0.012}px;margin-bottom:${H * 0.022}px">${('<i style="flex:1;height:' + Math.max(2, H * 0.0035) + 'px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden"><b style="display:block;height:100%;width:0;background:#fff"></b></i>').repeat(9)}</div>
+  caps.innerHTML = `<div class="dash" style="display:flex;gap:${W * 0.012}px;margin-bottom:${H * 0.022}px">${('<i style="flex:1;height:' + Math.max(2, H * 0.0035) + 'px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden"><b style="display:block;height:100%;width:0;background:#fff"></b></i>').repeat(FEATURES.length)}</div>
     <div class="l1" style="color:#fff;font-size:${capFont}px;line-height:1.12;letter-spacing:-0.02em;text-shadow:0 2px 18px rgba(3,6,26,.6)"></div>
     <div class="l2" style="display:inline-block;margin-top:${H * 0.006}px;color:#0b1a4a;background:#3fc6ee;font-size:${capFont}px;line-height:1.12;letter-spacing:-0.02em;padding:0 ${capFont * 0.18}px;border-radius:${capFont * 0.1}px;box-shadow:0 0 ${capFont * 0.5}px rgba(63,198,238,.35)"></div>`;
   root.appendChild(caps);
@@ -273,6 +275,52 @@ async function build() {
     const w = outExpo(prog(t, t0 + 0.3, t0 + 0.62));
     l2.style.clipPath = `inset(0 ${(1 - w) * 100}% 0 0 round ${capFont * 0.1}px)`;
     dashes.forEach((d, i) => { d.style.width = i < fi ? "100%" : i === fi ? `${100 * prog(t, t0, t0 + FEATURE_LEN)}%` : "0"; });
+  }
+
+  // ---------- the HUMC opener: the hospital's photos as glass panels the camera flies past ----------
+  const opener = new THREE.Group();
+  opener.position.set(0, 0, 40);
+  scene.add(opener);
+  groups.opener = opener; // hidden by cameraAt once the hook starts
+  const PHOTOS = [["entrance", -1.45, 6.0, 0.42], ["tower", 1.5, 3.6, -0.42], ["pavilion-dusk", -1.4, 1.2, 0.38], ["aerial", 0, -1.6, 0]];
+  const panels = [];
+  for (const [name, x, z, ry] of PHOTOS) {
+    const tex = await new Promise((res) => new THREE.TextureLoader().load(`assets/humc/${name}.jpg`, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; res(t); }));
+    const hgt = name === "aerial" ? 2.3 : 1.75, wdt = (hgt * tex.image.width) / tex.image.height;
+    const g = new THREE.Group();
+    const frame = new THREE.Mesh(new THREE.PlaneGeometry(wdt + 0.06, hgt + 0.06), new THREE.MeshBasicMaterial({ color: 0xbfe9fa, transparent: true, opacity: 0.55, toneMapped: false }));
+    frame.position.z = -0.005;
+    const photo = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false, color: 0xe6e6e6 }));
+    g.add(frame, photo);
+    g.position.set(x, 1.55, z);
+    g.rotation.y = ry;
+    g.userData.home = g.position.clone();
+    opener.add(g);
+    panels.push(g);
+  }
+  const openerTitle = document.createElement("div");
+  openerTitle.style.cssText = `position:absolute;left:0;right:0;bottom:${H * 0.1}px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;opacity:0;pointer-events:none;text-shadow:0 2px 22px rgba(3,6,26,.85)`;
+  openerTitle.innerHTML = `<div style="font-weight:800;font-size:${Math.round(H * 0.026)}px;letter-spacing:-0.01em;white-space:nowrap">Hackensack University Medical Center</div><div style="margin-top:${H * 0.008}px;font:500 ${Math.round(H * 0.017)}px 'JetBrains Mono',monospace;letter-spacing:.3em;color:#bfe9fa">HACKENSACK, NJ</div>`;
+  root.appendChild(openerTitle);
+  function openerAt(t) {
+    for (const g in groups) groups[g].visible = g === "opener";
+    // each panel swings in as the camera nears it
+    panels.forEach((g, i) => {
+      const p = outExpo(prog(t, i * 0.32, i * 0.32 + 0.5));
+      g.position.y = g.userData.home.y - (1 - p) * 0.8;
+      g.scale.setScalar(Math.max(0.001, 0.75 + 0.25 * p));
+      g.children.forEach((m) => { m.material.transparent = true; m.material.opacity = (m === g.children[0] ? 0.55 : 1) * p; });
+    });
+    const e = inOutSine(prog(t, 0, OPEN));
+    const z = lerp(9.2, 2.7, 1 - Math.pow(1 - e, 1.6));
+    camera.position.set(Math.sin(t * 1.4) * 0.25, 1.6 + 0.15 * Math.sin(t * 2), opener.position.z + z);
+    camera.lookAt(0, 1.55, opener.position.z + z - 4);
+    camera.rotation.z += Math.sin(t * 1.3) * 0.012;
+    bokeh.uniforms.focus.value = 3.2;
+    bokeh.uniforms.aperture.value = 0.0005;
+    tint.visible = false;
+    openerTitle.style.opacity = String(outCubic(prog(t, 0.6, 1.0)) * (1 - prog(t, OPEN - 0.15, OPEN)));
+    openerTitle.style.transform = `translateY(${(1 - outExpo(prog(t, 0.6, 1.1))) * H * 0.02}px)`;
   }
 
   // ---------- timing ----------
@@ -393,6 +441,8 @@ async function build() {
       cam.look.lerpVectors(view(s[2], s[1]).look, b.look, w);
       cam.pos.y += Math.sin(Math.PI * w) * 0.25;
     }
+    // the word shots sit a little farther back too, so nothing is cut off
+    if (["says", "doctor", "timer", "wrong", "right"].includes(s[2])) cam.pos.sub(cam.look).multiplyScalar(1.12).add(cam.look);
     camera.position.copy(cam.pos);
     camera.lookAt(cam.look);
     const fp = a.focus || a.look;
@@ -417,7 +467,10 @@ async function build() {
   }
 
   function renderAt(time) {
-    const t = clamp(time, 0, DURATION - 1e-4);
+    const T0 = clamp(time, 0, DURATION - 1e-4);
+    if (T0 < OPEN) { openerAt(T0); captionsAt(-1); composer.render(); return; }
+    openerTitle.style.opacity = "0";
+    const t = T0 - OPEN;
     partsAt(t);
     logoAt(t);
     const { s, next } = cameraAt(t);

@@ -3,11 +3,12 @@
 // from the references per shot:
 //   home        Slate phone: layers peel off, the quick tiles come forward
 //   glossary    andremass clones: a field of the 41 specialty pins ripples, then folds into the Emergency list
+//   body        Slate phone: the 3D Body on the phone, a tap on the chest, the view dives in to the heart, its card lifts
 //   translate   After Effects mascot: Dr. Smiley types, the glossary answer rises first, the AI card second
 //   physician   andremass chrome: Dr. Elena Marin's card turns like a solid slab, her terms fan out
 //   falsefriends After Effects mascot: Dr. Smiley lands on "constipado" and it flips over red
 //   drills      Slate lyric: "Fue un ingreso de urgencia." drops word by word, the trap word cracks
-//   cert        motionloved dashboard: bars grow, 145 counts up, Dr. Smiley climbs the bars like stairs
+//   cert        pop-up book: the CoreCHI campus (city/, the app's own 3D render) stands up out of the phone, 145 counts up
 //   team        Slate layers: chat bubbles stack in depth, "Lavado del port" comes forward
 //   ask         After Effects mascot: Dr. Smiley steps out of the screen, his briefing card rises behind him
 import * as THREE from "three";
@@ -16,17 +17,20 @@ import { createSmiley, MOVES } from "../smiley.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutSine, inOutCubic } from "../util.js";
 
 export const FEATURES = [
-  { g: "home", a: "Built by our", b: "own interpreters." },
-  { g: "glossary", a: "One glossary.", b: "Every specialty." },
-  { g: "translate", a: "Glossary first.", b: "AI second." },
-  { g: "physician", a: "Ready for", b: "every physician." },
-  { g: "falsefriends", a: "101 false friends.", b: "Flagged." },
-  { g: "drills", a: "Daily drills.", b: "Sharp skills." },
-  { g: "cert", a: "National certification.", b: "Prep built in." },
-  { g: "team", a: "One team.", b: "One channel." },
+  // every word capitalised (Jose, 2026-10-20)
+  { g: "home", a: "Built By Our", b: "Own Interpreters." },
+  { g: "glossary", a: "One Glossary.", b: "Every Specialty." },
+  { g: "body", a: "Explore The 3D Body.", b: "English And Spanish." },
+  { g: "translate", a: "Glossary First.", b: "AI Second." },
+  { g: "physician", a: "Ready For", b: "Every Physician." },
+  { g: "falsefriends", a: "101 False Friends.", b: "Flagged." },
+  { g: "drills", a: "Daily Drills.", b: "Sharp Skills." },
+  { g: "cert", a: "National Certification.", b: "Prep Built In." },
+  { g: "team", a: "One Team.", b: "One Channel." },
   { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley." },
 ];
 export const FEATURE_LEN = 2.5;
+const ZOOM = 1.28; // every camera this much farther from what it looks at
 
 const PX = 0.01;             // world units per CSS pixel of the 390 x 844 screen
 const SW = 390 * PX, SH = 844 * PX;
@@ -98,9 +102,24 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     groups[f.g] = g;
   }
   for (const f of FEATURES) {
-    shots[f.g] = await phoneScreen(f.g);
+    shots[f.g] = await phoneScreen(f.g === "body" ? "heart" : f.g); // the 3D Body shot is built on the heart screen
     groups[f.g].add(shots[f.g].group);
   }
+  // ---- 3D Body: the whole body over the heart screen, faded and dived through ----
+  const bodyFull = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: await loadTex("assets/layers/body/full.webp"), toneMapped: false, color: SCREEN, transparent: true, depthWrite: false }));
+  bodyFull.rotation.x = -Math.PI / 2;
+  bodyFull.renderOrder = 6;
+  const bodyPivot = new THREE.Group(); // at the heart on the chest, so the dive zooms there
+  const HEART_AT = new THREE.Vector3((193 - 195) * PX, TOP + 0.004, (330 - 422) * PX);
+  bodyPivot.position.copy(HEART_AT);
+  bodyFull.position.set(-HEART_AT.x, 0, -HEART_AT.z);
+  bodyPivot.add(bodyFull);
+  shots.body.group.add(bodyPivot);
+  const tapRing = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.13, 64), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, toneMapped: false, depthWrite: false }));
+  tapRing.rotation.x = -Math.PI / 2;
+  tapRing.position.copy(HEART_AT).add(new THREE.Vector3(0, 0.004, 0));
+  tapRing.renderOrder = 7;
+  shots.body.group.add(tapRing);
 
   // ---- glossary: the field of specialty pins ----
   const pinTex = await Promise.all(PINS.map((p) => loadTex(`assets/pins/${p}.webp`)));
@@ -126,10 +145,10 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   const bg2 = bc.getContext("2d");
   bg2.fillStyle = "#c2485c"; bg2.beginPath(); bg2.roundRect(0, 0, 756, 974, 44); bg2.fill();
   bg2.fillStyle = "#fff"; bg2.textAlign = "center";
-  bg2.font = '800 96px "Inter Tight"'; bg2.fillText("constipado", 378, 330);
+  bg2.font = '800 96px "Inter Tight"'; bg2.fillText("Constipado", 378, 330);
   bg2.font = '800 150px "Inter Tight"'; bg2.fillText("≠", 378, 500);
-  bg2.font = '500 64px "Inter Tight"'; bg2.fillText("constipated", 378, 600);
-  bg2.fillStyle = "#ffe3e9"; bg2.font = '800 80px "Inter Tight"'; bg2.fillText("= a cold", 378, 760);
+  bg2.font = '500 64px "Inter Tight"'; bg2.fillText("Constipated", 378, 600);
+  bg2.fillStyle = "#ffe3e9"; bg2.font = '800 80px "Inter Tight"'; bg2.fillText("= A Cold", 378, 760);
   const backTex = new THREE.CanvasTexture(bc); backTex.colorSpace = THREE.SRGBColorSpace;
   const back = new THREE.Mesh(new THREE.PlaneGeometry(ffL.w * 0.97, ffL.h * 0.97), new THREE.MeshBasicMaterial({ map: backTex, toneMapped: false, transparent: true }));
   back.rotation.x = Math.PI / 2; // faces down until the card flips
@@ -150,7 +169,7 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   // ---- drills: the heard line as thick words over the sheet; "ingreso" cracks in two ----
   // two centred lines, laid out from each word's real width
   const DSIZE = 0.34, GAP = 0.13;
-  const DRILL = [["Fue", 0], ["un", 0], ["ingreso", 0], ["de", 1], ["urgencia.", 1]].map(([w, line]) => ({ w, line, width: (word(w, { fit: 99, maxSize: DSIZE }).geometry.userData.w) * DSIZE }));
+  const DRILL = [["Fue", 0], ["Un", 0], ["Ingreso", 0], ["De", 1], ["Urgencia.", 1]].map(([w, line]) => ({ w, line, width: (word(w, { fit: 99, maxSize: DSIZE }).geometry.userData.w) * DSIZE }));
   for (const line of [0, 1]) {
     const ws = DRILL.filter((d) => d.line === line), total = ws.reduce((a, d) => a + d.width, 0) + GAP * (ws.length - 1);
     let x = -total / 2;
@@ -158,9 +177,9 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   }
   const drillWords = DRILL.map(({ w, x, y }) => {
     const g = new THREE.Group();
-    if (w === "ingreso") {
+    if (w === "Ingreso") {
       // the trap word is two pieces set side by side ("ingr" + "eso"), so it can crack apart cleanly
-      const L = word("ingr", { fit: 99, maxSize: DSIZE, face: "red" }), R = word("eso", { fit: 99, maxSize: DSIZE, face: "red" });
+      const L = word("Ingr", { fit: 99, maxSize: DSIZE, face: "red" }), R = word("eso", { fit: 99, maxSize: DSIZE, face: "red" });
       const wl = L.geometry.userData.w * DSIZE, wr = R.geometry.userData.w * DSIZE, tot = wl + wr + 0.012;
       L.position.x = -tot / 2 + wl / 2; R.position.x = tot / 2 - wr / 2;
       L.userData.side = -1; R.userData.side = 1; L.userData.x = L.position.x; R.userData.x = R.position.x;
@@ -171,21 +190,24 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     groups.drills.add(g);
     return g;
   });
-  // ---- cert: bars like stairs, and the 145 counter ----
-  const BARS = [0.25, 0.42, 0.6, 0.8, 1.0];
-  const barMat = new THREE.MeshStandardMaterial({ color: 0x7fdcf7, emissive: 0x3fc6ee, emissiveIntensity: 0.35, roughness: 0.25, metalness: 0.2 });
-  const bars = BARS.map((h, i) => {
-    const b = new THREE.Mesh(new RoundedBoxGeometry(0.42, 1, 0.42, 3, 0.05), barMat);
-    b.userData.h = h; b.userData.x = -1.15 + i * 0.52;
-    b.castShadow = true;
-    groups.cert.add(b);
-    return b;
-  });
+  // ---- cert: the CoreCHI campus, the app's own 3D render in three depth layers, as a pop-up ----
+  const [skyT, farT, nearT] = await Promise.all(["sky", "far", "near"].map((n) => loadTex(`assets/city/${n}.webp`)));
+  const CW = 3.7, CH = CW * 760 / 960;
+  const popLayer = (tex, z, scale = 1) => {
+    const hinge = new THREE.Group(); // hinged at its bottom edge on the glass, like a pop-up book
+    hinge.position.set(0, TOP + 0.01, z);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(CW * scale, CH * scale), new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false, side: THREE.DoubleSide, alphaTest: 0.02 }));
+    m.position.y = (CH * scale) / 2;
+    hinge.add(m);
+    groups.cert.add(hinge);
+    return hinge;
+  };
+  const campusSky = popLayer(skyT, -1.9, 1.25), campusFar = popLayer(farT, -1.0, 1.08), campusNear = popLayer(nearT, -0.1);
   const counter = new THREE.Group();
-  counter.position.set(0.55, 2.05, 0.6);
+  counter.position.set(1.15, 0.72, 2.1);
   groups.cert.add(counter);
   const qLabel = label ? label("QUESTIONS") : new THREE.Group();
-  qLabel.position.set(0.55, 1.72, 0.6);
+  qLabel.position.set(1.15, 0.5, 2.1);
   groups.cert.add(qLabel);
 
   // ---------- each shot as a function of u = seconds into it ----------
@@ -277,30 +299,38 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     },
     cert(u, S) {
       S.lift("proof", 0.25 * outBack(prog(u, 0.1, 0.45)), 0.3 * prog(u, 0.1, 0.45));
-      S.lift("hud", 0.12 * outBack(prog(u, 0.2, 0.5)));
-      bars.forEach((b, i) => {
-        const g = outBack(prog(u, 0.15 + i * 0.08, 0.6 + i * 0.08), 1.3);
-        const h = Math.max(0.001, b.userData.h * g);
-        b.scale.y = h;
-        b.position.set(b.userData.x, TOP + h / 2, 1.6);
+      // the campus stands up out of the phone: sky, then the city behind, then the hospital
+      [[campusSky, 0.05], [campusFar, 0.15], [campusNear, 0.28]].forEach(([h, t0]) => {
+        const p = outBack(prog(u, t0, t0 + 0.6), 1.25);
+        h.rotation.x = lerp(-Math.PI / 2, -0.08, p);
+        h.visible = u > t0;
       });
       // 0 to 145, in fives, then the exact number
-      const n = Math.round(145 * outCubic(prog(u, 0.25, 1.15)) / 5) * 5;
-      const txt = String(u >= 1.15 ? 145 : Math.min(145, n));
-      if (counter.userData.txt !== txt) { counter.clear(); counter.add(word(txt, { fit: 2, maxSize: 0.62 })); counter.userData.txt = txt; }
-      counter.visible = qLabel.visible = u > 0.2;
-      if (qLabel.material) qLabel.material.opacity = outCubic(prog(u, 0.3, 0.6));
-      // Dr. Smiley climbs: a hop to each of the first four bar tops
+      const n = Math.round(145 * outCubic(prog(u, 0.45, 1.3)) / 5) * 5;
+      const txt = String(u >= 1.3 ? 145 : Math.min(145, n));
+      if (counter.userData.txt !== txt) { counter.clear(); counter.add(word(txt, { fit: 2, maxSize: 0.42 })); counter.userData.txt = txt; }
+      counter.visible = qLabel.visible = u > 0.4;
+      if (qLabel.material) qLabel.material.opacity = outCubic(prog(u, 0.5, 0.8));
+      // Dr. Smiley hops in front of his campus and points at it
       smiley.group.visible = true;
-      const steps = [0.9, 1.15, 1.4, 1.65, 1.9];
-      let k = steps.findIndex((s) => u < s); if (k < 0) k = steps.length;
-      const at = (j) => j < 0 ? new THREE.Vector3(-1.75, TOP, 1.6) : new THREE.Vector3(bars[j].userData.x, TOP + bars[j].userData.h, 1.6);
-      const from = at(k - 2), to = at(Math.min(k - 1, bars.length - 1));
-      const a = k === 0 ? 0 : prog(u, steps[k - 1], steps[k - 1] + 0.25);
-      const pos = k === 0 ? at(-1) : from.clone().lerp(to, a);
-      smiley.group.position.copy(S.group.parent.position).add(pos);
-      smiley.group.rotation.y = 0.3;
-      smiley.pose(k === 0 ? MOVES.land(1) : a < 1 ? MOVES.hop(a) : { ...MOVES.land(prog(u, steps[k - 1] + 0.25, steps[k - 1] + 0.5)), face: k >= 5 ? "laugh" : "smile", brows: "glad" });
+      const a = prog(u, 0.7, 1.2);
+      smiley.group.position.copy(S.group.parent.position).add(new THREE.Vector3(lerp(-1.9, -1.05, a), TOP, lerp(2.4, 1.6, a)));
+      smiley.group.rotation.y = 0.35;
+      smiley.pose(u < 0.7 ? MOVES.land(1) : u < 1.2 ? MOVES.hop(a) : { ...MOVES.point(prog(u, 1.2, 1.7)), face: "smile", brows: "glad" });
+    },
+    body(u, S) {
+      // the whole body; a tap on the chest; the view dives in to the heart; its card lifts
+      const tap = prog(u, 0.45, 0.8);
+      tapRing.visible = tap > 0 && tap < 1;
+      tapRing.scale.setScalar(1 + 2.2 * outCubic(tap));
+      tapRing.material.opacity = 1 - tap;
+      const dive = inOutCubic(prog(u, 0.7, 1.15));
+      bodyPivot.scale.set(1 + 3 * dive, 1, 1 + 3 * dive);
+      bodyFull.material.opacity = 1 - outCubic(prog(u, 0.85, 1.15));
+      bodyFull.visible = bodyFull.material.opacity > 0.01;
+      S.layers.proof.mesh.visible = u > 1.1;
+      const p = outBack(prog(u, 1.2, 1.75), 1.5);
+      S.lift("proof", 0.22 * p, 0.3 * p);
     },
     team(u, S) {
       S.lift("channels", 0.1 * outBack(prog(u, 0.05, 0.35)));
@@ -333,14 +363,18 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     physician: [[-1.0, 3.2, 5.0], [0.6, 3.5, 4.4], [0, 0.6, -1.5], [0, 0.7, -1.0], [0, 0.9, -1.6]],
     falsefriends: [[1.3, 3.0, 7.6], [0.3, 3.7, 7.6], [-0.2, 0.4, 1.2], [0, 0.4, 1.0], [0, 0.6, 1.8]],
     drills: [[-0.9, 2.3, 7.2], [0.3, 2.6, 6.6], [0, 0.9, 0.5], [0, 0.95, 0.6], [0, 1.2, 0.9]],
-    cert: [[1.4, 2.2, 6.6], [-0.2, 2.6, 6.0], [-0.2, 0.9, 0.6], [0, 1.0, 0.8], [0, 1.0, 1.4]],
+    body: [[0.6, 4.4, 6.4], [-0.2, 4.6, 6.0], [0, 0.4, -0.6], [0, 0.45, -0.3], [0, 0.6, -0.6]],
+    cert: [[1.4, 2.6, 7.0], [-0.3, 2.9, 6.6], [-0.2, 1.4, 0.0], [0, 1.5, 0.2], [0, 1.4, -0.2]],
     team: [[1.1, 3.0, 7.0], [-0.1, 3.4, 6.6], [0, 0.35, 0.0], [0, 0.4, -0.4], [0, 0.6, -0.8]],
     ask: [[0.9, 2.4, 7.0], [-0.2, 2.9, 6.4], [-0.2, 0.7, 0.8], [0, 0.6, 0.6], [-0.4, 0.8, 2.3]],
   };
   function view(g, u) {
     const c = CAMS[g], e = inOutSine(clamp(u / FEATURE_LEN)), o = groups[g].position;
     const v = (a, b) => new THREE.Vector3(lerp(a[0], b[0], e) + o.x, lerp(a[1], b[1], e) + o.y, lerp(a[2], b[2], e) + o.z);
-    return { pos: v(c[0], c[1]), look: v(c[2], c[3]), focus: new THREE.Vector3(...c[4]).add(o) };
+    const look = v(c[2], c[3]);
+    // pulled back from the first cut (Jose: "it gets cut off, too zoomed in")
+    const pos = look.clone().add(v(c[0], c[1]).sub(look).multiplyScalar(ZOOM));
+    return { pos, look, focus: new THREE.Vector3(...c[4]).add(o) };
   }
 
   function update(g, u) {

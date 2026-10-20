@@ -108,10 +108,10 @@ export async function buildEnd(scene, group, { start }) {
   const LINES = [
     { t: 0.25, draw: (a) => drawSmiley(a) },
     { t: 0.45, draw: (a) => text("Interpreter Hub", 640, 345, '800 122px "Inter Tight"', "#fff", a, true) },
-    { t: 0.75, draw: (a) => text("Built here, for our patients.", 640, 408, '500 48px "Inter Tight"', "rgba(255,255,255,.85)", a) },
+    { t: 0.75, draw: (a) => text("Built Here, For Our Patients.", 640, 408, '500 48px "Inter Tight"', "rgba(255,255,255,.85)", a) },
     { t: 1.05, draw: (a) => urlPill(a) },
-    { t: 1.3, draw: (a) => text("Live today, on any phone.", 640, 536, '500 36px "Inter Tight"', "rgba(255,255,255,.7)", a) },
-    { t: 1.75, draw: (a) => text("Better words.", 640, 628, '800 80px "Inter Tight"', "#fff", a) },
+    { t: 1.3, draw: (a) => text("Live Today, On Any Phone.", 640, 536, '500 36px "Inter Tight"', "rgba(255,255,255,.7)", a) },
+    { t: 1.75, draw: (a) => text("Better Words.", 640, 628, '800 80px "Inter Tight"', "#fff", a) },
   ];
   let drawnKey = "";
   function text(s, x, y, font, color, a, glowText) {
@@ -147,7 +147,7 @@ export async function buildEnd(scene, group, { start }) {
     if (wipe > 0) {
       sg.save(); sg.beginPath(); sg.rect(640 - 225, 648, 450 * wipe, 96); sg.clip();
       sg.fillStyle = "#3fc6ee"; sg.beginPath(); sg.roundRect(640 - 225, 648, 450, 96, 12); sg.fill();
-      sg.font = '800 80px "Inter Tight"'; sg.fillStyle = "#0b1a4a"; sg.textAlign = "center"; sg.fillText("Safer care.", 640, 722);
+      sg.font = '800 80px "Inter Tight"'; sg.fillStyle = "#0b1a4a"; sg.textAlign = "center"; sg.fillText("Safer Care.", 640, 722);
       sg.restore();
     }
     scrTex.needsUpdate = true;
@@ -166,8 +166,8 @@ export async function buildEnd(scene, group, { start }) {
     const e = inOutSine(clamp(u / 4));
     const o = group.position;
     return {
-      pos: new THREE.Vector3(o.x + lerp(0.9, -0.25, e), lerp(2.4, 1.75, e), o.z + lerp(6.9, 4.9, e)),
-      look: new THREE.Vector3(o.x + lerp(0.0, -0.25, e), lerp(1.0, 1.05, e), o.z - 1.2),
+      pos: new THREE.Vector3(o.x + lerp(1.1, 0.15, e), lerp(2.6, 2.0, e), o.z + lerp(8.2, 6.4, e)),
+      look: new THREE.Vector3(o.x + lerp(0.2, 0.15, e), lerp(1.15, 1.25, e), o.z - 1.2),
       focus: new THREE.Vector3(o.x - 0.25, 1.2, o.z - 1.0),
     };
   }

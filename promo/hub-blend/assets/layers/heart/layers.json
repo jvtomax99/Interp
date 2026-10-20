@@ -1,0 +1,49 @@
+{
+  "state": "heart",
+  "caption": "Names In English And Spanish.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 10,
+      "y": 538.8125,
+      "w": 370,
+      "h": 295.1875,
+      "radius": 20,
+      "crop": true,
+      "file": "proof.webp",
+      "clip": {
+        "x": 0,
+        "y": 526.8125,
+        "width": 390,
+        "height": 317.1875
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 3
+    }
+  ],
+  "missing": []
+}
