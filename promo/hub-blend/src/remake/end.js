@@ -7,13 +7,35 @@ import { Reflector } from "../../vendor/Reflector.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { RectAreaLightUniformsLib } from "../../vendor/RectAreaLightUniformsLib.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutSine } from "../util.js";
+import { loadSmileyArt, composeSmiley, BROWS } from "../smiley.js";
 
 const LID_W = 3.3, LID_H = 2.1, SCR_W = 3.08, SCR_H = 1.9;
 
 export async function buildEnd(scene, group, { start }) {
   RectAreaLightUniformsLib.init();
   const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
-  const [smileyImg, homeImg] = await Promise.all([loadImg("assets/drsmiley/base.webp"), loadImg("assets/layers/home/full.webp")]);
+  const [art, homeImg, viewImg] = await Promise.all([loadSmileyArt("assets/drsmiley/"), loadImg("assets/layers/home/full.webp"), loadImg("assets/humc/skybridge-sunset.jpg")]);
+  // Dr. Smiley whole, brows included, smiling: drawn once, then placed on the screen
+  const smileyImg = document.createElement("canvas"); smileyImg.width = 480; smileyImg.height = 600;
+  composeSmiley(smileyImg.getContext("2d"), art, "smile", BROWS.glad);
+
+  // the window behind the table: HUMC's skybridge at sunset, a little soft, split by mullions
+  const wc = document.createElement("canvas"); wc.width = 1024; wc.height = 1024;
+  const wg = wc.getContext("2d");
+  wg.filter = "blur(1.2px) saturate(1.08)"; wg.drawImage(viewImg, 0, 0, 1024, 1024); wg.filter = "none";
+  wg.fillStyle = "rgba(4,7,18,0.18)"; wg.fillRect(0, 0, 1024, 1024);
+  wg.fillStyle = "#06080f";
+  for (const x of [0, 470, 1014]) wg.fillRect(x - 6, 0, 16, 1024); // mullions clear of the sign
+  wg.fillRect(0, 1008, 1024, 16);
+  const winTex = new THREE.CanvasTexture(wc); winTex.colorSpace = THREE.SRGBColorSpace;
+  const windowView = new THREE.Mesh(new THREE.PlaneGeometry(9.6, 9.6), new THREE.MeshBasicMaterial({ map: winTex, toneMapped: false, color: 0xd8d2d2 }));
+  windowView.position.set(2.0, 2.9, -4.6);
+  group.add(windowView);
+  // the sunset's warm light coming in through it, onto the table and the laptop's back
+  const sunset = new THREE.RectAreaLight(0xff9a6a, 0.9, 9, 4);
+  sunset.position.set(-0.4, 2.0, -4.4);
+  sunset.lookAt(-0.4, 0, 0);
+  group.add(sunset);
 
   // the table: a mirror, dimmed by a dark sheet so the reflection fades like lacquer
   const mirror = new Reflector(new THREE.PlaneGeometry(14, 10), { textureWidth: 540, textureHeight: 960, color: 0x7a8296, clipBias: 0.003 });

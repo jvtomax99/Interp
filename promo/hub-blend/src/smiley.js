@@ -26,8 +26,29 @@ const DISC_R = 0.36, DISC_H = 0.05;
 
 const load = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
 
-export async function createSmiley({ root = "../../drsmiley/", glow = 0x3fc6ee } = {}) {
+// His art from the app, for createSmiley and for anything that draws him flat (the end card).
+export async function loadSmileyArt(root = "../../drsmiley/") {
   const [base, face, bl, br] = await Promise.all(["base", "face", "brow-l", "brow-r"].map((n) => load(root + n + ".webp")));
+  return { base, face, bl, br };
+}
+// Draws him whole (base, one face frame, both brows) into a 480 x 600 area of g, as drSmileyArt lays him out.
+export function composeSmiley(g, { base, face, bl, br }, frame = "rest", brows = BROWS.rest) {
+  const fi = Math.max(0, FRAMES.indexOf(frame));
+  g.drawImage(base, 0, 0);
+  g.drawImage(face, fi * FACE.w, 0, FACE.w, FACE.h, FACE.x, FACE.y, FACE.w, FACE.h);
+  const brow = (img, b, lift, tilt) => {
+    g.save();
+    g.translate(b.x + b.w / 2, b.y + b.h / 2 + lift * SVG_TO_PX);
+    g.rotate((tilt * Math.PI) / 180);
+    g.drawImage(img, -b.w / 2, -b.h / 2);
+    g.restore();
+  };
+  brow(bl, BROW_L, brows[0], brows[1]);
+  brow(br, BROW_R, brows[2], brows[3]);
+}
+
+export async function createSmiley({ root = "../../drsmiley/", glow = 0x3fc6ee } = {}) {
+  const art = await loadSmileyArt(root);
   const cv = document.createElement("canvas");
   cv.width = 480; cv.height = 600;
   const g = cv.getContext("2d");
@@ -40,19 +61,8 @@ export async function createSmiley({ root = "../../drsmiley/", glow = 0x3fc6ee }
     const key = frame + "|" + brows.join(",");
     if (key === drawn) return;
     drawn = key;
-    const fi = Math.max(0, FRAMES.indexOf(frame));
     g.clearRect(0, 0, 480, 600);
-    g.drawImage(base, 0, 0);
-    g.drawImage(face, fi * FACE.w, 0, FACE.w, FACE.h, FACE.x, FACE.y, FACE.w, FACE.h);
-    const brow = (img, b, lift, tilt) => {
-      g.save();
-      g.translate(b.x + b.w / 2, b.y + b.h / 2 + lift * SVG_TO_PX);
-      g.rotate((tilt * Math.PI) / 180);
-      g.drawImage(img, -b.w / 2, -b.h / 2);
-      g.restore();
-    };
-    brow(bl, BROW_L, brows[0], brows[1]);
-    brow(br, BROW_R, brows[2], brows[3]);
+    composeSmiley(g, art, frame, brows);
     tex.needsUpdate = true;
   }
   paint("rest", BROWS.rest);

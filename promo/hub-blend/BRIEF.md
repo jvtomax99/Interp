@@ -136,6 +136,13 @@ distinct on screen.
    the table, then the end lines arrive). 36 s: 9 features x 2.5 s.
    Music: `assets/music-remake.m4a`, v11's track 0-32.6 s crossfaded into
    its 40.9-45 s ending (36.1 s). The 36 s draft renders in about 5 min.
+   Jose's notes on this draft (2026-10-20): the hospital was missing, and
+   the end card's Dr. Smiley had no brows. Fixed: behind the table is a
+   window onto HUMC's skybridge at sunset (`assets/humc/skybridge-sunset.jpg`,
+   the sign kept whole and readable, less blur in that shot, a little warm
+   light through it); his picture on the screen is now composed whole
+   (`composeSmiley` in `src/smiley.js`: base, face frame, both brows).
+   He chose the window only (not an opener, word walls or an aerial shot).
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.

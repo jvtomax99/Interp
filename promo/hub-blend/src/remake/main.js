@@ -397,6 +397,8 @@ async function build() {
     camera.lookAt(cam.look);
     const fp = a.focus || a.look;
     bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
+    // the end card keeps the hospital behind the table readable: less blur there
+    bokeh.uniforms.aperture.value = s[2] === "end" ? 0.00025 : 0.0007;
     camera.rotation.z += Math.sin(t * 1.3) * 0.012; // a hand-held breath
     // the spotlight moves with the shot
     const g = groups[s[2]].position;
