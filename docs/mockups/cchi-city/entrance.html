@@ -185,6 +185,19 @@ box(8.6, 0.08, 7.2, asphalt, -14.6, 0.24, 9.8, 0.03, false);
 for (let i=0;i<7;i++){ box(0.06, 0.02, 2.2, paint, -18.4 + i*1.25, 0.29, 8.0, 0.01, false); box(0.06, 0.02, 2.2, paint, -18.4 + i*1.25, 0.29, 11.6, 0.01, false); }
 for (let i=0;i<10;i++){ if (i === 3 || i === 8) continue; parked(-17.8 + (i%6)*1.25, i < 6 ? 8.0 : 11.6, 0, CARC[(i*5)%CARC.length]); }
 for (const [x,z,s,k] of [[14.2,9.0,0.9,'round'],[16.4,11.4,0.8,'cone'],[17.6,8.2,0.8,'round'],[-13,3.8,0.8,'cone'],[-15.5,2.2,0.9,'round'],[-17.6,-6,0.9,'cone'],[-13.6,-7.2,0.8,'round'],[16.8,-10.4,0.9,'cone'],[18.2,-7.2,0.8,'round'],[5.2,-20.6,0.7,'cone'],[-3.6,-20.4,0.7,'cone']]) tree(x, z, s, k);
+// the ambulance bay on the banner building's right flank: brick, a warm-lit opening; its two sliding doors are
+// captured on their own (closed, half, open) and the app opens them as the ambulance pulls in
+const BAY = { x:6.1, z:-11.2, w:2.2, h:1.3, d:2.4 };
+box(BAY.w, BAY.h, BAY.d, BRICK({ col:'#6e3a33', band:'#7a4239' })(BAY.w, BAY.h), BAY.x, 0.3 + BAY.h/2, BAY.z, 0.05);
+box(BAY.w + 0.12, 0.16, BAY.d + 0.12, M(0xd9cdb8), BAY.x, 0.3 + BAY.h + 0.08, BAY.z, 0.04);
+add(new THREE.PlaneGeometry(1.1, 1.0), new THREE.MeshBasicMaterial({ color:0xffd9a0 }), BAY.x, 0.3 + 0.5, BAY.z + BAY.d/2 + 0.01, false);   // the lit inside
+add(new THREE.PlaneGeometry(1.26, 0.08), M(0xf3efe6, {r:0.5}), BAY.x, 0.3 + 1.04, BAY.z + BAY.d/2 + 0.02, false);                        // the door's head
+glow(BAY.x, 0.3 + 0.6, BAY.z + BAY.d/2 + 0.3, 1.6, 0xffd0a0);
+const BAY_DOORS = new THREE.Group(); scene.add(BAY_DOORS); BAY_DOORS.visible = false; LIVE.push(BAY_DOORS);
+const DOORM = new THREE.MeshStandardMaterial({ color:0xdfe3ea, roughness:0.5, metalness:0.2 });
+const DOORS = [-1, 1].map(sd => { const dm = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.0, 0.04), DOORM); dm.position.set(BAY.x + sd*0.27, 0.3 + 0.5, BAY.z + BAY.d/2 + 0.04); dm.castShadow = true; BAY_DOORS.add(dm);
+  const st = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.06, 0.05), M(0xb8bec8)); st.position.set(BAY.x + sd*0.27, 0.3 + 0.55, BAY.z + BAY.d/2 + 0.07); BAY_DOORS.add(st); return [dm, st, sd]; });
+function bayDoors(open){ for (const [dm, st, sd] of DOORS){ const x = BAY.x + sd*(0.27 + open*0.52); dm.position.x = x; st.position.x = x; } }
 // three flagpoles by the mouth of the drive, flags caught in a breeze
 for (const [x, col] of [[-7.4, 0xf4f6fa], [-6.4, 0x1f3f7a], [-5.4, 0xf4f6fa]]){
   add(new THREE.CylinderGeometry(0.035, 0.045, 4.2, 8), M(0xd8dbe3, {r:0.4, m:0.6}), x, 2.35, 12.0);
@@ -307,9 +320,36 @@ function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandar
   for (const lx of [-0.2, 0.2]){ const h = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,6), new THREE.MeshBasicMaterial({ color:0xfff6dc })); h.position.set(lx, 0.3, 1.1); g.add(h);
     const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xfff1c8, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx, 0.3, 1.15); gl.scale.set(0.6,0.6,1); g.add(gl); }
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
-const STREET = [ { g: vehicle('car', 0x6fb3e0), ry: -Math.PI/2, z: 15.9, dir: 1, dur: 11000 }, { g: vehicle('car', 0xb83a3a), ry: Math.PI/2, z: 14.1, dir: -1, dur: 9500 },
-  { g: bus(), ry: -Math.PI/2, z: 15.9, dir: 1, dur: 16000 }, { g: vehicle('car', 0xf3f5fb), ry: Math.PI/2, z: 14.1, dir: -1, dur: 12500 } ];
+// a vehicle's front is its local +z, so rotation.y = +pi/2 noses it toward +x (round 1 had these the other way: the street cars drove backwards)
+const STREET = [ { g: vehicle('car', 0x6fb3e0), ry: Math.PI/2, z: 15.9, dir: 1, dur: 11000 }, { g: vehicle('car', 0xb83a3a), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 9500 },
+  { g: bus(), ry: Math.PI/2, z: 15.9, dir: 1, dur: 16000 }, { g: vehicle('car', 0xf3f5fb), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 12500 } ];
 const CAR_IN2 = vehicle('car', 0x2b2f3a);
+// the car that backs out of the surface lot: the same car twice (reversing, with its reverse lights on; then
+// nosed toward the drive), so the app can swap the look at the turn
+const LOT_A = vehicle('car', 0xe9e2d0), LOT_B = vehicle('car', 0xe9e2d0);
+for (const lx of [-0.17, 0.17]){ const h = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,6), new THREE.MeshBasicMaterial({ color:0xffffff })); h.position.set(lx, 0.2, -0.5); LOT_A.add(h);
+  const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xffffff, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx, 0.2, -0.56); gl.scale.set(0.45,0.45,1); LOT_A.add(gl); }
+// people sitting on the benches: legs forward on the seat, two looks (head straight, head turned)
+function sitter(kind, i=0){ const g = new THREE.Group(); g.scale.setScalar(1.75); const skin = M(SKIN[i % SKIN.length], {r:0.9});
+  const C = { patient:[0xa9d3f0,0xa9d3f0], visitor:[0xc9583a,0x2b2f3a], elder:[0x8a7cb3,0x4a4a5a], kid:[0xf2c94c,0x2f5fa6], nurse:[0x3aa6a0,0x3aa6a0] }[kind] || [0x999999,0x444444];
+  const sc = kind === 'kid' ? 0.68 : 1;
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.1*sc, 0.2*sc, 4, 10), M(C[0], {r:0.85})); body.position.set(0, 0.2*sc, 0); body.castShadow = true; g.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.085*sc, 12, 10), skin); head.position.set(0, 0.45*sc, 0); g.add(head);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.088*sc, 12, 8, 0, Math.PI*2, 0, Math.PI*0.5), M([0x2b1d14,0x5a3a1a,0x1a1a1a,0xd9c27a,0x8a8a8a][i%5], {r:0.9})); hair.position.set(0, 0.47*sc, 0); g.add(hair);
+  for (const dx of [-0.045, 0.045]){ const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035*sc, 0.035*sc, 0.2*sc, 8), M(C[1], {r:0.9})); l.rotation.x = Math.PI/2; l.position.set(dx*sc, 0.02*sc, 0.1*sc); g.add(l);
+    const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.035*sc, 0.035*sc, 0.16*sc, 8), M(C[1], {r:0.9})); sh.position.set(dx*sc, -0.08*sc, 0.2*sc); g.add(sh); }
+  g.userData.head = head; g.userData.hair = hair;
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
+function turnHead(g, f){ const a = f ? 0.55 : 0; g.userData.head.rotation.y = a; g.userData.hair.rotation.y = a; g.userData.hair.position.x = f ? 0.012 : 0; }
+const SITTERS = [ { g: sitter('elder', 3), at: [-9.35, 0.59, 12.4] }, { g: sitter('kid', 0), at: [-8.7, 0.59, 12.4] }, { g: sitter('visitor', 1), at: [9.3, 0.59, 12.4] } ];
+// a flock of birds crossing the sky: five small dark Vs, wings up and wings down
+function flock(){ const g = new THREE.Group(); const dark = new THREE.MeshBasicMaterial({ color:0x1a1424 }); g.userData.wings = [];
+  for (const [dx, dy, dz] of [[0,0,0],[-1.6,-0.4,0.6],[1.5,-0.5,0.4],[-3.0,-1.0,1.1],[2.9,-1.1,0.9]]){ const b = new THREE.Group(); b.position.set(dx, dy, dz);
+    for (const sd of [-1, 1]){ const w = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.05, 0.22), dark); w.position.x = sd*0.38; const piv = new THREE.Group(); piv.add(w); piv.userData.sd = sd; b.add(piv); g.userData.wings.push(piv); }
+    g.add(b); }
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
+function flap(g, f){ g.userData.wings.forEach(p => { p.rotation.z = p.userData.sd * (f ? -0.6 : 0.5); }); }
+const BIRDS = flock();
 const WALKS = [
   { g: person('visitor', 0), pts: [[-18,0.1,12.7],[-6,0.1,12.7],[4.5,0.1,12.7],[18,0.1,12.7]], dur: 42000 },
   { g: person('patient', 1), pts: [[18,0.1,12.2],[6,0.1,12.2],[-6,0.1,12.2],[-18,0.1,12.2]], dur: 48000 },
@@ -378,6 +418,14 @@ window.__run = async (nolit) => {
     ...path([[26,16,-34],[14,11,-28],[5,PAD.y+4.5,-23],[PAD.x,PAD.y+1.6,PAD.z],[PAD.x,PAD.y+0.5,PAD.z]], [PAD.x, PAD.y+0.5, PAD.z]) }; HELI.visible = false;
   place(CAR_IN2, 2.0, 0.2, 2.0, Math.PI); out.live.carIn2 = { img: alone(CAR_IN2, () => capAlpha()), ...path([[2.0,0.4,15.5],[2.0,0.4,9],[2.0,0.4,2.0],[2.0,0.4,-3],[2.0,0.4,-6.5]], [2.0,0.4,2.0]) }; CAR_IN2.visible = false;
   out.live.street = STREET.map(o => { place(o.g, 0, 0.2, o.z, o.ry); const r = { img: alone(o.g, () => capAlpha()), dur: o.dur, ...path(o.dir > 0 ? [[-19.5,0.4,o.z],[-7,0.4,o.z],[7,0.4,o.z],[19.5,0.4,o.z]] : [[19.5,0.4,o.z],[7,0.4,o.z],[-7,0.4,o.z],[-19.5,0.4,o.z]], [0,0.4,o.z]) }; o.g.visible = false; return r; });
+  // the bay doors: closed, half, open, each on its own
+  out.live.bay = [0, 0.5, 1].map(o => { bayDoors(o); return alone(BAY_DOORS, () => capAlpha(0.8)); });
+  // the lot car: parked in the empty spot (i = 8), backs out into the lane, then noses east along the lot's lane to the drive and out to the street
+  place(LOT_A, -15.3, 0.2, 11.6, 0); out.live.lot = { img: [alone(LOT_A, () => capAlpha())], ...path([[-15.3,0.4,11.6],[-15.3,0.4,10.4],[-15.3,0.4,9.6]], [-15.3,0.4,11.6]) }; LOT_A.visible = false;
+  place(LOT_B, -15.3, 0.2, 9.6, Math.PI/2); const lotB = { img: alone(LOT_B, () => capAlpha()), ...path([[-15.3,0.4,9.6],[-11,0.4,9.6],[-6.6,0.4,9.8],[-4.2,0.4,11.2],[-3.0,0.4,13.4],[-2.8,0.4,15.5]], [-15.3,0.4,9.6]) }; LOT_B.visible = false;
+  out.live.lot.img.push(lotB.img); out.live.lot.ref2 = lotB.ref; out.live.lot.pts2 = lotB.pts;
+  out.live.sitters = SITTERS.map(o => { place(o.g, o.at[0], o.at[1], o.at[2], 0); const img = [0, 1].map(f => { turnHead(o.g, f); return alone(o.g, () => capAlpha(0.8)); }); o.g.visible = false; return { img }; });
+  place(BIRDS, 0, 12.5, -30, 0); out.live.birds = { img: [0, 1].map(f => { flap(BIRDS, f); return alone(BIRDS, () => capAlpha(0.8)); }), ...path([[-46,10,-46],[-20,12,-36],[0,12.5,-30],[22,12,-26],[48,10,-22]], [0,12.5,-30]) }; BIRDS.visible = false;
   out.live.walkers = WALKS.map(w => { const mid = w.pts[Math.floor(w.pts.length/2)]; place(w.g, mid[0], mid[1], mid[2], 0);
     const img = [0,1].map(f => { stride(w.g, f); return alone(w.g, () => capAlpha(0.8)); }); const hh = w.g.userData.h*1.75/2; const r = { img, dur: w.dur, ...path(w.pts.map(p => [p[0], p[1] + hh, p[2]]), [mid[0], mid[1] + hh, mid[2]]) }; w.g.visible = false; return r; });
   CLOUDS.forEach(c => c.visible = true); FLAGS.forEach(f => f.visible = true);

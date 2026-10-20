@@ -24,12 +24,32 @@ written here.
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
-**One chat, no handoffs** (Jose, 2026-10-20: "no new chat anymore"; and
-earlier the same day: he doesn't archive chats). Finish a phase, carry on
-with the next one in the same chat. Never say "Start a new chat" or
-"Archive this chat", and don't open a new session to hand work over. The
-docs still carry everything worth keeping (a long chat gets compacted, and
-other tools read them).
+**Don't ask to start a new chat** (Jose, 2026-10-20: "Let's not ask to
+start a new chat anymore", his plan has the usage). Carry on in the same
+chat phase after phase, and keep everything worth keeping in this file
+anyway, so a chat that does end (compaction, a crash) loses nothing. The
+old rule, for the record: a new chat only when the chat was heavy
+(compacted, or full of big file reads, long test output or fix rounds).
+If a chat has to move anyway, the paragraph below says how.
+Don't repeat it in every reply.
+**Claude opens the new chat itself** (Jose, 2026-10-19): with
+`create_session` (claude-code-remote tools), same repo, its first message
+the handoff. **A chat opened from another keeps its exact title** (Jose,
+2026-10-19): read it with `get_session` and pass it to `create_session`.
+The main line of chats is called "Main inter Hub"; every chat opened from
+it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
+`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
+next, then stop and wait for Jose's go. In the old chat, tell Jose the new
+session carries the same title and say "Archive this chat" (archive it only when he says
+so). If `create_session` isn't available, fall back to the message to paste.
+
+**When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
+wants to stay organized). A chat is done when nothing in it is still
+waiting: its PRs are merged or closed, no question to Jose is open, no
+check-in is pending, and everything worth keeping is in this file. Say it
+once, at the end of that reply, with a one-line reason ("PR #52 merged,
+nothing open"). A chat left for a new one ("Start a new chat") is done
+too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
@@ -240,6 +260,11 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 Campus life round 2 (this PR): the car backing out of the lot,
+  the ambulance bay with doors that open as the ambulance pulls in, people
+  on the benches, a flock crossing the sky; round 1's street cars faced the
+  wrong way, fixed. Not picked by Jose: parallel tilt, day-to-night. Suite
+  `campus-life.cjs`; note `docs/features/practice-dashboard.md`.
 - 2026-10-19 Watch bubble always on Home (Jose couldn't find it: he had
   watched the video, and the once-only rule had hidden it). After watching,
   the ring stops turning (`.is-seen`). Guide: `promo` answer reworded.
@@ -467,6 +492,28 @@ paused or read his layout box, not his painted box. Not this PR's code.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **Then two chats did M2 at once, the same evening (2026-10-19).** #73 and
+  `claude/m2-memory-trainer-alt` (dropped, Jose's call; the branch stays
+  on the remote, unmerged). Both chats checked the remote branches before
+  starting and found nothing: the check only catches a chat that has
+  already pushed. **So: push the phase's branch (an empty commit is fine)
+  the moment you take the phase**, before reading code, and look at
+  `git ls-remote --heads origin 'claude/*'` right before that push.
+- **Two chats did M1 at once (2026-10-19).** #69 (`memory/lines.json`,
+  approved) and #70 (closed, a second set with its own review page) were
+  built in parallel from the same PLAN. Before taking a phase: fetch
+  `main`, then look at the open PRs and the remote `claude/*` branches
+  (`git ls-remote --heads origin 'claude/*'`); a branch named for the phase
+  means another chat has it. Remote `claude/*` branches can't be deleted
+  from a cloud session (the proxy drops delete pushes); Jose deletes them
+  on GitHub or they stay.
+- **The live site can't be fetched from a cloud session** (2026-10-19): the
+  proxy answers 403 for interp-six.vercel.app and Vercel's file API refuses.
+  What works: `list_deployments` (Vercel tools) gives the production
+  deployment's commit and state; that commit's `BUILD_ID` is the live one.
+  For a real page check, Jose adds the host under the environment's
+  Allowed domains.
 
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC

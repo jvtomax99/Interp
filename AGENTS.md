@@ -7,10 +7,11 @@ this file wins.
 
 **How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
 do, test, update the plan, open a pull request). A chat runs phase after
-phase and stays the same chat: never ask Jose to start a new chat or to
-archive one (Jose, 2026-10-20: "no new chat anymore"). Keep everything worth
-keeping in the docs anyway, in case a chat is compacted. Details:
+phase in a row and never asks to start a new chat (Jose, 2026-10-20); a
+chat that does start fresh reads the docs, not the old chat. Details:
 `docs/PLAN.md`.
+When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
+in `docs/PLAN.md`).
 
 **Feature notes** (Ask the Hub, Dr. Smiley's memory and movement, Term Review,
 the Daily Drill, 3D Body, the User Guide, Team access, …) are in
