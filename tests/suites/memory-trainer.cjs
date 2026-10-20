@@ -21,6 +21,19 @@ function standIns(){
     speak(u){ this._u = u; window.__mt.spoken.push({ text: u.text, voice: u.voice && u.voice.name, lang: u.lang, rate: u.rate });
       u._t = setTimeout(() => { if(this._u === u){ this._u = null; u.onend && u.onend(); } }, window.__mtHold ? 1e9 : 200); } };
   Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
+  // A mic whose tracks count their stops, a recorder that makes 4 KB, an
+  // audio session that remembers its type, playback that records its source.
+  Object.assign(window.__mt, { gum: 0, stopped: 0, played: [], revoked: 0 });
+  Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia: async () => { window.__mt.gum++;
+    if (window.__mtDeny) throw Object.assign(new Error('no'), { name: 'NotAllowedError' });
+    return { getTracks: () => [{ stop(){ window.__mt.stopped++; } }] }; } }, configurable: true });
+  window.MediaRecorder = class { constructor(s, o){ this.mimeType = (o && o.mimeType) || ''; this.state = 'inactive'; }
+    static isTypeSupported(t){ return t === 'audio/mp4'; }
+    start(){ this.state = 'recording'; }
+    stop(){ this.state = 'inactive'; setTimeout(() => { this.ondataavailable({ data: new Blob([new Uint8Array(4096)], { type: 'audio/mp4' }) }); this.onstop(); }, 30); } };
+  window.Audio = class { constructor(u){ this.src = u; window.__mt.played.push(u); } play(){ return Promise.resolve(); } pause(){} };
+  Object.defineProperty(navigator, 'audioSession', { value: { type: 'auto' }, configurable: true });
+  const rv = URL.revokeObjectURL.bind(URL); URL.revokeObjectURL = u => { window.__mt.revoked++; rv(u); };
   window.SpeechSynthesisUtterance = class { constructor(t){ this.text = t; this.voice = null; this.lang = ''; this.rate = 1; } };
 }
 
@@ -147,6 +160,51 @@ function standIns(){
     ok(page.__errors.length === 0, 'no page errors', page.__errors);
     await ctx.close();
   }
+
+  console.log('== Record me (M3)');
+  { const { ctx, page } = await L.boot(b, { device: 'iphone', settle: 4000, init: standIns });
+    await page.route('**/memory/lines.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: LINES }));
+    await page.evaluate(() => openMemoryTrainer()); await wait(800);
+    const off = await page.evaluate(() => { const i = document.querySelectorAll('.mem-notes input'); return { n: i.length, rec: i[1] && i[1].checked }; });
+    ok(off.n === 2 && off.rec === false, 'Record me is there and off by default', off);
+    await page.evaluate(() => { window.__mtHold = true; document.querySelectorAll('.mem-seg button')[1].click(); }); await wait(150);
+    await page.evaluate(() => document.querySelectorAll('.mem-notes input')[1].click()); await wait(150);
+    await page.evaluate(() => document.querySelector('.mem-start').click()); await wait(200);
+    const during = await page.evaluate(() => ({ gum: __mt.gum, stage: MEM.stage }));
+    ok(during.gum === 0 && during.stage === 'listen', 'the mic stays shut while the line plays', during);
+    await page.evaluate(() => { const u = speechSynthesis._u; speechSynthesis._u = null; u.onend(); }); await wait(1300);
+    const turn = await page.evaluate(() => ({ gum: __mt.gum, rec: (document.querySelector('.mem-rec') || {}).textContent, type: navigator.audioSession.type, state: MEMREC.state }));
+    ok(turn.gum === 1 && /^Recording 0:0[1-2]$/.test(turn.rec) && turn.type === 'play-and-record', 'your turn: the mic opens, "Recording" with the seconds', turn);
+    await page.screenshot({ path: O + 'rec-turn.png' });
+    await page.evaluate(() => [...document.querySelectorAll('.mem-go')].find(x => /Show the rendering/.test(x.textContent)).click()); await wait(300);
+    const chk = await page.evaluate(() => { const back = document.querySelector('.mem-back');
+      const btns = back ? [...back.querySelectorAll('button')].map(x => { const r = x.getBoundingClientRect(), h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { t: x.textContent, h: Math.round(r.height), hit: !!h && x.contains(h) }; }) : [];
+      return { stopped: __mt.stopped, type: navigator.audioSession.type, url: !!MEMREC.url, btns, sideways: document.documentElement.scrollWidth - innerWidth }; });
+    ok(chk.stopped === 1 && chk.type === 'playback' && chk.url, 'Show the rendering: the mic is let go, the audio session back to playback, the take kept', chk);
+    ok(chk.btns.map(x => x.t).join() === 'Mine,Model' && chk.btns.every(x => x.h >= 44 && x.hit) && chk.sideways <= 0, 'Listen back: Mine and Model, 44px, each takes its tap', chk.btns);
+    await page.evaluate(() => scrollTo(0, 0)); await page.screenshot({ path: O + 'rec-check.png' });
+    await page.evaluate(() => document.querySelector('.mem-back .btn').click()); await wait(100);
+    const mine = await page.evaluate(() => ({ played: __mt.played.slice(-1)[0], url: MEMREC.url }));
+    ok(mine.played === mine.url, 'Mine plays your take', mine);
+    await page.evaluate(() => document.querySelectorAll('.mem-back .btn')[1].click()); await wait(100);
+    const model = await page.evaluate(() => ({ s: __mt.spoken.slice(-1)[0], want: MEM.line.u.map(c => c[1]).join(' ') }));
+    ok(model.s.text === model.want && model.s.voice === 'Paulina', 'Model reads the rendering in Spanish with Paulina', model);
+    await page.evaluate(() => document.getElementById('memNext').click()); await wait(100);
+    const next = await page.evaluate(() => ({ url: MEMREC.url, revoked: __mt.revoked, gum: __mt.gum, stage: MEM.stage }));
+    ok(next.url === '' && next.revoked === 1 && next.gum === 1 && next.stage === 'listen', 'Next line drops the take; the mic stays shut while the next one plays', next);
+    // Leaving mid-turn lets go of the mic.
+    await page.evaluate(() => { const u = speechSynthesis._u; speechSynthesis._u = null; u.onend(); }); await wait(500);
+    await page.evaluate(() => goBack()); await wait(400);
+    const left = await page.evaluate(() => ({ stopped: __mt.stopped, stream: MEMREC.stream, rec: MEMREC.rec, type: navigator.audioSession.type }));
+    ok(left.stopped === 2 && left.stream === null && left.rec === null && left.type === 'playback', 'Back during your turn releases the mic', left);
+    // Mic refused: says so, the round goes on.
+    await page.evaluate(() => { window.__mtDeny = true; openMemoryTrainer(); }); await wait(600);
+    await page.evaluate(() => document.querySelector('.mem-start').click()); await wait(100);
+    await page.evaluate(() => { const u = speechSynthesis._u; speechSynthesis._u = null; u.onend(); }); await wait(300);
+    const den = await page.evaluate(() => ({ t: (document.querySelector('.mem-rec') || {}).textContent, show: !!document.querySelector('.mem-go'), type: navigator.audioSession.type }));
+    ok(/mic was refused/.test(den.t) && den.show && den.type === 'playback', 'mic refused: says so, Show the rendering still there', den);
+    ok(page.__errors.length === 0, 'no page errors', page.__errors);
+    await ctx.close(); }
 
   console.log('== no speech on this browser');
   { const { ctx, page } = await L.boot(b, { device: 'iphone', settle: 4000, init: () => { delete window.speechSynthesis; delete Window.prototype.speechSynthesis; } });

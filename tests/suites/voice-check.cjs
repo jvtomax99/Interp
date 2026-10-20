@@ -67,7 +67,7 @@ function noApis(){
     ok(open.shown && open.moreShut && open.mode === 'browser tab', 'opens over a closed More, says how the page runs', open);
     ok(open.voices === '2 Spanish and 1 English voices on this phone.', 'counts the voices once they arrive (es_ES counted as Spanish)', open.voices);
     ok(open.inView && open.sideways <= 0, 'sheet fits the width, no sideways scroll', open);
-    ok(open.btns.length === 7 && open.btns.every(x => x.h >= 40 && x.hit), 'seven buttons, each 40px+ and taking its own tap', open.btns);
+    ok(open.btns.length === 8 && open.btns.every(x => x.h >= 40 && x.hit), 'eight buttons, each 40px+ and taking its own tap', open.btns);
 
     await page.evaluate(() => vcPlay('es')); await wait(450);
     const play = await page.evaluate(() => ({ s: document.getElementById('vcPlay').textContent, spoken: __vc.spoken }));
@@ -82,6 +82,9 @@ function noApis(){
     await page.evaluate(() => document.getElementById('vcPlayBack').click()); await wait(300);
     ok(await page.evaluate(() => document.getElementById('vcRec').textContent) === 'played back (audio/mp4, 4 KB)', 'Play back plays the take');
 
+    await page.evaluate(() => { Object.defineProperty(navigator, 'audioSession', { value: { type: 'auto' }, configurable: true }); vcLoudFix(); }); await wait(450);
+    const fix = await page.evaluate(() => ({ s: document.getElementById('vcFix').textContent, type: navigator.audioSession.type, play: document.getElementById('vcPlay').textContent }));
+    ok(fix.s === 'audio session set to playback' && fix.type === 'playback' && /Spanish: played/.test(fix.play), 'Try the volume fix: sets the audio session to playback, plays Spanish', fix);
     await page.evaluate(() => vcListen('es')); await wait(400);
     const sr = await page.evaluate(() => ({ s: document.getElementById('vcSr').textContent, heard: __vc.heard }));
     ok(/^Spanish: done, first words after 0\.\d s · me duele el pecho$/.test(sr.s) && sr.heard[0] === 'es-US', 'Escuchar en español: es-US, shows the words', sr);
@@ -90,7 +93,7 @@ function noApis(){
     await page.evaluate(() => [...document.querySelectorAll('#voiceCheckBody .btn')].find(x => /Copy/.test(x.textContent)).click()); await wait(300);
     const clip = await page.evaluate(() => navigator.clipboard.readText());
     ok(/Running as: browser tab/.test(clip) && /Spanish: Paulina \(es-MX\); Mónica \(es-ES\)/.test(clip) && /Record: played back \(audio\/mp4, 4 KB\)$/m.test(clip)
-      && /Speech to text: yes \(webkit\)/.test(clip) && /Spanish: done.*"me duele el pecho"/.test(clip) && /English: not tried/.test(clip) && /as loud after the mic/.test(clip), 'Copy results: mode, voices, each step', clip);
+      && /Speech to text: yes \(webkit\)/.test(clip) && /Spanish: done.*"me duele el pecho"/.test(clip) && /English: not tried/.test(clip) && /as loud after the mic/.test(clip) && /Volume fix: audio session set to playback/.test(clip), 'Copy results: mode, voices, each step', clip);
 
     // Close mid-recording: the mic is let go and nothing is left running.
     await page.evaluate(() => document.getElementById('vcRecBtn').click()); await wait(600);
