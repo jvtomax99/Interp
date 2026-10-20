@@ -58,6 +58,24 @@ characters"; E1 and E2 done: E2 is the four drawn faces, surprised, sad,
 worried, doubt, in `docs/features/dr-smiley.md`).** E3 needs his yes: squash and stretch on the head as he springs and
 lands (he had the Home greeting's squish removed; show him first).
 
+**Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
+One PR each, after M2 (#73):
+F1. **Dr. Smiley reacts in quizzes** with current art: a bounce on a right
+   answer, a small wince (E2 worried face) on a wrong one (`DR_REACTS.think`
+   exists but nothing calls it), a cheer at streak milestones. Upgrade when
+   Jose sends: head and shoulders as separate layers (base.webp canvas, neck
+   pivot), two arm poses (both up; one fist pump), two face frames (happy
+   eyes-closed, wince). Layers, not Rive.
+F2. **Squash and stretch: Practice buttons and the streak flame only**
+   (spring press, overshoot and settle on pills and cards). Dr. Smiley's
+   own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
+   Inter (rounded face declined).
+F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
+   r3f declined: no build step, weight, unproven 60 fps). Re-render golden
+   hour, peach to lavender sky, warm rim light, more haze toward the
+   horizon, nothing pure black or gray; tilt parallax from layers
+   (device tilt, reduced-motion off). Full re-render (~25 min, lit set too).
+
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
 you missed, the line length follows your span, your span is charted over
@@ -241,6 +259,14 @@ paused or read his layout box, not his painted box. Not this PR's code.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-19 Watch bubble always on Home (Jose couldn't find it: he had
+  watched the video, and the once-only rule had hidden it). After watching,
+  the ring stops turning (`.is-seen`). Guide: `promo` answer reworded.
+  Same PR: the video has its own controls and full screen with an X that
+  never hides (Jose: full screen had no X; that was the iPhone's own player,
+  which hides it while playing). Closing the sheet now pauses the video (Back
+  used to leave it playing behind Home).
 
 - 2026-10-19 Campus: each building's badge names its exam area; first tap
   picks it (windows lit, scene dimmed, a card with the area's name,
