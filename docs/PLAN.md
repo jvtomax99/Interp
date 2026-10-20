@@ -241,6 +241,10 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
+  sky violet instead of night navy, no stars, a warm glow top left. Lower
+  colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim
+  (2.9:1) were already under the 4.5:1 text contrast minimum before this.
 - 2026-10-20 S4 glossary taps. Profiled a domain tap (`tap-trace.cjs`
   PROFILE=1): ~150 of the handler's ~220 ms was the browser laying out the
   new screen, forced early by `smileyElsewhere`/`watchDomainDock`; ~38 ms

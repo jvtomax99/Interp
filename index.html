@@ -3852,14 +3852,14 @@
   .cp-card{
     position:relative; overflow:hidden; max-width:760px; margin:0 0 17px 0; padding:17px 13px 13px;
     border-radius:var(--r-lg); color:#fff;
-    background:radial-gradient(120% 62% at 50% 112%, #f2a46b 0%, #c96a7c 30%, #4b2a63 60%, #1d1840 100%);
+    /* golden hour, like the scene (F3): peach at the horizon below, a deep violet sky above (dark enough for the white HUD) */
+    background:radial-gradient(120% 62% at 50% 112%, #f2a46b 0%, #c96a7c 30%, #4b2a63 60%, #33295f 100%);
     box-shadow:inset 0 2px 0 rgba(255,255,255,.14), inset 0 -4px 0 rgba(4,8,30,.35),
       0 3px 5px rgba(20,43,67,.14), 0 26px 46px -20px rgba(18,28,70,.62);
   }
-  .cp-card::before{ content:''; position:absolute; inset:0; pointer-events:none; opacity:.7;
-    background-image:radial-gradient(1.2px 1.2px at 12% 14%, #fff, transparent), radial-gradient(1px 1px at 38% 8%, #fff, transparent),
-      radial-gradient(1.4px 1.4px at 78% 12%, #fff, transparent), radial-gradient(1px 1px at 64% 24%, #fff, transparent),
-      radial-gradient(1px 1px at 22% 30%, #fff, transparent), radial-gradient(1.2px 1.2px at 92% 34%, #fff, transparent); }
+  /* no stars at golden hour: the low sun's warm glow from the top left instead, where the scene's sun sits off frame */
+  .cp-card::before{ content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(70% 34% at 0% 0%, rgba(255,186,128,.34), rgba(255,170,130,.12) 55%, transparent 100%); }
   .cp-hud{ position:relative; padding:0 4px; max-width:48%; }
   .cp-hud small{ display:block; font-size:12px; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.7); }
   .cp-hud .ready-ring{ margin:6px 0 0 -2px; }
