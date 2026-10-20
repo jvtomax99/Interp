@@ -192,8 +192,6 @@ D3. **Doctor list.** Two-column cards (mockup `list.png`): pin tile or
    a `SPECIALTY_PINS` map (cancer, children, heart...), fallback the
    place's pin.
 
-R5. **Provider Pictures on the Where picker.** Providers share the places
-   and icons but still type a facility. Same sheet, if Jose wants it.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
@@ -257,6 +255,13 @@ paused or read his layout box, not his painted box. Not this PR's code.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-20 R5, Provider Pictures on the Where picker (Jose's pick). The
+  provider sheet's facility text became the doctors' Where button plus a
+  "Department or unit" line; one picker serves both sheets (`placePickFor`),
+  its rows count doctors and providers. Saved: `locationGroup`, `unit`;
+  `facility` follows the doctors' rule. Guide: the Provider Pictures answer
+  and steps, a New lately card. `docs/features/places.md`.
 
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
