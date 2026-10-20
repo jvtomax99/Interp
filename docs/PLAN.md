@@ -155,17 +155,6 @@ S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
    before write. Target: handler < 50 ms, tap to paint < 150 ms.
-S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
-   (stiffness = (2π/duration)², damping ratio = 1 - bounce); WWDC18
-   "Designing Fluid Interfaces" (start at 100% damping; 80% only when a gesture
-   carries momentum). Every bounce-0 spring has one shape:
-   `linear(0, 0.094, 0.274, 0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945,
-   0.964, 0.977, 0.985, 0.99, 0.994, 0.996, 0.998, 0.998, 1)`; CSS duration =
-   1.47 x Apple duration. Press 0.25 s (368 ms CSS), screen 0.4 s (588 ms),
-   sheet 0.45 s (662 ms); swipe-dismiss bounce 0.2 (607 ms, overshoot 1.5%).
-   The 10 overshooting cubic-beziers on plain taps go to bounce 0. Fallback
-   `--ease` where `linear()` is unsupported (iOS < 17.2; Safari 17.2 notes).
-   Later, sheets only: a JS spring that keeps the finger's speed (CSS can't).
 **Doctors redesign (Jose approved 2026-10-14).** Mockups:
 `docs/mockups/doctors/list.png` and `page.png` (HTML beside them). Rule from
 Jose: it must look like the rest of the app (light background and mesh,
@@ -248,6 +237,18 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 S5 springs (this PR; Jose's pick: S5, keep F2's buttons).
+  `--spring0`, Apple's bounce-0 spring as one `linear()` shape (`--ease`
+  where unsupported), on the plain taps: tab bar icon (.368s) and lens
+  (.588s), the Home section panel (.588s), the week dots' and level-up
+  pops, the chat reaction pop and heart, the memory trainer's switch and
+  option buttons, the candy button release, the trend dot, the campus
+  badge, the tilt tiles. Kept on purpose: `--spring` itself (F2's
+  fallback), F2's `--spring-settle`, and Dr. Smiley's acting (face lean,
+  brows, cheer, dock move: `dr-smiley.md` calls the brow overshoot his
+  follow-through), which the S5 question to Jose had listed as changing;
+  his motion rules won. Suite `springs.cjs` (frame-by-frame: no swing past
+  the target, settled within the press time). Guide: nothing to change.
 - 2026-10-20 Dr. Smiley E4, his drawn faces seen (Jose: "what happened to
   these faces?"; they showed 0.26-0.7 s at rare moments). Each now holds
   about a second (pet's startle 0.6 s, the quiz wince 0.65 s), and a
@@ -843,6 +844,16 @@ then read the log; it names the suite and the check.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
+- Springs (S5, 2026-10-20): Apple's model, WWDC23 "Animate with springs"
+  (stiffness = (2π/duration)², damping ratio = 1 - bounce) and WWDC18
+  "Designing Fluid Interfaces" (100% damping on a tap; 80% only when a
+  gesture carries momentum). Bounce 0 as CSS: `linear(0, 0.094, 0.274,
+  0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945, 0.964, 0.977, 0.985,
+  0.99, 0.994, 0.996, 0.998, 0.998, 1)`, CSS duration = 1.47 x Apple's
+  (press .25 s -> .368s, screen .4 -> .588s, sheet .45 -> .662s); a
+  swipe-dismiss would be bounce 0.2 (.607s, 1.5% past). Chromium
+  serializes it as `linear(0 0%, 0.094 5.56%, ...)`. Later, sheets only: a
+  JS spring that keeps the finger's speed (CSS can't).
 - Sonnet 5.5 recipe (from the claude-api skill's migration guide): same
   price as Sonnet 5; effort levels recalibrated, so set `output_config.effort`
   explicitly (`medium` for search-then-write, `low` for chat/extraction);

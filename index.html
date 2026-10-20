@@ -3616,7 +3616,7 @@
   /* The lean: toward the finger while it is down, a spring back after. */
   .dash-tile, .mastery-row, .study-mode, .ready-card{
     transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-    transition:transform .6s var(--spring), box-shadow .3s var(--ease), border-color .14s var(--ease);
+    transition:transform .588s var(--spring0), box-shadow .3s var(--ease), border-color .14s var(--ease);
   }
   .study-mode:not(:disabled):active{ transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
   .is-tilting{ transition:transform .14s ease-out, box-shadow .3s var(--ease); }
@@ -3687,7 +3687,7 @@
     background:linear-gradient(180deg, var(--face), var(--face-lo));
     box-shadow:inset 0 1.5px 0 rgba(255,255,255,.75), 0 3px 0 var(--lip),
       0 7px 12px -5px color-mix(in srgb, var(--dom) 55%, transparent);
-    transform:translateY(0); transition:transform .32s var(--spring), box-shadow .2s var(--ease);
+    transform:translateY(0); transition:transform .368s var(--spring0), box-shadow .2s var(--ease);
   }
   html[data-theme="dark"] .mastery-go{
     --face:color-mix(in srgb, var(--dom) 34%, var(--paper)); --face-lo:color-mix(in srgb, var(--dom) 24%, var(--paper));
@@ -3703,7 +3703,7 @@
 
   /* The score line as a lit tube with glossy beads. */
   .trend-line{ stroke-width:3; filter:drop-shadow(0 3px 3px color-mix(in srgb, currentColor 35%, transparent)); }
-  .trend-dot{ fill:url(#trendBall); stroke:var(--paper); stroke-width:1.5; transition:transform .3s var(--spring); }
+  .trend-dot{ fill:url(#trendBall); stroke:var(--paper); stroke-width:1.5; transition:transform .368s var(--spring0); }
   .trend-dot.is-last{ fill:url(#trendBall); }
   .trend-dot.is-picked{ fill:url(#trendBall); stroke-width:1.5; transform:scale(1.4); }
 
@@ -3748,7 +3748,7 @@
   .mem-notes input{ position:absolute; opacity:0; width:1px; height:1px; }
   .mem-switch{ width:46px; height:28px; flex:none; border-radius:999px; background:var(--line); position:relative; transition:background .2s var(--ease); }
   .mem-switch::after{ content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff;
-    box-shadow:0 1px 3px rgba(20,43,67,.3); transition:transform .3s var(--spring); }
+    box-shadow:0 1px 3px rgba(20,43,67,.3); transition:transform .368s var(--spring0); }
   .mem-notes input:checked + .mem-switch{ background:var(--dom); }
   .mem-notes input:checked + .mem-switch::after{ transform:translateX(18px); }
   .mem-notes input:focus-visible + .mem-switch{ outline:2px solid var(--accent-2); outline-offset:2px; }
@@ -3810,7 +3810,7 @@
   .mem-chunk{ display:flex; flex-direction:column; gap:3px; text-align:left; padding:11px 13px; min-height:44px; border-radius:var(--r-md); cursor:pointer;
     font-family:var(--sans); border:1px solid var(--line); background:var(--paper); color:var(--ink);
     box-shadow:inset 0 1px 0 var(--clay-hi), 0 1px 2px rgba(20,43,67,.06);
-    transition:background .2s var(--ease), border-color .2s var(--ease), transform .3s var(--spring); }
+    transition:background .2s var(--ease), border-color .2s var(--ease), transform .368s var(--spring0); }
   .mem-model{ font-size:17px; line-height:1.4; font-weight:550; }
   .mem-srcx{ font-size:13px; line-height:1.35; color:var(--ink-faint); }
   .mem-chunk[aria-pressed="true"]{ background:var(--danger-soft); border-color:color-mix(in srgb, var(--danger) 45%, transparent); }
@@ -3887,7 +3887,7 @@
   .cp-tag i{ margin:0 0 0 4px; color:#FFC86B; }
   .cp-tag.is-focus i{ color:#7a3d00; }
   /* Picking a building (campusPick): its badge grows, the others step back, the scene dims around it */
-  .cp-tag{ transition:opacity .25s var(--ease), scale .3s var(--spring, cubic-bezier(.34,1.56,.64,1)); }
+  .cp-tag{ transition:opacity .25s var(--ease), scale .368s var(--spring0); }
   .cp-world.has-sel .cp-tag:not(.is-sel){ opacity:.55; }
   .cp-tag.is-sel{ scale:1.12; z-index:3; background:#fff; color:#151C2C; }
   .cp-tag.is-sel i{ color:#B5577A; } .cp-tag.is-sel::after{ border-top-color:#fff; }
@@ -6239,7 +6239,7 @@ body.ov-open.ov-open .appt-pill, body.gs-open.gs-open .appt-pill{ display:none; 
    question answered (quizzes and Term Review). Each rank adds to his outfit
    on every Dr. Smiley in the app; reaching one plays a celebration on the
    Home smiley, once per phone. The Home card is styled in home-polish.css. */
-.lv-acc.is-new{ animation:lvPop .8s cubic-bezier(.3,1.5,.5,1) both; transform-box:fill-box; transform-origin:50% 100%; }
+.lv-acc.is-new{ animation:lvPop .588s var(--spring0) both; transform-box:fill-box; transform-origin:50% 100%; }
 /* The dock and the desktop top bar show only his face, cropped tight in a circle: a hat
    there would cover his eyes, so he wears his outfit on Home, Ask the Hub and the lock screen. */
 .dock-smiley .ds-hat, .tg-smiley .ds-hat{ display:none; }
@@ -6248,7 +6248,7 @@ body.ov-open.ov-open .appt-pill, body.gs-open.gs-open .appt-pill{ display:none; 
   width:min(360px, calc(100vw - 32px)); box-sizing:border-box; background:var(--paper); border-radius:var(--r-lg); padding:13px 17px;
   display:grid; grid-template-columns:44px minmax(0,1fr); gap:13px; align-items:center;
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 18px 40px -16px rgba(22,55,90,0.45), 0 0 0 1px var(--line);
-  animation:lvBannerIn .6s cubic-bezier(.3,1.4,.5,1) both; }
+  animation:lvBannerIn .662s var(--spring0) both; }
 .lvl-banner.is-out{ animation:lvBannerOut .35s var(--ease) both; }
 @keyframes lvBannerIn{ 0%{ opacity:0; transform:translateY(30px) scale(.94); } 100%{ opacity:1; transform:none; } }
 @keyframes lvBannerOut{ to{ opacity:0; transform:translateY(16px); } }
@@ -6291,7 +6291,7 @@ html[data-theme="dark"] .lvl-banner small{ color:var(--cyan); }
 .tg-smiley[hidden]{ display:none; }
 .tg-smiley .ask-face{ width:38px; height:38px; flex:none; margin:6px 0 0; }
 .tg-smiley .ask-face svg{ filter:none; }
-.tg-smiley.is-new svg{ animation:smileyPop .5s cubic-bezier(.3,1.5,.5,1) both; }
+.tg-smiley.is-new svg{ animation:smileyPop .588s var(--spring0) both; }
 @keyframes smileyPop{ 0%{ transform:translateY(22px) scale(.6); } 100%{ transform:none; } }
 @media (max-width:900px){ .tg-smiley{ display:none; } }
 /* His top-bar button, with the panel: a ring while it's open; a turning
@@ -7097,10 +7097,10 @@ html[data-theme="dark"] .chat-title.is-admin{ color:#B9C6FF; border-color:rgba(1
 .tc-panel .chat-reaction.is-mine{ background:var(--accent-soft); border-color:var(--paper); }
 .tc-panel .chat-reaction b{ font-size:11px; }
 .tc-panel .chat-reaction::before{ content:''; position:absolute; inset:-9px -2px; }
-.chat-reaction.is-new span{ animation:tcPop .42s cubic-bezier(.3,1.6,.5,1); display:inline-block; }
+.chat-reaction.is-new span{ animation:tcPop .368s var(--spring0); display:inline-block; }
 @keyframes tcPop{ 0%{ transform:scale(.3); } 60%{ transform:scale(1.25); } 100%{ transform:scale(1); } }
 .tc-heart-burst{ position:absolute; left:50%; top:50%; width:56px; height:56px; margin:-28px 0 0 -28px; pointer-events:none; z-index:3;
-  animation:tcHeart .7s cubic-bezier(.2,.9,.3,1.2) forwards; font-size:44px; line-height:56px; text-align:center; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
+  animation:tcHeart .7s var(--spring0) forwards; font-size:44px; line-height:56px; text-align:center; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
 @keyframes tcHeart{ 0%{ transform:scale(.2); opacity:0; } 30%{ transform:scale(1.15); opacity:1; } 70%{ transform:scale(1); opacity:1; } 100%{ transform:scale(1.1) translateY(-10px); opacity:0; } }
 
 /* Swipe right to reply. */
@@ -7316,7 +7316,17 @@ body.pv-open{ overflow:hidden; }
      end of the styles so the release spring wins over each button's own
      transition without raising specificity. */
   :root{ --spring-settle:var(--spring); }
+  /* S5 (docs/PLAN.md): the plain-tap spring. Apple's model (WWDC23 "Animate
+     with springs", WWDC18 "Designing Fluid Interfaces"): a tap settles at
+     100% damping, bounce 0, no overshoot; CSS duration = 1.47 x Apple's
+     (press .368s, screen .588s, sheet .662s). One shape for every bounce-0
+     spring; --ease where linear() is unsupported (iOS before 17.2). The
+     overshoot stays only where it is the point: F2's --spring-settle on the
+     Practice buttons, and Dr. Smiley's own acting (his face, brows, cheers,
+     dock move: docs/features/dr-smiley.md). */
+  :root{ --spring0:var(--ease); }
   @supports (transition-timing-function: linear(0, 1)){
+    :root{ --spring0:linear(0, 0.094, 0.274, 0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945, 0.964, 0.977, 0.985, 0.99, 0.994, 0.996, 0.998, 0.998, 1); }
     :root{ --spring-settle:linear(0, 0.055, 0.195, 0.383, 0.588, 0.784, 0.953, 1.084, 1.172, 1.221, 1.234, 1.219, 1.185, 1.14, 1.092, 1.047, 1.008, 0.978, 0.958, 0.948, 0.945, 0.949, 0.958, 0.968, 0.979, 0.99, 0.999, 1.006, 1.01, 1.012, 1); }
   }
   .mastery-go{ transition:transform .6s var(--spring-settle), box-shadow .2s var(--ease); }
@@ -21846,8 +21856,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.1324';
-const BUILD_TIME = '2026-10-20 13:24 UTC';
+const BUILD_ID = 'b1020.1345';
+const BUILD_TIME = '2026-10-20 13:45 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
