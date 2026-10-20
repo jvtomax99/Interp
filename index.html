@@ -3466,7 +3466,7 @@
     animation:dashIn .42s var(--ease) backwards;
     animation-delay:calc(var(--i, 0) * 60ms + var(--motion-skip, 0s));
   }
-  .is-still:not(.study-flame), .is-still *:not(.study-flame, .cp-lit, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-litsel, .cp-pick-in){ animation:none !important; }
+  .is-still:not(.study-flame), .is-still *:not(.study-flame, .study-streak i, .cp-lit, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-litsel, .cp-pick-in){ animation:none !important; }
 
   .dash-row{ display:grid; grid-template-columns:1fr; gap:9px; max-width:760px; margin:0 0 26px 0; }
   @media (min-width:600px){ .dash-row{ grid-template-columns:1.6fr 1fr; align-items:start; } }
@@ -7201,6 +7201,46 @@ body.pv-open{ overflow:hidden; }
   .tc-heart-burst{ animation-duration:.01s; }
   .tc-send.is-busy::after, .pv-spinner{ animation-duration:2s; }
 }
+
+  /* ---------- Springy press (F2, Jose's film brief 2026-10-19) ----------
+     Practice buttons squash as you press (wider and shorter: the volume
+     stays) and spring back past their shape and settle on release. The
+     release easing is a damped spring (--spring-settle: about 23% past,
+     then a smaller swing back, 0.6 s); a browser without linear() keeps
+     the one-overshoot --spring. The press itself is quick (80 ms). The
+     candy buttons already squashed; they get the settling spring. Only
+     Practice: not Dr. Smiley (E3 is his own), headings unchanged. At the
+     end of the styles so the release spring wins over each button's own
+     transition without raising specificity. */
+  :root{ --spring-settle:var(--spring); }
+  @supports (transition-timing-function: linear(0, 1)){
+    :root{ --spring-settle:linear(0, 0.055, 0.195, 0.383, 0.588, 0.784, 0.953, 1.084, 1.172, 1.221, 1.234, 1.219, 1.185, 1.14, 1.092, 1.047, 1.008, 0.978, 0.958, 0.948, 0.945, 0.949, 0.958, 0.968, 0.979, 0.99, 0.999, 1.006, 1.01, 1.012, 1); }
+  }
+  .mastery-go{ transition:transform .6s var(--spring-settle), box-shadow .2s var(--ease); }
+  .cp-go button, .cp-pick .cp-play{ transition:transform .6s var(--spring-settle), box-shadow .2s; }
+  .study-mode, .quiz-option, .conf-btn{ transition:transform .6s var(--spring-settle), border-color .14s var(--ease), box-shadow .2s var(--ease), background .14s var(--ease); }
+  .study-mode:not(:disabled):active, .study-mode.is-pressed:not(:disabled){ transform:translateY(1px) scale(1.012,.97); transition-duration:.08s; transition-timing-function:ease-out; }
+  .quiz-option:not(:disabled):active, .quiz-option.is-pressed:not(:disabled){ transform:translateY(1px) scale(1.012,.95); transition-duration:.08s; transition-timing-function:ease-out; }
+  .conf-btn:active, .conf-btn.is-pressed{ transform:translateY(1px) scale(1.04,.92); transition-duration:.08s; transition-timing-function:ease-out; }
+
+  /* The streak flame: the flame itself flickers, stretching up as it
+     narrows and squashing as it widens, from its base. */
+  @keyframes flameFlicker{
+    0%, 100%{ transform:scale(1, 1); }
+    22%     { transform:scale(.9, 1.13) rotate(-3deg); }
+    48%     { transform:scale(1.07, .93) rotate(2deg); }
+    70%     { transform:scale(.95, 1.07) rotate(-1deg); }
+  }
+  .study-streak i{ transform-origin:50% 92%; animation:flameFlicker 1.7s ease-in-out infinite; }
+  .hot-streak span{ display:inline-block; transform-origin:50% 90%; animation:flameFlicker 1.1s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce){
+    .study-mode, .quiz-option, .conf-btn, .mastery-go, .cp-go button, .cp-pick .cp-play{ transition:none; }
+    .study-mode:not(:disabled):active, .study-mode.is-pressed:not(:disabled), .quiz-option:not(:disabled):active, .quiz-option.is-pressed:not(:disabled),
+    .conf-btn:active, .conf-btn.is-pressed, .cp-go button:active, .cp-go button.is-pressed, .cp-pick .cp-play:active, .cp-pick .cp-play.is-pressed{ transform:none; }
+    .study-streak i, .hot-streak span{ animation:none; }
+  }
+
 </style>
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -17221,10 +17261,11 @@ const GUIDE_TOPICS = [
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
     <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
 
-  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
+  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital streak flame squash spring press', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
     <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Each building's badge shows its exam area and how lit it is. Tap a building or its badge to pick it: its windows all light up, the rest of the campus dims, and a card under the picture names the exam area with its number of questions and its share of the exam. Tap <b>Practise</b> (or the same building again) to start; tap the empty campus or the × to put it back. Dr. Smiley stands by the one worth lighting next, and <b>Play</b> starts what's next. The campus is alive: cars come and go up the drive, a car backs out of the lot and heads for the street, an ambulance pulls in with its lights going and the bay's doors slide open for it, a helicopter lands on the white tower's helipad, people sit on the benches by the street, a flock of birds crosses the sky, the flags wave and the fountain plays. It all pauses while the campus is off screen. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
     <p>Right under the campus, <b>Your domains</b> lists one row per building: how much of its question bank you've learned, how often you got it right in your sessions, and a <b>Practise</b> button. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>The buttons here give a little springy squash when you press them, and the flame next to your study streak flickers. If your phone is set to reduce motion, they stay still.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
   { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms session specialty pause resume mistakes', q:'What is Term Review?', a:`
@@ -21605,7 +21646,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -21633,8 +21674,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0925';
-const BUILD_TIME = '2026-10-20 09:25 UTC';
+const BUILD_ID = 'b1020.0954';
+const BUILD_TIME = '2026-10-20 09:54 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
