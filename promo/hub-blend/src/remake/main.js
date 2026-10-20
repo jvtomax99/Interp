@@ -12,8 +12,9 @@ import { UnrealBloomPass } from "../../vendor/addons/postprocessing/UnrealBloomP
 import { OutputPass } from "../../vendor/addons/postprocessing/OutputPass.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
+import { FullScreenQuad } from "../../vendor/addons/postprocessing/Pass.js";
 import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen } from "./features.js";
-import { createSmiley } from "../smiley.js";
+import { createSmiley, MOVES } from "../smiley.js";
 import { buildEnd } from "./end.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
@@ -40,6 +41,8 @@ const SHOTS = [
   [FEATURES_END, DURATION - OPEN, "end"],
 ];
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
+const HOP = 0.6; // between two features: Dr. Smiley hops from one phone to the next and the camera follows him
+const isFeature = (g) => FEATURES.some((f) => f.g === g);
 
 async function build() {
   await Promise.all([document.fonts.load('500 40px "JetBrains Mono"'), document.fonts.load('800 40px "Inter Tight"'), document.fonts.load('500 40px "Inter Tight"')]);
@@ -440,7 +443,18 @@ async function build() {
     const a = view(s[2], t);
     cam.pos.copy(a.pos); cam.look.copy(a.look);
     const next = SHOTS[i + 1];
-    if (next && t > s[1] - WHIP) {
+    const hopping = next && isFeature(s[2]) && isFeature(next[2]) && t > s[1] - HOP;
+    if (hopping) {
+      // follow Dr. Smiley across: from this shot's last view to the next one's first, rising over the gap,
+      // the eye drawn along with him
+      const w = inOutCubic(prog(t, s[1] - HOP, s[1]));
+      const A = view(s[2], s[1] - HOP), B = view(next[2], next[0]);
+      // mid-hop the camera rides with him (behind and above, the next phone ahead), easing off at both ends
+      const k = Math.pow(Math.sin(Math.PI * w), 0.6) * 0.92;
+      const him = feat.smiley.group.position;
+      cam.pos.lerpVectors(A.pos, B.pos, w).lerp(him.clone().add(new THREE.Vector3(0.15, 1.7, 3.6)), k);
+      cam.look.lerpVectors(A.look, B.look, w).lerp(him.clone().add(new THREE.Vector3(0, 1.15, -0.4)), k); // his middle, not his feet
+    } else if (next && t > s[1] - WHIP) {
       // fly from the end of this shot to the start of the next, through the words
       const w = inOutExpo(prog(t, s[1] - WHIP, s[1]));
       const b = view(next[2], next[0]);
@@ -452,7 +466,7 @@ async function build() {
     if (["says", "doctor", "timer", "wrong", "right"].includes(s[2])) cam.pos.sub(cam.look).multiplyScalar(1.12).add(cam.look);
     camera.position.copy(cam.pos);
     camera.lookAt(cam.look);
-    const fp = a.focus || a.look;
+    const fp = hopping ? feat.smiley.group.position : a.focus || a.look; // mid-hop: focus on him
     bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
     // the end card keeps the hospital behind the table readable: less blur there
     bokeh.uniforms.aperture.value = s[2] === "end" ? 0.00025 : 0.0007;
@@ -462,31 +476,101 @@ async function build() {
     spot.position.set(g.x - 1.2, 7.5, g.z + 2.5);
     spot.target.position.set(g.x, 0.8, g.z);
     spot.target.updateMatrixWorld();
-    for (const g in groups) groups[g].visible = g === s[2] || (next && t > s[1] - WHIP && g === next[2]);
+    const span = hopping ? HOP : WHIP;
+    for (const g in groups) groups[g].visible = g === s[2] || (next && t > s[1] - span && g === next[2]);
     for (const [m, g] of walls) m.visible = g === s[2] || (next && t > s[1] - WHIP && g === next[2]);
     const glowing = s[2] === "wrong" ? C.red : s[2] === "right" ? C.cyan : null;
     tint.visible = !!glowing;
     if (glowing) { tint.color.setHex(glowing); tint.intensity = 6; tint.position.set(g.x, 1.4, g.z + 1.2); }
     spot.intensity = s[2] === "logo" ? 70 : 140;
-    if (FEATURES.some((f) => f.g === s[2])) { spot.position.set(g.x - 1.8, 6.5, g.z + 3.5); spot.target.position.set(g.x, 0, g.z + 0.8); spot.intensity = 110; }
+    spot.color.setHex(0xf3f7ff);
+    if (isFeature(s[2])) { spot.position.set(g.x - 1.8, 6.5, g.z + 3.5); spot.target.position.set(g.x, 0, g.z + 0.8); spot.intensity = 110; spot.color.setHex(0xffe6c8); } // warm, like the clip
+    if (hopping) { // the warm light rides with him over the gap
+      const him = feat.smiley.group.position;
+      spot.position.set(him.x - 1.6, him.y + 5.5, him.z + 2.8); spot.target.position.copy(him); spot.target.updateMatrixWorld(); spot.intensity = 110;
+    }
     if (s[2] === "end" || (next && next[2] === "end" && t > s[1] - WHIP)) { spot.intensity = 18; spot.position.set(g.x + 2, 6, g.z + 3); spot.target.position.set(g.x, 0, g.z); }
-    return { s, next, i };
+    return { s, next, i, hopping };
   }
 
-  function renderAt(time) {
+  // which shot is on at t, and whether we are in the hop between two features
+  function shotAt(t) {
+    const i = Math.max(0, SHOTS.findIndex((x) => t < x[1]));
+    const s = SHOTS[i], next = SHOTS[i + 1];
+    return { s, next, hopping: !!(next && isFeature(s[2]) && isFeature(next[2]) && t > s[1] - HOP) };
+  }
+  const hopFrom = new THREE.Vector3(), hopTo = new THREE.Vector3();
+  function drawScene(time) {
     const T0 = clamp(time, 0, DURATION - 1e-4);
     if (T0 < OPEN) { openerAt(T0); captionsAt(-1); composer.render(); return; }
     openerTitle.style.opacity = "0";
     const t = T0 - OPEN;
     partsAt(t);
     logoAt(t);
-    const { s, next } = cameraAt(t);
-    // the incoming shot sits at its start during the fly-through; the current one wins Dr. Smiley
-    if (next && t > s[1] - WHIP) feat.update(next[2], 0);
+    const { s, next, hopping } = shotAt(t);
+    const sm = feat.smiley;
+    // where he stands at the end of this shot and the start of the next (each shot's own choreography, else his spot)
+    if (hopping) {
+      feat.update(next[2], 0);
+      hopTo.copy(sm.group.visible ? sm.group.position : feat.idleSpot(next[2]));
+      feat.update(s[2], s[1] - HOP - s[0]);
+      hopFrom.copy(sm.group.visible ? sm.group.position : feat.idleSpot(s[2]));
+    } else if (next && t > s[1] - WHIP) feat.update(next[2], 0);
     feat.update(s[2], t - s[0]);
+    if (isFeature(s[2]) && !sm.group.visible) feat.idle(s[2], t - s[0]);
+    if (hopping) {
+      // the hop: a high arc from phone to phone, turning his back to us at the top and round again to land
+      const a = prog(t, s[1] - HOP, s[1]);
+      sm.group.visible = true;
+      sm.group.position.lerpVectors(hopFrom, hopTo, inOutSine(a));
+      sm.group.position.y += Math.sin(Math.PI * a) * 2.0;
+      sm.group.rotation.y = 0.15; // he keeps facing us (side-on he'd show how thin his card is)
+      sm.pose({ ...MOVES.hop(a), face: a < 0.5 ? "smile" : "laugh", brows: "glad", glow: 0.35 });
+    }
+    cameraAt(t);
     if (s[2] === "end" || (next && next[2] === "end")) endCard.update(Math.max(0, t - END_AT));
     captionsAt(t);
     composer.render();
+  }
+
+  /* Motion blur, like the clip's: during the hops and fly-throughs a frame is the average of several
+     moments inside a half-frame shutter, so fast motion smears the way a camera's does. Every
+     moment is still a pure function of time. */
+  const SUB = 7, SHUTTER = 0.35 / 30;
+  const accRT = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType });
+  const addQuad = new FullScreenQuad(new THREE.ShaderMaterial({
+    uniforms: { tex: { value: null }, k: { value: 1 / SUB } },
+    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
+    fragmentShader: "uniform sampler2D tex; uniform float k; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(tex, vUv).rgb * k, 1.0); }",
+    blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false, transparent: true,
+  }));
+  const showQuad = new FullScreenQuad(new THREE.ShaderMaterial({
+    uniforms: { tex: { value: accRT.texture } },
+    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
+    fragmentShader: "uniform sampler2D tex; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(tex, vUv).rgb, 1.0); }",
+    depthTest: false, depthWrite: false,
+  }));
+  function blurred(time) {
+    const t = time - OPEN;
+    if (t < 0) return false;
+    const { s, next, hopping } = shotAt(t);
+    return hopping || !!(next && t > s[1] - WHIP);
+  }
+  function renderAt(time) {
+    if (!blurred(time)) { composer.renderToScreen = true; drawScene(time); return; }
+    composer.renderToScreen = false;
+    renderer.setRenderTarget(accRT); renderer.setClearColor(0x000000, 1); renderer.clear();
+    for (let j = 0; j < SUB; j++) {
+      drawScene(time - (j / (SUB - 1)) * SHUTTER);
+      renderer.setRenderTarget(accRT);
+      renderer.autoClear = false;
+      addQuad.material.uniforms.tex.value = composer.readBuffer.texture;
+      addQuad.render(renderer);
+      renderer.autoClear = true;
+    }
+    renderer.setRenderTarget(null);
+    showQuad.render(renderer);
+    composer.renderToScreen = true;
   }
   timerSlot.userData.home = timerSlot.position.clone();
   window.addEventListener("hf-seek", (e) => renderAt(e.detail.time));

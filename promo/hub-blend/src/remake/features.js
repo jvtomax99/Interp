@@ -358,8 +358,9 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
       smiley.group.visible = true;
       smiley.group.position.copy(S.group.parent.position).add(new THREE.Vector3(-0.55, TOP, 2.35));
       smiley.group.rotation.y = 0.2;
-      const r = prog(u, 0.1, 1.2);
-      smiley.pose(u < 1.6 ? MOVES.stepOut(r) : MOVES.wave(prog(u, 1.6, 2.5)));
+      // he has just landed (from the last shot): he dives into the glowing ring, then steps back out of the screen
+      const sink = prog(u, 0.12, 0.55);
+      smiley.pose(u < 0.55 ? { y: -1.1 * sink * sink * sink, face: "smile", brows: "glad", glow: 1, rim: 1 } : u < 1.6 ? MOVES.stepOut(prog(u, 0.55, 1.45)) : MOVES.wave(prog(u, 1.6, 2.5)));
       holeRing.material.opacity = Math.sin(Math.PI * Math.min(1, prog(u, 0.0, 1.5))) * 0.95;
       holeHalo.material.opacity = holeRing.material.opacity * 0.3;
       const p = outBack(prog(u, 0.75, 1.3), 1.4);
@@ -399,5 +400,13 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     S.group.position.y = 0; S.group.visible = true;
     play[g](u, S);
   }
-  return { update, view, smiley };
+  // where he waits on a phone when its shot has nothing for him to do: bottom left, glancing at the proof
+  const idleSpot = (g) => groups[g].position.clone().add(new THREE.Vector3(-0.95, TOP, 2.4));
+  function idle(g, u) {
+    smiley.group.visible = true;
+    smiley.group.position.copy(idleSpot(g));
+    smiley.group.rotation.y = 0.3;
+    smiley.pose({ y: 0.015 * Math.abs(Math.sin(u * 5)), face: u % 2.2 < 1.4 ? "halfR" : "smile", brows: "glad", glow: 0.25, rim: 0.6 });
+  }
+  return { update, view, smiley, idle, idleSpot };
 }
