@@ -220,10 +220,6 @@ come from this alone.
    gap" paragraph says there are no spacing or font-size variables, but the
    Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
    text, both files.
-5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
-   `index.html`. `home-polish.css` still styles classes nothing makes
-   (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
-   file, so fetch `main` right before.
 
 **Flaky test: dock-tuck in WebKit.** "Dr. Smiley shrinks with the bar"
 failed once on PR #60 (run 39281179430) and passed on the same commit's
@@ -258,6 +254,20 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 Dead CSS in `home-polish.css` (this PR): the 2026-10-14 method
+  (a class is live if its name appears anywhere outside the stylesheet;
+  names built in code checked by prefix) finds three classes nothing
+  makes: `domain-family-kid`, `home-face-marks`, `home-wave-wide-name`.
+  Five rules and one orphaned comment removed, and the two selector lists
+  that paired `.home-greeting-name-row` with `.home-wave-wide-name` cut
+  to the live selector (587 -> 582 rules). Proof: every element's and
+  pseudo-element's computed style identical before/after on Home at rest,
+  scrolled and with a domain opened, phone and computer, light and dark
+  (reduced motion so nothing is mid-animation; the one difference seen was
+  the Home tip's text, `SESSION_TIP` is random per session). Lesson: deleting a line
+  of a selector list hands its selector to the next rule; the first pass
+  did exactly that and the proof caught it (the greeting row lost its
+  grid), so delete whole rules, never lines.
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys
