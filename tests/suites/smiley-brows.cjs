@@ -52,5 +52,11 @@ const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1
  ok(uses.surprise&&uses.pet&&uses.worry&&uses.general&&uses.composed,'the drawn faces: surprised (surprise, the startled take), worried (worry), doubt (a general answer), sad (composed) '+JSON.stringify(uses));
  ok(uses.sadOnce.length===1,'sad stays rare: one sequence uses it '+JSON.stringify(uses.sadOnce));
  ok(uses.brows.join()==='up,caring,worried,doubt','each drawn face brings its brow pose '+JSON.stringify(uses.brows));
+ // E4: each drawn face stays long enough to see (Jose couldn't find them).
+ const holds=await P.evaluate(()=>{const ms=(n,f)=>Math.max(0,...DR_FACE_SEQ[n].f.filter(x=>x[0]===f).map(x=>x[1]));drPerfSeed(3);const o={pet:ms('pet','surprised'),surprise:ms('surprise','surprised'),worry:ms('worry','worried'),general:ms('answerGeneral','doubt'),composed:ms('composed','sad'),wince:ms('wince','worried'),wow:ms('wow','surprised')};drPerfSeed(null);return o;});
+ ok(holds.surprise>=1000&&holds.worry>=1000&&holds.general>=1000&&holds.composed>=1000&&holds.wow>=900,'each drawn face holds about a second '+JSON.stringify(holds));
+ ok(holds.pet>=600&&holds.wince>=550,'the quick ones (the startled take, the quiz wince) at least 0.55 s '+JSON.stringify(holds));
+ const wow=await P.evaluate(()=>{const w=DR_FACE_SEQ.wow,f=w.f.map(x=>x[0]);return {first:f.indexOf('surprised'),laugh:f.indexOf('laugh'),up:(w.brow||[])[0],squash:w.squash,tone:DR_TONE.appointment.wow};});
+ ok(wow.first>=0&&wow.first<3&&wow.laugh>wow.first&&wow.up[1]==='up'&&wow.tone==='ack','a streak milestone: the surprised take first, then the cheer (an ack in an appointment) '+JSON.stringify(wow));
  ok(P.__errors.length===0,'page errors: '+JSON.stringify(P.__errors.slice(0,3)));
  await ctx.close();await b.close();})();
