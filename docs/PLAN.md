@@ -53,7 +53,7 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**Promo v12, the 3D remake (Jose, 2026-10-20).** v11's feature-by-feature
+**The 3D promo remake (Jose, 2026-10-20).** The promo's (v11, Jose's upload; the live `media/hub-promo.mp4` is v12) feature-by-feature
 story and copy, with the look of his four reference reels. Plan, shot table
 and the 7 steps: `promo/hub-blend/BRIEF.md`. Step 1 done (project and brief
 committed); next is step 2 (real screens in layers). One step at a time,

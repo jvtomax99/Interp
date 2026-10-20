@@ -1,4 +1,4 @@
-# Brief: the 3D remake of the promo (v12)
+# Brief: the 3D remake of the promo
 
 Jose's ask (2026-10-20): something like `media/hub-promo.mp4` (v11), which
 explains the app feature by feature, but with the 3D look of four reference
