@@ -225,11 +225,17 @@ come from this alone.
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
    file, so fetch `main` right before.
 
-**Flaky test: dock-tuck in WebKit.** "Dr. Smiley shrinks with the bar"
-failed once on PR #60 (run 39281179430) and passed on the same commit's
-other run and on its re-run: his size was read while `dsBreathe` was
-scaling him (54/58 expected, 0.954 measured). Measure him with the breathe
-paused or read his layout box, not his painted box. Not this PR's code.
+**Flaky WebKit tests, fixed.** dock-tuck's "Dr. Smiley shrinks with the
+bar" read his size mid-breath (fixed 2026-10-19: the loops are held at their
+start while he is measured, and the read waits for his scale to rest).
+startup-work's "afterwards the name itself is shown" failed twice on
+2026-10-20 (runs 39394492541, 39397824186) on PRs that don't touch Home:
+the pen moves 64 ms a frame at most, so a CI browser drawing ~3 frames a
+second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
+pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
+that shows the name whatever the frames do, and the test waits up to 40 s
+and prints how long it took. A WebKit red on an unrelated PR: re-run once,
+then read the log; it names the suite and the check.
 
 ## Later (only when the trigger happens)
 
