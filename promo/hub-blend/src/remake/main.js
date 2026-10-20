@@ -26,7 +26,7 @@ const DURATION = +root.dataset.duration;
    chooses, on a short first frame that sets the place (?first=sign or ?first=arrive, previews
    only). Everything after it keeps its own clock (t = time - OPEN). */
 const FIRST = new URLSearchParams(location.search).get("first") || "sign"; // Jose: "2 is the right direction"
-const TITLE = new URLSearchParams(location.search).get("title") || "signage"; // the name's lettering, while he picks
+const TITLE = new URLSearchParams(location.search).get("title") || "champagne"; // the name's lettering, while he picks
 const OPEN = FIRST === "none" ? 0 : 2.5;
 
 const C = { navy0: 0x03061a, navy1: 0x0b1640, navy2: 0x1a3a96, cyan: 0x3fc6ee, red: 0xf0436a, white: 0xffffff };
@@ -366,7 +366,31 @@ async function build() {
   firstTitle.style.cssText = "position:absolute;left:0;right:0;text-align:center;pointer-events:none";
   // three letterings for the name, while Jose picks (?title=signage | stacked | rising)
   const F = Math.round(H * 0.031);
-  if (TITLE === "stacked") {
+  // Jose: "stylish, not white". Three coloured letterings (champagne | glass | neon); the
+  // gradients sweep (a shine) while the name is up.
+  if (TITLE === "champagne") {
+    // champagne gold: an italic serif "Hackensack", the rest in spaced small caps between fine gold rules
+    firstTitle.style.top = H * 0.6 + "px";
+    const gold = "background:linear-gradient(100deg,#8a6a2f 0%,#e9cf8f 28%,#fff3cf 42%,#c9a45a 58%,#f4dea4 76%,#9b7637 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent";
+    firstTitle.innerHTML = `<div class="w shine" style="font:700 italic ${Math.round(H * 0.075)}px/1.05 'Playfair Display';letter-spacing:-.01em;${gold};filter:drop-shadow(0 3px 10px rgba(3,6,26,.75))">Hackensack</div>
+      <div class="w" style="display:flex;align-items:center;justify-content:center;gap:${W * 0.03}px;margin-top:${H * 0.012}px">
+        <i style="width:${W * 0.09}px;height:1.5px;background:linear-gradient(90deg,transparent,#e9cf8f)"></i>
+        <span class="shine" style="font:700 ${Math.round(H * 0.0175)}px 'Playfair Display';letter-spacing:.3em;${gold};filter:drop-shadow(0 2px 6px rgba(3,6,26,.8))">UNIVERSITY MEDICAL CENTER</span>
+        <i style="width:${W * 0.09}px;height:1.5px;background:linear-gradient(90deg,#e9cf8f,transparent)"></i></div>`;
+  } else if (TITLE === "glass") {
+    // the app's liquid glass: a frosted card, the name in HMH navy to blue, a cyan underline
+    firstTitle.style.top = H * 0.6 + "px";
+    const blue = "background:linear-gradient(100deg,#1b2a6b 0%,#1f5fae 35%,#2bb3e6 50%,#1f5fae 65%,#1b2a6b 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent";
+    firstTitle.innerHTML = `<div class="w" style="display:inline-block;padding:${H * 0.018}px ${W * 0.07}px ${H * 0.02}px;border-radius:${H * 0.022}px;background:rgba(255,255,255,.62);backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 18px 40px -12px rgba(3,6,26,.55);border:1px solid rgba(255,255,255,.7)">
+        <div class="shine" style="font:800 ${Math.round(H * 0.044)}px/1.05 'Inter Tight';letter-spacing:-.02em;${blue}">Hackensack</div>
+        <div class="shine" style="margin-top:${H * 0.004}px;font:800 ${Math.round(H * 0.026)}px/1.15 'Inter Tight';letter-spacing:-.01em;${blue}">University Medical Center</div>
+        <div style="margin:${H * 0.01}px auto 0;width:${W * 0.16}px;height:3px;border-radius:2px;background:#2bb3e6;box-shadow:0 0 12px rgba(43,179,230,.7)"></div></div>`;
+  } else if (TITLE === "neon") {
+    // a cyan neon script, the rest in spaced caps lit the same colour
+    firstTitle.style.top = H * 0.58 + "px";
+    firstTitle.innerHTML = `<div class="w" style="font:400 ${Math.round(H * 0.095)}px/1 'Great Vibes';color:#9ff0ff;text-shadow:0 0 6px #3fc6ee,0 0 18px #3fc6ee,0 0 40px rgba(63,198,238,.8),0 0 70px rgba(63,198,238,.5)">Hackensack</div>
+      <div class="w" style="margin-top:${H * 0.008}px;font:500 ${Math.round(H * 0.018)}px 'JetBrains Mono';letter-spacing:.34em;color:#7fe3fb;text-shadow:0 0 8px rgba(63,198,238,.9),0 0 22px rgba(63,198,238,.6)">UNIVERSITY MEDICAL CENTER</div>`;
+  } else if (TITLE === "stacked") {
     firstTitle.style.top = H * 0.62 + "px";
     firstTitle.innerHTML = `<div class="w" style="font:800 ${Math.round(H * 0.06)}px 'Inter Tight';letter-spacing:.16em;color:#fff;text-shadow:0 3px 24px rgba(3,6,26,.85)">HACKENSACK</div>
       <div class="w" style="margin:${H * 0.01}px auto 0;width:${W * 0.18}px;height:3px;background:#3fc6ee;border-radius:2px;box-shadow:0 0 14px rgba(63,198,238,.7)"></div>
@@ -398,6 +422,7 @@ async function build() {
     wash.style.opacity = String(Math.sin(Math.PI * Math.min(1, w + out * 0.5)) * 0.9 * (1 - out) + w * (1 - out) * 0.2);
     first.style.opacity = String(1 - outCubic(out));
     // the name: in on the first beats, out before the doors
+    for (const el of firstTitle.querySelectorAll(".shine")) el.style.backgroundPosition = `${lerp(100, 0, outCubic(prog(T0, 0.3, 1.7)))}% 0`;
     titleParts.forEach((el, i) => {
       const p = outExpo(prog(T0, 0.2 + i * 0.18, 0.6 + i * 0.18)), o = 1 - prog(T0, 1.6, 1.85);
       el.style.opacity = String(p * o);
