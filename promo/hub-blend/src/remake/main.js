@@ -15,6 +15,7 @@ import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
 import { FullScreenQuad } from "../../vendor/addons/postprocessing/Pass.js";
 import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen } from "./features.js";
 import { createSmiley, MOVES } from "../smiley.js";
+import { createOverlay, SMILEY_SHARE } from "./overlay.js";
 import { buildEnd } from "./end.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
@@ -41,7 +42,7 @@ const SHOTS = [
   [FEATURES_END, DURATION - OPEN, "end"],
 ];
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
-const HOP = 0.6; // between two features: Dr. Smiley hops from one phone to the next and the camera follows him
+const HOP = 0.4; // between two features: Dr. Smiley hops from one phone to the next (Jose: at most 0.4 s)
 const isFeature = (g) => FEATURES.some((f) => f.g === g);
 
 async function build() {
@@ -307,6 +308,7 @@ async function build() {
   host.group.scale.setScalar(1.35); host.group.position.z = 0.9;
   host.group.traverse((o) => { if (o.isMesh) o.castShadow = true; });
   opener.add(host.group);
+  host.group.visible = false; // drawn flat by the overlay instead
   const warm = new THREE.PointLight(0xffd2b0, 2.5, 6, 1.5); warm.position.set(0, 1.4, 3.1); opener.add(warm);
   const openerTitle = document.createElement("div");
   openerTitle.style.cssText = `position:absolute;left:0;right:0;bottom:${H * 0.1}px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;opacity:0;pointer-events:none;text-shadow:0 2px 22px rgba(3,6,26,.85)`;
@@ -314,13 +316,14 @@ async function build() {
   root.appendChild(openerTitle);
   const HOLD = 0.9; // seconds per photo
   function openerAt(t) {
+    camera.clearViewOffset();
     for (const g in groups) groups[g].visible = g === "opener";
     const N = PHOTOS.length, step = Math.min(N - 1, Math.floor(t / HOLD)), f = t / HOLD - step;
     const turn = inOutCubic(clamp((f - 0.55) / 0.45));
     ring.rotation.y = -((step + (step < N - 1 ? turn : 0)) / N) * Math.PI * 2;
     // he looks round at each photo as it passes, then at you with a wink
     const looking = t < 4.2;
-    host.pose({ face: t > 4.4 ? "wink" : looking ? (f < 0.5 ? "halfL" : "lookL") : "smile", brows: t > 4.4 ? "wink" : "glad", turn: looking ? -18 : 0, y: 0.02 * Math.abs(Math.sin(t * 6)), glow: 0.5 });
+    openerSmiley = { x: W / 2, base: H * 0.8, lift: H * 0.008 * Math.abs(Math.sin(t * 6)), face: t > 4.4 ? "wink" : looking ? (f < 0.5 ? "halfL" : "lookL") : "smile", brows: t > 4.4 ? "wink" : "glad" };
     const e = inOutSine(t / OPEN);
     camera.position.set(0.4 * Math.sin(t * 0.5), lerp(2.1, 1.8, e), opener.position.z + lerp(6.6, 5.8, e));
     camera.lookAt(0, 1.35, opener.position.z - 1.0);
@@ -449,11 +452,11 @@ async function build() {
       // the eye drawn along with him
       const w = inOutCubic(prog(t, s[1] - HOP, s[1]));
       const A = view(s[2], s[1] - HOP), B = view(next[2], next[0]);
-      // mid-hop the camera rides with him (behind and above, the next phone ahead), easing off at both ends
-      const k = Math.pow(Math.sin(Math.PI * w), 0.6) * 0.92;
-      const him = feat.smiley.group.position;
-      cam.pos.lerpVectors(A.pos, B.pos, w).lerp(him.clone().add(new THREE.Vector3(0.15, 1.7, 3.6)), k);
-      cam.look.lerpVectors(A.look, B.look, w).lerp(him.clone().add(new THREE.Vector3(0, 1.15, -0.4)), k); // his middle, not his feet
+      // no fly (it swept the proof cards through his path): this shot's camera keeps going, the
+      // picture dips through navy under him, and at the darkest moment it cuts to the next shot
+      const half = t >= s[1] - HOP / 2;
+      const V = half ? view(next[2], next[0]) : view(s[2], t);
+      cam.pos.copy(V.pos); cam.look.copy(V.look);
     } else if (next && t > s[1] - WHIP) {
       // fly from the end of this shot to the start of the next, through the words
       const w = inOutExpo(prog(t, s[1] - WHIP, s[1]));
@@ -466,7 +469,12 @@ async function build() {
     if (["says", "doctor", "timer", "wrong", "right"].includes(s[2])) cam.pos.sub(cam.look).multiplyScalar(1.12).add(cam.look);
     camera.position.copy(cam.pos);
     camera.lookAt(cam.look);
-    const fp = hopping ? feat.smiley.group.position : a.focus || a.look; // mid-hop: focus on him
+    // the phone shots' lens shift (room for Dr. Smiley under the proof), blended across cuts
+    const sh0 = SHIFT[s[2]] || 0;
+    const shift = hopping ? (t >= s[1] - HOP / 2 ? SHIFT[next[2]] || 0 : sh0)
+      : next && t > s[1] - WHIP ? lerp(sh0, SHIFT[next[2]] || 0, inOutCubic(prog(t, s[1] - WHIP, s[1]))) : sh0;
+    if (shift > 0.5) camera.setViewOffset(W, H, 0, shift, W, H); else camera.clearViewOffset();
+    const fp = a.focus || a.look;
     bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
     // the end card keeps the hospital behind the table readable: less blur there
     bokeh.uniforms.aperture.value = s[2] === "end" ? 0.00025 : 0.0007;
@@ -476,8 +484,8 @@ async function build() {
     spot.position.set(g.x - 1.2, 7.5, g.z + 2.5);
     spot.target.position.set(g.x, 0.8, g.z);
     spot.target.updateMatrixWorld();
-    const span = hopping ? HOP : WHIP;
-    for (const g in groups) groups[g].visible = g === s[2] || (next && t > s[1] - span && g === next[2]);
+    if (hopping) { const half = t >= s[1] - HOP / 2; for (const g in groups) groups[g].visible = g === (half ? next[2] : s[2]); }
+    else for (const g in groups) groups[g].visible = g === s[2] || (next && t > s[1] - WHIP && g === next[2]);
     for (const [m, g] of walls) m.visible = g === s[2] || (next && t > s[1] - WHIP && g === next[2]);
     const glowing = s[2] === "wrong" ? C.red : s[2] === "right" ? C.cyan : null;
     tint.visible = !!glowing;
@@ -485,13 +493,60 @@ async function build() {
     spot.intensity = s[2] === "logo" ? 70 : 140;
     spot.color.setHex(0xf3f7ff);
     if (isFeature(s[2])) { spot.position.set(g.x - 1.8, 6.5, g.z + 3.5); spot.target.position.set(g.x, 0, g.z + 0.8); spot.intensity = 110; spot.color.setHex(0xffe6c8); } // warm, like the clip
-    if (hopping) { // the warm light rides with him over the gap
-      const him = feat.smiley.group.position;
-      spot.position.set(him.x - 1.6, him.y + 5.5, him.z + 2.8); spot.target.position.copy(him); spot.target.updateMatrixWorld(); spot.intensity = 110;
-    }
     if (s[2] === "end" || (next && next[2] === "end" && t > s[1] - WHIP)) { spot.intensity = 18; spot.position.set(g.x + 2, 6, g.z + 3); spot.target.position.set(g.x, 0, g.z); }
     return { s, next, i, hopping };
   }
+
+  // ---------- Dr. Smiley's spot in each shot: about 25% of the frame tall, fully in frame,
+  // never over the proof item at any moment of the shot (measured here, checked per frame) ----------
+  // the dip through navy during a hop: over the picture and the captions, under Dr. Smiley
+  const dip = document.createElement("div");
+  dip.style.cssText = "position:absolute;inset:0;background:#03061a;opacity:0;pointer-events:none";
+  root.appendChild(dip);
+  const overlay = await createOverlay(root, W, H);
+  let smileyState = null, openerSmiley = null;
+  const _v = new THREE.Vector3();
+  function proofRect(g) {
+    const m = feat.proofMesh(g);
+    if (!m) return null;
+    for (let o = m; o; o = o.parent) if (!o.visible) return null; // not on screen
+    m.updateWorldMatrix(true, false);
+    if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
+    const bb = m.geometry.boundingBox;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const x of [bb.min.x, bb.max.x]) for (const y of [bb.min.y, bb.max.y]) {
+      _v.set(x, y, 0).applyMatrix4(m.matrixWorld).project(camera);
+      const px = (_v.x + 1) / 2 * W, py = (1 - _v.y) / 2 * H;
+      x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+    }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+  const hit = (a, b, m = 0) => a && b && a.x < b.x + b.w + m && b.x < a.x + a.w + m && a.y < b.y + b.h + m && b.y < a.y + a.h + m;
+  const SW_ = overlay.size.w, SH_ = overlay.size.h, MARGIN = W * 0.04;
+  /* The proof cards are as wide as the frame, so he can't stand beside them: he stands in a band
+     along the bottom, alternating corners (so each hop crosses the frame), and each phone shot's
+     picture is shifted up (a lens shift: setViewOffset, the camera itself doesn't move) just enough
+     that its proof item, at its largest in the shot, ends above his head and his hop. */
+  const ARC = H * 0.05; // the highest he ever leaves the ground, so a hop stays under the proof
+  const BASE = H * 0.965, LIMIT = BASE - SH_ * 1.06 - ARC - 8;
+  const SPOT = {}, SHIFT = {};
+  for (const [i, f] of FEATURES.entries()) {
+    const t0 = FEATURE_STARTS[i], len = featureLen(f);
+    let bottom = -Infinity, top = Infinity;
+    camera.clearViewOffset();
+    for (let u = 0; u <= len; u += 0.1) {
+      feat.update(f.g, u);
+      const v = view(f.g, t0 + u);
+      camera.position.copy(v.pos); camera.lookAt(v.look); camera.updateMatrixWorld();
+      scene.updateMatrixWorld();
+      const r = proofRect(f.g); if (r) { bottom = Math.max(bottom, r.y + r.h); top = Math.min(top, r.y); }
+    }
+    SHIFT[f.g] = Math.max(0, bottom - LIMIT);
+    SPOT[f.g] = { x: i % 2 ? W - MARGIN - SW_ / 2 : MARGIN + SW_ / 2, base: BASE };
+    if (top - SHIFT[f.g] < H * 0.2) console.warn(`Dr. Smiley: in ${f.g} the proof reaches up under the caption (${Math.round(top - SHIFT[f.g])} px)`);
+  }
+  camera.clearViewOffset();
+  window.__smileySpots = SPOT;
 
   // which shot is on at t, and whether we are in the hop between two features
   function shotAt(t) {
@@ -499,38 +554,43 @@ async function build() {
     const s = SHOTS[i], next = SHOTS[i + 1];
     return { s, next, hopping: !!(next && isFeature(s[2]) && isFeature(next[2]) && t > s[1] - HOP) };
   }
-  const hopFrom = new THREE.Vector3(), hopTo = new THREE.Vector3();
   function drawScene(time) {
     const T0 = clamp(time, 0, DURATION - 1e-4);
-    if (T0 < OPEN) { openerAt(T0); captionsAt(-1); composer.render(); return; }
+    if (T0 < OPEN) { openerAt(T0); captionsAt(-1); composer.render(); dip.style.opacity = "0"; overlay.draw(openerSmiley); window.__smileyCheck = { t: time, shot: "opener", smiley: overlay.box() }; return; }
     openerTitle.style.opacity = "0";
     const t = T0 - OPEN;
     partsAt(t);
     logoAt(t);
     const { s, next, hopping } = shotAt(t);
     const sm = feat.smiley;
-    // where he stands at the end of this shot and the start of the next (each shot's own choreography, else his spot)
-    if (hopping) {
-      feat.update(next[2], 0);
-      hopTo.copy(sm.group.visible ? sm.group.position : feat.idleSpot(next[2]));
-      feat.update(s[2], s[1] - HOP - s[0]);
-      hopFrom.copy(sm.group.visible ? sm.group.position : feat.idleSpot(s[2]));
-    } else if (next && t > s[1] - WHIP) feat.update(next[2], 0);
+    if (next && t > s[1] - Math.max(WHIP, hopping ? HOP : 0)) feat.update(next[2], 0);
+    sm.lastPose = null;
     feat.update(s[2], t - s[0]);
     if (isFeature(s[2]) && !sm.group.visible) feat.idle(s[2], t - s[0]);
+    const pose = sm.lastPose;
+    sm.group.visible = false; // never drawn in 3D: the overlay draws him
+    smileyState = null;
     if (hopping) {
-      // the hop: a high arc from phone to phone, turning his back to us at the top and round again to land
-      const a = prog(t, s[1] - HOP, s[1]);
-      sm.group.visible = true;
-      sm.group.position.lerpVectors(hopFrom, hopTo, inOutSine(a));
-      sm.group.position.y += Math.sin(Math.PI * a) * 2.0;
-      sm.group.rotation.y = 0.15; // he keeps facing us (side-on he'd show how thin his card is)
-      sm.pose({ ...MOVES.hop(a), face: a < 0.5 ? "smile" : "laugh", brows: "glad", glow: 0.35 });
+      // the hop: from his spot on this phone to his spot on the next, sharp at the top of the arc
+      const a = prog(t, s[1] - HOP, s[1]), A = SPOT[s[2]], B = SPOT[next[2]];
+      const arc = ARC, lift = Math.sin(Math.PI * a) * arc;
+      const vy = Math.cos(Math.PI * a) * Math.PI * arc / HOP / 30; // px per frame, 0 at the top
+      smileyState = { x: lerp(A.x, B.x, inOutSine(a)), base: lerp(A.base, B.base, inOutSine(a)), lift, smear: Math.abs(vy) > 3 ? vy : 0,
+        squash: MOVES.hop(a).squash, lean: lerp(-6, 6, a), face: a < 0.5 ? "smile" : "laugh", brows: "glad" };
+    } else if (isFeature(s[2]) && pose && !(next && !isFeature(next[2]) && t > s[1] - WHIP - 0.15)) { // gone before the fly to the end card
+      const A = SPOT[s[2]], y = pose.y || 0;
+      smileyState = { x: A.x, base: A.base, lift: Math.min(ARC, Math.max(0, y) * overlay.size.h * 0.35), rise: y < 0 ? clamp(1 + y / 1.1) : undefined,
+        squash: pose.squash ?? 1, lean: -(pose.lean || 0), face: pose.face || "rest", brows: pose.brows || "rest" };
     }
     cameraAt(t);
     if (s[2] === "end" || (next && next[2] === "end")) endCard.update(Math.max(0, t - END_AT));
     captionsAt(t);
     composer.render();
+    dip.style.opacity = hopping ? String(0.92 * Math.pow(Math.sin(Math.PI * prog(t, s[1] - HOP, s[1])), 1.3)) : "0";
+    overlay.draw(smileyState);
+    // for the checks: his box and the proof's box on screen this frame
+    window.__smileyCheck = { t: time, shot: s[2], smiley: overlay.box(), proof: isFeature(s[2]) ? proofRect(s[2]) : null,
+      nextProof: hopping ? proofRect(next[2]) : null };
   }
 
   /* Motion blur, like the clip's: during the hops and fly-throughs a frame is the average of several
@@ -554,7 +614,7 @@ async function build() {
     const t = time - OPEN;
     if (t < 0) return false;
     const { s, next, hopping } = shotAt(t);
-    return hopping || !!(next && t > s[1] - WHIP);
+    return !hopping && !!(next && t > s[1] - WHIP);
   }
   function renderAt(time) {
     if (!blurred(time)) { composer.renderToScreen = true; drawScene(time); return; }

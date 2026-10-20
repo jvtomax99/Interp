@@ -163,7 +163,11 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   ffL.pivot.add(back);
 
   // ---- Dr. Smiley ----
-  const smiley = await createSmiley({ root: "assets/drsmiley/", round: true }); // his rounded 3D body (Jose's pick)
+  // His 3D body is kept only as the shots' choreography: it is never drawn (Jose: the rounded
+  // body warped his drawing). Each pose is recorded and the overlay (overlay.js) draws him from it.
+  const smiley = await createSmiley({ root: "assets/drsmiley/" });
+  const rawPose = smiley.pose;
+  smiley.pose = (p) => { smiley.lastPose = p; rawPose(p); };
   smiley.group.scale.setScalar(0.9);
   scene.add(smiley.group);
   // nothing of him shows below the glass, so he can rise out of a screen (Ask)
@@ -180,7 +184,7 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
   for (const line of [0, 1]) {
     const ws = DRILL.filter((d) => d.line === line), total = ws.reduce((a, d) => a + d.width, 0) + GAP * (ws.length - 1);
     let x = -total / 2;
-    for (const d of ws) { d.x = x + d.width / 2; x += d.width + GAP; d.y = line ? 1.0 : 1.55; }
+    for (const d of ws) { d.x = x + d.width / 2; x += d.width + GAP; d.y = line ? 0.62 : 1.12; } // low over the sheet, clear of the caption once the picture shifts up for Dr. Smiley
   }
   const drillWords = DRILL.map(({ w, x, y }) => {
     const g = new THREE.Group();
@@ -342,7 +346,7 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
       bodyFull.visible = bodyFull.material.opacity > 0.01;
       S.layers.proof.mesh.visible = u > 2.35;
       const p = outBack(prog(u, 2.45, 3.0), 1.5);
-      S.lift("proof", 0.22 * p, 0.3 * p);
+      S.lift("proof", 0.12 * p, 0.18 * p); // a small lift: a big one ran up under the caption
     },
 
     team(u, S) {
@@ -408,5 +412,7 @@ export async function buildFeatures(scene, groups, { word, label } = {}) {
     smiley.group.rotation.y = 0.3;
     smiley.pose({ y: 0.015 * Math.abs(Math.sin(u * 5)), face: u % 2.2 < 1.4 ? "halfR" : "smile", brows: "glad", glow: 0.25, rim: 0.6 });
   }
-  return { update, view, smiley, idle, idleSpot };
+  // the proof item of a shot (the layer the caption points at), to keep Dr. Smiley off it
+  const proofMesh = (g) => { const S = shots[g]; const k = Object.keys(S.layers).find((k) => S.layers[k].l.proof); return k ? S.layers[k].mesh : null; };
+  return { update, view, smiley, idle, idleSpot, proofMesh };
 }

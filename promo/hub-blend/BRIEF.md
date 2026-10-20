@@ -171,6 +171,20 @@ distinct on screen.
    camera riding with him, with motion blur (7 moments in a 0.35-frame
    shutter, only on hops and fly-throughs). 44.5 s; music is v11's whole
    track. A full draft renders in about 13 min.
+   Fourth round (2026-10-20), Dr. Smiley fixed (Jose: teal face, warped
+   rounded body, sinking into screens, covering proof items, small, blurry
+   hops). He is no longer in the 3D scene: `src/remake/overlay.js` draws his
+   flat art (composeSmiley) on a canvas over the render, unlit and crisp,
+   25% of the frame tall. The shots' choreography still poses his hidden 3D
+   body; the overlay reads `lastPose` (face, brows, squash, lean, lift).
+   The proof cards are as wide as the frame, so he stands in a bottom band,
+   alternating corners, and each phone shot gets a lens shift
+   (`setViewOffset`, measured at build) so its proof ends above his head and
+   hop. Hops are 0.4 s, 5% of the frame high, his face sharp, with a light
+   trail; the picture dips through navy and cuts at the darkest moment (a
+   camera fly swept the proof cards through his path). `tools/check-smiley.cjs`
+   checks every frame: in frame, not over the proof (nor the next one in a
+   hop); 0 failures at 10 fps.
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.
