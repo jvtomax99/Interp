@@ -93,7 +93,15 @@ distinct on screen.
 3. Dr. Smiley puppet: a flat cutout in Three.js from `drsmiley/` (base,
    face strip, brows), card thickness, contact shadow, screen light on him,
    squash and stretch. Moves: hop, land, type, point, step out, wave. Six
-   stills at 540x960.
+   stills at 540x960. **Done** (2026-10-20): `src/smiley.js`
+   (`createSmiley`, `MOVES`: each move a pose over phase 0-1; poses take
+   any of the 30 face frames and DR_BROWS). He is a token on a glass disc
+   with a cyan rim, since his art ends at the shoulders. Stills:
+   `tools/smiley-stills.cjs` (page `tools/smiley-stills.html`) to
+   `out/smiley/`, sheet `assets/smiley-stills.jpg`. His art has no arms, so
+   type, point and wave are body language plus light (key rings, a cyan arc,
+   a rock and wink); real hands need two arm drawings from Jose (the same
+   ones PLAN F1 asks for).
 4. Hook and logo. Draft at 540x960, contact sheet at 2 fps.
 5. Shots 2-6. Draft, contact sheet.
 6. Shots 7-11. Draft, contact sheet.
