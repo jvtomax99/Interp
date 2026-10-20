@@ -248,6 +248,12 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 Dr. Smiley E4, his drawn faces seen (Jose: "what happened to
+  these faces?"; they showed 0.26-0.7 s at rare moments). Each now holds
+  about a second (pet's startle 0.6 s, the quiz wince 0.65 s), and a
+  study-streak milestone opens with the surprised face (`wow`) before the
+  cheer. Note `docs/features/dr-smiley.md`; checks in `smiley-brows.cjs`,
+  `smiley-quiz.cjs`. Guide: `askmoves` answer and card.
 - 2026-10-20 R5, Provider Pictures on the Where picker (Jose's pick). The
   provider sheet's facility text became the doctors' Where button plus a
   "Department or unit" line; one picker serves both sheets (`placePickFor`),
