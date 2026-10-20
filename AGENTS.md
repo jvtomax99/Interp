@@ -286,7 +286,7 @@ one-handed between hospital assignments. He directs the product and reviews
 from a phone: one step at a time, screenshots over description.
 
 **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
-(His standing rule.)
+(His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
 
 **Always say your recommendation** (Jose, 2026-10-19). Whenever there are
 options, a next step or a trade-off, name the one you would pick and why,

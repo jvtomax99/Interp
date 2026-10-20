@@ -377,7 +377,7 @@ design and anything touching data or rules stay with the main model.
 ## Working agreement
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
-  (His standing rule.)
+  (His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
 - **A question with options gets buttons** (Jose, 2026-10-18): ask it
   with `AskUserQuestion`, one button per option (recommended first), not
   as a numbered list in text. Where that tool is missing (a scheduled
