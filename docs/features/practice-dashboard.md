@@ -154,6 +154,13 @@ A drag never picks a building: the click that follows is swallowed. Nothing
 runs at rest (the loop stops once settled) or while the card is away
 (`is-away`); reduced motion draws the layers and never slides them. Suite:
 `campus-depth.cjs`.
+
+The card around the scene follows (2026-10-20): its sky runs to a deep
+violet (`#33295f`) instead of night navy, the stars are gone, and a soft
+warm glow sits at its top left where the scene's sun is off frame
+(`.cp-card::before`). The lower colours are unchanged, so the chips and
+Exam sim read as before; the HUD's white text keeps 9.7:1 on the new
+violet.
 **Round 2** (Jose's picks, 2026-10-19): an ambulance bay on the banner
 building's right flank (`BAY`, brick, a warm-lit opening; its two sliding
 doors captured apart as `bay0..2.webp`, closed/half/open, `.cp-bay`), which
