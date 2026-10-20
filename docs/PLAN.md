@@ -101,7 +101,7 @@ M3. **Record yourself, play it back beside the model** (built, PR on top of M2; 
    recording (a button in the check); if it fails, play every line before
    opening the mic and tell people to use earbuds.
 M4. **Span chart** (weeks) and the span number on the Practice tile (built, PR on top of M3; chart on the trainer's start card under Start, the tile's span is M2's; see the note).
-M5. **Auto-marking** from speech to text. Only if M0 shows it works in
+M5. **Auto-marking** from speech to text (built; speech to text works in the installed app in both languages, 2026-10-20; phone-only matching, off by default, Jose's picks; see the note. **Needs Jose:** one round with Auto-mark on, and one with Record me on too). Only if M0 shows it works in
    the installed app. Matching on the phone; Haiku (`_routine.js`) only
    for the chunks that look like paraphrases; text only, never audio.
 

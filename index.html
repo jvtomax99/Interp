@@ -3767,6 +3767,12 @@
   .mem-span-key span{ display:flex; align-items:center; gap:6px; }
   .mem-span-key i{ width:14px; height:3px; border-radius:2px; background:var(--dom); }
   .mem-span-key i.is-notes{ background:color-mix(in srgb, var(--dom) 60%, var(--accent-2)); opacity:.75; }
+  .mem-auto{ margin:0; display:flex; flex-direction:column; gap:3px; padding:9px 13px; border-radius:var(--r-md); font-size:13px; color:var(--ink-soft);
+    background:color-mix(in srgb, var(--dom) 7%, var(--bg-hi)); }
+  .mem-auto p{ margin:0; }
+  .mem-auto b{ color:var(--ink); }
+  .mem-auto q{ font-family:'IBM Plex Serif', Georgia, serif; font-size:15px; color:var(--ink); overflow-wrap:anywhere; }
+  .mem-tag{ align-self:flex-start; padding:1px 7px; border-radius:999px; font-size:12px; font-weight:650; color:var(--danger); background:color-mix(in srgb, var(--danger) 12%, var(--paper)); }
   .mem-start{ align-self:stretch; }
   .mem-rec{ margin:0; display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:550; color:var(--ink-soft); text-align:center; }
   .mem-rec.is-on{ color:var(--danger); font-variant-numeric:tabular-nums; }
@@ -17394,6 +17400,7 @@ const GUIDE_TOPICS = [
     <p>With <b>Record me</b> on, the mic records only during your turn. After the rendering, tap <b>Mine</b> to hear yourself and <b>Model</b> to hear the model rendering read aloud. Your take is dropped when the next line starts and is never sent anywhere.</p>
     <p>Three clean lines in a row and the next one is a few words longer. Two misses in a row and it gets shorter. Your <b>span</b> is the longest line you've held clean; lines done with notes count apart from memory only.</p>
     <p>Under <b>Start</b>, <b>Your span, by week</b> draws your longest clean line each week for the last 8 weeks. Tap a point to read that week. With notes shows as a second, lighter line.</p>
+    <p>With <b>Auto-mark</b> on, the phone listens to your turn and, when you tap Show the rendering, marks the parts it didn't hear ("not heard") and shows what it heard. It can be wrong, a synonym for example, so check the marks and tap to change any. Apple may process what you say, so practise away from patients. It's off unless you turn it on.</p>
     <p>If a line is wrong or sounds odd, tap <b>Flag this line</b> after the rendering and say why. Flags are read before the lines are changed.</p>
     <p>Your progress stays on this phone. Record me is off unless you turn it on. Near patients, use earbuds.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
@@ -21702,8 +21709,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.1250';
-const BUILD_TIME = '2026-10-20 12:50 UTC';
+const BUILD_ID = 'b1020.1315';
+const BUILD_TIME = '2026-10-20 13:15 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -22260,7 +22267,7 @@ function memRead(){
   try{ p = JSON.parse(localStorage.getItem(MEM_KEY) || 'null'); }catch(e){}
   p = p && typeof p === 'object' ? p : {};
   return { level: Math.min(MEM_MAX, Math.max(MEM_MIN, +p.level || MEM_START)), clean: +p.clean || 0, miss: +p.miss || 0,
-    notes: !!p.notes, rec: !!p.rec, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
+    notes: !!p.notes, rec: !!p.rec, auto: !!p.auto, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
     seen: p.seen && typeof p.seen === 'object' ? p.seen : {}, log: Array.isArray(p.log) ? p.log : [],
     best: p.best && typeof p.best === 'object' ? p.best : {} };
 }
@@ -22342,13 +22349,14 @@ function memLeave(){
   memUtter = null; clearTimeout(memTimer);
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
   drTaskEnd('memory');
-  memRecDrop();
+  memRecDrop(); memSRDrop();
   MEM.stage = 'home'; MEM.flagOpen = false; MEM.msg = '';
 }
 
 function memSetDir(d){ memProg().dir = d; memSave(); renderContent(); }
 function memSetNotes(on){ memProg().notes = !!on; memSave(); renderContent(); }
 function memSetRec(on){ memProg().rec = !!on; memSave(); renderContent(); }
+function memSetAuto(on){ memProg().auto = !!on; memSave(); renderContent(); }
 
 async function memRecStart(){
   memRecDrop();
@@ -22441,7 +22449,8 @@ function memStart(){
 function memPlay(L){
   if(!L){ showToast('No lines to practise in that direction.'); return; }
   MEM.line = L; MEM.missed = {}; MEM.flagOpen = false; MEM.run++;
-  memRecDrop();
+  MEM.auto = null; MEM.autoDone = false; MEM.touched = false;
+  memRecDrop(); memSRDrop();
   clearTimeout(memTimer);
   if(!('speechSynthesis' in window)){ MEM.stage = 'read'; renderContent(); return; }
   speechSynthesis.cancel();
@@ -22462,13 +22471,110 @@ function memPlay(L){
   speechSynthesis.speak(u);
 }
 
+/* Auto-mark (M5): while it's your turn the phone turns what you say into
+   text (webkitSpeechRecognition, in the language you render into) and,
+   when you tap Show the rendering, pre-marks every chunk it didn't hear.
+   Matching is on the phone only (Jose, 2026-10-20): a chunk counts as heard
+   when at least half of its content words are in what you said (accents,
+   case and punctuation ignored, small words skipped, the first 5 letters
+   enough so "toma"/"tome" and "dressing"/"dressings" match, any number
+   matches a number). You can change every mark. Off by default: Apple may
+   process the speech on its servers. */
+const MEMSR = { r: null, text: '', final: '', state: '', done: null, tries: 0 };
+const MEM_STOP = new Set(('el la los las lo le les un una unos unas de del al a y e o u en que se me te mi mis su sus tu tus es son por para con sin ' +
+  'the a an of to and or in on at is are be it its my your his her their for with by as this that was').split(' '));
+const MEM_NUM = new Set(('cero uno una dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis diecisiete dieciocho diecinueve veinte ' +
+  'veintiuno veintidos veintitres veinticuatro veinticinco treinta cuarenta cincuenta sesenta setenta ochenta noventa cien ciento doscientos quinientos mil ' +
+  'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety hundred thousand').split(' '));
+function memWords(t){
+  return foldText(String(t || '')).toLowerCase().replace(/[^a-z0-9ñ\s-]/g, ' ').split(/[\s-]+/).filter(Boolean)
+    .map(w => /^\d+$/.test(w) || MEM_NUM.has(w) ? '#' : w);
+}
+function memHeardSet(text){ const s = new Set(); memWords(text).forEach(w => { s.add(w); s.add(w.slice(0, 5)); }); return s; }
+// Which chunks the phone didn't hear (indexes).
+function memAutoMarks(L, text){
+  const heard = memHeardSet(text);
+  if(!heard.size) return null;
+  const out = [];
+  L.u.forEach((c, i) => {
+    const ws = memWords(c[1]).filter(w => !MEM_STOP.has(w));
+    if(!ws.length) return;
+    const got = ws.filter(w => heard.has(w) || heard.has(w.slice(0, 5))).length;
+    if(got / ws.length < .5) out.push(i);
+  });
+  return out;
+}
+function memSRStart(){
+  memSRDrop();
+  const SR = vcSR();
+  if(!SR){ MEMSR.state = 'off'; return; }
+  const r = MEMSR.r = new SR();
+  r.lang = MEM.line.dir === 'en-es' ? 'es-US' : 'en-US';
+  r.interimResults = true; r.continuous = true;
+  MEMSR.text = ''; MEMSR.final = ''; MEMSR.state = 'on'; MEMSR.tries = 0;
+  r.onresult = e => {
+    let fin = '', live = '';
+    for(const x of e.results){ if(x.isFinal) fin += x[0].transcript + ' '; else live += x[0].transcript + ' '; }
+    MEMSR.text = (MEMSR.final + ' ' + fin + live).trim();
+    const el = document.getElementById('memHeardN');
+    if(el){ const n = memWords(MEMSR.text).length; el.textContent = n ? `${n} word${n === 1 ? '' : 's'} heard` : 'listening'; }
+  };
+  r.onerror = e => { if(MEMSR.r !== r) return; const err = e && e.error || 'unknown';
+    if(err !== 'no-speech' && err !== 'aborted'){ MEMSR.state = 'error'; MEMSR.err = err; if(MEM.stage === 'turn') memRecPaint(); } };
+  // iPhones end a continuous listen after a pause: start again while it's
+  // still your turn (keeping what was heard), a few times at most.
+  r.onend = () => {
+    if(MEMSR.r !== r) return;
+    MEMSR.final = MEMSR.text;
+    if(MEM.stage === 'turn' && MEMSR.state === 'on' && MEMSR.tries < 4){ MEMSR.tries++; try{ r.start(); return; }catch(e){} }
+    MEMSR.r = null;
+    if(MEMSR.done){ const f = MEMSR.done; MEMSR.done = null; f(); }
+  };
+  try{ r.start(); }catch(e){ MEMSR.r = null; MEMSR.state = 'error'; MEMSR.err = e.name || 'start'; }
+}
+// Stop listening, then mark from what was heard (once the phone has handed
+// over its last words, or after 1.5 s).
+function memSRFinish(){
+  const r = MEMSR.r, run = MEM.run;
+  const apply = () => {
+    if(MEM.run !== run || MEM.stage !== 'check' || MEM.autoDone) return;
+    MEM.autoDone = true;
+    const marks = MEMSR.state === 'on' || MEMSR.text ? memAutoMarks(MEM.line, MEMSR.text) : null;
+    MEM.auto = { text: MEMSR.text, marks, err: MEMSR.state === 'error' ? MEMSR.err : '' };
+    if(marks && !MEM.touched) { MEM.missed = {}; marks.forEach(i => { MEM.missed[i] = true; }); }
+    if(activeCategory === 'memory') renderContent();
+  };
+  if(!r){ apply(); return; }
+  MEMSR.done = apply;
+  try{ r.stop(); }catch(e){ apply(); }
+  setTimeout(apply, 1500);
+}
+function memSRDrop(){
+  const r = MEMSR.r; MEMSR.r = null; MEMSR.done = null;
+  if(r){ try{ r.abort(); }catch(e){} }
+  MEMSR.state = '';
+}
+function memAutoLine(){
+  const A = MEM.auto;
+  if(!memProg().auto) return '';
+  if(!A) return `<p class="mem-rec" role="status">Checking what the phone heard…</p>`;
+  if(A.err === 'not-allowed' || A.err === 'service-not-allowed') return `<p class="mem-auto">Speech to text was refused. Mark it yourself, or allow it in Settings.</p>`;
+  if(!A.text) return `<p class="mem-auto">The phone heard nothing. Mark it yourself.</p>`;
+  const n = (A.marks || []).length;
+  return `<div class="mem-auto"><p>${n ? `Auto-marked: <b>${n}</b> part${n === 1 ? '' : 's'} not heard. Check ${n === 1 ? 'it' : 'them'}.` : 'Auto-marked: every part heard. Check it.'}</p>
+    <q>${escapeHtml(A.text)}</q></div>`;
+}
+
 function memTurn(){
   memUtter = null; clearTimeout(memTimer);
   MEM.stage = 'turn';
   drTask('processing', { key: 'memory', ms: 90000, perform: 'ponder', keep: true });
+  if(memProg().auto && activeCategory === 'memory' && MEM.line) memSRStart();
   if(activeCategory === 'memory') renderContent();
   if(memProg().rec && activeCategory === 'memory') memRecStart();
 }
+// If the phone only lets listening start from a tap.
+function memSRTap(){ memSRStart(); renderContent(); }
 
 function memReveal(){
   memUtter = null; clearTimeout(memTimer);
@@ -22476,10 +22582,13 @@ function memReveal(){
   MEM.stage = 'check';
   drTaskEnd('memory');
   if(MEMREC.rec) memRecStop(); else if(MEMREC.state !== 'done') MEMREC.state = '';
+  MEM.auto = null; MEM.autoDone = false;
   renderContent();
+  if(memProg().auto) memSRFinish();
 }
 
 function memToggleChunk(i){
+  MEM.touched = true;
   if(MEM.missed[i]) delete MEM.missed[i]; else MEM.missed[i] = true;
   const b = document.querySelector(`.mem-chunk[data-i="${i}"]`);
   if(b) b.setAttribute('aria-pressed', MEM.missed[i] ? 'true' : 'false');
@@ -22507,7 +22616,8 @@ function memHearAgain(){
 function memScore(){
   const p = memProg(), L = MEM.line, miss = Object.keys(MEM.missed).length, kind = p.notes ? 'notes' : 'mem';
   p.seen[L.id] = (p.seen[L.id] || 0) + 1;
-  p.log.push({ at: Date.now(), id: L.id, w: L.words, n: L.u.length, miss, notes: p.notes });
+  const A = MEM.auto && MEM.auto.marks;
+  p.log.push({ at: Date.now(), id: L.id, w: L.words, n: L.u.length, miss, notes: p.notes, ...(A ? { am: A.length } : {}) });
   if(p.log.length > 600) p.log = p.log.slice(-600);
   let moved = 0, best = false;
   if(!miss){
@@ -22598,6 +22708,9 @@ function renderMemTrainer(){
       <label class="mem-notes"><input type="checkbox" ${p.rec ? 'checked' : ''} onchange="memSetRec(this.checked)">
         <span class="mem-switch" aria-hidden="true"></span>
         <span><b>Record me</b><small>${p.rec ? 'On: the mic records your turn, so you can play it beside the model. Dropped after each line.' : 'Off: nothing is recorded.'}</small></span></label>
+      ${vcSR() ? `<label class="mem-notes"><input type="checkbox" ${p.auto ? 'checked' : ''} onchange="memSetAuto(this.checked)">
+        <span class="mem-switch" aria-hidden="true"></span>
+        <span><b>Auto-mark</b><small>${p.auto ? 'On: the phone listens to your turn and marks what it didn’t hear. Apple may process what you say: practise away from patients.' : 'Off: you mark every part yourself.'}</small></span></label>` : ''}
       <button type="button" class="mastery-go mem-go mem-start" ${go}>${ready ? 'Start' : MEM.err ? 'Try again' : 'Loading lines…'}</button>
       ${MEM.err ? `<p class="mem-small">Couldn’t load the lines. Check the connection, then tap <b>Try again</b>.</p>` : ''}
       <p class="mem-small">${p.rec ? 'Your take stays on this phone and is never sent.' : 'Nothing is recorded.'} Near patients, use earbuds.</p>
@@ -22617,14 +22730,15 @@ function renderMemTrainer(){
       <p class="mem-hint">This phone can’t read aloud. Read it once, then tap Hide.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memTurn()">Hide, my turn</button></div>`;
   } else if(MEM.stage === 'turn'){
-    html += memRingHtml('turn') + memRecLine() + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
+    html += memRingHtml('turn') + memRecLine() + (p.auto && MEMSR.state === 'on' ? `<p class="mem-rec" role="status">Auto-mark: <span id="memHeardN">listening</span></p>`
+      : p.auto && MEMSR.state === 'error' && !MEMSR.text ? `<div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memSRTap()">Start listening</button></div>` : '') + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memReveal()">Show the rendering</button></div>`;
   } else {
     const flagged = MEM.flagged[L.id];
-    html += `<p class="mem-hint">Tap any part you dropped or changed.</p>
+    html += memAutoLine() + `<p class="mem-hint">Tap any part you dropped or changed.</p>
       <div class="mem-chunks" lang="${L.dir === 'en-es' ? 'es' : 'en'}">${L.u.map((c, i) =>
         `<button type="button" class="mem-chunk" data-i="${i}" aria-pressed="${MEM.missed[i] ? 'true' : 'false'}" onclick="memToggleChunk(${i})">
-          <span class="mem-model">${escapeHtml(c[1])}</span><span class="mem-srcx" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(c[0])}</span></button>`).join('')}</div>
+          ${MEM.auto && MEM.auto.marks && MEM.auto.marks.includes(i) ? '<span class="mem-tag">not heard</span>' : ''}<span class="mem-model">${escapeHtml(c[1])}</span><span class="mem-srcx" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(c[0])}</span></button>`).join('')}</div>
       ${L.note ? `<p class="mem-watch"><b>Watch</b> ${escapeHtml(L.note)}</p>` : ''}
       ${MEMREC.url ? `<div class="mem-back"><span>Listen back</span><button type="button" class="btn btn-ghost" onclick="memPlayMine()">Mine</button><button type="button" class="btn btn-ghost" onclick="memPlayModel()">Model</button></div>`
         : MEMREC.state === 'saving' ? `<p class="mem-rec" role="status">Saving your take…</p>` : MEMREC.state === 'empty' ? `<p class="mem-rec" role="status">Nothing was recorded that time.</p>` : ''}
