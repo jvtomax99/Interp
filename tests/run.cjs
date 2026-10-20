@@ -32,6 +32,7 @@ const SUITES = [
   ['memory-trainer.cjs',  'Memory trainer: way in, a round with the words hidden, chunks, longer/shorter, notes, flags, leaving'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
   ['spring-press.cjs',    'Springy press: Practice buttons squash, spring past, settle; flame flickers'],
+  ['springs.cjs',         'S5 springs: plain taps settle with no overshoot (tab bar, section panel), the kept list'],
   ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
   ['campus-life.cjs',     'Campus life 2: bay doors with the ambulance, the lot car, sitters, the flock, pauses, reduced motion'],
   ['glossary-cv.cjs',     'Glossary taps: off-screen cards skip layout; same pixels; Back, a jump and a redraw land where they should'],

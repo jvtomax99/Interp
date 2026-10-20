@@ -144,6 +144,13 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
+S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
+   handler's forced layouts only moves the cost to the next reader or the
+   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
+   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
+   forced layout (`getClientRects`, `getBoundingClientRect` right after
+   `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
+   before write. Target: handler < 50 ms, tap to paint < 150 ms.
 S4. **Glossary taps** (this PR): off-screen term cards skip layout
    (`content-visibility`), with `#content.cv-all` wherever a guessed height
    could move what you read. Handler -37%, tap to paint -23% on real-size
@@ -353,6 +360,18 @@ then read the log; it names the suite and the check.
   of a selector list hands its selector to the next rule; the first pass
   did exactly that and the proof caught it (the greeting row lost its
   grid), so delete whole rules, never lines.
+- 2026-10-20 S5 springs (this PR; Jose's pick: S5, keep F2's buttons).
+  `--spring0`, Apple's bounce-0 spring as one `linear()` shape (`--ease`
+  where unsupported), on the plain taps: tab bar icon (.368s) and lens
+  (.588s), the Home section panel (.588s), the week dots' and level-up
+  pops, the chat reaction pop and heart, the memory trainer's switch and
+  option buttons, the candy button release, the trend dot, the campus
+  badge, the tilt tiles. Kept on purpose: `--spring` itself (F2's
+  fallback), F2's `--spring-settle`, and Dr. Smiley's acting (face lean,
+  brows, cheer, dock move: `dr-smiley.md` calls the brow overshoot his
+  follow-through), which the S5 question to Jose had listed as changing;
+  his motion rules won. Suite `springs.cjs` (frame-by-frame: no swing past
+  the target, settled within the press time). Guide: nothing to change.
 - 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
   sky violet instead of night navy, no stars, a warm glow top left. Lower
   colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim
@@ -994,6 +1013,16 @@ then read the log; it names the suite and the check.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
+- Springs (S5, 2026-10-20): Apple's model, WWDC23 "Animate with springs"
+  (stiffness = (2π/duration)², damping ratio = 1 - bounce) and WWDC18
+  "Designing Fluid Interfaces" (100% damping on a tap; 80% only when a
+  gesture carries momentum). Bounce 0 as CSS: `linear(0, 0.094, 0.274,
+  0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945, 0.964, 0.977, 0.985,
+  0.99, 0.994, 0.996, 0.998, 0.998, 1)`, CSS duration = 1.47 x Apple's
+  (press .25 s -> .368s, screen .4 -> .588s, sheet .45 -> .662s); a
+  swipe-dismiss would be bounce 0.2 (.607s, 1.5% past). Chromium
+  serializes it as `linear(0 0%, 0.094 5.56%, ...)`. Later, sheets only: a
+  JS spring that keeps the finger's speed (CSS can't).
 - Sonnet 5.5 recipe (from the claude-api skill's migration guide): same
   price as Sonnet 5; effort levels recalibrated, so set `output_config.effort`
   explicitly (`medium` for search-then-write, `low` for chat/extraction);

@@ -349,6 +349,11 @@ Rules that hold across the whole app:
 - Card rails are 4 columns at 13px gap, content left-aligned. Centering is
   only for the four `.qa-tile` buttons.
 - Keep `:focus-visible` and the `prefers-reduced-motion` guard on anything new.
+- **Easing** (S5, 2026-10-20): a plain tap settles on `--spring0`, Apple's
+  bounce-0 spring (`linear()`, `--ease` where unsupported; press .368s,
+  screen .588s, sheet .662s). Overshoot only where it is the point: F2's
+  `--spring-settle` on the Practice buttons, Dr. Smiley's acting. No new
+  overshooting `cubic-bezier`; `tests/suites/springs.cjs` lists the kept ones.
 
 **Known gap.** The look is tokenized (69 `:root` vars); the rhythm mostly
 is not. The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
