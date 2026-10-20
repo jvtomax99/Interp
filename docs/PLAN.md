@@ -195,9 +195,9 @@ come from this alone.
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
    helper; move one endpoint per PR.
-3. **Home styles in layers.** The greeting name and the quote (with its
-   author line) are each in one block now (their PRs); next the name row
-   (7 rules), then look for the next most-layered element.
+3. **Home styles in layers.** The greeting name, the quote (with its
+   author line) and the name row are each in one block now (their PRs);
+   next, the most-layered selectors left (census in the row's PR).
    Method that worked: list every rule for the element with its media
    context (comments stripped first), work out the winner per breakpoint,
    write one block at the lettering block's place, delete the rest, then
@@ -252,6 +252,10 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 Home styles in layers, the name row (this PR, on top of the
+  quote's): 7 rules in five places folded into one block with one
+  breakpoint (the flex row, the 3-column grid and margins of 3, 2, 73 and
+  34 px gone). Same proof: 30 states identical, 0 differing pixels.
 - 2026-10-20 Home styles in layers, the quote (this PR, on top of the
   name's): 20 rules (12 for the quote, 8 for its `cite`) in six places
   folded into one commented block with two breakpoints; the dead layers
