@@ -102,7 +102,17 @@ distinct on screen.
    type, point and wave are body language plus light (key rings, a cyan arc,
    a rock and wink); real hands need two arm drawings from Jose (the same
    ones PLAN F1 asks for).
-4. Hook and logo. Draft at 540x960, contact sheet at 2 fps.
+4. Hook and logo. Draft at 540x960, contact sheet at 2 fps. **Done**
+   (2026-10-20): `remake.html` + `src/remake/main.js` (render with
+   `-c remake.html`; draft size in the four 540/960 numbers there). Thick
+   words are real extruded type (Inter Tight 900 turned into a Three.js
+   typeface, `fonts/inter-tight-900.typeface.json`), one spotlight that
+   moves with the shot, a fly-through on every cut, bloom on the red and
+   cyan words. Cuts on the music's beats (`beats/`, 120 BPM). The logo is
+   the app icon's 16 tiles (`assets/icon-tiles.json`, found in
+   `icon-512.png`) rising out of a phone and assembling inside three rings.
+   9.5 s; a 540x960 draft renders in about 40 s. Quick looks without a
+   render: `tools/stills.cjs remake.html out/x <times>`.
 5. Shots 2-6. Draft, contact sheet.
 6. Shots 7-11. Draft, contact sheet.
 7. Check against the rules above, side by side with v11 per feature; fix;
