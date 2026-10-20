@@ -53,11 +53,6 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**Dr. Smiley acting, E3 (Jose, 2026-10-19: "expressive like Disney
-characters"; E1 and E2 done: E2 is the four drawn faces, surprised, sad,
-worried, doubt, in `docs/features/dr-smiley.md`).** E3 needs his yes: squash and stretch on the head as he springs and
-lands (he had the Home greeting's squish removed; show him first).
-
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
 F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right
@@ -88,9 +83,10 @@ M0. **Voice and mic check** (#60, merged). Installed-app results in the
    speech to text works in a Safari tab (English) but gave no words yet in
    the installed app. **Needs Jose:** installed app, speech to text in
    English and Spanish, waiting for "done" before Copy.
-M1. **Lines** (this PR): `memory/lines.json`, 60 lines approved by Jose
+M1. **Lines** (#69, merged): `memory/lines.json`, 60 lines approved by Jose
    without a line-by-line read (see the note); the trainer flags mistakes.
-M2. **The trainer.** Screen under Practice, playback with the text
+M2. **The trainer** (this PR; built as in the note's M2 section; flags go
+   to `terminology-meta/memory-flags`, Jose's pick). Screen under Practice, playback with the text
    hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
    Dr. Smiley's listening/thinking states, progress in `localStorage`
    only, notes toggle, a **Flag this line** button (saves line id + what's
@@ -259,6 +255,12 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
+  phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
+  spring, Lively only, on his picture, worked out from the head keys
+  (`drSquashKeys`). AGENTS.md's "never squash" rule rewritten to this one
+  exception. Suite `smiley-squash.cjs`; note `docs/features/dr-smiley.md`.
+  Guide: `askmoves` answer and its news card.
 - 2026-10-19 Watch bubble always on Home (Jose couldn't find it: he had
   watched the video, and the once-only rule had hidden it). After watching,
   the ring stops turning (`.is-seen`). Guide: `promo` answer reworded.
@@ -487,6 +489,14 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Facts (so nobody re-checks)
 
+- Recording a smooth, sharp clip of an animation from the tests' Chromium:
+  `recordVideo` and the CDP screencast give CSS-pixel frames (blurry), and
+  screenshots in a loop run at about 4 fps. What works: CSS `zoom: 3` on
+  the element (re-rendered sharp), then slow time: `page.clock.install()`,
+  CDP `Animation.setPlaybackRate` 0, and for each frame a cropped
+  screenshot, every animation's `currentTime` moved on 1/60 s and
+  `page.clock.runFor(17)` (the engine's timers). Every beat is caught.
+  Pinch zoom is refused by the app's viewport.
 - OpenStreetMap (Overpass) and most websites are blocked from cloud sessions
   (DNS fails in WebFetch, proxy refuses curl); only WebSearch works. The HUMC
   buildings were modelled from Jose's photos plus WebSearch facts.

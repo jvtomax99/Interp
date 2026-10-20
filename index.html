@@ -3712,6 +3712,103 @@
     .mastery-go:active, .mastery-go.is-pressed{ transform:none; }
   }
 
+  /* ---------- Memory trainer (renderMemTrainer) ----------
+     Its own screen beside Practice, in Practice's clay: one card that holds
+     the round (listen, your turn, the chunks), a ring that fills while the
+     line plays, candy buttons. Nothing moves at rest: the ring runs only
+     while the voice does. Note: docs/features/memory-trainer.md. */
+  .mem-entry{ display:flex; flex-direction:row; align-items:center; gap:13px; padding:13px 17px; max-width:760px; margin-bottom:26px; }
+  .mem-entry-icon, .mem-ring-in svg{ color:var(--dom); }
+  .mem-entry-icon{ width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center;
+    background:color-mix(in srgb, var(--dom) 15%, var(--paper)); }
+  .mem-entry-icon svg{ width:26px; height:26px; }
+  .mem-entry-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .mem-entry-text b{ font-size:15px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
+  .mem-entry-text span{ font-size:13px; line-height:1.4; color:var(--ink-soft); }
+  .mem-entry-span{ display:flex; flex-direction:column; align-items:center; flex:none; min-width:36px; }
+  .mem-entry-span b{ font-size:20px; font-weight:650; letter-spacing:-.03em; color:var(--dom); font-variant-numeric:tabular-nums; }
+  .mem-entry-span small{ font-size:12px; color:var(--ink-faint); }
+  .mem-go{ min-height:44px; padding:0 17px; font-size:15px; }
+  .mem-go:disabled{ opacity:.55; cursor:default; }
+
+  .mem-card{ padding:17px; max-width:560px; display:flex; flex-direction:column; gap:13px; }
+  .mem-lead{ margin:0; font-size:15px; line-height:1.45; color:var(--ink); }
+  .mem-stats{ display:grid; grid-template-columns:repeat(3, 1fr); gap:9px; }
+  .mem-stats span{ display:flex; flex-direction:column; gap:2px; padding:9px; border-radius:var(--r-md);
+    background:color-mix(in srgb, var(--dom) 7%, var(--bg-hi)); }
+  .mem-stats b{ font-size:22px; font-weight:650; letter-spacing:-.03em; color:var(--dom); font-variant-numeric:tabular-nums; }
+  .mem-stats small{ font-size:12px; line-height:1.3; color:var(--ink-soft); }
+  .mem-seg{ display:grid; grid-template-columns:repeat(3, 1fr); gap:3px; padding:3px; border-radius:999px; background:var(--bg); box-shadow:inset 0 0 0 1px var(--line-soft); }
+  .mem-seg button{ min-height:40px; border:none; border-radius:999px; background:transparent; font-family:var(--sans);
+    font-size:13px; font-weight:550; color:var(--ink-soft); cursor:pointer; transition:background .2s var(--ease), color .2s var(--ease); }
+  .mem-seg button[aria-checked="true"]{ background:var(--paper); color:var(--ink); font-weight:650;
+    box-shadow:0 1px 2px rgba(20,43,67,.08), 0 4px 10px -6px rgba(22,55,90,.3); }
+  .mem-seg button:focus-visible, .mem-chunk:focus-visible, .mem-flag-chip:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .mem-notes{ display:flex; align-items:center; gap:13px; cursor:pointer; min-height:44px; }
+  .mem-notes input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .mem-switch{ width:46px; height:28px; flex:none; border-radius:999px; background:var(--line); position:relative; transition:background .2s var(--ease); }
+  .mem-switch::after{ content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff;
+    box-shadow:0 1px 3px rgba(20,43,67,.3); transition:transform .3s var(--spring); }
+  .mem-notes input:checked + .mem-switch{ background:var(--dom); }
+  .mem-notes input:checked + .mem-switch::after{ transform:translateX(18px); }
+  .mem-notes input:focus-visible + .mem-switch{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .mem-notes > span:last-child{ display:flex; flex-direction:column; gap:1px; }
+  .mem-notes b{ font-size:15px; font-weight:650; color:var(--ink); }
+  .mem-notes small{ font-size:13px; color:var(--ink-soft); }
+  .mem-start{ align-self:stretch; }
+  .mem-small{ margin:0; font-size:12px; color:var(--ink-faint); text-align:center; }
+
+  .mem-top{ display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .mem-chip{ padding:3px 9px; border-radius:999px; font-size:12px; font-weight:650; color:color-mix(in srgb, var(--dom) 70%, var(--ink));
+    background:color-mix(in srgb, var(--dom) 13%, var(--paper)); }
+  .mem-who{ font-size:13px; font-weight:550; color:var(--ink-soft); }
+  .mem-len{ margin-left:auto; font-size:13px; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+  .mem-msg{ margin:0; padding:9px 13px; border-radius:var(--r-md); font-size:13px; font-weight:550;
+    color:color-mix(in srgb, var(--dom) 70%, var(--ink)); background:color-mix(in srgb, var(--dom) 10%, var(--paper)); }
+  .mem-ring{ position:relative; width:180px; height:180px; align-self:center; margin:6px 0; }
+  .mem-ring svg{ width:100%; height:100%; display:block; transform:rotate(-90deg); overflow:visible; }
+  .mem-ring circle{ fill:none; stroke-width:12; }
+  .mem-ring-track{ stroke:color-mix(in srgb, var(--dom) 13%, var(--bg)); }
+  .mem-ring-arc{ stroke:var(--dom); stroke-linecap:round; filter:drop-shadow(0 3px 4px color-mix(in srgb, var(--dom) 40%, transparent)); }
+  .mem-ring.is-turn .mem-ring-arc{ stroke:color-mix(in srgb, var(--dom) 55%, var(--accent-2)); }
+  .mem-ring-in{ position:absolute; inset:24px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-align:center;
+    background:radial-gradient(120% 90% at 30% 20%, var(--clay-sheen), transparent 60%), var(--paper);
+    box-shadow:inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 var(--clay-shade), 0 6px 14px -6px var(--clay-drop); }
+  .mem-ring-in svg{ width:32px; height:32px; }
+  .mem-ring-in b{ font-size:17px; font-weight:650; color:var(--ink); }
+  .mem-ring-in small{ font-size:13px; color:var(--ink-soft); padding:0 9px; }
+  .mem-hint{ margin:0; font-size:15px; color:var(--ink-soft); text-align:center; }
+  .mem-read{ margin:0; font-family:'IBM Plex Serif', Georgia, serif; font-size:17px; line-height:1.5; color:var(--ink); }
+  .mem-btns{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap; }
+  .mem-btns .btn{ min-height:44px; }
+  .mem-chunks{ display:flex; flex-direction:column; gap:9px; }
+  .mem-chunk{ display:flex; flex-direction:column; gap:3px; text-align:left; padding:11px 13px; min-height:44px; border-radius:var(--r-md); cursor:pointer;
+    font-family:var(--sans); border:1px solid var(--line); background:var(--paper); color:var(--ink);
+    box-shadow:inset 0 1px 0 var(--clay-hi), 0 1px 2px rgba(20,43,67,.06);
+    transition:background .2s var(--ease), border-color .2s var(--ease), transform .3s var(--spring); }
+  .mem-model{ font-size:17px; line-height:1.4; font-weight:550; }
+  .mem-srcx{ font-size:13px; line-height:1.35; color:var(--ink-faint); }
+  .mem-chunk[aria-pressed="true"]{ background:var(--danger-soft); border-color:color-mix(in srgb, var(--danger) 45%, transparent); }
+  .mem-chunk[aria-pressed="true"] .mem-model{ color:var(--danger); text-decoration:line-through; text-decoration-thickness:1.5px; }
+  .mem-chunk:active, .mem-chunk.is-pressed{ transform:scale(.985); transition:transform .08s ease-out; }
+  .mem-watch{ margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+  .mem-watch b{ color:var(--ink); font-weight:650; margin-right:3px; }
+  .mem-foot{ display:flex; justify-content:space-between; gap:13px; }
+  .mem-foot .link-btn{ margin:0; min-height:44px; font-size:13px; }
+  .mem-foot .link-btn:disabled{ color:var(--ink-faint); text-decoration:none; cursor:default; }
+  .mem-flag{ display:flex; flex-direction:column; gap:9px; padding:13px; border-radius:var(--r-md); background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); }
+  .mem-flag p{ margin:0; font-size:15px; font-weight:650; color:var(--ink); }
+  .mem-flag-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .mem-flag-chip{ min-height:40px; padding:0 13px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
+    font-family:var(--sans); font-size:13px; color:var(--ink-soft); cursor:pointer; }
+  .mem-flag-chip[aria-pressed="true"]{ border-color:var(--dom); color:var(--ink); background:color-mix(in srgb, var(--dom) 12%, var(--paper)); font-weight:550; }
+  .mem-flag textarea{ font-family:var(--sans); font-size:16px; padding:9px 11px; border-radius:var(--r-sm); border:1px solid var(--line);
+    background:var(--paper); color:var(--ink); resize:vertical; }
+  @media (prefers-reduced-motion: reduce){
+    .mem-ring-arc, .mem-chunk, .mem-switch, .mem-switch::after, .mem-seg button{ transition:none !important; }
+    .mem-chunk:active, .mem-chunk.is-pressed{ transform:none; }
+  }
+
   /* ---------- Your HUMC campus (renderCampus) ----------
      A night-to-sunset sky card; the campus is stacked pictures (ground,
      shadows, five buildings at their built floors). Labels are the tap
@@ -13161,8 +13258,8 @@ const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
   { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley reacts in your quiz: a bounce when you\'re right, a small wince when you\'re wrong, a cheer for your streak' },
-  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
-  { id:'promo',       tone:'gd-n3', pin:'pins/userguide.webp',           eyebrow:'Video',                 title:'Interpreter Hub in 45 seconds: watch it, or show it to someone new' },
+  { id:'memory',      tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'Memory trainer',        title:'Train your memory for consecutive: hear a line, say it in the other language, and the lines grow as you do' },
+  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -13226,6 +13323,9 @@ const GUIDE_UI = {
 // The same instructions as the answer text, drawn as steps. Keep them in
 // step with GUIDE_TOPICS; the text there is what search and Ask read.
 const GUIDE_STEPS = {
+  memory: () => ({ steps: ['Open <b>CoreCHI Practice</b>, scroll to <b>Consecutive</b> and tap <b>Start</b>.',
+    `Listen. At ${GUIDE_UI.pill('Your turn')}, say it in the other language, then tap ${GUIDE_UI.pill('Show the rendering')}.`,
+    `Tap the parts you missed, then ${GUIDE_UI.pill('Next line')}.`], note: 'Three clean in a row: longer. Two misses: shorter. Saved on this phone.' }),
   bodycard: () => ({ steps: ['Open <b>More</b> → <b>3D Body</b> and tap a part, or tap the magnifier and type its name.',
     `Read the English and the Spanish under it. Tap ${GUIDE_UI.pill('EN')} or ${GUIDE_UI.pill('ES')} to hear it.`,
     `Tap ${GUIDE_UI.pill('Open glossary')}, ${GUIDE_UI.pill('Practice this term')} or ${GUIDE_UI.pill('Ask Dr. Smiley')}.`],
@@ -14406,9 +14506,10 @@ const DR_FACE_SEQ = {
    Lively: as above. Focused: the same gestures, smaller and calmer, no
    laughter and no effects. Still: the engine shows one still frame (still)
    as it always has. Only the artwork's own frames are used, and the only
-   movement is the lean and lift of what holds him (never a sideways slide
-   or a stretch). The art has one wink (his left eye), so a wink always
-   tips that way. Effects are short and land on the moment: a quick burst
+   movement is the lean and lift of what holds him (never a sideways slide),
+   plus, for the cheer's and the greet's spring in Lively only, a small
+   squash and stretch of his picture (drSquashKeys). The art has one wink
+   (his left eye), so a wink always tips that way. Effects are short and land on the moment: a quick burst
    at the top of the cheer's spring, a glint as the wink closes, a "?" as
    the thought starts. */
 let drPerfRand = Math.random;
@@ -14440,6 +14541,31 @@ function drPerfMake(beats, extra){
   if(last[1] || last[2]) head.push([Math.round(t) + 260, 0, 0]);
   return Object.assign({ f, head }, brow.length ? { brow } : {}, extra || {});
 }
+/* Squash and stretch, worked out from a sequence's head keys (lift: + is
+   down). A spring up stretches him on the way (tall and narrow), the top is
+   his drawn shape, a crouch or a landing squashes him (short and wide). His
+   volume stays the same, as for a round body (width 1/sqrt(height), the
+   usual rule), and he scales from his shoulders. k is the most it changes
+   his height: DR_SQUASH, Jose's pick of 0 / 4% / 9% from a preview (E3, 2026-10-19). */
+const DR_SQUASH = .04, DR_SQUASH_AT = '50% 90%';
+function drSquashKeys(keys, k){
+  const T = keys[keys.length - 1][0];
+  if(!k || !(T > 0)) return null;
+  const c = x => Math.max(0, Math.min(1, x));
+  const at = (offset, sy, easing) => Object.assign({ offset, transform: `scale(${(1 / Math.sqrt(sy)).toFixed(4)},${sy.toFixed(4)})`, transformOrigin: DR_SQUASH_AT }, easing ? { easing } : {});
+  const kf = [at(0, 1, 'cubic-bezier(.3,0,.3,1)')];
+  let moved = false;
+  for(let i = 1; i < keys.length; i++){
+    const [t0, , y0] = keys[i - 1], [t1, , y1] = keys[i], yn = i + 1 < keys.length ? keys[i + 1][2] : y1;
+    const rise = y0 - y1;
+    if(rise > .9){ kf.push(at((t0 + (t1 - t0) * .45) / T, 1 + k * c(rise / 2.6), 'cubic-bezier(.3,0,.4,1)')); moved = true; }
+    const depth = y1 - Math.min(y0, yn), low = y1 > .3 && y1 >= y0 && y1 >= yn && depth > .7;
+    if(low) moved = true;
+    kf.push(at(t1 / T, low ? 1 - k * c(depth / 2.2) : 1, 'cubic-bezier(.3,0,.3,1)'));
+  }
+  kf[kf.length - 1] = at(1, 1);
+  return moved ? kf : null;
+}
 const DR_PERF = {
   greet(){
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
@@ -14466,7 +14592,7 @@ const DR_PERF = {
       [['smile2'], j(110), [0, .3]],
       [['smile1'], j(240), [-side * .25, .1]],
       [['rest'], j(380), [0, 0]],
-    ], { still: 'smile', stillMs: 1000 });
+    ], { still: 'smile', stillMs: 1000, squash: DR_SQUASH });
   },
   ack(){
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
@@ -14536,7 +14662,7 @@ const DR_PERF = {
       [['smile'], j(360, .2), [side * .2, -.15]],
       [['smile2', 'smile1'], j(230), [0, 0]],
       [['rest'], j(360), [0, 0]],
-    ], { fx: 'burst', fxAt: 360, still: 'smile', stillMs: 1000 });
+    ], { fx: 'burst', fxAt: 360, still: 'smile', stillMs: 1000, squash: DR_SQUASH });
   },
   wink(){
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14)));
@@ -14779,7 +14905,7 @@ function drSeq(name){
   const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
   const brow = raw.brow || null, browPeak = brow ? (brow.find(b => b[1]) || [0, null])[1] : null;
-  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak };
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak, squash: raw.squash || 0 };
   drSeqCache.set(raw, seq);
   return seq;
 }
@@ -14803,7 +14929,7 @@ class DrAnim{
     this.svg = svg; this.sheet = svg.querySelector('.ds-sheet');
     this.head = o.head || null;
     this.timers = new Set(); this.fx = new Set();
-    this.run = null; this.headAnim = null; this.idle = null; this.g = null; this.dead = false;
+    this.run = null; this.headAnim = null; this.sq = null; this.idle = null; this.g = null; this.dead = false;
     drAnims.add(this); drAnimOf.set(svg, this);
     if(!drSweepTimer) drSweepTimer = setInterval(drSweep, 4000);
   }
@@ -14824,6 +14950,7 @@ class DrAnim{
     this.dead = true;
     this.timers.forEach(t => clearTimeout(t)); this.timers.clear();
     if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    if(this.sq){ this.sq.cancel(); this.sq = null; }
     this.fx.forEach(el => el.remove()); this.fx.clear();
     this.run = null; this.idle = null; this.g = null;
     drAnims.delete(this); drInputSync();
@@ -14892,6 +15019,27 @@ class DrAnim{
       this.headSwap(a);
     }catch(e){}
   }
+  /* Squash and stretch (E3, Jose's pick B, 2026-10-19): on his own picture,
+     not what holds him, so the lean and lift stay as they are. Only for a
+     sequence that asks (squash: cheer and greet, Lively), only from its
+     start, and never where the picture is also what leans (Ask's face). */
+  squashPlay(keys, k, lead){
+    if(!keys || !this.head || this.head === this.svg || !this.svg.animate || drStill() || drMode() !== 'lively') return;
+    const kf = drSquashKeys(keys, k);
+    if(!kf) return;
+    this.squashStop(true);
+    try{ this.sq = this.svg.animate(kf, { duration: keys[keys.length - 1][0], delay: lead }); }catch(e){ this.sq = null; }
+  }
+  // Interrupted: ease back to his drawn shape rather than snap (quick: at once).
+  squashStop(quick){
+    const a = this.sq;
+    if(!a) return;
+    this.sq = null;
+    if(quick || a.playState === 'finished'){ a.cancel(); return; }
+    const now = getComputedStyle(this.svg).transform;
+    a.cancel();
+    if(now && now !== 'none') try{ this.svg.animate([{ transform: now, transformOrigin: DR_SQUASH_AT }, { transform: 'none', transformOrigin: DR_SQUASH_AT }], { duration: 140, easing: 'ease-out' }); }catch(e){}
+  }
   // ---- effects ----
   effect(kind){
     const el = drFaceFx(this.head, kind);
@@ -14941,6 +15089,7 @@ class DrAnim{
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
     if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
     this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.squash && !skip) this.squashPlay(seq.head, seq.squash, lead);
     if(seq.brow){
       // Keys already passed (joining part-way) leave the latest one in force.
       let now;
@@ -14991,6 +15140,7 @@ class DrAnim{
     if(run.gazeTimer) this.clear(run.gazeTimer);
     this.run = null;
     this.svg._browHold = null;
+    this.squashStop();
     this.fadeEffects();
     if(settle) this.settle();
   }
@@ -15292,6 +15442,7 @@ class DrAnim{
     if(this.idle) this.idle.timer = 0;
     this.run = null; this.g = null;
     if(this.headAnim){ this.headAnim.cancel(); this.headAnim = null; }
+    if(this.sq){ this.sq.cancel(); this.sq = null; }
     this.fx.forEach(el => el.remove()); this.fx.clear();
     this.set('rest');
   }
@@ -16866,11 +17017,11 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful quiz bounce wince streak right wrong answer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful squash stretch spring bounce cheer quiz bounce wince streak right wrong answer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help. In a CoreCHI quiz he sits in the dock and reacts to each answer: a little bounce when you're right, a small wince and then a kind smile when you're wrong, a laugh at 3, 5 and 10 right in a row, and a cheer on the first answer of a 3-, 7-, 14- or 30-day streak.</li>
-      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: when he cheers or says hello he crouches and springs, squashing a little as he dips and stretching as he goes up, a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help. In a CoreCHI quiz he sits in the dock and reacts to each answer: a little bounce when you're right, a small wince and then a kind smile when you're wrong, a laugh at 3, 5 and 10 right in a row, and a cheer on the first answer of a 3-, 7-, 14- or 30-day streak.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing, no squash and stretch and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
@@ -17149,8 +17300,20 @@ const GUIDE_TOPICS = [
     </ol>
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
+  { id:'memory', section:'study', k:'memory trainer consecutive span notes note-taking listen render retention short-term memory long lines chunks flag line voice paulina samantha', q:'How does the Memory trainer work?', a:`
+    <p>Practice for consecutive interpreting. The phone reads a line out loud, a provider in English or a patient in Spanish, with the words hidden. You say it in the other language, out loud, then check yourself.</p>
+    <ol>
+      <li>Open <b>CoreCHI Practice</b> and scroll to <b>Consecutive</b>. Tap <b>Start</b> on the Memory trainer.</li>
+      <li>Pick <b>Both ways</b>, <b>To Spanish</b> or <b>To English</b>. Turn <b>Notes</b> on if you want to use your notepad.</li>
+      <li>Tap <b>Start</b> and listen. The ring fills while the line plays.</li>
+      <li>When it says <b>Your turn</b>, say the whole line in the other language. Then tap <b>Show the rendering</b>.</li>
+      <li>The model rendering comes in parts. Tap every part you dropped or changed, then tap <b>Next line</b>.</li>
+    </ol>
+    <p>Three clean lines in a row and the next one is a few words longer. Two misses in a row and it gets shorter. Your <b>span</b> is the longest line you've held clean; lines done with notes count apart from memory only.</p>
+    <p>If a line is wrong or sounds odd, tap <b>Flag this line</b> after the rendering and say why. Flags are read before the lines are changed.</p>
+    <p>Your progress stays on this phone. Nothing is recorded. Near patients, use earbuds.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
-    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It's getting things ready for a memory trainer for consecutive interpreting.</p>
+    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It shows what the <b>Memory trainer</b> can use on your phone, and what it may add later.</p>
     <ol>
       <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
       <li>Do the four steps on the sheet. The phone asks before it uses the microphone.</li>
@@ -17575,6 +17738,8 @@ function render(){
   } else if(activeCategory === 'translate'){
     showTopbar = false;
   } else if(activeCategory === 'practice'){
+    showTopbar = false;
+  } else if(activeCategory === 'memory'){
     showTopbar = false;
   } else if(activeCategory === 'review'){
     showTopbar = false;
@@ -18515,6 +18680,17 @@ function renderContent(){
     return;
   }
 
+  if(activeCategory === 'memory'){
+    // A repaint that would draw the same thing is skipped, so a flag being
+    // typed or the ring mid-line isn't thrown away by chat arriving.
+    const html = renderMemTrainer();
+    if(sameScreen && html === MEM.html && content.querySelector('.mem-card')) return;
+    MEM.html = html;
+    content.innerHTML = html;
+    memAfterPaint(content);
+    return;
+  }
+
   if(activeCategory === 'practice'){
     const motionPrev = practiceMotionKeys(content);
     content.innerHTML = renderPractice();
@@ -18985,6 +19161,7 @@ function setCategory(id, isBack, returnState){
   // (often to "No terms match") with no sign of why.
   if(activeCategory !== id) searchQuery = isBack && returnState ? returnState.query || '' : '';
   closeAllOverlays();
+  if(activeCategory === 'memory' && id !== 'memory') memLeave();
   termRenderLimit = isBack && returnState ? returnState.termRenderLimit || 120 : 120;
   if(!isBack && activeCategory !== id){
     // A repeated destination is still a new visit. Record the screen we
@@ -20121,6 +20298,9 @@ function renderPractice(){
       <span class="sm-count">100</span>
     </button>`;
   html += `</div>`;
+
+  // ---- consecutive: the memory trainer's way in ----
+  html += memEntryHtml();
 
   // ---- this week, across the team ----
   html += renderWeeklyBoard();
@@ -21384,7 +21564,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -21412,8 +21592,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.2337';
-const BUILD_TIME = '2026-10-19 23:37 UTC';
+const BUILD_ID = 'b1020.0816';
+const BUILD_TIME = '2026-10-20 08:16 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -21922,6 +22102,345 @@ function vcCopy(){
 
 function voiceCheckMoreHtml(){
   return `<div class="vc-more"><button class="btn btn-ghost" onclick="voiceCheckOpen()">Voice and mic check</button></div>`;
+}
+
+/* ---------- Memory trainer ----------
+   Step M2 of the memory trainer (docs/PLAN.md, note:
+   docs/features/memory-trainer.md). Consecutive practice: the phone reads a
+   line with the text hidden, you say it in the other language, then the
+   model rendering appears in meaning chunks and you tap the ones you dropped
+   or changed. Three clean lines in a row make the next one longer, two
+   misses in a row make it shorter. Lines: memory/lines.json; under 10 words
+   the False Friends lines are the starters. Progress stays on this phone
+   (ih_memory). Flag this line saves to terminology-meta/memory-flags, read
+   back before the lines are edited (kept in ih_memFlags until it's sent). */
+const MEM_KEY = 'ih_memory', MEM_FLAGS_KEY = 'ih_memFlags';
+const MEM_START = 6, MEM_STEP = 3, MEM_MIN = 4, MEM_MAX = 44;
+const MEM_COLOR = '#7C6A9C';
+const MEM_SETS = { discharge:'Discharge', meds:'Medications', consent:'Consent', ed:'Emergency', ob:'Labor and delivery', peds:'Pediatrics', ff:'False Friends' };
+const MEM_REASONS = ['The Spanish is wrong', 'The English is wrong', 'Split in the wrong place', 'Sounds unnatural', 'The voice says it wrong'];
+const MEM_RING = 2 * Math.PI * 70;   // the ring's circumference (r = 70)
+const ICON_MEM = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7.5 9.5a4.5 4.5 0 1 1 8.2 2.6c-.9 1.2-2.2 1.9-2.2 3.6a2.4 2.4 0 0 1-4.3 1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 9.6a2 2 0 0 1 3.9-.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18.6 5.2a8 8 0 0 1 1.4 4.5M20.9 3a11 11 0 0 1 1.6 6.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const MEM = { p: null, lines: null, loading: null, err: '', stage: 'home', line: null, missed: {}, flagOpen: false, flagged: {},
+  msg: '', run: 0, ringAt: 0, ringMs: 0, html: '' };
+let memUtter = null, memTimer = 0;
+
+function memRead(){
+  let p = null;
+  try{ p = JSON.parse(localStorage.getItem(MEM_KEY) || 'null'); }catch(e){}
+  p = p && typeof p === 'object' ? p : {};
+  return { level: Math.min(MEM_MAX, Math.max(MEM_MIN, +p.level || MEM_START)), clean: +p.clean || 0, miss: +p.miss || 0,
+    notes: !!p.notes, dir: ['both', 'en-es', 'es-en'].includes(p.dir) ? p.dir : 'both',
+    seen: p.seen && typeof p.seen === 'object' ? p.seen : {}, log: Array.isArray(p.log) ? p.log : [],
+    best: p.best && typeof p.best === 'object' ? p.best : {} };
+}
+function memSave(){ try{ localStorage.setItem(MEM_KEY, JSON.stringify(MEM.p)); }catch(e){} }
+function memProg(){ return MEM.p || (MEM.p = memRead()); }
+
+// The False Friends lines, split at their commas when both sides have the
+// same number of pieces (the starters, 3 to 9 words, Spanish to English).
+function memStarters(){
+  const parts = s => { const a = String(s).split(/,\s+/); return a.map((x, i) => i < a.length - 1 ? x + ',' : x); };
+  return (typeof FALSE_FRIENDS !== 'undefined' ? FALSE_FRIENDS : []).filter(f => f.heard && f.truth).map(f => {
+    const a = parts(f.heard), b = parts(f.truth);
+    return { id: 'ff:' + f.es, set: 'ff', dir: 'es-en', words: f.heard.trim().split(/\s+/).length,
+      u: a.length === b.length ? a.map((x, i) => [x, b[i]]) : [[f.heard, f.truth]],
+      note: `“${f.es}” means ${f.means}, not ${f.looks}.`, starter: true };
+  });
+}
+
+function memLoad(){
+  if(MEM.lines) return Promise.resolve(MEM.lines);
+  if(!MEM.loading){
+    MEM.err = '';
+    MEM.loading = fetch('memory/lines.json').then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(d => { MEM.lines = (d && d.lines || []).filter(l => l && l.id && Array.isArray(l.u) && l.u.length && l.words); return MEM.lines; })
+      .catch(e => { MEM.err = String(e && e.message || e); MEM.loading = null; throw e; });
+  }
+  return MEM.loading;
+}
+
+// The next line: within a few words of your level (wider if nothing fits),
+// in the direction you picked, the ones you've heard least first, never the
+// same line twice running.
+function memPick(){
+  const p = memProg(), last = MEM.line && MEM.line.id;
+  const pool = (MEM.lines || []).concat(memStarters()).filter(l => p.dir === 'both' || l.dir === p.dir);
+  if(!pool.length) return null;
+  let band = [];
+  for(let w = 3; !band.length && w <= 45; w += 3) band = pool.filter(l => Math.abs(l.words - p.level) <= w && l.id !== last);
+  if(!band.length) band = pool;
+  const fewest = Math.min(...band.map(l => p.seen[l.id] || 0));
+  const fresh = band.filter(l => (p.seen[l.id] || 0) === fewest);
+  return fresh[Math.floor(Math.random() * fresh.length)];
+}
+
+// Paulina and Samantha by name (the phone's default for a language tag
+// can be a novelty voice); otherwise the closest language match.
+function memVoice(lang){
+  const vs = ('speechSynthesis' in window) ? speechSynthesis.getVoices() : [];
+  const named = vs.find(v => (lang === 'es' ? /paulina/i : /samantha/i).test(v.name));
+  if(named) return named;
+  for(const tag of (lang === 'es' ? ['es-us', 'es-mx', 'es'] : ['en-us', 'en'])){
+    const m = vs.filter(v => vcLang(v).toLowerCase().startsWith(tag));
+    const v = m.find(x => x.default) || m.find(x => x.localService) || m[0];
+    if(v) return v;
+  }
+  return null;
+}
+
+function memSrc(L){ return L.u.map(c => c[0]).join(' '); }
+function memModel(L){ return L.u.map(c => c[1]).join(' '); }
+function memWho(L){ return L.dir === 'en-es' ? 'Provider · English' : (L.set === 'peds' || L.set === 'ob' ? 'Family · Spanish' : 'Patient · Spanish'); }
+function memInto(L){ return L.dir === 'en-es' ? 'Spanish' : 'English'; }
+function memToday(){
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  return memProg().log.filter(x => x.at >= +d).length;
+}
+
+function openMemoryTrainer(){
+  memProg();
+  MEM.stage = 'home'; MEM.msg = '';
+  setCategory('memory');
+  memLoad().then(() => { if(activeCategory === 'memory') renderContent(); }, () => { if(activeCategory === 'memory') renderContent(); });
+  if('speechSynthesis' in window) vcLoadVoices();
+  memFlagsSend();
+}
+
+// Whatever was playing stops when you leave the screen.
+function memLeave(){
+  memUtter = null; clearTimeout(memTimer);
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  drTaskEnd('memory');
+  MEM.stage = 'home'; MEM.flagOpen = false; MEM.msg = '';
+}
+
+function memSetDir(d){ memProg().dir = d; memSave(); renderContent(); }
+function memSetNotes(on){ memProg().notes = !!on; memSave(); renderContent(); }
+
+function memStart(){
+  if(!MEM.lines){ memLoad().then(() => renderContent(), () => renderContent()); return; }
+  MEM.run = 0; MEM.msg = '';
+  memPlay(memPick());
+}
+
+// Called straight from the tap: iOS only lets a page speak from inside one.
+function memPlay(L){
+  if(!L){ showToast('No lines to practise in that direction.'); return; }
+  MEM.line = L; MEM.missed = {}; MEM.flagOpen = false; MEM.run++;
+  clearTimeout(memTimer);
+  if(!('speechSynthesis' in window)){ MEM.stage = 'read'; renderContent(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(memSrc(L)), lang = L.dir === 'en-es' ? 'en' : 'es';
+  const v = memVoice(lang);
+  if(v){ try{ u.voice = v; }catch(e){} u.lang = vcLang(v); } else u.lang = lang === 'es' ? 'es-US' : 'en-US';
+  u.rate = 0.92;
+  // About 2.6 words a second at this rate (Jose's phone: 11 words, 4.0 s).
+  MEM.ringMs = Math.round(L.words / 2.6 * 1000) + 400; MEM.ringAt = performance.now();
+  memUtter = u;
+  u.onend = () => { if(memUtter === u) memTurn(); };
+  u.onerror = e => { if(memUtter === u && !/interrupted|canceled/.test(e && e.error || '')) memTurn(); };
+  // If the phone never says it finished, your turn comes anyway.
+  memTimer = setTimeout(() => { if(memUtter === u) memTurn(); }, MEM.ringMs * 2 + 4000);
+  MEM.stage = 'listen';
+  drTask('attentive', { key: 'memory', ms: MEM.ringMs * 2 + 4000, perform: 'listen' });
+  renderContent();
+  speechSynthesis.speak(u);
+}
+
+function memTurn(){
+  memUtter = null; clearTimeout(memTimer);
+  MEM.stage = 'turn';
+  drTask('processing', { key: 'memory', ms: 90000, perform: 'ponder', keep: true });
+  if(activeCategory === 'memory') renderContent();
+}
+
+function memReveal(){
+  memUtter = null; clearTimeout(memTimer);
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  MEM.stage = 'check';
+  drTaskEnd('memory');
+  renderContent();
+}
+
+function memToggleChunk(i){
+  if(MEM.missed[i]) delete MEM.missed[i]; else MEM.missed[i] = true;
+  const b = document.querySelector(`.mem-chunk[data-i="${i}"]`);
+  if(b) b.setAttribute('aria-pressed', MEM.missed[i] ? 'true' : 'false');
+  const go = document.getElementById('memNext');
+  if(go) go.textContent = memNextLabel();
+}
+function memNextLabel(){
+  const n = Object.keys(MEM.missed).length;
+  return n ? `Next line · ${n} missed` : 'All clean · next line';
+}
+
+// Hear the line again once you've seen the rendering (it doesn't change
+// your score: the marking is already yours).
+function memHearAgain(){
+  if(!MEM.line || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const L = MEM.line, u = new SpeechSynthesisUtterance(memSrc(L)), v = memVoice(L.dir === 'en-es' ? 'en' : 'es');
+  if(v){ try{ u.voice = v; }catch(e){} u.lang = vcLang(v); } else u.lang = L.dir === 'en-es' ? 'en-US' : 'es-US';
+  u.rate = 0.92;
+  speechSynthesis.speak(u);
+}
+
+// Score the line, move the level, then play the next one.
+function memScore(){
+  const p = memProg(), L = MEM.line, miss = Object.keys(MEM.missed).length, kind = p.notes ? 'notes' : 'mem';
+  p.seen[L.id] = (p.seen[L.id] || 0) + 1;
+  p.log.push({ at: Date.now(), id: L.id, w: L.words, n: L.u.length, miss, notes: p.notes });
+  if(p.log.length > 600) p.log = p.log.slice(-600);
+  let moved = 0, best = false;
+  if(!miss){
+    p.clean++; p.miss = 0;
+    if(L.words > (p.best[kind] || 0)){ p.best[kind] = L.words; best = true; }
+    if(p.clean >= 3){ p.level = Math.min(MEM_MAX, Math.max(p.level, L.words) + MEM_STEP); p.clean = 0; moved = 1; }
+  } else {
+    p.miss++; p.clean = 0;
+    if(p.miss >= 2){ p.level = Math.max(MEM_MIN, Math.min(p.level, L.words) - MEM_STEP); p.miss = 0; moved = -1; }
+  }
+  memSave();
+  return { miss, moved, best, words: L.words };
+}
+function memNext(){
+  const r = memScore();
+  MEM.msg = r.moved > 0 ? 'Three clean in a row: this one is longer.'
+    : r.moved < 0 ? 'Two misses in a row: this one is shorter.'
+    : r.best ? `New span: ${r.words} words held clean.` : '';
+  memPlay(memPick());
+  if(r.moved > 0 || r.best) smileyStudy('memory', 1);
+  else if(r.moved < 0) smileyStudy('memory', .3);
+}
+
+function memRetry(){ MEM.err = ''; memLoad().then(() => renderContent(), () => renderContent()); renderContent(); }
+function memStop(){ memLeave(); renderContent(); }
+
+/* Flag this line. Kept on the phone first, then sent; anything unsent is
+   tried again next time the trainer opens. */
+function memFlagsLocal(){ try{ const a = JSON.parse(localStorage.getItem(MEM_FLAGS_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function memFlagsKeep(a){ try{ localStorage.setItem(MEM_FLAGS_KEY, JSON.stringify(a.slice(-60))); }catch(e){} }
+function memFlagOpen(on){ MEM.flagOpen = !!on; renderContent(); if(on) setTimeout(() => { const f = document.querySelector('.mem-flag'); if(f) f.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' }); }, 60); }
+function memFlagReason(btn){ btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }
+function memFlagSave(){
+  const L = MEM.line; if(!L) return;
+  const reasons = [...document.querySelectorAll('.mem-flag-chip[aria-pressed="true"]')].map(b => b.dataset.r);
+  const what = ((document.getElementById('memFlagText') || {}).value || '').trim().slice(0, 600);
+  if(!reasons.length && !what){ showToast('Pick a reason or write what’s wrong.'); return; }
+  const at = Date.now(), key = L.id.replace(/[^\w-]/g, '_') + '_' + at;
+  const entry = { line: L.id, src: memSrc(L), model: memModel(L), reasons, what, by: whoAmI() || '', at, build: BUILD_ID };
+  const a = memFlagsLocal(); a.push({ key, entry, sent: false }); memFlagsKeep(a);
+  MEM.flagged[L.id] = true; MEM.flagOpen = false;
+  renderContent();
+  showToast('Flagged. It gets read before the lines are edited.');
+  memFlagsSend();
+}
+async function memFlagsSend(){
+  if(!memFlagsLocal().some(f => !f.sent)) return;
+  try{ await hubAuthReady; }catch(e){}
+  if(!db) return;
+  for(const f of memFlagsLocal().filter(x => !x.sent)){
+    try{
+      await trackWrite(db.collection('terminology-meta').doc('memory-flags').set({ flags: { [f.key]: f.entry } }, { merge: true }));
+      memFlagsKeep(memFlagsLocal().map(x => x.key === f.key ? { ...x, sent: true } : x));
+    }catch(e){ return; }
+  }
+}
+
+function memRingHtml(kind){
+  const turn = kind === 'turn';
+  return `<div class="mem-ring${turn ? ' is-turn' : ''}" aria-hidden="true">
+    <svg viewBox="0 0 160 160"><circle class="mem-ring-track" cx="80" cy="80" r="70"/>
+      <circle class="mem-ring-arc" cx="80" cy="80" r="70" style="stroke-dasharray:${MEM_RING.toFixed(1)}; stroke-dashoffset:${turn ? 0 : MEM_RING.toFixed(1)}"/></svg>
+    <span class="mem-ring-in">${turn ? `<b>Your turn</b><small>Say it in ${memInto(MEM.line)}</small>` : `${ICON_MEM}<b>Listen</b>`}</span>
+  </div>`;
+}
+
+function renderMemTrainer(){
+  const p = memProg(), kind = p.notes ? 'notes' : 'mem', span = p.best[kind] || 0;
+  let html = `<div class="section-head"><h2>Memory trainer</h2><span class="sub">Consecutive</span></div>`;
+  const L = MEM.line;
+  if(MEM.stage === 'home' || !L){
+    if(!MEM.lines && !MEM.loading && !MEM.err) memLoad().then(() => { if(activeCategory === 'memory') renderContent(); }, () => { if(activeCategory === 'memory') renderContent(); });
+    const ready = !!MEM.lines;
+    const seg = [['both', 'Both ways'], ['en-es', 'To Spanish'], ['es-en', 'To English']];
+    const go = ready ? 'onclick="memStart()"' : MEM.err ? 'onclick="memRetry()"' : 'disabled';
+    html += `<div class="dash-tile mem-card mem-home" style="--dom:${MEM_COLOR}">
+      <p class="mem-lead">The phone reads a line with the words hidden. Say it in the other language, then tap the parts you dropped or changed.</p>
+      <div class="mem-stats">
+        <span><b>${span || 'New'}</b><small>${span ? 'your span, words' : 'no span yet'}</small></span>
+        <span><b>${p.level}</b><small>next line, words</small></span>
+        <span><b>${memToday()}</b><small>lines today</small></span>
+      </div>
+      <div class="mem-seg" role="radiogroup" aria-label="Direction">${seg.map(([k, t]) =>
+        `<button type="button" role="radio" aria-checked="${p.dir === k}" onclick="memSetDir('${k}')">${t}</button>`).join('')}</div>
+      <label class="mem-notes"><input type="checkbox" ${p.notes ? 'checked' : ''} onchange="memSetNotes(this.checked)">
+        <span class="mem-switch" aria-hidden="true"></span>
+        <span><b>Notes</b><small>${p.notes ? 'On: use your notepad. Spans with notes are kept apart.' : 'Off: memory only.'}</small></span></label>
+      <button type="button" class="mastery-go mem-go mem-start" ${go}>${ready ? 'Start' : MEM.err ? 'Try again' : 'Loading lines…'}</button>
+      ${MEM.err ? `<p class="mem-small">Couldn’t load the lines. Check the connection, then tap <b>Try again</b>.</p>` : ''}
+      <p class="mem-small">Nothing is recorded. Near patients, use earbuds.</p>
+    </div>`;
+    return html;
+  }
+  const head = `<div class="mem-top"><span class="mem-chip">${escapeHtml(MEM_SETS[L.set] || L.set)}</span><span class="mem-who">${escapeHtml(memWho(L))}</span>
+    <span class="mem-len">${L.words} words</span></div>`;
+  const msg = MEM.msg ? `<p class="mem-msg" role="status">${escapeHtml(MEM.msg)}</p>` : '';
+  html += `<div class="dash-tile mem-card mem-stage is-${MEM.stage}" style="--dom:${MEM_COLOR}">${head}${msg}`;
+  if(MEM.stage === 'listen'){
+    html += memRingHtml('listen') + `<p class="mem-hint">${p.notes ? 'Take your notes.' : 'Hold it in your head.'}</p>
+      <div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memStop()">Stop</button></div>`;
+  } else if(MEM.stage === 'read'){
+    html += `<p class="mem-read" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(memSrc(L))}</p>
+      <p class="mem-hint">This phone can’t read aloud. Read it once, then tap Hide.</p>
+      <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memTurn()">Hide, my turn</button></div>`;
+  } else if(MEM.stage === 'turn'){
+    html += memRingHtml('turn') + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
+      <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memReveal()">Show the rendering</button></div>`;
+  } else {
+    const flagged = MEM.flagged[L.id];
+    html += `<p class="mem-hint">Tap any part you dropped or changed.</p>
+      <div class="mem-chunks" lang="${L.dir === 'en-es' ? 'es' : 'en'}">${L.u.map((c, i) =>
+        `<button type="button" class="mem-chunk" data-i="${i}" aria-pressed="${MEM.missed[i] ? 'true' : 'false'}" onclick="memToggleChunk(${i})">
+          <span class="mem-model">${escapeHtml(c[1])}</span><span class="mem-srcx" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(c[0])}</span></button>`).join('')}</div>
+      ${L.note ? `<p class="mem-watch"><b>Watch</b> ${escapeHtml(L.note)}</p>` : ''}
+      <div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memHearAgain()">Hear it again</button>
+        <button type="button" class="mastery-go mem-go" id="memNext" onclick="memNext()">${memNextLabel()}</button></div>
+      <div class="mem-foot"><button type="button" class="link-btn mem-flag-btn" onclick="memFlagOpen(${MEM.flagOpen ? 'false' : 'true'})" ${flagged ? 'disabled' : ''}>${flagged ? 'Flagged, thanks' : 'Flag this line'}</button>
+        <button type="button" class="link-btn" onclick="memStop()">Stop</button></div>
+      ${MEM.flagOpen && !flagged ? `<div class="mem-flag"><p>What’s wrong with this line?</p>
+        <div class="mem-flag-chips">${MEM_REASONS.map(r => `<button type="button" class="mem-flag-chip" data-r="${escapeAttr(r)}" aria-pressed="false" onclick="memFlagReason(this)">${escapeHtml(r)}</button>`).join('')}</div>
+        <textarea id="memFlagText" rows="2" maxlength="600" placeholder="Say what it should be (optional)"></textarea>
+        <div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memFlagOpen(false)">Cancel</button><button type="button" class="btn btn-primary" onclick="memFlagSave()">Send flag</button></div></div>` : ''}`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+// After a paint: the ring picks up where the voice is (a repaint for some
+// other reason mustn't restart it), then runs to full in the time left.
+function memAfterPaint(root){
+  const arc = MEM.stage === 'listen' && root.querySelector('.mem-ring-arc');
+  if(!arc) return;
+  const left = Math.max(0, MEM.ringMs - (performance.now() - MEM.ringAt)), done = 1 - left / MEM.ringMs;
+  arc.style.strokeDashoffset = (MEM_RING * (1 - done)).toFixed(1);
+  if(reducedMotion() || !left) return;
+  arc.getBoundingClientRect();
+  arc.style.transition = `stroke-dashoffset ${Math.round(left)}ms linear`;
+  arc.style.strokeDashoffset = '0';
+}
+
+// The Practice screen's way in.
+function memEntryHtml(){
+  const p = memProg(), span = p.best[p.notes ? 'notes' : 'mem'] || 0;
+  return `<div class="section-head"><h2>Consecutive</h2><span class="sub">memory trainer</span></div>
+    <div class="dash-tile mem-entry dash-in" data-motion="memory" data-sig="${span}" style="--dom:${MEM_COLOR}; --i:0">
+      <span class="mem-entry-icon">${ICON_MEM}</span>
+      <span class="mem-entry-text"><b>Memory trainer</b><span>Hear a line, say it in the other language, tap what you dropped.</span></span>
+      <span class="mem-entry-span"><b>${span || 'New'}</b><small>${span ? 'span' : ''}</small></span>
+      <button type="button" class="mastery-go mem-go" onclick="openMemoryTrainer()">Start</button>
+    </div>`;
 }
 
 /* The hero photo is graded to the light outside, on the device's own clock.

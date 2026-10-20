@@ -104,8 +104,12 @@ for a name: `fitWave` in `home-polish.js` shrinks a name too wide for its
 line instead.
 
 **Dr. Smiley's gestures use only his drawn frames, a tilt and a lift.** Never
-slide his picture sideways to fake a head turn, and never squash or stretch it
-to fake a bounce. A gesture the art can't draw needs new frames, not a trick.
+slide his picture sideways to fake a head turn. The one squash and stretch is
+Jose's pick from a preview (E3, 2026-10-19): only the cheer's and the greet's
+spring, Lively only, at most 4% of his height, on his picture and never on what
+holds him (`drSquashKeys`, `DR_SQUASH` in `index.html`). Don't add it anywhere
+else or make it bigger without showing Jose first. A gesture the art can't draw
+needs new frames, not a trick.
 His five performances (`DR_PERF` in `index.html`) are built fresh each play,
 with their own calmer Focused versions; new gestures go there.
 
