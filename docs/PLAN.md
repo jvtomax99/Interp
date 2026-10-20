@@ -90,7 +90,8 @@ M0. **Voice and mic check** (#60, merged). Installed-app results in the
    English and Spanish, waiting for "done" before Copy.
 M1. **Lines** (#69, merged): `memory/lines.json`, 60 lines approved by Jose
    without a line-by-line read (see the note); the trainer flags mistakes.
-M2. **The trainer.** Screen under Practice, playback with the text
+M2. **The trainer** (this PR; built as in the note's M2 section; flags go
+   to `terminology-meta/memory-flags`, Jose's pick). Screen under Practice, playback with the text
    hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
    Dr. Smiley's listening/thinking states, progress in `localStorage`
    only, notes toggle, a **Flag this line** button (saves line id + what's
