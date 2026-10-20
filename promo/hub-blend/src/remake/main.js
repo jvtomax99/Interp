@@ -26,7 +26,7 @@ const DURATION = +root.dataset.duration;
    chooses, on a short first frame that sets the place (?first=sign or ?first=arrive, previews
    only). Everything after it keeps its own clock (t = time - OPEN). */
 const FIRST = new URLSearchParams(location.search).get("first") || "sign"; // Jose: "2 is the right direction"
-const TITLE = new URLSearchParams(location.search).get("title") || "champagne"; // the name's lettering, while he picks
+const TITLE = new URLSearchParams(location.search).get("title") || "glass-brick"; // Jose's pick // the name's lettering, while he picks
 const OPEN = FIRST === "none" ? 0 : 2.5;
 
 const C = { navy0: 0x03061a, navy1: 0x0b1640, navy2: 0x1a3a96, cyan: 0x3fc6ee, red: 0xf0436a, white: 0xffffff };

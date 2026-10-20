@@ -195,6 +195,12 @@ distinct on screen.
    and without the photos: every caption 13.4:1 or better (AAA is 7). First
    frame: straight on the hook, or 1.5 s "sign" (the entrance) or "arrive"
    (the aerial) via `?first=`, previews in out/first-*.mp4, Jose to pick.
+   First frame, settled (2026-10-20): 2.5 s walking up to the entrance
+   (two layers of the photo, the ground passing faster, a step per beat,
+   light at the doors), the name on the app's frosted glass card in the
+   building's own colours: brick card, cream lettering, sky-blue underline
+   ("glass-brick", sampled from the photo). Jose chose doors-only (no
+   interior photos). 42 s; music v11 0-38.5 s into its ending.
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.
