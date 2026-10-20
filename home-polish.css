@@ -1,10 +1,6 @@
 /* Approved mobile preview, applied to the real home screen and its folders.
    Existing feature pages retain their layout; colors use the app's theme tokens. */
 .main.home-layout{--home-inset:48px;}
-#content.is-home .home-greeting{
-  min-height:220px;gap:0;padding:17px var(--home-inset) 39px;
-  background:transparent;align-items:flex-start;
-}
 /* Retain the original curved photo/scrim masks so the page rises softly
    behind Search. A transparent hero lets the same page color show through. */
 #content.is-home .home-greeting-photo{filter:brightness(1.08);}
@@ -12,14 +8,6 @@
 #content.is-home .home-greeting-scrim{
   background:linear-gradient(90deg,#0c28486b 0%,#1438561f 57%,#12345105 100%),
              linear-gradient(0deg,#0b2b4538,transparent 48%);
-}
-#content.is-home .home-greeting-text{
-  width:min(310px,100%);max-width:none;margin-top:0;padding:11px 15px 12px;
-  border:1px solid #e2f6ff69;border-radius:21px;
-  background:linear-gradient(125deg,#254e6eaf,#24466572);
-  -webkit-backdrop-filter:blur(9px) saturate(1.15);backdrop-filter:blur(9px) saturate(1.15);
-  box-shadow:inset 0 1px 0 #ffffff26,inset 0 -1px 0 #0b24332b,0 9px 22px -14px #051b3499;
-  color:#fff;text-shadow:none;
 }
 #content.is-home .home-greeting-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 9px;}
 #content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;line-height:1.3;letter-spacing:.1em;color:#e9f7ff;margin:0;}
@@ -480,7 +468,6 @@
 
      These three numbers -- height, position-Y and the dome below -- are one
      setting. Changing any one alone breaks the other two. */
-  #content.is-home .home-greeting{min-height:280px;margin:0 calc(-1 * var(--home-inset));padding:14px 16px 39px;}
   #content.is-home .home-greeting-photo-drift{background-position:69% 76%;}
   /* What makes the curve VISIBLE is not where the 50%-alpha line sits -- it
      is whether the dissolve COMPLETES in view and by how much that finish
@@ -531,7 +518,6 @@
             mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 58%, rgba(0,0,0,0.55) 76%, rgba(0,0,0,0.9) 88%, #000 96%);
   }
-  #content.is-home .home-greeting-text{width:min(278px,calc(100% - 36px));}
   #content.is-home .home-rail{
     grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:calc((100% - 22px)/2.14);
     gap:11px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
@@ -587,7 +573,6 @@
 }
 @media(max-width:365px){
   .main.home-layout{--home-inset:13px;}
-  #content.is-home .home-greeting-text{padding-left:12px;padding-right:12px;}
   #content.is-home .home-greeting-eyebrow{letter-spacing:.05em;}
   #content.is-home .qa-grid{gap:5px;}
   #content.is-home .qa-tile-label{font-size:11px;}
@@ -617,10 +602,6 @@
    is worse than showing no quote. It is also unnecessary: HOME_QUOTES is
    filtered to 60 characters, so two lines is already the ceiling. */
 @media(max-width:819px){
-  #content.is-home .home-greeting-text{
-    width:min(234px,calc(100% - 36px));
-    padding:9px 12px 10px; border-radius:18px;
-  }
   /* The wave keeps a 44px hit area while the glyph inside shrinks with the
      name. A first pass took the whole button to 34px, which measured 36px in
      the row -- under the 44px minimum, on the one control in this banner that
@@ -802,7 +783,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    line, never below 1. His column widens to match; the scale pivots where
    his sway does (50% 85%, smileySway in index.html), and translate puts
    his centre back on the name's centre line. */
-#content.is-home .home-greeting-text{--hw-size:1.5;--hw-k:var(--hw-size);}
 #content.is-home .home-wave-icon{justify-self:center;scale:var(--hw-k);transform-origin:50% 85%;translate:0 calc(22.4px * (var(--hw-k) - 1));}
 #content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:64px;height:64px;flex:none;margin:-6px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
 #content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
@@ -841,22 +821,25 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 /* Keep the hand hidden until its decoded, synchronized entrance is ready. */
 #content.is-home .home-wave-pending .home-wave-pin{opacity:0;}
 
-/* Approved Panorama: open photograph, spacious greeting, and readable shading. */
-#content.is-home .home-greeting{
-  min-height:330px;padding:21px var(--home-inset) 55px;
-}
-#content.is-home .home-greeting-text{
-  width:min(560px,100%);max-width:100%;padding:0;margin:0;
-  background:transparent;border:0;border-radius:0;box-shadow:none;
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-}
+/* ---------- The banner, in one place (docs/PLAN.md, Home styles in layers) ----------
+   The Approved Panorama: open photograph, spacious greeting, readable
+   shading. The banner's box and its side margins per width live here; its
+   bottom padding, the sign's band, stays with the photo rules at the end
+   of the file ("Hello banner photo: tuned per mode"), which set it per
+   mode from the photo's width. The old layers (220/280/650px minimum
+   heights, a clamp height, the first paddings) are gone. */
+#content.is-home .home-greeting{min-height:330px;padding:21px var(--home-inset) 55px;gap:0;align-items:flex-start;background:transparent;}
+@media (max-width:819px){#content.is-home .home-greeting{margin:0 calc(-1 * var(--home-inset));}}
+@media (max-width:900px){#content.is-home .home-greeting{padding:21px 25px 55px;}}
+@media (min-width:820px) and (max-width:900px){#content.is-home .home-greeting{margin:-26px calc(-1 * var(--home-inset)) 0;}}
+@media (max-width:365px){#content.is-home .home-greeting{padding-left:20px;padding-right:20px;}}
+@media (min-width:901px){#content.is-home .home-greeting{margin-left:calc(-1 * var(--home-inset));margin-right:calc(-1 * var(--home-inset));}}
 #content.is-home .home-greeting-scrim{
   background:linear-gradient(180deg,#0b293145 0%,#0c253c20 18%,#0c2c4ac9 56%,#102f4aeb 80%,transparent 100%);
 }
 /* 50px clears his badge at size 1; it hangs 67px below his centre, so a
    bigger him moves the quote down by exactly the extra drop. */
 @media(max-width:900px){
-  #content.is-home .home-greeting{padding:21px 25px 55px;}
   #content.is-home .home-greeting-photo-drift{background-position:30% calc(76% - 48px);}
 }
 /* 820-900px (a tablet, a phone turned sideways): still the phone layout,
@@ -867,10 +850,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    exactly the padding, as every other width does. */
 @media(min-width:820px) and (max-width:900px){
   .main.home-layout{--home-inset:26px;}
-  #content.is-home .home-greeting{margin:-26px calc(-1 * var(--home-inset)) 0;}
-}
-@media(max-width:365px){
-  #content.is-home .home-greeting{padding-left:20px;padding-right:20px;}
 }
 /* Keep the desktop composition and raise its reading size. Phone rules stay as is. */
 @media (min-width:901px){
@@ -878,7 +857,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   /* Give the portrait photo the vertical space it has in the narrow view.
      Keep its scale: the added height reveals blossoms, pole and wayfinding
      sign instead of shrinking the sign to squeeze everything into a strip. */
-  #content.is-home .home-greeting{min-height:650px;}
   #content.is-home .home-greeting-photo-drift{background-position:69% calc(100% - 95px);}
   #content.is-home .home-greeting-photo{
     -webkit-mask-image:radial-gradient(115% 20% at 50% 101%,
@@ -1152,10 +1130,6 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
    tools below it. It is now sized to its content and framed on the blossoms,
    the way the phone shows them; Search and the tools sit in the first view. */
 @media (min-width:901px){
-  #content.is-home .home-greeting{
-    min-height:0;height:clamp(340px,44vh,430px);
-    margin-left:calc(-1 * var(--home-inset));margin-right:calc(-1 * var(--home-inset));
-  }
   #content.is-home .home-greeting-photo-drift{background-position:64% 36%;}
   /* 46px, not less: the Ask badge swings below his face and must clear it. */
   #content.is-home .home-search{height:54px;font-size:16px;}
@@ -1378,17 +1352,22 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    px) are gone; only the winners are kept. */
 #content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));grid-template-rows:var(--hw-line) auto;gap:0;align-items:center;min-height:52px;margin-top:9px;position:relative;}
 @media (min-width:901px){#content.is-home .home-greeting-name-row{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}}
-/* --hw-line: the name's line, as tall as a full-size name (font size x 1.18),
-   so a long name in the smaller face, or one fitWave shrank, sits on the
-   same baseline and he never moves up. */
-#content.is-home .home-greeting-text{--hw-line:66px;}
+/* ---------- The greeting text block, in one place (docs/PLAN.md, Home styles in layers) ----------
+   The block that holds the eyebrow, the name row and the quote. Once a
+   frosted card (border, blur, shadow); the "Approved Panorama" opened it
+   up, so what is left is the box reset, the width and the colour, and
+   Dr. Smiley's numbers: --hw-size/--hw-k his size on Home (1.5), --hw-line
+   the name's line, as tall as a full-size name (font size x 1.18) so a
+   long name in the smaller face, or one fitWave shrank, sits on the same
+   baseline and he never moves up, and --hw-left how far in from the right
+   edge he stands (Jose picked B, 48px: clear of the lamp post, still at
+   the side; his Ask badge, lanyard and thought cloud follow him). The old
+   card widths (310/278/234px), paddings and radii are gone. */
+#content.is-home .home-greeting-text{width:min(560px,100%);max-width:100%;padding:0;border:0;border-radius:0;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;color:#fff;text-shadow:none;margin:0;
+  --hw-size:1.5;--hw-k:var(--hw-size);--hw-line:66px;--hw-left:48px;}
 @media (max-width:365px){#content.is-home .home-greeting-text{--hw-line:59px;}}
 @media (min-width:901px){#content.is-home .home-greeting-text{--hw-line:95px;}}
 #content.is-home .home-wave-icon{grid-column:2;grid-row:2;margin:0 0 -6px;}
-/* --hw-left: how far in from the right edge he stands (Jose picked B, 48px:
-   clear of the lamp post, still at the side). His Ask badge, lanyard and
-   thought cloud all follow him. */
-#content.is-home .home-greeting-text{--hw-left:48px;}
 #content.is-home .home-wave-icon{left:calc(-1 * var(--hw-left,0px));}
 /* A computer has the width and not the height: the name and he share one
    line, he at its right end (the same place for every name; the column is
