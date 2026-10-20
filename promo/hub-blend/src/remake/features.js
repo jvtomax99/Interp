@@ -6,6 +6,10 @@
 //   translate   After Effects mascot: Dr. Smiley types, the glossary answer rises first, the AI card second
 //   physician   andremass chrome: Dr. Elena Marin's card turns like a solid slab, her terms fan out
 //   falsefriends After Effects mascot: Dr. Smiley lands on "constipado" and it flips over red
+//   drills      Slate lyric: "Fue un ingreso de urgencia." drops word by word, the trap word cracks
+//   cert        motionloved dashboard: bars grow, 145 counts up, Dr. Smiley climbs the bars like stairs
+//   team        Slate layers: chat bubbles stack in depth, "Lavado del port" comes forward
+//   ask         After Effects mascot: Dr. Smiley steps out of the screen, his briefing card rises behind him
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { createSmiley, MOVES } from "../smiley.js";
@@ -17,6 +21,10 @@ export const FEATURES = [
   { g: "translate", a: "Glossary first.", b: "AI second." },
   { g: "physician", a: "Ready for", b: "every physician." },
   { g: "falsefriends", a: "101 false friends.", b: "Flagged." },
+  { g: "drills", a: "Daily drills.", b: "Sharp skills." },
+  { g: "cert", a: "National certification.", b: "Prep built in." },
+  { g: "team", a: "One team.", b: "One channel." },
+  { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley." },
 ];
 export const FEATURE_LEN = 2.5;
 
@@ -80,7 +88,7 @@ async function phoneScreen(state) {
   return { group, layers, lift, meta };
 }
 
-export async function buildFeatures(scene, groups, { label } = {}) {
+export async function buildFeatures(scene, groups, { word, label } = {}) {
   const Z0 = -58, STEP = 12;
   const shots = {};
   for (const [i, f] of FEATURES.entries()) {
@@ -132,6 +140,53 @@ export async function buildFeatures(scene, groups, { label } = {}) {
   const smiley = await createSmiley({ root: "assets/drsmiley/" });
   smiley.group.scale.setScalar(0.9);
   scene.add(smiley.group);
+  // nothing of him shows below the glass, so he can rise out of a screen (Ask)
+  const glassClip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -(TOP - 0.004))];
+  smiley.group.traverse((o) => { if (o.material) o.material.clippingPlanes = glassClip; });
+  const holeRing = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.47, 96), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, toneMapped: false, side: THREE.DoubleSide }));
+  const holeHalo = new THREE.Mesh(new THREE.RingGeometry(0.47, 0.85, 96), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, opacity: 0.25, toneMapped: false, depthWrite: false }));
+  for (const r of [holeRing, holeHalo]) { r.rotation.x = -Math.PI / 2; r.position.set(-0.55, TOP + 0.006, 2.35); groups.ask.add(r); }
+
+  // ---- drills: the heard line as thick words over the sheet; "ingreso" cracks in two ----
+  // two centred lines, laid out from each word's real width
+  const DSIZE = 0.34, GAP = 0.13;
+  const DRILL = [["Fue", 0], ["un", 0], ["ingreso", 0], ["de", 1], ["urgencia.", 1]].map(([w, line]) => ({ w, line, width: (word(w, { fit: 99, maxSize: DSIZE }).geometry.userData.w) * DSIZE }));
+  for (const line of [0, 1]) {
+    const ws = DRILL.filter((d) => d.line === line), total = ws.reduce((a, d) => a + d.width, 0) + GAP * (ws.length - 1);
+    let x = -total / 2;
+    for (const d of ws) { d.x = x + d.width / 2; x += d.width + GAP; d.y = line ? 1.0 : 1.55; }
+  }
+  const drillWords = DRILL.map(({ w, x, y }) => {
+    const g = new THREE.Group();
+    if (w === "ingreso") {
+      // the trap word is two pieces set side by side ("ingr" + "eso"), so it can crack apart cleanly
+      const L = word("ingr", { fit: 99, maxSize: DSIZE, face: "red" }), R = word("eso", { fit: 99, maxSize: DSIZE, face: "red" });
+      const wl = L.geometry.userData.w * DSIZE, wr = R.geometry.userData.w * DSIZE, tot = wl + wr + 0.012;
+      L.position.x = -tot / 2 + wl / 2; R.position.x = tot / 2 - wr / 2;
+      L.userData.side = -1; R.userData.side = 1; L.userData.x = L.position.x; R.userData.x = R.position.x;
+      g.add(L, R);
+    } else g.add(word(w, { fit: 99, maxSize: DSIZE }));
+    g.position.set(x, y, 0.9);
+    g.userData.home = g.position.clone();
+    groups.drills.add(g);
+    return g;
+  });
+  // ---- cert: bars like stairs, and the 145 counter ----
+  const BARS = [0.25, 0.42, 0.6, 0.8, 1.0];
+  const barMat = new THREE.MeshStandardMaterial({ color: 0x7fdcf7, emissive: 0x3fc6ee, emissiveIntensity: 0.35, roughness: 0.25, metalness: 0.2 });
+  const bars = BARS.map((h, i) => {
+    const b = new THREE.Mesh(new RoundedBoxGeometry(0.42, 1, 0.42, 3, 0.05), barMat);
+    b.userData.h = h; b.userData.x = -1.15 + i * 0.52;
+    b.castShadow = true;
+    groups.cert.add(b);
+    return b;
+  });
+  const counter = new THREE.Group();
+  counter.position.set(0.55, 2.05, 0.6);
+  groups.cert.add(counter);
+  const qLabel = label ? label("QUESTIONS") : new THREE.Group();
+  qLabel.position.set(0.55, 1.72, 0.6);
+  groups.cert.add(qLabel);
 
   // ---------- each shot as a function of u = seconds into it ----------
   const play = {
@@ -203,6 +258,71 @@ export async function buildFeatures(scene, groups, { label } = {}) {
       card.mesh.visible = flip < 0.5;
       back.visible = flip >= 0.5;
     },
+    drills(u, S) {
+      S.lift("sheet", 0.04);
+      S.lift("title", 0.1 * outBack(prog(u, 0.0, 0.3)));
+      drillWords.forEach((g, i) => {
+        const t0 = 0.12 + i * 0.17, p = prog(u, t0, t0 + 0.32), e = outBack(p, 1.8);
+        g.visible = p > 0;
+        g.position.set(g.userData.home.x, g.userData.home.y + (1 - e) * 1.6, g.userData.home.z);
+        g.rotation.x = (1 - outExpo(p)) * 1.2;
+        g.scale.setScalar(Math.max(0.001, 0.5 + 0.5 * outExpo(p)));
+      });
+      // the trap word cracks on the beat after it lands
+      const c = outExpo(prog(u, 1.05, 1.4));
+      const ing = drillWords[2];
+      ing.children.forEach((m) => { const sd = m.userData.side; m.position.set(m.userData.x + sd * 0.1 * c, -0.1 * c * c, sd * 0.05 * c); m.rotation.z = -sd * 0.2 * c; });
+      const p = outBack(prog(u, 1.45, 1.95), 1.5);
+      S.lift("proof", 0.3 * p, 0.35 * p);
+    },
+    cert(u, S) {
+      S.lift("proof", 0.25 * outBack(prog(u, 0.1, 0.45)), 0.3 * prog(u, 0.1, 0.45));
+      S.lift("hud", 0.12 * outBack(prog(u, 0.2, 0.5)));
+      bars.forEach((b, i) => {
+        const g = outBack(prog(u, 0.15 + i * 0.08, 0.6 + i * 0.08), 1.3);
+        const h = Math.max(0.001, b.userData.h * g);
+        b.scale.y = h;
+        b.position.set(b.userData.x, TOP + h / 2, 1.6);
+      });
+      // 0 to 145, in fives, then the exact number
+      const n = Math.round(145 * outCubic(prog(u, 0.25, 1.15)) / 5) * 5;
+      const txt = String(u >= 1.15 ? 145 : Math.min(145, n));
+      if (counter.userData.txt !== txt) { counter.clear(); counter.add(word(txt, { fit: 2, maxSize: 0.62 })); counter.userData.txt = txt; }
+      counter.visible = qLabel.visible = u > 0.2;
+      if (qLabel.material) qLabel.material.opacity = outCubic(prog(u, 0.3, 0.6));
+      // Dr. Smiley climbs: a hop to each of the first four bar tops
+      smiley.group.visible = true;
+      const steps = [0.9, 1.15, 1.4, 1.65, 1.9];
+      let k = steps.findIndex((s) => u < s); if (k < 0) k = steps.length;
+      const at = (j) => j < 0 ? new THREE.Vector3(-1.75, TOP, 1.6) : new THREE.Vector3(bars[j].userData.x, TOP + bars[j].userData.h, 1.6);
+      const from = at(k - 2), to = at(Math.min(k - 1, bars.length - 1));
+      const a = k === 0 ? 0 : prog(u, steps[k - 1], steps[k - 1] + 0.25);
+      const pos = k === 0 ? at(-1) : from.clone().lerp(to, a);
+      smiley.group.position.copy(S.group.parent.position).add(pos);
+      smiley.group.rotation.y = 0.3;
+      smiley.pose(k === 0 ? MOVES.land(1) : a < 1 ? MOVES.hop(a) : { ...MOVES.land(prog(u, steps[k - 1] + 0.25, steps[k - 1] + 0.5)), face: k >= 5 ? "laugh" : "smile", brows: "glad" });
+    },
+    team(u, S) {
+      S.lift("channels", 0.1 * outBack(prog(u, 0.05, 0.35)));
+      S.lift("msg1", 0.16 * outBack(prog(u, 0.2, 0.55), 1.4), 0.12);
+      S.lift("msg2", 0.24 * outBack(prog(u, 0.35, 0.7), 1.4), 0.15);
+      S.lift("input", 0.08 * outBack(prog(u, 0.5, 0.8)));
+      const p = outBack(prog(u, 0.9, 1.45), 1.5);
+      S.lift("proof", 0.42 * p, 0.42 * p);
+      const L = S.layers.proof; L.pivot.position.x += 0.35 * p; // into the middle as it comes forward
+    },
+    ask(u, S) {
+      smiley.group.visible = true;
+      smiley.group.position.copy(S.group.parent.position).add(new THREE.Vector3(-0.55, TOP, 2.35));
+      smiley.group.rotation.y = 0.2;
+      const r = prog(u, 0.1, 1.2);
+      smiley.pose(u < 1.6 ? MOVES.stepOut(r) : MOVES.wave(prog(u, 1.6, 2.5)));
+      holeRing.material.opacity = Math.sin(Math.PI * Math.min(1, prog(u, 0.0, 1.5))) * 0.95;
+      holeHalo.material.opacity = holeRing.material.opacity * 0.3;
+      const p = outBack(prog(u, 0.75, 1.3), 1.4);
+      S.lift("proof", 0.3 * p, 0.38 * p);
+      S.lift("input", 0.08 * outBack(prog(u, 0.2, 0.5)));
+    },
   };
 
   // cameras: low, close, always moving. [from pos, to pos, from look, to look, focus point]
@@ -212,6 +332,10 @@ export async function buildFeatures(scene, groups, { label } = {}) {
     translate: [[1.1, 2.9, 7.2], [0.1, 3.6, 7.0], [-0.2, 0.35, 0.0], [0, 0.4, 0.6], [0, 0.6, 1.4]],
     physician: [[-1.0, 3.2, 5.0], [0.6, 3.5, 4.4], [0, 0.6, -1.5], [0, 0.7, -1.0], [0, 0.9, -1.6]],
     falsefriends: [[1.3, 3.0, 7.6], [0.3, 3.7, 7.6], [-0.2, 0.4, 1.2], [0, 0.4, 1.0], [0, 0.6, 1.8]],
+    drills: [[-0.9, 2.3, 7.2], [0.3, 2.6, 6.6], [0, 0.9, 0.5], [0, 0.95, 0.6], [0, 1.2, 0.9]],
+    cert: [[1.4, 2.2, 6.6], [-0.2, 2.6, 6.0], [-0.2, 0.9, 0.6], [0, 1.0, 0.8], [0, 1.0, 1.4]],
+    team: [[1.1, 3.0, 7.0], [-0.1, 3.4, 6.6], [0, 0.35, 0.0], [0, 0.4, -0.4], [0, 0.6, -0.8]],
+    ask: [[0.9, 2.4, 7.0], [-0.2, 2.9, 6.4], [-0.2, 0.7, 0.8], [0, 0.6, 0.6], [-0.4, 0.8, 2.3]],
   };
   function view(g, u) {
     const c = CAMS[g], e = inOutSine(clamp(u / FEATURE_LEN)), o = groups[g].position;

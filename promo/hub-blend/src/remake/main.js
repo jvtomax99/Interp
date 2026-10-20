@@ -13,6 +13,7 @@ import { OutputPass } from "../../vendor/addons/postprocessing/OutputPass.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
 import { buildFeatures, FEATURES, FEATURE_LEN } from "./features.js";
+import { buildEnd } from "./end.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine } from "../util.js";
 
 const root = document.getElementById("root");
@@ -32,6 +33,8 @@ const SHOTS = [
   [7.5, 9.5, "logo"],
   // features 1-5 (features.js), 2.5 s each
   ...FEATURES.map((f, i) => [9.5 + i * FEATURE_LEN, 9.5 + (i + 1) * FEATURE_LEN, f.g]),
+  // the end card (end.js)
+  [9.5 + FEATURES.length * FEATURE_LEN, DURATION, "end"],
 ];
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
 
@@ -50,6 +53,7 @@ async function build() {
   renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.localClippingEnabled = true;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(C.navy0);
@@ -241,7 +245,12 @@ async function build() {
   logo.add(sub);
 
   // ---------- features 1-5 ----------
-  const feat = await buildFeatures(scene, groups);
+  const feat = await buildFeatures(scene, groups, { word, label });
+  const END_AT = 9.5 + FEATURES.length * FEATURE_LEN;
+  groups.end = new THREE.Group();
+  groups.end.position.set(0, 0, -58 - FEATURES.length * 12 - 2);
+  scene.add(groups.end);
+  const endCard = await buildEnd(scene, groups.end, { start: END_AT });
 
   // ---------- captions: v11's two lines (white, then navy on a cyan box wiping in) and its progress dashes ----------
   const capFont = Math.round(H * 0.044); // 84 px at 1920: each line box is over 64 px tall
@@ -357,6 +366,7 @@ async function build() {
   const view = (g, t) => {
     const s = SHOTS.find((x) => x[2] === g), p = prog(t, s[0], s[1]);
     if (feat.view && FEATURES.some((f) => f.g === g)) return feat.view(g, t - s[0]);
+    if (g === "end") return endCard.view(t - s[0]);
     const gp = groups[g].position;
     if (g === "logo") {
       const e = inOutSine(p);
@@ -400,6 +410,7 @@ async function build() {
     if (glowing) { tint.color.setHex(glowing); tint.intensity = 6; tint.position.set(g.x, 1.4, g.z + 1.2); }
     spot.intensity = s[2] === "logo" ? 70 : 140;
     if (FEATURES.some((f) => f.g === s[2])) { spot.position.set(g.x - 1.8, 6.5, g.z + 3.5); spot.target.position.set(g.x, 0, g.z + 0.8); spot.intensity = 110; }
+    if (s[2] === "end" || (next && next[2] === "end" && t > s[1] - WHIP)) { spot.intensity = 18; spot.position.set(g.x + 2, 6, g.z + 3); spot.target.position.set(g.x, 0, g.z); }
     return { s, next, i };
   }
 
@@ -411,6 +422,7 @@ async function build() {
     // the incoming shot sits at its start during the fly-through; the current one wins Dr. Smiley
     if (next && t > s[1] - WHIP) feat.update(next[2], 0);
     feat.update(s[2], t - s[0]);
+    if (s[2] === "end" || (next && next[2] === "end")) endCard.update(Math.max(0, t - END_AT));
     captionsAt(t);
     composer.render();
   }

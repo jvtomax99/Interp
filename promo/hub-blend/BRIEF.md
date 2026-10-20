@@ -45,7 +45,7 @@ End: "Interpreter Hub" / "Built here, for our patients." /
 
 ## Shot table
 
-About 32 s, 1080x1920, 30 fps, v11's music re-cut to length, cuts on the
+About 32 s (36 s as built: 9 features at 2.5 s), 1080x1920, 30 fps, v11's music re-cut to length, cuts on the
 beat. Features 2.5 s each (never under 2.3 s).
 
 | # | Shot | Caption | Reference | What happens (proof item in bold) |
@@ -125,7 +125,20 @@ distinct on screen.
    while the caption sits top-left, leaving a dark band; the AI card on
    Translate still crops at the left as it lifts; Dr. Smiley is small
    next to the screens.
-6. Shots 7-11. Draft, contact sheet.
+6. Shots 7-11. Draft, contact sheet. **Done** (2026-10-20): the last
+   four features in `features.js` (the drill line as thick words, "ingreso"
+   cracking as two pieces "ingr" + "eso"; five glowing bars, 145 counting
+   up in fives, Dr. Smiley hopping up the bars; chat bubbles stacking in
+   depth; Dr. Smiley rising out of the Ask screen through a ring of light,
+   his briefing behind him) and `src/remake/end.js` (laptop and phone on a
+   mirror table under a lacquer sheet, the laptop screen a canvas and a
+   RectAreaLight of its own colour; a cyan flash on the first beat sweeps
+   the table, then the end lines arrive). 36 s: 9 features x 2.5 s.
+   Music: `assets/music-remake.m4a`, v11's track 0-32.6 s crossfaded into
+   its 40.9-45 s ending (36.1 s). The 36 s draft renders in about 5 min.
+   Known for step 7: the end card's lines are small at phone size (the
+   laptop screen is landscape inside a portrait frame); the phone in the end
+   card is mostly off frame; the Team shot's lift is subtle.
 7. Check against the rules above, side by side with v11 per feature; fix;
    full render; send with the side-by-side.
 
