@@ -3863,6 +3863,12 @@
   .cp-world img{ width:100%; height:100%; }
   .cp-sh{ opacity:.95; pointer-events:none; }
   .cp-ground{ pointer-events:none; }
+  /* F3 depth: the far world (sky, the town) is its own picture under the campus and slides a little with the page's
+     scroll and with a drag across the scene (campusDepth); drawn 7% larger so its edges never show. A drag's release
+     springs it back. Nothing moves at rest, nothing under reduced motion. */
+  .cp-far{ pointer-events:none; transform:translate(var(--fx, 0px), var(--fy, 0px)) scale(1.07); will-change:transform; }
+  .cp-far.is-settling{ transition:transform .6s var(--spring, cubic-bezier(.34,1.56,.64,1)); }
+  .cp-world.is-dragging{ cursor:grabbing; }
   .cp-bld{ padding:0; margin:0; border:0; background:none; cursor:pointer;
     -webkit-tap-highlight-color:transparent; }
   .cp-bld img{ display:block; pointer-events:none; }
@@ -3968,7 +3974,8 @@
   .cp-go button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
   @media (prefers-reduced-motion: reduce){
-    .cp-lit, .cp-litw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-bay img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
+    .cp-lit, .cp-litw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-bay img{ animation:none !important; }
+    .cp-far{ transform:scale(1.07) !important; transition:none; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
     .cp-sit img:first-child{ opacity:1; } .cp-sit img:last-child{ opacity:0; } .cp-bay img:first-child{ opacity:1 !important; } .cp-bay img:not(:first-child){ opacity:0 !important; }
     .cp-go button{ transition:none; }
   }
@@ -17235,7 +17242,7 @@ const GUIDE_TOPICS = [
 
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Each building's badge shows its exam area and how lit it is. Tap a building or its badge to pick it: its windows all light up, the rest of the campus dims, and a card under the picture names the exam area with its number of questions and its share of the exam. Tap <b>Practise</b> (or the same building again) to start; tap the empty campus or the × to put it back. Dr. Smiley stands by the one worth lighting next, and <b>Play</b> starts what's next. The campus is alive: cars come and go up the drive, a car backs out of the lot and heads for the street, an ambulance pulls in with its lights going and the bay's doors slide open for it, a helicopter lands on the white tower's helipad, people sit on the benches by the street, a flock of birds crosses the sky, the flags wave and the fountain plays. It all pauses while the campus is off screen. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at golden hour, with the drive, its flower bed, the fountain and the buildings around it; the town behind shifts a little as you scroll, or when you drag a finger across the scene. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Each building's badge shows its exam area and how lit it is. Tap a building or its badge to pick it: its windows all light up, the rest of the campus dims, and a card under the picture names the exam area with its number of questions and its share of the exam. Tap <b>Practise</b> (or the same building again) to start; tap the empty campus or the × to put it back. Dr. Smiley stands by the one worth lighting next, and <b>Play</b> starts what's next. The campus is alive: cars come and go up the drive, a car backs out of the lot and heads for the street, an ambulance pulls in with its lights going and the bay's doors slide open for it, a helicopter lands on the white tower's helipad, people sit on the benches by the street, a flock of birds crosses the sky, the flags wave and the fountain plays. It all pauses while the campus is off screen. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
     <p>Right under the campus, <b>Your domains</b> lists one row per building: how much of its question bank you've learned, how often you got it right in your sessions, and a <b>Practise</b> button. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
@@ -20614,7 +20621,7 @@ function renderFocusTile(worst){
    building its lit windows at 1..10 tenths, occluded by everything in front. CAMPUS_MAP: w,h render size;
    g scene box [x,y,w,h]; b[key] = { label [x,y], box (tap area), lv: boxes of the 10 lit layers };
    f fountain [x,y]; drive: the two lanes' ends. */
-const CAMPUS_MAP = {"w":960,"h":760,"g":[0,0,960,760],"f":[451,480],"drive":[[368,738],[405,472],[510,472],[524,738]],"b":{"e":{"label":[455,348],"box":[374,334,161,109],"lv":[[366,357,90,98],[348,348,198,116],[343,344,206,132],[332,335,225,150],[324,326,240,165],[316,319,255,182],[313,310,267,196],[309,305,276,207],[305,300,284,219],[302,296,289,227]]},"t":{"label":[466,242],"box":[430,234,72,154],"lv":[[411,267,91,125],[398,251,128,152],[389,242,148,169],[379,226,175,190],[372,221,188,208],[362,214,203,228],[356,208,214,241],[350,200,227,255],[346,197,234,260],[341,191,246,271]]},"s":{"label":[242,436],"box":[134,389,201,219],"lv":[[121,452,232,181],[108,426,258,231],[89,406,292,264],[84,392,310,290],[76,388,326,303],[72,379,339,324],[61,374,355,341],[57,368,365,352],[54,364,376,362],[47,359,391,374]]},"c":{"label":[649,354],"box":[573,329,157,187],"lv":[[558,364,189,178],[537,353,215,209],[519,336,262,241],[509,323,282,264],[501,314,298,280],[492,304,312,299],[485,294,325,317],[476,288,338,331],[467,282,354,345],[459,275,369,359]]},"n":{"label":[700,278],"box":[617,292,163,125],"lv":[[613,301,178,104],[597,286,205,137],[582,262,234,179],[571,254,254,198],[562,245,268,213],[555,237,282,231],[548,228,292,248],[543,219,304,264],[538,209,313,283],[534,200,323,302]]}},"live":{"clouds":[0,0,960,252],"flags":[[258,596,74,13],[258,596,74,14],[258,596,74,13]],"spray":[[434,457,35,34],[435,456,34,34],[433,457,35,34],[434,456,34,33]],"carIn":{"img":[505,565,16,18],"ref":[513,575],"pts":[[522,738,1.204],[517,647,1.095],[513,575,1],[510,517,0.917],[508,468,0.845]]},"carOut":{"img":[382,568,16,18],"ref":[391,575],"pts":[[406,468,0.845],[399,517,0.917],[391,575,1],[381,647,1.095],[368,738,1.202]]},"amb":{"img":[[527,549,23,35],[521,549,23,35]],"ref":[536,574],"pts":[[550,735,1.204],[541,631,1.077],[534,546,0.961],[532,487,0.876],[547,460,0.835],[563,453,0.822]]},"carIn2":{"img":[482,537,15,17],"ref":[490,547],"pts":[[493,738,1.253],[491,633,1.121],[490,547,1],[489,498,0.926],[489,468,0.879]]},"street":[{"img":[427,736,34,17],"ref":[441,745],"pts":[[-70,745,0.896],[257,745,0.981],[624,745,0.992],[951,745,0.921]],"dur":11000},{"img":[423,704,32,16],"ref":[442,713],"pts":[[932,713,0.925],[618,713,0.993],[266,713,0.982],[-48,713,0.901]],"dur":9500},{"img":[411,730,67,26],"ref":[441,745],"pts":[[-70,745,0.896],[257,745,0.981],[624,745,0.992],[951,745,0.921]],"dur":16000},{"img":[423,704,32,16],"ref":[442,713],"pts":[[932,713,0.925],[618,713,0.993],[266,713,0.982],[-48,713,0.901]],"dur":12500}],"bay":[[546,427,19,16],[542,427,28,16],[538,427,36,16]],"lot":{"img":[[66,658,27,26],[82,634,33,14]],"ref":[80,672],"pts":[[80,672,1],[90,653,0.982],[96,642,0.97]],"ref2":[96,642],"pts2":[[96,642,1],[194,642,1.026],[294,645,1.05],[345,665,1.083],[369,701,1.127],[368,738,1.169]]},"sitters":[{"img":[[210,660,11,33],[211,660,10,33]]},{"img":[[228,666,8,23],[228,666,8,23]]},{"img":[[665,660,10,33],[665,660,10,33]]}],"birds":{"img":[[409,167,100,24],[410,171,98,26]],"ref":[460,173],"pts":[[-54,162,0.742],[209,163,0.901],[460,173,1],[770,192,1.014],[1165,234,0.923]]},"walkers":[{"img":[[549,666,9,27],[549,666,9,27]],"ref":[553,684],"pts":[[4,684,0.918],[297,684,0.988],[553,684,1],[883,684,0.94]],"dur":42000},{"img":[[293,659,10,26],[293,659,10,26]],"ref":[299,676],"pts":[[879,676,0.952],[589,676,1.009],[299,676,1],[9,676,0.93]],"dur":48000},{"img":[[369,550,8,23],[369,550,8,23]],"ref":[373,565],"pts":[[128,631,1.041],[328,629,1.081],[373,565,1],[386,485,0.884],[413,457,0.842]],"dur":34000},{"img":[[521,550,8,23],[521,550,8,23]],"ref":[525,565],"pts":[[495,457,0.84],[520,485,0.883],[525,565,1],[573,631,1.087],[721,637,1.072]],"dur":36000},{"img":[[364,556,14,31],[364,556,14,31]],"ref":[371,575],"pts":[[147,635,1.037],[297,635,1.07],[371,575,1],[385,492,0.882],[410,456,0.831]],"dur":52000},{"img":[[329,678,7,18],[329,678,7,18]],"ref":[333,691],"pts":[[615,691,1.001],[554,691,1.007],[333,691,1],[259,691,0.989]],"dur":20000},{"img":[[424,444,6,20],[424,444,6,20]],"ref":[427,457],"pts":[[478,457,1.001],[427,457,1],[478,457,1.001]],"dur":22000},{"img":[[520,528,8,23],[520,528,8,23]],"ref":[524,543],"pts":[[519,472,0.892],[524,543,1],[519,472,0.892]],"dur":30000}],"heli":{"img":[[447,229,39,24],[446,229,40,24]],"ref":[466,244],"pts":[[802,116,0.82],[652,199,0.898],[532,176,0.979],[466,228,1.004],[466,244,1]],"pad":[466,244]}}};
+const CAMPUS_MAP = {"w":960,"h":760,"g":[0,0,960,760],"far":[0,0,960,760],"near":[0,240,960,520],"f":[451,480],"drive":[[368,738],[405,472],[510,472],[524,738]],"b":{"e":{"label":[455,348],"box":[374,334,161,109],"lv":[[365,356,92,100],[347,347,200,118],[339,342,211,137],[329,333,229,155],[321,323,244,171],[314,317,261,187],[311,308,272,201],[307,303,281,211],[303,297,289,225],[300,293,294,234]]},"t":{"label":[466,242],"box":[430,234,72,154],"lv":[[410,267,93,127],[395,250,132,154],[386,240,153,172],[377,224,179,193],[370,219,192,213],[360,211,208,234],[353,205,220,246],[347,198,232,259],[342,195,242,265],[336,189,256,276]]},"s":{"label":[242,436],"box":[134,389,201,219],"lv":[[119,451,235,183],[105,425,265,235],[87,404,297,269],[82,390,314,295],[74,385,331,310],[69,377,345,331],[58,371,361,348],[54,366,373,359],[50,361,385,369],[43,356,400,381]]},"c":{"label":[649,354],"box":[573,329,157,187],"lv":[[557,364,191,179],[534,351,220,214],[516,333,268,246],[506,320,288,269],[498,310,304,287],[488,300,319,307],[480,290,333,326],[471,284,347,340],[462,278,363,353],[455,271,377,367]]},"n":{"label":[700,278],"box":[617,292,163,125],"lv":[[613,300,179,107],[595,283,208,143],[579,260,240,184],[568,251,260,203],[559,243,274,218],[552,233,288,238],[545,223,298,258],[540,214,309,275],[535,204,319,294],[531,195,329,312]]}},"live":{"clouds":[0,0,960,248],"flags":[[258,596,74,13],[258,596,74,14],[258,596,74,13]],"spray":[[433,456,36,36],[434,455,36,36],[432,456,36,35],[433,456,36,34]],"carIn":{"img":[505,565,16,18],"ref":[513,575],"pts":[[522,738,1.204],[517,647,1.095],[513,575,1],[510,517,0.917],[508,468,0.845]]},"carOut":{"img":[382,568,16,18],"ref":[391,575],"pts":[[406,468,0.845],[399,517,0.917],[391,575,1],[381,647,1.095],[368,738,1.202]]},"amb":{"img":[[527,549,23,35],[521,549,23,35]],"ref":[536,574],"pts":[[550,735,1.204],[541,631,1.077],[534,546,0.961],[532,487,0.876],[547,460,0.835],[563,453,0.822]]},"carIn2":{"img":[482,537,15,17],"ref":[490,547],"pts":[[493,738,1.253],[491,633,1.121],[490,547,1],[489,498,0.926],[489,468,0.879]]},"street":[{"img":[427,736,34,17],"ref":[441,745],"pts":[[-70,745,0.896],[257,745,0.981],[624,745,0.992],[951,745,0.921]],"dur":11000},{"img":[423,704,32,16],"ref":[442,713],"pts":[[932,713,0.925],[618,713,0.993],[266,713,0.982],[-48,713,0.901]],"dur":9500},{"img":[411,730,67,26],"ref":[441,745],"pts":[[-70,745,0.896],[257,745,0.981],[624,745,0.992],[951,745,0.921]],"dur":16000},{"img":[423,704,32,16],"ref":[442,713],"pts":[[932,713,0.925],[618,713,0.993],[266,713,0.982],[-48,713,0.901]],"dur":12500}],"bay":[[546,427,19,16],[542,427,28,16],[538,427,36,16]],"lot":{"img":[[66,658,27,26],[82,634,33,14]],"ref":[80,672],"pts":[[80,672,1],[90,653,0.982],[96,642,0.97]],"ref2":[96,642],"pts2":[[96,642,1],[194,642,1.026],[294,645,1.05],[345,665,1.083],[369,701,1.127],[368,738,1.169]]},"sitters":[{"img":[[210,660,11,33],[211,660,10,33]]},{"img":[[228,666,8,23],[228,666,8,23]]},{"img":[[665,660,10,33],[665,660,10,33]]}],"birds":{"img":[[409,167,100,24],[410,171,98,26]],"ref":[460,173],"pts":[[-54,162,0.742],[209,163,0.901],[460,173,1],[770,192,1.014],[1165,234,0.923]]},"walkers":[{"img":[[549,666,9,27],[549,666,9,27]],"ref":[553,684],"pts":[[4,684,0.918],[297,684,0.988],[553,684,1],[883,684,0.94]],"dur":42000},{"img":[[293,659,10,26],[293,659,10,26]],"ref":[299,676],"pts":[[879,676,0.952],[589,676,1.009],[299,676,1],[9,676,0.93]],"dur":48000},{"img":[[369,550,8,23],[369,550,8,23]],"ref":[373,565],"pts":[[128,631,1.041],[328,629,1.081],[373,565,1],[386,485,0.884],[413,457,0.842]],"dur":34000},{"img":[[521,550,8,23],[521,550,8,23]],"ref":[525,565],"pts":[[495,457,0.84],[520,485,0.883],[525,565,1],[573,631,1.087],[721,637,1.072]],"dur":36000},{"img":[[364,556,14,31],[364,556,14,31]],"ref":[371,575],"pts":[[147,635,1.037],[297,635,1.07],[371,575,1],[385,492,0.882],[410,456,0.831]],"dur":52000},{"img":[[329,678,7,18],[329,678,7,18]],"ref":[333,691],"pts":[[615,691,1.001],[554,691,1.007],[333,691,1],[259,691,0.989]],"dur":20000},{"img":[[424,444,6,20],[424,444,6,20]],"ref":[427,457],"pts":[[478,457,1.001],[427,457,1],[478,457,1.001]],"dur":22000},{"img":[[520,528,8,23],[520,528,8,23]],"ref":[524,543],"pts":[[519,472,0.892],[524,543,1],[519,472,0.892]],"dur":30000}],"heli":{"img":[[447,229,39,24],[446,229,40,24]],"ref":[466,244],"pts":[[802,116,0.82],[652,199,0.898],[532,176,0.979],[466,228,1.004],[466,244,1]],"pad":[466,244]}}};
 const CAMPUS = [
   { key:'e', id:'ethics',      short:'Ethics',      place:'the building with the banners' },
   { key:'t', id:'terminology', short:'Terminology', place:'the white tower' },
@@ -20691,7 +20698,8 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     </div>
     <div class="cp-say"><p><small>Dr. Smiley</small>${say}</p></div>
     <div class="cp-world${CAMPUS_PICK.key ? ' has-sel' : ''}" style="aspect-ratio:${W} / ${H}" data-top="${top}" onclick="campusTapOut(event)">
-      <img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">
+      ${M.far ? `<img class="cp-far" src="./city/far.webp" alt="" decoding="async" style="${pos(...M.far)}">` : ''}
+      <img class="cp-ground" src="./city/${M.near ? 'near' : 'entrance'}.webp" alt="" decoding="async" style="${pos(...(M.near || M.g))}">
       ${lit}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelLit(CAMPUS_PICK.key, top) : ''}${hits}${tags}${dr}
     </div>
     <div class="cp-foot${CAMPUS_PICK.key ? ' has-sel' : ''}">
@@ -20816,6 +20824,39 @@ function campusLife(root){
       { duration: dur, iterations: Infinity, delay: +el.dataset.delay || 0, easing:'linear' }); });
   const clouds = world.querySelector('.cp-clouds'); if (clouds) run(clouds, [{ transform:'translateX(-1.2cqw)' }, { transform:'translateX(1.2cqw)' }], { duration: 70000, iterations: Infinity, direction:'alternate', easing:'ease-in-out' });
 }
+/* F3 depth (Jose, 2026-10-20: from scroll and drag, not device tilt). The far world (.cp-far) slides up to
+   1.6% of the scene's width as the card travels the screen, the other way from the scroll, so the campus
+   stands off the town; a drag across the scene shifts it up to 2.5% and it springs back on release. A drag
+   under 6 px is still a tap. Transform only, one listener, nothing while the card is off screen or under
+   reduced motion. */
+let campusDepthOn = null;
+function campusDepth(root){
+  if(campusDepthOn){ removeEventListener('scroll', campusDepthOn); campusDepthOn = null; }
+  const world = root.querySelector('.cp-world'), far = world && world.querySelector('.cp-far'), card = root.querySelector('.cp-card');
+  if(!far || reducedMotion()) return;
+  let raf = 0;
+  const apply = () => { raf = 0;
+    if(!document.contains(world)){ removeEventListener('scroll', onScroll); if(campusDepthOn === onScroll) campusDepthOn = null; return; }
+    if(card.classList.contains('is-away')) return;
+    const r = world.getBoundingClientRect(), half = innerHeight / 2;
+    const k = Math.max(-1, Math.min(1, (r.top + r.height / 2 - half) / (half + r.height / 2)));
+    world.style.setProperty('--fy', (k * -1.6).toFixed(2) + 'cqw'); };
+  const onScroll = () => { if(!raf) raf = requestAnimationFrame(apply); };
+  addEventListener('scroll', onScroll, { passive:true }); campusDepthOn = onScroll;
+  apply();
+  // drag
+  let x0 = 0, dragging = false, id = null;
+  let dragged = false;
+  world.addEventListener('pointerdown', e => { if(e.target.closest('.cp-tag, .cp-dr') || e.pointerType === 'mouse' && e.button !== 0) return; x0 = e.clientX; id = e.pointerId; dragging = false; });
+  world.addEventListener('pointermove', e => { if(e.pointerId !== id) return; const dx = e.clientX - x0;
+    if(!dragging){ if(Math.abs(dx) < 6) return; dragging = true; world.classList.add('is-dragging'); far.classList.remove('is-settling'); }
+    const w = world.clientWidth || 1; world.style.setProperty('--fx', Math.max(-2.5, Math.min(2.5, dx / w * 100 * 0.18)).toFixed(2) + 'cqw'); });
+  const end = e => { if(e.pointerId !== id) return; id = null; if(!dragging) return; dragging = false; dragged = true; world.classList.remove('is-dragging');
+    far.classList.add('is-settling'); world.style.setProperty('--fx', '0px'); setTimeout(() => far.classList.remove('is-settling'), 650); setTimeout(() => { dragged = false; }, 300); };
+  world.addEventListener('pointerup', end); world.addEventListener('pointercancel', end);
+  // the click that follows a drag is the drag's, not a pick
+  world.addEventListener('click', e => { if(dragged){ e.stopPropagation(); e.preventDefault(); dragged = false; } }, true);
+}
 // The campus cars and fountain run only while the card is on screen.
 let campusWatch = null;
 function watchCampus(root){
@@ -20828,6 +20869,7 @@ function watchCampus(root){
 function playPracticeMotion(root, prev){
   campusLife(root);
   watchCampus(root);
+  campusDepth(root);
   const now = performance.now();
   const still = reducedMotion();
   root.querySelectorAll('[data-motion]').forEach(el=>{
@@ -21647,8 +21689,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1020.0955';
-const BUILD_TIME = '2026-10-20 09:55 UTC';
+const BUILD_ID = 'b1020.1245';
+const BUILD_TIME = '2026-10-20 12:45 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

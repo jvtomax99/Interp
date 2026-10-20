@@ -132,3 +132,26 @@ of birds (`flock`, five Vs with two wing frames, `birds0/1.webp`,
 street cars drove nose-backwards (a vehicle's front is its local +z, so
 `rotation.y = +pi/2` faces +x); fixed in the same render. Suite
 `campus-life.cjs`.
+**Golden hour and depth (F3, Jose's film brief, 2026-10-20).** The scene is
+regraded: a lavender sky light over warm ground, the low sun behind and to
+the right of the campus (a warm rim on every roof and tower edge), a soft
+lavender fill from the front, the sky peach at the horizon, rose, then
+lavender overhead with a few early stars (the camera looks down, so the
+frame holds the peach-rose band; the lavender is in the haze over the
+town), rose-peach haze from 60 units out, the town's ground and blocks and
+the skyline in mauve, the parking deck, asphalt and roofs with a
+navy-violet cast (nothing pure black or gray), exposure 1.18. Depth: the
+base is captured twice more, the far world alone (`far.webp`: the sky
+dome, the town's ground, everything behind z -30) and the campus alone
+(`near.webp`, `capCut`: the full look with the plain render's alpha, so
+the sky is transparent; packed to its box, `CAMPUS_MAP.near`). In the app
+`.cp-far` sits under `.cp-ground` (now `near.webp`), 7% larger, and
+`campusDepth` slides it: up to 1.6% of the scene's width with the page's
+scroll (the other way from the scroll, one passive listener, a frame at a
+time, nothing while the card is off screen), up to 2.5% with a drag across
+the scene (a drag under 6 px is a tap; a drag that started on a building
+doesn't pick it on release), springing back on release (`.is-settling`,
+`--spring`). The lit layers, sprites and badges never move. Device tilt was
+declined (an iPhone motion permission prompt). Reduced motion: the far
+world stays put. Suite `campus-depth.cjs`. Regrade later with
+`NOLIT=<the render's entrance.json>` (3 min): the lit set is geometry only.

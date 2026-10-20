@@ -7,8 +7,10 @@ this file wins.
 
 **How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
 do, test, update the plan, open a pull request). A chat runs phase after
-phase in a row and never asks to start a new chat (Jose, 2026-10-20); a
-chat that does start fresh reads the docs, not the old chat. Details:
+phase in a row without stopping between them and never asks to start a
+new chat (Jose, 2026-10-20: only a decision that is his is a reason to
+wait, and the rest of the work goes on meanwhile); a chat that does start
+fresh reads the docs, not the old chat. Details:
 `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).

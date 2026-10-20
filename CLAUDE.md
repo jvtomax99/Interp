@@ -5,8 +5,10 @@ project is built and shipped.
 
 **How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
 do, test, update the plan, open a pull request). A chat runs phase after
-phase in a row and never asks to start a new chat (Jose, 2026-10-20); a
-chat that does start fresh reads the docs, not the old chat. Details:
+phase in a row without stopping between them and never asks to start a
+new chat (Jose, 2026-10-20: only a decision that is his is a reason to
+wait, and the rest of the work goes on meanwhile); a chat that does start
+fresh reads the docs, not the old chat. Details:
 `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
@@ -337,10 +339,11 @@ to five values covers 86% of current uses: **6 / 9 / 13 / 17 / 26**. When
 adjusting spacing on a component, move it onto that scale rather than
 extending the tail.
 
-## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
+## Subagents: the main chat thinks, cheaper models fetch (Jose, 2026-10-14)
 
-The main conversation (Opus 5.5) plans, decides, writes the real code and
-reviews. Repetitive work goes to the agents in `.claude/agents/`:
+The main conversation plans, decides, writes the real code and reviews. It
+runs on the strongest model available (Fable 5.1 since 2026-10-20, Jose's
+plan has the usage; Opus 5.5 before that). Repetitive work goes to the agents in `.claude/agents/`:
 
 | Agent | Model | Use for |
 |---|---|---|

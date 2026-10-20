@@ -24,6 +24,12 @@ written here.
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
+**Don't stop between phases** (Jose, 2026-10-20: "I don't want you to
+stop. Too many pauses"). When a PR is up, take the next phase in PLAN's
+order at once (claim its branch first); only a decision that is his
+(a look to approve, a data or rules change, something that needs his
+phone) is a reason to ask, and even then start whatever doesn't depend
+on the answer. He says "push" when a green PR should go live.
 **Don't ask to start a new chat** (Jose, 2026-10-20: "Let's not ask to
 start a new chat anymore", his plan has the usage). Carry on in the same
 chat phase after phase, and keep everything worth keeping in this file
@@ -65,14 +71,6 @@ F2. **Squash and stretch: Practice buttons and the streak flame only**
    (spring press, overshoot and settle on pills and cards). Dr. Smiley's
    own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
    Inter (rounded face declined).
-F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
-   r3f declined: no build step, weight, unproven 60 fps). Re-render golden
-   hour, peach to lavender sky, warm rim light, more haze toward the
-   horizon, nothing pure black or gray; depth parallax from the layers
-   driven by scroll and drag (Jose, 2026-10-20: not device tilt, which
-   needs an iPhone motion permission prompt; off with reduced motion).
-   Full re-render (~30 min) including round 2's benches, birds and bay
-   doors (#78). Order: F2 before F3 (Jose).
 
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
@@ -258,6 +256,12 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 F3 golden hour and depth (this PR): the campus regraded to
+  golden hour (peach to lavender sky, warm rim light, haze, nothing pure
+  black or gray) and rendered in full with the lit set; the far world is
+  its own picture under a campus cut from the sky and slides with the
+  page's scroll and with a drag across the scene (no device tilt). Suite
+  `campus-depth.cjs`; note `docs/features/practice-dashboard.md`.
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys
