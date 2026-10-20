@@ -19,15 +19,20 @@ const P = new URLSearchParams(location.search);
 const W = +P.get('w')||960, H = +P.get('h')||760;
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
 renderer.setPixelRatio(2); renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1; renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const cam = new THREE.PerspectiveCamera(40, W/H, 0.5, 600);
 cam.position.set(1.5, 29, 47); cam.lookAt(1.5, 7.0, -4); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
-scene.add(new THREE.HemisphereLight(0xb7c4ff, 0x4a3d52, 1.35));
-const moon = new THREE.DirectionalLight(0xc9c6ff, 1.0); moon.position.set(-18, 26, 14); moon.castShadow = true;
-moon.shadow.mapSize.set(8192,8192); Object.assign(moon.shadow.camera,{left:-24,right:24,top:24,bottom:-24,near:1,far:90}); moon.shadow.bias=-0.0006; moon.shadow.radius=4; scene.add(moon);
-const warm = new THREE.DirectionalLight(0xffb27a, 0.9); warm.position.set(22, 6, 18); scene.add(warm);
+// golden hour (F3, Jose 2026-10-20): a low warm sun from the left (long shadows to the right, warm on the
+// faces that turn to it), lavender fill in the shade, a pink backlight that rims the edges, the sun's glow
+// in the sky just off frame left
+const SUN_DIR = new THREE.Vector3(-0.8, 0.33, 0.22).normalize(), GLOW_DIR = new THREE.Vector3(-0.62, 0.2, -0.76).normalize();
+scene.add(new THREE.HemisphereLight(0xb6a6e8, 0x7d5a58, 0.75));
+const moon = new THREE.DirectionalLight(0xffa458, 3.2); moon.position.copy(SUN_DIR).multiplyScalar(44); moon.castShadow = true;
+moon.shadow.mapSize.set(8192,8192); Object.assign(moon.shadow.camera,{left:-34,right:34,top:34,bottom:-34,near:1,far:110}); moon.shadow.bias=-0.0006; moon.shadow.radius=4; scene.add(moon);
+const warm = new THREE.DirectionalLight(0xa99cf0, 0.45); warm.position.set(8, 14, 40); scene.add(warm);
+const rim = new THREE.DirectionalLight(0xff8f86, 1.1); rim.position.set(14, 10, -34); scene.add(rim);
 const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.traverse(()=>{});
 const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;
@@ -42,37 +47,40 @@ function glow(x, y, z, s=1.6, col=0xffffff){ const sp = new THREE.Sprite(new THR
 function noiseTex(base, spot, n=2600, size=256, rep=8){ const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
   g.fillStyle = base; g.fillRect(0,0,size,size); for (let i=0;i<n;i++){ g.fillStyle = spot[i%spot.length]; g.globalAlpha = 0.18 + Math.random()*0.25; g.fillRect(Math.random()*size, Math.random()*size, 2+Math.random()*3, 2+Math.random()*3); }
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); t.colorSpace = THREE.SRGBColorSpace; return t; }
-// ---- the sky: a dome with the dusk gradient and stars, soft cloud puffs, a far skyline, haze ----
+// ---- the sky: a dome with the golden-hour gradient and the sun's glow, soft cloud puffs, a far skyline, haze ----
+// Depth layers for the app's parallax: SKY_G (the dome) at the back, FAR (the town and skyline) in the middle,
+// BASE (the campus) in front. Each is captured on its own (__run), so a layer slid a few px never shows a hole.
+const SKY_G = new THREE.Group(), FAR = new THREE.Group(); scene.add(SKY_G, FAR);
 { const sky = new THREE.Mesh(new THREE.SphereGeometry(320, 48, 32), new THREE.ShaderMaterial({ side:THREE.BackSide, depthWrite:false,
-    uniforms:{}, vertexShader:`varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-    fragmentShader:`varying vec3 vP;
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+    uniforms:{ sun:{ value:GLOW_DIR } }, vertexShader:`varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader:`varying vec3 vP; uniform vec3 sun;
       void main(){
         float h = clamp(vP.y, -0.05, 1.0);
-        vec3 top = vec3(0.11,0.09,0.25), mid = vec3(0.30,0.16,0.39), low = vec3(0.79,0.42,0.49), hor = vec3(0.95,0.64,0.42);
-        vec3 c = mix(hor, low, smoothstep(0.17, 0.23, h)); c = mix(c, mid, smoothstep(0.22, 0.29, h)); c = mix(c, top, smoothstep(0.29, 0.5, h));
-        vec2 g = floor(vP.xz / max(vP.y, 0.05) * 140.0); float st = step(0.995, hash(g)) * smoothstep(0.27, 0.45, h) * (0.5 + 0.5*hash(g+1.0));
-        gl_FragColor = vec4(c + st*vec3(1.0,0.97,0.9), 1.0); }` }));
-  sky.position.set(0, -120, 0); scene.add(sky);
+        vec3 top = vec3(0.50,0.47,0.80), mid = vec3(0.80,0.60,0.80), low = vec3(1.0,0.70,0.62), hor = vec3(1.0,0.83,0.62);
+        vec3 c = mix(hor, low, smoothstep(0.17, 0.24, h)); c = mix(c, mid, smoothstep(0.23, 0.33, h)); c = mix(c, top, smoothstep(0.32, 0.6, h));
+        vec3 s = normalize(vec3(sun.x, sun.y * 0.55 + 0.1, sun.z)); float g = max(dot(normalize(vP), s), 0.0);
+        c += vec3(1.0,0.72,0.42) * (pow(g, 6.0) * 0.32 + pow(g, 40.0) * 0.45);
+        gl_FragColor = vec4(c, 1.0); }` }));
+  sky.position.set(0, -120, 0); SKY_G.add(sky);
   // the town's ground out to the skyline, so nothing of the dome shows below the horizon
-  const town = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshStandardMaterial({ color:0x2a2a3e, roughness:1 })); town.rotation.x = -Math.PI/2; town.position.y = -1.7; town.receiveShadow = true; scene.add(town);
+  const town = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshStandardMaterial({ color:0x5a6646, roughness:1 })); town.rotation.x = -Math.PI/2; town.position.y = -1.7; town.receiveShadow = true; FAR.add(town);
   // low blocks and trees scattered on it, so the middle distance isn't empty
   let td = 17; const trnd = () => (td = (td*16807)%2147483647)/2147483647;
-  for (let i=0;i<70;i++){ const x = -120 + trnd()*240, z = -35 - trnd()*60; if (Math.abs(x) < 24 && z > -48) continue;
-    if (trnd() < 0.55){ const w = 2+trnd()*4, h = 1.2+trnd()*3; const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 2+trnd()*3), new THREE.MeshStandardMaterial({ color:[0x3b3350,0x4a3a4f,0x33304a][i%3], roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); scene.add(b);
-      if (trnd() < 0.6){ const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x, 0.2, z + 1.6 + trnd()*1.4); scene.add(wl); } }
-    else { const t = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2+trnd()*1.2, 1), new THREE.MeshStandardMaterial({ color:0x2f4a3c, roughness:0.95, flatShading:true })); t.position.set(x, -0.6, z); scene.add(t); } }
-  scene.fog = new THREE.Fog(0x6a3f6e, 90, 260);
+  for (let i=0;i<150;i++){ const x = -120 + trnd()*240, z = -35 - trnd()*60; if (Math.abs(x) < 24 && z > -48) continue;
+    if (trnd() < 0.07){ const w = 2+trnd()*4, h = 1.2+trnd()*3; const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 2+trnd()*3), new THREE.MeshStandardMaterial({ color:[0x9a6a5a,0xb59a84,0x7d6470][i%3], roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); FAR.add(b);
+      if (trnd() < 0.6){ const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x, 0.2, z + 1.6 + trnd()*1.4); FAR.add(wl); } }
+    else { const t = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2+trnd()*1.2, 1), new THREE.MeshStandardMaterial({ color:[0x5f7a48,0x6d8a4e,0x7a7a44][i%3], roughness:0.95, flatShading:true })); t.position.set(x, -0.6, z); FAR.add(t); } }
+  scene.fog = new THREE.Fog(0xedb3a2, 95, 255);
   const puff = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
-    for (let i=0;i<9;i++){ const x = 60+Math.random()*136, y = 110+Math.random()*60, r = 40+Math.random()*50; const rg = g.createRadialGradient(x,y,0,x,y,r); rg.addColorStop(0,'rgba(255,225,235,.55)'); rg.addColorStop(1,'rgba(255,225,235,0)'); g.fillStyle = rg; g.fillRect(0,0,256,256); }
+    for (let i=0;i<9;i++){ const x = 60+Math.random()*136, y = 110+Math.random()*60, r = 40+Math.random()*50; const rg = g.createRadialGradient(x,y,0,x,y,r); rg.addColorStop(0,'rgba(255,236,226,.6)'); rg.addColorStop(1,'rgba(255,236,226,0)'); g.fillStyle = rg; g.fillRect(0,0,256,256); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
   for (const [x,y,z,sx] of [[-70,14,-150,70],[20,17,-170,85],[85,12,-150,65],[-30,20,-180,95],[55,23,-190,100]]){
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:puff, transparent:true, depthWrite:false, opacity:0.9 })); sp.position.set(x,y,z); sp.scale.set(sx, sx*0.5, 1); scene.add(sp); CLOUDS.push(sp); }
   // the far skyline: dark blocks with a few lit windows, behind the campus
   let sd = 3; const srnd = () => (sd = (sd*16807)%2147483647)/2147483647;
   for (let i=0;i<60;i++){ const x = -135 + i*4.6 + srnd()*2, z = -105 - srnd()*35, w = 2.5+srnd()*4, h = (srnd() < 0.15 ? 9 : 2.5) + srnd()*5;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 3), new THREE.MeshStandardMaterial({ color:0x1e1a32, roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); scene.add(b);
-    for (let k=0;k<Math.floor(h*1.2);k++){ if (srnd() < 0.5) continue; const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x - w/2 + 0.5 + srnd()*(w-1), 0.5 + srnd()*(h-1), z + 1.51); scene.add(wl); } }
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 3), new THREE.MeshStandardMaterial({ color:0xe2b0a8, roughness:1 })); b.position.set(x, h/2 - 1.7, z); FAR.add(b);
+    for (let k=0;k<Math.floor(h*1.2);k++){ if (srnd() < 0.96) continue; const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x - w/2 + 0.5 + srnd()*(w-1), 0.5 + srnd()*(h-1), z + 1.51); FAR.add(wl); } }
 }
 const GRASS_T = noiseTex('#5f9e6c', ['#4f8c5c','#73b47f','#88c38f']);
 const ASPH_T = noiseTex('#3d3c48', ['#34333e','#4a4956','#2f2e38'], 4000, 256, 10);
@@ -368,7 +376,7 @@ const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; con
 const full = new EffectComposer(renderer); full.setPixelRatio(2); full.setSize(W, H);
 full.addPass(new RenderPass(scene, cam));
 const gtao = new GTAOPass(scene, cam, W*2, H*2); gtao.output = GTAOPass.OUTPUT.Default; gtao.updateGtaoMaterial({ radius:0.6, distanceExponent:1.2, thickness:1.0, scale:1.0, samples:16, distanceFallOff:1.0, screenSpaceRadius:false }); gtao.updatePdMaterial({ lumaPhi:10, depthPhi:2, normalPhi:3, radius:4, radiusExponent:1, rings:2, samples:16 }); gtao.blendIntensity = 0.85; const gtaoRender = gtao.render.bind(gtao); gtao.render = (...a) => { GLOWS.forEach(g => g.visible = false); gtaoRender(...a); GLOWS.forEach(g => g.visible = true); }; full.addPass(gtao);
-const bloomA = new UnrealBloomPass(new THREE.Vector2(W, H), 0.45, 0.5, 0.9); full.addPass(bloomA);
+const bloomA = new UnrealBloomPass(new THREE.Vector2(W, H), 0.4, 0.45, 1.6); full.addPass(bloomA);
 full.addPass(new OutputPass()); full.addPass(new SMAAPass(W*2, H*2));
 // the lit windows: drawn alone on black with a wide warm bloom, then black becomes transparent
 const litC = new EffectComposer(renderer); litC.setPixelRatio(2); litC.setSize(W, H);
@@ -378,8 +386,39 @@ function pack(img, q){ let x0=W,y0=H,x1=-1,y1=-1; const d = img.data;
   for(let y=0;y<H;y++) for(let x=0;x<W;x++){ if(d[(y*W+x)*4+3] > 3){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
   if(x1<0) return null; const w=x1-x0+1, h=y1-y0+1, c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').putImageData(img, -x0, -y0);
   return { x:x0, y:y0, w, h, data:c.toDataURL('image/webp', q) }; }
-function capBase(){ full.render(); const img = grab(); return pack(img, 0.9); }
-function capAlpha(q=0.86){ renderer.render(scene, cam); const img = grab(); return pack(img, q); }
+// the grade (F3): shadows lift toward lavender, highlights warm toward peach, so nothing ends pure black or
+// neutral gray. Every capture gets it except the lit windows (light on black, made transparent).
+function grade(img){ const d = img.data; if (P.has('nograde')) return img;
+  for (let i=0;i<d.length;i+=4){ if (!d[i+3]) continue; let r = d[i]/255, g = d[i+1]/255, b = d[i+2]/255;
+    const L = 0.2126*r + 0.7152*g + 0.0722*b, mx = Math.max(r,g,b), sat = mx ? (mx - Math.min(r,g,b)) / mx : 0;
+    const dk = Math.max(0, 1 - L/0.3), s = dk*dk*0.32 + (1 - Math.min(1, sat/0.12)) * 0.06 * (1 - L), h = Math.max(0, (L - 0.62)/0.38) ** 2 * 0.1;
+    r += s*(0.31 - r) + h*(1.00 - r); g += s*(0.23 - g) + h*(0.85 - g); b += s*(0.43 - b) + h*(0.70 - b);
+    d[i] = r*255; d[i+1] = g*255; d[i+2] = b*255; }
+  return img; }
+function capBase(){ full.render(); const img = grade(grab()); return pack(img, 0.9); }
+function capAlpha(q=0.86){ renderer.render(scene, cam); const img = grade(grab()); return pack(img, q); }
+// the three depth layers, each the whole frame: sky (opaque), far (town and skyline), near (the campus).
+// A layer's edge pixels are un-mixed from what was behind them (c = (shot - (1-a)*behind) / a), so no sky
+// colour rims the buildings when the app slides the layers apart.
+const WHITE = new THREE.MeshBasicMaterial({ color:0xffffff, toneMapped:false });
+function layerVis(sky, far, near){ SKY_G.visible = sky; FAR.visible = far; BASE.visible = near; GLOWS.forEach(g => g.visible = near); }
+function shotOf(sky, far, near){ layerVis(sky, far, near); full.render(); const img = grab(); layerVis(true, true, true); return img; }
+function maskOf(far, near){ const fog = scene.fog, bg = scene.background; scene.fog = null; scene.background = new THREE.Color(0x000000); scene.overrideMaterial = WHITE;
+  layerVis(false, far, near); GLOWS.forEach(g => g.visible = false); renderer.render(scene, cam); const img = grab(); layerVis(true, true, true); scene.overrideMaterial = null; scene.fog = fog; scene.background = bg; return img; }
+function unmix(shot, behind, mask){ const d = shot.data, e = behind.data, m = mask.data;
+  for (let i=0;i<d.length;i+=4){ const a = m[i]/255; d[i+3] = m[i]; if (a < 0.004 || a > 0.996) continue;
+    for (let k=0;k<3;k++) d[i+k] = Math.max(0, Math.min(255, (d[i+k] - (1-a)*e[i+k]) / a)); }
+  return shot; }
+function webpOf(img, q){ const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(img, 0, 0); return { x:0, y:0, w:W, h:H, data:c.toDataURL('image/webp', q) }; }
+function capLayers(){ const C = shotOf(true, false, false), B = shotOf(true, true, false), A = shotOf(true, true, true);
+  const mFar = maskOf(true, false), mNear = maskOf(false, true);
+  const all = webpOf(grade(new ImageData(new Uint8ClampedArray(A.data), W, H)), 0.9);
+  const near = unmix(A, B, mNear), far = unmix(B, C, mFar);
+  return { sky: webpOf(grade(C), 0.9), far: webpOf(grade(far), 0.88), near: webpOf(grade(near), 0.9), all }; }
+const TEX_LOAD = async () => { if (TEX) return; TEX = await new Promise(r => { const t = new THREE.TextureLoader().load('hmh-mark-square.png', () => r(t)); }); TEX.colorSpace = THREE.SRGBColorSpace; pend.forEach(f => f()); };
+window.TEX_LOAD = TEX_LOAD;
+window.__preview = async () => { await TEX_LOAD(); CLOUDS.forEach(c => c.visible = false); FLAGS.forEach(f => f.visible = false); if (SPRAY) SPRAY.visible = false;
+  const L = capLayers(); return { all: L.all.data, sky: L.sky.data, far: L.far.data, near: L.near.data }; };
 function capLit(){ litC.render(); const img = grab(), d = img.data;
   for (let i=0;i<d.length;i+=4){ const l = Math.max(d[i], d[i+1], d[i+2]); d[i+3] = l < 5 ? 0 : Math.min(255, Math.round(l*1.1)); }
   return pack(img, 0.72); }
@@ -388,9 +427,10 @@ function bbox(key){ const b = BOX[key]; let x0=W,y0=H,x1=0,y1=0;
   for (const dx of [-1,1]) for (const dz of [-1,1]) for (const y of [0.3, 0.3+b.h]){ const [px,py] = proj(b.x+dx*b.w/2, y, b.z+dz*b.d/2); x0=Math.min(x0,px); x1=Math.max(x1,px); y0=Math.min(y0,py); y1=Math.max(y1,py); }
   return [x0, y0, x1-x0, y1-y0]; }
 window.__run = async (nolit) => {
-  TEX = await new Promise(r => { const t = new THREE.TextureLoader().load('hmh-mark-square.png', () => r(t)); }); TEX.colorSpace = THREE.SRGBColorSpace; pend.forEach(f => f());
+  await TEX_LOAD();
   CLOUDS.forEach(c => c.visible = false); FLAGS.forEach(f => f.visible = false); if (SPRAY) SPRAY.visible = false;
-  const out = { W, H, base: capBase(), b:{}, live:{} };
+  const layers = capLayers();
+  const out = { W, H, base: layers.all, layers, b:{}, live:{} };
   // everything but the subject writes depth only; the subject keeps its look
   const everything = []; scene.traverse(o => { if (o.isMesh || o.isSprite || o.isPoints) everything.push(o); });
   const matOf = new Map(everything.map(o => [o, o.material]));

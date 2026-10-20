@@ -65,14 +65,9 @@ F2. **Squash and stretch: Practice buttons and the streak flame only** (this PR;
    (spring press, overshoot and settle on pills and cards). Dr. Smiley's
    own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
    Inter (rounded face declined).
-F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
-   r3f declined: no build step, weight, unproven 60 fps). Re-render golden
-   hour, peach to lavender sky, warm rim light, more haze toward the
-   horizon, nothing pure black or gray; depth parallax from the layers
-   driven by scroll and drag (Jose, 2026-10-20: not device tilt, which
-   needs an iPhone motion permission prompt; off with reduced motion).
-   Full re-render (~30 min) including round 2's benches, birds and bay
-   doors (#78). Order: F2 before F3 (Jose).
+F3. **Campus golden hour + depth** (this PR; `practice-dashboard.md` "Golden hour and depth"):
+   re-lit and regraded pre-render, three depth layers slid by scroll and
+   drag (not device tilt), off with reduced motion.
 
 **Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
 practice: the phone reads a line, you render it, you tap the meaning chunks
@@ -254,6 +249,17 @@ then read the log; it names the suite and the check.
   locally: Practice 5 loads the reviews lazily, and the check read the
   state after a fixed 2.2 s. It now waits for the review screen (up to
   10 s) and prints the state it found when it fails.
+- 2026-10-20 F3 campus golden hour + depth (Jose's film brief). The scene
+  re-lit in `entrance.html`: a low warm sun from the left with long shadows,
+  lavender fill, a pink rim backlight, a peach-to-lavender sky with the sun's
+  glow, haze toward the horizon, a green town with a pastel skyline, and a
+  grade so nothing ends pure black or gray. It is now three pictures (sky,
+  far town, campus), and `campusDepth` slides the back two up to 10 px by
+  scroll and sideways drag, springing back; a drag never picks a building.
+  The lit windows were reused (same camera), so the full render took 46 s,
+  not the planned ~30 min. Suite `campus-depth.cjs` (19 checks). Guide:
+  `practice` answer and a "New lately" card. Not done: the card around the
+  scene keeps its night-navy top, which now reads as the high sky.
 - 2026-10-20 Version lines bump themselves (Jose's pick, before S1b). Every
   PR edited `BUILD_ID`/`BUILD_TIME` (`index.html`) and `CACHE_VERSION`
   (`sw.js`), so every open PR conflicted with the next merge. Now
