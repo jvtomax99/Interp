@@ -1940,10 +1940,32 @@
       cardPetalWatch.push(io);
     }
   }
+  /* ---- "Watch" on the hello banner ----
+     Bottom-right of the banner, in the band beside the Hackensack sign,
+     always; its ring holds still once the 45-second video has been watched
+     on this phone (promoSeen/watchPromo in index.html, answer 'promo'). */
+  function addPromoBtn(host){
+    const g = host && host.querySelector('#homeGreeting');
+    if(!g || g.querySelector('.home-promo-btn') || typeof window.watchPromo !== 'function') return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'home-promo-btn' + (window.promoSeen() ? ' is-seen' : '');
+    b.setAttribute('aria-label', 'Watch Interpreter Hub in 45 seconds');
+    // A story bubble: the video's still in a ring of its colours, a play
+    // badge, "Watch" under it.
+    b.innerHTML = '<span class="home-promo-bubble" aria-hidden="true"><span class="home-promo-ring"></span>'
+      + '<img class="home-promo-thumb" src="media/hub-promo-thumb.webp" alt="" width="84" height="84" decoding="async">'
+      + '<span class="home-promo-play"><svg viewBox="0 0 24 24"><path d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10-6.4a1 1 0 0 0 0-1.7l-10-6.4A1 1 0 0 0 8 5.6z"/></svg></span></span>'
+      + '<span class="home-promo-label" aria-hidden="true">Watch</span>';
+    b.addEventListener('click', () => window.watchPromo());
+    g.appendChild(b);
+  }
+  document.addEventListener('ih:home-paint', () => addPromoBtn(document.getElementById('content')));
+
   const content = document.getElementById('content');
   if(content && content.classList.contains('is-home')){
     initHomeGreeting(content);
     initHomeRails(content);
+    addPromoBtn(content);
     // Home may have painted before this file loaded, missing ih:home-paint.
     watchCardPetals(content.querySelector('.sm-widgets'));
   }

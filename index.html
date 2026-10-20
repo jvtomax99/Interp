@@ -1227,6 +1227,14 @@
   .fm-meta{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:13px; word-break:break-word; }
   .fm-btns{ display:flex; gap:9px; flex-wrap:wrap; }
   .fm-btns .btn{ flex:1 1 auto; }
+  /* ---------- Voice and mic check (More, under the smoothness meter) ---------- */
+  .vc-more{ margin-top:13px; display:flex; justify-content:center; }
+  .vc-step{ padding:9px 0 13px; border-bottom:1px solid var(--line-soft); }
+  .vc-step h4{ margin:0 0 3px; font-size:15px; font-weight:650; color:var(--ink); }
+  .vc-step p{ margin:0 0 9px; font-size:13px; color:var(--ink-soft); }
+  .vc-step .fm-btns{ margin-bottom:6px; }
+  .vc-state{ font-size:13px; color:var(--ink); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; min-height:1.4em; }
+  .vc-state q{ font-family:'IBM Plex Serif', Georgia, serif; }
 
   /* ---------- Icon picker (Add Domain) ---------- */  .icon-picker-row{ display:flex; flex-wrap:wrap; gap:8px; }
   .icon-pick{
@@ -2613,10 +2621,6 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
   }
   .progress-card p{ font-size:13px; color:var(--ink-soft); margin:0 0 10px 0; line-height:1.55; }
-  .progress-head{ display:flex; gap:28px; flex-wrap:wrap; }
-  .progress-head div{ display:flex; flex-direction:column; }
-  .progress-head b{ font-family:var(--serif); font-size:24px; font-weight:400; color:var(--ink); }
-  .progress-head span{ font-family:var(--mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
 
   .review-card{
     max-width:480px; padding:32px 28px; border-radius:var(--r-lg); text-align:center;
@@ -2748,6 +2752,63 @@
   .gd-n1{ background:linear-gradient(140deg,#252E6D,#2E5FB0 70%,#2E8BD0); }
   .gd-n2{ background:linear-gradient(140deg,#4E3F7A,#7C6A9C 80%); }
   .gd-n3{ background:linear-gradient(140deg,#0F5FA6,#0189B3); }
+  /* The 45-second video, upright (9:16), in the answer sheet. */
+  .gd-video{ margin:0 auto 13px; width:min(100%, 300px); aspect-ratio:9/16; max-height:62vh; border-radius:var(--r-md);
+    overflow:hidden; background:#0E1438;
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+  .gd-video video{ display:block; width:100%; height:100%; object-fit:contain; background:#0E1438; }
+  @media (max-height:700px){ .gd-video{ width:auto; height:62vh; } }
+  /* Its own controls (promoPlayer), not the phone's: the iPhone's full-screen
+     player hides its X while playing, so full screen here is ours (.is-theatre),
+     with an X that never hides. */
+  .gd-video{ position:relative; }
+  .gd-video video{ cursor:pointer; }
+  .pp-big{ position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; border:0; padding:0;
+    display:grid; place-items:center; color:#fff; cursor:pointer; background:rgba(14,20,56,0.62);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 18px rgba(6,18,58,0.4);
+    transition:opacity .2s var(--ease), transform .2s var(--ease); }
+  .pp-big svg{ width:26px; height:26px; fill:currentColor; margin-left:3px; }
+  .gd-video.is-playing .pp-big{ opacity:0; transform:scale(.8); pointer-events:none; }
+  .pp-bar{ position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:2px; padding:17px 6px 4px;
+    background:linear-gradient(to top, rgba(5,7,24,0.78), rgba(5,7,24,0)); color:#fff; font-family:var(--sans);
+    transition:opacity .25s var(--ease); }
+  .gd-video.is-idle .pp-bar{ opacity:0; pointer-events:none; }
+  .pp-b{ flex:none; width:44px; height:44px; border:0; padding:0; background:none; color:#fff; display:grid; place-items:center; cursor:pointer; border-radius:50%; }
+  .pp-b svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .pp-b svg .f{ fill:currentColor; stroke:none; }
+  .pp-b:active, .pp-b.is-pressed{ background:rgba(255,255,255,0.16); }
+  .pp-b:focus-visible, .pp-big:focus-visible, .pp-x:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .pp-b > span{ display:block; }
+  .pp-b > .pp-on, .gd-video.is-playing .pp-play > .pp-off, .gd-video.is-muted .pp-snd-b > .pp-off,
+  .gd-video.is-theatre .pp-full-b > .pp-off{ display:none; }
+  .gd-video.is-playing .pp-play > .pp-on, .gd-video.is-muted .pp-snd-b > .pp-on,
+  .gd-video.is-theatre .pp-full-b > .pp-on{ display:block; }
+  .pp-t{ flex:none; font-size:12px; font-weight:550; font-variant-numeric:tabular-nums; letter-spacing:.01em; padding:0 4px; opacity:.92; }
+  .gd-video .pp-seek{ flex:1; min-width:0; width:auto; height:44px; margin:0 6px; padding:0; border:0; border-radius:0; box-shadow:none;
+    background:transparent; cursor:pointer; -webkit-appearance:none; appearance:none; touch-action:none; }
+  .gd-video:not(.is-theatre) .pp-dur{ display:none; }
+  .pp-seek::-webkit-slider-runnable-track{ height:4px; border-radius:2px;
+    background:linear-gradient(to right, #01B8E6 var(--p,0%), rgba(255,255,255,0.32) var(--p,0%)); }
+  .pp-seek::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; margin-top:-5px; border-radius:50%; background:#fff; border:0;
+    box-shadow:0 1px 4px rgba(6,18,58,0.5); }
+  .pp-seek::-moz-range-track{ height:4px; border-radius:2px; background:rgba(255,255,255,0.32); }
+  .pp-seek::-moz-range-progress{ height:4px; border-radius:2px; background:#01B8E6; }
+  .pp-seek::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:#fff; border:0; }
+  .pp-x{ display:none; }
+  .gd-video.is-theatre{ position:fixed; inset:0; z-index:2100; width:auto; height:auto; max-height:none; margin:0; aspect-ratio:auto;
+    border-radius:0; box-shadow:none; background:#05070B; }
+  .gd-video.is-theatre video{ background:#05070B; }
+  .gd-video.is-theatre .pp-bar{ padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 9px); padding-left:9px; padding-right:9px; }
+  .gd-video.is-theatre .pp-x{ display:grid; place-items:center; position:absolute; z-index:2;
+    top:calc(env(safe-area-inset-top, 0px) + 13px); right:calc(env(safe-area-inset-right, 0px) + 13px);
+    width:44px; height:44px; padding:0; border:0; border-radius:50%; color:#fff; cursor:pointer;
+    background:rgba(14,20,56,0.62); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 12px rgba(0,0,0,0.35); }
+  .gd-video.is-theatre .pp-x svg{ width:20px; height:20px; }
+  .pp-x:active, .pp-x.is-pressed{ transform:scale(.92); }
+  body.pp-open{ overflow:hidden; }
+  .overlay.pp-host{ backdrop-filter:none; -webkit-backdrop-filter:none; }
+  @media (prefers-reduced-motion:reduce){ .pp-big, .pp-bar{ transition:none; } }
 
   /* Your first week */
   .gd-week{ display:flex; flex-direction:column; padding:15px 15px 6px; border-radius:var(--r-lg); background:var(--paper);
@@ -3074,9 +3135,9 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft); }
   .board-row{ display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:10px;
     font-family:var(--sans); animation:modeIn .3s var(--ease) backwards; }
-  .board-row:nth-child(1){ animation-delay:.03s } .board-row:nth-child(2){ animation-delay:.07s }
-  .board-row:nth-child(3){ animation-delay:.11s } .board-row:nth-child(4){ animation-delay:.15s }
-  .board-row:nth-child(n+5){ animation-delay:.19s }
+  .board-row:nth-child(1){ animation-delay:calc(.03s + var(--motion-skip, 0s)) } .board-row:nth-child(2){ animation-delay:calc(.07s + var(--motion-skip, 0s)) }
+  .board-row:nth-child(3){ animation-delay:calc(.11s + var(--motion-skip, 0s)) } .board-row:nth-child(4){ animation-delay:calc(.15s + var(--motion-skip, 0s)) }
+  .board-row:nth-child(n+5){ animation-delay:calc(.19s + var(--motion-skip, 0s)) }
   .board-row.is-me{ background:var(--accent-soft); }
   .board-rank{ width:22px; flex-shrink:0; text-align:center; font-size:13px; font-weight:650; color:var(--ink-faint); }
   .board-face{ width:28px; height:28px; border-radius:50%; flex-shrink:0; color:#fff;
@@ -3202,10 +3263,10 @@
   /* The four ways in, arriving in sequence rather than all at once. */
   @keyframes modeIn{ from{ opacity:0; transform:translateY(7px); } to{ opacity:1; transform:none; } }
   .study-mode{ animation:modeIn .30s var(--ease) backwards; }
-  .study-mode:nth-child(1){ animation-delay:.02s }
-  .study-mode:nth-child(2){ animation-delay:.07s }
-  .study-mode:nth-child(3){ animation-delay:.12s }
-  .study-mode:nth-child(4){ animation-delay:.17s }
+  .study-mode:nth-child(1){ animation-delay:calc(.02s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(2){ animation-delay:calc(.07s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(3){ animation-delay:calc(.12s + var(--motion-skip, 0s)) }
+  .study-mode:nth-child(4){ animation-delay:calc(.17s + var(--motion-skip, 0s)) }
 
   /* The last minute of an exam. */
   @keyframes clockUrge{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
@@ -3393,6 +3454,400 @@
   }
   .mastery-go::after{ content:''; position:absolute; inset:-4px -3px; }
   .mastery-go:hover{ background:color-mix(in srgb, var(--dom) 16%, var(--bg-hi)); }
+
+  /* ---------- Practice dashboard ----------
+     The readiness card leads; under it, your scores over time and the one
+     domain worth working on next. Blocks arrive in sequence, the score line
+     draws itself and its points pop as the pen reaches them. A block that
+     has finished moving carries .is-still (playPracticeMotion), and
+     --motion-skip lets a re-render resume motion instead of restarting it. */
+  @keyframes dashIn{ from{ opacity:0; transform:translateY(9px) scale(.985); } to{ opacity:1; transform:none; } }
+  .dash-in{
+    animation:dashIn .42s var(--ease) backwards;
+    animation-delay:calc(var(--i, 0) * 60ms + var(--motion-skip, 0s));
+  }
+  .is-still:not(.study-flame), .is-still *:not(.study-flame, .cp-lit, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-litsel, .cp-pick-in){ animation:none !important; }
+
+  .dash-row{ display:grid; grid-template-columns:1fr; gap:9px; max-width:760px; margin:0 0 26px 0; }
+  @media (min-width:600px){ .dash-row{ grid-template-columns:1.6fr 1fr; align-items:start; } }
+  .dash-tile{
+    position:relative; display:flex; flex-direction:column; min-width:0;
+    padding:13px 17px; border-radius:var(--r-md); background:var(--paper);
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow), inset 0 0 0 1px var(--line-soft);
+  }
+  .dash-label{
+    font-family:var(--sans); font-size:12px; font-weight:650; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .dash-empty{ font-size:13px; line-height:1.5; color:var(--ink-soft); margin:6px 0 9px 0; }
+  .dash-tile .btn{ align-self:flex-start; }
+
+  .trend-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:9px; margin-top:6px; }
+  .trend-now b{
+    display:block; font-family:var(--sans); font-size:28px; font-weight:650; letter-spacing:-.04em;
+    line-height:1; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .trend-cap{ display:block; font-size:12px; color:var(--ink-soft); margin-top:4px; }
+  .trend-delta{
+    flex-shrink:0; font-family:var(--sans); font-size:12px; font-weight:650; white-space:nowrap;
+    padding:3px 9px; border-radius:999px;
+  }
+  .trend-delta.is-up{ color:#3F7D58; background:color-mix(in srgb, #3F7D58 12%, transparent); }
+  .trend-delta.is-down{ color:var(--danger); background:var(--danger-soft); }
+  html[data-theme="dark"] .trend-delta.is-up{ color:#8FD8B0; background:rgba(143,216,176,0.12); }
+  .trend-svg{ display:block; width:100%; height:auto; max-height:132px; margin:9px 0 6px 0; color:var(--accent-2); overflow:visible; }
+  .trend-grid{ stroke:var(--line); stroke-width:1; stroke-dasharray:3 4; }
+  .trend-base{ stroke:var(--line); stroke-width:1; }
+  .trend-glabel{ font-family:var(--sans); font-size:9px; font-weight:550; fill:var(--ink-faint); }
+  .trend-line{
+    fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:1; stroke-dashoffset:0;
+    animation:trendDraw .9s var(--ease) backwards; animation-delay:calc(.18s + var(--motion-skip, 0s));
+  }
+  @keyframes trendDraw{ from{ stroke-dashoffset:1; } to{ stroke-dashoffset:0; } }
+  .trend-area{ animation:trendFade .6s ease-out backwards; animation-delay:calc(.7s + var(--motion-skip, 0s)); }
+  @keyframes trendFade{ from{ opacity:0; } to{ opacity:1; } }
+  .trend-dot{
+    fill:var(--paper); stroke:currentColor; stroke-width:2;
+    transform-box:fill-box; transform-origin:center;
+    animation:dotPop .34s var(--ease) backwards; animation-delay:calc(var(--d, 0ms) + var(--motion-skip, 0s));
+    transition:stroke-width .2s var(--ease);
+  }
+  .trend-dot.is-last{ fill:currentColor; }
+  .trend-dot.is-picked{ fill:currentColor; stroke-width:5; }
+  @keyframes dotPop{ 0%{ transform:scale(0); } 60%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
+  /* One ripple off the newest score once the line arrives, then nothing. */
+  .trend-ping{
+    fill:currentColor; opacity:0; pointer-events:none;
+    transform-box:fill-box; transform-origin:center;
+    animation:trendPing .9s ease-out 1; animation-delay:calc(1.15s + var(--motion-skip, 0s));
+  }
+  @keyframes trendPing{ from{ opacity:.45; transform:scale(1); } to{ opacity:0; transform:scale(3.4); } }
+  .trend-hit{ fill:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .trend-foot{ display:flex; flex-wrap:wrap; gap:6px 17px; font-family:var(--sans); font-size:12px; color:var(--ink-soft); }
+  .trend-foot b{ color:var(--ink); font-weight:650; font-variant-numeric:tabular-nums; }
+
+  .focus-tile{
+    --dom:var(--accent); gap:6px;
+    background:radial-gradient(130% 90% at 100% 0%, color-mix(in srgb, var(--dom) 14%, transparent), transparent 62%), var(--paper);
+  }
+  .focus-name{ font-family:var(--sans); font-size:17px; font-weight:650; letter-spacing:-.02em; line-height:1.25; color:var(--ink); }
+  .focus-why{ font-family:var(--sans); font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .focus-track{ margin:3px 0 6px 0; }
+  .focus-go{ align-self:flex-start; margin-top:auto; }
+
+  @media (prefers-reduced-motion: reduce){
+    .dash-in, .trend-line, .trend-area, .trend-dot, .trend-ping{ animation:none !important; }
+    .trend-dot{ transition:none; }
+  }
+
+  /* ---------- Practice: the Pixar finish ----------
+     Jose, 2026-10-19: "make it look like a 3D world, inspired by Disney
+     and Pixar". The look comes from light and material, not geometry: soft
+     clay surfaces lit warm from the top-left, a lip of thickness on every
+     tile, a glossy donut for readiness, candy buttons that squash when
+     pressed, tiles that lean toward the finger and spring back, arrivals
+     that land with a little squash. Practice screen only, by design: these
+     tiles deliberately step past the app-wide finish shadow. Nothing here
+     runs at rest; the lean exists only while a finger is down. */
+  :root{
+    --clay-hi:rgba(255,255,255,.95); --clay-sheen:rgba(255,255,255,.7);
+    --clay-shade:rgba(22,40,90,.08); --clay-drop:rgba(24,48,104,.17);
+    --clay-warm:rgba(255,186,112,.13); --clay-spec:rgba(255,255,255,.42);
+    --spring:cubic-bezier(.34,1.56,.64,1);
+  }
+  html[data-theme="dark"]{
+    --clay-hi:rgba(255,255,255,.11); --clay-sheen:rgba(255,255,255,.045);
+    --clay-shade:rgba(2,6,22,.4); --clay-drop:rgba(2,6,22,.6);
+    --clay-warm:rgba(255,170,90,.06); --clay-spec:rgba(255,255,255,.12);
+  }
+
+  /* Landing: drop in, squash on contact, settle. */
+  @keyframes dashIn{
+    0%  { opacity:0; transform:translateY(22px) scale(.93); }
+    55% { opacity:1; transform:translateY(-4px) scale(1.015,.985); }
+    78% { transform:translateY(1px) scale(.996,1.006); }
+    100%{ opacity:1; transform:none; }
+  }
+  .dash-in{ animation-duration:.62s; animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+  .study-mode{ animation-name:dashIn; animation-duration:.62s; animation-timing-function:cubic-bezier(.2,.7,.3,1); }
+
+  /* Clay: a sheen across the top, warm key light from the top-left, a
+     bright lip above and a shaded one below (the tile's thickness), a tight
+     contact shadow and a soft one far below. */
+  .dash-tile, .mastery-row, .study-mode:not(.is-exam){
+    position:relative; border-radius:var(--r-lg); border-color:transparent;
+    background:
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+    box-shadow:
+      inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 var(--clay-shade),
+      inset 0 0 0 1px var(--line-soft),
+      0 2px 3px var(--clay-drop), 0 20px 32px -16px var(--clay-drop);
+  }
+  .focus-tile{
+    background:
+      radial-gradient(130% 90% at 100% 0%, color-mix(in srgb, var(--dom) 16%, transparent), transparent 62%),
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+  }
+  .study-mode.is-next{
+    background:
+      radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--mode) 14%, transparent), transparent 64%),
+      radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%),
+      linear-gradient(180deg, var(--clay-sheen), transparent 48%),
+      var(--paper);
+    box-shadow:
+      inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 color-mix(in srgb, var(--mode) 16%, transparent),
+      inset 0 0 0 1.5px color-mix(in srgb, var(--mode) 34%, transparent),
+      0 2px 3px var(--clay-drop), 0 22px 34px -16px color-mix(in srgb, var(--mode) 32%, transparent);
+  }
+  .study-mode.is-exam, .ready-card{ border-radius:var(--r-lg); }
+  .study-mode.is-exam{
+    background:
+      radial-gradient(90% 120% at 0% 0%, rgba(255,186,112,.16), transparent 55%),
+      linear-gradient(135deg,#2C3680,#1A2250);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(4,8,30,.35),
+      0 2px 3px rgba(18,28,70,.3), 0 20px 32px -16px rgba(18,28,70,.7);
+  }
+
+  /* The lean: toward the finger while it is down, a spring back after. */
+  .dash-tile, .mastery-row, .study-mode, .ready-card{
+    transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:transform .6s var(--spring), box-shadow .3s var(--ease), border-color .14s var(--ease);
+  }
+  .study-mode:not(:disabled):active{ transform:perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .is-tilting{ transition:transform .14s ease-out, box-shadow .3s var(--ease); }
+  .dash-tile::after, .mastery-row::after, .study-mode::after{
+    content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(circle at var(--mx, 50%) var(--my, 0%), var(--clay-spec), transparent 58%);
+    opacity:0; transition:opacity .35s var(--ease);
+  }
+  .is-tilting::after{ opacity:1; }
+
+  /* Readiness: a chunky glossy donut sitting in the card. */
+  .ready-card{
+    background:
+      radial-gradient(80% 70% at 0% 0%, rgba(255,186,112,.17), transparent 60%),
+      linear-gradient(150deg,#2E3A82 0%,#1B2356 55%,#141B45 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -4px 0 rgba(4,8,30,.35),
+      0 3px 5px rgba(20,43,67,.14), 0 26px 46px -20px rgba(18,28,70,.62);
+  }
+  .ready-ring{
+    position:relative; width:104px; height:104px;
+    filter:drop-shadow(0 9px 9px rgba(4,8,30,.45));
+  }
+  .ready-ring::before{
+    content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:
+      radial-gradient(circle at 34% 24%, rgba(255,255,255,.5), rgba(255,255,255,0) 32%),
+      radial-gradient(circle, rgba(4,8,30,0) 33px, rgba(4,8,30,.38) 35px, rgba(255,255,255,.22) 43px, rgba(255,255,255,0) 46px, rgba(4,8,30,.42) 52px);
+    -webkit-mask:radial-gradient(circle, transparent 34.5px, #000 35.5px);
+            mask:radial-gradient(circle, transparent 34.5px, #000 35.5px);
+  }
+  .ready-ring-in{
+    position:relative; z-index:1; width:70px; height:70px;
+    background:radial-gradient(circle at 50% 30%, #222B5E, #151C47 70%);
+    box-shadow:inset 0 6px 10px rgba(4,8,30,.6), inset 0 -1px 0 rgba(255,255,255,.12);
+  }
+  /* Stat icons as small glossy bubbles. */
+  .ready-stat i{
+    width:26px; height:26px; padding:6px; box-sizing:border-box; border-radius:9px; margin-bottom:4px;
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.4), rgba(1,184,230,.22) 62%, rgba(1,184,230,.12));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), inset 0 -2px 0 rgba(4,8,30,.25), 0 3px 6px -2px rgba(4,8,30,.5);
+  }
+  .sm-icon{
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.95), color-mix(in srgb, var(--mode) 24%, var(--paper)) 66%);
+    box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--mode) 22%, transparent), 0 3px 6px -2px color-mix(in srgb, var(--mode) 40%, transparent);
+  }
+  .study-mode.is-exam .sm-icon{
+    background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.4), rgba(255,255,255,.1) 66%);
+    box-shadow:inset 0 -2px 0 rgba(4,8,30,.3), 0 3px 6px -2px rgba(4,8,30,.5);
+  }
+
+  /* Bars as glossy tubes sunk into a groove. */
+  .mastery-track{ height:9px; box-shadow:inset 0 2px 2px var(--clay-shade), inset 0 -1px 0 var(--clay-hi); }
+  .mastery-seg.is-known{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--dom) 50%, #fff) 0%, var(--dom) 55%, color-mix(in srgb, var(--dom) 82%, #1A2250) 100%);
+  }
+  .mastery-seg.is-known:first-child, .mastery-seg:first-child{ border-radius:999px 0 0 999px; }
+  .mastery-dot{
+    width:11px; height:11px; margin-top:3px;
+    background:radial-gradient(circle at 30% 28%, rgba(255,255,255,.85), var(--dom) 58%, color-mix(in srgb, var(--dom) 75%, #1A2250));
+    box-shadow:0 2px 3px color-mix(in srgb, var(--dom) 45%, transparent);
+  }
+
+  /* Candy buttons: a raised face on a darker lip, squashed flat on press. */
+  .mastery-go{
+    --face:color-mix(in srgb, var(--dom) 22%, #fff); --face-lo:color-mix(in srgb, var(--dom) 40%, #fff);
+    --lip:color-mix(in srgb, var(--dom) 70%, #fff);
+    border:none; color:color-mix(in srgb, var(--dom) 58%, #151C2C); font-weight:650;
+    background:linear-gradient(180deg, var(--face), var(--face-lo));
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.75), 0 3px 0 var(--lip),
+      0 7px 12px -5px color-mix(in srgb, var(--dom) 55%, transparent);
+    transform:translateY(0); transition:transform .32s var(--spring), box-shadow .2s var(--ease);
+  }
+  html[data-theme="dark"] .mastery-go{
+    --face:color-mix(in srgb, var(--dom) 34%, var(--paper)); --face-lo:color-mix(in srgb, var(--dom) 24%, var(--paper));
+    --lip:color-mix(in srgb, var(--dom) 40%, #050A1C); color:color-mix(in srgb, var(--dom) 35%, #fff);
+  }
+  html[data-theme="dark"] .mastery-go{ box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14), 0 3px 0 var(--lip), 0 7px 12px -5px rgba(2,6,22,.6); }
+  .mastery-go:hover{ background:linear-gradient(180deg, var(--face), var(--face-lo)); filter:brightness(1.03); }
+  .mastery-go:active, .mastery-go.is-pressed{
+    transform:translateY(2px) scale(1.03,.96); transition:transform .08s ease-out;
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 var(--lip), 0 3px 6px -4px color-mix(in srgb, var(--dom) 55%, transparent);
+  }
+  .mastery-go:focus-visible{ outline:2px solid var(--accent-2); outline-offset:3px; }
+
+  /* The score line as a lit tube with glossy beads. */
+  .trend-line{ stroke-width:3; filter:drop-shadow(0 3px 3px color-mix(in srgb, currentColor 35%, transparent)); }
+  .trend-dot{ fill:url(#trendBall); stroke:var(--paper); stroke-width:1.5; transition:transform .3s var(--spring); }
+  .trend-dot.is-last{ fill:url(#trendBall); }
+  .trend-dot.is-picked{ fill:url(#trendBall); stroke-width:1.5; transform:scale(1.4); }
+
+  @media (prefers-reduced-motion: reduce){
+    .dash-tile, .mastery-row, .study-mode, .ready-card, .mastery-go, .trend-dot{ transition:none; }
+    .mastery-go:active, .mastery-go.is-pressed{ transform:none; }
+  }
+
+  /* ---------- Your HUMC campus (renderCampus) ----------
+     A night-to-sunset sky card; the campus is stacked pictures (ground,
+     shadows, five buildings at their built floors). Labels are the tap
+     targets, the buildings too. Cars drive Second Street and the fountain
+     sparkles only while the card is on screen (.is-away pauses them). */
+  .cp-card{
+    position:relative; overflow:hidden; max-width:760px; margin:0 0 17px 0; padding:17px 13px 13px;
+    border-radius:var(--r-lg); color:#fff;
+    background:radial-gradient(120% 62% at 50% 112%, #f2a46b 0%, #c96a7c 30%, #4b2a63 60%, #1d1840 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.14), inset 0 -4px 0 rgba(4,8,30,.35),
+      0 3px 5px rgba(20,43,67,.14), 0 26px 46px -20px rgba(18,28,70,.62);
+  }
+  .cp-card::before{ content:''; position:absolute; inset:0; pointer-events:none; opacity:.7;
+    background-image:radial-gradient(1.2px 1.2px at 12% 14%, #fff, transparent), radial-gradient(1px 1px at 38% 8%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 78% 12%, #fff, transparent), radial-gradient(1px 1px at 64% 24%, #fff, transparent),
+      radial-gradient(1px 1px at 22% 30%, #fff, transparent), radial-gradient(1.2px 1.2px at 92% 34%, #fff, transparent); }
+  .cp-hud{ position:relative; padding:0 4px; max-width:48%; }
+  .cp-hud small{ display:block; font-size:12px; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+  .cp-hud .ready-ring{ margin:6px 0 0 -2px; }
+  .cp-hud .ready-pct{ color:#FFC86B; }
+  .cp-hud > span{ display:block; font-size:13px; font-weight:650; color:rgba(255,255,255,.88); margin-top:8px; }
+  .cp-say{ position:absolute; top:13px; right:13px; left:50%; display:flex; align-items:flex-start; gap:6px; z-index:3; }
+  .cp-face{ flex-shrink:0; width:40px; height:40px; border-radius:50%; overflow:hidden; background:#cfe6ff; border:2px solid #fff;
+    box-shadow:0 6px 14px rgba(10,6,30,.4); }
+  .cp-face .ds-art{ width:100%; height:100%; display:block; }
+  .cp-say p{ margin:0; background:#fff; color:#151C2C; border-radius:4px 14px 14px 14px; padding:7px 10px;
+    font-size:12px; line-height:1.35; box-shadow:0 6px 16px rgba(10,6,30,.35); }
+  .cp-say p b{ color:#B5577A; font-weight:650; }
+  .cp-world{ position:relative; margin:9px -13px 0; container-type:inline-size; isolation:isolate;
+    -webkit-mask-image:linear-gradient(transparent, #000 7%, #000 94%, transparent); mask-image:linear-gradient(transparent, #000 7%, #000 94%, transparent); }
+  .cp-world > img, .cp-bld{ position:absolute; display:block; }
+  .cp-world img{ width:100%; height:100%; }
+  .cp-sh{ opacity:.95; pointer-events:none; }
+  .cp-ground{ pointer-events:none; }
+  .cp-bld{ padding:0; margin:0; border:0; background:none; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; }
+  .cp-bld img{ display:block; pointer-events:none; }
+  .cp-bld:active{ filter:brightness(1.08); }
+  .cp-tag{ position:absolute; transform:translate(-50%,-100%); z-index:2; border:0; cursor:pointer; white-space:nowrap;
+    background:#241b33; color:#fff; font-family:var(--sans); font-size:12px; font-weight:650; padding:5px 9px; border-radius:9px;
+    box-shadow:0 4px 10px rgba(10,6,30,.35), inset 0 -2px 0 color-mix(in srgb, var(--dom) 70%, #241b33); }
+  .cp-tag::before{ content:''; position:absolute; inset:-8px -4px; }
+  .cp-tag::after{ content:''; position:absolute; left:50%; bottom:-4px; margin-left:-4px; border:4px solid transparent; border-top-color:#241b33; border-bottom:0; }
+  .cp-tag i{ font-style:normal; color:#FFC86B; margin-left:3px; font-variant-numeric:tabular-nums; }
+  .cp-tag.is-focus{ background:#FFB443; color:#2a1a08; box-shadow:0 4px 12px rgba(255,170,60,.5), inset 0 -2px 0 #C9801E; animation:cpBob 1.8s ease-in-out infinite; }
+  .cp-tag.is-focus i{ color:#7a3d00; } .cp-tag.is-focus::after{ border-top-color:#FFB443; }
+  .cp-tag:focus-visible, .cp-key:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .cp-tag{ padding:4px 7px; border-radius:999px; font-size:11.5px; border:2px solid var(--dom); }
+  .cp-tag b{ font-weight:650; }
+  .cp-tag i{ margin:0 0 0 4px; color:#FFC86B; }
+  .cp-tag.is-focus i{ color:#7a3d00; }
+  /* Picking a building (campusPick): its badge grows, the others step back, the scene dims around it */
+  .cp-tag{ transition:opacity .25s var(--ease), scale .3s var(--spring, cubic-bezier(.34,1.56,.64,1)); }
+  .cp-world.has-sel .cp-tag:not(.is-sel){ opacity:.55; }
+  .cp-tag.is-sel{ scale:1.12; z-index:3; background:#fff; color:#151C2C; }
+  .cp-tag.is-sel i{ color:#B5577A; } .cp-tag.is-sel::after{ border-top-color:#fff; }
+  .cp-tag.is-sel.is-focus{ background:#FFB443; color:#2a1a08; } .cp-tag.is-sel.is-focus::after{ border-top-color:#FFB443; } .cp-tag.is-sel.is-focus i{ color:#7a3d00; }
+  .cp-shade{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .3s var(--ease); background:rgba(10,6,30,.5);
+    -webkit-mask-image:radial-gradient(var(--rw,10%) var(--rh,10%) at var(--cx,50%) var(--cy,50%), transparent 55%, #000 100%);
+    mask-image:radial-gradient(var(--rw,10%) var(--rh,10%) at var(--cx,50%) var(--cy,50%), transparent 55%, #000 100%); }
+  .cp-world.has-sel .cp-shade{ opacity:1; }
+  .cp-litsel{ animation:cpLight .4s ease-out backwards; }
+  .cp-litsel .cp-lit{ animation:cpSelGlow 1.6s ease-in-out infinite; }
+  @keyframes cpSelGlow{ 50%{ opacity:.72; } }
+  /* the card takes the place of the chips and Play row (same box, nothing below moves) */
+  .cp-foot{ position:relative; }
+  .cp-foot.has-sel > .cp-chips, .cp-foot.has-sel > .cp-go{ visibility:hidden; }
+  .cp-pick{ position:absolute; left:0; right:0; top:6px; bottom:0; z-index:4; pointer-events:none; display:flex; align-items:center; }
+  .cp-pick-in{ flex:1; pointer-events:auto; display:flex; align-items:center; gap:9px; padding:9px 13px; border-radius:16px;
+    background:rgba(255,255,255,.94); color:#151C2C; box-shadow:0 10px 26px -8px rgba(10,6,30,.6); animation:cpPickIn .35s var(--ease) backwards; }
+  .cp-pick-in p{ margin:0; flex:1; min-width:0; font-size:13px; line-height:1.3; }
+  .cp-pick-in p b{ display:flex; align-items:center; gap:6px; font-size:15px; font-weight:650; line-height:1.25; }
+  .cp-pick-in .cp-dot{ flex-shrink:0; box-shadow:0 0 0 2px color-mix(in srgb, var(--dom) 30%, #fff); }
+  .cp-pick-in small{ display:block; margin-top:2px; font-size:12px; color:#5A6478; }
+  .cp-pick-go{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .cp-pick .cp-play{ border:0; cursor:pointer; min-height:44px; padding:0 13px; border-radius:14px; font-family:var(--sans); font-size:15px; font-weight:650;
+    transition:transform .3s var(--spring, cubic-bezier(.34,1.56,.64,1)), box-shadow .2s; }
+  .cp-pick .cp-play:active, .cp-pick .cp-play.is-pressed{ transform:translateY(3px) scale(1.02,.96); transition-duration:.08s;
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 #C9801E, 0 4px 8px -4px rgba(255,170,60,.6); }
+  .cp-pick .cp-play{ flex:none; }
+  .cp-pick-in{ position:relative; }
+  .cp-pick-x{ position:absolute; top:-9px; right:-6px; width:28px; height:28px; border:0; border-radius:50%; background:#fff; color:#5A6478; cursor:pointer;
+    display:grid; place-items:center; box-shadow:0 1px 2px rgba(20,43,67,.12), 0 4px 10px -4px rgba(10,6,30,.5); }
+  .cp-pick-x::before{ content:''; position:absolute; inset:-8px; }
+  .cp-pick-x svg{ width:14px; height:14px; }
+  .cp-pick button:focus-visible{ outline:2px solid #0F5FA6; outline-offset:2px; }
+  @keyframes cpPickIn{ from{ opacity:0; transform:translateY(10px); } }
+  .cp-legend{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+  .cp-key{ display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 11px; border-radius:999px; cursor:pointer;
+    border:0; background:rgba(255,255,255,.12); color:#fff; font-family:var(--sans); font-size:12px; font-weight:600; }
+  .cp-key i{ font-style:normal; color:#FFC86B; font-variant-numeric:tabular-nums; }
+  .cp-key.is-focus{ background:#FFB443; color:#2a1a08; } .cp-key.is-focus i{ color:#7a3d00; }
+  .cp-dot{ width:9px; height:9px; border-radius:50%; background:var(--dom); box-shadow:0 0 0 2px rgba(255,255,255,.5); }
+  @keyframes cpBob{ 50%{ transform:translate(-50%,-100%) translateY(-3px); } }
+  .cp-litw{ position:absolute; pointer-events:none; animation:cpLight .9s ease-out backwards; animation-delay:calc(.25s + var(--i,0) * .12s + var(--motion-skip, 0s)); }
+  .cp-litw img{ width:100%; height:100%; }
+  .cp-lit{ pointer-events:none; mix-blend-mode:screen; animation:cpFlick var(--fl, 3.5s) ease-in-out infinite; }
+  @keyframes cpLight{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes cpFlick{ 0%,100%{ opacity:1; } 37%{ opacity:.9; } 61%{ opacity:.97; } 80%{ opacity:.88; } }
+  .cp-clouds{ mix-blend-mode:screen; opacity:.5; pointer-events:none; }
+  .cp-flag, .cp-spray{ pointer-events:none; animation:cpFrame calc(var(--n) * .28s) steps(1) infinite; animation-delay:calc(var(--f) * -.28s); }
+  .cp-spray{ mix-blend-mode:screen; animation-duration:calc(var(--n) * .16s); animation-delay:calc(var(--f) * -.16s); }
+  @keyframes cpFrame{ 0%{ opacity:1; } 25%{ opacity:1; } 25.01%{ opacity:0; } 100%{ opacity:0; } }
+  .cp-flag{ animation-name:cpFrame3; } @keyframes cpFrame3{ 0%,33.3%{ opacity:1; } 33.4%,100%{ opacity:0; } }
+  .cp-veh{ position:absolute; pointer-events:none; opacity:0; will-change:transform; }
+  .cp-veh img{ position:absolute; inset:0; width:100%; height:100%; }
+  .cp-amb img:last-child, .cp-heli img:last-child{ animation:cpBlink .36s steps(1) infinite; } .cp-amb img:first-child, .cp-heli img:first-child{ animation:cpBlink .36s steps(1) -.18s infinite; }
+  .cp-heli img{ animation-duration:.1s; } .cp-heli img:first-child{ animation-delay:-.05s; }
+  .cp-walk img:last-child{ animation:cpBlink .6s steps(1) infinite; } .cp-walk img:first-child{ animation:cpBlink .6s steps(1) -.3s infinite; }
+  @keyframes cpBlink{ 0%,50%{ opacity:1; } 50.01%,100%{ opacity:0; } }
+  .cp-dr{ position:absolute; z-index:2; width:38px; height:38px; margin:-19px 0 0 -19px; border-radius:50%; overflow:hidden; background:#cfe6ff; border:2px solid #fff;
+    box-shadow:0 6px 14px rgba(10,6,30,.45); pointer-events:none; animation:cpDrBob 1.8s ease-in-out infinite; }
+  .cp-dr .ds-art{ width:100%; height:100%; display:block; }
+  @keyframes cpDrBob{ 50%{ transform:translateY(-4px); } }
+  .cp-say p small{ display:block; font-size:10px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:#98A1B3; margin-bottom:2px; }
+  .cp-card.is-away .cp-lit, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus{ animation-play-state:paused; }
+  .cp-chips{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .cp-chip{ display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:550;
+    color:rgba(255,255,255,.9); background:rgba(255,255,255,.14); }
+  .cp-chip b{ font-weight:650; color:#fff; font-variant-numeric:tabular-nums; }
+  .cp-chip i{ display:block; width:14px; height:14px; color:#FFC86B; } .cp-chip i svg{ width:100%; height:100%; display:block; }
+  .cp-chip.is-met{ background:rgba(130,220,170,.24); }
+  .cp-go{ position:relative; display:flex; gap:9px; margin-top:13px; }
+  .cp-go button{ border:0; cursor:pointer; min-height:46px; border-radius:16px; font-family:var(--sans); font-size:15px; font-weight:650;
+    transition:transform .3s var(--spring, cubic-bezier(.34,1.56,.64,1)), box-shadow .2s; }
+  .cp-play{ flex:1; color:#2a1a08; background:linear-gradient(180deg,#FFD58A,#FFB443);
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7), 0 4px 0 #C9801E, 0 10px 18px -6px rgba(255,170,60,.6); }
+  .cp-exam{ flex:.7; color:#fff; background:rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 0 rgba(4,8,30,.25); }
+  .cp-go button:active, .cp-go button.is-pressed{ transform:translateY(3px) scale(1.02,.96); transition-duration:.08s; }
+  .cp-play:active, .cp-play.is-pressed{ box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 #C9801E, 0 4px 8px -4px rgba(255,170,60,.6); }
+  .cp-go button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+  @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
+  @media (prefers-reduced-motion: reduce){
+    .cp-lit, .cp-litw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh{ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
+    .cp-go button{ transition:none; }
+  }
 
   /* Exam mode */
   .exam-bar{ display:flex; align-items:center; gap:13px; flex-wrap:wrap; margin-bottom:13px;
@@ -5138,6 +5593,13 @@ body.access-locked{ overflow:hidden; }
 }
 @media (prefers-reduced-motion: reduce){ .ds-fx{ display:none; } }
 svg.ds-art svg.ds-face{ width:66.692px !important; height:49.025px !important; overflow:hidden !important; filter:none !important; transform:none !important; animation:none !important; }
+/* His brows (DR_BROWS): each turns about its own middle and springs to the
+   next pose a beat after the eyes (follow-through: a small overshoot, then
+   settle), so they glide while the eyes and mouth step frame to frame. */
+svg.ds-art .ds-brow{ transform-box:fill-box; transition:transform .3s cubic-bezier(.34,1.45,.64,1) .03s; }
+svg.ds-art .ds-brow-l{ transform-origin:53.85% 46.15%; }
+svg.ds-art .ds-brow-r{ transform-origin:44% 44.44%; }
+@media (prefers-reduced-motion: reduce){ svg.ds-art .ds-brow{ transition:none; } }
 @keyframes askThink{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(-6deg); } 70%{ transform:rotate(5deg); } }
 img.tool-logo{ width:100%; height:100%; object-fit:contain; display:block; }
 .ask-review-pill{ min-height:44px; margin:0 2px 13px; padding:0 17px; border-radius:999px; border:0; cursor:pointer;
@@ -6124,7 +6586,6 @@ html[data-theme="dark"]{ --press-tint:rgba(255,255,255,0.06); }
 .section-head .sub{ font-size:var(--fs-foot); font-weight:500; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
 .hub-head h1{ font-family:var(--sans); font-weight:700; letter-spacing:-.028em; }
 .modal h3, .onboarding-modal h3, .results-summary h3{ font-family:var(--sans); font-weight:650; letter-spacing:-.02em; }
-.progress-head b{ font-family:var(--sans); font-weight:700; letter-spacing:-.02em; }
 .doc-card-name{ font-family:var(--sans); font-weight:650; font-size:16px; letter-spacing:-.015em; }
 .doc-research-specialty{ font-family:var(--sans); font-weight:650; letter-spacing:-.015em; }
 @media (min-width:901px){
@@ -6902,6 +7363,14 @@ body.pv-open{ overflow:hidden; }
     <div class="more-sheet-grip"></div>
     <button class="dd-detail-close" title="Close" onclick="frameMeterClose()">✕</button>
     <div id="frameMeterBody"></div>
+  </div>
+</div>
+
+<div class="overlay more-sheet-overlay" id="voiceCheckOverlay" onclick="if(event.target===this) voiceCheckClose()">
+  <div class="modal more-sheet" role="dialog" aria-modal="true" aria-label="Voice and mic check">
+    <div class="more-sheet-grip"></div>
+    <button class="dd-detail-close" title="Close" onclick="voiceCheckClose()">✕</button>
+    <div id="voiceCheckBody"></div>
   </div>
 </div>
 
@@ -8649,8 +9118,9 @@ function animateReadyRing(){
     num.textContent = Math.round(v) + '%';
     ring.style.background = `conic-gradient(var(--cyan) ${v*3.6}deg, rgba(255,255,255,0.13) 0deg)`;
   };
-  if(reducedMotion()){ paint(pct); return; }
-  const dur = 950, t0 = performance.now();
+  const dur = 950, age = motionAge(ring);
+  if(reducedMotion() || age >= dur){ paint(pct); return; }
+  const t0 = performance.now() - age;
   const tick = now => {
     const k = Math.min(1, (now - t0)/dur);
     paint(pct * (1 - Math.pow(1 - k, 3)));
@@ -12730,8 +13200,8 @@ const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
   { id:'teamtips',    tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'Team tips: everyone can add their own tip on a doctor’s page' },
-  { id:'smoothness',  tone:'gd-n1', pin:'pins/updates.webp',             eyebrow:'More',                  title:'Measure how smooth the app runs on your phone, and compare versions' },
-  { id:'chattitles',  tone:'gd-n2', pin:'pins/chat.webp',                eyebrow:'Team Chat',             title:'Administrator and Supervisor titles for the team’s leaders, in Chat and on Home' },
+  { id:'askmoves',    tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Dr. Smiley',            title:'Dr. Smiley has new faces: surprised, worried, doubtful and, rarely, sad' },
+  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your HUMC campus: each building wears its exam area\'s name; tap one to see what it practises, tap again to start' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12893,7 +13363,118 @@ function guideOpenSheet(t){
   sheet.style.setProperty('--c', sec.color);
   sheet.setAttribute('aria-labelledby', 'gdSheetTitle');
   ov._after = () => { guideOpenId = null; };
+  const vid = sheet.querySelector('.gd-video video');
+  if(vid) promoPlayer(vid, ov);
   if(prefersAutoFocus()) sheet.querySelector('.gd-show, .gd-x').focus({ preventScroll: true });
+}
+
+/* ---- The 45-second video (media/hub-promo.mp4, made in promo/) ----
+   Its answer is 'promo'. Home's hello banner always has a "Watch" bubble
+   (Jose, 2026-10-19); once the video has been watched on this phone
+   (ih_promoSeen: played to the end or past 15 s) its ring stops turning
+   (.is-seen). The bubble opens the answer over Home and starts it with sound
+   (the tap allows that); from the guide it waits for a tap on play. */
+function promoSeen(){ try{ return localStorage.getItem('ih_promoSeen') === '1'; }catch(e){ return false; } }
+/* Its own controls: play, time, seek, sound, full screen. The phone's
+   controls are off because the iPhone's full-screen player hides its X while
+   playing (Jose: "no X to exit"); our full screen (.is-theatre) moves the
+   video to the top of the page with an X that never hides. Back, Escape or
+   the end of the video leave it; closing the sheet pauses the video. */
+const PP_ICONS = {
+  play: '<svg viewBox="0 0 24 24"><path class="f" d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10-6.4a1 1 0 0 0 0-1.7l-10-6.4A1 1 0 0 0 8 5.6z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24"><rect class="f" x="6.5" y="5" width="4" height="14" rx="1.2"/><rect class="f" x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>',
+  snd: '<svg viewBox="0 0 24 24"><path class="f" d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/></svg>',
+  mute: '<svg viewBox="0 0 24 24"><path class="f" d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+  full: '<svg viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg>',
+  shrink: '<svg viewBox="0 0 24 24"><path d="M9 4.5V9H4.5M19.5 9H15V4.5M15 19.5V15h4.5M4.5 15H9v4.5"/></svg>'
+};
+// The video never moves in the page (so nothing can interrupt playback):
+// full screen is the same element fixed over everything, with the
+// sheet's backdrop blur off meanwhile (a blur would pin it inside the sheet).
+let PP_THEATRE = null;   // the .gd-video while full screen is open
+function ppTime(s){ s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function promoTheatre(wrap, on){
+  const host = wrap.closest('.overlay');
+  if(on && !PP_THEATRE){
+    PP_THEATRE = wrap;
+    wrap.classList.add('is-theatre'); document.body.classList.add('pp-open'); if(host) host.classList.add('pp-host');
+    const x = wrap.querySelector('.pp-x'); if(x) x.focus({ preventScroll: true });
+  } else if(!on && PP_THEATRE === wrap){
+    PP_THEATRE = null;
+    wrap.classList.remove('is-theatre'); document.body.classList.remove('pp-open'); if(host) host.classList.remove('pp-host');
+  }
+  if(wrap._ppState) wrap._ppState();
+}
+function promoTheatreClose(){ if(!PP_THEATRE) return false; promoTheatre(PP_THEATRE, false); return true; }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && PP_THEATRE){ e.preventDefault(); promoTheatreClose(); } });
+function promoPlayer(vid, ov){
+  const wrap = vid.parentNode;
+  vid.controls = false;
+  wrap.insertAdjacentHTML('beforeend', `
+    <button type="button" class="pp-big" aria-label="Play">${PP_ICONS.play}</button>
+    <button type="button" class="pp-x" aria-label="Close full screen">${ICON_X_TC}</button>
+    <div class="pp-bar">
+      <button type="button" class="pp-b pp-play" aria-label="Play"><span class="pp-off">${PP_ICONS.play}</span><span class="pp-on">${PP_ICONS.pause}</span></button>
+      <span class="pp-t">0:00</span>
+      <input type="range" class="pp-seek" min="0" max="1000" step="1" value="0" aria-label="Position in the video">
+      <span class="pp-t pp-dur">0:45</span>
+      <button type="button" class="pp-b pp-snd-b" aria-label="Sound off"><span class="pp-off">${PP_ICONS.snd}</span><span class="pp-on">${PP_ICONS.mute}</span></button>
+      <button type="button" class="pp-b pp-full-b" aria-label="Full screen"><span class="pp-off">${PP_ICONS.full}</span><span class="pp-on">${PP_ICONS.shrink}</span></button>
+    </div>`);
+  const $ = s => wrap.querySelector(s), seek = $('.pp-seek'), cur = $('.pp-t'), dur = $('.pp-dur'), playB = $('.pp-play');
+  let idleT = 0, wasIdle = false;
+  const wake = () => { wrap.classList.remove('is-idle'); clearTimeout(idleT);
+    if(!vid.paused) idleT = setTimeout(() => wrap.classList.add('is-idle'), 2600); };
+  const toggle = () => { if(vid.paused){ const p = vid.play(); if(p && p.catch) p.catch(() => {}); } else vid.pause(); };
+  const sync = () => {
+    const d = isFinite(vid.duration) ? vid.duration : 45, t = vid.currentTime || 0;
+    cur.textContent = ppTime(t); dur.textContent = ppTime(d);
+    const v = Math.round(t / d * 1000); if(document.activeElement !== seek) seek.value = v;
+    seek.style.setProperty('--p', (v / 10) + '%');
+  };
+  const state = () => {
+    wrap.classList.toggle('is-playing', !vid.paused);
+    wrap.classList.toggle('is-muted', vid.muted);
+    playB.setAttribute('aria-label', vid.paused ? 'Play' : 'Pause');
+    $('.pp-snd-b').setAttribute('aria-label', vid.muted ? 'Sound on' : 'Sound off');
+    $('.pp-full-b').setAttribute('aria-label', wrap.classList.contains('is-theatre') ? 'Leave full screen' : 'Full screen');
+    wake();
+  };
+  // A tap while the controls are hidden only brings them back.
+  vid.addEventListener('click', () => { if(!wasIdle) toggle(); wasIdle = false; });
+  $('.pp-big').addEventListener('click', toggle);
+  playB.addEventListener('click', toggle);
+  $('.pp-snd-b').addEventListener('click', () => { vid.muted = !vid.muted; state(); });
+  wrap._ppState = state;
+  $('.pp-full-b').addEventListener('click', () => promoTheatre(wrap, !wrap.classList.contains('is-theatre')));
+  $('.pp-x').addEventListener('click', () => promoTheatre(wrap, false));
+  seek.addEventListener('input', () => { const d = isFinite(vid.duration) ? vid.duration : 0;
+    if(d) vid.currentTime = seek.value / 1000 * d; seek.style.setProperty('--p', (seek.value / 10) + '%'); wake(); });
+  ['play', 'pause', 'volumechange'].forEach(ev => vid.addEventListener(ev, state));
+  ['timeupdate', 'loadedmetadata', 'durationchange'].forEach(ev => vid.addEventListener(ev, sync));
+  vid.addEventListener('ended', () => promoTheatre(wrap, false));
+  wrap.addEventListener('pointerdown', () => { wasIdle = wrap.classList.contains('is-idle'); wake(); });
+  // The sheet closing (X, a tap outside, Back) stops the video and leaves full screen.
+  if(ov && typeof MutationObserver !== 'undefined'){
+    const mo = new MutationObserver(() => { if(!ov.classList.contains('show') || !ov.contains(wrap)){
+      vid.pause(); promoTheatre(wrap, false); mo.disconnect(); } });
+    mo.observe(ov, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+  }
+  state(); sync();
+  const done = () => {
+    if(promoSeen()) return;
+    try{ localStorage.setItem('ih_promoSeen', '1'); }catch(e){}
+    document.querySelectorAll('.home-promo-btn').forEach(b => b.classList.add('is-seen'));
+  };
+  vid.addEventListener('ended', done);
+  vid.addEventListener('timeupdate', () => { if(vid.currentTime >= 15) done(); });
+}
+function watchPromo(){
+  const t = GUIDE_TOPICS.find(x => x.id === 'promo');
+  if(!t) return;
+  guideOpenSheet(t);
+  const vid = document.querySelector('#guideSheet .gd-video video, .gd-sheet .gd-video video');
+  if(vid){ const p = vid.play(); if(p && p.catch) p.catch(() => {}); }
 }
 
 // A link straight to one answer, to paste into Team Chat.
@@ -13709,7 +14290,7 @@ function externalUrl(raw){
    Home "Ask" tag; on Home his lanyard is live cords drawn by home-polish.js.
 
    His face moves frame by frame. drsmiley/base.webp is his calm picture;
-   drsmiley/face.webp is a strip of 18 frames of the part that moves (eyes and
+   drsmiley/face.webp is a strip of 30 frames of the part that moves (eyes and
    mouth), every frame built on that same calm face, so his hair, outline,
    nose and shoulders never shift: only lids come down, eyes look and lips
    part. Most frames are cut from Jose's drawn expression sheets and fitted
@@ -13723,18 +14304,30 @@ function externalUrl(raw){
    lookL/lookR (eyes to the viewer's left/right); love (heart eyes); sleep;
    then eight gazes made from rest by moving the irises inside the drawn
    eye openings (whites taken from the drawn glances): halfL/halfR (a little
-   to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR.
+   to the side), lookU/lookD, and the diagonals lookUL/lookUR/lookDL/lookDR;
+   then four drawn by Jose in 2026-10 from this same face (source and how
+   they were cut: docs/art/dr-smiley-faces/): surprised (eyes wide, an "O"
+   mouth), sad (heavy lids, corners down), worried (eyes aside, a tight
+   wavy mouth) and doubt (his left eye squinted, a side smirk).
    In picture units (240 x 300 base) the window is x 40, y 106, 151 x 111; the
    strip is see-through except where frames change, so the picture's own
-   edge shows wherever the window crosses his outline. */
+   edge shows wherever the window crosses his outline.
+
+   His brows are their own pictures (drsmiley/brow-l.webp, brow-r.webp), cut
+   out of that same calm face and drawn over the window; the forehead behind
+   them in base.webp, and the few frames that reached up to them, were
+   repainted as skin. They move smoothly (a lift and a tilt, never a stretch)
+   while the eyes and mouth step through frames: see DR_BROWS. */
 const DR_FACE_FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
-  'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR'];
+  'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'surprised', 'sad', 'worried', 'doubt'];
 const DR_FACE_W = 151, DR_FACE_H = 111;
 function drSmileyArt(cls){
   return `<svg class="ds-art${cls ? ' ' + cls : ''}" viewBox="4 4 112 112" aria-hidden="true" focusable="false">`
     + '<image class="ds-base" href="./drsmiley/base.webp" x="14" y=".8" width="106" height="132.5" preserveAspectRatio="none"/>'
     + `<svg class="ds-face" x="31.667" y="47.617" width="66.692" height="49.025" viewBox="0 0 ${DR_FACE_W} ${DR_FACE_H}" preserveAspectRatio="none">`
     +   `<image class="ds-sheet" href="./drsmiley/face.webp" x="0" y="0" width="${DR_FACE_W * DR_FACE_FRAMES.length}" height="${DR_FACE_H}" preserveAspectRatio="none"/></svg>`
+    + '<image class="ds-brow ds-brow-l" href="./drsmiley/brow-l.webp" x="33.875" y="39.446" width="28.708" height="14.354" preserveAspectRatio="none"/>'
+    + '<image class="ds-brow ds-brow-r" href="./drsmiley/brow-r.webp" x="73.625" y="42.758" width="27.604" height="19.875" preserveAspectRatio="none"/>'
     + '</svg>';
 }
 const ICON_WAVE = drSmileyArt('home-wave-art home-face');
@@ -13786,8 +14379,21 @@ const DR_FACE_SEQ = {
   notice: { f: [['rest', 60], ['blink1', 50], ['rest', 40], ['lookR', 560], ['rest', 90], ['smile1', 70], ['smile2', 70], ['smile', 800], ['smile2', 90], ['smile1', 110], ['rest', 340]],
             head: [[0, 0, 0], [90, -.4, .3], [260, 1.4, 0], [710, 1.4, 0], [870, 0, -.6], [1670, 0, -.5], [1930, 0, 0], [2280, 0, 0]] },
   // Pressed and held: a giggle and hearts.
-  pet:   { f: [['rest', 60], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
-           head: [[0, 0, 0], [90, 0, .45], [180, -1.4, .3], [290, 1.4, .3], [400, -1.4, .3], [510, 1.4, .3], [620, -1, .2], [730, .8, .1], [1160, 0, -.4], [1620, 0, 0], [1880, 0, 0]], fx: 'hearts', fxAt: 180 },
+  // A startled take first (a blink, eyes and brows up, the head pulled
+  // back), then the giggle: the beat that makes a cartoon reaction read.
+  pet:   { f: [['blink1', 40], ['surprised', 260], ['rest', 50], ['smile1', 60], ['smile2', 60], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 110], ['laughB', 110], ['laugh', 160], ['smile', 440], ['smile2', 90], ['smile1', 100], ['rest', 340]],
+           brow: [[40, 'up'], [330, null]],
+           head: [[0, 0, 0], [40, 0, .4], [150, 0, -1.5], [300, 0, -1.2], [390, 0, .45], [480, -1.4, .3], [590, 1.4, .3], [700, -1.4, .3], [810, 1.4, .3], [920, -1, .2], [1030, .8, .1], [1460, 0, -.4], [1920, 0, 0], [2180, 0, 0]], fx: 'hearts', fxAt: 480 },
+  // Surprised: a blink, eyes wide, an "O" mouth and brows up with the head
+  // pulled back, a beat held, then it softens into a smile.
+  surprise: { f: [['blink1', 40], ['blink2', 35], ['blink1', 35], ['surprised', 650], ['rest', 160], ['smile1', 380], ['rest', 300]],
+              brow: [[110, 'up'], [900, 'glad'], [1300, null]],
+              head: [[0, 0, 0], [110, 0, .5], [240, 0, -1.6], [860, -.6, -1.2], [1100, 0, -.3], [1500, 0, 0]] },
+  // Worried: eyes away, a tight wavy mouth and the brows turned up in the
+  // middle, a tilt; then he looks back to you with a small reassuring smile.
+  worry: { f: [['rest', 60], ['blink1', 50], ['blink2', 45], ['blink1', 50], ['worried', 700], ['halfL', 400], ['rest', 200], ['smile1', 500], ['rest', 300]],
+           brow: [[100, 'worried'], [1350, 'caring'], [2100, null]],
+           head: [[0, 0, 0], [200, -2, .4], [1300, -2.2, .5], [1600, -.8, .1], [2400, 0, 0]] },
   /* For his task states (drTask). Each has a small wind-up, a peak you can
      read and an unhurried way back. */
   // Attentive: you tapped into Ask's box. A quick blink, a look down to it
@@ -13803,15 +14409,20 @@ const DR_FACE_SEQ = {
   // An answer from the Hub: got it -- a lift, a smile and a nod -- then he reads it with you.
   answer: { f: [['rest', 50], ['blink1', 45], ['rest', 40], ['smile1', 80], ['smile2', 80], ['smile', 760], ['smile2', 90], ['smile1', 110], ['rest', 220]],
             head: [[0, 0, 0], [100, 0, -.45], [330, 0, .9], [520, 0, -.1], [700, 0, .7], [900, 0, 0], [1525, 0, 0]] },
-  // An answer from general knowledge: received, considered -- no smile.
-  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['halfL', 520], ['rest', 240]],
+  // An answer from general knowledge: received, considered -- a doubtful
+  // squint and one brow up (check it), no smile.
+  answerGeneral: { f: [['rest', 50], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 80], ['doubt', 520], ['rest', 240]],
+                   brow: [[260, 'doubt'], [860, null]],
                    head: [[0, 0, 0], [100, .4, 0], [320, -1.1, .2], [860, -1.1, .2], [1120, 0, 0]] },
-  // Uncertain or failed: composed. A slow blink, a considering look down to
-  // the side with a sympathetic tilt, then a small reassuring smile.
-  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['lookDL', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+  // Uncertain or failed: composed. A slow blink, a moment of sad (the one
+  // place the sad face is used, so it stays rare), a look to the side with
+  // a sympathetic tilt, then a small reassuring smile.
+  composed: { f: [['rest', 60], ['blink1', 60], ['blink2', 60], ['shut', 140], ['blink2', 60], ['blink1', 70], ['rest', 180], ['sad', 650], ['halfL', 90], ['rest', 220], ['smile1', 520], ['rest', 320]],
+              brow: [[480, 'worried'], [1300, 'caring'], [2050, null]],
               head: [[0, 0, 0], [90, .4, 0], [420, -1.8, .3], [1300, -1.8, .3], [1700, -.6, 0], [2300, 0, 0], [2620, 0, 0]] },
   // A missed answer or a low score: a blink, a small smile, two small nods. Keep going.
   encourage: { f: [['rest', 60], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 110], ['smile1', 90], ['smile2', 640], ['smile1', 120], ['rest', 300]],
+               brow: [[220, 'caring'], [1120, null]],
                head: [[0, 0, 0], [140, 0, -.3], [360, 0, .9], [560, 0, 0], [760, 0, .8], [960, 0, 0], [1450, 0, 0]] },
   // You stopped a question: okay -- a blink and one nod.
   okay: { still: 'rest', f: [['rest', 40], ['blink1', 45], ['blink2', 40], ['blink1', 45], ['rest', 320]],
@@ -13851,12 +14462,14 @@ function drPerfSeed(n){
   drPerfRand = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 // A sequence from beats: each beat is [frames, ms it lasts, head key at its
-// end ([tilt, lift]) or null]. The head keys land where the beats do, so a
-// change of frame and the lean it goes with arrive together.
+// end ([tilt, lift]) or null, and optionally a brow pose held from its start
+// (null: the brows follow the frames again)]. The head keys land where the
+// beats do, so a change of frame and the lean it goes with arrive together.
 function drPerfMake(beats, extra){
-  const f = [], head = [[0, 0, 0]];
+  const f = [], head = [[0, 0, 0]], brow = [];
   let t = 0;
-  beats.forEach(([frames, ms, key]) => {
+  beats.forEach(([frames, ms, key, bp]) => {
+    if(bp !== undefined) brow.push([Math.round(t), bp]);
     const per = frames.length ? frames : [];
     if(per.length){
       const each = per.map(x => Array.isArray(x) ? x : [x, 0]);
@@ -13868,7 +14481,7 @@ function drPerfMake(beats, extra){
   });
   const last = head[head.length - 1];
   if(last[1] || last[2]) head.push([Math.round(t) + 260, 0, 0]);
-  return Object.assign({ f, head }, extra || {});
+  return Object.assign({ f, head }, brow.length ? { brow } : {}, extra || {});
 }
 const DR_PERF = {
   greet(){
@@ -13884,12 +14497,13 @@ const DR_PERF = {
     return drPerfMake([
       // Anticipation: a dip and a blink -- he's just seen you.
       [['blink1', 'blink2', 'blink1'], j(170, .2), [-side * .5, .75]],
-      // Up into the smile, leaning to one side.
-      [['smile1', 'smile2'], j(150), [tilt * .7, up * .7]],
+      // Up into the smile, leaning to one side, with an eyebrow flash:
+      // the quick up-and-down people give someone they're glad to see.
+      [['smile1', 'smile2'], j(150), [tilt * .7, up * .7], 'up'],
       [['smile'], j(160), [tilt, up]],
       // The delight: a bright squint for a moment, then the smile again,
       // with a smaller sway back (follow-through, not a repeat).
-      [['laugh1'], j(190, .25), [-tilt * .35, up * .8]],
+      [['laugh1'], j(190, .25), [-tilt * .35, up * .8], null],
       [['smile'], j(560, .2), [tilt * .3, up * .6]],
       // Recovery: the smile lingers as he comes down, a small settle past upright.
       [['smile2'], j(110), [0, .3]],
@@ -13918,16 +14532,19 @@ const DR_PERF = {
     const R = drPerfRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), side = R() < .5 ? -1 : 1;
     const calm = drMode() === 'focused', k = calm ? .6 : 1, L = side < 0 ? 'L' : 'R';
     return drPerfMake([
-      // Anticipation: leaning back a little, the other way, with a slow blink.
-      [[['blink1', 60], ['blink2', 60], ['shut', 90], ['blink2', 55], ['blink1', 55]], 320, [-side * .5 * k, -.35 * k]],
-      // The thought: eyes up to one side, head tilted the same way.
-      [['look' + 'U' + L], j(calm ? 700 : 950, .2), [side * 2.3 * k, -.3 * k]],
+      // Anticipation: leaning back a little, the other way, with a slow
+      // blink and the brows drawn together.
+      [[['blink1', 60], ['blink2', 60], ['shut', 90], ['blink2', 55], ['blink1', 55]], 320, [-side * .5 * k, -.35 * k], 'focused'],
+      // The thought: eyes up to one side, head tilted the same way (the
+      // frame raises the far brow: quizzical).
+      [['look' + 'U' + L], j(calm ? 700 : 950, .2), [side * 2.3 * k, -.3 * k], null],
       [['look' + 'U' + L], j(320), [side * 2.6 * k, -.2 * k]],
       // Eyes come level, still to that side: getting there.
       [['half' + L], j(360), [side * 1.2 * k, 0]],
-      // It lands: eyes back to you, a small smile and a small nod.
-      [['rest'], 70, null],
-      [['smile1'], j(260), [-side * .3 * k, .6 * k]],
+      // It lands: eyes back to you with an "aha" lift of the brows, a small
+      // smile and a small nod.
+      [['rest'], 70, null, 'up'],
+      [['smile1'], j(260), [-side * .3 * k, .6 * k], null],
       [['smile1'], j(260), [0, 0]],
       [['rest'], j(320), [0, 0]],
     ], { fx: calm ? null : 'question', fxAt: 420, still: 'look' + 'U' + L, stillMs: 1200 });
@@ -14057,7 +14674,75 @@ const DR_FACE_BACK = {
   love: 'smile2',
   halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
   lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
+  surprised: 'rest', sad: 'blink1', worried: 'halfL', doubt: 'wink1',
 };
+/* His brows. Each pose: [left lift, left turn, right lift, right turn] for
+   the brow on your left and the one on your right; lift in his drawing's
+   units (minus is up), turn in degrees (plus is clockwise). The inner end of
+   a brow is the end by his nose, so a worried look turns the left brow
+   anticlockwise and the right one clockwise. By default the brows follow
+   the face frame (DR_BROW_OF); a sequence can hold a pose instead (brow:
+   [[ms, pose or null], ...], null handing back to the frames), for meanings
+   the frames alone can't carry (caring when he's unsure or encouraging you).
+   Focused moves them a little less; Still shows the pose without gliding. */
+const DR_BROWS = {
+  rest:   [0, 0, 0, 0],
+  relax:  [.8, 0, .8, 0],          // eyes closed, asleep
+  lift:   [-1.2, 0, -1.2, 0],      // a small smile
+  glad:   [-2, 0, -2, 0],          // a smile
+  laugh:  [-2.8, 0, -2.8, 0],
+  up:     [-4.2, 0, -4.2, 0],      // looking up, surprised
+  quizL:  [.4, -7, -3.6, -5],      // eyes up to your left: the other brow goes up
+  quizR:  [-3.6, 5, .4, 7],
+  down:   [.8, 0, .8, 0],          // looking down, reading
+  love:   [-2, -6, -2, 6],
+  wink:   [-1, 0, 1.2, -4],        // his left eye (your right)
+  caring: [-1, -11, -1, 11],       // inner ends up: sympathy, encouragement
+  worried:[-1.4, -15, -1.4, 15],
+  focused:[1.2, 10, 1.2, -10],
+  doubt:  [-3, -4, 1, 2],          // one up over the open eye, the squinting side down
+};
+const DR_BROW_OF = {
+  shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad',
+  laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
+  lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down',
+  love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+  surprised: 'up', sad: 'caring', worried: 'worried', doubt: 'doubt',
+};
+/* How he acts with them, after the Disney principles (The Illusion of
+   Life): no twins -- his left brow (yours on the right, the side he winks)
+   is his expressive one and goes a fifth further, the other a little less,
+   so a pose is never a mirror image; anticipation -- a big raise from
+   nearly level dips first for a moment; follow-through -- the glide (CSS,
+   .ds-brow) starts a beat after the eyes and overshoots before it settles. */
+const DR_BROW_SIDE = [.9, 1.2];     // [your left, your right]
+const DR_BROW_DIP = 70;             // ms of the dip before a big raise
+function drBrowApply(l, r, v, k){
+  const [a, b] = DR_BROW_SIDE;
+  l.style.transform = v ? `translate(0px,${(v[0] * k * a).toFixed(2)}px) rotate(${(v[1] * k * a).toFixed(2)}deg)` : '';
+  r.style.transform = v ? `translate(0px,${(v[2] * k * b).toFixed(2)}px) rotate(${(v[3] * k * b).toFixed(2)}deg)` : '';
+}
+function drBrowSet(svg, pose){
+  if(!svg || !svg.querySelector) return;
+  pose = DR_BROWS[pose] ? pose : 'rest';
+  const key = pose + (drMode() === 'focused' ? ':f' : '');
+  if(svg._brow === key) return;
+  const l = svg.querySelector('.ds-brow-l'), r = svg.querySelector('.ds-brow-r');
+  if(!l || !r) return;
+  svg._brow = key;
+  clearTimeout(svg._browT);
+  const v = DR_BROWS[pose], k = drMode() === 'focused' ? .6 : 1, still = drStill();
+  const lift = (v[0] + v[2]) / 2 * k, was = svg._browLift || 0;
+  svg._browLift = lift;
+  l.style.transition = r.style.transition = still ? 'none' : '';
+  const set = () => drBrowApply(l, r, pose === 'rest' ? null : v, k);
+  if(!still && drMode() === 'lively' && lift <= -2 && was > -.6){
+    drBrowApply(l, r, [.6, 0, .6, 0], 1);
+    svg._browT = setTimeout(set, DR_BROW_DIP);
+  } else set();
+}
+// The pose for this svg now: the sequence's hold if it has one, else the frame's.
+function drBrowSync(svg, frame){ drBrowSet(svg, svg._browHold || DR_BROW_OF[frame] || 'rest'); }
 // Neighbours: each frame and its way back, plus the steps the drawn
 // sequences take on purpose (a smile breaking into a laugh, a laugh's
 // "ha-ha" mouth, squinting straight into laughter).
@@ -14102,7 +14787,8 @@ function drSeq(name){
   const total = f.reduce((t, s) => t + s[1], 0);
   const peak = raw.still ? [raw.still, raw.stillMs || 600] : raw.f.filter(s => s[0] !== 'rest').reduce((a, s) => (!a || s[1] > a[1]) ? s : a, null);
   const peakAt = peak ? f.findIndex(s => s[0] === peak[0]) : 0;
-  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt) };
+  const brow = raw.brow || null, browPeak = brow ? (brow.find(b => b[1]) || [0, null])[1] : null;
+  const seq = { f, head: raw.head || null, fx: raw.fx || null, fxAt: raw.fxAt || 0, total, peak: peak ? peak[0] : 'rest', peakMs: peak ? peak[1] : 0, peakAt: Math.max(0, peakAt), brow, browPeak };
   drSeqCache.set(raw, seq);
   return seq;
 }
@@ -14157,6 +14843,8 @@ class DrAnim{
     return DR_FACE_FRAMES[Math.round(x / DR_FACE_W)] || 'rest';
   }
   set(name){ drFaceSet(this.svg, name); }
+  // Hold the brows in a pose (null: back to following the face frames).
+  browHold(pose){ this.svg._browHold = pose || null; drBrowSync(this.svg, this.frame()); }
   get busy(){ return !!this.run; }
   get priority(){ return this.run ? this.run.p : 0; }
   // ---- the head ----
@@ -14241,7 +14929,7 @@ class DrAnim{
     if(drStill() && p < DR_P.REACT) return false;
     this.stopRun(false);
     if(drStill()){
-      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done);
+      return this.still(seq.peak, Math.min(1400, Math.max(600, seq.peakMs)), p, o.done, seq.browPeak);
     }
     const run = { p, name: typeof name === 'string' ? name : 'custom', timers: [] };
     this.run = run;
@@ -14262,6 +14950,16 @@ class DrAnim{
     const last = frames.length ? frames[frames.length - 1][0] : this.frame();
     if(last !== 'rest' && !o.keep) drFacePath(last, 'rest').concat(['rest']).forEach(f => frames.push([f, DR_STEP]));
     this.headPlay(seq.head, skip, lead, o.keep);
+    if(seq.brow){
+      // Keys already passed (joining part-way) leave the latest one in force.
+      let now;
+      seq.brow.forEach(([t, pose]) => {
+        const at = t - skip + lead;
+        if(at <= 0) now = pose;
+        else run.timers.push(this.later(() => { if(this.run === run) this.browHold(pose); }, at));
+      });
+      if(now !== undefined) this.browHold(now);
+    }
     if(seq.fx && this.head && drFxOk()){
       run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
     }
@@ -14277,9 +14975,10 @@ class DrAnim{
     return true;
   }
   // Reduced motion: the expression's peak, still, then rest. No lean, no effects.
-  still(frame, ms, p, done){
+  still(frame, ms, p, done, brow){
     const run = { p, name: 'still', timers: [] };
     this.run = run;
+    if(brow) this.svg._browHold = brow;
     this.set(frame);
     run.timers.push(this.later(() => { if(this.run !== run) return; this.set('rest'); this.finish(run, done); }, ms));
     return true;
@@ -14287,6 +14986,7 @@ class DrAnim{
   finish(run, done){
     if(this.run !== run) return;
     this.run = null;
+    if(this.svg._browHold) this.browHold(null);
     if(done) done();
     this.next();
   }
@@ -14299,6 +14999,7 @@ class DrAnim{
     run.timers.forEach(t => this.clear(t));
     if(run.gazeTimer) this.clear(run.gazeTimer);
     this.run = null;
+    this.svg._browHold = null;
     this.fadeEffects();
     if(settle) this.settle();
   }
@@ -14841,7 +15542,7 @@ function drPerform(seq, o){
 function drSeqMs(name){ const q = drSeq(name); return q ? q.total : 0; }
 window.addEventListener('offline', () => {
   drMind.offline = true; drMindChanged();
-  drPerform('composed', { priority: DR_P.REACT });
+  drPerform('worry', { priority: DR_P.REACT });
 });
 window.addEventListener('online', () => {
   drMind.offline = false; drMindChanged();
@@ -14861,6 +15562,7 @@ function drFaceSet(svg, name){
   if(!sheet) return;
   const x = String(-DR_FACE_W * Math.max(0, DR_FACE_FRAMES.indexOf(name)));
   if(sheet.getAttribute('x') !== x) sheet.setAttribute('x', x);
+  drBrowSync(svg, name);
 }
 function drFaceBusy(svg){ const a = svg && drAnimOf.get(svg); return !!(a && a.busy); }
 // An expression as a reaction (REACT unless given), e.g. the lock screen's smile.
@@ -16046,6 +16748,12 @@ const GUIDE_SECTIONS = [
 ];
 
 const GUIDE_TOPICS = [
+  { id:'promo', section:'start', k:'video promo watch film movie clip 45 seconds introduction intro overview what is show someone new hire ceo explain the app', q:'What is Interpreter Hub? Watch the 45-second video', a:`
+    <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" playsinline webkit-playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
+    <p>A short film about the Hub: why the right word matters, then the glossary, Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice, Team Chat and Dr. Smiley. It plays with sound. Tap the square-corners button for full screen, and the <b>X</b> at the top right to come back.</p>
+    <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
+    <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
+
   { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
     <ol>
@@ -16167,11 +16875,11 @@ const GUIDE_TOPICS = [
     <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
-  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions', q:'Can I make Dr. Smiley move less, or hide him?', a:`
+  { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful', q:'Can I make Dr. Smiley move less, or hide him?', a:`
     <p>Tap your initial in the <b>top-right corner</b>. Under <b>How Dr. Smiley moves</b>, pick one:</p>
     <ul>
-      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team.</li>
-      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. No laughing and no little sparkles.</li>
+      <li><b>Lively</b>: his full expressions. A delighted hello, a nod when something is saved or right, a thoughtful look, a laugh when you do well, now and then a wink. His eyes follow your finger and he reacts to the team. His brows move with his face: up when he looks up or laughs, one raised while he thinks, and turned up softly in the middle when he isn't sure of an answer or is encouraging you. He acts, too: a quick eyebrow flash when he says hello, a startled look before he giggles when you hold him, an "aha" lift when a thought lands, and a worried look, then a reassuring smile, if the connection drops. He has faces for those moments: wide eyes and an "O" mouth when he's surprised, a tight mouth when he's worried, a doubtful squint when an answer comes from general knowledge instead of the Hub (check it), and a brief sad look when he couldn't help.</li>
+      <li><b>Focused</b>: the same gestures, smaller and calmer, only for what you're doing. His brows move less. No laughing and no little sparkles.</li>
       <li><b>Still</b>: he doesn't move. A reaction shows as one still face, then his usual one. Your name on Home is simply there, without the light writing it.</li>
     </ul>
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
@@ -16362,9 +17070,10 @@ const GUIDE_TOPICS = [
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
     <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
 
-  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness', q:'How do I practice for the CoreCHI exam?', a:`
+  { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game crane hospital', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
-    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. The ring at the top shows how ready you are. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
+    <p>Questions are spread across the five official exam areas in the same proportions as the real thing. At the top is <b>your HUMC campus</b>: the main entrance off the street at dusk, with the drive, its flower bed, the fountain and the buildings around it. Each exam area is one building (Ethics the building with the banners at the end of the drive, Terminology the white tower with the HMH mark, U.S. Health Systems the building on the left, Encounter the Helena Theurer Pavilion, Cultural Responsiveness the dark tower on the right), and its windows light up as you master it, until the whole building glows. The big number is how ready you are. Each building's badge shows its exam area and how lit it is. Tap a building or its badge to pick it: its windows all light up, the rest of the campus dims, and a card under the picture names the exam area with its number of questions and its share of the exam. Tap <b>Practise</b> (or the same building again) to start; tap the empty campus or the × to put it back. Dr. Smiley stands by the one worth lighting next, and <b>Play</b> starts what's next. The campus is alive: cars come and go up the drive, an ambulance pulls in with its lights going, a helicopter lands on the white tower's helipad, the flags wave and the fountain plays. It all pauses while the campus is off screen. Under it, <b>Your scores</b> draws a line through your last 12 sessions: tap a point to see that session's score and date, tap it again to go back to the latest. <b>Focus next</b> names the area costing you the most on the exam, with <b>Practise it</b> to start on it. Press and hold any card and it tips toward your finger, then springs back when you let go.</p>
+    <p>Right under the campus, <b>Your domains</b> lists one row per building: how much of its question bank you've learned, how often you got it right in your sessions, and a <b>Practise</b> button. After each quiz you'll see which areas you're strongest and weakest in, which is the part worth paying attention to.</p>
     <p>These are practice questions written for studying. They are not real exam questions.</p>` },
 
   { id:'review', section:'study', k:'review flashcards study memorize spaced repetition drill still learning practice five terms session specialty pause resume mistakes', q:'What is Term Review?', a:`
@@ -16455,6 +17164,14 @@ const GUIDE_TOPICS = [
     </ol>
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
+  { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
+    <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It's getting things ready for a memory trainer for consecutive interpreting.</p>
+    <ol>
+      <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
+      <li>Do the four steps on the sheet. The phone asks before it uses the microphone.</li>
+      <li>Tap <b>Copy results</b> and paste them into a chat.</li>
+    </ol>
+    <p>The Hub saves nothing and sends nothing: the recording is dropped when you close the sheet. The speech-to-text step may send what you say to Apple, so do it away from patients.</p>` },
   { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
     <p>Close it completely and open it again.</p>
     <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>
@@ -17808,9 +18525,9 @@ function renderContent(){
   }
 
   if(activeCategory === 'practice'){
+    const motionPrev = practiceMotionKeys(content);
     content.innerHTML = renderPractice();
-    animateBars();
-    animateReadyRing();
+    playPracticeMotion(content, motionPrev);
     if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
       const ring = content.querySelector('.score-ring');
       if(ring) animateScore(Number(ring.dataset.pct) || 0);
@@ -18782,6 +19499,8 @@ function navigateBack(){
   if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
   // So is the guide's Show me.
   if(guideCoachClose()) return true;
+  // So is the video's full screen.
+  if(promoTheatreClose()) return true;
 
   // An open overlay is the top layer, so Back closes that first — otherwise
   // it navigates the screen behind the panel and the panel stays put, which
@@ -19334,34 +20053,43 @@ function renderPractice(){
        affiliated with or endorsed by CCHI. Study the official CCHI materials too.</p>
   </details>`;
 
-  // ---- how ready you are ----
+  // ---- how ready you are: your HUMC campus, built floor by floor ----
   const ready = examReadiness();
-  html += `<div class="ready-card">
-    <div class="ready-main">
-      <div class="ready-ring" data-pct="${ready.pct}">
-        <div class="ready-ring-in"><b class="ready-pct">0%</b><span class="ready-cap">ready</span></div>
-      </div>
-      <div class="ready-say">
-        <b>${escapeHtml(ready.title)}</b>
-        <span>${escapeHtml(ready.note)}</span>
-      </div>
-    </div>
-    <div class="ready-stats">
-      <div class="ready-stat study-streak">
-        <i>${ICON_FLAME}</i><b><span class="study-flame">${st.days||0}</span></b>
-        <span>day${(st.days||0)===1?'':'s'} in a row</span>
-      </div>
-      <div class="ready-stat study-goal${todayCount >= DAILY_GOAL ? ' is-met' : ''}">
-        <i>${ICON_TARGET}</i>
-        <span class="study-goal-top"><b>${todayCount} / ${DAILY_GOAL}</b></span>
-        <span class="study-goal-note">${todayCount >= DAILY_GOAL ? 'today — goal met' : 'answered today'}</span>
-        <span class="study-goal-track"><span class="study-goal-fill" style="width:${goalPct}%"></span></span>
-      </div>
-      <div class="ready-stat">
-        <i>${ICON_CLOCK}</i><b>${due}</b><span>due for review</span>
-      </div>
-    </div>
-  </div>`;
+  html += renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen);
+
+  // ---- your domains: the campus's buildings, one row each (the live screen's rows) ----
+  const mast = domainMastery();
+  const acc = domainAccuracy();
+  html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
+  html += `<div class="mastery-list" data-motion="mastery" data-sig="${escapeAttr(JSON.stringify(mast))}">`;
+  CCHI_DOMAINS.forEach((d, i)=>{
+    const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
+    const a = acc[d.id];
+    const t = m.total || 1;
+    html += `
+      <div class="mastery-row dash-in" style="--dom:${d.color}; --i:${i}">
+        <div class="mastery-top">
+          <span class="mastery-dot"></span>
+          <span class="mastery-id">
+            <span class="mastery-name">${escapeHtml(d.name)}</span>
+            <span class="mastery-weight">${d.weight}% of the exam \u00b7 ${escapeHtml((CAMPUS.find(x=> x.id === d.id) || {}).place || '')}${a ? ` \u00b7 ${Math.round((a.right/a.total)*100)}% right` : ''}</span>
+          </span>
+          <span class="mastery-pct"><span class="js-count" data-to="${Math.round(((m.known + m.shaky*0.5)/t)*100)}">${Math.round(((m.known + m.shaky*0.5)/t)*100)}</span>%</span>
+        </div>
+        <span class="mastery-track">
+          <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
+          <span class="mastery-seg is-shaky" style="width:${(m.shaky/t)*100}%"></span>
+        </span>
+        <div class="mastery-foot">
+          <span class="mastery-stats">${m.known} learned · ${m.shaky} shaky · ${m.unseen} unseen</span>
+          <button class="mastery-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise</button>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+
+  // ---- your scores over time, and the one domain to work on ----
+  html += `<div class="dash-row">${renderScoreTrend()}${renderFocusTile(ready.worst)}</div>`;
 
   // ---- the four ways in ----
   // DOM order stays review / mistakes / new / exam; CSS `order` promotes
@@ -19379,7 +20107,7 @@ function renderPractice(){
   ];
   const nextKey = (MODES.find(m=> m.n > 0) || {}).key || 'exam';
 
-  html += `<div class="study-modes">`;
+  html += `<div class="study-modes" data-motion="modes" data-sig="${due}|${shaky}|${unseen}">`;
   MODES.forEach(m=>{
     const isNext = m.key === nextKey;
     html += `<button class="study-mode${isNext?' is-next':''}" style="--mode:${m.color}"
@@ -19419,37 +20147,6 @@ function renderPractice(){
       <span class="badge-note">${escapeHtml(bd.note)}</span>
     </div>`;
   }).join('') + `</div>`;
-
-  // ---- where you stand ----
-  html += renderMyProgress();
-
-  const mast = domainMastery();
-  html += `<div class="section-head"><h2>Your domains</h2><span class="sub">learned \u00b7 shaky \u00b7 unseen</span></div>`;
-  html += `<div class="mastery-list">`;
-  CCHI_DOMAINS.forEach(d=>{
-    const m = mast[d.id] || {known:0,shaky:0,unseen:0,total:0};
-    const t = m.total || 1;
-    html += `
-      <div class="mastery-row" style="--dom:${d.color}">
-        <div class="mastery-top">
-          <span class="mastery-dot"></span>
-          <span class="mastery-id">
-            <span class="mastery-name">${escapeHtml(d.name)}</span>
-            <span class="mastery-weight">${d.weight}% of the exam</span>
-          </span>
-          <span class="mastery-pct">${Math.round(((m.known + m.shaky*0.5)/t)*100)}%</span>
-        </div>
-        <span class="mastery-track">
-          <span class="mastery-seg is-known" style="width:${(m.known/t)*100}%"></span>
-          <span class="mastery-seg is-shaky" style="width:${(m.shaky/t)*100}%"></span>
-        </span>
-        <div class="mastery-foot">
-          <span class="mastery-stats">${m.known} learned · ${m.shaky} shaky · ${m.unseen} unseen</span>
-          <button class="mastery-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise</button>
-        </div>
-      </div>`;
-  });
-  html += `</div>`;
 
   // ---- the custom setup, kept for anyone who wants to choose ----
   html += `<div class="section-head"><h2>Custom session</h2></div>`;
@@ -19557,7 +20254,7 @@ function renderWeeklyBoard(){
   }
   const top = rows[0].q || 1;
   let html = `<div class="section-head"><h2>This week</h2><span class="sub">by questions practised</span></div>`;
-  html += `<div class="board">`;
+  html += `<div class="board" data-motion="board" data-sig="${escapeAttr(rows.slice(0, 8).map(r=> r.who + ':' + r.q).join(','))}">`;
   rows.slice(0, 8).forEach((r, i)=>{
     const mine = me && r.who.trim().toLowerCase() === me;
     const acc = r.q ? Math.round((r.right/r.q)*100) : 0;
@@ -19579,51 +20276,416 @@ function renderWeeklyBoard(){
   return html;
 }
 
-function renderMyProgress(){
-  const mine = myQuizHistory();
+/* ---------- Practice dashboard tiles ----------
+   Your scores: every finished session as a point, oldest to newest, the last
+   twelve so the line stays readable on a phone. Built from quiz-history,
+   which every session already writes. Focus next: the domain costing the
+   most exam weight, with a way straight into it. */
+let TREND_POINTS = [];
+// TREND_GUT keeps the 100% / 50% labels in their own column, clear of the newest point.
+const TREND_W = 300, TREND_H = 96, TREND_TOP = 9, TREND_BOT = 87, TREND_PAD = 9, TREND_GUT = 30;
+
+function domainAccuracy(){
+  const out = {};
+  myQuizHistory().forEach(h=>{
+    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
+      if(!s || !s.total) return;
+      if(!out[d]) out[d] = { right:0, total:0 };
+      out[d].right += s.right;
+      out[d].total += s.total;
+    });
+  });
+  return out;
+}
+
+function trendDate(at){
+  try{ return new Date(at).toLocaleDateString(undefined, { month:'short', day:'numeric' }); }catch(e){ return ''; }
+}
+
+function renderScoreTrend(){
   if(!whoAmI()){
-    return `<div class="progress-card"><p>Set your name to start tracking your practice results over time.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
+    TREND_POINTS = [];
+    return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="noname">
+      <span class="dash-label">Your scores</span>
+      <p class="dash-empty">Set your name to start tracking your scores over time.</p>
+      <button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
   }
+  const mine = myQuizHistory().filter(h=> h.total);
   if(!mine.length){
-    return `<div class="progress-card"><p>No practice sessions yet — your results will start building a personal accuracy record here.</p></div>`;
+    TREND_POINTS = [];
+    return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="none">
+      <span class="dash-label">Your scores</span>
+      <p class="dash-empty">Finish a session and your scores start drawing a line here.</p></div>`;
   }
 
   const totalQ = mine.reduce((n,h)=>n+h.total, 0);
-  const totalRight = mine.reduce((n,h)=>n+h.correct, 0);
-  const overallPct = totalQ ? Math.round((totalRight/totalQ)*100) : 0;
-  const best = Math.max(...mine.map(h=> h.total ? Math.round((h.correct/h.total)*100) : 0));
+  const totalRight = mine.reduce((n,h)=>n+(h.correct||0), 0);
+  const overall = Math.round((totalRight/totalQ)*100);
+  const scoreOf = h => Math.round(((h.correct||0)/h.total)*100);
+  const best = Math.max(...mine.map(scoreOf));
 
-  const domainTotals = {};
-  mine.forEach(h=>{
-    Object.entries(h.domainBreakdown || {}).forEach(([d, s])=>{
-      if(!domainTotals[d]) domainTotals[d] = { right:0, total:0 };
-      domainTotals[d].right += s.right;
-      domainTotals[d].total += s.total;
-    });
+  // History is newest first; the line reads left to right, oldest to newest.
+  const pts = mine.slice(0, 12).reverse().map(h=>({ pct:scoreOf(h), at:h.timestamp }));
+  const n = pts.length;
+  pts.forEach((p, i)=>{
+    p.x = n === 1 ? (TREND_W - TREND_GUT)/2 : TREND_PAD + i*(TREND_W - TREND_GUT - 2*TREND_PAD)/(n - 1);
+    p.y = TREND_TOP + (1 - p.pct/100)*(TREND_BOT - TREND_TOP);
   });
+  TREND_POINTS = pts;
+  const last = pts[n - 1];
+  const before = pts.slice(0, -1);
+  const avg = before.length ? Math.round(before.reduce((s,p)=>s+p.pct, 0)/before.length) : null;
+  const delta = avg === null ? null : last.pct - avg;
 
-  let html = `<div class="progress-card">
-    <div class="progress-head">
-      <div><b>${mine.length}</b><span>session${mine.length===1?'':'s'}</span></div>
-      <div><b>${overallPct}%</b><span>all-time accuracy</span></div>
-      <div><b>${best}%</b><span>best session</span></div>
+  const line = pts.map((p,i)=> `${i?'L':'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  const area = n > 1 ? `${line} L${last.x.toFixed(1)} ${TREND_BOT} L${pts[0].x.toFixed(1)} ${TREND_BOT} Z` : '';
+  const gy = v => (TREND_TOP + (1 - v/100)*(TREND_BOT - TREND_TOP)).toFixed(1);
+  // The dots follow the pen: each pops as the line reaches it.
+  const dots = pts.map((p,i)=> `<circle class="trend-dot${i===n-1?' is-last':''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${i===n-1 ? 6.5 : 5}"
+      style="--d:${Math.round(180 + (n === 1 ? 0 : (i/(n-1))*900))}ms"></circle>`).join('');
+  const hits = pts.map((p,i)=> `<circle class="trend-hit" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="15" onclick="trendPick(${i})"><title>${p.pct}% · ${escapeHtml(trendDate(p.at))}</title></circle>`).join('');
+
+  return `<div class="dash-tile trend-tile dash-in" style="--i:1" data-motion="trend" data-sig="${mine.length}|${last.at}">
+    <span class="dash-label">Your scores</span>
+    <div class="trend-head">
+      <div class="trend-now"><b><span class="js-count" data-to="${last.pct}">${last.pct}</span>%</b>
+        <span class="trend-cap">last session · ${escapeHtml(trendDate(last.at))}</span></div>
+      ${delta === null ? '' : `<span class="trend-delta ${delta >= 0 ? 'is-up' : 'is-down'}">${delta === 0 ? 'same as your average' : `${delta > 0 ? '+' : '−'}${Math.abs(delta)} vs your average`}</span>`}
     </div>
-    <div class="domain-bars" style="margin-top:14px;">`;
-  CCHI_DOMAINS.forEach(d=>{
-    const s = domainTotals[d.id];
-    if(!s) return;
-    const dpct = Math.round((s.right/s.total)*100);
-    html += `
-      <div class="domain-bar-row">
-        <span class="domain-bar-name">${escapeHtml(d.name)}</span>
-        <span class="domain-bar-track"><span class="domain-bar-fill" style="width:${dpct}%; background:${d.color};"></span></span>
-        <span class="domain-bar-pct">${dpct}%</span>
-        <span class="domain-bar-pct">${s.right}/${s.total}</span>
-      </div>`;
-  });
-  html += `</div></div>`;
-  return html;
+    <svg class="trend-svg" viewBox="0 0 ${TREND_W} ${TREND_H}" role="img" aria-label="Your last ${n} session score${n===1?'':'s'}, from ${pts[0].pct}% to ${last.pct}%">
+      <defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="currentColor" stop-opacity=".22"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/>
+      </linearGradient>
+      <radialGradient id="trendBall" cx=".36" cy=".3" r=".75">
+        <stop offset="0" stop-color="#fff"/><stop offset=".38" stop-color="currentColor"/><stop offset="1" stop-color="#1A4F86"/>
+      </radialGradient></defs>
+      <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(100)}" y2="${gy(100)}"/>
+      <line class="trend-grid" x1="0" x2="${TREND_W - TREND_GUT}" y1="${gy(50)}" y2="${gy(50)}"/>
+      <line class="trend-base" x1="0" x2="${TREND_W - TREND_GUT}" y1="${TREND_BOT}" y2="${TREND_BOT}"/>
+      <text class="trend-glabel" x="${TREND_W}" y="${(Number(gy(100)) + 3).toFixed(1)}" text-anchor="end">100%</text>
+      <text class="trend-glabel" x="${TREND_W}" y="${(Number(gy(50)) + 3).toFixed(1)}" text-anchor="end">50%</text>
+      ${area ? `<path class="trend-area" d="${area}" fill="url(#trendFill)"/>` : ''}
+      ${n > 1 ? `<path class="trend-line" d="${line}" pathLength="1"/>` : ''}
+      <circle class="trend-ping" cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="4"></circle>
+      ${dots}${hits}
+    </svg>
+    <div class="trend-foot">
+      <span><b>${mine.length}</b> session${mine.length===1?'':'s'}</span>
+      <span><b>${overall}%</b> all-time</span>
+      <span><b>${best}%</b> best</span>
+    </div>
+  </div>`;
 }
+
+// Tap a point to read that session; tap it again to go back to the latest.
+function trendPick(i){
+  const tile = document.querySelector('.trend-tile');
+  const p = TREND_POINTS[i];
+  if(!tile || !p) return;
+  const dots = tile.querySelectorAll('.trend-dot');
+  const again = dots[i] && dots[i].classList.contains('is-picked');
+  const show = again ? TREND_POINTS[TREND_POINTS.length - 1] : p;
+  dots.forEach((d, k)=> d.classList.toggle('is-picked', !again && k === i));
+  const b = tile.querySelector('.trend-now b');
+  const cap = tile.querySelector('.trend-cap');
+  if(b) b.textContent = show.pct + '%';
+  if(cap) cap.textContent = (show === TREND_POINTS[TREND_POINTS.length - 1] ? 'last session' : 'that session') + ' · ' + trendDate(show.at);
+}
+
+function renderFocusTile(worst){
+  if(!worst) return '';
+  const d = worst.d;
+  const cover = Math.round(worst.cover*100);
+  return `<div class="dash-tile focus-tile dash-in" style="--dom:${d.color}; --i:2" data-motion="focus" data-sig="${d.id}|${cover}">
+    <span class="dash-label">Focus next</span>
+    <b class="focus-name">${escapeHtml(d.name)}</b>
+    <span class="focus-why">${d.weight}% of the exam · <span class="js-count" data-to="${cover}">${cover}</span>% covered</span>
+    <span class="mastery-track focus-track"><span class="mastery-seg is-known" style="width:${cover}%"></span></span>
+    <button class="mastery-go focus-go" onclick="requireName(()=>startStudy('domain','${d.id}'))">Practise it</button>
+  </div>`;
+}
+
+/* ---------- Your HUMC campus (CoreCHI Practice) ----------
+   Jose, 2026-10-19: "make it look like a game", then "like Hackensack University Medical Center": the
+   main entrance at dusk, from his photos (the entry drive with its lamps, the fountain circle, the brick
+   towers with cream bands, the glass tower, the main building with the HMH mark). Each exam domain is one
+   building; its windows light up in tenths as you master it. Pre-rendered 3D (docs/mockups/cchi-city:
+   entrance.html + buildentr.cjs make city/*.webp and the manifest below): the scene once, and for each
+   building its lit windows at 1..10 tenths, occluded by everything in front. CAMPUS_MAP: w,h render size;
+   g scene box [x,y,w,h]; b[key] = { label [x,y], box (tap area), lv: boxes of the 10 lit layers };
+   f fountain [x,y]; drive: the two lanes' ends. */
+const CAMPUS_MAP = {"w":960,"h":760,"g":[0,0,960,760],"f":[451,480],"drive":[[368,738],[405,472],[510,472],[524,738]],"b":{"e":{"label":[455,348],"box":[374,334,161,109],"lv":[[366,357,90,98],[348,348,198,116],[343,344,206,132],[332,335,225,150],[324,326,240,165],[316,319,255,182],[313,310,267,196],[309,305,276,207],[305,300,284,219],[302,296,289,227]]},"t":{"label":[466,242],"box":[430,234,72,154],"lv":[[411,267,91,125],[398,251,128,152],[389,242,148,169],[379,226,175,190],[372,221,188,208],[362,214,203,228],[356,208,214,241],[350,200,227,255],[346,197,234,260],[341,191,246,271]]},"s":{"label":[242,436],"box":[134,389,201,219],"lv":[[121,452,232,181],[108,426,258,231],[89,406,292,264],[84,392,310,290],[76,388,326,303],[72,379,339,324],[61,374,355,341],[57,368,365,352],[54,364,376,362],[47,359,391,374]]},"c":{"label":[649,354],"box":[573,329,157,187],"lv":[[558,364,189,178],[537,353,215,209],[519,336,262,241],[509,323,282,264],[501,314,298,280],[492,304,312,299],[485,294,325,317],[476,288,338,331],[467,282,354,345],[459,275,369,359]]},"n":{"label":[700,278],"box":[617,292,163,125],"lv":[[613,301,178,104],[597,286,205,137],[582,262,234,179],[571,254,254,198],[562,245,268,213],[555,237,282,231],[548,228,292,248],[543,219,304,264],[538,209,313,283],[534,200,323,302]]}},"live":{"clouds":[0,0,960,246],"flags":[[258,596,74,13],[258,596,74,14],[258,596,74,13]],"spray":[[434,457,35,34],[435,456,34,34],[433,457,35,34],[434,456,34,33]],"carIn":{"img":[505,565,16,18],"ref":[513,575],"pts":[[522,738,1.204],[517,647,1.095],[513,575,1],[510,517,0.917],[508,468,0.845]]},"carOut":{"img":[382,568,16,18],"ref":[391,575],"pts":[[406,468,0.845],[399,517,0.917],[391,575,1],[381,647,1.095],[368,738,1.202]]},"amb":{"img":[[527,549,23,35],[521,549,23,35]],"ref":[536,574],"pts":[[550,735,1.204],[541,631,1.077],[534,546,0.961],[532,487,0.876],[547,460,0.835],[563,453,0.822]]},"carIn2":{"img":[482,537,15,17],"ref":[490,547],"pts":[[493,738,1.253],[491,633,1.121],[490,547,1],[489,498,0.926],[489,468,0.879]]},"street":[{"img":[421,736,33,17],"ref":[441,745],"pts":[[-70,745,0.896],[257,745,0.981],[624,745,0.992],[951,745,0.921]],"dur":11000},{"img":[429,704,33,16],"ref":[442,713],"pts":[[932,713,0.925],[618,713,0.993],[266,713,0.982],[-48,713,0.901]],"dur":9500},{"img":[404,730,66,26],"ref":[441,745],"pts":[[-70,745,0.896],[257,745,0.981],[624,745,0.992],[951,745,0.921]],"dur":16000},{"img":[429,704,33,16],"ref":[442,713],"pts":[[932,713,0.925],[618,713,0.993],[266,713,0.982],[-48,713,0.901]],"dur":12500}],"walkers":[{"img":[[549,666,9,27],[549,666,9,27]],"ref":[553,684],"pts":[[4,684,0.918],[297,684,0.988],[553,684,1],[883,684,0.94]],"dur":42000},{"img":[[293,659,10,26],[293,659,10,26]],"ref":[299,676],"pts":[[879,676,0.952],[589,676,1.009],[299,676,1],[9,676,0.93]],"dur":48000},{"img":[[369,550,8,23],[369,550,8,23]],"ref":[373,565],"pts":[[128,631,1.041],[328,629,1.081],[373,565,1],[386,485,0.884],[413,457,0.842]],"dur":34000},{"img":[[521,550,8,23],[521,550,8,23]],"ref":[525,565],"pts":[[495,457,0.84],[520,485,0.883],[525,565,1],[573,631,1.087],[721,637,1.072]],"dur":36000},{"img":[[364,556,14,31],[364,556,14,31]],"ref":[371,575],"pts":[[147,635,1.037],[297,635,1.07],[371,575,1],[385,492,0.882],[410,456,0.831]],"dur":52000},{"img":[[329,678,7,18],[329,678,7,18]],"ref":[333,691],"pts":[[615,691,1.001],[554,691,1.007],[333,691,1],[259,691,0.989]],"dur":20000},{"img":[[424,444,6,20],[424,444,6,20]],"ref":[427,457],"pts":[[478,457,1.001],[427,457,1],[478,457,1.001]],"dur":22000},{"img":[[520,528,8,23],[520,528,8,23]],"ref":[524,543],"pts":[[519,472,0.892],[524,543,1],[519,472,0.892]],"dur":30000}],"heli":{"img":[[447,229,39,24],[446,229,40,24]],"ref":[466,244],"pts":[[802,116,0.82],[652,199,0.898],[532,176,0.979],[466,228,1.004],[466,244,1]],"pad":[466,244]}}};
+const CAMPUS = [
+  { key:'e', id:'ethics',      short:'Ethics',      place:'the building with the banners' },
+  { key:'t', id:'terminology', short:'Terminology', place:'the white tower' },
+  { key:'s', id:'systems',     short:'US Systems',  place:'the building on the left' },
+  { key:'n', id:'encounter',   short:'Encounter',   place:'the Helena Theurer Pavilion' },
+  { key:'c', id:'cultural',    short:'Culture',     place:'the dark tower' }
+];
+// How lit a building is: the same coverage the domain bars show (learned, plus half for shaky), in tenths.
+const campusLevel = cover => Math.max(0, Math.min(10, Math.round(cover * 10)));
+function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
+  const M = CAMPUS_MAP, W = M.w;
+  const mast = domainMastery();
+  const cover = id => { const m = mast[id]; return m && m.total ? (m.known + m.shaky*0.5)/m.total : 0; };
+  // Labels: name + % in a chip ~ (letters x 6.6 + 24) css px at the phone's ~0.37 css px per render px;
+  // nudge any that would overlap upward, keep all inside the picture.
+  const K = 0.37, tagsAt = {}, placed = [];
+  if (!document.querySelector('#content .cp-card')) CAMPUS_PICK.key = null;   // a fresh arrival starts with nothing picked
+  CAMPUS.map(b => b.key).sort((a, b) => M.b[b].label[1] - M.b[a].label[1]).forEach(key => {
+    const w = ((CAMPUS.find(b => b.key === key).short.length + 5) * 6.6 + 24) / K, h = 30 / K;
+    let x = Math.max(w/2 + 4, Math.min(W - w/2 - 4, M.b[key].label[0])), y = M.b[key].label[1];
+    for (let guard = 0; guard < 12; guard++){
+      const hit = placed.find(p => Math.abs(p.x - x) < (p.w + w)/2 + 6 && Math.abs(p.y - y) < h + 4);
+      if (!hit) break; y = hit.y - h - 6;
+    }
+    placed.push({ x, y, w }); tagsAt[key] = [x, y, w];
+  });
+  const top = Math.max(0, Math.min(Math.min(...placed.map(p => p.y)) - 34/K - 8, M.g[1]));
+  const bottom = M.g[1] + M.g[3], H = bottom - top;
+  const pos = (x, y, w, h) => `left:${(x/W*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/W*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`;
+  const at = (x, y) => `left:${(x/W*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%`;
+  const worst = ready.pct < 100 && ready.worst ? ready.worst.d.id : null;
+  let lit = '', hits = '', tags = '', legend = '', sig = [];
+  CAMPUS.forEach((b, i) => {
+    const c = cover(b.id), lv = campusLevel(c), pct = Math.round(c*100), d = CCHI_DOMAINS.find(x => x.id === b.id) || {};
+    sig.push(b.key + lv);
+    if (lv) lit += `<span class="cp-litw" style="${pos(...M.b[b.key].lv[lv-1])};--i:${i}"><img class="cp-lit" src="./city/${b.key}-lit${lv}.webp" alt="" decoding="async" style="--fl:${(3.2 + i*0.7).toFixed(1)}s"></span>`;
+    hits += `<button class="cp-bld" data-k="${b.key}" style="${pos(...M.b[b.key].box)}" tabindex="-1" aria-hidden="true"
+        onclick="campusPick('${b.key}')"></button>`;
+    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}${CAMPUS_PICK.key === b.key ? ' is-sel' : ''}" data-k="${b.key}" style="${at(...tagsAt[b.key])};--dom:${d.color||'#888'}"
+        onclick="campusPick('${b.key}')" aria-label="${escapeAttr(d.name||b.short)}, ${pct}% lit" aria-pressed="${CAMPUS_PICK.key === b.key}"><b>${escapeHtml(b.short)}</b><i>${pct}%</i></button>`;
+    legend += `<button class="cp-key${b.id === worst ? ' is-focus' : ''}" style="--dom:${d.color||'#888'}" onclick="requireName(()=>startStudy('domain','${b.id}'))">
+        <span class="cp-dot"></span>${escapeHtml(b.short)} <i>${pct}%</i></button>`;
+  });
+  // the living layers: clouds, flags, the fountain's spray (frames), vehicles moved along their paths by campusLife()
+  const L = M.live, frames = (cls, arr) => arr.map((bx, i) => `<img class="${cls}" src="./city/${cls === 'cp-flag' ? 'flag' : 'spray'}${i}.webp" alt="" decoding="async" style="${pos(...bx)};--f:${i};--n:${arr.length}">`).join('');
+  const origin = (o, bx) => `transform-origin:${((o.ref[0]-bx[0])/bx[2]*100).toFixed(2)}% ${((o.ref[1]-bx[1])/bx[3]*100).toFixed(2)}%`;
+  const data = o => `data-ref="${o.ref.join(',')}" data-pts="${o.pts.map(p=>p.join(',')).join(';')}"`;
+  const live = `<img class="cp-clouds" src="./city/clouds.webp" alt="" decoding="async" style="${pos(...L.clouds)}">${frames('cp-flag', L.flags)}${frames('cp-spray', L.spray)}
+    <img class="cp-veh cp-car" src="./city/car-in.webp" alt="" decoding="async" ${data(L.carIn)} style="${pos(...L.carIn.img)};${origin(L.carIn, L.carIn.img)}">
+    <img class="cp-veh cp-car" src="./city/car-out.webp" alt="" decoding="async" ${data(L.carOut)} style="${pos(...L.carOut.img)};${origin(L.carOut, L.carOut.img)}">
+    <span class="cp-veh cp-amb" ${data(L.amb)} style="${pos(...L.amb.img[0])};${origin(L.amb, L.amb.img[0])}"><img src="./city/amb0.webp" alt="" decoding="async"><img src="./city/amb1.webp" alt="" decoding="async"></span>
+    <img class="cp-veh cp-car" src="./city/car-in2.webp" alt="" decoding="async" ${data(L.carIn2)} style="${pos(...L.carIn2.img)};${origin(L.carIn2, L.carIn2.img)}">
+    ${L.street.map((o, i) => `<img class="cp-veh cp-mv" src="./city/street${i}.webp" alt="" decoding="async" ${data(o)} data-dur="${o.dur}" data-delay="${-i*3700}" style="${pos(...o.img)};${origin(o, o.img)}">`).join('')}
+    ${L.walkers.map((o, i) => `<span class="cp-veh cp-mv cp-walk" ${data(o)} data-dur="${o.dur}" data-delay="${-i*5300}" style="${pos(...o.img[0])};${origin(o, o.img[0])}"><img src="./city/walk${i}-0.webp" alt="" decoding="async"><img src="./city/walk${i}-1.webp" alt="" decoding="async"></span>`).join('')}
+    <span class="cp-veh cp-heli" ${data(L.heli)} style="${pos(...L.heli.img[0])};${origin(L.heli, L.heli.img[0])}"><img src="./city/heli0.webp" alt="" decoding="async"><img src="./city/heli1.webp" alt="" decoding="async"></span>`;
+  // Dr. Smiley stands at the building to light next
+  const wk = worst ? CAMPUS.find(x => x.id === worst).key : null;
+  const dr = wk ? `<span class="cp-dr" style="${at(Math.max(22/K, tagsAt[wk][0] - tagsAt[wk][2]/2 - 24/K), tagsAt[wk][1] - 2/K)}">${drSmileyArt('ask-face')}</span>` : '';
+  let say;
+  if (!worst) say = 'Every window is lit. Sit an exam simulation to prove it!';
+  else { const b = CAMPUS.find(x => x.id === worst); say = `Light up <b>${escapeHtml(b ? b.place : '')}</b>: ${escapeHtml(b ? b.short : ready.worst.d.name)} is ${ready.worst.d.weight}% of the exam.`; }
+  const next = due ? ['review', `Play: ${due} due`] : shaky ? ['weak', `Play: ${shaky} mistake${shaky===1?'':'s'}`] : unseen ? ['new', 'Play: learn new'] : ['exam', 'Play: exam sim'];
+  return `<div class="cp-card dash-in" data-motion="ready" data-sig="${ready.pct}|${st.days||0}|${todayCount}|${due}|${sig.join('')}">
+    <div class="cp-hud">
+      <small>Your HUMC campus</small>
+      <div class="ready-ring" data-pct="${ready.pct}">
+        <div class="ready-ring-in"><b class="ready-pct">0%</b><span class="ready-cap">ready</span></div>
+      </div>
+      <span>${escapeHtml(ready.title)}</span>
+    </div>
+    <div class="cp-say"><p><small>Dr. Smiley</small>${say}</p></div>
+    <div class="cp-world${CAMPUS_PICK.key ? ' has-sel' : ''}" style="aspect-ratio:${W} / ${H}" data-top="${top}" onclick="campusTapOut(event)">
+      <img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">
+      ${lit}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelLit(CAMPUS_PICK.key, top) : ''}${hits}${tags}${dr}
+    </div>
+    <div class="cp-foot${CAMPUS_PICK.key ? ' has-sel' : ''}">
+    <div class="cp-pick" role="region" aria-live="polite" aria-label="Picked building">${CAMPUS_PICK.key ? campusPickCard(CAMPUS_PICK.key) : ''}</div>
+    <div class="cp-chips">
+      <span class="cp-chip study-streak"><i>${ICON_FLAME}</i><b class="study-flame js-count" data-to="${st.days||0}">${st.days||0}</b> day${(st.days||0)===1?'':'s'}</span>
+      <span class="cp-chip${todayCount >= DAILY_GOAL ? ' is-met' : ''}"><i>${ICON_TARGET}</i><b class="js-count" data-to="${todayCount}">${todayCount}</b>&#8202;/&#8202;${DAILY_GOAL} today</span>
+      <span class="cp-chip"><i>${ICON_CLOCK}</i><b class="js-count" data-to="${due}">${due}</b> due</span>
+    </div>
+    <div class="cp-go">
+      <button class="cp-play" onclick="requireName(()=>startStudy('${next[0]}'))">${escapeHtml(next[1])}</button>
+      <button class="cp-exam" onclick="requireName(()=>startStudy('exam'))">Exam sim</button>
+    </div>
+    </div>
+  </div>`;
+}
+
+/* Picking a building: the first tap on a building or its badge picks it (its windows all light, the
+   rest of the scene dims, a card names the exam area with Practise); a second tap, or Practise,
+   starts. A tap on the empty scene, the card's close or Escape puts it back. Kept across the
+   screen's re-renders, dropped on a fresh arrival (renderCampus). */
+const CAMPUS_PICK = { key: null };
+function campusPos(top){ const M = CAMPUS_MAP, H = M.g[1] + M.g[3] - top;
+  return { box: (x, y, w, h) => `left:${(x/M.w*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/M.w*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`,
+    pt: (x, y) => [(x/M.w*100).toFixed(2) + '%', ((y-top)/H*100).toFixed(2) + '%'], H }; }
+function campusShadeAt(key, top){
+  const [x, y, w, h] = CAMPUS_MAP.b[key].box, P = campusPos(top), [cx, cy] = P.pt(x + w/2, y + h/2);
+  return `--cx:${cx};--cy:${cy};--rw:${(w/CAMPUS_MAP.w*100*0.85).toFixed(2)}%;--rh:${(h/P.H*100*0.8).toFixed(2)}%`;
+}
+const campusSelLit = (key, top) => `<span class="cp-litw cp-litsel" style="${campusPos(top).box(...CAMPUS_MAP.b[key].lv[9])}"><img class="cp-lit" src="./city/${key}-lit10.webp" alt="" decoding="async"></span>`;
+function campusPickCard(key){
+  const b = CAMPUS.find(x => x.key === key), d = CCHI_DOMAINS.find(x => x.id === b.id) || {}, m = domainMastery()[b.id];
+  const pct = Math.round((m && m.total ? (m.known + m.shaky*0.5)/m.total : 0) * 100), n = allQuestions().filter(q => q.d === b.id).length;
+  return `<div class="cp-pick-in" style="--dom:${d.color||'#888'}">
+    <p><b><span class="cp-dot"></span>${escapeHtml(d.name || b.short)}</b>
+      <small>${n} question${n === 1 ? '' : 's'} · ${d.weight}% of exam</small></p>
+    <div class="cp-pick-go"><button class="cp-play" onclick="campusGo('${key}')" aria-label="Practise ${escapeAttr(b.short)}, ${pct}% lit">Practise</button>
+      <button class="cp-pick-x" onclick="campusPick(null)" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+  </div>`;
+}
+function campusPick(key){
+  if (key && CAMPUS_PICK.key === key) return campusGo(key);
+  CAMPUS_PICK.key = key;
+  const world = document.querySelector('#content .cp-world'), pick = document.querySelector('#content .cp-pick');
+  if (!world || !pick) return;
+  const top = +world.dataset.top || 0, shade = world.querySelector('.cp-shade');
+  world.classList.toggle('has-sel', !!key);
+  const foot = document.querySelector('#content .cp-foot'); if (foot) foot.classList.toggle('has-sel', !!key);
+  world.querySelectorAll('.cp-tag').forEach(t => { const on = t.dataset.k === key; t.classList.toggle('is-sel', on); t.setAttribute('aria-pressed', on); });
+  const old = world.querySelector('.cp-litsel'); if (old) old.remove();
+  if (key){ shade.setAttribute('style', campusShadeAt(key, top)); shade.insertAdjacentHTML('afterend', campusSelLit(key, top)); }
+  pick.innerHTML = key ? campusPickCard(key) : '';
+}
+function campusGo(key){
+  const b = CAMPUS.find(x => x.key === key); CAMPUS_PICK.key = null;
+  if (b) requireName(() => startStudy('domain', b.id));
+}
+function campusTapOut(e){ if (CAMPUS_PICK.key && !e.target.closest('.cp-bld, .cp-tag')) campusPick(null); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && CAMPUS_PICK.key && document.querySelector('#content .cp-world.has-sel')) campusPick(null); });
+
+/* ---------- Practice dashboard motion ----------
+   Each block that moves carries data-motion (its name) and data-sig (what it
+   shows). The screen re-renders for reasons that change nothing here (quiz
+   history arriving, a chat message elsewhere), so a block showing the same
+   thing picks its motion up where it was instead of starting over, and once
+   finished it stays still. Anything new, or the screen opened again, plays. */
+const MOTION_SPAN = 1500;
+const MOTION_BORN = {};
+
+function practiceMotionKeys(root){
+  const keys = {};
+  if(root) root.querySelectorAll('[data-motion]').forEach(el=>{ keys[el.dataset.motion] = el.dataset.sig; });
+  return keys;
+}
+
+/* The campus comes alive: vehicles follow their projected paths (each sprite was rendered at one
+   reference point; the path gives screen points and a scale per point), the ambulance pulls in and
+   holds with its lights flashing, the helicopter lands and later lifts off, clouds drift, flags and
+   the fountain cycle their frames, lit windows flicker. Web Animations, so they pause off screen. */
+let campusAnims = [];
+function campusLife(root){
+  campusAnims.forEach(a => a.cancel()); campusAnims = [];
+  const world = root.querySelector('.cp-world'); if (!world || reducedMotion()) return;
+  const W = CAMPUS_MAP.w;
+  const kf = el => { const ref = el.dataset.ref.split(',').map(Number), pts = el.dataset.pts.split(';').map(p => p.split(',').map(Number));
+    return pts.map(p => ({ transform: `translate(${((p[0]-ref[0])/W*100).toFixed(2)}cqw, ${((p[1]-ref[1])/W*100).toFixed(2)}cqw) scale(${p[2]})` })); };
+  const run = (el, frames, opts) => { const a = el.animate(frames, opts); campusAnims.push(a); return a; };
+  const at = (f, k) => ({ ...f, offset: k });
+  world.querySelectorAll('.cp-car').forEach((el, i) => { const f = kf(el);
+    run(el, [{ ...f[0], opacity:0 }, { ...f[0], opacity:1, offset:0.06 }, ...f.slice(1, -1).map((x, j) => at(x, 0.06 + 0.88*(j+1)/(f.length-1))), { ...f[f.length-1], opacity:1, offset:0.94 }, { ...f[f.length-1], opacity:0 }],
+      { duration: 9000 + i*2500, iterations: Infinity, delay: -i*4300, easing:'linear' }); });
+  const amb = world.querySelector('.cp-amb'); if (amb){ const f = kf(amb), n = f.length;
+    run(amb, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.02 }, ...f.slice(1).map((x, j) => at(x, 0.02 + 0.30*(j+1)/(n-1))), { ...f[n-1], opacity:1, offset:0.78 }, { ...f[n-1], opacity:0, offset:0.82 }, { ...f[n-1], opacity:0, offset:1 }],
+      { duration: 34000, iterations: Infinity, delay: -6000, easing:'linear' }); }
+  const heli = world.querySelector('.cp-heli'); if (heli){ const f = kf(heli), n = f.length, land = f.slice(0, n), lift = f.slice().reverse();
+    run(heli, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.02 }, ...land.slice(1).map((x, j) => at(x, 0.02 + 0.26*(j+1)/(n-1))), { ...f[n-1], offset:0.55 },
+        ...lift.slice(1).map((x, j) => at(x, 0.55 + 0.26*(j+1)/(n-1))), { ...f[0], opacity:1, offset:0.84 }, { ...f[0], opacity:0, offset:0.88 }, { ...f[0], opacity:0, offset:1 }],
+      { duration: 48000, iterations: Infinity, delay: -20000, easing:'ease-in-out' }); }
+  world.querySelectorAll('.cp-mv').forEach(el => { const f = kf(el), n = f.length, dur = +el.dataset.dur || 20000;
+    run(el, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.03 }, ...f.slice(1, -1).map((x, j) => at(x, 0.03 + 0.94*(j+1)/(n-1))), { ...f[n-1], opacity:1, offset:0.97 }, { ...f[n-1], opacity:0, offset:1 }],
+      { duration: dur, iterations: Infinity, delay: +el.dataset.delay || 0, easing:'linear' }); });
+  const clouds = world.querySelector('.cp-clouds'); if (clouds) run(clouds, [{ transform:'translateX(-1.2cqw)' }, { transform:'translateX(1.2cqw)' }], { duration: 70000, iterations: Infinity, direction:'alternate', easing:'ease-in-out' });
+}
+// The campus cars and fountain run only while the card is on screen.
+let campusWatch = null;
+function watchCampus(root){
+  const card = root.querySelector('.cp-card');
+  if (campusWatch) { campusWatch.disconnect(); campusWatch = null; }
+  if (!card || !('IntersectionObserver' in window)) return;
+  campusWatch = new IntersectionObserver(es => es.forEach(e => { card.classList.toggle('is-away', !e.isIntersecting); campusAnims.forEach(a => e.isIntersecting ? a.play() : a.pause()); }));
+  campusWatch.observe(card);
+}
+function playPracticeMotion(root, prev){
+  campusLife(root);
+  watchCampus(root);
+  const now = performance.now();
+  const still = reducedMotion();
+  root.querySelectorAll('[data-motion]').forEach(el=>{
+    const id = el.dataset.motion;
+    if(prev[id] !== el.dataset.sig || MOTION_BORN[id] == null) MOTION_BORN[id] = now;
+    const age = now - MOTION_BORN[id];
+    if(still || age > MOTION_SPAN) el.classList.add('is-still');
+    else if(age > 0) el.style.setProperty('--motion-skip', `-${Math.round(age)}ms`);
+  });
+  animateBars(root);
+  animateCounts(root);
+  animateReadyRing();
+}
+
+// How far into its motion an element already is: 0 for a fresh block (or
+// one outside any block, like the results screen), Infinity once settled.
+function motionAge(el){
+  const host = el.closest('[data-motion]');
+  if(!host) return 0;
+  if(host.classList.contains('is-still')) return Infinity;
+  const born = MOTION_BORN[host.dataset.motion];
+  return born == null ? 0 : performance.now() - born;
+}
+
+// Numbers arrive rather than appear. The markup already holds the final
+// value, so with no script, reduced motion or a settled block it just reads.
+function animateCounts(root){
+  if(reducedMotion()) return;
+  const DUR = 900;
+  const items = Array.from(root.querySelectorAll('.js-count'))
+    .map(el=>({ el, to:Number(el.dataset.to) || 0, age:motionAge(el) }))
+    .filter(c=> c.to > 0 && c.age < DUR);
+  if(!items.length) return;
+  const t0 = performance.now();
+  const tick = now=>{
+    let live = false;
+    items.forEach(c=>{
+      const k = Math.min(1, (now - t0 + c.age)/DUR);
+      c.el.textContent = Math.round(c.to * (1 - Math.pow(1 - k, 3)));
+      if(k < 1) live = true;
+    });
+    if(live) requestAnimationFrame(tick);
+  };
+  tick(t0);
+}
+
+/* The Pixar finish's lean: a practice tile tips toward the finger pressing
+   it and springs back on release (the spring is in CSS). With a mouse it
+   follows the pointer while hovering. Nothing runs unless a pointer is on a
+   tile; scrolling cancels the touch and so releases it. */
+(function(){
+  const SEL = '.dash-tile, .mastery-row, .study-mode:not(:disabled)';
+  let held = null;
+  const lean = e=>{
+    const r = held.getBoundingClientRect();
+    const x = (e.clientX - r.left)/r.width - .5, y = (e.clientY - r.top)/r.height - .5;
+    const k = Math.min(1, 280/Math.max(r.width, 1));   // a wide tile leans less
+    held.style.setProperty('--rx', (-y*10*k).toFixed(2) + 'deg');
+    held.style.setProperty('--ry', (x*12*k).toFixed(2) + 'deg');
+    held.style.setProperty('--mx', Math.round((x + .5)*100) + '%');
+    held.style.setProperty('--my', Math.round((y + .5)*100) + '%');
+  };
+  const release = ()=>{
+    if(!held) return;
+    held.classList.remove('is-tilting');
+    held.style.setProperty('--rx', '0deg'); held.style.setProperty('--ry', '0deg');
+    held = null;
+  };
+  const take = (t, e)=>{
+    if(t === held){ if(held) lean(e); return; }
+    release();
+    if(!t || activeCategory !== 'practice' || reducedMotion()) return;
+    held = t; held.classList.add('is-tilting'); lean(e);
+  };
+  const tileAt = e=> e.target && e.target.closest ? e.target.closest(SEL) : null;
+  document.addEventListener('pointerdown', e=>{ if(e.pointerType !== 'mouse') take(tileAt(e), e); }, { passive:true });
+  document.addEventListener('pointermove', e=>{
+    if(e.pointerType === 'mouse') take(tileAt(e), e);
+    else if(held) lean(e);
+  }, { passive:true });
+  document.addEventListener('pointerup', e=>{ if(e.pointerType !== 'mouse') release(); }, { passive:true });
+  document.addEventListener('pointercancel', release, { passive:true });
+})();
 
 function shuffleOptions(q){
   const order = shuffle(q.o.map((_, i) => i));
@@ -19817,15 +20879,14 @@ function animateScore(pct){
 /* Bars start at zero and grow to their real width on the first paint after a
    render. Without this they are simply present, which reads as a static
    report rather than progress you are making. */
-function animateBars(){
+function animateBars(root){
   if(reducedMotion()) return;
-  requestAnimationFrame(()=>{
-    document.querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill').forEach(el=>{
-      const target = el.style.width;
-      if(!target || target === '0%') return;
-      el.style.width = '0%';
-      requestAnimationFrame(()=>{ el.style.width = target; });
-    });
+  (root || document).querySelectorAll('.mastery-seg, .study-goal-fill, .domain-bar-fill, .board-fill').forEach(el=>{
+    const target = el.style.width;
+    const age = motionAge(el);
+    if(!target || target === '0%' || age >= 620 || !el.animate) return;
+    const grow = el.animate([{ width:'0%' }, { width:target }], { duration:620, easing:'cubic-bezier(.2,.8,.2,1)' });
+    grow.currentTime = age;
   });
 }
 
@@ -20332,7 +21393,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .dt-act';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -20360,8 +21421,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.1506';
-const BUILD_TIME = '2026-10-19 15:06 UTC';
+const BUILD_ID = 'b1020.0749';
+const BUILD_TIME = '2026-10-20 07:49 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -20644,6 +21705,232 @@ function frameMeterMoreHtml(){
         <span class="fm-dot ${c}" aria-hidden="true"></span><span><b>${fmR(r.ratio)} ms/s</b> · ${fmR(r.pct)}% dropped</span>
         <span>${escapeHtml(r.build)}</span></button>`; }).join('')}</div>` : ''}
   </div>`;
+}
+
+/* ---------- Voice and mic check ----------
+   Step M0 of the memory trainer (docs/PLAN.md). Before building on the
+   phone's voices, microphone and speech-to-text, find out which of them
+   work on an iPhone, in the installed app and in a Safari tab: Apple said
+   in 2021 that speech-to-text is off in Home Screen apps, and nobody has
+   checked since. Nothing is saved or sent by the Hub; the recording stays
+   in memory and is dropped on close. Copy results gives a report to paste
+   into a chat. Note: docs/features/memory-trainer.md. */
+const VC = { voices: null, play: {}, rec: null, sr: {} };
+let vcStream = null, vcRecog = null, vcUrl = null, vcAudio = null, vcTick = 0;
+const VC_LINES = {
+  es: 'Tome una tableta dos veces al día, con comida, durante diez días.',
+  en: 'Take one tablet twice a day, with food, for ten days.',
+};
+
+function vcMode(){
+  const sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  return sa ? 'installed app' : 'browser tab';
+}
+function vcSR(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+function vcLang(v){ return String(v.lang || '').replace('_', '-'); }
+
+function vcLoadVoices(){
+  return new Promise(res => {
+    if(!('speechSynthesis' in window)) return res([]);
+    const now = speechSynthesis.getVoices();
+    if(now.length) return res(now);
+    let done = false;
+    const finish = () => { if(done) return; done = true; speechSynthesis.removeEventListener('voiceschanged', finish); res(speechSynthesis.getVoices()); };
+    speechSynthesis.addEventListener('voiceschanged', finish);
+    setTimeout(finish, 2000);
+  });
+}
+
+function vcVoicesText(){
+  if(!('speechSynthesis' in window)) return 'No speech on this browser.';
+  if(!VC.voices) return 'Looking for voices…';
+  const of = p => VC.voices.filter(v => vcLang(v).toLowerCase().startsWith(p));
+  return `${of('es').length} Spanish and ${of('en').length} English voices on this phone.`;
+}
+
+function vcSet(id, text){
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = text;
+}
+function vcPaint(){
+  vcSet('vcVoices', escapeHtml(vcVoicesText()));
+  vcSet('vcPlay', ['es', 'en'].filter(l => VC.play[l]).map(l => `${l === 'es' ? 'Spanish' : 'English'}: ${escapeHtml(VC.play[l])}`).join('<br>'));
+  const R = VC.rec;
+  vcSet('vcRec', R ? escapeHtml(R.state) : '');
+  const pb = document.getElementById('vcPlayBack');
+  if(pb) pb.hidden = !vcUrl;
+  const rb = document.getElementById('vcRecBtn');
+  if(rb) rb.disabled = !!(R && R.busy);
+  vcSet('vcSr', ['en', 'es'].filter(l => VC.sr[l]).map(l => { const S = VC.sr[l];
+    return `${l === 'es' ? 'Spanish' : 'English'}: ${escapeHtml(S.state)}${S.text ? ` · <q>${escapeHtml(S.text)}</q>` : ''}`; }).join('<br>'));
+}
+
+function voiceCheckOpen(){
+  try{ closeMoreSheet(); }catch(e){}
+  const sr = vcSR();
+  document.getElementById('voiceCheckBody').innerHTML = `
+    <div class="fm-head">Voice and mic check</div>
+    <p class="fm-sub">What this phone can do for the memory trainer. Do the four steps, then tap <b>Copy results</b> and paste them into a chat. Running as: <b id="vcMode">${vcMode()}</b>.</p>
+    <div class="vc-step"><h4>1. Hear the voices</h4>
+      <p id="vcVoices"></p>
+      <div class="fm-btns"><button class="btn btn-ghost" onclick="vcPlay('es')">Play Spanish</button><button class="btn btn-ghost" onclick="vcPlay('en')">Play English</button></div>
+      <div class="vc-state" id="vcPlay" aria-live="polite"></div></div>
+    <div class="vc-step"><h4>2. Record yourself</h4>
+      <p>Records 5 seconds. Then tap Play back.</p>
+      <div class="fm-btns"><button class="btn btn-ghost" id="vcRecBtn" onclick="vcRecord()">Record 5 seconds</button><button class="btn btn-ghost" id="vcPlayBack" hidden onclick="vcPlayBack()">Play back</button></div>
+      <div class="vc-state" id="vcRec" aria-live="polite"></div></div>
+    <div class="vc-step"><h4>3. Voices after the mic</h4>
+      <p>Tap Play Spanish again. Is it as loud as before? Add yes or no when you paste.</p></div>
+    <div class="vc-step"><h4>4. Speech to text</h4>
+      <p>${sr ? 'Tap one and say a sentence. It may send what you say to Apple to turn it into text, so do this away from patients.' : 'Not available here.'}</p>
+      ${sr ? `<div class="fm-btns"><button class="btn btn-ghost" onclick="vcListen('en')">Listen in English</button><button class="btn btn-ghost" onclick="vcListen('es')">Escuchar en español</button></div>` : ''}
+      <div class="vc-state" id="vcSr" aria-live="polite"></div></div>
+    <div class="fm-meta">Build ${escapeHtml(BUILD_ID)} · ${escapeHtml(navigator.userAgent)}</div>
+    <div class="fm-btns">
+      <button class="btn btn-ghost" onclick="voiceCheckClose()">Close</button>
+      <button class="btn btn-primary" onclick="vcCopy()">Copy results</button>
+    </div>`;
+  document.getElementById('voiceCheckOverlay').classList.add('show');
+  vcPaint();
+  if(!VC.voices) vcLoadVoices().then(v => { VC.voices = v; vcPaint(); });
+}
+
+// Lets go of everything the check holds: speech, the mic, the recording.
+function voiceCheckClose(){
+  document.getElementById('voiceCheckOverlay').classList.remove('show');
+  try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+  if(vcRecog){ try{ vcRecog.abort(); }catch(e){} vcRecog = null; }
+  clearInterval(vcTick);
+  if(vcStream){ vcStream.getTracks().forEach(t => t.stop()); vcStream = null; }
+  if(vcAudio){ try{ vcAudio.pause(); }catch(e){} vcAudio = null; }
+  if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
+  if(VC.rec && VC.rec.busy){ VC.rec.busy = false; VC.rec.state = 'stopped (closed)'; }
+}
+
+function vcPlay(lang){
+  if(!('speechSynthesis' in window)){ VC.play[lang] = 'no speech on this browser'; return vcPaint(); }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(VC_LINES[lang]);
+  u.lang = lang === 'es' ? 'es-US' : 'en-US';
+  u.rate = 0.92;
+  const t0 = performance.now();
+  VC.play[lang] = 'starting…'; vcPaint();
+  u.onstart = () => { VC.play[lang] = 'playing…'; vcPaint(); };
+  u.onend = () => { VC.play[lang] = `played, ${((performance.now() - t0) / 1000).toFixed(1)} s`; vcPaint(); };
+  u.onerror = e => { VC.play[lang] = 'error: ' + (e.error || 'unknown'); vcPaint(); };
+  speechSynthesis.speak(u);
+}
+
+async function vcRecord(){
+  if(VC.rec && VC.rec.busy) return;
+  if(vcUrl){ URL.revokeObjectURL(vcUrl); vcUrl = null; }
+  const R = VC.rec = { busy: true, state: 'asking for the microphone…' };
+  vcPaint();
+  const gum = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if(!gum || !window.MediaRecorder){
+    Object.assign(R, { busy: false, state: `not available here (microphone ${gum ? 'yes' : 'no'}, recorder ${window.MediaRecorder ? 'yes' : 'no'})` });
+    return vcPaint();
+  }
+  try{ vcStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch(e){ Object.assign(R, { busy: false, state: 'microphone refused: ' + (e.name || e.message) }); return vcPaint(); }
+  const stream = vcStream;
+  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  let rec;
+  try{ rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined); }
+  catch(e){ stream.getTracks().forEach(t => t.stop()); vcStream = null; Object.assign(R, { busy: false, state: 'recorder failed: ' + (e.name || e.message) }); return vcPaint(); }
+  const chunks = [];
+  rec.ondataavailable = e => { if(e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    if(vcStream === stream) vcStream = null;
+    if(!R.busy) return; // closed while recording
+    const blob = new Blob(chunks, { type: rec.mimeType || type || 'audio/mp4' });
+    R.busy = false;
+    R.type = blob.type; R.kb = Math.round(blob.size / 1024);
+    if(!blob.size){ R.state = 'recorded nothing'; return vcPaint(); }
+    vcUrl = URL.createObjectURL(blob);
+    R.state = `recorded 5 s (${R.type}, ${R.kb} KB). Tap Play back.`;
+    vcPaint();
+  };
+  rec.start();
+  let n = 5;
+  R.state = `recording, say something… ${n}`; vcPaint();
+  clearInterval(vcTick);
+  vcTick = setInterval(() => {
+    n--;
+    if(n > 0){ R.state = `recording, say something… ${n}`; vcPaint(); return; }
+    clearInterval(vcTick);
+    if(rec.state !== 'inactive') rec.stop();
+  }, 1000);
+}
+
+// A tap, not automatic: iPhones only let sound start from a tap, and the
+// trainer will play your take back the same way.
+function vcPlayBack(){
+  if(!vcUrl || !VC.rec) return;
+  const R = VC.rec;
+  if(vcAudio){ try{ vcAudio.pause(); }catch(e){} }
+  const a = vcAudio = new Audio(vcUrl);
+  R.state = 'playing back…'; vcPaint();
+  a.onended = () => { R.state = `played back (${R.type}, ${R.kb} KB)`; vcPaint(); };
+  a.onerror = () => { R.state = 'recorded, but it would not play back'; vcPaint(); };
+  a.play().catch(e => { R.state = 'recorded, playback refused: ' + (e.name || e.message); vcPaint(); });
+}
+
+function vcListen(lang){
+  const SR = vcSR();
+  if(!SR){ VC.sr[lang] = { state: 'not available here' }; return vcPaint(); }
+  if(vcRecog){ try{ vcRecog.abort(); }catch(e){} }
+  const r = vcRecog = new SR();
+  r.lang = lang === 'es' ? 'es-US' : 'en-US';
+  r.interimResults = true;
+  r.continuous = false;
+  const S = VC.sr[lang] = { state: 'starting…', text: '', t0: performance.now() };
+  vcPaint();
+  r.onstart = () => { S.state = 'listening, speak now'; vcPaint(); };
+  r.onresult = e => {
+    S.text = [...e.results].map(x => x[0].transcript).join('');
+    if(!S.first) S.first = Math.round(performance.now() - S.t0);
+    S.state = 'hearing…'; vcPaint();
+  };
+  r.onerror = e => { S.err = e.error || 'unknown'; S.state = 'error: ' + S.err; vcPaint(); };
+  r.onend = () => {
+    if(!S.err) S.state = S.text ? `done, first words after ${(S.first / 1000).toFixed(1)} s` : 'heard nothing';
+    if(vcRecog === r) vcRecog = null;
+    vcPaint();
+  };
+  try{ r.start(); }
+  catch(e){ S.err = e.name || e.message; S.state = 'could not start: ' + S.err; vcPaint(); }
+  setTimeout(() => { if(vcRecog === r){ try{ r.stop(); }catch(e){} } }, 10000);
+}
+
+function vcText(){
+  const sr = vcSR();
+  const names = p => (VC.voices || []).filter(v => vcLang(v).toLowerCase().startsWith(p)).map(v => `${v.name} (${vcLang(v)}${v.localService === false ? ', online' : ''})`).join('; ') || 'none';
+  const R = VC.rec;
+  return [
+    `Voice and mic check · build ${BUILD_ID} · ${new Date().toLocaleString()}`,
+    `Running as: ${vcMode()}`,
+    navigator.userAgent,
+    `Voices: ${vcVoicesText()}`,
+    `  Spanish: ${names('es')}`,
+    `  English: ${names('en')}`,
+    `Play Spanish: ${VC.play.es || 'not tried'} · Play English: ${VC.play.en || 'not tried'}`,
+    `Record: ${R ? R.state : 'not tried'}`,
+    `Speech to text: ${sr ? (window.SpeechRecognition ? 'yes' : 'yes (webkit)') + (sr.prototype && 'processLocally' in sr.prototype ? ', on-device option' : '') : 'not available'}`,
+    ...['en', 'es'].map(l => `  ${l === 'es' ? 'Spanish' : 'English'}: ${VC.sr[l] ? VC.sr[l].state + (VC.sr[l].text ? ` · "${VC.sr[l].text}"` : '') : 'not tried'}`),
+    'Voice as loud after the mic? (yes/no): ',
+  ].join('\n');
+}
+
+function vcCopy(){
+  const done = () => showToast('Copied. Paste it into a chat or a note.');
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(vcText()).then(done, () => showToast('Could not copy on this phone.'));
+  else showToast('Could not copy on this phone.');
+}
+
+function voiceCheckMoreHtml(){
+  return `<div class="vc-more"><button class="btn btn-ghost" onclick="voiceCheckOpen()">Voice and mic check</button></div>`;
 }
 
 /* The hero photo is graded to the light outside, on the device's own clock.
@@ -21168,6 +22455,7 @@ function openMoreSheet(){
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
     ${frameMeterMoreHtml()}
+    ${voiceCheckMoreHtml()}
     <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
       Build ${BUILD_ID} · ${BUILD_TIME}<br>${screenReport()}
     </div>`;

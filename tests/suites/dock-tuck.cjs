@@ -6,9 +6,21 @@
 const L = require('../support/harness.cjs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 
+// Dr. Smiley never stops breathing: dsBreathe and dsDrift loop forever on
+// .dock-smiley-bob, around him, and the drift's tilt widens his box. Read
+// with those loops held at their start, so his size compares like for like
+// (WebKit failed here by 0.0026 of scale, depending on where in the breath
+// the frame landed), then let them run on from where they were.
 const rects = page => page.evaluate(() => {
+  const dr = document.querySelector('.dock-smiley');
+  const loops = document.getAnimations().filter(a => { const n = a.effect && a.effect.target;
+    return n && dr && (n === dr || n.contains(dr) || dr.contains(n)) && a.effect.getComputedTiming().iterations === Infinity; });
+  const was = loops.map(a => [a, a.currentTime, a.playState]);
+  loops.forEach(a => { a.pause(); a.currentTime = 0; });
   const q = s => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
-  return { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  const out = { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  was.forEach(([a, t, st]) => { a.currentTime = t; if (st === 'running') a.play(); });
+  return out;
 });
 // Every running animation on the dock, and what it animates.
 const dockAnims = page => page.evaluate(() => document.getAnimations().filter(a => {
@@ -30,7 +42,14 @@ const LAYOUT_FREE = ['transform', 'opacity', 'translate', 'scale', 'rotate'];
 const settle = page => page.evaluate(() => new Promise(r => {
   const t0 = performance.now();
   const swaying = () => [...document.querySelectorAll('.dock-smiley')].some(e => e.style.rotate);
-  const moving = () => swaying() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
+  // His grow back to full size after a tuck: on CI's WebKit the open reading
+  // came 65.9-69.9 px wide (full: 70.1) with nothing counted as moving, so
+  // also wait until his computed scale is the one the bar's state asks for.
+  const growing = () => { const d = document.querySelector('.dock-smiley'); if (!d) return false;
+    const want = document.body.classList.contains('dock-mini') ? 54 / 58 : 1;
+    const sc = getComputedStyle(d).scale; const v = sc === 'none' ? 1 : parseFloat(sc);
+    return Math.abs(v - want) > .0005; };
+  const moving = () => swaying() || growing() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
   const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
   check();
 }));
@@ -104,6 +123,11 @@ const settle = page => page.evaluate(() => new Promise(r => {
       }), gap);
     }), gap));
   }
+  // The bar tucks itself after 4 s idle. The loop's last restart of that
+  // count is followed by two settle() waits (each up to 3 s while Dr. Smiley
+  // sways), so a slow CI runner read the bar tucked (132 x 54). Restart it
+  // here: what follows (300 ms, one settle) stays under 4 s.
+  await page.evaluate(() => dockIdleRestart());
   const measured = jumps.filter(j => j !== 'skipped');
   ok(measured.length > 0 && measured.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
   await page.waitForTimeout(300); await settle(page);
