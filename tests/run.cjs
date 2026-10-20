@@ -21,6 +21,7 @@ const SUITES = [
   ['smiley-brows.cjs',    'Dr. Smiley: brows follow, hold, settle'],
   ['smiley-gestures.cjs', 'Dr. Smiley: the five performances'],
   ['smiley-squash.cjs',   'Dr. Smiley: squash and stretch on the spring, Lively only'],
+  ['smiley-quiz.cjs',     'Dr. Smiley in a quiz: bounce, wince, streaks, in the dock'],
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
