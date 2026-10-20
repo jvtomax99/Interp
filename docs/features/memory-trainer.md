@@ -86,3 +86,47 @@ line. Jose's call: ship them as approved-unread (`status` in the file,
 `reviewed` stays false) and catch mistakes in use with a **Flag this line**
 button in the trainer (M2): it saves the line id and what's wrong, and the
 flags are read back before lines are edited.
+
+## M2: the trainer
+
+Its own screen (`activeCategory === 'memory'`, `renderMemTrainer`), opened
+from the **Consecutive** tile on CoreCHI Practice, after the ways in
+(`memEntryHtml`, `openMemoryTrainer`). Not in the tools list. Block
+"Memory trainer" in `index.html`'s script (after the Voice and mic check)
+and a CSS block of the same name (before the campus block), in Practice's
+clay and candy buttons.
+
+A round (`MEM.stage`): **listen** (the line read aloud, words hidden, a
+ring filling for about words / 2.6 s; Dr. Smiley `attentive`, `listen`),
+**turn** ("Your turn, say it in Spanish"; `processing`, `ponder`), then
+**check** (one button per meaning chunk, model rendering over the source;
+tap the ones you dropped or changed; the line's `note` under them; Hear it
+again). Next line scores it and plays the next one from the same tap (iOS
+speaks only from a tap). Stop or leaving the screen (`memLeave`, called in
+`setCategory`) cancels the voice and ends Dr. Smiley's task. No speech on
+the browser: the line is shown to read once (**read**), then hidden.
+
+Voices by name (`memVoice`): Paulina for Spanish, Samantha for English;
+otherwise the language's default voice. Rate 0.92.
+
+The ladder (`memScore`, `memPick`): level starts at 6 words. Three clean in
+a row: level = max(level, that line) + 3. Two misses in a row: level =
+min(level, that line) - 3. Range 4-44. The next line is within 3 words of
+the level (widened until one fits), in the direction picked, least heard
+first, never the same twice running. Under 10 words the False Friends
+`heard`/`truth` lines are the starters (split at commas when both sides
+match). Span = the longest clean line, kept apart for notes on and off.
+
+Stored on the phone only, `ih_memory`: `level`, `clean`, `miss`, `notes`,
+`dir` (both | en-es | es-en), `seen` {id: times}, `log` (last 600: `at`,
+`id`, `w` words, `n` chunks, `miss` chunks missed, `notes`), `best`
+{mem, notes}. M4 charts the log.
+
+**Flag this line** (after the rendering): reasons (chips) and/or a note,
+kept in `ih_memFlags` then written to `terminology-meta/memory-flags`
+(`{flags: {<lineId>_<ms>: {line, src, model, reasons, what, by, at,
+build}}}`, merged; no new rule needed). Unsent flags are retried when the
+trainer opens. Read them before editing `memory/lines.json`.
+
+`memory/lines.json` is precached by `sw.js`. Suite:
+`tests/suites/memory-trainer.cjs`.
