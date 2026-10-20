@@ -27,7 +27,7 @@ every count); the tabs stick under the top bar while scrolling. A term row is
 about 175px, so no header layout gets three rows on screen: the rest is row
 height. The biggest single cost is the "+ Add to glossary" line (about 40px
 per row), which the mockup didn't have; it could become a third small pill
-under EN / ES. **Jose decides: A as built, B, or B plus the smaller row.**
+under EN / ES. **Jose (2026-10-20): picked B plus the smaller row, saw it built, and kept A for its look.** D1b keeps A, compacts its bento and keeps the smaller row: 1 full row on open for a typical doctor.
 
 ## Fixed in this PR, from the review
 
@@ -59,8 +59,8 @@ Speed: opening the worst doctor 52-144 ms, switching tabs 58-124 ms, at a
    fixes it. Until then, low traffic makes it rare.
 2. **Doctor Prep's Spanish looks as trusted as the glossary's.** Same size,
    same navy; only "In glossary" tells them apart. Recommend one line above
-   research rows: "From Doctor Prep, not checked by the team." Jose's call:
-   it is visible copy.
+   research rows: "From Doctor Prep, not checked by the team." Jose said
+   yes (2026-10-20); built in D1b.
 3. **Speech on an iPhone without a Spanish voice** reads Spanish with an
    English voice. Untestable here. Check on a real phone (task 3 below);
    if it happens, the ES button should say so instead of mangling it.
