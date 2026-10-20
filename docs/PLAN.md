@@ -203,10 +203,6 @@ Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
 come from this alone.
 
-1. **AI models.** `claude-sonnet-5` (translate backup) →
-   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
-   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
-   claude-api skill first. Next: translate backup.
 2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
@@ -258,6 +254,12 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 AI backup models (this PR): Translate's backup
+  `claude-sonnet-5` -> `claude-sonnet-5-5` (effort set explicitly, medium);
+  the term check's backup `claude-opus-5` -> `claude-opus-5-5` (effort
+  low, set explicitly: its default is medium and thinking can't be turned
+  off). The backups only answer when Haiku 5.5 declines or fails, so
+  nothing to see in the app; Jose can't test it on purpose.
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys

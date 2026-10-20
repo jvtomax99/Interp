@@ -36,9 +36,13 @@ import { callRoutine } from './_routine.js';
 // back shallow -- missing false friends you would expect it to catch -- raise
 // EFFORT to 'high' first; that is the cheaper knob.
 const EFFORT = 'medium';
-// The model the check used before. It answers whenever Haiku declines, runs
-// out of room or fails, at the effort it always ran.
-const BACKUP_MODEL = 'claude-opus-5';
+// The backup answers whenever Haiku declines, runs out of room or fails:
+// Claude Opus 5.5 (2026-10-20; was claude-opus-5, which ran this check at
+// low effort; Opus 5.5 is cheaper per token). Its effort default is medium,
+// not high, and its thinking can't be turned off, so `low` is set explicitly
+// to keep the check as quick as it always was. A decline comes back as
+// stop_reason "refusal", which _routine.js treats as no answer.
+const BACKUP_MODEL = 'claude-opus-5-5';
 const BACKUP_EFFORT = 'low';
 
 const MAX_FIELD = 600;      // guards against oversized or abusive requests
