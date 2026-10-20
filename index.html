@@ -2758,6 +2758,57 @@
     box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
   .gd-video video{ display:block; width:100%; height:100%; object-fit:contain; background:#0E1438; }
   @media (max-height:700px){ .gd-video{ width:auto; height:62vh; } }
+  /* Its own controls (promoPlayer), not the phone's: the iPhone's full-screen
+     player hides its X while playing, so full screen here is ours (.is-theatre),
+     with an X that never hides. */
+  .gd-video{ position:relative; }
+  .gd-video video{ cursor:pointer; }
+  .pp-big{ position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%; border:0; padding:0;
+    display:grid; place-items:center; color:#fff; cursor:pointer; background:rgba(14,20,56,0.62);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 18px rgba(6,18,58,0.4);
+    transition:opacity .2s var(--ease), transform .2s var(--ease); }
+  .pp-big svg{ width:26px; height:26px; fill:currentColor; margin-left:3px; }
+  .gd-video.is-playing .pp-big{ opacity:0; transform:scale(.8); pointer-events:none; }
+  .pp-bar{ position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:2px; padding:17px 6px 4px;
+    background:linear-gradient(to top, rgba(5,7,24,0.78), rgba(5,7,24,0)); color:#fff; font-family:var(--sans);
+    transition:opacity .25s var(--ease); }
+  .gd-video.is-idle .pp-bar{ opacity:0; pointer-events:none; }
+  .pp-b{ flex:none; width:44px; height:44px; border:0; padding:0; background:none; color:#fff; display:grid; place-items:center; cursor:pointer; border-radius:50%; }
+  .pp-b svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .pp-b svg .f{ fill:currentColor; stroke:none; }
+  .pp-b:active, .pp-b.is-pressed{ background:rgba(255,255,255,0.16); }
+  .pp-b:focus-visible, .pp-big:focus-visible, .pp-x:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .pp-b > span{ display:block; }
+  .pp-b > .pp-on, .gd-video.is-playing .pp-play > .pp-off, .gd-video.is-muted .pp-snd-b > .pp-off,
+  .gd-video.is-theatre .pp-full-b > .pp-off{ display:none; }
+  .gd-video.is-playing .pp-play > .pp-on, .gd-video.is-muted .pp-snd-b > .pp-on,
+  .gd-video.is-theatre .pp-full-b > .pp-on{ display:block; }
+  .pp-t{ flex:none; font-size:12px; font-weight:550; font-variant-numeric:tabular-nums; letter-spacing:.01em; padding:0 4px; opacity:.92; }
+  .gd-video .pp-seek{ flex:1; min-width:0; width:auto; height:44px; margin:0 6px; padding:0; border:0; border-radius:0; box-shadow:none;
+    background:transparent; cursor:pointer; -webkit-appearance:none; appearance:none; touch-action:none; }
+  .gd-video:not(.is-theatre) .pp-dur{ display:none; }
+  .pp-seek::-webkit-slider-runnable-track{ height:4px; border-radius:2px;
+    background:linear-gradient(to right, #01B8E6 var(--p,0%), rgba(255,255,255,0.32) var(--p,0%)); }
+  .pp-seek::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; margin-top:-5px; border-radius:50%; background:#fff; border:0;
+    box-shadow:0 1px 4px rgba(6,18,58,0.5); }
+  .pp-seek::-moz-range-track{ height:4px; border-radius:2px; background:rgba(255,255,255,0.32); }
+  .pp-seek::-moz-range-progress{ height:4px; border-radius:2px; background:#01B8E6; }
+  .pp-seek::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:#fff; border:0; }
+  .pp-x{ display:none; }
+  .gd-video.is-theatre{ position:fixed; inset:0; z-index:2100; width:auto; height:auto; max-height:none; margin:0; aspect-ratio:auto;
+    border-radius:0; box-shadow:none; background:#05070B; }
+  .gd-video.is-theatre video{ background:#05070B; }
+  .gd-video.is-theatre .pp-bar{ padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 9px); padding-left:9px; padding-right:9px; }
+  .gd-video.is-theatre .pp-x{ display:grid; place-items:center; position:absolute; z-index:2;
+    top:calc(env(safe-area-inset-top, 0px) + 13px); right:calc(env(safe-area-inset-right, 0px) + 13px);
+    width:44px; height:44px; padding:0; border:0; border-radius:50%; color:#fff; cursor:pointer;
+    background:rgba(14,20,56,0.62); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 12px rgba(0,0,0,0.35); }
+  .gd-video.is-theatre .pp-x svg{ width:20px; height:20px; }
+  .pp-x:active, .pp-x.is-pressed{ transform:scale(.92); }
+  body.pp-open{ overflow:hidden; }
+  .overlay.pp-host{ backdrop-filter:none; -webkit-backdrop-filter:none; }
+  @media (prefers-reduced-motion:reduce){ .pp-big, .pp-bar{ transition:none; } }
 
   /* Your first week */
   .gd-week{ display:flex; flex-direction:column; padding:15px 15px 6px; border-radius:var(--r-lg); background:var(--paper);
@@ -13267,21 +13318,107 @@ function guideOpenSheet(t){
   sheet.setAttribute('aria-labelledby', 'gdSheetTitle');
   ov._after = () => { guideOpenId = null; };
   const vid = sheet.querySelector('.gd-video video');
-  if(vid) promoWatch(vid);
+  if(vid) promoPlayer(vid, ov);
   if(prefersAutoFocus()) sheet.querySelector('.gd-show, .gd-x').focus({ preventScroll: true });
 }
 
 /* ---- The 45-second video (media/hub-promo.mp4, made in promo/) ----
-   Its answer is 'promo'. Home's hello banner has a "Watch" button until the
-   video has been watched on this phone (ih_promoSeen): played to the end or
-   past 15 s. The button opens the answer over Home and starts it with sound
+   Its answer is 'promo'. Home's hello banner always has a "Watch" bubble
+   (Jose, 2026-10-19); once the video has been watched on this phone
+   (ih_promoSeen: played to the end or past 15 s) its ring stops turning
+   (.is-seen). The bubble opens the answer over Home and starts it with sound
    (the tap allows that); from the guide it waits for a tap on play. */
 function promoSeen(){ try{ return localStorage.getItem('ih_promoSeen') === '1'; }catch(e){ return false; } }
-function promoWatch(vid){
+/* Its own controls: play, time, seek, sound, full screen. The phone's
+   controls are off because the iPhone's full-screen player hides its X while
+   playing (Jose: "no X to exit"); our full screen (.is-theatre) moves the
+   video to the top of the page with an X that never hides. Back, Escape or
+   the end of the video leave it; closing the sheet pauses the video. */
+const PP_ICONS = {
+  play: '<svg viewBox="0 0 24 24"><path class="f" d="M8 5.6v12.8a1 1 0 0 0 1.5.9l10-6.4a1 1 0 0 0 0-1.7l-10-6.4A1 1 0 0 0 8 5.6z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24"><rect class="f" x="6.5" y="5" width="4" height="14" rx="1.2"/><rect class="f" x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>',
+  snd: '<svg viewBox="0 0 24 24"><path class="f" d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/></svg>',
+  mute: '<svg viewBox="0 0 24 24"><path class="f" d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+  full: '<svg viewBox="0 0 24 24"><path d="M4.5 9V4.5H9M15 4.5h4.5V9M19.5 15v4.5H15M9 19.5H4.5V15"/></svg>',
+  shrink: '<svg viewBox="0 0 24 24"><path d="M9 4.5V9H4.5M19.5 9H15V4.5M15 19.5V15h4.5M4.5 15H9v4.5"/></svg>'
+};
+// The video never moves in the page (so nothing can interrupt playback):
+// full screen is the same element fixed over everything, with the
+// sheet's backdrop blur off meanwhile (a blur would pin it inside the sheet).
+let PP_THEATRE = null;   // the .gd-video while full screen is open
+function ppTime(s){ s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function promoTheatre(wrap, on){
+  const host = wrap.closest('.overlay');
+  if(on && !PP_THEATRE){
+    PP_THEATRE = wrap;
+    wrap.classList.add('is-theatre'); document.body.classList.add('pp-open'); if(host) host.classList.add('pp-host');
+    const x = wrap.querySelector('.pp-x'); if(x) x.focus({ preventScroll: true });
+  } else if(!on && PP_THEATRE === wrap){
+    PP_THEATRE = null;
+    wrap.classList.remove('is-theatre'); document.body.classList.remove('pp-open'); if(host) host.classList.remove('pp-host');
+  }
+  if(wrap._ppState) wrap._ppState();
+}
+function promoTheatreClose(){ if(!PP_THEATRE) return false; promoTheatre(PP_THEATRE, false); return true; }
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && PP_THEATRE){ e.preventDefault(); promoTheatreClose(); } });
+function promoPlayer(vid, ov){
+  const wrap = vid.parentNode;
+  vid.controls = false;
+  wrap.insertAdjacentHTML('beforeend', `
+    <button type="button" class="pp-big" aria-label="Play">${PP_ICONS.play}</button>
+    <button type="button" class="pp-x" aria-label="Close full screen">${ICON_X_TC}</button>
+    <div class="pp-bar">
+      <button type="button" class="pp-b pp-play" aria-label="Play"><span class="pp-off">${PP_ICONS.play}</span><span class="pp-on">${PP_ICONS.pause}</span></button>
+      <span class="pp-t">0:00</span>
+      <input type="range" class="pp-seek" min="0" max="1000" step="1" value="0" aria-label="Position in the video">
+      <span class="pp-t pp-dur">0:45</span>
+      <button type="button" class="pp-b pp-snd-b" aria-label="Sound off"><span class="pp-off">${PP_ICONS.snd}</span><span class="pp-on">${PP_ICONS.mute}</span></button>
+      <button type="button" class="pp-b pp-full-b" aria-label="Full screen"><span class="pp-off">${PP_ICONS.full}</span><span class="pp-on">${PP_ICONS.shrink}</span></button>
+    </div>`);
+  const $ = s => wrap.querySelector(s), seek = $('.pp-seek'), cur = $('.pp-t'), dur = $('.pp-dur'), playB = $('.pp-play');
+  let idleT = 0, wasIdle = false;
+  const wake = () => { wrap.classList.remove('is-idle'); clearTimeout(idleT);
+    if(!vid.paused) idleT = setTimeout(() => wrap.classList.add('is-idle'), 2600); };
+  const toggle = () => { if(vid.paused){ const p = vid.play(); if(p && p.catch) p.catch(() => {}); } else vid.pause(); };
+  const sync = () => {
+    const d = isFinite(vid.duration) ? vid.duration : 45, t = vid.currentTime || 0;
+    cur.textContent = ppTime(t); dur.textContent = ppTime(d);
+    const v = Math.round(t / d * 1000); if(document.activeElement !== seek) seek.value = v;
+    seek.style.setProperty('--p', (v / 10) + '%');
+  };
+  const state = () => {
+    wrap.classList.toggle('is-playing', !vid.paused);
+    wrap.classList.toggle('is-muted', vid.muted);
+    playB.setAttribute('aria-label', vid.paused ? 'Play' : 'Pause');
+    $('.pp-snd-b').setAttribute('aria-label', vid.muted ? 'Sound on' : 'Sound off');
+    $('.pp-full-b').setAttribute('aria-label', wrap.classList.contains('is-theatre') ? 'Leave full screen' : 'Full screen');
+    wake();
+  };
+  // A tap while the controls are hidden only brings them back.
+  vid.addEventListener('click', () => { if(!wasIdle) toggle(); wasIdle = false; });
+  $('.pp-big').addEventListener('click', toggle);
+  playB.addEventListener('click', toggle);
+  $('.pp-snd-b').addEventListener('click', () => { vid.muted = !vid.muted; state(); });
+  wrap._ppState = state;
+  $('.pp-full-b').addEventListener('click', () => promoTheatre(wrap, !wrap.classList.contains('is-theatre')));
+  $('.pp-x').addEventListener('click', () => promoTheatre(wrap, false));
+  seek.addEventListener('input', () => { const d = isFinite(vid.duration) ? vid.duration : 0;
+    if(d) vid.currentTime = seek.value / 1000 * d; seek.style.setProperty('--p', (seek.value / 10) + '%'); wake(); });
+  ['play', 'pause', 'volumechange'].forEach(ev => vid.addEventListener(ev, state));
+  ['timeupdate', 'loadedmetadata', 'durationchange'].forEach(ev => vid.addEventListener(ev, sync));
+  vid.addEventListener('ended', () => promoTheatre(wrap, false));
+  wrap.addEventListener('pointerdown', () => { wasIdle = wrap.classList.contains('is-idle'); wake(); });
+  // The sheet closing (X, a tap outside, Back) stops the video and leaves full screen.
+  if(ov && typeof MutationObserver !== 'undefined'){
+    const mo = new MutationObserver(() => { if(!ov.classList.contains('show') || !ov.contains(wrap)){
+      vid.pause(); promoTheatre(wrap, false); mo.disconnect(); } });
+    mo.observe(ov, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+  }
+  state(); sync();
   const done = () => {
     if(promoSeen()) return;
     try{ localStorage.setItem('ih_promoSeen', '1'); }catch(e){}
-    document.querySelectorAll('.home-promo-btn').forEach(b => b.remove());
+    document.querySelectorAll('.home-promo-btn').forEach(b => b.classList.add('is-seen'));
   };
   vid.addEventListener('ended', done);
   vid.addEventListener('timeupdate', () => { if(vid.currentTime >= 15) done(); });
@@ -16566,10 +16703,10 @@ const GUIDE_SECTIONS = [
 
 const GUIDE_TOPICS = [
   { id:'promo', section:'start', k:'video promo watch film movie clip 45 seconds introduction intro overview what is show someone new hire ceo explain the app', q:'What is Interpreter Hub? Watch the 45-second video', a:`
-    <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" controls playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
-    <p>A short film about the Hub: why the right word matters, then the glossary, Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice, Team Chat and Dr. Smiley. It plays with sound; tap the screen for full screen.</p>
+    <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" playsinline webkit-playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
+    <p>A short film about the Hub: why the right word matters, then the glossary, Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice, Team Chat and Dr. Smiley. It plays with sound. Tap the square-corners button for full screen, and the <b>X</b> at the top right to come back.</p>
     <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
-    <p>On Home, the hello banner has a round <b>Watch</b> bubble in its bottom-right corner, with a ring of colours around it, until you've watched the video once. After that it's only here.</p>` },
+    <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
 
   { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
@@ -19310,6 +19447,8 @@ function navigateBack(){
   if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
   // So is the guide's Show me.
   if(guideCoachClose()) return true;
+  // So is the video's full screen.
+  if(promoTheatreClose()) return true;
 
   // An open overlay is the top layer, so Back closes that first — otherwise
   // it navigates the screen behind the panel and the panel stays put, which
@@ -21229,8 +21368,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
-const BUILD_ID = 'b1019.2307';
-const BUILD_TIME = '2026-10-19 23:07 UTC';
+const BUILD_ID = 'b1019.2337';
+const BUILD_TIME = '2026-10-19 23:37 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

@@ -1416,7 +1416,7 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    of the banner, in the band beside the Hackensack sign, 9px above Search
    (the banner runs 25px under it), its right edge on Search's. The ring
    turns slowly while the banner is on screen (paused with the petals when
-   it isn't), stills for reduced motion. Gone once the video is watched. */
+   it isn't), stills for reduced motion. Still, too, once the video is watched (.is-seen). */
 #content.is-home .home-promo-btn{
   position:absolute; right:16px; bottom:34px; z-index:6;
   display:flex; flex-direction:column; align-items:center; gap:3px; padding:0; margin:0;
@@ -1447,6 +1447,7 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
 @media (hover:hover){ #content.is-home .home-promo-btn:hover{ transform:translateY(-2px); } }
 @media (min-width:901px){ #content.is-home .home-promo-btn{ right:38px; } }
 #content.is-home .home-petals.is-offscreen ~ .home-promo-btn .home-promo-ring{ animation-play-state:paused; }
+#content.is-home .home-promo-btn.is-seen .home-promo-ring{ animation:none; }
 @keyframes homePromoIn{ 0%{ opacity:0; scale:.4; } 60%{ opacity:1; scale:1.08; } 100%{ opacity:1; scale:1; } }
 @keyframes homePromoSpin{ to{ rotate:360deg; } }
 @media (prefers-reduced-motion:reduce){

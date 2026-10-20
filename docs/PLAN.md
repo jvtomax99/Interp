@@ -241,6 +241,14 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-19 Watch bubble always on Home (Jose couldn't find it: he had
+  watched the video, and the once-only rule had hidden it). After watching,
+  the ring stops turning (`.is-seen`). Guide: `promo` answer reworded.
+  Same PR: the video has its own controls and full screen with an X that
+  never hides (Jose: full screen had no X; that was the iPhone's own player,
+  which hides it while playing). Closing the sheet now pauses the video (Back
+  used to leave it playing behind Home).
+
 - 2026-10-19 Campus: each building's badge names its exam area; first tap
   picks it (windows lit, scene dimmed, a card with the area's name,
   questions, share of the exam, Practise), second tap starts (Jose: "we are
