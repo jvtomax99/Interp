@@ -10,6 +10,7 @@
      UA=chromium ...                               Chromium's own paths
      PROFILE=1 ...                                 + the click's script time by function
      CSS='...' ...                                 extra CSS in the page (an experiment, A/B)
+     BIG=150 ...                                   every domain padded to 150 terms (real sizes)
 
    Per run: the click's wait and handler time (Event Timing), tap to next
    paint, and every task over 16 ms in the 1.5 s after the tap with its
@@ -18,6 +19,9 @@ const { chromium, route, SEED } = require('../support/harness.cjs');
 const RATE = +(process.env.RATE || 4), RUNS = +(process.env.RUNS || 1);
 const SEL = process.env.SEL || '#content .home-tile, #content .domain-family';
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1';
+const BIG = +(process.env.BIG || 0);
+const SEEDX = BIG ? SEED.map(c => { const t = c.terms || []; if (!t.length) return c; const out = [];
+  for (let i = 0; out.length < Math.max(BIG, t.length); i++) { const x = t[i % t.length]; out.push(i < t.length ? x : { ...x, id: x.id + '-x' + i, en: x.en + ' ' + i }); } return { ...c, terms: out }; }) : SEED;
 const short = u => (u || '').replace(/^https?:\/\/[^/]+\//, '') || '(page)';
 
 async function once(browser) {
@@ -27,7 +31,7 @@ async function once(browser) {
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
     try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
-    window.__ev = []; try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'click') window.__ev.push({ d: Math.round(e.duration), wait: Math.round(e.processingStart - e.startTime), run: Math.round(e.processingEnd - e.processingStart) }); })).observe({ type: 'event', buffered: true, durationThreshold: 16 }); } catch (e) {} }, { seed: SEED });
+    window.__ev = []; try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'click') window.__ev.push({ d: Math.round(e.duration), wait: Math.round(e.processingStart - e.startTime), run: Math.round(e.processingEnd - e.processingStart) }); })).observe({ type: 'event', buffered: true, durationThreshold: 16 }); } catch (e) {} }, { seed: SEEDX });
   await page.goto('https://interp.test/', { waitUntil: 'load' });
   if (process.env.CSS) await page.addStyleTag({ content: process.env.CSS });
   await page.waitForTimeout(9000);
