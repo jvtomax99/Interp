@@ -157,3 +157,18 @@ this time. So the quiet voice of the first run doesn't happen every time;
 the fix stays as a guard (it only sets the audio session back to playback).
 Same voices, now each listed twice (Paulina and Samantha both there). Speech
 to text still not tried in the installed app: M5 stays on hold.
+
+## M4: span chart
+
+**Your span, by week** on the trainer's start card, under Start (Jose
+picked the start card; above Start it pushed Start under the tab bar on a
+phone). `renderSpanChart`, `memSpanWeeks`: the last 8 weeks, Monday to
+Sunday (local), one bead per week at the longest clean line (`w` of a log
+entry with `miss` 0); memory only is the main line with a fill, notes a
+lighter second line with hollow beads and a key. Weeks with nothing clean
+are skipped; older than 8 weeks isn't drawn (the "best ever" in the foot
+still counts it). Scale: 20 words, or the top value rounded up to 10.
+Tap a bead (`memSpanPick`) to read its week; again for this week. Look and
+motion are Practice's score line (`trend-*` classes, `data-motion="span"`,
+plays once per change, then still). The span number on the Practice tile
+is the M2 one (Jose: nothing more).
