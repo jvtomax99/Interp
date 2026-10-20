@@ -1,0 +1,266 @@
+<!doctype html>
+<!-- Opener ideas for Jose to choose from (his note: the hospital photos went by too fast).
+     ?idea=prism|gallery|postcards|mosaic   window.__renderAt(t), t in seconds (0-5).
+     tools/clip.cjs renders one of these to an MP4. -->
+<html><head><meta charset="utf-8">
+<script type="importmap">{ "imports": { "three": "../vendor/three.module.js" } }</script>
+<style>
+  @font-face { font-family: "Inter Tight"; font-weight: 800; src: url("../fonts/inter-tight-latin-800-normal.woff2") format("woff2"); }
+  @font-face { font-family: "JetBrains Mono"; font-weight: 500; src: url("../fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+  html,body{margin:0;background:#03061a;overflow:hidden}
+  #root{position:relative;width:540px;height:960px}
+  #stage{display:block;width:540px;height:960px}
+  #title{position:absolute;left:0;right:0;bottom:96px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;opacity:0;text-shadow:0 2px 22px rgba(3,6,26,.85)}
+  #title b{display:block;font-weight:800;font-size:25px;white-space:nowrap;letter-spacing:-.01em}
+  #title i{display:block;margin-top:8px;font:500 16px "JetBrains Mono",monospace;letter-spacing:.3em;color:#bfe9fa;font-style:normal}
+</style></head>
+<body><div id="root"><canvas id="stage" width="540" height="960"></canvas><div id="title"><b>Hackensack University Medical Center</b><i>HACKENSACK, NJ</i></div></div>
+<script type="module">
+import * as THREE from "three";
+import { RoundedBoxGeometry } from "../vendor/RoundedBoxGeometry.js";
+import { Reflector } from "../vendor/Reflector.js";
+import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutSine, inOutCubic } from "../src/util.js";
+
+const idea = new URLSearchParams(location.search).get("idea") || "prism";
+const W = 540, H = 960, LEN = 5;
+await document.fonts.load('800 25px "Inter Tight"');
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("stage"), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x03061a);
+const camera = new THREE.PerspectiveCamera(42, W / H, 0.05, 80);
+const title = document.getElementById("title");
+
+const NAMES = ["entrance", "tower", "pavilion-dusk", "skybridge-sunset", "aerial"];
+const texs = await Promise.all(NAMES.map((n) => new Promise((res) => new THREE.TextureLoader().load(`../assets/humc/${n}.jpg`, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; res(t); }))));
+const aspect = (t) => t.image.width / t.image.height;
+const photoMat = (t, extra = {}) => new THREE.MeshBasicMaterial({ map: t, toneMapped: false, ...extra });
+// a cover-fit copy of a texture for a face of a given aspect
+function cover(t, faceAspect) {
+  const c = t.clone(); c.needsUpdate = true;
+  const a = aspect(t);
+  if (a > faceAspect) { c.repeat.set(faceAspect / a, 1); c.offset.set((1 - faceAspect / a) / 2, 0); }
+  else { c.repeat.set(1, a / faceAspect); c.offset.set(0, (1 - a / faceAspect) / 2); }
+  return c;
+}
+
+let update = () => {};
+// ---- A. Prism: the five photos on the faces of a slowly turning five-sided prism ----
+if (idea === "prism") {
+  const N = 5, R = 1.55, FW = 2 * R * Math.tan(Math.PI / N), FH = 3.6;
+  const prism = new THREE.Group(); scene.add(prism);
+  texs.forEach((t, i) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(FW * 0.995, FH), photoMat(cover(t, FW / FH)));
+    const a = (i / N) * Math.PI * 2;
+    m.position.set(Math.sin(a) * R, 0, Math.cos(a) * R); m.rotation.y = a;
+    prism.add(m);
+  });
+  const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(R / Math.cos(Math.PI / N), R / Math.cos(Math.PI / N), FH, N)), new THREE.LineBasicMaterial({ color: 0x3fc6ee }));
+  edge.rotation.y = Math.PI / N; prism.add(edge);
+  update = (t) => {
+    // one face per second: a short turn, then a hold on each photo
+    const step = Math.floor(t), f = t - step, turn = inOutCubic(clamp((f - 0.62) / 0.38));
+    prism.rotation.y = -((step + turn) / N) * Math.PI * 2;
+    prism.position.y = 0.3;
+    camera.position.set(0.15 * Math.sin(t * 0.7), 0.9, lerp(7.4, 6.4, inOutSine(t / LEN)));
+    camera.lookAt(0, 0.25, 0);
+    title.style.opacity = String(outCubic(prog(t, 3.2, 3.8)));
+  };
+}
+// ---- B. Gallery: framed on a dark wall, each lit by its own spotlight as the camera walks past ----
+if (idea === "gallery") {
+  scene.add(new THREE.HemisphereLight(0x8fa8d8, 0x05070f, 0.25));
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(40, 10), new THREE.MeshStandardMaterial({ color: 0x0d1430, roughness: 0.9 }));
+  wall.position.set(6, 1.5, -0.08); wall.receiveShadow = true; scene.add(wall);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 10), new THREE.MeshStandardMaterial({ color: 0x080c1e, roughness: 0.35, metalness: 0.4 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.set(6, -1.6, 4); scene.add(floor);
+  const spots = [];
+  texs.forEach((t, i) => {
+    const hgt = 1.9, wdt = hgt * aspect(t), x = i * 3.1;
+    const frame = new THREE.Mesh(new RoundedBoxGeometry(wdt + 0.24, hgt + 0.24, 0.08, 3, 0.02), new THREE.MeshStandardMaterial({ color: 0x1a2238, metalness: 0.6, roughness: 0.35 }));
+    frame.position.set(x, 1.0, 0); frame.castShadow = true;
+    const pic = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), new THREE.MeshStandardMaterial({ map: t, roughness: 0.6 }));
+    pic.position.set(x, 1.0, 0.045);
+    scene.add(frame, pic);
+    const s = new THREE.SpotLight(0xfff1dc, 0, 9, 0.42, 0.6, 1.2);
+    s.position.set(x, 4.2, 2.6); s.target.position.set(x, 1.0, 0); s.castShadow = true;
+    scene.add(s, s.target); spots.push(s);
+  });
+  update = (t) => {
+    const x = lerp(-0.4, 12.6, inOutSine(t / LEN));
+    camera.position.set(x - 0.6, 1.1, 5.2); camera.lookAt(x + 0.3, 0.95, 0);
+    spots.forEach((s, i) => { const d = Math.abs(i * 3.1 - x); s.intensity = 60 * clamp(1.4 - d / 2.2) + 8; });
+    title.style.opacity = String(outCubic(prog(t, 3.4, 4.0)));
+  };
+}
+// ---- C. Postcards: thick cards drop one at a time onto a glossy table, a loose stack, seen from above ----
+if (idea === "postcards") {
+  const mirror = new Reflector(new THREE.PlaneGeometry(20, 20), { textureWidth: 540, textureHeight: 960, color: 0x5a6070 });
+  mirror.rotation.x = -Math.PI / 2; scene.add(mirror);
+  const lac = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x05070f, transparent: true, opacity: 0.72, roughness: 0.3 }));
+  lac.rotation.x = -Math.PI / 2; lac.position.y = 0.002; lac.receiveShadow = true; scene.add(lac);
+  scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x1a2140, 0.6));
+  const key = new THREE.DirectionalLight(0xfff1dc, 2.2); key.position.set(-3, 8, 4); key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5 }); key.shadow.radius = 5;
+  scene.add(key);
+  const cards = texs.map((t, i) => {
+    const wdt = 2.6, hgt = wdt / aspect(t);
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new RoundedBoxGeometry(wdt + 0.12, 0.04, hgt + 0.12, 3, 0.02), new THREE.MeshStandardMaterial({ color: 0xf2efe8, roughness: 0.7 }));
+    body.castShadow = true; body.receiveShadow = true;
+    const pic = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), photoMat(t)); pic.rotation.x = -Math.PI / 2; pic.position.y = 0.022;
+    g.add(body, pic); scene.add(g);
+    g.userData = { x: [-0.5, 0.6, -0.3, 0.45, 0][i], z: [-1.6, -0.5, 0.6, 1.5, 0.2][i], r: [-0.25, 0.18, -0.12, 0.22, 0.04][i], y: 0.05 + i * 0.045 };
+    return g;
+  });
+  update = (t) => {
+    cards.forEach((g, i) => {
+      const t0 = 0.1 + i * 0.8, p = prog(t, t0, t0 + 0.7), e = outCubic(p);
+      g.visible = p > 0;
+      const u = g.userData;
+      g.position.set(u.x + (1 - e) * 1.5, u.y + (1 - e) * 3.5 + Math.sin(Math.PI * p) * 0.2, u.z - (1 - e) * 1.2);
+      g.rotation.set((1 - e) * -0.9, u.r + (1 - e) * 0.8, (1 - e) * 0.5);
+    });
+    const a = lerp(0.35, -0.15, inOutSine(t / LEN));
+    camera.position.set(Math.sin(a) * 4.2, lerp(9.0, 7.6, inOutSine(t / LEN)), Math.cos(a) * 4.2);
+    camera.lookAt(0, 0, 0.1);
+    title.style.opacity = String(outCubic(prog(t, 3.9, 4.4)));
+  };
+}
+// ---- D. Mosaic: the photos fly in as tiles that build one wall, then the camera pulls back to see it whole ----
+if (idea === "mosaic") {
+  // a 2 x 3 grid on a tall wall: entrance wide across the top, then pairs
+  const slots = [[0, 2.35, 3.6, 2.0], [-0.92, 0.18, 1.76, 2.1], [0.92, 0.18, 1.76, 2.1], [-0.92, -2.05, 1.76, 2.1], [0.92, -2.05, 1.76, 2.1]];
+  const tiles = texs.map((t, i) => {
+    const [x, y, w, h] = slots[i];
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), photoMat(cover(t, w / h)));
+    m.userData = { x, y }; scene.add(m); return m;
+  });
+  update = (t) => {
+    tiles.forEach((m, i) => {
+      const t0 = i * 0.55, p = outExpo(prog(t, t0, t0 + 0.9));
+      m.visible = t > t0;
+      const s = Math.sign(i % 2 ? 1 : -1);
+      m.position.set(m.userData.x + (1 - p) * s * 3, m.userData.y + (1 - p) * 1.5, (1 - p) * 4);
+      m.rotation.set((1 - p) * 0.6, (1 - p) * s * -1.2, 0);
+    });
+    // close on each new tile as it lands, then back to the whole wall
+    const z = lerp(4.2, 10.4, inOutCubic(prog(t, 2.6, 4.2)));
+    const focus = tiles[Math.min(4, Math.floor(t / 0.55))].userData;
+    const k = 1 - inOutCubic(prog(t, 2.6, 4.2));
+    camera.position.set(focus.x * k * 0.6, focus.y * k * 0.6, z); camera.lookAt(focus.x * k * 0.6, focus.y * k * 0.6, 0);
+    title.style.opacity = String(outCubic(prog(t, 3.8, 4.3)));
+  };
+}
+// ---- Dr. Smiley turning, to judge his rounded 3D body ----
+if (idea === "smiley3d") {
+  const { createSmiley } = await import("../src/smiley.js");
+  const sm = await createSmiley({ root: "../assets/drsmiley/", round: true });
+  scene.add(sm.group);
+  scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x1a2140, 0.8));
+  const key = new THREE.DirectionalLight(0xfff1dc, 2.4); key.position.set(-2, 3, 3); scene.add(key);
+  const rim = new THREE.DirectionalLight(0x3fc6ee, 2.5); rim.position.set(2.5, 2, -2); scene.add(rim);
+  sm.group.scale.setScalar(2.4);
+  update = (t) => {
+    sm.body.rotation.y = Math.sin(t * 1.3) * 0.45;
+    sm.pose({ face: t % 2 < 1 ? "smile" : "wink", brows: t % 2 < 1 ? "glad" : "wink", turn: Math.sin(t * 1.3) * 26 });
+    camera.position.set(0, 1.5, 5.6); camera.lookAt(0, 1.3, 0);
+  };
+}
+// ---- ideas with Dr. Smiley (his rounded 3D body) ----
+if (["carousel", "stones", "cinema"].includes(idea)) {
+  const { createSmiley, MOVES } = await import("../src/smiley.js");
+  const sm = await createSmiley({ root: "../assets/drsmiley/", round: true });
+  scene.add(sm.group);
+  scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x1a2140, 0.7));
+  const key = new THREE.DirectionalLight(0xfff1dc, 2.2); key.position.set(-2.5, 5, 4); key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024); Object.assign(key.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6 }); key.shadow.radius = 5; key.shadow.bias = -0.0005;
+  scene.add(key);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: 0x0a1233, roughness: 0.35, metalness: 0.35 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  scene.fog = new THREE.Fog(0x03061a, 10, 24);
+
+  // E. Carousel: the photos on a slowly turning ring around him; each comes round to the front and holds
+  if (idea === "carousel") {
+    const ring = new THREE.Group(); ring.position.z = -3.0; scene.add(ring); // behind him, so the photo in front never covers him
+    const N = texs.length, R = 2.6;
+    texs.forEach((t, i) => {
+      const hgt = 1.7, wdt = Math.min(2.6, hgt * aspect(t));
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(wdt, hgt), photoMat(cover(t, wdt / hgt), { side: THREE.DoubleSide }));
+      const a = (i / N) * Math.PI * 2;
+      m.position.set(Math.sin(a) * R, 1.45, Math.cos(a) * R); m.rotation.y = a;
+      ring.add(m);
+    });
+    const glow = new THREE.PointLight(0xffd2b0, 3, 6, 1.5); scene.add(glow);
+    sm.group.scale.setScalar(1.35); sm.group.position.z = 0.9;
+    update = (t) => {
+      const step = Math.min(N - 1, Math.floor(t / 0.9)), f = t / 0.9 - step, turn = inOutCubic(clamp((f - 0.55) / 0.45));
+      ring.rotation.y = -((step + (step < N - 1 ? turn : 0)) / N) * Math.PI * 2;
+      // he looks round at each photo as it passes, then at you
+      const look = t < 4.2 ? (f < 0.5 ? "halfL" : "lookL") : "smile";
+      sm.pose({ face: t > 4.4 ? "wink" : look, brows: t > 4.4 ? "wink" : "glad", turn: t < 4.2 ? -18 : 0, y: 0.02 * Math.abs(Math.sin(t * 6)) });
+      glow.position.set(0, 1.4, 2.2); glow.intensity = 2.5;
+      camera.position.set(0.4 * Math.sin(t * 0.5), lerp(2.1, 1.8, inOutSine(t / LEN)), lerp(6.6, 5.8, inOutSine(t / LEN)));
+      camera.lookAt(0, 1.35, -1.0);
+      title.style.opacity = String(outCubic(prog(t, 3.9, 4.4)));
+    };
+  }
+  // F. Stepping stones: the photos laid on the floor as a path; he hops from one to the next toward you
+  if (idea === "stones") {
+    const stones = texs.map((t, i) => {
+      const wdt = 1.9, hgt = wdt / aspect(t);
+      const m = new THREE.Mesh(new RoundedBoxGeometry(wdt, 0.06, hgt, 3, 0.02), [new THREE.MeshStandardMaterial({ color: 0xe9edf5 }), new THREE.MeshStandardMaterial({ color: 0xe9edf5 }), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }), new THREE.MeshStandardMaterial({ color: 0xe9edf5 }), new THREE.MeshStandardMaterial({ color: 0xe9edf5 }), new THREE.MeshStandardMaterial({ color: 0xe9edf5 })]);
+      // RoundedBoxGeometry has one group: draw the photo on a plane on top instead
+      m.material = new THREE.MeshStandardMaterial({ color: 0xe9edf5, roughness: 0.6 });
+      const top = new THREE.Mesh(new THREE.PlaneGeometry(wdt * 0.96, hgt * 0.96), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+      top.rotation.x = -Math.PI / 2; top.position.y = 0.031; m.add(top);
+      m.position.set([-0.7, 0.75, -0.55, 0.6, 0][i], 0.03, -9 + i * 2.35);
+      m.rotation.y = [-0.2, 0.18, -0.12, 0.15, 0][i];
+      m.castShadow = m.receiveShadow = true;
+      scene.add(m); return m;
+    });
+    update = (t) => {
+      // a hop to each stone, 0.9 s apiece
+      const k = Math.min(stones.length - 1, Math.floor(t / 0.9)), f = clamp((t - k * 0.9) / 0.9);
+      const from = stones[Math.max(0, k - 1)].position, to = stones[k].position;
+      const a = k === 0 ? 1 : clamp(f / 0.55);
+      sm.group.position.set(lerp(from.x, to.x, a), 0.06, lerp(from.z, to.z, a));
+      sm.pose(a < 1 ? MOVES.hop(a) : { ...MOVES.land(clamp((f - 0.55) / 0.45)), face: t > 4.2 ? "wink" : "smile", brows: t > 4.2 ? "wink" : "glad" });
+      stones.forEach((s, i) => { const lit = i === k && a >= 1; s.children[0].material.color.setScalar(lit ? 1.15 : 0.85); });
+      const sp = sm.group.position;
+      camera.position.set(sp.x * 0.4 + 0.8, 2.3, sp.z + 4.6); camera.lookAt(sp.x * 0.6, 0.6, sp.z - 1.2);
+      title.style.opacity = String(outCubic(prog(t, 3.9, 4.4)));
+    };
+  }
+  // G. Cinema: he stands before a tall curved screen showing the photos in turn; its light is on him
+  if (idea === "cinema") {
+    const scr = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 4.2, 64, 1, true, -0.42, 0.84), new THREE.MeshBasicMaterial({ side: THREE.BackSide, toneMapped: false }));
+    scr.position.set(0, 2.3, 4.0); scene.add(scr);
+    const screenLight = new THREE.PointLight(0xffffff, 6, 8, 1.2); screenLight.position.set(0, 1.6, -0.8); scene.add(screenLight);
+    sm.group.position.set(0, 0, 0.4); sm.group.scale.setScalar(1.15);
+    const covers = texs.map((t) => cover(t, (6 * 0.84) / 4.2));
+    update = (t) => {
+      const i = Math.min(texs.length - 1, Math.floor(t / 0.95)), f = (t / 0.95) % 1;
+      scr.material.map = covers[i]; scr.material.needsUpdate = true;
+      // a slow push on each photo, a quick dip between them
+      covers[i].offset.x = (1 - covers[i].repeat.x) / 2 + (f - 0.5) * 0.04;
+      scr.material.color.setScalar(i < texs.length - 1 ? 1 - 0.7 * clamp((f - 0.85) / 0.15) : 1);
+      const avg = [0xbfd4ff, 0xffe2c4, 0xffc29e, 0xff9f8a, 0xd9f0ff][i];
+      screenLight.color.setHex(avg);
+      // he watches over his shoulder, then turns to you
+      const back = t < 4.0;
+      // three-quarter to the screen while he watches, then round to face you
+      sm.group.rotation.y = back ? Math.PI * 0.72 : lerp(Math.PI * 0.72, Math.PI, outBack(prog(t, 4.0, 4.5), 1.3));
+      sm.pose({ face: back ? "lookR" : "smile", brows: back ? "up" : "glad", y: 0 });
+      camera.position.set(lerp(0.9, 0.3, inOutSine(t / LEN)), 1.35, lerp(-4.2, -3.3, inOutSine(t / LEN)));
+      camera.lookAt(0, 1.6, 2.0);
+      title.style.opacity = String(outCubic(prog(t, 4.0, 4.5)));
+    };
+  }
+}
+window.__renderAt = (t) => { update(clamp(t, 0, LEN)); renderer.render(scene, camera); };
+window.__renderAt(0);
+document.title = "ready";
+</script></body></html>

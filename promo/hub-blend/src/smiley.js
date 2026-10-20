@@ -47,7 +47,54 @@ export function composeSmiley(g, { base, face, bl, br }, frame = "rest", brows =
   brow(br, BROW_R, brows[2], brows[3]);
 }
 
-export async function createSmiley({ root = "../../drsmiley/", glow = 0x3fc6ee } = {}) {
+/* A rounded body for him: his outline (the base art's alpha) "inflated" like a
+   pillow, so the drawing has real depth, catches the light and turns in 3D.
+   Height at each point grows with its distance from his outline (a round
+   profile), front and back. Returns [front, back] geometries, pivot at his base. */
+function inflatedGeometry(base, w, h, { gw = 150, gh = 188, depth = 0.11, reach = 0.32 } = {}) {
+  const c = document.createElement("canvas"); c.width = gw; c.height = gh;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(base, 0, 0, gw, gh);
+  const a = g.getImageData(0, 0, gw, gh).data;
+  const inside = new Uint8Array(gw * gh);
+  for (let i = 0; i < gw * gh; i++) inside[i] = a[i * 4 + 3] > 110 ? 1 : 0;
+  // distance to the outline, in cells (two-pass chamfer)
+  const INF = 1e9, d = new Float32Array(gw * gh).fill(INF);
+  for (let i = 0; i < gw * gh; i++) if (!inside[i]) d[i] = 0;
+  const at = (x, y) => (x < 0 || y < 0 || x >= gw || y >= gh ? 0 : d[y * gw + x]);
+  for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) { const i = y * gw + x; if (d[i]) d[i] = Math.min(d[i], at(x - 1, y) + 1, at(x, y - 1) + 1, at(x - 1, y - 1) + 1.414, at(x + 1, y - 1) + 1.414); }
+  for (let y = gh - 1; y >= 0; y--) for (let x = gw - 1; x >= 0; x--) { const i = y * gw + x; if (d[i]) d[i] = Math.min(d[i], at(x + 1, y) + 1, at(x, y + 1) + 1, at(x + 1, y + 1) + 1.414, at(x - 1, y + 1) + 1.414); }
+  // the height: a round profile of that distance, then smoothed (the chamfer steps would show as bands)
+  const R = reach * gw;
+  let z = new Float32Array(gw * gh);
+  for (let k = 0; k < gw * gh; k++) { const q = Math.min(1, d[k] / R); z[k] = inside[k] ? Math.sqrt(Math.max(0, 1 - (1 - q) * (1 - q))) : 0; }
+  for (let pass = 0; pass < 4; pass++) {
+    const nz = new Float32Array(gw * gh);
+    for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
+      const k = y * gw + x;
+      if (!inside[k]) continue;
+      let sum = 0, n = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= gw || yy >= gh) continue;
+        sum += z[yy * gw + xx]; n++;
+      }
+      nz[k] = sum / n;
+    }
+    z = nz;
+  }
+  const make = (sign) => {
+    const geo = new THREE.PlaneGeometry(w, h, gw - 1, gh - 1);
+    const pos = geo.attributes.position;
+    for (let k = 0; k < gw * gh; k++) pos.setZ(k, sign * depth * z[k] * (sign < 0 ? 0.7 : 1));
+    geo.translate(0, h / 2, 0);
+    geo.computeVertexNormals();
+    return geo;
+  };
+  return [make(1), make(-1)];
+}
+
+export async function createSmiley({ root = "../../drsmiley/", glow = 0x3fc6ee, round = false } = {}) {
   const art = await loadSmileyArt(root);
   const cv = document.createElement("canvas");
   cv.width = 480; cv.height = 600;
@@ -75,12 +122,30 @@ export async function createSmiley({ root = "../../drsmiley/", glow = 0x3fc6ee }
   front.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: tex, alphaTest: 0.5 });
   const card = new THREE.Group();
   card.add(front);
-  const edgeMat = new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, color: 0x9aa6c8, roughness: 0.8, side: THREE.DoubleSide });
-  const SLICES = 7, DEPTH = 0.028;
-  for (let i = 1; i <= SLICES; i++) {
-    const s = new THREE.Mesh(geo, i === SLICES ? new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, color: 0xe8ecf6, roughness: 0.7, side: THREE.BackSide }) : edgeMat);
-    s.position.z = -(DEPTH * i) / SLICES;
-    card.add(s);
+  if (round) {
+    // a rounded body instead of a flat card (see inflatedGeometry)
+    const [fg, bg] = inflatedGeometry(art.base, W, H);
+    front.geometry = fg;
+    // his back: the back of his hair over his white coat, inside his outline (not his face mirrored)
+    const bc = document.createElement("canvas"); bc.width = 480; bc.height = 600;
+    const bx = bc.getContext("2d");
+    bx.drawImage(art.base, 0, 0); bx.globalCompositeOperation = "source-in";
+    const hair = bx.createLinearGradient(0, 0, 0, 600);
+    hair.addColorStop(0, "#7a4126"); hair.addColorStop(0.62, "#5b2f1c"); hair.addColorStop(0.7, "#eef1f6"); hair.addColorStop(1, "#dfe4ee");
+    bx.fillStyle = hair; bx.fillRect(0, 0, 480, 600);
+    const backTex = new THREE.CanvasTexture(bc); backTex.colorSpace = THREE.SRGBColorSpace;
+    const back = new THREE.Mesh(bg, new THREE.MeshStandardMaterial({ map: backTex, alphaTest: 0.5, roughness: 0.75, side: THREE.BackSide }));
+    back.castShadow = true;
+    back.customDepthMaterial = front.customDepthMaterial;
+    card.add(back);
+  } else {
+    const edgeMat = new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, color: 0x9aa6c8, roughness: 0.8, side: THREE.DoubleSide });
+    const SLICES = 7, DEPTH = 0.028;
+    for (let i = 1; i <= SLICES; i++) {
+      const s = new THREE.Mesh(geo, i === SLICES ? new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, color: 0xe8ecf6, roughness: 0.7, side: THREE.BackSide }) : edgeMat);
+      s.position.z = -(DEPTH * i) / SLICES;
+      card.add(s);
+    }
   }
   card.position.y = DISC_H;
 

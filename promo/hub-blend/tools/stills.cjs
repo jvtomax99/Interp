@@ -15,8 +15,8 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.webp': 'image/
     if (!f.startsWith(PROJ) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end(); }
     r.writeHead(200, { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(r);
   }).listen(0);
-  const html = fs.readFileSync(path.join(PROJ, page0), 'utf8');
-  const w = +(html.match(/data-width="(\d+)"/) || [])[1], h = +(html.match(/data-height="(\d+)"/) || [])[1];
+  const html = fs.readFileSync(path.join(PROJ, page0.split('?')[0]), 'utf8');
+  const w = +(html.match(/data-width="(\d+)"/) || [0, 540])[1], h = +(html.match(/data-height="(\d+)"/) || [0, 960])[1]; // test pages: 540x960
   const browser = await pw.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const page = await browser.newPage({ viewport: { width: w, height: h } });
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
