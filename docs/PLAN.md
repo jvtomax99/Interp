@@ -55,8 +55,8 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 **The 3D promo remake (Jose, 2026-10-20).** The promo's (v11, Jose's upload; the live `media/hub-promo.mp4` is v12) feature-by-feature
 story and copy, with the look of his four reference reels. Plan, shot table
-and the 7 steps: `promo/hub-blend/BRIEF.md`. Step 1 done (project and brief
-committed); next is step 2 (real screens in layers). One step at a time,
+and the 7 steps: `promo/hub-blend/BRIEF.md`. Steps 1-2 done (project, brief,
+real screens in layers); next is step 3 (the Dr. Smiley puppet). One step at a time,
 Jose reviews each. Nothing in the app changes until he picks the final cut.
 
 

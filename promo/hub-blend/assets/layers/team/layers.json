@@ -1,0 +1,127 @@
+{
+  "state": "team",
+  "caption": "One team. One channel.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 55,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 67
+      },
+      "depth": 2
+    },
+    {
+      "key": "channels",
+      "proof": false,
+      "x": 18,
+      "y": 114,
+      "w": 354,
+      "h": 40,
+      "file": "channels.webp",
+      "clip": {
+        "x": 6,
+        "y": 102,
+        "width": 378,
+        "height": 64
+      },
+      "depth": 2
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 13,
+      "y": 213,
+      "w": 283.90625,
+      "h": 109.046875,
+      "file": "proof.webp",
+      "clip": {
+        "x": 1,
+        "y": 201,
+        "width": 307.90625,
+        "height": 133.046875
+      },
+      "depth": 3
+    },
+    {
+      "key": "msg1",
+      "proof": false,
+      "x": 13,
+      "y": 337.046875,
+      "w": 283.90625,
+      "h": 154.03125,
+      "file": "msg1.webp",
+      "clip": {
+        "x": 1,
+        "y": 325.046875,
+        "width": 307.90625,
+        "height": 178.03125
+      },
+      "depth": 1
+    },
+    {
+      "key": "msg2",
+      "proof": false,
+      "x": 93.09375,
+      "y": 506.078125,
+      "w": 283.90625,
+      "h": 139.140625,
+      "file": "msg2.webp",
+      "clip": {
+        "x": 81.09375,
+        "y": 494.078125,
+        "width": 307.90625,
+        "height": 163.140625
+      },
+      "depth": 1
+    },
+    {
+      "key": "input",
+      "proof": false,
+      "x": 9,
+      "y": 683,
+      "w": 372,
+      "h": 50,
+      "file": "input.webp",
+      "clip": {
+        "x": 0,
+        "y": 671,
+        "width": 390,
+        "height": 74
+      },
+      "depth": 2
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 295,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 319,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

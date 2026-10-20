@@ -1,0 +1,95 @@
+{
+  "state": "home",
+  "caption": "Built by our own interpreters.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "banner",
+      "proof": false,
+      "x": 0,
+      "y": 45,
+      "w": 390,
+      "h": 491.9375,
+      "file": "banner.webp",
+      "clip": {
+        "x": 0,
+        "y": 33,
+        "width": 390,
+        "height": 515.9375
+      },
+      "depth": 0
+    },
+    {
+      "key": "search",
+      "proof": false,
+      "x": 16,
+      "y": 511.9375,
+      "w": 358,
+      "h": 50,
+      "file": "search.webp",
+      "clip": {
+        "x": 4,
+        "y": 499.9375,
+        "width": 382,
+        "height": 74
+      },
+      "depth": 0
+    },
+    {
+      "key": "tiles",
+      "proof": true,
+      "x": 16,
+      "y": 579.9375,
+      "w": 358,
+      "h": 84,
+      "file": "tiles.webp",
+      "clip": {
+        "x": 4,
+        "y": 567.9375,
+        "width": 382,
+        "height": 108
+      },
+      "depth": 3
+    },
+    {
+      "key": "drill",
+      "proof": false,
+      "x": 16,
+      "y": 684.9375,
+      "w": 172.5,
+      "h": 127.890625,
+      "file": "drill.webp",
+      "clip": {
+        "x": 4,
+        "y": 672.9375,
+        "width": 196.5,
+        "height": 151.890625
+      },
+      "depth": 0
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 362,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 386,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

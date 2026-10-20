@@ -1,0 +1,127 @@
+{
+  "state": "cert",
+  "caption": "National certification. Prep built in.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 18,
+      "y": 81.09375,
+      "w": 354,
+      "h": 32,
+      "file": "proof.webp",
+      "clip": {
+        "x": 6,
+        "y": 69.09375,
+        "width": 378,
+        "height": 56
+      },
+      "depth": 3
+    },
+    {
+      "key": "card",
+      "proof": false,
+      "x": 18,
+      "y": 192.09375,
+      "w": 354,
+      "h": 575.25,
+      "file": "card.webp",
+      "clip": {
+        "x": 6,
+        "y": 180.09375,
+        "width": 378,
+        "height": 599.25
+      },
+      "depth": 1
+    },
+    {
+      "key": "hud",
+      "proof": false,
+      "x": 31,
+      "y": 209.09375,
+      "w": 157.4375,
+      "h": 164,
+      "file": "hud.webp",
+      "clip": {
+        "x": 19,
+        "y": 197.09375,
+        "width": 181.4375,
+        "height": 188
+      },
+      "depth": 0
+    },
+    {
+      "key": "world",
+      "proof": false,
+      "x": 18,
+      "y": 382.09375,
+      "w": 354,
+      "h": 280.25,
+      "file": "world.webp",
+      "clip": {
+        "x": 6,
+        "y": 370.09375,
+        "width": 378,
+        "height": 304.25
+      },
+      "depth": 0
+    },
+    {
+      "key": "foot",
+      "proof": false,
+      "x": 31,
+      "y": 668.34375,
+      "w": 328,
+      "h": 86,
+      "file": "foot.webp",
+      "clip": {
+        "x": 19,
+        "y": 656.34375,
+        "width": 352,
+        "height": 110
+      },
+      "depth": 0
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 362,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 386,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

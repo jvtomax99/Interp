@@ -1,0 +1,126 @@
+{
+  "state": "physician",
+  "caption": "Ready for every physician.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "hero",
+      "proof": false,
+      "x": 16,
+      "y": 68,
+      "w": 358,
+      "h": 90,
+      "file": "hero.webp",
+      "clip": {
+        "x": 4,
+        "y": 56,
+        "width": 382,
+        "height": 114
+      },
+      "depth": 0
+    },
+    {
+      "key": "bento",
+      "proof": true,
+      "x": 16,
+      "y": 168,
+      "w": 358,
+      "h": 209.78125,
+      "file": "bento.webp",
+      "clip": {
+        "x": 4,
+        "y": 156,
+        "width": 382,
+        "height": 233.78125
+      },
+      "depth": 3
+    },
+    {
+      "key": "tabs",
+      "proof": false,
+      "x": 16,
+      "y": 390.78125,
+      "w": 358,
+      "h": 50,
+      "file": "tabs.webp",
+      "clip": {
+        "x": 4,
+        "y": 378.78125,
+        "width": 382,
+        "height": 74
+      },
+      "depth": 0
+    },
+    {
+      "key": "row1",
+      "proof": false,
+      "x": 16,
+      "y": 496.765625,
+      "w": 358,
+      "h": 152,
+      "file": "row1.webp",
+      "clip": {
+        "x": 4,
+        "y": 484.765625,
+        "width": 382,
+        "height": 176
+      },
+      "depth": 1
+    },
+    {
+      "key": "row2",
+      "proof": false,
+      "x": 16,
+      "y": 648.765625,
+      "w": 358,
+      "h": 153,
+      "file": "row2.webp",
+      "clip": {
+        "x": 4,
+        "y": 636.765625,
+        "width": 382,
+        "height": 177
+      },
+      "depth": 1
+    },
+    {
+      "key": "row3",
+      "proof": false,
+      "x": 16,
+      "y": 801.765625,
+      "w": 358,
+      "h": 42.234375,
+      "file": "row3.webp",
+      "clip": {
+        "x": 4,
+        "y": 789.765625,
+        "width": 382,
+        "height": 54.234375
+      },
+      "depth": 1
+    },
+    {
+      "key": "bar",
+      "proof": false,
+      "x": 12,
+      "y": 760,
+      "w": 366,
+      "h": 70,
+      "file": "bar.webp",
+      "clip": {
+        "x": 0,
+        "y": 748,
+        "width": 390,
+        "height": 94
+      },
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

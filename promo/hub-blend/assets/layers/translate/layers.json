@@ -1,0 +1,95 @@
+{
+  "state": "translate",
+  "caption": "Glossary first. AI second.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "input",
+      "proof": false,
+      "x": 18,
+      "y": 184.09375,
+      "w": 354,
+      "h": 261,
+      "file": "input.webp",
+      "clip": {
+        "x": 6,
+        "y": 172.09375,
+        "width": 378,
+        "height": 285
+      },
+      "depth": 2
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 18,
+      "y": 556.28125,
+      "w": 354,
+      "h": 287.71875,
+      "file": "proof.webp",
+      "clip": {
+        "x": 6,
+        "y": 544.28125,
+        "width": 378,
+        "height": 299.71875
+      },
+      "depth": 3
+    },
+    {
+      "key": "result1",
+      "proof": false,
+      "x": 18,
+      "y": 462.09375,
+      "w": 354,
+      "h": 82.1875,
+      "file": "result1.webp",
+      "clip": {
+        "x": 6,
+        "y": 450.09375,
+        "width": 378,
+        "height": 106.1875
+      },
+      "depth": 1
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 295,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 319,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

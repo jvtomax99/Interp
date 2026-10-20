@@ -82,7 +82,14 @@ distinct on screen.
    states in the table; each region a transparent PNG plus a JSON of
    positions; one labelled sheet for Jose. The old `assets/screens/*.png`
    (cut from v11, soft) stay until these replace them, so the current
-   reel still renders.
+   reel still renders. **Done** (2026-10-20): `tools/capture-layers.cjs`
+   writes `assets/layers/<state>/` (full, bg with the layers cut out, one
+   WebP per layer, `layers.json`: box in CSS px, depth, which is the proof)
+   and `assets/layers/sheet.jpg`. About 3 minutes; rerun after app changes.
+   Known: the tab bar is glass, so it carries a little of what was behind
+   it; on Home and CoreCHI it is the app's compact pill, as the app shows
+   it there. The chat question bubble on Ask scrolls above the answer, so
+   only the answer card is a layer.
 3. Dr. Smiley puppet: a flat cutout in Three.js from `drsmiley/` (base,
    face strip, brows), card thickness, contact shadow, screen light on him,
    squash and stretch. Moves: hop, land, type, point, step out, wave. Six

@@ -2,3 +2,6 @@ out/
 renders/
 node_modules/
 .hyperframes/
+
+# Layer PNGs are rebuilt by tools/capture-layers.cjs; git keeps the WebP copies
+assets/layers/*/*.png

@@ -1,0 +1,127 @@
+{
+  "state": "glossary",
+  "caption": "One glossary. Every specialty.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "head",
+      "proof": false,
+      "x": 18,
+      "y": 71.09375,
+      "w": 354,
+      "h": 152,
+      "file": "head.webp",
+      "clip": {
+        "x": 6,
+        "y": 59.09375,
+        "width": 378,
+        "height": 176
+      },
+      "depth": 0
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 18,
+      "y": 418.0625,
+      "w": 354,
+      "h": 154.984375,
+      "file": "proof.webp",
+      "clip": {
+        "x": 6,
+        "y": 406.0625,
+        "width": 378,
+        "height": 178.984375
+      },
+      "depth": 3
+    },
+    {
+      "key": "row1",
+      "proof": false,
+      "x": 18,
+      "y": 237.09375,
+      "w": 354,
+      "h": 168.96875,
+      "file": "row1.webp",
+      "clip": {
+        "x": 6,
+        "y": 225.09375,
+        "width": 378,
+        "height": 192.96875
+      },
+      "depth": 1
+    },
+    {
+      "key": "row2",
+      "proof": false,
+      "x": 18,
+      "y": 585.046875,
+      "w": 354,
+      "h": 186.984375,
+      "file": "row2.webp",
+      "clip": {
+        "x": 6,
+        "y": 573.046875,
+        "width": 378,
+        "height": 210.984375
+      },
+      "depth": 1
+    },
+    {
+      "key": "row3",
+      "proof": false,
+      "x": 18,
+      "y": 784.03125,
+      "w": 354,
+      "h": 59.96875,
+      "file": "row3.webp",
+      "clip": {
+        "x": 6,
+        "y": 772.03125,
+        "width": 378,
+        "height": 71.96875
+      },
+      "depth": 1
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 295,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 319,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}
