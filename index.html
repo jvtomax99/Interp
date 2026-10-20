@@ -21846,6 +21846,8 @@ const MOTIVATIONAL_QUOTES = [
 // Build stamp. Shown in the More sheet and logged to the console so it's
 // possible to tell, from the phone, exactly which deploy is running — cache
 // problems and "did that upload actually land?" are otherwise guesswork.
+// Both lines are set by .github/workflows/bump-version.yml after each push
+// to main; never edit them by hand (every open PR conflicted when we did).
 const BUILD_ID = 'b1020.1324';
 const BUILD_TIME = '2026-10-20 13:24 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
