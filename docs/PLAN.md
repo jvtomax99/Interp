@@ -221,8 +221,13 @@ then read the log; it names the suite and the check.
 - **Glossary changes-only sync.** Each cold start reads every term (~1,700
   reads; persistence is off on purpose, iPhone crashes). Do it only if
   Firestore reads near 50K/day (Usage page). Was 23K on 2026-10-13.
-- **Split `index.html`** (1.6 MB) into CSS + JS by feature. Big; plan it as
-  its own multi-phase effort, coordinated with ChatGPT's edits.
+- **Split `index.html`** (1.86 MB) into CSS + JS by feature. The plan,
+  measured: `docs/split-index.md` (2026-10-20): markers and a census
+  first, then the CSS, then the data constants, then features one file
+  per PR, leaves first; the proof per move and the three lists every new
+  file must join. Jose (2026-10-20): start after the open PRs merge,
+  one move at a time with nothing else in flight; phase 1's first-paint
+  trade is still his call once measured.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
