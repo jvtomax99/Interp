@@ -24,7 +24,6 @@
 #content.is-home .home-greeting-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 9px;}
 #content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;line-height:1.3;letter-spacing:.1em;color:#e9f7ff;margin:0;}
 #content.is-home .home-greeting-date{white-space:nowrap;font-size:11px;line-height:1.3;letter-spacing:-.015em;color:#f3f9ff;}
-#content.is-home .home-greeting-name-row{display:flex;align-items:center;gap:9px;margin-top:3px;position:relative;}
 #content.is-home .home-greeting-actions{margin-top:13px;}
 #content.is-home .home-greeting-btn{min-height:44px;}
 #content.is-home .home-greeting-actions:empty{display:none;}
@@ -622,7 +621,6 @@
     width:min(234px,calc(100% - 36px));
     padding:9px 12px 10px; border-radius:18px;
   }
-  #content.is-home .home-greeting-name-row{ gap:6px; margin-top:2px; }
   /* The wave keeps a 44px hit area while the glyph inside shrinks with the
      name. A first pass took the whole button to 34px, which measured 36px in
      the row -- under the 44px minimum, on the one control in this banner that
@@ -805,7 +803,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
    his sway does (50% 85%, smileySway in index.html), and translate puts
    his centre back on the name's centre line. */
 #content.is-home .home-greeting-text{--hw-size:1.5;--hw-k:var(--hw-size);}
-#content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k)) minmax(0,1fr);gap:0;min-height:52px;}
 #content.is-home .home-wave-icon{justify-self:center;scale:var(--hw-k);transform-origin:50% 85%;translate:0 calc(22.4px * (var(--hw-k) - 1));}
 #content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:64px;height:64px;flex:none;margin:-6px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
 #content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
@@ -856,7 +853,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-greeting-scrim{
   background:linear-gradient(180deg,#0b293145 0%,#0c253c20 18%,#0c2c4ac9 56%,#102f4aeb 80%,transparent 100%);
 }
-#content.is-home .home-greeting-name-row{margin-top:73px;}
 /* 50px clears his badge at size 1; it hangs 67px below his centre, so a
    bigger him moves the quote down by exactly the extra drop. */
 @media(max-width:900px){
@@ -1161,7 +1157,6 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
     margin-left:calc(-1 * var(--home-inset));margin-right:calc(-1 * var(--home-inset));
   }
   #content.is-home .home-greeting-photo-drift{background-position:64% 36%;}
-  #content.is-home .home-greeting-name-row{margin-top:34px;}
   /* 46px, not less: the Ask badge swings below his face and must clear it. */
   #content.is-home .home-search{height:54px;font-size:16px;}
   /* Quick tools read as a row of actions: icon and label side by side. */
@@ -1374,7 +1369,15 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    The heart line runs under the name, beside him, and his thought cloud
    opens to his left (createThought). Same selectors as the rules above, so
    nothing here outranks a press or focus state. */
-#content.is-home .home-greeting-name-row{grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));grid-template-rows:var(--hw-line) auto;gap:0;margin-top:9px;}
+/* ---------- The name row, in one place (docs/PLAN.md, Home styles in layers) ----------
+   The row holds the name and Dr. Smiley: on a phone the name has the
+   first line to itself and he stands on the line below at the right
+   (--hw-line is that first line's height; --hw-k his size); on a
+   computer they share one line, he at its right end. The older layers
+   (a flex row with a 9px gap, then 3 columns, margins of 3, 2, 73 and 34
+   px) are gone; only the winners are kept. */
+#content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));grid-template-rows:var(--hw-line) auto;gap:0;align-items:center;min-height:52px;margin-top:9px;position:relative;}
+@media (min-width:901px){#content.is-home .home-greeting-name-row{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}}
 /* --hw-line: the name's line, as tall as a full-size name (font size x 1.18),
    so a long name in the smaller face, or one fitWave shrank, sits on the
    same baseline and he never moves up. */
@@ -1391,7 +1394,6 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    line, he at its right end (the same place for every name; the column is
    wide enough for any name beside him), and the cloud opens to his right. */
 @media (min-width:901px){
-  #content.is-home .home-greeting-name-row{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}
   #content.is-home .home-wave-icon{grid-row:1;align-self:center;margin:-6px 0;}
 }
 
