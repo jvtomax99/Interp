@@ -236,8 +236,9 @@ then read the log; it names the suite and the check.
   measured: `docs/split-index.md` (2026-10-20): markers and a census
   first, then the CSS, then the data constants, then features one file
   per PR, leaves first; the proof per move and the three lists every new
-  file must join. Starts when Jose says so (his two decisions are at the
-  end of that file).
+  file must join. Jose (2026-10-20): start after the open PRs merge,
+  one move at a time with nothing else in flight; phase 1's first-paint
+  trade is still his call once measured.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;

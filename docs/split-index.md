@@ -93,8 +93,9 @@ startup work is the same code; S3's numbers are the guard, not the goal.
 
 ## Decisions for Jose
 
-- Whether to start at all now, with the Home and campus work still moving
-  daily in `index.html` (each move is a merge-conflict magnet for a day).
+- When to start: **after the open PRs merge** (Jose, 2026-10-20), then one
+  move at a time with nothing else in flight, since each move is a
+  merge-conflict magnet for a day.
 - Phase 1's trade: a file for the CSS (clean) against the possible one-frame
   later first paint on a cold visit. The measurement decides; his call if
   it is close.
