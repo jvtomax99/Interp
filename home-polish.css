@@ -824,7 +824,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-greeting-text{--hw-size:1.5;--hw-k:var(--hw-size);}
 #content.is-home .home-greeting-name-row{display:grid;grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k)) minmax(0,1fr);gap:0;min-height:52px;}
 #content.is-home .home-greeting-name{grid-column:1;max-width:100%;}
-#content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));gap:8px;}
 #content.is-home .home-wave-icon{justify-self:center;scale:var(--hw-k);transform-origin:50% 85%;translate:0 calc(22.4px * (var(--hw-k) - 1));}
 #content.is-home .home-wave-icon{display:block;position:relative;grid-column:2;width:64px;height:64px;flex:none;margin:-6px 0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fff;cursor:pointer;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;isolation:isolate;z-index:7;}
 #content.is-home .home-wave-icon:hover,#content.is-home .home-wave-icon:active{background:transparent;box-shadow:none;}
@@ -843,10 +842,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-wave-glint-a{left:6px;top:6px;}
 #content.is-home .home-wave-glint-b{right:3px;bottom:7px;font-size:11px;}
 #content.is-home .home-wave-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;}
-/* Mini Hackensack marks thrown off by the face's idle animations. The layer
-   is a zero-size point at the face's centre; home-polish.js moves each mark. */
-#content.is-home .home-face-marks{position:absolute;left:50%;top:50%;width:0;height:0;z-index:8;pointer-events:none;}
-#content.is-home .home-face-marks img{position:absolute;left:-10px;top:-8.5px;width:20px;height:17px;opacity:0;will-change:transform,opacity;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 2.5px #fffc) drop-shadow(0 1px 2px #05142a80);pointer-events:none;}
 
 /* Approved floating thought, with isolated emoji cloud and dots. */
 .home-wave-thought{
@@ -949,8 +944,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   #content.is-home .qa-tile-icon,#content.is-home .qa-tile-icon .medical-pin,
   #content.is-home .qa-tile-icon .pin-sprite{width:34px;height:34px;}
   #content.is-home .qa-tile-label{font-size:13.5px;}
-  #content.is-home .domain-family-kid{font-size:12.5px;}
-  #content.is-home .domain-family-kid span{font-size:10.5px;}
 }
 @media (min-width:1200px){
   #content.is-home .home-rail{grid-template-columns:repeat(4,minmax(0,1fr));}
@@ -1384,8 +1377,7 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    The heart line runs under the name, beside him, and his thought cloud
    opens to his left (createThought). Same selectors as the rules above, so
    nothing here outranks a press or focus state. */
-#content.is-home .home-greeting-name-row,
-#content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));grid-template-rows:var(--hw-line) auto;gap:0;margin-top:9px;}
+#content.is-home .home-greeting-name-row{grid-template-columns:minmax(0,1fr) calc(64px * var(--hw-k));grid-template-rows:var(--hw-line) auto;gap:0;margin-top:9px;}
 /* --hw-line: the name's line, as tall as a full-size name (font size x 1.18),
    so a long name in the smaller face, or one fitWave shrank, sits on the
    same baseline and he never moves up. */
@@ -1403,8 +1395,7 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    line, he at its right end (the same place for every name; the column is
    wide enough for any name beside him), and the cloud opens to his right. */
 @media (min-width:901px){
-  #content.is-home .home-greeting-name-row,
-  #content.is-home .home-greeting-name-row.home-wave-wide-name{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}
+  #content.is-home .home-greeting-name-row{grid-template-rows:var(--hw-line);column-gap:8px;margin-top:24px;}
   #content.is-home .home-greeting-name{grid-column:1;}
   #content.is-home .home-wave-icon{grid-row:1;align-self:center;margin:-6px 0;}
 }

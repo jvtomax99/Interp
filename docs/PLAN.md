@@ -196,6 +196,12 @@ come from this alone.
    `index.html`. `home-polish.css` still styles classes nothing makes
    (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
    file, so fetch `main` right before.
+4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
+   old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
+   ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
+   gap" paragraph says there are no spacing or font-size variables, but the
+   Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
+   text, both files.
 
 **Flaky WebKit tests, fixed.** dock-tuck's "Dr. Smiley shrinks with the
 bar" read his size mid-breath (fixed 2026-10-19: the loops are held at their
@@ -289,6 +295,20 @@ then read the log; it names the suite and the check.
   (Translate and the term check untouched). Term lookup uses it: same
   requests, same answers, its own `clip` and request code gone. New suite
   `tests/suites/api-helper.mjs` (64 checks, no browser).
+- 2026-10-20 Dead CSS in `home-polish.css` (this PR): the 2026-10-14 method
+  (a class is live if its name appears anywhere outside the stylesheet;
+  names built in code checked by prefix) finds three classes nothing
+  makes: `domain-family-kid`, `home-face-marks`, `home-wave-wide-name`.
+  Five rules and one orphaned comment removed, and the two selector lists
+  that paired `.home-greeting-name-row` with `.home-wave-wide-name` cut
+  to the live selector (587 -> 582 rules). Proof: every element's and
+  pseudo-element's computed style identical before/after on Home at rest,
+  scrolled and with a domain opened, phone and computer, light and dark
+  (reduced motion so nothing is mid-animation; the one difference seen was
+  the Home tip's text, `SESSION_TIP` is random per session). Lesson: deleting a line
+  of a selector list hands its selector to the next rule; the first pass
+  did exactly that and the proof caught it (the greeting row lost its
+  grid), so delete whole rules, never lines.
 - 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
   sky violet instead of night navy, no stars, a warm glow top left. Lower
   colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim
