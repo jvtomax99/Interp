@@ -7,6 +7,7 @@ import path from 'node:path';
 const ROOT = process.argv[2] || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const { default: lookup } = await import(ROOT + '/api/term-lookup.js');
 const { default: ask } = await import(ROOT + '/api/ask.js');
+const { default: research } = await import(ROOT + '/api/doctor-research.js');
 const { callRoutine, callClaude, clip, clipLine, parseAnswer, ROUTINE_MODEL } = await import(ROOT + '/api/_routine.js');
 let fails = 0; const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (!c && d !== undefined ? ' ' + JSON.stringify(d).slice(0, 400) : '')); if (!c) fails++; };
 
@@ -201,6 +202,70 @@ ok(o.code === 400 && sent.length === 0 && /question/i.test(o.body.error), 'no qu
 reset(); o = await runAsk({ method: 'GET', headers: {} });
 ok(o.code === 405 && sent.length === 0, 'GET: 405', o);
 ok(clipLine(' a \n\n b ') === 'a b' && clipLine(null) === '' && clipLine('x'.repeat(700)).length === 600 && clip(' a \n b ') === 'a \n b', 'clipLine folds whitespace to one space; clip does not');
+
+console.log('== Doctor Prep: the directory fast path');
+const runDr = async (req) => { let out = {}; const res = { status(c) { out.code = c; return this; }, json(o) { out.body = o; return this; } }; await research(req, res); return out; };
+const TIERS = { found: true, specialty: 'Radiation Oncology — John Theurer Cancer Center', note: 'matched', tiers: [
+  { key: 'procedures', terms: [{ en: 'simulation', es: 'simulación', def: 'Planning session.' }] },
+  { key: 'core', terms: [{ en: 'tumor', es: 'tumor', def: 'A mass.' }, { en: 'Tumor', es: 'tumor' }, { en: 'no spanish', es: '' }] },
+  { key: 'bogus', terms: [{ en: 'x', es: 'y' }] }, { key: 'drugs', terms: [] } ] };
+reset(); queue.push(reply([text(JSON.stringify(TIERS))]));
+o = await runDr(post({ doctorName: 'Dr. Glen Gejerman' }));
+ok(sent.length === 1, 'one request', sent.length);
+r = sent[0];
+ok(r.body.model === 'claude-sonnet-5-5' && r.body.max_tokens === 16000 && !r.body.tools && r.body.system.includes('"Radiation Oncology"') && r.body.messages[0].content === 'Division: Radiation Oncology', 'a known name: Sonnet 5.5, 16000 tokens, no web search, the division in the prompt', { model: r.body.model, tools: r.body.tools, msg: r.body.messages[0].content });
+ok(r.body.output_config.effort === 'medium' && r.body.output_config.format.type === 'json_schema' && r.body.output_config.format.schema.required.join() === 'found,specialty,note,tiers', 'medium effort and the research schema', r.body.output_config);
+ok(o.code === 200 && o.body.found === true && o.body.specialty === TIERS.specialty && o.body.note === 'matched', 'answers 200 with found, specialty, note', o.body);
+ok(o.body.tiers.map(t => t.key).join() === 'core,procedures' && o.body.tiers[0].terms.length === 1 && o.body.tiers[0].terms[0].def === 'A mass.' && o.body.tiers[0].label, 'tiers in the fixed order, the duplicate and the term without Spanish dropped, an unknown tier dropped, empty tiers dropped', o.body.tiers);
+ok(o.body.terms.length === 2 && o.body.terms.map(t => t.en).join() === 'tumor,simulation', 'terms flattened in tier order', o.body.terms);
+ok(errors.length === 0 && warns.length === 0, 'nothing logged', { errors, warns });
+
+console.log('== Doctor Prep: the web search path');
+reset(); queue.push(reply([text('Let me check the directory.'), { type: 'server_tool_use', id: 't1', name: 'web_search', input: { query: 'Jane Roe Hackensack' } }, { type: 'web_search_tool_result', tool_use_id: 't1', content: [{ type: 'web_search_result', url: 'https://doctors.hackensackmeridianhealth.org/x', title: 'Jane Roe, MD' }] }, text(JSON.stringify({ ...TIERS, specialty: 'Cardiology — Heart Failure' }))]));
+o = await runDr(post({ doctorName: ' Jane Roe ', specialty: 'cardio', location: 'Hackensack UMC' }));
+r = sent[0]; const ws = r.body.tools && r.body.tools[0];
+ok(sent.length === 1 && ws && ws.type === 'web_search_20260209' && ws.name === 'web_search' && ws.max_uses === 2, 'an unknown name: one web search tool, two searches at most', ws);
+ok(ws && ws.strict === true && JSON.stringify(ws.allowed_domains) === '["hackensackmeridianhealth.org","doctors.hackensackmeridianhealth.org"]', 'Hackensack: the search is held to the Find a Doctor directory', ws);
+ok(r.body.system.includes('Find a Doctor') && r.body.messages[0].content === 'Doctor name: Jane Roe\nSpecialty (if helpful to confirm): cardio\nHospital / location: Hackensack UMC', 'the prompt names the directory; name, specialty and location in the message', r.body.messages[0].content);
+ok(o.code === 200 && o.body.specialty === 'Cardiology — Heart Failure' && o.body.terms.length === 2, 'the answer is the last text block, after the remark and the search', o.body.specialty);
+reset(); queue.push(reply([text(JSON.stringify(TIERS))]));
+o = await runDr(post({ doctorName: 'Jane Roe', location: 'Mount Sinai' }));
+ok(sent[0].body.tools[0].allowed_domains === undefined && sent[0].body.tools[0].strict === undefined && !sent[0].body.system.includes('Find a Doctor'), 'elsewhere: the search is open', sent[0].body.tools[0]);
+
+console.log('== Doctor Prep: the schema rejected, errors, the door');
+reset();
+queue.push({ status: 400, body: { type: 'error', error: { type: 'invalid_request_error', message: 'output_config.format: structured outputs are not supported with server tools' } } });
+queue.push(reply([text('Here is what I found:\n```json\n' + JSON.stringify(TIERS) + '\n```\nHope this helps.')]));
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(sent.length === 2 && JSON.stringify(sent[1].body.output_config) === '{"effort":"medium"}', 'the retry keeps the effort and drops only the schema', sent[1] && sent[1].body.output_config);
+ok(o.code === 200 && o.body.terms.length === 2 && o.body.found === true, 'without the schema the JSON is dug out of the prose', o.body);
+ok(warns.length === 1 && /output_config rejected, retrying with \{"effort":"medium"\}/.test(warns[0]), 'the warning says what was sent instead', warns);
+reset(); queue.push({ status: 400, body: { error: { message: 'effort: no' } } }); queue.push({ status: 400, body: { error: { message: 'effort: still no' } } });
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(sent.length === 2 && o.code === 502 && /temporarily unavailable/.test(o.body.error), 'a second 400 after the retry: 502, no third request', { n: sent.length, o });
+reset(); queue.push({ status: 500, body: { error: { message: 'boom' } } });
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(sent.length === 1 && o.code === 502 && /temporarily unavailable/.test(o.body.error) && errors.some(e => /Anthropic API error: 500/.test(e)), 'a 500: 502 unavailable, logged', { o, errors });
+reset(); queue.push(reply([], 'refusal', { stop_details: { reason: 'policy' } }));
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(o.code === 502 && /declined/.test(o.body.error) && errors.some(e => /Model declined/.test(e)), 'a refusal: 502 declined', { o, errors });
+reset(); queue.push(reply([text('{"found":true')], 'max_tokens'));
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(o.code === 502 && /cut off/.test(o.body.error), 'cut off at max_tokens: 502 cut off', o);
+reset(); queue.push(reply([text('not json at all')]));
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(o.code === 502 && /Could not understand/.test(o.body.error), 'unreadable under the schema: 502 could not understand', o);
+reset(); queue.push(reply([text(JSON.stringify({ found: false, specialty: '', note: 'unknown', terms: [{ en: 'pain', es: 'dolor' }, { en: 'Pain', es: 'dolor' }] }))]));
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(o.code === 200 && o.body.found === false && o.body.specialty === null && o.body.tiers.length === 1 && o.body.tiers[0].key === 'core' && o.body.terms.length === 1, 'a flat list of terms still becomes a core tier; not found reads as null specialty', o.body);
+reset(); o = await runDr(post({ doctorName: '  ' }));
+ok(o.code === 400 && sent.length === 0, 'no name: 400, nothing sent', o);
+reset(); o = await runDr({ method: 'GET', headers: {} });
+ok(o.code === 405 && sent.length === 0, 'GET: 405', o);
+reset(); const key2 = process.env.ANTHROPIC_API_KEY; delete process.env.ANTHROPIC_API_KEY;
+o = await runDr(post({ doctorName: 'Jane Roe' }));
+ok(o.code === 500 && /not configured/i.test(o.body.error) && sent.length === 0, 'no key: 500, nothing sent', o);
+process.env.ANTHROPIC_API_KEY = key2;
 
 console.log('== callRoutine: Haiku first, the backup after');
 const BODY = { max_tokens: 1000, system: 'sys', messages: [{ role: 'user', content: 'hi' }] };

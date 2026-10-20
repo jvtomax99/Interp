@@ -191,14 +191,6 @@ come from this alone.
    `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
    `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
    claude-api skill first. Next: translate backup.
-2. **One Claude helper in `api/`.** `_routine.js` is the helper now
-   (`callClaude` with its `beta` option, `parseAnswer`, `clip`,
-   `clipLine`; `callRoutine` built on it); Term lookup and Ask the Hub are
-   on it, each with its cases in `api-helper.mjs` (the API faked). Last
-   one: `doctor-research.js` (throws `api_error`/`refused`/`truncated`;
-   keep those for its callers; its request has `output_config.effort`
-   even on the retry without a schema, so the helper needs to keep
-   `effort` when only `format` is rejected, or the move changes that).
 3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
@@ -252,6 +244,17 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 One Claude helper, last move (this PR, on top of Ask's):
+  Doctor Prep on `callClaude`, which learned `retryOutput` (what to send
+  as `output_config` when the first is rejected; Doctor Prep keeps its
+  effort, the others send nothing, as before). Its `api_error` /
+  `refused` / `truncated` throws and the loose parse without a schema
+  stay in `doctor-research.js`; its own fetch, retry and text helpers are
+  gone. 24 Doctor Prep cases in `api-helper.mjs` (115 checks). Item 2
+  done: every request to the Messages API goes through `_routine.js`;
+  the one behaviour change across the three moves is that a 400 naming
+  `effort` on Doctor Prep now retries once with the effort alone before
+  failing (it failed at once before). `clip()` lives in one place.
 - 2026-10-20 One Claude helper, second move (this PR, on top of the
   first): Ask the Hub on `callClaude`, which learned a `beta` option
   (header + body; dropped first on a 400 naming it, then `output_config`,

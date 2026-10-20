@@ -24,6 +24,7 @@
 // call web search at all.
 
 import { allowTeam } from './_hub-access.js';
+import { callClaude } from './_routine.js';
 export const config = {
   maxDuration: 60,
 };
@@ -154,78 +155,41 @@ function parseLoosely(rawText) {
   }
 }
 
-function textOf(data) {
-  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-}
-
-// With the schema, the answer is the LAST text block. A short remark before
-// a web search ("Let me look that up.") can come back as its own text block,
-// and joining it in front of the JSON would break the parse.
-function lastTextOf(data) {
-  const texts = (data.content || []).filter(b => b.type === 'text');
-  return texts.length ? texts[texts.length - 1].text.trim() : '';
-}
-
-async function postMessages(apiKey, body) {
-  return fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify(body),
-  });
-}
-
-async function callClaude(apiKey, systemPrompt, userContent, tools) {
+/* One research call. The request, the retry when this deployment rejects
+   structured outputs (or the combination with the server-side web search
+   tool: then only the effort is sent again) and the refusal check are the
+   shared helper's (_routine.js); Doctor Prep keeps working either way, on
+   the old prose-and-parse path when there is no schema. The outcomes the
+   handler maps to its messages are thrown as before: api_error, refused,
+   truncated, and a SyntaxError from the parse. */
+async function research(apiKey, systemPrompt, userContent, tools) {
   // max_tokens: five tiers is a lot of output, hitting the cap throws the
   // whole response away, and the model's thinking counts toward it too
   // (8000 until Sonnet 5.5; 16000 is room, not a target).
-  const base = {
-    model: MODEL, max_tokens: 16000, system: systemPrompt,
-    output_config: { effort: EFFORT },
-    messages: [{ role: 'user', content: userContent }],
-  };
-  if (tools) base.tools = tools;
-
-  // Ask for a schema-constrained response first. If this deployment or this
-  // combination (structured outputs alongside the server-side web search tool)
-  // is rejected, fall back to the old prose-and-parse path rather than failing
-  // the request — Doctor Prep keeps working either way.
-  let usedSchema = true;
-  let response = await postMessages(apiKey, {
-    ...base,
-    output_config: { ...base.output_config, format: { type: 'json_schema', schema: RESEARCH_SCHEMA } },
+  const body = { max_tokens: 16000, system: systemPrompt, messages: [{ role: 'user', content: userContent }] };
+  if (tools) body.tools = tools;
+  const result = await callClaude(apiKey, {
+    model: MODEL, body,
+    output: { effort: EFFORT, format: { type: 'json_schema', schema: RESEARCH_SCHEMA } },
+    retryOutput: { effort: EFFORT },
   });
-
-  if (response.status === 400) {
-    const errText = await response.text();
-    if (/output_config|json_schema|\bformat\b/i.test(errText)) {
-      console.warn('Structured outputs rejected, retrying without a schema:', errText);
-      usedSchema = false;
-      response = await postMessages(apiKey, base);
-    } else {
-      console.error('Anthropic API error:', response.status, errText);
-      throw new Error('api_error');
-    }
-  }
-
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error('Anthropic API error:', response.status, errText);
+  if (!result.ok) {
+    console.error('Anthropic API error:', result.status, result.detail);
     throw new Error('api_error');
   }
-
-  const data = await response.json();
   // A safety decline is a normal 200 with no answer in it. Say so, instead of
   // failing to parse an empty reply.
-  if (data.stop_reason === 'refusal') {
-    console.error('Model declined:', JSON.stringify(data.stop_details || null));
+  if (result.stopReason === 'refusal') {
+    console.error('Model declined:', JSON.stringify(result.data.stop_details || null));
     throw new Error('refused');
   }
-  if (data.stop_reason === 'max_tokens') {
+  if (result.stopReason === 'max_tokens') {
     console.error('Response was truncated at max_tokens before finishing.');
     throw new Error('truncated');
   }
-
-  return usedSchema ? JSON.parse(lastTextOf(data)) : parseLoosely(textOf(data));
+  // With the schema the answer is the last text block (a remark before a
+  // search can be a block of its own); without it, every block, joined.
+  return result.usedSchema ? JSON.parse(result.answer) : parseLoosely(result.texts.join('\n').trim());
 }
 
 // Render order, easiest to hardest. The client reads `label` straight off
@@ -356,7 +320,7 @@ ${TIER_BRIEF}
 ${RESPONSE_SHAPE}
 Set "found" to true, "specialty" to "${directoryMatch.division} — John Theurer Cancer Center", and "note" to mention this was matched directly against the confirmed building directory.`;
 
-      const parsed = await callClaude(apiKey, systemPrompt, `Division: ${directoryMatch.division}`, null);
+      const parsed = await research(apiKey, systemPrompt, `Division: ${directoryMatch.division}`, null);
       res.status(200).json(normalizeResult(parsed));
       return;
     }
@@ -384,7 +348,7 @@ If you cannot find reliable, specific information about this named individual, s
       webSearchTool.strict = true;
     }
 
-    const parsed = await callClaude(apiKey, systemPrompt, details.join('\n'), [webSearchTool]);
+    const parsed = await research(apiKey, systemPrompt, details.join('\n'), [webSearchTool]);
     res.status(200).json(normalizeResult(parsed));
   } catch (err) {
     console.error('doctor-research handler failed:', err);

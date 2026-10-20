@@ -10,7 +10,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | Suite | What it covers |
 |---|---|
 | `events-login.mjs` | The events watcher's own login (`api/_service-login.js`), with a throwaway key; no browser |
-| `api-helper.mjs` | The one Claude helper (`api/_routine.js`) with the Messages API faked: Term lookup and Ask the Hub end to end (the request sent, the beta, the answer filtered), the retries without the beta and without a schema, a refusal, a cut-off answer, a failed web search, the door, and the routine backup (Haiku first, the backup after); no browser |
+| `api-helper.mjs` | The one Claude helper (`api/_routine.js`) with the Messages API faked: Term lookup, Ask the Hub and Doctor Prep end to end (the request sent, the beta, the web search tool, the answer filtered), the retries without the beta and without a schema (Doctor Prep keeping its effort), a refusal, a cut-off answer, a failed web search, the door, and the routine backup (Haiku first, the backup after); no browser |
 | `daily-drill.cjs` | Daily Drill: the three rounds at every level, the trap, compare, the clock, your place kept, score, level up/down, Home card |
 | `guide.cjs` | User Guide: search, answers, steps, Show me, deep links |
 | `destination-labels.cjs` | Doctor Prep and Doctors entrances, Provider Pictures labels, route and scroll restoration, glossary state, separate appointment briefing, guide targets |
