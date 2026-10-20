@@ -25,8 +25,9 @@ const DURATION = +root.dataset.duration;
 /* The reel starts on the hook (Jose, 2026-10-20: the carousel opener is gone), or, while he
    chooses, on a short first frame that sets the place (?first=sign or ?first=arrive, previews
    only). Everything after it keeps its own clock (t = time - OPEN). */
-const FIRST = new URLSearchParams(location.search).get("first") || "none";
-const OPEN = FIRST === "none" ? 0 : 1.5;
+const FIRST = new URLSearchParams(location.search).get("first") || "sign"; // Jose: "2 is the right direction"
+const TITLE = new URLSearchParams(location.search).get("title") || "signage"; // the name's lettering, while he picks
+const OPEN = FIRST === "none" ? 0 : 2.5;
 
 const C = { navy0: 0x03061a, navy1: 0x0b1640, navy2: 0x1a3a96, cyan: 0x3fc6ee, red: 0xf0436a, white: 0xffffff };
 
@@ -347,33 +348,61 @@ async function build() {
     m.position.set(h.x + Math.sin(t * 0.22 + m.userData.phase) * 0.9, h.y + Math.cos(t * 0.17 + m.userData.phase) * 0.35, h.z);
   });
 
-  // ---------- the first frame, while Jose picks one (previews: ?first=sign | ?first=arrive) ----------
+  // ---------- the first frame: walking up to HUMC's entrance and in through the doors ----------
+  // The entrance photo in two layers (the ground and pillars near us, the building beyond), pushed
+  // at different speeds with a walking bob, so it feels like stepping toward the doors; at the doors
+  // a wash of light, and the hook begins over the same photo, softened, as its backdrop.
   const first = document.createElement("div");
-  first.style.cssText = "position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none";
-  const firstImg = document.createElement("img");
-  firstImg.src = FIRST === "arrive" ? "assets/humc/aerial.jpg" : "assets/humc/entrance.jpg";
-  firstImg.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 60%";
+  first.style.cssText = "position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none;background:#03061a";
+  const mkLayer = (mask) => {
+    const d = document.createElement("div");
+    d.style.cssText = `position:absolute;inset:0;background:url(assets/humc/entrance.jpg) 56% 50% / cover no-repeat;transform-origin:50% 54%;${mask}`;
+    return d;
+  };
+  const far = mkLayer(""), near = mkLayer("-webkit-mask-image:linear-gradient(180deg, transparent 58%, #000 70%);mask-image:linear-gradient(180deg, transparent 58%, #000 70%);");
+  const wash = document.createElement("div");
+  wash.style.cssText = "position:absolute;inset:0;opacity:0;background:radial-gradient(60% 45% at 50% 54%, rgba(235,248,255,1), rgba(120,210,245,0.85) 45%, rgba(3,6,26,0.95) 100%)";
   const firstTitle = document.createElement("div");
-  firstTitle.style.cssText = `position:absolute;left:0;right:0;bottom:${H * 0.1}px;text-align:center;color:#fff;font-family:"Inter Tight",sans-serif;text-shadow:0 2px 22px rgba(3,6,26,.9)`;
-  firstTitle.innerHTML = `<div style="font-weight:800;font-size:${Math.round(H * 0.026)}px;letter-spacing:-0.01em;white-space:nowrap">Hackensack University Medical Center</div><div style="margin-top:${H * 0.008}px;font:500 ${Math.round(H * 0.017)}px 'JetBrains Mono',monospace;letter-spacing:.3em;color:#bfe9fa">HACKENSACK, NJ</div>`;
-  first.append(firstImg, firstTitle);
+  firstTitle.style.cssText = "position:absolute;left:0;right:0;text-align:center;pointer-events:none";
+  // three letterings for the name, while Jose picks (?title=signage | stacked | rising)
+  const F = Math.round(H * 0.031);
+  if (TITLE === "stacked") {
+    firstTitle.style.top = H * 0.62 + "px";
+    firstTitle.innerHTML = `<div class="w" style="font:800 ${Math.round(H * 0.06)}px 'Inter Tight';letter-spacing:.16em;color:#fff;text-shadow:0 3px 24px rgba(3,6,26,.85)">HACKENSACK</div>
+      <div class="w" style="margin:${H * 0.01}px auto 0;width:${W * 0.18}px;height:3px;background:#3fc6ee;border-radius:2px;box-shadow:0 0 14px rgba(63,198,238,.7)"></div>
+      <div class="w" style="margin-top:${H * 0.012}px;font:500 ${Math.round(H * 0.019)}px 'JetBrains Mono';letter-spacing:.32em;color:#d8f2fc;text-shadow:0 2px 14px rgba(3,6,26,.9)">UNIVERSITY MEDICAL CENTER</div>`;
+  } else if (TITLE === "rising") {
+    firstTitle.style.top = H * 0.56 + "px";
+    firstTitle.innerHTML = ["Hackensack", "University", "Medical Center"].map((w) => `<div class="w" style="font:800 ${Math.round(H * 0.052)}px 'Inter Tight';letter-spacing:-.02em;line-height:1.08;color:#fff;text-shadow:0 4px 26px rgba(3,6,26,.9)">${w}</div>`).join("");
+  } else {
+    // signage: the name the way the hospital's own skybridge sign sets it, serif on a white band
+    firstTitle.style.top = H * 0.66 + "px";
+    firstTitle.innerHTML = `<div class="w" style="display:inline-block;padding:${H * 0.014}px ${W * 0.06}px;background:rgba(247,248,250,.96);box-shadow:0 8px 30px rgba(3,6,26,.45);font:400 ${F}px/1.35 'Libre Baskerville';color:#1b2340">Hackensack University<br>Medical Center</div>
+      <div class="w" style="margin-top:${H * 0.014}px;font:500 ${Math.round(H * 0.016)}px 'JetBrains Mono';letter-spacing:.32em;color:#d8f2fc;text-shadow:0 2px 14px rgba(3,6,26,.9)">HACKENSACK, NJ</div>`;
+  }
+  // a soft dark band low in the frame, so the name reads over the busy photo
+  const band = document.createElement("div");
+  band.style.cssText = `position:absolute;left:0;right:0;bottom:0;height:${H * 0.5}px;background:linear-gradient(180deg, rgba(3,6,26,0) 0%, rgba(3,6,26,.55) 45%, rgba(3,6,26,.72) 100%)`;
+  first.append(far, near, band, wash, firstTitle);
   root.appendChild(first);
+  const titleParts = [...firstTitle.querySelectorAll(".w")];
   function firstAt(T0) {
     if (FIRST === "none" || T0 >= OPEN) { first.style.opacity = "0"; return; }
-    const p = T0 / OPEN, out = prog(T0, OPEN - 0.55, OPEN);
-    first.style.opacity = String(1 - out);
-    // the photo goes soft and dark as it hands over to the same photo blurred behind the words
-    const blur = 7 * out, dim = lerp(1, 0.55, out);
-    if (FIRST === "arrive") {
-      // a drone coming down over the campus
-      firstImg.style.transform = `scale(${lerp(1.35, 1.08, outCubic(p))}) rotate(${lerp(-4, 0, outCubic(p))}deg)`;
-    } else {
-      // the entrance and its sign, a slow push
-      firstImg.style.transform = `scale(${lerp(1.0, 1.1, p)})`;
-    }
-    firstImg.style.filter = `blur(${blur}px) brightness(${dim})`;
-    firstTitle.style.opacity = String(outCubic(prog(T0, 0.15, 0.5)) * (1 - out));
-    firstTitle.style.transform = `translateY(${(1 - outExpo(prog(T0, 0.15, 0.6))) * H * 0.02}px)`;
+    first.style.opacity = "1";
+    // the walk: 0 to 2 s; the near ground passes faster than the building; a step every 0.5 s (the beat)
+    const walk = inOutSine(clamp(T0 / 2.0)), bob = Math.sin(T0 * Math.PI * 4) * H * 0.004, sway = Math.sin(T0 * Math.PI * 2) * W * 0.003;
+    far.style.transform = `translate(${sway}px, ${bob}px) scale(${lerp(1.0, 1.55, walk)})`;
+    near.style.transform = `translate(${sway * 1.6}px, ${bob * 1.6}px) scale(${lerp(1.0, 2.2, walk)})`;
+    // the doors: light washes over, then hands over to the hook (its backdrop is this same photo)
+    const w = prog(T0, 1.75, 2.15), out = prog(T0, 2.15, OPEN);
+    wash.style.opacity = String(Math.sin(Math.PI * Math.min(1, w + out * 0.5)) * 0.9 * (1 - out) + w * (1 - out) * 0.2);
+    first.style.opacity = String(1 - outCubic(out));
+    // the name: in on the first beats, out before the doors
+    titleParts.forEach((el, i) => {
+      const p = outExpo(prog(T0, 0.2 + i * 0.18, 0.6 + i * 0.18)), o = 1 - prog(T0, 1.6, 1.85);
+      el.style.opacity = String(p * o);
+      el.style.transform = TITLE === "rising" ? `perspective(600px) translateY(${(1 - p) * H * 0.04}px) rotateX(${(1 - p) * -60}deg)` : `translateY(${(1 - p) * H * 0.02}px)`;
+    });
   }
 
   // ---------- timing ----------
