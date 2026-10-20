@@ -191,8 +191,11 @@ come from this alone.
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
    helper; move one endpoint per PR.
 3. **Home styles in layers.** The greeting name, the quote (with its
-   author line) and the name row are each in one block now (their PRs);
-   next, the most-layered selectors left (census in the row's PR).
+   author line), the name row, the greeting text block and the banner
+   itself are each in one place now (their PRs). Left as they are: the
+   photo drift and scrim (8 rules each, one per mode by design), section
+   heads, tile names and card titles (7-8, one per breakpoint). Fold
+   those the same way when someone touches them.
    Method that worked: list every rule for the element with its media
    context (comments stripped first), work out the winner per breakpoint,
    write one block at the lettering block's place, delete the rest, then
@@ -247,6 +250,14 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-20 Home styles in layers, the text block and the banner (this
+  PR, on top of the row's): `.home-greeting-text` 10 rules in five
+  places (the old frosted card and its phone widths, all dead under the
+  Panorama reset; Dr. Smiley's --hw-* numbers) folded into one block in
+  the wave block with their comments; `.home-greeting` 10 rules in six
+  places folded into one base rule and five media rules at the Panorama
+  comment, the sign's band (padding-bottom per mode) left with the photo
+  rules on purpose. Same proof: 30 states identical, 0 differing pixels.
 - 2026-10-20 Home styles in layers, the name row (this PR, on top of the
   quote's): 7 rules in five places folded into one block with one
   breakpoint (the flex row, the 3-column grid and margins of 3, 2, 73 and
