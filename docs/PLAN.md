@@ -185,6 +185,18 @@ come from this alone.
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
    helper; move one endpoint per PR.
+1. **AI models.** `claude-sonnet-5` (translate backup) →
+   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
+   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
+   claude-api skill first. Next: translate backup.
+2. **One Claude helper in `api/`.** `_routine.js` is the helper now
+   (`callClaude`, `parseAnswer`, `clip`; `callRoutine` built on it), with
+   Term lookup moved onto it and a no-browser suite (`api-helper.mjs`,
+   the API faked). Still on their own requests: `ask.js` next (needs a
+   headers option for its `server-side-fallback` beta and its two-step
+   retry), then `doctor-research.js` (throws `api_error`/`refused`/
+   `truncated`; keep those for its callers). One endpoint per PR; every
+   move adds its cases to `api-helper.mjs`.
 3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
@@ -260,6 +272,13 @@ then read the log; it names the suite and the check.
   `--fs-title1`, `--fs-footnote`, index.html ~1215, ~1216, ~2005) and run
   on their px fallbacks; same sizes, so nothing shows. Rename them to
   `--fs-head`/`--fs-t1`/`--fs-foot` in the next PR that bumps the build.
+- 2026-10-20 One Claude helper, first move (this PR): `_routine.js` grew
+  `callClaude` (one request, the retry without `output_config`, the
+  web-search failure log, `answer` = the last text block under a schema),
+  `parseAnswer` and `clip`; `callRoutine` is built on it, same behaviour
+  (Translate and the term check untouched). Term lookup uses it: same
+  requests, same answers, its own `clip` and request code gone. New suite
+  `tests/suites/api-helper.mjs` (64 checks, no browser).
 - 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
   sky violet instead of night navy, no stars, a warm glow top left. Lower
   colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim

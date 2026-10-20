@@ -12,6 +12,7 @@ const path = require('path');
 
 const SUITES = [
   ['events-login.mjs',    'Events watcher login (no browser)'],
+  ['api-helper.mjs',      'Claude helper (no browser): Term lookup end to end, the retry without a schema, refusals, the routine backup'],
   ['daily-drill.cjs',     'Daily Drill: rounds, levels, score, Home card'],
   ['guide.cjs',           'User Guide: search, answers, Show me'],
   ['destination-labels.cjs', 'Doctor tools: labels, entrances, Back, guide targets'],
