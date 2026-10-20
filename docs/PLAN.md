@@ -67,7 +67,7 @@ F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with 
    Jose sends: head and shoulders as separate layers (base.webp canvas, neck
    pivot), two arm poses (both up; one fist pump), two face frames (happy
    eyes-closed, wince). Layers, not Rive.
-F2. **Squash and stretch: Practice buttons and the streak flame only**
+F2. **Squash and stretch: Practice buttons and the streak flame only** (this PR; `practice-dashboard.md` "Springy press")
    (spring press, overshoot and settle on pills and cards). Dr. Smiley's
    own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
    Inter (rounded face declined).

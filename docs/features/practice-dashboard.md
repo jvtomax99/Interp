@@ -132,6 +132,18 @@ of birds (`flock`, five Vs with two wing frames, `birds0/1.webp`,
 street cars drove nose-backwards (a vehicle's front is its local +z, so
 `rotation.y = +pi/2` faces +x); fixed in the same render. Suite
 `campus-life.cjs`.
+**Springy press (F2, 2026-10-20; Jose's film brief).** Block "Springy
+press" at the end of `index.html`'s main styles (late on purpose: it wins
+over each button's own transition at the same specificity). Pressing a
+study-mode card, a quiz option, a confidence button, a candy Practise or
+Play button squashes it (wider and shorter, 80 ms); releasing springs it
+back past its shape and settles (`--spring-settle`, a damped-spring
+`linear()`, about 23% over then a smaller swing, 0.6 s; browsers without
+`linear()` keep `--spring`). `.study-mode`, `.quiz-option` and `.conf-btn`
+joined `LIFTS` so a touch marks them pressed. The streak chip's flame icon
+flickers from its base (`flameFlicker`: tall and narrow, then wide and
+short), exempt from `.is-still`; the quiz's hot-streak 🔥 does the same,
+faster. Reduced motion: no squash, no flicker. Suite: `spring-press.cjs`.
 **Golden hour and depth (F3, Jose's film brief, 2026-10-20).** The scene is
 regraded: a lavender sky light over warm ground, the low sun behind and to
 the right of the campus (a warm rim on every roof and tower edge), a soft

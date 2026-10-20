@@ -29,6 +29,7 @@ const SUITES = [
   ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
   ['memory-trainer.cjs',  'Memory trainer: way in, a round with the words hidden, chunks, longer/shorter, notes, flags, leaving'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
+  ['spring-press.cjs',    'Springy press: Practice buttons squash, spring past, settle; flame flickers'],
   ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
   ['campus-life.cjs',     'Campus life 2: bay doors with the ambulance, the lot car, sitters, the flock, pauses, reduced motion'],
   ['campus-depth.cjs',    'F3: golden hour in two pictures, the far world slides with scroll and drag, springs back, still under reduced motion'],
