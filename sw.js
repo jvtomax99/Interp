@@ -26,7 +26,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v254-spring-press';
+const CACHE_VERSION = 'interpreter-hub-v255-auto-mark';
 const PRECACHE = [
   './',
   './index.html',
