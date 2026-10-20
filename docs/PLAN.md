@@ -176,10 +176,9 @@ to read. Nothing in a doctor's research is lost: all five tiers (core,
 procedures, drugs, anatomy, falsefriends), hand-added `customTerms` and
 photos stay. One PR per step; User Guide in each.
 
-D1b. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): layout A (as
-   built) or B (terms first, `d1-layouts.png`); the "From Doctor Prep, not
-   checked by the team" line; the real-data replay (he sends `doctors.json`,
-   steps in the review); the 5-minute interpreter test on iPhones.
+D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
+   replay (he sends `doctors.json`, steps in the review); the 5-minute
+   interpreter test on iPhones (Spanish voice on ES included).
 R5. **Provider Pictures on the Where picker.** Providers share the places
    and icons but still type a facility. Same sheet, if Jose wants it.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
@@ -245,6 +244,13 @@ paused or read his layout box, not his painted box. Not this PR's code.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-20 D1b, doctor page layout B + smaller rows and the trust line
+  (Jose's picks). Where on one line with the term count, tip as a strip,
+  no navy tile; sticky tabs; "+ Glossary" pill under EN / ES (no foot line
+  on research rows); "From Doctor Prep, not checked by the team." over
+  research rows. Typical doctor at 393x759: first term 562 to 456px, 1 full
+  row on open (was 0). `docs/features/doctor-page.md`.
 
 - 2026-10-19 D3, Doctor list (Doctors redesign; mockup `list.png`). Cards
   two to a row on a phone (`doctorListCard`): photo or specialty pin with

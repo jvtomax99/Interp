@@ -19,18 +19,29 @@ whichever of the two scrolls.
   the `SPECIALTY_PINS` list (regex to pin key), fallback the place's pin
   (`groupIconKeyFor`). D3 reuses it for the list. Name 22/650; the dot and
   the tint come from `specialtyColor()`.
-- Bento: navy tile = every term (research + team terms), one bar per tab
-  (false friends pink, team terms white); no research = "Research this
-  doctor". Where = place pin, place name, floor. Team tip = the first
-  tip, who wrote it and the count; tap = the Team tips sheet.
+- Layout B (Jose's pick, 2026-10-20; was a bento with a navy count tile):
+  Where on one line (place pin, place, floor) with the navy count pill
+  (`.dp-count`, research + team terms); the team tip as a full-width strip
+  (count and who on the label line, the text clamped to 2 lines; tap = the
+  Team tips sheet); no research = one navy card (`.dp-nores`) with
+  "Research this doctor", or offline, that the terms need a connection.
+  Hero tile 64px. Measured at 393x759 (typical: 7 terms, 10-word
+  definitions, no tip): first term at 456px (was 562), row 149px (was
+  171), 1 full row above the glass bar (was 0). Worst (37 terms, 25-word
+  definitions, long name, tip, place): 0 rows, but the first term's text
+  shows (was hidden).
 - Tabs (`ds-mode-seg dp-tabs`, scrolls sideways): one per research tier
   (`researchTiers`), then Team terms (`customTerms`). Old flat research
   (`terms` with no `tiers`) is one "Terms" tab plus the "Older research"
-  prompt. The active tab is `activeResearchTier.detail`.
+  prompt. The active tab is `activeResearchTier.detail`. The tabs are
+  sticky 62px down, right under the top bar.
 - Rows: English 17/650, Spanish 17/550 navy, definition 14 ink-soft;
   EN / ES buttons (`speakText`, en-US / es-US), 34px to see and 44px to hit
-  (`::after`), 12px apart so the hit areas never touch. Under the text: In
-  glossary, or Add to glossary; team terms add Remove and who added it.
+  (`::after`), 12px apart so the hit areas never touch. Under them the
+  glossary pill (`.dp-gl`, 30px, 44px to hit, 14px below ES): "+ Glossary"
+  or a quiet "✓ Glossary". Research tabs: "From Doctor Prep, not checked by
+  the team." above the rows (`.dp-trust`, Jose 2026-10-20); not on Team
+  terms. Team terms keep a foot line: Remove and who added it.
   Add all N new, the target domain, Research again, source and who updated.
 - Glass bar: Start appointment (`doctorPagePrep` sets `PREP` from the
   doctor's specialty, then `startAppt`; with this doctor already running it
@@ -49,7 +60,7 @@ Add to glossary still uses `findBestDomainMatch` alone.
 **The saved copy has no research.** `doctorDirToCache` leaves out
 `researchResult`. Opening a doctor before the directory has loaded fetches
 that one document (`doctorPageFetch`); a finished load redraws an open page;
-offline the navy tile says the terms need a connection, never "Research
+offline the no-research card says the terms need a connection, never "Research
 this doctor" (that costs an API call).
 
 **Measured** (`docs/mockups/doctors/d1-review.md`): above the fold, axe,
