@@ -145,3 +145,24 @@ joined `LIFTS` so a touch marks them pressed. The streak chip's flame icon
 flickers from its base (`flameFlicker`: tall and narrow, then wide and
 short), exempt from `.is-still`; the quiz's hot-streak 🔥 does the same,
 faster. Reduced motion: no squash, no flicker. Suite: `spring-press.cjs`.
+
+**Warm twilight and depth (F3, 2026-10-20).** Jose tried golden hour on his
+phone screenshots and picked warm twilight instead (golden hour washed the
+town out and the lit windows lost their glow). The render keeps the dusk
+sky with a warmer horizon, a warmer ground bounce and a warm rim light from
+behind; the town, skyline and parking deck are lifted off near-black. Depth
+(Jose: scroll and drag, not phone tilt, which needs a motion permission
+prompt): `entrance.html` tags the sky, the town around the campus and the
+skyline `FAR`; `buildentr.cjs` saves them alone as `city/sky.webp` (the
+campus still casts its shadow on the town: drawn with a material that writes
+neither colour nor depth) and cuts them out of `city/entrance.webp`
+(transparent there), with `sky` in the manifest. `renderCampus` draws
+`.cp-sky` under `.cp-ground`, 6% larger, and frames the picture from the
+sky's top so nothing moved. `campusDepth` (with `campusLife`): as the card
+scrolls through the screen the sky slides up to 12 px and the clouds 7 px
+the other way; a sideways drag pans them (7% / 12% of the drag, at most
+160 px of drag) and they spring back on release (`--spring-settle`). CSS
+`translate`, so the clouds' own drift (a transform animation) keeps going.
+Reduced motion: still. Re-render: `NOLIT=<old manifest> node buildentr.cjs
+out` (about 1 minute; the lit windows are self-lit, so they're reused).
+Suite: `campus-depth.cjs`.

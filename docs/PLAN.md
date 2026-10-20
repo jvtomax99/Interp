@@ -65,7 +65,7 @@ F2. **Squash and stretch: Practice buttons and the streak flame only** (this PR;
    (spring press, overshoot and settle on pills and cards). Dr. Smiley's
    own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
    Inter (rounded face declined).
-F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
+F3. **Campus regrade + depth** (this PR; Jose picked warm twilight over golden hour after screenshots; `practice-dashboard.md` "Warm twilight and depth"). Was: keep the pre-render (real-time three.js and
    r3f declined: no build step, weight, unproven 60 fps). Re-render golden
    hour, peach to lavender sky, warm rim light, more haze toward the
    horizon, nothing pure black or gray; depth parallax from the layers

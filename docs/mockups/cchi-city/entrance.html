@@ -19,20 +19,23 @@ const P = new URLSearchParams(location.search);
 const W = +P.get('w')||960, H = +P.get('h')||760;
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
 renderer.setPixelRatio(2); renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1; renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.14; renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const cam = new THREE.PerspectiveCamera(40, W/H, 0.5, 600);
 cam.position.set(1.5, 29, 47); cam.lookAt(1.5, 7.0, -4); cam.updateMatrixWorld(); cam.updateProjectionMatrix();
-scene.add(new THREE.HemisphereLight(0xb7c4ff, 0x4a3d52, 1.35));
+// Warm twilight (F3, 2026-10-20; Jose picked it over golden hour): the dusk light,
+// warmer bounce from the ground, and a warm rim from behind on the buildings' edges.
+scene.add(new THREE.HemisphereLight(0xb7c4ff, 0x6a5060, 1.4));
 const moon = new THREE.DirectionalLight(0xc9c6ff, 1.0); moon.position.set(-18, 26, 14); moon.castShadow = true;
 moon.shadow.mapSize.set(8192,8192); Object.assign(moon.shadow.camera,{left:-24,right:24,top:24,bottom:-24,near:1,far:90}); moon.shadow.bias=-0.0006; moon.shadow.radius=4; scene.add(moon);
-const warm = new THREE.DirectionalLight(0xffb27a, 0.9); warm.position.set(22, 6, 18); scene.add(warm);
+const warm = new THREE.DirectionalLight(0xffb27a, 1.0); warm.position.set(22, 6, 18); scene.add(warm);
+const rim = new THREE.DirectionalLight(0xffa070, 1.0); rim.position.set(14, 9, -30); scene.add(rim);
 const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.traverse(()=>{});
 const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;
 // soft additive glows (lamps, fountain): hidden while the lit-window layers are captured
-const GLOWS = [], CLOUDS = [], FLAGS = [], LIVE = [];   // LIVE: things captured on their own, hidden from the base
+const GLOWS = [], CLOUDS = [], FLAGS = [], LIVE = [], FAR = [];   // FAR: the sky, the town around the campus and the skyline: the back layer (F3 depth)   // LIVE: things captured on their own, hidden from the base
 const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
   const r = g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,236,190,1)'); r.addColorStop(.25,'rgba(255,200,120,.55)'); r.addColorStop(1,'rgba(255,170,80,0)');
   g.fillStyle = r; g.fillRect(0,0,128,128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
@@ -49,20 +52,20 @@ function noiseTex(base, spot, n=2600, size=256, rep=8){ const c = document.creat
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
       void main(){
         float h = clamp(vP.y, -0.05, 1.0);
-        vec3 top = vec3(0.11,0.09,0.25), mid = vec3(0.30,0.16,0.39), low = vec3(0.79,0.42,0.49), hor = vec3(0.95,0.64,0.42);
+        vec3 top = vec3(0.13,0.11,0.29), mid = vec3(0.34,0.19,0.43), low = vec3(0.86,0.48,0.52), hor = vec3(1.0,0.70,0.48);
         vec3 c = mix(hor, low, smoothstep(0.17, 0.23, h)); c = mix(c, mid, smoothstep(0.22, 0.29, h)); c = mix(c, top, smoothstep(0.29, 0.5, h));
         vec2 g = floor(vP.xz / max(vP.y, 0.05) * 140.0); float st = step(0.995, hash(g)) * smoothstep(0.27, 0.45, h) * (0.5 + 0.5*hash(g+1.0));
         gl_FragColor = vec4(c + st*vec3(1.0,0.97,0.9), 1.0); }` }));
-  sky.position.set(0, -120, 0); scene.add(sky);
+  sky.position.set(0, -120, 0); scene.add(sky); FAR.push(sky);
   // the town's ground out to the skyline, so nothing of the dome shows below the horizon
-  const town = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshStandardMaterial({ color:0x2a2a3e, roughness:1 })); town.rotation.x = -Math.PI/2; town.position.y = -1.7; town.receiveShadow = true; scene.add(town);
+  const town = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshStandardMaterial({ color:0x3e3550, roughness:1 })); town.rotation.x = -Math.PI/2; town.position.y = -1.7; town.receiveShadow = true; scene.add(town); FAR.push(town);
   // low blocks and trees scattered on it, so the middle distance isn't empty
   let td = 17; const trnd = () => (td = (td*16807)%2147483647)/2147483647;
   for (let i=0;i<70;i++){ const x = -120 + trnd()*240, z = -35 - trnd()*60; if (Math.abs(x) < 24 && z > -48) continue;
-    if (trnd() < 0.55){ const w = 2+trnd()*4, h = 1.2+trnd()*3; const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 2+trnd()*3), new THREE.MeshStandardMaterial({ color:[0x3b3350,0x4a3a4f,0x33304a][i%3], roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); scene.add(b);
-      if (trnd() < 0.6){ const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x, 0.2, z + 1.6 + trnd()*1.4); scene.add(wl); } }
-    else { const t = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2+trnd()*1.2, 1), new THREE.MeshStandardMaterial({ color:0x2f4a3c, roughness:0.95, flatShading:true })); t.position.set(x, -0.6, z); scene.add(t); } }
-  scene.fog = new THREE.Fog(0x6a3f6e, 90, 260);
+    if (trnd() < 0.55){ const w = 2+trnd()*4, h = 1.2+trnd()*3; const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 2+trnd()*3), new THREE.MeshStandardMaterial({ color:[0x4f4262,0x5c4864,0x473f60][i%3], roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); scene.add(b); FAR.push(b);
+      if (trnd() < 0.6){ const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x, 0.2, z + 1.6 + trnd()*1.4); scene.add(wl); FAR.push(wl); } }
+    else { const t = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2+trnd()*1.2, 1), new THREE.MeshStandardMaterial({ color:0x36543f, roughness:0.95, flatShading:true })); t.position.set(x, -0.6, z); scene.add(t); FAR.push(t); } }
+  scene.fog = new THREE.Fog(0x7c4a70, 95, 270);   // warm haze toward the horizon
   const puff = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
     for (let i=0;i<9;i++){ const x = 60+Math.random()*136, y = 110+Math.random()*60, r = 40+Math.random()*50; const rg = g.createRadialGradient(x,y,0,x,y,r); rg.addColorStop(0,'rgba(255,225,235,.55)'); rg.addColorStop(1,'rgba(255,225,235,0)'); g.fillStyle = rg; g.fillRect(0,0,256,256); }
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
@@ -71,8 +74,8 @@ function noiseTex(base, spot, n=2600, size=256, rep=8){ const c = document.creat
   // the far skyline: dark blocks with a few lit windows, behind the campus
   let sd = 3; const srnd = () => (sd = (sd*16807)%2147483647)/2147483647;
   for (let i=0;i<60;i++){ const x = -135 + i*4.6 + srnd()*2, z = -105 - srnd()*35, w = 2.5+srnd()*4, h = (srnd() < 0.15 ? 9 : 2.5) + srnd()*5;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 3), new THREE.MeshStandardMaterial({ color:0x1e1a32, roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); scene.add(b);
-    for (let k=0;k<Math.floor(h*1.2);k++){ if (srnd() < 0.5) continue; const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x - w/2 + 0.5 + srnd()*(w-1), 0.5 + srnd()*(h-1), z + 1.51); scene.add(wl); } }
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, 3), new THREE.MeshStandardMaterial({ color:0x2e2848, roughness:0.9 })); b.position.set(x, h/2 - 1.7, z); scene.add(b); FAR.push(b);
+    for (let k=0;k<Math.floor(h*1.2);k++){ if (srnd() < 0.5) continue; const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.3), new THREE.MeshBasicMaterial({ color:0xffd27a })); wl.position.set(x - w/2 + 0.5 + srnd()*(w-1), 0.5 + srnd()*(h-1), z + 1.51); scene.add(wl); FAR.push(wl); } }
 }
 const GRASS_T = noiseTex('#5f9e6c', ['#4f8c5c','#73b47f','#88c38f']);
 const ASPH_T = noiseTex('#3d3c48', ['#34333e','#4a4956','#2f2e38'], 4000, 256, 10);
@@ -241,8 +244,8 @@ tower('s', -10.2, 1.0, 7.0, 12.0, 8, {});
 box(7.1, 2*FL, 12.1, GLASSWALL, -10.2, 0.3+FL, 1.0, 0.04);
 box(7.2, 0.25, 12.2, M(0xf1f2f4), -10.2, 0.3+8*FL+0.12, 1.0, 0.04);
 // the dark parking deck on the right (context): open levels
-for (let l=0;l<7;l++){ box(6.4, 0.25, 8.2, M(0x3f4352), 9.6, 0.3+l*0.95+0.12, 6.2, 0.04); }
-for (const [dx,dz] of [[-3,-4],[3,-4],[-3,4],[3,4],[0,-4],[0,4],[-3,0],[3,0]]) box(0.28, 6.6, 0.28, M(0x3a3e4c), 9.6+dx, 0.3+3.3, 6.2+dz, 0.03);
+for (let l=0;l<7;l++){ box(6.4, 0.25, 8.2, M(0x5c5668), 9.6, 0.3+l*0.95+0.12, 6.2, 0.04); }
+for (const [dx,dz] of [[-3,-4],[3,-4],[-3,4],[3,4],[0,-4],[0,4],[-3,0],[3,0]]) box(0.28, 6.6, 0.28, M(0x56505f), 9.6+dx, 0.3+3.3, 6.2+dz, 0.03);
 // Culture: the dark stepped tower behind the deck
 tower('c', 10.6, -5.2, 7.0, 8.0, 11, 'glass');
 box(5.4, 1.2*FL, 6.2, GLASSWALL, 10.6, 0.3+11*FL+0.4, -5.6, 0.05);
@@ -391,6 +394,19 @@ window.__run = async (nolit) => {
   TEX = await new Promise(r => { const t = new THREE.TextureLoader().load('hmh-mark-square.png', () => r(t)); }); TEX.colorSpace = THREE.SRGBColorSpace; pend.forEach(f => f());
   CLOUDS.forEach(c => c.visible = false); FLAGS.forEach(f => f.visible = false); if (SPRAY) SPRAY.visible = false;
   const out = { W, H, base: capBase(), b:{}, live:{} };
+  // Depth (F3): the sky and the town around the campus alone as the back layer;
+  // then the front picture keeps only the campus (their pixels go transparent), so the
+  // app can slide the sky behind the campus as you scroll or drag.
+  // The campus stays in the shadow pass (its long shadow falls on the town) but
+  // draws nothing: a material that writes neither colour nor depth.
+  { const ghost = new THREE.MeshBasicMaterial({ colorWrite:false, depthWrite:false }), was = [];
+    scene.traverse(o => { if ((o.isMesh || o.isSprite || o.isPoints) && !FAR.includes(o)) { was.push([o, o.material, o.visible]); if (o.isMesh) o.material = ghost; else o.visible = false; } });
+    out.sky = capBase(); was.forEach(([o, m, v]) => { o.material = m; o.visible = v; });
+    FAR.forEach(o => o.visible = false); GLOWS.forEach(g => g.visible = false); const fogK = scene.fog; scene.fog = null;
+    renderer.setClearColor(0x000000, 0); renderer.render(scene, cam); const mask = grab();
+    FAR.forEach(o => o.visible = true); GLOWS.forEach(g => g.visible = true); scene.fog = fogK;
+    full.render(); const img = grab(); for (let i = 3; i < img.data.length; i += 4) img.data[i] = mask.data[i];
+    out.base = pack(img, 0.9); }
   // everything but the subject writes depth only; the subject keeps its look
   const everything = []; scene.traverse(o => { if (o.isMesh || o.isSprite || o.isPoints) everything.push(o); });
   const matOf = new Map(everything.map(o => [o, o.material]));

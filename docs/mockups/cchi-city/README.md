@@ -35,3 +35,13 @@ running kids, cherry trees). Circle drive with fountain, parking deck.
 Mastery = floors built; the rest is orange scaffolding with a crane.
 Footprints are from the photos, not survey data: OpenStreetMap (Overpass) and
 most sites are blocked from this container.
+
+## Warm twilight + depth (F3, 2026-10-20)
+
+`entrance.html` tags the sky, the town and the skyline `FAR`; `buildentr.cjs`
+writes them as `sky.webp` (the back layer) and cuts them out of
+`entrance.webp`. Lighting: dusk with a warm horizon, a warm ground bounce
+and a warm rim (`rim`). Needs `npm install --no-save three@0.160.0` here.
+Fast re-render reusing the lit windows: `NOLIT=<old manifest json> node
+buildentr.cjs <out>` (~1 min), then copy the files into `city/` and paste
+`entrance.json` as `CAMPUS_MAP` in `index.html`.
