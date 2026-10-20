@@ -96,7 +96,7 @@ distinct on screen.
 ## Practical
 
 - No GPU here: Three.js renders in software. The first hub-blend (31 s) took
-  48 min on 2 cores. Work on stills and 540x960 drafts; one full render at
+  48 min on 2 cores, 15 min on this 4-core cloud box (3 workers, software GPU). Work on stills and 540x960 drafts; one full render at
   the end. Real motion blur multiplies render time; use it only where it
   shows.
 - Render command and still tool: `NOTES.md`.
