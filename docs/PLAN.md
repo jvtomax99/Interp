@@ -178,8 +178,6 @@ photos stay. One PR per step; User Guide in each.
 D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    replay (he sends `doctors.json`, steps in the review); the 5-minute
    interpreter test on iPhones (Spanish voice on ES included).
-R5. **Provider Pictures on the Where picker.** Providers share the places
-   and icons but still type a facility. Same sheet, if Jose wants it.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
@@ -256,6 +254,13 @@ then read the log; it names the suite and the check.
   study-streak milestone opens with the surprised face (`wow`) before the
   cheer. Note `docs/features/dr-smiley.md`; checks in `smiley-brows.cjs`,
   `smiley-quiz.cjs`. Guide: `askmoves` answer and card.
+- 2026-10-20 R5, Provider Pictures on the Where picker (Jose's pick). The
+  provider sheet's facility text became the doctors' Where button plus a
+  "Department or unit" line; one picker serves both sheets (`placePickFor`),
+  its rows count doctors and providers. Saved: `locationGroup`, `unit`;
+  `facility` follows the doctors' rule. Guide: the Provider Pictures answer
+  and steps, a New lately card. `docs/features/places.md`.
+
 - 2026-10-20 D1b, doctor page: terms sooner, layout A kept. Jose picked B
   plus smaller rows, saw it, and kept A for its look ("find another way").
   So: A's bento made compact (hero 64px, place and tip up to 3 lines, short

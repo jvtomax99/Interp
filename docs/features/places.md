@@ -40,5 +40,12 @@ while the place is unchanged and becomes the place when it moves, so a card
 never shows the old building under the new heading. `region` is stored only
 for a doctor with no specific site (their old one, or the adder's).
 
-Provider Pictures shares the icons and grouping but still has its own
-facility text field; it doesn't use the Where picker yet.
+**Provider Pictures (R5, 2026-10-20)** uses the same picker: the sheet's
+"Where" button (`fPPlace`, `ppPlace`) plus "Department or unit" (`unit`,
+free text, shown after the place's note on the card and searched). The
+picker serves both sheets: `openPlacePicker('pp'|'dd')` sets
+`placePickFor`, `pickPlace` writes the right value and `placeCount` lists
+doctors and providers at a place. Saving sets `locationGroup`; `facility`
+keeps its old wording while the place is unchanged and becomes the place
+when it moves (the doctors' rule). Old providers keep grouping by
+`facility` until edited; nothing is migrated.
