@@ -112,18 +112,30 @@ Resolve conflicts hunk by hunk, then confirm all three files are still loaded
 
 Vercel auto-deploys on push to the default branch. There is no build step.
 
-**Three things must stay in sync on every deploy that changes `index.html`:**
+**Never edit the version lines by hand; a GitHub Action moves them**
+(2026-10-20). After every push to `main` that changes the app,
+`.github/workflows/bump-version.yml` runs `.github/bump-version.cjs` and
+pushes one small commit, "Bump version to bMMDD.HHMM", which Vercel deploys:
 
-1. **`BUILD_ID`** (`index.html`, search for `const BUILD_ID`; format
-   `bMMDD.HHMM` in UTC, with `BUILD_TIME` on the next line) — bump it.
-   This is the only reliable way to confirm what is actually live.
-2. **`CACHE_VERSION`** (`sw.js`, search for `const CACHE_VERSION`) —
-   bump it whenever `index.html` changes meaningfully, or returning users
+1. **`BUILD_ID`** (`index.html`, `const BUILD_ID`; `bMMDD.HHMM` in UTC,
+   with `BUILD_TIME` on the next line). The only reliable way to confirm
+   what is actually live.
+2. **`CACHE_VERSION`** (`sw.js`, `const CACHE_VERSION`;
+   `interpreter-hub-v<n>-<BUILD_ID>`). Without a new one, returning users
    keep the stale cached app.
-3. If an `api/*.js` file changed, it ships in the same push.
 
-After pushing, verify: load the live URL headless and confirm the new
-`BUILD_ID` is present. Do not ask Jose to check something you can check.
+Pull requests leave both lines alone. When every PR bumped them, every
+open PR conflicted with every other on those two lines. Pushes that change
+only `docs/`, `tests/`, `.github/`, `.claude/`, `*.md` or the Firebase
+rules get no bump (nothing deployed changed). If an `api/*.js` file
+changed, it ships in the same push.
+
+After merging, verify: the bump commit lands on `main` within a minute or
+two, and its `BUILD_ID` is the one to find live. From a cloud session the
+site itself is blocked; read Vercel's status on that commit instead
+(`curl -sS https://api.github.com/repos/jvtomax99/Interp/commits/<sha>/status`,
+context "Vercel", "Deployment has completed"). Do not ask Jose to check
+something you can check.
 
 ## Verifying before you push
 
