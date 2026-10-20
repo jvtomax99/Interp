@@ -96,6 +96,16 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   so it stays rare; `smiley-brows.cjs` checks that). Each brings its brow
   pose in `DR_BROW_OF` and has a neighbour in `DR_FACE_BACK` (rest, blink1,
   halfL, wink1), so an interruption walks back through a real frame.
+  **Held long enough to see (E4, 2026-10-20).** Jose couldn't find them:
+  each showed for 0.26-0.7 s, at 48-90 px, at rare moments. Now each holds
+  about a second (`surprise` 1.0, `worry` 1.1, `answerGeneral` 1.0,
+  `composed` 1.0 s; the head and brow keys after it moved along with it).
+  Two stay quicker on purpose: `pet`'s startled take 0.6 s (a take longer
+  than that kills the giggle's timing) and the quiz `wince` about 0.65 s
+  (it plays on every wrong answer). And `wow`: a study-streak milestone
+  opens with the surprised face held 0.9 s, then the cheer (Focused: just
+  the calmer cheer; an appointment: `ack`). The `surprise` sequence itself
+  is still played by nothing. `smiley-brows.cjs` checks the holds.
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
   getters, so every play varies a little (side, amplitude, beats) with an
@@ -151,7 +161,7 @@ half size in Focused, one frame in Still; in an appointment `bounce` becomes
 `ack` and `wince` nothing (`DR_TONE`). A 3/5/10 run of right answers keeps
 its bigger `smileyStudy('streak')` instead of a bounce; exam mode has no
 feedback, so no reaction. The first answer of a day that makes the study
-streak 3, 7, 14, 30, 60 or 100 days plays `cheer` (`STREAK_DAYS`,
+streak 3, 7, 14, 30, 60 or 100 days plays `wow`, a surprised take and then the cheer (E4; `STREAK_DAYS`,
 `bumpStreak`, `smileyStudy('days')`).
 
 **He was never on screen in a quiz before this.** The dock steps aside on
