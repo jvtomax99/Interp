@@ -11,6 +11,8 @@ import { RenderPass } from "../../vendor/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "../../vendor/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "../../vendor/addons/postprocessing/OutputPass.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
+import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
+import { buildFeatures, FEATURES, FEATURE_LEN } from "./features.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine } from "../util.js";
 
 const root = document.getElementById("root");
@@ -27,7 +29,9 @@ const SHOTS = [
   [2.4, 3.4, "timer"],
   [3.4, 5.98, "wrong"],
   [5.98, 7.5, "right"],
-  [7.5, DURATION, "logo"],
+  [7.5, 9.5, "logo"],
+  // features 1-5 (features.js), 2.5 s each
+  ...FEATURES.map((f, i) => [9.5 + i * FEATURE_LEN, 9.5 + (i + 1) * FEATURE_LEN, f.g]),
 ];
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
 
@@ -54,6 +58,9 @@ async function build() {
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
+  // the background out of focus (the references' shallow depth of field); focus follows the shot
+  const bokeh = new BokehPass(scene, camera, { focus: 6, aperture: 0.0007, maxblur: 0.006 });
+  composer.addPass(bokeh);
   const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 0.5, 0.5, 0.86);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
@@ -233,6 +240,32 @@ async function build() {
   sub.scale.setScalar(0.8);
   logo.add(sub);
 
+  // ---------- features 1-5 ----------
+  const feat = await buildFeatures(scene, groups);
+
+  // ---------- captions: v11's two lines (white, then navy on a cyan box wiping in) and its progress dashes ----------
+  const capFont = Math.round(H * 0.044); // 84 px at 1920: each line box is over 64 px tall
+  const caps = document.createElement("div");
+  caps.style.cssText = `position:absolute;left:${W * 0.075}px;top:${H * 0.085}px;right:${W * 0.075}px;font-family:"Inter Tight",sans-serif;font-weight:800;pointer-events:none`;
+  caps.innerHTML = `<div class="dash" style="display:flex;gap:${W * 0.012}px;margin-bottom:${H * 0.022}px">${('<i style="flex:1;height:' + Math.max(2, H * 0.0035) + 'px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden"><b style="display:block;height:100%;width:0;background:#fff"></b></i>').repeat(9)}</div>
+    <div class="l1" style="color:#fff;font-size:${capFont}px;line-height:1.12;letter-spacing:-0.02em;text-shadow:0 2px 18px rgba(3,6,26,.6)"></div>
+    <div class="l2" style="display:inline-block;margin-top:${H * 0.006}px;color:#0b1a4a;background:#3fc6ee;font-size:${capFont}px;line-height:1.12;letter-spacing:-0.02em;padding:0 ${capFont * 0.18}px;border-radius:${capFont * 0.1}px;box-shadow:0 0 ${capFont * 0.5}px rgba(63,198,238,.35)"></div>`;
+  root.appendChild(caps);
+  const l1 = caps.querySelector(".l1"), l2 = caps.querySelector(".l2"), dashes = [...caps.querySelectorAll(".dash b")];
+  function captionsAt(t) {
+    const fi = FEATURES.findIndex((f, i) => t >= 9.5 + i * FEATURE_LEN && t < 9.5 + (i + 1) * FEATURE_LEN);
+    caps.style.opacity = fi < 0 ? "0" : "1";
+    if (fi < 0) return;
+    const f = FEATURES[fi], t0 = 9.5 + fi * FEATURE_LEN;
+    if (l1.textContent !== f.a) { l1.textContent = f.a; l2.textContent = f.b; }
+    const a = outExpo(prog(t, t0 + 0.04, t0 + 0.34));
+    l1.style.opacity = String(a);
+    l1.style.transform = `translateY(${(1 - a) * capFont * 0.5}px)`;
+    const w = outExpo(prog(t, t0 + 0.3, t0 + 0.62));
+    l2.style.clipPath = `inset(0 ${(1 - w) * 100}% 0 0 round ${capFont * 0.1}px)`;
+    dashes.forEach((d, i) => { d.style.width = i < fi ? "100%" : i === fi ? `${100 * prog(t, t0, t0 + FEATURE_LEN)}%` : "0"; });
+  }
+
   // ---------- timing ----------
   function partsAt(t) {
     for (const k in parts) {
@@ -323,6 +356,7 @@ async function build() {
   // ---------- camera: a slow push in each shot, a fly-through on each cut ----------
   const view = (g, t) => {
     const s = SHOTS.find((x) => x[2] === g), p = prog(t, s[0], s[1]);
+    if (feat.view && FEATURES.some((f) => f.g === g)) return feat.view(g, t - s[0]);
     const gp = groups[g].position;
     if (g === "logo") {
       const e = inOutSine(p);
@@ -351,6 +385,8 @@ async function build() {
     }
     camera.position.copy(cam.pos);
     camera.lookAt(cam.look);
+    const fp = a.focus || a.look;
+    bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
     camera.rotation.z += Math.sin(t * 1.3) * 0.012; // a hand-held breath
     // the spotlight moves with the shot
     const g = groups[s[2]].position;
@@ -363,13 +399,19 @@ async function build() {
     tint.visible = !!glowing;
     if (glowing) { tint.color.setHex(glowing); tint.intensity = 6; tint.position.set(g.x, 1.4, g.z + 1.2); }
     spot.intensity = s[2] === "logo" ? 70 : 140;
+    if (FEATURES.some((f) => f.g === s[2])) { spot.position.set(g.x - 1.8, 6.5, g.z + 3.5); spot.target.position.set(g.x, 0, g.z + 0.8); spot.intensity = 110; }
+    return { s, next, i };
   }
 
   function renderAt(time) {
     const t = clamp(time, 0, DURATION - 1e-4);
     partsAt(t);
     logoAt(t);
-    cameraAt(t);
+    const { s, next } = cameraAt(t);
+    // the incoming shot sits at its start during the fly-through; the current one wins Dr. Smiley
+    if (next && t > s[1] - WHIP) feat.update(next[2], 0);
+    feat.update(s[2], t - s[0]);
+    captionsAt(t);
     composer.render();
   }
   timerSlot.userData.home = timerSlot.position.clone();

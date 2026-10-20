@@ -113,7 +113,18 @@ distinct on screen.
    `icon-512.png`) rising out of a phone and assembling inside three rings.
    9.5 s; a 540x960 draft renders in about 40 s. Quick looks without a
    render: `tools/stills.cjs remake.html out/x <times>`.
-5. Shots 2-6. Draft, contact sheet.
+5. Shots 2-6. Draft, contact sheet. **Done** (2026-10-20):
+   `src/remake/features.js` (each screen from step 2 on a phone body, its
+   layers lifting off the glass with soft shadows; per shot a function of
+   seconds-into-shot, plus a moving camera). Captions are DOM over the
+   canvas, v11's style and progress dashes, font 4.4% of the height (84 px
+   at 1920, line box 94 px). Depth of field (BokehPass) follows each
+   shot's focus point. Screens are drawn just under white (`SCREEN`) so
+   bloom leaves them crisp. 22 s draft renders in about 3 minutes;
+   `assets/remake-draft-sheet.jpg`. Known: the screens fill the lower 60%
+   while the caption sits top-left, leaving a dark band; the AI card on
+   Translate still crops at the left as it lifts; Dr. Smiley is small
+   next to the screens.
 6. Shots 7-11. Draft, contact sheet.
 7. Check against the rules above, side by side with v11 per feature; fix;
    full render; send with the side-by-side.
