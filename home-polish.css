@@ -25,11 +25,6 @@
 #content.is-home .home-greeting-eyebrow{font-size:11px;font-weight:500;line-height:1.3;letter-spacing:.1em;color:#e9f7ff;margin:0;}
 #content.is-home .home-greeting-date{white-space:nowrap;font-size:11px;line-height:1.3;letter-spacing:-.015em;color:#f3f9ff;}
 #content.is-home .home-greeting-name-row{display:flex;align-items:center;gap:9px;margin-top:3px;position:relative;}
-#content.is-home .home-greeting-quote{
-  font:italic 400 13px/1.35 var(--serif);color:#f5faff;max-width:none;margin:9px 0 0;padding:0;border:0;
-  letter-spacing:0;text-shadow:none;display:block;overflow:visible;
-}
-#content.is-home .home-greeting-quote cite{display:block;margin-top:4px;font:400 11px/1.3 var(--sans);letter-spacing:.01em;color:#daecf8;}
 #content.is-home .home-greeting-actions{margin-top:13px;}
 #content.is-home .home-greeting-btn{min-height:44px;}
 #content.is-home .home-greeting-actions:empty{display:none;}
@@ -632,10 +627,6 @@
      name. A first pass took the whole button to 34px, which measured 36px in
      the row -- under the 44px minimum, on the one control in this banner that
      is actually tappable. The button stays 44px; only the sprite is smaller. */
-  #content.is-home .home-greeting-quote{
-    margin-top:5px; font-size:11.5px; line-height:1.3;
-  }
-  #content.is-home .home-greeting-quote cite{ margin-top:2px; font-size:10px; }
 }
 
 /* ---------- Hero: falling petals + arc of marks ----------
@@ -868,13 +859,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .home-greeting-name-row{margin-top:73px;}
 /* 50px clears his badge at size 1; it hangs 67px below his centre, so a
    bigger him moves the quote down by exactly the extra drop. */
-#content.is-home .home-greeting-quote{
-  margin-top:calc(50px + 67px * (var(--hw-k) - 1));font-size:22px;line-height:1.3;max-width:480px;
-  text-shadow:0 1px 5px #102b4533;
-}
-#content.is-home .home-greeting-quote cite{
-  margin-top:9px;font-size:11px;line-height:1.5;color:#e7f5ff;
-}
 @media(max-width:900px){
   #content.is-home .home-greeting{padding:21px 25px 55px;}
   #content.is-home .home-greeting-photo-drift{background-position:30% calc(76% - 48px);}
@@ -891,7 +875,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 }
 @media(max-width:365px){
   #content.is-home .home-greeting{padding-left:20px;padding-right:20px;}
-  #content.is-home .home-greeting-quote{font-size:20px;}
 }
 /* Keep the desktop composition and raise its reading size. Phone rules stay as is. */
 @media (min-width:901px){
@@ -913,8 +896,6 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
             mask-image:radial-gradient(115% 20% at 50% 101%,
       rgba(0,0,0,0) 58%,rgba(0,0,0,.55) 76%,rgba(0,0,0,.9) 88%,#000 96%);
   }
-  #content.is-home .home-greeting-quote{font-size:23px;}
-  #content.is-home .home-greeting-quote cite{font-size:12px;}
   #content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-size:13px;}
   #content.is-home .home-search{font-size:15px;}
   #content.is-home .home-sec-head h3{font-size:21px;}
@@ -1182,7 +1163,6 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
   #content.is-home .home-greeting-photo-drift{background-position:64% 36%;}
   #content.is-home .home-greeting-name-row{margin-top:34px;}
   /* 46px, not less: the Ask badge swings below his face and must clear it. */
-  #content.is-home .home-greeting-quote{margin-top:calc(46px + 67px * (var(--hw-k) - 1));font-size:21px;}
   #content.is-home .home-search{height:54px;font-size:16px;}
   /* Quick tools read as a row of actions: icon and label side by side. */
   #content.is-home .qa-tile{flex-direction:row;justify-content:flex-start;gap:13px;min-height:64px;padding:13px 17px;}
@@ -1312,8 +1292,6 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
    two soft local pools (behind the words, behind the date), never a card, so the photo
    stays open. home-polish.js keeps the quote's last two words together and moves a
    script name beside Dr. Smiley when it would reach him (fitWave). */
-#content.is-home .home-greeting-quote{text-wrap:balance;}
-#content.is-home .home-greeting-quote cite{display:flex;align-items:center;gap:9px;font-style:normal;}
 #content.is-home .home-greeting-quote cite::before{content:"";flex:none;width:18px;height:2px;border-radius:2px;background:currentColor;opacity:.85;}
 @media (max-width:900px){
   #content.is-home .home-greeting-scrim{background:
@@ -1325,8 +1303,6 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
     radial-gradient(ellipse 50% 40% at 20% 46%,rgba(6,20,38,.6) 0%,rgba(6,20,38,.36) 52%,rgba(6,20,38,0) 100%),
     radial-gradient(ellipse 34% 12% at 12% 4%,rgba(6,20,38,.35) 0%,rgba(6,20,38,0) 100%);}
 }
-#content.is-home .home-greeting-quote{margin-top:calc(56px + 67px * (var(--hw-k) - 1));}
-@media (min-width:901px){#content.is-home .home-greeting-quote{margin-top:calc(52px + 67px * (var(--hw-k) - 1));}}
 /* ---------- The greeting name, in one place (docs/PLAN.md, Home styles in layers) ----------
    Every rule for the name is here; the row, the quote and the rest of the
    banner keep their own blocks. Where each value came from: the script
@@ -1355,18 +1331,34 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
   #content.is-home .home-greeting-name{font-size:80px;grid-column:1;}
   #content.is-home .home-greeting-name.is-long{font-size:52px;}
 }
-#content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-family:var(--sans);font-weight:600;letter-spacing:.13em;text-shadow:0 0 2px rgba(4,14,28,.7),0 1px 3px rgba(4,14,28,.65),0 0 12px rgba(4,14,28,.55);}
-#content.is-home .home-greeting-date{letter-spacing:.02em;}
-#content.is-home .home-greeting-quote{font-family:'Lora',Georgia,serif;font-style:italic;font-weight:500;letter-spacing:0;line-height:1.32;color:#fff;text-shadow:0 1px 2px rgba(4,14,28,.55),0 2px 16px rgba(4,14,28,.45);}
-#content.is-home .home-greeting-quote cite{font-family:var(--sans);font-style:normal;color:#fff;text-shadow:0 1px 3px rgba(4,14,28,.7);font-weight:650;text-transform:uppercase;letter-spacing:.16em;}
+/* ---------- The quote, in one place (docs/PLAN.md, Home styles in layers) ----------
+   Every rule for the quote and its author line is here (the cite's rule
+   mark, ::before, follows). Where each value came from: the serif face,
+   weight, shadow and the author's small capitals from "Hello banner
+   lettering" (Jose's style 8); its distance below the name, which grows
+   with Dr. Smiley's size (--hw-k), from "Dr. Smiley's own place"; the
+   block, margins and overflow from the first banner rules. The font
+   shorthand is kept so the same longhands reset as before. The older
+   layers set 13, 11.5, 22, 23 and 21 px and three other margins before
+   the lettering's 20 (phone) and 22 (computer) won; only the winners are
+   kept, and the 22 px / 480 px are what a width between 900 and 901 px
+   still gets. */
+#content.is-home .home-greeting-quote{display:block;margin:calc(56px + 67px * (var(--hw-k) - 1)) 0 0;padding:0;border:0;max-width:480px;overflow:visible;
+  font:italic 500 22px/1.32 'Lora',Georgia,serif;letter-spacing:0;color:#fff;text-wrap:balance;
+  text-shadow:0 1px 2px rgba(4,14,28,.55),0 2px 16px rgba(4,14,28,.45);}
+#content.is-home .home-greeting-quote cite{display:flex;align-items:center;gap:9px;margin-top:9px;
+  font:normal 650 11px/1.5 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#fff;
+  text-shadow:0 1px 3px rgba(4,14,28,.7);}
 @media (max-width:900px){
   #content.is-home .home-greeting-quote{font-size:20px;max-width:24em;}
-  #content.is-home .home-greeting-quote cite{margin-top:9px;font-size:13px;}
+  #content.is-home .home-greeting-quote cite{font-size:13px;}
 }
 @media (min-width:901px){
-  #content.is-home .home-greeting-quote{font-size:22px;max-width:28em;}
+  #content.is-home .home-greeting-quote{margin-top:calc(52px + 67px * (var(--hw-k) - 1));font-size:22px;max-width:28em;}
   #content.is-home .home-greeting-quote cite{margin-top:10px;font-size:14px;}
 }
+#content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-family:var(--sans);font-weight:600;letter-spacing:.13em;text-shadow:0 0 2px rgba(4,14,28,.7),0 1px 3px rgba(4,14,28,.65),0 0 12px rgba(4,14,28,.55);}
+#content.is-home .home-greeting-date{letter-spacing:.02em;}
 
 /* ---------- The name, written in light (home-polish.js, namePen) ----------
    While the navy light writes it, the real name keeps its place but is
