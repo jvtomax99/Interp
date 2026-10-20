@@ -377,14 +377,21 @@ async function build() {
         <i style="width:${W * 0.09}px;height:1.5px;background:linear-gradient(90deg,transparent,#e9cf8f)"></i>
         <span class="shine" style="font:700 ${Math.round(H * 0.0175)}px 'Playfair Display';letter-spacing:.3em;${gold};filter:drop-shadow(0 2px 6px rgba(3,6,26,.8))">UNIVERSITY MEDICAL CENTER</span>
         <i style="width:${W * 0.09}px;height:1.5px;background:linear-gradient(90deg,#e9cf8f,transparent)"></i></div>`;
-  } else if (TITLE === "glass") {
-    // the app's liquid glass: a frosted card, the name in HMH navy to blue, a cyan underline
+  } else if (TITLE.startsWith("glass")) {
+    // the app's liquid glass, in colours taken from the entrance photo (Jose: "coordinate with the
+    // hospital"): its brick #755449, terracotta #9f7d69, limestone #cebba1-#e3dfd3, sky #5f94c4,
+    // and HMH navy #252e6d. ?title=glass-limestone | glass-brick | glass-navy
+    const P = {
+      "glass-limestone": { card: "rgba(236,226,210,.68)", edge: "rgba(255,248,236,.75)", text: "#5a2f22,#8e4f3b,#b8735a,#8e4f3b,#5a2f22", line: "#252e6d" },
+      "glass-brick": { card: "rgba(117,64,48,.58)", edge: "rgba(214,170,140,.55)", text: "#f6ead8,#e6cfae,#fff6e8,#e6cfae,#f6ead8", line: "#86b5dc" },
+      "glass-navy": { card: "rgba(37,46,109,.58)", edge: "rgba(160,190,230,.5)", text: "#e3dfd3,#cebba1,#f4eee2,#cebba1,#e3dfd3", line: "#b8735a" },
+    }[TITLE] || { card: "rgba(236,226,210,.68)", edge: "rgba(255,248,236,.75)", text: "#5a2f22,#8e4f3b,#b8735a,#8e4f3b,#5a2f22", line: "#252e6d" };
     firstTitle.style.top = H * 0.6 + "px";
-    const blue = "background:linear-gradient(100deg,#1b2a6b 0%,#1f5fae 35%,#2bb3e6 50%,#1f5fae 65%,#1b2a6b 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent";
-    firstTitle.innerHTML = `<div class="w" style="display:inline-block;padding:${H * 0.018}px ${W * 0.07}px ${H * 0.02}px;border-radius:${H * 0.022}px;background:rgba(255,255,255,.62);backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 18px 40px -12px rgba(3,6,26,.55);border:1px solid rgba(255,255,255,.7)">
-        <div class="shine" style="font:800 ${Math.round(H * 0.044)}px/1.05 'Inter Tight';letter-spacing:-.02em;${blue}">Hackensack</div>
-        <div class="shine" style="margin-top:${H * 0.004}px;font:800 ${Math.round(H * 0.026)}px/1.15 'Inter Tight';letter-spacing:-.01em;${blue}">University Medical Center</div>
-        <div style="margin:${H * 0.01}px auto 0;width:${W * 0.16}px;height:3px;border-radius:2px;background:#2bb3e6;box-shadow:0 0 12px rgba(43,179,230,.7)"></div></div>`;
+    const fill = `background:linear-gradient(100deg,${P.text});background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent`;
+    firstTitle.innerHTML = `<div class="w" style="display:inline-block;padding:${H * 0.018}px ${W * 0.07}px ${H * 0.02}px;border-radius:${H * 0.022}px;background:${P.card};backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);box-shadow:inset 0 1px 0 ${P.edge},0 18px 40px -12px rgba(30,16,10,.55);border:1px solid ${P.edge}">
+        <div class="shine" style="font:800 ${Math.round(H * 0.044)}px/1.05 'Inter Tight';letter-spacing:-.02em;${fill}">Hackensack</div>
+        <div class="shine" style="margin-top:${H * 0.004}px;font:800 ${Math.round(H * 0.026)}px/1.15 'Inter Tight';letter-spacing:-.01em;${fill}">University Medical Center</div>
+        <div style="margin:${H * 0.01}px auto 0;width:${W * 0.16}px;height:3px;border-radius:2px;background:${P.line}"></div></div>`;
   } else if (TITLE === "neon") {
     // a cyan neon script, the rest in spaced caps lit the same colour
     firstTitle.style.top = H * 0.58 + "px";
