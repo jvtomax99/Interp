@@ -41,6 +41,21 @@ Score dots are glossy beads (`#trendBall`). Arrivals land with a squash
 on the pressed tile (touch) or hovered tile (mouse), only on the practice
 screen; release springs back via `--spring`. Nothing runs at rest; reduced
 motion turns the lean and squashes off.
+**Squash and stretch (F2, Jose's film brief, 2026-10-20; Practice buttons
+and the streak flame only).** `--spring` is a real spring where the browser
+has `linear()` (Apple's model, stiffness (2pi/0.45 s)^2, bounce .38: an 8%
+overshoot, settled in ~.7 s; the old bezier stays on iOS before 17.2): the
+tiles' lean and the candy buttons' transitions use it (.55 s). A transition
+back from a 4% squash overshoots by a hair, so the release is drawn:
+`candyRelease` (flat, 4.5% tall and narrow, a dip, a lift, settled, area
+kept); the press helper (`LIFTS`, `SPRINGS`) puts `.is-released` on
+`.mastery-go`, the campus Play/Exam buttons and the pick card's Practise
+for .7 s as a touch leaves (a mouse keeps the transition). `.is-still`
+leaves `.is-released` alone. The streak chip's flame (`.study-streak i`,
+pivot at its base) lands with a squash (`flameLand`) then breathes wide and
+low / tall and narrow (`flameBreathe`, area within 4%); the number
+(`.study-flame`) pops once as it lands (`countLand`) and holds still. Reduced
+motion: none of it. Suite `practice-spring.cjs`.
 
 **Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`; Jose,
 2026-10-19: "look like a game", then "like Hackensack University Medical

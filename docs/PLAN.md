@@ -61,10 +61,6 @@ F1. **Dr. Smiley reacts in quizzes** with current art: a bounce on a right
    Jose sends: head and shoulders as separate layers (base.webp canvas, neck
    pivot), two arm poses (both up; one fist pump), two face frames (happy
    eyes-closed, wince). Layers, not Rive.
-F2. **Squash and stretch: Practice buttons and the streak flame only**
-   (spring press, overshoot and settle on pills and cards). Dr. Smiley's
-   own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
-   Inter (rounded face declined).
 F3. **Campus regrade + tilt:** keep the pre-render (real-time three.js and
    r3f declined: no build step, weight, unproven 60 fps). Re-render golden
    hour, peach to lavender sky, warm rim light, more haze toward the
@@ -255,6 +251,13 @@ paused or read his layout box, not his painted box. Not this PR's code.
 
 ## Done
 
+- 2026-10-20 F2 squash and stretch (this PR): Practice's candy buttons
+  squash flat on press and spring back past their rest (a drawn
+  `candyRelease` on touch release; `--spring` is a real `linear()` spring
+  where supported), the tiles' lean springs back the same way, the streak
+  flame squashes and stretches from its base and lands with a squash, the
+  number pops once. Suite `practice-spring.cjs`; note
+  `docs/features/practice-dashboard.md`.
 - 2026-10-19 Dr. Smiley E3, squash and stretch (Jose's pick B, 4%, from
   phone-size clips of 0 / 4% / 9%): only the cheer's and the greet's
   spring, Lively only, on his picture, worked out from the head keys
