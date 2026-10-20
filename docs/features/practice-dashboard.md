@@ -46,7 +46,7 @@ motion turns the lean and squashes off.
 2026-10-19: "look like a game", then "like Hackensack University Medical
 Center"; after a generic city, a satellite-traced campus and a box model he
 said "still not it", he sent photos of the main entrance, day and night).
-Replaced the readiness card. The scene is the main entrance at dusk, laid
+Replaced the readiness card. The scene is the main entrance at golden hour (dusk until F3), laid
 out from his Google 3D screenshots: the drive off the street (crosswalk,
 turn-arrow lanes, a pill median with the flower bed and evergreen, the
 keyhole median with the fountain), the brown-brick building with the two
@@ -63,7 +63,7 @@ through an EffectComposer with ambient occlusion, bloom, SMAA at 2x) plus
 own bloom, on black turned to alpha; drawn with `mix-blend-mode:screen` so
 the glow adds light), made by `docs/mockups/cchi-city/entrance.html` +
 `buildentr.cjs` (~25 min headless on SwiftShader); paste the printed
-manifest into `CAMPUS_MAP`. Phone loads the picture + 5 layers (~300 KB). On the scene: a small % badge
+manifest into `CAMPUS_MAP`. Phone loads the three depth pictures + 5 lit layers (~300 KB). On the scene: a small % badge
 per roof (`.cp-tag`, nudged apart), tap areas (`.cp-bld`), headlights on the
 drive and the fountain sparkle (only while on screen: `watchCampus`). Under
 it a legend of names (`.cp-key`), streak/goal/due chips, Play and Exam sim.
@@ -115,6 +115,45 @@ Re-render with `NOLIT=<old entrance.json> node buildentr.cjs out` to keep
 the 50 lit layers (the live things take ~3 min, the lit set ~25). There is
 no old `entrance.json` in the repo: write one from `CAMPUS_MAP` first
 (`JSON.parse` of the line in `index.html`).
+
+**Golden hour and depth (F3, 2026-10-20; Jose's film brief: keep the
+pre-render, regrade, add parallax from scroll and drag, not device tilt).**
+The light in `entrance.html`: a low warm sun from the left (`SUN_DIR`, long
+shadows to the right), lavender fill in the shade, a pink backlight for the
+rims; the sky dome runs peach at the horizon to lavender overhead with the
+sun's glow just off frame left (`GLOW_DIR`), no stars; the haze
+(`scene.fog`, peach) thickens toward the horizon; the far town is green
+ground with trees, a few warm roofs and a pastel skyline with almost no lit
+windows. The bloom threshold rose to 1.6: at 0.9 the bright sky bloomed into
+a veil over the whole picture. Every capture except the lit windows goes
+through `grade()`: only near-black and near-gray pixels move (shadows toward
+lavender, light toward peach), so nothing ends pure black or gray (a
+stronger grade washed the whole picture out; `?nograde` turns it off for
+comparison). The scene is three full-frame pictures (`capLayers`):
+`city/sky.webp` (the dome alone), `city/far.webp` (town and skyline over
+transparent sky) and `city/near.webp` (the campus over transparent
+background). Each layer's edge pixels are un-mixed from what was behind them
+(`unmix`), so no sky colour rims the buildings when the layers slide apart.
+`city/entrance.webp` is still written, now the whole graded picture: the app
+draws it only for a map without `layers` (an old `CAMPUS_MAP`).
+`CAMPUS_MAP.layers` holds their boxes. The lit windows did not need
+re-rendering (same camera and geometry; `NOLIT`), so the full run is under a
+minute.
+
+In the app the sky (`.cp-d-sky`, with the clouds) and the town
+(`.cp-d-far`, with the flock) slide behind the still campus by
+`--dpx`/`--dpy` (css px, at most 10; the town and flock 0.6 of it, the clouds
+0.9), set on `.cp-world` by `campusDepth(root)` (called with `campusLife`):
+by where the card sits on screen as the page scrolls, and by a sideways
+drag across the scene (finger or mouse), which springs back on release (a
+small spring, the finger leading with no lag while it drags). The campus
+never moves, so badges, tap areas, movers and lit windows stay put. Each
+back layer is scaled up (1.08, 1.045) just enough to cover its widest slide.
+`.cp-world` has `touch-action:pan-y`, so up-and-down still scrolls the page.
+A drag never picks a building: the click that follows is swallowed. Nothing
+runs at rest (the loop stops once settled) or while the card is away
+(`is-away`); reduced motion draws the layers and never slides them. Suite:
+`campus-depth.cjs`.
 **Round 2** (Jose's picks, 2026-10-19): an ambulance bay on the banner
 building's right flank (`BAY`, brick, a warm-lit opening; its two sliding
 doors captured apart as `bay0..2.webp`, closed/half/open, `.cp-bay`), which

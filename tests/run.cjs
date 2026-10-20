@@ -34,6 +34,7 @@ const SUITES = [
   ['springs.cjs',         'S5 springs: plain taps settle with no overshoot (tab bar, section panel), the kept list'],
   ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
   ['campus-life.cjs',     'Campus life 2: bay doors with the ambulance, the lot car, sitters, the flock, pauses, reduced motion'],
+  ['campus-depth.cjs',    'Campus depth: sky, town and campus layers; scroll and drag slide the back ones, spring home, never pick'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
 ];
 const only = process.argv.slice(2);
