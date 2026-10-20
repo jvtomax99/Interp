@@ -128,8 +128,9 @@ only `docs/`, `tests/`, `.github/`, `.claude/`, `*.md` or the Firebase
 rules get no bump (nothing deployed changed). If an `api/*.js` file
 changed, it ships in the same push.
 
-After merging, verify: the bump commit lands on `main` within a minute or
-two, and its `BUILD_ID` is the one to find live. From a cloud session the
+After merging, verify: the bump commit lands on `main` (a minute when the
+runners are free; ~10 min on 2026-10-20 behind the merge's own test runs),
+and its `BUILD_ID` is the one to find live. From a cloud session the
 site itself is blocked; read Vercel's status on that commit instead
 (`curl -sS https://api.github.com/repos/jvtomax99/Interp/commits/<sha>/status`,
 context "Vercel", "Deployment has completed"). Do not ask Jose to check
