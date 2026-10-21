@@ -54,7 +54,7 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**K1. Your knowledge brain (Jose's pick, 2026-10-21; plan in `docs/handoff.md`).**
+**K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/humc-brain.md`).**
 The HUMC Brain shows the person, not the code: domains as regions, terms as
 dots lit by what you know, tap a dark area to practice it. First find what
 per-term data the app keeps. Personal data never shown to others.
