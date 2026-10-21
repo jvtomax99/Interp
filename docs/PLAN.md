@@ -295,8 +295,11 @@ then read the log; it names the suite and the check.
 - 2026-10-21 3D Dr. Smiley R1 (this PR): `docs/mockups/smiley-3d/`, the
   figure built in code in Blender with a 20-bone skeleton, his drawn face
   and brows projected on the head (`prep.py`, `build.py`); head views,
-  body views, six poses and a 360-degree turn in `out/`. Docs only,
-  nothing deployed, no User Guide change.
+  body views, six poses and a 360-degree turn in `out/`. Round 2 after
+  Jose's look review (his picks): hair closer to the drawing (bigger
+  swoop, tips flicking), hands with a thumb and three fingers on bones
+  (`GRIPS`), a stethoscope, and a 3D nose, cheeks and muzzle under the
+  drawn face. Docs only, nothing deployed, no User Guide change.
 - 2026-10-21 Split `index.html`, phase 1 (this PR, merge only on Jose's
   call): the `<style>` block is `app.css`, verbatim plus `@charset`,
   linked where it was, before `home-polish.css`. `sw.js` precaches it,

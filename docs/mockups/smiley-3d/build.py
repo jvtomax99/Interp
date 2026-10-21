@@ -269,8 +269,27 @@ def hair_material():
 
 
 # ---------- the head ----------
+# Relief under the drawing, in drawing pixels: (x, y, radius x, radius y, mm forward, roundness).
+# The nose is his drawn nose; the cheeks sit under the blush, the mouth area is a soft muzzle.
+RELIEF = [(218, 340, 33, 21, 16, 1.6), (103, 348, 58, 50, 7, 1.0), (366, 358, 58, 50, 7, 1.0),
+          (222, 378, 92, 46, 5, 1.0), (215, 418, 70, 34, 3, 1.0)]
+
+
+def face_relief(p):
+    """How far (metres) the face pushes forward at head-local point p (front only)."""
+    if p.y >= 0:
+        return 0.0
+    front = min(1, -p.y / .12)
+    x, y = FACE_PX[0] + p.x * 1000, FACE_PX[1] - p.z * 1000
+    mm = 0.0
+    for cx, cy, rx, ry, h, k in RELIEF:
+        r2 = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2
+        mm += h * math.exp(-r2 ** k)
+    return mm / 1000 * front
+
+
 def build_head(mats, coll):
-    segs, rings = 96, 72
+    segs, rings = 160, 120
     verts, uvs = [], []
     for r in range(1, rings):
         el = -math.pi / 2 + math.pi * r / rings
@@ -278,8 +297,9 @@ def build_head(mats, coll):
             az = 2 * math.pi * s / segs
             d = (math.cos(el) * math.sin(az), -math.cos(el) * math.cos(az), math.sin(el))
             p = head_point(d)
-            verts.append(p + Vector((0, 0, HZ)))
             uvs.append(((FACE_PX[0] + p.x * 1000) / 480, 1 - (FACE_PX[1] - p.z * 1000) / 600))
+            p.y -= face_relief(p)
+            verts.append(p + Vector((0, 0, HZ)))
     for z in (-1, 1):
         p = head_point((0, 0, z))
         verts.append(p + Vector((0, 0, HZ)))
@@ -318,7 +338,7 @@ def hairline(az):
 
 
 WHORL = sph(200, 62)
-QUIFF = sph(25, 52)
+QUIFF = sph(30, 46)
 PUFF = sph(95, 22)
 
 
@@ -333,7 +353,7 @@ def flow(d):
     sweep = Vector((1, -.25, 0))
     sweep -= d * sweep.dot(d)
     top = max(0, d.z) * max(0, -d.y + .3)   # strong on top and at the front
-    v = away + sweep.normalized() * (1.4 * top)
+    v = away + sweep.normalized() * (1.8 * top)
     v -= d * v.dot(d)
     return v.normalized()
 
@@ -362,14 +382,19 @@ def clump(name, dirs, width, lift, base, ridges=3, segs=14):
     n = len(dirs)
     if n < 3:
         return None
+    taz, tel = az_el(dirs[-1])
+    flick = .026 if (-45 < taz < 135 and tel > -15) else 0.0
     # resample to a smooth spine
     spine, nrms = [], []
     for i, d in enumerate(dirs):
         t = i / (n - 1)
         # volume: the quiff rises over the front of the top, a puff over his left ear
-        q = math.exp(-((d - QUIFF).length / .55) ** 2) * .050 + math.exp(-((d - PUFF).length / .5) ** 2) * .024
-        q += .012 * max(0, d.z)
+        q = math.exp(-((d - QUIFF).length / .52) ** 2) * .080 + math.exp(-((d - PUFF).length / .5) ** 2) * .032
+        q += .020 * max(0, d.z)
         rise = base * (1 - t ** 4) + (lift + q) * math.sin(math.pi * min(1, t * 1.05)) ** .7 * (1 - .3 * t)
+        # tips at the fringe and over his left ear flick up off the head, as drawn
+        f = max(0, min(1, (t - .72) / .28))
+        rise += flick * f * f * (3 - 2 * f)
         p = head_point(d, grow=rise)
         spine.append(p)
         nrms.append(head_point(d, grow=rise + .01) - p)
@@ -624,11 +649,46 @@ for S, sx in (('L', 1), ('R', -1)):
         f'shoulder.{S}': ((.03 * sx, 0, .49), (.140 * sx, 0, .49), 'chest'),
         f'upper_arm.{S}': ((.140 * sx, 0, .49), (.180 * sx, -.004, .395), f'shoulder.{S}'),
         f'forearm.{S}': ((.180 * sx, -.004, .395), (.198 * sx, -.014, .305), f'upper_arm.{S}'),
-        f'hand.{S}': ((.198 * sx, -.014, .305), (.205 * sx, -.022, .238), f'forearm.{S}'),
         f'thigh.{S}': ((.066 * sx, 0, .265), (.070 * sx, -.004, .170), 'hips'),
         f'shin.{S}': ((.070 * sx, -.004, .170), (.070 * sx, 0, .072), f'thigh.{S}'),
         f'foot.{S}': ((.070 * sx, 0, .072), (.070 * sx, -.085, .030), f'shin.{S}'),
     })
+
+# Hands: a palm, a thumb and three fingers, two bones each. HAND_FRAME holds
+# each hand's rest axes (palm normal, front-to-back, along the hand) and
+# FINGERS each finger's rest direction, for curling (pose 'grip.L').
+HAND_FRAME, FINGERS = {}, {}
+HS = 1.45                               # hand size: cartoon hands, big enough to read in a full shot
+for S, sx in (('L', 1), ('R', -1)):
+    W = Vector((.198 * sx, -.014, .305))
+    d = (Vector((.205 * sx, -.022, .238)) - W).normalized()
+    rot = d.to_track_quat('Z', 'Y').to_matrix()
+    ex, ey = rot.col[0].copy(), rot.col[1].copy()
+    palm = ex * sx                      # out of the palm, towards his body
+    HAND_FRAME[S] = (palm, ey, d, rot)
+    BONES[f'hand.{S}'] = (tuple(W), tuple(W + d * .030 * HS), f'forearm.{S}')
+    for k, (la, lb, r) in enumerate(((.019, .017, .0090), (.021, .018, .0093), (.018, .015, .0086))):
+        la, lb, r = la * HS, lb * HS, r * HS
+        base = W + d * .030 * HS + ey * (-.0118 + .0118 * k) * HS
+        dk = (d + ey * (-.10 + .10 * k)).normalized()
+        a, b = base + dk * la, base + dk * (la + lb)
+        BONES[f'f{k}a.{S}'] = (tuple(base), tuple(a), f'hand.{S}')
+        BONES[f'f{k}b.{S}'] = (tuple(a), tuple(b), f'f{k}a.{S}')
+        FINGERS[(S, f'f{k}')] = (dk, r)
+    tb = W + (d * .010 - ey * .016 + palm * .007) * HS
+    dt = (d * .55 - ey * .65 + palm * .35).normalized()
+    BONES[f'tha.{S}'] = (tuple(tb), tuple(tb + dt * .017 * HS), f'hand.{S}')
+    BONES[f'thb.{S}'] = (tuple(tb + dt * .017 * HS), tuple(tb + dt * .031 * HS), f'tha.{S}')
+    FINGERS[(S, 'th')] = (dt, .0098 * HS)
+
+# Hand shapes: (first joint, second joint) curl in degrees per finger.
+GRIPS = {
+    'relaxed': {'th': (8, 10), 'f0': (18, 22), 'f1': (24, 28), 'f2': (30, 34)},
+    'open':    {'th': (-8, 0), 'f0': (-4, 2), 'f1': (0, 2), 'f2': (2, 4)},
+    'fist':    {'th': (38, 52), 'f0': (92, 100), 'f1': (95, 100), 'f2': (98, 100)},
+    'point':   {'th': (34, 46), 'f0': (-2, 0), 'f1': (92, 100), 'f2': (96, 100)},
+    'wave':    {'th': (-12, -4), 'f0': (-8, 0), 'f1': (-2, 2), 'f2': (4, 6), 'spread': 9},
+}
 
 
 def build_limbs(mats, coll):
@@ -642,16 +702,18 @@ def build_limbs(mats, coll):
         path = [sh.lerp(el, i / 10) for i in range(10)] + [el.lerp(wr, i / 10) for i in range(11)]
         sleeve = tube(f'Sleeve.{S}', path, lambda t: .043 - .006 * t + .006 * max(0, t - .88) / .12, segs=28, mat=mats['coat'])
         cuff = tube(f'Cuff.{S}', [wr + (wr - el).normalized() * -.012, wr + (wr - el).normalized() * .004], .040, segs=28, mat=mats['coat'])
-        # mitten hand with a thumb, palm facing in
-        hc = B(f'hand.{S}', 0).lerp(B(f'hand.{S}', 1), .5)
-        d = (B(f'hand.{S}', 1) - B(f'hand.{S}', 0)).normalized()
-        rot = d.to_track_quat('Z', 'Y').to_matrix()
-        hand = ellipsoid(f'Hand.{S}', hc, (.027, .033, .040), mat=mats['skin'], rot=rot, p=2.3)
-        thumb = ellipsoid(f'Thumb.{S}', hc + rot @ Vector((-.018 * sx, -.022, .006)), (.012, .012, .021), mat=mats['skin'],
-                          rot=rot @ Matrix.Rotation(math.radians(-30 * sx), 3, 'Y'))
-        finger = tube(f'Point.{S}', [hc + rot @ Vector((0, -.010, .030)), hc + rot @ Vector((0, -.010, .068))], .0105,
-                      segs=16, mat=mats['skin'])
-        finger.hide_render = True; finger.hide_viewport = True
+        # the hand: a soft palm, then each finger segment its own capsule on its bone
+        palm, ey, d, rot = HAND_FRAME[S]
+        W = B(f'hand.{S}', 0)
+        hand = ellipsoid(f'Hand.{S}', W + (d * .017 + palm * -.001) * HS, (.016 * HS, .021 * HS, .023 * HS), mat=mats['skin'], rot=rot, p=2.4)
+        digits = []
+        for f in ('th', 'f0', 'f1', 'f2'):
+            dk, r = FINGERS[(S, f)]
+            for j, part in enumerate('ab'):
+                bn = f'{f}{part}.{S}'
+                h0, h1 = B(bn, 0), B(bn, 1)
+                rr = r * (1 if part == 'a' else .94)
+                digits.append(tube(f'Fing.{bn}', [h0 - dk * rr * .2, h1], rr, segs=16, mat=mats['skin']))
         # trouser leg and shoe
         hp, kn, an = B(f'thigh.{S}', 0), B(f'shin.{S}', 0), B(f'foot.{S}', 0)
         lp = [hp.lerp(kn, i / 8) for i in range(8)] + [kn.lerp(an, i / 8) for i in range(9)]
@@ -662,7 +724,7 @@ def build_limbs(mats, coll):
         sole = ellipsoid(f'Sole.{S}', sc + Vector((0, 0, -.026)), (.045, .075, .012), mat=mats['sole'], p=4)
         lace = ellipsoid(f'Tongue.{S}', sc + Vector((0, -.018, .030)), (.022, .03, .010), mat=mats['sole'], p=3,
                          rot=Matrix.Rotation(math.radians(-25), 3, 'X'))
-        for o in (sleeve, cuff, hand, thumb, finger, leg, shoe, sole, lace):
+        for o in [sleeve, cuff, hand, leg, shoe, sole, lace] + digits:
             coll.objects.link(o); bpy.context.scene.collection.objects.unlink(o)
             obs.append(o)
     return obs
@@ -686,6 +748,50 @@ def build_lanyard(mats, coll):
     obs.append(ellipsoid('Clip', clip + Vector((0, 0, -.004)), (.008, .004, .012), mat=mats['metal'], segs=16, rings=10))
     bc = clip + Vector((0, -.004, -.050))
     obs.append(ellipsoid('Badge', bc, (.027, .0035, .037), mat=mats['badge'], p=7))
+    for o in obs:
+        coll.objects.link(o); bpy.context.scene.collection.objects.unlink(o)
+    return obs
+
+
+def catmull(pts, k=8):
+    pts = [Vector(p) for p in pts]
+    path = []
+    for i in range(len(pts) - 1):
+        p0, p1, p2, p3 = pts[max(i - 1, 0)], pts[i], pts[i + 1], pts[min(i + 2, len(pts) - 1)]
+        for j in range(k):
+            t = j / k
+            path.append(.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3))
+    path.append(pts[-1])
+    return path
+
+
+def build_stethoscope(mats, coll):
+    """Draped round his neck over the collar: the chest piece hangs on his
+    left (your right), the ear tubes on his right."""
+    obs = []
+    back = [Vector((-.04, .080, .577)), Vector((0, .084, .579)), Vector((.04, .080, .577))]
+    left = [Vector((.075, .030, .574)), Vector((.083, -.030, .560)), coat_point(.515, 34, grow=.020),
+            coat_point(.465, 31, grow=.021), coat_point(.415, 29, grow=.022), coat_point(.385, 28, grow=.024)]
+    right = [Vector((-.075, .030, .574)), Vector((-.083, -.030, .560)), coat_point(.515, -34, grow=.020),
+             coat_point(.47, -32, grow=.021), coat_point(.44, -31, grow=.022)]
+    tubing = catmull(list(reversed(right)) + back + left, 10)
+    obs.append(tube('Steth.Tube', tubing, .0062, segs=14, mat=mats['steth']))
+    # chest piece: a metal bell with a dark diaphragm, facing out
+    end = left[-1]
+    out = Vector((end.x, end.y, 0)).normalized()
+    rot = out.to_track_quat('-Y', 'Z').to_matrix()
+    cp = end + out * .004 + Vector((0, 0, -.016))
+    obs.append(tube('Steth.Stem', [end, cp + Vector((0, 0, .012))], .0045, segs=12, mat=mats['metal']))
+    obs.append(ellipsoid('Steth.Bell', cp, (.018, .007, .018), mat=mats['metal'], rot=rot, p=3))
+    obs.append(ellipsoid('Steth.Disc', cp + out * .006, (.015, .002, .015), mat=mats['steth'], rot=rot, p=3))
+    # ear tubes: two metal tubes from the Y-piece, ear tips at the ends
+    y0 = right[-1]
+    for k, (ang, z) in enumerate(((-40, .392), (-22, .388))):
+        tip = coat_point(z, ang, grow=.03)
+        mid = y0.lerp(tip, .5) + Vector((y0.x, y0.y, 0)).normalized() * .01
+        obs.append(tube(f'Steth.Ear{k}', catmull([y0, mid, tip], 6), .0034, segs=10, mat=mats['metal']))
+        obs.append(ellipsoid(f'Steth.Tip{k}', tip, (.0075, .0075, .0075), mat=mats['steth'], segs=16, rings=10))
+    obs.append(ellipsoid('Steth.Y', y0, (.0075, .006, .009), mat=mats['metal'], segs=16, rings=10))
     for o in obs:
         coll.objects.link(o); bpy.context.scene.collection.objects.unlink(o)
     return obs
@@ -800,14 +906,16 @@ def rig_everything(arm, objs):
             skin(o, arm, ['chest', 'neck'], bias={'neck': 1.5})
         elif n in ('Coat', 'Lapel', 'Button', 'Pocket', 'BreastPocket', 'Pen', 'Scrubs', 'ThroatV'):
             skin(o, arm, trunk + ['neck', 'thigh.L', 'thigh.R'], bias={'thigh.L': coat_thigh(1), 'thigh.R': coat_thigh(-1), 'neck': 1.6})
-        elif n in ('Lanyard', 'Clip', 'Badge'):
+        elif n in ('Lanyard', 'Clip', 'Badge', 'Steth'):
             skin(o, arm, ['chest'])
         elif n == 'Sleeve':
             skin(o, arm, [f'upper_arm.{S}', f'forearm.{S}', 'chest'], bias={'chest': 2.5})
         elif n == 'Cuff':
             skin(o, arm, [f'forearm.{S}'])
-        elif n in ('Hand', 'Thumb', 'Point'):
+        elif n == 'Hand':
             skin(o, arm, [f'hand.{S}'])
+        elif n == 'Fing':
+            skin(o, arm, [o.name[5:]])
         elif n == 'Leg':
             skin(o, arm, [f'thigh.{S}', f'shin.{S}', 'hips'], bias={'hips': 2.5})
         elif n in ('Shoe', 'Sole', 'Tongue'):
@@ -824,15 +932,30 @@ def pose(arm, spec, face=None):
     for pb in arm.pose.bones:
         pb.rotation_euler = (0, 0, 0)
         pb.location = (0, 0, 0)
-    for o in arm.children:
-        if o.name.startswith('Point.'):
-            o.hide_render = not spec.get(o.name.lower(), False)
+    spec = dict(spec)
+    for S in ('L', 'R'):
+        g = GRIPS[spec.get(f'grip.{S}', 'relaxed')]
+        palm = HAND_FRAME[S][0]
+        spread = g.get('spread', 0)
+        for f, ab in g.items():
+            if f == 'spread':
+                continue
+            a, b = ab
+            dk = FINGERS[(S, f)][0]
+            u = (-palm).cross(dk).normalized()
+            fan = {'f0': -1, 'f1': 0, 'f2': 1}.get(f, 0) * spread
+            M = Matrix.Rotation(math.radians(fan), 3, palm) @ Matrix.Rotation(math.radians(a), 3, u)
+            spec[f'{f}a.{S}'] = ('mat', M)
+            spec[f'{f}b.{S}'] = ('mat', Matrix.Rotation(math.radians(b), 3, u))
     for b, r in spec.items():
         if b not in arm.pose.bones:
             continue
         pb = arm.pose.bones[b]
         M = pb.bone.matrix_local.to_3x3()
-        R = Matrix.Rotation(math.radians(r[2]), 3, 'Z') @ Matrix.Rotation(math.radians(r[1]), 3, 'Y') @ Matrix.Rotation(math.radians(r[0]), 3, 'X')
+        if isinstance(r, tuple) and r and r[0] == 'mat':
+            R = r[1]
+        else:
+            R = Matrix.Rotation(math.radians(r[2]), 3, 'Z') @ Matrix.Rotation(math.radians(r[1]), 3, 'Y') @ Matrix.Rotation(math.radians(r[0]), 3, 'X')
         q = (M.inverted() @ R @ M).to_quaternion()
         pb.rotation_mode = 'QUATERNION'
         pb.rotation_quaternion = q
@@ -924,6 +1047,7 @@ def build(head_only=False):
         'pen': principled('Pen', srgb(15, 95, 166), rough=.25, coat=.6),
         'lanyard': principled('Lanyard', LANYARD, rough=.55, coat=.1, sheen=.4),
         'metal': principled('Metal', srgb(200, 205, 215), rough=.2, coat=.3),
+        'steth': principled('Stethoscope', srgb(37, 46, 109), rough=.35, coat=.4),
         'badge': None,
     }
     mats['badge'] = badge_material()
@@ -936,7 +1060,7 @@ def build(head_only=False):
     subsurf(hair, 1)
     arm = None
     if not head_only:
-        body = build_coat(mats, coll) + build_torso(mats, coll) + build_limbs(mats, coll) + build_lanyard(mats, coll)
+        body = build_coat(mats, coll) + build_torso(mats, coll) + build_limbs(mats, coll) + build_lanyard(mats, coll) + build_stethoscope(mats, coll)
         for o in body:
             if o.name.split('.')[0] in ('Sleeve', 'Leg', 'Hand', 'Thumb', 'Shoe', 'Sole', 'Scrubs', 'Neck', 'Pocket', 'BreastPocket', 'Badge'):
                 subsurf(o, 1)
