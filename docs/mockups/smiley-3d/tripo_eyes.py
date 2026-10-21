@@ -16,10 +16,16 @@ import tripo_lib as T
 import build
 
 HERE = T.HERE
-COVER = 1.16          # eyeball outline over the painted opening
-DEPTH = .014          # eyeball half-depth (metres; he is 1 m tall)
-SINK = .0055          # how far its centre sits behind the face surface
-OPEN, SHUT = 50, -62  # lid edge elevation on the eyeball, degrees (open: its dark edge is his lash line / closed)
+# EYE_STYLE: 'v1' (first try: big white balls, Jose: "the eyes look weird"),
+# 'matched' (3D eyes made to match his painted ones: same size, eyeliner, dark
+# brown iris, big pupil, soft whites), 'painted' (his painted eyes kept, only a
+# blink lid added; no looking around)
+EYE_STYLE = os.environ.get('EYE_STYLE', 'matched')
+S = {'v1':      dict(cover=1.16, depth=.014, sink=.0055, open=50, ball=True, liner=False),
+     'matched': dict(cover=1.0, depth=.012, sink=.0062, open=72, ball=True, liner=True),
+     'painted': dict(cover=1.0, depth=.0075, sink=.0045, open=88, ball=False, liner=False)}[EYE_STYLE]
+COVER, DEPTH, SINK, OPEN = S['cover'], S['depth'], S['sink'], S['open']
+SHUT = -62            # lid edge elevation on the eyeball when closed, degrees
 
 
 def mesh_from(name, verts, faces, mat):
@@ -74,9 +80,10 @@ def eye_material(name, iris_dark, iris_light, pupil_r, iris_r):
     ramp = N.new('ShaderNodeValToRGB'); cr = ramp.color_ramp
     cr.interpolation = 'EASE'
     cr.elements[0].position, cr.elements[0].color = 0, (.004, .003, .003, 1)          # pupil
-    cr.elements[1].position, cr.elements[1].color = 1, (.92, .93, .95, 1)             # white
+    white = (.92, .93, .95, 1) if EYE_STYLE == 'v1' else (.78, .77, .76, 1)   # matched: soft, like the painted whites
+    cr.elements[1].position, cr.elements[1].color = 1, white
     for pos, col in ((pupil_r - .01, (.004, .003, .003, 1)), (pupil_r + .02, iris_light), (iris_r - .09, iris_dark),
-                     (iris_r - .015, (.05, .02, .01, 1)), (iris_r + .02, (.92, .93, .95, 1))):
+                     (iris_r - .015, (.05, .02, .01, 1)), (iris_r + .02, white)):
         e = cr.elements.new(max(0, min(1, pos))); e.color = col
     dd = math_node('ADD', d, math_node('MULTIPLY', math_node('SUBTRACT', 1, front), 5))
     L.new(dd, ramp.inputs['Fac'])
@@ -110,7 +117,7 @@ def set_blink(lid, amount):
     # below stage 1 the open shape (Basis) mixes with B1 by the same rule
     glint = bpy.data.objects.get('Glint.' + lid.name.split('.')[-1])
     if glint:                      # the shine sits on the eye, so it goes when the lid covers it
-        glint.hide_render = amount > .2
+        glint.hide_render = amount > .2 or EYE_STYLE == 'painted'
 
 
 def build_eyes(ob, eyes):
@@ -129,6 +136,10 @@ def build_eyes(ob, eyes):
     hb = hl_m.node_tree.nodes['Principled BSDF']
     hb.inputs['Base Color'].default_value = (1, 1, 1, 1); hb.inputs['Emission Color'].default_value = (1, 1, 1, 1)
     hb.inputs['Emission Strength'].default_value = 1.2
+    liner_m = bpy.data.materials.new('Liner'); liner_m.use_nodes = True
+    lb = liner_m.node_tree.nodes['Principled BSDF']
+    lb.inputs['Base Color'].default_value = srgb(36, 18, 10); lb.inputs['Roughness'].default_value = .7
+    lb.inputs['Specular IOR Level'].default_value = .1
     made = []
     for side, e in zip(('L', 'R'), eyes):
         n = Vector(e['normal']).normalized()
@@ -137,9 +148,15 @@ def build_eyes(ob, eyes):
         rx, rz = e['hw'] * COVER, e['hh'] * COVER
         centre = c - n * SINK
         # the ball
-        iris_r = e['ir'] / max(e['hw'], e['hh']) * .95
-        mat = eye_material(f'Eye.{side}', srgb(92, 46, 20), srgb(170, 102, 50), iris_r * .42, iris_r)
+        if EYE_STYLE == 'v1':
+            iris_r = e['ir'] / max(e['hw'], e['hh']) * .95
+            mat = eye_material(f'Eye.{side}', srgb(92, 46, 20), srgb(170, 102, 50), iris_r * .42, iris_r)
+        else:                   # his painted iris: about .7 of the eye's half-width, dark brown, a big pupil
+            iris_r = e['ir'] / rx * 1.02
+            mat = eye_material(f'Eye.{side}', srgb(62, 32, 14), srgb(126, 76, 40), iris_r * .5, iris_r)
         ball = mesh_from(f'Eye.{side}', ellipsoid_verts(rx, DEPTH, rz), grid(32, 48), mat)
+        if not S['ball']:
+            ball.hide_render = True
         ball.matrix_world = Matrix.Translation(centre) @ rot
         ball.add_rest_position_attribute = True
         nodes = mat.node_tree.nodes
@@ -177,8 +194,39 @@ def build_eyes(ob, eyes):
         # catchlight: a small soft white oval up and to the light's side, fixed to the head
         hl_verts = ellipsoid_verts(rx * .16, .0015, rz * .2, 16, 8)
         hl = mesh_from(f'Glint.{side}', hl_verts, grid(8, 16), hl_m)
-        hl.matrix_world = Matrix.Translation(centre + (rot.to_3x3() @ Vector((-rx * .3, -DEPTH * 1.02, rz * .38)))) @ rot
+        if EYE_STYLE == 'v1':
+            gpos = Vector((-rx * .3, -DEPTH * 1.02, rz * .38))
+        else:   # on the iris at rest, upper right (viewer's), like his painted shine
+            ix, iz = gx0 * .32 * rx + iris_r * rx * .42, gz0 * .24 * rz + iris_r * rz * .45
+            iy = -DEPTH * math.sqrt(max(0, 1 - (ix / rx) ** 2 - (iz / rz) ** 2)) - .0006
+            gpos = Vector((ix, iy, iz))
+        hl.matrix_world = Matrix.Translation(centre + (rot.to_3x3() @ gpos)) @ rot
+        if not S['ball']:
+            hl.hide_render = True
         made += [ball, lid, hl]
+        if S['liner']:
+            # eyeliner like his painted eyes: a dark line round the opening, thick on top
+            pts, rads = [], []
+            # over the top only, from just below the outer corner to the inner one, tapering at both ends
+            NP = 96
+            for k in range(NP + 1):
+                t = math.radians(-14 + 208 * k / NP)
+                pts.append(Vector((rx * 1.03 * math.cos(t), -SINK - .0012, rz * 1.03 * math.sin(t))))
+                u = k / NP
+                rads.append(.0042 * math.sin(math.pi * u) ** .6 + .0003)
+            vs, fs = [], []
+            sg = 10
+            for k, p in enumerate(pts):
+                tan = (pts[min(k + 1, NP)] - pts[max(k - 1, 0)]).normalized()
+                nrm = Vector((p.x / rx, 0, p.z / rz)).normalized()
+                bi = tan.cross(nrm)
+                for j in range(sg):
+                    a = 2 * math.pi * j / sg
+                    vs.append(p + (nrm * math.cos(a) + bi * math.sin(a)) * rads[k])
+            fs = [(k * sg + j, k * sg + (j + 1) % sg, (k + 1) * sg + (j + 1) % sg, (k + 1) * sg + j) for k in range(NP) for j in range(sg)]
+            ln = mesh_from(f'Liner.{side}', [tuple(v) for v in vs], fs, liner_m)
+            ln.matrix_world = Matrix.Translation(centre) @ rot
+            made.append(ln)
     return made
 
 

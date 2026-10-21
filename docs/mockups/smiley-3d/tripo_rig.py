@@ -96,7 +96,7 @@ if __name__ == '__main__':
     # eyes, lids and shines follow the head bone through an armature modifier
     # (bone parenting via matrix_world reads a stale parent matrix and shifts them)
     for o in list(sc.objects):
-        if o.name.split('.')[0] in ('Eye', 'Lid', 'Glint'):
+        if o.name.split('.')[0] in ('Eye', 'Lid', 'Glint', 'Liner'):
             o.parent = arm                       # the rig sits at the origin: no shift
             g = o.vertex_groups.new(name='head'); g.add(range(len(o.data.vertices)), 1.0, 'REPLACE')
             m = o.modifiers.new('Armature', 'ARMATURE'); m.object = arm
