@@ -66,6 +66,13 @@ R1. The figure and skeleton: turntable and six poses (this PR). Jose
    the 3D body, white background); Jose uploads it to Tripo or Meshy
    (blocked from the cloud session), sends the GLB back; Claude cleans
    it, rigs it with `BONES`, puts the face frames on its front as now.
+   Then (same day) Jose: "look more animated", Pixar style (his reference:
+   Pixar's characters 1995-2024). Plan approved (`out/plan-pixar.png`):
+   his picture app makes a full-body Pixar-style turnaround from his
+   drawing; a picture-to-3D site makes the GLB; Claude rigs it. His pick:
+   a sculpted 3D face with 3D eyes, his expressions rebuilt as face
+   controls matched to the 30 drawings (the drawn frames are not put on
+   the 3D face). Rule: a visual plan before any mascot work (`AGENTS.md`).
 R2. The motions as short clips: idle breathing, anticipation crouch, jump
    with legs tucked, a spin or flip, a squash landing, wave, look, point,
    happy bounce; secondary motion (hair, coat hem, lanyard) on springs;
