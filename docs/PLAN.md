@@ -54,6 +54,11 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**K1. Your knowledge brain (Jose's pick, 2026-10-21; plan in `docs/handoff.md`).**
+The HUMC Brain shows the person, not the code: domains as regions, terms as
+dots lit by what you know, tap a dark area to practice it. First find what
+per-term data the app keeps. Personal data never shown to others.
+
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
 F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right
