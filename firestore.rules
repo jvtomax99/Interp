@@ -197,6 +197,31 @@ service cloud.firestore {
     match /activity-log/{docId}   { allow read, write: if team(); }
     match /announcements/{docId}  { allow read, write: if team(); }
 
+    // ---- Notifications (Web Push; docs/features/notifications.md) ----
+    // One line per phone that turned notifications on: where its push
+    // service reaches it, whose phone it is, what it wants. The server
+    // (api/push.js) reads them all to send, and removes a phone that's gone.
+    // The address alone can't send anything: every push must be signed with
+    // the server's private key, which lives only in Vercel.
+    match /push-subs/{docId} {
+      allow read, delete: if team();
+      allow create, update: if team()
+        && request.resource.data.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'uid', 'name', 'region', 'chat', 'ce', 'device', 'at'])
+        && request.resource.data.endpoint is string && request.resource.data.endpoint.size() < 1024
+        && (request.resource.data.uid == '' || (signedIn() && request.resource.data.uid == request.auth.uid));
+    }
+    // Which chat messages already went out, so each is sent once.
+    match /push-sent/{docId} {
+      allow create: if team();
+      allow read, update, delete: if false;
+    }
+    // Owner notifications, for the Notifications screen. Only owner phones write.
+    match /push-log/{docId} {
+      allow read: if team();
+      allow create: if isOwner() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isOwner();
+    }
+
     // ---- Study ----
     match /practice-questions/{docId} { allow read, write: if team(); }
     match /quiz-history/{docId}       { allow read, write: if team(); }

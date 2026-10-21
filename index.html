@@ -1448,6 +1448,7 @@ function setMyRegion(id){
   try{ localStorage.setItem(REGION_KEY, id); }catch(e){}
   doctorRegionPick = null;          // the directory follows your region again
   syncRegionControls();
+  if(typeof pushSync === 'function') pushSync();   // the server's region filter
   updateChatBadge();
   if(activeCategory === 'chat'){ renderChatChannels(); }
   else if(activeCategory === 'doctor-directory') renderContent();
@@ -3578,6 +3579,8 @@ function startChatListener(){
         showChatNotification(m);
       });
     }
+    // Your own messages, once saved: ask the server to notify the team.
+    CHAT_MESSAGES.forEach(m => { if(isMyChatMessage(m)) pushChatMessage(m); });
     if(activeCategory === 'chat'){
       markChatSeen();
       renderChatMessages();
@@ -4791,12 +4794,11 @@ async function saveQuestion(){
 }
 
 /* ---------- Chat notifications ----------
-   These fire while the app is open (including in a background tab or behind
-   the lock screen on an installed app). They do NOT require a server.
-
-   True push-when-fully-closed additionally needs a backend to send the push
-   (Firebase Cloud Messaging + a Cloud Function triggered by new chat
-   documents), which is a separate piece of infrastructure. */
+   These fire only while the app is running. An iPhone freezes a Home Screen
+   app seconds after you leave it, so on their own they rarely arrived: the
+   server sends Team Chat and training as real push now (Web Push, below), and
+   these stay quiet for whatever push covers (pushCovers). Team updates are
+   still local only. */
 function loadNotifyPref(){
   try{
     notifyEnabled = localStorage.getItem('interpreterHubNotify') === 'yes';
@@ -4831,6 +4833,7 @@ async function toggleCeNotifications(){
   if(notifyCeEnabled){
     notifyCeEnabled = false;
     saveNotifyCePref(false);
+    pushSync();
     showToast('Training alerts turned off.');
     renderContent();
     return;
@@ -4838,6 +4841,7 @@ async function toggleCeNotifications(){
   if(!await ensureNotifyPermission()) return;
   notifyCeEnabled = true;
   saveNotifyCePref(true);
+  pushSync();
   showToast('You\u2019ll be alerted about new training and webinars.');
   renderContent();
 }
@@ -4870,6 +4874,7 @@ async function toggleNotifications(){
   if(notifyEnabled){
     notifyEnabled = false;
     saveNotifyPref(false);
+    pushSync();
     showToast('Chat notifications turned off.');
     if(document.getElementById('chatNotifyBtn')) syncChatNotifyButton(); else renderContent();
     return;
@@ -4877,6 +4882,7 @@ async function toggleNotifications(){
   if(!await ensureNotifyPermission()) return;
   notifyEnabled = true;
   saveNotifyPref(true);
+  pushSync();   // with the app closed too, where this browser can
   showToast('Chat notifications on.');
   if(document.getElementById('chatNotifyBtn')) syncChatNotifyButton(); else renderContent();
 }
@@ -4922,7 +4928,7 @@ async function sendNotification(title, body, section, tag){
 }
 
 async function showChatNotification(msg){
-  if(!notifyEnabled) return;
+  if(!notifyEnabled || pushCovers('chat')) return;
   const author = msg.author || 'Teammate';
   const mentionsMe = messageMentions(msg.text).includes(whoAmI().trim().toLowerCase());
   const files = chatAttachmentsOf(msg);
@@ -4942,6 +4948,325 @@ async function showActivityNotification(entry){
   // Activity summaries are already written as readable phrases, e.g.
   // 'added "Xerocytosis" to Oncology' — so this reads as a full sentence.
   await sendNotification('Interpreter Hub', `${author} ${entry.summary || 'made a change'}`, 'updates', 'interpreter-hub-activity');
+}
+
+/* ---------- Notifications that reach a closed phone (Web Push) ----------
+   docs/features/notifications.md. The notifications above only fire while
+   the app is running; an iPhone freezes a Home Screen app seconds after you
+   leave it, so they almost never arrived. With push, the server (api/push.js)
+   sends through Apple's or Google's push service and the phone shows it with
+   the app closed (sw.js, 'push').
+   This phone signs up once (pushTurnOn, from a tap): the browser hands over a
+   subscription, kept in push-subs/{id} with what it wants (chat, ce), whose
+   phone it is (uid, name) and its region. pushSync keeps that document
+   current. While it's on, the local chat and training notifications stay
+   quiet so nothing arrives twice; team updates stay local (in-app only).
+   iPhone: only from the Home Screen app, iOS 16.4 or later. */
+const PUSH = { key: undefined, sub: null, docId: '', ready: false, busy: false,
+               phones: null, log: [], logLoaded: false, draft: { title: '', body: '' }, sending: false, sentNote: '' };
+const PUSH_SIG_KEY = 'ih_pushSig';
+const PUSHED_KEY = 'ih_pushedChat';
+
+function pushSupported(){
+  return notificationsSupported() && 'PushManager' in window && typeof crypto !== 'undefined' && !!crypto.subtle;
+}
+function pushIsIos(){ return /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function pushIsInstalled(){
+  try{ return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches; }catch(e){ return false; }
+}
+// What the Notifications screen says this phone can do.
+function pushState(){
+  if(pushIsIos() && !pushIsInstalled()) return 'install';
+  if(!pushSupported()) return 'unsupported';
+  if(PUSH.key === null) return 'server';
+  if(Notification.permission === 'denied') return 'blocked';
+  return PUSH.ready ? 'on' : 'off';
+}
+// Is the server sending this kind for this phone? Then the local copy stays quiet.
+function pushCovers(kind){ return PUSH.ready && (kind === 'chat' ? notifyEnabled : kind === 'ce' ? notifyCeEnabled : false); }
+
+async function pushPublicKey(){
+  if(PUSH.key !== undefined) return PUSH.key;
+  try{
+    const r = await fetch('./api/push', { cache: 'no-store' });
+    const j = r.ok ? await r.json() : null;
+    PUSH.key = j && typeof j.publicKey === 'string' && j.publicKey ? j.publicKey : null;
+  }catch(e){ return null; }   // offline: ask again next time
+  return PUSH.key;
+}
+function pushKeyBytes(b64){
+  const s = (b64 + '==='.slice((b64.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+}
+async function pushDocId(endpoint){
+  const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
+  return Array.from(new Uint8Array(h).slice(0, 20), b => b.toString(16).padStart(2, '0')).join('');
+}
+async function pushRegistration(){
+  if(!('serviceWorker' in navigator)) return null;
+  // ready never settles where no worker registered (a private window, a
+  // blocked one), so it gets 5 seconds.
+  try{ return await Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(() => r(null), 5000))]); }catch(e){ return null; }
+}
+
+// Write this phone's line when anything in it changed (or it's a week old).
+async function pushSave(sub){
+  if(!db || !sub) return false;
+  const j = sub.toJSON ? sub.toJSON() : sub;
+  if(!j || !j.endpoint || !j.keys) return false;
+  const id = await pushDocId(j.endpoint);
+  const user = hubAuth && hubAuth.currentUser;
+  const doc = { endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth,
+                uid: user ? user.uid : '', name: (whoAmI() || '').trim().slice(0, 60), region: myRegion(),
+                chat: !!notifyEnabled, ce: !!notifyCeEnabled, device: deviceLabel(), at: Date.now() };
+  const sig = [id, doc.uid, doc.name, doc.region, doc.chat, doc.ce].join('|');
+  let last = '';
+  try{ last = localStorage.getItem(PUSH_SIG_KEY) || ''; }catch(e){}
+  const [lastSig, lastAt] = last.split('#');
+  PUSH.docId = id;
+  if(lastSig === sig && Date.now() - Number(lastAt || 0) < 7 * 86400000) return true;
+  try{
+    await db.collection('push-subs').doc(id).set(doc);
+    try{ localStorage.setItem(PUSH_SIG_KEY, sig + '#' + Date.now()); }catch(e){}
+    return true;
+  }catch(err){
+    console.warn('push sign-up not saved:', err);
+    return false;
+  }
+}
+
+// On launch and whenever name, region or a switch changes: keep the line true.
+async function pushSync(){
+  if(!pushSupported() || Notification.permission !== 'granted') { PUSH.ready = false; return; }
+  const reg = await pushRegistration();
+  if(!reg || !reg.pushManager) return;
+  let sub = null;
+  try{ sub = await reg.pushManager.getSubscription(); }catch(e){}
+  if(!sub){
+    // Permission is there but the subscription went (the browser renews them
+    // now and then): sign up again quietly; no prompt is needed.
+    const key = await pushPublicKey();
+    if(!key) { PUSH.ready = false; return; }
+    try{ sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushKeyBytes(key) }); }catch(e){ PUSH.ready = false; return; }
+  }
+  PUSH.sub = sub;
+  PUSH.ready = await pushSave(sub);
+}
+
+// The tap that turns notifications on. Must stay a direct tap handler: iPhone
+// only shows the permission question from one.
+async function pushTurnOn(){
+  if(PUSH.busy) return;
+  const st = pushState();
+  if(st === 'install'){ showToast('On iPhone: Share, then Add to Home Screen, and open the Hub from there.'); return; }
+  if(st === 'unsupported'){ showToast('This browser can’t get notifications with the app closed.'); return; }
+  PUSH.busy = true; pushRerender();
+  try{
+    // Asked first, while the tap still counts; the key is fetched after.
+    if(!await ensureNotifyPermission()) return;
+    const key = await pushPublicKey();
+    if(!key){ showToast(navigator.onLine === false ? 'You’re offline. Try again with a connection.' : 'Notifications aren’t set up on the server yet.'); return; }
+    const reg = await pushRegistration();
+    if(!reg || !reg.pushManager){ showToast('Couldn’t start notifications. Reload the Hub and try again.'); return; }
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushKeyBytes(key) });
+    PUSH.sub = sub;
+    // First time on: Team Chat and training come with it (each has its own switch).
+    if(!notifyEnabled){ notifyEnabled = true; saveNotifyPref(true); }
+    if(!notifyCeEnabled){ notifyCeEnabled = true; saveNotifyCePref(true); }
+    PUSH.ready = await pushSave(sub);
+    showToast(PUSH.ready ? 'Notifications on. They’ll arrive with the app closed.' : 'Couldn’t save. Check your connection and try again.');
+  }catch(err){
+    console.warn('push sign-up failed:', err);
+    showToast('Couldn’t turn notifications on. Try again in a moment.');
+  }finally{
+    PUSH.busy = false; pushRerender();
+  }
+}
+
+async function pushTurnOff(){
+  if(PUSH.busy) return;
+  PUSH.busy = true;
+  try{
+    const reg = await pushRegistration();
+    const sub = reg && reg.pushManager ? await reg.pushManager.getSubscription() : null;
+    const id = sub ? await pushDocId(sub.endpoint) : PUSH.docId;
+    if(sub) await sub.unsubscribe().catch(() => {});
+    if(id && db) await db.collection('push-subs').doc(id).delete().catch(() => {});
+    try{ localStorage.removeItem(PUSH_SIG_KEY); }catch(e){}
+    PUSH.sub = null; PUSH.ready = false;
+    showToast('Notifications off for this phone.');
+  }finally{ PUSH.busy = false; pushRerender(); }
+}
+
+// A switch on the Notifications screen (Team Chat, Training, Team updates).
+async function pushSetKind(kind, on){
+  if(on && !await ensureNotifyPermission()) return;
+  if(kind === 'chat'){ notifyEnabled = on; saveNotifyPref(on); }
+  else if(kind === 'ce'){ notifyCeEnabled = on; saveNotifyCePref(on); }
+  else if(kind === 'activity'){ notifyActivityEnabled = on; saveNotifyActivityPref(on); }
+  pushRerender();
+  if(PUSH.sub) PUSH.ready = await pushSave(PUSH.sub);
+}
+
+// A test to this phone only, to see it arrive with the app closed.
+async function pushTest(){
+  if(!PUSH.docId){ showToast('Turn notifications on first.'); return; }
+  try{
+    const r = await fetch('./api/push', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, await hubAuthHeaders()),
+      body: JSON.stringify({ kind: 'test', id: PUSH.docId }) });
+    const j = await r.json().catch(() => ({}));
+    showToast(r.ok && j.sent ? 'Sent. Lock the phone: it arrives in a few seconds.' : (j.message || 'The test didn’t go out. Try turning notifications off and on.'));
+  }catch(e){ showToast('You’re offline. Try again with a connection.'); }
+}
+
+/* Team Chat: the sender's phone asks the server to notify everyone else once
+   its message is saved (not just queued). Seen in the chat listener, so a
+   message sent offline goes out when it finally lands; the server sends each
+   message once whoever asks (push-sent/{id}). */
+function pushedChatIds(){ try{ return JSON.parse(localStorage.getItem(PUSHED_KEY) || '[]'); }catch(e){ return []; } }
+function pushChatMessage(m){
+  if(!m || !m.id || m._local || m._pending) return;
+  if(!m.timestamp || Date.now() - m.timestamp > 14 * 60000) return;
+  const done = pushedChatIds();
+  if(done.includes(m.id)) return;
+  try{ localStorage.setItem(PUSHED_KEY, JSON.stringify(done.concat(m.id).slice(-40))); }catch(e){}
+  (async () => {
+    if(!await pushPublicKey()) return;     // server not set up: nothing to ask for
+    try{
+      await fetch('./api/push', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, await hubAuthHeaders()),
+        body: JSON.stringify({ kind: 'chat', id: m.id }), keepalive: true });
+    }catch(e){ /* offline: the server-side mark means a retry could only repeat nothing */ }
+  })();
+}
+function isMyChatMessage(m){
+  const user = hubAuth && hubAuth.currentUser;
+  if(m.uid) return !!user && m.uid === user.uid;
+  const me = whoAmI().trim().toLowerCase();
+  return !!me && (m.author || '').trim().toLowerCase() === me;
+}
+
+// Opening the Hub clears what's waiting: the icon's badge and the
+// notifications left in the list, as other apps do once you're in them.
+async function pushClearWaiting(){
+  if(document.visibilityState !== 'visible') return;
+  try{ if(navigator.clearAppBadge) navigator.clearAppBadge(); }catch(e){}
+  try{
+    const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+    if(reg && reg.getNotifications) (await reg.getNotifications()).forEach(n => n.close());
+  }catch(e){}
+}
+document.addEventListener('visibilitychange', pushClearWaiting);
+setTimeout(pushClearWaiting, 1500);
+
+/* ---- The Notifications screen (everyone), with Send to the team (owners) ---- */
+function pushRerender(){ if(activeCategory === 'notifications') renderContent(); }
+
+async function loadPushScreen(){
+  await pushPublicKey();
+  await pushSync();
+  if(db){
+    try{
+      const snap = await db.collection('push-log').orderBy('at', 'desc').limit(12).get();
+      PUSH.log = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }catch(e){ PUSH.log = PUSH.log || []; }
+    if(isHubOwner()){
+      try{ PUSH.phones = (await db.collection('push-subs').get()).size; }catch(e){ PUSH.phones = null; }
+    }
+  }
+  // Loaded once per visit, even with no connection: a redraw must not start it again.
+  PUSH.logLoaded = true;
+  pushRerender();
+}
+
+function pushAgo(ms){
+  if(!ms) return '';
+  const min = Math.round((Date.now() - ms) / 60000);
+  if(min < 1) return 'just now';
+  if(min < 60) return `${min} min ago`;
+  const h = Math.round(min / 60);
+  if(h < 24) return `${h} h ago`;
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function renderNotifications(){
+  if(PUSH.logLoaded && Date.now() - (PUSH.loadedAt || 0) > 60000) PUSH.logLoaded = false;
+  if(!PUSH.logLoaded && !PUSH.loading){ PUSH.loadedAt = Date.now(); PUSH.loading = true; loadPushScreen().finally(() => { PUSH.loading = false; }); }
+  const st = pushState();
+  const head = `<div class="hub-head"><h1>Notifications</h1><p>Team Chat, new training and messages from the team, on this phone even with the Hub closed.</p></div>`;
+
+  const status = {
+    on:          { dot: 'is-on', h: 'On for this phone', p: 'They arrive like any app’s, with the Hub closed.' },
+    off:         { dot: '', h: 'Off for this phone', p: 'Turn them on to hear about Team Chat, new training and messages from the team.' },
+    blocked:     { dot: 'is-off', h: 'Blocked in settings', p: pushIsIos() ? 'iPhone Settings, then Notifications, then Interpreter Hub: turn on Allow Notifications.' : 'This site’s notifications are blocked in the browser’s site settings. Allow them there, then come back.' },
+    install:     { dot: 'is-off', h: 'Add the Hub to your Home Screen first', p: 'iPhone only sends notifications to apps on the Home Screen. In Safari tap Share, then Add to Home Screen, then open the Hub from its icon and come back here.' },
+    unsupported: { dot: 'is-off', h: 'Not available in this browser', p: 'This browser can’t get notifications with the app closed. Try Chrome, Edge or Safari, or the Home Screen app.' },
+    server:      { dot: 'is-off', h: 'Not set up on the server yet', p: 'The Hub’s server is missing its notification keys. The owner adds them once in Vercel (docs/features/notifications.md).' }
+  }[st];
+  let html = head + `
+    <div class="ta-card nt-status">
+      <div class="ta-state"><span class="ta-state-dot ${status.dot}"></span><div><h3>${status.h}</h3><p>${status.p}</p></div></div>
+      ${st === 'off' ? `<div class="ta-row2"><button class="btn btn-primary" onclick="pushTurnOn()" ${PUSH.busy ? 'disabled' : ''}>${PUSH.busy ? 'Turning on…' : 'Turn on notifications'}</button></div>` : ''}
+      ${st === 'on' ? `<div class="ta-row2"><button class="btn btn-ghost" onclick="pushTest()">Send me a test</button><button class="btn btn-ghost" onclick="pushTurnOff()" ${PUSH.busy ? 'disabled' : ''}>Turn off</button></div>` : ''}
+    </div>`;
+
+  const sw = (kind, on, label, sub) => `
+      <div class="ta-switchrow"><span><b>${label}</b><br><small>${sub}</small></span>
+        <button class="ta-switch is-calm" type="button" role="switch" aria-checked="${on ? 'true' : 'false'}" aria-label="${escapeAttr(label)}" onclick="pushSetKind('${kind}', this.getAttribute('aria-checked') !== 'true')"></button></div>`;
+  if(st === 'on' || st === 'off' || st === 'server'){
+    const region = myRegion();
+    html += `
+    <div class="ta-card nt-kinds">
+      <h3>What you hear about</h3>
+      ${sw('chat', notifyEnabled, 'Team Chat', region ? `Everyone and ${escapeHtml(regionName(region))}, and any message that @mentions you` : 'Every channel, and any message that @mentions you')}
+      ${sw('ce', notifyCeEnabled, 'Training &amp; Events', 'When the daily check finds new CE or webinars')}
+      ${sw('activity', notifyActivityEnabled, 'Team updates', 'Terms added or edited. Only while the Hub is open')}
+      <p class="nt-note">Messages from the team’s owners always come through while notifications are on.</p>
+    </div>`;
+  }
+
+  if(isHubOwner()){
+    const phones = PUSH.phones == null ? '' : `Reaches ${PUSH.phones} phone${PUSH.phones === 1 ? '' : 's'} with notifications on.`;
+    html += `
+    <div class="ta-card nt-send">
+      <h3>Send to the team</h3>
+      <p>Shows on every teammate’s phone that has notifications on, like a text. Only phones with the owner code see this. ${phones}</p>
+      <label class="ta-label" for="ntTitle">Title</label>
+      <input class="ta-field" id="ntTitle" type="text" maxlength="80" placeholder="Staff meeting moved" value="${escapeAttr(PUSH.draft.title)}" oninput="PUSH.draft.title=this.value">
+      <label class="ta-label" for="ntBody">Message</label>
+      <textarea class="ta-field nt-text" id="ntBody" maxlength="600" rows="4" placeholder="Now Thursday at 2 pm, room B." oninput="PUSH.draft.body=this.value">${escapeHtml(PUSH.draft.body)}</textarea>
+      <div class="ta-row2"><button class="btn btn-primary" onclick="pushSendTeam()" ${PUSH.sending || st === 'server' ? 'disabled' : ''}>${PUSH.sending ? 'Sending…' : 'Send notification'}</button></div>
+      ${PUSH.sentNote ? `<p class="nt-sent" role="status">${escapeHtml(PUSH.sentNote)}</p>` : ''}
+    </div>`;
+  }
+
+  if(PUSH.log.length){
+    html += `<div class="ta-card nt-log"><h3>From the team</h3><div class="ta-people">` + PUSH.log.map(n => `
+      <div class="ta-person nt-item"><div class="ta-who"><b>${escapeHtml(n.title || 'Interpreter Hub')}</b>${n.body ? `<span class="nt-body">${escapeHtml(n.body)}</span>` : ''}<span>${escapeHtml([n.from, pushAgo(n.at)].filter(Boolean).join(' · '))}</span></div></div>`).join('') + `</div></div>`;
+  }
+  return html;
+}
+
+async function pushSendTeam(){
+  if(PUSH.sending) return;
+  const title = (PUSH.draft.title || '').trim(), body = (PUSH.draft.body || '').trim();
+  if(!title && !body){ showToast('Write a title or a message first.'); return; }
+  if(!confirm(`Send this to the whole team?\n\n${title}${title && body ? '\n' : ''}${body}`)) return;
+  PUSH.sending = true; PUSH.sentNote = ''; pushRerender();
+  try{
+    const r = await fetch('./api/push', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, await hubAuthHeaders()),
+      body: JSON.stringify({ kind: 'team', title, body, from: (whoAmI() || '').trim().slice(0, 60) }) });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok){ showToast(j.message || 'Not sent. Try again in a moment.'); return; }
+    PUSH.draft = { title: '', body: '' };
+    PUSH.sentNote = j.phones ? `Sent to ${j.sent} of ${j.phones} phone${j.phones === 1 ? '' : 's'}.` : 'Sent. No phones have notifications on yet.';
+    logActivity('sent a notification to the team');
+    PUSH.logLoaded = false;   // reload the list with this one in it
+  }catch(e){
+    showToast('You’re offline. It wasn’t sent.');
+  }finally{
+    PUSH.sending = false; pushRerender();
+  }
 }
 
 /* ---------- Typing presence ----------
@@ -5398,7 +5723,7 @@ function updateCeBadge(){
 }
 
 async function showCeNotification(ev){
-  if(!notifyCeEnabled) return;
+  if(!notifyCeEnabled || pushCovers('ce')) return;
   const body = ev.title || ev.summary || 'New training opportunity';
   await sendNotification(`${ev.source || 'Training'} \u2014 Interpreter Hub`, body, 'events', 'interpreter-hub-events');
 }
@@ -5621,6 +5946,7 @@ function getToolTiles(){
     { id:'doctors',   name:'Doctors',              color:'#7C6A9C', icon: DOMAIN_ICONS.grid, count: null, label: '' },
     { id:'doctor-directory', name:'Doctor Directory', color:'#7C6A9C', icon: DOMAIN_ICONS.grid, count: DOCTOR_DIRECTORY.length, label: DOCTOR_DIRECTORY.length===1?'doctor':'doctors' },
     { id:'directory', name:'Link Directory',       color:'#8B7BAE', icon: DOMAIN_ICONS.link,  count: totalLinks, label:'links' },
+    { id:'notifications', name:'Notifications',   color:'#C2485C', icon: DOMAIN_ICONS.bell, count: null, label: '' },
     { id:'updates',   name:'Recent Updates',       color:'#B08D2A', icon: DOMAIN_ICONS.bell,   count: ACTIVITY.length, label: ACTIVITY.length===1?'update':'updates' },
     // Listed as a tool so it reaches the More sheet and the Home tools grid.
     // It was only in the desktop sidebar, which the More sheet doesn't use —
@@ -6173,9 +6499,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'brain',       tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'HUMC Brain',            title:'Double-tap Dr. Smiley’s head on Home: the whole app as a 3D brain you can turn and explore' },
-  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
-  { id:'providers',   tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
+  { id:'notifications', tone:'gd-n1', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
+  { id:'brain',       tone:'gd-n2', pin:'pins/wave.webp',                eyebrow:'HUMC Brain',            title:'Double-tap Dr. Smiley’s head on Home: the whole app as a 3D brain you can turn and explore' },
+  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -10212,6 +10538,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'team-access'){
     showTopbar = false;
+  } else if(activeCategory === 'notifications'){
+    showTopbar = false;
   } else if(activeCategory === 'ask'){
     showTopbar = false;
   } else if(activeCategory === 'anatomy'){
@@ -11228,6 +11556,11 @@ function renderContent(){
 
   if(activeCategory === 'team-access'){
     content.innerHTML = renderTeamAccess();
+    return;
+  }
+
+  if(activeCategory === 'notifications'){
+    content.innerHTML = renderNotifications();
     return;
   }
 
@@ -23783,6 +24116,14 @@ try{
     if(GUIDE_TOPICS.some(t => t.id === guideLink)) setTimeout(() => openGuideTopic(guideLink), 0);
   }
 }catch(e){}
+// A tapped notification that had to open the app (sw.js) names its screen.
+try{
+  const opened = new URLSearchParams(location.search).get('open');
+  if(opened){
+    history.replaceState(history.state, '', location.pathname + location.hash);
+    if(/^(chat|events|notifications|updates)$/.test(opened)) setTimeout(() => setCategory(opened), 0);
+  }
+}catch(e){}
 // Your own face from the local cache, before any round trip.
 applyMyPhotoCache(false);
 updateTopbarAvatar();
@@ -23792,6 +24133,8 @@ updateTopbarAvatar();
 hubAuthReady.then(()=>{
   // Changes made offline in an earlier session are still sitting in localStorage.
   flushOutbox();
+  // This phone's push sign-up kept current, after the first paint has settled.
+  setTimeout(() => { pushSync().catch(() => {}); }, 4000);
   loadProviders();
   loadDoctorDirectory();
   loadTrash();

@@ -49,13 +49,13 @@ async function isPractice() {
   return practice;
 }
 
-function readToken(req) {
+export function readToken(req) {
   const h = req.headers?.authorization || req.headers?.Authorization || '';
   const m = /^Bearer\s+(.+)$/i.exec(h);
   return m ? m[1].trim() : '';
 }
 
-function claimsOf(token) {
+export function claimsOf(token) {
   try {
     const part = token.split('.')[1];
     return JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));

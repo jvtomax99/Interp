@@ -157,7 +157,7 @@
     'provider pictures':'providers', 'pictures of healthcare providers':'providers',
     'find a doctor':'find-doctor', 'medifind':'medifind', 'translate':'translate',
     'team chat':'chat', 'chat':'chat', 'link directory':'directory',
-    'user guide':'userguide', 'recent updates':'updates', '3d body':'anatomy', 'corechi practice':'practice',
+    'user guide':'userguide', 'recent updates':'updates', 'notifications':'updates', '3d body':'anatomy', 'corechi practice':'practice',
     'term review':'review', 'code of ethics':'ethics', 'training & events':'events',
     'oncology, hematology & leukemia':'oncology', 'heart failure & cardiac':'heart-failure',
     'peds ent, urology, endocrinology & nephrology':'ent',
