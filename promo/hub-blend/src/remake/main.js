@@ -48,12 +48,12 @@ const SHOTS = [
   // the end card (end.js)
   [FEATURES_END, DURATION - OPEN, "end"],
 ];
-/* The music plays straight from the first frame (Jose, 2026-10-21: "let the music play and start
-   the script once the words show up"), so the hook's cuts are moved onto the song's own hits after
-   the walk-in: the time since the words appeared (actual) maps to the hook as designed, through
-   these anchors, each cut landing on a hit (v11's track: 3.29, 4.83, 5.93, 8.79, 9.96 s from
-   the first frame). After the logo nothing moves. */
-const HOOK_MAP = [[0, 0], [0.79, 1.0], [2.33, 2.4], [3.43, 3.4], [6.29, 5.98], [7.46, 7.5], [9.5, 9.5]];
+/* The music follows the script (Jose, 2026-10-21): tools/music.py re-cuts v11's track so every
+   shot has the music v11 had under the same caption, from the moment the words appear. The hook
+   then plays on v11's own clock: these anchors map the time since the words appeared (v11's hook
+   times: "Heart failure" 1.0, the timer 1.9 to zero at 3.2, the wrong word 3.3, the strike 4.85,
+   the right word 6.0) onto the hook as designed. Only the timer moves; after the logo nothing does. */
+const HOOK_MAP = [[0, 0], [1.0, 1.0], [1.9, 2.4], [3.2, 3.3], [4.85, 4.855], [6.0, 5.98], [7.5, 7.5], [9.5, 9.5]];
 function hookTime(a) {
   if (a <= 0 || a >= 9.5) return a;
   let i = 1; while (a > HOOK_MAP[i][0]) i++;
