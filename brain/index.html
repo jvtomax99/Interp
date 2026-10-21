@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<!-- HUMC Brain: the app's own code (the census of index.html) drawn as a brain.
+     Opened full screen from Home by a double-tap on Dr. Smiley's head
+     (home-polish.js, openHumcBrain). Data: brain/data.json, made by
+     tests/tools/brain-data.cjs. Notes: docs/features/humc-brain.md. -->
+<title>HUMC Brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650;750&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D brain on a deep navy field; title block top-left, detail sheet and lobe legend docked at the bottom */
+:root{
+  --bg:#060A17;
+  --bg-glow:#101C42;
+  --bg-deep:#02040B;
+  --panel:rgba(12,19,42,.82);
+  --panel-line:rgba(126,156,226,.20);
+  --ink:#E9EEFA;
+  --ink-soft:#A4B0CC;
+  --ink-faint:#6A779E;
+  --cyan:#01B8E6;
+  --f-ui:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme:dark;
+}
+body{
+  margin:0;color:var(--ink);font-family:var(--f-ui);
+  background:var(--bg);
+  background-image:radial-gradient(ellipse 80% 70svh at 50% 45svh, var(--bg-glow) 0%, var(--bg) 60%, var(--bg-deep) 100%);background-repeat:no-repeat;
+  -webkit-font-smoothing:antialiased;
+}
+#scan{position:relative;height:max(560px,90svh);overflow:hidden}
+#stage{position:absolute;inset:0;touch-action:none;cursor:grab}
+#stage:active{cursor:grabbing}
+#stage canvas{display:block;width:100%;height:100%}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;will-change:transform;transition:opacity .25s}
+.lbl.region{font:500 10.5px/1.25 var(--f-mono);letter-spacing:.11em;text-transform:uppercase;text-align:center;text-shadow:0 1px 8px var(--bg-deep),0 0 2px var(--bg-deep)}
+.lbl.region small{display:block;font-size:9.5px;letter-spacing:.08em;color:var(--ink-faint);text-transform:none}
+.lbl.node{font:550 12px/1.2 var(--f-ui);color:var(--ink);background:var(--panel);border:1px solid var(--panel-line);padding:3px 7px;border-radius:7px;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.lbl.node.main{font-weight:650;border-color:currentColor}
+
+.hud{
+  position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 12px);
+}
+.hud > *{pointer-events:auto}
+header{max-width:600px;display:grid;gap:7px}
+.eyebrow{font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+h1{margin:0;font-size:clamp(21px,4.4vw,32px);line-height:1.08;font-weight:750;letter-spacing:-.025em;text-wrap:balance}
+.sub{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink-soft);max-width:58ch}
+.stats{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11.5px/1.3 var(--f-mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:500}
+
+.dock{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.sheet{
+  box-sizing:border-box;grid-template-columns:minmax(0,1fr);justify-self:start;width:min(100%,460px);background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;
+  padding:14px 16px 15px;backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);
+  box-shadow:0 18px 40px -18px rgba(2,4,12,.9);display:grid;gap:9px;min-width:0;max-height:44vh;overflow:auto;
+}
+.sheet-top{display:flex;align-items:flex-start;gap:10px}
+.sheet-top > div{flex:1;min-width:0;display:grid;gap:5px}
+.tag{font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase}
+.sheet h2{margin:0;font-size:17px;line-height:1.25;font-weight:650;letter-spacing:-.01em;text-wrap:balance}
+.meta{font:400 12px/1.4 var(--f-mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.close{flex:none;width:30px;height:30px;border-radius:9px;border:1px solid var(--panel-line);background:transparent;color:var(--ink-soft);font:400 18px/1 var(--f-ui);cursor:pointer}
+.close:hover{color:var(--ink)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cols > div{min-width:0}
+.cols h3{margin:0 0 5px;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+.cols ul{margin:0;padding:0;list-style:none;display:grid;gap:3px}
+.cols li{display:flex;gap:6px;font-size:12.5px;line-height:1.3;color:var(--ink-soft);min-width:0}
+.cols li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.cols li span:last-child{font-family:var(--f-mono);font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.cols li i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.cols .none{font-size:12.5px;color:var(--ink-faint)}
+
+.legend-wrap{overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding:2px 4px}
+.legend-wrap::-webkit-scrollbar{display:none}
+.legend{display:flex;gap:8px;width:max-content}
+.chip{
+  display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;
+  padding:8px 12px 8px 10px;border-radius:12px;border:1px solid var(--panel-line);background:var(--panel);color:var(--ink);
+  font:inherit;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:border-color .2s, background .2s, opacity .2s;
+}
+.chip .dot{grid-row:span 2;width:10px;height:10px;border-radius:50%;box-shadow:0 0 10px currentColor;background:currentColor}
+.chip b{font-size:12.5px;font-weight:650;letter-spacing:-.005em}
+.chip span{font:400 10.5px/1.3 var(--f-mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{border-color:currentColor;background:rgba(30,44,92,.9)}
+.legend.filtering .chip[aria-pressed="false"]{opacity:.55}
+.chip:focus-visible,.close:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;font:400 10.5px/1.4 var(--f-mono);color:var(--ink-faint)}
+.foot code{font:inherit;color:var(--ink-soft)}
+.tele{display:grid;gap:4px;margin-top:2px;max-width:520px}
+.tele-row{display:flex;flex-wrap:wrap;gap:2px 12px;font:400 10.5px/1.3 var(--f-mono);color:var(--ink-faint);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.tele-row b{color:var(--cyan);font-weight:500}
+.tele-row .ok{color:#3DDC97}
+#eeg{width:100%;height:30px;display:block;border-top:1px solid var(--panel-line);border-bottom:1px solid var(--panel-line)}
+.lbl.orient{font:500 12px/1 var(--f-mono);color:var(--cyan);opacity:.75;letter-spacing:.06em}
+.acc{font:400 9.5px/1.35 var(--f-mono);letter-spacing:.06em;color:var(--ink-faint);text-transform:uppercase;border-bottom:1px dashed var(--panel-line);padding-bottom:7px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;margin:0}
+.fields div{min-width:0;display:grid;gap:1px}
+.fields dt{font:500 9px/1.2 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+.fields dd{margin:0;font:400 11.5px/1.3 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.fields dd small{color:var(--ink-faint);font-size:10px}
+.bar{height:3px;border-radius:2px;background:var(--panel-line);overflow:hidden;margin-top:2px}
+.bar i{display:block;height:100%;background:currentColor}
+.impr{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-soft);border-left:2px solid currentColor;padding-left:9px}
+.impr b{font:500 9.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:3px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.slice-fig{flex:none;width:210px;display:grid;gap:5px;background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:9px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.slice-fig canvas{width:100%;display:block;border-radius:8px}
+.slice-fig figcaption{font:500 9.5px/1.3 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+.jump{justify-self:start;font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);background:var(--panel);border:1px solid var(--panel-line);border-radius:999px;padding:9px 14px;cursor:pointer}
+.jump:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.workup{max-width:1240px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));padding-block:28px 48px;display:grid;gap:18px}
+.wu-head{display:grid;gap:6px;max-width:760px}
+.wu-head h2{margin:0;font-size:clamp(20px,3.2vw,26px);font-weight:750;letter-spacing:-.02em}
+.wu-head p{margin:0;color:var(--ink-soft);font-size:13.5px;line-height:1.5}
+.figs{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.fig{grid-column:span 6;min-width:0;background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:14px 16px 16px;display:grid;gap:10px;align-content:start}
+.fig.wide{grid-column:span 7}.fig.narrow{grid-column:span 5}.fig.full{grid-column:span 12}
+.fig header{display:grid;gap:4px;max-width:none}
+.fig .num{font:500 10px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.fig h3{margin:0;font-size:15px;font-weight:650;letter-spacing:-.01em}
+.fig .cap{margin:0;font-size:12px;line-height:1.45;color:var(--ink-faint)}
+.fig canvas{width:100%;display:block;touch-action:pan-y}
+.scroll-x{overflow-x:auto}
+table{border-collapse:collapse;font:400 11px/1.2 var(--f-mono);font-variant-numeric:tabular-nums;color:var(--ink);width:100%}
+th{font-weight:500;color:var(--ink-faint);text-align:left;padding:5px 4px;white-space:nowrap;font-size:10px;letter-spacing:.04em}
+th i,.nm i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.flux td{text-align:center;padding:6px 3px;border:2px solid var(--bg);border-radius:4px;min-width:34px;color:var(--ink)}
+.flux td small{display:block;font-size:9px;color:var(--ink-soft);margin-top:2px}
+.flux td.diag{outline:1px solid rgba(233,238,250,.35);outline-offset:-3px}
+.flux td.sum{background:transparent;color:var(--ink-soft)}
+.flux .corner{font-size:9px}
+.rank td{padding:6px;border-top:1px solid var(--panel-line);white-space:nowrap}
+.rank tbody tr{cursor:pointer}.rank tbody tr:hover td{background:rgba(126,156,226,.08)}
+.rank td.nm{font-family:var(--f-ui);font-size:12px;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.cbar{display:inline-block;width:56px;height:4px;border-radius:2px;background:var(--panel-line);margin-right:6px;vertical-align:2px;overflow:hidden}.cbar i{display:block;height:100%}
+.key{display:flex;flex-wrap:wrap;gap:4px 12px;font:400 10px/1.3 var(--f-mono);color:var(--ink-faint)}
+.key span{display:inline-flex;align-items:center;gap:5px}.key i{width:8px;height:8px;border-radius:2px}
+#tip{position:fixed;left:0;top:0;z-index:30;pointer-events:none;max-width:280px;background:rgba(8,13,32,.96);border:1px solid var(--panel-line);border-radius:9px;padding:7px 9px;font:400 11.5px/1.4 var(--f-ui);color:var(--ink);box-shadow:0 10px 30px -10px rgba(0,0,0,.8)}
+#tip .t-dim{color:var(--ink-faint);font-family:var(--f-mono);font-size:10.5px}
+.disclaim{font:400 10.5px/1.5 var(--f-mono);color:var(--ink-faint);border-top:1px solid var(--panel-line);padding-top:12px}
+@media (max-width:900px){.fig,.fig.wide,.fig.narrow{grid-column:span 12}.topbar .slice-fig{display:none}}
+@media (max-width:620px){
+  .tele-row.extra{display:none}
+  .sub{font-size:12.5px}
+  .hide-sm{display:none}
+  .cols{grid-template-columns:1fr}
+  .sheet{max-height:36vh}
+  header{gap:5px}
+}
+@media (prefers-reduced-motion:reduce){.lbl,.chip{transition:none}}
+[hidden]{display:none!important}
+*{-webkit-tap-highlight-color:transparent}
+.close-brain{position:fixed;z-index:40;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px, env(safe-area-inset-right,0px));width:40px;height:40px;border-radius:12px;border:1px solid var(--panel-line);background:var(--panel);color:var(--ink);font:400 22px/1 var(--f-ui);cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.close-brain:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.in-frame .topbar{padding-right:52px}
+.no3d{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);max-width:280px;text-align:center;font:400 13px/1.5 var(--f-ui);color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<button class="close-brain" id="closeBrain" type="button" aria-label="Close" hidden>×</button>
+<section id="scan">
+<div id="stage" aria-label="HUMC Brain, a 3D connectome of app code styled as a scan. Drag to turn, pinch or scroll to zoom, tap a dot for details." role="img"></div>
+<div id="labels"></div>
+
+<div class="hud">
+  <div class="topbar">
+  <header>
+    <div class="eyebrow">Connectomic tractography · DTI reconstruction · T1</div>
+    <h1>HUMC Brain</h1>
+    <p class="sub">Whole-brain connectome, <span data-k="nodes">118</span> nuclei. Soma diameter scales with parenchymal volume; each tract is an efferent projection colour-coded by its target nucleus.<span class="hide-sm"> Marked afferent convergence on the dorsomedial thalamus from nearly every cortical territory.</span></p>
+    <div class="stats" id="stats"></div>
+    <div class="tele" aria-hidden="true">
+      <div class="tele-row" id="tele1"></div>
+      <div class="tele-row extra" id="tele2"></div>
+      <canvas id="eeg"></canvas>
+    </div>
+  </header>
+  <figure class="slice-fig" id="sliceTop" data-v="sliceTop" style="margin:0"></figure>
+  </div>
+
+  <div class="dock">
+    <section class="sheet" id="sheet" hidden aria-live="polite"></section>
+    <button class="jump" type="button" id="jump">Full workup · 7 figures ↓</button>
+    <div class="legend-wrap"><div class="legend" id="legend" role="group" aria-label="Brain regions"></div></div>
+    <div class="foot">
+      <span>Source: static census of index.html, <span data-k="date"></span>, <code>tests/tools/census.cjs</code> · not patient data</span>
+      <span class="hide-sm">Drag to rotate · scroll or pinch to magnify · tap a nucleus or a region</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<main class="workup" id="workup">
+  <div class="wu-head">
+    <span class="eyebrow">Full connectomic workup · Seq CENSUS-T1 · <span data-k="date"></span></span>
+    <h2>Quantitative analysis</h2>
+    <p>Every figure below is computed from the census graph: <span data-k="nodes">118</span> nuclei, <span data-k="edges">1,090</span> directed tracts, weight = number of named references crossing the tract.</p>
+  </div>
+  <div class="figs">
+    <section class="fig wide"><header><span class="num">Fig. 1 · Adjacency</span><h3>Connectivity matrix, <span data-k="nodes">118</span> × <span data-k="nodes">118</span></h3><p class="cap">Row nucleus projects to column nucleus. Ordered by region, then volume. Cell opacity is log tract weight; colour is the target region.</p></header><canvas id="mx" aria-label="Connectivity matrix"></canvas><div class="key" id="key1"></div></section>
+    <section class="fig narrow"><header><span class="num">Fig. 2 · Inter-regional flux</span><h3>Tract counts between regions</h3><p class="cap">Rows are source regions, columns are targets. Small figure is summed weight Σw. Diagonal is intra-regional.</p></header><div class="scroll-x" id="flux"></div>
+      <figure class="slice-fig" id="sliceLow" data-v="sliceLow" style="margin:0;width:auto"></figure></section>
+    <section class="fig wide"><header><span class="num">Fig. 3 · Network roles</span><h3>Afferent versus efferent load</h3><p class="cap">Each nucleus by in-degree and out-degree, sized by volume. Dashed lines are population means.</p></header><canvas id="sc" aria-label="Scatter of afferent versus efferent degree"></canvas><div class="key" id="key3"></div></section>
+    <section class="fig narrow"><header><span class="num">Fig. 4 · Degree distribution</span><h3>Heavy-tailed connectivity</h3><p class="cap">Nuclei per degree bin (width 4). Amber is the mean, pink the median.</p></header><canvas id="hist" aria-label="Degree histogram"></canvas></section>
+    <section class="fig full"><header><span class="num">Fig. 5 · Volumetrics</span><h3>Parenchymal volume by region and nucleus</h3><p class="cap">Area is bytes. Fill strength is degree: brighter nuclei are more connected.</p></header><canvas id="tree" aria-label="Treemap of volume"></canvas></section>
+    <section class="fig wide"><header><span class="num">Fig. 6 · Hub ranking</span><h3>Top 15 nuclei by degree</h3><p class="cap">Tap a row to localize it in the scan.</p></header><div class="scroll-x" id="rank"></div></section>
+    <section class="fig narrow" data-v="raster"><header><span class="num">Fig. 7 · Spike raster · live</span><h3>Signal arrivals per nucleus</h3><p class="cap">One row per nucleus, last 10 seconds. Signals are an animation weighted by real tract strength, not recorded activity.</p></header><canvas id="raster" aria-label="Live spike raster"></canvas></section>
+  </div>
+  <p class="disclaim">HUMC Brain is a visualization of software structure drawn as neuroanatomy. Source: static census of index.html (tests/tools/census.cjs), <span data-k="date"></span>. Not patient data, not a medical image, not for clinical use.</p>
+</main>
+<div id="tip" hidden></div>
+
+<script src="./three.min.js"></script>
+<script>
+/* In the app it opens in a frame over Home: the X and Escape ask the app to close it. */
+const inFrame = window.parent !== window;
+if(inFrame){
+  document.documentElement.classList.add("in-frame");
+  const closeBrain = () => { try{ parent.postMessage({ ih:"brain-close" }, location.origin); }catch(e){} };
+  const cb = document.getElementById("closeBrain"); cb.hidden = false; cb.addEventListener("click", closeBrain);
+  // The first Escape closes an open readout, the next one the brain.
+  addEventListener("keydown", e => { if(e.key === "Escape" && document.getElementById("sheet").hidden) closeBrain(); });
+}
+fetch("./data.json", { cache:"no-cache" }).then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(DATA => {
+document.querySelectorAll("[data-k]").forEach(el => { el.textContent = el.dataset.k === "date" ? DATA.measured : el.dataset.k === "nodes" ? DATA.nodes.length : DATA.edges.length.toLocaleString("en-US"); });
+
+const GROUPS = {
+  core:   {name:"Shared core",      region:"Thalamus",       full:"Dorsomedial thalamic nucleus, bilateral",                 code:"THAL-DM", note:"Resection contraindicated. Retain in situ.",              color:"#4F9DFF"},
+  start:  {name:"Startup path",     region:"Brainstem",      full:"Medulla oblongata and pons",                              code:"BS-MED",  note:"Vital autonomic pathway. Retain in situ.",                color:"#B6C1E0"},
+  data:   {name:"Big data lists",   region:"Hippocampus",    full:"Hippocampal formation, bilateral mesial temporal lobes",  code:"TMP-HC",  note:"Candidate for extraction to external storage.",           color:"#F5B342"},
+  safe:   {name:"Safe first moves", region:"Cerebellum",     full:"Cerebellar hemispheres and vermis",                       code:"CBL",     note:"Low-risk candidate for early resection.",                 color:"#3DDC97"},
+  ask:    {name:"Ask the Hub",      region:"Broca's area",   full:"Left inferior frontal gyrus, pars triangularis (BA 44/45)", code:"IFG-L", note:"En bloc resection advised. Do not fragment.",           color:"#B07CFF"},
+  smiley: {name:"Dr. Smiley",       region:"Motor strip",    full:"Precentral gyrus, primary motor cortex (BA 4)",           code:"M1",      note:"En bloc resection advised. Do not fragment.",             color:"#FF7AB6"},
+  other:  {name:"Other features",   region:"Cortex",         full:"Heteromodal association cortex",                          code:"ASSOC",   note:"Intervention deferred. Re-image before resection.",      color:"#7D89B0"}
+};
+const ORDER = ["core","start","data","safe","ask","smiley","other"];
+const KB = b => b < 1024 ? "<1 KB" : Math.round(b/1024) + " KB";
+const fmt = n => n.toLocaleString("en-US");
+
+/* ---------- Data ---------- */
+const nodes = DATA.nodes.map(([title,bytes,group],i)=>({i,title:title.replace(/\s*\u2014\s*/g,": "),bytes,group,uses:[],usedBy:[]}));
+const edges = DATA.edges.map(([a,b,w])=>({a,b,w})); // a uses b
+edges.forEach(e=>{nodes[e.a].uses.push(e);nodes[e.b].usedBy.push(e)});
+const gStats = {};
+ORDER.forEach(g=>gStats[g]={count:0,bytes:0});
+nodes.forEach(n=>{gStats[n.group].count++;gStats[n.group].bytes+=n.bytes});
+/* Network measures, all from the census graph */
+const adj = nodes.map(()=>new Set());
+edges.forEach(e=>{adj[e.a].add(e.b);adj[e.b].add(e.a)});
+nodes.forEach(n=>{
+  n.aff=n.usedBy.length; n.eff=n.uses.length; n.deg=adj[n.i].size;
+  n.load=[...n.uses,...n.usedBy].reduce((a,e)=>a+e.w,0);
+  const nb=[...adj[n.i]], k=nb.length; let t=0;
+  for(let x=0;x<k;x++)for(let y=x+1;y<k;y++) if(adj[nb[x]].has(nb[y])) t++;
+  n.clust = k>1 ? t/(k*(k-1)/2) : 0;
+});
+const degSorted = nodes.map(n=>n.deg).sort((a,b)=>a-b);
+nodes.forEach(n=>{ n.pct = Math.round(100*degSorted.filter(d=>d<n.deg).length/(nodes.length-1)) });
+const pctLabel = p => p>=99 ? "P99" : "P" + String(p).padStart(2,"0");
+function classify(n){
+  if(n.pct>=90) return "Rich-club hub nucleus";
+  if(n.eff===0 && n.aff>0) return "Terminal sink nucleus";
+  if(n.aff===0 && n.eff>0) return "Efferent-only projection neuron";
+  if(n.deg===0) return "Isolated nucleus, no tracts identified";
+  if(n.deg<=3) return "Peripheral leaf nucleus";
+  return "Intermediate relay nucleus";
+}
+
+const N=nodes.length, density=edges.length/(N*(N-1)), meanDeg=2*edges.length/N;
+document.getElementById("stats").innerHTML =
+  `<span>Parenchymal vol <b>${(DATA.total/1048576).toFixed(2)} MB</b></span>`+
+  `<span>Named loci <b>${fmt(DATA.names)}</b></span>`+
+  `<span>Nuclei <b>${N}</b></span>`+
+  `<span>Tracts <b>${fmt(edges.length)}</b></span>`+
+  `<span>Mean degree <b>${meanDeg.toFixed(1)}</b></span>`+
+  `<span>Density ρ <b>${density.toFixed(3)}</b></span>`;
+
+/* ---------- Seeded randomness ---------- */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R = rng(1726);
+function randDir(r){let x,y,z,l;do{x=r()*2-1;y=r()*2-1;z=r()*2-1;l=x*x+y*y+z*z}while(l>1||l<1e-4);l=Math.sqrt(l);return[x/l,y/l,z/l]}
+function fib(n){const out=[],g=Math.PI*(3-Math.sqrt(5));for(let i=0;i<n;i++){const y=1-2*(i+.5)/n,r=Math.sqrt(1-y*y),t=g*i;out.push([Math.cos(t)*r,y,Math.sin(t)*r])}return out}
+const norm = v => {const l=Math.hypot(...v);return v.map(x=>x/l)};
+const dot = (a,b) => a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+
+/* ---------- Brain geometry: +z is the front, +y is up ---------- */
+const H = {cx:.31, rx:.80, ry:.92, rz:1.40, cy:.14};
+const gyri = (x,y,z) => Math.sin(9.1*x+2.3*z+1.1)*Math.cos(7.7*y+3.1*x) + .7*Math.sin(10.3*z+5.2*y)*Math.cos(6.1*x-4*z);
+function cortex(d, side, depth=1){
+  let x=d[0]*H.rx, y=d[1]*H.ry, z=d[2]*H.rz;
+  const lateral = side*d[0] > 0;
+  if(!lateral) x *= .26;                                    // flat inner wall: the fissure between hemispheres
+  if(d[1] < -.2) y = -.2*H.ry + (y+.2*H.ry)*.62;            // flatter base
+  const tb = Math.max(0,-d[1]) * Math.max(0, 1-Math.abs(d[2]-.15)*1.3);
+  if(lateral) x *= 1 + .16*tb;                              // temporal bulge
+  if(d[2] > .55) y *= 1 - (d[2]-.55)*.35;                    // frontal pole tapers
+  const g = gyri(x,y,z), k = depth*(1+.032*g);
+  return {p:[side*H.cx + x*k, H.cy + y*k, z*k], g};
+}
+const CB = {c:[0,-.66,-.98], r:[.78,.36,.52]};
+const cerebellum = (d,depth=1) => [CB.c[0]+d[0]*CB.r[0]*depth, CB.c[1]+d[1]*CB.r[1]*depth, CB.c[2]+d[2]*CB.r[2]*depth];
+function stem(t,a){const r=.19-.05*t;return[Math.cos(a)*r*1.1, -.36-1.18*t, -.36-.22*t+Math.sin(a)*r]}
+
+/* ---------- Where each part lives ---------- */
+const pos = new Array(nodes.length);
+const byGroup = g => nodes.filter(n=>n.group===g);
+
+byGroup("core").forEach((n,k,arr)=>{const d=fib(arr.length)[k];pos[n.i]=[d[0]*.36,d[1]*.22+.02,d[2]*.3-.12]});
+byGroup("start").forEach((n,k,arr)=>{const t=.04+k/(arr.length-1)*.9;pos[n.i]=stem(t,k*2.4+.6)});
+{
+  const cand = fib(140).filter(d=>d[2]<.15 && d[1]>-.75);
+  const pick = farthest(cand, byGroup("safe").length, [0,.4,-1]);
+  byGroup("safe").forEach((n,k)=>pos[n.i]=cerebellum(pick[k],1.0));
+}
+function farthest(cands, n, seed){
+  const out=[]; let best=0, bd=-2;
+  cands.forEach((c,i)=>{const s=dot(c,norm(seed));if(s>bd){bd=s;best=i}});
+  out.push(cands[best]);
+  while(out.length<n){
+    let bi=-1, bv=-1;
+    cands.forEach(c=>{let m=9;out.forEach(o=>{m=Math.min(m,1-dot(c,o))});if(m>bv){bv=m;bi=c}});
+    out.push(bi);
+  }
+  return out;
+}
+/* Cortex: candidate spots on both hemispheres, then each lobe claims its own */
+const cands = [];
+[-1,1].forEach(side=>fib(1100).forEach(d=>{ if(side*d[0] > -.12 && d[1] > -.72) cands.push({d,side,used:false}) }));
+const angle = (a,b) => a.side!==b.side ? 9 : 1-dot(a.d,b.d);
+function claim(target, n, spacing){
+  const t = {d:norm(target.d), side:target.side};
+  const sorted = cands.filter(c=>!c.used && c.side===t.side).sort((x,y)=>angle(x,t)-angle(y,t));
+  const out=[];
+  for(const c of sorted){ if(out.every(o=>angle(o,c)>spacing)){out.push(c); if(out.length===n)break} }
+  out.forEach(c=>c.used=true); return out;
+}
+const anchors = [];
+const place = (n,c) => {pos[n.i]=cortex(c.d,c.side,.985).p; anchors.push(c)};
+{ const g=byGroup("ask"); claim({d:[-.55,.18,.82],side:-1},g.length,.012).forEach((c,k)=>place(g[k],c)); }
+{ const g=byGroup("data"); const L=claim({d:[-.86,-.42,.28],side:-1},2,.03), Rt=claim({d:[.86,-.42,.28],side:1},2,.03); [...L,...Rt].forEach((c,k)=>place(g[k],c)); }
+{ const g=byGroup("smiley"); g.forEach((n,k)=>{const side=k<5?-1:1, f=(k%5)/4; const c=claim({d:[side*(.12+.8*f),1-.62*f,.06],side},1,0)[0]; place(n,c)}); }
+{
+  const g = byGroup("other");
+  const free = cands.filter(c=>!c.used && anchors.every(a=>angle(a,c)>.07));
+  const out=[free.reduce((b,c)=>c.d[1]-c.d[2] > b.d[1]-b.d[2] ? c : b)];
+  while(out.length<g.length){
+    let bi=null,bv=-1;
+    for(const c of free){let m=9;for(const o of out){const a=angle(o,c);if(a<m)m=a}if(m>bv){bv=m;bi=c}}
+    out.push(bi);
+  }
+  g.forEach((n,k)=>pos[n.i]=cortex(out[k].d,out[k].side,.985).p);
+}
+
+/* ---------- Three.js scene ---------- */
+const stage = document.getElementById("stage");
+let renderer;
+try{ renderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); }
+catch(e){
+  // No 3D on this phone (WebGL off or out of memory): the readouts and the
+  // figures below still work; the scan says why it's empty.
+  renderer = { domElement:document.createElement("div"), setPixelRatio(){}, setClearColor(){}, setSize(){}, render(){} };
+  const msg = document.createElement("p"); msg.className = "no3d"; msg.textContent = "This device can't draw the 3D brain right now. The figures below still work."; stage.appendChild(msg);
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setClearColor(0x000000, 0);
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, .05, 100);
+const root = new THREE.Group(); scene.add(root);
+
+function glowTexture(){
+  const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d");
+  const g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.18,"rgba(255,255,255,.9)");g.addColorStop(.45,"rgba(255,255,255,.28)");g.addColorStop(1,"rgba(255,255,255,0)");
+  x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTexture();
+
+let SHELL_N=0, SHELL_P=null, SHELL_C=null;
+/* The brain's surface as a cloud: ridges (gyri) bright, folds (sulci) dark */
+{
+  const P=[], C=[], col=new THREE.Color(), base=new THREE.Color("#4C6FD0"), ridge=new THREE.Color("#8FB6FF");
+  const push=(p,b)=>{P.push(...p);col.copy(base).lerp(ridge,Math.max(0,b)).multiplyScalar(.25+.75*Math.max(0,b));C.push(col.r,col.g,col.b)};
+  for(let i=0;i<20000;i++){const side=i%2?1:-1;const d=randDir(R);if(side*d[0]<-.97)continue;const {p,g}=cortex(d,side,1);push(p,.5+g*.35+(R()-.5)*.2)}
+  for(let i=0;i<4200;i++){const d=randDir(R);const f=Math.sin(d[1]*26+d[2]*5);push(cerebellum(d,1+.025*f),.42+f*.3)}
+  for(let i=0;i<900;i++){push(stem(R(),R()*Math.PI*2),.35+R()*.2)}
+  SHELL_N=P.length/3; SHELL_P=new Float32Array(P); SHELL_C=new Float32Array(C);
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",new THREE.Float32BufferAttribute(P,3));
+  geo.setAttribute("color",new THREE.Float32BufferAttribute(C,3));
+  const shell=new THREE.Points(geo,new THREE.PointsMaterial({size:.024,map:GLOW,vertexColors:true,transparent:true,opacity:.85,depthWrite:false,blending:THREE.AdditiveBlending}));
+  root.add(shell);
+}
+
+/* Scan plane sweeping axially, and viewer corner brackets */
+const planeTex=(()=>{const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");x.strokeStyle="rgba(1,184,230,.9)";x.lineWidth=1;for(let k=0;k<=256;k+=16){x.globalAlpha=k%64?.25:.7;x.beginPath();x.moveTo(k,0);x.lineTo(k,256);x.moveTo(0,k);x.lineTo(256,k);x.stroke()}x.globalAlpha=1;x.lineWidth=3;x.strokeRect(1.5,1.5,253,253);return new THREE.CanvasTexture(c)})();
+const plane=new THREE.Mesh(new THREE.PlaneGeometry(2.5,3.1),new THREE.MeshBasicMaterial({map:planeTex,transparent:true,opacity:.13,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
+plane.rotation.x=-Math.PI/2; root.add(plane);
+{
+  const lo=[-1.3,-1.95,-1.65], hi=[1.3,1.3,1.75], L=.2, P=[];
+  for(const cx of [0,1])for(const cy of [0,1])for(const cz of [0,1]){
+    const c=[cx?hi[0]:lo[0],cy?hi[1]:lo[1],cz?hi[2]:lo[2]], s=[cx?-1:1,cy?-1:1,cz?-1:1];
+    for(let a=0;a<3;a++){const e=c.slice();e[a]+=s[a]*L;P.push(...c,...e)}
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(P,3));
+  root.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0x01B8E6,transparent:true,opacity:.45})));
+}
+let planeY=.3;
+
+/* Links: curves dipping through the white matter toward the middle */
+const SEG = 16;
+const V3 = a => new THREE.Vector3(a[0],a[1],a[2]);
+const nodeV = pos.map(V3);
+const CENTER = new THREE.Vector3(0,.05,-.1);
+function ctrl(e){return nodeV[e.a].clone().add(nodeV[e.b]).multiplyScalar(.5).lerp(CENTER,.62)}
+function bez(e,t,out){const A=nodeV[e.a],B=nodeV[e.b],Cc=e.c,u=1-t;return out.set(u*u*A.x+2*u*t*Cc.x+t*t*B.x,u*u*A.y+2*u*t*Cc.y+t*t*B.y,u*u*A.z+2*u*t*Cc.z+t*t*B.z)}
+edges.forEach(e=>e.c=ctrl(e));
+const gColor = {}; ORDER.forEach(g=>gColor[g]=new THREE.Color(GROUPS[g].color));
+function linkGeometry(list, boost){
+  const P=new Float32Array(list.length*SEG*6), C=new Float32Array(list.length*SEG*6), v=new THREE.Vector3(), w=new THREE.Vector3();
+  let o=0;
+  list.forEach(e=>{
+    const k=(boost? .75 : .32) + (boost? .25 : .55)*Math.min(1,Math.log2(1+e.w)/5);
+    const col=gColor[nodes[e.b].group];
+    for(let s=0;s<SEG;s++){
+      bez(e,s/SEG,v);bez(e,(s+1)/SEG,w);
+      const fade = boost ? 1 : .55 + .45*Math.sin(Math.PI*(s+.5)/SEG);
+      P.set([v.x,v.y,v.z,w.x,w.y,w.z],o);
+      C.set([col.r*k*fade,col.g*k*fade,col.b*k*fade,col.r*k*fade,col.g*k*fade,col.b*k*fade],o);
+      o+=6;
+    }
+  });
+  const g=new THREE.BufferGeometry();
+  g.setAttribute("position",new THREE.BufferAttribute(P,3));g.setAttribute("color",new THREE.BufferAttribute(C,3));
+  return g;
+}
+const linkMat = new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending});
+const links = new THREE.LineSegments(linkGeometry(edges,false), linkMat); root.add(links);
+/* Tract samples for the slice viewer: where fibres cross the scan plane */
+const TRACT=(()=>{const out=[],v=new THREE.Vector3();edges.forEach(e=>{const g=ORDER.indexOf(nodes[e.b].group);for(let s=1;s<40;s++){bez(e,s/40,v);out.push(v.x,v.y,v.z,g)}});return new Float32Array(out)})();
+const hiMat = new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.95,depthWrite:false,blending:THREE.AdditiveBlending});
+let hiLinks = null;
+
+/* Neurons */
+const sprites = nodes.map(n=>{
+  const s = .05 + .021*Math.sqrt(n.bytes/1024);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color:gColor[n.group],transparent:true,opacity:n.group==="other"?.32:.55,depthWrite:false,blending:THREE.AdditiveBlending}));
+  halo.scale.setScalar(s*2.6); halo.position.copy(nodeV[n.i]);
+  const core = new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color:gColor[n.group].clone().lerp(new THREE.Color("#ffffff"),n.group==="other"||n.group==="start"?.1:.35),transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending}));
+  core.scale.setScalar(s); core.position.copy(nodeV[n.i]);
+  root.add(halo); root.add(core);
+  return {halo,core,s};
+});
+
+/* Signals travelling along the links */
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const PULSES = reduce ? 0 : 240;
+const pulseGeo = new THREE.BufferGeometry();
+const pulsePos = new Float32Array(Math.max(1,PULSES)*3), pulseCol = new Float32Array(Math.max(1,PULSES)*3);
+pulseGeo.setAttribute("position",new THREE.BufferAttribute(pulsePos,3));
+pulseGeo.setAttribute("color",new THREE.BufferAttribute(pulseCol,3));
+const pulses = new THREE.Points(pulseGeo,new THREE.PointsMaterial({size:.07,map:GLOW,vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+root.add(pulses);
+let pool = edges;
+const weightedPick = list => { let tot=0; list.forEach(e=>tot+=Math.sqrt(e.w)); let r=R()*tot; for(const e of list){r-=Math.sqrt(e.w); if(r<=0) return e} return list[list.length-1] };
+const P_STATE = Array.from({length:PULSES},()=>({e:weightedPick(edges),t:R(),v:.18+R()*.35}));
+
+/* ---------- Labels ---------- */
+const labelsEl = document.getElementById("labels");
+const regionLbl = {};
+const groupCenter = {};
+ORDER.forEach(g=>{
+  const ps = nodes.filter(n=>n.group===g).map(n=>nodeV[n.i]);
+  const c = ps.reduce((a,v)=>a.add(v),new THREE.Vector3()).multiplyScalar(1/ps.length);
+  if(g==="other") c.set(0,1.2,-.55);
+  else if(g==="core") c.set(0,.05,-.1);
+  else if(g==="start") c.set(0,-1.62,-.62);
+  else if(g==="safe") c.add(new THREE.Vector3(0,-.42,-.25));
+  else if(g==="data") c.set(0,-.62,.55);
+  else c.multiplyScalar(1.22);
+  groupCenter[g]=c;
+  const el=document.createElement("div");el.className="lbl region";el.style.color=GROUPS[g].color;
+  el.innerHTML=`${GROUPS[g].name}<small>${GROUPS[g].region} · ${GROUPS[g].code}</small>`;labelsEl.appendChild(el);regionLbl[g]=el;
+});
+const ORIENT = [["A",[0,.1,1.72]],["P",[0,.1,-1.72]],["S",[0,1.22,0]],["I",[0,-1.9,-.5]],["L",[-1.38,.1,0]],["R",[1.38,.1,0]]].map(([t,p])=>{
+  const el=document.createElement("div");el.className="lbl orient";el.textContent=t;labelsEl.appendChild(el);return {el,v:V3(p)};
+});
+const nodeLbl = nodes.map(n=>{const el=document.createElement("div");el.className="lbl node";el.textContent=n.title;el.style.color=GROUPS[n.group].color;el.hidden=true;labelsEl.appendChild(el);return el});
+nodeLbl.forEach((el,i)=>{el.innerHTML="";const s=document.createElement("span");s.style.color="var(--ink)";s.textContent=nodes[i].title;el.appendChild(s)});
+
+/* ---------- Camera orbit ---------- */
+const view = {theta:-.95, phi:1.22, dist:6, target:new THREE.Vector3(0,-.12,-.1)};
+let W=1,Hh=1, fitD=6;
+function fit(){
+  W=stage.clientWidth;Hh=stage.clientHeight;renderer.setSize(W,Hh,false);camera.aspect=W/Hh;camera.updateProjectionMatrix();
+  const v=Math.tan(THREE.MathUtils.degToRad(20));
+  fitD = Math.max((camera.aspect<.8?1.45:1.75)/(v*camera.aspect), 1.85/v);
+  view.dist = THREE.MathUtils.clamp(view.dist||fitD, fitD*.45, fitD*1.6);
+  view.target.y = camera.aspect < .8 ? .02 : .04;
+}
+let firstFit=true;
+function resize(){const prev=fitD;fit();if(firstFit){view.dist=fitD;firstFit=false}else view.dist*=fitD/prev}
+addEventListener("resize",resize);resize();
+function placeCamera(){
+  const s=Math.sin(view.phi);
+  camera.position.set(view.target.x+view.dist*s*Math.sin(view.theta), view.target.y+view.dist*Math.cos(view.phi), view.target.z+view.dist*s*Math.cos(view.theta));
+  camera.lookAt(view.target);
+}
+
+const ptrs = new Map(); let down=null, pinch=0, idleAt=0;
+stage.addEventListener("pointerdown",e=>{
+  stage.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1) down={x:e.clientX,y:e.clientY,moved:0};
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);down=null}
+  idleAt=performance.now()+4000;
+});
+stage.addEventListener("pointermove",e=>{
+  const p=ptrs.get(e.pointerId);
+  if(!p){ if(e.pointerType==="mouse"){const r=stage.getBoundingClientRect();hover(e.clientX-r.left,e.clientY-r.top)} return }
+  const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX;p.y=e.clientY;
+  if(ptrs.size===1){
+    view.theta-=dx*.006; view.phi=THREE.MathUtils.clamp(view.phi-dy*.006,.25,Math.PI-.25);
+    if(down) down.moved+=Math.abs(dx)+Math.abs(dy);
+  } else if(ptrs.size===2){
+    const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(pinch){view.dist=THREE.MathUtils.clamp(view.dist*pinch/d,fitD*.45,fitD*1.6)} pinch=d;
+  }
+  idleAt=performance.now()+4000;
+});
+function endPtr(e){
+  const wasTap = down && ptrs.size===1 && down.moved<7;
+  ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=0;
+  if(wasTap){ const r=stage.getBoundingClientRect(); const hit=pick(e.clientX-r.left,e.clientY-r.top); hit!=null ? selectNode(hit) : clearSel() }
+  if(!ptrs.size) down=null;
+}
+stage.addEventListener("pointerup",endPtr);stage.addEventListener("pointercancel",e=>{ptrs.delete(e.pointerId);down=null;pinch=0});
+stage.addEventListener("pointerleave",()=>{if(hoverI!=null&&!sel){nodeLbl[hoverI].hidden=true;hoverI=null}});
+stage.addEventListener("wheel",e=>{e.preventDefault();view.dist=THREE.MathUtils.clamp(view.dist*Math.exp(e.deltaY*.0012),fitD*.45,fitD*1.6);idleAt=performance.now()+4000},{passive:false});
+addEventListener("keydown",e=>{if(e.key==="Escape")clearSel()});
+
+const scr = nodes.map(()=>({x:0,y:0,z:0,on:false}));
+const tmp = new THREE.Vector3();
+function project(v,out){tmp.copy(v).applyMatrix4(root.matrixWorld).project(camera);out.x=(tmp.x+1)/2*W;out.y=(1-tmp.y)/2*Hh;out.z=tmp.z;out.on=tmp.z<1;return out}
+function pick(x,y){
+  let best=null,bd=Infinity;
+  nodes.forEach((n,i)=>{const s=scr[i];if(!s.on)return;const d=Math.hypot(s.x-x,s.y-y);const r=Math.max(22,sprites[i].s*Hh/ (view.dist*.75));if(d<r&&d+s.z*4<bd){bd=d+s.z*4;best=i}});
+  return best;
+}
+let hoverI=null;
+function hover(x,y){
+  if(sel) return;
+  const h=pick(x,y);
+  if(h===hoverI) return;
+  if(hoverI!=null) nodeLbl[hoverI].hidden=true;
+  hoverI=h; if(h!=null){nodeLbl[h].hidden=false} stage.style.cursor=h!=null?"pointer":"";
+}
+
+/* ---------- Selection ---------- */
+let sel=null, shown=[];
+const sheet=document.getElementById("sheet");
+const headerEl=document.querySelector("header");
+const legend=document.getElementById("legend");
+ORDER.forEach(g=>{
+  const b=document.createElement("button");b.className="chip";b.type="button";b.style.color=GROUPS[g].color;b.setAttribute("aria-pressed","false");b.dataset.g=g;
+  b.innerHTML=`<i class="dot"></i><b>${GROUPS[g].name}</b><span>${GROUPS[g].code} · n=${gStats[g].count} · ${KB(gStats[g].bytes)}</span>`;
+  b.querySelector("b").style.color="var(--ink)";
+  b.addEventListener("click",()=> sel&&sel.type==="group"&&sel.g===g ? clearSel() : selectGroup(g));
+  legend.appendChild(b);
+});
+function setHighlight(list, focusSet){
+  if(hiLinks){root.remove(hiLinks);hiLinks.geometry.dispose();hiLinks=null}
+  if(list){hiLinks=new THREE.LineSegments(linkGeometry(list,true),hiMat);root.add(hiLinks)}
+  linkMat.opacity = list ? .07 : .5;
+  sprites.forEach((s,i)=>{const on=!focusSet||focusSet.has(i);s.halo.material.opacity=on?(nodes[i].group==="other"?.32:.6):.08;s.core.material.opacity=on?1:.22});
+  pool = list && list.length ? list : edges;
+  P_STATE.forEach(p=>{p.e=weightedPick(pool);p.t=R()});
+  legend.classList.toggle("filtering", !!(sel&&sel.type==="group"));
+  legend.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed", String(!!(sel&&sel.type==="group"&&sel.g===c.dataset.g))));
+}
+function listHtml(items, key){
+  if(!items.length) return `<p class="none">None identified</p>`;
+  const rows = items.slice().sort((a,b)=>b.w-a.w).slice(0,6).map(e=>{const n=nodes[e[key]];return `<li><span><i style="background:${GROUPS[n.group].color}"></i>${esc(n.title)}</span><span>w=${e.w}</span></li>`}).join("");
+  const more = items.length>6 ? `<li><span style="color:var(--ink-faint)">and ${items.length-6} more</span><span></span></li>` : "";
+  return `<ul>${rows}${more}</ul>`;
+}
+const esc = s => s.replace(/[<>"]/g,c=>({"<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const mni = v => [v.x*68, v.z*68, v.y*68].map(x=>(x<0?"−":"+")+Math.abs(x).toFixed(0).padStart(2,"0")).join(", ");
+const side = v => Math.abs(v.x)<.06 ? "Midline" : v.x<0 ? "Left" : "Right";
+function localize(n){
+  const v=nodeV[n.i], L=side(v), y=v.y-H.cy, z=v.z/H.rz;
+  switch(n.group){
+    case "core":   return `${L} thalamus, dorsomedial nucleus`;
+    case "start":  return v.y>-.85 ? "Brainstem, pons (tegmentum)" : "Brainstem, medulla oblongata";
+    case "safe":   return Math.abs(v.x)<.22 ? "Cerebellar vermis" : `${L} cerebellar hemisphere`;
+    case "ask":    return "Left inferior frontal gyrus, pars triangularis (BA 44/45)";
+    case "smiley": return `${L} precentral gyrus, primary motor cortex (BA 4)`;
+    case "data":   return `${L} mesial temporal lobe, hippocampal formation (BA 28/35)`;
+  }
+  if(z>.5) return `${L} dorsolateral prefrontal cortex (BA 9/46)`;
+  if(z>.12 && y>.25) return `${L} premotor and supplementary motor cortex (BA 6)`;
+  if(z<-.62) return `${L} occipital association cortex (BA 18/19)`;
+  if(y<-.05) return `${L} lateral temporal cortex (BA 21/22)`;
+  return `${L} superior parietal lobule (BA 5/7)`;
+}
+const bar = (f,c) => `<div class="bar" style="color:${c}"><i style="width:${Math.max(2,Math.min(100,f*100)).toFixed(0)}%"></i></div>`;
+const maxDeg = Math.max(...nodes.map(n=>n.deg)), maxLoad = Math.max(...nodes.map(n=>n.load));
+function selectNode(i){
+  sel={type:"node",i}; const n=nodes[i], G=GROUPS[n.group];
+  const list=[...n.uses,...n.usedBy];
+  const set=new Set([i]); list.forEach(e=>{set.add(e.a);set.add(e.b)});
+  setHighlight(list,set);
+  const top=[...n.usedBy.map(e=>[e.a,e.w]),...n.uses.map(e=>[e.b,e.w])].sort((a,b)=>b[1]-a[1]).slice(0,innerWidth<620?5:10).map(x=>x[0]);
+  shown=[i,...new Set(top)].filter((x,k,a)=>a.indexOf(x)===k);
+  const ae = n.eff ? (n.aff/n.eff).toFixed(2) : (n.aff ? "∞" : "n/a");
+  const msw = n.deg ? (n.load/list.length).toFixed(1) : "0.0";
+  const cls = classify(n), loc = localize(n);
+  sheet.innerHTML=`<div class="acc">Acc# HUMC-${String(i+1).padStart(4,"0")} · Connectomic CT/DTI · Seq CENSUS-T1 · ${DATA.measured} · ${G.code}</div>
+    <div class="sheet-top"><div><span class="tag" style="color:${G.color}">${G.name} · ${G.region}</span><h2>${esc(n.title)}</h2>
+    <span class="meta">${esc(cls)}</span></div>
+    <button class="close" type="button" aria-label="Close">×</button></div>
+    <dl class="fields">
+      <div><dt>Localization</dt><dd>${loc}</dd></div>
+      <div><dt>Stereotactic (MNI, mm)</dt><dd>${mni(nodeV[i])}</dd></div>
+      <div><dt>Soma volume</dt><dd>${fmt(n.bytes)} B <small>(${KB(n.bytes)})</small></dd></div>
+      <div><dt>Afferent / efferent</dt><dd>${n.aff} / ${n.eff} <small>A:E ${ae}</small></dd></div>
+      <div><dt>Degree centrality</dt><dd>${(n.deg/(N-1)).toFixed(3)} <small>${pctLabel(n.pct)}</small>${bar(n.deg/maxDeg,G.color)}</dd></div>
+      <div><dt>Projection load Σw</dt><dd>${fmt(n.load)} <small>refs</small>${bar(n.load/maxLoad,G.color)}</dd></div>
+      <div><dt>Clustering coeff. C</dt><dd>${n.clust.toFixed(3)}</dd></div>
+      <div><dt>Mean synaptic weight</dt><dd>${msw} <small>w/tract</small></dd></div>
+    </dl>
+    <p class="impr" style="border-color:${G.color}"><b>Impression</b>${esc(cls)} localized to the ${loc.charAt(0).toLowerCase()+loc.slice(1)}. Receives ${n.aff} afferent projection${n.aff===1?"":"s"} and emits ${n.eff} efferent; degree centrality at the ${pctLabel(n.pct)} level${n.clust>.5?", with dense local clustering":""}. ${G.note}</p>
+    <div class="cols"><div><h3>Afferent projections</h3>${listHtml(n.usedBy,"a")}</div><div><h3>Efferent projections</h3>${listHtml(n.uses,"b")}</div></div>`;
+  sheet.style.color=""; sheet.hidden=false; sheet.querySelector(".close").onclick=clearSel;
+  updateLabelVis();
+}
+function selectGroup(g){
+  sel={type:"group",g}; const G=GROUPS[g];
+  const inG=new Set(nodes.filter(n=>n.group===g).map(n=>n.i));
+  const list=edges.filter(e=>inG.has(e.a)||inG.has(e.b));
+  const set=new Set(inG); list.forEach(e=>{set.add(e.a);set.add(e.b)});
+  setHighlight(list,set);
+  const intra=list.filter(e=>inG.has(e.a)&&inG.has(e.b)).length;
+  const intoIt=new Set(list.filter(e=>inG.has(e.b)&&!inG.has(e.a)).map(e=>e.a));
+  const fromIt=new Set(list.filter(e=>inG.has(e.a)&&!inG.has(e.b)).map(e=>e.b));
+  const members=[...inG].sort((a,b)=>nodes[b].bytes-nodes[a].bytes);
+  const mC=members.reduce((a,i)=>a+nodes[i].clust,0)/members.length;
+  const lft=members.filter(i=>nodeV[i].x<-.06).length, rgt=members.filter(i=>nodeV[i].x>.06).length;
+  const li=(lft+rgt)?((lft-rgt)/(lft+rgt)).toFixed(2):"0.00";
+  const pctVol=(100*gStats[g].bytes/DATA.total).toFixed(1);
+  shown=members.slice(0,innerWidth<620?5:10);
+  sheet.innerHTML=`<div class="acc">Regional volumetrics · ROI ${G.code} · Seq CENSUS-T1 · ${DATA.measured}</div>
+    <div class="sheet-top"><div><span class="tag" style="color:${G.color}">${G.region}</span><h2>${G.name}</h2>
+    <span class="meta">${G.full}</span></div>
+    <button class="close" type="button" aria-label="Close">×</button></div>
+    <dl class="fields">
+      <div><dt>Nuclei (n)</dt><dd>${gStats[g].count}</dd></div>
+      <div><dt>ROI volume</dt><dd>${KB(gStats[g].bytes)} <small>${pctVol}% parenchyma</small>${bar(gStats[g].bytes/DATA.total*3,G.color)}</dd></div>
+      <div><dt>Intra-regional tracts</dt><dd>${intra}</dd></div>
+      <div><dt>Total tracts</dt><dd>${list.length}</dd></div>
+      <div><dt>Afferent sources</dt><dd>${intoIt.size} <small>extra-regional</small></dd></div>
+      <div><dt>Efferent targets</dt><dd>${fromIt.size} <small>extra-regional</small></dd></div>
+      <div><dt>Mean clustering C̄</dt><dd>${mC.toFixed(3)}</dd></div>
+      <div><dt>Laterality index</dt><dd>${li} <small>L${lft} / R${rgt}</small></dd></div>
+    </dl>
+    <p class="impr" style="border-color:${G.color}"><b>Impression</b>${G.full}: ${gStats[g].count} nuclei occupying ${pctVol}% of parenchymal volume, receiving afferents from ${intoIt.size} extra-regional nuclei and projecting to ${fromIt.size}. ${G.note}</p>
+    <div class="cols"><div><h3>Largest nuclei</h3><ul>${members.slice(0,6).map(i=>`<li><span>${esc(nodes[i].title)}</span><span>${KB(nodes[i].bytes)}</span></li>`).join("")}${members.length>6?`<li><span style="color:var(--ink-faint)">and ${members.length-6} more</span><span></span></li>`:""}</ul></div>
+    <div><h3>Highest afferent load</h3><ul>${members.slice().sort((a,b)=>nodes[b].aff-nodes[a].aff).slice(0,6).map(i=>`<li><span>${esc(nodes[i].title)}</span><span>${nodes[i].aff} aff</span></li>`).join("")}</ul></div></div>`;
+  sheet.hidden=false; sheet.querySelector(".close").onclick=clearSel;
+  updateLabelVis();
+}
+function clearSel(){ sel=null; shown=[]; sheet.hidden=true; setHighlight(null,null); updateLabelVis() }
+function updateLabelVis(){
+  nodeLbl.forEach((el,i)=>{el.hidden=!shown.includes(i);el.classList.toggle("main",sel&&sel.type==="node"&&sel.i===i)});
+  ORDER.forEach(g=>regionLbl[g].style.opacity = sel ? (sel.type==="group"&&sel.g===g ? 0 : .12) : 1);
+  if(hoverI!=null&&!shown.includes(hoverI)) nodeLbl[hoverI].hidden=true;
+  hoverI=null;
+}
+
+/* ---------- Loop ---------- */
+const lv=new THREE.Vector3(), pv=new THREE.Vector3(), rp={x:0,y:0,z:0,on:false};
+let last=performance.now(), shiftY=0, arrivals=0, acc=0, binT=0, fps=60;
+const eeg=document.getElementById("eeg"), ex=eeg.getContext("2d"), trace=new Array(160).fill(0);
+const tele1=document.getElementById("tele1"), tele2=document.getElementById("tele2");
+let teleT=0;
+function drawEEG(){
+  const w=eeg.clientWidth, h=eeg.clientHeight, dpr=Math.min(2,devicePixelRatio||1);
+  if(eeg.width!==Math.round(w*dpr)){eeg.width=Math.round(w*dpr);eeg.height=Math.round(h*dpr)}
+  ex.setTransform(dpr,0,0,dpr,0,0);ex.clearRect(0,0,w,h);
+  ex.strokeStyle="rgba(126,156,226,.18)";ex.lineWidth=1;
+  for(let gx=0;gx<w;gx+=w/16){ex.beginPath();ex.moveTo(gx,0);ex.lineTo(gx,h);ex.stroke()}
+  const mx=Math.max(4,...trace);ex.strokeStyle="#01B8E6";ex.lineWidth=1.25;ex.beginPath();
+  trace.forEach((v,k)=>{const x=k/(trace.length-1)*w, y=h-3-(v/mx)*(h-6);k?ex.lineTo(x,y):ex.moveTo(x,y)});ex.stroke();
+}
+let scanVisible=true;
+new IntersectionObserver(es=>{scanVisible=es[0].isIntersecting}).observe(document.getElementById("scan"));
+let sliceT=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(!reduce) planeY = -1.55 + (Math.sin(now*.00035)*.5+.5)*2.6;
+  plane.position.y = planeY;
+  sliceT+=dt; if((workupVisible.sliceTop||workupVisible.sliceLow) && sliceT>.05){sliceT=0;drawSlice(planeY)}
+  if(workupVisible.raster) drawRaster(now);
+  if(!reduce && ptrs.size===0 && now>idleAt) view.theta+=dt*.09;
+  const want = !sheet.hidden && innerWidth<900 ? Math.min(sheet.offsetHeight*.55, Hh*.22) : 0;
+  shiftY += (want-shiftY)*Math.min(1,dt*6);
+  if(Math.abs(shiftY)>.5) camera.setViewOffset(W,Hh,0,shiftY,W,Hh); else camera.clearViewOffset();
+  placeCamera(); root.updateMatrixWorld();
+  for(let k=0;k<PULSES;k++){
+    const p=P_STATE[k]; p.t+=dt*p.v; if(p.t>1){arrivals++;noteSpike(p.e.b,now);p.e=weightedPick(pool);p.t=0;p.v=.18+R()*.35}
+    bez(p.e,p.t,pv); pulsePos[k*3]=pv.x;pulsePos[k*3+1]=pv.y;pulsePos[k*3+2]=pv.z;
+    const c=gColor[nodes[p.e.b].group], f=Math.sin(Math.PI*p.t);
+    pulseCol[k*3]=c.r*f;pulseCol[k*3+1]=c.g*f;pulseCol[k*3+2]=c.b*f;
+  }
+  if(PULSES){pulseGeo.attributes.position.needsUpdate=true;pulseGeo.attributes.color.needsUpdate=true}
+  nodes.forEach((n,i)=>project(nodeV[i],scr[i]));
+  const st=stage.getBoundingClientRect(), topY=headerEl.getBoundingClientRect().bottom-st.top+8, botY=sheet.hidden?Hh:sheet.getBoundingClientRect().top-st.top-4;
+  // Region names, like part names, never sit over the header's text.
+  ORDER.forEach(g=>{project(groupCenter[g],rp);const el=regionLbl[g];el.style.transform=`translate3d(${rp.x}px,${rp.y}px,0) translate(-50%,-50%)`;el.style.visibility=rp.on&&rp.y-12>topY&&rp.y<botY?"visible":"hidden"});
+  const vis = sel ? shown : (hoverI!=null?[hoverI]:[]);
+  vis.forEach(i=>{const s=scr[i];nodeLbl[i].style.transform=`translate3d(${s.x}px,${s.y}px,0) translate(-50%,-150%)`;nodeLbl[i].style.visibility=(s.y-20>topY&&s.y<botY)?"visible":"hidden"});
+  ORIENT.forEach(o=>{project(o.v,rp);o.el.style.transform=`translate3d(${rp.x}px,${rp.y}px,0) translate(-50%,-50%)`;o.el.style.visibility=rp.on?"visible":"hidden"});
+  fps += ((dt>0?1/dt:60)-fps)*.05;
+  binT+=dt; if(binT>=.1){trace.push(arrivals);trace.shift();acc=acc*.9+arrivals*10*.1;arrivals=0;binT=0;drawEEG()}
+  teleT+=dt; if(teleT>.25){teleT=0;
+    const az=((view.theta*180/Math.PI)%360+360)%360, el=90-view.phi*180/Math.PI;
+    tele1.innerHTML=`<span>AZ <b>${az.toFixed(1)}°</b></span><span>EL <b>${(el>=0?"+":"−")+Math.abs(el).toFixed(1)}°</b></span><span>MAG <b>${(fitD/view.dist).toFixed(2)}×</b></span><span>Spikes <b>${acc.toFixed(1)}/s</b></span><span>Signals <b>${PULSES}</b></span><span class="ok">● Acquiring</span>`;
+    tele2.innerHTML=`<span>FOV <b>40°</b></span><span>Frame <b>${fps.toFixed(0)} Hz</b></span><span>Voxels <b>${fmt(SHELL_N)}</b></span><span>Seg <b>${SEG}/tract</b></span><span>Recon <b>Bezier, quadratic</b></span><span>Window <b>100 ms</b></span><span>Slice <b>z ${(planeY*68>=0?"+":"\u2212")}${Math.abs(planeY*68).toFixed(0)} mm</b></span>`;
+  }
+  if(scanVisible) renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+/* Slice viewer lives top-right on wide screens, inside Fig. 2 on narrow ones */
+function placeSlice(){
+  const wide=innerWidth>900, host=document.getElementById(wide?"sliceTop":"sliceLow"), other=document.getElementById(wide?"sliceLow":"sliceTop");
+  other.innerHTML="";other.hidden=true;host.hidden=false;
+  if(!host.querySelector("canvas")) host.innerHTML='<canvas id="slice" aria-label="Axial slice"></canvas><figcaption>Axial slice · follows scan plane</figcaption>';
+  SL=null;
+}
+/* ================= Full workup: figures below the scan ================= */
+const $ = s => document.querySelector(s);
+const ordered = ORDER.flatMap(g=>nodes.filter(n=>n.group===g).sort((a,b)=>b.bytes-a.bytes));
+const rankOf = new Map(ordered.map((n,k)=>[n.i,k]));
+const edgeKey = new Map(edges.map(e=>[e.a*1000+e.b,e]));
+const tip = $("#tip");
+function showTip(html,x,y){tip.innerHTML=html;tip.hidden=false;const r=tip.getBoundingClientRect();let L=x+14,T=y+14;if(L+r.width>innerWidth-8)L=x-r.width-14;if(T+r.height>innerHeight-8)T=y-r.height-14;tip.style.transform=`translate(${Math.max(8,L)}px,${Math.max(8,T)}px)`}
+function hideTip(){tip.hidden=true}
+function canvasCtx(c,h){const w=c.clientWidth,dpr=Math.min(2,devicePixelRatio||1);c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.height=h+"px";const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);return {x,w,h}}
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const short = (t,n) => t.length>n ? t.slice(0,n-1)+"…" : t;
+function hoverCanvas(c, find){
+  const on=e=>{const r=c.getBoundingClientRect();const h=find(e.clientX-r.left,e.clientY-r.top);h?showTip(h,e.clientX,e.clientY):hideTip()};
+  c.addEventListener("pointermove",on);c.addEventListener("pointerdown",on);c.addEventListener("pointerleave",hideTip);
+}
+const workupVisible = {raster:false, sliceTop:false, sliceLow:false};
+
+/* FIG 1: connectivity matrix */
+let MX={};
+function drawMatrix(){
+  const c=$("#mx"); const w=c.clientWidth; const padL=50, padT=10, band=5;
+  const n=ordered.length, cell=(w-padL-band-2)/n, ox=padL+band+2, oy=padT+band+2;
+  const {x}=canvasCtx(c,Math.ceil(oy+n*cell+4));
+  x.fillStyle=css("--ink-faint");x.font="500 9px "+css("--f-mono");x.textBaseline="middle";x.textAlign="right";
+  let k0=0;
+  ORDER.forEach(g=>{
+    const cnt=gStats[g].count, y0=oy+k0*cell, len=cnt*cell;
+    x.fillStyle=GROUPS[g].color; x.fillRect(ox+k0*cell,padT,len-1,band); x.fillRect(padL,y0,band,len-1);
+    if(len>=10){x.fillStyle=css("--ink-soft");x.fillText(GROUPS[g].code,padL-4,y0+len/2)}
+    x.fillStyle="rgba(126,156,226,.045)";x.fillRect(ox+k0*cell,y0,len,len);
+    k0+=cnt;
+  });
+  x.strokeStyle="rgba(126,156,226,.16)";x.lineWidth=1;k0=0;
+  ORDER.forEach(g=>{k0+=gStats[g].count;const p=k0*cell;if(k0<n){x.beginPath();x.moveTo(ox+p,oy);x.lineTo(ox+p,oy+n*cell);x.moveTo(ox,oy+p);x.lineTo(ox+n*cell,oy+p);x.stroke()}});
+  const mw=Math.log2(1+Math.max(...edges.map(e=>e.w)));
+  edges.forEach(e=>{const r=rankOf.get(e.a),cl=rankOf.get(e.b);x.globalAlpha=.3+.7*Math.log2(1+e.w)/mw;x.fillStyle=GROUPS[nodes[e.b].group].color;x.fillRect(ox+cl*cell,oy+r*cell,Math.max(1,cell-.4),Math.max(1,cell-.4))});
+  x.globalAlpha=1; MX={ox,oy,cell,n};
+}
+hoverCanvas($("#mx"),(px,py)=>{const {ox,oy,cell,n}=MX;const cl=Math.floor((px-ox)/cell),r=Math.floor((py-oy)/cell);if(cl<0||r<0||cl>=n||r>=n)return null;
+  const A=ordered[r],B=ordered[cl],e=edgeKey.get(A.i*1000+B.i);
+  return `<b>${esc(A.title)}</b> <span class="t-dim">→</span> <b>${esc(B.title)}</b><br><span class="t-dim">${GROUPS[A.group].code} → ${GROUPS[B.group].code} · </span>${e?`tract w=${e.w}`:"no tract"}`});
+
+/* FIG 2: inter-regional flux */
+function buildFlux(){
+  const M={};ORDER.forEach(a=>{M[a]={};ORDER.forEach(b=>M[a][b]={n:0,w:0})});
+  edges.forEach(e=>{const c=M[nodes[e.a].group][nodes[e.b].group];c.n++;c.w+=e.w});
+  const mx=Math.max(...ORDER.flatMap(a=>ORDER.map(b=>M[a][b].n)));
+  let h=`<table class="flux"><thead><tr><th class="corner">src ↓ · tgt →</th>${ORDER.map(g=>`<th><i style="background:${GROUPS[g].color}"></i>${GROUPS[g].code}</th>`).join("")}<th>Σ out</th></tr></thead><tbody>`;
+  ORDER.forEach(a=>{
+    const tot=ORDER.reduce((s,b)=>s+M[a][b].n,0);
+    h+=`<tr><th><i style="background:${GROUPS[a].color}"></i>${GROUPS[a].code}</th>`+ORDER.map(b=>{const c=M[a][b];const al=c.n?(.12+.78*c.n/mx):0;
+      return `<td class="${a===b?"diag":""}" style="background:rgba(1,184,230,${al.toFixed(3)})" title="${GROUPS[a].name} → ${GROUPS[b].name}: ${c.n} tracts, Σw ${c.w}">${c.n||"·"}<small>${c.w?c.w:""}</small></td>`}).join("")+`<td class="sum">${tot}</td></tr>`;
+  });
+  h+=`<tr><th>Σ in</th>${ORDER.map(b=>`<td class="sum">${ORDER.reduce((s,a)=>s+M[a][b].n,0)}</td>`).join("")}<td class="sum">${edges.length}</td></tr></tbody></table>`;
+  $("#flux").innerHTML=h;
+}
+
+/* FIG 3: network roles scatter */
+let SC=[];
+function drawScatter(){
+  const c=$("#sc"); const {x,w,h}=canvasCtx(c,320);
+  const m={l:40,r:12,t:12,b:36}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+  const mxA=Math.ceil(Math.max(...nodes.map(n=>n.aff))/10)*10, mxE=Math.ceil(Math.max(...nodes.map(n=>n.eff))/10)*10;
+  const X=v=>m.l+v/mxA*pw, Y=v=>m.t+ph-v/mxE*ph;
+  x.font="400 10px "+css("--f-mono");x.fillStyle=css("--ink-faint");x.strokeStyle="rgba(126,156,226,.12)";x.lineWidth=1;
+  for(let v=0;v<=mxA;v+=10){x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),m.t+ph);x.stroke();x.textAlign="center";x.fillText(v,X(v),h-m.b+14)}
+  for(let v=0;v<=mxE;v+=10){x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(m.l+pw,Y(v));x.stroke();x.textAlign="right";x.textBaseline="middle";x.fillText(v,m.l-6,Y(v))}
+  x.textBaseline="alphabetic";x.textAlign="center";x.fillStyle=css("--ink-soft");x.fillText("Afferent inputs (in-degree) →",m.l+pw/2,h-4);
+  x.save();x.translate(11,m.t+ph/2);x.rotate(-Math.PI/2);x.fillText("Efferent outputs (out-degree) →",0,0);x.restore();
+  const mA=nodes.reduce((s,n)=>s+n.aff,0)/N, mE=nodes.reduce((s,n)=>s+n.eff,0)/N;
+  x.setLineDash([3,4]);x.strokeStyle="rgba(1,184,230,.45)";x.beginPath();x.moveTo(X(mA),m.t);x.lineTo(X(mA),m.t+ph);x.moveTo(m.l,Y(mE));x.lineTo(m.l+pw,Y(mE));x.stroke();x.setLineDash([]);
+  x.font="500 9px "+css("--f-mono");x.fillStyle=css("--ink-faint");
+  x.textAlign="right";x.fillText("CONVERGENT HUBS",m.l+pw-4,Y(mE)+14);x.fillText("CONNECTOR HUBS",m.l+pw-4,m.t+12);
+  x.textAlign="left";x.fillText("DIVERGENT INTEGRATORS",m.l+4,m.t+12);x.fillText("PERIPHERAL",m.l+4,m.t+ph-6);
+  SC=nodes.map(n=>({n,x:X(n.aff),y:Y(n.eff),r:2.5+Math.sqrt(n.bytes/1024)*.75})).sort((a,b)=>b.r-a.r);
+  SC.forEach(p=>{x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fillStyle=GROUPS[p.n.group].color;x.globalAlpha=.82;x.fill();x.globalAlpha=1;x.lineWidth=1.5;x.strokeStyle=css("--bg");x.stroke()});
+  x.font="550 10.5px "+css("--f-ui");x.fillStyle=css("--ink");
+  const boxes=[];
+  nodes.slice().sort((a,b)=>b.deg-a.deg).slice(0,w<500?5:9).forEach(n=>{const px=X(n.aff),py=Y(n.eff),t=short(n.title,24),tw=x.measureText(t).width,right=px>m.l+pw*.6;
+    const bx=right?px-9-tw:px+9, by=py-16, bb={x:bx,y:by,w:tw,h:13};
+    if(boxes.some(o=>bb.x<o.x+o.w+4&&o.x<bb.x+bb.w+4&&bb.y<o.y+o.h&&o.y<bb.y+bb.h))return; boxes.push(bb);
+    x.textAlign="left";x.fillText(t,bx,py-6)});
+}
+hoverCanvas($("#sc"),(px,py)=>{let b=null,bd=16;SC.forEach(p=>{const d=Math.hypot(p.x-px,p.y-py)-p.r;if(d<bd){bd=d;b=p}});if(!b)return null;const n=b.n;
+  return `<b>${esc(n.title)}</b><br><span class="t-dim">${GROUPS[n.group].code} · </span>aff ${n.aff} · eff ${n.eff} · ${KB(n.bytes)}<br><span class="t-dim">${classify(n)}</span>`});
+
+/* FIG 4: degree distribution */
+let HB=[];
+function drawHist(){
+  const c=$("#hist"); const {x,w,h}=canvasCtx(c,220);
+  const m={l:32,r:10,t:16,b:30}, pw=w-m.l-m.r, ph=h-m.t-m.b, bw=4;
+  const mxD=Math.max(...nodes.map(n=>n.deg)), nb=Math.ceil((mxD+1)/bw);
+  const bins=new Array(nb).fill(0); nodes.forEach(n=>bins[Math.floor(n.deg/bw)]++);
+  const mxC=Math.ceil(Math.max(...bins)/5)*5;
+  const Y=v=>m.t+ph-v/mxC*ph, slot=pw/nb;
+  x.font="400 10px "+css("--f-mono");x.strokeStyle="rgba(126,156,226,.12)";x.fillStyle=css("--ink-faint");x.textAlign="right";x.textBaseline="middle";
+  for(let v=0;v<=mxC;v+=5){x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(m.l+pw,Y(v));x.stroke();x.fillText(v,m.l-6,Y(v))}
+  HB=[];x.fillStyle="#01B8E6";
+  bins.forEach((v,k)=>{const bx=m.l+k*slot+1,bwid=Math.max(1,slot-2),by=Y(v);HB.push({x:bx,w:bwid,k,v});if(!v)return;x.beginPath();x.roundRect?x.roundRect(bx,by,bwid,m.t+ph-by,[3,3,0,0]):x.rect(bx,by,bwid,m.t+ph-by);x.globalAlpha=.85;x.fill();x.globalAlpha=1});
+  x.textAlign="center";x.textBaseline="alphabetic";x.fillStyle=css("--ink-faint");
+  for(let k=0;k<nb;k+=Math.ceil(nb/8)) x.fillText(k*bw,m.l+k*slot+slot/2,h-m.b+14);
+  x.fillStyle=css("--ink-soft");x.fillText("Degree k (afferent + efferent partners)",m.l+pw/2,h-3);
+  const sorted=nodes.map(n=>n.deg).sort((a,b)=>a-b), med=sorted[Math.floor(N/2)], X=v=>m.l+(v/bw)*slot;
+  [[meanDeg,"μ "+meanDeg.toFixed(1)],[med,"x̃ "+med]].forEach(([v,t],k)=>{x.setLineDash([3,3]);x.strokeStyle=k?"rgba(255,122,182,.7)":"rgba(245,179,66,.8)";x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),m.t+ph);x.stroke();x.setLineDash([]);x.fillStyle=css("--ink");x.textAlign=k?"right":"left";x.font="500 10px "+css("--f-mono");x.fillText(t,X(v)+(k?-4:4),m.t+8)});
+}
+hoverCanvas($("#hist"),px=>{const b=HB.find(b=>px>=b.x-1&&px<=b.x+b.w+1);return b?`Degree <b>${b.k*4}–${b.k*4+3}</b><br>${b.v} nuclei`:null});
+
+/* FIG 5: volumetric treemap */
+function squarify(items,rect){
+  const out=[];let {x,y,w,h}=rect;const tot=items.reduce((a,b)=>a+b.v,0);let rest=items.map(it=>({...it,a:it.v*w*h/tot}));
+  while(rest.length){
+    const s0=Math.min(w,h);const worst=row=>{const s=row.reduce((a,b)=>a+b.a,0);let mx=0,mn=Infinity;row.forEach(r=>{mx=Math.max(mx,r.a);mn=Math.min(mn,r.a)});return Math.max(s0*s0*mx/(s*s),s*s/(s0*s0*mn))};
+    let row=[rest[0]],i=1;while(i<rest.length&&worst([...row,rest[i]])<=worst(row)){row.push(rest[i]);i++}
+    const s=row.reduce((a,b)=>a+b.a,0);
+    if(w>=h){const cw=s/h;let cy=y;row.forEach(r=>{const ch=r.a/cw;out.push({it:r,x,y:cy,w:cw,h:ch});cy+=ch});x+=cw;w-=cw}
+    else{const ch=s/w;let cx=x;row.forEach(r=>{const cw=r.a/ch;out.push({it:r,x:cx,y,w:cw,h:ch});cx+=cw});y+=ch;h-=ch}
+    rest=rest.slice(i);
+  }
+  return out;
+}
+let TM=[];
+function drawTree(){
+  const c=$("#tree"); const {x,w,h}=canvasCtx(c,w0()); function w0(){return c.clientWidth<520?380:340}
+  const regs=squarify(ORDER.map(g=>({g,v:gStats[g].bytes})).sort((a,b)=>b.v-a.v),{x:0,y:0,w,h});
+  TM=[];
+  regs.forEach(R0=>{
+    const g=R0.it.g, pad=2;
+    const cells=squarify(nodes.filter(n=>n.group===g).map(n=>({n,v:Math.max(n.bytes,256)})).sort((a,b)=>b.v-a.v),{x:R0.x+pad,y:R0.y+pad+13,w:R0.w-pad*2,h:Math.max(1,R0.h-pad*2-13)});
+    x.fillStyle="rgba(126,156,226,.06)";x.fillRect(R0.x+1,R0.y+1,R0.w-2,R0.h-2);
+    x.font="500 9.5px "+css("--f-mono");x.fillStyle=GROUPS[g].color;x.textBaseline="middle";x.textAlign="left";
+    if(R0.w>40) x.fillText(`${GROUPS[g].code} ${(100*gStats[g].bytes/DATA.total).toFixed(1)}%`,R0.x+5,R0.y+9);
+    cells.forEach(cl=>{
+      const n=cl.it.n;x.fillStyle=GROUPS[g].color;x.globalAlpha=.22+.5*Math.min(1,n.deg/40);x.fillRect(cl.x+1,cl.y+1,Math.max(0,cl.w-2),Math.max(0,cl.h-2));x.globalAlpha=1;
+      if(cl.w>62&&cl.h>26){x.fillStyle=css("--ink");x.font="550 10.5px "+css("--f-ui");x.fillText(short(n.title,Math.floor(cl.w/6.2)),cl.x+5,cl.y+11);x.fillStyle=css("--ink-soft");x.font="400 9.5px "+css("--f-mono");x.fillText(KB(n.bytes),cl.x+5,cl.y+23)}
+      TM.push({...cl,n});
+    });
+  });
+}
+hoverCanvas($("#tree"),(px,py)=>{const t=TM.find(t=>px>=t.x&&px<=t.x+t.w&&py>=t.y&&py<=t.y+t.h);if(!t)return null;const n=t.n;return `<b>${esc(n.title)}</b><br><span class="t-dim">${GROUPS[n.group].code} · </span>${KB(n.bytes)} · ${(100*n.bytes/DATA.total).toFixed(2)}% · k=${n.deg}`});
+
+/* FIG 6: hub ranking */
+function buildRank(){
+  const top=nodes.slice().sort((a,b)=>b.deg-a.deg||b.load-a.load).slice(0,15);
+  $("#rank").innerHTML=`<table class="rank"><thead><tr><th>#</th><th>Nucleus</th><th>ROI</th><th>Aff</th><th>Eff</th><th>C</th><th>Σw</th><th>Centrality</th></tr></thead><tbody>${
+    top.map((n,k)=>`<tr data-i="${n.i}"><td>${String(k+1).padStart(2,"0")}</td><td class="nm"><i style="background:${GROUPS[n.group].color}"></i>${esc(n.title)}</td><td>${GROUPS[n.group].code}</td><td>${n.aff}</td><td>${n.eff}</td><td>${n.clust.toFixed(2)}</td><td>${n.load}</td><td><span class="cbar"><i style="width:${(100*n.deg/maxDeg).toFixed(0)}%;background:${GROUPS[n.group].color}"></i></span>${(n.deg/(N-1)).toFixed(3)}</td></tr>`).join("")}</tbody></table>`;
+  $("#rank").querySelectorAll("tr[data-i]").forEach(tr=>tr.addEventListener("click",()=>{selectNode(+tr.dataset.i);document.getElementById("scan").scrollIntoView({behavior:reduce?"auto":"smooth"})}));
+}
+
+/* FIG 7: live spike raster (simulation, weighted by real tract strength) */
+const spikes=[];
+function noteSpike(i,t){spikes.push({r:rankOf.get(i),t,g:nodes[i].group});if(spikes.length>4000)spikes.splice(0,spikes.length-4000)}
+let RS=null;
+function drawRaster(now){
+  const c=$("#raster"); if(!RS||RS.w!==c.clientWidth) RS=canvasCtx(c,250);
+  const {x,w,h}=RS, padL=8, top=4, rowH=(h-top-20)/N, win=10000;
+  x.clearRect(0,0,w,h);
+  let k0=0;ORDER.forEach(g=>{x.fillStyle=GROUPS[g].color;x.fillRect(0,top+k0*rowH,4,gStats[g].count*rowH-1);k0+=gStats[g].count});
+  x.strokeStyle="rgba(126,156,226,.1)";x.lineWidth=1;
+  for(let s=0;s<=10;s++){const gx=padL+(w-padL)*s/10;x.beginPath();x.moveTo(gx,top);x.lineTo(gx,h-20);x.stroke()}
+  x.fillStyle=css("--ink-faint");x.font="400 9.5px "+css("--f-mono");x.textAlign="center";
+  for(let s=0;s<=10;s+=2)x.fillText((s-10)+" s",padL+(w-padL)*s/10,h-6);
+  spikes.forEach(sp=>{const age=now-sp.t;if(age>win)return;const px=padL+(w-padL)*(1-age/win);x.fillStyle=GROUPS[sp.g].color;x.globalAlpha=.4+.6*(1-age/win);x.fillRect(px-1,top+sp.r*rowH,2.2,Math.max(1.4,rowH))});
+  x.globalAlpha=1;
+}
+
+/* FIG 0: axial slice viewer, follows the scan plane */
+let SL=null;
+function drawSlice(planeY){
+  const c=$("#slice"); if(!c||!SHELL_P) return; if(!SL||SL.w!==c.clientWidth) SL=canvasCtx(c,c.clientWidth);
+  const {x,w}=SL, cx=w/2, cy=w/2, sc=w/3.7;
+  x.fillStyle="#02040B";x.fillRect(0,0,w,w);
+  for(let k=0;k<SHELL_N;k++){const y=SHELL_P[k*3+1];if(Math.abs(y-planeY)>.045)continue;const b=SHELL_C[k*3+2];x.fillStyle=`rgba(${(150*b+60)|0},${(170*b+70)|0},${(230*b+25)|0},.9)`;x.fillRect(cx+SHELL_P[k*3]*sc-1,cy-SHELL_P[k*3+2]*sc-1,2,2)}
+  for(let k=0;k<TRACT.length;k+=4){if(Math.abs(TRACT[k+1]-planeY)>.02)continue;x.fillStyle=GROUPS[ORDER[TRACT[k+3]]].color;x.globalAlpha=.75;x.fillRect(cx+TRACT[k]*sc-.75,cy-TRACT[k+2]*sc-.75,1.5,1.5)}
+  x.globalAlpha=1;
+  nodes.forEach(n=>{const v=nodeV[n.i];const d=Math.abs(v.y-planeY);if(d>.12)return;x.beginPath();x.arc(cx+v.x*sc,cy-v.z*sc,2+3*(1-d/.12),0,7);x.fillStyle=GROUPS[n.group].color;x.fill()});
+  x.strokeStyle="rgba(1,184,230,.35)";x.lineWidth=1;x.beginPath();x.moveTo(cx,6);x.lineTo(cx,w-6);x.moveTo(6,cy);x.lineTo(w-6,cy);x.stroke();
+  x.fillStyle="#01B8E6";x.font="500 10px "+css("--f-mono");x.textAlign="center";x.textBaseline="middle";
+  x.fillText("A",cx,10);x.fillText("P",cx,w-10);x.fillText("R",w-9,cy);x.fillText("L",9,cy);
+  x.textAlign="left";x.fillStyle="#A4B0CC";x.fillText(`AXIAL  z ${(planeY*68>=0?"+":"\u2212")}${Math.abs(planeY*68).toFixed(0)} mm`,8,w-10);
+}
+
+function drawAll(){drawMatrix();buildFlux();drawScatter();drawHist();drawTree();buildRank();RS=null;SL=null}
+let rT=0;addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(drawAll,150)});
+document.fonts && document.fonts.ready.then(drawAll);
+drawAll();
+const io=new IntersectionObserver(es=>es.forEach(e=>workupVisible[e.target.dataset.v]=e.isIntersecting));
+document.querySelectorAll("[data-v]").forEach(el=>io.observe(el));
+
+placeSlice(); addEventListener("resize",placeSlice);
+document.getElementById("jump").addEventListener("click",()=>document.getElementById("workup").scrollIntoView({behavior:reduce?"auto":"smooth"}));
+const keyHtml=ORDER.map(g=>`<span><i style="background:${GROUPS[g].color}"></i>${GROUPS[g].code} ${GROUPS[g].name}</span>`).join("");
+document.getElementById("key1").innerHTML=keyHtml;document.getElementById("key3").innerHTML=keyHtml;
+window.BRAIN = { nodes, edges, DATA };
+requestAnimationFrame(frame);
+}).catch(err => {
+  document.getElementById("stats").textContent = "Couldn't load the brain's data. Check the connection and open it again.";
+  console.error(err);
+});
+</script>
+</body>
+</html>

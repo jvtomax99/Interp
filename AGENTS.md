@@ -64,6 +64,7 @@ So:
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
 | 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
 | Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
+| HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Everything else | `index.html` |
 
 **The app's stylesheet is `app.css`** (2026-10-21, phase 1 of

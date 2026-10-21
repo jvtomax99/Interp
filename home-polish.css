@@ -1422,3 +1422,9 @@ html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
   #content.is-home .home-promo-btn{ animation:none; transition:none; }
   #content.is-home .home-promo-ring{ animation:none; }
 }
+
+/* HUMC Brain (home-polish.js, openHumcBrain): brain/index.html full screen,
+   no sheet or backdrop. .overlay.brain-ov only outranks the plain .overlay
+   padding and backdrop in index.html; nothing here touches press or focus. */
+.overlay.brain-ov{padding:0;background:#02040B;-webkit-backdrop-filter:none;backdrop-filter:none;align-items:stretch;justify-content:stretch;overflow:hidden;}
+.overlay.brain-ov iframe{flex:1 1 auto;display:block;width:100%;height:100%;border:0;background:#02040B;}
