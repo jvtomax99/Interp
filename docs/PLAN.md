@@ -67,7 +67,8 @@ R2. The motions as short clips: idle breathing, anticipation crouch, jump
    layer so they glide, as `DR_BROWS` does in the app). Disney principles
    as in `dr-smiley.md`. Ground: decide with Jose (v1's Home tabletop from
    PR #110, or the studio sweep).
-R3. v1's reel (PR #110) rebuilt with the 3D figure.
+R3. v1's reel (PR #110) rebuilt with the 3D figure. Blender renders the
+   frames; Remotion (`promo/`, #111) can cut them to the beat with music.
 
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
@@ -279,7 +280,9 @@ then read the log; it names the suite and the check.
   file must join. Jose (2026-10-20): start after the open PRs merge,
   one move at a time with nothing else in flight; phase 1's first-paint
   trade is still his call once measured. Phase 0 (census, markers) done
-  2026-10-21; next is phase 1, the CSS, measured first.
+  2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
+  2026-10-21, waiting on Jose's call (numbers in `docs/split-index.md`);
+  then phase 2, the data constants, `GUIDE_TOPICS` first.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -294,7 +297,14 @@ then read the log; it names the suite and the check.
   and brows projected on the head (`prep.py`, `build.py`); head views,
   body views, six poses and a 360-degree turn in `out/`. Docs only,
   nothing deployed, no User Guide change.
-
+- 2026-10-21 Split `index.html`, phase 1 (this PR, merge only on Jose's
+  call): the `<style>` block is `app.css`, verbatim plus `@charset`,
+  linked where it was, before `home-polish.css`. `sw.js` precaches it,
+  network-first with the page; the harness serves it; `springs.cjs` reads
+  it; `AGENTS.md`/`CLAUDE.md` say styles go there. Measured with two new
+  tools, `first-paint.cjs` and `style-proof.cjs`: weak Wi-Fi first paint
+  +0.33 s, Home -0.30 s; 4G both under 0.1 s; looks identical (only the
+  noise two runs of the old version show). Nothing visible, no guide change.
 - 2026-10-21 Split `index.html`, phase 0 (this PR): `tests/tools/census.cjs`
   (acorn added to `tests/`) maps every top-level name of the inline
   scripts to its section and who uses it, code and `on...=""` handlers
@@ -741,7 +751,16 @@ then read the log; it names the suite and the check.
   colours (AgX washed the skin out). Pose angles that must hit a spot
   (hand under the chin) are solved by brute-force forward kinematics on
   `BONES`, not guessed.
-
+- **Proving a CSS move with computed styles: sort the properties.**
+  `getComputedStyle` lists custom properties in the order the sheets
+  declared them, so moving a sheet (inline to a file) reorders the list
+  and every element's fingerprint changes with no value changed
+  (2026-10-21). And compare against a second run of the old version: chat
+  timestamps, the tab bar's lens and Home text under a sheet differ
+  between two runs of the same code.
+- **The suites can't see network cost**: the harness answers every file
+  from memory at once. `tests/tools/first-paint.cjs` serves real files
+  over Chromium's throttled network (2026-10-21).
 - **The census (`tests/tools/census.cjs`)** counts a use only by name: a
   `window[name]` lookup or a name built in a string is invisible to it,
   and it says nothing about run order. A banner put inside a function is

@@ -21,7 +21,8 @@ const SAMPLE = (sel, what, ms) => `new Promise(r => { const out = []; const t0 =
   const b = await L.chromium.launch();
   console.log('== the token and the kept list (stylesheets read)');
   const html = fs.readFileSync(L.ROOT + 'index.html', 'utf8'), css = fs.readFileSync(L.ROOT + 'home-polish.css', 'utf8');
-  const styles = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n') + '\n' + css;
+  const app = fs.existsSync(L.ROOT + 'app.css') ? fs.readFileSync(L.ROOT + 'app.css', 'utf8') : '';
+  const styles = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n') + '\n' + app + '\n' + css;
   const clean = styles.replace(/\/\*[\s\S]*?\*\//g, '');
   ok(/--spring0:var\(--ease\)/.test(clean) && /@supports \(transition-timing-function: linear\(0, 1\)\)\{\s*:root\{ --spring0:linear\(0, 0\.094, 0\.274, 0\.456, 0\.609, 0\.727, 0\.813, 0\.874, 0\.916, 0\.945, 0\.964, 0\.977, 0\.985, 0\.99, 0\.994, 0\.996, 0\.998, 0\.998, 1\); \}/.test(clean), 'the token: --ease, then the 19-point bounce-0 spring under @supports linear()');
   const over = []; const re = /([^{}]+)\{([^{}]*cubic-bezier\([^)]*\)[^{}]*)\}/g; let m;
