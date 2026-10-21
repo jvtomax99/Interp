@@ -79,6 +79,15 @@ R1. The figure and skeleton: turntable and six poses (this PR). Jose
    arms down (the baked wave would stretch in jumps); hair recoloured to
    the drawing's browns AND reshaped to its tall swoop; all matte. Next:
    Jose attaches the new GLB in the chat (iCloud links are blocked here).
+   Done the same day: the GLB arrived (zip in the chat), checked as it came
+   (`out/tripo-turn.mp4`), then Jose's OK; steps 4-6 built (`tripo_fix.py`:
+   matte, hair recoloured to the drawing's browns, the swoop) and kept on
+   his OK (`out/tripo-before-after.png`). Next: the skeleton and face plan
+   (`out/plan-rig.png`): bones by his measured proportions; 3D eyes over
+   the painted ones first (blink, look; shown alone), then brow and cheek
+   bones, then mouth shapes from his 30 drawings. The GLB and the edited
+   model live in `docs/mockups/smiley-3d/in/` (not in git, 32 MB and 48 MB):
+   a new chat needs the zip again from Jose.
 R2. The motions as short clips: idle breathing, anticipation crouch, jump
    with legs tucked, a spin or flip, a squash landing, wave, look, point,
    happy bounce; secondary motion (hair, coat hem, lanyard) on springs;

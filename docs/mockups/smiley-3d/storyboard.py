@@ -139,3 +139,16 @@ tripo = [
     ('9', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
 ]
 board('Plan: your Tripo model \u2192 Dr. Smiley', SUB, tripo, 'plan-tripo.png')
+
+
+rig = [
+    ('1', 'ME', 'Skeleton: 36 bones (fingers included) placed by his own measured proportions, so he bends, jumps, waves and points. His model stays exactly as you approved it.',
+     [fit(P('tripo-skeleton.png'), 420, 750)], 'Planned bones over your model', False),
+    ('2', 'ME', 'His eyes become real 3D eyes over the painted ones: they blink and look around. This is the riskiest part, so you see it alone first.',
+     [fit(P('tripo-face-plan.png'), 760, 860)], 'What moves on his face; below: the mouth shapes from your 30 drawn expressions', True),
+    ('3', 'ME', 'Brows and cheeks get small face bones: brows lift and frown, cheeks rise with a smile.', [], '', False),
+    ('4', 'ME', 'Mouth: shapes swap for each expression (smile, laugh, surprised, sad, worried, doubt), redrawn from your drawings in his 3D look.', [], '', False),
+    ('5', 'ME', 'An expression sheet, six poses and a 360\u00b0 turn, all matte, for your OK.', [], '', True),
+    ('6', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
+]
+board('Plan: his skeleton and face', ['Nothing is built until you say OK. The pictures show where', 'each part goes on your approved model.'], rig, 'plan-rig.png')
