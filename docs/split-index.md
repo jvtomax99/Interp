@@ -94,6 +94,20 @@ move each, with the same proof every time and nothing visible changing.
    deep-equals the old literal (a one-time check in the PR), the feature's
    suite passes, and it opens offline in the suite's offline case.
    `DEFAULT_DATA` (the glossary's seed) stays: Home paints from it.
+   **`GUIDE_TOPICS` done 2026-10-21, differently** (Jose's pick): the
+   premise was wrong, the answers are read at startup (Home's User Guide
+   tile counts them, global search and Ask the Hub search them, the deep
+   link opens one), so fetching them on demand would mean async plumbing in
+   eight places for ~16 KB compressed. Instead `guide/topics.js`: plain
+   data with `GUIDE_SECTIONS`, loaded by a `<script src>` just before the
+   app's script, so nothing reading them changes. Proof: both lists
+   JSON-identical in the browser before and after (55,407 chars), Home's
+   tile still 66, `Object.keys(window)` unchanged. Measured (first-paint,
+   5 runs): weak Wi-Fi first paint +80-100 ms (the extra file's bytes
+   arrive with `app.css`; `fetchpriority="low"` made no difference), Home
+   -10 to -135 ms; 4G first paint -16/0 ms, Home -6/-147 ms. The other
+   constants: same approach (a plain script) unless one is truly read only
+   when its feature opens; check every reader first, as here.
 3. **JS by feature, one file per PR**, leaves first (the census says which:
    sections whose names few others use). Candidates from the sizes alone:
    Dr. Smiley's engine (`DrAnim` 25 KB with `DR_FACE_SEQ`, `DR_PERF`,
