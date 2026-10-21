@@ -19,7 +19,7 @@ The glossary as a brain, lit by this person's own Term Review record.
 | Layout | Cortex spots on both hemispheres; each top domain gets an anchor (spread apart, biggest first), spots go to the nearest domain with room. Inside a domain its own terms take the middle, each subgroup a wedge |
 | Actions | Domain sheet: **Practise** → `{ih:'brain-practice', domain}` → `knowledgePractise` (top domain: `startReview({spec,n:10})`; subgroup: its terms from `reviewBuild`). Term sheet: **Open the card** → `{ih:'brain-term', id}` → `knowledgeOpenTerm` → `revealTerm`. Both close the brain first |
 | Figures | Fig. 1 coverage by domain, weakest first; Fig. 2 next up (missed, then due); Fig. 3 progress from `ih_knowledgeLog` (a note until there are two days) |
-| Entrances | Head double-tap on Home; the **Your knowledge brain** tile on the CoreCHI Practice dashboard (`knowledgeEntryHtml`, reuses the memory trainer tile's classes plus `.kb-entry`) |
+| Entrances | Head double-tap on Home; the **Your knowledge brain** tile on the CoreCHI Practice dashboard (`knowledgeEntryHtml`, styled with the memory trainer tile: `.kb-entry*` and `.kb-go` sit beside `.mem-entry*` in `app.css`) |
 | Drawing | Dots are two `THREE.Points` layers (core, halo) with light added and alpha left alone (`ADD`): plain additive blending also adds alpha, and on the see-through canvas faint dots cut dark holes in the background |
 
 **Privacy.** The view reads only your own record. But `term-reviews` is

@@ -132,7 +132,7 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
 
   // The CoreCHI Practice dashboard's tile opens it too, on the knowledge tab.
   await P.evaluate(() => setCategory('practice')); await P.waitForTimeout(2000);
-  const tile = await P.evaluate(() => { const b = document.querySelector('#content .kb-entry .mem-go'); if(!b) return null; b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, pct: document.querySelector('#content .kb-entry .mem-entry-span b').textContent }; });
+  const tile = await P.evaluate(() => { const b = document.querySelector('#content .kb-entry .kb-go'); if(!b) return null; b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, pct: document.querySelector('#content .kb-entry .kb-entry-span b').textContent }; });
   ok(tile && tile.h >= 30, 'the Practice dashboard has the knowledge brain tile ' + JSON.stringify(tile));
   await P.screenshot({ path: OUT + 'phone-practice-tile.png' });
   if (tile) { await P.touchscreen.tap(tile.x, tile.y); await P.waitForTimeout(2500); }

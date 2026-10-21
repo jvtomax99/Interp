@@ -5726,18 +5726,19 @@ function knowledgeOpenTerm(termId){
   const c = DATA.categories.find(x => x.terms.some(t => t.id === termId));
   if(c) revealTerm(c.id, termId); else showToast('That term is no longer in the glossary.');
 }
-// The tile on the CoreCHI Practice dashboard (the head double-tap on Home is the other way in).
+// The tile on the CoreCHI Practice dashboard (the head double-tap on Home is the other way in);
+// styled with the memory trainer's tile (app.css, .kb-entry beside .mem-entry).
 function knowledgeEntryHtml(){
   if(!termReviewsLoaded && whoAmI()) ensureLoaded('termReviews', loadTermReviews);
   let total = 0, known = 0;
   DATA.categories.forEach(c => c.terms.forEach(t => { if(t.en && t.es){ total++; if(kbLevel(TERM_REVIEWS[t.id]) === 3) known++; } }));
   const lit = termReviewsLoaded && total ? Math.round(100 * known / total) : null;
   return `<div class="section-head"><h2>Your knowledge brain</h2><span class="sub">glossary terms you know</span></div>
-    <div class="dash-tile mem-entry kb-entry dash-in" style="--dom:#4F9DFF; --i:0">
-      <span class="mem-entry-icon">${DOMAIN_ICONS.brain}</span>
-      <span class="mem-entry-text"><b>Your terms as a brain</b><span>Every term is a dot that lights up as you learn it. Tap a dark area to practise it.</span></span>
-      <span class="mem-entry-span"><b>${lit == null ? 'New' : lit + '%'}</b><small>${lit == null ? '' : 'known'}</small></span>
-      <button type="button" class="mastery-go mem-go" onclick="window.openHumcBrain && openHumcBrain('you')">Open</button>
+    <div class="dash-tile kb-entry dash-in" style="--dom:#4F9DFF; --i:0">
+      <span class="kb-entry-icon">${DOMAIN_ICONS.brain}</span>
+      <span class="kb-entry-text"><b>Your terms as a brain</b><span>Every term is a dot that lights up as you learn it. Tap a dark area to practise it.</span></span>
+      <span class="kb-entry-span"><b>${lit == null ? 'New' : lit + '%'}</b><small>${lit == null ? '' : 'known'}</small></span>
+      <button type="button" class="mastery-go kb-go" onclick="window.openHumcBrain && openHumcBrain('you')">Open</button>
     </div>`;
 }
 
