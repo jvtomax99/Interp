@@ -156,6 +156,23 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
   ok(s.open && brainFrame() && brainFrame().url().endsWith('/brain/you.html'), 'its Open button opens the knowledge brain ' + JSON.stringify(s));
   await P.evaluate(() => navigateBack()); await P.waitForTimeout(700);
 
+  // Term Review's small live brain: drawn, tappable as a whole, opens the knowledge brain.
+  await P.evaluate(() => setCategory('review')); await P.waitForTimeout(2000);
+  const mini = await P.evaluate(() => {
+    const b = document.querySelector('#content .kb-mini'), c = b && b.querySelector('canvas');
+    if(!b) return null;
+    const r = b.getBoundingClientRect(), x = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let lit = 0; for(let i = 3; i < x.length; i += 4) if(x[i] > 0) lit++;
+    const hit = document.elementFromPoint(r.left + 60, r.top + r.height / 2);
+    return { x: r.left + 60, y: r.top + r.height / 2, h: Math.round(r.height), w: Math.round(r.width), lit, onCard: !!(hit && hit.closest('.kb-mini')), line: b.querySelector('.kb-mini-text span').textContent, start: (() => { const st = document.querySelector('#content .rv-start').getBoundingClientRect(); return Math.round(st.bottom); })(), sw: document.documentElement.scrollWidth, vw: innerWidth };
+  });
+  ok(mini && mini.lit > 300 && mini.onCard && mini.h >= 90 && mini.h <= 110 && mini.sw <= mini.vw, 'Term Review shows the small live brain at the top, drawn and tappable ' + JSON.stringify(mini && { ...mini, x: undefined, y: undefined }));
+  await P.screenshot({ path: OUT + 'phone-review-mini.png' });
+  if (mini) { await P.touchscreen.tap(mini.x, mini.y); await P.waitForTimeout(2500); }
+  s = await state();
+  ok(s.open && brainFrame() && brainFrame().url().endsWith('/brain/you.html'), 'tapping it opens the knowledge brain ' + JSON.stringify(s));
+  await P.evaluate(() => navigateBack()); await P.waitForTimeout(700);
+
   // Leaving Home with it open closes it.
   await P.evaluate(() => setCategory('home')); await P.waitForTimeout(2000);
   await P.evaluate(() => openHumcBrain()); await P.waitForTimeout(800);
