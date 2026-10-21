@@ -45,7 +45,7 @@ says it is **not patient data**. Keep that line.
 | Opening it | `home-polish.js`: the hello's click handler (`onHead`, `HEAD_SHARE` 0.62 of his picture, `DOUBLE_TAP_MS` 320) and `window.openHumcBrain(view)` (a `.overlay.brain-ov` holding an iframe of `brain/you.html`, or `brain/index.html` with `'code'`) |
 | Its frame's look | `home-polish.css`, last block: no padding, no backdrop, full screen |
 | Offline | `sw.js`: never opened online yet → a one-line note in its frame, not the whole app inside it |
-| Guide | `GUIDE_TOPICS` id `brain` (section Asking Dr. Smiley; now about your knowledge brain, the code tab in one line); `GUIDE_NEWS` card `brain` |
+| Guide | `GUIDE_TOPICS` id `brain` (in `guide/topics.js`) (section Asking Dr. Smiley; now about your knowledge brain, the code tab in one line); `GUIDE_NEWS` card `brain` |
 | Test | `tests/suites/humc-brain.cjs` |
 
 ## Taps

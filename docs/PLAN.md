@@ -284,8 +284,9 @@ then read the log; it names the suite and the check.
   one move at a time with nothing else in flight; phase 1's first-paint
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
-  2026-10-21, waiting on Jose's call (numbers in `docs/split-index.md`);
-  then phase 2, the data constants, `GUIDE_TOPICS` first.
+  2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
+  this PR. Next: the other data constants (`SEED_QUESTIONS`,
+  `FALSE_FRIENDS`), each checked for startup readers first.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -295,6 +296,14 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
+  `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
+  script loaded just before the app's own (Jose's pick over fetching it on
+  demand: Home's tile, search and Ask read it from startup). Identical in
+  the browser before and after; `sw.js` precache + network-first, the
+  harness, `AGENTS.md`/`CLAUDE.md`/`user-guide.md` updated. Weak Wi-Fi
+  first paint +0.08 s, Home up to 0.1 s sooner; 4G no worse.
+  Phase 1 (#112) merged on Jose's "Push it", live as b1021.1058.
 - 2026-10-21 HUMC Brain (Jose's ask, this PR): the census as a 3D brain with
   a quantitative workup, `brain/` (page, data, vendored Three.js), opened for
   everyone by a double-tap on Dr. Smiley's head in the hello; one tap still
