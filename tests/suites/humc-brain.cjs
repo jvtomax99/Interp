@@ -45,6 +45,23 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
     return { total: ts.length, known: a.id, learning: b.id, missed: c.id, missedDom: c.categoryId, top: askTopOf(c.categoryId) };
   });
 
+  // K2: the record's rule checks this phone's name in hub-members. A refused
+  // read syncs that name, waited for, and asks once more.
+  const k2 = await P.evaluate(async () => {
+    const realColl = db.collection.bind(db), savedAuth = hubAuth, before = { ...TERM_REVIEWS };
+    let asked = 0, synced = null;
+    hubAuth = { currentUser: { uid: 'phone1' } };
+    db.collection = name => {
+      if(name === 'hub-members') return { doc: id => ({ update: d => { synced = { id, who: d.who }; return Promise.resolve(); } }) };
+      const c = realColl(name);
+      if(name !== 'term-reviews') return c;
+      return { ...c, where: (...a) => { const q = c.where(...a); return { ...q, get: () => asked++ ? q.get() : Promise.reject(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })) }; } };
+    };
+    try{ await loadTermReviews(); return { loaded: termReviewsLoaded, asked, synced, me: whoAmI() }; }
+    finally{ db.collection = realColl; hubAuth = savedAuth; TERM_REVIEWS = before; termReviewsLoaded = true; }
+  });
+  ok(k2.loaded && k2.asked === 2 && k2.synced && k2.synced.id === 'phone1' && k2.synced.who === k2.me, 'a refused record read syncs this phone\'s name, then loads ' + JSON.stringify(k2));
+
   // Your knowledge brain (the Practice tile's way in; the tile itself is tapped further down).
   await P.evaluate(() => openHumcBrain('you')); await P.waitForTimeout(3000);
   let s = await state();

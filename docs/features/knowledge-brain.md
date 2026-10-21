@@ -24,9 +24,21 @@ The glossary as a brain, lit by this person's own Term Review record.
 | Entrance | Only the **Your knowledge brain** tile on the CoreCHI Practice dashboard (`openHumcBrain('you')`) (`knowledgeEntryHtml`, styled with the memory trainer tile: `.kb-entry*` and `.kb-go` sit beside `.mem-entry*` in `app.css`) |
 | Drawing | Dots are two `THREE.Points` layers (core, halo) with light added and alpha left alone (`ADD`): plain additive blending also adds alpha, and on the see-through canvas faint dots cut dark holes in the background |
 
-**Privacy.** The view reads only your own record. But `term-reviews` is
-readable by the whole team in `firestore.rules` and keyed by typed name, so
-that promise holds only inside the app. K2 in `docs/PLAN.md` fixes it.
+**Privacy (K2, 2026-10-21).** The view reads only your own record, and
+once the Hub is locked so do the rules: `term-reviews` is read and written
+only by a phone whose name in `hub-members/{uid}.who` (trimmed, lower case)
+matches the record's `who` (`ownReview` in `firestore.rules`); no listing of
+everyone's. Practice mode leaves it open, as before. Jose's pick: **by
+name**, so a record follows its person to a new phone; the weak spot is a
+phone renamed to a teammate's name (names are self-reported). Per phone
+(uid) was the other option: unspoofable, but a new phone or cleared storage
+would start from zero. The app keeps `who` in step (`syncAccessWho`); when a
+read or save is refused, `syncAccessWhoNow` waits for that sync and tries
+once more (`loadTermReviews`, `saveTermReview`). Two names that make the same
+document id (`reviewDocId`: "Ana-Maria", "Ana Maria") now refuse each other's
+saves instead of silently overwriting. Tested in the Firestore emulator (18
+cases); the retry in `tests/suites/humc-brain.cjs`. Takes effect only once
+the rules are published in the Firebase console.
 
 | Guide | `GUIDE_TOPICS` id `knowledgebrain` (section study, `guide/topics.js`); `GUIDE_NEWS` card `knowledgebrain` |
 | Test | `tests/suites/humc-brain.cjs` (both brains, and that they stay apart) |

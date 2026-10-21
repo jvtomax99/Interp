@@ -68,10 +68,10 @@ per term. Brightness = box, dimmed when overdue; never practiced = dark.
 Jose's picks: first as two tabs with the code view, then (same day) kept
 separate: his head opens only his code brain, the CoreCHI Practice tile
 only the knowledge brain, no link between; record one daily snapshot on the phone from now on for the
-progress figure. **K2 (next, separate PR): `term-reviews` is readable by the
-whole team (`firestore.rules`, `team()`) and keyed by typed name, so the
-"never shown to others" promise holds only in the app; tie records to the
-login and tighten the rule.**
+progress figure. **K2 (this PR; Jose's pick "by name"): once locked,
+`term-reviews` is read and written only by the phone whose `hub-members`
+name matches the record (`ownReview`), with a sync-and-retry when refused.
+Jose publishes `firestore.rules` in the console; until then nothing changes.**
 
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):

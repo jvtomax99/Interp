@@ -3316,7 +3316,10 @@ async function loadTermReviews(){
   const me = whoAmI().trim().toLowerCase();
   if(!me) return;
   try{
-    const snap = await db.collection('term-reviews').where('who','==',me).get();
+    const q = () => db.collection('term-reviews').where('who','==',me).get();
+    // Refused: this phone's name in hub-members is behind (a rename, a new
+    // phone); bring it up to date and ask once more.
+    const snap = await q().catch(async err => { if(err && err.code === 'permission-denied' && await syncAccessWhoNow()) return q(); throw err; });
     snap.forEach(doc=>{
       const d = doc.data();
       TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount,
@@ -3349,7 +3352,8 @@ async function saveTermReview(termId, box, reviewCount, opts){
   // Firestore's offline cache, so a plain set() would wait for the server)
   // the answer is kept on the phone and sent when the connection is back.
   try{
-    const how = await queuedWrite({ collection: 'term-reviews', docId: reviewDocId(me, termId), op: 'set', data: stripUndefined(record) });
+    const entry = { collection: 'term-reviews', docId: reviewDocId(me, termId), op: 'set', data: stripUndefined(record) };
+    const how = await queuedWrite(entry).catch(async err => { if(err && err.code === 'permission-denied' && await syncAccessWhoNow()) return queuedWrite({ ...entry }); throw err; });
     TERM_REVIEWS[termId] = record;
     kbLogNote();
     return { ok: true, how };
@@ -20156,6 +20160,14 @@ function renderNameAccess(){
 
 // Saving a name in the name sheet updates this phone's line in the owner's
 // list straight away rather than at the next launch.
+// The same, waited for: the practice record's rule (term-reviews) checks this
+// name, so a refused read or write syncs it and tries once more.
+async function syncAccessWhoNow(){
+  const user = hubAuth && hubAuth.currentUser;
+  if(!user || !db || !accessWho()) return false;
+  try{ await db.collection('hub-members').doc(user.uid).update({ who: accessWho(), lastSeen: Date.now() }); return true; }
+  catch(e){ return false; }
+}
 function syncAccessWho(){
   const me = readAccessMe();
   const user = hubAuth && hubAuth.currentUser;
