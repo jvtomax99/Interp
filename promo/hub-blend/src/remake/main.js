@@ -48,6 +48,18 @@ const SHOTS = [
   // the end card (end.js)
   [FEATURES_END, DURATION - OPEN, "end"],
 ];
+/* The music plays straight from the first frame (Jose, 2026-10-21: "let the music play and start
+   the script once the words show up"), so the hook's cuts are moved onto the song's own hits after
+   the walk-in: the time since the words appeared (actual) maps to the hook as designed, through
+   these anchors, each cut landing on a hit (v11's track: 3.29, 4.83, 5.93, 8.79, 9.96 s from
+   the first frame). After the logo nothing moves. */
+const HOOK_MAP = [[0, 0], [0.79, 1.0], [2.33, 2.4], [3.43, 3.4], [6.29, 5.98], [7.46, 7.5], [9.5, 9.5]];
+function hookTime(a) {
+  if (a <= 0 || a >= 9.5) return a;
+  let i = 1; while (a > HOOK_MAP[i][0]) i++;
+  const [a0, d0] = HOOK_MAP[i - 1], [a1, d1] = HOOK_MAP[i];
+  return d0 + (d1 - d0) * (a - a0) / (a1 - a0);
+}
 const WHIP = 0.24; // the fly-through between shots, ending on the beat
 const HOP = 0.4; // between two features: Dr. Smiley hops from one phone to the next (Jose: at most 0.4 s)
 const isFeature = (g) => FEATURES.some((f) => f.g === g);
@@ -667,7 +679,7 @@ async function build() {
   function drawScene(time) {
     const T0 = clamp(time, 0, DURATION - 1e-4);
     firstAt(T0);
-    const t = Math.max(0, T0 - OPEN); // during the first frame the hook waits at its start, the photo behind it
+    const t = hookTime(Math.max(0, T0 - OPEN)); // during the first frame the hook waits at its start, the photo behind it
     driftBackdrops(t);
     floor.visible = !isFeature(shotAt(t).s[2]); // phones float in front of their photo; the words keep their floor
     partsAt(t);
@@ -733,7 +745,7 @@ async function build() {
     depthTest: false, depthWrite: false,
   }));
   function blurred(time) {
-    const t = time - OPEN;
+    const t = hookTime(time - OPEN);
     if (t < 0) return false;
     const { s, next, hopping } = shotAt(t);
     return !hopping && !!(next && t > s[1] - WHIP);
