@@ -28,7 +28,8 @@ const SCREENS = ['home', 'all', 'chat', 'practice', 'review', 'userguide', 'tran
 const SHEETS = ['openMoreSheet', 'openNameModal', 'openAddDomainModal', 'openAddEventModal', 'openAddProviderModal', 'openAddDoctorDirModal', 'openOutboxSheet', 'openWarmupSheet', 'openRankSheet'];
 const dump = page => page.evaluate(() => {
   const h = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(36); };
-  const st = (e, p) => { const cs = getComputedStyle(e, p); let s = ''; for (let i = 0; i < cs.length; i++) s += cs[i] + ':' + cs.getPropertyValue(cs[i]) + ';'; return h(s); };
+  // sorted: custom properties are listed in the order the sheets declared them
+  const st = (e, p) => { const cs = getComputedStyle(e, p), k = []; for (let i = 0; i < cs.length; i++) k.push(cs[i]); return h(k.sort().map(n => n + ':' + cs.getPropertyValue(n)).join(';')); };
   const out = {}, seen = {};
   for (const e of document.querySelectorAll('*')) {
     if (e.closest('head')) continue;
