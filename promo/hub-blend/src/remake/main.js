@@ -48,14 +48,15 @@ const SHOTS = [
   // the end card (end.js)
   [FEATURES_END, DURATION - OPEN, "end"],
 ];
-/* The music follows the script (Jose, 2026-10-21): tools/music.py re-cuts v11's track so every
-   shot has the music v11 had under the same caption, from the moment the words appear. The hook
-   then plays on v11's own clock: these anchors map the time since the words appeared (v11's hook
-   times: "Heart failure" 1.0, the timer 1.9 to zero at 3.2, the wrong word 3.3, the strike 4.85,
-   the right word 6.0) onto the hook as designed. Only the timer moves; after the logo nothing does. */
-const HOOK_MAP = [[0, 0], [1.0, 1.0], [1.9, 2.4], [3.2, 3.3], [4.85, 4.855], [6.0, 5.98], [7.5, 7.5], [9.5, 9.5]];
+/* v11's audio has a narrator reading the script, so it plays untouched (Jose, 2026-10-21) and the
+   picture follows v11's clock: from the moment the words appear, the time maps onto the hook as
+   designed through v11's own cut times ("Heart failure" 1.0, the timer 1.9 to zero at 3.2, the
+   wrong word 3.3, the strike 4.85, the right word 6.0, the logo 8.0, the first feature 10.0);
+   after that the features run 3 s each, as in v11, half a second behind the design clock. */
+const HOOK_MAP = [[0, 0], [1.0, 1.0], [1.9, 2.4], [3.2, 3.3], [4.85, 4.855], [6.0, 5.98], [8.0, 7.5], [10.0, 9.5]];
 function hookTime(a) {
-  if (a <= 0 || a >= 9.5) return a;
+  if (a <= 0) return a;
+  if (a >= 10.0) return a - 0.5;
   let i = 1; while (a > HOOK_MAP[i][0]) i++;
   const [a0, d0] = HOOK_MAP[i - 1], [a1, d1] = HOOK_MAP[i];
   return d0 + (d1 - d0) * (a - a0) / (a1 - a0);

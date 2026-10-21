@@ -106,12 +106,13 @@ export async function buildEnd(scene, group, { start }) {
 
   // ---------- the screen's content over time (u = seconds into the shot) ----------
   const LINES = [
-    { t: 0.25, draw: (a) => drawSmiley(a) },
-    { t: 0.45, draw: (a) => text("Interpreter Hub", 640, 300, '800 112px "Inter Tight"', "#fff", a, true) },
-    { t: 0.75, draw: (a) => text("Built Here, For Our Patients.", 640, 374, '600 62px "Inter Tight"', "rgba(255,255,255,.92)", a) },
-    { t: 1.05, draw: (a) => urlPill(a) },
-    { t: 1.3, draw: (a) => text("Live Today, On Any Phone.", 640, 556, '600 50px "Inter Tight"', "rgba(255,255,255,.85)", a) },
-    { t: 1.75, draw: (a) => text("Better Words.", 640, 640, '800 80px "Inter Tight"', "#fff", a) },
+    // when each line appears: v11's end card, from 37 s (the narrator reads them at these moments)
+    { t: 0.2, draw: (a) => drawSmiley(a) },
+    { t: 0.9, draw: (a) => text("Interpreter Hub", 640, 300, '800 112px "Inter Tight"', "#fff", a, true) },
+    { t: 1.9, draw: (a) => text("Built Here, For Our Patients.", 640, 374, '600 62px "Inter Tight"', "rgba(255,255,255,.92)", a) },
+    { t: 2.9, draw: (a) => urlPill(a) },
+    { t: 3.9, draw: (a) => text("Live Today, On Any Phone.", 640, 556, '600 50px "Inter Tight"', "rgba(255,255,255,.85)", a) },
+    { t: 5.9, draw: (a) => text("Better Words.", 640, 640, '800 80px "Inter Tight"', "#fff", a) },
   ];
   let drawnKey = "";
   function text(s, x, y, font, color, a, glowText) {
@@ -134,7 +135,7 @@ export async function buildEnd(scene, group, { start }) {
   function drawScreen(u) {
     // the first beat flashes the screen cyan, so its light visibly sweeps the table, then it settles navy
     const flash = 1 - outCubic(prog(u, 0.05, 0.6));
-    const wipe = outExpo(prog(u, 2.05, 2.4));
+    const wipe = outExpo(prog(u, 6.9, 7.25));
     const key = [flash.toFixed(2), wipe.toFixed(2), ...LINES.map((l) => outCubic(prog(u, l.t, l.t + 0.35)).toFixed(2))].join();
     if (key === drawnKey) return;
     drawnKey = key;
@@ -163,7 +164,7 @@ export async function buildEnd(scene, group, { start }) {
     hinge.rotation.x = lerp(-0.05, -0.32, outBack(prog(u, 0, 0.6), 1.2));
   }
   function view(u) {
-    const e = inOutSine(clamp(u / 4));
+    const e = inOutSine(clamp(u / 7));
     const o = group.position;
     return {
       pos: new THREE.Vector3(o.x + lerp(1.1, -0.1, e), lerp(2.6, 2.0, e), o.z + lerp(8.2, 5.7, e)),

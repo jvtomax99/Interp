@@ -20,16 +20,16 @@ export const FEATURES = [
   // every word capitalised (Jose, 2026-10-20)
   { g: "home", a: "Built By Our", b: "Own Interpreters." },
   { g: "glossary", a: "One Glossary.", b: "Every Specialty." },
-  { g: "body", a: "Explore The 3D Body.", b: "English And Spanish.", len: 3.5 }, // longer: the body comes apart first
+  // the 3D Body was cut (Jose, 2026-10-21): v11 has no narrated line for it, and v11's audio now plays untouched
   { g: "translate", a: "Glossary First.", b: "AI Second." },
   { g: "physician", a: "Ready For", b: "Every Physician." },
   { g: "falsefriends", a: "101 False Friends.", b: "Flagged." },
   { g: "drills", a: "Daily Drills.", b: "Sharp Skills." },
-  { g: "cert", a: "National Certification.", b: "Prep Built In.", len: 3.0 }, // longer: the flight into the campus
+  { g: "cert", a: "National Certification.", b: "Prep Built In." },
   { g: "team", a: "One Team.", b: "One Channel." },
   { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley." },
 ];
-export const FEATURE_LEN = 2.5;
+export const FEATURE_LEN = 3.0; // v11's: its narrator reads one caption every 3 s
 export const featureLen = (f) => f.len || FEATURE_LEN;
 // when each feature starts, in the clock after the opener (the hook and logo take the first 9.5 s)
 export const FEATURE_STARTS = FEATURES.reduce((a, f, i) => (a.push(i ? a[i - 1] + featureLen(FEATURES[i - 1]) : 9.5), a), []);
