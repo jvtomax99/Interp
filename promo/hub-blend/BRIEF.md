@@ -234,7 +234,21 @@ distinct on screen.
    (muffled, as if through the doors). 43 s; music: swell, v11 0-38 s into
    its last 3.5 s.
 7. Check against the rules above, side by side with v11 per feature; fix;
-   full render; send with the side-by-side.
+   full render; send with the side-by-side. **Done** (2026-10-21).
+   Checked: captions 84 px at full size (rule: 64), 11.5:1 contrast or
+   better; Dr. Smiley over the proof 0 frames (`tools/check-smiley.cjs`);
+   no dark or empty phone screen, 122 frames measured, darkest 0.22
+   (`tools/check-screens.cjs`); real captures throughout. Failed and fixed:
+   the proof was unreadable at 360 px wide in every desk shot (the phone is
+   small in the frame), so it now flies off the phone to about 86% of the
+   frame width with v11's cyan outline, the scene dimmed, and settles back
+   before Dr. Smiley hops (`src/remake/hero.js`); the end card's smaller
+   lines and the address were unreadable, now bigger, the address pill
+   toned down (the bloom washed it out). The walk-in swell is audible from
+   its start. Full size: `remake-final.html` (1080x1920, otherwise the same
+   file); `tools/side-by-side.sh` puts v11 beside the remake shot by shot.
+   Still open for Jose: the logo shot keeps the old flat phone; the hop
+   between features dips through navy (a dark beat each time).
 
 ## Practical
 
