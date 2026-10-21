@@ -218,11 +218,11 @@ if(inFrame){
 
 /* Your record, from the app. Outside the app, or if it never answers, the brain is drawn dark with a note. */
 let started = false;
-const start = K => { if(started) return; started = true; build(K); };
-addEventListener("message", e => { if(e.origin === location.origin && e.data && e.data.ih === "brain-data") start(e.data.data); });
+const start = (K, focus) => { if(started) return; started = true; build(K, focus); };
+addEventListener("message", e => { if(e.origin === location.origin && e.data && e.data.ih === "brain-data") start(e.data.data, e.data.focus); });
 if(inFrame){ tell({ ih:"brain-want" }); setTimeout(() => start(null), 8000); } else start(null);
 
-function build(K){
+function build(K, FOCUS){
 const ok = !!(K && K.v === 1 && Array.isArray(K.terms) && Array.isArray(K.domains));
 const DOMS = ok ? K.domains : [];
 const LEVEL = ["Not practised yet", "Missed last time", "Learning", "Known"];
@@ -398,9 +398,11 @@ function paint(){
     c.copy(t.lv === 1 ? missCol : dColor[t.d]);
     if(t.lv === 3) c.lerp(white, .35);
     if(t.lv === 0) c.lerp(slate, .55);   // not practised: a faint slate dot, there but unlit
-    const f = (on ? 1 : .18) * (t.lv === 0 ? .62 : .35 + .65 * b);
+    let f = (on ? 1 : .18) * (t.lv === 0 ? .62 : .35 + .65 * b);
     coreCol[k] = c.r*f; coreCol[k+1] = c.g*f; coreCol[k+2] = c.b*f;
-    const h = (on ? 1 : .1) * (t.lv === 0 ? 0 : .7 * b * b);
+    let h = (on ? 1 : .1) * (t.lv === 0 ? 0 : .7 * b * b);
+    // A session's terms (opened from Term Review's summary) glow whatever their level, so they're easy to find.
+    if(on && focus && sel && sel.type === "session"){ if(t.lv === 0) c.copy(dColor[t.d]); f = Math.max(f, 1); h = Math.max(h, .55); }
     haloCol[k] = c.r*h; haloCol[k+1] = c.g*h; haloCol[k+2] = c.b*h;
   });
   coreGeo.attributes.color.needsUpdate = true; haloGeo.attributes.color.needsUpdate = true;
@@ -564,12 +566,38 @@ function selectTerm(i){
   sheet.querySelector('[data-act="practise"]').onclick=() => tell({ ih:"brain-practice", domain:D.id });
   hoverI=i; showTermLbl(i); updateLabels();
 }
-function clearSel(){ sel=null; sheet.hidden=true; setFocus(null); hoverI=null; showTermLbl(null); updateLabels(); }
+// Opened from a Term Review session's summary: those terms only, the brain turned to face them.
+function selectSession(f){
+  const okIds = new Set(f.right || []), missIds = new Set(f.missed || []);
+  const list = terms.filter(t => okIds.has(t.id) || missIds.has(t.id));
+  if(!list.length) return;
+  sel={type:"session"};
+  setFocus(new Set(list.map(t => t.i)));
+  const c = list.reduce((a,t) => a.add(nodeV[t.i]), new THREE.Vector3()).multiplyScalar(1 / list.length);
+  // Face them, centred and closer; Close puts the view back.
+  view.theta = Math.atan2(c.x, c.z); idleAt = performance.now() + 9000;
+  homeView = { target: view.target.clone(), dist: view.dist };
+  view.target.lerp(c, .75); view.dist = fitD * .62;
+  const r = list.filter(t => okIds.has(t.id)), m = list.filter(t => missIds.has(t.id));
+  const row = (t, ok) => `<li><span>${esc(t.en)}</span><span style="color:${ok ? LCOL[3] : LCOL[1]}">${ok ? (t.lv===3 ? "Known" : "Right") : "Missed"}</span></li>`;
+  sheet.innerHTML = `<div class="sheet-top"><div><span class="tag" style="color:var(--cyan)">This session</span><h2>${r.length} right${m.length ? ` · ${m.length} to practise` : ""}</h2>
+      <span class="meta">Lit in your brain. Tap a name to find it.</span></div>
+      <button class="close" type="button" aria-label="Close">×</button></div>
+    <ul class="list">${r.map(t => row(t, true)).join("")}${m.map(t => row(t, false)).join("")}</ul>`;
+  sheet.hidden=false; sheet.querySelector(".close").onclick=clearSel;
+  hoverI=null; showTermLbl(null); updateLabels();
+  // Tap a name: its label shows beside its dot (all of them at once would pile up; a session's terms sit close together).
+  sheet.querySelectorAll(".list li").forEach((li, k) => { const t = [...r, ...m][k]; li.tabIndex = 0; li.style.cursor = "pointer";
+    const show = () => { hoverI = t.i; showTermLbl(t.i); }; li.onclick = show; li.onkeydown = e => { if(e.key === "Enter") show(); }; });
+}
+let homeView = null;
+function clearSel(){ if(homeView){ view.target.copy(homeView.target); view.dist = homeView.dist; homeView = null; } sel=null; sheet.hidden=true; setFocus(null); hoverI=null; showTermLbl(null); updateLabels(); }
 function updateLabels(){
   const showing = sel && sel.type==="dom" ? topOf(sel.d) : null;
   tops.forEach(g => { regionLbl[g].style.opacity = sel ? (g===showing ? 1 : 0) : (bigTops.includes(g) ? 1 : 0); });
 }
 updateLabels();
+if(FOCUS && ok) selectSession(FOCUS);
 document.getElementById("jump").onclick=() => document.getElementById("workup").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 
 /* ---------- Loop ---------- */

@@ -10,6 +10,8 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | Suite | What it covers |
 |---|---|
 | `events-login.mjs` | The events watcher's own login (`api/_service-login.js`), with a throwaway key; no browser |
+| `push.mjs` | Notifications (`api/push.js`, `_push-team.js`, `_webpush.js`), Firestore and the push services faked: the sealed message opens on a receiver written from RFC 8291, the VAPID signature verifies, who hears about a chat message (channels, @mentions, never the sender), once per message, owner-only sends, gone phones removed; no browser |
+| `notifications-screen.cjs` | More → Notifications: iPhone in Safari told to add the Hub to the Home Screen, off / blocked / on, the switches, owners' Send to the team (the request, the phones reached), members never see it, From the team, `?open=chat` from a tapped notification |
 | `api-helper.mjs` | The one Claude helper (`api/_routine.js`) with the Messages API faked: Term lookup, Ask the Hub and Doctor Prep end to end (the request sent, the beta, the web search tool, the answer filtered), the retries without the beta and without a schema (Doctor Prep keeping its effort), a refusal, a cut-off answer, a failed web search, the door, and the routine backup (Haiku first, the backup after); no browser |
 | `daily-drill.cjs` | Daily Drill: the three rounds at every level, the trap, compare, the clock, your place kept, score, level up/down, Home card |
 | `guide.cjs` | User Guide: search, answers, steps, Show me, deep links |

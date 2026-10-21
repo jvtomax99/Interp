@@ -1,71 +1,86 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-21, 12:20 UTC, from the chat that built the
-HUMC Brain (#113, live as b1021.1147).
+hands over"). This one: 2026-10-21, from the chat that built the 3D Dr.
+Smiley on Jose's Tripo model (PR #114, branch `claude/3d-dr-smiley-r1-avn9y1`).
 
 ## Paste this into the new chat
 
-> Read AGENTS.md, CLAUDE.md, docs/PLAN.md and docs/handoff.md on branch
-> claude/knowledge-brain of jvtomax99/Interp. Next job: turn the HUMC Brain
-> into "your knowledge brain" (handoff has the plan). Start by checking what
-> per-term knowledge data the app already keeps, then tell me in 2-3 lines
-> what you'll build and ask me the open questions with buttons.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
+> continue the 3D Dr. Smiley on branch `claude/3d-dr-smiley-r1-avn9y1`: I'll
+> attach the zip of my Tripo model; rebuild it, then show me the visual plan
+> for his brows, cheeks and mouth. Plain words, say "working on it" and "done".
+
+## Jose's standing rule for this work (in `AGENTS.md`)
+
+**A visual step-by-step plan with screenshots before anything is built**, then
+wait for his go. Every step that changes the look stops for his OK with
+pictures. Questions with options go as buttons, recommended first.
 
 ## Where things stand
 
-- **#113 HUMC Brain: merged, live (b1021.1147).** Double-tap Dr. Smiley's
-  head in the Home hello opens `brain/index.html` full screen for everyone.
-  It shows the census of `index.html` (118 sections, 1,090 links) as a 3D
-  brain plus a 7-figure workup. `docs/features/humc-brain.md` has it all.
-- No open PRs from this chat. No check-ins armed.
-- This branch (`claude/knowledge-brain`) holds only this handoff and the
-  PLAN entry; the new chat builds on it and opens one PR.
+- **PR #114 (`claude/3d-dr-smiley-r1-avn9y1`), open, docs only** (nothing
+  deployed). Folder `docs/mockups/smiley-3d/`. Merged with `main` 2026-10-21.
+- The look Jose kept: **his own Tripo model** (he made it on tripo3d.ai from
+  a Pixar-style picture of Dr. Smiley, arms down), then changed by
+  `tripo_fix.py`: **matte** (no gloss: roughness >= .62, specular .1, no
+  coat), **hair recoloured** to the drawing's chestnut, **a swoop** at the
+  front. Approved: `out/tripo-before-after.png`.
+- **Skeleton:** `tripo_rig.py`, 36 bones (fingers too). Pose test approved:
+  `out/plan/rig-test.png` (rest, wave, jump, point).
+- **Eyes:** `tripo_eyes.py`, `EYE_STYLE=matched` (Jose's pick "B" over
+  `out/plan-eyes-options.png`): 3D eyes at his painted eyes' size, top
+  eyeliner, dark brown iris, big pupil, one shine; blink and look around.
+  Approved: `out/tripo-eyes.mp4`.
+- Earlier tries, rejected (kept in git as a record): shapes built in code
+  (`build.py` styles v1, figure, film: "still not him", "glossy", "the
+  hair"). Don't go back there.
 
-## Next: your knowledge brain (Jose's pick, 2026-10-21)
+## The model files are NOT in git (too big)
 
-Jose asked what the brain is *for*; the honest answer was "a code map for
-whoever writes the code, an easter egg for everyone else". Of three ways to
-give it a job (knowledge brain, team brain, code health brain) he picked:
+`docs/mockups/smiley-3d/in/` is git-ignored. **A new chat needs Jose's zip
+again** (`Dr.Smiley ( hands down ) .zip`, a 32 MB GLB inside; he attaches it
+in the chat; iCloud links are blocked in the cloud session). Rebuild, about
+2 minutes, in this order:
 
-**Your knowledge brain.** Same 3D brain, but about the interpreter, not the
-code:
-- Regions = the glossary's domains (oncology, cardiology, GI, peds...),
-  laid out over the lobes; subgroups cluster inside their parent's region.
-- Dots = terms. Brightness = how well *this phone's person* knows the term,
-  from what the app already records. Dark = never practiced or often missed.
-- Tap a dark region → practice exactly those terms (Daily Drill or Term
-  Review scoped to them). Tap a dot → the term card.
-- Over weeks the brain lights up: motivation for CoreCHI.
-- The figures below become about knowledge too (weakest domains, coverage,
-  progress over time) instead of code.
+```
+pip install bpy opencv-python-headless pillow scipy
+cd docs/mockups/smiley-3d && mkdir -p in
+unzip -j <the zip> -d /tmp/z && cp "/tmp/z/Dr.Smiley ( hands down ) .glb" in/tripo-hands-down.glb
+python3 tripo_fix.py                      # in/tripo-fixed.blend (matte, hair, swoop)
+EYE_STYLE=matched python3 tripo_eyes.py   # in/tripo-eyes.blend
+python3 tripo_rig.py                      # in/tripo-rig.blend (36 bones)
+python3 tripo_posetest.py                 # check: out/plan/rig-test.png
+```
 
-**First step, before any building: find the data.** Unproven so far how
-much per-term detail exists. Look at (banner sections in `index.html`):
-"Practice record: what you personally know, question by question",
-"Term Review: Dr. Smiley's practice sessions" (`saveTermReview`,
-`term-reviews/`), "Quiz" and `quiz-history/`, "Daily Drill" (`ih_warmup`),
-"Memory trainer". Report which give per-term right/wrong with dates, and
-whether they're on the phone (localStorage) or in Firestore per person.
+## What's next (Jose's approved plan, `out/plan-rig.png`, steps 3-6)
 
-## Open questions for Jose (ask with buttons, recommendation first)
+3. **Brows and cheeks**: small face bones (brow lift/frown per side, cheek
+   raise). His brows are painted on the model's texture; options to show
+   him first: (a) bones under the painted brows, (b) 3D brow pieces over
+   them, like the eyeliner. Show both as pictures, recommend one.
+4. **Mouth**: shapes per expression (smile, laugh, surprised, sad,
+   worried, doubt), from his 30 drawn expressions (`drsmiley/face.webp`,
+   `DR_FACE_FRAMES`). The model's mouth is painted (open smile); the
+   approach needs a plan with mock-ups first.
+5. Expression sheet, six poses, 360-degree turn: stop for his OK.
+6. Then the animation (R2), again as a visual plan first.
 
-1. Keep the code view as a second tab ("How the Hub is built") or replace
-   it? Pick: keep it as a tab; it's done and costs nothing.
-2. Still opened by double-tapping his head, or also a visible entrance
-   (CoreCHI Practice dashboard)? Pick: both; a useful tool shouldn't be
-   hidden.
-3. Personal data stays on the phone / the person's own records only. Never
-   show one person's gaps to others. (State it; don't ask.)
+Plan pictures: `storyboard.py` (`board()`), `tripo_planviz.py`.
 
-## Learned this chat, not yet elsewhere
+## Learned (also in the code comments)
 
-- From a cloud session, `gh pr create` fails (GraphQL blocked): open PRs
-  with `gh api repos/jvtomax99/Interp/pulls --input pr.json`, merge with
-  `gh api -X PUT .../pulls/N/merge -f merge_method=merge -f sha=<full sha>`.
-- On the shallow clone, `--force-with-lease` needs the explicit old sha
-  (`--force-with-lease=refs/heads/B:<sha>`), or it says "stale info".
-- The harness serves only `/` for our origin; a suite opening another page
-  of ours routes it itself (`tests/suites/humc-brain.cjs`).
-- `main` moved mid-chat (the `app.css` split, phase 1); rebase before the
-  PR, regenerate `brain/data.json` after (`cd tests && node tools/brain-data.cjs`).
+- The Tripo GLB is one fused surface split along its texture seams (no
+  shared corners across seams): weld positions before any "touching"
+  logic or bone heat, or bone heat finds no solution.
+- An edited embedded GLB image keeps its old copy: load the edited PNG
+  as a new image and swap it into the material.
+- Saved `.blend` files may default to Eevee (needs a GPU): set Cycles CPU.
+- A new shape key comes in at full strength: set it to 0.
+- Iris shading must use the `rest_position` attribute, or a skeleton
+  moving the ball drags the iris off it.
+- Bone parenting via `matrix_world` right after setting `parent_bone`
+  reads a stale matrix: use an armature modifier with one vertex group.
+- Lids that blink with one shape key cut through the eyeball (the lash
+  line vanishes): 8 keys, each a step round the ball.
+- Renders here: about 7-12 s a frame at 540 px, 12-24 samples, CPU.

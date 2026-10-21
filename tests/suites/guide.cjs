@@ -21,7 +21,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     newsMissing: GUIDE_NEWS.filter(n => !GUIDE_TOPICS.some(t => t.id === n.id)).map(n => n.id),
     pins: Object.values(GUIDE_SECTION_PINS),
   }));
-  ok(data.n === 68 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
+  ok(data.n === 69 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
   const broken = await page.evaluate(async pins => { const bad = []; for (const p of pins) { const i = new Image(); i.src = p; try { await i.decode(); } catch (e) { bad.push(p); } } return bad; }, data.pins);
   ok(!broken.length, 'all tile pictures load', broken);
 

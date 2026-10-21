@@ -88,6 +88,13 @@ R1. The figure and skeleton: turntable and six poses (this PR). Jose
    bones, then mouth shapes from his 30 drawings. The GLB and the edited
    model live in `docs/mockups/smiley-3d/in/` (not in git, 32 MB and 48 MB):
    a new chat needs the zip again from Jose.
+   Then (same day): skeleton built (`tripo_rig.py`, 36 bones, bone heat on a
+   welded decimated copy) and 3D eyes (`tripo_eyes.py`). Jose: "the eyes
+   look weird"; options shown (`out/plan-eyes-options.png`), his pick B,
+   EYE_STYLE 'matched' (his painted eyes' size, top eyeliner, dark iris,
+   big pupil; blinks in 8 steps round the ball, lid 1.2 wide, shut at -68).
+   Kept: `out/tripo-eyes.mp4`, `out/plan/rig-test.png`. Next: the visual
+   plan for brows, cheeks and mouth (handoff).
 R2. The motions as short clips: idle breathing, anticipation crouch, jump
    with legs tucked, a spin or flip, a squash landing, wave, look, point,
    happy bounce; secondary motion (hair, coat hem, lanyard) on springs;
@@ -112,10 +119,10 @@ per term. Brightness = box, dimmed when overdue; never practiced = dark.
 Jose's picks: first as two tabs with the code view, then (same day) kept
 separate: his head opens only his code brain, the CoreCHI Practice tile
 only the knowledge brain, no link between; record one daily snapshot on the phone from now on for the
-progress figure. **K2 (next, separate PR): `term-reviews` is readable by the
-whole team (`firestore.rules`, `team()`) and keyed by typed name, so the
-"never shown to others" promise holds only in the app; tie records to the
-login and tighten the rule.**
+progress figure. **K2 (this PR; Jose's pick "by name"): once locked,
+`term-reviews` is read and written only by the phone whose `hub-members`
+name matches the record (`ownReview`), with a sync-and-retry when refused.
+Jose publishes `firestore.rules` in the console; until then nothing changes.**
 
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
@@ -348,6 +355,15 @@ then read the log; it names the suite and the check.
   swoop, tips flicking), hands with a thumb and three fingers on bones
   (`GRIPS`), a stethoscope, and a 3D nose, cheeks and muzzle under the
   drawn face. Docs only, nothing deployed, no User Guide change.
+- 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
+  aren't being delivered", owners should send them, "like a normal app";
+  his picks: owner-code phones send, push for Team Chat and new training).
+  Web Push with no package (`api/push.js`, `_push-team.js`, `_webpush.js`),
+  `sw.js` push + badge + `?open=`, More → Notifications for everyone with
+  Send to the team for owners, `push-subs`/`push-sent`/`push-log` rules,
+  the events watcher notifies. Guide answer `notifications` + New lately.
+  `tests/suites/push.mjs`. Needs Jose: the VAPID keys in Vercel and the
+  rules published (`docs/features/notifications.md`, Setup).
 - 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
   `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
   script loaded just before the app's own (Jose's pick over fetching it on
