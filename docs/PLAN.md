@@ -54,6 +54,13 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**3D Dr. Smiley with a skeleton (Jose, 2026-10-21; plan in `docs/handoff.md`).**
+His verdict on the reel (PR #110): Dr. Smiley "doesn't look like the
+reference video and animation"; scratch the HUMC photos. Picks: a 3D toy
+figure built in code with his drawn face and expressions on the head, sides
+and back invented, a skeleton for movement and face. R1 figure and rig
+(turntable plus six poses, Jose approves), R2 motions, R3 the reel rebuilt.
+
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
 F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right

@@ -1,96 +1,93 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-21, 00:05 UTC, from the chat that did the AI
-backup models, the one Claude helper, Home styles in layers, S5 springs, the
-split plan and the "push on all 14".
+hands over"). This one: 2026-10-21, from the chat that made the Dr. Smiley
+reel (v1 on Home's tiles, v2 at HUMC; PR #110).
 
 ## Paste this into the new chat
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
-> say in 2-3 lines what you'll do next and wait for my go. Plain words,
-> say "working on it" and "done".
+> start the 3D Dr. Smiley (phase R1 in the handoff): say in 2-3 lines what
+> you'll build first and wait for my go. Plain words, say "working on it"
+> and "done".
 
 ## Where things stand
 
-**Everything is merged and live.** Build `b1020.2318` (Vercel: "Deployment
-has completed" on the bump commit `fefc994`). Nothing of this chat's is
-open; no check-ins armed. Merged today from this chat, in one push after
-Jose said "push on all 14" (commits `8d79895` and before on `main`):
-- #88 AI backups: Translate's backup `claude-sonnet-5-5` (effort medium
-  set), the term check's `claude-opus-5-5` (effort low set).
-- #89, #98, #99 one Claude helper: every request to the Messages API goes
-  through `api/_routine.js` (`callClaude` with `beta` and `retryOutput`,
-  `parseAnswer`, `clip`, `clipLine`); Term lookup, Ask the Hub and Doctor
-  Prep are on it; `tests/suites/api-helper.mjs` (115 checks, the API faked).
-- #90 stale numbers in `CLAUDE.md`/`AGENTS.md` re-measured; "Known gap"
-  rewritten from a measurement.
-- #92 dead CSS in `home-polish.css`; #95, #96, #97, #103 Home styles in
-  layers: the greeting name, quote, row, text block and banner each in one
-  place, proven identical (30 states, 0 pixels).
-- #94 S5 springs: plain taps settle on `--spring0` (bounce 0); F2's
-  Practice buttons and Dr. Smiley's acting keep their overshoot (Jose's
-  pick); `tests/suites/springs.cjs`.
-- #100 the three `--fs-*` names that didn't exist renamed to the real ones.
-- #101 journey suite waits for the review screen (the "Term Review on 5"
-  flake); #104 the split plan `docs/split-index.md`; #108 the reporting
-  rules (plain words, "working on it", "done").
-- Closed, superseded: my #87 F3 (another chat's #102 merged first).
+- **PR #110 (`claude/smiley-reel`), open, waiting for Jose's OK.** Docs
+  only (`docs/mockups/smiley-reel/`, nothing deployed): v1 reel (12 s, Dr.
+  Smiley as a flat cutout hopping Home's four quick tiles, `reel.mp4`
+  committed) and v2 (20 s at HUMC from Jose's four photos; video not
+  committed, 29 MB, re-render with `node render.cjs v2`). Folder README
+  says how each is made. No check-ins pending.
+- **Jose's verdict on both (2026-10-21):** "Dr. Smiley doesn't look like
+  the reference video and animation." **Scratch the HUMC pictures**
+  (v2 stays in the PR as a record; not the direction). Focus on Dr. Smiley
+  and his animation.
+- The reference: an Instagram reel where a 3D toy mascot hops across a 3D
+  After Effects screen; everything (scene, music, render) made as code.
+  That mascot is Claude's own character (Clawd): match the *style of
+  animation* (solid 3D toy, real hops, tumbles, squash, landings on the
+  beat, close camera, depth of field), never its design.
 
-**Open, other chats:** none of mine. Check `git ls-remote --heads origin
-'claude/*'` before taking a phase; two chats built F3 today.
+## What's next: a 3D Dr. Smiley with a skeleton (Jose's picks)
 
-## Next, with my picks
+Jose's picks: **a 3D toy figure of Dr. Smiley built in code, with his
+drawn face and expressions on the head**; invent the sides, back and body
+he has never drawn ("let's invent them"); **a skeleton for movement and for
+facial expression.** What it takes:
 
-1. **The split of `index.html`, phase 0** (`docs/split-index.md`): Jose
-   said start after the open PRs merge; they have. Phase 0 is the census
-   tool (`tests/tools/census.cjs`) and section markers, tests and comments
-   only. My pick: start it, one PR, then phase 1 (the CSS to `app.css`)
-   with the first-paint measurement Jose asked for before he decides.
-2. **Chip and Exam sim contrast** (from the previous handoff, still open):
-   a visible change, Jose decides; show before/after.
-3. **S1b Home taps** (59-90 ms against < 20 ms): now that S5 and the Home
-   styles PRs are in.
-4. **Home styles in layers, the rest:** photo drift and scrim (8 rules
-   each), section heads, tile names, card titles; fold the same way when
-   someone touches them (method in `docs/PLAN.md`).
+1. **The figure (mesh).** Chibi toy proportions: big head (about 45% of
+   his height), his brown hair as 3D clumps that read from the side and
+   back, ears, neck, white doctor's coat over navy scrubs, short arms with
+   mitten hands, short legs, shoes, the lanyard and badge. Colours sampled
+   from `drsmiley/base.webp`. Soft vinyl-toy finish (rounded, slight
+   clearcoat), like v1's tiles.
+2. **The skeleton (rig).** Bones: root, hips, spine, chest, neck, head;
+   per side shoulder, upper arm, forearm, hand; thigh, shin, foot. Toy
+   parts hang rigidly on bones (no weight painting); the coat's hem can
+   be a few skinned bones or springs.
+3. **The face rig.** His drawn face stays his: the face skin cut from
+   `base.webp` (inside the hairline, without the hair and outline), wrapped
+   onto the head's curved front, with the 30 eye/mouth frames
+   (`face.webp`, `DR_FACE_FRAMES`) switched on it and the brows as their
+   own decals moved by `DR_BROWS`, exactly as `drSmileyArt()` lays them
+   out (numbers in `scene.html`, `ART`). A head-turn then foreshortens his
+   face like a real one. Limit: no full profile face (it turns away).
+4. **Motion.** Keyed poses on a timing file (like `timeline.json`):
+   idle breathing, anticipation crouch, jump (legs tuck, arms up), a spin
+   or flip in the air, land with squash, wave, look at something, point,
+   happy bounce. Secondary motion on springs: hair, coat hem, lanyard.
+   Disney principles as in `docs/features/dr-smiley.md`.
+5. **Approval gates for Jose, in order:**
+   - R1: the figure and skeleton. A turntable (he turns 360 degrees) and a
+     sheet of six poses, phone size, sent as files. Jose approves the
+     invented sides, back and body before any animation.
+   - R2: the motions, as short clips on v1's Home tabletop.
+   - R3: v1's reel rebuilt with the 3D figure in place of the cutout.
+   Each a commit on its own branch and PR (PR #110 can merge first).
+
+Tools: three.js 0.160 and Playwright are already installed in
+`docs/mockups/smiley-reel/` (`node_modules`, not committed; `npm install
+three@0.160.0 playwright@1.56.1` in a fresh container). The render and
+sound pipeline in that folder works (`render.cjs`, `sound.py`). Option to
+weigh in R1: `pip install bpy` (Blender 5.2 as a Python module) works here
+and could build smoother organic shapes (hair, coat) and export a GLB with
+the skeleton for three.js to render; Blender's own renderer is too slow
+here (no graphics card).
 
 ## Open questions for Jose
 
-- Phase 1 of the split: a file for the CSS against a possible one-frame
-  later first paint on a cold visit; measured first, his call if close.
-- Dr. Smiley's face lean and brows stay on their overshoot (his acting,
-  `dr-smiley.md`); one line to change if he wants them on the spring too.
+- Merge PR #110 as a record, or close it?
+- Later: should the 3D Dr. Smiley replace the drawn one in the app, or
+  stay for videos? (In the app it would be pre-rendered frames, not live 3D.)
 
-## Not proven (say so if asked)
+## Learned in this chat (also in `docs/PLAN.md` Facts)
 
-- **The dock-tuck WebKit flake** ("Dr. Smiley shrinks with the bar", 0.954
-  measured for 54/58): the arithmetic says the *open* reading was 2.4%
-  short (54/58 x 70.1/68.4 = 0.954), which matches the WebKit short-scale
-  symptom already noted in `home-polish.css`; the fix would measure his
-  layout box times the computed scale, not his painted box. WebKit won't
-  install in the cloud session, so it is unverified and unfixed.
-- S5's feel and the Home folds on a real iPhone (measured in Chromium).
-
-## Learned in this chat (also in the docs where it matters)
-
-- **Deleting a line of a CSS selector list hands its selector to the next
-  rule.** The first dead-CSS pass did that and the computed-style proof
-  caught the greeting row losing its grid. Delete whole rules, never lines.
-- **Proof scripts for `home-polish.css` changes** are in `docs/PLAN.md`
-  (Done, 2026-10-20): every computed property and box under
-  `#homeGreeting` at 11 widths x short/long name x light/dark x penning,
-  with `Math.random` pinned (`SESSION_QUOTE` and `SESSION_TIP` are random
-  per session, so a before/after without pinning differs by a line of
-  text), plus 0-pixel screenshots.
-- **Chained PRs** (base = another branch) are not auto-closed when their
-  commits reach `main` by a direct push; close them by hand with a note.
-- **Merging many PRs:** each merge's PLAN "Done" entry conflicts with the
-  next PR's; a resolver that keeps both sides of `docs/PLAN.md` and takes
-  main's version lines handles it (`scratchpad/resolve2.py` pattern:
-  PLAN keep both, `BUILD_ID`/`CACHE_VERSION` theirs, anything else by
-  hand). The bump Action can take ~10 min behind the merge's test runs.
-- **The journey "Term Review on 5" flake** is fixed in #101 (waits for the
-  review screen); if it returns, the state it found is printed.
-- A branch pushed as an empty claim can't be deleted from the cloud
-  session (403): `claude/dock-tuck-flake` is such a leftover, nothing on it.
+- three.js in headless Chromium (SwiftShader) renders 1080 x 1920 with
+  depth of field and soft shadows at about 1.1-1.5 s a frame.
+- `ShaderPass` clones its uniforms, textures too: set a live texture on
+  the pass after creating it, or its updates never show.
+- Film grain makes video huge (110 MB for 20 s at crf 18): x264 crf 27
+  with `-tune grain` gives 29 MB with no visible loss.
+- No speech-to-text here (Hugging Face blocked); captions can be read off
+  frames. PyTorch's site blocked; OpenCV EDSR upscaling works.
