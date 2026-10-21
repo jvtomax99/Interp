@@ -711,7 +711,7 @@ then read the log; it names the suite and the check.
   (`pip install bpy` works) would render on the CPU, far too slow for 360
   frames. three.js in the tests' headless Chromium with
   `--use-angle=swiftshader --enable-unsafe-swiftshader` draws depth of
-  field and soft shadows at 1080 x 1920 in about 1.3 s a frame. Whisper
+  field and soft shadows at 1080 x 1920 in about 1.1 s a frame (7 min for 12 s). Whisper
   models can't be fetched (Hugging Face is blocked), so a video's speech
   can't be transcribed here; burned-in captions can be read from frames.
 - Recording a smooth, sharp clip of an animation from the tests' Chromium:

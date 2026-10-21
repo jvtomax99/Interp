@@ -30,7 +30,7 @@ in headless Chromium, frame by frame.
 
 ```
 npm install three@0.160.0 playwright@1.56.1   # here; not committed
-node render.cjs              # reel.mp4, about 8 min
+node render.cjs              # reel.mp4, about 7 min
 node render.cjs preview      # preview.mp4 at half size, about 2 min
 node render.cjs still 2.5 8  # still_2.5.jpg, still_8.jpg
 ```
