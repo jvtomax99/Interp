@@ -25,6 +25,7 @@ const SUITES = [
   ['smiley-squash.cjs',   'Dr. Smiley: squash and stretch on the spring, Lively only'],
   ['smiley-quiz.cjs',     'Dr. Smiley in a quiz: bounce, wince, streaks, in the dock'],
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
+  ['humc-brain.cjs',      'HUMC Brain: double-tap his head opens it, one tap still opens Ask, Back and X close it'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],
