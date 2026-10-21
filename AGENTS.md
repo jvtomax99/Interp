@@ -64,6 +64,7 @@ So:
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
 | 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
 | Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
+| User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Everything else | `index.html` |
 
@@ -148,18 +149,20 @@ checks rules on `dock-mini`, `ov-open`, `gs-open` and `dm-open`.
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
 renamed button, a new message. Dr. Smiley answers "how do I…" from the
 guide's entries (`GUIDE_TOPICS`), so a stale answer becomes a wrong answer
-from him too; nine had drifted. In `index.html`:
-- `GUIDE_TOPICS`: add an answer for something new, rewrite any answer the
+from him too; nine had drifted.
+- `GUIDE_TOPICS` (the answers) and `GUIDE_SECTIONS` live in
+  `guide/topics.js` (plain data, loaded just before `index.html`'s script;
+  2026-10-21). Add an answer for something new, rewrite any answer the
   change makes wrong (search the guide for the old label or wording).
-- `GUIDE_STEPS` (drawn steps) and `GUIDE_COACH` (the "Show me" selectors):
+- In `index.html`: `GUIDE_STEPS` (drawn steps) and `GUIDE_COACH` (the "Show me" selectors):
   change them when the control they draw or point at changes.
 - `GUIDE_NEWS` ("New lately", three cards): a new feature gets a card,
   newest first; the oldest card drops off (its answer stays).
-- `GUIDE_SECTIONS` / `GUIDE_SECTION_PINS`: only when a new area of the app
+- `GUIDE_SECTIONS` (`guide/topics.js`) / `GUIDE_SECTION_PINS`: only when a new area of the app
   needs its own tile.
 A fix nobody can notice needs no guide change; say so in the commit
 message. Changes to `home-polish.*` or `pin-icons.js` still update the
-guide, which lives in `index.html`.
+guide (`guide/topics.js` and `index.html`).
 
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
 nothing for the glossary, terms, chat, Doctor Prep, study, quizzes, profile,
