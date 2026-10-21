@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v269-b1021.1058';
+const CACHE_VERSION = 'interpreter-hub-v270-b1021.1147';
 const PRECACHE = [
   './',
   './index.html',
@@ -171,7 +171,11 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
+        .catch(() => caches.match(req).then(hit => hit || (url.pathname.startsWith('/brain/')
+          // The HUMC Brain never opened online yet: say so in its frame,
+          // rather than loading the whole app inside it.
+          ? new Response('<p style="font:16px system-ui;color:#A4B0CC;background:#02040B;margin:0;padding:24px;min-height:100vh">Open the HUMC Brain once with a connection; after that it works offline.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+          : caches.match('./index.html'))))
     );
     return;
   }

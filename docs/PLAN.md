@@ -285,6 +285,11 @@ then read the log; it names the suite and the check.
   harness, `AGENTS.md`/`CLAUDE.md`/`user-guide.md` updated. Weak Wi-Fi
   first paint +0.08 s, Home up to 0.1 s sooner; 4G no worse.
   Phase 1 (#112) merged on Jose's "Push it", live as b1021.1058.
+- 2026-10-21 HUMC Brain (Jose's ask, this PR): the census as a 3D brain with
+  a quantitative workup, `brain/` (page, data, vendored Three.js), opened for
+  everyone by a double-tap on Dr. Smiley's head in the hello; one tap still
+  opens Ask (320 ms on his head, 200 below). Guide answer `brain` + New
+  lately card. `tests/suites/humc-brain.cjs`. `docs/features/humc-brain.md`.
 - 2026-10-21 Split `index.html`, phase 1 (this PR, merge only on Jose's
   call): the `<style>` block is `app.css`, verbatim plus `@charset`,
   linked where it was, before `home-polish.css`. `sw.js` precaches it,
@@ -738,6 +743,12 @@ then read the log; it names the suite and the check.
 - **The suites can't see network cost**: the harness answers every file
   from memory at once. `tests/tools/first-paint.cjs` serves real files
   over Chromium's throttled network (2026-10-21).
+- **`brain/data.json` is a snapshot** of the census, not live: refresh it
+  with `cd tests && node tools/brain-data.cjs` (`--check` tells). A section
+  the tool doesn't list goes to the cortex; a renamed one is reported.
+- **The test harness serves only `/`** for the app's own origin; a suite
+  that opens another page of ours (`brain/`) routes it itself
+  (`humc-brain.cjs`).
 - **The census (`tests/tools/census.cjs`)** counts a use only by name: a
   `window[name]` lookup or a name built in a string is invisible to it,
   and it says nothing about run order. A banner put inside a function is

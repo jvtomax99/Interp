@@ -169,6 +169,16 @@ const GUIDE_TOPICS = [
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
     <p>If your phone is set to reduce motion, he's always still.</p>` },
 
+  { id:'brain', section:'ask', k:'brain humc brain 3d double tap double-tap head dr smiley hello home secret hidden scan map code how the app is built connectome network graph figures matrix not patient data', q:'What is the brain when I double-tap Dr. Smiley?', a:`
+    <p>On Home, <b>double-tap Dr. Smiley's head</b> in the hello to open the <b>HUMC Brain</b>: a 3D picture of how this app is built. A single tap still opens Ask the Hub, and press and hold still pets him.</p>
+    <p>Each glowing dot is one part of the app, sized by how big it is. Each line is one part using another. Parts that belong together sit in the same area: the shared core everything relies on in the middle, Dr. Smiley's moves on the top strip, Ask the Hub at the front.</p>
+    <ul>
+      <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>
+      <li><b>Tap a dot</b> to see that part's details and what it connects to. Tap a colour at the bottom to light up one area.</li>
+      <li>Tap <b>Full workup</b> for charts: every connection in one grid, the busiest parts, and where the app's size goes.</li>
+    </ul>
+    <p>It looks like a scan and uses medical words for fun, but it's <b>not patient data</b> and not a medical image. It's the app's own code. Close it with the <b>X</b> at the top right or the Back button.</p>` },
+
   { id:'search', section:'find', k:'search look up find lookup word term', q:'How do I look up a word?', a:`
     <ol>
       <li>Tap <b>Search</b> at the bottom, or the search box on Home.</li>

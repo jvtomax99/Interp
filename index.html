@@ -6173,9 +6173,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
-  { id:'providers',   tone:'gd-n2', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
-  { id:'directory',   tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Doctor Directory',      title:'A new doctor list: terms, traps and tips at a glance, two to a row' },
+  { id:'brain',       tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'HUMC Brain',            title:'Double-tap Dr. Smiley’s head on Home: the whole app as a 3D brain you can turn and explore' },
+  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
+  { id:'providers',   tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -14151,8 +14151,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1021.1058';
-const BUILD_TIME = '2026-10-21 10:58 UTC';
+const BUILD_ID = 'b1021.1147';
+const BUILD_TIME = '2026-10-21 11:47 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
