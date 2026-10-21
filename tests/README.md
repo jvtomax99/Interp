@@ -52,4 +52,5 @@ a change from any tool gets a green check or a red X on its commit.
 - `tools/perf.cjs`: smoothness numbers (idle busy %, tap waits, startup, layout shift, animations that aren't transform/opacity) at iPhone size with the CPU slowed 4x. The S-phases in `docs/PLAN.md` are judged by it.
 - `tools/startup.cjs`: the app opening, task by task (S3): each long task's biggest pieces, the script lines that forced a layout, and the functions that took the time. `UA=chromium`, `RETURNING=1`, `RUNS=n`, `ROOT=` another checkout for before/after.
 - `tools/idle.cjs`: Home left still (S7): the meter's numbers and longest stalls, and every main-thread task over 50 ms with what ran in it. `SCROLL=n` scrolls first, `START=s` waits after load, `UA=iphone`, `RUNS=n`, `INDEX=` another index.html.
+- `tools/census.cjs`: the map of `index.html`'s script for the split (`docs/split-index.md`): every top-level name, its section, and which sections use which. `--names`, `--section <title>`, `--json`, `--write` (refreshes the table in the split plan). No browser; under a second.
 - `tools/doctor-replay.cjs`: replays a `doctors.json` export through the doctor page and reports anything lost.
