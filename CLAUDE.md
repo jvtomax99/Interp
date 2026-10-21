@@ -28,7 +28,7 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 24,479 | The whole app's markup and JS (1.4 MB), all inline |
+| `index.html` | 23,988 | The whole app's markup and JS (1.3 MB), all inline |
 | `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
 | `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
 | `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
@@ -39,11 +39,13 @@ between assignments.
 | `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
 | `media/` | 8 MB | The 45-second video (`hub-promo.mp4`, 720p) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
+| `guide/topics.js` | 503 | The User Guide's answers, `GUIDE_SECTIONS` and `GUIDE_TOPICS` (plain data; was in `index.html` until 2026-10-21). Loaded by a `<script src>` just before `index.html`'s script; precached, network-first |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
+| `brain/` | — | HUMC Brain: the app's code drawn as a 3D brain (`index.html`, its data `data.json` from `tests/tools/brain-data.cjs`, vendored Three.js r128). Opened over Home by a double-tap on Dr. Smiley's head (`openHumcBrain` in `home-polish.js`). `docs/features/humc-brain.md` |
 | `api/translate.js` | 145 | Translate tool — Claude API |
 | `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
@@ -92,6 +94,7 @@ different places is what silently killed the coloured press glow: a
 | Home behaviour — wave, rail dots, section overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js` |
 | Styles for every other screen | `app.css` |
+| User Guide answers | `guide/topics.js` |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
@@ -199,10 +202,11 @@ touch before changing it; update it in the same commit when the behaviour change
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
 - The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 - CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
+- HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
-for anything new, any answer it makes wrong rewritten, `GUIDE_STEPS` and
+(`guide/topics.js`) for anything new, any answer it makes wrong rewritten, `GUIDE_STEPS` and
 `GUIDE_COACH` kept in step with the controls they draw or light up, and a
 "New lately" card (`GUIDE_NEWS`) for a new feature. Say in the report what
 changed in the guide; say so in the commit message when nothing needed to.

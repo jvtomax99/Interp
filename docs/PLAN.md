@@ -281,8 +281,9 @@ then read the log; it names the suite and the check.
   one move at a time with nothing else in flight; phase 1's first-paint
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
-  2026-10-21, waiting on Jose's call (numbers in `docs/split-index.md`);
-  then phase 2, the data constants, `GUIDE_TOPICS` first.
+  2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
+  this PR. Next: the other data constants (`SEED_QUESTIONS`,
+  `FALSE_FRIENDS`), each checked for startup readers first.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -293,13 +294,26 @@ then read the log; it names the suite and the check.
 ## Done
 
 - 2026-10-21 3D Dr. Smiley R1 (this PR): `docs/mockups/smiley-3d/`, the
-  figure built in code in Blender with a 20-bone skeleton, his drawn face
+  figure built in code in Blender with a 36-bone skeleton (fingers included), his drawn face
   and brows projected on the head (`prep.py`, `build.py`); head views,
   body views, six poses and a 360-degree turn in `out/`. Round 2 after
   Jose's look review (his picks): hair closer to the drawing (bigger
   swoop, tips flicking), hands with a thumb and three fingers on bones
   (`GRIPS`), a stethoscope, and a 3D nose, cheeks and muzzle under the
   drawn face. Docs only, nothing deployed, no User Guide change.
+- 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
+  `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
+  script loaded just before the app's own (Jose's pick over fetching it on
+  demand: Home's tile, search and Ask read it from startup). Identical in
+  the browser before and after; `sw.js` precache + network-first, the
+  harness, `AGENTS.md`/`CLAUDE.md`/`user-guide.md` updated. Weak Wi-Fi
+  first paint +0.08 s, Home up to 0.1 s sooner; 4G no worse.
+  Phase 1 (#112) merged on Jose's "Push it", live as b1021.1058.
+- 2026-10-21 HUMC Brain (Jose's ask, this PR): the census as a 3D brain with
+  a quantitative workup, `brain/` (page, data, vendored Three.js), opened for
+  everyone by a double-tap on Dr. Smiley's head in the hello; one tap still
+  opens Ask (320 ms on his head, 200 below). Guide answer `brain` + New
+  lately card. `tests/suites/humc-brain.cjs`. `docs/features/humc-brain.md`.
 - 2026-10-21 Split `index.html`, phase 1 (this PR, merge only on Jose's
   call): the `<style>` block is `app.css`, verbatim plus `@charset`,
   linked where it was, before `home-polish.css`. `sw.js` precaches it,
@@ -764,6 +778,12 @@ then read the log; it names the suite and the check.
 - **The suites can't see network cost**: the harness answers every file
   from memory at once. `tests/tools/first-paint.cjs` serves real files
   over Chromium's throttled network (2026-10-21).
+- **`brain/data.json` is a snapshot** of the census, not live: refresh it
+  with `cd tests && node tools/brain-data.cjs` (`--check` tells). A section
+  the tool doesn't list goes to the cortex; a renamed one is reported.
+- **The test harness serves only `/`** for the app's own origin; a suite
+  that opens another page of ours (`brain/`) routes it itself
+  (`humc-brain.cjs`).
 - **The census (`tests/tools/census.cjs`)** counts a use only by name: a
   `window[name]` lookup or a name built in a string is invisible to it,
   and it says nothing about run order. A banner put inside a function is

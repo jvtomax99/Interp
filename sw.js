@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v269-b1021.1058';
+const CACHE_VERSION = 'interpreter-hub-v271-b1021.1248';
 const PRECACHE = [
   './',
   './index.html',
@@ -55,6 +55,7 @@ const PRECACHE = [
   './drsmiley/hat-grad.webp',
   './pin-icons.js',
   './app.css',
+  './guide/topics.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
@@ -170,17 +171,21 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
+        .catch(() => caches.match(req).then(hit => hit || (url.pathname.startsWith('/brain/')
+          // The HUMC Brain never opened online yet: say so in its frame,
+          // rather than loading the whole app inside it.
+          ? new Response('<p style="font:16px system-ui;color:#A4B0CC;background:#02040B;margin:0;padding:24px;min-height:100vh">Open the HUMC Brain once with a connection; after that it works offline.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+          : caches.match('./index.html'))))
     );
     return;
   }
 
-  /* The app's own code beside the page (its styles in app.css, Home
-   * behaviour and its styles, the pins wiring): network-first like the
+  /* The app's own code beside the page (its styles in app.css, the
+   * guide's answers, Home behaviour and its styles, the pins wiring): network-first like the
    * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:app\.css|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  if (/\/(?:app\.css|guide\/topics\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
