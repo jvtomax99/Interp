@@ -1,71 +1,56 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-21, 12:20 UTC, from the chat that built the
-HUMC Brain (#113, live as b1021.1147).
+hands over"). This one: 2026-10-21, 23:30 UTC, from the chat that built the
+knowledge brain.
 
 ## Paste this into the new chat
 
 > Read AGENTS.md, CLAUDE.md, docs/PLAN.md and docs/handoff.md on branch
-> claude/knowledge-brain of jvtomax99/Interp. Next job: turn the HUMC Brain
-> into "your knowledge brain" (handoff has the plan). Start by checking what
-> per-term knowledge data the app already keeps, then tell me in 2-3 lines
-> what you'll build and ask me the open questions with buttons.
+> claude/brain-next of jvtomax99/Interp. Then ask me which knowledge-brain
+> improvement to do next (the list is in the handoff), with buttons.
 
-## Where things stand
+## Where things stand (all merged and live, b1021.2325)
 
-- **#113 HUMC Brain: merged, live (b1021.1147).** Double-tap Dr. Smiley's
-  head in the Home hello opens `brain/index.html` full screen for everyone.
-  It shows the census of `index.html` (118 sections, 1,090 links) as a 3D
-  brain plus a 7-figure workup. `docs/features/humc-brain.md` has it all.
-- No open PRs from this chat. No check-ins armed.
-- This branch (`claude/knowledge-brain`) holds only this handoff and the
-  PLAN entry; the new chat builds on it and opens one PR.
+- **#116 Your knowledge brain** (`brain/you.html`): glossary terms as dots
+  lit by your own Term Review record; separate from Dr. Smiley's code brain
+  (his head opens his only). `docs/features/knowledge-brain.md`.
+- **#117 K2 privacy**: `term-reviews` readable/writable only under the
+  phone's own `hub-members` name once locked (Jose's pick "by name").
+  Jose published the rules in the console. Not yet confirmed by Jose on a
+  phone: knowledge brain opens with no warning note, a Term Review answer
+  saves. Ask him once if he hasn't said.
+- **#119** small live brain at the top of Term Review (`kbMiniHtml`).
+- **#120** after a session, its terms light up in the summary's small brain;
+  "See it in your brain" opens the full one focused on them.
+- No open PRs, no check-ins armed.
 
-## Next: your knowledge brain (Jose's pick, 2026-10-21)
+## Next: improvements Jose was offered (pick with him)
 
-Jose asked what the brain is *for*; the honest answer was "a code map for
-whoever writes the code, an easter egg for everyone else". Of three ways to
-give it a job (knowledge brain, team brain, code health brain) he picked:
-
-**Your knowledge brain.** Same 3D brain, but about the interpreter, not the
-code:
-- Regions = the glossary's domains (oncology, cardiology, GI, peds...),
-  laid out over the lobes; subgroups cluster inside their parent's region.
-- Dots = terms. Brightness = how well *this phone's person* knows the term,
-  from what the app already records. Dark = never practiced or often missed.
-- Tap a dark region → practice exactly those terms (Daily Drill or Term
-  Review scoped to them). Tap a dot → the term card.
-- Over weeks the brain lights up: motivation for CoreCHI.
-- The figures below become about knowledge too (weakest domains, coverage,
-  progress over time) instead of code.
-
-**First step, before any building: find the data.** Unproven so far how
-much per-term detail exists. Look at (banner sections in `index.html`):
-"Practice record: what you personally know, question by question",
-"Term Review: Dr. Smiley's practice sessions" (`saveTermReview`,
-`term-reviews/`), "Quiz" and `quiz-history/`, "Daily Drill" (`ih_warmup`),
-"Memory trainer". Report which give per-term right/wrong with dates, and
-whether they're on the phone (localStorage) or in Firestore per person.
-
-## Open questions for Jose (ask with buttons, recommendation first)
-
-1. Keep the code view as a second tab ("How the Hub is built") or replace
-   it? Pick: keep it as a tab; it's done and costs nothing.
-2. Still opened by double-tapping his head, or also a visible entrance
-   (CoreCHI Practice dashboard)? Pick: both; a useful tool shouldn't be
-   hidden.
-3. Personal data stays on the phone / the person's own records only. Never
-   show one person's gaps to others. (State it; don't ask.)
+1. Done (#120).
+2. One shared layout for the small and full brain (the small one draws
+   domains as bands; positions don't match).
+3. Day one: "Light your first 10 terms" for a new, all-dark brain.
+4. Search a term in the brain.
+5. Reliable dot taps on a phone (zoom then pick, or a list under the finger).
+6. A List view (screen readers, no 3D).
+7. Count other practice (memory trainer, quiz) only if they map to glossary
+   terms; check first, quiz questions are exam topics, probably not.
+8. Measure use first (owner-only open counts, nothing about who knows what).
+   My recommendation: #8 before more polish; a glowing brain motivating
+   practice is unproven.
 
 ## Learned this chat, not yet elsewhere
 
-- From a cloud session, `gh pr create` fails (GraphQL blocked): open PRs
-  with `gh api repos/jvtomax99/Interp/pulls --input pr.json`, merge with
-  `gh api -X PUT .../pulls/N/merge -f merge_method=merge -f sha=<full sha>`.
-- On the shallow clone, `--force-with-lease` needs the explicit old sha
-  (`--force-with-lease=refs/heads/B:<sha>`), or it says "stale info".
-- The harness serves only `/` for our origin; a suite opening another page
-  of ours routes it itself (`tests/suites/humc-brain.cjs`).
-- `main` moved mid-chat (the `app.css` split, phase 1); rebase before the
-  PR, regenerate `brain/data.json` after (`cd tests && node tools/brain-data.cjs`).
+- Rules testing works here: firebase-tools + `@firebase/rules-unit-testing`
+  in the scratchpad, `env -u HTTPS_PROXY -u HTTP_PROXY ... npx firebase
+  emulators:exec --only firestore` (18 cases for term-reviews passed).
+- The live `hub-access/settings` is readable without login (REST): the Hub is
+  locked (`practice: false`).
+- `tests/tools/brain-data.cjs` needs `acorn`: `cd tests && npm ci
+  --ignore-scripts`, then delete `tests/node_modules` before running suites
+  (a local playwright copy can shadow the global one).
+- The head double-tap checks in `humc-brain.cjs` failed once under load
+  (timing between taps), clean on rerun.
+- On a merge, two "checks" runs appear per commit (push and pull_request);
+  one is cancelled by the workflow's concurrency setting. Not a failure.
