@@ -2004,9 +2004,15 @@
      closeAllOverlays in index.html); its X and Escape inside the frame ask
      to close by message. The frame is dropped once closed, so its 3D stops
      drawing and frees its memory. docs/features/humc-brain.md. */
+  /* Two separate brains in the same frame (Jose: kept apart, no link
+     between them). Dr. Smiley's head opens his: brain/index.html, how the Hub
+     is built. openHumcBrain('you') (the CoreCHI Practice tile) opens your
+     knowledge brain, brain/you.html, which asks for your own record by message
+     ('brain-want'; knowledgeBrainData in index.html) and asks the app to
+     practise a domain or open a term, which closes it first. */
   let brainOv=null;
   const closeBrain=()=>{if(brainOv)brainOv.classList.remove('show');};
-  window.openHumcBrain=function(){
+  window.openHumcBrain=function(view){
     if(!brainOv){
       brainOv=document.createElement('div');
       brainOv.className='overlay brain-ov';
@@ -2017,14 +2023,27 @@
         setTimeout(()=>{if(!brainOv.classList.contains('show')){const f=brainOv.querySelector('iframe');if(f)f.remove();}},300);
       }).observe(brainOv,{attributes:true,attributeFilter:['class']});
     }
+    const want=view==='you'?'./brain/you.html':'./brain/index.html', old=brainOv.querySelector('iframe');
+    if(old&&old.getAttribute('src')!==want)old.remove();
+    brainOv.setAttribute('aria-label',view==='you'?'Your knowledge brain':'HUMC Brain');
     if(!brainOv.querySelector('iframe')){
       const f=document.createElement('iframe');
-      f.src='./brain/index.html';f.title='HUMC Brain: the app\u2019s code drawn as a brain';
+      f.src=want;f.title=view==='you'?'Your knowledge brain: your glossary terms, lit by what you know':'HUMC Brain: the app\u2019s code drawn as a brain';
       brainOv.appendChild(f);
       f.addEventListener('load',()=>{try{f.focus();}catch(e){}},{once:true});
     }
     brainOv.classList.add('show');
   };
-  window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.ih==='brain-close')closeBrain();});
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin||!e.data)return;
+    const m=e.data, f=brainOv&&brainOv.querySelector('iframe');
+    if(!f||e.source!==f.contentWindow)return;
+    if(m.ih==='brain-close')closeBrain();
+    else if(m.ih==='brain-want'&&typeof window.knowledgeBrainData==='function'){
+      window.knowledgeBrainData().then(data=>{try{e.source.postMessage({ih:'brain-data',data},location.origin);}catch(err){}});
+    }
+    else if(m.ih==='brain-practice'&&typeof window.knowledgePractise==='function'){closeBrain();window.knowledgePractise(String(m.domain||''));}
+    else if(m.ih==='brain-term'&&typeof window.knowledgeOpenTerm==='function'){closeBrain();window.knowledgeOpenTerm(String(m.id||''));}
+  });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&brainOv&&brainOv.classList.contains('show'))closeBrain();});
 })();

@@ -66,6 +66,7 @@ So:
 | Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
 | User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
+| Your knowledge brain (CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
 | Everything else | `index.html` |
 
 **The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
@@ -112,6 +113,14 @@ opening to his left; on a
 computer he is 48px in from the right end of the name's line. He is never resized
 for a name: `fitWave` in `home-polish.js` shrinks a name too wide for its
 line instead.
+
+**Designing the 3D mascot: a visual plan first, every time** (Jose,
+2026-10-21). Before building or changing anything on the 3D / expressive
+Dr. Smiley (look, skeleton, face, motion), show Jose a visual step-by-step
+plan with screenshots (each step: what is done, a picture of what it makes,
+where it stops for his OK) and wait for his go. Example pictures from earlier
+work are labelled "example". The work and its tools: `docs/mockups/smiley-3d/`
+(`planboard.py`, `storyboard.py` make the plan picture).
 
 **Dr. Smiley's gestures use only his drawn frames, a tilt and a lift.** Never
 slide his picture sideways to fake a head turn. The one squash and stretch is

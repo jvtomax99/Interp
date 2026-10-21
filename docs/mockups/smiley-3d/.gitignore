@@ -10,3 +10,6 @@ __pycache__/
 out/qh_*.png
 out/quick-head.png
 out/concept-body.png
+out/plan_face_*.png
+out/plan-skeleton.png
+out/plan-faces.png
