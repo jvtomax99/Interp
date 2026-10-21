@@ -3677,18 +3677,18 @@
      the round (listen, your turn, the chunks), a ring that fills while the
      line plays, candy buttons. Nothing moves at rest: the ring runs only
      while the voice does. Note: docs/features/memory-trainer.md. */
-  .mem-entry{ display:flex; flex-direction:row; align-items:center; gap:13px; padding:13px 17px; max-width:760px; margin-bottom:26px; }
-  .mem-entry-icon, .mem-ring-in svg{ color:var(--dom); }
-  .mem-entry-icon{ width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center;
+  .mem-entry, .kb-entry{ display:flex; flex-direction:row; align-items:center; gap:13px; padding:13px 17px; max-width:760px; margin-bottom:26px; }
+  .mem-entry-icon, .mem-ring-in svg, .kb-entry-icon{ color:var(--dom); }
+  .mem-entry-icon, .kb-entry-icon{ width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center;
     background:color-mix(in srgb, var(--dom) 15%, var(--paper)); }
-  .mem-entry-icon svg{ width:26px; height:26px; }
-  .mem-entry-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-  .mem-entry-text b{ font-size:15px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
-  .mem-entry-text span{ font-size:13px; line-height:1.4; color:var(--ink-soft); }
-  .mem-entry-span{ display:flex; flex-direction:column; align-items:center; flex:none; min-width:36px; }
-  .mem-entry-span b{ font-size:20px; font-weight:650; letter-spacing:-.03em; color:var(--dom); font-variant-numeric:tabular-nums; }
-  .mem-entry-span small{ font-size:12px; color:var(--ink-faint); }
-  .mem-go{ min-height:44px; padding:0 17px; font-size:15px; }
+  .mem-entry-icon svg, .kb-entry-icon svg{ width:26px; height:26px; }
+  .mem-entry-text, .kb-entry-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .mem-entry-text b, .kb-entry-text b{ font-size:15px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
+  .mem-entry-text span, .kb-entry-text span{ font-size:13px; line-height:1.4; color:var(--ink-soft); }
+  .mem-entry-span, .kb-entry-span{ display:flex; flex-direction:column; align-items:center; flex:none; min-width:36px; }
+  .mem-entry-span b, .kb-entry-span b{ font-size:20px; font-weight:650; letter-spacing:-.03em; color:var(--dom); font-variant-numeric:tabular-nums; }
+  .mem-entry-span small, .kb-entry-span small{ font-size:12px; color:var(--ink-faint); }
+  .mem-go, .kb-go{ min-height:44px; padding:0 17px; font-size:15px; }
   .mem-go:disabled{ opacity:.55; cursor:default; }
 
   .mem-card{ padding:17px; max-width:560px; display:flex; flex-direction:column; gap:13px; }

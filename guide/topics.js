@@ -395,6 +395,17 @@ const GUIDE_TOPICS = [
     <p>Missed one? He says what tells it apart, and <b>Try it again later</b> brings it back a few cards on. At the end you see what moved up a step and your mistakes, with <b>Practise these again</b>. Your recent mistakes are also on the Term Review page.</p>
     <p><b>Pause</b> keeps your place on this phone, even if the app closes. Ask Dr. Smiley to <i>practice five terms I'm still learning</i> and he opens Term Review with just those.</p>` },
 
+  { id:'knowledgebrain', section:'study', k:'knowledge brain my brain your knowledge 3d terms dots lit light up dark known learning missed due practise practice coverage weakest progress over time corechi tile', q:'What is my knowledge brain?', a:`
+    <p>Open <b>CoreCHI Practice</b> and tap <b>Open</b> on the <b>Your knowledge brain</b> tile. It's your glossary drawn as a 3D brain: every dot is a term, each domain is one area.</p>
+    <p>A dot <b>lights up</b> as you get the term right in Term Review, the Daily Drill and Doctor Prep flashcards. <b>Faint</b>: not practised yet. <b>Red</b>: missed last time. <b>Dim</b>: due again. A term counts as known after three right answers in a row.</p>
+    <ul>
+      <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>
+      <li><b>Tap a domain</b> at the bottom (or a row under Your progress) to see what to practise first, then <b>Practise</b> to start Term Review on it.</li>
+      <li><b>Tap a dot</b> to see that term and how you're doing, then <b>Open the card</b>.</li>
+      <li><b>Your progress</b> below the brain: your domains weakest first, what you missed or is due, and a line of terms known over time. That line starts the day you first open it; one count a day is kept on your phone.</li>
+    </ul>
+    <p>It shows only <b>your own</b> record. It's separate from the brain you get by double-tapping Dr. Smiley's head, which is a map of the app's own code. Close it with the <b>X</b> at the top right or the Back button.</p>` },
+
   { id:'reviewcheck', section:'study', k:'term review check answer accent accents capital wrong right spanish variant alternative regional compare self check saved not saved', q:'How does Term Review check my Spanish?', a:`
     <p>Against your team's glossary, never a guess.</p>
     <ul>
