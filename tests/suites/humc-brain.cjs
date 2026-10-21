@@ -173,6 +173,33 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
   ok(s.open && brainFrame() && brainFrame().url().endsWith('/brain/you.html'), 'tapping it opens the knowledge brain ' + JSON.stringify(s));
   await P.evaluate(() => navigateBack()); await P.waitForTimeout(700);
 
+  // A finished session: its summary lights those terms in the small brain, and "See it in your brain" opens the full one turned to them.
+  const sess = await P.evaluate(() => {
+    const ts = allTermsFlat().filter(t => t.en && t.es).slice(10, 14);
+    reviewActive = false; reviewQueue = ts; reviewIndex = ts.length;
+    RS.done = true; RS.results = ts.map((t, i) => ({ id: t.id, term: t, ok: i < 3, self: false, box: i < 3 ? 1 : 0, wasMissed: false }));
+    ts.forEach((t, i) => TERM_REVIEWS[t.id] = { box: i < 3 ? 1 : 0, reviewCount: 1, lastResult: i < 3 ? 'ok' : 'miss', misses: i < 3 ? 0 : 1, lastAt: Date.now(), nextReviewAt: Date.now() + 86400000 });
+    setCategory('review');
+    return { right: ts.slice(0, 3).map(t => t.id), missed: [ts[3].id] };
+  });
+  await P.waitForTimeout(900);
+  const mid = await P.evaluate(() => { const b = document.querySelector('#content .kb-mini.is-session'); return b && { line: b.querySelector('.kb-mini-text span').textContent, cta: !!b.querySelector('.kb-mini-cta'), playing: KBM.sess && performance.now() - KBM.t0 < KBM.sess.end, focus: JSON.parse(b.dataset.focus) }; });
+  ok(mid && mid.line === '3 lit up · 1 to practise' && mid.cta && mid.playing && JSON.stringify(mid.focus) === JSON.stringify(sess), 'the session summary shows the session lighting up in the small brain ' + JSON.stringify(mid && { line: mid.line, cta: mid.cta, playing: mid.playing }));
+  await P.screenshot({ path: OUT + 'phone-session-glow.png' });
+  await P.waitForTimeout(2600);
+  const settled = await P.evaluate(() => performance.now() - KBM.t0 > KBM.sess.end);
+  await P.evaluate(() => { renderContent(); }); await P.waitForTimeout(300);
+  const replay = await P.evaluate(() => KBM.t0 < 0);
+  ok(settled && replay, 'it settles, and a redraw of the summary doesn\'t replay it ' + JSON.stringify({ settled, replay }));
+  await P.evaluate(() => document.querySelector('#content .kb-mini.is-session').click()); await P.waitForTimeout(3000);
+  const foc = brainFrame() && await brainFrame().evaluate(() => ({ h2: document.querySelector('#sheet h2')?.textContent, tag: document.querySelector('#sheet .tag')?.textContent, rows: document.querySelectorAll('#sheet .list li').length, first: document.querySelector('#sheet .list li span')?.textContent, hidden: document.getElementById('sheet').hidden }));
+  ok(foc && !foc.hidden && foc.tag === 'This session' && foc.h2 === '3 right · 1 to practise' && foc.rows === 4, 'See it in your brain opens the full brain on those terms ' + JSON.stringify(foc));
+  await brainFrame().evaluate(() => document.querySelector('#sheet .list li').click()); await P.waitForTimeout(300);
+  const lbl = await brainFrame().evaluate(() => { const l = [...document.querySelectorAll('#labels .lbl.node')].find(x => !x.hidden); return l && l.textContent; });
+  ok(lbl === foc.first, 'tapping a name in it shows that term beside its dot ' + JSON.stringify({ lbl, want: foc.first }));
+  await P.screenshot({ path: OUT + 'phone-session-brain.png' });
+  await P.evaluate(() => { navigateBack(); RS.done = false; RS.results = []; reviewQueue = []; }); await P.waitForTimeout(700);
+
   // Leaving Home with it open closes it.
   await P.evaluate(() => setCategory('home')); await P.waitForTimeout(2000);
   await P.evaluate(() => openHumcBrain()); await P.waitForTimeout(800);
