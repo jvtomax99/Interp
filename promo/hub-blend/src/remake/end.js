@@ -107,11 +107,11 @@ export async function buildEnd(scene, group, { start }) {
   // ---------- the screen's content over time (u = seconds into the shot) ----------
   const LINES = [
     { t: 0.25, draw: (a) => drawSmiley(a) },
-    { t: 0.45, draw: (a) => text("Interpreter Hub", 640, 345, '800 122px "Inter Tight"', "#fff", a, true) },
-    { t: 0.75, draw: (a) => text("Built Here, For Our Patients.", 640, 408, '500 48px "Inter Tight"', "rgba(255,255,255,.85)", a) },
+    { t: 0.45, draw: (a) => text("Interpreter Hub", 640, 300, '800 112px "Inter Tight"', "#fff", a, true) },
+    { t: 0.75, draw: (a) => text("Built Here, For Our Patients.", 640, 374, '600 62px "Inter Tight"', "rgba(255,255,255,.92)", a) },
     { t: 1.05, draw: (a) => urlPill(a) },
-    { t: 1.3, draw: (a) => text("Live Today, On Any Phone.", 640, 536, '500 36px "Inter Tight"', "rgba(255,255,255,.7)", a) },
-    { t: 1.75, draw: (a) => text("Better Words.", 640, 628, '800 80px "Inter Tight"', "#fff", a) },
+    { t: 1.3, draw: (a) => text("Live Today, On Any Phone.", 640, 556, '600 50px "Inter Tight"', "rgba(255,255,255,.85)", a) },
+    { t: 1.75, draw: (a) => text("Better Words.", 640, 640, '800 80px "Inter Tight"', "#fff", a) },
   ];
   let drawnKey = "";
   function text(s, x, y, font, color, a, glowText) {
@@ -120,15 +120,15 @@ export async function buildEnd(scene, group, { start }) {
     sg.fillText(s, x, y + (1 - a) * 22); sg.restore();
   }
   function drawSmiley(a) {
-    const h = 205 * outBack(a, 2), w = (h * 480) / 600;
+    const h = 170 * outBack(a, 2), w = (h * 480) / 600;
     if (h <= 1) return;
     sg.save(); sg.globalAlpha = Math.min(1, a * 1.6);
-    sg.drawImage(smileyImg, 640 - w / 2, 238 - h, w, h); sg.restore();
+    sg.drawImage(smileyImg, 640 - w / 2, 200 - h, w, h); sg.restore();
   }
   function urlPill(a) {
     sg.save(); sg.globalAlpha = a;
-    sg.fillStyle = "#fff"; sg.beginPath(); sg.roundRect(640 - 260, 434, 520, 62, 31); sg.fill();
-    sg.font = '500 36px "JetBrains Mono"'; sg.fillStyle = "#0b1a4a"; sg.textAlign = "center"; sg.fillText("interp-six.vercel.app", 640, 477);
+    sg.fillStyle = "#c9d6ea"; sg.beginPath(); sg.roundRect(640 - 380, 404, 760, 88, 44); sg.fill(); // not pure white: the bloom washed the address out
+    sg.font = '500 54px "JetBrains Mono"'; sg.fillStyle = "#03061a"; sg.strokeStyle = "#03061a"; sg.lineWidth = 2.5; sg.textAlign = "center"; sg.strokeText("interp-six.vercel.app", 640, 466); sg.fillText("interp-six.vercel.app", 640, 466);
     sg.restore();
   }
   function drawScreen(u) {
@@ -145,9 +145,9 @@ export async function buildEnd(scene, group, { start }) {
     for (const l of LINES) { const a = outCubic(prog(u, l.t, l.t + 0.35)); if (a > 0) l.draw(a); }
     // "Safer care." on v11's cyan box, wiped in
     if (wipe > 0) {
-      sg.save(); sg.beginPath(); sg.rect(640 - 225, 648, 450 * wipe, 96); sg.clip();
-      sg.fillStyle = "#3fc6ee"; sg.beginPath(); sg.roundRect(640 - 225, 648, 450, 96, 12); sg.fill();
-      sg.font = '800 80px "Inter Tight"'; sg.fillStyle = "#0b1a4a"; sg.textAlign = "center"; sg.fillText("Safer Care.", 640, 722);
+      sg.save(); sg.beginPath(); sg.rect(640 - 225, 664, 450 * wipe, 96); sg.clip();
+      sg.fillStyle = "#3fc6ee"; sg.beginPath(); sg.roundRect(640 - 225, 664, 450, 96, 12); sg.fill();
+      sg.font = '800 80px "Inter Tight"'; sg.fillStyle = "#0b1a4a"; sg.textAlign = "center"; sg.fillText("Safer Care.", 640, 738);
       sg.restore();
     }
     scrTex.needsUpdate = true;
@@ -166,8 +166,8 @@ export async function buildEnd(scene, group, { start }) {
     const e = inOutSine(clamp(u / 4));
     const o = group.position;
     return {
-      pos: new THREE.Vector3(o.x + lerp(1.1, 0.15, e), lerp(2.6, 2.0, e), o.z + lerp(8.2, 6.4, e)),
-      look: new THREE.Vector3(o.x + lerp(0.2, 0.15, e), lerp(1.15, 1.25, e), o.z - 1.2),
+      pos: new THREE.Vector3(o.x + lerp(1.1, -0.1, e), lerp(2.6, 2.0, e), o.z + lerp(8.2, 5.7, e)),
+      look: new THREE.Vector3(o.x + lerp(0.2, -0.1, e), lerp(1.15, 1.25, e), o.z - 1.2),
       focus: new THREE.Vector3(o.x - 0.25, 1.2, o.z - 1.0),
     };
   }
