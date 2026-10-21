@@ -263,7 +263,8 @@ then read the log; it names the suite and the check.
   per PR, leaves first; the proof per move and the three lists every new
   file must join. Jose (2026-10-20): start after the open PRs merge,
   one move at a time with nothing else in flight; phase 1's first-paint
-  trade is still his call once measured.
+  trade is still his call once measured. Phase 0 (census, markers) done
+  2026-10-21; next is phase 1, the CSS, measured first.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -273,6 +274,14 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-21 Split `index.html`, phase 0 (this PR): `tests/tools/census.cjs`
+  (acorn added to `tests/`) maps every top-level name of the inline
+  scripts to its section and who uses it, code and `on...=""` handlers
+  both; 35 banners added and 3 sub-headings promoted, so the script has
+  118 one-feature sections. Proof: the inline code's tokens and the page's
+  markup and CSS are identical to `main`'s. The table and its reading (the
+  shared core is ~60 KB; the leaves; what moves as a group) are in
+  `docs/split-index.md`. Nothing visible, no User Guide change.
 - 2026-10-20 Journey flake (this PR): "Term Review on 5 of your
   still-learning terms" failed on two PR runs within 30 minutes (#94,
   #98; neither touches that path) while passing on main's head and
@@ -700,6 +709,14 @@ then read the log; it names the suite and the check.
 
 ## Facts (so nobody re-checks)
 
+- **The census (`tests/tools/census.cjs`)** counts a use only by name: a
+  `window[name]` lookup or a name built in a string is invisible to it,
+  and it says nothing about run order. A banner put inside a function is
+  not a section; the census prints "Banner inside code" for one at the
+  left edge. Proving a comments-only change to `index.html`: tokenize the
+  inline scripts with acorn (comments are skipped) and compare old and
+  new, plus the markup with the scripts cut out (2026-10-21: 226,941
+  tokens each, identical).
 - Recording a smooth, sharp clip of an animation from the tests' Chromium:
   `recordVideo` and the CDP screencast give CSS-pixel frames (blurry), and
   screenshots in a loop run at about 4 fps. What works: CSS `zoom: 3` on
