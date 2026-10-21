@@ -54,7 +54,7 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/humc-brain.md`).**
+**K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/knowledge-brain.md`).**
 The HUMC Brain shows the person, not the code: domains as regions, terms as
 dots lit by what you know, tap a dark area to practice it. First find what
 per-term data the app keeps. Personal data never shown to others.
@@ -65,9 +65,9 @@ Term Review, Daily Drill round 2 and Doctor Prep flashcards (`prepMark`).
 Quiz practice (`ih_practice_v1`) is per question by CoreCHI exam domain,
 not glossary domain; `quiz-history`, `ih_warmup`, `ih_memory` hold nothing
 per term. Brightness = box, dimmed when overdue; never practiced = dark.
-Jose's picks: keep the code view as a second tab ("How the Hub is built");
-open by the head double-tap and a visible button on the CoreCHI Practice
-dashboard; record one daily snapshot on the phone from now on for the
+Jose's picks: first as two tabs with the code view, then (same day) kept
+separate: his head opens only his code brain, the CoreCHI Practice tile
+only the knowledge brain, no link between; record one daily snapshot on the phone from now on for the
 progress figure. **K2 (next, separate PR): `term-reviews` is readable by the
 whole team (`firestore.rules`, `team()`) and keyed by typed name, so the
 "never shown to others" promise holds only in the app; tie records to the

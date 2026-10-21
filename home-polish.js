@@ -2004,11 +2004,12 @@
      closeAllOverlays in index.html); its X and Escape inside the frame ask
      to close by message. The frame is dropped once closed, so its 3D stops
      drawing and frees its memory. docs/features/humc-brain.md. */
-  /* Two pages in the frame, with tabs between them: brain/you.html, your
-     knowledge (the default; the CoreCHI Practice dashboard opens it too), and
-     brain/index.html, how the Hub is built. you.html asks for your own record
-     by message ('brain-want'; knowledgeBrainData in index.html) and asks the
-     app to practise a region or open a term, which closes the brain first. */
+  /* Two separate brains in the same frame (Jose: kept apart, no link
+     between them). Dr. Smiley's head opens his: brain/index.html, how the Hub
+     is built. openHumcBrain('you') (the CoreCHI Practice tile) opens your
+     knowledge brain, brain/you.html, which asks for your own record by message
+     ('brain-want'; knowledgeBrainData in index.html) and asks the app to
+     practise a domain or open a term, which closes it first. */
   let brainOv=null;
   const closeBrain=()=>{if(brainOv)brainOv.classList.remove('show');};
   window.openHumcBrain=function(view){
@@ -2022,9 +2023,12 @@
         setTimeout(()=>{if(!brainOv.classList.contains('show')){const f=brainOv.querySelector('iframe');if(f)f.remove();}},300);
       }).observe(brainOv,{attributes:true,attributeFilter:['class']});
     }
+    const want=view==='you'?'./brain/you.html':'./brain/index.html', old=brainOv.querySelector('iframe');
+    if(old&&old.getAttribute('src')!==want)old.remove();
+    brainOv.setAttribute('aria-label',view==='you'?'Your knowledge brain':'HUMC Brain');
     if(!brainOv.querySelector('iframe')){
       const f=document.createElement('iframe');
-      f.src=view==='code'?'./brain/index.html':'./brain/you.html';f.title='HUMC Brain: your knowledge, and the app\u2019s code, drawn as a brain';
+      f.src=want;f.title=view==='you'?'Your knowledge brain: your glossary terms, lit by what you know':'HUMC Brain: the app\u2019s code drawn as a brain';
       brainOv.appendChild(f);
       f.addEventListener('load',()=>{try{f.focus();}catch(e){}},{once:true});
     }

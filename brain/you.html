@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <!-- Your knowledge brain: the glossary drawn as a brain, each term a dot lit
-     by this person's own Term Review record. The first tab of the HUMC Brain
-     (home-polish.js, openHumcBrain); the second is brain/index.html, how the
-     Hub is built. Its data comes from the app by message (knowledgeBrainData
-     in index.html). Notes: docs/features/humc-brain.md. -->
+     by this person's own Term Review record. Opened from the CoreCHI Practice
+     tile (home-polish.js, openHumcBrain('you')); separate from Dr. Smiley's
+     brain (brain/index.html), with no link between them (Jose). Its data
+     comes from the app by message (knowledgeBrainData in index.html).
+     Notes: docs/features/knowledge-brain.md. -->
 <title>Your knowledge brain</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650;750&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* The same field, panels and type as brain/index.html, so the two tabs read as one thing */
+/* The same field, panels and type as Dr. Smiley's brain (brain/index.html) */
 :root{
   --bg:#060A17;
   --bg-glow:#101C42;
@@ -65,12 +66,6 @@ h1{margin:0;font-size:clamp(21px,4.4vw,32px);line-height:1.08;font-weight:750;le
 .stats b{font-weight:500}
 .stats i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:0}
 .note{margin:0;font-size:12.5px;line-height:1.45;color:var(--ink);background:rgba(245,196,106,.12);border:1px solid rgba(245,196,106,.35);border-radius:10px;padding:8px 10px;max-width:52ch}
-
-/* The two tabs: you, and how the Hub is built (the same bar on brain/index.html) */
-.tabs{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:var(--panel);border:1px solid var(--panel-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);justify-self:start}
-.tabs a{font:550 12.5px/1 var(--f-ui);color:var(--ink-soft);text-decoration:none;padding:9px 13px;border-radius:999px;min-height:16px;transition:background .2s,color .2s}
-.tabs a[aria-current="page"]{background:rgba(79,157,255,.22);color:var(--ink)}
-.tabs a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 
 .dock{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
 .sheet{
@@ -154,7 +149,7 @@ h1{margin:0;font-size:clamp(21px,4.4vw,32px);line-height:1.08;font-weight:750;le
   .sheet{max-height:40vh}
   header{gap:6px}
 }
-@media (prefers-reduced-motion:reduce){.lbl,.chip,.tabs a{transition:none}}
+@media (prefers-reduced-motion:reduce){.lbl,.chip{transition:none}}
 [hidden]{display:none!important}
 *{-webkit-tap-highlight-color:transparent}
 .close-brain{position:fixed;z-index:40;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px, env(safe-area-inset-right,0px));width:40px;height:40px;border-radius:12px;border:1px solid var(--panel-line);background:var(--panel);color:var(--ink);font:400 22px/1 var(--f-ui);cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -172,7 +167,6 @@ h1{margin:0;font-size:clamp(21px,4.4vw,32px);line-height:1.08;font-weight:750;le
 
 <div class="hud">
   <header>
-    <nav class="tabs" aria-label="HUMC Brain views"><a href="./you.html" aria-current="page">You</a><a href="./index.html" id="tabCode">How the Hub is built</a></nav>
     <div class="eyebrow">Your knowledge · Term Review record</div>
     <h1>Your knowledge brain</h1>
     <p class="sub">Every dot is a glossary term, grouped by domain. It lights up as you get it right in Term Review, the Daily Drill and Doctor Prep flashcards.<span class="hide-sm"> Dark: not practised yet. Red: missed last time. Dim: due again.</span></p>
@@ -221,8 +215,6 @@ if(inFrame){
   // The first Escape closes an open readout, the next one the brain.
   addEventListener("keydown", e => { if(e.key === "Escape" && document.getElementById("sheet").hidden) tell({ ih:"brain-close" }); });
 }
-// The other tab replaces this page in the frame, so Back still closes the brain.
-document.getElementById("tabCode").addEventListener("click", e => { e.preventDefault(); location.replace("./index.html"); });
 
 /* Your record, from the app. Outside the app, or if it never answers, the brain is drawn dark with a note. */
 let started = false;
@@ -267,7 +259,7 @@ document.getElementById("stats").innerHTML = ok ?
   `<span>Due again <b>${fmt(ALL.due)}</b></span>` : "";
 const note = document.getElementById("note");
 const say = s => { note.textContent = s; note.hidden = false; };
-if(!ok) say(inFrame ? "Your record didn't arrive from the app. Close this and open it again." : "Open this from the app (double-tap Dr. Smiley's head on Home) to see your terms.");
+if(!ok) say(inFrame ? "Your record didn't arrive from the app. Close this and open it again." : "Open this from the app (CoreCHI Practice, Your knowledge brain) to see your terms.");
 else if(!terms.length) say("The glossary hasn't loaded yet. Close this and open it again in a moment.");
 else if(!K.me) say("Set your name in the app first: your practice record is kept under it. Until then every dot stays dark.");
 else if(!K.loaded) say("Your record didn't load (no connection?). The dots show dark until it does.");

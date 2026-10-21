@@ -1,10 +1,10 @@
-/* HUMC Brain: a double-tap on Dr. Smiley's head in the hello opens the brain
-   full screen, on its first tab, your knowledge (brain/you.html, lit by your
-   own Term Review record); its second tab is how the Hub is built
-   (brain/index.html). A single tap still opens Ask the Hub; Back, the X and
-   leaving close it and drop its frame. A region's Practise starts Term Review
-   on it, a term's Open the card shows it; the CoreCHI Practice dashboard
-   opens it too. docs/features/humc-brain.md. */
+/* Two separate brains. A double-tap on Dr. Smiley's head in the hello opens
+   his, the app's code (brain/index.html), and nothing else; a single tap
+   still opens Ask the Hub; Back, the X and leaving close it and drop its
+   frame. The CoreCHI Practice tile opens your knowledge brain
+   (brain/you.html, lit by your own Term Review record): a domain's Practise
+   starts Term Review on it, a term's Open the card shows it. Neither links to
+   the other. docs/features/humc-brain.md, knowledge-brain.md. */
 const { chromium, boot, ROOT } = require('../support/harness.cjs');
 const fs = require('fs');
 const OUT = require('../support/harness.cjs').OUT + 'brain/'; fs.mkdirSync(OUT, { recursive: true });
@@ -45,20 +45,19 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
     return { total: ts.length, known: a.id, learning: b.id, missed: c.id, missedDom: c.categoryId, top: askTopOf(c.categoryId) };
   });
 
-  // Double-tap his head: the brain, not Ask.
-  await doubleTap(head); await P.waitForTimeout(3000);
+  // Your knowledge brain (the Practice tile's way in; the tile itself is tapped further down).
+  await P.evaluate(() => openHumcBrain('you')); await P.waitForTimeout(3000);
   let s = await state();
-  ok(s.open && s.frame && s.ov && s.cat === 'home', 'double-tap on his head opens the brain over Home, Ask stays shut ' + JSON.stringify(s));
   let fr = brainFrame();
   const you = fr && await fr.evaluate(() => {
     const K = window.KNOW, lv = id => (K.terms.find(t => t.id === id) || {}).lv;
     return { url: location.pathname, n: K && K.terms.length, all: K && K.ALL.lv, tops: K && K.tops.length, loaded: K && K.K && K.K.loaded,
       chips: document.querySelectorAll('#legend .chip').length, rows: document.querySelectorAll('#cover .row').length, next: document.querySelectorAll('#next .row').length,
       note: document.getElementById('note').hidden ? '' : document.getElementById('note').textContent, w: innerWidth, sw: document.documentElement.scrollWidth,
-      tab: document.querySelector('.tabs [aria-current="page"]').textContent, lvs: [] , lvOf: null };
+      tabs: document.querySelectorAll('.tabs, a[href]').length };
   });
   const lvs = fr && await fr.evaluate(ids => ids.map(id => (window.KNOW.terms.find(t => t.id === id) || {}).lv), [rec.known, rec.learning, rec.missed]);
-  ok(you && you.url.endsWith('/brain/you.html') && you.tab === 'You', 'it opens on the knowledge tab ' + JSON.stringify(you && { url: you.url, tab: you.tab }));
+  ok(s.open && you && you.url.endsWith('/brain/you.html') && you.tabs === 0, 'the knowledge brain opens on its own, with no link to his ' + JSON.stringify(you && { url: you.url, links: you.tabs }));
   ok(you && you.n === rec.total && you.loaded && you.chips === you.tops && you.rows === you.tops, 'every term with English and Spanish is a dot, one chip and one coverage row per domain ' + JSON.stringify(you && { n: you.n, total: rec.total, tops: you.tops, chips: you.chips, rows: you.rows }));
   ok(JSON.stringify(lvs) === '[3,2,1]' && you.all[3] === 1 && you.all[2] === 1 && you.all[1] === 1 && you.next === 1, 'the record lights it: known, learning, missed; the missed one is next up ' + JSON.stringify({ lvs, all: you && you.all, next: you && you.next }));
   ok(you && you.sw <= you.w && !you.note, 'nothing runs off the side, no warning note ' + JSON.stringify(you && { w: you.w, sw: you.sw, note: you.note }));
@@ -79,7 +78,7 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
   await P.evaluate(() => { reviewActive = false; reviewQueue = []; try{ localStorage.removeItem('ih_reviewSession'); }catch(e){} setCategory('home'); }); await P.waitForTimeout(2000);
 
   // A term's sheet: Open the card shows it in the glossary.
-  await P.evaluate(() => openHumcBrain()); await P.waitForTimeout(3000);
+  await P.evaluate(() => openHumcBrain('you')); await P.waitForTimeout(3000);
   fr = brainFrame();
   await fr.evaluate(id => { const t = window.KNOW.terms.find(x => x.id === id); document.querySelector(`#next .row[data-i="${t.i}"]`).click(); }, rec.missed);
   await P.waitForTimeout(400);
@@ -91,15 +90,15 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
   ok(!s.open && s.cat === rec.missedDom && shown, 'Open the card closes the brain and shows the term in its domain ' + JSON.stringify({ ...s, shown, want: rec.missedDom }));
   await P.evaluate(() => setCategory('home')); await P.waitForTimeout(2000);
 
-  // The second tab: how the Hub is built.
+  // Double-tap his head: his brain, the app's code, not Ask and not the knowledge brain.
   await doubleTap(head); await P.waitForTimeout(2500);
-  fr = brainFrame();
-  await fr.click('#tabCode'); await P.waitForTimeout(2500);
   s = await state();
+  ok(s.open && s.frame && s.ov && s.cat === 'home', 'double-tap on his head opens his brain over Home, Ask stays shut ' + JSON.stringify(s));
+  ok(brainFrame() && brainFrame().url().endsWith('/brain/index.html'), 'his head opens his brain, not the knowledge brain ' + (brainFrame() && brainFrame().url()));
   const inside = (fr = brainFrame()) && await fr.evaluate(() => ({ n: window.BRAIN && BRAIN.nodes.length, e: window.BRAIN && BRAIN.edges.length,
     mx: document.getElementById('mx').height, tree: document.getElementById('tree').height, rows: document.querySelectorAll('.rank tbody tr').length,
     close: !document.getElementById('closeBrain').hidden, w: innerWidth, sw: document.documentElement.scrollWidth }));
-  ok(s.open && inside && inside.n === DATA.nodes.length && inside.e === DATA.edges.length, 'its second tab, how the Hub is built, loads every section and link from brain/data.json ' + JSON.stringify(inside));
+  ok(s.open && inside && inside.n === DATA.nodes.length && inside.e === DATA.edges.length, 'his brain loads every section and link from brain/data.json ' + JSON.stringify(inside));
   ok(inside && inside.mx > 100 && inside.tree > 100 && inside.rows === 15, 'its figures are drawn (matrix, volumes, top 15 table)');
   ok(inside && inside.close && inside.sw <= inside.w, 'its X shows in the app, and nothing runs off the side');
   await P.screenshot({ path: OUT + 'phone-brain.png' });

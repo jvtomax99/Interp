@@ -169,16 +169,15 @@ const GUIDE_TOPICS = [
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
     <p>If your phone is set to reduce motion, he's always still.</p>` },
 
-  { id:'brain', section:'ask', k:'brain humc brain knowledge brain your knowledge 3d double tap double-tap head dr smiley hello home progress lit light up dark known learning missed practise practice coverage weakest how the app is built code connectome figures not patient data', q:'What is my knowledge brain (double-tap Dr. Smiley)?', a:`
-    <p>On Home, <b>double-tap Dr. Smiley's head</b> in the hello to open <b>your knowledge brain</b>. You can also open it from <b>CoreCHI Practice</b>: the <b>Your knowledge brain</b> tile, then <b>Open</b>. A single tap on his head still opens Ask the Hub, and press and hold still pets him.</p>
-    <p>Every dot is a glossary term, and each domain is one area of the brain. A dot <b>lights up</b> as you get the term right in Term Review, the Daily Drill and Doctor Prep flashcards. <b>Dark</b>: not practised yet. <b>Red</b>: missed last time. <b>Dim</b>: due again. A term counts as known after three right answers in a row.</p>
+  { id:'brain', section:'ask', k:'brain humc brain 3d double tap double-tap head dr smiley hello home secret hidden scan map code how the app is built connectome network graph figures matrix not patient data', q:'What is the brain when I double-tap Dr. Smiley?', a:`
+    <p>On Home, <b>double-tap Dr. Smiley's head</b> in the hello to open the <b>HUMC Brain</b>: a 3D picture of how this app is built. A single tap still opens Ask the Hub, and press and hold still pets him.</p>
+    <p>Each glowing dot is one part of the app, sized by how big it is. Each line is one part using another. Parts that belong together sit in the same area: the shared core everything relies on in the middle, Dr. Smiley's moves on the top strip, Ask the Hub at the front.</p>
     <ul>
       <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>
-      <li><b>Tap a domain</b> at the bottom (or a row under Your progress) to see what to practise first, then <b>Practise</b> to start Term Review on it.</li>
-      <li><b>Tap a dot</b> to see that term and how you're doing, then <b>Open the card</b>.</li>
-      <li><b>Your progress</b> below the brain: your domains weakest first, what you missed or is due, and a line of terms known over time. That line starts the day you first open it; one count a day is kept on your phone.</li>
+      <li><b>Tap a dot</b> to see that part's details and what it connects to. Tap a colour at the bottom to light up one area.</li>
+      <li>Tap <b>Full workup</b> for charts: every connection in one grid, the busiest parts, and where the app's size goes.</li>
     </ul>
-    <p>It shows only <b>your own</b> record. The second tab, <b>How the Hub is built</b>, is a 3D map of the app's own code. It looks like a scan, but it's <b>not patient data</b>. Close it with the <b>X</b> at the top right or the Back button.</p>` },
+    <p>It looks like a scan and uses medical words for fun, but it's <b>not patient data</b> and not a medical image. It's the app's own code. Close it with the <b>X</b> at the top right or the Back button.</p>` },
 
   { id:'search', section:'find', k:'search look up find lookup word term', q:'How do I look up a word?', a:`
     <ol>
@@ -384,6 +383,17 @@ const GUIDE_TOPICS = [
     </ol>
     <p>Missed one? He says what tells it apart, and <b>Try it again later</b> brings it back a few cards on. At the end you see what moved up a step and your mistakes, with <b>Practise these again</b>. Your recent mistakes are also on the Term Review page.</p>
     <p><b>Pause</b> keeps your place on this phone, even if the app closes. Ask Dr. Smiley to <i>practice five terms I'm still learning</i> and he opens Term Review with just those.</p>` },
+
+  { id:'knowledgebrain', section:'study', k:'knowledge brain my brain your knowledge 3d terms dots lit light up dark known learning missed due practise practice coverage weakest progress over time corechi tile', q:'What is my knowledge brain?', a:`
+    <p>Open <b>CoreCHI Practice</b> and tap <b>Open</b> on the <b>Your knowledge brain</b> tile. It's your glossary drawn as a 3D brain: every dot is a term, each domain is one area.</p>
+    <p>A dot <b>lights up</b> as you get the term right in Term Review, the Daily Drill and Doctor Prep flashcards. <b>Faint</b>: not practised yet. <b>Red</b>: missed last time. <b>Dim</b>: due again. A term counts as known after three right answers in a row.</p>
+    <ul>
+      <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>
+      <li><b>Tap a domain</b> at the bottom (or a row under Your progress) to see what to practise first, then <b>Practise</b> to start Term Review on it.</li>
+      <li><b>Tap a dot</b> to see that term and how you're doing, then <b>Open the card</b>.</li>
+      <li><b>Your progress</b> below the brain: your domains weakest first, what you missed or is due, and a line of terms known over time. That line starts the day you first open it; one count a day is kept on your phone.</li>
+    </ul>
+    <p>It shows only <b>your own</b> record. It's separate from the brain you get by double-tapping Dr. Smiley's head, which is a map of the app's own code. Close it with the <b>X</b> at the top right or the Back button.</p>` },
 
   { id:'reviewcheck', section:'study', k:'term review check answer accent accents capital wrong right spanish variant alternative regional compare self check saved not saved', q:'How does Term Review check my Spanish?', a:`
     <p>Against your team's glossary, never a guess.</p>

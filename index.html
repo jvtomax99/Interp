@@ -5654,7 +5654,7 @@ function dueReviewCount(){
 }
 
 /* ---------- Your knowledge brain: your own Term Review record, drawn as a brain ----------
-   brain/you.html (opened by openHumcBrain in home-polish.js) asks for this
+   brain/you.html (openHumcBrain('you') in home-polish.js) asks for this
    by message. Only this person's own record goes in (TERM_REVIEWS, loaded by
    their name), never anyone else's. Terms Term Review can ask (English and
    Spanish both written). A term's level: 0 never practised, 1 missed last
@@ -5662,7 +5662,7 @@ function dueReviewCount(){
    a row); overdue ones are marked so the brain dims them. The record keeps
    only its latest state, so one count a day (ih_knowledgeLog, this phone
    only, per name) feeds the progress figure from 2026-10-21 on.
-   docs/features/humc-brain.md. */
+   docs/features/knowledge-brain.md. */
 const KB_LOG_KEY = 'ih_knowledgeLog';
 function kbLevel(r){
   if(!r || !r.reviewCount) return 0;
@@ -5727,7 +5727,7 @@ function knowledgeOpenTerm(termId){
   const c = DATA.categories.find(x => x.terms.some(t => t.id === termId));
   if(c) revealTerm(c.id, termId); else showToast('That term is no longer in the glossary.');
 }
-// The tile on the CoreCHI Practice dashboard (the head double-tap on Home is the other way in);
+// Its one way in: the tile on the CoreCHI Practice dashboard (Dr. Smiley's head opens his own, separate brain);
 // styled with the memory trainer's tile (app.css, .kb-entry beside .mem-entry).
 function knowledgeEntryHtml(){
   if(!termReviewsLoaded && whoAmI()) ensureLoaded('termReviews', loadTermReviews);
@@ -6265,7 +6265,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'brain',       tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: double-tap Dr. Smiley’s head, or open it from CoreCHI Practice' },
+  { id:'knowledgebrain', tone:'gd-n1', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: open it from CoreCHI Practice' },
   { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
   { id:'providers',   tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
 ];

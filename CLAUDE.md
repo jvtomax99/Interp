@@ -45,7 +45,7 @@ between assignments.
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
-| `brain/` | — | HUMC Brain, two tabs: `you.html`, your knowledge brain (glossary terms lit by your own Term Review record, data from `knowledgeBrainData` in `index.html` by message), and `index.html`, the app's code drawn as a 3D brain (its data `data.json` from `tests/tools/brain-data.cjs`); vendored Three.js r128. Opened over Home by a double-tap on Dr. Smiley's head or the CoreCHI Practice tile (`openHumcBrain` in `home-polish.js`). `docs/features/humc-brain.md` |
+| `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `index.html` by message), opened from the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
 | `api/translate.js` | 145 | Translate tool — Claude API |
 | `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
@@ -202,7 +202,8 @@ touch before changing it; update it in the same commit when the behaviour change
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
 - The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 - CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
-- HUMC Brain: your knowledge brain and the code map, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `knowledgeBrainData`, `brain/`): `humc-brain.md`
+- HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
+- Your knowledge brain, the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
