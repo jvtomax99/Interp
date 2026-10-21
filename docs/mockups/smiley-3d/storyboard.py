@@ -117,3 +117,25 @@ pixar = [
 ]
 board('Plan: your 3D file \u2192 Dr. Smiley', SUB, glb, 'plan-glb.png')
 board('Plan: Dr. Smiley, Pixar style', SUB, pixar, 'plan-pixar.png')
+
+
+P = lambda n: Image.open(O('plan/' + n))
+tripo = [
+    ('1', 'YOU', 'Attach the 3D file itself (GLB) in this chat, like you did the video. iCloud links are blocked in my workspace.',
+     [fit(P('tripo-turn.png'), 900, 700)], 'Your Tripo model (from your recording)', False),
+    ('2', 'DECIDE', 'His right arm is fixed in a wave. Jumps and flips would stretch it. Best: make him again on Tripo from an arms-down picture, then send that GLB.',
+     [fit(P('arm_compare.png'), 900, 760)], '', True),
+    ('3', 'ME', 'Open the file, check it from every side, send you its 360\u00b0 turn as it came.', [], '', True),
+    ('4', 'ME', 'No gloss anywhere: skin, hair, coat and shoes get a soft matte finish and soft light.',
+     [fit(P('gloss_pair.png'), 900, 500)], 'Example on today\u2019s 3D head: glossy (left), matte (right)', False),
+    ('5', 'ME', 'Hair, part 1: recolour his near-black hair to your drawing\u2019s chestnut browns.',
+     [fit(P('recolour_pair.png'), 900, 480)], 'Mock-up on your model: now (left), recoloured (right)', False),
+    ('6', 'ME', 'Hair, part 2: reshape it like your drawing, taller on top with the swoop rising up and to his left. I send before/after pictures.',
+     [fit(P('hair_compare.png'), 900, 560)], '', True),
+    ('7', 'ME', 'Skeleton (36 bones, fingers) and the 3D face controls: blink, look, brows, cheeks, smile, lips, jaw.',
+     [side_by_side(fit(Image.open(O('plan-skeleton.png')), 300, 500), fit(Image.open(O('plan-face-controls.png')), 400, 500))],
+     'Examples: the skeleton on today\u2019s figure; the face controls on your drawing', False),
+    ('8', 'ME', 'Expression sheet, six poses and a 360\u00b0 turn, all matte.', [], '', True),
+    ('9', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
+]
+board('Plan: your Tripo model \u2192 Dr. Smiley', SUB, tripo, 'plan-tripo.png')
