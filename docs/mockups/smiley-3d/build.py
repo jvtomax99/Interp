@@ -1286,11 +1286,11 @@ def studio():
     sc.cycles.use_denoising = True
     sc.view_settings.view_transform = 'Standard'
     sc.view_settings.look = 'None'
-    sc.view_settings.exposure = -.5 if STYLE_NOW == 'film' else -.75
+    sc.view_settings.exposure = -.5 if STYLE_NOW in ('film', 'tripo') else -.75
     sc.render.film_transparent = False
     w = bpy.data.worlds.new('World'); sc.world = w
     w.use_nodes = True
-    w.node_tree.nodes['Background'].inputs['Color'].default_value = srgb(226, 232, 242)
+    w.node_tree.nodes['Background'].inputs['Color'].default_value = srgb(236, 232, 228) if STYLE_NOW == 'tripo' else srgb(226, 232, 242)
     w.node_tree.nodes['Background'].inputs['Strength'].default_value = .35
 
     def area(name, loc, target, size, power, color=(1, 1, 1)):
@@ -1300,10 +1300,11 @@ def studio():
         d = (Vector(target) - Vector(loc)).normalized()
         ob.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
         return ob
-    area('Key', (-1.4, -2.0, 2.2), (0, 0, .6), 1.6, 190, (1, .97, .92))
-    area('Fill', (2.0, -1.6, 1.0), (0, 0, .6), 2.5, 70, (.88, .93, 1))
+    warm = STYLE_NOW == 'tripo'           # Jose's model: warm light like his drawing's, no blue fill
+    area('Key', (-1.4, -2.0, 2.2), (0, 0, .6), 1.6, 190, (1, .93, .84) if warm else (1, .97, .92))
+    area('Fill', (2.0, -1.6, 1.0), (0, 0, .6), 2.5, 70, (1, .96, .92) if warm else (.88, .93, 1))
     area('Rim', (.6, 2.2, 2.0), (0, 0, .7), 1.2, 160, (.9, .95, 1))
-    area('Top', (0, -.3, 3.0), (0, 0, .5), 2.0, 50 if STYLE_NOW != 'film' else 20)
+    area('Top', (0, -.3, 3.0), (0, 0, .5), 2.0, 50 if STYLE_NOW not in ('film', 'tripo') else 20)
     # floor: a soft studio sweep (floor curving up into a back wall) in the app's blue-grey
     prof = []
     for i in range(41):
