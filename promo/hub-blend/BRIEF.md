@@ -231,8 +231,8 @@ distinct on screen.
    "CoreCHI Practice" with the five domains. Audio: the 2.5 s walk-in had
    pushed the hook 2.5 s after the music; the music now starts the hook at
    2.5 s, under the walk-in a reverse swell of the track's own opening
-   (muffled, as if through the doors). 43 s; music: swell, v11 0-38 s into
-   its last 3.5 s.
+   (muffled, as if through the doors; replaced in step 7). 43 s; music:
+   lead-in, v11 0-38 s into its last 3.5 s.
 7. Check against the rules above, side by side with v11 per feature; fix;
    full render; send with the side-by-side. **Done** (2026-10-21).
    Checked: captions 84 px at full size (rule: 64), 11.5:1 contrast or
@@ -244,8 +244,11 @@ distinct on screen.
    frame width with v11's cyan outline, the scene dimmed, and settles back
    before Dr. Smiley hops (`src/remake/hero.js`); the end card's smaller
    lines and the address were unreadable, now bigger, the address pill
-   toned down (the bloom washed it out). The walk-in swell is audible from
-   its start. Full size: `remake-final.html` (1080x1920, otherwise the same
+   toned down (the bloom washed it out). Walk-in sound, Jose's pick "A"
+   (2026-10-21): the reversed swell sounded like a rewind at the doors, so
+   now the song plays forward under the walk-in (v11 30-32.7 s), muffled as
+   if through the doors, and crossfades (0.2 s) into the hook clean at
+   2.5 s. Full size: `remake-final.html` (1080x1920, otherwise the same
    file); `tools/side-by-side.sh` puts v11 beside the remake shot by shot.
    Still open for Jose: the logo shot keeps the old flat phone; the hop
    between features dips through navy (a dark beat each time).
