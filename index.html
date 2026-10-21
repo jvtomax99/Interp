@@ -5747,6 +5747,89 @@ function knowledgeEntryHtml(){
     </div>`;
 }
 
+/* The small live brain at the top of Term Review (Jose, 2026-10-21): your
+   terms as dots on a turning brain, lit by the same levels as brain/you.html,
+   drawn on a 2D canvas here so the screen loads no 3D. A preview, not the
+   same layout: domains are bands of the cortex. Tapping it opens the full
+   brain. Draws only while on screen and the page is visible; still under
+   reduced motion. */
+function kbMiniHtml(){
+  let total = 0, known = 0;
+  DATA.categories.forEach(c => c.terms.forEach(t => { if(t.en && t.es){ total++; if(kbLevel(TERM_REVIEWS[t.id]) === 3) known++; } }));
+  const line = !termReviewsLoaded ? 'Loading your record…' : `${known} of ${total} known${total ? ' · ' + Math.round(100 * known / total) + '%' : ''}`;
+  requestAnimationFrame(kbMiniStart);
+  return `<button type="button" class="kb-mini dash-in" style="--i:0" onclick="window.openHumcBrain && openHumcBrain('you')" aria-label="Your knowledge brain: ${escapeAttr(line)}. Open it">
+    <canvas class="kb-mini-scan" id="kbMini" aria-hidden="true"></canvas>
+    <span class="kb-mini-text"><b>Your knowledge brain</b><span>${escapeHtml(line)}</span></span>
+    <svg class="kb-mini-go" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>`;
+}
+const KBM = { el: null, raf: 0, pts: null, on: true, io: null };
+function kbMiniStart(){
+  const c = document.getElementById('kbMini');
+  if(!c || c === KBM.el) return;
+  cancelAnimationFrame(KBM.raf);
+  KBM.el = c; KBM.pts = kbMiniPoints(); KBM.on = true;
+  if(KBM.io) KBM.io.disconnect();
+  KBM.io = new IntersectionObserver(es => { KBM.on = es[0].isIntersecting; if(KBM.on && !KBM.raf) KBM.raf = requestAnimationFrame(kbMiniFrame); });
+  KBM.io.observe(c);
+  KBM.raf = requestAnimationFrame(kbMiniFrame);
+}
+// The brain's shape (the cortex of brain/you.html) and the terms on it.
+function kbMiniPoints(){
+  const H = { cx:.31, rx:.80, ry:.92, rz:1.40, cy:.14 };
+  const fib = n => { const o = [], g = Math.PI * (3 - Math.sqrt(5)); for(let i = 0; i < n; i++){ const y = 1 - 2 * (i + .5) / n, r = Math.sqrt(1 - y * y), t = g * i; o.push([Math.cos(t) * r, y, Math.sin(t) * r]); } return o; };
+  const cortex = (d, side) => {
+    let x = d[0] * H.rx, y = d[1] * H.ry, z = d[2] * H.rz;
+    if(side * d[0] <= 0) x *= .26;
+    if(d[1] < -.2) y = -.2 * H.ry + (y + .2 * H.ry) * .62;
+    if(d[2] > .55) y *= 1 - (d[2] - .55) * .35;
+    return [side * H.cx + x, H.cy + y, z];
+  };
+  const shell = [];
+  [-1, 1].forEach(side => fib(700).forEach(d => { if(side * d[0] > -.9) shell.push(cortex(d, side)); }));
+  const terms = [];
+  const cats = DATA.categories.slice().sort((a, b) => collateTerms(a.name, b.name)), now = Date.now();
+  const top = c => c.parentId || c.id;
+  cats.slice().sort((a, b) => collateTerms(top(a), top(b))).forEach(c => c.terms.forEach(t => {
+    if(!t.en || !t.es) return;
+    const r = TERM_REVIEWS[t.id], lv = kbLevel(r);
+    terms.push({ color: lv === 1 ? '#FF8A8A' : c.color || '#7D89B0', lv, over: !!(r && r.reviewCount && r.nextReviewAt <= now), box: r ? r.box || 0 : 0 });
+  }));
+  // Domains as bands: outer-cortex spots in order around each hemisphere.
+  const spots = [];
+  [-1, 1].forEach(side => fib(Math.max(400, Math.ceil(terms.length * 1.6))).forEach(d => { if(side * d[0] > .05 && d[1] > -.7) spots.push({ d, side, k: side * 10 + Math.atan2(d[1], d[2]) }); }));
+  spots.sort((a, b) => a.k - b.k);
+  const step = spots.length / Math.max(1, terms.length);
+  terms.forEach((t, i) => { const s = spots[Math.floor(i * step)] || spots[0]; t.p = s ? cortex(s.d, s.side) : [0, 0, 0]; });
+  return { shell, terms };
+}
+function kbMiniFrame(now){
+  KBM.raf = 0;
+  const c = KBM.el;
+  if(!c || !c.isConnected){ if(KBM.io) KBM.io.disconnect(); KBM.el = null; return; }
+  if(!KBM.on || document.hidden) return;
+  const w = c.clientWidth, h = c.clientHeight, dpr = Math.min(2, devicePixelRatio || 1);
+  if(c.width !== Math.round(w * dpr)){ c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+  const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  const still = reducedMotion(), a = still ? -.95 : -.95 + now * .00025, ca = Math.cos(a), sa = Math.sin(a), tilt = .32, ct = Math.cos(tilt), st = Math.sin(tilt);
+  const sc = Math.min(w / 2.8, h / 2.4), cx = w / 2 + 6, cy = h / 2 + sc * .1;
+  const proj = p => { const X = p[0] * ca + p[2] * sa, Z0 = -p[0] * sa + p[2] * ca, Y = p[1] * ct - Z0 * st, Z = p[1] * st + Z0 * ct, f = 1 / (1 + Z * -.12); return [cx + X * sc * f, cy - Y * sc * f, Z]; };
+  x.globalCompositeOperation = 'lighter';
+  x.fillStyle = 'rgba(110,145,230,.22)';
+  KBM.pts.shell.forEach(p => { const q = proj(p); x.fillRect(q[0], q[1], 1.1, 1.1); });
+  KBM.pts.terms.forEach(t => {
+    const q = proj(t.p), front = q[2] > -.2 ? 1 : .55;
+    if(t.lv === 0){ x.fillStyle = `rgba(143,163,214,${.28 * front})`; x.fillRect(q[0] - .8, q[1] - .8, 1.6, 1.6); return; }
+    const b = (t.lv === 1 ? .55 : t.lv === 2 ? .7 : 1) * (t.over ? .6 : 1) * front;
+    x.globalAlpha = b * .26; x.fillStyle = t.color; x.beginPath(); x.arc(q[0], q[1], t.lv === 3 ? 3.2 : 2.6, 0, 7); x.fill();
+    x.globalAlpha = b; x.fillStyle = t.lv === 3 ? '#F2FBFF' : t.color; x.beginPath(); x.arc(q[0], q[1], t.lv === 3 ? 1.35 : 1.1, 0, 7); x.fill();
+    x.globalAlpha = 1;
+  });
+  x.globalCompositeOperation = 'source-over';
+  if(!still) KBM.raf = requestAnimationFrame(t => setTimeout(() => kbMiniFrame(performance.now()), 16));
+}
+
 /* ---------- Term Review: Dr. Smiley's practice sessions ----------
    Built on the record Term Review already keeps (term-reviews/{who__termId}:
    box, nextReviewAt, reviewCount, plus lastResult, misses and lastAt, written
@@ -6069,6 +6152,7 @@ function renderReview(){
     return html;
   }
   if(!termReviewsLoaded) ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'review' && !reviewActive) renderContent(); });
+  html += kbMiniHtml();
   const paused = reviewStored();
   if(paused){
     const spec = paused.spec && askSpecialties().find(d => d.id === paused.spec);
@@ -6269,7 +6353,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'knowledgebrain', tone:'gd-n1', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: open it from CoreCHI Practice' },
+  { id:'knowledgebrain', tone:'gd-n1', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: at the top of Term Review, or from CoreCHI Practice' },
   { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
   { id:'providers',   tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
 ];
@@ -14220,7 +14304,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dp-gl';
+  const LIFTS = '.cp-play, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already

@@ -384,8 +384,8 @@ const GUIDE_TOPICS = [
     <p>Missed one? He says what tells it apart, and <b>Try it again later</b> brings it back a few cards on. At the end you see what moved up a step and your mistakes, with <b>Practise these again</b>. Your recent mistakes are also on the Term Review page.</p>
     <p><b>Pause</b> keeps your place on this phone, even if the app closes. Ask Dr. Smiley to <i>practice five terms I'm still learning</i> and he opens Term Review with just those.</p>` },
 
-  { id:'knowledgebrain', section:'study', k:'knowledge brain my brain your knowledge 3d terms dots lit light up dark known learning missed due practise practice coverage weakest progress over time corechi tile', q:'What is my knowledge brain?', a:`
-    <p>Open <b>CoreCHI Practice</b> and tap <b>Open</b> on the <b>Your knowledge brain</b> tile. It's your glossary drawn as a 3D brain: every dot is a term, each domain is one area.</p>
+  { id:'knowledgebrain', section:'study', k:'knowledge brain my brain your knowledge 3d term review top small turning terms dots lit light up dark known learning missed due practise practice coverage weakest progress over time corechi tile', q:'What is my knowledge brain?', a:`
+    <p>Open <b>Term Review</b>: the small turning brain at the top is yours. Tap it to open it full screen. You can also open it from <b>CoreCHI Practice</b>, on the <b>Your knowledge brain</b> tile. It's your glossary drawn as a 3D brain: every dot is a term, each domain is one area.</p>
     <p>A dot <b>lights up</b> as you get the term right in Term Review, the Daily Drill and Doctor Prep flashcards. <b>Faint</b>: not practised yet. <b>Red</b>: missed last time. <b>Dim</b>: due again. A term counts as known after three right answers in a row.</p>
     <ul>
       <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>

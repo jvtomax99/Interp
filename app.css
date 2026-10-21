@@ -7323,3 +7323,20 @@ body.pv-open{ overflow:hidden; }
     .study-streak i, .hot-streak span{ animation:none; }
   }
 
+
+/* The small live brain at the top of Term Review (kbMiniHtml in index.html): one
+   compact row (brain, words, chevron) so Start stays in reach, on the knowledge
+   brain's own dark field so it reads as a window onto it. */
+.kb-mini{ display:flex; align-items:center; gap:13px; width:100%; max-width:480px; min-height:96px;
+  margin:0 0 var(--sp-4, 17px); padding:0 13px 0 0; border:1px solid rgba(126,156,226,.22); border-radius:var(--r-lg); overflow:hidden;
+  background:radial-gradient(ellipse 70% 120% at 18% 50%, #142252 0%, #060A17 75%); color:#E9EEFA; font:inherit; text-align:left; cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.08), 0 1px 2px rgba(20,43,67,.06), 0 8px 20px -12px rgba(22,55,90,.22);
+  transition:transform .368s var(--spring0, var(--ease)); }
+.kb-mini-scan{ flex:none; display:block; width:128px; height:96px; }
+.kb-mini-text{ flex:1; display:flex; flex-direction:column; gap:3px; min-width:0; }
+.kb-mini-text b{ font-size:var(--fs-subhead, 15px); font-weight:650; letter-spacing:-.015em; }
+.kb-mini-text span{ font-size:var(--fs-footnote, 13px); line-height:1.35; color:#A4B0CC; font-variant-numeric:tabular-nums; }
+.kb-mini-go{ flex:none; width:24px; height:24px; color:#7FB8FF; }
+.kb-mini:active, .kb-mini.is-pressed{ transform:scale(.985); }
+.kb-mini:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
+@media (prefers-reduced-motion:reduce){ .kb-mini{ transition:none; } .kb-mini:active, .kb-mini.is-pressed{ transform:none; } }
