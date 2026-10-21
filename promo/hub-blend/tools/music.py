@@ -13,15 +13,14 @@ music must not sound cut ("the audio seems to get cut off"), so:
 - the end card keeps v11's finale, jumping once from its first second;
 - every jump is on the beat grid (one beat = 0.500 s, measured on .465/.965), crossfaded over 40 ms
   just before the beat's attack;
-- before the words, an idle sound under the walk-in: soft air ("air") or a quiet open fifth on A
-  ("pad"), swelling into the first words.
+- before the words, under the walk-in, a 2.5 s piece of the same song chosen to flow into its
+  start, soft and rising into the first words.
 
-  python3 -I promo/hub-blend/tools/music.py <v11.mp4> <out.m4a> [air|pad]"""
+  python3 -I promo/hub-blend/tools/music.py <v11.mp4> <out.m4a>"""
 import subprocess, sys
 import numpy as np
 
 V11, OUT = sys.argv[1], sys.argv[2]
-IDLE = sys.argv[3] if len(sys.argv) > 3 else "air"
 SR = 48000
 WALK = 2.5           # the walk-in before the words
 BEAT, PHASE = 0.5, 0.465
@@ -127,35 +126,28 @@ for a, b in merged[1:]:
     mid = tail_a * fade_out + nxt[:nx] * fade_in
     out = np.concatenate([head, mid, nxt[nx:]])
 
-# ---- the idle sound under the walk-in ----
+# ---- under the walk-in: a 2.5 s piece of the same song (Jose: "a sample of the music used
+# through the whole video"), the one whose end sounds most like the song's first moment, so it
+# flows into the words; soft at first, rising to full as the words appear ----
 n = int(WALK * SR)
-t = np.arange(n) / SR
-rng = np.random.default_rng(7)
-def lowpass(x, fc):
-    a = np.exp(-2 * np.pi * fc / SR); y = np.empty_like(x); s = 0.0
-    for i in range(len(x)):
-        s = (1 - a) * x[i] + a * s; y[i] = s
-    return y
-if IDLE == "pad":
-    # a quiet open fifth on A (A2, E3, A3), slightly detuned voices, a slow swell
-    voice = sum(np.sin(2 * np.pi * f * t + p) * g for f, g, p in
-                [(110, 0.5, 0), (110.4, 0.35, 1), (164.81, 0.32, 2), (165.2, 0.22, 3), (220, 0.18, 4), (220.6, 0.12, 5)])
-    air = lowpass(rng.standard_normal(n), 900) * 0.06
-    idle = voice * 0.5 + air
-else:
-    # soft air: filtered noise that breathes, a low hum under it
-    air = lowpass(rng.standard_normal(n), 1400) * (0.75 + 0.25 * np.sin(2 * np.pi * 0.6 * t))
-    hum = lowpass(lowpass(rng.standard_normal(n), 120), 120) * 2.0
-    idle = air * 0.5 + hum
-env = np.clip(t / 1.4, 0, 1) ** 1.5                  # swell in
-env *= np.clip((WALK + 0.15 - t) / 0.35, 0, 1)        # give way to the words
-idle = idle * env
-idle = idle / (np.abs(idle).max() + 1e-9) * (0.06 if IDLE == "pad" else 0.12)  # well under the song (a pure tone reads louder than air)
-idle = np.stack([idle, idle], 1).astype(np.float32)
+best = None
+for bt in beats(8.0, DUR - 4.0):
+    x1 = bt + 0.035                     # the piece ends where a caption-grid moment would be
+    score = sim(x1, 0.0)
+    if best is None or score > best[0]:
+        best = (score, x1 - WALK)
+x0 = best[1]
+log.append(f"walk-in: v11 {x0:.2f}-{x0 + WALK:.2f} (alike the start {best[0]:.2f})")
+piece = src[int(round(x0 * SR)):int(round(x0 * SR)) + n + nx].copy()
+t = np.arange(n + nx) / SR
+env = 0.35 + 0.65 * np.clip((t - 0.6) / 1.9, 0, 1) ** 2      # soft, then up to full at the words
+env *= np.clip(t / 0.5, 0, 1)                                   # in from silence
+piece *= env[:, None]
+# into the song's start: the same crossfade as every other jump
+idle = piece
 song = out
-total = np.concatenate([idle, song])
-# a 30 ms fade at the very start of the song so its first attack lands clean on the words
-total[n:n + int(0.003 * SR)] *= np.linspace(0, 1, int(0.003 * SR))[:, None]
+tail = idle[n:] * fade_out + song[:nx] * fade_in   # the song's first 40 ms, from the words on
+total = np.concatenate([idle[:n], tail, song[nx:]])
 
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", "-",
                 "-c:a", "aac", "-b:a", "192k", OUT], input=total.astype(np.float32).tobytes(), check=True)
