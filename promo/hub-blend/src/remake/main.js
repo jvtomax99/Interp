@@ -19,6 +19,7 @@ import { createOverlay, SMILEY_SHARE } from "./overlay.js";
 import { buildEnd } from "./end.js";
 import { buildDesk } from "./desk.js";
 import { createCity } from "./city.js";
+import { createHero } from "./hero.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
@@ -611,6 +612,7 @@ async function build() {
   root.appendChild(dip);
   const overlay = await createOverlay(root, W, H);
   const city = await createCity(root, canvas, W, H); // CoreCHI's campus, flown into (city.js)
+  const hero = createHero(city.canvas, W, H); // the proof, big enough to read (hero.js)
   let smileyState = null;
   const _v = new THREE.Vector3();
   function proofRect(g) {
@@ -701,10 +703,16 @@ async function build() {
     // the campus takes over from the phone, until the cut in the middle of the hop out
     const inCity = s[2] === "cert" && !(hopping && t >= s[1] - HOP / 2);
     city.draw(t - s[0], t, inCity ? feat.worldRect(camera, W, H) : null, inCity ? prog(t - s[0], 0.78, 0.96) : 0);
+    // the proof flies out to be read, then settles back onto the phone before his hop
+    if (isFeature(s[2]) && s[2] !== "cert") {
+      const u = t - s[0], len = s[1] - s[0], start = s[2] === "body" ? 2.0 : 0.6, end = len - HOP - 0.06;
+      const k = prog(u, start, start + 0.35) * (1 - prog(u, end - 0.22, end));
+      hero.draw(k > 0.001 ? feat.proofArt(s[2]) : null, k > 0.001 ? proofRect(s[2]) : null, k);
+    } else hero.draw(null, null, 0);
     overlay.draw(smileyState);
     // for the checks: his box and the proof's box on screen this frame
-    window.__smileyCheck = { t: time, shot: s[2], smiley: overlay.box(), proof: city.box() || (isFeature(s[2]) ? proofRect(s[2]) : null),
-      nextProof: hopping ? proofRect(next[2]) : null };
+    window.__smileyCheck = { t: time, shot: s[2], smiley: overlay.box(), proof: hero.box() || city.box() || (isFeature(s[2]) ? proofRect(s[2]) : null),
+      nextProof: hopping ? proofRect(next[2]) : null, screen: isFeature(s[2]) ? feat.screenRect(camera, W, H) : null };
   }
 
   /* Motion blur, like the clip's: during the hops and fly-throughs a frame is the average of several

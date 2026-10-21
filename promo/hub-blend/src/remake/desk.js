@@ -335,6 +335,23 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
   }
   const idleSpot = (g) => desk.position.clone();
   const idle = (g, u) => update(g, u);
+  // the proof's picture, cropped to the element (hero.js shows it big)
+  const proofArt = (g) => {
+    const S = screens[SCREEN_OF[g]], P = S && S.proofKey && S.layers[S.proofKey];
+    if (!P) return null;
+    const img = P.mesh.material.map.image, l = P.l, c = l.clip, k = img.width / c.width;
+    return { img, sx: (l.x - c.x) * k, sy: (l.y - c.y) * k, sw: l.w * k, sh: l.h * k };
+  };
   const proofMesh = (g) => { const S = screens[SCREEN_OF[g]]; return S && S.proofKey ? S.layers[S.proofKey].mesh : null; };
-  return { update, view, smiley, idle, idleSpot, proofMesh, desk, worldRect };
+  // the whole phone screen on screen (for the "no dark or empty screen" check)
+  function screenRect(camera, W, H) {
+    phone.updateWorldMatrix(true, false);
+    const v = new THREE.Vector3(), pts = [];
+    for (const [x, y] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      v.set(x * PHONE.w / 2, y * PHONE.h / 2, 0.05).applyMatrix4(phone.matrixWorld).project(camera);
+      pts.push([(v.x + 1) / 2 * W, (1 - v.y) / 2 * H]);
+    }
+    return pts;
+  }
+  return { update, view, smiley, idle, idleSpot, proofMesh, proofArt, desk, worldRect, screenRect };
 }
