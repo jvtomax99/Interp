@@ -364,11 +364,8 @@ distinctions the eye cannot resolve); padding, margin and gap use a token
 99 times against 1,737 px values, 12 of them crowding into 6-17px: 9px (251
 uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each),
 then 12/11/16/7/15. The scale **6 / 9 / 13 / 17 / 26** covers 42% of the
-px spacing uses as they stand. Three rules name tokens that don't exist
-(`--fs-headline`, `--fs-title1`, `--fs-footnote`) and run on their px
-fallbacks; the real names are `--fs-head`, `--fs-t1`, `--fs-foot`. When
-adjusting spacing or type on a component, move it onto the tokens rather
-than extending the tail.
+px spacing uses as they stand. When adjusting spacing or type on a
+component, move it onto the tokens rather than extending the tail.
 
 ## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
 
