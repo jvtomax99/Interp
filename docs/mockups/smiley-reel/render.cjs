@@ -53,7 +53,7 @@ const server = http.createServer((req, res) => {
     execFileSync('python3', ['-I', path.join(__dirname, 'sound.py'), path.join(__dirname, TIMELINE), wav], { stdio: 'inherit' });
     const out = path.join(__dirname, (mode === 'full' ? 'reel' : 'preview') + SUFFIX + '.mp4');
     execFileSync('ffmpeg', ['-y', '-v', 'error', '-framerate', '30', '-i', path.join(dir, 'f_%04d.jpg'), '-i', wav,
-      '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
+      '-c:v', 'libx264', '-preset', 'slow', '-crf', v2 ? '27' : '18', ...(v2 ? ['-tune', 'grain'] : []), '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
     console.log('wrote', out);
   }
   await browser.close(); server.close();
