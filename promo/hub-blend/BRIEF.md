@@ -201,6 +201,16 @@ distinct on screen.
    building's own colours: brick card, cream lettering, sky-blue underline
    ("glass-brick", sampled from the photo). Jose chose doors-only (no
    interior photos). 42 s; music v11 0-38.5 s into its ending.
+   Sixth round (2026-10-21): Jose preferred how the first hub-blend reel
+   showed the app (whole screens, upright, with a headline) and said the 3D
+   Body looked wrong (the flat phone and the zoomed dive smeared it). The
+   features are now staged at one desk (`src/remake/desk.js`, same API as
+   features.js, which still holds the feature list and timing): glossy
+   table, a window onto that feature's HUMC photo, the laptop on the left
+   with a big headline drawn per feature, the phone upright on the right
+   with the real screen, its proof popping forward in v11's cyan outline.
+   3D Body: the real explode frames play on the upright phone, then fade to
+   the heart and its card. Checks: Dr. Smiley 0 failures, captions 15.4:1+.
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.

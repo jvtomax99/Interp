@@ -17,6 +17,7 @@ import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen } fro
 import { MOVES } from "../smiley.js";
 import { createOverlay, SMILEY_SHARE } from "./overlay.js";
 import { buildEnd } from "./end.js";
+import { buildDesk } from "./desk.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
@@ -256,7 +257,8 @@ async function build() {
   logo.add(sub);
 
   // ---------- features 1-5 ----------
-  const feat = await buildFeatures(scene, groups, { word, label });
+  // the features, staged at one desk like the first reel (Jose, 2026-10-21; desk.js)
+  const feat = await buildDesk(scene, groups);
   const END_AT = FEATURES_END;
   groups.end = new THREE.Group();
   groups.end.position.set(0, 0, -58 - FEATURES.length * 12 - 2);
@@ -297,8 +299,6 @@ async function build() {
   // The skybridge stays in the end card's window. ----------
   const PHOTO_OF = {
     says: "entrance", doctor: "entrance", timer: "tower", wrong: "pavilion-dusk", right: "aerial", logo: "pavilion-dusk-2",
-    home: "entrance", glossary: "tower", body: "pavilion-dusk", translate: "aerial", physician: "pavilion-dusk-2",
-    falsefriends: "entrance", drills: "tower", cert: "aerial", team: "pavilion-dusk", ask: "pavilion-dusk-2",
   };
   const photoImg = {};
   await Promise.all([...new Set(Object.values(PHOTO_OF))].map((n) => new Promise((res) => { const im = new Image(); im.onload = () => { photoImg[n] = im; res(); }; im.src = `assets/humc/${n}.jpg`; })));
@@ -587,6 +587,7 @@ async function build() {
     spot.target.updateMatrixWorld();
     if (hopping) { const half = t >= s[1] - HOP / 2; for (const g in groups) groups[g].visible = g === (half ? next[2] : s[2]); }
     else for (const g in groups) groups[g].visible = g === s[2] || (next && t > s[1] - WHIP && g === next[2]);
+    groups.desk.visible = FEATURES.some((f) => groups[f.g].visible); // the features share one desk
     for (const [m, g] of walls) m.visible = g === s[2] || (next && t > s[1] - WHIP && g === next[2]);
     const glowing = s[2] === "wrong" ? C.red : s[2] === "right" ? C.cyan : null;
     tint.visible = !!glowing;
@@ -670,6 +671,8 @@ async function build() {
     sm.lastPose = null;
     feat.update(s[2], t - s[0]);
     if (isFeature(s[2]) && !sm.group.visible) feat.idle(s[2], t - s[0]);
+    // after the cut at the middle of a hop, the desk shows the next feature
+    if (hopping && t >= s[1] - HOP / 2) feat.update(next[2], 0);
     const pose = sm.lastPose;
     sm.group.visible = false; // never drawn in 3D: the overlay draws him
     smileyState = null;
