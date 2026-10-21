@@ -54,6 +54,21 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**3D Dr. Smiley (Jose's picks, 2026-10-21).** A 3D toy figure built in code
+(Blender `bpy`, rendered with Cycles), his drawn face on the head, invented
+sides, back and body, a skeleton for movement. Folder and method:
+`docs/mockups/smiley-3d/README.md`. One PR per gate, each waits for Jose:
+R1. The figure and skeleton: turntable and six poses (this PR). Jose
+   approves the invented sides, back and body before any animation.
+R2. The motions as short clips: idle breathing, anticipation crouch, jump
+   with legs tucked, a spin or flip, a squash landing, wave, look, point,
+   happy bounce; secondary motion (hair, coat hem, lanyard) on springs;
+   face frames and brows driven from a timing file (the brows as their own
+   layer so they glide, as `DR_BROWS` does in the app). Disney principles
+   as in `dr-smiley.md`. Ground: decide with Jose (v1's Home tabletop from
+   PR #110, or the studio sweep).
+R3. v1's reel (PR #110) rebuilt with the 3D figure.
+
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
 F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right
@@ -273,6 +288,12 @@ then read the log; it names the suite and the check.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-10-21 3D Dr. Smiley R1 (this PR): `docs/mockups/smiley-3d/`, the
+  figure built in code in Blender with a 20-bone skeleton, his drawn face
+  and brows projected on the head (`prep.py`, `build.py`); head views,
+  body views, six poses and a 360-degree turn in `out/`. Docs only,
+  nothing deployed, no User Guide change.
 
 - 2026-10-21 Split `index.html`, phase 0 (this PR): `tests/tools/census.cjs`
   (acorn added to `tests/`) maps every top-level name of the inline
@@ -708,6 +729,18 @@ then read the log; it names the suite and the check.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **Blender in the cloud session** (2026-10-21): `pip install bpy` gives
+  Blender 5.2 as a Python module; Cycles on the CPU (4 cores) renders his
+  figure at 540 x 960, 24 samples with the denoiser, in about 20 s a
+  frame. `bpy.ops` works headless for armature edit mode, joins and
+  `transform_apply` (with `temp_override`); `ob.modifiers.move()` reorders
+  modifiers without an operator. Hair as many short random clumps reads as
+  a pine cone; locks that all start at the crown and run to the hairline
+  read as a haircut. Standard view transform keeps his drawn face's
+  colours (AgX washed the skin out). Pose angles that must hit a spot
+  (hand under the chin) are solved by brute-force forward kinematics on
+  `BONES`, not guessed.
 
 - **The census (`tests/tools/census.cjs`)** counts a use only by name: a
   `window[name]` lookup or a name built in a string is invisible to it,

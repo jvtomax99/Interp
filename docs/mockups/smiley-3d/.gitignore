@@ -1,0 +1,9 @@
+tex/
+out/turn/
+out/head_*.png
+out/body_*.png
+out/pose_*.png
+out/head-views-64.png
+smiley.blend
+smiley.blend1
+__pycache__/
