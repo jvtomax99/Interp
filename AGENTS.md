@@ -65,6 +65,7 @@ So:
 | 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
 | Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
 | User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
+| Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Your knowledge brain (CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
 | Everything else | `index.html` |
