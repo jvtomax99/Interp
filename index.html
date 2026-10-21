@@ -3322,6 +3322,7 @@ async function loadTermReviews(){
         lastResult: d.lastResult, misses: d.misses, lastAt: d.lastAt };
     });
     termReviewsLoaded = true;
+    kbLogNote();
   }catch(err){
     console.error('loadTermReviews failed:', err);
   }
@@ -3349,6 +3350,7 @@ async function saveTermReview(termId, box, reviewCount, opts){
   try{
     const how = await queuedWrite({ collection: 'term-reviews', docId: reviewDocId(me, termId), op: 'set', data: stripUndefined(record) });
     TERM_REVIEWS[termId] = record;
+    kbLogNote();
     return { ok: true, how };
   }catch(err){
     console.error('saveTermReview failed:', err);
@@ -5650,6 +5652,95 @@ function dueReviewCount(){
   }).length;
 }
 
+/* ---------- Your knowledge brain: your own Term Review record, drawn as a brain ----------
+   brain/you.html (opened by openHumcBrain in home-polish.js) asks for this
+   by message. Only this person's own record goes in (TERM_REVIEWS, loaded by
+   their name), never anyone else's. Terms Term Review can ask (English and
+   Spanish both written). A term's level: 0 never practised, 1 missed last
+   time, 2 learning (right once or twice in a row), 3 known (right 3+ times in
+   a row); overdue ones are marked so the brain dims them. The record keeps
+   only its latest state, so one count a day (ih_knowledgeLog, this phone
+   only, per name) feeds the progress figure from 2026-10-21 on.
+   docs/features/humc-brain.md. */
+const KB_LOG_KEY = 'ih_knowledgeLog';
+function kbLevel(r){
+  if(!r || !r.reviewCount) return 0;
+  if(reviewMissedRec(r)) return 1;
+  return r.box >= 3 ? 3 : 2;
+}
+function kbToday(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+// Today's count, written whenever the record loads or an answer is saved. Returns your days.
+function kbLogNote(){
+  const me = whoAmI().trim().toLowerCase();
+  if(!me || !termReviewsLoaded) return null;
+  let practised = 0, known = 0, total = 0;
+  DATA.categories.forEach(c => c.terms.forEach(t => {
+    if(!t.en || !t.es) return;
+    total++;
+    const l = kbLevel(TERM_REVIEWS[t.id]);
+    if(l) practised++;
+    if(l === 3) known++;
+  }));
+  let log = null;
+  try{ log = JSON.parse(localStorage.getItem(KB_LOG_KEY) || 'null'); }catch(e){}
+  if(!log || typeof log !== 'object') log = {};
+  const days = log[me] && typeof log[me] === 'object' ? log[me] : {};
+  days[kbToday()] = [practised, known, total];
+  const keys = Object.keys(days).sort();
+  keys.slice(0, Math.max(0, keys.length - 400)).forEach(k => delete days[k]);
+  log[me] = days;
+  try{ localStorage.setItem(KB_LOG_KEY, JSON.stringify(log)); }catch(e){}
+  return days;
+}
+async function knowledgeBrainData(){
+  try{ await ensureLoaded('termReviews', loadTermReviews); }catch(e){}
+  const now = Date.now(), cats = DATA.categories.slice().sort((a, b) => collateTerms(a.name, b.name));
+  const at = new Map(cats.map((c, i) => [c.id, i]));
+  const terms = [];
+  let noSpanish = 0;
+  cats.forEach((c, i) => c.terms.forEach(t => {
+    if(!t.en || !t.es){ noSpanish++; return; }
+    const r = TERM_REVIEWS[t.id], seen = !!(r && r.reviewCount);
+    // [id, English, Spanish, domain, level, misses, last practised, overdue, right in a row]
+    terms.push([t.id, t.en, t.es, i, kbLevel(r), seen ? (r.misses || 0) : 0, seen ? (r.lastAt || 0) : 0, seen && r.nextReviewAt <= now ? 1 : 0, seen ? (r.box || 0) : 0]);
+  }));
+  return { v: 1, me: whoAmI(), loaded: !!termReviewsLoaded, at: now, noSpanish,
+    domains: cats.map(c => ({ id: c.id, name: c.name, color: c.color || '#7D89B0', parent: c.parentId && at.has(c.parentId) ? at.get(c.parentId) : -1 })),
+    terms, days: kbLogNote() || {} };
+}
+// "Practise these" on a region: ten of its terms, missed and due first, as Term Review picks them.
+function knowledgePractise(domainId){
+  const c = DATA.categories.find(x => x.id === domainId);
+  if(!c) return;
+  requireName(async () => {
+    await ensureLoaded('termReviews', loadTermReviews);
+    setCategory('review');
+    if(!c.parentId){ await startReview({ spec: c.id, n: 10 }); return; }
+    const s = reviewBuild(c.parentId, 9999), terms = s.terms.filter(t => t.categoryId === c.id).slice(0, 10);
+    if(!terms.length){ showToast('No terms with Spanish in ' + c.name + ' yet.'); return; }
+    reviewBegin(terms, s.why, { label: c.name });
+    renderContent();
+  });
+}
+function knowledgeOpenTerm(termId){
+  const c = DATA.categories.find(x => x.terms.some(t => t.id === termId));
+  if(c) revealTerm(c.id, termId); else showToast('That term is no longer in the glossary.');
+}
+// The tile on the CoreCHI Practice dashboard (the head double-tap on Home is the other way in).
+function knowledgeEntryHtml(){
+  if(!termReviewsLoaded && whoAmI()) ensureLoaded('termReviews', loadTermReviews);
+  let total = 0, known = 0;
+  DATA.categories.forEach(c => c.terms.forEach(t => { if(t.en && t.es){ total++; if(kbLevel(TERM_REVIEWS[t.id]) === 3) known++; } }));
+  const lit = termReviewsLoaded && total ? Math.round(100 * known / total) : null;
+  return `<div class="section-head"><h2>Your knowledge brain</h2><span class="sub">glossary terms you know</span></div>
+    <div class="dash-tile mem-entry kb-entry dash-in" style="--dom:#4F9DFF; --i:0">
+      <span class="mem-entry-icon">${DOMAIN_ICONS.brain}</span>
+      <span class="mem-entry-text"><b>Your terms as a brain</b><span>Every term is a dot that lights up as you learn it. Tap a dark area to practise it.</span></span>
+      <span class="mem-entry-span"><b>${lit == null ? 'New' : lit + '%'}</b><small>${lit == null ? '' : 'known'}</small></span>
+      <button type="button" class="mastery-go mem-go" onclick="window.openHumcBrain && openHumcBrain('you')">Open</button>
+    </div>`;
+}
+
 /* ---------- Term Review: Dr. Smiley's practice sessions ----------
    Built on the record Term Review already keeps (term-reviews/{who__termId}:
    box, nextReviewAt, reviewCount, plus lastResult, misses and lastAt, written
@@ -6172,7 +6263,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'brain',       tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'HUMC Brain',            title:'Double-tap Dr. Smiley’s head on Home: the whole app as a 3D brain you can turn and explore' },
+  { id:'brain',       tone:'gd-n1', pin:'pins/wave.webp',                eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: double-tap Dr. Smiley’s head, or open it from CoreCHI Practice' },
   { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
   { id:'providers',   tone:'gd-n3', pin:'pins/doctor-directory.webp',    eyebrow:'Provider Pictures',     title:'Providers get the doctors’ Where: pick the place from the shared list, add a department or unit' },
 ];
@@ -9966,15 +10057,16 @@ const GUIDE_TOPICS = [
     <p>To take him off every page, turn off <b>Dr. Smiley follows me</b> on the same screen. You can still reach him from <b>More</b> → <b>Ask the Hub</b>.</p>
     <p>If your phone is set to reduce motion, he's always still.</p>` },
 
-  { id:'brain', section:'ask', k:'brain humc brain 3d double tap double-tap head dr smiley hello home secret hidden scan map code how the app is built connectome network graph figures matrix not patient data', q:'What is the brain when I double-tap Dr. Smiley?', a:`
-    <p>On Home, <b>double-tap Dr. Smiley's head</b> in the hello to open the <b>HUMC Brain</b>: a 3D picture of how this app is built. A single tap still opens Ask the Hub, and press and hold still pets him.</p>
-    <p>Each glowing dot is one part of the app, sized by how big it is. Each line is one part using another. Parts that belong together sit in the same area: the shared core everything relies on in the middle, Dr. Smiley's moves on the top strip, Ask the Hub at the front.</p>
+  { id:'brain', section:'ask', k:'brain humc brain knowledge brain your knowledge 3d double tap double-tap head dr smiley hello home progress lit light up dark known learning missed practise practice coverage weakest how the app is built code connectome figures not patient data', q:'What is my knowledge brain (double-tap Dr. Smiley)?', a:`
+    <p>On Home, <b>double-tap Dr. Smiley's head</b> in the hello to open <b>your knowledge brain</b>. You can also open it from <b>CoreCHI Practice</b>: the <b>Your knowledge brain</b> tile, then <b>Open</b>. A single tap on his head still opens Ask the Hub, and press and hold still pets him.</p>
+    <p>Every dot is a glossary term, and each domain is one area of the brain. A dot <b>lights up</b> as you get the term right in Term Review, the Daily Drill and Doctor Prep flashcards. <b>Dark</b>: not practised yet. <b>Red</b>: missed last time. <b>Dim</b>: due again. A term counts as known after three right answers in a row.</p>
     <ul>
       <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>
-      <li><b>Tap a dot</b> to see that part's details and what it connects to. Tap a colour at the bottom to light up one area.</li>
-      <li>Tap <b>Full workup</b> for charts: every connection in one grid, the busiest parts, and where the app's size goes.</li>
+      <li><b>Tap a domain</b> at the bottom (or a row under Your progress) to see what to practise first, then <b>Practise</b> to start Term Review on it.</li>
+      <li><b>Tap a dot</b> to see that term and how you're doing, then <b>Open the card</b>.</li>
+      <li><b>Your progress</b> below the brain: your domains weakest first, what you missed or is due, and a line of terms known over time. That line starts the day you first open it; one count a day is kept on your phone.</li>
     </ul>
-    <p>It looks like a scan and uses medical words for fun, but it's <b>not patient data</b> and not a medical image. It's the app's own code. Close it with the <b>X</b> at the top right or the Back button.</p>` },
+    <p>It shows only <b>your own</b> record. The second tab, <b>How the Hub is built</b>, is a 3D map of the app's own code. It looks like a scan, but it's <b>not patient data</b>. Close it with the <b>X</b> at the top right or the Back button.</p>` },
 
   { id:'search', section:'find', k:'search look up find lookup word term', q:'How do I look up a word?', a:`
     <ol>
@@ -13276,6 +13368,9 @@ function renderPractice(){
       <span class="sm-count">100</span>
     </button>`;
   html += `</div>`;
+
+  // ---- your knowledge brain: the glossary as a brain, lit by your Term Review record ----
+  html += knowledgeEntryHtml();
 
   // ---- consecutive: the memory trainer's way in ----
   html += memEntryHtml();

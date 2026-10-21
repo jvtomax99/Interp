@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<!-- Your knowledge brain: the glossary drawn as a brain, each term a dot lit
+     by this person's own Term Review record. The first tab of the HUMC Brain
+     (home-polish.js, openHumcBrain); the second is brain/index.html, how the
+     Hub is built. Its data comes from the app by message (knowledgeBrainData
+     in index.html). Notes: docs/features/humc-brain.md. -->
+<title>Your knowledge brain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650;750&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* The same field, panels and type as brain/index.html, so the two tabs read as one thing */
+:root{
+  --bg:#060A17;
+  --bg-glow:#101C42;
+  --bg-deep:#02040B;
+  --panel:rgba(12,19,42,.82);
+  --panel-line:rgba(126,156,226,.20);
+  --ink:#E9EEFA;
+  --ink-soft:#A4B0CC;
+  --ink-faint:#6A779E;
+  --cyan:#01B8E6;
+  --known:#7FE3B4;
+  --learning:#F5C46A;
+  --missed:#FF8A8A;
+  --never:#3A4670;
+  --f-ui:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme:dark;
+}
+body{
+  margin:0;color:var(--ink);font-family:var(--f-ui);
+  background:var(--bg);
+  background-image:radial-gradient(ellipse 80% 70svh at 50% 45svh, var(--bg-glow) 0%, var(--bg) 60%, var(--bg-deep) 100%);background-repeat:no-repeat;
+  -webkit-font-smoothing:antialiased;
+}
+#scan{position:relative;height:max(560px,90svh);overflow:hidden}
+#stage{position:absolute;inset:0;touch-action:none;cursor:grab}
+#stage:active{cursor:grabbing}
+#stage canvas{display:block;width:100%;height:100%}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;will-change:transform;transition:opacity .25s}
+.lbl.region{font:500 10.5px/1.25 var(--f-mono);letter-spacing:.11em;text-transform:uppercase;text-align:center;text-shadow:0 1px 8px var(--bg-deep),0 0 2px var(--bg-deep)}
+.lbl.region small{display:block;font-size:9.5px;letter-spacing:.06em;color:var(--ink-faint);text-transform:none}
+.lbl.node{font:550 12px/1.2 var(--f-ui);color:var(--ink);background:var(--panel);border:1px solid currentColor;padding:3px 7px;border-radius:7px;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.lbl.node span{color:var(--ink)}
+
+.hud{
+  position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:calc(env(safe-area-inset-top,0px) + 14px) calc(env(safe-area-inset-bottom,0px) + 12px);
+}
+.hud > *{pointer-events:auto}
+header{max-width:600px;display:grid;gap:7px}
+.eyebrow{font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+h1{margin:0;font-size:clamp(21px,4.4vw,32px);line-height:1.08;font-weight:750;letter-spacing:-.025em;text-wrap:balance}
+.sub{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink-soft);max-width:58ch}
+.stats{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11.5px/1.3 var(--f-mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.stats b{font-weight:500}
+.stats i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:0}
+.note{margin:0;font-size:12.5px;line-height:1.45;color:var(--ink);background:rgba(245,196,106,.12);border:1px solid rgba(245,196,106,.35);border-radius:10px;padding:8px 10px;max-width:52ch}
+
+/* The two tabs: you, and how the Hub is built (the same bar on brain/index.html) */
+.tabs{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:var(--panel);border:1px solid var(--panel-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);justify-self:start}
+.tabs a{font:550 12.5px/1 var(--f-ui);color:var(--ink-soft);text-decoration:none;padding:9px 13px;border-radius:999px;min-height:16px;transition:background .2s,color .2s}
+.tabs a[aria-current="page"]{background:rgba(79,157,255,.22);color:var(--ink)}
+.tabs a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+.dock{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.sheet{
+  box-sizing:border-box;justify-self:start;width:min(100%,460px);background:var(--panel);border:1px solid var(--panel-line);border-radius:16px;
+  padding:14px 16px 15px;backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);
+  box-shadow:0 18px 40px -18px rgba(2,4,12,.9);display:grid;gap:9px;min-width:0;max-height:44vh;overflow:auto;
+}
+.sheet-top{display:flex;align-items:flex-start;gap:10px}
+.sheet-top > div{flex:1;min-width:0;display:grid;gap:5px}
+.tag{font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase}
+.sheet h2{margin:0;font-size:17px;line-height:1.25;font-weight:650;letter-spacing:-.01em;text-wrap:balance}
+.es{font-size:14px;line-height:1.35;color:var(--ink-soft)}
+.meta{font:400 12px/1.4 var(--f-mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.close{flex:none;width:30px;height:30px;border-radius:9px;border:1px solid var(--panel-line);background:transparent;color:var(--ink-soft);font:400 18px/1 var(--f-ui);cursor:pointer}
+.close:hover{color:var(--ink)}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 14px;margin:0}
+.fields div{min-width:0;display:grid;gap:1px}
+.fields dt{font:500 9px/1.2 var(--f-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+.fields dd{margin:0;font:400 11.5px/1.3 var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.mix{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--never)}
+.mix i{display:block;height:100%}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.act{font:650 13px/1 var(--f-ui);color:#06122B;background:#7FB8FF;border:0;border-radius:999px;padding:11px 15px;cursor:pointer}
+.act.ghost{background:transparent;color:var(--ink);border:1px solid var(--panel-line)}
+.act:focus-visible,.close:focus-visible,.chip:focus-visible,.sub-chip:focus-visible,.row:focus-visible,.jump:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.subs{display:flex;flex-wrap:wrap;gap:6px}
+.sub-chip{font:550 12px/1 var(--f-ui);color:var(--ink);background:transparent;border:1px solid var(--panel-line);border-radius:999px;padding:7px 10px;cursor:pointer}
+.sub-chip small{font:400 10.5px/1 var(--f-mono);color:var(--ink-faint);margin-left:5px}
+.list{margin:0;padding:0;list-style:none;display:grid;gap:3px}
+.list li{display:flex;gap:8px;font-size:12.5px;line-height:1.3;color:var(--ink-soft);min-width:0}
+.list li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.list li span:last-child{font-family:var(--f-mono);font-size:11px;color:var(--ink-faint);white-space:nowrap}
+.h3{margin:0;font:500 10.5px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+
+.legend-wrap{overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding:2px 4px}
+.legend-wrap::-webkit-scrollbar{display:none}
+.legend{display:flex;gap:8px;width:max-content}
+.chip{
+  display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;text-align:left;
+  padding:8px 12px 8px 10px;border-radius:12px;border:1px solid var(--panel-line);background:var(--panel);color:var(--ink);
+  font:inherit;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:border-color .2s, background .2s, opacity .2s;
+}
+.chip .dot{grid-row:span 2;width:10px;height:10px;border-radius:50%;box-shadow:0 0 10px currentColor;background:currentColor}
+.chip b{font-size:12.5px;font-weight:650;letter-spacing:-.005em;color:var(--ink)}
+.chip span{font:400 10.5px/1.3 var(--f-mono);color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{border-color:currentColor;background:rgba(30,44,92,.9)}
+.legend.filtering .chip[aria-pressed="false"]{opacity:.55}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;font:400 10.5px/1.4 var(--f-mono);color:var(--ink-faint)}
+.jump{justify-self:start;font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);background:var(--panel);border:1px solid var(--panel-line);border-radius:999px;padding:9px 14px;cursor:pointer}
+
+.workup{max-width:1240px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));padding-block:28px 48px;display:grid;gap:18px}
+.wu-head{display:grid;gap:6px;max-width:760px}
+.wu-head h2{margin:0;font-size:clamp(20px,3.2vw,26px);font-weight:750;letter-spacing:-.02em}
+.wu-head p{margin:0;color:var(--ink-soft);font-size:13.5px;line-height:1.5}
+.figs{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.fig{grid-column:span 6;min-width:0;background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:14px 16px 16px;display:grid;gap:10px;align-content:start}
+.fig.wide{grid-column:span 7}.fig.narrow{grid-column:span 5}.fig.full{grid-column:span 12}
+.fig header{display:grid;gap:4px;max-width:none}
+.fig .num{font:500 10px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.fig h3{margin:0;font-size:15px;font-weight:650;letter-spacing:-.01em}
+.fig .cap{margin:0;font-size:12px;line-height:1.45;color:var(--ink-faint)}
+.fig canvas{width:100%;display:block}
+.key{display:flex;flex-wrap:wrap;gap:4px 12px;font:400 10px/1.3 var(--f-mono);color:var(--ink-faint)}
+.key span{display:inline-flex;align-items:center;gap:5px}.key i{width:8px;height:8px;border-radius:2px}
+.rows{display:grid;gap:2px}
+.row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) 4.2em;gap:10px;align-items:center;font:inherit;color:inherit;text-align:left;background:transparent;border:0;border-radius:8px;padding:7px 6px;cursor:pointer}
+.row:hover{background:rgba(126,156,226,.08)}
+.row b{font-size:12.5px;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row b i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.row span{text-align:right;font:400 11px/1 var(--f-mono);color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+.row.term{grid-template-columns:minmax(0,1fr) auto}
+.row.term span{text-align:left}
+.row.term b small{font-weight:400;color:var(--ink-faint);margin-left:6px}
+.empty{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-faint)}
+.disclaim{font:400 10.5px/1.5 var(--f-mono);color:var(--ink-faint);border-top:1px solid var(--panel-line);padding-top:12px}
+#tip{position:fixed;left:0;top:0;z-index:30;pointer-events:none;max-width:280px;background:rgba(8,13,32,.96);border:1px solid var(--panel-line);border-radius:9px;padding:7px 9px;font:400 11.5px/1.4 var(--f-ui);color:var(--ink)}
+@media (max-width:900px){.fig,.fig.wide,.fig.narrow{grid-column:span 12}}
+@media (max-width:620px){
+  .sub{font-size:12.5px}
+  .hide-sm{display:none}
+  .sheet{max-height:40vh}
+  header{gap:6px}
+}
+@media (prefers-reduced-motion:reduce){.lbl,.chip,.tabs a{transition:none}}
+[hidden]{display:none!important}
+*{-webkit-tap-highlight-color:transparent}
+.close-brain{position:fixed;z-index:40;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px, env(safe-area-inset-right,0px));width:40px;height:40px;border-radius:12px;border:1px solid var(--panel-line);background:var(--panel);color:var(--ink);font:400 22px/1 var(--f-ui);cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.close-brain:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.in-frame header{padding-right:52px}
+.no3d{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);max-width:280px;text-align:center;font:400 13px/1.5 var(--f-ui);color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<button class="close-brain" id="closeBrain" type="button" aria-label="Close" hidden>×</button>
+<section id="scan">
+<div id="stage" aria-label="Your knowledge brain: every glossary term is a dot, lit by how well you know it. Drag to turn, pinch or scroll to zoom, tap a dot or an area." role="img"></div>
+<div id="labels"></div>
+
+<div class="hud">
+  <header>
+    <nav class="tabs" aria-label="HUMC Brain views"><a href="./you.html" aria-current="page">You</a><a href="./index.html" id="tabCode">How the Hub is built</a></nav>
+    <div class="eyebrow">Your knowledge · Term Review record</div>
+    <h1>Your knowledge brain</h1>
+    <p class="sub">Every dot is a glossary term, grouped by domain. It lights up as you get it right in Term Review, the Daily Drill and Doctor Prep flashcards.<span class="hide-sm"> Dark: not practised yet. Red: missed last time. Dim: due again.</span></p>
+    <div class="stats" id="stats"></div>
+    <p class="note" id="note" hidden></p>
+  </header>
+
+  <div class="dock">
+    <section class="sheet" id="sheet" hidden aria-live="polite"></section>
+    <button class="jump" type="button" id="jump">Your progress · 3 figures ↓</button>
+    <div class="legend-wrap"><div class="legend" id="legend" role="group" aria-label="Domains"></div></div>
+    <div class="foot">
+      <span>Your own Term Review record · not patient data</span>
+      <span class="hide-sm">Drag to turn · scroll or pinch to zoom · tap a dot or a domain</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<main class="workup" id="workup">
+  <div class="wu-head">
+    <span class="eyebrow">Your progress</span>
+    <h2>Where you stand</h2>
+    <p>From your own record: what you've practised, what you know, and what to do next. Tap a row to find it in the brain.</p>
+  </div>
+  <div class="figs">
+    <section class="fig wide"><header><span class="num">Fig. 1 · Coverage</span><h3>Your domains, weakest first</h3><p class="cap">Each bar is one domain's terms: known, learning, missed last time, and not practised yet.</p></header>
+      <div class="key"><span><i style="background:var(--known)"></i>Known</span><span><i style="background:var(--learning)"></i>Learning</span><span><i style="background:var(--missed)"></i>Missed</span><span><i style="background:var(--never)"></i>Not practised</span></div>
+      <div class="rows" id="cover"></div></section>
+    <section class="fig narrow"><header><span class="num">Fig. 2 · Next up</span><h3>Missed and due</h3><p class="cap">The terms your record says to practise first. Tap one to see it.</p></header><div class="rows" id="next"></div></section>
+    <section class="fig full"><header><span class="num">Fig. 3 · Progress</span><h3>Over time</h3><p class="cap" id="progCap">Terms practised and terms known, one count a day, kept on this phone.</p></header><canvas id="prog" aria-label="Terms practised and known over time"></canvas>
+      <div class="key"><span><i style="background:var(--cyan)"></i>Practised</span><span><i style="background:var(--known)"></i>Known</span></div></section>
+  </div>
+  <p class="disclaim">Your knowledge brain shows your own Term Review record as the app has it on this phone. A term counts as known after three right answers in a row; a miss sends it back. Not patient data, not a medical image.</p>
+</main>
+<div id="tip" hidden></div>
+
+<script src="./three.min.js"></script>
+<script>
+/* In the app it opens in a frame over Home: the X and Escape ask the app to close it. */
+const inFrame = window.parent !== window;
+const tell = m => { try{ parent.postMessage(m, location.origin); }catch(e){} };
+if(inFrame){
+  document.documentElement.classList.add("in-frame");
+  const cb = document.getElementById("closeBrain"); cb.hidden = false; cb.addEventListener("click", () => tell({ ih:"brain-close" }));
+  // The first Escape closes an open readout, the next one the brain.
+  addEventListener("keydown", e => { if(e.key === "Escape" && document.getElementById("sheet").hidden) tell({ ih:"brain-close" }); });
+}
+// The other tab replaces this page in the frame, so Back still closes the brain.
+document.getElementById("tabCode").addEventListener("click", e => { e.preventDefault(); location.replace("./index.html"); });
+
+/* Your record, from the app. Outside the app, or if it never answers, the brain is drawn dark with a note. */
+let started = false;
+const start = K => { if(started) return; started = true; build(K); };
+addEventListener("message", e => { if(e.origin === location.origin && e.data && e.data.ih === "brain-data") start(e.data.data); });
+if(inFrame){ tell({ ih:"brain-want" }); setTimeout(() => start(null), 8000); } else start(null);
+
+function build(K){
+const ok = !!(K && K.v === 1 && Array.isArray(K.terms) && Array.isArray(K.domains));
+const DOMS = ok ? K.domains : [];
+const LEVEL = ["Not practised yet", "Missed last time", "Learning", "Known"];
+const LCOL = ["--never", "--missed", "--learning", "--known"].map(v => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+const fmt = n => n.toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const DAYMS = 86400000;
+const ago = t => { const d = Math.round((Date.now() - t) / DAYMS); return d <= 0 ? "today" : d === 1 ? "yesterday" : d + " days ago"; };
+
+/* ---------- Data ---------- */
+const topOf = i => DOMS[i] && DOMS[i].parent >= 0 ? DOMS[i].parent : i;
+const terms = (ok ? K.terms : []).map(([id, en, es, d, lv, miss, last, over, box], i) => ({ i, id, en, es, d, top: topOf(d), lv, miss, last, over: !!over, box }));
+const tops = DOMS.map((d, i) => i).filter(i => DOMS[i].parent < 0 && terms.some(t => t.top === i));
+const tally = list => { const c = { n: list.length, lv: [0, 0, 0, 0], due: 0 }; list.forEach(t => { c.lv[t.lv]++; if(t.over) c.due++; }); return c; };
+const inDom = d => terms.filter(t => t.d === d || t.top === d);
+const regionStats = {}; tops.forEach(g => regionStats[g] = tally(inDom(g)));
+const ALL = tally(terms);
+const knownShare = c => c.n ? c.lv[3] / c.n : 0;
+// How brightly a term glows: dark never practised, faint red missed, rising with right answers in a row; overdue dims.
+function glow(t){
+  if(t.lv === 0) return 0;
+  const b = t.lv === 1 ? .32 : t.lv === 2 ? .5 + .1 * Math.min(t.box, 2) : .82 + .036 * Math.min(t.box - 3, 5);
+  return t.over ? b * .55 : b;
+}
+window.KNOW = { terms, tops, ALL, K };
+
+/* ---------- Header ---------- */
+document.getElementById("stats").innerHTML = ok ?
+  `<span>Terms <b>${fmt(ALL.n)}</b></span>` +
+  `<span><i style="background:${LCOL[3]}"></i>Known <b>${fmt(ALL.lv[3])}</b></span>` +
+  `<span><i style="background:${LCOL[2]}"></i>Learning <b>${fmt(ALL.lv[2])}</b></span>` +
+  `<span><i style="background:${LCOL[1]}"></i>Missed <b>${fmt(ALL.lv[1])}</b></span>` +
+  `<span><i style="background:${LCOL[0]};box-shadow:0 0 0 1px #6A779E inset"></i>Not practised <b>${fmt(ALL.lv[0])}</b></span>` +
+  `<span>Due again <b>${fmt(ALL.due)}</b></span>` : "";
+const note = document.getElementById("note");
+const say = s => { note.textContent = s; note.hidden = false; };
+if(!ok) say(inFrame ? "Your record didn't arrive from the app. Close this and open it again." : "Open this from the app (double-tap Dr. Smiley's head on Home) to see your terms.");
+else if(!terms.length) say("The glossary hasn't loaded yet. Close this and open it again in a moment.");
+else if(!K.me) say("Set your name in the app first: your practice record is kept under it. Until then every dot stays dark.");
+else if(!K.loaded) say("Your record didn't load (no connection?). The dots show dark until it does.");
+else if(!ALL.lv[1] && !ALL.lv[2] && !ALL.lv[3]) say("All dark for now: you haven't practised any terms yet. Tap a domain, then Practise, and watch it light up.");
+
+/* ---------- Seeded randomness and the brain's shape (the same as brain/index.html) ---------- */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R = rng(1726);
+function randDir(r){let x,y,z,l;do{x=r()*2-1;y=r()*2-1;z=r()*2-1;l=x*x+y*y+z*z}while(l>1||l<1e-4);l=Math.sqrt(l);return[x/l,y/l,z/l]}
+function fib(n){const out=[],g=Math.PI*(3-Math.sqrt(5));for(let i=0;i<n;i++){const y=1-2*(i+.5)/n,r=Math.sqrt(1-y*y),t=g*i;out.push([Math.cos(t)*r,y,Math.sin(t)*r])}return out}
+const norm = v => {const l=Math.hypot(...v);return v.map(x=>x/l)};
+const dot = (a,b) => a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross = (a,b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+const H = {cx:.31, rx:.80, ry:.92, rz:1.40, cy:.14};
+const gyri = (x,y,z) => Math.sin(9.1*x+2.3*z+1.1)*Math.cos(7.7*y+3.1*x) + .7*Math.sin(10.3*z+5.2*y)*Math.cos(6.1*x-4*z);
+function cortex(d, side, depth=1){
+  let x=d[0]*H.rx, y=d[1]*H.ry, z=d[2]*H.rz;
+  const lateral = side*d[0] > 0;
+  if(!lateral) x *= .26;
+  if(d[1] < -.2) y = -.2*H.ry + (y+.2*H.ry)*.62;
+  const tb = Math.max(0,-d[1]) * Math.max(0, 1-Math.abs(d[2]-.15)*1.3);
+  if(lateral) x *= 1 + .16*tb;
+  if(d[2] > .55) y *= 1 - (d[2]-.55)*.35;
+  const g = gyri(x,y,z), k = depth*(1+.032*g);
+  return {p:[side*H.cx + x*k, H.cy + y*k, z*k], g};
+}
+const CB = {c:[0,-.66,-.98], r:[.78,.36,.52]};
+const cerebellum = (d,depth=1) => [CB.c[0]+d[0]*CB.r[0]*depth, CB.c[1]+d[1]*CB.r[1]*depth, CB.c[2]+d[2]*CB.r[2]*depth];
+function stem(t,a){const r=.19-.05*t;return[Math.cos(a)*r*1.1, -.36-1.18*t, -.36-.22*t+Math.sin(a)*r]}
+
+/* ---------- Where each term lives ----------
+   Spots on the outer (lateral) cortex of both hemispheres. Each domain gets
+   an anchor, spread apart, then the spots go to the nearest domain with room
+   left, so a domain is one patch sized by its terms. Inside it, the parent's
+   own terms take the middle and each subgroup a wedge around it. */
+const pos = new Array(terms.length);
+{
+  const M = Math.max(900, Math.ceil(terms.length * 2.8));
+  const cands = [];
+  [-1,1].forEach(side => fib(M).forEach(d => { if(side*d[0] > .05 && d[1] > -.7) cands.push({ d, side, r:-1 }); }));
+  const gap = (a,b) => a.side !== b.side ? 4 + (1 - dot(a.d, b.d)) : 1 - dot(a.d, b.d);
+  // Anchors: biggest domain front left, each next one as far as possible from those placed.
+  const order = tops.slice().sort((a,b) => regionStats[b].n - regionStats[a].n);
+  const anchors = {};
+  if(order.length){
+    let first = cands[0], best = -9;
+    cands.forEach(c => { const s = c.side < 0 ? c.d[2] - c.d[0]*.5 + c.d[1]*.2 : -9; if(s > best){ best = s; first = c; } });
+    anchors[order[0]] = first;
+    const placed = [first];
+    order.slice(1).forEach(g => {
+      let bc = null, bv = -1;
+      cands.forEach(c => { let m = 9; placed.forEach(o => { const a = gap(o, c); if(a < m) m = a; }); if(m > bv){ bv = m; bc = c; } });
+      anchors[g] = bc; placed.push(bc);
+    });
+  }
+  const room = {}; tops.forEach(g => room[g] = regionStats[g].n);
+  const pairs = [];
+  cands.forEach((c, ci) => tops.forEach(g => pairs.push([gap(anchors[g], c), ci, g])));
+  pairs.sort((a,b) => a[0] - b[0]);
+  const got = {}; tops.forEach(g => got[g] = []);
+  for(const [, ci, g] of pairs){ const c = cands[ci]; if(c.r < 0 && room[g] > 0){ c.r = g; room[g]--; got[g].push(c); } }
+  tops.forEach(g => {
+    const a = anchors[g], spots = got[g].slice().sort((x,y) => gap(a, x) - gap(a, y));
+    const own = terms.filter(t => t.d === g), subs = DOMS.map((d, i) => i).filter(i => DOMS[i].parent === g);
+    own.forEach((t, k) => pos[t.i] = spots[k]);
+    let up = [0,1,0]; if(Math.abs(dot(up, a.d)) > .9) up = [0,0,1];
+    const u = norm(cross(a.d, up)), v = cross(a.d, u);
+    const rest = spots.slice(own.length).sort((x,y) => Math.atan2(dot(x.d,v), dot(x.d,u)) - Math.atan2(dot(y.d,v), dot(y.d,u)));
+    let k = 0;
+    subs.forEach(s => terms.filter(t => t.d === s).forEach(t => pos[t.i] = rest[k++]));
+  });
+  terms.forEach(t => { const c = pos[t.i]; pos[t.i] = c ? cortex(c.d, c.side, .995).p : [0, .2, 0]; });
+}
+
+/* ---------- Three.js scene ---------- */
+const stage = document.getElementById("stage");
+let renderer;
+try{ renderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); }
+catch(e){
+  renderer = { domElement:document.createElement("div"), setPixelRatio(){}, setClearColor(){}, setSize(){}, render(){} };
+  const msg = document.createElement("p"); msg.className = "no3d"; msg.textContent = "This device can't draw the 3D brain right now. The figures below still work."; stage.appendChild(msg);
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setClearColor(0x000000, 0);
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, .05, 100);
+const root = new THREE.Group(); scene.add(root);
+function glowTexture(){
+  const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d");
+  const g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.18,"rgba(255,255,255,.9)");g.addColorStop(.45,"rgba(255,255,255,.28)");g.addColorStop(1,"rgba(255,255,255,0)");
+  x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTexture();
+/* The brain's surface, dimmer than on the code tab so the terms carry the light */
+{
+  const P=[], C=[], col=new THREE.Color(), base=new THREE.Color("#3A55A8"), ridge=new THREE.Color("#7FA2F0");
+  const push=(p,b)=>{P.push(...p);col.copy(base).lerp(ridge,Math.max(0,b)).multiplyScalar(.16+.5*Math.max(0,b));C.push(col.r,col.g,col.b)};
+  for(let i=0;i<16000;i++){const side=i%2?1:-1;const d=randDir(R);if(side*d[0]<-.97)continue;const {p,g}=cortex(d,side,1);push(p,.5+g*.35+(R()-.5)*.2)}
+  for(let i=0;i<3600;i++){const d=randDir(R);const f=Math.sin(d[1]*26+d[2]*5);push(cerebellum(d,1+.025*f),.42+f*.3)}
+  for(let i=0;i<800;i++){push(stem(R(),R()*Math.PI*2),.35+R()*.2)}
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute("position",new THREE.Float32BufferAttribute(P,3));
+  geo.setAttribute("color",new THREE.Float32BufferAttribute(C,3));
+  root.add(new THREE.Points(geo,new THREE.PointsMaterial({size:.022,map:GLOW,vertexColors:true,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending})));
+}
+/* The scan plane sweeping, as on the code tab */
+const planeTex=(()=>{const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");x.strokeStyle="rgba(1,184,230,.9)";x.lineWidth=1;for(let k=0;k<=256;k+=16){x.globalAlpha=k%64?.25:.7;x.beginPath();x.moveTo(k,0);x.lineTo(k,256);x.moveTo(0,k);x.lineTo(256,k);x.stroke()}x.globalAlpha=1;x.lineWidth=3;x.strokeRect(1.5,1.5,253,253);return new THREE.CanvasTexture(c)})();
+const plane=new THREE.Mesh(new THREE.PlaneGeometry(2.5,3.1),new THREE.MeshBasicMaterial({map:planeTex,transparent:true,opacity:.1,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
+plane.rotation.x=-Math.PI/2; root.add(plane);
+
+/* Terms: a small core for every term (dark ones only just visible), and a soft halo that grows with what you know */
+const V3 = a => new THREE.Vector3(a[0],a[1],a[2]);
+const nodeV = pos.map(V3);
+const dColor = DOMS.map(d => new THREE.Color(d.color));
+const missCol = new THREE.Color(LCOL[1]), white = new THREE.Color("#ffffff"), slate = new THREE.Color("#8FA3D6");
+const coreGeo = new THREE.BufferGeometry(), haloGeo = new THREE.BufferGeometry();
+const flat = new Float32Array(terms.length * 3); nodeV.forEach((v,k) => { flat[k*3]=v.x; flat[k*3+1]=v.y; flat[k*3+2]=v.z; });
+coreGeo.setAttribute("position", new THREE.BufferAttribute(flat, 3));
+haloGeo.setAttribute("position", new THREE.BufferAttribute(flat, 3));
+const coreCol = new Float32Array(Math.max(1, terms.length) * 3), haloCol = new Float32Array(Math.max(1, terms.length) * 3);
+coreGeo.setAttribute("color", new THREE.BufferAttribute(coreCol, 3));
+haloGeo.setAttribute("color", new THREE.BufferAttribute(haloCol, 3));
+// Light added to the page, alpha left alone: plain additive also adds alpha, and on this
+// see-through canvas that let faint dots cut dark holes in the background glow.
+const ADD = {transparent:true,depthWrite:false,blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.SrcAlphaFactor,blendDst:THREE.OneFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor};
+const coreMat = new THREE.PointsMaterial({size:.06,map:GLOW,vertexColors:true,...ADD});
+const haloMat = new THREE.PointsMaterial({size:.2,map:GLOW,vertexColors:true,...ADD});
+root.add(new THREE.Points(haloGeo, haloMat)); root.add(new THREE.Points(coreGeo, coreMat));
+let focus = null;   // a Set of term indexes to keep bright, or null for all
+function paint(){
+  const c = new THREE.Color();
+  terms.forEach(t => {
+    const on = !focus || focus.has(t.i), b = glow(t), k = t.i * 3;
+    c.copy(t.lv === 1 ? missCol : dColor[t.d]);
+    if(t.lv === 3) c.lerp(white, .35);
+    if(t.lv === 0) c.lerp(slate, .55);   // not practised: a faint slate dot, there but unlit
+    const f = (on ? 1 : .18) * (t.lv === 0 ? .62 : .35 + .65 * b);
+    coreCol[k] = c.r*f; coreCol[k+1] = c.g*f; coreCol[k+2] = c.b*f;
+    const h = (on ? 1 : .1) * (t.lv === 0 ? 0 : .7 * b * b);
+    haloCol[k] = c.r*h; haloCol[k+1] = c.g*h; haloCol[k+2] = c.b*h;
+  });
+  coreGeo.attributes.color.needsUpdate = true; haloGeo.attributes.color.needsUpdate = true;
+}
+paint();
+
+/* ---------- Labels ---------- */
+const labelsEl = document.getElementById("labels");
+const regionLbl = {}, groupCenter = {};
+const bigTops = tops.slice().sort((a,b) => regionStats[b].n - regionStats[a].n).slice(0, innerWidth < 620 ? 7 : 12);
+tops.forEach(g => {
+  const ps = terms.filter(t => t.top === g).map(t => nodeV[t.i]);
+  const c = ps.reduce((a,v) => a.add(v), new THREE.Vector3()).multiplyScalar(1 / Math.max(1, ps.length));
+  groupCenter[g] = c.multiplyScalar(1.16);
+  const el = document.createElement("div"); el.className = "lbl region"; el.style.color = DOMS[g].color;
+  const s = regionStats[g];
+  el.innerHTML = `${esc(DOMS[g].name)}<small>${s.lv[3]} of ${s.n} known</small>`;
+  labelsEl.appendChild(el); regionLbl[g] = el;
+});
+const byLabel = tops.slice().sort((a,b) => regionStats[b].n - regionStats[a].n), lblW = {};
+const termLbl = document.createElement("div"); termLbl.className = "lbl node"; termLbl.hidden = true; labelsEl.appendChild(termLbl);
+
+/* ---------- Camera orbit (as on the code tab) ---------- */
+const view = {theta:-.95, phi:1.22, dist:6, target:new THREE.Vector3(0,-.12,-.1)};
+let W=1,Hh=1, fitD=6;
+function fit(){
+  W=stage.clientWidth;Hh=stage.clientHeight;renderer.setSize(W,Hh,false);camera.aspect=W/Hh;camera.updateProjectionMatrix();
+  const v=Math.tan(THREE.MathUtils.degToRad(20));
+  fitD = Math.max((camera.aspect<.8?1.45:1.75)/(v*camera.aspect), 1.85/v);
+  view.dist = THREE.MathUtils.clamp(view.dist||fitD, fitD*.45, fitD*1.6);
+  view.target.y = camera.aspect < .8 ? .02 : .04;
+}
+let firstFit=true;
+function resize(){const prev=fitD;fit();if(firstFit){view.dist=fitD;firstFit=false}else view.dist*=fitD/prev}
+addEventListener("resize",resize);resize();
+function placeCamera(){
+  const s=Math.sin(view.phi);
+  camera.position.set(view.target.x+view.dist*s*Math.sin(view.theta), view.target.y+view.dist*Math.cos(view.phi), view.target.z+view.dist*s*Math.cos(view.theta));
+  camera.lookAt(view.target);
+}
+const ptrs = new Map(); let down=null, pinch=0, idleAt=0;
+stage.addEventListener("pointerdown",e=>{
+  stage.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1) down={x:e.clientX,y:e.clientY,moved:0};
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);down=null}
+  idleAt=performance.now()+4000;
+});
+stage.addEventListener("pointermove",e=>{
+  const p=ptrs.get(e.pointerId);
+  if(!p){ if(e.pointerType==="mouse"){const r=stage.getBoundingClientRect();hover(e.clientX-r.left,e.clientY-r.top)} return }
+  const dx=e.clientX-p.x, dy=e.clientY-p.y; p.x=e.clientX;p.y=e.clientY;
+  if(ptrs.size===1){
+    view.theta-=dx*.006; view.phi=THREE.MathUtils.clamp(view.phi-dy*.006,.25,Math.PI-.25);
+    if(down) down.moved+=Math.abs(dx)+Math.abs(dy);
+  } else if(ptrs.size===2){
+    const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(pinch){view.dist=THREE.MathUtils.clamp(view.dist*pinch/d,fitD*.45,fitD*1.6)} pinch=d;
+  }
+  idleAt=performance.now()+4000;
+});
+stage.addEventListener("pointerup",e=>{
+  const wasTap = down && ptrs.size===1 && down.moved<7;
+  ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=0;
+  if(wasTap){ const r=stage.getBoundingClientRect(); const hit=pick(e.clientX-r.left,e.clientY-r.top); hit!=null ? selectTerm(hit) : clearSel() }
+  if(!ptrs.size) down=null;
+});
+stage.addEventListener("pointercancel",e=>{ptrs.delete(e.pointerId);down=null;pinch=0});
+stage.addEventListener("pointerleave",()=>{ if(hoverI!=null && !(sel && sel.type==="term")){ hoverI=null; termLbl.hidden=true; } });
+stage.addEventListener("wheel",e=>{e.preventDefault();view.dist=THREE.MathUtils.clamp(view.dist*Math.exp(e.deltaY*.0012),fitD*.45,fitD*1.6);idleAt=performance.now()+4000},{passive:false});
+addEventListener("keydown",e=>{if(e.key==="Escape")clearSel()});
+
+const tmp = new THREE.Vector3(), rp = {x:0,y:0,z:0,on:false};
+function project(v,out){tmp.copy(v).applyMatrix4(root.matrixWorld).project(camera);out.x=(tmp.x+1)/2*W;out.y=(1-tmp.y)/2*Hh;out.z=tmp.z;out.on=tmp.z<1;return out}
+// The nearest term to a tap, front ones first, within a finger's width.
+function pick(x,y){
+  let best=null, bd=Infinity; const s={x:0,y:0,z:0,on:false};
+  // With a domain open only its terms answer; with one term open, any term does.
+  terms.forEach(t => { if(focus && sel && sel.type==="dom" && !focus.has(t.i)) return; project(nodeV[t.i], s); if(!s.on) return; const d=Math.hypot(s.x-x,s.y-y); if(d<22 && d+s.z*6<bd){ bd=d+s.z*6; best=t.i; } });
+  return best;
+}
+let hoverI=null;
+function hover(x,y){
+  if(sel && sel.type==="term") return;
+  const h=pick(x,y); if(h===hoverI) return;
+  hoverI=h; stage.style.cursor=h!=null?"pointer":"";
+  showTermLbl(h);
+}
+function showTermLbl(i){
+  if(i==null){ termLbl.hidden=true; return; }
+  const t=terms[i]; termLbl.style.color = t.lv===1 ? LCOL[1] : DOMS[t.d].color;
+  termLbl.innerHTML = `<span>${esc(t.en)}</span>`; termLbl.hidden=false;
+}
+
+/* ---------- Selection ---------- */
+let sel=null;
+const sheet=document.getElementById("sheet"), headerEl=document.querySelector("header"), legend=document.getElementById("legend");
+tops.slice().sort((a,b) => DOMS[a].name.localeCompare(DOMS[b].name)).forEach(g => {
+  const s=regionStats[g], b=document.createElement("button");
+  b.className="chip"; b.type="button"; b.style.color=DOMS[g].color; b.setAttribute("aria-pressed","false"); b.dataset.g=g;
+  b.innerHTML=`<i class="dot"></i><b>${esc(DOMS[g].name)}</b><span>${s.lv[3]}/${s.n} known${s.lv[1]?` · ${s.lv[1]} missed`:""}</span>`;
+  b.addEventListener("click", () => sel && sel.type==="dom" && sel.d===g ? clearSel() : selectDom(g));
+  legend.appendChild(b);
+});
+function mixBar(c){
+  if(!c.n) return `<div class="mix"></div>`;
+  return `<div class="mix" role="img" aria-label="${c.lv[3]} known, ${c.lv[2]} learning, ${c.lv[1]} missed, ${c.lv[0]} not practised">` +
+    [3,2,1].map(l => c.lv[l] ? `<i style="width:${(100*c.lv[l]/c.n).toFixed(1)}%;background:${LCOL[l]}"></i>` : "").join("") + `</div>`;
+}
+function setFocus(set){
+  focus = set; paint();
+  legend.classList.toggle("filtering", !!(sel && sel.type==="dom"));
+  legend.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(!!(sel && sel.type==="dom" && (sel.d===+c.dataset.g || topOf(sel.d)===+c.dataset.g)))));
+}
+// Practise first: missed (most misses first), then due (longest waiting), then never practised.
+function weakest(list){
+  return list.filter(t => t.lv===1 || t.over || t.lv===0)
+    .sort((a,b) => ((b.lv===1)-(a.lv===1)) || (b.miss-a.miss) || (b.over-a.over) || ((a.last||Infinity)-(b.last||Infinity)) || a.en.localeCompare(b.en));
+}
+function why(t){
+  if(t.lv===1) return t.miss>=2 ? `Missed ${t.miss} times` : "Missed last time";
+  if(t.over) return `Due: last ${ago(t.last)}`;
+  if(t.lv===0) return "Not practised yet";
+  return t.lv===3 ? `Known: right ${t.box} in a row` : `Learning: right ${t.box} in a row`;
+}
+function selectDom(g){
+  sel={type:"dom", d:g}; const D=DOMS[g], list=inDom(g), c=tally(list), isTop=D.parent<0;
+  setFocus(new Set(list.map(t => t.i)));
+  const subs = isTop ? DOMS.map((d,i)=>i).filter(i => DOMS[i].parent===g && terms.some(t => t.d===i)) : [];
+  const weak = weakest(list).slice(0, 6);
+  sheet.innerHTML = `<div class="sheet-top"><div><span class="tag" style="color:${D.color}">${isTop ? "Domain" : esc(DOMS[D.parent].name) + " · subgroup"}</span><h2>${esc(D.name)}</h2>
+      <span class="meta">${c.lv[3]} of ${c.n} known · ${Math.round(100*knownShare(c))}%</span></div>
+      <button class="close" type="button" aria-label="Close">×</button></div>
+    ${mixBar(c)}
+    <span class="meta">${c.lv[2]} learning · ${c.lv[1]} missed · ${c.lv[0]} not practised · ${c.due} due again</span>
+    ${subs.length ? `<div class="subs">${subs.map(s => { const sc=tally(terms.filter(t=>t.d===s)); return `<button class="sub-chip" type="button" data-s="${s}" style="border-color:${DOMS[s].color}">${esc(DOMS[s].name)}<small>${sc.lv[3]}/${sc.n}</small></button>`; }).join("")}</div>` : ""}
+    ${weak.length ? `<p class="h3">Practise first</p><ul class="list">${weak.map(t => `<li><span>${esc(t.en)}</span><span>${why(t)}</span></li>`).join("")}</ul>` : `<p class="empty">Nothing missed, due or new here. Well done.</p>`}
+    <div class="acts"><button class="act" type="button" data-act="practise">Practise ${esc(D.name)}</button>${!isTop ? `<button class="act ghost" type="button" data-act="up">All of ${esc(DOMS[D.parent].name)}</button>` : ""}</div>`;
+  sheet.hidden=false;
+  sheet.querySelector(".close").onclick=clearSel;
+  sheet.querySelector('[data-act="practise"]').onclick=() => tell({ ih:"brain-practice", domain:D.id });
+  const up=sheet.querySelector('[data-act="up"]'); if(up) up.onclick=() => selectDom(D.parent);
+  sheet.querySelectorAll(".sub-chip").forEach(b => b.onclick=() => selectDom(+b.dataset.s));
+  hoverI=null; showTermLbl(null); updateLabels();
+}
+function selectTerm(i){
+  sel={type:"term", i}; const t=terms[i], D=DOMS[t.d];
+  setFocus(new Set([i]));
+  sheet.innerHTML = `<div class="sheet-top"><div><span class="tag" style="color:${D.color}">${D.parent>=0 ? esc(DOMS[D.parent].name) + " · " : ""}${esc(D.name)}</span><h2>${esc(t.en)}</h2>
+      <span class="es" lang="es">${esc(t.es)}</span></div>
+      <button class="close" type="button" aria-label="Close">×</button></div>
+    <dl class="fields">
+      <div><dt>Where you are</dt><dd style="color:${t.lv ? LCOL[t.lv] : "var(--ink-soft)"}">${LEVEL[t.lv]}${t.over && t.lv>1 ? ", due again" : ""}</dd></div>
+      <div><dt>Right in a row</dt><dd>${t.lv>1 ? t.box : 0}</dd></div>
+      <div><dt>Misses</dt><dd>${t.miss}</dd></div>
+      <div><dt>Last practised</dt><dd>${t.last ? ago(t.last) : "never"}</dd></div>
+    </dl>
+    <div class="acts"><button class="act" type="button" data-act="card">Open the card</button><button class="act ghost" type="button" data-act="practise">Practise ${esc(D.name)}</button></div>`;
+  sheet.hidden=false;
+  sheet.querySelector(".close").onclick=clearSel;
+  sheet.querySelector('[data-act="card"]').onclick=() => tell({ ih:"brain-term", id:t.id });
+  sheet.querySelector('[data-act="practise"]').onclick=() => tell({ ih:"brain-practice", domain:D.id });
+  hoverI=i; showTermLbl(i); updateLabels();
+}
+function clearSel(){ sel=null; sheet.hidden=true; setFocus(null); hoverI=null; showTermLbl(null); updateLabels(); }
+function updateLabels(){
+  const showing = sel && sel.type==="dom" ? topOf(sel.d) : null;
+  tops.forEach(g => { regionLbl[g].style.opacity = sel ? (g===showing ? 1 : 0) : (bigTops.includes(g) ? 1 : 0); });
+}
+updateLabels();
+document.getElementById("jump").onclick=() => document.getElementById("workup").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+
+/* ---------- Loop ---------- */
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let last=performance.now(), shiftY=0, planeY=.3, scanVisible=true;
+new IntersectionObserver(es=>{scanVisible=es[0].isIntersecting}).observe(document.getElementById("scan"));
+const tp={x:0,y:0,z:0,on:false};
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  if(!reduce){ planeY = -1.55 + (Math.sin(now*.00035)*.5+.5)*2.6; haloMat.opacity = .82 + .18*Math.sin(now*.0016); }
+  plane.position.y = planeY;
+  if(!reduce && ptrs.size===0 && now>idleAt) view.theta+=dt*.09;
+  const want = !sheet.hidden && innerWidth<900 ? Math.min(sheet.offsetHeight*.55, Hh*.22) : 0;
+  shiftY += (want-shiftY)*Math.min(1,dt*6);
+  if(Math.abs(shiftY)>.5) camera.setViewOffset(W,Hh,0,shiftY,W,Hh); else camera.clearViewOffset();
+  placeCamera(); root.updateMatrixWorld();
+  const st=stage.getBoundingClientRect(), topY=headerEl.getBoundingClientRect().bottom-st.top+8, botY=sheet.hidden?Hh:sheet.getBoundingClientRect().top-st.top-4;
+  // Region names: biggest first, and one that would overlap a name already placed waits.
+  const boxes=[];
+  byLabel.forEach(g=>{project(groupCenter[g],rp);const el=regionLbl[g];el.style.transform=`translate3d(${rp.x}px,${rp.y}px,0) translate(-50%,-50%)`;
+    let vis=rp.on&&rp.y-12>topY&&rp.y<botY&&el.style.opacity!=="0";
+    if(vis){const w=(lblW[g]||(lblW[g]=el.offsetWidth))/2+4,h=16;vis=rp.x-w>0&&rp.x+w<W&&boxes.every(b=>Math.abs(b.x-rp.x)>b.w+w||Math.abs(b.y-rp.y)>2*h);if(vis)boxes.push({x:rp.x,y:rp.y,w})}
+    el.style.visibility=vis?"visible":"hidden"});
+  if(hoverI!=null && !termLbl.hidden){ project(nodeV[hoverI],tp); termLbl.style.transform=`translate3d(${tp.x}px,${tp.y}px,0) translate(-50%,-150%)`; termLbl.style.visibility=(tp.on&&tp.y-20>topY&&tp.y<botY)?"visible":"hidden"; }
+  if(scanVisible) renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ================= Your progress: the figures below the scan ================= */
+const toScan = () => document.getElementById("scan").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+// Fig. 1: every domain, weakest first (lowest share known, then most missed)
+{
+  const host=document.getElementById("cover");
+  const rows=tops.slice().sort((a,b) => (knownShare(regionStats[a])-knownShare(regionStats[b])) || (regionStats[b].lv[1]-regionStats[a].lv[1]) || DOMS[a].name.localeCompare(DOMS[b].name));
+  host.innerHTML = rows.length ? rows.map(g => { const c=regionStats[g]; return `<button class="row" type="button" data-g="${g}"><b><i style="background:${DOMS[g].color}"></i>${esc(DOMS[g].name)}</b>${mixBar(c)}<span>${c.lv[3]}/${c.n}</span></button>`; }).join("") : `<p class="empty">No terms to show yet.</p>`;
+  host.querySelectorAll(".row").forEach(b => b.onclick=() => { selectDom(+b.dataset.g); toScan(); });
+}
+// Fig. 2: what to practise first, across the glossary (never-practised terms are the brain's dark areas, not this list)
+{
+  const host=document.getElementById("next");
+  const list=terms.filter(t => t.lv===1 || t.over).sort((a,b) => ((b.lv===1)-(a.lv===1)) || (b.miss-a.miss) || ((a.last||0)-(b.last||0))).slice(0, 10);
+  host.innerHTML = list.length ? list.map(t => `<button class="row term" type="button" data-i="${t.i}"><b><i style="background:${t.lv===1?LCOL[1]:DOMS[t.d].color}"></i>${esc(t.en)}<small>${esc(DOMS[t.d].name)}</small></b><span>${why(t)}</span></button>`).join("")
+    : `<p class="empty">${ok && ALL.n > ALL.lv[0] ? "Nothing missed or due right now." : "Nothing yet: practise a domain and what you miss shows up here."} Dark areas in the brain are terms you haven't practised.</p>`;
+  host.querySelectorAll(".row").forEach(b => b.onclick=() => { selectTerm(+b.dataset.i); toScan(); });
+}
+// Fig. 3: one count a day from this phone (ih_knowledgeLog in the app); the record itself keeps no history
+const days = ok && K.days && typeof K.days === "object" ? Object.entries(K.days).filter(([d,v]) => /^\d{4}-\d\d-\d\d$/.test(d) && Array.isArray(v)).sort((a,b) => a[0] < b[0] ? -1 : 1) : [];
+function drawProg(){
+  const c=document.getElementById("prog"), w=c.clientWidth, h=w<520?170:200, dpr=Math.min(2,devicePixelRatio||1);
+  c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); c.style.height=h+"px";
+  const x=c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,w,h);
+  const cap=document.getElementById("progCap");
+  if(days.length < 2){
+    const [p,k,n] = days.length ? days[0][1] : [ALL.n-ALL.lv[0], ALL.lv[3], ALL.n];
+    cap.textContent = `Counting started ${days.length ? "today" : "when you first open this"}: ${k} known and ${p} practised of ${n} terms. One count a day is kept on this phone, so the line grows as you practise.`;
+    x.fillStyle="#6A779E"; x.font='400 11px "JetBrains Mono", monospace'; x.textAlign="center";
+    x.fillText("Come back tomorrow: the line starts with your second day.", w/2, h/2);
+    return;
+  }
+  const L=34, Rr=10, T=10, B=24, t0=Date.parse(days[0][0]), t1=Date.parse(days[days.length-1][0]), top=Math.max(4, ...days.map(([,v]) => Math.max(v[0], v[1])));
+  const X = d => L + (w-L-Rr) * (t1>t0 ? (Date.parse(d)-t0)/(t1-t0) : .5), Y = v => T + (h-T-B) * (1 - v/top);
+  x.strokeStyle="rgba(126,156,226,.18)"; x.lineWidth=1; x.fillStyle="#6A779E"; x.font='400 10px "JetBrains Mono", monospace'; x.textAlign="right";
+  [0, .5, 1].forEach(f => { const v=Math.round(top*f), y=Y(v); x.beginPath(); x.moveTo(L,y); x.lineTo(w-Rr,y); x.stroke(); x.fillText(String(v), L-6, y+3); });
+  x.textAlign="left"; x.fillText(days[0][0], L, h-6); x.textAlign="right"; x.fillText(days[days.length-1][0], w-Rr, h-6);
+  [[0,"#01B8E6"],[1,LCOL[3]]].forEach(([k,col]) => {
+    x.strokeStyle=col; x.lineWidth=2; x.beginPath();
+    days.forEach(([d,v],j) => { const px=X(d), py=Y(v[k]); j ? x.lineTo(px,py) : x.moveTo(px,py); }); x.stroke();
+    const [d,v]=days[days.length-1]; x.fillStyle=col; x.beginPath(); x.arc(X(d),Y(v[k]),3,0,7); x.fill();
+  });
+  cap.textContent = `${days.length} days counted on this phone. Today: ${days[days.length-1][1][1]} known, ${days[days.length-1][1][0]} practised.`;
+}
+drawProg();
+let rT=0; addEventListener("resize", () => { clearTimeout(rT); rT=setTimeout(drawProg, 150); });
+}
+</script>
+</body>
+</html>

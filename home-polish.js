@@ -2004,9 +2004,14 @@
      closeAllOverlays in index.html); its X and Escape inside the frame ask
      to close by message. The frame is dropped once closed, so its 3D stops
      drawing and frees its memory. docs/features/humc-brain.md. */
+  /* Two pages in the frame, with tabs between them: brain/you.html, your
+     knowledge (the default; the CoreCHI Practice dashboard opens it too), and
+     brain/index.html, how the Hub is built. you.html asks for your own record
+     by message ('brain-want'; knowledgeBrainData in index.html) and asks the
+     app to practise a region or open a term, which closes the brain first. */
   let brainOv=null;
   const closeBrain=()=>{if(brainOv)brainOv.classList.remove('show');};
-  window.openHumcBrain=function(){
+  window.openHumcBrain=function(view){
     if(!brainOv){
       brainOv=document.createElement('div');
       brainOv.className='overlay brain-ov';
@@ -2019,12 +2024,22 @@
     }
     if(!brainOv.querySelector('iframe')){
       const f=document.createElement('iframe');
-      f.src='./brain/index.html';f.title='HUMC Brain: the app\u2019s code drawn as a brain';
+      f.src=view==='code'?'./brain/index.html':'./brain/you.html';f.title='HUMC Brain: your knowledge, and the app\u2019s code, drawn as a brain';
       brainOv.appendChild(f);
       f.addEventListener('load',()=>{try{f.focus();}catch(e){}},{once:true});
     }
     brainOv.classList.add('show');
   };
-  window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.ih==='brain-close')closeBrain();});
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin||!e.data)return;
+    const m=e.data, f=brainOv&&brainOv.querySelector('iframe');
+    if(!f||e.source!==f.contentWindow)return;
+    if(m.ih==='brain-close')closeBrain();
+    else if(m.ih==='brain-want'&&typeof window.knowledgeBrainData==='function'){
+      window.knowledgeBrainData().then(data=>{try{e.source.postMessage({ih:'brain-data',data},location.origin);}catch(err){}});
+    }
+    else if(m.ih==='brain-practice'&&typeof window.knowledgePractise==='function'){closeBrain();window.knowledgePractise(String(m.domain||''));}
+    else if(m.ih==='brain-term'&&typeof window.knowledgeOpenTerm==='function'){closeBrain();window.knowledgeOpenTerm(String(m.id||''));}
+  });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&brainOv&&brainOv.classList.contains('show'))closeBrain();});
 })();

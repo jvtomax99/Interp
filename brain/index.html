@@ -165,6 +165,12 @@ th i,.nm i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-ri
 .close-brain{position:fixed;z-index:40;top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px, env(safe-area-inset-right,0px));width:40px;height:40px;border-radius:12px;border:1px solid var(--panel-line);background:var(--panel);color:var(--ink);font:400 22px/1 var(--f-ui);cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .close-brain:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .in-frame .topbar{padding-right:52px}
+/* The two tabs: you (brain/you.html), and how the Hub is built (this page) */
+.tabs{display:inline-flex;gap:3px;padding:3px;border-radius:999px;background:var(--panel);border:1px solid var(--panel-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);justify-self:start}
+.tabs a{font:550 12.5px/1 var(--f-ui);color:var(--ink-soft);text-decoration:none;padding:9px 13px;border-radius:999px;transition:background .2s,color .2s}
+.tabs a[aria-current="page"]{background:rgba(79,157,255,.22);color:var(--ink)}
+.tabs a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.tabs a{transition:none}}
 .no3d{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);max-width:280px;text-align:center;font:400 13px/1.5 var(--f-ui);color:var(--ink-soft)}
 </style>
 </head>
@@ -178,6 +184,7 @@ th i,.nm i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-ri
 <div class="hud">
   <div class="topbar">
   <header>
+    <nav class="tabs" aria-label="HUMC Brain views"><a href="./you.html" id="tabYou">You</a><a href="./index.html" aria-current="page">How the Hub is built</a></nav>
     <div class="eyebrow">Connectomic tractography · DTI reconstruction · T1</div>
     <h1>HUMC Brain</h1>
     <p class="sub">Whole-brain connectome, <span data-k="nodes">118</span> nuclei. Soma diameter scales with parenchymal volume; each tract is an efferent projection colour-coded by its target nucleus.<span class="hide-sm"> Marked afferent convergence on the dorsomedial thalamus from nearly every cortical territory.</span></p>
@@ -234,6 +241,8 @@ if(inFrame){
   // The first Escape closes an open readout, the next one the brain.
   addEventListener("keydown", e => { if(e.key === "Escape" && document.getElementById("sheet").hidden) closeBrain(); });
 }
+// The other tab replaces this page in the frame, so Back still closes the brain.
+document.getElementById("tabYou").addEventListener("click", e => { e.preventDefault(); location.replace("./you.html"); });
 fetch("./data.json", { cache:"no-cache" }).then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(DATA => {
 document.querySelectorAll("[data-k]").forEach(el => { el.textContent = el.dataset.k === "date" ? DATA.measured : el.dataset.k === "nodes" ? DATA.nodes.length : DATA.edges.length.toLocaleString("en-US"); });
 
