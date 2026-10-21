@@ -1,5 +1,5 @@
 """Shared helpers for working on Jose's Tripo model (steps 4-6 of out/plan-tripo.png)."""
-import os
+import os, math
 import numpy as np
 import bpy
 from PIL import Image
@@ -86,3 +86,58 @@ def hair_faces(ob, px):
     big = np.argmax(sizes)
     hair = brown & (lab == big)
     return hair, brown, lab, sizes
+
+
+def measure_eyes(ob, out_png=None):
+    """Find his painted eyes: a flat (unlit) orthographic picture of his face
+    from the front, the whites found there, the opening filled (iris and lash
+    line inside), ellipse by image moments, depth by casting a ray at the
+    model. Returns per eye (+x first): centre (x, y, z), half-width,
+    half-height, iris centre (x, z) and iris radius, all in metres."""
+    import cv2
+    from mathutils import Vector
+    sc = bpy.context.scene
+    sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'     # the .blend may default to Eevee (needs a GPU)
+    mat = ob.data.materials[0]
+    N, L = mat.node_tree.nodes, mat.node_tree.links
+    out = [n for n in N if n.type == 'OUTPUT_MATERIAL'][0]
+    keep = out.inputs['Surface'].links[0].from_socket
+    tex = [n for n in N if n.type == 'TEX_IMAGE'][0]
+    em = N.new('ShaderNodeEmission'); L.new(tex.outputs['Color'], em.inputs['Color'])
+    L.new(em.outputs[0], out.inputs['Surface'])
+    cd = bpy.data.cameras.new('EyeCam'); cd.type = 'ORTHO'; cd.ortho_scale = .4
+    cam = bpy.data.objects.new('EyeCam', cd); sc.collection.objects.link(cam)
+    cam.location = (0, -2, .8); cam.rotation_euler = (math.radians(90), 0, 0)
+    old = sc.camera, sc.render.resolution_x, sc.render.resolution_y, sc.cycles.samples, sc.view_settings.view_transform, sc.render.filepath
+    sc.camera = cam; sc.render.resolution_x = sc.render.resolution_y = 800; sc.cycles.samples = 4
+    sc.view_settings.view_transform = 'Standard'
+    path = out_png or os.path.join(HERE, 'in', 'eyes-flat.png')
+    sc.render.filepath = path; bpy.ops.render.render(write_still=True)
+    L.new(keep, out.inputs['Surface']); N.remove(em)
+    sc.camera, sc.render.resolution_x, sc.render.resolution_y, sc.cycles.samples, sc.view_settings.view_transform, sc.render.filepath = old
+    a = np.array(Image.open(path).convert('RGB')).astype(int)
+    px2m = .4 / 800                        # metres per pixel; image centre = (0, .8)
+    to_xz = lambda u, v: ((u - 400) * px2m, .8 - (v - 400) * px2m)
+    white = ((a > 200).all(-1)).astype(np.uint8)
+    n, lab, st, cent = cv2.connectedComponentsWithStats(white)
+    eyes = []
+    # the two biggest white blobs above the mouth (z > .72) are the eyes
+    cands = [i for i in range(1, n) if to_xz(*cent[i])[1] > .72 and st[i, cv2.CC_STAT_AREA] > 300]
+    cands = sorted(cands, key=lambda i: -st[i, cv2.CC_STAT_AREA])[:2]
+    for i in sorted(cands, key=lambda i: -cent[i][0]):
+        m = (lab == i).astype(np.uint8)
+        hull = cv2.convexHull(cv2.findNonZero(m))
+        fill = np.zeros_like(m); cv2.fillConvexPoly(fill, hull, 1)
+        ys, xs = np.nonzero(fill)
+        cx, cy = xs.mean(), ys.mean()
+        hw, hh = (xs.max() - xs.min()) / 2, (ys.max() - ys.min()) / 2
+        dark = fill.astype(bool) & (a.sum(-1) < 260)
+        dys, dxs = np.nonzero(dark)
+        ix, iy = dxs.mean(), dys.mean()
+        ir = np.sqrt(dark.sum() / math.pi)
+        x, z = to_xz(cx, cy)
+        hit, loc, nrm, *_ = sc.ray_cast(bpy.context.evaluated_depsgraph_get(), Vector((x, -2, z)), Vector((0, 1, 0)))
+        eyes.append(dict(c=(x, loc.y if hit else -.15, z), hw=hw * px2m, hh=hh * px2m, iris=to_xz(ix, iy), ir=ir * px2m,
+                         normal=tuple(nrm) if hit else (0, -1, 0)))
+    bpy.data.objects.remove(cam)
+    return eyes

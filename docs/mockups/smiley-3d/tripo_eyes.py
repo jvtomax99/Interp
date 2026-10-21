@@ -1,0 +1,196 @@
+"""His 3D eyes on the kept Tripo model (plan-rig.png step 2): an eyeball over
+each painted eye, iris and pupil that slide on it to look around (the eye's
+outline never changes), a skin lid with a dark lash edge that closes to blink,
+and a painted-style catchlight that stays put. Matte.
+
+  python3 tripo_eyes.py      -> in/tripo-eyes.blend
+Controls (per eye object 'Eye.L'/'Eye.R'): set_gaze(gx, gz) in -1..1,
+set_blink(0 open .. 1 shut).
+"""
+import os, sys, math
+import numpy as np
+import bpy, bmesh
+from mathutils import Vector, Matrix
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import tripo_lib as T
+import build
+
+HERE = T.HERE
+COVER = 1.16          # eyeball outline over the painted opening
+DEPTH = .014          # eyeball half-depth (metres; he is 1 m tall)
+SINK = .0055          # how far its centre sits behind the face surface
+OPEN, SHUT = 50, -62  # lid edge elevation on the eyeball, degrees (open: its dark edge is his lash line / closed)
+
+
+def mesh_from(name, verts, faces, mat):
+    me = bpy.data.meshes.new(name); me.from_pydata(verts, [], faces); me.validate(); me.shade_smooth()
+    ob = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(ob)
+    ob.data.materials.append(mat)
+    return ob
+
+
+def ellipsoid_verts(rx, ry, rz, segs=48, rings=32, el0=-90, el1=90):
+    vs = []
+    for r in range(rings + 1):
+        el = math.radians(el0 + (el1 - el0) * r / rings)
+        for s in range(segs):
+            az = 2 * math.pi * s / segs
+            vs.append((rx * math.cos(el) * math.sin(az), -ry * math.cos(el) * math.cos(az), rz * math.sin(el)))
+    return vs
+
+
+def grid(rings, segs):
+    return [(r * segs + s, r * segs + (s + 1) % segs, (r + 1) * segs + (s + 1) % segs, (r + 1) * segs + s)
+            for r in range(rings) for s in range(segs)]
+
+
+def eye_material(name, iris_dark, iris_light, pupil_r, iris_r):
+    """White ball; iris and pupil drawn by distance from a gaze point on the
+    ball's front (object coordinates divided by its radii)."""
+    m = bpy.data.materials.new(name); m.use_nodes = True
+    N, L = m.node_tree.nodes, m.node_tree.links
+    b = N['Principled BSDF']
+    b.inputs['Roughness'].default_value = .55
+    b.inputs['Specular IOR Level'].default_value = .15
+    # the ball's own undeformed coordinates, so the iris stays put when a skeleton moves the ball
+    rest = N.new('ShaderNodeAttribute'); rest.attribute_type = 'GEOMETRY'; rest.attribute_name = 'rest_position'
+    sep = N.new('ShaderNodeSeparateXYZ'); L.new(rest.outputs['Vector'], sep.inputs['Vector'])
+    gx = N.new('ShaderNodeValue'); gx.name = 'GazeX'
+    gz = N.new('ShaderNodeValue'); gz.name = 'GazeZ'
+    rx = N.new('ShaderNodeValue'); rx.name = 'RX'
+    rz = N.new('ShaderNodeValue'); rz.name = 'RZ'
+    def math_node(op, a, bb):
+        n = N.new('ShaderNodeMath'); n.operation = op
+        for i, v in enumerate((a, bb)):
+            if isinstance(v, (int, float)):
+                n.inputs[i].default_value = v
+            else:
+                L.new(v, n.inputs[i])
+        return n.outputs[0]
+    u = math_node('SUBTRACT', math_node('DIVIDE', sep.outputs['X'], rx.outputs[0]), gx.outputs[0])
+    v = math_node('SUBTRACT', math_node('DIVIDE', sep.outputs['Z'], rz.outputs[0]), gz.outputs[0])
+    d = math_node('SQRT', math_node('ADD', math_node('MULTIPLY', u, u), math_node('MULTIPLY', v, v)), 0)
+    front = math_node('LESS_THAN', sep.outputs['Y'], 0)          # only on the front of the ball
+    ramp = N.new('ShaderNodeValToRGB'); cr = ramp.color_ramp
+    cr.interpolation = 'EASE'
+    cr.elements[0].position, cr.elements[0].color = 0, (.004, .003, .003, 1)          # pupil
+    cr.elements[1].position, cr.elements[1].color = 1, (.92, .93, .95, 1)             # white
+    for pos, col in ((pupil_r - .01, (.004, .003, .003, 1)), (pupil_r + .02, iris_light), (iris_r - .09, iris_dark),
+                     (iris_r - .015, (.05, .02, .01, 1)), (iris_r + .02, (.92, .93, .95, 1))):
+        e = cr.elements.new(max(0, min(1, pos))); e.color = col
+    dd = math_node('ADD', d, math_node('MULTIPLY', math_node('SUBTRACT', 1, front), 5))
+    L.new(dd, ramp.inputs['Fac'])
+    # a soft dark rim where the ball turns away, like the outline round his drawn eyes
+    lw = N.new('ShaderNodeLayerWeight'); lw.inputs['Blend'].default_value = .5
+    rim = N.new('ShaderNodeValToRGB'); rc = rim.color_ramp
+    rc.elements[0].position, rc.elements[0].color = .55, (1, 1, 1, 1)
+    rc.elements[1].position, rc.elements[1].color = .82, (.06, .03, .02, 1)
+    L.new(lw.outputs['Facing'], rim.inputs['Fac'])
+    mul = N.new('ShaderNodeMix'); mul.data_type = 'RGBA'; mul.blend_type = 'MULTIPLY'
+    mul.inputs['Factor'].default_value = 1
+    L.new(ramp.outputs['Color'], mul.inputs['A']); L.new(rim.outputs['Color'], mul.inputs['B'])
+    L.new(mul.outputs['Result'], b.inputs['Base Color'])
+    return m
+
+
+def set_gaze(eye, gx, gz):
+    m = eye.data.materials[0].node_tree.nodes
+    m['GazeX'].outputs[0].default_value = gx * .32
+    m['GazeZ'].outputs[0].default_value = gz * .24
+
+
+def set_blink(lid, amount):
+    lid.data.shape_keys.key_blocks['Shut'].value = max(0, min(1, amount))
+    glint = bpy.data.objects.get('Glint.' + lid.name.split('.')[-1])
+    if glint:                      # the shine sits on the eye, so it goes when the lid covers it
+        glint.hide_render = amount > .45
+
+
+def build_eyes(ob, eyes):
+    srgb = build.srgb
+    skin_m = bpy.data.materials.new('Lid'); skin_m.use_nodes = True
+    sb = skin_m.node_tree.nodes['Principled BSDF']
+    sb.inputs['Roughness'].default_value = .62; sb.inputs['Specular IOR Level'].default_value = .1
+    at = skin_m.node_tree.nodes.new('ShaderNodeAttribute'); at.attribute_name = 'edge'
+    lr = skin_m.node_tree.nodes.new('ShaderNodeValToRGB')
+    lr.color_ramp.elements[0].position, lr.color_ramp.elements[0].color = .70, srgb(250, 205, 180)
+    lr.color_ramp.elements[1].position, lr.color_ramp.elements[1].color = .80, srgb(38, 18, 10)
+    skin_m.node_tree.links.new(at.outputs['Fac'], lr.inputs['Fac'])
+    skin_m.node_tree.links.new(lr.outputs['Color'], sb.inputs['Base Color'])
+    hl_m = bpy.data.materials.new('Catchlight'); hl_m.use_nodes = True
+    hb = hl_m.node_tree.nodes['Principled BSDF']
+    hb.inputs['Base Color'].default_value = (1, 1, 1, 1); hb.inputs['Emission Color'].default_value = (1, 1, 1, 1)
+    hb.inputs['Emission Strength'].default_value = 1.2
+    made = []
+    for side, e in zip(('L', 'R'), eyes):
+        n = Vector(e['normal']).normalized()
+        c = Vector(e['c'])
+        rot = (-n).to_track_quat('-Y', 'Z').to_matrix().to_4x4() if False else n.to_track_quat('-Y', 'Z').to_matrix().to_4x4()
+        rx, rz = e['hw'] * COVER, e['hh'] * COVER
+        centre = c - n * SINK
+        # the ball
+        iris_r = e['ir'] / max(e['hw'], e['hh']) * .95
+        mat = eye_material(f'Eye.{side}', srgb(92, 46, 20), srgb(170, 102, 50), iris_r * .42, iris_r)
+        ball = mesh_from(f'Eye.{side}', ellipsoid_verts(rx, DEPTH, rz), grid(32, 48), mat)
+        ball.matrix_world = Matrix.Translation(centre) @ rot
+        ball.add_rest_position_attribute = True
+        nodes = mat.node_tree.nodes
+        nodes['RX'].outputs[0].default_value = rx
+        nodes['RZ'].outputs[0].default_value = rz
+        # where the painted iris looks now becomes the rest gaze
+        gx0 = (e['iris'][0] - c.x) / rx / .32
+        gz0 = (e['iris'][1] - c.z) / rz / .24
+        ball['rest_gaze'] = (gx0, gz0)
+        set_gaze(ball, gx0, gz0)
+        # the upper lid: a shell just outside the ball, from the top down to OPEN;
+        # its shape key 'Shut' brings the edge down to SHUT
+        lr_, rows, segs = 1.07, 24, 48
+        def lid_verts(edge):
+            vs = []
+            for r in range(rows + 1):
+                el = math.radians(90 - (90 - edge) * r / rows)
+                for s in range(segs):
+                    az = 2 * math.pi * s / segs
+                    # the lid only wraps the front half of the ball
+                    if math.cos(az) < -.05:
+                        k = .2
+                    vs.append((rx * lr_ * math.cos(el) * math.sin(az), -(DEPTH * 1.25) * math.cos(el) * math.cos(az), rz * lr_ * math.sin(el)))
+            return vs
+        lid = mesh_from(f'Lid.{side}', lid_verts(OPEN), grid(rows, segs), skin_m)
+        edge = lid.data.attributes.new('edge', 'FLOAT', 'POINT')
+        edge.data.foreach_set('value', [r / rows for r in range(rows + 1) for s in range(segs)])
+        lid.shape_key_add(name='Basis')
+        sk = lid.shape_key_add(name='Shut')
+        for i, v in enumerate(lid_verts(SHUT)):
+            sk.data[i].co = v
+        lid.matrix_world = Matrix.Translation(centre) @ rot
+        set_blink(lid, 0)              # a new shape key comes in at full strength: start open
+        # catchlight: a small soft white oval up and to the light's side, fixed to the head
+        hl_verts = ellipsoid_verts(rx * .16, .0015, rz * .2, 16, 8)
+        hl = mesh_from(f'Glint.{side}', hl_verts, grid(8, 16), hl_m)
+        hl.matrix_world = Matrix.Translation(centre + (rot.to_3x3() @ Vector((-rx * .3, -DEPTH * 1.02, rz * .38)))) @ rot
+        made += [ball, lid, hl]
+    return made
+
+
+def lid_skin_colour(ob):
+    """Sample his skin under the eyes, so the lids match it."""
+    img, px = T.texture(ob)
+    cen, tuv = T.face_arrays(ob)
+    sel = (np.abs(cen[:, 2] - .795) < .006) & (np.abs(cen[:, 0] - .018) < .012) & (cen[:, 1] < -.12)   # between the brows
+    c = T.sample(px, tuv[sel].mean(1)) * 255
+    return np.median(c, 0)
+
+
+if __name__ == '__main__':
+    bpy.ops.wm.open_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-fixed.blend'))
+    ob = [o for o in bpy.data.objects if o.type == 'MESH'][0]
+    eyes = T.measure_eyes(ob)
+    skin = lid_skin_colour(ob)
+    print('eyes', [{k: v for k, v in e.items() if k in ('c', 'hw', 'hh', 'ir')} for e in eyes], 'skin', skin)
+    made = build_eyes(ob, eyes)
+    lid_m = bpy.data.materials['Lid']
+    # a lid sits forward of the face and catches more light: a shade darker to match
+    lid_m.node_tree.nodes['Color Ramp'].color_ramp.elements[0].color = build.srgb(*[int(v * .9) for v in skin])
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-eyes.blend'))
+    print('done')
