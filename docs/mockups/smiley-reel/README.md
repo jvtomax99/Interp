@@ -37,3 +37,31 @@ node render.cjs still 2.5 8  # still_2.5.jpg, still_8.jpg
 
 Not in the app. If Jose wants it there, it goes in `media/` and the User
 Guide like `hub-promo.mp4` (see `docs/features/user-guide.md`).
+
+## Version 2: at HUMC (2026-10-21)
+
+Jose's ask: the same look and motion, but highlight HUMC, from his four
+photos, and make it feel alive. Picked: living photos, about 20 seconds;
+he asked for his photos to be improved.
+
+- `photos/src/`: Jose's four photos as sent (447 to 1000 px wide).
+  `upscale.py` sharpens each 4x with EDSR (OpenCV's dnn_superres; faithful,
+  doesn't invent detail on signs) into `photos/`. Real-ESRGAN was the
+  first pick, but PyTorch's download site is blocked here; the EDSR model
+  comes from GitHub (`raw.githubusercontent.com/Saafke/EDSR_Tensorflow`).
+  `prep.py` maps each photo's sky (`photos/<name>-sky.png`).
+- `scene-v2.html`, `timeline-v2.json`: aerial descent (name card), the
+  skybridge at sunset (he lands under the sign and looks up at it), the
+  four tiles on the main-entrance drive (he ends left of the Hackensack
+  Meridian Health sign and glances at it), the Helena Theurer Pavilion at
+  dusk (title, wink). Each photo is a set: its ground laid in 3D from the
+  photo's eye level, so moving the camera gives real parallax and his
+  shadow falls on the photo's road. Alive: drifting clouds, cloud shadows,
+  glints along the glass, swaying trees, flags and banners, twinkling lit
+  windows, birds, dust in the light, headlight trails, a sunset flare,
+  film grain, a flash on each cut. `PLACES` holds each photo's eye level
+  and regions, and the signs that must stay readable.
+- `node render.cjs v2` gives `reel-v2.mp4` (`v2 preview`, `v2 still 4.8`).
+
+The photos look like Hackensack Meridian Health's own professional shots:
+fine in the app for the team; posting the video publicly needs HMH's OK.

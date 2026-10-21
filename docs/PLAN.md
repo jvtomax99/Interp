@@ -279,7 +279,9 @@ then read the log; it names the suite and the check.
   across its four quick tiles; each lights in its colour and pops its pin;
   the camera swings round; he lands under "Interpreter Hub" and winks.
   Sound made in numpy on the same timing file. `docs/mockups/smiley-reel/`.
-  Not in the app (Jose decides).
+  Not in the app (Jose decides). Version 2, same PR: 20 s at HUMC from
+  Jose's four photos (sharpened 4x, each made a 3D set with parallax),
+  alive (clouds, glints, swaying trees and flags, birds, trails).
 - 2026-10-20 Journey flake (this PR): "Term Review on 5 of your
   still-learning terms" failed on two PR runs within 30 minutes (#94,
   #98; neither touches that path) while passing on main's head and
@@ -714,6 +716,10 @@ then read the log; it names the suite and the check.
   field and soft shadows at 1080 x 1920 in about 1.1 s a frame (7 min for 12 s). Whisper
   models can't be fetched (Hugging Face is blocked), so a video's speech
   can't be transcribed here; burned-in captions can be read from frames.
+  Photo upscaling: PyTorch's site (download.pytorch.org) is blocked, so no
+  Real-ESRGAN; OpenCV's EDSR x4 (model from raw.githubusercontent.com)
+  works, about 7 min for four photos on 4 cores. three.js ShaderPass
+  clones its uniforms, textures too: set a live texture on the pass after.
 - Recording a smooth, sharp clip of an animation from the tests' Chromium:
   `recordVideo` and the CDP screencast give CSS-pixel frames (blurry), and
   screenshots in a loop run at about 4 fps. What works: CSS `zoom: 3` on

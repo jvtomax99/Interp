@@ -1,0 +1,681 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Dr. Smiley reel v2: HUMC</title>
+<style>
+  html, body { margin:0; background:#000; overflow:hidden; }
+  canvas { display:block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./node_modules/three/build/three.module.js",
+  "three/addons/": "./node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<script type="module">
+/* Version 2: the reel at Hackensack University Medical Center, from Jose's
+   four photos (photos/, sharpened 4x by upscale.py).
+
+   Each photo is a living set, not a flat backdrop. Its ground is laid in 3D
+   from where the photo's eye level is (horizon) and how high the camera
+   stood (h): a ground pixel at height v sits at the distance where a level
+   camera would see the ground there. Buildings stand at the distance of
+   their base (zones). Seen from where the photographer stood it is exactly
+   the photo; move the camera and near things slide past far things. Dr.
+   Smiley and the tiles stand on that ground and cast shadows onto it.
+
+   Alive, in the photo's own shader: clouds drift where the sky is
+   (photos/<name>-sky.png, from prep.py), cloud shadows cross the aerial,
+   light glints sweep along the glass, trees, flags and banners sway, lit
+   windows twinkle at dusk. Beside it: birds, dust in the light, headlight
+   trails, a flare at the sunset.
+
+   As in version 1, nothing reads the clock: draw(n) always gives frame n,
+   and every time comes from timeline-v2.json. */
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1080, H = +q.get('h') || 1920;
+const T = await (await fetch('./timeline-v2.json')).json();
+const ROOT = '../../../';
+
+const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error(src)); i.src = src; });
+await document.fonts.load('650 80px Inter');
+await document.fonts.load('550 40px Inter');
+
+/* ---------- Easing ---------- */
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const smooth = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const smoother = x => { x = clamp01(x); return x * x * x * (x * (x * 6 - 15) + 10); };
+const lerp = (a, b, k) => a + (b - a) * k;
+const lerp3 = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
+const springOut = x => { x = clamp01(x); return 1 - Math.exp(-6 * x) * Math.cos(9 * x); };
+const hash = n => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
+
+/* ---------- The places ----------
+   Regions are in percent of the photo from its top-left, as read off a grid
+   laid over each one. v_h: eye level, as a fraction from the bottom. h: how
+   high the camera stood (m). uc: the photo column at the middle of the
+   frame. base: how far its buildings stand (m); zones: parts nearer or
+   further. spot: where Dr. Smiley lands [u, distance]. The signs named in
+   keepClear must stay readable: nothing is placed over them. */
+const PLACES = {
+  aerial: {
+    photo: 'aerial', v_h: 0.875, h: 70, uc: 0.55, base: 3000, far: 3000,
+    sway: [[0, 74, 25, 100, 0.0016], [58, 80, 72, 100, 0.0012], [88, 84, 100, 100, 0.0012], [60, 44.5, 62.5, 50, 0.003]],
+    glass: [[80, 33, 100, 62], [0, 48, 9, 70], [52, 27, 64, 32]],
+    cloud: 0.55, cloudTint: '#FFFFFF', shadow: 0.22, glint: 0.35, glintTint: '#FFF4DC', twinkle: 0,
+    birds: { n: 7, depth: 45, v: [0.80, 0.93], from: -0.7, to: 0.8, span: [0.0, 4.0] },
+    smiley: { scale: 1.2, tint: '#FFFFFF', glow: 0.75 },
+    light: { color: '#FFF1DC', pos: [-20, 40, 10], power: 1.4 },
+  },
+  skybridge: {
+    photo: 'skybridge', v_h: 0.32, h: 1.6, uc: 0.26, base: 21,
+    zones: [[0, 44, 30, 76, 17], [30, 55, 52, 75, 30]],
+    sway: [[0, 44, 38, 77, 0.0018], [44, 74, 60, 80, 0.0012]],
+    glass: [[0, 27, 58, 42], [62, 24, 100, 70], [57, 33, 67, 66]],
+    cloud: 0.4, cloudTint: '#FFC9B8', shadow: 0, glint: 0.6, glintTint: '#FFD9A8', twinkle: 0,
+    keepClear: ['Hackensack University Medical Center, on the skybridge: x 0-38, y 37-46'],
+    spot: [0.42, 7.8],
+    birds: { n: 3, depth: 30, v: [0.80, 0.92], from: 0.9, to: -0.6, span: [4.0, 8.0] },
+    dust: { n: 70, tint: '#FFC58A' },
+    flare: { at: [35, 50], depth: 40, tint: '#FFB36B', size: 9 },
+    smiley: { scale: 1.45, tint: '#FFE2C4', glow: 0.62 },
+    light: { color: '#FFB878', pos: [-8, 3, -22], power: 1.6 },
+  },
+  entrance: {
+    photo: 'entrance', v_h: 0.40, h: 1.6, uc: 0.578, base: 34,
+    zones: [[0, 0, 24, 75, 14], [66, 0, 100, 68, 21], [60, 58, 71, 69, 21.4], [6, 33, 31, 64, 16]],
+    sway: [[6, 33, 31, 63, 0.0016], [22, 45, 31, 62, 0.0012], [60, 46, 64, 58, 0.0012], [38, 55, 56, 66, 0.001],
+           [49.5, 38, 52, 46, 0.006], [41.5, 40, 45.5, 54, 0.0025], [54, 40, 57.5, 53, 0.0025], [48, 51, 53, 58, 0.002]],
+    glass: [[41, 26, 47, 34], [25, 32, 66, 39], [86, 0, 94, 12]],
+    cloud: 0.45, cloudTint: '#FFFFFF', shadow: 0, glint: 0.55, glintTint: '#FFFFFF', twinkle: 0,
+    keepClear: ['Hackensack Meridian Health / Hackensack University Medical Center sign: x 60-71, y 59-68',
+                'the HMH banner over the centre building: x 41-46, y 40-54'],
+    tiles: { z: 5.6, x0: -3.75, step: 1.25, start: -5.2 },
+    birds: { n: 3, depth: 60, v: [0.78, 0.9], from: -0.5, to: 0.9, span: [8.0, 14.5] },
+    smiley: { scale: 1.1, tint: '#FFFFFF', glow: 0.55 },
+    light: { color: '#FFF4E2', pos: [-6, 9, 3], power: 2.0 },
+  },
+  pavilion: {
+    photo: 'pavilion', v_h: 0.26, h: 1.6, uc: 0.58, base: 30,
+    zones: [[0, 0, 14, 86, 10], [70, 25, 100, 82, 20]],
+    sway: [[92, 70, 100, 82, 0.0014]],
+    glass: [[42, 12, 84, 50]],
+    cloud: 0.25, cloudTint: '#C9D8F2', shadow: 0, glint: 0.25, glintTint: '#CFE3FF', twinkle: 0.55,
+    keepClear: ['the Hackensack University Medical Center letters along the tower: x 40-80, y 8-35',
+                'Helena Theurer Pavilion over the entrance: x 33-44, y 70-73'],
+    spot: [0.62, 8.0],
+    trails: [[40, 82], [55, 83.5], [70, 85.5], [85, 87.5], [100, 90.5]],
+    dust: { n: 40, tint: '#BFD4FF' },
+    smiley: { scale: 1.5, tint: '#E6EEFF', glow: 0.6 },
+    light: { color: '#FFD9A6', pos: [-2, 3, -12], power: 1.2 },
+  },
+};
+
+/* ---------- Renderer, camera, post ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.NoToneMapping; // the photos keep their own colours
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#000000');
+// The photos are laid out for a 50-degree lens; the camera's is 44, so the frame
+// sits inside the photo with a margin for every move.
+const D = 10, FOV = 50, HP = 2 * D * Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+const camera = new THREE.PerspectiveCamera(44, W / H, 0.1, 6000);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 7, aperture: 0.0009, maxblur: 0.006 });
+composer.addPass(bokeh);
+
+// The finish: words, vignette, film grain, the flash on each cut, fade.
+const textCanvas = document.createElement('canvas'); textCanvas.width = W; textCanvas.height = H;
+const textG = textCanvas.getContext('2d');
+const textTex = new THREE.CanvasTexture(textCanvas); textTex.colorSpace = THREE.SRGBColorSpace;
+const finish = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uText: { value: textTex }, uTextOn: { value: 0 }, uFrame: { value: 0 }, uFlash: { value: 0 }, uFade: { value: 1 }, uAspect: { value: W / H } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `
+    uniform sampler2D tDiffuse, uText; uniform float uTextOn, uFrame, uFlash, uFade, uAspect; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+    void main(){
+      vec3 c = texture2D(tDiffuse, vUv).rgb;
+      vec2 d = (vUv - 0.5) * vec2(uAspect, 1.0);
+      c *= mix(1.0, 0.62, smoothstep(0.32, 0.9, length(d) * 1.25));
+      c += vec3(1.0, 0.86, 0.7) * uFlash;
+      if (uTextOn > 0.5) { vec4 t = texture2D(uText, vUv); c = mix(c, t.rgb, t.a); }
+      c += (h(vUv * 1000.0 + uFrame * 7.13) - 0.5) * 0.035;
+      gl_FragColor = vec4(c * uFade, 1.0);
+    }`,
+});
+finish.uniforms.uText.value = textTex; // ShaderPass clones textures; keep the live one
+composer.addPass(finish);
+composer.addPass(new OutputPass());
+
+/* ---------- Light ---------- */
+const hemi = new THREE.HemisphereLight('#DCE7FF', '#3A3A3A', 0.6);
+scene.add(hemi);
+const key = new THREE.DirectionalLight('#FFFFFF', 1.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 0.5, far: 80 });
+key.shadow.bias = -0.0005;
+key.shadow.radius = 5;
+scene.add(key, key.target);
+
+/* ---------- Shader bits ---------- */
+const NOISE = `
+  float hash1(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash1(i), hash1(i + vec2(1, 0)), f.x), mix(hash1(i + vec2(0, 1)), hash1(i + vec2(1, 1)), f.x), f.y); }
+  float fbm(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 5; i++){ s += a * vnoise(p); p *= 2.03; a *= 0.5; } return s; }`;
+
+function canvasTex(w, h, paint, srgb = true){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  paint(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+function roundRect(g, x, y, w, h, r){ g.beginPath(); g.roundRect(x, y, w, h, r); }
+const pct = r => [r[0] / 100, 1 - r[3] / 100, r[2] / 100, 1 - r[1] / 100]; // percent from top-left -> uv box (u0, v0, u1, v1)
+
+/* ---------- A photo, made into a set ---------- */
+async function buildPlace(key){
+  const P = PLACES[key];
+  const img = await loadImg(`./photos/${P.photo}.jpg`);
+  const skyImg = await loadImg(`./photos/${P.photo}-sky.png`);
+  const aspect = img.width / img.height, WP = HP * aspect;
+  const tex = new THREE.Texture(img); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.generateMipmaps = true; tex.needsUpdate = true;
+  const sky = new THREE.Texture(skyImg); sky.needsUpdate = true;
+  const glass = canvasTex(512, Math.round(512 / aspect), (g, w, h) => {
+    g.filter = 'blur(6px)'; g.fillStyle = '#fff';
+    for (const r of P.glass) g.fillRect(r[0] / 100 * w, r[1] / 100 * h, (r[2] - r[0]) / 100 * w, (r[3] - r[1]) / 100 * h);
+  }, false);
+
+  // How far each part of the photo is.
+  const zones = (P.zones || []).map(z => [...pct(z), z[4]]);
+  const groundZ = v => P.h * D / Math.max(1e-4, (P.v_h - v) * HP);
+  function depthAt(u, v){
+    let z = P.base;
+    for (const [u0, v0, u1, v1, d] of zones) {
+      const w = smooth((u - u0) / 0.012) * smooth((u1 - u) / 0.012) * smooth((v - v0) / 0.012) * smooth((v1 - v) / 0.012);
+      z = lerp(z, d, w);
+    }
+    if (v < P.v_h) z = Math.min(z, groundZ(v));
+    return Math.min(z, P.far || 1e9);
+  }
+  const toWorld = (u, v, z) => [(u - P.uc) * WP * z / D, (v - P.v_h) * HP * z / D, -z];
+
+  const segs = 220;
+  const geo = new THREE.PlaneGeometry(WP, HP, segs, Math.round(segs / Math.max(1, aspect)));
+  const pos = geo.attributes.position, uv = geo.attributes.uv;
+  for (let i = 0; i < pos.count; i++) {
+    const u = uv.getX(i), v = uv.getY(i);
+    const p = toWorld(u, v, depthAt(u, v));
+    pos.setXYZ(i, p[0], p[1], p[2]);
+  }
+  geo.computeBoundingSphere();
+
+  const sway = P.sway.map(pct), swayAmp = P.sway.map(r => r[4]);
+  while (sway.length < 8) { sway.push([0, 0, 0, 0]); swayAmp.push(0); }
+  const uniforms = {
+    map: { value: tex }, skyMask: { value: sky }, glassMask: { value: glass },
+    uTime: { value: 0 }, uCloud: { value: P.cloud }, uShadow: { value: P.shadow }, uGlint: { value: P.glint }, uTwinkle: { value: P.twinkle },
+    uCloudTint: { value: new THREE.Color(P.cloudTint) }, uGlintTint: { value: new THREE.Color(P.glintTint) },
+    uSway: { value: sway.map(r => new THREE.Vector4(...r)) }, uSwayAmp: { value: swayAmp }, uExposure: { value: 1 },
+  };
+  const mat = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `
+      uniform sampler2D map, skyMask, glassMask;
+      uniform float uTime, uCloud, uShadow, uGlint, uTwinkle, uExposure;
+      uniform vec3 uCloudTint, uGlintTint;
+      uniform vec4 uSway[8]; uniform float uSwayAmp[8];
+      varying vec2 vUv;
+      ${NOISE}
+      void main(){
+        vec2 uv = vUv;
+        // Trees, flags and banners: rooted at the bottom of their box, swaying more toward the top.
+        for (int i = 0; i < 8; i++) {
+          vec4 r = uSway[i];
+          float inside = smoothstep(r.x, r.x + 0.012, vUv.x) * smoothstep(r.z, r.z - 0.012, vUv.x) * smoothstep(r.y, r.y + 0.012, vUv.y) * smoothstep(r.w, r.w - 0.012, vUv.y);
+          float root = clamp((vUv.y - r.y) / max(1e-3, r.w - r.y), 0.0, 1.0);
+          float n = sin(uTime * 1.9 + vUv.y * 45.0 + float(i) * 1.7) * 0.55 + (vnoise(vec2(vUv.y * 14.0, uTime * 0.9 + float(i) * 3.1)) - 0.5) * 1.5;
+          uv.x += uSwayAmp[i] * inside * root * n;
+          uv.y += uSwayAmp[i] * 0.35 * inside * root * sin(uTime * 2.6 + vUv.x * 70.0);
+        }
+        vec3 c = texture2D(map, uv).rgb;
+        float sky = texture2D(skyMask, vUv).r;
+        // Clouds drifting where the sky shows.
+        vec2 cp = vec2(vUv.x * 2.4 + uTime * 0.02, vUv.y * 5.5 - uTime * 0.004);
+        float cl = fbm(cp + vec2(fbm(cp * 1.6 + uTime * 0.035), 0.0));
+        c = mix(c, uCloudTint, sky * uCloud * smoothstep(0.5, 0.86, cl));
+        // Cloud shadows passing over the ground.
+        float sh = fbm(vUv * vec2(1.8, 2.8) + vec2(uTime * 0.04, uTime * 0.012));
+        c *= 1.0 - uShadow * smoothstep(0.48, 0.74, sh) * (1.0 - sky);
+        // A glint sweeping along the glass.
+        float gl = texture2D(glassMask, vUv).r * (1.0 - sky);
+        float d = (vUv.x * 0.9 + vUv.y * 0.55) - (fract(uTime * 0.21 + 0.15) * 2.6 - 0.6);
+        c += uGlintTint * gl * (exp(-d * d / 0.0016) + 0.4 * exp(-(d + 0.06) * (d + 0.06) / 0.0003)) * uGlint;
+        // Lit windows coming and going at dusk.
+        vec2 cell = floor(vUv * vec2(70.0, 55.0));
+        float rr = hash1(cell);
+        float on = step(0.9, hash1(cell + floor(uTime * 0.55 + rr * 7.0)));
+        // Only windows already lit get brighter or dimmer: no squares on dark glass.
+        float lum = dot(c, vec3(0.299, 0.587, 0.114));
+        c *= 1.0 + gl * uTwinkle * smoothstep(0.22, 0.55, lum) * (on * 0.7 - 0.15 * hash1(cell + 5.0));
+        gl_FragColor = vec4(c * uExposure, 1.0);
+      }`,
+  });
+  const plate = new THREE.Mesh(geo, mat);
+  plate.frustumCulled = false;
+  const grp = new THREE.Group(); grp.add(plate); grp.visible = false;
+  scene.add(grp);
+
+  // Shadows from Dr. Smiley and the tiles fall on the photo's ground.
+  if (P.h < 10) {
+    const catcher = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.ShadowMaterial({ opacity: 0.38, color: '#141B33' }));
+    catcher.rotation.x = -Math.PI / 2; catcher.position.set(0, -P.h + 0.004, -12);
+    catcher.receiveShadow = true;
+    grp.add(catcher);
+  }
+  // Lens shift: the camera stays level (verticals stay straight) and the frame
+  // is moved up or down the photo. On the ground it sits just above the
+  // photo's bottom edge, where Dr. Smiley and the tiles stand; the margin the
+  // tighter lens leaves goes to the top, which is sky.
+  const half = Math.tan(THREE.MathUtils.degToRad(22)) * D;
+  const yc = P.h < 10 ? -P.v_h * HP + half + 0.14 : (0.5 - P.v_h) * HP;
+  return { key, P, grp, uniforms, WP, depthAt, toWorld, yc,
+    ground: (u, z) => [(u - P.uc) * WP * z / D, -P.h, -z],
+    screenToWorld: (u, v, z) => toWorld(u, v, z) };
+}
+const places = {};
+for (const k of Object.keys(PLACES)) places[k] = await buildPlace(k);
+
+/* ---------- Home's four quick tiles, on the drive at the main entrance ---------- */
+const TILE = { w: 1.0, h: 0.28 };
+const pins = await Promise.all(T.tiles.map(t => loadImg(`${ROOT}pins/${t.pin}.webp`)));
+const E = places.entrance, ET = E.P.tiles, EG = -E.P.h;
+const tileX = i => ET.x0 + i * ET.step;
+const tiles = T.tiles.map((t, i) => {
+  const grp = new THREE.Group();
+  grp.position.set(tileX(i), EG, -ET.z);
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#FFFFFF', roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.2, emissive: new THREE.Color(t.color), emissiveIntensity: 0 });
+  const box = new THREE.Mesh(new RoundedBoxGeometry(TILE.w, TILE.h, TILE.w, 5, 0.13), mat);
+  box.position.y = TILE.h / 2;
+  box.castShadow = box.receiveShadow = true;
+  grp.add(box);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(TILE.w - 0.16, TILE.w - 0.16), new THREE.MeshStandardMaterial({
+    transparent: true, roughness: 0.5,
+    map: canvasTex(512, 512, (g, w) => {
+      g.fillStyle = t.color; g.globalAlpha = 0.18; roundRect(g, 150, 70, 220, 220, 60); g.fill();
+      g.globalAlpha = 1; g.drawImage(pins[i], 156, 60, 200, 200);
+      g.fillStyle = '#151C2C'; g.font = '650 62px Inter'; g.textAlign = 'center';
+      g.fillText(t.label, w / 2, 400);
+    }),
+  }));
+  face.rotation.x = -Math.PI / 2;
+  box.add(face); face.position.y = TILE.h / 2 + 0.002;
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2.4), new THREE.MeshBasicMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0,
+    map: canvasTex(256, 256, (g, w) => {
+      const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      gr.addColorStop(0, t.color); gr.addColorStop(0.45, t.color + '66'); gr.addColorStop(1, t.color + '00');
+      g.fillStyle = gr; g.fillRect(0, 0, w, w);
+    }),
+  }));
+  halo.rotation.x = -Math.PI / 2; halo.position.y = 0.006;
+  grp.add(halo);
+  const lamp = new THREE.PointLight(t.color, 0, 3, 1.6);
+  lamp.position.set(0, 0.9, 0.35);
+  grp.add(lamp);
+  const pinTex = new THREE.Texture(pins[i]); pinTex.needsUpdate = true; pinTex.colorSpace = THREE.SRGBColorSpace;
+  const pin = new THREE.Sprite(new THREE.SpriteMaterial({ map: pinTex, transparent: true, opacity: 0 }));
+  pin.scale.set(0.001, 0.001, 1);
+  grp.add(pin);
+  E.grp.add(grp);
+  return { ...t, grp, box, mat, halo, lamp, pin };
+});
+const hops = T.moves.filter(m => m.kind === 'hop');
+const landOf = T.tiles.map((_, i) => (hops.find(h => h.to === i) || {}).land ?? 99);
+function pressDip(i, t){ const k = t - landOf[i]; if (k < 0 || k > 1.2) return 0; return 0.06 * Math.exp(-7 * k) * Math.cos(10 * k); }
+
+/* ---------- Dr. Smiley: Jose's drawing as a cutout (as in version 1) ---------- */
+const ART = { w: 480, h: 600, face: [80, 212, 302, 222], browL: [90, 175, 130, 65], browR: [270, 190, 125, 90], browUnit: 4.53 };
+const FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
+  'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'surprised', 'sad', 'worried', 'doubt'];
+const BROWS = { rest: [0, 0, 0, 0], relax: [.8, 0, .8, 0], lift: [-1.2, 0, -1.2, 0], glad: [-2, 0, -2, 0], laugh: [-2.8, 0, -2.8, 0], up: [-4.2, 0, -4.2, 0],
+  quizL: [.4, -7, -3.6, -5], quizR: [-3.6, 5, .4, 7], down: [.8, 0, .8, 0], love: [-2, -6, -2, 6], wink: [-1, 0, 1.2, -4], caring: [-1, -11, -1, 11],
+  worried: [-1.4, -15, -1.4, 15], doubt: [-3, -4, 1, 2] };
+const BROW_OF = { shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad', laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
+  lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down', love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+  surprised: 'up', sad: 'caring', worried: 'worried', doubt: 'doubt' };
+const [base, faceStrip, browL, browR] = await Promise.all(['base', 'face', 'brow-l', 'brow-r'].map(n => loadImg(`${ROOT}drsmiley/${n}.webp`)));
+const drCanvas = document.createElement('canvas'); drCanvas.width = ART.w; drCanvas.height = ART.h;
+const drG = drCanvas.getContext('2d');
+const drTex = new THREE.CanvasTexture(drCanvas); drTex.colorSpace = THREE.SRGBColorSpace;
+const DR_H = 1.12, DR_W = DR_H * ART.w / ART.h;
+const drGeo = new THREE.PlaneGeometry(DR_W, DR_H); drGeo.translate(0, DR_H / 2, 0);
+const drMat = new THREE.MeshStandardMaterial({ map: drTex, emissiveMap: drTex, emissive: '#FFFFFF', emissiveIntensity: 0.6, transparent: true, alphaTest: 0.5, roughness: 0.8, side: THREE.DoubleSide });
+const dr = new THREE.Mesh(drGeo, drMat);
+dr.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: drTex, alphaTest: 0.5 });
+dr.castShadow = true;
+const drRig = new THREE.Group(); drRig.add(dr); scene.add(drRig);
+const blob = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, opacity: 0.5,
+  map: canvasTex(128, 128, (g, w) => { const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(10,14,30,0.85)'); gr.addColorStop(1, 'rgba(10,14,30,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); }) }));
+blob.rotation.x = -Math.PI / 2;
+scene.add(blob);
+
+function faceAt(t){ let f = 'rest'; for (const [at, name] of T.faces) if (t >= at) f = name; return f; }
+const browTarget = t => BROWS[BROW_OF[faceAt(t)] || 'rest'];
+function browsAt(t){ const out = [0, 0, 0, 0]; for (let k = 0; k <= 8; k++) { const b = browTarget(t - k * 0.02); for (let j = 0; j < 4; j++) out[j] += b[j] / 9; } return out; }
+function paintSmiley(t){
+  const g = drG, f = Math.max(0, FRAMES.indexOf(faceAt(t)));
+  g.clearRect(0, 0, ART.w, ART.h);
+  g.drawImage(base, 0, 0, ART.w, ART.h);
+  const [fx, fy, fw, fh] = ART.face;
+  g.drawImage(faceStrip, f * fw, 0, fw, fh, fx, fy, fw, fh);
+  const b = browsAt(t);
+  for (const [img, box, dy, deg] of [[browL, ART.browL, b[0], b[1]], [browR, ART.browR, b[2], b[3]]]) {
+    const [x, y, w, h] = box;
+    g.save(); g.translate(x + w / 2, y + h / 2 + dy * ART.browUnit); g.rotate(deg * Math.PI / 180);
+    g.drawImage(img, -w / 2, -h / 2, w, h); g.restore();
+  }
+  drTex.needsUpdate = true;
+}
+
+/* ---------- Where we are ---------- */
+const shotAt = t => T.shots.find(s => t >= s.from && t < s.to) || T.shots[T.shots.length - 1];
+function spotOf(shot, spot){
+  const pl = places[shot];
+  if (shot === 'entrance') return spot === 'start' ? [ET.start, EG, -ET.z] : [tileX(spot), EG + TILE.h, -ET.z];
+  return pl.ground(pl.P.spot[0], pl.P.spot[1]);
+}
+function smileyAt(t){
+  const shot = shotAt(t);
+  const mine = T.moves.filter(m => m.shot === shot.key || (m.kind === 'hop' && m.off >= shot.from && m.land <= shot.to));
+  let cur = null, pos = null, air = 0, squash = 0, lean = 0, groundY = null, hidden = false, fall = null;
+  const settle = (dt, amt) => { if (dt >= 0 && dt < 0.5) squash = Math.max(squash, amt * Math.exp(-6 * dt) * Math.cos(12 * dt)); };
+  for (const m of mine) {
+    if (m.kind === 'fall') { if (t >= m.from) fall = clamp01((t - m.from) / (m.to - m.from)); else hidden = true; continue; }
+    if (m.kind === 'drop') {
+      const spot = spotOf(shot.key, m.spot);
+      if (t < m.from) { hidden = true; continue; }
+      if (t < m.land) { const k = (t - m.from) / (m.land - m.from); pos = [spot[0], spot[1] + 5 * (1 - k * k), spot[2]]; groundY = spot[1]; air = k; }
+      settle(t - m.land, 0.28);
+      cur = spot; continue;
+    }
+    if (m.kind === 'hop') {
+      const from = cur, to = spotOf('entrance', m.to);
+      if (t >= m.off && t < m.land) {
+        const k = (t - m.off) / (m.land - m.off);
+        pos = lerp3(from, to, smooth(k)); groundY = pos[1]; pos[1] += 4 * 0.62 * k * (1 - k);
+        air = k; lean = (to[0] > from[0] ? -0.12 : 0.12) * Math.sin(Math.PI * k);
+      }
+      const pre = m.off - t; if (pre > 0 && pre < 0.14) squash = Math.max(squash, 0.16 * Math.sin(Math.PI * (1 - pre / 0.14)));
+      settle(t - m.land, 0.22);
+      if (t >= m.land) cur = to;
+      continue;
+    }
+    if (m.kind === 'exit') {
+      const pre = m.off - t; if (pre > 0 && pre < 0.16) squash = Math.max(squash, 0.2 * Math.sin(Math.PI * (1 - pre / 0.16)));
+      if (t >= m.off) {
+        const k = (t - m.off) / (m.to - m.off);
+        pos = [cur[0] + 0.4 * k, cur[1] + 7 * Math.pow(k, 1.25), cur[2] + 1.2 * k]; groundY = cur[1]; air = Math.min(0.5, k);
+      }
+    }
+  }
+  if (!pos && cur) pos = [...cur];
+  for (let i = 0; i < tiles.length; i++) if (pos && shot.key === 'entrance' && Math.abs(pos[0] - tileX(i)) < 0.05 && Math.abs(pos[1] - (EG + TILE.h)) < 0.001) pos[1] -= pressDip(i, t);
+  const stretch = air > 0 && air < 1 ? 0.12 * Math.sin(Math.PI * air) : 0;
+  const breathe = 0.012 * Math.sin(t * 2.4);
+  return { shot, pos, fall, hidden: hidden && fall === null && !pos, groundY: groundY ?? (pos ? pos[1] : 0),
+    sy: 1 - squash + stretch + breathe, sx: 1 + squash * 0.8 - stretch * 0.6, lean };
+}
+
+/* ---------- Camera ---------- */
+function keyCam(list, t){
+  const keys = list.filter(c => typeof c.t === 'number');
+  let a = keys[0], b = keys[keys.length - 1];
+  for (let i = 0; i < keys.length - 1; i++) if (t >= keys[i].t && t <= keys[i + 1].t) { a = keys[i]; b = keys[i + 1]; break; }
+  const k = smoother((t - a.t) / Math.max(1e-6, b.t - a.t));
+  return { pos: lerp3(a.pos, b.pos, k), yaw: lerp(a.yaw, b.yaw, k), pitch: lerp(a.pitch, b.pitch, k), focus: lerp(a.focus, b.focus, k) };
+}
+function cameraAt(t){
+  const shot = shotAt(t), list = T.camera[shot.key];
+  const c = keyCam(list, t);
+  const track = list.find(k => k.t === 'track');
+  if (track) {
+    const w = smooth((t - track.from) / 0.5) * smooth((track.to - t) / 0.5);
+    if (w > 0) {
+      const s = smileyAt(Math.max(track.from, t - track.lag));
+      if (s.pos) {
+        c.pos = [lerp(c.pos[0], s.pos[0] + track.x, w), c.pos[1], c.pos[2]];
+        c.focus = lerp(c.focus, ET.z + c.pos[2] * -1 + 0.0, w);
+      }
+    }
+  }
+  // A hand-held drift, so the frame breathes.
+  c.pos[0] += 0.02 * Math.sin(t * 0.9) * (shot.key === 'aerial' ? 20 : 1);
+  c.pos[1] += 0.012 * Math.sin(t * 1.3 + 1) * (shot.key === 'aerial' ? 20 : 1);
+  return c;
+}
+function applyCamera(t){
+  const shot = shotAt(t), pl = places[shot.key], c = cameraAt(t);
+  camera.position.set(...c.pos);
+  camera.rotation.set(THREE.MathUtils.degToRad(c.pitch), THREE.MathUtils.degToRad(c.yaw), 0, 'YXZ');
+  camera.updateProjectionMatrix();
+  const e = camera.projectionMatrix.elements;
+  e[9] = e[5] * pl.yc / D; // lens shift (see buildPlace)
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+  return c;
+}
+
+/* ---------- Birds, dust, trails, flare ---------- */
+function makeBirds(pl){
+  const B = pl.P.birds; if (!B) return null;
+  const n = B.n, geo = new THREE.BufferGeometry();
+  const arr = new Float32Array(n * 2 * 3 * 3); geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: '#1B1F2E', side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+  mesh.frustumCulled = false; pl.grp.add(mesh);
+  return { B, n, arr, geo,
+    update(t){
+      const k = (t - B.span[0]) / (B.span[1] - B.span[0]);
+      let o = 0;
+      for (let i = 0; i < n; i++) {
+        const ux = lerp(B.from, B.to, k) + (hash(i + 1) - 0.5) * 0.35 + (i % 2 ? 0.05 : -0.05) * i * 0.3;
+        const vy = lerp(B.v[0], B.v[1], hash(i + 7)) + 0.01 * Math.sin(t * 1.3 + i);
+        const z = B.depth * (0.85 + 0.3 * hash(i + 3));
+        const p = pl.toWorld(pl.P.uc + ux * 0.56 * HP / pl.WP, vy, z);
+        const s = z * 0.012, flap = Math.sin(t * 13 + i * 2.1) * 0.9, dir = B.to > B.from ? 1 : -1;
+        const tip = [s * 1.0, s * 0.55 * flap], body = [0, 0];
+        for (const side of [-1, 1]) {
+          const pts = [[p[0], p[1], p[2]], [p[0] + side * tip[0], p[1] + tip[1], p[2]], [p[0] + dir * s * 0.25, p[1] - s * 0.12, p[2]]];
+          for (const q2 of pts) { arr[o++] = q2[0]; arr[o++] = q2[1]; arr[o++] = q2[2]; }
+        }
+      }
+      geo.attributes.position.needsUpdate = true;
+    } };
+}
+const dotTex = canvasTex(64, 64, (g, w) => { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.4, 'rgba(255,255,255,0.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+function makeDust(pl){
+  const Dd = pl.P.dust; if (!Dd) return null;
+  const n = Dd.n, geo = new THREE.BufferGeometry(), arr = new Float32Array(n * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: dotTex, color: Dd.tint, size: 0.05, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }));
+  pts.frustumCulled = false; pl.grp.add(pts);
+  return { update(t){
+    for (let i = 0; i < n; i++) {
+      const z = 2.5 + 9 * hash(i + 11), sp = 0.05 + 0.08 * hash(i + 5);
+      arr[i * 3] = (hash(i + 2) - 0.5) * z * 0.9 + 0.25 * Math.sin(t * 0.4 + i);
+      arr[i * 3 + 1] = -pl.P.h + ((hash(i + 9) * 3.2 + t * sp) % 3.2);
+      arr[i * 3 + 2] = -z;
+    }
+    geo.attributes.position.needsUpdate = true;
+  } };
+}
+function makeTrails(pl){
+  const tr = pl.P.trails; if (!tr) return null;
+  const pts = tr.map(([x, y]) => { const u = x / 100, v = 1 - y / 100, z = pl.depthAt(u, v); const p = pl.toWorld(u, v, z); return new THREE.Vector3(p[0], -pl.P.h + 0.45, p[2]); });
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const ribbons = [];
+  for (const [off, col, dir] of [[0.0, '#FFF3D6', 1], [0.9, '#FF4A3A', -1]]) {
+    const n = 160, geo = new THREE.BufferGeometry(), pos = [], uvs = [], idx = [];
+    for (let i = 0; i <= n; i++) {
+      const k = i / n, p = curve.getPointAt(k), tg = curve.getTangentAt(k), nrm = new THREE.Vector3(-tg.z, 0, tg.x).normalize();
+      const c = p.clone().addScaledVector(nrm, off);
+      pos.push(c.x, c.y + 0.07, c.z, c.x, c.y - 0.07, c.z); uvs.push(k, 1, k, 0);
+      if (i < n) idx.push(i * 2, i * 2 + 1, i * 2 + 2, i * 2 + 1, i * 2 + 3, i * 2 + 2);
+    }
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geo.setIndex(idx);
+    const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+      uniforms: { uTime: { value: 0 }, uCol: { value: new THREE.Color(col) }, uDir: { value: dir } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: `uniform float uTime, uDir; uniform vec3 uCol; varying vec2 vUv;
+        void main(){ float x = fract(vUv.x * 1.6 - uDir * uTime * 0.42); float streak = smoothstep(0.0, 0.55, x) * smoothstep(1.0, 0.7, x);
+          float across = exp(-pow((vUv.y - 0.5) / 0.22, 2.0)); gl_FragColor = vec4(uCol * streak * across * 1.6, 1.0); }` });
+    const m = new THREE.Mesh(geo, mat); m.frustumCulled = false; pl.grp.add(m); ribbons.push(mat);
+  }
+  return { update(t){ for (const r of ribbons) r.uniforms.uTime.value = t; } };
+}
+function makeFlare(pl){
+  const F = pl.P.flare; if (!F) return null;
+  const u = F.at[0] / 100, v = 1 - F.at[1] / 100, p = pl.toWorld(u, v, F.depth);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex, color: F.tint, transparent: true, opacity: 0.5, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending }));
+  glow.position.set(...p); glow.scale.set(F.size, F.size, 1); pl.grp.add(glow);
+  const streak = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex, color: F.tint, transparent: true, opacity: 0.25, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending }));
+  streak.position.set(...p); streak.scale.set(F.size * 5, F.size * 0.12, 1); pl.grp.add(streak);
+  return { update(t){ const k = 0.85 + 0.15 * Math.sin(t * 1.7); glow.material.opacity = 0.42 * k; streak.material.opacity = 0.22 * k; } };
+}
+const extras = Object.values(places).map(pl => [makeBirds(pl), makeDust(pl), makeTrails(pl), makeFlare(pl)].filter(Boolean));
+
+/* ---------- Words ---------- */
+function drawText(t){
+  const g = textG; g.clearRect(0, 0, W, H);
+  let on = false;
+  const L = T.lowerThird, s = W / 1080;
+  const li = smooth((t - L.from) / 0.6) * smooth((L.to - t) / 0.5);
+  if (li > 0) {
+    on = true;
+    g.save(); g.globalAlpha = li;
+    const y = H * 0.80 + (1 - li) * 20 * s;
+    const gr = g.createLinearGradient(0, y - 170 * s, 0, y + 90 * s); gr.addColorStop(0, 'rgba(8,12,28,0)'); gr.addColorStop(0.5, 'rgba(8,12,28,0.45)'); gr.addColorStop(1, 'rgba(8,12,28,0)');
+    g.fillStyle = gr; g.fillRect(0, y - 170 * s, W, 260 * s);
+    g.fillStyle = '#01B8E6'; g.fillRect(64 * s, y - 112 * s, 70 * s * li, 5 * s);
+    g.fillStyle = '#FFFFFF'; g.font = `650 ${50 * s}px Inter`; g.textBaseline = 'alphabetic';
+    g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = 18 * s;
+    g.fillText(L.title, 64 * s, y - 44 * s);
+    g.fillStyle = '#DCE7FF'; g.font = `550 ${34 * s}px Inter`;
+    g.fillText(L.sub.toUpperCase().split('').join(' '), 66 * s, y + 6 * s);
+    g.restore();
+  }
+  const ti = smooth((t - T.titleIn) / 0.8);
+  if (ti > 0) {
+    on = true;
+    // Top-left, in the sky between the buildings: the tower's lit letters run up to the right.
+    g.save(); g.globalAlpha = ti;
+    const x = 64 * s, y = H * 0.115 - (1 - ti) * 16 * s;
+    const gr = g.createRadialGradient(x + 300 * s, y, 0, x + 300 * s, y, 560 * s); gr.addColorStop(0, 'rgba(8,12,28,0.45)'); gr.addColorStop(1, 'rgba(8,12,28,0)');
+    g.fillStyle = gr; g.fillRect(0, y - 280 * s, W, 560 * s);
+    g.shadowColor = 'rgba(1,184,230,0.6)'; g.shadowBlur = 34 * s;
+    g.fillStyle = '#FFFFFF'; g.font = `650 ${96 * s}px Inter`; g.fillText(T.title, x, y);
+    g.shadowColor = 'rgba(0,0,0,0.5)'; g.shadowBlur = 14 * s;
+    g.fillStyle = '#E4ECFF'; g.font = `550 ${36 * s}px Inter`; g.fillText(T.tagline, x + 3 * s, y + 60 * s);
+    g.fillStyle = '#01B8E6'; g.fillRect(x + 3 * s, y + 92 * s, 120 * s * ti, 5 * s);
+    g.restore();
+  }
+  if (on) textTex.needsUpdate = true;
+  return on;
+}
+
+/* ---------- One frame ---------- */
+function draw(n){
+  const t = n / T.fps;
+  const shot = shotAt(t), pl = places[shot.key], P = pl.P;
+  for (const k in places) places[k].grp.visible = k === shot.key;
+  pl.uniforms.uTime.value = t;
+  for (const ex of extras.flat()) ex.update(t);
+
+  // Light, matched to the photo.
+  key.color.set(P.light.color); key.intensity = P.light.power;
+  key.position.set(...P.light.pos);
+  key.target.position.set(0, -P.h, -6);
+  hemi.intensity = P.h < 10 ? 0.6 : 0.3;
+
+  // Tiles (entrance only).
+  tiles.forEach((tl, i) => {
+    const k = t - landOf[i], lit = k >= 0 ? smooth(k / 0.25) : 0;
+    tl.box.position.y = TILE.h / 2 - pressDip(i, t);
+    tl.mat.emissiveIntensity = 0.12 * lit + (k >= 0 && k < 0.4 ? 0.3 * (1 - k / 0.4) : 0);
+    tl.halo.material.opacity = 0.6 * lit + (k >= 0 && k < 0.5 ? 0.6 * (1 - k / 0.5) : 0);
+    tl.lamp.intensity = 1.6 * lit;
+    const p = k >= 0 ? springOut(k / 0.7) : 0;
+    tl.pin.material.opacity = clamp01(k / 0.15);
+    tl.pin.scale.set(0.6 * p + 0.001, 0.6 * p + 0.001, 1);
+    tl.pin.position.set(0, TILE.h + 0.45 + 0.4 * p + 0.04 * Math.sin(t * 2.2 + i), -0.18);
+  });
+
+  const cam = applyCamera(t);
+
+  // Dr. Smiley.
+  const s = smileyAt(t), S = P.smiley;
+  drMat.emissive.set(S.tint); drMat.emissiveIntensity = S.glow;
+  if (s.fall !== null && s.fall !== undefined) {
+    // Falling past the camera, into the next place.
+    const k = s.fall;
+    drRig.position.set(cam.pos[0] + 0.7, cam.pos[1] + lerp(3.2, -4.6, k * k), cam.pos[2] - 5.5);
+    drRig.rotation.set(0, 0, 0); dr.rotation.z = 0.5 * k - 0.15; dr.scale.set(1.25 * S.scale, 1.25 * S.scale, 1);
+    dr.visible = true; blob.visible = false;
+  } else if (s.pos && !s.hidden) {
+    drRig.position.set(...s.pos);
+    dr.scale.set(s.sx * S.scale, s.sy * S.scale, 1);
+    drRig.rotation.set(0, Math.atan2(cam.pos[0] - s.pos[0], cam.pos[2] - s.pos[2]), 0);
+    dr.rotation.z = s.lean;
+    dr.visible = true;
+    const hgt = Math.max(0, s.pos[1] - s.groundY);
+    blob.visible = true;
+    blob.position.set(s.pos[0], s.groundY + 0.008, s.pos[2] + 0.05);
+    blob.scale.setScalar(0.95 * S.scale / (1 + hgt * 0.8));
+    blob.material.opacity = 0.5 / (1 + hgt * 1.5);
+  } else { dr.visible = false; blob.visible = false; }
+  paintSmiley(t);
+
+  // Focus on him where he is; deep focus over the campus.
+  bokeh.uniforms.focus.value = s.pos && shot.key !== 'aerial' ? Math.hypot(s.pos[0] - cam.pos[0], s.pos[1] + 0.6 - cam.pos[1], s.pos[2] - cam.pos[2]) : cam.focus;
+  bokeh.uniforms.aperture.value = shot.key === 'aerial' ? 0.00005 : 0.0009;
+
+  // The finish.
+  const cutAgo = Math.min(...T.shots.slice(1).map(sh => t >= sh.from ? t - sh.from : 99));
+  finish.uniforms.uFlash.value = cutAgo < 1 ? 0.32 * Math.exp(-cutAgo * 10) : 0;
+  const up = smooth((t - T.lightsUp[0]) / (T.lightsUp[1] - T.lightsUp[0]));
+  const out = smooth((t - T.fadeOut[0]) / (T.fadeOut[1] - T.fadeOut[0]));
+  finish.uniforms.uFade.value = up * (1 - out);
+  finish.uniforms.uFrame.value = n;
+  finish.uniforms.uTextOn.value = drawText(t) ? 1 : 0;
+  composer.render();
+}
+window.draw = draw;
+window.frames = T.fps * T.seconds;
+window.ready = true;
+draw(0);
+</script>
+</body>
+</html>

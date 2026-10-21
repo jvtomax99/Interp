@@ -1,11 +1,19 @@
 """The reel's sound, made from numbers: a lo-fi beat at the timeline's tempo
-and a sound for every moment in timeline.json (the drop, each hop, each
-tile, the title, the wink). numpy only. Writes sound.wav beside this file."""
-import json, os, wave
+and a sound for every moment in the timeline (the drop, each hop, each
+tile, the title, the wink; in version 2 also the fall, each exit and the
+birds over the campus). numpy only.
+  python3 -I sound.py [timeline.json] [sound.wav]"""
+import json, os, sys, wave
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-T = json.load(open(os.path.join(HERE, 'timeline.json')))
+T = json.load(open(sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'timeline.json')))
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, 'sound.wav')
+# Version 2 lists moves (drop, hop, exit, fall) across four places; version 1, a drop and hops.
+V2 = 'moves' in T
+if V2:
+    T['hops'] = [m for m in T['moves'] if m['kind'] == 'hop']
+    T['dropIn'] = next(m for m in T['moves'] if m['kind'] == 'drop')
 SR = 44100
 N = int(SR * T['seconds'])
 BEAT = 60 / T['bpm']
@@ -47,9 +55,9 @@ def bass(n, d):
 
 BAR = 4 * BEAT
 chords = [([53, 57, 60, 64], 41), ([52, 55, 59, 62], 40), ([50, 53, 57, 60], 38), ([48, 52, 55, 59], 36), ([53, 57, 60, 64], 41), ([48, 52, 55, 59, 62], 36)]
-for b, (ch, root) in enumerate(chords):
+for b in range(int(np.ceil(T['seconds'] / BAR))):
+    ch, root = chords[b % len(chords)]
     at = b * BAR
-    if at >= T['seconds']: break
     put(music, at, keys(ch, BAR + 0.5), 0.5)
     for k, off in enumerate([0, 1.5, 2, 3.5]):
         put(music, at + off * BEAT, bass(root, BEAT * 0.9), 0.55 if k % 2 == 0 else 0.35)
@@ -88,15 +96,33 @@ def whoosh(d):
     t = t_(d); env = np.sin(np.pi * t / d) ** 2
     return filt(rng.standard_normal(len(t)), lo=2500, hi=400) * env
 
-d = T['dropIn']
-put(sfx, d['from'], whoosh(d['land'] - d['from']), 0.35)
-put(sfx, d['land'], knock(), 1.0)
-put(sfx, d['land'], kick(), 0.6)
+def chirp(at, f0):
+    t = t_(0.09); f = f0 * (1 + 0.5 * np.sin(np.pi * t / 0.09)) * (1 + 0.04 * np.sin(2 * np.pi * 60 * t))
+    put(sfx, at, np.sin(2 * np.pi * np.cumsum(f) / SR) * np.sin(np.pi * t / 0.09) ** 2, 0.08)
+
+drops = [m for m in T['moves'] if m['kind'] == 'drop'] if V2 else [T['dropIn']]
+for d in drops:
+    put(sfx, d['from'], whoosh(d['land'] - d['from']), 0.35)
+    put(sfx, d['land'], knock(), 1.0)
+    put(sfx, d['land'], kick(), 0.6)
+if V2:
+    for m in T['moves']:
+        if m['kind'] == 'exit': put(sfx, m['off'] - 0.03, boing(True, True), 0.5); put(sfx, m['off'] + 0.1, whoosh(0.45), 0.3)
+        if m['kind'] == 'fall': put(sfx, m['from'], whoosh(m['to'] - m['from']), 0.45)
+    # Birds over the campus while the aerial plays, and the cut flashes.
+    for k in range(9):
+        at = 0.4 + k * 0.37 + rng.uniform(0, 0.15)
+        chirp(at, rng.uniform(2600, 3800)); chirp(at + 0.11, rng.uniform(2600, 3800))
+    for sh in T['shots'][1:]:
+        put(sfx, sh['from'] - 0.05, filt(rng.standard_normal(int(SR * 0.3)), lo=6000, hi=1500) * np.exp(-t_(0.3) * 14), 0.25)
 for h in T['hops']:
     put(sfx, h['off'] - 0.03, boing(True, h.get('big')), 0.45)
     put(sfx, h['land'], knock(), 0.9)
     if isinstance(h['to'], int):
         put(sfx, h['land'], bell(84 + T['tiles'][h['to']]['note']), 0.5)
+if V2:  # Before the beat: a soft pad over the aerial, so the place breathes before he arrives.
+    pad = keys([53, 57, 60, 64, 67], drops[0]['land'] + 0.5)
+    put(music, 0, pad * np.clip(t_(len(pad) / SR) / 1.5, 0, 1), 0.6)
 for k, n in enumerate([72, 76, 79, 84, 88]):  # the title: a rising arpeggio of the tiles' notes
     put(sfx, T['titleIn'] + k * 0.09, bell(n, 2.0), 0.32)
 wink = next(at for at, f in T['faces'] if f == 'wink')
@@ -108,6 +134,6 @@ fo = T['fadeOut']; mix *= np.clip((fo[1] - tt) / (fo[1] - fo[0]), 0, 1)
 mix = np.tanh(mix * 1.2) / np.tanh(1.2)  # soft limit
 mix = mix / max(1e-9, np.abs(mix).max()) * 0.89
 pcm = (np.stack([mix, mix], 1) * 32767).astype('<i2')
-with wave.open(os.path.join(HERE, 'sound.wav'), 'wb') as w:
+with wave.open(OUT, 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())
-print('sound.wav', T['seconds'], 's')
+print(os.path.basename(OUT), T['seconds'], 's')

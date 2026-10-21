@@ -1,0 +1,68 @@
+{
+  "_": "Version 2, at HUMC: every moment in seconds. scene-v2.html moves Dr. Smiley and the camera from it; sound.py puts each sound on it. Places (which photo, its eye level, its signs) live in PLACES in scene-v2.html; times live here.",
+  "fps": 30,
+  "seconds": 20,
+  "bpm": 120,
+  "tiles": [
+    {"key": "translate", "label": "Translate", "color": "#2E8BD0", "pin": "translate", "note": 0},
+    {"key": "doctor-prep", "label": "Doctor Prep", "color": "#7C6A9C", "pin": "doctor-prep", "note": 4},
+    {"key": "chat", "label": "Team Chat", "color": "#35A97A", "pin": "chat", "note": 7},
+    {"key": "add-term", "label": "Add Term", "color": "#B08D2A", "pin": "medical-terminology", "note": 12}
+  ],
+  "shots": [
+    {"key": "aerial", "from": 0.0, "to": 4.0},
+    {"key": "skybridge", "from": 4.0, "to": 8.0},
+    {"key": "entrance", "from": 8.0, "to": 14.5},
+    {"key": "pavilion", "from": 14.5, "to": 20.0}
+  ],
+  "moves": [
+    {"kind": "fall", "shot": "aerial", "from": 3.25, "to": 4.0},
+    {"kind": "drop", "shot": "skybridge", "from": 4.0, "land": 4.5, "spot": "mark"},
+    {"kind": "exit", "shot": "skybridge", "off": 7.45, "to": 8.0},
+    {"kind": "drop", "shot": "entrance", "from": 8.0, "land": 8.5, "spot": "start"},
+    {"kind": "hop", "off": 9.0, "land": 9.5, "to": 0},
+    {"kind": "hop", "off": 10.0, "land": 10.5, "to": 1},
+    {"kind": "hop", "off": 11.0, "land": 11.5, "to": 2},
+    {"kind": "hop", "off": 12.0, "land": 12.5, "to": 3},
+    {"kind": "exit", "shot": "entrance", "off": 13.95, "to": 14.5},
+    {"kind": "drop", "shot": "pavilion", "from": 14.5, "land": 15.0, "spot": "mark"}
+  ],
+  "camera": {
+    "aerial": [
+      {"t": 0.0, "pos": [0, 0, 0], "yaw": 0, "pitch": 0, "focus": 200},
+      {"t": 4.0, "pos": [0, -9, -26], "yaw": 1.5, "pitch": -2.5, "focus": 150}
+    ],
+    "skybridge": [
+      {"t": 4.0, "pos": [-0.2, 0.05, 0.1], "yaw": 0.4, "pitch": 0, "focus": 7},
+      {"t": 8.0, "pos": [0.1, -0.05, -0.9], "yaw": 1.0, "pitch": 1.0, "focus": 6}
+    ],
+    "entrance": [
+      {"t": 8.0, "pos": [-4.4, 0, 0.1], "yaw": 0, "pitch": 0, "focus": 5.6},
+      {"t": "track", "from": 8.5, "to": 13.4, "lag": 0.25, "x": 0.5},
+      {"t": 13.4, "pos": [0.55, 0.1, -0.2], "yaw": -0.5, "pitch": 1.2, "focus": 5.2},
+      {"t": 14.5, "pos": [0.75, 0.2, -0.5], "yaw": -0.8, "pitch": 2.0, "focus": 5.0}
+    ],
+    "pavilion": [
+      {"t": 14.5, "pos": [0.5, 0.15, 0.15], "yaw": 1.2, "pitch": 0, "focus": 6.4},
+      {"t": 20.0, "pos": [-0.2, 0.05, -0.4], "yaw": -0.5, "pitch": 0.6, "focus": 5.6}
+    ]
+  },
+  "faces": [
+    [0.0, "rest"], [3.25, "surprised"],
+    [4.5, "smile1"], [4.57, "smile2"], [4.64, "smile"], [5.1, "lookU"], [5.4, "lookUL"], [6.3, "smile1"],
+    [6.37, "smile2"], [6.44, "smile"], [6.9, "blink1"], [6.95, "blink2"], [7.0, "shut"], [7.08, "blink2"], [7.13, "smile"],
+    [7.4, "surprised"], [8.5, "smile1"], [8.57, "smile2"], [8.64, "smile"], [8.95, "lookR"], [9.25, "smile"],
+    [9.6, "blink1"], [9.65, "blink2"], [9.7, "shut"], [9.78, "blink2"], [9.83, "smile"], [10.55, "laughB"], [10.75, "smile"],
+    [11.55, "love"], [11.95, "smile"], [12.55, "laugh1"], [12.6, "laugh2"], [12.65, "laugh"], [12.8, "laughB"],
+    [12.95, "laugh"], [13.1, "laughB"], [13.25, "smile"], [13.4, "lookR"], [13.8, "surprised"],
+    [15.0, "smile1"], [15.07, "smile2"], [15.14, "smile"], [15.6, "lookU"], [16.1, "lookUR"], [16.6, "smile"],
+    [17.2, "blink1"], [17.25, "blink2"], [17.3, "shut"], [17.38, "blink2"], [17.43, "smile"],
+    [18.2, "wink1"], [18.25, "wink2"], [18.3, "wink"], [18.85, "wink2"], [18.9, "wink1"], [18.95, "smile"]
+  ],
+  "lowerThird": {"from": 0.5, "to": 3.1, "title": "Hackensack University Medical Center", "sub": "Hackensack, New Jersey"},
+  "titleIn": 16.0,
+  "title": "Interpreter Hub",
+  "tagline": "Hackensack University Medical Center",
+  "lightsUp": [0.0, 0.8],
+  "fadeOut": [19.4, 20.0]
+}
