@@ -1,0 +1,19 @@
+{
+  "name": "hub-promo",
+  "private": true,
+  "description": "Remotion project for the Hub's promo videos (media/). Not part of the app; kept out of the deploy by .vercelignore.",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render HubTitle out/hub-title.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.537",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.537"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}
