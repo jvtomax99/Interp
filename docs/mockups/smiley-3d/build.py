@@ -485,6 +485,211 @@ def build_hair(mats, coll):
     return join(parts, 'Hair')
 
 
+# ---------- the hair, collectible-figure style (art direction 2, Jose's pick 2026-10-21) ----------
+# A few big molded locks with sharp tips, placed by hand after the drawing:
+# (waypoints (az, el) in degrees over the scalp, width, thickness, lift, tip flick).
+FIG_LOCKS = []
+for i in range(10):                                  # the back: from the crown down to the nape
+    a = 112 + 15 * i
+    FIG_LOCKS.append(([(200, 66), ((200 + a) / 2, 44), (a, 6), (a + 4, -36)], .072, .018, .012, .024))
+FIG_LOCKS += [
+    # his right side (your left): combed down and back over the temple
+    ([(-150, 62), (-124, 32), (-114, 2), (-118, -24)], .070, .018, .014, .022),
+    ([(-118, 66), (-100, 38), (-94, 10), (-97, -12)], .070, .018, .014, .022),
+    ([(-88, 66), (-80, 40), (-78, 16), (-83, 0)], .064, .017, .014, .02),
+    ([(-68, 58), (-64, 40), (-66, 24), (-70, 12)], .056, .016, .014, .018),
+    # his left side (your right): the puff over his ear, standing off more
+    ([(152, 62), (124, 32), (117, 2), (121, -26)], .074, .019, .022, .026),
+    ([(120, 66), (106, 38), (102, 8), (106, -16)], .078, .019, .030, .032),
+    ([(92, 64), (90, 38), (93, 12), (99, -8)], .074, .019, .034, .036),
+    # over the top, from the crown towards his left
+    ([(-150, 74), (-90, 82), (20, 84), (80, 66), (108, 40)], .082, .019, .030, .03),
+    ([(-100, 66), (-55, 76), (10, 78), (64, 66), (96, 40)], .080, .019, .034, .03),
+    ([(170, 74), (120, 70), (112, 46)], .076, .019, .024, .028),
+    # the pompadour: locks rising from his forehead, up and over to his left,
+    # their tips standing up off the top (the swoop in the drawing)
+    ([(-58, 34), (-46, 50), (-24, 64), (8, 72)], .066, .019, .046, .040),
+    ([(-36, 38), (-20, 54), (6, 66), (36, 68)], .074, .020, .060, .046),
+    ([(-12, 40), (6, 55), (32, 62), (58, 58)], .076, .021, .068, .050),
+    ([(12, 40), (30, 51), (54, 54), (78, 46)], .072, .020, .060, .046),
+    ([(36, 34), (54, 42), (74, 41), (92, 30)], .066, .019, .046, .040),
+]
+
+
+# How far his hair stands off his head in the drawing, seen from the front, by
+# angle round the head centre (0 = his left, your right; 90 = the top), in mm.
+# Measured on base.webp's hair against head_point()'s outline; the ears' rows
+# (170-200 and below -10) replaced by their neighbours.
+HAIR_T = [(-30, 0), (-20, 8), (-10, 16), (0, 30), (10, 50), (20, 62), (30, 64), (40, 60), (50, 62), (60, 65),
+          (70, 62), (80, 62), (90, 64), (100, 60), (110, 58), (120, 50), (130, 26), (140, 14), (150, 10),
+          (160, 9), (170, 8), (180, 8), (190, 6), (210, 0)]
+
+
+def hair_t(d):
+    """Envelope thickness (metres) over unit direction d: the drawing's outline,
+    less at the very front and back (the drawing can't show depth), fading to
+    nothing at the hairline so the hair rises off the forehead instead of
+    hanging over it."""
+    p = head_point(d)
+    phi = math.degrees(math.atan2(p.z, p.x))
+    if phi < -90:
+        phi += 360
+    t = 0.0
+    for (a0, t0), (a1, t1) in zip(HAIR_T, HAIR_T[1:]):
+        if a0 <= phi <= a1:
+            u = (phi - a0) / (a1 - a0)
+            t = t0 + (t1 - t0) * u
+            break
+    k = 1 - .45 * max(0, -d.y) ** 1.5 - .35 * max(0, d.y) ** 1.5
+    az, el = az_el(d)
+    ramp = max(0, min(1, (el - hairline(az)) / 22))
+    ramp = ramp * ramp * (3 - 2 * ramp)
+    return t / 1000 * k * (.25 + .75 * ramp)
+
+
+def fig_lock_traced(name, dirs, width, frac, flick, segs=18):
+    """A moulded lock along a streamline, lying at `frac` of the envelope."""
+    m = len(dirs)
+    if m < 4:
+        return None
+    spine = []
+    for i, d in enumerate(dirs):
+        t = i / (m - 1)
+        f = max(0, min(1, (t - .7) / .3))
+        root = min(1, t / .18) ** .7          # roots tuck into the cap at the crown
+        rise = .004 + root * frac * 1.1 * hair_t(d) * (.6 + .4 * math.sin(math.pi * min(1, t * 1.6))) + flick * f * f * (3 - 2 * f)
+        spine.append((head_point(d, grow=rise), head_point(d, grow=rise + .01)))
+    verts, along = [], []
+    for i, (p, pn) in enumerate(spine):
+        t = i / (m - 1)
+        tan = (spine[min(i + 1, m - 1)][0] - spine[max(i - 1, 0)][0]).normalized()
+        nrm = (pn - p) - tan * (pn - p).dot(tan)
+        nrm.normalize()
+        bi = tan.cross(nrm)
+        w = width * (.45 + .55 * min(1, t / .25)) * max(0, 1 - t ** 2.4) ** .9
+        h = max(.004, .32 * w)
+        if i == m - 1:
+            w, h = .0004, .0004
+        for k in range(segs):
+            a = 2 * math.pi * k / segs
+            sa = math.sin(a)
+            verts.append(p + bi * (w * math.cos(a)) + nrm * (h * sa * abs(sa) ** .35))
+            along.append(t)
+    ob = mesh_obj(name, verts, grid_faces(m, segs))
+    ob.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', along)
+    ob.data.uv_layers.new(name='UVMap')
+    return ob
+
+
+def fig_lock(name, waypoints, width, thick, lift, flick, segs=18, n=36):
+    pts = [sph(a, e) for a, e in waypoints]
+    dirs = [p.normalized() for p in catmull(pts, max(2, n // (len(pts) - 1)))]
+    m = len(dirs)
+    spine = []
+    for i, d in enumerate(dirs):
+        t = i / (m - 1)
+        f = max(0, min(1, (t - .65) / .35))
+        rise = .006 + lift * math.sin(math.pi * min(1, t * 1.15)) ** .8 * (1 - .4 * t) + flick * f * f * (3 - 2 * f)
+        spine.append((head_point(d, grow=rise), head_point(d, grow=rise + .01)))
+    verts, along = [], []
+    for i, (p, pn) in enumerate(spine):
+        t = i / (m - 1)
+        tan = (spine[min(i + 1, m - 1)][0] - spine[max(i - 1, 0)][0]).normalized()
+        nrm = (pn - p) - tan * (pn - p).dot(tan)
+        nrm.normalize()
+        bi = tan.cross(nrm)
+        w = width * (.55 + .45 * min(1, t / .2)) * max(0, 1 - t ** 2.2) ** .85
+        h = thick * max(0, 1 - t ** 1.6) ** .6 + .0008
+        if i == m - 1:
+            w, h = .0004, .0004
+        for k in range(segs):
+            a = 2 * math.pi * k / segs
+            sa = math.sin(a)
+            verts.append(p + bi * (w * math.cos(a)) + nrm * (h * sa * abs(sa) ** .35))
+            along.append(t)
+    ob = mesh_obj(name, verts, grid_faces(m, segs))
+    ob.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', along)
+    ob.data.uv_layers.new(name='UVMap')
+    return ob
+
+
+def fig_hair_material():
+    """Glossy moulded PVC: one brown, a touch darker at the roots."""
+    m = principled('HairFig', srgb(88, 34, 15), rough=.34, coat=.35, sss=.04)
+    N, L = m.node_tree.nodes, m.node_tree.links
+    b = N['Principled BSDF']
+    b.inputs['Coat Roughness'].default_value = .18
+    at = N.new('ShaderNodeAttribute'); at.attribute_name = 'along'
+    ramp = N.new('ShaderNodeValToRGB')
+    ramp.color_ramp.elements[0].color = srgb(52, 19, 8)
+    ramp.color_ramp.elements[1].color = srgb(104, 40, 17)
+    ramp.color_ramp.elements[1].position = .6
+    L.new(at.outputs['Fac'], ramp.inputs['Fac'])
+    L.new(ramp.outputs['Color'], b.inputs['Base Color'])
+    return m
+
+
+def build_hair_figure(mats, coll):
+    parts = []
+    segs, rings = 96, 50
+    verts, faces, rows = [], [], []
+    for r in range(rings + 1):
+        row = []
+        for s_ in range(segs):
+            az = 360 * s_ / segs - 180
+            lo = hairline(az) + 2
+            el = lo + (89.5 - lo) * r / rings
+            row.append(len(verts))
+            verts.append(head_point(sph(az, el), grow=.006) + Vector((0, 0, HZ)))
+        rows.append(row)
+    for r in range(rings):
+        for s_ in range(segs):
+            faces.append((rows[r][s_], rows[r][(s_ + 1) % segs], rows[r + 1][(s_ + 1) % segs], rows[r + 1][s_]))
+    top = len(verts)
+    verts.append(head_point((0, 0, 1), grow=.006) + Vector((0, 0, HZ)))
+    faces += [(rows[-1][s_], rows[-1][(s_ + 1) % segs], top) for s_ in range(segs)]
+    cap = mesh_obj('HairCap', verts, faces, coll=coll)
+    cap.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', [0.0] * len(verts))
+    cap.data.uv_layers.new(name='UVMap')
+    cap.data.materials.append(mats['hair'])
+    parts.append(cap)
+    # a little swirl where the locks meet at the crown
+    for k, (r, g) in enumerate(((.026, .010), (.016, .016))):
+        sw = ellipsoid(f'Swirl.{k}', head_point(WHORL, grow=g) + Vector((0, 0, HZ)), (r, r, r * .45), mat=mats['hair'],
+                       rot=WHORL.to_track_quat('Z', 'Y').to_matrix())
+        sw.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', [.3] * len(sw.data.vertices))
+        sw.data.uv_layers.new(name='UVMap')
+        parts.append(sw)
+    # locks traced from the crown (flow()), in three layers up to the envelope
+    up = Vector((0, 0, 1))
+    e1 = (up - WHORL * up.dot(WHORL)).normalized()
+    e2 = WHORL.cross(e1)
+    i = 0
+    for layer, (count, ring, frac, wmin, wmax) in enumerate([(24, 8, .35, .060, .072),
+                                                            (22, 18, .70, .058, .070),
+                                                            (18, 30, .98, .054, .066)]):
+        for j in range(count):
+            ang = 2 * math.pi * (j + .33 * layer) / count
+            r = math.radians(ring + rng.uniform(-3, 3))
+            d = (WHORL * math.cos(r) + (e1 * math.cos(ang) + e2 * math.sin(ang)) * math.sin(r)).normalized()
+            dirs = trace(d, 3.0)
+            # carry on a little past the hairline so the tips end in points
+            for _ in range(4):
+                dirs.append((dirs[-1] + flow(dirs[-1]) * .03).normalized())
+            ob = fig_lock_traced(f'Lock.{i:02d}', dirs, rng.uniform(wmin, wmax), frac, .010 + .008 * layer)
+            i += 1
+            if ob:
+                ob.location.z = HZ
+                ob.data.materials.append(mats['hair'])
+                parts.append(ob)
+    for o in parts:
+        if o.name not in coll.objects:
+            coll.objects.link(o)
+        if o.name in bpy.context.scene.collection.objects:
+            bpy.context.scene.collection.objects.unlink(o)
+    return join(parts, 'Hair')
+
+
 def join(obs, name):
     ctx = bpy.context
     for o in ctx.view_layer.objects:
@@ -1015,7 +1220,7 @@ def studio():
             vs.append((x, y, z))
     m = len(prof)
     fs = [(i, i + 1, m + i + 1, m + i) for i in range(m - 1)]
-    fl = mesh_obj('Floor', vs, fs)
+    fl = mesh_obj('Floor', [(x, y, z - STAND_H) for x, y, z in vs], fs)
     fm = principled('Floor', srgb(196, 206, 222), rough=.7, coat=0)
     fl.data.materials.append(fm)
     cam_d = bpy.data.cameras.new('Cam'); cam_d.lens = 85
@@ -1024,13 +1229,31 @@ def studio():
     return cam
 
 
+STAND_H = .036      # the display stand he stands on; the floor sits under it
+
+
+def build_stand(coll):
+    m = principled('Stand', srgb(37, 46, 109), rough=.22, coat=.6)
+    rim = principled('StandRim', srgb(1, 184, 230), rough=.3, coat=.4)
+    st = ellipsoid('Stand', (0, -.01, -STAND_H / 2), (.25, .25, STAND_H / 2), mat=m, segs=96, rings=24, p=7)
+    ring = ellipsoid('StandRing', (0, -.01, -.002), (.236, .236, .003), mat=rim, segs=96, rings=8, p=8)
+    top = ellipsoid('StandTop', (0, -.01, -.0005), (.226, .226, .002), mat=m, segs=96, rings=8, p=8)
+    for o in (st, ring, top):
+        coll.objects.link(o); bpy.context.scene.collection.objects.unlink(o)
+    return [st, ring, top]
+
+
 def look(cam, target, dist, az, el):
     t = Vector(target)
     cam.location = t + sph(az, el) * dist
     cam.rotation_euler = (t - cam.location).to_track_quat('-Z', 'Y').to_euler()
 
 
-def build(head_only=False):
+STYLE = 'figure'      # 'figure' (art direction 2) or 'v1' (the first look, kept for comparison)
+
+
+def build(head_only=False, style=None):
+    style = style or STYLE
     bpy.ops.wm.read_factory_settings(use_empty=True)
     coll = bpy.data.collections.new('DrSmiley'); bpy.context.scene.collection.children.link(coll)
     mats = {
@@ -1038,9 +1261,9 @@ def build(head_only=False):
         'skin': principled('Skin', SKIN, rough=.42, coat=.18, sss=.12),
         'ear': principled('Ear', SKIN_EAR, rough=.45, coat=.15, sss=.15),
         'earin': principled('EarIn', srgb(236, 140, 128), rough=.5, coat=.1, sss=.15),
-        'hair': hair_material(),
-        'coat': principled('Coat', COAT, rough=.55, coat=.12, sheen=.3),
-        'scrub': principled('Scrubs', SCRUB, rough=.6, coat=.08, sheen=.4),
+        'hair': fig_hair_material() if style == 'figure' else hair_material(),
+        'coat': principled('Coat', COAT, rough=.42, coat=.3) if style == 'figure' else principled('Coat', COAT, rough=.55, coat=.12, sheen=.3),
+        'scrub': principled('Scrubs', SCRUB, rough=.45, coat=.25) if style == 'figure' else principled('Scrubs', SCRUB, rough=.6, coat=.08, sheen=.4),
         'shoe': principled('Shoe', SHOE, rough=.4, coat=.3),
         'sole': principled('Sole', SOLE, rough=.45, coat=.2),
         'button': principled('Button', srgb(214, 220, 232), rough=.25, coat=.6),
@@ -1056,7 +1279,7 @@ def build(head_only=False):
     ears = build_ears(mats, coll)
     for e in ears:
         subsurf(e, 1)
-    hair = build_hair(mats, coll)
+    hair = build_hair_figure(mats, coll) if style == 'figure' else build_hair(mats, coll)
     subsurf(hair, 1)
     arm = None
     if not head_only:
@@ -1066,6 +1289,8 @@ def build(head_only=False):
                 subsurf(o, 1)
             elif o.name.split('.')[0] in ('Coat', 'Lapel', 'Collar'):
                 subsurf(o, 2)
+        if style == 'figure':
+            build_stand(coll)
         arm = build_rig(coll)
         rig_everything(arm, [head, hair] + ears + body)
     root = bpy.data.objects.new('DrSmiley', None); coll.objects.link(root)
