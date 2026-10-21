@@ -312,11 +312,12 @@ def build_head(mats, coll):
 def build_ears(mats, coll):
     obs = []
     for side in (-1, 1):
-        c = head_point(sph(side * 90, -12)) + Vector((side * .006, .012, HZ))
+        big = 1.18 if STYLE_NOW == 'film' else 1.0      # the drawing's ears are big and sit low
+        c = head_point(sph(side * 90, -16 if big > 1 else -12)) + Vector((side * .008, .012, HZ))
         rot = Matrix.Rotation(math.radians(side * 18), 3, 'Z') @ Matrix.Rotation(math.radians(-8 * side), 3, 'Y')
-        outer = ellipsoid(f'Ear.{"L" if side > 0 else "R"}', c, (.026, .042, .058), mat=mats['ear'], rot=rot, p=2.2)
-        inner = ellipsoid(f'EarIn.{"L" if side > 0 else "R"}', c + rot @ Vector((side * .012, -.006, 0)),
-                          (.012, .028, .040), mat=mats['earin'], rot=rot)
+        outer = ellipsoid(f'Ear.{"L" if side > 0 else "R"}', c, (.026 * big, .042 * big, .058 * big), mat=mats['ear'], rot=rot, p=2.2)
+        inner = ellipsoid(f'EarIn.{"L" if side > 0 else "R"}', c + rot @ Vector((side * .012 * big, -.006, 0)),
+                          (.012 * big, .028 * big, .040 * big), mat=mats['earin'], rot=rot)
         for o in (outer, inner):
             coll.objects.link(o); bpy.context.scene.collection.objects.unlink(o)
         obs += [outer, inner]
@@ -547,7 +548,7 @@ def hair_t(d):
     return t / 1000 * k * (.25 + .75 * ramp)
 
 
-def fig_lock_traced(name, dirs, width, frac, flick, segs=18):
+def fig_lock_traced(name, dirs, width, frac, flick, segs=18, tuck=False):
     """A moulded lock along a streamline, lying at `frac` of the envelope."""
     m = len(dirs)
     if m < 4:
@@ -558,26 +559,35 @@ def fig_lock_traced(name, dirs, width, frac, flick, segs=18):
         f = max(0, min(1, (t - .7) / .3))
         root = min(1, t / .18) ** .7          # roots tuck into the cap at the crown
         rise = .004 + root * frac * 1.1 * hair_t(d) * (.6 + .4 * math.sin(math.pi * min(1, t * 1.6))) + flick * f * f * (3 - 2 * f)
+        if tuck:                               # drawn hair: the ends curl in against the head
+            rise = .004 + root * frac * 1.1 * hair_t(d) * (1 - .75 * f * f * (3 - 2 * f))
         spine.append((head_point(d, grow=rise), head_point(d, grow=rise + .01)))
-    verts, along = [], []
+    verts, along, uv_front, uv_lock = [], [], [], []
+    length = sum((spine[i + 1][0] - spine[i][0]).length for i in range(m - 1))
     for i, (p, pn) in enumerate(spine):
         t = i / (m - 1)
         tan = (spine[min(i + 1, m - 1)][0] - spine[max(i - 1, 0)][0]).normalized()
         nrm = (pn - p) - tan * (pn - p).dot(tan)
         nrm.normalize()
         bi = tan.cross(nrm)
-        w = width * (.45 + .55 * min(1, t / .25)) * max(0, 1 - t ** 2.4) ** .9
+        w = width * (.45 + .55 * min(1, t / .25)) * (max(0, 1 - t ** 4) ** .45 if tuck else max(0, 1 - t ** 2.4) ** .9)
         h = max(.004, .32 * w)
         if i == m - 1:
             w, h = .0004, .0004
         for k in range(segs):
             a = 2 * math.pi * k / segs
             sa = math.sin(a)
-            verts.append(p + bi * (w * math.cos(a)) + nrm * (h * sa * abs(sa) ** .35))
+            v = p + bi * (w * math.cos(a)) + nrm * (h * sa * abs(sa) ** .35)
+            verts.append(v)
             along.append(t)
-    ob = mesh_obj(name, verts, grid_faces(m, segs))
+            uv_front.append(((FACE_PX[0] + v.x * 1000) / 480, 1 - (FACE_PX[1] - v.z * 1000) / 600))
+            uv_lock.append((k / segs * width / .05, t * length / .05))
+    ob = mesh_obj(name, verts, grid_faces(m, segs), uvs=uv_front)
     ob.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', along)
-    ob.data.uv_layers.new(name='UVMap')
+    lay = ob.data.uv_layers.new(name='Lock')
+    for poly in ob.data.polygons:
+        for li in poly.loop_indices:
+            lay.data[li].uv = uv_lock[ob.data.loops[li].vertex_index]
     return ob
 
 
@@ -651,6 +661,7 @@ def build_hair_figure(mats, coll):
     cap = mesh_obj('HairCap', verts, faces, coll=coll)
     cap.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', [0.0] * len(verts))
     cap.data.uv_layers.new(name='UVMap')
+    cap.data.uv_layers.new(name='Lock')
     cap.data.materials.append(mats['hair'])
     parts.append(cap)
     # a little swirl where the locks meet at the crown
@@ -659,6 +670,7 @@ def build_hair_figure(mats, coll):
                        rot=WHORL.to_track_quat('Z', 'Y').to_matrix())
         sw.data.attributes.new('along', 'FLOAT', 'POINT').data.foreach_set('value', [.3] * len(sw.data.vertices))
         sw.data.uv_layers.new(name='UVMap')
+        sw.data.uv_layers.new(name='Lock')
         parts.append(sw)
     # locks traced from the crown (flow()), in three layers up to the envelope
     up = Vector((0, 0, 1))
@@ -673,10 +685,12 @@ def build_hair_figure(mats, coll):
             r = math.radians(ring + rng.uniform(-3, 3))
             d = (WHORL * math.cos(r) + (e1 * math.cos(ang) + e2 * math.sin(ang)) * math.sin(r)).normalized()
             dirs = trace(d, 3.0)
-            # carry on a little past the hairline so the tips end in points
-            for _ in range(4):
-                dirs.append((dirs[-1] + flow(dirs[-1]) * .03).normalized())
-            ob = fig_lock_traced(f'Lock.{i:02d}', dirs, rng.uniform(wmin, wmax), frac, .010 + .008 * layer)
+            tuck = STYLE_NOW == 'film'
+            if not tuck:                       # figure: carry on past the hairline so the tips end in points
+                for _ in range(4):
+                    dirs.append((dirs[-1] + flow(dirs[-1]) * .03).normalized())
+            wd = rng.uniform(wmin, wmax) * (1.25 if tuck else 1)
+            ob = fig_lock_traced(f'Lock.{i:02d}', dirs, wd, frac, .010 + .008 * layer, tuck=tuck)
             i += 1
             if ob:
                 ob.location.z = HZ
@@ -688,6 +702,92 @@ def build_hair_figure(mats, coll):
         if o.name in bpy.context.scene.collection.objects:
             bpy.context.scene.collection.objects.unlink(o)
     return join(parts, 'Hair')
+
+
+# ---------- the hair, wrapped (art direction 3, Jose's pick 2026-10-21) ----------
+def hair_film_material():
+    """His drawn hair on the front (projected like the face), drawn strands
+    from the same drawing everywhere else (box-mapped tile), blended by how
+    much the surface faces forward."""
+    m = principled('HairFilm', srgb(110, 42, 18), rough=.42, coat=.06)
+    N, L = m.node_tree.nodes, m.node_tree.links
+    b = N['Principled BSDF']
+    uv = N.new('ShaderNodeUVMap'); uv.uv_map = 'UVMap'
+    front = N.new('ShaderNodeTexImage'); front.name = 'HairFront'
+    front.image = bpy.data.images.load(os.path.join(TEX, 'hair_front.png'), check_existing=True)
+    front.extension = 'CLIP'; front.interpolation = 'Cubic'
+    L.new(uv.outputs['UV'], front.inputs['Vector'])
+    tc = N.new('ShaderNodeTexCoord')
+    luv = N.new('ShaderNodeUVMap'); luv.uv_map = 'Lock'
+    mp = N.new('ShaderNodeMapping')      # fine strands: fast across the lock, slow along it
+    mp.inputs['Scale'].default_value = (40, .5, 1)
+    L.new(luv.outputs['UV'], mp.inputs['Vector'])
+    nz = N.new('ShaderNodeTexNoise')
+    nz.inputs['Scale'].default_value = 1.0
+    nz.inputs['Detail'].default_value = 4
+    nz.inputs['Roughness'].default_value = .55
+    L.new(mp.outputs['Vector'], nz.inputs['Vector'])
+    tile = N.new('ShaderNodeValToRGB'); tile.name = 'HairStrands'   # browns sampled from his drawn hair
+    cr = tile.color_ramp
+    # the drawing's hair tones at its 10th, 30th, 50th, 70th and 90th percentiles of brightness
+    cr.elements[0].position, cr.elements[0].color = .32, srgb(30, 5, 2)
+    cr.elements[1].position, cr.elements[1].color = .44, srgb(56, 14, 5)
+    for pos, col in ((.52, (76, 23, 10)), (.60, (100, 42, 28)), (.70, (146, 76, 56))):
+        e = cr.elements.new(pos); e.color = srgb(*col)
+    L.new(nz.outputs['Fac'], tile.inputs['Fac'])
+    sep = N.new('ShaderNodeSeparateXYZ')
+    L.new(tc.outputs['Normal'], sep.inputs['Vector'])
+    mr = N.new('ShaderNodeMapRange')
+    mr.inputs['From Min'].default_value = -.2
+    mr.inputs['From Max'].default_value = -.6
+    L.new(sep.outputs['Y'], mr.inputs['Value'])
+    w = N.new('ShaderNodeMath'); w.operation = 'MULTIPLY'
+    L.new(mr.outputs['Result'], w.inputs[0]); L.new(front.outputs['Alpha'], w.inputs[1])
+    soft = N.new('ShaderNodeMix'); soft.data_type = 'RGBA'   # the drawn gaps are deep; soften them on the sides
+    soft.inputs['Factor'].default_value = 0.0
+    soft.inputs['B'].default_value = srgb(72, 22, 10)
+    L.new(tile.outputs['Color'], soft.inputs['A'])
+    mix = N.new('ShaderNodeMix'); mix.data_type = 'RGBA'
+    L.new(w.outputs['Value'], mix.inputs['Factor'])
+    L.new(soft.outputs['Result'], mix.inputs['A']); L.new(front.outputs['Color'], mix.inputs['B'])
+    L.new(mix.outputs['Result'], b.inputs['Base Color'])
+    L.new(mix.outputs['Result'], b.inputs['Emission Color'])
+    b.inputs['Emission Strength'].default_value = .16
+    return m
+
+
+def build_hair_film(mats, coll):
+    """One smooth hair shape filling the drawing's outline (hair_t), its lower
+    edge tucked into the head, with front-projection UVs like the face."""
+    segs, rings = 160, 70
+    verts, uvs, rows = [], [], []
+    for r in range(-1, rings + 1):
+        row = []
+        for s_ in range(segs):
+            az = 360 * s_ / segs - 180
+            lo = hairline(az)
+            if r < 0:
+                d = sph(az, lo - 3); g = -.006
+            else:
+                el = lo + (89.6 - lo) * (r / rings) ** .9
+                d = sph(az, el); g = .004 + 1.08 * hair_t(d)
+            p = head_point(d, grow=g)
+            row.append(len(verts))
+            verts.append(p + Vector((0, 0, HZ)))
+            uvs.append(((FACE_PX[0] + p.x * 1000) / 480, 1 - (FACE_PX[1] - p.z * 1000) / 600))
+        rows.append(row)
+    faces = []
+    for r in range(len(rows) - 1):
+        for s_ in range(segs):
+            faces.append((rows[r][s_], rows[r][(s_ + 1) % segs], rows[r + 1][(s_ + 1) % segs], rows[r + 1][s_]))
+    top = len(verts)
+    p = head_point((0, 0, 1), grow=.004 + 1.08 * hair_t(Vector((0, 0, 1))))
+    verts.append(p + Vector((0, 0, HZ)))
+    uvs.append(((FACE_PX[0] + p.x * 1000) / 480, 1 - (FACE_PX[1] - p.z * 1000) / 600))
+    faces += [(rows[-1][s_], rows[-1][(s_ + 1) % segs], top) for s_ in range(segs)]
+    ob = mesh_obj('Hair', verts, faces, uvs=uvs, coll=coll)
+    ob.data.materials.append(mats['hair'])
+    return ob
 
 
 def join(obs, name):
@@ -1186,7 +1286,7 @@ def studio():
     sc.cycles.use_denoising = True
     sc.view_settings.view_transform = 'Standard'
     sc.view_settings.look = 'None'
-    sc.view_settings.exposure = -.75
+    sc.view_settings.exposure = -.5 if STYLE_NOW == 'film' else -.75
     sc.render.film_transparent = False
     w = bpy.data.worlds.new('World'); sc.world = w
     w.use_nodes = True
@@ -1203,7 +1303,7 @@ def studio():
     area('Key', (-1.4, -2.0, 2.2), (0, 0, .6), 1.6, 190, (1, .97, .92))
     area('Fill', (2.0, -1.6, 1.0), (0, 0, .6), 2.5, 70, (.88, .93, 1))
     area('Rim', (.6, 2.2, 2.0), (0, 0, .7), 1.2, 160, (.9, .95, 1))
-    area('Top', (0, -.3, 3.0), (0, 0, .5), 2.0, 50)
+    area('Top', (0, -.3, 3.0), (0, 0, .5), 2.0, 50 if STYLE_NOW != 'film' else 20)
     # floor: a soft studio sweep (floor curving up into a back wall) in the app's blue-grey
     prof = []
     for i in range(41):
@@ -1220,7 +1320,8 @@ def studio():
             vs.append((x, y, z))
     m = len(prof)
     fs = [(i, i + 1, m + i + 1, m + i) for i in range(m - 1)]
-    fl = mesh_obj('Floor', [(x, y, z - STAND_H) for x, y, z in vs], fs)
+    drop = STAND_H if STYLE_NOW == 'figure' else 0
+    fl = mesh_obj('Floor', [(x, y, z - drop) for x, y, z in vs], fs)
     fm = principled('Floor', srgb(196, 206, 222), rough=.7, coat=0)
     fl.data.materials.append(fm)
     cam_d = bpy.data.cameras.new('Cam'); cam_d.lens = 85
@@ -1249,11 +1350,15 @@ def look(cam, target, dist, az, el):
     cam.rotation_euler = (t - cam.location).to_track_quat('-Z', 'Y').to_euler()
 
 
-STYLE = 'figure'      # 'figure' (art direction 2) or 'v1' (the first look, kept for comparison)
+STYLE = 'film'        # 'film' (art direction 3: his drawing wrapped on), 'figure' (2) or 'v1' (the first look)
+
+
+STYLE_NOW = STYLE
 
 
 def build(head_only=False, style=None):
-    style = style or STYLE
+    global STYLE_NOW
+    style = STYLE_NOW = style or STYLE
     bpy.ops.wm.read_factory_settings(use_empty=True)
     coll = bpy.data.collections.new('DrSmiley'); bpy.context.scene.collection.children.link(coll)
     mats = {
@@ -1261,7 +1366,7 @@ def build(head_only=False, style=None):
         'skin': principled('Skin', SKIN, rough=.42, coat=.18, sss=.12),
         'ear': principled('Ear', SKIN_EAR, rough=.45, coat=.15, sss=.15),
         'earin': principled('EarIn', srgb(236, 140, 128), rough=.5, coat=.1, sss=.15),
-        'hair': fig_hair_material() if style == 'figure' else hair_material(),
+        'hair': {'figure': fig_hair_material, 'film': hair_film_material}.get(style, hair_material)(),
         'coat': principled('Coat', COAT, rough=.42, coat=.3) if style == 'figure' else principled('Coat', COAT, rough=.55, coat=.12, sheen=.3),
         'scrub': principled('Scrubs', SCRUB, rough=.45, coat=.25) if style == 'figure' else principled('Scrubs', SCRUB, rough=.6, coat=.08, sheen=.4),
         'shoe': principled('Shoe', SHOE, rough=.4, coat=.3),
@@ -1279,7 +1384,7 @@ def build(head_only=False, style=None):
     ears = build_ears(mats, coll)
     for e in ears:
         subsurf(e, 1)
-    hair = build_hair_figure(mats, coll) if style == 'figure' else build_hair(mats, coll)
+    hair = {'figure': build_hair_figure, 'film': build_hair_figure}.get(style, build_hair)(mats, coll)
     subsurf(hair, 1)
     arm = None
     if not head_only:

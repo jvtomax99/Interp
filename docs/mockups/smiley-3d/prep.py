@@ -136,3 +136,51 @@ if __name__ == '__main__':
         name = job[2] if len(job) > 2 else f
         face_texture(f, b, base).save(os.path.join(OUT, f'face_{name}.png'))
         print('tex', f, b)
+
+
+def hair_textures():
+    """The drawing's own hair, for wrapping: hair_front.png (base.webp's hair
+    only, its edge grown a few pixels so the 3D outline never shows the
+    background) and hair_tile.png (a patch of drawn strands, mirrored so it
+    repeats without seams, for the sides, top and back)."""
+    im = np.array(load('base.webp')).astype(np.float32)
+    R, G, B, A = [im[..., i] for i in range(4)]
+    mx = np.maximum(np.maximum(R, G), B)
+    hair = (A > 128) & (((mx < 175) & (R > G * 1.15) & (R > B * 1.3)) | ((R < 215) & (G < 130) & (B < 100) & (R > G + 30)))
+    h, w = R.shape
+    yy, xx = np.mgrid[0:h, 0:w]
+    cx, cy, rx, ry = OVAL
+    face = ((xx - cx) / (rx * .93)) ** 2 + ((yy - cy) / (ry * .93)) ** 2 < 1
+    ears = ((xx < 70) & (yy > 235)) | ((xx > 395) & (yy > 330))
+    keep = hair & ~face & ~ears & (yy < 400)
+    keep = cv2.morphologyEx(keep.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8)) > 0
+    # keep only the big hair region (drops stray dark pixels in the eyes, mouth)
+    n, lab, stats, _ = cv2.connectedComponentsWithStats(keep.astype(np.uint8))
+    big = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    keep = lab == big
+    rgb = im[..., :3].astype(np.uint8).copy()
+    # grow the colour outwards (into the background only, never into skin) so
+    # the 3D outline can sit a little past the drawn one
+    bgnd = A < 128
+    grow = (cv2.dilate(keep.astype(np.uint8), np.ones((15, 15), np.uint8)) > 0) & bgnd
+    rgb = cv2.inpaint(rgb, grow.astype(np.uint8) * 255, 7, cv2.INPAINT_TELEA)
+    soft = keep | grow
+    alpha = cv2.GaussianBlur(soft.astype(np.uint8) * 255, (5, 5), 0)
+    out = np.dstack([rgb, alpha])
+    img = Image.fromarray(out, 'RGBA').resize((w * SCALE, h * SCALE), Image.LANCZOS)
+    img.save(os.path.join(OUT, 'hair_front.png'))
+    # strands for everywhere else: a patch of drawn hair made seamless by
+    # blending it with itself shifted half a tile (no mirror images)
+    P = im[40:112, 130:330, :3].astype(np.float32)
+    P = cv2.resize(P, (P.shape[1] * 2, P.shape[0] * 2), interpolation=cv2.INTER_LANCZOS4)
+    H, W = P.shape[:2]
+    for axis, n in ((1, W), (0, H)):
+        tri = 1 - np.abs(np.linspace(-1, 1, n))
+        m = tri[None, :, None] if axis == 1 else tri[:, None, None]
+        P = P * m + np.roll(P, n // 2, axis=axis) * (1 - m)
+    Image.fromarray(np.clip(P, 0, 255).astype(np.uint8)).save(os.path.join(OUT, 'hair_tile.png'))
+
+
+if __name__ == '__main__':
+    hair_textures()
+    print('hair textures')
