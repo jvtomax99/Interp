@@ -152,7 +152,21 @@ service cloud.firestore {
     match /terminology-meta/{docId}    { allow read, write: if team(); }
     match /terminology-hub/{docId}     { allow read, write: if team(); }
     match /term-attachments/{docId}    { allow read, write: if team(); }
-    match /term-reviews/{docId}        { allow read, write: if team(); }
+    // Each person's practice record (Term Review, Daily Drill, Doctor Prep
+    // flashcards; the knowledge brain reads it). Once the Hub is locked, a
+    // phone reads and writes only the records under the name it goes by in
+    // hub-members (who, kept in step by the app). Names are self-reported,
+    // so this stops bulk reading and casual peeking, not someone who renames
+    // their phone to a teammate's name (Jose's pick, 2026-10-21: by name, so
+    // a record follows its person to a new phone; per phone was the other
+    // option). docs/features/knowledge-brain.md.
+    match /term-reviews/{docId} {
+      allow read, delete: if practice() || ownReview(resource.data);
+      allow create: if practice() || ownReview(request.resource.data);
+      allow update: if practice() || (ownReview(resource.data) && ownReview(request.resource.data));
+    }
+    function myName() { return get(memberPath()).data.get('who', '').trim().lower(); }
+    function ownReview(d) { return isMember() && d.get('who', '') is string && d.get('who', '') != '' && d.get('who', '') == myName(); }
 
     // Reference reading found for a term, cached so the team pays for a
     // given term's search once rather than once per interpreter.

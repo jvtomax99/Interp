@@ -13,7 +13,9 @@ mode. Practice mode (`hub-access/settings.practice`) is the owner's switch;
 while it's on nothing is enforced. The first owner is claimed once via
 `?setup=owner`. The AI endpoints check the same thing through
 `api/_hub-access.js`, and the app sends `hubAuthHeaders()`. Startup database
-calls wait for `hubAuthReady`. Rules are tested against the Firebase emulator
+calls wait for `hubAuthReady`. Exception: `term-reviews` (each person's
+practice record) also checks the phone's `who` against the record's
+(`ownReview`; `knowledge-brain.md`, K2). Rules are tested against the Firebase emulator
 (firebase-tools + `@firebase/rules-unit-testing`; run the emulators with the
 proxy variables unset or cross-service Storage lookups silently fail).
 
