@@ -5620,6 +5620,17 @@ body.access-locked{ overflow:hidden; }
 .ta-switch[aria-checked="true"]{ background:var(--danger); }
 .ta-switch[aria-checked="true"]::after{ transform:translateX(20px); }
 .ta-switch:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+/* ---------- Notifications screen (renderNotifications) ----------
+   Team access's cards and switches; only what's new is here. */
+.ta-state-dot.is-on{ background:var(--good); box-shadow:0 0 0 4px var(--good-soft); }
+.ta-state-dot.is-off{ background:var(--danger); box-shadow:0 0 0 4px var(--danger-soft); }
+.nt-kinds{ gap:13px; }
+.nt-kinds .ta-switchrow b{ font-weight:600; font-size:15px; }
+.nt-kinds .ta-switchrow small{ font-size:13px; color:var(--ink-soft); }
+.ta-card p.nt-note{ font-size:13px; color:var(--ink-faint); }
+.ta-field.nt-text{ height:auto; min-height:104px; padding:13px; line-height:1.45; resize:vertical; }
+.ta-card p.nt-sent{ color:var(--good); font-weight:600; }
+.nt-item .ta-who .nt-body{ color:var(--ink); font-size:15px; line-height:1.45; white-space:pre-line; overflow-wrap:anywhere; }
 /* Name sheet: the owner's way in to Team access, or a way to enter the code. */
 .name-access{ margin-top:13px; padding-top:13px; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:6px; }
 .name-access-row{ display:flex; align-items:center; justify-content:space-between; gap:9px; font-size:14px; color:var(--ink-soft); }

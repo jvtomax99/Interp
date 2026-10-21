@@ -296,6 +296,15 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
+  aren't being delivered", owners should send them, "like a normal app";
+  his picks: owner-code phones send, push for Team Chat and new training).
+  Web Push with no package (`api/push.js`, `_push-team.js`, `_webpush.js`),
+  `sw.js` push + badge + `?open=`, More → Notifications for everyone with
+  Send to the team for owners, `push-subs`/`push-sent`/`push-log` rules,
+  the events watcher notifies. Guide answer `notifications` + New lately.
+  `tests/suites/push.mjs`. Needs Jose: the VAPID keys in Vercel and the
+  rules published (`docs/features/notifications.md`, Setup).
 - 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
   `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
   script loaded just before the app's own (Jose's pick over fetching it on

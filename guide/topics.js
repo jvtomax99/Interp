@@ -363,6 +363,17 @@ const GUIDE_TOPICS = [
     <p>In Team Chat, tap the <b>pin</b> at the top and write the update, like a new CE requirement or a changed protocol.</p>
     <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Anyone can unpin one when it's no longer needed.</p>` },
 
+  { id:'notifications', section:'team', k:'notifications push notify alert alerts closed lock screen badge phone banner sound iphone home screen send owner administrator message team broadcast test not arriving not working', q:'How do I get notifications on my phone?', a:`
+    <ol>
+      <li>Open <b>More</b> → <b>Notifications</b>.</li>
+      <li>Tap <b>Turn on notifications</b> and allow them when your phone asks.</li>
+      <li>Pick what you hear about: <b>Team Chat</b> (Everyone, your region, and anything that @mentions you), <b>Training &amp; Events</b> (new CE and webinars) and <b>Team updates</b> (terms added or edited).</li>
+    </ol>
+    <p>Team Chat and training arrive like any app’s notifications, even with the Hub closed, and the Hub’s icon shows how many are waiting. Tap one to open that screen. Team updates only show while the Hub is open.</p>
+    <p><b>On iPhone</b> they only work from the Home Screen app (iOS 16.4 or later): in Safari tap <b>Share</b> → <b>Add to Home Screen</b>, open the Hub from its icon, then turn them on there.</p>
+    <p>Not arriving? On the same screen tap <b>Send me a test</b> and lock the phone. If it doesn’t show, check the phone’s Settings → Notifications → Interpreter Hub, or tap <b>Turn off</b> and turn them on again.</p>
+    <p><b>Owners</b> (phones that joined with the owner code) also see <b>Send to the team</b> there: write a title and a message and it goes to every phone with notifications on. The last ones sent are listed under <b>From the team</b> for everyone.</p>` },
+
   { id:'updates', section:'team', k:'bell notification updates activity feed what changed news', q:'What is the bell at the top of the screen?', a:`
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
     <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
