@@ -21,12 +21,12 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.webp': 'image/
   const page = await browser.newPage({ viewport: { width: w, height: h } });
   const errs = []; page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await page.goto(`http://localhost:${server.address().port}/${page0}`);
-  await page.waitForFunction(() => typeof window.__renderAt === 'function', null, { timeout: 90000 });
+  await page.waitForFunction(() => typeof window.__renderAt === 'function', null, { timeout: 90000 }).catch(e => { console.log('errors:', errs.join('\n')); throw e; });
   const files = [];
   for (const t of times) {
     await page.evaluate(t => window.__renderAt(t), +t);
     const f = path.join(OUT, `${(+t).toFixed(2)}.png`);
-    await page.locator('#stage').screenshot({ path: f }); files.push([t, f]);
+    await page.screenshot({ path: f, clip: { x: 0, y: 0, width: w, height: h } }); files.push([t, f]); // the canvas and everything over it
   }
   // contact sheet: a row of up to 8, the time on each
   const cols = Math.min(8, files.length), cw = 270, ch = Math.round(cw * h / w);

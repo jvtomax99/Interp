@@ -101,7 +101,9 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
       const pivot = new THREE.Group();
       pivot.position.set((c.x + c.width / 2) * PX - PHONE.w / 2, PHONE.h / 2 - (c.y + c.height / 2) * PX, 0.002 + l.depth * 0.001);
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: texOf(await loadImg(`assets/layers/${state}/${l.file}`)), transparent: true, toneMapped: false, depthWrite: false, color: 0xd6dbe6 }));
-      m.renderOrder = 3 + l.depth;
+      // a layer inside an earlier one (CoreCHI's campus and stats inside its card) draws over it
+      const inside = meta.layers.slice(0, meta.layers.indexOf(l)).filter((o) => o.clip.x <= c.x && o.clip.y <= c.y && o.clip.x + o.clip.width >= c.x + c.width && o.clip.y + o.clip.height >= c.y + c.height);
+      m.renderOrder = Math.max(3 + l.depth, ...inside.map((o) => layers[o.key].mesh.renderOrder + 0.1));
       pivot.add(m);
       g.add(pivot);
       layers[l.key] = { pivot, mesh: m, l, w, h };
@@ -126,7 +128,6 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
   // ---------- what the laptop says for each feature ----------
   const [iconImg, art, ...pinImgs] = await Promise.all([loadImg("assets/appicon.png"), loadSmileyArt("assets/drsmiley/"),
     ...["cardiology", "oncology", "emergency", "neurology", "pediatrics", "orthopedics", "nephrology", "pulmonology", "dermatology", "hematology", "infusion", "pharmacy", "surgery-anesthesia", "urology", "ophthalmology", "genetics", "laboratory", "endocrinology"].map((p) => loadImg(`assets/pins/${p}.webp`))]);
-  const [skyI, farI, nearI] = await Promise.all(["sky", "far", "near"].map((n) => loadImg(`assets/city/${n}.webp`)));
   const smileyPic = document.createElement("canvas"); smileyPic.width = 480; smileyPic.height = 600;
   composeSmiley(smileyPic.getContext("2d"), art, "smile", BROWS.glad);
   const bgFill = () => {
@@ -210,14 +211,11 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
       pill(TT("counted"), 640, 640, "#3fc6ee", "#0b1a4a", ap(u, 1.5, 1.8));
     },
     cert(u) {
-      // the CoreCHI campus, flying down into it (the app's own render: sky, far, near)
-      const z = inOutSine(clamp(u / 2.4));
-      const draw = (im, k, dy) => { const s = lerp(1.0, k, z), w = 1280 * s, h = (1280 * 760 / 960) * s; sg.drawImage(im, 640 - w / 2, 395 - h / 2 + dy * z, w, h); };
-      sg.fillStyle = "#cfd6e6"; sg.fillRect(0, 0, 1280, 790);
-      draw(skyI, 1.15, 0); draw(farI, 1.45, 40); draw(nearI, 2.0, 120);
-      sg.fillStyle = "rgba(3,6,26,.35)"; sg.fillRect(0, 600, 1280, 190);
-      const n = Math.round(145 * ap(u, 0.3, 1.3) / 5) * 5;
-      txt(`${u >= 1.3 ? 145 : Math.min(145, n)} ${TT("questions")}`, 640, 730, '800 84px "Inter Tight"', "#fff", ap(u, 0.3, 0.6), "center", "rgba(3,6,26,.9)");
+      // CoreCHI Practice and its five domains, lit one by one (the phone carries the campus)
+      bgFill();
+      txt("CoreCHI Practice", 560, 250 - (1 - ap(u, 0.05, 0.35)) * 30, '800 76px "Inter Tight"', "#fff", ap(u, 0.05, 0.35));
+      const D = ["Terminology", "Ethics", "Encounter", "Culture", "US Systems"];
+      D.forEach((d, i) => pill(d, [420, 720, 420, 720, 570][i], 400 + Math.floor(i / 2) * 115, i % 2 ? "#3fc6ee" : "rgba(255,255,255,.92)", "#0b1a4a", ap(u, 0.25 + i * 0.08, 0.45 + i * 0.08), '800 46px "Inter Tight"'));
     },
     team(u) {
       bgFill();
@@ -255,7 +253,7 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     physician: (u) => ({ face: u < 1 ? "halfR" : "smile", brows: "glad" }),
     falsefriends: (u) => (u > 0.95 ? { face: "worried", brows: "worried" } : { face: "doubt", brows: "doubt" }),
     drills: (u) => (u > 1.0 ? { face: "laugh", brows: "laugh", ...(u < 1.5 ? MOVES.land(prog(u, 1.0, 1.5)) : {}) } : { face: "lookUR", brows: "focused" }),
-    cert: (u) => (u < 0.8 ? MOVES.hop(prog(u, 0.2, 0.8)) : { ...MOVES.point(prog(u, 0.8, 1.3)), face: "smile", brows: "glad" }),
+    cert: (u) => (u < 0.9 ? { face: "lookUR", brows: "up" } : u < 2.0 ? { face: "surprised", brows: "up" } : { ...MOVES.point(prog(u, 2.0, 2.5)), face: "smile", brows: "glad" }),
     team: (u) => ({ face: u % 1.4 < 0.9 ? "laugh" : "smile", brows: "laugh" }),
     ask: (u) => (u < 1.2 ? MOVES.stepOut(prog(u, 0.05, 1.0)) : MOVES.wave(prog(u, 1.2, 2.4))),
   };
@@ -270,7 +268,7 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     for (const k in S.layers) { const L = S.layers[k]; L.pivot.position.z = 0.002 + L.l.depth * 0.001; L.pivot.scale.setScalar(1); }
     // the proof pops forward with its cyan outline, on the beat after the shot settles
     const P = S.layers[S.proofKey];
-    const pop = outBack(prog(u, 0.55, 1.0), 1.6);
+    const pop = g === "cert" ? outBack(prog(u, 0.1, 0.45), 1.6) * (1 - prog(u, 0.55, 0.8)) : outBack(prog(u, 0.55, 1.0), 1.6);
     outline.visible = false;
     if (P) {
       P.pivot.position.z = 0.002 + 0.16 * pop;
@@ -304,10 +302,39 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     const r = lerp(7.9, 7.4, e);
     const pos = new THREE.Vector3(Math.sin(a) * r + 0.05, lerp(2.05, 1.9, e), Math.cos(a) * r + 0.2).add(desk.position);
     // focus on the phone, where the proof is
-    return { pos, look, focus: phone.getWorldPosition(new THREE.Vector3()) };
+    const focus = phone.getWorldPosition(new THREE.Vector3());
+    if (g === "cert") {
+      // CoreCHI: the camera pushes into the phone, square onto the campus picture in the card,
+      // close enough that it fills the frame's width; the city layer (city.js) takes it from there
+      const w = inOutCubic(prog(u, 0.3, 0.98));
+      if (w > 0) {
+        phone.updateWorldMatrix(true, false);
+        const at = new THREE.Vector3(WORLD.cx, WORLD.cy, 0.05).applyMatrix4(phone.matrixWorld);
+        const nrm = new THREE.Vector3(0, 0, 1).transformDirection(phone.matrixWorld);
+        const d = (WORLD.w / 0.92) / (2 * Math.tan(THREE.MathUtils.degToRad(25)) * 0.5625);
+        pos.lerp(at.clone().addScaledVector(nrm, d), w);
+        look.lerp(at, w);
+        focus.lerp(at, w);
+      }
+    }
+    return { pos, look, focus };
+  }
+  // where the campus picture sits in the CoreCHI card, in phone units, and on screen
+  const WL = screens.cert.layers.world.l;
+  const WORLD = { cx: (WL.x + WL.w / 2) * PX - PHONE.w / 2, cy: PHONE.h / 2 - (WL.y + WL.h / 2) * PX, w: WL.w * PX, h: WL.h * PX };
+  function worldRect(camera, W, H) {
+    phone.updateWorldMatrix(true, false);
+    const v = new THREE.Vector3();
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [x, y] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      v.set(WORLD.cx + x * WORLD.w / 2, WORLD.cy + y * WORLD.h / 2, 0.05).applyMatrix4(phone.matrixWorld).project(camera);
+      const px = (v.x + 1) / 2 * W, py = (1 - v.y) / 2 * H;
+      x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+    }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
   const idleSpot = (g) => desk.position.clone();
   const idle = (g, u) => update(g, u);
   const proofMesh = (g) => { const S = screens[SCREEN_OF[g]]; return S && S.proofKey ? S.layers[S.proofKey].mesh : null; };
-  return { update, view, smiley, idle, idleSpot, proofMesh, desk };
+  return { update, view, smiley, idle, idleSpot, proofMesh, desk, worldRect };
 }

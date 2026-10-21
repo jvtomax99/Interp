@@ -18,6 +18,7 @@ import { MOVES } from "../smiley.js";
 import { createOverlay, SMILEY_SHARE } from "./overlay.js";
 import { buildEnd } from "./end.js";
 import { buildDesk } from "./desk.js";
+import { createCity } from "./city.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
@@ -572,8 +573,10 @@ async function build() {
     camera.lookAt(cam.look);
     // the phone shots' lens shift (room for Dr. Smiley under the proof), blended across cuts
     const sh0 = SHIFT[s[2]] || 0;
-    const shift = hopping ? (t >= s[1] - HOP / 2 ? SHIFT[next[2]] || 0 : sh0)
+    let shift = hopping ? (t >= s[1] - HOP / 2 ? SHIFT[next[2]] || 0 : sh0)
       : next && t > s[1] - WHIP ? lerp(sh0, SHIFT[next[2]] || 0, inOutCubic(prog(t, s[1] - WHIP, s[1]))) : sh0;
+    // CoreCHI: the shift eases away as the camera squares up to the phone
+    if (s[2] === "cert") shift *= 1 - inOutCubic(prog(t - s[0], 0.3, 0.98));
     if (shift > 0.5) camera.setViewOffset(W, H, 0, shift, W, H); else camera.clearViewOffset();
     const fp = a.focus || a.look;
     bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
@@ -607,6 +610,7 @@ async function build() {
   dip.style.cssText = "position:absolute;inset:0;background:#03061a;opacity:0;pointer-events:none";
   root.appendChild(dip);
   const overlay = await createOverlay(root, W, H);
+  const city = await createCity(root, canvas, W, H); // CoreCHI's campus, flown into (city.js)
   let smileyState = null;
   const _v = new THREE.Vector3();
   function proofRect(g) {
@@ -637,7 +641,8 @@ async function build() {
     const t0 = FEATURE_STARTS[i], len = featureLen(f);
     let bottom = -Infinity, top = Infinity;
     camera.clearViewOffset();
-    for (let u = 0; u <= len; u += 0.1) {
+    // CoreCHI: only before the camera dives into the phone (after that the city layer is on screen)
+    for (let u = 0; u <= (f.g === "cert" ? 0.35 : len); u += 0.1) {
       feat.update(f.g, u);
       const v = view(f.g, t0 + u);
       camera.position.copy(v.pos); camera.lookAt(v.look); camera.updateMatrixWorld();
@@ -693,9 +698,12 @@ async function build() {
     captionsAt(t);
     composer.render();
     dip.style.opacity = hopping ? String(0.92 * Math.pow(Math.sin(Math.PI * prog(t, s[1] - HOP, s[1])), 1.3)) : "0";
+    // the campus takes over from the phone, until the cut in the middle of the hop out
+    const inCity = s[2] === "cert" && !(hopping && t >= s[1] - HOP / 2);
+    city.draw(t - s[0], t, inCity ? feat.worldRect(camera, W, H) : null, inCity ? prog(t - s[0], 0.78, 0.96) : 0);
     overlay.draw(smileyState);
     // for the checks: his box and the proof's box on screen this frame
-    window.__smileyCheck = { t: time, shot: s[2], smiley: overlay.box(), proof: isFeature(s[2]) ? proofRect(s[2]) : null,
+    window.__smileyCheck = { t: time, shot: s[2], smiley: overlay.box(), proof: city.box() || (isFeature(s[2]) ? proofRect(s[2]) : null),
       nextProof: hopping ? proofRect(next[2]) : null };
   }
 

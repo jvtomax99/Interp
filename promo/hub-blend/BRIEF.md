@@ -214,6 +214,25 @@ distinct on screen.
    Known for step 7: the end card's lines are small at phone size (the
    laptop screen is landscape inside a portrait frame); the phone in the end
    card is mostly off frame; the Team shot's lift is subtle.
+   Seventh round (2026-10-21), Jose's prompt 3 and the audio: CoreCHI is a
+   flight into the campus (`src/remake/city.js`, 3 s). The camera pushes
+   into the phone, square onto the campus picture in the CoreCHI card; a 2D
+   layer takes over exactly on that picture, opens to the full frame and
+   sinks toward the main hospital and the white tower's helipad, with sky,
+   skyline and campus at three depths. Every mover is the app's own piece
+   and path on the app's clock (`campusLife` and the `cp*` keyframes in
+   index.html): cars, Second Street, walkers, bench sitters, the lot car,
+   spray, flags, clouds, birds; the helicopter (lands on the pad) and the
+   ambulance (bay doors open) run faster so each finishes inside the shot.
+   The windows light up building by building while "145 Questions" counts
+   up. Pieces re-rendered at 2x (1920x1520) from
+   `docs/mockups/cchi-city/entrance.html` so the close end stays sharp
+   (`assets/city/`, with its own `entrance.json`). The laptop now says
+   "CoreCHI Practice" with the five domains. Audio: the 2.5 s walk-in had
+   pushed the hook 2.5 s after the music; the music now starts the hook at
+   2.5 s, under the walk-in a reverse swell of the track's own opening
+   (muffled, as if through the doors). 43 s; music: swell, v11 0-38 s into
+   its last 3.5 s.
 7. Check against the rules above, side by side with v11 per feature; fix;
    full render; send with the side-by-side.
 

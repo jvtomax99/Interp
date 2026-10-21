@@ -25,7 +25,7 @@ export const FEATURES = [
   { g: "physician", a: "Ready For", b: "Every Physician." },
   { g: "falsefriends", a: "101 False Friends.", b: "Flagged." },
   { g: "drills", a: "Daily Drills.", b: "Sharp Skills." },
-  { g: "cert", a: "National Certification.", b: "Prep Built In." },
+  { g: "cert", a: "National Certification.", b: "Prep Built In.", len: 3.0 }, // longer: the flight into the campus
   { g: "team", a: "One Team.", b: "One Channel." },
   { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley." },
 ];
