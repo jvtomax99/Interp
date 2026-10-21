@@ -4,7 +4,8 @@
   "description": "Remotion project for the Hub's promo videos (media/). Not part of the app; kept out of the deploy by .vercelignore.",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render HubTitle out/hub-title.mp4"
+    "render": "remotion render HubPromo out/hub-promo.mp4 --crf=27 --x264-preset=slow",
+    "shots": "cd .. && node promo/capture/shots.cjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.537",
