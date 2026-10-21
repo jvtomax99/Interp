@@ -1,6 +1,6 @@
 # The app's checks
 
-Each suite opens the real app (this checkout's `index.html`, `home-polish.*`,
+Each suite opens the real app (this checkout's `index.html`, `app.css`, `home-polish.*`,
 `pin-icons.js`) in a headless Chromium at phone and computer sizes, does what
 a person would do, and checks the result by measuring: what's on screen, what
 receives a tap, what was saved. Nothing touches the live Hub: Firebase is
@@ -52,5 +52,6 @@ a change from any tool gets a green check or a red X on its commit.
 - `tools/perf.cjs`: smoothness numbers (idle busy %, tap waits, startup, layout shift, animations that aren't transform/opacity) at iPhone size with the CPU slowed 4x. The S-phases in `docs/PLAN.md` are judged by it.
 - `tools/startup.cjs`: the app opening, task by task (S3): each long task's biggest pieces, the script lines that forced a layout, and the functions that took the time. `UA=chromium`, `RETURNING=1`, `RUNS=n`, `ROOT=` another checkout for before/after.
 - `tools/idle.cjs`: Home left still (S7): the meter's numbers and longest stalls, and every main-thread task over 50 ms with what ran in it. `SCROLL=n` scrolls first, `START=s` waits after load, `UA=iphone`, `RUNS=n`, `INDEX=` another index.html.
+- `tools/first-paint.cjs`: a visit's first paint over a slowed network (`ROOTS=before,after`): each folder served by a local server the way Vercel does (brotli, ETag), Chromium's throttling for weak Wi-Fi and 4G, CPU 4x; first visit and return, medians. Made for phase 1 of the split (`docs/split-index.md`).
 - `tools/census.cjs`: the map of `index.html`'s script for the split (`docs/split-index.md`): every top-level name, its section, and which sections use which. `--names`, `--section <title>`, `--json`, `--write` (refreshes the table in the split plan). No browser; under a second.
 - `tools/doctor-replay.cjs`: replays a `doctors.json` export through the doctor page and reports anything lost.

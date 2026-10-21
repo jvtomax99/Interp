@@ -28,8 +28,9 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 31,214 | The whole app (1.8 MB). All CSS and JS inline |
-| `home-polish.css` | 1,456 | Overlay layer. Loads right after `</style>`, so it wins |
+| `index.html` | 24,479 | The whole app's markup and JS (1.4 MB), all inline |
+| `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
+| `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
 | `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
 | `pin-icons.js` | 987 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
@@ -38,7 +39,7 @@ between assignments.
 | `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
 | `media/` | 8 MB | The 45-second video (`hub-promo.mp4`, 720p) and its still; made from `promo/`, shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
-| `sw.js` | 220 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
+| `sw.js` | 220 | Service worker. Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
@@ -89,24 +90,25 @@ different places is what silently killed the coloured press glow: a
 | Domain folder / section overlay styling | `home-polish.css` |
 | Home behaviour — wave, rail dots, section overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js` |
+| Styles for every other screen | `app.css` |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
 terms, chat, Doctor Prep, study, quizzes, profile, settings or the guide —
-those screens exist only inside `index.html`, so that is where their changes
-have to go. Say so plainly rather than inventing a place to put them.
+those screens' styles are in `app.css` and their code inside `index.html`,
+so that is where their changes have to go. Say so plainly rather than inventing a place to put them.
 
 **Match specificity, do not escalate it.** `home-polish.css` is written with ID
 selectors (`#content.is-home .x`). Anything added there at the same or higher
 specificity will quietly beat interaction states (`:active`, `.is-pressed`,
-`:focus-visible`) defined in `index.html`. When adding a rule, use the lowest
+`:focus-visible`) defined in `app.css`. When adding a rule, use the lowest
 specificity that works, and check that press, focus and hover still fire
 afterwards — measure them, do not assume.
 
 **Never resolve a merge with `git checkout --ours`.** It once discarded the
 `pin-icons` and `home-polish` wiring out of `index.html` in a single command.
-Resolve conflicts hunk by hunk, then confirm all three files are still loaded
-(in `index.html`: the `<link>` to `home-polish.css` and `<script>` for
+Resolve conflicts hunk by hunk, then confirm all four files are still loaded
+(in `index.html`: the `<link>`s to `app.css` then `home-polish.css`, the `<script>` for
 `home-polish.js` near the end of `<head>`, and the `<script>` for
 `pin-icons.js` just before `</body>`) before pushing.
 
@@ -313,7 +315,7 @@ box-shadow:
 
 **Type.** Inter (variable) for all interface text — headings included; the
 banner titles and section heads used to be serif. Scale, as tokens in the
-"Visual refinement" block of `index.html`: caption 12, footnote 13, subhead
+"Visual refinement" block of `app.css`: caption 12, footnote 13, subhead
 15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`). Spacing
 6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
 cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
@@ -357,7 +359,7 @@ Rules that hold across the whole app:
 
 **Known gap.** The look is tokenized (69 `:root` vars); the rhythm mostly
 is not. The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
-but little uses them. Measured in `index.html`'s CSS on 2026-10-20:
+but little uses them. Measured in `index.html`'s CSS (now `app.css`) on 2026-10-20:
 font-size is set with a token 65 times and with a plain px value about 900
 times, over 36 distinct sizes (12/12.5/13 and 14/14.5/15 all still there,
 distinctions the eye cannot resolve); padding, margin and gap use a token
@@ -431,5 +433,5 @@ design and anything touching data or rules stay with the main model.
   which ("login"), and a refused key stops the run with the reason. Lock the
   Hub only after a run reports "service account". Putting a shared secret
   inside the documents it writes was rejected as a credential leak.
-- `index.html` is one 1.8 MB file. Splitting CSS and JS out is the main
-  structural cleanup available.
+- `index.html` is one 1.4 MB file. The CSS is out (`app.css`, 2026-10-21);
+  the data and the JS by feature are next (`docs/split-index.md`).

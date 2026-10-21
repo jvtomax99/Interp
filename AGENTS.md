@@ -63,11 +63,17 @@ So:
 | Home behaviour — hello wave, rail dots, overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
 | 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
+| Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
 | Everything else | `index.html` |
 
+**The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
+`docs/split-index.md`). `index.html` has no `<style>` block any more: it
+links `app.css`, then `home-polish.css`, which must stay after it so it
+still wins. Never put a `<style>` block back in `index.html`; a style
+change goes in `app.css` (or `home-polish.css` for Home).
+
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
-`--ic-*`) lives in the "Visual refinement" block at the end of `index.html`'s
-stylesheet; Home's half is the block of the same name at the end of
+`--ic-*`) lives in the "Visual refinement" block at the end of `app.css`; Home's half is the block of the same name at the end of
 `home-polish.css`. Use those values instead of new one-off sizes. The
 interface face is Inter; the serif is for quoted human speech only. The one
 exception is the Home hello banner (Jose's pick): the name in Parisienne, the
@@ -160,10 +166,10 @@ settings or the guide — those exist only inside `index.html`. Say so rather
 than inventing a place to put them.
 
 **Match specificity, do not escalate it.** `home-polish.css` is written with
-ID selectors (`#content.is-home .x`) and loads last, so it beats the inline
-CSS. Anything new added there at that strength will quietly disable
+ID selectors (`#content.is-home .x`) and loads last, so it beats
+`app.css`. Anything new added there at that strength will quietly disable
 `:active`, `.is-pressed` and `:focus-visible` states defined in
-`index.html`. Use the weakest selector that works, then check press, focus
+`app.css`. Use the weakest selector that works, then check press, focus
 and hover still fire — measure them, do not assume.
 
 ## Team access — the Hub is for the team only
@@ -262,8 +268,8 @@ https://interp-six.vercel.app before reporting success.
 
 ## Before pushing `index.html`
 
-It is one ~31,000-line, 1.8 MB file with all CSS and JS inline, used mostly on
-phones in a hospital. Do not push it unverified.
+It is one ~24,500-line, 1.4 MB file with all the app's JS inline (its CSS is
+`app.css`), used mostly on phones in a hospital. Do not push it unverified.
 
 **The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
 install && node run.cjs`. GitHub runs the same suites on every push
