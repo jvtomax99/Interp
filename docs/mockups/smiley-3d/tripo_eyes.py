@@ -99,11 +99,18 @@ def set_gaze(eye, gx, gz):
     m['GazeZ'].outputs[0].default_value = gz * .24
 
 
+STAGES = 8          # the lid's edge travels round the ball in steps, never through it
+
+
 def set_blink(lid, amount):
-    lid.data.shape_keys.key_blocks['Shut'].value = max(0, min(1, amount))
+    a = max(0, min(1, amount)) * STAGES
+    kb = lid.data.shape_keys.key_blocks
+    for i in range(1, STAGES + 1):
+        kb[f'B{i}'].value = max(0, 1 - abs(a - i)) if a <= STAGES else 0
+    # below stage 1 the open shape (Basis) mixes with B1 by the same rule
     glint = bpy.data.objects.get('Glint.' + lid.name.split('.')[-1])
     if glint:                      # the shine sits on the eye, so it goes when the lid covers it
-        glint.hide_render = amount > .45
+        glint.hide_render = amount > .2
 
 
 def build_eyes(ob, eyes):
@@ -113,8 +120,9 @@ def build_eyes(ob, eyes):
     sb.inputs['Roughness'].default_value = .62; sb.inputs['Specular IOR Level'].default_value = .1
     at = skin_m.node_tree.nodes.new('ShaderNodeAttribute'); at.attribute_name = 'edge'
     lr = skin_m.node_tree.nodes.new('ShaderNodeValToRGB')
-    lr.color_ramp.elements[0].position, lr.color_ramp.elements[0].color = .70, srgb(250, 205, 180)
-    lr.color_ramp.elements[1].position, lr.color_ramp.elements[1].color = .80, srgb(38, 18, 10)
+    # skin, then a thin dark lash line along the very edge, there at every stage of a blink
+    lr.color_ramp.elements[0].position, lr.color_ramp.elements[0].color = .935, srgb(250, 205, 180)
+    lr.color_ramp.elements[1].position, lr.color_ramp.elements[1].color = .965, srgb(38, 18, 10)
     skin_m.node_tree.links.new(at.outputs['Fac'], lr.inputs['Fac'])
     skin_m.node_tree.links.new(lr.outputs['Color'], sb.inputs['Base Color'])
     hl_m = bpy.data.materials.new('Catchlight'); hl_m.use_nodes = True
@@ -144,7 +152,7 @@ def build_eyes(ob, eyes):
         set_gaze(ball, gx0, gz0)
         # the upper lid: a shell just outside the ball, from the top down to OPEN;
         # its shape key 'Shut' brings the edge down to SHUT
-        lr_, rows, segs = 1.07, 24, 48
+        lr_, rows, segs = 1.07, 64, 128      # fine enough that the edge stays smooth
         def lid_verts(edge):
             vs = []
             for r in range(rows + 1):
@@ -160,9 +168,10 @@ def build_eyes(ob, eyes):
         edge = lid.data.attributes.new('edge', 'FLOAT', 'POINT')
         edge.data.foreach_set('value', [r / rows for r in range(rows + 1) for s in range(segs)])
         lid.shape_key_add(name='Basis')
-        sk = lid.shape_key_add(name='Shut')
-        for i, v in enumerate(lid_verts(SHUT)):
-            sk.data[i].co = v
+        for k in range(1, STAGES + 1):
+            sk = lid.shape_key_add(name=f'B{k}', from_mix=False)
+            for i, v in enumerate(lid_verts(OPEN + (SHUT - OPEN) * k / STAGES)):
+                sk.data[i].co = v
         lid.matrix_world = Matrix.Translation(centre) @ rot
         set_blink(lid, 0)              # a new shape key comes in at full strength: start open
         # catchlight: a small soft white oval up and to the light's side, fixed to the head
@@ -191,6 +200,6 @@ if __name__ == '__main__':
     made = build_eyes(ob, eyes)
     lid_m = bpy.data.materials['Lid']
     # a lid sits forward of the face and catches more light: a shade darker to match
-    lid_m.node_tree.nodes['Color Ramp'].color_ramp.elements[0].color = build.srgb(*[int(v * .9) for v in skin])
+    lid_m.node_tree.nodes['Color Ramp'].color_ramp.elements[0].color = build.srgb(*[int(v * float(os.environ.get('LID_K', .84))) for v in skin])
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-eyes.blend'))
     print('done')
