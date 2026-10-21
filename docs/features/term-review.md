@@ -24,4 +24,4 @@ results; never what was typed): Pause, a reload or Dr. Smiley's Resume
 moves straight on. Reactions: a nod, a smile when a previously missed term
 is right, encourage after a miss, `smileyStudy` at the end.
 
-**The small live brain** (2026-10-21) sits at the top of the start screen, under the intro: your terms on a turning brain, known count and %, tap to open the full knowledge brain. `kbMiniHtml`; `knowledge-brain.md`.
+**The small live brain** (2026-10-21) sits at the top of the start screen, under the intro: your terms on a turning brain, known count and %, tap to open the full knowledge brain. `kbMiniHtml`; `knowledge-brain.md`. The session summary has its own copy: the session's terms light up in it, and **See it in your brain** opens the full brain turned to them.

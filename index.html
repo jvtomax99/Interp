@@ -6079,23 +6079,50 @@ function knowledgeEntryHtml(){
    same layout: domains are bands of the cortex. Tapping it opens the full
    brain. Draws only while on screen and the page is visible; still under
    reduced motion. */
-function kbMiniHtml(){
+function kbMiniHtml(opts){
+  opts = opts || {};
   let total = 0, known = 0;
   DATA.categories.forEach(c => c.terms.forEach(t => { if(t.en && t.es){ total++; if(kbLevel(TERM_REVIEWS[t.id]) === 3) known++; } }));
-  const line = !termReviewsLoaded ? 'Loading your record…' : `${known} of ${total} known${total ? ' · ' + Math.round(100 * known / total) + '%' : ''}`;
+  const sess = opts.session && (opts.session.right.length || opts.session.missed.length) ? opts.session : null;
+  KBM.next = sess;
   requestAnimationFrame(kbMiniStart);
+  if(sess){
+    // The session summary: what just lit up, and a way into the full brain turned to those terms.
+    const r = sess.right.length, m = sess.missed.length, line = `${r} lit up${m ? ` · ${m} to practise` : ''}`;
+    return `<button type="button" class="kb-mini is-session dash-in" style="--i:0" data-focus="${escapeAttr(JSON.stringify(sess))}" onclick="kbMiniOpen(this)" aria-label="This session in your brain: ${escapeAttr(line)}. See it in your brain">
+      <canvas class="kb-mini-scan" id="kbMini" aria-hidden="true"></canvas>
+      <span class="kb-mini-text"><b>This session in your brain</b><span>${escapeHtml(line)}</span><span class="kb-mini-cta">See it in your brain</span></span>
+      <svg class="kb-mini-go" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>`;
+  }
+  const line = !termReviewsLoaded ? 'Loading your record…' : `${known} of ${total} known${total ? ' · ' + Math.round(100 * known / total) + '%' : ''}`;
   return `<button type="button" class="kb-mini dash-in" style="--i:0" onclick="window.openHumcBrain && openHumcBrain('you')" aria-label="Your knowledge brain: ${escapeAttr(line)}. Open it">
     <canvas class="kb-mini-scan" id="kbMini" aria-hidden="true"></canvas>
     <span class="kb-mini-text"><b>Your knowledge brain</b><span>${escapeHtml(line)}</span></span>
     <svg class="kb-mini-go" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>`;
 }
-const KBM = { el: null, raf: 0, pts: null, on: true, io: null };
+function kbMiniOpen(el){
+  let focus = null;
+  try{ focus = JSON.parse(el.dataset.focus || 'null'); }catch(e){}
+  if(window.openHumcBrain) openHumcBrain('you', { focus });
+}
+// next/sess: a session's terms to light up ({ right, missed } ids); played: sessions already shown, so a redraw doesn't replay it.
+const KBM = { el: null, raf: 0, pts: null, on: true, io: null, next: null, sess: null, t0: 0, played: new Set() };
 function kbMiniStart(){
   const c = document.getElementById('kbMini');
   if(!c || c === KBM.el) return;
   cancelAnimationFrame(KBM.raf);
   KBM.el = c; KBM.pts = kbMiniPoints(); KBM.on = true;
+  KBM.sess = null;
+  if(KBM.next){
+    const key = KBM.next.right.join() + '|' + KBM.next.missed.join(), map = {};
+    KBM.next.right.forEach((id, k) => map[id] = { ok: true, at: 500 + k * 260 });
+    KBM.next.missed.forEach((id, k) => map[id] = { ok: false, at: 700 + KBM.next.right.length * 260 + k * 320 });
+    KBM.sess = { map, end: 1700 + KBM.next.right.length * 260 + KBM.next.missed.length * 320 };
+    KBM.t0 = KBM.played.has(key) || reducedMotion() ? -1e9 : performance.now();
+    KBM.played.add(key);
+  }
   if(KBM.io) KBM.io.disconnect();
   KBM.io = new IntersectionObserver(es => { KBM.on = es[0].isIntersecting; if(KBM.on && !KBM.raf) KBM.raf = requestAnimationFrame(kbMiniFrame); });
   KBM.io.observe(c);
@@ -6120,7 +6147,7 @@ function kbMiniPoints(){
   cats.slice().sort((a, b) => collateTerms(top(a), top(b))).forEach(c => c.terms.forEach(t => {
     if(!t.en || !t.es) return;
     const r = TERM_REVIEWS[t.id], lv = kbLevel(r);
-    terms.push({ color: lv === 1 ? '#FF8A8A' : c.color || '#7D89B0', lv, over: !!(r && r.reviewCount && r.nextReviewAt <= now), box: r ? r.box || 0 : 0 });
+    terms.push({ id: t.id, color: lv === 1 ? '#FF8A8A' : c.color || '#7D89B0', lv, over: !!(r && r.reviewCount && r.nextReviewAt <= now), box: r ? r.box || 0 : 0 });
   }));
   // Domains as bands: outer-cortex spots in order around each hemisphere.
   const spots = [];
@@ -6144,8 +6171,22 @@ function kbMiniFrame(now){
   x.globalCompositeOperation = 'lighter';
   x.fillStyle = 'rgba(110,145,230,.22)';
   KBM.pts.shell.forEach(p => { const q = proj(p); x.fillRect(q[0], q[1], 1.1, 1.1); });
+  const S = KBM.sess, el = now - KBM.t0;
   KBM.pts.terms.forEach(t => {
-    const q = proj(t.p), front = q[2] > -.2 ? 1 : .55;
+    const q = proj(t.p), m = S && S.map[t.id];
+    let front = q[2] > -.2 ? 1 : .55;
+    if(m){
+      // This session's terms: dark until their turn, then the right ones glow on and the missed ones pulse red.
+      const e = (el - m.at) / (m.ok ? 700 : 1000);
+      if(e < 0){ x.fillStyle = 'rgba(143,163,214,.35)'; x.fillRect(q[0] - .9, q[1] - .9, 1.8, 1.8); return; }
+      if(e < 1){
+        const k = m.ok ? 1 - e : Math.abs(Math.sin(e * Math.PI * 2)), col = m.ok ? t.color : '#FF6B6B';
+        x.globalAlpha = .35 + .5 * k; x.fillStyle = col; x.beginPath(); x.arc(q[0], q[1], 3 + 6 * k, 0, 7); x.fill();
+        x.globalAlpha = 1; x.fillStyle = m.ok ? '#FFFFFF' : '#FFB3B3'; x.beginPath(); x.arc(q[0], q[1], 1.4 + .8 * k, 0, 7); x.fill();
+        return;
+      }
+      front = 1;
+    }
     if(t.lv === 0){ x.fillStyle = `rgba(143,163,214,${.28 * front})`; x.fillRect(q[0] - .8, q[1] - .8, 1.6, 1.6); return; }
     const b = (t.lv === 1 ? .55 : t.lv === 2 ? .7 : 1) * (t.over ? .6 : 1) * front;
     x.globalAlpha = b * .26; x.fillStyle = t.color; x.beginPath(); x.arc(q[0], q[1], t.lv === 3 ? 3.2 : 2.6, 0, 7); x.fill();
@@ -6607,6 +6648,9 @@ function renderReviewSummary(){
     ${rs.some(r => r.self) ? `<p class="rv-note">${rs.filter(r => r.self).length} you checked yourself.</p>` : ''}
     <p class="rv-note">One right answer moves a term one step; it takes several reviews over days to really know one.</p>
   </div>`;
+  // The session in your knowledge brain: each term once, by how it ended.
+  const lastOk = [...new Set(rs.map(r => r.id))].filter(id => last(id).ok);
+  if(n) html += kbMiniHtml({ session: { right: lastOk, missed: left.map(r => r.id) } });
   if(left.length){
     html += `<div class="rv-mistakes is-open"><p class="rv-lab">Your mistakes</p><ul>${left.map(r => `<li><b>${escapeHtml(r.term.en)}</b><span>${escapeHtml(r.term.es)}</span>
       ${r.ans ? `<small>You wrote “${escapeHtml(r.ans)}”</small>` : ''}${(() => { const d = r.check && r.check.kind !== 'self' ? reviewDistinction(r.term, r.check) : ''; return d ? `<small>${escapeHtml(d)}</small>` : ''; })()}</li>`).join('')}</ul>

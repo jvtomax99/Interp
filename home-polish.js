@@ -2010,9 +2010,10 @@
      knowledge brain, brain/you.html, which asks for your own record by message
      ('brain-want'; knowledgeBrainData in index.html) and asks the app to
      practise a domain or open a term, which closes it first. */
-  let brainOv=null;
+  let brainOv=null, brainFocus=null;   // brainFocus: terms the knowledge brain opens turned to (a Term Review session's)
   const closeBrain=()=>{if(brainOv)brainOv.classList.remove('show');};
-  window.openHumcBrain=function(view){
+  window.openHumcBrain=function(view,opts){
+    brainFocus=view==='you'&&opts&&opts.focus||null;
     if(!brainOv){
       brainOv=document.createElement('div');
       brainOv.className='overlay brain-ov';
@@ -2040,7 +2041,8 @@
     if(!f||e.source!==f.contentWindow)return;
     if(m.ih==='brain-close')closeBrain();
     else if(m.ih==='brain-want'&&typeof window.knowledgeBrainData==='function'){
-      window.knowledgeBrainData().then(data=>{try{e.source.postMessage({ih:'brain-data',data},location.origin);}catch(err){}});
+      const focus=brainFocus;brainFocus=null;
+      window.knowledgeBrainData().then(data=>{try{e.source.postMessage({ih:'brain-data',data,focus},location.origin);}catch(err){}});
     }
     else if(m.ih==='brain-practice'&&typeof window.knowledgePractise==='function'){closeBrain();window.knowledgePractise(String(m.domain||''));}
     else if(m.ih==='brain-term'&&typeof window.knowledgeOpenTerm==='function'){closeBrain();window.knowledgeOpenTerm(String(m.id||''));}

@@ -7348,6 +7348,8 @@ body.pv-open{ overflow:hidden; }
 .kb-mini-text b{ font-size:var(--fs-subhead, 15px); font-weight:650; letter-spacing:-.015em; }
 .kb-mini-text span{ font-size:var(--fs-footnote, 13px); line-height:1.35; color:#A4B0CC; font-variant-numeric:tabular-nums; }
 .kb-mini-go{ flex:none; width:24px; height:24px; color:#7FB8FF; }
+.kb-mini-text .kb-mini-cta{ margin-top:3px; font-weight:650; color:#7FB8FF; }
+.kb-mini.is-session{ margin-top:var(--sp-4, 17px); }
 .kb-mini:active, .kb-mini.is-pressed{ transform:scale(.985); }
 .kb-mini:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
 @media (prefers-reduced-motion:reduce){ .kb-mini{ transition:none; } .kb-mini:active, .kb-mini.is-pressed{ transform:none; } }
