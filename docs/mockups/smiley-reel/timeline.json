@@ -1,0 +1,43 @@
+{
+  "_": "Every moment of the reel, in seconds. scene.html moves Dr. Smiley and the camera from it; sound.py puts each sound on it. Change a number here and re-render; nothing else holds a time.",
+  "fps": 30,
+  "seconds": 12,
+  "bpm": 120,
+  "tiles": [
+    {"key": "translate", "label": "Translate", "color": "#2E8BD0", "pin": "translate", "note": 0},
+    {"key": "doctor-prep", "label": "Doctor Prep", "color": "#7C6A9C", "pin": "doctor-prep", "note": 4},
+    {"key": "chat", "label": "Team Chat", "color": "#35A97A", "pin": "chat", "note": 7},
+    {"key": "add-term", "label": "Add Term", "color": "#B08D2A", "pin": "medical-terminology", "note": 12}
+  ],
+  "lightsUp": [0.0, 1.2],
+  "dropIn": {"from": 0.9, "land": 1.5, "at": "start"},
+  "hops": [
+    {"off": 2.0, "land": 2.5, "to": 0},
+    {"off": 3.0, "land": 3.5, "to": 1},
+    {"off": 4.0, "land": 4.5, "to": 2},
+    {"off": 5.0, "land": 5.5, "to": 3},
+    {"off": 7.5, "land": 8.1, "to": "front", "big": true}
+  ],
+  "camera": [
+    {"t": 0.0, "pos": [-4.9, 1.2, 4.3], "look": [-3.1, 0.6, 0.0], "focus": 4.6},
+    {"t": 1.5, "pos": [-4.4, 1.5, 4.4], "look": [-3.0, 0.65, 0.0], "focus": 4.6},
+    {"t": "track", "from": 1.5, "to": 5.9, "offset": [-1.0, 1.55, 4.3], "lookUp": 0.75, "lag": 0.22},
+    {"t": 5.9, "pos": [0.9, 1.9, 4.6], "look": [1.6, 0.75, 0.0], "focus": 4.7},
+    {"t": 7.4, "pos": [3.6, 4.0, 5.6], "look": [0.2, 0.35, -0.1], "focus": 7.2},
+    {"t": 9.0, "pos": [0.0, 1.7, 6.6], "look": [0.0, 1.05, 0.0], "focus": 5.6},
+    {"t": 12.0, "pos": [0.0, 1.55, 6.0], "look": [0.0, 1.05, 0.0], "focus": 5.0}
+  ],
+  "faces": [
+    [0.0, "shut"], [0.95, "surprised"], [1.5, "smile1"], [1.57, "smile2"], [1.64, "smile"], [1.95, "lookR"],
+    [2.25, "smile"], [2.6, "blink1"], [2.65, "blink2"], [2.7, "shut"], [2.78, "blink2"], [2.83, "smile"],
+    [3.55, "laughB"], [3.75, "smile"], [4.55, "love"], [4.95, "smile"], [5.55, "laugh1"], [5.6, "laugh2"],
+    [5.65, "laugh"], [5.8, "laughB"], [5.95, "laugh"], [6.1, "laughB"], [6.25, "laugh"], [6.5, "smile"],
+    [6.9, "lookUL"], [7.3, "smile"], [7.45, "surprised"], [8.15, "smile2"], [8.22, "smile"], [9.3, "blink1"],
+    [9.35, "blink2"], [9.4, "shut"], [9.48, "blink2"], [9.53, "smile"], [10.4, "wink1"], [10.45, "wink2"],
+    [10.5, "wink"], [11.05, "wink2"], [11.1, "wink1"], [11.15, "smile"]
+  ],
+  "titleIn": 8.6,
+  "title": "Interpreter Hub",
+  "tagline": "For the HUMC interpreter team",
+  "fadeOut": [11.5, 12.0]
+}

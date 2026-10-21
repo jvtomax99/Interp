@@ -273,6 +273,13 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-21 Dr. Smiley reel (this PR): a 12-second video made entirely
+  as code, after a reel Jose saw (a mascot hopping across a 3D screen).
+  Dr. Smiley, a cutout of his own art, drops onto Home laid flat and hops
+  across its four quick tiles; each lights in its colour and pops its pin;
+  the camera swings round; he lands under "Interpreter Hub" and winks.
+  Sound made in numpy on the same timing file. `docs/mockups/smiley-reel/`.
+  Not in the app (Jose decides).
 - 2026-10-20 Journey flake (this PR): "Term Review on 5 of your
   still-learning terms" failed on two PR runs within 30 minutes (#94,
   #98; neither touches that path) while passing on main's head and
@@ -700,6 +707,13 @@ then read the log; it names the suite and the check.
 
 ## Facts (so nobody re-checks)
 
+- Making video from code in this container: no graphics card, so Blender
+  (`pip install bpy` works) would render on the CPU, far too slow for 360
+  frames. three.js in the tests' headless Chromium with
+  `--use-angle=swiftshader --enable-unsafe-swiftshader` draws depth of
+  field and soft shadows at 1080 x 1920 in about 1.3 s a frame. Whisper
+  models can't be fetched (Hugging Face is blocked), so a video's speech
+  can't be transcribed here; burned-in captions can be read from frames.
 - Recording a smooth, sharp clip of an animation from the tests' Chromium:
   `recordVideo` and the CDP screencast give CSS-pixel frames (blurry), and
   screenshots in a loop run at about 4 fps. What works: CSS `zoom: 3` on

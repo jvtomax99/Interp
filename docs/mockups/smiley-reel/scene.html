@@ -1,0 +1,361 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Dr. Smiley reel</title>
+<style>
+  html, body { margin:0; background:#0B1226; overflow:hidden; }
+  canvas { display:block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./node_modules/three/build/three.module.js",
+  "three/addons/": "./node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<script type="module">
+/* The reel, drawn as code. render.cjs opens this page in a hidden browser,
+   calls draw(n) for every frame and photographs the canvas. Nothing here
+   reads the clock: frame n always looks the same, so a re-render of one
+   moment matches the rest. Every time comes from timeline.json. */
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1080, H = +q.get('h') || 1920;
+const T = await (await fetch('./timeline.json')).json();
+const ROOT = '../../../';
+
+const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error(src)); i.src = src; });
+await document.fonts.load('650 80px Inter');
+await document.fonts.load('550 40px Inter');
+
+/* ---------- Easing ---------- */
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const smooth = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const smoother = x => { x = clamp01(x); return x * x * x * (x * (x * 6 - 15) + 10); };
+const lerp = (a, b, k) => a + (b - a) * k;
+const lerp3 = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
+// A spring that settles with one small overshoot: for pops and presses.
+const springOut = x => { x = clamp01(x); return 1 - Math.exp(-6 * x) * Math.cos(9 * x); };
+
+/* ---------- Renderer, camera, post ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0B1226');
+scene.fog = new THREE.Fog('#0B1226', 12, 30);
+const camera = new THREE.PerspectiveCamera(46, W / H, 0.05, 60);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 3, aperture: 0.0035, maxblur: 0.012 });
+composer.addPass(bokeh);
+composer.addPass(new OutputPass());
+
+/* ---------- Light ---------- */
+const hemi = new THREE.HemisphereLight('#AFC6FF', '#141B33', 0.5);
+scene.add(hemi);
+const key = new THREE.DirectionalLight('#FFE3BE', 2.4);
+key.position.set(-3.5, 6, 4.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -5, right: 5, top: 4, bottom: -4, near: 1, far: 20 });
+key.shadow.bias = -0.0004;
+key.shadow.radius = 4;
+scene.add(key);
+const rim = new THREE.DirectionalLight('#01B8E6', 1.6);
+rim.position.set(2.5, 3, -5);
+scene.add(rim);
+
+/* ---------- Stage: the floor and Home, laid flat ---------- */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: '#121A35', roughness: 0.55, metalness: 0.1 }));
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.14;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const SLAB = { w: 7.6, d: 3.6, z: -0.45 };
+const slab = new THREE.Mesh(new RoundedBoxGeometry(SLAB.w, 0.14, SLAB.d, 4, 0.06),
+  new THREE.MeshPhysicalMaterial({ color: '#F4F6FA', roughness: 0.4, clearcoat: 0.4 }));
+slab.position.set(0, -0.07, SLAB.z);
+slab.receiveShadow = true;
+scene.add(slab);
+
+function canvasTex(w, h, paint){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  paint(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+function roundRect(g, x, y, w, h, r){ g.beginPath(); g.roundRect(x, y, w, h, r); }
+
+// The top of the slab: Home's soft colour mesh, the app's name and Search.
+const homeTex = canvasTex(1900, 900, (g, w, h) => {
+  g.fillStyle = '#F4F6FA'; g.fillRect(0, 0, w, h);
+  for (const [x, y, r, c] of [[260, 160, 520, '#DCE9F8'], [1500, 120, 560, '#E6E3F2'], [1100, 820, 600, '#DDF1EA'], [200, 860, 420, '#F3ECD9']]) {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, c); gr.addColorStop(1, 'rgba(244,246,250,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }
+  g.fillStyle = '#252E6D'; g.font = '650 74px Inter'; g.textBaseline = 'alphabetic';
+  g.fillText('Interpreter Hub', 120, 150);
+  g.fillStyle = '#5A6478'; g.font = '550 40px Inter';
+  g.fillText('Spanish · English medical interpreting', 122, 212);
+  g.fillStyle = 'rgba(255,255,255,0.9)'; roundRect(g, 120, 262, w - 240, 92, 46); g.fill();
+  g.strokeStyle = '#E2E7F0'; g.lineWidth = 3; g.stroke();
+  g.fillStyle = '#98A1B3'; g.font = '550 38px Inter'; g.fillText('Search terms, doctors, phrases', 200, 322);
+  g.strokeStyle = '#98A1B3'; g.lineWidth = 5; g.beginPath(); g.arc(160, 303, 15, 0, 7); g.stroke();
+  g.beginPath(); g.moveTo(171, 314); g.lineTo(184, 327); g.stroke();
+});
+const homeTop = new THREE.Mesh(new THREE.PlaneGeometry(SLAB.w - 0.12, SLAB.d - 0.12), new THREE.MeshStandardMaterial({ map: homeTex, roughness: 0.6 }));
+homeTop.rotation.x = -Math.PI / 2;
+homeTop.position.set(0, 0.001, SLAB.z);
+homeTop.receiveShadow = true;
+scene.add(homeTop);
+
+/* ---------- Home's four quick tiles ---------- */
+const TILE = { w: 1.0, h: 0.28, gap: 0.25 };
+const tileX = i => (i - 1.5) * (TILE.w + TILE.gap);
+const START = [-3.15, 0, 0.05];
+const FRONT = [0, 0, 1.05];
+const pins = await Promise.all(T.tiles.map(t => loadImg(`${ROOT}pins/${t.pin}.webp`)));
+const tiles = T.tiles.map((t, i) => {
+  const grp = new THREE.Group();
+  grp.position.set(tileX(i), 0, 0);
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#FFFFFF', roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.2, emissive: new THREE.Color(t.color), emissiveIntensity: 0 });
+  const box = new THREE.Mesh(new RoundedBoxGeometry(TILE.w, TILE.h, TILE.w, 5, 0.13), mat);
+  box.position.y = TILE.h / 2;
+  box.castShadow = box.receiveShadow = true;
+  grp.add(box);
+  // The face: a duotone colour block with the label, as on the real tile.
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(TILE.w - 0.16, TILE.w - 0.16), new THREE.MeshStandardMaterial({
+    transparent: true, roughness: 0.5,
+    map: canvasTex(512, 512, (g, w, h) => {
+      g.fillStyle = t.color; g.globalAlpha = 0.18; roundRect(g, 150, 70, 220, 220, 60); g.fill();
+      g.globalAlpha = 1; g.drawImage(pins[i], 156, 60, 200, 200);
+      g.fillStyle = '#151C2C'; g.font = '650 62px Inter'; g.textAlign = 'center';
+      g.fillText(t.label, w / 2, 400);
+    }),
+  }));
+  face.rotation.x = -Math.PI / 2;
+  face.position.y = TILE.h + 0.002;
+  box.add(face); face.position.y = TILE.h / 2 + 0.002;
+  // A pool of the tile's colour on Home under it, and a light, for when he lands.
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshBasicMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0,
+    map: canvasTex(256, 256, (g, w) => {
+      const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      gr.addColorStop(0, t.color); gr.addColorStop(0.45, t.color + '66'); gr.addColorStop(1, t.color + '00');
+      g.fillStyle = gr; g.fillRect(0, 0, w, w);
+    }),
+  }));
+  halo.rotation.x = -Math.PI / 2; halo.position.y = 0.004;
+  grp.add(halo);
+  const lamp = new THREE.PointLight(t.color, 0, 2.6, 1.6);
+  lamp.position.set(0, 0.9, 0.35);
+  grp.add(lamp);
+  // Its pin pops up out of the tile and floats there.
+  const pinTex = new THREE.Texture(pins[i]); pinTex.needsUpdate = true; pinTex.colorSpace = THREE.SRGBColorSpace;
+  const pin = new THREE.Sprite(new THREE.SpriteMaterial({ map: pinTex, transparent: true, opacity: 0 }));
+  pin.scale.set(0.001, 0.001, 1);
+  grp.add(pin);
+  scene.add(grp);
+  return { ...t, grp, box, mat, halo, lamp, pin };
+});
+
+/* ---------- Dr. Smiley: Jose's drawing as a cutout ---------- */
+// Picture layout, in base.webp pixels (480 x 600): the same numbers as
+// drSmileyArt() in index.html, from its 240 x 300 picture units, times two.
+const ART = { w: 480, h: 600, face: [80, 212, 302, 222], browL: [90, 175, 130, 65], browR: [270, 190, 125, 90], browUnit: 4.53 };
+const FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
+  'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'surprised', 'sad', 'worried', 'doubt'];
+// DR_BROWS and DR_BROW_OF from index.html: [left lift, left tilt, right lift, right tilt].
+const BROWS = { rest: [0, 0, 0, 0], relax: [.8, 0, .8, 0], lift: [-1.2, 0, -1.2, 0], glad: [-2, 0, -2, 0], laugh: [-2.8, 0, -2.8, 0], up: [-4.2, 0, -4.2, 0],
+  quizL: [.4, -7, -3.6, -5], quizR: [-3.6, 5, .4, 7], down: [.8, 0, .8, 0], love: [-2, -6, -2, 6], wink: [-1, 0, 1.2, -4], caring: [-1, -11, -1, 11],
+  worried: [-1.4, -15, -1.4, 15], doubt: [-3, -4, 1, 2] };
+const BROW_OF = { shut: 'relax', sleep: 'relax', smile1: 'lift', smile2: 'glad', smile: 'glad', laugh1: 'laugh', laugh2: 'laugh', laugh: 'laugh', laughB: 'laugh',
+  lookU: 'up', lookUL: 'quizL', lookUR: 'quizR', lookD: 'down', lookDL: 'down', lookDR: 'down', love: 'love', wink1: 'wink', wink2: 'wink', wink: 'wink',
+  surprised: 'up', sad: 'caring', worried: 'worried', doubt: 'doubt' };
+const [base, faceStrip, browL, browR] = await Promise.all(['base', 'face', 'brow-l', 'brow-r'].map(n => loadImg(`${ROOT}drsmiley/${n}.webp`)));
+const drCanvas = document.createElement('canvas'); drCanvas.width = ART.w; drCanvas.height = ART.h;
+const drG = drCanvas.getContext('2d');
+const drTex = new THREE.CanvasTexture(drCanvas); drTex.colorSpace = THREE.SRGBColorSpace;
+const DR_H = 1.12, DR_W = DR_H * ART.w / ART.h;
+const drGeo = new THREE.PlaneGeometry(DR_W, DR_H); drGeo.translate(0, DR_H / 2, 0); // feet at the origin, so squash keeps them down
+// His own picture glows a little, so he reads as Jose's drawing from any side the light falls.
+const dr = new THREE.Mesh(drGeo, new THREE.MeshStandardMaterial({ map: drTex, emissiveMap: drTex, emissive: '#FFFFFF', emissiveIntensity: 0.55, transparent: true, alphaTest: 0.5, roughness: 0.8, side: THREE.DoubleSide }));
+dr.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: drTex, alphaTest: 0.5 });
+dr.castShadow = true;
+const drRig = new THREE.Group(); drRig.add(dr); scene.add(drRig);
+// A soft contact shadow that tightens as he comes down.
+const blob = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, opacity: 0.5,
+  map: canvasTex(128, 128, (g, w) => { const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(10,18,45,0.9)'); gr.addColorStop(1, 'rgba(10,18,45,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); }) }));
+blob.rotation.x = -Math.PI / 2;
+scene.add(blob);
+
+function faceAt(t){ let f = 'rest'; for (const [at, name] of T.faces) if (t >= at) f = name; return f; }
+const browTarget = t => BROWS[BROW_OF[faceAt(t)] || 'rest'];
+// The brows glide while the face steps: an average of where they were aiming over the last 0.16 s.
+function browsAt(t){ const out = [0, 0, 0, 0]; let n = 0; for (let k = 0; k <= 8; k++) { const b = browTarget(t - k * 0.02); for (let j = 0; j < 4; j++) out[j] += b[j]; n++; } return out.map(v => v / n); }
+function paintSmiley(t){
+  const g = drG, f = Math.max(0, FRAMES.indexOf(faceAt(t)));
+  g.clearRect(0, 0, ART.w, ART.h);
+  g.drawImage(base, 0, 0, ART.w, ART.h);
+  const [fx, fy, fw, fh] = ART.face;
+  g.drawImage(faceStrip, f * fw, 0, fw, fh, fx, fy, fw, fh);
+  const b = browsAt(t);
+  for (const [img, box, dy, deg] of [[browL, ART.browL, b[0], b[1]], [browR, ART.browR, b[2], b[3]]]) {
+    const [x, y, w, h] = box;
+    g.save(); g.translate(x + w / 2, y + h / 2 + dy * ART.browUnit); g.rotate(deg * Math.PI / 180);
+    g.drawImage(img, -w / 2, -h / 2, w, h); g.restore();
+  }
+  drTex.needsUpdate = true;
+}
+
+/* ---------- Where he is ---------- */
+const TOP = TILE.h;
+const spotOf = to => to === 'start' ? START : to === 'front' ? FRONT : [tileX(to), TOP, 0];
+// Lands: when each tile was pressed (for its glow, pin and dip).
+const landOf = T.tiles.map((_, i) => (T.hops.find(h => h.to === i) || {}).land ?? 99);
+function pressDip(i, t){ const k = t - landOf[i]; if (k < 0) return 0; return 0.06 * Math.exp(-7 * k) * Math.cos(10 * k) * (k < 1.2 ? 1 : 0); }
+
+function smileyAt(t){
+  // Before he arrives: falling in from above the start.
+  const d = T.dropIn;
+  let pos = [...START], air = 0, squash = 0, lean = 0, groundY = null;
+  if (t < d.land) {
+    const k = clamp01((t - d.from) / (d.land - d.from));
+    pos = [START[0], START[1] + 3.2 * (1 - k * k), START[2]]; air = t < d.from ? -1 : k;
+  }
+  let at = d.land;
+  for (const h of T.hops) {
+    const from = spotOf(h === T.hops[0] ? 'start' : T.hops[T.hops.indexOf(h) - 1].to), to = spotOf(h.to);
+    if (t >= at && t < h.off) pos = [...from];
+    if (t >= h.off && t < h.land) {
+      const k = (t - h.off) / (h.land - h.off), lift = h.big ? 1.0 : 0.62;
+      pos = lerp3(from, to, smooth(k)); groundY = pos[1]; pos[1] += 4 * lift * k * (1 - k);
+      air = k; lean = (to[0] - from[0]) > 0 ? -0.12 : 0.12;
+      lean *= Math.sin(Math.PI * k);
+    }
+    // Anticipation before take-off, a squash on landing.
+    const pre = h.off - t; if (pre > 0 && pre < 0.14) squash = Math.max(squash, 0.16 * Math.sin(Math.PI * (1 - pre / 0.14)));
+    const post = t - h.land; if (post >= 0 && post < 0.45) squash = Math.max(squash, 0.22 * Math.exp(-6 * post) * Math.cos(12 * post));
+    at = h.land;
+  }
+  if (t >= at) pos = [...spotOf(T.hops[T.hops.length - 1].to)];
+  const dl = t - d.land; if (dl >= 0 && dl < 0.5) squash = Math.max(squash, 0.28 * Math.exp(-6 * dl) * Math.cos(12 * dl));
+  // Standing on a tile that is still dipping from his landing.
+  for (let i = 0; i < tiles.length; i++) if (Math.abs(pos[0] - tileX(i)) < 0.05 && Math.abs(pos[1] - TOP) < 0.001) pos[1] -= pressDip(i, t);
+  const stretch = air > 0 && air < 1 ? 0.12 * Math.sin(Math.PI * air) : 0;
+  // Idle breathing when nothing else is going on.
+  const breathe = 0.012 * Math.sin(t * 2.4);
+  return { pos, groundY: groundY ?? pos[1], sy: 1 - squash + stretch + breathe, sx: 1 + squash * 0.8 - stretch * 0.6, lean, airborne: air > 0 && air < 1 };
+}
+
+/* ---------- Camera ---------- */
+const keys = T.camera.filter(c => typeof c.t === 'number');
+const track = T.camera.find(c => c.t === 'track');
+function keyCam(t){
+  let a = keys[0], b = keys[keys.length - 1];
+  for (let i = 0; i < keys.length - 1; i++) if (t >= keys[i].t && t <= keys[i + 1].t) { a = keys[i]; b = keys[i + 1]; break; }
+  const k = smoother((t - a.t) / Math.max(1e-6, b.t - a.t));
+  return { pos: lerp3(a.pos, b.pos, k), look: lerp3(a.look, b.look, k), focus: lerp(a.focus, b.focus, k) };
+}
+function cameraAt(t){
+  const c = keyCam(t);
+  const w = smooth((t - track.from) / 0.5) * smooth((track.to - t) / 0.5);
+  if (w > 0) {
+    const m = smileyAt(t - track.lag), s = [m.pos[0], m.groundY, m.pos[2]];
+    const tp = [s[0] + track.offset[0], s[1] + track.offset[1], s[2] + track.offset[2]];
+    const tl = [s[0] + 0.3, s[1] + track.lookUp, s[2]];
+    c.pos = lerp3(c.pos, tp, w); c.look = lerp3(c.look, tl, w);
+    c.focus = lerp(c.focus, Math.hypot(tp[0] - s[0], tp[1] - s[1] - 0.5, tp[2] - s[2]), w);
+  }
+  // A small hand-held drift so the frame breathes.
+  c.pos[0] += 0.015 * Math.sin(t * 0.9); c.pos[1] += 0.01 * Math.sin(t * 1.3 + 1);
+  return c;
+}
+
+/* ---------- Title ---------- */
+const title = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.78), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false,
+  map: canvasTex(1600, 500, (g, w) => {
+    g.textAlign = 'center';
+    g.shadowColor = 'rgba(1,184,230,0.55)'; g.shadowBlur = 40;
+    g.fillStyle = '#FFFFFF'; g.font = '650 150px Inter'; g.fillText(T.title, w / 2, 210);
+    g.shadowBlur = 0; g.fillStyle = '#AFC6FF'; g.font = '550 64px Inter'; g.fillText(T.tagline, w / 2, 340);
+    g.fillStyle = '#01B8E6'; g.fillRect(w / 2 - 70, 395, 140, 6);
+  }) }));
+title.position.set(0, 1.9, 0.6);
+scene.add(title);
+
+/* ---------- One frame ---------- */
+function draw(n){
+  const t = n / T.fps;
+  // Lights up from dark.
+  const up = smooth((t - T.lightsUp[0]) / (T.lightsUp[1] - T.lightsUp[0]));
+  key.intensity = 2.4 * up; rim.intensity = 1.6 * up; hemi.intensity = 0.15 + 0.4 * up;
+  const out = smooth((t - T.fadeOut[0]) / (T.fadeOut[1] - T.fadeOut[0]));
+  renderer.toneMappingExposure = 1.05 * (1 - out);
+
+  // Tiles: dip, colour and pin from the moment he lands on each.
+  tiles.forEach((tl, i) => {
+    const k = t - landOf[i], lit = k >= 0 ? smooth(k / 0.25) : 0;
+    tl.box.position.y = TILE.h / 2 - pressDip(i, t);
+    tl.mat.emissiveIntensity = 0.16 * lit + (k >= 0 && k < 0.4 ? 0.3 * (1 - k / 0.4) : 0);
+    tl.halo.material.opacity = 0.75 * lit + (k >= 0 && k < 0.5 ? 0.6 * (1 - k / 0.5) : 0);
+    tl.lamp.intensity = 2.2 * lit;
+    const p = k >= 0 ? springOut(k / 0.7) : 0;
+    tl.pin.material.opacity = clamp01(k / 0.15);
+    tl.pin.scale.set(0.62 * p + 0.001, 0.62 * p + 0.001, 1);
+    tl.pin.position.set(0, TILE.h + 0.45 + 0.42 * p + 0.04 * Math.sin(t * 2.2 + i), -0.18);
+  });
+
+  // Dr. Smiley.
+  const s = smileyAt(t);
+  drRig.position.set(...s.pos);
+  dr.scale.set(s.sx, s.sy, 1);
+  const cam = cameraAt(t);
+  drRig.rotation.set(0, Math.atan2(cam.pos[0] - s.pos[0], cam.pos[2] - s.pos[2]), 0);
+  dr.rotation.z = s.lean;
+  dr.visible = t >= T.dropIn.from;
+  paintSmiley(t);
+  const onTile = tiles.some((_, i) => Math.abs(s.pos[0] - tileX(i)) < TILE.w / 2 && Math.abs(s.pos[2]) < TILE.w / 2);
+  const ground = onTile ? TOP : 0;
+  const hgt = Math.max(0, s.pos[1] - ground);
+  blob.position.set(s.pos[0], ground + 0.006, s.pos[2] + 0.05);
+  blob.scale.setScalar(0.95 / (1 + hgt * 0.8));
+  blob.material.opacity = dr.visible ? 0.55 / (1 + hgt * 1.5) : 0;
+
+  // The title rises in for the last seconds.
+  const ti = smooth((t - T.titleIn) / 0.8);
+  title.material.opacity = ti;
+  title.position.y = 1.82 + 0.1 * ti;
+
+  camera.position.set(...cam.pos);
+  camera.lookAt(...cam.look);
+  bokeh.uniforms.focus.value = cam.focus;
+  composer.render();
+}
+window.draw = draw;
+window.frames = T.fps * T.seconds;
+window.ready = true;
+draw(0);
+</script>
+</body>
+</html>
