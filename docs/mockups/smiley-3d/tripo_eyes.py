@@ -25,7 +25,7 @@ S = {'v1':      dict(cover=1.16, depth=.014, sink=.0055, open=50, ball=True, lin
      'matched': dict(cover=1.0, depth=.012, sink=.0062, open=72, ball=True, liner=True),
      'painted': dict(cover=1.0, depth=.0075, sink=.0045, open=88, ball=False, liner=False)}[EYE_STYLE]
 COVER, DEPTH, SINK, OPEN = S['cover'], S['depth'], S['sink'], S['open']
-SHUT = -62            # lid edge elevation on the eyeball when closed, degrees
+SHUT = -62 if EYE_STYLE == 'v1' else -68   # lid edge elevation when closed (matched: the ball's whole opening shows, so all the way down)
 
 
 def mesh_from(name, verts, faces, mat):
@@ -118,6 +118,9 @@ def set_blink(lid, amount):
     glint = bpy.data.objects.get('Glint.' + lid.name.split('.')[-1])
     if glint:                      # the shine sits on the eye, so it goes when the lid covers it
         glint.hide_render = amount > .2 or EYE_STYLE == 'painted'
+    liner = bpy.data.objects.get('Liner.' + lid.name.split('.')[-1])
+    if liner:                      # once the lid comes down, its own dark edge is the lash line
+        liner.hide_render = amount > .22
 
 
 def build_eyes(ob, eyes):
@@ -128,8 +131,8 @@ def build_eyes(ob, eyes):
     at = skin_m.node_tree.nodes.new('ShaderNodeAttribute'); at.attribute_name = 'edge'
     lr = skin_m.node_tree.nodes.new('ShaderNodeValToRGB')
     # skin, then a thin dark lash line along the very edge, there at every stage of a blink
-    lr.color_ramp.elements[0].position, lr.color_ramp.elements[0].color = .935, srgb(250, 205, 180)
-    lr.color_ramp.elements[1].position, lr.color_ramp.elements[1].color = .965, srgb(38, 18, 10)
+    lr.color_ramp.elements[0].position, lr.color_ramp.elements[0].color = (.935 if EYE_STYLE == 'v1' else .90), srgb(250, 205, 180)
+    lr.color_ramp.elements[1].position, lr.color_ramp.elements[1].color = (.965 if EYE_STYLE == 'v1' else .93), srgb(36, 18, 10)
     skin_m.node_tree.links.new(at.outputs['Fac'], lr.inputs['Fac'])
     skin_m.node_tree.links.new(lr.outputs['Color'], sb.inputs['Base Color'])
     hl_m = bpy.data.materials.new('Catchlight'); hl_m.use_nodes = True
@@ -169,7 +172,7 @@ def build_eyes(ob, eyes):
         set_gaze(ball, gx0, gz0)
         # the upper lid: a shell just outside the ball, from the top down to OPEN;
         # its shape key 'Shut' brings the edge down to SHUT
-        lr_, rows, segs = 1.07, 64, 128      # fine enough that the edge stays smooth
+        lr_, rows, segs = (1.07 if EYE_STYLE == 'v1' else 1.2), 64, 128   # matched: wide enough to cover the painted eyeliner when shut
         def lid_verts(edge):
             vs = []
             for r in range(rows + 1):
