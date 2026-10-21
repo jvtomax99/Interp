@@ -63,6 +63,28 @@ move each, with the same proof every time and nothing visible changing.
    Measure it; if the first paint moves by more than a frame, keep the
    startup-path CSS inline (the shell, the Home banner) and move the rest.
    After the first visit the service worker has it.
+   **Built 2026-10-21; measured** (`tests/tools/first-paint.cjs`: each
+   version served the way Vercel does, brotli and ETag, Chromium's network
+   throttling, iPhone size, CPU 4x, medians; "first paint" is the first
+   thing drawn, "Home" the first `ih:home-paint`):
+
+   | Network, visit | First paint, before -> after | Home on screen, before -> after |
+   |---|---|---|
+   | Weak Wi-Fi (150 ms, 1.6 Mbps), first visit (5 runs) | 1788 -> 2116 ms (+328) | 5497 -> 5195 ms (-302) |
+   | Weak Wi-Fi, return visit | 1736 -> 2060 ms (+324) | 4819 -> 4467 ms (-352) |
+   | 4G (60 ms, 9 Mbps), first visit (9 runs) | 604 -> 668 ms (+64) | 1871 -> 1836 ms (-35) |
+   | 4G, return visit | 540 -> 584 ms (+44) | 1138 -> 1228 ms (+90) |
+
+   So the trade is real: the first paint (the top bar and background) comes
+   later, by a third of a second on weak Wi-Fi, because it now waits for
+   `app.css` (78 KB compressed) where the inline block arrived with the
+   page's first bytes; Home itself comes about as much sooner there,
+   because the page it waits for is 467 KB smaller. On 4G both moves are
+   under 0.1 s. Looks: every element's computed style and box on 30
+   screens and sheets x phone/computer x light/dark
+   (`tests/tools/style-proof.cjs`) differ only where two runs of the old
+   version differ from each other (chat timestamps, the tab bar's moving
+   lens, Home text under a sheet). Jose's call (below).
 2. **Data out, one constant per PR**, biggest first: `GUIDE_TOPICS` (the
    guide is opened on purpose, never at startup), `SEED_QUESTIONS`,
    `FALSE_FRIENDS`, `DOMAIN_ICONS` (check: are the icons needed for the first

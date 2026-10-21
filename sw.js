@@ -54,6 +54,7 @@ const PRECACHE = [
   './drsmiley/hat-mirror.webp',
   './drsmiley/hat-grad.webp',
   './pin-icons.js',
+  './app.css',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
@@ -174,12 +175,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  /* The app's own code beside the page (Home behaviour and its styles, the
-   * pins wiring): network-first like the page, so a deploy's page and its
-   * Home code always arrive together. As stale-while-revalidate these were
+  /* The app's own code beside the page (its styles in app.css, Home
+   * behaviour and its styles, the pins wiring): network-first like the
+   * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  if (/\/(?:app\.css|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
