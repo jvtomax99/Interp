@@ -266,8 +266,8 @@ then read the log; it names the suite and the check.
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
-  this PR. Next: the other data constants (`SEED_QUESTIONS`,
-  `FALSE_FRIENDS`), each checked for startup readers first.
+  #115, live. `SEED_QUESTIONS`: this PR. Next: `FALSE_FRIENDS`, checked
+  for startup readers first.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -277,6 +277,12 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-21 Split `index.html`, phase 2, the practice bank (this PR):
+  `CCHI_DOMAINS` and `SEED_QUESTIONS` are `practice/questions.js`, loaded
+  like `guide/topics.js`. Identical in the browser before and after;
+  `sw.js`, the harness, `first-paint.cjs`, `brain-data.cjs` (the section
+  is gone from the census), `AGENTS.md`/`CLAUDE.md`/`daily-drill.md`.
+  Phase 2's guide (#115) merged on Jose's "Push", live as b1021.1248.
 - 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
   `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
   script loaded just before the app's own (Jose's pick over fetching it on

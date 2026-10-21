@@ -65,6 +65,7 @@ So:
 | 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
 | Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
 | User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
+| CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Everything else | `index.html` |
 
