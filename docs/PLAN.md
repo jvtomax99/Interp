@@ -60,6 +60,12 @@ sides, back and body, a skeleton for movement. Folder and method:
 `docs/mockups/smiley-3d/README.md`. One PR per gate, each waits for Jose:
 R1. The figure and skeleton: turntable and six poses (this PR). Jose
    approves the invented sides, back and body before any animation.
+   2026-10-21: three looks built in code (`STYLE` v1, figure, film) and
+   Jose's verdict on the last: "still not him". Next (his pick): picture-
+   to-3D. `concept.py` makes `out/concept-front.png` (his drawn head on
+   the 3D body, white background); Jose uploads it to Tripo or Meshy
+   (blocked from the cloud session), sends the GLB back; Claude cleans
+   it, rigs it with `BONES`, puts the face frames on its front as now.
 R2. The motions as short clips: idle breathing, anticipation crouch, jump
    with legs tucked, a spin or flip, a squash landing, wave, look, point,
    happy bounce; secondary motion (hair, coat hem, lanyard) on springs;
