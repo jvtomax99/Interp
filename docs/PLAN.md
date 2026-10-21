@@ -73,6 +73,12 @@ R1. The figure and skeleton: turntable and six poses (this PR). Jose
    a sculpted 3D face with 3D eyes, his expressions rebuilt as face
    controls matched to the 30 drawings (the drawn frames are not put on
    the 3D face). Rule: a visual plan before any mascot work (`AGENTS.md`).
+   Jose then made a model on Tripo (screen recording: Pixar-like, waving,
+   near-black hair). His notes: no glossy look; work on the hair. Plan
+   approved (`out/plan-tripo.png`), his picks: remake it on Tripo with the
+   arms down (the baked wave would stretch in jumps); hair recoloured to
+   the drawing's browns AND reshaped to its tall swoop; all matte. Next:
+   Jose attaches the new GLB in the chat (iCloud links are blocked here).
 R2. The motions as short clips: idle breathing, anticipation crouch, jump
    with legs tucked, a spin or flip, a squash landing, wave, look, point,
    happy bounce; secondary motion (hair, coat hem, lanyard) on springs;
