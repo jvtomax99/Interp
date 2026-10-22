@@ -136,6 +136,8 @@ def hook(t0, vel=96, upto=32, start=0, step=U, piano=False):
         if not start <= k < upto:
             continue
         t, dur = t0 + (k - start) * step, length * step * 0.92
+        if k in (13, 26):  # a phrase ends: the player breathes before the next
+            dur = length * step * 0.7
         accent = 8 if k in (0, 16) else 0
         if piano:
             n('piano', t, x, vel + accent, dur * 1.6, wobble=0.008)
@@ -275,8 +277,8 @@ def tumbao(b, halves, nxt, since=0.0, doubled=False):
 
 
 def bed(t0, name, vel, dur=1.5):
-    chord('strings', t0, CH[name][2], vel, dur)
-    chord('pad', t0, CH[name][2][:3], 42, dur)
+    chord('strings', t0, CH[name][2], vel, dur - 0.05)  # a breath for the bow change
+    chord('pad', t0, CH[name][2][:3], 42, dur - 0.05)
 
 
 def drop(d0, d1, keep=()):
@@ -541,6 +543,63 @@ for i, (t, p, x, vel, dur) in enumerate(events):
 for s in fx['sub']:
     s[0] = round(max(0.0, s[0] + offset('bass', s[0], 0)), 4)
 
+# ---------- Phrasing (Jose, 2026-10-22: prompt 3) ----------
+# "Shape the trumpet and strings like a real player: notes that swell and
+# fade, a small scoop into the long hook notes, short breaths between
+# phrases, and less loudness on the weaker beats." Still every note kept.
+# Swells and fades are expression (CC11) curves through each held note or
+# chord; the scoop is a pitch bend from just under the note (bend range
+# +-200 cents); the breaths are in hook() and bed(); the weaker beats are
+# played softer by where each note falls in the bar at 160.
+controls = []  # (seconds, part, 'cc11' or 'bend', value)
+SHAPED = {  # part: (start, peak, end) of the expression curve, peak at 40%
+    'lead': (84, 118, 96), 'strings': (72, 112, 84), 'pad': (80, 104, 86),
+    'trem': (62, 118, 104), 'cello': (74, 112, 86),
+}
+LONG = 0.25        # seconds: notes this long or longer swell (and on the trumpet, scoop)
+SCOOP = -60        # cents below the note it starts from (a third of a semitone)
+METRIC = {'lead': 1.0, 'brass': 1.0, 'stabs': 0.6, 'strings': 0.5}
+
+
+def weight(t):
+    """Velocity change by beat strength at 160: downbeats up, offbeats down."""
+    k = round((t - T0) / U) % 32
+    return 6 if k % 16 == 0 else 3 if k % 8 == 0 else 0 if k % 4 == 0 else -4 if k % 2 == 0 else -7
+
+
+def curve(t, dur, part, values):
+    """Expression from start to peak (at 40%) to end, a point every 30 ms."""
+    a, peak, z = values
+    steps = max(2, int(dur / 0.03))
+    for i in range(steps + 1):
+        f = i / steps
+        if f < 0.4:
+            x = a + (peak - a) * math.sin(f / 0.4 * math.pi / 2)
+        else:
+            x = peak + (z - peak) * ((f - 0.4) / 0.6) ** 1.5
+        controls.append((t + f * dur * 0.95, part, 'cc11', int(round(x))))
+
+
+for i, (t, p, x, vel, dur) in enumerate(events):
+    if p in METRIC:
+        events[i] = (t, p, x, max(1, min(127, vel + int(round(weight(t) * METRIC[p])))), dur)
+
+for part, values in SHAPED.items():
+    groups = {}  # a chord is shaped as one: notes that start together
+    for t, p, x, vel, dur in events:
+        if p == part:
+            key = round(t, 2)
+            groups[key] = (min(t, groups.get(key, (t, 0))[0]), max(dur, groups.get(key, (t, 0))[1]))
+    for t, dur in sorted(groups.values()):
+        if dur >= LONG:
+            curve(t, dur, part, values)
+        else:  # short notes: no swell, played at a steady, full expression
+            controls.append((t - 0.002, part, 'cc11', values[1] - 6))
+        if part == 'lead' and dur >= LONG:  # the scoop: up into the note in 100 ms
+            for j in range(9):
+                cents = SCOOP * (1 - j / 8) ** 1.5
+                controls.append((max(0.0, t - 0.002 + j * 0.0125), part, 'bend', int(cents / 200 * 8191)))
+
 # ---------- write the MIDI file ----------
 # A note struck again while still sounding: end the first one just before,
 # or its note-off would cut the new one dead.
@@ -573,7 +632,13 @@ for part, (ch, prog) in PARTS.items():
             continue
         msgs.append((ticks(t), mido.Message('note_on', channel=ch, note=x, velocity=vel)))
         msgs.append((ticks(t + dur), mido.Message('note_off', channel=ch, note=x, velocity=0)))
-    msgs.sort(key=lambda m: (m[0], m[1].type == 'note_on'))  # offs before ons
+    for t, p, kind, value in controls:
+        if p == part:
+            msg = (mido.Message('control_change', channel=ch, control=11, value=value) if kind == 'cc11'
+                   else mido.Message('pitchwheel', channel=ch, pitch=value))
+            msgs.append((ticks(t), msg))
+    order = {'program_change': 0, 'note_off': 0, 'control_change': 1, 'pitchwheel': 1, 'note_on': 2}
+    msgs.sort(key=lambda m: (m[0], order[m[1].type]))  # offs, then controls, then ons
     now = 0
     for at, msg in msgs:
         track.append(msg.copy(time=at - now))

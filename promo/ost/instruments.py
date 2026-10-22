@@ -67,9 +67,9 @@ ROUTES = {
 # per part: set from each part rendered alone, the trumpet hook on top.
 MIX = {
     'piano':   (6, 0.0, 0.30), 'keys': (-2, 0.15, 0.25),
-    'strings': (-3, -0.2, 0.45), 'pad': (-9, 0.2, 0.55), 'trem': (-2, -0.25, 0.45),
-    'stabs':   (3, -0.3, 0.30), 'cello': (-4, 0.35, 0.40),
-    'bass':    (4, 0.0, 0.10), 'brass': (-3, 0.3, 0.35), 'lead': (-2, 0.05, 0.28),
+    'strings': (1, -0.2, 0.45), 'pad': (-5, 0.2, 0.55), 'trem': (0, -0.25, 0.45),
+    'stabs':   (3, -0.3, 0.30), 'cello': (-2, 0.35, 0.40),
+    'bass':    (4, 0.0, 0.10), 'brass': (-3, 0.3, 0.35), 'lead': (1, 0.05, 0.28),
     'guitar':  (-4, -0.35, 0.40), 'bells': (-8, 0.4, 0.45), 'drums': (10, 0.0, 0.18),
 }
 # GM drum note -> VSCO samples: (sample, lowest velocity, highest velocity)
@@ -120,19 +120,22 @@ def read(path):
 
 
 def notes_of(track):
-    """(start tick, end tick, note, velocity) for every note in a track."""
-    t, on, found = 0, {}, []
+    """(start tick, end tick, note, velocity) for every note in a track, and
+    its phrasing: expression (CC11) and pitch bend, as (tick, message)."""
+    t, on, found, shaping = 0, {}, [], []
     for msg in track:
         t += msg.time
-        if msg.type == 'note_on' and msg.velocity > 0:
+        if msg.type == 'pitchwheel' or (msg.type == 'control_change' and msg.control == 11):
+            shaping.append((t, msg.copy(channel=0, time=0)))
+        elif msg.type == 'note_on' and msg.velocity > 0:
             on.setdefault(msg.note, []).append((t, msg.velocity))
         elif msg.type in ('note_off', 'note_on') and on.get(msg.note):
             start, vel = on[msg.note].pop(0)
             found.append((start, t, msg.note, vel))
-    return found
+    return found, shaping
 
 
-def midi_with(meta, notes):
+def midi_with(meta, notes, shaping=()):
     m = mido.MidiFile(ticks_per_beat=src.ticks_per_beat)
     m.tracks.append(meta)
     tr = mido.MidiTrack()
@@ -141,7 +144,8 @@ def midi_with(meta, notes):
     for a, b, x, vel in notes:
         msgs.append((a, 1, mido.Message('note_on', note=x, velocity=vel)))
         msgs.append((b, 0, mido.Message('note_off', note=x, velocity=0)))
-    msgs.sort(key=lambda m: (m[0], m[1]))
+    msgs += [(at, 0.5, msg) for at, msg in shaping]
+    msgs.sort(key=lambda m: (m[0], m[1]))  # offs, then the phrasing, then ons
     now = 0
     for at, _, msg in msgs:
         tr.append(msg.copy(time=at - now))
@@ -181,7 +185,7 @@ length = int(46 * SR)
 dry, wet = np.zeros((length, 2)), np.zeros((length, 2))
 kit = []
 for name, track in zip(TRACKS, src.tracks[1:]):
-    notes = notes_of(track)
+    notes, shaping = notes_of(track)
     if name == 'drums':
         kit = [[round(seconds(a), 4), SYNTH_KIT[x], vel] for a, b, x, vel in notes if x in SYNTH_KIT]
         notes = [nt for nt in notes if nt[2] in PERC]
@@ -192,7 +196,7 @@ for name, track in zip(TRACKS, src.tracks[1:]):
         if not chosen:
             continue
         mid_path, wav_path = os.path.join(stems, f'{name}{i}.mid'), os.path.join(stems, f'{name}{i}.wav')
-        midi_with(meta, chosen).save(mid_path)
+        midi_with(meta, chosen, shaping).save(mid_path)
         subprocess.run([SFIZZ, '--sfz', sfz, '--midi', mid_path, '--wav', wav_path,
                         '-s', str(SR), '-q', '3'], check=True, capture_output=True)
         audio = read(wav_path)[:length]
