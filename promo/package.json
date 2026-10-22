@@ -4,9 +4,15 @@
   "description": "Remotion project for the Hub's promo videos (media/). Not part of the app; kept out of the deploy by .vercelignore.",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render HubTitle out/hub-title.mp4"
+    "render": "remotion render HubTitle out/hub-title.mp4",
+    "assets": "node scripts/app-assets.cjs",
+    "prestudio": "node scripts/app-assets.cjs",
+    "prerender": "node scripts/app-assets.cjs",
+    "render:promo": "node scripts/app-assets.cjs && remotion render HubPromo out/hub-promo-rough.mp4"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/ibm-plex-serif": "^5.3.0",
     "@remotion/cli": "4.0.537",
     "react": "19.2.0",
     "react-dom": "19.2.0",
