@@ -59,10 +59,17 @@ def main():
     S.place(L, S.keyclick(), at(106), 0.9)             # tap
     S.place(L, S.ding(S.note('C7')), at(106), 0.4)
     S.place(L, S.keyclick(), at(110), 0.9)             # tap
-    S.place(L, S.riser(1.0), at(114), 0.7)             # rising into the title and the flash
-    S.place(L, impact(), at(121), 1.0)                 # INTERPRETER
-    S.place(L, impact(), at(128), 1.1)                 # HUB
-    S.place(L, S.sparkle(), at(140), 0.35)
+    S.place(L, swish(0.6, 300, 3000), at(108), 0.8)    # the phone drops away, the set brightens
+    S.place(L, S.riser(1.2), at(110), 0.5)
+    for k in range(14):                                  # tiles streaming out of his head
+        S.place(L, S.ding(S.note(['C7', 'D7', 'F7', 'G7', 'A7'][k % 5])) * 0.25, at(110 + k * 1.2), 0.5)
+    for k in range(11):                                  # "Interpreter" assembling, letter by letter
+        S.place(L, S.keyclick() * 0.6, at(114 + k), 0.7)
+    S.place(L, impact(), at(124), 1.1)                 # "Hub" lands
+    S.place(L, S.keyclick(), at(130), 0.9)             # bubble
+    S.place(L, S.keyclick(), at(133), 0.9)             # bubble
+    S.place(L, S.glass(), at(134), 0.35)               # the shine
+    S.place(L, S.sparkle(), at(136), 0.35)
     st = S.stereo(L, width=0.3)
     out = Pedalboard([HighpassFilter(28), LowpassFilter(16500), Reverb(room_size=0.5, wet_level=0.16, dry_level=0.88),
                       Limiter(threshold_db=-3.0)])(st.astype(np.float32), S.SR)

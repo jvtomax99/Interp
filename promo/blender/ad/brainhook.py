@@ -38,7 +38,7 @@ W, H = 540, 960
 OUT = os.path.join(A.HERE, 'renders', 'brainhook')
 rnd = random.Random(5)
 PHONE_Y, PHONE_H = 0.6, 1.6
-TITLE_SIZE, TITLE_Z = 0.16, (1.07, 0.9)
+LOGO_AT, LOGO_W = Vector((0, PHONE_Y - 0.35, 0.42)), 0.75   # the middle of "Interpreter"'s line
 START = Vector()
 HEAD = Vector(((0.746 - 0.5) * PHONE_H * PH_W / PH_H, PHONE_Y - 0.05, (0.5 - 0.29) * PHONE_H))
 
@@ -169,11 +169,22 @@ def build():
     scr_mat = bpy.data.materials.get('screen home')
     rings = [ring(HEAD + Vector((0, -0.02, 0)), r, '#5FD3F3', 3.0, 0.006) for r in (0.08, 0.14, 0.2)]
 
-    white = mat_face('white face', '#FFFFFF', 2.0)
-    cyan_side = mat_side('cyan side', '#5FD3F3')
+    # The logo (logo.py, after Jose's reference picture), built from the brain.
+    import logo as LG
     cam_end = cam_end_pos()
-    t1 = word('INTERPRETER', (0, PHONE_Y - 0.12, TITLE_Z[0]), TITLE_SIZE, white, cyan_side, BLACK, cam_end)
-    t2 = word('HUB', (0, PHONE_Y - 0.12, TITLE_Z[1]), TITLE_SIZE, white, cyan_side, BLACK, cam_end)
+    lg = LG.build(LOGO_AT, cam_end, LOGO_W)
+    floor, lights = LG.light_set(min(p.location.z - p.dimensions.z / 2 for p in lg['hub']) - 0.01, PHONE_Y)
+    lg['set'] = [floor] + lights
+    lg['bg'], lg['dim'] = LG.world_backdrop(sc, '#060A17', light=0.25)
+    # A soft bar of light only reflections see: the shine across the letters.
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(-2, -1.6, 1.0))
+    shine = bpy.context.active_object
+    shine.scale = (0.25, 3.0, 1)
+    shine.rotation_euler = (0, math.radians(90), math.radians(-20))
+    shine.data.materials.append(A.emission('shine', '#FFFFFF', 12))
+    shine.visible_camera = shine.visible_diffuse = shine.visible_shadow = False
+    lg['shine'] = shine
+    t1, t2 = lg, None
 
     cd = bpy.data.cameras.new('cam')
     cam = A.link(bpy.data.objects.new('cam', cd))
@@ -218,6 +229,10 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             pos = side.lerp(Vector(cam_end_pos()), t)
             tgt = centre.lerp(Vector((0, PHONE_Y, 0.26)), t)
             lens = 35
+        if f > 108:      # settle on the logo, centred, slightly from below like the reference
+            u = ease_out((f - 108) / 14)
+            pos = pos.lerp(Vector((0, LOGO_AT.y - 1.45, 0.12)), u)
+            tgt = tgt.lerp(LOGO_AT + Vector((0, 0, -0.14)), u)
         cam.location = pos
         cam.rotation_euler = (tgt - pos).to_track_quat('-Z', 'Y').to_euler()
         cam.data.lens = lens
@@ -235,7 +250,8 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             if 'rest' not in o:
                 o['rest'] = list(o.location)
             u = back((f - 84) / 12, 1.4)
-            key(o, f, loc=Vector(o['rest']) + Vector((0, 0, -1.2 * (1 - u))), hide=f < 84)
+            sink = 2.2 * max(0.0, min(1.0, (f - 108) / 8)) ** 2       # drops away as the logo starts
+            key(o, f, loc=Vector(o['rest']) + Vector((0, 0, -1.2 * (1 - u) - sink)), hide=f < 84 or f > 116)
 
         if scr_mat:      # the Home screen lights up as the brain lands
             sv = scr_mat.node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
@@ -244,25 +260,68 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
 
         for k, r in enumerate(rings):   # rings on the two taps, 106 and 110
             u = (f - (106 if k < 2 else 110) - (k % 2)) / 6
-            key(r, f, scale=max(0.001, 2.5 - 1.5 * ease_out(u)) if u >= 0 else 0.001, hide=not (0 <= u < 1.6))
+            key(r, f, scale=max(0.001, 2.5 - 1.5 * ease_out(u)) if u >= 0 else 0.001, hide=not (0 <= u < 1.6) or f >= 112)
 
-        for word_, land in ((t1, 121), (t2, 128)):   # the title, on the beat, then held
-            for p in word_:
-                at = land + p['frac'] * 3
-                rest = Vector(p['rest_loc'])
-                rr = tuple(p['rest_rot'])
-                if f < at - 4:
-                    key(p, f, loc=rest + Vector((0, -0.5, 0.04)), rot=rr, scale=0.001, hide=True)
-                elif f <= at:
-                    u = (f - (at - 4)) / 4
-                    key(p, f, loc=rest + Vector((0, -0.5 * (1 - u) ** 2, 0.04 * (1 - u))), rot=rr, scale=2.0 - u, hide=False)
-                else:
-                    key(p, f, loc=rest, rot=rr, scale=back((f - at) / 6, 3.0) if f - at < 6 else 1.0, hide=False)
+        logo_frame(t1, f)
 
     for a in bpy.data.actions:
         for fc in getattr(a, 'fcurves', []):
             for kp in fc.keyframe_points:
                 kp.interpolation = 'CONSTANT' if fc.data_path == 'hide_render' else 'LINEAR'
+
+
+def logo_frame(lg, f):
+    """The logo, built from the brain: from 110 the set brightens to the
+    reference picture's white-blue; diamond tiles stream out of Dr. Smiley's
+    head along arcs to their places; the letters assemble left to right as
+    the stream passes (Interpreter 114-126, Hub 124-130); the bubbles pop
+    (130, 133); a shine sweeps across (134-144)."""
+    k = max(0.0, min(1.0, (f - 110) / 12))
+    k = k * k * (3 - 2 * k)
+    dark, light = Vector(A.srgb('#060A17')[:3]), Vector(A.srgb('#EEF4FD')[:3])
+    c = dark.lerp(light, k)
+    for node in (lg['bg'], lg['dim']):
+        node.inputs['Color'].default_value = (*c, 1)
+        node.inputs['Color'].keyframe_insert('default_value', frame=f)
+    for o in lg['set']:
+        key(o, f, hide=f < 110)
+    fl = lg['set'][0].data.materials[0].node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
+    fl.default_value = 0.22 * k                       # the floor fades up with the set, no hard edge
+    fl.keyframe_insert('default_value', frame=f)
+    head = HEAD + Vector((0, -0.05, 0))
+    for i, t in enumerate(lg['tiles']):
+        at = 110 + (i % 21) * 0.75                     # streaming out over ~16 frames
+        rest = Vector(t['rest_loc'])
+        u = (f - at) / 9
+        if u < 0:
+            key(t, f, loc=head, scale=0.001, hide=True)
+            continue
+        e = ease_out(min(1.0, u))
+        mid = head.lerp(rest, 0.5) + Vector((0, -0.15, 0.25))          # an arc, bowing up and toward us
+        q = (1 - e) ** 2 * head + 2 * (1 - e) * e * mid + e * e * rest
+        bob = 0.006 * math.sin(f * 0.25 + i) if u >= 1 else 0
+        r = t['rest_rot']
+        key(t, f, loc=q + Vector((0, 0, bob)), rot=(r[0], r[1] + (1 - e) * 3.0, r[2]),
+            scale=(t['rest_scale'] * min(1.0, 0.3 + e), t['rest_scale'] * 0.28, t['rest_scale'] * min(1.0, 0.3 + e)), hide=False)
+    for word_, start, span in ((lg['inter'], 114, 10), (lg['hub'], 124, 5)):
+        for p in word_:
+            at = start + p['frac'] * span
+            rest = Vector(p['rest_loc'])
+            rr = p['rest_rot']
+            u = (f - at) / 7
+            if u < 0:
+                key(p, f, loc=rest, rot=rr, scale=0.001, hide=True)
+            else:
+                b = back(min(1.0, u), 2.6)
+                key(p, f, loc=rest + Vector((0, -0.12 * (1 - min(1.0, u)), -0.04 * (1 - min(1.0, u)))),
+                    rot=(rr[0] + 0.9 * (1 - min(1.0, b)), rr[1], rr[2]), scale=max(0.001, b), hide=False)
+    for n, o in enumerate(lg['bubbles']):
+        at = 130 + (n // 2) * 3
+        u = (f - at) / 6
+        s0 = Vector(o['rest_scale'])
+        key(o, f, scale=s0 * max(0.001, back(min(1.0, u), 2.4)) if u >= 0 else s0 * 0.001, hide=u < 0)
+    u = (f - 134) / 10
+    key(lg['shine'], f, loc=(-2.0 + 4.0 * max(0.0, min(1.0, u)), -1.6, 1.0))
 
 
 def cam_end_pos():
@@ -309,7 +368,9 @@ def bloom(im):
 
 
 def post(f, path, labels=()):
-    im = bloom(Image.open(path).convert('RGB'))
+    raw = Image.open(path).convert('RGB')
+    k = max(0.0, min(1.0, (f - 108) / 10))           # no bloom once the set turns bright
+    im = Image.blend(bloom(raw), raw, k) if k else bloom(raw)
     layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
     dr = ImageDraw.Draw(layer)
     # No words over the brain (Jose, 2026-10-22): no name panel, no caption.
