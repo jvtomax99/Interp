@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- The end card (Jose, 2026-10-22: the ad ends on the real place): his
+     photo of the campus (cherry tree, the direction sign readable in full),
+     the Interpreter Hub logo from the hook, his own end lines. 720 x 1280.
+     Every word starts with a capital, the web address stays lower case. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../../src/fonts.css">
+<style>
+  html,body{margin:0;width:720px;height:1280px;overflow:hidden;background:#060A17;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .photo{position:absolute;left:0;right:0;top:-170px;height:1180px;background:url(../build/photo/cherry.png) 0% 0%/auto 100% no-repeat}
+  /* dark at the top for the logo and at the bottom for the lines; the middle (tree, sign) clear */
+  .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,23,.92) 0%,rgba(6,10,23,.5) 20%,rgba(6,10,23,0) 32%,rgba(6,10,23,0) 62%,rgba(6,10,23,.9) 74%,rgba(6,10,23,1) 82%)}
+  .logo{position:absolute;left:50%;top:40px;width:600px;transform:translateX(-50%);filter:drop-shadow(0 6px 24px rgba(47,123,255,.55))}
+  .lines{position:absolute;left:0;right:0;bottom:56px;text-align:center;color:#fff}
+  .built{font-size:38px;font-weight:700;letter-spacing:-.02em;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+  .tag{margin-top:16px;font-size:46px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+  .tag span{display:inline-block;background:#5FD3F3;color:#071029;padding:0 14px 4px;border-radius:8px;margin-top:6px}
+  .url{display:inline-block;margin-top:26px;font-size:24px;font-weight:600;padding:9px 18px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25)}
+  .live{margin-top:10px;font-size:19px;color:#C9D6F2;font-weight:550}
+  .credit{position:absolute;left:0;right:0;bottom:22px;text-align:center;font-size:13px;color:rgba(200,210,235,.55)}
+</style></head><body>
+<div class="photo"></div><div class="shade"></div>
+<img class="logo" src="../build/logo_cut.png">
+<div class="lines">
+  <div class="built">Built Here, For Our Patients.</div>
+  <div class="tag">Better Words.<br><span>Safer Care.</span></div>
+  <div class="url">interp-six.vercel.app</div>
+  <div class="live">Live Today, On Any Phone.</div>
+</div>
+<div class="credit">Anatomy: BodyParts3D © DBCLS, CC BY 4.0</div>
+</body></html>

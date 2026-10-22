@@ -213,6 +213,20 @@ def main(which):
         camera(sc, cam_at, (1.5, 7, 6.5), 30)
         shot(sc, 'v14', 'campus', WAVE)
 
+    if 'v16' in which:   # The ending, first beat: rising above the campus at golden hour
+        sc = fresh(bg='#F6B98E', view='AgX', strength=0.32)
+        sky = sc.world.node_tree.nodes.new('ShaderNodeTexSky')
+        sky.sun_elevation = math.radians(6)
+        sky.sun_rotation = math.radians(250)
+        sc.world.node_tree.links.new(sky.outputs[0], sc.world.node_tree.nodes['Background'].inputs['Color'])
+        coll, objs = A.campus()
+        sun = bpy.data.lights.new('sun', 'SUN')
+        sun.energy, sun.color, sun.angle = 5.0, A.srgb('#FF9A4A')[:3], math.radians(3)
+        so = A.link(bpy.data.objects.new('sun', sun))
+        so.rotation_euler = Vector((0.8, 0.22, -0.33)).to_track_quat('-Z', 'Y').to_euler()
+        camera(sc, (2, -14, 62), (1.5, 2, 0), 26)
+        shot(sc, 'v16')
+
     if 'v15' in which:   # End
         sc = fresh(bg='#070B22')
         floor(z=-0.75)

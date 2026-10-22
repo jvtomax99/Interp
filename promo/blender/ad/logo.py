@@ -231,6 +231,15 @@ if __name__ == '__main__':
     parts = build((0, 0, 0.42), cam, 0.72)
     light_set(-0.02, 0)
     camera(sc, cam, (0, 0, 0.3), 35)
-    sc.render.filepath = os.path.join(A.BUILD, 'logo_test.png')
+    if 'clear' in sys.argv:   # no background or floor: build/logo_clear.png, to lay over a photo
+        sc.render.film_transparent = True
+        for o in bpy.data.objects:
+            if o.name.startswith('Plane') and o.dimensions.x > 30:
+                o.hide_render = True
+        sc.render.resolution_x, sc.render.resolution_y = 1080, 1080
+        sc.camera.location = (0, -1.55, 0.25)
+        sc.camera.rotation_euler = (Vector((0, 0, 0.3)) - sc.camera.location).to_track_quat('-Z', 'Y').to_euler()
+        sc.camera.data.lens = 35
+    sc.render.filepath = os.path.join(A.BUILD, 'logo_clear.png' if 'clear' in sys.argv else 'logo_test.png')
     bpy.ops.render.render(write_still=True)
-    print('wrote build/logo_test.png')
+    print('wrote', sc.render.filepath)

@@ -37,8 +37,8 @@ time: moving test, Jose's notes (`REVIEW_PROMPT.md`), then the final render.
 | 11-20.5 | 3 3D Body | Whole, broken down by system (the drop at 13.5 s), every piece |
 | 20.5-26.5 | 4 Before an appointment | Doctor Directory, a doctor's page, Doctor Prep, Team Chat (sample doctors) |
 | 26.5-31 | 5 Keep learning | Daily Drill, Term Review, Memory trainer |
-| 31-41 | 6 CoreCHI City | Jose's Hackensack photo (cherry tree) as the doorway, the Practice screen, the campus building up |
-| 41-45 | 7 End | Jose's end card, the BodyParts3D credit |
+| 31-39 | 6 CoreCHI City | The Practice screen, the dive into its campus card, the campus building up (the photo is no longer here) |
+| 39-45 | 7 End | Rise over the campus; it melts into Jose's real cherry-tree photo; the hook's logo rebuilds in the sky; his end lines (`src/endcard.html`, `tools/endcard.cjs`). Chosen 2026-10-22 from five ideas (`IDEA_PROMPTS.md`) |
 
 ## Earlier beats (storyboard 4-5), kept for reference
 
