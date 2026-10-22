@@ -8,9 +8,9 @@ and the mouth test for the 3D Dr. Smiley on Jose's Tripo model (PR #114, branch 
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
 > continue the 3D Dr. Smiley on branch `claude/3d-dr-smiley-r1-avn9y1`: I'll
-> attach the zip of my Tripo model; rebuild it (with the face rig: tripo_face.py,
-> tripo_mouths.py, tripo_muscles.py), then show me the expression sheet (brows, eyes, mouth, cheeks together). Plain words, say "working on
-> it" and "done".
+> attach the zip of my Tripo model; rebuild it with the face rig and the new
+> eyes (build order in the handoff), then go on from where the handoff
+> stops. Plain words, say "working on it" and "done".
 
 ## Jose's standing rule for this work (in `AGENTS.md`)
 
