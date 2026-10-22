@@ -119,7 +119,7 @@ const Glow: React.FC<{src: string; blur: number; amount: number; style?: React.C
 // 3D Body hero: the app's own BodyParts3D meshes rendered in Blender
 // (promo/blender/body.py, 150 frames): the body turns, its systems fan out,
 // the heart flies to the lens. Then the app's real card for it.
-const HEART_CARD: [number, number, number, number] = [30, 1625, 1115, 890];
+const HEART_CARD: [number, number, number, number] = [30, 1625, 1115, 445]; // names, speakers, description
 const BodyHero: React.FC<{b: Beat}> = ({b}) => {
 	const frame = useCurrentFrame();
 	const {fps} = useVideoConfig();
@@ -206,7 +206,6 @@ const AskBrain: React.FC<{b: Beat}> = ({b}) => {
 					// once lit, a slow push in on "Heart failure" (about 45%, 60% of the frame)
 					transform: `scale(${1.25 - 0.2 * brainIn + (frame >= LIT ? 0.35 * settle(frame, 30, LIT, 40) : 0)})`,
 					transformOrigin: '45% 60%',
-					filter: frame >= LIT ? 'brightness(1.35) saturate(1.2)' : undefined,
 				}}
 			>
 				<Glow src={src} blur={frame >= LIT ? 16 : 10} amount={frame >= LIT ? 1 : 0.9} style={{left: 0, top: 160, width: 1080, height: 1920}} />
