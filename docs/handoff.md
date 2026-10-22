@@ -9,8 +9,7 @@ and the mouth test for the 3D Dr. Smiley on Jose's Tripo model (PR #114, branch 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
 > continue the 3D Dr. Smiley on branch `claude/3d-dr-smiley-r1-avn9y1`: I'll
 > attach the zip of my Tripo model; rebuild it (with the face rig), then
-> fix his surprised, sad and worried mouths from my drawings and show me
-> the expression sheet. Plain words, say "working on
+> show me the expression sheet (brows, eyes, mouth, cheeks together). Plain words, say "working on
 > it" and "done".
 
 ## Jose's standing rule for this work (in `AGENTS.md`)
@@ -84,10 +83,13 @@ expressions as mixes. Shown: `out/plan-mouths.png`. Good: rest, smile,
 laugh, doubt. Not yet: surprised (leans, creases above the lip), sad and
 worried (flat, not a frown).
 
-1. **Waiting on Jose:** my proposed fix is to trace each drawn mouth in
-   `drsmiley/face.webp` (its lip line or opening) and fit his lips onto
-   that outline, the way `close_mouth()` targets a meeting line and
-   `oval()` an ellipse: map the drawing's mouth box onto his opening's box.
+1. **Done, waiting on Jose's OK:** surprised, sad and worried traced from
+   his drawings (Jose's pick): `tripo_trace.py` levels the drawn face (11
+   degree tilt), maps the drawn rest mouth onto the 3D one, and
+   `fit_line()` / `fit_open()` in `tripo_mouths.py` fit his lips to each
+   outline (keys `Mouth.Sad`, `Mouth.Worried`, `Mouth.Surprised`). Shown:
+   `out/plan-mouths.png`. Known: the O has soft folds by the nose and is a
+   little uneven inside (teeth one side).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

@@ -25,9 +25,9 @@ MOUTHS = {
     'rest':      dict(close=1),
     'smile':     dict(close=0, cheek=(.6, .6), brow=((2, 0), (2.4, 0))),
     'laugh':     dict(close=0, mouth={'JawOpen': 1, 'CornerUp.L': .6, 'CornerUp.R': .6}, cheek=(1, 1), brow=((2.8, 0), (3.4, 0))),
-    'surprised': dict(close=0, mouth={'O': 1}, brow=((4.2, 0), (5, 0))),
-    'sad':       dict(close=1, mouth={'Frown': 1}, brow=((1, 11), (1.2, 13))),
-    'worried':   dict(close=1, mouth={'Frown': .75, 'Narrow': .3}, brow=((1.4, 15), (1.7, 18))),
+    'surprised': dict(close=0, mouth={'Surprised': 1}, brow=((4.2, 0), (5, 0))),
+    'sad':       dict(close=1, mouth={'Sad': 1}, brow=((1, 11), (1.2, 13))),
+    'worried':   dict(close=1, mouth={'Worried': 1}, brow=((1.4, 15), (1.7, 18))),
     'doubt':     dict(close=1, mouth={'CornerDown.R': .7, 'CornerUp.L': 1}, brow=((3, 4), (-1.2, 2.4))),
 }
 DRAWN = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh',
@@ -118,6 +118,59 @@ def oval(co0, X, ZU, ZL, front, a=.024, b=.01):
     return co
 
 
+def fit_line(co0, X, ZU, ZL, teeth, front, xs, zs):
+    """A closed mouth fitted to a traced lip line (tripo_trace.py): on top of
+    Mouth.Close1, his closed line's ends go to the tracing's ends, each point
+    between to its place along it, up or down onto it. Both lips near the
+    line move together; past the corners the move fades out."""
+    from tripo_mouthtest import UPPER
+    shut = close_mouth(co0, X, ZU, ZL, 1, teeth)
+    x, y = co0[:, 0], co0[:, 1]
+    X0, X1 = X.min(), X.max()
+    zc = np.interp(x, X, ZU) - UPPER * (np.interp(x, X, ZU) - np.interp(x, X, ZL))
+    u = np.clip((x - X0) / (X1 - X0), 0, 1)
+    nx = xs[0] + u * (xs[-1] - xs[0])
+    past = np.maximum(np.maximum(X0 - x, x - X1), 0)
+    fade = 1 - smooth(past / .025)
+    dz = (np.interp(nx, xs, zs) - zc) * fade
+    dx = (nx - np.clip(x, X0, X1)) * fade
+    off = np.abs(shut[:, 2] - zc)
+    wall = front * (1 - smooth((y + .105) / .022))
+    co = co0.copy()
+    co[:, 2] += dz * (1 - smooth((off - .004) / .024)) * wall
+    co[:, 0] += dx * (1 - smooth((off - .004) / .016)) * wall     # sideways only near the lips (it creased under the nose)
+    return co
+
+
+def fit_open(co0, X, ZU, ZL, front, xs, tops, bots):
+    """An open mouth fitted to a traced opening: each column of his lips moved
+    in to its place across the tracing, the top edge onto its top, the bottom
+    edge (and the jaw under it) onto its bottom."""
+    x, y, z = co0.T
+    X0, X1 = X.min(), X.max()
+    zu, zl = np.interp(x, X, ZU), np.interp(x, X, ZL)
+    h = zu - zl
+    u = np.clip((x - X0) / (X1 - X0), 0, 1)
+    nx = xs[0] + u * (xs[-1] - xs[0])
+    du, dl = np.interp(nx, xs, tops) - zu, np.interp(nx, xs, bots) - zl
+    t = np.clip((z - zl) / np.maximum(h, 1e-6), 0, 1)
+    dz = np.where(z > zu, du * (1 - smooth((z - zu) / .012)),
+                  np.where(z < zl, dl * (1 - smooth((zl - z) / .045)), dl * (1 - t) + du * t))
+    past = np.maximum(np.maximum(X0 - x, x - X1), 0)
+    fade = 1 - smooth(past / .06)
+    dx = (nx - np.clip(x, X0, X1)) * fade
+    # a pucker pulls the cheeks and the skin under the nose in too: kept to the
+    # lips alone, the squeeze (10 cm to 4) creased from the nose down
+    reach = (1 - smooth((z - zu) / .03)) * (1 - smooth((zl - .004 - z) / .04))
+    wall = front * (1 - smooth((y + .105) / .022))
+    co = co0.copy()
+    co[:, 0] += dx * reach * wall
+    co[:, 2] += dz * (1 - smooth(past / .025)) * wall
+    inside = (x > X0) & (x < X1)
+    co[:, 1] -= .005 * np.sin(np.pi * u) * inside * reach * wall    # the lips push forward a little
+    return co
+
+
 if __name__ == '__main__':
     bpy.ops.wm.open_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-face.blend'))
     ob = bpy.data.objects['Mesh_0']
@@ -138,6 +191,14 @@ if __name__ == '__main__':
     add_key(ob, 'Mouth.Narrow', narrow(co0, X, ZU, ZL, front))
     add_key(ob, 'Mouth.Frown', frown(co0, X, ZU, ZL, teeth, front))
     add_key(ob, 'Mouth.O', oval(co0, X, ZU, ZL, front))
+    # his three mouths traced from the drawings (Jose's pick)
+    from tripo_trace import trace
+    from tripo_mouthtest import UPPER
+    for n in ('sad', 'worried'):
+        xs, zs = trace(n, X, ZU, ZL, UPPER)['line']
+        add_key(ob, 'Mouth.' + n.capitalize(), fit_line(co0, X, ZU, ZL, teeth, front, xs, zs))
+    xs, tops, bots = trace('surprised', X, ZU, ZL, UPPER)['open']
+    add_key(ob, 'Mouth.Surprised', fit_open(co0, X, ZU, ZL, front, xs, tops, bots))
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-face.blend'))
     # the sheet: each drawn mouth, then his, close up and the whole face
     build.STYLE_NOW = 'tripo'
