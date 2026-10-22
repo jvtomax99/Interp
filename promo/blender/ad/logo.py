@@ -1,6 +1,7 @@
 """The Interpreter Hub logo in 3D, after Jose's reference picture
 (2026-10-22): "Interpreter" over a bigger "Hub" in a rounded wide face
-(Unbounded, from Google Fonts), glossy navy faces with bright blue
+(Poppins ExtraBold, set tight, from Google Fonts; it matches the
+reference's slanted "t" and round bowls), glossy navy faces with bright blue
 bevelled edges, blue and glass diamond tiles streaming in arcs, two speech
 bubbles (one solid blue, one glass) beside "Hub", on a bright white-blue
 set with a reflective floor.
@@ -20,7 +21,7 @@ from mathutils import Vector  # noqa: E402
 
 import assets as A  # noqa: E402
 
-FONT = os.path.join(A.BUILD, 'fonts', 'Unbounded.ttf')
+FONT = os.path.join(A.BUILD, 'fonts', 'Poppins-wght-800.ttf')
 rnd = random.Random(21)
 
 
@@ -49,12 +50,13 @@ def letters(body, centre, width, face, side, cam):
     cu.align_x = 'CENTER'
     cu.align_y = 'CENTER'
     cu.size = 1.0
+    cu.space_character = 0.93          # tight, like the reference
     ob = A.link(bpy.data.objects.new('logo', cu))
     bpy.context.view_layer.update()
     size = width / ob.dimensions.x
     cu.size = size
-    cu.extrude = size * 0.16
-    cu.bevel_depth = size * 0.028
+    cu.extrude = size * 0.09
+    cu.bevel_depth = size * 0.022
     cu.bevel_resolution = 4
     ob.location = centre
     d = Vector(cam) - Vector(centre)
@@ -101,25 +103,40 @@ def tile(loc, size, mat):
     return t
 
 
-def bubble(loc, w, h, mat, flip=False):
-    """A speech bubble: a rounded slab and a tail at its lower corner."""
-    bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
-    b = bpy.context.active_object
-    b.scale = (w, h * 0.35, h)
-    bev = b.modifiers.new('round', 'BEVEL')
-    bev.width = h * 0.16
-    bev.segments = 6
-    b.data.materials.append(mat)
-    sx = -1 if flip else 1
-    bpy.ops.mesh.primitive_cone_add(vertices=3, radius1=h * 0.22, depth=h * 0.18,
-                                    location=(loc[0] + sx * w * 0.3, loc[1], loc[2] - h * 0.55))
-    t = bpy.context.active_object
-    t.rotation_euler = (math.radians(90), 0, math.radians(180 + sx * 20))
-    t.data.materials.append(mat)
-    for o in (b, t):
-        o['rest_loc'] = list(o.location)
-        o['rest_scale'] = list(o.scale)
-    return [b, t]
+def bubble(loc, w, h, mat, tail='right'):
+    """A speech bubble: a rounded box with a pointed tail at its lower edge,
+    drawn as one outline and extruded with a soft bevel, facing -Y."""
+    r = min(w, h) * 0.22
+    pts = []
+    def arc(cx, cz, a0, a1):
+        for k in range(7):
+            a = math.radians(a0 + (a1 - a0) * k / 6)
+            pts.append((cx + r * math.cos(a), cz + r * math.sin(a)))
+    hw, hh = w / 2, h / 2
+    arc(hw - r, hh - r, 0, 90)          # top right
+    arc(-hw + r, hh - r, 90, 180)       # top left
+    arc(-hw + r, -hh + r, 180, 270)     # bottom left
+    tx = hw * (0.25 if tail == 'right' else -0.35)
+    pts += [(tx - w * 0.08, -hh), (tx + w * 0.02, -hh - h * 0.38), (tx + w * 0.12, -hh)]   # the tail
+    arc(hw - r, -hh + r, 270, 360)      # bottom right
+    cu = bpy.data.curves.new('bubble', 'CURVE')
+    cu.dimensions = '2D'
+    cu.fill_mode = 'BOTH'
+    cu.extrude = h * 0.09
+    cu.bevel_depth = h * 0.05
+    cu.bevel_resolution = 4
+    sp = cu.splines.new('POLY')
+    sp.points.add(len(pts) - 1)
+    for p, (x, z) in zip(sp.points, pts):
+        p.co = (x, z, 0, 1)
+    sp.use_cyclic_u = True
+    ob = A.link(bpy.data.objects.new('bubble', cu))
+    ob.location = loc
+    ob.rotation_euler = (math.radians(90), 0, 0)
+    cu.materials.append(mat)
+    ob['rest_loc'] = list(ob.location)
+    ob['rest_scale'] = list(ob.scale)
+    return [ob]
 
 
 def build(centre, cam, width):
@@ -127,19 +144,19 @@ def build(centre, cam, width):
     `width` metres wide, facing `cam`. Returns its pieces."""
     c = Vector(centre)
     navy = glossy('logo navy', '#061648', 0.14)
-    edge = glossy('logo edge', '#1756D6', 0.1, '#2F7BFF', 0.35)
-    hub_face = glossy('logo hub', '#0B3FB8', 0.12)
+    edge = glossy('logo edge', '#2F7BFF', 0.08, '#4FA0FF', 1.2)
+    hub_face = glossy('logo hub', '#0A3DB8', 0.08, '#1F63E8', 0.1)
     hub_edge = glossy('logo hub edge', '#3C8DFF', 0.08, '#5AA8FF', 0.6)
     tile_mats = [glossy('tile navy', '#0B2A78', 0.1), glossy('tile blue', '#1F6BFF', 0.1, '#2F7BFF', 0.4),
-                 glossy('tile glass', '#F4F9FF', 0.03, '#CFE3FF', 0.5, transmission=0.6)]
+                 glossy('tile glass', '#FFFFFF', 0.04, transmission=1.0)]
     inter, s1 = letters('Interpreter', c, width, navy, edge, cam)
     hub, s2 = letters('Hub', c + Vector((width * 0.12, 0, -width * 0.27)), width * 0.6, hub_face, hub_edge, cam)
-    glass = glossy('bubble glass', '#F4F9FF', 0.03, '#CFE3FF', 0.5, transmission=0.6)
+    glass = glossy('bubble glass', '#FFFFFF', 0.04, transmission=1.0)
     blue_b = glossy('bubble blue', '#1F6BFF', 0.08, '#2F7BFF', 0.6)
     bx = c.x - width * 0.36
     bz = c.z - width * 0.23
-    bubbles = bubble((bx + width * 0.03, c.y + 0.01, bz + width * 0.02), width * 0.16, width * 0.1, blue_b) + \
-        bubble((bx - width * 0.02, c.y - 0.02, bz - width * 0.06), width * 0.15, width * 0.1, glass)
+    bubbles = bubble((bx + width * 0.04, c.y + 0.015, bz + width * 0.03), width * 0.17, width * 0.12, blue_b, 'right') + \
+        bubble((bx - width * 0.02, c.y - 0.02, bz - width * 0.05), width * 0.15, width * 0.11, glass, 'left')
     # Tiles: an arc over "Interpreter" (left, rising) and a cluster right of "Hub".
     tiles = []
     for k in range(26):
@@ -192,7 +209,11 @@ def world_backdrop(sc, col='#EEF4FD', light=0.25):
     bg.inputs['Color'].default_value = A.srgb(col)
     nt.links.new(bg.inputs['Color'].links[0].from_socket, dim.inputs['Color']) if bg.inputs['Color'].links else None
     dim.inputs['Color'].default_value = A.srgb(col)
-    nt.links.new(lp.outputs['Is Camera Ray'], mx.inputs['Fac'])
+    seen = nt.nodes.new('ShaderNodeMath')     # the camera, and anything seen through glass
+    seen.operation = 'MAXIMUM'
+    nt.links.new(lp.outputs['Is Camera Ray'], seen.inputs[0])
+    nt.links.new(lp.outputs['Is Transmission Ray'], seen.inputs[1])
+    nt.links.new(seen.outputs[0], mx.inputs['Fac'])
     nt.links.new(dim.outputs[0], mx.inputs[1])
     nt.links.new(bg.outputs[0], mx.inputs[2])
     nt.links.new(mx.outputs[0], out.inputs['Surface'])

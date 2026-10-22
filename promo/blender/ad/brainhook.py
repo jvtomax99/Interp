@@ -316,7 +316,7 @@ def logo_frame(lg, f):
                 key(p, f, loc=rest + Vector((0, -0.12 * (1 - min(1.0, u)), -0.04 * (1 - min(1.0, u)))),
                     rot=(rr[0] + 0.9 * (1 - min(1.0, b)), rr[1], rr[2]), scale=max(0.001, b), hide=False)
     for n, o in enumerate(lg['bubbles']):
-        at = 130 + (n // 2) * 3
+        at = 130 + n * 3
         u = (f - at) / 6
         s0 = Vector(o['rest_scale'])
         key(o, f, scale=s0 * max(0.001, back(min(1.0, u), 2.4)) if u >= 0 else s0 * 0.001, hide=u < 0)
