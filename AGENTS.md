@@ -326,3 +326,7 @@ changed; phone size first), or for work with nothing to see, a short
 summary of what changed and what it needs from him. Then notify his phone
 so he can come back and review. Not for routine progress, only when there
 is something to review or decide.
+**And always a preview** (Jose, 2026-10-22: "Always show me a preview"):
+every reply that reports work done or a change made shows him the picture
+of it, small fixes included, not words alone. The phone notification stays
+for when there is something to review or decide.
