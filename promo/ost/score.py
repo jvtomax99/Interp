@@ -21,11 +21,14 @@ he sent ("Delirious", Jujutsu Kaisen S2: measured, nothing taken from the
 recording), then "the hook, the intro needs more refinement and a smoother
 ending". So:
 
+  The intro (after "I don't like the beginning... make it more like [the
+  JJK track]"): built on the reference's measured shape. A low drone, the
+  drop's groove behind a filter that opens, a climbing half-step cluster,
+  the question as a wrong chord, a cut, and the drop on the right word.
   The hook: a trumpet line in 3-3-2 (the tresillo, the root of Latin
   rhythm and the pulse of that track), a call and an answer that comes
-  back down to D. It opens the video, the question interrupts it, the
-  right word finishes it, it carries the second half of the cards and the
-  title, and the piano plays it slowly at the end.
+  back down to D. It carries the second half of the cards and the title,
+  and the piano plays it slowly at the end.
   The Latin groove: clave, congas, bongos, cowbell, guiro, timbales,
   tumbao bass, piano montuno. The fight-track energy: string stabs in
   3-3-2, sixteenth hats with rolls, a backbeat, an 808 sub (synth.py),
@@ -299,67 +302,94 @@ def drop(d0, d1, keep=()):
             fx['sub'][i][2] = round(d0 - t, 4)
 
 
-# ---------- Intro: the cold open (0 - 6.0) ----------
-# A riser and a timbale roll from the first frame, a slam as "Heart failure"
-# appears, and the hook twice at full speed: over Bm | G, then D | A.
+# ---------- Intro (0 - 10.73): built on the shape of Jose's reference ----------
+# Jose, 2026-10-22: "I don't like the beginning... make it more like [the
+# JJK track]." Measured from his reference, nothing taken from it: a dark,
+# low drone almost alone (all its energy near 54 Hz), then the sound opening
+# up (its brightness climbing from ~80 Hz to ~1 kHz over about 3.5 s, about
+# 13 dB louder, a clashing cluster of notes), then a drop onto a heavy bass
+# moving by half steps. Here: a drone on A from the first frame; the drop's
+# own groove playing behind a filter that opens from the first title to the
+# question (synth.py, fx 'sweep'); strings in a half-step cluster that
+# climbs; the question hits; a cut; and the right word drops it all in.
 OPEN = bar(0, -1)                     # 0.983: on the grid, with the first title
-fx['riser'].append([0.0, OPEN, 0.9])
-chord('trem', 0.0, [B2, Fs3, B3], 40, OPEN)
-roll(0.35, OPEN, 26, 100, 0.0625)
-fx['impact'].append([OPEN, 1.0])
-hit(OPEN, CRASH, 104, 2.0)
-hit(OPEN, KICK, 110)
-hook(OPEN)                            # 0.98 - 3.98
-hook(OPEN + 3.0, vel=102, upto=17)    # 3.98 - 6.0: the question cuts it off
-for i, name in enumerate(('Bm', 'G', 'D', 'A')):
-    th = OPEN + 1.5 * i
-    bed(th, name, 56 + 3 * i)
-    stabs_at(th, name, 2, 64)
-    root = CH[name][0]
-    for k, length in ((0, 6), (6, 4), (10, 6)):   # the bass in 3-3-2, the 808 under it
-        sub(th + k * U, root, length * U * 0.95, 104)
-        n('bass', th + k * U, root, 84, length * U * 0.9)
-    for k in range(16):               # sixteenth hats, the backbeat at 160
-        hit(th + k * U, HAT, 56 if k % 4 == 0 else 40 if k % 2 == 0 else 28, 0.08)
-    hit(th, KICK, 100)
-    hit(th + 10 * U, KICK, 84)
-    hit(th + 8 * U, SNARE, 92)
-    hit(th + 8 * U, CLAP, 70)
-    for k, x, v in TUMBAO:            # the congas, one salsa bar per half
-        hit(th + 2 * k * U, x, v)
-    if i >= 2:                        # the clave joins the second time
-        for k in (0, 3, 6) if i == 2 else (2, 4):
-            hit(th + 2 * k * U, CLAVES, 70)
-hit(OPEN + 3.0, CRASH, 96, 2.0)
-
-# ---------- 6.0 "¿Fallo cardíaco?": the hook stops mid-word ----------
 QUESTION, CUT, RIGHT = 6.0, 7.6, 7.9
-drop(QUESTION, RIGHT, keep=('trem',))
-chord('trem', QUESTION, [A2, E3, A3, D4], 72, CUT - QUESTION)
-n('lead', QUESTION, B5, 58, 0.5)       # the note it broke off on, hanging
-n('piano', QUESTION, B5, 70, CUT - QUESTION)
-sub(QUESTION, A1, CUT - QUESTION, 84)
-roll(QUESTION + 0.3, CUT, 30, 104, 0.0625)
-fx['riser'].append([QUESTION, CUT, 1.0])
+DROP = unit(2, 2)                     # 7.92: the drop's grid, 20 ms after the cut
+C2, Eb2, Eb3, Bb3, Eb4, F4, Bb4, C5 = 36, 39, 51, 58, 63, 65, 70, 72
+
+# the drone: low cellos on A and E, an 808 under them, rising all the way
+chord('cello', 0.15, [A2, E3], 60, CUT - 0.15)
+for t0, t1, v in [(0.15, 2.5, 36), (2.5, 4.5, 46), (4.5, QUESTION, 58), (QUESTION, CUT, 72)]:
+    sub(t0, A1, t1 - t0 - 0.02, v)
+fx['impact'].append([OPEN, 0.35])     # "Heart failure": a deep boom, nothing bright
+hit(OPEN, LO_TIMB, 70)
+
+
+def dark_groove(t0, t1, scale=lambda t: 1.0, bass_from=0.0, kick_from=0.0, low=lambda t: 1.0):
+    """The drop's groove, in 16-unit cycles from t0: kick in 3-3-2, the
+    backbeat at 160, sixteenth hats, congas, the 808 moving by half steps
+    around D (from bass_from on; the kick from kick_from), and low string stabs on D with the half
+    step above. scale(t) sets how hard it plays at each moment, low(t) the
+    kick and the bass on top of that."""
+    BASSLINE = [(0, D2, 3), (3, D2, 3), (6, Eb2, 2), (8, D2, 2), (10, C2, 3), (13, D2, 3)]
+    cycle = 16 * U
+    m = 0
+    while t0 + m * cycle < t1:
+        c = t0 + m * cycle
+        def at(k):
+            return c + k * U
+        for k, x, length in BASSLINE:
+            if bass_from <= at(k) < t1:
+                sub(at(k), x, length * U * 0.95, int(104 * scale(at(k)) * low(at(k))))
+                n('bass', at(k), x, int(86 * scale(at(k)) * low(at(k))), length * U * 0.9)
+        for k, v in [(0, 104), (6, 86), (10, 92)]:
+            if kick_from <= at(k) < t1:
+                hit(at(k), KICK, int(v * scale(at(k)) * low(at(k))))
+        if at(8) < t1:
+            hit(at(8), SNARE, int(94 * scale(at(8))))
+            hit(at(8), CLAP, int(72 * scale(at(8))))
+        for k in range(16):
+            if at(k) < t1:
+                hit(at(k), HAT, int((58 if k % 4 == 0 else 42 if k % 2 == 0 else 28) * scale(at(k))), 0.08)
+        for half in (0, 8):
+            for k, x, v in TUMBAO:
+                if at(half + k) < t1:
+                    hit(at(half + k), x, int(v * scale(at(half + k))))
+        for k, notes in [(0, [D3, A3, D4]), (3, [D3, A3, D4]), (6, [Eb3, Bb3, Eb4]),
+                         (10, [D3, A3, D4]), (13, [D3, A3, D4])]:
+            if at(k) < t1:
+                stab(at(k), notes, int((78 if k in (0, 10) else 64) * scale(at(k))))
+        m += 1
+
+
+# from the first title to the question: the groove behind the closing filter
+# it plays soft at first and grows; the kick joins at 3.0 and the 808 at 4.0
+dark_groove(OPEN, CUT, scale=lambda t: 0.4 + 0.45 * (t - OPEN) / (CUT - OPEN), bass_from=4.0, kick_from=3.0,
+            low=lambda t: 0.35 + 0.35 * max(0.0, t - 3.0) / (CUT - 3.0))   # the drop keeps the full weight
+fx['sweep'] = [[0.0, CUT, [[0.0, 150], [OPEN, 200], [3.0, 450], [4.5, 900],
+                           [QUESTION, 2500], [7.0, 6000], [CUT, 14000]]]]
+# the cluster: violins in tremolo on two notes a half step apart, climbing
+for t0, t1, pair in [(3.0, 4.6, (A4, Bb4)), (4.6, QUESTION, (Bb4, B4)),
+                     (QUESTION, 6.8, (B4, C5)), (6.8, CUT, (C5, Cs5))]:
+    chord('trem', t0, list(pair), 84, t1 - t0)
+fx['riser'].append([3.0, CUT, 2.2])   # louder than the others: it is what opens up
+
+# 6.0 "¿Fallo cardíaco?": a wrong chord, hit hard, and the roll takes over
+chord('brass', QUESTION, [Bb3, D4, F4], 96, 0.4)
+chord('stabs', QUESTION, [Bb3, D4, F4], 96, U * 1.6)
+hit(QUESTION, CRASH, 70, 1.0)
+roll(QUESTION + 0.2, CUT, 40, 108, 0.0625)
 fx['cut'].append([CUT, RIGHT])
 
-# ---------- 7.9 "Insuficiencia cardíaca": the right word finishes it ----------
-fx['impact'].append([RIGHT, 1.0])
-for x, v in [(CRASH, 100), (KICK, 108), (LO_TIMB, 96)]:
+# 7.9 "Insuficiencia cardíaca": the drop. Everything, open, on D.
+fx['impact'].append([RIGHT, 1.1])
+for x, v in [(CRASH, 108), (KICK, 112), (LO_TIMB, 100)]:
     hit(RIGHT, x, v, 2.0)
-sub(RIGHT, D2, 1.2, 112)
-n('bass', RIGHT, D2, 92, 1.2)
-hook(RIGHT, vel=104, start=22)        # F#, E, D: the answer comes home
-chord('strings', RIGHT, CH['D'][2], 70, bar(3) - RIGHT)
-chord('pad', RIGHT, CH['D'][2][:3], 48, bar(3) - RIGHT)
-chord('piano', RIGHT, [D3, A3, D4, Fs4, A4], 70, 2.6, roll=0.03)
-chord('guitar', RIGHT + 0.05, [D3, A3, D4, Fs4, A4, D5], 70, 2.6, roll=0.025)
-n('bells', RIGHT + 0.05, A5, 56, 1.5)
-n('bells', RIGHT + 0.3, D6, 52, 1.5)
-# the groove keeps ticking into the first card, lighter
-hats(2, vel=0.75, since=8.5)
-latin(2, False, since=8.5)
-tumbao(2, ('D', 'D'), 'D', since=8.5)
+chord('brass', RIGHT, [D3, A3, D4, A4], 100, 0.5)
+dark_groove(DROP, bar(2, 3))
+chord('strings', RIGHT, [D3, A3, D4, A4], 72, bar(3) - RIGHT)
+n('bells', RIGHT + 0.05, A5, 60, 1.5)  # the right word still shines
+n('bells', RIGHT + 0.3, D6, 56, 1.5)
 fill(2, 12)
 n('piano', bar(2, 3), Fs4, 70, BEAT)   # pick-up into the slow tune
 n('piano', bar(2, 3.5), G4, 70, BEAT)
@@ -591,7 +621,12 @@ for part, values in SHAPED.items():
             key = round(t, 2)
             groups[key] = (min(t, groups.get(key, (t, 0))[0]), max(dur, groups.get(key, (t, 0))[1]))
     for t, dur in sorted(groups.values()):
-        if dur >= LONG:
+        if part in ('cello', 'trem') and t < CUT:  # the intro: one rise, all the way to the cut
+            steps = max(2, int(dur / 0.03))
+            for j in range(steps + 1):
+                tt = t + j / steps * dur * 0.97
+                controls.append((tt, part, 'cc11', int(30 + 97 * min(1, max(0, (tt - 0.15) / (CUT - 0.15))) ** 1.4)))
+        elif dur >= LONG:
             curve(t, dur, part, values)
         else:  # short notes: no swell, played at a steady, full expression
             controls.append((t - 0.002, part, 'cc11', values[1] - 6))

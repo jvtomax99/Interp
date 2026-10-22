@@ -13,6 +13,9 @@ and writes out/mix.wav:
           hi-hat, the sounds an orchestra library doesn't have
   cut     a stretch where everything goes silent (the drops), with short
           fades so it doesn't click; the impact after it lands on silence
+  sweep   a filter over everything that opens up as the intro builds (the
+          cutoff moves through the points given, in Hz), so the groove is
+          heard first as a muffled thump and then comes into the light
   duck    the bass (out/bass.wav, kept apart by instruments.py) and the sub
           dip about 3 dB under each kick and come back in 140 ms, the way a
           studio "sidechains" them, so the kick punches through
@@ -155,7 +158,16 @@ for a, b, gain in fx['riser']:
     place(extra, a + 0.011, r, RISER_GAIN * gain * 0.5, width=-0.6)  # spread it
 for t, sound, vel in fx.get('kit', []):
     place(extra, t, KIT[sound](vel), KIT_GAIN[sound], width=KIT_PAN[sound])
-mix = (score + extra) * gate[:, None]  # the impacts land after the cuts
+mix = score + extra
+for t0, t1, points in fx.get('sweep', []):
+    i, j = int(t0 * SR), int(t1 * SR)
+    times, hz = zip(*points)
+    cutoff = np.exp(np.interp(np.arange(i, j) / SR, times, np.log(hz)))
+    seg = mix[i:j]
+    for _ in range(4):  # four poles: a steep, smooth slope
+        seg = np.stack([lowpass(seg[:, c], cutoff) for c in (0, 1)], 1)
+    mix[i:j] = seg
+mix *= gate[:, None]  # the impacts land after the cuts
 for t, gain in fx['impact']:
     place(mix, t, impact(), IMPACT_GAIN * gain)
 
