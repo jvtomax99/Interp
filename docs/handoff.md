@@ -8,8 +8,8 @@ and the mouth test for the 3D Dr. Smiley on Jose's Tripo model (PR #114, branch 
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
 > continue the 3D Dr. Smiley on branch `claude/3d-dr-smiley-r1-avn9y1`: I'll
-> attach the zip of my Tripo model; rebuild it (with the face rig), then
-> show me the expression sheet (brows, eyes, mouth, cheeks together). Plain words, say "working on
+> attach the zip of my Tripo model; rebuild it (with the face rig: tripo_face.py,
+> tripo_mouths.py, tripo_muscles.py), then show me the expression sheet (brows, eyes, mouth, cheeks together). Plain words, say "working on
 > it" and "done".
 
 ## Jose's standing rule for this work (in `AGENTS.md`)
@@ -83,13 +83,18 @@ expressions as mixes. Shown: `out/plan-mouths.png`. Good: rest, smile,
 laugh, doubt. Not yet: surprised (leans, creases above the lip), sad and
 worried (flat, not a frown).
 
-1. **Done, waiting on Jose's OK:** surprised, sad and worried traced from
-   his drawings (Jose's pick): `tripo_trace.py` levels the drawn face (11
-   degree tilt), maps the drawn rest mouth onto the 3D one, and
-   `fit_line()` / `fit_open()` in `tripo_mouths.py` fit his lips to each
-   outline (keys `Mouth.Sad`, `Mouth.Worried`, `Mouth.Surprised`). Shown:
-   `out/plan-mouths.png`. Known: the O has soft folds by the nose and is a
-   little uneven inside (teeth one side).
+1. **Done, waiting on Jose's OK:** after the traced mouths Jose asked
+   for mouths that move "how a normal person makes mouth reactions".
+   `tripo_muscles.py` adds muscle blocks after FACS action units (keys
+   `AU.*`: SmileOff/SmileOffOpen, Relax (closed lips, via `fit_line`),
+   CornerDepress, LipStretch, Dimple, ChinRaise; recipes from Matsumoto &
+   Ekman 2008 as quoted by secondary sources: the primary PDFs are blocked
+   from the cloud session), `MOUTHS` in `tripo_mouths.py` mixes them, and
+   `render_sheet()` + `diagram()` draw `out/plan/mouths.png` and
+   `out/plan/muscles.png`; page `out/plan-mouths.png`. Lessons: a corner
+   move must carry the cheek (~4-5 cm); fade by distance to the side, not
+   by depth (the mouth is deep at its corners); move closed lips sideways
+   only through their meeting line (`fit_line`), never by pulling corners.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

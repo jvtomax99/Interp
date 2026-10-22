@@ -84,7 +84,7 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True):
     for j, c in enumerate(CLOSE_STEPS, 1):
         kb[f'Mouth.Close{c:g}'].value = float(np.interp(close, pts, [float(k == j) for k in range(len(pts))]))
     for k, v in (mouth or {}).items():
-        kb['Mouth.' + k].value = v
+        kb[k if k.startswith('AU.') else 'Mouth.' + k].value = v      # AU.*: the muscle blocks (tripo_muscles.py)
     if lids:
         from tripo_eyes import set_blink
         for i, s in enumerate((R, L)):

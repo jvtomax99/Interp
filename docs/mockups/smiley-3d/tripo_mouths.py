@@ -25,10 +25,16 @@ MOUTHS = {
     'rest':      dict(close=1),
     'smile':     dict(close=0, cheek=(.6, .6), brow=((2, 0), (2.4, 0))),
     'laugh':     dict(close=0, mouth={'JawOpen': 1, 'CornerUp.L': .6, 'CornerUp.R': .6}, cheek=(1, 1), brow=((2.8, 0), (3.4, 0))),
-    'surprised': dict(close=0, mouth={'Surprised': 1}, brow=((4.2, 0), (5, 0))),
-    'sad':       dict(close=1, mouth={'Sad': 1}, brow=((1, 11), (1.2, 13))),
-    'worried':   dict(close=1, mouth={'Worried': 1}, brow=((1.4, 15), (1.7, 18))),
-    'doubt':     dict(close=1, mouth={'CornerDown.R': .7, 'CornerUp.L': 1}, brow=((3, 4), (-1.2, 2.4))),
+    # after the muscles (tripo_muscles.py, Jose 2026-10-22: "how a normal person makes
+    # mouth reactions"): surprise is the jaw dropping with the lips let go (AU 26), not a
+    # pucker; sadness pulls the corners down (15) and the chin up into a pout (17);
+    # worry stretches the lips sideways (20); doubt dimples one corner (14)
+    'surprised': dict(close=0, mouth={'AU.SmileOffOpen.L': 1, 'AU.SmileOffOpen.R': 1, 'JawOpen': 1}, brow=((4.2, 0), (5, 0))),
+    'sad':       dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.CornerDepress.L': 1, 'AU.CornerDepress.R': 1,
+                                      'AU.ChinRaise': 1}, brow=((1, 11), (1.2, 13))),
+    'worried':   dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.LipStretch.L': 1, 'AU.LipStretch.R': 1,
+                                      'AU.CornerDepress.L': .5, 'AU.CornerDepress.R': .7}, brow=((1.4, 15), (1.7, 18))),
+    'doubt':     dict(close=1, mouth={'AU.Relax.R': 1, 'AU.Dimple.L': 1}, brow=((3, 4), (-1.2, 2.4))),
 }
 DRAWN = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh',
          'laughB', 'lookL', 'lookR', 'love', 'sleep', 'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR',
@@ -200,27 +206,31 @@ if __name__ == '__main__':
     xs, tops, bots = trace('surprised', X, ZU, ZL, UPPER)['open']
     add_key(ob, 'Mouth.Surprised', fit_open(co0, X, ZU, ZL, front, xs, tops, bots))
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-face.blend'))
-    # the sheet: each drawn mouth, then his, close up and the whole face
+    # the sheet: tripo_muscles.py draws it, once its keys are in
+
+
+def render_sheet(ob, CX, name='mouths.png'):
+    """Each drawn mouth, then his, close up and the whole face: out/plan/<name>."""
     build.STYLE_NOW = 'tripo'
     cam = build.studio(); sc = bpy.context.scene; sc.camera = cam
     sc.cycles.samples = int(os.environ.get('SAMPLES', 16))
     strip = Image.open(os.path.join(HERE, '..', '..', '..', 'drsmiley', 'face.webp')).convert('RGBA')
     rows = []
     f = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 30)
-    for name, ctl in MOUTHS.items():
+    for name_, ctl in MOUTHS.items():
         set_face(ob, **ctl)
-        close = shot(os.path.join(TMP, f'mo-{name}.png'), (CX, 0, .672), .5, -10, 2, (480, 360))
-        face = shot(os.path.join(TMP, f'mf-{name}.png'), (CX, 0, .74), .95, -12, 3, (480, 360))
-        k = DRAWN.index(name)
+        close = shot(os.path.join(TMP, f'mo-{name_}.png'), (CX, 0, .672), .5, -10, 2, (480, 360))
+        face = shot(os.path.join(TMP, f'mf-{name_}.png'), (CX, 0, .74), .95, -12, 3, (480, 360))
+        k = DRAWN.index(name_)
         m = strip.crop((k * 302, 0, k * 302 + 302, 222)); bg = Image.new('RGBA', m.size, (255, 255, 255, 255)); bg.alpha_composite(m)
         drawn = bg.convert('RGB').resize((302 * 360 // 222, 360))
         row = Image.new('RGB', (drawn.width + 480 * 2 + 24, 360 + 50), 'white')
-        ImageDraw.Draw(row).text((10, 8), name, font=f, fill=(37, 46, 109))
+        ImageDraw.Draw(row).text((10, 8), name_, font=f, fill=(37, 46, 109))
         row.paste(drawn, (0, 50)); row.paste(close, (drawn.width + 12, 50)); row.paste(face, (drawn.width + 492 + 12, 50))
         rows.append(row)
     sheet = Image.new('RGB', (rows[0].width, sum(r.height + 16 for r in rows)), 'white')
     y = 0
     for r in rows:
         sheet.paste(r, (0, y)); y += r.height + 16
-    sheet.save(os.path.join(HERE, 'out', 'plan', 'mouths.png'))
+    sheet.save(os.path.join(HERE, 'out', 'plan', name))
     print('done')
