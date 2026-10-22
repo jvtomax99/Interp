@@ -21,6 +21,15 @@ first film's pipeline, which this one reuses). Branch:
   captions) and his remake draft (vertical, 3D neon, desk). PLAN.md says
   what was taken and what wasn't.
 
+## The opening (storyboard 5)
+
+Jose disliked the neon-on-black opening; of three tries (`openings.py` a, b,
+c) he replaced the night campus with his own photo of Helena Theurer
+Pavilion (683 x 1024; a second, dusk photo was only 447 px wide). The photo
+is NOT in git (rights unconfirmed): re-upload it to `build/photo/helena.jpg`,
+then the sky mask (smooth blue connected to the top-left corner, window
+frames excluded; see the commit "the photo opening") and `openings.py p1 p1b p2`.
+
 ## Rebuilding everything from a fresh session
 
 ```

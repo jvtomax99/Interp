@@ -36,7 +36,7 @@ measured in the app). Storyboards 1-3 and their code are kept.
 
 | Seconds | Scene | What happens |
 |---|---|---|
-| 0-5 | The opening | "Heart failure" (the doctor), "¿Fallo cardíaco?" struck, "Not for patients." (the interpreter), "Insuficiencia cardíaca" (the right word): 3D neon over a mirror floor |
+| 0-5 | The opening (storyboard 5) | Jose's photo of Helena Theurer Pavilion in depth layers (sky cut away and filled in behind): "Heart failure" in the sky behind the tower; "¿Fallo cardíaco?" struck, in front of the building; the camera arrives at a phone with the real Translate answer and its real caution ("Avoid 'fallo cardíaco' with patients"). `openings.py` p1, p1b, p2 |
 | 5-6.5 | Interpreter Hub | Dr. Smiley peels off the glass; "Built by our own interpreters." |
 | 6.5-12.5 | Finding a word | One glass phone per beat: Glossary, Translate, Ask the Hub, False Friends, with the promo's captions |
 | 12.5-15 | 3D Body | The real body, tall, on the mirror floor; "Explore the 3D Body. English and Spanish." |
@@ -83,6 +83,11 @@ the real `api/ask.js` with a fixed, correct reply; Translate is asked
 7. **MP4**, sent to Jose.
 
 ## Open questions for Jose
+
+- The opening photo (Helena Theurer Pavilion, uploaded by Jose 2026-10-22)
+  looks like a professional architecture photo: may it be used, and may it
+  be committed? Until then it lives only in `build/photo/` (not in git).
+  It shows the hospital's name across the tower.
 
 - Length: about 56 s, or a 45 s cut like the original (about 2 hours less render).
 - The campus model carries real logos (the HMH mark on the main tower, the

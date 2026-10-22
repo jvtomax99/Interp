@@ -213,5 +213,83 @@ def main(which):
             shot(sc, 'o_c2', smiley=WAVE)
 
 
+PHOTO = os.path.join(A.BUILD, 'photo')
+
+
+def photo_layers():
+    """Jose's photo of Helena Theurer Pavilion in two layers: the building
+    (sky cut away, build/photo/building.png) and a sky that also fills in
+    behind the building, so the layers can slide apart (parallax)."""
+    import numpy as np
+    from PIL import Image
+    src = os.path.join(PHOTO, 'sky.png')
+    if not os.path.exists(src):
+        im = np.asarray(Image.open(os.path.join(PHOTO, 'helena.jpg')).convert('RGB')).astype(float)
+        m = np.asarray(Image.open(os.path.join(PHOTO, 'sky_mask.png'))) > 128
+        rows = []
+        last = None
+        for y in range(im.shape[0]):
+            last = im[y][m[y]].mean(0) if m[y].sum() > 20 else last
+            rows.append(last)
+        first = next(r for r in rows if r is not None)
+        rows = np.array([first if r is None else r for r in rows])
+        from scipy.ndimage import uniform_filter1d
+        rows = uniform_filter1d(rows, 25, axis=0)
+        sky = np.repeat(rows[:, None, :], im.shape[1], axis=1)
+        sky[m] = im[m]
+        Image.fromarray(sky.clip(0, 255).astype('uint8')).save(src)
+    return os.path.join(PHOTO, 'building.png'), src
+
+
+def photo_plane(path, w, h, loc):
+    from storyboard import picture
+    ob = picture(path, loc, h)
+    return ob
+
+
+def photo_main(which):
+    bld, sky = photo_layers()
+    H = 1.024
+    if 'p1' in which:   # the real building; the doctor's words in the sky, behind the tower
+        sc = fresh(bg='#2D6FD8')
+        photo_plane(sky, 0, H * 2.6, (0, 2.2, 0.18))
+        photo_plane(bld, 0, H, (0, 0, 0))
+        cam = (0.0, -1.36, 0.0)
+        neon('Heart', (-0.12, 0.35, 0.33), 0.13, '#FFFFFF', strength=3.5, extrude=0.012, cam=cam)
+        neon('failure', (-0.12, 0.35, 0.2), 0.13, '#FFFFFF', strength=3.5, extrude=0.012, cam=cam)
+        text('THE DOCTOR SAYS', (-0.12, 0.35, 0.43), 0.035, '#0A1A40', True, face_cam=cam, glow=1.0)
+        camera(sc, cam, (0, 0, 0), 50)
+        shot(sc, 'o_p1')
+    if 'p1b' in which:   # closer; the interpreter's first try, struck through
+        sc = fresh(bg='#2D6FD8')
+        photo_plane(sky, 0, H * 2.6, (0, 2.2, 0.18))
+        photo_plane(bld, 0, H, (0, 0, 0))
+        cam = (0.02, -1.15, -0.04)
+        # In front of the building this time (the doctor's words were behind the tower).
+        y = -0.25
+        text('THE INTERPRETER', (0.0, y, 0.25), 0.024, '#0A1A40', True, face_cam=cam, glow=1.0)
+        neon('¿Fallo', (0.0, y, 0.18), 0.075, '#FF3D7A', strength=4, extrude=0.008, cam=cam)
+        neon('cardíaco?', (0.0, y, 0.1), 0.075, '#FF3D7A', strength=4, extrude=0.008, cam=cam)
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(0.0, y - 0.01, 0.14))
+        bar = bpy.context.active_object
+        bar.scale = (0.3, 0.002, 0.005)
+        bar.rotation_euler = (0, math.radians(-9), 0)
+        bar.data.materials.append(A.emission('strike', '#FF2D6B', 8))
+        text('Not for patients.', (0.0, y, 0.04), 0.024, '#FFFFFF', True, face_cam=cam, glow=2.0)
+        camera(sc, cam, (0, 0, -0.03), 50)
+        shot(sc, 'o_p1b', smiley=SURPRISED)
+    if 'p2' in which:   # the camera moves in; the real Translate answer and its caution
+        sc = fresh(bg='#2D6FD8')
+        photo_plane(sky, 0, H * 2.6, (0, 2.2, 0.18))
+        photo_plane(bld, 0, H, (0, 0, 0))
+        cam = Vector((0.03, -1.4, -0.02))
+        phone('translate2', (0.0, -0.78, -0.02), rot_z=0.1, h=0.44)
+        ring((0.0, -0.81, -0.02 + (0.5 - 0.44) * 0.44), 0.09, '#FF4F86', 2.0, 0.0018)
+        camera(sc, tuple(cam), (0.0, -0.78, -0.02), 50, fstop=1.6, focus=0.62)
+        shot(sc, 'o_p2', smiley=WINK)
+
+
 if __name__ == '__main__':
-    main(sys.argv[1:] or ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'])
+    args = sys.argv[1:] or ['a1', 'a2', 'b1', 'b2', 'c1', 'c2', 'p1', 'p1b', 'p2']
+    main(args)
+    photo_main(args)
