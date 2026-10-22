@@ -4,9 +4,9 @@
 Then hook_sound2 in brainhook_sound.py and ffmpeg make build/brainhook.mp4.
 
 Beats (30 fps, 120 BPM)
-  1-68    inside the real HUMC Brain: the camera flies through nuclei and
-          tracts, signals racing past; "HUMC BRAIN · 119 NUCLEI · 1,115
-          TRACTS" flashes (real numbers, brain/data.json via the dump)
+  1-68    inside the real HUMC Brain, drawn the way the app draws it (glow
+          halos, additive tracts, bloom; Jose's screen recording): signals
+          racing past; the app's readout (live numbers: 118 nuclei, 1,097 tracts)
   68-98   pull back: the whole brain appears
   96-122  it shrinks and flies into Dr. Smiley's head on the real Home
           screen, which lights up (the double-tap, in reverse)
@@ -44,8 +44,89 @@ def smooth(a, b, t):
     return a + (b - a) * t
 
 
+def soft(name, strength, attr='col', solid=False, tint_white=0.0, see_through=0.0):
+    """Emission that adds up like the page's additive sprites: a soft ball
+    (bright middle, fading edge), or for lines just partly see-through."""
+    m = bpy.data.materials.new(name)
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    out = nt.nodes.new('ShaderNodeOutputMaterial')
+    a = nt.nodes.new('ShaderNodeAttribute')
+    a.attribute_name = attr
+    col = a.outputs['Color']
+    if tint_white:
+        mx = nt.nodes.new('ShaderNodeMix')
+        mx.data_type = 'RGBA'
+        mx.inputs['Factor'].default_value = tint_white
+        nt.links.new(col, mx.inputs[6])
+        mx.inputs[7].default_value = (1, 1, 1, 1)
+        col = mx.outputs[2]
+    em = nt.nodes.new('ShaderNodeEmission')
+    em.inputs['Strength'].default_value = strength
+    nt.links.new(col, em.inputs['Color'])
+    tr = nt.nodes.new('ShaderNodeBsdfTransparent')
+    mix = nt.nodes.new('ShaderNodeMixShader')
+    if solid:
+        mix.inputs['Fac'].default_value = 1.0 - see_through
+    else:   # a soft ball: opaque at the middle, nothing at the rim
+        lw = nt.nodes.new('ShaderNodeLayerWeight')
+        lw.inputs['Blend'].default_value = 0.5
+        pw = nt.nodes.new('ShaderNodeMath')
+        pw.operation = 'POWER'
+        inv = nt.nodes.new('ShaderNodeMath')
+        inv.operation = 'SUBTRACT'
+        inv.inputs[0].default_value = 1.0
+        nt.links.new(lw.outputs['Facing'], inv.inputs[1])
+        nt.links.new(inv.outputs[0], pw.inputs[0])
+        pw.inputs[1].default_value = 2.2
+        nt.links.new(pw.outputs[0], mix.inputs['Fac'])
+    nt.links.new(tr.outputs[0], mix.inputs[1])
+    nt.links.new(em.outputs[0], mix.inputs[2])
+    nt.links.new(mix.outputs[0], out.inputs['Surface'])
+    return m
+
+
+def app_look(B, coll):
+    """Restyle assets.brain() the way brain/index.html draws it: each nucleus
+    a glow (halo) round a whiter core, tracts thin and additive, the surface
+    a faint dotted shell."""
+    d = B['data']
+    groups = d['groups']
+    pts, cols, cores, halos = [], [], [], []
+    for n in d['nodes']:
+        p = d['pos'][n['i']]
+        pts.append((p[0], -p[2], p[1]))
+        cols.append(A.srgb(groups[n['group']]['color']))
+        size = 0.05 + 0.021 * math.sqrt(n['bytes'] / 1024)      # the page's sprite size
+        cores.append(size * 0.13)
+        halos.append(size * 0.42)
+    B['nuclei'].data.materials.clear()
+    B['nuclei'].modifiers['points'].node_group.nodes['Set Material'].inputs['Material'].default_value = \
+        soft('core', 7.0, solid=True, tint_white=0.4)
+    rad = B['nuclei'].data.attributes['rad']
+    rad.data.foreach_set('value', np.asarray(cores, np.float32))
+    B['halo'] = A._points('halos', pts, cols, halos, soft('halo', 1.3), coll)
+    B['shell'].modifiers['points'].node_group.nodes['Set Material'].inputs['Material'].default_value = \
+        soft('shell', 1.1, solid=True, see_through=0.35)
+    cu = B['tracts'].data
+    cu.bevel_depth = 0.0007
+    for i, m in enumerate(cu.materials):
+        hexc = m.node_tree.nodes['Emission'].inputs['Color'].default_value
+        cu.materials[i] = A.emission('tract app %d' % i, '#FFFFFF', 0.8)
+        nt = cu.materials[i].node_tree
+        nt.nodes['Emission'].inputs['Color'].default_value = tuple(0.65 * c + 0.35 for c in hexc[:3]) + (1,)
+        em, out = nt.nodes['Emission'], nt.nodes['Material Output']
+        tr = nt.nodes.new('ShaderNodeBsdfTransparent')
+        mx = nt.nodes.new('ShaderNodeMixShader')
+        mx.inputs['Fac'].default_value = 0.6
+        nt.links.new(tr.outputs[0], mx.inputs[1])
+        nt.links.new(em.outputs[0], mx.inputs[2])
+        nt.links.new(mx.outputs[0], out.inputs['Surface'])
+
+
 def build():
-    sc = fresh(bg='#02030C')
+    sc = fresh(bg='#060A17')
     sc.render.resolution_x, sc.render.resolution_y = W, H
     sc.cycles.samples = 10
     sc.render.use_motion_blur = True
@@ -53,11 +134,12 @@ def build():
     sc.frame_start, sc.frame_end = 1, N
 
     coll, B = A.brain()
+    app_look(B, coll)
     d = B['data']
     # One handle for the whole brain, so it can shrink and fly as one.
     pivot = A.link(bpy.data.objects.new('brain', None))
     bpy.context.view_layer.update()
-    for o in (B['shell'], B['nuclei'], B['tracts']):
+    for o in (B['shell'], B['nuclei'], B['tracts'], B['halo']):
         o.parent = pivot
         o.matrix_parent_inverse = pivot.matrix_world.inverted()
 
@@ -91,6 +173,14 @@ def build():
     cd = bpy.data.cameras.new('cam')
     cam = A.link(bpy.data.objects.new('cam', cd))
     sc.camera = cam
+    global LABELS
+    LABELS = []
+    for g, info in d['groups'].items():
+        if g == 'other':
+            continue
+        pts = [d['pos'][n['i']] for n in d['nodes'] if n['group'] == g]
+        c = Vector([sum(p[i] for p in pts) / len(pts) for i in range(3)])
+        LABELS.append((Vector((c.x, -c.z, c.y)), info['name'].upper(), '%s · %s' % (info['region'], info['code']), info['color']))
     return sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2
 
 
@@ -107,13 +197,13 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             # out to the side: from the front the brain reads as a bow-tie;
             # from the side it reads as a brain
             t = ease_out((f - 68) / 32)
-            pos = Vector((0.35, -0.15, 0)).lerp(Vector((3.3, -1.5, 0.45)), t)
+            pos = Vector((0.35, -0.15, 0)).lerp(Vector((4.3, -2.0, 0.5)), t)
             a = Vector((0.35, -0.15, 0)) + Vector((1.0, -0.15 + 0.3 * math.sin(2.2), -0.05))
             tgt = a.lerp(Vector((0, 0.1, 0.0)), min(1.0, t * 1.6))
             lens = smooth(22, 35, (f - 68) / 12)
         else:
             t = (f - 100) / 24
-            pos = Vector((3.3, -1.5, 0.45)).lerp(Vector(cam_end_pos()), ease_out(t))
+            pos = Vector((4.3, -2.0, 0.5)).lerp(Vector(cam_end_pos()), ease_out(t))
             tgt = Vector((0, 0.1, 0.0)).lerp(Vector((0, PHONE_Y, 0.2)), ease_out(t))
             lens = smooth(32, 35, t)
         cam.location = pos
@@ -173,24 +263,93 @@ def move_signals(sig, paths, f):
     sig.data.update()
 
 
-def post(f, path):
-    im = Image.open(path).convert('RGB')
-    if 22 <= f < 70:   # the readout, the brain page's own numbers
-        a = min(1.0, (f - 22) / 6) * min(1.0, (70 - f) / 6)
-        layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
-        dr = ImageDraw.Draw(layer)
-        big = ImageFont.truetype('/usr/share/fonts/opentype/inter/Inter-SemiBold.otf', 22)
-        small = ImageFont.truetype('/usr/share/fonts/opentype/inter/Inter-Medium.otf', 15)
-        col = (95, 211, 243, int(255 * a))
-        dr.text((34, 60), 'H U M C   B R A I N', font=big, fill=col)
-        shown = '1 1 9   N U C L E I   ·   1 , 1 1 5   T R A C T S'
-        n = int(len(shown) * min(1.0, (f - 28) / 14)) if f >= 28 else 0
-        dr.text((34, 94), shown[:n], font=small, fill=(200, 214, 242, int(230 * a)))
-        dr.line((34, 124, 34 + 180 * min(1.0, (f - 22) / 10), 124), fill=col, width=2)
-        im = Image.alpha_composite(im.convert('RGBA'), layer).convert('RGB')
+FONTS = os.path.join(A.BUILD, 'fonts')
+MONO = os.path.join(FONTS, 'PlexMono-Medium.ttf')     # the page uses JetBrains Mono; Plex Mono is the closest here
+INTER_B = '/usr/share/fonts/opentype/inter/Inter-Bold.otf'
+LABELS = []
+# The live app's numbers (Jose's screen recording, 2026-10-22); this checkout's
+# data has 119 / 1,115, a slightly different version.
+TELE = [('Nuclei', '118'), ('Tracts', '1,097'), ('Mean degree', '18.6')]
+
+
+def spaced(dr, xy, txt, font, fill, track):
+    x, y = xy
+    for ch in txt:
+        dr.text((x, y), ch, font=font, fill=fill)
+        x += dr.textlength(ch, font=font) + track
+    return x
+
+
+def bloom(im):
+    """The page's glow: bright parts blurred and added back, twice."""
+    from PIL import ImageFilter
+    a = np.asarray(im).astype(np.float32) / 255
+    lum = a.mean(2, keepdims=True)
+    bright = Image.fromarray((np.clip((a - 0.45) * 1.8, 0, 1) * 255).astype('uint8'))
+    b1 = np.asarray(bright.filter(ImageFilter.GaussianBlur(5))).astype(np.float32) / 255
+    b2 = np.asarray(bright.filter(ImageFilter.GaussianBlur(22))).astype(np.float32) / 255
+    out = 1 - (1 - a) * (1 - 0.55 * b1) * (1 - 0.45 * b2)          # screen blend
+    h, w = out.shape[:2]
+    yy, xx = np.mgrid[0:h, 0:w]
+    v = 1 - 0.35 * (((xx - w / 2) / (w * 0.7)) ** 2 + ((yy - h / 2) / (h * 0.7)) ** 2)
+    return Image.fromarray((np.clip(out * v[..., None], 0, 1) * 255).astype('uint8'))
+
+
+def post(f, path, labels=()):
+    im = bloom(Image.open(path).convert('RGB'))
+    layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
+    dr = ImageDraw.Draw(layer)
+    if 14 <= f < 100:   # the page's own readout, top left
+        a = min(1.0, (f - 14) / 6) * min(1.0, (100 - f) / 8)
+        cyan = (1, 184, 230, int(255 * a))
+        mono = ImageFont.truetype(MONO, 14)
+        spaced(dr, (26, 54), 'CONNECTOMIC TRACTOGRAPHY · DTI', mono, cyan, 1.6)
+        dr.text((26, 76), 'HUMC Brain', font=ImageFont.truetype(INTER_B, 34), fill=(233, 238, 250, int(255 * a)))
+        x = 26
+        small = ImageFont.truetype(MONO, 14)
+        for k, (lab, val) in enumerate(TELE):
+            if f < 22 + k * 5:
+                break
+            x = spaced(dr, (x, 124), lab + ' ', small, (106, 119, 158, int(255 * a)), 0.3)
+            x = spaced(dr, (x, 124), val + '   ', small, (233, 238, 250, int(255 * a)), 0.3)
+        pts = []   # the EEG trace, scrolling
+        for i in range(120):
+            u = i / 119
+            y = 162 + 7 * math.sin(i * 0.9 + f * 0.7) * math.sin(i * 0.13 + f * 0.05)
+            if (i + f * 2) % 37 == 0:
+                y -= 16
+            pts.append((26 + u * 300, y))
+        dr.line(pts, fill=(1, 184, 230, int(200 * a)), width=2)
+        if (f // 8) % 2 == 0:
+            dr.ellipse((26, 182, 34, 190), fill=(61, 220, 151, int(255 * a)))
+        dr.text((40, 179), 'Acquiring', font=small, fill=(61, 220, 151, int(255 * a)))
+    for (x, y, name, sub, col, a) in labels:   # region labels, as on the page
+        r, g, b = (int(col[i:i + 2], 16) for i in (1, 3, 5))
+        f1 = ImageFont.truetype(MONO, 14)
+        f2 = ImageFont.truetype(MONO, 12)
+        w1 = sum(dr.textlength(ch, font=f1) + 1.5 for ch in name)
+        spaced(dr, (x - w1 / 2, y), name, f1, (r, g, b, int(255 * a)), 1.5)
+        w2 = dr.textlength(sub, font=f2)
+        dr.text((x - w2 / 2, y + 18), sub, font=f2, fill=(106, 119, 158, int(255 * a)))
+    im = Image.alpha_composite(im.convert('RGBA'), layer).convert('RGB')
     if f >= 140:
         im = Image.blend(im, Image.new('RGB', im.size, (255, 255, 255)), min(1.0, ((f - 140) / 10) ** 2))
     im.save(path)
+
+
+def label_spots(sc, cam, pivot, f):
+    """Where each region's name goes on screen this frame (during the pull-back)."""
+    from bpy_extras.object_utils import world_to_camera_view
+    if not 76 <= f < 98:
+        return []
+    a = min(1.0, (f - 76) / 5) * min(1.0, (98 - f) / 5)
+    out = []
+    for c, name, sub, col in LABELS:
+        p = pivot.matrix_world @ c
+        v = world_to_camera_view(sc, cam, p)
+        if v.z > 0 and 0.05 < v.x < 0.95 and 0.05 < v.y < 0.95:
+            out.append((v.x * W, (1 - v.y) * H, name, sub, col, a))
+    return out
 
 
 def main():
@@ -205,7 +364,7 @@ def main():
         path = os.path.join(OUT, 'f_%04d.png' % f)
         sc.render.filepath = path
         bpy.ops.render.render(write_still=True)
-        post(f, path)
+        post(f, path, label_spots(sc, parts[1], parts[2], f))
         print('frame', f, flush=True)
 
 
