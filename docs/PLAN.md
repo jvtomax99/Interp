@@ -285,8 +285,8 @@ then read the log; it names the suite and the check.
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
-  #115, live. `SEED_QUESTIONS`: this PR. Next: `FALSE_FRIENDS`, checked
-  for startup readers first.
+  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). Next:
+  `FALSE_FRIENDS`, checked for startup readers first (`docs/handoff.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
