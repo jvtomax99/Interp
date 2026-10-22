@@ -60,3 +60,18 @@ board('Eyes, step 5: lids wrapped into his skin', ['Shut eyes no longer look lik
      'surprise, heavy lids in sad, one half-shut eye in doubt.', [fit(sheet, 1000, 2200)], 'your drawing, his mouth, his whole face', True),
     ('3', 'NEXT', 'After your OK: the teeth (real upper and lower teeth, gums and tongue), then the expression sheet.', [], '', False),
 ], 'plan-eyes6.png')
+
+
+e7 = Image.open(O('plan/eyes7.png'))
+sheet = Image.open(O('plan/mouths.png'))
+board('Eyes, the animator\u2019s way', ['No lower lids, no spiky lashes. What animators do instead.'], [
+    ('1', 'ME', 'What animation teachers say (Animation Mentor, AnimSchool, Bloop Animation): the top lid does the work and '
+     'moves with the eye; a boy\u2019s lashes are one bold line, not separate hairs; the line lives on the lid\u2019s edge '
+     'so it travels with every blink; happy shut eyes are a closed lid with an upward-curved line.', [], '', False),
+    ('2', 'ME', 'Done that way: the eyeliner painted into his old texture is gone (it stayed behind like glasses when the lid '
+     'came down); one smooth tapered lash line rides the lid\u2019s edge; the lid is his own skin colour; the laugh is a shut '
+     'lid with an upward arc.', [fit(e7, 1000, 380)], 'rest, half blink, sad, laugh', False),
+    ('3', 'ME', 'All seven reactions with these eyes.', [fit(sheet, 1000, 2200)], 'your drawing, his mouth, his whole face', True),
+    ('4', 'NEXT', 'Known: a shut eye still bulges a little (the eyeball stands out of his face), and the arc\u2019s ends dip as '
+     'they tuck under the skin. After your OK: the teeth.', [], '', False),
+], 'plan-eyes7.png')

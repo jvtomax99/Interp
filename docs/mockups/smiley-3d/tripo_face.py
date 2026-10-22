@@ -63,7 +63,7 @@ def add_key(ob, name, co):
     return kb
 
 
-def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, lid=None, lower=(0, 0)):
+def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, lid=None, lower=(0, 0), happy=0):
     """brow: per side (his right, his left) a (lift, tilt) in the app's units
     (DR_BROWS: lift up positive, tilt positive = inner end up); cheek: per side
     0..1; close: 0 (his sculpted smile) .. 1 (closed); mouth: {shape: 0..2} (past
@@ -95,7 +95,10 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
     if lids:
         from tripo_eyes import set_blink
         for i, s in enumerate((R, L)):
-            set_blink(bpy.data.objects['Lid.' + s], lid[i] if lid else REST_LID + lid_down[i])
+            lo = bpy.data.objects['Lid.' + s]
+            set_blink(lo, (1 - happy) * (lid[i] if lid else REST_LID + lid_down[i]))
+            if 'Happy' in lo.data.shape_keys.key_blocks:      # happy shut eyes (tripo_eyes2.py)
+                lo.data.shape_keys.key_blocks['Happy'].value = happy
             if 'Cornea.' + s in bpy.data.objects:      # the dome's real shine replaces the painted one (tripo_eyes2.py)
                 bpy.data.objects['Glint.' + s].hide_render = True
             if 'LidLow.' + s in bpy.data.objects:

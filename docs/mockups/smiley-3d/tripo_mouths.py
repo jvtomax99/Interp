@@ -23,11 +23,11 @@ TMP = os.path.join(HERE, 'in', 'faceplan')
 # his left brow, your right, goes a fifth further: DR_BROW_SIDE)
 MOUTHS = {
     'rest':      dict(close=1),
-    'smile':     dict(close=0, cheek=(1, 1), brow=((2, 0), (2.4, 0)), lower=(.3, .3)),   # a smile lifts the lower lids a little
+    'smile':     dict(close=0, cheek=(1, 1), brow=((2, 0), (2.4, 0))),
     # pushed toward the size of his drawings (Jose: "push them further"), the
     # muscles past their natural strength the way a cartoon exaggerates
     'laugh':     dict(close=0, mouth={'JawOpen': 1.2, 'CornerUp.L': 1, 'CornerUp.R': 1}, cheek=(1.6, 1.6),
-                      brow=((2.8, 0), (3.4, 0)), lid=(.64, .64), lower=(1, 1)),   # eyes shut in a gentle arc, the lower lid up to meet the upper
+                      brow=((2.8, 0), (3.4, 0)), happy=1),   # eyes shut in an upward curve, the cheeks pushed up
     # after the muscles (tripo_muscles.py, Jose 2026-10-22: "how a normal person makes
     # mouth reactions"): surprise is the jaw dropping with the lips let go (AU 26), not a
     # pucker; sadness pulls the corners down (15) and the chin up into a pout (17);

@@ -144,6 +144,18 @@ worried (flat, not a frown).
    .8 mm further out so it closes over the lower). Laugh: `lid .64, lower 1`
    (both edges arch up and meet); smile `lower .3`. Shown
    `out/plan-eyes6.png`, waiting. Next: the teeth (plan in plan-alive).
+   Jose then: no lower lids, the lashes "awkward and unnatural", "study
+   animators". Now (`tripo_eyes2.py`): no lower lid (`build_lower_lid` not
+   called), the painted eyeliner in his texture painted out
+   (`paint_out_liner`, `in/tex-noliner.png`: it stayed behind like glasses
+   as the lid lowered), the Liner objects removed, the lid a skin shell
+   ending at its edge plus one tapered lash-line tube riding it
+   (`line_verts`, part of every blink key), lid in his skin colour
+   (`lid_skin_colour_above`), happy shut eyes = shape key `Happy`
+   (`set_face(happy=1)`): lid shut, line an upward arc across it. `wrap`
+   uses a soft minimum near the ball (a hard min drew a grid cross).
+   Shown `out/plan-eyes7.png`, waiting. Known: shut eyes bulge a little,
+   arc ends dip.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

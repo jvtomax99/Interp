@@ -14,6 +14,7 @@ tripo_eyes.set_gaze).
 import os, sys, math
 import numpy as np
 import bpy
+from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tripo_eyes as E
 import build
@@ -254,7 +255,11 @@ def wrap(vs, eye, rx, ry, rz, rows=None, segs=128, extra=0.):
     inside = rho < 1
     yb = -ry * np.sqrt(np.clip(1 - rho * rho, 0, 1))   # the ball's front surface (its y is out-negative)
     margin = .0008 + extra + (BULGE + .0008) * (1 - smooth((rho - .7) / .25))
-    y = np.where(inside, np.minimum(y, yb - margin), y)
+    # a soft minimum: where the shut lid lies almost on the clearance surface, a hard
+    # min switched between the two point by point and shaded as a grid (a cross on the lid)
+    a_, b_ = y, yb - margin
+    soft = (a_ + b_) / 2 - np.sqrt(((a_ - b_) / 2) ** 2 + .0012 ** 2)
+    y = np.where(inside, soft, y)
     dy = y - v[:, 1]
     if rows is not None:
         # the rim and lashes move as one piece with their column's lid edge: pushed out
@@ -268,11 +273,11 @@ def wrap(vs, eye, rx, ry, rz, rows=None, segs=128, extra=0.):
 
 def lid_faces(rows=48, segs=128):
     q = lambda r: [(r * segs + j, r * segs + (j + 1) % segs, (r + 1) * segs + (j + 1) % segs, (r + 1) * segs + j) for j in range(segs)]
-    shell = [f for r in range(rows) for f in q(r)]
+    shell = [f for r in range(rows - 2) for f in q(r)]
     rim = q(rows + 1)
     # the rim's front is the dark lash line: seen from the front, the lashes point at you
     # and read as a thin line on their own
-    lash = q(rows) + q(rows + 3)
+    lash = q(rows) + q(rows - 1) + q(rows - 2)   # a bold line on the lid's edge, moving with it; the rim's dark front only: the spiky lash sweep read awkward (Jose; animators keep boys' lashes to a line)
     return shell + rim, lash
 
 
@@ -361,6 +366,18 @@ def cheek_colour(eye):
     return [int(v) for v in np.median(T.sample(px, tuv[sel].mean(1)) * 255, 0)]
 
 
+def lid_skin_colour_above(eye):
+    """His skin between this eye and its brow, from the face texture (after the liner is painted out)."""
+    import tripo_lib as T
+    head = bpy.data.objects['Mesh_0']
+    img, px = T.texture(head)
+    cen, tuv = T.face_arrays(head)
+    t = eye.matrix_world.translation
+    rz = eye.data.materials[0].node_tree.nodes['RZ'].outputs[0].default_value
+    sel = (np.abs(cen[:, 0] - t.x) < .015) & (np.abs(cen[:, 2] - (t.z + rz * 1.5)) < .004) & (cen[:, 1] < -.09)
+    return [int(v) for v in np.median(T.sample(px, tuv[sel].mean(1)) * 255, 0)]
+
+
 def set_lower(side, amount):
     """The lower lid raised 0 (rest) .. 1 (high: a squint, the laugh's arc), through its stages."""
     ob = bpy.data.objects.get('LidLow.' + side)
@@ -393,21 +410,104 @@ def caruncle(mat, side):
     L.new(tint.outputs['Result'], N['Principled BSDF'].inputs['Base Color'])
 
 
+def paint_out_liner(eyes):
+    """His model's eyeliner is painted into the skin texture above each eye.
+    With the lid resting lower it showed as a second line, and stayed put as
+    the lid came down (glasses). Animators keep the lash line on the lid's
+    edge so it moves with it: the painted line goes, the lid's rim is the line.
+    Dark texels in a ring round each eye (not the brows) become his skin."""
+    import cv2, tripo_lib as T
+    head = bpy.data.objects['Mesh_0']
+    img, px = T.texture(head)
+    cen, tuv = T.face_arrays(head)
+    col = T.sample(px, tuv.mean(1)) * 255
+    h, w = px.shape[:2]
+    mask = np.zeros((h, w), np.uint8)
+    ring = np.zeros(len(cen), bool)
+    for eye in eyes:
+        t = eye.matrix_world.translation
+        N = eye.data.materials[0].node_tree.nodes
+        rx, rz = N['RX'].outputs[0].default_value, N['RZ'].outputs[0].default_value
+        rho = np.hypot((cen[:, 0] - t.x) / rx, (cen[:, 2] - t.z) / rz)
+        near = (rho > .8) & (rho < 1.75) & (cen[:, 1] < -.09)
+        dark = near & (col.sum(1) < 330)
+        ring |= near & (rho > 1.3) & (col.sum(1) > 500)
+        for f in np.nonzero(dark)[0]:
+            cv2.fillConvexPoly(mask, np.round(tuv[f] * [w, h]).astype(np.int32), 1)
+    skin = np.median(T.sample(px, tuv[ring].mean(1)), 0)
+    mask = cv2.dilate(mask, np.ones((9, 9), np.uint8))
+    soft = cv2.GaussianBlur(mask.astype(np.float32), (15, 15), 0)[..., None]
+    out = px.copy(); out[..., :3] = out[..., :3] * (1 - soft) + skin * soft
+    path = os.path.join(HERE, 'in', 'tex-noliner.png')
+    Image.fromarray((np.clip(out[::-1], 0, 1) * 255).astype(np.uint8), 'RGBA').save(path)
+    new = bpy.data.images.load(path, check_existing=False)
+    for n in head.data.materials[0].node_tree.nodes:
+        if n.type == 'TEX_IMAGE' and n.image == img:
+            n.image = new
+    print('liner painted out', int(mask.sum()), 'texels')
+
+
+LINE_N, LINE_SG = 72, 8
+
+
+def line_verts(edge_pts, eye, side):
+    """The lash line: one smooth tube riding the lid's edge, bold over the eye and
+    tapering to nothing at both corners, thickest toward the outer corner (as
+    animated films draw a boy's lash line: a bold stroke, no separate lashes)."""
+    M = len(edge_pts)                      # the edge row, one point per azimuth step (front = index 0)
+    out_x = 1 if side == 'L' else -1
+    idx = [(j % M) for j in range(-M // 4 + 3, M // 4 - 2)]
+    pts = np.array([edge_pts[i] for i in idx])
+    # resample evenly along its length
+    seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))]
+    t = np.linspace(0, seg[-1], LINE_N)
+    P = np.stack([np.interp(t, seg, pts[:, k]) for k in range(3)], 1)
+    P[:, 1] -= .0007                        # just in front of the lid's skin
+    vs = []
+    for k in range(LINE_N):
+        u = k / (LINE_N - 1)
+        x = P[k, 0] * out_x                 # outer corner is +x for his left eye
+        bias = .75 + .5 * (x - P[:, 0].min() * out_x if out_x > 0 else 0) * 0
+        r = (.0034 * math.sin(math.pi * u) ** .55 + .0002) * (1 + .35 * (u if out_x * (P[-1, 0] - P[0, 0]) > 0 else 1 - u))
+        tan = P[min(k + 1, LINE_N - 1)] - P[max(k - 1, 0)]; tan /= np.linalg.norm(tan)
+        a = np.array([0, -1., 0]); a -= tan * (a @ tan); a /= np.linalg.norm(a)
+        b = np.cross(tan, a)
+        for j in range(LINE_SG):
+            ang = 2 * math.pi * j / LINE_SG
+            vs.append(tuple(P[k] + (a * math.cos(ang) * .55 + b * math.sin(ang)) * r))   # flat-ish: wider up/down than deep
+    return vs
+
+
+def line_faces(base):
+    return [(base + k * LINE_SG + j, base + k * LINE_SG + (j + 1) % LINE_SG,
+             base + (k + 1) * LINE_SG + (j + 1) % LINE_SG, base + (k + 1) * LINE_SG + j)
+            for k in range(LINE_N - 1) for j in range(LINE_SG)]
+
+
 def rebuild_lid(eye, side):
-    """The lid object kept (its rig, place and material), its mesh replaced; the
-    blink stages B1..B8 rebuilt to match (tripo_eyes.set_blink drives them)."""
+    """The lid object kept (its rig, place and material), its mesh replaced: a
+    skin shell that ends at its edge, and a lash line riding that edge. Blink
+    stages B1..B8 (tripo_eyes.set_blink) and Happy rebuilt to match."""
     lid = bpy.data.objects['Lid.' + side]
     N = eye.data.materials[0].node_tree.nodes
     rx, rz = N['RX'].outputs[0].default_value, N['RZ'].outputs[0].default_value
     ry = max(abs(v.co.y) for v in eye.data.vertices)
+    rows, segs = 48, 128
     # the arch holds until the lid is nearly shut (straight between, half closed was flat again)
     stages = [(E.OPEN + (E.SHUT - E.OPEN) * k / E.STAGES, ARCH_OPEN + (ARCH_SHUT - ARCH_OPEN) * (k / E.STAGES) ** 2.5) for k in range(E.STAGES + 1)]
-    skin, lash = lid_faces()
+    def stage(edge, arch, line_at=None):
+        v = wrap(lid_stage_verts(rx, ry, rz, edge, arch, side, grow=0), eye, rx, ry, rz, rows=rows, extra=.0008)
+        shell = v[:(rows + 1) * segs]          # the skin only: the rolled rim poked through his skin at the corners
+        path = shell[rows * segs:]
+        if line_at:                            # a crease drawn on the shut lid instead of on its edge
+            w = wrap(lid_stage_verts(rx, ry, rz, *line_at, side, grow=0), eye, rx, ry, rz, rows=rows, extra=.0008)
+            path = w[rows * segs:(rows + 1) * segs]
+        return shell + line_verts(path, eye, side)
+    q = lambda r: [(r * segs + j, r * segs + (j + 1) % segs, (r + 1) * segs + (j + 1) % segs, (r + 1) * segs + j) for j in range(segs)]
+    skin = [f for r in range(rows) for f in q(r)]
+    line = line_faces((rows + 1) * segs)
     me = bpy.data.meshes.new('Lid.' + side)
-    # open, the lid is tucked above the eye behind his face and the liner draws the line;
-    # its lashes grow in as it comes down (open, they poked out over the eye as tabs)
-    grow = lambda k: min(1., k / 2)
-    me.from_pydata(wrap(lid_stage_verts(rx, ry, rz, *stages[0], side, grow=grow(0)), eye, rx, ry, rz, rows=48, extra=.0008), [], skin + lash)
+    me.from_pydata(stage(*stages[0]), [], skin + line)
     me.shade_smooth()
     me.materials.append(bpy.data.materials['Lid'])
     lm = bpy.data.materials.get('Lash') or bpy.data.materials.new('Lash')
@@ -416,19 +516,27 @@ def rebuild_lid(eye, side):
     lb.inputs['Base Color'].default_value = build.srgb(30, 16, 10); lb.inputs['Roughness'].default_value = .65
     lb.inputs['Specular IOR Level'].default_value = .15
     me.materials.append(lm)
-    mi = [0] * len(skin) + [1] * len(lash)
-    me.polygons.foreach_set('material_index', mi)
+    me.polygons.foreach_set('material_index', [0] * len(skin) + [1] * len(line))
     old = lid.data
     lid.data = me
     bpy.data.meshes.remove(old)
     lid.vertex_groups.clear()
-    vg = lid.vertex_groups.new(name='head'); vg.add(list(range(len(me.vertices))), 1.0, 'REPLACE')
+    lid.vertex_groups.new(name='head').add(list(range(len(me.vertices))), 1.0, 'REPLACE')
     lid.shape_key_add(name='Basis', from_mix=False)
     for k in range(1, E.STAGES + 1):
         kb = lid.shape_key_add(name=f'B{k}', from_mix=False)
-        kb.data.foreach_set('co', np.array(wrap(lid_stage_verts(rx, ry, rz, *stages[k], side, grow=grow(k)), eye, rx, ry, rz, rows=48, extra=.0008)).ravel())
+        kb.data.foreach_set('co', np.array(stage(*stages[k])).ravel())
         kb.value = 0
-    glue_liner(eye, side, rx, rz)
+    # happy shut eyes: the lid closed in an upward curve, as animators draw a laugh (with the
+    # cheeks pushed up); a blink closes in a soft sag instead
+    kb = lid.shape_key_add(name='Happy', from_mix=False)
+    # the lid fully shut, the line an upward arc across it (a closed lid with a
+    # curved line, as a happy shut eye is drawn: no lower lid needed)
+    kb.data.foreach_set('co', np.array(stage(E.SHUT, 0, line_at=(-60, 34))).ravel())
+    kb.value = 0
+    ln = bpy.data.objects.get('Liner.' + side)
+    if ln:                      # the lid's own edge carries the line now
+        bpy.data.objects.remove(ln)
 
 
 def glue_liner(eye, side, rx, rz):
@@ -476,13 +584,19 @@ if __name__ == '__main__':
     if not os.path.exists(before):
         shutil.copy(src, before)
     bpy.ops.wm.open_mainfile(filepath=before)        # always from the eyes as they were
+    paint_out_liner([bpy.data.objects['Eye.L'], bpy.data.objects['Eye.R']])
+    # the lid in his skin's own colour right above the eye (a shade darker read as a disc
+    # round each eye); the new lid has no 'edge' attribute, so the ramp's first stop is it
+    c = lid_skin_colour_above(bpy.data.objects['Eye.L'])
+    r = bpy.data.materials['Lid'].node_tree.nodes['Color Ramp'].color_ramp
+    r.elements[0].color = r.elements[1].color = build.srgb(*c)
     for s in ('L', 'R'):
         eye = bpy.data.objects['Eye.' + s]
         iris_detail(eye.data.materials[0])
         add_cornea(eye)
         bpy.data.objects['Glint.' + s].hide_render = True      # the dome's real shine replaces the painted one
         rebuild_lid(eye, s)
-        build_lower_lid(eye, s)
+        # no lower lids (Jose, 2026-10-22: "I don't want him to have lower eye lids")
         caruncle(eye.data.materials[0], s)
     bpy.ops.wm.save_as_mainfile(filepath=src)
     print('done')
