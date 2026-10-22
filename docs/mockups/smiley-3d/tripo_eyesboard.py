@@ -24,3 +24,15 @@ board('Eyes, step 2: lids and lashes', ['His lids before (top) and after (bottom
     ('3', 'NEXT', 'After your OK, step 3: soft shading in the whites and pink inner corners; then step 4, a lower lid (squint, '
      'the laugh\u2019s happy arcs, a lash line when the eye shuts).', [], '', False),
 ], 'plan-eyes3.png')
+
+
+rl = Image.open(O('plan/restlid.png'))
+board('Eyes, step 3: more human', ['Three ways his upper lid can rest. All three now have a', 'lower lid and pink inner corners.'], [
+    ('1', 'ME', 'Real eyes at rest show no white above the iris: the upper lid sits on its top edge. White there reads as '
+     'startled. A is his eyes as they are now; B rests the lid just on the iris; C a little over it.',
+     [fit(rl, 1000, 560)], 'A (left), B (middle, my pick), C (right)', False),
+    ('2', 'ME', 'New in all three: a lower lid with its own rim and short lashes along the bottom of each eye, and the whites '
+     'warming to pink at the inner corners, as real eyes do.', [], '', True),
+    ('3', 'NEXT', 'The lower lid rising for a squint and for your laugh\u2019s happy arcs: raised, it still looks like a separate '
+     'skin patch; it needs to blend into his cheek. Then the expression sheet.', [], '', False),
+], 'plan-eyes4.png')

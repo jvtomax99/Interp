@@ -124,6 +124,13 @@ worried (flat, not a frown).
    corner; the liner kept but pressed onto his skin by ray casts (it
    floated from the side) and bolder. Shown: `out/plan-eyes3.png`, waiting.
    Known: a shut eye is a plain dome (lower lid, step 4).
+   Jose: "work more on it to make it more human". Step 3: lower lid
+   (`build_lower_lid`, `LidLow.L/R`, keys U1..U6, `set_lower`,
+   `set_face(lower=...)`; hugging the ball, LOW_R 1.03: at 1.2 it stood out
+   over the cheek), pink inner corners (`caruncle`). Shown
+   `out/plan-eyes4.png`: upper lid at rest A (now) / B (on the iris, my
+   pick) / C (over it), waiting on his pick. Not done: the raised lower lid
+   still reads as a separate skin patch (needs to blend into the cheek).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

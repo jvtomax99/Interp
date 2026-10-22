@@ -215,6 +215,106 @@ def lid_faces(rows=48, segs=128):
     return shell + rim, lash
 
 
+LOW_REST, LOW_HIGH = -58, 8        # the lower lid's edge: at rest under the iris, raised for a squint or a laugh
+LOW_ARCH_REST, LOW_ARCH_HIGH = -5, 16   # a slight dip at rest; pushed up by the cheeks it bows up (the laugh's arc)
+LOW_STAGES = 6
+LOW_R, LOW_D = 1.03, 1.3      # the lower lid hugs the ball (1.2x wide, like the upper, it stood out over his
+                              # cheek: a floating lash line, a pink disc raised); deep enough to clear the glass dome
+
+
+def lower_stage_verts(rx, ry, rz, edge, arch, side, rows=32, segs=128, lash=.0022):
+    """The lower lid: a shell from the bottom of the ball up to an edge, with a
+    rim and short lashes, the upper lid's build turned upside down."""
+    vs = []
+    out_x = 1 if side == 'L' else -1
+    def pt(el, az, k=1.0):
+        el = math.radians(el)
+        return np.array([rx * LOW_R * k * math.cos(el) * math.sin(az), -(ry * LOW_D * k) * math.cos(el) * math.cos(az),
+                         rz * LOW_R * k * math.sin(el)])
+    azs = [2 * math.pi * j / segs for j in range(segs)]
+    edges = [edge + arch * max(0., math.cos(a)) ** 1.5 for a in azs]
+    for r in range(rows + 1):
+        for j, a in enumerate(azs):
+            vs.append(pt(-90 + (edges[j] + 90) * r / rows, a))
+    for j, a in enumerate(azs):
+        vs.append(pt(edges[j] + 1.4, a, .985))
+    for j, a in enumerate(azs):
+        vs.append(pt(edges[j] - 2.2, a, .962))
+    for j, a in enumerate(azs):
+        vs.append(pt(edges[j] + .5, a, 1.004))
+    for j, a in enumerate(azs):
+        root = pt(edges[j] + .5, a, 1.004)
+        n = np.array([root[0] / rx ** 2, root[1] / ry ** 2, root[2] / rz ** 2]); n /= np.linalg.norm(n)
+        front = max(0., math.cos(a)) ** .5 * (math.cos(a) > .15)
+        t = math.sin(a) * out_x
+        length = lash * front * (.3 + .7 * (t + 1) / 2)
+        vs.append(root + (n * .8 - np.array([0, 0, 1.]) * .45) * length)
+    return [tuple(v) for v in vs]
+
+
+def build_lower_lid(eye, side):
+    """A new lower lid per eye, riding the head like the upper one; shape keys
+    U1..U6 raise it (set_lower drives them)."""
+    name = 'LidLow.' + side
+    if name in bpy.data.objects:
+        bpy.data.objects.remove(bpy.data.objects[name])
+    up = bpy.data.objects['Lid.' + side]
+    N = eye.data.materials[0].node_tree.nodes
+    rx, rz = N['RX'].outputs[0].default_value, N['RZ'].outputs[0].default_value
+    ry = max(abs(v.co.y) for v in eye.data.vertices)
+    st = [(LOW_REST + (LOW_HIGH - LOW_REST) * k / LOW_STAGES, LOW_ARCH_REST + (LOW_ARCH_HIGH - LOW_ARCH_REST) * k / LOW_STAGES)
+          for k in range(LOW_STAGES + 1)]
+    skin, lash = lid_faces(rows=32)
+    me = bpy.data.meshes.new(name)
+    me.from_pydata(lower_stage_verts(rx, ry, rz, *st[0], side), [], skin + lash); me.shade_smooth()
+    me.materials.append(bpy.data.materials['Lid']); me.materials.append(bpy.data.materials['Lash'])
+    me.polygons.foreach_set('material_index', [0] * len(skin) + [1] * len(lash))
+    ob = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(ob)
+    ob.parent = up.parent; ob.parent_type = up.parent_type; ob.matrix_world = up.matrix_world.copy()
+    for md in up.modifiers:
+        if md.type == 'ARMATURE':
+            am = ob.modifiers.new('Armature', 'ARMATURE'); am.object = md.object
+    ob.vertex_groups.new(name='head').add(list(range(len(me.vertices))), 1.0, 'REPLACE')
+    ob.shape_key_add(name='Basis', from_mix=False)
+    for k in range(1, LOW_STAGES + 1):
+        kb = ob.shape_key_add(name=f'U{k}', from_mix=False)
+        kb.data.foreach_set('co', np.array(lower_stage_verts(rx, ry, rz, *st[k], side)).ravel())
+        kb.value = 0
+    return ob
+
+
+def set_lower(side, amount):
+    """The lower lid raised 0 (rest) .. 1 (high: a squint, the laugh's arc), through its stages."""
+    ob = bpy.data.objects.get('LidLow.' + side)
+    if not ob:
+        return
+    a = max(0, min(1, amount)) * LOW_STAGES
+    for i in range(1, LOW_STAGES + 1):
+        ob.data.shape_keys.key_blocks[f'U{i}'].value = max(0, 1 - abs(a - i))
+
+
+def caruncle(mat, side):
+    """Pink inner corners and softer whites: the whites warm a little toward
+    pink at the corner by his nose, as a real eye's do."""
+    N, L = mat.node_tree.nodes, mat.node_tree.links
+    if 'Caruncle' in N:
+        return
+    mul = [n for n in N if n.type == 'MIX' and n.blend_type == 'MULTIPLY' and n.outputs['Result'].links
+           and n.outputs['Result'].links[0].to_socket.name == 'Base Color'][0]
+    rest = [n for n in N if n.type == 'ATTRIBUTE' and n.attribute_name == 'rest_position'][0]
+    sep = N.new('ShaderNodeSeparateXYZ'); L.new(rest.outputs['Vector'], sep.inputs['Vector'])
+    rx = N['RX'].outputs[0]
+    m = N.new('ShaderNodeMath'); m.operation = 'DIVIDE'; L.new(sep.outputs['X'], m.inputs[0]); L.new(rx, m.inputs[1])
+    s = N.new('ShaderNodeMath'); s.operation = 'MULTIPLY'; L.new(m.outputs[0], s.inputs[0]); s.inputs[1].default_value = -1 if side == 'L' else 1
+    ramp = N.new('ShaderNodeValToRGB'); ramp.name = 'Caruncle'
+    ramp.color_ramp.elements[0].position, ramp.color_ramp.elements[0].color = .62, (1, 1, 1, 1)
+    ramp.color_ramp.elements[1].position, ramp.color_ramp.elements[1].color = .97, (1, .62, .6, 1)
+    L.new(s.outputs[0], ramp.inputs['Fac'])
+    tint = N.new('ShaderNodeMix'); tint.data_type = 'RGBA'; tint.blend_type = 'MULTIPLY'; tint.inputs['Factor'].default_value = 1
+    L.new(mul.outputs['Result'], tint.inputs['A']); L.new(ramp.outputs['Color'], tint.inputs['B'])
+    L.new(tint.outputs['Result'], N['Principled BSDF'].inputs['Base Color'])
+
+
 def rebuild_lid(eye, side):
     """The lid object kept (its rig, place and material), its mesh replaced; the
     blink stages B1..B8 rebuilt to match (tripo_eyes.set_blink drives them)."""
@@ -304,5 +404,7 @@ if __name__ == '__main__':
         add_cornea(eye)
         bpy.data.objects['Glint.' + s].hide_render = True      # the dome's real shine replaces the painted one
         rebuild_lid(eye, s)
+        build_lower_lid(eye, s)
+        caruncle(eye.data.materials[0], s)
     bpy.ops.wm.save_as_mainfile(filepath=src)
     print('done')
