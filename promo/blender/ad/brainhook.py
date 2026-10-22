@@ -38,7 +38,11 @@ W, H = 540, 960
 OUT = os.path.join(A.HERE, 'renders', 'brainhook')
 rnd = random.Random(5)
 PHONE_Y, PHONE_H = 0.6, 1.6
-LOGO_AT, LOGO_W = Vector((0, PHONE_Y - 0.35, 0.42)), 0.75   # the middle of "Interpreter"'s line
+# Jose: the logo is shown on top of the app. It builds in front of the
+# phone's upper half; the phone stays, the set stays dark (the white set,
+# floor and camera move are switched off by ON_APP).
+ON_APP = True
+LOGO_AT, LOGO_W = Vector((0, PHONE_Y - 0.28, 0.5)), 0.78   # the middle of "Interpreter"'s line
 START = Vector()
 HEAD = Vector(((0.746 - 0.5) * PHONE_H * PH_W / PH_H, PHONE_Y - 0.05, (0.5 - 0.29) * PHONE_H))
 
@@ -229,7 +233,7 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             pos = side.lerp(Vector(cam_end_pos()), t)
             tgt = centre.lerp(Vector((0, PHONE_Y, 0.26)), t)
             lens = 35
-        if f > 108:      # settle on the logo, centred, slightly from below like the reference
+        if f > 108 and not ON_APP:      # settle on the logo, centred, slightly from below like the reference
             u = ease_out((f - 108) / 14)
             pos = pos.lerp(Vector((0, LOGO_AT.y - 1.45, 0.12)), u)
             tgt = tgt.lerp(LOGO_AT + Vector((0, 0, -0.14)), u)
@@ -250,12 +254,14 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             if 'rest' not in o:
                 o['rest'] = list(o.location)
             u = back((f - 84) / 12, 1.4)
-            sink = 2.2 * max(0.0, min(1.0, (f - 108) / 8)) ** 2       # drops away as the logo starts
-            key(o, f, loc=Vector(o['rest']) + Vector((0, 0, -1.2 * (1 - u) - sink)), hide=f < 84 or f > 116)
+            sink = 0 if ON_APP else 2.2 * max(0.0, min(1.0, (f - 108) / 8)) ** 2   # drops away as the logo starts
+            key(o, f, loc=Vector(o['rest']) + Vector((0, 0, -1.2 * (1 - u) - sink)), hide=f < 84 or (f > 116 and not ON_APP))
 
         if scr_mat:      # the Home screen lights up as the brain lands
             sv = scr_mat.node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
             sv.default_value = smooth(0.15, 1.0, (f - 92) / 16)
+            if ON_APP:   # dims a little behind the logo so the letters stand out
+                sv.default_value *= 1 - 0.45 * smooth(0, 1, (f - 110) / 10)
             sv.keyframe_insert('default_value', frame=f)
 
         for k, r in enumerate(rings):   # rings on the two taps, 106 and 110
@@ -280,11 +286,13 @@ def logo_frame(lg, f):
     k = k * k * (3 - 2 * k)
     dark, light = Vector(A.srgb('#060A17')[:3]), Vector(A.srgb('#EEF4FD')[:3])
     c = dark.lerp(light, k)
+    if ON_APP:
+        c = dark
     for node in (lg['bg'], lg['dim']):
         node.inputs['Color'].default_value = (*c, 1)
         node.inputs['Color'].keyframe_insert('default_value', frame=f)
     for o in lg['set']:
-        key(o, f, hide=f < 110)
+        key(o, f, hide=f < 110 or (ON_APP and o.type != 'LIGHT'))
     fl = lg['set'][0].data.materials[0].node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
     fl.default_value = 0.22 * k                       # the floor fades up with the set, no hard edge
     fl.keyframe_insert('default_value', frame=f)
@@ -369,7 +377,7 @@ def bloom(im):
 
 def post(f, path, labels=()):
     raw = Image.open(path).convert('RGB')
-    k = max(0.0, min(1.0, (f - 108) / 10))           # no bloom once the set turns bright
+    k = 0.6 * max(0.0, min(1.0, (f - 108) / 10))     # less bloom on the logo
     im = Image.blend(bloom(raw), raw, k) if k else bloom(raw)
     layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
     dr = ImageDraw.Draw(layer)
