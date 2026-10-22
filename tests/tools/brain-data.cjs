@@ -20,7 +20,7 @@ const GROUPS = {
     'Small helpers: tile colours, escaping, links', 'Icons (inline SVG)', 'Theme, navigation and overlays', 'Your name and photo (the name sheet)'],
   start: ['Dark mode before the first paint', 'Loading the glossary', 'The screen: renderContent', 'Split dock (phones)', 'Home screen', 'Init',
     'Phone chrome, dialogs and the on-screen keyboard', 'Install / offline support'],
-  data: ['Seed data (from the shared reference doc)', 'False Friends (falsos amigos)', 'Domain icons and link lists'],
+  data: ['Seed data (from the shared reference doc)', 'Code of Ethics', 'Domain icons and link lists'],
   safe: ['Translate lookup', 'CSV export / import', 'Training & Events', 'The guide: installing, the front page', '3D Body', 'Looking a term up',
     'Subdomain folder', 'Practice dashboard tiles', 'Your HUMC campus (CoreCHI Practice)', 'Voice and mic check',
     'Lists: providers, recently deleted, doctors hub', 'Duplicate doctors', 'Terminology backfill', 'Healthcare Providers: modal + photo handling',
