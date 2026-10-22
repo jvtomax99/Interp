@@ -49,7 +49,7 @@ def main():
     # before the landing or the title, taps exactly on the rings.
     S.place(L, impact() * 0.7, at(1), 1.0)              # frame 1: a hit on the first frame
     S.place(L, swish(0.5, 400, 6000), at(1), 0.8)      # ripping back from his nucleus
-    S.place(L, hum(2.8), 0, 1.0)
+    S.place(L, hum(4.8), 0, 1.0)                      # under the whole clip: no silent dips
     S.place(L, crackle(2.8), 0, 0.35)
     for k, f in enumerate(range(16, 84, 15)):           # a pulse on every beat
         S.place(L, pulse(196 if k % 2 else 262), at(f), 0.9)
