@@ -285,8 +285,9 @@ then read the log; it names the suite and the check.
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
-  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: this PR.
-  Next: `DOMAIN_ICONS` (Home's first paint reads it) or phase 3.
+  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
+  Phase 3 (features), Jose's pick: Translate, this PR. Next leaves: 3D
+  Body, Looking a term up, Voice and mic check (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -296,6 +297,14 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-22 Split `index.html`, phase 3, Translate (this PR): the
+  Translate section is `features/translate.js`, verbatim, loaded before
+  the app's script (declarations only). Proof: tokens identical when put
+  back, the screen and a translation identical in the browser, globals
+  unchanged. `sw.js` (any `features/*.js` network-first), the harness (serves
+  `features/*.js`), `first-paint.cjs`, `brain-data.cjs`,
+  `AGENTS.md` (a feature's code lives in its file), `CLAUDE.md`.
+  False Friends (#125) merged on Jose's "Push", live as b1022.1233.
 - 2026-10-22 Split `index.html`, phase 2, False Friends (this PR):
   `FALSE_FRIENDS` is `falsefriends/list.js`, loaded like the guide and the
   practice bank; `ETHICS_CONTENT` stays, under a "Code of Ethics"
