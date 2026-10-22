@@ -23,23 +23,35 @@ so the organ shot uses heart, stomach, pancreas, kidneys. The campus's
 sky dome doesn't carry over to glTF (hidden; Blender's sky instead). The
 explode follows the app's Explode slider: systems slide apart side by side.
 
-## Beats (storyboard 3, about 55 s, 120 BPM; Jose 2026-10-22: every
-feature, brief, the three 3D ones longer; no organs; the doctor databases in)
+## Beats (storyboard 4, vertical 9:16, about 56 s, 120 BPM)
+
+Jose 2026-10-22: take inspiration from the original promo
+(`media/hub-promo.mp4`, 720 x 1280, 45 s) and his remake draft (540 x 960,
+43 s). Taken from them: vertical; the "heart failure" opening (the doctor's
+word, the wrong word struck out, the right word); his own two-line
+captions and ending; Dr. Smiley reacting in a corner; a glossy floor. Not
+taken: the draft's long static desk shot, its dark laptop screen, and the
+"0.33 s" / "0.13 s" to-find-the-word number (unmeasured; it goes in only if
+measured in the app). Storyboards 1-3 and their code are kept.
 
 | Seconds | Scene | What happens |
 |---|---|---|
-| 0-2.5 | Open | Dr. Smiley peels off a glass screen; "Interpreter Hub" |
-| 2.5-8.5 | Finding a word | Real screens on glass phones, one per beat: Glossary, Translate, Ask the Hub, False Friends |
-| 8.5-12 | 3D Body | The real body turns on a dark stage |
-| 12-15.5 | Broken down | The drop at 12 s: systems slide apart, one per beat |
-| 15.5-19 | Every piece | The Explode slider at 100%: each piece pulls apart within its system |
-| 19-25 | Before an appointment | Doctor Directory, a doctor's page, Doctor Prep, Team Chat (sample doctors, labelled) |
-| 25-26.5 | The double-tap | Home; a double-tap on Dr. Smiley's head (how the brain really opens) |
-| 26.5-35.5 | HUMC Brain | Regions light one per beat, signals race along tracts |
-| 35.5-40 | Keep learning | Term Review (its knowledge brain), Daily Drill, Memory trainer |
-| 40-41.5 | Into the campus | The CoreCHI Practice screen; the camera dives into its campus card |
-| 41.5-51 | CoreCHI City | The campus at golden hour, buildings build up per CoreCHI area |
-| 51-55 | End | Interpreter Hub, built for HUMC medical interpreters; the BodyParts3D credit |
+| 0-5 | The opening | "Heart failure" (the doctor), "¿Fallo cardíaco?" struck, "Not for patients." (the interpreter), "Insuficiencia cardíaca" (the right word): 3D neon over a mirror floor |
+| 5-6.5 | Interpreter Hub | Dr. Smiley peels off the glass; "Built by our own interpreters." |
+| 6.5-12.5 | Finding a word | One glass phone per beat: Glossary, Translate, Ask the Hub, False Friends, with the promo's captions |
+| 12.5-15 | 3D Body | The real body, tall, on the mirror floor; "Explore the 3D Body. English and Spanish." |
+| 15-18.5 | Broken down | The drop at 15 s: systems step out into a line going back |
+| 18.5-22 | Every piece | The Explode slider at 100% |
+| 22-28 | Before an appointment | "Ready for every physician." Doctor Directory, a doctor's page, Doctor Prep; Team Chat "One team. One channel." (sample doctors, labelled) |
+| 28-29.5 | The double-tap | Home; a double-tap on Dr. Smiley's head |
+| 29.5-38 | HUMC Brain | "The HUMC Brain. The app, mapped." Regions light per beat |
+| 38-42.5 | Keep learning | "Daily drills. Sharp skills." Daily Drill, Term Review, Memory trainer |
+| 42.5-44 | Into the campus | The CoreCHI Practice screen; the dive into its campus card |
+| 44-52 | CoreCHI City | "National certification. Prep built in." Buildings build up per beat |
+| 52-56 | End | Interpreter Hub. "Built here, for our patients." interp-six.vercel.app, live today, on any phone. "Better words. Safer care." BodyParts3D credit |
+
+Frames: `storyboard3.py` (v01-v15), captions `src/captions.html` via
+`tools/captions.cjs`.
 
 The organ shot (storyboard 1-2) is out of the film but its code stays
 (`storyboard.py` p4). The doctor screens use made-up sample doctors
@@ -55,7 +67,7 @@ the real `api/ask.js` with a fixed, correct reply; Translate is asked
 ## Steps (the guide's, in order)
 
 1. **Brief** (`BRIEF.md`): this plan in the six blocks. Only after the OK.
-2. **Build**: `timeline.py` (every time and place for 1,650 frames), the
+2. **Build**: `timeline.py` (every time and place for 1,680 frames), the
    cards and titles as HTML photographed by Playwright (like the first
    film's card), `scene.py` per scene, all keyed from the timeline.
 3. **Stills**: 24 half-size stills as one grid, sent to Jose before any
@@ -64,7 +76,7 @@ the real `api/ask.js` with a fixed, correct reply; Translate is asked
 4. **Fixes**: exact changes, rounds until the grid is right.
 5. **Render** in chunks of at most 2 hours (resumable), then the
    broken-frame scan. Estimate on this machine (4 cores, no graphics
-   card): about 9 hours for 1,650 frames (3D scenes 15-35 s a frame, the
+   card): about 9 hours for 1,680 frames (3D scenes 15-35 s a frame, the
    phone bursts about 10 s).
 6. **Sound**: synthesized, 120 BPM, the drop on the explode; loudness every
    half second and a -1 dB true-peak ceiling.
@@ -72,8 +84,8 @@ the real `api/ask.js` with a fixed, correct reply; Translate is asked
 
 ## Open questions for Jose
 
-- Length: about 55 s, or a 40 s cut (about 3 hours less render).
+- Length: about 56 s, or a 45 s cut like the original (about 2 hours less render).
 - The campus model carries real logos (the HMH mark on the main tower, the
   hospital's name sign). The guide says leave real logos out of a promo.
-- 16:9 only, or also a vertical 9:16 for phones (a separate composition,
-  bigger type, never a crop).
+- Vertical 9:16 (like both of Jose's videos and the app's promo), or a wide
+  16:9 too (a separate composition, never a crop).

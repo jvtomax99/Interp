@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Captions for the vertical ad, in the original promo's style (Jose's own
+     copy): a white first line, the second in a coloured highlight. Drawn on
+     a transparent 720 x 1280 page and laid over the 3D frames. ?c=<name>. -->
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../../src/fonts.css">
+<style>
+  html,body{margin:0;width:720px;height:1280px;background:transparent;font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .cap{position:absolute;left:44px;top:96px;right:44px}
+  .rule{height:0;border-top:3px dashed rgba(255,255,255,.35);margin-bottom:22px;width:300px}
+  .l1{font-size:46px;font-weight:700;letter-spacing:-.02em;color:#fff;line-height:1.08;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+  .l2{display:inline-block;margin-top:8px;font-size:46px;font-weight:700;letter-spacing:-.02em;line-height:1.12;padding:2px 12px 6px;border-radius:6px;color:#071029}
+  .note{margin-top:14px;font-size:20px;color:rgba(230,236,250,.75);font-weight:550;letter-spacing:.02em}
+  .end{position:absolute;left:0;right:0;bottom:150px;text-align:center;color:#fff}
+  .end h1{margin:0;font-size:64px;font-weight:750;letter-spacing:-.03em}
+  .end .sub{font-size:26px;color:#C9D6F2;margin-top:6px;font-weight:550}
+  .end .url{display:inline-block;margin-top:22px;font-size:22px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+  .end .live{font-size:18px;color:#9FB0D6;margin-top:10px}
+  .end .tag{margin-top:26px;font-size:40px;font-weight:750;letter-spacing:-.02em}
+  .end .tag span{display:inline-block;background:#5FD3F3;color:#071029;padding:0 12px 4px;border-radius:6px;margin-top:6px}
+  .credit{position:absolute;left:0;right:0;bottom:36px;text-align:center;font-size:14px;color:rgba(200,210,235,.55)}
+</style></head><body><div id="root"></div>
+<script>
+const C = {
+  title:     ['Built by our', 'own interpreters.', '#F28C6B'],
+  glossary:  ['One glossary.', 'Every specialty.', '#F2C46B'],
+  body:      ['Explore the 3D Body.', 'English and Spanish.', '#5FD3F3'],
+  doctors:   ['Ready for', 'every physician.', '#F2A0C4', 'Sample doctors'],
+  brain:     ['The HUMC Brain.', 'The app, mapped.', '#B9A3FF'],
+  drills:    ['Daily drills.', 'Sharp skills.', '#F2A65A'],
+  campus:    ['National certification.', 'Prep built in.', '#7FD6A8'],
+};
+const name = new URLSearchParams(location.search).get('c');
+const root = document.getElementById('root');
+if (name === 'end') {
+  root.innerHTML = `<div class="end"><h1>Interpreter Hub</h1><div class="sub">Built here, for our patients.</div>
+    <div class="url">interp-six.vercel.app</div><div class="live">Live today, on any phone.</div>
+    <div class="tag">Better words.<br><span>Safer care.</span></div></div>
+    <div class="credit">Anatomy: BodyParts3D © DBCLS, CC BY 4.0</div>`;
+} else if (C[name]) {
+  const [a, b, col, note] = C[name];
+  root.innerHTML = `<div class="cap"><div class="rule"></div><div class="l1">${a}</div><div class="l2" style="background:${col}">${b}</div>${note ? `<div class="note">${note}</div>` : ''}</div>`;
+}
+</script></body></html>
