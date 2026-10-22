@@ -45,20 +45,26 @@ def pulse(f0=220):
 
 def main():
     L = np.zeros(N)
-    S.place(L, hum(2.4), 0, 1.0)
-    S.place(L, crackle(2.3), 0, 0.35)
-    for k, f in enumerate(range(1, 69, 15)):            # a pulse on every beat, inside
+    # Timed to brainhook.py as revised after the review: no silent gaps
+    # before the landing or the title, taps exactly on the rings.
+    S.place(L, impact() * 0.7, at(1), 1.0)              # frame 1: a hit on the first frame
+    S.place(L, swish(0.5, 400, 6000), at(1), 0.8)      # ripping back from his nucleus
+    S.place(L, hum(2.8), 0, 1.0)
+    S.place(L, crackle(2.8), 0, 0.35)
+    for k, f in enumerate(range(16, 84, 15)):           # a pulse on every beat
         S.place(L, pulse(196 if k % 2 else 262), at(f), 0.9)
-    for k, f in enumerate((22, 28, 34, 40, 46, 52)):     # the readout typing on
-        S.place(L, tick(), at(f), 0.5)
-    S.place(L, swish(1.0, 200, 5000), at(68), 0.9)     # the rush out
-    S.place(L, swish(0.8, 1500, 9000), at(96), 0.6)    # shrinking into his head
-    S.place(L, S.keyclick(), at(119), 0.9)             # tap
-    S.place(L, S.keyclick(), at(123), 0.9)             # tap
-    S.place(L, S.ding(S.note('C7')), at(123), 0.4)
-    S.place(L, impact(), at(126), 1.0)                 # INTERPRETER
-    S.place(L, impact(), at(132), 1.1)                 # HUB
-    S.place(L, S.riser(0.45), at(137), 0.9)            # into the flash
+    for f in range(22, 36, 2):                           # the caption typing on
+        S.place(L, tick(), at(f), 0.35)
+    S.place(L, swish(1.1, 200, 5000), at(50), 0.9)     # the pull-back
+    S.place(L, swish(0.8, 300, 4000), at(84), 0.8)     # the phone rises
+    S.place(L, swish(0.7, 1500, 9000), at(88), 0.6)    # the brain shrinking into his head
+    S.place(L, S.keyclick(), at(106), 0.9)             # tap
+    S.place(L, S.ding(S.note('C7')), at(106), 0.4)
+    S.place(L, S.keyclick(), at(110), 0.9)             # tap
+    S.place(L, S.riser(1.0), at(114), 0.7)             # rising into the title and the flash
+    S.place(L, impact(), at(121), 1.0)                 # INTERPRETER
+    S.place(L, impact(), at(128), 1.1)                 # HUB
+    S.place(L, S.sparkle(), at(140), 0.35)
     st = S.stereo(L, width=0.3)
     out = Pedalboard([HighpassFilter(28), LowpassFilter(16500), Reverb(room_size=0.5, wet_level=0.16, dry_level=0.88),
                       Limiter(threshold_db=-3.0)])(st.astype(np.float32), S.SR)

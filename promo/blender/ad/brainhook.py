@@ -3,16 +3,20 @@
     python brainhook.py [frames...]   -> renders/brainhook/f_0001.png ...
 Then hook_sound2 in brainhook_sound.py and ffmpeg make build/brainhook.mp4.
 
-Beats (30 fps, 120 BPM)
-  1-68    inside the real HUMC Brain, drawn the way the app draws it (glow
-          halos, additive tracts, bloom; Jose's screen recording): signals
-          racing past; the app's readout (live numbers: 118 nuclei, 1,097 tracts)
-  68-98   pull back: the whole brain appears
-  96-122  it shrinks and flies into Dr. Smiley's head on the real Home
-          screen, which lights up (the double-tap, in reverse)
-  122     rings snap in round his head
-  126,132 INTERPRETER, HUB slam in above the phone
-  140-150 white flash into the next section
+Beats (30 fps, 120 BPM; a beat every 15 frames). Revised after the review
+(build/review_frames.png): a subject at frame 1, no dark stretch, big phone,
+big held title, two readable labels, a plain-words caption, no scan jargon.
+  1-15    frame 1: close on Dr. Smiley's own nucleus (pink), the camera
+          rips back from it into the brain
+  15-50   flying through: signals racing along the real tracts;
+          "HUMC Brain" and the caption "The App, Mapped Like A Brain."
+  50-84   pull back to the whole brain in profile, two labels:
+          DR. SMILEY, ASK THE HUB
+  84-106  the phone rises in face-on; the brain shrinks into Dr. Smiley's
+          head on the real Home screen, which lights up
+  106,110 two taps, rings (the double-tap, in reverse)
+  121,128 INTERPRETER, HUB slam in above the phone, held
+  144-150 white flash into the next section
 """
 import math
 import os
@@ -35,6 +39,8 @@ W, H = 540, 960
 OUT = os.path.join(A.HERE, 'renders', 'brainhook')
 rnd = random.Random(5)
 PHONE_Y, PHONE_H = 0.6, 1.6
+TITLE_SIZE, TITLE_Z = 0.16, (1.07, 0.9)
+START = Vector()
 HEAD = Vector(((0.746 - 0.5) * PHONE_H * PH_W / PH_H, PHONE_Y - 0.05, (0.5 - 0.29) * PHONE_H))
 
 
@@ -167,16 +173,19 @@ def build():
     white = mat_face('white face', '#FFFFFF', 2.0)
     cyan_side = mat_side('cyan side', '#5FD3F3')
     cam_end = cam_end_pos()
-    t1 = word('INTERPRETER', (0, PHONE_Y - 0.3, 1.13), 0.13, white, cyan_side, BLACK, cam_end)
-    t2 = word('HUB', (0, PHONE_Y - 0.3, 0.97), 0.13, white, cyan_side, BLACK, cam_end)
+    t1 = word('INTERPRETER', (0, PHONE_Y - 0.12, TITLE_Z[0]), TITLE_SIZE, white, cyan_side, BLACK, cam_end)
+    t2 = word('HUB', (0, PHONE_Y - 0.12, TITLE_Z[1]), TITLE_SIZE, white, cyan_side, BLACK, cam_end)
 
     cd = bpy.data.cameras.new('cam')
     cam = A.link(bpy.data.objects.new('cam', cd))
     sc.camera = cam
-    global LABELS
+    global LABELS, START
+    biggest = max((n for n in d['nodes'] if n['group'] == 'smiley'), key=lambda n: n['bytes'])
+    q = d['pos'][biggest['i']]
+    START = Vector((q[0], -q[2], q[1]))          # Dr. Smiley's own nucleus
     LABELS = []
     for g, info in d['groups'].items():
-        if g == 'other':
+        if g not in ('smiley', 'ask'):            # two readable labels, not seven
             continue
         pts = [d['pos'][n['i']] for n in d['nodes'] if n['group'] == g]
         c = Vector([sum(p[i] for p in pts) / len(pts) for i in range(3)])
@@ -185,27 +194,31 @@ def build():
 
 
 def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
+    inside = Vector((0.35, -0.15, 0.0))
+    side = Vector((4.3, -2.0, 0.5))
+    centre = Vector((0, 0.1, 0.0))
     for f in range(1, N + 1):
-        # Camera: inside, flying through the middle where the tracts converge;
-        # then back out to the whole brain; then to the phone.
-        if f <= 68:
-            t = (f - 1) / 67
-            pos = Vector((smooth(-1.05, 0.35, t), smooth(0.25, -0.15, t), smooth(0.2, 0.0, t)))
-            tgt = pos + Vector((1.0, -0.15 + 0.3 * math.sin(t * 2.2), -0.05))
-            lens = 22
-        elif f <= 100:   # out fast, so the wide lens doesn't stretch the brain
-            # out to the side: from the front the brain reads as a bow-tie;
-            # from the side it reads as a brain
-            t = ease_out((f - 68) / 32)
-            pos = Vector((0.35, -0.15, 0)).lerp(Vector((4.3, -2.0, 0.5)), t)
-            a = Vector((0.35, -0.15, 0)) + Vector((1.0, -0.15 + 0.3 * math.sin(2.2), -0.05))
-            tgt = a.lerp(Vector((0, 0.1, 0.0)), min(1.0, t * 1.6))
-            lens = smooth(22, 35, (f - 68) / 12)
-        else:
-            t = (f - 100) / 24
-            pos = Vector((4.3, -2.0, 0.5)).lerp(Vector(cam_end_pos()), ease_out(t))
-            tgt = Vector((0, 0.1, 0.0)).lerp(Vector((0, PHONE_Y, 0.2)), ease_out(t))
-            lens = smooth(32, 35, t)
+        if f <= 15:      # close on his nucleus, ripping back
+            t = ease_out((f - 1) / 14)
+            pos = (START + Vector((0.02, -0.3, 0.02))).lerp(START + Vector((-0.35, -0.75, 0.05)), t)
+            tgt = START
+            lens = 35
+        elif f <= 50:    # flying through the middle, looking along the tracts
+            t = (f - 15) / 35
+            a = START + Vector((-0.35, -0.75, 0.05))
+            pos = a.lerp(inside, smooth(0, 1, t))
+            tgt = START.lerp(inside + Vector((1.0, -0.2, -0.05)), smooth(0, 1, t * 1.3))
+            lens = smooth(35, 24, t * 2)
+        elif f <= 84:    # pull back to the profile, always looking at the brain
+            t = ease_out((f - 50) / 30)
+            pos = inside.lerp(side, t)
+            tgt = (inside + Vector((1.0, -0.2, -0.05))).lerp(centre, ease_out((f - 50) / 8))
+            lens = smooth(24, 35, (f - 50) / 10)
+        else:            # to the phone, face-on
+            t = ease_out((f - 84) / 20)
+            pos = side.lerp(Vector(cam_end_pos()), t)
+            tgt = centre.lerp(Vector((0, PHONE_Y, 0.26)), t)
+            lens = 35
         cam.location = pos
         cam.rotation_euler = (tgt - pos).to_track_quat('-Z', 'Y').to_euler()
         cam.data.lens = lens
@@ -213,33 +226,37 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
         cam.keyframe_insert('rotation_euler', frame=f)
         cam.data.keyframe_insert('lens', frame=f)
 
-        # The brain: whole until 96, then shrinks into his head and is gone at 123.
-        t = ease_out((f - 96) / 26)
-        s = 1.0 + (0.045 - 1.0) * t if f < 122 else max(0.0005, 0.045 * (1 - (f - 122) / 2))
-        key(pivot, f, loc=Vector((0, 0, 0)).lerp(HEAD, t), scale=s)
+        # The brain: whole until 88, then shrinks into his head; gone at 108.
+        t = ease_out((f - 88) / 18)
+        s_ = 1.0 + (0.045 - 1.0) * t if f < 106 else max(0.0005, 0.045 * (1 - (f - 106) / 2))
+        key(pivot, f, loc=Vector((0, 0, 0)).lerp(HEAD, t), scale=s_)
 
-        # The Home screen lights up as the brain lands.
-        if scr_mat:
+        # The phone: hidden inside the brain until it rises in at 84.
+        for o in ph:
+            if 'rest' not in o:
+                o['rest'] = list(o.location)
+            u = back((f - 84) / 12, 1.4)
+            key(o, f, loc=Vector(o['rest']) + Vector((0, 0, -1.2 * (1 - u))), hide=f < 84)
+
+        if scr_mat:      # the Home screen lights up as the brain lands
             sv = scr_mat.node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
-            sv.default_value = smooth(0.0, 1.0, (f - 98) / 18)
+            sv.default_value = smooth(0.15, 1.0, (f - 92) / 16)
             sv.keyframe_insert('default_value', frame=f)
 
-        # Rings snap in round his head (the double-tap, in reverse).
-        for k, r in enumerate(rings):
-            u = (f - 122 - k) / 6
+        for k, r in enumerate(rings):   # rings on the two taps, 106 and 110
+            u = (f - (106 if k < 2 else 110) - (k % 2)) / 6
             key(r, f, scale=max(0.001, 2.5 - 1.5 * ease_out(u)) if u >= 0 else 0.001, hide=not (0 <= u < 1.6))
 
-        # INTERPRETER, HUB slam in.
-        for word_, land in ((t1, 126), (t2, 132)):
+        for word_, land in ((t1, 121), (t2, 128)):   # the title, on the beat, then held
             for p in word_:
                 at = land + p['frac'] * 3
                 rest = Vector(p['rest_loc'])
                 rr = tuple(p['rest_rot'])
                 if f < at - 4:
-                    key(p, f, loc=rest + Vector((0, -0.8, 0.05)), rot=rr, scale=0.001, hide=True)
+                    key(p, f, loc=rest + Vector((0, -0.5, 0.04)), rot=rr, scale=0.001, hide=True)
                 elif f <= at:
                     u = (f - (at - 4)) / 4
-                    key(p, f, loc=rest + Vector((0, -0.8 * (1 - u) ** 2, 0.05 * (1 - u))), rot=rr, scale=2.0 - u, hide=False)
+                    key(p, f, loc=rest + Vector((0, -0.5 * (1 - u) ** 2, 0.04 * (1 - u))), rot=rr, scale=2.0 - u, hide=False)
                 else:
                     key(p, f, loc=rest, rot=rr, scale=back((f - at) / 6, 3.0) if f - at < 6 else 1.0, hide=False)
 
@@ -250,7 +267,7 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
 
 
 def cam_end_pos():
-    return (0, -1.75, 0.22)        # the phone fills about two thirds of the frame
+    return (0, PHONE_Y - 1.85, 0.24)  # the phone fills about three quarters of the width
 
 
 def move_signals(sig, paths, f):
@@ -267,9 +284,6 @@ FONTS = os.path.join(A.BUILD, 'fonts')
 MONO = os.path.join(FONTS, 'PlexMono-Medium.ttf')     # the page uses JetBrains Mono; Plex Mono is the closest here
 INTER_B = '/usr/share/fonts/opentype/inter/Inter-Bold.otf'
 LABELS = []
-# The live app's numbers (Jose's screen recording, 2026-10-22); this checkout's
-# data has 119 / 1,115, a slightly different version.
-TELE = [('Nuclei', '118'), ('Tracts', '1,097'), ('Mean degree', '18.6')]
 
 
 def spaced(dr, xy, txt, font, fill, track):
@@ -299,56 +313,45 @@ def post(f, path, labels=()):
     im = bloom(Image.open(path).convert('RGB'))
     layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
     dr = ImageDraw.Draw(layer)
-    if 14 <= f < 100:   # the page's own readout, top left
-        a = min(1.0, (f - 14) / 6) * min(1.0, (100 - f) / 8)
-        cyan = (1, 184, 230, int(255 * a))
-        mono = ImageFont.truetype(MONO, 14)
-        spaced(dr, (26, 54), 'CONNECTOMIC TRACTOGRAPHY · DTI', mono, cyan, 1.6)
-        dr.text((26, 76), 'HUMC Brain', font=ImageFont.truetype(INTER_B, 34), fill=(233, 238, 250, int(255 * a)))
-        x = 26
-        small = ImageFont.truetype(MONO, 14)
-        for k, (lab, val) in enumerate(TELE):
-            if f < 22 + k * 5:
-                break
-            x = spaced(dr, (x, 124), lab + ' ', small, (106, 119, 158, int(255 * a)), 0.3)
-            x = spaced(dr, (x, 124), val + '   ', small, (233, 238, 250, int(255 * a)), 0.3)
-        pts = []   # the EEG trace, scrolling
-        for i in range(120):
-            u = i / 119
-            y = 162 + 7 * math.sin(i * 0.9 + f * 0.7) * math.sin(i * 0.13 + f * 0.05)
-            if (i + f * 2) % 37 == 0:
-                y -= 16
-            pts.append((26 + u * 300, y))
-        dr.line(pts, fill=(1, 184, 230, int(200 * a)), width=2)
-        if (f // 8) % 2 == 0:
-            dr.ellipse((26, 182, 34, 190), fill=(61, 220, 151, int(255 * a)))
-        dr.text((40, 179), 'Acquiring', font=small, fill=(61, 220, 151, int(255 * a)))
+    if 8 <= f < 86:     # the name, and what it is, in plain words
+        a = min(1.0, (f - 8) / 5) * min(1.0, (86 - f) / 6)
+        dr.rounded_rectangle((18, 44, 330, 112), radius=14, fill=(6, 10, 23, int(170 * a)))
+        dr.text((32, 50), 'HUMC Brain', font=ImageFont.truetype(INTER_B, 48), fill=(233, 238, 250, int(255 * a)))
+        cap = 'The App, Mapped Like A Brain.'
+        if f >= 22:
+            n = int(len(cap) * min(1.0, (f - 22) / 14))
+            ft = ImageFont.truetype(INTER_B, 30)
+            w = dr.textlength(cap, font=ft)
+            dr.rounded_rectangle((26, 126, 26 + w + 20, 170), radius=7, fill=(185, 163, 255, int(235 * a)))
+            dr.text((36, 129), cap[:n], font=ft, fill=(7, 16, 41, int(255 * a)))
     for (x, y, name, sub, col, a) in labels:   # region labels, as on the page
         r, g, b = (int(col[i:i + 2], 16) for i in (1, 3, 5))
-        f1 = ImageFont.truetype(MONO, 14)
-        f2 = ImageFont.truetype(MONO, 12)
+        f1 = ImageFont.truetype(os.path.join(FONTS, 'PlexMono-SemiBold.ttf'), 25)
+        f2 = ImageFont.truetype(MONO, 17)
         w1 = sum(dr.textlength(ch, font=f1) + 1.5 for ch in name)
-        spaced(dr, (x - w1 / 2, y), name, f1, (r, g, b, int(255 * a)), 1.5)
+        bx = x - w1 / 2
+        dr.rounded_rectangle((bx - 8, y - 4, bx + w1 + 6, y + 44), radius=8, fill=(6, 10, 23, int(150 * a)))
+        spaced(dr, (bx, y), name, f1, (r, g, b, int(255 * a)), 1.5)
         w2 = dr.textlength(sub, font=f2)
-        dr.text((x - w2 / 2, y + 18), sub, font=f2, fill=(106, 119, 158, int(255 * a)))
+        dr.text((x - w2 / 2, y + 26), sub, font=f2, fill=(164, 176, 204, int(255 * a)))
     im = Image.alpha_composite(im.convert('RGBA'), layer).convert('RGB')
-    if f >= 140:
-        im = Image.blend(im, Image.new('RGB', im.size, (255, 255, 255)), min(1.0, ((f - 140) / 10) ** 2))
+    if f >= 144:
+        im = Image.blend(im, Image.new('RGB', im.size, (255, 255, 255)), min(1.0, ((f - 144) / 6) ** 2))
     im.save(path)
 
 
 def label_spots(sc, cam, pivot, f):
     """Where each region's name goes on screen this frame (during the pull-back)."""
     from bpy_extras.object_utils import world_to_camera_view
-    if not 76 <= f < 98:
+    if not 58 <= f < 86:
         return []
-    a = min(1.0, (f - 76) / 5) * min(1.0, (98 - f) / 5)
+    a = min(1.0, (f - 58) / 5) * min(1.0, (86 - f) / 5)
     out = []
     for c, name, sub, col in LABELS:
         p = pivot.matrix_world @ c
         v = world_to_camera_view(sc, cam, p)
-        if v.z > 0 and 0.05 < v.x < 0.95 and 0.05 < v.y < 0.95:
-            out.append((v.x * W, (1 - v.y) * H, name, sub, col, a))
+        if v.z > 0 and 0.15 < v.x < 0.85 and 0.1 < v.y < 0.75:
+            out.append((v.x * W, (1 - v.y) * H - 60, name, sub, col, a))
     return out
 
 
