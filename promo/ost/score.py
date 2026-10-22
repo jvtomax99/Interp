@@ -1,6 +1,6 @@
 """The Hub's theme, "Built Here": the score for media/hub-promo.mp4.
 
-Writes out/built-here.mid. render.sh turns it into audio and puts it under
+Writes out/built-here.mid and out/fx.json (for synth.py). render.sh turns it into audio and puts it under
 the video. Every time below is in seconds on the video's own clock, measured
 from its cuts (ffmpeg scene detection, 2026-10-22):
 
@@ -18,7 +18,11 @@ One clave cycle is one card (a sixteenth of the bar is a salsa eighth, so
 it moves like salsa at 160). Piano tune, piano montuno, tumbao bass, congas,
 bongos, cowbell, guiro, timbales, nylon guitar, brass on the tune the
 second time, and a soft kick that beats like a heart (lub-dub).
+Then (Jose, 2026-10-22) inspired by an anime fight track he sent ("Delirious",
+Jujutsu Kaisen S2): its energy measured and borrowed, nothing taken from the
+recording. See "The anime energy" below.
 """
+import json
 import os
 import random
 
@@ -49,12 +53,15 @@ PARTS = {
     'bass':    (8, 33),   # Fingered Bass: the driving eighths
     'drums':   (9, 0),    # the GM drum kit is always channel 10 (index 9)
     'brass':   (11, 61),  # Brass Section: the tune, second time, stabs, the end
+    'stabs':   (10, 48),  # String Ensemble, played short and hard: the 3-3-2 hits
+    'trem':    (12, 44),  # Tremolo Strings: the dark intro
 }
 REVERB = {'drums': 28, 'bass': 20}  # reverb send per part (others 70)
 # Channel volume per part (others 127), set from each part rendered alone so
 # the piano tune sits on top: strings and bass are loud in this bank.
 VOLUME = {'strings': 62, 'pad': 64, 'bass': 80, 'cello': 80,
-          'brass': 76, 'guitar': 96, 'drums': 106, 'keys': 110}
+          'brass': 90, 'guitar': 96, 'drums': 106, 'keys': 110,
+          'stabs': 84, 'trem': 84}
 
 events = []  # (seconds, part, note, velocity, length in seconds)
 
@@ -137,9 +144,6 @@ for i, (root, bed, arp) in enumerate(SECOND):
     b = 7 + i
     chord('strings', bar(b), bed, 64 + 2 * i, 3.0)
     chord('pad', bar(b), bed[:3], 44, 3.0)
-    for k in range(8):  # eighths, up and back down
-        x = arp[[0, 1, 2, 3, 2, 3, 1, 2][k]] + 12
-        n('guitar', bar(b, k * 0.5), x, 46 if k % 2 else 54, BEAT, wobble=0.006)
 
 TUNE2 = [
     (7, 0, D5, 1), (7, 1, G5, 2), (7, 3, Fs5, 1),
@@ -282,16 +286,15 @@ def tumbao(b, root, fifth, nxt, until=99.0):
             n('bass', slot(b, k), x, v, S16 * length * 0.95, wobble=0.004)
 
 
-# Intro: a nylon guitar ticks from the first word and grows, the maracas
-# join, a timbale roll swells under the question, and everything lands on
-# the right word.
+# Intro: a nylon guitar ticks under the first word, then the string stabs
+# take over (below), the maracas join, a timbale roll swells under the
+# question, and everything lands on the right word.
 t = bar(0, -1)
-while t < 7.85:
-    root = B2 if t < 3.95 else G2 if t < 5.95 else A2
-    v = int(46 + 36 * t / 7.9)
-    k = int(round((t - bar(0, -1)) / E8))
-    n('guitar', t, [root + 12, root + 19, root + 24, root + 19][k % 4], v, E8 * 1.6)
-    if t >= 3.95:
+while t < 7.6:
+    if t < 3.95:
+        k = int(round((t - bar(0, -1)) / E8))
+        n('guitar', t, [B3, Fs3 + 12, B3 + 12, Fs3 + 12][k % 4], int(52 + 6 * t), E8 * 1.6)
+    else:
         hit(t, MARACAS, 30 + int(20 * (t - 4) / 4))
     t += E8
 roll(6.0, 7.9, 24, 96, 0.0625)
@@ -321,7 +324,8 @@ NEXT = [Cs3 - 12, B2 - 12, G2, G2, Fs2, E2, B2 - 12, G2]
 for (b, triad, root, fifth), nxt in zip(CARDS, NEXT):
     busy = b >= 7
     percussion(b, busy)
-    montuno(b, triad, vel=62 if busy else 56)
+    if not busy:  # the second time, the string stabs take its place
+        montuno(b, triad, vel=56)
     tumbao(b, root, fifth, nxt)
 hit(bar(3), CRASH, 84, 2.0)
 hit(bar(7), CRASH, 100, 2.0)
@@ -348,8 +352,6 @@ chord('brass', HOME + 0.56, [D3, A3, D4, Fs4], 84, 2.6)
 END = 42.8
 percussion(12, True, until=END)
 percussion(13, True, until=END)
-montuno(12, [D4, Fs4, A4], until=END, vel=60)
-montuno(13, [D4, G4, B4], until=END, vel=60)
 tumbao(12, D2, A2, D2, until=END)
 tumbao(13, D2, A2, D2, until=END)
 chord('brass', 41.25, [D3, B3, D4], 70, 1.55)
@@ -358,6 +360,145 @@ for x, v in [(CRASH, 100), (KICK, 104), (LO_TIMB, 100), (HI_TIMB, 92)]:
     hit(42.85, x, v, 2.0)
 n('bass', 42.85, D2, 92, 2.0)
 chord('brass', 42.85, [D3, A3, Fs4, D5], 80, 2.1)
+
+# ---------- The anime energy (Jose, 2026-10-22) ----------
+# Inspired by "Delirious" (Jujutsu Kaisen S2), measured, not copied: it runs
+# at 144 with a sub-bass under nearly everything, hard short stabs spaced
+# 3-3-2 (the tresillo, which is also the root of Latin rhythm), a rise into
+# each hit, and drops where it all cuts out before it slams back. Here it
+# is 160, so a card is exactly two of its bars. synth.py makes the sounds
+# the bank can't: the sub, the risers, the impacts and the cuts (fx).
+SNARE, CLAP, HAT = 38, 39, 42
+U = BEAT / 8                        # a sixteenth at 160: 32 to a bar
+fx = {'sub': [], 'riser': [], 'impact': [], 'cut': []}
+
+
+def unit(b, k):
+    return bar(b, k / 8)
+
+
+def sub(t, note, dur, vel=100):
+    fx['sub'].append([round(t, 4), note, round(dur, 4), vel])
+
+
+def stab(t, notes, vel):
+    chord('stabs', t, notes, vel, U * 1.6)
+
+
+def stabs(b, notes, vel, beats=range(4), since=0.0, until=99.0):
+    """3-3-2 in every beat: three hard hits, the first one accented."""
+    for beat in beats:
+        for i, k in enumerate((0, 3, 6)):
+            t = unit(b, beat * 8 + k)
+            if since <= t < until:
+                stab(t, notes, vel + (12 if i == 0 else 0))
+
+
+def hats(b, vel=1.0, since=0.0, until=99.0, roll=False):
+    """Sixteenths at 160; roll ends the bar in thirty-seconds, trap style."""
+    for k in range(32):
+        t = unit(b, k)
+        if not since <= t < until:
+            continue
+        if roll and k >= 28:
+            for j in range(2):
+                hit(t + j * U / 2, HAT, int((44 + 8 * (k - 28)) * vel), 0.05)
+        else:
+            hit(t, HAT, int((60 if k % 4 == 0 else 44 if k % 2 == 0 else 30) * vel), 0.08)
+
+
+def backbeat(b, vel, until=99.0):
+    for beat in (1, 3):
+        if bar(b, beat) < until:
+            hit(bar(b, beat), SNARE, vel)
+            hit(bar(b, beat), CLAP, vel - 22)
+
+
+def drop(d0, d1, keep=()):
+    """Everything not in keep stops at d0 and nothing new starts before d1."""
+    for i in range(len(events) - 1, -1, -1):
+        t, p, x, vel, dur = events[i]
+        if p in keep:
+            continue
+        if d0 <= t < d1:
+            del events[i]
+        elif t < d0 < t + dur:
+            events[i] = (t, p, x, vel, d0 - t)
+
+
+# Intro, dark: tremolo strings and a low sub under the doctor's words, the
+# stabs come in and climb, a riser under the question, a cut, and the
+# right word slams in bright.
+chord('trem', 1.0, [B2, Fs3, B3, D4], 46, 2.98)
+chord('trem', 3.98, [G2, D3, B3, D4], 56, 2.02)
+chord('trem', 6.0, [A2, E3, A3, D4], 70, 1.6)
+sub(1.0, B2 - 12, 2.9, 48)
+sub(3.98, G2 - 12, 2.0, 62)
+sub(6.0, A2 - 12, 1.6, 80)
+for beat in range(4):  # bar 1 (4.73 - 7.73): the stabs arrive, G then Asus
+    for i, k in enumerate((0, 3, 6)):
+        t = unit(1, beat * 8 + k)
+        if t >= 7.6:
+            break
+        notes = [G2 + 12, B3, D4] if t < 5.95 else [A3, D4, E4]
+        stab(t, notes, 50 + 6 * beat + (10 if i == 0 else 0))
+stabs(0, [B2 + 12, D4, Fs4 - 12], 44, beats=(2, 3), since=3.98)
+fx['riser'].append([4.6, 7.6, 0.9])
+fx['cut'].append([7.6, 7.9])
+fx['impact'].append([7.9, 1.0])
+sub(7.9, D2, 1.4, 110)
+stabs(2, [D3, A3, D4, Fs4], 64, beats=(1, 2, 3))
+hats(2, vel=0.7, since=8.4)
+
+# Cards, first time: the Latin groove leads; the sub holds the roots and a
+# light backbeat keeps it moving.
+for b, triad, root, fifth in CARDS[:4]:
+    sub(bar(b), root, 1.45, 84)
+    sub(bar(b, 2), root, 0.7 if b == 6 else 1.45, 76)  # bar 6: clear of the drop
+    backbeat(b, 62)
+# the drop before the second time: everything stops but the piano's pick-up
+# note, a riser fills the gap, and bar 7 slams in.
+drop(bar(6, 3), bar(7), keep=('piano',))
+fx['riser'].append([bar(6, 1), bar(7), 0.8])
+fx['impact'].append([bar(7), 0.9])
+
+# Cards, second time: full energy. Stabs on every beat, sixteenth hats with
+# trap rolls, a hard backbeat, the sub doubling the tumbao.
+for b, triad, root, fifth in CARDS[4:]:
+    lo, mid, top = triad
+    stabs(b, [lo - 12, mid - 12, top - 12, lo], 72)
+    hats(b, roll=b in (8, 10))
+    backbeat(b, 96)
+
+# "Stuck? Ask Dr. Smiley": the big drop. It all falls away but the piano and
+# the timbale roll, stabs stutter faster and faster, a riser, half a breath
+# of silence, and the campus slams in.
+drop(t_sus, HOME, keep=('piano', 'drums'))
+gap, t = 0.26, t_sus
+while t < HOME - 0.25:
+    stab(t, [A2 + 12, E3 + 12, A3 + 12, Cs4 + 12], int(70 + 40 * (t - t_sus) / (HOME - t_sus)))
+    t += gap
+    gap = max(0.07, gap * 0.8)
+fx['riser'].append([bar(11), HOME - 0.2, 1.0])
+fx['cut'].append([HOME - 0.2, HOME])
+fx['impact'].append([HOME, 1.1])
+sub(HOME, D2, 1.4, 112)
+
+# The title: the groove with everything, then a last cut and a final hit.
+for b in (12, 13):
+    hats(b, since=bar(12), until=42.62, roll=b == 13)
+    backbeat(b, 94, until=END)
+stabs(12, [D3, A3, D4, Fs4], 72)
+stabs(13, [D3, A3, D4, Fs4], 72, until=41.25)
+stabs(13, [D3, B3, D4, G4], 72, since=41.25, until=END)
+fx['cut'].append([42.62, 42.85])
+fx['impact'].append([42.85, 1.0])
+sub(42.85, D2, 2.0, 110)
+
+# The sub doubles the tumbao wherever the energy is full.
+for t, p, x, vel, dur in list(events):
+    if p == 'bass' and (bar(7) <= t < bar(11) or bar(12) <= t < END):
+        sub(t, x, dur, 100)
 
 # ---------- write the MIDI file ----------
 # A note struck again while still sounding: end the first one just before,
@@ -384,8 +525,8 @@ for part, (ch, prog) in PARTS.items():
     track = mido.MidiTrack()
     mid.tracks.append(track)
     msgs = [(0, mido.Message('program_change', channel=ch, program=prog))]
-    msgs.append((0, mido.Message('control_change', channel=ch, control=91, value=REVERB.get(part, 70))))
-    msgs.append((0, mido.Message('control_change', channel=ch, control=7, value=VOLUME.get(part, 127))))  # reverb send
+    msgs.append((0, mido.Message('control_change', channel=ch, control=91, value=REVERB.get(part, 70))))  # reverb send
+    msgs.append((0, mido.Message('control_change', channel=ch, control=7, value=VOLUME.get(part, 127))))
     for t, p, x, vel, dur in events:
         if p != part:
             continue
@@ -401,3 +542,6 @@ here = os.path.dirname(os.path.abspath(__file__))
 os.makedirs(os.path.join(here, 'out'), exist_ok=True)
 mid.save(os.path.join(here, 'out', 'built-here.mid'))
 print(f'{len(events)} notes, {mid.length:.2f} s')
+with open(os.path.join(here, 'out', 'fx.json'), 'w') as f:
+    json.dump(fx, f)
+print(f"{len(fx['sub'])} sub notes, {len(fx['riser'])} risers, {len(fx['impact'])} impacts, {len(fx['cut'])} cuts")

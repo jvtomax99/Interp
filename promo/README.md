@@ -33,8 +33,10 @@ file whose every note is timed to the video's cuts (listed at the top of
 the file; a new card every 3 s is one bar at 80 beats a minute), and
 `ost/render.sh` plays it through the FluidR3 GM sound bank (piano and
 strings over a son/salsa groove: clave, congas, bongos, cowbell, guiro,
-timbales, tumbao bass, piano montuno, nylon guitar, brass), sets it to
--16 LUFS and lays
+timbales, tumbao bass, piano montuno, nylon guitar, brass, and hard string
+stabs, hats and backbeat in the manner of an anime fight track), adds what
+the bank can't make with `ost/synth.py` (an 808 sub-bass, risers, impacts,
+and the silent cuts before each slam), packs it to -14 LUFS and lays
 it under `media/hub-promo.mp4`. Output goes to `ost/out/` (not in git);
 `media/` is replaced by hand once the result is approved.
 
