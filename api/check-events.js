@@ -38,6 +38,7 @@
 
 import { createHash } from 'node:crypto';
 import { serviceToken } from './_service-login.js';
+import { firestore, pushToTeam, clipText } from './_push-team.js';
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'language-specialist';
 const FIREBASE_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg';
@@ -128,6 +129,7 @@ async function writeState(id, state) {
 /* Findings go to their own collection, not the general activity log — mixing
    "a teammate added a term" with "a new CHIA webinar" makes both easier to
    miss. The app shows these in a dedicated Training & Events section. */
+const ANNOUNCED = [];   // this run's findings, for the one notification at the end
 async function announce(summary, source, link, title) {
   const body = {
     fields: {
@@ -145,6 +147,28 @@ async function announce(summary, source, link, title) {
     body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`announce failed: ${res.status}`);
+  ANNOUNCED.push({ summary, source, title });
+}
+
+/* One notification per run to the phones that asked for training alerts
+   (push-subs .ce, api/_push-team.js), so a closed phone hears about it too.
+   Never stops the run: a failed send is only reported. */
+async function notifyPhones() {
+  if (!ANNOUNCED.length) return 'nothing new';
+  const first = ANNOUNCED[0];
+  const body = ANNOUNCED.length === 1
+    ? clipText(first.title || first.summary, 300)
+    : clipText(`${ANNOUNCED.length} new: ` + ANNOUNCED.map(a => a.title || a.summary).join(' \u00b7 '), 300);
+  try {
+    const out = await pushToTeam(firestore(TOKEN), s => !!s.ce, {
+      kind: 'ce', section: 'events', tag: 'events',
+      title: ANNOUNCED.length === 1 ? (first.source ? `New from ${first.source}` : 'New training') : 'New training and events',
+      body
+    }, { topic: 'events', urgency: 'normal' });
+    return out.notSetUp ? 'not set up' : `${out.sent}/${out.phones} phones`;
+  } catch (err) {
+    return `failed: ${String(err.message || err)}`;
+  }
 }
 
 /* ---------- Parsing ---------- */
@@ -206,6 +230,7 @@ export default async function handler(req, res) {
   const login = TOKEN ? 'service account' : 'none (works only while practice mode is on)';
 
   const report = [];
+  ANNOUNCED.length = 0;
 
   for (const src of SOURCES) {
     if (src.disabled) {
@@ -271,6 +296,8 @@ export default async function handler(req, res) {
   // source that answered with an error shows its HTTP status ("ccc
   // fetch_failed 404"): 404/410 means the page moved, 403/429/503 usually a
   // block on automated visits.
+  const phones = await notifyPhones();
+  console.log(`events watcher: phones notified = ${phones}`);
   console.log(`events watcher: login = ${login}; ` + report.map(r => `${r.source} ${r.status}${r.code ? ' ' + r.code : ''}`).join(', '));
-  return res.status(200).json({ ok: true, login, checkedAt: new Date().toISOString(), report });
+  return res.status(200).json({ ok: true, login, phones, checkedAt: new Date().toISOString(), report });
 }

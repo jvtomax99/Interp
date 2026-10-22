@@ -42,11 +42,11 @@ between assignments.
 | `guide/topics.js` | 503 | The User Guide's answers, `GUIDE_SECTIONS` and `GUIDE_TOPICS` (plain data; was in `index.html` until 2026-10-21). Loaded by a `<script src>` just before `index.html`'s script; precached, network-first |
 | `practice/questions.js` | 348 | The CoreCHI practice bank, `CCHI_DOMAINS` and `SEED_QUESTIONS` (100 questions; plain data, was in `index.html` until 2026-10-21). Loaded like `guide/topics.js` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
-| `sw.js` | 220 | Service worker. Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
+| `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
-| `brain/` | — | HUMC Brain: the app's code drawn as a 3D brain (`index.html`, its data `data.json` from `tests/tools/brain-data.cjs`, vendored Three.js r128). Opened over Home by a double-tap on Dr. Smiley's head (`openHumcBrain` in `home-polish.js`). `docs/features/humc-brain.md` |
+| `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `index.html` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
 | `api/translate.js` | 145 | Translate tool — Claude API |
 | `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
@@ -57,6 +57,7 @@ between assignments.
 | `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
 | `api/_routine.js` | — | The one Claude helper: every request to the Messages API (`callClaude`: the retries, the refusal check, `parseAnswer`, `clip`), and Haiku 5.5 first then the backup model for Translate and the term check (`callRoutine`). Not an endpoint itself |
 | `api/ask.js` | 508 | Ask the Hub — answers from the entries the app sends, plus approved team notes |
+| `api/push.js` | — | Notifications that reach a closed phone (Web Push): Team Chat, owners' sends, a test; the key phones sign up with. `_push-team.js` (who gets what, gone phones) and `_webpush.js` (encryption + VAPID signing, Node crypto) beside it. `docs/features/notifications.md` |
 | `firestore.rules`, `storage.rules` | 213 / 33 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
 | `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more and not deployed (`.vercelignore`); the files above were cut from them |
@@ -182,6 +183,7 @@ activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 hub-lessons/{id}                                                     <-- Ask the Hub team notes
 hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
+push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you
@@ -201,10 +203,12 @@ touch before changing it; update it in the same commit when the behaviour change
 - The doctor's page (`renderDoctorDirDetail`, `SPECIALTY_PINS`, tabs, glass bar): `doctor-page.md`
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
+- Notifications that reach a closed phone, the Notifications screen, owners' Send to the team (`pushTurnOn`, `pushSync`, `api/push.js`, `sw.js` push): `notifications.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
 - The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 - CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
 - HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
+- Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`

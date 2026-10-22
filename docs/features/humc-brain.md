@@ -14,7 +14,7 @@ says it is **not patient data**. Keep that line.
 | The page | `brain/index.html`: one file, its own CSS and JS. Three.js r128 vendored beside it (`brain/three.min.js`, MIT, `brain/three.LICENSE`) so it works offline and never waits on a CDN |
 | The data | `brain/data.json`: sections (title, bytes, region), links (user, used, how many names), total bytes, named-piece count, date measured |
 | Making the data | `cd tests && node tools/brain-data.cjs` (writes it); `--check` says if it's out of date. Run it after a PR that adds, renames or moves sections, or before showing it off |
-| Opening it | `home-polish.js`: the hello's click handler (`onHead`, `HEAD_SHARE` 0.62 of his picture, `DOUBLE_TAP_MS` 320) and `window.openHumcBrain` (a `.overlay.brain-ov` holding an iframe of `brain/index.html`) |
+| Opening it | `home-polish.js`: the hello's click handler (`onHead`, `HEAD_SHARE` 0.62 of his picture, `DOUBLE_TAP_MS` 320) and `window.openHumcBrain` (a `.overlay.brain-ov` holding an iframe of `brain/index.html`; `openHumcBrain('you')` puts the separate knowledge brain, `knowledge-brain.md`, in the same frame) |
 | Its frame's look | `home-polish.css`, last block: no padding, no backdrop, full screen |
 | Offline | `sw.js`: never opened online yet → a one-line note in its frame, not the whole app inside it |
 | Guide | `GUIDE_TOPICS` id `brain` (section Asking Dr. Smiley); `GUIDE_NEWS` card `brain` (replaced `directory`) |

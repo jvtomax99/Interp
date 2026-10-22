@@ -3677,18 +3677,18 @@
      the round (listen, your turn, the chunks), a ring that fills while the
      line plays, candy buttons. Nothing moves at rest: the ring runs only
      while the voice does. Note: docs/features/memory-trainer.md. */
-  .mem-entry{ display:flex; flex-direction:row; align-items:center; gap:13px; padding:13px 17px; max-width:760px; margin-bottom:26px; }
-  .mem-entry-icon, .mem-ring-in svg{ color:var(--dom); }
-  .mem-entry-icon{ width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center;
+  .mem-entry, .kb-entry{ display:flex; flex-direction:row; align-items:center; gap:13px; padding:13px 17px; max-width:760px; margin-bottom:26px; }
+  .mem-entry-icon, .mem-ring-in svg, .kb-entry-icon{ color:var(--dom); }
+  .mem-entry-icon, .kb-entry-icon{ width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center;
     background:color-mix(in srgb, var(--dom) 15%, var(--paper)); }
-  .mem-entry-icon svg{ width:26px; height:26px; }
-  .mem-entry-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-  .mem-entry-text b{ font-size:15px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
-  .mem-entry-text span{ font-size:13px; line-height:1.4; color:var(--ink-soft); }
-  .mem-entry-span{ display:flex; flex-direction:column; align-items:center; flex:none; min-width:36px; }
-  .mem-entry-span b{ font-size:20px; font-weight:650; letter-spacing:-.03em; color:var(--dom); font-variant-numeric:tabular-nums; }
-  .mem-entry-span small{ font-size:12px; color:var(--ink-faint); }
-  .mem-go{ min-height:44px; padding:0 17px; font-size:15px; }
+  .mem-entry-icon svg, .kb-entry-icon svg{ width:26px; height:26px; }
+  .mem-entry-text, .kb-entry-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .mem-entry-text b, .kb-entry-text b{ font-size:15px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
+  .mem-entry-text span, .kb-entry-text span{ font-size:13px; line-height:1.4; color:var(--ink-soft); }
+  .mem-entry-span, .kb-entry-span{ display:flex; flex-direction:column; align-items:center; flex:none; min-width:36px; }
+  .mem-entry-span b, .kb-entry-span b{ font-size:20px; font-weight:650; letter-spacing:-.03em; color:var(--dom); font-variant-numeric:tabular-nums; }
+  .mem-entry-span small, .kb-entry-span small{ font-size:12px; color:var(--ink-faint); }
+  .mem-go, .kb-go{ min-height:44px; padding:0 17px; font-size:15px; }
   .mem-go:disabled{ opacity:.55; cursor:default; }
 
   .mem-card{ padding:17px; max-width:560px; display:flex; flex-direction:column; gap:13px; }
@@ -5620,6 +5620,17 @@ body.access-locked{ overflow:hidden; }
 .ta-switch[aria-checked="true"]{ background:var(--danger); }
 .ta-switch[aria-checked="true"]::after{ transform:translateX(20px); }
 .ta-switch:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+/* ---------- Notifications screen (renderNotifications) ----------
+   Team access's cards and switches; only what's new is here. */
+.ta-state-dot.is-on{ background:var(--good); box-shadow:0 0 0 4px var(--good-soft); }
+.ta-state-dot.is-off{ background:var(--danger); box-shadow:0 0 0 4px var(--danger-soft); }
+.nt-kinds{ gap:13px; }
+.nt-kinds .ta-switchrow b{ font-weight:600; font-size:15px; }
+.nt-kinds .ta-switchrow small{ font-size:13px; color:var(--ink-soft); }
+.ta-card p.nt-note{ font-size:13px; color:var(--ink-faint); }
+.ta-field.nt-text{ height:auto; min-height:104px; padding:13px; line-height:1.45; resize:vertical; }
+.ta-card p.nt-sent{ color:var(--good); font-weight:600; }
+.nt-item .ta-who .nt-body{ color:var(--ink); font-size:15px; line-height:1.45; white-space:pre-line; overflow-wrap:anywhere; }
 /* Name sheet: the owner's way in to Team access, or a way to enter the code. */
 .name-access{ margin-top:13px; padding-top:13px; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:6px; }
 .name-access-row{ display:flex; align-items:center; justify-content:space-between; gap:9px; font-size:14px; color:var(--ink-soft); }
@@ -7323,3 +7334,22 @@ body.pv-open{ overflow:hidden; }
     .study-streak i, .hot-streak span{ animation:none; }
   }
 
+
+/* The small live brain at the top of Term Review (kbMiniHtml in index.html): one
+   compact row (brain, words, chevron) so Start stays in reach, on the knowledge
+   brain's own dark field so it reads as a window onto it. */
+.kb-mini{ display:flex; align-items:center; gap:13px; width:100%; max-width:480px; min-height:96px;
+  margin:0 0 var(--sp-4, 17px); padding:0 13px 0 0; border:1px solid rgba(126,156,226,.22); border-radius:var(--r-lg); overflow:hidden;
+  background:radial-gradient(ellipse 70% 120% at 18% 50%, #142252 0%, #060A17 75%); color:#E9EEFA; font:inherit; text-align:left; cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,.08), 0 1px 2px rgba(20,43,67,.06), 0 8px 20px -12px rgba(22,55,90,.22);
+  transition:transform .368s var(--spring0, var(--ease)); }
+.kb-mini-scan{ flex:none; display:block; width:128px; height:96px; }
+.kb-mini-text{ flex:1; display:flex; flex-direction:column; gap:3px; min-width:0; }
+.kb-mini-text b{ font-size:var(--fs-subhead, 15px); font-weight:650; letter-spacing:-.015em; }
+.kb-mini-text span{ font-size:var(--fs-footnote, 13px); line-height:1.35; color:#A4B0CC; font-variant-numeric:tabular-nums; }
+.kb-mini-go{ flex:none; width:24px; height:24px; color:#7FB8FF; }
+.kb-mini-text .kb-mini-cta{ margin-top:3px; font-weight:650; color:#7FB8FF; }
+.kb-mini.is-session{ margin-top:var(--sp-4, 17px); }
+.kb-mini:active, .kb-mini.is-pressed{ transform:scale(.985); }
+.kb-mini:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
+@media (prefers-reduced-motion:reduce){ .kb-mini{ transition:none; } .kb-mini:active, .kb-mini.is-pressed{ transform:none; } }

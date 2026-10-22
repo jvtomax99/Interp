@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v271-b1021.1248';
+const CACHE_VERSION = 'interpreter-hub-v275-b1021.2325';
 const PRECACHE = [
   './',
   './index.html',
@@ -125,8 +125,34 @@ self.addEventListener('activate', event => {
   );
 });
 
+/* A push from the server (api/push.js): Team Chat, new training, a message
+ * from the team's owners. Arrives with the app closed. Every push must show a
+ * notification (iPhone stops delivering to apps that don't), so even an
+ * unreadable one shows something. The app icon's badge counts what's waiting. */
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : '' }; }
+  const title = d.title || 'Interpreter Hub';
+  const options = {
+    body: [d.where, d.body].filter(Boolean).join('\n') || 'Something new on the Hub',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    timestamp: Date.now(),
+    data: { section: d.section || 'chat' }
+  };
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+      .then(() => self.registration.getNotifications())
+      .then(list => { if (self.navigator && self.navigator.setAppBadge) return self.navigator.setAppBadge(list.length); })
+      .catch(() => {})
+  );
+});
+
 /* Tapping a notification should bring the already-open app forward rather
- * than opening a second copy of it. */
+ * than opening a second copy of it; with the app closed it opens on the
+ * notification's screen (?open=, read at startup in index.html). */
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const section = (event.notification.data && event.notification.data.section) || 'chat';
@@ -138,8 +164,10 @@ self.addEventListener('notificationclick', event => {
           return client.focus();
         }
       }
-      if (self.clients.openWindow) return self.clients.openWindow('./');
-    })
+      if (self.clients.openWindow) return self.clients.openWindow('./?open=' + encodeURIComponent(section));
+    }).then(() => self.registration.getNotifications())
+      .then(list => { if (self.navigator && self.navigator.setAppBadge) return list.length ? self.navigator.setAppBadge(list.length) : self.navigator.clearAppBadge(); })
+      .catch(() => {})
   );
 });
 

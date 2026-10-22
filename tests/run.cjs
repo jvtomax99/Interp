@@ -12,6 +12,8 @@ const path = require('path');
 
 const SUITES = [
   ['events-login.mjs',    'Events watcher login (no browser)'],
+  ['push.mjs',            'Notifications (no browser): sealed and signed pushes, who hears about a chat message, owner sends, gone phones'],
+  ['notifications-screen.cjs', 'More → Notifications: install first on iPhone, off/blocked/on, switches, owners\' Send to the team, ?open= from a notification'],
   ['api-helper.mjs',      'Claude helper (no browser): Term lookup end to end, the retry without a schema, refusals, the routine backup'],
   ['daily-drill.cjs',     'Daily Drill: rounds, levels, score, Home card'],
   ['guide.cjs',           'User Guide: search, answers, Show me'],
@@ -25,7 +27,7 @@ const SUITES = [
   ['smiley-squash.cjs',   'Dr. Smiley: squash and stretch on the spring, Lively only'],
   ['smiley-quiz.cjs',     'Dr. Smiley in a quiz: bounce, wince, streaks, in the dock'],
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
-  ['humc-brain.cjs',      'HUMC Brain: double-tap his head opens it, one tap still opens Ask, Back and X close it'],
+  ['humc-brain.cjs',      'Two brains: his head opens the code brain, the Practice tile your knowledge brain (lit by your record; Practise, Open the card), never linked; one tap still opens Ask; Back and X close it'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],

@@ -363,6 +363,17 @@ const GUIDE_TOPICS = [
     <p>In Team Chat, tap the <b>pin</b> at the top and write the update, like a new CE requirement or a changed protocol.</p>
     <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Anyone can unpin one when it's no longer needed.</p>` },
 
+  { id:'notifications', section:'team', k:'notifications push notify alert alerts closed lock screen badge phone banner sound iphone home screen send owner administrator message team broadcast test not arriving not working', q:'How do I get notifications on my phone?', a:`
+    <ol>
+      <li>Open <b>More</b> → <b>Notifications</b>.</li>
+      <li>Tap <b>Turn on notifications</b> and allow them when your phone asks.</li>
+      <li>Pick what you hear about: <b>Team Chat</b> (Everyone, your region, and anything that @mentions you), <b>Training &amp; Events</b> (new CE and webinars) and <b>Team updates</b> (terms added or edited).</li>
+    </ol>
+    <p>Team Chat and training arrive like any app’s notifications, even with the Hub closed, and the Hub’s icon shows how many are waiting. Tap one to open that screen. Team updates only show while the Hub is open.</p>
+    <p><b>On iPhone</b> they only work from the Home Screen app (iOS 16.4 or later): in Safari tap <b>Share</b> → <b>Add to Home Screen</b>, open the Hub from its icon, then turn them on there.</p>
+    <p>Not arriving? On the same screen tap <b>Send me a test</b> and lock the phone. If it doesn’t show, check the phone’s Settings → Notifications → Interpreter Hub, or tap <b>Turn off</b> and turn them on again.</p>
+    <p><b>Owners</b> (phones that joined with the owner code) also see <b>Send to the team</b> there: write a title and a message and it goes to every phone with notifications on. The last ones sent are listed under <b>From the team</b> for everyone.</p>` },
+
   { id:'updates', section:'team', k:'bell notification updates activity feed what changed news', q:'What is the bell at the top of the screen?', a:`
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
     <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
@@ -383,6 +394,18 @@ const GUIDE_TOPICS = [
     </ol>
     <p>Missed one? He says what tells it apart, and <b>Try it again later</b> brings it back a few cards on. At the end you see what moved up a step and your mistakes, with <b>Practise these again</b>. Your recent mistakes are also on the Term Review page.</p>
     <p><b>Pause</b> keeps your place on this phone, even if the app closes. Ask Dr. Smiley to <i>practice five terms I'm still learning</i> and he opens Term Review with just those.</p>` },
+
+  { id:'knowledgebrain', section:'study', k:'knowledge brain my brain your knowledge 3d term review top small turning session summary glow see it in your brain terms dots lit light up dark known learning missed due practise practice coverage weakest progress over time corechi tile', q:'What is my knowledge brain?', a:`
+    <p>Open <b>Term Review</b>: the small turning brain at the top is yours. Tap it to open it full screen. You can also open it from <b>CoreCHI Practice</b>, on the <b>Your knowledge brain</b> tile. It's your glossary drawn as a 3D brain: every dot is a term, each domain is one area.</p>
+    <p>A dot <b>lights up</b> as you get the term right in Term Review, the Daily Drill and Doctor Prep flashcards. <b>Faint</b>: not practised yet. <b>Red</b>: missed last time. <b>Dim</b>: due again. A term counts as known after three right answers in a row.</p>
+    <ul>
+      <li><b>Turn it</b>: drag. <b>Zoom</b>: pinch.</li>
+      <li><b>Tap a domain</b> at the bottom (or a row under Your progress) to see what to practise first, then <b>Practise</b> to start Term Review on it.</li>
+      <li><b>Tap a dot</b> to see that term and how you're doing, then <b>Open the card</b>.</li>
+      <li><b>After a Term Review session</b>, the summary shows that session in your brain: the terms you got right glow on one by one, the ones you missed flash red. Tap <b>See it in your brain</b> to open the full brain turned to those terms.</li>
+      <li><b>Your progress</b> below the brain: your domains weakest first, what you missed or is due, and a line of terms known over time. That line starts the day you first open it; one count a day is kept on your phone.</li>
+    </ul>
+    <p>It shows only <b>your own</b> record. It's separate from the brain you get by double-tapping Dr. Smiley's head, which is a map of the app's own code. Close it with the <b>X</b> at the top right or the Back button.</p>` },
 
   { id:'reviewcheck', section:'study', k:'term review check answer accent accents capital wrong right spanish variant alternative regional compare self check saved not saved', q:'How does Term Review check my Spanish?', a:`
     <p>Against your team's glossary, never a guess.</p>

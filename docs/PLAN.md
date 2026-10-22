@@ -54,6 +54,25 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/knowledge-brain.md`).**
+The HUMC Brain shows the person, not the code: domains as regions, terms as
+dots lit by what you know, tap a dark area to practice it. First find what
+per-term data the app keeps. Personal data never shown to others.
+Data found (2026-10-21): the only per-term, per-person record is
+`term-reviews/{who__termId}` (Firestore; box 0-5, reviewCount, misses,
+lastResult, lastAt, nextReviewAt; latest state only, no history), fed by
+Term Review, Daily Drill round 2 and Doctor Prep flashcards (`prepMark`).
+Quiz practice (`ih_practice_v1`) is per question by CoreCHI exam domain,
+not glossary domain; `quiz-history`, `ih_warmup`, `ih_memory` hold nothing
+per term. Brightness = box, dimmed when overdue; never practiced = dark.
+Jose's picks: first as two tabs with the code view, then (same day) kept
+separate: his head opens only his code brain, the CoreCHI Practice tile
+only the knowledge brain, no link between; record one daily snapshot on the phone from now on for the
+progress figure. **K2 (this PR; Jose's pick "by name"): once locked,
+`term-reviews` is read and written only by the phone whose `hub-members`
+name matches the record (`ownReview`), with a sync-and-retry when refused.
+Jose publishes `firestore.rules` in the console; until then nothing changes.**
+
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
 F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right
@@ -283,6 +302,15 @@ then read the log; it names the suite and the check.
   `sw.js`, the harness, `first-paint.cjs`, `brain-data.cjs` (the section
   is gone from the census), `AGENTS.md`/`CLAUDE.md`/`daily-drill.md`.
   Phase 2's guide (#115) merged on Jose's "Push", live as b1021.1248.
+- 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
+  aren't being delivered", owners should send them, "like a normal app";
+  his picks: owner-code phones send, push for Team Chat and new training).
+  Web Push with no package (`api/push.js`, `_push-team.js`, `_webpush.js`),
+  `sw.js` push + badge + `?open=`, More → Notifications for everyone with
+  Send to the team for owners, `push-subs`/`push-sent`/`push-log` rules,
+  the events watcher notifies. Guide answer `notifications` + New lately.
+  `tests/suites/push.mjs`. Needs Jose: the VAPID keys in Vercel and the
+  rules published (`docs/features/notifications.md`, Setup).
 - 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
   `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
   script loaded just before the app's own (Jose's pick over fetching it on
