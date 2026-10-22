@@ -263,7 +263,7 @@ def main(which):
         sc = fresh()
         picture(WAVE, (-0.82, 0, 0.0), 0.8)
         text('Interpreter Hub', (-0.3, 0, 0.14), 0.18, bold=True, align='LEFT')
-        text('3D Body  ·  HUMC Brain  ·  CoreCHI City', (-0.3, 0, -0.07), 0.062, '#5FD3F3', align='LEFT')
+        text('Built for HUMC medical interpreters', (-0.3, 0, -0.07), 0.062, '#5FD3F3', align='LEFT')
         text('Anatomy: BodyParts3D © DBCLS, CC BY 4.0', (0, 0, -0.62), 0.032, '#7F8AB0')
         camera(sc, (0, -3.2, 0.0), (0, 0, 0.0), 50)
         shot(sc, 'p8')
