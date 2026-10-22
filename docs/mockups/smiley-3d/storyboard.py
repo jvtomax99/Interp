@@ -83,72 +83,74 @@ def board(title, sub, steps, name):
     print('done', name, im.size)
 
 
-SUB = ['Nothing is built until you say OK. Pictures marked "example" use',
-       'today\u2019s 3D only to show what each step makes.']
-glb = [
-    ('1', 'YOU', 'Upload the picture to Tripo or Meshy, download the 3D file (GLB), send it here.',
-     [fit(Image.open(O('concept-front.png')), 330, 480)], 'The picture I sent you', False),
-    ('2', 'ME', 'Check the AI model from every side, fix size and gaps, split hair, face, hands. I send you its 360\u00b0 turn as it came.',
-     [fit(Image.open(O('head-views.png')), 1000, 260)], 'Example of the check (today\u2019s 3D head, front to back)', True),
-    ('3', 'ME', 'Put his skeleton in: 36 bones, fingers included, so he can bend, jump, wave and point.',
-     [fit(Image.open(O('plan-skeleton.png')), 360, 600)], 'The skeleton (dark: body, light blue: fingers)', False),
-    ('4', 'ME', 'Put your 30 drawn expressions and his moving brows on the new face. The eyes and smile are always your drawing.',
-     [fit(Image.open(O('plan-faces.png')), 1000, 740)], 'Your expressions on a 3D head (today\u2019s head as the example)', False),
-    ('5', 'ME', 'Six poses and a 360\u00b0 turn of the finished figure, phone size.',
-     [fit(Image.open(O('poses.png')), 1000, 900)], 'Example: the six poses from round 2', True),
-    ('6', 'NEXT', 'Only after your OK: the animation (jumps, flips, landings, wave), again shown as a plan first.', [], '', False),
-]
-pixar = [
-    ('1', 'YOU', 'In your picture app (the one that made his drawing), paste my prompt with his drawing: it draws him full body, Pixar style, from 4 sides.',
-     [side_by_side(fit(Image.open(O('../../../../drsmiley/base.webp')), 300, 380),
-                   placeholder(560, 380, ['Full body, Pixar style', 'front \u00b7 3/4 \u00b7 side \u00b7 back', '(you make it)']))],
-     'Your drawing in, a turnaround out', True),
-    ('2', 'YOU', 'Upload the front picture (or all 4, if the site takes several) to Tripo or Meshy, download the GLB, send it here.',
-     [placeholder(900, 200, ['3D file (GLB)', 'made by the site from your picture'])], '', False),
-    ('3', 'ME', 'Check it from every side; I send you its 360\u00b0 turn as it came.',
-     [fit(Image.open(O('head-views.png')), 1000, 260)], 'Example of the check (today\u2019s 3D head)', True),
-    ('4', 'ME', 'Skeleton for the body: 36 bones, fingers included.',
-     [fit(Image.open(O('plan-skeleton.png')), 360, 600)], 'Example: the skeleton on today\u2019s figure', False),
-    ('5', 'ME', 'Face controls for Pixar-style acting: 3D eyes that blink and look around, brows, cheeks, smile corners, lips, jaw.',
-     [fit(Image.open(O('plan-face-controls.png')), 600, 750)], 'Where the face controls go (on your drawing)', False),
-    ('6', 'ME', 'An expression sheet (happy, laugh, surprised, wink, worried), six poses and a 360\u00b0 turn.',
-     [fit(Image.open(O('plan-faces.png')), 1000, 740)], 'Example of an expression sheet (today\u2019s head)', True),
-    ('7', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
-]
-board('Plan: your 3D file \u2192 Dr. Smiley', SUB, glb, 'plan-glb.png')
-board('Plan: Dr. Smiley, Pixar style', SUB, pixar, 'plan-pixar.png')
+
+if __name__ == '__main__':      # the boards made so far; tripo_faceboard.py imports the helpers only
+    SUB = ['Nothing is built until you say OK. Pictures marked "example" use',
+           'today\u2019s 3D only to show what each step makes.']
+    glb = [
+        ('1', 'YOU', 'Upload the picture to Tripo or Meshy, download the 3D file (GLB), send it here.',
+         [fit(Image.open(O('concept-front.png')), 330, 480)], 'The picture I sent you', False),
+        ('2', 'ME', 'Check the AI model from every side, fix size and gaps, split hair, face, hands. I send you its 360\u00b0 turn as it came.',
+         [fit(Image.open(O('head-views.png')), 1000, 260)], 'Example of the check (today\u2019s 3D head, front to back)', True),
+        ('3', 'ME', 'Put his skeleton in: 36 bones, fingers included, so he can bend, jump, wave and point.',
+         [fit(Image.open(O('plan-skeleton.png')), 360, 600)], 'The skeleton (dark: body, light blue: fingers)', False),
+        ('4', 'ME', 'Put your 30 drawn expressions and his moving brows on the new face. The eyes and smile are always your drawing.',
+         [fit(Image.open(O('plan-faces.png')), 1000, 740)], 'Your expressions on a 3D head (today\u2019s head as the example)', False),
+        ('5', 'ME', 'Six poses and a 360\u00b0 turn of the finished figure, phone size.',
+         [fit(Image.open(O('poses.png')), 1000, 900)], 'Example: the six poses from round 2', True),
+        ('6', 'NEXT', 'Only after your OK: the animation (jumps, flips, landings, wave), again shown as a plan first.', [], '', False),
+    ]
+    pixar = [
+        ('1', 'YOU', 'In your picture app (the one that made his drawing), paste my prompt with his drawing: it draws him full body, Pixar style, from 4 sides.',
+         [side_by_side(fit(Image.open(O('../../../../drsmiley/base.webp')), 300, 380),
+                       placeholder(560, 380, ['Full body, Pixar style', 'front \u00b7 3/4 \u00b7 side \u00b7 back', '(you make it)']))],
+         'Your drawing in, a turnaround out', True),
+        ('2', 'YOU', 'Upload the front picture (or all 4, if the site takes several) to Tripo or Meshy, download the GLB, send it here.',
+         [placeholder(900, 200, ['3D file (GLB)', 'made by the site from your picture'])], '', False),
+        ('3', 'ME', 'Check it from every side; I send you its 360\u00b0 turn as it came.',
+         [fit(Image.open(O('head-views.png')), 1000, 260)], 'Example of the check (today\u2019s 3D head)', True),
+        ('4', 'ME', 'Skeleton for the body: 36 bones, fingers included.',
+         [fit(Image.open(O('plan-skeleton.png')), 360, 600)], 'Example: the skeleton on today\u2019s figure', False),
+        ('5', 'ME', 'Face controls for Pixar-style acting: 3D eyes that blink and look around, brows, cheeks, smile corners, lips, jaw.',
+         [fit(Image.open(O('plan-face-controls.png')), 600, 750)], 'Where the face controls go (on your drawing)', False),
+        ('6', 'ME', 'An expression sheet (happy, laugh, surprised, wink, worried), six poses and a 360\u00b0 turn.',
+         [fit(Image.open(O('plan-faces.png')), 1000, 740)], 'Example of an expression sheet (today\u2019s head)', True),
+        ('7', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
+    ]
+    board('Plan: your 3D file \u2192 Dr. Smiley', SUB, glb, 'plan-glb.png')
+    board('Plan: Dr. Smiley, Pixar style', SUB, pixar, 'plan-pixar.png')
 
 
-P = lambda n: Image.open(O('plan/' + n))
-tripo = [
-    ('1', 'YOU', 'Attach the 3D file itself (GLB) in this chat, like you did the video. iCloud links are blocked in my workspace.',
-     [fit(P('tripo-turn.png'), 900, 700)], 'Your Tripo model (from your recording)', False),
-    ('2', 'DECIDE', 'His right arm is fixed in a wave. Jumps and flips would stretch it. Best: make him again on Tripo from an arms-down picture, then send that GLB.',
-     [fit(P('arm_compare.png'), 900, 760)], '', True),
-    ('3', 'ME', 'Open the file, check it from every side, send you its 360\u00b0 turn as it came.', [], '', True),
-    ('4', 'ME', 'No gloss anywhere: skin, hair, coat and shoes get a soft matte finish and soft light.',
-     [fit(P('gloss_pair.png'), 900, 500)], 'Example on today\u2019s 3D head: glossy (left), matte (right)', False),
-    ('5', 'ME', 'Hair, part 1: recolour his near-black hair to your drawing\u2019s chestnut browns.',
-     [fit(P('recolour_pair.png'), 900, 480)], 'Mock-up on your model: now (left), recoloured (right)', False),
-    ('6', 'ME', 'Hair, part 2: reshape it like your drawing, taller on top with the swoop rising up and to his left. I send before/after pictures.',
-     [fit(P('hair_compare.png'), 900, 560)], '', True),
-    ('7', 'ME', 'Skeleton (36 bones, fingers) and the 3D face controls: blink, look, brows, cheeks, smile, lips, jaw.',
-     [side_by_side(fit(Image.open(O('plan-skeleton.png')), 300, 500), fit(Image.open(O('plan-face-controls.png')), 400, 500))],
-     'Examples: the skeleton on today\u2019s figure; the face controls on your drawing', False),
-    ('8', 'ME', 'Expression sheet, six poses and a 360\u00b0 turn, all matte.', [], '', True),
-    ('9', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
-]
-board('Plan: your Tripo model \u2192 Dr. Smiley', SUB, tripo, 'plan-tripo.png')
+    P = lambda n: Image.open(O('plan/' + n))
+    tripo = [
+        ('1', 'YOU', 'Attach the 3D file itself (GLB) in this chat, like you did the video. iCloud links are blocked in my workspace.',
+         [fit(P('tripo-turn.png'), 900, 700)], 'Your Tripo model (from your recording)', False),
+        ('2', 'DECIDE', 'His right arm is fixed in a wave. Jumps and flips would stretch it. Best: make him again on Tripo from an arms-down picture, then send that GLB.',
+         [fit(P('arm_compare.png'), 900, 760)], '', True),
+        ('3', 'ME', 'Open the file, check it from every side, send you its 360\u00b0 turn as it came.', [], '', True),
+        ('4', 'ME', 'No gloss anywhere: skin, hair, coat and shoes get a soft matte finish and soft light.',
+         [fit(P('gloss_pair.png'), 900, 500)], 'Example on today\u2019s 3D head: glossy (left), matte (right)', False),
+        ('5', 'ME', 'Hair, part 1: recolour his near-black hair to your drawing\u2019s chestnut browns.',
+         [fit(P('recolour_pair.png'), 900, 480)], 'Mock-up on your model: now (left), recoloured (right)', False),
+        ('6', 'ME', 'Hair, part 2: reshape it like your drawing, taller on top with the swoop rising up and to his left. I send before/after pictures.',
+         [fit(P('hair_compare.png'), 900, 560)], '', True),
+        ('7', 'ME', 'Skeleton (36 bones, fingers) and the 3D face controls: blink, look, brows, cheeks, smile, lips, jaw.',
+         [side_by_side(fit(Image.open(O('plan-skeleton.png')), 300, 500), fit(Image.open(O('plan-face-controls.png')), 400, 500))],
+         'Examples: the skeleton on today\u2019s figure; the face controls on your drawing', False),
+        ('8', 'ME', 'Expression sheet, six poses and a 360\u00b0 turn, all matte.', [], '', True),
+        ('9', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
+    ]
+    board('Plan: your Tripo model \u2192 Dr. Smiley', SUB, tripo, 'plan-tripo.png')
 
 
-rig = [
-    ('1', 'ME', 'Skeleton: 36 bones (fingers included) placed by his own measured proportions, so he bends, jumps, waves and points. His model stays exactly as you approved it.',
-     [fit(P('tripo-skeleton.png'), 420, 750)], 'Planned bones over your model', False),
-    ('2', 'ME', 'His eyes become real 3D eyes over the painted ones: they blink and look around. This is the riskiest part, so you see it alone first.',
-     [fit(P('tripo-face-plan.png'), 760, 860)], 'What moves on his face; below: the mouth shapes from your 30 drawn expressions', True),
-    ('3', 'ME', 'Brows and cheeks get small face bones: brows lift and frown, cheeks rise with a smile.', [], '', False),
-    ('4', 'ME', 'Mouth: shapes swap for each expression (smile, laugh, surprised, sad, worried, doubt), redrawn from your drawings in his 3D look.', [], '', False),
-    ('5', 'ME', 'An expression sheet, six poses and a 360\u00b0 turn, all matte, for your OK.', [], '', True),
-    ('6', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
-]
-board('Plan: his skeleton and face', ['Nothing is built until you say OK. The pictures show where', 'each part goes on your approved model.'], rig, 'plan-rig.png')
+    rig = [
+        ('1', 'ME', 'Skeleton: 36 bones (fingers included) placed by his own measured proportions, so he bends, jumps, waves and points. His model stays exactly as you approved it.',
+         [fit(P('tripo-skeleton.png'), 420, 750)], 'Planned bones over your model', False),
+        ('2', 'ME', 'His eyes become real 3D eyes over the painted ones: they blink and look around. This is the riskiest part, so you see it alone first.',
+         [fit(P('tripo-face-plan.png'), 760, 860)], 'What moves on his face; below: the mouth shapes from your 30 drawn expressions', True),
+        ('3', 'ME', 'Brows and cheeks get small face bones: brows lift and frown, cheeks rise with a smile.', [], '', False),
+        ('4', 'ME', 'Mouth: shapes swap for each expression (smile, laugh, surprised, sad, worried, doubt), redrawn from your drawings in his 3D look.', [], '', False),
+        ('5', 'ME', 'An expression sheet, six poses and a 360\u00b0 turn, all matte, for your OK.', [], '', True),
+        ('6', 'NEXT', 'Only after your OK: the animation, shown as a plan first.', [], '', False),
+    ]
+    board('Plan: his skeleton and face', ['Nothing is built until you say OK. The pictures show where', 'each part goes on your approved model.'], rig, 'plan-rig.png')
