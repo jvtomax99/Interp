@@ -53,9 +53,7 @@ def main():
     S.place(L, crackle(2.8), 0, 0.35)
     for k, f in enumerate(range(16, 84, 15)):           # a pulse on every beat
         S.place(L, pulse(196 if k % 2 else 262), at(f), 0.9)
-    for f in range(22, 36, 2):                           # the caption typing on
-        S.place(L, tick(), at(f), 0.35)
-    S.place(L, swish(1.1, 200, 5000), at(50), 0.9)     # the pull-back
+    S.place(L, swish(1.1, 200, 5000), at(44), 0.9)     # the pull-back
     S.place(L, swish(0.8, 300, 4000), at(84), 0.8)     # the phone rises
     S.place(L, swish(0.7, 1500, 9000), at(88), 0.6)    # the brain shrinking into his head
     S.place(L, S.keyclick(), at(106), 0.9)             # tap

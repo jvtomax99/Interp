@@ -8,10 +8,9 @@ Beats (30 fps, 120 BPM; a beat every 15 frames). Revised after the review
 big held title, two readable labels, a plain-words caption, no scan jargon.
   1-15    frame 1: close on Dr. Smiley's own nucleus (pink), the camera
           rips back from it into the brain
-  15-50   flying through: signals racing along the real tracts;
-          "HUMC Brain" and the caption "The App, Mapped Like A Brain."
-  50-84   pull back to the whole brain in profile, two labels:
-          DR. SMILEY, ASK THE HUB
+  15-44   flying through: signals racing along the real tracts
+  44-84   pull back to the whole brain in profile
+          No words over the brain (Jose): no name, caption or labels.
   84-106  the phone rises in face-on; the brain shrinks into Dr. Smiley's
           head on the real Home screen, which lights up
   106,110 two taps, rings (the double-tap, in reverse)
@@ -203,17 +202,17 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             pos = (START + Vector((0.02, -0.3, 0.02))).lerp(START + Vector((-0.35, -0.75, 0.05)), t)
             tgt = START
             lens = 35
-        elif f <= 50:    # flying through the middle, looking along the tracts
-            t = (f - 15) / 35
+        elif f <= 44:    # flying through the middle, looking along the tracts
+            t = (f - 15) / 29
             a = START + Vector((-0.35, -0.75, 0.05))
             pos = a.lerp(inside, smooth(0, 1, t))
             tgt = START.lerp(inside + Vector((1.0, -0.2, -0.05)), smooth(0, 1, t * 1.3))
             lens = smooth(35, 24, t * 2)
         elif f <= 84:    # pull back to the profile, always looking at the brain
-            t = ease_out((f - 50) / 30)
+            t = ease_out((f - 44) / 36)
             pos = inside.lerp(side, t)
-            tgt = (inside + Vector((1.0, -0.2, -0.05))).lerp(centre, ease_out((f - 50) / 8))
-            lens = smooth(24, 35, (f - 50) / 10)
+            tgt = (inside + Vector((1.0, -0.2, -0.05))).lerp(centre, ease_out((f - 44) / 8))
+            lens = smooth(24, 35, (f - 44) / 10)
         else:            # to the phone, face-on
             t = ease_out((f - 84) / 20)
             pos = side.lerp(Vector(cam_end_pos()), t)
@@ -313,17 +312,7 @@ def post(f, path, labels=()):
     im = bloom(Image.open(path).convert('RGB'))
     layer = Image.new('RGBA', im.size, (0, 0, 0, 0))
     dr = ImageDraw.Draw(layer)
-    if 8 <= f < 86:     # the name, and what it is, in plain words
-        a = min(1.0, (f - 8) / 5) * min(1.0, (86 - f) / 6)
-        dr.rounded_rectangle((18, 44, 330, 112), radius=14, fill=(6, 10, 23, int(170 * a)))
-        dr.text((32, 50), 'HUMC Brain', font=ImageFont.truetype(INTER_B, 48), fill=(233, 238, 250, int(255 * a)))
-        cap = 'The App, Mapped Like A Brain.'
-        if f >= 22:
-            n = int(len(cap) * min(1.0, (f - 22) / 14))
-            ft = ImageFont.truetype(INTER_B, 30)
-            w = dr.textlength(cap, font=ft)
-            dr.rounded_rectangle((26, 126, 26 + w + 20, 170), radius=7, fill=(185, 163, 255, int(235 * a)))
-            dr.text((36, 129), cap[:n], font=ft, fill=(7, 16, 41, int(255 * a)))
+    # No words over the brain (Jose, 2026-10-22): no name panel, no caption.
     for (x, y, name, sub, col, a) in labels:   # region labels, as on the page
         r, g, b = (int(col[i:i + 2], 16) for i in (1, 3, 5))
         f1 = ImageFont.truetype(os.path.join(FONTS, 'PlexMono-SemiBold.ttf'), 25)
@@ -342,6 +331,7 @@ def post(f, path, labels=()):
 
 def label_spots(sc, cam, pivot, f):
     """Where each region's name goes on screen this frame (during the pull-back)."""
+    return []   # no words over the brain (Jose, 2026-10-22); the code below is kept for later
     from bpy_extras.object_utils import world_to_camera_view
     if not 58 <= f < 86:
         return []
