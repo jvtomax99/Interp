@@ -10,6 +10,33 @@ const OUT = path.resolve(__dirname, '../build/screens');
 const ASK_REPLY = { fromHub: false, headline: 'Watch "constipado".', sayLabel: 'Say', say: 'estreñido',
   details: 'It means congested, not constipated. For constipated, say "estreñido".',
   sourceIds: [], lessonIds: [], actions: [], suggestTerm: { en: '', es: '', def: '' } };
+// The doctor databases: made-up sample doctors (never real people's names;
+// the ad labels these screens "sample data"). Their terms are the app's
+// own test content, which is correct.
+const T = (en, es, def) => ({ en, es, def });
+const SAMPLE_DOCTORS = [
+  { id: 's1', name: 'Dr. Samuel Okafor', specialty: 'Hematology/Oncology', hospitalLocation: 'John Theurer Cancer Center', locationDetails: '4th fl', region: 'north',
+    notes: 'Likes the family in the room for big news.', updatedBy: 'Maria', source: 'research', customTerms: [],
+    researchResult: { found: true, specialty: 'Hematology/Oncology', note: '', tiers: [
+      { key: 'core', terms: [T('staging', 'estadificación', 'How far the lymphoma has spread, stages I to IV.'), T('remission', 'remisión', 'No signs of disease; not the same as cured.')] },
+      { key: 'procedures', terms: [T('bone marrow biopsy', 'biopsia de médula ósea', 'Sample taken from the hip bone.'), T('PET scan', 'tomografía PET', 'Imaging that shows active cancer.')] },
+      { key: 'drugs', terms: [T('rituximab', 'rituximab', 'Antibody given by infusion.')] },
+      { key: 'anatomy', terms: [T('lymph node', 'ganglio linfático', 'Small gland of the immune system.')] },
+      { key: 'falsefriends', terms: [T('constipated', 'estreñido', 'Not "constipado", which means a cold.')] } ] } },
+  { id: 's2', name: 'Dr. Elena Marquez', specialty: 'Cardiology', hospitalLocation: 'Heart & Vascular Hospital', locationDetails: '', region: 'north', notes: '', customTerms: [] },
+  { id: 's3', name: 'Dr. Priya Raman', specialty: 'Pulmonology', hospitalLocation: 'Hackensack', locationDetails: '', region: 'north', notes: '', customTerms: [] },
+  { id: 's4', name: 'Dr. Daniel Cho', specialty: 'Gastroenterology', hospitalLocation: 'Hackensack', locationDetails: '', region: 'north', notes: '', customTerms: [] },
+  { id: 's5', name: 'Dr. Rosa Delgado', specialty: 'Pediatrics', hospitalLocation: "Children's Hospital", locationDetails: '', region: 'north', notes: '', customTerms: [] },
+  { id: 's6', name: 'Dr. Hannah Weiss', specialty: 'Neurology', hospitalLocation: 'Hackensack', locationDetails: '', region: 'south', notes: '', customTerms: [] },
+  { id: 's7', name: 'Dr. Marcus Bell', specialty: 'Nephrology', hospitalLocation: 'Hackensack', locationDetails: '', region: 'south', notes: '', customTerms: [] },
+  { id: 's8', name: 'Dr. Luis Ortega', specialty: 'Orthopedics', hospitalLocation: 'Hackensack', locationDetails: '', region: 'south', notes: '', customTerms: [] },
+];
+async function sampleDoctors(page) {
+  await page.evaluate(ds => {
+    if (window.__DB) { window.__DB['doctor-directory'] = {}; ds.forEach(({ id, ...rest }) => { window.__DB['doctor-directory'][id] = JSON.parse(JSON.stringify(rest)); }); }
+    DOCTOR_DIRECTORY.length = 0; ds.forEach(d => DOCTOR_DIRECTORY.push(JSON.parse(JSON.stringify(d))));
+  }, SAMPLE_DOCTORS);
+}
 let askMod;
 async function askRoute(page) {
   await page.route('**/api/ask', async r => {
@@ -41,6 +68,8 @@ const SHOTS = {
     await p.getByRole('button', { name: /^Research$/ }).first().click(); await p.waitForTimeout(5000); },
   doctors:   p => H.go(p, 'doctor-directory', 1500),
   chat:      p => H.go(p, 'chat', 1500),
+  directory: async p => { await sampleDoctors(p); await H.go(p, 'doctor-directory', 1500); },
+  doctorpage: async p => { await sampleDoctors(p); await H.go(p, 'doctor-directory', 800); await p.evaluate(() => openDoctorDirDetail('s1')); await p.waitForTimeout(1500); },
   review:    p => H.go(p, 'review', 1500),
   drill:     async p => { await H.go(p, 'home', 1200); await p.evaluate(() => openWarmupSheet()); await p.waitForTimeout(1200); },
   memory:    p => H.go(p, 'memory', 1500),

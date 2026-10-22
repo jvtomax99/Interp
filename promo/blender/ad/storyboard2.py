@@ -94,25 +94,32 @@ def ring(loc, r, col='#5FD3F3', strength=4.0, thick=0.006):
     return o
 
 
-def burst(name, title, items):
-    """Three phones in a shallow arc, each lights on its beat; names below."""
+def burst(name, title, items, note=None):
+    """Phones in a shallow arc, each lights on its beat; names below."""
     sc = fresh(bg='#070B22', view='Standard')
     sheen()
-    cam = (0, -2.75, 0.12)
+    n = len(items)
+    cam = (0, -2.75 - 0.35 * (n - 3), 0.12)
+    gap = 0.68 if n == 3 else 0.6
     for k, (scr, label) in enumerate(items):
-        x = (k - 1) * 0.68
-        phone(scr, (x, abs(k - 1) * 0.18, 0.12), rot_z=-(k - 1) * 0.2)
-        text(label, (x, abs(k - 1) * 0.18 - 0.1, -0.5), 0.07, '#FFFFFF', True, face_cam=cam, glow=1.0)
-    text(title, (-1.0, 0.1, 0.8), 0.055, '#5FD3F3', False, align='LEFT', face_cam=cam, glow=1.0)
+        c = k - (n - 1) / 2
+        x = c * gap
+        phone(scr, (x, abs(c) * 0.18, 0.12), rot_z=-c * 0.18)
+        text(label, (x, abs(c) * 0.18 - 0.1, -0.5), 0.07, '#FFFFFF', True, face_cam=cam, glow=1.0)
+    text(title, (-(n - 1) / 2 * gap - 0.32, 0.1, 0.8), 0.055, '#5FD3F3', False, align='LEFT', face_cam=cam, glow=1.0)
+    if note:
+        text(note, ((n - 1) / 2 * gap + 0.32, 0.1, 0.8), 0.04, '#7F8AB0', False, align='RIGHT', face_cam=cam, glow=1.0)
     camera(sc, cam, (0, 0, 0.1), 35)
     shot(sc, name)
 
 
 def main(which):
     if 'm1' in which:
-        burst('m1', 'FINDING A WORD', [('glossary', 'Glossary'), ('translate', 'Translate'), ('ask', 'Ask the Hub')])
+        burst('m1', 'FINDING A WORD', [('glossary', 'Glossary'), ('translate', 'Translate'), ('ask', 'Ask the Hub'),
+                                       ('falsefriends', 'False Friends')])
     if 'm2' in which:
-        burst('m2', 'BEFORE AN APPOINTMENT', [('prep', 'Doctor Prep'), ('falsefriends', 'False Friends'), ('chat', 'Team Chat')])
+        burst('m2', 'BEFORE AN APPOINTMENT', [('directory', 'Doctor Directory'), ('doctorpage', "A doctor's page"),
+                                              ('prep', 'Doctor Prep'), ('chat', 'Team Chat')], note='sample doctors')
     if 'm3' in which:
         burst('m3', 'KEEP LEARNING', [('review', 'Term Review'), ('drill', 'Daily Drill'), ('memory', 'Memory trainer')])
     if 'm4' in which:   # Home: a double-tap on Dr. Smiley's head opens the HUMC Brain

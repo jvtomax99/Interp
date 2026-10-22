@@ -147,7 +147,7 @@ def main(which):
         camera(sc, (0, -3.2, 0.02), (0, 0, 0.02), 50)
         shot(sc, 'p1')
 
-    if 'p2' in which or 'p3' in which or 'p4' in which:
+    if 'p2' in which or 'p3' in which or 'p3b' in which or 'p4' in which:
         sc = fresh()
         parts = A.body()
         body_lights()
@@ -166,6 +166,14 @@ def main(which):
             shot(sc, 'p3')
             for t in names:
                 t.hide_render = True
+        if 'p3b' in which:   # Every piece: the Explode slider at 100%
+            for ob in parts.values():
+                k = next(j for j, g in enumerate(LINEUP) if ob['system'] in g)
+                c = Vector(ob['centre'])
+                # Each piece moves out from the middle of its system's column.
+                ob.location = Vector(((k - 2) * 0.86 + c.x * 1.75, c.y * 3.0, 0.9 + (c.z - 0.9) * 1.14))
+            camera(sc, (0.0, -5.3, 1.0), (0, 0, 0.9), 30)
+            shot(sc, 'p3b')
         if 'p4' in which:   # Organs lifted out whole, in a row, each with its bilingual card
             cat = A.catalogue()
             # Whole organs only: in BodyParts3D the lung is its airway tree and
@@ -270,4 +278,4 @@ def main(which):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:] or ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8'])
+    main(sys.argv[1:] or ['p1', 'p2', 'p3', 'p3b', 'p4', 'p5', 'p6', 'p7', 'p8'])
