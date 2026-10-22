@@ -4,7 +4,28 @@ For the next chat. Read this, then `PLAN.md`, then `../README.md` (the
 first film's pipeline, which this one reuses). Branch:
 `claude/guide-walkthrough-wntrl2`.
 
-## Where it stands
+## Latest (end of the first chat, 2026-10-22)
+
+- Current plan: storyboard 7 (PLAN.md "Beats (storyboard 6...)" table,
+  with the new ending); playable page
+  https://claude.ai/artifact/G9Q35eXGbDwFrMK6QDLgRa.
+- Section 1, the hook, is built as a rough moving test: `brainhook.py`
+  (frames 1-150) + `brainhook_sound.py` + `logo.py` (the logo after Jose's
+  reference picture, Poppins ExtraBold from Google Fonts into
+  build/fonts/). Jose's rules there: no words over the brain; the logo
+  sits above the phone, never covering the app. Open ideas he hasn't
+  answered: logo bigger with a soft glow behind it.
+- The ending: `src/endcard.html` + `tools/endcard.cjs` (end card on his
+  cherry-tree photo), `logo.py clear` (logo without background),
+  `storyboard3.py v16` (rise over the campus).
+- Photos NOT in git (rights unconfirmed), re-upload to build/photo/:
+  helena.jpg (Helena Theurer Pavilion, used by the older openings) and
+  cherry.png (the cherry tree, the ending).
+- Prompts: `REVIEW_PROMPT.md` (critique each section), `IDEA_PROMPTS.md`.
+- Fonts in build/fonts are downloaded from Google Fonts (Poppins,
+  Unbounded...); IBM Plex Mono .ttf converted from tests/support/fonts.
+
+## Where it stood earlier
 
 - Storyboard 4 (vertical, about 56 s) is waiting for Jose's OK and his four
   choices (length, logos, shape; my picks: approve, 56 s, logos off the
