@@ -16,7 +16,8 @@ const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.on
 const texOf = (img) => { const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true; return t; };
 
 // which app screen each feature shows on the phone, and which HUMC photo fills the window
-const SCREEN_OF = { home: "home", glossary: "glossary", body: "heart", translate: "translate", physician: "physician", falsefriends: "falsefriends", drills: "drills", cert: "cert", team: "team", ask: "ask" };
+const SCREEN_OF = { home: "home", glossary: "heart", // the 3D Body lives in the Glossary shot now (Jose, 2026-10-22): the body comes apart, then its Heart / Corazón glossary card
+   body: "heart", translate: "translate", physician: "physician", falsefriends: "falsefriends", drills: "drills", cert: "cert", team: "team", ask: "ask" };
 const WINDOW_OF = { home: "entrance", glossary: "tower", body: "pavilion-dusk", translate: "aerial", physician: "pavilion-dusk-2", falsefriends: "entrance", drills: "tower", cert: "aerial", team: "pavilion-dusk", ask: "pavilion-dusk-2" };
 const PHONE = { w: 0.98, h: 2.12 }, PX = PHONE.w / 390;
 const LID_W = 3.3, LID_H = 2.1, SCR_W = 3.08, SCR_H = 1.9;
@@ -247,7 +248,7 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
   const smiley = { group: { visible: false, position: new THREE.Vector3() }, lastPose: null, pose(p) { this.lastPose = p; } };
   const POSE = {
     home: (u) => (u < 1.2 ? MOVES.wave(u / 1.2) : { face: "smile", brows: "glad" }),
-    glossary: (u) => ({ face: u % 1.6 < 1 ? "lookUR" : "smile", brows: "up", y: 0.02 * Math.abs(Math.sin(u * 5)) }),
+    glossary: (u) => (u > 0.5 && u < 1.6 ? { face: "surprised", brows: "up" } : { face: "smile", brows: "glad" }),
     body: (u) => (u > 0.4 && u < 1.6 ? { face: "surprised", brows: "up" } : { face: "smile", brows: "glad" }),
     translate: (u) => (u < 1.0 ? MOVES.type(u) : { ...MOVES.point(prog(u, 1.0, 1.5)), face: "smile" }),
     physician: (u) => ({ face: u < 1 ? "halfR" : "smile", brows: "glad" }),
@@ -255,7 +256,8 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     drills: (u) => (u > 1.0 ? { face: "laugh", brows: "laugh", ...(u < 1.5 ? MOVES.land(prog(u, 1.0, 1.5)) : {}) } : { face: "lookUR", brows: "focused" }),
     cert: (u) => (u < 0.9 ? { face: "lookUR", brows: "up" } : u < 2.0 ? { face: "surprised", brows: "up" } : { ...MOVES.point(prog(u, 2.0, 2.5)), face: "smile", brows: "glad" }),
     team: (u) => ({ face: u % 1.4 < 0.9 ? "laugh" : "smile", brows: "laugh" }),
-    ask: (u) => (u < 1.2 ? MOVES.stepOut(prog(u, 0.05, 1.0)) : MOVES.wave(prog(u, 1.2, 2.4))),
+    // out of the screen, then thinking (his AI brain lights up: main.js), then the wave
+    ask: (u) => (u < 1.0 ? MOVES.stepOut(prog(u, 0.05, 1.0)) : u < 2.1 ? { face: "lookUR", brows: "up" } : MOVES.wave(prog(u, 2.1, 3.0))),
   };
 
   // ---------- each feature at u seconds in ----------
@@ -268,7 +270,7 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     for (const k in S.layers) { const L = S.layers[k]; L.pivot.position.z = 0.002 + L.l.depth * 0.001; L.pivot.scale.setScalar(1); }
     // the proof pops forward with its cyan outline, on the beat after the shot settles
     const P = S.layers[S.proofKey];
-    const pop = g === "cert" ? outBack(prog(u, 0.1, 0.45), 1.6) * (1 - prog(u, 0.55, 0.8)) : outBack(prog(u, 0.55, 1.0), 1.6);
+    const pop = g === "glossary" ? 0 : g === "cert" ? outBack(prog(u, 0.1, 0.45), 1.6) * (1 - prog(u, 0.55, 0.8)) : outBack(prog(u, 0.55, 1.0), 1.6);
     outline.visible = false;
     if (P) {
       P.pivot.position.z = 0.002 + 0.16 * pop;
@@ -279,14 +281,14 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
       outline.material.opacity = Math.min(1, pop);
     }
     // the 3D Body: the real viewer coming apart on the phone, then the heart and its card
-    exPlane.visible = g === "body" && exTex.length > 0 && u < 1.9;
+    exPlane.visible = g === "glossary" && exTex.length > 0 && u < 1.85;
     if (exPlane.visible) {
-      const k = Math.min(exTex.length - 1, Math.floor(prog(u, 0.05, 1.5) * exTex.length));
+      const k = Math.min(exTex.length - 1, Math.floor(prog(u, 0.55, 1.5) * exTex.length));
       if (exPlane.material.map !== exTex[k]) { exPlane.material.map = exTex[k]; exPlane.material.needsUpdate = true; }
-      exPlane.material.opacity = 1 - prog(u, 1.55, 1.9);
+      exPlane.material.opacity = 1 - prog(u, 1.5, 1.85);
       if (P) { const pp = outBack(prog(u, 1.9, 2.35), 1.6); P.pivot.position.z = 0.002 + 0.16 * pp; P.pivot.scale.setScalar(1 + 0.16 * pp); outline.visible = pp > 0.02; outline.material.opacity = Math.min(1, pp); }
     }
-    if (g === "body" && P && u >= 1.9) { const pp = outBack(prog(u, 1.9, 2.35), 1.6); P.pivot.position.z = 0.002 + 0.16 * pp; P.pivot.scale.setScalar(1 + 0.16 * pp); outline.visible = pp > 0.02; outline.material.opacity = Math.min(1, pp); outline.position.z = P.pivot.position.z + 0.004; outline.scale.set(P.w * P.pivot.scale.x + 0.05, P.h * P.pivot.scale.y + 0.05, 1); }
+    if (g === "glossary" && P && u >= 1.9) { const pp = outBack(prog(u, 1.9, 2.35), 1.6); P.pivot.position.z = 0.002 + 0.16 * pp; P.pivot.scale.setScalar(1 + 0.16 * pp); outline.visible = pp > 0.02; outline.material.opacity = Math.min(1, pp); outline.position.z = P.pivot.position.z + 0.004; outline.scale.set(P.w * P.pivot.scale.x + 0.05, P.h * P.pivot.scale.y + 0.05, 1); }
     drawLaptop(g, u);
     smiley.group.visible = true;
     smiley.pose(POSE[g] ? POSE[g](u) : { face: "smile", brows: "glad" });
@@ -342,6 +344,12 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     const img = P.mesh.material.map.image, l = P.l, c = l.clip, k = img.width / c.width;
     return { img, sx: (l.x - c.x) * k, sy: (l.y - c.y) * k, sw: l.w * k, sh: l.h * k };
   };
+  // the body coming apart, one captured frame (i may be fractional: the next frame mixes in), cropped to the viewer
+  const explodeArt = (i) => {
+    if (!exTex.length) return null;
+    const a = Math.max(0, Math.min(exTex.length - 1, Math.floor(i))), b = Math.min(exTex.length - 1, a + 1), img = exTex[a].image, k = img.width / 780;
+    return { img, sx: 0, sy: 240 * k, sw: 780 * k, sh: 1240 * k, next: exTex[b].image, mix: i - a };
+  };
   const proofMesh = (g) => { const S = screens[SCREEN_OF[g]]; return S && S.proofKey ? S.layers[S.proofKey].mesh : null; };
   // the whole phone screen on screen (for the "no dark or empty screen" check)
   function screenRect(camera, W, H) {
@@ -353,5 +361,5 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     }
     return pts;
   }
-  return { update, view, smiley, idle, idleSpot, proofMesh, proofArt, desk, worldRect, screenRect };
+  return { update, view, smiley, idle, idleSpot, proofMesh, proofArt, explodeArt, desk, worldRect, screenRect };
 }

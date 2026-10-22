@@ -23,12 +23,23 @@ export function createHero(after, W, H) {
     return { x: (W - w) / 2, y: (TOP + BOTTOM) / 2 - h / 2, w, h };
   }
   // k: 0 on the phone (from = its rect on screen), 1 out front; art: the proof layer's picture and
-  // the element's rect inside it (the capture has a margin around it)
-  function draw(art, from, k) {
+  // the element's rect inside it (the capture has a margin around it), and optionally the next
+  // picture mixed in (art.next, art.mix: frames of the 3D Body coming apart). art2/mix2: what it
+  // turns into (the body into its Heart card), its size and picture blending over
+  const pic = (a, r, alpha) => {
+    if (alpha <= 0.003) return;
+    g.globalAlpha = alpha;
+    g.drawImage(a.img, a.sx, a.sy, a.sw, a.sh, r.x, r.y, r.w, r.h);
+    if (a.next && a.mix > 0.003) { g.globalAlpha = alpha * a.mix; g.drawImage(a.next, a.sx, a.sy, a.sw, a.sh, r.x, r.y, r.w, r.h); }
+    g.globalAlpha = 1;
+  };
+  function draw(art, from, k, art2 = null, mix2 = 0) {
     g.clearRect(0, 0, W, H);
     box = null;
     if (!art || !from || k <= 0.001) return;
-    const to = target(art), e = outBack(clamp(k), 1.3), f = clamp(k);
+    const t1 = target(art), t2 = art2 ? target(art2) : t1, m2 = inOutCubic(clamp(mix2));
+    const to = { x: lerp(t1.x, t2.x, m2), y: lerp(t1.y, t2.y, m2), w: lerp(t1.w, t2.w, m2), h: lerp(t1.h, t2.h, m2) };
+    const e = outBack(clamp(k), 1.3), f = clamp(k);
     const r = { x: lerp(from.x, to.x, e), y: lerp(from.y, to.y, e), w: lerp(from.w, to.w, e), h: lerp(from.h, to.h, e) };
     g.fillStyle = `rgba(3,6,26,${0.5 * inOutCubic(f)})`;
     g.fillRect(0, 0, W, H);
@@ -38,7 +49,8 @@ export function createHero(after, W, H) {
     g.fillStyle = "#fff"; g.beginPath(); g.roundRect(r.x, r.y, r.w, r.h, rad); g.fill();
     g.restore();
     g.save(); g.beginPath(); g.roundRect(r.x, r.y, r.w, r.h, rad); g.clip();
-    g.drawImage(art.img, art.sx, art.sy, art.sw, art.sh, r.x, r.y, r.w, r.h);
+    pic(art, r, art2 ? 1 - m2 : 1);
+    if (art2) pic(art2, r, m2);
     g.restore();
     // v11's cyan outline
     g.save();

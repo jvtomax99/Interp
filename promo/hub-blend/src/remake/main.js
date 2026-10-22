@@ -706,7 +706,9 @@ async function build() {
     } else if (isFeature(s[2]) && pose && !(next && !isFeature(next[2]) && t > s[1] - WHIP - 0.15)) { // gone before the fly to the end card
       const A = SPOT[s[2]], y = pose.y || 0;
       smileyState = { x: A.x, base: A.base, lift: Math.min(ARC, Math.max(0, y) * overlay.size.h * 0.35), rise: y < 0 ? clamp(1 + y / 1.1) : undefined,
-        squash: pose.squash ?? 1, lean: -(pose.lean || 0), face: pose.face || "rest", brows: pose.brows || "rest" };
+        squash: pose.squash ?? 1, lean: -(pose.lean || 0), face: pose.face || "rest", brows: pose.brows || "rest",
+        // his AI brain, on "Ask Dr. Smiley." (Jose, 2026-10-22)
+        brain: s[2] === "ask" ? prog(t - s[0], 1.0, 1.3) * (1 - prog(t - s[0], 2.0, 2.3)) : 0, time: t };
     }
     cameraAt(t);
     if (s[2] === "end" || (next && next[2] === "end")) endCard.update(Math.max(0, t - END_AT));
@@ -717,8 +719,17 @@ async function build() {
     const inCity = s[2] === "cert" && !(hopping && t >= s[1] - HOP / 2);
     city.draw(t - s[0], t, inCity ? feat.worldRect(camera, W, H) : null, inCity ? prog(t - s[0], 0.78, 0.96) : 0);
     // the proof flies out to be read, then settles back onto the phone before his hop
-    if (isFeature(s[2]) && s[2] !== "cert") {
-      const u = t - s[0], len = s[1] - s[0], start = s[2] === "body" ? 2.0 : 0.6, end = len - HOP - 0.06;
+    if (s[2] === "glossary") {
+      // the 3D Body: off the phone, big, coming apart (the app's own explode frames), then it turns
+      // into its Heart / Corazón glossary card, and settles back before his hop
+      const u = t - s[0], len = s[1] - s[0], end = len - HOP - 0.06;
+      const k = prog(u, 0.3, 0.62) * (1 - prog(u, end - 0.22, end));
+      const q = feat.screenRect(camera, W, H), xs = q.map((p) => p[0]), ys = q.map((p) => p[1]);
+      const from = { x: Math.min(...xs), y: Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * 0.14, w: Math.max(...xs) - Math.min(...xs), h: (Math.max(...ys) - Math.min(...ys)) * 0.74 };
+      const body = feat.explodeArt(13 * inOutSine(prog(u, 0.55, 1.5)));
+      hero.draw(k > 0.001 ? body : null, from, k, feat.proofArt("glossary"), prog(u, 1.55, 1.9));
+    } else if (isFeature(s[2]) && s[2] !== "cert") {
+      const u = t - s[0], len = s[1] - s[0], start = 0.6, end = len - HOP - 0.06;
       const k = prog(u, start, start + 0.35) * (1 - prog(u, end - 0.22, end));
       hero.draw(k > 0.001 ? feat.proofArt(s[2]) : null, k > 0.001 ? proofRect(s[2]) : null, k);
     } else hero.draw(null, null, 0);
