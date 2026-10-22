@@ -95,6 +95,12 @@ worried (flat, not a frown).
    move must carry the cheek (~4-5 cm); fade by distance to the side, not
    by depth (the mouth is deep at its corners); move closed lips sideways
    only through their meeting line (`fit_line`), never by pulling corners.
+   Then Jose: "push them further". Recipes in `MOUTHS` go past 1 (sliders
+   to 2), `set_face(lid=...)` sets lids per expression (sad heavy, doubt one
+   half shut), `JawOpen` moves only the lower jaw (`close_mouth(upper=0)`),
+   the top teeth stay still when it opens (teeth = white or light grey, plus
+   one ring). Limits: harder corner pulls crease toward the nose; the drawn
+   laugh's shut happy-arc eyes need a lower lid (not built).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

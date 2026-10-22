@@ -60,13 +60,16 @@ def add_key(ob, name, co):
     return kb
 
 
-def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True):
+def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, lid=None):
     """brow: per side (his right, his left) a (lift, tilt) in the app's units
     (DR_BROWS: lift up positive, tilt positive = inner end up); cheek: per side
-    0..1; close: 0 (his sculpted smile) .. 1 (closed); mouth: {shape: 0..1}."""
+    0..1; close: 0 (his sculpted smile) .. 1 (closed); mouth: {shape: 0..2} (past
+    1 for cartoon-strong, Jose 2026-10-22: "push them further"); lid: per side
+    0 (open) .. 1 (shut), overriding the lid that follows a lowered brow."""
     ob = ob or bpy.data.objects['Mesh_0']
     kb = ob.data.shape_keys.key_blocks
     for k in kb[1:]:
+        k.slider_max = 2
         k.value = 0
     lid_down = [0, 0]
     for i, s in enumerate((R, L)):
@@ -88,7 +91,7 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True):
     if lids:
         from tripo_eyes import set_blink
         for i, s in enumerate((R, L)):
-            set_blink(bpy.data.objects['Lid.' + s], lid_down[i])
+            set_blink(bpy.data.objects['Lid.' + s], lid[i] if lid else lid_down[i])
 
 
 if __name__ == '__main__':

@@ -13,9 +13,13 @@ board('His mouth, moved like a real face', ['Each reaction is now made the way a
      'movements): surprise drops the jaw with the lips let go, no pucker; sadness pulls the corners down and the chin muscle '
      'pushes the lower lip up into a pout; worry stretches the lips sideways; doubt dimples one corner; a mouth corner drags a '
      'wide patch of cheek with it, which is why the old shapes creased.', [diagram], 'Which way each muscle pulls on his face', False),
-    ('2', 'ME', 'All seven, rebuilt that way: your drawing (left), his mouth close up, his whole face. Surprised is now a '
-     'relaxed open \u201coh\u201d, sad a frown with the chin pout, worried a stretched flat mouth, doubt a one-sided dimple.',
-     [rows([0, 1, 2, 3, 4, 5, 6])], '', True),
-    ('3', 'NEXT', 'After your OK: the expression sheet, where the eyes join in too (surprise opens them wider, a laugh '
-     'squints them, as real faces do), then six poses and a 360\u00b0 turn.', [], '', False),
+    ('2', 'ME', 'Pushed further, toward your drawings: a bigger jaw drop for surprised and laugh (only the lower jaw '
+     'moves; the top teeth stay still, as on a real skull), a deeper frown and chin pout for sad, a harder stretch for '
+     'worried, a stronger smirk for doubt, and the eyes join in like yours: heavy lids for sad, one eye half shut for doubt.',
+     [rows([0, 1, 2, 3, 4, 5, 6])], 'Your drawing (left), his mouth close up, his whole face', True),
+    ('3', 'NOTE', 'Two limits found. Pulled harder than this, his mouth corners crease up toward the nose. And your laugh '
+     'shuts the eyes in happy arcs: that needs a lower eyelid, which he does not have yet (his laugh keeps open, smiling eyes).',
+     [], '', False),
+    ('4', 'NEXT', 'After your OK: the expression sheet (brows, eyes, mouth and cheeks together), then six poses and a '
+     '360\u00b0 turn.', [], '', False),
 ], 'plan-mouths.png')

@@ -23,18 +23,23 @@ TMP = os.path.join(HERE, 'in', 'faceplan')
 # his left brow, your right, goes a fifth further: DR_BROW_SIDE)
 MOUTHS = {
     'rest':      dict(close=1),
-    'smile':     dict(close=0, cheek=(.6, .6), brow=((2, 0), (2.4, 0))),
-    'laugh':     dict(close=0, mouth={'JawOpen': 1, 'CornerUp.L': .6, 'CornerUp.R': .6}, cheek=(1, 1), brow=((2.8, 0), (3.4, 0))),
+    'smile':     dict(close=0, cheek=(1, 1), brow=((2, 0), (2.4, 0))),
+    # pushed toward the size of his drawings (Jose: "push them further"), the
+    # muscles past their natural strength the way a cartoon exaggerates
+    'laugh':     dict(close=0, mouth={'JawOpen': 1.2, 'CornerUp.L': 1, 'CornerUp.R': 1}, cheek=(1.6, 1.6),
+                      brow=((2.8, 0), (3.4, 0))),   # his drawn laugh shuts the eyes in happy arcs: needs a lower lid (not built)
     # after the muscles (tripo_muscles.py, Jose 2026-10-22: "how a normal person makes
     # mouth reactions"): surprise is the jaw dropping with the lips let go (AU 26), not a
     # pucker; sadness pulls the corners down (15) and the chin up into a pout (17);
     # worry stretches the lips sideways (20); doubt dimples one corner (14)
-    'surprised': dict(close=0, mouth={'AU.SmileOffOpen.L': 1, 'AU.SmileOffOpen.R': 1, 'JawOpen': 1}, brow=((4.2, 0), (5, 0))),
-    'sad':       dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.CornerDepress.L': 1, 'AU.CornerDepress.R': 1,
-                                      'AU.ChinRaise': 1}, brow=((1, 11), (1.2, 13))),
-    'worried':   dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.LipStretch.L': 1, 'AU.LipStretch.R': 1,
-                                      'AU.CornerDepress.L': .5, 'AU.CornerDepress.R': .7}, brow=((1.4, 15), (1.7, 18))),
-    'doubt':     dict(close=1, mouth={'AU.Relax.R': 1, 'AU.Dimple.L': 1}, brow=((3, 4), (-1.2, 2.4))),
+    'surprised': dict(close=0, mouth={'AU.SmileOffOpen.L': 1.3, 'AU.SmileOffOpen.R': 1.3, 'JawOpen': 2},
+                      brow=((5, 0), (6, 0))),
+    'sad':       dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.CornerDepress.L': 1.15, 'AU.CornerDepress.R': 1.15,
+                                      'AU.ChinRaise': 1.6}, brow=((1.2, 15), (1.4, 18)), lid=(.32, .32)),   # heavy lids, as drawn
+    'worried':   dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.LipStretch.L': 1.25, 'AU.LipStretch.R': 1.25,
+                                      'AU.CornerDepress.L': .6, 'AU.CornerDepress.R': .85}, brow=((1.6, 18), (2, 21))),
+    'doubt':     dict(close=1, mouth={'AU.Relax.R': 1.2, 'AU.Dimple.L': 1.6, 'CornerUp.L': .6}, lid=(0, .42),   # one eye half shut, as drawn
+                  brow=((3.6, 5), (-1.4, 3))),
 }
 DRAWN = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh',
          'laughB', 'lookL', 'lookR', 'love', 'sleep', 'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR',
@@ -189,7 +194,9 @@ if __name__ == '__main__':
     op = np.load(os.path.join(HERE, 'in', 'mouth-opening.npz'))
     X, ZU, ZL, CX = op['X'], op['ZU'], op['ZL'], float(op['CX'])
     teeth = teeth_vertices(ob)
-    add_key(ob, 'Mouth.JawOpen', close_mouth(co0, X, ZU, ZL, -.6, teeth))
+    # only the lower jaw drops: the upper lip and top teeth stay with the skull (a rising
+    # upper lip dragged the teeth and streaked them)
+    add_key(ob, 'Mouth.JawOpen', close_mouth(co0, X, ZU, ZL, -.55, teeth, upper=0))
     for s in (L, R):
         # down past his smile's upward curve (~8 mm), or a frown reads as neutral
         add_key(ob, f'Mouth.CornerDown.{s}', corner(co0, X, ZU, ZL, s, -.013, front))

@@ -63,7 +63,7 @@ def opening(ob, cx):
     return np.array(xs), np.array(zu), np.array(zl)
 
 
-def close_mouth(co0, X, ZU, ZL, close, teeth):
+def close_mouth(co0, X, ZU, ZL, close, teeth, upper=None):
     co = co0.copy()
     x, y, z = co0[:, 0], co0[:, 1], co0[:, 2]
     x0, x1 = X.min(), X.max()
@@ -73,9 +73,10 @@ def close_mouth(co0, X, ZU, ZL, close, teeth):
     zu, zl = np.interp(xi, X, ZU), np.interp(xi, X, ZL)
     h = zu - zl
     taper = 1 - smooth(np.maximum(x0 - xi, xi - x1) / .012)          # past the corners the move fades out
-    zc = zu - UPPER * h                                              # where the lips meet
+    upper = UPPER if upper is None else upper                       # the upper lip's share (opening wider: ~0, only the jaw moves)
+    zc = zu - upper * h                                              # where the lips meet
     tuck = smooth(h / .006)                     # fades in from the corners (a step there creased them)
-    up_by = (UPPER * h + OVERLAP * tuck) * taper * close
+    up_by = (upper * h + OVERLAP * tuck) * taper * close
     lo_by = ((1 - UPPER) * h + OVER_LO * tuck) * taper * close
     w_up = 1 - smooth((zi - zu) / .010)          # the upper lip, fading out 10 mm above the opening
     w_lo = 1 - smooth((zl - zi) / .045)          # the lower lip and chin: the jaw, fading out 45 mm below
@@ -105,6 +106,8 @@ def close_mouth(co0, X, ZU, ZL, close, teeth):
     t = teeth[i] & (xi > x0 - .004) & (xi < x1 + .004)
     nz[t] = zi[t] + (zu[t] + .008 - zi[t]) * .6 * late
     ny[t] = yi[t] + .015 * late
+    if close < 0:          # the jaw opening wider: the top teeth stay still with the skull (squeezed with the inside they streaked)
+        nz[t] = zi[t]
     co[i, 1], co[i, 2] = ny, nz
     return co
 
@@ -115,9 +118,13 @@ def teeth_vertices(ob):
     img, px = T.texture(ob)
     cen, tuv = T.face_arrays(ob)
     col = T.sample(px, tuv.mean(1)) * 255
-    f = (col.min(1) > 225) & (cen[:, 1] < -.1) & (np.abs(cen[:, 2] - .675) < .03)
+    # white, or the grey shading along their edges (light and not pink): pure white
+    # alone left the bottom rim behind, and it streaked when the jaw opened
+    f = ((col.min(1) > 225) | ((col.min(1) > 160) & (np.ptp(col, 1) < 45))) & (cen[:, 1] < -.1) & (np.abs(cen[:, 2] - .675) < .03)
     lv = np.empty(len(ob.data.loops), dtype=np.int64); ob.data.loops.foreach_get('vertex_index', lv)
-    m = np.zeros(len(ob.data.vertices), bool); m[lv.reshape(-1, 3)[f].ravel()] = True
+    tri = lv.reshape(-1, 3)
+    m = np.zeros(len(ob.data.vertices), bool); m[tri[f].ravel()] = True
+    m[tri[m[tri].any(1)].ravel()] = True          # and one ring round them
     return m
 
 

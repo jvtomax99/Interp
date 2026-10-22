@@ -38,6 +38,25 @@ def side_fade(x, y, xm):
     return (1 - smooth((np.abs(x - xm) - .085) / .03)) * (1 - smooth((y + .06) / .015))
 
 
+def corner_soften(co0, X, ZU, ZL, side, r0=.007, ring=.016):
+    """His smile's dimple at one mouth corner filled in: the pit pressed out to
+    the skin round it. When the smile lets go a real corner's pit softens;
+    pulled down hard, his sculpted pit tore into a V notch."""
+    from tripo_faceplan import fit_surface
+    i = 0 if side == R else -1
+    cx, cz = X[i], (ZU[i] + ZL[i]) / 2
+    x, y, z = co0.T
+    r = np.hypot(x - cx, z - cz)
+    near = (r < ring + .004) & (y < -.08)
+    ringm = near & (r > r0 + .002) & (r < ring)
+    S = fit_surface(co0[ringm][:, [0, 2]], y[ringm])
+    w = (1 - smooth((r - r0) / (ring - r0))) * near
+    target = S(x[near], z[near])
+    co = co0.copy()
+    co[near, 1] = y[near] + (np.minimum(target, y[near]) - y[near]) * w[near]    # only ever outward, to the skin
+    return co
+
+
 def corner_pull(co0, X, ZU, ZL, side, d, rx=.05, rz=.04, below=None, keep_middle=True):
     """One mouth corner moved by d (dx outward, dy forward, dz up), the skin
     round it following over an ellipse rx by rz (below: a different reach
@@ -128,6 +147,8 @@ if __name__ == '__main__':
         add_key(ob, f'AU.LipStretch.{s}', corner_pull(co0, X, ZU, ZL, s, (.008, -.002, -.002), rx=.045, rz=.03))
         add_key(ob, f'AU.Dimple.{s}', corner_pull(co0, X, ZU, ZL, s, (-.003, -.004, .001), rx=.016, rz=.014))
     add_key(ob, 'AU.ChinRaise', chin_raise(co0, X, ZU, ZL))
+    for s in (L, R):
+        add_key(ob, f'AU.CornerSoften.{s}', corner_soften(co0, X, ZU, ZL, s))
     # with the lips closed, letting go of the smile moves the line where they meet,
     # both lips following it (fit_line): pulling closed lips sideways by the corners
     # pushed a bump of lower lip up over the line near each corner
