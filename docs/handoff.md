@@ -101,6 +101,15 @@ worried (flat, not a frown).
    the top teeth stay still when it opens (teeth = white or light grey, plus
    one ring). Limits: harder corner pulls crease toward the nose; the drawn
    laugh's shut happy-arc eyes need a lower lid (not built).
+1b. **Then Jose: "look alive and human like; the teeth and eyes need work".**
+   Plan shown: `out/plan-alive.png` (`tripo_alivepan.py`, close-ups
+   `out/plan/cu-*.png`). Teeth: real 3D upper row on the skull, lower row,
+   gums and tongue on the jaw, his painted band tucked away. Eyes: (a) a
+   clear cornea dome (shine from the light), (b) iris fibres, dark rim,
+   depth, (c) lids with thickness and a rounded edge, lashes on the lid
+   (the separate liner floats off the eye from the side), (d) shaded whites,
+   pink inner corners, (e) a lower lid (squint, laugh arcs). Waiting on his
+   OK and which first.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.
