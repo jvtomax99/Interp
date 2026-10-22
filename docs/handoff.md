@@ -161,6 +161,14 @@ worried (flat, not a frown).
    under the lash line. Fixed (only y<0 wraps); `REST_LID` .32 (on the iris
    top), sad .5, doubt .32/.62. Shown `out/plan-eyes8.png`, waiting.
    Diagnostic trick: colour Lid red and Lash blue (`/tmp` script pattern).
+   Jose: surprised and laugh "don't look right". Laugh: `HAPPY_EYE_DEPTH`
+   .4 (`set_face(happy=1)` scales Eye/Cornea depth; the Happy lid is built
+   for the shallower ball), line across the eye's middle (-40, 28).
+   Surprised: `oval()` a=.02 b=.012 with a gradual squeeze (`UP_FADE`
+   .035) and a nose guard (`NOSE_Z`), recipe `O 1 + JawOpen 1.1` (`Narrow`
+   folds, don't use). Shown `out/plan-laugh-surprised.png`, waiting.
+   Left: teeth streak (real teeth next), faint shut-eye rim, soft folds by
+   the nose in the "oh".
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

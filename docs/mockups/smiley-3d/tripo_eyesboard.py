@@ -86,3 +86,17 @@ board('Eyes: the lash line fixed', ['You spotted it: the lash line floated above
      [fit(e7b, 1000, 380), fit(e8, 1000, 380)], 'before (top), after (bottom): rest, half blink, sad, laugh', False),
     ('2', 'ME', 'All seven reactions with the fix.', [fit(sheet, 1000, 2200)], 'your drawing, his mouth, his whole face', True),
 ], 'plan-eyes8.png')
+
+
+import numpy as _np
+sh = Image.open(O('plan/mouths.png')); _h = sh.height // 7
+two = Image.fromarray(_np.vstack([_np.asarray(sh.crop((0, k * _h, sh.width, (k + 1) * _h))) for k in (2, 3)]))
+board('Laugh and surprised, redone', ['Your drawing (left), his mouth close up, his whole face.'], [
+    ('1', 'ME', 'Laugh: when he shuts his eyes the eyeballs ease back, so the lids lie nearly flush instead of bulging, and '
+     'the shut line runs across the middle of the eye like your drawing. Surprised: a round \u201coh\u201d instead of a wide '
+     'flat mouth; the skin round it follows gently and his nose stays put.', [fit(two, 1000, 700)], 'laugh, surprised', False),
+    ('2', 'ME', 'Surprised straight on and at three-quarters.', [fit(Image.open(O('plan/surprised-front.png')), 1000, 420)], '', True),
+    ('3', 'NEXT', 'Still off: the teeth show as a streaky band in both (they are a painted strip, not real teeth); a shut eye '
+     'still shows a faint rim; the \u201coh\u201d leaves two soft folds beside the nose. The teeth rebuild fixes the first.',
+     [], '', False),
+], 'plan-laugh-surprised.png')

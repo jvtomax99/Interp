@@ -451,6 +451,7 @@ def paint_out_liner(eyes):
 
 
 LINE_N, LINE_SG = 72, 8
+HAPPY_EYE_DEPTH = .4
 
 
 def line_verts(edge_pts, eye, side):
@@ -498,12 +499,12 @@ def rebuild_lid(eye, side):
     rows, segs = 48, 128
     # the arch holds until the lid is nearly shut (straight between, half closed was flat again)
     stages = [(E.OPEN + (E.SHUT - E.OPEN) * k / E.STAGES, ARCH_OPEN + (ARCH_SHUT - ARCH_OPEN) * (k / E.STAGES) ** 2.5) for k in range(E.STAGES + 1)]
-    def stage(edge, arch, line_at=None):
-        v = wrap(lid_stage_verts(rx, ry, rz, edge, arch, side, grow=0), eye, rx, ry, rz, rows=rows, extra=.0008)
+    def stage(edge, arch, line_at=None, ryk=1.):
+        v = wrap(lid_stage_verts(rx, ry, rz, edge, arch, side, grow=0), eye, rx, ry * ryk, rz, rows=rows, extra=.0008)
         shell = v[:(rows + 1) * segs]          # the skin only: the rolled rim poked through his skin at the corners
         path = shell[rows * segs:]
         if line_at:                            # a crease drawn on the shut lid instead of on its edge
-            w = wrap(lid_stage_verts(rx, ry, rz, *line_at, side, grow=0), eye, rx, ry, rz, rows=rows, extra=.0008)
+            w = wrap(lid_stage_verts(rx, ry, rz, *line_at, side, grow=0), eye, rx, ry * ryk, rz, rows=rows, extra=.0008)
             path = w[rows * segs:(rows + 1) * segs]
         return shell + line_verts(path, eye, side)
     q = lambda r: [(r * segs + j, r * segs + (j + 1) % segs, (r + 1) * segs + (j + 1) % segs, (r + 1) * segs + j) for j in range(segs)]
@@ -535,7 +536,9 @@ def rebuild_lid(eye, side):
     kb = lid.shape_key_add(name='Happy', from_mix=False)
     # the lid fully shut, the line an upward arc across it (a closed lid with a
     # curved line, as a happy shut eye is drawn: no lower lid needed)
-    kb.data.foreach_set('co', np.array(stage(E.SHUT, 0, line_at=(-60, 34))).ravel())
+    # the eyeballs ease back when he laughs (set_face scales them by HAPPY_EYE_DEPTH), so the
+    # shut lid lies nearly flush instead of bulging; the line across the middle of the eye
+    kb.data.foreach_set('co', np.array(stage(E.SHUT, 0, line_at=(-40, 28), ryk=HAPPY_EYE_DEPTH)).ravel())
     kb.value = 0
     ln = bpy.data.objects.get('Liner.' + side)
     if ln:                      # the lid's own edge carries the line now

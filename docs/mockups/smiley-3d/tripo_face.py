@@ -99,6 +99,11 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
             set_blink(lo, (1 - happy) * (lid[i] if lid else REST_LID + lid_down[i]))
             if 'Happy' in lo.data.shape_keys.key_blocks:      # happy shut eyes (tripo_eyes2.py)
                 lo.data.shape_keys.key_blocks['Happy'].value = happy
+                import tripo_eyes2
+                k = 1 - (1 - tripo_eyes2.HAPPY_EYE_DEPTH) * happy      # the eyeball eases back under the shut lid
+                for nm in ('Eye.', 'Cornea.'):
+                    if nm + s in bpy.data.objects:
+                        bpy.data.objects[nm + s].scale[1] = k
             if 'Cornea.' + s in bpy.data.objects:      # the dome's real shine replaces the painted one (tripo_eyes2.py)
                 bpy.data.objects['Glint.' + s].hide_render = True
             if 'LidLow.' + s in bpy.data.objects:

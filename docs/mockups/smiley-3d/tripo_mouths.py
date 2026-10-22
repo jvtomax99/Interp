@@ -32,7 +32,8 @@ MOUTHS = {
     # mouth reactions"): surprise is the jaw dropping with the lips let go (AU 26), not a
     # pucker; sadness pulls the corners down (15) and the chin up into a pout (17);
     # worry stretches the lips sideways (20); doubt dimples one corner (14)
-    'surprised': dict(close=0, mouth={'AU.SmileOffOpen.L': 1.3, 'AU.SmileOffOpen.R': 1.3, 'JawOpen': 2},
+    # a round "oh": the lips gathered into an oval, the skin round them following gently
+    'surprised': dict(close=0, mouth={'O': 1, 'JawOpen': 1.1},
                       brow=((5, 0), (6, 0)), lid=(0, 0)),   # lids up from rest: white above the iris is the surprise
     'sad':       dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.CornerDepress.L': 1.15, 'AU.CornerDepress.R': 1.15,
                                       'AU.ChinRaise': 1.6}, brow=((1.2, 15), (1.4, 18)), lid=(.5, .5)),   # heavy lids, as drawn
@@ -94,7 +95,11 @@ def frown(co0, X, ZU, ZL, teeth, front, drop=.009):
     return co
 
 
-def oval(co0, X, ZU, ZL, front, a=.024, b=.01):
+UP_FADE = .035   # .022 still pinched the skin under the nose
+NOSE_Z = .69      # the bottom of his nose
+
+
+def oval(co0, X, ZU, ZL, front, a=.02, b=.012):
     """The surprised O: the open mouth mapped onto an oval `a` by `b` (half
     width, half height): every lip point pulled in toward the middle, the
     top edge onto the oval's top, the bottom edge onto its bottom; the skin
@@ -117,8 +122,12 @@ def oval(co0, X, ZU, ZL, front, a=.024, b=.01):
     # sideways: the lips' columns squeezed in; beyond the corners the cheek follows, fading out
     past = np.maximum(np.abs(x - xm) - hw, 0)
     dx = np.where(inside, nx - x, -np.sign(x - xm) * (hw - a) * (1 - smooth(past / .04)))
-    # the squeeze stays off the skin under his nose (it creased from the nose to the cheeks)
-    reach = (1 - smooth((z - zu - .002) / .01)) * (1 - smooth((zl - .004 - z) / .03))
+    # how much of the squeeze each bit of skin gets: all of it on the lips, fading out
+    # gradually above and below, the way a cheek follows a pucker (cut off 1 cm above the
+    # lip, the skin creased from the nose to the corners)
+    reach = np.where(z > zu, np.exp(-((z - zu) / UP_FADE) ** 2), np.where(z < zl, np.exp(-((zl - z) / .035) ** 2), 1.))
+    # never the nose (it was pinched narrow); only the nose: across the whole face that line creased the cheeks
+    reach *= 1 - smooth((z - NOSE_Z) / .012) * (1 - smooth((np.abs(x - xm) - .022) / .05))
     edge = 1 - smooth(past / .025)
     dz *= edge
     wall = front * (1 - smooth((y + .105) / .022))
