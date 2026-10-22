@@ -109,7 +109,14 @@ worried (flat, not a frown).
    depth, (c) lids with thickness and a rounded edge, lashes on the lid
    (the separate liner floats off the eye from the side), (d) shaded whites,
    pink inner corners, (e) a lower lid (squint, laugh arcs). Waiting on his
-   OK and which first.
+   OK and which first. Jose: eyes first. Step 1 done (`tripo_eyes2.py`,
+   on `in/tripo-face.blend`, always rebuilt from
+   `in/tripo-face-before-eyes2.blend`): a clear cornea dome per eye that
+   follows the gaze (its `set_gaze`), iris fibres/collarette/dark rim in the
+   eye shader, and `eye_lights()` (called from `build.studio()` when a
+   cornea exists): one round catchlight seen only in reflections, up and
+   right; studio lights, floor and world hidden from reflections (they made
+   rectangles and haze). Shown: `out/plan-eyes2.png`, waiting on his OK.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

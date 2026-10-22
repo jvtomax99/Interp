@@ -1328,6 +1328,8 @@ def studio():
     cam_d = bpy.data.cameras.new('Cam'); cam_d.lens = 85
     cam = bpy.data.objects.new('Cam', cam_d); sc.collection.objects.link(cam)
     sc.camera = cam
+    if 'Cornea.L' in bpy.data.objects:          # his alive eyes: their own catchlight (tripo_eyes2.py)
+        import tripo_eyes2; tripo_eyes2.eye_lights()
     return cam
 
 
