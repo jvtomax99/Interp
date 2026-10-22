@@ -141,7 +141,8 @@ def build():
     sc.frame_start, sc.frame_end = 1, N
     sc.render.fps = FPS
     bld, sky = photo_layers()
-    photo_plane(sky, 0, 1.024 * 2.6, (0, 2.2, 0.18))
+    # The sky reaches far above the building: the opening whip looks up into it.
+    photo_plane(sky, 0, 1.024 * 6.0, (0, 2.2, 1.6))
     photo_plane(bld, 0, 1.024, (0, 0, 0))
     cam_far = (0, -1.36, 0)
 
@@ -209,10 +210,10 @@ def animate(sc, cam, label, heart, failure, wrong, stamp, pill, slash, ph, right
 
     for f in range(1, N + 1):
         # Camera: whip in, drift, the impacts, then down to the phone.
-        if f <= 12:
+        if f <= 12:   # whip down from the sky onto the building (a start from far back showed the photo's edges)
             t = ease_out((f - 1) / 11)
-            pos = Vector((0, -2.6 + 1.24 * t, 0.06 - 0.06 * t))
-            roll = math.radians(6) * (1 - t)
+            pos = Vector((0, -1.36, 0))
+            roll = math.radians(5) * (1 - t)
         elif f < 92:
             t = (f - 12) / 80
             pos = Vector((0.01 * t, -1.36 + 0.2 * t, -0.03 * t))
@@ -223,6 +224,8 @@ def animate(sc, cam, label, heart, failure, wrong, stamp, pill, slash, ph, right
             roll = 0
         pos += shake(f, 16, 0.006) + shake(f, 31, 0.008) + shake(f, 78, 0.004)
         tgt = pos + Vector((0, 1, 0))
+        if f <= 12:
+            tgt = pos + Vector((0, 1, 0.55 * (1 - ease_out((f - 1) / 11))))
         cam.location = pos
         cam.rotation_euler = (tgt - pos).to_track_quat('-Z', 'Y').to_euler()
         cam.rotation_euler.y += roll
