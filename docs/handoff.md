@@ -8,9 +8,9 @@ and the mouth test for the 3D Dr. Smiley on Jose's Tripo model (PR #114, branch 
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
 > continue the 3D Dr. Smiley on branch `claude/3d-dr-smiley-r1-avn9y1`: I'll
-> attach the zip of my Tripo model; rebuild it, then build his brows (A),
-> the eyelid that follows a lowered brow, his cheeks and the other mouth
-> shapes, showing me pictures at each stop. Plain words, say "working on
+> attach the zip of my Tripo model; rebuild it (with the face rig), then
+> fix his surprised, sad and worried mouths from my drawings and show me
+> the expression sheet. Plain words, say "working on
 > it" and "done".
 
 ## Jose's standing rule for this work (in `AGENTS.md`)
@@ -70,29 +70,31 @@ python3 tripo_rig.py                      # in/tripo-rig.blend (36 bones)
 python3 tripo_posetest.py                 # check: out/plan/rig-test.png
 ```
 
-## What's next (`out/plan-face.png`, approved route)
+## What's next
 
-1. **Make it a real face rig in `in/tripo-face.blend`** (from
-   `tripo-rig.blend`): turn the mock-up moves into controls that keep:
-   shape keys on `Mesh_0` built from `deform_skin()` (brows A: lift and tilt
-   per side, the app's `DR_BROWS` numbers), `cheeks()` and `close_mouth()`
-   (all in `tripo_faceplan.py` / `tripo_mouthtest.py`; recompute normals
-   per state, `set_co`). Shape keys are how the mouth must work anyway: the
-   in-between frames matter (halfway was the hard part).
-2. **Lid follows a lowered brow**: focused/worried bring the 3D lid
-   (`Lid.L/R`, `set_blink` in `tripo_eyes.py`) down a little.
-3. **Smooth the faint line** over his left brow's inner end in A (surprised,
-   worried); mock-up roughness, flagged on the plan.
-4. **The other mouth shapes**, each on his own surface like the closed one:
-   laugh (wider and taller than now), surprised (small O: corners in),
-   sad, worried, doubt (corners down / one side up). Compare each to
-   `drsmiley/face.webp`. Show as a sheet, stop for his OK.
-5. Expression sheet (brows + eyes + mouth + cheeks together), six poses,
-   360-degree turn: stop for his OK.
-6. Then the animation (R2), again as a visual plan first.
+Done 2026-10-22 (this chat): `tripo_face.py` builds `in/tripo-face.blend`:
+his surface welded along the texture seams (476,822 -> 447,667 points,
+fixed normals dropped; rest renders identical to the approved model), shape
+keys for brows A (`BrowUp/Down/InUp/InDown.L/R`, no folds: checked by
+counting flipped triangles), cheeks (`CheekUp.L/R`), the closed mouth
+sampled (`Mouth.Close0.25..1`), and `set_face()` (the lid comes down with a
+lowered brow). `tripo_mouths.py` adds mouth building blocks (`JawOpen`,
+`CornerUp/Down.L/R`, `Narrow`, `Frown`, `O`) and `MOUTHS`, the seven drawn
+expressions as mixes. Shown: `out/plan-mouths.png`. Good: rest, smile,
+laugh, doubt. Not yet: surprised (leans, creases above the lip), sad and
+worried (flat, not a frown).
 
-Plan pictures: `storyboard.py` (`board()`, import it; its old boards run
-only as a script), `tripo_faceboard.py`.
+1. **Waiting on Jose:** my proposed fix is to trace each drawn mouth in
+   `drsmiley/face.webp` (its lip line or opening) and fit his lips onto
+   that outline, the way `close_mouth()` targets a meeting line and
+   `oval()` an ellipse: map the drawing's mouth box onto his opening's box.
+2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
+   a 360-degree turn: stop for his OK.
+3. Then the animation (R2), as a visual plan first.
+
+Plan pictures: `storyboard.py` (`board()`, import it), `tripo_faceboard.py`,
+`tripo_mouthboard.py`. Build order after a fresh rebuild: `tripo_fix.py`,
+`tripo_eyes.py`, `tripo_rig.py`, `tripo_face.py`, `tripo_mouths.py`.
 
 ## Learned (also in the code comments)
 

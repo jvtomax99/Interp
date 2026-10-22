@@ -59,6 +59,7 @@ class Brow:
         p = cen[sel]
         self.c = np.array([np.median(p[:, 0]), np.median(p[:, 2])])
         self.length = np.subtract(*np.percentile(p[:, 0], [98, 2]))    # not a few stray dark specks
+        self.xr = np.percentile(p[:, 0], [2, 98])
         # footprint mask on a grid round the brow
         self.x0, self.z0 = p[:, 0].min() - .04, p[:, 2].min() - .03
         W, H = int(np.ptp(p[:, 0]) / self.G) + int(.08 / self.G), int(np.ptp(p[:, 2]) / self.G) + int(.08 / self.G)
@@ -107,16 +108,29 @@ def deform_skin(co0, front, brows, pose):
         if lift == 0 and tilt == 0:
             continue
         x, z = co0[:, 0], co0[:, 2]
-        near = front & (np.abs(x - b.c[0]) < .09) & (np.abs(z - b.c[1]) < .06)
+        near = front & (np.abs(x - b.c[0]) < .11) & (np.abs(z - b.c[1]) < .08)
         idx = np.nonzero(near)[0]
         d = b.dist_at(x[idx], z[idx])
-        dx, dz = b.motion(x[idx], z[idx], lift, tilt)
+        # each bit of skin follows the part of the brow straight below or above it,
+        # up and down only: turning the whole patch about the brow's centre dragged
+        # the forehead sideways and creased it over the inner ends
+        xs = np.clip(x[idx], *b.xr)
+        gx = np.clip(((xs - b.x0) / b.G).astype(int), 0, len(b.mid) - 1)
+        _, dz = b.motion(xs, b.mid[gx], lift, tilt)
+        dx = np.zeros_like(dz)
         # one smooth falloff (a seam where it changes folds the skin): 30 mm up the
         # forehead, 6 mm down to the eye, more where the brow comes down, or the
         # skin it pushes into folds (his brow sits 6-10 mm above the eye)
         up = b.above(x[idx], z[idx])
         reach = .006 + .024 * up + (1 - up) * 2.2 * np.maximum(-dz, 0)
+        # past the brow's ends (the bridge of the nose, the temple) there is no eye
+        # under it to keep still, so the skin there fades out gently: 6 mm made the
+        # lifted inner end stretch it into a crease
+        past = np.abs(x[idx] - xs)
+        reach = reach + (1 - up) * .016 * smooth(past / .01)
         w = 1 - smooth((d - .003) / reach)                       # the ridge's sides (3 mm) move whole with it
+        w *= 1 - smooth((co0[idx, 1] + .105) / .022)              # fades out round the sides of his head (a hard edge tore the temple)
+        w *= 1 - smooth((np.abs(x[idx] - b.c[0]) - .09) / .02)   # and before the box's sides
         nx, nz = x[idx] + dx * w, z[idx] + dz * w
         # add to what the other brow did (their areas meet between the eyes)
         co[idx, 0] += nx - x[idx]; co[idx, 2] += nz - z[idx]
