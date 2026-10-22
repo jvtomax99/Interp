@@ -48,3 +48,15 @@ board('Eyes, step 4: squint and laugh', ['Your pick B is now his resting lid. Th
      'onto his own face (the way the eyeliner is pressed onto it now), so a shut eye is a soft bulge flowing into his cheek '
      'and brow, as on a real face. Then the two lids can meet in your drawing\u2019s happy arc.', [], '', True),
 ], 'plan-eyes5.png')
+
+
+lg2 = Image.open(O('plan/laugh-lids2.png')).crop((0, 0, 864 - 12, 652))
+sheet = Image.open(O('plan/mouths.png'))
+board('Eyes, step 5: lids wrapped into his skin', ['Shut eyes no longer look like goggles. All seven reactions', 'with the new eyes, beside your drawings.'], [
+    ('1', 'ME', 'The lids now tuck under his skin past the eye\u2019s outline, like a real lid under the brow and cheek, so a shut '
+     'eye sits flush. The laugh shuts his eyes in a gentle upward arc, the lower lid rising to meet the upper. A squint '
+     'works too.', [fit(lg2, 1000, 520)], 'squint, and the laugh\u2019s shut eyes', False),
+    ('2', 'ME', 'All seven with the new eyes: calm resting lids, lower lids lifting in a smile, white above the iris in '
+     'surprise, heavy lids in sad, one half-shut eye in doubt.', [fit(sheet, 1000, 2200)], 'your drawing, his mouth, his whole face', True),
+    ('3', 'NEXT', 'After your OK: the teeth (real upper and lower teeth, gums and tongue), then the expression sheet.', [], '', False),
+], 'plan-eyes6.png')

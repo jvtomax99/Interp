@@ -138,6 +138,12 @@ worried (flat, not a frown).
    lines cross. Proposed (`out/plan-eyes5.png`, waiting on Jose): wrap the
    lids into his skin, blending from the ball near the edge to his face
    surface further out (ray casts, like `glue_liner`).
+   Jose OK'd; done: `face_grid` + `wrap` in `tripo_eyes2.py` (inside the
+   eye's outline on the ball, outside .6 mm under his skin, never into the
+   ball or dome; rim and lashes move with their column's edge; the upper lid
+   .8 mm further out so it closes over the lower). Laugh: `lid .64, lower 1`
+   (both edges arch up and meet); smile `lower .3`. Shown
+   `out/plan-eyes6.png`, waiting. Next: the teeth (plan in plan-alive).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

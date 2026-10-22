@@ -205,6 +205,67 @@ def lid_stage_verts(rx, ry, rz, edge, arch, side, rows=48, segs=128, lash=.0058,
     return [tuple(v) for v in vs]
 
 
+_FACE = {}
+
+
+def face_grid(eye, rx, rz, n=90, span=1.7):
+    """His face's depth round one eye, in the eye's own frame (y: into the head),
+    on an n x n grid of x/rx, z/rz from -span to span: ray casts along the eye's
+    forward line onto his face, done once per eye."""
+    if eye.name in _FACE:
+        return _FACE[eye.name]
+    from mathutils import Vector
+    head = bpy.data.objects['Mesh_0']
+    M, Mi, Hi = eye.matrix_world, eye.matrix_world.inverted(), head.matrix_world.inverted()
+    fwd = (M.to_3x3() @ Vector((0, -1, 0))).normalized()
+    d = (Hi.to_3x3() @ -fwd).normalized()
+    us = np.linspace(-span, span, n)
+    g = np.full((n, n), np.nan)
+    for i, v in enumerate(us):
+        for j, u in enumerate(us):
+            w = M @ Vector((u * rx, 0, v * rz))
+            hit, loc, *_ = head.ray_cast(Hi @ (w + fwd * .05), d)
+            if hit:
+                g[i, j] = (Mi @ (head.matrix_world @ loc)).y
+    _FACE[eye.name] = (us, g)
+    return _FACE[eye.name]
+
+
+def wrap(vs, eye, rx, ry, rz, rows=None, segs=128, extra=0.):
+    # extra: more room off the ball; the upper lid gets .8 mm so it closes over the lower
+    # one (at one depth they flickered through each other)
+    """A lid wrapped into his skin (Jose's OK, 2026-10-22: shut eyes looked like
+    goggles, shells standing out over his face): inside the eye's outline it
+    stays on the ball; outside, it tucks just under his skin, the way a real lid
+    goes under the brow and cheek; between, a smooth blend. Never into the ball,
+    and clear of the glass dome over the iris."""
+    from tripo_faceplan import smooth
+    us, g = face_grid(eye, rx, rz)
+    v = np.array(vs)
+    u, w = v[:, 0] / rx, v[:, 2] / rz
+    rho = np.hypot(u, w)
+    n = len(us); step = us[1] - us[0]
+    fi = np.clip((w - us[0]) / step, 0, n - 1.001); fj = np.clip((u - us[0]) / step, 0, n - 1.001)
+    i0, j0 = fi.astype(int), fj.astype(int); ti, tj = fi - i0, fj - j0
+    gg = np.where(np.isnan(g), np.nanmax(g), g)
+    fy = (gg[i0, j0] * (1 - ti) * (1 - tj) + gg[i0 + 1, j0] * ti * (1 - tj) + gg[i0, j0 + 1] * (1 - ti) * tj + gg[i0 + 1, j0 + 1] * ti * tj)
+    s = smooth((rho - .85) / .3)
+    y = v[:, 1] * (1 - s) + (fy + .0006) * s            # outside: .6 mm under his skin
+    inside = rho < 1
+    yb = -ry * np.sqrt(np.clip(1 - rho * rho, 0, 1))   # the ball's front surface (its y is out-negative)
+    margin = .0008 + extra + (BULGE + .0008) * (1 - smooth((rho - .7) / .25))
+    y = np.where(inside, np.minimum(y, yb - margin), y)
+    dy = y - v[:, 1]
+    if rows is not None:
+        # the rim and lashes move as one piece with their column's lid edge: pushed out
+        # point by point, their rolled shape was crushed into jagged dotted lines
+        e0 = rows * segs
+        k = np.arange(e0 + segs, len(v))
+        dy[k] = dy[e0 + (k - e0) % segs]
+    v[:, 1] += dy
+    return [tuple(p) for p in v]
+
+
 def lid_faces(rows=48, segs=128):
     q = lambda r: [(r * segs + j, r * segs + (j + 1) % segs, (r + 1) * segs + (j + 1) % segs, (r + 1) * segs + j) for j in range(segs)]
     shell = [f for r in range(rows) for f in q(r)]
@@ -266,7 +327,7 @@ def build_lower_lid(eye, side):
           for k in range(LOW_STAGES + 1)]
     skin, lash = lid_faces(rows=32)
     me = bpy.data.meshes.new(name)
-    me.from_pydata(lower_stage_verts(rx, ry, rz, *st[0], side), [], skin + lash); me.shade_smooth()
+    me.from_pydata(wrap(lower_stage_verts(rx, ry, rz, *st[0], side), eye, rx, ry, rz, rows=32), [], skin + lash); me.shade_smooth()
     # the cheek's own colour, not the upper lid's darker tone: raised, it must read as his cheek pushing up
     lm = bpy.data.materials.get('LidLow') or bpy.data.materials['Lid'].copy()
     lm.name = 'LidLow'
@@ -283,7 +344,7 @@ def build_lower_lid(eye, side):
     ob.shape_key_add(name='Basis', from_mix=False)
     for k in range(1, LOW_STAGES + 1):
         kb = ob.shape_key_add(name=f'U{k}', from_mix=False)
-        kb.data.foreach_set('co', np.array(lower_stage_verts(rx, ry, rz, *st[k], side)).ravel())
+        kb.data.foreach_set('co', np.array(wrap(lower_stage_verts(rx, ry, rz, *st[k], side), eye, rx, ry, rz, rows=32)).ravel())
         kb.value = 0
     return ob
 
@@ -346,7 +407,7 @@ def rebuild_lid(eye, side):
     # open, the lid is tucked above the eye behind his face and the liner draws the line;
     # its lashes grow in as it comes down (open, they poked out over the eye as tabs)
     grow = lambda k: min(1., k / 2)
-    me.from_pydata(lid_stage_verts(rx, ry, rz, *stages[0], side, grow=grow(0)), [], skin + lash)
+    me.from_pydata(wrap(lid_stage_verts(rx, ry, rz, *stages[0], side, grow=grow(0)), eye, rx, ry, rz, rows=48, extra=.0008), [], skin + lash)
     me.shade_smooth()
     me.materials.append(bpy.data.materials['Lid'])
     lm = bpy.data.materials.get('Lash') or bpy.data.materials.new('Lash')
@@ -365,7 +426,7 @@ def rebuild_lid(eye, side):
     lid.shape_key_add(name='Basis', from_mix=False)
     for k in range(1, E.STAGES + 1):
         kb = lid.shape_key_add(name=f'B{k}', from_mix=False)
-        kb.data.foreach_set('co', np.array(lid_stage_verts(rx, ry, rz, *stages[k], side, grow=grow(k))).ravel())
+        kb.data.foreach_set('co', np.array(wrap(lid_stage_verts(rx, ry, rz, *stages[k], side, grow=grow(k)), eye, rx, ry, rz, rows=48, extra=.0008)).ravel())
         kb.value = 0
     glue_liner(eye, side, rx, rz)
 
