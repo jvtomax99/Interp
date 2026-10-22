@@ -12,10 +12,12 @@ from its cuts (ffmpeg scene detection, 2026-10-22):
 
 A card every 3 s is one bar of 4/4 at 80 beats a minute, so from 10.73 the
 music sits on that grid (bar(n, beat)). The intro and the ending follow
-the cuts instead. Key: D major. Warm and hopeful, and driving (Jose,
-2026-10-22: "more exciting"): piano tune and strings, with drums, bass and
-fast strings under the cards, horns on the tune the second time, and a
-kick that beats like a heart (lub-dub) in the second half.
+the cuts instead. Key: D major. Warm and hopeful, then (Jose, 2026-10-22)
+"more exciting" and "a Latino flavor": a son/salsa groove under the cards.
+One clave cycle is one card (a sixteenth of the bar is a salsa eighth, so
+it moves like salsa at 160). Piano tune, piano montuno, tumbao bass, congas,
+bongos, cowbell, guiro, timbales, nylon guitar, brass on the tune the
+second time, and a soft kick that beats like a heart (lub-dub).
 """
 import os
 import random
@@ -40,20 +42,19 @@ PARTS = {
     'keys':    (1, 0),    # the same piano, accompaniment, softer
     'strings': (2, 49),   # Slow Strings: the bed
     'cello':   (3, 42),   # Cello: the bass in the second half
-    'harp':    (4, 46),   # Harp: moving eighths in the second half
+    'guitar':  (4, 24),   # Nylon Guitar: the intro pulse, eighths in the second half
     'bells':   (5, 9),    # Glockenspiel: the right word, the title
     'timp':    (6, 47),   # Timpani: the heartbeat
     'pad':     (7, 89),   # Warm Pad: under everything, very low
     'bass':    (8, 33),   # Fingered Bass: the driving eighths
     'drums':   (9, 0),    # the GM drum kit is always channel 10 (index 9)
-    'stacc':   (10, 48),  # String Ensemble, played short: the pulse
-    'horns':   (11, 60),  # French Horns: the tune, second time, and the end
+    'brass':   (11, 61),  # Brass Section: the tune, second time, stabs, the end
 }
 REVERB = {'drums': 28, 'bass': 20}  # reverb send per part (others 70)
 # Channel volume per part (others 127), set from each part rendered alone so
 # the piano tune sits on top: strings and bass are loud in this bank.
-VOLUME = {'strings': 72, 'pad': 64, 'bass': 80, 'stacc': 96, 'cello': 80,
-          'horns': 80, 'drums': 106, 'keys': 110}
+VOLUME = {'strings': 62, 'pad': 64, 'bass': 80, 'cello': 80,
+          'brass': 76, 'guitar': 96, 'drums': 106, 'keys': 110}
 
 events = []  # (seconds, part, note, velocity, length in seconds)
 
@@ -113,9 +114,6 @@ FIRST = [
 ]
 for i, (bass, bed, broken) in enumerate(FIRST):
     b = 3 + i
-    chord('keys', bar(b), bass, 56, 2 * BEAT)
-    for k, x in enumerate(broken):
-        n('keys', bar(b, 1 + k), x, 42, BEAT, wobble=0.008)
     chord('strings', bar(b), bed, 54 + 2 * i, 3.0)
     chord('pad', bar(b), bed[:3], 40, 3.0)
 
@@ -137,14 +135,11 @@ SECOND = [
 ]
 for i, (root, bed, arp) in enumerate(SECOND):
     b = 7 + i
-    n('cello', bar(b), root, 70, 2.9)
-    n('cello', bar(b), root + 12, 54, 2.9)
-    chord('keys', bar(b), [root + 12, root + 19], 54, 2 * BEAT)
     chord('strings', bar(b), bed, 64 + 2 * i, 3.0)
     chord('pad', bar(b), bed[:3], 44, 3.0)
     for k in range(8):  # eighths, up and back down
         x = arp[[0, 1, 2, 3, 2, 3, 1, 2][k]] + 12
-        n('harp', bar(b, k * 0.5), x, 46 if k % 2 else 54, BEAT, wobble=0.006)
+        n('guitar', bar(b, k * 0.5), x, 46 if k % 2 else 54, BEAT, wobble=0.006)
 
 TUNE2 = [
     (7, 0, D5, 1), (7, 1, G5, 2), (7, 3, Fs5, 1),
@@ -170,7 +165,7 @@ n('piano', t_g, B4, 92, BEAT)
 n('piano', t_sus, D5, 94, t_a - t_sus)
 n('piano', t_a, Cs5, 96, HOME - t_a)
 for k, x in enumerate([A3, Cs4, E4, A4, Cs5, E5]):  # the run up to the photo
-    n('harp', t_a + k * (HOME - t_a) / 6, x, 50 + 4 * k, 0.8)
+    n('guitar', t_a + k * (HOME - t_a) / 6, x, 50 + 4 * k, 0.8)
 
 # ---------- The campus and the title (36.65 - 45) ----------
 chord('strings', HOME, [D3, A3, D4, Fs4, A4], 76, 4.6)
@@ -192,114 +187,179 @@ chord('piano', 42.85, [D3, A3, D4, Fs4], 56, 2.1, roll=0.04)
 n('piano', 43.0, Fs5, 78, 2.0)
 n('bells', 43.15, D6, 42, 1.8)
 
-# ---------- The drive (Jose, 2026-10-22: "more exciting") ----------
-KICK, SNARE, CLAP, HAT, OHAT, CRASH, RIDE = 36, 38, 39, 42, 46, 49, 51
-TOM_L, TOM_M, TOM_H, SHAKER = 45, 47, 50, 70
+# ---------- The groove: son/salsa (Jose, 2026-10-22) ----------
+# GM drum-kit notes (channel 10).
+KICK, CRASH = 36, 49
+HI_BONGO, LO_BONGO = 60, 61
+MUTE_CONGA, OPEN_CONGA, LO_CONGA = 62, 63, 64
+HI_TIMB, LO_TIMB, COWBELL = 65, 66, 56
+CLAVES, MARACAS, GUIRO_S, GUIRO_L = 75, 70, 73, 74
 E8 = BEAT / 2
+S16 = BEAT / 4     # one slot: a salsa eighth; 16 to a bar, one clave cycle
 
 
-def hit(t, x, vel, dur=0.25):
+def hit(t, x, vel, dur=0.2):
     n('drums', t, x, vel, dur, wobble=0.004)
 
 
-def roll(start, end, x, v0, v1, step):
-    k, count = 0, int((end - start) / step)
-    while k < count:
-        hit(start + k * step, x, int(v0 + (v1 - v0) * k / max(1, count - 1)), step)
-        k += 1
+def slot(b, k):
+    return bar(b, k / 4)
 
 
-# Intro: strings tick in eighths from the first word and grow; a snare roll
-# under the question; everything lands on the right word.
+def roll(start, end, v0, v1, step):
+    """A timbale roll, high and low drum in turn, swelling."""
+    count = int((end - start) / step)
+    for k in range(count):
+        hit(start + k * step, HI_TIMB if k % 2 else LO_TIMB,
+            int(v0 + (v1 - v0) * k / max(1, count - 1)), step)
+
+
+def fill(b, start=12):
+    """Timbales into the next bar: the last four slots."""
+    for k, x in enumerate([HI_TIMB, HI_TIMB, LO_TIMB, LO_TIMB]):
+        hit(slot(b, start + k), x, 76 + 6 * k)
+
+
+CLAVE = [0, 3, 6, 10, 12]                       # son clave, 3-2
+TUMBAO = [(0, MUTE_CONGA, 34), (2, MUTE_CONGA, 72), (4, MUTE_CONGA, 30),
+          (6, OPEN_CONGA, 70), (7, LO_CONGA, 66)]  # one half bar
+MARTILLO = [(0, HI_BONGO, 62), (2, HI_BONGO, 40), (4, LO_BONGO, 56),
+            (6, HI_BONGO, 44)]
+BELL = [(0, 84), (2, 50), (4, 70), (6, 50), (8, 84), (10, 50), (12, 70), (14, 50)]
+
+
+def percussion(b, busy, until=99.0):
+    """One bar of the groove. busy adds the cowbell and the heartbeat kick."""
+    def h(k, x, v):
+        if slot(b, k) < until:
+            hit(slot(b, k), x, v)
+    for k in CLAVE:
+        h(k, CLAVES, 74)
+    for half in (0, 8):
+        for k, x, v in TUMBAO:
+            h(half + k, x, v + (6 if busy else 0))
+    for k in range(0, 16, 4):  # guiro: long, short, short
+        h(k, GUIRO_L, 40)
+        h(k + 2, GUIRO_S, 34)
+        h(k + 3, GUIRO_S, 30)
+    for k in range(16):
+        h(k, MARACAS, 30 if k % 2 else 40)
+    if busy:
+        for k, v in BELL:
+            h(k, COWBELL, v - 10)
+        for beat, v in [(0, 88), (0.5, 60), (2, 84), (2.5, 58)]:  # lub-dub
+            h(beat * 4, KICK, v)
+    else:
+        for half in (0, 8):
+            for k, x, v in MARTILLO:
+                h(half + k, x, v)
+        h(0, KICK, 72)
+        h(8, KICK, 64)
+
+
+# Montuno: the piano's repeating syncopated figure, under the tune.
+# 'O' = the top note in octaves, 'C' = the two notes under it.
+MONTUNO = [(0, 'C'), (2, 'O'), (3, 'C'), (5, 'O'), (6, 'C'), (8, 'O'),
+           (10, 'C'), (11, 'O'), (13, 'C'), (14, 'O')]
+
+
+def montuno(b, triad, until=99.0, vel=58):
+    lo, mid, top = triad
+    for k, kind in MONTUNO:
+        t = slot(b, k)
+        if t >= until:
+            break
+        notes = [top - 12, top] if kind == 'O' else [lo, mid]
+        chord('keys', t, notes, vel + (8 if k in CLAVE else 0), S16 * 0.9)
+
+
+def tumbao(b, root, fifth, nxt, until=99.0):
+    """The bass that pushes: on 2-and and 4 of the salsa bar, and the next
+    chord's root arrives early, before the bar line."""
+    for k, x, v, length in [(3, root, 92, 3), (6, fifth, 80, 2),
+                            (11, root, 90, 3), (14, nxt, 96, 4)]:
+        if slot(b, k) < until:
+            n('bass', slot(b, k), x, v, S16 * length * 0.95, wobble=0.004)
+
+
+# Intro: a nylon guitar ticks from the first word and grows, the maracas
+# join, a timbale roll swells under the question, and everything lands on
+# the right word.
 t = bar(0, -1)
 while t < 7.85:
     root = B2 if t < 3.95 else G2 if t < 5.95 else A2
-    v = int(38 + 40 * t / 7.9)
-    n('stacc', t, root + 12, v, E8 * 0.6)
-    n('stacc', t, root + 19, v - 8, E8 * 0.6)
+    v = int(46 + 36 * t / 7.9)
+    k = int(round((t - bar(0, -1)) / E8))
+    n('guitar', t, [root + 12, root + 19, root + 24, root + 19][k % 4], v, E8 * 1.6)
     if t >= 3.95:
-        hit(t, SHAKER, 30 + int(20 * (t - 4) / 4))
+        hit(t, MARACAS, 30 + int(20 * (t - 4) / 4))
     t += E8
-roll(6.0, 7.9, SNARE, 26, 92, 0.0625)
-roll(6.9, 7.9, TOM_L, 30, 70, 0.125)
-for x, v in [(CRASH, 96), (KICK, 100), (TOM_L, 80)]:
+roll(6.0, 7.9, 24, 96, 0.0625)
+for x, v in [(CRASH, 96), (KICK, 100), (LO_TIMB, 96)]:
     hit(7.9, x, v, 2.0)
-chord('horns', 7.9, [D3, A3, D4, Fs4], 70, 2.6)
+chord('brass', 7.9, [D3, A3, D4, Fs4], 74, 0.5)   # a short stab
+chord('brass', 8.43, [D3, A3, D4, Fs4], 64, 2.0)
 n('bass', 7.9, D2, 90, 1.4)
-t = 8.65
-while t < bar(3) - 0.75:  # the pulse keeps going on D
-    n('stacc', t, D3, 60, E8 * 0.6)
-    n('stacc', t, A3, 52, E8 * 0.6)
-    hit(t, HAT, 44 if (t - 8.65) % BEAT < 0.01 else 30)
-    t += E8
-hit(bar(2, 2), KICK, 84)
-for k, x in enumerate([TOM_H, TOM_H, TOM_M, TOM_L]):  # fill into the first card
-    hit(bar(2, 3) + k * E8 / 2, x, 70 + 6 * k)
+for k in range(5, 16):  # the guitar and the clave start the groove early
+    n('guitar', slot(2, k), [D3, A3, D4, A3][k % 4], 60, S16 * 1.8)
+for k in CLAVE[3:]:
+    hit(slot(2, k), CLAVES, 70)
+for k, x, v in TUMBAO:
+    hit(slot(2, 8 + k), x, v)
+n('bass', slot(2, 14), D2, 90, S16 * 4)
+fill(2, 12)
 
-# Cards: bass and strings in eighths, a groove that gets busier each half.
-ROOTS = [D2, Cs3 - 12, B2 - 12, G2, G2, Fs2, E2, B2 - 12]
-for i, root in enumerate(ROOTS):
-    b = 3 + i
-    second = i >= 4
-    for k in range(8):
-        t = bar(b, k * 0.5)
-        up = 12 if second and k % 4 == 3 else 0  # an octave jump to push it
-        n('bass', t, root + up, 92 if k % 2 == 0 else 74, E8 * 0.85, wobble=0.004)
-        n('stacc', t, root + 24, 58 if k % 2 == 0 else 46, E8 * 0.55)
-        n('stacc', t, root + 31, 50 if k % 2 == 0 else 40, E8 * 0.55)
-    if second:
-        # the heart: lub-dub on beats 1 and 3
-        for beat, v in [(0, 104), (0.5, 72), (2, 100), (2.5, 70)]:
-            hit(bar(b, beat), KICK, v)
-        for k in range(16):  # sixteenth hats
-            hit(bar(b, k * 0.25), HAT, 54 if k % 2 == 0 else 34, 0.1)
-    else:
-        for beat in (0, 1.5, 2):
-            hit(bar(b, beat), KICK, 96 if beat != 1.5 else 76)
-        for k in range(8):
-            hit(bar(b, k * 0.5), OHAT if k == 7 else HAT, 50 if k % 2 == 0 else 36, 0.15)
-    for beat in (1, 3):
-        hit(bar(b, beat), SNARE, 86 if second else 78)
-        hit(bar(b, beat), CLAP, 60 if second else 44)
+# Cards. First time: clave, congas, bongos, guiro, montuno, tumbao.
+# Second time: cowbell, the heartbeat kick, brass on the tune.
+CARDS = [  # bar: (montuno triad, bass root, fifth)
+    (3, [D4, Fs4, A4], D2, A2), (4, [Cs4, E4, A4], Cs3 - 12, E2 + 12),
+    (5, [B3, D4, Fs4], B2 - 12, Fs2), (6, [B3, D4, G4], G2, D3),
+    (7, [B3, D4, G4], G2, D3), (8, [D4, Fs4, A4], Fs2, A2),
+    (9, [E4, G4, B4], E2, B2 - 12), (10, [D4, Fs4, A4], B2 - 12, Fs2),
+]
+NEXT = [Cs3 - 12, B2 - 12, G2, G2, Fs2, E2, B2 - 12, G2]
+for (b, triad, root, fifth), nxt in zip(CARDS, NEXT):
+    busy = b >= 7
+    percussion(b, busy)
+    montuno(b, triad, vel=62 if busy else 56)
+    tumbao(b, root, fifth, nxt)
 hit(bar(3), CRASH, 84, 2.0)
 hit(bar(7), CRASH, 100, 2.0)
-for k, x in enumerate([SNARE, SNARE, TOM_H, TOM_M, TOM_M, TOM_L, TOM_L, TOM_L]):
-    hit(bar(6, 3) + k * E8 / 2, x, 62 + 4 * k)  # fill into the second time
-# horns sing the tune with the piano the second time
-for b, beat, x, length in TUNE2:
-    n('horns', bar(b, beat), x - 12, 70, length * BEAT * 0.95)
+fill(6, 12)
+fill(10, 12)
+for b, beat, x, length in TUNE2:  # brass sings the tune the second time
+    n('brass', bar(b, beat), x - 12, 70, length * BEAT * 0.95)
 
-# "Stuck?": a snare roll that speeds up and swells into the campus photo
-roll(t_g, t_a, SNARE, 52, 80, 0.125)
-roll(t_a, HOME, SNARE, 80, 110, 0.0625)
-roll(t_g, HOME, TOM_L, 40, 90, 0.1875)
+# "Stuck?": brass stabs on the clave, a timbale roll swelling into the photo
+for k in (0, 3, 6):
+    chord('brass', slot(11, k), [B3, D4, G4] if k == 0 else [Cs4, E4, A4], 84, S16 * 1.4)
+roll(slot(11, 7), HOME, 60, 112, 0.0625)
+hit(slot(11, 0), CRASH, 80, 1.5)
 n('bass', t_g, G2, 96, t_sus - t_g)
 n('bass', t_sus, A2, 100, HOME - t_sus)
-chord('horns', t_sus, [A2 + 12, E3, Cs4], 80, HOME - t_sus)
 
-# The campus: one big landing, then a half-time groove under the title,
-# and a last hit where the music settles.
-for x, v in [(CRASH, 112), (KICK, 112), (TOM_L, 90)]:
+# The campus: one big landing, then the groove comes back under the title
+# with the cowbell, and a last hit where the music settles.
+for x, v in [(CRASH, 112), (KICK, 112), (LO_TIMB, 104)]:
     hit(HOME, x, v, 2.5)
 n('bass', HOME, D2, 104, 1.0)
-chord('horns', HOME, [D3, A3, D4, Fs4], 92, 3.5)
-for b in (12, 13):
-    root = D2
-    for k in range(8):
-        t = bar(b, k * 0.5)
-        if t >= 42.8:
-            break
-        n('bass', t, root + (12 if k % 4 == 3 else 0), 84 if k % 2 == 0 else 66, E8 * 0.85)
-        hit(t, RIDE, 52 if k % 2 == 0 else 38, 0.3)
-    for beat, x, v in [(0, KICK, 96), (1.5, KICK, 70), (2, SNARE, 84)]:
-        if bar(b, beat) < 42.8:
-            hit(bar(b, beat), x, v)
-chord('horns', 41.25, [D3, B3, D4], 70, 1.55)
-for x, v in [(CRASH, 96), (KICK, 100)]:
+chord('brass', HOME, [D3, A3, D4, Fs4], 92, 0.45)
+chord('brass', HOME + 0.56, [D3, A3, D4, Fs4], 84, 2.6)
+END = 42.8
+percussion(12, True, until=END)
+percussion(13, True, until=END)
+montuno(12, [D4, Fs4, A4], until=END, vel=60)
+montuno(13, [D4, G4, B4], until=END, vel=60)
+tumbao(12, D2, A2, D2, until=END)
+tumbao(13, D2, A2, D2, until=END)
+chord('brass', 41.25, [D3, B3, D4], 70, 1.55)
+fill(13, 4)
+for x, v in [(CRASH, 100), (KICK, 104), (LO_TIMB, 100), (HI_TIMB, 92)]:
     hit(42.85, x, v, 2.0)
-n('bass', 42.85, D2, 90, 2.0)
-chord('horns', 42.85, [D3, A3, Fs4], 66, 2.1)
+n('bass', 42.85, D2, 92, 2.0)
+chord('brass', 42.85, [D3, A3, Fs4, D5], 80, 2.1)
 
+# ---------- write the MIDI file ----------
 # A note struck again while still sounding: end the first one just before,
 # or its note-off would cut the new one dead.
 events.sort(key=lambda e: (e[1], e[2], e[0]))
