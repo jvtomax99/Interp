@@ -1,15 +1,17 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-21, from the chat that built the 3D Dr.
-Smiley (updated 2026-10-22 with the face plan) on Jose's Tripo model (PR #114, branch `claude/3d-dr-smiley-r1-avn9y1`).
+hands over"). This one: 2026-10-22, from the chat that made the face plan
+and the mouth test for the 3D Dr. Smiley on Jose's Tripo model (PR #114, branch `claude/3d-dr-smiley-r1-avn9y1`).
 
 ## Paste this into the new chat
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
 > continue the 3D Dr. Smiley on branch `claude/3d-dr-smiley-r1-avn9y1`: I'll
-> attach the zip of my Tripo model; rebuild it, then show me the visual plan
-> for his brows, cheeks and mouth. Plain words, say "working on it" and "done".
+> attach the zip of my Tripo model; rebuild it, then build his brows (A),
+> the eyelid that follows a lowered brow, his cheeks and the other mouth
+> shapes, showing me pictures at each stop. Plain words, say "working on
+> it" and "done".
 
 ## Jose's standing rule for this work (in `AGENTS.md`)
 
@@ -38,7 +40,7 @@ pictures. Questions with options go as buttons, recommended first.
   skin, my pick) or B (new pieces); cheeks rise on smile/laugh; mouth route
   1 (reshape his own lips, my pick), 2 (new 3D mouth) or 3 (painted, not
   recommended); then a closed-mouth test before anything else.
-- **Mouth test (2026-10-22), shown, waiting on Jose's OK:**
+- **Mouth test (2026-10-22), approved by Jose:**
   `out/plan-mouth-test.png` (`tripo_mouthtest.py`, `close_mouth()`): his own
   open smile closed by moving his surface only. Lessons in its comments:
   measure the opening on a flat picture with exposure 0 and Standard colour;
@@ -68,20 +70,29 @@ python3 tripo_rig.py                      # in/tripo-rig.blend (36 bones)
 python3 tripo_posetest.py                 # check: out/plan/rig-test.png
 ```
 
-## What's next (Jose's approved plan, `out/plan-rig.png`, steps 3-6)
+## What's next (`out/plan-face.png`, approved route)
 
-3. **Brows and cheeks**: small face bones (brow lift/frown per side, cheek
-   raise). His brows are painted on the model's texture; options to show
-   him first: (a) bones under the painted brows, (b) 3D brow pieces over
-   them, like the eyeliner. Show both as pictures, recommend one.
-4. **Mouth**: shapes per expression (smile, laugh, surprised, sad,
-   worried, doubt), from his 30 drawn expressions (`drsmiley/face.webp`,
-   `DR_FACE_FRAMES`). The model's mouth is painted (open smile); the
-   approach needs a plan with mock-ups first.
-5. Expression sheet, six poses, 360-degree turn: stop for his OK.
+1. **Make it a real face rig in `in/tripo-face.blend`** (from
+   `tripo-rig.blend`): turn the mock-up moves into controls that keep:
+   shape keys on `Mesh_0` built from `deform_skin()` (brows A: lift and tilt
+   per side, the app's `DR_BROWS` numbers), `cheeks()` and `close_mouth()`
+   (all in `tripo_faceplan.py` / `tripo_mouthtest.py`; recompute normals
+   per state, `set_co`). Shape keys are how the mouth must work anyway: the
+   in-between frames matter (halfway was the hard part).
+2. **Lid follows a lowered brow**: focused/worried bring the 3D lid
+   (`Lid.L/R`, `set_blink` in `tripo_eyes.py`) down a little.
+3. **Smooth the faint line** over his left brow's inner end in A (surprised,
+   worried); mock-up roughness, flagged on the plan.
+4. **The other mouth shapes**, each on his own surface like the closed one:
+   laugh (wider and taller than now), surprised (small O: corners in),
+   sad, worried, doubt (corners down / one side up). Compare each to
+   `drsmiley/face.webp`. Show as a sheet, stop for his OK.
+5. Expression sheet (brows + eyes + mouth + cheeks together), six poses,
+   360-degree turn: stop for his OK.
 6. Then the animation (R2), again as a visual plan first.
 
-Plan pictures: `storyboard.py` (`board()`), `tripo_planviz.py`.
+Plan pictures: `storyboard.py` (`board()`, import it; its old boards run
+only as a script), `tripo_faceboard.py`.
 
 ## Learned (also in the code comments)
 
