@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- Captions for the vertical ad, in the original promo's style (Jose's own
-     copy): a white first line, the second in a coloured highlight. Drawn on
+     copy): a white first line, the second in a coloured highlight. Every
+     word starts with a capital (Jose, 2026-10-22), except the web address. Drawn on
      a transparent 720 x 1280 page and laid over the 3D frames. ?c=<name>. -->
 <html><head><meta charset="utf-8"><link rel="stylesheet" href="../../src/fonts.css">
 <style>
@@ -21,20 +22,20 @@
 </style></head><body><div id="root"></div>
 <script>
 const C = {
-  title:     ['Built by our', 'own interpreters.', '#F28C6B'],
-  glossary:  ['One glossary.', 'Every specialty.', '#F2C46B'],
-  body:      ['Explore the 3D Body.', 'English and Spanish.', '#5FD3F3'],
-  doctors:   ['Ready for', 'every physician.', '#F2A0C4', 'Sample doctors'],
-  brain:     ['The HUMC Brain.', 'The app, mapped.', '#B9A3FF'],
-  drills:    ['Daily drills.', 'Sharp skills.', '#F2A65A'],
-  campus:    ['National certification.', 'Prep built in.', '#7FD6A8'],
+  title:     ['Built By Our', 'Own Interpreters.', '#F28C6B'],
+  glossary:  ['One Glossary.', 'Every Specialty.', '#F2C46B'],
+  body:      ['Explore The 3D Body.', 'English And Spanish.', '#5FD3F3'],
+  doctors:   ['Ready For', 'Every Physician.', '#F2A0C4', 'Sample Doctors'],
+  brain:     ['The HUMC Brain.', 'The App, Mapped.', '#B9A3FF'],
+  drills:    ['Daily Drills.', 'Sharp Skills.', '#F2A65A'],
+  campus:    ['National Certification.', 'Prep Built In.', '#7FD6A8'],
 };
 const name = new URLSearchParams(location.search).get('c');
 const root = document.getElementById('root');
 if (name === 'end') {
-  root.innerHTML = `<div class="end"><h1>Interpreter Hub</h1><div class="sub">Built here, for our patients.</div>
-    <div class="url">interp-six.vercel.app</div><div class="live">Live today, on any phone.</div>
-    <div class="tag">Better words.<br><span>Safer care.</span></div></div>
+  root.innerHTML = `<div class="end"><h1>Interpreter Hub</h1><div class="sub">Built Here, For Our Patients.</div>
+    <div class="url">interp-six.vercel.app</div><div class="live">Live Today, On Any Phone.</div>
+    <div class="tag">Better Words.<br><span>Safer Care.</span></div></div>
     <div class="credit">Anatomy: BodyParts3D © DBCLS, CC BY 4.0</div>`;
 } else if (C[name]) {
   const [a, b, col, note] = C[name];

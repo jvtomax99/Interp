@@ -83,7 +83,7 @@ def hook(name, label, word, col, strike=False):
         bar.scale = (1.75, 0.02, 0.035)
         bar.rotation_euler = (0, math.radians(-8), 0)
         bar.data.materials.append(A.emission('strike', '#FF3B6B', 8))
-        text('Not for patients.', (0, 0, -0.42), 0.08, '#FF8FA8', True, face_cam=cam, glow=1.6)
+        text('Not For Patients.', (0, 0, -0.42), 0.08, '#FF8FA8', True, face_cam=cam, glow=1.6)
     light('wash', (0, -2, 2.5), (0, 0, 0), 40, 3, '#5FD3F3')
     camera(sc, cam, (0, 0, 0.12), 32)
     return sc
@@ -104,13 +104,13 @@ def main(which):
     os.makedirs(OUT, exist_ok=True)
 
     if 'v01' in which:
-        sc = hook('v01', 'THE DOCTOR SAYS', 'Heart\nfailure', '#FFFFFF')
+        sc = hook('v01', 'THE DOCTOR SAYS', 'Heart\nFailure', '#FFFFFF')
         shot(sc, 'v01')
     if 'v02' in which:
-        sc = hook('v02', 'THE INTERPRETER', '¿Fallo\ncardíaco?', '#FF4F86', strike=True)
+        sc = hook('v02', 'THE INTERPRETER', '¿Fallo\nCardíaco?', '#FF4F86', strike=True)
         shot(sc, 'v02')
     if 'v03' in which:
-        sc = hook('v03', 'THE RIGHT WORD', 'Insuficiencia\ncardíaca', '#5FD3F3')
+        sc = hook('v03', 'THE RIGHT WORD', 'Insuficiencia\nCardíaca', '#5FD3F3')
         shot(sc, 'v03')
 
     if 'v04' in which:   # Title: Dr. Smiley peels off the glass; the Hub's mark
@@ -160,7 +160,7 @@ def main(which):
         for r, s in ((0.07, 3.0), (0.12, 1.5), (0.18, 0.7)):
             ring(head, r, strength=s)
         cam = (0.2, -2.6, 0.35)
-        text('double-tap', head + Vector((-0.02, -0.12, 0.26)), 0.07, '#5FD3F3', True, face_cam=cam, glow=1.4)
+        text('Double-Tap', head + Vector((-0.02, -0.12, 0.26)), 0.07, '#5FD3F3', True, face_cam=cam, glow=1.4)
         camera(sc, cam, head + Vector((-0.12, 0, -0.35)), 35, fstop=2.4, focus=(head - Vector(cam)).length)
         shot(sc, 'v10')
 
@@ -169,7 +169,7 @@ def main(which):
         coll, B = A.brain()
         d = B['data']
         cam_at = (4.2, -1.2, 0.35)       # from the front: the brain's narrow side suits a tall frame
-        for g, label, dz in (('ask', 'Ask the Hub', 0.22), ('smiley', 'Dr. Smiley', 0.22), ('core', 'Shared core', -0.32)):
+        for g, label, dz in (('ask', 'Ask The Hub', 0.22), ('smiley', 'Dr. Smiley', 0.22), ('core', 'Shared Core', -0.32)):
             pts = [d['pos'][n['i']] for n in d['nodes'] if n['group'] == g]
             m = Vector([sum(p[i] for p in pts) / len(pts) for i in range(3)])
             text(label, Vector((m.x, -m.z, m.y + dz)), 0.2, d['groups'][g]['color'], True, face_cam=cam_at, glow=2.2)

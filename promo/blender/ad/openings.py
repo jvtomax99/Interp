@@ -84,7 +84,7 @@ def main(which):
             strips('#FF4F86', '#7C5CFF')
             text('THE INTERPRETER', (0, 0, 0.78), 0.08, '#9FB0D6', False, face_cam=cam, glow=1.4)
             pink = glass('pink glass', '#FF4F86', 0.12)
-            for i, ln in enumerate(('¿Fallo', 'cardíaco?')):
+            for i, ln in enumerate(('¿Fallo', 'Cardíaco?')):
                 for p in letters(ln, (0, 0, 0.4 - i * 0.42), 0.36, pink, cam):
                     # the crack runs left to right: the right side flies first
                     k = max(0.0, (p.location.x - 0.05) / 0.9) ** 1.5   # the crack: the left half still reads
@@ -104,7 +104,7 @@ def main(which):
             strips('#5FD3F3', '#2E8BD0')
             text('THE RIGHT WORD', (0, 0, 0.78), 0.08, '#9FB0D6', False, face_cam=cam, glow=1.4)
             cyan = glass('cyan glass', '#5FD3F3', 0.15)
-            for i, ln in enumerate(('Insuficiencia', 'cardíaca')):
+            for i, ln in enumerate(('Insuficiencia', 'Cardíaca')):
                 for p in letters(ln, (0, 0, 0.42 - i * 0.36), 0.25, cyan, cam):
                     k = max(0.0, (p.location.x - 0.45) / 0.8) ** 1.5   # the last letters still arriving
                     p.location += Vector((rnd.uniform(0, .25) * k, -rnd.uniform(.1, .6) * k, rnd.uniform(-.1, .2) * k))
@@ -142,7 +142,7 @@ def main(which):
         if 'b1' in which:
             cam = (3.6, -9.5, 3.4)
             words = [neon('Heart', win + Vector((0.1, -1.2, 3.3)), 1.3, '#FFFFFF', strength=5, extrude=0.12, cam=cam),
-                     neon('failure', win + Vector((0.1, -1.2, 1.8)), 1.3, '#FFFFFF', strength=5, extrude=0.12, cam=cam),
+                     neon('Failure', win + Vector((0.1, -1.2, 1.8)), 1.3, '#FFFFFF', strength=5, extrude=0.12, cam=cam),
                      text('THE DOCTOR SAYS', win + Vector((0.1, -1.2, 4.6)), 0.4, '#9FB0D6', False, face_cam=cam, glow=2)]
             camera(sc, cam, win + Vector((0, 0, 1.9)), 30, fstop=4.0, focus=(win - Vector(cam)).length)
             shot(sc, 'o_b1')
@@ -192,7 +192,7 @@ def main(which):
             ecg(-1.6, 1.6, -0.05, 4, '#5FD3F3')
             ring((0.42, 0, 0.37), 0.05, '#FFFFFF', 6, 0.012)
             text('THE DOCTOR SAYS', (0, 0, 0.85), 0.08, '#9FB0D6', False, face_cam=cam, glow=1.4)
-            neon('Heart failure', (0, 0, 0.55), 0.2, '#FFFFFF', strength=4, extrude=0.03, cam=cam)
+            neon('Heart Failure', (0, 0, 0.55), 0.2, '#FFFFFF', strength=4, extrude=0.03, cam=cam)
             camera(sc, cam, (0, 0, 0.2), 32)
             shot(sc, 'o_c1')
         if 'c2' in which:   # flatline red on the wrong word, back to life on the right one
@@ -201,14 +201,14 @@ def main(which):
             ecg(-1.6, 0.0, 0.1, 2, '#FF2D6B', flat_from=-0.8, name='flat')
             ecg(0.0, 1.6, 0.1, 2, '#5FD3F3', name='back')
             neon('¿Fallo', (0, 0, 0.78), 0.17, '#FF4F86', strength=4, extrude=0.03, cam=cam)
-            neon('cardíaco?', (0, 0, 0.57), 0.17, '#FF4F86', strength=4, extrude=0.03, cam=cam)
+            neon('Cardíaco?', (0, 0, 0.57), 0.17, '#FF4F86', strength=4, extrude=0.03, cam=cam)
             bpy.ops.mesh.primitive_cube_add(size=1, location=(0, -0.04, 0.67))
             bar = bpy.context.active_object
             bar.scale = (1.0, 0.01, 0.014)
             bar.rotation_euler = (0, math.radians(-8), 0)
             bar.data.materials.append(A.emission('strike', '#FF2D6B', 8))
             neon('Insuficiencia', (0, 0, -0.18), 0.17, '#5FD3F3', strength=4, extrude=0.03, cam=cam)
-            neon('cardíaca', (0, 0, -0.4), 0.17, '#5FD3F3', strength=4, extrude=0.03, cam=cam)
+            neon('Cardíaca', (0, 0, -0.4), 0.17, '#5FD3F3', strength=4, extrude=0.03, cam=cam)
             camera(sc, cam, (0, 0, 0.12), 32)
             shot(sc, 'o_c2', smiley=WAVE)
 
@@ -256,7 +256,7 @@ def photo_main(which):
         photo_plane(bld, 0, H, (0, 0, 0))
         cam = (0.0, -1.36, 0.0)
         neon('Heart', (-0.12, 0.35, 0.33), 0.13, '#FFFFFF', strength=3.5, extrude=0.012, cam=cam)
-        neon('failure', (-0.12, 0.35, 0.2), 0.13, '#FFFFFF', strength=3.5, extrude=0.012, cam=cam)
+        neon('Failure', (-0.12, 0.35, 0.2), 0.13, '#FFFFFF', strength=3.5, extrude=0.012, cam=cam)
         text('THE DOCTOR SAYS', (-0.12, 0.35, 0.43), 0.035, '#0A1A40', True, face_cam=cam, glow=1.0)
         camera(sc, cam, (0, 0, 0), 50)
         shot(sc, 'o_p1')
@@ -269,13 +269,13 @@ def photo_main(which):
         y = -0.25
         text('THE INTERPRETER', (0.0, y, 0.25), 0.024, '#0A1A40', True, face_cam=cam, glow=1.0)
         neon('¿Fallo', (0.0, y, 0.18), 0.075, '#FF3D7A', strength=4, extrude=0.008, cam=cam)
-        neon('cardíaco?', (0.0, y, 0.1), 0.075, '#FF3D7A', strength=4, extrude=0.008, cam=cam)
+        neon('Cardíaco?', (0.0, y, 0.1), 0.075, '#FF3D7A', strength=4, extrude=0.008, cam=cam)
         bpy.ops.mesh.primitive_cube_add(size=1, location=(0.0, y - 0.01, 0.14))
         bar = bpy.context.active_object
         bar.scale = (0.3, 0.002, 0.005)
         bar.rotation_euler = (0, math.radians(-9), 0)
         bar.data.materials.append(A.emission('strike', '#FF2D6B', 8))
-        text('Not for patients.', (0.0, y, 0.04), 0.024, '#FFFFFF', True, face_cam=cam, glow=2.0)
+        text('Not For Patients.', (0.0, y, 0.04), 0.024, '#FFFFFF', True, face_cam=cam, glow=2.0)
         camera(sc, cam, (0, 0, -0.03), 50)
         shot(sc, 'o_p1b', smiley=SURPRISED)
     if 'p2' in which:   # the camera moves in; the real Translate answer and its caution

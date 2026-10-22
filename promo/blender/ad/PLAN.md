@@ -64,6 +64,11 @@ the real `api/ask.js` with a fixed, correct reply; Translate is asked
 "heart failure", the stand-in's answer; the harness's missing files
 (memory lines, chat photos) are served from the repo. Left out because the stand-in data reads as fake: events ("CE event 0").
 
+On-screen words: every word starts with a capital (Jose, 2026-10-22),
+Spanish lines included ("¿Fallo Cardíaco?", "Insuficiencia Cardíaca"). Not
+changed: the web address (interp-six.vercel.app), the app's own screens,
+labels already in capitals.
+
 ## Steps (the guide's, in order)
 
 1. **Brief** (`BRIEF.md`): this plan in the six blocks. Only after the OK.
