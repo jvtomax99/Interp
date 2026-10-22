@@ -167,6 +167,130 @@ def iris_detail(mat):
     return mat
 
 
+LID_R, LID_D = 1.2, 1.25     # the lid shell round the ball, as tripo_eyes.py: 1.2x wide, 1.25x deep
+ARCH_OPEN, ARCH_SHUT = 22, -4   # degrees the edge rises over the pupil: an arch open, a soft sag shut
+
+
+def lid_stage_verts(rx, ry, rz, edge, arch, side, rows=48, segs=128, lash=.0058, grow=1.):
+    """One stage of the new lid: the shell from the top down to an edge that
+    arches over the pupil (a flat cut made the lowered lid a card with a
+    straight edge), a rounded rim with thickness, and a lash sweep growing
+    from the rim: short at the inner corner, longest and flicking up at the
+    outer one, only along the front."""
+    vs = []
+    out_x = 1 if side == 'L' else -1                 # his left eye's outer corner is +x
+    def pt(el, az, k=1.0):
+        el = math.radians(el)
+        return np.array([rx * LID_R * k * math.cos(el) * math.sin(az), -(ry * LID_D * k) * math.cos(el) * math.cos(az),
+                         rz * LID_R * k * math.sin(el)])
+    azs = [2 * math.pi * j / segs for j in range(segs)]
+    edges = [edge + arch * max(0., math.cos(a)) ** 1.5 for a in azs]
+    for r in range(rows + 1):
+        for j, a in enumerate(azs):
+            vs.append(pt(90 - (90 - edges[j]) * r / rows, a))
+    for j, a in enumerate(azs):                      # the rim, rolled under toward the ball
+        vs.append(pt(edges[j] - 1.6, a, .985))
+    for j, a in enumerate(azs):
+        vs.append(pt(edges[j] + 2.5, a, .962))
+    for j, a in enumerate(azs):                      # lash roots, on the rim's front
+        vs.append(pt(edges[j] - .6, a, 1.004))
+    for j, a in enumerate(azs):                      # lash tips: out from the ball, and up
+        root = pt(edges[j] - .6, a, 1.004)
+        n = np.array([root[0] / rx ** 2, root[1] / ry ** 2, root[2] / rz ** 2]); n /= np.linalg.norm(n)
+        front = max(0., math.cos(a)) ** .5 * (math.cos(a) > .12)
+        t = math.sin(a) * out_x                      # -1 inner corner .. +1 outer
+        length = grow * lash * front * (.25 + .75 * (t + 1) / 2) * (1 + .7 * max(0., (t - .45) / .55))
+        up = np.array([0, 0, 1.])
+        vs.append(root + (n * .75 + up * .55) * length)
+    return [tuple(v) for v in vs]
+
+
+def lid_faces(rows=48, segs=128):
+    q = lambda r: [(r * segs + j, r * segs + (j + 1) % segs, (r + 1) * segs + (j + 1) % segs, (r + 1) * segs + j) for j in range(segs)]
+    shell = [f for r in range(rows) for f in q(r)]
+    rim = q(rows + 1)
+    # the rim's front is the dark lash line: seen from the front, the lashes point at you
+    # and read as a thin line on their own
+    lash = q(rows) + q(rows + 3)
+    return shell + rim, lash
+
+
+def rebuild_lid(eye, side):
+    """The lid object kept (its rig, place and material), its mesh replaced; the
+    blink stages B1..B8 rebuilt to match (tripo_eyes.set_blink drives them)."""
+    lid = bpy.data.objects['Lid.' + side]
+    N = eye.data.materials[0].node_tree.nodes
+    rx, rz = N['RX'].outputs[0].default_value, N['RZ'].outputs[0].default_value
+    ry = max(abs(v.co.y) for v in eye.data.vertices)
+    # the arch holds until the lid is nearly shut (straight between, half closed was flat again)
+    stages = [(E.OPEN + (E.SHUT - E.OPEN) * k / E.STAGES, ARCH_OPEN + (ARCH_SHUT - ARCH_OPEN) * (k / E.STAGES) ** 2.5) for k in range(E.STAGES + 1)]
+    skin, lash = lid_faces()
+    me = bpy.data.meshes.new('Lid.' + side)
+    # open, the lid is tucked above the eye behind his face and the liner draws the line;
+    # its lashes grow in as it comes down (open, they poked out over the eye as tabs)
+    grow = lambda k: min(1., k / 2)
+    me.from_pydata(lid_stage_verts(rx, ry, rz, *stages[0], side, grow=grow(0)), [], skin + lash)
+    me.shade_smooth()
+    me.materials.append(bpy.data.materials['Lid'])
+    lm = bpy.data.materials.get('Lash') or bpy.data.materials.new('Lash')
+    lm.use_nodes = True
+    lb = lm.node_tree.nodes['Principled BSDF']
+    lb.inputs['Base Color'].default_value = build.srgb(30, 16, 10); lb.inputs['Roughness'].default_value = .65
+    lb.inputs['Specular IOR Level'].default_value = .15
+    me.materials.append(lm)
+    mi = [0] * len(skin) + [1] * len(lash)
+    me.polygons.foreach_set('material_index', mi)
+    old = lid.data
+    lid.data = me
+    bpy.data.meshes.remove(old)
+    lid.vertex_groups.clear()
+    vg = lid.vertex_groups.new(name='head'); vg.add(list(range(len(me.vertices))), 1.0, 'REPLACE')
+    lid.shape_key_add(name='Basis', from_mix=False)
+    for k in range(1, E.STAGES + 1):
+        kb = lid.shape_key_add(name=f'B{k}', from_mix=False)
+        kb.data.foreach_set('co', np.array(lid_stage_verts(rx, ry, rz, *stages[k], side, grow=grow(k))).ravel())
+        kb.value = 0
+    glue_liner(eye, side, rx, rz)
+
+
+def glue_liner(eye, side, rx, rz):
+    """The eyeliner rebuilt on his skin: the same arc and taper as tripo_eyes.py,
+    each point pressed onto his face along the eye's forward line. It was a flat
+    arc while his face curves back toward the outer corner, so from the side it
+    floated off the eye."""
+    from mathutils import Vector
+    ln = bpy.data.objects['Liner.' + side]
+    head = bpy.data.objects['Mesh_0']
+    M = eye.matrix_world
+    fwd = (M.to_3x3() @ Vector((0, -1, 0))).normalized()          # out of the eye
+    Hi = head.matrix_world.inverted()
+    NP, sg = 96, 10
+    pts, rads = [], []
+    for k in range(NP + 1):
+        t = math.radians(-14 + 208 * k / NP)
+        w = M @ Vector((rx * 1.07 * math.cos(t), 0, rz * 1.07 * math.sin(t)))     # clear of the ball, which hid its inner half
+        o = Hi @ (w + fwd * .05); d = (Hi.to_3x3() @ -fwd).normalized()
+        hit, loc, nrm, _ = head.ray_cast(o, d)
+        p = head.matrix_world @ loc + fwd * .0009 if hit else w + fwd * .006
+        pts.append(M.inverted() @ p)
+        u = k / NP
+        rads.append(.0058 * math.sin(math.pi * u) ** .6 + .0004)      # bolder: on the skin it reads thinner than floating in front
+    vs = []
+    for k, p in enumerate(pts):
+        tan = (pts[min(k + 1, NP)] - pts[max(k - 1, 0)]).normalized()
+        nrm = Vector((p.x / rx, 0, p.z / rz)).normalized()
+        bi = tan.cross(nrm)
+        for j in range(sg):
+            a = 2 * math.pi * j / sg
+            vs.append(tuple(p + (nrm * math.cos(a) + bi * math.sin(a)) * rads[k]))
+    fs = [(k * sg + j, k * sg + (j + 1) % sg, (k + 1) * sg + (j + 1) % sg, (k + 1) * sg + j) for k in range(NP) for j in range(sg)]
+    me = bpy.data.meshes.new('Liner.' + side); me.from_pydata(vs, [], fs); me.shade_smooth()
+    me.materials.append(ln.data.materials[0])
+    old = ln.data; ln.data = me; bpy.data.meshes.remove(old)
+    ln.vertex_groups.clear()
+    ln.vertex_groups.new(name='head').add(list(range(len(me.vertices))), 1.0, 'REPLACE')
+
+
 if __name__ == '__main__':
     import shutil
     src = os.path.join(HERE, 'in', 'tripo-face.blend')
@@ -179,5 +303,6 @@ if __name__ == '__main__':
         iris_detail(eye.data.materials[0])
         add_cornea(eye)
         bpy.data.objects['Glint.' + s].hide_render = True      # the dome's real shine replaces the painted one
+        rebuild_lid(eye, s)
     bpy.ops.wm.save_as_mainfile(filepath=src)
     print('done')

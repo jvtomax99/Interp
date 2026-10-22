@@ -116,7 +116,14 @@ worried (flat, not a frown).
    eye shader, and `eye_lights()` (called from `build.studio()` when a
    cornea exists): one round catchlight seen only in reflections, up and
    right; studio lights, floor and world hidden from reflections (they made
-   rectangles and haze). Shown: `out/plan-eyes2.png`, waiting on his OK.
+   rectangles and haze). Shown: `out/plan-eyes2.png`; Jose OK'd it.
+   Step 2 (`rebuild_lid`, `glue_liner` in `tripo_eyes2.py`): the lid mesh
+   replaced (same object, rig, blink keys B1..B8): an edge that arches over
+   the eye (it was a flat cut: a card), a rolled rim, a dark lash line on
+   the rim's front, lashes that grow in as it lowers and flick at the outer
+   corner; the liner kept but pressed onto his skin by ray casts (it
+   floated from the side) and bolder. Shown: `out/plan-eyes3.png`, waiting.
+   Known: a shut eye is a plain dome (lower lid, step 4).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.
