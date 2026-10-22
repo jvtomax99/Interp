@@ -162,7 +162,8 @@ worried (flat, not a frown).
 
 Plan pictures: `storyboard.py` (`board()`, import it), `tripo_faceboard.py`,
 `tripo_mouthboard.py`. Build order after a fresh rebuild: `tripo_fix.py`,
-`tripo_eyes.py`, `tripo_rig.py`, `tripo_face.py`, `tripo_mouths.py`.
+`tripo_eyes.py` (EYE_STYLE=matched), `tripo_rig.py`, `tripo_face.py`, `tripo_mouths.py`,
+`tripo_muscles.py`, `tripo_eyes2.py`.
 
 ## Learned (also in the code comments)
 
