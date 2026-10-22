@@ -20,6 +20,7 @@ import { buildEnd } from "./end.js";
 import { buildDesk } from "./desk.js";
 import { createCity } from "./city.js";
 import { createHero } from "./hero.js";
+import { buildLogo3D } from "./logo3d.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
@@ -270,6 +271,12 @@ async function build() {
   sub.position.set(0, 2.72, 0.3);
   sub.scale.setScalar(0.8);
   logo.add(sub);
+  // the logo shot as Jose's 3D logo picture (logo3d.js, 2026-10-22); the phone, icon and rings above are no longer shown
+  const LOGO_FONT = new URLSearchParams(location.search).get("logofont") || "fredoka-700";
+  const logoFont = await new Promise((res, rej) => new FontLoader().load(`fonts/${LOGO_FONT}.typeface.json`, res, undefined, rej));
+  const logo3d = buildLogo3D(renderer, logoFont, { W, H });
+  logo.clear();
+  logo.add(logo3d.group);
 
   // ---------- features 1-5 ----------
   // the features, staged at one desk like the first reel (Jose, 2026-10-21; desk.js)
@@ -496,6 +503,8 @@ async function build() {
   }
 
   function logoAt(t) {
+    logo3d.update(t - 7.5);
+    return;
     const u = t - 7.5;
     // the phone slides in tilted and settles flat
     const sp = outExpo(prog(u, 0, 0.5));
@@ -545,7 +554,8 @@ async function build() {
     if (feat.view && FEATURES.some((f) => f.g === g)) return feat.view(g, t - s[0]);
     if (g === "end") return endCard.view(t - s[0]);
     const gp = groups[g].position;
-    if (g === "logo") {
+    if (g === "logo") return logo3d.view(t - s[0], gp);
+    if (g === "logo-old") {
       const e = inOutSine(p);
       return { pos: new THREE.Vector3(gp.x + lerp(0.9, 0.2, e), lerp(2.9, 2.6, e), gp.z + lerp(7.0, 6.2, e)), look: new THREE.Vector3(gp.x, lerp(1.45, 1.65, e), gp.z + 0.3) };
     }
@@ -595,7 +605,7 @@ async function build() {
     const fp = a.focus || a.look;
     bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
     // the end card keeps the hospital behind the table readable: less blur there
-    bokeh.uniforms.aperture.value = s[2] === "end" ? 0.00025 : 0.0007;
+    bokeh.uniforms.aperture.value = s[2] === "end" || s[2] === "logo" ? 0.00025 : 0.0007;
     camera.rotation.z += Math.sin(t * 1.3) * 0.012; // a hand-held breath
     // the spotlight moves with the shot
     const g = groups[s[2]].position;
