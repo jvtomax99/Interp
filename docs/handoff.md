@@ -1,71 +1,83 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-21, 12:20 UTC, from the chat that built the
-HUMC Brain (#113, live as b1021.1147).
+hands over"). This one: 2026-10-22, from the chat that ran the split of
+`index.html`, phases 0 to 2b (#109, #112, #115, #122).
 
 ## Paste this into the new chat
 
-> Read AGENTS.md, CLAUDE.md, docs/PLAN.md and docs/handoff.md on branch
-> claude/knowledge-brain of jvtomax99/Interp. Next job: turn the HUMC Brain
-> into "your knowledge brain" (handoff has the plan). Start by checking what
-> per-term knowledge data the app already keeps, then tell me in 2-3 lines
-> what you'll build and ask me the open questions with buttons.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
+> say in 2-3 lines what you'll do next and wait for my go. Plain words,
+> say "working on it" and "done".
 
 ## Where things stand
 
-- **#113 HUMC Brain: merged, live (b1021.1147).** Double-tap Dr. Smiley's
-  head in the Home hello opens `brain/index.html` full screen for everyone.
-  It shows the census of `index.html` (118 sections, 1,090 links) as a 3D
-  brain plus a 7-figure workup. `docs/features/humc-brain.md` has it all.
-- No open PRs from this chat. No check-ins armed.
-- This branch (`claude/knowledge-brain`) holds only this handoff and the
-  PLAN entry; the new chat builds on it and opens one PR.
+**Everything of this chat's is merged.** The split of `index.html`
+(`docs/split-index.md`), one change each, all on Jose's "push":
+- #109 phase 0: `tests/tools/census.cjs` (the map of the script's
+  sections and who uses whom; `--write` refreshes the table in the split
+  plan) and 35 section banners (comments only).
+- #112 phase 1: the stylesheet is `app.css` (Jose chose it on the numbers:
+  weak Wi-Fi first paint +0.33 s, Home -0.3 s).
+- #115 phase 2: `guide/topics.js` (`GUIDE_SECTIONS`, `GUIDE_TOPICS`).
+- #122 phase 2b: `practice/questions.js` (`CCHI_DOMAINS`, `SEED_QUESTIONS`),
+  plus a fix to `brain/index.html` (it placed exactly four data lists).
+All live: #122 as b1022.0855 (Vercel: "Deployment has completed").
+No PR of this chat's is open; no check-ins armed.
 
-## Next: your knowledge brain (Jose's pick, 2026-10-21)
+**Other chats were busy on `main` the same day** (HUMC Brain, knowledge
+brain, Term Review brain, notifications, K2 privacy, a 3D Dr. Smiley
+mockup #114). Fetch `main` and look before starting.
 
-Jose asked what the brain is *for*; the honest answer was "a code map for
-whoever writes the code, an easter egg for everyone else". Of three ways to
-give it a job (knowledge brain, team brain, code health brain) he picked:
+## Next, with my pick
 
-**Your knowledge brain.** Same 3D brain, but about the interpreter, not the
-code:
-- Regions = the glossary's domains (oncology, cardiology, GI, peds...),
-  laid out over the lobes; subgroups cluster inside their parent's region.
-- Dots = terms. Brightness = how well *this phone's person* knows the term,
-  from what the app already records. Dark = never practiced or often missed.
-- Tap a dark region → practice exactly those terms (Daily Drill or Term
-  Review scoped to them). Tap a dot → the term card.
-- Over weeks the brain lights up: motivation for CoreCHI.
-- The figures below become about knowledge too (weakest domains, coverage,
-  progress over time) instead of code.
+1. **`FALSE_FRIENDS` (44 KB) to its own file**, same method as the guide and
+   the practice bank (below). Readers at startup: the Home tool tile counts
+   it (`getToolTiles`), global search, Term Review's `rvLoose` lookup, the
+   Daily Drill. So a plain `<script src>`, not fetched on demand. Suggested
+   name: `falsefriends/list.js` (or ask Jose).
+2. Then `DOMAIN_ICONS` (18 KB, section "Domain icons and link lists"): used
+   by Home's tiles at first paint, so the same plain-script way, or leave it.
+3. Then phase 3, JS by feature, leaves first (the census and
+   `docs/split-index.md` "What it says" list them).
 
-**First step, before any building: find the data.** Unproven so far how
-much per-term detail exists. Look at (banner sections in `index.html`):
-"Practice record: what you personally know, question by question",
-"Term Review: Dr. Smiley's practice sessions" (`saveTermReview`,
-`term-reviews/`), "Quiz" and `quiz-history/`, "Daily Drill" (`ih_warmup`),
-"Memory trainer". Report which give per-term right/wrong with dates, and
-whether they're on the phone (localStorage) or in Firestore per person.
+## The method for a data list (worked twice)
 
-## Open questions for Jose (ask with buttons, recommendation first)
+1. Check it's pure data: walk its acorn AST, only literals/arrays/objects
+   (the snippet is in this chat's history; any `Identifier` value or
+   template expression means it isn't).
+2. Move the banner + declarations verbatim into the new file under a short
+   header comment; leave a two-line pointer comment in `index.html`.
+3. `<script src="./x/y.js"></script>` after the others, just before the
+   main inline `<script>` (around line 625).
+4. The lists: `sw.js` (precache + the network-first regex + its comment),
+   `tests/support/harness.cjs` (the served files), `tests/tools/
+   first-paint.cjs` (its unroute list), `tests/tools/brain-data.cjs` (drop
+   the section from the `data` group), then `node tools/brain-data.cjs` and
+   `node tests/tools/census.cjs --write`.
+5. Proof: a probe page in both checkouts (`ROOT=` a worktree of `main`):
+   `JSON.stringify` of the lists identical, the tile count the same,
+   `Object.keys(window)` the same, no page errors. Then all suites, then
+   `first-paint.cjs` (`ROOTS=before,after RUNS=5`, about 20 min).
+6. Docs: `AGENTS.md` where-table, `CLAUDE.md` file map + table, the
+   feature note that names the list, `docs/split-index.md`, `docs/PLAN.md`.
 
-1. Keep the code view as a second tab ("How the Hub is built") or replace
-   it? Pick: keep it as a tab; it's done and costs nothing.
-2. Still opened by double-tapping his head, or also a visible entrance
-   (CoreCHI Practice dashboard)? Pick: both; a useful tool shouldn't be
-   hidden.
-3. Personal data stays on the phone / the person's own records only. Never
-   show one person's gaps to others. (State it; don't ask.)
+## Not proven / open
 
-## Learned this chat, not yet elsewhere
+- Each moved file costs weak Wi-Fi first paint about 0.08-0.1 s (its bytes
+  arrive with `app.css`); Home comes sooner by about as much.
+  `fetchpriority="low"` made no difference in Chromium's throttling;
+  real HTTP/2 priorities on Vercel are unmeasured.
+- The census can't see `window[name]` lookups or names built in strings.
+- WebKit CI crashed once mid-suite (startup-work, "page closed") and passed
+  on the re-run; not reproduced.
 
-- From a cloud session, `gh pr create` fails (GraphQL blocked): open PRs
-  with `gh api repos/jvtomax99/Interp/pulls --input pr.json`, merge with
-  `gh api -X PUT .../pulls/N/merge -f merge_method=merge -f sha=<full sha>`.
-- On the shallow clone, `--force-with-lease` needs the explicit old sha
-  (`--force-with-lease=refs/heads/B:<sha>`), or it says "stale info".
-- The harness serves only `/` for our origin; a suite opening another page
-  of ours routes it itself (`tests/suites/humc-brain.cjs`).
-- `main` moved mid-chat (the `app.css` split, phase 1); rebase before the
-  PR, regenerate `brain/data.json` after (`cd tests && node tools/brain-data.cjs`).
+## Learned (also in `docs/PLAN.md` Facts)
+
+- Computed-style proofs must sort property names: custom properties are
+  listed in declaration order, which moving a sheet changes.
+- Compare against a second run of the old version: some elements differ
+  between two runs of the same code (chat timestamps, the tab bar's lens).
+- `brain/index.html` and `brain-data.cjs` depend on census section titles;
+  a renamed or moved section needs the list updated (the tool prints "Not
+  found in the census").
