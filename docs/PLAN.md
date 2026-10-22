@@ -285,8 +285,8 @@ then read the log; it names the suite and the check.
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
-  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). Next:
-  `FALSE_FRIENDS`, checked for startup readers first (`docs/handoff.md`).
+  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: this PR.
+  Next: `DOMAIN_ICONS` (Home's first paint reads it) or phase 3.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -296,6 +296,12 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-22 Split `index.html`, phase 2, False Friends (this PR):
+  `FALSE_FRIENDS` is `falsefriends/list.js`, loaded like the guide and the
+  practice bank; `ETHICS_CONTENT` stays, under a "Code of Ethics"
+  banner. Identical in the browser; `sw.js`, harness, `first-paint.cjs`,
+  `brain-data.cjs` ("Code of Ethics" takes its place in the data group),
+  `AGENTS.md`/`CLAUDE.md`. Nothing visible, no guide change.
 - 2026-10-21 Split `index.html`, phase 2, the practice bank (this PR):
   `CCHI_DOMAINS` and `SEED_QUESTIONS` are `practice/questions.js`, loaded
   like `guide/topics.js`. Identical in the browser before and after;
