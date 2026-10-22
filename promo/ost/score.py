@@ -32,6 +32,7 @@ ending". So:
   risers, drops into silence and slams.
 """
 import json
+import math
 import os
 import random
 
@@ -481,6 +482,64 @@ chord('piano', LAST, [D3, A3, D4, Fs4], 58, 45.1 - LAST, roll=0.04)
 n('piano', LAST + 0.05, D5, 70, 45.1 - LAST)
 n('lead', LAST + 0.05, D5, 60, 1.4)
 n('bells', LAST + 0.2, D6, 44, 1.6)
+
+# ---------- The human feel (Jose, 2026-10-22: prompt 2) ----------
+# "Make the playing human: notes slightly ahead or behind the beat, the
+# congas and bongos a little loose, and every hit at a slightly different
+# loudness, so no two in a row are identical." Every note stays; only when
+# it lands and how hard it's played move. Each part has a feel, like a
+# player's: (lean in ms, + is behind the beat; spread in ms; loudness spread).
+FEEL = {
+    'piano': (6, 7, 5), 'keys': (-3, 6, 6), 'strings': (10, 6, 3), 'pad': (12, 4, 2),
+    'trem': (8, 6, 3), 'stabs': (0, 5, 6), 'cello': (8, 6, 3), 'bass': (-6, 5, 5),
+    'brass': (6, 6, 5), 'lead': (8, 6, 5), 'guitar': (0, 8, 5), 'bells': (0, 4, 4),
+}
+DRUM_FEEL = {  # by drum note; the clave is the anchor, the hand drums loosest
+    CLAVES: (0, 3, 4), COWBELL: (-3, 4, 6), MUTE_CONGA: (4, 10, 8),
+    OPEN_CONGA: (4, 10, 8), LO_CONGA: (4, 10, 8), HI_BONGO: (2, 9, 8),
+    LO_BONGO: (2, 9, 8), GUIRO_S: (5, 10, 6), GUIRO_L: (5, 10, 6),
+    MARACAS: (0, 6, 6), HAT: (0, 4, 7), KICK: (0, 2, 4), SNARE: (6, 3, 5),
+    CLAP: (6, 3, 5), CRASH: (0, 2, 3), HI_TIMB: (0, 6, 7), LO_TIMB: (0, 6, 7),
+}
+SWING = {HAT: 6, MARACAS: 10}  # ms late on the off sixteenths
+# The slams stay exactly on the cut: hits there don't move.
+SYNC = [OPEN, RIGHT, bar(7), HOME, OUT]
+
+
+def feel(part, note):
+    return DRUM_FEEL.get(note, (0, 4, 5)) if part == 'drums' else FEEL.get(part, (0, 4, 4))
+
+
+def offset(part, t, note):
+    """Seconds this note moves. Seeded by part and time, so the 808 under the
+    bass moves exactly with the bass."""
+    if any(abs(t - s) < 0.003 for s in SYNC):
+        return 0.0
+    lean, spread, _ = feel(part, note)
+    r = random.Random(f'{part}:{round(t, 3)}')
+    ms = lean + max(-2.5, min(2.5, r.gauss(0, 1))) * spread
+    k = round((t - T0) / U)
+    if part == 'drums' and k % 2 and abs(t - (T0 + k * U)) < 0.004:
+        ms += SWING.get(note, 0)
+    return ms / 1000
+
+
+human = random.Random(11)
+drift = {p: [human.uniform(0, 6.28) for _ in range(2)] for p in PARTS}
+last = {}
+events.sort(key=lambda e: (e[1], e[0]))
+for i, (t, p, x, vel, dur) in enumerate(events):
+    _, _, vel_spread = feel(p, x)
+    a, b = drift[p]
+    swell = 3 * math.sin(t / 3.1 + a) + 2 * math.sin(t / 1.3 + b)  # a player's slow ebb
+    new = int(round(vel + swell + human.gauss(0, vel_spread)))
+    new = max(1, min(127, new))
+    if last.get((p, x)) == new:                   # never the same twice in a row
+        new += 1 if new < 127 else -1
+    last[(p, x)] = new
+    events[i] = (max(0.0, t + offset(p, t, x)), p, x, new, dur)
+for s in fx['sub']:
+    s[0] = round(max(0.0, s[0] + offset('bass', s[0], 0)), 4)
 
 # ---------- write the MIDI file ----------
 # A note struck again while still sounding: end the first one just before,
