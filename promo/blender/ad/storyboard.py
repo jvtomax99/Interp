@@ -30,7 +30,9 @@ def fresh(bg='#070B22', strength=1.0, view='AgX', samples=12):
     sc.render.engine = 'CYCLES'
     sc.cycles.samples = samples
     sc.cycles.use_denoising = True
-    sc.render.resolution_x, sc.render.resolution_y = 640, 360
+    # BOARD_SCALE=2 for sharper frames (1280 x 720)
+    k = int(os.environ.get('BOARD_SCALE', '1'))
+    sc.render.resolution_x, sc.render.resolution_y = 640 * k, 360 * k
     sc.view_settings.view_transform = view
     w = bpy.data.worlds.new('w')
     sc.world = w
