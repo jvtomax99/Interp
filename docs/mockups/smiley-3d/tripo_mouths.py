@@ -33,12 +33,12 @@ MOUTHS = {
     # pucker; sadness pulls the corners down (15) and the chin up into a pout (17);
     # worry stretches the lips sideways (20); doubt dimples one corner (14)
     'surprised': dict(close=0, mouth={'AU.SmileOffOpen.L': 1.3, 'AU.SmileOffOpen.R': 1.3, 'JawOpen': 2},
-                      brow=((5, 0), (6, 0))),
+                      brow=((5, 0), (6, 0)), lid=(0, 0)),   # lids up from rest: white above the iris is the surprise
     'sad':       dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.CornerDepress.L': 1.15, 'AU.CornerDepress.R': 1.15,
-                                      'AU.ChinRaise': 1.6}, brow=((1.2, 15), (1.4, 18)), lid=(.32, .32)),   # heavy lids, as drawn
+                                      'AU.ChinRaise': 1.6}, brow=((1.2, 15), (1.4, 18)), lid=(.44, .44)),   # heavy lids, as drawn
     'worried':   dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.LipStretch.L': 1.25, 'AU.LipStretch.R': 1.25,
                                       'AU.CornerDepress.L': .6, 'AU.CornerDepress.R': .85}, brow=((1.6, 18), (2, 21))),
-    'doubt':     dict(close=1, mouth={'AU.Relax.R': 1.2, 'AU.Dimple.L': 1.6, 'CornerUp.L': .6}, lid=(0, .42),   # one eye half shut, as drawn
+    'doubt':     dict(close=1, mouth={'AU.Relax.R': 1.2, 'AU.Dimple.L': 1.6, 'CornerUp.L': .6}, lid=(.26, .56),   # one eye half shut, as drawn
                   brow=((3.6, 5), (-1.4, 3))),
 }
 DRAWN = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh',

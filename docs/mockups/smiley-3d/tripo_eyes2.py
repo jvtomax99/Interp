@@ -215,7 +215,7 @@ def lid_faces(rows=48, segs=128):
     return shell + rim, lash
 
 
-LOW_REST, LOW_HIGH = -58, 8        # the lower lid's edge: at rest under the iris, raised for a squint or a laugh
+LOW_REST, LOW_HIGH = -58, -24        # the lower lid's edge: at rest under the iris, raised for a squint or a laugh
 LOW_ARCH_REST, LOW_ARCH_HIGH = -5, 16   # a slight dip at rest; pushed up by the cheeks it bows up (the laugh's arc)
 LOW_STAGES = 6
 LOW_R, LOW_D = 1.03, 1.3      # the lower lid hugs the ball (1.2x wide, like the upper, it stood out over his
@@ -267,7 +267,12 @@ def build_lower_lid(eye, side):
     skin, lash = lid_faces(rows=32)
     me = bpy.data.meshes.new(name)
     me.from_pydata(lower_stage_verts(rx, ry, rz, *st[0], side), [], skin + lash); me.shade_smooth()
-    me.materials.append(bpy.data.materials['Lid']); me.materials.append(bpy.data.materials['Lash'])
+    # the cheek's own colour, not the upper lid's darker tone: raised, it must read as his cheek pushing up
+    lm = bpy.data.materials.get('LidLow') or bpy.data.materials['Lid'].copy()
+    lm.name = 'LidLow'
+    c = cheek_colour(eye)
+    lm.node_tree.nodes['Color Ramp'].color_ramp.elements[0].color = build.srgb(*c)
+    me.materials.append(lm); me.materials.append(bpy.data.materials['Lash'])
     me.polygons.foreach_set('material_index', [0] * len(skin) + [1] * len(lash))
     ob = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(ob)
     ob.parent = up.parent; ob.parent_type = up.parent_type; ob.matrix_world = up.matrix_world.copy()
@@ -281,6 +286,18 @@ def build_lower_lid(eye, side):
         kb.data.foreach_set('co', np.array(lower_stage_verts(rx, ry, rz, *st[k], side)).ravel())
         kb.value = 0
     return ob
+
+
+def cheek_colour(eye):
+    """His skin just under this eye, from the face texture."""
+    import tripo_lib as T
+    head = bpy.data.objects['Mesh_0']
+    img, px = T.texture(head)
+    cen, tuv = T.face_arrays(head)
+    t = eye.matrix_world.translation
+    rz = eye.data.materials[0].node_tree.nodes['RZ'].outputs[0].default_value
+    sel = (np.abs(cen[:, 0] - t.x) < .012) & (np.abs(cen[:, 2] - (t.z - rz * 1.35)) < .005) & (cen[:, 1] < -.09)
+    return [int(v) for v in np.median(T.sample(px, tuv[sel].mean(1)) * 255, 0)]
 
 
 def set_lower(side, amount):

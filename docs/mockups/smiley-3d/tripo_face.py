@@ -29,6 +29,9 @@ L, R = 'L', 'R'          # his left (+x) and right
 BROWS = {   # key: (lift, tilt) in the app's units (DR_BROWS), the full-strength move
     'BrowUp': (4.2, 0), 'BrowDown': (-1.2, 0), 'BrowInUp': (0, 15), 'BrowInDown': (0, -12)}
 CLOSE_STEPS = (.25, .5, .75, 1)
+# the upper lid at rest just touches the top of the iris (Jose's pick B, 2026-10-22):
+# white above the iris reads startled
+REST_LID = .26
 
 
 def weld(ob):
@@ -92,7 +95,7 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
     if lids:
         from tripo_eyes import set_blink
         for i, s in enumerate((R, L)):
-            set_blink(bpy.data.objects['Lid.' + s], lid[i] if lid else lid_down[i])
+            set_blink(bpy.data.objects['Lid.' + s], lid[i] if lid else REST_LID + lid_down[i])
             if 'Cornea.' + s in bpy.data.objects:      # the dome's real shine replaces the painted one (tripo_eyes2.py)
                 bpy.data.objects['Glint.' + s].hide_render = True
             if 'LidLow.' + s in bpy.data.objects:

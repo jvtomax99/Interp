@@ -131,6 +131,13 @@ worried (flat, not a frown).
    `out/plan-eyes4.png`: upper lid at rest A (now) / B (on the iris, my
    pick) / C (over it), waiting on his pick. Not done: the raised lower lid
    still reads as a separate skin patch (needs to blend into the cheek).
+   Jose picked B: `REST_LID = .26` in `tripo_face.py` (surprised opens to
+   0; sad .44, doubt .56). Lower lid: `LOW_HIGH -24`, the cheek's own
+   colour (`cheek_colour`). Squint works (`lower=.5`); shut laugh eyes do
+   not: lid shells over a ball standing 6 mm out read as goggles, lash
+   lines cross. Proposed (`out/plan-eyes5.png`, waiting on Jose): wrap the
+   lids into his skin, blending from the ball near the edge to his face
+   surface further out (ray casts, like `glue_liner`).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.
