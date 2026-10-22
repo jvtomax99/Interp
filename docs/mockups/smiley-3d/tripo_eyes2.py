@@ -250,7 +250,10 @@ def wrap(vs, eye, rx, ry, rz, rows=None, segs=128, extra=0.):
     i0, j0 = fi.astype(int), fj.astype(int); ti, tj = fi - i0, fj - j0
     gg = np.where(np.isnan(g), np.nanmax(g), g)
     fy = (gg[i0, j0] * (1 - ti) * (1 - tj) + gg[i0 + 1, j0] * ti * (1 - tj) + gg[i0, j0 + 1] * (1 - ti) * tj + gg[i0 + 1, j0 + 1] * ti * tj)
-    s = smooth((rho - .85) / .3)
+    # only the lid's front half: its back half (behind the eye's centre) was pulled forward too
+    # and showed as a second, lower lid edge under the lash line
+    front = v[:, 1] < 0
+    s = smooth((rho - .85) / .3) * front
     y = v[:, 1] * (1 - s) + (fy + .0006) * s            # outside: .6 mm under his skin
     inside = rho < 1
     yb = -ry * np.sqrt(np.clip(1 - rho * rho, 0, 1))   # the ball's front surface (its y is out-negative)
@@ -259,7 +262,7 @@ def wrap(vs, eye, rx, ry, rz, rows=None, segs=128, extra=0.):
     # min switched between the two point by point and shaded as a grid (a cross on the lid)
     a_, b_ = y, yb - margin
     soft = (a_ + b_) / 2 - np.sqrt(((a_ - b_) / 2) ** 2 + .0012 ** 2)
-    y = np.where(inside, soft, y)
+    y = np.where(inside & front, soft, y)
     dy = y - v[:, 1]
     if rows is not None:
         # the rim and lashes move as one piece with their column's lid edge: pushed out

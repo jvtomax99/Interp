@@ -156,6 +156,11 @@ worried (flat, not a frown).
    uses a soft minimum near the ball (a hard min drew a grid cross).
    Shown `out/plan-eyes7.png`, waiting. Known: shut eyes bulge a little,
    arc ends dip.
+   Jose: "see how the eyelashes are moving?". Cause: `wrap` also pulled the
+   lid ring's hidden back half forward; it showed as a second lower lid edge
+   under the lash line. Fixed (only y<0 wraps); `REST_LID` .32 (on the iris
+   top), sad .5, doubt .32/.62. Shown `out/plan-eyes8.png`, waiting.
+   Diagnostic trick: colour Lid red and Lash blue (`/tmp` script pattern).
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

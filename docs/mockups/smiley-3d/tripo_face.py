@@ -31,7 +31,7 @@ BROWS = {   # key: (lift, tilt) in the app's units (DR_BROWS), the full-strength
 CLOSE_STEPS = (.25, .5, .75, 1)
 # the upper lid at rest just touches the top of the iris (Jose's pick B, 2026-10-22):
 # white above the iris reads startled
-REST_LID = .26
+REST_LID = .32   # .26 before the lid's hidden back half was fixed (it had been the edge you saw)
 
 
 def weld(ob):

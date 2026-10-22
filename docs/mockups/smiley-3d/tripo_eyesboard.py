@@ -75,3 +75,14 @@ board('Eyes, the animator\u2019s way', ['No lower lids, no spiky lashes. What an
     ('4', 'NEXT', 'Known: a shut eye still bulges a little (the eyeball stands out of his face), and the arc\u2019s ends dip as '
      'they tuck under the skin. After your OK: the teeth.', [], '', False),
 ], 'plan-eyes7.png')
+
+
+e7b, e8 = Image.open(O('plan/eyes7-before.png')), Image.open(O('plan/eyes8.png'))
+sheet = Image.open(O('plan/mouths.png'))
+board('Eyes: the lash line fixed', ['You spotted it: the lash line floated above the eye.'], [
+    ('1', 'ME', 'Why: each lid is a ring round the eyeball, and its hidden back half was being pulled forward too. It showed '
+     'as a second, lower lid edge under the lash line, so the line looked detached and wandered from pose to pose. Now only '
+     'the front half wraps; the line sits exactly on the lid\u2019s edge, which rests on the top of the iris (your pick B).',
+     [fit(e7b, 1000, 380), fit(e8, 1000, 380)], 'before (top), after (bottom): rest, half blink, sad, laugh', False),
+    ('2', 'ME', 'All seven reactions with the fix.', [fit(sheet, 1000, 2200)], 'your drawing, his mouth, his whole face', True),
+], 'plan-eyes8.png')
