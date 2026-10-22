@@ -32,12 +32,21 @@ pictures. Questions with options go as buttons, recommended first.
   `out/plan-eyes-options.png`): 3D eyes at his painted eyes' size, top
   eyeliner, dark brown iris, big pupil, one shine; blink and look around.
   Approved: `out/tripo-eyes.mp4`.
-- **Face plan (2026-10-22), shown, waiting on Jose's picks:** `out/plan-face.png`
+- **Face plan (2026-10-22), Jose picked brows A and mouth route 1:** `out/plan-face.png`
   (`tripo_faceplan.py` renders the mock-ups into `in/faceplan/`,
   `tripo_faceboard.py` lays them out). Brows A (his sculpted brows move the
   skin, my pick) or B (new pieces); cheeks rise on smile/laugh; mouth route
   1 (reshape his own lips, my pick), 2 (new 3D mouth) or 3 (painted, not
   recommended); then a closed-mouth test before anything else.
+- **Mouth test (2026-10-22), shown, waiting on Jose's OK:**
+  `out/plan-mouth-test.png` (`tripo_mouthtest.py`, `close_mouth()`): his own
+  open smile closed by moving his surface only. Lessons in its comments:
+  measure the opening on a flat picture with exposure 0 and Standard colour;
+  lips move straight up/down (sliding them on a fitted surface pushed the
+  lower lip back and tore the chin); the inside is squeezed evenly across the
+  opening and tucks only late in the closing (else it folds and streaks);
+  the upper teeth go up and back, and the lower lip tucks 4 mm behind the
+  upper one (its top curls inward).
 - Earlier tries, rejected (kept in git as a record): shapes built in code
   (`build.py` styles v1, figure, film: "still not him", "glossy", "the
   hair"). Don't go back there.
