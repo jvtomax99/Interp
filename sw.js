@@ -58,6 +58,7 @@ const PRECACHE = [
   './guide/topics.js',
   './practice/questions.js',
   './falsefriends/list.js',
+  './features/translate.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
@@ -211,11 +212,12 @@ self.addEventListener('fetch', event => {
   }
 
   /* The app's own code beside the page (its styles in app.css, the
-   * guide's answers, the practice bank, False Friends, Home behaviour and its styles, the pins wiring): network-first like the
+   * guide's answers, the practice bank, False Friends, the
+   * features moved out to features/, Home behaviour and its styles, the pins wiring): network-first like the
    * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {

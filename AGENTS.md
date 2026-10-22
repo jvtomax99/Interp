@@ -67,6 +67,7 @@ So:
 | User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
+| The Translate tool's code (`renderTranslate`, `runTranslate`…) | `features/translate.js` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
@@ -77,6 +78,13 @@ So:
 links `app.css`, then `home-polish.css`, which must stay after it so it
 still wins. Never put a `<style>` block back in `index.html`; a style
 change goes in `app.css` (or `home-polish.css` for Home).
+
+**Features are moving out of `index.html` into `features/*.js`** (phase 3
+of `docs/split-index.md`; Translate first, 2026-10-22). A feature's code
+lives in its file: edit it there, never paste a copy back into
+`index.html`. Those files load with plain `<script src>` before
+`index.html`'s script, so they may only declare things at the top level;
+a top-level line that calls into `index.html` would run before it exists.
 
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
 `--ic-*`) lives in the "Visual refinement" block at the end of `app.css`; Home's half is the block of the same name at the end of
