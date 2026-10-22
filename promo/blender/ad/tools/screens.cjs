@@ -60,6 +60,17 @@ const SHOTS = {
   translate: async p => { await H.go(p, 'translate', 1200);
     await p.getByPlaceholder(/word or phrase/i).first().fill('heart failure');   // the stand-in's answer
     await p.getByRole('button', { name: /^Translate$/ }).first().click(); await p.waitForTimeout(2500); },
+  translate2: async p => { await SHOTS.translate(p);      // scrolled: the answer and its caution in full
+    const r = await p.evaluate(() => {
+      const el = [...document.querySelectorAll('body *')].reverse().find(e => /fallo card/i.test(e.textContent) && e.offsetParent);
+      if (!el) return 'not found';
+      let sc = el.parentElement; while (sc && !(sc.scrollHeight > sc.clientHeight + 20 && /auto|scroll/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement;
+      const target = sc || document.scrollingElement;
+      const box = el.getBoundingClientRect();
+      target.scrollTop += box.top - innerHeight * 0.42;
+      return (sc ? sc.id || sc.className : 'page') + ' ' + Math.round(box.top);
+    });
+    console.log('translate2 scroll:', r); await p.waitForTimeout(900); },
   ask:       async p => { await askRoute(p); await H.go(p, 'ask', 1200);
     await p.evaluate(q => { const i = document.getElementById('askInput'); i.value = q; ASK.draft = q; submitAsk(); }, 'Does "constipado" mean constipated?');
     await p.waitForTimeout(4000); },
