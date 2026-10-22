@@ -23,6 +23,25 @@ so the organ shot uses heart, stomach, pancreas, kidneys. The campus's
 sky dome doesn't carry over to glTF (hidden; Blender's sky instead). The
 explode follows the app's Explode slider: systems slide apart side by side.
 
+## Beats (storyboard 6, the whole film, vertical, about 45 s; 2026-10-22)
+
+The hook is built and approved in direction (`brainhook.py`, `logo.py`);
+the rest are storyboard frames. The brain is in the hook now, so the later
+brain scene is out unless Jose wants it back. Sections are built one at a
+time: moving test, Jose's notes (`REVIEW_PROMPT.md`), then the final render.
+
+| Seconds | Section | What happens |
+|---|---|---|
+| 0-5 | 1 Hook | Dr. Smiley's nucleus, through the HUMC Brain (no words), the whole brain, into his head on the Home screen (double-tap in reverse), the Interpreter Hub logo builds above the phone (after Jose's reference picture), white flash |
+| 5-11 | 2 Finding a word | Glossary, Translate, Ask the Hub, False Friends, with Jose's captions |
+| 11-20.5 | 3 3D Body | Whole, broken down by system (the drop at 13.5 s), every piece |
+| 20.5-26.5 | 4 Before an appointment | Doctor Directory, a doctor's page, Doctor Prep, Team Chat (sample doctors) |
+| 26.5-31 | 5 Keep learning | Daily Drill, Term Review, Memory trainer |
+| 31-41 | 6 CoreCHI City | Jose's Hackensack photo (cherry tree) as the doorway, the Practice screen, the campus building up |
+| 41-45 | 7 End | Jose's end card, the BodyParts3D credit |
+
+## Earlier beats (storyboard 4-5), kept for reference
+
 ## Beats (storyboard 4, vertical 9:16, about 56 s, 120 BPM)
 
 Jose 2026-10-22: take inspiration from the original promo
