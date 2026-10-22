@@ -1,14 +1,14 @@
 #!/bin/sh
 # Score -> audio -> the promo video with its new soundtrack. Needs python3
-# with mido, fluidsynth and the FluidR3 GM sound bank (MIT licence):
-#   apt-get install fluidsynth fluid-soundfont-gm && pip install mido
+# with mido, numpy and scipy, ffmpeg, and the instrument libraries and
+# their player, fetched once by ./fetch-libs.sh into libs/ (not in git).
 # Writes out/built-here.wav and out/hub-promo-ost.mp4. media/ is untouched;
 # copy the video there by hand once it's approved.
 set -e
 cd "$(dirname "$0")"
-SF2=${SF2:-/usr/share/sounds/sf2/FluidR3_GM.sf2}
+export SFIZZ_RENDER=${SFIZZ_RENDER:-$PWD/libs/sfizz/build/library/bin/sfizz_render}
 python3 score.py
-fluidsynth -ni -q -r 48000 -g 0.5 -R 1 -C 0 -F out/raw.wav "$SF2" out/built-here.mid
+python3 instruments.py   # the recorded instruments, mixed in a room -> out/raw.wav
 python3 synth.py   # the sub, risers, impacts and cuts -> out/mix.wav
 # 45.1 s like the video's audio, a fade on the last 1.3 s
 # A gentle compressor to pack it like the reference, one gain for the whole

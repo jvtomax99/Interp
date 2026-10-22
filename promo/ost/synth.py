@@ -1,13 +1,16 @@
 """The sounds the sound bank can't make, mixed under the rendered score.
 
-Reads out/raw.wav (the score through FluidR3) and out/fx.json (written by
-score.py), and writes out/mix.wav:
+Reads out/raw.wav (the score through the recorded instruments,
+instruments.py) and out/fx.json (written by score.py and instruments.py),
+and writes out/mix.wav:
 
   sub     an 808-style bass: a sine that drops from an octave up in its
           first moments, saturated so its overtones carry on a phone
           speaker, which can't play the fundamental (D2 is 73 Hz)
   riser   noise that opens up and swells into a hit, with a rising tone
   impact  the hit itself: a falling boom and a burst of noise
+  kit     the electronic drums: an 808-style kick, a clap and a closed
+          hi-hat, the sounds an orchestra library doesn't have
   cut     a stretch where everything goes silent (the drops), with short
           fades so it doesn't click; the impact after it lands on silence
 """
@@ -23,6 +26,8 @@ out = os.path.join(here, 'out')
 rng = np.random.default_rng(7)
 
 SUB_GAIN, RISER_GAIN, IMPACT_GAIN = 0.19, 0.12, 0.30
+KIT_GAIN = {'kick': 0.42, 'clap': 0.30, 'hat': 0.10}
+KIT_PAN = {'kick': 0.0, 'clap': 0.0, 'hat': 0.25}
 
 
 def read(path):
@@ -73,6 +78,33 @@ def impact():
     return np.tanh(1.8 * (boom + 0.5 * burst))
 
 
+def highpass(x, cutoff):
+    return x - lowpass(x, cutoff)
+
+
+def kick(vel):
+    t = np.arange(int(0.5 * SR)) / SR
+    body = np.sin(2 * np.pi * np.cumsum(45 + 105 * np.exp(-t / 0.035)) / SR) * np.exp(-t / 0.28)
+    click = lowpass(rng.standard_normal(len(t)), 4000) * np.exp(-t / 0.004) * 0.6
+    return np.tanh(1.5 * (body + click)) * vel / 127
+
+
+def hat(vel):
+    t = np.arange(int(0.09 * SR)) / SR
+    return highpass(highpass(rng.standard_normal(len(t)), 7000), 7000) * np.exp(-t / 0.022) * vel / 127
+
+
+def clap(vel):
+    t = np.arange(int(0.4 * SR)) / SR
+    noise = lowpass(rng.standard_normal(len(t)), 2600) - lowpass(rng.standard_normal(len(t)), 600)
+    env = sum(np.where(t >= d, np.exp(-(t - d) / 0.006), 0) for d in (0, 0.011, 0.022))
+    env = env + np.where(t >= 0.022, 0.6 * np.exp(-(t - 0.022) / 0.12), 0)
+    return noise * env * vel / 127
+
+
+KIT = {'kick': kick, 'clap': clap, 'hat': hat}
+
+
 def place(track, t, sound, gain, width=0.0):
     i = int(t * SR)
     j = min(len(track), i + len(sound))
@@ -102,6 +134,8 @@ for a, b, gain in fx['riser']:
     r = riser(b - a)
     place(extra, a, r, RISER_GAIN * gain, width=0.3)
     place(extra, a + 0.011, r, RISER_GAIN * gain * 0.5, width=-0.6)  # spread it
+for t, sound, vel in fx.get('kit', []):
+    place(extra, t, KIT[sound](vel), KIT_GAIN[sound], width=KIT_PAN[sound])
 mix = (score + extra) * gate[:, None]  # the impacts land after the cuts
 for t, gain in fx['impact']:
     place(mix, t, impact(), IMPACT_GAIN * gain)

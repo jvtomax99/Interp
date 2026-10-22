@@ -31,17 +31,23 @@ companies need a paid company licence.
 The promo's music, written as a score in code: `ost/score.py` writes a MIDI
 file whose every note is timed to the video's cuts (listed at the top of
 the file; a new card every 3 s is one bar at 80 beats a minute), and
-`ost/render.sh` plays it through the FluidR3 GM sound bank (piano and
-strings over a son/salsa groove: clave, congas, bongos, cowbell, guiro,
-timbales, tumbao bass, piano montuno, nylon guitar, brass, and hard string
-stabs, hats and backbeat in the manner of an anime fight track), adds what
-the bank can't make with `ost/synth.py` (an 808 sub-bass, risers, impacts,
-and the silent cuts before each slam), packs it to -14 LUFS and lays
-it under `media/hub-promo.mp4`. Output goes to `ost/out/` (not in git);
-`media/` is replaced by hand once the result is approved.
+`ost/instruments.py` plays it through real recorded instruments (sfizz,
+an SFZ player): Salamander Grand Piano for the piano and VSCO 2 Community
+Edition for strings by section, trumpet, horns, trombones, contrabass
+pizzicato, harp, glockenspiel and the Latin percussion (congas, bongos,
+claves, cowbell, guiro, cabasa, snare and crash), balanced, placed left to
+right and put in one room. `ost/synth.py` adds what an orchestra library
+doesn't have: an 808 sub-bass, kick, clap and hi-hat, risers, impacts and
+the silent cuts before each slam. `ost/render.sh` packs it to -14 LUFS and
+lays it under `media/hub-promo.mp4`. Output goes to `ost/out/` (not in
+git); `media/` is replaced by hand once the result is approved.
+
+Credit that must go with the video (its description is enough):
+"Piano: Salamander Grand Piano by Alexander Holm (CC BY 3.0)". VSCO 2 CE
+is CC0 and sfizz is BSD 2-Clause; neither asks for anything.
 
 ```
-apt-get install fluidsynth fluid-soundfont-gm && pip install mido
+ost/fetch-libs.sh   # once: the libraries (~3 GB) and the player, into ost/libs/
 ost/render.sh       # out/built-here.wav, out/hub-promo-ost.mp4
 ```
 

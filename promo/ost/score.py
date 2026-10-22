@@ -59,7 +59,8 @@ def unit(b, k):
     return bar(b, k / 8)
 
 
-# General MIDI programs from the FluidR3 bank, one channel each.
+# One channel per part. The General MIDI programs only matter for a quick
+# preview in any MIDI player; instruments.py picks the recorded instruments.
 PARTS = {
     'piano':   (0, 0),    # Acoustic Grand: the slow tune, and the hook at the end
     'keys':    (1, 0),    # the same piano: the montuno
