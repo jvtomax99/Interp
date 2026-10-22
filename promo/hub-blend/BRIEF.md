@@ -253,6 +253,17 @@ distinct on screen.
    Still open for Jose: the logo shot keeps the old flat phone; the hop
    between features dips through navy (a dark beat each time).
 
+## Audio and timing, settled (2026-10-21/22)
+
+v11's audio has a narrator reading the script, mixed into the music; no copy of the music alone
+exists here (the first reel's `music.m4a` was cut from the same mix) and separation models are
+blocked from this machine. Every edit inside the track cut his words, so Jose chose to match v11's
+timing: v11's audio plays untouched, the hook runs on v11's cut times (`HOOK_MAP` in main.js),
+features are 3 s each as in v11, the end card's lines appear when he reads them. The 3D Body shot
+is cut (no narrated line for it in v11) and so is the walk-in (Jose, 2026-10-22): the reel opens
+on the hook, like v11. 45 s, the same length and clock as v11. If a music-only file turns up, the
+walk-in and the 3D Body can come back (`git log` has both).
+
 ## Practical
 
 - No GPU here: Three.js renders in software. The first hub-blend (31 s) took

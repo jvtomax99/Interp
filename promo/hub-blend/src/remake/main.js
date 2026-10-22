@@ -28,7 +28,7 @@ const DURATION = +root.dataset.duration;
 /* The reel starts on the hook (Jose, 2026-10-20: the carousel opener is gone), or, while he
    chooses, on a short first frame that sets the place (?first=sign or ?first=arrive, previews
    only). Everything after it keeps its own clock (t = time - OPEN). */
-const FIRST = new URLSearchParams(location.search).get("first") || "sign"; // Jose: "2 is the right direction"
+const FIRST = new URLSearchParams(location.search).get("first") || "none"; // the walk-in was cut (Jose, 2026-10-22): the reel opens on the hook, like v11
 const TITLE = new URLSearchParams(location.search).get("title") || "glass-brick"; // Jose's pick // the name's lettering, while he picks
 const OPEN = FIRST === "none" ? 0 : 2.5;
 
