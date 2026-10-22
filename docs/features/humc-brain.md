@@ -43,7 +43,10 @@ name goes to the cortex ("Other features"). Core = thalamus (stays inline),
 startup = brainstem (stays), big data lists = hippocampus (move out as
 files), safe first moves = cerebellum, Ask the Hub = Broca's area, Dr.
 Smiley = motor strip. A renamed section shows in the tool's output as "Not
-found in the census"; update the list.
+found in the census"; update the list. As the split moves a data list out
+of `index.html` (`docs/split-index.md`, phase 2), its section leaves the
+census and the hippocampus: the page splits whatever is left between the
+two sides (it assumed exactly four until 2026-10-21 and drew nothing).
 
 ## What's real and what isn't
 
