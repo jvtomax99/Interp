@@ -38,11 +38,12 @@ W, H = 540, 960
 OUT = os.path.join(A.HERE, 'renders', 'brainhook')
 rnd = random.Random(5)
 PHONE_Y, PHONE_H = 0.6, 1.6
-# Jose: the logo is shown on top of the app. It builds in front of the
-# phone's upper half; the phone stays, the set stays dark (the white set,
-# floor and camera move are switched off by ON_APP).
+# Jose: the logo sits at the top, above the phone, never covering the app.
+# The phone stays, the set stays dark, and the camera tilts up and back as
+# the logo builds to make room (the white set and floor are switched off by
+# ON_APP and kept in the code).
 ON_APP = True
-LOGO_AT, LOGO_W = Vector((0, PHONE_Y - 0.28, 0.5)), 0.78   # the middle of "Interpreter"'s line
+LOGO_AT, LOGO_W = Vector((0, PHONE_Y - 0.12, 1.24)), 0.78   # the middle of "Interpreter"'s line
 START = Vector()
 HEAD = Vector(((0.746 - 0.5) * PHONE_H * PH_W / PH_H, PHONE_Y - 0.05, (0.5 - 0.29) * PHONE_H))
 
@@ -233,6 +234,10 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
             pos = side.lerp(Vector(cam_end_pos()), t)
             tgt = centre.lerp(Vector((0, PHONE_Y, 0.26)), t)
             lens = 35
+        if f > 108 and ON_APP:          # tilt up and back: room for the logo above the phone
+            u = ease_out((f - 108) / 14)
+            pos = pos.lerp(Vector((0, PHONE_Y - 2.25, 0.5)), u)
+            tgt = tgt.lerp(Vector((0, PHONE_Y, 0.48)), u)
         if f > 108 and not ON_APP:      # settle on the logo, centred, slightly from below like the reference
             u = ease_out((f - 108) / 14)
             pos = pos.lerp(Vector((0, LOGO_AT.y - 1.45, 0.12)), u)
@@ -260,8 +265,6 @@ def animate(sc, cam, pivot, sig, paths, ph, scr_mat, rings, t1, t2):
         if scr_mat:      # the Home screen lights up as the brain lands
             sv = scr_mat.node_tree.nodes['Principled BSDF'].inputs['Emission Strength']
             sv.default_value = smooth(0.15, 1.0, (f - 92) / 16)
-            if ON_APP:   # dims a little behind the logo so the letters stand out
-                sv.default_value *= 1 - 0.45 * smooth(0, 1, (f - 110) / 10)
             sv.keyframe_insert('default_value', frame=f)
 
         for k, r in enumerate(rings):   # rings on the two taps, 106 and 110
