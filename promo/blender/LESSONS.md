@@ -42,3 +42,10 @@ in BRAND.
 
 **The one rule for BEATS:** every jump must change something you can see.
 A jump that changes nothing is a wasted second.
+
+**Spot the broken beat.** Ask of every button: "What do I see change on
+the result?" If the answer is "nothing new appears", cut that button.
+Team Chat with **Open, Scroll, Read, Close** fails: scrolling and reading
+add nothing to anything being built. Doctor Prep with **Name, Specialty,
+Research, False friends, Save** passes: each press adds a new piece to
+the page (even "Research" makes the tabs appear).
