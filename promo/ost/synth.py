@@ -16,6 +16,7 @@ and writes out/mix.wav:
   sweep   a filter over everything that opens up as the intro builds (the
           cutoff moves through the points given, in Hz), so the groove is
           heard first as a muffled thump and then comes into the light
+  ping    a soft monitor ping on each beat of the intro, outside the filter
   fade    the level easing down evenly, in dB, to silence: the end
   duck    the bass (out/bass.wav, kept apart by instruments.py) and the sub
           dip about 3 dB under each kick and come back in 140 ms, the way a
@@ -28,6 +29,7 @@ import os
 import subprocess
 
 import numpy as np
+from scipy.signal import butter, sosfilt
 
 SR = 48000
 here = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +37,8 @@ out = os.path.join(here, 'out')
 rng = np.random.default_rng(7)
 
 SUB_GAIN, RISER_GAIN, IMPACT_GAIN = 0.17, 0.11, 0.22   # eased back for a softer mood
+GRIT, GRIT_BAND = 1.1, butter(2, [150, 1200], 'bandpass', fs=SR, output='sos')
+PING_GAIN = 0.15
 DUCK, DUCK_RELEASE = 0.3, 0.14   # depth (0.3 is about -3 dB) and recovery (s)
 KIT_GAIN = {'kick': 0.36, 'clap': 0.18, 'hat': 0.07}
 KIT_PAN = {'kick': 0.0, 'clap': 0.0, 'hat': 0.25}
@@ -69,7 +73,18 @@ def sub(note, dur, vel):
     wave = np.sin(2 * np.pi * np.cumsum(f) / SR)
     env = np.minimum(1, t / 0.003) * (0.6 + 0.4 * np.exp(-t / 0.25))
     env *= np.clip((dur + 0.08 - t) / 0.08, 0, 1)                   # release
-    return np.tanh(2.2 * wave) / np.tanh(2.2) * env * vel / 127
+    body = np.tanh(2.2 * wave) / np.tanh(2.2)
+    # its grit: the same note driven hard, kept only where a phone speaker
+    # plays (150 Hz - 1.2 kHz), so the bass is still felt on a phone
+    grit = sosfilt(GRIT_BAND, np.tanh(7 * wave))
+    return (body + GRIT * grit) * env * vel / 127
+
+
+def ping(vel):
+    """A soft monitor ping: A5 with a little of its octave, gone in a quarter second."""
+    t = np.arange(int(0.25 * SR)) / SR
+    tone = np.sin(2 * np.pi * 880 * t) + 0.3 * np.sin(2 * np.pi * 1760 * t)
+    return tone * np.minimum(1, t / 0.003) * np.exp(-t / 0.07) * vel / 127
 
 
 def riser(dur):
@@ -168,6 +183,8 @@ for t0, t1, points in fx.get('sweep', []):
     for _ in range(4):  # four poles: a steep, smooth slope
         seg = np.stack([lowpass(seg[:, c], cutoff) for c in (0, 1)], 1)
     mix[i:j] = seg
+for t, vel in fx.get('ping', []):  # after the sweep: the ping is never muffled
+    place(mix, t, ping(vel), PING_GAIN, width=0.15)
 mix *= gate[:, None]  # the impacts land after the cuts
 for t, gain in fx['impact']:
     place(mix, t, impact(), IMPACT_GAIN * gain)

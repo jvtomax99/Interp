@@ -314,30 +314,35 @@ def drop(d0, d1, keep=()):
 # climbs; the question hits; a cut; and the right word drops it all in.
 OPEN = bar(0, -1)                     # 0.983: on the grid, with the first title
 QUESTION, CUT, RIGHT = 6.0, 7.6, 7.9
-DROP = unit(2, 2)                     # 7.92: the drop's grid, 20 ms after the cut
+DROP = bar(2)                         # 7.73: the drop's groove sits on the card grid (it starts at the cut)
 C2, Eb2, Eb3, Bb3, Eb4, F4, Bb4, C5 = 36, 39, 51, 58, 63, 65, 70, 72
 
 # the drone: low cellos on A and E, an 808 under them, rising all the way
 chord('cello', 0.15, [A2, E3], 60, CUT - 0.15)
-for t0, t1, v in [(0.15, 2.5, 36), (2.5, 4.5, 46), (4.5, QUESTION, 58), (QUESTION, CUT, 72)]:
+for t0, t1, v in [(0.15, 2.5, 36), (2.5, 3.98, 46)]:  # the 808 drone gives way when the groove's 808 comes in
     sub(t0, A1, t1 - t0 - 0.02, v)
 fx['impact'].append([OPEN, 0.35])     # "Heart failure": a deep boom, nothing bright
 hit(OPEN, LO_TIMB, 70)
 
 
-def dark_groove(t0, t1, scale=lambda t: 1.0, bass_from=0.0, kick_from=0.0, low=lambda t: 1.0):
+def dark_groove(t0, t1, scale=lambda t: 1.0, bass_from=0.0, kick_from=0.0, low=lambda t: 1.0,
+                since=0.0, octave_up=False):
     """The drop's groove, in 16-unit cycles from t0: kick in 3-3-2, the
     backbeat at 160, sixteenth hats, congas, the 808 moving by half steps
     around D (from bass_from on; the kick from kick_from), and low string stabs on D with the half
     step above. scale(t) sets how hard it plays at each moment, low(t) the
-    kick and the bass on top of that."""
+    kick and the bass on top of that. Nothing before since is played (so
+    the groove can sit on the card grid and still start at a cut);
+    octave_up doubles the stabs an octave higher, where a phone can play
+    them."""
     BASSLINE = [(0, D2, 3), (3, D2, 3), (6, Eb2, 2), (8, D2, 2), (10, C2, 3), (13, D2, 3)]
     cycle = 16 * U
     m = 0
     while t0 + m * cycle < t1:
         c = t0 + m * cycle
         def at(k):
-            return c + k * U
+            t = c + k * U
+            return t if t >= since else 99.0  # 99: past t1, so it is skipped
         for k, x, length in BASSLINE:
             if bass_from <= at(k) < t1:
                 sub(at(k), x, length * U * 0.95, int(104 * scale(at(k)) * low(at(k))))
@@ -359,6 +364,10 @@ def dark_groove(t0, t1, scale=lambda t: 1.0, bass_from=0.0, kick_from=0.0, low=l
                          (10, [D3, A3, D4]), (13, [D3, A3, D4])]:
             if at(k) < t1:
                 stab(at(k), notes, int((78 if k in (0, 10) else 64) * scale(at(k))))
+                if octave_up:
+                    stab(at(k), [x + 12 for x in notes], int((84 if k in (0, 10) else 70) * scale(at(k))))
+                    if k in (0, 10):  # and the brass with them on the accents
+                        chord('brass', at(k), [x + 12 for x in notes], 100, U * 2)
         m += 1
 
 
@@ -372,13 +381,18 @@ fx['sweep'] = [[0.0, CUT, [[0.0, 150], [OPEN, 200], [3.0, 450], [4.5, 900],
 for t0, t1, pair in [(3.0, 4.6, (A4, Bb4)), (4.6, QUESTION, (Bb4, B4)),
                      (QUESTION, 6.8, (B4, C5)), (6.8, CUT, (C5, Cs5))]:
     chord('trem', t0, list(pair), 84, t1 - t0)
-fx['riser'].append([3.0, CUT, 2.2])   # louder than the others: it is what opens up
+fx['riser'].append([3.0, CUT, 0.9])   # louder than the others: it is what opens up
+# a soft monitor ping at a resting heart rate (80 a minute is this grid's
+# beat), from the first title to the question: the build's top line, the part a
+# phone speaker can play while the rest is still low and muffled (synth.py)
+fx['ping'] = [[round(OPEN + k * BEAT, 4), 60 + 4 * k] for k in range(int((CUT - OPEN) / BEAT) + 1)
+              if OPEN + k * BEAT < QUESTION]
 
 # 6.0 "¿Fallo cardíaco?": a wrong chord, hit hard, and the roll takes over
 chord('brass', QUESTION, [Bb3, D4, F4], 96, 0.4)
 chord('stabs', QUESTION, [Bb3, D4, F4], 96, U * 1.6)
 hit(QUESTION, CRASH, 70, 1.0)
-roll(QUESTION + 0.2, CUT, 40, 108, 0.0625)
+roll(QUESTION + 0.2, CUT, 36, 88, 0.0625)   # the mistake must not outshine the right word
 fx['cut'].append([CUT, RIGHT])
 
 # 7.9 "Insuficiencia cardíaca": the drop. Everything, open, on D.
@@ -386,8 +400,11 @@ fx['impact'].append([RIGHT, 1.1])
 for x, v in [(CRASH, 108), (KICK, 112), (LO_TIMB, 100)]:
     hit(RIGHT, x, v, 2.0)
 chord('brass', RIGHT, [D3, A3, D4, A4], 100, 0.5)
-dark_groove(DROP, bar(2, 3))
-chord('strings', RIGHT, [D3, A3, D4, A4], 72, bar(3) - RIGHT)
+chord('brass', RIGHT, [D4, A4, D5], 108, 0.7)    # the mid-range hit, for phones
+chord('stabs', RIGHT, [D4, A4, D5], 110, 0.3)
+hit(RIGHT, CLAP, 96)
+dark_groove(DROP, bar(2, 3), since=RIGHT + 0.01, octave_up=True)
+chord('strings', RIGHT, [D3, A3, D4, A4, D5], 84, bar(3) - RIGHT)
 n('bells', RIGHT + 0.05, A5, 60, 1.5)  # the right word still shines
 n('bells', RIGHT + 0.3, D6, 56, 1.5)
 fill(2, 12)
@@ -404,7 +421,7 @@ for i, name in enumerate(FIRST):
     bed(bar(b), name, 54 + 2 * i, 3.0)
     backbeat(b, 62)
     sub(bar(b), CH[name][0], 1.45, 84)
-    sub(bar(b, 2), CH[name][0], 0.7 if b == 6 else 1.45, 76)
+    sub(bar(b, 2), CH[name][0], 0.7 if b == 6 else 1.08, 76)  # ends before the bass moves early
 hit(bar(3), CRASH, 84, 2.0)
 
 TUNE1 = [  # (bar, beat, note, beats long)
@@ -422,7 +439,9 @@ drop(bar(6, 3), bar(7), keep=('piano',))
 fx['riser'].append([bar(6, 1), bar(7), 0.8])
 
 # ---------- Cards, second time: the hook, full energy (bars 7 - 10) ----------
-SECOND = [('Bm', 'G'), ('D', 'A'), ('Bm', 'G'), ('D', 'A')]
+# the hook's last note is D: under it A suspended (D, E, A), not A (C#),
+# which clashed with it a half step apart
+SECOND = [('Bm', 'G'), ('D', 'Asus'), ('Bm', 'G'), ('D', 'Asus')]
 fx['impact'].append([bar(7), 0.9])
 hit(bar(7), CRASH, 100, 2.0)
 for i, halves in enumerate(SECOND):
@@ -478,8 +497,8 @@ chord('piano', HOME + 0.02, [D5, Fs5, A5, D6], 90, 1.0, roll=0.02)
 for k, x in enumerate([A5, D6, Fs6, A6]):  # the title appears
     n('bells', 37.25 + k * 0.19, x, 58 - 3 * k, 1.6)
 hats(11, since=HOME + 0.4, vel=0.8)
-for k, x, v in TUMBAO:                     # congas carry into the last hook
-    hit(HOME + 0.375 + 2 * k * U, x, v)
+for k, x, v in TUMBAO[:4]:                 # congas carry into the last hook, on the grid
+    hit(slot(11, 12 + k), x, v)
 
 hook(bar(12), vel=100)                     # 37.73 - 40.73, over D | G, then Asus
 latin(12, True)
@@ -638,7 +657,7 @@ for part, values in SHAPED.items():
             steps = max(2, int(dur / 0.03))
             for j in range(steps + 1):
                 tt = t + j / steps * dur * 0.97
-                controls.append((tt, part, 'cc11', int(30 + 97 * min(1, max(0, (tt - 0.15) / (CUT - 0.15))) ** 1.4)))
+                controls.append((tt, part, 'cc11', int(30 + 80 * min(1, max(0, (tt - 0.15) / (CUT - 0.15))) ** 1.4)))
         elif dur >= LONG:
             curve(t, dur, part, values)
         else:  # short notes: no swell, played at a steady, full expression
