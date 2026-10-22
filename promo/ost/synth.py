@@ -13,6 +13,11 @@ and writes out/mix.wav:
           hi-hat, the sounds an orchestra library doesn't have
   cut     a stretch where everything goes silent (the drops), with short
           fades so it doesn't click; the impact after it lands on silence
+  duck    the bass (out/bass.wav, kept apart by instruments.py) and the sub
+          dip about 3 dB under each kick and come back in 140 ms, the way a
+          studio "sidechains" them, so the kick punches through
+  tape    a little tape warmth on the whole track: gentle saturation, the
+          low "head bump", the softened top, and a trace of wow and flutter
 """
 import json
 import os
@@ -26,6 +31,7 @@ out = os.path.join(here, 'out')
 rng = np.random.default_rng(7)
 
 SUB_GAIN, RISER_GAIN, IMPACT_GAIN = 0.19, 0.12, 0.30
+DUCK, DUCK_RELEASE = 0.3, 0.14   # depth (0.3 is about -3 dB) and recovery (s)
 KIT_GAIN = {'kick': 0.42, 'clap': 0.30, 'hat': 0.10}
 KIT_PAN = {'kick': 0.0, 'clap': 0.0, 'hat': 0.25}
 
@@ -128,8 +134,21 @@ for a, b in fx['cut']:
     gate[j:j + ramp] = np.minimum(gate[j:j + ramp], np.linspace(0, 1, len(gate[j:j + ramp])))
 
 extra = np.zeros_like(score)
+low = np.zeros_like(score)
+bass = read(os.path.join(out, 'bass.wav'))[:len(score)]
+low[:len(bass)] += bass
 for t, note, dur, vel in fx['sub']:
-    place(extra, t, sub(note, dur, vel), SUB_GAIN)
+    place(low, t, sub(note, dur, vel), SUB_GAIN)
+# the duck: a dip under each kick, in 5 ms, back out over DUCK_RELEASE
+env = np.zeros(len(score))
+shape_t = np.arange(int(0.6 * SR)) / SR
+shape = np.minimum(1, shape_t / 0.005) * np.exp(-np.maximum(0, shape_t - 0.005) / DUCK_RELEASE * 2.3)
+for t, sound, vel in fx.get('kit', []):
+    if sound == 'kick':
+        i = int(t * SR)
+        j = min(len(env), i + len(shape))
+        env[i:j] = np.maximum(env[i:j], shape[:j - i] * min(1, vel / 100))
+extra += low * (1 - DUCK * env)[:, None]
 for a, b, gain in fx['riser']:
     r = riser(b - a)
     place(extra, a, r, RISER_GAIN * gain, width=0.3)
@@ -140,5 +159,25 @@ mix = (score + extra) * gate[:, None]  # the impacts land after the cuts
 for t, gain in fx['impact']:
     place(mix, t, impact(), IMPACT_GAIN * gain)
 
+def tape(x):
+    """A little tape warmth (Jose, 2026-10-22, prompt 4)."""
+    level = np.sqrt((x ** 2).mean()) / 0.12          # drive it at a fixed level
+    y = x / level
+    # wow (0.6 Hz) and flutter (7 Hz): the speed wavers by under 0.1 %
+    t = np.arange(len(y)) / SR
+    warp = t - (0.00025 * np.sin(2 * np.pi * 0.6 * t) + 0.00004 * np.sin(2 * np.pi * 7.0 * t))
+    y = np.stack([np.interp(warp, t, y[:, c]) for c in (0, 1)], 1)
+    # saturation, slightly uneven (that is what gives tape its warm overtones)
+    y = np.tanh(1.5 * (y + 0.04 * y ** 2)) / 1.5
+    y -= y.mean(0)
+    # the head bump (+1.2 dB around 90 Hz) and a softened top (-2 dB by 16 kHz)
+    spec = np.fft.rfft(y, axis=0)
+    f = np.fft.rfftfreq(len(y), 1 / SR)
+    db = 1.2 * np.exp(-np.log(f / 90 + 1e-9) ** 2 / 0.5) - 2.0 / (1 + (12000 / (f + 1e-9)) ** 4)
+    y = np.fft.irfft(spec * (10 ** (db / 20))[:, None], len(y), axis=0)
+    return y * level
+
+
+mix = tape(mix)
 write(os.path.join(out, 'mix.wav'), mix)
 print('out/mix.wav')

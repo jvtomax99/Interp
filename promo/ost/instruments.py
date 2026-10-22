@@ -6,14 +6,16 @@ strings, brass and percussion. Keep every note the same."
 
 Reads out/built-here.mid (score.py; one track per part, named by PARTS in
 score.py's order) and renders each part with sfizz_render through the
-library that ROUTES gives it, then pans, balances and puts them all in one
-room (a convolution reverb). The three drum sounds an orchestra library
+library that ROUTES gives it, then places each piece on a stage left to right,
+balances them and puts them in two real recorded rooms (convolution). The three drum sounds an orchestra library
 doesn't have (kick, clap, closed hi-hat: the electronic side of the track)
 go to out/fx.json for synth.py to make.
 
 Libraries (downloaded by render.sh, never in git):
   Salamander Grand Piano V3, Alexander Holm, CC BY 3.0: credit required
   VSCO 2 Community Edition, Versilian Studios, CC0: no conditions
+  Two recorded rooms (a warehouse, a kitchen) from Google's Web Audio
+    samples (GoogleChromeLabs/web-audio-samples), Apache 2.0
 """
 import json
 import os
@@ -22,7 +24,7 @@ import sys
 
 import mido
 import numpy as np
-from scipy.signal import fftconvolve
+from scipy.signal import butter, fftconvolve, sosfilt
 
 SR = 48000
 here = os.path.dirname(os.path.abspath(__file__))
@@ -31,6 +33,7 @@ LIBS = os.environ.get('OST_LIBS', os.path.join(here, 'libs'))
 SFIZZ = os.environ.get('SFIZZ_RENDER', 'sfizz_render')
 PIANO = os.path.join(LIBS, 'salamander', 'Salamander Grand Piano V3.sfz')
 VSCO = os.path.join(LIBS, 'vsco')
+IRS = os.path.join(LIBS, 'ir')  # recorded rooms: Google Web Audio samples, Apache 2.0
 
 # Track order in the MIDI file: the order of PARTS in score.py.
 TRACKS = ['piano', 'keys', 'strings', 'cello', 'guitar', 'bells', 'trem', 'pad',
@@ -41,36 +44,45 @@ def v(name):
     return os.path.join(VSCO, name)
 
 
-# part: [(library, lowest note, highest note, shortest, longest)], so a part
-# can split by range (strings by section) or by length (trumpet: short
-# notes from its staccato samples).
+# part: [(library, lowest note, highest note, shortest, longest, place)]. A
+# part can split by range (strings by section, the percussion by drum) or by
+# length (trumpet: short notes from its staccato samples), and each piece
+# sits in its own place left to right (-1 to 1), as on a stage (Jose,
+# 2026-10-22, prompt 4): violins left, violas and cellos to the right, the
+# trumpet in the middle with the horns and trombones right of it, congas
+# left and bongos right, the small percussion spread out to the edges.
 LOW, HIGH = 0, 127
-SECTIONS = lambda kind: [(v(f'CelloEns{kind}.sfz'), LOW, 54, 0, 99),
-                         (v(f'ViolaEns{kind}.sfz'), 55, 66, 0, 99),
-                         (v(f'ViolinEns{kind}.sfz'), 67, HIGH, 0, 99)]
+SECTIONS = lambda kind: [(v(f'CelloEns{kind}.sfz'), LOW, 54, 0, 99, 0.40),
+                         (v(f'ViolaEns{kind}.sfz'), 55, 66, 0, 99, 0.15),
+                         (v(f'ViolinEns{kind}.sfz'), 67, HIGH, 0, 99, -0.45)]
+KIT_ROUTES = [  # (first drum note, last, place)
+    (38, 38, 0.0), (49, 49, -0.1), (56, 56, 0.30), (60, 61, 0.45), (62, 64, -0.35),
+    (65, 66, 0.20), (70, 70, -0.60), (73, 74, 0.60), (75, 75, -0.20),
+]
 ROUTES = {
-    'piano':   [(PIANO, LOW, HIGH, 0, 99)],
-    'keys':    [(PIANO, LOW, HIGH, 0, 99)],
+    'piano':   [(PIANO, LOW, HIGH, 0, 99, 0.0)],
+    'keys':    [(PIANO, LOW, HIGH, 0, 99, 0.2)],
     'strings': SECTIONS('SusVib'),
     'pad':     SECTIONS('SusVib-Quiet'),
     'trem':    SECTIONS('Trem'),
     'stabs':   SECTIONS('Spic'),
-    'cello':   [(v('CelloEnsSusVib.sfz'), LOW, HIGH, 0, 99)],
-    'bass':    [(v('ContrabassPizz.sfz'), LOW, HIGH, 0, 99)],
-    'brass':   [(v('TromboneSus.sfz'), LOW, 56, 0, 99), (v('FHornSus.sfz'), 57, HIGH, 0, 99)],
-    'lead':    [(v('TrumpetStac.sfz'), LOW, HIGH, 0, 0.25), (v('TrumpetSus.sfz'), LOW, HIGH, 0.25, 99)],
-    'guitar':  [(v('Harp.sfz'), LOW, HIGH, 0, 99)],
-    'bells':   [(v('Glockenspiel.sfz'), LOW, HIGH, 0, 99)],
-    'drums':   [(v('hub-perc.sfz'), LOW, HIGH, 0, 99)],
+    'cello':   [(v('CelloEnsSusVib.sfz'), LOW, HIGH, 0, 99, 0.40)],
+    'bass':    [(v('ContrabassPizz.sfz'), LOW, HIGH, 0, 99, 0.0)],
+    'brass':   [(v('TromboneSus.sfz'), LOW, 56, 0, 99, 0.25), (v('FHornSus.sfz'), 57, HIGH, 0, 99, 0.45)],
+    'lead':    [(v('TrumpetStac.sfz'), LOW, HIGH, 0, 0.25, 0.0), (v('TrumpetSus.sfz'), LOW, HIGH, 0.25, 99, 0.0)],
+    'guitar':  [(v('Harp.sfz'), LOW, HIGH, 0, 99, -0.5)],
+    'bells':   [(v('Glockenspiel.sfz'), LOW, HIGH, 0, 99, 0.5)],
+    'drums':   [(v('hub-perc.sfz'), lo, hi, 0, 99, pan) for lo, hi, pan in KIT_ROUTES],
 }
-# Balance (dB), place left to right (-1 to 1) and how much room (reverb send),
-# per part: set from each part rendered alone, the trumpet hook on top.
+# Per part: balance (dB, set from each part rendered alone, the trumpet hook
+# on top), how much goes to the hall and to the small room, and stereo width
+# (1 keeps a part's own stereo, 0 makes it a point at its place).
 MIX = {
-    'piano':   (6, 0.0, 0.30), 'keys': (-2, 0.15, 0.25),
-    'strings': (1, -0.2, 0.45), 'pad': (-5, 0.2, 0.55), 'trem': (0, -0.25, 0.45),
-    'stabs':   (3, -0.3, 0.30), 'cello': (-2, 0.35, 0.40),
-    'bass':    (4, 0.0, 0.10), 'brass': (-3, 0.3, 0.35), 'lead': (1, 0.05, 0.28),
-    'guitar':  (-4, -0.35, 0.40), 'bells': (-8, 0.4, 0.45), 'drums': (10, 0.0, 0.18),
+    'piano':   (6, 0.22, 0.0, 1.0), 'keys': (-2, 0.15, 0.10, 0.4),
+    'strings': (1, 0.40, 0.0, 0.5), 'pad': (-5, 0.50, 0.0, 0.8), 'trem': (0, 0.40, 0.0, 0.5),
+    'stabs':   (3, 0.25, 0.10, 0.4), 'cello': (-2, 0.35, 0.0, 0.5),
+    'bass':    (4, 0.0, 0.12, 0.2), 'brass': (-3, 0.30, 0.0, 0.5), 'lead': (1, 0.24, 0.05, 0.3),
+    'guitar':  (-4, 0.35, 0.0, 0.6), 'bells': (-8, 0.40, 0.0, 0.6), 'drums': (10, 0.06, 0.22, 0.4),
 }
 # GM drum note -> VSCO samples: (sample, lowest velocity, highest velocity)
 # with round robins picked at random. Kick, clap and hat are synthesized.
@@ -153,23 +165,36 @@ def midi_with(meta, notes, shaping=()):
     return m
 
 
-def room(seconds=1.7, predelay=0.018):
-    """A stereo room impulse: early reflections, then a decaying, darkening tail."""
-    rng = np.random.default_rng(3)
-    n = int(seconds * SR)
-    t = np.arange(n) / SR
-    ir = np.zeros((n, 2))
-    for ch in (0, 1):
-        tail = rng.standard_normal(n) * np.exp(-t * 6.9 / seconds)
-        spec = np.fft.rfft(tail)
-        f = np.fft.rfftfreq(n, 1 / SR)
-        spec *= 1 / (1 + (f / 6000) ** 2)           # air absorbs the highs
-        ir[:, ch] = np.fft.irfft(spec, n)
-        for d, g in [(0.011, 0.5), (0.017, 0.35), (0.023, 0.3), (0.031, 0.22)]:
-            ir[int((d + 0.002 * ch) * SR), ch] += g
+def impulse(name):
+    """A recorded room, resampled to 48 kHz, as (L->L, L->R, R->L, R->R). A
+    true-stereo file has those four channels; a stereo one, L->L and R->R."""
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', os.path.join(IRS, name), '-f', 'f32le',
+                          '-ar', str(SR), '-'], capture_output=True, check=True).stdout
+    chans = int(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'stream=channels',
+                                '-of', 'csv=p=0', os.path.join(IRS, name)],
+                               capture_output=True, text=True, check=True).stdout)
+    ir = np.frombuffer(raw, np.float32).reshape(-1, chans).astype(float)
+    if chans == 2:
+        z = np.zeros(len(ir))
+        ir = np.stack([ir[:, 0], z, z, ir[:, 1]], 1)
+    return ir / np.abs(ir).sum(0).max() * 4
+
+
+def reverb(x, ir, predelay):
+    """x through the room: each output side hears both input sides."""
     p = int(predelay * SR)
-    ir = np.vstack([np.zeros((p, 2)), ir])
-    return ir / np.abs(ir).sum(0).max() * 6
+    out_ = np.zeros_like(x)
+    for (src_, dst), k in zip([(0, 0), (0, 1), (1, 0), (1, 1)], range(4)):
+        if np.any(ir[:, k]):
+            out_[p:, dst] += fftconvolve(x[:, src_], ir[:, k])[:len(x) - p]
+    return out_
+
+
+def place_at(audio, pan, width):
+    """Pan an instrument to its place (constant power), narrowed to width."""
+    mono = audio.mean(1, keepdims=True)
+    left, right = np.cos((pan + 1) * np.pi / 4), np.sin((pan + 1) * np.pi / 4)
+    return (audio * width + mono * (1 - width)) * np.sqrt(2) * np.array([left, right])
 
 
 def seconds(tick):
@@ -182,7 +207,8 @@ perc_sfz()
 stems = os.path.join(out, 'stems')
 os.makedirs(stems, exist_ok=True)
 length = int(46 * SR)
-dry, wet = np.zeros((length, 2)), np.zeros((length, 2))
+dry, hall_send, room_send = (np.zeros((length, 2)) for _ in range(3))
+bass_dry, bass_room = np.zeros((length, 2)), np.zeros((length, 2))
 kit = []
 for name, track in zip(TRACKS, src.tracks[1:]):
     notes, shaping = notes_of(track)
@@ -190,7 +216,8 @@ for name, track in zip(TRACKS, src.tracks[1:]):
         kit = [[round(seconds(a), 4), SYNTH_KIT[x], vel] for a, b, x, vel in notes if x in SYNTH_KIT]
         notes = [nt for nt in notes if nt[2] in PERC]
     part = np.zeros((length, 2))
-    for i, (sfz, lo, hi, short, long_) in enumerate(ROUTES[name]):
+    gain_db, hall, small, width = MIX[name]
+    for i, (sfz, lo, hi, short, long_, pan) in enumerate(ROUTES[name]):
         chosen = [nt for nt in notes
                   if lo <= nt[2] <= hi and short <= seconds(nt[1] - nt[0]) < long_]
         if not chosen:
@@ -200,23 +227,35 @@ for name, track in zip(TRACKS, src.tracks[1:]):
         subprocess.run([SFIZZ, '--sfz', sfz, '--midi', mid_path, '--wav', wav_path,
                         '-s', str(SR), '-q', '3'], check=True, capture_output=True)
         audio = read(wav_path)[:length]
-        part[:len(audio)] += audio
-    gain_db, pan, send = MIX[name]
-    g = 10 ** (gain_db / 20)
-    left, right = np.cos((pan + 1) * np.pi / 4), np.sin((pan + 1) * np.pi / 4)
-    mono = part.mean(1, keepdims=True)
-    placed = (part * 0.5 + mono * 0.5) * g * np.sqrt(2) * np.array([left, right])
-    dry += placed
-    wet += placed * send
+        part[:len(audio)] += place_at(audio, pan, width)
+    placed = part * 10 ** (gain_db / 20)
+    if name == 'bass':  # kept apart so synth.py can duck it under the kick
+        bass_dry, bass_room = placed, placed * small
+    else:
+        dry += placed
+        hall_send += placed * hall
+        room_send += placed * small
     if '-v' in sys.argv:
         def rms(a, b):
             return 20 * np.log10(np.sqrt((placed[int(a * SR):int(b * SR)] ** 2).mean()) + 1e-9)
         print(f'{name:8s} intro {rms(1, 6):6.1f}  cards {rms(11, 22):6.1f}  hook {rms(23, 34):6.1f}  end {rms(37.7, 44):6.1f} dB')
 
-ir = room()
-mix = dry + np.stack([fftconvolve(wet[:, c], ir[:, c])[:length] for c in (0, 1)], 1)
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ac', '2', '-ar', str(SR), '-i', '-',
-                os.path.join(out, 'raw.wav')], input=mix.astype(np.float32).tobytes(), check=True)
+# Two real rooms, recorded (see IRS): a warehouse, heard from 35 ft, for the
+# orchestra's space; a kitchen, close up, for the drums and bass. The hall
+# hears nothing under 220 Hz, so the low end stays clean.
+hall_send = sosfilt(butter(2, 220, 'highpass', fs=SR, output='sos'), hall_send, axis=0)
+WAREHOUSE, KITCHEN = impulse('cardiod-35-10-spread.wav'), impulse('kitchen-true-stereo.wav')
+small_room = reverb(room_send + bass_room, KITCHEN, 0.004)
+mix = dry + reverb(hall_send, WAREHOUSE, 0.022) + small_room * 0.8
+
+
+def save(path, x):
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ac', '2', '-ar', str(SR), '-i', '-',
+                    path], input=x.astype(np.float32).tobytes(), check=True)
+
+
+save(os.path.join(out, 'raw.wav'), mix)
+save(os.path.join(out, 'bass.wav'), bass_dry)
 
 fx_path = os.path.join(out, 'fx.json')
 fx = json.load(open(fx_path))

@@ -35,10 +35,14 @@ the file; a new card every 3 s is one bar at 80 beats a minute), and
 an SFZ player): Salamander Grand Piano for the piano and VSCO 2 Community
 Edition for strings by section, trumpet, horns, trombones, contrabass
 pizzicato, harp, glockenspiel and the Latin percussion (congas, bongos,
-claves, cowbell, guiro, cabasa, snare and crash), balanced, placed left to
-right and put in one room. `ost/synth.py` adds what an orchestra library
-doesn't have: an 808 sub-bass, kick, clap and hi-hat, risers, impacts and
-the silent cuts before each slam. `ost/render.sh` packs it to -14 LUFS and
+claves, cowbell, guiro, cabasa, snare and crash), balanced, each placed
+left to right as on a stage, and put in two real recorded rooms (a
+warehouse for the orchestra, a kitchen for the drums; impulse responses
+from Google's Web Audio samples, Apache 2.0). `ost/synth.py` adds what an
+orchestra library doesn't have (an 808 sub-bass, kick, clap and hi-hat,
+risers, impacts, the silent cuts before each slam), ducks the bass and sub
+about 3 dB under each kick, and gives the whole track a little tape
+warmth. `ost/render.sh` packs it to -14 LUFS and
 lays it under `media/hub-promo.mp4`. Output goes to `ost/out/` (not in
 git); `media/` is replaced by hand once the result is approved.
 

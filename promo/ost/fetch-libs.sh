@@ -7,6 +7,7 @@
 #     the video, e.g. in its description.
 #   VSCO 2 Community Edition (Versilian Studios), CC0: no conditions.
 #   sfizz (sfztools), BSD 2-Clause: the SFZ player, built here.
+#   Two recorded rooms from GoogleChromeLabs/web-audio-samples, Apache 2.0.
 #
 # Needs git, cmake, ninja, a C++ compiler and libsndfile
 # (apt-get install cmake ninja-build g++ libsndfile1-dev); pip install mido numpy scipy.
@@ -29,6 +30,14 @@ if [ ! -d vsco ]; then
     "VSCO 1 Percussion/drums/other/Bongos" "VSCO 1 Percussion/varMetal/various" \
     "VSCO 1 Percussion/drums/snare/drum1"
   cd ..
+fi
+
+if [ ! -d ir ]; then
+  # two recorded rooms (impulse responses): a warehouse and a kitchen
+  git clone --depth 1 --filter=blob:none --no-checkout https://github.com/GoogleChromeLabs/web-audio-samples ir-src
+  (cd ir-src && git checkout HEAD -- LICENSE src/sounds/impulse-responses/cardiod-35-10-spread.wav \
+     src/sounds/impulse-responses/kitchen-true-stereo.wav)
+  mkdir ir && cp ir-src/LICENSE ir-src/src/sounds/impulse-responses/*.wav ir/
 fi
 
 if [ ! -x sfizz/build/library/bin/sfizz_render ]; then
