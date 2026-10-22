@@ -2,7 +2,7 @@
 
 Copy this file for a new film. Fill in BRAND. Change the others only if
 you need to. Give the filled copy to Claude and say: "Build this film,
-following promo/blender/LESSONS.md."
+the way promo/blender/README.md does."
 
 ## BRAND (the only block you must change)
 

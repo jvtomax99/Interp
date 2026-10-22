@@ -28,9 +28,9 @@ as in the guide. Only BRAND is specific to this film.
 ## FORMAT
 
 Blender 5.2 as a Python module (`bpy`), Cycles on the **CPU** (this cloud
-machine has no graphics card), 1280 x 720, 30 fps, 12 s = 360 frames, 120
-BPM (one beat = 15 frames). The interface is HTML screenshotted by
-Puppeteer into one 2560 x 1440 image; the card is drawn on a canvas, one
+machine has no graphics card), 24 samples with the denoiser, 1280 x 720, 30 fps, 12 s = 360 frames, 120
+BPM (one beat = 15 frames). The interface is HTML photographed by
+Playwright (the guide uses Puppeteer; same job) into one 2560 x 1440 image; the card is drawn on a canvas, one
 image per frame. One shared timeline file, `timeline.py`, holds every
 button position and every event time; everything else reads it.
 
@@ -47,8 +47,9 @@ button position and every event time; everything else reads it.
 | 5.5 | Hop onto **Audio** | a voice waveform ripples across the card |
 | 6.5 | Hop onto **Example** | the example pair writes in |
 | 7.5 | Hop onto **Save** | the card lifts and gets its shadow, a check, "Saved"; he winks |
+| 8.0 - 8.5 | He jumps from Save up onto the card's top edge (changed while building: the keys fall too, so he can't stay on them) | |
 | 8.5 - 10.0 | Every panel powers down and falls away, one after another | |
-| 10.0 - 12.0 | Only the card is left; he hops onto its top edge, laughs, settles | the finished card, the poster frame |
+| 10.0 - 12.0 | Only the card is left, him on top; he laughs, settles | the finished card, the poster frame |
 
 ## CAMERA
 

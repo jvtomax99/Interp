@@ -1,0 +1,150 @@
+<!doctype html>
+<!-- The term card, drawn on a canvas one frame at a time. render_ui.cjs
+     loads this page, hands it the timeline (window.T, from timeline.py)
+     through init() and calls draw(frame) 360 times, saving each picture to
+     build/card/c_0001.png ... The card answers one question: what does it
+     look like at this frame? Nothing here keeps state between frames. -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts.css">
+<style>html,body{margin:0;background:transparent}</style></head>
+<body><canvas id="c" width="1040" height="760"></canvas>
+<script>
+const C = document.getElementById('c'), g = C.getContext('2d');
+const W = 1040, H = 760, PAD = 64;
+const COL = { paper:'#FFFFFF', ink:'#151C2C', soft:'#5A6478', faint:'#98A1B3', line:'#E2E7F0',
+  accent:'#0F5FA6', accent2:'#2E8BD0', soft2:'#E8F1FA', navy:'#252E6D', cyan:'#01B8E6', ok:'#1E9E6A' };
+const TEXT = {
+  en: 'shortness of breath', es: 'falta de aire', domain: 'Pulmonology',
+  exEn: 'Do you get short of breath when you walk?',
+  exEs: '¿Le falta el aire cuando camina?',
+};
+let pin = null;
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = t => 1 - Math.pow(1 - clamp(t), 3);                       // settle
+const back = t => { t = clamp(t); const s = 1.9; return 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2); };
+// progress of an event that starts at frame `at` and lasts `len` frames
+const prog = (n, at, len) => clamp((n - at) / len);
+
+function rr(x, y, w, h, r){ g.beginPath(); g.roundRect(x, y, w, h, r); }
+function label(txt, x, y, a = 1){
+  g.globalAlpha = a; g.fillStyle = COL.faint;
+  g.font = '650 26px Inter'; g.letterSpacing = '3px'; g.fillText(txt.toUpperCase(), x, y);
+  g.letterSpacing = '0px'; g.globalAlpha = 1;
+}
+
+function draw(n){
+  const E = T.CARD_EVENTS;
+  g.clearRect(0, 0, W, H);
+
+  // The card itself: paper, a hairline, a slow sheen once saved.
+  rr(6, 6, W - 12, H - 12, 40); g.fillStyle = COL.paper; g.fill();
+  g.lineWidth = 3; g.strokeStyle = COL.line; g.stroke();
+  const saved = prog(n, E['Save'], 10);
+  if (saved > 0){
+    g.save(); rr(6, 6, W - 12, H - 12, 40); g.clip();
+    const sx = -400 + 1900 * prog(n, E['Save'], 26);
+    const grd = g.createLinearGradient(sx, 0, sx + 380, H);
+    grd.addColorStop(0, 'rgba(46,139,208,0)'); grd.addColorStop(.5, 'rgba(46,139,208,.13)'); grd.addColorStop(1, 'rgba(46,139,208,0)');
+    g.fillStyle = grd; g.fillRect(0, 0, W, H); g.restore();
+    g.lineWidth = 6; g.strokeStyle = `rgba(46,139,208,${.9 * (1 - prog(n, E['Save'] + 6, 30)) + .25})`;
+    rr(6, 6, W - 12, H - 12, 40); g.stroke();
+  }
+
+  // English: typed one letter at a time, with a caret while typing.
+  const tEn = prog(n, E['Type'], 14);
+  label('English', PAD, 92, n >= E['Type'] ? 1 : .45);
+  if (n < E['Type']){ rr(PAD, 122, 560, 46, 14); g.fillStyle = COL.line; g.fill(); }
+  else {
+    const shown = TEXT.en.slice(0, Math.ceil(TEXT.en.length * tEn));
+    g.font = '650 76px Inter'; g.letterSpacing = '-1.5px'; g.fillStyle = COL.ink;
+    g.fillText(shown, PAD, 172);
+    if (tEn < 1 || (n - E['Type']) % 16 < 8 && n < E['ES/EN']){
+      const w = g.measureText(shown).width; g.fillStyle = COL.accent2; g.fillRect(PAD + w + 6, 108, 6, 76);
+    }
+    g.letterSpacing = '0px';
+  }
+
+  // Spanish: flips down into place like a card turning over.
+  label('Español', PAD, 252, n >= E['ES/EN'] ? 1 : .45);
+  if (n < E['ES/EN']){ rr(PAD, 282, 420, 46, 14); g.fillStyle = COL.line; g.fill(); }
+  else {
+    const t = prog(n, E['ES/EN'], 10), s = Math.max(.02, back(t));
+    g.save(); g.translate(PAD, 306); g.scale(1, s); g.globalAlpha = clamp(t * 2);
+    g.font = '650 76px Inter'; g.letterSpacing = '-1.5px'; g.fillStyle = COL.navy;
+    g.fillText(TEXT.es, 0, 26); g.restore(); g.letterSpacing = '0px';
+  }
+
+  // Audio: two speaker pills and a voice wave that runs across, then rests.
+  const ay = 402;
+  const aOn = n >= E['Audio'];
+  [['EN', PAD], ['ES', PAD + 128]].forEach(([t, x]) => {
+    rr(x, ay - 30, 112, 60, 30); g.fillStyle = aOn ? COL.soft2 : '#F2F4F8'; g.fill();
+    g.fillStyle = aOn ? COL.accent : COL.faint; g.font = '650 26px Inter';
+    g.beginPath(); g.moveTo(x + 24, ay - 8); g.lineTo(x + 34, ay - 8); g.lineTo(x + 46, ay - 18);
+    g.lineTo(x + 46, ay + 18); g.lineTo(x + 34, ay + 8); g.lineTo(x + 24, ay + 8); g.fill();
+    g.fillText(t, x + 56, ay + 9);
+  });
+  const bars = 46, bx = PAD + 280, bw = W - PAD - bx, run = prog(n, E['Audio'], 22);
+  for (let i = 0; i < bars; i++){
+    const u = i / (bars - 1), x = bx + u * bw;
+    const shape = .35 + .65 * Math.abs(Math.sin(i * 1.7) * Math.sin(i * .43 + 1));
+    let h = 6;
+    if (aOn){
+      const front = run * 1.3 - .15, d = u - front;
+      const live = Math.exp(-d * d / .012) * (1 - prog(n, E['Audio'] + 18, 14));
+      h = 8 + shape * (18 + 50 * live) * (u <= front + .1 ? 1 : .15);
+    }
+    g.fillStyle = aOn ? (u <= run * 1.3 - .15 ? COL.accent2 : COL.line) : COL.line;
+    rr(x - 3, ay - h / 2, 6, h, 3); g.fill();
+  }
+
+  // A rule, then the example pair, written in from the left.
+  g.fillStyle = COL.line; g.fillRect(PAD, 470, W - 2 * PAD, 3);
+  label('Example', PAD, 524, n >= E['Example'] ? 1 : .45);
+  [[TEXT.exEn, 578, 0, COL.soft], [TEXT.exEs, 630, 6, COL.navy]].forEach(([s, y, lag, col]) => {
+    if (n < E['Example']){ rr(PAD, y - 30, lag ? 520 : 700, 30, 10); g.fillStyle = '#F2F4F8'; g.fill(); return; }
+    const t = ease(prog(n, E['Example'] + lag, 16));
+    g.save(); g.beginPath(); g.rect(PAD - 4, y - 50, (W - 2 * PAD + 8) * t, 70); g.clip();
+    g.font = 'italic 400 38px "IBM Plex Serif"'; g.fillStyle = col; g.fillText(s, PAD, y); g.restore();
+  });
+
+  // Bottom row: the domain pin and its chip on the left, Saved on the right.
+  const by = 692;
+  if (n < E['Domain']){
+    g.beginPath(); g.arc(PAD + 36, by, 34, 0, Math.PI * 2); g.fillStyle = '#F2F4F8'; g.fill();
+    rr(PAD + 88, by - 22, 200, 44, 22); g.fill();
+  } else {
+    const t = prog(n, E['Domain'], 9), s = 1 + 1.6 * (1 - back(t));
+    // a ring of light goes out from the stamp
+    const ring = prog(n, E['Domain'] + 3, 14);
+    if (ring > 0 && ring < 1){
+      g.beginPath(); g.arc(PAD + 36, by, 40 + 160 * ease(ring), 0, Math.PI * 2);
+      g.lineWidth = 34 * (1 - ring) + 4; g.strokeStyle = `rgba(1,184,230,${.8 * (1 - ring)})`; g.stroke();
+    }
+    g.save(); g.translate(PAD + 36, by); g.scale(s, s); g.globalAlpha = clamp(t * 3);
+    if (pin) g.drawImage(pin, -40, -40, 80, 80); g.restore();
+    const ct = ease(prog(n, E['Domain'] + 4, 10));
+    g.globalAlpha = ct; rr(PAD + 92, by - 28, 262, 56, 28); g.fillStyle = COL.soft2; g.fill();
+    g.fillStyle = COL.accent; g.font = '650 32px Inter'; g.fillText(TEXT.domain, PAD + 114, by + 11);
+    g.globalAlpha = 1;
+  }
+  if (saved > 0){
+    const t = prog(n, E['Save'], 9), s = 1 + 1.4 * (1 - back(t));
+    g.save(); g.translate(W - PAD - 150, by); g.scale(s, s); g.globalAlpha = clamp(t * 3);
+    rr(-70, -32, 236, 64, 32); g.fillStyle = COL.navy; g.fill();
+    g.strokeStyle = '#fff'; g.lineWidth = 6; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath(); g.moveTo(-34, 0); g.lineTo(-22, 12); g.lineTo(-2, -12); g.stroke();
+    g.fillStyle = '#fff'; g.font = '650 34px Inter'; g.fillText('Saved', 12, 12); g.restore();
+  }
+}
+
+// render_ui.cjs calls this first. The pin comes in as a data URL: a canvas
+// that drew a picture from another file:// page may not be exported.
+window.init = async (timeline, pinSrc) => {
+  window.T = timeline;
+  await document.fonts.load('650 76px Inter');
+  await document.fonts.load('italic 400 38px "IBM Plex Serif"');
+  pin = new Image(); pin.src = pinSrc; await pin.decode();
+};
+</script></body></html>

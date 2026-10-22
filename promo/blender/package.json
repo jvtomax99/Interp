@@ -1,0 +1,8 @@
+{
+  "name": "hub-blender-film",
+  "private": true,
+  "description": "Screenshots the fake app and the card for the Blender film. See README.md.",
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

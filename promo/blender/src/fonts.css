@@ -1,0 +1,5 @@
+/* The app's own fonts, from the copies the tests keep (latin subsets). */
+@font-face { font-family: 'Inter'; font-weight: 100 700; font-style: normal;
+  src: url(../../../tests/support/fonts/inter_v20_UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Serif'; font-weight: 400; font-style: italic;
+  src: url(../../../tests/support/fonts/ibmplexserif_v20_jizBREVNn1dOx-zrZ2X3pZvkTiUa6zUTjg.woff2) format('woff2'); }

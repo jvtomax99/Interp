@@ -1,0 +1,117 @@
+<!doctype html>
+<!-- The fake Hub workspace, photographed once into build/ui.png (2560 x 1440).
+     Every rectangle here matches PANELS, CARD, HELLO and KEY_RECTS in
+     timeline.py; render_ui.cjs checks that they still do. -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="fonts.css">
+<style>
+  :root{
+    --bg:#F4F6FA; --paper:#FFFFFF; --ink:#151C2C; --ink-soft:#5A6478; --ink-faint:#98A1B3;
+    --accent:#0F5FA6; --accent-2:#2E8BD0; --accent-soft:#E8F1FA; --navy:#252E6D; --cyan:#01B8E6;
+    --line:#E2E7F0; --line-soft:#EEF1F7;
+    --finish: 0 2px 0 0 inset rgba(255,255,255,.82), 0 2px 4px rgba(20,43,67,.06), 0 16px 40px -24px rgba(22,55,90,.22);
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{width:2560px;height:1440px;background:#0B1030;overflow:hidden}
+  body{font-family:'Inter',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .panel{position:absolute;background:var(--bg);border-radius:40px;overflow:hidden;
+    background-image:radial-gradient(900px 600px at 15% 0%, #E6F0FB 0, transparent 60%),
+                     radial-gradient(800px 700px at 100% 100%, #EEF0FA 0, transparent 60%)}
+  .bar{height:120px;display:flex;align-items:center;gap:22px;padding:0 44px;
+    border-bottom:2px solid var(--line);background:rgba(255,255,255,.7)}
+  .bar h1{font-size:44px;font-weight:650;letter-spacing:-.02em}
+  .bar .crumb{font-size:30px;color:var(--ink-soft);font-weight:550}
+  .bar .dot{width:22px;height:22px;border-radius:50%;background:var(--cyan);margin-left:auto;
+    box-shadow:0 0 0 8px rgba(1,184,230,.18)}
+
+  /* Domains */
+  .row{display:flex;align-items:center;gap:22px;height:104px;margin:10px 22px;padding:0 22px;
+    border-radius:26px}
+  .row img{width:72px;height:72px}
+  .row span{font-size:34px;font-weight:550;letter-spacing:-.01em}
+  .row small{margin-left:auto;font-size:26px;color:var(--ink-faint);font-weight:550}
+  .row.on{background:var(--paper);box-shadow:var(--finish)}
+
+  /* Editor */
+  .slot{position:absolute;border:4px dashed #C9D3E4;border-radius:40px}
+  .hint{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-size:30px;
+    color:var(--ink-soft);font-weight:550}
+
+  /* Home */
+  .hello{position:absolute;left:22px;right:22px;top:140px;height:560px;border-radius:34px;
+    background:linear-gradient(160deg,#DCEBFA,#EEF2FB 60%,#F7F8FC)}
+  .hello .glow{position:absolute;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(1,184,230,.25),transparent)}
+  .hello p{position:absolute;left:0;right:0;text-align:center}
+  .hello .hi{bottom:100px;font-size:52px;font-weight:650;letter-spacing:-.02em;color:var(--navy)}
+  .hello .q{bottom:52px;font-size:26px;color:var(--ink-soft);font-weight:550}
+  .tiles{position:absolute;left:22px;right:22px;top:730px;display:grid;
+    grid-template-columns:1fr 1fr;gap:22px}
+  .tile{height:150px;border-radius:30px;background:var(--paper);box-shadow:var(--finish);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  .tile img{width:70px;height:70px}
+  .tile span{font-size:24px;font-weight:650}
+
+  /* Keys: only their tops are used, one rectangle per key */
+  .key{position:absolute;border-radius:28px;background:var(--paper);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    box-shadow:inset 0 0 0 3px var(--line), inset 0 -10px 0 0 var(--accent-soft)}
+  .key svg{width:54px;height:54px}
+  .key span{font-size:34px;font-weight:650;letter-spacing:-.01em;color:var(--navy)}
+  .key.save{background:var(--navy)} .key.save span{color:#fff}
+</style></head>
+<body>
+
+<div class="panel" style="left:60px;top:120px;width:500px;height:1060px">
+  <div class="bar"><h1>Glossary</h1><i class="dot"></i></div>
+  <div class="row"><img src="../../../pins/cardiology.webp"><span>Cardiology</span><small>212</small></div>
+  <div class="row"><img src="../../../pins/neurology.webp"><span>Neurology</span><small>148</small></div>
+  <div class="row"><img src="../../../pins/oncology.webp"><span>Oncology</span><small>196</small></div>
+  <div class="row on"><img src="../../../pins/pulmonology.webp"><span>Pulmonology</span><small>131</small></div>
+  <div class="row"><img src="../../../pins/pediatrics.webp"><span>Pediatrics</span><small>174</small></div>
+  <div class="row"><img src="../../../pins/nephrology.webp"><span>Nephrology</span><small>89</small></div>
+  <div class="row"><img src="../../../pins/emergency.webp"><span>Emergency</span><small>240</small></div>
+  <div class="row"><img src="../../../pins/orthopedics.webp"><span>Orthopedics</span><small>117</small></div>
+</div>
+
+<div class="panel" style="left:620px;top:120px;width:1320px;height:1060px">
+  <div class="bar"><h1>Add term</h1><span class="crumb">Glossary&nbsp;›&nbsp;New term</span><i class="dot"></i></div>
+  <!-- the card is drawn on its own (card.html); this is its empty slot -->
+  <div class="slot" style="left:136px;top:126px;width:1048px;height:768px"></div>
+  <p class="hint">Fill in each part, then Save</p>
+</div>
+
+<div class="panel" style="left:2000px;top:120px;width:500px;height:1060px">
+  <div class="bar"><h1>Home</h1><i class="dot"></i></div>
+  <div class="hello">
+    <!-- Dr. Smiley stands here as his own 3D cutout (HELLO in timeline.py) -->
+    <i class="glow" style="left:58px;top:40px;width:340px;height:340px"></i>
+    <p class="hi">Hello!</p>
+    <p class="q">Ready for today?</p>
+  </div>
+  <div class="tiles">
+    <div class="tile"><img src="../../../pins/medical-terminology.webp"><span>Glossary</span></div>
+    <div class="tile"><img src="../../../pins/translate.webp"><span>Translate</span></div>
+    <div class="tile"><img src="../../../pins/doctor-prep.webp"><span>Doctor Prep</span></div>
+    <div class="tile"><img src="../../../pins/practice.webp"><span>Practice</span></div>
+  </div>
+</div>
+
+<!-- Key tops, y 1240-1400. Icons: simple strokes in the Hub's navy. -->
+<div id="keys"></div>
+<script>
+  const KEYS = [
+    ['Type',    '<path d="M6 8h20M16 8v18M11 26h10"/>'],
+    ['ES/EN',   '<path d="M5 11h16l-4-4M27 21H11l4 4"/>'],
+    ['Domain',  '<path d="M16 28s9-8 9-15a9 9 0 0 0-18 0c0 7 9 15 9 15z"/><circle cx="16" cy="13" r="3"/>'],
+    ['Audio',   '<path d="M5 12v8h5l7 6V6l-7 6z"/><path d="M21 11a6 6 0 0 1 0 10M24 7a11 11 0 0 1 0 18"/>'],
+    ['Example', '<path d="M5 7h22v14H14l-6 5v-5H5z"/>'],
+    ['Save',    '<path d="M7 17l6 6L26 9"/>'],
+  ];
+  const html = KEYS.map(([k, d], i) => `<div class="key${k === 'Save' ? ' save' : ''}"
+      style="left:${620 + i * 224}px;top:1240px;width:200px;height:160px">
+      <svg viewBox="0 0 32 32" fill="none" stroke="${k === 'Save' ? '#fff' : '#252E6D'}" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round">${d}</svg><span>${k}</span></div>`).join('');
+  document.getElementById('keys').innerHTML = html;
+</script>
+</body></html>

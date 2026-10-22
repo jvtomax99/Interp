@@ -1,0 +1,5 @@
+# Everything made from the code: rebuilt by the scripts, never committed.
+build/
+renders/
+node_modules/
+*.blend1
