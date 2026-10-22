@@ -41,7 +41,7 @@ export const BEATS: Beat[] = [
 	{id: 'drills', dur: 4 * BEAT, line1: 'Daily Drills.', line2: 'Sharp Skills.', screen: 'drill', move: 'fan', accent: '#FFC857', face: 'laugh'},
 	{id: 'cert', dur: 8 * BEAT, line1: 'National Certification.', line2: 'Prep Built In.', screen: 'practice', move: 'campus', accent: '#FFC857', face: 'love'},
 	{id: 'team', dur: 4 * BEAT, line1: 'One Team.', line2: 'One Channel.', screen: 'chat', move: 'tiltL', accent: '#35A97A', callout: [30, 150, 1110, 330], face: 'smile'},
-	{id: 'ask', dur: 8 * BEAT, line1: 'Stuck?', line2: 'Ask Dr. Smiley.', screen: 'ask', move: 'brain', accent: '#01B8E6', callout: [40, 650, 1090, 920], face: 'laugh'},
+	{id: 'ask', dur: 8 * BEAT, line1: 'Stuck?', line2: 'Ask Dr. Smiley.', screen: 'ask', move: 'brain', accent: '#01B8E6', callout: [40, 640, 1090, 1160], face: 'laugh'},
 ];
 
 SCENES.find((s) => s.id === 'beats')!.dur = BEATS.reduce((n, b) => n + b.dur, 0);

@@ -29,8 +29,8 @@ companies need a paid company licence.
 ## The promo remake (`HubPromo`, 1080 x 1920)
 
 A vertical remake of Jose's 43 s draft (made in HyperFrames, 540 x 960):
-same script and order, new pictures. Phase 1 (2026-10-22) is a rough
-cut; the three hero shots are placeholders, marked "ROUGH CUT" on screen.
+same script and order, new pictures. Phase 1 (2026-10-22): storyboard
+and rough cut. Phase 2 (2026-10-22): the three hero shots for real.
 
 | Piece | Where |
 |---|---|
@@ -41,13 +41,17 @@ cut; the three hero shots are placeholders, marked "ROUGH CUT" on screen.
 | Close and music | `src/hub-promo/HubPromo.tsx` |
 | Campus window positions | `src/hub-promo/campus.json` (copied from `CAMPUS_MAP` in `index.html`) |
 
-To render it, three things must exist first; none are committed:
+To render it, these must exist first; none are committed (screens 20 MB,
+renders ~300 MB):
 
 ```
 node capture/capture.cjs        # real app screens -> public/screens/ (~1 min)
+node capture/brain.cjs          # the knowledge brain, live, frame by frame (~3 min)
+(cd ../docs/mockups/cchi-city && npm i --no-save three@0.160.0)
+node capture/campus.cjs         # the 3D campus flight, 120 frames (~6 min)
 apt-get install -y blender      # 4.0.2 from Ubuntu; blender.org is blocked here
-for t in 0 0.5 1; do blender -b --factory-startup -P blender/body.py -- \
-  --t $t --out public/renders/body/still_t$t.png --w 540 --h 960 --samples 48; done
+blender -b --factory-startup -P blender/body.py -- --frames 0-149 \
+  --out public/renders/body/seq --w 1080 --h 1920 --samples 36   # ~42 s a frame, ~1 h 45 min
 npm run render:promo -- --browser-executable=/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell
 ```
 
@@ -63,13 +67,35 @@ adds three records inside the capture only: a "Heart failure /
 Insuficiencia cardíaca" glossary term, Dr. Elena Marin (not a real
 person, Jose 2026-10-21) and Dr. Smiley's answer about heart failure.
 
-**The 3D Body** (`blender/body.py`) builds the app's own BodyParts3D
-meshes (`atlas/models`: float32 positions, int16 normals, uint32
-indices per part, offsets in `atlas.json`) into six groups: skin,
-muscle, vessels, organs, skeleton and the heart (concept `FMA7088`,
-83 parts). `--t` spreads them apart in depth for a still; `--frames`
-renders the animation. This Blender build has no denoiser, so use
-more samples rather than `use_denoising`.
+### The three hero shots
+
+**3D Body** (`blender/body.py`, Cycles): the app's own BodyParts3D meshes
+(`atlas/models`: float32 positions, int16 normals, uint32 indices per
+part, offsets in `atlas.json`) in six groups: skin, muscle, vessels,
+organs, skeleton and the heart (concept `FMA7088`, 83 parts). The
+reproductive system and pubic hair are left out, and the skin is a cyan
+see-through "hologram" whose faces turned to the camera go clear, so the
+shot stays modest. The body turns, the five layers fan out sideways and
+back like cards while the camera pulls back, then the heart flies to just
+in front of the lens and the focus follows it. Remotion then lifts the
+app's real Heart / Corazón card (`screens/heart.png`, the 3D Body opened
+on the heart through the app's own restore message) under it, its ES
+speaker pulsing. This Blender build has no denoiser: more samples, not
+`use_denoising`.
+
+**Campus** (`capture/campus.cjs`): not the app's flat 960 x 760 layers
+but the 3D scene they were rendered from
+(`docs/mockups/cchi-city/entrance.html`, its `?promo` mode), flown
+through at 1080 x 1920 while each building's windows light up,
+Terminology first. Same composer and colour grade as the app's pictures.
+
+**Knowledge brain** (`capture/brain.cjs`): the real `brain/you.html`
+inside the app, on a fake clock (requestAnimationFrame and
+performance.now replaced in `/brain/` pages only) stepped 1/30 s a frame,
+so the motion is smooth. Its text panels are hidden for the shot. Two
+passes: calm, then reopened with the cardiac terms as a Term Review
+session ("See it in your brain"), with "Heart failure" labelled at its
+dot through the session list's own tap-a-name.
 
 ### Numbers on screen, checked
 
@@ -81,16 +107,10 @@ more samples rather than `use_denoising`.
 | "131 Questions" (draft) | Cut: not found; the stand-in Practice screen says 145, the live count is unknown |
 | Campus "86% ready" | A made-up learner's score, shown as a demo, not a claim |
 
-### Left for phase 2
+### Still open
 
-- 3D Body: the real animation, the heart coming forward, the app's
-  Heart / Corazón card, the skin grain (more samples) and framing that
-  keeps the skin layer modest (it's a complete male model).
-- Campus: the `city/` layers are 960 x 760, soft at full frame;
-  re-render them bigger from `docs/mockups/cchi-city/entrance.html`.
-- Knowledge brain: live with `@remotion/three` instead of its screenshot.
-- Opener: the draft's entrance photo (ask Jose) cut into depth layers.
-- Dr. Smiley's answer says "Not from the Hub": `api/ask.js` only marks
-  an answer as the Hub's when the app sent that entry; capture it from
-  a search that does.
-- The close's credits overlap the phone.
+- Opener: the draft's entrance photo (ask Jose), cut into depth layers.
+  It uses `hero.jpg` until then.
+- Music: the draft's own track stands in (`public/music/`, not
+  committed). Jose to send the real file and confirm it can be used.
+- Phase 3: the final cut timed to the music, then a 16:9 version.

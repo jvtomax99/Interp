@@ -38,7 +38,7 @@ const Close: React.FC = () => {
 					);
 				})}
 			</div>
-			<div style={{position: 'absolute', left: 0, right: 0, bottom: 420, textAlign: 'center', fontFamily: SANS, fontSize: 26, lineHeight: 1.6, color: 'rgba(255,255,255,0.75)', opacity: credits}}>
+			<div style={{position: 'absolute', left: 0, right: 0, top: 440, textAlign: 'center', fontFamily: SANS, fontSize: 26, lineHeight: 1.6, color: 'rgba(255,255,255,0.75)', opacity: credits}}>
 				Anatomy: BodyParts3D, © DBCLS, CC BY 4.0
 				<br />
 				Screens shown with made-up data. Never patient information.

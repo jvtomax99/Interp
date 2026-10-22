@@ -31,7 +31,7 @@ const MARIN = { id: 'promo-marin', name: 'Dr. Elena Marin', specialty: 'Hematolo
     { key: 'falsefriends', terms: [T('constipated', 'estreñido', 'Not "constipado", which means a cold.')] } ] } };
 const ANSWER = { fromHub: true, headline: 'Heart failure is “insuficiencia cardíaca”.', sayLabel: 'Say', say: 'insuficiencia cardíaca',
   details: 'The heart can’t pump enough blood. It hasn’t stopped, so avoid “paro”. “Fallo cardíaco” is understood, but it isn’t the standard term.',
-  sourceIds: ['promo-hf'], lessonIds: [], actions: [], suggestTerm: { en: '', es: '', def: '' } };
+  sourceIds: ['t:promo-hf'], lessonIds: [], actions: [], suggestTerm: { en: '', es: '', def: '' } };
 
 async function askHandler(body, headers) {
   const mod = await import(require('url').pathToFileURL(L.ROOT + 'api/ask.js').href);
@@ -88,37 +88,53 @@ const SHOTS = {
     await p.evaluate(() => { const i = document.querySelector('#askInput'); i.value = 'How do I say heart failure?'; ASK.draft = i.value; submitAsk(); });
     await wait(p, 4500);
   },
-  async brain(p) {
-    // A made-up review record so the brain has something lit: every third term
-    // known, some learning, the rest not practised.
+  // A made-up review record so the brain has something lit: three in five
+  // terms practised, most of those known.
+  async brainSeed(p) {
     await p.evaluate(async () => {
       const now = Date.now();
       allTermsFlat().forEach((t, i) => { if (i % 5 > 2) return;
         window.__DB['term-reviews']['jose__' + t.id] = { who: 'jose', termId: t.id, box: i % 5 === 0 ? 1 : 4, nextReviewAt: now + 864e5, reviewCount: 3 }; });
       await loadTermReviews();
     });
-    await p.evaluate(() => openHumcBrain('you')); await wait(p, 7000);
   },
+  async brain(p) { await SHOTS.brainSeed(p); await p.evaluate(() => openHumcBrain('you')); await wait(p, 7000); },
   async anatomy(p) { await L.go(p, 'anatomy', 12000); },
+  // The 3D Body opened on the heart with its card, through the app's own
+  // "your place when you come back" message (atlasReady in index.html).
+  async heart(p) {
+    await p.evaluate(() => { ATLAS.mem = { at: Date.now(), view: { pick: { kind: 'concept', id: 'FMA7088' }, cam: null, explode: 0, isolate: true, view: 'front', expanded: false,
+      visible: ['integumentary', 'skeletal', 'muscular', 'cardiac', 'arterial', 'venous', 'respiratory', 'digestive', 'nervous', 'urinary', 'endocrine', 'lymphatic', 'sensory', 'connective'] } }; });
+    await L.go(p, 'anatomy', 16000);
+  },
 };
 
-(async () => {
+// Opens the app with the stand-ins, the routes the screens need and the
+// capture-only records. extraInit: more script for every frame (brain.cjs).
+async function openApp(b, extraInit = '') {
+  const { ctx, page } = await L.boot(b, { device: 'iphone', name: 'Jose', settle: 3500,
+    init: `(${(hf) => { const c = (window.__SEED_CATS || []).find(x => x.id === 'cardiac');
+      try { localStorage.setItem('ih_region', 'north'); } catch (e) {}
+      if (c && !c.terms.some(t => t.id === hf.id)) c.terms.unshift(hf); }})(${JSON.stringify(HEART_FAILURE)});` + extraInit });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await serveDir(page, '**/brain/**'); await serveDir(page, '**/atlas/**'); await serveDir(page, '**/memory/**');
+  // The stub chat's photos that aren't in the repo get the campus photo.
+  await page.route(/\/(portrait|landscape|square|tall)\.jpg$/, r => r.fulfill({ status: 200, contentType: 'image/jpeg', body: fs.readFileSync(L.ROOT + 'hero.jpg') }));
+  await page.route('**/api/ask', async r => {
+    const o = await askHandler(JSON.parse(r.request().postData() || '{}'), r.request().headers());
+    r.fulfill({ status: o.status, contentType: 'application/json', body: JSON.stringify(o.json) });
+  });
+  return { ctx, page };
+}
+const GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+module.exports = { openApp, seedReviews: SHOTS.brainSeed, GL, L };
+
+if (require.main === module) (async () => {
   const want = process.argv.slice(2);
-  const names = want.length ? want : Object.keys(SHOTS);
-  const b = await L.chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  const names = want.length ? want : Object.keys(SHOTS).filter(n => n !== 'brainSeed');
+  const b = await L.chromium.launch({ args: GL });
   for (const name of names) {
-    const { ctx, page } = await L.boot(b, { device: 'iphone', name: 'Jose', settle: 3500,
-      init: `(${(hf) => { const c = (window.__SEED_CATS || []).find(x => x.id === 'cardiac');
-        try { localStorage.setItem('ih_region', 'north'); } catch (e) {}
-        if (c && !c.terms.some(t => t.id === hf.id)) c.terms.unshift(hf); }})(${JSON.stringify(HEART_FAILURE)})` });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await serveDir(page, '**/brain/**'); await serveDir(page, '**/atlas/**'); await serveDir(page, '**/memory/**');
-    // The stub chat's photos that aren't in the repo get the campus photo.
-    await page.route(/\/(portrait|landscape|square|tall)\.jpg$/, r => r.fulfill({ status: 200, contentType: 'image/jpeg', body: fs.readFileSync(L.ROOT + 'hero.jpg') }));
-    await page.route('**/api/ask', async r => {
-      const o = await askHandler(JSON.parse(r.request().postData() || '{}'), r.request().headers());
-      r.fulfill({ status: o.status, contentType: 'application/json', body: JSON.stringify(o.json) });
-    });
+    const { ctx, page } = await openApp(b);
     try {
       await SHOTS[name](page);
       await page.screenshot({ path: path.join(OUT, name + '.png') });

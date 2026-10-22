@@ -16,9 +16,9 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 const P = new URLSearchParams(location.search);
-const W = +P.get('w')||960, H = +P.get('h')||760;
+const W = +P.get('w')||960, H = +P.get('h')||760, PR = +P.get('pr')||2;  // pr: pixel ratio (the promo renders at 1)
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
-renderer.setPixelRatio(2); renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(PR); renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
@@ -373,13 +373,13 @@ const WALKS = [
 const depthOnly = new THREE.MeshBasicMaterial({ colorWrite:false });
 const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tctx = tmp.getContext('2d', { willReadFrequently:true });
 // the full look for the scene: occlusion in the corners, a little bloom on the lights, anti-aliasing
-const full = new EffectComposer(renderer); full.setPixelRatio(2); full.setSize(W, H);
+const full = new EffectComposer(renderer); full.setPixelRatio(PR); full.setSize(W, H);
 full.addPass(new RenderPass(scene, cam));
-const gtao = new GTAOPass(scene, cam, W*2, H*2); gtao.output = GTAOPass.OUTPUT.Default; gtao.updateGtaoMaterial({ radius:0.6, distanceExponent:1.2, thickness:1.0, scale:1.0, samples:16, distanceFallOff:1.0, screenSpaceRadius:false }); gtao.updatePdMaterial({ lumaPhi:10, depthPhi:2, normalPhi:3, radius:4, radiusExponent:1, rings:2, samples:16 }); gtao.blendIntensity = 0.85; const gtaoRender = gtao.render.bind(gtao); gtao.render = (...a) => { GLOWS.forEach(g => g.visible = false); gtaoRender(...a); GLOWS.forEach(g => g.visible = true); }; full.addPass(gtao);
+const gtao = new GTAOPass(scene, cam, W*PR, H*PR); gtao.output = GTAOPass.OUTPUT.Default; gtao.updateGtaoMaterial({ radius:0.6, distanceExponent:1.2, thickness:1.0, scale:1.0, samples:16, distanceFallOff:1.0, screenSpaceRadius:false }); gtao.updatePdMaterial({ lumaPhi:10, depthPhi:2, normalPhi:3, radius:4, radiusExponent:1, rings:2, samples:16 }); gtao.blendIntensity = 0.85; const gtaoRender = gtao.render.bind(gtao); gtao.render = (...a) => { GLOWS.forEach(g => g.visible = false); gtaoRender(...a); GLOWS.forEach(g => g.visible = true); }; full.addPass(gtao);
 const bloomA = new UnrealBloomPass(new THREE.Vector2(W, H), 0.4, 0.45, 1.6); full.addPass(bloomA);
-full.addPass(new OutputPass()); full.addPass(new SMAAPass(W*2, H*2));
+full.addPass(new OutputPass()); full.addPass(new SMAAPass(W*PR, H*PR));
 // the lit windows: drawn alone on black with a wide warm bloom, then black becomes transparent
-const litC = new EffectComposer(renderer); litC.setPixelRatio(2); litC.setSize(W, H);
+const litC = new EffectComposer(renderer); litC.setPixelRatio(PR); litC.setSize(W, H);
 litC.addPass(new RenderPass(scene, cam)); litC.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.5, 0.5, 0.35)); litC.addPass(new OutputPass());
 function grab(){ tctx.clearRect(0,0,W,H); tctx.imageSmoothingQuality = 'high'; tctx.drawImage(renderer.domElement, 0, 0, W, H); return tctx.getImageData(0,0,W,H); }
 function pack(img, q){ let x0=W,y0=H,x1=-1,y1=-1; const d = img.data;
@@ -490,5 +490,21 @@ window.__run = async (nolit) => {
   out.drive = [proj(-2.8, 0.4, 15.5), proj(-2.8, 0.4, -6), proj(3.2, 0.4, -6), proj(3.2, 0.4, 15.5)];
   return out;
 };
+// The promo video (promo/capture/campus.cjs): one frame of a camera move with each building's windows
+// lit to a share (0-1). Same look as the app's pictures (full composer + grade), real 3D parallax.
+if (P.has('promo')) {
+  const ORDER = {}; let ps = 11; const prnd = () => (ps = (ps*16807)%2147483647)/2147483647;
+  const MAT = new Map();
+  for (const key of Object.keys(WINDOWS)) { const w = WINDOWS[key].slice(); for (let i = w.length - 1; i > 0; i--){ const j = Math.floor(prnd()*(i+1)); [w[i], w[j]] = [w[j], w[i]]; } ORDER[key] = w; w.forEach(m => MAT.set(m, m.material)); }
+  window.__promoFrame = async (f) => {
+    await TEX_LOAD();
+    for (const key of Object.keys(ORDER)) { const n = Math.round(ORDER[key].length * Math.max(0, Math.min(1, (f.lit || {})[key] || 0)));
+      ORDER[key].forEach((m, i) => { m.material = i < n ? LIT : MAT.get(m); }); }
+    cam.fov = f.fov || 40; cam.aspect = W / H; cam.position.set(...f.pos); cam.lookAt(...f.look); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+    full.render(); renderer.shadowMap.autoUpdate = false;  // nothing that casts a shadow moves
+    const img = grade(grab()); tctx.putImageData(img, 0, 0); return tmp.toDataURL('image/jpeg', 0.93);
+  };
+  window.__promoKeys = Object.keys(ORDER);
+}
 window.__done = true;
 </script></body></html>

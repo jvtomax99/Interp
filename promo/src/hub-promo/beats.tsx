@@ -106,64 +106,71 @@ const Fan: React.FC<{b: Beat}> = ({b}) => {
 	);
 };
 
-// 3D Body hero. PLACEHOLDER for the rough cut: three Blender stills of the
-// real BodyParts3D meshes (whole, half apart, apart); phase 2 renders the
-// animation (promo/blender/body.py --frames) and the heart card.
+const pad = (n: number) => String(n).padStart(4, '0');
+
+// Soft bloom: the frame again, blurred and added on top (screen blend).
+const Glow: React.FC<{src: string; blur: number; amount: number; style?: React.CSSProperties}> = ({src, blur, amount, style}) => (
+	<>
+		<Img src={src} style={{position: 'absolute', ...style}} />
+		<Img src={src} style={{position: 'absolute', ...style, filter: `blur(${blur}px)`, mixBlendMode: 'screen', opacity: amount}} />
+	</>
+);
+
+// 3D Body hero: the app's own BodyParts3D meshes rendered in Blender
+// (promo/blender/body.py, 150 frames): the body turns, its systems fan out,
+// the heart flies to the lens. Then the app's real card for it.
+const HEART_CARD: [number, number, number, number] = [30, 1625, 1115, 890];
 const BodyHero: React.FC<{b: Beat}> = ({b}) => {
 	const frame = useCurrentFrame();
-	const {fps, durationInFrames} = useVideoConfig();
-	const k = interpolate(frame, [30, 60, 90], [0, 1, 2], clamp);
-	const stills = ['still_t0', 'still_t0.5', 'still_t1'];
-	const push = interpolate(frame, [0, durationInFrames], [1.0, 1.12]);
-	const card = settle(frame, fps, 100, 14);
+	const {fps} = useVideoConfig();
+	const card = settle(frame, fps, 104, 14);
+	const n = Math.min(149, frame);
+	// the ES speaker answers: a ring pulsing out from it
+	const ring = interpolate((frame - 122) % 24, [0, 24], [0, 1], clamp);
+	const cw = 900;
+	const k = cw / HEART_CARD[2];
 	return (
 		<AbsoluteFill style={{overflow: 'hidden'}}>
-			{stills.map((s, i) => (
-				<Img
-					key={s}
-					src={staticFile(`renders/body/${s}.png`)}
-					style={{position: 'absolute', width: 1080, top: 380, transform: `scale(${push * 1.25})`, opacity: Math.max(0, 1 - Math.abs(k - i))}}
-				/>
-			))}
-			<Phone
-				screen="anatomy"
-				width={420}
+			<Glow src={staticFile(`renders/body/seq/body_${pad(n)}.png`)} blur={14} amount={0.45} style={{left: 0, top: 0, width: 1080, height: 1920}} />
+			<Callout
+				screen="heart"
+				rect={HEART_CARD}
+				width={cw}
 				glow={b.accent}
-				style={{left: 600, top: 1000, opacity: card, transform: `translateY(${(1 - card) * 300}px) rotateY(-16deg)`}}
+				style={{left: 90, top: 1180 + (1 - card) * 160, opacity: card, transform: `perspective(1600px) rotateX(${(1 - card) * 20}deg)`}}
 			/>
-			<div style={{position: 'absolute', left: 40, bottom: 40, fontSize: 22, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace'}}>ROUGH CUT · Blender stills, animation in phase 2</div>
+			{frame > 122 ? (
+				<div
+					style={{
+						position: 'absolute',
+						// the ES button sits at (419, 1844) in the 1170x2532 capture
+						left: 90 + (419 - HEART_CARD[0]) * k - 70,
+						top: 1180 + (1844 - HEART_CARD[1]) * k - 70,
+						width: 140,
+						height: 140,
+						borderRadius: 70,
+						border: `4px solid ${b.accent}`,
+						opacity: 1 - ring,
+						transform: `scale(${0.5 + ring})`,
+					}}
+				/>
+			) : null}
 		</AbsoluteFill>
 	);
 };
 
-// Certification hero: the app's own campus layers (city/), pushed through
-// in depth, windows lighting up building by building as the score climbs.
-// The layers are 960x760, so full frame is soft; phase 2 re-renders them big.
+// Certification hero: the app's own 3D campus (docs/mockups/cchi-city/
+// entrance.html) flown through frame by frame (promo/capture/campus.cjs),
+// windows lighting up building by building as the score climbs.
 const CampusHero: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {durationInFrames} = useVideoConfig();
-	const t = frame / durationInFrames;
-	const S = 1920 / 760; // cover the frame's height
-	const w = 960 * S;
-	const left = (1080 - w) / 2 + 160;
-	const order = ['t', 'e', 'n', 'c', 's'];
+	const n = Math.min(119, frame);
 	const score = Math.round(interpolate(frame, [10, durationInFrames - 15], [0, 86], clamp));
-	const B = campus as Record<string, {lv: number[][]}>;
-	const img = (name: string, r: number[]) => (
-		<Img key={name} src={staticFile(`city/${name}.webp`)} style={{position: 'absolute', left: r[0] * S, top: r[1] * S, width: r[2] * S, height: r[3] * S}} />
-	);
 	return (
 		<AbsoluteFill style={{overflow: 'hidden', background: '#2b2350'}}>
-			<div style={{position: 'absolute', left: left - t * 40, top: 0, width: w, height: 1920, transform: `scale(${1 + t * 0.04})`}}>{img('sky', [0, 0, 960, 760])}</div>
-			<div style={{position: 'absolute', left: left - t * 140, top: 0, width: w, height: 1920, transform: `scale(${1 + t * 0.14})`, transformOrigin: '50% 62%'}}>
-				{img('far', [0, 0, 960, 760])}
-				{order.map((key, i) => {
-					const lvl = Math.round(interpolate(frame, [10 + i * 10, 40 + i * 10], [0, 10], clamp));
-					return lvl < 1 ? null : <div key={key} style={{filter: 'drop-shadow(0 0 10px #ffd27a)'}}>{img(`${key}-lit${lvl}`, B[key].lv[lvl - 1])}</div>;
-				})}
-				{img('near', [0, 0, 960, 760])}
-			</div>
-			<AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(6,10,28,0.85) 0%, rgba(6,10,28,0) 30%, rgba(6,10,28,0) 75%, rgba(6,10,28,0.7) 100%)'}} />
+			<Glow src={staticFile(`renders/campus/campus_${pad(n)}.jpg`)} blur={10} amount={0.25} style={{left: 0, top: 0, width: 1080, height: 1920}} />
+			<AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(6,10,28,0.85) 0%, rgba(6,10,28,0) 30%, rgba(6,10,28,0) 72%, rgba(6,10,28,0.75) 100%)'}} />
 			<div style={{position: 'absolute', left: 0, right: 0, top: 1480, textAlign: 'center', fontFamily: 'Inter Variable', color: '#fff'}}>
 				<div style={{fontSize: 170, fontWeight: 800, letterSpacing: -6, textShadow: '0 0 40px #ffc857'}}>{score}%</div>
 				<div style={{fontSize: 32, letterSpacing: 10, opacity: 0.8}}>READY</div>
@@ -172,22 +179,39 @@ const CampusHero: React.FC = () => {
 	);
 };
 
-// Ask Dr. Smiley, then his answer feeding the knowledge brain.
-// PLACEHOLDER: the brain is its screenshot; phase 2 renders brain/you.html live.
+// Ask Dr. Smiley, then his answer flies into the knowledge brain (the live
+// brain/you.html, captured frame by frame by promo/capture/brain.cjs): the
+// brain turning, then lit with the heart terms, "Heart failure" labelled.
 const AskBrain: React.FC<{b: Beat}> = ({b}) => {
 	const frame = useCurrentFrame();
-	const {durationInFrames} = useVideoConfig();
-	const half = Math.round(durationInFrames / 2);
-	const dive = interpolate(frame, [half - 10, half + 8], [0, 1], clamp);
+	const ASK = 48; // frames on the answer
+	const LIT = ASK + 26; // the cut to the lit brain, on a beat
+	const out = interpolate(frame, [ASK - 8, ASK + 4], [0, 1], clamp);
+	const flash = interpolate(frame, [LIT - 3, LIT, LIT + 10], [0, 1, 0], clamp);
+	const brainIn = interpolate(frame, [ASK - 4, ASK + 8], [0, 1], clamp);
+	const calm = Math.min(39, Math.max(0, frame - ASK + 6));
+	const lit = Math.min(49, Math.max(0, frame - LIT));
+	const src = frame < LIT ? staticFile(`renders/brain/calm_${pad(calm)}.png`) : staticFile(`renders/brain/lit_${pad(lit)}.png`);
 	return (
 		<AbsoluteFill>
-			<AbsoluteFill style={{opacity: 1 - dive, transform: `scale(${1 + dive * 1.6})`}}>
-				<PhoneBeat b={b} />
+			{frame < ASK + 6 ? (
+				<AbsoluteFill style={{opacity: 1 - out, transform: `scale(${1 - out * 0.5}) translateY(${-out * 300}px)`}}>
+					<PhoneBeat b={b} />
+				</AbsoluteFill>
+			) : null}
+			<LightBall from={[540, 1100]} to={[540, 900]} at={ASK - 8} dur={12} />
+			<AbsoluteFill
+				style={{
+					opacity: brainIn,
+					// once lit, a slow push in on "Heart failure" (about 45%, 60% of the frame)
+					transform: `scale(${1.25 - 0.2 * brainIn + (frame >= LIT ? 0.35 * settle(frame, 30, LIT, 40) : 0)})`,
+					transformOrigin: '45% 60%',
+					filter: frame >= LIT ? 'brightness(1.35) saturate(1.2)' : undefined,
+				}}
+			>
+				<Glow src={src} blur={frame >= LIT ? 16 : 10} amount={frame >= LIT ? 1 : 0.9} style={{left: 0, top: 160, width: 1080, height: 1920}} />
 			</AbsoluteFill>
-			<AbsoluteFill style={{opacity: dive}}>
-				<Img src={staticFile('screens/brain.png')} style={{position: 'absolute', width: 1080 * 1.35, left: -190, top: -300, transform: `scale(${1.25 - 0.25 * dive})`}} />
-				<div style={{position: 'absolute', left: 40, bottom: 40, fontSize: 22, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace'}}>ROUGH CUT · brain screenshot, live 3D in phase 2</div>
-			</AbsoluteFill>
+			<AbsoluteFill style={{background: '#bfefff', opacity: flash * 0.5, mixBlendMode: 'screen'}} />
 		</AbsoluteFill>
 	);
 };

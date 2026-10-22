@@ -35,3 +35,12 @@ running kids, cherry trees). Circle drive with fountain, parking deck.
 Mastery = floors built; the rest is orange scaffolding with a crane.
 Footprints are from the photos, not survey data: OpenStreetMap (Overpass) and
 most sites are blocked from this container.
+
+## Promo frames (2026-10-22)
+
+`entrance.html?promo&w=1080&h=1920&pr=1` adds `window.__promoFrame({pos,
+look, fov, lit})`: one frame of a camera move, each building's windows lit
+to a share (0-1), through the same composer and grade as the app's
+pictures. `pr` is the pixel ratio (default 2, as before). Used by
+`promo/capture/campus.cjs` for the promo's certification shot; nothing in
+the app uses it.
