@@ -495,6 +495,12 @@ bed(bar(12, 3), 'Asus', 66, 0.75)          # the last D of the hook hangs on A
 # and cello hold D, then G over D, then D; the piano plays the call at
 # half speed, and the last chord rings out under the fade.
 OUT, LAST = bar(13), bar(13) + 2.4
+# Jose, 2026-10-22: "a better transition at the end. Like the sound gets
+# lower and lower before it ends." From OUT the sound closes, the mirror of
+# the intro opening: a filter darkening from 14 kHz to 300 Hz, and the
+# level easing down evenly (in dB) to silence at the end (synth.py).
+fx['sweep'].append([OUT, 45.1, [[OUT, 14000], [42.0, 5000], [43.3, 1600], [44.3, 700], [45.1, 300]]])
+fx['fade'] = [[OUT + 0.3, 45.1, -30]]
 fx['impact'].append([OUT, 0.5])
 hit(OUT, CRASH, 72, 3.0)
 sub(OUT, D2, 2.4, 78)
@@ -609,6 +615,13 @@ def curve(t, dur, part, values):
             x = peak + (z - peak) * ((f - 0.4) / 0.6) ** 1.5
         controls.append((t + f * dur * 0.95, part, 'cc11', int(round(x))))
 
+
+# Jose, 2026-10-22: "make the sound more softer in mood": the hits are
+# played gentler (a softer stroke sounds rounder, not just quieter).
+SOFT = {'drums': 0.85, 'stabs': 0.85, 'brass': 0.88, 'lead': 0.9}
+for i, (t, p, x, vel, dur) in enumerate(events):
+    if p in SOFT:
+        events[i] = (t, p, x, max(1, int(round(vel * SOFT[p]))), dur)
 
 for i, (t, p, x, vel, dur) in enumerate(events):
     if p in METRIC:

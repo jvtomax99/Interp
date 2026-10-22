@@ -75,14 +75,14 @@ ROUTES = {
     'drums':   [(v('hub-perc.sfz'), lo, hi, 0, 99, pan) for lo, hi, pan in KIT_ROUTES],
 }
 # Per part: balance (dB, set from each part rendered alone, the trumpet hook
-# on top), how much goes to the hall and to the small room, and stereo width
+# on top; drums, stabs and brass eased back for a softer mood, Jose 2026-10-22), how much goes to the hall and to the small room, and stereo width
 # (1 keeps a part's own stereo, 0 makes it a point at its place).
 MIX = {
     'piano':   (6, 0.22, 0.0, 1.0), 'keys': (-2, 0.15, 0.10, 0.4),
-    'strings': (1, 0.40, 0.0, 0.5), 'pad': (-5, 0.50, 0.0, 0.8), 'trem': (0, 0.40, 0.0, 0.5),
-    'stabs':   (3, 0.25, 0.10, 0.4), 'cello': (-2, 0.35, 0.0, 0.5),
-    'bass':    (4, 0.0, 0.12, 0.2), 'brass': (-3, 0.30, 0.0, 0.5), 'lead': (1, 0.24, 0.05, 0.3),
-    'guitar':  (-4, 0.35, 0.0, 0.6), 'bells': (-8, 0.40, 0.0, 0.6), 'drums': (10, 0.06, 0.22, 0.4),
+    'strings': (2, 0.40, 0.0, 0.5), 'pad': (-3, 0.50, 0.0, 0.8), 'trem': (0, 0.40, 0.0, 0.5),
+    'stabs':   (0, 0.25, 0.10, 0.4), 'cello': (-2, 0.35, 0.0, 0.5),
+    'bass':    (4, 0.0, 0.12, 0.2), 'brass': (-4, 0.30, 0.0, 0.5), 'lead': (1, 0.24, 0.05, 0.3),
+    'guitar':  (-4, 0.35, 0.0, 0.6), 'bells': (-8, 0.40, 0.0, 0.6), 'drums': (7, 0.06, 0.22, 0.4),
 }
 # GM drum note -> VSCO samples: (sample, lowest velocity, highest velocity)
 # with round robins picked at random. Kick, clap and hat are synthesized.

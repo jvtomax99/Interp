@@ -16,6 +16,7 @@ and writes out/mix.wav:
   sweep   a filter over everything that opens up as the intro builds (the
           cutoff moves through the points given, in Hz), so the groove is
           heard first as a muffled thump and then comes into the light
+  fade    the level easing down evenly, in dB, to silence: the end
   duck    the bass (out/bass.wav, kept apart by instruments.py) and the sub
           dip about 3 dB under each kick and come back in 140 ms, the way a
           studio "sidechains" them, so the kick punches through
@@ -33,9 +34,9 @@ here = os.path.dirname(os.path.abspath(__file__))
 out = os.path.join(here, 'out')
 rng = np.random.default_rng(7)
 
-SUB_GAIN, RISER_GAIN, IMPACT_GAIN = 0.19, 0.12, 0.30
+SUB_GAIN, RISER_GAIN, IMPACT_GAIN = 0.17, 0.11, 0.22   # eased back for a softer mood
 DUCK, DUCK_RELEASE = 0.3, 0.14   # depth (0.3 is about -3 dB) and recovery (s)
-KIT_GAIN = {'kick': 0.42, 'clap': 0.30, 'hat': 0.10}
+KIT_GAIN = {'kick': 0.36, 'clap': 0.18, 'hat': 0.07}
 KIT_PAN = {'kick': 0.0, 'clap': 0.0, 'hat': 0.25}
 
 
@@ -191,5 +192,9 @@ def tape(x):
 
 
 mix = tape(mix)
+for t0, t1, db in fx.get('fade', []):  # even in dB, so it sounds like a steady letting go
+    i, j = int(t0 * SR), min(len(mix), int(t1 * SR))
+    mix[i:j] *= (10 ** (np.linspace(0, db, j - i) / 20))[:, None]
+    mix[j:] *= 10 ** (db / 20)
 write(os.path.join(out, 'mix.wav'), mix)
 print('out/mix.wav')
