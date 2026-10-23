@@ -62,79 +62,19 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-**The 3D promo remake (Jose, 2026-10-20). Done: final cut 2026-10-23.** v11's
-feature-by-feature story, copy and narrated audio (untouched, 45 s, on v11's
-clock), with the look of his four reference reels: the 3D logo over the main
-entrance, the 3D Body coming apart, the cherry-tree doorway into CoreCHI City,
-Dr. Smiley's real HUMC Brain. In the app as `media/hub-promo.mp4` (720p) with
-its still and Home thumbnail; the User Guide answer and a New lately card
-updated. How it was built, every pick and the checks: `promo/hub-blend/BRIEF.md`.
+Tidied 2026-10-23: finished items left this list for **Done** (a line
+each; the long notes live in `docs/features/`). What's left is the work
+under way, then what waits on Jose, then small leftovers.
 
-**K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/knowledge-brain.md`).**
-The HUMC Brain shows the person, not the code: domains as regions, terms as
-dots lit by what you know, tap a dark area to practice it. First find what
-per-term data the app keeps. Personal data never shown to others.
-Data found (2026-10-21): the only per-term, per-person record is
-`term-reviews/{who__termId}` (Firestore; box 0-5, reviewCount, misses,
-lastResult, lastAt, nextReviewAt; latest state only, no history), fed by
-Term Review, Daily Drill round 2 and Doctor Prep flashcards (`prepMark`).
-Quiz practice (`ih_practice_v1`) is per question by CoreCHI exam domain,
-not glossary domain; `quiz-history`, `ih_warmup`, `ih_memory` hold nothing
-per term. Brightness = box, dimmed when overdue; never practiced = dark.
-Jose's picks: first as two tabs with the code view, then (same day) kept
-separate: his head opens only his code brain, the CoreCHI Practice tile
-only the knowledge brain, no link between; record one daily snapshot on the phone from now on for the
-progress figure. **K2 (this PR; Jose's pick "by name"): once locked,
-`term-reviews` is read and written only by the phone whose `hub-members`
-name matches the record (`ownReview`), with a sync-and-retry when refused.
-Jose publishes `firestore.rules` in the console; until then nothing changes.**
-
-**Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
-One PR each, after M2 (#73):
-F1. **Dr. Smiley reacts in quizzes** (this PR; `dr-smiley.md` "In a quiz") with current art: a bounce on a right
-   answer, a small wince (E2 worried face) on a wrong one (`DR_REACTS.think`
-   exists but nothing calls it), a cheer at streak milestones. Upgrade when
-   Jose sends: head and shoulders as separate layers (base.webp canvas, neck
-   pivot), two arm poses (both up; one fist pump), two face frames (happy
-   eyes-closed, wince). Layers, not Rive.
-F2. **Squash and stretch: Practice buttons and the streak flame only** (this PR; `practice-dashboard.md` "Springy press")
-   (spring press, overshoot and settle on pills and cards). Dr. Smiley's
-   own squash is E3 (#74, 4%, Jose's pick there), not this. Headings stay
-   Inter (rounded face declined).
-F3. **Campus golden hour + depth** (this PR; `practice-dashboard.md` "Golden hour and depth"):
-   re-lit and regraded pre-render, three depth layers slid by scroll and
-   drag (not device tilt), off with reduced motion.
-
-**Memory trainer (Jose approved 2026-10-19).** Consecutive interpreting
-practice: the phone reads a line, you render it, you tap the meaning chunks
-you missed, the line length follows your span, your span is charted over
-weeks on your phone. Design and decisions: `docs/features/memory-trainer.md`.
-Jose's choices: Claude drafts the lines, he checks every Spanish line; M0
-first; notes toggle, memory-only default. One PR each:
-
-M0. **Voice and mic check** (#60, merged). Installed-app results in the
-   note: recording works in both, voice quieter after the mic (app),
-   speech to text works in a Safari tab (English) but gave no words yet in
-   the installed app. **Needs Jose:** installed app, speech to text in
-   English and Spanish, waiting for "done" before Copy.
-M1. **Lines** (#69, merged): `memory/lines.json`, 60 lines approved by Jose
-   without a line-by-line read (see the note); the trainer flags mistakes.
-M2. **The trainer** (this PR; built as in the note's M2 section; flags go
-   to `terminology-meta/memory-flags`, Jose's pick). Screen under Practice, playback with the text
-   hidden and a ring, your turn, the chunks to tap, longer/shorter steps,
-   Dr. Smiley's listening/thinking states, progress in `localStorage`
-   only, notes toggle, a **Flag this line** button (saves line id + what's
-   wrong, read back before editing lines). Voices by name: Paulina (es-MX),
-   Samantha (en-US). User Guide, a suite.
-M3. **Record yourself, play it back beside the model** (built, PR on top of M2; Record me off by default; see the note's M3 section. Voice as loud after the mic on Jose's second run, 2026-10-20, without the fix; the fix stays as a guard). Record and play
-   back work in the installed app (M0). The voice is quieter after the
-   mic: first test `navigator.audioSession.type = 'playback'` after each
-   recording (a button in the check); if it fails, play every line before
-   opening the mic and tell people to use earbuds.
-M4. **Span chart** (weeks) and the span number on the Practice tile (built, PR on top of M3; chart on the trainer's start card under Start, the tile's span is M2's; see the note).
-M5. **Auto-marking** from speech to text (built; speech to text works in the installed app in both languages, 2026-10-20; phone-only matching, off by default, Jose's picks; see the note. **Needs Jose:** one round with Auto-mark on, and one with Record me on too). Only if M0 shows it works in
-   the installed app. Matching on the phone; Haiku (`_routine.js`) only
-   for the chunks that look like paraphrases; text only, never audio.
+1. **Split `index.html`, phase 3: features to their own files**, one per
+   pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
+   Plan, census and the method: `docs/split-index.md`; where it stands:
+   the split entry under **Later** and `docs/handoff.md`. Next: Dr.
+   Smiley's performances, then the campus.
+2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
+   smoothness meter on his phone (More, Measure smoothness; it now lists
+   the six slowest taps, #132), then fix the taps that are slow there.
+   Background, the S-steps so far:
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
 Measured first (`tests/tools/perf.cjs`, iPhone size, CPU 4x, Chromium as a
@@ -179,29 +119,14 @@ S1b. **Home taps, still slow (found in S1).** With Home at rest (#37), taps stil
 Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
-S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
-   handler's forced layouts only moves the cost to the next reader or the
-   frame; tap-to-paint unchanged. Not worth doing as planned; what's left
-   is the new screen's own render work. Original note: a domain tap's handler is 117-207 ms, ~144 ms of it
-   forced layout (`getClientRects`, `getBoundingClientRect` right after
-   `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
-   before write. Target: handler < 50 ms, tap to paint < 150 ms.
-S4. **Glossary taps** (this PR): off-screen term cards skip layout
-   (`content-visibility`), with `#content.cv-all` wherever a guessed height
-   could move what you read. Handler -37%, tap to paint -23% on real-size
-   domains; the targets (< 50 ms, < 150 ms at 4x) are not met. Next, if
-   wanted: draw fewer than 120 cards up front (a visible change: ask Jose).
-S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
-   (stiffness = (2π/duration)², damping ratio = 1 - bounce); WWDC18
-   "Designing Fluid Interfaces" (start at 100% damping; 80% only when a gesture
-   carries momentum). Every bounce-0 spring has one shape:
-   `linear(0, 0.094, 0.274, 0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945,
-   0.964, 0.977, 0.985, 0.99, 0.994, 0.996, 0.998, 0.998, 1)`; CSS duration =
-   1.47 x Apple duration. Press 0.25 s (368 ms CSS), screen 0.4 s (588 ms),
-   sheet 0.45 s (662 ms); swipe-dismiss bounce 0.2 (607 ms, overshoot 1.5%).
-   The 10 overshooting cubic-beziers on plain taps go to bounce 0. Fallback
-   `--ease` where `linear()` is unsupported (iOS < 17.2; Safari 17.2 notes).
-   Later, sheets only: a JS spring that keeps the finger's speed (CSS can't).
+
+**Waiting on Jose** (nothing to build until he does):
+- **K2, Term Review privacy (#117):** publish `firestore.rules` in the
+  Firebase console. Until then the "only your own record" rule does
+  nothing.
+- **M5, auto-marking (#91):** one memory-trainer round with Auto-mark on,
+  and one with Record me on too.
+
 **Doctors redesign (Jose approved 2026-10-14).** Mockups:
 `docs/mockups/doctors/list.png` and `page.png` (HTML beside them). Rule from
 Jose: it must look like the rest of the app (light background and mesh,
@@ -223,58 +148,9 @@ Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
 come from this alone.
 
-2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
-   `doctor-research.js`, `term-lookup.js` each build their own request and
-   retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
-   helper; move one endpoint per PR.
-1. **AI models.** `claude-sonnet-5` (translate backup) →
-   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
-   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
-   claude-api skill first. Next: translate backup.
-3. **Home styles in layers.** In `home-polish.css` the greeting name is
-   restyled by 13 rules, the quote by 12. Merge each element's rules into
-   one, one element per PR, pixel-compared. Jose signs off on the look.
-5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
-   `index.html`. `home-polish.css` still styles classes nothing makes
-   (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
-   file, so fetch `main` right before.
-3. **Home styles in layers.** The greeting name is in one block now (its
-   PR); next the quote (12 rules, with its `cite`), then the name row (7).
-3. **Home styles in layers.** The greeting name and the quote (with its
-   author line) are each in one block now (their PRs); next the name row
-   (7 rules), then look for the next most-layered element.
-3. **Home styles in layers.** The greeting name, the quote (with its
-   author line), the name row, the greeting text block and the banner
-   itself are each in one place now (their PRs). Left as they are: the
-   photo drift and scrim (8 rules each, one per mode by design), section
-   heads, tile names and card titles (7-8, one per breakpoint). Fold
-   those the same way when someone touches them.
-   Method that worked: list every rule for the element with its media
-   context (comments stripped first), work out the winner per breakpoint,
-   write one block at the lettering block's place, delete the rest, then
-   prove it: computed styles and boxes of everything under `#homeGreeting`
-   identical at 11 widths x short/long name x light/dark x penning
-   (`Math.random` pinned, the quote is random per session), and the
-   banner's pixels identical at phone and computer size. Jose signs off on
-   the look.
-4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
-   old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
-   ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
-   gap" paragraph says there are no spacing or font-size variables, but the
-   Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
-   text, both files.
-
-**Flaky WebKit tests, fixed.** dock-tuck's "Dr. Smiley shrinks with the
-bar" read his size mid-breath (fixed 2026-10-19: the loops are held at their
-start while he is measured, and the read waits for his scale to rest).
-startup-work's "afterwards the name itself is shown" failed twice on
-2026-10-20 (runs 39394492541, 39397824186) on PRs that don't touch Home:
-the pen moves 64 ms a frame at most, so a CI browser drawing ~3 frames a
-second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
-pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
-that shows the name whatever the frames do, and the test waits up to 40 s
-and prints how long it took. A WebKit red on an unrelated PR: re-run once,
-then read the log; it names the suite and the check.
+**Small leftovers**, for whoever next touches the file:
+- `api/term-check.js` still has its own `clip()` (line ~105) beside
+  `_routine.js`'s `clip`; fold it in.
 
 ## Later (only when the trigger happens)
 
@@ -314,6 +190,22 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-23 Plan tidied (this PR): the finished items below left
+  **Next**; the ones that had no line here get one now:
+  - 2026-10-23 3D promo remake, final cut (#128): `media/hub-promo.mp4`
+    (720p), its still and Home thumbnail; User Guide answer and a New
+    lately card. How it was built: `promo/hub-blend/BRIEF.md`.
+  - 2026-10-21 K1 your knowledge brain (#116) and K2 Term Review privacy
+    by name (#117; waits on Jose publishing the rules, under **Next**):
+    `docs/features/knowledge-brain.md`.
+  - 2026-10-20 F1 Dr. Smiley reacts in quizzes (#81; `dr-smiley.md`
+    "In a quiz"). F2 (#82) and F3 (#102) already have lines below.
+  - 2026-10-20 Memory trainer M2 the trainer (#73), M3 record yourself
+    (#77), M4 span chart (#80), M5 auto-marking (#91; one round from
+    Jose still wanted, under **Next**): `docs/features/memory-trainer.md`.
+  - Already recorded below, removed from **Next** as done: S4 (#105), S5
+    springs, the AI model updates, one Claude helper, Home styles in
+    layers, dead CSS in `home-polish.css`, stale numbers.
 - 2026-10-23 S9 Home taps, part 1: the meter times taps (this PR; Jose's
   pick: phone timing first). Lab (`tests/tools/tap-hold.cjs`, new: a 90 ms
   finger, timed from the lift, UA=chromium 4x, 3 runs): lift -> click
@@ -843,6 +735,41 @@ then read the log; it names the suite and the check.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **Kept from the old Next list when it was tidied (2026-10-23).**
+  Knowledge brain data (K1, 2026-10-21): the only per-term, per-person
+  record is `term-reviews/{who__termId}` (box 0-5, reviewCount, misses,
+  lastResult, lastAt, nextReviewAt; latest state only, no history), fed by
+  Term Review, Daily Drill round 2 and Doctor Prep flashcards
+  (`prepMark`). Quiz practice (`ih_practice_v1`) is per question by
+  CoreCHI exam domain, not glossary domain; `quiz-history`, `ih_warmup`,
+  `ih_memory` hold nothing per term. S4: if glossary taps need more,
+  draw fewer than 120 cards up front, a visible change, so ask Jose
+  first. Home styles in layers: the greeting name, quote, name row, text
+  block and banner are each one block; left as they are on purpose: the
+  photo drift and scrim (one rule per mode), section heads, tile names
+  and card titles (one per breakpoint); fold those when someone touches
+  them. Method: list every rule for the element with its media context
+  (comments stripped), work out the winner per breakpoint, write one
+  block, delete the rest, then prove computed styles and boxes identical
+  at 11 widths x short/long name x light/dark x penning (`Math.random`
+  pinned) and the pixels at phone and computer size; Jose signs off.
+- **Flaky WebKit tests, fixed.** dock-tuck's "Dr. Smiley shrinks with the
+  bar" read his size mid-breath (fixed 2026-10-19: the loops are held at their
+  start while he is measured, and the read waits for his scale to rest).
+  startup-work's "afterwards the name itself is shown" failed twice on
+  2026-10-20 (runs 39394492541, 39397824186) on PRs that don't touch Home:
+  the pen moves 64 ms a frame at most, so a CI browser drawing ~3 frames a
+  second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
+  pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
+  that shows the name whatever the frames do, and the test waits up to 40 s
+  and prints how long it took. A WebKit red on an unrelated PR: re-run once,
+  then read the log; it names the suite and the check. A WebKit job
+  "cancelled" at its 20-minute limit while installing the browser (#129,
+  and #131 twice, 2026-10-23) was still in `playwright install --with-deps
+  webkit` (its log ends with that process killed at cleanup; why the
+  install hangs is unproven). Each push runs the tests twice (push and
+  pull request); the other WebKit run passing on the same commit covers it.
 
 - **Proving a CSS move with computed styles: sort the properties.**
   `getComputedStyle` lists custom properties in the order the sheets
