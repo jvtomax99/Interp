@@ -9,6 +9,8 @@ import { loadSmileyArt, composeSmiley, BROWS } from "../smiley.js";
 import { rng } from "../util.js";
 
 export const SMILEY_SHARE = 0.25; // of the frame height (Jose: "about 25%")
+// his head only glows now; the brain itself is the app's real one, lifted out as a hologram (hologram.js)
+const DRAWN_BRAIN = false;
 
 export async function createOverlay(root, W, H) {
   const art = await loadSmileyArt("assets/drsmiley/");
@@ -92,6 +94,7 @@ export async function createOverlay(root, W, H) {
       bg.fillStyle = rg;
       bg.beginPath(); outlines[n].forEach(([x, y], i) => (i ? bg.lineTo(x, y) : bg.moveTo(x, y))); bg.closePath(); bg.fill();
     });
+    if (!DRAWN_BRAIN) { bg.shadowBlur = 0; bg.globalAlpha = 1; bg.globalCompositeOperation = "destination-in"; bg.drawImage(art.base, 0, 0); bg.globalCompositeOperation = "source-over"; return brainLayer; }
     bg.shadowColor = "#3fc6ee"; bg.shadowBlur = 16;
     bg.strokeStyle = `rgba(170,235,255,${0.95 * b})`; bg.lineWidth = 4;
     for (const o of outlines) { bg.beginPath(); o.forEach(([x, y], i) => (i ? bg.lineTo(x, y) : bg.moveTo(x, y))); bg.closePath(); bg.stroke(); }

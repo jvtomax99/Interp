@@ -22,6 +22,7 @@ import { createCity } from "./city.js";
 import { createHero } from "./hero.js";
 import { buildLogo3D } from "./logo3d.js";
 import { createDoorway } from "./doorway.js";
+import { createHologram } from "./hologram.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
@@ -637,6 +638,7 @@ async function build() {
   const overlay = await createOverlay(root, W, H);
   const city = await createCity(root, canvas, W, H); // CoreCHI's campus, flown into (city.js)
   const doorway = await createDoorway(city.canvas, W, H); // the cherry-tree photo opening the CoreCHI shot (doorway.js)
+  const hologram = await createHologram(city.canvas, W, H); // his real brain on "Ask Dr. Smiley." (hologram.js)
   const hero = createHero(city.canvas, W, H); // the proof, big enough to read (hero.js)
   let smileyState = null;
   const _v = new THREE.Vector3();
@@ -721,7 +723,7 @@ async function build() {
       smileyState = { x: A.x, base: A.base, lift: Math.min(ARC, Math.max(0, y) * overlay.size.h * 0.35), rise: y < 0 ? clamp(1 + y / 1.1) : undefined,
         squash: pose.squash ?? 1, lean: -(pose.lean || 0), face: pose.face || "rest", brows: pose.brows || "rest",
         // his AI brain, on "Ask Dr. Smiley." (Jose, 2026-10-22)
-        brain: s[2] === "ask" ? prog(t - s[0], 1.0, 1.3) * (1 - prog(t - s[0], 2.0, 2.3)) : 0, time: t };
+        brain: s[2] === "ask" ? prog(t - s[0], 0.6, 0.9) * (1 - prog(t - s[0], 1.75, 2.0)) : 0, time: t };
     }
     cameraAt(t);
     if (s[2] === "end" || (next && next[2] === "end")) endCard.update(Math.max(0, t - END_AT));
@@ -745,10 +747,12 @@ async function build() {
       const body = feat.explodeArt(13 * inOutSine(prog(u, 0.55, 1.5)));
       hero.draw(k > 0.001 ? body : null, from, k, feat.proofArt("glossary"), prog(u, 1.55, 1.9));
     } else if (isFeature(s[2]) && s[2] !== "cert") {
-      const u = t - s[0], len = s[1] - s[0], start = 0.6, end = len - HOP - 0.06;
+      const u = t - s[0], len = s[1] - s[0], start = s[2] === "ask" ? 1.6 : 0.6, end = len - HOP - 0.06; // Ask: after his brain
       const k = prog(u, start, start + 0.35) * (1 - prog(u, end - 0.22, end));
       hero.draw(k > 0.001 ? feat.proofArt(s[2]) : null, k > 0.001 ? proofRect(s[2]) : null, k);
     } else hero.draw(null, null, 0);
+    // his brain, lifted out of his head (the head: about a third down his picture)
+    hologram.draw(s[2] === "ask" ? t - s[0] : -1, smileyState && s[2] === "ask" ? { x: smileyState.x, y: smileyState.base - (smileyState.lift || 0) - overlay.size.h * 0.68 + (smileyState.rise != null && smileyState.rise < 1 ? (1 - smileyState.rise) * overlay.size.h : 0), r: overlay.size.w * 0.4 } : null);
     overlay.draw(smileyState);
     // for the checks: his box and the proof's box on screen this frame
     window.__smileyCheck = { t: time, shot: s[2], smiley: overlay.box(), proof: hero.box() || city.box() || (isFeature(s[2]) ? proofRect(s[2]) : null),
