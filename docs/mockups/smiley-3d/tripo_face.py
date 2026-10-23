@@ -63,7 +63,7 @@ def add_key(ob, name, co):
     return kb
 
 
-def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, lid=None, lower=(0, 0), happy=0):
+def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, lid=None, lower=(0, 0), happy=0, gaze=None):
     """brow: per side (his right, his left) a (lift, tilt) in the app's units
     (DR_BROWS: lift up positive, tilt positive = inner end up); cheek: per side
     0..1; close: 0 (his sculpted smile) .. 1 (closed); mouth: {shape: 0..2} (past
@@ -98,6 +98,15 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
     if te is not None and te.data.shape_keys is not None:
         for tk in te.data.shape_keys.key_blocks[1:]:
             tk.value = kb['Mouth.' + tk.name].value if 'Mouth.' + tk.name in kb else 0
+    if gaze is not None:
+        # the eyes look there (the iris in the shader, the glass dome with it); the upper lid
+        # follows an upward or downward look by about half the iris's travel, the lower a little
+        from tripo_eyes import set_gaze as _ball_gaze
+        for s in (R, L):
+            e = bpy.data.objects['Eye.' + s]
+            _ball_gaze(e, gaze[0], gaze[1])
+            if 'Cornea.' + s in bpy.data.objects:
+                import tripo_eyes2; tripo_eyes2.set_gaze(e, gaze[0], gaze[1])
     if lids and 'Lid.U1.L' in kb:
         # the lids as his own skin (tripo_lids.py): rest = 0 (the edge on the iris top),
         # the old shells' scale mapped onto it (their .32 was rest; 0 wide open; 1 shut)
@@ -109,6 +118,9 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
                 old = lid[i] if lid else REST_LID + lid_down[i]
                 up = (old - REST_LID) / (1 - REST_LID) if old >= REST_LID else (old - REST_LID) / REST_LID
                 lo = lower[i]
+                if gaze is not None:
+                    up -= .09 * gaze[1]                   # looking up: the lid rises (wide); down: it drops
+                    lo = max(0., lo + .06 * gaze[1])
             set_lids(ob, s, up, lo)
     elif lids:
         from tripo_eyes import set_blink

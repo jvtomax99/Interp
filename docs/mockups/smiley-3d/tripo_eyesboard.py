@@ -145,7 +145,7 @@ board('The surprised “oh”, redone', ['Your drawing (left), the first “oh�
 ], 'plan-oh.png')
 
 
-board('Step A, review 3: his eyelids as his own skin', ['Reference tiles are generated art, marked as such; every other picture is a render of the model. Same camera, light and framing for before and now.'], [
+board('Step A, review 4: his eyelids as his own skin', ['Reference tiles are generated art, marked as such; every other picture is a render of the model. Same camera, light and framing for before and now.'], [
     ('1', 'ME', 'Neutral, warm smile, joyful laugh, relaxed blink: your reference, the old shell lids, the new lids front, '
      'three-quarter and one eye. Since your notes: the upper lid rests on the iris top (it covered a third of it: tired); '
      'the smile narrows the eye from below, cheeks and lower lids up, the upper lid lifted a touch; the laugh closes both '
@@ -160,7 +160,10 @@ board('Step A, review 3: his eyelids as his own skin', ['Reference tiles are gen
      'ball (six down, four up), the cheeks and brows with them.', [fit(Image.open(O('plan/gateA-moves.png')), 1000, 600)], 'transitions', False),
     ('4', 'ME', 'The wireframe: the lid ring (160 upright columns, 24 rows, faces about 1 mm like his mesh) joined to the '
      'cut round the eye, at rest and shut.', [fit(Image.open(O('plan/gateA-wire.png')), 1000, 420)], 'wireframe', False),
-    ('5', 'NOTE', 'Remaining mismatch, plainly: the closed eye\u2019s mound and its depth under the brow (above); a faint '
-     'seam at the outer corner in close-ups; the lower lid at rest reads as a small ledge; the lash line is thinner than '
-     'the art\u2019s. Not done: lids following the gaze; the timing (step C).', [], '', True),
+    ('5', 'ME', 'Review 4 (your \u201ckeep tuning the eyes\u201d): the lash line bolder (3 mm, darker); the lower lid '
+     'thinner with a faint line of its own; the spike at the eye\u2019s corners gone; the lids follow the gaze (an upward '
+     'look lifts the upper lid, a downward look lowers it). The five states plus look up, look down, look left.',
+     [fit(Image.open(O('plan/lids-test.png')), 1000, 2160)], 'rest, smile, laugh, blink, wide, look up, down, left', False),
+    ('6', 'NOTE', 'Remaining mismatch, plainly: the closed eye\u2019s mound and its depth under the brow (step 2 above: '
+     'the sculpt\u2019s socket, not the lids); a faint mark at the outer corner in close-ups. Not done: the timing (step C).', [], '', True),
 ], 'plan-lids.png')

@@ -20,6 +20,9 @@ STATES = [
     ('laugh', dict(close=0, cheek=(1.6, 1.6), happy=1, brow=((2.8, 0), (3.4, 0)))),
     ('blink', dict(lid=(1, 1))),
     ('wide', dict(lid=(0, 0), brow=((5, 0), (6, 0)))),
+    ('look up', dict(gaze=(0, 1))),
+    ('look down', dict(gaze=(0, -1))),
+    ('look left', dict(gaze=(-1, 0))),
 ]
 if __name__ == '__main__':
     tag = sys.argv[1] if len(sys.argv) > 1 else ''

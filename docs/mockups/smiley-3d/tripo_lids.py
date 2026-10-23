@@ -49,8 +49,9 @@ BULGE = .0026                  # the glass dome over the iris (tripo_eyes2.py)
 U_STEPS, D_STEPS = 6, 4
 RIM_W = (.03, .015)            # the rim rows, inward from the edge (ball units of height)
 FOLD_AT, FOLD_W, FOLD_DEPTH = .42, .11, .0008   # the fold above the open eye: where along the lid (0 edge .. 1 cut), its width, its depth (into the face)
-NFIX, FIX_STEP = 6, .015                       # rows above the edge at a fixed .5 mm spacing (ball units), in every state
-LASH_ROWS = (1., 1., 1., 1., .6, .25)          # the lash line on those rows, from the edge up: 2 mm full, gone by 3 mm
+NFIX, FIX_STEP = 8, .015                       # rows above the edge at a fixed .5 mm spacing (ball units), in every state
+LASH_ROWS = (1., 1., 1., 1., 1., 1., .55, .2)  # the lash line on those rows, from the edge up: 3 mm full, gone by 4 mm (the first mm is seen edge-on)
+LOW_THICK, LOW_RIM = .0005, (.018, .009)       # the lower lid: thinner edge and a smaller roll (at the upper's it read as a ledge)
 FEATHER = .3                   # the ring's flat colour feathers into his texture this far past the cut (ball units)
 
 
@@ -126,7 +127,7 @@ class EyeRing:
         when shut read as a cap standing off the eye)."""
         # the dome's clearance only over the dome (the iris, a < .6): at the open lid's edge it made a 5 mm plate
         # (shut, the clearance over the dome was cut to a tenth: the glass dome then poked through the shut lid)
-        margin = THICK + (BULGE + .0003) * (1 - smooth((min(a, 1.) - .5) / .2)) + ((.0005 * (1 - .7 * shut)) if upper else 0.)
+        margin = (THICK if upper else LOW_THICK) + (BULGE + .0003) * (1 - smooth((min(a, 1.) - .5) / .2)) + ((.0005 * (1 - .7 * shut)) if upper else 0.)
         if i == 0:
             margin = .0003
         elif i == 1:
@@ -154,7 +155,8 @@ class EyeRing:
             # lives on them: spread with the rest, a shut lid's lash zone grew into half the eye)
             fixed = [we + sgn * FIX_STEP * k for k in range(NFIX + 1)]
             rest_span = (ws - fixed[-1])
-            rows = [we - sgn * RIM_W[0] * taper * thin, we - sgn * RIM_W[1] * taper * thin] + fixed + [fixed[-1] + rest_span * (k / (ROWS - NFIX)) ** 1.2 for k in range(1, ROWS - NFIX + 1)]
+            rw = RIM_W if upper else LOW_RIM
+            rows = [we - sgn * rw[0] * taper * thin, we - sgn * rw[1] * taper * thin] + fixed + [fixed[-1] + rest_span * (k / (ROWS - NFIX)) ** 1.2 for k in range(1, ROWS - NFIX + 1)]
             y_cut = float(self.y_cut['up' if upper else 'lo'][j])
             for i, w in enumerate(rows):
                 a = math.hypot(u, w)
@@ -248,10 +250,17 @@ def cut_and_ring(ob, eyes):
             verts[key] = [[None] * (COLS + 1) for _ in range(nrow)]
         for i in range(nrow):
             for j in range(COLS + 1):
+                if corner[j] and i < RIM:                   # past the corners the rim is the edge itself (no sliver faces)
+                    verts['up'][i][j] = None; verts['lo'][i][j] = None; continue
                 vu = bm.verts.new(Vector(pts['up'][i, j])); verts['up'][i][j] = vu
                 # the lower strip shares the end columns (the cut's two ends) and the edge rows past the corners
                 share = (j in (0, COLS)) or (corner[j] and i <= RIM)
                 verts['lo'][i][j] = vu if share else bm.verts.new(Vector(pts['lo'][i, j]))
+        for key in ('up', 'lo'):
+            for j in range(COLS + 1):
+                if corner[j]:
+                    for i in range(RIM):
+                        verts[key][i][j] = verts[key][RIM][j]
         new_verts = {id(v): v for row in verts['up'] for v in row}
         new_verts.update({id(v): v for row in verts['lo'] for v in row})
         for v in new_verts.values():
@@ -274,6 +283,8 @@ def cut_and_ring(ob, eyes):
             for n, k in enumerate(LASH_ROWS):
                 kk = min(1., k * (1 + .6 * outer))                     # thicker toward the outer corner
                 verts['up'][RIM + 1 + n][j][lash_lay] = kk * taper
+            verts['lo'][1][j][lash_lay] = .3 * taper                   # the lower lid: a faint line on its rim
+            verts['lo'][RIM][j][lash_lay] = .3 * taper
             if outer > .5:                                             # the outer third: one more row
                 verts['up'][RIM + 1 + len(LASH_ROWS)][j][lash_lay] = .5 * (outer - .5) * 2 * taper
         faces = []
@@ -388,7 +399,7 @@ def cut_and_ring(ob, eyes):
         nt.links.new(rl[0].from_socket, rA); rB.default_value = .88          # matte (at .62 a shut lid carried a glossy patch)
         nt.links.new(flat_att.outputs['Fac'], rmix.inputs['Factor'])
         nt.links.new(rout, bsdf.inputs['Roughness'])
-    A2, out2 = mixer('lash', (.03, .012, .006, 1)); nt.links.new(out1, A2)
+    A2, out2 = mixer('lash', (.018, .007, .004, 1)); nt.links.new(out1, A2)
     nt.links.new(out2, bsdf.inputs['Base Color'])
     np.savez(os.path.join(HERE, 'in', 'lids.npz'), **{f'{key}_{s}': R.idx[key] for s, R in rings.items() for key in ('up', 'lo')})
     return rings

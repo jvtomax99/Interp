@@ -138,6 +138,13 @@ page: the shut eye's mound and its depth under the brow (his sculpt's eye
 dish is 9 mm behind the egg's front), the lower lid's small ledge, a faint
 outer-corner seam, the lash thinner than the art's.
 
+Jose then: "keep tuning the eyes" (review 4): `LASH_ROWS` 3 mm full,
+darker; the lower lid its own thickness and roll (`LOW_THICK`, `LOW_RIM`)
+and a faint line; past the corners the rim rows are the edge itself (a
+spike at the corners); `set_face(gaze=(gx, gz))` turns the eyes (iris and
+dome) and the lids follow (up .09, lower .06 per unit). `tripo_lidtest.py`
+adds look up / down / left. Page `out/plan-lids.png` (review 4).
+
 ## Rebuild (about 15 minutes)
 
 ```
