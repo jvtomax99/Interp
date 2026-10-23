@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- The 3D promo remake (BRIEF.md). Its own composition beside index.html
+     (the first hub-blend reel). Draft size 540x960: for the final render set
+     the four 540/960 numbers below to 1080/1920; everything is drawn in 3D,
+     so nothing else changes.
+     Render: hyperframes render -c remake.html -o out/remake.mp4 -->
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=540, height=960" />
+    <script>
+      window.__hf = window.__hf || {};
+      window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["remake"] = new Promise((res) => {
+        window.__hfBuildResolve = (p) => p.then(res, (e) => { console.error(e); res(); });
+      });
+    </script>
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.js" } }
+    </script>
+    <style>
+      @font-face { font-family: "Inter Tight"; font-weight: 800; src: url("fonts/inter-tight-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter Tight"; font-weight: 500; src: url("fonts/inter-tight-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "JetBrains Mono"; font-weight: 500; src: url("fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Libre Baskerville"; font-weight: 400; src: url("fonts/libre-baskerville-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Libre Baskerville"; font-weight: 700; src: url("fonts/libre-baskerville-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Playfair Display"; font-weight: 700; font-style: italic; src: url("fonts/playfair-display-latin-700-italic.woff2") format("woff2"); }
+      @font-face { font-family: "Playfair Display"; font-weight: 700; src: url("fonts/playfair-display-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Great Vibes"; font-weight: 400; src: url("fonts/great-vibes-latin-400-normal.woff2") format("woff2"); }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 540px; height: 960px; overflow: hidden; background: #03061a; }
+      #root { position: relative; width: 540px; height: 960px; }
+      #stage { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="remake" data-start="0" data-duration="45" data-width="540" data-height="960">
+      <canvas id="stage" class="clip" data-start="0" data-duration="45" data-track-index="0"></canvas>
+      <audio id="music" src="assets/music-remake.m4a" data-start="0" data-duration="45" data-track-index="1" data-timeline-role="music"></audio>
+    </div>
+    <script src="./vendor/gsap.min.js"></script>
+    <script>
+      // Motion is driven by hf-seek in src/remake/main.js; an empty root timeline satisfies the runtime contract.
+      window.__timelines = window.__timelines || {};
+      window.__timelines["remake"] = gsap.timeline({ paused: true });
+    </script>
+    <script type="module" src="./src/remake/main.js"></script>
+  </body>
+</html>

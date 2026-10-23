@@ -1,0 +1,79 @@
+{
+  "state": "ask",
+  "caption": "Stuck? Ask Dr. Smiley.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 24,
+      "y": 221.6875,
+      "w": 342,
+      "h": 444.359375,
+      "file": "proof.webp",
+      "clip": {
+        "x": 12,
+        "y": 209.6875,
+        "width": 366,
+        "height": 468.359375
+      },
+      "depth": 3
+    },
+    {
+      "key": "input",
+      "proof": false,
+      "x": 18,
+      "y": 678.09375,
+      "w": 354,
+      "h": 61,
+      "file": "input.webp",
+      "clip": {
+        "x": 6,
+        "y": 666.09375,
+        "width": 378,
+        "height": 85
+      },
+      "depth": 2
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 362,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 386,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

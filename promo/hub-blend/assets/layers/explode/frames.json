@@ -1,0 +1,64 @@
+{
+ "size": [
+  780,
+  1688
+ ],
+ "frames": [
+  {
+   "file": "00.webp",
+   "explode": 0
+  },
+  {
+   "file": "01.webp",
+   "explode": 5
+  },
+  {
+   "file": "02.webp",
+   "explode": 10
+  },
+  {
+   "file": "03.webp",
+   "explode": 15
+  },
+  {
+   "file": "04.webp",
+   "explode": 20
+  },
+  {
+   "file": "05.webp",
+   "explode": 25
+  },
+  {
+   "file": "06.webp",
+   "explode": 30
+  },
+  {
+   "file": "07.webp",
+   "explode": 35
+  },
+  {
+   "file": "08.webp",
+   "explode": 40
+  },
+  {
+   "file": "09.webp",
+   "explode": 45
+  },
+  {
+   "file": "10.webp",
+   "explode": 50
+  },
+  {
+   "file": "11.webp",
+   "explode": 55
+  },
+  {
+   "file": "12.webp",
+   "explode": 60
+  },
+  {
+   "file": "13.webp",
+   "explode": 65
+  }
+ ]
+}

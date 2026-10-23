@@ -1,0 +1,78 @@
+{
+  "state": "drills",
+  "caption": "Daily drills. Sharp skills.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "sheet",
+      "proof": false,
+      "x": 0,
+      "y": 358.40625,
+      "w": 390,
+      "h": 485.59375,
+      "file": "sheet.webp",
+      "clip": {
+        "x": 0,
+        "y": 346.40625,
+        "width": 390,
+        "height": 497.59375
+      },
+      "depth": 0
+    },
+    {
+      "key": "title",
+      "proof": false,
+      "x": 17,
+      "y": 411.40625,
+      "w": 356,
+      "h": 23,
+      "file": "title.webp",
+      "clip": {
+        "x": 5,
+        "y": 399.40625,
+        "width": 380,
+        "height": 47
+      },
+      "depth": 0
+    },
+    {
+      "key": "heard",
+      "proof": false,
+      "x": 135.71875,
+      "y": 461.40625,
+      "w": 223.28125,
+      "h": 50.375,
+      "file": "heard.webp",
+      "clip": {
+        "x": 123.71875,
+        "y": 449.40625,
+        "width": 247.28125,
+        "height": 74.375
+      },
+      "depth": 0
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 17,
+      "y": 534.78125,
+      "w": 356,
+      "h": 237.21875,
+      "file": "proof.webp",
+      "clip": {
+        "x": 5,
+        "y": 522.78125,
+        "width": 380,
+        "height": 261.21875
+      },
+      "depth": 3
+    }
+  ],
+  "missing": []
+}
