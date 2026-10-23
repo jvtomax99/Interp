@@ -175,10 +175,12 @@ wince faces.
 
 ## Full body: the cutout rig (2026-10-23)
 
-**Superseded the same day:** Jose chose to redraw him whole in 2D (head
-included) and rig that; the engine, performances and viewer below are
-kept and re-skinned, the cut 3D pieces are the placeholder. Plan:
-`docs/art/dr-smiley-2d/prompts.md`.
+**Still the plan** (a 2D redraw was tried and dropped the same evening for
+likeness, `docs/art/dr-smiley-2d/prompts.md`). Jose: the body animated
+the way his face is, drawn pictures of the same 3D him in each pose,
+swapped, with this rig moving the arms between them. The drawn poses
+(`docs/art/dr-smiley-body/prompts.md`) become frames of the arms and
+legs; the rig's own pieces fill the moments between.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a

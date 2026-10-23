@@ -1,4 +1,17 @@
-# Dr. Smiley redrawn in 2D: the plan and the prompts
+# Dr. Smiley redrawn in 2D: tried and dropped (2026-10-23)
+
+**Dropped the same evening.** Two results of the style prompt came back
+(`style-a1.png`, `style-a2.png`); Jose: "it looks different from the
+original". Measured: the body's widths matched within 1% of his height
+but he was 10% leggier (2.71 heads tall against 2.46) and the face was
+not his (smaller eyes, narrower, less cheek). Jose's words: "I just want
+to be animated like he animates in the app. Only that it's his face the
+only thing that animates but this time I want the body too." So: the 3D
+him stays, and the body is done the way his face is, drawn pictures of
+the same him in each pose, swapped, with the cutout rig for the moments
+between. The prompts to run are `../dr-smiley-body/prompts.md`. The rest
+of this file is kept for the record only.
+
 
 Jose, 2026-10-23: "It doesn't have to be 3D. I just want it to look natural
 and like a professional work." His pick, with the cost stated (the 30 faces,

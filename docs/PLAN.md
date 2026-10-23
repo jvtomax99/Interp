@@ -66,16 +66,16 @@ Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work
 under way, then what waits on Jose, then small leftovers.
 
-1. **Dr. Smiley redrawn in 2D, then his full body rigged from it** (Jose,
-   2026-10-23: "it doesn't have to be 3D, natural and professional"; his
-   pick, cost stated: the head and every face, brow and hat redone, one
-   Dr. Smiley everywhere). Plan, prompts, pipeline:
-   `docs/art/dr-smiley-2d/prompts.md`. Waits on Jose's pictures from
-   ChatGPT: the style (Step 0), the master (Step 1), then the faces,
-   hands, leg plates, hats. One pull request per step: the head set
-   (with a User Guide "New lately" card), the body (the engine from #135
-   re-skinned, a `hand` joint), then where he stands full-length (his call,
-   still open). Nothing in the app shows him full-length until then.
+1. **Dr. Smiley's full body, finished from drawn poses** (Jose, 2026-10-23:
+   "animated like he animates in the app", his face is drawn pictures
+   swapped, now the body too; a 2D redraw was tried the same evening and
+   dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`). Waits on
+   Jose's pictures from ChatGPT (`docs/art/dr-smiley-body/prompts.md`,
+   Step 2: wave, fist pump, think, shrug first, then crouch and jump).
+   Each is measured against the master, its arms or legs cut as frames
+   into `drsmiley/body/`, the rig (#135) swaps them and moves its own
+   pieces between. Then where he stands full-length (his call, still
+   open). Nothing in the app shows him full-length until then.
 2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:

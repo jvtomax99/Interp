@@ -1,7 +1,10 @@
 # Dr. Smiley: prompts for his full body
 
-**Superseded 2026-10-23:** Jose chose a 2D redraw, head included; the
-prompts to run are in `../dr-smiley-2d/prompts.md`, not these.
+**These are the prompts to run** (2026-10-23, after a 2D redraw was tried
+and dropped for likeness: `../dr-smiley-2d/prompts.md`). Jose: the body
+animated the way his face is, drawn pictures of the same him in each pose.
+First four to send: `wave.png`, `fist-pump.png`, `think.png`, `shrug.png`;
+then `crouch.png` and `jump.png`; the rest after those fit.
 
 Same workflow as `docs/art/dr-smiley-faces/prompts.md`: an image tool that
 edits a picture you upload (ChatGPT image editing or similar), one change

@@ -41,20 +41,20 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Decided 2026-10-23 (the chat after the one above): redraw him in 2D
+## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 
-Jose, asked which path: first "nowhere for now, I want to hit finished
-first", then "it doesn't have to be 3D, I just want it to look natural and
-like a professional work", and his pick with the cost stated: **redraw him
-whole in 2D, head included, then rig that** (one Dr. Smiley everywhere; the
-3D head stays in the app until the 2D set is complete). Plan, prompts and
-the pipeline: `docs/art/dr-smiley-2d/prompts.md`. What the next chat waits
-on: Jose's style picture (Step 0), then the master (Step 1). The engine in
-`drsmiley/body.js`, the viewer and `tests/suites/body-rig.cjs` are the
-keepers; the 3D pieces in `drsmiley/body/` are the placeholder until then.
-The two older paths below are kept for the record; neither is next.
+Jose first said "nowhere for now, I want to hit finished first" and "it
+doesn't have to be 3D"; a 2D redraw was tried (two pictures) and dropped
+for likeness (`docs/art/dr-smiley-2d/prompts.md` has the numbers). His
+words then: "I just want to be animated like he animates in the app.
+Only that it's his face the only thing that animates but this time I want
+the body too." So the 3D him stays and path 1 below is the plan: drawn
+poses of the same him (`docs/art/dr-smiley-body/prompts.md`, Step 2; wave,
+fist pump, think, shrug first, then crouch and jump), measured against the
+master, cut as frames the rig swaps. What the next chat waits on: those
+pictures. PR #135 stays the base (engine, viewer, checks).
 
-## The two older paths (superseded above)
+## The two paths as they stood (path 1 is the one)
 
 1. **Jose sends drawn poses.** Measure each against the master as the
    four faces were (`docs/art/dr-smiley-faces/README.md`: scale, offset,
