@@ -50,8 +50,12 @@ export async function buildLogo3D(renderer, font, { W, H }) {
     const ph = await loadImg("assets/humc/entrance-main.jpg"); // the main entrance, the tower and the sign (Jose's photo, 2026-10-23)
     const c = document.createElement("canvas"); c.width = 700; c.height = 1000;
     const cg = c.getContext("2d"), k = Math.max(700 / ph.width, 1000 / ph.height);
-    cg.filter = "blur(4px) saturate(1.05)"; cg.drawImage(ph, (700 - ph.width * k) / 2, (1000 - ph.height * k) / 2, ph.width * k, ph.height * k); cg.filter = "none";
-    cg.fillStyle = "rgba(228,238,250,0.46)"; cg.fillRect(0, 0, 700, 1000);
+    cg.filter = "blur(1.6px) saturate(1.08)"; // a bit clearer (Jose): the entrance, the tower and the sign read
+    cg.drawImage(ph, (700 - ph.width * k) / 2, (1000 - ph.height * k) / 2, ph.width * k, ph.height * k); cg.filter = "none";
+    cg.fillStyle = "rgba(228,238,250,0.26)"; cg.fillRect(0, 0, 700, 1000);
+    // a soft light halo behind the word, so the logo still reads over the brick
+    const hg = cg.createRadialGradient(350, 520, 20, 350, 520, 300); hg.addColorStop(0, "rgba(236,243,252,0.55)"); hg.addColorStop(1, "rgba(236,243,252,0)");
+    cg.fillStyle = hg; cg.fillRect(0, 0, 700, 1000);
     const fg = cg.createLinearGradient(0, 0, 0, 1000); fg.addColorStop(0, "rgba(3,6,26,0.35)"); fg.addColorStop(0.5, "rgba(3,6,26,0)"); fg.addColorStop(1, "rgba(3,6,26,0.25)");
     cg.fillStyle = fg; cg.fillRect(0, 0, 700, 1000);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
