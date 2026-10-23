@@ -64,6 +64,19 @@ viewer at `/drsmiley/body.html` once it is live, and decides later. So the
 next chat waits for that pick; when it comes, path 2 below. The app still
 shows nothing full-length.
 
+## 2026-10-23, late evening: the held states are in
+
+Jose saw previews of all nine performances (GIFs recorded from the viewer)
+and picked "held states, full body" as the next step toward "animated like
+he animates in the app": `body.state(name)` with listening, thinking,
+answering, celebrating, uncertain (`DR_BODY_STATES` in `drsmiley/body.js`;
+the viewer's second row; the feature doc's "Held states" bullet). Also
+fixed: a gesture cut short by another left its drawn hand up. Where he
+stands in the app is still his open pick (Home greeting and the quiz
+recommended). Previews are made by recording the viewer with Playwright
+video, frames out with Playwright's bundled ffmpeg (`-r 12`, no filters in
+that build), cropped and written as GIFs with Pillow.
+
 ## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 
 Jose first said "nowhere for now, I want to hit finished first" and "it
@@ -101,7 +114,7 @@ pictures. PR #135 stays the base (engine, viewer, checks).
 
 ## How to verify
 
-- `cd tests && node run.cjs body-rig` (about 1 minute; 81 checks). The
+- `cd tests && node run.cjs body-rig` (about 1.5 minutes; 98 checks). The
   full run: `node run.cjs`, about 8 minutes. If Playwright says the
   browser is missing (it expects `chromium_headless_shell-1194`, the
   container has 1243), make the two folders point at the installed ones:

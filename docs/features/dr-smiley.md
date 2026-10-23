@@ -265,6 +265,28 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   alternating, arms against them; returns `dx`, how far he went). Focused
   plays the same beats smaller (about 0.55) with no jump; Still holds the
   one pose in `still` for `stillMs`; reduced motion is Still.
+- **Held states** (`body.state(name)`, `DR_BODY_STATES`; 2026-10-23, Jose's
+  pick after the previews): what he does while something goes on, for as
+  long as it goes on, the way his head holds a task state in the app
+  (`drTask`): `listening` (leaned in a touch, head tipped, one open hand a
+  little forward, slow tilts, a nod now and then), `thinking` (the drawn
+  finger on the chin, eyes up and away from the hand wandering, a slow blink
+  every other beat, a tap of the finger; slower after 9 s; the exit is the
+  "aha"), `answering` (eyes down on the answer along a line and back, one
+  open cutout hand presenting it, the hands trading places every few
+  beats), `celebrating` (the cheer, then a happy bob with one drawn fist
+  pumping), `uncertain` (shoulders up, both open hands half out, a doubtful
+  face and never a cheerful one, a small re-shrug now and then). Each is an
+  entry, then a hold built one group of beats at a time (`play` with
+  `keep`: from the live pose as it is, drawn frames included, ending where
+  its last beat left him), until `state(null)` plays the exit or another
+  state replaces it. A gesture (`perform`) cuts in; it ends at rest and the
+  hold carries on (each group names its base pose again in its first beat).
+  Focused: the same, smaller (k .6). Still: the one pose in `still`, held;
+  a gesture's one frame, then back to it. The viewer's second row of
+  buttons; `tests/suites/body-rig.cjs` checks each holds 4.5 s without a
+  gap inside the limits, Off returns to rest with every drawn pose hidden,
+  a nod during thinking resumes it, Focused smaller, Still one pose.
 - **Rest life** (`drBodyIdle`): breathing is a CSS animation on
   `.db-breath` (the compositor; `transform-box: fill-box`, about the hips;
   none in Still), blinks every few seconds, now and then a shift of weight

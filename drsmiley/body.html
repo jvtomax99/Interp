@@ -64,6 +64,15 @@
   <button class="act" data-perf="wince">Wince</button>
   <button class="act" data-perf="walk">Walk</button>
 </div>
+<p class="sub" style="margin:13px 0 0">While something goes on: he holds these for as long as it takes, the way his head does in the app.</p>
+<div class="bar" id="states">
+  <button class="act" data-state="listening">Listening</button>
+  <button class="act" data-state="thinking">Thinking</button>
+  <button class="act" data-state="answering">Answering</button>
+  <button class="act" data-state="celebrating">Celebrating</button>
+  <button class="act" data-state="uncertain">Unsure</button>
+  <button class="act" data-state="">Off</button>
+</div>
 <div class="row">
   <span class="seg" id="mode" role="group" aria-label="Mode"><button data-mode="lively" class="is-on">Lively</button><button data-mode="focused">Focused</button><button data-mode="still">Still</button></span>
   <span class="seg" id="bgs" role="group" aria-label="Background"><button data-bg="" class="is-on">Light</button><button data-bg="is-mesh">Mesh</button><button data-bg="is-navy">Navy</button></span>
@@ -98,12 +107,21 @@
     b.classList.add('is-pressed'); setTimeout(() => b.classList.remove('is-pressed'), 260);
     act(b.dataset.perf);
   });
+  // The held states: one at a time; Off ends it (the exit). A gesture tapped
+  // meanwhile cuts in, and the hold carries on after it.
+  document.getElementById('states').addEventListener('click', e => {
+    const b = e.target.closest('[data-state]'); if(!b) return;
+    b.classList.add('is-pressed'); setTimeout(() => b.classList.remove('is-pressed'), 260);
+    body.state(b.dataset.state || null);
+    for(const x of e.currentTarget.children) x.classList.toggle('is-on', x === b && !!b.dataset.state);
+  });
   document.getElementById('mode').addEventListener('click', e => {
     const b = e.target.closest('[data-mode]'); if(!b) return;
     opts.mode = b.dataset.mode;
     for(const x of e.currentTarget.children) x.classList.toggle('is-on', x === b);
     document.body.classList.toggle('is-still', body.mode() === 'still');
     body.stop(); body.rest();
+    if(body.stateName()) body.state(body.stateName(), { restart: true });
     document.getElementById('note').textContent = { lively: 'Lively', focused: 'Focused: the same acting, smaller and calmer', still: 'Still: one held pose, no motion' }[opts.mode];
   });
   document.getElementById('bgs').addEventListener('click', e => {

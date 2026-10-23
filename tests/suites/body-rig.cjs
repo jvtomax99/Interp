@@ -157,6 +157,57 @@ const SAMPLE = () => {
   }));
   ok(cut.before.length >= 1 && cut.right.frameL === '' && cut.right.frameR === '' && cut.right.frot === 0 && !cut.everShown && cut.done && cut.clear,
      'a gesture cut short by another hands its drawn pose back at once; the new one shows none and ends clear ' + JSON.stringify(cut));
+
+  // The held states (body.state): an entry, then a hold that goes on until Off,
+  // inside the limits, never idle; a gesture cuts in and the hold carries on;
+  // Off plays the exit back to rest with every drawn pose hidden.
+  const REST_KEYS = ['x', 'y', 'lean', 'head', 'lift', 'aL', 'aR', 'fL', 'fR', 'lL', 'lR', 'upL', 'upR'];
+  const holdRun = (name, ms) => P.evaluate(([n, ms]) => new Promise(res => {
+    const b = window.body, L = DR_BODY.limit, deg = el => Math.abs(parseFloat((el.getAttribute('transform') || '').split('rotate(')[1]) || 0);
+    b.state(null); b.stop(); b.rest(); drBodySeed(4); const on = b.state(n, { restart: true }); drBodySeed(null);
+    const t0 = performance.now(); let frames = 0, idle = 0, over = [], maxHead = 0, maxLean = 0, maxSy = 0, frameOn = 0, moved = 0, lastSig = '';
+    const tick = () => { frames++; const p = b.pose; if(!b.busy()) idle++;
+      // what is drawn (the limits clamp it; a spring past the mark never shows a cut edge)
+      if(deg(b.el.armL) > L.arm[1] + .01 || deg(b.el.armR) > L.arm[1] + .01 || deg(b.el.foreL) > L.fore[1] + .01 || deg(b.el.foreR) > L.fore[1] + .01 || deg(b.el.head) > L.head[1] + .01) over.push(Math.round(performance.now() - t0));
+      maxHead = Math.max(maxHead, Math.abs(p.head)); maxLean = Math.max(maxLean, Math.abs(p.lean)); maxSy = Math.max(maxSy, Math.abs(p.sy - 1));
+      if(b.el.poses.some(g => g.style.opacity === '1')) frameOn++;
+      const sig = [p.head.toFixed(1), p.lift.toFixed(1), p.aL.toFixed(0), p.aR.toFixed(0), p.face].join('|'); if(sig !== lastSig) moved++; lastSig = sig;
+      if(performance.now() - t0 < ms) return requestAnimationFrame(tick);
+      const p2 = b.pose, away = ['head', 'lift', 'aL', 'aR', 'fL', 'fR'].some(k => Math.abs(p2[k]) > 1.5);
+      res({ on, frames, idle, over: over.slice(0, 3), maxHead, maxLean, maxSy, frameOn, moved, away, busy: b.busy(), name: b.stateName(), face: p2.face, frames2: [p2.frameL, p2.frameR, p2.frameLegs] }); };
+    requestAnimationFrame(tick);
+  }), [name, ms]);
+  const states = ['listening', 'thinking', 'answering', 'celebrating', 'uncertain'], held = {};
+  for(const n of states){
+    const r = await holdRun(n, 4500);
+    held[n] = r;
+    ok(r.on && r.busy && r.name === n && r.idle === 0 && r.frames > 60 && r.over.length === 0 && r.away && r.moved > 12,
+       `${n}: held for 4.5 s without a gap, every joint inside its limit, away from rest and alive (${r.frames} frames, ${r.moved} changes) ` + JSON.stringify({ idle: r.idle, over: r.over, away: r.away }));
+    const off = await P.evaluate(() => new Promise(res => { const b = window.body; b.state(null); const t0 = performance.now();
+      const tick = () => { if(b.busy() && performance.now() - t0 < 2500) return requestAnimationFrame(tick);
+        const p = b.pose; res({ ms: Math.round(performance.now() - t0), name: b.stateName(), rest: ['head', 'lift', 'aL', 'aR', 'fL', 'fR', 'lean'].every(k => Math.abs(p[k]) < .01) && p.sy === 1 && p.face === 'rest', clear: b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.legL.style.opacity === '1' }); };
+      requestAnimationFrame(tick); }));
+    ok(!off.name && off.ms < 2000 && off.rest && off.clear, `${n}: Off plays the exit and he is back at rest, every drawn pose hidden (${off.ms} ms) ` + JSON.stringify(off));
+  }
+  ok(held.thinking.frameOn > held.thinking.frames * .7 && held.thinking.frames2[0] + held.thinking.frames2[1] === 'think' && /^lookU/.test(held.thinking.face), 'thinking: the drawn finger stays on the chin the whole hold, eyes up ' + JSON.stringify([held.thinking.frameOn, held.thinking.frames, held.thinking.frames2, held.thinking.face]));
+  ok(held.celebrating.frames2.includes('fist-pump') && held.celebrating.maxSy <= .041, 'celebrating: a drawn fist still pumping after the cheer, the squash within 4% ' + JSON.stringify([held.celebrating.frames2, held.celebrating.maxSy]));
+  ok(/^lookD/.test(held.answering.face) && !held.answering.frameOn, 'answering: eyes down on the answer, the open cutout hand presenting it ' + held.answering.face);
+  ok(['doubt', 'rest', 'lookUL', 'lookUR'].includes(held.uncertain.face) && !held.uncertain.frameOn && held.listening.maxLean > 0, 'uncertain: a composed face, never a cheerful one; listening: leaned in ' + JSON.stringify([held.uncertain.face, held.listening.maxLean]));
+  // A gesture during a hold: it plays, then the hold carries on.
+  const resume = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(4); b.state('thinking'); drBodySeed(null);
+    setTimeout(() => { let ended = false; b.perform('ack', { done: () => ended = true }); const t0 = performance.now();
+      const tick = () => { if((!ended || !b.busy() || !(b.pose.frameL + b.pose.frameR).includes('think')) && performance.now() - t0 < 4000) return requestAnimationFrame(tick);
+        res({ ended, busy: b.busy(), name: b.stateName(), frames: [b.pose.frameL, b.pose.frameR], ms: Math.round(performance.now() - t0) }); };
+      requestAnimationFrame(tick); }, 1800); }));
+  ok(resume.ended && resume.busy && resume.name === 'thinking' && (resume.frames[0] + resume.frames[1]) === 'think' && resume.ms < 4000, 'a nod during thinking plays through, then the finger is back on the chin ' + JSON.stringify(resume));
+  await P.evaluate(() => { window.body.state(null); window.body.stop(); window.body.rest(); });
+  // Focused: the same hold, smaller. Still: the one pose, no loop.
+  const fh = await P.evaluate(() => { opts.mode = 'focused'; return true; }) && await holdRun('thinking', 2500);
+  ok(fh.busy && fh.maxHead < held.thinking.maxHead * .8, 'Focused thinking: the same hold, the head turning less ' + JSON.stringify([fh.maxHead, held.thinking.maxHead]));
+  const sh = await P.evaluate(() => new Promise(res => { opts.mode = 'still'; const b = window.body; b.state(null); b.stop(); b.rest(); b.state('thinking');
+    const a = JSON.stringify(b.pose); setTimeout(() => { res({ busy: b.busy(), same: JSON.stringify(b.pose) === a, frame: b.pose.frameL + b.pose.frameR, name: b.stateName() }); b.state(null); opts.mode = 'lively'; }, 1200); }));
+  ok(!sh.busy && sh.same && sh.frame === 'think' && sh.name === 'thinking', 'Still thinking: the one held pose with the drawn finger, nothing moving ' + JSON.stringify(sh));
+  await P.evaluate(() => { window.body.state(null); window.body.stop(); window.body.rest(); });
   ok(lively.greet.max.aL >= 95 || lively.greet.max.aR >= 95, 'greet: an arm comes up to where the drawn wave is');
   ok(lively.cheer.max.aL >= 105 && lively.cheer.max.aR >= 105 && lively.cheer.max.y > 40, 'cheer: both arms up to the drawn fists and a jump');
   ok(lively.think.max.fL > 100 || lively.think.max.fR > 100, 'think: a hand comes to the chin');

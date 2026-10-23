@@ -138,7 +138,7 @@ function drBody(svg, opts){
   const mode = () => reduced() ? 'still' : (opts.mode || 'lively');
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const pose = Object.assign({}, DR_BODY_REST);
-  let run = null, raf = 0, last = 'rest';
+  let run = null, raf = 0, last = 'rest', cur = null, hctx = null;   // cur: the held state he is in (DR_BODY_STATES)
 
   function draw(p){
     const L = B.limit, r = (deg, at) => `rotate(${deg.toFixed(3)} ${at[0]} ${at[1]})`;
@@ -194,12 +194,17 @@ function drBody(svg, opts){
   function set(patch){ Object.assign(pose, patch); draw(pose); }
 
   /* beats: [[ms, patch, ease], ...]; each beat eases from the pose reached by
-     the one before (the live pose for the first, so an interruption blends). */
+     the one before (the live pose for the first, so an interruption blends).
+     o.keep: a piece of a held state (its entry, one group of its hold): it
+     starts from the live pose as it is, drawn frames included, and ends where
+     its last beat left him, not at rest. Without it the play is a gesture:
+     it ends at rest, and if a held state is on, the hold carries on. */
   function play(beats, o){
     o = o || {};
     stop();
+    const keep = !!o.keep;
     if(mode() === 'still'){
-      if(o.still){ set(Object.assign({}, DR_BODY_REST, o.still)); run = { still: true, timer: setTimeout(() => { run = null; set(DR_BODY_REST); if(o.done) o.done(); }, o.stillMs || 900) }; }
+      if(o.still){ set(Object.assign({}, DR_BODY_REST, o.still)); run = { still: true, timer: setTimeout(() => { run = null; stillRest(); if(o.done) o.done(); }, o.stillMs || 900) }; }
       else if(o.done) o.done();
       return true;
     }
@@ -207,7 +212,7 @@ function drBody(svg, opts){
     // drawn pose the interrupted gesture was showing hands back now (the
     // cutout arm or legs stand where it was), or it would stay up through
     // the whole new gesture: two waving hands, seen 2026-10-23.
-    const start = Object.assign({}, pose, { frameL: '', frameR: '', frameLegs: '', frot: 0 });
+    const start = keep ? Object.assign({}, pose) : Object.assign({}, pose, { frameL: '', frameR: '', frameLegs: '', frot: 0 });
     Object.assign(pose, start);
     const keys = []; let t = 0, from = start;
     for(const [ms, patch, ease] of beats){
@@ -230,7 +235,7 @@ function drBody(svg, opts){
       }
       Object.assign(pose, p); draw(pose);
       if(u < T) raf = requestAnimationFrame(tick);
-      else { const d = run.done; run = null; raf = 0; svg.classList.remove('db-acting'); set(DR_BODY_REST); if(d) d(); }
+      else { const d = run.done; run = null; raf = 0; svg.classList.remove('db-acting'); if(!keep) set(DR_BODY_REST); if(d) d(); if(!keep && !o.exit && cur) holdLoop(); }
     };
     run.t0 = t0; raf = requestAnimationFrame(tick);
     return true;
@@ -246,8 +251,44 @@ function drBody(svg, opts){
     const p = make(mode());
     return play(p.beats, Object.assign({ name, still: p.still, stillMs: p.stillMs }, o || {}));
   }
+  /* Held states (DR_BODY_STATES): what he does while something goes on, for
+     as long as it goes on, the way his head holds a task state in the app
+     (drTask): listening, thinking, answering, celebrating, uncertain. An
+     entry, then the hold, built one group of beats at a time (a little
+     different each) until state(null) plays the exit, or another state
+     replaces it. A gesture (perform) cuts in and the hold carries on after.
+     Still: the one pose in `still`, held; a gesture's one frame, then back. */
+  function ctxFor(name){
+    const m = mode(), R = drBodyRand, side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1;
+    return { name, mode: m, k: m === 'focused' ? .6 : 1, beat: -1, since: performance.now(), R, side, s, A: 'a' + side, F: 'f' + side, O: side === 'L' ? 'R' : 'L', FR: 'frame' + side,
+             j: (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))) };
+  }
+  function stillRest(){ if(cur && hctx) set(Object.assign({}, DR_BODY_REST, DR_BODY_STATES[cur].still(hctx))); else set(DR_BODY_REST); }
+  function state(name, o){
+    o = o || {};
+    if(name && !DR_BODY_STATES[name]) return false;
+    name = name || null;
+    if(name === cur && !o.restart) return true;
+    const prev = cur, pctx = hctx; stop(); cur = name;
+    if(!cur){
+      hctx = null;
+      if(prev && pctx && mode() !== 'still'){ const S = DR_BODY_STATES[prev]; play((S.exit || DR_BODY_HOLD_EXIT)(pctx), { name: 'exit:' + prev, exit: true }); }
+      else set(DR_BODY_REST);
+      return true;
+    }
+    hctx = ctxFor(cur);
+    if(mode() === 'still'){ stillRest(); return true; }
+    play(DR_BODY_STATES[cur].enter(hctx), { keep: true, name: 'enter:' + cur, done: holdLoop });
+    return true;
+  }
+  function holdLoop(){
+    if(!cur || mode() === 'still') return;
+    if(!hctx) hctx = ctxFor(cur);
+    hctx.beat++;
+    play(DR_BODY_STATES[cur].hold(hctx), { keep: true, name: 'hold:' + cur, done: holdLoop });
+  }
   draw(pose);
-  return { el, pose, set, play, perform, stop, setFace, setBrow, setFrames, mode, busy: () => !!run, rest: () => set(DR_BODY_REST) };
+  return { el, pose, set, play, perform, stop, setFace, setBrow, setFrames, mode, state, stateName: () => cur, busy: () => !!run, rest: () => set(DR_BODY_REST) };
 }
 
 /* The performances. Each is built fresh, with the side, the sizes and the
@@ -417,6 +458,112 @@ const DR_BODY_PERF = {
       [120, { face: 'half' + L }, 'linear'],
       [360, { head: 0, face: 'rest' }, 'out'],
     ], still: null, stillMs: 0 };
+  },
+};
+
+/* The held states (body.state(name)). Each: enter(c) and hold(c), beats built
+   from the context c (side, k for Focused, beat count, since, the seeded
+   random and j for timing jitter), still(c) for Still, exit(c) or the common
+   exit. A hold group names its base pose again in its first beat, so a hold
+   resumed after a gesture (which ends at rest) folds back into it. */
+const DR_BODY_BLINK = face => [[45, { face: 'blink1' }, 'linear'], [40, { face: 'blink2' }, 'linear'], [75, { face: 'shut' }, 'linear'], [45, { face: 'blink2' }, 'linear'], [55, { face: 'blink1' }, 'linear'], [60, { face }, 'linear']];
+const DR_BODY_HOLD_EXIT = c => [
+  [c.j(400), { x: 0, y: 0, lean: 0, sx: 1, sy: 1, head: 0, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, lL: 0, lR: 0, upL: 0, upR: 0, frameL: '', frameR: '', frameLegs: '', frot: 0, face: 'smile1', brow: 'rest' }, 'spring'],
+  [c.j(260), { face: 'rest' }, 'out'],
+];
+const DR_BODY_STATES = {
+  // Listening (the app's attentive): leaned in a touch, head tipped, one open
+  // hand a little forward ("go on"); slow tilts, a small nod now and then.
+  listening: {
+    still: c => ({ lean: c.s * .6, head: c.s * 3, lift: -2, [c.A]: 14, [c.F]: 34, brow: 'up' }),
+    enter: c => { const { k, s, j, A, F } = c; return [
+      [j(220), { lift: -3 * k, head: -s * 1 * k, face: 'blink1' }, 'out'],
+      [j(360), { lift: -2 * k, head: s * 3 * k, lean: s * .6 * k, [A]: 14 * k, [F]: 34 * k, brow: 'up', face: 'rest' }, 'spring'],
+    ]; },
+    hold: c => { const { k, s, j, A, F, beat } = c, tilt = (beat % 2 ? -.8 : 1) * s * 3 * k, b = [];
+      b.push([j(1400, .25), { lean: s * .6 * k, [A]: 14 * k, [F]: (34 + (beat % 2) * 6) * k, head: tilt, lift: (-2 + (beat % 2)) * k, brow: 'up' }, 'inOut']);
+      if(beat % 3 === 2) b.push([j(160), { lift: 5 * k, face: 'smile1' }, 'inOut'], [j(280), { lift: -2 * k }, 'spring'], [j(260), { face: 'rest' }, 'linear']);   // a nod: "I see"
+      if(beat % 2 === 1) b.push(...DR_BODY_BLINK('rest'));
+      b.push([j(500, .3), {}, 'linear']);
+      return b; },
+  },
+  // Thinking (processing): the drawn finger on the chin, eyes up and away
+  // from the hand, wandering; a slow blink every other beat, a tap of the
+  // finger now and then; slower once it has taken a while. The exit is the "aha".
+  thinking: {
+    still: c => { const T = DR_BODY.pose.think.at; return { [c.A]: T.a, [c.F]: T.f, ['a' + c.O]: T.a2, ['f' + c.O]: T.f2, [c.FR]: 'think', head: c.s * 5, face: 'lookU' + c.O, brow: 'focused' }; },
+    enter: c => { const { k, s, j, A, F, O, FR } = c, T = DR_BODY.pose.think.at; return [
+      [j(300), { lean: -s * 1.2 * k, head: -s * 2 * k, face: 'blink2', brow: 'focused' }, 'out'],
+      [j(380), { [A]: T.a, [F]: T.f, ['a' + O]: T.a2, ['f' + O]: T.f2, head: s * 5 * k, lean: s * .8 * k, face: 'lookU' + O }, 'spring'],
+      [j(140), { [FR]: 'think', frot: 0, lift: 2 * k }, 'linear'],
+    ]; },
+    hold: c => { const { k, s, j, A, F, O, FR, beat, since } = c, T = DR_BODY.pose.think.at;
+      const faces = ['lookU' + O, 'lookU', 'lookU' + O, 'lookU'], face = faces[beat % 4], turn = [6, 4.5, 6.5, 4][beat % 4];
+      const slow = performance.now() - since > 9000 ? 1.5 : 1, b = [];
+      b.push([Math.round(j(1100, .3) * slow), { [A]: T.a, [F]: T.f, ['a' + O]: T.a2, ['f' + O]: T.f2, [FR]: 'think', lean: s * .8 * k, head: s * turn * k, lift: (2 + (beat % 2)) * k, face, brow: 'focused' }, 'inOut']);
+      if(beat % 4 === 3) b.push([j(170), { frot: 2.4 * k }, 'inOut'], [j(170), { frot: 0 }, 'inOut']);   // the finger taps
+      if(beat % 2 === 1) b.push(...DR_BODY_BLINK(face));
+      b.push([Math.round(j(400, .3) * slow), {}, 'linear']);
+      return b; },
+    exit: c => { const { k, s, j, A, F, O, FR } = c; return [
+      [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                        // aha
+      [j(300), { [FR]: '', frot: 0, [A]: 0, [F]: 0, ['a' + O]: 0, ['f' + O]: 0, head: -s * .5 * k, lift: 4 * k, face: 'smile1', brow: 'rest' }, 'spring'],
+      [j(320), { head: 0, lift: 0, lean: 0, face: 'rest' }, 'out'],
+    ]; },
+  },
+  // Answering (reading the answer with you): eyes down on it, along a line and
+  // back, one open hand presenting it, pulsing gently, the hands trading places
+  // every few beats; a blink every third beat.
+  answering: {
+    still: c => ({ lift: 3, head: c.s * 1.5, [c.A]: 22, [c.F]: 62, face: 'lookD' }),
+    enter: c => { const { k, s, j, A, F } = c; return [
+      [j(200), { face: 'blink2' }, 'out'],
+      [j(380), { lift: 3 * k, head: s * 1.5 * k, [A]: 22 * k, [F]: 62 * k, face: 'lookD', brow: 'rest' }, 'spring'],
+    ]; },
+    hold: c => { const { k, j, beat } = c, s = c.s, A = c.A, F = c.F, O = c.O;
+      const faces = ['lookD' + (s < 0 ? 'L' : 'R'), 'lookD', 'lookD' + (s < 0 ? 'R' : 'L'), 'lookD'], face = faces[beat % 4], b = [];
+      b.push([j(900, .3), { [A]: 22 * k, [F]: (62 + (beat % 2) * 9) * k, ['a' + O]: 0, ['f' + O]: 0, lift: (3 + (beat % 4 === 1 ? 3 : 0)) * k, head: s * (1.5 + (beat % 2) * .8) * k, face, brow: 'rest' }, 'inOut']);
+      if(beat % 3 === 2) b.push(...DR_BODY_BLINK(face));
+      if(beat % 6 === 5){   // the other hand takes the answer
+        b.push([j(420), { [A]: 0, [F]: 0, ['a' + O]: 22 * k, ['f' + O]: 62 * k, head: -s * 1.5 * k }, 'spring']);
+        const was = c.side; c.side = O; c.O = was; c.s = -s; c.A = 'a' + O; c.F = 'f' + O; c.FR = 'frame' + O;
+      }
+      b.push([j(300, .3), {}, 'linear']);
+      return b; },
+  },
+  // Celebrating: the cheer, then a happy bob with one drawn fist pumping
+  // (as drawn or mirrored), the other hand up a little, a laugh.
+  celebrating: {
+    still: c => { const P = DR_BODY.pose['fist-pump'].at; return { aL: P.a, aR: P.a, fL: P.f, fR: P.f, frameL: 'fist-pump', frameR: 'fist-pump', frameLegs: 'crouch', face: 'laugh', brow: 'up' }; },
+    enter: c => DR_BODY_PERF.cheer(c.mode).beats.slice(0, -2),
+    hold: c => { const { k, s, j, A, F, O, FR, beat } = c, P = DR_BODY.pose['fist-pump'].at, b = [];
+      b.push([j(beat ? 260 : 320), { [A]: P.a, [F]: P.f, ['a' + O]: 18 * k, ['f' + O]: 28 * k, lean: -s * 1.2 * k, sy: 1 - .012 * k, sx: 1 + .006 * k, lift: 4 * k, head: s * 2 * k, face: beat % 2 ? 'laughB' : 'laugh', brow: 'up' }, beat ? 'in' : 'spring']);
+      b.push([j(120), { [FR]: 'fist-pump', frot: -4 * k }, 'linear']);
+      b.push([j(320), { sy: 1 + .008 * k, sx: 1 - .004 * k, lift: -2 * k, frot: 5 * k, head: -s * 1 * k, face: 'laugh' }, 'spring']);
+      b.push([j(380), { sy: 1, sx: 1, lift: 0, frot: 0, head: 0 }, 'out']);
+      if(beat % 3 === 2) b.push(...DR_BODY_BLINK('laugh'));
+      return b; },
+    exit: c => { const { j } = c; return [
+      [j(380), { frameL: '', frameR: '', frameLegs: '', frot: 0, aL: 0, aR: 0, fL: 0, fR: 0, lean: 0, sy: 1, sx: 1, lift: 0, head: 0, face: 'smile', brow: 'rest' }, 'spring'],
+      [j(300), { face: 'smile1' }, 'out'], [j(240), { face: 'rest' }, 'out'],
+    ]; },
+  },
+  // Uncertain: shoulders a little up, both open hands half out, a doubtful
+  // face and never a cheerful one; the head tips slowly side to side, a small
+  // re-shrug now and then.
+  uncertain: {
+    still: c => ({ lift: -6, head: c.s * 3, aL: 15, aR: 15, fL: 60, fR: 60, face: 'doubt', brow: 'doubt' }),
+    enter: c => { const { k, s, j } = c; return [
+      [j(160), { face: 'blink1' }, 'in'],
+      [j(320), { lift: -6 * k, head: s * 3 * k, aL: 15 * k, aR: 15 * k, fL: 60 * k, fR: 60 * k, face: 'doubt', brow: 'doubt' }, 'spring'],
+    ]; },
+    hold: c => { const { k, s, j, O, beat } = c, faces = ['doubt', 'rest', 'lookU' + O, 'doubt'], face = faces[beat % 4], b = [];
+      b.push([j(1500, .25), { lift: -6 * k, aL: 15 * k, aR: 15 * k, fL: 60 * k, fR: 60 * k, head: (beat % 2 ? -.8 : 1) * s * 3 * k, face, brow: 'doubt' }, 'inOut']);
+      if(beat % 3 === 2) b.push([j(240), { lift: -11 * k, fL: 70 * k, fR: 70 * k }, 'out'], [j(380), { lift: -6 * k, fL: 60 * k, fR: 60 * k }, 'spring']);   // a small shrug again
+      if(beat % 2 === 1) b.push(...DR_BODY_BLINK(face));
+      b.push([j(400, .3), {}, 'linear']);
+      return b; },
+    exit: c => [[c.j(400), { lift: 0, head: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'rest', brow: 'rest' }, 'spring'], [c.j(200), {}, 'linear']],
   },
 };
 
