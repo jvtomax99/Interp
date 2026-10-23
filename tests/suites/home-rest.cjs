@@ -61,11 +61,25 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
   const o1 = await PROBE(page); await page.waitForTimeout(1000);
   const off = frames(await PROBE(page)) - frames(o1);
   ok(off === 0, 'scrolled past the banner and the card, the petals stop drawing (' + off + ' frames in 1 s)');
+  // Home scroll (2026-10-23): what nobody can see rests. Greeting off screen:
+  // the badge's breathing and the Ask ring pause, the heartline stops replaying.
+  const away = await page.evaluate(() => new Promise(r => {
+    const st = s => [...document.querySelectorAll(s)].flatMap(e => e.getAnimations()).map(a => a.playState);
+    const hl = document.querySelector('#content .home-heartline'); let n = 0;
+    const mo = new MutationObserver(() => { if (hl.classList.contains('is-draw')) n++; });
+    mo.observe(hl, { attributes: true, attributeFilter: ['class'] });
+    setTimeout(() => { mo.disconnect(); r({ pin: st('#content .home-wave-pin'), ring: st('#content .home-ask-ring'), draws: n, dockShown: document.body.classList.contains('dock-has-smiley'), dock: st('.dock-smiley-bob') }); }, 7000);
+  }));
+  ok(away.pin.length && away.ring.length && away.pin.concat(away.ring).every(x => x === 'paused') && away.draws === 0, 'greeting scrolled off: his breathing and the Ask ring pause, no heartline draws', away);
+  ok(away.dockShown && away.dock.length && away.dock.every(x => x === 'running'), 'the dock Dr. Smiley, now shown, breathes', away);
 
   // A repaint of Home redraws the rank card: its ring doesn't glow again.
   await page.evaluate(() => { goHome(); window.scrollTo(0, 0); });
   await page.waitForTimeout(2500);
   ok((await state(page)).ringGlow === 0, 'a repaint of Home does not replay the card ring glow');
+  const back = await page.evaluate(() => { const st = s => [...document.querySelectorAll(s)].flatMap(e => e.getAnimations()).map(a => a.playState);
+    return { pin: st('#content .home-wave-pin'), ring: st('#content .home-ask-ring'), dockShown: document.body.classList.contains('dock-has-smiley'), dock: st('.dock-smiley-bob') }; });
+  ok(back.pin.concat(back.ring).every(x => x === 'running') && back.pin.length && !back.dockShown && back.dock.every(x => x === 'paused'), 'back at the top: the badge and the ring run again, the faded-out dock one rests', back);
   ok(!page.__errors.length, 'no page errors', page.__errors);
 
   console.log('== phone, reduced motion');

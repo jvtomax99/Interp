@@ -1157,6 +1157,12 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
 }
 /* "Still" in his settings (index.html, setSmileyMode) stops it too. */
 html.ds-still .home-wave-pin,html.ds-still .dock-smiley-bob{animation:none;}
+/* Nobody sees them (Home scroll, 2026-10-23): the Home badge and the Ask ring
+   with the greeting scrolled off, the dock one while it's faded out. Paused,
+   not stopped: each carries on from the same pose when it's back. */
+#content.is-home .home-greeting.is-offscreen .home-wave-pin,
+#content.is-home .home-greeting.is-offscreen .home-ask-ring,
+body:not(.dock-has-smiley) .dock-smiley-bob{animation-play-state:paused;}
 /* And it waits while he springs in at the start of the hello: running next to
    the entrance on the same layer, an iPhone could leave him drawn at the
    entrance's first frame, tiny (home-polish.js, placeFace). */

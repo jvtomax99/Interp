@@ -30,5 +30,14 @@ const ok=(c,m)=>{console.log((c?'  PASS ':'  FAIL ')+m);if(!c)process.exitCode=1
  await P.evaluate(()=>setCategory('all'));await P.waitForTimeout(1500);
  const sway=await P.evaluate(async()=>{const btn=document.querySelector('.dock-smiley');const seen=[];for(let i=0;i<10;i++){window.scrollBy(0,60);await new Promise(r=>requestAnimationFrame(r));seen.push(btn.style.rotate);}await new Promise(r=>setTimeout(r,1800));return {during:seen.filter(Boolean).slice(-3),after:btn.style.rotate}});
  ok(sway.during.length>0&&sway.after==='','scrolling leans him and he springs back upright: '+JSON.stringify(sway));
+ // only the one you can see is pushed (Home scroll, 2026-10-23; the badge sways once the hello is over): at the top of Home the dock Dr. Smiley is faded out, further down the Home badge is off screen
+ await P.evaluate(()=>setCategory('home'));await P.waitForTimeout(2500);
+ const lean=()=>P.evaluate(async()=>{const w=document.querySelector('.home-wave-icon'),d=document.querySelector('.dock-smiley');const W=[],D=[];for(let i=0;i<6;i++){window.scrollBy(0,i%2?-8:8);await new Promise(r=>requestAnimationFrame(r));W.push(w.style.rotate);D.push(d.style.rotate);}return {wave:W.filter(Boolean).length,dock:D.filter(Boolean).length,dockShown:document.body.classList.contains('dock-has-smiley'),y:Math.round(w.getBoundingClientRect().top)}});
+ await P.evaluate(()=>window.scrollTo(0,0));await P.waitForFunction(()=>{const w=document.querySelector('.home-wave-icon');return w&&w.__sway},null,{timeout:20000}).catch(()=>{});await P.waitForTimeout(500);
+ const top=await lean();
+ ok(top.wave>0&&top.dock===0&&!top.dockShown,'top of Home: the badge leans, the faded-out dock one is left alone: '+JSON.stringify(top));
+ await P.evaluate(()=>window.scrollTo(0,document.scrollingElement.scrollHeight));await P.waitForTimeout(2500);
+ const low=await lean();
+ ok(low.dock>0&&low.wave===0&&low.dockShown,'lower down: the dock one leans, the off-screen badge is left alone: '+JSON.stringify(low));
  ok(P.__errors.length===0,'page errors: '+JSON.stringify(P.__errors.slice(0,3)));
  await ctx.close();await b.close();})();
