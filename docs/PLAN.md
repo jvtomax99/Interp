@@ -66,12 +66,22 @@ Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work
 under way, then what waits on Jose, then small leftovers.
 
-1. **Split `index.html`, phase 3: features to their own files**, one per
+1. **Dr. Smiley redrawn in 2D, then his full body rigged from it** (Jose,
+   2026-10-23: "it doesn't have to be 3D, natural and professional"; his
+   pick, cost stated: the head and every face, brow and hat redone, one
+   Dr. Smiley everywhere). Plan, prompts, pipeline:
+   `docs/art/dr-smiley-2d/prompts.md`. Waits on Jose's pictures from
+   ChatGPT: the style (Step 0), the master (Step 1), then the faces,
+   hands, leg plates, hats. One pull request per step: the head set
+   (with a User Guide "New lately" card), the body (the engine from #135
+   re-skinned, a `hand` joint), then where he stands full-length (his call,
+   still open). Nothing in the app shows him full-length until then.
+2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
    the split entry under **Later** and `docs/handoff.md`. Next: Dr.
    Smiley's performances, then the campus.
-2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
+3. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
    Background, the S-steps so far:

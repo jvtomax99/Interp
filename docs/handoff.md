@@ -41,7 +41,20 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Next: one of two paths, Jose picks
+## Decided 2026-10-23 (the chat after the one above): redraw him in 2D
+
+Jose, asked which path: first "nowhere for now, I want to hit finished
+first", then "it doesn't have to be 3D, I just want it to look natural and
+like a professional work", and his pick with the cost stated: **redraw him
+whole in 2D, head included, then rig that** (one Dr. Smiley everywhere; the
+3D head stays in the app until the 2D set is complete). Plan, prompts and
+the pipeline: `docs/art/dr-smiley-2d/prompts.md`. What the next chat waits
+on: Jose's style picture (Step 0), then the master (Step 1). The engine in
+`drsmiley/body.js`, the viewer and `tests/suites/body-rig.cjs` are the
+keepers; the 3D pieces in `drsmiley/body/` are the placeholder until then.
+The two older paths below are kept for the record; neither is next.
+
+## The two older paths (superseded above)
 
 1. **Jose sends drawn poses.** Measure each against the master as the
    four faces were (`docs/art/dr-smiley-faces/README.md`: scale, offset,

@@ -1,5 +1,8 @@
 # Dr. Smiley: prompts for his full body
 
+**Superseded 2026-10-23:** Jose chose a 2D redraw, head included; the
+prompts to run are in `../dr-smiley-2d/prompts.md`, not these.
+
 Same workflow as `docs/art/dr-smiley-faces/prompts.md`: an image tool that
 edits a picture you upload (ChatGPT image editing or similar), one change
 per request. His head is never remade: whatever head comes back, the real
