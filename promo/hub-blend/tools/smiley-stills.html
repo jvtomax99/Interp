@@ -1,0 +1,93 @@
+<!doctype html>
+<!-- Step 3 test stage: Dr. Smiley on a real app screen lying flat.
+     ?move=hop&u=0.5&screen=home  (tools/smiley-stills.cjs shoots the six moves) -->
+<html><head><meta charset="utf-8">
+<script type="importmap">{ "imports": { "three": "../vendor/three.module.js" } }</script>
+<style>html,body{margin:0;background:#03061a;overflow:hidden}canvas{display:block}</style></head>
+<body><canvas id="c" width="540" height="960"></canvas>
+<script type="module">
+import * as THREE from "three";
+import { RoomEnvironment } from "../vendor/RoomEnvironment.js";
+import { createSmiley, MOVES } from "../src/smiley.js";
+
+const Q = new URLSearchParams(location.search);
+const move = Q.get("move") || "hop", u = +(Q.get("u") || 0.5), screen = Q.get("screen") || "home";
+const W = 540, H = 960;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("c"), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.localClippingEnabled = true;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05081a);
+scene.fog = new THREE.Fog(0x05081a, 6, 14);
+const pm = new THREE.PMREMGenerator(renderer);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.35;
+
+// The phone screen as the ground: the real capture, glowing on its own.
+const img = await new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.src = `../assets/layers/${screen}/full.webp`; });
+const sTex = new THREE.Texture(img); sTex.colorSpace = THREE.SRGBColorSpace; sTex.anisotropy = 8; sTex.needsUpdate = true;
+const SW = 3.9, SH = 8.44;
+const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: sTex, toneMapped: false }));
+screenMesh.rotation.x = -Math.PI / 2;
+scene.add(screenMesh);
+// phone body under it
+const phone = new THREE.Mesh(new THREE.BoxGeometry(SW + 0.22, 0.18, SH + 0.22), new THREE.MeshStandardMaterial({ color: 0x11162a, roughness: 0.35, metalness: 0.6 }));
+phone.position.y = -0.092; scene.add(phone);
+// shadows land on the screen through this
+const catcher = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.ShadowMaterial({ opacity: 0.32, color: 0x0a1432 }));
+catcher.rotation.x = -Math.PI / 2; catcher.position.y = 0.001; catcher.receiveShadow = true;
+scene.add(catcher);
+
+scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x1a2140, 0.55));
+const key = new THREE.DirectionalLight(0xfff1dc, 2.4); // warm key, high left, behind the camera
+key.position.set(-2.5, 5, 3.5); key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024); key.shadow.camera.left = -3; key.shadow.camera.right = 3; key.shadow.camera.top = 3; key.shadow.camera.bottom = -3;
+key.shadow.radius = 6; key.shadow.bias = -0.0005;
+scene.add(key);
+// the screen lights him from below, in its own colour
+const fill = new THREE.PointLight(0xdfeaff, 1.2, 4, 1.5); fill.position.set(0, 0.15, 0.9); scene.add(fill);
+
+const smiley = await createSmiley({ root: "../../../drsmiley/" });
+scene.add(smiley.group);
+smiley.group.position.set(0, 0, 0.8);
+const p = MOVES[move](u);
+smiley.pose(p);
+
+// Rising out of the screen: nothing under the glass shows, and a ring of light marks the hole.
+if (p.clipBelow) {
+  const clip = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)];
+  smiley.group.traverse((o) => { if (o.material) { o.material.clippingPlanes = clip; } });
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.5, 96), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, opacity: 0.85, toneMapped: false, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(0, 0.004, 0.8); scene.add(ring);
+  const halo = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.85, 96), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, opacity: 0.22, toneMapped: false }));
+  halo.rotation.x = -Math.PI / 2; halo.position.set(0, 0.003, 0.8); scene.add(halo);
+  smiley.contact.visible = false;
+}
+// Typing: light rings where his keys land.
+if (move === "type") {
+  for (const [x, z, r] of [[-0.35, 1.35, 0.12], [0.1, 1.45, 0.18], [0.42, 1.3, 0.09]]) {
+    const m = new THREE.Mesh(new THREE.RingGeometry(r, r + 0.02, 48), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, opacity: 0.8, toneMapped: false }));
+    m.rotation.x = -Math.PI / 2; m.position.set(x, 0.004, z); scene.add(m);
+  }
+}
+// Pointing: a cyan arc from him to the item he means.
+if (move === "point") {
+  const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(0.3, 0.95, 0.8), new THREE.Vector3(1.3, 1.6, 0.1), new THREE.Vector3(1.35, 0.03, -0.9));
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 64, 0.02, 10), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, toneMapped: false })));
+  for (const [r, o] of [[0.14, 1], [0.24, 0.35]]) {
+    const dot = new THREE.Mesh(new THREE.RingGeometry(r, r + 0.03, 48), new THREE.MeshBasicMaterial({ color: 0x3fc6ee, transparent: true, opacity: o, toneMapped: false }));
+    dot.rotation.x = -Math.PI / 2; dot.position.set(1.35, 0.004, -0.9); scene.add(dot);
+  }
+}
+
+// Low camera, close to the glass, wide lens: the After Effects reel's angle.
+const cam = new THREE.PerspectiveCamera(42, W / H, 0.05, 50);
+const cp = { hop: [[1.3, 1.5, 4.4], [0, 0.75, 0.6]], land: [[1.1, 1.25, 4.1], [0, 0.5, 0.6]], type: [[-1.0, 1.6, 4.3], [0, 0.45, 0.9]],
+  point: [[-1.5, 2.1, 4.4], [0.6, 0.45, -0.1]], stepOut: [[0.8, 1.3, 4.0], [0, 0.5, 0.6]], wave: [[0.5, 1.35, 4.0], [0, 0.55, 0.6]] }[move];
+cam.position.set(...cp[0]);
+cam.lookAt(...cp[1]);
+renderer.render(scene, cam);
+document.title = "ready";
+</script></body></html>

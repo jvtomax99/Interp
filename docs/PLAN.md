@@ -54,6 +54,14 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**The 3D promo remake (Jose, 2026-10-20). Done: final cut 2026-10-23.** v11's
+feature-by-feature story, copy and narrated audio (untouched, 45 s, on v11's
+clock), with the look of his four reference reels: the 3D logo over the main
+entrance, the 3D Body coming apart, the cherry-tree doorway into CoreCHI City,
+Dr. Smiley's real HUMC Brain. In the app as `media/hub-promo.mp4` (720p) with
+its still and Home thumbnail; the User Guide answer and a New lately card
+updated. How it was built, every pick and the checks: `promo/hub-blend/BRIEF.md`.
+
 **K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/knowledge-brain.md`).**
 The HUMC Brain shows the person, not the code: domains as regions, terms as
 dots lit by what you know, tap a dark area to practice it. First find what

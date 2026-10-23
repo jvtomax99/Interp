@@ -1,0 +1,95 @@
+{
+  "state": "falsefriends",
+  "caption": "101 false friends. Flagged.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "search",
+      "proof": false,
+      "x": 18,
+      "y": 277.078125,
+      "w": 354,
+      "h": 46,
+      "file": "search.webp",
+      "clip": {
+        "x": 6,
+        "y": 265.078125,
+        "width": 378,
+        "height": 70
+      },
+      "depth": 0
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 18,
+      "y": 340.078125,
+      "w": 354,
+      "h": 462.875,
+      "file": "proof.webp",
+      "clip": {
+        "x": 6,
+        "y": 328.078125,
+        "width": 378,
+        "height": 486.875
+      },
+      "depth": 3
+    },
+    {
+      "key": "card1",
+      "proof": false,
+      "x": 18,
+      "y": 815.953125,
+      "w": 354,
+      "h": 28.046875,
+      "file": "card1.webp",
+      "clip": {
+        "x": 6,
+        "y": 803.953125,
+        "width": 378,
+        "height": 40.046875
+      },
+      "depth": 1
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 295,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 319,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

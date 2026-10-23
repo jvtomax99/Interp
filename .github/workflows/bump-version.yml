@@ -12,6 +12,7 @@ on:
     # Pushes that change nothing deployed (.vercelignore) need no new version.
     paths-ignore:
       - 'docs/**'
+      - 'promo/**'
       - 'tests/**'
       - '.github/**'
       - '.claude/**'
