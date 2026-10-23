@@ -5,7 +5,7 @@
 const path = require('path'), fs = require('fs'), http = require('http'), { spawn } = require('child_process');
 let pw; try { pw = require('playwright'); } catch (e) { pw = require('/opt/node22/lib/node_modules/playwright'); }
 const PROJ = path.resolve(__dirname, '..');
-const [pageRel, outRel, secs = '5'] = process.argv.slice(2);
+const [pageRel, outRel, secs = '5', from = '0'] = process.argv.slice(2); // from: start time in the page's clock
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json', '.woff2': 'font/woff2' };
 (async () => {
   const server = http.createServer((q, r) => {
@@ -22,7 +22,7 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.webp': 'image/
   const ff = spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'image2pipe', '-framerate', '30', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', out]);
   const n = Math.round(+secs * 30);
   for (let i = 0; i < n; i++) {
-    await page.evaluate(t => window.__renderAt(t), i / 30);
+    await page.evaluate(t => window.__renderAt(t), +from + i / 30);
     ff.stdin.write(await page.screenshot({ type: 'png' }));
   }
   ff.stdin.end(); await new Promise(r => ff.on('close', r));
