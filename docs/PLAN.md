@@ -37,12 +37,20 @@ rounds, and the next phase would add a lot more):
    questions for Jose, what this chat learned that isn't in the docs yet,
    and at the top the exact message to paste into the new chat.
 3. Commit and push it, send it to Jose with `SendUserFile`, and say
-   "Start a new chat" with the message to paste. Once, not every reply.
+   "Start a new chat". Once, not every reply. Ask with buttons (Jose,
+   2026-10-23): **"I start it for you" (the pick)**, a new session
+   (`create_session`, same repository) whose first message is the whole
+   of `docs/handoff.md` plus a short summary of this chat (what was done,
+   what is open, why), with its link given to Jose; or **"I'll paste it
+   myself"**, the exact message to paste. Where the buttons or
+   `create_session` are missing, give the message to paste.
 4. Leave nothing half-done: an open PR is fine (the handoff names it), an
    uncommitted change is not. Cancel this chat's check-ins; the new chat
    re-arms what it needs. Then "Archive this chat" (below).
 The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
-says in 2-3 lines what it will do, and waits for Jose's go.
+then opens with a short summary for Jose: what is being worked on and the
+goal of the task (Jose, 2026-10-23), then in 2-3 lines what it will do,
+and waits for his go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
