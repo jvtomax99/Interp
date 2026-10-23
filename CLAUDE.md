@@ -7,8 +7,10 @@ project is built and shipped.
 do, test, update the plan, open a pull request). A chat runs phase after
 phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
 and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
-ask"). A new chat reads the docs and the handoff, not the old chat. Details:
-`docs/PLAN.md`.
+ask"). It offers to start that chat itself, with the handoff and a summary
+of this chat pasted in (Jose, 2026-10-23); the new chat opens by telling
+Jose what is being worked on and the goal. A new chat reads the docs and the
+handoff, not the old chat. Details: `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
 
