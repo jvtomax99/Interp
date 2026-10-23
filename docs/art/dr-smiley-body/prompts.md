@@ -7,8 +7,8 @@ one (`drsmiley/base.webp`, the 30 face frames, the brows, the rank hats)
 is fitted onto the body afterwards. So the body only has to match his
 collar, his angle and his lighting, not his face pixel for pixel.
 
-What the app needs (layers, not Rive, as `docs/PLAN.md` F1 says): one
-master standing pose, a torso plate with no arms (so arm poses can be laid
+What the app needs (layers, not Rive, as `docs/PLAN.md` F1 says): the
+master standing pose (done), a torso plate with no arms (so arm poses can be laid
 over it), a T-pose (cut into upper arm and forearm pieces for smooth waves
 and points), then arm poses as frames, two leg plates for the quiz bounce,
 and two face frames. Every pose is generated from the master, with nothing
@@ -17,35 +17,17 @@ else moved, so the pieces line up the way the face frames do.
 Send every result, even an imperfect one; alignment is measured here and
 the ones to redo are named. Save each with the name given.
 
-## Step 1. The master (upload `docs/art/dr-smiley-faces/reference.png`)
+## Step 1. The master: done
 
-```
-Edit this image. This is Dr. Smiley, a 3D cartoon doctor in the style of a
-Pixar or Disney feature film: soft matte skin with rosy cheeks, glossy
-sculpted chestnut-brown hair swept up and back, big round brown eyes with
-two catchlights, a small button nose, a calm closed-mouth smile, a white
-doctor's coat with lapels over a navy blue V-neck scrub top. Keep him
-exactly this character: same head, same face, same hair, same colours,
-same soft studio lighting from the upper left, same render quality.
-
-Show his whole body, standing, from the top of his hair to the soles of
-his shoes, nothing cropped, with a little empty space above the hair and
-below the feet. He is a stylised cartoon figure about two and a half heads
-tall: a big head, a small rounded body, short arms and legs, small
-rounded hands. His head keeps the exact size, angle and expression of the
-uploaded image (turned slightly toward the picture's left), and his body
-is turned the same way. Arms hang relaxed at his sides, a little away from
-the body, so the outline of the coat is clear. Outfit: the white coat
-open and falling to just above his knees, over the navy V-neck scrub top,
-navy scrub pants, white sneakers. No lanyard, no badge, no stethoscope,
-nothing in the pockets. He stands centred, both feet on the same level.
-Plain pure white background, no floor, no shadow on the ground, no props,
-no text. Portrait, 2:3 (1024 x 1536).
-```
-
-Save as `body-master.png`. Keep it only if the head looks like him, the
-coat reads as his, and the whole figure is in the frame. Ask again
-otherwise; everything else is built on this one.
+Jose sent his full body on 2026-10-23: `body-master.png` (standing, arms at
+his sides, straight on, on a light grey background, 1070 x 1470) and
+`body-wave-props.png` (waving, with a stethoscope, the HMH logo on the
+scrubs, a "Dr. Smiley" badge and a clipboard; a reference for props, not
+a layer source). Proportions: about two and a half heads tall, royal blue
+scrubs and blue shoes. The master's scrub blue is lighter than the app
+head's (mean RGB 31,74,145 against 20,52,114 in `base.webp`) and his
+head faces straight on where the app's is turned a little; the head is
+cut at the chin and fitted on the body's own collar, so neither matters.
 
 ## Step 2. Poses (upload `body-master.png` for each)
 
@@ -54,7 +36,7 @@ Paste this opening before every pose prompt:
 ```
 Edit this image. Keep everything identical: the same character, size,
 position, camera, head, face, hair, coat, pants, shoes, lighting and the
-plain white background. Do not move, zoom, crop, tilt or redraw anything
+plain light grey background. Do not move, zoom, crop, tilt or redraw anything
 except what is described below. His feet stay exactly where they are, his
 head does not move. Same 3D cartoon style, same render quality, same size
 and aspect ratio (2:3). Change ONLY the following.
@@ -95,7 +77,8 @@ The four talking mouths in that file are still optional.
 
 1. Each pose is laid over the master and measured (scale, offset, colour),
    as the four faces were. Drift under a few pixels is corrected; a zoomed
-   or moved result is redone.
+   or moved result is redone. The grey background is cut away (it is
+   flat, so a plain colour key does it).
 2. The real head (`base.webp`) is cut at the collar and fitted on the
    body, with the neck as the pivot, so the head keeps every face frame,
    brow pose and rank hat.
