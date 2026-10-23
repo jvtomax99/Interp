@@ -105,7 +105,14 @@ standing proud (sink the balls), (b) a crease where the lid met the skin
 (read the skin exactly, fade the ball-hug to zero by the cut), (c) slivers
 in the bridge (end the ring 5% inside the cut, faces as fine as his mesh).
 Snapping or inserting the cut's points onto the ring never lined up (the
-cut zigzags). Left: a faint dashed seam in close-ups, the lash line thin.
+cut zigzags). Jose then: "fix the eyes more first". Done: the cut's points and the ring's
+last two rows relaxed three times against each other (the shift kept in
+`R.delta` and added to every key, or the join popped); the ring ends 7%
+inside the cut; the lash line wider (`LASH_FULL`/`LASH_END`, thicker at
+the outer corner, darker); the fold above the open eye (`FOLD_AT/W/DEPTH`:
+a 1.1 mm groove at .42 of the lid, flattening as it shuts). The seam is
+gone from the face views; a faint mark stays at the outer corners in
+close-ups. Waiting on Jose: `out/plan-lids.png`.
 
 ## Rebuild (about 15 minutes)
 

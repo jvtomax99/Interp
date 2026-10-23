@@ -147,17 +147,18 @@ board('The surprised “oh”, redone', ['Your drawing (left), the first “oh�
 
 board('Step A: his eyelids as his own skin', ['Your targets, the old shell lids, the new lids: front, three-quarter, one eye close up. Nothing moves in time yet (step C).'], [
     ('1', 'ME', 'What was built: the skin inside an oval round each eye is cut out and replaced by two strips of new skin, '
-     'upper lid and lower lid, in upright columns, each from the lid’s edge on the ball out to the cut, hugging the '
-     'ball near the edge and becoming his own skin by the cut, with a rolled rim and a dark lash line on the upper one; '
-     'the strips meet past the corners and join his face with faces as fine as his own mesh. The eyeballs sit 4 mm deeper '
-     'in his head (same size, same opening): before, they stood 6 mm proud and the lids had to climb back in a trench.',
+     'upper lid and lower lid, in upright columns, each from the lid\u2019s edge on the ball out to the cut, hugging the '
+     'ball near the edge and becoming his own skin by the cut, with a rolled rim, a dark lash line on the upper one '
+     '(thicker toward the outer corner) and the fold above the open eye; the strips meet past the corners and join his '
+     'face with faces as fine as his own mesh. The eyeballs sit 4 mm deeper in his head (same size, same opening): '
+     'before, they stood 6 mm proud and the lids had to climb back in a trench.',
      [fit(Image.open(O('plan/gateA.png')), 1000, 1150)], 'reference, before, now', False),
     ('2', 'ME', 'What the lids do: the upper lid blinks in six steps round the ball (never through it) and opens wide; '
-     'the lower lid rises in four (a squint, the cheek’s push); a smile lifts the cheeks and the lower lids a little; '
+     'the lower lid rises in four (a squint, the cheek\u2019s push); a smile lifts the cheeks and the lower lids a little; '
      'the laugh raises the lower lids into an upward arc and brings the upper lids down to meet them: the crescent. '
-     'A blink shuts without the laughing cheeks. The eyeballs and irises keep their size throughout.',
-     [fit(Image.open(O('plan/lids-test.png')), 1000, 1350)], 'rest, smile, laugh, blink, wide', True),
-    ('3', 'NOTE', 'Still off, small: a faint seam where the new skin meets his (a dashed line in close-ups); the lash '
-     'line is thinner than your sheet’s; a shut lid is a smooth dome with no crease. Not yet: the eyelid crease above '
-     'the open eye; lids following the gaze; the timing (step C).', [], '', False),
+     'A blink shuts without the laughing cheeks; the fold flattens as the lid comes down. The eyeballs and irises keep '
+     'their size throughout.', [fit(Image.open(O('plan/lids-test.png')), 1000, 1350)], 'rest, smile, laugh, blink, wide', True),
+    ('3', 'NOTE', 'After your \u201cfix the eyes more first\u201d: the seam round the eye is gone from the face views (a '
+     'faint mark at the outer corner in close-ups), the lash line is bolder, the fold is in. Not yet: lids following the '
+     'gaze; the timing (step C).', [], '', False),
 ], 'plan-lids.png')

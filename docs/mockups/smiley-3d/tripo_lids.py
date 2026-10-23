@@ -48,6 +48,8 @@ THICK = .0012                  # the lid's thickness at its edge
 BULGE = .0026                  # the glass dome over the iris (tripo_eyes2.py)
 U_STEPS, D_STEPS = 6, 4
 RIM_W = (.03, .015)            # the rim rows, inward from the edge (ball units of height)
+FOLD_AT, FOLD_W, FOLD_DEPTH = .42, .07, .0011   # the fold above the open eye: where along the lid (0 edge .. 1 cut), its width, its depth (into the face)
+LASH_FULL, LASH_END = .16, .27                 # the lash line: full to this part of the lid, gone by this
 FEATHER = .3                   # the ring's flat colour feathers into his texture this far past the cut (ball units)
 
 
@@ -139,7 +141,7 @@ class EyeRing:
             we = float(edge_h(u, h))
             # the ring ends 5% inside the cut: on the cut itself its outer row lay on top of the
             # cut's zigzag, and the bridge between them was all slivers (a dotted ring)
-            ws = sgn * S_Z * math.sqrt(max(0., 1 - (u / S_X) ** 2)) * .95
+            ws = sgn * S_Z * math.sqrt(max(0., 1 - (u / S_X) ** 2)) * .93
             taper = float(np.clip((U_C - abs(u)) / .1, 0, 1))                 # the rim thins out at the corners
             rows = [we - sgn * RIM_W[0] * taper, we - sgn * RIM_W[1] * taper] + [we + (ws - we) * (k / ROWS) ** 1.4 for k in range(ROWS + 1)]
             y_cut = float(self.y_cut['up' if upper else 'lo'][j])
@@ -159,7 +161,11 @@ class EyeRing:
                     y = F * yb + (1 - F) * ys
                     if a < 1:                                            # never behind the ball's clearance (softly)
                         y = (y + yb) / 2 - math.sqrt(((y - yb) / 2) ** 2 + .0006 ** 2)
-                    # the lower lid puffs forward as it rises (the cheek pushing up under the eye), away from the edge
+                    # the fold above the open eye (the sheet's crease line): a shallow groove across the
+                    # upper lid about 6 mm above its edge, fading toward the corners, flattening as the lid shuts
+                    if upper:
+                        openness = float(np.clip((h - H_SHUT) / (H_TOP - H_SHUT), 0, 1))
+                        y += FOLD_DEPTH * openness * math.exp(-((t - FOLD_AT) / FOLD_W) ** 2) * float(np.clip(1 - (u / U_C) ** 2, 0, 1)) ** .5
                     y -= .0022 * lift * (1 - (u / S_X) ** 2) * float(smooth((t - .2) / .3) * (1 - smooth((t - .55) / .45)))
                 if i == RIM + ROWS:
                     y = y_cut
@@ -254,9 +260,11 @@ def cut_and_ring(ob, eyes):
             verts['up'][RIM][j][lash_lay] = taper
             # and the first tenth of the lid's front: the edge zone wraps over the ball and is
             # seen foreshortened from the front, so a line only on it read as a hairline
+            outer = (1 + inner * u / U_C) / 2                           # 0 at the nose .. 1 at the outer corner
             for i in range(RIM + 1, RIM + 1 + ROWS):
                 t = (i - RIM) / ROWS
-                k = 1. if t <= .1 else 1 - float(smooth((t - .1) / .1))
+                full = LASH_FULL * (1 + .5 * outer)                    # thicker toward the outer corner
+                k = 1. if t <= full else 1 - float(smooth((t - full) / (LASH_END - LASH_FULL)))
                 if k > 0:
                     verts['up'][i][j][lash_lay] = k * taper
         faces = []
@@ -297,8 +305,21 @@ def cut_and_ring(ob, eyes):
         bfaces = list(res.get('faces', []))
         for f in bfaces:
             f.smooth = True
-        # the cut's own zigzag relaxed a little against the ring (its sawtooth shaded as a dashed line)
-        bmesh.ops.smooth_vert(bm, verts=bverts, factor=.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        # the cut's own zigzag and the ring's last two rows relaxed against each other (the
+        # sawtooth shaded as a dashed line); the ring's shift from this is kept (R.delta) and
+        # added to every lid key, or the join would pop as the lids move
+        rows_out = list({id(v): v for key in ('up', 'lo') for r in (-2, -1) for v in verts[key][r]}.values())
+        before_co = {id(v): v.co.copy() for v in rows_out}
+        for _ in range(3):
+            bmesh.ops.smooth_vert(bm, verts=bverts + rows_out, factor=.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+        R.delta = {}
+        for key in ('up', 'lo'):
+            dd = np.zeros((nrow, COLS + 1, 3))
+            for i in (-2, -1):
+                for j in range(COLS + 1):
+                    v = verts[key][i][j]
+                    dd[i, j] = np.array(v.co - before_co[id(v)])
+            R.delta[key] = dd
         allnew = faces + bfaces
         tree = cKDTree(bco)
         bid = {id(v): k for k, v in enumerate(bverts)}
@@ -358,7 +379,7 @@ def cut_and_ring(ob, eyes):
         nt.links.new(rl[0].from_socket, rA); rB.default_value = .62
         nt.links.new(flat_att.outputs['Fac'], rmix.inputs['Factor'])
         nt.links.new(rout, bsdf.inputs['Roughness'])
-    A2, out2 = mixer('lash', (.05, .022, .011, 1)); nt.links.new(out1, A2)
+    A2, out2 = mixer('lash', (.03, .012, .006, 1)); nt.links.new(out1, A2)
     nt.links.new(out2, bsdf.inputs['Base Color'])
     np.savez(os.path.join(HERE, 'in', 'lids.npz'), **{f'{key}_{s}': R.idx[key] for s, R in rings.items() for key in ('up', 'lo')})
     return rings
@@ -373,10 +394,10 @@ def lid_keys(ob, rings, add_key, co0):
         for name, ht, hb in states:
             co = co0.copy()
             p = R.points(ht, hb)
-            co[R.idx['up']] = p['up']
+            co[R.idx['up']] = p['up'] + R.delta['up']
             lo = R.idx['lo']
             own = lo != R.idx['up']                     # shared points keep the upper strip's place
-            co[lo[own]] = p['lo'][own]
+            co[lo[own]] = (p['lo'] + R.delta['lo'])[own]
             add_key(ob, name, co)
 
 
