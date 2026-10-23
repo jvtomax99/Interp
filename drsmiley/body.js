@@ -347,18 +347,21 @@ const DR_BODY_PERF = {
       [j(260), { face: 'rest' }, 'out'],
     ], still: { lift: -10, head: s * 4, aL: P.a, aR: P.a2, fL: P.f, fR: P.f2, [FR]: 'shrug', face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
   },
-  // A right answer: a happy hop, arms up a little, a smaller second hop.
+  // A right answer: a happy hop on the drawn crouch and jump, a smaller second
+  // hop. The cutout arms rise only a little (past about 25 degrees the shoulder
+  // cap comes out from under the coat); a drawn thumbs-up takes the top of the
+  // hop once Jose draws it (prompts.md).
   bounce(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .5 : 1, jump = mode === 'focused' ? 0 : 1;
     return { beats: [
       [j(150), { frameLegs: 'crouch', sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, face: 'smile1' }, 'in'],                              // the drawn crouch
-      [j(230), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, aL: 50 * k, aR: 50 * k, fL: 30 * k, fR: 30 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // the drawn jump
-      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k, aL: 35 * k, aR: 35 * k }, 'in'],
-      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, aL: 42 * k, aR: 42 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, knees still bent
+      [j(230), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, aL: 22 * k, aR: 22 * k, fL: 24 * k, fR: 24 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // the drawn jump
+      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k, aL: 14 * k, aR: 14 * k }, 'in'],
+      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, aL: 20 * k, aR: 20 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, knees still bent
       [j(160), { y: 0, sy: 1 - .015 * k, sx: 1 + .007 * k, lift: 3 * k }, 'in'],
       [j(340), { frameLegs: '', sy: 1, sx: 1, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile', brow: 'rest' }, 'spring'],
       [j(280), { face: 'rest' }, 'out'],
-    ], still: { aL: 50, aR: 50, fL: 30, fR: 30, frameLegs: 'crouch', face: 'smile', brow: 'up' }, stillMs: 800 };
+    ], still: { aL: 22, aR: 22, fL: 24, fR: 24, frameLegs: 'crouch', face: 'smile', brow: 'up' }, stillMs: 800 };
   },
   // A wrong answer: a wince, drawn in and down, then a caring smile.
   wince(mode){
