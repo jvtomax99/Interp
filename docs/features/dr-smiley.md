@@ -244,7 +244,9 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
 - **How he moves** (`drBody(svg)`): the same shape as his face's acting. A
   performance is a list of beats `[ms, pose patch, ease]`, each eased from
   the pose the one before reached (from the live pose for the first, so an
-  interruption blends, never snaps), built fresh each play with the side,
+  interruption blends, never snaps; a drawn pose the interrupted gesture
+  was showing hands back at once, or it stayed up through the whole new
+  gesture: two waving hands, fixed 2026-10-23), built fresh each play with the side,
   sizes and timing varied (`drBodyRand`, `drBodySeed(n)` for the checks).
   Joints: the root (a lift `y`, a `lean` and the squash `sx`/`sy`, all about
   his feet), the head (a turn about the neck, a `lift`), each arm's raise

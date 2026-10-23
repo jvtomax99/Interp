@@ -203,7 +203,12 @@ function drBody(svg, opts){
       else if(o.done) o.done();
       return true;
     }
-    const start = Object.assign({}, pose);
+    // From the live joints, so an interruption blends, never snaps; but a
+    // drawn pose the interrupted gesture was showing hands back now (the
+    // cutout arm or legs stand where it was), or it would stay up through
+    // the whole new gesture: two waving hands, seen 2026-10-23.
+    const start = Object.assign({}, pose, { frameL: '', frameR: '', frameLegs: '', frot: 0 });
+    Object.assign(pose, start);
     const keys = []; let t = 0, from = start;
     for(const [ms, patch, ease] of beats){
       const to = Object.assign({}, from, patch || {});

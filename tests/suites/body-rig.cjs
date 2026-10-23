@@ -135,6 +135,28 @@ const SAMPLE = () => {
   ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
   ok(/thumbs-up-[lr]/.test(seen('bounce')), 'bounce: the drawn thumbs-up from the top of the hop ' + seen('bounce'));
   ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.wince.frameEverShown, 'ack, wink, wince and the walk use the cutout pieces only');
+  // A gesture interrupted by another: the drawn hand it was showing hands back
+  // at once (the cutout arm stands where it was), never stays up through the
+  // new gesture. Greet until its drawn wave shows, then a nod, which draws no
+  // frame: no drawn pose may show from then on, and all are hidden at the end.
+  const cut = await P.evaluate(() => new Promise(res => {
+    const b = window.body; b.stop(); b.rest(); drBodySeed(3); b.perform('greet'); drBodySeed(null);
+    const t0 = performance.now();
+    const wait = () => {
+      const shown = b.el.poses.some(g => g.style.opacity === '1');
+      if(!shown && performance.now() - t0 < 2500) return requestAnimationFrame(wait);
+      const before = b.el.poses.filter(g => g.style.opacity === '1').map(g => g.dataset.pose + '-' + g.dataset.side);
+      let done = false; b.perform('ack', { done: () => done = true });
+      const right = { frameL: b.pose.frameL, frameR: b.pose.frameR, frot: b.pose.frot };
+      let everShown = false, frames = 0;
+      const tick = () => { frames++; if(b.el.poses.some(g => g.style.opacity === '1')) everShown = true; if(!done && performance.now() - t0 < 6000) return requestAnimationFrame(tick);
+        res({ before, right, everShown, frames, done, clear: b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.armR.style.opacity === '1' }); };
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(wait);
+  }));
+  ok(cut.before.length >= 1 && cut.right.frameL === '' && cut.right.frameR === '' && cut.right.frot === 0 && !cut.everShown && cut.done && cut.clear,
+     'a gesture cut short by another hands its drawn pose back at once; the new one shows none and ends clear ' + JSON.stringify(cut));
   ok(lively.greet.max.aL >= 95 || lively.greet.max.aR >= 95, 'greet: an arm comes up to where the drawn wave is');
   ok(lively.cheer.max.aL >= 105 && lively.cheer.max.aR >= 105 && lively.cheer.max.y > 40, 'cheer: both arms up to the drawn fists and a jump');
   ok(lively.think.max.fL > 100 || lively.think.max.fR > 100, 'think: a hand comes to the chin');
