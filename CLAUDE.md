@@ -7,8 +7,10 @@ project is built and shipped.
 do, test, update the plan, open a pull request). A chat runs phase after
 phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
 and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
-ask"). A new chat reads the docs and the handoff, not the old chat. Details:
-`docs/PLAN.md`.
+ask"). It offers to start that chat itself, with the handoff and a summary
+of this chat pasted in (Jose, 2026-10-23); the new chat opens by telling
+Jose what is being worked on and the goal. A new chat reads the docs and the
+handoff, not the old chat. Details: `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
 
@@ -28,7 +30,7 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 22,473 | The whole app's markup and JS (1.3 MB), all inline |
+| `index.html` | 22,524 | The whole app's markup and JS (1.3 MB), all inline |
 | `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
 | `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
 | `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |

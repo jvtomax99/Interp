@@ -12850,8 +12850,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1023.1412';
-const BUILD_TIME = '2026-10-23 14:12 UTC';
+const BUILD_ID = 'b1023.1938';
+const BUILD_TIME = '2026-10-23 19:38 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -12921,11 +12921,17 @@ function screenReport(){
    layout, style, paint). An animation Safari hands to Core Animation can
    stay smooth through a stall the meter reports, so a drop of hitches after
    a transform-only change is the main thread being freed. Runs are kept on
-   this phone only (ih_frameMeter, last 8) with the build they ran on. */
+   this phone only (ih_frameMeter, last 8) with the build they ran on.
+   Taps too (Home taps, 2026-10-23): each tap in a run is timed from the
+   moment the finger lifts (pointerup) to the app's click starting ("wait")
+   and to the end of the next frame after it ("drawn": a message posted
+   from that frame's requestAnimationFrame runs once it has been drawn).
+   Safari has no Event Timing, so this is how a phone can say it. */
 const FM_KEY = 'ih_frameMeter';
 const FM_MAX_MS = 5 * 60 * 1000;
 const FM = { on:false, raf:0, last:0, t0:0, gaps:[], key:'', keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, pill:null, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[], stalls:[] };
 const FM_STALL_MS = 50;      // a frame this late is listed with what ran in it
+const FM_TAP_MAX = 60;       // taps kept per run
 
 /* What ran in a stall. Safari has no long-task timing, so the app's own
    jobs that can run while you leave a screen alone (a render, the greeting's
@@ -12949,6 +12955,29 @@ function fmScreenName(id){
   return id || '?';
 }
 function fmOnScroll(){ FM.scrollAt = performance.now(); }
+// A finger lifts: remember when and on what. Its click, if one follows
+// within a second, is timed against it; a lift that was a scroll has none.
+function fmOnLift(e){
+  if(e.pointerType === 'mouse' || (e.target.closest && e.target.closest('.fm-pill'))) return;
+  const el = e.target.closest && e.target.closest('button, a, [role="button"], [onclick], .home-tile, .qa-card, .qa-tile, .domain-family, .tabbar-btn');
+  const name = el ? (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 28) : '';
+  FM.lift = { at:e.timeStamp, name: name || (el ? el.className.toString().split(' ')[0] : 'page'), key:FM.key };
+}
+function fmOnClick(){
+  const l = FM.lift; FM.lift = null;
+  if(!l) return;
+  const start = performance.now();
+  if(start - l.at > 1000 || start < l.at) return;   // not this lift's click, or a clock that isn't performance.now()
+  requestAnimationFrame(() => {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = () => {
+      if(!FM.on) return;
+      FM.taps.push([Math.round(l.at - FM.t0 - FM.hiddenMs), Math.round(start - l.at), Math.round(performance.now() - l.at), l.key, l.name]);
+      if(FM.taps.length > FM_TAP_MAX) FM.taps.shift();
+    };
+    ch.port2.postMessage(0);
+  });
+}
 function fmOnVis(){
   if(!FM.on) return;
   if(document.visibilityState === 'hidden'){ FM.hideAt = performance.now(); FM.last = 0; }
@@ -13021,7 +13050,7 @@ const fmR = n => n < 10 ? n.toFixed(1) : String(Math.round(n));
 function frameMeterStart(){
   if(FM.on) return;
   try{ closeMoreSheet(); }catch(e){}
-  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[[performance.now(), 'More closing']], stalls:[] });
+  Object.assign(FM, { on:true, last:0, t0:performance.now(), gaps:[], keyAt:0, scrollAt:-1e9, hiddenMs:0, hideAt:0, uiAt:0, T:1000 / 60, live:0, prev:0, notes:[[performance.now(), 'More closing']], stalls:[], taps:[], lift:null });
   const p = document.createElement('button');
   p.className = 'fm-pill';
   p.type = 'button';
@@ -13032,6 +13061,8 @@ function frameMeterStart(){
   FM.pill = p;
   document.addEventListener('scroll', fmOnScroll, { capture:true, passive:true });
   document.addEventListener('visibilitychange', fmOnVis);
+  window.addEventListener('pointerup', fmOnLift, { capture:true, passive:true });
+  window.addEventListener('click', fmOnClick, true);
   FM.raf = requestAnimationFrame(fmFrame);
 }
 
@@ -13041,6 +13072,8 @@ function frameMeterStop(){
   cancelAnimationFrame(FM.raf);
   document.removeEventListener('scroll', fmOnScroll, { capture:true });
   document.removeEventListener('visibilitychange', fmOnVis);
+  window.removeEventListener('pointerup', fmOnLift, { capture:true });
+  window.removeEventListener('click', fmOnClick, true);
   if(FM.pill){ FM.pill.remove(); FM.pill = null; }
   const r = fmSummarise(FM.gaps);
   const run = { at:Date.now(), build:BUILD_ID, hz:r.hz, ms:Math.round(r.ms), frames:r.frames, dropped:r.dropped,
@@ -13051,12 +13084,28 @@ function frameMeterStop(){
     device: fmDevice(),
     // The six longest stalls, in the order they happened.
     stallList: FM.stalls.slice().sort((a, b) => b[1] - a[1]).slice(0, 6).sort((a, b) => a[0] - b[0])
-      .map(([at, ms, sc, key, up, what]) => ({ at, ms, scroll:sc, screen:fmScreenName(key), up, what })) };
-  FM.gaps = []; FM.stalls = []; FM.notes = [];
+      .map(([at, ms, sc, key, up, what]) => ({ at, ms, scroll:sc, screen:fmScreenName(key), up, what })),
+    taps: fmTapSummary(FM.taps) };
+  FM.gaps = []; FM.stalls = []; FM.notes = []; FM.taps = [];
   if(run.frames < 30){ showToast('Too short to measure. Use the app for a few seconds, then stop.'); return null; }
   try{ localStorage.setItem(FM_KEY, JSON.stringify([run].concat(fmRuns()).slice(0, 8))); }catch(e){}
   frameMeterShow(run);
   return run;
+}
+
+// Taps: how many, the middle and the slowest wait and drawn times, and the
+// six slowest to draw, in the order they happened.
+function fmTapSummary(taps){
+  if(!taps || !taps.length) return null;
+  const mid = i => taps.map(t => t[i]).sort((a, b) => a - b)[Math.floor(taps.length / 2)];
+  return { n:taps.length, wait:mid(1), drawn:mid(2), worstWait:Math.max(...taps.map(t => t[1])), worstDrawn:Math.max(...taps.map(t => t[2])),
+    list: taps.slice().sort((a, b) => b[2] - a[2]).slice(0, 6).sort((a, b) => a[0] - b[0])
+      .map(([at, wait, drawn, key, name]) => ({ at, wait, drawn, screen:fmScreenName(key), name })) };
+}
+// "0:21 · Home · Translate · wait 34 ms · drawn 210 ms"
+function fmTapText(x){
+  const t = Math.floor(Math.max(0, x.at) / 1000);
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')} · ${x.screen} · ${x.name} · wait ${x.wait} ms · drawn ${x.drawn} ms`;
 }
 
 function fmDevice(){
@@ -13075,6 +13124,7 @@ function fmRunText(run){
     run.scroll.ms ? `While scrolling: ${run.scroll.ratio} ms/s · ${run.scroll.pct}% dropped · worst ${run.scroll.worst} ms · ${Math.round(run.scroll.ms / 1000)} s` : 'No scrolling',
   ].concat(run.screens.map(s => `  ${s.name}: ${s.ratio} ms/s · ${s.pct}% · worst ${s.worst} ms · ${Math.round(s.ms / 1000)} s`));
   if(run.stallList && run.stallList.length) lines.push(`Longest stalls (over ${FM_STALL_MS} ms):`, ...run.stallList.map(x => '  ' + fmStallText(x)));
+  if(run.taps) lines.push(`Taps ${run.taps.n} · from the lift: wait ${run.taps.wait} ms, drawn ${run.taps.drawn} ms (middle) · slowest wait ${run.taps.worstWait} ms, drawn ${run.taps.worstDrawn} ms`, ...run.taps.list.map(x => '  ' + fmTapText(x)));
   return lines.join('\n');
 }
 // "0:14 · 120 ms · Home · 4.2 s after a scroll · 31 s after opening · heartline"
@@ -13100,6 +13150,7 @@ function frameMeterShow(run){
       ${run.screens.map(s => row(s.name, s)).join('')}
     </table>
     ${run.stallList && run.stallList.length ? `<div class="fm-stalls"><b>Longest stalls</b>${run.stallList.map(x => `<div>${escapeHtml(fmStallText(x))}</div>`).join('')}</div>` : ''}
+    ${run.taps ? `<div class="fm-stalls fm-taps"><b>Taps</b><div>${run.taps.n} tap${run.taps.n === 1 ? '' : 's'}, timed from when your finger lifts. Middle: the app starts in ${run.taps.wait} ms, the next screen is drawn in ${run.taps.drawn} ms. Slowest: ${run.taps.worstWait} ms and ${run.taps.worstDrawn} ms.</div>${run.taps.list.map(x => `<div>${escapeHtml(fmTapText(x))}</div>`).join('')}</div>` : ''}
     <div class="fm-meta">Build ${escapeHtml(run.build)} · ${escapeHtml(new Date(run.at).toLocaleString())}<br>${escapeHtml(run.device)} · ${run.hz} Hz · motion ${run.motion}</div>
     <div class="fm-btns">
       <button class="btn btn-ghost" onclick="frameMeterCopy(${run.at})">Copy numbers</button>

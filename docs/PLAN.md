@@ -37,12 +37,20 @@ rounds, and the next phase would add a lot more):
    questions for Jose, what this chat learned that isn't in the docs yet,
    and at the top the exact message to paste into the new chat.
 3. Commit and push it, send it to Jose with `SendUserFile`, and say
-   "Start a new chat" with the message to paste. Once, not every reply.
+   "Start a new chat". Once, not every reply. Ask with buttons (Jose,
+   2026-10-23): **"I start it for you" (the pick)**, a new session
+   (`create_session`, same repository) whose first message is the whole
+   of `docs/handoff.md` plus a short summary of this chat (what was done,
+   what is open, why), with its link given to Jose; or **"I'll paste it
+   myself"**, the exact message to paste. Where the buttons or
+   `create_session` are missing, give the message to paste.
 4. Leave nothing half-done: an open PR is fine (the handoff names it), an
    uncommitted change is not. Cancel this chat's check-ins; the new chat
    re-arms what it needs. Then "Archive this chat" (below).
 The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
-says in 2-3 lines what it will do, and waits for Jose's go.
+then opens with a short summary for Jose: what is being worked on and the
+goal of the task (Jose, 2026-10-23), then in 2-3 lines what it will do,
+and waits for his go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -312,6 +320,21 @@ then read the log; it names the suite and the check.
   when put back; the More button, the open sheet, its report and closing
   identical in the browser, phone and computer, globals unchanged.
   Looking a term up (#129) live as b1023.1250.
+- 2026-10-23 S9 Home taps, part 1: the meter times taps (#132; Jose's
+  pick: phone timing first). Lab (`tests/tools/tap-hold.cjs`, new: a 90 ms
+  finger, timed from the lift, UA=chromium 4x, 3 runs): lift -> click
+  starts 65-114 ms median by target (tile 78, quick tile 114, View all 65,
+  Chat tab 98); lift -> paint 256-496. Playwright's `tap()` presses and
+  lifts at once, so tap-trace's "wait" also counted the touchstart work a
+  real thumb hides. Traced (TRACE=1): one frame (~20 ms: the press look,
+  Layerize, Paint), then inside the click's own task ~45-58 ms before the
+  click runs: hit tests, the compatibility mouse events (mousedown/up/move,
+  `drInputEvent` on each), forced style. No single app handler; mostly the
+  browser's own tap work, which the lab can't size for an iPhone. So the
+  meter now times every tap of a run on the phone (wait and drawn, from the
+  lift; `frame-meter.md` "Taps") and lists the six slowest. Next: Jose's
+  runs say which taps are slow there, then fix those. Guide: the
+  smoothness answer explains Taps.
 - 2026-10-23 S8 Home scroll, round 3 (#130; Jose's pick after asking
   what happened to the smoothness work). New lab tool
   `tests/tools/scroll-trace.cjs` (style passes while scrolling Home and
