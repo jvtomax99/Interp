@@ -117,3 +117,13 @@ board('Real teeth', ['His painted tooth strip replaced by real 3D teeth.'], [
     ('3', 'NOTE', 'Not yet: no lower teeth (your drawings show none either); the tongue crumples a little in the \u201coh\u201d; '
      'the \u201coh\u201d hides the teeth where your drawing shows a sliver.', [], '', False),
 ], 'plan-teeth.png')
+
+
+board('Teeth, closer to your drawing', ['Three ways to show his teeth, on his face.'], [
+    ('1', 'ME', 'Your drawing shows his teeth as one smooth white band under the upper lip, as animated kids are drawn; '
+     'separate teeth with gaps read as dentures. A (my pick): one smooth band.',
+     [fit(Image.open(O('plan/teeth-band.png')), 1000, 380)], 'A: one smooth band', False),
+    ('2', 'ME', 'B: the band with faint dividers between teeth (they read as a saw edge).',
+     [fit(Image.open(O('plan/teeth-grooves.png')), 1000, 380)], 'B: faint dividers', False),
+    ('3', 'ME', 'C: the separate teeth from before.', [fit(Image.open(O('plan/teeth-after.png')), 1000, 380)], 'C: separate teeth', True),
+], 'plan-teeth2.png')

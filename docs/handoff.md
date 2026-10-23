@@ -179,6 +179,10 @@ worried (flat, not a frown).
    Build order: tripo_face, tripo_mouths, tripo_muscles, tripo_eyes2,
    tripo_teeth, then tripo_mouths + tripo_muscles again (the pucker needs
    the arc). Shown `out/plan-teeth.png`, waiting.
+   Jose: "teeth doesn't look right". `TEETH` style in `tripo_teeth.py`:
+   `band` (default, one smooth white band as drawn: `build_band`),
+   `grooves` (faint dividers: read as a saw), `teeth` (separate: read as
+   dentures). Shown `out/plan-teeth2.png`, waiting on his pick.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.

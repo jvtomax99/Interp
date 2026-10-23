@@ -126,6 +126,53 @@ def build_teeth(fy, bz):
     return verts, faces, mats
 
 
+STYLE = os.environ.get('TEETH', 'band')   # 'band': one smooth white band, as drawn; 'grooves': faint dividers; 'teeth': separate
+
+
+def build_band(fy, bz, grooves=0.):
+    """His teeth as one soft white band along the arc, the way his drawings and
+    animated kids' faces show them (separate teeth with gaps read as dentures):
+    a rounded cross-section swept along the arc, its bottom edge gently rounded,
+    tapering at the ends so it tucks into the corners. grooves > 0 adds faint
+    dips at the tooth boundaries."""
+    nu, nv = 160, 16
+    xs = np.linspace(X0, X1, nu + 1)
+    pts = np.stack([xs, fy(xs)], 1)
+    s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))]; s /= s[-1]
+    widths = np.array([1.0 - .32 * abs(k - (N_TEETH - 1) / 2) / ((N_TEETH - 1) / 2) for k in range(N_TEETH)])
+    bounds = np.cumsum(widths)[:-1] / widths.sum()
+    verts, faces = [], []
+    for i, x in enumerate(xs):
+        y = float(fy(x)); d = float(fy.deriv()(x))
+        tan = np.array([1, d, 0]); tan /= np.linalg.norm(tan)
+        back = np.array([-tan[1], tan[0], 0]); back = back if back[1] > 0 else -back
+        end = min(s[i], 1 - s[i])
+        taper = math.sin(math.pi / 2 * min(1, end / .08)) ** .5          # tucks into the corners
+        dip = 1 - grooves * max(0., 1 - min(abs(s[i] - b) for b in bounds) / .012)
+        hh = HEIGHT / 2 * taper * dip
+        hd = DEPTH / 2 * (.6 + .4 * taper)
+        bottom = float(bz(x)) - .0006
+        c = np.array([x, y, bottom + HEIGHT / 2]) + back * (DEPTH / 2 - .0014)
+        for j in range(nv):
+            a_ = 2 * math.pi * j / nv
+            ca, sa = math.cos(a_), math.sin(a_)
+            # a rounded rectangle cross-section: flat-ish front, soft bottom edge
+            u = math.copysign(abs(ca) ** (2 / 4.5), ca); v = math.copysign(abs(sa) ** (2 / 4.5), sa)
+            zoff = v * HEIGHT / 2 if v > 0 else v * hh * 2 - (HEIGHT / 2 - hh) * 0
+            p = c + back * (u * hd) + np.array([0, 0, 1.]) * (v * HEIGHT / 2 if v > 0 else v * (hh * 2 - HEIGHT / 2) if hh * 2 > HEIGHT / 2 else v * hh)
+            verts.append(tuple(p))
+    for i in range(nu):
+        for j in range(nv):
+            a0 = i * nv + j
+            faces.append((a0, a0 + nv, i * nv + nv + (j + 1) % nv, i * nv + (j + 1) % nv))
+    # caps
+    for i in (0, nu):
+        cidx = len(verts); verts.append(tuple(np.mean([verts[i * nv + j] for j in range(nv)], 0)))
+        for j in range(nv):
+            faces.append((i * nv + j, i * nv + (j + 1) % nv, cidx) if i else (i * nv + (j + 1) % nv, i * nv + j, cidx))
+    return verts, faces, [0] * len(faces)
+
+
 def materials():
     t = bpy.data.materials.get('Teeth') or bpy.data.materials.new('Teeth'); t.use_nodes = True
     b = t.node_tree.nodes['Principled BSDF']
@@ -150,7 +197,14 @@ if __name__ == '__main__':
     if 'Teeth' in bpy.data.objects:
         bpy.data.objects.remove(bpy.data.objects['Teeth'])
     np.savez(os.path.join(HERE, 'in', 'teeth-arc.npz'), fy=fy.coeffs, bz=bz.coeffs)     # for the pucker (tripo_mouths.oval)
-    verts, faces, mats = build_teeth(fy, bz)
+    if STYLE == 'teeth':
+        verts, faces, mats = build_teeth(fy, bz)
+    else:
+        verts, faces, mats = build_band(fy, bz, grooves=.18 if STYLE == 'grooves' else 0.)
+        gv, gf, gm = build_teeth(fy, bz)            # keep its gum strip only
+        n0 = len(verts); k0 = gm.index(1)
+        used = sorted({i for f in gf[k0:] for i in f}); remap = {o: n0 + i for i, o in enumerate(used)}
+        verts += [gv[o] for o in used]; faces += [tuple(remap[i] for i in f) for f in gf[k0:]]; mats += [1] * (len(gf) - k0)
     me = bpy.data.meshes.new('Teeth'); me.from_pydata(verts, [], faces); me.validate(); me.shade_smooth()
     tm, gm = materials(); me.materials.append(tm); me.materials.append(gm)
     me.polygons.foreach_set('material_index', mats)
