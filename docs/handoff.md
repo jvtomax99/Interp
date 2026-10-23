@@ -182,7 +182,7 @@ worried (flat, not a frown).
    Jose: "teeth doesn't look right". `TEETH` style in `tripo_teeth.py`:
    `band` (default, one smooth white band as drawn: `build_band`),
    `grooves` (faint dividers: read as a saw), `teeth` (separate: read as
-   dentures). Shown `out/plan-teeth2.png`, waiting on his pick.
+   dentures). Shown `out/plan-teeth2.png`; Jose picked A, the band.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.
