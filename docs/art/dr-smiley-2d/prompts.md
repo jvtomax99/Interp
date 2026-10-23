@@ -30,6 +30,12 @@ looks wrong to you.
 Send the one you like. Everything after this is an edit of that picture, so
 the style never has to be described again.
 
+**Done 2026-10-23.** Jose sent two results of prompt A, the same drawing
+to the pixel (1024 x 1536, figure in the same place within 1 px):
+`style-a1.png` (every line navy) and `style-a2.png` (blush on the cheeks,
+the coat's inner lines in light blue-grey). **His pick: `style-a2.png`.**
+That is the picture every Step 1 prompt edits.
+
 ## Step 1. The master (the picture every piece is cut from)
 
 Upload the chosen style picture. This opening goes before every prompt from
