@@ -27,6 +27,7 @@
  */
 
 import { allowTeam } from './_hub-access.js';
+import { callClaude, clip, parseAnswer } from './_routine.js';
 
 // A web search plus a model turn runs well past Vercel's 10s Hobby default.
 // This only takes effect on Pro or higher — same caveat as doctor-research.
@@ -64,7 +65,6 @@ const EFFORT = 'medium';
  * query once and caps the wait. */
 const MAX_SEARCHES = 3;
 
-const MAX_FIELD = 600;
 const MAX_SOURCES = 5;
 
 /* Sources an interpreter can cite without hedging. Government and academic
@@ -147,10 +147,6 @@ Rules:
 
 Keep "note" to one sentence, and empty when the sources speak for themselves.`;
 
-function clip(v) {
-  return String(v == null ? '' : v).trim().slice(0, MAX_FIELD);
-}
-
 /* A URL is only worth showing if it is absolute, https, and on a site we
  * asked for. The domain list is enforced at the API, but a model can still
  * quote a URL out of page text rather than out of a result — so it is checked
@@ -202,7 +198,6 @@ export default async function handler(req, res) {
       `Find reference reading for this concept. The definition above is what decides which sense of the term is meant.`;
 
     const body = {
-      model: MODEL,
       max_tokens: 8000,
       system: SYSTEM,
       messages: [{ role: 'user', content: userContent }],
@@ -214,74 +209,32 @@ export default async function handler(req, res) {
       }],
     };
 
-    const post = extra => fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({ ...body, ...extra }),
+    // The request, the retry without a schema and the web-search failure log
+    // are the shared helper's (_routine.js).
+    const result = await callClaude(apiKey, {
+      model: MODEL,
+      body,
+      output: { effort: EFFORT, format: { type: 'json_schema', schema: LOOKUP_SCHEMA } },
     });
-
-    // Same defensive shape as the other endpoints: prefer a schema-constrained
-    // response, but never fail the lookup because the parameter was rejected.
-    let usedSchema = true;
-    let upstream = await post({
-      output_config: { effort: EFFORT, format: { type: 'json_schema', schema: LOOKUP_SCHEMA } },
-    });
-
-    if (upstream.status === 400) {
-      const detail = await upstream.text();
-      if (/output_config|json_schema|\bformat\b|\beffort\b/i.test(detail)) {
-        console.warn('Structured outputs rejected, retrying without a schema:', detail);
-        usedSchema = false;
-        upstream = await post({});
-      } else {
-        console.error('Anthropic API error:', upstream.status, detail);
-        return res.status(502).json({ error: 'upstream_error' });
-      }
-    }
-
-    if (!upstream.ok) {
-      console.error('Anthropic API error:', upstream.status, await upstream.text());
+    if (!result.ok) {
+      console.error('Anthropic API error:', result.status, result.detail);
       return res.status(502).json({ error: 'upstream_error' });
-    }
-
-    const data = await upstream.json();
-
-    /* A web search failure arrives as a normal 200 with an error object where
-     * the results list would be — it does not throw. On success `content` is
-     * an array; on failure it is a single object. Branch on that before
-     * treating it as results. */
-    for (const block of data.content || []) {
-      if (block.type === 'web_search_tool_result' && !Array.isArray(block.content)) {
-        console.error('Web search failed:', JSON.stringify(block.content));
-      }
     }
 
     // A safety decline is a normal 200 with no answer. The app treats it like
     // "nothing found"; the log says why.
-    if (data.stop_reason === 'refusal') {
-      console.error('Model declined:', JSON.stringify(data.stop_details || null));
+    if (result.stopReason === 'refusal') {
+      console.error('Model declined:', JSON.stringify(result.data.stop_details || null));
       return res.status(200).json({ sources: [], note: '' });
     }
 
-    if (data.stop_reason === 'max_tokens') {
+    if (result.stopReason === 'max_tokens') {
       console.error('Response truncated at max_tokens before finishing.');
     }
 
-    // With the schema, the answer is the LAST text block: a short remark
-    // before a search ("Let me look that up.") can be a text block of its own,
-    // and joining it in front of the JSON would break the parse.
-    const texts = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
-    const raw = (usedSchema ? texts.slice(-1) : texts).join('').trim();
-
-    let parsed;
-    try {
-      parsed = JSON.parse(usedSchema ? raw : raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim());
-    } catch (err) {
-      console.error('Could not parse term-lookup response:', raw.slice(0, 400));
+    const parsed = parseAnswer(result);
+    if (!parsed) {
+      console.error('Could not parse term-lookup response:', result.answer.slice(0, 400));
       return res.status(200).json({ sources: [], note: '' });
     }
 

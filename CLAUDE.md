@@ -5,8 +5,9 @@ project is built and shipped.
 
 **How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
 do, test, update the plan, open a pull request). A chat runs phase after
-phase in a row and never asks to start a new chat (Jose, 2026-10-20); a
-chat that does start fresh reads the docs, not the old chat. Details:
+phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
+and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
+ask"). A new chat reads the docs and the handoff, not the old chat. Details:
 `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
@@ -27,34 +28,45 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 28,341 | The whole app (1.6 MB). All CSS and JS inline |
-| `home-polish.css` | 1,318 | Overlay layer. Loads right after `</style>`, so it wins |
-| `home-polish.js` | 1,558 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
-| `pin-icons.js` | 968 | Pin/icon wiring: which pin each domain and tool gets |
+| `index.html` | 23,133 | The whole app's markup and JS (1.3 MB), all inline |
+| `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
+| `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
+| `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
+| `pin-icons.js` | 987 | Pin/icon wiring: which pin each domain and tool gets |
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 30 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face; the last four, surprised, sad, worried and doubt, from `docs/art/dr-smiley-faces/`), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
-| `city/*.webp` | 51 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
-| `media/` | 8 MB | The 45-second video (`hub-promo.mp4`, 720p) and its still; made from `promo/`, shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
+| `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
+| `media/` | 8 MB | The 45-second video (`hub-promo.mp4`, 720p) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
+| `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
 | `promo/hub-blend/` | — | Source of the 3D promo remake (HyperFrames + Three.js); plan in its `BRIEF.md`. Not deployed (`.vercelignore`); only a rendered MP4 goes into `media/` |
+| `guide/topics.js` | 503 | The User Guide's answers, `GUIDE_SECTIONS` and `GUIDE_TOPICS` (plain data; was in `index.html` until 2026-10-21). Loaded by a `<script src>` just before `index.html`'s script; precached, network-first |
+| `practice/questions.js` | 348 | The CoreCHI practice bank, `CCHI_DOMAINS` and `SEED_QUESTIONS` (100 questions; plain data, was in `index.html` until 2026-10-21). Loaded like `guide/topics.js` |
+| `falsefriends/list.js` | 846 | The False Friends list, `FALSE_FRIENDS` (101 entries; plain data, was in `index.html` until 2026-10-22). Loaded like `guide/topics.js` |
+| `features/translate.js` | 276 | The Translate tool's code, moved verbatim out of `index.html` (2026-10-22, phase 3 of the split). Declarations only; loaded just before `index.html`'s script |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
-| `sw.js` | 212 | Service worker. Network-first for HTML and for the app code beside it (`home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
+| `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
+| `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `index.html` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
 | `api/translate.js` | 145 | Translate tool — Claude API |
-| `api/doctor-research.js` | 383 | Doctor Prep — Claude API + web search |
+| `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
-| `api/term-lookup.js` | 297 | Term reference lookup — Claude API + web search |
+| `api/term-lookup.js` | 307 | Term reference lookup — Claude API + web search |
 | `api/term-check.js` | 185 | Checks a glossary entry before it is saved — Haiku 5.5 first (`_routine.js`), then its backup model |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
 | `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
-| `api/_routine.js` | — | Haiku 5.5 first, then the endpoint's backup model, for Translate and the term check (not an endpoint itself) |
-| `api/ask.js` | — | Ask the Hub — answers from the entries the app sends, plus approved team notes |
-| `firestore.rules`, `storage.rules` | 78 / 19 | Firebase rules, applied by hand in the console |
+| `api/_routine.js` | — | The one Claude helper: every request to the Messages API (`callClaude`: the retries, the refusal check, `parseAnswer`, `clip`), and Haiku 5.5 first then the backup model for Translate and the term check (`callRoutine`). Not an endpoint itself |
+| `api/ask.js` | 508 | Ask the Hub — answers from the entries the app sends, plus approved team notes |
+| `api/push.js` | — | Notifications that reach a closed phone (Web Push): Team Chat, owners' sends, a test; the key phones sign up with. `_push-team.js` (who gets what, gone phones) and `_webpush.js` (encryption + VAPID signing, Node crypto) beside it. `docs/features/notifications.md` |
+| `firestore.rules`, `storage.rules` | 213 / 33 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
 | `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more and not deployed (`.vercelignore`); the files above were cut from them |
+
+Line counts are `wc -l` on 2026-10-20. They drift with every PR; the names
+and roles don't. Re-measure before quoting one.
 
 Inside `index.html`, sections are marked with banner comments
 (`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
@@ -86,24 +98,29 @@ different places is what silently killed the coloured press glow: a
 | Domain folder / section overlay styling | `home-polish.css` |
 | Home behaviour — wave, rail dots, section overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js` |
+| Styles for every other screen | `app.css` |
+| User Guide answers | `guide/topics.js` |
+| CoreCHI practice questions | `practice/questions.js` |
+| False Friends list | `falsefriends/list.js` |
+| Translate tool code | `features/translate.js` |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
 terms, chat, Doctor Prep, study, quizzes, profile, settings or the guide —
-those screens exist only inside `index.html`, so that is where their changes
-have to go. Say so plainly rather than inventing a place to put them.
+those screens' styles are in `app.css` and their code inside `index.html`,
+so that is where their changes have to go. Say so plainly rather than inventing a place to put them.
 
 **Match specificity, do not escalate it.** `home-polish.css` is written with ID
 selectors (`#content.is-home .x`). Anything added there at the same or higher
 specificity will quietly beat interaction states (`:active`, `.is-pressed`,
-`:focus-visible`) defined in `index.html`. When adding a rule, use the lowest
+`:focus-visible`) defined in `app.css`. When adding a rule, use the lowest
 specificity that works, and check that press, focus and hover still fire
 afterwards — measure them, do not assume.
 
 **Never resolve a merge with `git checkout --ours`.** It once discarded the
 `pin-icons` and `home-polish` wiring out of `index.html` in a single command.
-Resolve conflicts hunk by hunk, then confirm all three files are still loaded
-(in `index.html`: the `<link>` to `home-polish.css` and `<script>` for
+Resolve conflicts hunk by hunk, then confirm all four files are still loaded
+(in `index.html`: the `<link>`s to `app.css` then `home-polish.css`, the `<script>` for
 `home-polish.js` near the end of `<head>`, and the `<script>` for
 `pin-icons.js` just before `</body>`) before pushing.
 
@@ -129,8 +146,9 @@ only `docs/`, `tests/`, `.github/`, `.claude/`, `*.md` or the Firebase
 rules get no bump (nothing deployed changed). If an `api/*.js` file
 changed, it ships in the same push.
 
-After merging, verify: the bump commit lands on `main` within a minute or
-two, and its `BUILD_ID` is the one to find live. From a cloud session the
+After merging, verify: the bump commit lands on `main` (a minute when the
+runners are free; ~10 min on 2026-10-20 behind the merge's own test runs),
+and its `BUILD_ID` is the one to find live. From a cloud session the
 site itself is blocked; read Vercel's status on that commit instead
 (`curl -sS https://api.github.com/repos/jvtomax99/Interp/commits/<sha>/status`,
 context "Vercel", "Deployment has completed"). Do not ask Jose to check
@@ -170,6 +188,7 @@ activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 hub-lessons/{id}                                                     <-- Ask the Hub team notes
 hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
+push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you
@@ -189,13 +208,16 @@ touch before changing it; update it in the same commit when the behaviour change
 - The doctor's page (`renderDoctorDirDetail`, `SPECIALTY_PINS`, tabs, glass bar): `doctor-page.md`
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
+- Notifications that reach a closed phone, the Notifications screen, owners' Send to the team (`pushTurnOn`, `pushSync`, `api/push.js`, `sw.js` push): `notifications.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
 - The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 - CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
+- HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
+- Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
-for anything new, any answer it makes wrong rewritten, `GUIDE_STEPS` and
+(`guide/topics.js`) for anything new, any answer it makes wrong rewritten, `GUIDE_STEPS` and
 `GUIDE_COACH` kept in step with the controls they draw or light up, and a
 "New lately" card (`GUIDE_NEWS`) for a new feature. Say in the report what
 changed in the guide; say so in the commit message when nothing needed to.
@@ -247,6 +269,11 @@ lost concurrent edits. Do not reintroduce that.
 - **Pins are pre-cut files.** `pin-icons.js` used to download 9 MB of sheets
   and cut every pin out on a canvas at each launch (~2.7 s on a phone). Now
   each pin is `pins/<key>.webp`; to change one, replace its file.
+- **Term cards skip layout off screen** (S4, `content-visibility:auto`;
+  heights are guesses until drawn). Anything that jumps into the card list
+  (a scroll restore, `scrollIntoView` on a card) adds `cv-all` to
+  `#content` first, or it lands on a guess; iPhone Safari has no scroll
+  anchoring to fix it. `renderContent` does this itself for redraws.
 - **No `body:has(...)` for state** (`AGENTS.md`): it made scrolling Home
   restyle. Overlays open set `body.ov-open` / `.gs-open` / `.dm-open`
   (`overlayFlags` in `index.html`, a watcher, so new overlays need nothing).
@@ -304,7 +331,7 @@ box-shadow:
 
 **Type.** Inter (variable) for all interface text — headings included; the
 banner titles and section heads used to be serif. Scale, as tokens in the
-"Visual refinement" block of `index.html`: caption 12, footnote 13, subhead
+"Visual refinement" block of `app.css`: caption 12, footnote 13, subhead
 15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`). Spacing
 6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
 cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
@@ -340,15 +367,23 @@ Rules that hold across the whole app:
 - Card rails are 4 columns at 13px gap, content left-aligned. Centering is
   only for the four `.qa-tile` buttons.
 - Keep `:focus-visible` and the `prefers-reduced-motion` guard on anything new.
+- **Easing** (S5, 2026-10-20): a plain tap settles on `--spring0`, Apple's
+  bounce-0 spring (`linear()`, `--ease` where unsupported; press .368s,
+  screen .588s, sheet .662s). Overshoot only where it is the point: F2's
+  `--spring-settle` on the Practice buttons, Dr. Smiley's acting. No new
+  overshooting `cubic-bezier`; `tests/suites/springs.cjs` lists the kept ones.
 
-**Known gap.** The look is tokenized (34 `:root` vars); the rhythm is not.
-There are no spacing or font-size variables, and 12 hard-coded spacing values
-crowd into 6-17px: 9px (113 uses), 17px (66), 11px (57), 10px (38), 6px (22),
-then a tail of 7/8/13/14/15/16. Type has 11 sizes with no ratio, and
-12/12.5/13 and 14/14.5/15 are distinctions the eye cannot resolve. Collapsing
-to five values covers 86% of current uses: **6 / 9 / 13 / 17 / 26**. When
-adjusting spacing on a component, move it onto that scale rather than
-extending the tail.
+**Known gap.** The look is tokenized (69 `:root` vars); the rhythm mostly
+is not. The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
+but little uses them. Measured in `index.html`'s CSS (now `app.css`) on 2026-10-20:
+font-size is set with a token 65 times and with a plain px value about 900
+times, over 36 distinct sizes (12/12.5/13 and 14/14.5/15 all still there,
+distinctions the eye cannot resolve); padding, margin and gap use a token
+99 times against 1,737 px values, 12 of them crowding into 6-17px: 9px (251
+uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each),
+then 12/11/16/7/15. The scale **6 / 9 / 13 / 17 / 26** covers 42% of the
+px spacing uses as they stand. When adjusting spacing or type on a
+component, move it onto the tokens rather than extending the tail.
 
 ## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
 
@@ -371,7 +406,7 @@ design and anything touching data or rules stay with the main model.
 ## Working agreement
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
-  (His standing rule.)
+  (His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
 - **A question with options gets buttons** (Jose, 2026-10-18): ask it
   with `AskUserQuestion`, one button per option (recommended first), not
   as a numbered list in text. Where that tool is missing (a scheduled
@@ -414,5 +449,5 @@ design and anything touching data or rules stay with the main model.
   which ("login"), and a refused key stops the run with the reason. Lock the
   Hub only after a run reports "service account". Putting a shared secret
   inside the documents it writes was rejected as a credential leak.
-- `index.html` is one 1.1 MB file. Splitting CSS and JS out is the main
-  structural cleanup available.
+- `index.html` is one 1.4 MB file. The CSS is out (`app.css`, 2026-10-21);
+  the data and the JS by feature are next (`docs/split-index.md`).

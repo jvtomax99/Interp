@@ -23,11 +23,17 @@ import { callRoutine } from './_routine.js';
 
 /* Every lookup is a short, routine job, so it goes to Claude Haiku 5.5 first
  * (see _routine.js), at medium effort: it thinks before answering, which is
- * what a false friend or an ambiguous term needs. BACKUP_MODEL, the model
- * Translate used before, answers whenever Haiku declines, runs out of room
- * or fails. */
+ * what a false friend or an ambiguous term needs. BACKUP_MODEL answers
+ * whenever Haiku declines, runs out of room or fails: Claude Sonnet 5.5
+ * (2026-10-20; was claude-sonnet-5, same price). Its effort levels were
+ * recalibrated, so the level is set explicitly rather than left to the
+ * default (`high`): medium, the same as Haiku's, for a short judgment call
+ * on a term. Its thinking is on and counts toward max_tokens; a decline
+ * comes back as stop_reason "refusal", which _routine.js treats as no
+ * answer. */
 const EFFORT = 'medium';
-const BACKUP_MODEL = 'claude-sonnet-5';
+const BACKUP_MODEL = 'claude-sonnet-5-5';
+const BACKUP_EFFORT = 'medium';
 
 // Structured outputs: the response is constrained to this shape rather than
 // the prompt asking for JSON and this file hoping. Every field is a plain
@@ -116,7 +122,7 @@ Rules:
       body: { max_tokens: 4000, system, messages: [{ role: 'user', content: userMsg }] },
       routine: { effort: EFFORT, format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } },
       // The backup runs as Translate always did: default effort.
-      backup: { model: BACKUP_MODEL, output: { format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } } },
+      backup: { model: BACKUP_MODEL, output: { effort: BACKUP_EFFORT, format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } } },
     });
     if (!result.ok) {
       console.error('Anthropic API error:', result.model, result.status, result.detail);

@@ -24,24 +24,25 @@ written here.
    hasn't approved.
 7. Next phase: in the same chat while it's still light (see below).
 
-**Don't ask to start a new chat** (Jose, 2026-10-20: "Let's not ask to
-start a new chat anymore", his plan has the usage). Carry on in the same
-chat phase after phase, and keep everything worth keeping in this file
-anyway, so a chat that does end (compaction, a crash) loses nothing. The
-old rule, for the record: a new chat only when the chat was heavy
-(compacted, or full of big file reads, long test output or fix rounds).
-If a chat has to move anyway, the paragraph below says how.
-Don't repeat it in every reply.
-**Claude opens the new chat itself** (Jose, 2026-10-19): with
-`create_session` (claude-code-remote tools), same repo, its first message
-the handoff. **A chat opened from another keeps its exact title** (Jose,
-2026-10-19): read it with `get_session` and pass it to `create_session`.
-The main line of chats is called "Main inter Hub"; every chat opened from
-it is "Main inter Hub" too. Don't rename a chat unless Jose asks. That message tells it to read
-`AGENTS.md`, `CLAUDE.md` and this file, say in 2-3 lines what it will do
-next, then stop and wait for Jose's go. In the old chat, tell Jose the new
-session carries the same title and say "Archive this chat" (archive it only when he says
-so). If `create_session` isn't available, fall back to the message to paste.
+**A heavy chat hands over with `docs/handoff.md`** (Jose, 2026-10-20:
+"Whenever a chat gets extremely heavy and expensive, hand me a handoff.md
+to start in a new chat. It's to be able to use you for long period of
+time"; this replaces "don't ask to start a new chat"). Carry on phase
+after phase while the chat is light. When it gets extremely heavy (it has
+been compacted, or holds many big file reads, long test runs or fix
+rounds, and the next phase would add a lot more):
+1. Write everything worth keeping into this file as usual.
+2. Overwrite `docs/handoff.md`: where things stand (merged, open PRs and
+   what each waits on, pending check-ins), what's next with the pick, open
+   questions for Jose, what this chat learned that isn't in the docs yet,
+   and at the top the exact message to paste into the new chat.
+3. Commit and push it, send it to Jose with `SendUserFile`, and say
+   "Start a new chat" with the message to paste. Once, not every reply.
+4. Leave nothing half-done: an open PR is fine (the handoff names it), an
+   uncommitted change is not. Cancel this chat's check-ins; the new chat
+   re-arms what it needs. Then "Archive this chat" (below).
+The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
+says in 2-3 lines what it will do, and waits for Jose's go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -60,6 +61,24 @@ rules, full-size render `promo/hub-blend/out/remake-final.mp4`, side by side
 with v11). Next: Jose watches it and picks the final cut; then the MP4 goes
 into `media/` and a PR. Nothing in the app changes until he picks.
 
+**K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/knowledge-brain.md`).**
+The HUMC Brain shows the person, not the code: domains as regions, terms as
+dots lit by what you know, tap a dark area to practice it. First find what
+per-term data the app keeps. Personal data never shown to others.
+Data found (2026-10-21): the only per-term, per-person record is
+`term-reviews/{who__termId}` (Firestore; box 0-5, reviewCount, misses,
+lastResult, lastAt, nextReviewAt; latest state only, no history), fed by
+Term Review, Daily Drill round 2 and Doctor Prep flashcards (`prepMark`).
+Quiz practice (`ih_practice_v1`) is per question by CoreCHI exam domain,
+not glossary domain; `quiz-history`, `ih_warmup`, `ih_memory` hold nothing
+per term. Brightness = box, dimmed when overdue; never practiced = dark.
+Jose's picks: first as two tabs with the code view, then (same day) kept
+separate: his head opens only his code brain, the CoreCHI Practice tile
+only the knowledge brain, no link between; record one daily snapshot on the phone from now on for the
+progress figure. **K2 (this PR; Jose's pick "by name"): once locked,
+`term-reviews` is read and written only by the phone whose `hub-members`
+name matches the record (`ownReview`), with a sync-and-retry when refused.
+Jose publishes `firestore.rules` in the console; until then nothing changes.**
 
 **Feature-film look (Jose's brief, 2026-10-19; his picks after the trade-offs).**
 One PR each, after M2 (#73):
@@ -158,6 +177,11 @@ S4. **Glossary taps.** 2026-10-19 (Facts, "S4 first look"): removing the
    forced layout (`getClientRects`, `getBoundingClientRect` right after
    `innerHTML`); `ih:home-paint` forces 70-84 ms on each Home repaint. Read
    before write. Target: handler < 50 ms, tap to paint < 150 ms.
+S4. **Glossary taps** (this PR): off-screen term cards skip layout
+   (`content-visibility`), with `#content.cv-all` wherever a guessed height
+   could move what you read. Handler -37%, tap to paint -23% on real-size
+   domains; the targets (< 50 ms, < 150 ms at 4x) are not met. Next, if
+   wanted: draw fewer than 120 cards up front (a visible change: ask Jose).
 S5. **Springs (`linear()`).** Apple's model: WWDC23 "Animate with springs"
    (stiffness = (2π/duration)², damping ratio = 1 - bounce); WWDC18
    "Designing Fluid Interfaces" (start at 100% damping; 80% only when a gesture
@@ -190,27 +214,46 @@ Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
 come from this alone.
 
-1. **AI models.** `claude-sonnet-5` (translate backup) →
-   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
-   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
-   claude-api skill first. Next: translate backup.
 2. **One Claude helper in `api/`.** `_routine.js`, `ask.js`,
    `doctor-research.js`, `term-lookup.js` each build their own request and
    retry rule; `clip()` is defined 3 times. Grow `_routine.js` into the one
    helper; move one endpoint per PR.
+1. **AI models.** `claude-sonnet-5` (translate backup) →
+   `claude-sonnet-5-5`; `claude-opus-5` (term-check backup) →
+   `claude-opus-5-5`. Same recipe as doctor-research (see Facts). Read the
+   claude-api skill first. Next: translate backup.
 3. **Home styles in layers.** In `home-polish.css` the greeting name is
    restyled by 13 rules, the quote by 12. Merge each element's rules into
    one, one element per PR, pixel-compared. Jose signs off on the look.
+5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
+   `index.html`. `home-polish.css` still styles classes nothing makes
+   (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
+   file, so fetch `main` right before.
+3. **Home styles in layers.** The greeting name is in one block now (its
+   PR); next the quote (12 rules, with its `cite`), then the name row (7).
+3. **Home styles in layers.** The greeting name and the quote (with its
+   author line) are each in one block now (their PRs); next the name row
+   (7 rules), then look for the next most-layered element.
+3. **Home styles in layers.** The greeting name, the quote (with its
+   author line), the name row, the greeting text block and the banner
+   itself are each in one place now (their PRs). Left as they are: the
+   photo drift and scrim (8 rules each, one per mode by design), section
+   heads, tile names and card titles (7-8, one per breakpoint). Fold
+   those the same way when someone touches them.
+   Method that worked: list every rule for the element with its media
+   context (comments stripped first), work out the winner per breakpoint,
+   write one block at the lettering block's place, delete the rest, then
+   prove it: computed styles and boxes of everything under `#homeGreeting`
+   identical at 11 widths x short/long name x light/dark x penning
+   (`Math.random` pinned, the quote is random per session), and the
+   banner's pixels identical at phone and computer size. Jose signs off on
+   the look.
 4. **Stale numbers in `CLAUDE.md` / `AGENTS.md`.** File map line counts are
    old (`index.html` is 28,056 lines, 1.6 MB, not 28,341; AGENTS says
    ~21,000 lines, 1.1 MB; CLAUDE.md's Open items says 1.1 MB). The "Known
    gap" paragraph says there are no spacing or font-size variables, but the
    Type paragraph says `--fs-*` / `--sp-*` exist. Check the code, fix the
    text, both files.
-5. **Dead CSS in `home-polish.css`.** Phase "Dead CSS" covered only
-   `index.html`. `home-polish.css` still styles classes nothing makes
-   (e.g. `.domain-family-kid`). Same method; Jose's other tools edit that
-   file, so fetch `main` right before.
 
 **Flaky WebKit tests, fixed.** dock-tuck's "Dr. Smiley shrinks with the
 bar" read his size mid-breath (fixed 2026-10-19: the loops are held at their
@@ -240,8 +283,18 @@ then read the log; it names the suite and the check.
 - **Glossary changes-only sync.** Each cold start reads every term (~1,700
   reads; persistence is off on purpose, iPhone crashes). Do it only if
   Firestore reads near 50K/day (Usage page). Was 23K on 2026-10-13.
-- **Split `index.html`** (1.6 MB) into CSS + JS by feature. Big; plan it as
-  its own multi-phase effort, coordinated with ChatGPT's edits.
+- **Split `index.html`** (1.86 MB) into CSS + JS by feature. The plan,
+  measured: `docs/split-index.md` (2026-10-20): markers and a census
+  first, then the CSS, then the data constants, then features one file
+  per PR, leaves first; the proof per move and the three lists every new
+  file must join. Jose (2026-10-20): start after the open PRs merge,
+  one move at a time with nothing else in flight; phase 1's first-paint
+  trade is still his call once measured. Phase 0 (census, markers) done
+  2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
+  2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
+  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
+  Phase 3 (features), Jose's pick: Translate, this PR. Next leaves: 3D
+  Body, Looking a term up, Voice and mic check (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -251,6 +304,188 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-22 Split `index.html`, phase 3, Translate (this PR): the
+  Translate section is `features/translate.js`, verbatim, loaded before
+  the app's script (declarations only). Proof: tokens identical when put
+  back, the screen and a translation identical in the browser, globals
+  unchanged. `sw.js` (any `features/*.js` network-first), the harness (serves
+  `features/*.js`), `first-paint.cjs`, `brain-data.cjs`,
+  `AGENTS.md` (a feature's code lives in its file), `CLAUDE.md`.
+  False Friends (#125) merged on Jose's "Push", live as b1022.1233.
+- 2026-10-22 Split `index.html`, phase 2, False Friends (this PR):
+  `FALSE_FRIENDS` is `falsefriends/list.js`, loaded like the guide and the
+  practice bank; `ETHICS_CONTENT` stays, under a "Code of Ethics"
+  banner. Identical in the browser; `sw.js`, harness, `first-paint.cjs`,
+  `brain-data.cjs` ("Code of Ethics" takes its place in the data group),
+  `AGENTS.md`/`CLAUDE.md`. Nothing visible, no guide change.
+- 2026-10-21 Split `index.html`, phase 2, the practice bank (this PR):
+  `CCHI_DOMAINS` and `SEED_QUESTIONS` are `practice/questions.js`, loaded
+  like `guide/topics.js`. Identical in the browser before and after;
+  `sw.js`, the harness, `first-paint.cjs`, `brain-data.cjs` (the section
+  is gone from the census), `AGENTS.md`/`CLAUDE.md`/`daily-drill.md`.
+  Phase 2's guide (#115) merged on Jose's "Push", live as b1021.1248.
+- 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
+  aren't being delivered", owners should send them, "like a normal app";
+  his picks: owner-code phones send, push for Team Chat and new training).
+  Web Push with no package (`api/push.js`, `_push-team.js`, `_webpush.js`),
+  `sw.js` push + badge + `?open=`, More → Notifications for everyone with
+  Send to the team for owners, `push-subs`/`push-sent`/`push-log` rules,
+  the events watcher notifies. Guide answer `notifications` + New lately.
+  `tests/suites/push.mjs`. Needs Jose: the VAPID keys in Vercel and the
+  rules published (`docs/features/notifications.md`, Setup).
+- 2026-10-21 Split `index.html`, phase 2, the guide (this PR):
+  `GUIDE_SECTIONS` and `GUIDE_TOPICS` are `guide/topics.js`, a plain
+  script loaded just before the app's own (Jose's pick over fetching it on
+  demand: Home's tile, search and Ask read it from startup). Identical in
+  the browser before and after; `sw.js` precache + network-first, the
+  harness, `AGENTS.md`/`CLAUDE.md`/`user-guide.md` updated. Weak Wi-Fi
+  first paint +0.08 s, Home up to 0.1 s sooner; 4G no worse.
+  Phase 1 (#112) merged on Jose's "Push it", live as b1021.1058.
+- 2026-10-21 HUMC Brain (Jose's ask, this PR): the census as a 3D brain with
+  a quantitative workup, `brain/` (page, data, vendored Three.js), opened for
+  everyone by a double-tap on Dr. Smiley's head in the hello; one tap still
+  opens Ask (320 ms on his head, 200 below). Guide answer `brain` + New
+  lately card. `tests/suites/humc-brain.cjs`. `docs/features/humc-brain.md`.
+- 2026-10-21 Split `index.html`, phase 1 (this PR, merge only on Jose's
+  call): the `<style>` block is `app.css`, verbatim plus `@charset`,
+  linked where it was, before `home-polish.css`. `sw.js` precaches it,
+  network-first with the page; the harness serves it; `springs.cjs` reads
+  it; `AGENTS.md`/`CLAUDE.md` say styles go there. Measured with two new
+  tools, `first-paint.cjs` and `style-proof.cjs`: weak Wi-Fi first paint
+  +0.33 s, Home -0.30 s; 4G both under 0.1 s; looks identical (only the
+  noise two runs of the old version show). Nothing visible, no guide change.
+- 2026-10-21 Split `index.html`, phase 0 (this PR): `tests/tools/census.cjs`
+  (acorn added to `tests/`) maps every top-level name of the inline
+  scripts to its section and who uses it, code and `on...=""` handlers
+  both; 35 banners added and 3 sub-headings promoted, so the script has
+  118 one-feature sections. Proof: the inline code's tokens and the page's
+  markup and CSS are identical to `main`'s. The table and its reading (the
+  shared core is ~60 KB; the leaves; what moves as a group) are in
+  `docs/split-index.md`. Nothing visible, no User Guide change.
+- 2026-10-20 Journey flake (this PR): "Term Review on 5 of your
+  still-learning terms" failed on two PR runs within 30 minutes (#94,
+  #98; neither touches that path) while passing on main's head and
+  locally: Practice 5 loads the reviews lazily, and the check read the
+  state after a fixed 2.2 s. It now waits for the review screen (up to
+  10 s) and prints the state it found when it fails.
+- 2026-10-20 AI backup models (this PR): Translate's backup
+  `claude-sonnet-5` -> `claude-sonnet-5-5` (effort set explicitly, medium);
+  the term check's backup `claude-opus-5` -> `claude-opus-5-5` (effort
+  low, set explicitly: its default is medium and thinking can't be turned
+  off). The backups only answer when Haiku 5.5 declines or fails, so
+  nothing to see in the app; Jose can't test it on purpose.
+- 2026-10-20 Stale numbers in `CLAUDE.md` / `AGENTS.md` (this PR): file
+  map counts re-measured (`index.html` 31,214 lines, 1.8 MB; the city has
+  99 files; rules 213/33), a line under the table saying counts drift and
+  to re-measure; the "Known gap" paragraph rewritten from a measurement
+  (tokens exist, 65 font-size and 99 spacing uses against ~900 and 1,737
+  px values; the 6/9/13/17/26 scale covers 42% of px spacing); AGENTS.md's
+  "~21,000-line, 1.1 MB" and the Open item's 1.1 MB fixed. Found on the
+  way: three rules use token names that don't exist (`--fs-headline`,
+  `--fs-title1`, `--fs-footnote`, index.html ~1215, ~1216, ~2005) and run
+  on their px fallbacks; same sizes, so nothing shows. Rename them to
+  `--fs-head`/`--fs-t1`/`--fs-foot` in the next PR that bumps the build.
+- 2026-10-20 One Claude helper, last move (this PR, on top of Ask's):
+  Doctor Prep on `callClaude`, which learned `retryOutput` (what to send
+  as `output_config` when the first is rejected; Doctor Prep keeps its
+  effort, the others send nothing, as before). Its `api_error` /
+  `refused` / `truncated` throws and the loose parse without a schema
+  stay in `doctor-research.js`; its own fetch, retry and text helpers are
+  gone. 24 Doctor Prep cases in `api-helper.mjs` (115 checks). Item 2
+  done: every request to the Messages API goes through `_routine.js`;
+  the one behaviour change across the three moves is that a 400 naming
+  `effort` on Doctor Prep now retries once with the effort alone before
+  failing (it failed at once before). `clip()` lives in one place.
+- 2026-10-20 One Claude helper, second move (this PR, on top of the
+  first): Ask the Hub on `callClaude`, which learned a `beta` option
+  (header + body; dropped first on a 400 naming it, then `output_config`,
+  one retry each, as Ask's own loop did) and `parseAnswer(result, text)`
+  for a caller without tools; `clipLine` (whitespace folded) is Ask's
+  clip. Same requests, same answers; 27 Ask cases added to
+  `api-helper.mjs` (91 checks).
+- 2026-10-20 One Claude helper, first move (this PR): `_routine.js` grew
+  `callClaude` (one request, the retry without `output_config`, the
+  web-search failure log, `answer` = the last text block under a schema),
+  `parseAnswer` and `clip`; `callRoutine` is built on it, same behaviour
+  (Translate and the term check untouched). Term lookup uses it: same
+  requests, same answers, its own `clip` and request code gone. New suite
+  `tests/suites/api-helper.mjs` (64 checks, no browser).
+- 2026-10-20 Home styles in layers, the text block and the banner (this
+  PR, on top of the row's): `.home-greeting-text` 10 rules in five
+  places (the old frosted card and its phone widths, all dead under the
+  Panorama reset; Dr. Smiley's --hw-* numbers) folded into one block in
+  the wave block with their comments; `.home-greeting` 10 rules in six
+  places folded into one base rule and five media rules at the Panorama
+  comment, the sign's band (padding-bottom per mode) left with the photo
+  rules on purpose. Same proof: 30 states identical, 0 differing pixels.
+- 2026-10-20 Home styles in layers, the name row (this PR, on top of the
+  quote's): 7 rules in five places folded into one block with one
+  breakpoint (the flex row, the 3-column grid and margins of 3, 2, 73 and
+  34 px gone). Same proof: 30 states identical, 0 differing pixels.
+- 2026-10-20 Home styles in layers, the quote (this PR, on top of the
+  name's): 20 rules (12 for the quote, 8 for its `cite`) in six places
+  folded into one commented block with two breakpoints; the dead layers
+  (13/11.5/22/23/21 px, three margins, `#f5faff`/`#daecf8`/`#e7f5ff`)
+  gone; the `font` shorthand kept so the same longhands reset. Same proof
+  as the name: 30 states identical, 0 differing pixels.
+- 2026-10-20 Home styles in layers, the greeting name (this PR, on top
+  of the dead-CSS PR): 21 rules (13 for the name, 8 for `.is-long`) in
+  six places folded into one commented block with three breakpoints;
+  the dead layers (42/31/39/48/52 px, weight 600 then 500, the old
+  letter-spacing) gone. Proof: every computed property and box under
+  `#homeGreeting` identical before/after in 30 states, and 0 differing
+  pixels in the banner at phone and computer size, short and long name.
+- 2026-10-20 Dead CSS in `home-polish.css` (this PR): the 2026-10-14 method
+  (a class is live if its name appears anywhere outside the stylesheet;
+  names built in code checked by prefix) finds three classes nothing
+  makes: `domain-family-kid`, `home-face-marks`, `home-wave-wide-name`.
+  Five rules and one orphaned comment removed, and the two selector lists
+  that paired `.home-greeting-name-row` with `.home-wave-wide-name` cut
+  to the live selector (587 -> 582 rules). Proof: every element's and
+  pseudo-element's computed style identical before/after on Home at rest,
+  scrolled and with a domain opened, phone and computer, light and dark
+  (reduced motion so nothing is mid-animation; the one difference seen was
+  the Home tip's text, `SESSION_TIP` is random per session). Lesson: deleting a line
+  of a selector list hands its selector to the next rule; the first pass
+  did exactly that and the proof caught it (the greeting row lost its
+  grid), so delete whole rules, never lines.
+- 2026-10-20 The three type tokens that didn't exist (this PR, on top of
+  S5): `--fs-headline`, `--fs-title1`, `--fs-footnote` (the frame meter's
+  heading and big number, 3D Body's waiting line) renamed to the real
+  `--fs-head`, `--fs-t1`, `--fs-foot`; same sizes, the px fallbacks gone.
+  Proof: computed font-size identical before/after on each. Found in the
+  stale-numbers pass (#90).
+- 2026-10-20 S5 springs (this PR; Jose's pick: S5, keep F2's buttons).
+  `--spring0`, Apple's bounce-0 spring as one `linear()` shape (`--ease`
+  where unsupported), on the plain taps: tab bar icon (.368s) and lens
+  (.588s), the Home section panel (.588s), the week dots' and level-up
+  pops, the chat reaction pop and heart, the memory trainer's switch and
+  option buttons, the candy button release, the trend dot, the campus
+  badge, the tilt tiles. Kept on purpose: `--spring` itself (F2's
+  fallback), F2's `--spring-settle`, and Dr. Smiley's acting (face lean,
+  brows, cheer, dock move: `dr-smiley.md` calls the brow overshoot his
+  follow-through), which the S5 question to Jose had listed as changing;
+  his motion rules won. Suite `springs.cjs` (frame-by-frame: no swing past
+  the target, settled within the press time). Guide: nothing to change.
+- 2026-10-20 Campus card to golden hour (Jose's pick after F3): the card's
+  sky violet instead of night navy, no stars, a warm glow top left. Lower
+  colours unchanged. Found, not changed: the chips (4.1-4.4:1) and Exam sim
+  (2.9:1) were already under the 4.5:1 text contrast minimum before this.
+- 2026-10-20 S4 glossary taps. Profiled a domain tap (`tap-trace.cjs`
+  PROFILE=1): ~150 of the handler's ~220 ms was the browser laying out the
+  new screen, forced early by `smileyElsewhere`/`watchDomainDock`; ~38 ms
+  building the HTML. A screen draws up to 120 cards (~6,600 elements on a
+  real domain; the test seed has 28), so term cards now skip layout and
+  paint off screen (`content-visibility:auto`, guessed 172 px). Same look:
+  cards already clip, and every box on screen sits where it did to 0.05 px
+  (pixels differ only by one device pixel of text snapping). Guessed
+  heights above the screen would move what you read in Safari (no scroll
+  anchoring), so `#content.cv-all` lays every card out for a redraw in
+  place while scrolled down (`cvFresh`), Back's restore, `revealTerm` and
+  Show me; removing either guard makes the suite fail. Interleaved 6+6 taps
+  on 150-term domains (`BIG=150`, 4x, this session's slow machine): handler
+  median 783 -> 494 ms, tap to paint 1,564 -> 1,212 ms. Suite
+  `glossary-cv.cjs`. Not measured on an iPhone.
 - 2026-10-20 F3 campus golden hour + depth (Jose's film brief). The scene
   re-lit in `entrance.html`: a low warm sun from the left with long shadows,
   lavender fill, a pink rim backlight, a peach-to-lavender sky with the sun's
@@ -554,6 +789,30 @@ then read the log; it names the suite and the check.
 
 ## Facts (so nobody re-checks)
 
+- **Proving a CSS move with computed styles: sort the properties.**
+  `getComputedStyle` lists custom properties in the order the sheets
+  declared them, so moving a sheet (inline to a file) reorders the list
+  and every element's fingerprint changes with no value changed
+  (2026-10-21). And compare against a second run of the old version: chat
+  timestamps, the tab bar's lens and Home text under a sheet differ
+  between two runs of the same code.
+- **The suites can't see network cost**: the harness answers every file
+  from memory at once. `tests/tools/first-paint.cjs` serves real files
+  over Chromium's throttled network (2026-10-21).
+- **`brain/data.json` is a snapshot** of the census, not live: refresh it
+  with `cd tests && node tools/brain-data.cjs` (`--check` tells). A section
+  the tool doesn't list goes to the cortex; a renamed one is reported.
+- **The test harness serves only `/`** for the app's own origin; a suite
+  that opens another page of ours (`brain/`) routes it itself
+  (`humc-brain.cjs`).
+- **The census (`tests/tools/census.cjs`)** counts a use only by name: a
+  `window[name]` lookup or a name built in a string is invisible to it,
+  and it says nothing about run order. A banner put inside a function is
+  not a section; the census prints "Banner inside code" for one at the
+  left edge. Proving a comments-only change to `index.html`: tokenize the
+  inline scripts with acorn (comments are skipped) and compare old and
+  new, plus the markup with the scripts cut out (2026-10-21: 226,941
+  tokens each, identical).
 - Recording a smooth, sharp clip of an animation from the tests' Chromium:
   `recordVideo` and the CDP screencast give CSS-pixel frames (blurry), and
   screenshots in a loop run at about 4 fps. What works: CSS `zoom: 3` on
@@ -873,6 +1132,16 @@ then read the log; it names the suite and the check.
 - Feature write-ups: `docs/features/*.md`. Moving them was checked line by
   line (every non-blank line of the old `CLAUDE.md` is in the new one or a
   feature file).
+- Springs (S5, 2026-10-20): Apple's model, WWDC23 "Animate with springs"
+  (stiffness = (2π/duration)², damping ratio = 1 - bounce) and WWDC18
+  "Designing Fluid Interfaces" (100% damping on a tap; 80% only when a
+  gesture carries momentum). Bounce 0 as CSS: `linear(0, 0.094, 0.274,
+  0.456, 0.609, 0.727, 0.813, 0.874, 0.916, 0.945, 0.964, 0.977, 0.985,
+  0.99, 0.994, 0.996, 0.998, 0.998, 1)`, CSS duration = 1.47 x Apple's
+  (press .25 s -> .368s, screen .4 -> .588s, sheet .45 -> .662s); a
+  swipe-dismiss would be bounce 0.2 (.607s, 1.5% past). Chromium
+  serializes it as `linear(0 0%, 0.094 5.56%, ...)`. Later, sheets only: a
+  JS spring that keeps the finger's speed (CSS can't).
 - Sonnet 5.5 recipe (from the claude-api skill's migration guide): same
   price as Sonnet 5; effort levels recalibrated, so set `output_config.effort`
   explicitly (`medium` for search-then-write, `low` for chat/extraction);

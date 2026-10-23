@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v263-b1020.1449';
+const CACHE_VERSION = 'interpreter-hub-v278-b1022.1541';
 const PRECACHE = [
   './',
   './index.html',
@@ -54,6 +54,11 @@ const PRECACHE = [
   './drsmiley/hat-mirror.webp',
   './drsmiley/hat-grad.webp',
   './pin-icons.js',
+  './app.css',
+  './guide/topics.js',
+  './practice/questions.js',
+  './falsefriends/list.js',
+  './features/translate.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
@@ -122,8 +127,34 @@ self.addEventListener('activate', event => {
   );
 });
 
+/* A push from the server (api/push.js): Team Chat, new training, a message
+ * from the team's owners. Arrives with the app closed. Every push must show a
+ * notification (iPhone stops delivering to apps that don't), so even an
+ * unreadable one shows something. The app icon's badge counts what's waiting. */
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : '' }; }
+  const title = d.title || 'Interpreter Hub';
+  const options = {
+    body: [d.where, d.body].filter(Boolean).join('\n') || 'Something new on the Hub',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    timestamp: Date.now(),
+    data: { section: d.section || 'chat' }
+  };
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+      .then(() => self.registration.getNotifications())
+      .then(list => { if (self.navigator && self.navigator.setAppBadge) return self.navigator.setAppBadge(list.length); })
+      .catch(() => {})
+  );
+});
+
 /* Tapping a notification should bring the already-open app forward rather
- * than opening a second copy of it. */
+ * than opening a second copy of it; with the app closed it opens on the
+ * notification's screen (?open=, read at startup in index.html). */
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const section = (event.notification.data && event.notification.data.section) || 'chat';
@@ -135,8 +166,10 @@ self.addEventListener('notificationclick', event => {
           return client.focus();
         }
       }
-      if (self.clients.openWindow) return self.clients.openWindow('./');
-    })
+      if (self.clients.openWindow) return self.clients.openWindow('./?open=' + encodeURIComponent(section));
+    }).then(() => self.registration.getNotifications())
+      .then(list => { if (self.navigator && self.navigator.setAppBadge) return list.length ? self.navigator.setAppBadge(list.length) : self.navigator.clearAppBadge(); })
+      .catch(() => {})
   );
 });
 
@@ -169,17 +202,22 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
+        .catch(() => caches.match(req).then(hit => hit || (url.pathname.startsWith('/brain/')
+          // The HUMC Brain never opened online yet: say so in its frame,
+          // rather than loading the whole app inside it.
+          ? new Response('<p style="font:16px system-ui;color:#A4B0CC;background:#02040B;margin:0;padding:24px;min-height:100vh">Open the HUMC Brain once with a connection; after that it works offline.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+          : caches.match('./index.html'))))
     );
     return;
   }
 
-  /* The app's own code beside the page (Home behaviour and its styles, the
-   * pins wiring): network-first like the page, so a deploy's page and its
-   * Home code always arrive together. As stale-while-revalidate these were
+  /* The app's own code beside the page (its styles in app.css, the
+   * guide's answers, the practice bank, False Friends, the
+   * features moved out to features/, Home behaviour and its styles, the pins wiring): network-first like the
+   * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {

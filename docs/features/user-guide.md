@@ -3,7 +3,10 @@
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
 Code is in `index.html` unless a file is named. Keep this in step with the code.
 
-**The User Guide (Guide 2.0).** The answers are one list, `GUIDE_TOPICS`;
+**The User Guide (Guide 2.0).** The answers are one list, `GUIDE_TOPICS`
+(with `GUIDE_SECTIONS`, in `guide/topics.js` since 2026-10-21: plain data,
+loaded by a `<script src>` just before `index.html`'s script, so every
+reader below finds it by name as before);
 Dr. Smiley (`askRetrieve`) and global search read it, so it has to match the
 app. The guide screen is search-first: the box filters answers (every word
 required, words in the question count most), and its last row hands the

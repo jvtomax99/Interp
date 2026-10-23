@@ -7,8 +7,9 @@ this file wins.
 
 **How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
 do, test, update the plan, open a pull request). A chat runs phase after
-phase in a row and never asks to start a new chat (Jose, 2026-10-20); a
-chat that does start fresh reads the docs, not the old chat. Details:
+phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
+and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
+ask"). A new chat reads the docs and the handoff, not the old chat. Details:
 `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
@@ -62,11 +63,31 @@ So:
 | Home behaviour — hello wave, rail dots, overlay | `home-polish.js` |
 | Pin and icon artwork | `pin-icons.js`, artwork files in `pins/` (one per pin) |
 | 3D Body (anatomy viewer) | `atlas/` is someone else's built app; read `atlas/README.md` first. Card text: `atlas/hub-catalogue.json` (no rebuild) |
+| Styles for every other screen (glossary, chat, Practice, sheets, the guide…) | `app.css` |
+| User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
+| CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
+| False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
+| The Translate tool's code (`renderTranslate`, `runTranslate`…) | `features/translate.js` |
+| Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
+| HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
+| Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
 | Everything else | `index.html` |
 
+**The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
+`docs/split-index.md`). `index.html` has no `<style>` block any more: it
+links `app.css`, then `home-polish.css`, which must stay after it so it
+still wins. Never put a `<style>` block back in `index.html`; a style
+change goes in `app.css` (or `home-polish.css` for Home).
+
+**Features are moving out of `index.html` into `features/*.js`** (phase 3
+of `docs/split-index.md`; Translate first, 2026-10-22). A feature's code
+lives in its file: edit it there, never paste a copy back into
+`index.html`. Those files load with plain `<script src>` before
+`index.html`'s script, so they may only declare things at the top level;
+a top-level line that calls into `index.html` would run before it exists.
+
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
-`--ic-*`) lives in the "Visual refinement" block at the end of `index.html`'s
-stylesheet; Home's half is the block of the same name at the end of
+`--ic-*`) lives in the "Visual refinement" block at the end of `app.css`; Home's half is the block of the same name at the end of
 `home-polish.css`. Use those values instead of new one-off sizes. The
 interface face is Inter; the serif is for quoted human speech only. The one
 exception is the Home hello banner (Jose's pick): the name in Parisienne, the
@@ -140,18 +161,20 @@ checks rules on `dock-mini`, `ov-open`, `gs-open` and `dm-open`.
 Jose's standing rule: a new feature, a changed behaviour, a new or moved or
 renamed button, a new message. Dr. Smiley answers "how do I…" from the
 guide's entries (`GUIDE_TOPICS`), so a stale answer becomes a wrong answer
-from him too; nine had drifted. In `index.html`:
-- `GUIDE_TOPICS`: add an answer for something new, rewrite any answer the
+from him too; nine had drifted.
+- `GUIDE_TOPICS` (the answers) and `GUIDE_SECTIONS` live in
+  `guide/topics.js` (plain data, loaded just before `index.html`'s script;
+  2026-10-21). Add an answer for something new, rewrite any answer the
   change makes wrong (search the guide for the old label or wording).
-- `GUIDE_STEPS` (drawn steps) and `GUIDE_COACH` (the "Show me" selectors):
+- In `index.html`: `GUIDE_STEPS` (drawn steps) and `GUIDE_COACH` (the "Show me" selectors):
   change them when the control they draw or point at changes.
 - `GUIDE_NEWS` ("New lately", three cards): a new feature gets a card,
   newest first; the oldest card drops off (its answer stays).
-- `GUIDE_SECTIONS` / `GUIDE_SECTION_PINS`: only when a new area of the app
+- `GUIDE_SECTIONS` (`guide/topics.js`) / `GUIDE_SECTION_PINS`: only when a new area of the app
   needs its own tile.
 A fix nobody can notice needs no guide change; say so in the commit
 message. Changes to `home-polish.*` or `pin-icons.js` still update the
-guide, which lives in `index.html`.
+guide (`guide/topics.js` and `index.html`).
 
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
 nothing for the glossary, terms, chat, Doctor Prep, study, quizzes, profile,
@@ -159,10 +182,10 @@ settings or the guide — those exist only inside `index.html`. Say so rather
 than inventing a place to put them.
 
 **Match specificity, do not escalate it.** `home-polish.css` is written with
-ID selectors (`#content.is-home .x`) and loads last, so it beats the inline
-CSS. Anything new added there at that strength will quietly disable
+ID selectors (`#content.is-home .x`) and loads last, so it beats
+`app.css`. Anything new added there at that strength will quietly disable
 `:active`, `.is-pressed` and `:focus-visible` states defined in
-`index.html`. Use the weakest selector that works, then check press, focus
+`app.css`. Use the weakest selector that works, then check press, focus
 and hover still fire — measure them, do not assume.
 
 ## Team access — the Hub is for the team only
@@ -261,8 +284,8 @@ https://interp-six.vercel.app before reporting success.
 
 ## Before pushing `index.html`
 
-It is one ~21,000-line, 1.1 MB file with all CSS and JS inline, used mostly on
-phones in a hospital. Do not push it unverified.
+It is one ~24,500-line, 1.4 MB file with all the app's JS inline (its CSS is
+`app.css`), used mostly on phones in a hospital. Do not push it unverified.
 
 **The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
 install && node run.cjs`. GitHub runs the same suites on every push
@@ -285,7 +308,7 @@ one-handed between hospital assignments. He directs the product and reviews
 from a phone: one step at a time, screenshots over description.
 
 **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
-(His standing rule.)
+(His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
 
 **Always say your recommendation** (Jose, 2026-10-19). Whenever there are
 options, a next step or a trade-off, name the one you would pick and why,

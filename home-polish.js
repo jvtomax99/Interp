@@ -1223,11 +1223,28 @@
     // Press and hold to pet him (index.html, smileyPettable): a giggle and
     // hearts, and that press doesn't open Ask.
     const petted=typeof window.smileyPettable==='function'?window.smileyPettable(wave,()=>{if(window.drSetMood)window.drSetMood('happy',180000);actNow('pet');}):()=>false;
+    // Double-tap his head to open the HUMC Brain (openHumcBrain, below).
+    // A tap on his head waits a moment longer before Ask opens, to see if a
+    // second one follows; a tap below his head (his badge) opens Ask as before.
+    // Keyboard and screen-reader clicks (no pointer, e.detail 0) open Ask.
+    let headTapAt=0, askTimer=0;
+    const onHead=e=>{
+      if(!e.detail)return false;
+      const r=(wave.querySelector('.home-wave-pin')||wave).getBoundingClientRect();
+      return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.top+r.height*HEAD_SHARE;
+    };
     wave.addEventListener('click',e=>{
       if(petted()){e.preventDefault();return;}
+      const head=onHead(e), now=performance.now();
+      if(head&&now-headTapAt<DOUBLE_TAP_MS&&typeof window.openHumcBrain==='function'){
+        clearTimeout(askTimer);headTapAt=0;wave.classList.remove('home-wave-tap');
+        window.openHumcBrain();return;
+      }
+      headTapAt=head?now:0;
       if(typeof window.openAskHub!=='function'){play();return;}
       wave.classList.add('home-wave-tap');
-      setTimeout(()=>{wave.classList.remove('home-wave-tap');window.openAskHub();},reduced.matches?0:200);
+      clearTimeout(askTimer);
+      askTimer=setTimeout(()=>{wave.classList.remove('home-wave-tap');window.openAskHub();},head&&typeof window.openHumcBrain==='function'?DOUBLE_TAP_MS:(reduced.matches?0:200));
     });
     lastGreetingWave={el:wave,play};
     // Wait for startup rebuilds to settle. If already playing, keep the
@@ -1246,6 +1263,10 @@
   // His mode changed (Lively / Focused / Still): Still stops his idle here,
   // leaving it starts it again; Lively and Focused are the engine's business.
   window.addEventListener('drmodechange',()=>{if(still()){idleStop();namePen.release();}else if(!idleRunning&&hasWavedHello&&lastGreetingWave&&lastGreetingWave.el.isConnected)startIdle(lastGreetingWave.el);});
+
+  /* Dr. Smiley's head is the top 62% of his 60px picture (his shoulders and
+     the Ask badge below it); two taps on it within DOUBLE_TAP_MS are a double-tap. */
+  const HEAD_SHARE = 0.62, DOUBLE_TAP_MS = 320;
 
   /* Reopening an installed PWA does not reload the page, so without this the
      wave fires once on the very first launch and never again -- which is not
@@ -1975,4 +1996,56 @@
     // Home may have painted before this file loaded, missing ih:home-paint.
     watchCardPetals(content.querySelector('.sm-widgets'));
   }
+
+  /* HUMC Brain: the app's own code drawn as a brain (brain/index.html; its
+     data, brain/data.json, from tests/tools/brain-data.cjs). A double-tap on
+     Dr. Smiley's head in the hello opens it full screen. It's an .overlay, so
+     Back, Escape and leaving Home close it like any panel (navigateBack,
+     closeAllOverlays in index.html); its X and Escape inside the frame ask
+     to close by message. The frame is dropped once closed, so its 3D stops
+     drawing and frees its memory. docs/features/humc-brain.md. */
+  /* Two separate brains in the same frame (Jose: kept apart, no link
+     between them). Dr. Smiley's head opens his: brain/index.html, how the Hub
+     is built. openHumcBrain('you') (the CoreCHI Practice tile) opens your
+     knowledge brain, brain/you.html, which asks for your own record by message
+     ('brain-want'; knowledgeBrainData in index.html) and asks the app to
+     practise a domain or open a term, which closes it first. */
+  let brainOv=null, brainFocus=null;   // brainFocus: terms the knowledge brain opens turned to (a Term Review session's)
+  const closeBrain=()=>{if(brainOv)brainOv.classList.remove('show');};
+  window.openHumcBrain=function(view,opts){
+    brainFocus=view==='you'&&opts&&opts.focus||null;
+    if(!brainOv){
+      brainOv=document.createElement('div');
+      brainOv.className='overlay brain-ov';
+      brainOv.setAttribute('role','dialog');brainOv.setAttribute('aria-modal','true');brainOv.setAttribute('aria-label','HUMC Brain');
+      document.body.appendChild(brainOv);
+      new MutationObserver(()=>{
+        if(brainOv.classList.contains('show'))return;
+        setTimeout(()=>{if(!brainOv.classList.contains('show')){const f=brainOv.querySelector('iframe');if(f)f.remove();}},300);
+      }).observe(brainOv,{attributes:true,attributeFilter:['class']});
+    }
+    const want=view==='you'?'./brain/you.html':'./brain/index.html', old=brainOv.querySelector('iframe');
+    if(old&&old.getAttribute('src')!==want)old.remove();
+    brainOv.setAttribute('aria-label',view==='you'?'Your knowledge brain':'HUMC Brain');
+    if(!brainOv.querySelector('iframe')){
+      const f=document.createElement('iframe');
+      f.src=want;f.title=view==='you'?'Your knowledge brain: your glossary terms, lit by what you know':'HUMC Brain: the app\u2019s code drawn as a brain';
+      brainOv.appendChild(f);
+      f.addEventListener('load',()=>{try{f.focus();}catch(e){}},{once:true});
+    }
+    brainOv.classList.add('show');
+  };
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin||!e.data)return;
+    const m=e.data, f=brainOv&&brainOv.querySelector('iframe');
+    if(!f||e.source!==f.contentWindow)return;
+    if(m.ih==='brain-close')closeBrain();
+    else if(m.ih==='brain-want'&&typeof window.knowledgeBrainData==='function'){
+      const focus=brainFocus;brainFocus=null;
+      window.knowledgeBrainData().then(data=>{try{e.source.postMessage({ih:'brain-data',data,focus},location.origin);}catch(err){}});
+    }
+    else if(m.ih==='brain-practice'&&typeof window.knowledgePractise==='function'){closeBrain();window.knowledgePractise(String(m.domain||''));}
+    else if(m.ih==='brain-term'&&typeof window.knowledgeOpenTerm==='function'){closeBrain();window.knowledgeOpenTerm(String(m.id||''));}
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&brainOv&&brainOv.classList.contains('show'))closeBrain();});
 })();
