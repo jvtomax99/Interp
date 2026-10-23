@@ -306,6 +306,21 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-23 S9 Home taps, part 1: the meter times taps (this PR; Jose's
+  pick: phone timing first). Lab (`tests/tools/tap-hold.cjs`, new: a 90 ms
+  finger, timed from the lift, UA=chromium 4x, 3 runs): lift -> click
+  starts 65-114 ms median by target (tile 78, quick tile 114, View all 65,
+  Chat tab 98); lift -> paint 256-496. Playwright's `tap()` presses and
+  lifts at once, so tap-trace's "wait" also counted the touchstart work a
+  real thumb hides. Traced (TRACE=1): one frame (~20 ms: the press look,
+  Layerize, Paint), then inside the click's own task ~45-58 ms before the
+  click runs: hit tests, the compatibility mouse events (mousedown/up/move,
+  `drInputEvent` on each), forced style. No single app handler; mostly the
+  browser's own tap work, which the lab can't size for an iPhone. So the
+  meter now times every tap of a run on the phone (wait and drawn, from the
+  lift; `frame-meter.md` "Taps") and lists the six slowest. Next: Jose's
+  runs say which taps are slow there, then fix those. Guide: the
+  smoothness answer explains Taps.
 - 2026-10-23 S8 Home scroll, round 3 (this PR; Jose's pick after asking
   what happened to the smoothness work). New lab tool
   `tests/tools/scroll-trace.cjs` (style passes while scrolling Home and

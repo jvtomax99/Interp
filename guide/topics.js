@@ -475,7 +475,7 @@ const GUIDE_TOPICS = [
     </ol>
     <p>If it says the phone's storage is full, or the browser won't let the Hub save, free some space or stop using a private window. Until then, new changes can't be kept offline.</p>` },
 
-  { id:'smoothness', section:'trouble', k:'smooth smoothness slow laggy lag choppy stutter jerky jank frames fps dropped meter measure speed performance hitch hitches', q:'The app feels choppy. Can I measure it?', a:`
+  { id:'smoothness', section:'trouble', k:'smooth smoothness slow laggy lag choppy stutter jerky jank frames fps dropped meter measure speed performance hitch hitches tap taps delay slow tap', q:'The app feels choppy. Can I measure it?', a:`
     <p>Yes, on your own phone. It counts the frames the app shows late.</p>
     <ol>
       <li>Open <b>More</b> and scroll to the very bottom.</li>
@@ -484,6 +484,7 @@ const GUIDE_TOPICS = [
       <li>Tap the timer to stop. The results open.</li>
     </ol>
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
+    <p>Last come your <b>Taps</b>: every tap in the run, timed from when your finger lifts. "Wait" is how long until the app starts on it, "drawn" how long until the next screen is on view. The six slowest are listed with where you were and what you tapped.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
   { id:'memory', section:'study', k:'memory trainer consecutive span notes note-taking listen render retention short-term memory long lines chunks flag line voice paulina samantha', q:'How does the Memory trainer work?', a:`
     <p>Practice for consecutive interpreting. The phone reads a line out loud, a provider in English or a patient in Spanish, with the words hidden. You say it in the other language, out loud, then check yourself.</p>
