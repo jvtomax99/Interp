@@ -789,7 +789,7 @@
       timer=0;
       if(!el||!el.isConnected){el=null;return;}
       if(window.fmNote)fmNote('heartline');   // the smoothness meter's list of what ran
-      if(busy())el.classList.remove('is-draw');
+      if(busy()||el.closest('.is-offscreen'))el.classList.remove('is-draw');
       else if(el.offsetParent||el.getBoundingClientRect().width){el.classList.remove('is-draw');void el.getBoundingClientRect();el.classList.add('is-draw');}
       schedule();
     }
@@ -1742,7 +1742,9 @@
 
     if(typeof IntersectionObserver !== 'undefined'){
       const io = new IntersectionObserver(entries => {
-        entries.forEach(e => petals.classList.toggle('is-offscreen', !e.isIntersecting));
+        // The greeting too: its loops (his breathing, the Ask ring, the
+        // heartline) rest while it's scrolled off (Home scroll, 2026-10-23).
+        entries.forEach(e => { petals.classList.toggle('is-offscreen', !e.isIntersecting); hero.classList.toggle('is-offscreen', !e.isIntersecting); });
         syncPetals();
       });
       io.observe(hero);

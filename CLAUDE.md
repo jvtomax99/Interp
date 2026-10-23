@@ -28,7 +28,7 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 22,465 | The whole app's markup and JS (1.3 MB), all inline |
+| `index.html` | 22,473 | The whole app's markup and JS (1.3 MB), all inline |
 | `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
 | `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
 | `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |

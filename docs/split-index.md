@@ -315,16 +315,16 @@ Census of `index.html`: 3 inline scripts, 115 sections, 1688 top-level names (`t
 | 103 | Dr. Smiley's memory screen | 20370-20419 | 4.0 | 6 | 6 / 14 | 3 / 3 |
 | 104 | Ask the Hub: corrections, feedback, sources | 20420-20573 | 7.6 | 12 | 16 / 23 | 5 / 15 |
 | 105 | Appointment mode | 20574-20693 | 7.3 | 17 | 11 / 15 | 10 / 14 |
-| 106 | Dr. Smiley reacts | 20694-20817 | 6.3 | 12 | 4 / 10 | 8 / 10 |
-| 107 | Daily Drill (the warm-up on Home) | 20818-21244 | 28 | 51 | 11 / 19 | 6 / 8 |
-| 108 | Dr. Smiley's career | 21245-21423 | 12 | 20 | 7 / 9 | 10 / 11 |
-| 109 | Appointment prep | 21424-21676 | 18 | 26 | 17 / 26 | 8 / 18 |
-| 110 | Dr. Smiley's news | 21677-21729 | 3.1 | 1 | 7 / 11 | 0 / 0 |
-| 111 | Dr. Smiley companion | 21730-21917 | 9.8 | 6 | 10 / 15 | 7 / 9 |
-| 112 | Dr. Smiley: the companion panel | 21918-22236 | 19 | 2 | 9 / 19 | 5 / 5 |
-| 113 | Init | 22237-22326 | 3.7 | 0 | 26 / 30 | 0 / 0 |
-| 114 | Phone chrome, dialogs and the on-screen keyboard | 22327-22428 | 4.5 | 0 | 0 / 0 | 0 / 0 |
-| 115 | Install / offline support | 22429-22462 | 1.5 | 0 | 1 / 1 | 0 / 0 |
+| 106 | Dr. Smiley reacts | 20694-20825 | 6.9 | 12 | 4 / 10 | 8 / 10 |
+| 107 | Daily Drill (the warm-up on Home) | 20826-21252 | 28 | 51 | 11 / 19 | 6 / 8 |
+| 108 | Dr. Smiley's career | 21253-21431 | 12 | 20 | 7 / 9 | 10 / 11 |
+| 109 | Appointment prep | 21432-21684 | 18 | 26 | 17 / 26 | 8 / 18 |
+| 110 | Dr. Smiley's news | 21685-21737 | 3.1 | 1 | 7 / 11 | 0 / 0 |
+| 111 | Dr. Smiley companion | 21738-21925 | 9.9 | 6 | 10 / 15 | 7 / 9 |
+| 112 | Dr. Smiley: the companion panel | 21926-22244 | 19 | 2 | 9 / 19 | 5 / 5 |
+| 113 | Init | 22245-22334 | 3.7 | 0 | 26 / 30 | 0 / 0 |
+| 114 | Phone chrome, dialogs and the on-screen keyboard | 22335-22436 | 4.5 | 0 | 0 / 0 | 0 / 0 |
+| 115 | Install / offline support | 22437-22470 | 1.5 | 0 | 1 / 1 | 0 / 0 |
 <!-- census:end -->
 
 ## What this costs and buys
