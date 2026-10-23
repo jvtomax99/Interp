@@ -145,6 +145,14 @@ spike at the corners); `set_face(gaze=(gx, gz))` turns the eyes (iris and
 dome) and the lids follow (up .09, lower .06 per unit). `tripo_lidtest.py`
 adds look up / down / left. Page `out/plan-lids.png` (review 4).
 
+Jose: "show me a preview of how it would look animated". `tripo_anim.py`:
+128 frames at 24 fps (neutral, a blink motivated by a small look, an
+anticipation dip, the warm smile, a hold, the laugh, a hold, the settle),
+brows 2 frames ahead, the mouth 2 behind, a 7% overshoot settling over 5
+frames, head still; `out/tripo-face-anim.mp4` (front + three-quarter),
+`out/plan/anim-sheet.png`. Sent, waiting on Jose. Known: a shut-smooth
+moment at the start of the laugh before the arc line shows.
+
 ## Rebuild (about 15 minutes)
 
 ```
