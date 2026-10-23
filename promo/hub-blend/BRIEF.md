@@ -264,6 +264,26 @@ is cut (no narrated line for it in v11) and so is the walk-in (Jose, 2026-10-22)
 on the hook, like v11. 45 s, the same length and clock as v11. If a music-only file turns up, the
 walk-in and the 3D Body can come back (`git log` has both).
 
+## The last additions and the final cut (2026-10-22/23)
+
+Jose: "almost perfect", then four prompts (`PROMPTS-next.md`), script and pacing unchanged:
+- The logo shot (8-10 s) in 3D after his logo picture (`src/remake/logo3d.js`, Fredoka,
+  his pick from three): glossy "Interpreter" over a big blue "Hub", the bubbles, the
+  icon's tiles; over his photo of the main entrance, a little frosted (his pick from
+  four sets: white, navy, HMH mark, campus).
+- "The Doctor Says:" as a big 3D stack, "The Doctor" over a cyan "Says:" (his pick from
+  three; `?says=` keeps the others).
+- The 3D Body comes apart in the Glossary shot and turns into its Heart card (`hero.js`).
+- CoreCHI opens on his cherry-tree photo (`src/remake/doorway.js`), two depths, then the
+  card and the campus; Dr. Smiley stands right in that shot, clear of the HMH sign.
+- On "Ask Dr. Smiley." his real HUMC Brain, captured from the app's page
+  (`tools/capture-brain.cjs`), lifts out of his head as a hologram (`hologram.js`).
+Checks on the final: captions on v11's clock 10/10 (`tools/check-timing.cjs`), Dr.
+Smiley over a proof 0 frames, no dark phone screen, captions 11.5:1 or better.
+In the app: `media/hub-promo.mp4` (720x1280, ~8 MB, two-pass), `hub-promo.jpg` and
+`hub-promo-thumb.webp` from 9.44 s (the logo). Any photo with the HMH sign or mark:
+HMH marketing's OK before posting publicly.
+
 ## Practical
 
 - No GPU here: Three.js renders in software. The first hub-blend (31 s) took
