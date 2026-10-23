@@ -132,9 +132,25 @@ def oval(co0, X, ZU, ZL, front, a=.02, b=.012):
     dz *= edge
     wall = front * (1 - smooth((y + .105) / .022))
     co = co0.copy()
-    co[:, 0] += dx * reach * wall
+    co[:, 0] += dx * reach * wall      # the inside follows the lips (left behind, it poked out past them)
     co[:, 2] += dz * wall
     co[:, 1] -= .006 * (1 - np.abs(v)) * inside * reach * wall      # pucker
+    arc = os.path.join(HERE, 'in', 'teeth-arc.npz')
+    if os.path.exists(arc):
+        # the real teeth stay with his skull while the lips gather: the lips and cheeks
+        # moving in over them come forward to stay at least 3.5 mm in front (they slid in
+        # at their old depth and the side teeth poked out through his cheeks) ...
+        t = np.load(arc); fy, bz = np.poly1d(t['fy']), np.poly1d(t['bz'])
+        nx = co[:, 0]
+        near = (co[:, 2] > bz(nx) - .012) & (co[:, 2] < bz(nx) + .024) & (np.abs(nx - xm) < hw + .01) & (co0[:, 1] < -.1)
+        lim = fy(nx) - .0035
+        ahead = np.minimum(co[:, 1], lim)
+        k = reach * wall * near
+        co[:, 1] = co[:, 1] * (1 - k) + ahead * k
+        # ... and the old painted teeth sheet tucks back out of sight
+        from tripo_mouthtest import teeth_vertices
+        tv = teeth_vertices(bpy.data.objects['Mesh_0'])
+        co[tv, 1] += .014
     return co
 
 

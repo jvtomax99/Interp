@@ -100,3 +100,20 @@ board('Laugh and surprised, redone', ['Your drawing (left), his mouth close up, 
      'still shows a faint rim; the \u201coh\u201d leaves two soft folds beside the nose. The teeth rebuild fixes the first.',
      [], '', False),
 ], 'plan-laugh-surprised.png')
+
+
+import numpy as _np2
+def _rows(path, ks):
+    sh = Image.open(path).convert('RGB'); hh = sh.height // 7
+    return Image.fromarray(_np2.vstack([_np2.asarray(sh.crop((0, k * hh, sh.width, (k + 1) * hh))) for k in ks]))
+board('Real teeth', ['His painted tooth strip replaced by real 3D teeth.'], [
+    ('1', 'ME', 'Before: his teeth were a white sheet 1\u20133 mm thin painted inside his smile; whenever his mouth opened '
+     'wider you saw its edge from below as a streaky band.', [fit(_rows('/tmp/claude-0/fp/mouths-before.png', [1, 2, 3]), 1000, 900)],
+     'before: smile, laugh, surprised', False),
+    ('2', 'ME', 'Now: a row of ten rounded teeth (the middle ones a little bigger, fine gaps between) with a pink gum line, '
+     'fixed to his skull like real upper teeth; the old sheet is painted into the dark of his mouth. In the \u201coh\u201d his '
+     'lips come forward over the teeth as real lips do.', [fit(Image.open(O('plan/teeth-after.png')), 1000, 420),
+     fit(_rows(O('plan/mouths.png'), [1, 2, 3]), 1000, 900)], 'after', True),
+    ('3', 'NOTE', 'Not yet: no lower teeth (your drawings show none either); the tongue crumples a little in the \u201coh\u201d; '
+     'the \u201coh\u201d hides the teeth where your drawing shows a sliver.', [], '', False),
+], 'plan-teeth.png')

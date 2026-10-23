@@ -586,10 +586,9 @@ def glue_liner(eye, side, rx, rz):
 if __name__ == '__main__':
     import shutil
     src = os.path.join(HERE, 'in', 'tripo-face.blend')
-    before = os.path.join(HERE, 'in', 'tripo-face-before-eyes2.blend')
-    if not os.path.exists(before):
-        shutil.copy(src, before)
-    bpy.ops.wm.open_mainfile(filepath=before)        # always from the eyes as they were
+    # in place: each part here rebuilds itself, so a rerun is safe (starting from a saved
+    # copy instead undid the mouth shapes made since that copy)
+    bpy.ops.wm.open_mainfile(filepath=src)
     paint_out_liner([bpy.data.objects['Eye.L'], bpy.data.objects['Eye.R']])
     # the lid in his skin's own colour right above the eye (a shade darker read as a disc
     # round each eye); the new lid has no 'edge' attribute, so the ramp's first stop is it

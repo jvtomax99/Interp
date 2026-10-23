@@ -169,6 +169,16 @@ worried (flat, not a frown).
    folds, don't use). Shown `out/plan-laugh-surprised.png`, waiting.
    Left: teeth streak (real teeth next), faint shut-eye rim, soft folds by
    the nose in the "oh".
+   Teeth (2026-10-23, Jose "let's continue"): `tripo_teeth.py` finds the
+   painted band in his original colours (`in/hair_tex.png`), paints it into
+   the mouth's dark red (`in/tex-noteeth.png`), builds 10 rounded teeth +
+   gum on the head bone, saves the arc (`in/teeth-arc.npz`) for `oval()`,
+   which keeps puckered lips 3.5 mm in front of the teeth and tucks the old
+   sheet back. `tripo_eyes2.py` now edits in place (it used to restart
+   from `tripo-face-before-eyes2.blend`, which undid newer mouth keys).
+   Build order: tripo_face, tripo_mouths, tripo_muscles, tripo_eyes2,
+   tripo_teeth, then tripo_mouths + tripo_muscles again (the pucker needs
+   the arc). Shown `out/plan-teeth.png`, waiting.
 2. Then the expression sheet (brows + eyes + mouth + cheeks), six poses,
    a 360-degree turn: stop for his OK.
 3. Then the animation (R2), as a visual plan first.
