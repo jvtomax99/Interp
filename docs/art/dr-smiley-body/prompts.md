@@ -100,6 +100,8 @@ edge under each sleeve relit from the coat beside it); the arms are four
 pieces, upper arm and forearm each side, with round caps at the shoulder
 and elbow, drawn behind the body so the shoulder cap covers the joint.
 `preview-rig.png`: rest, wave, cheer, fist pump, think, shrug, all from
-these pieces. Wave, cheer and shrug read well; the fist pump and think
+these pieces. The deployed set is `drsmiley/body/` (with the legs split
+and the head on the base grid, by `layers/export.py`), driven by
+`drsmiley/body.js` and shown in `drsmiley/body.html`. Wave, cheer and shrug read well; the fist pump and think
 poses still need drawn hands (a cutout hand stays an open palm), which
 is what the pose prompts above are for. Not wired into the app yet.

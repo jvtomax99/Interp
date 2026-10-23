@@ -26,6 +26,7 @@ const SUITES = [
   ['smiley-gestures.cjs', 'Dr. Smiley: the five performances'],
   ['smiley-squash.cjs',   'Dr. Smiley: squash and stretch on the spring, Lively only'],
   ['smiley-quiz.cjs',     'Dr. Smiley in a quiz: bounce, wince, streaks, in the dock'],
+  ['body-rig.cjs',        'Dr. Smiley full-length: the pieces compose, performances within limits and back to rest, Still, the walk, the viewer fits a phone'],
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
   ['humc-brain.cjs',      'Two brains: his head opens the code brain, the Practice tile your knowledge brain (lit by your record; Practise, Open the card), never linked; one tap still opens Ask; Back and X close it'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],

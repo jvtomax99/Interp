@@ -172,3 +172,61 @@ away. `renderContent` now queues one `smileyRider.sync()` per frame.
 Suite: `tests/suites/smiley-quiz.cjs`. Upgrades wait on Jose's art: head
 and shoulders as separate layers, two arm poses, happy eyes-closed and
 wince faces.
+
+## Full body: the cutout rig (2026-10-23)
+
+Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
+into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
+cloud session has no image generator; the drawn poses from
+`docs/art/dr-smiley-body/prompts.md` (a real fist, a finger to the chin, a
+clipboard) come later, when Jose runs them. **Nothing in the app shows him
+full-length yet** (Jose, 2026-10-23: "fully animated first, decide where
+later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
+`tests/suites/body-rig.cjs` checks that stays so until the decision.
+
+- **The pieces** (`drsmiley/body/`, in the picture's own pixels, 1070 x 1470;
+  the pivots in `rig.json` and `DR_BODY` in `drsmiley/body.js`): his head
+  is the app's own (`head.webp`: `base.webp` above the chin, its sliver of
+  coat removed, a skin neck tube behind, on the same 480 x 600 grid, so the
+  face strip, the brows and the rank hats fit it unchanged; placed at scale
+  1.0881); the torso and legs with no arms (`body.webp`, the floor shadow
+  keyed out, the coat's edge under each sleeve relit from the coat beside
+  it); each arm as an upper arm and a forearm with round caps at the
+  shoulder and elbow; each leg, its top repeated up under the coat. Drawn
+  back to front: legs, arms, head, body, so the coat covers every joint and
+  the collar covers the neck. At rest they compose back into the picture
+  (mean difference under the chin 7.6 of 255; the suite checks under 12).
+- **How he moves** (`drBody(svg)`): the same shape as his face's acting. A
+  performance is a list of beats `[ms, pose patch, ease]`, each eased from
+  the pose the one before reached (from the live pose for the first, so an
+  interruption blends, never snaps), built fresh each play with the side,
+  sizes and timing varied (`drBodyRand`, `drBodySeed(n)` for the checks).
+  Joints: the root (a lift `y`, a `lean` and the squash `sx`/`sy`, all about
+  his feet), the head (a turn about the neck, a `lift`), each arm's raise
+  (`aL`/`aR`: 0 hanging, 90 out, 170 up) and elbow bend (`fL`/`fR`), each
+  leg's swing and lift, the face frame and the brow pose. Limits
+  (`DR_BODY.limit`) clamp what is drawn, so a spring past the mark never
+  shows a cut edge. Easings: `out`, `in`, `inOut`, `linear`, `snap` (an
+  anticipation's release) and `spring` (about 7% past, then settled:
+  follow-through). Only transforms move; his box never changes.
+- **Performances** (`DR_BODY_PERF`): greet (a dip, then a wave beside his
+  head with the near arm, brows flashed, three wags), ack (a nod with an
+  open hand), think (a hand to the chin, eyes up away from it, the "aha"),
+  cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
+  wink (his left eye, a "hey you" of the right hand), shrug (palms up,
+  doubtful), bounce and wince (the quiz pair), walk (`steps` paces, legs
+  alternating, arms against them; returns `dx`, how far he went). Focused
+  plays the same beats smaller (about 0.55) with no jump; Still holds the
+  one pose in `still` for `stillMs`; reduced motion is Still.
+- **Rest life** (`drBodyIdle`): breathing is a CSS animation on
+  `.db-breath` (the compositor; `transform-box: fill-box`, about the hips;
+  none in Still), blinks every few seconds, now and then a shift of weight
+  or a glance, only while seen and nothing else plays. No frame loop runs
+  at rest.
+- **Squash and stretch**: the cheer and the bounce, 4% and 3.5% of his
+  height, width 1/sqrt(height) as E3; never more (the suite checks).
+- **Known limits of the cut**: the hands are open palms whatever the pose
+  (the fist pump and the chin rest read as "hmm" and "hey", not a fist or a
+  finger); the arms turn only in the picture's plane; the legs are one piece
+  each, so a walk is a stylised bounce-walk from the front. The drawn poses
+  replace those when they come.

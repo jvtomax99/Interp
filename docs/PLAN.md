@@ -314,6 +314,19 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-23 Dr. Smiley full body, the cutout rig (this PR; Jose: "fully
+  animated first, decide where later"). Jose sent his standing picture;
+  no image generator runs in a cloud session, so it was cut into layers by
+  code (`docs/art/dr-smiley-body/layers/build.py`): the app's own head on
+  the base grid, the armless body, upper arms, forearms, legs
+  (`drsmiley/body/`). `drsmiley/body.js`: the rig as SVG, a joint engine
+  after his face's acting (beats, easings with anticipation and
+  follow-through, Lively/Focused/Still, limits), nine performances and rest
+  life. The viewer `drsmiley/body.html` (not linked from the app) is where
+  Jose reviews him. Suite `body-rig.cjs`. The drawn poses from
+  `docs/art/dr-smiley-body/prompts.md` (a real fist, a finger to the chin,
+  a clipboard) replace the open-palm cutouts when Jose runs them. Guide:
+  nothing visible in the app changed, so nothing to update.
 - 2026-10-23 S9 Home taps, part 1: the meter times taps (this PR; Jose's
   pick: phone timing first). Lab (`tests/tools/tap-hold.cjs`, new: a 90 ms
   finger, timed from the lift, UA=chromium 4x, 3 runs): lift -> click

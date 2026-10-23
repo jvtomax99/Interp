@@ -38,6 +38,9 @@ between assignments.
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 30 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face; the last four, surprised, sad, worried and doubt, from `docs/art/dr-smiley-faces/`), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `index.html`. On Home, `home-polish.js` draws his lanyard as live cords over him |
+| `drsmiley/body/` | 9 files | Dr. Smiley full-length, cut by code from Jose's standing picture (`docs/art/dr-smiley-body/`): the app's own head on the base grid, the armless body, four arm pieces, two legs, `rig.json` (pivots). Not shown in the app yet (`docs/features/dr-smiley.md`, "Full body") |
+| `drsmiley/body.js` | — | The full-body rig: `drBodyArt()` (the layers as an SVG), `drBody()` (the joint engine), `DR_BODY_PERF` (greet, ack, think, cheer, wink, shrug, bounce, wince, walk), `drBodyIdle` |
+| `drsmiley/body.html` | — | The viewer for his full-body acting, not linked from the app; Jose reviews it at `/drsmiley/body.html` before deciding where he stands full-length |
 | `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
 | `media/` | — | The 45-second video (`hub-promo.mp4`, 720p; the 3D remake from `promo/hub-blend/` since 2026-10-23) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
@@ -213,7 +216,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Regions, North and South: chat channels, directory by region, `ih_region`, `HMH_LOCATIONS` regions: `regions.md`
 - The doctor's page (`renderDoctorDirDetail`, `SPECIALTY_PINS`, tabs, glass bar): `doctor-page.md`
 - Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
-- Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
+- Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`), and his full body (`drsmiley/body.js`, `DR_BODY_PERF`, the viewer `drsmiley/body.html`): `dr-smiley.md`
 - Notifications that reach a closed phone, the Notifications screen, owners' Send to the team (`pushTurnOn`, `pushSync`, `api/push.js`, `sw.js` push): `notifications.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
 - The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
