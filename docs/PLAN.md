@@ -302,9 +302,9 @@ then read the log; it names the suite and the check.
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
-  Phase 3 (features): Translate #126, 3D Body #127, live; Looking a term
-  up, this PR. Next leaves: Voice and mic check, the campus, Dr. Smiley's
-  performances (`docs/split-index.md`).
+  Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
+  #129, live; Voice and mic check, this PR. Next leaves: Dr. Smiley's
+  performances, the campus (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -314,7 +314,13 @@ then read the log; it names the suite and the check.
 
 ## Done
 
-- 2026-10-23 S9 Home taps, part 1: the meter times taps (this PR; Jose's
+- 2026-10-23 Split `index.html`, phase 3, Voice and mic check (this PR):
+  `features/voice-check.js`, verbatim, declarations only (`audioMode`,
+  which the memory trainer calls, comes with it). Proof: tokens identical
+  when put back; the More button, the open sheet, its report and closing
+  identical in the browser, phone and computer, globals unchanged.
+  Looking a term up (#129) live as b1023.1250.
+- 2026-10-23 S9 Home taps, part 1: the meter times taps (#132; Jose's
   pick: phone timing first). Lab (`tests/tools/tap-hold.cjs`, new: a 90 ms
   finger, timed from the lift, UA=chromium 4x, 3 runs): lift -> click
   starts 65-114 ms median by target (tile 78, quick tile 114, View all 65,
@@ -329,7 +335,7 @@ then read the log; it names the suite and the check.
   lift; `frame-meter.md` "Taps") and lists the six slowest. Next: Jose's
   runs say which taps are slow there, then fix those. Guide: the
   smoothness answer explains Taps.
-- 2026-10-23 S8 Home scroll, round 3 (this PR; Jose's pick after asking
+- 2026-10-23 S8 Home scroll, round 3 (#130; Jose's pick after asking
   what happened to the smoothness work). New lab tool
   `tests/tools/scroll-trace.cjs` (style passes while scrolling Home and
   what set them off): 1,736 style passes in 19 s, median 9 elements each,
@@ -348,7 +354,7 @@ then read the log; it names the suite and the check.
   every animation paused, style -22%. Lab only; Jose's phone decides
   (3 runs before on b1023.1111, 3 after). smiley-gaze and home-rest check
   both places. Guide: nothing visible changed.
-- 2026-10-23 Split `index.html`, phase 3, Looking a term up (this PR):
+- 2026-10-23 Split `index.html`, phase 3, Looking a term up (#129):
   `features/term-lookup.js`, verbatim, declarations only. Proof: tokens
   identical when put back; a lookup, its results, closing and the cached
   reopen identical in the browser. 3D Body (#127) live as b1023.1056
