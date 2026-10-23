@@ -18,7 +18,7 @@ const R = L.ROOT, OUT = process.argv[2];
   const box = await page.evaluate(() => { const r = document.querySelector('svg.db').getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; });
   const shots = [];
   // [name, seed, times in ms after the start]
-  for(const [name, seed, times] of [['greet', 3, [0, 420, 700, 1000, 1500]], ['cheer', 3, [200, 480, 700, 1000, 1700]], ['think', 2, [300, 700, 1400, 2100, 2500]], ['shrug', 3, [180, 450, 900, 1300, 1700]]]){
+  for(const [name, seed, times] of [['greet', 3, [0, 420, 700, 1000, 1500]], ['cheer', 3, [200, 480, 700, 1000, 1700]], ['think', 2, [300, 700, 1400, 2100, 2500]], ['shrug', 3, [180, 450, 900, 1300, 1700]], ['bounce', 3, [120, 300, 450, 700, 1100]]]){
     for(const t of times){
       await page.evaluate(([n, s]) => { body.stop(); body.rest(); drBodySeed(s); body.perform(n); drBodySeed(null); window.__t0 = performance.now(); }, [name, seed]);
       await page.waitForTimeout(t);

@@ -200,8 +200,17 @@ takes over there, holds or wags, hands back before the arm comes down.
 drawn fists (one mirrored) from the top of the jump, `think` holds the
 drawn finger on the chin, `shrug` the drawn palms; `ack`, `wink`, `bounce`,
 `wince` and the walk stay on the cutout arms (an open hand is right for
-them). Still shows the drawn pose held. Not run yet: `crouch.png` and
-`jump.png` (the quiz pair's legs), `thumbs-up`, `point`, `clipboard`,
+them). Still shows the drawn pose held. **The leg plates** (the same
+evening): `crouch.png` (knees bent, feet in place) and `jump.png` (in the
+air, feet tucked) came back on the same grid (4 px off); `cutframes.py`
+cuts both legs whole below the hip line (the floor shadow out, the top
+rows repeated up under the coat, the scrub blue shifted to the master's,
+which ChatGPT had rendered brighter) as `pose-crouch` and `pose-jump`,
+one copy each (`legs: true`, no mirror), drawn right after the cutout legs.
+`frameLegs` names the one shown; both cutout legs hide meanwhile. `cheer`
+and `bounce` go crouch, then jump at the top of the hop (Focused keeps
+the crouch, never tucked feet on the ground), crouch again at the landing
+squash, then back. Not run yet: `thumbs-up`, `point`, `clipboard`,
 `body-noarms` and the rest of the table.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
@@ -258,5 +267,5 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   gestures with a fist, a finger or upturned palms use the drawn frames
   above and the cutout arms only for the way there and back; the arms turn
   only in the picture's plane; the legs are one piece each, so a walk is a
-  stylised bounce-walk from the front (the drawn `crouch` and `jump` plates
-  will give the quiz bounce real knees).
+  stylised bounce-walk from the front; the quiz bounce and the cheer use
+  the drawn `crouch` and `jump` plates for real knees.

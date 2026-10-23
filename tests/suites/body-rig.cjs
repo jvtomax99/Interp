@@ -44,14 +44,16 @@ const SAMPLE = () => {
       drawn.arm = Math.max(drawn.arm, deg(b.el.armL), deg(b.el.armR)); drawn.fore = Math.max(drawn.fore, deg(b.el.foreL), deg(b.el.foreR));
       drawn.head = Math.max(drawn.head, deg(b.el.head)); drawn.leg = Math.max(drawn.leg, deg(b.el.legL), deg(b.el.legR));
       for(const g of b.el.poses) if(g.style.opacity === '1'){ frameEverShown = true; frames_seen.add(g.dataset.pose + '-' + g.dataset.side);
-        for(const a of DR_BODY.pose[g.dataset.pose].arms){ const side = g.dataset.side === 'l' ? a : (a === 'L' ? 'R' : 'L'); if(b.el['arm' + side].style.opacity !== '0') armHiddenWhileFrame = false; } }
+        const P = DR_BODY.pose[g.dataset.pose];
+        if(P.legs){ if(b.el.legL.style.opacity !== '0' || b.el.legR.style.opacity !== '0') armHiddenWhileFrame = false; continue; }
+        for(const a of P.arms){ const side = g.dataset.side === 'l' ? a : (a === 'L' ? 'R' : 'L'); if(b.el['arm' + side].style.opacity !== '0') armHiddenWhileFrame = false; } }
       const bx = b.el.root.ownerSVGElement.getBoundingClientRect();
       if(Math.abs(bx.x - box0.x) > .5 || Math.abs(bx.width - box0.width) > .5) layoutMoved = true;
       if(!done && performance.now() - t0 < 8000) requestAnimationFrame(tick);
       else {
         const end = Object.assign({}, b.pose);
         const atRest = keys.every(k => Math.abs(end[k] - (k === 'sx' || k === 'sy' ? 1 : 0)) < 1e-6) && end.face === 'rest' && end.brow === 'rest';
-        const framesClear = b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.armR.style.opacity === '1';
+        const framesClear = b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.armR.style.opacity === '1' && b.el.legL.style.opacity === '1' && b.el.legR.style.opacity === '1';
         res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end, framesSeen: [...frames_seen], armHiddenWhileFrame, frameEverShown, framesClear });
       }
     };
@@ -88,13 +90,14 @@ const SAMPLE = () => {
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
   const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp'];
-  ok(layers.length === 19 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
-     && poseFiles.every(f => layers.filter(x => x === f).length === 2),
-     'nineteen layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, and the four drawn poses twice each (as drawn and mirrored) ' + layers.join(' '));
+  ok(layers.length === 21 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+     && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
+     'twenty-one layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the four drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
-     && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body'),
-     'drawn back to front: legs, then arms, the drawn poses that come from under the coat, the head, the body, then the poses over the coat ' + order.join(' | '));
+     && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
+     && order.indexOf('db-poses-legs') > order.indexOf('db-leg db-leg-r') && order.indexOf('db-poses-legs') < order.indexOf('db-breath'),
+     'drawn back to front: legs and the leg plates, then arms, the drawn poses that come from under the coat, the head, the body, then the poses over the coat ' + order.join(' | '));
   const hidden = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-pose')].every(g => getComputedStyle(g).opacity === '0') && getComputedStyle(body.el.armL).opacity === '1');
   ok(hidden, 'at rest every drawn pose is hidden and the cutout arms show');
   await P.waitForTimeout(400);
@@ -122,14 +125,15 @@ const SAMPLE = () => {
     ok(r.drawn.arm <= 175 && r.drawn.fore <= 135 && r.drawn.head <= 9 && r.drawn.leg <= 35, `${n}: every joint drawn inside its limit ` + JSON.stringify(r.drawn));
     ok(!r.layoutMoved, `${n}: his box never changes (transforms only)`);
     ok(r.max.sy <= .041 && r.max.sx <= .021, `${n}: squash and stretch at most 4% ` + JSON.stringify([r.max.sx, r.max.sy]));
-    ok(r.armHiddenWhileFrame && r.framesClear, `${n}: while a drawn pose shows, the cutout arm it replaces is hidden; at the end every drawn pose is hidden again`);
+    ok(r.armHiddenWhileFrame && r.framesClear, `${n}: while a drawn pose shows, the cutout arm or legs it replaces are hidden; at the end every drawn pose is hidden again`);
   }
   const seen = n => lively[n].framesSeen.join(' ');
   ok(/wave-[lr]/.test(seen('greet')), 'greet: the drawn wave takes over at the top ' + seen('greet'));
   ok(lively.cheer.framesSeen.includes('fist-pump-l') && lively.cheer.framesSeen.includes('fist-pump-r'), 'cheer: two drawn fists, one mirrored ' + seen('cheer'));
   ok(/think-[lr]/.test(seen('think')), 'think: the drawn finger on the chin ' + seen('think'));
   ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));
-  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.bounce.frameEverShown, 'ack, bounce and the walk use the cutout arms only');
+  ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
+  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.bounce.framesSeen.some(f => !/^(crouch|jump)-/.test(f)), 'ack and the walk use the cutout pieces only; bounce swaps only its legs');
   ok(lively.greet.max.aL >= 95 || lively.greet.max.aR >= 95, 'greet: an arm comes up to where the drawn wave is');
   ok(lively.cheer.max.aL >= 105 && lively.cheer.max.aR >= 105 && lively.cheer.max.y > 40, 'cheer: both arms up to the drawn fists and a jump');
   ok(lively.think.max.fL > 100 || lively.think.max.fR > 100, 'think: a hand comes to the chin');
@@ -149,7 +153,7 @@ const SAMPLE = () => {
   // Focused: the same acting, smaller. Still: one pose, nothing moves.
   await P.click('[data-mode="focused"]');
   const fc = await P.evaluate(() => window.__play('cheer'));
-  ok(fc.atRest && fc.max.sy < lively.cheer.max.sy * .7 && fc.max.y === 0 && fc.framesSeen.includes('fist-pump-l'), 'Focused cheer: smaller squash, no jump, the drawn fists still, back to rest ' + JSON.stringify([fc.max.sy, lively.cheer.max.sy, fc.max.y]));
+  ok(fc.atRest && fc.max.sy < lively.cheer.max.sy * .7 && fc.max.y === 0 && fc.framesSeen.includes('fist-pump-l') && fc.framesSeen.includes('crouch-l') && !fc.framesSeen.includes('jump-l'), 'Focused cheer: smaller squash, no jump (the crouch plate, never the tucked feet), the drawn fists still, back to rest ' + JSON.stringify([fc.max.sy, lively.cheer.max.sy, fc.max.y, fc.framesSeen]));
   await P.click('[data-mode="still"]');
   const st = await P.evaluate(async () => {
     const b = window.body; b.rest();

@@ -7,8 +7,10 @@ animated the way his face is, drawn pictures of the same him in each pose.
 came back (same size, 0 to 4 px off, colours within a few points) and are
 cut into the rig (`layers/cutframes.py`, `drsmiley/body/pose-*.webp`;
 `preview-frames.png` shows them on the body, `preview-acting.png` mid
-performance). **Next to run:** `crouch.png` and `jump.png` (the quiz
-bounce's knees), then `thumbs-up.png`, `point.png`, `clipboard.png`.
+performance). `crouch.png` and `jump.png` came next (made from the shrug
+picture, so their arms are out; only the legs are cut) and are in as the
+leg plates of the cheer and the quiz bounce. **Next to run:** `thumbs-up.png`,
+`point.png`, `clipboard.png`.
 
 Same workflow as `docs/art/dr-smiley-faces/prompts.md`: an image tool that
 edits a picture you upload (ChatGPT image editing or similar), one change

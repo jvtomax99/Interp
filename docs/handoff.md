@@ -49,12 +49,14 @@ cut them into `drsmiley/body/pose-*.webp` (content changes only; coat over
 coat left to `body.webp`), `drsmiley/body.js` shows each as drawn and
 mirrored (`DR_BODY.pose`, `frameL`/`frameR`/`frot` in the pose, `setFrames`),
 greet/cheer/think/shrug swap them in at the top of the gesture;
-`tests/suites/body-rig.cjs` checks it (78 checks). The acting sheet:
+`tests/suites/body-rig.cjs` checks it. Then `crouch.png` and `jump.png`
+came and are in as leg plates (`legs: true` in `DR_BODY.pose`, `frameLegs`
+in the pose, both cutout legs hidden meanwhile; the scrub blue shifted to
+the master's in `cutframes.py`) for `cheer` and `bounce`. The acting sheet:
 `layers/sheet.cjs` run from `tests/` (frames to a folder), tiled into
-`preview-acting.png`. Sent to Jose. Next from him: `crouch.png` and
-`jump.png`; cut them the same way as leg frames (a `legs` entry in
-`DR_BODY.pose`, hiding both cutout legs) for `bounce`/`cheer`. The app
-still shows nothing full-length.
+`preview-acting.png`. Sent to Jose. Next from him: thumbs up, point,
+clipboard (arm frames, cut like the first four). The app still shows
+nothing full-length.
 
 ## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 

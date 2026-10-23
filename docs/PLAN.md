@@ -73,9 +73,9 @@ under way, then what waits on Jose, then small leftovers.
    (PR #135): wave, fist pump, think and shrug from ChatGPT, measured
    against the master, cut as frames (`layers/cutframes.py`,
    `drsmiley/body/pose-*.webp`), swapped in by the rig at the top of
-   greet, cheer, think and shrug, mirrored for the other side. Next from
-   Jose (`docs/art/dr-smiley-body/prompts.md`): `crouch.png` and
-   `jump.png` for the quiz bounce's knees, then thumbs up, point,
+   greet, cheer, think and shrug, mirrored for the other side; then crouch
+   and jump as leg plates for the cheer and the quiz bounce. Next from
+   Jose (`docs/art/dr-smiley-body/prompts.md`): thumbs up, point,
    clipboard. Then where he stands full-length (his call, still open).
    Nothing in the app shows him full-length until then.
 2. **Split `index.html`, phase 3: features to their own files**, one per

@@ -48,6 +48,9 @@ const DR_BODY = {
     'fist-pump': { box: [121, 361, 276, 348], arms: ['L'], layer: 'back', at: { a: 110, f: 100 }, pivot: [353, 630] },
     think:       { box: [352, 497, 274, 445], arms: ['L', 'R'], layer: 'front', at: { a: 18, f: 128, a2: 10, f2: 60 }, pivot: [353, 630] },
     shrug:       { box: [95, 568, 892, 398], arms: ['L', 'R'], layer: 'back', at: { a: 28, f: 95, a2: 28, f2: 95 }, pivot: [556, 630] },
+    // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
+    crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
+    jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
   },
 };
 /* The face frames, in the order of drsmiley/face.webp (the same list as
@@ -79,11 +82,12 @@ function drBodyArt(cls, root){
   const poses = layer => Object.keys(B.pose).filter(k => B.pose[k].layer === layer).map(k => {
     const [x, y, w, h] = B.pose[k].box, im = `<image href="${root}body/pose-${k}.webp" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
     return `<g class="db-pose db-pose-${k}-l" data-pose="${k}" data-side="l" style="opacity:0">${im}</g>`
-         + `<g class="db-pose db-pose-${k}-r" data-pose="${k}" data-side="r" style="opacity:0">${im}</g>`;
+         + (B.pose[k].legs ? '' : `<g class="db-pose db-pose-${k}-r" data-pose="${k}" data-side="r" style="opacity:0">${im}</g>`);
   }).join('');
   return `<svg class="db${cls ? ' ' + cls : ''}" viewBox="0 0 ${B.w} ${B.h}" aria-hidden="true" focusable="false" style="overflow:visible">`
     + '<g class="db-root">'
     +   `<g class="db-leg db-leg-l">${img('leg-l', 'db-leg-art')}</g><g class="db-leg db-leg-r">${img('leg-r', 'db-leg-art')}</g>`
+    +   `<g class="db-poses-legs">${poses('legs')}</g>`
     +   '<g class="db-breath">'
     +     `<g class="db-arm db-arm-l">${img('arm-upper-l', 'db-upper')}<g class="db-fore db-fore-l">${img('arm-fore-l', 'db-fore-art')}</g></g>`
     +     `<g class="db-arm db-arm-r">${img('arm-upper-r', 'db-upper')}<g class="db-fore db-fore-r">${img('arm-fore-r', 'db-fore-art')}</g></g>`
@@ -100,8 +104,9 @@ function drBodyArt(cls, root){
    1 for a plain scale. `face` and `brow` are names; so are `frameL` and
    `frameR`, the drawn pose shown as drawn (L, on the picture's left, his
    right) or mirrored (R); names swap at a beat's start, like a face. `frot`
-   turns a shown frame about its pivot (a wag). */
-const DR_BODY_REST = { x: 0, y: 0, lean: 0, sx: 1, sy: 1, head: 0, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, lL: 0, lR: 0, upL: 0, upR: 0, chest: 1, face: 'rest', brow: 'rest', frameL: '', frameR: '', frot: 0 };
+   turns a shown frame about its pivot (a wag). `frameLegs` names a leg
+   plate (crouch, jump) shown in place of both cutout legs. */
+const DR_BODY_REST = { x: 0, y: 0, lean: 0, sx: 1, sy: 1, head: 0, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, lL: 0, lR: 0, upL: 0, upR: 0, chest: 1, face: 'rest', brow: 'rest', frameL: '', frameR: '', frot: 0, frameLegs: '' };
 const DR_BODY_EASE = {
   linear: t => t,
   out: t => 1 - Math.pow(1 - t, 3),
@@ -153,20 +158,24 @@ function drBody(svg, opts){
      in for. Opacity, so the page can cross-fade the swap. */
   let shown = '';
   function setFrames(p){
-    const key = p.frameL + '|' + p.frameR + '|' + (p.frameL || p.frameR ? p.frot.toFixed(2) : '');
+    const key = p.frameL + '|' + p.frameR + '|' + p.frameLegs + '|' + (p.frameL || p.frameR ? p.frot.toFixed(2) : '');
     if(key === shown) return;
     shown = key;
-    const hide = { L: false, R: false };
+    const hide = { L: false, R: false }; let legs = false;
     for(const g of el.poses){
-      const name = g.dataset.pose, side = g.dataset.side, want = side === 'l' ? p.frameL === name : p.frameR === name;
+      const name = g.dataset.pose, side = g.dataset.side, P = B.pose[name];
+      const want = P.legs ? p.frameLegs === name : (side === 'l' ? p.frameL === name : p.frameR === name);
       g.style.opacity = want ? '1' : '0';
       if(!want) continue;
-      const P = B.pose[name], [px, py] = P.pivot;
+      if(P.legs){ legs = true; continue; }
+      const [px, py] = P.pivot;
       g.setAttribute('transform', (side === 'r' ? `translate(${2 * B.mirrorX},0) scale(-1,1) ` : '') + `rotate(${p.frot.toFixed(3)} ${px} ${py})`);
       for(const a of P.arms) hide[side === 'l' ? a : (a === 'L' ? 'R' : 'L')] = true;
     }
     el.armL.style.opacity = hide.L ? '0' : '1';
     el.armR.style.opacity = hide.R ? '0' : '1';
+    el.legL.style.opacity = legs ? '0' : '1';
+    el.legR.style.opacity = legs ? '0' : '1';
   }
   function setFace(name){
     const i = Math.max(0, DR_BODY_FACES.indexOf(name));
@@ -299,16 +308,16 @@ const DR_BODY_PERF = {
     // the jump the two drawn fists take over (one as drawn, one mirrored) and
     // pump with the laugh; they hand back before the arms come down.
     return { beats: [
-      [j(200), { sy: 1 - .04 * k, sx: 1 + .02 * k, aL: -12 * k, aR: -12 * k, fL: 20 * k, fR: 20 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],         // crouch
-      [j(260), { sy: 1 + .04 * k, sx: 1 - .02 * k, y: -70 * jump, aL: P.a, aR: P.a, fL: P.f, fR: P.f, lL: 8 * jump, lR: 8 * jump, head: -s * 3 * k, lift: -6 * k, face: 'laugh', brow: 'up' }, 'snap'],
-      [j(180), { frameL: 'fist-pump', frameR: 'fist-pump', frot: 0, y: -40 * jump, sy: 1.01, sx: .995, lL: 4 * jump, lR: 4 * jump, face: 'laughB' }, 'in'],
-      [j(170), { y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, lL: 0, lR: 0, frot: 6 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash
-      [j(260), { sy: 1, sx: 1, lift: 0, frot: -5 * k, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
+      [j(200), { frameLegs: 'crouch', sy: 1 - .04 * k, sx: 1 + .02 * k, aL: -12 * k, aR: -12 * k, fL: 20 * k, fR: 20 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],         // the drawn crouch, knees bent
+      [j(260), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .04 * k, sx: 1 - .02 * k, y: -50 * jump, aL: P.a, aR: P.a, fL: P.f, fR: P.f, head: -s * 3 * k, lift: -6 * k, face: 'laugh', brow: 'up' }, 'snap'],   // the drawn jump, feet tucked
+      [j(180), { frameL: 'fist-pump', frameR: 'fist-pump', frot: 0, y: -30 * jump, sy: 1.01, sx: .995, face: 'laughB' }, 'in'],
+      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, frot: 6 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash, into the crouch
+      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, frot: -5 * k, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
       [j(260), { frot: 4 * k, head: s * 1.2 * k, face: 'laugh' }, 'inOut'],
       [j(380), { frameL: '', frameR: '', frot: 0, aL: 0, aR: 0, fL: 0, fR: 0, head: 0, face: 'smile', brow: 'rest' }, 'spring'],
       [j(360), { face: 'smile1' }, 'out'],
       [j(240), { face: 'rest' }, 'out'],
-    ], still: { aL: P.a, aR: P.a, fL: P.f, fR: P.f, frameL: 'fist-pump', frameR: 'fist-pump', face: 'laugh', brow: 'up' }, stillMs: 1000 };
+    ], still: { aL: P.a, aR: P.a, fL: P.f, fR: P.f, frameL: 'fist-pump', frameR: 'fist-pump', frameLegs: 'crouch', face: 'laugh', brow: 'up' }, stillMs: 1000 };
   },
   // A wink with a little "hey you" of the hand.
   wink(mode){
@@ -342,14 +351,14 @@ const DR_BODY_PERF = {
   bounce(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .5 : 1, jump = mode === 'focused' ? 0 : 1;
     return { beats: [
-      [j(150), { sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, face: 'smile1' }, 'in'],
-      [j(230), { sy: 1 + .035 * k, sx: 1 - .017 * k, y: -48 * jump, aL: 50 * k, aR: 50 * k, fL: 30 * k, fR: 30 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],
-      [j(170), { y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k, aL: 35 * k, aR: 35 * k }, 'in'],
-      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, aL: 42 * k, aR: 42 * k, face: 'laughB' }, 'snap'],
+      [j(150), { frameLegs: 'crouch', sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, face: 'smile1' }, 'in'],                              // the drawn crouch
+      [j(230), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, aL: 50 * k, aR: 50 * k, fL: 30 * k, fR: 30 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // the drawn jump
+      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k, aL: 35 * k, aR: 35 * k }, 'in'],
+      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, aL: 42 * k, aR: 42 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, knees still bent
       [j(160), { y: 0, sy: 1 - .015 * k, sx: 1 + .007 * k, lift: 3 * k }, 'in'],
-      [j(340), { sy: 1, sx: 1, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile', brow: 'rest' }, 'spring'],
+      [j(340), { frameLegs: '', sy: 1, sx: 1, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile', brow: 'rest' }, 'spring'],
       [j(280), { face: 'rest' }, 'out'],
-    ], still: { aL: 50, aR: 50, fL: 30, fR: 30, face: 'smile', brow: 'up' }, stillMs: 800 };
+    ], still: { aL: 50, aR: 50, fL: 30, fR: 30, frameLegs: 'crouch', face: 'smile', brow: 'up' }, stillMs: 800 };
   },
   // A wrong answer: a wince, drawn in and down, then a caring smile.
   wince(mode){
