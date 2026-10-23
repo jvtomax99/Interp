@@ -45,6 +45,18 @@ block of the same name next to the More sheet styles, overlay
   stall shows one frame late). "Nothing named": the browser's own work
   (style, layout, paint, memory) or a job without a name yet; add an
   `fmNote` where a new suspect runs.
+- **Taps** (Home taps, 2026-10-23): while a run is on, `fmOnLift`
+  (window `pointerup`, capture; not mouse, not the pill) notes the lift's
+  `timeStamp`, the screen and what was tapped (its `aria-label` or text);
+  `fmOnClick` (window `click`, capture, so before the app's own handlers)
+  times "wait" = click start - lift, then posts a message from the next
+  `requestAnimationFrame`, which runs once that frame is drawn: "drawn" =
+  that - lift. A lift with no click within 1 s (a scroll) is dropped. Last
+  60 kept; the run saves the count, the middle and slowest of each, and the
+  six slowest to draw (`fmTapSummary`). Safari has no Event Timing, so this
+  is the phone's way to time a tap. Lab tool for the same, Chromium:
+  `tests/tools/tap-hold.cjs` (a 90 ms finger, timed from the lift, TRACE=1
+  for what runs in between).
 - Time with the app hidden is left out (visibilitychange). Runs under 30
   frames are not saved.
 - Runs are kept on the phone only, `ih_frameMeter` (last 8, each with

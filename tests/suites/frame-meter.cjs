@@ -38,6 +38,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     await page.evaluate(() => { fmNote('test job'); const t = performance.now(); while (performance.now() - t < 400) {} });
     await wait(600);
     await page.evaluate(async () => { for (let i = 0; i < 20; i++) { window.scrollBy(0, 30); document.dispatchEvent(new Event('scroll')); await new Promise(r => requestAnimationFrame(r)); } });
+    // A real tap on Home (touch devices): timed from the lift (Home taps, 2026-10-23).
+    if (device === 'iphone') { await page.tap('#content .qa-tile'); await wait(800); }
     await page.evaluate(() => setCategory('translate')); await wait(1500);
     const live = await page.evaluate(() => document.querySelector('.fm-pill .fm-live').textContent);
     ok(/^\d+ dropped$/.test(live) && parseInt(live) >= 20, 'the timer counts the stall as dropped frames', live);
@@ -58,6 +60,11 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     ok(st.screen === 'Home' && /test job/.test(st.what) && st.at >= 1000 && st.at < 4000 && st.up > st.at && st.scroll > 3e5 && r.stallList.length <= 6,
       'the longest stalls are listed: time into the run, screen, no scroll yet, and the job that ran (test job)', r.stallList);
     ok(res.stalls.some(t => /test job/.test(t)), 'the results sheet shows the stall list', res.stalls);
+    if (device === 'iphone') {
+      const tp = r.taps || {}, t0 = (tp.list || [])[0] || {};
+      ok(tp.n >= 1 && tp.wait >= 0 && tp.drawn >= tp.wait && tp.drawn < 3000 && t0.screen === 'Home' && t0.name, 'the tap is timed from the lift: wait, then drawn, on Home, with what was tapped', tp);
+      ok(res.stalls.some(t => /^\d+:\d\d · Home · .+ · wait \d+ ms · drawn \d+ ms$/.test(t)), 'the results list the tap', res.stalls);
+    } else ok(!r.taps, 'no taps on a computer run with a mouse: none listed', r.taps);
     ok(/ms of hitches per second/.test(res.big) && /Smooth|Some hitches|Choppy/.test(res.head), 'the headline: a grade and the hitch number', { h: res.head, b: res.big });
     await page.screenshot({ path: O + tag + '-results.png' });
 
@@ -70,6 +77,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     await page.evaluate(() => [...document.querySelectorAll('#frameMeterBody .btn')].find(x => /Copy/.test(x.textContent)).click()); await wait(300);
     const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(e => 'error ' + e.message);
     ok(/^Smoothness b\d{4}\.\d{4}/.test(copied) && /Hitches .* ms\/s/.test(copied) && /Home:/.test(copied) && /Longest stalls[\s\S]*\d+ ms · Home · no scroll yet · \d+ s after opening · [^\n]*test job/.test(copied), 'Copy numbers: plain text with the build, hitches, screens and the stall list', copied.slice(0, 600));
+    if (device === 'iphone') ok(/\nTaps \d+ · from the lift: wait \d+ ms, drawn \d+ ms \(middle\)[^\n]*\n  \d+:\d\d · Home · /.test(copied), 'Copy numbers carries the taps', copied.slice(-300));
 
     await page.evaluate(() => frameMeterClose()); await page.evaluate(() => openMoreSheet()); await wait(400);
     const listed = await page.evaluate(() => [...document.querySelectorAll('#moreSheetBody .fm-run')].map(x => x.textContent.replace(/\s+/g, ' ').trim()));
