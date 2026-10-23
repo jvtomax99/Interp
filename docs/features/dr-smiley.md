@@ -26,7 +26,8 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   centred on its middle line, 14px from the edge) and `--hw-size` for the
   Home greeting (1.5: a 90px face, centred on the name). Inside him
   everything is still drawn at the old size and scaled. His sway pins the
-  pivot (`smileySway`: 50% 92% dock, 50% 85% Home), so a scale must be
+  pivot (`smileySway`: 50% 92% dock, 50% 85% Home; only the one on screen
+  is pushed, and the unseen one's breathing pauses), so a scale must be
   moved back (dock: the bob's left/top; Home: `translate`), or he drifts
   up. When the tab bar tucks (54px) he shrinks by `scale: 54/58` and a
   `translate` worked out for that 50% 92% pivot, not by a new `--ds-s`

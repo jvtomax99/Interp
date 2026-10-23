@@ -305,6 +305,25 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-23 S8 Home scroll, round 3 (this PR; Jose's pick after asking
+  what happened to the smoothness work). New lab tool
+  `tests/tools/scroll-trace.cjs` (style passes while scrolling Home and
+  what set them off): 1,736 style passes in 19 s, median 9 elements each,
+  so it's the number of passes, not their size. Causes: Dr. Smiley's sway
+  writing `rotate` every frame, and infinite CSS loops. Of the two Smileys
+  one is always unseen (the dock one faded out at the top, the Home badge
+  off screen lower down), and both swayed and breathed. Now only the one
+  you can see is pushed (`smileySway`'s `shown` + an IntersectionObserver;
+  a lean under way still settles), and the unseen loops pause (the badge's
+  breathing and the Ask ring with `.home-greeting.is-offscreen`, set by
+  the petals' observer; the dock bob without `dock-has-smiley`; no
+  heartline draw off screen). Same look. `scroll.cjs` UA=chromium 4x, 4+4
+  interleaved: hitch ratio while scrolling 143 -> 114 median (-20%),
+  dropped 20.4 -> 16.1%, style 8.2 -> 6.7 s (every new run below every
+  old one). Experiments, not shipped: sway off entirely halved style time;
+  every animation paused, style -22%. Lab only; Jose's phone decides
+  (3 runs before on b1023.1111, 3 after). smiley-gaze and home-rest check
+  both places. Guide: nothing visible changed.
 - 2026-10-22 Split `index.html`, phase 3, 3D Body (this PR): the Hub's side
   of the 3D Body is `features/3d-body.js`, verbatim, before the app's
   script. Proof: tokens identical when put back; the frame, its wall, the
