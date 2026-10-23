@@ -77,7 +77,8 @@ under way, then what waits on Jose, then small leftovers.
    and jump as leg plates for the cheer and the quiz bounce, and the
    thumbs-up at the top of the bounce. The drawings the acting needs are
    all in; point and clipboard wait for a use. Next: where he stands
-   full-length (his call, still open).
+   full-length (his call; "not yet" on 2026-10-23: he looks at the viewer
+   `/drsmiley/body.html` live first, then decides).
    Nothing in the app shows him full-length until then.
 2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).

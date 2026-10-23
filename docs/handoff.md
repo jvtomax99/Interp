@@ -57,9 +57,12 @@ the master's in `cutframes.py`) for `cheer` and `bounce`. The acting sheet:
 `preview-acting.png`. Sent to Jose. The thumbs-up came last (cut as a
 feathered band, `band: True`, since its sleeve lies over the coat; drawn
 in front; the top of `bounce`). Every drawing the acting needs is in;
-point and clipboard wait for a use. Next: Jose picks where he stands
-full-length (the recommendation stays: Home greeting and the quiz, never
-the dock), then path 2 below. The app still shows nothing full-length.
+point and clipboard wait for a use. Asked where he stands full-length
+(Home greeting and the quiz recommended, never the dock), Jose said "not
+yet" (2026-10-23, late): he OKs PR #135 as it is, looks at him in the
+viewer at `/drsmiley/body.html` once it is live, and decides later. So the
+next chat waits for that pick; when it comes, path 2 below. The app still
+shows nothing full-length.
 
 ## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 
