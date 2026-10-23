@@ -21269,7 +21269,11 @@ window.smileyPettable = smileyPettable;
    stacks on everything else. One shared scroll listener for every swaying
    element (it used to add one per Home rebuild, never removed); elements
    that leave the page are dropped, and the listener goes when none is left.
-   Off when he's Still (reduced motion, or his Still mode). */
+   Off when he's Still (reduced motion, or his Still mode).
+   Only the one you can see is pushed (Home scroll, 2026-10-23): the Home
+   badge once it's off screen (an IntersectionObserver), the dock button
+   while it's faded out (its `shown` test). A lean already under way still
+   settles. Each was style work every frame of a scroll for nobody. */
 const drSways = new Set();
 let drSwayLast = new WeakMap(), drSwayOn = false;
 function drSwayScroll(e){
@@ -21280,20 +21284,24 @@ function drSwayScroll(e){
   drSwayLast.set(t, y);
   const push = Math.max(-1.1, Math.min(1.1, -(y - was) * .03));
   drSways.forEach(s => {
-    if(!s.el.isConnected){ drSways.delete(s); return; }
+    if(!s.el.isConnected){ drSways.delete(s); s.io.disconnect(); return; }
+    if(!s.seen || (s.shown && !s.shown())) return;
     s.push += push;
     if(!s.raf) s.raf = requestAnimationFrame(s.step);
   });
   if(!drSways.size){ document.removeEventListener('scroll', drSwayScroll, { capture: true }); drSwayOn = false; }
 }
-function smileySway(el, origin){
+function smileySway(el, origin, shown){
   if(!el || el.__sway) return;
   el.__sway = true;
   if(origin) el.style.transformOrigin = origin;
-  const s = { el, ang: 0, vel: 0, push: 0, raf: 0 };
+  const s = { el, shown, seen: true, ang: 0, vel: 0, push: 0, raf: 0 };
+  // A margin, so he is already being pushed as he scrolls into view.
+  s.io = new IntersectionObserver(en => { s.seen = en[en.length - 1].isIntersecting; }, { rootMargin: '120px 0px' });
+  s.io.observe(el);
   s.step = () => {
     s.raf = 0;
-    if(!el.isConnected){ drSways.delete(s); return; }
+    if(!el.isConnected){ drSways.delete(s); s.io.disconnect(); return; }
     s.vel = (s.vel + s.push - s.ang * .14) * .78; s.push = 0;
     s.ang = Math.max(-5, Math.min(5, s.ang + s.vel));
     if(Math.abs(s.ang) < .03 && Math.abs(s.vel) < .03){ s.ang = s.vel = 0; el.style.rotate = ''; return; }
@@ -22270,7 +22278,7 @@ const smileyRider = (() => {
     btn.innerHTML = `<span class="dock-smiley-bob"><span class="ask-face" aria-hidden="true">${askFaceSvg()}</span></span><span class="dock-smiley-tag" aria-hidden="true">Ask</span>`
       + '<span class="dock-smiley-z" aria-hidden="true">z</span><span class="dock-smiley-z" aria-hidden="true">z</span>';
     face = btn.querySelector('.ask-face'); bob = btn.querySelector('.dock-smiley-bob');
-    smileySway(btn, '50% 92%');
+    smileySway(btn, '50% 92%', () => document.body.classList.contains('dock-has-smiley'));
     // Press and hold to pet him (a giggle and hearts); a tap opens his
     // panel (drPanel), a quick Ask the Hub right here; tapping him again closes it.
     const petted = smileyPettable(btn, () => { drSetMood('happy', 180000); emote('pet'); });
