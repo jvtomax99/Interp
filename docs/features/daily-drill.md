@@ -12,7 +12,7 @@ English by the interpreter; using the trap word (`drillTrapRe`, from
 anything else is compared with `truth` and judged by them. 2 *Hear it,
 write it*, a glossary term (still learning, else due), Spanish checked by
 `reviewCheck` and saved to Term Review. 3 *The judgment call*, a
-`SEED_QUESTIONS` item from ethics / encounter / cultural, with its
+`SEED_QUESTIONS` (`practice/questions.js`) item from ethics / encounter / cultural, with its
 explanation. Levels (`DRILL_LEVELS`: Reading, Listening, Consecutive, Under
 pressure) move up on 3/3 and down on 0-1; from Listening the words are a tap
 away (never when the phone can't speak), Under pressure adds `DRILL_SECS`.

@@ -73,8 +73,11 @@ async function route(page, opts = {}) {
     r.fulfill({ status: 200, contentType: { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml',
       gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json' }[ext], body: fs.readFileSync(p) });
   });
-  for (const f of ['app.css', 'guide/topics.js', 'home-polish.css', 'home-polish.js', 'pin-icons.js'])
+  for (const f of ['app.css', 'guide/topics.js', 'practice/questions.js', 'falsefriends/list.js', 'home-polish.css', 'home-polish.js', 'pin-icons.js'])
     await page.route('**/' + f, r => r.fulfill({ status: 200, contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', body: fs.readFileSync(process.env.POLISH_DIR && fs.existsSync(path.join(process.env.POLISH_DIR, f)) ? path.join(process.env.POLISH_DIR, f) : R + f) }));
+  // The features moved out of index.html (features/*.js, docs/split-index.md phase 3).
+  await page.route(/^https:\/\/interp\.test\/features\/[\w-]+\.js(\?.*)?$/, r => r.fulfill({ status: 200, contentType: 'application/javascript',
+    body: fs.readFileSync(R + new URL(r.request().url()).pathname.slice(1)) }));
   // Anything else external is recorded, not silently dropped.
   page.__external = [];
   await page.route(/^https?:\/\/(?!interp\.test)/, r => {

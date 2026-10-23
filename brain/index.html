@@ -350,7 +350,7 @@ function claim(target, n, spacing){
 const anchors = [];
 const place = (n,c) => {pos[n.i]=cortex(c.d,c.side,.985).p; anchors.push(c)};
 { const g=byGroup("ask"); claim({d:[-.55,.18,.82],side:-1},g.length,.012).forEach((c,k)=>place(g[k],c)); }
-{ const g=byGroup("data"); const L=claim({d:[-.86,-.42,.28],side:-1},2,.03), Rt=claim({d:[.86,-.42,.28],side:1},2,.03); [...L,...Rt].forEach((c,k)=>place(g[k],c)); }
+{ const g=byGroup("data"), h=Math.ceil(g.length/2); const L=h?claim({d:[-.86,-.42,.28],side:-1},h,.03):[], Rt=g.length-h?claim({d:[.86,-.42,.28],side:1},g.length-h,.03):[]; [...L,...Rt].forEach((c,k)=>place(g[k],c)); }
 { const g=byGroup("smiley"); g.forEach((n,k)=>{const side=k<5?-1:1, f=(k%5)/4; const c=claim({d:[side*(.12+.8*f),1-.62*f,.06],side},1,0)[0]; place(n,c)}); }
 {
   const g = byGroup("other");

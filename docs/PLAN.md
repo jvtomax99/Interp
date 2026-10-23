@@ -336,8 +336,9 @@ then read the log; it names the suite and the check.
   trade is still his call once measured. Phase 0 (census, markers) done
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
-  this PR. Next: the other data constants (`SEED_QUESTIONS`,
-  `FALSE_FRIENDS`), each checked for startup readers first.
+  #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
+  Phase 3 (features), Jose's pick: Translate, this PR. Next leaves: 3D
+  Body, Looking a term up, Voice and mic check (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -347,14 +348,33 @@ then read the log; it names the suite and the check.
 
 ## Done
 
-- 2026-10-21 3D Dr. Smiley R1 (this PR): `docs/mockups/smiley-3d/`, the
-  figure built in code in Blender with a 36-bone skeleton (fingers included), his drawn face
-  and brows projected on the head (`prep.py`, `build.py`); head views,
-  body views, six poses and a 360-degree turn in `out/`. Round 2 after
-  Jose's look review (his picks): hair closer to the drawing (bigger
-  swoop, tips flicking), hands with a thumb and three fingers on bones
-  (`GRIPS`), a stethoscope, and a 3D nose, cheeks and muzzle under the
-  drawn face. Docs only, nothing deployed, no User Guide change.
+- 2026-10-22 Split `index.html`, phase 3, Translate (this PR): the
+  Translate section is `features/translate.js`, verbatim, loaded before
+  the app's script (declarations only). Proof: tokens identical when put
+  back, the screen and a translation identical in the browser, globals
+  unchanged. `sw.js` (any `features/*.js` network-first), the harness (serves
+  `features/*.js`), `first-paint.cjs`, `brain-data.cjs`,
+  `AGENTS.md` (a feature's code lives in its file), `CLAUDE.md`.
+  False Friends (#125) merged on Jose's "Push", live as b1022.1233.
+- 2026-10-22 Split `index.html`, phase 2, False Friends (this PR):
+  `FALSE_FRIENDS` is `falsefriends/list.js`, loaded like the guide and the
+  practice bank; `ETHICS_CONTENT` stays, under a "Code of Ethics"
+  banner. Identical in the browser; `sw.js`, harness, `first-paint.cjs`,
+  `brain-data.cjs` ("Code of Ethics" takes its place in the data group),
+  `AGENTS.md`/`CLAUDE.md`. Nothing visible, no guide change.
+- 2026-10-21 Split `index.html`, phase 2, the practice bank (this PR):
+  `CCHI_DOMAINS` and `SEED_QUESTIONS` are `practice/questions.js`, loaded
+  like `guide/topics.js`. Identical in the browser before and after;
+  `sw.js`, the harness, `first-paint.cjs`, `brain-data.cjs` (the section
+  is gone from the census), `AGENTS.md`/`CLAUDE.md`/`daily-drill.md`.
+  Phase 2's guide (#115) merged on Jose's "Push", live as b1021.1248.
+- 2026-10-21 to 10-23 3D Dr. Smiley R1 (#114, open, docs only): first a
+  figure built in code (rejected), then Jose's own Tripo model, matte, hair
+  and swoop, a 36-bone skeleton, a face rig on his own surface (brows,
+  cheeks, mouths after the face's muscles), alive eyes (glass cornea, one
+  lash line, no lower lids) and a smooth tooth band, each step on Jose's OK
+  with pictures. `docs/mockups/smiley-3d/`; handoff
+  `docs/handoff-smiley-3d.md`. Nothing deployed, no User Guide change.
 - 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
   aren't being delivered", owners should send them, "like a normal app";
   his picks: owner-code phones send, push for Team Chat and new training).
