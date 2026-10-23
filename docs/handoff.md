@@ -54,9 +54,12 @@ came and are in as leg plates (`legs: true` in `DR_BODY.pose`, `frameLegs`
 in the pose, both cutout legs hidden meanwhile; the scrub blue shifted to
 the master's in `cutframes.py`) for `cheer` and `bounce`. The acting sheet:
 `layers/sheet.cjs` run from `tests/` (frames to a folder), tiled into
-`preview-acting.png`. Sent to Jose. Next from him: thumbs up, point,
-clipboard (arm frames, cut like the first four). The app still shows
-nothing full-length.
+`preview-acting.png`. Sent to Jose. The thumbs-up came last (cut as a
+feathered band, `band: True`, since its sleeve lies over the coat; drawn
+in front; the top of `bounce`). Every drawing the acting needs is in;
+point and clipboard wait for a use. Next: Jose picks where he stands
+full-length (the recommendation stays: Home greeting and the quiz, never
+the dock), then path 2 below. The app still shows nothing full-length.
 
 ## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 

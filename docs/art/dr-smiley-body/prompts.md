@@ -9,10 +9,9 @@ cut into the rig (`layers/cutframes.py`, `drsmiley/body/pose-*.webp`;
 `preview-frames.png` shows them on the body, `preview-acting.png` mid
 performance). `crouch.png` and `jump.png` came next (made from the shrug
 picture, so their arms are out; only the legs are cut) and are in as the
-leg plates of the cheer and the quiz bounce. **Next to run:** `thumbs-up.png` (Jose's pick for the top of the quiz
-bounce, 2026-10-23; until it comes the bounce's cutout arms rise only a
-little, so the shoulder cap stays under the coat), then `point.png`,
-`clipboard.png`.
+leg plates of the cheer and the quiz bounce. `thumbs-up.png` came too (from the jump picture; only the arm is cut, as a
+feathered band) and is at the top of the quiz bounce. **Left in the table,
+not needed yet:** `point.png`, `clipboard.png`, `body-noarms.png`.
 
 Same workflow as `docs/art/dr-smiley-faces/prompts.md`: an image tool that
 edits a picture you upload (ChatGPT image editing or similar), one change

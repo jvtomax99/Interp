@@ -210,8 +210,15 @@ one copy each (`legs: true`, no mirror), drawn right after the cutout legs.
 `frameLegs` names the one shown; both cutout legs hide meanwhile. `cheer`
 and `bounce` go crouch, then jump at the top of the hop (Focused keeps
 the crouch, never tucked feet on the ground), crouch again at the landing
-squash, then back. Not run yet: `thumbs-up`, `point`, `clipboard`,
-`body-noarms` and the rest of the table.
+squash, then back. **The thumbs-up** (the same evening, Jose's pick for the
+top of the quiz bounce): its sleeve lies over the coat, where colour cannot
+tell sleeve from coat, so `cutframes.py` cuts it as a feathered band of the
+picture (`band: True`, a 6 px feather melting into the coat beneath) and
+the rig draws it in front; `bounce` folds one cutout arm up during the hop
+and swaps the drawn thumbs-up in at the top (as drawn or mirrored), pushes
+it up a little on the second hop, and hands back at the settle. Not run
+yet: `point`, `clipboard`, `body-noarms` and the rest of the table;
+nothing needs them until he has a place in the app.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a

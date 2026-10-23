@@ -1,4 +1,4 @@
-# Cut the drawn poses (docs/art/dr-smiley-body/{wave,fist-pump,think,shrug,crouch,jump}.png, Jose, 2026-10-23)
+# Cut the drawn poses (docs/art/dr-smiley-body/{wave,fist-pump,think,shrug,thumbs-up,crouch,jump}.png, Jose, 2026-10-23)
 # into frames on the master grid: drsmiley/body/pose-<name>.webp + poses.json (their boxes), and
 # preview-frames.png. Content changes only: coat over coat is the same coat, shaded a little
 # differently, so it is left to body.webp. Run from anywhere: python3 -I cutframes.py (needs scipy).
@@ -18,25 +18,35 @@ POSES={
  'fist-pump': dict(region=lambda: (xx<450)&(yy>300)&(yy<1100)&~((yy<578)&(xx>318)), offset=(0,0)),
  'think':     dict(region=lambda: (xx>280)&(xx<800)&(yy>488)&(yy<1000), offset=(4,0)),
  'shrug':     dict(region=lambda: (yy>540)&(yy<1100), offset=(4,0)),
+ # made from the jump picture, so the legs are tucked: only the arm's band is read
+ # made from the jump picture, so the legs are tucked: only the arm's band is read; its
+ # sleeve lies over the coat, so coat over coat is kept here and the band kept narrow
+ # (band: everything of the figure inside it, feathered, since colour cannot tell that sleeve from the coat)
+ 'thumbs-up': dict(region=lambda: (xx>236)&(xx<420)&(yy>496)&(yy<800)&~((yy<578)&(xx>365)), offset=(6,0), band=True),
 }
 res={}
 for name,cfg in POSES.items():
     im=Image.open(D+name+'.png').convert('RGB')
     dx,dy=cfg['offset']
-    if dx or dy: im=im.transform(im.size, Image.AFFINE, (1,0,-dx,0,1,-dy), Image.BICUBIC)  # shift by (dx,dy) so it lands on the master
+    fill=tuple(int(v) for v in np.median(np.asarray(im)[20:120,20:120].reshape(-1,3),0))
+    if dx or dy: im=im.transform(im.size, Image.AFFINE, (1,0,-dx,0,1,-dy), Image.BICUBIC, fillcolor=fill)  # shift by (dx,dy) so it lands on the master; the edge filled with background
     P=np.asarray(im).astype(float); aP=key(P)
     diff=np.abs(P-M).sum(2)
     white=lambda A: (A.min(2)>140)&((A.max(2)-A.min(2))<22)   # the coat, lit or shaded (skin, scrubs and hair are coloured or dark)
     coatM=white(M)&(alphaM>0.5); coatP=white(P)&(aP>0.5)
     # content changes only: coat-white over coat-white is the same coat, shaded a little differently
-    mask=(diff>60)&(aP>0.5)&cfg['region']()&~(coatM&coatP)
-    mask=ndi.binary_opening(mask,iterations=2)
-    lab,n=ndi.label(mask); sizes=ndi.sum(mask,lab,range(1,n+1))
-    keep=np.isin(lab,[i+1 for i,s in enumerate(sizes) if s>1500]); mask=keep
-    mask=ndi.binary_closing(mask,iterations=3)
-    holes=ndi.binary_fill_holes(mask)&~mask; mask|=holes&~coatM
-    mask=ndi.binary_dilation(mask,iterations=2)
-    soft=ndi.gaussian_filter(mask.astype(float),1.5)
+    if cfg.get('band'):
+        mask=(aP>0.5)&cfg['region']()
+        soft=ndi.gaussian_filter(mask.astype(float),6)   # a wide feather: the band's edge melts into the coat beneath
+    else:
+        mask=(diff>60)&(aP>0.5)&cfg['region']()&~(coatM&coatP)
+        mask=ndi.binary_opening(mask,iterations=2)
+        lab,n=ndi.label(mask); sizes=ndi.sum(mask,lab,range(1,n+1))
+        keep=np.isin(lab,[i+1 for i,s in enumerate(sizes) if s>1500]); mask=keep
+        mask=ndi.binary_closing(mask,iterations=3)
+        holes=ndi.binary_fill_holes(mask)&~mask; mask|=holes&~coatM
+        mask=ndi.binary_dilation(mask,iterations=2)
+        soft=ndi.gaussian_filter(mask.astype(float),1.5)
     a=np.clip(soft,0,1)*aP
     rgba=np.dstack([P,a*255]).astype(np.uint8); fr=Image.fromarray(rgba,'RGBA'); bb=fr.getbbox()
     fr.crop(bb).save(OUT+'pose-'+name+'.webp',quality=92,method=6)
@@ -48,7 +58,8 @@ for name,cfg in POSES.items():
 LEGS={'crouch':(4,0),'jump':(4,0)}
 for name,(dx,dy) in LEGS.items():
     im=Image.open(D+name+'.png').convert('RGB')
-    if dx or dy: im=im.transform(im.size, Image.AFFINE, (1,0,-dx,0,1,-dy), Image.BICUBIC)
+    fill=tuple(int(v) for v in np.median(np.asarray(im)[20:120,20:120].reshape(-1,3),0))
+    if dx or dy: im=im.transform(im.size, Image.AFFINE, (1,0,-dx,0,1,-dy), Image.BICUBIC, fillcolor=fill)
     P=np.asarray(im).astype(float); aP=key(P)
     sat=P.max(2)-P.min(2); dark=P.max(2)<90
     mask=(aP>0.5)&(yy>=990)&((sat>25)|dark)
@@ -75,7 +86,7 @@ def piece(k):
     im=Image.open(OUT+k+'.webp').convert('RGBA'); return im,bx[k]
 head=Image.open(OUT+'head.webp').convert('RGBA'); s=rig['head']['scale']; hx,hy=rig['head']['at']
 head=head.resize((round(480*s),round(600*s)),Image.LANCZOS)
-HIDES={'wave':['l'],'fist-pump':['l'],'think':['l','r'],'shrug':['l','r']}
+HIDES={'wave':['l'],'fist-pump':['l'],'think':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
 def compose(name=None):
     out=Image.new('RGBA',(W,H),(255,255,255,255))
     legs=name in LEGS
@@ -88,7 +99,7 @@ def compose(name=None):
     if name and not legs:
         f=Image.open(OUT+'pose-'+name+'.webp').convert('RGBA'); b=res[name]['box']; out.alpha_composite(f,(b[0],b[1]))
     return out
-names=['rest','wave','fist-pump','think','shrug','crouch','jump']
+names=['rest','wave','fist-pump','think','shrug','thumbs-up','crouch','jump']
 sheet=Image.new('RGB',(len(names)*470,780),(255,255,255)); d=ImageDraw.Draw(sheet)
 for i,n in enumerate(names):
     sheet.paste(compose(None if n=='rest' else n).convert('RGB').crop((60,0,1040,1470)).resize((460,690),Image.LANCZOS),(i*470+5,4)); d.text((i*470+200,740),n,fill=(21,28,44))

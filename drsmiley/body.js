@@ -48,6 +48,8 @@ const DR_BODY = {
     'fist-pump': { box: [121, 361, 276, 348], arms: ['L'], layer: 'back', at: { a: 110, f: 100 }, pivot: [353, 630] },
     think:       { box: [352, 497, 274, 445], arms: ['L', 'R'], layer: 'front', at: { a: 18, f: 128, a2: 10, f2: 60 }, pivot: [353, 630] },
     shrug:       { box: [95, 568, 892, 398], arms: ['L', 'R'], layer: 'back', at: { a: 28, f: 95, a2: 28, f2: 95 }, pivot: [556, 630] },
+    // Cut as a feathered band of the picture (its sleeve lies over the coat), so it is drawn in front.
+    'thumbs-up': { box: [239, 509, 197, 306], arms: ['L'], layer: 'front', at: { a: 20, f: 120 }, pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
@@ -347,21 +349,22 @@ const DR_BODY_PERF = {
       [j(260), { face: 'rest' }, 'out'],
     ], still: { lift: -10, head: s * 4, aL: P.a, aR: P.a2, fL: P.f, fR: P.f2, [FR]: 'shrug', face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
   },
-  // A right answer: a happy hop on the drawn crouch and jump, a smaller second
-  // hop. The cutout arms rise only a little (past about 25 degrees the shoulder
-  // cap comes out from under the coat); a drawn thumbs-up takes the top of the
-  // hop once Jose draws it (prompts.md).
+  // A right answer: a happy hop on the drawn crouch and jump, the drawn
+  // thumbs-up (one side, as drawn or mirrored) from the top of the hop through
+  // a smaller second hop. The other cutout arm rises only a little (past about
+  // 25 degrees the shoulder cap comes out from under the coat).
   bounce(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .5 : 1, jump = mode === 'focused' ? 0 : 1;
+    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, O = side === 'L' ? 'R' : 'L', FR = 'frame' + side, T = DR_BODY.pose['thumbs-up'].at;
     return { beats: [
-      [j(150), { frameLegs: 'crouch', sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, face: 'smile1' }, 'in'],                              // the drawn crouch
-      [j(230), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, aL: 22 * k, aR: 22 * k, fL: 24 * k, fR: 24 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // the drawn jump
-      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k, aL: 14 * k, aR: 14 * k }, 'in'],
-      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, aL: 20 * k, aR: 20 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, knees still bent
-      [j(160), { y: 0, sy: 1 - .015 * k, sx: 1 + .007 * k, lift: 3 * k }, 'in'],
-      [j(340), { frameLegs: '', sy: 1, sx: 1, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile', brow: 'rest' }, 'spring'],
+      [j(150), { frameLegs: 'crouch', sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, head: -s * 1 * k, face: 'smile1' }, 'in'],                              // the drawn crouch
+      [j(230), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, [A]: T.a, [F]: T.f, ['a' + O]: 18 * k, ['f' + O]: 24 * k, head: s * 2.5 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // the drawn jump, the arm folding up
+      [j(170), { [FR]: 'thumbs-up', frot: 0, frameLegs: 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k, ['a' + O]: 12 * k }, 'in'],            // the drawn thumbs-up takes over at the top
+      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, frot: -s * 5 * k, head: s * 3 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, knees still bent, the thumb pushed up
+      [j(160), { y: 0, sy: 1 - .015 * k, sx: 1 + .007 * k, lift: 3 * k, frot: 0 }, 'in'],
+      [j(340), { [FR]: '', frameLegs: '', sy: 1, sx: 1, lift: 0, head: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile', brow: 'rest' }, 'spring'],
       [j(280), { face: 'rest' }, 'out'],
-    ], still: { aL: 22, aR: 22, fL: 24, fR: 24, frameLegs: 'crouch', face: 'smile', brow: 'up' }, stillMs: 800 };
+    ], still: { [A]: T.a, [F]: T.f, [FR]: 'thumbs-up', ['a' + O]: 12, frameLegs: 'crouch', head: s * 2.5, face: 'smile', brow: 'up' }, stillMs: 800 };
   },
   // A wrong answer: a wince, drawn in and down, then a caring smile.
   wince(mode){
