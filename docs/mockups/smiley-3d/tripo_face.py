@@ -92,6 +92,12 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
         kb[f'Mouth.Close{c:g}'].value = float(np.interp(close, pts, [float(k == j) for k in range(len(pts))]))
     for k, v in (mouth or {}).items():
         kb[k if k.startswith('AU.') else 'Mouth.' + k].value = v      # AU.*: the muscle blocks (tripo_muscles.py)
+    # a key on the tooth band named like a mouth key follows it (O2: the band's ends
+    # gather in with the mouth's corners, tripo_oh.py)
+    te = bpy.data.objects.get('Teeth')
+    if te is not None and te.data.shape_keys is not None:
+        for tk in te.data.shape_keys.key_blocks[1:]:
+            tk.value = kb['Mouth.' + tk.name].value if 'Mouth.' + tk.name in kb else 0
     if lids:
         from tripo_eyes import set_blink
         for i, s in enumerate((R, L)):

@@ -106,17 +106,19 @@ import numpy as _np2
 def _rows(path, ks):
     sh = Image.open(path).convert('RGB'); hh = sh.height // 7
     return Image.fromarray(_np2.vstack([_np2.asarray(sh.crop((0, k * hh, sh.width, (k + 1) * hh))) for k in ks]))
-board('Real teeth', ['His painted tooth strip replaced by real 3D teeth.'], [
-    ('1', 'ME', 'Before: his teeth were a white sheet 1\u20133 mm thin painted inside his smile; whenever his mouth opened '
-     'wider you saw its edge from below as a streaky band.', [fit(_rows('/tmp/claude-0/fp/mouths-before.png', [1, 2, 3]), 1000, 900)],
-     'before: smile, laugh, surprised', False),
-    ('2', 'ME', 'Now: a row of ten rounded teeth (the middle ones a little bigger, fine gaps between) with a pink gum line, '
-     'fixed to his skull like real upper teeth; the old sheet is painted into the dark of his mouth. In the \u201coh\u201d his '
-     'lips come forward over the teeth as real lips do.', [fit(Image.open(O('plan/teeth-after.png')), 1000, 420),
-     fit(_rows(O('plan/mouths.png'), [1, 2, 3]), 1000, 900)], 'after', True),
-    ('3', 'NOTE', 'Not yet: no lower teeth (your drawings show none either); the tongue crumples a little in the \u201coh\u201d; '
-     'the \u201coh\u201d hides the teeth where your drawing shows a sliver.', [], '', False),
-], 'plan-teeth.png')
+import os as _os
+if _os.path.exists('/tmp/claude-0/fp/mouths-before.png'):   # its before picture was never kept (2026-10-23): the page only redraws where it exists
+  board('Real teeth', ['His painted tooth strip replaced by real 3D teeth.'], [
+      ('1', 'ME', 'Before: his teeth were a white sheet 1\u20133 mm thin painted inside his smile; whenever his mouth opened '
+       'wider you saw its edge from below as a streaky band.', [fit(_rows('/tmp/claude-0/fp/mouths-before.png', [1, 2, 3]), 1000, 900)],
+       'before: smile, laugh, surprised', False),
+      ('2', 'ME', 'Now: a row of ten rounded teeth (the middle ones a little bigger, fine gaps between) with a pink gum line, '
+       'fixed to his skull like real upper teeth; the old sheet is painted into the dark of his mouth. In the \u201coh\u201d his '
+       'lips come forward over the teeth as real lips do.', [fit(Image.open(O('plan/teeth-after.png')), 1000, 420),
+       fit(_rows(O('plan/mouths.png'), [1, 2, 3]), 1000, 900)], 'after', True),
+      ('3', 'NOTE', 'Not yet: no lower teeth (your drawings show none either); the tongue crumples a little in the \u201coh\u201d; '
+       'the \u201coh\u201d hides the teeth where your drawing shows a sliver.', [], '', False),
+  ], 'plan-teeth.png')
 
 
 board('Teeth, closer to your drawing', ['Three ways to show his teeth, on his face.'], [
@@ -127,3 +129,17 @@ board('Teeth, closer to your drawing', ['Three ways to show his teeth, on his fa
      [fit(Image.open(O('plan/teeth-grooves.png')), 1000, 380)], 'B: faint dividers', False),
     ('3', 'ME', 'C: the separate teeth from before.', [fit(Image.open(O('plan/teeth-after.png')), 1000, 380)], 'C: separate teeth', True),
 ], 'plan-teeth2.png')
+
+
+board('The surprised “oh”, redone', ['Your drawing (left), the first “oh”, the new one: close up, whole face, from the side.'], [
+    ('1', 'ME', 'The first “oh” squeezed his whole smile into a small oval: the corner skin travelled 32 mm, which creased '
+     'the cheeks from the nose to the corners, crumpled the tongue (its tip moved more than its back) and hid the teeth.',
+     [fit(Image.open(O('plan/oh2.png')), 1000, 770)], 'drawing, before, after', False),
+    ('2', 'ME', 'Now, as you drew it: the corners come in and the lips meet just past the opening; a flat upper lip with a '
+     'sliver of the tooth band under it, a U below, the chin dropping with the lower lip. The whole inside of the mouth moves '
+     'as one piece, so the tongue keeps its shape. The band’s ends gather in with the corners (they used to show through '
+     'the gathered lips). The painted tooth sheet from the Tripo model, which sat dark in front of the band, is found again '
+     'in his original colours and tucked away.', [], '', True),
+    ('3', 'NOTE', 'Still there, small: a nick at each corner where the lips meet. Left for now: the faint rim round a shut '
+     'eye and the dip at the ends of the laugh’s shut-eye arc.', [], '', False),
+], 'plan-oh.png')

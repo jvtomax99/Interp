@@ -15,20 +15,41 @@ chat that built his face rig, eyes and teeth (PR #114, branch
 > say "working on it" and "done".
 
 Jose attaches `Dr.Smiley ( hands down ) .zip` (32 MB GLB inside); the
-model files are not in git. Try the new chat on Claude Fable 5.1 (talked
-over 2026-10-23: may catch visual misses before Jose does; 2.5x the cost,
-unproven for this task; go back to Opus 5.5 if no better).
+model files are not in git. The 2026-10-23 continuation ran on Claude
+Fable 5.1 (it caught the dark sheet in front of the band from a red-band
+diagnostic render; whether that beats Opus 5.5 is still Jose's call).
 
-## Now (2026-10-23)
+## Now (2026-10-23, later chat)
 
 Everything Jose has OK'd, newest last: matte model, hair, swoop; skeleton
 (36 bones); brows A (his sculpted brows move the skin); mouth route 1 (his
 own lips reshape) and the closed-mouth test; muscle-based mouths "pushed
 further"; eyes: glass cornea + real shine, iris detail, no lower lids,
 one tapered lash line on the lid edge, resting lid on the iris top (B),
-happy shut eyes for the laugh; laugh and surprised redone; **teeth: one
-smooth white band (A)**. Latest picture: `out/plan/mouths.png` (all seven
-beside his drawings); `out/plan-teeth2.png`.
+happy shut eyes for the laugh; laugh and surprised redone; teeth: one
+smooth white band (A). Rebuilt from his zip in this chat: the reactions
+sheet came out the same to the pixel.
+
+**Waiting on Jose: the surprised "oh", second build** (`tripo_oh.py`,
+his pick of the leftovers): `out/plan-oh.png` (drawing | before | after),
+`out/plan/mouths.png` (all seven with it). Corners in 26 mm, the lips meet
+just past the opening, a flat upper lip with a thin sliver of the tooth
+band under it (`TOP_LIFT` -4 mm), a U below (44 x 36 mm), the inside moved
+as one piece (the tongue keeps its shape), the chin drops; the band's ends
+follow the corners (key `O2` on Teeth, set by `set_face` with `Mouth.O2`).
+Two bugs found on the way: `teeth_vertices` (tripo_mouthtest.py) read the
+live texture, where tripo_teeth.py had painted the sheet dark, so it found
+no sheet at all and the sheet stayed dark in front of the band (the old
+"teeth hidden in the oh"); it now reads `in/hair_tex.png`. And sliding
+moved skin along his surface (fitted curve, grid, ray casts) all failed on
+the lip rims; dropped, the band following the corners made it unneeded.
+Known, small: a nick at each corner where the lips meet.
+
+Also made, not yet shown as a page: `tripo_sheet.py` renders the seven
+faces in a row (`out/plan/expressions.png`), six poses with a face each
+(`out/plan/poses6.png`: Hello, Wave, Get ready, Jump, Point, Thinking; the
+crouch and the thinking hand are rough first guesses) and a 24-frame turn
+(`out/plan/turn-strip.png`, `out/tripo-face-turn.mp4`).
 
 ## Rebuild (about 15 minutes)
 
@@ -39,20 +60,24 @@ unzip -j <the zip> -d /tmp/z && cp "/tmp/z/Dr.Smiley ( hands down ) .glb" in/tri
 python3 tripo_fix.py && EYE_STYLE=matched python3 tripo_eyes.py && python3 tripo_rig.py
 python3 tripo_face.py && python3 tripo_mouths.py && python3 tripo_muscles.py
 python3 tripo_eyes2.py && python3 tripo_teeth.py          # TEETH=band is the default
-python3 tripo_mouths.py && python3 tripo_muscles.py       # again: the pucker needs the teeth arc
+python3 tripo_mouths.py && python3 tripo_muscles.py       # again: the pucker and the second "oh" need the teeth
 ```
 
 `tripo_muscles.py` ends by rendering `out/plan/mouths.png`: compare it with
-the committed one (git) to confirm the rebuild matches.
+the committed one (git) to confirm the rebuild matches (2026-10-23: it did,
+mean difference 0.01 of 255; only render grain). `pip install bpy` took
+~4 minutes; the whole chain ~7 minutes on the cloud machine. Rendering the
+reactions sheet alone: open `in/tripo-face.blend`, `render_sheet(ob, CX)`
+from `tripo_mouths.py` (2.5 min).
 
 ## Next
 
-1. Known leftovers, in Jose's order of annoyance (ask him): the tongue
-   crumples a little in the surprised "oh"; the "oh" hides the teeth where
-   his drawing shows a sliver; a faint rim round a shut eye; two soft folds
-   beside the nose in the "oh"; the laugh's shut-eye arc ends dip.
-2. The expression sheet (brows, eyes, mouth, cheeks together), six poses, a
-   360-degree turn: stop for his OK.
+1. Jose's verdict on the "oh" (`out/plan-oh.png`). Then the other
+   leftovers in his order: the faint rim round a shut eye; the laugh's
+   shut-eye arc ends dip; the corner nicks of the new "oh".
+2. The expression sheet, six poses and the turn as a plan page for his OK
+   (`tripo_sheet.py` already renders them; tune the crouch and the
+   thinking pose first: the crouch's legs splay, the hand misses the chin).
 3. The animation (R2), a visual plan first (blinks: 2-3 frames down, 1
    hold, 3-4 up, motivated by a thought or a look change; lids follow eye
    darts; Animation Mentor / Bloop Animation, noted 2026-10-22).

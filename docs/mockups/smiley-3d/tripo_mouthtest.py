@@ -115,7 +115,15 @@ def close_mouth(co0, X, ZU, ZL, close, teeth, upper=None):
 def teeth_vertices(ob):
     """His teeth: white in the texture, in the mouth."""
     import tripo_lib as T
-    img, px = T.texture(ob)
+    # from his original colours when they are kept (tripo_fix.py's in/hair_tex.png): after
+    # tripo_teeth.py the live texture has the band painted into the mouth's dark red, and
+    # reading that found no teeth at all (2026-10-23: the sheet then stayed in front of the
+    # 3D band in the "oh" and hid its middle)
+    orig = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'in', 'hair_tex.png')
+    if os.path.exists(orig):
+        px = np.asarray(Image.open(orig).convert('RGBA'), dtype=np.float32)[::-1] / 255
+    else:
+        img, px = T.texture(ob)
     cen, tuv = T.face_arrays(ob)
     col = T.sample(px, tuv.mean(1)) * 255
     # white, or the grey shading along their edges (light and not pink): pure white

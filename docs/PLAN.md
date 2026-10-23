@@ -373,8 +373,11 @@ then read the log; it names the suite and the check.
   and swoop, a 36-bone skeleton, a face rig on his own surface (brows,
   cheeks, mouths after the face's muscles), alive eyes (glass cornea, one
   lash line, no lower lids) and a smooth tooth band, each step on Jose's OK
-  with pictures. `docs/mockups/smiley-3d/`; handoff
-  `docs/handoff-smiley-3d.md`. Nothing deployed, no User Guide change.
+  with pictures. Then (new chat, same day) the model rebuilt from his zip
+  (identical sheet), the surprised "oh" redone (`tripo_oh.py`, waiting on
+  his OK), first renders of six poses and a turn (`tripo_sheet.py`).
+  `docs/mockups/smiley-3d/`; handoff `docs/handoff-smiley-3d.md`. Nothing
+  deployed, no User Guide change.
 - 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
   aren't being delivered", owners should send them, "like a normal app";
   his picks: owner-code phones send, push for Team Chat and new training).

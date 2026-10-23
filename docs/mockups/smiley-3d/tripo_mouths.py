@@ -33,7 +33,9 @@ MOUTHS = {
     # pucker; sadness pulls the corners down (15) and the chin up into a pout (17);
     # worry stretches the lips sideways (20); doubt dimples one corner (14)
     # a round "oh": the lips gathered into an oval, the skin round them following gently
-    'surprised': dict(close=0, mouth={'O': 1, 'JawOpen': 1.1},
+    # the second "oh" (tripo_oh.py, 2026-10-23): corners in, lips meeting past the opening,
+    # flat upper lip over the tooth band, a U below, the inside moved as one piece
+    'surprised': dict(close=0, mouth={'O2': 1},
                       brow=((5, 0), (6, 0)), lid=(0, 0)),   # lids up from rest: white above the iris is the surprise
     'sad':       dict(close=1, mouth={'AU.Relax.L': 1, 'AU.Relax.R': 1, 'AU.CornerDepress.L': 1.15, 'AU.CornerDepress.R': 1.15,
                                       'AU.ChinRaise': 1.6}, brow=((1.2, 15), (1.4, 18)), lid=(.5, .5)),   # heavy lids, as drawn
@@ -237,6 +239,11 @@ if __name__ == '__main__':
         add_key(ob, 'Mouth.' + n.capitalize(), fit_line(co0, X, ZU, ZL, teeth, front, xs, zs))
     xs, tops, bots = trace('surprised', X, ZU, ZL, UPPER)['open']
     add_key(ob, 'Mouth.Surprised', fit_open(co0, X, ZU, ZL, front, xs, tops, bots))
+    # the second "oh" and the tooth band's key with it (the band exists after tripo_teeth.py)
+    from tripo_oh import oval2, band_key
+    add_key(ob, 'Mouth.O2', oval2(co0, X, ZU, ZL, teeth, front))
+    if 'Teeth' in bpy.data.objects:
+        band_key(bpy.data.objects['Teeth'], X)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-face.blend'))
     # the sheet: tripo_muscles.py draws it, once its keys are in
 
