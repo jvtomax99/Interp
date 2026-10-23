@@ -385,7 +385,7 @@ def cut_and_ring(ob, eyes):
         rmix = nt.nodes.new('ShaderNodeMix'); rmix.data_type = 'FLOAT'
         rA = next(i for i in rmix.inputs if i.identifier == 'A_Float'); rB = next(i for i in rmix.inputs if i.identifier == 'B_Float')
         rout = next(o for o in rmix.outputs if o.identifier == 'Result_Float')
-        nt.links.new(rl[0].from_socket, rA); rB.default_value = .62
+        nt.links.new(rl[0].from_socket, rA); rB.default_value = .88          # matte (at .62 a shut lid carried a glossy patch)
         nt.links.new(flat_att.outputs['Fac'], rmix.inputs['Factor'])
         nt.links.new(rout, bsdf.inputs['Roughness'])
     A2, out2 = mixer('lash', (.03, .012, .006, 1)); nt.links.new(out1, A2)
