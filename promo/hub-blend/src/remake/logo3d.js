@@ -14,7 +14,10 @@ import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutSine, rng } from ".
 
 const NAVY = 0x0a1f5c, BLUE = 0x1560e0, TILE_COLORS = [0x13306e, 0x1f5fd6, 0x2f86f0, 0x7cc0ff, 0xcfe6ff];
 
-export function buildLogo3D(renderer, font, { W, H }) {
+export async function buildLogo3D(renderer, font, { W, H }) {
+  // the set behind it (Jose, 2026-10-23: the white looks out of place; ?logobg= picks a version for the previews)
+  const BG = new URLSearchParams(location.search).get("logobg") || "campus"; // Jose's pick: his photo of the main entrance, frosted
+  const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
   const group = new THREE.Group();
   const pmrem = new THREE.PMREMGenerator(renderer);
   const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -23,18 +26,44 @@ export function buildLogo3D(renderer, font, { W, H }) {
   const wc = document.createElement("canvas"); wc.width = 512; wc.height = 1024;
   const wg = wc.getContext("2d");
   const gr = wg.createRadialGradient(256, 470, 30, 256, 520, 620);
-  gr.addColorStop(0, "#f4f8fe"); gr.addColorStop(0.45, "#dce9f9"); gr.addColorStop(1, "#a9c6ec");
+  if (BG === "navy") { gr.addColorStop(0, "#2a4fb0"); gr.addColorStop(0.2, "#14286e"); gr.addColorStop(0.6, "#08113a"); gr.addColorStop(1, "#03061a"); }
+  else { gr.addColorStop(0, "#f4f8fe"); gr.addColorStop(0.45, "#dce9f9"); gr.addColorStop(1, "#a9c6ec"); }
   wg.fillStyle = gr; wg.fillRect(0, 0, 512, 1024);
+  if (BG === "hmh") { // the edges go to the reel's navy, so the shots before and after flow into it
+    const vg = wg.createRadialGradient(256, 545, 40, 256, 545, 150);
+    vg.addColorStop(0, "rgba(3,6,26,0)"); vg.addColorStop(1, "rgba(9,22,70,0.85)");
+    wg.fillStyle = vg; wg.fillRect(0, 0, 512, 1024);
+  }
   const wallTex = new THREE.CanvasTexture(wc); wallTex.colorSpace = THREE.SRGBColorSpace;
   // under the bloom threshold: a white wall would glow over everything
   const wall = new THREE.Mesh(new THREE.PlaneGeometry(18, 30), new THREE.MeshBasicMaterial({ map: wallTex, toneMapped: false, color: 0xf4f6fa, fog: false })); // its middle just over the bloom threshold: a soft glow behind the word
   wall.position.set(0, 4, -3.2);
   group.add(wall);
+  if (BG === "hmh") { // the HMH mark, large and faint behind the word
+    const mk = await loadImg("assets/hmh-mark.png");
+    const t = new THREE.Texture(mk); t.colorSpace = THREE.SRGBColorSpace; t.needsUpdate = true;
+    const mark = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 4.6 * mk.height / mk.width), new THREE.MeshBasicMaterial({ map: t, transparent: true, opacity: 0.22, toneMapped: false, fog: false, depthWrite: false }));
+    mark.position.set(0.1, 3.0, -3.1);
+    group.add(mark);
+  }
+  if (BG === "campus") { // the hospital at dusk behind frosted glass
+    const ph = await loadImg("assets/humc/entrance-main.jpg"); // the main entrance, the tower and the sign (Jose's photo, 2026-10-23)
+    const c = document.createElement("canvas"); c.width = 700; c.height = 1000;
+    const cg = c.getContext("2d"), k = Math.max(700 / ph.width, 1000 / ph.height);
+    cg.filter = "blur(4px) saturate(1.05)"; cg.drawImage(ph, (700 - ph.width * k) / 2, (1000 - ph.height * k) / 2, ph.width * k, ph.height * k); cg.filter = "none";
+    cg.fillStyle = "rgba(228,238,250,0.46)"; cg.fillRect(0, 0, 700, 1000);
+    const fg = cg.createLinearGradient(0, 0, 0, 1000); fg.addColorStop(0, "rgba(3,6,26,0.35)"); fg.addColorStop(0.5, "rgba(3,6,26,0)"); fg.addColorStop(1, "rgba(3,6,26,0.25)");
+    cg.fillStyle = fg; cg.fillRect(0, 0, 700, 1000);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+    const glass = new THREE.Mesh(new THREE.PlaneGeometry(7, 10), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, fog: false, color: 0xe6e6e6 }));
+    glass.position.set(0, 3.2, -3.1);
+    group.add(glass);
+  }
   const FLOOR_Y = 0.9;
   const mirror = new Reflector(new THREE.PlaneGeometry(30, 30), { textureWidth: W / 2, textureHeight: H / 2, color: 0xb9c9e2, clipBias: 0.003 });
   mirror.rotation.x = -Math.PI / 2; mirror.position.y = FLOOR_Y;
   group.add(mirror);
-  const sheen = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshBasicMaterial({ color: 0xdfe9f7, transparent: true, opacity: 0.72, toneMapped: false, fog: false }));
+  const sheen = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshBasicMaterial({ color: BG === "navy" ? 0x0a1440 : 0xdfe9f7, transparent: true, opacity: BG === "navy" ? 0.6 : 0.72, toneMapped: false, fog: false }));
   sheen.rotation.x = -Math.PI / 2; sheen.position.y = FLOOR_Y + 0.002;
   group.add(sheen);
 
@@ -69,7 +98,7 @@ export function buildLogo3D(renderer, font, { W, H }) {
     g.userData.width = x; g.userData.list = list;
     return g;
   };
-  const top = letters("Interpreter", 1, glossy(NAVY), 0.3, 0.45); // a thinner bevel: its strokes are thinner than Hub's
+  const top = letters("Interpreter", 1, glossy(BG === "navy" ? 0xe6efff : NAVY), 0.3, 0.45); // on navy the word turns ice white, so it never sits dark on dark // a thinner bevel: its strokes are thinner than Hub's
   const hub = letters("Hub", 1, hubMat, 0.42);
   // sizes: "Interpreter" across the frame, "Hub" about 2.2 times taller, as in the picture
   const TOPW = 3.3, sTop = TOPW / top.userData.width, sHub = sTop * 1.95;
@@ -120,7 +149,7 @@ export function buildLogo3D(renderer, font, { W, H }) {
   // ---------- the line under it ----------
   const lc = document.createElement("canvas"); lc.width = 1400; lc.height = 120;
   const lg = lc.getContext("2d");
-  lg.font = '600 64px "Inter Tight"'; lg.fillStyle = "#13306e"; lg.textAlign = "center"; lg.textBaseline = "middle";
+  lg.font = '600 64px "Inter Tight"'; lg.fillStyle = BG === "navy" ? "#cfe3ff" : "#13306e"; lg.textAlign = "center"; lg.textBaseline = "middle";
   if ("letterSpacing" in lg) lg.letterSpacing = "6px";
   lg.fillText("For The HUMC Interpreter Team", 700, 62);
   const lineTex = new THREE.CanvasTexture(lc); lineTex.colorSpace = THREE.SRGBColorSpace;

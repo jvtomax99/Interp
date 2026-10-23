@@ -193,7 +193,35 @@ async function build() {
   }
 
   // 0-1 s
-  place("says", "says", word("The Doctor Says:", { fit: 2.5, maxSize: 0.5 }), 0, 1.15, 0, 0.05);
+  // "The Doctor Says:" (Jose, 2026-10-23: better word art; ?says= picks a version for the previews)
+  const SAYS = new URLSearchParams(location.search).get("says") || "stack"; // Jose's pick
+  if (SAYS === "stack") {
+    // big, like "Heart Failure": "The Doctor" over a cyan "Says:"
+    place("says", "says", word("The Doctor", { fit: 2.6, maxSize: 0.7 }), 0, 1.95, 0, 0.05);
+    place("says2", "says", word("Says:", { fit: 2.2, maxSize: 1.25, face: "cyan" }), 0, 0.75, 0, 0.3);
+  } else if (SAYS === "bubble") {
+    // a glossy white speech bubble, the words on it in navy, its tail pointing down at what he says
+    const bw = 3.0, bh = 1.25, br = 0.36, sh = new THREE.Shape();
+    sh.moveTo(-bw / 2 + br, -bh / 2); sh.lineTo(-0.55, -bh / 2); sh.lineTo(-0.85, -bh / 2 - 0.42); sh.lineTo(-0.2, -bh / 2);
+    sh.lineTo(bw / 2 - br, -bh / 2); sh.quadraticCurveTo(bw / 2, -bh / 2, bw / 2, -bh / 2 + br); sh.lineTo(bw / 2, bh / 2 - br);
+    sh.quadraticCurveTo(bw / 2, bh / 2, bw / 2 - br, bh / 2); sh.lineTo(-bw / 2 + br, bh / 2); sh.quadraticCurveTo(-bw / 2, bh / 2, -bw / 2, bh / 2 - br);
+    sh.lineTo(-bw / 2, -bh / 2 + br); sh.quadraticCurveTo(-bw / 2, -bh / 2, -bw / 2 + br, -bh / 2);
+    const bubble = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.22, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.07, bevelSegments: 6, curveSegments: 16 }),
+      new THREE.MeshPhysicalMaterial({ color: 0xf4f8ff, roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.08, emissive: 0x9fb8e6, emissiveIntensity: 0.12 }));
+    body.position.z = -0.2; body.castShadow = true;
+    const text = flat((g, w, h) => { g.font = '800 120px "Inter Tight"'; g.fillStyle = "#0b1a4a"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("The Doctor Says:", w / 2, h / 2 + 6); }, 1100, 200, 0.52);
+    text.position.z = 0.11;
+    bubble.add(body, text); bubble.userData.size = 1;
+    place("says", "says", bubble, 0, 1.35, 0, 0.05, "pop");
+  } else if (SAYS === "ecg") {
+    // the words over a heartbeat line in cyan that runs across and spikes, leading into "Heart Failure"
+    place("says", "says", word("The Doctor Says:", { fit: 2.6, maxSize: 0.62 }), 0, 1.6, 0, 0.05);
+    const pts = [[-1.6, 0], [-0.55, 0], [-0.4, 0.12], [-0.28, -0.08], [-0.12, 0.62], [0.02, -0.42], [0.16, 0.08], [0.3, 0], [1.6, 0]].map(([x, y]) => new THREE.Vector3(x, y, 0));
+    const ecg = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.05), 160, 0.03, 8, false),
+      new THREE.MeshBasicMaterial({ color: C.cyan, toneMapped: false }));
+    place("ecg", "says", ecg, 0, 0.82, 0.1, 0.25, "wipe");
+  } else place("says", "says", word("The Doctor Says:", { fit: 2.5, maxSize: 0.5 }), 0, 1.15, 0, 0.05);
   // 1-2.4 s
   place("docLabel", "doctor", label("THE DOCTOR"), 0, 2.95, 0, 1.0, "fade");
   place("heart", "doctor", word("Heart", { fit: 2.2, maxSize: 0.95 }), 0, 1.75, 0, 1.0);
@@ -276,7 +304,7 @@ async function build() {
   // the logo shot as Jose's 3D logo picture (logo3d.js, 2026-10-22); the phone, icon and rings above are no longer shown
   const LOGO_FONT = new URLSearchParams(location.search).get("logofont") || "fredoka-700";
   const logoFont = await new Promise((res, rej) => new FontLoader().load(`fonts/${LOGO_FONT}.typeface.json`, res, undefined, rej));
-  const logo3d = buildLogo3D(renderer, logoFont, { W, H });
+  const logo3d = await buildLogo3D(renderer, logoFont, { W, H });
   logo.clear();
   logo.add(logo3d.group);
 
