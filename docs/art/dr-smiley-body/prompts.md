@@ -86,3 +86,20 @@ The four talking mouths in that file are still optional.
    T-pose is cut into upper arm and forearm pieces for continuous motion.
 4. New layers go into `drSmileyArt()` and `DrAnim`; `dr-smiley.md`
    and the User Guide are updated with the places he shows full-length.
+
+## Done without the generator (2026-10-23)
+
+No image generator runs in a cloud session, so the master was cut into a
+cutout rig by code instead (`layers/`: `seams.py` tracks the sleeve
+seams, `build.py` does the rest; `rig.json` has the pivots in master
+pixels). `head.webp` is the app's own head (`base.webp` above its chin,
+scaled 1.088, its sliver of coat removed) with a skin neck tube behind;
+`head-master.webp` is the master's own head for comparison. `body.webp`
+is the torso and legs with no arms (the floor shadow keyed out, the coat
+edge under each sleeve relit from the coat beside it); the arms are four
+pieces, upper arm and forearm each side, with round caps at the shoulder
+and elbow, drawn behind the body so the shoulder cap covers the joint.
+`preview-rig.png`: rest, wave, cheer, fist pump, think, shrug, all from
+these pieces. Wave, cheer and shrug read well; the fist pump and think
+poses still need drawn hands (a cutout hand stays an open palm), which
+is what the pose prompts above are for. Not wired into the app yet.
