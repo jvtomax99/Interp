@@ -286,8 +286,8 @@ then read the log; it names the suite and the check.
   2026-10-21. Phase 1 (the CSS to `app.css`) built and measured
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
-  Phase 3 (features), Jose's pick: Translate, this PR. Next leaves: 3D
-  Body, Looking a term up, Voice and mic check (`docs/split-index.md`).
+  Phase 3 (features): Translate #126, live; 3D Body, this PR. Next
+  leaves: Looking a term up, Voice and mic check (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -297,6 +297,12 @@ then read the log; it names the suite and the check.
 
 ## Done
 
+- 2026-10-22 Split `index.html`, phase 3, 3D Body (this PR): the Hub's side
+  of the 3D Body is `features/3d-body.js`, verbatim, before the app's
+  script. Proof: tokens identical when put back; the frame, its wall, the
+  resize placement, a forged message and closing identical in the browser
+  (no suite covered it, so a probe did). `3d-body.md`, `AGENTS.md`,
+  `CLAUDE.md`. Translate (#126) live as b1022.1541.
 - 2026-10-22 Split `index.html`, phase 3, Translate (this PR): the
   Translate section is `features/translate.js`, verbatim, loaded before
   the app's script (declarations only). Proof: tokens identical when put
