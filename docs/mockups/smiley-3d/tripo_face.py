@@ -98,7 +98,19 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
     if te is not None and te.data.shape_keys is not None:
         for tk in te.data.shape_keys.key_blocks[1:]:
             tk.value = kb['Mouth.' + tk.name].value if 'Mouth.' + tk.name in kb else 0
-    if lids:
+    if lids and 'Lid.U1.L' in kb:
+        # the lids as his own skin (tripo_lids.py): rest = 0 (the edge on the iris top),
+        # the old shells' scale mapped onto it (their .32 was rest; 0 wide open; 1 shut)
+        from tripo_lids import set_lids
+        for i, s in enumerate((R, L)):
+            if happy:
+                up, lo = 1., happy                 # the upper comes down to meet the raised lower lid (set_lids clamps it)
+            else:
+                old = lid[i] if lid else REST_LID + lid_down[i]
+                up = (old - REST_LID) / (1 - REST_LID) if old >= REST_LID else (old - REST_LID) / REST_LID
+                lo = lower[i]
+            set_lids(ob, s, up, lo)
+    elif lids:
         from tripo_eyes import set_blink
         for i, s in enumerate((R, L)):
             lo = bpy.data.objects['Lid.' + s]
@@ -115,7 +127,6 @@ def set_face(ob=None, brow=None, cheek=(0, 0), close=0, mouth=None, lids=True, l
             if 'LidLow.' + s in bpy.data.objects:
                 import tripo_eyes2; tripo_eyes2.set_lower(s, lower[i])
 
-
 if __name__ == '__main__':
     from tripo_faceplan import Brow, deform_skin, cheeks, POSES
     from tripo_mouthtest import opening, close_mouth, teeth_vertices
@@ -123,6 +134,13 @@ if __name__ == '__main__':
     sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'
     ob = bpy.data.objects['Mesh_0']
     weld(ob)
+    # the eyelids as his own skin (tripo_lids.py, Jose's go 2026-10-23): cut, ring, bridge
+    from tripo_lids import cut_and_ring, lid_keys, lash_material
+    rings = cut_and_ring(ob, {'L': bpy.data.objects['Eye.L'], 'R': bpy.data.objects['Eye.R']})
+    for n in ('Lid.L', 'Lid.R', 'Glint.L', 'Glint.R', 'Liner.L', 'Liner.R'):     # the old shells, shines and painted-style liner tubes
+        if n in bpy.data.objects:
+            bpy.data.objects.remove(bpy.data.objects[n])
+    lash_material(ob)
     co0 = coords(ob)
     front = (co0[:, 1] < -.08) & (co0[:, 2] > .6)
     img, px = T.texture(ob)
@@ -148,5 +166,6 @@ if __name__ == '__main__':
     for c in CLOSE_STEPS:
         add_key(ob, f'Mouth.Close{c:g}', close_mouth(co0, X, ZU, ZL, c, teeth))
     np.savez(os.path.join(HERE, 'in', 'mouth-opening.npz'), X=X, ZU=ZU, ZL=ZL, CX=CX)
+    lid_keys(ob, rings, add_key, co0)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(HERE, 'in', 'tripo-face.blend'))
     print('done', [k.name for k in ob.data.shape_keys.key_blocks])

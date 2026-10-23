@@ -25,6 +25,10 @@ S = {'v1':      dict(cover=1.16, depth=.014, sink=.0055, open=50, ball=True, lin
      'matched': dict(cover=1.0, depth=.012, sink=.0062, open=72, ball=True, liner=True),
      'painted': dict(cover=1.0, depth=.0075, sink=.0045, open=88, ball=False, liner=False)}[EYE_STYLE]
 COVER, DEPTH, SINK, OPEN = S['cover'], S['depth'], S['sink'], S['open']
+# the balls sunk deeper for the skin lids (tripo_lids.py, 2026-10-23): at 6.2 mm the ball stood 6 mm proud
+# of the painted skin and the lids had to climb 10 mm back to the face round it, a trench that read
+# as goggles; EYE_SINK overrides (the size and the opening are unchanged)
+SINK = float(os.environ.get('EYE_SINK', .0100 if EYE_STYLE == 'matched' else SINK))
 SHUT = -62 if EYE_STYLE == 'v1' else -68   # lid edge elevation when closed (matched: the ball's whole opening shows, so all the way down)
 
 

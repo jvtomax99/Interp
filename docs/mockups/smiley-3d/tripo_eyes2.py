@@ -592,15 +592,18 @@ if __name__ == '__main__':
     paint_out_liner([bpy.data.objects['Eye.L'], bpy.data.objects['Eye.R']])
     # the lid in his skin's own colour right above the eye (a shade darker read as a disc
     # round each eye); the new lid has no 'edge' attribute, so the ramp's first stop is it
-    c = lid_skin_colour_above(bpy.data.objects['Eye.L'])
-    r = bpy.data.materials['Lid'].node_tree.nodes['Color Ramp'].color_ramp
-    r.elements[0].color = r.elements[1].color = build.srgb(*c)
+    if 'Lid.L' in bpy.data.objects:        # the old shell lids (gone since tripo_lids.py, 2026-10-23)
+        c = lid_skin_colour_above(bpy.data.objects['Eye.L'])
+        r = bpy.data.materials['Lid'].node_tree.nodes['Color Ramp'].color_ramp
+        r.elements[0].color = r.elements[1].color = build.srgb(*c)
     for s in ('L', 'R'):
         eye = bpy.data.objects['Eye.' + s]
         iris_detail(eye.data.materials[0])
         add_cornea(eye)
-        bpy.data.objects['Glint.' + s].hide_render = True      # the dome's real shine replaces the painted one
-        rebuild_lid(eye, s)
+        if 'Glint.' + s in bpy.data.objects:
+            bpy.data.objects['Glint.' + s].hide_render = True      # the dome's real shine replaces the painted one
+        if 'Lid.' + s in bpy.data.objects:
+            rebuild_lid(eye, s)
         # no lower lids (Jose, 2026-10-22: "I don't want him to have lower eye lids")
         caruncle(eye.data.materials[0], s)
     bpy.ops.wm.save_as_mainfile(filepath=src)

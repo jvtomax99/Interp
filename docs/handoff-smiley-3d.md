@@ -73,6 +73,40 @@ coloured: `out/plan/parts.png`; him beside the targets:
 **step A go**: the eyes rebuilt as his own skin, lower lids back as part
 of it (not the separate pieces he rejected on 10-22).
 
+## Step A built (2026-10-23, later): the eyelids as his skin, waiting on Jose
+
+`tripo_lids.py`, called from `tripo_face.py` right after the weld (before any
+shape key): the skin inside an oval round each eye (S_X 1.3, S_Z 1.2 ball
+units) is cut out; two strips (upper lid, lower lid; 160 upright columns,
+22 rows + 2 rim rows) are built from the lid edges on the ball out to just
+inside the cut, bridged to the cut (`bridge_loops`; the cut's zigzag relaxed
+once). Each point: over the ball it keeps the lid's thickness (plus the
+cornea's dome); outward it becomes his own skin, read by ray casts onto a
+kept copy of the skin, with the ball-hugging weight dying out by the cut.
+Colour: one flat skin tone (his texture at the nose bridge), mixed into
+Material_0 by the 'flat' attribute (1 on the ring, feathered .3 ball units
+into his skin), the bump and roughness maps faded out there too (the bump
+read as a streak), the lash line by the 'lash' attribute (the upper rim and
+the first tenth of the lid, tapered toward the nose). Keys: Lid.W (wide),
+Lid.U1..U6 (upper lid down), Lid.D1..D4 (lower lid up, with a puff); the
+laugh = upper down to meet the lower raised in an arc (`set_lids` keeps the
+upper edge above the lower); `set_face` maps the old shell scale (lid .32 =
+rest). The old Lid, Glint and Liner objects are removed; `tripo_eyes2.py`
+skips its lid parts when they are gone. `EYE_SINK` (tripo_eyes.py): the
+balls now sit 10 mm behind the painted skin (was 6.2): at 6.2 they stood
+6 mm proud and the lids climbed back to the face in a trench (goggles).
+Checks: `tripo_lidtest.py` (rest, smile, laugh, blink, wide; front,
+three-quarter, one eye), `tripo_gateA.py` (beside the reference tiles and
+the old lids), page `out/plan-lids.png`.
+Learned the hard way (20 rebuilds): the dark arc over each lid was the old
+Liner tube object, not the lash; the streak down a shut lid was Tripo's
+bump map through borrowed UVs; the ring round the eye was (a) the lids
+standing proud (sink the balls), (b) a crease where the lid met the skin
+(read the skin exactly, fade the ball-hug to zero by the cut), (c) slivers
+in the bridge (end the ring 5% inside the cut, faces as fine as his mesh).
+Snapping or inserting the cut's points onto the ring never lined up (the
+cut zigzags). Left: a faint dashed seam in close-ups, the lash line thin.
+
 ## Rebuild (about 15 minutes)
 
 ```
