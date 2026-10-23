@@ -51,6 +51,28 @@ faces in a row (`out/plan/expressions.png`), six poses with a face each
 crouch and the thinking hand are rough first guesses) and a 24-frame turn
 (`out/plan/turn-strip.png`, `out/tripo-face-turn.mp4`).
 
+## Jose's new brief (2026-10-23, after the "oh")
+
+Two reference sheets (AI-made, Pixar-style; in the chat, not in git): "A
+smile becomes a laugh" (8 moments) and "Corrected expression targets"
+(neutral, warm smile, joyful laugh, surprised, empathetic sadness, worried,
+skeptical, relaxed blink). His brief: expressions through the whole face;
+eyelids wrap the balls with thickness and close without cutting, blinks
+never shrink the eyes; a smile lifts the cheeks and the lower lids, a laugh
+pushes the eyes into upward crescents, a blink closes without laughing
+cheeks; the mouth opens by the jaw with a recessed inside, curved upper
+teeth and a tongue; brows independent (sad: inner ends up; worried: more
+tension, lips pressed; skeptical: one brow up, one eye narrower, both open);
+transitions with anticipation, hold, settle, staggered; head still.
+Neutral, warm smile and joyful laugh first, front and three-quarter, with a
+slow there-and-back clip; check floating, clipping, sliding colours and
+identity before the rest. Plan page: `out/plan-match.png` (his parts
+coloured: `out/plan/parts.png`; him beside the targets:
+`out/plan/targets-now.png`). **His picks:** the new sheets rule over the
+30 drawings where they disagree (the drawings stay for the 2D app);
+**step A go**: the eyes rebuilt as his own skin, lower lids back as part
+of it (not the separate pieces he rejected on 10-22).
+
 ## Rebuild (about 15 minutes)
 
 ```
