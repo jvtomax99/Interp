@@ -6125,9 +6125,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'promo',       tone:'gd-n3', pin:'pins/wave.webp',               eyebrow:'The video',             title:'A new 45-second film, in 3D: the 3D Body coming apart, your campus, and Dr. Smiley’s brain' },
   { id:'notifications', tone:'gd-n1', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
   { id:'knowledgebrain', tone:'gd-n2', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: at the top of Term Review, or from CoreCHI Practice' },
-  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',            eyebrow:'CoreCHI Practice',      title:'Your campus at golden hour, with depth: drag across it and the sky and town move behind the buildings' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -6297,7 +6297,7 @@ function guideOpenSheet(t){
   if(prefersAutoFocus()) sheet.querySelector('.gd-show, .gd-x').focus({ preventScroll: true });
 }
 
-/* ---- The 45-second video (media/hub-promo.mp4, made in promo/) ----
+/* ---- The 45-second video (media/hub-promo.mp4, made in promo/hub-blend/) ----
    Its answer is 'promo'. Home's hello banner always has a "Watch" bubble
    (Jose, 2026-10-19); once the video has been watched on this phone
    (ih_promoSeen: played to the end or past 15 s) its ring stops turning
