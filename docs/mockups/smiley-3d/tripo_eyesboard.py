@@ -145,20 +145,22 @@ board('The surprised “oh”, redone', ['Your drawing (left), the first “oh�
 ], 'plan-oh.png')
 
 
-board('Step A: his eyelids as his own skin', ['Your targets, the old shell lids, the new lids: front, three-quarter, one eye close up. Nothing moves in time yet (step C).'], [
-    ('1', 'ME', 'What was built: the skin inside an oval round each eye is cut out and replaced by two strips of new skin, '
-     'upper lid and lower lid, in upright columns, each from the lid\u2019s edge on the ball out to the cut, hugging the '
-     'ball near the edge and becoming his own skin by the cut, with a rolled rim, a dark lash line on the upper one '
-     '(thicker toward the outer corner) and the fold above the open eye; the strips meet past the corners and join his '
-     'face with faces as fine as his own mesh. The eyeballs sit 4 mm deeper in his head (same size, same opening): '
-     'before, they stood 6 mm proud and the lids had to climb back in a trench.',
-     [fit(Image.open(O('plan/gateA.png')), 1000, 1150)], 'reference, before, now', False),
-    ('2', 'ME', 'What the lids do: the upper lid blinks in six steps round the ball (never through it) and opens wide; '
-     'the lower lid rises in four (a squint, the cheek\u2019s push); a smile lifts the cheeks and the lower lids a little; '
-     'the laugh raises the lower lids into an upward arc and brings the upper lids down to meet them: the crescent. '
-     'A blink shuts without the laughing cheeks; the fold flattens as the lid comes down. The eyeballs and irises keep '
-     'their size throughout.', [fit(Image.open(O('plan/lids-test.png')), 1000, 1350)], 'rest, smile, laugh, blink, wide', True),
-    ('3', 'NOTE', 'After your \u201cfix the eyes more first\u201d: the seam round the eye is gone from the face views (a '
-     'faint mark at the outer corner in close-ups), the lash line is bolder, the fold is in. Not yet: lids following the '
-     'gaze; the timing (step C).', [], '', False),
+board('Step A, review 3: his eyelids as his own skin', ['Reference tiles are generated art, marked as such; every other picture is a render of the model. Same camera, light and framing for before and now.'], [
+    ('1', 'ME', 'Neutral, warm smile, joyful laugh, relaxed blink: your reference, the old shell lids, the new lids front, '
+     'three-quarter and one eye. Since your notes: the upper lid rests on the iris top (it covered a third of it: tired); '
+     'the smile narrows the eye from below, cheeks and lower lids up, the upper lid lifted a touch; the laugh closes both '
+     'lids in an upward arc with a dark lash line on it; the blink closes on the lower lid\u2019s edge with a thin line, '
+     'the lid settling onto the eye, cheeks at rest.', [fit(Image.open(O('plan/gateA.png')), 1000, 1150)], 'reference | before | now', False),
+    ('2', 'ME', 'The side profile, rest and blink, before and now. Plainly: the shut eye is still a mound, taller than your '
+     'reference\u2019s, and the eye sits a little deep under the brow. The eyeball is a 24 mm-deep egg and his sculpt\u2019s '
+     'skin round the painted eye is a shallow dish 9 mm behind the egg\u2019s front; a lid wrapping that egg makes a mound, '
+     'and a lid reaching that dish climbs. A flatter egg (8 mm) and a pad under the brow were both tried today and read '
+     'worse (thick plates, a raised disc); the depth you see is the compromise.', [fit(Image.open(O('plan/gateA-side.png')), 1000, 400)], 'side: before, now', False),
+    ('3', 'ME', 'The in-between shapes: rest to blink and back, rest to smile to laugh. The lids move in steps round the '
+     'ball (six down, four up), the cheeks and brows with them.', [fit(Image.open(O('plan/gateA-moves.png')), 1000, 600)], 'transitions', False),
+    ('4', 'ME', 'The wireframe: the lid ring (160 upright columns, 24 rows, faces about 1 mm like his mesh) joined to the '
+     'cut round the eye, at rest and shut.', [fit(Image.open(O('plan/gateA-wire.png')), 1000, 420)], 'wireframe', False),
+    ('5', 'NOTE', 'Remaining mismatch, plainly: the closed eye\u2019s mound and its depth under the brow (above); a faint '
+     'seam at the outer corner in close-ups; the lower lid at rest reads as a small ledge; the lash line is thinner than '
+     'the art\u2019s. Not done: lids following the gaze; the timing (step C).', [], '', True),
 ], 'plan-lids.png')

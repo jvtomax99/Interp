@@ -114,6 +114,30 @@ a 1.1 mm groove at .42 of the lid, flattening as it shuts). The seam is
 gone from the face views; a faint mark stays at the outer corners in
 close-ups. Waiting on Jose: `out/plan-lids.png`.
 
+## Step A, review 3 (2026-10-23, later): after Jose's detailed notes
+
+Jose (not approved): neutral too covered (tired), smile slits under heavy
+lids, laugh "protruding caps with a thin line", blink "a thick dark crescent
+under the lids"; fix in order neutral, blink (side profile too), smile and
+laugh from those, the in-betweens; show large front and three-quarter, one
+eye, a wireframe; no approval requests for minor steps. Done: `H_TOP` .72
+(the lid on the iris top), `H_BOT` -.76, `H_SHUT` = H_BOT + .015 (the
+closure on the lower lid: the .06 gap was the dark crescent); the shut lid
+settles onto the dome (`ball_y(shut)`), its rim thinner; the lash line on
+rows with a FIXED .5 mm spacing (`NFIX`, `FIX_STEP`, `LASH_ROWS`): by row
+with the rest spacing, a shut lid's lash zone grew into half the eye (the
+"dark half" that survived every lighting test); `THICK` .8 mm and the
+dome's clearance only over the iris (a < .6); the smile recipe lower .45,
+lid .22 (bright eyes); `cheeks()` reaches the lower socket (.728). Tried
+and reverted: a flatter ball (depth 8: thick plates), an under-brow pad
+(any local lift read as a raised disc), SINK 12 (deep-set, a V-crease),
+the lower lid "forward only" rule (a shelf). Kept: depth 12, SINK 9.
+Review: `tripo_gateA.py` (gateA.png, gateA-side.png, gateA-moves.png,
+gateA-wire.png), page `out/plan-lids.png`. Remaining, said plainly on the
+page: the shut eye's mound and its depth under the brow (his sculpt's eye
+dish is 9 mm behind the egg's front), the lower lid's small ledge, a faint
+outer-corner seam, the lash thinner than the art's.
+
 ## Rebuild (about 15 minutes)
 
 ```

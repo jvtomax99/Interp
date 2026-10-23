@@ -224,7 +224,7 @@ def cheeks(co0, front, amount, CX):
         c = np.array([CX + .08 * sx, .695])
         x, z = co0[:, 0], co0[:, 2]
         r = np.hypot((x - c[0]) / .034, (z - c[1]) / .03)
-        w = (1 - smooth(r)) * (1 - smooth((z - .715) / .02)) * front
+        w = (1 - smooth(r)) * (1 - smooth((z - .728) / .022)) * front      # up to the lower socket (.715: the lower lids got nothing from the cheeks, 2026-10-23)
         co[:, 2] += w * .009 * amount
         co[:, 1] -= w * .005 * amount
     return co

@@ -23,7 +23,7 @@ TMP = os.path.join(HERE, 'in', 'faceplan')
 # his left brow, your right, goes a fifth further: DR_BROW_SIDE)
 MOUTHS = {
     'rest':      dict(close=1),
-    'smile':     dict(close=0, cheek=(1, 1), lower=(.3, .3), brow=((2, 0), (2.4, 0))),   # the cheeks push the lower lids up a little (skin lids, 2026-10-23)
+    'smile':     dict(close=0, cheek=(1, 1), lower=(.45, .45), lid=(.22, .22), brow=((2, 0), (2.4, 0))),   # the cheeks push the lower lids up, the upper lids lift a touch (lid .32 = rest): bright eyes, not slits (Jose)
     # pushed toward the size of his drawings (Jose: "push them further"), the
     # muscles past their natural strength the way a cartoon exaggerates
     'laugh':     dict(close=0, mouth={'JawOpen': 1.2, 'CornerUp.L': 1, 'CornerUp.R': 1}, cheek=(1.6, 1.6),

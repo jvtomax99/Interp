@@ -39,17 +39,18 @@ COLS, ROWS = 160, 22           # columns across the eye, rows from the edge out 
 RIM = 2                        # rows rolled under the edge toward the ball
 S_X, S_Z = 1.3, 1.2            # the cut, in ball units (an oval a little wider than tall)
 W_C, U_C = -.06, .97           # the corners: height and half width, ball units
-H_TOP, H_BOT = .5, -.8         # the edges at rest: the upper on the iris top, the lower under it
-H_SHUT = -.74                  # the upper edge shut (just above the resting lower lid)
+H_TOP, H_BOT = .72, -.76       # the edges at rest: the upper just touching the iris top (its top is at .8), the lower on the iris bottom (at -.86 the closure sat 10 mm behind the cheek, a V-crease)
+H_SHUT = H_BOT + .015          # the upper edge shut: on the lower lid's edge (a .06 gap showed as a dark crescent)
 H_LOW = .4                     # the lower edge fully raised (the laugh: a high upward arc)
-H_WIDE = .74                   # the upper edge raised (surprise: white above the iris)
+H_WIDE = .88                   # the upper edge raised (surprise: white above the iris)
 Q = .8                         # the edge curve's roundness
-THICK = .0012                  # the lid's thickness at its edge
+THICK = .0008                  # the lid's thickness at its edge
 BULGE = .0026                  # the glass dome over the iris (tripo_eyes2.py)
 U_STEPS, D_STEPS = 6, 4
 RIM_W = (.03, .015)            # the rim rows, inward from the edge (ball units of height)
-FOLD_AT, FOLD_W, FOLD_DEPTH = .42, .07, .0011   # the fold above the open eye: where along the lid (0 edge .. 1 cut), its width, its depth (into the face)
-LASH_FULL, LASH_END = .16, .27                 # the lash line: full to this part of the lid, gone by this
+FOLD_AT, FOLD_W, FOLD_DEPTH = .42, .11, .0008   # the fold above the open eye: where along the lid (0 edge .. 1 cut), its width, its depth (into the face)
+NFIX, FIX_STEP = 6, .015                       # rows above the edge at a fixed .5 mm spacing (ball units), in every state
+LASH_ROWS = (1., 1., 1., 1., .6, .25)          # the lash line on those rows, from the edge up: 2 mm full, gone by 3 mm
 FEATHER = .3                   # the ring's flat colour feathers into his texture this far past the cut (ball units)
 
 
@@ -118,10 +119,14 @@ class EyeRing:
         i0, j0 = fi.astype(int), fj.astype(int); ti, tj = fi - i0, fj - j0
         return g[i0, j0] * (1 - ti) * (1 - tj) + g[i0 + 1, j0] * ti * (1 - tj) + g[i0, j0 + 1] * (1 - ti) * tj + g[i0 + 1, j0 + 1] * ti * tj
 
-    def ball_y(self, a, i, upper):
+    def ball_y(self, a, i, upper, shut=0.):
         """y of the lid over the ball at radius a (ball units): the ball's front plus the
-        lid's thickness, more over the glass dome; past the ball, flat. Rows 0, 1: the rim."""
-        margin = THICK + (BULGE + .0002) * (1 - smooth((min(a, 1.) - .7) / .25)) + (.0006 if upper else 0.)
+        lid's thickness, more over the glass dome; past the ball, flat. Rows 0, 1: the rim.
+        shut (0..1): a closing lid settles onto the dome (a lid that kept its open clearance
+        when shut read as a cap standing off the eye)."""
+        # the dome's clearance only over the dome (the iris, a < .6): at the open lid's edge it made a 5 mm plate
+        # (shut, the clearance over the dome was cut to a tenth: the glass dome then poked through the shut lid)
+        margin = THICK + (BULGE + .0003) * (1 - smooth((min(a, 1.) - .5) / .2)) + ((.0005 * (1 - .7 * shut)) if upper else 0.)
         if i == 0:
             margin = .0003
         elif i == 1:
@@ -137,17 +142,23 @@ class EyeRing:
         pts = np.zeros((RIM + 1 + ROWS, COLS + 1, 3))
         sgn = 1 if upper else -1
         lift = 0. if upper else (h - H_BOT) / (H_LOW - H_BOT)                # the lower lid rising: 0 .. 1
+        shut = float(np.clip((H_TOP - h) / (H_TOP - H_SHUT), 0, 1)) if upper else 0.   # the upper lid closing: 0 .. 1
         for j, u in enumerate(self.u):
             we = float(edge_h(u, h))
             # the ring ends 5% inside the cut: on the cut itself its outer row lay on top of the
             # cut's zigzag, and the bridge between them was all slivers (a dotted ring)
             ws = sgn * S_Z * math.sqrt(max(0., 1 - (u / S_X) ** 2)) * .93
             taper = float(np.clip((U_C - abs(u)) / .1, 0, 1))                 # the rim thins out at the corners
-            rows = [we - sgn * RIM_W[0] * taper, we - sgn * RIM_W[1] * taper] + [we + (ws - we) * (k / ROWS) ** 1.4 for k in range(ROWS + 1)]
+            thin = 1 - .5 * shut                                                # the rim rolls thinner as the lid shuts (a delicate closure line)
+            # the first NFIX rows above the edge keep a fixed spacing in every state (the lash line
+            # lives on them: spread with the rest, a shut lid's lash zone grew into half the eye)
+            fixed = [we + sgn * FIX_STEP * k for k in range(NFIX + 1)]
+            rest_span = (ws - fixed[-1])
+            rows = [we - sgn * RIM_W[0] * taper * thin, we - sgn * RIM_W[1] * taper * thin] + fixed + [fixed[-1] + rest_span * (k / (ROWS - NFIX)) ** 1.2 for k in range(1, ROWS - NFIX + 1)]
             y_cut = float(self.y_cut['up' if upper else 'lo'][j])
             for i, w in enumerate(rows):
                 a = math.hypot(u, w)
-                yb = self.ball_y(a, i, upper)
+                yb = self.ball_y(a, i, upper, shut)
                 if i < RIM:
                     y = yb
                 else:
@@ -157,7 +168,7 @@ class EyeRing:
                     # every earlier scheme (a curve to the cut, the skin's slope matched per column)
                     # met his skin in a crease that read as a ring round the eye
                     ys = self.cast_y(u, w)
-                    F = float(smooth((1 - a) / .5)) if a < 1 else 0.
+                    F = float(smooth((1 - a) / (.5 + .4 * shut))) if a < 1 else 0.     # shut: the lid leaves the ball earlier, a tent over its rim (a cap otherwise)
                     y = F * yb + (1 - F) * ys
                     if a < 1:                                            # never behind the ball's clearance (softly)
                         y = (y + yb) / 2 - math.sqrt(((y - yb) / 2) ** 2 + .0006 ** 2)
@@ -167,8 +178,6 @@ class EyeRing:
                         openness = float(np.clip((h - H_SHUT) / (H_TOP - H_SHUT), 0, 1))
                         y += FOLD_DEPTH * openness * math.exp(-((t - FOLD_AT) / FOLD_W) ** 2) * float(np.clip(1 - (u / U_C) ** 2, 0, 1)) ** .5
                     y -= .0022 * lift * (1 - (u / S_X) ** 2) * float(smooth((t - .2) / .3) * (1 - smooth((t - .55) / .45)))
-                if i == RIM + ROWS:
-                    y = y_cut
                 pts[i, j] = (self.rx * u, y, self.rz * w)
         return pts
 
@@ -189,6 +198,7 @@ def cut_and_ring(ob, eyes):
     """The surgery. eyes: {'L': Eye.L object, 'R': Eye.R}. Returns {'L': EyeRing, 'R': EyeRing}."""
     import tripo_lib as T, build
     me = ob.data
+    # (an under-brow pad, the skin above the eye brought 4 mm forward, was tried: any local lift read as a raised disc round the eye)
     rings = {s: EyeRing(e, s) for s, e in eyes.items()}
     img, px = T.texture(ob)
     bm = bmesh.new(); bm.from_mesh(me)
@@ -261,12 +271,11 @@ def cut_and_ring(ob, eyes):
             # and the first tenth of the lid's front: the edge zone wraps over the ball and is
             # seen foreshortened from the front, so a line only on it read as a hairline
             outer = (1 + inner * u / U_C) / 2                           # 0 at the nose .. 1 at the outer corner
-            for i in range(RIM + 1, RIM + 1 + ROWS):
-                t = (i - RIM) / ROWS
-                full = LASH_FULL * (1 + .5 * outer)                    # thicker toward the outer corner
-                k = 1. if t <= full else 1 - float(smooth((t - full) / (LASH_END - LASH_FULL)))
-                if k > 0:
-                    verts['up'][i][j][lash_lay] = k * taper
+            for n, k in enumerate(LASH_ROWS):
+                kk = min(1., k * (1 + .6 * outer))                     # thicker toward the outer corner
+                verts['up'][RIM + 1 + n][j][lash_lay] = kk * taper
+            if outer > .5:                                             # the outer third: one more row
+                verts['up'][RIM + 1 + len(LASH_ROWS)][j][lash_lay] = .5 * (outer - .5) * 2 * taper
         faces = []
         for key in ('up', 'lo'):
             vv = verts[key]
