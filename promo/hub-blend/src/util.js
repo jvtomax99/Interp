@@ -40,3 +40,4 @@ export function roundRect(ctx, x, y, w, h, r) {
   ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
 }
+export const smooth = (x) => x * x * (3 - 2 * x);

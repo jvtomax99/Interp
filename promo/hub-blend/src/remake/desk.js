@@ -308,7 +308,8 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     if (g === "cert") {
       // CoreCHI: the camera pushes into the phone, square onto the campus picture in the card,
       // close enough that it fills the frame's width; the city layer (city.js) takes it from there
-      const w = inOutCubic(prog(u, 0.3, 0.98));
+      // it starts close on the phone (the doorway photo covers the first 0.7 s, doorway.js) and finishes the push
+      const w = lerp(0.72, 1, inOutCubic(prog(u, 0.3, 0.98)));
       if (w > 0) {
         phone.updateWorldMatrix(true, false);
         const at = new THREE.Vector3(WORLD.cx, WORLD.cy, 0.05).applyMatrix4(phone.matrixWorld);

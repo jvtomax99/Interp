@@ -21,6 +21,7 @@ import { buildDesk } from "./desk.js";
 import { createCity } from "./city.js";
 import { createHero } from "./hero.js";
 import { buildLogo3D } from "./logo3d.js";
+import { createDoorway } from "./doorway.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutExpo, inOutSine, inOutCubic } from "../util.js";
 
 const root = document.getElementById("root");
@@ -600,7 +601,7 @@ async function build() {
     let shift = hopping ? (t >= s[1] - HOP / 2 ? SHIFT[next[2]] || 0 : sh0)
       : next && t > s[1] - WHIP ? lerp(sh0, SHIFT[next[2]] || 0, inOutCubic(prog(t, s[1] - WHIP, s[1]))) : sh0;
     // CoreCHI: the shift eases away as the camera squares up to the phone
-    if (s[2] === "cert") shift *= 1 - inOutCubic(prog(t - s[0], 0.3, 0.98));
+    if (s[2] === "cert") shift = 0; // the camera is already close on the phone (the doorway photo covers the start)
     if (shift > 0.5) camera.setViewOffset(W, H, 0, shift, W, H); else camera.clearViewOffset();
     const fp = a.focus || a.look;
     bokeh.uniforms.focus.value = camera.position.distanceTo(fp);
@@ -635,6 +636,7 @@ async function build() {
   root.appendChild(dip);
   const overlay = await createOverlay(root, W, H);
   const city = await createCity(root, canvas, W, H); // CoreCHI's campus, flown into (city.js)
+  const doorway = await createDoorway(city.canvas, W, H); // the cherry-tree photo opening the CoreCHI shot (doorway.js)
   const hero = createHero(city.canvas, W, H); // the proof, big enough to read (hero.js)
   let smileyState = null;
   const _v = new THREE.Vector3();
@@ -675,7 +677,8 @@ async function build() {
       const r = proofRect(f.g); if (r) { bottom = Math.max(bottom, r.y + r.h); top = Math.min(top, r.y); }
     }
     SHIFT[f.g] = Math.max(0, bottom - LIMIT);
-    SPOT[f.g] = { x: i % 2 ? W - MARGIN - SW_ / 2 : MARGIN + SW_ / 2, base: BASE };
+    SPOT[f.g] = { x: i % 2 || f.g === "cert" ? // CoreCHI: on the right, clear of the HMH sign in the doorway photo
+       W - MARGIN - SW_ / 2 : MARGIN + SW_ / 2, base: BASE };
     if (top - SHIFT[f.g] < H * 0.2) console.warn(`Dr. Smiley: in ${f.g} the proof reaches up under the caption (${Math.round(top - SHIFT[f.g])} px)`);
   }
   camera.clearViewOffset();
@@ -728,6 +731,9 @@ async function build() {
     // the campus takes over from the phone, until the cut in the middle of the hop out
     const inCity = s[2] === "cert" && !(hopping && t >= s[1] - HOP / 2);
     city.draw(t - s[0], t, inCity ? feat.worldRect(camera, W, H) : null, inCity ? prog(t - s[0], 0.78, 0.96) : 0);
+    // the cherry-tree photo, then the phone: it dissolves into the CoreCHI card from 0.5 to 0.75 s
+    const intoCert = hopping && next[2] === "cert" && t >= s[1] - HOP / 2; // after the cut in the hop into it
+    doorway.draw(intoCert ? 0 : t - s[0], intoCert ? 1 : inCity ? 1 - prog(t - s[0], 0.5, 0.75) : 0);
     // the proof flies out to be read, then settles back onto the phone before his hop
     if (s[2] === "glossary") {
       // the 3D Body: off the phone, big, coming apart (the app's own explode frames), then it turns
