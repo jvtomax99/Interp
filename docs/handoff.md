@@ -28,6 +28,7 @@ No PR of this chat's is open; no check-ins armed.
 **Other chats were busy on `main` the same day** (HUMC Brain, knowledge
 brain, Term Review brain, notifications, K2 privacy, a 3D Dr. Smiley
 mockup #114). Fetch `main` and look before starting.
+The 3D Dr. Smiley work has its own handoff: `docs/handoff-smiley-3d.md`.
 
 ## Next, with my pick
 

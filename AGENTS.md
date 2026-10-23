@@ -125,6 +125,14 @@ computer he is 48px in from the right end of the name's line. He is never resize
 for a name: `fitWave` in `home-polish.js` shrinks a name too wide for its
 line instead.
 
+**Designing the 3D mascot: a visual plan first, every time** (Jose,
+2026-10-21). Before building or changing anything on the 3D / expressive
+Dr. Smiley (look, skeleton, face, motion), show Jose a visual step-by-step
+plan with screenshots (each step: what is done, a picture of what it makes,
+where it stops for his OK) and wait for his go. Example pictures from earlier
+work are labelled "example". The work and its tools: `docs/mockups/smiley-3d/`
+(`planboard.py`, `storyboard.py` make the plan picture).
+
 **Dr. Smiley's gestures use only his drawn frames, a tilt and a lift.** Never
 slide his picture sideways to fake a head turn. The one squash and stretch is
 Jose's pick from a preview (E3, 2026-10-19): only the cheer's and the greet's
@@ -328,3 +336,7 @@ changed; phone size first), or for work with nothing to see, a short
 summary of what changed and what it needs from him. Then notify his phone
 so he can come back and review. Not for routine progress, only when there
 is something to review or decide.
+**And always a preview** (Jose, 2026-10-22: "Always show me a preview"):
+every reply that reports work done or a change made shows him the picture
+of it, small fixes included, not words alone. The phone notification stays
+for when there is something to review or decide.

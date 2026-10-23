@@ -54,6 +54,57 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+**3D Dr. Smiley (Jose's picks, 2026-10-21).** A 3D toy figure built in code
+(Blender `bpy`, rendered with Cycles), his drawn face on the head, invented
+sides, back and body, a skeleton for movement. Folder and method:
+`docs/mockups/smiley-3d/README.md`. One PR per gate, each waits for Jose:
+R1. The figure and skeleton: turntable and six poses (this PR). Jose
+   approves the invented sides, back and body before any animation.
+   2026-10-21: three looks built in code (`STYLE` v1, figure, film) and
+   Jose's verdict on the last: "still not him". Next (his pick): picture-
+   to-3D. `concept.py` makes `out/concept-front.png` (his drawn head on
+   the 3D body, white background); Jose uploads it to Tripo or Meshy
+   (blocked from the cloud session), sends the GLB back; Claude cleans
+   it, rigs it with `BONES`, puts the face frames on its front as now.
+   Then (same day) Jose: "look more animated", Pixar style (his reference:
+   Pixar's characters 1995-2024). Plan approved (`out/plan-pixar.png`):
+   his picture app makes a full-body Pixar-style turnaround from his
+   drawing; a picture-to-3D site makes the GLB; Claude rigs it. His pick:
+   a sculpted 3D face with 3D eyes, his expressions rebuilt as face
+   controls matched to the 30 drawings (the drawn frames are not put on
+   the 3D face). Rule: a visual plan before any mascot work (`AGENTS.md`).
+   Jose then made a model on Tripo (screen recording: Pixar-like, waving,
+   near-black hair). His notes: no glossy look; work on the hair. Plan
+   approved (`out/plan-tripo.png`), his picks: remake it on Tripo with the
+   arms down (the baked wave would stretch in jumps); hair recoloured to
+   the drawing's browns AND reshaped to its tall swoop; all matte. Next:
+   Jose attaches the new GLB in the chat (iCloud links are blocked here).
+   Done the same day: the GLB arrived (zip in the chat), checked as it came
+   (`out/tripo-turn.mp4`), then Jose's OK; steps 4-6 built (`tripo_fix.py`:
+   matte, hair recoloured to the drawing's browns, the swoop) and kept on
+   his OK (`out/tripo-before-after.png`). Next: the skeleton and face plan
+   (`out/plan-rig.png`): bones by his measured proportions; 3D eyes over
+   the painted ones first (blink, look; shown alone), then brow and cheek
+   bones, then mouth shapes from his 30 drawings. The GLB and the edited
+   model live in `docs/mockups/smiley-3d/in/` (not in git, 32 MB and 48 MB):
+   a new chat needs the zip again from Jose.
+   Then (same day): skeleton built (`tripo_rig.py`, 36 bones, bone heat on a
+   welded decimated copy) and 3D eyes (`tripo_eyes.py`). Jose: "the eyes
+   look weird"; options shown (`out/plan-eyes-options.png`), his pick B,
+   EYE_STYLE 'matched' (his painted eyes' size, top eyeliner, dark iris,
+   big pupil; blinks in 8 steps round the ball, lid 1.2 wide, shut at -68).
+   Kept: `out/tripo-eyes.mp4`, `out/plan/rig-test.png`. Next: the visual
+   plan for brows, cheeks and mouth (handoff).
+R2. The motions as short clips: idle breathing, anticipation crouch, jump
+   with legs tucked, a spin or flip, a squash landing, wave, look, point,
+   happy bounce; secondary motion (hair, coat hem, lanyard) on springs;
+   face frames and brows driven from a timing file (the brows as their own
+   layer so they glide, as `DR_BROWS` does in the app). Disney principles
+   as in `dr-smiley.md`. Ground: decide with Jose (v1's Home tabletop from
+   PR #110, or the studio sweep).
+R3. v1's reel (PR #110) rebuilt with the 3D figure. Blender renders the
+   frames; Remotion (`promo/`, #111) can cut them to the beat with music.
+
 **K1. Your knowledge brain (Jose's pick, 2026-10-21; built in this PR, `docs/features/knowledge-brain.md`).**
 The HUMC Brain shows the person, not the code: domains as regions, terms as
 dots lit by what you know, tap a dark area to practice it. First find what
@@ -317,6 +368,16 @@ then read the log; it names the suite and the check.
   `sw.js`, the harness, `first-paint.cjs`, `brain-data.cjs` (the section
   is gone from the census), `AGENTS.md`/`CLAUDE.md`/`daily-drill.md`.
   Phase 2's guide (#115) merged on Jose's "Push", live as b1021.1248.
+- 2026-10-21 to 10-23 3D Dr. Smiley R1 (#114, open, docs only): first a
+  figure built in code (rejected), then Jose's own Tripo model, matte, hair
+  and swoop, a 36-bone skeleton, a face rig on his own surface (brows,
+  cheeks, mouths after the face's muscles), alive eyes (glass cornea, one
+  lash line, no lower lids) and a smooth tooth band, each step on Jose's OK
+  with pictures. Then (new chat, same day) the model rebuilt from his zip
+  (identical sheet), the surprised "oh" redone (`tripo_oh.py`, waiting on
+  his OK), first renders of six poses and a turn (`tripo_sheet.py`).
+  `docs/mockups/smiley-3d/`; handoff `docs/handoff-smiley-3d.md`. Nothing
+  deployed, no User Guide change.
 - 2026-10-21 Notifications that reach a closed phone (Jose: "notifications
   aren't being delivered", owners should send them, "like a normal app";
   his picks: owner-code phones send, push for Team Chat and new training).
@@ -782,6 +843,17 @@ then read the log; it names the suite and the check.
 
 ## Facts (so nobody re-checks)
 
+- **Blender in the cloud session** (2026-10-21): `pip install bpy` gives
+  Blender 5.2 as a Python module; Cycles on the CPU (4 cores) renders his
+  figure at 540 x 960, 24 samples with the denoiser, in about 20 s a
+  frame. `bpy.ops` works headless for armature edit mode, joins and
+  `transform_apply` (with `temp_override`); `ob.modifiers.move()` reorders
+  modifiers without an operator. Hair as many short random clumps reads as
+  a pine cone; locks that all start at the crown and run to the hairline
+  read as a haircut. Standard view transform keeps his drawn face's
+  colours (AgX washed the skin out). Pose angles that must hit a spot
+  (hand under the chin) are solved by brute-force forward kinematics on
+  `BONES`, not guessed.
 - **Proving a CSS move with computed styles: sort the properties.**
   `getComputedStyle` lists custom properties in the order the sheets
   declared them, so moving a sheet (inline to a file) reorders the list

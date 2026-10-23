@@ -406,6 +406,9 @@ design and anything touching data or rules stay with the main model.
 
 - **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
   (His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
+- **3D mascot work: a visual step-by-step plan with screenshots before
+  anything is built** (Jose, 2026-10-21; `AGENTS.md`), then wait for his go.
+  Tools: `docs/mockups/smiley-3d/planboard.py` and `storyboard.py`.
 - **A question with options gets buttons** (Jose, 2026-10-18): ask it
   with `AskUserQuestion`, one button per option (recommended first), not
   as a numbered list in text. Where that tool is missing (a scheduled
@@ -424,6 +427,9 @@ design and anything touching data or rules stay with the main model.
   `proactive`), then `PushNotification` with one line saying what's ready
   and what he needs to do. Only when there is something to review or
   decide, never for routine progress.
+- **Always show a preview** (Jose, 2026-10-22; `AGENTS.md`): every reply
+  that reports work or a change carries its picture (`SendUserFile`),
+  small fixes included. Words alone are not a report.
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the
