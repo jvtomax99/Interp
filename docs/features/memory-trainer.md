@@ -15,9 +15,9 @@ toggle, memory-only default.
 
 ## M0: Voice and mic check
 
-Bottom of More, under "Measure smoothness". Block "Voice and mic check" in
-`index.html` (after the smoothness meter), CSS block of the same name,
-overlay `#voiceCheckOverlay`. Four steps: play a Spanish and an English
+Bottom of More, under "Measure smoothness". Its code is
+`features/voice-check.js` (moved out of `index.html` on 2026-10-23), its
+styles the block "Voice and mic check" in `app.css`, overlay `#voiceCheckOverlay`. Four steps: play a Spanish and an English
 line (`speechSynthesis`, es-US / en-US, rate 0.92 like `speakText`, no
 voice picked); record 5 s (`getUserMedia` + `MediaRecorder`, audio/mp4
 first) and play it back on a tap; play Spanish again to hear whether the
@@ -92,7 +92,7 @@ flags are read back before lines are edited.
 Its own screen (`activeCategory === 'memory'`, `renderMemTrainer`), opened
 from the **Consecutive** tile on CoreCHI Practice, after the ways in
 (`memEntryHtml`, `openMemoryTrainer`). Not in the tools list. Block
-"Memory trainer" in `index.html`'s script (after the Voice and mic check)
+"Memory trainer" in `index.html`'s script (it calls `audioMode` from `features/voice-check.js`)
 and a CSS block of the same name (before the campus block), in Practice's
 clay and candy buttons.
 
