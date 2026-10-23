@@ -28,7 +28,7 @@ between assignments.
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 22,704 | The whole app's markup and JS (1.3 MB), all inline |
+| `index.html` | 22,465 | The whole app's markup and JS (1.3 MB), all inline |
 | `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
 | `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
 | `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
@@ -46,6 +46,7 @@ between assignments.
 | `features/translate.js` | 276 | The Translate tool's code, moved verbatim out of `index.html` (2026-10-22, phase 3 of the split). Declarations only; loaded just before `index.html`'s script |
 | `features/3d-body.js` | 191 | The 3D Body's Hub side: `anatomySync`, the `ATLAS` frame bridge (`atlasOnMessage`, `atlasAction`), the cards. Moved verbatim (2026-10-22); `docs/features/3d-body.md` |
 | `features/term-lookup.js` | 263 | Looking a term up: `openTermLookup`, the trusted-source search (`/api/term-lookup`) and its memory + Firestore caches. Moved verbatim (2026-10-23) |
+| `features/voice-check.js` | 251 | The Voice and mic check at the bottom of More (`voiceCheckOpen`, and `audioMode`, which the memory trainer calls too). Moved verbatim (2026-10-23) |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
@@ -107,6 +108,7 @@ different places is what silently killed the coloured press glow: a
 | Translate tool code | `features/translate.js` |
 | 3D Body's Hub side (the frame bridge) | `features/3d-body.js` |
 | Looking a term up | `features/term-lookup.js` |
+| Voice and mic check | `features/voice-check.js` |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,

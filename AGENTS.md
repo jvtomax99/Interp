@@ -70,6 +70,7 @@ So:
 | The Translate tool's code (`renderTranslate`, `runTranslate`…) | `features/translate.js` |
 | The 3D Body's Hub side (`anatomySync`, the `ATLAS` bridge, `atlasOnMessage`) | `features/3d-body.js` (the wall rules above still apply) |
 | Looking a term up (`openTermLookup`, its trusted sources and caches) | `features/term-lookup.js` |
+| The Voice and mic check in More (`voiceCheckOpen`, `audioMode`) | `features/voice-check.js` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
