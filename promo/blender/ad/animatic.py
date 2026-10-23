@@ -62,6 +62,8 @@ def push(im, zoom, dx, dy):
     w, h = im.size
     cw, ch = w / zoom, h / zoom
     cx, cy = w / 2 + dx * w, h / 2 + dy * h
+    cx = min(max(cx, cw / 2), w - cw / 2)        # keep the crop inside the picture
+    cy = min(max(cy, ch / 2), h - ch / 2)
     box = (cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2)
     return im.resize((W, H), Image.BICUBIC, box=box)
 
@@ -183,7 +185,10 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     n_all = int(SHOTS[-1][1] * FPS)
     for n in range(1, n_all + 1):
-        frame(n).save(os.path.join(OUT, 'f_%04d.png' % n))
+        path = os.path.join(OUT, 'f_%04d.png' % n)
+        if os.path.exists(path):          # resumable: finished frames are kept
+            continue
+        frame(n).save(path)
         if n % 150 == 0:
             print('frame', n, flush=True)
 
