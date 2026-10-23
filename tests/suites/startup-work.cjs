@@ -79,9 +79,21 @@ const init = () => {
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
     const wrote = await page.waitForFunction(() => document.querySelector('.home-name-pen'), null, { timeout: 20000 }).then(() => true, () => false);
     const t0 = Date.now();
+    // Opening the app rebuilds Home as each collection arrives; a rebuilt
+    // greeting adopts the writing. The wall clock is the writing's, not the
+    // pen copy's: a rebuild 6 s in must not start a fresh 12 s (it did, on
+    // 2026-10-23: two rebuilds on CI's WebKit held the name 32 s).
+    await page.waitForTimeout(6000);
+    const pens = await page.evaluate(() => { lastHomeHtml = ''; keptGreetingSig = ''; renderContent(); return document.querySelectorAll('.home-name-pen').length; });
     const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 30000 }).then(() => true, () => false);
     const took = (Date.now() - t0) / 1000;
-    ok(wrote && shown && took < 22, 'starved of frames, the wall clock still shows the name within the cap (' + Math.round(took * 10) / 10 + ' s)');
+    ok(wrote && shown && took < 16, 'starved of frames, with Home rebuilt 6 s in, the wall clock still shows the name within the cap (' + Math.round(took * 10) / 10 + ' s)', { wrote, shown, pens });
+    // After the writing, a rebuilt greeting keeps the name shown (no new pen,
+    // no hold): once written, the name stays.
+    await page.evaluate(() => { lastHomeHtml = ''; keptGreetingSig = ''; renderContent(); });
+    await page.waitForTimeout(400);
+    const after = await page.evaluate(() => ({ penning: document.querySelector('.home-greeting-name').classList.contains('is-penning'), pens: document.querySelectorAll('.home-name-pen').length }));
+    ok(!after.penning && !after.pens, 'a greeting rebuilt after the writing keeps the name shown', after);
     await ctx.close();
   }
 

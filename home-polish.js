@@ -985,6 +985,9 @@
     // Before the hello: keep the name back so it can be written, never longer than 6 s.
     function hold(name){
       if(run||waiting||!name||still())return;
+      // Written already (a greeting rebuilt after the pen finished): the
+      // name stays shown rather than vanishing again for up to 6 s.
+      if(lastTxt!==null&&name.textContent.trim()===lastTxt)return;
       held=name;name.classList.add('is-penning');
       clearTimeout(safety);safety=setTimeout(()=>{if(!run)show(held);},6000);
     }
@@ -1030,9 +1033,9 @@
       const r=run;r.stop(true);
       if(r.txt!==txt||still()||document.hidden)return;
       name.classList.add('is-penning');
-      write(name,txt,r.family,parseFloat(getComputedStyle(name).fontSize)||r.size,r.strokes,r.elapsed());
+      write(name,txt,r.family,parseFloat(getComputedStyle(name).fontSize)||r.size,r.strokes,r.elapsed(),r.due);
     }
-    function write(name,txt,family,size,strokes,from){
+    function write(name,txt,family,size,strokes,from,due){
       const row=name.parentElement;
       // where the name's baseline starts, in the row's own coordinates
       const mk=document.createElement('span');mk.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';
@@ -1109,7 +1112,12 @@
       // all but stopped painting) can take many times `total`. A wall clock
       // ends it: the name is never kept back longer than this, whatever the
       // frames do. Generous enough never to cut a pen that is visibly moving.
-      const cap=setTimeout(()=>stop(),Math.max(12000,total*4));
+      // The deadline belongs to the writing, not to this copy of the pen:
+      // when a rebuilt greeting adopts the writing (adopt), the new copy
+      // keeps the old deadline instead of starting a fresh 12 s. Home
+      // rebuilt twice on a starved machine once held the name 32 s.
+      const dueAt=due||Date.now()+Math.max(12000,total*4);
+      const cap=setTimeout(()=>stop(),Math.max(0,dueAt-Date.now()));
       let dx=0, dy=0;
       function tick(now){
         if(!svg.isConnected||document.hidden||!name.isConnected)return stop();
@@ -1142,7 +1150,7 @@
         }
         raf=requestAnimationFrame(tick);
       }
-      run={stop,txt,family,size,strokes,elapsed:()=>clock};
+      run={stop,txt,family,size,strokes,elapsed:()=>clock,due:dueAt};
       // a breath after Dr. Smiley starts to appear (none when carrying on)
       if(from)raf=requestAnimationFrame(tick);else setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
     }
