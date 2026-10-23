@@ -175,12 +175,34 @@ wince faces.
 
 ## Full body: the cutout rig (2026-10-23)
 
-**Still the plan** (a 2D redraw was tried and dropped the same evening for
-likeness, `docs/art/dr-smiley-2d/prompts.md`). Jose: the body animated
-the way his face is, drawn pictures of the same 3D him in each pose,
-swapped, with this rig moving the arms between them. The drawn poses
-(`docs/art/dr-smiley-body/prompts.md`) become frames of the arms and
-legs; the rig's own pieces fill the moments between.
+**The drawn poses are in (2026-10-23, the same evening; a 2D redraw was
+tried first and dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`).**
+Jose: the body animated the way his face is, drawn pictures of the same
+3D him in each pose, swapped, with this rig moving the arms between. He
+ran four prompts in ChatGPT (`docs/art/dr-smiley-body/prompts.md`): wave,
+fist pump, think, shrug; all four came back at the master's size, 0 to 4 px
+off, colours within a few points. `layers/cutframes.py` cuts each into a
+frame on the master grid (`drsmiley/body/pose-*.webp`, boxes in
+`poses.json` and `DR_BODY.pose`): only content changes, coat over coat is
+left to `body.webp`. In the rig each frame exists twice, as drawn (`-l`,
+his right arm on the picture's left) and mirrored about his middle
+(`DR_BODY.mirrorX`, `-r`), so either side can use it; `wave`, `fist-pump`
+and `shrug` sit behind the coat (the arm comes from under the shoulder),
+`think` in front (the folded arm, the finger on the chin). The pose joints
+`frameL`/`frameR` name the frame shown on each side (swapped at a beat's
+start, like a face frame) and `frot` wags it about its pivot; while one
+shows, the cutout arms it stands in for are hidden, with a 120 ms
+cross-fade (CSS on `.db-pose`/`.db-arm`; the viewer has it, the app's
+copy goes in `app.css` when he is wired in). How a gesture uses one: the
+cutout arm swings to the frame's `at` (its raise and bend), the frame
+takes over there, holds or wags, hands back before the arm comes down.
+`greet` waves with the drawn hand (3 wags of `frot`), `cheer` pumps two
+drawn fists (one mirrored) from the top of the jump, `think` holds the
+drawn finger on the chin, `shrug` the drawn palms; `ack`, `wink`, `bounce`,
+`wince` and the walk stay on the cutout arms (an open hand is right for
+them). Still shows the drawn pose held. Not run yet: `crouch.png` and
+`jump.png` (the quiz pair's legs), `thumbs-up`, `point`, `clipboard`,
+`body-noarms` and the rest of the table.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
@@ -232,8 +254,9 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   at rest.
 - **Squash and stretch**: the cheer and the bounce, 4% and 3.5% of his
   height, width 1/sqrt(height) as E3; never more (the suite checks).
-- **Known limits of the cut**: the hands are open palms whatever the pose
-  (the fist pump and the chin rest read as "hmm" and "hey", not a fist or a
-  finger); the arms turn only in the picture's plane; the legs are one piece
-  each, so a walk is a stylised bounce-walk from the front. The drawn poses
-  replace those when they come.
+- **Known limits of the cut**: the cutout hands are open palms, so the
+  gestures with a fist, a finger or upturned palms use the drawn frames
+  above and the cutout arms only for the way there and back; the arms turn
+  only in the picture's plane; the legs are one piece each, so a walk is a
+  stylised bounce-walk from the front (the drawn `crouch` and `jump` plates
+  will give the quiz bounce real knees).

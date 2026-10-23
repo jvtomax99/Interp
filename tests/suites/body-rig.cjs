@@ -33,6 +33,7 @@ const SAMPLE = () => {
     for(const k of keys) max[k] = 0;
     // What is actually drawn: the angle in each joint's rotate(), after the engine's limits.
     const drawn = { arm: 0, fore: 0, head: 0, leg: 0 }, deg = el => { const m = /rotate\((-?[\d.]+)/.exec(el.getAttribute('transform') || ''); return m ? Math.abs(+m[1]) : 0; };
+    const frames_seen = new Set(); let armHiddenWhileFrame = true, frameEverShown = false;
     let done = false;
     played = name === 'walk' ? b.play(DR_BODY_PERF.walk(b.mode(), { dir: o.dir || 1, steps: 4 }).beats, { name, done: () => done = true }) : b.perform(name, { done: () => done = true });
     drBodySeed(null);
@@ -42,13 +43,16 @@ const SAMPLE = () => {
       for(const k of keys) max[k] = Math.max(max[k], Math.abs(p[k] - (k === 'sx' || k === 'sy' ? 1 : 0)));
       drawn.arm = Math.max(drawn.arm, deg(b.el.armL), deg(b.el.armR)); drawn.fore = Math.max(drawn.fore, deg(b.el.foreL), deg(b.el.foreR));
       drawn.head = Math.max(drawn.head, deg(b.el.head)); drawn.leg = Math.max(drawn.leg, deg(b.el.legL), deg(b.el.legR));
+      for(const g of b.el.poses) if(g.style.opacity === '1'){ frameEverShown = true; frames_seen.add(g.dataset.pose + '-' + g.dataset.side);
+        for(const a of DR_BODY.pose[g.dataset.pose].arms){ const side = g.dataset.side === 'l' ? a : (a === 'L' ? 'R' : 'L'); if(b.el['arm' + side].style.opacity !== '0') armHiddenWhileFrame = false; } }
       const bx = b.el.root.ownerSVGElement.getBoundingClientRect();
       if(Math.abs(bx.x - box0.x) > .5 || Math.abs(bx.width - box0.width) > .5) layoutMoved = true;
       if(!done && performance.now() - t0 < 8000) requestAnimationFrame(tick);
       else {
         const end = Object.assign({}, b.pose);
         const atRest = keys.every(k => Math.abs(end[k] - (k === 'sx' || k === 'sy' ? 1 : 0)) < 1e-6) && end.face === 'rest' && end.brow === 'rest';
-        res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end });
+        const framesClear = b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.armR.style.opacity === '1';
+        res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end, framesSeen: [...frames_seen], armHiddenWhileFrame, frameEverShown, framesClear });
       }
     };
     requestAnimationFrame(tick);
@@ -83,11 +87,16 @@ const SAMPLE = () => {
   ok(P.__failed.length === 0, 'every layer and script arrives ' + JSON.stringify(P.__failed));
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
-  ok(layers.length === 11 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f)),
-     'eleven layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces ' + layers.join(' '));
+  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp'];
+  ok(layers.length === 19 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+     && poseFiles.every(f => layers.filter(x => x === f).length === 2),
+     'nineteen layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, and the four drawn poses twice each (as drawn and mirrored) ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
-  ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r'),
-     'drawn back to front: legs, then arms and head, the body last (the coat covers the joints) ' + order.join(' | '));
+  ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
+     && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body'),
+     'drawn back to front: legs, then arms, the drawn poses that come from under the coat, the head, the body, then the poses over the coat ' + order.join(' | '));
+  const hidden = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-pose')].every(g => getComputedStyle(g).opacity === '0') && getComputedStyle(body.el.armL).opacity === '1');
+  ok(hidden, 'at rest every drawn pose is hidden and the cutout arms show');
   await P.waitForTimeout(400);
   fs.mkdirSync(L.SHOTS, { recursive: true });
   await P.screenshot({ path: L.SHOTS + 'body-rig-phone.png' });
@@ -113,9 +122,16 @@ const SAMPLE = () => {
     ok(r.drawn.arm <= 175 && r.drawn.fore <= 135 && r.drawn.head <= 9 && r.drawn.leg <= 35, `${n}: every joint drawn inside its limit ` + JSON.stringify(r.drawn));
     ok(!r.layoutMoved, `${n}: his box never changes (transforms only)`);
     ok(r.max.sy <= .041 && r.max.sx <= .021, `${n}: squash and stretch at most 4% ` + JSON.stringify([r.max.sx, r.max.sy]));
+    ok(r.armHiddenWhileFrame && r.framesClear, `${n}: while a drawn pose shows, the cutout arm it replaces is hidden; at the end every drawn pose is hidden again`);
   }
-  ok(lively.greet.max.aL > 100 || lively.greet.max.aR > 100, 'greet: an arm comes up to wave');
-  ok(lively.cheer.max.aL > 140 && lively.cheer.max.aR > 140 && lively.cheer.max.y > 40, 'cheer: both arms up and a jump');
+  const seen = n => lively[n].framesSeen.join(' ');
+  ok(/wave-[lr]/.test(seen('greet')), 'greet: the drawn wave takes over at the top ' + seen('greet'));
+  ok(lively.cheer.framesSeen.includes('fist-pump-l') && lively.cheer.framesSeen.includes('fist-pump-r'), 'cheer: two drawn fists, one mirrored ' + seen('cheer'));
+  ok(/think-[lr]/.test(seen('think')), 'think: the drawn finger on the chin ' + seen('think'));
+  ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));
+  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.bounce.frameEverShown, 'ack, bounce and the walk use the cutout arms only');
+  ok(lively.greet.max.aL >= 95 || lively.greet.max.aR >= 95, 'greet: an arm comes up to where the drawn wave is');
+  ok(lively.cheer.max.aL >= 105 && lively.cheer.max.aR >= 105 && lively.cheer.max.y > 40, 'cheer: both arms up to the drawn fists and a jump');
   ok(lively.think.max.fL > 100 || lively.think.max.fR > 100, 'think: a hand comes to the chin');
   ok(lively.walk.max.x > 150 && lively.walk.max.upL > 10 && lively.walk.max.upR > 10, 'walk: he moves sideways, each leg lifting');
   const faces = await P.evaluate(async () => {
@@ -133,7 +149,7 @@ const SAMPLE = () => {
   // Focused: the same acting, smaller. Still: one pose, nothing moves.
   await P.click('[data-mode="focused"]');
   const fc = await P.evaluate(() => window.__play('cheer'));
-  ok(fc.atRest && fc.max.aL < lively.cheer.max.aL * .7 && fc.max.y === 0, 'Focused cheer: smaller arms, no jump, still back to rest ' + JSON.stringify([fc.max.aL, lively.cheer.max.aL, fc.max.y]));
+  ok(fc.atRest && fc.max.sy < lively.cheer.max.sy * .7 && fc.max.y === 0 && fc.framesSeen.includes('fist-pump-l'), 'Focused cheer: smaller squash, no jump, the drawn fists still, back to rest ' + JSON.stringify([fc.max.sy, lively.cheer.max.sy, fc.max.y]));
   await P.click('[data-mode="still"]');
   const st = await P.evaluate(async () => {
     const b = window.body; b.rest();

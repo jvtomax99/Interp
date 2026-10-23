@@ -3,8 +3,12 @@
 **These are the prompts to run** (2026-10-23, after a 2D redraw was tried
 and dropped for likeness: `../dr-smiley-2d/prompts.md`). Jose: the body
 animated the way his face is, drawn pictures of the same him in each pose.
-First four to send: `wave.png`, `fist-pump.png`, `think.png`, `shrug.png`;
-then `crouch.png` and `jump.png`; the rest after those fit.
+**Done 2026-10-23:** `wave.png`, `fist-pump.png`, `think.png`, `shrug.png`
+came back (same size, 0 to 4 px off, colours within a few points) and are
+cut into the rig (`layers/cutframes.py`, `drsmiley/body/pose-*.webp`;
+`preview-frames.png` shows them on the body, `preview-acting.png` mid
+performance). **Next to run:** `crouch.png` and `jump.png` (the quiz
+bounce's knees), then `thumbs-up.png`, `point.png`, `clipboard.png`.
 
 Same workflow as `docs/art/dr-smiley-faces/prompts.md`: an image tool that
 edits a picture you upload (ChatGPT image editing or similar), one change

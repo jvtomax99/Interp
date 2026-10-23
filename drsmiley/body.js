@@ -33,6 +33,22 @@ const DR_BODY = {
   },
   // How far each joint may go, in degrees (a cutout arm past these shows its cut).
   limit: { arm: [-20, 175], fore: [-10, 135], leg: [-35, 35], head: [-9, 9] },
+  // The drawn poses (docs/art/dr-smiley-body/prompts.md, cut by cutframes.py
+  // into drsmiley/body/pose-*.webp): his arms as Jose's pictures drew them, a
+  // real open hand, fist, finger and palms. Each is swapped in at the top of a
+  // gesture the way a face frame is, once the cutout arm has swung to `at`
+  // (its raise and bend, so the swap is a change of hand, not a jump); `arms`
+  // are the cutout arms it stands in for; `layer` back is behind the coat
+  // (the arm comes out from under the shoulder), front is over it (the folded
+  // arm, the finger on the chin); `pivot` is where it turns for a wag (`frot`).
+  // Every one also exists mirrored about his middle (`mirrorX`), for the other side.
+  mirrorX: 556,
+  pose: {
+    wave:        { box: [133, 357, 264, 370], arms: ['L'], layer: 'back', at: { a: 100, f: 80 }, pivot: [190, 600] },
+    'fist-pump': { box: [121, 361, 276, 348], arms: ['L'], layer: 'back', at: { a: 110, f: 100 }, pivot: [353, 630] },
+    think:       { box: [352, 497, 274, 445], arms: ['L', 'R'], layer: 'front', at: { a: 18, f: 128, a2: 10, f2: 60 }, pivot: [353, 630] },
+    shrug:       { box: [95, 568, 892, 398], arms: ['L', 'R'], layer: 'back', at: { a: 28, f: 95, a2: 28, f2: 95 }, pivot: [556, 630] },
+  },
 };
 /* The face frames, in the order of drsmiley/face.webp (the same list as
    DR_FACE_FRAMES in index.html; kept here so the rig can stand alone). */
@@ -59,22 +75,33 @@ function drBodyArt(cls, root){
     + `<image class="ds-brow ds-brow-l" href="${root}brow-l.webp" x="90" y="175" width="130" height="65"/>`
     + `<image class="ds-brow ds-brow-r" href="${root}brow-r.webp" x="270" y="190" width="125" height="90"/>`
     + '</g></g>';
+  // The drawn poses, each as drawn (-l) and mirrored (-r), hidden until a gesture swaps one in.
+  const poses = layer => Object.keys(B.pose).filter(k => B.pose[k].layer === layer).map(k => {
+    const [x, y, w, h] = B.pose[k].box, im = `<image href="${root}body/pose-${k}.webp" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
+    return `<g class="db-pose db-pose-${k}-l" data-pose="${k}" data-side="l" style="opacity:0">${im}</g>`
+         + `<g class="db-pose db-pose-${k}-r" data-pose="${k}" data-side="r" style="opacity:0">${im}</g>`;
+  }).join('');
   return `<svg class="db${cls ? ' ' + cls : ''}" viewBox="0 0 ${B.w} ${B.h}" aria-hidden="true" focusable="false" style="overflow:visible">`
     + '<g class="db-root">'
     +   `<g class="db-leg db-leg-l">${img('leg-l', 'db-leg-art')}</g><g class="db-leg db-leg-r">${img('leg-r', 'db-leg-art')}</g>`
     +   '<g class="db-breath">'
     +     `<g class="db-arm db-arm-l">${img('arm-upper-l', 'db-upper')}<g class="db-fore db-fore-l">${img('arm-fore-l', 'db-fore-art')}</g></g>`
     +     `<g class="db-arm db-arm-r">${img('arm-upper-r', 'db-upper')}<g class="db-fore db-fore-r">${img('arm-fore-r', 'db-fore-art')}</g></g>`
+    +     `<g class="db-poses-back">${poses('back')}</g>`
     +     head
     +     img('body', 'db-body')
+    +     `<g class="db-poses-front">${poses('front')}</g>`
     +   '</g>'
     + '</g></svg>';
 }
 
 /* A pose: every joint at a number. Degrees for turns (an arm's "raise" is
    out and up on either side, a leg's "swing" out), picture pixels for moves,
-   1 for a plain scale. `face` and `brow` are names. */
-const DR_BODY_REST = { x: 0, y: 0, lean: 0, sx: 1, sy: 1, head: 0, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, lL: 0, lR: 0, upL: 0, upR: 0, chest: 1, face: 'rest', brow: 'rest' };
+   1 for a plain scale. `face` and `brow` are names; so are `frameL` and
+   `frameR`, the drawn pose shown as drawn (L, on the picture's left, his
+   right) or mirrored (R); names swap at a beat's start, like a face. `frot`
+   turns a shown frame about its pivot (a wag). */
+const DR_BODY_REST = { x: 0, y: 0, lean: 0, sx: 1, sy: 1, head: 0, lift: 0, aL: 0, aR: 0, fL: 0, fR: 0, lL: 0, lR: 0, upL: 0, upR: 0, chest: 1, face: 'rest', brow: 'rest', frameL: '', frameR: '', frot: 0 };
 const DR_BODY_EASE = {
   linear: t => t,
   out: t => 1 - Math.pow(1 - t, 3),
@@ -98,7 +125,7 @@ function drBody(svg, opts){
   opts = opts || {};
   const q = s => svg.querySelector(s);
   const el = { root: q('.db-root'), breath: q('.db-breath'), head: q('.db-head'), armL: q('.db-arm-l'), armR: q('.db-arm-r'), foreL: q('.db-fore-l'), foreR: q('.db-fore-r'),
-               legL: q('.db-leg-l'), legR: q('.db-leg-r'), sheet: q('.ds-sheet'), browL: q('.ds-brow-l'), browR: q('.ds-brow-r') };
+               legL: q('.db-leg-l'), legR: q('.db-leg-r'), sheet: q('.ds-sheet'), browL: q('.ds-brow-l'), browR: q('.ds-brow-r'), poses: [...svg.querySelectorAll('.db-pose')] };
   const B = DR_BODY, mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
   const reduced = () => opts.reduced != null ? !!opts.reduced : !!(mq && mq.matches);
   const mode = () => reduced() ? 'still' : (opts.mode || 'lively');
@@ -119,6 +146,27 @@ function drBody(svg, opts){
     el.legR.setAttribute('transform', `translate(0,${(-p.upR).toFixed(2)}) ${r(-clamp(p.lR, L.leg[0], L.leg[1]), B.hip.r)}`);
     if(p.face !== last){ setFace(p.face); last = p.face; }
     setBrow(p.brow);
+    setFrames(p);
+  }
+  /* The drawn poses: show the one named on each side (the mirrored copy for
+     R), turned by `frot` about its pivot, and hide the cutout arms it stands
+     in for. Opacity, so the page can cross-fade the swap. */
+  let shown = '';
+  function setFrames(p){
+    const key = p.frameL + '|' + p.frameR + '|' + (p.frameL || p.frameR ? p.frot.toFixed(2) : '');
+    if(key === shown) return;
+    shown = key;
+    const hide = { L: false, R: false };
+    for(const g of el.poses){
+      const name = g.dataset.pose, side = g.dataset.side, want = side === 'l' ? p.frameL === name : p.frameR === name;
+      g.style.opacity = want ? '1' : '0';
+      if(!want) continue;
+      const P = B.pose[name], [px, py] = P.pivot;
+      g.setAttribute('transform', (side === 'r' ? `translate(${2 * B.mirrorX},0) scale(-1,1) ` : '') + `rotate(${p.frot.toFixed(3)} ${px} ${py})`);
+      for(const a of P.arms) hide[side === 'l' ? a : (a === 'L' ? 'R' : 'L')] = true;
+    }
+    el.armL.style.opacity = hide.L ? '0' : '1';
+    el.armR.style.opacity = hide.R ? '0' : '1';
   }
   function setFace(name){
     const i = Math.max(0, DR_BODY_FACES.indexOf(name));
@@ -183,7 +231,7 @@ function drBody(svg, opts){
     return play(p.beats, Object.assign({ name, still: p.still, stillMs: p.stillMs }, o || {}));
   }
   draw(pose);
-  return { el, pose, set, play, perform, stop, setFace, setBrow, mode, busy: () => !!run, rest: () => set(DR_BODY_REST) };
+  return { el, pose, set, play, perform, stop, setFace, setBrow, setFrames, mode, busy: () => !!run, rest: () => set(DR_BODY_REST) };
 }
 
 /* The performances. Each is built fresh, with the side, the sizes and the
@@ -196,22 +244,23 @@ const DR_BODY_PERF = {
   // Hello: a wave with the near arm, the head tipped toward it, brows flashed.
   greet(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .55 : 1;
-    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side;
-    // The hand waves beside his head, not behind it (the arms are drawn behind the head).
-    const up = 122 + R() * 10, bend = 52 + R() * 8, wags = mode === 'focused' ? 2 : 3;
+    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, FR = 'frame' + side;
+    // The cutout arm swings up to where the drawn wave is, the drawn hand takes
+    // over there (the swap of a frame), wags, and hands back for the way down.
+    const { a: up, f: bend } = DR_BODY.pose.wave.at, wags = mode === 'focused' ? 2 : 3, wag = 7 + R() * 2;
     const beats = [
       [j(160, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'blink1', head: -s * 1.5 * k }, 'in'],                       // a dip: he's seen you
-      [j(260), { sy: 1 + .02 * k, sx: 1 - .01 * k, y: -14 * k, [A]: up * k, [F]: bend * k, face: 'smile', brow: 'up', head: s * 4 * k, lean: s * 1.2 * k }, 'snap'],
-      [j(170), { sy: 1, sx: 1, y: 0, brow: 'rest' }, 'spring'],
+      [j(260), { sy: 1 + .02 * k, sx: 1 - .01 * k, y: -14 * k, [A]: up, [F]: bend, face: 'smile', brow: 'up', head: s * 4 * k, lean: s * 1.2 * k }, 'snap'],
+      [j(170), { sy: 1, sx: 1, y: 0, brow: 'rest', [FR]: 'wave', frot: 0 }, 'spring'],
     ];
     for(let i = 0; i < wags; i++){
-      beats.push([j(150, .2), { [F]: (bend + 30) * k, head: s * (4.6 - i * .4) * k }, 'inOut']);
-      beats.push([j(150, .2), { [F]: (bend - 10) * k, head: s * (3.6 - i * .4) * k }, 'inOut']);
+      beats.push([j(150, .2), { frot: wag * k, head: s * (4.6 - i * .4) * k }, 'inOut']);
+      beats.push([j(150, .2), { frot: -wag * k, head: s * (3.6 - i * .4) * k }, 'inOut']);
     }
-    beats.push([j(240), { [F]: bend * k, face: 'smile2' }, 'out']);
-    beats.push([j(420), { [A]: 0, [F]: 0, head: -s * .6 * k, lean: 0, face: 'smile1' }, 'spring']);
+    beats.push([j(240), { frot: 0, face: 'smile2' }, 'out']);
+    beats.push([j(420), { [FR]: '', [A]: 0, [F]: 0, head: -s * .6 * k, lean: 0, face: 'smile1' }, 'spring']);
     beats.push([j(300), { head: 0, face: 'rest' }, 'out']);
-    return { beats, still: { [A]: up, [F]: bend + 10, head: s * 4, face: 'smile' }, stillMs: 1000 };
+    return { beats, still: { [A]: up, [F]: bend, [FR]: 'wave', head: s * 4, face: 'smile' }, stillMs: 1000 };
   },
   // "Yes": a nod and a small open hand, like "got it".
   ack(mode){
@@ -228,33 +277,38 @@ const DR_BODY_PERF = {
   // Thinking: a hand to the chin, eyes up to the side, then the "aha".
   think(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
-    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, O = side === 'L' ? 'R' : 'L';
-    const look = 'lookU' + O;   // eyes away from the hand
+    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, O = side === 'L' ? 'R' : 'L', FR = 'frame' + side;
+    const look = 'lookU' + O, T = DR_BODY.pose.think.at;   // eyes away from the hand
+    // The cutout arms fold to where the drawn pose has them, then the drawn
+    // finger on the chin takes over and holds; the "aha" hands back.
     return { beats: [
       [j(300), { lean: -s * 1.2 * k, head: -s * 2 * k, face: 'blink2', brow: 'focused' }, 'out'],
-      [j(380), { [A]: 18 * k, [F]: 128 * k, ['a' + O]: 10 * k, ['f' + O]: 60 * k, head: s * 5 * k, lean: s * .8 * k, face: look }, 'spring'],
-      [j(mode === 'focused' ? 700 : 950, .2), { head: s * 6 * k, lift: 2 * k }, 'inOut'],
+      [j(380), { [A]: T.a, [F]: T.f, ['a' + O]: T.a2, ['f' + O]: T.f2, head: s * 5 * k, lean: s * .8 * k, face: look }, 'spring'],
+      [j(mode === 'focused' ? 700 : 950, .2), { [FR]: 'think', head: s * 6 * k, lift: 2 * k }, 'inOut'],
       [j(360), { face: 'half' + O, head: s * 3 * k }, 'out'],
       [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                        // aha
-      [j(300), { [A]: 0, [F]: 0, ['a' + O]: 0, ['f' + O]: 0, head: -s * .5 * k, lift: 4 * k, face: 'smile1', brow: 'rest' }, 'spring'],
+      [j(300), { [FR]: '', [A]: 0, [F]: 0, ['a' + O]: 0, ['f' + O]: 0, head: -s * .5 * k, lift: 4 * k, face: 'smile1', brow: 'rest' }, 'spring'],
       [j(320), { head: 0, lift: 0, lean: 0, face: 'rest' }, 'out'],
-    ], still: { [A]: 18, [F]: 128, head: s * 5, face: look, brow: 'focused' }, stillMs: 1200 };
+    ], still: { [A]: T.a, [F]: T.f, ['a' + O]: T.a2, ['f' + O]: T.f2, [FR]: 'think', head: s * 5, face: look, brow: 'focused' }, stillMs: 1200 };
   },
   // A cheer: crouch, spring up with both arms, land with a squash, a laugh.
   cheer(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .5 : 1;
-    const s = R() < .5 ? -1 : 1, jump = mode === 'focused' ? 0 : 1;
+    const s = R() < .5 ? -1 : 1, jump = mode === 'focused' ? 0 : 1, P = DR_BODY.pose['fist-pump'].at;
+    // Both cutout arms snap up to where the drawn fist pump is; at the top of
+    // the jump the two drawn fists take over (one as drawn, one mirrored) and
+    // pump with the laugh; they hand back before the arms come down.
     return { beats: [
       [j(200), { sy: 1 - .04 * k, sx: 1 + .02 * k, aL: -12 * k, aR: -12 * k, fL: 20 * k, fR: 20 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],         // crouch
-      [j(260), { sy: 1 + .04 * k, sx: 1 - .02 * k, y: -70 * jump, aL: 165 * k, aR: 165 * k, fL: 15 * k, fR: 15 * k, lL: 8 * jump, lR: 8 * jump, head: -s * 3 * k, lift: -6 * k, face: 'laugh', brow: 'up' }, 'snap'],
-      [j(180), { y: -40 * jump, sy: 1.01, sx: .995, lL: 4 * jump, lR: 4 * jump, face: 'laughB' }, 'in'],
-      [j(170), { y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, lL: 0, lR: 0, aL: 150 * k, aR: 150 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash
-      [j(260), { sy: 1, sx: 1, lift: 0, aL: 160 * k, aR: 160 * k, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
-      [j(260), { head: s * 1.2 * k, face: 'laugh' }, 'inOut'],
-      [j(380), { aL: 0, aR: 0, fL: 0, fR: 0, head: 0, face: 'smile', brow: 'rest' }, 'spring'],
+      [j(260), { sy: 1 + .04 * k, sx: 1 - .02 * k, y: -70 * jump, aL: P.a, aR: P.a, fL: P.f, fR: P.f, lL: 8 * jump, lR: 8 * jump, head: -s * 3 * k, lift: -6 * k, face: 'laugh', brow: 'up' }, 'snap'],
+      [j(180), { frameL: 'fist-pump', frameR: 'fist-pump', frot: 0, y: -40 * jump, sy: 1.01, sx: .995, lL: 4 * jump, lR: 4 * jump, face: 'laughB' }, 'in'],
+      [j(170), { y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, lL: 0, lR: 0, frot: 6 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash
+      [j(260), { sy: 1, sx: 1, lift: 0, frot: -5 * k, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
+      [j(260), { frot: 4 * k, head: s * 1.2 * k, face: 'laugh' }, 'inOut'],
+      [j(380), { frameL: '', frameR: '', frot: 0, aL: 0, aR: 0, fL: 0, fR: 0, head: 0, face: 'smile', brow: 'rest' }, 'spring'],
       [j(360), { face: 'smile1' }, 'out'],
       [j(240), { face: 'rest' }, 'out'],
-    ], still: { aL: 165, aR: 165, fL: 15, fR: 15, face: 'laugh', brow: 'up' }, stillMs: 1000 };
+    ], still: { aL: P.a, aR: P.a, fL: P.f, fR: P.f, frameL: 'fist-pump', frameR: 'fist-pump', face: 'laugh', brow: 'up' }, stillMs: 1000 };
   },
   // A wink with a little "hey you" of the hand.
   wink(mode){
@@ -273,14 +327,16 @@ const DR_BODY_PERF = {
   // Not sure: a shrug, palms up, a doubtful face.
   shrug(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
-    const s = R() < .5 ? -1 : 1;
+    const s = R() < .5 ? -1 : 1, P = DR_BODY.pose.shrug.at, FR = s < 0 ? 'frameL' : 'frameR';
+    // The cutout arms open to where the drawn shrug has them; the drawn palms
+    // (as drawn or mirrored) take over for the hold and hand back on the way down.
     return { beats: [
       [j(180), { lift: 4 * k, head: -s * 1 * k, face: 'blink1' }, 'in'],
-      [j(260), { lift: -10 * k, head: s * 4 * k, aL: 28 * k, aR: 28 * k, fL: 95 * k, fR: 95 * k, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],
-      [j(700, .2), { head: s * 4.5 * k }, 'inOut'],
-      [j(420), { lift: 0, head: 0, aL: 0, aR: 0, fL: 0, fR: 0, sy: 1, face: 'smile1', brow: 'rest' }, 'spring'],
+      [j(260), { lift: -10 * k, head: s * 4 * k, aL: P.a, aR: P.a2, fL: P.f, fR: P.f2, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],
+      [j(700, .2), { [FR]: 'shrug', head: s * 4.5 * k }, 'inOut'],
+      [j(420), { [FR]: '', lift: 0, head: 0, aL: 0, aR: 0, fL: 0, fR: 0, sy: 1, face: 'smile1', brow: 'rest' }, 'spring'],
       [j(260), { face: 'rest' }, 'out'],
-    ], still: { lift: -10, head: s * 4, aL: 28, aR: 28, fL: 95, fR: 95, face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
+    ], still: { lift: -10, head: s * 4, aL: P.a, aR: P.a2, fL: P.f, fR: P.f2, [FR]: 'shrug', face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
   },
   // A right answer: a happy hop, arms up a little, a smaller second hop.
   bounce(mode){

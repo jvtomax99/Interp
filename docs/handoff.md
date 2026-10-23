@@ -41,6 +41,21 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
+## Where it stands (2026-10-23, late): the first four drawn poses are in
+
+Jose ran wave, fist pump, think and shrug in ChatGPT; they lined up with
+the master (0 to 4 px, colours close). `docs/art/dr-smiley-body/layers/cutframes.py`
+cut them into `drsmiley/body/pose-*.webp` (content changes only; coat over
+coat left to `body.webp`), `drsmiley/body.js` shows each as drawn and
+mirrored (`DR_BODY.pose`, `frameL`/`frameR`/`frot` in the pose, `setFrames`),
+greet/cheer/think/shrug swap them in at the top of the gesture;
+`tests/suites/body-rig.cjs` checks it (78 checks). The acting sheet:
+`layers/sheet.cjs` run from `tests/` (frames to a folder), tiled into
+`preview-acting.png`. Sent to Jose. Next from him: `crouch.png` and
+`jump.png`; cut them the same way as leg frames (a `legs` entry in
+`DR_BODY.pose`, hiding both cutout legs) for `bounce`/`cheer`. The app
+still shows nothing full-length.
+
 ## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 
 Jose first said "nowhere for now, I want to hit finished first" and "it

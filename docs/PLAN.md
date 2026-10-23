@@ -69,13 +69,15 @@ under way, then what waits on Jose, then small leftovers.
 1. **Dr. Smiley's full body, finished from drawn poses** (Jose, 2026-10-23:
    "animated like he animates in the app", his face is drawn pictures
    swapped, now the body too; a 2D redraw was tried the same evening and
-   dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`). Waits on
-   Jose's pictures from ChatGPT (`docs/art/dr-smiley-body/prompts.md`,
-   Step 2: wave, fist pump, think, shrug first, then crouch and jump).
-   Each is measured against the master, its arms or legs cut as frames
-   into `drsmiley/body/`, the rig (#135) swaps them and moves its own
-   pieces between. Then where he stands full-length (his call, still
-   open). Nothing in the app shows him full-length until then.
+   dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`). Done so far
+   (PR #135): wave, fist pump, think and shrug from ChatGPT, measured
+   against the master, cut as frames (`layers/cutframes.py`,
+   `drsmiley/body/pose-*.webp`), swapped in by the rig at the top of
+   greet, cheer, think and shrug, mirrored for the other side. Next from
+   Jose (`docs/art/dr-smiley-body/prompts.md`): `crouch.png` and
+   `jump.png` for the quiz bounce's knees, then thumbs up, point,
+   clipboard. Then where he stands full-length (his call, still open).
+   Nothing in the app shows him full-length until then.
 2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
