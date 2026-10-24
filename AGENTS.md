@@ -99,6 +99,10 @@ lives in its file: edit it there, never paste a copy back into
 `index.html`. Those files load with plain `<script src>` before
 `index.html`'s script, so they may only declare things at the top level;
 a top-level line that calls into `index.html` would run before it exists.
+A listener such a file adds at load (resize, keydown, message) can fire
+before `index.html`'s script has run, so it must not read `index.html`'s
+names until then (guard with `typeof`); `tests/suites/load-order.cjs`
+checks that gap.
 
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
 `--ic-*`) lives in the "Visual refinement" block at the end of `app.css`; Home's half is the block of the same name at the end of
