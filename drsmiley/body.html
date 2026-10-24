@@ -30,8 +30,7 @@
   .who .db-breath { transform-box:fill-box; transform-origin:50% 100%; animation: dbBreath 3.6s ease-in-out infinite }
   .is-still .who .db-breath { animation:none }
   /* A drawn pose taking over from the cutout arm: a short cross-fade, not a cut. */
-  .who .db-pose { transition: opacity .07s linear }
-  .who .db-poses-legs .db-pose { transition: none }
+  .who .db-pose { transition: none }
   @media (prefers-reduced-motion: reduce) { .who .db-breath { animation:none } .who { transition:none } .who .db-pose, .who .db-arm, .who .db-leg { transition:none } }
   @keyframes dbBreath { 0%, 100% { transform:scale(1,1) } 50% { transform:scale(.996,1.012) } }
   .bar { display:flex; flex-wrap:wrap; gap:9px; margin-top:13px }

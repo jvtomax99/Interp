@@ -216,9 +216,9 @@ the app's (`drMode()`, read each frame; `drmodechange` restarts a held
 state in the new mode); reduced motion is Still. The dock steps aside
 while a body is in view (`smileyInView`/`smileyElsewhere` count `.db-app`)
 and comes back when it scrolls off; his breathing pauses off screen
-(`is-offscreen`). Shared styles (`.db-host`: breathing, the cross-fade,
-Still, reduced motion) are in `app.css`. `sw.js` precaches the rig, its
-Hub side and the 19 layers; the rig is network-first with the app code.
+(`is-offscreen`). Shared styles (`.db-host`: breathing, drawn poses that
+swap with no fade, Still, reduced motion) are in `app.css`. `sw.js`
+precaches the rig, its Hub side and its layers; the rig is network-first with the app code.
 `tests/suites/smiley-body-app.cjs`. User Guide: `smileybody` (and the
 first "New lately" card). The viewer (`drsmiley/body.html`) stays unlinked.
 
@@ -277,6 +277,56 @@ and swaps the drawn thumbs-up in at the top (as drawn or mirrored), pushes
 it up a little on the second hop, and hands back at the settle. Not run
 yet: `body-noarms`, `pockets`, `crossed`, `arms-up`; nothing needs them.
 
+**The wave's breakdowns, and a cleaner cut (2026-10-24, a new chat).** Jose
+ran the first three animation prompts
+(`docs/art/dr-smiley-body/prompts-animation.md`): `wave-rise` (the arm on
+its way up, elbow leading, the hand trailing below it), `wave-in` and
+`wave-out` (the hand by his head tipped in toward it and out away from it,
+the wag's two extremes). All three came back within a pixel of the master,
+colours a few points off. `greet` is now drawn the way a hand animator
+times it: the dip, the cutout arm flicking up a few frames into the drawn
+rise, a swap to the hand flung out (the overshoot drawn) that settles on a
+spring, the wag as drawings on twos (out, `wave` between, in, `wave`
+between, about 3 a second, a degree or so of `frot` sway between them),
+and down through the rise drawing, the hand dropping first, into the
+cutout arm. **Drawings swap, they never fade** (`DR_BODY_FADE` is 0, no
+transition on `.db-pose`): the 70 ms fade showed a half-transparent hand in
+the air for four frames at each end, and between two drawings it would
+have shown two hands at half; the piece a frame stands in for is cut in
+the same paint, and `body-rig.cjs` checks one drawing per side at a time.
+**The cut, redone after a look on navy.** On white every arm frame looked
+fine; on the viewer's navy (as on Home's photo) the single arms had holes,
+torn edges and a notch at the shoulder, the shrug's forearms were missing
+(floating hands), the thumbs-up sleeve was blotchy and the clipboard had a
+hole showing his scrubs. The cause was the rule "keep only what differs
+from the master": the master's hanging sleeve is coat-white, the raised
+sleeve over the same spot is coat-white too, so it was dropped, and that
+hanging sleeve is hidden while the frame shows. Now (`arm: True` in
+`cutframes.py`) a back-layer arm frame takes everything of the figure on
+its side that the body and head pieces do not cover, solid (holes up to
+1500 px filled; a bigger enclosed pool is wall, as between wave-in's arm
+and his head; a crack the key opens in a sleeve's shaded underside is
+bridged, away from the hand); thin slivers past the body's edge and hair
+or ear past the head piece are dropped (they would stay put or swing
+loose); the two frames swung far by `fsw` (fist pump about 50 degrees,
+point about 78) also leave out the shoulder's cap above the body's
+shoulder line and the coat beside his neck, which swung up as a white
+flap, while the wave's frames (12 at most) keep the drawing's shoulder; the sleeve's grey underside
+stays (it is the sleeve's own shading, not a shadow on the wall; an
+attempt to strip it as one made the thumbs-up streaky and was undone). The
+band cuts (clipboard, thumbs-up, think) fill enclosed holes, and outside
+the body piece take the figure solid; the thumbs-up picture's sleeve is
+shaded nearly the wall's grey, so it is keyed tighter (`near=12`, keeping
+only the one big shape). `layers/trimpieces.py` fixed two pieces: the head
+carried both coat shoulders and grey shaded coat beside the neck under the
+chin, ragged and full of holes (frayed white bits above his shoulders even
+at rest on a dark background, a torn strip once an arm went up, flecks
+swinging out when his head turned), and now keeps only skin there (his jaw
+and neck; the body piece draws all the coat); and the body carried a few islands of the right
+cuff that floated by the hem whenever that arm was hidden, now moved into
+`arm-fore-r.webp`. Review clips: `tests/tools/body-clip.cjs` films the
+viewer frame by frame (`BG=is-navy`, `ROOT=` for a before).
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from
@@ -313,8 +363,9 @@ later", then placed on 2026-10-24: above); the viewer is `drsmiley/body.html`, n
   shows a cut edge. Easings: `out`, `in`, `inOut`, `linear`, `snap` (an
   anticipation's release) and `spring` (about 7% past, then settled:
   follow-through). Only transforms move; his box never changes.
-- **Performances** (`DR_BODY_PERF`): greet (a dip, then a wave beside his
-  head with the near arm, brows flashed, three wags), ack (a nod with an
+- **Performances** (`DR_BODY_PERF`): greet (a dip, the drawn rise with the
+  elbow leading, the hand flung out at the top, brows flashed, three wags
+  as drawings tipped in and out, down through the rise drawing), ack (a nod with an
   open hand), think (a hand to the chin, eyes up away from it, the "aha"),
   cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
   wink (his left eye, a "hey you" of the right hand), shrug (palms up,

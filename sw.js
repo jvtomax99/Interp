@@ -83,6 +83,9 @@ const PRECACHE = [
   './drsmiley/body/pose-think.webp',
   './drsmiley/body/pose-thumbs-up.webp',
   './drsmiley/body/pose-wave.webp',
+  './drsmiley/body/pose-wave-in.webp',
+  './drsmiley/body/pose-wave-out.webp',
+  './drsmiley/body/pose-wave-rise.webp',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the

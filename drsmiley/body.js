@@ -49,25 +49,35 @@ const DR_BODY = {
   // one also exists mirrored about his middle (`mirrorX`), for the other side.
   mirrorX: 556,
   pose: {
-    wave:        { box: [134, 360, 263, 367], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
-    'fist-pump': { box: [123, 364, 274, 343], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    think:       { box: [352, 497, 275, 446], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
-    shrug:       { box: [97, 559, 889, 407], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    wave:        { box: [134,  360,  306,  394], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    // The wave's breakdowns (prompts-animation.md, 2026-10-24): on the way up the
+    // elbow leads and the hand trails below it; at the top the hand tips in
+    // toward his head and out away from it, the wag's two extremes, with `wave`
+    // as the drawing between them.
+    'wave-rise': { box: [127,  528,  315,  286], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'wave-in':   { box: [142,  273,  300,  443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'wave-out':  { box: [46,  280,  396,  444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'fist-pump': { box: [121,  364,  278,  381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    think:       { box: [352,  497,  275,  446], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
+    shrug:       { box: [97,  585,  889,  247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     // Cut as a feathered band of the picture (its sleeve lies over the coat), so it is drawn in front.
-    'thumbs-up': { box: [247, 512, 189, 304], arms: ['L'], layer: 'front', pivot: [353, 630] },
+    'thumbs-up': { box: [247,  512,  189,  354], arms: ['L'], layer: 'front', pivot: [353, 630] },
     // Both hands on a clipboard at his chest (a feathered band from the collar to below the hands, both sleeves in it): stands in for both arms; `frot` tilts it.
-    clipboard:   { box: [281, 567, 511, 354], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
+    clipboard:   { box: [281,  567,  511,  354], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
     // The pointing arm: straight out at shoulder height, the index finger out ("look here"); `frot` bobs it about the shoulder.
-    point:       { box: [24, 559, 386, 136], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    point:       { box: [24,  559,  375,  153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
-    crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
-    jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
+    crouch:      { box: [292,  990,  506,  425], legs: true, layer: 'legs', pivot: [556, 1040] },
+    jump:        { box: [315,  990,  463,  328], legs: true, layer: 'legs', pivot: [556, 1040] },
   },
 };
-// How long a drawn arm pose takes to fade in over the arm it replaces (match the CSS on .db-pose).
-// The leg plates swap at once, like face frames: a fade between two leg drawings
-// (or a plate and the cutout legs) showed both pairs of legs at half (2026-10-24 review).
-const DR_BODY_FADE = 70;
+// Drawn poses swap at once, the way a drawn animation swaps drawings and his
+// face swaps frames (2026-10-24, the wave review): the 70 ms fade they had
+// showed a half-transparent hand in the air for four frames on the way in and
+// out, and between two drawings (the wave's in and out) two hands at half.
+// The piece a frame stands in for is cut in the same paint, so nothing is
+// ever see-through. Kept as a number for the checks (tests/suites/body-rig.cjs).
+const DR_BODY_FADE = 0;
 /* The face frames, in the order of drsmiley/face.webp (the same list as
    DR_FACE_FRAMES in index.html; kept here so the rig can stand alone). */
 const DR_BODY_FACES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
@@ -171,10 +181,9 @@ function drBody(svg, opts){
   /* The drawn poses: show the one named on each side (the mirrored copy for
      R), placed by fsw/fy/fsx and turned by `frot` about its pivot, and hide
      the cutout arms or legs it stands in for. The swap never shows through
-     him: a frame fades in (CSS on .db-pose, about .12 s) over the piece it
-     replaces, which stays opaque underneath and is cut only once the frame
-     is in (DR_BODY_FADE); on the way back the piece is shown at once and the
-     frame fades out over it. The pieces themselves never fade. */
+     him: a frame and the piece it replaces trade places in the same paint
+     (DR_BODY_FADE is 0: drawings swap, they never fade), and a frame
+     swapped for another on the same side does the same. */
   let shown = '', coverT = 0;
   const onAt = new Map();
   const FADE = () => mode() === 'still' ? 0 : DR_BODY_FADE;
@@ -335,26 +344,40 @@ function drBody(svg, opts){
    one pose in `still`. Angles: an arm's raise is 0 hanging, 90 straight
    out, 170 straight up; a forearm's bend opens the elbow outward. */
 const DR_BODY_PERF = {
-  // Hello: a dip, then the drawn waving arm swings up from his side (it
-  // carries the motion: the cutout arm only draws back a touch first), three
-  // wags, and it swings back down.
+  // Hello, drawn the way a hand animator would (2026-10-24, the wave
+  // drawings): a dip and the arm drawing back (anticipation); the cutout arm
+  // flicks up a few frames into the drawn rise, elbow leading and the hand
+  // trailing (drag); the hand flung up and out at the top (the overshoot
+  // drawn), settling; then the wag as drawings, out, between, in, between,
+  // on twos, with a little sway between them; and down through the rise
+  // drawing, the hand dropping first, into the cutout arm. Drawings swap,
+  // they never fade (DR_BODY_FADE).
   greet(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .55 : 1;
     const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, FR = 'frame' + side;
-    const wags = mode === 'focused' ? 2 : 3, wag = 7 + R() * 2;
+    const wags = mode === 'focused' ? 2 : 3;
     const beats = [
-      [j(160, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'blink1', head: -s * 1.5 * k, [A]: -6, [F]: 12 }, 'in'],      // a dip: he's seen you
-      [60, { [FR]: 'wave', fsw: -48, frot: 0, [A]: 0, [F]: 0 }, 'linear'],                                                   // the drawn arm, still low
-      [j(300), { fsw: 0, sy: 1 + .02 * k, sx: 1 - .01 * k, y: -14 * k, face: 'smile', brow: 'up', head: s * 4 * k, lean: s * 1.2 * k }, 'spring'],
-      [j(140), { sy: 1, sx: 1, y: 0, brow: 'rest' }, 'out'],
+      [j(160, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'blink1', head: -s * 1.5 * k, [A]: -6, [F]: 12, fsw: -12 }, 'in'],   // a dip: he's seen you
+      [j(50), { [A]: 20, [F]: 8 }, 'in'],                                                                                         // the arm flicks up
+      [0, { [FR]: 'wave-rise', [A]: 0, [F]: 0 }],                                                                                 // the drawn rise: elbow leads
+      [j(70), { fsw: 0, sy: 1 + .012 * k, sx: 1 - .006 * k, y: -8 * k, face: 'smile1' }, 'out'],
+      [0, { [FR]: 'wave-out', fsw: -7, frot: -1.5 }],                                                                             // the top: the hand flung out
+      [j(260), { fsw: 0, frot: 0, sy: 1 + .02 * k, sx: 1 - .01 * k, y: -14 * k, face: 'smile', brow: 'up', head: s * 4 * k, lean: s * 1.2 * k }, 'spring'],
+      [j(120), { sy: 1, sx: 1, y: 0, brow: 'rest' }, 'out'],
     ];
     for(let i = 0; i < wags; i++){
-      beats.push([j(150, .2), { frot: wag * k, head: s * (4.6 - i * .4) * k }, 'inOut']);
-      beats.push([j(150, .2), { frot: -wag * k, head: s * (3.6 - i * .4) * k }, 'inOut']);
+      const h = (4.6 - i * .4) * k;
+      beats.push([j(70, .15), { [FR]: 'wave', frot: .8 * k, head: s * (h - .5) }, 'inOut']);
+      beats.push([j(90, .15), { [FR]: 'wave-in', frot: 1.4 * k, head: s * (h - 1) }, 'out']);
+      beats.push([j(70, .15), { [FR]: 'wave', frot: -.4 * k, head: s * (h - .5) }, 'inOut']);
+      beats.push([j(90, .15), { [FR]: 'wave-out', frot: -1.4 * k, head: s * h }, 'out']);
     }
-    beats.push([j(200), { frot: 0, face: 'smile2' }, 'out']);
-    beats.push([j(200), { fsw: -46, head: -s * .6 * k, lean: 0, face: 'smile1' }, 'in']);                                    // swings back down
-    beats.push([60, { [FR]: '', fsw: 0, [A]: 6, [F]: 6 }, 'linear']);
+    beats.push([j(80), { [FR]: 'wave', frot: 0, face: 'smile2' }, 'out']);
+    beats.push([j(160), {}, 'out']);                                                                                              // a beat on the hello
+    beats.push([0, { [FR]: 'wave-rise', fsw: 4 }]);                                                                               // down: the hand drops first
+    beats.push([j(100), { fsw: -12, head: -s * .6 * k, lean: 0, face: 'smile1' }, 'in']);
+    beats.push([0, { [FR]: '', fsw: 0, [A]: 20, [F]: 6 }]);                                                                       // into the cutout arm
+    beats.push([j(70), { [A]: -5, [F]: 4 }, 'in']);
     beats.push([j(300), { [A]: 0, [F]: 0, head: 0, face: 'rest' }, 'spring']);
     return { beats, still: { [FR]: 'wave', head: s * 4, face: 'smile' }, stillMs: 1000 };
   },

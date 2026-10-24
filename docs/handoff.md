@@ -41,7 +41,29 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-24, end of this chat): read this first
+## Where it stands (2026-10-24, evening, second chat): read this first
+
+The wave drawings are in and `greet` is rebuilt around them; the cutter is
+fixed for every arm pose. Full story: `docs/features/dr-smiley.md`, "The
+wave's breakdowns, and a cleaner cut". In short: drawn poses swap with no
+fade (`DR_BODY_FADE` 0); a single arm frame is cut as everything the body
+and head pieces don't cover (`arm: True` in `cutframes.py`), which fixed
+holes and torn sleeves that showed only on dark backgrounds;
+`layers/trimpieces.py` trimmed the head's ragged shoulders and moved the
+body's loose cuff bits into the right forearm. body-rig 158 checks
+(one drawing per side at a time; greet plays all three wave drawings),
+smiley-body-app 18. **Always review on navy** (`BG=is-navy`): white hides
+cut edges. Clips: `cd tests && BG=is-navy node tools/body-clip.cjs OUT greet`
+(`ROOT=<a worktree>` films a before; frames land in `OUT/greet-frames/`).
+
+**Next:** the remaining drawings in `prompts-animation.md` (cheer, think,
+point, shrug, read, thumbs, wince, the two leg drawings), each added to
+`POSES` in `cutframes.py` (single back-layer arms get `arm=True` through
+the loop under `ARM=`), its box copied from `poses.json` into
+`DR_BODY.pose`, built into its performance as breakdowns, reviewed on
+navy frame by frame. Same branch, same storage-only rule.
+
+## Where it stands (2026-10-24, end of the first chat)
 
 **Goal (Jose's words):** fully perfect his animation before he replaces Dr.
 Smiley's head in the app. Do not ask Jose to push or OK it; keep improving

@@ -33,7 +33,7 @@ const SAMPLE = () => {
     for(const k of keys) max[k] = 0;
     // What is actually drawn: the angle in each joint's rotate(), after the engine's limits.
     const drawn = { arm: 0, fore: 0, head: 0, leg: 0 }, deg = el => { const m = /rotate\((-?[\d.]+)/.exec(el.getAttribute('transform') || ''); return m ? Math.abs(+m[1]) : 0; };
-    const frames_seen = new Set(); let armHiddenWhileFrame = true, frameEverShown = false, seeThrough = 0;
+    const frames_seen = new Set(); let armHiddenWhileFrame = true, frameEverShown = false, seeThrough = 0, twoAtOnce = 0;
     // When each drawn pose turned on (as this sampler saw it): it fades in over the piece it replaces (DR_BODY_FADE),
     // which must stay opaque until the frame is in, and is cut once it is.
     const since = new Map();
@@ -47,6 +47,9 @@ const SAMPLE = () => {
       drawn.arm = Math.max(drawn.arm, deg(b.el.armL), deg(b.el.armR)); drawn.fore = Math.max(drawn.fore, deg(b.el.foreL), deg(b.el.foreR));
       drawn.head = Math.max(drawn.head, deg(b.el.head)); drawn.leg = Math.max(drawn.leg, deg(b.el.legL), deg(b.el.legR));
       const now = performance.now(), cov = { L: false, R: false, legs: false };
+      // drawings swap (DR_BODY_FADE 0): never two drawn arms on one side at once, not even for a frame
+      const onSide = { l: 0, r: 0 }; for(const g of b.el.poses) if(g.style.opacity === '1' && !DR_BODY.pose[g.dataset.pose].legs) onSide[g.dataset.side]++;
+      if(onSide.l > 1 || onSide.r > 1) twoAtOnce++;
       for(const g of b.el.poses){
         if(g.style.opacity !== '1'){ since.delete(g); continue; }
         if(!since.has(g)) since.set(g, now);
@@ -64,7 +67,7 @@ const SAMPLE = () => {
         const end = Object.assign({}, b.pose);
         const atRest = keys.every(k => Math.abs(end[k] - (k === 'sx' || k === 'sy' ? 1 : 0)) < 1e-6) && end.face === 'rest' && end.brow === 'rest';
         const framesClear = b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.armR.style.opacity === '1' && b.el.legL.style.opacity === '1' && b.el.legR.style.opacity === '1';
-        res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end, framesSeen: [...frames_seen], armHiddenWhileFrame, frameEverShown, framesClear, seeThrough });
+        res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end, framesSeen: [...frames_seen], armHiddenWhileFrame, frameEverShown, framesClear, seeThrough, twoAtOnce });
       }
     };
     requestAnimationFrame(tick);
@@ -100,9 +103,9 @@ const SAMPLE = () => {
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
   const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp'];
-  ok(layers.length === 27 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  ok(layers.length === 33 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'twenty-seven layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the seven drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
+     'thirty-three layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the ten drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
@@ -138,12 +141,14 @@ const SAMPLE = () => {
     ok(!r.layoutMoved, `${n}: his box never changes (transforms only)`);
     ok(r.max.sy <= .041 && r.max.sx <= .021, `${n}: squash and stretch at most 4% ` + JSON.stringify([r.max.sx, r.max.sy]));
     ok(r.armHiddenWhileFrame && r.framesClear, `${n}: while a drawn pose shows, the cutout arm or legs it replaces are hidden; at the end every drawn pose is hidden again`);
+    ok(r.twoAtOnce === 0, `${n}: one drawing per side at a time (${r.twoAtOnce} frames with two)`);
     ok(r.seeThrough === 0, `${n}: never see-through (a piece is cut only once the drawn pose covering it has faded in) (${r.seeThrough} frames)`);
     // The cutout arms stay small (2026-10-24 review: swung to big angles they read as flat paper arms); the drawn poses carry the big moves.
     ok(r.drawn.arm <= 25 && r.drawn.fore <= 60, `${n}: the cutout arms stay small (raise ${r.drawn.arm.toFixed(0)}, bend ${r.drawn.fore.toFixed(0)}; at most 25 and 60)`);
   }
   const seen = n => lively[n].framesSeen.join(' ');
   ok(/wave-[lr]/.test(seen('greet')), 'greet: the drawn wave takes over at the top ' + seen('greet'));
+  ok(['wave-rise', 'wave-in', 'wave-out'].every(f => new RegExp(f + '-[lr]').test(seen('greet'))), 'greet: drawn as a hand animator would, the rise with the elbow leading, then the wag as the hand tipped in and out ' + seen('greet'));
   ok(lively.cheer.framesSeen.includes('fist-pump-l') && lively.cheer.framesSeen.includes('fist-pump-r'), 'cheer: two drawn fists, one mirrored ' + seen('cheer'));
   ok(/think-[lr]/.test(seen('think')), 'think: the drawn finger on the chin ' + seen('think'));
   ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));

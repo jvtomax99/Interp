@@ -7364,8 +7364,7 @@ body.pv-open{ overflow:hidden; }
 .db-host .db-breath{ transform-box:fill-box; transform-origin:50% 100%; animation:dbBreath 3.6s ease-in-out infinite; }
 .db-host.is-offscreen .db-breath{ animation-play-state:paused; }
 html.ds-still .db-host .db-breath{ animation:none; }
-.db-host .db-pose{ transition:opacity .07s linear; }
-.db-host .db-poses-legs .db-pose{ transition:none; }   /* the leg plates swap at once, like face frames */
+.db-host .db-pose{ transition:none; }   /* drawn poses and leg plates swap at once, like face frames (DR_BODY_FADE, drsmiley/body.js) */
 @keyframes dbBreath{ 0%,100%{ transform:scale(1,1); } 50%{ transform:scale(.996,1.012); } }
 @media (prefers-reduced-motion:reduce){ .db-host .db-breath{ animation:none; } .db-host .db-pose, .db-host .db-arm, .db-host .db-leg{ transition:none; } }
 /* In a quiz he stands in the card's top-right corner (Jose's pick, 2026-10-24):
