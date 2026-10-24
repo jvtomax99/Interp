@@ -26,7 +26,7 @@ const DR_BODY = {
   hip: { l: [458, 1040], r: [627, 1040] },
   // Each layer's place in the picture: [x, y, width, height].
   box: {
-    body: [353, 578, 377, 488],
+    body: [353, 578, 411, 488],
     'arm-upper-l': [284, 602, 132, 247], 'arm-fore-l': [233, 736, 164, 327],
     'arm-upper-r': [685, 611, 113, 235], 'arm-fore-r': [690, 739, 151, 326],
     'leg-l': [288, 990, 247, 426], 'leg-r': [554, 990, 240, 426],

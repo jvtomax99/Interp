@@ -54,15 +54,23 @@ upL=armL.copy(); upL[ELBOW:,:]=False; upL|=disc(shL,62)&fig; upL|=disc(elL,wL//2
 foL=armL.copy(); foL[:ELBOW,:]=False; foL|=disc(elL,wL//2)&armL
 upR=armR.copy(); upR[ELBOW:,:]=False; upR|=disc(shR,62)&fig; upR|=disc(elR,wR//2)&armR
 foR=armR.copy(); foR[:ELBOW,:]=False; foR|=disc(elR,wR//2)&armR
-band=np.array(Image.fromarray(((armL|armR)*255).astype(np.uint8)).filter(ImageFilter.MaxFilter(11)))>0
+# The body and the legs are cut against the arms with no gap (2026-10-24): the
+# body overlaps each arm's inner edge by 4 px (the arms less that strip), the
+# legs end exactly at the hands. A 5 px band carved out around the arms used to
+# leave a seam that showed the page through him over a dark background.
+arms=armL|armR
+inner=np.zeros((H,W),bool)            # the 4 px of each arm just inside its seam with the coat
+for y in range(TOP,CUFF+1):
+    xl=int(fL(y)); xr=int(fR(y)); inner[y,max(0,xl-4):xl+1]=True; inner[y,xr:xr+5]=True
+core=arms&~inner
 # legs: below the hem, split at the gap; each leg's top repeated upward behind the coat
-legs=fig&~band&(yy>=HEM)
+legs=fig&~arms&(yy>=HEM)
 legL=legs&(xx<SPLIT); legR=legs&(xx>=SPLIT)
-body=fig&~band&~legs; body[:CHIN,:]=False
+body=fig&~core&~legs; body[:CHIN,:]=False
 body=despeck(body); upL,foL,upR,foR,legL,legR=map(despeck,(upL,foL,upR,foR,legL,legR))
 src=rgb.copy()
-for y in range(TOP,CUFF+1):   # relight the coat edge under each sleeve
-    xl=int(fL(y))+13; xr=int(fR(y))-13
+for y in range(TOP,CUFF+1):   # relight the coat edge under each sleeve (from the body's edge, 4 px inside the arm, inward)
+    xl=int(fL(y))-4; xr=int(fR(y))+4
     for k in range(14):
         w=1-k/14; src[y,xl+k]=w*rgb[y,xl+22]+(1-w)*rgb[y,xl+k]; src[y,xr-k]=w*rgb[y,xr-22]+(1-w)*rgb[y,xr-k]
 legsrc=rgb.copy(); lega=alpha.copy()
