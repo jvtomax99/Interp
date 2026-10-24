@@ -1,85 +1,143 @@
-# Handoff
+# Handoff: Dr. Smiley full body (written 2026-10-23, from the chat that built PR #135)
 
-Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-23, from the chat that ran the split of
-`index.html`, phases 0 to 3c (#109, #112, #115, #122, #125, #126, #127,
-#129).
+A new chat reads this and the docs it names, not the old chat. Open by
+telling Jose, in plain words, what is being worked on and the goal, then
+wait for his direction (two paths below).
 
-## Paste this into the new chat
+## What is being worked on, and the goal
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
-> say in 2-3 lines what you'll do next and wait for my go. Plain words,
-> say "working on it" and "done".
+Jose wants Dr. Smiley fully animated as a whole body, in the style his
+head already acts in the app (beats with anticipation and follow-through,
+Lively / Focused / Still). **His call, 2026-10-23: animate him fully first;
+where he stands full-length in the app is decided later.** So nothing in
+the app shows him full-length yet, and a check keeps it that way
+(`tests/suites/body-rig.cjs`, last check).
 
-## Where things stand
+## State
 
-The split of `index.html` (`docs/split-index.md`), one change each, all on
-Jose's "push":
-- #109 phase 0: `tests/tools/census.cjs` and the section banners.
-- #112 phase 1: the stylesheet is `app.css`.
-- #115, #122, #125 phase 2, data: `guide/topics.js`, `practice/questions.js`,
-  `falsefriends/list.js`.
-- #126, #127 phase 3, features: `features/translate.js`, `features/3d-body.js`
-  (both live; 3D Body as b1023.1056).
-- **#129 phase 3: `features/term-lookup.js`, plus this handoff. Open,
-  checks green when written; waits for Jose's "push".** If it's still open,
-  confirm checks and merge on his word, then confirm Vercel's "Deployment
-  has completed" on the bump commit.
+- **PR #135** (branch `claude/dr-smiley-body-prompts`, a change waiting
+  for Jose's OK): the cutout rig, his acting, and a viewer page. Read
+  `docs/features/dr-smiley.md`, section "Full body: the cutout rig", for
+  every rule and the known limits. Files: `drsmiley/body/` (the layers and
+  `rig.json`), `drsmiley/body.js` (the rig as SVG, the joint engine
+  `drBody`, `DR_BODY_PERF`: greet, ack, think, cheer, wink, shrug, bounce,
+  wince, walk; `drBodyIdle`), `drsmiley/body.html` (the viewer, not linked
+  from the app; once live: `/drsmiley/body.html`).
+- **How the art was made:** Jose sent his standing picture
+  (`docs/art/dr-smiley-body/body-master.png`). No image generator runs in a
+  cloud session, so it was cut into layers by code
+  (`docs/art/dr-smiley-body/layers/export.py` makes `drsmiley/body/`;
+  `seams.py` found the sleeve seams first). The head is the app's own
+  (`base.webp` above the chin, on the same grid), so all 30 faces, the
+  brows and the rank hats fit it unchanged.
+- **Known limits of the cutouts:** the hands are open palms whatever the
+  pose (the fist pump and the chin rest read as "hey" and "hmm"); arms
+  turn only in the picture's plane; each leg is one piece (the walk is a
+  stylised bounce-walk from the front).
+- **The prompts** for drawn poses (`docs/art/dr-smiley-body/prompts.md`,
+  Step 2 and 3): a torso without arms, a T-pose, arms up, a fist pump, a
+  wave, thumbs up, pockets, think, shrug, crossed, point, clipboard,
+  crouch, jump; two faces (happy eyes-closed, wince). Jose runs them in
+  ChatGPT on his phone (upload `body-master.png`, paste the opening, add
+  one pose line). Not run yet.
 
-`DOMAIN_ICONS` was left in `index.html` on purpose (Home draws it at first
-paint; a file would cost the first screen). Jose didn't decide; my pick.
+## Where it stands (2026-10-23, late): the first four drawn poses are in
 
-## Next, with my pick
+Jose ran wave, fist pump, think and shrug in ChatGPT; they lined up with
+the master (0 to 4 px, colours close). `docs/art/dr-smiley-body/layers/cutframes.py`
+cut them into `drsmiley/body/pose-*.webp` (content changes only; coat over
+coat left to `body.webp`), `drsmiley/body.js` shows each as drawn and
+mirrored (`DR_BODY.pose`, `frameL`/`frameR`/`frot` in the pose, `setFrames`),
+greet/cheer/think/shrug swap them in at the top of the gesture;
+`tests/suites/body-rig.cjs` checks it. Then `crouch.png` and `jump.png`
+came and are in as leg plates (`legs: true` in `DR_BODY.pose`, `frameLegs`
+in the pose, both cutout legs hidden meanwhile; the scrub blue shifted to
+the master's in `cutframes.py`) for `cheer` and `bounce`. The acting sheet:
+`layers/sheet.cjs` run from `tests/` (frames to a folder), tiled into
+`preview-acting.png`. Sent to Jose. The thumbs-up came last (cut as a
+feathered band, `band: True`, since its sleeve lies over the coat; drawn
+in front; the top of `bounce`). Every drawing the acting needs is in;
+point and clipboard wait for a use. Asked where he stands full-length
+(Home greeting and the quiz recommended, never the dock), Jose said "not
+yet" (2026-10-23, late): he OKs PR #135 as it is, looks at him in the
+viewer at `/drsmiley/body.html` once it is live, and decides later. So the
+next chat waits for that pick; when it comes, path 2 below. The app still
+shows nothing full-length.
 
-Phase 3, one feature per change, leaves first (census table in
-`docs/split-index.md`): **Voice and mic check** (12 KB), then **Dr.
-Smiley's performances** (16 KB), then **the campus** (19 KB, animates: more
-to check). Ask the Hub's group (~125 KB) and Dr. Smiley's engine move last,
-as groups, or stay.
+## 2026-10-23, late evening: the held states are in
 
-## The method for a feature (worked three times)
+Jose saw previews of all nine performances (GIFs recorded from the viewer)
+and picked "held states, full body" as the next step toward "animated like
+he animates in the app": `body.state(name)` with listening, thinking,
+answering, celebrating, uncertain (`DR_BODY_STATES` in `drsmiley/body.js`;
+the viewer's second row; the feature doc's "Held states" bullet). Also
+fixed: a gesture cut short by another left its drawn hand up. Then Jose ran the clipboard prompt: cut as a band
+(`pose-clipboard.webp`), the `read` performance and the `answering` hold
+use it. Then the point (`pose-point.webp`, the `point` performance with a `side`: "look here"), the doze and rest-life levels (`drBodyIdle`: full, calm, blinks, none; `stop.doze()`). His body now covers everything his head does in the app: gestures, held states, the phone's states. Where he
+stands in the app is still his open pick (Home greeting and the quiz
+recommended). Previews are made by recording the viewer with Playwright
+video, frames out with Playwright's bundled ffmpeg (`-r 12`, no filters in
+that build), cropped and written as GIFs with Pillow.
 
-1. List the section's top-level statements with acorn (snippet: walk
-   `ast.body` of the biggest inline script, print each statement's type and
-   name between the section's banner lines). Every one must be a declaration
-   whose value runs nothing that touches `index.html` names. A listener
-   added at load (`window.addEventListener(...)`) is OK if its handler runs
-   later; check the order against earlier listeners of the same event (3D
-   Body's note in `docs/split-index.md`).
-2. Cut the banner through the section's last line into
-   `features/<name>.js` under a short header comment; leave a two-line
-   pointer comment. Watch for stray pointer comments from earlier moves
-   sitting before the next banner: they belong to `index.html`.
-3. `<script src="./features/<name>.js"></script>` after the other
-   `features/` lines, before the main inline `<script>`.
-4. Lists: `sw.js` precache line (the network-first regex already covers
-   `features/*.js`), `tests/tools/brain-data.cjs` (drop the section from its
-   group), then `node tools/brain-data.cjs` and `node tests/tools/census.cjs
-   --write`. The harness and `first-paint.cjs` already handle `features/*.js`.
-5. Proof: the old main script's tokens equal the new one's with the file's
-   tokens put back at the first difference (acorn tokenizer); a browser probe
-   of the feature in both checkouts (`ROOT=` a worktree of `main`) reading
-   identically, plus `Object.keys(window)`; all suites; `first-paint.cjs`
-   (`ROOTS=before,after RUNS=5`, ~20 min).
-6. Docs: `AGENTS.md` where-table, `CLAUDE.md` file map + table, the
-   feature's note in `docs/features/`, `docs/split-index.md`, `docs/PLAN.md`.
+## Decided 2026-10-23 (the chat after the one above): path 1, drawn poses
 
-## Not proven / open
+Jose first said "nowhere for now, I want to hit finished first" and "it
+doesn't have to be 3D"; a 2D redraw was tried (two pictures) and dropped
+for likeness (`docs/art/dr-smiley-2d/prompts.md` has the numbers). His
+words then: "I just want to be animated like he animates in the app.
+Only that it's his face the only thing that animates but this time I want
+the body too." So the 3D him stays and path 1 below is the plan: drawn
+poses of the same him (`docs/art/dr-smiley-body/prompts.md`, Step 2; wave,
+fist pump, think, shrug first, then crouch and jump), measured against the
+master, cut as frames the rig swaps. What the next chat waits on: those
+pictures. PR #135 stays the base (engine, viewer, checks).
 
-- Each file adds about 0.03-0.1 s to the very first paint on weak Wi-Fi
-  (its bytes arrive with `app.css`); Home has come the same or sooner each
-  time. Real HTTP/2 priorities on Vercel are unmeasured.
-- The census can't see `window[name]` lookups or names built in strings.
-- WebKit CI twice timed out installing the browser (Ubuntu mirror slow),
-  passed on a re-run; once crashed mid-suite and passed on a re-run.
+## The two paths as they stood (path 1 is the one)
 
-## Learned (also in `docs/PLAN.md` Facts)
+1. **Jose sends drawn poses.** Measure each against the master as the
+   four faces were (`docs/art/dr-smiley-faces/README.md`: scale, offset,
+   colour), cut the arms (or the whole part that changed) and add them as
+   new pieces or frames in `drsmiley/body/` and `DR_BODY.box`; a real fist
+   replaces the open palm in `cheer`'s fist beat and `bounce`, a finger to
+   the chin in `think`, the clipboard for a reading pose. Keep the rest
+   pose composing back into the picture (the suite checks mean difference
+   under 12 below the chin). Redo the frames sheet
+   (`docs/art/dr-smiley-body/preview-acting.png`) and send it to Jose.
+2. **Jose picks where he stands full-length** (his pick is still open;
+   the recommendation was Home greeting and the quiz, never the dock: at
+   58 px his face would be a dot). Then wire `drBodyArt`/`drBody` into
+   `index.html` (load `drsmiley/body.js` like `features/*.js`, before
+   `index.html`'s script), drive the face from `DrAnim` (the head group
+   carries the same `.ds-face`/`.ds-sheet`/`.ds-brow` classes), add the
+   layers to `sw.js`'s precache, keep `.db-breath` breathing as CSS in
+   `app.css`, honour `setSmileyMode` and `drTask`, and update the User
+   Guide (a new answer, `GUIDE_NEWS` card) in the same commit. Phone
+   screenshots first, then numbers.
 
-- Computed-style proofs must sort property names (custom properties come
-  in declaration order) and be compared against a second run of the old
-  version (some elements differ run to run).
-- `brain/index.html` and `brain-data.cjs` depend on census section titles;
-  a moved section must leave `brain-data.cjs`'s lists, or it prints "Not
-  found in the census".
-- Other chats merge to `main` often; merge `main` in before opening a
-  change and regenerate `brain/data.json` if `--check` says so.
+## How to verify
+
+- `cd tests && node run.cjs body-rig` (about 2 minutes; 121 checks). The
+  full run: `node run.cjs`, about 8 minutes. If Playwright says the
+  browser is missing (it expects `chromium_headless_shell-1194`, the
+  container has 1243), make the two folders point at the installed ones:
+  `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`
+  as a symlink to `.../chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell`,
+  and `chromium-1194/chrome-linux/chrome` to `chromium-1243/chrome-linux64/chrome`,
+  with an `INSTALLATION_COMPLETE` file in each.
+- Frames mid-performance: the script that made the sheet is in the old
+  chat only; `body-rig.cjs` saves `tests/out/shots/body-rig-phone.png` and
+  `-desktop.png`. For frames, open the viewer in Playwright, call
+  `drBodySeed(3); body.perform('cheer')` and screenshot the stage at a few
+  times.
+
+## Rules that bit this chat
+
+- Fetch `main` before writing and before pushing; it moved twice during
+  this work (#131, #134) and `docs/PLAN.md` conflicted (resolve hunk by
+  hunk, keep both; never `--ours`).
+- A commit message with `"` inside `-m "..."` breaks the commit; write
+  the message to a file and use `-F`.
+- Reporting to Jose: extremely concise, plain words, "working on it" while
+  running, "done" when finished; options as buttons (`AskUserQuestion`),
+  the recommendation first; every finished job a picture
+  (`SendUserFile`, phone first) then a `PushNotification`.

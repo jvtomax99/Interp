@@ -66,12 +66,30 @@ Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work
 under way, then what waits on Jose, then small leftovers.
 
-1. **Split `index.html`, phase 3: features to their own files**, one per
+1. **Dr. Smiley's full body, finished from drawn poses** (Jose, 2026-10-23:
+   "animated like he animates in the app", his face is drawn pictures
+   swapped, now the body too; a 2D redraw was tried the same evening and
+   dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`). Done so far
+   (PR #135): wave, fist pump, think and shrug from ChatGPT, measured
+   against the master, cut as frames (`layers/cutframes.py`,
+   `drsmiley/body/pose-*.webp`), swapped in by the rig at the top of
+   greet, cheer, think and shrug, mirrored for the other side; then crouch
+   and jump as leg plates for the cheer and the quiz bounce, and the
+   thumbs-up at the top of the bounce. Then (2026-10-23/24, Jose's picks
+   from the previews): the five held states his head holds in the app
+   (`body.state`: listening, thinking, answering, celebrating, uncertain),
+   the clipboard (`read`, and `answering` reads on it), the point
+   (`point`, with a side), the doze and rest-life levels. His body now
+   covers everything his head does in the app. Next: where he stands
+   full-length (his call; "not yet" on 2026-10-23: he looks at the viewer
+   `/drsmiley/body.html` live first, then decides).
+   Nothing in the app shows him full-length until then.
+2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
    the split entry under **Later** and `docs/handoff.md`. Next: the
    campus (it animates: more to check).
-2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
+3. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
    Background, the S-steps so far:
@@ -190,8 +208,25 @@ come from this alone.
 
 ## Done
 
-- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (this
-  PR): `features/smiley-performances.js`, verbatim, except the one line
+- 2026-10-23/24 Dr. Smiley full body, the cutout rig (this PR; Jose:
+  "fully animated first, decide where later"). Jose sent his standing
+  picture; no image generator runs in a cloud session, so it was cut into
+  layers by code (`docs/art/dr-smiley-body/layers/build.py`): the app's
+  own head on the base grid, the armless body, upper arms, forearms, legs
+  (`drsmiley/body/`). `drsmiley/body.js`: the rig as SVG, a joint engine
+  after his face's acting (beats, easings with anticipation and
+  follow-through, Lively/Focused/Still, limits), twelve performances
+  (greet, ack, think, cheer, wink, shrug, read, point, bounce, wince,
+  walk, doze), the five held states his head holds in the app (listening,
+  thinking, answering, celebrating, uncertain), rest life with the app's
+  idle levels. Nine drawn poses from Jose's ChatGPT runs (wave, fist pump,
+  think, shrug, thumbs-up, clipboard, point; crouch and jump as leg
+  plates), cut by `layers/cutframes.py` and swapped in at the top of the
+  gestures. The viewer `drsmiley/body.html` (not linked from the app) is
+  where Jose reviews him. Suite `body-rig.cjs`, 121 checks. Guide: nothing
+  visible in the app changed, so nothing to update.
+- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances
+  (#137): `features/smiley-performances.js`, verbatim, except the one line
   that fills `DR_FACE_SEQ` (it stays in `index.html`; Jose's pick, the
   table is defined earlier there). Proof: old `index.html` rebuilt byte
   for byte; every performance built with three seeds, the table, globals

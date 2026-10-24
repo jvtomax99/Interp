@@ -174,3 +174,149 @@ away. `renderContent` now queues one `smileyRider.sync()` per frame.
 Suite: `tests/suites/smiley-quiz.cjs`. Upgrades wait on Jose's art: head
 and shoulders as separate layers, two arm poses, happy eyes-closed and
 wince faces.
+
+## Full body: the cutout rig (2026-10-23)
+
+**The drawn poses are in (2026-10-23, the same evening; a 2D redraw was
+tried first and dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`).**
+Jose: the body animated the way his face is, drawn pictures of the same
+3D him in each pose, swapped, with this rig moving the arms between. He
+ran four prompts in ChatGPT (`docs/art/dr-smiley-body/prompts.md`): wave,
+fist pump, think, shrug; all four came back at the master's size, 0 to 4 px
+off, colours within a few points. `layers/cutframes.py` cuts each into a
+frame on the master grid (`drsmiley/body/pose-*.webp`, boxes in
+`poses.json` and `DR_BODY.pose`): only content changes, coat over coat is
+left to `body.webp`. In the rig each frame exists twice, as drawn (`-l`,
+his right arm on the picture's left) and mirrored about his middle
+(`DR_BODY.mirrorX`, `-r`), so either side can use it; `wave`, `fist-pump`
+and `shrug` sit behind the coat (the arm comes from under the shoulder),
+`think` in front (the folded arm, the finger on the chin). The pose joints
+`frameL`/`frameR` name the frame shown on each side (swapped at a beat's
+start, like a face frame) and `frot` wags it about its pivot; while one
+shows, the cutout arms it stands in for are hidden, with a 120 ms
+cross-fade (CSS on `.db-pose`/`.db-arm`; the viewer has it, the app's
+copy goes in `app.css` when he is wired in). How a gesture uses one: the
+cutout arm swings to the frame's `at` (its raise and bend), the frame
+takes over there, holds or wags, hands back before the arm comes down.
+`greet` waves with the drawn hand (3 wags of `frot`), `cheer` pumps two
+drawn fists (one mirrored) from the top of the jump, `think` holds the
+drawn finger on the chin, `shrug` the drawn palms; `ack`, `wink`, `bounce`,
+`wince` and the walk stay on the cutout arms (an open hand is right for
+them). **The clipboard** (2026-10-23, late evening; Jose ran the prompt):
+both hands on a plain clipboard at his chest, over the coat, so
+`cutframes.py` takes it as a feathered band of the figure from the collar
+to below the hands (`band: True`, both sleeves in it); it stands in for
+both cutout arms (`arms: ['L', 'R']`, drawn in front) and `frot` tilts it
+about the chest. `read` (a new performance) brings it up, runs his eyes
+down it along a line and back, nods and brings it down; the held state
+`answering` reads the answer on it. **The point** (2026-10-24): the arm
+straight out at shoulder height, the index finger out, cut like the wave
+(a back-layer arm, as drawn and mirrored); `point` (a performance, with
+`side` for which way: "look here") glances that way, swings the cutout
+arm out, swaps the finger in, bobs it twice, holds on it, and comes back. Still shows the drawn pose held. **The leg plates** (the same
+evening): `crouch.png` (knees bent, feet in place) and `jump.png` (in the
+air, feet tucked) came back on the same grid (4 px off); `cutframes.py`
+cuts both legs whole below the hip line (the floor shadow out, the top
+rows repeated up under the coat, the scrub blue shifted to the master's,
+which ChatGPT had rendered brighter) as `pose-crouch` and `pose-jump`,
+one copy each (`legs: true`, no mirror), drawn right after the cutout legs.
+`frameLegs` names the one shown; both cutout legs hide meanwhile. `cheer`
+and `bounce` go crouch, then jump at the top of the hop (Focused keeps
+the crouch, never tucked feet on the ground), crouch again at the landing
+squash, then back. **The thumbs-up** (the same evening, Jose's pick for the
+top of the quiz bounce): its sleeve lies over the coat, where colour cannot
+tell sleeve from coat, so `cutframes.py` cuts it as a feathered band of the
+picture (`band: True`, a 6 px feather melting into the coat beneath) and
+the rig draws it in front; `bounce` folds one cutout arm up during the hop
+and swaps the drawn thumbs-up in at the top (as drawn or mirrored), pushes
+it up a little on the second hop, and hands back at the settle. Not run
+yet: `body-noarms`, `pockets`, `crossed`, `arms-up`; nothing needs them.
+
+Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
+into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
+cloud session has no image generator; the drawn poses from
+`docs/art/dr-smiley-body/prompts.md` (a real fist, a finger to the chin, a
+clipboard) come later, when Jose runs them. **Nothing in the app shows him
+full-length yet** (Jose, 2026-10-23: "fully animated first, decide where
+later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
+`tests/suites/body-rig.cjs` checks that stays so until the decision.
+
+- **The pieces** (`drsmiley/body/`, in the picture's own pixels, 1070 x 1470;
+  the pivots in `rig.json` and `DR_BODY` in `drsmiley/body.js`): his head
+  is the app's own (`head.webp`: `base.webp` above the chin, its sliver of
+  coat removed, a skin neck tube behind, on the same 480 x 600 grid, so the
+  face strip, the brows and the rank hats fit it unchanged; placed at scale
+  1.0881); the torso and legs with no arms (`body.webp`, the floor shadow
+  keyed out, the coat's edge under each sleeve relit from the coat beside
+  it); each arm as an upper arm and a forearm with round caps at the
+  shoulder and elbow; each leg, its top repeated up under the coat. Drawn
+  back to front: legs, arms, head, body, so the coat covers every joint and
+  the collar covers the neck. At rest they compose back into the picture
+  (mean difference under the chin 7.6 of 255; the suite checks under 12).
+- **How he moves** (`drBody(svg)`): the same shape as his face's acting. A
+  performance is a list of beats `[ms, pose patch, ease]`, each eased from
+  the pose the one before reached (from the live pose for the first, so an
+  interruption blends, never snaps; a drawn pose the interrupted gesture
+  was showing hands back at once, or it stayed up through the whole new
+  gesture: two waving hands, fixed 2026-10-23), built fresh each play with the side,
+  sizes and timing varied (`drBodyRand`, `drBodySeed(n)` for the checks).
+  Joints: the root (a lift `y`, a `lean` and the squash `sx`/`sy`, all about
+  his feet), the head (a turn about the neck, a `lift`), each arm's raise
+  (`aL`/`aR`: 0 hanging, 90 out, 170 up) and elbow bend (`fL`/`fR`), each
+  leg's swing and lift, the face frame and the brow pose. Limits
+  (`DR_BODY.limit`) clamp what is drawn, so a spring past the mark never
+  shows a cut edge. Easings: `out`, `in`, `inOut`, `linear`, `snap` (an
+  anticipation's release) and `spring` (about 7% past, then settled:
+  follow-through). Only transforms move; his box never changes.
+- **Performances** (`DR_BODY_PERF`): greet (a dip, then a wave beside his
+  head with the near arm, brows flashed, three wags), ack (a nod with an
+  open hand), think (a hand to the chin, eyes up away from it, the "aha"),
+  cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
+  wink (his left eye, a "hey you" of the right hand), shrug (palms up,
+  doubtful), read (the drawn clipboard up, eyes down it, a nod, down), point (a
+  glance that way, the drawn finger straight out, two bobs, a hold),
+  bounce and wince (the quiz pair), doze (eyes closing slowly, head and
+  shoulders sinking, one slow breath asleep on the `sleep` frame, a jolt
+  awake, a look around; the phone's resting state, 2026-10-24), walk (`steps` paces, legs
+  alternating, arms against them; returns `dx`, how far he went). Focused
+  plays the same beats smaller (about 0.55) with no jump; Still holds the
+  one pose in `still` for `stillMs`; reduced motion is Still.
+- **Held states** (`body.state(name)`, `DR_BODY_STATES`; 2026-10-23, Jose's
+  pick after the previews): what he does while something goes on, for as
+  long as it goes on, the way his head holds a task state in the app
+  (`drTask`): `listening` (leaned in a touch, head tipped, one open hand a
+  little forward, slow tilts, a nod now and then), `thinking` (the drawn
+  finger on the chin, eyes up and away from the hand wandering, a slow blink
+  every other beat, a tap of the finger; slower after 9 s; the exit is the
+  "aha"), `answering` (the drawn clipboard in both hands at his chest, eyes down
+  on it along a line and back, the board tilting a little with them, a nod
+  now and then), `celebrating` (the cheer, then a happy bob with one drawn fist
+  pumping), `uncertain` (shoulders up, both open hands half out, a doubtful
+  face and never a cheerful one, a small re-shrug now and then). Each is an
+  entry, then a hold built one group of beats at a time (`play` with
+  `keep`: from the live pose as it is, drawn frames included, ending where
+  its last beat left him), until `state(null)` plays the exit or another
+  state replaces it. A gesture (`perform`) cuts in; it ends at rest and the
+  hold carries on (each group names its base pose again in its first beat).
+  Focused: the same, smaller (k .6). Still: the one pose in `still`, held;
+  a gesture's one frame, then back to it. The viewer's second row of
+  buttons; `tests/suites/body-rig.cjs` checks each holds 4.5 s without a
+  gap inside the limits, Off returns to rest with every drawn pose hidden,
+  a nod during thinking resumes it, Focused smaller, Still one pose.
+- **Rest life** (`drBodyIdle`): breathing is a CSS animation on
+  `.db-breath` (the compositor; `transform-box: fill-box`, about the hips;
+  none in Still), blinks every few seconds, now and then a shift of weight
+  or a glance, only while seen and nothing else plays. No frame loop runs
+  at rest. Levels, as the app's idle levels for his head (`DR_IDLE_LEVEL`;
+  `stop.setLevel`): `full`, `calm` (blinks and a glance now and then:
+  offline, resting), `blinks` (attentive, uncertain, an appointment),
+  `none`; `stop.doze()` plays the doze (the resting state's one doze when
+  the phone has been quiet a while). The viewer's "Rest" switch.
+- **Squash and stretch**: the cheer and the bounce, 4% and 3.5% of his
+  height, width 1/sqrt(height) as E3; never more (the suite checks).
+- **Known limits of the cut**: the cutout hands are open palms, so the
+  gestures with a fist, a finger or upturned palms use the drawn frames
+  above and the cutout arms only for the way there and back; the arms turn
+  only in the picture's plane; the legs are one piece each, so a walk is a
+  stylised bounce-walk from the front; the quiz bounce and the cheer use
+  the drawn `crouch` and `jump` plates for real knees.
