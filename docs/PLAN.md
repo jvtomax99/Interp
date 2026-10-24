@@ -75,8 +75,9 @@ under way, then what waits on Jose, then small leftovers.
 1. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
-   the split entry under **Later** and `docs/handoff.md`. Next: the
-   campus (it animates: more to check).
+   the split entry under **Later** and `docs/handoff.md`. The campus is
+   this PR. Next: Ask the Hub's group and Dr. Smiley's engine, as groups,
+   or they stay (`docs/split-index.md`).
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
@@ -157,6 +158,13 @@ come from this alone.
 **Small leftovers**, for whoever next touches the file:
 - `api/term-check.js` still has its own `clip()` (line ~105) beside
   `_routine.js`'s `clip`; fold it in.
+- `features/3d-body.js` line 48: its `resize` listener reads
+  `activeCategory`, which `index.html`'s script declares later; a resize
+  while the page loads throws "activeCategory is not defined" (seen in
+  daily-drill, smiley-quiz and springs, on `main` too, 2026-10-24).
+  Harmless (a console error), but it fails those suites' "no page errors"
+  now and then. Fix: guard it (`typeof activeCategory`) or register the
+  listener from `index.html`. Since #127.
 
 ## Later (only when the trigger happens)
 
@@ -185,8 +193,8 @@ come from this alone.
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
-  #129, Voice and mic check #131, Dr. Smiley's performances #137, live.
-  Next leaves: the campus (`docs/split-index.md`).
+  #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
+  the campus, this PR. Next: the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -196,6 +204,13 @@ come from this alone.
 
 ## Done
 
+- 2026-10-24 Split `index.html`, phase 3, the campus (this PR):
+  `features/campus.js`, verbatim, its Escape listener included (the
+  earlier keydown listeners neither stop the event nor touch the campus).
+  `campusLife`/`campusDepth` stay inline. Proof: old `index.html` rebuilt
+  byte for byte; campus markup, tables, a pick then Escape, globals:
+  identical in the browser; first paint the same (slow Wi-Fi +0.02 s,
+  Home the same or sooner). `docs/split-index.md`.
 - 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (#137,
   live b1024.1338): `features/smiley-performances.js`, verbatim, except the one line
   that fills `DR_FACE_SEQ` (it stays in `index.html`; Jose's pick, the
