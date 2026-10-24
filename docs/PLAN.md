@@ -39,18 +39,24 @@ rounds, and the next phase would add a lot more):
 3. Commit and push it, send it to Jose with `SendUserFile`, and say
    "Start a new chat". Once, not every reply. Ask with buttons (Jose,
    2026-10-23): **"I start it for you" (the pick)**, a new session
-   (`create_session`, same repository) whose first message is the whole
+   (`create_session`, same repository, titled with the chat's focus in
+   plain words, Jose 2026-10-24) whose first message is the whole
    of `docs/handoff.md` plus a short summary of this chat (what was done,
    what is open, why), with its link given to Jose; or **"I'll paste it
    myself"**, the exact message to paste. Where the buttons or
-   `create_session` are missing, give the message to paste.
+   `create_session` are missing, give the message to paste. Either way,
+   the reply also gives Jose a fresh two-part summary (Jose, 2026-10-24):
+   what is being worked on now and its goal, and what was worked on
+   before (this chat's changes and where each stands).
 4. Leave nothing half-done: an open PR is fine (the handoff names it), an
    uncommitted change is not. Cancel this chat's check-ins; the new chat
    re-arms what it needs. Then "Archive this chat" (below).
 The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
-then opens with a short summary for Jose: what is being worked on and the
-goal of the task (Jose, 2026-10-23), then in 2-3 lines what it will do,
-and waits for his go.
+then opens with a short summary for Jose in two parts: what is being
+worked on now and its goal (Jose, 2026-10-23), and what was worked on
+before (Jose, 2026-10-24), each a few lines in simple words, never a
+big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
+for his go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -179,8 +185,8 @@ come from this alone.
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
-  #129, Voice and mic check #131, live; Dr. Smiley's performances, this
-  PR. Next leaves: the campus (`docs/split-index.md`).
+  #129, Voice and mic check #131, Dr. Smiley's performances #137, live.
+  Next leaves: the campus (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -190,8 +196,8 @@ come from this alone.
 
 ## Done
 
-- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (this
-  PR): `features/smiley-performances.js`, verbatim, except the one line
+- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (#137,
+  live b1024.1338): `features/smiley-performances.js`, verbatim, except the one line
   that fills `DR_FACE_SEQ` (it stays in `index.html`; Jose's pick, the
   table is defined earlier there). Proof: old `index.html` rebuilt byte
   for byte; every performance built with three seeds, the table, globals
