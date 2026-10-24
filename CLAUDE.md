@@ -58,6 +58,7 @@ between assignments.
 | `features/voice-check.js` | 251 | The Voice and mic check at the bottom of More (`voiceCheckOpen`, and `audioMode`, which the memory trainer calls too). Moved verbatim (2026-10-23) |
 | `features/smiley-performances.js` | 288 | Dr. Smiley's five performances (`DR_PERF`, `drPerfBuild`, `drPerfSeed`), his squash (`drSquashKeys`), mood (`drSetMood`) and the effects off his head (`drFaceFx`). Moved verbatim (2026-10-24) except one line that stays in `index.html`: the one putting them into `DR_FACE_SEQ` |
 | `features/campus.js` | 157 | Your HUMC campus on CoreCHI Practice: `CAMPUS_MAP`, `CAMPUS`, `renderCampus`, the building pick (`campusPick`, `campusGo`) and its Escape key. Moved verbatim (2026-10-24). Its motion (`campusLife`, `campusDepth`) stays in `index.html`, section "Practice dashboard motion" |
+| `features/false-friends.js` | 227 | The False Friends screen: `renderFalseFriends`, Study and Drill (`buildFFDrill`, `answerFF`), search and the risk filter (`FF_RISKS`). Moved verbatim (2026-10-24); the list is `falsefriends/list.js`. The Practice code that followed it in the same section (`renderPractice`, `startStudy`, the exam timer) stays in `index.html`, now under its own banner |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
@@ -116,6 +117,7 @@ different places is what silently killed the coloured press glow: a
 | User Guide answers | `guide/topics.js` |
 | CoreCHI practice questions | `practice/questions.js` |
 | False Friends list | `falsefriends/list.js` |
+| False Friends screen (Study, Drill) | `features/false-friends.js` |
 | Translate tool code | `features/translate.js` |
 | 3D Body's Hub side (the frame bridge) | `features/3d-body.js` |
 | Looking a term up | `features/term-lookup.js` |

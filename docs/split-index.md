@@ -178,6 +178,16 @@ move each, with the same proof every time and nothing visible changing.
    `index.html`'s script has run (the 3D Body's resize did, 2026-10-24).
    It must not read `index.html`'s names then, or must guard them
    (`typeof`). `tests/suites/load-order.cjs` checks the gap.
+   **False Friends' screen done 2026-10-24**: `features/false-friends.js`,
+   declarations only. The census's "False Friends" section (22 KB) was in
+   fact two: the False Friends screen (10 KB) and, with no banner between,
+   the Practice screen (`renderPractice`, `startStudy`, the exam timer,
+   the weekly board). Only the first moved; the second stays inline under
+   a new banner, "CoreCHI practice: the screen, studying, the exam timer".
+   Proof: the old `index.html` rebuilt byte for byte; in the browser,
+   phone and computer, False Friends' Study, Drill and an answered
+   question, the Practice screen (a timestamp aside) and globals:
+   identical, no page errors.
 3. **JS by feature, one file per PR**, leaves first (the census says which:
    sections whose names few others use). Candidates from the sizes alone:
    Dr. Smiley's engine (`DrAnim` 25 KB with `DR_FACE_SEQ`, `DR_PERF`,
@@ -234,123 +244,123 @@ loaded at the same place keeps the order, so the census needn't).
   KB (11), the CoreCHI bank 44 KB (8). Phase 2 stands as written.
 
 <!-- census:start -->
-Census of `index.html`: 3 inline scripts, 113 sections, 1666 top-level names (`tests/tools/census.cjs`). The markup's own on... handlers use 67 names from 29 sections.
+Census of `index.html`: 3 inline scripts, 113 sections, 1643 top-level names (`tests/tools/census.cjs`). The markup's own on... handlers use 67 names from 29 sections.
 
 | # | Section | Lines | KB | Names | Uses: sections / names | Used by: sections / names |
 |---|---|---|---|---|---|---|
 | 1 | Dark mode before the first paint | 4-12 | 0.3 | 0 | 0 / 0 | 0 / 0 |
 | 2 | Firebase: config, and the SDK loading in the background | 566-622 | 2.6 | 6 | 0 / 0 | 41 / 50 |
-| 3 | Seed data (from the shared reference doc) | 634-725 | 8.3 | 2 | 0 / 0 | 1 / 1 |
-| 4 | State | 726-741 | 0.8 | 8 | 0 / 0 | 62 / 87 |
-| 5 | Location grouping | 742-818 | 5.0 | 7 | 0 / 0 | 8 / 20 |
-| 6 | Regions | 819-898 | 3.8 | 14 | 11 / 16 | 14 / 34 |
-| 7 | Places (shared) | 899-1052 | 7.3 | 16 | 14 / 18 | 7 / 15 |
-| 8 | Collapsible groups: doctors by place, domains by parent | 1053-1149 | 4.4 | 11 | 8 / 13 | 8 / 17 |
-| 9 | Your name on this phone | 1150-1163 | 0.7 | 2 | 0 / 0 | 4 / 4 |
-| 10 | Team members' faces | 1164-1315 | 6.5 | 15 | 7 / 8 | 6 / 14 |
-| 11 | Shared state: search, editing, providers, quiz | 1316-1341 | 1.0 | 23 | 0 / 0 | 29 / 71 |
-| 12 | Practice record: what you personally know, question by question | 1342-1632 | 12 | 30 | 6 / 6 | 4 / 25 |
-| 13 | Shared state: Term Review, domains, chat, events, activity | 1633-1782 | 6.9 | 62 | 2 / 5 | 35 / 123 |
-| 14 | First-run onboarding | 1783-1866 | 3.6 | 12 | 5 / 5 | 8 / 16 |
-| 15 | Storage | 1867-1888 | 0.8 | 2 | 0 / 0 | 15 / 19 |
-| 16 | CSV export / import | 1889-2046 | 6.5 | 9 | 11 / 15 | 2 / 5 |
-| 17 | Loading the glossary | 2047-2246 | 6.9 | 2 | 8 / 12 | 1 / 1 |
-| 18 | Slang domains | 2247-2343 | 6.4 | 20 | 3 / 4 | 4 / 19 |
-| 19 | Domain fields and the first seeding | 2344-2381 | 1.6 | 2 | 2 / 3 | 2 / 2 |
-| 20 | Local glossary cache | 2382-2551 | 7.0 | 15 | 9 / 12 | 6 / 10 |
-| 21 | Recently deleted | 2552-2688 | 5.0 | 9 | 15 / 19 | 8 / 14 |
-| 22 | Healthcare Providers | 2689-2803 | 5.3 | 8 | 11 / 14 | 11 / 15 |
-| 23 | Doctor Directory | 2804-2949 | 7.3 | 13 | 12 / 15 | 10 / 17 |
-| 24 | Team Chat | 2950-3024 | 3.4 | 3 | 10 / 21 | 5 / 5 |
-| 25 | Recent Updates (activity log) | 3025-3043 | 0.7 | 1 | 3 / 3 | 18 / 18 |
-| 26 | Announcements | 3044-3095 | 2.0 | 6 | 8 / 10 | 4 / 6 |
-| 27 | Team Chat panel: pinned strip, typing box, drop | 3096-3222 | 6.8 | 9 | 10 / 15 | 10 / 22 |
-| 28 | Recent Updates: the feed | 3223-3312 | 3.8 | 5 | 12 / 19 | 2 / 2 |
-| 29 | Attachments (terms, chat, notes) | 3313-3637 | 15 | 22 | 14 / 21 | 9 / 13 |
-| 30 | Utilities | 3638-3714 | 3.0 | 4 | 3 / 3 | 54 / 62 |
-| 31 | Photo viewer | 3715-4057 | 17 | 15 | 3 / 5 | 6 / 8 |
-| 32 | Deleting chat messages and activity entries | 4058-4116 | 2.6 | 5 | 4 / 6 | 8 / 10 |
-| 33 | Accent-insensitive search | 4117-4153 | 1.6 | 3 | 0 / 0 | 17 / 17 |
-| 34 | Team-contributed practice questions | 4154-4208 | 2.2 | 4 | 9 / 10 | 3 / 4 |
-| 35 | Chat notifications | 4209-4365 | 5.6 | 12 | 9 / 13 | 6 / 14 |
-| 36 | Notifications that reach a closed phone (Web Push) | 4366-4684 | 18 | 27 | 11 / 22 | 6 / 8 |
-| 37 | Typing presence | 4685-4858 | 7.1 | 14 | 7 / 12 | 6 / 12 |
-| 38 | Global search | 4859-5095 | 8.8 | 12 | 13 / 22 | 5 / 8 |
-| 39 | Training & Events | 5096-5229 | 5.4 | 8 | 13 / 26 | 3 / 4 |
-| 40 | Small helpers: save errors, toasts, colours, tile lists | 5230-5392 | 9.5 | 12 | 8 / 15 | 55 / 101 |
-| 41 | Your knowledge brain: your own Term Review record, drawn as a brain | 5393-5606 | 13 | 14 | 15 / 20 | 3 / 3 |
-| 42 | Term Review: Dr. Smiley's practice sessions | 5607-6070 | 30 | 42 | 20 / 34 | 6 / 15 |
-| 43 | The guide: search, answer sheets, Show me | 6071-6572 | 34 | 46 | 14 / 23 | 8 / 27 |
-| 44 | Doctor Prep: research | 6573-6961 | 17 | 23 | 17 / 23 | 7 / 18 |
-| 45 | The guide: installing, the front page | 6962-7185 | 11 | 17 | 6 / 27 | 2 / 5 |
-| 46 | Small helpers: tile colours, escaping, links | 7186-7219 | 1.7 | 4 | 0 / 0 | 59 / 103 |
-| 47 | Dr. Smiley's art | 7220-7373 | 14 | 6 | 0 / 0 | 4 / 7 |
-| 48 | Dr. Smiley: animation engine | 7374-8116 | 36 | 31 | 4 / 16 | 9 / 19 |
-| 49 | Dr. Smiley: how lively (Lively, Focused, Still) | 8117-8153 | 1.8 | 7 | 3 / 5 | 7 / 14 |
-| 50 | Dr. Smiley: what he's doing (task states) | 8154-8349 | 9.8 | 23 | 6 / 14 | 12 / 33 |
-| 51 | Icons (inline SVG) | 8350-8430 | 19 | 59 | 0 / 0 | 37 / 127 |
-| 52 | Code of Ethics | 8431-8477 | 4.8 | 1 | 0 / 0 | 4 / 4 |
-| 53 | Domain icons and link lists | 8478-8537 | 19 | 2 | 4 / 6 | 9 / 9 |
-| 54 | Term card menu (phones) | 8538-8622 | 4.5 | 5 | 8 / 11 | 1 / 1 |
-| 55 | Rendering | 8623-8713 | 3.8 | 9 | 1 / 1 | 10 / 10 |
-| 56 | Domain banner and its ⋯ menu | 8714-8982 | 13 | 9 | 22 / 38 | 20 / 20 |
-| 57 | Offline outbox | 8983-9260 | 10 | 25 | 5 / 6 | 12 / 31 |
-| 58 | Unsent changes sheet | 9261-9498 | 11 | 15 | 7 / 16 | 9 / 16 |
-| 59 | Sync status and the top bar | 9499-9667 | 7.9 | 8 | 11 / 17 | 13 / 14 |
-| 60 | The screen: renderContent | 9668-10235 | 28 | 15 | 49 / 123 | 25 / 26 |
-| 61 | Theme, navigation and overlays | 10236-10359 | 6.5 | 5 | 14 / 25 | 26 / 29 |
-| 62 | Opening one particular term | 10360-10411 | 2.3 | 2 | 7 / 12 | 4 / 4 |
-| 63 | Subdomain folder | 10412-10545 | 6.0 | 4 | 4 / 5 | 1 / 1 |
-| 64 | Going Home and going back | 10546-10618 | 3.6 | 3 | 5 / 8 | 3 / 4 |
-| 65 | Your name and photo (the name sheet) | 10619-10815 | 8.4 | 15 | 18 / 31 | 31 / 39 |
-| 66 | CoreCHI practice | 10816-10883 | 2.5 | 4 | 1 / 1 | 5 / 11 |
-| 67 | False Friends | 10884-11353 | 22 | 30 | 17 / 63 | 3 / 6 |
-| 68 | Practice dashboard tiles | 11354-11485 | 7.2 | 12 | 5 / 6 | 2 / 4 |
-| 69 | Practice dashboard motion | 11486-11697 | 15 | 12 | 3 / 4 | 4 / 6 |
-| 70 | Quiz | 11698-12199 | 21 | 23 | 18 / 43 | 8 / 16 |
-| 71 | Quiz celebrations | 12200-12254 | 2.5 | 3 | 1 / 1 | 9 / 9 |
-| 72 | Live relative time | 12255-12330 | 3.2 | 4 | 2 / 3 | 8 / 8 |
-| 73 | Multilingual greeting | 12331-12493 | 8.9 | 11 | 4 / 5 | 5 / 8 |
-| 74 | Smoothness meter | 12494-12776 | 17 | 31 | 6 / 9 | 12 / 12 |
-| 75 | Memory trainer | 12777-13512 | 43 | 87 | 22 / 35 | 6 / 10 |
-| 76 | Split dock (phones) | 13513-13894 | 21 | 16 | 3 / 3 | 2 / 3 |
-| 77 | Tab bar and the More sheet | 13895-13947 | 3.1 | 3 | 9 / 19 | 3 / 3 |
-| 78 | Home screen | 13948-14155 | 13 | 8 | 16 / 25 | 2 / 2 |
-| 79 | Lists: providers, recently deleted, doctors hub | 14156-14265 | 5.5 | 3 | 12 / 24 | 1 / 3 |
-| 80 | Duplicate doctors | 14266-14417 | 6.2 | 7 | 16 / 17 | 1 / 2 |
-| 81 | Terminology backfill | 14418-14561 | 6.1 | 7 | 10 / 11 | 1 / 3 |
-| 82 | Doctor list (the directory) | 14562-14779 | 11 | 20 | 22 / 46 | 5 / 9 |
-| 83 | Doctor page | 14780-14970 | 8.1 | 22 | 14 / 22 | 6 / 23 |
-| 84 | Team tips (D2) | 14971-15318 | 19 | 19 | 25 / 61 | 7 / 12 |
-| 85 | Team Chat: rendering + sending | 15319-15455 | 6.4 | 18 | 4 / 4 | 5 / 24 |
-| 86 | Titles under names (Team Chat) | 15456-15542 | 4.7 | 12 | 6 / 8 | 3 / 3 |
-| 87 | Team Chat: messages, channels, scrolling | 15543-15999 | 23 | 18 | 19 / 76 | 11 / 18 |
-| 88 | Message interactions | 16000-16522 | 25 | 23 | 18 / 40 | 4 / 15 |
-| 89 | Add / Edit / Delete | 16523-16703 | 8.4 | 11 | 13 / 15 | 9 / 12 |
-| 90 | Term check — a second look after saving | 16704-16866 | 6.2 | 12 | 12 / 15 | 4 / 5 |
-| 91 | Add / delete domain | 16867-17051 | 8.2 | 13 | 10 / 17 | 4 / 6 |
-| 92 | Healthcare Providers: modal + photo handling | 17052-17216 | 6.2 | 10 | 15 / 23 | 3 / 7 |
-| 93 | Doctor and provider sheets: places | 17217-17336 | 6.8 | 18 | 10 / 22 | 4 / 9 |
-| 94 | Doctor directory: the add and edit sheet | 17337-17525 | 7.6 | 11 | 17 / 29 | 3 / 7 |
-| 95 | Team access | 17526-18173 | 32 | 58 | 19 / 35 | 18 / 30 |
-| 96 | Ask the Hub | 18174-18985 | 47 | 55 | 26 / 88 | 14 / 48 |
-| 97 | Dr. Smiley: following a conversation | 18986-19285 | 19 | 33 | 13 / 30 | 3 / 21 |
-| 98 | Dr. Smiley: context and actions | 19286-19751 | 31 | 32 | 25 / 53 | 9 / 39 |
-| 99 | Dr. Smiley: what he remembers (on this device) | 19752-19936 | 12 | 19 | 7 / 12 | 7 / 23 |
-| 100 | Ask the Hub: your practice and the next step | 19937-20004 | 3.8 | 8 | 11 / 21 | 6 / 10 |
-| 101 | Dr. Smiley's memory screen | 20005-20054 | 4.0 | 6 | 6 / 14 | 3 / 3 |
-| 102 | Ask the Hub: corrections, feedback, sources | 20055-20208 | 7.6 | 12 | 16 / 23 | 5 / 15 |
-| 103 | Appointment mode | 20209-20328 | 7.3 | 17 | 11 / 15 | 10 / 14 |
-| 104 | Dr. Smiley reacts | 20329-20460 | 6.9 | 12 | 3 / 9 | 8 / 10 |
-| 105 | Daily Drill (the warm-up on Home) | 20461-20887 | 28 | 51 | 11 / 19 | 6 / 8 |
-| 106 | Dr. Smiley's career | 20888-21066 | 12 | 20 | 7 / 9 | 10 / 11 |
-| 107 | Appointment prep | 21067-21319 | 18 | 26 | 17 / 26 | 8 / 18 |
-| 108 | Dr. Smiley's news | 21320-21372 | 3.1 | 1 | 7 / 11 | 0 / 0 |
-| 109 | Dr. Smiley companion | 21373-21560 | 9.9 | 6 | 9 / 14 | 7 / 9 |
-| 110 | Dr. Smiley: the companion panel | 21561-21879 | 19 | 2 | 9 / 19 | 5 / 5 |
-| 111 | Init | 21880-21969 | 3.7 | 0 | 26 / 30 | 0 / 0 |
-| 112 | Phone chrome, dialogs and the on-screen keyboard | 21970-22071 | 4.5 | 0 | 0 / 0 | 0 / 0 |
-| 113 | Install / offline support | 22072-22105 | 1.5 | 0 | 1 / 1 | 0 / 0 |
+| 3 | Seed data (from the shared reference doc) | 635-726 | 8.3 | 2 | 0 / 0 | 1 / 1 |
+| 4 | State | 727-742 | 0.8 | 8 | 0 / 0 | 62 / 87 |
+| 5 | Location grouping | 743-819 | 5.0 | 7 | 0 / 0 | 8 / 20 |
+| 6 | Regions | 820-899 | 3.8 | 14 | 11 / 16 | 14 / 34 |
+| 7 | Places (shared) | 900-1053 | 7.3 | 16 | 14 / 18 | 7 / 15 |
+| 8 | Collapsible groups: doctors by place, domains by parent | 1054-1150 | 4.4 | 11 | 8 / 13 | 8 / 17 |
+| 9 | Your name on this phone | 1151-1164 | 0.7 | 2 | 0 / 0 | 4 / 4 |
+| 10 | Team members' faces | 1165-1316 | 6.5 | 15 | 7 / 8 | 6 / 14 |
+| 11 | Shared state: search, editing, providers, quiz | 1317-1342 | 1.0 | 23 | 0 / 0 | 29 / 71 |
+| 12 | Practice record: what you personally know, question by question | 1343-1633 | 12 | 30 | 6 / 6 | 4 / 25 |
+| 13 | Shared state: Term Review, domains, chat, events, activity | 1634-1783 | 6.9 | 62 | 2 / 5 | 35 / 123 |
+| 14 | First-run onboarding | 1784-1867 | 3.6 | 12 | 5 / 5 | 8 / 16 |
+| 15 | Storage | 1868-1889 | 0.8 | 2 | 0 / 0 | 15 / 19 |
+| 16 | CSV export / import | 1890-2047 | 6.5 | 9 | 11 / 15 | 2 / 5 |
+| 17 | Loading the glossary | 2048-2247 | 6.9 | 2 | 8 / 12 | 1 / 1 |
+| 18 | Slang domains | 2248-2344 | 6.4 | 20 | 3 / 4 | 4 / 19 |
+| 19 | Domain fields and the first seeding | 2345-2382 | 1.6 | 2 | 2 / 3 | 2 / 2 |
+| 20 | Local glossary cache | 2383-2552 | 7.0 | 15 | 9 / 12 | 6 / 10 |
+| 21 | Recently deleted | 2553-2689 | 5.0 | 9 | 15 / 19 | 8 / 14 |
+| 22 | Healthcare Providers | 2690-2804 | 5.3 | 8 | 11 / 14 | 11 / 15 |
+| 23 | Doctor Directory | 2805-2950 | 7.3 | 13 | 12 / 15 | 10 / 17 |
+| 24 | Team Chat | 2951-3025 | 3.4 | 3 | 10 / 21 | 5 / 5 |
+| 25 | Recent Updates (activity log) | 3026-3044 | 0.7 | 1 | 3 / 3 | 18 / 18 |
+| 26 | Announcements | 3045-3096 | 2.0 | 6 | 8 / 10 | 4 / 6 |
+| 27 | Team Chat panel: pinned strip, typing box, drop | 3097-3223 | 6.8 | 9 | 10 / 15 | 10 / 22 |
+| 28 | Recent Updates: the feed | 3224-3313 | 3.8 | 5 | 12 / 19 | 2 / 2 |
+| 29 | Attachments (terms, chat, notes) | 3314-3638 | 15 | 22 | 14 / 21 | 9 / 13 |
+| 30 | Utilities | 3639-3715 | 3.0 | 4 | 3 / 3 | 54 / 62 |
+| 31 | Photo viewer | 3716-4058 | 17 | 15 | 3 / 5 | 6 / 8 |
+| 32 | Deleting chat messages and activity entries | 4059-4117 | 2.6 | 5 | 4 / 6 | 8 / 10 |
+| 33 | Accent-insensitive search | 4118-4154 | 1.6 | 3 | 0 / 0 | 16 / 16 |
+| 34 | Team-contributed practice questions | 4155-4209 | 2.2 | 4 | 9 / 10 | 3 / 4 |
+| 35 | Chat notifications | 4210-4366 | 5.6 | 12 | 9 / 13 | 6 / 14 |
+| 36 | Notifications that reach a closed phone (Web Push) | 4367-4685 | 18 | 27 | 11 / 22 | 6 / 8 |
+| 37 | Typing presence | 4686-4859 | 7.1 | 14 | 7 / 12 | 6 / 12 |
+| 38 | Global search | 4860-5096 | 8.8 | 12 | 13 / 22 | 5 / 8 |
+| 39 | Training & Events | 5097-5230 | 5.4 | 8 | 13 / 26 | 3 / 4 |
+| 40 | Small helpers: save errors, toasts, colours, tile lists | 5231-5393 | 9.5 | 12 | 8 / 15 | 55 / 101 |
+| 41 | Your knowledge brain: your own Term Review record, drawn as a brain | 5394-5607 | 13 | 14 | 15 / 20 | 3 / 3 |
+| 42 | Term Review: Dr. Smiley's practice sessions | 5608-6071 | 30 | 42 | 20 / 34 | 6 / 15 |
+| 43 | The guide: search, answer sheets, Show me | 6072-6573 | 34 | 46 | 14 / 23 | 8 / 27 |
+| 44 | Doctor Prep: research | 6574-6962 | 17 | 23 | 17 / 23 | 7 / 18 |
+| 45 | The guide: installing, the front page | 6963-7186 | 11 | 17 | 6 / 27 | 2 / 5 |
+| 46 | Small helpers: tile colours, escaping, links | 7187-7220 | 1.7 | 4 | 0 / 0 | 59 / 103 |
+| 47 | Dr. Smiley's art | 7221-7374 | 14 | 6 | 0 / 0 | 4 / 7 |
+| 48 | Dr. Smiley: animation engine | 7375-8117 | 36 | 31 | 4 / 16 | 9 / 19 |
+| 49 | Dr. Smiley: how lively (Lively, Focused, Still) | 8118-8154 | 1.8 | 7 | 3 / 5 | 7 / 14 |
+| 50 | Dr. Smiley: what he's doing (task states) | 8155-8350 | 9.8 | 23 | 6 / 14 | 12 / 33 |
+| 51 | Icons (inline SVG) | 8351-8431 | 19 | 59 | 0 / 0 | 37 / 127 |
+| 52 | Code of Ethics | 8432-8478 | 4.8 | 1 | 0 / 0 | 4 / 4 |
+| 53 | Domain icons and link lists | 8479-8538 | 19 | 2 | 4 / 6 | 9 / 9 |
+| 54 | Term card menu (phones) | 8539-8623 | 4.5 | 5 | 8 / 11 | 1 / 1 |
+| 55 | Rendering | 8624-8714 | 3.8 | 9 | 1 / 1 | 10 / 10 |
+| 56 | Domain banner and its ⋯ menu | 8715-8983 | 13 | 9 | 22 / 38 | 19 / 19 |
+| 57 | Offline outbox | 8984-9261 | 10 | 25 | 5 / 6 | 12 / 31 |
+| 58 | Unsent changes sheet | 9262-9499 | 11 | 15 | 7 / 16 | 9 / 16 |
+| 59 | Sync status and the top bar | 9500-9668 | 7.9 | 8 | 11 / 17 | 13 / 14 |
+| 60 | The screen: renderContent | 9669-10236 | 28 | 15 | 49 / 122 | 25 / 26 |
+| 61 | Theme, navigation and overlays | 10237-10360 | 6.5 | 5 | 14 / 25 | 26 / 29 |
+| 62 | Opening one particular term | 10361-10412 | 2.3 | 2 | 7 / 12 | 4 / 4 |
+| 63 | Subdomain folder | 10413-10546 | 6.0 | 4 | 4 / 5 | 1 / 1 |
+| 64 | Going Home and going back | 10547-10619 | 3.6 | 3 | 5 / 8 | 3 / 4 |
+| 65 | Your name and photo (the name sheet) | 10620-10816 | 8.4 | 15 | 18 / 31 | 31 / 39 |
+| 66 | CoreCHI practice | 10817-10887 | 2.6 | 4 | 1 / 1 | 5 / 11 |
+| 67 | CoreCHI practice: the screen, studying, the exam timer | 10888-11141 | 12 | 7 | 15 / 61 | 3 / 5 |
+| 68 | Practice dashboard tiles | 11142-11273 | 7.2 | 12 | 5 / 6 | 2 / 4 |
+| 69 | Practice dashboard motion | 11274-11485 | 15 | 12 | 3 / 4 | 4 / 6 |
+| 70 | Quiz | 11486-11987 | 21 | 23 | 18 / 43 | 8 / 16 |
+| 71 | Quiz celebrations | 11988-12042 | 2.5 | 3 | 1 / 1 | 9 / 9 |
+| 72 | Live relative time | 12043-12118 | 3.2 | 4 | 2 / 3 | 8 / 8 |
+| 73 | Multilingual greeting | 12119-12281 | 8.9 | 11 | 4 / 5 | 5 / 8 |
+| 74 | Smoothness meter | 12282-12564 | 17 | 31 | 6 / 9 | 12 / 12 |
+| 75 | Memory trainer | 12565-13300 | 43 | 87 | 22 / 35 | 6 / 10 |
+| 76 | Split dock (phones) | 13301-13682 | 21 | 16 | 3 / 3 | 2 / 3 |
+| 77 | Tab bar and the More sheet | 13683-13735 | 3.1 | 3 | 9 / 19 | 3 / 3 |
+| 78 | Home screen | 13736-13943 | 13 | 8 | 16 / 25 | 2 / 2 |
+| 79 | Lists: providers, recently deleted, doctors hub | 13944-14053 | 5.5 | 3 | 12 / 24 | 1 / 3 |
+| 80 | Duplicate doctors | 14054-14205 | 6.2 | 7 | 16 / 17 | 1 / 2 |
+| 81 | Terminology backfill | 14206-14349 | 6.1 | 7 | 10 / 11 | 1 / 3 |
+| 82 | Doctor list (the directory) | 14350-14567 | 11 | 20 | 22 / 46 | 5 / 9 |
+| 83 | Doctor page | 14568-14758 | 8.1 | 22 | 14 / 22 | 6 / 23 |
+| 84 | Team tips (D2) | 14759-15106 | 19 | 19 | 25 / 61 | 7 / 12 |
+| 85 | Team Chat: rendering + sending | 15107-15243 | 6.4 | 18 | 4 / 4 | 5 / 24 |
+| 86 | Titles under names (Team Chat) | 15244-15330 | 4.7 | 12 | 6 / 8 | 3 / 3 |
+| 87 | Team Chat: messages, channels, scrolling | 15331-15787 | 23 | 18 | 19 / 76 | 11 / 18 |
+| 88 | Message interactions | 15788-16310 | 25 | 23 | 18 / 40 | 4 / 15 |
+| 89 | Add / Edit / Delete | 16311-16491 | 8.4 | 11 | 13 / 15 | 9 / 12 |
+| 90 | Term check — a second look after saving | 16492-16654 | 6.2 | 12 | 12 / 15 | 4 / 5 |
+| 91 | Add / delete domain | 16655-16839 | 8.2 | 13 | 10 / 17 | 4 / 6 |
+| 92 | Healthcare Providers: modal + photo handling | 16840-17004 | 6.2 | 10 | 15 / 23 | 3 / 7 |
+| 93 | Doctor and provider sheets: places | 17005-17124 | 6.8 | 18 | 10 / 22 | 4 / 9 |
+| 94 | Doctor directory: the add and edit sheet | 17125-17313 | 7.6 | 11 | 17 / 29 | 3 / 7 |
+| 95 | Team access | 17314-17961 | 32 | 58 | 19 / 35 | 18 / 30 |
+| 96 | Ask the Hub | 17962-18773 | 47 | 55 | 26 / 88 | 14 / 48 |
+| 97 | Dr. Smiley: following a conversation | 18774-19073 | 19 | 33 | 13 / 30 | 3 / 21 |
+| 98 | Dr. Smiley: context and actions | 19074-19539 | 31 | 32 | 25 / 53 | 9 / 39 |
+| 99 | Dr. Smiley: what he remembers (on this device) | 19540-19724 | 12 | 19 | 7 / 12 | 7 / 23 |
+| 100 | Ask the Hub: your practice and the next step | 19725-19792 | 3.8 | 8 | 11 / 21 | 6 / 10 |
+| 101 | Dr. Smiley's memory screen | 19793-19842 | 4.0 | 6 | 6 / 14 | 3 / 3 |
+| 102 | Ask the Hub: corrections, feedback, sources | 19843-19996 | 7.6 | 12 | 16 / 23 | 5 / 15 |
+| 103 | Appointment mode | 19997-20116 | 7.3 | 17 | 11 / 15 | 10 / 14 |
+| 104 | Dr. Smiley reacts | 20117-20248 | 6.9 | 12 | 3 / 9 | 8 / 10 |
+| 105 | Daily Drill (the warm-up on Home) | 20249-20675 | 28 | 51 | 11 / 19 | 6 / 8 |
+| 106 | Dr. Smiley's career | 20676-20854 | 12 | 20 | 7 / 9 | 10 / 11 |
+| 107 | Appointment prep | 20855-21107 | 18 | 26 | 17 / 26 | 8 / 18 |
+| 108 | Dr. Smiley's news | 21108-21160 | 3.1 | 1 | 7 / 11 | 0 / 0 |
+| 109 | Dr. Smiley companion | 21161-21348 | 9.9 | 6 | 9 / 14 | 7 / 9 |
+| 110 | Dr. Smiley: the companion panel | 21349-21667 | 19 | 2 | 9 / 19 | 5 / 5 |
+| 111 | Init | 21668-21757 | 3.7 | 0 | 26 / 30 | 0 / 0 |
+| 112 | Phone chrome, dialogs and the on-screen keyboard | 21758-21859 | 4.5 | 0 | 0 / 0 | 0 / 0 |
+| 113 | Install / offline support | 21860-21893 | 1.5 | 0 | 1 / 1 | 0 / 0 |
 <!-- census:end -->
 
 ## What this costs and buys
