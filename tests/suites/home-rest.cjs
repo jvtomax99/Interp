@@ -68,7 +68,7 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
     const hl = document.querySelector('#content .home-heartline'); let n = 0;
     const mo = new MutationObserver(() => { if (hl.classList.contains('is-draw')) n++; });
     mo.observe(hl, { attributes: true, attributeFilter: ['class'] });
-    setTimeout(() => { mo.disconnect(); r({ pin: st('#content .home-wave-pin'), ring: st('#content .home-ask-ring'), draws: n, dockShown: document.body.classList.contains('dock-has-smiley'), dock: st('.dock-smiley-bob') }); }, 7000);
+    setTimeout(() => { mo.disconnect(); r({ pin: st('#content .home-body .db-breath'), ring: st('#content .home-ask-ring'), draws: n, dockShown: document.body.classList.contains('dock-has-smiley'), dock: st('.dock-smiley-bob') }); }, 7000);
   }));
   ok(away.pin.length && away.ring.length && away.pin.concat(away.ring).every(x => x === 'paused') && away.draws === 0, 'greeting scrolled off: his breathing and the Ask ring pause, no heartline draws', away);
   ok(away.dockShown && away.dock.length && away.dock.every(x => x === 'running'), 'the dock Dr. Smiley, now shown, breathes', away);
@@ -78,7 +78,7 @@ const rafIn = async (page, ms) => { await page.evaluate(() => { window.__raf = 0
   await page.waitForTimeout(2500);
   ok((await state(page)).ringGlow === 0, 'a repaint of Home does not replay the card ring glow');
   const back = await page.evaluate(() => { const st = s => [...document.querySelectorAll(s)].flatMap(e => e.getAnimations()).map(a => a.playState);
-    return { pin: st('#content .home-wave-pin'), ring: st('#content .home-ask-ring'), dockShown: document.body.classList.contains('dock-has-smiley'), dock: st('.dock-smiley-bob') }; });
+    return { pin: st('#content .home-body .db-breath'), ring: st('#content .home-ask-ring'), dockShown: document.body.classList.contains('dock-has-smiley'), dock: st('.dock-smiley-bob') }; });
   ok(back.pin.concat(back.ring).every(x => x === 'running') && back.pin.length && !back.dockShown && back.dock.every(x => x === 'paused'), 'back at the top: the badge and the ring run again, the faded-out dock one rests', back);
   ok(!page.__errors.length, 'no page errors', page.__errors);
 

@@ -177,6 +177,51 @@ wince faces.
 
 ## Full body: the cutout rig (2026-10-23)
 
+**In the app (2026-10-24, Jose's picks from mockups on his phone's
+screen).** He stands full-length in two places; everywhere else he is still
+the head (the dock, Ask, the lock screen). **Home:** at the banner's bottom
+right, on the grass by the lamp post, 216 px tall (size A; his face about
+the size the head alone was), the quote wrapping to 56% beside him and
+Watch moved to the middle (`home-polish.css`, block "Hello: Dr. Smiley
+full-length"). `renderHome` draws the host (`.home-body`, in
+`.home-greeting`); `initHomeGreeting` (`home-polish.js`) mounts the rig in
+it, hides the head (`#content.has-body .home-wave-icon`: it stays in the
+markup as the hello's anchor for the name pen and `fitWave`, its grid
+column closed so the name has the row) and wires him: a tap opens Ask the
+Hub, a double-tap on his head (the top 44%) the HUMC Brain, press and hold
+a pet; Enter or Space on him as a button. He arrives with the hello
+(`is-in`, set in `placeFace` when the head used to grow in: a fade and a
+scale over .46 s) and greets on the rig at `GREET_AT`; `actNow` (every
+sequence Home asked of the head: reactions, the pet, the scroll-back nod)
+goes to his body (`DR_BODY_ACT`); his thought cloud anchors to his head;
+`smileySway` leans him on scroll. **A quiz:** `renderQuiz` puts the host
+(`.quiz-dr`) in the card, a float at the top right, 110 px tall, so the
+section label and the counter sit beside him and the question starts below
+his feet (`app.css`); `renderContent` mounts it after the practice screen
+paints (`drBodyMountAll`), carrying the one body from the old card to the
+new so a bounce is not cut by the next question, and takes it down with
+the quiz. **How the app reaches him** (`features/smiley-body.js`):
+`drStage` returns the body you can see before the dock (`drBodyStage`:
+mounted, on screen, not hidden), and `drPerform` plays the asked sequence
+as his body's performance (`DR_BODY_ACT`: greet, ack and its kin, think,
+cheer and its kin, wink, bounce, wince, shrug for composed and surprise,
+read for the answer, doze; an unknown name is a nod); so `smileyAnswer`,
+`smileyStudy`, `smileyReact`, `drCelebrate` and a task's `perform` reach
+him unchanged, and `DR_TONE` (Focused, an appointment) still applies first.
+The task state on `<html>` (`data-dr-state`) is his held state
+(`drBodyStateSync`: attentive listening, processing thinking, answering
+answering, celebrating celebrating, uncertain uncertain) and his idle level
+(`DR_STATES[state].idle`), with the resting state's one doze. His mode is
+the app's (`drMode()`, read each frame; `drmodechange` restarts a held
+state in the new mode); reduced motion is Still. The dock steps aside
+while a body is in view (`smileyInView`/`smileyElsewhere` count `.db-app`)
+and comes back when it scrolls off; his breathing pauses off screen
+(`is-offscreen`). Shared styles (`.db-host`: breathing, the cross-fade,
+Still, reduced motion) are in `app.css`. `sw.js` precaches the rig, its
+Hub side and the 19 layers; the rig is network-first with the app code.
+`tests/suites/smiley-body-app.cjs`. User Guide: `smileybody` (and the
+first "New lately" card). The viewer (`drsmiley/body.html`) stays unlinked.
+
 **The drawn poses are in (2026-10-23, the same evening; a 2D redraw was
 tried first and dropped for likeness, `docs/art/dr-smiley-2d/prompts.md`).**
 Jose: the body animated the way his face is, drawn pictures of the same
@@ -238,7 +283,7 @@ cloud session has no image generator; the drawn poses from
 `docs/art/dr-smiley-body/prompts.md` (a real fist, a finger to the chin, a
 clipboard) come later, when Jose runs them. **Nothing in the app shows him
 full-length yet** (Jose, 2026-10-23: "fully animated first, decide where
-later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
+later", then placed on 2026-10-24: above); the viewer is `drsmiley/body.html`, not linked from anywhere, and
 `tests/suites/body-rig.cjs` checks that stays so until the decision.
 
 - **The pieces** (`drsmiley/body/`, in the picture's own pixels, 1070 x 1470;
@@ -305,9 +350,12 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   a nod during thinking resumes it, Focused smaller, Still one pose.
 - **Rest life** (`drBodyIdle`): breathing is a CSS animation on
   `.db-breath` (the compositor; `transform-box: fill-box`, about the hips;
-  none in Still), blinks every few seconds, now and then a shift of weight
-  or a glance, only while seen and nothing else plays. No frame loop runs
-  at rest. Levels, as the app's idle levels for his head (`DR_IDLE_LEVEL`;
+  none in Still), blinks every few seconds (face frames stepped by timers,
+  no frame loop), now and then a shift of weight or a glance with the head
+  (a short run of the rig's loop), only while seen and nothing else plays.
+  With `quiet` (Home, where what settles stays settled: `home-rest.cjs`
+  counts the page's frames at rest) the rest beats are face-only on
+  timers: the eyes glance aside, or a smile. Levels, as the app's idle levels for his head (`DR_IDLE_LEVEL`;
   `stop.setLevel`): `full`, `calm` (blinks and a glance now and then:
   offline, resting), `blinks` (attentive, uncertain, an appointment),
   `none`; `stop.doze()` plays the doze (the resting state's one doze when

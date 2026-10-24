@@ -73,7 +73,7 @@ answering, celebrating, uncertain (`DR_BODY_STATES` in `drsmiley/body.js`;
 the viewer's second row; the feature doc's "Held states" bullet). Also
 fixed: a gesture cut short by another left its drawn hand up. Then Jose ran the clipboard prompt: cut as a band
 (`pose-clipboard.webp`), the `read` performance and the `answering` hold
-use it. Then the point (`pose-point.webp`, the `point` performance with a `side`: "look here"), the doze and rest-life levels (`drBodyIdle`: full, calm, blinks, none; `stop.doze()`). His body now covers everything his head does in the app: gestures, held states, the phone's states. Where he
+use it. Then the point (`pose-point.webp`, the `point` performance with a `side`: "look here"), the doze and rest-life levels (`drBodyIdle`: full, calm, blinks, none; `stop.doze()`). His body now covers everything his head does in the app: gestures, held states, the phone's states. Then Jose picked where he stands from mockups (Home's banner bottom right at 216 px; the quiz card's top-right corner) and the wiring was built on a branch off #135 (`claude/dr-smiley-body-home`; `features/smiley-body.js`, the Home block in `home-polish.js`/`.css`, the quiz corner in `app.css`, suite `smiley-body-app.cjs`, the guide answer `smileybody`). Jose's rule: nothing pushed for the app until he has seen previews. Where he
 stands in the app is still his open pick (Home greeting and the quiz
 recommended). Previews are made by recording the viewer with Playwright
 video, frames out with Playwright's bundled ffmpeg (`-r 12`, no filters in

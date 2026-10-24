@@ -74,6 +74,8 @@ So:
 | Looking a term up (`openTermLookup`, its trusted sources and caches) | `features/term-lookup.js` |
 | The Voice and mic check in More (`voiceCheckOpen`, `audioMode`) | `features/voice-check.js` |
 | Dr. Smiley's performances (`DR_PERF`, `drSquashKeys`, his mood, the effects off his head) | `features/smiley-performances.js` |
+| Dr. Smiley full-length: his rig and acting (`drBody`, `DR_BODY_PERF`, `DR_BODY_STATES`) | `drsmiley/body.js` |
+| Where he stands full-length and how the app reaches him (`drBodyMount`, `drBodyStage`, `DR_BODY_ACT`) | `features/smiley-body.js`; his place and tap on Home in `home-polish.js`/`.css`, the quiz corner in `app.css` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |

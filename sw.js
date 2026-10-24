@@ -63,6 +63,26 @@ const PRECACHE = [
   './features/term-lookup.js',
   './features/voice-check.js',
   './features/smiley-performances.js',
+  './drsmiley/body.js',
+  './features/smiley-body.js',
+  // Dr. Smiley full-length (Home, a quiz)
+  './drsmiley/body/arm-fore-l.webp',
+  './drsmiley/body/arm-fore-r.webp',
+  './drsmiley/body/arm-upper-l.webp',
+  './drsmiley/body/arm-upper-r.webp',
+  './drsmiley/body/body.webp',
+  './drsmiley/body/head.webp',
+  './drsmiley/body/leg-l.webp',
+  './drsmiley/body/leg-r.webp',
+  './drsmiley/body/pose-clipboard.webp',
+  './drsmiley/body/pose-crouch.webp',
+  './drsmiley/body/pose-fist-pump.webp',
+  './drsmiley/body/pose-jump.webp',
+  './drsmiley/body/pose-point.webp',
+  './drsmiley/body/pose-shrug.webp',
+  './drsmiley/body/pose-think.webp',
+  './drsmiley/body/pose-thumbs-up.webp',
+  './drsmiley/body/pose-wave.webp',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
@@ -221,7 +241,7 @@ self.addEventListener('fetch', event => {
    * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|features\/[\w-]+\.js|drsmiley\/body\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {

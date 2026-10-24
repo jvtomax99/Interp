@@ -23,11 +23,12 @@ const DATA = JSON.parse(fs.readFileSync(ROOT + 'brain/data.json', 'utf8'));
   await P.evaluate(() => setCategory('home')); await P.waitForTimeout(2500);
 
   const spot = async (share) => P.evaluate(s => {
-    const r = document.querySelector('#content.is-home .home-wave-icon .home-wave-pin').getBoundingClientRect();
+    // Him full-length on Home (2026-10-24): his head is the top of his body, the spot below it his coat.
+    const r = document.querySelector('#content.is-home .home-body').getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height * s };
   }, share);
-  const head = await spot(.3), below = await spot(.9);
-  const hit = await P.evaluate(([h, l]) => [h, l].map(p => !!document.elementFromPoint(p.x, p.y)?.closest('.home-wave-icon')), [head, below]);
+  const head = await spot(.2), below = await spot(.7);
+  const hit = await P.evaluate(([h, l]) => [h, l].map(p => !!document.elementFromPoint(p.x, p.y)?.closest('.home-body')), [head, below]);
   ok(hit[0] && hit[1], 'his head and the spot below it both land on Dr. Smiley ' + JSON.stringify(hit));
 
   const state = () => P.evaluate(() => ({ cat: activeCategory, open: !!document.querySelector('.brain-ov.show'), frame: !!document.querySelector('.brain-ov iframe'), ov: document.body.classList.contains('ov-open') }));

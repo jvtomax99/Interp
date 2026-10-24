@@ -68,12 +68,13 @@ const SAMPLE = () => {
   ok(st.sy[0] === 1 && st.sy[1] === 1, 'Still: no squash ' + JSON.stringify(st.sy));
   await P.evaluate(() => setSmileyMode('lively'));
 
-  // Home: on his picture, not his pin.
+  // Home: him full-length (2026-10-24). His cheer squashes and stretches his whole body on the rig, 4% at most, back to his drawn shape.
   await P.evaluate(() => setCategory('home')); await P.waitForTimeout(2500);
-  const home = await P.evaluate(() => { const b = document.querySelector('#content.is-home .home-wave-icon');
-    return window.__squash(b.querySelector('.home-face'), b.querySelector('.home-wave-pin'), 'cheer'); });
-  ok(home.sy[0] < .99 && home.sy[1] > 1.01 && home.sy[1] <= 1.041 && home.end === 'none', 'Home, cheer: the same squash on his picture ' + JSON.stringify(home.sy));
-  ok(home.headUneven < .001, 'Home: his pin is never stretched ' + home.headUneven);
+  const home = await P.evaluate(() => new Promise(res => { const b = window.homeBody.body; window.homeBody.idle.setLevel('none'); b.stop(); b.rest(); let lo = 1, hi = 1; const t0 = performance.now();
+    b.perform('cheer');
+    const tick = () => { lo = Math.min(lo, b.pose.sy); hi = Math.max(hi, b.pose.sy); if(b.busy() && performance.now() - t0 < 5000) requestAnimationFrame(tick); else { window.homeBody.idle.setLevel('full'); res({ sy: [lo, hi], end: b.pose.sy, host: window.homeBody.host.getBoundingClientRect().height }); } }; requestAnimationFrame(tick); }));
+  ok(home.sy[0] < .99 && home.sy[1] > 1.01 && home.sy[1] <= 1.041 && home.end === 1, 'Home, cheer: the squash on his whole body, 4% at most, back to his shape ' + JSON.stringify(home.sy));
+  ok(home.host > 200, 'Home: he stands full-length (over 200px tall) ' + home.host);
 
   // Where his picture is also what leans (Ask's face), none at all.
   const self = await P.evaluate(() => { const box = document.createElement('div'); box.innerHTML = drSmileyArt('sq-test'); document.body.appendChild(box);

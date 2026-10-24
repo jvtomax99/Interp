@@ -81,7 +81,8 @@
     </svg>`;
     // Escape the greeting card's clipping and backdrop-filter layers.
     document.body.appendChild(bubble);
-    const b=button.getBoundingClientRect();
+    // With him full-length (window.homeBody) the cloud anchors to his head, the top of his body.
+    const b=(()=>{const hb=window.homeBody&&window.homeBody.host;if(!hb||!hb.isConnected)return button.getBoundingClientRect();const r=hb.getBoundingClientRect();return {left:r.left+r.width*.18,right:r.right-r.width*.18,top:r.top+r.height*.04,bottom:r.top+r.height*.44,width:r.width*.64,height:r.height*.4};})();
     // The bubble box is 136px, but the drawing reaches 150px from its left
     // edge (sparkles and marks), and nothing may pass the screen's right
     // edge: past it, the whole page widens, shifts sideways, and on a phone
@@ -260,7 +261,10 @@
   let idleStop=()=>{},idleRunning=false,forcedAct=null,idleCtl=null;
   // Still has no idle, but a reaction still shows: the engine (index.html,
   // drFacePlay) holds its peak frame still, no movement.
-  const actNow=(name,priority)=>{const f=seqOf(name),p=priority||(name==='pet'?P('DIRECT',5):P('REACT',3));
+  // Him full-length on Home (features/smiley-body.js, window.homeBody): when
+  // he is there, everything the head was asked for goes to his body instead.
+  const homeBodyLive=()=>!!(window.homeBody&&window.homeBody.host&&window.homeBody.host.isConnected);
+  const actNow=(name,priority)=>{if(homeBodyLive()){window.homeBody.act(name);return;}const f=seqOf(name),p=priority||(name==='pet'?P('DIRECT',5):P('REACT',3));
     if(idleCtl){idleCtl.act(f,p);forcedAct=null;return;}
     if(still()&&typeof window.drFacePlay==='function'){const b=document.querySelector('#content.is-home .home-wave-icon'),svg=b&&b.querySelector('.home-face');if(svg)window.drFacePlay(svg,f,b.querySelector('.home-wave-pin'),null,p);return;}
     forcedAct=[name,p];};
@@ -269,6 +273,20 @@
   function startIdle(button){
     idleStop();
     if(still()||document.hidden||!button||!button.isConnected)return;
+    if(homeBodyLive()){
+      // His body's rest life runs on the rig (drBodyMount); Home only adds the
+      // nod when you scroll back up to him after a while.
+      const host=window.homeBody.host;let onScreen=true,goneAt=0,lastNotice=0;
+      const io=new IntersectionObserver(entries=>{
+        const was=onScreen;onScreen=entries[0].isIntersecting;
+        if(!onScreen&&was){goneAt=performance.now();return;}
+        const now=performance.now();
+        if(onScreen&&!was&&goneAt&&now-goneAt>4000&&now-lastNotice>15000){lastNotice=now;setTimeout(()=>{if(homeBodyLive())window.homeBody.act('ack');},350);}
+      });
+      io.observe(host);idleRunning=true;
+      idleStop=()=>{io.disconnect();idleRunning=false;idleStop=()=>{};};
+      return;
+    }
     const pin=button.querySelector('.home-wave-pin'),svg=button.querySelector('.home-face');
     if(!pin||!svg||typeof window.drFaceIdle!=='function')return;
     let onScreen=true,goneAt=0,lastNotice=0;
@@ -417,6 +435,7 @@
     landed=()=>{entered=true;art.style.transform='';art.style.opacity='';smileyTilt=0;button.classList.remove('home-wave-entering');};
     const placeFace=t=>{
       if(entered)return;
+      if(t>=FACE_AT&&homeBodyLive())window.homeBody.host.classList.add('is-in');   // his body arrives as the head used to grow in
       if(t>=FACE_AT+ENTER_MS){landed();return;}
       const f=faceBody(Math.max(0,t-FACE_AT));
       art.style.transform=f.transform;art.style.opacity=String(f.opacity);smileyTilt=f.angle;
@@ -543,7 +562,7 @@
       // late for the whole of it just carries on to his idle).
       if(elapsed>=GREET_AT&&!sequence.greeted){
         sequence.greeted=true;
-        if(elapsed<FACE_AT+FACE_MS-1600&&typeof window.drFacePlay==='function')window.drFacePlay(faceSvg,'greet',art,null,P('REACT',3));
+        if(homeBodyLive())window.homeBody.body.perform('greet');else if(elapsed<FACE_AT+FACE_MS-1600&&typeof window.drFacePlay==='function')window.drFacePlay(faceSvg,'greet',art,null,P('REACT',3));
       }
       if(elapsed>=FACE_AT+FACE_MS&&!idleRunning&&!sequence.idled){sequence.idled=true;startIdle(button);}
       // Asked once per hello and kept on the sequence, so a hello resumed
@@ -1246,6 +1265,35 @@
       clearTimeout(askTimer);
       askTimer=setTimeout(()=>{wave.classList.remove('home-wave-tap');window.openAskHub();},head&&typeof window.openHumcBrain==='function'?DOUBLE_TAP_MS:(reduced.matches?0:200));
     });
+    // Him full-length (features/smiley-body.js): the host renderHome drew in
+    // the banner. Jose's pick (2026-10-24): he stands at the bottom right,
+    // 216px tall; the head above stays as the hello's anchor (the name pen,
+    // fitWave) but is not shown (home-polish.css, .has-body). Tap: Ask the
+    // Hub; double-tap his head: the HUMC Brain; press and hold: a pet.
+    const bodyHost=content.querySelector('.home-body');
+    if(bodyHost&&typeof window.drBodyMount==='function'){
+      const m=bodyHost.dataset.dbMounted?window.drBodyMountOf(bodyHost):window.drBodyMount(bodyHost,{quiet:true});   // quiet: his rest beats on Home are face-only, no frame loop (home-rest.cjs)
+      if(m){
+        window.homeBody=m;content.classList.add('has-body');
+        bodyHost.setAttribute('role','button');bodyHost.tabIndex=0;bodyHost.setAttribute('aria-label','Ask the Hub');bodyHost.removeAttribute('aria-hidden');
+        wave.tabIndex=-1;wave.setAttribute('aria-hidden','true');
+        if(hasWavedHello||reduced.matches||(resume&&resume.elapsed>=FACE_AT))bodyHost.classList.add('is-in');
+        if(typeof window.smileySway==='function')window.smileySway(bodyHost,'50% 100%');
+        const pettedB=typeof window.smileyPettable==='function'?window.smileyPettable(bodyHost,()=>{if(window.drSetMood)window.drSetMood('happy',180000);m.act('pet');}):()=>false;
+        let headAt=0,askT=0;
+        const onBodyHead=e=>{if(!e.detail)return false;const r=bodyHost.getBoundingClientRect();return e.clientY<=r.top+r.height*.44;};
+        bodyHost.addEventListener('click',e=>{
+          if(pettedB()){e.preventDefault();return;}
+          const head=onBodyHead(e),now=performance.now();
+          if(head&&now-headAt<DOUBLE_TAP_MS&&typeof window.openHumcBrain==='function'){clearTimeout(askT);headAt=0;bodyHost.classList.remove('is-tap');window.openHumcBrain();return;}
+          headAt=head?now:0;
+          if(typeof window.openAskHub!=='function'){play();return;}
+          bodyHost.classList.add('is-tap');clearTimeout(askT);
+          askT=setTimeout(()=>{bodyHost.classList.remove('is-tap');window.openAskHub();},head&&typeof window.openHumcBrain==='function'?DOUBLE_TAP_MS:(reduced.matches?0:200));
+        });
+        bodyHost.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();bodyHost.click();}});
+      }
+    }
     lastGreetingWave={el:wave,play};
     // Wait for startup rebuilds to settle. If already playing, keep the
     // original clock and message rather than restarting the logo and hand.

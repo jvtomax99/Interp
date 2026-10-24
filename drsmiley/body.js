@@ -633,24 +633,36 @@ const DR_BODY_STATES = {
    one doze, when the phone has been quiet a while) on it. */
 function drBodyIdle(body, o){
   o = o || {};
-  let t1 = 0, t2 = 0, on = true, level = o.level || 'full';
+  let t1 = 0, t2 = 0, t3 = 0, on = true, level = o.level || 'full';
   const R = drBodyRand;
-  const seen = () => on && document.visibilityState === 'visible' && body.mode() !== 'still';
+  const seen = () => on && (!o.canPlay || o.canPlay()) && document.visibilityState === 'visible' && body.mode() !== 'still';
+  // Face frames stepped by timers, not the frame loop: a blink, a glance of
+  // the eyes, a smile cost the page no frames (Home's rule: what settles
+  // stays settled; only a performance runs the loop). Back to the face he had.
+  const steps = list => { let i = 0; const face0 = body.pose.face; const go = () => { if(!seen() || body.busy()) return; if(i >= list.length){ body.set({ face: face0 }); return; } const [f, ms] = list[i++]; body.set({ face: f }); t3 = setTimeout(go, ms); }; clearTimeout(t3); go(); };
+  const BLINK = [['blink1', 45], ['blink2', 40], ['shut', 75], ['blink2', 45], ['blink1', 55]];
   const blink = () => {
     t1 = setTimeout(() => {
-      if(level !== 'none' && seen() && !body.busy()) body.play([[45, { face: 'blink1' }, 'linear'], [40, { face: 'blink2' }, 'linear'], [75, { face: 'shut' }, 'linear'], [45, { face: 'blink2' }, 'linear'], [55, { face: 'blink1' }, 'linear'], [60, { face: 'rest' }, 'linear']], { name: 'blink' });
+      if(level !== 'none' && seen() && !body.busy()) steps(BLINK);
       blink();
     }, 2600 + R() * 3200);
   };
+  // Rest beats: a shift of weight or a glance with the head (the rig, a short
+  // frame loop), or, with o.quiet (Home), face-only beats on timers: the eyes
+  // glance aside, or a smile.
+  const faceBeat = () => { const S = R() < .5 ? 'L' : 'R'; steps(R() < .5 ? [['half' + S, 200], ['look' + S, 900 + R() * 700], ['half' + S, 120]] : [['smile1', 260], ['smile', 900 + R() * 600], ['smile1', 260]]); };
   const beat = () => {
     t2 = setTimeout(() => {
-      if(level === 'full' && seen() && !body.busy()) body.perform(R() < .6 ? 'shift' : 'glance');
-      else if(level === 'calm' && seen() && !body.busy() && R() < .5) body.perform('glance');
+      if(seen() && !body.busy()){
+        if(o.quiet){ if(level === 'full' || (level === 'calm' && R() < .5)) faceBeat(); }
+        else if(level === 'full') body.perform(R() < .6 ? 'shift' : 'glance');
+        else if(level === 'calm' && R() < .5) body.perform('glance');
+      }
       beat();
     }, (o.every || 7000) + R() * 5000 + (level === 'calm' ? 6000 : 0));
   };
   blink(); beat();
-  const stop = () => { on = false; clearTimeout(t1); clearTimeout(t2); };
+  const stop = () => { on = false; clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   stop.setLevel = l => { level = l; };
   stop.level = () => level;
   stop.doze = () => { if(level !== 'none' && seen() && !body.busy()) return body.perform('doze'); return false; };

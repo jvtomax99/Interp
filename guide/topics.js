@@ -36,7 +36,7 @@ const GUIDE_TOPICS = [
     <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" playsinline webkit-playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
     <p>A short film about the Hub, made in 3D: why the right word matters, then the glossary (with the 3D Body coming apart), Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice and your campus, Team Chat and Dr. Smiley, with his brain. It plays with sound. Tap the square-corners button for full screen, and the <b>X</b> at the top right to come back.</p>
     <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
-    <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
+    <p>On Home, the hello banner always has a round <b>Watch</b> bubble at the bottom, beside Dr. Smiley. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
 
   { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
@@ -90,6 +90,11 @@ const GUIDE_TOPICS = [
     <p>Across the <b>top</b>: the moon switches dark mode on and off, the bell shows what the team changed, and your initial opens your name and settings.</p>
     <p>If you ever feel lost, tap <b>Home</b>. The arrow in the top-left corner takes you back one step.</p>` },
 
+  { id:'smileybody', section:'start', k:'dr smiley full body standing home banner quiz tap ask double tap brain pet hold wave bounce wince cheer thinking listening still lively focused', q:'Why is Dr. Smiley standing on Home now, and in my quiz?', a:`
+    <p>He is full-length now, not just his head. On Home he stands at the bottom right of the hello banner, by the lamp post, and waves when the app says hello. In CoreCHI Practice he stands in the top-right corner of the question card: a happy bounce with a thumbs-up when you answer right, a small wince when you miss, a cheer at a streak.</p>
+    <p>He acts with his whole body the way his face always did: he thinks with a finger on his chin while Ask the Hub works, reads the answer on a clipboard, shrugs when unsure, celebrates with a fist pump, and dozes if the phone sits untouched for a while.</p>
+    <p><b>Tap him</b> to open Ask the Hub. <b>Double-tap his head</b> for the HUMC Brain. <b>Press and hold</b> to pet him. Everywhere else he is still the small head beside the tab bar.</p>
+    <p>Lively, Focused and Still (tap your initial, then <b>How Dr. Smiley moves</b>) apply to his body too: Focused is the same acting, smaller and calmer; Still holds one pose. Your phone's reduce-motion setting means Still.</p>` },
   { id:'askwhat', section:'ask', k:'ask the hub dr smiley doctor smiley assistant ai question chatbot help character', q:'Who is Dr. Smiley, and what can I ask him?', a:`
     <p>Dr. Smiley is the Hub's interpreter assistant. Ask him the way you'd ask a teammate: <i>How do I explain “ejection fraction”?</i> or <i>“Embarazada” or “embarrassed”?</i></p>
     <p>To ask him, tap him beside the tab bar (or his round button at the top right on a computer): a small panel opens right there, over the page you're on. You can also tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b> for the full screen.</p>

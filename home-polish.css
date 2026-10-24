@@ -1434,3 +1434,28 @@ body:not(.dock-has-smiley) .dock-smiley-bob{animation-play-state:paused;}
    padding and backdrop in index.html; nothing here touches press or focus. */
 .overlay.brain-ov{padding:0;background:#02040B;-webkit-backdrop-filter:none;backdrop-filter:none;align-items:stretch;justify-content:stretch;overflow:hidden;}
 .overlay.brain-ov iframe{flex:1 1 auto;display:block;width:100%;height:100%;border:0;background:#02040B;}
+
+/* ---------- Hello: Dr. Smiley full-length (2026-10-24) ----------
+   Jose's pick from the mockups: he stands at the banner's bottom right, on
+   the grass by the lamp post, 216px tall (size A: his face about the size
+   the head alone was), the quote wrapping a little narrower beside him and
+   Watch moving to the middle. The head (.home-wave-icon) stays in the
+   markup as the hello's anchor (the name pen, fitWave) but is not shown,
+   and its grid column closes so the name has the full width. He arrives
+   with the hello (is-in, set when the head used to grow in) and greets on
+   the rig (home-polish.js, GREET_AT). The rig's own styles (breathing, the
+   cross-fade) are in app.css (.db-host). Same specificity as the rules
+   above, so nothing here outranks a press or focus state. */
+#content.is-home .home-body{position:absolute;right:14px;bottom:4px;height:216px;aspect-ratio:1070 / 1470;z-index:8;cursor:pointer;-webkit-tap-highlight-color:transparent;transform-origin:50% 100%;opacity:0;translate:0 10px;scale:.92;}
+#content.is-home .home-body.is-in{opacity:1;translate:0 0;scale:1;transition:opacity .46s var(--ease),translate .46s var(--ease),scale .46s var(--spring-settle,var(--ease));}
+#content.is-home .home-body.is-tap{scale:.96;transition:scale .16s var(--ease);}
+#content.is-home .home-body:focus-visible{outline:2px solid #d8f9ff;outline-offset:3px;border-radius:12px;}
+#content.is-home.has-body .home-wave-icon{visibility:hidden;pointer-events:none;}
+#content.is-home.has-body .home-greeting-name-row{grid-template-columns:minmax(0,1fr) 0;}
+#content.is-home.has-body .home-greeting-quote{max-width:56%;}
+#content.is-home.has-body .home-promo-btn{right:auto;left:calc(50% - 46px);}
+@media (min-width:901px){
+  #content.is-home .home-body{right:40px;height:240px;}
+  #content.is-home.has-body .home-greeting-quote{max-width:70%;}
+}
+@media (prefers-reduced-motion:reduce){#content.is-home .home-body,#content.is-home .home-body.is-in{transition:none;opacity:1;translate:0 0;scale:1;}}

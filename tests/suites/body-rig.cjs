@@ -279,6 +279,7 @@ const SAMPLE = () => {
   ok(P3.__errors.length === 0, 'the desktop view opens without errors');
   await c3.close();
   const idx = fs.readFileSync(R + 'index.html', 'utf8'), hp = fs.readFileSync(R + 'home-polish.js', 'utf8');
-  ok(!/body\.html|drsmiley\/body\.js|drBodyArt/.test(idx + hp), 'the app does not show him full-length yet (nothing links the viewer or the rig)');
+  ok(/drsmiley\/body\.js/.test(idx) && /features\/smiley-body\.js/.test(idx) && /class="home-body"/.test(idx) && /class="quiz-dr"/.test(idx) && !/body\.html/.test(idx + hp),
+     'the app shows him full-length (the rig and its Hub side are loaded; Home and the quiz card have his host); nothing links the viewer');
   await b.close();
 })().catch(e => { console.log('  FAIL crashed: ' + (e.stack || e)); process.exitCode = 1; });

@@ -80,10 +80,11 @@ under way, then what waits on Jose, then small leftovers.
    (`body.state`: listening, thinking, answering, celebrating, uncertain),
    the clipboard (`read`, and `answering` reads on it), the point
    (`point`, with a side), the doze and rest-life levels. His body now
-   covers everything his head does in the app. Next: where he stands
-   full-length (his call; "not yet" on 2026-10-23: he looks at the viewer
-   `/drsmiley/body.html` live first, then decides).
-   Nothing in the app shows him full-length until then.
+   covers everything his head does in the app. Placed on 2026-10-24
+   (Jose's picks from mockups): Home's banner, bottom right, 216 px, and
+   the quiz card's top-right corner; `features/smiley-body.js` is how the
+   app reaches him (`docs/features/dr-smiley.md`, "In the app"). The dock,
+   Ask and the lock screen keep the head. Suite `smiley-body-app.cjs`.
 2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:

@@ -1,9 +1,10 @@
 /* Dr. Smiley in a quiz (F1, docs/PLAN.md): a bounce on a right answer, a
    small wince on a wrong one, the 3/5/10 streaks keep their bigger
    reactions, nothing in an exam, a cheer on the first answer of a 3/7/14...
-   day streak. Then the two moves themselves, measured on the dock: short,
-   the right faces, up for the bounce, back and down for the wince, never a
-   sideways slide or a stretch; smaller in Focused, one frame in Still. */
+   day streak. Then the two moves themselves, measured on his body in the
+   card (full-length since 2026-10-24): short, the right faces and drawn
+   frames, up for the bounce, down and away for the wince, never a sideways
+   slide, the squash within 4%; smaller in Focused. */
 const L = require('../support/harness.cjs');
 const O = L.OUT + 'smiley-quiz/'; require('fs').mkdirSync(O, { recursive: true });
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d).slice(0, 600))); if (!c) process.exitCode = 1; };
@@ -24,9 +25,10 @@ const next = page => page.evaluate(() => { rateConfidence('sure'); nextQuestion(
     await page.evaluate(() => startStudy('new')); await wait(500);
     const opt = await page.evaluate(() => Array.isArray(quizQuestions[0].o));
     ok(opt, 'a quiz is running', opt);
-    const dock = await page.evaluate(() => { const st = drStage(); const btn = document.querySelector('.dock-smiley, .smiley-rider'); const r = btn && btn.getBoundingClientRect();
-      return { stage: !!st && !st.home, cls: document.body.classList.contains('dock-has-smiley'), inView: !!r && r.width > 20 && r.bottom <= innerHeight + 1 }; });
-    ok(dock.stage && dock.cls && dock.inView, 'in a quiz he is in the dock (the campus and its Dr. Smiley are gone)', dock);
+    // Since 2026-10-24 he stands full-length in the quiz card (features/smiley-body.js); the dock head steps aside.
+    const dock = await page.evaluate(() => { const st = drStage(); const h = document.querySelector('.quiz-card .quiz-dr');
+      return { stage: !!st && !!st.body, mounted: !!h && h.dataset.dbMounted === '1', cls: document.body.classList.contains('dock-has-smiley'), campus: !!document.querySelector('.cp-dr') }; });
+    ok(dock.stage && dock.mounted && !dock.cls && !dock.campus, 'in a quiz he stands in the card, full-length (the campus and its Dr. Smiley are gone, the dock head aside)', dock);
     const r1 = await answer(page, true);
     ok(r1.join() === 'perform:bounce', 'right answer: bounce', r1);
     await next(page);
@@ -59,36 +61,32 @@ const next = page => page.evaluate(() => { rateConfidence('sure'); nextQuestion(
     ok(page.__errors.length === 0, 'no page errors', page.__errors);
   }
 
-  { // The moves themselves, on the dock.
+  { // The moves themselves, on his body in the card (the rig: drsmiley/body.js).
     const { page } = await L.boot(b, { device: 'iphone' });
     await L.go(page, 'practice', 1200);
     await page.evaluate(() => startStudy('new')); await wait(600);
     const measure = (name, mode) => page.evaluate(async ([name, mode]) => {
       setSmileyMode(mode); await new Promise(r => setTimeout(r, 200));
-      const st = drStage(); if (!st || st.home) return { err: 'no stage' };
-      const a = drAnim(st.svg, { head: st.head });
-      const io = a.idle && a.idle.opts; if (io) io.canPlay = () => false;
-      a.stopRun(false); a.set('rest'); if (a.headAnim){ a.headAnim.cancel(); a.headAnim = null; }
+      const st = drStage(); if (!st || !st.body) return { err: 'no body stage' };
+      const bd = st.body.body; st.body.idle.setLevel('none'); bd.stop(); bd.rest();
       await new Promise(r => setTimeout(r, 250));
-      const frames = [], set = a.set.bind(a); a.set = n => { frames.push(n); return set(n); };
-      drPerfSeed(7); const total = drSeqMs(name); a.play(name, { priority: DR_P.REACT }); drPerfSeed(null);
-      const out = [], t0 = performance.now();
-      await new Promise(res => { const tick = () => { const m = getComputedStyle(st.head).transform;
-        if (m && m !== 'none'){ const v = m.match(/matrix\(([^)]+)\)/)[1].split(',').map(Number); out.push({ rot: Math.atan2(v[1], v[0]) * 180 / Math.PI, sx: Math.hypot(v[0], v[1]), sy: Math.hypot(v[2], v[3]), tx: v[4], ty: v[5] }); }
-        if (performance.now() - t0 < total + 500) requestAnimationFrame(tick); else res(); }; tick(); });
-      a.set = set;
-      const pick = f => out.length ? f(...out) : 0;
-      return { total, frames: [...new Set(frames)], up: Math.min(0, ...out.map(x => x.ty)), down: Math.max(0, ...out.map(x => x.ty)), rot: Math.max(0, ...out.map(x => Math.abs(x.rot))),
-        slide: Math.max(0, ...out.map(x => Math.abs(x.tx))), stretch: Math.max(0, ...out.map(x => Math.max(Math.abs(x.sx - x.sy), 0))), end: a.frame() };
+      drBodySeed(7); const p = DR_BODY_PERF[name](bd.mode()); const total = p.beats.reduce((s, x) => s + x[0], 0); bd.play(p.beats, { name }); drBodySeed(null);
+      const faces = new Set(), frames = new Set(); let up = 0, down = 0, rot = 0, slide = 0, sq = 0; const t0 = performance.now();
+      await new Promise(res => { const tick = () => { const q = bd.pose; faces.add(q.face); if (q.frameLegs) frames.add(q.frameLegs); if (q.frameL || q.frameR) frames.add(q.frameL || q.frameR);
+        up = Math.min(up, q.y); down = Math.max(down, q.lift); rot = Math.max(rot, Math.abs(q.head)); slide = Math.max(slide, Math.abs(q.x)); sq = Math.max(sq, Math.abs(q.sy - 1));
+        if (bd.busy() && performance.now() - t0 < total + 800) requestAnimationFrame(tick); else res(); }; tick(); });
+      st.body.idle.setLevel('full');
+      const q = bd.pose, rest = ['x', 'y', 'lean', 'head', 'lift', 'aL', 'aR', 'fL', 'fR'].every(k => Math.abs(q[k]) < .01) && q.sy === 1 && q.face === 'rest' && !q.frameL && !q.frameR && !q.frameLegs;
+      return { total, faces: [...faces], frames: [...frames], up, down, rot, slide, sq, end: rest ? 'rest' : JSON.stringify(q) };
     }, [name, mode]);
     const bl = await measure('bounce', 'lively'), wl = await measure('wince', 'lively');
     const bf = await measure('bounce', 'focused'), wf = await measure('wince', 'focused');
-    ok(!bl.err && bl.total > 600 && bl.total < 1500 && bl.frames.includes('smile') && bl.end === 'rest', 'bounce: under 1.5 s, smiles, ends at rest', bl);
-    ok(bl.up < -1.3 && bl.down > .15, 'bounce: a crouch, then up', bl);
-    ok(!wl.err && wl.total > 600 && wl.total < 1900 && wl.frames.includes('worried') && wl.frames.includes('smile1') && wl.end === 'rest', 'wince: under 1.9 s (the worried face held long enough to see, E4), the worried face then a small smile, ends at rest', wl);
-    ok(wl.down > .6 && wl.rot > .8, 'wince: drawn back and down, turned away', wl);
-    ok([bl, wl].every(x => x.slide < 1.5 && x.stretch < .002), 'no sideways slide, no stretch', [bl.slide, wl.slide, bl.stretch, wl.stretch]);
-    ok(bf.up > bl.up && wf.rot < wl.rot, 'Focused: smaller', { bf: bf.up, bl: bl.up, wf: wf.rot, wl: wl.rot });
+    ok(!bl.err && bl.total > 600 && bl.total < 1800 && bl.faces.includes('smile') && bl.end === 'rest', 'bounce: under 1.8 s, smiles, ends at rest', bl);
+    ok(bl.frames.includes('crouch') && bl.frames.includes('jump') && bl.frames.includes('thumbs-up') && bl.up < -20, 'bounce: the drawn crouch, the jump with the feet tucked, the thumbs-up at the top', bl);
+    ok(!wl.err && wl.total > 600 && wl.total < 1900 && wl.faces.includes('worried') && wl.faces.includes('smile1') && wl.end === 'rest', 'wince: under 1.9 s, the worried face then a small smile, ends at rest', wl);
+    ok(wl.down > 5 && wl.rot > 3, 'wince: drawn down and turned away', wl);
+    ok([bl, wl].every(x => x.slide === 0 && x.sq <= .041), 'no sideways slide; squash within 4%', [bl.slide, wl.slide, bl.sq, wl.sq]);
+    ok(bf.up > bl.up && wf.rot < wl.rot && !bf.frames.includes('jump'), 'Focused: smaller, no jump', { bf: bf.up, bl: bl.up, wf: wf.rot, wl: wl.rot });
     const tone = await page.evaluate(() => ({ b: drTone('bounce'), w: drTone('wince') }));
     ok(tone.b === 'bounce' && tone.w === 'wince', 'Lively: plays as written', tone);
     ok(await page.evaluate(() => DR_TONE.appointment.bounce === 'ack' && DR_TONE.appointment.wince === null), 'in an appointment: a nod for right, nothing for wrong');

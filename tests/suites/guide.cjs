@@ -21,7 +21,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     newsMissing: GUIDE_NEWS.filter(n => !GUIDE_TOPICS.some(t => t.id === n.id)).map(n => n.id),
     pins: Object.values(GUIDE_SECTION_PINS),
   }));
-  ok(data.n === 69 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
+  ok(data.n === 70 && !data.showMissing.length && !data.stepsMissing.length && !data.newsMissing.length, 'every Show me, step list and news card points at a real answer', data);
   const broken = await page.evaluate(async pins => { const bad = []; for (const p of pins) { const i = new Image(); i.src = p; try { await i.decode(); } catch (e) { bad.push(p); } } return bad; }, data.pins);
   ok(!broken.length, 'all tile pictures load', broken);
 
@@ -242,11 +242,13 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
       const r = e => e.getBoundingClientRect(), btn = document.querySelector('.home-promo-btn'), s = document.querySelector('.home-search');
       if (!btn) return null;
       const B = r(btn), hit = document.elementFromPoint(B.x + B.width / 2, B.y + B.height / 2);
-      return { h: Math.round(B.height), gap: Math.round(r(s).top - B.bottom), right: Math.round(r(s).right - B.right),
-        hit: !!(hit && hit.closest('.home-promo-btn')), inBanner: !!btn.closest('#homeGreeting') };
+      const G = r(btn.closest('#homeGreeting')), body = document.querySelector('#homeGreeting .home-body'), br = body && r(body);
+      return { h: Math.round(B.height), gap: Math.round(r(s).top - B.bottom), centerOff: Math.round((B.left + B.right) / 2 - (G.left + G.right) / 2),
+        clearOfHim: !br || B.right <= br.left + 1, hit: !!(hit && hit.closest('.home-promo-btn')), inBanner: !!btn.closest('#homeGreeting') };
     });
-    ok(home && home.inBanner && home.hit && home.h >= 44 && home.gap >= 8 && home.right === 0,
-      'Home: Watch sits in the banner, takes its own taps, 44px tall, above Search and lined up with it', home);
+    // Since 2026-10-24 Dr. Smiley stands full-length at the banner's bottom right, so Watch sits in the bottom middle, clear of him.
+    ok(home && home.inBanner && home.hit && home.h >= 44 && home.gap >= 8 && Math.abs(home.centerOff) <= 48 && home.clearOfHim,
+      'Home: Watch sits in the banner, takes its own taps, 44px tall, above Search, in the middle and clear of Dr. Smiley', home);
     await p7.click('.home-promo-btn'); await wait(500);
     const sheet = await p7.evaluate(() => { const v = document.querySelector('.gd-video video');
       return v && { src: v.getAttribute('src'), poster: v.getAttribute('poster'), inline: v.playsInline, controls: v.controls, cat: activeCategory,

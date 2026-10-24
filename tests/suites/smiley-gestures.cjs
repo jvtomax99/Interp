@@ -55,26 +55,28 @@ async function playAndMeasure(page, name, o = {}){
     const { page: hp, ctx } = await boot(b, { device: 'iphone', settle: 50 });
     await hp.waitForFunction(() => { try{ return typeof DrAnim !== 'undefined'; }catch(e){ return false; } }, null, { timeout: 8000, polling: 20 });
     await hp.evaluate(INSTR);
+    // Him full-length (2026-10-24): his host arrives with the hello (is-in, a scale and a fade, then full size), his
+    // box keeps its shape, and the hello's greet plays on the rig: the drawn wave, a smile.
     const samples = await hp.evaluate(() => new Promise(res => {
-      const out = [], t0 = performance.now();
+      const out = [], faces = new Set(), frames = new Set(), t0 = performance.now();
       const tick = () => {
-        const pin = document.querySelector('#content.is-home .home-wave-pin');
-        if(pin){ const m = getComputedStyle(pin).transform; let sx = 1, sy = 1, tx = 0;
-          if(m && m !== 'none'){ const v = m.match(/matrix\(([^)]+)\)/)[1].split(',').map(Number); sx = Math.hypot(v[0], v[1]); sy = Math.hypot(v[2], v[3]); tx = v[4]; }
-          out.push({ t: performance.now() - t0, sx, sy, tx, entering: !!pin.closest('.home-wave-entering') }); }
-        if(performance.now() - t0 < 12000) requestAnimationFrame(tick); else res(out);
+        const host = document.querySelector('#content.is-home .home-body');
+        if(host){ const r = host.getBoundingClientRect(); const m = getComputedStyle(host); const b = window.homeBody && window.homeBody.body;
+          if(b){ faces.add(b.pose.face); if(b.pose.frameL) frames.add(b.pose.frameL); if(b.pose.frameR) frames.add(b.pose.frameR); }
+          out.push({ t: performance.now() - t0, ratio: r.width / r.height, scale: m.scale, isIn: host.classList.contains('is-in'), x: r.x }); }
+        if(performance.now() - t0 < 12000) requestAnimationFrame(tick); else res({ out, faces: [...faces], frames: [...frames] });
       };
       tick();
     }));
-    const flog = await hp.evaluate(() => window.__log.filter(x => x.place === 'home').map(x => x.f));
-    const stretch = samples.filter(s => Math.abs(s.sx - s.sy) > .002);
-    const landedScale = samples.filter(s => !s.entering && (Math.abs(s.sx - 1) > .002));
-    const slide = samples.filter(s => Math.abs(s.tx) > .01);
-    ok(samples.length > 100, `Home greeting sampled (${samples.length} frames)`);
-    ok(!stretch.length, `Home greeting: never stretched (scaleX = scaleY on every frame; ${stretch.length} bad)`);
+    const out = samples.out, ratio0 = 1070 / 1470;
+    const stretch = out.filter(s => Math.abs(s.ratio - ratio0) > .01);
+    const landed = out.filter(s => s.isIn && s.t > out.find(x => x.isIn).t + 700), landedScale = landed.filter(s => s.scale !== '1' && s.scale !== 'none');
+    const slide = landed.filter(s => Math.abs(s.x - out[out.length - 1].x) > .5);
+    ok(out.length > 100 && out.some(s => s.isIn), `Home greeting sampled, he arrives with the hello (${out.length} frames)`);
+    ok(!stretch.length, `Home greeting: his box keeps its shape on every frame (${stretch.length} bad)`);
     ok(!landedScale.length, `Home greeting: full size once he has landed (${landedScale.length} frames scaled)`);
-    ok(!slide.length, `Home greeting: never slid sideways (${slide.length} frames with translateX)`);
-    ok(flog.includes('smile') && flog.includes('laugh1') && flog.includes('blink2'), 'Home greeting: the engine played greet (blink, open smile, bright squint): ' + [...new Set(flog)].join(' '));
+    ok(!slide.length, `Home greeting: never slid sideways (${slide.length} frames)`);
+    ok(samples.frames.includes('wave') && samples.faces.includes('smile'), 'Home greeting: the rig played greet (the drawn wave, a smile): ' + samples.frames.join(' ') + ' | ' + samples.faces.join(' '));
     await hp.screenshot({ path: OUT + 'shots/home-greet.png' });
     await ctx.close();
   }

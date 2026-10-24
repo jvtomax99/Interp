@@ -7353,3 +7353,24 @@ body.pv-open{ overflow:hidden; }
 .kb-mini:active, .kb-mini.is-pressed{ transform:scale(.985); }
 .kb-mini:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
 @media (prefers-reduced-motion:reduce){ .kb-mini{ transition:none; } .kb-mini:active, .kb-mini.is-pressed{ transform:none; } }
+
+/* ---------- Dr. Smiley, full body (drsmiley/body.js; features/smiley-body.js) ----------
+   A host (.db-host) holds the rig as an SVG. Breathing is a CSS animation on
+   the compositor, paused while he is scrolled off and none in Still or under
+   reduced motion; a drawn pose taking over from a cutout arm cross-fades.
+   Where he stands: Home's banner (home-polish.css, .home-body) and the quiz
+   card's top-right corner (.quiz-dr, below). */
+.db-host svg.db{ width:100%; height:100%; display:block; overflow:visible; }
+.db-host .db-breath{ transform-box:fill-box; transform-origin:50% 100%; animation:dbBreath 3.6s ease-in-out infinite; }
+.db-host.is-offscreen .db-breath{ animation-play-state:paused; }
+html.ds-still .db-host .db-breath{ animation:none; }
+.db-host .db-pose, .db-host .db-arm, .db-host .db-leg{ transition:opacity .12s linear; }
+@keyframes dbBreath{ 0%,100%{ transform:scale(1,1); } 50%{ transform:scale(.996,1.012); } }
+@media (prefers-reduced-motion:reduce){ .db-host .db-breath{ animation:none; } .db-host .db-pose, .db-host .db-arm, .db-host .db-leg{ transition:none; } }
+/* In a quiz he stands in the card's top-right corner (Jose's pick, 2026-10-24):
+   a float, so the section label and the counter sit beside him and the
+   question starts below his feet (clear). He bounces on a right answer,
+   winces on a wrong one, cheers at a streak (smileyAnswer, smileyStudy, through
+   drPerform's stage). */
+.quiz-card .quiz-dr{ float:right; height:110px; aspect-ratio:1070 / 1470; margin:-6px -8px 8px 14px; pointer-events:none; }
+.quiz-card.has-dr .quiz-question{ clear:right; }

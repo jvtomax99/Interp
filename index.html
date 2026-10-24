@@ -629,6 +629,8 @@
 <script src="./features/term-lookup.js"></script>
 <script src="./features/voice-check.js"></script>
 <script src="./features/smiley-performances.js"></script>
+<script src="./drsmiley/body.js"></script>
+<script src="./features/smiley-body.js"></script>
 <script>
 /* ============ Seed data (from the shared reference doc) ============ */
 const DEFAULT_DATA = {
@@ -6129,9 +6131,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'smileybody',  tone:'gd-n2', pin:'pins/wave.webp',               eyebrow:'Dr. Smiley, full-length', title:'He stands on Home and in your quiz now, acting with his whole body: a wave, a thumbs-up bounce, a think, a cheer' },
   { id:'promo',       tone:'gd-n3', pin:'pins/wave.webp',               eyebrow:'The video',             title:'A new 45-second film, in 3D: the 3D Body coming apart, your campus, and Dr. Smiley’s brain' },
   { id:'notifications', tone:'gd-n1', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
-  { id:'knowledgebrain', tone:'gd-n2', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: at the top of Term Review, or from CoreCHI Practice' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -8269,6 +8271,8 @@ function drStage(o){
     const svg = document.querySelector('#content .ask-hello .ask-face svg') || document.querySelector('#askFace svg');
     return svg ? { svg, head: svg } : null;
   }
+  // Him full-length (features/smiley-body.js): on Home's banner, in a quiz card. The one you can see.
+  if(typeof drBodyStage === 'function'){ const bm = drBodyStage(); if(bm) return { body: bm }; }
   const dock = typeof smileyRider !== 'undefined' && smileyRider.stage();
   if(dock) return dock;
   if(typeof activeCategory !== 'undefined' && activeCategory === 'home' && !(o && o.noHome) && window.homeSmileyAct) return { home: true };
@@ -8297,6 +8301,7 @@ function drPerform(seq, o){
   const st = drStage(o);
   if(!st) return false;
   const p = o.priority || DR_P.REACT;
+  if(st.body){ st.body.act(s); return true; }
   if(st.home){ window.homeSmileyAct(s, p); return true; }
   const a = drAnim(st.svg, { head: st.head });
   return a ? a.play(s, { priority: p, keep: o.keep, done: o.done }) : false;
@@ -9833,6 +9838,7 @@ function renderContent(){
   if(activeCategory === 'practice'){
     const motionPrev = practiceMotionKeys(content);
     content.innerHTML = renderPractice();
+    if(typeof drBodyMountAll === 'function') drBodyMountAll(content);   // him full-length in the quiz card (features/smiley-body.js)
     playPracticeMotion(content, motionPrev);
     if(!quizActive && quizQuestions.length && quizIndex >= quizQuestions.length){
       const ring = content.querySelector('.score-ring');
@@ -11898,8 +11904,9 @@ function renderQuiz(){
   // would make the card flinch under your thumb.
   const entering = quizIndex !== lastEnteredQuizIndex;
   lastEnteredQuizIndex = quizIndex;
-  html += `<div class="quiz-card${entering ? ' is-entering' : ''}">
+  html += `<div class="quiz-card has-dr${entering ? ' is-entering' : ''}">
     <div class="quiz-progress-track"><span class="quiz-progress-fill" style="width:${pct}%"></span><span class="quiz-pip" style="left:${pct}%"></span></div>
+    <div class="quiz-dr" aria-hidden="true"></div>
     <div class="quiz-meta">
       <span class="tag" style="--tag-color:${dm.color};">${escapeHtml(dm.name)}</span>
       ${(!exam && stat) ? `<span class="quiz-seen" title="your record on this question">seen ${stat.seen}\u00d7 \u00b7 ${stat.right} right</span>` : ''}
@@ -14245,6 +14252,7 @@ function renderHome(){
     <div class="home-greeting" id="homeGreeting">
       <div class="home-greeting-photo"><div class="home-greeting-photo-inner"><div class="home-greeting-photo-drift"></div></div></div>
       <div class="home-greeting-scrim"></div>
+      <div class="home-body" aria-hidden="true"></div>
       <div class="home-greeting-text">
         <div class="home-greeting-meta">
           <div class="home-greeting-eyebrow">${greetingForNow(now).toUpperCase()},</div>
@@ -21594,7 +21602,7 @@ const smileyRider = (() => {
   // Only one Dr. Smiley at a time: any other one drawn and showing (the Home
   // greeting, Ask, the lock screen, a pop-up) sends this one away.
   function smileyElsewhere(){
-    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
+    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face, .db-app')){
       if(f.closest('.smiley-rider, .dock-smiley, #tgSmiley')) continue;
       if(f.getClientRects().length && getComputedStyle(f).visibility !== 'hidden') return true;
     }
@@ -21602,7 +21610,7 @@ const smileyRider = (() => {
   }
   // The same, but only counting one you can actually see right now.
   function smileyInView(){
-    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
+    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face, .db-app')){
       if(f.closest('.smiley-rider, .dock-smiley, #tgSmiley')) continue;
       const r = f.getBoundingClientRect();
       if(!r.width || r.bottom <= 0 || r.top >= window.innerHeight) continue;
