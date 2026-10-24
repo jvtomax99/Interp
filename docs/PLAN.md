@@ -776,7 +776,13 @@ come from this alone.
   second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
   pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
   that shows the name whatever the frames do, and the test waits up to 40 s
-  and prints how long it took. A WebKit red on an unrelated PR: re-run once,
+  and prints how long it took. Red again on `main` on 2026-10-23 (run 936,
+  32.3 s against 22): each rebuild of Home while the pen wrote (data arriving)
+  handed the writing to the new greeting and restarted the wall clock from
+  zero. Fixed the same day: the deadline belongs to the writing and is
+  carried over on adoption (`due` in `write`/`adopt`), and a greeting rebuilt
+  after the writing no longer holds the name again; the test rebuilds Home
+  6 s in and expects the name within 16 s. A WebKit red on an unrelated PR: re-run once,
   then read the log; it names the suite and the check. A WebKit job
   "cancelled" at its 20-minute limit while installing the browser (#129,
   and #131 twice, 2026-10-23) was still in `playwright install --with-deps
