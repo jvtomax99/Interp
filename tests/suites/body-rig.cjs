@@ -89,10 +89,10 @@ const SAMPLE = () => {
   ok(P.__failed.length === 0, 'every layer and script arrives ' + JSON.stringify(P.__failed));
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
-  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp'];
-  ok(layers.length === 25 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp'];
+  ok(layers.length === 27 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'twenty-five layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the six drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
+     'twenty-seven layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the seven drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
@@ -115,7 +115,7 @@ const SAMPLE = () => {
   await P.evaluate(() => { document.body.classList.remove('is-still'); document.getElementById('who').style.removeProperty('--size'); });
 
   // Every performance: within limits, transforms only, back to rest.
-  const perfs = ['greet', 'ack', 'think', 'cheer', 'wink', 'shrug', 'read', 'bounce', 'wince', 'walk', 'doze'];
+  const perfs = ['greet', 'ack', 'think', 'cheer', 'wink', 'shrug', 'read', 'point', 'bounce', 'wince', 'walk', 'doze'];
   const lively = {};
   for(const n of perfs){
     const r = await P.evaluate(n => window.__play(n), n);
@@ -147,6 +147,12 @@ const SAMPLE = () => {
     requestAnimationFrame(tick); }));
   ok(lv.frames > 60 && lv.busyFrames === 0 && lv.lvl === 'full' && lv.dozed && lv.name && lv.hasSet, 'rest life has levels: none plays nothing for 3 s; doze() plays the doze; the viewer\'s idle has setLevel ' + JSON.stringify(lv));
   ok(/clipboard-[lr]/.test(seen('read')) && lively.read.armHiddenWhileFrame, 'read: the drawn clipboard in both hands, both cutout arms hidden meanwhile ' + seen('read'));
+  ok(/point-[lr]/.test(seen('point')) && (lively.point.max.aL >= 90 || lively.point.max.aR >= 90), 'point: an arm straight out to where the drawn finger is, which takes over ' + seen('point'));
+  // point takes a side: L is the picture's left (the arm as drawn), R the mirrored copy.
+  const pt = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); const seenP = new Set();
+    b.play(DR_BODY_PERF.point(b.mode(), { side: 'R' }).beats, { name: 'point', done: () => res([...seenP]) });
+    const tick = () => { for(const g of b.el.poses) if(g.style.opacity === '1') seenP.add(g.dataset.pose + '-' + g.dataset.side); if(b.busy()) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }));
+  ok(pt.includes('point-r') && !pt.includes('point-l'), 'point to the other side uses the mirrored finger ' + pt.join(' '));
   // A gesture interrupted by another: the drawn hand it was showing hands back
   // at once (the cutout arm stands where it was), never stays up through the
   // new gesture. Greet until its drawn wave shows, then a nod, which draws no

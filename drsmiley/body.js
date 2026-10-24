@@ -52,6 +52,8 @@ const DR_BODY = {
     'thumbs-up': { box: [239, 509, 197, 306], arms: ['L'], layer: 'front', at: { a: 20, f: 120 }, pivot: [353, 630] },
     // Both hands on a clipboard at his chest (a feathered band from the collar to below the hands, both sleeves in it): stands in for both arms; `frot` tilts it.
     clipboard:   { box: [275, 567, 520, 354], arms: ['L', 'R'], layer: 'front', at: { a: 20, f: 115, a2: 20, f2: 115 }, pivot: [556, 760] },
+    // The pointing arm: straight out at shoulder height, the index finger out ("look here"); `frot` bobs it about the shoulder.
+    point:       { box: [23, 557, 387, 138], arms: ['L'], layer: 'back', at: { a: 95, f: 0 }, pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
@@ -414,6 +416,25 @@ const DR_BODY_PERF = {
       [j(380), { [FR]: '', aL: 0, aR: 0, fL: 0, fR: 0, lift: 0, head: 0, face: 'smile', brow: 'rest' }, 'spring'],
       [j(260), { face: 'rest' }, 'out'],
     ], still: { aL: C.a, aR: C.a2, fL: C.f, fR: C.f2, [FR]: 'clipboard', face: 'lookD', brow: 'focused' }, stillMs: 1100 };
+  },
+  // "Look here": a glance that way, the arm swings straight out to where the
+  // drawn pointing hand is, the finger takes over and bobs twice (the point
+  // itself), eyes and head toward it; then back. o.side: 'L' (the picture's
+  // left) or 'R' (mirrored), else picked.
+  point(mode, o){
+    o = o || {}; const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
+    const side = o.side || (R() < .5 ? 'L' : 'R'), s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, FR = 'frame' + side, P = DR_BODY.pose.point.at;
+    return { beats: [
+      [j(160), { face: 'half' + side, head: -s * 1 * k, [A]: -6 * k, [F]: 10 * k }, 'in'],                                   // a glance that way, the arm drawn back a touch
+      [j(260), { [A]: P.a, [F]: P.f, head: s * 5 * k, lean: s * 1.5 * k, face: 'look' + side, brow: 'up' }, 'snap'],         // out
+      [j(120), { [FR]: 'point', frot: 0 }, 'linear'],                                                                        // the drawn finger takes over
+      [j(180), { frot: -s * 3 * k, lift: 2 * k }, 'inOut'],                                                                  // the point: two bobs
+      [j(180), { frot: s * 1.5 * k, lift: 0 }, 'inOut'],
+      [j(180), { frot: -s * 2.5 * k, face: 'smile1' }, 'inOut'],
+      [j(500, .2), { frot: 0, head: s * 4 * k, face: 'look' + side }, 'inOut'],                                              // holds on it
+      [j(400), { [FR]: '', [A]: 0, [F]: 0, head: -s * .5 * k, lean: 0, face: 'smile', brow: 'rest' }, 'spring'],
+      [j(260), { head: 0, face: 'rest' }, 'out'],
+    ], still: { [A]: P.a, [F]: P.f, [FR]: 'point', head: s * 5, lean: s * 1.5, face: 'look' + side, brow: 'up' }, stillMs: 1100 };
   },
   // A right answer: a happy hop on the drawn crouch and jump, the drawn
   // thumbs-up (one side, as drawn or mirrored) from the top of the hop through

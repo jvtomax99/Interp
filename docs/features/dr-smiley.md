@@ -207,7 +207,11 @@ to below the hands (`band: True`, both sleeves in it); it stands in for
 both cutout arms (`arms: ['L', 'R']`, drawn in front) and `frot` tilts it
 about the chest. `read` (a new performance) brings it up, runs his eyes
 down it along a line and back, nods and brings it down; the held state
-`answering` reads the answer on it. Still shows the drawn pose held. **The leg plates** (the same
+`answering` reads the answer on it. **The point** (2026-10-24): the arm
+straight out at shoulder height, the index finger out, cut like the wave
+(a back-layer arm, as drawn and mirrored); `point` (a performance, with
+`side` for which way: "look here") glances that way, swings the cutout
+arm out, swaps the finger in, bobs it twice, holds on it, and comes back. Still shows the drawn pose held. **The leg plates** (the same
 evening): `crouch.png` (knees bent, feet in place) and `jump.png` (in the
 air, feet tucked) came back on the same grid (4 px off); `cutframes.py`
 cuts both legs whole below the hip line (the floor shadow out, the top
@@ -224,7 +228,7 @@ picture (`band: True`, a 6 px feather melting into the coat beneath) and
 the rig draws it in front; `bounce` folds one cutout arm up during the hop
 and swaps the drawn thumbs-up in at the top (as drawn or mirrored), pushes
 it up a little on the second hop, and hands back at the settle. Not run
-yet: `point`, `body-noarms` and the rest of the table.
+yet: `body-noarms`, `pockets`, `crossed`, `arms-up`; nothing needs them.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
@@ -267,7 +271,8 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   open hand), think (a hand to the chin, eyes up away from it, the "aha"),
   cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
   wink (his left eye, a "hey you" of the right hand), shrug (palms up,
-  doubtful), read (the drawn clipboard up, eyes down it, a nod, down),
+  doubtful), read (the drawn clipboard up, eyes down it, a nod, down), point (a
+  glance that way, the drawn finger straight out, two bobs, a hold),
   bounce and wince (the quiz pair), doze (eyes closing slowly, head and
   shoulders sinking, one slow breath asleep on the `sleep` frame, a jolt
   awake, a look around; the phone's resting state, 2026-10-24), walk (`steps` paces, legs

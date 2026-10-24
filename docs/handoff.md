@@ -73,7 +73,7 @@ answering, celebrating, uncertain (`DR_BODY_STATES` in `drsmiley/body.js`;
 the viewer's second row; the feature doc's "Held states" bullet). Also
 fixed: a gesture cut short by another left its drawn hand up. Then Jose ran the clipboard prompt: cut as a band
 (`pose-clipboard.webp`), the `read` performance and the `answering` hold
-use it. The point prompt is asked for next (a "look here" gesture). Where he
+use it. Then the point (`pose-point.webp`, the `point` performance with a `side`: "look here"), the doze and rest-life levels (`drBodyIdle`: full, calm, blinks, none; `stop.doze()`). His body now covers everything his head does in the app: gestures, held states, the phone's states. Where he
 stands in the app is still his open pick (Home greeting and the quiz
 recommended). Previews are made by recording the viewer with Playwright
 video, frames out with Playwright's bundled ffmpeg (`-r 12`, no filters in
@@ -116,7 +116,7 @@ pictures. PR #135 stays the base (engine, viewer, checks).
 
 ## How to verify
 
-- `cd tests && node run.cjs body-rig` (about 2 minutes; 113 checks). The
+- `cd tests && node run.cjs body-rig` (about 2 minutes; 121 checks). The
   full run: `node run.cjs`, about 8 minutes. If Playwright says the
   browser is missing (it expects `chromium_headless_shell-1194`, the
   container has 1243), make the two folders point at the installed ones:

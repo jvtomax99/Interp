@@ -27,6 +27,8 @@ POSES={
  # lies over the coat, and both sleeves bend forward over it, so the whole band of the figure is
  # taken, feathered, from the collar to below the hands; it stands in for both cutout arms
  'clipboard': dict(region=lambda: (xx>262)&(xx<812)&(yy>582)&(yy<905), offset=(0,0), band=True),
+ # the pointing arm (2026-10-24): straight out to the picture's left at shoulder height, the index finger out
+ 'point':     dict(region=lambda: (xx<445)&(yy>530)&(yy<780)&~((yy<578)&(xx>318)), offset=(0,0)),
 }
 res={}
 for name,cfg in POSES.items():
