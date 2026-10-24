@@ -76,8 +76,12 @@ under way, then what waits on Jose, then small leftovers.
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
    the split entry under **Later** and `docs/handoff.md`. The campus:
-   #139, live b1024.1553. Next: Ask the Hub's group and Dr. Smiley's engine, as groups,
-   or they stay (`docs/split-index.md`).
+   #139, live b1024.1553. Now (Jose, 2026-10-24: small pieces first): the
+   leftover small leaves, one per PR, False Friends' screen first (this
+   PR); then the knowledge brain, the guide's front page, the doctor
+   sheets, CSV, duplicate doctors, the backfill. After them: Ask the Hub's
+   group and Dr. Smiley's engine, as groups, or they stay
+   (`docs/split-index.md`).
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
@@ -187,7 +191,8 @@ come from this alone.
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
   #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
-  the campus #139, live. Next: the groups (`docs/split-index.md`).
+  the campus #139, live; False Friends' screen, this PR. Next: the small
+  leaves, then the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -197,11 +202,16 @@ come from this alone.
 
 ## Done
 
+- 2026-10-24 Split `index.html`, phase 3, False Friends' screen (this PR):
+  `features/false-friends.js`, declarations only. Its section also held
+  the Practice screen with no banner between; that half stays inline
+  under a new banner. Proof: byte rebuild; Study, Drill, an answer, the
+  Practice screen and globals identical in the browser.
 - 2026-10-24 The 3D Body's resize listener (`features/3d-body.js`, since
   #127) read `activeCategory` before `index.html`'s script declared it
   when the window resized during load: "activeCategory is not defined", a
   console error that failed daily-drill, smiley-quiz and springs now and
-  then (this PR). Guarded with `typeof`; new suite `load-order.cjs` holds
+  then (#140, live b1024.1804). Guarded with `typeof`; new suite `load-order.cjs` holds
   the gap between the `features/` files and `index.html`'s script open
   and resizes, presses a key and posts a message in it (fails on the old
   code, passes on the new).
