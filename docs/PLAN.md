@@ -179,8 +179,8 @@ come from this alone.
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
-  #129, Voice and mic check #131, live; Dr. Smiley's performances, this
-  PR. Next leaves: the campus (`docs/split-index.md`).
+  #129, Voice and mic check #131, Dr. Smiley's performances #137, live.
+  Next leaves: the campus (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -190,8 +190,8 @@ come from this alone.
 
 ## Done
 
-- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (this
-  PR): `features/smiley-performances.js`, verbatim, except the one line
+- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (#137,
+  live b1024.1338): `features/smiley-performances.js`, verbatim, except the one line
   that fills `DR_FACE_SEQ` (it stays in `index.html`; Jose's pick, the
   table is defined earlier there). Proof: old `index.html` rebuilt byte
   for byte; every performance built with three seeds, the table, globals
