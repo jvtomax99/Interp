@@ -31,6 +31,10 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(home.isIn && home.h > 200 && Math.abs(home.ratio - 1070 / 1470) < .01 && home.inBanner, 'he stands full-length in the banner (over 200px, his own shape)', home);
   ok(home.quoteClear && home.watchClear && home.aboveSearch, 'the quote, Watch and Search are clear of him', home);
   ok(home.tapLands && home.waveHidden && home.nameFull === '0px', 'the tap lands on him, the old head is hidden and the name has the row to itself', home);
+  // Start-up repaints (data arriving) keep the greeting and reset #content's classes: the head must stay hidden through them.
+  const repaint = await P.evaluate(() => { const c = document.getElementById('content'); c.className = 'content-fade is-home'; lastHomeHtml = ''; renderContent();
+    return { heads: [...document.querySelectorAll('.home-wave-icon, .home-wave-pin, .home-ask-tag')].filter(e => getComputedStyle(e).visibility !== 'hidden' && e.getClientRects().length).length, bodies: document.querySelectorAll('.home-body svg.db').length }; });
+  ok(repaint.heads === 0 && repaint.bodies === 1, 'after a repaint that resets the page\'s classes: still one Dr. Smiley, the head hidden', repaint);
   ok(home.stageBody && !home.dock && home.breath === 'dbBreath' && home.images === 27, 'he is the stage for performances, the dock head stays away, he breathes', home);
   ok(!P.__errors.length, 'no page errors', P.__errors);
 

@@ -1274,7 +1274,8 @@
     if(bodyHost&&typeof window.drBodyMount==='function'){
       const m=bodyHost.dataset.dbMounted?window.drBodyMountOf(bodyHost):window.drBodyMount(bodyHost,{quiet:true});   // quiet: his rest beats on Home are face-only, no frame loop (home-rest.cjs)
       if(m){
-        window.homeBody=m;content.classList.add('has-body');
+        // The marker sits on the greeting, which a start-up repaint keeps (keptGreeting); #content's own classes get reset, which once showed the head and the body together.
+        window.homeBody=m;bodyHost.closest('.home-greeting').classList.add('has-body');
         bodyHost.setAttribute('role','button');bodyHost.tabIndex=0;bodyHost.setAttribute('aria-label','Ask the Hub');bodyHost.removeAttribute('aria-hidden');
         wave.tabIndex=-1;wave.setAttribute('aria-hidden','true');
         if(hasWavedHello||reduced.matches||(resume&&resume.elapsed>=FACE_AT))bodyHost.classList.add('is-in');

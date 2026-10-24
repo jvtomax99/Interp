@@ -185,7 +185,7 @@ the size the head alone was), the quote wrapping to 56% beside him and
 Watch moved to the middle (`home-polish.css`, block "Hello: Dr. Smiley
 full-length"). `renderHome` draws the host (`.home-body`, in
 `.home-greeting`); `initHomeGreeting` (`home-polish.js`) mounts the rig in
-it, hides the head (`#content.has-body .home-wave-icon`: it stays in the
+it, hides the head (`.home-greeting.has-body .home-wave-icon`; the marker sits on the greeting, which a start-up repaint keeps, because `#content`'s classes are reset and once showed head and body together; the head stays in the
 markup as the hello's anchor for the name pen and `fitWave`, its grid
 column closed so the name has the row) and wires him: a tap opens Ask the
 Hub, a double-tap on his head (the top 44%) the HUMC Brain, press and hold
