@@ -69,8 +69,8 @@ under way, then what waits on Jose, then small leftovers.
 1. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
-   the split entry under **Later** and `docs/handoff.md`. Next: Dr.
-   Smiley's performances, then the campus.
+   the split entry under **Later** and `docs/handoff.md`. Next: the
+   campus (it animates: more to check).
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
@@ -179,8 +179,8 @@ come from this alone.
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
-  #129, Voice and mic check #131, live. Next leaves: Dr. Smiley's
-  performances, the campus (`docs/split-index.md`).
+  #129, Voice and mic check #131, live; Dr. Smiley's performances, this
+  PR. Next leaves: the campus (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -190,7 +190,14 @@ come from this alone.
 
 ## Done
 
-- 2026-10-23 Plan tidied (this PR): the finished items below left
+- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (this
+  PR): `features/smiley-performances.js`, verbatim, except the one line
+  that fills `DR_FACE_SEQ` (it stays in `index.html`; Jose's pick, the
+  table is defined earlier there). Proof: old `index.html` rebuilt byte
+  for byte; every performance built with three seeds, the table, globals
+  identical in the browser, phone and computer. Plan tidy (#134) merged;
+  Voice and mic check (#131) live as b1023.2011.
+- 2026-10-23 Plan tidied (#134): the finished items below left
   **Next**; the ones that had no line here get one now:
   - 2026-10-23 3D promo remake, final cut (#128): `media/hub-promo.mp4`
     (720p), its still and Home thumbnail; User Guide answer and a New

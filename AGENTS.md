@@ -73,6 +73,7 @@ So:
 | The 3D Body's Hub side (`anatomySync`, the `ATLAS` bridge, `atlasOnMessage`) | `features/3d-body.js` (the wall rules above still apply) |
 | Looking a term up (`openTermLookup`, its trusted sources and caches) | `features/term-lookup.js` |
 | The Voice and mic check in More (`voiceCheckOpen`, `audioMode`) | `features/voice-check.js` |
+| Dr. Smiley's performances (`DR_PERF`, `drSquashKeys`, his mood, the effects off his head) | `features/smiley-performances.js` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
@@ -134,10 +135,10 @@ line instead.
 slide his picture sideways to fake a head turn. The one squash and stretch is
 Jose's pick from a preview (E3, 2026-10-19): only the cheer's and the greet's
 spring, Lively only, at most 4% of his height, on his picture and never on what
-holds him (`drSquashKeys`, `DR_SQUASH` in `index.html`). Don't add it anywhere
+holds him (`drSquashKeys`, `DR_SQUASH` in `features/smiley-performances.js`). Don't add it anywhere
 else or make it bigger without showing Jose first. A gesture the art can't draw
 needs new frames, not a trick.
-His five performances (`DR_PERF` in `index.html`) are built fresh each play,
+His five performances (`DR_PERF` in `features/smiley-performances.js`) are built fresh each play,
 with their own calmer Focused versions; new gestures go there.
 
 **Speed never costs the look** (Jose, 2026-10-15). A speed or battery fix

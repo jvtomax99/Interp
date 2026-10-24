@@ -27,7 +27,7 @@ const GROUPS = {
     'Doctor directory: the add and edit sheet'],
   ask: ['Ask the Hub', 'Dr. Smiley: following a conversation', 'Dr. Smiley: context and actions', 'Dr. Smiley: what he remembers (on this device)',
     'Ask the Hub: your practice and the next step', "Dr. Smiley's memory screen", 'Ask the Hub: corrections, feedback, sources'],
-  smiley: ["Dr. Smiley's art", 'Dr. Smiley: performances', 'Dr. Smiley: animation engine', 'Dr. Smiley: how lively (Lively, Focused, Still)',
+  smiley: ["Dr. Smiley's art", 'Dr. Smiley: animation engine', 'Dr. Smiley: how lively (Lively, Focused, Still)',
     "Dr. Smiley: what he's doing (task states)", 'Dr. Smiley reacts', "Dr. Smiley's career", "Dr. Smiley's news", 'Dr. Smiley companion',
     'Dr. Smiley: the companion panel'],
 };
