@@ -446,6 +446,11 @@ design and anything touching data or rules stay with the main model.
   `proactive`), then `PushNotification` with one line saying what's ready
   and what he needs to do. Only when there is something to review or
   decide, never for routine progress.
+- **Always a phone notification when it's time to push** (Jose,
+  2026-10-24; `AGENTS.md`; he wants this in every project): whenever a
+  change is ready for his "push" (GitHub's checks passed), send
+  `PushNotification` saying which change and that it needs "push", even
+  if he seems to be in the chat.
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the

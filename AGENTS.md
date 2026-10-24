@@ -346,4 +346,7 @@ on his phone: screenshots of what changed (before/after when the look
 changed; phone size first), or for work with nothing to see, a short
 summary of what changed and what it needs from him. Then notify his phone
 so he can come back and review. Not for routine progress, only when there
-is something to review or decide.
+is something to review or decide. **Always a phone notification when
+something is ready for his "push"** (Jose, 2026-10-24): every time a
+change is waiting for his OK to go live (its checks passed), notify his
+phone, even if he seems to be watching the chat.
