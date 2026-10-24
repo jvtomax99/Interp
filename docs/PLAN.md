@@ -77,8 +77,8 @@ under way, then what waits on Jose, then small leftovers.
    Plan, census and the method: `docs/split-index.md`; where it stands:
    the split entry under **Later** and `docs/handoff.md`. The campus:
    #139, live b1024.1553. Now (Jose, 2026-10-24: small pieces first): the
-   leftover small leaves, one per PR, False Friends' screen first (this
-   PR); then the knowledge brain, the guide's front page, the doctor
+   leftover small leaves, one per PR: False Friends' screen #141 (live
+   b1024.1920), the knowledge brain (this PR); then the guide's front page, the doctor
    sheets, CSV, duplicate doctors, the backfill. After them: Ask the Hub's
    group and Dr. Smiley's engine, as groups, or they stay
    (`docs/split-index.md`).
@@ -191,7 +191,7 @@ come from this alone.
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
   #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
-  the campus #139, live; False Friends' screen, this PR. Next: the small
+  the campus #139, live; False Friends' screen #141, live; the knowledge brain, this PR. Next: the small
   leaves, then the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
@@ -202,7 +202,11 @@ come from this alone.
 
 ## Done
 
-- 2026-10-24 Split `index.html`, phase 3, False Friends' screen (this PR):
+- 2026-10-24 Split `index.html`, phase 3, your knowledge brain's Hub side
+  (this PR): `features/knowledge-brain.js`, declarations only. Proof: byte
+  rebuild; its data, the small brain, globals and humc-brain's
+  knowledge-brain checks identical before and after.
+- 2026-10-24 Split `index.html`, phase 3, False Friends' screen (#141, live b1024.1920):
   `features/false-friends.js`, declarations only. Its section also held
   the Practice screen with no banner between; that half stays inline
   under a new banner. Proof: byte rebuild; Study, Drill, an answer, the

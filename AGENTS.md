@@ -85,7 +85,7 @@ So:
 | Your HUMC campus on CoreCHI Practice (`renderCampus`, `CAMPUS_MAP`, the building pick); its motion (`campusLife`, `campusDepth`) stays in `index.html` | `features/campus.js` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
-| Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
+| Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`; the Hub's side (its data `knowledgeBrainData`, your record, the small brain `kbMiniHtml`) in `features/knowledge-brain.js`; `docs/features/knowledge-brain.md` |
 | Everything else | `index.html` |
 
 **The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
