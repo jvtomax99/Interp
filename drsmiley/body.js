@@ -50,6 +50,8 @@ const DR_BODY = {
     shrug:       { box: [95, 568, 892, 398], arms: ['L', 'R'], layer: 'back', at: { a: 28, f: 95, a2: 28, f2: 95 }, pivot: [556, 630] },
     // Cut as a feathered band of the picture (its sleeve lies over the coat), so it is drawn in front.
     'thumbs-up': { box: [239, 509, 197, 306], arms: ['L'], layer: 'front', at: { a: 20, f: 120 }, pivot: [353, 630] },
+    // Both hands on a clipboard at his chest (a feathered band from the collar to below the hands, both sleeves in it): stands in for both arms; `frot` tilts it.
+    clipboard:   { box: [275, 567, 520, 354], arms: ['L', 'R'], layer: 'front', at: { a: 20, f: 115, a2: 20, f2: 115 }, pivot: [556, 760] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
@@ -395,6 +397,24 @@ const DR_BODY_PERF = {
       [j(260), { face: 'rest' }, 'out'],
     ], still: { lift: -10, head: s * 4, aL: P.a, aR: P.a2, fL: P.f, fR: P.f2, [FR]: 'shrug', face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
   },
+  // Reading: both hands bring the drawn clipboard up to his chest, his eyes go
+  // down it along a line and back, a nod ("got it"), and the hands come down.
+  read(mode){
+    const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
+    const s = R() < .5 ? -1 : 1, C = DR_BODY.pose.clipboard.at, FR = s < 0 ? 'frameL' : 'frameR', L = s < 0 ? 'L' : 'R', O = s < 0 ? 'R' : 'L';
+    return { beats: [
+      [j(180), { lift: 2 * k, face: 'blink1' }, 'out'],
+      [j(360), { aL: C.a, aR: C.a2, fL: C.f, fR: C.f2, lift: 4 * k, head: s * 2 * k, face: 'lookD', brow: 'focused' }, 'spring'],
+      [j(120), { [FR]: 'clipboard', frot: 0 }, 'linear'],
+      [j(700, .2), { face: 'lookD' + L, head: s * 3 * k, frot: -s * 1.8 * k }, 'inOut'],
+      [j(700, .2), { face: 'lookD' + O, head: -s * 1 * k, frot: s * 1.8 * k }, 'inOut'],
+      [j(220), { face: 'lookD', frot: 0 }, 'out'],
+      [j(160), { lift: 8 * k, face: 'smile1', brow: 'up' }, 'inOut'],                     // got it
+      [j(260), { lift: 3 * k }, 'spring'],
+      [j(380), { [FR]: '', aL: 0, aR: 0, fL: 0, fR: 0, lift: 0, head: 0, face: 'smile', brow: 'rest' }, 'spring'],
+      [j(260), { face: 'rest' }, 'out'],
+    ], still: { aL: C.a, aR: C.a2, fL: C.f, fR: C.f2, [FR]: 'clipboard', face: 'lookD', brow: 'focused' }, stillMs: 1100 };
+  },
   // A right answer: a happy hop on the drawn crouch and jump, the drawn
   // thumbs-up (one side, as drawn or mirrored) from the top of the hop through
   // a smaller second hop. The other cutout arm rises only a little (past about
@@ -511,23 +531,21 @@ const DR_BODY_STATES = {
       [j(320), { head: 0, lift: 0, lean: 0, face: 'rest' }, 'out'],
     ]; },
   },
-  // Answering (reading the answer with you): eyes down on it, along a line and
-  // back, one open hand presenting it, pulsing gently, the hands trading places
-  // every few beats; a blink every third beat.
+  // Answering (reading the answer with you): the drawn clipboard in both hands
+  // at his chest, eyes down on it along a line and back, the board tilting a
+  // little with them, a nod now and then; a blink every third beat.
   answering: {
-    still: c => ({ lift: 3, head: c.s * 1.5, [c.A]: 22, [c.F]: 62, face: 'lookD' }),
-    enter: c => { const { k, s, j, A, F } = c; return [
-      [j(200), { face: 'blink2' }, 'out'],
-      [j(380), { lift: 3 * k, head: s * 1.5 * k, [A]: 22 * k, [F]: 62 * k, face: 'lookD', brow: 'rest' }, 'spring'],
+    still: c => { const C = DR_BODY.pose.clipboard.at; return { aL: C.a, aR: C.a2, fL: C.f, fR: C.f2, [c.FR]: 'clipboard', lift: 3, face: 'lookD', brow: 'focused' }; },
+    enter: c => { const { k, s, j, FR } = c, C = DR_BODY.pose.clipboard.at; return [
+      [j(200), { lift: 2 * k, face: 'blink2' }, 'out'],
+      [j(380), { aL: C.a, aR: C.a2, fL: C.f, fR: C.f2, lift: 3 * k, head: s * 1.5 * k, face: 'lookD', brow: 'focused' }, 'spring'],
+      [j(120), { [FR]: 'clipboard', frot: 0 }, 'linear'],
     ]; },
-    hold: c => { const { k, j, beat } = c, s = c.s, A = c.A, F = c.F, O = c.O;
-      const faces = ['lookD' + (s < 0 ? 'L' : 'R'), 'lookD', 'lookD' + (s < 0 ? 'R' : 'L'), 'lookD'], face = faces[beat % 4], b = [];
-      b.push([j(900, .3), { [A]: 22 * k, [F]: (62 + (beat % 2) * 9) * k, ['a' + O]: 0, ['f' + O]: 0, lift: (3 + (beat % 4 === 1 ? 3 : 0)) * k, head: s * (1.5 + (beat % 2) * .8) * k, face, brow: 'rest' }, 'inOut']);
+    hold: c => { const { k, s, j, FR, beat } = c, C = DR_BODY.pose.clipboard.at, L = s < 0 ? 'L' : 'R', O = s < 0 ? 'R' : 'L';
+      const faces = ['lookD' + L, 'lookD', 'lookD' + O, 'lookD'], face = faces[beat % 4], tilt = [-1.6, 0, 1.6, 0][beat % 4], b = [];
+      b.push([j(900, .3), { aL: C.a, aR: C.a2, fL: C.f, fR: C.f2, [FR]: 'clipboard', frot: s * tilt * k, lift: (3 + (beat % 4 === 1 ? 2 : 0)) * k, head: s * (1.5 + (beat % 2) * 1) * k, face, brow: 'focused' }, 'inOut']);
+      if(beat % 5 === 4) b.push([j(160), { lift: 8 * k, face: 'smile1' }, 'inOut'], [j(260), { lift: 3 * k, face }, 'spring']);   // a nod: "I see"
       if(beat % 3 === 2) b.push(...DR_BODY_BLINK(face));
-      if(beat % 6 === 5){   // the other hand takes the answer
-        b.push([j(420), { [A]: 0, [F]: 0, ['a' + O]: 22 * k, ['f' + O]: 62 * k, head: -s * 1.5 * k }, 'spring']);
-        const was = c.side; c.side = O; c.O = was; c.s = -s; c.A = 'a' + O; c.F = 'f' + O; c.FR = 'frame' + O;
-      }
       b.push([j(300, .3), {}, 'linear']);
       return b; },
   },

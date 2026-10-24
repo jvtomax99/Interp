@@ -68,7 +68,7 @@ and aspect ratio (2:3). Change ONLY the following.
 | `shrug.png` | Both arms bent at the elbows, forearms out to the sides, palms up and open, shoulders raised a little. |
 | `crossed.png` | Arms folded across his chest, each hand tucked under the other arm. |
 | `point.png` | His right arm extended straight out toward the picture's left, index finger pointing. The other arm stays at his side. |
-| `clipboard.png` | Both hands holding a plain white clipboard with a silver clip at chest height, slightly tilted toward him, as if reading it. Nothing written on it. |
+| `clipboard.png` (done 2026-10-23) | Both hands holding a plain white clipboard with a silver clip at chest height, slightly tilted toward him, as if reading it. Nothing written on it. |
 
 Two leg plates (the quiz bounce; here the feet may move):
 

@@ -89,10 +89,10 @@ const SAMPLE = () => {
   ok(P.__failed.length === 0, 'every layer and script arrives ' + JSON.stringify(P.__failed));
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
-  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp'];
-  ok(layers.length === 23 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp'];
+  ok(layers.length === 25 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'twenty-three layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the five drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
+     'twenty-five layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the six drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
@@ -115,7 +115,7 @@ const SAMPLE = () => {
   await P.evaluate(() => { document.body.classList.remove('is-still'); document.getElementById('who').style.removeProperty('--size'); });
 
   // Every performance: within limits, transforms only, back to rest.
-  const perfs = ['greet', 'ack', 'think', 'cheer', 'wink', 'shrug', 'bounce', 'wince', 'walk'];
+  const perfs = ['greet', 'ack', 'think', 'cheer', 'wink', 'shrug', 'read', 'bounce', 'wince', 'walk'];
   const lively = {};
   for(const n of perfs){
     const r = await P.evaluate(n => window.__play(n), n);
@@ -135,6 +135,7 @@ const SAMPLE = () => {
   ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
   ok(/thumbs-up-[lr]/.test(seen('bounce')), 'bounce: the drawn thumbs-up from the top of the hop ' + seen('bounce'));
   ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.wince.frameEverShown, 'ack, wink, wince and the walk use the cutout pieces only');
+  ok(/clipboard-[lr]/.test(seen('read')) && lively.read.armHiddenWhileFrame, 'read: the drawn clipboard in both hands, both cutout arms hidden meanwhile ' + seen('read'));
   // A gesture interrupted by another: the drawn hand it was showing hands back
   // at once (the cutout arm stands where it was), never stays up through the
   // new gesture. Greet until its drawn wave shows, then a nod, which draws no
@@ -191,7 +192,7 @@ const SAMPLE = () => {
   }
   ok(held.thinking.frameOn > held.thinking.frames * .7 && held.thinking.frames2[0] + held.thinking.frames2[1] === 'think' && /^lookU/.test(held.thinking.face), 'thinking: the drawn finger stays on the chin the whole hold, eyes up ' + JSON.stringify([held.thinking.frameOn, held.thinking.frames, held.thinking.frames2, held.thinking.face]));
   ok(held.celebrating.frames2.includes('fist-pump') && held.celebrating.maxSy <= .041, 'celebrating: a drawn fist still pumping after the cheer, the squash within 4% ' + JSON.stringify([held.celebrating.frames2, held.celebrating.maxSy]));
-  ok(/^lookD/.test(held.answering.face) && !held.answering.frameOn, 'answering: eyes down on the answer, the open cutout hand presenting it ' + held.answering.face);
+  ok(/^lookD/.test(held.answering.face) && held.answering.frames2.includes('clipboard') && held.answering.frameOn > held.answering.frames * .7, 'answering: the drawn clipboard in his hands the whole hold, eyes down on it ' + JSON.stringify([held.answering.face, held.answering.frames2, held.answering.frameOn, held.answering.frames]));
   ok(['doubt', 'rest', 'lookUL', 'lookUR'].includes(held.uncertain.face) && !held.uncertain.frameOn && held.listening.maxLean > 0, 'uncertain: a composed face, never a cheerful one; listening: leaned in ' + JSON.stringify([held.uncertain.face, held.listening.maxLean]));
   // A gesture during a hold: it plays, then the hold carries on.
   const resume = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(4); b.state('thinking'); drBodySeed(null);

@@ -23,6 +23,10 @@ POSES={
  # sleeve lies over the coat, so coat over coat is kept here and the band kept narrow
  # (band: everything of the figure inside it, feathered, since colour cannot tell that sleeve from the coat)
  'thumbs-up': dict(region=lambda: (xx>236)&(xx<420)&(yy>496)&(yy<800)&~((yy<578)&(xx>365)), offset=(6,0), band=True),
+ # both hands on a clipboard at the chest (2026-10-23, late): the clipboard is near coat-white and
+ # lies over the coat, and both sleeves bend forward over it, so the whole band of the figure is
+ # taken, feathered, from the collar to below the hands; it stands in for both cutout arms
+ 'clipboard': dict(region=lambda: (xx>262)&(xx<812)&(yy>582)&(yy<905), offset=(0,0), band=True),
 }
 res={}
 for name,cfg in POSES.items():

@@ -200,7 +200,14 @@ takes over there, holds or wags, hands back before the arm comes down.
 drawn fists (one mirrored) from the top of the jump, `think` holds the
 drawn finger on the chin, `shrug` the drawn palms; `ack`, `wink`, `bounce`,
 `wince` and the walk stay on the cutout arms (an open hand is right for
-them). Still shows the drawn pose held. **The leg plates** (the same
+them). **The clipboard** (2026-10-23, late evening; Jose ran the prompt):
+both hands on a plain clipboard at his chest, over the coat, so
+`cutframes.py` takes it as a feathered band of the figure from the collar
+to below the hands (`band: True`, both sleeves in it); it stands in for
+both cutout arms (`arms: ['L', 'R']`, drawn in front) and `frot` tilts it
+about the chest. `read` (a new performance) brings it up, runs his eyes
+down it along a line and back, nods and brings it down; the held state
+`answering` reads the answer on it. Still shows the drawn pose held. **The leg plates** (the same
 evening): `crouch.png` (knees bent, feet in place) and `jump.png` (in the
 air, feet tucked) came back on the same grid (4 px off); `cutframes.py`
 cuts both legs whole below the hip line (the floor shadow out, the top
@@ -217,8 +224,7 @@ picture (`band: True`, a 6 px feather melting into the coat beneath) and
 the rig draws it in front; `bounce` folds one cutout arm up during the hop
 and swaps the drawn thumbs-up in at the top (as drawn or mirrored), pushes
 it up a little on the second hop, and hands back at the settle. Not run
-yet: `point`, `clipboard`, `body-noarms` and the rest of the table;
-nothing needs them until he has a place in the app.
+yet: `point`, `body-noarms` and the rest of the table.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
@@ -261,7 +267,8 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   open hand), think (a hand to the chin, eyes up away from it, the "aha"),
   cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
   wink (his left eye, a "hey you" of the right hand), shrug (palms up,
-  doubtful), bounce and wince (the quiz pair), walk (`steps` paces, legs
+  doubtful), read (the drawn clipboard up, eyes down it, a nod, down),
+  bounce and wince (the quiz pair), walk (`steps` paces, legs
   alternating, arms against them; returns `dx`, how far he went). Focused
   plays the same beats smaller (about 0.55) with no jump; Still holds the
   one pose in `still` for `stillMs`; reduced motion is Still.
@@ -272,9 +279,9 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   little forward, slow tilts, a nod now and then), `thinking` (the drawn
   finger on the chin, eyes up and away from the hand wandering, a slow blink
   every other beat, a tap of the finger; slower after 9 s; the exit is the
-  "aha"), `answering` (eyes down on the answer along a line and back, one
-  open cutout hand presenting it, the hands trading places every few
-  beats), `celebrating` (the cheer, then a happy bob with one drawn fist
+  "aha"), `answering` (the drawn clipboard in both hands at his chest, eyes down
+  on it along a line and back, the board tilting a little with them, a nod
+  now and then), `celebrating` (the cheer, then a happy bob with one drawn fist
   pumping), `uncertain` (shoulders up, both open hands half out, a doubtful
   face and never a cheerful one, a small re-shrug now and then). Each is an
   entry, then a hold built one group of beats at a time (`play` with
