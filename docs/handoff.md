@@ -8,8 +8,8 @@ performances).
 ## Paste this into the new chat
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
-> tell me what's being worked on and the goal, say in 2-3 lines what you'll
-> do next, and wait for my go. Plain words, say "working on it" and "done".
+> tell me what's being worked on now and the goal, and what was worked on
+> before, say in 2-3 lines what you'll do next, and wait for my go. Plain words, say "working on it" and "done".
 
 ## Where things stand
 

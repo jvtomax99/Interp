@@ -43,14 +43,18 @@ rounds, and the next phase would add a lot more):
    of `docs/handoff.md` plus a short summary of this chat (what was done,
    what is open, why), with its link given to Jose; or **"I'll paste it
    myself"**, the exact message to paste. Where the buttons or
-   `create_session` are missing, give the message to paste.
+   `create_session` are missing, give the message to paste. Either way,
+   the reply also gives Jose a fresh two-part summary (Jose, 2026-10-24):
+   what is being worked on now and its goal, and what was worked on
+   before (this chat's changes and where each stands).
 4. Leave nothing half-done: an open PR is fine (the handoff names it), an
    uncommitted change is not. Cancel this chat's check-ins; the new chat
    re-arms what it needs. Then "Archive this chat" (below).
 The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
-then opens with a short summary for Jose: what is being worked on and the
-goal of the task (Jose, 2026-10-23), then in 2-3 lines what it will do,
-and waits for his go.
+then opens with a short summary for Jose in two parts: what is being
+worked on now and its goal (Jose, 2026-10-23), and what was worked on
+before (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
+for his go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still

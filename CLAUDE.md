@@ -8,8 +8,12 @@ do, test, update the plan, open a pull request). A chat runs phase after
 phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
 and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
-of this chat pasted in (Jose, 2026-10-23); the new chat opens by telling
-Jose what is being worked on and the goal. A new chat reads the docs and the
+of this chat pasted in (Jose, 2026-10-23). Whenever a chat starts a new
+chat for Jose, it gives him a fresh summary in plain words, in two parts:
+**what is being worked on now** (and its goal) and **what was worked on
+before** (the last chat's changes and where each stands). It says it in
+the reply that gives the new chat's link, and the new chat opens with the
+same two parts (Jose, 2026-10-24). A new chat reads the docs and the
 handoff, not the old chat. Details: `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
