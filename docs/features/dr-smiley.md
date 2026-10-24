@@ -108,8 +108,10 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   the calmer cheer; an appointment: `ack`). The `surprise` sequence itself
   is still played by nothing. `smiley-brows.cjs` checks the holds.
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
-  think, cheer -- also called celebrate -- and wink) sits in `DR_FACE_SEQ` as
-  getters, so every play varies a little (side, amplitude, beats) with an
+  think, cheer -- also called celebrate -- and wink; its code, with
+  `drSquashKeys`, his mood and `drFaceFx`, is `features/smiley-performances.js`
+  since 2026-10-24) sits in `DR_FACE_SEQ` as getters (that one line stays in
+  `index.html`, after the table), so every play varies a little (side, amplitude, beats) with an
   anticipation, one main gesture and a recovery. Each builds its own Focused
   version (smaller, no laughter, no effects); Still uses its `still` frame.
   `drPerfSeed(n)` makes the variant repeatable for tests. Movement is only a
