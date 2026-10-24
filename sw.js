@@ -65,6 +65,7 @@ const PRECACHE = [
   './features/smiley-performances.js',
   './features/campus.js',
   './features/false-friends.js',
+  './features/knowledge-brain.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
