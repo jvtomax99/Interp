@@ -22,7 +22,7 @@ const GROUPS = {
     'Phone chrome, dialogs and the on-screen keyboard', 'Install / offline support'],
   data: ['Seed data (from the shared reference doc)', 'Code of Ethics', 'Domain icons and link lists'],
   safe: ['CSV export / import', 'Training & Events', 'The guide: installing, the front page',
-    'Subdomain folder', 'Practice dashboard tiles', 'Your HUMC campus (CoreCHI Practice)',
+    'Subdomain folder', 'Practice dashboard tiles',
     'Lists: providers, recently deleted, doctors hub', 'Duplicate doctors', 'Terminology backfill', 'Healthcare Providers: modal + photo handling',
     'Doctor directory: the add and edit sheet'],
   ask: ['Ask the Hub', 'Dr. Smiley: following a conversation', 'Dr. Smiley: context and actions', 'Dr. Smiley: what he remembers (on this device)',
