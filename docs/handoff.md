@@ -41,6 +41,58 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
+## Where it stands (2026-10-24, end of this chat): read this first
+
+**Goal (Jose's words):** fully perfect his animation before he replaces Dr.
+Smiley's head in the app. Do not ask Jose to push or OK it; keep improving
+until it's good to go. Use simple sentences and clickable options
+(AskUserQuestion), recommendation first.
+
+**Branches.** `claude/dr-smiley-body-prompts` is PR #135 (the rig, all
+acting, the solid cut, no seams). `claude/dr-smiley-body-home` (this one,
+on top of #135) holds everything since: him wired into Home's banner
+(bottom right, 216 px) and the quiz card's corner (`features/smiley-body.js`,
+the Home block in `home-polish.js`/`.css`, the quiz corner in `app.css`,
+suite `smiley-body-app.cjs`, guide answer `smileybody`), the fix for the
+head and body showing together (the `has-body` marker is on the greeting),
+and the animation rework below. It is pushed only for storage: a
+`claude/` branch never deploys (`vercel.json`), and no PR is open for it.
+PR #136 (the name pen's wall clock) waits separately.
+
+**The animation rework (commit "the drawn poses carry the motion").** A
+frame-by-frame review found see-through swaps (ghost legs at jumps, faded
+sleeves) and flat cutout arms swung wide ("paper arms"). Now the cutout
+arms stay small (body-rig checks at most 25 degrees out, 60 at the elbow),
+and a drawn pose moves itself into place with three joints: `fsw` (swings
+a single arm about its shoulder, `anchor`), `fy` (lifts a folded arm or the
+clipboard), `fsx` (opens the shrug). Arm poses fade in over the piece they
+replace (`DR_BODY_FADE`, 70 ms), which is cut only once covered; leg plates
+swap at once. body-rig checks "never see-through". 145 checks pass;
+smiley-body-app 18, smiley-quiz 19, smiley-squash 18, smiley-gestures 114,
+home-rest 23.
+
+**Next.** Jose runs the drawings in
+`docs/art/dr-smiley-body/prompts-animation.md` in ChatGPT, starting with
+the hello wave: `wave-rise`, `wave-in`, `wave-out`. Measure each against
+`body-master.png`, cut with `layers/cutframes.py` (add each to `POSES`),
+add to `DR_BODY.pose`, and build them into `greet` as breakdowns (the arm
+on its way up, the wag's two extremes). Then cheer, think, point, shrug,
+read, thumbs, wince, the two leg drawings. Review every change frame by
+frame before showing Jose; send before/after clips side by side.
+
+**How the previews are made.** Record the viewer (`drsmiley/body.html`)
+or the app with Playwright video, cut frames with Playwright's own ffmpeg
+(`/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux`, `-r 12`; its filters don't
+work, crop in Pillow), write GIFs with Pillow, label with Inter
+(`/usr/share/fonts/opentype/inter/Inter-SemiBold.otf`). For an app clip,
+put a tiny red marker in the page's corner when the action starts and cut
+from that frame. Contact sheets (every 2nd frame, times printed) are how
+the review is done.
+
+**The limit to tell Jose plainly:** these drawings keep his torso and head
+still, so his whole body can't bend into one line of action. Beyond that
+means full-body drawings or a 3D model of him.
+
 ## Where it stands (2026-10-23, late): the first four drawn poses are in
 
 Jose ran wave, fist pump, think and shrug in ChatGPT; they lined up with
