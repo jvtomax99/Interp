@@ -39,7 +39,8 @@ rounds, and the next phase would add a lot more):
 3. Commit and push it, send it to Jose with `SendUserFile`, and say
    "Start a new chat". Once, not every reply. Ask with buttons (Jose,
    2026-10-23): **"I start it for you" (the pick)**, a new session
-   (`create_session`, same repository) whose first message is the whole
+   (`create_session`, same repository, titled with the chat's focus in
+   plain words, Jose 2026-10-24) whose first message is the whole
    of `docs/handoff.md` plus a short summary of this chat (what was done,
    what is open, why), with its link given to Jose; or **"I'll paste it
    myself"**, the exact message to paste. Where the buttons or
