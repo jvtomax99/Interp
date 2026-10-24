@@ -64,6 +64,7 @@
   <button class="act" data-perf="bounce">Bounce</button>
   <button class="act" data-perf="wince">Wince</button>
   <button class="act" data-perf="walk">Walk</button>
+  <button class="act" data-perf="doze">Doze</button>
 </div>
 <p class="sub" style="margin:13px 0 0">While something goes on: he holds these for as long as it takes, the way his head does in the app.</p>
 <div class="bar" id="states">
@@ -77,6 +78,7 @@
 <div class="row">
   <span class="seg" id="mode" role="group" aria-label="Mode"><button data-mode="lively" class="is-on">Lively</button><button data-mode="focused">Focused</button><button data-mode="still">Still</button></span>
   <span class="seg" id="bgs" role="group" aria-label="Background"><button data-bg="" class="is-on">Light</button><button data-bg="is-mesh">Mesh</button><button data-bg="is-navy">Navy</button></span>
+  <span class="seg" id="idle" role="group" aria-label="Rest life"><button data-idle="full" class="is-on">Rest: full</button><button data-idle="calm">Calm</button><button data-idle="blinks">Blinks</button></span>
   <label>Size <input type="range" id="size" min="30" max="100" value="72" aria-label="Size"></label>
 </div>
 <p class="note" id="note">Lively</p>
@@ -124,6 +126,12 @@
     body.stop(); body.rest();
     if(body.stateName()) body.state(body.stateName(), { restart: true });
     document.getElementById('note').textContent = { lively: 'Lively', focused: 'Focused: the same acting, smaller and calmer', still: 'Still: one held pose, no motion' }[opts.mode];
+  });
+  // Rest life, as the phone sets it for his head in the app: full, calm (offline, resting), blinks only (an appointment).
+  document.getElementById('idle').addEventListener('click', e => {
+    const b = e.target.closest('[data-idle]'); if(!b) return;
+    stopIdle.setLevel(b.dataset.idle);
+    for(const x of e.currentTarget.children) x.classList.toggle('is-on', x === b);
   });
   document.getElementById('bgs').addEventListener('click', e => {
     const b = e.target.closest('[data-bg]'); if(!b) return;

@@ -116,7 +116,7 @@ pictures. PR #135 stays the base (engine, viewer, checks).
 
 ## How to verify
 
-- `cd tests && node run.cjs body-rig` (about 1.5 minutes; 105 checks). The
+- `cd tests && node run.cjs body-rig` (about 2 minutes; 113 checks). The
   full run: `node run.cjs`, about 8 minutes. If Playwright says the
   browser is missing (it expects `chromium_headless_shell-1194`, the
   container has 1243), make the two folders point at the installed ones:

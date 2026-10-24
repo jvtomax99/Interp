@@ -115,7 +115,7 @@ const SAMPLE = () => {
   await P.evaluate(() => { document.body.classList.remove('is-still'); document.getElementById('who').style.removeProperty('--size'); });
 
   // Every performance: within limits, transforms only, back to rest.
-  const perfs = ['greet', 'ack', 'think', 'cheer', 'wink', 'shrug', 'read', 'bounce', 'wince', 'walk'];
+  const perfs = ['greet', 'ack', 'think', 'cheer', 'wink', 'shrug', 'read', 'bounce', 'wince', 'walk', 'doze'];
   const lively = {};
   for(const n of perfs){
     const r = await P.evaluate(n => window.__play(n), n);
@@ -134,7 +134,18 @@ const SAMPLE = () => {
   ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));
   ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
   ok(/thumbs-up-[lr]/.test(seen('bounce')), 'bounce: the drawn thumbs-up from the top of the hop ' + seen('bounce'));
-  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.wince.frameEverShown, 'ack, wink, wince and the walk use the cutout pieces only');
+  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.wince.frameEverShown && !lively.doze.frameEverShown, 'ack, wink, wince, the walk and the doze use the cutout pieces only');
+  // The doze: eyes closed on the sleep frame, the head sunk, then awake and back.
+  const dz = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(3); b.perform('doze', { done: () => { res(out); } }); drBodySeed(null);
+    const out = { sleepMs: 0, maxLift: 0, last: performance.now() }; const tick = () => { const now = performance.now(); if(b.pose.face === 'sleep') out.sleepMs += now - out.last; out.last = now; out.maxLift = Math.max(out.maxLift, b.pose.lift); if(b.busy()) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }));
+  ok(dz.sleepMs > 1500 && dz.maxLift > 10, 'doze: asleep on the sleep frame for over 1.5 s, the head sunk, then back ' + JSON.stringify([Math.round(dz.sleepMs), Math.round(dz.maxLift)]));
+  // Rest life has levels: at 'none' nothing plays; 'blinks' and 'calm' exist; doze() plays the doze.
+  const lv = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest();
+    const idle = drBodyIdle(b, { every: 300 }); idle.setLevel('none'); let busyFrames = 0, frames = 0; const t0 = performance.now();
+    const tick = () => { frames++; if(b.busy()) busyFrames++; if(performance.now() - t0 < 3000) return requestAnimationFrame(tick);
+      idle.setLevel('full'); const lvl = idle.level(); const dozed = idle.doze(); const name = b.busy(); idle(); b.stop(); b.rest(); res({ frames, busyFrames, lvl, dozed, name, hasSet: typeof stopIdle.setLevel === 'function' }); };
+    requestAnimationFrame(tick); }));
+  ok(lv.frames > 60 && lv.busyFrames === 0 && lv.lvl === 'full' && lv.dozed && lv.name && lv.hasSet, 'rest life has levels: none plays nothing for 3 s; doze() plays the doze; the viewer\'s idle has setLevel ' + JSON.stringify(lv));
   ok(/clipboard-[lr]/.test(seen('read')) && lively.read.armHiddenWhileFrame, 'read: the drawn clipboard in both hands, both cutout arms hidden meanwhile ' + seen('read'));
   // A gesture interrupted by another: the drawn hand it was showing hands back
   // at once (the cutout arm stands where it was), never stays up through the

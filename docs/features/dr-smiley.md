@@ -268,7 +268,9 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
   wink (his left eye, a "hey you" of the right hand), shrug (palms up,
   doubtful), read (the drawn clipboard up, eyes down it, a nod, down),
-  bounce and wince (the quiz pair), walk (`steps` paces, legs
+  bounce and wince (the quiz pair), doze (eyes closing slowly, head and
+  shoulders sinking, one slow breath asleep on the `sleep` frame, a jolt
+  awake, a look around; the phone's resting state, 2026-10-24), walk (`steps` paces, legs
   alternating, arms against them; returns `dx`, how far he went). Focused
   plays the same beats smaller (about 0.55) with no jump; Still holds the
   one pose in `still` for `stillMs`; reduced motion is Still.
@@ -298,7 +300,11 @@ later"); the viewer is `drsmiley/body.html`, not linked from anywhere, and
   `.db-breath` (the compositor; `transform-box: fill-box`, about the hips;
   none in Still), blinks every few seconds, now and then a shift of weight
   or a glance, only while seen and nothing else plays. No frame loop runs
-  at rest.
+  at rest. Levels, as the app's idle levels for his head (`DR_IDLE_LEVEL`;
+  `stop.setLevel`): `full`, `calm` (blinks and a glance now and then:
+  offline, resting), `blinks` (attentive, uncertain, an appointment),
+  `none`; `stop.doze()` plays the doze (the resting state's one doze when
+  the phone has been quiet a while). The viewer's "Rest" switch.
 - **Squash and stretch**: the cheer and the bounce, 4% and 3.5% of his
   height, width 1/sqrt(height) as E3; never more (the suite checks).
 - **Known limits of the cut**: the cutout hands are open palms, so the

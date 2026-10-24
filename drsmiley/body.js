@@ -460,6 +460,23 @@ const DR_BODY_PERF = {
     beats.push([Math.round(ms * .9), { lL: 0, lR: 0, aL: 0, aR: 0, fL: 0, fR: 0, head: 0, lean: 0, face: 'rest' }, 'spring']);
     return { beats, still: null, stillMs: 0, dx: x };
   },
+  // A doze (the phone's resting state, nobody has touched it for a while): his
+  // eyes close slowly, his head and shoulders sink, one slow breath asleep, a
+  // small jolt awake, a look around, back. Still: nothing.
+  doze(mode){
+    const R = drBodyRand, k = mode === 'focused' ? .6 : 1, s = R() < .5 ? -1 : 1, L = s < 0 ? 'L' : 'R';
+    return { beats: [
+      [500, { face: 'blink1', lift: 2 * k }, 'inOut'],
+      [400, { face: 'blink2', lift: 5 * k, head: s * 2 * k }, 'inOut'],
+      [600, { face: 'shut', lift: 9 * k, head: s * 4 * k, lean: s * .6 * k, sy: 1 - .008 * k, aL: 2 * k, aR: 2 * k, brow: 'down' }, 'inOut'],   // slumps
+      [800, { face: 'sleep', lift: 12 * k, head: s * 6 * k }, 'inOut'],
+      [1200, { lift: 14 * k, head: s * 7 * k, sy: 1 - .012 * k }, 'inOut'],                                                                 // one slow breath asleep
+      [120, { lift: -4 * k, head: -s * 1 * k, lean: 0, sy: 1, face: 'blink2', brow: 'up' }, 'snap'],                                        // a jolt awake
+      [240, { face: 'rest', lift: 2 * k }, 'spring'],
+      [300, { face: 'look' + L, head: s * 1.5 * k }, 'out'],
+      [400, { lift: 0, head: 0, aL: 0, aR: 0, brow: 'rest', face: 'rest' }, 'spring'],
+    ], still: null, stillMs: 0 };
+  },
   // Rest beats, picked now and then while idle (drBodyIdle): a shift of weight, a look around.
   shift(mode){
     const R = drBodyRand, k = mode === 'focused' ? .6 : 1, s = R() < .5 ? -1 : 1;
@@ -587,24 +604,34 @@ const DR_BODY_STATES = {
 
 /* Idle life: blinks every few seconds, and now and then a shift of weight or
    a glance, only while the page is seen and nothing else plays. Lively and
-   Focused; Still and reduced motion get nothing. Returns stop(). */
+   Focused; Still and reduced motion get nothing. Levels, as the app's idle
+   levels for his head (DR_IDLE_LEVEL): 'full' (blinks, shifts, glances),
+   'calm' (blinks and a glance now and then: offline, resting), 'blinks'
+   (blinks only: attentive, uncertain, an appointment), 'none'. Returns
+   stop(), with stop.setLevel(level) and stop.doze() (the resting state's
+   one doze, when the phone has been quiet a while) on it. */
 function drBodyIdle(body, o){
   o = o || {};
-  let t1 = 0, t2 = 0, on = true;
+  let t1 = 0, t2 = 0, on = true, level = o.level || 'full';
   const R = drBodyRand;
   const seen = () => on && document.visibilityState === 'visible' && body.mode() !== 'still';
   const blink = () => {
     t1 = setTimeout(() => {
-      if(seen() && !body.busy()) body.play([[45, { face: 'blink1' }, 'linear'], [40, { face: 'blink2' }, 'linear'], [75, { face: 'shut' }, 'linear'], [45, { face: 'blink2' }, 'linear'], [55, { face: 'blink1' }, 'linear'], [60, { face: 'rest' }, 'linear']], { name: 'blink' });
+      if(level !== 'none' && seen() && !body.busy()) body.play([[45, { face: 'blink1' }, 'linear'], [40, { face: 'blink2' }, 'linear'], [75, { face: 'shut' }, 'linear'], [45, { face: 'blink2' }, 'linear'], [55, { face: 'blink1' }, 'linear'], [60, { face: 'rest' }, 'linear']], { name: 'blink' });
       blink();
     }, 2600 + R() * 3200);
   };
   const beat = () => {
     t2 = setTimeout(() => {
-      if(seen() && !body.busy()) body.perform(R() < .6 ? 'shift' : 'glance');
+      if(level === 'full' && seen() && !body.busy()) body.perform(R() < .6 ? 'shift' : 'glance');
+      else if(level === 'calm' && seen() && !body.busy() && R() < .5) body.perform('glance');
       beat();
-    }, (o.every || 7000) + R() * 5000);
+    }, (o.every || 7000) + R() * 5000 + (level === 'calm' ? 6000 : 0));
   };
   blink(); beat();
-  return () => { on = false; clearTimeout(t1); clearTimeout(t2); };
+  const stop = () => { on = false; clearTimeout(t1); clearTimeout(t2); };
+  stop.setLevel = l => { level = l; };
+  stop.level = () => level;
+  stop.doze = () => { if(level !== 'none' && seen() && !body.busy()) return body.perform('doze'); return false; };
+  return stop;
 }
