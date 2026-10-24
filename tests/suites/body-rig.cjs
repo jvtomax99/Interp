@@ -33,7 +33,10 @@ const SAMPLE = () => {
     for(const k of keys) max[k] = 0;
     // What is actually drawn: the angle in each joint's rotate(), after the engine's limits.
     const drawn = { arm: 0, fore: 0, head: 0, leg: 0 }, deg = el => { const m = /rotate\((-?[\d.]+)/.exec(el.getAttribute('transform') || ''); return m ? Math.abs(+m[1]) : 0; };
-    const frames_seen = new Set(); let armHiddenWhileFrame = true, frameEverShown = false;
+    const frames_seen = new Set(); let armHiddenWhileFrame = true, frameEverShown = false, seeThrough = 0;
+    // When each drawn pose turned on (as this sampler saw it): it fades in over the piece it replaces (DR_BODY_FADE),
+    // which must stay opaque until the frame is in, and is cut once it is.
+    const since = new Map();
     let done = false;
     played = name === 'walk' ? b.play(DR_BODY_PERF.walk(b.mode(), { dir: o.dir || 1, steps: 4 }).beats, { name, done: () => done = true }) : b.perform(name, { done: () => done = true });
     drBodySeed(null);
@@ -43,10 +46,17 @@ const SAMPLE = () => {
       for(const k of keys) max[k] = Math.max(max[k], Math.abs(p[k] - (k === 'sx' || k === 'sy' ? 1 : 0)));
       drawn.arm = Math.max(drawn.arm, deg(b.el.armL), deg(b.el.armR)); drawn.fore = Math.max(drawn.fore, deg(b.el.foreL), deg(b.el.foreR));
       drawn.head = Math.max(drawn.head, deg(b.el.head)); drawn.leg = Math.max(drawn.leg, deg(b.el.legL), deg(b.el.legR));
-      for(const g of b.el.poses) if(g.style.opacity === '1'){ frameEverShown = true; frames_seen.add(g.dataset.pose + '-' + g.dataset.side);
-        const P = DR_BODY.pose[g.dataset.pose];
-        if(P.legs){ if(b.el.legL.style.opacity !== '0' || b.el.legR.style.opacity !== '0') armHiddenWhileFrame = false; continue; }
-        for(const a of P.arms){ const side = g.dataset.side === 'l' ? a : (a === 'L' ? 'R' : 'L'); if(b.el['arm' + side].style.opacity !== '0') armHiddenWhileFrame = false; } }
+      const now = performance.now(), cov = { L: false, R: false, legs: false };
+      for(const g of b.el.poses){
+        if(g.style.opacity !== '1'){ since.delete(g); continue; }
+        if(!since.has(g)) since.set(g, now);
+        frameEverShown = true; frames_seen.add(g.dataset.pose + '-' + g.dataset.side);
+        const P = DR_BODY.pose[g.dataset.pose], age = now - since.get(g), full = age >= DR_BODY_FADE * .7;
+        // the leg plates swap at once (no fade), so they cover the legs from their first frame
+        if(P.legs){ cov.legs = true; if(age > 40 && (b.el.legL.style.opacity !== '0' || b.el.legR.style.opacity !== '0')) armHiddenWhileFrame = false; continue; }
+        for(const a of P.arms){ const side = g.dataset.side === 'l' ? a : (a === 'L' ? 'R' : 'L'); if(full) cov[side] = true; if(age > 220 && b.el['arm' + side].style.opacity !== '0') armHiddenWhileFrame = false; } }
+      // never see-through: a piece is hidden only while a frame that has faded in covers it
+      if((b.el.armL.style.opacity === '0' && !cov.L) || (b.el.armR.style.opacity === '0' && !cov.R) || (b.el.legL.style.opacity === '0' && !cov.legs)) seeThrough++;
       const bx = b.el.root.ownerSVGElement.getBoundingClientRect();
       if(Math.abs(bx.x - box0.x) > .5 || Math.abs(bx.width - box0.width) > .5) layoutMoved = true;
       if(!done && performance.now() - t0 < 8000) requestAnimationFrame(tick);
@@ -54,7 +64,7 @@ const SAMPLE = () => {
         const end = Object.assign({}, b.pose);
         const atRest = keys.every(k => Math.abs(end[k] - (k === 'sx' || k === 'sy' ? 1 : 0)) < 1e-6) && end.face === 'rest' && end.brow === 'rest';
         const framesClear = b.el.poses.every(g => g.style.opacity === '0') && b.el.armL.style.opacity === '1' && b.el.armR.style.opacity === '1' && b.el.legL.style.opacity === '1' && b.el.legR.style.opacity === '1';
-        res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end, framesSeen: [...frames_seen], armHiddenWhileFrame, frameEverShown, framesClear });
+        res({ played, ms: Math.round(performance.now() - t0), frames, max, drawn, atRest, layoutMoved, done, end, framesSeen: [...frames_seen], armHiddenWhileFrame, frameEverShown, framesClear, seeThrough });
       }
     };
     requestAnimationFrame(tick);
@@ -98,6 +108,8 @@ const SAMPLE = () => {
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
      && order.indexOf('db-poses-legs') > order.indexOf('db-leg db-leg-r') && order.indexOf('db-poses-legs') < order.indexOf('db-breath'),
      'drawn back to front: legs and the leg plates, then arms, the drawn poses that come from under the coat, the head, the body, then the poses over the coat ' + order.join(' | '));
+  // (the viewer greets on opening; let it come to rest first)
+  await P.evaluate(() => { stopIdle(); body.stop(); body.rest(); }); await P.waitForTimeout(300);
   const hidden = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-pose')].every(g => getComputedStyle(g).opacity === '0') && getComputedStyle(body.el.armL).opacity === '1');
   ok(hidden, 'at rest every drawn pose is hidden and the cutout arms show');
   await P.waitForTimeout(400);
@@ -126,6 +138,9 @@ const SAMPLE = () => {
     ok(!r.layoutMoved, `${n}: his box never changes (transforms only)`);
     ok(r.max.sy <= .041 && r.max.sx <= .021, `${n}: squash and stretch at most 4% ` + JSON.stringify([r.max.sx, r.max.sy]));
     ok(r.armHiddenWhileFrame && r.framesClear, `${n}: while a drawn pose shows, the cutout arm or legs it replaces are hidden; at the end every drawn pose is hidden again`);
+    ok(r.seeThrough === 0, `${n}: never see-through (a piece is cut only once the drawn pose covering it has faded in) (${r.seeThrough} frames)`);
+    // The cutout arms stay small (2026-10-24 review: swung to big angles they read as flat paper arms); the drawn poses carry the big moves.
+    ok(r.drawn.arm <= 25 && r.drawn.fore <= 60, `${n}: the cutout arms stay small (raise ${r.drawn.arm.toFixed(0)}, bend ${r.drawn.fore.toFixed(0)}; at most 25 and 60)`);
   }
   const seen = n => lively[n].framesSeen.join(' ');
   ok(/wave-[lr]/.test(seen('greet')), 'greet: the drawn wave takes over at the top ' + seen('greet'));
@@ -147,7 +162,7 @@ const SAMPLE = () => {
     requestAnimationFrame(tick); }));
   ok(lv.frames > 60 && lv.busyFrames === 0 && lv.lvl === 'full' && lv.dozed && lv.name && lv.hasSet, 'rest life has levels: none plays nothing for 3 s; doze() plays the doze; the viewer\'s idle has setLevel ' + JSON.stringify(lv));
   ok(/clipboard-[lr]/.test(seen('read')) && lively.read.armHiddenWhileFrame, 'read: the drawn clipboard in both hands, both cutout arms hidden meanwhile ' + seen('read'));
-  ok(/point-[lr]/.test(seen('point')) && (lively.point.max.aL >= 90 || lively.point.max.aR >= 90), 'point: an arm straight out to where the drawn finger is, which takes over ' + seen('point'));
+  ok(/point-[lr]/.test(seen('point')), 'point: the drawn pointing arm swings out ' + seen('point'));
   // point takes a side: L is the picture's left (the arm as drawn), R the mirrored copy.
   const pt = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); const seenP = new Set();
     b.play(DR_BODY_PERF.point(b.mode(), { side: 'R' }).beats, { name: 'point', done: () => res([...seenP]) });
@@ -226,9 +241,9 @@ const SAMPLE = () => {
     const a = JSON.stringify(b.pose); setTimeout(() => { res({ busy: b.busy(), same: JSON.stringify(b.pose) === a, frame: b.pose.frameL + b.pose.frameR, name: b.stateName() }); b.state(null); opts.mode = 'lively'; }, 1200); }));
   ok(!sh.busy && sh.same && sh.frame === 'think' && sh.name === 'thinking', 'Still thinking: the one held pose with the drawn finger, nothing moving ' + JSON.stringify(sh));
   await P.evaluate(() => { window.body.state(null); window.body.stop(); window.body.rest(); });
-  ok(lively.greet.max.aL >= 95 || lively.greet.max.aR >= 95, 'greet: an arm comes up to where the drawn wave is');
-  ok(lively.cheer.max.aL >= 105 && lively.cheer.max.aR >= 105 && lively.cheer.max.y > 40, 'cheer: both arms up to the drawn fists and a jump');
-  ok(lively.think.max.fL > 100 || lively.think.max.fR > 100, 'think: a hand comes to the chin');
+  ok(/wave-[lr]/.test(seen('greet')), 'greet: the drawn waving arm swings up ' + seen('greet'));
+  ok(lively.cheer.max.y > 40, 'cheer: a jump with the drawn fists');
+  ok(/think-[lr]/.test(seen('think')), 'think: the drawn hand rises to the chin ' + seen('think'));
   ok(lively.walk.max.x > 150 && lively.walk.max.upL > 10 && lively.walk.max.upR > 10, 'walk: he moves sideways, each leg lifting');
   const faces = await P.evaluate(async () => {
     const seen = {};
