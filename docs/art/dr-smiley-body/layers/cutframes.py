@@ -9,8 +9,23 @@ from scipy import ndimage as ndi
 D='/home/user/Interp/docs/art/dr-smiley-body/'; OUT='/home/user/Interp/drsmiley/body/'
 M=np.asarray(Image.open(D+'body-master.png').convert('RGB')).astype(float); H,W,_=M.shape
 yy,xx=np.mgrid[0:H,0:W]
+# The figure as one solid shape (2026-10-24). Keying by colour distance alone
+# left the coat porous: shading close to the grey background went transparent,
+# and on Home the photo showed through him. Background is what reaches the
+# picture's edge at the background colour (or a large enclosed pool of it);
+# everything else is opaque inside, with the colour key kept for the edge's
+# anti-aliasing only.
+def matte(rgb, bg, lo=8, hi=24, near=20):
+    from scipy import ndimage as ndi
+    d=np.abs(rgb-bg).sum(2); soft=np.clip((d-lo)/hi,0,1)
+    bgm=d<near; lab,n=ndi.label(bgm)
+    edge=set(np.unique(np.concatenate([lab[0],lab[-1],lab[:,0],lab[:,-1]])))-{0}
+    sizes=ndi.sum(bgm,lab,range(1,n+1)); big={i+1 for i,s in enumerate(sizes) if s>8000}   # an enclosed pool this big is background (between the legs); the coat's grey streaks are smaller
+    outside=np.isin(lab,list(edge|big))
+    inner=ndi.binary_erosion(~outside,iterations=2)
+    return np.where(inner,1.0,soft)*(~outside)
 def key(rgb):
-    bg=np.median(rgb[20:120,20:120].reshape(-1,3),0); d=np.abs(rgb-bg).sum(2); return np.clip((d-8)/24,0,1)
+    bg=np.median(rgb[20:120,20:120].reshape(-1,3),0); return matte(rgb,bg)
 alphaM=key(M)
 # region: which part of the picture a pose's arms may occupy; head box excluded unless allowed
 POSES={

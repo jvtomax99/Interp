@@ -6,7 +6,22 @@ import numpy as np, json, os
 OUT='/home/user/Interp/drsmiley/body'; os.makedirs(OUT,exist_ok=True)
 SRC='/home/user/Interp/docs/art/dr-smiley-body/body-master.png'
 rgb=np.array(Image.open(SRC).convert('RGB')).astype(float); H,W,_=rgb.shape
-bg=np.array([210,209,211.]); d=np.abs(rgb-bg).sum(2); alpha=np.clip((d-8)/24,0,1)
+# The figure as one solid shape (2026-10-24). Keying by colour distance alone
+# left the coat porous: shading close to the grey background went transparent,
+# and on Home the photo showed through him. Background is what reaches the
+# picture's edge at the background colour (or a large enclosed pool of it);
+# everything else is opaque inside, with the colour key kept for the edge's
+# anti-aliasing only.
+def matte(rgb, bg, lo=8, hi=24, near=20):
+    from scipy import ndimage as ndi
+    d=np.abs(rgb-bg).sum(2); soft=np.clip((d-lo)/hi,0,1)
+    bgm=d<near; lab,n=ndi.label(bgm)
+    edge=set(np.unique(np.concatenate([lab[0],lab[-1],lab[:,0],lab[:,-1]])))-{0}
+    sizes=ndi.sum(bgm,lab,range(1,n+1)); big={i+1 for i,s in enumerate(sizes) if s>8000}   # an enclosed pool this big is background (between the legs); the coat's grey streaks are smaller
+    outside=np.isin(lab,list(edge|big))
+    inner=ndi.binary_erosion(~outside,iterations=2)
+    return np.where(inner,1.0,soft)*(~outside)
+bg=np.array([210,209,211.]); alpha=matte(rgb,bg)
 gray=rgb.mean(2); sat=rgb.max(2)-rgb.min(2)
 shadow=(sat<12)&(gray<209)&(gray>170); shadow[:1280,:]=False
 alpha=alpha*(~shadow); fig=alpha>0.5

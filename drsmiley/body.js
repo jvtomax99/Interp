@@ -26,10 +26,10 @@ const DR_BODY = {
   hip: { l: [458, 1040], r: [627, 1040] },
   // Each layer's place in the picture: [x, y, width, height].
   box: {
-    body: [353, 578, 378, 489],
-    'arm-upper-l': [284, 602, 133, 248], 'arm-fore-l': [233, 736, 165, 328],
-    'arm-upper-r': [685, 611, 114, 236], 'arm-fore-r': [691, 739, 151, 327],
-    'leg-l': [288, 990, 248, 427], 'leg-r': [554, 990, 241, 427],
+    body: [353, 578, 377, 488],
+    'arm-upper-l': [284, 602, 132, 247], 'arm-fore-l': [233, 736, 164, 327],
+    'arm-upper-r': [685, 611, 113, 235], 'arm-fore-r': [690, 739, 151, 326],
+    'leg-l': [288, 990, 247, 426], 'leg-r': [554, 990, 240, 426],
   },
   // How far each joint may go, in degrees (a cutout arm past these shows its cut).
   limit: { arm: [-20, 175], fore: [-10, 135], leg: [-35, 35], head: [-9, 9] },
@@ -44,16 +44,16 @@ const DR_BODY = {
   // Every one also exists mirrored about his middle (`mirrorX`), for the other side.
   mirrorX: 556,
   pose: {
-    wave:        { box: [133, 357, 264, 370], arms: ['L'], layer: 'back', at: { a: 100, f: 80 }, pivot: [190, 600] },
-    'fist-pump': { box: [121, 361, 276, 348], arms: ['L'], layer: 'back', at: { a: 110, f: 100 }, pivot: [353, 630] },
-    think:       { box: [352, 497, 274, 445], arms: ['L', 'R'], layer: 'front', at: { a: 18, f: 128, a2: 10, f2: 60 }, pivot: [353, 630] },
-    shrug:       { box: [95, 568, 892, 398], arms: ['L', 'R'], layer: 'back', at: { a: 28, f: 95, a2: 28, f2: 95 }, pivot: [556, 630] },
+    wave:        { box: [134, 360, 263, 367], arms: ['L'], layer: 'back', at: { a: 100, f: 80 }, pivot: [190, 600] },
+    'fist-pump': { box: [123, 364, 274, 343], arms: ['L'], layer: 'back', at: { a: 110, f: 100 }, pivot: [353, 630] },
+    think:       { box: [352, 497, 275, 446], arms: ['L', 'R'], layer: 'front', at: { a: 18, f: 128, a2: 10, f2: 60 }, pivot: [353, 630] },
+    shrug:       { box: [97, 559, 889, 407], arms: ['L', 'R'], layer: 'back', at: { a: 28, f: 95, a2: 28, f2: 95 }, pivot: [556, 630] },
     // Cut as a feathered band of the picture (its sleeve lies over the coat), so it is drawn in front.
-    'thumbs-up': { box: [239, 509, 197, 306], arms: ['L'], layer: 'front', at: { a: 20, f: 120 }, pivot: [353, 630] },
+    'thumbs-up': { box: [247, 512, 189, 304], arms: ['L'], layer: 'front', at: { a: 20, f: 120 }, pivot: [353, 630] },
     // Both hands on a clipboard at his chest (a feathered band from the collar to below the hands, both sleeves in it): stands in for both arms; `frot` tilts it.
-    clipboard:   { box: [275, 567, 520, 354], arms: ['L', 'R'], layer: 'front', at: { a: 20, f: 115, a2: 20, f2: 115 }, pivot: [556, 760] },
+    clipboard:   { box: [281, 567, 511, 354], arms: ['L', 'R'], layer: 'front', at: { a: 20, f: 115, a2: 20, f2: 115 }, pivot: [556, 760] },
     // The pointing arm: straight out at shoulder height, the index finger out ("look here"); `frot` bobs it about the shoulder.
-    point:       { box: [23, 557, 387, 138], arms: ['L'], layer: 'back', at: { a: 95, f: 0 }, pivot: [353, 630] },
+    point:       { box: [24, 559, 386, 136], arms: ['L'], layer: 'back', at: { a: 95, f: 0 }, pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
