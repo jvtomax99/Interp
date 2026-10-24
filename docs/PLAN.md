@@ -54,7 +54,8 @@ rounds, and the next phase would add a lot more):
 The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
 then opens with a short summary for Jose in two parts: what is being
 worked on now and its goal (Jose, 2026-10-23), and what was worked on
-before (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
+before (Jose, 2026-10-24), each a few lines in simple words, never a
+big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
 for his go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he

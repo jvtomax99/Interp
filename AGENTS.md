@@ -15,7 +15,8 @@ chat for Jose, it gives him a fresh summary in plain words, in two parts:
 **what is being worked on now** (and its goal) and **what was worked on
 before** (the last chat's changes and where each stands). It says it in
 the reply that gives the new chat's link, and the new chat opens with the
-same two parts (Jose, 2026-10-24). The new chat's title names its focus
+same two parts (Jose, 2026-10-24). Keep both short: a few lines each,
+simple words, no big blocks of text (Jose, 2026-10-24). The new chat's title names its focus
 in plain words, the work it is for ("Campus code to its own file"), never
 a generic "New session" or "Handoff" (Jose, 2026-10-24). A new chat reads the docs and the
 handoff, not the old chat. Details: `docs/PLAN.md`.
