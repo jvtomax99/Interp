@@ -42,7 +42,9 @@ on the pressed tile (touch) or hovered tile (mouse), only on the practice
 screen; release springs back via `--spring`. Nothing runs at rest; reduced
 motion turns the lean and squashes off.
 
-**Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`; Jose,
+**Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`, the pick: in
+`features/campus.js` since 2026-10-24; `campusLife` and `campusDepth` are
+in `index.html`, "Practice dashboard motion"; Jose,
 2026-10-19: "look like a game", then "like Hackensack University Medical
 Center"; after a generic city, a satellite-traced campus and a box model he
 said "still not it", he sent photos of the main entrance, day and night).
