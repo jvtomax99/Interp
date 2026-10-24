@@ -45,7 +45,9 @@ function anatomyPlace(){
   const top = bar ? Math.max(0, Math.round(bar.getBoundingClientRect().bottom)) : 0;
   document.documentElement.style.setProperty('--anat-top', top + 'px');
 }
-window.addEventListener('resize', () => { if(activeCategory === 'anatomy') anatomyPlace(); });
+// typeof: this file loads before index.html's script, so a resize while the
+// page is still loading can come before activeCategory exists.
+window.addEventListener('resize', () => { if(typeof activeCategory !== 'undefined' && activeCategory === 'anatomy') anatomyPlace(); });
 
 /* ---- 3D Body cards: the Hub's side ----
    Tapping a structure in the viewer shows its card: English and Spanish

@@ -174,6 +174,10 @@ move each, with the same proof every time and nothing visible changing.
    the campus card's markup (inline styles aside, which the motion moves),
    `CAMPUS_MAP`, `CAMPUS`, `campusLevel`'s rounding, a pick then Escape,
    and globals: identical, no page errors.
+   **Load-time listeners**: a `features/` file's listener can fire before
+   `index.html`'s script has run (the 3D Body's resize did, 2026-10-24).
+   It must not read `index.html`'s names then, or must guard them
+   (`typeof`). `tests/suites/load-order.cjs` checks the gap.
 3. **JS by feature, one file per PR**, leaves first (the census says which:
    sections whose names few others use). Candidates from the sizes alone:
    Dr. Smiley's engine (`DrAnim` 25 KB with `DR_FACE_SEQ`, `DR_PERF`,

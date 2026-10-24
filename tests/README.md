@@ -27,6 +27,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `springs.cjs` | S5: plain taps settle on the bounce-0 spring (`--spring0`), measured frame by frame on the tab bar's icon and lens and the Home section panel; the stylesheets read for any overshooting easing outside the kept list (F2's Practice buttons, Dr. Smiley's acting) |
 | `campus-life.cjs` | Campus life round 2: the ambulance bay's doors on the ambulance's clock, the lot car backing out and driving off in its second look, the bench sitters' head turns, the flock, everything paused off screen, reduced motion |
 | `campus-depth.cjs` | The campus's three depth pictures (sky, far town, campus): order, cover at the widest slide, scroll and drag slide the back ones and spring home, a drag never picks a building, reduced motion still |
+| `load-order.cjs` | The gap between the `features/*.js` files and `index.html`'s own script, held open 1.5 s: a resize, a key and a message in it raise no page error, and the app comes up afterwards |
 | `glossary-cv.cjs` | Glossary taps (S4), on 150-term domains: a fresh domain skips off-screen cards' layout; every box on screen sits where it would with all laid out; a redraw while scrolled, Back and a jump to one term land on the same card |
 | `chat-titles.cjs` | Team Chat titles: Admin follows the owner-code phone (a typed name can't borrow it), Supervisor of Language Services by name and spellings, new messages carry the phone |
 
