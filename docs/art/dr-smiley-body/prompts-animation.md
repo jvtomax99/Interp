@@ -35,8 +35,9 @@ Edit this image. This is one drawing in an animation sequence, so it must line u
 
 ## The drawings
 
-Done (2026-10-24): the three hello-wave drawings, cut and built into `greet`
-(`docs/features/dr-smiley.md`, "The wave's breakdowns"). The rest are next.
+Done (2026-10-24): the three hello-wave drawings (in `greet`) and the three
+cheer drawings (in `cheer` and `celebrating`); `docs/features/dr-smiley.md`.
+The rest are next.
 
 | Move | File | Pose line (after the opening) |
 |---|---|---|

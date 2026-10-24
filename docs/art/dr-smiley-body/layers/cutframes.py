@@ -91,6 +91,12 @@ ARM=lambda: (xx<556)&(yy>240)&(yy<1058)
 ARMSWUNG=lambda: ARM()&~((yy<590)&(xx>385)&(xx<727))&~SHOULDER
 for k in ['wave','fist-pump','point','wave-rise','wave-in','wave-out']: POSES[k]=dict(region=ARMSWUNG if k in ('fist-pump','point') else ARM, offset=POSES[k]['offset'], arm=True)
 POSES['shrug']=dict(region=lambda: (yy>240)&(yy<1058)&~((yy<590)&(xx>385)&(xx<727)), offset=POSES['shrug']['offset'], arm=True)   # both arms, the same way
+# The cheer's three drawings (2026-10-24, prompts-animation.md): both arms, the load
+# (fists low by his hips), the rise (fists at shoulder height) and the V (fists above
+# his head, level with his hair, so the region starts higher). 1 to 2 px off the master.
+for k,off in (('cheer-load',(1,0)),('cheer-mid',(2,1)),('cheer-up',(2,1))):
+    POSES[k]=dict(region=lambda: (yy>150)&(yy<1058)&~((yy<590)&(xx>385)&(xx<727)), offset=off, arm=True)
+POSES['cheer-up']['skinabove']=400
 res={}
 for name,cfg in POSES.items():
     im=Image.open(D+name+'.png').convert('RGB')
@@ -119,13 +125,21 @@ for name,cfg in POSES.items():
         # it open to the outside (wave-rise): narrow cracks are bridged, away from
         # the hand only (between the fingers is wall)
         fig=(aP>0.5)&cfg['region']()
+        if cfg.get('skinabove'):
+            # above this line the drawing has only fists, forearms and hair: anything
+            # pale and colourless there is wall (cheer-up: the wall the fists shade
+            # reads 30 levels darker than the rest, too far for any key)
+            sat=P.max(2)-P.min(2); fig&=~((yy<cfg['skinabove'])&(sat<16)&(P.mean(2)>140))
         nearhand=ndi.binary_dilation(skin&fig,iterations=24)
         fig|=ndi.binary_closing(fig,iterations=5)&~nearhand&cfg['region']()
         aP=np.where(fig,np.maximum(aP,ndi.binary_erosion(fig,iterations=1)),aP)
         mask=fillsmall(fig)&~under
         mask=ndi.binary_opening(mask,iterations=3)
         lab,n=ndi.label(mask); sizes=ndi.sum(mask,lab,range(1,n+1))
-        mask=np.isin(lab,[i for i in np.unique(lab[620:1058]) if i and sizes[i-1]>2000])
+        # only what joins him: the wall darkens toward a picture's edge (the cheer's), and
+        # a patch of it read as figure would float beside him
+        joins=np.unique(lab[ndi.binary_dilation(bodyA>.5,iterations=8)])
+        mask=np.isin(lab,[i for i in np.unique(lab[620:1058]) if i and sizes[i-1]>2000 and i in joins])
         mask=ndi.binary_dilation(mask,iterations=1)&(aP>0.02)|fillsmall(mask)
         aP=np.maximum(aP,ndi.binary_erosion(mask,iterations=1))   # what was filled is solid
         soft=ndi.gaussian_filter(mask.astype(float),0.8)
@@ -191,7 +205,7 @@ def piece(k):
     im=Image.open(OUT+k+'.webp').convert('RGBA'); return im,bx[k]
 head=Image.open(OUT+'head.webp').convert('RGBA'); s=rig['head']['scale']; hx,hy=rig['head']['at']
 head=head.resize((round(480*s),round(600*s)),Image.LANCZOS)
-HIDES={'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'think':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
+HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'think':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
 def compose(name=None):
     out=Image.new('RGBA',(W,H),(255,255,255,255))
     legs=name in LEGS
@@ -204,7 +218,7 @@ def compose(name=None):
     if name and not legs:
         f=Image.open(OUT+'pose-'+name+'.webp').convert('RGBA'); b=res[name]['box']; out.alpha_composite(f,(b[0],b[1]))
     return out
-names=['rest','wave-rise','wave-in','wave','wave-out','fist-pump','think','shrug','thumbs-up','crouch','jump']
+names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','think','shrug','thumbs-up','crouch','jump']
 sheet=Image.new('RGB',(len(names)*470,780),(255,255,255)); d=ImageDraw.Draw(sheet)
 for i,n in enumerate(names):
     sheet.paste(compose(None if n=='rest' else n).convert('RGB').crop((60,0,1040,1470)).resize((460,690),Image.LANCZOS),(i*470+5,4)); d.text((i*470+200,740),n,fill=(21,28,44))

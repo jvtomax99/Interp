@@ -35,14 +35,14 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   const repaint = await P.evaluate(() => { const c = document.getElementById('content'); c.className = 'content-fade is-home'; lastHomeHtml = ''; renderContent();
     return { heads: [...document.querySelectorAll('.home-wave-icon, .home-wave-pin, .home-ask-tag')].filter(e => getComputedStyle(e).visibility !== 'hidden' && e.getClientRects().length).length, bodies: document.querySelectorAll('.home-body svg.db').length }; });
   ok(repaint.heads === 0 && repaint.bodies === 1, 'after a repaint that resets the page\'s classes: still one Dr. Smiley, the head hidden', repaint);
-  ok(home.stageBody && !home.dock && home.breath === 'dbBreath' && home.images === 33, 'he is the stage for performances, the dock head stays away, he breathes', home);
+  ok(home.stageBody && !home.dock && home.breath === 'dbBreath' && home.images === 39, 'he is the stage for performances, the dock head stays away, he breathes', home);
   ok(!P.__errors.length, 'no page errors', P.__errors);
 
   // The hello's greet played on the rig (the drawn wave is one of its frames); a reaction reaches him through drPerform.
   const perf = await P.evaluate(() => new Promise(res => { const bd = window.homeBody.body; bd.stop(); bd.rest(); const seen = new Set();
     const played = drPerform('cheer', { priority: DR_P.REACT }); const t0 = performance.now();
-    const tick = () => { if(bd.pose.frameL) seen.add(bd.pose.frameL); if(bd.busy() && performance.now() - t0 < 5000) requestAnimationFrame(tick); else res({ played, seen: [...seen], busyAfter: bd.busy() }); }; requestAnimationFrame(tick); }));
-  ok(perf.played && perf.seen.includes('fist-pump') && !perf.busyAfter, 'drPerform(cheer) plays on his body: the drawn fists, then rest', perf);
+    const tick = () => { for(const f of [bd.pose.frameL, bd.pose.frameR]) if(f) seen.add(f); if(bd.busy() && performance.now() - t0 < 5000) requestAnimationFrame(tick); else res({ played, seen: [...seen], busyAfter: bd.busy() }); }; requestAnimationFrame(tick); }));
+  ok(perf.played && perf.seen.includes('cheer-up') && !perf.busyAfter, 'drPerform(cheer) plays on his body: the drawn fists up, then rest', perf);
 
   // A task state is his held state; its end lets him go.
   const task = await P.evaluate(() => new Promise(res => { drTask('processing', { key: 't' }); setTimeout(() => { const a = window.homeBody.body.stateName(), frames = [window.homeBody.body.pose.frameL, window.homeBody.body.pose.frameR];
@@ -59,8 +59,8 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
 
   // Still: one held pose, no breathing; a performance is its one frame.
   await P.evaluate(() => setSmileyMode('still')); await P.waitForTimeout(300);
-  const still = await P.evaluate(() => new Promise(res => { const bd = window.homeBody.body; drPerform('cheer'); const a = JSON.stringify(bd.pose); setTimeout(() => res({ same: JSON.stringify(bd.pose) === a, frame: bd.pose.frameL, breath: getComputedStyle(document.querySelector('.home-body .db-breath')).animationName, mode: bd.mode() }), 500); }));
-  ok(still.mode === 'still' && still.same && still.frame === 'fist-pump' && still.breath === 'none', 'Still: his cheer is one held frame, no breathing', still);
+  const still = await P.evaluate(() => new Promise(res => { const bd = window.homeBody.body; drPerform('cheer'); const a = JSON.stringify(bd.pose); setTimeout(() => res({ same: JSON.stringify(bd.pose) === a, frame: bd.pose.frameL || bd.pose.frameR, breath: getComputedStyle(document.querySelector('.home-body .db-breath')).animationName, mode: bd.mode() }), 500); }));
+  ok(still.mode === 'still' && still.same && still.frame === 'cheer-up' && still.breath === 'none', 'Still: his cheer is one held frame, no breathing', still);
   await P.evaluate(() => setSmileyMode('lively')); await P.waitForTimeout(1300);
 
   // A tap on him opens Ask the Hub.

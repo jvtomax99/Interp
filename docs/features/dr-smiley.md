@@ -327,6 +327,24 @@ cuff that floated by the hem whenever that arm was hidden, now moved into
 `arm-fore-r.webp`. Review clips: `tests/tools/body-clip.cjs` films the
 viewer frame by frame (`BG=is-navy`, `ROOT=` for a before).
 
+**The cheer, drawn (2026-10-24, the same chat).** Jose ran `cheer-load`
+(fists pulled low by his hips), `cheer-mid` (fists rising at shoulder
+height) and `cheer-up` (both arms up in a V), 1 to 2 px off the master.
+They are two-arm frames (`arms: ['L', 'R']`, back layer, cut like the
+shrug); `cheer-up` reaches above his head, so its region starts higher, and
+there the wall each fist shades reads 30 levels darker than the rest, too
+far for any key, so above y 400 only skin and hair are kept (`skinabove`).
+Arm cuts now keep only pieces joined to the body piece (patches of the
+darker wall at the cheer pictures' edges floated beside him). `cheer` is
+drawn throughout: crouch and load, the rise as he springs, the V at the
+top, the landing drops the fists to the rise and they fly up again, one more
+pump, down through the rise and the load into the cutout arms; as drawn or
+mirrored at random; Focused has no jump and the fists stop at the rise.
+`cheer` returns `land` (where the landing ends), and `celebrating` enters
+with the cheer up to there, then steps through the rise drawing into its
+one-fist pump (the arm that goes down never jumps from overhead to his
+side). The clip tool films held states too (`state:celebrating`).
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from
@@ -367,7 +385,7 @@ later", then placed on 2026-10-24: above); the viewer is `drsmiley/body.html`, n
   elbow leading, the hand flung out at the top, brows flashed, three wags
   as drawings tipped in and out, down through the rise drawing), ack (a nod with an
   open hand), think (a hand to the chin, eyes up away from it, the "aha"),
-  cheer (a crouch, a jump with both arms up and a laugh, a landing squash),
+  cheer (drawn: a crouch with the fists loaded low, the rise, the V at the top of the jump, the fists pumping on the landing),
   wink (his left eye, a "hey you" of the right hand), shrug (palms up,
   doubtful), read (the drawn clipboard up, eyes down it, a nod, down), point (a
   glance that way, the drawn finger straight out, two bobs, a hold),

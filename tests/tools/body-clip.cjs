@@ -4,7 +4,7 @@
    Playwright's, every CSS animation is moved on by hand, one screenshot per
    1/60 s.
 
-   node tools/body-clip.cjs OUTDIR [names...]     (default: greet)
+   node tools/body-clip.cjs OUTDIR [names...]     (default: greet; state:<name> films a held state)
    Each name: OUTDIR/<name>.mp4 at real speed and OUTDIR/<name>-slow.mp4 at
    1/4, plus OUTDIR/<name>-frames/ (every frame, for the review). Same
    variant every run (SEED, default 7). ROOT=... films another checkout (a
@@ -33,19 +33,19 @@ const STEP = 1000 / 60, DUR = +process.env.MS || 3400;
   await cdp.send('Animation.enable');
   const clip = await page.evaluate(() => { const r = document.getElementById('stage').getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; });
   for(const name of NAMES){
-    const dir = path.join(OUT, name + '-frames');
+    const file = name.replace(':', '-'), dir = path.join(OUT, file + '-frames');
     fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
     await page.clock.pauseAt(await page.evaluate(() => Date.now()) + 50);
     await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
-    await page.evaluate(([n, s]) => { drBodySeed(s); body.perform(n); drBodySeed(null); }, [name, SEED]);
+    await page.evaluate(([n, s]) => { drBodySeed(s); if(n.startsWith('state:')) body.state(n.slice(6)); else body.perform(n); drBodySeed(null); }, [name, SEED]);
     for(let k = 0; k * STEP < DUR; k++){
       await page.screenshot({ path: path.join(dir, String(k).padStart(4, '0') + '.png'), clip });
       await page.evaluate(ms => document.getAnimations().forEach(a => { try{ if(a.playState !== 'finished') a.currentTime = (a.currentTime || 0) + ms; }catch(e){} }), STEP);
       await page.clock.runFor(Math.round(STEP));
     }
     const enc = ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2'];
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '60', '-i', path.join(dir, '%04d.png'), ...enc, path.join(OUT, name + '.mp4')]);
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '15', '-i', path.join(dir, '%04d.png'), ...enc, path.join(OUT, name + '-slow.mp4')]);
+    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '60', '-i', path.join(dir, '%04d.png'), ...enc, path.join(OUT, file + '.mp4')]);
+    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '15', '-i', path.join(dir, '%04d.png'), ...enc, path.join(OUT, file + '-slow.mp4')]);
     console.log(name, Math.ceil(DUR / STEP), 'frames');
   }
   await b.close();

@@ -49,26 +49,32 @@ const DR_BODY = {
   // one also exists mirrored about his middle (`mirrorX`), for the other side.
   mirrorX: 556,
   pose: {
-    wave:        { box: [134,  360,  306,  394], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    wave:        { box: [134, 360, 306, 394], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     // The wave's breakdowns (prompts-animation.md, 2026-10-24): on the way up the
     // elbow leads and the hand trails below it; at the top the hand tips in
     // toward his head and out away from it, the wag's two extremes, with `wave`
     // as the drawing between them.
-    'wave-rise': { box: [127,  528,  315,  286], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    'wave-in':   { box: [142,  273,  300,  443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
-    'wave-out':  { box: [46,  280,  396,  444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
-    'fist-pump': { box: [121,  364,  278,  381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    think:       { box: [352,  497,  275,  446], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
-    shrug:       { box: [97,  585,  889,  247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    'wave-rise': { box: [127, 528, 315, 286], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'wave-in':   { box: [142, 273, 300, 443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'wave-out':  { box: [46, 280, 396, 444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'fist-pump': { box: [121, 364, 278, 381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    think:       { box: [352, 497, 275, 446], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
+    shrug:       { box: [97, 585, 889, 247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    // The cheer's drawings (prompts-animation.md, 2026-10-24): both arms, behind the coat.
+    // The load (fists pulled low by his hips, about to throw them up), the rise (fists
+    // at shoulder height, elbows out) and the V (both fists above his head).
+    'cheer-load': { box: [243, 587, 590, 352], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    'cheer-mid':  { box: [195, 481, 711, 275], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    'cheer-up':   { box: [73, 190, 937, 521], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     // Cut as a feathered band of the picture (its sleeve lies over the coat), so it is drawn in front.
-    'thumbs-up': { box: [247,  512,  189,  354], arms: ['L'], layer: 'front', pivot: [353, 630] },
+    'thumbs-up': { box: [247, 512, 189, 354], arms: ['L'], layer: 'front', pivot: [353, 630] },
     // Both hands on a clipboard at his chest (a feathered band from the collar to below the hands, both sleeves in it): stands in for both arms; `frot` tilts it.
-    clipboard:   { box: [281,  567,  511,  354], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
+    clipboard:   { box: [281, 567, 511, 354], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
     // The pointing arm: straight out at shoulder height, the index finger out ("look here"); `frot` bobs it about the shoulder.
-    point:       { box: [24,  559,  375,  153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    point:       { box: [24, 559, 375, 153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
-    crouch:      { box: [292,  990,  506,  425], legs: true, layer: 'legs', pivot: [556, 1040] },
-    jump:        { box: [315,  990,  463,  328], legs: true, layer: 'legs', pivot: [556, 1040] },
+    crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
+    jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
   },
 };
 // Drawn poses swap at once, the way a drawn animation swaps drawings and his
@@ -411,25 +417,46 @@ const DR_BODY_PERF = {
       [j(320), { head: 0, lift: 0, lean: 0, face: 'rest' }, 'out'],
     ], still: { [FR]: 'think', head: s * 5, face: look, brow: 'focused' }, stillMs: 1200 };
   },
-  // A cheer: crouch, then the two drawn fists swing up as he jumps, a laugh,
-  // a landing squash, the fists pump, and they swing back down.
+  // A cheer, drawn (2026-10-24, the cheer drawings): he crouches and pulls both
+  // fists back by his hips (the load), they rise past his shoulders as he
+  // springs (the rise), and at the top of the jump both arms are up in a V. The
+  // landing squash drops the fists back to the rise (follow-through) and they
+  // fly up again, one more pump, a laugh; down through the rise and the load
+  // into the cutout arms. As drawn or mirrored, a little different each time.
+  // Focused: no jump, the fists only to the rise. `land` is where the landing
+  // ends (the celebrating state holds on from there).
   cheer(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .5 : 1;
-    const s = R() < .5 ? -1 : 1, jump = mode === 'focused' ? 0 : 1;
-    return { beats: [
-      [j(200), { frameLegs: 'crouch', sy: 1 - .04 * k, sx: 1 + .02 * k, aL: -8 * k, aR: -8 * k, fL: 14 * k, fR: 14 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],   // the drawn crouch, arms drawn back
-      [60, { frameL: 'fist-pump', frameR: 'fist-pump', fsw: -52, frot: 0, aL: 0, aR: 0, fL: 0, fR: 0 }, 'linear'],
-      [j(260), { frameLegs: jump ? 'jump' : 'crouch', fsw: 0, sy: 1 + .04 * k, sx: 1 - .02 * k, y: -50 * jump, head: -s * 3 * k, lift: -6 * k, face: 'laugh', brow: 'up' }, 'snap'],   // up: the jump, feet tucked, the fists swing up
-      [j(180), { y: -30 * jump, sy: 1.01, sx: .995, face: 'laughB' }, 'in'],
-      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, frot: 6 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash, into the crouch
-      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, frot: -5 * k, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
-      [j(260), { frot: 4 * k, head: s * 1.2 * k, face: 'laugh' }, 'inOut'],
-      [j(220), { frot: 0, fsw: -50, head: 0, face: 'smile', brow: 'rest' }, 'in'],                                       // the fists swing back down
-      [60, { frameL: '', frameR: '', fsw: 0, aL: 6, aR: 6, fL: 8, fR: 8 }, 'linear'],
-      [j(320), { aL: 0, aR: 0, fL: 0, fR: 0 }, 'spring'],
+    const s = R() < .5 ? -1 : 1, jump = mode === 'focused' ? 0 : 1, CH = R() < .5 ? 'frameL' : 'frameR', top = jump ? 'cheer-up' : 'cheer-mid';
+    const beats = [
+      [j(200), { frameLegs: 'crouch', [CH]: 'cheer-load', sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],   // the load: crouched, fists pulled back
+      [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the rise: fists past the shoulders
+      [j(110), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .03 * k, sx: 1 - .015 * k, y: -28 * jump, head: -s * 2 * k, lift: -4 * k, face: 'laugh', brow: 'up' }, 'snap'],
+      [0, { [CH]: top }],                                                                                                                               // the top: the V
+      [j(190), { y: -50 * jump, sy: 1 + .04 * k, sx: 1 - .02 * k, head: -s * 3 * k, lift: -6 * k }, 'out'],
+      [j(150), { y: -42 * jump, sy: 1.01, sx: .995, face: 'laughB' }, 'in'],
+      [j(150), { frameLegs: 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash
+      [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the fists drop with it
+      [j(90), { lift: 6 * k }, 'out'],
+      [0, { [CH]: top }],                                                                                                                               // and fly up again
+      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
+    ];
+    const land = beats.length;
+    beats.push(
+      [j(130), { [CH]: 'cheer-mid', head: s * 1.2 * k, lift: 3 * k, face: 'laugh' }, 'in'],                                                          // one more pump
+      [0, { [CH]: top }],
+      [j(240), { lift: 0, head: -s * .6 * k }, 'spring'],
+      [j(200), { face: 'smile' }, 'out'],
+      [0, { [CH]: 'cheer-mid', brow: 'rest' }],                                                                                                         // down: the rise
+      [j(100), { head: 0 }, 'in'],
+      [0, { [CH]: 'cheer-load' }],                                                                                                                      // the load
+      [j(100), {}, 'in'],
+      [0, { [CH]: '', aL: 4, aR: 4, fL: 6, fR: 6 }],                                                                                                    // into the cutout arms
+      [j(300), { aL: 0, aR: 0, fL: 0, fR: 0 }, 'spring'],
       [j(360), { face: 'smile1' }, 'out'],
       [j(240), { face: 'rest' }, 'out'],
-    ], still: { frameL: 'fist-pump', frameR: 'fist-pump', frameLegs: 'crouch', face: 'laugh', brow: 'up' }, stillMs: 1000 };
+    );
+    return { beats, land, still: { [CH]: top, face: 'laugh', brow: 'up' }, stillMs: 1000 };
   },
   // A wink with a little "hey you" of the hand (the cutout arm, kept small).
   wink(mode){
@@ -663,9 +690,12 @@ const DR_BODY_STATES = {
   // exit swings the fist back down.
   celebrating: {
     still: c => ({ frameL: 'fist-pump', frameR: 'fist-pump', frameLegs: 'crouch', face: 'laugh', brow: 'up' }),
-    enter: c => { const all = DR_BODY_PERF.cheer(c.mode).beats, cut = all.findIndex(([, p]) => p && p.fsw === -50); return all.slice(0, cut < 0 ? all.length : cut); },
+    enter: c => { const p = DR_BODY_PERF.cheer(c.mode); return p.beats.slice(0, p.land); },
     hold: c => { const { k, s, j, O, FR, beat } = c, b = [];
-      b.push([j(beat ? 260 : 320), { [FR]: 'fist-pump', ['frame' + O]: '', fsw: 0, ['a' + O]: 4 * k, ['f' + O]: 10 * k, lean: -s * 1.2 * k, sy: 1 - .012 * k, sx: 1 + .006 * k, lift: 4 * k, head: s * 2 * k, face: beat % 2 ? 'laughB' : 'laugh', brow: 'up' }, beat ? 'in' : 'spring']);
+      // from the cheer's V (both arms up) through its rise drawing, so the arm that
+      // goes down comes down in two steps, never from overhead to his side at once
+      if(!beat) b.push([0, { frameL: 'cheer-mid', frameR: '' }], [j(110), { lift: 3 * k }, 'in']);
+      b.push([j(beat ? 260 : 300), { [FR]: 'fist-pump', ['frame' + O]: '', fsw: 0, ['a' + O]: 4 * k, ['f' + O]: 10 * k, lean: -s * 1.2 * k, sy: 1 - .012 * k, sx: 1 + .006 * k, lift: 4 * k, head: s * 2 * k, face: beat % 2 ? 'laughB' : 'laugh', brow: 'up' }, beat ? 'in' : 'spring']);
       b.push([j(120), { frot: -4 * k }, 'linear']);
       b.push([j(320), { sy: 1 + .008 * k, sx: 1 - .004 * k, lift: -2 * k, frot: 5 * k, head: -s * 1 * k, face: 'laugh' }, 'spring']);
       b.push([j(380), { sy: 1, sx: 1, lift: 0, frot: 0, head: 0 }, 'out']);

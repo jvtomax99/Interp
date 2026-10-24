@@ -56,8 +56,11 @@ smiley-body-app 18. **Always review on navy** (`BG=is-navy`): white hides
 cut edges. Clips: `cd tests && BG=is-navy node tools/body-clip.cjs OUT greet`
 (`ROOT=<a worktree>` films a before; frames land in `OUT/greet-frames/`).
 
-**Next:** the remaining drawings in `prompts-animation.md` (cheer, think,
-point, shrug, read, thumbs, wince, the two leg drawings), each added to
+**Then the cheer** (same evening): `cheer-load`/`-mid`/`-up` cut and built
+into `cheer` and `celebrating` (dr-smiley.md, "The cheer, drawn").
+
+**Next:** the remaining drawings in `prompts-animation.md` (think, point,
+shrug, read, thumbs, wince, the two leg drawings), each added to
 `POSES` in `cutframes.py` (single back-layer arms get `arm=True` through
 the loop under `ARM=`), its box copied from `poses.json` into
 `DR_BODY.pose`, built into its performance as breakdowns, reviewed on

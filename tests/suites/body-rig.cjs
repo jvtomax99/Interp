@@ -103,9 +103,9 @@ const SAMPLE = () => {
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
   const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp'];
-  ok(layers.length === 33 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  ok(layers.length === 39 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'thirty-three layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the ten drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
+     'thirty-nine layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the thirteen drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
@@ -149,7 +149,7 @@ const SAMPLE = () => {
   const seen = n => lively[n].framesSeen.join(' ');
   ok(/wave-[lr]/.test(seen('greet')), 'greet: the drawn wave takes over at the top ' + seen('greet'));
   ok(['wave-rise', 'wave-in', 'wave-out'].every(f => new RegExp(f + '-[lr]').test(seen('greet'))), 'greet: drawn as a hand animator would, the rise with the elbow leading, then the wag as the hand tipped in and out ' + seen('greet'));
-  ok(lively.cheer.framesSeen.includes('fist-pump-l') && lively.cheer.framesSeen.includes('fist-pump-r'), 'cheer: two drawn fists, one mirrored ' + seen('cheer'));
+  ok(['cheer-load', 'cheer-mid', 'cheer-up'].every(f => new RegExp(f + '-[lr]').test(seen('cheer'))), 'cheer: drawn throughout, the fists loaded low, rising, then the V ' + seen('cheer'));
   ok(/think-[lr]/.test(seen('think')), 'think: the drawn finger on the chin ' + seen('think'));
   ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));
   ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
@@ -265,7 +265,7 @@ const SAMPLE = () => {
   // Focused: the same acting, smaller. Still: one pose, nothing moves.
   await P.click('[data-mode="focused"]');
   const fc = await P.evaluate(() => window.__play('cheer'));
-  ok(fc.atRest && fc.max.sy < lively.cheer.max.sy * .7 && fc.max.y === 0 && fc.framesSeen.includes('fist-pump-l') && fc.framesSeen.includes('crouch-l') && !fc.framesSeen.includes('jump-l'), 'Focused cheer: smaller squash, no jump (the crouch plate, never the tucked feet), the drawn fists still, back to rest ' + JSON.stringify([fc.max.sy, lively.cheer.max.sy, fc.max.y, fc.framesSeen]));
+  ok(fc.atRest && fc.max.sy < lively.cheer.max.sy * .7 && fc.max.y === 0 && /cheer-mid-[lr]/.test(fc.framesSeen.join(' ')) && !/cheer-up/.test(fc.framesSeen.join(' ')) && fc.framesSeen.includes('crouch-l') && !fc.framesSeen.includes('jump-l'), 'Focused cheer: smaller squash, no jump (the crouch plate, never the tucked feet), the drawn fists only to the rise, back to rest ' + JSON.stringify([fc.max.sy, lively.cheer.max.sy, fc.max.y, fc.framesSeen]));
   await P.click('[data-mode="still"]');
   const st = await P.evaluate(async () => {
     const b = window.body; b.rest();
