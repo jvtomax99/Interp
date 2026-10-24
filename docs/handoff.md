@@ -1,90 +1,69 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-24, from the chat that merged #129 and ran
-#131 (Voice and mic check), #134 (plan tidy) and #137 (Dr. Smiley's
-performances).
+hands over"). This one: 2026-10-24, from the chat that ran #139 to #143.
 
 ## Paste this into the new chat
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
 > tell me what's being worked on now and the goal, and what was worked on
-> before, say in 2-3 lines what you'll do next, and wait for my go. Plain words, say "working on it" and "done".
+> before, in a few short lines each, say in 2-3 lines what you'll do next,
+> and wait for my go. Plain words, say "working on it" and "done".
 
-## Where things stand
+## Now
 
-The split of `index.html` (`docs/split-index.md`), phase 3, features to
-their own files, one per change, all on Jose's "push":
-- #126 Translate, #127 3D Body, #129 Looking a term up (live b1023.1250),
-  #131 Voice and mic check (live b1023.2011), #137 Dr. Smiley's
-  performances (live b1024.1338).
-- #137 was the first move that wasn't declarations only: the one line
-  that puts each performance into `DR_FACE_SEQ` stays in `index.html`
-  (Jose's pick), because that table is defined earlier there and the
-  feature file loads before `index.html`'s script.
-- #134 tidied `docs/PLAN.md`: **Next** is now short (the split; S9 Home
-  taps part 2, waiting on Jose's phone runs; what waits on Jose; small
-  leftovers). Old promo drafts #121 and #123 closed (their Remotion code
-  stays on their branches).
+The split of `index.html` (`docs/split-index.md`), phase 3, small pieces
+first (Jose's pick, 2026-10-24), one change at a time, each merged on his
+"push". Next: the guide's front page ("The guide: installing, the front
+page", 11 KB), then the doctor sheets, CSV, duplicate doctors, the
+backfill. After those: Ask the Hub's group and Dr. Smiley's engine, as
+groups, or they stay.
 
-Open: only this handoff's change (`docs/` only, nothing deployed). No
-check-ins armed.
+## Before (this chat, all live)
 
-## Next, with my pick
+- #138 the last handoff, merged.
+- #139 the campus -> `features/campus.js` (b1024.1553). Its Escape listener
+  moved with it: no earlier keydown listener stops the event or touches
+  the campus.
+- #140 3D Body's resize listener read `activeCategory` before it existed
+  (a resize during load): guarded with `typeof`; new suite
+  `load-order.cjs` holds that gap open (b1024.1804).
+- #141 False Friends' screen -> `features/false-friends.js` (b1024.1920).
+  Its census section also held the Practice screen; that half stayed
+  inline under a new banner.
+- #142 rule: always a phone notification when a change is ready for
+  Jose's push (docs).
+- #143 your knowledge brain's Hub side -> `features/knowledge-brain.js`
+  (b1024.2150).
 
-**The campus** (section "Your HUMC campus (CoreCHI Practice)", ~19 KB,
-`renderCampus`). Unchecked leads from a first look: its top level has
-`CAMPUS_MAP`, `CAMPUS`, `campusLevel`, `CAMPUS_PICK`, `campusSelLit` and
-one `addEventListener` at load (the last line of the section); check what
-each value runs, and the listener's order against earlier listeners of
-the same event (3D Body's note in `docs/split-index.md` shows how).
-`campusLife` and `campusDepth` may live in other sections; the census
-says. It animates, so the browser proof needs the campus drawn and its
-motion compared (the campus-life, campus-depth and campus-pick suites
-cover it), not only globals.
+Open: only this handoff's change (docs only). No check-ins armed.
 
-After that: Ask the Hub's group (~125 KB) and Dr. Smiley's engine move
-last, as groups, or stay (`docs/split-index.md`).
+## The method (worked eight times)
 
-## The method (worked five times)
-
-1. List the section's top-level statements with acorn (walk `ast.body`
-   of the biggest inline script, print type and name between the banner
-   lines). Declarations are fine; anything that runs must touch nothing
-   from `index.html` at load. If one line does, keep that line in
-   `index.html` at its place (as #137) or ask Jose.
-2. Cut banner to last line into `features/<name>.js` under a short header
-   comment; leave a pointer comment. Script tag after the other
-   `features/` lines.
-3. Lists: `sw.js` precache, `tests/tools/brain-data.cjs` (drop the
-   section), `node tools/brain-data.cjs`, `node tools/census.cjs --write`.
-4. Proof: rebuild the old `index.html` from the pieces and compare byte
-   for byte (stronger than tokens, and handles a kept line); a browser
-   probe in both checkouts (`ROOT=` a worktree of `main`) of the feature's
-   output and `Object.keys(window)`; all suites; `first-paint.cjs`
-   (`ROOTS=before,after RUNS=5`).
-5. Docs: `AGENTS.md` where-table (and any rule naming the code's file),
-   `CLAUDE.md` file map + table + line count, the feature note,
-   `docs/split-index.md`, `docs/PLAN.md`.
-6. Before merging: fetch `main`. Other chats merge often; merge it in,
-   regenerate `brain/data.json` and the census, rerun the suites the
-   other change touched, push, wait for green.
+1. List the section's top-level statements with acorn (`tests/node_modules`
+   has acorn only; if missing, `cd tests && npm ci`, then delete
+   `node_modules/playwright*` or the preinstalled browser is not found).
+   Check the section really is one feature: a census section can hold two
+   (#141). Anything that runs at load must not read `index.html`'s names
+   until it has run (load-order.cjs).
+2. Cut banner to last line into `features/<name>.js` under the header
+   comment the others use; pointer comment in its place; script tag after
+   the last `features/` line; `sw.js` precache.
+3. `node tools/brain-data.cjs` (drop the section from GROUPS if listed),
+   `node tools/census.cjs --write`.
+4. Proof: rebuild the old `index.html` byte for byte; a browser probe in
+   both checkouts (`ROOT=` a worktree of `main`) of the feature's output
+   and `Object.keys(window)` (seed timestamps and animation frames
+   differ; strip them); the suites that cover it on both; all suites;
+   `first-paint.cjs` (`ROOTS=before,after RUNS=5`).
+5. Docs: `AGENTS.md` and `CLAUDE.md` tables and file map, the feature
+   note, `docs/split-index.md`, `docs/PLAN.md`.
+6. PR, wait for GitHub's checks, phone notification, merge on "push",
+   confirm the bump commit and Vercel "Deployment has completed".
 
 ## Not proven / open
 
-- Each moved file has cost weak Wi-Fi first paint 0.03-0.1 s; Home came
-  the same or sooner each time. 4G differences are within run noise
-  (one 4G run showed a 0.9 s "DOM ready" jump that flipped to the old
-  version on the re-run). Real HTTP/2 on Vercel is unmeasured.
-- WebKit CI jobs get "cancelled" at their 20-minute limit while still in
-  `playwright install --with-deps webkit` (seen on #129, #131 twice);
-  the other run on the same commit passed each time. Why the install
-  hangs is unproven.
-
-## Learned (also in `docs/PLAN.md` Facts)
-
-- An acorn insertion point for the token proof can be off by one when the
-  moved section and the next one start with the same token; the byte
-  rebuild avoids that.
-- A test only *mentioning* `PLAN.md` in a comment is common; no suite
-  reads it, so a `docs/`-only change can't fail the suites.
+- humc-brain's double-tap checks fail now and then under load (seen on
+  `main` too, 2026-10-24); not investigated.
+- Each moved file: first paint within noise so far; real HTTP/2 on Vercel
+  unmeasured.
