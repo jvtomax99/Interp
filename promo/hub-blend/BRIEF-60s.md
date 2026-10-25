@@ -59,7 +59,11 @@ from that cue list instead of `HOOK_MAP`.
   `dl.fbaipublicfiles.com`, which this environment's network blocks (also `download.pytorch.org`
   and `huggingface.co`). Jose added the host to Allowed domains; the chat that was open did not
   see it. Try again in a new chat. Quality still unheard.
-- Voice draft 1 (2026-10-25, `SCRIPT-60s.md` as approved): 21 clips, 48.7 s of speech, joined
-  with breaths to end at 57.2 s. Clip lengths and start times: `voice-cues-60s.tsv`.
+- Voice, locked (Jose, 2026-10-25, draft 2): draft 1 (one clip per line) sounded robotic, so
+  the script is read in 7 long passages (`assets/voice-60s/groups.tsv`, Michael at `-s 0.92`,
+  the two Spanish lines in Dora), joined to end at 56.3 s: `assets/voice-60s.m4a`. Passage
+  starts and the pauses inside each: `voice-cues-60s.tsv` (silencedetect at -40 dB, 0.18 s;
+  it misses some line breaks, so read the exact cut points off the waveform in step 4).
+  Cloud voices (Microsoft, ElevenLabs, OpenAI) are blocked here too.
 - Kokoro's pacing over a full minute: only a 13 s sample has been heard.
 - New 3D shots for Notifications and the knowledge brain: not designed.
