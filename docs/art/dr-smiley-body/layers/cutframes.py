@@ -111,8 +111,9 @@ POSES['point-reach'].update(wallleft=120, below=668)
 POSES['think-rise']=dict(region=None, offset=(5,1), torso=960, drop=[(776,750,850,835)])
 POSES['think-tap']=dict(region=None, offset=(6,1), torso=960)
 POSES['think']=dict(region=None, offset=(4,0), torso=960)   # the old drawing, cut the same way
+POSES['clipboard']=dict(region=None, offset=(0,0), torso=950, fillall=True, faceto=600)   # recut the same way too (seams at the sleeve ends on navy)
 # the body piece's top edge per column (its shoulder line), 0 where it has none (no rule there)
-TOP=np.where((bodyA>.5).any(0),(bodyA>.5).argmax(0),0)
+TOP=np.where((bodyA>.5).any(0),(bodyA>.5).argmax(0),0)   # used beside the neck only: at the neck its top is the scrubs' V, and the clipboard stands in front of it
 # python3 -I cutframes.py point-load point-reach: cut only those (the others' boxes kept from poses.json)
 ONLY=sys.argv[1:]
 res={k:v for k,v in json.load(open(OUT+'poses.json')).items() if k not in ONLY} if ONLY else {}
@@ -192,15 +193,16 @@ for name,cfg in POSES.items():
         fig=(aP>0.5)&(yy>520)&(yy<y1)
         skin=(P[...,0]>150)&(P[...,0]>P[...,1]+25)&(P[...,1]>P[...,2]-5)
         face=(ndi.binary_dilation(headA>.35,iterations=6))&~((diff>60)&ndi.binary_dilation(skin,iterations=2)&(yy>560))   # over the head only the hand, never the wall the drawing's own head left
+        if cfg.get('faceto'): face&=yy<cfg['faceto']   # the clipboard stands in front of his neck below the chin
         fig&=~face
         # above the coat's own shoulder line (the body piece's top) only the hand: the
         # wall between hand and face, and between chin and shoulder, is the coat's grey
-        fig&=~(~skin&(yy<TOP[None,:]-6)&(yy<600))
+        fig&=~(~skin&(yy<TOP[None,:]-6)&(yy<600)&((xx<470)|(xx>650)))
         for bx0,by0,bx1,by1 in cfg.get('drop',()): fig&=~((xx>=bx0)&(xx<bx1)&(yy>=by0)&(yy<by1))
         # the sleeve's shaded edge is the wall's grey too and the key notched it: close the notches
-        fig=ndi.binary_closing(fig,iterations=8)&(yy<y1)&~face&~(~skin&(yy<TOP[None,:]-6)&(yy<600))
+        fig=ndi.binary_closing(fig,iterations=8)&(yy<y1)&~face&~(~skin&(yy<TOP[None,:]-6)&(yy<600)&((xx<470)|(xx>650)))
         lab,n=ndi.label(fig); sz=ndi.sum(fig,lab,range(1,n+1)); fig=lab==int(np.argmax(sz))+1
-        mask=ndi.binary_opening(fillsmall(fig,4000),iterations=2)
+        mask=ndi.binary_opening(ndi.binary_fill_holes(fig) if cfg.get('fillall') else fillsmall(fig,4000),iterations=2)   # fillall: the clipboard's grey face reads as wall
         lab,n=ndi.label(mask); sz=ndi.sum(mask,lab,range(1,n+1)); mask=lab==int(np.argmax(sz))+1
         both=mask&(alphaM>0.5)&(yy>y1-160)
         for cls in (white(M)&white(P), ((M[...,2]-M[...,0])>40)&((P[...,2]-P[...,0])>40)):

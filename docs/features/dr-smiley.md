@@ -406,6 +406,19 @@ aha, down through the rise into the cutout arms hanging with a small bend.
 clipboard (`read`, `answering`) is cut as an older feathered band and shows
 similar seams on navy (sleeve ends, the band's bottom); next.
 
+**The clipboard, cut whole (same chat).** `clipboard` is recut the `torso`
+way (to y 950), with every enclosed hole filled (`fillall`: the board's grey
+face reads as wall) and the head rule only above the chin (`faceto` 600:
+the board stands in front of his neck, which the head piece covers down to
+about y 720). The shoulder-line rule now holds beside the neck only (x
+under 470 or over 650: at the neck the body's top is the scrubs' V). Like
+the thinking drawings it never slides or tilts and plays as drawn only
+(`answering` has `asDrawn`; `read` takes side L). Until Jose's
+`clipboard-low` drawing (the board at waist height on its way up) gives it
+a way up, the board comes up at the bottom of a small dip with a blink,
+and goes at the bottom of another; reading along a line leans his body a
+little instead of tilting the board.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from
