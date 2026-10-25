@@ -116,4 +116,5 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   (`doctorTidyCount`: each duplicate group, plus 1 if any doctor is on the
   old terminology) opening `#doctorTidyOverlay` with the same banners. A
   running update shows on the list instead. The sheet redraws after a merge
-  and closes when nothing is left.
+  and closes when nothing is left. Finding and merging duplicates:
+  `features/duplicate-doctors.js` (moved out of `index.html` 2026-10-25).
