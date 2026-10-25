@@ -12,7 +12,11 @@ and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
 of this chat pasted in (Jose, 2026-10-23), offered as clickable buttons
 (`AskUserQuestion`), "I start it for you" first as the pick, never only
-as text to paste (Jose, 2026-10-25). Whenever a chat starts a new
+as text to paste (Jose, 2026-10-25). **After every finished job** (each
+time a reply says "done"), the reply ends with the same clickable buttons,
+"Start a new chat for me" first and "Keep going here" second, over a short
+summary of what is being worked on (Jose, 2026-10-25); a new chat is made
+only when he picks it, with the handoff written first. Whenever a chat starts a new
 chat for Jose, it gives him a fresh summary in plain words, in two parts:
 **what is being worked on now** (and its goal) and **what was worked on
 before** (the last chat's changes and where each stands). It says it in
@@ -80,6 +84,7 @@ So:
 | The doctor and provider sheets' place picker, the doctor directory's add and edit sheet (`openPlacePicker`, `openAddDoctorDirModal`, `saveDoctorDirEntry`) | `features/doctor-sheets.js` |
 | Glossary CSV export and import (`exportTermsCsv`, `parseCsv`, `confirmCsvImport`) | `features/csv.js` |
 | Duplicate doctors: finding and merging them (`duplicateDoctorGroups`, `mergeDuplicateDoctors`, `duplicateBannerHtml`) | `features/duplicate-doctors.js` |
+| The terminology backfill: re-researching doctors on the old flat list (`runTierBackfill`, `backfillBannerHtml`) | `features/backfill.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
 | The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |

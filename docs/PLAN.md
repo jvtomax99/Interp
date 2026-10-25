@@ -59,6 +59,19 @@ before (Jose, 2026-10-24), each a few lines in simple words, never a
 big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
 for his go.
 
+**After every finished job, offer a new chat as buttons** (Jose,
+2026-10-25: "always give me clickable option for you to make a new chat
+for me and with a short summary of what is being worked on"; he picked
+"after each finished job" over every reply or only when heavy). Each reply
+that says "done" ends with `AskUserQuestion`: **"Start a new chat for me"**
+first, **"Keep going here"** second, and the question itself carries the
+summary (what is being worked on now and its goal, a few plain words).
+This is an offer, not the heavy-chat handover above: say which one you
+recommend (a light chat: keep going here). If he picks the new chat, do
+steps 1 to 4 above (the handoff first, then `create_session` with it and
+the two-part summary). Not during a job, not on progress replies. Where
+the buttons are missing, one plain line instead.
+
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
 waiting: its PRs are merged or closed, no question to Jose is open, no
@@ -82,7 +95,8 @@ under way, then what waits on Jose, then small leftovers.
    b1024.1920), the knowledge brain #143 (live b1024.2150), the guide's front page
    #145 (live b1025.0157), the doctor sheets #147 (live
    b1025.1140), CSV #148 (live b1025.1453),
-   duplicate doctors (this PR); then, the backfill. After them: Ask the Hub's
+   duplicate doctors #150 (live
+   b1025.1607), the backfill (this PR), the last small leaf; then, the backfill. After them: Ask the Hub's
    group and Dr. Smiley's engine, as groups, or they stay
    (`docs/split-index.md`).
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
@@ -194,7 +208,7 @@ come from this alone.
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
   #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
-  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live; the guide's front page #145, live; the doctor sheets #147, live; CSV #148, live; duplicate doctors, this PR. Next: the small
+  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live; the guide's front page #145, live; the doctor sheets #147, live; CSV #148, live; duplicate doctors #150, live; the backfill, this PR. Next: the small
   leaves, then the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
@@ -205,7 +219,13 @@ come from this alone.
 
 ## Done
 
-- 2026-10-25 Split `index.html`, phase 3, duplicate doctors (this PR):
+- 2026-10-25 Split `index.html`, phase 3, the terminology backfill (this PR):
+  `features/backfill.js`, declarations only. Proof: byte rebuild; which
+  doctors need it, the banner, a run that fails (no answer) and one that
+  works (both doctors saved with tiers, then "up to date"), globals
+  identical. No suite covers it; the probe did.
+- 2026-10-25 Split `index.html`, phase 3, duplicate doctors
+  (#150, live b1025.1607):
   `features/duplicate-doctors.js`, declarations only. Proof: byte rebuild;
   name parsing, the groups, the banner, a merge and its result identical
   (a new random tip id aside); doctor-page.cjs on both.

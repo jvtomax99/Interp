@@ -24,11 +24,13 @@ step 1, the music sample, then the script for Jose to approve.
 
 - **#151** (branch `claude/new-session-rpv122`): the promo's sound effects
   (`media/hub-promo.mp4` remixed, picture untouched) and the 15 s What's new
-  video (`promo/whats-new/`). GitHub's checks passed on its last commit
-  (a78020f); waiting for Jose's "push". After it merges, start the next change
+  video (`promo/whats-new/`). Merged with `main` (only this file
+  clashed); waiting for Jose's "push". After it merges, start the next change
   from `main`.
 - The split of `index.html` (`docs/split-index.md`) is paused, not finished:
-  duplicate doctors went live in #150; the backfill was next.
+  duplicate doctors went live in #150, the backfill in #152 (b1025.1713).
+  Next there: Ask the Hub's group and Dr. Smiley's engine, as groups, or
+  they stay.
 
 ## Before (this chat)
 

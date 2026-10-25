@@ -117,4 +117,5 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   old terminology) opening `#doctorTidyOverlay` with the same banners. A
   running update shows on the list instead. The sheet redraws after a merge
   and closes when nothing is left. Finding and merging duplicates:
-  `features/duplicate-doctors.js` (moved out of `index.html` 2026-10-25).
+  `features/duplicate-doctors.js`; the old-terminology update:
+  `features/backfill.js` (both moved out of `index.html` 2026-10-25).
