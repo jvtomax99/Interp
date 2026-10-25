@@ -116,13 +116,16 @@
       <section class="scene clip" id="s3" data-start="9.5" data-duration="3.7" data-track-index="4">
         <div class="label">THE VIDEO</div>
         <div class="head">A new 45-second film, in 3D.</div>
-        <div id="filmcard" class="glass"><div class="in">
-          <video id="film" class="clip" src="assets/film.mp4" muted playsinline data-start="9.7" data-duration="3.2" data-track-index="5"></video>
-        </div></div>
         <div class="fcap" id="fc1"><span class="glass">The 3D Body coming apart</span></div>
         <div class="fcap" id="fc2"><span class="glass">Your campus</span></div>
         <div class="fcap" id="fc3"><span class="glass">Dr. Smiley’s brain</span></div>
       </section>
+
+      <!-- The film's card sits outside the timed scene: a timed <video> inside a timed section is given
+           the wrong frames (hyperframes lint, video_nested_in_timed_element). -->
+      <div id="filmcard" class="glass"><div class="in">
+        <video id="film" class="clip" src="assets/film.mp4" muted playsinline data-start="9.65" data-duration="3.1" data-track-index="5"></video>
+      </div></div>
 
       <section class="scene clip" id="s4" data-start="13.1" data-duration="1.9" data-track-index="6">
         <img class="icon" src="assets/appicon.png" alt="" />
@@ -132,13 +135,13 @@
       </section>
 
       <!-- sound: the kit's effects, nothing on a plain slide-in -->
-      <audio class="clip" src="sfx/pop.wav" data-start="0.25" data-duration="0.17" data-track-index="10" data-volume="0.5"></audio>
-      <audio class="clip" src="sfx/pop.wav" data-start="3.2" data-duration="0.17" data-track-index="10" data-volume="0.6"></audio>
-      <audio class="clip" src="sfx/tick.wav" data-start="4.0" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
-      <audio class="clip" src="sfx/tick.wav" data-start="4.35" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
-      <audio class="clip" src="sfx/tick.wav" data-start="4.7" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
-      <audio class="clip" src="sfx/switch.wav" data-start="7.0" data-duration="0.14" data-track-index="10" data-volume="0.45"></audio>
-      <audio class="clip" src="sfx/chime.wav" data-start="13.4" data-duration="0.95" data-track-index="10" data-volume="0.6"></audio>
+      <audio id="sfx-icon" class="clip" src="sfx/pop.wav" data-start="0.25" data-duration="0.17" data-track-index="10" data-volume="0.5"></audio>
+      <audio id="sfx-notification" class="clip" src="sfx/pop.wav" data-start="3.2" data-duration="0.17" data-track-index="10" data-volume="0.6"></audio>
+      <audio id="sfx-tick1" class="clip" src="sfx/tick.wav" data-start="4.0" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
+      <audio id="sfx-tick2" class="clip" src="sfx/tick.wav" data-start="4.35" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
+      <audio id="sfx-tick3" class="clip" src="sfx/tick.wav" data-start="4.7" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
+      <audio id="sfx-brain" class="clip" src="sfx/switch.wav" data-start="7.0" data-duration="0.14" data-track-index="10" data-volume="0.45"></audio>
+      <audio id="sfx-chime" class="clip" src="sfx/chime.wav" data-start="13.4" data-duration="0.95" data-track-index="10" data-volume="0.6"></audio>
     </div>
 
     <script src="./vendor/gsap.min.js"></script>
@@ -186,10 +189,11 @@
       rise("#s3 .label", 9.6); words("#s3", 9.7);
       rise("#filmcard", 9.6, 0.7);
       tl.set(["#fc2", "#fc3"], { opacity: 0 }, 0);
-      rise("#fc1", 9.9, 0.45);
-      tl.to("#fc1", { opacity: 0, duration: 0.15 }, 10.75); tl.fromTo("#fc2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: EASE }, 10.8);
-      tl.to("#fc2", { opacity: 0, duration: 0.15 }, 11.85); tl.fromTo("#fc3", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: EASE }, 11.9);
+      rise("#fc1", 9.85, 0.45);
+      tl.to("#fc1", { opacity: 0, duration: 0.15 }, 10.7); tl.fromTo("#fc2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: EASE }, 10.75);
+      tl.to("#fc2", { opacity: 0, duration: 0.15 }, 11.8); tl.fromTo("#fc3", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: EASE }, 11.85);
       out("#s3", 12.85);
+      tl.to("#filmcard", { opacity: 0, y: -24, duration: 0.3, ease: "power2.in" }, 12.7);
 
       // 4: where to find it
       rise("#s4 .icon", 13.2, 0.7);

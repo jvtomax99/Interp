@@ -24,7 +24,7 @@ opens, a chime on the end.
 - `assets/notifications.webp`, `review.webp`, `brain.webp`: the app's screens, from
   `tools/capture.cjs` (this checkout with the tests' stand-ins). The brain is lit by a made-up
   record (about half the terms known); the stand-in database has none.
-- `assets/film.mp4`: cut from `media/hub-promo.mp4` (13.3-14.4, 28.9-30.0, 34.85-35.85 s, its
+- `assets/film.mp4`: cut from `media/hub-promo.mp4` (13.3-14.4 and 28.9-30.0 s, then 34.92-35.42 s, the brain, slowed to half speed; its
   captions cropped off). The ffmpeg line is in the commit that added it; recut it if the promo changes.
 - `fonts/`, `sfx/`, `vendor/gsap.min.js`: Inter (OFL), the kit's sounds, GSAP 3.12.5.
 
