@@ -71,6 +71,9 @@ between assignments.
 | `features/false-friends.js` | 227 | The False Friends screen: `renderFalseFriends`, Study and Drill (`buildFFDrill`, `answerFF`), search and the risk filter (`FF_RISKS`). Moved verbatim (2026-10-24); the list is `falsefriends/list.js`. The Practice code that followed it in the same section (`renderPractice`, `startStudy`, the exam timer) stays in `index.html`, now under its own banner |
 | `features/knowledge-brain.js` | 223 | Your knowledge brain, the Hub's side: `knowledgeBrainData` (what `brain/you.html` draws), your record and the daily count (`kbLogNote`, `ih_knowledgeLog`), the small live brain atop Term Review (`kbMiniHtml`, `kbMiniStart`, `kbMiniFrame`). Moved verbatim (2026-10-24); `docs/features/knowledge-brain.md` |
 | `features/guide-front.js` | 232 | The User Guide's front page: `renderUserGuide`, the home of answers (`guideHomeHtml`, New lately), its sections, search (`setupGuideSearch`, `guideMarkWords`) and the install steps (`GUIDE_INSTALL_STEPS`). Moved verbatim (2026-10-24); the answers are `guide/topics.js`, the sheets and Show me stay in `index.html` |
+| `features/doctor-sheets.js` | 317 | The doctor and provider sheets' "Where" (the place picker: `openPlacePicker`, `pickPlace`, adding a place) and the doctor directory's add and edit sheet (`openAddDoctorDirModal`, `openEditDoctorDirModal`, the photo, `saveDoctorDirEntry`, delete). Moved verbatim (2026-10-25); `docs/features/places.md`. Places' data and `savePlace` stay in `index.html` ("Places (shared)") |
+| `features/csv.js` | 166 | The glossary's CSV export and import (More's Export / Import): `exportTermsCsv`, `parseCsv`, the staged import (`handleCsvImportSelected`, `showImportPreview`, `confirmCsvImport`). Moved verbatim (2026-10-25) |
+| `features/duplicate-doctors.js` | 161 | Duplicate doctors: the likely pairs (`nameParts`, `looksLikeSamePerson`, `duplicateDoctorGroups`), the merge (`mergeDoctorRecords`, `mergeDuplicateDoctors`) and its card in the doctor list's tidy sheet (`duplicateBannerHtml`). Moved verbatim (2026-10-25) |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
@@ -128,6 +131,9 @@ different places is what silently killed the coloured press glow: a
 | Styles for every other screen | `app.css` |
 | User Guide answers | `guide/topics.js` |
 | User Guide front page and search | `features/guide-front.js` |
+| Doctor and provider sheets: the place picker, the doctor's add and edit sheet | `features/doctor-sheets.js` |
+| Glossary CSV export and import | `features/csv.js` |
+| Duplicate doctors (finding and merging them) | `features/duplicate-doctors.js` |
 | CoreCHI practice questions | `practice/questions.js` |
 | False Friends list | `falsefriends/list.js` |
 | False Friends screen (Study, Drill) | `features/false-friends.js` |

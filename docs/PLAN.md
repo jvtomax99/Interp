@@ -112,8 +112,9 @@ under way, then what waits on Jose, then small leftovers.
    #139, live b1024.1553. Now (Jose, 2026-10-24: small pieces first): the
    leftover small leaves, one per PR: False Friends' screen #141 (live
    b1024.1920), the knowledge brain #143 (live b1024.2150), the guide's front page
-   #145 (live b1025.0157); then the doctor
-   sheets, CSV, duplicate doctors, the backfill. After them: Ask the Hub's
+   #145 (live b1025.0157), the doctor sheets #147 (live
+   b1025.1140), CSV #148 (live b1025.1453),
+   duplicate doctors (this PR); then, the backfill. After them: Ask the Hub's
    group and Dr. Smiley's engine, as groups, or they stay
    (`docs/split-index.md`).
 3. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
@@ -225,7 +226,7 @@ come from this alone.
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
   #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
-  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live; the guide's front page #145, live. Next: the small
+  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live; the guide's front page #145, live; the doctor sheets #147, live; CSV #148, live; duplicate doctors, this PR. Next: the small
   leaves, then the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
@@ -236,6 +237,21 @@ come from this alone.
 
 ## Done
 
+- 2026-10-25 Split `index.html`, phase 3, duplicate doctors (this PR):
+  `features/duplicate-doctors.js`, declarations only. Proof: byte rebuild;
+  name parsing, the groups, the banner, a merge and its result identical
+  (a new random tip id aside); doctor-page.cjs on both.
+- 2026-10-25 Split `index.html`, phase 3, CSV export / import
+  (#148, live b1025.1453):
+  `features/csv.js`, declarations only. Proof: byte rebuild; the export
+  file, parsing, an import's preview (1 new, 1 updated), the saved term and
+  globals identical. No suite covers CSV; the probe did.
+- 2026-10-25 Split `index.html`, phase 3, the doctor sheets
+  (#147, live b1025.1140):
+  `features/doctor-sheets.js` (the place picker, the doctor's add and edit
+  sheet), declarations only. Proof: byte rebuild; add sheet, picker, add a
+  place, pick, save, edit sheet, globals identical; provider-where.cjs and
+  doctor-page.cjs on both.
 - 2026-10-23/24 Dr. Smiley full body, the cutout rig (this PR; Jose:
   "fully animated first, decide where later"). Jose sent his standing
   picture; no image generator runs in a cloud session, so it was cut into
