@@ -62,9 +62,11 @@ from that cue list instead of `HOOK_MAP`.
 - Final render, voice and effects, no music: `renders/hub-promo-60s.mp4` (1080x1920, 51 min 27 s on 4 cores).
   `renders/` is kept out of git (`.gitignore`), so a new chat renders it again from `remake-60-final.html`;
   Jose has the file.
-- Still to do: music only. Picture and sound are separate, so music needs no re-render: mix it under
-  `voice-60s.m4a` + `sfx-60s.m4a` and copy the picture (`-c:v copy`). Demucs needs a chat where
-  `dl.fbaipublicfiles.com` is allowed.
+- Music (Jose heard the 15 s sample: "clean, use it"): `assets/music-60s.m4a`, from
+  `tools/music60.py` (six bars of the middle played twice, one join at 25.70 s, starts at 1.18 s so
+  its last notes land on "Safer Care." at 57.08 s). Mixed 12 dB under the voice as in v11 (voice
+  -17.3 LUFS, music set to -29.3), under the render's own voice and effects, picture copied
+  (`-c:v copy`).
 
 ## Not proven yet
 
