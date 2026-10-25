@@ -31,3 +31,8 @@ Inside `main.js` everything after the opener uses `t = time - OPEN` (OPEN = 2); 
 - HUMC photos are low-res; end-card skybridge is soft. Ask Jose for originals.
 - HMH logo appears (app icon, signage in photos): needs HMH marketing sign-off before public posting.
 - Final MP4 frame-by-frame check was pending when tools timed out: re-check with a contact sheet.
+
+## Sound effects (2026-10-25)
+Jose's pick: quiet effects under v11's narrator and music, which stay untouched (`assets/music-remake.m4a` is not changed). `tools/sfx.cjs` lists the cues and writes two files: `assets/sfx-remake.m4a` (the effects alone, the second `<audio>` in `remake.html` and `remake-final.html`, so a new render carries them; HyperFrames mixes its audio tracks with `amix`, read in its 0.8.181 code, not yet rendered) and, with `--promo`, `media/hub-promo.mp4` again (picture copied untouched, same frames; sound = music + effects from the .wav files).
+Cues, in the shipped video's clock: the timer rolling to zero (counter, 1.97), the strike on "¿Fallo cardíaco?" (snap, 4.85), the right word (success, 6.0), each feature's cyan caption box (tick, start + 0.3), 145 Questions counting up (counter, 29.22 to 30.05), "Safer Care." (chime, 43.9). The 145 count in the shipped video runs later than `features.js` says (29.22, not 28.45): the times were read off the video's frames, so after any re-render, read them again.
+Levels: each effect peaks 2 to 10 dB below the narrator and music at that moment; the mix's loudest point is the music's own (-5.1 dB), so nothing clips.

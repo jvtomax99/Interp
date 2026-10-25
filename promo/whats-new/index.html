@@ -1,0 +1,209 @@
+<!doctype html>
+<!-- What's new in the Hub: 15 s, 1080x1920, 30 fps (Jose, 2026-10-25). The User Guide's three "New
+     lately" cards (GUIDE_NEWS in index.html), one per scene, in the Motion Graphics starter kit's
+     Liquid Glass style turned to the app's own palette. The screens are the app's own
+     (tools/capture.cjs); the film clips are cut from media/hub-promo.mp4.
+     Render: see README.md -->
+<html lang="en" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <style>
+      @font-face { font-family: "Inter"; font-weight: 100 700; src: url("fonts/inter-latin-var.woff2") format("woff2"); }
+      :root {
+        --ink: #151c2c; --ink-soft: #5a6478; --accent: #0f5fa6; --navy: #252e6d; --tick: #34c759;
+        --glass: rgba(255,255,255,0.78); --glass-line: rgba(255,255,255,0.92);
+        --finish: 0 2px 0 0 inset rgba(255,255,255,0.82), 0 3px 8px rgba(20,43,67,0.07), 0 40px 80px -36px rgba(22,55,90,0.32);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #f4f6fa; }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: "Inter", sans-serif; color: var(--ink);
+        background: linear-gradient(170deg, #f7f9fd 0%, #eef2f9 55%, #f6f1f4 100%); }
+
+      .blob { position: absolute; width: 760px; height: 760px; border-radius: 50%; filter: blur(110px); opacity: 0.75; }
+      #b1 { left: -260px; top: 120px; background: #bcd8f5; }
+      #b2 { left: 520px; top: 640px; background: #dcd3f6; }
+      #b3 { left: -80px; top: 1300px; background: #fbdcc9; }
+
+      .scene { position: absolute; inset: 0; }
+      .label { position: absolute; left: 108px; right: 108px; top: 196px; font-size: 30px; font-weight: 650; letter-spacing: 0.14em; color: var(--ink-soft); }
+      .head { position: absolute; left: 108px; right: 108px; top: 246px; font-size: 84px; font-weight: 700; line-height: 1.06; letter-spacing: -0.03em; }
+      .head .w { display: inline-block; }
+      .glass { background: var(--glass); -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px);
+        border: 2px solid var(--glass-line); box-shadow: var(--finish); }
+
+      /* the phone: a glass rim round the app's own screen */
+      .phone { position: absolute; left: 280px; top: 520px; width: 520px; height: 1000px; padding: 20px; border-radius: 62px; }
+      .screen { position: relative; width: 480px; height: 960px; border-radius: 44px; overflow: hidden; background: #fff; }
+      .screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+      /* scene 0 */
+      #s0 .icon { position: absolute; left: 430px; top: 600px; width: 220px; height: 220px; border-radius: 52px; box-shadow: var(--finish); }
+      #s0 .head { top: 900px; text-align: center; font-size: 96px; }
+      #s0 .label { top: 850px; text-align: center; }
+      #s0 .sub { position: absolute; left: 108px; right: 108px; top: 1140px; text-align: center; font-size: 40px; font-weight: 450; color: var(--ink-soft); }
+
+      /* scene 1 */
+      #banner { position: absolute; left: 150px; top: 600px; width: 780px; border-radius: 40px; padding: 26px 30px; display: flex; gap: 24px; align-items: center; }
+      #banner img { width: 88px; height: 88px; border-radius: 22px; flex: none; }
+      #banner small { display: block; font-size: 25px; font-weight: 600; color: var(--ink-soft); letter-spacing: 0.02em; }
+      #banner b { display: block; margin-top: 4px; font-size: 31px; font-weight: 650; }
+      #banner span { display: block; margin-top: 2px; font-size: 29px; font-weight: 450; color: #2b3447; }
+      #ticks { position: absolute; left: 140px; top: 1556px; width: 800px; border-radius: 40px; padding: 26px 36px; }
+      .trow { display: flex; align-items: center; gap: 22px; height: 76px; font-size: 34px; font-weight: 600; }
+      .tdot { width: 48px; height: 48px; border-radius: 50%; background: var(--tick); display: grid; place-items: center; flex: none; }
+      .tdot svg { width: 28px; height: 28px; }
+
+      /* scene 2 */
+      #brain { clip-path: inset(293px 22px 548px 22px round 26px); } /* Term Review's small brain card, 390 px wide screen x 480/390 */
+      #chips { position: absolute; left: 108px; right: 108px; top: 1556px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+      .chip { border-radius: 999px; padding: 16px 32px 16px 24px; font-size: 34px; font-weight: 600; display: flex; align-items: center; gap: 16px; }
+      .chip i { width: 26px; height: 26px; border-radius: 50%; display: block; }
+
+      /* scene 3 */
+      #filmcard { position: absolute; left: 200px; top: 520px; width: 680px; height: 929px; padding: 20px; border-radius: 52px; }
+      #filmcard .in { position: relative; width: 640px; height: 889px; border-radius: 34px; overflow: hidden; background: #03061a; }
+      #film { position: absolute; left: 0; top: 0; width: 640px; height: 889px; }
+      .fcap { position: absolute; left: 108px; right: 108px; top: 1500px; text-align: center; }
+      .fcap span { display: inline-block; border-radius: 999px; padding: 16px 34px; font-size: 36px; font-weight: 650; }
+
+      /* scene 4 */
+      #s4 .icon { position: absolute; left: 440px; top: 620px; width: 200px; height: 200px; border-radius: 48px; box-shadow: var(--finish); }
+      #s4 .name { position: absolute; left: 0; right: 0; top: 870px; text-align: center; font-size: 100px; font-weight: 700; letter-spacing: -0.03em; }
+      #s4 .line { position: absolute; left: 140px; right: 140px; top: 1010px; text-align: center; font-size: 42px; font-weight: 450; line-height: 1.3; color: var(--ink-soft); }
+      #s4 .line b { color: var(--ink); font-weight: 650; }
+      #s4 .url { position: absolute; left: 0; right: 0; top: 1190px; text-align: center; }
+      #s4 .url span { display: inline-block; border-radius: 999px; padding: 20px 44px; font-size: 38px; font-weight: 650; color: var(--navy); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1080" data-height="1920">
+      <div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div>
+
+      <section class="scene clip" id="s0" data-start="0" data-duration="2.3" data-track-index="1">
+        <img class="icon" src="assets/appicon.png" alt="" />
+        <div class="label">NEW LATELY</div>
+        <div class="head">What’s new in Interpreter Hub</div>
+        <div class="sub">Three new things, in 15 seconds.</div>
+      </section>
+
+      <section class="scene clip" id="s1" data-start="2.2" data-duration="3.8" data-track-index="2">
+        <div class="label">NOTIFICATIONS</div>
+        <div class="head">Even with the Hub closed.</div>
+        <div class="phone glass"><div class="screen"><img src="assets/notifications.webp" alt="" /></div></div>
+        <div id="banner" class="glass">
+          <img src="assets/appicon.png" alt="" />
+          <div><small>INTERPRETER HUB · NOW</small><b>Team Chat · North</b><span>Lavado del port. Added it to the glossary.</span></div>
+        </div>
+        <div id="ticks" class="glass">
+          <div class="trow"><i class="tdot"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Team Chat</div>
+          <div class="trow"><i class="tdot"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i>New training</div>
+          <div class="trow"><i class="tdot"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Messages from the team’s owners</div>
+        </div>
+      </section>
+
+      <section class="scene clip" id="s2" data-start="5.9" data-duration="3.7" data-track-index="3">
+        <div class="label">YOUR KNOWLEDGE BRAIN</div>
+        <div class="head">Every term you know lights up.</div>
+        <div class="phone glass"><div class="screen"><img src="assets/review.webp" alt="" /><img id="brain" src="assets/brain.webp" alt="" /></div></div>
+        <div id="chips">
+          <div class="chip glass"><i style="background:#7ee0b2;box-shadow:0 0 14px #7ee0b2"></i>Lit: you know it</div>
+          <div class="chip glass"><i style="background:#f07a8a"></i>Red: missed last time</div>
+          <div class="chip glass"><i style="background:#9aa6bd"></i>Dim: due again</div>
+        </div>
+      </section>
+
+      <section class="scene clip" id="s3" data-start="9.5" data-duration="3.7" data-track-index="4">
+        <div class="label">THE VIDEO</div>
+        <div class="head">A new 45-second film, in 3D.</div>
+        <div class="fcap" id="fc1"><span class="glass">The 3D Body coming apart</span></div>
+        <div class="fcap" id="fc2"><span class="glass">Your campus</span></div>
+        <div class="fcap" id="fc3"><span class="glass">Dr. Smiley’s brain</span></div>
+      </section>
+
+      <!-- The film's card sits outside the timed scene: a timed <video> inside a timed section is given
+           the wrong frames (hyperframes lint, video_nested_in_timed_element). -->
+      <div id="filmcard" class="glass"><div class="in">
+        <video id="film" class="clip" src="assets/film.mp4" muted playsinline data-start="9.65" data-duration="3.5" data-track-index="5"></video>
+      </div></div>
+
+      <section class="scene clip" id="s4" data-start="13.1" data-duration="1.9" data-track-index="6">
+        <img class="icon" src="assets/appicon.png" alt="" />
+        <div class="name">Interpreter Hub</div>
+        <div class="line">All three are in the User Guide, under <b>New lately</b>.</div>
+        <div class="url"><span class="glass">interp-six.vercel.app</span></div>
+      </section>
+
+      <!-- sound: the kit's effects, nothing on a plain slide-in -->
+      <audio id="sfx-icon" class="clip" src="sfx/pop.wav" data-start="0.25" data-duration="0.17" data-track-index="10" data-volume="0.5"></audio>
+      <audio id="sfx-notification" class="clip" src="sfx/pop.wav" data-start="3.2" data-duration="0.17" data-track-index="10" data-volume="0.6"></audio>
+      <audio id="sfx-tick1" class="clip" src="sfx/tick.wav" data-start="4.0" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
+      <audio id="sfx-tick2" class="clip" src="sfx/tick.wav" data-start="4.35" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
+      <audio id="sfx-tick3" class="clip" src="sfx/tick.wav" data-start="4.7" data-duration="0.09" data-track-index="10" data-volume="0.9"></audio>
+      <audio id="sfx-brain" class="clip" src="sfx/switch.wav" data-start="7.0" data-duration="0.14" data-track-index="10" data-volume="0.45"></audio>
+      <audio id="sfx-chime" class="clip" src="sfx/chime.wav" data-start="13.4" data-duration="0.95" data-track-index="10" data-volume="0.6"></audio>
+    </div>
+
+    <script src="./vendor/gsap.min.js"></script>
+    <script>
+      // Words arrive one by one: each heading split into word spans.
+      document.querySelectorAll(".head").forEach((h) => {
+        h.innerHTML = h.textContent.split(" ").map((w) => `<span class="w">${w}</span>`).join(" ");
+      });
+
+      const tl = gsap.timeline({ paused: true });
+      const IN = { opacity: 0, y: 30, scale: 0.96 }, EASE = "power3.out";
+      const rise = (sel, at, d = 0.6) => tl.from(sel, { ...IN, duration: d, ease: EASE }, at);
+      const words = (sc, at) => tl.from(`${sc} .head .w`, { opacity: 0, y: 24, duration: 0.5, ease: EASE, stagger: 0.06 }, at);
+      const out = (sc, at) => tl.to(`${sc} > *`, { opacity: 0, y: -24, duration: 0.3, ease: "power2.in", stagger: 0.02 }, at);
+
+      // the light behind everything, drifting the whole time
+      tl.to("#b1", { x: 260, y: 160, duration: 15, ease: "sine.inOut" }, 0);
+      tl.to("#b2", { x: -300, y: -120, duration: 15, ease: "sine.inOut" }, 0);
+      tl.to("#b3", { x: 240, y: -220, duration: 15, ease: "sine.inOut" }, 0);
+
+      // 0: the name
+      rise("#s0 .icon", 0.2, 0.7);
+      rise("#s0 .label", 0.5);
+      words("#s0", 0.65);
+      rise("#s0 .sub", 1.05);
+      out("#s0", 1.95);
+
+      // 1: notifications
+      rise("#s1 .label", 2.3); words("#s1", 2.4);
+      rise("#s1 .phone", 2.55, 0.7);
+      tl.from("#banner", { opacity: 0, y: -70, scale: 0.96, duration: 0.6, ease: EASE }, 3.2);
+      rise("#ticks", 3.75);
+      tl.from("#ticks .tdot", { scale: 0, opacity: 0, duration: 0.35, ease: EASE, stagger: 0.35 }, 4.0);
+      tl.from("#ticks .trow", { x: -20, duration: 0.35, ease: EASE, stagger: 0.35 }, 4.0);
+      out("#s1", 5.65);
+
+      // 2: your knowledge brain, opening from its small copy on Term Review
+      rise("#s2 .label", 6.0); words("#s2", 6.1);
+      rise("#s2 .phone", 6.25, 0.7);
+      tl.to("#brain", { clipPath: "inset(0px 0px 0px 0px round 44px)", duration: 0.8, ease: "power3.inOut" }, 7.0);
+      rise("#chips .chip:nth-child(1)", 7.9); rise("#chips .chip:nth-child(2)", 8.1); rise("#chips .chip:nth-child(3)", 8.3);
+      out("#s2", 9.25);
+
+      // 3: the film, playing in its glass card
+      rise("#s3 .label", 9.6); words("#s3", 9.7);
+      rise("#filmcard", 9.6, 0.7);
+      tl.set(["#fc2", "#fc3"], { opacity: 0 }, 0);
+      rise("#fc1", 9.85, 0.45);
+      tl.to("#fc1", { opacity: 0, duration: 0.15 }, 10.7); tl.fromTo("#fc2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: EASE }, 10.75);
+      tl.to("#fc2", { opacity: 0, duration: 0.15 }, 11.8); tl.fromTo("#fc3", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: EASE }, 11.85);
+      out("#s3", 12.85);
+      tl.to("#filmcard", { opacity: 0, y: -24, duration: 0.3, ease: "power2.in" }, 12.7);
+
+      // 4: where to find it
+      rise("#s4 .icon", 13.2, 0.7);
+      rise("#s4 .name", 13.4);
+      rise("#s4 .line", 13.6);
+      rise("#s4 .url", 13.8);
+      tl.set({}, {}, 15);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

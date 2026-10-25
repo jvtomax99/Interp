@@ -1,42 +1,56 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-24, from the chat that ran #139 to #143.
+hands over"). This one: 2026-10-25, from the chat that ran #151 (promo sound
+effects and the What's new video).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
-> tell me what's being worked on now and the goal, and what was worked on
-> before, in a few short lines each, say in 2-3 lines what you'll do next,
-> and wait for my go. Plain words, say "working on it" and "done".
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`, `docs/handoff.md` and
+> `promo/hub-blend/BRIEF-60s.md`. Then tell me what's being worked on now and
+> the goal, and what was worked on before, in a few short lines each, say in
+> 2-3 lines what you'll do next, and wait for my go. Plain words, say
+> "working on it" and "done".
 
 ## Now
 
-The split of `index.html` (`docs/split-index.md`), phase 3, small pieces
-first (Jose's pick, 2026-10-24), one change at a time, each merged on his
-"push". The doctor sheets (#147), CSV (#148) and duplicate doctors
-(#150, b1025.1607) are live; the backfill, the last small piece, is in
-its change now. After it: Ask the Hub's group and Dr. Smiley's engine, as
-groups, or they stay.
+**The 1-minute promo** (Jose, 2026-10-25). Plan and every decision:
+`promo/hub-blend/BRIEF-60s.md`. In short: same 3D look, 60 s, a new AI narrator
+(Kokoro, Michael; Spanish words in Dora), v11's music with its old narrator taken
+out by Demucs, kept as a separate file (the app keeps its 45 s video). Next:
+step 1, the music sample, then the script for Jose to approve.
 
-## Before (this chat, all live)
+## Open
 
-- #138 the last handoff, merged.
-- #139 the campus -> `features/campus.js` (b1024.1553). Its Escape listener
-  moved with it: no earlier keydown listener stops the event or touches
-  the campus.
-- #140 3D Body's resize listener read `activeCategory` before it existed
-  (a resize during load): guarded with `typeof`; new suite
-  `load-order.cjs` holds that gap open (b1024.1804).
-- #141 False Friends' screen -> `features/false-friends.js` (b1024.1920).
-  Its census section also held the Practice screen; that half stayed
-  inline under a new banner.
-- #142 rule: always a phone notification when a change is ready for
-  Jose's push (docs).
-- #143 your knowledge brain's Hub side -> `features/knowledge-brain.js`
-  (b1024.2150).
+- **#151** (branch `claude/new-session-rpv122`): the promo's sound effects
+  (`media/hub-promo.mp4` remixed, picture untouched) and the 15 s What's new
+  video (`promo/whats-new/`). Merged with `main` (only this file
+  clashed); waiting for Jose's "push". After it merges, start the next change
+  from `main`.
+- The split of `index.html` (`docs/split-index.md`) is paused, not finished:
+  duplicate doctors went live in #150, the backfill in #152 (b1025.1713).
+  Next there: Ask the Hub's group and Dr. Smiley's engine, as groups, or
+  they stay.
 
-Open: only this handoff's change (docs only). No check-ins armed.
+## Before (this chat)
+
+- #151 above: the kit's 9 sound effects in `promo/hub-blend/assets/sfx/`,
+  cue list `tools/sfx.cjs`; the What's new video, rendered three times after
+  `hyperframes lint` caught silent sounds and wrong film frames.
+- Jose's Motion Graphics starter kit (Damiano Caudullo): only its sounds and
+  its Liquid Glass look were used. Its fonts, practice clip and fake
+  screenshots were left out on purpose.
+
+## Learned here, not in the docs before
+
+- The test harness (`tests/support/harness.cjs`) serves the app but not
+  `brain/`: a capture of `brain/you.html` routes it itself
+  (`promo/whats-new/tools/capture.cjs`).
+- The Notifications screen in a headless browser says "not available";
+  stand in `pushState = () => 'on'` to show it switched on.
+- Playwright's Chromium here can't decode H.264, so a page preview of an MP4
+  shows the wrong frame. HyperFrames' render is right (it takes frames with
+  ffmpeg).
 
 ## The method (worked eight times)
 
