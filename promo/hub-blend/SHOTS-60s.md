@@ -35,4 +35,4 @@ read off the waveform; the build re-reads them exactly.
 `remake-60-final.html` 1080x1920); the 45 s film draws the same, frame for frame (7 frames compared
 against `main`, identical). The 60 s voice is laid by `tools/voice60.py`.
 
-**Not proven yet:** no render yet, only stills; no music (Demucs blocked here).
+**Rendered** 2026-10-25: draft and final (`BRIEF-60s.md`, "Done so far"). **Not done:** music (Demucs blocked here).
