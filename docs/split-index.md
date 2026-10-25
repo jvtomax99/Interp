@@ -289,6 +289,16 @@ move each, with the same proof every time and nothing visible changing.
    memory-trainer, frame-meter. HUMC Brain's motor strip would empty
    except the five later Smiley sections (reacts, career, news,
    companion, panel), which stay.
+   **Dr. Smiley's engine done 2026-10-25** (Jose's go on the plan):
+   `features/smiley-engine.js`, as planned; the `ds-still` toggle moved,
+   the three listeners stayed. Proof: the moved lines verbatim but the
+   rewritten note over the `DR_FACE_SEQ` line, the rest of `index.html`
+   identical; the sandbox load reads only `DR_PERF`; a probe in both
+   checkouts (phone, computer, reduced motion), 48 readings identical
+   (his modes, `ds-still`, three tasks, four performances, offline and
+   online, Ask and back, `DR_FACE_SEQ` with the performances, globals);
+   all suites pass. First paint (5 runs): slow Home painted 4762 to 4636
+   ms, 4g 1544 to 1493 ms; within noise. `index.html` 1.02 MB to 0.96 MB.
 3. **JS by feature, one file per PR**, leaves first (the census says which:
    sections whose names few others use). Candidates from the sizes alone:
    Dr. Smiley's engine (`DrAnim` 25 KB with `DR_FACE_SEQ`, `DR_PERF`,
