@@ -14,8 +14,8 @@ hands over"). This one: 2026-10-24, from the chat that ran #139 to #143.
 
 The split of `index.html` (`docs/split-index.md`), phase 3, small pieces
 first (Jose's pick, 2026-10-24), one change at a time, each merged on his
-"push". The doctor sheets are live (#147, b1025.1140); CSV is in its
-change now; next: duplicate doctors, the backfill. After those: Ask the Hub's group and Dr. Smiley's engine, as
+"push". The doctor sheets (#147) and CSV (#148, b1025.1453) are live;
+duplicate doctors is in its change now; next: the backfill. After those: Ask the Hub's group and Dr. Smiley's engine, as
 groups, or they stay.
 
 ## Before (this chat, all live)
