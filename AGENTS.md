@@ -78,6 +78,7 @@ So:
 | User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
 | The User Guide's front page (`renderUserGuide`, its search, the install steps) | `features/guide-front.js` |
 | The doctor and provider sheets' place picker, the doctor directory's add and edit sheet (`openPlacePicker`, `openAddDoctorDirModal`, `saveDoctorDirEntry`) | `features/doctor-sheets.js` |
+| Glossary CSV export and import (`exportTermsCsv`, `parseCsv`, `confirmCsvImport`) | `features/csv.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
 | The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |
