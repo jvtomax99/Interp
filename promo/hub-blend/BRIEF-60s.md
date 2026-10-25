@@ -55,6 +55,11 @@ from that cue list instead of `HOOK_MAP`.
 
 ## Not proven yet
 
-- Demucs: not installed, not tried; it needs PyTorch (a big install) and may sound watery.
+- Demucs: PyTorch and Demucs install from PyPI (2026-10-25), but its model only downloads from
+  `dl.fbaipublicfiles.com`, which this environment's network blocks (also `download.pytorch.org`
+  and `huggingface.co`). Jose added the host to Allowed domains; the chat that was open did not
+  see it. Try again in a new chat. Quality still unheard.
+- Voice draft 1 (2026-10-25, `SCRIPT-60s.md` as approved): 21 clips, 48.7 s of speech, joined
+  with breaths to end at 57.2 s. Clip lengths and start times: `voice-cues-60s.tsv`.
 - Kokoro's pacing over a full minute: only a 13 s sample has been heard.
 - New 3D shots for Notifications and the knowledge brain: not designed.
