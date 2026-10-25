@@ -23,7 +23,7 @@ const GROUPS = {
   data: ['Seed data (from the shared reference doc)', 'Code of Ethics', 'Domain icons and link lists'],
   safe: ['Training & Events',
     'Subdomain folder', 'Practice dashboard tiles',
-    'Lists: providers, recently deleted, doctors hub', 'Terminology backfill', 'Healthcare Providers: modal + photo handling'],
+    'Lists: providers, recently deleted, doctors hub', 'Healthcare Providers: modal + photo handling'],
   ask: ['Ask the Hub', 'Dr. Smiley: following a conversation', 'Dr. Smiley: context and actions', 'Dr. Smiley: what he remembers (on this device)',
     'Ask the Hub: your practice and the next step', "Dr. Smiley's memory screen", 'Ask the Hub: corrections, feedback, sources'],
   smiley: ["Dr. Smiley's art", 'Dr. Smiley: animation engine', 'Dr. Smiley: how lively (Lively, Focused, Still)',

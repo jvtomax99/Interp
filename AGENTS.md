@@ -80,6 +80,7 @@ So:
 | The doctor and provider sheets' place picker, the doctor directory's add and edit sheet (`openPlacePicker`, `openAddDoctorDirModal`, `saveDoctorDirEntry`) | `features/doctor-sheets.js` |
 | Glossary CSV export and import (`exportTermsCsv`, `parseCsv`, `confirmCsvImport`) | `features/csv.js` |
 | Duplicate doctors: finding and merging them (`duplicateDoctorGroups`, `mergeDuplicateDoctors`, `duplicateBannerHtml`) | `features/duplicate-doctors.js` |
+| The terminology backfill: re-researching doctors on the old flat list (`runTierBackfill`, `backfillBannerHtml`) | `features/backfill.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
 | The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |
