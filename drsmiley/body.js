@@ -49,15 +49,15 @@ const DR_BODY = {
   // one also exists mirrored about his middle (`mirrorX`), for the other side.
   mirrorX: 556,
   pose: {
-    wave:        { box: [134, 360, 306, 394], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    wave:        { box: [134, 360, 340, 394], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     // The wave's breakdowns (prompts-animation.md, 2026-10-24): on the way up the
     // elbow leads and the hand trails below it; at the top the hand tips in
     // toward his head and out away from it, the wag's two extremes, with `wave`
     // as the drawing between them.
-    'wave-rise': { box: [127, 528, 315, 286], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    'wave-in':   { box: [142, 273, 300, 443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
-    'wave-out':  { box: [46, 280, 396, 444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
-    'fist-pump': { box: [121, 364, 278, 381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'wave-rise': { box: [127, 528, 347, 286], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'wave-in':   { box: [142, 273, 332, 443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'wave-out':  { box: [46, 280, 428, 444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'fist-pump': { box: [121, 364, 330, 381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     think:       { box: [352, 497, 275, 446], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     shrug:       { box: [97, 585, 889, 247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     // The cheer's drawings (prompts-animation.md, 2026-10-24): both arms, behind the coat.
@@ -70,8 +70,14 @@ const DR_BODY = {
     'thumbs-up': { box: [247, 512, 189, 354], arms: ['L'], layer: 'front', pivot: [353, 630] },
     // Both hands on a clipboard at his chest (a feathered band from the collar to below the hands, both sleeves in it): stands in for both arms; `frot` tilts it.
     clipboard:   { box: [281, 567, 511, 354], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
-    // The pointing arm: straight out at shoulder height, the index finger out ("look here"); `frot` bobs it about the shoulder.
-    point:       { box: [24, 559, 375, 153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    // The pointing arm: straight out at shoulder height, the index finger out ("look here"); since the
+    // point's drawings it is the in-between on the way down. `frot` bobs it about the shoulder.
+    point:       { box: [24, 559, 427, 153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    // The point's drawings (prompts-animation.md, 2026-10-25): the load, the arm bent and pulled
+    // back with the hand by his shoulder, finger already out; the reach, the arm stretched out
+    // a little above the shoulder (20 degrees higher than `point`), the strong moment.
+    'point-load':  { box: [98, 420, 376, 294], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'point-reach': { box: [10, 418, 464, 255], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
@@ -505,25 +511,41 @@ const DR_BODY_PERF = {
       [j(260), { face: 'rest' }, 'out'],
     ], still: { [FR]: 'clipboard', face: 'lookD', brow: 'focused' }, stillMs: 1100 };
   },
-  // "Look here": a glance that way, the drawn pointing arm swings up from his
-  // side to straight out (a little past, then settles), the finger bobs
-  // twice, he holds on it, and it swings back down. o.side: 'L' (the
-  // picture's left) or 'R' (mirrored), else picked.
+  // "Look here", drawn (2026-10-25, the point's drawings): a glance that way
+  // and the arm drawn back a touch; the load, the arm cocked by his shoulder
+  // as he leans away from where he will point (anticipation); a beat; then
+  // the reach, the arm snapping out a little above the shoulder and past it
+  // (frot), settling with a spring; the finger bobs twice, he holds on it;
+  // and down by drawings, as the hello comes down: the arm at shoulder height
+  // (`point`), then the wave's rise, the hand dropped below the elbow and the
+  // finger let go, into the cutout arm, which swings past hanging and back
+  // (`point` swung further lifted its cut shoulder as a flap). Drawings
+  // swap, they never fade. o.side: 'L' (the picture's left) or 'R'
+  // (mirrored), else picked. Up for this arm's frot is -s.
   point(mode, o){
     o = o || {}; const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
     const side = o.side || (R() < .5 ? 'L' : 'R'), s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, FR = 'frame' + side;
     return { beats: [
       [j(160), { face: 'half' + side, head: -s * 1 * k, [A]: -6, [F]: 10 }, 'in'],                                     // a glance that way, the arm drawn back a touch
-      [60, { [FR]: 'point', fsw: -78, frot: 0, [A]: 0, [F]: 0 }, 'linear'],
-      [j(300), { fsw: 0, head: s * 5 * k, lean: s * 1.5 * k, face: 'look' + side, brow: 'up' }, 'spring'],             // out
+      [j(50), { [A]: 24, [F]: 30 }, 'in'],                                                                               // the arm comes up
+      [0, { [FR]: 'point-load', fsw: -14, frot: 0, [A]: 0, [F]: 0 }],                                                    // the load drawn: cocked by his shoulder
+      [j(110), { fsw: 0, sy: 1 - .015 * k, sx: 1 + .008 * k, head: -s * 2 * k, lean: -s * .8 * k, face: 'look' + side, brow: 'up' }, 'out'],
+      [j(90, .2), { frot: s * 1.5 }, 'inOut'],                                                                            // a beat, cocked a hair further
+      [0, { [FR]: 'point-reach', frot: -s * 4 * k }],                                                                    // the reach drawn, past its place
+      [j(80), { sy: 1 + .012 * k, sx: 1 - .006 * k, y: -6 * k, head: s * 5.5 * k, lean: s * 1.8 * k }, 'out'],
+      [j(260), { frot: 0, sy: 1, sx: 1, y: 0, head: s * 5 * k, lean: s * 1.5 * k }, 'spring'],                          // settles
       [j(180), { frot: -s * 3 * k, lift: 2 * k }, 'inOut'],                                                              // the point: two bobs
       [j(180), { frot: s * 1.5 * k, lift: 0 }, 'inOut'],
-      [j(180), { frot: -s * 2.5 * k, face: 'smile1' }, 'inOut'],
-      [j(500, .2), { frot: 0, head: s * 4 * k, face: 'look' + side }, 'inOut'],                                          // holds on it
-      [j(240), { fsw: -76, head: -s * .5 * k, lean: 0, face: 'smile', brow: 'rest' }, 'in'],                           // back down
-      [60, { [FR]: '', fsw: 0, [A]: 6, [F]: 6 }, 'linear'],
+      [j(180), { frot: -s * 2 * k, face: 'smile1' }, 'inOut'],
+      [j(460, .2), { frot: 0, head: s * 4 * k, face: 'look' + side }, 'inOut'],                                          // holds on it
+      [0, { [FR]: 'point', frot: -s * 8 }],                                                                              // down: the arm at shoulder height
+      [j(70), { fsw: -14, frot: 0, head: -s * .5 * k, lean: 0, face: 'smile', brow: 'rest' }, 'in'],
+      [0, { [FR]: 'wave-rise', fsw: 4 }],                                                                                // the hand drops first, the finger lets go
+      [j(100), { fsw: -12, face: 'smile1' }, 'in'],
+      [0, { [FR]: '', fsw: 0, [A]: 20, [F]: 6 }],                                                                        // into the cutout arm
+      [j(80), { [A]: -6, [F]: 4 }, 'in'],                                                                                // past hanging
       [j(300), { [A]: 0, [F]: 0, head: 0, face: 'rest' }, 'spring'],
-    ], still: { [FR]: 'point', head: s * 5, lean: s * 1.5, face: 'look' + side, brow: 'up' }, stillMs: 1100 };
+    ], still: { [FR]: 'point-reach', head: s * 5, lean: s * 1.5, face: 'look' + side, brow: 'up' }, stillMs: 1100 };
   },
   // A right answer: a happy hop on the drawn crouch and jump, the drawn
   // thumbs-up rising into place as he springs up (the cutout arm stays down),

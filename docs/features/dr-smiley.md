@@ -345,6 +345,40 @@ with the cheer up to there, then steps through the rise drawing into its
 one-fist pump (the arm that goes down never jumps from overhead to his
 side). The clip tool films held states too (`state:celebrating`).
 
+**The point, drawn (2026-10-25, a new chat).** Jose ran `point-load` (the
+arm bent and pulled back, the hand by his shoulder, finger already out) and
+`point-reach` (the arm stretched out a little above the shoulder), both 4 px
+right and 1 down of the master. One-arm frames on the back layer, cut like
+the wave's, but with the tighter key (`near` 12): the sleeve's shaded
+underside is nearly the wall's grey and the usual key tore it. The reach
+also drops anything pale and colourless left of x 120 (`wallleft`; the wall
+darkens toward the picture's edge, behind the fingertip) and its coat flank
+below y 668 (`below`; uncovered by the raised arm, shaded too near the wall
+to cut clean, and the body piece draws that side anyway). `point` is now
+drawn throughout: a glance and the cutout arm drawn back; the load, cocked
+while he leans away (about 200 ms with a beat, the anticipation); the reach
+snapped in 4 degrees past its place (frot, about 17 px high at the
+fingertip) and sprung back; two bobs and the hold; then down the way the
+hello comes down: the old one-drawing `point` (straight out at shoulder
+height, 20 degrees under the reach) for a few frames, the wave's rise (the
+hand dropped below the elbow, the finger let go), the cutout arm past
+hanging and back. The old `point` swung by `fsw` far enough to reach the
+cutout lifted its cut shoulder as a square flap, and a cutout arm shown
+half raised reads stiff with its open palm; neither happens now. The
+still pose is the reach. `cutframes.py` takes names (`python3 -I
+cutframes.py point-load point-reach`) and recuts only those, keeping the
+rest of `poses.json`.
+
+**The mirrored side's seam (same day).** The body piece is not symmetric:
+his left shoulder edge (the picture's right) sits 7 to 23 px further in than
+the mirror of his right. A one-arm frame cut to fit the picture's left left
+that sliver open when shown mirrored: a navy line along the coat from collar
+to armpit, on every mirrored wave and point (half of them, at random). The
+one-arm frames (`single` in `cutframes.py`: the wave's four, the fist pump,
+both points and the old point) now run on 26 px under the body's outer edge
+between y 540 and 700, hidden by the body on their own side and filling the
+gap on the other. Their boxes in `DR_BODY.pose` grew to match.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

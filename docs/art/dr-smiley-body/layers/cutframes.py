@@ -90,6 +90,7 @@ SHOULDER=(xx>362)&(xx<556)&(yy<_top[None,:]-3)&(yy>500)
 ARM=lambda: (xx<556)&(yy>240)&(yy<1058)
 ARMSWUNG=lambda: ARM()&~((yy<590)&(xx>385)&(xx<727))&~SHOULDER
 for k in ['wave','fist-pump','point','wave-rise','wave-in','wave-out']: POSES[k]=dict(region=ARMSWUNG if k in ('fist-pump','point') else ARM, offset=POSES[k]['offset'], arm=True)
+for k in ['wave','fist-pump','point','wave-rise','wave-in','wave-out']: POSES[k]['single']=True
 POSES['shrug']=dict(region=lambda: (yy>240)&(yy<1058)&~((yy<590)&(xx>385)&(xx<727)), offset=POSES['shrug']['offset'], arm=True)   # both arms, the same way
 # The cheer's three drawings (2026-10-24, prompts-animation.md): both arms, the load
 # (fists low by his hips), the rise (fists at shoulder height) and the V (fists above
@@ -97,8 +98,17 @@ POSES['shrug']=dict(region=lambda: (yy>240)&(yy<1058)&~((yy<590)&(xx>385)&(xx<72
 for k,off in (('cheer-load',(1,0)),('cheer-mid',(2,1)),('cheer-up',(2,1))):
     POSES[k]=dict(region=lambda: (yy>150)&(yy<1058)&~((yy<590)&(xx>385)&(xx<727)), offset=off, arm=True)
 POSES['cheer-up']['skinabove']=400
-res={}
+# The point's two drawings (2026-10-25, prompts-animation.md): the load (arm bent and
+# pulled back, the hand by his shoulder, finger already out) and the reach (arm
+# stretched out past the shoulder's height). Drawn in place, never swung, so each
+# keeps the drawing's own shoulder, like the wave's. 4 px right and 1 down of the master.
+for k in ('point-load','point-reach'): POSES[k]=dict(region=ARM, offset=(4,1), arm=True, near=12, single=True)   # the sleeve's shaded underside is nearly the wall's grey
+POSES['point-reach'].update(wallleft=120, below=668)
+# python3 -I cutframes.py point-load point-reach: cut only those (the others' boxes kept from poses.json)
+ONLY=sys.argv[1:]
+res={k:v for k,v in json.load(open(OUT+'poses.json')).items() if k not in ONLY} if ONLY else {}
 for name,cfg in POSES.items():
+    if ONLY and name not in ONLY: continue
     im=Image.open(D+name+'.png').convert('RGB')
     dx,dy=cfg['offset']
     fill=tuple(int(v) for v in np.median(np.asarray(im)[20:120,20:120].reshape(-1,3),0))
@@ -121,6 +131,16 @@ for name,cfg in POSES.items():
         rgbP=P; skin=(rgbP[...,0]>150)&(rgbP[...,0]>rgbP[...,1]+25)&(rgbP[...,1]>rgbP[...,2]-5)
         under=(bodyA>.9)|(headA>.35)|(ndi.binary_dilation(headA>.35,iterations=16)&~skin&(yy<590))
         under|=ndi.binary_dilation(bodyA>.5,iterations=5)&(yy>690)   # below the armpit the coat's edge is the body piece's, not the drawing's
+        if cfg.get('single'):
+            # a one-arm frame is also shown mirrored, on his other side, and the body is
+            # not symmetric: his left shoulder edge sits 7 to 23 px further in than the
+            # mirror of his right, and the mirrored frame left that sliver open, a navy
+            # line along the coat from collar to armpit (2026-10-25, the point review).
+            # So the frame runs on 26 px under the body's edge there: hidden on its own
+            # side, filling the gap on the other.
+            inner=bodyA>.9; xl=np.where(inner.any(1),inner.argmax(1),W)   # each row's outer (left) edge
+            seam=inner&(xx<xl[:,None]+26)&(yy>540)&(yy<700)
+            under&=~seam
         # a sleeve's shaded underside is near the wall's grey, and the key can crack
         # it open to the outside (wave-rise): narrow cracks are bridged, away from
         # the hand only (between the fingers is wall)
@@ -130,6 +150,14 @@ for name,cfg in POSES.items():
             # pale and colourless there is wall (cheer-up: the wall the fists shade
             # reads 30 levels darker than the rest, too far for any key)
             sat=P.max(2)-P.min(2); fig&=~((yy<cfg['skinabove'])&(sat<16)&(P.mean(2)>140))
+        if cfg.get('wallleft'):
+            # left of this line the drawing has only his finger: pale and colourless there is
+            # wall (point-reach: the wall darkens toward the picture's edge, past the key)
+            sat=P.max(2)-P.min(2); fig&=~((xx<cfg['wallleft'])&(sat<16)&(P.mean(2)>140))
+        if cfg.get('below'):
+            # below this line on his side is only the coat's flank the raised arm
+            # uncovers, shaded too near the wall to cut clean; the body piece draws it
+            fig&=~((yy>cfg['below'])&(xx<420))
         nearhand=ndi.binary_dilation(skin&fig,iterations=24)
         fig|=ndi.binary_closing(fig,iterations=5)&~nearhand&cfg['region']()
         aP=np.where(fig,np.maximum(aP,ndi.binary_erosion(fig,iterations=1)),aP)
@@ -176,6 +204,7 @@ for name,cfg in POSES.items():
 # does, so a longer or shorter coat in the picture never shows a gap.
 LEGS={'crouch':(4,0),'jump':(4,0)}
 for name,(dx,dy) in LEGS.items():
+    if ONLY and name not in ONLY: continue
     im=Image.open(D+name+'.png').convert('RGB')
     fill=tuple(int(v) for v in np.median(np.asarray(im)[20:120,20:120].reshape(-1,3),0))
     if dx or dy: im=im.transform(im.size, Image.AFFINE, (1,0,-dx,0,1,-dy), Image.BICUBIC, fillcolor=fill)
@@ -205,7 +234,7 @@ def piece(k):
     im=Image.open(OUT+k+'.webp').convert('RGBA'); return im,bx[k]
 head=Image.open(OUT+'head.webp').convert('RGBA'); s=rig['head']['scale']; hx,hy=rig['head']['at']
 head=head.resize((round(480*s),round(600*s)),Image.LANCZOS)
-HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'think':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
+HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'point-load':['l'],'point-reach':['l'],'think':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
 def compose(name=None):
     out=Image.new('RGBA',(W,H),(255,255,255,255))
     legs=name in LEGS
@@ -218,7 +247,7 @@ def compose(name=None):
     if name and not legs:
         f=Image.open(OUT+'pose-'+name+'.webp').convert('RGBA'); b=res[name]['box']; out.alpha_composite(f,(b[0],b[1]))
     return out
-names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','think','shrug','thumbs-up','crouch','jump']
+names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','point-load','point-reach','think','shrug','thumbs-up','crouch','jump']
 sheet=Image.new('RGB',(len(names)*470,780),(255,255,255)); d=ImageDraw.Draw(sheet)
 for i,n in enumerate(names):
     sheet.paste(compose(None if n=='rest' else n).convert('RGB').crop((60,0,1040,1470)).resize((460,690),Image.LANCZOS),(i*470+5,4)); d.text((i*470+200,740),n,fill=(21,28,44))
