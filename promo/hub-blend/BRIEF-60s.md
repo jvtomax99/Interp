@@ -53,6 +53,14 @@ from that cue list instead of `HOOK_MAP`.
   new video: an `<audio>` without an `id` renders silent, and a timed `<video>` inside a timed
   element gets the wrong frames.
 
+## Done so far (2026-10-25)
+
+- Draft render of the 60 s cut, voice only: `hyperframes render -c remake-60.html -w 3` took 16 min 40 s
+  at 540x960 on 4 cores (`out/`, not kept in git). Lint: copy `remake-60.html` alone into a scratch
+  folder as `index.html` (with the folders linked), since the project has several root pages.
+- Still to do: music (Demucs, needs a chat where `dl.fbaipublicfiles.com` is allowed), sound
+  effects re-cued (step 6), the final render at 1080x1920.
+
 ## Not proven yet
 
 - Demucs: PyTorch and Demucs install from PyPI (2026-10-25), but its model only downloads from
