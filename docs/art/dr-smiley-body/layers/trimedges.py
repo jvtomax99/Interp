@@ -84,3 +84,21 @@ B=full('body'); rows=(yy>=614)&(yy<660)
 B[rows&(xx>705),3]=0; B[rows&(xx<386),3]=0
 im=Image.fromarray(B,'RGBA').crop(tuple(rig['bbox']['body'])); im.save(OUT+'body-trim.webp',quality=92,method=6)
 print('body-trim px cut',int(((full('body')[...,3]>0)&(B[...,3]==0)).sum()))
+# gusset-l/-r.webp (2026-10-25): the armpit. A cutout upper arm swung out opened a navy slit
+# between sleeve and coat right up to the shoulder (the walk). Each gusset is a still copy of
+# its upper arm's inner half above the armpit (y 690, faded out by 715), a touch shaded, drawn
+# behind the moving arm: hidden at rest, it fills the slit's top when the arm swings out; below
+# the armpit the gap stays, as a real one does. Only the inner half, so an arm swung in (the
+# walk's -14 degrees) never uncovers its outer edge.
+for side,name in (('l','arm-upper-l'),('r','arm-upper-r')):
+    A=full(name); G=A.copy(); m=A[...,3]>0
+    for y in range(H):
+        xs=np.nonzero(m[y])[0]
+        if not len(xs): continue
+        w=xs.max()-xs.min()
+        if side=='r': G[y,xs.min()+int(.55*w):,3]=0     # his left arm: its inner side faces the coat at small x
+        else: G[y,:xs.max()-int(.55*w),3]=0
+    fade=np.clip((715-yy)/25.,0,1); G[...,3]=(G[...,3]*fade).astype(np.uint8)
+    G[...,:3]=(G[...,:3]*.9).astype(np.uint8)
+    im=Image.fromarray(G,'RGBA'); bb=im.getbbox(); im.crop(bb).save(OUT+'gusset-'+side+'.webp',quality=92,method=6)
+    print('gusset',side,[bb[0],bb[1],bb[2]-bb[0],bb[3]-bb[1]])

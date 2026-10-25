@@ -29,6 +29,7 @@ const DR_BODY = {
     body: [353, 578, 376, 504], 'body-trim': [353, 578, 376, 504],
     'arm-upper-l': [284, 602, 132, 247], 'arm-fore-l': [233, 736, 164, 327],
     'arm-upper-r': [685, 611, 113, 235], 'arm-fore-r': [690, 739, 151, 326],
+    'gusset-l': [356, 602, 60, 113], 'gusset-r': [687, 612, 43, 103],
     'leg-l': [294, 990, 239, 425], 'leg-r': [555, 990, 238, 426],
   },
   // How far each joint may go, in degrees (a cutout arm past these shows its cut).
@@ -150,6 +151,8 @@ function drBodyArt(cls, root){
     +   `<g class="db-leg db-leg-l">${img('leg-l', 'db-leg-art')}</g><g class="db-leg db-leg-r">${img('leg-r', 'db-leg-art')}</g>`
     +   `<g class="db-poses-legs">${poses('legs')}</g>`
     +   '<g class="db-breath">'
+    // the armpits: still copies of each sleeve's inner top, behind the moving arm, filling the slit an arm swung out opens
+    +     `<g class="db-gusset db-gusset-l">${img('gusset-l', 'db-gusset-art')}</g><g class="db-gusset db-gusset-r">${img('gusset-r', 'db-gusset-art')}</g>`
     +     `<g class="db-arm db-arm-l">${img('arm-upper-l', 'db-upper')}<g class="db-fore db-fore-l">${img('arm-fore-l', 'db-fore-art')}</g></g>`
     +     `<g class="db-arm db-arm-r">${img('arm-upper-r', 'db-upper')}<g class="db-fore db-fore-r">${img('arm-fore-r', 'db-fore-art')}</g></g>`
     +     `<g class="db-poses-back">${poses('back')}</g>`
@@ -191,7 +194,7 @@ function drBodySeed(n){
 function drBody(svg, opts){
   opts = opts || {};
   const q = s => svg.querySelector(s);
-  const el = { root: q('.db-root'), body: q('.db-body'), bodyTrim: q('.db-body-trim'), breath: q('.db-breath'), head: q('.db-head'), armL: q('.db-arm-l'), armR: q('.db-arm-r'), foreL: q('.db-fore-l'), foreR: q('.db-fore-r'),
+  const el = { root: q('.db-root'), gusL: q('.db-gusset-l'), gusR: q('.db-gusset-r'), body: q('.db-body'), bodyTrim: q('.db-body-trim'), breath: q('.db-breath'), head: q('.db-head'), armL: q('.db-arm-l'), armR: q('.db-arm-r'), foreL: q('.db-fore-l'), foreR: q('.db-fore-r'),
                legL: q('.db-leg-l'), legR: q('.db-leg-r'), sheet: q('.ds-sheet'), browL: q('.ds-brow-l'), browR: q('.ds-brow-r'), poses: [...svg.querySelectorAll('.db-pose')] };
   const B = DR_BODY, mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
   const reduced = () => opts.reduced != null ? !!opts.reduced : !!(mq && mq.matches);
@@ -238,6 +241,7 @@ function drBody(svg, opts){
     for(const g of onAt.keys()) if(B.pose[g.dataset.pose].legs) legs = true;   // the plates: at once
     el.armL.style.opacity = hide.L ? '0' : '1';
     el.armR.style.opacity = hide.R ? '0' : '1';
+    if(el.gusL){ el.gusL.style.opacity = hide.L ? '0' : '1'; el.gusR.style.opacity = hide.R ? '0' : '1'; }
     el.legL.style.opacity = legs ? '0' : '1';
     el.legR.style.opacity = legs ? '0' : '1';
     // the body's shoulder stubs (where the cutout upper arms join it) poked out past the narrower

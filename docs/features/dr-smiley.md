@@ -493,6 +493,17 @@ between y 614 and 660; made at the end of `layers/trimedges.py`), and
 `cover()` shows it in place of `body.webp` in the same paint while such a
 drawing is up (a `front` pose with both arms). 59 layers.
 
+**The armpits (same chat).** A cutout upper arm swung out (the walk's 20
+degrees) opened a navy slit between sleeve and coat from the shoulder
+down, because the sleeve turns away from a straight coat edge. Each side
+now has a gusset (`gusset-l/-r.webp`, made at the end of
+`layers/trimedges.py`): a still copy of its upper arm's inner half above
+the armpit (to y 690, faded out by 715), shaded 10%, drawn behind the
+moving arm and hidden with it (`cover()`). At rest it lies under the arm;
+swung out, it fills the slit's top, and below the armpit the gap stays as
+a real one does. Only the inner half, so an arm swung in (the walk's -14)
+never uncovers its outer edge. 61 layers.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

@@ -83,8 +83,8 @@ way up, the wince's arms, the landing").
 Jose to run it from `body-master.png` in a fresh ChatGPT chat). The shoulder
 stub past the front drawings is fixed (`body-trim.webp`, dr-smiley.md,
 "The shoulder stub"). Jose's first legs-toes run drifted (heels down, made
-from the wince picture) and was not used. Open, seen in review: in the walk a
-raised cutout arm opens a navy wedge at the armpit; the landing's shoes
+from the wince picture) and was not used. The walk's armpit slit is filled (gussets, dr-smiley.md "The armpits").
+Open, seen in review: the landing's shoes
 are a brighter blue than his; the mirrored wave's sleeve has a small step
 at the armpit. Still open,
 seen in the review: the mirrored wave's sleeve has a small step in its

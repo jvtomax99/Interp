@@ -103,9 +103,9 @@ const SAMPLE = () => {
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
   const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp', 'pose-point-load.webp', 'pose-point-reach.webp', 'pose-think-rise.webp', 'pose-think-tap.webp', 'pose-clipboard-low.webp', 'pose-clipboard-mid.webp'];
-  ok(layers.length === 59 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  ok(layers.length === 61 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'fifty-nine layers: the app\'s head, face strip and brows, the body and its trimmed copy, two legs, four arm pieces, the twenty-two drawn arm poses twice each (as drawn and mirrored), the three leg plates once ' + layers.join(' '));
+     'sixty-one layers: the app\'s head, face strip and brows, the body and its trimmed copy, two armpit gussets, two legs, four arm pieces, the twenty-two drawn arm poses twice each (as drawn and mirrored), the three leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
