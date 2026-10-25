@@ -1,7 +1,9 @@
 # Dr. Smiley's memory and follow-ups
 
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
-Code is in `index.html` unless a file is named. Keep this in step with the code.
+Code is in `features/ask-hub.js` (moved out of `index.html` 2026-10-25,
+with a few load-time lines left where it began) unless a file is named.
+Keep this in step with the code.
 
 **What Dr. Smiley remembers (on this device).** `ih_smileyMemory` holds, per
 name typed on this phone, a few allowlisted choices (`DR_MEM_FIELDS`: lang,
