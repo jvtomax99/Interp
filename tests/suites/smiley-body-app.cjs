@@ -35,7 +35,7 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   const repaint = await P.evaluate(() => { const c = document.getElementById('content'); c.className = 'content-fade is-home'; lastHomeHtml = ''; renderContent();
     return { heads: [...document.querySelectorAll('.home-wave-icon, .home-wave-pin, .home-ask-tag')].filter(e => getComputedStyle(e).visibility !== 'hidden' && e.getClientRects().length).length, bodies: document.querySelectorAll('.home-body svg.db').length }; });
   ok(repaint.heads === 0 && repaint.bodies === 1, 'after a repaint that resets the page\'s classes: still one Dr. Smiley, the head hidden', repaint);
-  ok(home.stageBody && !home.dock && home.breath === 'dbBreath' && home.images === 51, 'he is the stage for performances, the dock head stays away, he breathes', home);
+  ok(home.stageBody && !home.dock && home.breath === 'dbBreath' && home.images === 58, 'he is the stage for performances, the dock head stays away, he breathes', home);
   ok(!P.__errors.length, 'no page errors', P.__errors);
 
   // The hello's greet played on the rig (the drawn wave is one of its frames); a reaction reaches him through drPerform.

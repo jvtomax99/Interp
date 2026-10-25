@@ -39,7 +39,12 @@ Done: the three hello-wave drawings (in `greet`) and the three cheer drawings
 (in `cheer` and `celebrating`), 2026-10-24; the two point drawings (in
 `point`), the two thinking drawings (in `think` and `thinking`) and the
 clipboard's way up (`clipboard-low` and `clipboard-mid`, in `read` and
-`answering`), 2026-10-25; `docs/features/dr-smiley.md`. The rest are next.
+`answering`), and `shrug-half`, `thumbs-rise`, `wince-arms` and
+`legs-land`, 2026-10-25; `docs/features/dr-smiley.md`. Next: `legs-toes`.
+Run each from `body-master.png` in a fresh ChatGPT chat: the five
+pictures of 2026-10-25 were run one after another in one chat and drifted
+(a darker wall, crisper, the second wince's coat and legs 40 px short,
+the landing's arms carried over from the wince).
 The openings gained a line on 2026-10-25 from what the cuts showed: the
 clipboard drawings came back with a blotchy wall, a shorter, narrower coat
 and darker scrubs, each of which the cutter had to work around.

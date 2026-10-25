@@ -74,14 +74,18 @@ trouser and hand fringe gone on navy (`layers/trimedges.py`; dr-smiley.md,
 "The standing cut's edges"). The openings in `prompts-animation.md` gained
 a line each from what the clipboard cut showed.
 
-**Next:** the remaining drawings in `prompts-animation.md`, given to Jose
-ready to paste on 2026-10-25: `shrug-half` (the shrug's way in, replacing
-its `fsx` squeeze), `thumbs-rise` (the thumb's way up, replacing its `fy`
-slide), `wince-arms` (a real flinch; the wince now uses the open-palmed
-cutout arms), `legs-land` and `legs-toes`. Each: into `POSES` in
-`cutframes.py`, its box from `poses.json` into `DR_BODY.pose`, built into
-its performance, reviewed on navy frame by frame. Also seen: in the walk
-a raised cutout arm opens a navy wedge at the armpit (the cut shoulder). Still open,
+Then Jose's run of those prompts: `shrug-half`, `thumbs-rise`, `wince-arms`
+and `legs-land` cut and built into `shrug`, `bounce`, `wince` and the
+cheer's and hop's landing (dr-smiley.md, "The shrug's way in, the thumb's
+way up, the wince's arms, the landing").
+
+**Next:** `legs-toes` (the one drawing left in `prompts-animation.md`; ask
+Jose to run it from `body-master.png` in a fresh ChatGPT chat). Open, seen
+in review: the body's right shoulder corner shows as a small white nub
+past a torso drawing's narrower shoulder (wince, thinking); in the walk a
+raised cutout arm opens a navy wedge at the armpit; the landing's shoes
+are a brighter blue than his; the mirrored wave's sleeve has a small step
+at the armpit. Still open,
 seen in the review: the mirrored wave's sleeve has a small step in its
 cut at the armpit (a few px, visible only zoomed in).
 

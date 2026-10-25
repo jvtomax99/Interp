@@ -103,9 +103,9 @@ const SAMPLE = () => {
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
   const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp', 'pose-point-load.webp', 'pose-point-reach.webp', 'pose-think-rise.webp', 'pose-think-tap.webp', 'pose-clipboard-low.webp', 'pose-clipboard-mid.webp'];
-  ok(layers.length === 51 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  ok(layers.length === 58 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'fifty-one layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the nineteen drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
+     'fifty-eight layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the twenty-two drawn arm poses twice each (as drawn and mirrored), the three leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
@@ -154,7 +154,7 @@ const SAMPLE = () => {
   ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));
   ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
   ok(/thumbs-up-[lr]/.test(seen('bounce')), 'bounce: the drawn thumbs-up from the top of the hop ' + seen('bounce'));
-  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.wince.frameEverShown && !lively.doze.frameEverShown, 'ack, wink, wince, the walk and the doze use the cutout pieces only');
+  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.doze.frameEverShown, 'ack, wink, the walk and the doze use the cutout pieces only');
   // The doze: eyes closed on the sleep frame, the head sunk, then awake and back.
   const dz = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(3); b.perform('doze', { done: () => { res(out); } }); drBodySeed(null);
     const out = { sleepMs: 0, maxLift: 0, last: performance.now() }; const tick = () => { const now = performance.now(); if(b.pose.face === 'sleep') out.sleepMs += now - out.last; out.last = now; out.maxLift = Math.max(out.maxLift, b.pose.lift); if(b.busy()) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }));

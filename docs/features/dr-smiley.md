@@ -454,6 +454,36 @@ forearm also lost a sliver of shaded wall beside the coat. Boxes in
 `DR_BODY.box` follow (body 376 x 504, legs re-cropped). body-rig 158,
 smiley-body-app 18.
 
+**The shrug's way in, the thumb's way up, the wince's arms, the landing
+(same chat).** Jose ran the prompts and sent five pictures, unnamed; read
+as: `wince-arms` (twice; the second, its coat and legs drawn shorter, set
+aside), `thumbs-rise`, `shrug-half` and `legs-land` (made from the wince
+picture, so its arms are the wince's; only its legs are used). Drawn
+crisper than the master, the wall at 182 not 212, scrubs a brighter blue,
+about 6 px left and 2 to 8 px up (collar 8, hem 2). `shrug-half` is cut
+like `shrug` (both arms behind the coat) and runs on under both of the
+body's flanks (`bothseams`); the drawing leaves a sliver of wall between
+each sleeve and the coat, just past the body's edge, closed in the
+sleeve's colour. `thumbs-rise` is a band in front like `thumbs-up`, its
+coat and scrubs matched to the master's colour (`match`: its scrubs read
+as a bright stripe), the band ending at the coat's front edge (x 505).
+`wince-arms` is cut whole like the thinking drawings, ending just under
+the cuffs on a 12 px fade (`fadepx`; its coat's front edge sits 10 px off
+the master's and the usual 40 px fade smudged it over his scrubs), and
+between the lapels his own scrubs show (`dropblue`: its neckline has a
+trim his has not, a double V). `legs-land` is a leg plate moved 41 px down
+(its legs and coat drawn 40 px short; the shoes now stand on the floor).
+In the acting: the shrug goes in and out through `shrug-half` (no more
+`fsx` squeeze); the right-answer hop closes the fist (`thumbs-rise`)
+before the thumb springs up and goes down through it again; the wince
+pulls the drawn arms in (as drawn only, `frameL`) and lets them go into
+the cutout arms on the spring back; the cheer's and the hop's landing
+squash is on `legs-land`, then the crouch. Still open: when a torso
+drawing is up, the body piece's right shoulder corner shows past the
+drawing's narrower shoulder as a small white nub; `legs-toes` not yet
+drawn; the landing's shoes are a brighter blue than his. body-rig 158
+(58 layers), smiley-body-app 18.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

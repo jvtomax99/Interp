@@ -68,6 +68,14 @@ const DR_BODY = {
     'think-rise': { box: [272, 519, 506, 441], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     'think-tap': { box: [336, 558, 397, 402], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     shrug:       { box: [97, 585, 889, 247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    // The fourth chat's drawings (2026-10-25): the shrug's way in (both elbows at his sides,
+    // forearms half out, palms turning up); the thumb's way up (the fist at his stomach,
+    // the thumb starting up), a band in front like `thumbs-up`; the wince's arms (both
+    // hands curled in front of his stomach), cut whole like the thinking drawings, so
+    // played as drawn only (frameL), never slid or turned.
+    'shrug-half': { box: [224, 587, 638, 367], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    'thumbs-rise': { box: [322, 574, 199, 342], arms: ['L'], layer: 'front', pivot: [353, 630] },
+    'wince-arms': { box: [346, 574, 389, 306], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
     // The cheer's drawings (prompts-animation.md, 2026-10-24): both arms, behind the coat.
     // The load (fists pulled low by his hips, about to throw them up), the rise (fists
     // at shoulder height, elbows out) and the V (both fists above his head).
@@ -95,6 +103,8 @@ const DR_BODY = {
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },
+    // A landing (2026-10-25): knees bent deep, feet planted wide; after the jump, before the crouch.
+    'legs-land': { box: [209, 990, 662, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
   },
 };
 // Drawn poses swap at once, the way a drawn animation swaps drawings and his
@@ -464,7 +474,7 @@ const DR_BODY_PERF = {
       [0, { [CH]: top }],                                                                                                                               // the top: the V
       [j(190), { y: -50 * jump, sy: 1 + .04 * k, sx: 1 - .02 * k, head: -s * 3 * k, lift: -6 * k }, 'out'],
       [j(150), { y: -42 * jump, sy: 1.01, sx: .995, face: 'laughB' }, 'in'],
-      [j(150), { frameLegs: 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash
+      [j(150), { frameLegs: jump ? 'legs-land' : 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash, drawn
       [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the fists drop with it
       [j(90), { lift: 6 * k }, 'out'],
       [0, { [CH]: top }],                                                                                                                               // and fly up again
@@ -507,11 +517,15 @@ const DR_BODY_PERF = {
     const s = R() < .5 ? -1 : 1, FR = s < 0 ? 'frameL' : 'frameR';
     return { beats: [
       [j(180), { lift: 4 * k, head: -s * 1 * k, face: 'blink1' }, 'in'],
-      [60, { [FR]: 'shrug', fsx: .5, fy: 14 }, 'linear'],
-      [j(280), { fsx: 1, fy: 0, lift: -10 * k, head: s * 4 * k, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],
+      [0, { [FR]: 'shrug-half' }],                                                                       // the way in, drawn: elbows at his sides, palms turning up
+      [j(110), { lift: -4 * k, head: s * 1.5 * k }, 'out'],
+      [0, { [FR]: 'shrug' }],
+      [j(280), { lift: -10 * k, head: s * 4 * k, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],
       [j(700, .2), { head: s * 4.5 * k }, 'inOut'],
-      [j(200), { fsx: .52, fy: 14, lift: 0, sy: 1, face: 'smile1', brow: 'rest' }, 'in'],
-      [60, { [FR]: '', fsx: 1, fy: 0 }, 'linear'],
+      [j(140), { lift: -3 * k, sy: 1, face: 'smile1', brow: 'rest' }, 'in'],
+      [0, { [FR]: 'shrug-half' }],                                                                       // and out the same way
+      [j(120), { lift: 0 }, 'in'],
+      [0, { [FR]: '' }],
       [j(320), { head: 0, face: 'rest' }, 'out'],
     ], still: { lift: -10, head: s * 4, [FR]: 'shrug', face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
   },
@@ -586,27 +600,32 @@ const DR_BODY_PERF = {
     const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, O = side === 'L' ? 'R' : 'L', FR = 'frame' + side;
     return { beats: [
       [j(150), { frameLegs: 'crouch', sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, head: -s * 1 * k, face: 'smile1' }, 'in'],                              // the drawn crouch
-      [60, { [FR]: 'thumbs-up', fy: 44, frot: 0 }, 'linear'],
+      [0, { [FR]: 'thumbs-rise', frot: 0 }],                                                                                                                   // the fist closing, the thumb starting up
+      [0, { [FR]: 'thumbs-up', fy: 14 }],
       [j(230), { frameLegs: jump ? 'jump' : 'crouch', fy: 0, sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, ['a' + O]: 6 * k, ['f' + O]: 10 * k, head: s * 2.5 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // up: the jump, the thumb rises; the other arm stays close (out stiff it read as a board)
-      [j(170), { frameLegs: 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k }, 'in'],
-      [j(200), { sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, frot: -s * 5 * k, head: s * 3 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, the thumb pushed up
+      [j(170), { frameLegs: jump ? 'legs-land' : 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k }, 'in'],      // the landing, drawn
+      [j(200), { frameLegs: 'crouch', sy: 1 + .015 * k, sx: 1 - .007 * k, y: -22 * jump, lift: -2 * k, frot: -s * 5 * k, head: s * 3 * k, face: 'laughB' }, 'snap'],         // a smaller second hop, the thumb pushed up
       [j(160), { y: 0, sy: 1 - .015 * k, sx: 1 + .007 * k, lift: 3 * k, frot: 0 }, 'in'],
-      [j(200), { frameLegs: '', fy: 40, sy: 1, sx: 1, lift: 0, head: 0, ['a' + O]: 0, ['f' + O]: 0, face: 'smile', brow: 'rest' }, 'in'],
-      [60, { [FR]: '', fy: 0 }, 'linear'],
+      [j(160), { frameLegs: '', sy: 1, sx: 1, lift: 0, head: 0, ['a' + O]: 0, ['f' + O]: 0, face: 'smile', brow: 'rest' }, 'in'],
+      [0, { [FR]: 'thumbs-rise' }],                                                                                                                            // down the way it came
+      [j(110), { lift: 1 * k }, 'out'],
+      [0, { [FR]: '' }],
       [j(280), { face: 'rest' }, 'out'],
     ], still: { [FR]: 'thumbs-up', frameLegs: 'crouch', head: s * 2.5, face: 'smile', brow: 'up' }, stillMs: 800 };
   },
-  // A wrong answer: a wince, drawn in and down, then a caring smile.
+  // A wrong answer: a wince, the arms pulled in (drawn) and down, then a caring smile.
   wince(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
     const s = R() < .5 ? -1 : 1;
     return { beats: [
       [j(80), { face: 'blink2' }, 'linear'],
-      [j(200), { sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 9 * k, head: s * 5 * k, lean: -s * 1 * k, aL: -6 * k, aR: -6 * k, fL: 16 * k, fR: 16 * k, face: 'worried', brow: 'caring' }, 'snap'],
+      [0, { frameL: 'wince-arms' }],                                                                       // the arms pulled in, drawn (as drawn only: it carries his coat)
+      [j(200), { sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 9 * k, head: s * 5 * k, lean: -s * 1 * k, face: 'worried', brow: 'caring' }, 'snap'],
       [j(650, .2), { head: s * 5.5 * k }, 'inOut'],
-      [j(420), { sy: 1, sx: 1, lift: 0, head: -s * .5 * k, lean: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile1' }, 'spring'],
+      [0, { frameL: '' }],
+      [j(420), { sy: 1, sx: 1, lift: 0, head: -s * .5 * k, lean: 0, face: 'smile1' }, 'spring'],
       [j(320), { head: 0, face: 'rest', brow: 'rest' }, 'out'],
-    ], still: { lift: 9, head: s * 5, face: 'worried', brow: 'caring' }, stillMs: 900 };
+    ], still: { frameL: 'wince-arms', lift: 9, head: s * 5, face: 'worried', brow: 'caring' }, stillMs: 900 };
   },
   // A walk: `steps` paces to `dir` (1 right, -1 left), legs alternating,
   // arms swinging against them, a bob on each step. Still: nothing.
