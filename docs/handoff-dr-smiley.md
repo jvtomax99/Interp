@@ -85,10 +85,8 @@ stub past the front drawings is fixed (`body-trim.webp`, dr-smiley.md,
 "The shoulder stub"). Jose's first legs-toes run drifted (heels down, made
 from the wince picture) and was not used. The walk's armpit slit is filled (gussets, dr-smiley.md "The armpits").
 The landing's shoes match his now.
-Open, seen in review: the mirrored wave's sleeve has a small step
-at the armpit. Still open,
-seen in the review: the mirrored wave's sleeve has a small step in its
-cut at the armpit (a few px, visible only zoomed in).
+The armpit's step on both sides (drawn and mirrored) is closed (dr-smiley.md,
+"The armpit's step"). Open: `legs-toes` (Jose's picture), nothing else seen.
 
 ## Where it stands (2026-10-24, evening, second chat)
 

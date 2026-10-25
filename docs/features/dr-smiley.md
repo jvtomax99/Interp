@@ -509,6 +509,19 @@ purer blue than his. Below y 1300 its blue is now moved to the master
 shoes' mean and spread per channel (`SHOES` in `cutframes.py`), faded in
 over 20 px so the trouser hem never shows a line.
 
+**The armpit's step (same chat).** Where a raised sleeve's underside met
+the coat there was a small navy notch, on both sides: below y 690 every
+arm frame stops 5 px short of the body. The fill `shrug-half` got
+(`bothseams`) now runs for every arm frame: the gap between the sleeve and
+the body, closed within 8 px of the sleeve, in the sleeve's colour. The
+mirrored side had a bigger one: his coat there is 20 to 26 px narrower
+than the mirror of the drawn side all the way down, so a mirrored sleeve's
+armpit missed the coat. For each one-arm frame (`single`) that gap is
+worked out in mirrored space (y 640 to 790) and mirrored back into the
+frame, where it lies under the body on the drawn side. Pixels the fills
+surround are made solid (a navy arc showed at the wave-rise armpit).
+Boxes of point, point-load, point-reach and wave-in grew 4 to 9 px.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

@@ -50,13 +50,13 @@ const DR_BODY = {
   // one also exists mirrored about his middle (`mirrorX`), for the other side.
   mirrorX: 556,
   pose: {
-    wave:        { box: [134, 360, 340, 394], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    wave:        { box: [134, 360, 340, 397], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     // The wave's breakdowns (prompts-animation.md, 2026-10-24): on the way up the
     // elbow leads and the hand trails below it; at the top the hand tips in
     // toward his head and out away from it, the wag's two extremes, with `wave`
     // as the drawing between them.
     'wave-rise': { box: [127, 528, 347, 286], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    'wave-in':   { box: [142, 273, 332, 443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
+    'wave-in':   { box: [142, 273, 332, 447], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     'wave-out':  { box: [46, 280, 428, 444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     'fist-pump': { box: [121, 364, 330, 381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     // The thinking drawings (2026-10-25): his whole torso from the shoulders down past
@@ -82,7 +82,7 @@ const DR_BODY = {
     // at shoulder height, elbows out) and the V (both fists above his head).
     'cheer-load': { box: [243, 587, 590, 352], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     'cheer-mid':  { box: [195, 481, 711, 275], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
-    'cheer-up':   { box: [73, 190, 937, 521], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
+    'cheer-up':   { box: [73, 190, 937, 524], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     // Cut as a feathered band of the picture (its sleeve lies over the coat), so it is drawn in front.
     'thumbs-up': { box: [247, 512, 189, 354], arms: ['L'], layer: 'front', pivot: [353, 630] },
     // Both hands on a clipboard at his chest: cut whole like the thinking drawings (2026-10-25;
@@ -95,12 +95,12 @@ const DR_BODY = {
     'clipboard-mid': { box: [322, 581, 436, 483], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
     // The pointing arm: straight out at shoulder height, the index finger out ("look here"); since the
     // point's drawings it is the in-between on the way down. `frot` bobs it about the shoulder.
-    point:       { box: [24, 559, 427, 153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    point:       { box: [24, 559, 427, 160], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     // The point's drawings (prompts-animation.md, 2026-10-25): the load, the arm bent and pulled
     // back with the hand by his shoulder, finger already out; the reach, the arm stretched out
     // a little above the shoulder (20 degrees higher than `point`), the strong moment.
-    'point-load':  { box: [98, 420, 376, 294], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    'point-reach': { box: [10, 418, 464, 255], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'point-load':  { box: [98, 420, 376, 298], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
+    'point-reach': { box: [10, 418, 464, 269], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
     // The leg plates: both legs whole, in place of the two cutout legs (no mirror; `frameLegs` names one).
     crouch:      { box: [292, 990, 506, 425], legs: true, layer: 'legs', pivot: [556, 1040] },
     jump:        { box: [315, 990, 463, 328], legs: true, layer: 'legs', pivot: [556, 1040] },

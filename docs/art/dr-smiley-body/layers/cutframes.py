@@ -198,12 +198,27 @@ for name,cfg in POSES.items():
         mask=np.isin(lab,[i for i in np.unique(lab[620:1058]) if i and sizes[i-1]>2000 and i in joins])
         mask=ndi.binary_dilation(mask,iterations=1)&(aP>0.02)|fillsmall(mask)
         aP=np.maximum(aP,ndi.binary_erosion(mask,iterations=1))   # what was filled is solid
-        if cfg.get('bothseams'):
+        if True:
             # the drawing leaves a sliver of wall between each sleeve and its coat, just past the
-            # body piece's edge: a navy line on Home. Closed, in the sleeve's own colour
-            B=bodyA>.5; gap=ndi.binary_closing(mask|B,iterations=6)&~mask&~B&(yy>600)&(yy<1000)
+            # body piece's edge: a navy line on Home (shrug-half), and at the armpit, where the
+            # frame stops 5 px short of the body below y 690, a notch under the sleeve (every
+            # one-arm frame, drawn and mirrored, 2026-10-25). Closed, in the sleeve's own colour
+            B=bodyA>.5; gap=ndi.binary_closing(mask|B,iterations=6)&~mask&~B&(yy>600)&(yy<1000)&ndi.binary_dilation(mask,iterations=8)&(headA<.35)   # only beside the sleeve itself
             _,(iy,ix)=ndi.distance_transform_edt(~mask,return_indices=True)
             P=P.copy(); P[gap]=P[iy[gap],ix[gap]]; mask|=gap; aP=np.where(gap,1.0,aP)
+            if cfg.get('single'):
+                # the same for the copy shown mirrored on his other side: his coat there is 20 to
+                # 26 px narrower than the mirror of this side, so under a mirrored sleeve the
+                # armpit missed the coat, a navy notch with a hard top (2026-10-25). That gap,
+                # worked out in mirrored space, mirrored back: under the body on this side
+                def mir(A):
+                    O=np.zeros_like(A); src=1112-np.arange(W); ok=(src>=0)&(src<W); O[:,ok]=A[:,src[ok]]; return O
+                mm=mir(mask); g=ndi.binary_closing(mm|B,iterations=15)&~mm&~B&ndi.binary_dilation(mm,iterations=18)&(yy>640)&(yy<790)&(headA<.35)
+                g=mir(g)&~mask
+                _,(iy,ix)=ndi.distance_transform_edt(~mask,return_indices=True)
+                P[g]=P[iy[g],ix[g]]; mask|=g; aP=np.where(g,1.0,aP)
+                print('  mirror fill px',int(g.sum()),'not under the body',int((g&(bodyA<.5)).sum()))
+            aP=np.maximum(aP,ndi.binary_erosion(mask,iterations=1))   # soft pixels the fill now surrounds: solid (a navy arc at the armpit)
         soft=ndi.gaussian_filter(mask.astype(float),0.8)
     elif cfg.get('torso'):
         # Both arms folded in front of him (the thinking drawings, 2026-10-25, the navy
