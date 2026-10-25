@@ -49,6 +49,8 @@ census and the hippocampus: the page splits whatever is left between the
 two sides (it assumed exactly four until 2026-10-21 and drew nothing).
 Broca's area has been empty since 2026-10-25: the whole Ask the Hub group
 moved to `features/ask-hub.js` (`ask: []` in `tools/brain-data.cjs`).
+The motor strip keeps only the five later Smiley sections since his engine
+moved to `features/smiley-engine.js` (2026-10-25).
 `claim()` returns no spots for an empty region (before, asking for 0 took
 every spot and the page stopped drawing).
 
