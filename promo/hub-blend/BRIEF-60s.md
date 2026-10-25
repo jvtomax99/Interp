@@ -70,10 +70,13 @@ from that cue list instead of `HOOK_MAP`.
 
 ## Not proven yet
 
-- Demucs: PyTorch and Demucs install from PyPI (2026-10-25), but its model only downloads from
-  `dl.fbaipublicfiles.com`, which this environment's network blocks (also `download.pytorch.org`
-  and `huggingface.co`). Jose added the host to Allowed domains; the chat that was open did not
-  see it. Try again in a new chat. Quality still unheard.
+- Removing v11's narrator (done 2026-10-25): Demucs' model host (dl.fbaipublicfiles.com),
+  Hugging Face and download.pytorch.org still answer 403 here. What works instead:
+  `pip install "audio-separator[cpu]" audioread standard-aifc standard-sunau` in a venv, then
+  `audio-separator v11.wav --model_filename UVR-MDX-NET-Inst_HQ_3.onnx --single_stem Instrumental`
+  (it fetches its 67 MB model itself; about 1 min on 4 cores). The music sat 12 dB under v11's
+  narrator (-33 against -21 LUFS); a second pass with `UVR-MDX-NET-Voc_FT.onnx` finds voice left
+  at -62 LUFS, 29 dB under the music. Jose: "clean".
 - Voice, locked (Jose, 2026-10-25, draft 2): draft 1 (one clip per line) sounded robotic, so
   the script is read in 7 long passages (`assets/voice-60s/groups.tsv`, Michael at `-s 0.92`,
   the two Spanish lines in Dora), joined to end at 56.3 s: `assets/voice-60s.m4a`. Passage
