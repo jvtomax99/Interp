@@ -86,6 +86,8 @@ const PRECACHE = [
   './drsmiley/body/pose-point-reach.webp',
   './drsmiley/body/pose-shrug.webp',
   './drsmiley/body/pose-think.webp',
+  './drsmiley/body/pose-think-rise.webp',
+  './drsmiley/body/pose-think-tap.webp',
   './drsmiley/body/pose-thumbs-up.webp',
   './drsmiley/body/pose-wave.webp',
   './drsmiley/body/pose-wave-in.webp',

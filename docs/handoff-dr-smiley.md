@@ -58,8 +58,14 @@ coat. `cutframes.py` now takes names to recut only those
 (`python3 -I cutframes.py point-load point-reach`). body-rig 158,
 smiley-body-app 18. `main` merged in on 2026-10-25.
 
-**Next:** the remaining drawings in `prompts-animation.md` (think, shrug,
-read, thumbs, wince, the two leg drawings), the same way. Still open,
+Then the thinking (same chat): `think-rise` and `think-tap` in, and all
+three thinking drawings recut whole (the old one was sleeveless on navy);
+they play as drawn only (dr-smiley.md, "The thinking, drawn").
+
+**Next:** the clipboard (`read`, `answering`): recut it the `torso` way and
+play it as drawn (seams at the sleeve ends and the band's bottom on navy).
+Then the remaining drawings in `prompts-animation.md` (shrug, read, thumbs,
+wince, the two leg drawings), the same way. Still open,
 seen in the review: the mirrored wave's sleeve has a small step in its
 cut at the armpit (a few px, visible only zoomed in).
 

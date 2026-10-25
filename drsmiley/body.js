@@ -58,7 +58,15 @@ const DR_BODY = {
     'wave-in':   { box: [142, 273, 332, 443], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     'wave-out':  { box: [46, 280, 428, 444], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [190, 600] },
     'fist-pump': { box: [121, 364, 330, 381], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
-    think:       { box: [352, 497, 275, 446], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
+    // The thinking drawings (2026-10-25): his whole torso from the shoulders down past
+    // the hands, solid, in front of the body (the sleeves lie on the coat, and a cut of
+    // only the changes lost them), faded into its coat at the bottom. So they never
+    // slide (fy) or turn (frot): the coat would move. The rise (the hand on its way up
+    // at chest height, finger starting to point, the other arm starting to fold), the
+    // held pose, and the tap (the finger lifted off the chin).
+    think:       { box: [329, 559, 417, 401], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
+    'think-rise': { box: [272, 519, 506, 441], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
+    'think-tap': { box: [336, 558, 397, 402], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     shrug:       { box: [97, 585, 889, 247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     // The cheer's drawings (prompts-animation.md, 2026-10-24): both arms, behind the coat.
     // The load (fists pulled low by his hips, about to throw them up), the rise (fists
@@ -317,7 +325,10 @@ function drBody(svg, opts){
      replaces it. A gesture (perform) cuts in and the hold carries on after.
      Still: the one pose in `still`, held; a gesture's one frame, then back. */
   function ctxFor(name){
-    const m = mode(), R = drBodyRand, side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1;
+    // a state drawn with whole-torso drawings plays only as drawn (`asDrawn`): his coat
+    // is not symmetric, and a mirrored torso lands its pockets and front edge beside
+    // the body's own
+    const m = mode(), R = drBodyRand, pick = R() < .5 ? 'L' : 'R', side = DR_BODY_STATES[name].asDrawn ? 'L' : pick, s = side === 'L' ? -1 : 1;
     return { name, mode: m, k: m === 'focused' ? .6 : 1, beat: -1, since: performance.now(), R, side, s, A: 'a' + side, F: 'f' + side, O: side === 'L' ? 'R' : 'L', FR: 'frame' + side,
              j: (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))) };
   }
@@ -409,18 +420,24 @@ const DR_BODY_PERF = {
   // arms stay down), eyes up and away from the hand, then the "aha".
   think(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
-    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, O = side === 'L' ? 'R' : 'L', FR = 'frame' + side;
-    const look = 'lookU' + O;
+    R(); const side = 'L', s = -1, O = 'R', FR = 'frameL';   // as drawn only: the drawings carry his coat (see ctxFor)
+    const A = 'a' + side, F = 'f' + side, look = 'lookU' + O;
     return { beats: [
-      [j(260), { lean: -s * 1.2 * k, head: -s * 2 * k, face: 'blink2', brow: 'focused' }, 'out'],
-      [60, { [FR]: 'think', fy: 46, frot: 0 }, 'linear'],
-      [j(360), { fy: 0, head: s * 5 * k, lean: s * .8 * k, face: look }, 'spring'],
-      [j(mode === 'focused' ? 700 : 950, .2), { head: s * 6 * k, lift: 2 * k }, 'inOut'],
-      [j(360), { face: 'half' + O, head: s * 3 * k }, 'out'],
-      [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                        // aha
-      [j(180), { fy: 40, head: -s * .5 * k, lift: 4 * k, face: 'smile1', brow: 'rest' }, 'in'],
-      [60, { [FR]: '', fy: 0 }, 'linear'],
-      [j(320), { head: 0, lift: 0, lean: 0, face: 'rest' }, 'out'],
+      [j(160), { lean: -s * 1.2 * k, head: -s * 2 * k, sy: 1 - .012 * k, face: 'blink2', brow: 'focused' }, 'out'],   // a breath in (a cutout arm would only swing out sideways)
+      [0, { [FR]: 'think-rise' }],                                                                                  // the rise drawn: the hand comes up in front
+      [j(120), { head: s * 1.5 * k, lean: 0, sy: 1, face: 'blink1' }, 'out'],
+      [0, { [FR]: 'think' }],                                                                                         // finger to the chin
+      [j(340), { head: s * 5 * k, lean: s * .8 * k, lift: 2 * k, sy: 1 - .01 * k, face: look }, 'spring'],
+      [j(mode === 'focused' ? 700 : 900, .2), { head: s * 6 * k, lift: 3 * k, sy: 1 }, 'inOut'],
+      [0, { [FR]: 'think-tap' }], [j(110), {}, 'linear'], [0, { [FR]: 'think' }], [j(150), {}, 'linear'],          // the finger taps, twice
+      [0, { [FR]: 'think-tap' }], [j(110), {}, 'linear'], [0, { [FR]: 'think' }],
+      [j(320), { face: 'half' + O, head: s * 3 * k }, 'out'],
+      [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                                                    // aha
+      [j(120), { lift: 4 * k, face: 'smile1', brow: 'rest' }, 'out'],
+      [0, { [FR]: 'think-rise' }],                                                                                    // down the way it came
+      [j(110), { head: -s * .5 * k }, 'in'],
+      [0, { [FR]: '', ['f' + O]: 10, [F]: 16 }],                                                                      // into the cutout arms, hanging, elbows still a little bent
+      [j(320), { ['f' + O]: 0, [F]: 0, head: 0, lift: 0, lean: 0, face: 'rest' }, 'spring'],
     ], still: { [FR]: 'think', head: s * 5, face: look, brow: 'focused' }, stillMs: 1200 };
   },
   // A cheer, drawn (2026-10-24, the cheer drawings): he crouches and pulls both
@@ -658,30 +675,36 @@ const DR_BODY_STATES = {
       b.push([j(500, .3), {}, 'linear']);
       return b; },
   },
-  // Thinking (processing): the drawn folded arm and finger rise to his chin,
+  // Thinking (processing): the hand rises through the drawn rise to his chin,
   // eyes up and away from the hand, wandering; a slow blink every other beat,
-  // a tap of the finger now and then; slower once it has taken a while. The
-  // exit is the "aha", and the arm goes back down.
+  // the finger tapping now and then (the tap drawing); slower once it has
+  // taken a while. The exit is the "aha", and down through the rise.
   thinking: {
+    asDrawn: true,
     still: c => ({ [c.FR]: 'think', head: c.s * 5, face: 'lookU' + c.O, brow: 'focused' }),
     enter: c => { const { k, s, j, O, FR } = c; return [
       [j(260), { lean: -s * 1.2 * k, head: -s * 2 * k, face: 'blink2', brow: 'focused' }, 'out'],
-      [60, { [FR]: 'think', fy: 46, frot: 0 }, 'linear'],
-      [j(360), { fy: 0, head: s * 5 * k, lean: s * .8 * k, lift: 2 * k, face: 'lookU' + O }, 'spring'],
+      [0, { [FR]: 'think-rise', frot: 0 }],
+      [j(120), { head: s * 1.5 * k, lean: 0 }, 'out'],
+      [0, { [FR]: 'think' }],
+      [j(340), { head: s * 5 * k, lean: s * .8 * k, lift: 2 * k, face: 'lookU' + O }, 'spring'],
     ]; },
     hold: c => { const { k, s, j, O, FR, beat, since } = c;
       const faces = ['lookU' + O, 'lookU', 'lookU' + O, 'lookU'], face = faces[beat % 4], turn = [6, 4.5, 6.5, 4][beat % 4];
       const slow = performance.now() - since > 9000 ? 1.5 : 1, b = [];
-      b.push([Math.round(j(1100, .3) * slow), { [FR]: 'think', fy: 0, lean: s * .8 * k, head: s * turn * k, lift: (2 + (beat % 2)) * k, face, brow: 'focused' }, 'inOut']);
-      if(beat % 4 === 3) b.push([j(170), { frot: 2.4 * k }, 'inOut'], [j(170), { frot: 0 }, 'inOut']);   // the finger taps
+      b.push([Math.round(j(1100, .3) * slow), { [FR]: 'think', lean: s * .8 * k, head: s * turn * k, lift: (2 + (beat % 2)) * k, face, brow: 'focused' }, 'inOut']);
+      if(beat % 4 === 3) b.push([0, { [FR]: 'think-tap' }], [j(110), {}, 'linear'], [0, { [FR]: 'think' }], [j(150), {}, 'linear'],
+        [0, { [FR]: 'think-tap' }], [j(110), {}, 'linear'], [0, { [FR]: 'think' }]);   // the finger taps, twice
       if(beat % 2 === 1) b.push(...DR_BODY_BLINK(face));
       b.push([Math.round(j(400, .3) * slow), {}, 'linear']);
       return b; },
     exit: c => { const { k, s, j, FR } = c; return [
       [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                        // aha
-      [j(180), { fy: 40, frot: 0, head: -s * .5 * k, lift: 4 * k, face: 'smile1', brow: 'rest' }, 'in'],
-      [60, { [FR]: '', fy: 0 }, 'linear'],
-      [j(320), { head: 0, lift: 0, lean: 0, face: 'rest' }, 'out'],
+      [j(120), { lift: 4 * k, face: 'smile1', brow: 'rest' }, 'out'],
+      [0, { [FR]: 'think-rise' }],                                                        // down the way it came
+      [j(110), { head: -s * .5 * k }, 'in'],
+      [0, { [FR]: '', fL: 14, fR: 14 }],
+      [j(320), { fL: 0, fR: 0, head: 0, lift: 0, lean: 0, face: 'rest' }, 'spring'],
     ]; },
   },
   // Answering (reading the answer with you): the drawn clipboard rises into

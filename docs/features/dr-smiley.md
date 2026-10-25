@@ -379,6 +379,33 @@ both points and the old point) now run on 26 px under the body's outer edge
 between y 540 and 700, hidden by the body on their own side and filling the
 gap on the other. Their boxes in `DR_BODY.pose` grew to match.
 
+**The thinking, drawn (2026-10-25, the same chat).** Jose ran `think-rise`
+(his right hand on its way up at chest height, the finger starting to
+point, the other arm starting to fold) and `think-tap` (the finger lifted
+off the chin), 5 and 6 px right and 1 down of the master. On navy the old
+`think` turned out sleeveless: it was cut as what changed against the
+master, and a sleeve lying on the coat is white on white, so both sleeves
+were dropped where they lay on him and the cutout arms are hidden; its cuff
+was torn too. All three are now cut whole (`torso` in `cutframes.py`): his
+torso from the shoulders to y 960, solid, in front of the body, faded into
+its coat over the last 40 px; over the head piece only the hand (skin that
+differs), never the grey the drawing's own head leaves; above the coat's
+shoulder line (`TOP`, the body piece's top per column, only above y 600)
+only skin, since the wall between hand and face is the coat's grey; the
+sleeve's shaded edge closed (binary closing 8); coat and scrubs moved to
+the master's colour (the drawings' scrubs ran 36 to 57 levels darker); the
+rise drops a loose patch of wall past its elbow (`drop`). These drawings
+carry his coat, so they never slide (`fy`) or turn (`frot`), and they play
+only as drawn: his coat is not symmetric and a mirrored torso landed its
+pockets and front edge beside the body's own (`asDrawn` on a held state;
+`think` takes side L). `think` is drawn throughout: a breath in (no cutout
+arm: it can only swing out sideways), the rise, the finger to the chin
+settling on a spring, the hold, two taps (the tap drawing and back), the
+aha, down through the rise into the cutout arms hanging with a small bend.
+`thinking` enters and leaves the same way and taps with the drawing. The
+clipboard (`read`, `answering`) is cut as an older feathered band and shows
+similar seams on navy (sleeve ends, the band's bottom); next.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from
