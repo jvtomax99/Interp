@@ -252,7 +252,11 @@ move each, with the same proof every time and nothing visible changing.
    open_prep and keep_lang succeeding; the rest refusing for real
    reasons), a question left waiting brought back and answered after a
    reload, the panel's fit; globals unchanged, no page errors. journey.cjs
-   and guide.cjs cover the rest. `index.html` 1.15 MB to 1.02 MB.
+   and guide.cjs cover the rest; all suites pass. HUMC Brain's page broke
+   on its now-empty Ask region (`claim` asked for 0 spots took them all;
+   humc-brain.cjs caught it): `claim` now returns none for 0. First paint
+   (first-paint.cjs, 5 runs): slow network Home painted 4925 to 4702 ms,
+   4g 1660 to 1594 ms; within noise. `index.html` 1.15 MB to 1.02 MB.
 3. **JS by feature, one file per PR**, leaves first (the census says which:
    sections whose names few others use). Candidates from the sizes alone:
    Dr. Smiley's engine (`DrAnim` 25 KB with `DR_FACE_SEQ`, `DR_PERF`,
