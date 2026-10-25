@@ -58,8 +58,13 @@ from that cue list instead of `HOOK_MAP`.
 - Draft render of the 60 s cut, voice only: `hyperframes render -c remake-60.html -w 3` took 16 min 40 s
   at 540x960 on 4 cores (`out/`, not kept in git). Lint: copy `remake-60.html` alone into a scratch
   folder as `index.html` (with the folders linked), since the project has several root pages.
-- Still to do: music (Demucs, needs a chat where `dl.fbaipublicfiles.com` is allowed), sound
-  effects re-cued (step 6), the final render at 1080x1920.
+- Sound effects for the cut: `node tools/sfx.cjs --60` (`assets/sfx-60s.m4a`, 21 cues read off the draft's frames).
+- Final render, voice and effects, no music: `renders/hub-promo-60s.mp4` (1080x1920, 51 min 27 s on 4 cores).
+  `renders/` is kept out of git (`.gitignore`), so a new chat renders it again from `remake-60-final.html`;
+  Jose has the file.
+- Still to do: music only. Picture and sound are separate, so music needs no re-render: mix it under
+  `voice-60s.m4a` + `sfx-60s.m4a` and copy the picture (`-c:v copy`). Demucs needs a chat where
+  `dl.fbaipublicfiles.com` is allowed.
 
 ## Not proven yet
 
