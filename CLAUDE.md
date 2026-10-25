@@ -8,8 +8,15 @@ do, test, update the plan, open a pull request). A chat runs phase after
 phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
 and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
-of this chat pasted in (Jose, 2026-10-23); the new chat opens by telling
-Jose what is being worked on and the goal. A new chat reads the docs and the
+of this chat pasted in (Jose, 2026-10-23). Whenever a chat starts a new
+chat for Jose, it gives him a fresh summary in plain words, in two parts:
+**what is being worked on now** (and its goal) and **what was worked on
+before** (the last chat's changes and where each stands). It says it in
+the reply that gives the new chat's link, and the new chat opens with the
+same two parts (Jose, 2026-10-24). Keep both short: a few lines each,
+simple words, no big blocks of text (Jose, 2026-10-24). The new chat's title names its focus
+in plain words, the work it is for ("Campus code to its own file"), never
+a generic "New session" or "Handoff" (Jose, 2026-10-24). A new chat reads the docs and the
 handoff, not the old chat. Details: `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
@@ -42,7 +49,7 @@ between assignments.
 | `drsmiley/body.js` | — | The full-body rig: `drBodyArt()` (the layers as an SVG, each drawn pose as drawn and mirrored), `drBody()` (the joint engine; `frameL`/`frameR` swap a drawn pose in, `frot` wags it; `state()` holds a state), `DR_BODY_PERF` (greet, ack, think, cheer, wink, shrug, read, point, bounce, wince, walk, doze), `DR_BODY_STATES` (listening, thinking, answering, celebrating, uncertain), `drBodyIdle` (levels, the doze) |
 | `features/smiley-body.js` | — | His body's Hub side: `drBodyMount` (a host filled with the rig: Home's `.home-body`, the quiz card's `.quiz-dr`), `drBodyStage`/`drBodyAct` (drPerform's stage and the head's sequence names as his body's performances, `DR_BODY_ACT`), the app's task state as his held state (`drBodyStateSync`), his mode |
 | `drsmiley/body.html` | — | The viewer for his full-body acting, not linked from the app; every performance and held state, Lively / Focused / Still, the rest life, at `/drsmiley/body.html` |
-| `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus`, `docs/mockups/cchi-city/`) |
+| `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance at golden hour as three depth layers (`sky`, `far`, `near`, slid for parallax) + each building's lit windows in tenths (pre-rendered 3D; `renderCampus` in `features/campus.js`, `docs/mockups/cchi-city/`) |
 | `media/` | — | The 45-second video (`hub-promo.mp4`, 720p; the 3D remake from `promo/hub-blend/` since 2026-10-23) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
 | `promo/hub-blend/` | — | Source of the 3D promo remake (HyperFrames + Three.js); plan in its `BRIEF.md`. Not deployed (`.vercelignore`); only a rendered MP4 goes into `media/` |
@@ -54,12 +61,15 @@ between assignments.
 | `features/term-lookup.js` | 263 | Looking a term up: `openTermLookup`, the trusted-source search (`/api/term-lookup`) and its memory + Firestore caches. Moved verbatim (2026-10-23) |
 | `features/voice-check.js` | 251 | The Voice and mic check at the bottom of More (`voiceCheckOpen`, and `audioMode`, which the memory trainer calls too). Moved verbatim (2026-10-23) |
 | `features/smiley-performances.js` | 288 | Dr. Smiley's five performances (`DR_PERF`, `drPerfBuild`, `drPerfSeed`), his squash (`drSquashKeys`), mood (`drSetMood`) and the effects off his head (`drFaceFx`). Moved verbatim (2026-10-24) except one line that stays in `index.html`: the one putting them into `DR_FACE_SEQ` |
+| `features/campus.js` | 157 | Your HUMC campus on CoreCHI Practice: `CAMPUS_MAP`, `CAMPUS`, `renderCampus`, the building pick (`campusPick`, `campusGo`) and its Escape key. Moved verbatim (2026-10-24). Its motion (`campusLife`, `campusDepth`) stays in `index.html`, section "Practice dashboard motion" |
+| `features/false-friends.js` | 227 | The False Friends screen: `renderFalseFriends`, Study and Drill (`buildFFDrill`, `answerFF`), search and the risk filter (`FF_RISKS`). Moved verbatim (2026-10-24); the list is `falsefriends/list.js`. The Practice code that followed it in the same section (`renderPractice`, `startStudy`, the exam timer) stays in `index.html`, now under its own banner |
+| `features/knowledge-brain.js` | 223 | Your knowledge brain, the Hub's side: `knowledgeBrainData` (what `brain/you.html` draws), your record and the daily count (`kbLogNote`, `ih_knowledgeLog`), the small live brain atop Term Review (`kbMiniHtml`, `kbMiniStart`, `kbMiniFrame`). Moved verbatim (2026-10-24); `docs/features/knowledge-brain.md` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
-| `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `index.html` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
+| `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `features/knowledge-brain.js` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
 | `api/translate.js` | 145 | Translate tool — Claude API |
 | `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
@@ -112,12 +122,15 @@ different places is what silently killed the coloured press glow: a
 | User Guide answers | `guide/topics.js` |
 | CoreCHI practice questions | `practice/questions.js` |
 | False Friends list | `falsefriends/list.js` |
+| False Friends screen (Study, Drill) | `features/false-friends.js` |
+| Your knowledge brain, the Hub's side (its data, the small brain on Term Review) | `features/knowledge-brain.js` |
 | Translate tool code | `features/translate.js` |
 | 3D Body's Hub side (the frame bridge) | `features/3d-body.js` |
 | Looking a term up | `features/term-lookup.js` |
 | Voice and mic check | `features/voice-check.js` |
 | Dr. Smiley's performances | `features/smiley-performances.js` |
 | Dr. Smiley full-length: his rig and acting | `drsmiley/body.js`; where he stands and how the app reaches him | `features/smiley-body.js` (Home's place and tap: `home-polish.js`/`.css`; the quiz corner: `app.css`) |
+| Your HUMC campus (the scene and the building pick) | `features/campus.js` |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
@@ -440,6 +453,11 @@ design and anything touching data or rules stay with the main model.
   `proactive`), then `PushNotification` with one line saying what's ready
   and what he needs to do. Only when there is something to review or
   decide, never for routine progress.
+- **Always a phone notification when it's time to push** (Jose,
+  2026-10-24; `AGENTS.md`; he wants this in every project): whenever a
+  change is ready for his "push" (GitHub's checks passed), send
+  `PushNotification` saying which change and that it needs "push", even
+  if he seems to be in the chat.
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the

@@ -39,18 +39,24 @@ rounds, and the next phase would add a lot more):
 3. Commit and push it, send it to Jose with `SendUserFile`, and say
    "Start a new chat". Once, not every reply. Ask with buttons (Jose,
    2026-10-23): **"I start it for you" (the pick)**, a new session
-   (`create_session`, same repository) whose first message is the whole
+   (`create_session`, same repository, titled with the chat's focus in
+   plain words, Jose 2026-10-24) whose first message is the whole
    of `docs/handoff.md` plus a short summary of this chat (what was done,
    what is open, why), with its link given to Jose; or **"I'll paste it
    myself"**, the exact message to paste. Where the buttons or
-   `create_session` are missing, give the message to paste.
+   `create_session` are missing, give the message to paste. Either way,
+   the reply also gives Jose a fresh two-part summary (Jose, 2026-10-24):
+   what is being worked on now and its goal, and what was worked on
+   before (this chat's changes and where each stands).
 4. Leave nothing half-done: an open PR is fine (the handoff names it), an
    uncommitted change is not. Cancel this chat's check-ins; the new chat
    re-arms what it needs. Then "Archive this chat" (below).
 The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
-then opens with a short summary for Jose: what is being worked on and the
-goal of the task (Jose, 2026-10-23), then in 2-3 lines what it will do,
-and waits for his go.
+then opens with a short summary for Jose in two parts: what is being
+worked on now and its goal (Jose, 2026-10-23), and what was worked on
+before (Jose, 2026-10-24), each a few lines in simple words, never a
+big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
+for his go.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -88,8 +94,13 @@ under way, then what waits on Jose, then small leftovers.
 2. **Split `index.html`, phase 3: features to their own files**, one per
    pull request, leaves first, nothing else in flight (Jose, 2026-10-20).
    Plan, census and the method: `docs/split-index.md`; where it stands:
-   the split entry under **Later** and `docs/handoff.md`. Next: the
-   campus (it animates: more to check).
+   the split entry under **Later** and `docs/handoff.md`. The campus:
+   #139, live b1024.1553. Now (Jose, 2026-10-24: small pieces first): the
+   leftover small leaves, one per PR: False Friends' screen #141 (live
+   b1024.1920), the knowledge brain #143 (live b1024.2150); then the guide's front page, the doctor
+   sheets, CSV, duplicate doctors, the backfill. After them: Ask the Hub's
+   group and Dr. Smiley's engine, as groups, or they stay
+   (`docs/split-index.md`).
 3. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
@@ -198,8 +209,9 @@ come from this alone.
   2026-10-21, merged on Jose's call (#112). Phase 2, `GUIDE_TOPICS`:
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
-  #129, Voice and mic check #131, live; Dr. Smiley's performances, this
-  PR. Next leaves: the campus (`docs/split-index.md`).
+  #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
+  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live. Next: the small
+  leaves, then the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -226,8 +238,32 @@ come from this alone.
   gestures. The viewer `drsmiley/body.html` (not linked from the app) is
   where Jose reviews him. Suite `body-rig.cjs`, 121 checks. Guide: nothing
   visible in the app changed, so nothing to update.
-- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances
-  (#137): `features/smiley-performances.js`, verbatim, except the one line
+- 2026-10-24 Split `index.html`, phase 3, your knowledge brain's Hub side
+  (#143, live b1024.2150): `features/knowledge-brain.js`, declarations only. Proof: byte
+  rebuild; its data, the small brain, globals and humc-brain's
+  knowledge-brain checks identical before and after.
+- 2026-10-24 Split `index.html`, phase 3, False Friends' screen (#141, live b1024.1920):
+  `features/false-friends.js`, declarations only. Its section also held
+  the Practice screen with no banner between; that half stays inline
+  under a new banner. Proof: byte rebuild; Study, Drill, an answer, the
+  Practice screen and globals identical in the browser.
+- 2026-10-24 The 3D Body's resize listener (`features/3d-body.js`, since
+  #127) read `activeCategory` before `index.html`'s script declared it
+  when the window resized during load: "activeCategory is not defined", a
+  console error that failed daily-drill, smiley-quiz and springs now and
+  then (#140, live b1024.1804). Guarded with `typeof`; new suite `load-order.cjs` holds
+  the gap between the `features/` files and `index.html`'s script open
+  and resizes, presses a key and posts a message in it (fails on the old
+  code, passes on the new).
+- 2026-10-24 Split `index.html`, phase 3, the campus (#139, live b1024.1553):
+  `features/campus.js`, verbatim, its Escape listener included (the
+  earlier keydown listeners neither stop the event nor touch the campus).
+  `campusLife`/`campusDepth` stay inline. Proof: old `index.html` rebuilt
+  byte for byte; campus markup, tables, a pick then Escape, globals:
+  identical in the browser; first paint the same (slow Wi-Fi +0.02 s,
+  Home the same or sooner). `docs/split-index.md`.
+- 2026-10-24 Split `index.html`, phase 3, Dr. Smiley's performances (#137,
+  live b1024.1338): `features/smiley-performances.js`, verbatim, except the one line
   that fills `DR_FACE_SEQ` (it stays in `index.html`; Jose's pick, the
   table is defined earlier there). Proof: old `index.html` rebuilt byte
   for byte; every performance built with three seeds, the table, globals

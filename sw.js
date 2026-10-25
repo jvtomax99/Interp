@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v286-b1024.1338';
+const CACHE_VERSION = 'interpreter-hub-v290-b1024.2150';
 const PRECACHE = [
   './',
   './index.html',
@@ -91,6 +91,9 @@ const PRECACHE = [
   './drsmiley/body/pose-wave-in.webp',
   './drsmiley/body/pose-wave-out.webp',
   './drsmiley/body/pose-wave-rise.webp',
+  './features/campus.js',
+  './features/false-friends.js',
+  './features/knowledge-brain.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the

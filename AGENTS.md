@@ -10,8 +10,15 @@ do, test, update the plan, open a pull request). A chat runs phase after
 phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
 and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
-of this chat pasted in (Jose, 2026-10-23); the new chat opens by telling
-Jose what is being worked on and the goal. A new chat reads the docs and the
+of this chat pasted in (Jose, 2026-10-23). Whenever a chat starts a new
+chat for Jose, it gives him a fresh summary in plain words, in two parts:
+**what is being worked on now** (and its goal) and **what was worked on
+before** (the last chat's changes and where each stands). It says it in
+the reply that gives the new chat's link, and the new chat opens with the
+same two parts (Jose, 2026-10-24). Keep both short: a few lines each,
+simple words, no big blocks of text (Jose, 2026-10-24). The new chat's title names its focus
+in plain words, the work it is for ("Campus code to its own file"), never
+a generic "New session" or "Handoff" (Jose, 2026-10-24). A new chat reads the docs and the
 handoff, not the old chat. Details: `docs/PLAN.md`.
 When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
 in `docs/PLAN.md`).
@@ -69,6 +76,7 @@ So:
 | User Guide answers (`GUIDE_TOPICS`, `GUIDE_SECTIONS`) | `guide/topics.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
+| The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |
 | The Translate tool's code (`renderTranslate`, `runTranslate`…) | `features/translate.js` |
 | The 3D Body's Hub side (`anatomySync`, the `ATLAS` bridge, `atlasOnMessage`) | `features/3d-body.js` (the wall rules above still apply) |
 | Looking a term up (`openTermLookup`, its trusted sources and caches) | `features/term-lookup.js` |
@@ -76,9 +84,10 @@ So:
 | Dr. Smiley's performances (`DR_PERF`, `drSquashKeys`, his mood, the effects off his head) | `features/smiley-performances.js` |
 | Dr. Smiley full-length: his rig and acting (`drBody`, `DR_BODY_PERF`, `DR_BODY_STATES`) | `drsmiley/body.js` |
 | Where he stands full-length and how the app reaches him (`drBodyMount`, `drBodyStage`, `DR_BODY_ACT`) | `features/smiley-body.js`; his place and tap on Home in `home-polish.js`/`.css`, the quiz corner in `app.css` |
+| Your HUMC campus on CoreCHI Practice (`renderCampus`, `CAMPUS_MAP`, the building pick); its motion (`campusLife`, `campusDepth`) stays in `index.html` | `features/campus.js` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
-| Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`, its data from `knowledgeBrainData` in `index.html`; `docs/features/knowledge-brain.md` |
+| Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`; the Hub's side (its data `knowledgeBrainData`, your record, the small brain `kbMiniHtml`) in `features/knowledge-brain.js`; `docs/features/knowledge-brain.md` |
 | Everything else | `index.html` |
 
 **The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
@@ -93,6 +102,10 @@ lives in its file: edit it there, never paste a copy back into
 `index.html`. Those files load with plain `<script src>` before
 `index.html`'s script, so they may only declare things at the top level;
 a top-level line that calls into `index.html` would run before it exists.
+A listener such a file adds at load (resize, keydown, message) can fire
+before `index.html`'s script has run, so it must not read `index.html`'s
+names until then (guard with `typeof`); `tests/suites/load-order.cjs`
+checks that gap.
 
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
 `--ic-*`) lives in the "Visual refinement" block at the end of `app.css`; Home's half is the block of the same name at the end of
@@ -335,4 +348,7 @@ on his phone: screenshots of what changed (before/after when the look
 changed; phone size first), or for work with nothing to see, a short
 summary of what changed and what it needs from him. Then notify his phone
 so he can come back and review. Not for routine progress, only when there
-is something to review or decide.
+is something to review or decide. **Always a phone notification when
+something is ready for his "push"** (Jose, 2026-10-24): every time a
+change is waiting for his OK to go live (its checks passed), notify his
+phone, even if he seems to be watching the chat.

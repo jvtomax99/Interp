@@ -13,7 +13,7 @@ The glossary as a brain, lit by this person's own Term Review record.
 
 | What | Where |
 |---|---|
-| The data | `knowledgeBrainData()` in `index.html` (banner "Your knowledge brain"), sent by message: the page posts `{ih:'brain-want'}`, `home-polish.js` answers `{ih:'brain-data', data}`. Only `TERM_REVIEWS` (loaded by the person's own name) goes in |
+| The data | `knowledgeBrainData()` in `features/knowledge-brain.js` (banner "Your knowledge brain"; in `index.html` until 2026-10-24), sent by message: the page posts `{ih:'brain-want'}`, `home-polish.js` answers `{ih:'brain-data', data}`. Only `TERM_REVIEWS` (loaded by the person's own name) goes in |
 | Which terms | Every term with English and Spanish (what Term Review can ask); `noSpanish` counts the rest |
 | Levels | `kbLevel`: 0 never practised (faint slate dot), 1 missed last time (red), 2 learning (box 1-2), 3 known (box 3+, right 3+ in a row). Overdue dims the glow (`glow` in the page) |
 | Where the record comes from | `term-reviews/{who__termId}`, written by Term Review, Daily Drill round 2 and Doctor Prep flashcards (`prepMark`). Latest state only, no history |
