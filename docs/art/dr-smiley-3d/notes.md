@@ -87,15 +87,23 @@ Worked:
 - **His app expressions on the 3D face**, all 30, switched like the app does.
 
 Not good enough yet:
-- **The hand.** Meshy made each hand one cupped, mitten-like shape with no
-  finger bones. Jose's first look ("doesn't look right": the hand and the
-  wave): the hand read as a fist and the arm hugged his head. Fixed in the
-  second version: one added bone (`DEF-fingers.R`, the hand's last 40-60%)
-  opens the fingers flat, palm to the camera, a beat after the arm arrives;
-  the elbow is lower (66 instead of 95 degrees out) and the wag swings away
-  from his face, like the drawn wave. The fingers still move as one piece and
-  can't spread; a model with separate fingers would fix that (Meshy's rigged
-  or A-pose output, or the hand redone in Blender).
+- **The hand (fixed in the second version).** Meshy made each hand one
+  cupped, mitten-like lump with no fingers to move. Jose's look at the first
+  version ("doesn't look right": the hand, then "still not right": the hand)
+  was right: it read as a fist and the arm hugged his head. Bending the lump
+  open (one bone through it) only made a paddle. What works: **the waving
+  hand is new**, built in Blender (`HandR` in the .blend): a chubby cartoon
+  palm, four fingers and a thumb, fused into one smooth shape, his skin
+  colour, 18% bigger than Meshy's; Meshy's right hand is cut off inside the
+  cuff. One finger bone at the knuckles (`DEF-fingers.R`) keeps it relaxed
+  at rest and opens it flat a beat after the arm arrives; the wrist stands
+  it up beside his head, palm out; it grows a little (up to 1.16 x, the
+  cartoon way) while it waves. The arm is lower and wider (elbow 66 instead
+  of 95 degrees out) and the wag swings away from his face, like the drawn
+  wave. Still: the fingers move together (one bone, no spread or ripple),
+  and the left hand is still Meshy's lump (it only hangs). Note: the "v2"
+  video first sent to Jose was the old frames by mistake (a render went to
+  the wrong folder); the committed files are the real second version.
 - **The face up close.** Eyes, smile and blinks read at 440 px; at full size
   the mouth plate shows a faint light patch, and the brows can't move (the app's
   separate brows, `DR_BROWS`, were not done). From the side the face plate
@@ -110,7 +118,7 @@ Not good enough yet:
 Measured on this PC (Blender 5.2, EEVEE):
 - **Money:** none per move. One Meshy generation for the model (Jose's Meshy
   account). Blender, Rigify and ffmpeg are free.
-- **Rendering:** 36 to 39 s for the 46 frames of greet at 320 x 440, 64 samples.
+- **Rendering:** 35 to 39 s for the 46 frames of greet at 320 x 440, 64 samples.
 - **Making it:** the one-time work (model, rig, weights, face plate) was most
   of this session. A new move on the same rig is keying 8 to 15 poses: one
   focused chat step, plus a look and a fix or two; no new drawings ever.
