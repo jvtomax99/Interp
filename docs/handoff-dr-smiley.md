@@ -66,8 +66,12 @@ Then the clipboard, recut whole the same way (dr-smiley.md, "The
 clipboard, cut whole"); it pops in at the bottom of a dip until Jose's
 `clipboard-low` drawing comes (prompt given to him on 2026-10-25).
 
-**Next:** `clipboard-low` into `read` and `answering` as the way up and
-down. Then the remaining drawings in `prompts-animation.md` (shrug, read, thumbs,
+Then `clipboard-low` (two heights, low and mid) built in as the way up and
+down (dr-smiley.md, "The clipboard's way up").
+
+**Next:** the leg pieces' edges at rest: a light strip under the coat's
+hem and a white fringe down the trouser edges, plain on navy. Then the
+remaining drawings in `prompts-animation.md` (shrug, read, thumbs,
 wince, the two leg drawings), the same way. Still open,
 seen in the review: the mirrored wave's sleeve has a small step in its
 cut at the armpit (a few px, visible only zoomed in).

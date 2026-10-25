@@ -102,10 +102,10 @@ const SAMPLE = () => {
   ok(P.__failed.length === 0, 'every layer and script arrives ' + JSON.stringify(P.__failed));
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
-  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp', 'pose-point-load.webp', 'pose-point-reach.webp', 'pose-think-rise.webp', 'pose-think-tap.webp'];
-  ok(layers.length === 47 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
+  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp', 'pose-point-load.webp', 'pose-point-reach.webp', 'pose-think-rise.webp', 'pose-think-tap.webp', 'pose-clipboard-low.webp', 'pose-clipboard-mid.webp'];
+  ok(layers.length === 51 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
-     'forty-seven layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the seventeen drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
+     'fifty-one layers: the app\'s head, face strip and brows, the body, two legs, four arm pieces, the nineteen drawn arm poses twice each (as drawn and mirrored), the two leg plates once ' + layers.join(' '));
   const order = await P.evaluate(() => [...document.querySelectorAll('svg.db .db-root > *, svg.db .db-breath > *')].map(e => e.getAttribute('class')));
   ok(order.indexOf('db-body') > order.indexOf('db-arm db-arm-l') && order.indexOf('db-body') > order.indexOf('db-head') && order.indexOf('db-breath') > order.indexOf('db-leg db-leg-r')
      && order.indexOf('db-poses-back') > order.indexOf('db-arm db-arm-r') && order.indexOf('db-poses-back') < order.indexOf('db-head') && order.indexOf('db-poses-front') > order.indexOf('db-body')
@@ -166,7 +166,7 @@ const SAMPLE = () => {
       idle.setLevel('full'); const lvl = idle.level(); const dozed = idle.doze(); const name = b.busy(); idle(); b.stop(); b.rest(); res({ frames, busyFrames, lvl, dozed, name, hasSet: typeof stopIdle.setLevel === 'function' }); };
     requestAnimationFrame(tick); }));
   ok(lv.frames > 60 && lv.busyFrames === 0 && lv.lvl === 'full' && lv.dozed && lv.name && lv.hasSet, 'rest life has levels: none plays nothing for 3 s; doze() plays the doze; the viewer\'s idle has setLevel ' + JSON.stringify(lv));
-  ok(/clipboard-[lr]/.test(seen('read')) && lively.read.armHiddenWhileFrame, 'read: the drawn clipboard in both hands, both cutout arms hidden meanwhile ' + seen('read'));
+  ok(['clipboard-low', 'clipboard-mid', 'clipboard'].every(f => new RegExp('(^|[ ,])' + f + '-[lr]').test(seen('read'))) && lively.read.armHiddenWhileFrame, 'read: the board comes up by drawings (hips, higher, chest), both cutout arms hidden meanwhile ' + seen('read'));
   ok(['point-load', 'point-reach', 'point', 'wave-rise'].every(f => new RegExp('(^|[ ,])' + f + '-[lr]').test(seen('point'))), 'point: drawn throughout, the arm cocked by his shoulder, the reach, then down through shoulder height and the dropped hand ' + seen('point'));
   // point takes a side: L is the picture's left (the arm as drawn), R the mirrored copy.
   const pt = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); const seenP = new Set();

@@ -419,6 +419,23 @@ a way up, the board comes up at the bottom of a small dip with a blink,
 and goes at the bottom of another; reading along a line leans his body a
 little instead of tilting the board.
 
+**The clipboard's way up (same chat).** Jose's run of `clipboard-low`
+came back at two heights, both kept: `clipboard-low` (the board at his
+hips) and `clipboard-mid` (a little higher), 6 and 5 px right, 2 down.
+`read` and `answering` now bring the board up by drawings (low, mid, chest)
+and take it down the same way. Their wall is blotchy, so they use a local
+key (`localkey` 80: the wall's own shade estimated at every point from the
+wall well away from him, a wider estimate where the near one has no data;
+the first try left grey wings where the master's arms hang) and stay
+inside the master's outline (`within` 12). Their coat is drawn shorter and
+narrower than the master's and doubled the hem, so they fade out above it
+(to y 1040) and only the board goes on down whole (`keep`). Colour is now
+matched over the whole torso from y 600 (near the bottom alone the board
+covered the scrubs, which stayed 50 levels dark). Seen in this review and
+still open: the standing cut itself shows a light strip under the coat's
+hem and a white fringe down the trouser edges on navy (the leg pieces),
+at rest.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

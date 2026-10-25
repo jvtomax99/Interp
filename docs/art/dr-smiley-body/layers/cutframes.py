@@ -112,6 +112,11 @@ POSES['think-rise']=dict(region=None, offset=(5,1), torso=960, drop=[(776,750,85
 POSES['think-tap']=dict(region=None, offset=(6,1), torso=960)
 POSES['think']=dict(region=None, offset=(4,0), torso=960)   # the old drawing, cut the same way
 POSES['clipboard']=dict(region=None, offset=(0,0), torso=950, fillall=True, faceto=600)   # recut the same way too (seams at the sleeve ends on navy)
+# the way up to it (2026-10-25): the board held low at his hips, then a little higher. Their
+# coat is drawn shorter and narrower than the master's, so they fade out above the hem and
+# the body's own hem and trousers show; only the board (`keep`) goes on down over them
+POSES['clipboard-low']=dict(region=None, offset=(6,2), torso=1040, keep=(428,1000,656,1104), fillall=True, faceto=600, within=12, localkey=80)
+POSES['clipboard-mid']=dict(region=None, offset=(5,2), torso=1040, keep=(428,1000,656,1064), fillall=True, faceto=600, within=12, localkey=80)
 # the body piece's top edge per column (its shoulder line), 0 where it has none (no rule there)
 TOP=np.where((bodyA>.5).any(0),(bodyA>.5).argmax(0),0)   # used beside the neck only: at the neck its top is the scrubs' V, and the clipboard stands in front of it
 # python3 -I cutframes.py point-load point-reach: cut only those (the others' boxes kept from poses.json)
@@ -191,6 +196,23 @@ for name,cfg in POSES.items():
         # coat and scrubs shifted to the master's colour so the fade never shows.
         y1=cfg['torso']
         fig=(aP>0.5)&(yy>520)&(yy<y1)
+        if cfg.get('localkey'):
+            # a blotchy wall (the clipboard-low pictures): its shade estimated at every point
+            # from the wall well away from him, and figure is what differs from it by more
+            # than the wall itself varies (up to ~67 there)
+            wall=~ndi.binary_dilation(alphaM>.5,iterations=45); wall[:5]=wall[-5:]=False
+            def est(sg):
+                wb=ndi.gaussian_filter(wall.astype(float),sg)
+                return np.dstack([ndi.gaussian_filter(P[...,c]*wall,sg)/np.maximum(wb,1e-6) for c in range(3)]), wb
+            Bg,wb=est(25); Bw,_=est(90)
+            Bg=np.where((wb>.05)[...,None],Bg,Bw)   # deep beside him the near wall is too far: the wider estimate
+            dl=np.abs(P-Bg).sum(2); T=cfg['localkey']
+            kb=cfg.get('keep'); inkeep=(xx>=kb[0])&(xx<kb[2])&(yy>=kb[1])&(yy<kb[3]) if kb else np.zeros_like(yy,bool)
+            fig=(dl>T)&(yy>520)&((yy<y1)|inkeep)
+            lab,n=ndi.label(fig); sz=ndi.sum(fig,lab,range(1,n+1)); fig=ndi.binary_fill_holes(lab==int(np.argmax(sz))+1)
+            aP=np.where(fig,np.clip((dl-T+30)/30,0,1),0)
+   # arms close to the master's: nothing past its outline (the blotchy wall of the clipboard-low pictures read as figure)
+            fig&=ndi.binary_dilation(alphaM>.5,iterations=cfg['within'])
         skin=(P[...,0]>150)&(P[...,0]>P[...,1]+25)&(P[...,1]>P[...,2]-5)
         face=(ndi.binary_dilation(headA>.35,iterations=6))&~((diff>60)&ndi.binary_dilation(skin,iterations=2)&(yy>560))   # over the head only the hand, never the wall the drawing's own head left
         if cfg.get('faceto'): face&=yy<cfg['faceto']   # the clipboard stands in front of his neck below the chin
@@ -200,11 +222,11 @@ for name,cfg in POSES.items():
         fig&=~(~skin&(yy<TOP[None,:]-6)&(yy<600)&((xx<470)|(xx>650)))
         for bx0,by0,bx1,by1 in cfg.get('drop',()): fig&=~((xx>=bx0)&(xx<bx1)&(yy>=by0)&(yy<by1))
         # the sleeve's shaded edge is the wall's grey too and the key notched it: close the notches
-        fig=ndi.binary_closing(fig,iterations=8)&(yy<y1)&~face&~(~skin&(yy<TOP[None,:]-6)&(yy<600)&((xx<470)|(xx>650)))
+        fig=ndi.binary_closing(fig,iterations=8)&((yy<y1)|(inkeep if cfg.get('keep') else False))&~face&~(~skin&(yy<TOP[None,:]-6)&(yy<600)&((xx<470)|(xx>650)))
         lab,n=ndi.label(fig); sz=ndi.sum(fig,lab,range(1,n+1)); fig=lab==int(np.argmax(sz))+1
         mask=ndi.binary_opening(ndi.binary_fill_holes(fig) if cfg.get('fillall') else fillsmall(fig,4000),iterations=2)   # fillall: the clipboard's grey face reads as wall
         lab,n=ndi.label(mask); sz=ndi.sum(mask,lab,range(1,n+1)); mask=lab==int(np.argmax(sz))+1
-        both=mask&(alphaM>0.5)&(yy>y1-160)
+        both=mask&(alphaM>0.5)&(yy>600)   # the whole torso: near the bottom alone the board can cover the scrubs
         # exposure first, over the whole drawing (the coat's white decides it): shifting
         # only what reads as white striped the clipboard's shaded face; then the
         # scrubs' blue, which ran darker still
@@ -216,6 +238,7 @@ for name,cfg in POSES.items():
             sh=M[c].mean(0)-P[c].mean(0); print('  blue',sh.round(1))
             w=ndi.gaussian_filter((mask&blue(P)).astype(float),2)[...,None]; P=np.clip(P+sh*w,0,255)
         fade=np.clip((y1-yy)/40.,0,1)
+        if cfg.get('keep'): fade=np.maximum(fade,inkeep.astype(float))   # the board goes on over his trousers whole
         aP=np.maximum(aP,ndi.binary_erosion(mask,iterations=1))
         soft=np.minimum(ndi.gaussian_filter(mask.astype(float),.8),fade)
     elif cfg.get('band'):
@@ -281,7 +304,7 @@ def piece(k):
     im=Image.open(OUT+k+'.webp').convert('RGBA'); return im,bx[k]
 head=Image.open(OUT+'head.webp').convert('RGBA'); s=rig['head']['scale']; hx,hy=rig['head']['at']
 head=head.resize((round(480*s),round(600*s)),Image.LANCZOS)
-HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'point-load':['l'],'point-reach':['l'],'think':['l','r'],'think-rise':['l','r'],'think-tap':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
+HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'point-load':['l'],'point-reach':['l'],'think':['l','r'],'think-rise':['l','r'],'think-tap':['l','r'],'clipboard-low':['l','r'],'clipboard-mid':['l','r'],'clipboard':['l','r'],'shrug':['l','r'],'thumbs-up':['l']}
 def compose(name=None):
     out=Image.new('RGBA',(W,H),(255,255,255,255))
     legs=name in LEGS
@@ -294,7 +317,7 @@ def compose(name=None):
     if name and not legs:
         f=Image.open(OUT+'pose-'+name+'.webp').convert('RGBA'); b=res[name]['box']; out.alpha_composite(f,(b[0],b[1]))
     return out
-names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','point-load','point-reach','think-rise','think','think-tap','shrug','thumbs-up','crouch','jump']
+names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','point-load','point-reach','think-rise','think','think-tap','clipboard-low','clipboard-mid','clipboard','shrug','thumbs-up','crouch','jump']
 sheet=Image.new('RGB',(len(names)*470,780),(255,255,255)); d=ImageDraw.Draw(sheet)
 for i,n in enumerate(names):
     sheet.paste(compose(None if n=='rest' else n).convert('RGB').crop((60,0,1040,1470)).resize((460,690),Image.LANCZOS),(i*470+5,4)); d.text((i*470+200,740),n,fill=(21,28,44))

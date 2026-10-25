@@ -80,6 +80,10 @@ const DR_BODY = {
     // it was a feathered band, seamed at the sleeve ends on navy), so it carries his coat:
     // never slid or tilted, played as drawn only. Stands in for both arms.
     clipboard:   { box: [281, 570, 511, 380], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
+    // Its way up (2026-10-25): the board held low at his hips, then a little higher; they fade
+    // out above the hem (their coat is drawn shorter) and only the board goes on down.
+    'clipboard-low': { box: [338, 579, 408, 525], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
+    'clipboard-mid': { box: [322, 581, 436, 483], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
     // The pointing arm: straight out at shoulder height, the index finger out ("look here"); since the
     // point's drawings it is the in-between on the way down. `frot` bobs it about the shoulder.
     point:       { box: [24, 559, 427, 153], arms: ['L'], layer: 'back', anchor: [353, 630], pivot: [353, 630] },
@@ -511,25 +515,31 @@ const DR_BODY_PERF = {
       [j(320), { head: 0, face: 'rest' }, 'out'],
     ], still: { lift: -10, head: s * 4, [FR]: 'shrug', face: 'doubt', brow: 'doubt' }, stillMs: 1000 };
   },
-  // Reading: the drawn clipboard comes up at the bottom of a small dip (until
-  // Jose's clipboard-low drawing gives it a way up), his eyes go down it along
-  // a line and back, a nod ("got it"), and it goes at the bottom of another
-  // dip. As drawn only, never slid or tilted: the drawing carries his coat.
+  // Reading: the board comes up by drawings (at his hips, a little higher, at
+  // his chest), his eyes go down it along a line and back, a nod ("got it"),
+  // and it goes down the way it came. As drawn only, never slid or tilted:
+  // the drawings carry his coat.
   read(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
     R(); const s = -1, FR = 'frameL', L = 'L', O = 'R';   // as drawn only: the drawing carries his coat
     return { beats: [
-      [j(170), { lift: 2 * k, sy: 1 - .018 * k, sx: 1 + .008 * k, face: 'blink1' }, 'in'],                  // a dip: the board comes up at its bottom
-      [0, { [FR]: 'clipboard' }],
-      [j(320), { lift: 4 * k, sy: 1, sx: 1, head: s * 2 * k, face: 'lookD', brow: 'focused' }, 'spring'],
+      [j(140), { lift: 2 * k, sy: 1 - .012 * k, face: 'blink1' }, 'in'],                                    // he looks down for it
+      [0, { [FR]: 'clipboard-low' }],                                                                       // the board at his hips (drawn)
+      [j(90), { sy: 1, face: 'lookD' }, 'out'],
+      [0, { [FR]: 'clipboard-mid' }],                                                                       // on its way up
+      [j(80), {}, 'linear'],
+      [0, { [FR]: 'clipboard' }],                                                                           // up to read
+      [j(320), { lift: 4 * k, head: s * 2 * k, face: 'lookD', brow: 'focused' }, 'spring'],
       [j(700, .2), { face: 'lookD' + L, head: s * 3 * k, lean: -s * .4 * k }, 'inOut'],                  // reading along a line
       [j(700, .2), { face: 'lookD' + O, head: -s * 1 * k, lean: s * .4 * k }, 'inOut'],
       [j(220), { face: 'lookD', lean: 0 }, 'out'],
       [j(160), { lift: 8 * k, face: 'smile1', brow: 'up' }, 'inOut'],                     // got it
       [j(260), { lift: 3 * k }, 'spring'],
-      [j(170), { lift: 0, head: 0, sy: 1 - .015 * k, sx: 1 + .006 * k, face: 'smile', brow: 'rest' }, 'in'],   // down, at the bottom of a dip
+      [j(120), { lift: 0, head: 0, face: 'smile', brow: 'rest' }, 'in'],
+      [0, { [FR]: 'clipboard-mid' }], [j(80), {}, 'linear'],                                                // down the way it came
+      [0, { [FR]: 'clipboard-low' }], [j(110), {}, 'linear'],
       [0, { [FR]: '', fL: 14, fR: 14 }],
-      [j(300), { fL: 0, fR: 0, sy: 1, sx: 1, face: 'rest' }, 'spring'],
+      [j(300), { fL: 0, fR: 0, face: 'rest' }, 'spring'],
     ], still: { [FR]: 'clipboard', face: 'lookD', brow: 'focused' }, stillMs: 1100 };
   },
   // "Look here", drawn (2026-10-25, the point's drawings): a glance that way
@@ -711,17 +721,19 @@ const DR_BODY_STATES = {
       [j(320), { fL: 0, fR: 0, head: 0, lift: 0, lean: 0, face: 'rest' }, 'spring'],
     ]; },
   },
-  // Answering (reading the answer with you): the drawn clipboard comes up at
-  // the bottom of a small dip, eyes down on it along a line and back, his body
+  // Answering (reading the answer with you): the board comes up by drawings
+  // (hips, higher, chest), eyes down on it along a line and back, his body
   // leaning a little with them (the board carries his coat, so it never tilts
   // or slides), a nod now and then; a blink every third beat.
   answering: {
     asDrawn: true,
     still: c => ({ [c.FR]: 'clipboard', lift: 3, face: 'lookD', brow: 'focused' }),
     enter: c => { const { k, s, j, FR } = c; return [
-      [j(170), { lift: 2 * k, sy: 1 - .018 * k, sx: 1 + .008 * k, face: 'blink2' }, 'in'],   // a dip: the board comes up at its bottom
-      [0, { [FR]: 'clipboard', frot: 0 }],
-      [j(320), { lift: 3 * k, sy: 1, sx: 1, head: s * 1.5 * k, face: 'lookD', brow: 'focused' }, 'spring'],
+      [j(140), { lift: 2 * k, sy: 1 - .012 * k, face: 'blink2' }, 'in'],
+      [0, { [FR]: 'clipboard-low', frot: 0 }], [j(90), { sy: 1, face: 'lookD' }, 'out'],   // the board up from his hips (drawn)
+      [0, { [FR]: 'clipboard-mid' }], [j(80), {}, 'linear'],
+      [0, { [FR]: 'clipboard' }],
+      [j(320), { lift: 3 * k, head: s * 1.5 * k, face: 'lookD', brow: 'focused' }, 'spring'],
     ]; },
     hold: c => { const { k, s, j, FR, beat } = c, L = s < 0 ? 'L' : 'R', O = s < 0 ? 'R' : 'L';
       const faces = ['lookD' + L, 'lookD', 'lookD' + O, 'lookD'], face = faces[beat % 4], tilt = [-.4, 0, .4, 0][beat % 4], b = [];
@@ -731,9 +743,11 @@ const DR_BODY_STATES = {
       b.push([j(300, .3), {}, 'linear']);
       return b; },
     exit: c => { const { j, FR } = c; return [
-      [j(170), { lean: 0, lift: 0, head: 0, sy: 1 - .015, sx: 1.006, face: 'smile1', brow: 'rest' }, 'in'],
+      [j(120), { lean: 0, lift: 0, head: 0, face: 'smile1', brow: 'rest' }, 'in'],
+      [0, { [FR]: 'clipboard-mid' }], [j(80), {}, 'linear'],
+      [0, { [FR]: 'clipboard-low' }], [j(110), {}, 'linear'],
       [0, { [FR]: '', fL: 14, fR: 14 }],
-      [j(300), { fL: 0, fR: 0, sy: 1, sx: 1, face: 'rest' }, 'spring'],
+      [j(300), { fL: 0, fR: 0, face: 'rest' }, 'spring'],
     ]; },
   },
   // Celebrating: the cheer up to its landing, then a happy bob with one drawn
