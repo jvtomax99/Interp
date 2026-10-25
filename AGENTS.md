@@ -10,7 +10,9 @@ do, test, update the plan, open a pull request). A chat runs phase after
 phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
 and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
-of this chat pasted in (Jose, 2026-10-23). Whenever a chat starts a new
+of this chat pasted in (Jose, 2026-10-23), offered as clickable buttons
+(`AskUserQuestion`), "I start it for you" first as the pick, never only
+as text to paste (Jose, 2026-10-25). Whenever a chat starts a new
 chat for Jose, it gives him a fresh summary in plain words, in two parts:
 **what is being worked on now** (and its goal) and **what was worked on
 before** (the last chat's changes and where each stands). It says it in
