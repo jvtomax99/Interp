@@ -1,8 +1,9 @@
 # Places (where a doctor works) and their icons
 
 Since 2026-10-14. Code in `index.html`: banner "Places (shared)" (data,
-icons, `savePlace`) next to `HMH_LOCATIONS`, and the "Where" picker before
-`openAddDoctorDirModal`.
+icons, `savePlace`) next to `HMH_LOCATIONS`. The "Where" picker and the
+doctor's add and edit sheet (`openAddDoctorDirModal`) are in
+`features/doctor-sheets.js` (moved out of `index.html` 2026-10-25).
 
 **Jose's decisions:** icons are his pin artwork (`pins/*.webp`), with the HMH
 mark for hospitals that have no specialty of their own; anyone can change a
