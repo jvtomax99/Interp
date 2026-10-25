@@ -205,11 +205,16 @@ for name,cfg in POSES.items():
         mask=ndi.binary_opening(ndi.binary_fill_holes(fig) if cfg.get('fillall') else fillsmall(fig,4000),iterations=2)   # fillall: the clipboard's grey face reads as wall
         lab,n=ndi.label(mask); sz=ndi.sum(mask,lab,range(1,n+1)); mask=lab==int(np.argmax(sz))+1
         both=mask&(alphaM>0.5)&(yy>y1-160)
-        for cls in (white(M)&white(P), ((M[...,2]-M[...,0])>40)&((P[...,2]-P[...,0])>40)):
-            c=both&cls
-            if c.sum()>500:
-                sh=M[c].mean(0)-P[c].mean(0); print('  colour shift',sh.round(1))
-                w=ndi.gaussian_filter((mask&cls).astype(float),2)[...,None]; P=np.clip(P+sh*w,0,255)
+        # exposure first, over the whole drawing (the coat's white decides it): shifting
+        # only what reads as white striped the clipboard's shaded face; then the
+        # scrubs' blue, which ran darker still
+        c=both&white(M)&white(P)
+        if c.sum()>500: sh=M[c].mean(0)-P[c].mean(0); print('  exposure',sh.round(1)); P=np.clip(P+sh,0,255)
+        blue=lambda A: (A[...,2]-A[...,0])>40
+        c=both&blue(M)&blue(P)
+        if c.sum()>500:
+            sh=M[c].mean(0)-P[c].mean(0); print('  blue',sh.round(1))
+            w=ndi.gaussian_filter((mask&blue(P)).astype(float),2)[...,None]; P=np.clip(P+sh*w,0,255)
         fade=np.clip((y1-yy)/40.,0,1)
         aP=np.maximum(aP,ndi.binary_erosion(mask,iterations=1))
         soft=np.minimum(ndi.gaussian_filter(mask.astype(float),.8),fade)
