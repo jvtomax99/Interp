@@ -97,9 +97,9 @@ under way, then what waits on Jose, then small leftovers.
    b1025.1140), CSV #148 (live b1025.1453),
    duplicate doctors #150 (live
    b1025.1607), the backfill #152 (live b1025.1713): the small leaves
-   are done. Next: Ask the Hub's group and Dr. Smiley's engine, as
-   groups, or they stay; a plan first, and Jose's call
-   (`docs/split-index.md`).
+   are done. The Ask the Hub group #154 (live b1025.1947). Next: Dr.
+   Smiley's engine group, planned in `docs/split-index.md`; Jose's call
+   whether to move it.
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.

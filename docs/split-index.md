@@ -257,6 +257,38 @@ move each, with the same proof every time and nothing visible changing.
    humc-brain.cjs caught it): `claim` now returns none for 0. First paint
    (first-paint.cjs, 5 runs): slow network Home painted 4925 to 4702 ms,
    4g 1660 to 1594 ms; within noise. `index.html` 1.15 MB to 1.02 MB.
+   Live b1025.1947 (#154).
+   **Plan: Dr. Smiley's engine group** (written 2026-10-25, no code yet).
+   Four sections side by side, lines 6642-7771 on b1025.1947, about 62 KB
+   (his performances already left in #137): his art (`drSmileyArt`,
+   `DR_FACE_SEQ`), the animation engine (`DrAnim`, `drAnim`,
+   `drFacePlay`/`drFaceIdle`), "how lively" (`drMode`, `drStill`,
+   `setSmileyMode`) and his task states (`drTask`, `drMind`,
+   `drPerform`). One file, `features/smiley-engine.js`, loaded after
+   `features/smiley-performances.js`: the one load-time outside read is
+   `DR_PERF` (a bare `vm` sandbox run of the four sections), so the line
+   that puts the performances into `DR_FACE_SEQ`, kept in `index.html` by
+   #137, comes into the new file. Called from 10 `index.html` sections
+   (Dr. Smiley reacts, companion, Team access, Term Review's practice,
+   the companion panel, the memory trainer, Home screen's `ICON_WAVE`,
+   the smoothness meter, Appointment mode, the markup's
+   `setSmileyMode`) and from `home-polish.js`, `features/ask-hub.js`,
+   `features/smiley-performances.js`, `features/campus.js`, all at call
+   time. Runs at load: the `DR_FACE_SEQ` line, `class DrAnim`, a
+   `visibilitychange` listener (own names only), `drReduce`'s `change`
+   listener and the `ds-still` class (both reach `smileyModeSync` /
+   `fmNote` in `index.html` only when called), and the `offline` /
+   `online` listeners (`drMindChanged` reaches `apptActive`). Those last
+   two listeners and `drReduce`'s stay in `index.html` where the group
+   began (load-order.cjs's gap); the `ds-still` toggle moves, since
+   `drStill` reads only its own names (sandbox). It draws Home's first
+   paint, so first-paint.cjs before and after decides it; the iPhone
+   entrance freeze (`docs/features/dr-smiley.md`) has to hold. Covered
+   far better than Ask: smiley-gaze, smiley-brows, smiley-gestures,
+   smiley-squash, smiley-quiz, home-rest, dock-tuck, journey,
+   memory-trainer, frame-meter. HUMC Brain's motor strip would empty
+   except the five later Smiley sections (reacts, career, news,
+   companion, panel), which stay.
 3. **JS by feature, one file per PR**, leaves first (the census says which:
    sections whose names few others use). Candidates from the sizes alone:
    Dr. Smiley's engine (`DrAnim` 25 KB with `DR_FACE_SEQ`, `DR_PERF`,
