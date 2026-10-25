@@ -48,7 +48,30 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-25, third chat): read this first
+## Where it stands (2026-10-25, fourth chat): read this first
+
+**His full-body animation is complete as far as the drawings go.** Every
+drawing in `prompts-animation.md` is in except `legs-toes`, which Jose
+dropped. Every performance (greet, ack, think, cheer, wink, shrug, read,
+point, bounce, wince, walk, doze) and held state (listening, thinking,
+answering, celebrating, uncertain) was filmed on navy with two seeds and
+reviewed frame by frame; nothing open is known. Done in this chat (each in
+`docs/features/dr-smiley.md`, from "The standing cut's edges"): the leg
+and hand edges, the shrug's way in, the thumb's way up, the wince's arms,
+the landing legs and their shoes, the shoulder stub (`body-trim`), the
+armpit gussets, the armpit's step drawn and mirrored, and a state
+replacing another going out through its exit. body-rig 159,
+smiley-body-app 18.
+
+**What's next is Jose's call:** when he replaces Dr. Smiley's head in the
+app with the full body (his words, 2026-10-23: "animate him fully first;
+where he stands full-length is decided later"). He already stands on
+Home's banner and in the quiz card on this branch. The branch is storage
+only (`claude/` never deploys); getting him live means a pull request from
+it to `main` (merge `main` in first: `main` moved on with the split of
+`index.html`), which waits for Jose's OK.
+
+## Where it stood (2026-10-25, third chat)
 
 The point is drawn: Jose's `point-load` and `point-reach`, cut and built
 into `point` (dr-smiley.md, "The point, drawn"). And the mirrored side's

@@ -43,7 +43,10 @@ Done: the three hello-wave drawings (in `greet`) and the three cheer drawings
 `point`), the two thinking drawings (in `think` and `thinking`) and the
 clipboard's way up (`clipboard-low` and `clipboard-mid`, in `read` and
 `answering`), and `shrug-half`, `thumbs-rise`, `wince-arms` and
-`legs-land`, 2026-10-25; `docs/features/dr-smiley.md`. Next: `legs-toes`.
+`legs-land`, 2026-10-25; `docs/features/dr-smiley.md`. `legs-toes` is
+dropped (Jose, 2026-10-25): from the front a rise onto the toes barely
+shows (the best run only tilted the shoes and changed their shape), and
+the jump already reads as crouch, jump, landing. Every drawing is done.
 Run each from `body-master.png` in a fresh ChatGPT chat: the five
 pictures of 2026-10-25 were run one after another in one chat and drifted
 (a darker wall, crisper, the second wince's coat and legs 40 px short,
