@@ -40,3 +40,6 @@ HYPERFRAMES_SKIP_SKILLS=1 npx --yes hyperframes@0.8.181 render -o out/whats-new.
 
 The stills tool's browser can't decode H.264, so the film card can show the wrong frame in
 stills; the render takes the film's frames with ffmpeg and is right.
+
+The finished video is kept at `renders/whats-new.mp4` (9 MB, 15 s, 1080x1920, 30 fps), so it
+outlives a cloud session; `out/` is scratch and not kept.
