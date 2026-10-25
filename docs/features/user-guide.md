@@ -1,7 +1,11 @@
 # The User Guide (Guide 2.0)
 
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
-Code is in `index.html` unless a file is named. Keep this in step with the code.
+Code is in `index.html` unless a file is named. The front page, its
+search and the install steps (`renderUserGuide`, `guideHomeHtml`,
+`setupGuideSearch`, `GUIDE_INSTALL_STEPS`) are in
+`features/guide-front.js` (since 2026-10-24); the answers are
+`guide/topics.js`. Keep this in step with the code.
 
 **The User Guide (Guide 2.0).** The answers are one list, `GUIDE_TOPICS`
 (with `GUIDE_SECTIONS`, in `guide/topics.js` since 2026-10-21: plain data,

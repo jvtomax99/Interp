@@ -17,8 +17,7 @@ Dr. Smiley's full-body animation runs alongside on branch
 
 The split of `index.html` (`docs/split-index.md`), phase 3, small pieces
 first (Jose's pick, 2026-10-24), one change at a time, each merged on his
-"push". Next: the guide's front page ("The guide: installing, the front
-page", 11 KB), then the doctor sheets, CSV, duplicate doctors, the
+"push". The guide's front page is in its change now; next: the doctor sheets, CSV, duplicate doctors, the
 backfill. After those: Ask the Hub's group and Dr. Smiley's engine, as
 groups, or they stay.
 
