@@ -16,7 +16,10 @@ frames between drawings. These prompts add those drawings.
 
 ## How to run one
 
-1. Upload `body-master.png` in ChatGPT.
+1. Open a new ChatGPT chat for each drawing and upload `body-master.png`
+   there. Editing an earlier result drifts: on 2026-10-25 a `legs-toes`
+   run came back from the wince picture (its arms, a darker wall, coat and
+   legs about 50 px short) with the heels still down, so it was not used.
 2. Paste the opening and one pose line together, as one message.
 3. Send the result back with its file name. Every result is measured here
    and the ones to redo are named.
