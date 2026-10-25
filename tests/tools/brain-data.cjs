@@ -21,7 +21,7 @@ const GROUPS = {
   start: ['Dark mode before the first paint', 'Loading the glossary', 'The screen: renderContent', 'Split dock (phones)', 'Home screen', 'Init',
     'Phone chrome, dialogs and the on-screen keyboard', 'Install / offline support'],
   data: ['Seed data (from the shared reference doc)', 'Code of Ethics', 'Domain icons and link lists'],
-  safe: ['CSV export / import', 'Training & Events',
+  safe: ['Training & Events',
     'Subdomain folder', 'Practice dashboard tiles',
     'Lists: providers, recently deleted, doctors hub', 'Duplicate doctors', 'Terminology backfill', 'Healthcare Providers: modal + photo handling'],
   ask: ['Ask the Hub', 'Dr. Smiley: following a conversation', 'Dr. Smiley: context and actions', 'Dr. Smiley: what he remembers (on this device)',
