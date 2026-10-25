@@ -522,6 +522,17 @@ frame, where it lies under the body on the drawn side. Pixels the fills
 surround are made solid (a navy arc showed at the wave-rise armpit).
 Boxes of point, point-load, point-reach and wave-in grew 4 to 9 px.
 
+**One state replacing another (same chat, the full review on navy).**
+Filming every move and held state turned up one fault: a held state that
+names no drawing (`listening`, `uncertain`) entered straight from one that
+does kept that drawing up the whole time (the celebrating fist pump, the
+thinking finger, the clipboard), since a state starts from the live pose.
+`state()` now plays the old state's exit first when one state replaces
+another (its drawings go down the drawn way; thinking's exit is the
+"aha"), then the new state's entry. It costs the old exit's length
+(well under 2 s) before the new state starts. body-rig checks celebrating
+to uncertain (159). Nothing else seen in the review.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

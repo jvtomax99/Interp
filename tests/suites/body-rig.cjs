@@ -239,6 +239,14 @@ const SAMPLE = () => {
       requestAnimationFrame(tick); }, 1800); }));
   ok(resume.ended && resume.busy && resume.name === 'thinking' && (resume.frames[0] + resume.frames[1]) === 'think' && resume.ms < 4000, 'a nod during thinking plays through, then the finger is back on the chin ' + JSON.stringify(resume));
   await P.evaluate(() => { window.body.state(null); window.body.stop(); window.body.rest(); });
+  // One state replacing another: out through the old one's exit, so a drawn arm never stays up
+  // into a state that draws none (2026-10-25: the fist pump stayed up through uncertain).
+  const swap = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(5); b.state('celebrating'); drBodySeed(null);
+    setTimeout(() => { const up = b.pose.frameL + b.pose.frameR; b.state('uncertain');
+      setTimeout(() => { const shown = [...document.querySelectorAll('.db-pose')].filter(g => g.style.opacity !== '0').length;
+        res({ up, name: b.stateName(), frames: b.pose.frameL + b.pose.frameR, shown, busy: b.busy() }); b.state(null); }, 3000); }, 3500); }));
+  ok(swap.up && swap.name === 'uncertain' && !swap.frames && !swap.shown && swap.busy, 'celebrating to uncertain: the drawn fist goes down on the way out, uncertain holds with no drawing up ' + JSON.stringify(swap));
+  await P.evaluate(() => { window.body.state(null); window.body.stop(); window.body.rest(); });
   // Focused: the same hold, smaller. Still: the one pose, no loop.
   const fh = await P.evaluate(() => { opts.mode = 'focused'; return true; }) && await holdRun('thinking', 2500);
   ok(fh.busy && fh.maxHead < held.thinking.maxHead * .8, 'Focused thinking: the same hold, the head turning less ' + JSON.stringify([fh.maxHead, held.thinking.maxHead]));

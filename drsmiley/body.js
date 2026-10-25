@@ -372,7 +372,12 @@ function drBody(svg, opts){
     }
     hctx = ctxFor(cur);
     if(mode() === 'still'){ stillRest(); return true; }
-    play(DR_BODY_STATES[cur].enter(hctx), { keep: true, name: 'enter:' + cur, done: holdLoop });
+    const enter = () => { if(cur === name) play(DR_BODY_STATES[cur].enter(hctx), { keep: true, name: 'enter:' + cur, done: holdLoop }); };
+    // one state replacing another goes out through the old one's exit first (2026-10-25): a
+    // new state starts from the live pose, and one that never names a drawing (listening,
+    // uncertain) kept the last state's drawn arm up the whole time (the fist pump, the clipboard)
+    if(prev && pctx){ const S = DR_BODY_STATES[prev]; play((S.exit || DR_BODY_HOLD_EXIT)(pctx), { name: 'exit:' + prev, exit: true, done: enter }); }
+    else enter();
     return true;
   }
   function holdLoop(){

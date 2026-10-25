@@ -86,7 +86,10 @@ stub past the front drawings is fixed (`body-trim.webp`, dr-smiley.md,
 from the wince picture) and was not used. The walk's armpit slit is filled (gussets, dr-smiley.md "The armpits").
 The landing's shoes match his now.
 The armpit's step on both sides (drawn and mirrored) is closed (dr-smiley.md,
-"The armpit's step"). Open: `legs-toes` (Jose's picture), nothing else seen.
+"The armpit's step"). Then a full review of every move and held state on navy, two seeds: one
+fault, a state replacing another kept the old one's drawn arm up; fixed
+(dr-smiley.md, "One state replacing another"). Open: `legs-toes` (Jose's
+picture), nothing else seen.
 
 ## Where it stands (2026-10-24, evening, second chat)
 
