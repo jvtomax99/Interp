@@ -9,7 +9,7 @@ import { Reflector } from "../../vendor/Reflector.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { RectAreaLightUniformsLib } from "../../vendor/RectAreaLightUniformsLib.js";
 import { MOVES, loadSmileyArt, composeSmiley, BROWS } from "../smiley.js";
-import { FEATURES, featureLen } from "./features.js";
+import { FEATURES, featureLen, CUT, EXPLODE_IN } from "./features.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutSine, inOutCubic } from "../util.js";
 
 const loadImg = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
@@ -18,7 +18,9 @@ const texOf = (img) => { const t = new THREE.Texture(img); t.colorSpace = THREE.
 // which app screen each feature shows on the phone, and which HUMC photo fills the window
 const SCREEN_OF = { home: "home", glossary: "heart", // the 3D Body lives in the Glossary shot now (Jose, 2026-10-22): the body comes apart, then its Heart / Corazón glossary card
    body: "heart", translate: "translate", physician: "physician", falsefriends: "falsefriends", drills: "drills", cert: "cert", team: "team", ask: "ask" };
-const WINDOW_OF = { home: "entrance", glossary: "tower", body: "pavilion-dusk", translate: "aerial", physician: "pavilion-dusk-2", falsefriends: "entrance", drills: "tower", cert: "aerial", team: "pavilion-dusk", ask: "pavilion-dusk-2" };
+// the 1-minute cut: the Glossary shows the glossary again (the body has its own shot), and two new shots
+if (CUT === 60) Object.assign(SCREEN_OF, { glossary: "glossary", notifications: "notifications", brain: "review" });
+const WINDOW_OF = { home: "entrance", glossary: "tower", body: "pavilion-dusk", translate: "aerial", physician: "pavilion-dusk-2", falsefriends: "entrance", drills: "tower", cert: "aerial", team: "pavilion-dusk", notifications: "entrance", brain: "tower", ask: "pavilion-dusk-2" };
 const PHONE = { w: 0.98, h: 2.12 }, PX = PHONE.w / 390;
 const LID_W = 3.3, LID_H = 2.1, SCR_W = 3.08, SCR_H = 1.9;
 const TT = (s) => s.replace(/(^|\s)(\p{L})/gu, (m, a, b) => a + b.toUpperCase()); // every word capitalised (Jose)
@@ -91,7 +93,7 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
   phone.position.set(0.82, PHONE.h / 2 + 0.11, 1.55); phone.rotation.set(-0.05, -0.2, 0); // forward, so it reads big
   desk.add(phone);
   const screens = {};
-  for (const state of new Set(Object.values(SCREEN_OF))) {
+  for (const state of new Set(FEATURES.map((f) => SCREEN_OF[f.g]).concat("cert"))) {
     const meta = await (await fetch(`assets/layers/${state}/layers.json`)).json();
     const g = new THREE.Group(); g.position.z = 0.047; g.visible = false;
     const bg = new THREE.Mesh(new THREE.PlaneGeometry(PHONE.w, PHONE.h), new THREE.MeshBasicMaterial({ map: texOf(await loadImg(`assets/layers/${state}/${meta.bg}`)), toneMapped: false, color: 0xd6dbe6 }));
@@ -129,6 +131,8 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
   // ---------- what the laptop says for each feature ----------
   const [iconImg, art, ...pinImgs] = await Promise.all([loadImg("assets/appicon.png"), loadSmileyArt("assets/drsmiley/"),
     ...["cardiology", "oncology", "emergency", "neurology", "pediatrics", "orthopedics", "nephrology", "pulmonology", "dermatology", "hematology", "infusion", "pharmacy", "surgery-anesthesia", "urology", "ophthalmology", "genetics", "laboratory", "endocrinology"].map((p) => loadImg(`assets/pins/${p}.webp`))]);
+  // the knowledge brain's real points (tools/capture-kbrain.cjs), for the brain shot's laptop
+  const KB = CUT === 60 ? await (await fetch("assets/kbrain.json")).json() : null;
   const smileyPic = document.createElement("canvas"); smileyPic.width = 480; smileyPic.height = 600;
   composeSmiley(smileyPic.getContext("2d"), art, "smile", BROWS.glad);
   const bgFill = () => {
@@ -225,6 +229,50 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
       bub(TT("ED is busy. who is free?"), 120, 330 + (1 - ap(u, 0.5, 0.85)) * 30, 760, "rgba(255,255,255,.85)", "#0b1a4a", ap(u, 0.5, 0.85));
       bub(TT("on my way."), 1160, 500 + (1 - ap(u, 0.95, 1.3)) * 30, 460, "#3fc6ee", "#0b1a4a", ap(u, 0.95, 1.3), true);
     },
+    notifications(u) {
+      // a lock screen: the time, then three of the Hub's notifications dropping in, newest on top
+      bgFill();
+      txt("9:41", 640, 170, '800 120px "Inter Tight"', "#fff", ap(u, 0.05, 0.35), "center", "rgba(120,200,255,.45)");
+      const N = [[TT("team chat · Maria Ruiz"), TT("lavado del port. added it to the glossary.")],
+        [TT("new training"), TT("the daily check found a new CE webinar.")],
+        [TT("from the team's owners"), TT("the new schedule is posted.")]];
+      N.forEach(([h, b], i) => {
+        const a = ap(u, 0.35 + i * 0.4, 0.7 + i * 0.4); if (a <= 0) return;
+        const y = 250 + i * 160 - (1 - outBack(prog(u, 0.35 + i * 0.4, 0.75 + i * 0.4), 1.4)) * 90;
+        sg.save(); sg.globalAlpha = a; sg.fillStyle = "rgba(236,242,252,.94)"; sg.beginPath(); sg.roundRect(170, y, 940, 136, 34); sg.fill();
+        sg.drawImage(iconImg, 196, y + 26, 84, 84);
+        sg.fillStyle = "#0b1a4a"; sg.textAlign = "left"; sg.font = '800 40px "Inter Tight"'; sg.fillText(h, 304, y + 58);
+        sg.fillStyle = "#33405e"; sg.font = '500 36px "Inter Tight"'; sg.fillText(b, 304, y + 104);
+        sg.restore();
+      });
+      pill(TT("even with the hub closed"), 640, 735, "#3fc6ee", "#0b1a4a", ap(u, 1.6, 1.95), '800 42px "Inter Tight"');
+    },
+    brain(u) {
+      // the knowledge brain turning, its terms lighting up one by one: the real page's points
+      bgFill();
+      if (!KB) return;
+      const ang = -0.6 + u * 0.55, ca = Math.cos(ang), sa = Math.sin(ang), K = 205, cx = 640, cy = 350;
+      const grow = outExpo(prog(u, 0.05, 0.6));
+      sg.save(); sg.globalCompositeOperation = "lighter";
+      const P = KB.cortex;
+      for (let i = 0; i < P.length; i += 6) {
+        const x = P[i] * ca - P[i + 2] * sa, y = P[i + 1];
+        sg.fillStyle = `rgb(${P[i + 3] * 420 | 0},${P[i + 4] * 420 | 0},${P[i + 5] * 420 | 0})`;
+        sg.fillRect(cx + x * K * grow - 1.5, cy - y * K * grow - 1.5, 3, 3);
+      }
+      const T = KB.terms, lit = prog(u, 0.55, 1.9), n = T.length / 6;
+      for (let j = 0; j < n; j++) {
+        const i = j * 6, on = ((j * 61) % n) / n < lit; // a fixed scattered order
+        const x = T[i] * ca - T[i + 2] * sa, y = T[i + 1], X = cx + x * K * grow, Y = cy - y * K * grow;
+        const r = Math.min(255, T[i + 3] * 255 | 0), g = Math.min(255, T[i + 4] * 255 | 0), b = Math.min(255, T[i + 5] * 255 | 0);
+        sg.fillStyle = on ? `rgba(${r},${g},${b},.28)` : "rgba(90,110,170,.25)";
+        sg.beginPath(); sg.arc(X, Y, on ? 16 : 5, 0, 7); sg.fill();
+        if (on) { sg.fillStyle = `rgb(${r},${g},${b})`; sg.beginPath(); sg.arc(X, Y, 5.5, 0, 7); sg.fill(); }
+      }
+      sg.restore();
+      const k = Math.round(171 * outCubic(prog(u, 0.55, 1.9)));
+      pill(`${k} ${TT("of 328 known")}`, 640, 735, "#3fc6ee", "#0b1a4a", ap(u, 0.5, 0.8), '800 46px "Inter Tight"');
+    },
     ask(u) {
       bgFill();
       const a = ap(u, 0.1, 0.5), h = 260 * outBack(a, 1.8);
@@ -256,6 +304,8 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     drills: (u) => (u > 1.0 ? { face: "laugh", brows: "laugh", ...(u < 1.5 ? MOVES.land(prog(u, 1.0, 1.5)) : {}) } : { face: "lookUR", brows: "focused" }),
     cert: (u) => (u < 0.9 ? { face: "lookUR", brows: "up" } : u < 2.0 ? { face: "surprised", brows: "up" } : { ...MOVES.point(prog(u, 2.0, 2.5)), face: "smile", brows: "glad" }),
     team: (u) => ({ face: u % 1.4 < 0.9 ? "laugh" : "smile", brows: "laugh" }),
+    notifications: (u) => (u < 0.4 ? { face: "lookUR", brows: "up" } : u < 1.4 ? { face: "surprised", brows: "up" } : { face: "smile", brows: "glad" }),
+    brain: (u) => (u < 0.6 ? { face: "lookUR", brows: "focused" } : { face: u < 1.8 ? "surprised" : "laugh", brows: u < 1.8 ? "up" : "laugh" }),
     // out of the screen, then thinking (his AI brain lights up: main.js), then the wave
     ask: (u) => (u < 1.0 ? MOVES.stepOut(prog(u, 0.05, 1.0)) : u < 2.1 ? { face: "lookUR", brows: "up" } : MOVES.wave(prog(u, 2.1, 3.0))),
   };
@@ -270,7 +320,7 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
     for (const k in S.layers) { const L = S.layers[k]; L.pivot.position.z = 0.002 + L.l.depth * 0.001; L.pivot.scale.setScalar(1); }
     // the proof pops forward with its cyan outline, on the beat after the shot settles
     const P = S.layers[S.proofKey];
-    const pop = g === "glossary" ? 0 : g === "cert" ? outBack(prog(u, 0.1, 0.45), 1.6) * (1 - prog(u, 0.55, 0.8)) : outBack(prog(u, 0.55, 1.0), 1.6);
+    const pop = g === EXPLODE_IN ? 0 : g === "cert" ? outBack(prog(u, 0.1, 0.45), 1.6) * (1 - prog(u, 0.55, 0.8)) : outBack(prog(u, 0.55, 1.0), 1.6);
     outline.visible = false;
     if (P) {
       P.pivot.position.z = 0.002 + 0.16 * pop;
@@ -281,21 +331,21 @@ export async function buildDesk(scene, groups, { at = new THREE.Vector3(0, 0, -5
       outline.material.opacity = Math.min(1, pop);
     }
     // the 3D Body: the real viewer coming apart on the phone, then the heart and its card
-    exPlane.visible = g === "glossary" && exTex.length > 0 && u < 1.85;
+    exPlane.visible = g === EXPLODE_IN && exTex.length > 0 && u < 1.85;
     if (exPlane.visible) {
       const k = Math.min(exTex.length - 1, Math.floor(prog(u, 0.55, 1.5) * exTex.length));
       if (exPlane.material.map !== exTex[k]) { exPlane.material.map = exTex[k]; exPlane.material.needsUpdate = true; }
       exPlane.material.opacity = 1 - prog(u, 1.5, 1.85);
       if (P) { const pp = outBack(prog(u, 1.9, 2.35), 1.6); P.pivot.position.z = 0.002 + 0.16 * pp; P.pivot.scale.setScalar(1 + 0.16 * pp); outline.visible = pp > 0.02; outline.material.opacity = Math.min(1, pp); }
     }
-    if (g === "glossary" && P && u >= 1.9) { const pp = outBack(prog(u, 1.9, 2.35), 1.6); P.pivot.position.z = 0.002 + 0.16 * pp; P.pivot.scale.setScalar(1 + 0.16 * pp); outline.visible = pp > 0.02; outline.material.opacity = Math.min(1, pp); outline.position.z = P.pivot.position.z + 0.004; outline.scale.set(P.w * P.pivot.scale.x + 0.05, P.h * P.pivot.scale.y + 0.05, 1); }
+    if (g === EXPLODE_IN && P && u >= 1.9) { const pp = outBack(prog(u, 1.9, 2.35), 1.6); P.pivot.position.z = 0.002 + 0.16 * pp; P.pivot.scale.setScalar(1 + 0.16 * pp); outline.visible = pp > 0.02; outline.material.opacity = Math.min(1, pp); outline.position.z = P.pivot.position.z + 0.004; outline.scale.set(P.w * P.pivot.scale.x + 0.05, P.h * P.pivot.scale.y + 0.05, 1); }
     drawLaptop(g, u);
     smiley.group.visible = true;
     smiley.pose(POSE[g] ? POSE[g](u) : { face: "smile", brows: "glad" });
   }
 
   // cameras: the desk framed like the first reel, each feature a slightly different, slowly moving angle
-  const ANG = { home: -6, glossary: 5, body: -3, translate: 6, physician: -5, falsefriends: 4, drills: -4, cert: 6, team: -6, ask: 3 };
+  const ANG = { home: -6, glossary: 5, body: -3, translate: 6, physician: -5, falsefriends: 4, drills: -4, cert: 6, team: -6, notifications: 5, brain: -4, ask: 3 };
   function view(g, u) {
     const len = featureLen(FEATURES.find((f) => f.g === g) || { len: 2.5 });
     const e = inOutSine(clamp(u / len)), a = THREE.MathUtils.degToRad((ANG[g] || 0) + lerp(-2, 2, e));

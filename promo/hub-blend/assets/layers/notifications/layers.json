@@ -1,0 +1,111 @@
+{
+  "state": "notifications",
+  "caption": "Team news reaches you, even with the Hub closed.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "head",
+      "proof": false,
+      "x": 20,
+      "y": 77.09375,
+      "w": 350,
+      "h": 74.6875,
+      "file": "head.webp",
+      "clip": {
+        "x": 8,
+        "y": 65.09375,
+        "width": 374,
+        "height": 98.6875
+      },
+      "depth": 0
+    },
+    {
+      "key": "status",
+      "proof": false,
+      "x": 18,
+      "y": 169.78125,
+      "w": 354,
+      "h": 153.59375,
+      "file": "status.webp",
+      "clip": {
+        "x": 6,
+        "y": 157.78125,
+        "width": 378,
+        "height": 177.59375
+      },
+      "depth": 0
+    },
+    {
+      "key": "kinds",
+      "proof": false,
+      "x": 18,
+      "y": 336.375,
+      "w": 354,
+      "h": 326.25,
+      "file": "kinds.webp",
+      "clip": {
+        "x": 6,
+        "y": 324.375,
+        "width": 378,
+        "height": 350.25
+      },
+      "depth": 0
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 36,
+      "y": 387.375,
+      "w": 318,
+      "h": 60.1875,
+      "file": "proof.webp",
+      "clip": {
+        "x": 24,
+        "y": 375.375,
+        "width": 342,
+        "height": 84.1875
+      },
+      "depth": 3
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 748,
+      "w": 295,
+      "h": 58,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 736,
+        "width": 319,
+        "height": 82
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

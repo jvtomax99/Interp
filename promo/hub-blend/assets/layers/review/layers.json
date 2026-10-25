@@ -1,0 +1,79 @@
+{
+  "state": "review",
+  "caption": "Every term you know lights up.",
+  "viewport": {
+    "w": 390,
+    "h": 844,
+    "dpr": 3
+  },
+  "full": "full.webp",
+  "bg": "bg.webp",
+  "layers": [
+    {
+      "key": "topbar",
+      "proof": false,
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 51.09375,
+      "file": "topbar.webp",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 63.09375
+      },
+      "depth": 2
+    },
+    {
+      "key": "proof",
+      "proof": true,
+      "x": 18,
+      "y": 238.15625,
+      "w": 354,
+      "h": 98,
+      "file": "proof.webp",
+      "clip": {
+        "x": 6,
+        "y": 226.15625,
+        "width": 378,
+        "height": 122
+      },
+      "depth": 3
+    },
+    {
+      "key": "setup",
+      "proof": false,
+      "x": 18,
+      "y": 353.15625,
+      "w": 354,
+      "h": 291.59375,
+      "file": "setup.webp",
+      "clip": {
+        "x": 6,
+        "y": 341.15625,
+        "width": 378,
+        "height": 315.59375
+      },
+      "depth": 0
+    },
+    {
+      "key": "tabbar",
+      "proof": false,
+      "x": 14,
+      "y": 752,
+      "w": 132,
+      "h": 54,
+      "file": "tabbar.webp",
+      "clip": {
+        "x": 2,
+        "y": 740,
+        "width": 156,
+        "height": 78
+      },
+      "note": "cut from the screen, corners masked",
+      "depth": 2
+    }
+  ],
+  "missing": []
+}

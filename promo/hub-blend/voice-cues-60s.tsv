@@ -1,7 +1,19 @@
-g1	start 0.4	len 5.824	phrase starts (in clip) 1.16 2.42
-g2	start 6.574	len 1.259	phrase starts (in clip) 
-g3	start 8.033	len 1.408	phrase starts (in clip) 1.41
-g4	start 9.841	len 1.728	phrase starts (in clip) 
-g5	start 12.369	len 23.445	phrase starts (in clip) 1.50 4.91 7.16 9.59 13.47 18.57 20.47 21.76
-g6	start 36.414	len 12.288	phrase starts (in clip) 2.74 4.50 7.87 9.98 10.86
-g7	start 49.402	len 6.848	phrase starts (in clip) 1.33 3.06 4.83
+shot	passage	from	to	starts
+hook	g1	0	5.82	0.4
+wrong	g2	0	1.26	6.97
+strike	g3	0	1.41	8.43
+right	g4	0	1.73	10.24
+logo	g5	0	4.53	12.77
+home	g5	4.91	6.52	17.7
+glossary	g5	7.16	9.02	20.2
+translate	g5	9.59	11.72	22.7
+physician	g5	11.82	13.2	25.2
+falsefriends	g5	13.47	16.34	27.7
+drills	g5	16.45	18.22	30.92
+cert	g5	18.57	21.25	33.42
+team	g5	21.76	23.45	36.45
+body	g6	0.14	4.02	38.95
+notifications	g6	4.5	7.49	43.18
+brain	g6	7.96	9.46	46.52
+ask	g6	9.99	12.2	49.02
+end	g7	0	6.85	51.58

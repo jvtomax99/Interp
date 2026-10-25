@@ -102,6 +102,18 @@ async function openAtlas(page, heart) {
   page.__rects = [{ key: 'proof', proof: true, x: box.x + off.x, y: box.y + off.y, w: box.w, h: box.h, radius: box.radius }];
 }
 
+// a made-up Term Review record, about half the terms known (as promo/whats-new/tools/capture.cjs):
+// the stand-in database has none
+const DEMO_RECORD = `(() => {
+  const now = Date.now(), day = 864e5; let i = 0;
+  DATA.categories.forEach(c => c.terms.forEach(t => {
+    if (!t.en || !t.es) return; const k = (i++ * 37) % 100;
+    if (k < 52) TERM_REVIEWS[t.id] = { box: 3 + (k % 3), reviewCount: 4, lastResult: 'right', nextReviewAt: now + 9 * day };
+    else if (k < 66) TERM_REVIEWS[t.id] = { box: 1 + (k % 2), reviewCount: 2, lastResult: 'right', nextReviewAt: now + day };
+    else if (k < 72) TERM_REVIEWS[t.id] = { box: 0, reviewCount: 2, lastResult: 'miss', misses: 1, nextReviewAt: now };
+  }));
+})()`;
+
 const STATES = [
   { name: 'body', caption: 'Explore The 3D Body.', prep: async p => openAtlas(p, false), regions: [['topbar', '.topbar-global']] },
   { name: 'heart', caption: 'Names In English And Spanish.', prep: async p => openAtlas(p, true), regions: [['topbar', '.topbar-global']] },
@@ -170,6 +182,18 @@ const STATES = [
     },
     regions: [['topbar', '.topbar-global'], ['proof', '.ask-card', { nth: -1, proof: 1 }],
       ['input', '#askInput', { up: '.ask-compose, .ask-input-row, form' }], ['tabbar', 'nav.tabbar']] },
+  // the 1-minute cut's two new shots (SHOTS-60s.md)
+  { name: 'notifications', caption: 'Team news reaches you, even with the Hub closed.', prep: async p => {
+      await p.evaluate(() => { window.pushState = () => 'on'; PUSH.ready = true; notifyEnabled = true; notifyCeEnabled = true; }); // headless has no push service
+      await L.go(p, 'notifications', 1500);
+    },
+    regions: [['topbar', '.topbar-global'], ['head', '.hub-head'], ['status', '.nt-status'], ['kinds', '.nt-kinds'],
+      ['proof', '.nt-kinds .ta-switchrow', { proof: 1 }], ['tabbar', 'nav.tabbar']] },
+  { name: 'review', caption: 'Every term you know lights up.', prep: async p => {
+      await L.go(p, 'review', 2500); // loads (and so clears) the record first
+      await p.evaluate(DEMO_RECORD + ';termReviewsLoaded = true; renderContent();'); await p.waitForTimeout(2500);
+    },
+    regions: [['topbar', '.topbar-global'], ['proof', '.kb-mini', { proof: 1 }], ['setup', '.rv-setup'], ['tabbar', 'nav.tabbar']] },
 ];
 
 async function markRegions(page, regions) {

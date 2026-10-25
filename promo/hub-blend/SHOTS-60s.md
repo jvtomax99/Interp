@@ -1,4 +1,4 @@
-# Shot table: the 1-minute promo (draft 1, 2026-10-25, for Jose's OK)
+# Shot table: the 1-minute promo (approved 2026-10-25; built as draft stills the same day)
 
 The clock is the locked voice (`assets/voice-60s/`). The passages are cut at their pauses, and
 silence is added between features so each gets at least 2.5 s (BRIEF.md: never under 2.3 s).
@@ -21,9 +21,9 @@ read off the waveform; the build re-reads them exactly.
 | 30.9 | Daily Drill | "Daily drills, sharp skills." | as now | built |
 | 33.4 | CoreCHI | "National certification. Prep built in." | as now, 3.0 s | built |
 | 36.5 | Team Chat | "One team, one channel." | as now | built |
-| 39.0 | **3D Body** | "Every part of the body, in 3D. In both languages." | Already built, cut in October: the 3D Body on the phone, a tap on the chest, the view dives into the heart (it echoes the hook), its bilingual card lifts | built, back in |
-| 43.2 | **Notifications** | "Team news reaches you, even with the Hub closed." | **New.** The phone lies on the floor showing its lock screen (the HUMC photo, never dark). A Team Chat notification, a thick glass slab, drops from above and lands on the glass with a bounce and a cyan glow; two more stack behind it (New training, a message from the owners) | to design |
-| 46.5 | **Knowledge brain** | "Every term you know lights up." | **New.** Term Review's small brain on the phone; its points lift off the glass into a floating 3D brain that lights up cyan point by point, a few red, some dim | to design |
+| 39.0 | **3D Body** | "Every part of the body, in 3D. In both languages." | The body coming apart and its Heart / Corazón card, which the 45 s film plays inside the Glossary shot, now its own shot; the laptop says Heart / Corazón / EN · ES. Caption "Every Part, In 3D." / "In Both Languages." (the longer one wrapped to three lines) | built, moved |
+| 43.2 | **Notifications** | "Team news reaches you, even with the Hub closed." | **New**, on the desk like every feature: the laptop is a lock screen (9:41), three of the Hub's notifications drop in (Team Chat, New training, from the team's owners), "Even With The Hub Closed"; the phone shows the real Notifications screen (switched on), its Team Chat switch the proof, shown big only from 1.7 s, once all three have landed | built |
+| 46.5 | **Knowledge brain** | "Every term you know lights up." | **New**: the laptop shows the knowledge brain turning, its real points (`assets/kbrain.json`, `tools/capture-kbrain.cjs`), the terms lighting up one by one as the count climbs to 171 of 328 known; the phone shows Term Review with its small brain. No big proof card, so the laptop is the picture | built |
 | 49.0 | Ask | "Stuck? Ask Dr. Smiley." | as now | built |
 | 51.6 | End | "Interpreter Hub. Built here, for our patients. Live today, on any phone. Better words. Safer care." | The laptop and phone end card; each line appears as he says it | built, retimed |
 
@@ -31,5 +31,8 @@ read off the waveform; the build re-reads them exactly.
 
 **Sound effects:** re-cued in step 6, from the new frames.
 
-**Not proven yet:** both new shots are ideas, not built. Stills come before any render, at phone
-size first.
+**Built** with `data-cut="60"` on the same code as the 45 s film (`remake-60.html` draft,
+`remake-60-final.html` 1080x1920); the 45 s film draws the same, frame for frame (7 frames compared
+against `main`, identical). The 60 s voice is laid by `tools/voice60.py`.
+
+**Not proven yet:** no render yet, only stills; no music (Demucs blocked here).

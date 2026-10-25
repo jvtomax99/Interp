@@ -66,4 +66,5 @@ from that cue list instead of `HOOK_MAP`.
   it misses some line breaks, so read the exact cut points off the waveform in step 4).
   Cloud voices (Microsoft, ElevenLabs, OpenAI) are blocked here too.
 - Kokoro's pacing over a full minute: only a 13 s sample has been heard.
-- New 3D shots for Notifications and the knowledge brain: not designed.
+- New shots for Notifications and the knowledge brain: built as desk shots, stills only so far (`SHOTS-60s.md`).
+- The feature shots play on one desk (`desk.js`); the 3D Body was never cut, it played inside the Glossary.
