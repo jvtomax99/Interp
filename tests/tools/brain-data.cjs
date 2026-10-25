@@ -25,8 +25,7 @@ const GROUPS = {
     'Subdomain folder', 'Practice dashboard tiles',
     'Lists: providers, recently deleted, doctors hub', 'Healthcare Providers: modal + photo handling'],
   ask: [],   // all seven sections moved out together to features/ask-hub.js (2026-10-25)
-  smiley: ["Dr. Smiley's art", 'Dr. Smiley: animation engine', 'Dr. Smiley: how lively (Lively, Focused, Still)',
-    "Dr. Smiley: what he's doing (task states)", 'Dr. Smiley reacts', "Dr. Smiley's career", "Dr. Smiley's news", 'Dr. Smiley companion',
+  smiley: ['Dr. Smiley reacts', "Dr. Smiley's career", "Dr. Smiley's news", 'Dr. Smiley companion',
     'Dr. Smiley: the companion panel'],
 };
 const groupOf = new Map();

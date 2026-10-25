@@ -63,6 +63,7 @@ const PRECACHE = [
   './features/term-lookup.js',
   './features/voice-check.js',
   './features/smiley-performances.js',
+  './features/smiley-engine.js',
   './features/campus.js',
   './features/false-friends.js',
   './features/knowledge-brain.js',

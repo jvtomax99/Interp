@@ -4,10 +4,10 @@
    (docs/split-index.md, phase 3). Loaded by a plain <script src> just
    before index.html's own script. Nothing here runs into index.html as
    the page loads: the only top-level lines that run fill DR_PERF itself.
-   One line stayed in index.html, where it was: the one that puts each
-   performance into DR_FACE_SEQ (Dr. Smiley's art), a table this file
-   loads before. The names used from index.html (drMode, drStill,
-   drAnim...) are read when a function runs. Keep it that way. */
+   The line that puts each performance into DR_FACE_SEQ (Dr. Smiley's
+   art) is in features/smiley-engine.js, which loads after this file
+   (2026-10-25). The names used from that file and index.html (drMode,
+   drStill, drAnim...) are read when a function runs. Keep it that way. */
 
 /* ---------- Dr. Smiley: performances ----------
    Five gestures, each built fresh every time it plays (drPerfBuild), so no
