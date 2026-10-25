@@ -1,7 +1,7 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-24, from the chat that ran #139 to #143.
+hands over"). This one: 2026-10-25, from the chat that ran #146 to #152.
 
 ## Paste this into the new chat
 
@@ -12,40 +12,48 @@ hands over"). This one: 2026-10-24, from the chat that ran #139 to #143.
 
 ## Now
 
-The split of `index.html` (`docs/split-index.md`), phase 3, small pieces
-first (Jose's pick, 2026-10-24), one change at a time, each merged on his
-"push". The doctor sheets (#147), CSV (#148) and duplicate doctors
-(#150, b1025.1607) are live; the backfill, the last small piece, is in
-its change now. After it: Ask the Hub's group and Dr. Smiley's engine, as
-groups, or they stay.
+The split of `index.html` (`docs/split-index.md`), phase 3. All the small
+pieces are out (the last, the backfill, live b1025.1713); `index.html` is
+1.15 MB. What's left are the two groups the census names: Ask the Hub
+with Dr. Smiley's conversation, context and memory (7 sections, about
+125 KB) and Dr. Smiley's art, engine, performances' wiring, "how lively"
+and task states (5 sections, about 78 KB; 12 sections call his task
+states). Each would be one bigger change, or they stay inline.
+
+**Open question for Jose (ask with buttons):** move the groups, or stop
+the split here. Pick: plan the Ask the Hub group first (a written plan,
+no code: which sections, what runs at load, which suites cover it), then
+decide. Rerun `node tools/census.cjs --write` before choosing.
 
 ## Before (this chat, all live)
 
-- #138 the last handoff, merged.
-- #139 the campus -> `features/campus.js` (b1024.1553). Its Escape listener
-  moved with it: no earlier keydown listener stops the event or touches
-  the campus.
-- #140 3D Body's resize listener read `activeCategory` before it existed
-  (a resize during load): guarded with `typeof`; new suite
-  `load-order.cjs` holds that gap open (b1024.1804).
-- #141 False Friends' screen -> `features/false-friends.js` (b1024.1920).
-  Its census section also held the Practice screen; that half stayed
-  inline under a new banner.
-- #142 rule: always a phone notification when a change is ready for
-  Jose's push (docs).
-- #143 your knowledge brain's Hub side -> `features/knowledge-brain.js`
-  (b1024.2150).
+- #146 docs: #145 marked live; rule: offer the new chat as buttons.
+- #147 the doctor sheets (the place picker, the add and edit sheet) ->
+  `features/doctor-sheets.js` (b1025.1140). Two side-by-side sections,
+  one feature.
+- #148 CSV export / import -> `features/csv.js` (b1025.1453). No suite
+  covers it; a probe exported, edited and imported a file on both.
+- #150 duplicate doctors -> `features/duplicate-doctors.js` (b1025.1607).
+- #152 the terminology backfill -> `features/backfill.js` (b1025.1713).
+  No suite covers it; the probe ran it failing and working on both.
 
-Open: only this handoff's change (docs only). No check-ins armed.
+Open, not this chat's (opened from Jose's account in other chats):
+#149 (rule: offer a new chat as buttons after every finished job; docs
+only, touches `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`) and #151 (promo
+video sound effects). This handoff's change also touches
+`docs/PLAN.md`; whichever merges second may need its lines merged.
 
-## The method (worked eight times)
+No check-ins armed.
+
+## The method (worked twelve times)
 
 1. List the section's top-level statements with acorn (`tests/node_modules`
    has acorn only; if missing, `cd tests && npm ci`, then delete
    `node_modules/playwright*` or the preinstalled browser is not found).
    Check the section really is one feature: a census section can hold two
-   (#141). Anything that runs at load must not read `index.html`'s names
-   until it has run (load-order.cjs).
+   (#141), and two neighbouring sections can be one (#147). Anything that
+   runs at load must not read `index.html`'s names until it has run
+   (load-order.cjs).
 2. Cut banner to last line into `features/<name>.js` under the header
    comment the others use; pointer comment in its place; script tag after
    the last `features/` line; `sw.js` precache.
@@ -53,9 +61,12 @@ Open: only this handoff's change (docs only). No check-ins armed.
    `node tools/census.cjs --write`.
 4. Proof: rebuild the old `index.html` byte for byte; a browser probe in
    both checkouts (`ROOT=` a worktree of `main`) of the feature's output
-   and `Object.keys(window)` (seed timestamps and animation frames
-   differ; strip them); the suites that cover it on both; all suites;
-   `first-paint.cjs` (`ROOTS=before,after RUNS=5`).
+   and `Object.keys(window)` (seed timestamps, random ids and animation
+   frames differ; strip them); the suites that cover it on both; all
+   suites; `first-paint.cjs` (`ROOTS=before,after RUNS=5`). Where no
+   suite covers a feature, the probe must drive its real paths (success
+   and failure); a probe that only hits the error path proves little
+   (#152: seeded doctors need ids from `doctorDirIdFor`).
 5. Docs: `AGENTS.md` and `CLAUDE.md` tables and file map, the feature
    note, `docs/split-index.md`, `docs/PLAN.md`.
 6. PR, wait for GitHub's checks, phone notification, merge on "push",
@@ -64,6 +75,6 @@ Open: only this handoff's change (docs only). No check-ins armed.
 ## Not proven / open
 
 - humc-brain's double-tap checks fail now and then under load (seen on
-  `main` too, 2026-10-24); not investigated.
+  `main` too, 2026-10-24); not investigated. Did not show up this chat.
 - Each moved file: first paint within noise so far; real HTTP/2 on Vercel
-  unmeasured.
+  unmeasured. Twelve files now load before `index.html`'s script.
