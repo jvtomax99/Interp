@@ -47,7 +47,7 @@ renders and the cutout clip's frames.
 4. **The move (greet).** Keyed by hand, pose to pose, at 24 fps:
    - frames 1-4 rest; 4-8 **anticipation**: a dip (the whole body down 14 mm),
      the arm pulls in and down, the shoulder drops, the head tips away;
-   - 8-16 the rise on an **arc**: the upper arm swings out and up with the
+   - 8-16 the rise on an **arc**: the upper arm swings out and up (to 72 degrees, settling at 66) with the
      elbow leading, the forearm still nearly straight and the hand hanging
      (**drag**), then the forearm whips up and the hand flicks in past its
      place (**follow-through**), settling by 20;
@@ -87,10 +87,15 @@ Worked:
 - **His app expressions on the 3D face**, all 30, switched like the app does.
 
 Not good enough yet:
-- **The hand.** Meshy made each hand one closed, mitten-like shape with no
-  finger bones, so the wave is a stiff paddle, smaller and less readable than
-  the drawn open hand on the left of the video. Needs a model with separate
-  fingers (Meshy's rigged/A-pose output, or a hand redone in Blender).
+- **The hand.** Meshy made each hand one cupped, mitten-like shape with no
+  finger bones. Jose's first look ("doesn't look right": the hand and the
+  wave): the hand read as a fist and the arm hugged his head. Fixed in the
+  second version: one added bone (`DEF-fingers.R`, the hand's last 40-60%)
+  opens the fingers flat, palm to the camera, a beat after the arm arrives;
+  the elbow is lower (66 instead of 95 degrees out) and the wag swings away
+  from his face, like the drawn wave. The fingers still move as one piece and
+  can't spread; a model with separate fingers would fix that (Meshy's rigged
+  or A-pose output, or the hand redone in Blender).
 - **The face up close.** Eyes, smile and blinks read at 440 px; at full size
   the mouth plate shows a faint light patch, and the brows can't move (the app's
   separate brows, `DR_BROWS`, were not done). From the side the face plate
