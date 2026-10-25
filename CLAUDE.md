@@ -51,6 +51,7 @@ between assignments.
 | `media/` | — | The 45-second video (`hub-promo.mp4`, 720p; the 3D remake from `promo/hub-blend/` since 2026-10-23) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
 | `promo/hub-blend/` | — | Source of the 3D promo remake (HyperFrames + Three.js); plan in its `BRIEF.md`. Not deployed (`.vercelignore`); only a rendered MP4 goes into `media/` |
+| `promo/whats-new/` | — | A 15-second "What's new" video (HyperFrames, the starter kit's Liquid Glass look): the User Guide's three New lately cards, for Team Chat. Not deployed; `promo/whats-new/README.md` |
 | `guide/topics.js` | 503 | The User Guide's answers, `GUIDE_SECTIONS` and `GUIDE_TOPICS` (plain data; was in `index.html` until 2026-10-21). Loaded by a `<script src>` just before `index.html`'s script; precached, network-first |
 | `practice/questions.js` | 348 | The CoreCHI practice bank, `CCHI_DOMAINS` and `SEED_QUESTIONS` (100 questions; plain data, was in `index.html` until 2026-10-21). Loaded like `guide/topics.js` |
 | `falsefriends/list.js` | 846 | The False Friends list, `FALSE_FRIENDS` (101 entries; plain data, was in `index.html` until 2026-10-22). Loaded like `guide/topics.js` |
