@@ -478,11 +478,20 @@ In the acting: the shrug goes in and out through `shrug-half` (no more
 before the thumb springs up and goes down through it again; the wince
 pulls the drawn arms in (as drawn only, `frameL`) and lets them go into
 the cutout arms on the spring back; the cheer's and the hop's landing
-squash is on `legs-land`, then the crouch. Still open: when a torso
-drawing is up, the body piece's right shoulder corner shows past the
-drawing's narrower shoulder as a small white nub; `legs-toes` not yet
-drawn; the landing's shoes are a brighter blue than his. body-rig 158
+squash is on `legs-land`, then the crouch. Still open: `legs-toes` not
+yet drawn (a run came back from the wince picture with the heels down;
+not used); the landing's shoes are a brighter blue than his. body-rig 158
 (58 layers), smiley-body-app 18.
+
+**The shoulder stub (same chat).** With a front drawing standing in for
+both arms (the wince's, the thinking and clipboard drawings) the body
+piece's shoulder stub, where each cutout upper arm joins it at rest,
+poked out past the drawing's narrower right shoulder as a white wedge on
+navy. A frame in front cannot hide it, so the rig carries a trimmed copy,
+`body-trim.webp` (stubs cut at x 705 on the right and 386 on the left
+between y 614 and 660; made at the end of `layers/trimedges.py`), and
+`cover()` shows it in place of `body.webp` in the same paint while such a
+drawing is up (a `front` pose with both arms). 59 layers.
 
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a

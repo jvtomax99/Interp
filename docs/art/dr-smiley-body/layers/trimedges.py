@@ -75,3 +75,12 @@ for name in ('arm-fore-l','arm-fore-r'):                # the hands, below the c
     F=full(name); grey=((F[...,:3].max(2).astype(int)-F[...,:3].min(2))<16)&~skin&(yy>960); F[grey,3]=0
     n=decontam(F,below=940); print(name,'wall px',int((grey&(full(name)[...,3]>0)).sum()),'edge px recoloured',n,'box',save(name,F))
 json.dump(rig,open(OUT+'rig.json','w'),indent=1)
+# body-trim.webp (2026-10-25): the body piece with its shoulder stubs cut back, where each cutout
+# upper arm joins it at rest. Shown in place of body.webp while a front drawing stands in for both
+# arms (the wince's, the thinking and clipboard drawings): their shoulders are drawn narrower and
+# the stub poked out past the right one as a white wedge on navy. Right: no further out than x 705
+# from y 614 to 660; left: no further in than x 386 over the same rows.
+B=full('body'); rows=(yy>=614)&(yy<660)
+B[rows&(xx>705),3]=0; B[rows&(xx<386),3]=0
+im=Image.fromarray(B,'RGBA').crop(tuple(rig['bbox']['body'])); im.save(OUT+'body-trim.webp',quality=92,method=6)
+print('body-trim px cut',int(((full('body')[...,3]>0)&(B[...,3]==0)).sum()))

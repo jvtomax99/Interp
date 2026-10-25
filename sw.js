@@ -71,6 +71,7 @@ const PRECACHE = [
   './drsmiley/body/arm-upper-l.webp',
   './drsmiley/body/arm-upper-r.webp',
   './drsmiley/body/body.webp',
+  './drsmiley/body/body-trim.webp',
   './drsmiley/body/head.webp',
   './drsmiley/body/leg-l.webp',
   './drsmiley/body/leg-r.webp',

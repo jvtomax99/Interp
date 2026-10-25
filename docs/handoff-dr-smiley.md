@@ -80,9 +80,10 @@ cheer's and hop's landing (dr-smiley.md, "The shrug's way in, the thumb's
 way up, the wince's arms, the landing").
 
 **Next:** `legs-toes` (the one drawing left in `prompts-animation.md`; ask
-Jose to run it from `body-master.png` in a fresh ChatGPT chat). Open, seen
-in review: the body's right shoulder corner shows as a small white nub
-past a torso drawing's narrower shoulder (wince, thinking); in the walk a
+Jose to run it from `body-master.png` in a fresh ChatGPT chat). The shoulder
+stub past the front drawings is fixed (`body-trim.webp`, dr-smiley.md,
+"The shoulder stub"). Jose's first legs-toes run drifted (heels down, made
+from the wince picture) and was not used. Open, seen in review: in the walk a
 raised cutout arm opens a navy wedge at the armpit; the landing's shoes
 are a brighter blue than his; the mirrored wave's sleeve has a small step
 at the armpit. Still open,

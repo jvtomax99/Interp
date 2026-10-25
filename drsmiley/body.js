@@ -26,7 +26,7 @@ const DR_BODY = {
   hip: { l: [458, 1040], r: [627, 1040] },
   // Each layer's place in the picture: [x, y, width, height].
   box: {
-    body: [353, 578, 376, 504],
+    body: [353, 578, 376, 504], 'body-trim': [353, 578, 376, 504],
     'arm-upper-l': [284, 602, 132, 247], 'arm-fore-l': [233, 736, 164, 327],
     'arm-upper-r': [685, 611, 113, 235], 'arm-fore-r': [690, 739, 151, 326],
     'leg-l': [294, 990, 239, 425], 'leg-r': [555, 990, 238, 426],
@@ -155,6 +155,7 @@ function drBodyArt(cls, root){
     +     `<g class="db-poses-back">${poses('back')}</g>`
     +     head
     +     img('body', 'db-body')
+    +     img('body-trim', 'db-body-trim').replace('/>', ' style="opacity:0"/>')   // in place of the body while a front drawing stands in for both arms
     +     `<g class="db-poses-front">${poses('front')}</g>`
     +   '</g>'
     + '</g></svg>';
@@ -190,7 +191,7 @@ function drBodySeed(n){
 function drBody(svg, opts){
   opts = opts || {};
   const q = s => svg.querySelector(s);
-  const el = { root: q('.db-root'), breath: q('.db-breath'), head: q('.db-head'), armL: q('.db-arm-l'), armR: q('.db-arm-r'), foreL: q('.db-fore-l'), foreR: q('.db-fore-r'),
+  const el = { root: q('.db-root'), body: q('.db-body'), bodyTrim: q('.db-body-trim'), breath: q('.db-breath'), head: q('.db-head'), armL: q('.db-arm-l'), armR: q('.db-arm-r'), foreL: q('.db-fore-l'), foreR: q('.db-fore-r'),
                legL: q('.db-leg-l'), legR: q('.db-leg-r'), sheet: q('.ds-sheet'), browL: q('.ds-brow-l'), browR: q('.ds-brow-r'), poses: [...svg.querySelectorAll('.db-pose')] };
   const B = DR_BODY, mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
   const reduced = () => opts.reduced != null ? !!opts.reduced : !!(mq && mq.matches);
@@ -225,19 +226,23 @@ function drBody(svg, opts){
   const FADE = () => mode() === 'still' ? 0 : DR_BODY_FADE;
   function cover(){
     clearTimeout(coverT); coverT = 0;
-    const now = performance.now(), hide = { L: false, R: false }; let legs = false, wait = 0;
+    const now = performance.now(), hide = { L: false, R: false }; let legs = false, wait = 0, trim = false;
     for(const g of el.poses){
       if(!onAt.has(g) || B.pose[g.dataset.pose].legs) continue;
       const left = onAt.get(g) + FADE() - now;
       if(left > 0){ wait = Math.max(wait, left); continue; }
       const P = B.pose[g.dataset.pose];
       for(const a of P.arms) hide[g.dataset.side === 'l' ? a : (a === 'L' ? 'R' : 'L')] = true;
+      if(P.layer === 'front' && P.arms.length === 2) trim = true;
     }
     for(const g of onAt.keys()) if(B.pose[g.dataset.pose].legs) legs = true;   // the plates: at once
     el.armL.style.opacity = hide.L ? '0' : '1';
     el.armR.style.opacity = hide.R ? '0' : '1';
     el.legL.style.opacity = legs ? '0' : '1';
     el.legR.style.opacity = legs ? '0' : '1';
+    // the body's shoulder stubs (where the cutout upper arms join it) poked out past the narrower
+    // shoulders of the front drawings that stand in for both arms: the trimmed body then, same paint
+    if(el.bodyTrim){ el.body.style.opacity = trim ? '0' : '1'; el.bodyTrim.style.opacity = trim ? '1' : '0'; }
     if(wait) coverT = setTimeout(cover, wait + 4);
   }
   function setFrames(p){
