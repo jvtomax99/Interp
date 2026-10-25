@@ -301,6 +301,7 @@ for name,cfg in POSES.items():
 # The leg plates (crouch, jump): both legs whole, pants and shoes below the hip
 # line, the floor shadow out, the top row repeated up under the coat as export.py
 # does, so a longer or shorter coat in the picture never shows a gap.
+SHOES={'legs-land':1300}   # where its shoes start (after the shift)
 LEGS={'crouch':(4,0),'jump':(4,0),'legs-land':(6,41)}   # legs-land: its legs drawn 40 px short (its coat too): moved down so the shoes stand on the floor
 for name,(dx,dy) in LEGS.items():
     if ONLY and name not in ONLY: continue
@@ -320,6 +321,16 @@ for name,(dx,dy) in LEGS.items():
     shift=M[blueM].mean(0)-P[blueP].mean(0); print('  blue shift',shift.round(1))
     w=ndi.gaussian_filter(blueP.astype(float),2)[...,None]
     src=np.clip(P+shift*w,0,255); a=np.clip(ndi.gaussian_filter(mask.astype(float),1.2),0,1)*aP
+    if name in SHOES:
+        # its shoes a brighter, purer blue than his (legs-land, 2026-10-25): below SHOES[name] the
+        # blue's mean and spread per channel moved to the master's shoes', faded in over 20 px
+        y0=SHOES[name]; sm=(alphaM>0.5)&(yy>=1290)&(yy<1415)&((M[:,:,2]-M[:,:,0])>30)
+        sp=mask&(yy>=y0)&((P[:,:,2]-P[:,:,0])>30)
+        mu_m,sd_m=M[sm].mean(0),M[sm].std(0); mu_p,sd_p=src[sp].mean(0),src[sp].std(0)
+        print('  shoes',mu_p.round(), '->', mu_m.round())
+        t=np.clip((src-mu_p)/np.maximum(sd_p,1)*sd_m+mu_m,0,255)
+        wy=np.clip((yy-y0+20)/20.,0,1)[...,None]*ndi.gaussian_filter(sp.astype(float),1.5)[...,None]
+        src=src*(1-wy)+t*wy
     top=int(np.where(mask.any(1))[0].min())
     for y in range(990,top+10): mask[y]=mask[top+10]; src[y]=P[top+10]; a[y]=a[top+10]
     rgba=np.dstack([src,a*mask*255]).astype(np.uint8); fr=Image.fromarray(rgba,'RGBA'); bb=fr.getbbox()

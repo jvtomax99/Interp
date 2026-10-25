@@ -504,6 +504,11 @@ swung out, it fills the slit's top, and below the armpit the gap stays as
 a real one does. Only the inner half, so an arm swung in (the walk's -14)
 never uncovers its outer edge. 61 layers.
 
+**The landing's shoes (same chat).** `legs-land`'s shoes were a brighter,
+purer blue than his. Below y 1300 its blue is now moved to the master
+shoes' mean and spread per channel (`SHOES` in `cutframes.py`), faded in
+over 20 px so the trouser hem never shows a line.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from
