@@ -68,8 +68,9 @@ app with the full body (his words, 2026-10-23: "animate him fully first;
 where he stands full-length is decided later"). He already stands on
 Home's banner and in the quiz card on this branch. The branch is storage
 only (`claude/` never deploys); getting him live means a pull request from
-it to `main` (merge `main` in first: `main` moved on with the split of
-`index.html`), which waits for Jose's OK.
+it to `main`, which waits for Jose's OK. `main` was merged in on
+2026-10-25 (commit 36d8995) and the whole test set passed (33 suites);
+merge it again first, since it keeps moving.
 
 ## Where it stood (2026-10-25, third chat)
 
@@ -102,8 +103,8 @@ and `legs-land` cut and built into `shrug`, `bounce`, `wince` and the
 cheer's and hop's landing (dr-smiley.md, "The shrug's way in, the thumb's
 way up, the wince's arms, the landing").
 
-**Next:** `legs-toes` (the one drawing left in `prompts-animation.md`; ask
-Jose to run it from `body-master.png` in a fresh ChatGPT chat). The shoulder
+Then `legs-toes` was dropped (Jose's call: two runs came back with the
+heels down). The shoulder
 stub past the front drawings is fixed (`body-trim.webp`, dr-smiley.md,
 "The shoulder stub"). Jose's first legs-toes run drifted (heels down, made
 from the wince picture) and was not used. The walk's armpit slit is filled (gussets, dr-smiley.md "The armpits").
@@ -111,8 +112,7 @@ The landing's shoes match his now.
 The armpit's step on both sides (drawn and mirrored) is closed (dr-smiley.md,
 "The armpit's step"). Then a full review of every move and held state on navy, two seeds: one
 fault, a state replacing another kept the old one's drawn arm up; fixed
-(dr-smiley.md, "One state replacing another"). Open: `legs-toes` (Jose's
-picture), nothing else seen.
+(dr-smiley.md, "One state replacing another"). Nothing open.
 
 ## Where it stands (2026-10-24, evening, second chat)
 
