@@ -69,10 +69,19 @@ clipboard, cut whole"); it pops in at the bottom of a dip until Jose's
 Then `clipboard-low` (two heights, low and mid) built in as the way up and
 down (dr-smiley.md, "The clipboard's way up").
 
-**Next:** the leg pieces' edges at rest: a light strip under the coat's
-hem and a white fringe down the trouser edges, plain on navy. Then the
-remaining drawings in `prompts-animation.md` (shrug, read, thumbs,
-wince, the two leg drawings), the same way. Still open,
+Then (fourth chat, 2026-10-25) the standing cut's edges: hem strip,
+trouser and hand fringe gone on navy (`layers/trimedges.py`; dr-smiley.md,
+"The standing cut's edges"). The openings in `prompts-animation.md` gained
+a line each from what the clipboard cut showed.
+
+**Next:** the remaining drawings in `prompts-animation.md`, given to Jose
+ready to paste on 2026-10-25: `shrug-half` (the shrug's way in, replacing
+its `fsx` squeeze), `thumbs-rise` (the thumb's way up, replacing its `fy`
+slide), `wince-arms` (a real flinch; the wince now uses the open-palmed
+cutout arms), `legs-land` and `legs-toes`. Each: into `POSES` in
+`cutframes.py`, its box from `poses.json` into `DR_BODY.pose`, built into
+its performance, reviewed on navy frame by frame. Also seen: in the walk
+a raised cutout arm opens a navy wedge at the armpit (the cut shoulder). Still open,
 seen in the review: the mirrored wave's sleeve has a small step in its
 cut at the armpit (a few px, visible only zoomed in).
 

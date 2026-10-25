@@ -436,6 +436,24 @@ still open: the standing cut itself shows a light strip under the coat's
 hem and a white fringe down the trouser edges on navy (the leg pieces),
 at rest.
 
+**The standing cut's edges (2026-10-25, a new chat).** On navy, at rest,
+the legs showed a light strip under the coat's hem and a white fringe down
+the trousers and shoes. The strip: `export.py` cuts the body at y 1066, but
+the coat runs on to about y 1080, so its last rows were in the leg pieces,
+and each leg's top (repeated upward behind the coat from y 1076) was coat
+white too, showing whenever a leg swung. The fringe: the key's soft edge
+keeps the wall's pale grey mixed into the outer few pixels. `layers/trimedges.py`
+(run after `export.py` and `trimpieces.py`) moves the hem's coat pixels
+into the body piece, brings back the coat's two lower corners from the
+picture (the cut had squared them off), makes each leg's top its trousers'
+blue from the first trouser row up, drops the shaded wall between the legs
+under the coat (a grey violet that read pale) and the floor's shadow beside
+the right shoe, and gives every edge pixel of the legs, and of the hands
+below the cuffs, the colour of the nearest pixel 4 px inside. The right
+forearm also lost a sliver of shaded wall beside the coat. Boxes in
+`DR_BODY.box` follow (body 376 x 504, legs re-cropped). body-rig 158,
+smiley-body-app 18.
+
 Jose's standing picture (`docs/art/dr-smiley-body/body-master.png`) cut
 into layers by code (`docs/art/dr-smiley-body/layers/build.py`), since a
 cloud session has no image generator; the drawn poses from

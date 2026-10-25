@@ -24,20 +24,25 @@ frames between drawings. These prompts add those drawings.
 ## Opening for arm drawings
 
 ```
-Edit this image. This is one drawing in an animation sequence, so it must line up exactly with the original. Keep everything identical: the same character, size, position, camera, lighting and plain light grey background. Do not move, zoom, crop or tilt anything. His head, face, hair, body, coat, legs and feet stay exactly where they are. Same 3D cartoon style and render quality, same 2:3 size. Change ONLY his arms and hands, as described below.
+Edit this image. This is one drawing in an animation sequence, so it must line up exactly with the original. Keep everything identical: the same character, size, position, camera, lighting and plain light grey background. Do not move, zoom, crop or tilt anything. His head, face, hair, body, coat, legs and feet stay exactly where they are. The background stays one flat, even light grey with no new shadows. His white coat keeps its exact length and width, and his scrubs stay the same bright blue. Same 3D cartoon style and render quality, same 2:3 size. Change ONLY his arms and hands, as described below.
 ```
 
 ## Opening for leg drawings
 
 ```
-Edit this image. This is one drawing in an animation sequence, so it must line up exactly with the original. Keep everything identical: the same character, size, position, camera, lighting and plain light grey background. Do not move, zoom, crop or tilt anything. His head, face, hair, coat and arms stay exactly where they are. Same 3D cartoon style and render quality, same 2:3 size. Change ONLY his legs and feet below the coat, as described below.
+Edit this image. This is one drawing in an animation sequence, so it must line up exactly with the original. Keep everything identical: the same character, size, position, camera, lighting and plain light grey background. Do not move, zoom, crop or tilt anything. His head, face, hair, coat and arms stay exactly where they are. The background stays one flat, even light grey; only his shadow on the floor follows his feet. His coat keeps its exact length, and his scrubs and shoes stay the same blue. Same 3D cartoon style and render quality, same 2:3 size. Change ONLY his legs and feet below the coat, as described below.
 ```
 
 ## The drawings
 
 Done: the three hello-wave drawings (in `greet`) and the three cheer drawings
 (in `cheer` and `celebrating`), 2026-10-24; the two point drawings (in
-`point`) and the two thinking drawings (in `think` and `thinking`), 2026-10-25; `docs/features/dr-smiley.md`. The rest are next.
+`point`), the two thinking drawings (in `think` and `thinking`) and the
+clipboard's way up (`clipboard-low` and `clipboard-mid`, in `read` and
+`answering`), 2026-10-25; `docs/features/dr-smiley.md`. The rest are next.
+The openings gained a line on 2026-10-25 from what the cuts showed: the
+clipboard drawings came back with a blotchy wall, a shorter, narrower coat
+and darker scrubs, each of which the cutter had to work around.
 
 | Move | File | Pose line (after the opening) |
 |---|---|---|
@@ -51,10 +56,10 @@ Done: the three hello-wave drawings (in `greet`) and the three cheer drawings
 | Thinking | `think-tap.png` | His right index finger at his chin and his left arm folded under the right elbow, as in a thinking pose. The index finger is lifted a little off the chin, mid-tap. |
 | Point | `point-load.png` | His right arm bent and pulled back, hand near his right shoulder, index finger already out, as if about to point to the picture's left. The other arm stays at his side. |
 | Point | `point-reach.png` | His right arm fully stretched to the picture's left, a little higher than the shoulder, index finger out, wrist straight. A strong reaching point. The other arm stays at his side. |
-| Shrug | `shrug-half.png` | Both elbows bent at his sides, forearms halfway out, hands turning palms up, fingers relaxed. On the way into a shrug. |
+| Shrug | `shrug-half.png` | Halfway into a shrug. Both elbows bent and close to his sides, forearms swinging out to the sides, hands at waist height turning palms up, fingers relaxed and trailing a little. Not yet the full shrug (that one has both palms up beside his shoulders). |
 | Reading | `clipboard-low.png` | Both hands holding a plain white clipboard with a silver clip at waist height, arms long and relaxed, as if lifting it to read. Nothing written on it. |
-| Right answer | `thumbs-rise.png` | His right hand at stomach height, closing into a fist with the thumb starting to point up. Elbow bent close to his side. The other arm stays at his side. |
-| Wrong answer | `wince-arms.png` | Both arms pulled in tight, elbows against his sides, hands curled loosely in front of his stomach, as if flinching. |
+| Right answer | `thumbs-rise.png` | His right hand (on the picture's left) at stomach height, closing into a fist with the thumb starting to point up. Elbow bent close to his side. The other arm stays at his side. |
+| Wrong answer | `wince-arms.png` | Both arms pulled in tight, elbows against his sides, hands curled loosely in front of his stomach, knuckles toward the viewer, as if flinching. |
 | Jump landing (legs) | `legs-land.png` | Landing from a small jump. Knees bent deeply, feet planted wider apart than now, toes turned out a little, the weight sinking down. |
 | Jump take-off (legs) | `legs-toes.png` | Rising on his toes, heels lifted off the floor, legs straight, as if springing up. |
 
