@@ -70,6 +70,7 @@ const PRECACHE = [
   './features/doctor-sheets.js',
   './features/csv.js',
   './features/duplicate-doctors.js',
+  './features/backfill.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the

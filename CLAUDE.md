@@ -70,6 +70,7 @@ between assignments.
 | `features/doctor-sheets.js` | 317 | The doctor and provider sheets' "Where" (the place picker: `openPlacePicker`, `pickPlace`, adding a place) and the doctor directory's add and edit sheet (`openAddDoctorDirModal`, `openEditDoctorDirModal`, the photo, `saveDoctorDirEntry`, delete). Moved verbatim (2026-10-25); `docs/features/places.md`. Places' data and `savePlace` stay in `index.html` ("Places (shared)") |
 | `features/csv.js` | 166 | The glossary's CSV export and import (More's Export / Import): `exportTermsCsv`, `parseCsv`, the staged import (`handleCsvImportSelected`, `showImportPreview`, `confirmCsvImport`). Moved verbatim (2026-10-25) |
 | `features/duplicate-doctors.js` | 161 | Duplicate doctors: the likely pairs (`nameParts`, `looksLikeSamePerson`, `duplicateDoctorGroups`), the merge (`mergeDoctorRecords`, `mergeDuplicateDoctors`) and its card in the doctor list's tidy sheet (`duplicateBannerHtml`). Moved verbatim (2026-10-25) |
+| `features/backfill.js` | 154 | The terminology backfill: doctors whose research is still the old flat list (`doctorsNeedingTiers`) re-researched one at a time (`runTierBackfill`, `cancelTierBackfill`, `tierBackfill`) and its card in the doctor list's tidy sheet (`backfillBannerHtml`). Moved verbatim (2026-10-25) |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
@@ -130,6 +131,7 @@ different places is what silently killed the coloured press glow: a
 | Doctor and provider sheets: the place picker, the doctor's add and edit sheet | `features/doctor-sheets.js` |
 | Glossary CSV export and import | `features/csv.js` |
 | Duplicate doctors (finding and merging them) | `features/duplicate-doctors.js` |
+| The terminology backfill (old doctor terminology) | `features/backfill.js` |
 | CoreCHI practice questions | `practice/questions.js` |
 | False Friends list | `falsefriends/list.js` |
 | False Friends screen (Study, Drill) | `features/false-friends.js` |
