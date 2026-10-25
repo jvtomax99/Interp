@@ -85,6 +85,7 @@ So:
 | Glossary CSV export and import (`exportTermsCsv`, `parseCsv`, `confirmCsvImport`) | `features/csv.js` |
 | Duplicate doctors: finding and merging them (`duplicateDoctorGroups`, `mergeDuplicateDoctors`, `duplicateBannerHtml`) | `features/duplicate-doctors.js` |
 | The terminology backfill: re-researching doctors on the old flat list (`runTierBackfill`, `backfillBannerHtml`) | `features/backfill.js` |
+| Ask the Hub and Dr. Smiley's side of it: retrieval, answers, his actions, what he remembers, the memory screen, corrections and the team notes review (`ASK`, `submitAsk`, `askTurnHtml`, `ASK_RUN`, `drMemGet`) | `features/ask-hub.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
 | The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |

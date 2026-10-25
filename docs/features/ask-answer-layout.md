@@ -1,7 +1,9 @@
 # How an Ask answer is drawn
 
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
-Code is in `index.html` unless a file is named. Keep this in step with the code.
+Code is in `features/ask-hub.js` (moved out of `index.html` 2026-10-25,
+with a few load-time lines left where it began) unless a file is named.
+Keep this in step with the code.
 
 **How an answer is drawn (`askTurnHtml`).** Dr. Smiley's byline and the
 provenance tag, the headline, then at most one structured block from

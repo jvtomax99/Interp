@@ -341,7 +341,8 @@ const cands = [];
 [-1,1].forEach(side=>fib(1100).forEach(d=>{ if(side*d[0] > -.12 && d[1] > -.72) cands.push({d,side,used:false}) }));
 const angle = (a,b) => a.side!==b.side ? 9 : 1-dot(a.d,b.d);
 function claim(target, n, spacing){
-  const t = {d:norm(target.d), side:target.side};
+  if(!n) return [];   // an emptied region (Ask the Hub since its code left index.html) claims nothing
+  const t ={d:norm(target.d), side:target.side};
   const sorted = cands.filter(c=>!c.used && c.side===t.side).sort((x,y)=>angle(x,t)-angle(y,t));
   const out=[];
   for(const c of sorted){ if(out.every(o=>angle(o,c)>spacing)){out.push(c); if(out.length===n)break} }

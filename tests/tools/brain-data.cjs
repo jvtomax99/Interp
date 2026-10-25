@@ -24,8 +24,7 @@ const GROUPS = {
   safe: ['Training & Events',
     'Subdomain folder', 'Practice dashboard tiles',
     'Lists: providers, recently deleted, doctors hub', 'Healthcare Providers: modal + photo handling'],
-  ask: ['Ask the Hub', 'Dr. Smiley: following a conversation', 'Dr. Smiley: context and actions', 'Dr. Smiley: what he remembers (on this device)',
-    'Ask the Hub: your practice and the next step', "Dr. Smiley's memory screen", 'Ask the Hub: corrections, feedback, sources'],
+  ask: [],   // all seven sections moved out together to features/ask-hub.js (2026-10-25)
   smiley: ["Dr. Smiley's art", 'Dr. Smiley: animation engine', 'Dr. Smiley: how lively (Lively, Focused, Still)',
     "Dr. Smiley: what he's doing (task states)", 'Dr. Smiley reacts', "Dr. Smiley's career", "Dr. Smiley's news", 'Dr. Smiley companion',
     'Dr. Smiley: the companion panel'],

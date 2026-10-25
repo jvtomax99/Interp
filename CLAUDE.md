@@ -72,6 +72,7 @@ between assignments.
 | `features/csv.js` | 166 | The glossary's CSV export and import (More's Export / Import): `exportTermsCsv`, `parseCsv`, the staged import (`handleCsvImportSelected`, `showImportPreview`, `confirmCsvImport`). Moved verbatim (2026-10-25) |
 | `features/duplicate-doctors.js` | 161 | Duplicate doctors: the likely pairs (`nameParts`, `looksLikeSamePerson`, `duplicateDoctorGroups`), the merge (`mergeDoctorRecords`, `mergeDuplicateDoctors`) and its card in the doctor list's tidy sheet (`duplicateBannerHtml`). Moved verbatim (2026-10-25) |
 | `features/backfill.js` | 154 | The terminology backfill: doctors whose research is still the old flat list (`doctorsNeedingTiers`) re-researched one at a time (`runTierBackfill`, `cancelTierBackfill`, `tierBackfill`) and its card in the doctor list's tidy sheet (`backfillBannerHtml`). Moved verbatim (2026-10-25) |
+| `features/ask-hub.js` | 2,040 | Ask the Hub with Dr. Smiley's side of it: retrieval and the answer (`askRetrieve`, `submitAsk`, `askTurnHtml`, `askLayout`), following a conversation (`ASK.convo`), context and actions (`askContext`, `ASK_ACTION_TYPES`, `ASK_RUN`), what he remembers (`drMemGet`, `ih_smileyMemory`), the memory screen (`openMemory`), your practice and the next step, corrections, feedback, sources and the owner's team notes review (`renderAskReview`). Moved verbatim (2026-10-25), 7 sections at once; a few lines stay in `index.html` where the group began (`ASK_STOP`, the waiting questions brought back, the `online`/`resize` listeners, `window.openAskHub`): they run at load and need `index.html`'s names. `docs/features/ask-the-hub.md` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
@@ -133,6 +134,7 @@ different places is what silently killed the coloured press glow: a
 | Glossary CSV export and import | `features/csv.js` |
 | Duplicate doctors (finding and merging them) | `features/duplicate-doctors.js` |
 | The terminology backfill (old doctor terminology) | `features/backfill.js` |
+| Ask the Hub, Dr. Smiley's conversation, actions and memory | `features/ask-hub.js` |
 | CoreCHI practice questions | `practice/questions.js` |
 | False Friends list | `falsefriends/list.js` |
 | False Friends screen (Study, Drill) | `features/false-friends.js` |

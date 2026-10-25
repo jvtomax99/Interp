@@ -47,6 +47,10 @@ found in the census"; update the list. As the split moves a data list out
 of `index.html` (`docs/split-index.md`, phase 2), its section leaves the
 census and the hippocampus: the page splits whatever is left between the
 two sides (it assumed exactly four until 2026-10-21 and drew nothing).
+Broca's area has been empty since 2026-10-25: the whole Ask the Hub group
+moved to `features/ask-hub.js` (`ask: []` in `tools/brain-data.cjs`).
+`claim()` returns no spots for an empty region (before, asking for 0 took
+every spot and the page stopped drawing).
 
 ## What's real and what isn't
 
