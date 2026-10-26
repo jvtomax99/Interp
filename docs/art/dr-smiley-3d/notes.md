@@ -126,6 +126,22 @@ Not good enough yet:
   the wave and drops when the arm comes down. Still no real cloth: the coat
   doesn't hang or fold on its own, and a new Meshy model in A-pose (arms
   away from the body) would give clean sleeves from the start.
+- **The Blender skills' checks (fourth version).** With the
+  `blender-agent-skills` plugin (Jose: "use any blender skill"): its model
+  check (`blender-asset-qa`, `qa_check.py`) found 8,736 duplicate points
+  (the Meshy mesh split along its texture seams, so it was 629 loose
+  pieces), points pulled by more than 4 bones, and a stray bit. Fixed:
+  seams welded (13,236 points merged; 629 pieces became 49), at most 4 bones
+  per point. Its rig stress poses (`blender-character-rigging`,
+  `stress_poses.py`, arms raised, elbows bent, crouch, twist) showed the
+  weld had glued the left hand to the hip (122 points on the chest bone)
+  and arm to coat at a few touching spots: the hand's points were moved to
+  the arm, and those false joins cut (edges only). Tried and undone:
+  deleting the faces glued between sleeve and coat (it left a hole at rest)
+  and hiding back faces (the opening turned see-through). The rig check
+  script (`rig_check.py`) fails on Blender 5.2 (it slices a collection with
+  a step, which 5.2 refuses) and wasn't used. Still open: with an arm held
+  straight out (not in the greet) the sleeve's underside still stretches.
 - **The look** is close, not the same: his hair is darker brown and the coat
   flatter than the master's.
 
