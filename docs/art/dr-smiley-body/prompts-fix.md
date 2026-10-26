@@ -76,7 +76,11 @@ Branch: claude/dr-smiley-body-home (storage only, never deploys).
 Read CLAUDE.md, AGENTS.md, docs/handoff-dr-smiley.md (its first section),
 docs/features/dr-smiley.md from "Full body: the cutout rig" on, and
 docs/art/dr-smiley-body/prompts-fix.md (the first read and the four ways
-forward).
+forward). Also read ANIMATION_GUIDE.md from
+https://github.com/JohnHeibel/ClaudeAnimationBase (MIT): use its Timing
+and Motion sections as your checklist (reads, quick-and-held, no
+twinning, faces never snap) and its three-zoom review (sheet, strip,
+crop). Its 2D brush style and its Clawd character don't apply here.
 
 1. Film every performance in DR_BODY_PERF and every held state in
    DR_BODY_STATES with tests/tools/body-clip.cjs, BG=is-navy, seeds 7 and
@@ -107,7 +111,8 @@ forward).
 Fix Dr. Smiley's full-body animation on branch claude/dr-smiley-body-home,
 working from docs/art/dr-smiley-body/animation-review.md, worst problem
 first. You are a senior character animator who also writes the code.
-Read the same docs as the review first.
+Read the same docs as the review first, including the Timing and Motion
+sections of ClaudeAnimationBase's ANIMATION_GUIDE.md.
 
 Rules for every fix:
 - No visible swap. Where a cutout arm hands over to a drawn pose, the
