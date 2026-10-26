@@ -98,9 +98,10 @@ under way, then what waits on Jose, then small leftovers.
    duplicate doctors #150 (live
    b1025.1607), the backfill #152 (live b1025.1713): the small leaves
    are done. The Ask the Hub group #154 (live b1025.1947). Dr.
-   Smiley's engine group (`features/smiley-engine.js`): planned, then
-   moved on Jose's go (2026-10-25). After it, phase 3's groups are done;
+   Smiley's engine group #155 (live b1025.2317). **The split is done**;
    what's left stays inline by design (phase 4, `docs/split-index.md`).
+   The 1-minute promo: made (#151, #156), in the app as Home's Watch video
+   with a voice fix and 10% faster (#158); `promo/hub-blend/BRIEF-60s.md`.
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
