@@ -3805,7 +3805,7 @@
     border-radius:var(--r-lg); color:var(--ink);
     /* the floating diorama's page (Jose, 2026-10-26): the same cream to pink to lilac wash as the scene's
        backdrop (city/sky.webp), so the picture's faded top and bottom melt into the card */
-    background:linear-gradient(180deg, #fffaf6 0%, #fdeaea 55%, #f4def2 100%);
+    background:linear-gradient(180deg, #fff2ea 0%, #ffe0e3 55%, #f4d5f3 100%);
     box-shadow:
       0 1px 0 0 inset rgba(255,255,255,0.82),
       0 1px 2px        rgba(20,43,67,0.06),

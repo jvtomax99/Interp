@@ -56,9 +56,15 @@ open sky on top for the badges; the board's side corners run off the
 frame). Busier: people standing about baked into the board (`stand`, `sit`,
 pulled out of `LIVE`), a café with umbrellas on the right lawn, a garden
 with a pond at the back left, cherry trees, a hedge along the back.
+Then (same day, Jose: "looks flat... more alive and with vibrant colors"
+like the video): candy colours per building (each glass tower its own hue,
+roofs tinted with their building: from above the roofs are most of what
+shows), a warmer, stronger sun with less flat fill, and `grade()` now adds
+saturation (x1.28) and a little contrast instead of a haze lift.
 Progress is paint, not lit windows: the board (`near.webp`) has every
-building in white clay; `city/<key>-paint<1..10>.webp` is that building
-coloured from the ground to its share (`fillSetup`/`fillAt`: a world-height
+building faded (its own colour, a third greyed and nearly half toward
+white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building
+in full colour from the ground to its share (`fillSetup`/`fillAt`: a world-height
 cut in each of its meshes' shaders; every mesh standing in its footprint
 counts, banners and podium too), kept only where it shows and where it
 changed a pixel. Drawn plainly over the board (`.cp-paint`, no blend, no
