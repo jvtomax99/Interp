@@ -104,8 +104,12 @@ under way, then what waits on Jose, then small leftovers.
    with a voice fix and 10% faster (#158); `promo/hub-blend/BRIEF-60s.md`.
 2. **Smoothness, what's left.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home is still 64 ms/s on Jose's phone (Apple: 10+ is
-   distracting); no step for it is open. Possible small one, needs Jose:
-   Back to a scrolled Home opens the tab bar and tucks it again at once.
+   distracting); no step for it is open. Back to a scrolled Home opens
+   the tab bar and tucks it again in the same frame (never seen; frames
+   checked 2026-10-26). Skipping the open was tried and **dropped**: the
+   rebuilt bar starts at the last screen's capsule width, so without the
+   second morph it visibly grows (132 -> 142 px over ~250 ms); an exact
+   fix needs more dock code than its ~20 ms (4x) is worth.
    Background, the S-steps so far:
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
