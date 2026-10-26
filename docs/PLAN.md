@@ -125,9 +125,15 @@ under way, then what waits on Jose, then small leftovers.
    sections: worse (Back's style 170 -> 224). Back to a scrolled Home also
    opens the tab bar then tucks it again at once (dockAfterRender, then
    the restore's scroll event): two morphs, ~20 ms at 4x; fixing it
-   changes whether the bar ends open, so it needs Jose. Untried lead:
-   which CSS selectors cost the most in that style pass (Chromium's
-   selector stats).
+   changes whether the bar ends open, so it needs Jose. **Selectors are
+   not it** (Chromium selector stats, both taps): matching is ~14 ms of
+   ~300 ms of style passes (~5%), spread over 1,364 selectors, none over
+   0.5 ms. The style pass is simply the new screen: ~700 elements for Home
+   (the phone's hidden sidebar is display:none, so it costs ~nothing),
+   then small per-frame passes from the animations; no pass restyles the
+   page for a small change. What's left would be structural: drawing
+   Home's lower sections a frame later (risk: Back's scroll restore needs
+   their real height).
    Background, the S-steps so far:
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
