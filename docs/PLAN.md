@@ -105,6 +105,29 @@ under way, then what waits on Jose, then small leftovers.
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
+   **Jose's run, 2026-10-26** (b1026.1522, iPhone iOS 18.7, 60 Hz, 80 s,
+   one run): taps wait 20 ms middle / 51 slowest (target < 20: met),
+   drawn 81 ms middle / 125 slowest. Every stall over 100 ms came within a
+   second of a tap, as the new screen was drawn (Home and domains 117-177
+   ms, 3D Body 256 ms with nothing named, likely the atlas frame), named
+   "render, pins". Scrolling Home 64 ms/s, unchanged (62-78 before).
+   **Lab split** (`tests/tools/screen-trace.cjs`, 4x, Home -> domain and
+   its Back; 700 ms after the lift, medians): pins ~8 ms (2%, it only runs
+   in the same frame); the click's JS ~100-150; style 105-170 (the biggest
+   piece: a whole new screen styled against ~470 KB of CSS); paint +
+   layerize ~110-190; layout ~55. Tried and **rejected**, with numbers:
+   (1) top bar height cached instead of read in every render: worse
+   (Back's second task 117 -> 190 ms, domain's 51 -> 80, 5 runs each;
+   the early read apparently splits the style work well); (2) fitWave's
+   two refits skipped when fonts are in, and heroPetals' second read:
+   no change measured; (3) pins without `will-change` (172 -> 131
+   layers on Home): within noise; (4) `content-visibility:auto` on Home's
+   sections: worse (Back's style 170 -> 224). Back to a scrolled Home also
+   opens the tab bar then tucks it again at once (dockAfterRender, then
+   the restore's scroll event): two morphs, ~20 ms at 4x; fixing it
+   changes whether the bar ends open, so it needs Jose. Untried lead:
+   which CSS selectors cost the most in that style pass (Chromium's
+   selector stats).
    Background, the S-steps so far:
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
