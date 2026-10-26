@@ -13,7 +13,7 @@ import { OutputPass } from "../../vendor/addons/postprocessing/OutputPass.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { BokehPass } from "../../vendor/addons/postprocessing/BokehPass.js";
 import { FullScreenQuad } from "../../vendor/addons/postprocessing/Pass.js";
-import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen } from "./features.js";
+import { buildFeatures, FEATURES, FEATURE_STARTS, FEATURES_END, featureLen, CUT, EXPLODE_IN } from "./features.js";
 import { MOVES } from "../smiley.js";
 import { createOverlay, SMILEY_SHARE } from "./overlay.js";
 import { buildEnd } from "./end.js";
@@ -56,10 +56,17 @@ const SHOTS = [
    designed through v11's own cut times ("Heart failure" 1.0, the timer 1.9 to zero at 3.2, the
    wrong word 3.3, the strike 4.85, the right word 6.0, the logo 8.0, the first feature 10.0);
    after that the features run 3 s each, as in v11, half a second behind the design clock. */
-const HOOK_MAP = [[0, 0], [1.0, 1.0], [1.9, 2.4], [3.2, 3.3], [4.85, 4.855], [6.0, 5.98], [8.0, 7.5], [10.0, 9.5]];
+const HOOK_MAP = CUT === 60
+  /* the 1-minute cut, on its own voice (assets/voice-60s/, SHOTS-60s.md): "heart failure" 1.57, the
+     timer from 2.82 to zero as he finishes its line (6.0), "¿Fallo cardíaco?" 6.97, the strike on "Not
+     for patients" 8.43, the right word 10.24, the logo under "Interpreter Hub" 12.77, the first
+     feature 17.45; then every feature its own length (features.js) */
+  ? [[0, 0], [1.57, 1.0], [2.82, 2.4], [6.0, 3.3], [6.85, 3.42], [8.43, 4.855], [10.2, 5.98], [12.5, 7.5], [17.45, 9.5]]
+  : [[0, 0], [1.0, 1.0], [1.9, 2.4], [3.2, 3.3], [4.85, 4.855], [6.0, 5.98], [8.0, 7.5], [10.0, 9.5]];
+const HOOK_END = HOOK_MAP.at(-1);
 function hookTime(a) {
   if (a <= 0) return a;
-  if (a >= 10.0) return a - 0.5;
+  if (a >= HOOK_END[0]) return a - (HOOK_END[0] - HOOK_END[1]);
   let i = 1; while (a > HOOK_MAP[i][0]) i++;
   const [a0, d0] = HOOK_MAP[i - 1], [a1, d1] = HOOK_MAP[i];
   return d0 + (d1 - d0) * (a - a0) / (a1 - a0);
@@ -765,7 +772,7 @@ async function build() {
     const intoCert = hopping && next[2] === "cert" && t >= s[1] - HOP / 2; // after the cut in the hop into it
     doorway.draw(intoCert ? 0 : t - s[0], intoCert ? 1 : inCity ? 1 - prog(t - s[0], 0.5, 0.75) : 0);
     // the proof flies out to be read, then settles back onto the phone before his hop
-    if (s[2] === "glossary") {
+    if (s[2] === EXPLODE_IN) {
       // the 3D Body: off the phone, big, coming apart (the app's own explode frames), then it turns
       // into its Heart / Corazón glossary card, and settles back before his hop
       const u = t - s[0], len = s[1] - s[0], end = len - HOP - 0.06;
@@ -773,9 +780,9 @@ async function build() {
       const q = feat.screenRect(camera, W, H), xs = q.map((p) => p[0]), ys = q.map((p) => p[1]);
       const from = { x: Math.min(...xs), y: Math.min(...ys) + (Math.max(...ys) - Math.min(...ys)) * 0.14, w: Math.max(...xs) - Math.min(...xs), h: (Math.max(...ys) - Math.min(...ys)) * 0.74 };
       const body = feat.explodeArt(13 * inOutSine(prog(u, 0.55, 1.5)));
-      hero.draw(k > 0.001 ? body : null, from, k, feat.proofArt("glossary"), prog(u, 1.55, 1.9));
-    } else if (isFeature(s[2]) && s[2] !== "cert") {
-      const u = t - s[0], len = s[1] - s[0], start = s[2] === "ask" ? 1.6 : 0.6, end = len - HOP - 0.06; // Ask: after his brain
+      hero.draw(k > 0.001 ? body : null, from, k, feat.proofArt(EXPLODE_IN), prog(u, 1.55, 1.9));
+    } else if (isFeature(s[2]) && s[2] !== "cert" && s[2] !== "brain") { // the knowledge brain: its laptop is the picture
+      const u = t - s[0], len = s[1] - s[0], start = s[2] === "ask" ? 1.6 : s[2] === "notifications" ? 1.7 : 0.6, end = len - HOP - 0.06; // Ask: after his brain; Notifications: once all three have landed
       const k = prog(u, start, start + 0.35) * (1 - prog(u, end - 0.22, end));
       hero.draw(k > 0.001 ? feat.proofArt(s[2]) : null, k > 0.001 ? proofRect(s[2]) : null, k);
     } else hero.draw(null, null, 0);
