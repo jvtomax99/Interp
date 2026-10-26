@@ -95,8 +95,25 @@ building stepping back in three tiers (Culture, "the dark building on the
 right"; `tower(..., base)` stacks the tiers, `BOX.c.crane` puts its crane
 on the top tier), where a parking deck and a dark tower had been guessed.
 Google's 3D map can't be used directly (their terms; and this container
-can't reach it); OpenStreetMap outlines could be, once `overpass-api.de`
-is allowed in the environment's network settings.
+can't reach it).
+Then (2026-10-26, third chat) the five buildings' sizes, heights and places
+come from OpenStreetMap (ODbL, "© OpenStreetMap contributors", credited in
+the User Guide answer): `api.openstreetmap.org/api/0.6/map?bbox=-74.062,40.880,-74.050,40.890`
+(overpass-api.de resets from the container). OSM has the outlines and names
+but no heights; floors are read from Jose's Google screenshots. The drive's
+axis (Prospect Ave mouth, heading 23° south of east, ~100 m to the end loop)
+becomes the scene's -z at 0.2 units a metre; the drive itself stays wider than
+real, and the back row is pulled forward onto the board. Ethics = George Link
+Jr. Pavilion (Jose), ~6 floors, 12x7; Culture = Medical Plaza (Google labels
+it), wider than deep (12.4x11, the three tiers); US Systems = Jurist Research
+Center (guess), 6 floors, 6.5x9; Encounter = the blue glass building, now back
+left (guess: the Helena Theurer Pavilion); Terminology = the rust tower, 12
+floors (guess: part of Theurer); the old brick building with rows of windows
+is a context block back right (`x2`); the other glass context block (`x1`) is
+gone. Left out on purpose: Women's and Children's, Imaging and the parking
+decks (they would hide the exam buildings from the corner camera, and the
+garden and café would go). Badge rows changed: the glass building's badge is
+back left now (`LABEL_2D`).
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building

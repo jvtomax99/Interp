@@ -23,7 +23,7 @@ const CAMPUS = [
   { key:'e', id:'ethics',      short:'Ethics',      place:'the building with the banners' },
   { key:'t', id:'terminology', short:'Terminology', place:'the brick tower' },
   { key:'s', id:'systems',     short:'US Systems',  place:'the building on the left' },
-  { key:'n', id:'encounter',   short:'Encounter',   place:'the Helena Theurer Pavilion' },
+  { key:'n', id:'encounter',   short:'Encounter',   place:'the blue glass building' },
   { key:'c', id:'cultural',    short:'Culture',     place:'the dark building on the right' }
 ];
 // How painted a building is: the same coverage the domain bars show (learned, plus half for shaky), in tenths.
