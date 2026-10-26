@@ -16,7 +16,10 @@ import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { createSmiley, MOVES } from "../smiley.js";
 import { clamp, lerp, prog, outBack, outExpo, outCubic, inOutSine, inOutCubic } from "../util.js";
 
-export const FEATURES = [
+// which cut this page renders: 45 (the app's film, media/hub-promo.mp4) or 60 (the 1-minute promo,
+// SHOTS-60s.md, its own voice); the page's root says so (data-cut)
+export const CUT = +(document.getElementById("root")?.dataset.cut || 45);
+const F45 = [
   // every word capitalised (Jose, 2026-10-20)
   { g: "home", a: "Built By Our", b: "Own Interpreters." },
   { g: "glossary", a: "One Glossary.", b: "Every Specialty." },
@@ -29,6 +32,25 @@ export const FEATURES = [
   { g: "team", a: "One Team.", b: "One Channel." },
   { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley." },
 ];
+// the 1-minute cut: each feature lasts until the next line of the voice (at least 2.5 s), and the
+// 3D Body, Notifications and the knowledge brain have lines of their own
+const F60 = [
+  { g: "home", a: "Built By Our", b: "Own Interpreters.", len: 2.5 },
+  { g: "glossary", a: "One Glossary.", b: "Every Specialty.", len: 2.5 },
+  { g: "translate", a: "Glossary First.", b: "AI Second.", len: 2.5 },
+  { g: "physician", a: "Ready For", b: "Every Physician.", len: 2.5 },
+  { g: "falsefriends", a: "101 False Friends.", b: "Flagged.", len: 3.22 },
+  { g: "drills", a: "Daily Drills.", b: "Sharp Skills.", len: 2.5 },
+  { g: "cert", a: "National Certification.", b: "Prep Built In.", len: 3.03 },
+  { g: "team", a: "One Team.", b: "One Channel.", len: 2.5 },
+  { g: "body", a: "Every Part, In 3D.", b: "In Both Languages.", len: 4.23 },
+  { g: "notifications", a: "Team News, Even With", b: "The Hub Closed.", len: 3.34 },
+  { g: "brain", a: "Every Term You Know", b: "Lights Up.", len: 2.5 },
+  { g: "ask", a: "Stuck?", b: "Ask Dr. Smiley.", len: 2.56 },
+];
+export const FEATURES = CUT === 60 ? F60 : F45;
+// the shot where the 3D Body comes apart: inside the Glossary in the 45 s film, its own shot in the 60 s cut
+export const EXPLODE_IN = CUT === 60 ? "body" : "glossary";
 export const FEATURE_LEN = 3.0; // v11's: its narrator reads one caption every 3 s
 export const featureLen = (f) => f.len || FEATURE_LEN;
 // when each feature starts, in the clock after the opener (the hook and logo take the first 9.5 s)

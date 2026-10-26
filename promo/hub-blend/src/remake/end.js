@@ -3,6 +3,7 @@
 // main light. Its colour reaches the keys, the table and the reflection, and
 // the end-card lines arrive on the screen one beat at a time.
 import * as THREE from "three";
+import { CUT } from "./features.js";
 import { Reflector } from "../../vendor/Reflector.js";
 import { RoundedBoxGeometry } from "../../vendor/RoundedBoxGeometry.js";
 import { RectAreaLightUniformsLib } from "../../vendor/RectAreaLightUniformsLib.js";
@@ -105,14 +106,16 @@ export async function buildEnd(scene, group, { start }) {
   group.add(phoneGlow);
 
   // ---------- the screen's content over time (u = seconds into the shot) ----------
+  // when each line appears: v11's end card, from 37 s (the narrator reads them at these moments);
+  // the 1-minute cut: as its own voice reads them (assets/voice-60s/g7.wav, from 51.33 s)
+  const AT = CUT === 60 ? [0.05, 0.2, 1.5, 2.45, 3.3, 5.0, 5.75] : [0.2, 0.9, 1.9, 2.9, 3.9, 5.9, 6.9];
   const LINES = [
-    // when each line appears: v11's end card, from 37 s (the narrator reads them at these moments)
-    { t: 0.2, draw: (a) => drawSmiley(a) },
-    { t: 0.9, draw: (a) => text("Interpreter Hub", 640, 300, '800 112px "Inter Tight"', "#fff", a, true) },
-    { t: 1.9, draw: (a) => text("Built Here, For Our Patients.", 640, 374, '600 62px "Inter Tight"', "rgba(255,255,255,.92)", a) },
-    { t: 2.9, draw: (a) => urlPill(a) },
-    { t: 3.9, draw: (a) => text("Live Today, On Any Phone.", 640, 556, '600 50px "Inter Tight"', "rgba(255,255,255,.85)", a) },
-    { t: 5.9, draw: (a) => text("Better Words.", 640, 640, '800 80px "Inter Tight"', "#fff", a) },
+    { t: AT[0], draw: (a) => drawSmiley(a) },
+    { t: AT[1], draw: (a) => text("Interpreter Hub", 640, 300, '800 112px "Inter Tight"', "#fff", a, true) },
+    { t: AT[2], draw: (a) => text("Built Here, For Our Patients.", 640, 374, '600 62px "Inter Tight"', "rgba(255,255,255,.92)", a) },
+    { t: AT[3], draw: (a) => urlPill(a) },
+    { t: AT[4], draw: (a) => text("Live Today, On Any Phone.", 640, 556, '600 50px "Inter Tight"', "rgba(255,255,255,.85)", a) },
+    { t: AT[5], draw: (a) => text("Better Words.", 640, 640, '800 80px "Inter Tight"', "#fff", a) },
   ];
   let drawnKey = "";
   function text(s, x, y, font, color, a, glowText) {
@@ -135,7 +138,7 @@ export async function buildEnd(scene, group, { start }) {
   function drawScreen(u) {
     // the first beat flashes the screen cyan, so its light visibly sweeps the table, then it settles navy
     const flash = 1 - outCubic(prog(u, 0.05, 0.6));
-    const wipe = outExpo(prog(u, 6.9, 7.25));
+    const wipe = outExpo(prog(u, AT[6], AT[6] + 0.35)); // "Safer Care."
     const key = [flash.toFixed(2), wipe.toFixed(2), ...LINES.map((l) => outCubic(prog(u, l.t, l.t + 0.35)).toFixed(2))].join();
     if (key === drawnKey) return;
     drawnKey = key;
