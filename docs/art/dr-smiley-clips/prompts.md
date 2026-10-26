@@ -38,3 +38,39 @@ He stands still for half a second, then lifts his right hand (on the viewer's le
 - Size: a 4 s clip at 24 fps is about 100 frames; at 320 x 440 webp about
   1 to 1.5 MB a move. Alternatives if that is too heavy: 12 fps on twos,
   or a see-through video (VP9 alpha for Chrome, HEVC alpha for Safari).
+
+## The wave test came back (2026-10-26, Jose's first clip, Sora)
+
+1228 x 1686, 30 fps, 5 s (150 frames), 7.9 MB. Measured against the master
+(`layers/keyclip.py`, `wave-test-strip.png`):
+
+- **It's him and it's fluid.** Face, hair, coat, scrubs, shoes all his; the
+  arm bends at the elbow, the shoulder and coat move with it, the head
+  tilts, the smile widens. Nothing swaps.
+- **Likeness drift, small:** the first frame already differs from the master
+  (mean difference 10.8 of 255; a copy would be 0 to 3): he is drawn a
+  touch rounder, the mouth open in a wider smile from frame 1, the eyes a
+  little bigger. The last frame is the same drawing (12.1), so start and
+  end match each other, which is what the hand-off needs.
+- **His hands end in front of his coat, not at his sides.** He starts (frame
+  1) and ends with both hands curled at his stomach, not the master's
+  arms-down pose. The rig's rest pose has them down, so a cut straight from
+  one to the other would show. Either the prompt insists on the arms-down
+  start ("both arms hanging straight at his sides, hands open beside his
+  thighs"), or a short in-between is drawn.
+- **The camera held.** His feet stay on the same line all 150 frames (y 1425
+  to 1427), his width and head top within 25 px; no zoom, no drift.
+- **The wall keys.** One flat grey (205, 205, 208; the master's is 211,
+  211, 214), spread 1.5. The clip paints a floor shadow and a shadow on the
+  wall behind his calves; `keyclip.py` drops everything below the coat's hem
+  that is not blue. It also paints a light rim along the top of his hair; the
+  key tightens the hair's outline by 2 px, and what is left is in his own
+  pixels (one px at phone size).
+- **Size:** 151 see-through frames at 320 x 440 are 3.6 MB at 30 fps, 1.8 MB
+  on twos. One move at 1.8 MB is heavier than all his drawn poses together
+  (about 1.3 MB); five moves would be 9 MB, precached. A see-through video
+  (VP9 alpha, HEVC alpha for Safari) would be about 150 KB a move; the trade
+  is two files per move and no frame-exact control.
+
+Verdict: the route works; the pose at the ends is the thing to fix in the
+prompt before making the other moves.
