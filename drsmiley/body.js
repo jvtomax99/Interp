@@ -409,29 +409,34 @@ const DR_BODY_PERF = {
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .55 : 1;
     const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side, FR = 'frame' + side;
     const wags = mode === 'focused' ? 2 : 3;
+    // Each swap meets the drawing before it (2026-10-26, Jose: "awkward"): the rise starts
+    // swung down by his hip, where the pulled-in cutout hand is, and swings up past its
+    // drawn place; the wave comes in swung down to meet it and springs up; on the way
+    // down the wave swings low before the rise takes over. A swap a third of his height
+    // away read as a pop, not a move. He notices you with his eyes open (brows up), not
+    // half-lidded: a held half-blink at the start read as sleepy.
     const beats = [
-      [j(160, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'blink1', head: -s * 1.5 * k, [A]: -6, [F]: 12, fsw: -12 }, 'in'],   // a dip: he's seen you
-      [j(50), { [A]: 20, [F]: 8 }, 'in'],                                                                                         // the arm flicks up
-      [0, { [FR]: 'wave-rise', [A]: 0, [F]: 0 }],                                                                                 // the drawn rise: elbow leads
-      [j(70), { fsw: 0, sy: 1 + .012 * k, sx: 1 - .006 * k, y: -8 * k, face: 'smile1' }, 'out'],
-      [0, { [FR]: 'wave-out', fsw: -7, frot: -1.5 }],                                                                             // the top: the hand flung out
-      [j(260), { fsw: 0, frot: 0, sy: 1 + .02 * k, sx: 1 - .01 * k, y: -14 * k, face: 'smile', brow: 'up', head: s * 4 * k, lean: s * 1.2 * k }, 'spring'],
-      [j(120), { sy: 1, sx: 1, y: 0, brow: 'rest' }, 'out'],
+      [j(150, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'smile1', brow: 'up', head: -s * 1.5 * k, [A]: -6, [F]: 12 }, 'in'],   // a dip: he's seen you
+      [0, { [FR]: 'wave-rise', fsw: -45, [A]: 0, [F]: 0 }],                                                                          // the elbow comes out first, the hand still by his hip
+      [j(130), { fsw: 30, sy: 1 + .012 * k, sx: 1 - .006 * k, y: -8 * k, brow: 'rest' }, 'in'],                                       // up: elbow leading, hand dragging
+      [0, { [FR]: 'wave-out', fsw: -28, frot: 0 }],                                                                                   // the hand whips up past the elbow
+      [j(300), { fsw: 0, frot: -2, sy: 1 + .02 * k, sx: 1 - .01 * k, y: -14 * k, face: 'smile', brow: 'up', head: s * 4 * k, lean: s * 1.4 * k }, 'spring'],
+      [j(130), { sy: 1, sx: 1, y: 0, frot: 0, brow: 'rest' }, 'inOut'],
     ];
     for(let i = 0; i < wags; i++){
-      const h = (4.6 - i * .4) * k;
-      beats.push([j(70, .15), { [FR]: 'wave', frot: .8 * k, head: s * (h - .5) }, 'inOut']);
-      beats.push([j(90, .15), { [FR]: 'wave-in', frot: 1.4 * k, head: s * (h - 1) }, 'out']);
-      beats.push([j(70, .15), { [FR]: 'wave', frot: -.4 * k, head: s * (h - .5) }, 'inOut']);
-      beats.push([j(90, .15), { [FR]: 'wave-out', frot: -1.4 * k, head: s * h }, 'out']);
+      const h = (4.6 - i * .5) * k, w = (3.2 - i * .5) * k;   // the wags die down a little
+      beats.push([j(80, .15), { [FR]: 'wave', frot: w * .4, head: s * (h - .5), lean: s * 1.6 * k }, 'inOut']);
+      beats.push([j(100, .15), { [FR]: 'wave-in', frot: w, head: s * (h - 1.2), lean: s * 1.1 * k }, 'out']);
+      beats.push([j(80, .15), { [FR]: 'wave', frot: -w * .3, head: s * (h - .5), lean: s * 1.4 * k }, 'inOut']);
+      beats.push([j(100, .15), { [FR]: 'wave-out', frot: -w, head: s * h, lean: s * 1.8 * k }, 'out']);
     }
-    beats.push([j(80), { [FR]: 'wave', frot: 0, face: 'smile2' }, 'out']);
-    beats.push([j(160), {}, 'out']);                                                                                              // a beat on the hello
-    beats.push([0, { [FR]: 'wave-rise', fsw: 4 }]);                                                                               // down: the hand drops first
-    beats.push([j(100), { fsw: -12, head: -s * .6 * k, lean: 0, face: 'smile1' }, 'in']);
-    beats.push([0, { [FR]: '', fsw: 0, [A]: 20, [F]: 6 }]);                                                                       // into the cutout arm
-    beats.push([j(70), { [A]: -5, [F]: 4 }, 'in']);
-    beats.push([j(300), { [A]: 0, [F]: 0, head: 0, face: 'rest' }, 'spring']);
+    beats.push([j(90), { [FR]: 'wave', frot: 0, face: 'smile2', lean: s * 1 * k }, 'out']);
+    beats.push([j(200), {}, 'out']);                                                                                              // a beat on the hello
+    beats.push([j(90), { fsw: -22, head: s * 1.5 * k }, 'in']);                                                                   // down: the arm drops
+    beats.push([0, { [FR]: 'wave-rise', fsw: 28 }]);                                                                              // the hand falls below the elbow
+    beats.push([j(130), { fsw: -45, head: -s * .6 * k, lean: 0, face: 'smile1' }, 'in']);
+    beats.push([0, { [FR]: '', fsw: 0, frot: 0, [A]: -4, [F]: 14 }]);                                                             // into the cutout arm, by his hip
+    beats.push([j(340), { [A]: 0, [F]: 0, head: 0, face: 'rest' }, 'spring']);
     return { beats, still: { [FR]: 'wave', head: s * 4, face: 'smile' }, stillMs: 1000 };
   },
   // "Yes": a nod and a small open hand, like "got it" (the cutout arm, kept small).
@@ -453,7 +458,7 @@ const DR_BODY_PERF = {
     R(); const side = 'L', s = -1, O = 'R', FR = 'frameL';   // as drawn only: the drawings carry his coat (see ctxFor)
     const A = 'a' + side, F = 'f' + side, look = 'lookU' + O;
     return { beats: [
-      [j(160), { lean: -s * 1.2 * k, head: -s * 2 * k, sy: 1 - .012 * k, face: 'blink2', brow: 'focused' }, 'out'],   // a breath in (a cutout arm would only swing out sideways)
+      [j(160), { lean: -s * 1.2 * k, head: -s * 2 * k, sy: 1 - .012 * k, face: 'lookU' + O, brow: 'focused' }, 'out'],   // a breath in, the eyes lead (a cutout arm would only swing out sideways)
       [0, { [FR]: 'think-rise' }],                                                                                  // the rise drawn: the hand comes up in front
       [j(120), { head: s * 1.5 * k, lean: 0, sy: 1, face: 'blink1' }, 'out'],
       [0, { [FR]: 'think' }],                                                                                         // finger to the chin
@@ -484,22 +489,19 @@ const DR_BODY_PERF = {
     const beats = [
       [j(200), { frameLegs: 'crouch', [CH]: 'cheer-load', sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],   // the load: crouched, fists pulled back
       [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the rise: fists past the shoulders
-      [j(110), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .03 * k, sx: 1 - .015 * k, y: -28 * jump, head: -s * 2 * k, lift: -4 * k, face: 'laugh', brow: 'up' }, 'snap'],
-      [0, { [CH]: top }],                                                                                                                               // the top: the V
-      [j(190), { y: -50 * jump, sy: 1 + .04 * k, sx: 1 - .02 * k, head: -s * 3 * k, lift: -6 * k }, 'out'],
-      [j(150), { y: -42 * jump, sy: 1.01, sx: .995, face: 'laughB' }, 'in'],
+      [j(110), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .03 * k, sx: 1 - .015 * k, y: -28 * jump, head: -s * 2 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],
+      [0, { [CH]: top, frot: s * 3 * k }],                                                                                                              // the top: the V, tipped (never twins)
+      [j(190), { y: -50 * jump, sy: 1 + .04 * k, sx: 1 - .02 * k, head: -s * 3 * k, lift: -6 * k, frot: s * 1.5 * k }, 'out'],
+      [j(150), { y: -42 * jump, sy: 1.01, sx: .995, face: 'laugh' }, 'in'],
       [j(150), { frameLegs: jump ? 'legs-land' : 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash, drawn
       [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the fists drop with it
       [j(90), { lift: 6 * k }, 'out'],
-      [0, { [CH]: top }],                                                                                                                               // and fly up again
-      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, head: -s * 1.5 * k, face: 'laughB' }, 'spring'],
+      [0, { [CH]: top, frot: -s * 2 * k }],                                                                                                             // and fly up again, tipped the other way
+      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, frot: 0, head: -s * 1.5 * k, face: 'smile' }, 'spring'],
     ];
     const land = beats.length;
     beats.push(
-      [j(130), { [CH]: 'cheer-mid', head: s * 1.2 * k, lift: 3 * k, face: 'laugh' }, 'in'],                                                          // one more pump
-      [0, { [CH]: top }],
-      [j(240), { lift: 0, head: -s * .6 * k }, 'spring'],
-      [j(200), { face: 'smile' }, 'out'],
+      [j(320), { head: -s * .6 * k, face: 'smile2' }, 'inOut'],                                                                                       // a hold on the V
       [0, { [CH]: 'cheer-mid', brow: 'rest' }],                                                                                                         // down: the rise
       [j(100), { head: 0 }, 'in'],
       [0, { [CH]: 'cheer-load' }],                                                                                                                      // the load
@@ -530,7 +532,7 @@ const DR_BODY_PERF = {
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
     const s = R() < .5 ? -1 : 1, FR = s < 0 ? 'frameL' : 'frameR';
     return { beats: [
-      [j(180), { lift: 4 * k, head: -s * 1 * k, face: 'blink1' }, 'in'],
+      [j(180), { lift: 4 * k, head: -s * 1 * k, face: 'smile1', brow: 'up' }, 'in'],
       [0, { [FR]: 'shrug-half' }],                                                                       // the way in, drawn: elbows at his sides, palms turning up
       [j(110), { lift: -4 * k, head: s * 1.5 * k }, 'out'],
       [0, { [FR]: 'shrug' }],
@@ -551,7 +553,7 @@ const DR_BODY_PERF = {
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
     R(); const s = -1, FR = 'frameL', L = 'L', O = 'R';   // as drawn only: the drawing carries his coat
     return { beats: [
-      [j(140), { lift: 2 * k, sy: 1 - .012 * k, face: 'blink1' }, 'in'],                                    // he looks down for it
+      [j(140), { lift: 2 * k, sy: 1 - .012 * k, face: 'lookD' }, 'in'],                                     // he looks down for it, the eyes first
       [0, { [FR]: 'clipboard-low' }],                                                                       // the board at his hips (drawn)
       [j(90), { sy: 1, face: 'lookD' }, 'out'],
       [0, { [FR]: 'clipboard-mid' }],                                                                       // on its way up
@@ -614,7 +616,8 @@ const DR_BODY_PERF = {
     const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, O = side === 'L' ? 'R' : 'L', FR = 'frame' + side;
     return { beats: [
       [j(150), { frameLegs: 'crouch', sy: 1 - .035 * k, sx: 1 + .017 * k, lift: 5 * k, head: -s * 1 * k, face: 'smile1' }, 'in'],                              // the drawn crouch
-      [0, { [FR]: 'thumbs-rise', frot: 0 }],                                                                                                                   // the fist closing, the thumb starting up
+      [0, { [FR]: 'thumbs-rise', frot: 0, fy: 16 }],                                                                                                          // the fist closing, the thumb starting up
+      [j(80), { fy: 6, sy: 1 - .02 * k, sx: 1 + .01 * k }, 'out'],                                                                                            // (two zero beats in a row never showed it: 2026-10-26)
       [0, { [FR]: 'thumbs-up', fy: 14 }],
       [j(230), { frameLegs: jump ? 'jump' : 'crouch', fy: 0, sy: 1 + .035 * k, sx: 1 - .017 * k, y: -34 * jump, ['a' + O]: 6 * k, ['f' + O]: 10 * k, head: s * 2.5 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],   // up: the jump, the thumb rises; the other arm stays close (out stiff it read as a board)
       [j(170), { frameLegs: jump ? 'legs-land' : 'crouch', y: 0, sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 6 * k }, 'in'],      // the landing, drawn
@@ -632,7 +635,7 @@ const DR_BODY_PERF = {
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
     const s = R() < .5 ? -1 : 1;
     return { beats: [
-      [j(80), { face: 'blink2' }, 'linear'],
+      [j(60), { face: 'shut' }, 'linear'],
       [0, { frameL: 'wince-arms' }],                                                                       // the arms pulled in, drawn (as drawn only: it carries his coat)
       [j(200), { sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 9 * k, head: s * 5 * k, lean: -s * 1 * k, face: 'worried', brow: 'caring' }, 'snap'],
       [j(650, .2), { head: s * 5.5 * k }, 'inOut'],

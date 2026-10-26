@@ -625,3 +625,18 @@ later", then placed on 2026-10-24: above); the viewer is `drsmiley/body.html`, n
   only in the picture's plane; the legs are one piece each, so a walk is a
   stylised bounce-walk from the front; the quiz bounce and the cheer use
   the drawn `crouch` and `jump` plates for real knees.
+
+**Moves reworked for smoothness (2026-10-26, Jose: "the movements are awkward").**
+Measured frame by frame on navy (`body-clip.cjs`, every 1/60 s): the worst
+of it was drawings swapped a third of his height apart, so a hand jumped in
+one frame. Rules now: a drawing is swung (`fsw`) to meet the one before it
+at a swap and swings on from there (the wave's rise starts by his hip and
+swings up past its place; the wave comes in swung low and springs up; the
+way down mirrors it); his eyes lead a move and are open at its start (a
+held half-blink at the start of greet, think, read and shrug read as
+sleepy); the cheer's arms tip (`frot`) so they are not twins, its eyes
+open at the top, one pump fewer; the bounce's thumb rise now shows (two
+zero-length beats in a row had skipped it). Still open: the whole-torso
+drawings (think, wince, the clipboard) can't be swung, so their arms still
+go from his sides to his chest in one frame; the fix is an in-between
+drawing each. Prompts: `docs/art/dr-smiley-body/prompts-fix.md`.
