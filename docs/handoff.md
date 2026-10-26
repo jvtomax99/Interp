@@ -1,45 +1,51 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-26, the campus diorama chat.
+hands over"). This one: 2026-10-26, the third campus chat (#157, #164, #165).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`, `docs/handoff.md` and
-> `docs/features/practice-dashboard.md` (its top section, the floating
-> diorama). Then tell me what's being worked on now and the goal, and what
-> was worked on before, in a few short lines each, say in 2-3 lines what
-> you'll do next, and wait for my go. Plain words, say "working on it" and
-> "done".
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next 2, the campus),
+> `docs/handoff.md` and `docs/features/practice-dashboard.md` (the diorama,
+> the miniature-world kit, the campus in 3D). Then tell me what's being
+> worked on now and the goal, and what was worked on before, in a few short
+> lines each, say in 2-3 lines what you'll do next, and wait for my go.
+> Plain words, say "working on it" and "done".
 
 ## Now
 
-**The campus as a crafted miniature world, in daylight: done on `claude/campus-alive`**
-(2026-10-26). Jose's two reference images and brief: lush trees and cherry
-trees, curved stone-edged flower beds, cute people (staff, visitors, a
-wheelchair), entrances with canopies, glass doors and planters (Ethics, US
-Systems, JTCC), a pond with stone rim and fountain, window depth, roof trim,
-soft daylight with a sky-blue card. In the app's pictures (`city/`) and the
-live 3D test https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX (v11). Kit and
-numbers: `docs/features/practice-dashboard.md`. Campus suites and guide pass.
-Jose said "push" on #157 (2026-10-26): main merged into it (conflicts in
-CLAUDE.md, PLAN, GUIDE_NEWS resolved), merged once its checks pass; main is
-merged into campus-alive too, whose change is next. **Waiting on Jose:** the
-fps of the live test on his iPhone (decides step b of `docs/PLAN.md` Next 2).
+**Campus 3D: Jose's feedback from his phone.** Nothing is open. The campus
+in 3D is live (#165, b1026.2227): the **3D** button on the CoreCHI Practice
+card opens `campus3d/index.html` full screen (drag to turn, pinch to zoom,
+tap a building, "See it finished"). Ask Jose how it feels on his iPhone
+(smooth or choppy) and what he wants changed. If it's choppy, the levers are
+in `docs/mockups/cchi-city/live/runtime.js` (sharpness steps down under 42
+fps; shadows only on change) and `LITE` in `diorama.html` (simpler shapes);
+measure the triangles first (about 440k now). After that, `docs/PLAN.md`
+Next 2 lists what's left of his seven "alive and interactive" ideas: tap a
+person for a term (4), fireworks when a building is finished (5), friendly
+weather from the streak (6), and the campus drawn live in the card itself
+(step b), which waits on the phone result.
 
-## Before (the last chat's changes and where each stands)
+How to change the campus: the scene is `docs/mockups/cchi-city/diorama.html`.
+Pictures for the card: `node builddiorama.cjs <outdir>` (~10 min; copy the
+`.webp` files to `city/`, paste `entrance.json` over `CAMPUS_MAP` in
+`features/campus.js`; `sky.webp` alone: `window.__sky`). The 3D page:
+`python3 docs/mockups/cchi-city/live/gen.py --app` (writes `campus3d/`;
+needs `npm install --no-save three@0.160.0` in `docs/mockups/cchi-city`).
+The iPhone test page (Artifact https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX):
+`gen.py <out.html>`. Playwright in this container: link
+`tests/node_modules/playwright` to `/opt/node22/lib/node_modules/playwright`.
+Checks: `cd tests && node run.cjs campus-3d campus-pick campus-alive campus-life campus-depth guide`.
 
-- **#157, the campus as a floating diorama**: Jose's "push" given; merging.
-- **#158, #159** (the 1-minute film, S9 Home taps closed): merged by another chat.
-- **The campus from OpenStreetMap** (third chat, 2026-10-26): five buildings
-  sized and placed from the map, JTCC is Encounter; pictures rebuilt, campus
-  suites and guide pass; on `claude/campus-alive`.
-- **Branch `claude/campus-alive`**, built on #157, no change opened yet:
-  lights back, flickering lit windows on painted floors, cranes until a
-  building is done, people about, the paint rising after practice (new
-  suite `campus-alive.cjs`), plus the screenshot fixes (red-brick HMH tower,
-  the dark stepped building as Culture). All campus suites and the guide
-  pass. **Next step:** once #157 is merged, merge `main` into it and open
-  its change for Jose.
-- Not measured: smoothness on an iPhone with this much moving (the
-  smoothness meter at the bottom of More).
+## Before (this chat's changes, all live)
+
+- **#157** the campus as a floating diorama (b1026.2005).
+- **#164** the real HUMC layout from OpenStreetMap, JTCC as Encounter, the
+  entrance sign in the median, the tall brick building behind Ethics,
+  Medical Plaza in brick, the miniature world (trees, flower beds, cute
+  people, entrances, pond fountain), soft daylight, no cranes (b1026.2044).
+- **#165** the campus in 3D, full screen (b1026.2227).
+- Lessons: GitHub's journey step "Term Review on 5" and a WebKit browser
+  crash in `dock-tuck` each failed once on a PR while passing on the same
+  code elsewhere; one re-run cleared them (PR comments say so).
