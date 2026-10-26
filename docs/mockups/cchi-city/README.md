@@ -1,7 +1,7 @@
 # CCHI City (mockup, 2026-10-19)
 
 **Current (2026-10-26): `diorama.html` + `builddiorama.cjs`**, the floating
-pastel board from Jose's video (`docs/features/practice-dashboard.md`, top
+board from Jose's video, in the campus's own colours (`docs/features/practice-dashboard.md`, top
 section). `entrance.html` + `buildentr.cjs` are the dusk version it was
 built from. Needs `npm install --no-save three@0.160.0` here first.
 

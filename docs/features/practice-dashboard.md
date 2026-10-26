@@ -42,7 +42,8 @@ on the pressed tile (touch) or hovered tile (mouse), only on the practice
 screen; release springs back via `--spring`. Nothing runs at rest; reduced
 motion turns the lean and squashes off.
 
-**The floating diorama (2026-10-26; supersedes the golden-hour look below).**
+**The floating diorama (2026-10-26; the board, camera and paint replace the scene below; the colours
+and golden-hour light below still hold).**
 Jose sent a video of soft pastel low-poly dioramas on rounded bases ("can we
 make the cchi sim city in this style") and picked, from a test render: this
 style but busier, progress as paint, the corner view. Source:
@@ -50,7 +51,7 @@ style but busier, progress as paint, the corner view. Source:
 stays as the dusk version's history) + `builddiorama.cjs` (`node
 builddiorama.cjs <out>`, ~7 min on SwiftShader; then paste
 `<out>/entrance.json` over the `CAMPUS_MAP` line). Same campus and movers;
-daylight, pastel materials, a layered board (grass, cream, two clays), the
+first in daylight pastels, then back in its own colours (below); a layered board (grass and three soils), the
 camera at the front-left corner (`cam`, fov 18.77, 960x840 with 80 px of
 open sky on top for the badges; the board's side corners run off the
 frame). Busier: people standing about baked into the board (`stand`, `sit`,
@@ -61,6 +62,14 @@ like the video): candy colours per building (each glass tower its own hue,
 roofs tinted with their building: from above the roofs are most of what
 shows), a warmer, stronger sun with less flat fill, and `grade()` now adds
 saturation (x1.28) and a little contrast instead of a haze lift.
+Then (Jose, same day: "I like the original colors more"; his pick: the
+old campus's colours on the new board): the live campus's materials,
+golden-hour light (`SUN_DIR`, the lavender fill, the pink rim) and grade
+(`grade()` calls `gradeDusk`, the F3 grade) are back, the backdrop is the
+card's dusk (violet above, peach below) and the card, HUD and chips are
+the evening ones again. Terminology is the white tower and Culture the
+dark tower again: the faded state pales the dark windows, so even the
+white tower shows its progress.
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building
@@ -76,10 +85,8 @@ drifting `clouds.webp`. Badges: placed by hand per camera
 (`LABEL_2D`, three rows; the projected roof tops crowd at phone size), Dr.
 Smiley steps to the right of his badge when the left would cover another,
 and the tap areas go back to front (lowest box last) so the building in
-front takes the tap. The card is the same cream-pink-lilac wash as the
-backdrop, HUD and chips in ink; the readiness ring stays navy. Renamed:
-Terminology "the peach tower", Culture "the blue glass tower" (`CAMPUS`).
-Phone loads ~360 KB for the whole set (was ~1.4 MB in `city/`).
+front takes the tap. (For a few hours the card was a light pastel wash
+with ink text; it is the evening card again, see above.) Phone loads ~360 KB for the whole set (was ~1.4 MB in `city/`).
 
 **Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`, the pick: in
 `features/campus.js` since 2026-10-24; `campusLife` and `campusDepth` are

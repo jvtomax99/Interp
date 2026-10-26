@@ -3802,28 +3802,27 @@
      sparkles only while the card is on screen (.is-away pauses them). */
   .cp-card{
     position:relative; overflow:hidden; max-width:760px; margin:0 0 17px 0; padding:17px 13px 13px;
-    border-radius:var(--r-lg); color:var(--ink);
-    /* the floating diorama's page (Jose, 2026-10-26): the same cream to pink to lilac wash as the scene's
-       backdrop (city/sky.webp), so the picture's faded top and bottom melt into the card */
-    background:linear-gradient(180deg, #fff2ea 0%, #ffe0e3 55%, #f4d5f3 100%);
-    box-shadow:
-      0 1px 0 0 inset rgba(255,255,255,0.82),
-      0 1px 2px        rgba(20,43,67,0.06),
-      0 8px 20px -12px rgba(22,55,90,0.22);
+    border-radius:var(--r-lg); color:#fff;
+    /* golden hour, like the scene (F3): peach at the horizon below, a deep violet sky above (dark enough for the white HUD).
+       The floating board (2026-10-26) keeps it: its backdrop (city/sky.webp) is painted to the same colours */
+    background:radial-gradient(120% 62% at 50% 112%, #f2a46b 0%, #c96a7c 30%, #4b2a63 60%, #33295f 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.14), inset 0 -4px 0 rgba(4,8,30,.35),
+      0 3px 5px rgba(20,43,67,.14), 0 26px 46px -20px rgba(18,28,70,.62);
   }
+  /* no stars at golden hour: the low sun's warm glow from the top left instead, where the scene's sun sits off frame */
   .cp-card::before{ content:''; position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(70% 34% at 0% 0%, rgba(255,255,255,.7), transparent 100%); }
+    background:radial-gradient(70% 34% at 0% 0%, rgba(255,186,128,.34), rgba(255,170,130,.12) 55%, transparent 100%); }
   .cp-hud{ position:relative; padding:0 4px; max-width:48%; }
-  .cp-hud small{ display:block; font-size:12px; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); }
+  .cp-hud small{ display:block; font-size:12px; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.7); }
   .cp-hud .ready-ring{ margin:6px 0 0 -2px; }
   .cp-hud .ready-pct{ color:#FFC86B; }
-  .cp-hud > span{ display:block; font-size:13px; font-weight:650; color:var(--ink); margin-top:8px; }
+  .cp-hud > span{ display:block; font-size:13px; font-weight:650; color:rgba(255,255,255,.88); margin-top:8px; }
   .cp-say{ position:absolute; top:13px; right:13px; left:50%; display:flex; align-items:flex-start; gap:6px; z-index:3; }
   .cp-face{ flex-shrink:0; width:40px; height:40px; border-radius:50%; overflow:hidden; background:#cfe6ff; border:2px solid #fff;
     box-shadow:0 6px 14px rgba(10,6,30,.4); }
   .cp-face .ds-art{ width:100%; height:100%; display:block; }
   .cp-say p{ margin:0; background:#fff; color:#151C2C; border-radius:4px 14px 14px 14px; padding:7px 10px;
-    font-size:12px; line-height:1.35; box-shadow:0 6px 16px rgba(22,55,90,.18); }
+    font-size:12px; line-height:1.35; box-shadow:0 6px 16px rgba(10,6,30,.35); }
   .cp-say p b{ color:#B5577A; font-weight:650; }
   .cp-world{ position:relative; margin:9px -13px 0; container-type:inline-size; isolation:isolate;
     -webkit-mask-image:linear-gradient(transparent, #000 7%, #000 94%, transparent); mask-image:linear-gradient(transparent, #000 7%, #000 94%, transparent); }
@@ -3854,7 +3853,7 @@
   .cp-tag.is-sel{ scale:1.12; z-index:3; background:#fff; color:#151C2C; }
   .cp-tag.is-sel i{ color:#B5577A; } .cp-tag.is-sel::after{ border-top-color:#fff; }
   .cp-tag.is-sel.is-focus{ background:#FFB443; color:#2a1a08; } .cp-tag.is-sel.is-focus::after{ border-top-color:#FFB443; } .cp-tag.is-sel.is-focus i{ color:#7a3d00; }
-  .cp-shade{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .3s var(--ease); background:rgba(72,52,104,.3);
+  .cp-shade{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .3s var(--ease); background:rgba(10,6,30,.5);
     -webkit-mask-image:radial-gradient(var(--rw,10%) var(--rh,10%) at var(--cx,50%) var(--cy,50%), transparent 55%, #000 100%);
     mask-image:radial-gradient(var(--rw,10%) var(--rh,10%) at var(--cx,50%) var(--cy,50%), transparent 55%, #000 100%); }
   .cp-world.has-sel .cp-shade{ opacity:1; }
@@ -3891,7 +3890,7 @@
   .cp-key.is-focus{ background:#FFB443; color:#2a1a08; } .cp-key.is-focus i{ color:#7a3d00; }
   .cp-dot{ width:9px; height:9px; border-radius:50%; background:var(--dom); box-shadow:0 0 0 2px rgba(255,255,255,.5); }
   @keyframes cpBob{ 50%{ transform:translate(-50%,-100%) translateY(-3px); } }
-  /* a building's paint (its colour up to your share) fades in over the white clay board on arrival */
+  /* a building's paint (its full colour up to your share) fades in over the faded board on arrival */
   .cp-paintw{ position:absolute; pointer-events:none; animation:cpLight .9s ease-out backwards; animation-delay:calc(.25s + var(--i,0) * .12s + var(--motion-skip, 0s)); }
   .cp-paintw img{ width:100%; height:100%; }
   .cp-paint{ pointer-events:none; }
@@ -3930,19 +3929,19 @@
   .cp-card.is-away .cp-paint, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-bay img{ animation-play-state:paused; }
   .cp-chips{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .cp-chip{ display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:550;
-    color:var(--ink-soft); background:rgba(255,255,255,.66); }
-  .cp-chip b{ font-weight:650; color:var(--ink); font-variant-numeric:tabular-nums; }
-  .cp-chip i{ display:block; width:14px; height:14px; color:#E0902A; } .cp-chip i svg{ width:100%; height:100%; display:block; }
-  .cp-chip.is-met{ background:rgba(150,220,180,.5); }
+    color:rgba(255,255,255,.9); background:rgba(255,255,255,.14); }
+  .cp-chip b{ font-weight:650; color:#fff; font-variant-numeric:tabular-nums; }
+  .cp-chip i{ display:block; width:14px; height:14px; color:#FFC86B; } .cp-chip i svg{ width:100%; height:100%; display:block; }
+  .cp-chip.is-met{ background:rgba(130,220,170,.24); }
   .cp-go{ position:relative; display:flex; gap:9px; margin-top:13px; }
   .cp-go button{ border:0; cursor:pointer; min-height:46px; border-radius:16px; font-family:var(--sans); font-size:15px; font-weight:650;
     transition:transform .3s var(--spring, cubic-bezier(.34,1.56,.64,1)), box-shadow .2s; }
   .cp-play{ flex:1; color:#2a1a08; background:linear-gradient(180deg,#FFD58A,#FFB443);
     box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7), 0 4px 0 #C9801E, 0 10px 18px -6px rgba(255,170,60,.6); }
-  .cp-exam{ flex:.7; color:var(--navy); background:rgba(255,255,255,.72); box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 4px 0 rgba(37,46,109,.18); }
+  .cp-exam{ flex:.7; color:#fff; background:rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 0 rgba(4,8,30,.25); }
   .cp-go button:active, .cp-go button.is-pressed{ transform:translateY(3px) scale(1.02,.96); transition-duration:.08s; }
   .cp-play:active, .cp-play.is-pressed{ box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 #C9801E, 0 4px 8px -4px rgba(255,170,60,.6); }
-  .cp-go button:focus-visible{ outline:2px solid var(--navy); outline-offset:3px; }
+  .cp-go button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
   @media (prefers-reduced-motion: reduce){
     .cp-paint, .cp-paintw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-bay img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }

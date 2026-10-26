@@ -229,9 +229,9 @@ come from this alone.
   tap areas back to front. Guide: the CoreCHI answer rewritten, a New
   lately card (replaces the film's). Suites: campus-pick, -life (the lot
   car's last stretch threshold for the new angle), -depth; full run.
-  Then, on Jose's "looks flat": vivid candy colours, tinted roofs, a
-  stronger warm sun, a saturation grade, unstudied buildings faded (not
-  white). Note: `docs/features/practice-dashboard.md`.
+  Then, on Jose's "looks flat" and "I like the original colors more":
+  the live campus's colours and golden-hour light on the new board,
+  evening card kept, unstudied buildings faded (not white). Note: `docs/features/practice-dashboard.md`.
 
 - 2026-10-25 Split `index.html`, phase 3, the terminology backfill
   (#152, live b1025.1713):
