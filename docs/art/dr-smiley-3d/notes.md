@@ -20,7 +20,7 @@ Jose's verdict on the still: "Looks like him: go on".
 
 Big files stay on Jose's PC, not in git, in `C:\Users\Inter\Documents\DrSmiley3D\`:
 `dr-smiley-3d.blend` (the Blender file with the rig, the move and the face plate,
-18 MB; it reads its pictures from that folder, so keep them together), `meshy-in\dr-smiley-hands-down.glb` (the Meshy model as it came,
+25 MB with the cloth cache; it reads its pictures from that folder, so keep them together), `meshy-in\dr-smiley-hands-down.glb` (the Meshy model as it came,
 32 MB), `dr-smiley-greet.glb` (the rigged model exported, 1.1 MB), the PNG
 renders and the cutout clip's frames.
 
@@ -142,6 +142,25 @@ Not good enough yet:
   script (`rig_check.py`) fails on Blender 5.2 (it slices a collection with
   a step, which 5.2 refuses) and wasn't used. Still open: with an arm held
   straight out (not in the greet) the sleeve's underside still stretches.
+- **Real cloth on the coat (fifth version, `blender-simulation`).** Jose:
+  "continue with coat". The Meshy coat can't be simulated itself (fused,
+  uneven triangles), so, as the skill advises, an even cloth mesh is built
+  for it: `CoatCloth` in the .blend, 1,161 points, about 2.5 cm squares,
+  rays cast from his middle onto the outside of the coat from the waist
+  (z 0.84 m) to the hem, the front opening and the back vent left out (its
+  points are only coat, never sleeves). It is skinned from the body (coat
+  bones included, no arm bones) and simulated with Blender's cloth: pinned
+  fully at the waist, easing to 30% at the hem, mass 0.2, bending 2, quality
+  10, colliding with a copy of his trousers (`LegCollider`, 8 mm), 12
+  frames of lead-in before frame 1 so it starts settled. The real coat's
+  3,947 points from the waist down follow it (Surface Deform, fading in
+  from the waist). Measured: the hem trails the body by 1 to 3 cm during
+  the wave (2.9 cm at most, at the top flick) and is back within 0.2 mm of
+  rest at frame 46. At 440 px that's a few pixels of sway. Gotcha found:
+  the helper meshes must stay "in render" (made invisible with a
+  transparent material and no camera/shadow rays); set to not render, the
+  final render skipped the cloth and the coat panel tore. `coat-cloth-before-after.webp`:
+  frame 23 before, frame 17 with the cloth.
 - **The look** is close, not the same: his hair is darker brown and the coat
   flatter than the master's.
 
