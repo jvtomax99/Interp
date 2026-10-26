@@ -14,19 +14,30 @@ hands over"). This one: 2026-10-26, the campus diorama chat.
 
 ## Now
 
-**Done 2026-10-26 (third campus chat): the campus laid out from OpenStreetMap.**
-`api.openstreetmap.org` answers (Jose allowed it). The five buildings take their
-sizes, heights and places from the map outlines; Encounter is now John Theurer
-Cancer Center (Jose's pick); details in `docs/features/practice-dashboard.md`.
-Pictures rebuilt, campus suites + guide pass, all on `claude/campus-alive`
-(commit 45c64c2). Guesses Jose couldn't confirm: Jurist = the building on the
-left, the rust tower and the blue glass building = Helena Theurer Pavilion.
+**The campus, alive and interactive (`docs/PLAN.md`, Next 2).** Jose picked all
+seven ideas (2026-10-26). Step a. is under way: a live 3D test page on his
+iPhone, https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX (source and how to
+rebuild it: `docs/mockups/cchi-city/live/README.md`; publish the output of
+`gen.py` with the Artifact tool to the same URL). Version 3 has: spin and pinch,
+tap a building to lift it, time of day on his clock (windows lit at night),
+floors rising with scaffolding and cranes, a smiling sun that becomes a sleepy
+moon at night (tap it: it giggles), cherry blossoms with falling petals.
+His first run (version 1, screen recording) held a steady 29-30 fps: "choppy".
+Versions 2-3 draw shadows only on change and start at 1.5x sharpness. **Waiting
+on his fps reading of version 3.** If it's smooth: step b (live 3D in the app,
+pictures as the fallback). If not: make it lighter, or the picture route.
+He also asked (done in `diorama.html`, not yet in `city/`): cherry trees off
+the street, blossoms in the garden and along the front. Rebuild the pictures
+(`builddiorama.cjs`) before opening the campus-alive change.
 
 ## Before (the last chat's changes and where each stands)
 
 - **#157, the campus as a floating diorama** (old campus colours at
   golden hour, progress as paint, corner view): GitHub's checks passed;
   **waiting for Jose's "push"**.
+- **The campus from OpenStreetMap** (third chat, 2026-10-26): five buildings
+  sized and placed from the map, JTCC is Encounter; pictures rebuilt, campus
+  suites and guide pass; on `claude/campus-alive`.
 - **Branch `claude/campus-alive`**, built on #157, no change opened yet:
   lights back, flickering lit windows on painted floors, cranes until a
   building is done, people about, the paint rising after practice (new
