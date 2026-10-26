@@ -5773,7 +5773,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'promo',       tone:'gd-n3', pin:'pins/wave.webp',               eyebrow:'The video',             title:'A new 45-second film, in 3D: the 3D Body coming apart, your campus, and Dr. Smiley’s brain' },
+  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',           eyebrow:'Your campus',           title:'Your HUMC campus is now a little model on a floating board: each building fills with colour as you master it' },
   { id:'notifications', tone:'gd-n1', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
   { id:'knowledgebrain', tone:'gd-n2', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: at the top of Term Review, or from CoreCHI Practice' },
 ];
@@ -9596,7 +9596,7 @@ function practiceMotionKeys(root){
 /* The campus comes alive: vehicles follow their projected paths (each sprite was rendered at one
    reference point; the path gives screen points and a scale per point), the ambulance pulls in and
    holds with its lights flashing, the helicopter lands and later lifts off, clouds drift, flags and
-   the fountain cycle their frames, lit windows flicker. Web Animations, so they pause off screen. */
+   the fountain cycle their frames. Web Animations, so they pause off screen. */
 let campusAnims = [];
 function campusLife(root){
   campusAnims.forEach(a => a.cancel()); campusAnims = [];
@@ -9652,7 +9652,7 @@ function watchCampus(root){
   campusWatch.observe(card);
 }
 /* Depth (F3; Jose 2026-10-20: scroll and drag, not device tilt, which needs an iPhone permission prompt).
-   The sky and the far town slide behind the still campus: by where the card sits as the page scrolls, and
+   The backdrop and the clouds behind the board slide behind the still campus: by where the card sits as the page scrolls, and
    by a horizontal drag across the scene, which springs back on release. A drag never picks a building.
    Work happens only while something moves; nothing runs at rest, off screen or with reduced motion. */
 const CAMPUS_DEPTH = { off: null, max: 10 };

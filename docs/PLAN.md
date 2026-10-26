@@ -221,6 +221,16 @@ come from this alone.
 
 ## Done
 
+- 2026-10-26 The campus as a floating diorama (Jose's video, "in this
+  style"; his picks: busier, paint for progress, corner view). New source
+  `docs/mockups/cchi-city/diorama.html` + `builddiorama.cjs`; `city/`
+  re-rendered (lit layers gone, `-paint1..10` per building); card restyled
+  light; badges in three hand-set rows, Dr. Smiley steps right when needed,
+  tap areas back to front. Guide: the CoreCHI answer rewritten, a New
+  lately card (replaces the film's). Suites: campus-pick, -life (the lot
+  car's last stretch threshold for the new angle), -depth; full run.
+  Note: `docs/features/practice-dashboard.md`.
+
 - 2026-10-25 Split `index.html`, phase 3, the terminology backfill
   (#152, live b1025.1713):
   `features/backfill.js`, declarations only. Proof: byte rebuild; which

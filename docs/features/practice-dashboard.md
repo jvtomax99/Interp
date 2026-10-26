@@ -42,6 +42,39 @@ on the pressed tile (touch) or hovered tile (mouse), only on the practice
 screen; release springs back via `--spring`. Nothing runs at rest; reduced
 motion turns the lean and squashes off.
 
+**The floating diorama (2026-10-26; supersedes the golden-hour look below).**
+Jose sent a video of soft pastel low-poly dioramas on rounded bases ("can we
+make the cchi sim city in this style") and picked, from a test render: this
+style but busier, progress as paint, the corner view. Source:
+`docs/mockups/cchi-city/diorama.html` (built from `entrance.html`, which
+stays as the dusk version's history) + `builddiorama.cjs` (`node
+builddiorama.cjs <out>`, ~7 min on SwiftShader; then paste
+`<out>/entrance.json` over the `CAMPUS_MAP` line). Same campus and movers;
+daylight, pastel materials, a layered board (grass, cream, two clays), the
+camera at the front-left corner (`cam`, fov 18.77, 960x840 with 80 px of
+open sky on top for the badges; the board's side corners run off the
+frame). Busier: people standing about baked into the board (`stand`, `sit`,
+pulled out of `LIVE`), a café with umbrellas on the right lawn, a garden
+with a pond at the back left, cherry trees, a hedge along the back.
+Progress is paint, not lit windows: the board (`near.webp`) has every
+building in white clay; `city/<key>-paint<1..10>.webp` is that building
+coloured from the ground to its share (`fillSetup`/`fillAt`: a world-height
+cut in each of its meshes' shaders; every mesh standing in its footprint
+counts, banners and podium too), kept only where it shows and where it
+changed a pixel. Drawn plainly over the board (`.cp-paint`, no blend, no
+flicker). Depth layers keep their names: `sky.webp` is the backdrop wash
+with the board's soft shadow (painted in 2D, exact colours), `far.webp` the
+clouds behind the board, `near.webp` the board; each drawn alone on black
+with its own silhouette as alpha (`aloneOnBlack`). Front clouds are the
+drifting `clouds.webp`. Badges: placed by hand per camera
+(`LABEL_2D`, three rows; the projected roof tops crowd at phone size), Dr.
+Smiley steps to the right of his badge when the left would cover another,
+and the tap areas go back to front (lowest box last) so the building in
+front takes the tap. The card is the same cream-pink-lilac wash as the
+backdrop, HUD and chips in ink; the readiness ring stays navy. Renamed:
+Terminology "the peach tower", Culture "the blue glass tower" (`CAMPUS`).
+Phone loads ~360 KB for the whole set (was ~1.4 MB in `city/`).
+
 **Your HUMC campus** (`renderCampus`, `CAMPUS`, `CAMPUS_MAP`, the pick: in
 `features/campus.js` since 2026-10-24; `campusLife` and `campusDepth` are
 in `index.html`, "Practice dashboard motion"; Jose,
