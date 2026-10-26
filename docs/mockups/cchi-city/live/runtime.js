@@ -38,6 +38,7 @@ for (const g of groups.values()){ const geo = mergeGeometries(g.geos, false); if
   if (g.lit){ mesh.userData.dark = mesh.material; mesh.userData.litM = clipped(LIT, g.k); (LITM[g.k] = LITM[g.k] || []).push(mesh); }
   BG[g.k].add(mesh); draws++; }
 
+renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; const shadowsDirty = () => { renderer.shadowMap.needsUpdate = true; };
 // ---- scaffolding and a crane at the top of what's built ----
 const SCAF = {}, CRANE = {};
 for (const k in BOX){ const b = BOX[k], s = new THREE.Group(), Y = M(0xf2b33d, { r:0.6 });
@@ -50,7 +51,7 @@ const BUILT = { e:0.8, t:0.35, s:0.6, n:0.5, c:0.7 };   // a sample learner, sca
 function setProgress(p){ for (const k in BOX){ const b = BOX[k], f = Math.min(1, p * BUILT[k] / 0.6), floors = Math.round(f*20)/20;
     const top = b.top + 0.2, cut = f >= 1 ? 999 : 0.3 + (top - 0.3) * floors;
     CUT[k].value = cut; SCAF[k].visible = f < 1; SCAF[k].position.y = Math.max(0, cut - 0.9);
-    CRANE[k].visible = f < 1; CRANE[k].position.y = Math.max(0.3, cut - 0.1); } }
+    CRANE[k].visible = f < 1; CRANE[k].position.y = Math.max(0.3, cut - 0.1); } shadowsDirty(); }
 
 // ---- the time of day: four looks, blended ----
 const HEMI = scene.children.find(c => c.isHemisphereLight);
@@ -73,12 +74,17 @@ function setHour(h){ const hh = h < 5 ? h + 24 : h; let i = 0; while (i < KEYS.l
   document.documentElement.style.setProperty('--sky', `linear-gradient(${mix(A.bg[0],B.bg[0],f)}, ${mix(A.bg[1],B.bg[1],f)} 55%, ${mix(A.bg[2],B.bg[2],f)})`);
   GLOWS.forEach(g => { g.material.opacity = Math.min(1, n*1.4 + (hh > 17 && hh < 21 ? 0.6 : 0)); g.visible = g.material.opacity > 0.02; });
   const lit = n > 0.3; if (lit !== litNow){ litNow = lit; for (const k in LITM) LITM[k].forEach(m => m.material = lit ? m.userData.litM : m.userData.dark); }
+  shadowsDirty();
   const hr = Math.floor(h) % 24, mi = Math.round((h % 1) * 60) % 60; $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
 
 // ---- the living things ----
 [CAR_IN, CAR_OUT, AMB, HELI, BIRDS, CAR_IN2, ...STREET.map(o => o.g), ...WALKS.map(w => w.g), ...SITTERS.map(o => o.g)].forEach(g => g.visible = true);
 SITTERS.forEach(o => o.g.position.set(...o.at)); IDLE.forEach(o => { o.set(0); o.g.visible = true; });
-ambLights(0); const SPR = spray(9);
+ambLights(0); const SPR = spray(9); const SPA = SPR.geometry.attributes.position, SPN = SPA.count;
+const SPD = Array.from({ length:SPN }, (_, i) => [(i*2.399) % (Math.PI*2), (i*0.6180339) % 1, 0.35 + ((i*7) % 10)/18]);
+function fountain(t){ for (let i = 0; i < SPN; i++){ const [a, ph, rmax] = SPD[i], u = (t*0.7 + ph) % 1, r = 0.05 + u*rmax;
+    SPA.setXYZ(i, -0.1 + Math.cos(a)*r, 1.25 + Math.sin(u*Math.PI)*0.75 - u*0.45, -3.4 + Math.sin(a)*r); } SPA.needsUpdate = true; }
+[CAR_IN, CAR_OUT, AMB, HELI, BIRDS, CAR_IN2, ...STREET.map(o => o.g), ...WALKS.map(w => w.g), ...SITTERS.map(o => o.g), ...IDLE.map(o => o.g)].forEach(g => g.traverse(o => { o.castShadow = false; }));
 const along = (pts, u) => { const seg = []; let L = 0; for (let i = 1; i < pts.length; i++){ const l = Math.hypot(pts[i][0]-pts[i-1][0], pts[i][2]-pts[i-1][2]); seg.push(l); L += l; }
   let d = u * L; for (let i = 0; i < seg.length; i++){ if (d <= seg[i] || i === seg.length - 1){ const f = seg[i] ? Math.min(1, d/seg[i]) : 0, a = pts[i], b = pts[i+1];
     return [a[0] + (b[0]-a[0])*f, a[1] + (b[1]-a[1])*f, a[2] + (b[2]-a[2])*f, Math.atan2(b[0]-a[0], b[2]-a[2])]; } d -= seg[i]; } };
@@ -92,7 +98,7 @@ function life(t){ const loop = (dur, off=0) => ((t*1000 + off) % dur) / dur;
   IDLE.forEach((o, i) => o.set(((t + i*1.7) % 7) < 1.2 ? 1 : 0));
   HELI.position.set(PAD.x + Math.cos(t*0.25)*5, PAD.y + 3 + Math.sin(t*0.7)*0.4, PAD.z + Math.sin(t*0.25)*5); HELI.rotation.y = -t*0.25; HELI.userData.rotor.rotation.y = t*18;
   BIRDS.position.set(-30 + ((t*2.2) % 60), 14 + Math.sin(t*0.5), -10); BIRDS.rotation.y = Math.PI/2; flap(BIRDS, (t*4|0) % 2);
-  waveFlags(t*3); SPR.rotation.y = t*2; SPR.scale.y = 1 + Math.sin(t*6)*0.08;
+  waveFlags(t*3); fountain(t);
   CLOUDS.forEach((c, i) => c.position.y += Math.sin(t*0.4 + i)*0.004); }
 
 // ---- the camera: drag to spin, pinch to zoom ----
@@ -102,7 +108,7 @@ controls.target.set(0.5, -1.5, -3); controls.enableDamping = true; controls.damp
 controls.minPolarAngle = 0.3; controls.maxPolarAngle = 1.32; controls.minDistance = 45; controls.maxDistance = 190; controls.rotateSpeed = 0.7;
 function fit(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h); const a = w/h;
   cam.aspect = a; cam.fov = Math.min(46, 2*Math.atan(Math.tan(THREE.MathUtils.degToRad(11.5)) / Math.min(a, 1.15)) * 180/Math.PI); cam.updateProjectionMatrix(); }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); fit(); addEventListener('resize', fit);
+let DPR = Math.min(devicePixelRatio, 1.5); renderer.setPixelRatio(DPR); fit(); addEventListener('resize', fit);
 cam.position.set(-34, 70, 82); controls.update();
 
 // ---- tap a building: it lifts off the board ----
@@ -130,8 +136,9 @@ const BADGES = {}; for (const k in BOX){ const el = document.createElement('butt
 const v3 = new THREE.Vector3();
 function badges(){ const r = renderer.domElement.getBoundingClientRect(), p = +$('prog').value/100, at = [];
   for (const k in BOX){ const b = BOX[k], f = Math.min(1, p * BUILT[k] / 0.6), y = Math.min(b.top, CUT[k].value) + 0.9 + LIFT[k].y;
-    v3.set(b.x, y, b.z).project(cam); const el = BADGES[k]; el.querySelector('b').textContent = f >= 1 ? '★' : Math.round(f*100) + '%'; el.classList.toggle('done', f >= 1);
-    at.push({ el, x:(v3.x+1)/2*r.width, y:(1-v3.y)/2*r.height, w:el.offsetWidth, h:el.offsetHeight }); }
+    v3.set(b.x, y, b.z).project(cam); const el = BADGES[k], txt = f >= 1 ? '★' : Math.round(f*100) + '%', bb = el.querySelector('b'); if (bb.textContent !== txt) bb.textContent = txt; el.classList.toggle('done', f >= 1);
+    if (!el._w || el._t !== el.textContent){ el._t = el.textContent; el._w = el.offsetWidth; el._h = el.offsetHeight; }
+    at.push({ el, x:(v3.x+1)/2*r.width, y:(1-v3.y)/2*r.height, w:el._w, h:el._h }); }
   // nearest first; a badge that would cover one already placed moves up above it
   at.sort((a, b) => b.y - a.y); const placed = [];
   for (const a of at){ for (let g = 0; g < 8; g++){ const hit = placed.find(q => Math.abs(q.x - a.x) < (q.w + a.w)/2 + 4 && Math.abs(q.y - a.y) < a.h + 3); if (!hit) break; a.y = hit.y - a.h - 4; }
@@ -146,11 +153,13 @@ $('now').onclick = () => { follow = true; $('now').classList.add('on'); $('hour'
 $('prog').oninput = e => { setProgress(+e.target.value/100); if (picked) { const k = picked; picked = null; pick(k); } }; setProgress(0.6);
 
 // ---- the loop, with a frame meter ----
-let last = performance.now(), frames = 0, acc = 0, worst = 0, t0 = last;
+let slowSecs = 0, last = performance.now(), frames = 0, acc = 0, worst = 0, t0 = last;
 function frame(now){ const dt = now - last; last = now; frames++; acc += dt; worst = Math.max(worst, dt);
-  if (acc > 1000){ $('fps').textContent = `${Math.round(frames*1000/acc)} fps`; $('fps').classList.toggle('slow', frames*1000/acc < 45); frames = 0; acc = 0; worst = 0; }
+  if (acc > 1000){ const fps = frames*1000/acc; $('fps').textContent = `${Math.round(fps)} fps`; $('fps').classList.toggle('slow', fps < 45);
+    slowSecs = fps < 42 ? slowSecs + 1 : 0; if (slowSecs >= 2 && DPR > 1){ DPR = Math.max(1, DPR - 0.25); renderer.setPixelRatio(DPR); fit(); slowSecs = 0; }
+    $('draws').textContent = `${DPR}x · ${draws} draws`; frames = 0; acc = 0; worst = 0; }
   const t = (now - t0)/1000; if (!REDUCE) life(t);
-  for (const k in BOX){ const L = LIFT[k], goal = k === picked ? 1.6 : 0; L.v += (goal - L.y)*0.12; L.v *= 0.72; L.y += L.v; BG[k].position.y = L.y; }
+  for (const k in BOX){ const L = LIFT[k], goal = k === picked ? 1.6 : 0; L.v += (goal - L.y)*0.12; L.v *= 0.72; L.y += L.v; if (Math.abs(L.y - BG[k].position.y) > 0.002) shadowsDirty(); BG[k].position.y = L.y; }
   if (ring.visible) ring.material.opacity = 0.6 + Math.sin(t*4)*0.3;
   if (follow && frames === 1) setHour(nowH());
   controls.update(); renderer.render(scene, cam); badges(); requestAnimationFrame(frame); }
