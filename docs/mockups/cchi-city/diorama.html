@@ -611,7 +611,7 @@ const FILL = {};
 // where each badge's point sits, set by hand for this camera: three rows, so five badges at phone size never
 // overlap (the projected roof tops crowd: __proj prints them). Row 1 the brick tower and JTCC, row 2 the banner
 // building and the dark stepped one, row 3 the building on the left.
-const LABEL_2D = P.has('autolabels') ? {} : { t:[355,150], n:[690,150], e:[400,280], c:[740,300], s:[300,470] };
+const LABEL_2D = P.has('autolabels') ? {} : { t:[330,150], n:[715,150], e:[400,280], c:[740,300], s:[300,470] };
 function fillSetup(){ if (Object.keys(FILL).length) return; BASE.updateMatrixWorld(true);
   for (const key of Object.keys(BOX)){ const b = BOX[key], F = FILL[key] = { cut: { value: -100 }, meshes: [] };
     BASE.traverse(o => { if (!o.isMesh || o.material === depthOnly) return; const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
