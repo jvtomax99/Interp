@@ -664,4 +664,12 @@ out with the breath (a beat after the chest, the two arms not in step),
 tips the head 1 degree either way over 7.4 s, and sways him half a degree
 from his feet over 11.3 s. CSS only, so Home still runs no frame loop;
 paused off screen, none in Still or reduced motion (`app.css`, and the
-viewer's own copy).
+viewer's own copy). A pass against ClaudeAnimationBase's
+`ANIMATION_GUIDE.md` (Jose, 2026-10-26, "use the guide"): the wave's eyes
+lead (a glance to the side the hand will rise on, before the arm moves);
+the shrug's wide drawing comes in slid down and narrowed (`fy`, `fsx`) to
+meet the half-shrug and springs open, sinks the same way on the way out,
+its eyes lead with a "hmm" up and away, and its face steps back through
+half-lidded instead of snapping from doubt to rest; the clipboard's "got
+it" nod is 20 px, not 8 (subtle read as nothing). The point's load-to-reach
+snap is left: the app never plays `point`.

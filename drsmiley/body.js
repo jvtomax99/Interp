@@ -426,7 +426,8 @@ const DR_BODY_PERF = {
     // away read as a pop, not a move. He notices you with his eyes open (brows up), not
     // half-lidded: a held half-blink at the start read as sleepy.
     const beats = [
-      [j(150, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'smile1', brow: 'up', head: -s * 1.5 * k, [A]: -6, [F]: 12 }, 'in'],   // a dip: he's seen you
+      [j(90), { face: 'look' + side, brow: 'up' }, 'linear'],                                                                           // the eyes lead: a glance where the hand will rise
+      [j(150, .2), { sy: 1 - .025 * k, sx: 1 + .012 * k, face: 'smile1', head: -s * 1.5 * k, [A]: -6, [F]: 12 }, 'in'],                  // a dip: he's seen you
       [0, { [FR]: 'wave-rise', fsw: -45, [A]: 0, [F]: 0 }],                                                                          // the elbow comes out first, the hand still by his hip
       [j(130), { fsw: 30, sy: 1 + .012 * k, sx: 1 - .006 * k, y: -8 * k, brow: 'rest' }, 'in'],                                       // up: elbow leading, hand dragging
       [0, { [FR]: 'wave-out', fsw: -28, frot: 0 }],                                                                                   // the hand whips up past the elbow
@@ -557,16 +558,23 @@ const DR_BODY_PERF = {
   // Not sure: the drawn palms open outward from his sides, shoulders up, a doubtful face.
   shrug(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
-    const s = R() < .5 ? -1 : 1, FR = s < 0 ? 'frameL' : 'frameR';
+    const s = R() < .5 ? -1 : 1, FR = s < 0 ? 'frameL' : 'frameR', O = s < 0 ? 'R' : 'L';
+    // The wide drawing comes in slid down and narrowed (fy, fsx), its hands where the
+    // half-shrug's are, and springs open; it sinks the same way before the half-shrug
+    // takes over (2026-10-26: the swap between the two was the move's worst jump).
+    // The eyes lead: a "hmm" up and away before the shoulders go.
     return { beats: [
-      [j(180), { lift: 4 * k, head: -s * 1 * k, face: 'smile1', brow: 'up' }, 'in'],
+      [j(120), { face: 'lookU' + O, brow: 'up' }, 'linear'],                                              // the eyes lead: hmm
+      [j(150), { lift: 4 * k, head: -s * 1 * k }, 'in'],                                                  // a dip of the shoulders first
       [0, { [FR]: 'shrug-half' }],                                                                       // the way in, drawn: elbows at his sides, palms turning up
-      [j(110), { lift: -4 * k, head: s * 1.5 * k }, 'out'],
-      [0, { [FR]: 'shrug' }],
-      [j(280), { lift: -10 * k, head: s * 4 * k, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],
-      [j(700, .2), { head: s * 4.5 * k }, 'inOut'],
-      [j(140), { lift: -3 * k, sy: 1, face: 'smile1', brow: 'rest' }, 'in'],
-      [0, { [FR]: 'shrug-half' }],                                                                       // and out the same way
+      [j(100), { lift: -3 * k, head: s * 1.5 * k }, 'out'],
+      [0, { [FR]: 'shrug', fy: 70, fsx: .8 }],                                                           // the wide drawing, low and narrow
+      [j(300), { fy: 0, fsx: 1, lift: -10 * k, head: s * 4 * k, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],   // springs open
+      [j(700, .2), { head: s * 4.5 * k }, 'inOut'],                                                      // held: the read
+      [j(50), { face: 'half' + O }, 'linear'],                                                           // the face steps back through half-lidded (never snaps)
+      [j(50), { face: 'rest', brow: 'rest' }, 'linear'],
+      [j(130), { fy: 70, fsx: .8, lift: -4 * k, sy: 1, face: 'smile1' }, 'out'],                           // sinks
+      [0, { [FR]: 'shrug-half', fy: 0, fsx: 1 }],                                                        // and out the same way
       [j(120), { lift: 0 }, 'in'],
       [0, { [FR]: '' }],
       [j(320), { head: 0, face: 'rest' }, 'out'],
@@ -590,8 +598,8 @@ const DR_BODY_PERF = {
       [j(700, .2), { face: 'lookD' + L, head: s * 3 * k, lean: -s * .4 * k }, 'inOut'],                  // reading along a line
       [j(700, .2), { face: 'lookD' + O, head: -s * 1 * k, lean: s * .4 * k }, 'inOut'],
       [j(220), { face: 'lookD', lean: 0 }, 'out'],
-      [j(160), { lift: 8 * k, face: 'smile1', brow: 'up' }, 'inOut'],                     // got it
-      [j(260), { lift: 3 * k }, 'spring'],
+      [j(160), { lift: 20 * k, face: 'smile1', brow: 'up' }, 'inOut'],                    // got it (a nod this size reads at 216 px; 8 did not)
+      [j(260), { lift: 4 * k }, 'spring'],
       [j(120), { lift: 0, head: 0, face: 'smile', brow: 'rest' }, 'in'],
       [0, { [FR]: 'clipboard-mid' }], [j(80), {}, 'linear'],                                                // down the way it came
       [0, { [FR]: 'clipboard-low' }], [j(110), {}, 'linear'],
