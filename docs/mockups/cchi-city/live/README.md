@@ -5,6 +5,7 @@ three.js, to decide whether the app's campus moves from pre-rendered
 pictures to live 3D. Published as a private Artifact for Jose to open on his
 iPhone: https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX
 
+- `gen.py --app`: the same, for the app: `campus3d/index.html` (`app-shell.html`, `runtime.js` in `APP` mode) and three.js copied into `campus3d/three/`.
 - `gen.py <out.html>`: takes `../diorama.html` up to its capture pipeline,
   points three.js at jsDelivr (three@0.160.0), drops the post-processing,
   shadow map 2048, and appends `runtime.js` inside `shell.html`.

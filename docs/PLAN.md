@@ -111,6 +111,10 @@ under way, then what waits on Jose, then small leftovers.
       as the pre-rendered look. Yes: b. No: the picture route (1 as
       per-hour background and window pictures, 3 as picture layers, 7
       dropped) and say so.
+   **2026-10-26: a first piece is in** (Jose's pick): the card stays the
+      picture, its **3D** button opens the campus full screen (`campus3d/`):
+      drag to turn, pinch to zoom, tap a building, "See it finished". Still
+      waiting on his frame-rate reading of it on his iPhone.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the

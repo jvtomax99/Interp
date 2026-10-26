@@ -3913,6 +3913,18 @@
      by --dpx/--dpy (css px) as the card scrolls and while a finger drags across it; the campus never moves,
      so badges, tap areas and movers stay put. Each layer is scaled up just enough to cover its widest slide. */
   .cp-world{ touch-action:pan-y; }
+  /* the way into the campus in 3D (openCampus3d): a small glass button low on the left, over the clouds */
+  .cp-3d{ position:absolute; left:3%; bottom:5%; z-index:4; display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 15px 0 12px;
+    border-radius:999px; border:1px solid rgba(255,255,255,.9); background:rgba(255,255,255,.74); -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px);
+    color:#151C2C; font-family:var(--sans); font-size:15px; font-weight:650; cursor:pointer;
+    box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); transition:transform .368s var(--spring0, var(--ease)); }
+  .cp-3d svg{ width:20px; height:20px; color:#252E6D; }
+  .cp-3d:active, .cp-3d.is-pressed{ transform:scale(.95); }
+  .cp-3d:focus-visible{ outline:2px solid #252E6D; outline-offset:2px; }
+  .cp-world.has-sel .cp-3d{ opacity:0; pointer-events:none; }
+  /* the campus in 3D runs full screen in a frame, like the brains (.brain-ov in home-polish.css) */
+  .overlay.c3d-ov{ padding:0; background:#5f95d0; -webkit-backdrop-filter:none; backdrop-filter:none; align-items:stretch; justify-content:stretch; overflow:hidden; }
+  .overlay.c3d-ov iframe{ flex:1 1 auto; display:block; width:100%; height:100%; border:0; background:#5f95d0; }
   .cp-depth{ position:absolute; pointer-events:none; will-change:translate; }
   .cp-d-sky{ scale:1.08; translate:calc(var(--dpx, 0) * 1px) calc(var(--dpy, 0) * 1px); }
   .cp-d-far{ scale:1.045; translate:calc(var(--dpx, 0) * .6px) calc(var(--dpy, 0) * .6px); }

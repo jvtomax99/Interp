@@ -128,6 +128,30 @@ reflections and a few warm rooms, roof parapets. Daylight is the default
 (`?dusk` for the golden hour); the card's colours in `app.css` and
 `sky.webp` (`window.__sky`) match it. `LITE` (the live 3D test) uses plainer
 stones and simpler spheres: ~440k triangles instead of ~940k.
+**The campus in 3D** (Jose, 2026-10-26: "rotate, pinch to zoom, and a button to
+preview how the buildings would look once they are completed"; his pick: a 3D
+button opening it full screen, the card stays the fast picture). `.cp-3d` on
+the picture (bottom left, 44 px, hidden while a building is picked) calls
+`openCampus3d()` (`features/campus.js`): an `.overlay.c3d-ov` frame with
+`campus3d/index.html`, dropped 300 ms after it closes (like the brains).
+Messages, same origin only: the page sends `campus3d-want`, the app answers
+`campus3d-data` {levels: each building's coverage, the card's paint share;
+names: short, place, weight}; `campus3d-practice` {key} closes it and runs
+`campusGo`; `campus3d-close` (its × and Escape). The page is
+`docs/mockups/cchi-city/live/gen.py --app`: the diorama up to its capture
+pipeline in `LITE` (~440k triangles), merged per building and material,
+`runtime.js` in `APP` mode inside `app-shell.html`; three.js 0.160 vendored in
+`campus3d/three/` (copied by the same script). In 3D progress is height, not
+paint: a building stands at its finished floors with its roof on (no
+construction); "See it finished" (`#finished`, `FINISHED`) shows them all done,
+the badges lose their %. The sky and sun follow the phone's clock (the test
+page's hour slider is not in the app). Drag turns (OrbitControls, no pan,
+polar 0.3-1.32, distance 45-190), pinch zooms, the round arrow puts the front
+view back, a tap on a building lifts it with its card. Shadows redraw only on
+change; sharpness starts at 1.5x and steps down to 1x while under 42 fps; a
+hidden page draws nothing. No WebGL: the page says 3D isn't available. Offline
+before a first visit: sw.js answers with a short note, as for the brain.
+Suite: `campus-3d.cjs` (SwiftShader). Not measured yet: frame rate on Jose's iPhone.
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building

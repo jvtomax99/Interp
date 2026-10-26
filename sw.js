@@ -216,7 +216,10 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(req).then(hit => hit || (url.pathname.startsWith('/brain/')
+        .catch(() => caches.match(req).then(hit => hit || (url.pathname.startsWith('/campus3d/')
+          // the campus in 3D never opened online yet: say so in its frame, as the brain does
+          ? new Response('<p style="font:16px system-ui;color:#151C2C;background:#c3def6;margin:0;padding:24px;min-height:100vh">Open the campus in 3D once with a connection; after that it works offline.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+          : url.pathname.startsWith('/brain/')
           // The HUMC Brain never opened online yet: say so in its frame,
           // rather than loading the whole app inside it.
           ? new Response('<p style="font:16px system-ui;color:#A4B0CC;background:#02040B;margin:0;padding:24px;min-height:100vh">Open the HUMC Brain once with a connection; after that it works offline.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
