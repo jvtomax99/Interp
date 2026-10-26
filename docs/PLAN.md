@@ -96,9 +96,11 @@ under way, then what waits on Jose, then small leftovers.
    #145 (live b1025.0157), the doctor sheets #147 (live
    b1025.1140), CSV #148 (live b1025.1453),
    duplicate doctors #150 (live
-   b1025.1607), the backfill (this PR), the last small leaf; then, the backfill. After them: Ask the Hub's
-   group and Dr. Smiley's engine, as groups, or they stay
-   (`docs/split-index.md`).
+   b1025.1607), the backfill #152 (live b1025.1713): the small leaves
+   are done. The Ask the Hub group #154 (live b1025.1947). Dr.
+   Smiley's engine group (`features/smiley-engine.js`): planned, then
+   moved on Jose's go (2026-10-25). After it, phase 3's groups are done;
+   what's left stays inline by design (phase 4, `docs/split-index.md`).
 2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
@@ -208,8 +210,8 @@ come from this alone.
   #115, live. `SEED_QUESTIONS`: #122, live (b1022.0855). `FALSE_FRIENDS`: #125, live.
   Phase 3 (features): Translate #126, 3D Body #127, Looking a term up
   #129, Voice and mic check #131, Dr. Smiley's performances #137, live;
-  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live; the guide's front page #145, live; the doctor sheets #147, live; CSV #148, live; duplicate doctors #150, live; the backfill, this PR. Next: the small
-  leaves, then the groups (`docs/split-index.md`).
+  the campus #139, live; False Friends' screen #141, live; the knowledge brain #143, live; the guide's front page #145, live; the doctor sheets #147, live; CSV #148, live; duplicate doctors #150, live; the backfill #152, live. Small leaves done;
+  next the groups (`docs/split-index.md`).
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
@@ -219,7 +221,8 @@ come from this alone.
 
 ## Done
 
-- 2026-10-25 Split `index.html`, phase 3, the terminology backfill (this PR):
+- 2026-10-25 Split `index.html`, phase 3, the terminology backfill
+  (#152, live b1025.1713):
   `features/backfill.js`, declarations only. Proof: byte rebuild; which
   doctors need it, the banner, a run that fails (no answer) and one that
   works (both doctors saved with tiers, then "up to date"), globals

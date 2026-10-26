@@ -1,7 +1,9 @@
 # Dr. Smiley: how he moves
 
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
-Code is in `index.html` unless a file is named. Keep this in step with the code.
+Code is in `features/smiley-engine.js` (his art, the engine, how lively, task
+states; moved out of `index.html` 2026-10-25) unless a file is named. Keep
+this in step with the code.
 
 The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
 
@@ -110,8 +112,8 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
 - **Five performances, built fresh each play.** `DR_PERF` (greet, ack,
   think, cheer -- also called celebrate -- and wink; its code, with
   `drSquashKeys`, his mood and `drFaceFx`, is `features/smiley-performances.js`
-  since 2026-10-24) sits in `DR_FACE_SEQ` as getters (that one line stays in
-  `index.html`, after the table), so every play varies a little (side, amplitude, beats) with an
+  since 2026-10-24) sits in `DR_FACE_SEQ` as getters (that one line is in
+  `features/smiley-engine.js`, after the table), so every play varies a little (side, amplitude, beats) with an
   anticipation, one main gesture and a recovery. Each builds its own Focused
   version (smaller, no laughter, no effects); Still uses its `still` frame.
   `drPerfSeed(n)` makes the variant repeatable for tests. Movement is only a

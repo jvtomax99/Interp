@@ -85,6 +85,7 @@ So:
 | Glossary CSV export and import (`exportTermsCsv`, `parseCsv`, `confirmCsvImport`) | `features/csv.js` |
 | Duplicate doctors: finding and merging them (`duplicateDoctorGroups`, `mergeDuplicateDoctors`, `duplicateBannerHtml`) | `features/duplicate-doctors.js` |
 | The terminology backfill: re-researching doctors on the old flat list (`runTierBackfill`, `backfillBannerHtml`) | `features/backfill.js` |
+| Ask the Hub and Dr. Smiley's side of it: retrieval, answers, his actions, what he remembers, the memory screen, corrections and the team notes review (`ASK`, `submitAsk`, `askTurnHtml`, `ASK_RUN`, `drMemGet`) | `features/ask-hub.js` |
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
 | The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |
@@ -93,6 +94,7 @@ So:
 | Looking a term up (`openTermLookup`, its trusted sources and caches) | `features/term-lookup.js` |
 | The Voice and mic check in More (`voiceCheckOpen`, `audioMode`) | `features/voice-check.js` |
 | Dr. Smiley's performances (`DR_PERF`, `drSquashKeys`, his mood, the effects off his head) | `features/smiley-performances.js` |
+| Dr. Smiley's engine: his art, the animation engine, how lively, task states (`drSmileyArt`, `DR_FACE_SEQ`, `DrAnim`, `drMode`, `drTask`, `drPerform`) | `features/smiley-engine.js` |
 | Your HUMC campus on CoreCHI Practice (`renderCampus`, `CAMPUS_MAP`, the building pick); its motion (`campusLife`, `campusDepth`) stays in `index.html` | `features/campus.js` |
 | Notifications (Web Push, the Notifications screen, owners' sends) | `api/push.js`, `api/_push-team.js`, `api/_webpush.js`, `sw.js` (`push`), client in `index.html` ("Notifications that reach a closed phone"); `docs/features/notifications.md` |
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |

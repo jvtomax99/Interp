@@ -1,7 +1,9 @@
 # Ask the Hub
 
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
-Code is in `index.html` unless a file is named. Keep this in step with the code.
+Code is in `features/ask-hub.js` (moved out of `index.html` 2026-10-25,
+with a few load-time lines left where it began) unless a file is named.
+Keep this in step with the code.
 
 **Ask the Hub.** The phone picks up to 24 matching entries (glossary, False
 Friends, Doctor Directory, providers, Code of Ethics, User Guide) with
