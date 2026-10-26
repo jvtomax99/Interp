@@ -177,7 +177,7 @@ let slowSecs = 0, last = performance.now(), frames = 0, acc = 0, worst = 0, t0 =
 function frame(now){ const dt = now - last; last = now; frames++; acc += dt; worst = Math.max(worst, dt);
   if (acc > 1000){ const fps = frames*1000/acc; $('fps').textContent = `${Math.round(fps)} fps`; $('fps').classList.toggle('slow', fps < 45);
     slowSecs = fps < 42 ? slowSecs + 1 : 0; if (slowSecs >= 2 && DPR > 1){ DPR = Math.max(1, DPR - 0.25); renderer.setPixelRatio(DPR); fit(); slowSecs = 0; }
-    $('draws').textContent = `${DPR}x · ${draws} draws`; frames = 0; acc = 0; worst = 0; }
+    $("draws").textContent = `${DPR}x · ${renderer.info.render.calls} draws · ${Math.round(renderer.info.render.triangles/1000)}k tris`; frames = 0; acc = 0; worst = 0; }
   const t = (now - t0)/1000; if (!REDUCE) life(t);
   for (const k in BOX){ const L = LIFT[k], goal = k === picked ? 1.6 : 0; L.v += (goal - L.y)*0.12; L.v *= 0.72; L.y += L.v; if (Math.abs(L.y - BG[k].position.y) > 0.002) shadowsDirty(); BG[k].position.y = L.y; }
   if (ring.visible) ring.material.opacity = 0.6 + Math.sin(t*4)*0.3;
