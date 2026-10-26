@@ -14,21 +14,17 @@ hands over"). This one: 2026-10-26, the campus diorama chat.
 
 ## Now
 
-**The campus, alive and interactive (`docs/PLAN.md`, Next 2).** Jose picked all
-seven ideas (2026-10-26). Step a. is under way: a live 3D test page on his
-iPhone, https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX (source and how to
-rebuild it: `docs/mockups/cchi-city/live/README.md`; publish the output of
-`gen.py` with the Artifact tool to the same URL). Version 3 has: spin and pinch,
-tap a building to lift it, time of day on his clock (windows lit at night),
-floors rising with scaffolding and cranes, a smiling sun that becomes a sleepy
-moon at night (tap it: it giggles), cherry blossoms with falling petals.
-His first run (version 1, screen recording) held a steady 29-30 fps: "choppy".
-Versions 2-3 draw shadows only on change and start at 1.5x sharpness. **Waiting
-on his fps reading of version 3.** If it's smooth: step b (live 3D in the app,
-pictures as the fallback). If not: make it lighter, or the picture route.
-He also asked (done in `diorama.html`, not yet in `city/`): cherry trees off
-the street, blossoms in the garden and along the front. Rebuild the pictures
-(`builddiorama.cjs`) before opening the campus-alive change.
+**The campus as a crafted miniature world, in daylight: done on `claude/campus-alive`**
+(2026-10-26). Jose's two reference images and brief: lush trees and cherry
+trees, curved stone-edged flower beds, cute people (staff, visitors, a
+wheelchair), entrances with canopies, glass doors and planters (Ethics, US
+Systems, JTCC), a pond with stone rim and fountain, window depth, roof trim,
+soft daylight with a sky-blue card. In the app's pictures (`city/`) and the
+live 3D test https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX (v11). Kit and
+numbers: `docs/features/practice-dashboard.md`. Campus suites and guide pass.
+**Waiting on Jose:** his look at it, the fps of the live test on his iPhone
+(decides step b of `docs/PLAN.md` Next 2), and his "push" on #157; then merge
+main into campus-alive and open its change.
 
 ## Before (the last chat's changes and where each stands)
 
