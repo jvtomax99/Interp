@@ -1,0 +1,76 @@
+<title>HUMC Campus Live</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650&display=swap">
+<style>
+/* One committed evening look (the Hub's campus card): the canvas fills the screen, controls float in glass over it. */
+:root{
+  --sky:linear-gradient(#3a2b62,#8a4570 55%,#e88f72);
+  --ink:#F4F1FA; --ink-soft:#C9C2E0; --glass:rgba(24,18,52,.62); --line:rgba(255,255,255,.16);
+  --gold:#FFD27A; --gold-2:#F2A93B; --navy:#151C2C; --slow:#FF8A8A;
+  --ui:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;background:#241a48;color:var(--ink);font-family:var(--ui);overflow:hidden;-webkit-user-select:none;user-select:none}
+#stage{position:fixed;inset:0;background:var(--sky);touch-action:none}
+#stage canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .6s}
+body.ready #stage canvas{opacity:1}
+#loading{position:fixed;inset:0;display:grid;place-items:center;font-weight:550;color:var(--ink-soft);pointer-events:none}
+body.ready #loading{display:none}
+.top{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:8px;pointer-events:none}
+.top h1{margin:0;font-size:17px;font-weight:650;letter-spacing:-.2px;flex:1;text-wrap:balance}
+.top h1 small{display:block;font-size:12px;font-weight:550;color:var(--ink-soft);letter-spacing:.02em}
+.chip{font-size:12px;font-weight:650;padding:5px 9px;border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-variant-numeric:tabular-nums}
+.chip.slow{color:var(--slow)}
+#badges{position:fixed;inset:0;pointer-events:none}
+.badge{position:absolute;left:0;top:0;pointer-events:auto;font:650 13px var(--ui);color:var(--ink);background:var(--glass);border:1.5px solid var(--line);border-radius:99px;padding:5px 10px;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);cursor:pointer}
+.badge b{color:var(--gold);font-weight:650}
+.badge.on{background:linear-gradient(var(--gold),var(--gold-2));color:var(--navy)}.badge.on b{color:var(--navy)}
+.badge.done{border-color:var(--gold)}
+.badge:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#card{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 168px);background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:14px 14px 14px 16px;display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:up .45s cubic-bezier(.2,.8,.2,1)}
+#cardK{font-size:20px;font-weight:650;letter-spacing:-.3px}
+#cardP,#cardF{font-size:13px;color:var(--ink-soft);grid-column:1}
+#cardF{color:var(--gold);font-weight:550}
+.go{grid-row:1/4;grid-column:2;border:0;border-radius:99px;padding:11px 18px;font:650 15px var(--ui);color:var(--navy);background:linear-gradient(var(--gold),var(--gold-2));box-shadow:0 1px 0 0 inset rgba(255,255,255,.6),0 8px 20px -10px rgba(242,169,59,.8)}
+#cardX{grid-row:1/4;grid-column:3;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:18px}
+@keyframes up{from{transform:translateY(16px);opacity:0}}
+.sheet{position:fixed;left:0;right:0;bottom:0;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 14px) max(16px,env(safe-area-inset-left,0px));background:var(--glass);border-top:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:grid;gap:10px}
+.row{display:grid;grid-template-columns:86px 1fr auto;align-items:center;gap:10px}
+.row label{font-size:13px;font-weight:650;color:var(--ink-soft)}
+.row output{font-size:13px;font-weight:650;min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--gold);height:28px;min-width:0}
+#now{border:1px solid var(--line);background:transparent;color:var(--ink);font:650 12px var(--ui);border-radius:99px;padding:5px 10px}
+#now.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.hint{font-size:12px;color:var(--ink-soft);text-align:center;margin:0}
+@media (prefers-reduced-motion:reduce){#card{animation:none}#stage canvas{transition:none}}
+</style>
+
+<div id="stage"></div>
+<div id="loading">Building the campus…</div>
+<div class="top">
+  <h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>
+  <span class="chip" id="fps">… fps</span>
+  <span class="chip" id="draws">…</span>
+</div>
+<div id="badges"></div>
+<div id="card" hidden>
+  <div id="cardK">Ethics</div>
+  <div id="cardP">George Link Jr. Pavilion</div>
+  <div id="cardF">80% built</div>
+  <button class="go" type="button" id="cardGo">Practise</button>
+  <button id="cardX" type="button" aria-label="Put it back">×</button>
+</div>
+<div class="sheet">
+  <div class="row"><label for="hour">Time of day</label><input id="hour" type="range" min="5" max="24" step="0.25" value="18.5"><button id="now" class="on" type="button">Now <output id="hourOut">6:30 pm</output></button></div>
+  <div class="row"><label for="prog">Your progress</label><input id="prog" type="range" min="0" max="100" step="1" value="60"><output id="progOut">60%</output></div>
+  <p class="hint">Drag to spin · pinch to zoom · tap a building</p>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script>addEventListener('error', e => { const l = document.getElementById('loading'); if (l) l.textContent = 'Could not draw the campus: ' + e.message; });</script>
+<script type="module">
+document.getElementById('prog').addEventListener('input', e => document.getElementById('progOut').textContent = e.target.value + '%');
+/*SCENE*/
+</script>
