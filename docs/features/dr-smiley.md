@@ -651,4 +651,9 @@ mirrored) instead of holding the flat arm straight out. The held states the same
 out sideways the whole time), leans in, nods now and then; `uncertain`
 holds the drawn `shrug-half` with the full `shrug` now and then (both
 flat arms were held stiffly out); `celebrating` keeps his eyes open while
-the fist bobs, a laugh only now and then.
+the fist bobs, a laugh only now and then. The cheer's V now comes in low and
+narrow (`fy`, `fsx`), its fists near where the rise's were, and shoots
+up; it sinks the same way before the rise takes over on the landing and
+on the way down (fists at the shoulders to arms straight up in one frame
+read as a flicker); his eyes stay open in the air, shut only for the
+landing's laugh.

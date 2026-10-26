@@ -503,19 +503,22 @@ const DR_BODY_PERF = {
       [j(200), { frameLegs: 'crouch', [CH]: 'cheer-load', sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 1 * k, lift: 6 * k, face: 'smile1' }, 'in'],   // the load: crouched, fists pulled back
       [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the rise: fists past the shoulders
       [j(110), { frameLegs: jump ? 'jump' : 'crouch', sy: 1 + .03 * k, sx: 1 - .015 * k, y: -28 * jump, head: -s * 2 * k, lift: -4 * k, face: 'smile', brow: 'up' }, 'snap'],
-      [0, { [CH]: top, frot: s * 3 * k }],                                                                                                              // the top: the V, tipped (never twins)
-      [j(190), { y: -50 * jump, sy: 1 + .04 * k, sx: 1 - .02 * k, head: -s * 3 * k, lift: -6 * k, frot: s * 1.5 * k }, 'out'],
-      [j(150), { y: -42 * jump, sy: 1.01, sx: .995, face: 'laugh' }, 'in'],
-      [j(150), { frameLegs: jump ? 'legs-land' : 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh' }, 'in'],      // the landing squash, drawn
-      [0, { [CH]: 'cheer-mid' }],                                                                                                                       // the fists drop with it
+      // the V comes in low and narrow, its fists where the rise's were, and shoots up (2026-10-26:
+      // from fists at the shoulders to arms straight up in one frame read as a flicker)
+      [0, { [CH]: top, frot: s * 3 * k, fy: 110 * jump, fsx: jump ? .86 : 1 }],                                                                       // the top: the V, tipped (never twins)
+      [j(190), { y: -50 * jump, sy: 1 + .04 * k, sx: 1 - .02 * k, head: -s * 3 * k, lift: -6 * k, frot: s * 1.5 * k, fy: 0, fsx: 1 }, 'out'],
+      [j(150), { y: -42 * jump, sy: 1.01, sx: .995, face: 'smile2', fy: 30 * jump, fsx: jump ? .97 : 1 }, 'in'],
+      [j(150), { frameLegs: jump ? 'legs-land' : 'crouch', y: 0, sy: 1 - .04 * k, sx: 1 + .02 * k, head: s * 2 * k, lift: 8 * k, face: 'laugh', fy: 100 * jump, fsx: jump ? .87 : 1 }, 'in'],      // the landing squash, drawn; the V sinks with it
+      [0, { [CH]: 'cheer-mid', fy: 0, fsx: 1 }],                                                                                                                       // the fists drop with it
       [j(90), { lift: 6 * k }, 'out'],
-      [0, { [CH]: top, frot: -s * 2 * k }],                                                                                                             // and fly up again, tipped the other way
-      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, frot: 0, head: -s * 1.5 * k, face: 'smile' }, 'spring'],
+      [0, { [CH]: top, frot: -s * 2 * k, fy: 90 * jump, fsx: jump ? .89 : 1 }],                                                                     // and fly up again, tipped the other way
+      [j(260), { frameLegs: '', sy: 1, sx: 1, lift: 0, frot: 0, fy: 0, fsx: 1, head: -s * 1.5 * k, face: 'smile' }, 'spring'],
     ];
     const land = beats.length;
     beats.push(
       [j(320), { head: -s * .6 * k, face: 'smile2' }, 'inOut'],                                                                                       // a hold on the V
-      [0, { [CH]: 'cheer-mid', brow: 'rest' }],                                                                                                         // down: the rise
+      [j(110), { fy: 100 * jump, fsx: jump ? .87 : 1 }, 'in'],                                                                                       // down: the V sinks first
+      [0, { [CH]: 'cheer-mid', brow: 'rest', fy: 0, fsx: 1 }],                                                                                        // then the rise
       [j(100), { head: 0 }, 'in'],
       [0, { [CH]: 'cheer-load' }],                                                                                                                      // the load
       [j(100), {}, 'in'],
