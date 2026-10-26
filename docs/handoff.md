@@ -12,7 +12,7 @@ hands over"). This one: 2026-10-26, from the chat that ran #153 to #158.
 
 ## Now
 
-Nothing is open from this chat once #158 is merged. Jose picks the next
+Nothing is open from this chat (#158 is merged and live, b1026.1522). Jose picks the next
 work. The pick on the list (`docs/PLAN.md`, Next): **S9 Home taps, part
 2**, which needs Jose first: a few runs of More, Measure smoothness on his
 phone (it lists the six slowest taps), then fix the slow ones. Offer that
