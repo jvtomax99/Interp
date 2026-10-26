@@ -101,7 +101,26 @@ under way, then what waits on Jose, then small leftovers.
    Smiley's engine group (`features/smiley-engine.js`): planned, then
    moved on Jose's go (2026-10-25). After it, phase 3's groups are done;
    what's left stays inline by design (phase 4, `docs/split-index.md`).
-2. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
+2. **Campus: alive and interactive (Jose, 2026-10-26; previews in the
+   third campus chat; he picked all seven).** Waits on #157, then
+   `claude/campus-alive`. Order, one PR each:
+   a. **Live 3D test on his iPhone first** (an Artifact page: the campus
+      drawn live with three.js; spin, pinch, tap to lift, an hour slider,
+      floors rising). Gate: smooth on his phone (frame meter) and as good
+      as the pre-rendered look. Yes: b. No: the picture route (1 as
+      per-hour background and window pictures, 3 as picture layers, 7
+      dropped) and say so.
+   b. Campus drawn live in the app (`features/campus.js`), pictures kept
+      as the fallback (no WebGL, reduced motion, slow phone), windows on
+      all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
+      clock: sun moved live, no extra pictures) and 3 (floors rise,
+      replacing paint).
+   c. Overlays, either route: 4 (tap a person: a term from your glossary,
+      counts as practice; tap area bigger than the figure), 5 (fireworks,
+      ribbon, gold badge when a building is finished), 6 (weather, the
+      friendly half only: sun and a rainbow for a streak, never snow for a
+      missed day).
+3. **S9 Home taps, part 2. Needs Jose first:** a few runs of the
    smoothness meter on his phone (More, Measure smoothness; it now lists
    the six slowest taps, #132), then fix the taps that are slow there.
    Background, the S-steps so far:
