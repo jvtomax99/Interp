@@ -27,7 +27,7 @@ doesn't see body classes) and the tip has no face. "Copy link" gives
 `?guide=<id>`, opened at startup. The first-week list and "New" badges are
 on this phone only (`ih_firstWeek`, `ih_guideSeen`).
 
-**The 45-second video** (answer `promo`, first in "Getting started"). Its
+**The 1-minute video** (54.5 s since 2026-10-26; `promo/hub-blend/BRIEF-60s.md`) (answer `promo`, first in "Getting started"). Its
 `<video>` (`media/hub-promo.mp4`, poster `media/hub-promo.jpg`, made from
 `promo/hub-blend/`, the 3D remake, 720x1280, since 2026-10-23; v12 before it) sits in the answer's text; tags are stripped for
 search and Ask, so it doesn't pollute them. `promoPlayer` gives it our own

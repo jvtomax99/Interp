@@ -2712,7 +2712,7 @@
   .gd-n1{ background:linear-gradient(140deg,#252E6D,#2E5FB0 70%,#2E8BD0); }
   .gd-n2{ background:linear-gradient(140deg,#4E3F7A,#7C6A9C 80%); }
   .gd-n3{ background:linear-gradient(140deg,#0F5FA6,#0189B3); }
-  /* The 45-second video, upright (9:16), in the answer sheet. */
+  /* The 1-minute video, upright (9:16), in the answer sheet. */
   .gd-video{ margin:0 auto 13px; width:min(100%, 300px); aspect-ratio:9/16; max-height:62vh; border-radius:var(--r-md);
     overflow:hidden; background:#0E1438;
     box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }

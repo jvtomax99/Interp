@@ -236,7 +236,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
     ok(hs3 <= 0 && p6.__errors.length === 0, '360px: no sideways scroll, no errors', { hs3, e: p6.__errors });
     await c6.close(); }
 
-  { console.log('== the 45-second video (Home Watch button, answer promo)');
+  { console.log('== the 1-minute video (Home Watch button, answer promo)');
     const { ctx: c7, page: p7 } = await boot(b, { device: 'iphone', name: 'Jose', settle: 3500 });
     const home = await p7.evaluate(() => {
       const r = e => e.getBoundingClientRect(), btn = document.querySelector('.home-promo-btn'), s = document.querySelector('.home-search');

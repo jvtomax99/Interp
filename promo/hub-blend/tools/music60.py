@@ -8,7 +8,9 @@ before the one nearest 24.5 s repeat once, joined on that beat with a 60 ms cros
 music starts late enough that its last notes, under "Safer Care." at 43.9 s in v11, land on the
 60 s cut's "Safer Care." at 57.08 s (sfx.cjs). Its level is set at mix time, 12 dB under the
 voice as in v11.
-  <venv>/bin/python promo/hub-blend/tools/music60.py <instrumental.wav> <out.wav>
+  <venv>/bin/python promo/hub-blend/tools/music60.py <instrumental.wav> <out.wav> [at] [beats]
+For another song, give the join (seconds, a beat in its steady part) and how many beats before it
+repeat: Jose's own track (2026-10-26) uses 34.78 16, its chorus played twice.
 (the venv needs librosa, numpy, soundfile; audio-separator brings them)"""
 import sys
 import librosa
@@ -16,12 +18,14 @@ import numpy as np
 import soundfile as sf
 
 IN, OUT = sys.argv[1], sys.argv[2]
-OLD_END, NEW_END, AT, BARS, LEN = 43.9, 57.08, 24.5, 6, 60
+OLD_END, NEW_END, LEN = 43.9, 57.08, 60
+AT = float(sys.argv[3]) if len(sys.argv) > 3 else 24.5
+BEATS = int(sys.argv[4]) if len(sys.argv) > 4 else 24
 
 y, sr = librosa.load(IN, sr=44100, mono=False)
 _, beats = librosa.beat.beat_track(y=librosa.to_mono(y), sr=sr, units='samples')
 i = int(np.argmin(abs(beats / sr - AT)))
-P, Q = beats[i], beats[i - 4 * BARS]
+P, Q = beats[i], beats[i - BEATS]
 X = int(0.06 * sr)
 f = np.linspace(0, 1, X)
 a, b = y[:, :P + X].copy(), y[:, Q:]

@@ -88,3 +88,14 @@ from that cue list instead of `HOOK_MAP`.
 - Kokoro's pacing over a full minute: only a 13 s sample has been heard.
 - New shots for Notifications and the knowledge brain: built as desk shots, stills only so far (`SHOTS-60s.md`).
 - The feature shots play on one desk (`desk.js`); the 3D Body was never cut, it played inside the Glossary.
+
+## After Jose watched it (2026-10-26)
+
+- "Too slow, the narrator is a bit slow": the whole film 10% faster (`setpts=PTS/1.10`, `atempo=1.10`,
+  pitch kept), 54.5 s, at 720p for the app (`renders/hub-promo-55s-720.mp4`, 10.5 MB). Making only the
+  voice faster would mean a new voice, new shot times and a new render; not done.
+- "Daily drills gets cut off": three cuts in `tools/voice60.py` sat off the real pauses. "Daily" lost
+  its "Da" to the line before (false friends ended at 16.34 s, the pause is at 16.12-16.18), and
+  "interpreters" lost its end (6.52 s, the pause starts at 6.72). Moved onto the pauses; the false
+  friends line keeps its old end for the clock (`CLOCK_END`), so every start time is unchanged and the
+  rendered picture still fits. Voice rebuilt, mixed as before (-13.2 LUFS), picture untouched.
