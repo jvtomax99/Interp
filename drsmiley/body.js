@@ -445,15 +445,18 @@ const DR_BODY_PERF = {
     beats.push([j(340), { [A]: 0, [F]: 0, head: 0, face: 'rest' }, 'spring']);
     return { beats, still: { [FR]: 'wave', head: s * 4, face: 'smile' }, stillMs: 1000 };
   },
-  // "Yes": a nod and a small open hand, like "got it" (the cutout arm, kept small).
+  // "Yes": a nod, his head and shoulders (2026-10-26: the open hand it had swung one flat
+  // cutout arm out sideways and held it, the paper-arm look; a nod is the head). Down and
+  // up twice, the second smaller, the shoulders sinking with the first, a warm face.
   ack(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
-    const side = R() < .5 ? 'L' : 'R', s = side === 'L' ? -1 : 1, A = 'a' + side, F = 'f' + side;
+    const s = R() < .5 ? -1 : 1;
     return { beats: [
-      [j(120), { lift: -6 * k, head: s * .5 * k, face: 'smile1' }, 'out'],
-      [j(200), { lift: 10 * k, head: s * 1.6 * k, [A]: 16 * k, [F]: 34 * k, face: 'smile2', brow: 'caring' }, 'inOut'],
-      [j(220), { lift: 2 * k, head: s * .8 * k, [F]: 40 * k }, 'spring'],
-      [j(380), { lift: 0, head: 0, [A]: 0, [F]: 0, face: 'smile1', brow: 'rest' }, 'spring'],
+      [j(110), { lift: -8 * k, head: s * .6 * k, face: 'smile1', brow: 'up' }, 'out'],                       // a small lift: "oh"
+      [j(160), { lift: 26 * k, head: s * 2.4 * k, sy: 1 - .015 * k, sx: 1 + .006 * k, face: 'smile2', brow: 'caring' }, 'inOut'],   // down
+      [j(140), { lift: -4 * k, head: s * 1 * k, sy: 1 }, 'inOut'],                                           // up
+      [j(140), { lift: 14 * k, head: s * 1.8 * k }, 'inOut'],                                                 // down again, smaller
+      [j(380), { lift: 0, head: 0, sx: 1, face: 'smile1', brow: 'rest' }, 'spring'],
       [j(260), { face: 'rest' }, 'out'],
     ], still: { lift: 8, head: 1.5, face: 'smile2' }, stillMs: 700 };
   },
@@ -523,19 +526,26 @@ const DR_BODY_PERF = {
     );
     return { beats, land, still: { [CH]: top, face: 'laugh', brow: 'up' }, stillMs: 1000 };
   },
-  // A wink with a little "hey you" of the hand (the cutout arm, kept small).
+  // A wink and a thumbs-up (2026-10-26: the "hey you" hand was the flat cutout arm held
+  // straight out for most of a second). His left eye winks (the viewer's right), so the
+  // thumb comes up on that side, the drawn rise then the thumb (mirrored), a tip of the head.
   wink(mode){
     const R = drBodyRand, j = (ms, k) => Math.round(ms * (1 + (R() * 2 - 1) * (k || .14))), k = mode === 'focused' ? .6 : 1;
-    // His left eye winks (the viewer's right), so the right arm and a tip that way.
     return { beats: [
-      [j(140), { head: -1 * k, face: 'smile1', aR: -4 * k }, 'out'],
-      [j(220), { head: 3.5 * k, lean: .8 * k, aR: 22 * k, fR: 46 * k, face: 'wink1' }, 'snap'],
+      [j(130), { head: -1 * k, face: 'smile1', aR: -4 * k, fR: 10 * k }, 'out'],
+      [0, { frameR: 'thumbs-rise', fy: 14 }],                                                       // the fist comes up
+      [j(80), { fy: 4, head: 1.5 * k }, 'out'],
+      [0, { frameR: 'thumbs-up', fy: 10 }],                                                         // the thumb
+      [j(200), { fy: 0, head: 3.5 * k, lean: .8 * k, lift: -3 * k, face: 'wink1' }, 'snap'],
       [j(60), { face: 'wink' }, 'linear'],
-      [j(520, .2), { fR: 54 * k, head: 4 * k }, 'inOut'],
-      [j(60), { face: 'wink1' }, 'linear'],
-      [j(380), { aR: 0, fR: 0, head: -.4 * k, lean: 0, face: 'smile' }, 'spring'],
-      [j(300), { head: 0, face: 'rest' }, 'out'],
-    ], still: { head: 3.5, aR: 22, fR: 50, face: 'wink' }, stillMs: 900 };
+      [j(480, .2), { head: 4 * k, lift: 0, frot: 2 * k }, 'inOut'],
+      [j(60), { face: 'wink1', frot: 0 }, 'linear'],
+      [j(160), { head: 1 * k, lean: 0, face: 'smile' }, 'out'],
+      [0, { frameR: 'thumbs-rise', fy: 4 }],                                                        // down the way it came
+      [j(100), { fy: 14 }, 'in'],
+      [0, { frameR: '', fy: 0, aR: 0, fR: 12 * k }],
+      [j(320), { fR: 0, head: 0, face: 'rest' }, 'spring'],
+    ], still: { head: 3.5, frameR: 'thumbs-up', face: 'wink' }, stillMs: 900 };
   },
   // Not sure: the drawn palms open outward from his sides, shoulders up, a doubtful face.
   shrug(mode){

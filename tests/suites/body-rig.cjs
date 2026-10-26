@@ -154,7 +154,8 @@ const SAMPLE = () => {
   ok(/shrug-[lr]/.test(seen('shrug')), 'shrug: the drawn palms ' + seen('shrug'));
   ok(lively.cheer.framesSeen.includes('crouch-l') && lively.cheer.framesSeen.includes('jump-l') && lively.bounce.framesSeen.includes('crouch-l') && lively.bounce.framesSeen.includes('jump-l'), 'cheer and bounce: the drawn crouch, then the drawn jump with the feet tucked ' + seen('bounce'));
   ok(/thumbs-up-[lr]/.test(seen('bounce')), 'bounce: the drawn thumbs-up from the top of the hop ' + seen('bounce'));
-  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.wink.frameEverShown && !lively.doze.frameEverShown, 'ack, wink, the walk and the doze use the cutout pieces only');
+  ok(!lively.ack.frameEverShown && !lively.walk.frameEverShown && !lively.doze.frameEverShown, 'ack (a nod), the walk and the doze use the cutout pieces only');
+  ok(/thumbs-rise-r/.test(seen('wink')) && /thumbs-up-r/.test(seen('wink')), 'wink: the thumb comes up on the winking side, drawn (mirrored), not a flat arm held out ' + seen('wink'));
   // The doze: eyes closed on the sleep frame, the head sunk, then awake and back.
   const dz = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(3); b.perform('doze', { done: () => { res(out); } }); drBodySeed(null);
     const out = { sleepMs: 0, maxLift: 0, last: performance.now() }; const tick = () => { const now = performance.now(); if(b.pose.face === 'sleep') out.sleepMs += now - out.last; out.last = now; out.maxLift = Math.max(out.maxLift, b.pose.lift); if(b.busy()) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }));

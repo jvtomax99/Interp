@@ -643,3 +643,7 @@ frame; Jose drew the in-betweens the same day (`think-start`,
 out of `think`, the `thinking` state and `wince`. The clipboard keeps its
 prop pop (the board appears in his hands at his hips). Prompts for a
 review by an animator: `docs/art/dr-smiley-body/prompts-fix.md`.
+The nod (`ack`) is now his head and shoulders only, down and up twice
+(its open hand swung one flat cutout arm out sideways and held it); the
+wink brings the thumb up on the winking side (`thumbs-rise`, `thumbs-up`,
+mirrored) instead of holding the flat arm straight out.
