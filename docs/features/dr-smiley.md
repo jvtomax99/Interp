@@ -636,7 +636,10 @@ way down mirrors it); his eyes lead a move and are open at its start (a
 held half-blink at the start of greet, think, read and shrug read as
 sleepy); the cheer's arms tip (`frot`) so they are not twins, its eyes
 open at the top, one pump fewer; the bounce's thumb rise now shows (two
-zero-length beats in a row had skipped it). Still open: the whole-torso
-drawings (think, wince, the clipboard) can't be swung, so their arms still
-go from his sides to his chest in one frame; the fix is an in-between
-drawing each. Prompts: `docs/art/dr-smiley-body/prompts-fix.md`.
+zero-length beats in a row had skipped it). The whole-torso drawings
+can't be swung, so their arms went from his sides to his chest in one
+frame; Jose drew the in-betweens the same day (`think-start`,
+`wince-start`, round two in `prompts-animation.md`), now the way in and
+out of `think`, the `thinking` state and `wince`. The clipboard keeps its
+prop pop (the board appears in his hands at his hips). Prompts for a
+review by an animator: `docs/art/dr-smiley-body/prompts-fix.md`.

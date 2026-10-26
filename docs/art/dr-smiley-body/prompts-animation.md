@@ -85,6 +85,9 @@ them: a fresh ChatGPT chat each, upload `body-master.png`, paste the arm
 opening and the pose line as one message, send the result back with its
 file name.
 
+Done the same day: both came back within 1 to 4 px of the master, the
+closest yet, and are in (`think-start`, `wince-start`).
+
 | Move | File | Pose line (after the opening) |
 |---|---|---|
 | Think, way in | `think-start.png` | Both arms just starting to move in from his sides, a third of the way to a thinking pose. His right arm (on the picture's left): the elbow bent to about 60 degrees and still close to his side, the forearm angled up and in, the hand at the height of his lowest coat button, in front of the coat, fingers loosely curled with the index finger just starting to straighten. His left arm (on the picture's right): the elbow bent about 45 degrees, the forearm swinging in toward his stomach, the hand just inside the coat's front edge at hip height, relaxed and open, palm facing his body. Both hands are in front of the coat. The shoulders stay level and relaxed. |

@@ -102,7 +102,7 @@ const SAMPLE = () => {
   ok(P.__failed.length === 0, 'every layer and script arrives ' + JSON.stringify(P.__failed));
   await P.evaluate(SAMPLE);
   const layers = await P.evaluate(() => [...document.querySelectorAll('svg.db image')].map(i => i.getAttribute('href').split('/').pop()));
-  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp', 'pose-point-load.webp', 'pose-point-reach.webp', 'pose-think-rise.webp', 'pose-think-tap.webp', 'pose-clipboard-low.webp', 'pose-clipboard-mid.webp'];
+  const poseFiles = ['pose-wave.webp', 'pose-fist-pump.webp', 'pose-think.webp', 'pose-shrug.webp', 'pose-thumbs-up.webp', 'pose-clipboard.webp', 'pose-point.webp', 'pose-point-load.webp', 'pose-point-reach.webp', 'pose-think-rise.webp', 'pose-think-tap.webp', 'pose-clipboard-low.webp', 'pose-clipboard-mid.webp', 'pose-think-start.webp', 'pose-wince-start.webp'];
   ok(layers.length === 61 && ['head.webp', 'face.webp', 'brow-l.webp', 'brow-r.webp', 'body.webp', 'leg-l.webp', 'leg-r.webp', 'arm-upper-l.webp', 'arm-fore-l.webp', 'arm-upper-r.webp', 'arm-fore-r.webp'].every(f => layers.includes(f))
      && poseFiles.every(f => layers.filter(x => x === f).length === 2) && ['pose-crouch.webp', 'pose-jump.webp'].every(f => layers.filter(x => x === f).length === 1),
      'sixty-one layers: the app\'s head, face strip and brows, the body and its trimmed copy, two armpit gussets, two legs, four arm pieces, the twenty-two drawn arm poses twice each (as drawn and mirrored), the three leg plates once ' + layers.join(' '));

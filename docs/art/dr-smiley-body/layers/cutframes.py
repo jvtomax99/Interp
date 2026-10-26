@@ -125,6 +125,11 @@ POSES['clipboard-mid']=dict(region=None, offset=(5,2), torso=1040, keep=(428,100
 POSES['shrug-half']=dict(region=lambda: (yy>240)&(yy<1058)&~((yy<590)&(xx>385)&(xx<727)), offset=(6,6), arm=True, bothseams=True)
 POSES['thumbs-rise']=dict(region=lambda: (xx>230)&(xx<505)&(yy>560)&(yy<900)&~((yy<590)&(xx>365)), offset=(6,6), band=True, match=True)   # its scrubs ran a brighter blue: a stripe beside his own
 POSES['wince-arms']=dict(region=None, offset=(6,6), torso=880, fadepx=12, dropblue=(470,560,650,900))   # ends just under the cuffs on a short fade (its coat's front edge sits 10 px off the master's: a long fade smudged it over his scrubs); between the lapels his own scrubs (its neckline has a trim his has not, a double V, and its blue ran brighter)
+# Round two (2026-10-26, prompts-animation.md): the way in to thinking and to the wince, both
+# hands a third of the way in from his sides, cut whole like the drawings they lead to. Drawn
+# within 1 to 4 px of the master (closer than any before).
+POSES['think-start']=dict(region=None, offset=(1,1), torso=1010)   # its lower hand reaches 970: the fade goes below it
+POSES['wince-start']=dict(region=None, offset=(1,2), torso=930, fadepx=16)   # no dropblue: its hands are apart, so taking out the scrubs between the lapels split him in two and only one side was kept
 # the body piece's top edge per column (its shoulder line), 0 where it has none (no rule there)
 TOP=np.where((bodyA>.5).any(0),(bodyA>.5).argmax(0),0)   # used beside the neck only: at the neck its top is the scrubs' V, and the clipboard stands in front of it
 # python3 -I cutframes.py point-load point-reach: cut only those (the others' boxes kept from poses.json)
@@ -359,7 +364,7 @@ def piece(k):
     im=Image.open(OUT+k+'.webp').convert('RGBA'); return im,bx[k]
 head=Image.open(OUT+'head.webp').convert('RGBA'); s=rig['head']['scale']; hx,hy=rig['head']['at']
 head=head.resize((round(480*s),round(600*s)),Image.LANCZOS)
-HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'point-load':['l'],'point-reach':['l'],'think':['l','r'],'think-rise':['l','r'],'think-tap':['l','r'],'clipboard-low':['l','r'],'clipboard-mid':['l','r'],'clipboard':['l','r'],'shrug':['l','r'],'thumbs-up':['l'],'shrug-half':['l','r'],'thumbs-rise':['l'],'wince-arms':['l','r']}
+HIDES={'cheer-load':['l','r'],'cheer-mid':['l','r'],'cheer-up':['l','r'],'wave':['l'],'wave-rise':['l'],'wave-in':['l'],'wave-out':['l'],'fist-pump':['l'],'point-load':['l'],'point-reach':['l'],'think':['l','r'],'think-rise':['l','r'],'think-tap':['l','r'],'clipboard-low':['l','r'],'clipboard-mid':['l','r'],'clipboard':['l','r'],'shrug':['l','r'],'thumbs-up':['l'],'shrug-half':['l','r'],'thumbs-rise':['l'],'wince-arms':['l','r'],'think-start':['l','r'],'wince-start':['l','r']}
 def compose(name=None):
     out=Image.new('RGBA',(W,H),(255,255,255,255))
     legs=name in LEGS
@@ -372,7 +377,7 @@ def compose(name=None):
     if name and not legs:
         f=Image.open(OUT+'pose-'+name+'.webp').convert('RGBA'); b=res[name]['box']; out.alpha_composite(f,(b[0],b[1]))
     return out
-names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','point-load','point-reach','think-rise','think','think-tap','clipboard-low','clipboard-mid','clipboard','shrug-half','shrug','thumbs-rise','thumbs-up','wince-arms','crouch','legs-land','jump']
+names=['rest','cheer-load','cheer-mid','cheer-up','wave-rise','wave-in','wave','wave-out','fist-pump','point-load','point-reach','think-start','think-rise','think','think-tap','clipboard-low','clipboard-mid','clipboard','shrug-half','shrug','thumbs-rise','thumbs-up','wince-start','wince-arms','crouch','legs-land','jump']
 sheet=Image.new('RGB',(len(names)*470,780),(255,255,255)); d=ImageDraw.Draw(sheet)
 for i,n in enumerate(names):
     sheet.paste(compose(None if n=='rest' else n).convert('RGB').crop((60,0,1040,1470)).resize((460,690),Image.LANCZOS),(i*470+5,4)); d.text((i*470+200,740),n,fill=(21,28,44))

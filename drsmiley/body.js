@@ -67,6 +67,10 @@ const DR_BODY = {
     // held pose, and the tap (the finger lifted off the chin).
     think:       { box: [329, 559, 417, 401], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     'think-rise': { box: [272, 519, 506, 441], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
+    // Round two (2026-10-26): the way in to the rise, both hands a third of the way in from his
+    // sides, the finger just starting to straighten; before it the arms jumped from his sides to
+    // his chest in one frame. Cut whole like the others.
+    'think-start': { box: [264, 570, 543, 440], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     'think-tap': { box: [336, 558, 397, 402], arms: ['L', 'R'], layer: 'front', pivot: [353, 630] },
     shrug:       { box: [97, 585, 889, 247], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     // The fourth chat's drawings (2026-10-25): the shrug's way in (both elbows at his sides,
@@ -77,6 +81,8 @@ const DR_BODY = {
     'shrug-half': { box: [224, 587, 638, 367], arms: ['L', 'R'], layer: 'back', pivot: [556, 630] },
     'thumbs-rise': { box: [322, 574, 199, 342], arms: ['L'], layer: 'front', pivot: [353, 630] },
     'wince-arms': { box: [346, 574, 389, 306], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
+    // Its way in (round two, 2026-10-26): elbows tucked, hands at his hips curling, shoulders up a touch.
+    'wince-start': { box: [296, 570, 495, 360], arms: ['L', 'R'], layer: 'front', pivot: [556, 760] },
     // The cheer's drawings (prompts-animation.md, 2026-10-24): both arms, behind the coat.
     // The load (fists pulled low by his hips, about to throw them up), the rise (fists
     // at shoulder height, elbows out) and the V (both fists above his head).
@@ -459,6 +465,8 @@ const DR_BODY_PERF = {
     const A = 'a' + side, F = 'f' + side, look = 'lookU' + O;
     return { beats: [
       [j(160), { lean: -s * 1.2 * k, head: -s * 2 * k, sy: 1 - .012 * k, face: 'lookU' + O, brow: 'focused' }, 'out'],   // a breath in, the eyes lead (a cutout arm would only swing out sideways)
+      [0, { [FR]: 'think-start' }],                                                                                 // the hands start in from his sides
+      [j(90), { head: s * .5 * k, lean: -s * .5 * k }, 'out'],
       [0, { [FR]: 'think-rise' }],                                                                                  // the rise drawn: the hand comes up in front
       [j(120), { head: s * 1.5 * k, lean: 0, sy: 1, face: 'blink1' }, 'out'],
       [0, { [FR]: 'think' }],                                                                                         // finger to the chin
@@ -470,7 +478,9 @@ const DR_BODY_PERF = {
       [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                                                    // aha
       [j(120), { lift: 4 * k, face: 'smile1', brow: 'rest' }, 'out'],
       [0, { [FR]: 'think-rise' }],                                                                                    // down the way it came
-      [j(110), { head: -s * .5 * k }, 'in'],
+      [j(100), { head: -s * .5 * k }, 'in'],
+      [0, { [FR]: 'think-start' }],
+      [j(90), {}, 'in'],
       [0, { [FR]: '', ['f' + O]: 10, [F]: 16 }],                                                                      // into the cutout arms, hanging, elbows still a little bent
       [j(320), { ['f' + O]: 0, [F]: 0, head: 0, lift: 0, lean: 0, face: 'rest' }, 'spring'],
     ], still: { [FR]: 'think', head: s * 5, face: look, brow: 'focused' }, stillMs: 1200 };
@@ -636,11 +646,15 @@ const DR_BODY_PERF = {
     const s = R() < .5 ? -1 : 1;
     return { beats: [
       [j(60), { face: 'shut' }, 'linear'],
+      [0, { frameL: 'wince-start' }],                                                                      // the flinch starts: elbows in, hands curling at his hips
+      [j(70), { sy: 1 - .012 * k, lift: 4 * k, head: s * 2 * k }, 'out'],
       [0, { frameL: 'wince-arms' }],                                                                       // the arms pulled in, drawn (as drawn only: it carries his coat)
       [j(200), { sy: 1 - .03 * k, sx: 1 + .015 * k, lift: 9 * k, head: s * 5 * k, lean: -s * 1 * k, face: 'worried', brow: 'caring' }, 'snap'],
       [j(650, .2), { head: s * 5.5 * k }, 'inOut'],
+      [0, { frameL: 'wince-start' }],                                                                      // and out the same way
+      [j(110), { sy: 1 - .015 * k, sx: 1 + .007 * k, lift: 5 * k, head: s * 3 * k }, 'out'],
       [0, { frameL: '' }],
-      [j(420), { sy: 1, sx: 1, lift: 0, head: -s * .5 * k, lean: 0, face: 'smile1' }, 'spring'],
+      [j(400), { sy: 1, sx: 1, lift: 0, head: -s * .5 * k, lean: 0, face: 'smile1' }, 'spring'],
       [j(320), { head: 0, face: 'rest', brow: 'rest' }, 'out'],
     ], still: { frameL: 'wince-arms', lift: 9, head: s * 5, face: 'worried', brow: 'caring' }, stillMs: 900 };
   },
@@ -733,8 +747,10 @@ const DR_BODY_STATES = {
     asDrawn: true,
     still: c => ({ [c.FR]: 'think', head: c.s * 5, face: 'lookU' + c.O, brow: 'focused' }),
     enter: c => { const { k, s, j, O, FR } = c; return [
-      [j(260), { lean: -s * 1.2 * k, head: -s * 2 * k, face: 'blink2', brow: 'focused' }, 'out'],
-      [0, { [FR]: 'think-rise', frot: 0 }],
+      [j(260), { lean: -s * 1.2 * k, head: -s * 2 * k, face: 'lookU' + O, brow: 'focused' }, 'out'],   // the eyes lead
+      [0, { [FR]: 'think-start', frot: 0 }],
+      [j(90), { head: s * .5 * k, lean: -s * .5 * k }, 'out'],
+      [0, { [FR]: 'think-rise' }],
       [j(120), { head: s * 1.5 * k, lean: 0 }, 'out'],
       [0, { [FR]: 'think' }],
       [j(340), { head: s * 5 * k, lean: s * .8 * k, lift: 2 * k, face: 'lookU' + O }, 'spring'],
@@ -752,7 +768,9 @@ const DR_BODY_STATES = {
       [j(90), { face: 'rest', brow: 'up', lift: -8 * k }, 'snap'],                        // aha
       [j(120), { lift: 4 * k, face: 'smile1', brow: 'rest' }, 'out'],
       [0, { [FR]: 'think-rise' }],                                                        // down the way it came
-      [j(110), { head: -s * .5 * k }, 'in'],
+      [j(100), { head: -s * .5 * k }, 'in'],
+      [0, { [FR]: 'think-start' }],
+      [j(90), {}, 'in'],
       [0, { [FR]: '', fL: 14, fR: 14 }],
       [j(320), { fL: 0, fR: 0, head: 0, lift: 0, lean: 0, face: 'rest' }, 'spring'],
     ]; },
