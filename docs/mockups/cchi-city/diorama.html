@@ -183,8 +183,15 @@ function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.8, 8), M(0x2c2
 for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }
 for (let x = -18; x <= 18; x += 6) lamp(x, 13.4);
 // trees: the big street trees in front, evergreens and red maples along the drive
+// cherry blossoms (Jose, 2026-10-26: "cherry blossom trees somewhere"): pink crowns on a dark trunk; BLOSSOMS
+// keeps where they stand, for the falling petals in the live campus
+const BLOSSOMS = [];
 function tree(x, z, s=1, kind='round'){
-  add(new THREE.CylinderGeometry(0.09*s,0.12*s,0.6*s,6), M(0x4a3426), x, 0.5+0.3*s, z);
+  add(new THREE.CylinderGeometry(0.09*s,0.12*s,0.6*s,6), M(kind === 'blossom' ? 0x3a2a26 : 0x4a3426), x, 0.5+0.3*s, z);
+  if (kind === 'blossom'){ BLOSSOMS.push([x, z, s]);
+    for (const [dx,dy,dz,r,c] of [[0,1.2,0,0.8,0xf4a7c0],[0.5,1.0,0.25,0.55,0xf9c4d4],[-0.45,1.05,-0.2,0.58,0xee8fb0],[0.1,1.6,0.05,0.5,0xfbd6e2],[-0.2,1.35,0.4,0.42,0xffe4ec]])
+      add(new THREE.IcosahedronGeometry(r*s, 1), new THREE.MeshStandardMaterial({ color:c, roughness:0.85, flatShading:true, envMapIntensity:0.1, emissive:0x3a0d1c, emissiveIntensity:0.25 }), x+dx*s, 0.5+dy*s, z+dz*s);
+    return; }
   if (kind === 'cone'){ for (const [y,r,h] of [[1.0,0.75,1.1],[1.55,0.58,0.95],[2.05,0.4,0.8]]) add(new THREE.ConeGeometry(r*s, h*s, 9), new THREE.MeshStandardMaterial({ color:0x2f6447, roughness:0.9, flatShading:true, envMapIntensity:0.1 }), x, 0.5+y*s, z); }
   else { const col = kind === 'red' ? [0x9c3b45,0xb44a50,0x863241] : [0x3c7a52,0x4a8c5e,0x356c49];
     for (const [dx,dy,dz,r,i] of [[0,1.15,0,0.85,0],[0.42,0.95,0.2,0.6,1],[-0.4,1.0,-0.15,0.62,2],[0.05,1.55,0.05,0.55,1]]){
@@ -422,9 +429,9 @@ for (const [dx,dz] of [[-0.8,0.4],[0.6,-0.7],[0.9,0.8]]) add(new THREE.CylinderG
 for (let i=0;i<7;i++) add(new THREE.CylinderGeometry(0.32,0.32,0.06,12), M(0xb0aab8), -12.2 + i*0.15, 0.22, -8.6 - i*0.62, false);
 for (const [x,z,ry] of [[-17.9,-12.6,1.57],[-15,-14.5,0]]) { box(1.2, 0.08, 0.4, M(0x8a5a3c), x, 0.55, z, 0.02).rotation.y = ry; }
 for (let i=0;i<14;i++){ const a = i/14*Math.PI*2; box(0.2,0.16,0.2, M([0xe0414b,0xf2c14e,0xf28c28,0xc9583a][i%4]), -15 + Math.cos(a)*2.55, 0.32, -11.6 + Math.sin(a)*2.55, 0.06, false); }
-for (const [x,z,s,k] of [[-18.4,-15.6,0.9,'red'],[-11.8,-15.2,0.8,'round'],[-18.6,-8.2,0.8,'red'],[-11,-6.6,0.7,'red'],[-19,-18.8,0.8,'cone'],[-15,-16.4,0.7,'red'],
+for (const [x,z,s,k] of [[-18.4,-15.6,0.9,'blossom'],[-11.8,-15.2,0.8,'round'],[-18.6,-8.2,0.8,'blossom'],[-11,-6.6,0.8,'blossom'],[-19,-18.8,0.8,'cone'],[-15,-16.4,0.8,'blossom'],
     [17.2,-9.6,0.9,'red'],[18.6,-4.6,0.8,'red'],[19,-21.5,0.7,'red'],[-1.2,-23.6,0.6,'red'],[4.6,-23.4,0.6,'red'],
-    [-17.2,4.8,0.8,'red'],[-19,0.8,0.7,'round'],[-13,18.2,0.6,'red'],[0.6,18.2,0.6,'red'],[13.4,18.2,0.6,'red']]) tree(x, z, s, k);
+    [-17.2,4.8,0.8,'red'],[-19,0.8,0.7,'round'],[-13,18.2,0.7,'blossom'],[-7.6,18.3,0.6,'blossom'],[0.6,18.2,0.7,'blossom'],[7.2,18.3,0.6,'blossom'],[13.4,18.2,0.7,'blossom']]) tree(x, z, s, k);
 // a low hedge of round bushes along the back edge
 for (let x = -19; x <= 19; x += 1.15) add(new THREE.IcosahedronGeometry(0.42 + ((x*7)%3+3)%3*0.06, 1), new THREE.MeshStandardMaterial({ color:[0x3c7a52,0x4a8c5e,0x356c49][Math.round(x*3+60)%3], roughness:0.9, flatShading:true, envMapIntensity:0.1 }), x, 0.55, -25.6);
 const WALKS = [

@@ -74,7 +74,7 @@ function setHour(h){ const hh = h < 5 ? h + 24 : h; let i = 0; while (i < KEYS.l
   document.documentElement.style.setProperty('--sky', `linear-gradient(${mix(A.bg[0],B.bg[0],f)}, ${mix(A.bg[1],B.bg[1],f)} 55%, ${mix(A.bg[2],B.bg[2],f)})`);
   GLOWS.forEach(g => { g.material.opacity = Math.min(1, n*1.4 + (hh > 17 && hh < 21 ? 0.6 : 0)); g.visible = g.material.opacity > 0.02; });
   const lit = n > 0.3; if (lit !== litNow){ litNow = lit; for (const k in LITM) LITM[k].forEach(m => m.material = lit ? m.userData.litM : m.userData.dark); }
-  shadowsDirty();
+  shadowsDirty(); hourNow = h;
   const hr = Math.floor(h) % 24, mi = Math.round((h % 1) * 60) % 60; $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
 
 // ---- the living things ----
@@ -98,8 +98,28 @@ function life(t){ const loop = (dur, off=0) => ((t*1000 + off) % dur) / dur;
   IDLE.forEach((o, i) => o.set(((t + i*1.7) % 7) < 1.2 ? 1 : 0));
   HELI.position.set(PAD.x + Math.cos(t*0.25)*5, PAD.y + 3 + Math.sin(t*0.7)*0.4, PAD.z + Math.sin(t*0.25)*5); HELI.rotation.y = -t*0.25; HELI.userData.rotor.rotation.y = t*18;
   BIRDS.position.set(-30 + ((t*2.2) % 60), 14 + Math.sin(t*0.5), -10); BIRDS.rotation.y = Math.PI/2; flap(BIRDS, (t*4|0) % 2);
-  waveFlags(t*3); fountain(t);
+  waveFlags(t*3); fountain(t); petalsAt(t);
   CLOUDS.forEach((c, i) => c.position.y += Math.sin(t*0.4 + i)*0.004); }
+
+// ---- petals drifting down from the blossoms ----
+const PN = 160, PET = new Float32Array(PN*3), PD = [];
+for (let i = 0; i < PN; i++){ const [x, z, s] = BLOSSOMS[i % BLOSSOMS.length]; PD.push([x, z, s, (i*0.618) % 1, (i*2.399) % 6.283]); }
+const petals = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(PET, 3)), new THREE.PointsMaterial({ color:0xffc6d8, size:0.16, transparent:true, opacity:0.95, depthWrite:false }));
+scene.add(petals);
+function petalsAt(t){ for (let i = 0; i < PN; i++){ const [x, z, s, ph, a] = PD[i], u = (t*0.09 + ph) % 1, h = 0.5 + 1.9*s;
+    PET[i*3] = x + Math.cos(a)*0.9*s + Math.sin(t*1.3 + a)*0.35 + u*1.6; PET[i*3+1] = 0.3 + h*(1 - u); PET[i*3+2] = z + Math.sin(a)*0.9*s + Math.cos(t*1.1 + a)*0.3; }
+  petals.geometry.attributes.position.needsUpdate = true; }
+petalsAt(0);
+
+// ---- the sun: a big smiling face in the sky behind the campus, on your clock; at night a sleepy moon ----
+const SUN = $('sun'); let hourNow = 18.5;
+function sunAt(){ const h = hourNow, day = h >= 6 && h < 19.75, e = day ? Math.sin(Math.PI * (h - 6) / 13.75) : 0.75;
+  SUN.classList.toggle('is-night', !day);
+  const camAz = Math.atan2(cam.position.x - controls.target.x, cam.position.z - controls.target.z), sunAz = day ? -1.2 + (h - 6) / 13.75 * 2.4 : 0.6;
+  const rel = Math.atan2(Math.sin(sunAz - camAz + Math.PI), Math.cos(sunAz - camAz + Math.PI)), W = innerWidth, H = innerHeight;
+  const x = W*0.5 + Math.sin(rel)*W*0.42, y = H*(0.36 - e*0.22) + Math.cos(controls.getPolarAngle())*H*0.05, s = 0.8 + 0.25*e;
+  SUN.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) scale(${s.toFixed(3)})`; }
+function giggle(){ SUN.classList.remove('giggle'); void SUN.offsetWidth; SUN.classList.add('giggle'); }
 
 // ---- the camera: drag to spin, pinch to zoom ----
 cam.clearViewOffset();
@@ -125,7 +145,8 @@ function pick(k){ picked = k === picked ? null : k;
 let down = null;
 renderer.domElement.addEventListener('pointerdown', e => { down = { x:e.clientX, y:e.clientY, t:performance.now() }; });
 renderer.domElement.addEventListener('pointerup', e => { if (!down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), quick = performance.now() - down.t < 350; down = null;
-  if (moved > 8 || !quick) return; const r = renderer.domElement.getBoundingClientRect(); ndc.set((e.clientX - r.left)/r.width*2 - 1, -(e.clientY - r.top)/r.height*2 + 1); ray.setFromCamera(ndc, cam);
+  if (moved > 8 || !quick) return; { const sr = SUN.getBoundingClientRect(); if (e.clientX > sr.left && e.clientX < sr.right && e.clientY > sr.top && e.clientY < sr.bottom){ giggle(); return; } }
+  const r = renderer.domElement.getBoundingClientRect(); ndc.set((e.clientX - r.left)/r.width*2 - 1, -(e.clientY - r.top)/r.height*2 + 1); ray.setFromCamera(ndc, cam);
   const hits = ray.intersectObjects(Object.keys(BOX).map(k => BG[k]), true).filter(h => h.object.visible);
   let k = null; for (const h of hits){ let o = h.object; while (o && !(o.userData.key in BOX)) o = o.parent; if (o){ k = o.userData.key; break; } }
   pick(k); });
@@ -162,7 +183,7 @@ function frame(now){ const dt = now - last; last = now; frames++; acc += dt; wor
   for (const k in BOX){ const L = LIFT[k], goal = k === picked ? 1.6 : 0; L.v += (goal - L.y)*0.12; L.v *= 0.72; L.y += L.v; if (Math.abs(L.y - BG[k].position.y) > 0.002) shadowsDirty(); BG[k].position.y = L.y; }
   if (ring.visible) ring.material.opacity = 0.6 + Math.sin(t*4)*0.3;
   if (follow && frames === 1) setHour(nowH());
-  controls.update(); renderer.render(scene, cam); badges(); requestAnimationFrame(frame); }
+  controls.update(); renderer.render(scene, cam); badges(); sunAt(); requestAnimationFrame(frame); }
 life(0); $("draws").textContent = `${draws} draws`;
 document.body.classList.add('ready');
 requestAnimationFrame(frame);
