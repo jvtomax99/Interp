@@ -98,6 +98,24 @@ the board itself appears from nowhere in the first frame, the way a cartoon
 pulls a prop from off screen. A drawing can't fix that without a pocket for
 it to come from, so it stays.
 
+## Round three: the drawings that finish him (2026-10-26)
+
+Jose: "ask for as many drawings as you need to get this animation perfected."
+After the guide pass, four drawings would fix what is left; nothing else on
+the list would be seen often enough to earn its risk of drift. The face
+snaps are fixed in code (the body walks the head's in-between faces now),
+so no face drawings. Same way to run them: a fresh ChatGPT chat each,
+upload `body-master.png`, paste the opening and the pose line as one
+message, send the result back with its file name. The first, second and
+fourth use the arm opening, the third the leg opening.
+
+| Move | File | Pose line (after the opening) |
+|---|---|---|
+| Clipboard, the reach (its way in: today the board appears in his hands from nowhere) | `clipboard-reach.png` | His right arm (on the picture's left) reaching down and back beside his right hip, the elbow bent, the hand just behind the coat's side edge at hip height, fingers closing on the top edge of a plain white clipboard that is mostly hidden behind the coat: only its top corner and the metal clip show, beside his hip, tilted about 30 degrees. His left arm (on the picture's right) hangs relaxed at his side, exactly as in the original. |
+| Listening (hands behind his back, leaning in a touch) | `listen-back.png` | Both arms behind his back: the upper arms go straight down and back from the shoulders, the forearms meet behind him at the waist, so from the front only the upper arms show at his sides, ending at the elbows just below the coat's pockets, and no hands or forearms are visible. The coat's front hangs exactly as in the original. |
+| Weight on one leg (the idle shift of weight, seen all day on Home) | `legs-shift.png` | His weight on his right leg (on the picture's left): that leg straight, the hip above it pushed about 15 px outward, the foot flat and exactly where it is. His left leg (on the picture's right) relaxed, the knee bent slightly forward, the heel lifted about 20 px off the floor and the toe resting on it, the foot a little closer to the other. His shoes stay the same blue and shape. |
+| Doze (slumped, for the resting state's nap) | `doze-slump.png` | Both shoulders dropped and rolled forward about 25 px, both arms hanging loosely a little in front of his sides, the elbows slightly bent, the hands relaxed and turned inward with the fingers curled, the wrists about 30 px lower than in the original. The coat sags with the shoulders but keeps its length. |
+
 ## The limit of this method
 
 In these drawings his torso and head never move. So his whole body cannot

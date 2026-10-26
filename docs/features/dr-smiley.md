@@ -672,4 +672,12 @@ meet the half-shrug and springs open, sinks the same way on the way out,
 its eyes lead with a "hmm" up and away, and its face steps back through
 half-lidded instead of snapping from doubt to rest; the clipboard's "got
 it" nod is 20 px, not 8 (subtle read as nothing). The point's load-to-reach
-snap is left: the app never plays `point`.
+snap is left: the app never plays `point`. His body's face now acts the way his head's
+does: a beat that names a far face walks there through the in-betweens
+(`DR_BODY_FACE_BACK`, a copy of `DR_FACE_BACK` so the rig stands alone;
+`drBodyFacePath`, 40 ms a step, at most four), so doubt goes to rest
+through the wink's first frame and a smile to a laugh through `laugh1`,
+`laugh2`; Still swaps at once, and a stop lands the walk on its target.
+Round three of the drawings (`prompts-animation.md`): the clipboard's
+reach, hands behind his back for listening, weight on one leg for the idle
+shift, a slump for the doze.

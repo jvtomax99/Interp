@@ -126,6 +126,44 @@ const DR_BODY_FADE = 0;
 const DR_BODY_FACES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile', 'laugh1', 'laugh2', 'laugh', 'laughB', 'lookL', 'lookR', 'love', 'sleep',
   'halfL', 'halfR', 'lookU', 'lookD', 'lookUL', 'lookUR', 'lookDL', 'lookDR', 'surprised', 'sad', 'worried', 'doubt'];
 const DR_BODY_FACE_W = 151, DR_BODY_FACE_H = 111;
+/* Faces act, they never snap (2026-10-26, the animation guide): a beat that names a
+   far face walks there through the in-betweens, 40 ms each, the way his head does
+   (DR_FACE_BACK in index.html, copied here so the rig stands alone): doubt to rest
+   goes through the wink's first frame, smile to laugh through smile2, laugh1, laugh2. */
+const DR_BODY_FACE_BACK = {
+  blink1: 'rest', blink2: 'blink1', shut: 'blink2', sleep: 'shut',
+  wink1: 'rest', wink2: 'wink1', wink: 'wink2',
+  smile1: 'rest', smile2: 'smile1', smile: 'smile2',
+  laugh1: 'smile2', laugh2: 'laugh1', laugh: 'laugh2', laughB: 'laugh',
+  love: 'smile2',
+  halfL: 'rest', halfR: 'rest', lookL: 'halfL', lookR: 'halfR', lookU: 'rest', lookD: 'rest',
+  lookUL: 'halfL', lookUR: 'halfR', lookDL: 'halfL', lookDR: 'halfR',
+  surprised: 'rest', sad: 'blink1', worried: 'halfL', doubt: 'wink1',
+};
+const DR_BODY_FACE_NEAR = (() => {
+  const n = {};
+  const link = (a, b) => { (n[a] = n[a] || new Set()).add(b); (n[b] = n[b] || new Set()).add(a); };
+  Object.entries(DR_BODY_FACE_BACK).forEach(([a, b]) => link(a, b));
+  link('smile', 'laugh1'); link('laugh1', 'laughB');
+  return n;
+})();
+const drBodyFacePaths = new Map();
+// The frames between a and b (both ends excluded): the shortest walk over neighbours.
+function drBodyFacePath(a, b){
+  if(a === b || !a || !b) return [];
+  const key = a + '>' + b;
+  if(drBodyFacePaths.has(key)) return drBodyFacePaths.get(key);
+  const prev = { [a]: null }, q = [a];
+  while(q.length){
+    const x = q.shift(); if(x === b) break;
+    for(const y of DR_BODY_FACE_NEAR[x] || []) if(!(y in prev)){ prev[y] = x; q.push(y); }
+  }
+  const out = [];
+  if(b in prev){ let x = prev[b]; while(x && x !== a){ out.unshift(x); x = prev[x]; } }
+  drBodyFacePaths.set(key, out);
+  return out;
+}
+const DR_BODY_FACE_STEP = 40;
 /* Brow poses: [lift (px of the base grid, up is negative), turn (deg)] for
    [left brow, right brow] (his left is the viewer's right), from DR_BROWS'
    idea: a lift and a turn about each brow's middle, never a stretch. */
@@ -224,7 +262,7 @@ function drBody(svg, opts){
     el.foreR.setAttribute('transform', r(-clamp(p.fR, L.fore[0], L.fore[1]), B.elbow.r));
     el.legL.setAttribute('transform', `translate(0,${(-p.upL).toFixed(2)}) ${r(clamp(p.lL, L.leg[0], L.leg[1]), B.hip.l)}`);
     el.legR.setAttribute('transform', `translate(0,${(-p.upR).toFixed(2)}) ${r(-clamp(p.lR, L.leg[0], L.leg[1]), B.hip.r)}`);
-    if(p.face !== last){ setFace(p.face); last = p.face; }
+    if(p.face !== last) faceTo(p.face);
     setBrow(p.brow);
     setFrames(p);
   }
@@ -283,6 +321,15 @@ function drBody(svg, opts){
   function setFace(name){
     const i = Math.max(0, DR_BODY_FACES.indexOf(name));
     el.sheet.setAttribute('x', String(-i * DR_BODY_FACE_W));
+  }
+  // The face walks to `name` through its in-betweens (Still: at once). `last` is the
+  // frame on screen; a new target mid-walk restarts the walk from there.
+  let faceT = 0;
+  function faceTo(name){
+    clearTimeout(faceT); faceT = 0;
+    const steps = mode() === 'still' ? [] : drBodyFacePath(last, name).slice(0, 4);
+    const go = () => { const f = steps.shift(); if(f == null){ setFace(name); last = name; return; } setFace(f); last = f; faceT = setTimeout(go, DR_BODY_FACE_STEP); };
+    go();
   }
   function setBrow(name){
     const b = DR_BODY_BROWS[name] || DR_BODY_BROWS.rest, k = mode() === 'focused' ? .6 : 1;
@@ -345,6 +392,7 @@ function drBody(svg, opts){
     if(run && run.timer) clearTimeout(run.timer);
     if(raf) cancelAnimationFrame(raf);
     raf = 0; run = null; svg.classList.remove('db-acting');
+    clearTimeout(faceT); faceT = 0; if(last !== pose.face){ setFace(pose.face); last = pose.face; }   // a walk cut short lands
   }
   function perform(name, o){
     const make = DR_BODY_PERF[name];
@@ -571,8 +619,7 @@ const DR_BODY_PERF = {
       [0, { [FR]: 'shrug', fy: 70, fsx: .8 }],                                                           // the wide drawing, low and narrow
       [j(300), { fy: 0, fsx: 1, lift: -10 * k, head: s * 4 * k, face: 'doubt', brow: 'doubt', sy: 1 + .015 * k }, 'spring'],   // springs open
       [j(700, .2), { head: s * 4.5 * k }, 'inOut'],                                                      // held: the read
-      [j(50), { face: 'half' + O }, 'linear'],                                                           // the face steps back through half-lidded (never snaps)
-      [j(50), { face: 'rest', brow: 'rest' }, 'linear'],
+      [j(90), { face: 'rest', brow: 'rest' }, 'linear'],                                                 // the face walks back (drBodyFacePath: doubt, wink1, rest)
       [j(130), { fy: 70, fsx: .8, lift: -4 * k, sy: 1, face: 'smile1' }, 'out'],                           // sinks
       [0, { [FR]: 'shrug-half', fy: 0, fsx: 1 }],                                                        // and out the same way
       [j(120), { lift: 0 }, 'in'],
