@@ -646,4 +646,9 @@ review by an animator: `docs/art/dr-smiley-body/prompts-fix.md`.
 The nod (`ack`) is now his head and shoulders only, down and up twice
 (its open hand swung one flat cutout arm out sideways and held it); the
 wink brings the thumb up on the winking side (`thumbs-rise`, `thumbs-up`,
-mirrored) instead of holding the flat arm straight out.
+mirrored) instead of holding the flat arm straight out. The held states the same day:
+`listening` keeps his hands relaxed at his sides (one flat arm was held
+out sideways the whole time), leans in, nods now and then; `uncertain`
+holds the drawn `shrug-half` with the full `shrug` now and then (both
+flat arms were held stiffly out); `celebrating` keeps his eyes open while
+the fist bobs, a laugh only now and then.

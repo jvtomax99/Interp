@@ -733,18 +733,18 @@ const DR_BODY_HOLD_EXIT = c => [
   [c.j(260), { face: 'rest' }, 'out'],
 ];
 const DR_BODY_STATES = {
-  // Listening (the app's attentive): leaned in a touch, head tipped, one open
-  // hand a little forward ("go on"; the cutout arm, kept small); slow tilts,
-  // a small nod now and then.
+  // Listening (the app's attentive): leaned in, head tipped, brows up, hands relaxed at
+  // his sides (2026-10-26: one flat cutout arm held out sideways the whole time read as a
+  // paper arm), slow tilts and a nod now and then ("I see").
   listening: {
-    still: c => ({ lean: c.s * .6, head: c.s * 3, lift: -2, [c.A]: 12, [c.F]: 30, brow: 'up' }),
+    still: c => ({ lean: c.s * .8, head: c.s * 3, lift: -2, [c.F]: 8, brow: 'up' }),
     enter: c => { const { k, s, j, A, F } = c; return [
-      [j(220), { lift: -3 * k, head: -s * 1 * k, face: 'blink1' }, 'out'],
-      [j(360), { lift: -2 * k, head: s * 3 * k, lean: s * .6 * k, [A]: 12 * k, [F]: 30 * k, brow: 'up', face: 'rest' }, 'spring'],
+      [j(200), { lift: -4 * k, head: -s * .8 * k, face: 'rest', brow: 'up' }, 'out'],                     // "oh?"
+      [j(380), { lift: -2 * k, head: s * 3 * k, lean: s * .9 * k, [A]: 2 * k, [F]: 8 * k, face: 'smile1' }, 'spring'],
     ]; },
     hold: c => { const { k, s, j, A, F, beat } = c, tilt = (beat % 2 ? -.8 : 1) * s * 3 * k, b = [];
-      b.push([j(1400, .25), { lean: s * .6 * k, [A]: 12 * k, [F]: (30 + (beat % 2) * 6) * k, head: tilt, lift: (-2 + (beat % 2)) * k, brow: 'up' }, 'inOut']);
-      if(beat % 3 === 2) b.push([j(160), { lift: 5 * k, face: 'smile1' }, 'inOut'], [j(280), { lift: -2 * k }, 'spring'], [j(260), { face: 'rest' }, 'linear']);   // a nod: "I see"
+      b.push([j(1400, .25), { lean: s * (beat % 2 ? .5 : .9) * k, [A]: 2 * k, [F]: (8 + (beat % 2) * 4) * k, head: tilt, lift: (-2 + (beat % 2)) * k, brow: 'up', face: beat % 4 === 1 ? 'smile1' : 'rest' }, 'inOut']);
+      if(beat % 3 === 2) b.push([j(160), { lift: 14 * k, face: 'smile1' }, 'inOut'], [j(150), { lift: -2 * k }, 'inOut'], [j(140), { lift: 7 * k }, 'inOut'], [j(300), { lift: -1 * k, face: 'rest' }, 'spring']);   // a nod: "I see"
       if(beat % 2 === 1) b.push(...DR_BODY_BLINK('rest'));
       b.push([j(500, .3), {}, 'linear']);
       return b; },
@@ -824,11 +824,11 @@ const DR_BODY_STATES = {
       // from the cheer's V (both arms up) through its rise drawing, so the arm that
       // goes down comes down in two steps, never from overhead to his side at once
       if(!beat) b.push([0, { frameL: 'cheer-mid', frameR: '' }], [j(110), { lift: 3 * k }, 'in']);
-      b.push([j(beat ? 260 : 300), { [FR]: 'fist-pump', ['frame' + O]: '', fsw: 0, ['a' + O]: 4 * k, ['f' + O]: 10 * k, lean: -s * 1.2 * k, sy: 1 - .012 * k, sx: 1 + .006 * k, lift: 4 * k, head: s * 2 * k, face: beat % 2 ? 'laughB' : 'laugh', brow: 'up' }, beat ? 'in' : 'spring']);
+      b.push([j(beat ? 260 : 300), { [FR]: 'fist-pump', ['frame' + O]: '', fsw: 0, ['a' + O]: 4 * k, ['f' + O]: 10 * k, lean: -s * 1.2 * k, sy: 1 - .012 * k, sx: 1 + .006 * k, lift: 4 * k, head: s * 2 * k, face: ['smile', 'laugh', 'smile2', 'smile'][beat % 4], brow: 'up' }, beat ? 'in' : 'spring']);   // eyes open mostly: a laugh held with them shut read as asleep
       b.push([j(120), { frot: -4 * k }, 'linear']);
-      b.push([j(320), { sy: 1 + .008 * k, sx: 1 - .004 * k, lift: -2 * k, frot: 5 * k, head: -s * 1 * k, face: 'laugh' }, 'spring']);
+      b.push([j(320), { sy: 1 + .008 * k, sx: 1 - .004 * k, lift: -2 * k, frot: 5 * k, head: -s * 1 * k, face: beat % 4 === 1 ? 'laughB' : 'smile' }, 'spring']);
       b.push([j(380), { sy: 1, sx: 1, lift: 0, frot: 0, head: 0 }, 'out']);
-      if(beat % 3 === 2) b.push(...DR_BODY_BLINK('laugh'));
+      if(beat % 3 === 2) b.push(...DR_BODY_BLINK('smile'));
       return b; },
     exit: c => { const { j } = c; return [
       [j(220), { frot: 0, fsw: -50, lean: 0, sy: 1, sx: 1, lift: 0, head: 0, face: 'smile', brow: 'rest' }, 'in'],
@@ -836,22 +836,28 @@ const DR_BODY_STATES = {
       [j(300), { aL: 0, aR: 0, fL: 0, fR: 0, face: 'smile1' }, 'spring'], [j(240), { face: 'rest' }, 'out'],
     ]; },
   },
-  // Uncertain: shoulders a little up, both open hands a little out from his
-  // sides (the cutout arms, kept small), a doubtful face and never a cheerful
-  // one; the head tips slowly side to side, a small re-shrug now and then.
+  // Uncertain: the drawn half-shrug held (elbows at his sides, palms turning up), shoulders
+  // a little up, a doubtful face; the head tips slowly side to side, and now and then the
+  // full shrug and back (2026-10-26: both flat cutout arms held stiffly out read as paper).
   uncertain: {
-    still: c => ({ lift: -6, head: c.s * 3, aL: 8, aR: 8, fL: 34, fR: 34, face: 'doubt', brow: 'doubt' }),
-    enter: c => { const { k, s, j } = c; return [
-      [j(160), { face: 'blink1' }, 'in'],
-      [j(320), { lift: -6 * k, head: s * 3 * k, aL: 8 * k, aR: 8 * k, fL: 34 * k, fR: 34 * k, face: 'doubt', brow: 'doubt' }, 'spring'],
+    still: c => ({ lift: -6, head: c.s * 3, [c.FR]: 'shrug-half', face: 'doubt', brow: 'doubt' }),
+    enter: c => { const { k, s, j, FR } = c; return [
+      [j(160), { lift: 3 * k, head: -s * 1 * k, face: 'rest', brow: 'up' }, 'in'],
+      [0, { [FR]: 'shrug-half' }],
+      [j(340), { lift: -6 * k, head: s * 3 * k, face: 'doubt', brow: 'doubt' }, 'spring'],
     ]; },
-    hold: c => { const { k, s, j, O, beat } = c, faces = ['doubt', 'rest', 'lookU' + O, 'doubt'], face = faces[beat % 4], b = [];
-      b.push([j(1500, .25), { lift: -6 * k, aL: 8 * k, aR: 8 * k, fL: 34 * k, fR: 34 * k, head: (beat % 2 ? -.8 : 1) * s * 3 * k, face, brow: 'doubt' }, 'inOut']);
-      if(beat % 3 === 2) b.push([j(240), { lift: -11 * k, fL: 42 * k, fR: 42 * k }, 'out'], [j(380), { lift: -6 * k, fL: 34 * k, fR: 34 * k }, 'spring']);   // a small shrug again
+    hold: c => { const { k, s, j, O, FR, beat } = c, faces = ['doubt', 'rest', 'lookU' + O, 'doubt'], face = faces[beat % 4], b = [];
+      b.push([j(1500, .25), { [FR]: 'shrug-half', lift: -6 * k, head: (beat % 2 ? -.8 : 1) * s * 3 * k, face, brow: 'doubt' }, 'inOut']);
+      if(beat % 3 === 2) b.push([0, { [FR]: 'shrug' }], [j(260), { lift: -11 * k, face: 'doubt' }, 'spring'], [j(300, .2), {}, 'linear'],
+        [0, { [FR]: 'shrug-half' }], [j(300), { lift: -6 * k }, 'out']);   // the full shrug again, and back
       if(beat % 2 === 1) b.push(...DR_BODY_BLINK(face));
       b.push([j(400, .3), {}, 'linear']);
       return b; },
-    exit: c => [[c.j(400), { lift: 0, head: 0, aL: 0, aR: 0, fL: 0, fR: 0, face: 'rest', brow: 'rest' }, 'spring'], [c.j(200), {}, 'linear']],
+    exit: c => { const { j, FR } = c; return [
+      [j(140), { lift: -2, face: 'smile1', brow: 'rest' }, 'in'],
+      [0, { [FR]: '' }],
+      [j(380), { lift: 0, head: 0, face: 'rest' }, 'spring'], [j(200), {}, 'linear'],
+    ]; },
   },
 };
 

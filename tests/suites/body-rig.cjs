@@ -231,7 +231,7 @@ const SAMPLE = () => {
   ok(held.thinking.frameOn > held.thinking.frames * .7 && held.thinking.frames2[0] + held.thinking.frames2[1] === 'think' && /^lookU/.test(held.thinking.face), 'thinking: the drawn finger stays on the chin the whole hold, eyes up ' + JSON.stringify([held.thinking.frameOn, held.thinking.frames, held.thinking.frames2, held.thinking.face]));
   ok(held.celebrating.frames2.includes('fist-pump') && held.celebrating.maxSy <= .041, 'celebrating: a drawn fist still pumping after the cheer, the squash within 4% ' + JSON.stringify([held.celebrating.frames2, held.celebrating.maxSy]));
   ok(/^lookD/.test(held.answering.face) && held.answering.frames2.includes('clipboard') && held.answering.frameOn > held.answering.frames * .7, 'answering: the drawn clipboard in his hands the whole hold, eyes down on it ' + JSON.stringify([held.answering.face, held.answering.frames2, held.answering.frameOn, held.answering.frames]));
-  ok(['doubt', 'rest', 'lookUL', 'lookUR'].includes(held.uncertain.face) && !held.uncertain.frameOn && held.listening.maxLean > 0, 'uncertain: a composed face, never a cheerful one; listening: leaned in ' + JSON.stringify([held.uncertain.face, held.listening.maxLean]));
+  ok(['doubt', 'rest', 'lookUL', 'lookUR'].includes(held.uncertain.face) && held.uncertain.frames2.includes('shrug-half') && held.listening.maxLean > 0, 'uncertain: a composed face, never a cheerful one, the drawn half-shrug held (2026-10-26: the flat arms held out read as paper); listening: leaned in ' + JSON.stringify([held.uncertain.face, held.uncertain.frames2, held.listening.maxLean]));
   // A gesture during a hold: it plays, then the hold carries on.
   const resume = await P.evaluate(() => new Promise(res => { const b = window.body; b.stop(); b.rest(); drBodySeed(4); b.state('thinking'); drBodySeed(null);
     setTimeout(() => { let ended = false; b.perform('ack', { done: () => ended = true }); const t0 = performance.now();
@@ -246,7 +246,7 @@ const SAMPLE = () => {
     setTimeout(() => { const up = b.pose.frameL + b.pose.frameR; b.state('uncertain');
       setTimeout(() => { const shown = [...document.querySelectorAll('.db-pose')].filter(g => g.style.opacity !== '0').length;
         res({ up, name: b.stateName(), frames: b.pose.frameL + b.pose.frameR, shown, busy: b.busy() }); b.state(null); }, 3000); }, 3500); }));
-  ok(swap.up && swap.name === 'uncertain' && !swap.frames && !swap.shown && swap.busy, 'celebrating to uncertain: the drawn fist goes down on the way out, uncertain holds with no drawing up ' + JSON.stringify(swap));
+  ok(swap.up && swap.name === 'uncertain' && /^(shrug-half|shrug)$/.test(swap.frames) && swap.shown === 1 && swap.busy, 'celebrating to uncertain: the drawn fist goes down on the way out, uncertain holds only its own drawn shrug ' + JSON.stringify(swap));
   await P.evaluate(() => { window.body.state(null); window.body.stop(); window.body.rest(); });
   // Focused: the same hold, smaller. Still: the one pose, no loop.
   const fh = await P.evaluate(() => { opts.mode = 'focused'; return true; }) && await holdRun('thinking', 2500);
