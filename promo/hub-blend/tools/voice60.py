@@ -9,19 +9,23 @@ HERE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 V = os.path.join(HERE, "assets", "voice-60s")
 # (shot, passage, from, to): seconds inside the passage, cut at its pauses (silencedetect, -38 dB)
 PIECES = [("hook", "g1", 0, 5.82), ("wrong", "g2", 0, 1.26), ("strike", "g3", 0, 1.41), ("right", "g4", 0, 1.73),
-          ("logo", "g5", 0, 4.53), ("home", "g5", 4.91, 6.52), ("glossary", "g5", 7.16, 9.02),
-          ("translate", "g5", 9.59, 11.72), ("physician", "g5", 11.82, 13.20), ("falsefriends", "g5", 13.47, 16.34),
-          ("drills", "g5", 16.45, 18.22), ("cert", "g5", 18.57, 21.25), ("team", "g5", 21.76, 23.45),
+          ("logo", "g5", 0, 4.53), ("home", "g5", 4.91, 6.72), ("glossary", "g5", 7.16, 9.02),
+          ("translate", "g5", 9.59, 11.72), ("physician", "g5", 11.82, 13.20), ("falsefriends", "g5", 13.47, 16.12),
+          ("drills", "g5", 16.18, 18.22), ("cert", "g5", 18.57, 21.25), ("team", "g5", 21.76, 23.45),
           ("body", "g6", 0.14, 4.02), ("notifications", "g6", 4.50, 7.49), ("brain", "g6", 7.96, 9.46),
           ("ask", "g6", 9.99, 12.20), ("end", "g7", 0, 6.85)]
 FEATURES = {"home", "glossary", "translate", "physician", "falsefriends", "drills", "cert", "team", "body", "notifications", "brain", "ask"}
 GAP_BEFORE = {"wrong": 0.75, "strike": 0.2, "right": 0.4, "logo": 0.8, "end": 0.6}
 MIN, LEAD = 2.5, 0.35  # each feature at least 2.5 s; a feature ends 0.35 s after its line at the least
+# Cuts moved onto the real pauses (2026-10-26: "Daily" lost its "Da" to the line before, "interpreters"
+# its end), timed as before so the rendered picture still fits: the clock keeps the old end here.
+CLOCK_END = {"falsefriends": 16.34}
 
 t, cues = 0.4, []
 for k, (shot, g, a, b) in enumerate(PIECES):
     cues.append((shot, g, a, b, round(t, 3)))
     if k + 1 == len(PIECES): break
+    b = CLOCK_END.get(shot, b)
     t += max(MIN, b - a + LEAD) if shot in FEATURES else b - a + GAP_BEFORE.get(PIECES[k + 1][0], 0.4)
 
 with open(os.path.join(HERE, "voice-cues-60s.tsv"), "w") as f:
