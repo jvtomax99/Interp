@@ -24,7 +24,7 @@ const CAMPUS = [
   { key:'t', id:'terminology', short:'Terminology', place:'the brick tower' },
   { key:'s', id:'systems',     short:'US Systems',  place:'the building on the left' },
   { key:'n', id:'encounter',   short:'Encounter',   place:'John Theurer Cancer Center' },
-  { key:'c', id:'cultural',    short:'Culture',     place:'the dark building on the right' }
+  { key:'c', id:'cultural',    short:'Culture',     place:'the stepped building on the right' }
 ];
 // How painted a building is: the same coverage the domain bars show (learned, plus half for shaky), in tenths.
 const campusLevel = cover => Math.max(0, Math.min(10, Math.round(cover * 10)));
