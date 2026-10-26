@@ -18,7 +18,13 @@ hands over"). This one: 2026-10-26, the campus diorama chat.
 `overpass-api.de` (OpenStreetMap) in the environment's network settings on
 2026-10-26; it did not reach the chat that was already open, so check it
 first: `curl -sS -o /dev/null -w "%{http_code}" https://overpass-api.de/api/status`
-should print 200. Goal: lay the campus out from OpenStreetMap's building
+should print 200. **2026-10-26, second chat:** it did not: `overpass-api.de` is let
+through but every HTTPS connection is reset before data (plain HTTP: 406),
+and `www.openstreetmap.org` is refused. Jose then picked adding
+`api.openstreetmap.org` (its `/api/0.6/map?bbox=...` call returns every
+outline and height tag in a small box, enough for the campus); check
+`curl -sS -o /dev/null -w "%{http_code}" https://api.openstreetmap.org/api/0.6/capabilities`
+prints 200 and use it. Goal: lay the campus out from OpenStreetMap's building
 outlines (and heights where tagged) around Hackensack University Medical
 Center's main entrance, 30 Prospect Ave, Hackensack NJ, the drive off the
 street with the keyhole fountain median, keeping the diorama style (floating
