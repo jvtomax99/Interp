@@ -20,7 +20,7 @@ Jose's verdict on the still: "Looks like him: go on".
 
 Big files stay on Jose's PC, not in git, in `C:\Users\Inter\Documents\DrSmiley3D\`:
 `dr-smiley-3d.blend` (the Blender file with the rig, the move and the face plate,
-15 MB; it reads its pictures from that folder, so keep them together), `meshy-in\dr-smiley-hands-down.glb` (the Meshy model as it came,
+18 MB; it reads its pictures from that folder, so keep them together), `meshy-in\dr-smiley-hands-down.glb` (the Meshy model as it came,
 32 MB), `dr-smiley-greet.glb` (the rigged model exported, 1.1 MB), the PNG
 renders and the cutout clip's frames.
 
@@ -108,8 +108,24 @@ Not good enough yet:
   the mouth plate shows a faint light patch, and the brows can't move (the app's
   separate brows, `DR_BROWS`, were not done). From the side the face plate
   would show: the frames are front pictures.
-- **Coat and arm are one skin.** The coat stretches at the armpit when the arm
-  goes up; nothing swings (no cloth).
+- **The coat (fixed in the third version).** Jose: "the coat doesn't move
+  right". In the Meshy model the arms hang against the coat, so sleeve and
+  coat side are one fused surface, in 600+ loose pieces; raising the arm
+  dragged the coat's side up into a web from elbow to chest. Splitting them
+  by hand on that mesh tore it, and softening the weights spread into the
+  coat front (both undone). What works: a clean **driver** mesh (`Driver`
+  in the .blend, hidden): the Meshy mesh split into the two arms and the
+  body, each sealed on its own (solidify, then a 6 mm voxel remesh), rigged
+  with Blender's automatic weights; on the body piece the arm bones are
+  allowed only near the shoulder seam. Its weights are copied onto the
+  Meshy mesh (the head's kept as they were). The coat's side now stays
+  straight under the raised arm, no tears. **Secondary motion:** two coat
+  bones (`DEF-coat.L`/`.R`) carry the coat's lower panels (the white of the
+  texture below the waist, sleeves left out), keyed a beat behind the body:
+  the hem flares on the dip, settles on the rise, the right panel lifts with
+  the wave and drops when the arm comes down. Still no real cloth: the coat
+  doesn't hang or fold on its own, and a new Meshy model in A-pose (arms
+  away from the body) would give clean sleeves from the start.
 - **The look** is close, not the same: his hair is darker brown and the coat
   flatter than the master's.
 
