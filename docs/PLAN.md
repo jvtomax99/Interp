@@ -102,9 +102,13 @@ under way, then what waits on Jose, then small leftovers.
    what's left stays inline by design (phase 4, `docs/split-index.md`).
    The 1-minute promo: made (#151, #156), in the app as Home's Watch video
    with a voice fix and 10% faster (#158); `promo/hub-blend/BRIEF-60s.md`.
-2. **Smoothness, what's left.** Home taps are done (S9, Done 2026-10-26).
-   Scrolling Home is still 64 ms/s on Jose's phone (Apple: 10+ is
-   distracting); no step for it is open. Back to a scrolled Home opens
+2. **Smoothness: parked.** Home taps are done (S9, Done 2026-10-26).
+   Scrolling Home still reads 64 ms/s on the meter (Apple: 10+ is
+   distracting), but **Jose, 2026-10-26: scrolling Home feels fine.** The
+   meter times the page's own frames; Safari scrolls the page on its own
+   thread, so the number is not the scroll he sees. No more scroll work
+   unless he notices a hitch (then ask what moves badly: the page, or
+   something on top of it like Dr. Smiley's lean or the tab bar). Back to a scrolled Home opens
    the tab bar and tucks it again in the same frame (never seen; frames
    checked 2026-10-26). Skipping the open was tried and **dropped**: the
    rebuilt bar starts at the last screen's capsule width, so without the
