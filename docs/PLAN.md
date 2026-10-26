@@ -221,6 +221,16 @@ come from this alone.
 
 ## Done
 
+- 2026-10-26 The campus, alive (Jose: "how can we make it more alive";
+  he picked all four): lamps, headlights and bloom back; warm lit windows
+  on the painted floors (`<key>-glow1..10`, flickering); a crane on each
+  roof until the building is fully painted, swinging; the people about as
+  two-frame sprites (one picture for all of them, one for the cranes);
+  the paint climbing a tenth at a time after practice, with a flash
+  (`ih_campusLv`). New suite `campus-alive.cjs`. Guide answer updated.
+  Built on #157. Not measured yet: smoothness on an iPhone with this much
+  moving (the smoothness meter in More can tell).
+
 - 2026-10-26 The campus as a floating diorama (Jose's video, "in this
   style"; his picks: busier, paint for progress, corner view). New source
   `docs/mockups/cchi-city/diorama.html` + `builddiorama.cjs`; `city/`
