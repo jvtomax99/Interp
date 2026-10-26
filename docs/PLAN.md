@@ -123,8 +123,12 @@ under way, then what waits on Jose, then small leftovers.
       missed day).
 3. **Smoothness, what's left.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home is still 64 ms/s on Jose's phone (Apple: 10+ is
-   distracting); no step for it is open. Possible small one, needs Jose:
-   Back to a scrolled Home opens the tab bar and tucks it again at once.
+   distracting); no step for it is open. Back to a scrolled Home opens
+   the tab bar and tucks it again in the same frame (never seen; frames
+   checked 2026-10-26). Skipping the open was tried and **dropped**: the
+   rebuilt bar starts at the last screen's capsule width, so without the
+   second morph it visibly grows (132 -> 142 px over ~250 ms); an exact
+   fix needs more dock code than its ~20 ms (4x) is worth.
    Background, the S-steps so far:
 
 **Smoothness: feel like iOS on an iPhone (Jose approved 2026-10-15).**
@@ -939,9 +943,12 @@ come from this alone.
   then read the log; it names the suite and the check. A WebKit job
   "cancelled" at its 20-minute limit while installing the browser (#129,
   and #131 twice, 2026-10-23) was still in `playwright install --with-deps
-  webkit` (its log ends with that process killed at cleanup; why the
-  install hangs is unproven). Each push runs the tests twice (push and
-  pull request); the other WebKit run passing on the same commit covers it.
+  webkit` (its log ends with that process killed at cleanup). Cause found
+  2026-10-26 (#158, #160 both runs): apt pulling ~117 MB (181 packages,
+  fonts and media codecs) from azure.archive.ubuntu.com at ~40 KB/s. Since
+  then the job runs inside Playwright's image
+  (`mcr.microsoft.com/playwright:v1.56.1-noble`), which has WebKit and its
+  packages; **bump that tag with `playwright` in `tests/package.json`**.
 
 - **Proving a CSS move with computed styles: sort the properties.**
   `getComputedStyle` lists custom properties in the order the sheets
@@ -1255,7 +1262,8 @@ come from this alone.
   doctor page uses `doctorDomainFor` (hints first). Moving Add to glossary
   onto it is a small follow-up; it changes where new terms are filed.
 - This container has no WebKit (and must not run `playwright install`); the
-  `webkit` CI job runs the doctor page suite in it. `BROWSER=webkit` in
+  `webkit` CI job runs the doctor page, dock-tuck and startup-work suites
+  in it, inside Playwright's image (its tag follows `tests/package.json`). `BROWSER=webkit` in
   `tests/support/harness.cjs`.
 - Test fixtures: doctors pushed straight into `DOCTOR_DIRECTORY` vanish when
   the directory listener reloads; also write them to `window.__DB`
