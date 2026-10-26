@@ -184,9 +184,7 @@ Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
 come from this alone.
 
-**Small leftovers**, for whoever next touches the file:
-- `api/term-check.js` still has its own `clip()` (line ~105) beside
-  `_routine.js`'s `clip`; fold it in.
+**Small leftovers**, for whoever next touches the file: none.
 
 ## Later (only when the trigger happens)
 
@@ -227,6 +225,8 @@ come from this alone.
 
 ## Done
 
+- 2026-10-26 `api/term-check.js` uses `_routine.js`'s `clip` (same trim and
+  600-character cut); its own copy and `MAX_FIELD` are gone.
 - 2026-10-26 S9 Home taps, part 2: **closed, no app change** (Jose's pick
   after the findings). Taps meet the wait target on his phone; what's left
   of a screen change's hiccup is drawing the new screen itself. Tool:
