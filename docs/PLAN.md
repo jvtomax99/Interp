@@ -121,10 +121,14 @@ under way, then what waits on Jose, then small leftovers.
       ribbon, gold badge when a building is finished), 6 (weather, the
       friendly half only: sun and a rainbow for a streak, never snow for a
       missed day).
-3. **Smoothness, what's left.** Home taps are done (S9, Done 2026-10-26).
-   Scrolling Home is still 64 ms/s on Jose's phone (Apple: 10+ is
-   distracting); no step for it is open. Back to a scrolled Home opens
-   the tab bar and tucks it again in the same frame (never seen; frames
+3. **Smoothness: parked.** Home taps are done (S9, Done 2026-10-26).
+   Scrolling Home still reads 64 ms/s on the meter (Apple: 10+ is
+   distracting), but **Jose, 2026-10-26: scrolling Home feels fine.** The
+   meter times the page's own frames; Safari scrolls the page on its own
+   thread, so the number is not the scroll he sees. No more scroll work
+   unless he notices a hitch (then ask what moves badly: the page, or
+   something on top of it like Dr. Smiley's lean or the tab bar). Back
+   to a scrolled Home opens the tab bar and tucks it again in the same frame (never seen; frames
    checked 2026-10-26). Skipping the open was tried and **dropped**: the
    rebuilt bar starts at the last screen's capsule width, so without the
    second morph it visibly grows (132 -> 142 px over ~250 ms); an exact
