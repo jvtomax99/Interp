@@ -14,38 +14,13 @@ hands over"). This one: 2026-10-26, the campus diorama chat.
 
 ## Now
 
-**The campus from real building outlines.** Jose allowed
-`overpass-api.de` (OpenStreetMap) in the environment's network settings on
-2026-10-26; it did not reach the chat that was already open, so check it
-first: `curl -sS -o /dev/null -w "%{http_code}" https://overpass-api.de/api/status`
-should print 200. **2026-10-26, second chat:** it did not: `overpass-api.de` is let
-through but every HTTPS connection is reset before data (plain HTTP: 406),
-and `www.openstreetmap.org` is refused. Jose then picked adding
-`api.openstreetmap.org` (its `/api/0.6/map?bbox=...` call returns every
-outline and height tag in a small box, enough for the campus); check
-`curl -sS -o /dev/null -w "%{http_code}" https://api.openstreetmap.org/api/0.6/capabilities`
-prints 200 and use it. Goal: lay the campus out from OpenStreetMap's building
-outlines (and heights where tagged) around Hackensack University Medical
-Center's main entrance, 30 Prospect Ave, Hackensack NJ, the drive off the
-street with the keyhole fountain median, keeping the diorama style (floating
-board, corner camera, golden-hour colours). OpenStreetMap is ODbL: credit
-it ("© OpenStreetMap contributors") in the scene's notes and the User Guide
-answer. Google Maps can't be used (its terms; the container can't reach it);
-Jose's Google Maps screenshots (in the old chat) are reference only.
-From his screenshots, still to do: the dark stepped building right of the
-drive has a big dark block with a white rooftop section on top of its
-tiers; behind, a long blue glass building, the old brick building with rows
-of windows, a white tower. Ask him before moving any building's role
-(which exam area it is).
-
-How the scene is built: `docs/mockups/cchi-city/diorama.html` (three.js) +
-`builddiorama.cjs` (`npm install --no-save three@0.160.0` in that folder,
-`tests/node_modules` for Playwright; on this container the test Playwright
-needed linking to the global one: `ln -s /opt/node22/lib/node_modules/playwright tests/node_modules/playwright`).
-`node builddiorama.cjs <outdir>` takes ~10 min; copy `<outdir>/*.webp` to
-`city/` and paste `<outdir>/entrance.json` over the `CAMPUS_MAP` line in
-`features/campus.js`. Badge points are hand-set per camera (`LABEL_2D`).
-Checks: `cd tests && node run.cjs campus guide`.
+**Done 2026-10-26 (third campus chat): the campus laid out from OpenStreetMap.**
+`api.openstreetmap.org` answers (Jose allowed it). The five buildings take their
+sizes, heights and places from the map outlines; Encounter is now John Theurer
+Cancer Center (Jose's pick); details in `docs/features/practice-dashboard.md`.
+Pictures rebuilt, campus suites + guide pass, all on `claude/campus-alive`
+(commit 45c64c2). Guesses Jose couldn't confirm: Jurist = the building on the
+left, the rust tower and the blue glass building = Helena Theurer Pavilion.
 
 ## Before (the last chat's changes and where each stands)
 
