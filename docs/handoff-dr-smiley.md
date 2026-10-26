@@ -48,7 +48,34 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-25, fourth chat): read this first
+## Where it stands (2026-10-26, fifth chat): read this first
+
+Jose watched a preview and found the moves awkward. This chat reworked them
+frame by frame on navy (`tests/tools/body-clip.cjs`, `BG=is-navy`); every
+change is on this branch, nothing is live, all 33 suites pass.
+
+- Swaps: a drawing is swung (`fsw`) or slid and narrowed (`fy`, `fsx`) to
+  meet the one before it, so no hand jumps a third of his height in a frame
+  (greet, cheer's V). Eyes open at the start of moves (no held half-blink).
+- New drawings from Jose: `think-start`, `wince-start` (round two in
+  `prompts-animation.md`), cut in `cutframes.py`, used in think, thinking,
+  wince.
+- Nod (`ack`) is the head only; wink comes with the drawn thumbs-up; bounce's
+  thumb rise now shows (two zero beats had skipped it).
+- Held states: listening hands at his sides, uncertain holds `shrug-half`,
+  celebrating eyes open.
+- At rest: CSS `.db-idle` wrappers (arms with the breath, head drift, sway
+  from the feet), no frame loop on Home.
+- Not touched: walk and point (the app never plays them); the clipboard's
+  board still appears in his hands (a prop pop, kept).
+- `docs/art/dr-smiley-body/prompts-fix.md`: prompts for an outside review.
+  A Blender test (a 3D him, another chat) is in `docs/art/dr-smiley-3d/`;
+  Jose chose to continue without Blender.
+
+Next is Jose's call: more polish, a preview in the app, or going live (a
+pull request to main, waiting for his push; merge main in first).
+
+## Where it stood (2026-10-25, fourth chat)
 
 **His full-body animation is complete as far as the drawings go.** Every
 drawing in `prompts-animation.md` is in except `legs-toes`, which Jose
