@@ -9596,7 +9596,8 @@ function practiceMotionKeys(root){
 /* The campus comes alive: vehicles follow their projected paths (each sprite was rendered at one
    reference point; the path gives screen points and a scale per point), the ambulance pulls in and
    holds with its lights flashing, the helicopter lands and later lifts off, clouds drift, flags and
-   the fountain cycle their frames. Web Animations, so they pause off screen. */
+   the fountain cycle their frames (lit windows and the people about flip in CSS).
+   Web Animations, so they pause off screen. */
 let campusAnims = [];
 function campusLife(root){
   campusAnims.forEach(a => a.cancel()); campusAnims = [];

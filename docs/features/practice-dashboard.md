@@ -70,6 +70,64 @@ card's dusk (violet above, peach below) and the card, HUD and chips are
 the evening ones again. Terminology is the white tower and Culture the
 dark tower again: the faded state pales the dark windows, so even the
 white tower shows its progress.
+Then (Jose: "how can we make it more alive"; he picked all four): the
+lights are back (lamp glows and pools, headlights, bloom, the context
+towers' lit windows); `city/<key>-glow<1..10>.webp`, about half of a
+building's windows lit where the paint has reached (the same ones at every
+tenth), screen-blended and flickering (`.cp-glow`); (cranes on unfinished roofs
+were here too, removed the same day: Jose wants no sign of construction on
+the campus; `crane(key)` still renders `cranes.webp`, which nothing shows); the
+people standing and sitting about are no longer in the board but sprites
+(`IDLE`), two frames each (a turn and a step, or a head turn) flipped by
+CSS (`.cp-idle`, `cpTurn` on a 5-9 s clock); the people come
+from one picture (`idlers.webp`, packed by `atlasOf`; the
+manifest gives each item its box and frame cells, drawn by background
+position). Paint rising: `ih_campusLv` keeps the levels this phone last
+drew; a building now higher climbs from the old tenth, one `.cp-rise`
+layer per tenth 0.32 s apart after 1 s, then `.cp-spark` flashes at its
+badge point and its lit windows come on; the first visit and every later
+drawing just draw. Reduced motion: no swing, flip, climb, flash or
+flicker. Suite: `campus-alive.cjs`.
+Then (Jose sent Google Maps screenshots; his pick: fix the campus from
+them, no Google data in the app): Terminology's tower is red-brown brick
+("the brick tower"), and the right side of the drive is one big dark
+building stepping back in three tiers (Culture, "the dark building on the
+right"; `tower(..., base)` stacks the tiers, `BOX.c.crane` puts its crane
+on the top tier), where a parking deck and a dark tower had been guessed.
+Google's 3D map can't be used directly (their terms; and this container
+can't reach it).
+Then (2026-10-26, third chat) the five buildings' sizes, heights and places
+come from OpenStreetMap (ODbL, "© OpenStreetMap contributors", credited in
+the User Guide answer): `api.openstreetmap.org/api/0.6/map?bbox=-74.062,40.880,-74.050,40.890`
+(overpass-api.de resets from the container). OSM has the outlines and names
+but no heights; floors are read from Jose's Google screenshots. The drive's
+axis (Prospect Ave mouth, heading 23° south of east, ~100 m to the end loop)
+becomes the scene's -z at 0.2 units a metre; the drive itself stays wider than
+real, and the back row is pulled forward onto the board. Ethics = George Link
+Jr. Pavilion (Jose), ~6 floors, 12x7; Culture = Medical Plaza (Google labels
+it), wider than deep (12.4x11, the three tiers); US Systems = Jurist Research
+Center (guess), 6 floors, 6.5x9; Encounter = John Theurer Cancer Center (Jose
+picked it from his screenshots: orange brick, white window bands, a round
+glass corner, ~5 floors; `JT`), back right, pulled forward into the open space
+behind Medical Plaza so it shows (really it is across 2nd Street); Terminology =
+the rust tower, 12 floors (guess: part of the Helena Theurer Pavilion); the blue
+glass building with the lettering is now context back left (`x1`, a guess at
+Theurer), the old brick building with rows of windows context behind JTCC (`x2`). Left out on purpose: Women's and Children's, Imaging and the parking
+decks (they would hide the exam buildings from the corner camera, and the
+garden and café would go). Badge rows changed (`LABEL_2D`): row 1 the brick tower and JTCC.
+Then (Jose, 2026-10-26, two AI reference images: "a beautifully crafted
+miniature world", soft daylight) the scene got a kit in `diorama.html`:
+`tree()` (curved trunk, branches, clustered crown, cherry `blossom`, clipped
+`cone`), `bed(points)` (curved stone-edged beds of small flowers, lavender
+and shrubs), `shrub`, `bench`, `bollard`, `entrance(key, x, frontZ)` (canopy,
+columns, glass doors into a warm lobby, planters; at Ethics inline, US
+Systems, JTCC), cute `person()`/`sitter()` characters (vertex-coloured,
+faces, hair styles, props, a wheelchair being pushed), paving (`pave`), a
+pond with stone rim, ripples and fountain, windows with a lintel shadow, sky
+reflections and a few warm rooms, roof parapets. Daylight is the default
+(`?dusk` for the golden hour); the card's colours in `app.css` and
+`sky.webp` (`window.__sky`) match it. `LITE` (the live 3D test) uses plainer
+stones and simpler spheres: ~440k triangles instead of ~940k.
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building

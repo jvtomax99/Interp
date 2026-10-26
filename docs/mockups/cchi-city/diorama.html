@@ -18,8 +18,11 @@ import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 const P = new URLSearchParams(location.search);
 const W = +P.get('w')||960, H = +P.get('h')||840;
+// LITE: the live 3D campus on a phone draws the same scene with fewer triangles (plain stones, simpler spheres)
+const LITE = P.has('lite') || !!window.__LITE, SEG = LITE ? 0.5 : 1, seg = n => Math.max(4, Math.round(n*SEG));
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
 renderer.setPixelRatio(2); renderer.setSize(W,H); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -39,6 +42,10 @@ const moon = new THREE.DirectionalLight(0xffa458, +P.get('sun')||3.2); moon.posi
 moon.shadow.mapSize.set(8192,8192); Object.assign(moon.shadow.camera,{left:-34,right:34,top:34,bottom:-34,near:1,far:110}); moon.shadow.bias=-0.0006; moon.shadow.radius=9; moon.shadow.camera.left=-40; moon.shadow.camera.right=40; moon.shadow.camera.top=40; moon.shadow.camera.bottom=-40; scene.add(moon);
 const warm = new THREE.DirectionalLight(0xa99cf0, 0.45); warm.position.set(8, 14, 40); scene.add(warm);
 const rim = new THREE.DirectionalLight(0xff8f86, 1.1); rim.position.set(14, 10, -34); scene.add(rim);
+// ?day: soft warm daylight (Jose's references) instead of golden hour: a higher, whiter sun, a sky-blue fill, a faint rim
+const DAY = !P.has('dusk');
+if (DAY){ moon.color.set(0xfff0dc); moon.intensity = 2.6; moon.position.set(-24, 40, 22); warm.color.set(0xdfe9ff); warm.intensity = 0.55; rim.color.set(0xffd2b0); rim.intensity = 0.45;
+  scene.children.find(c => c.isHemisphereLight).color.set(0xd6e6ff); scene.children.find(c => c.isHemisphereLight).groundColor.set(0x8a7a62); scene.children.find(c => c.isHemisphereLight).intensity = 1.05; }
 const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.traverse(()=>{});
 const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;
@@ -47,7 +54,7 @@ const GLOWS = [], CLOUDS = [], FLAGS = [], LIVE = [];   // LIVE: things captured
 const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
   const r = g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,236,190,1)'); r.addColorStop(.25,'rgba(255,200,120,.55)'); r.addColorStop(1,'rgba(255,170,80,0)');
   g.fillStyle = r; g.fillRect(0,0,128,128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
-function glow(x, y, z, s=1.6, col=0xffffff){ return new THREE.Sprite(); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:col, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true }));
+function glow(x, y, z, s=1.6, col=0xffffff){ const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:col, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true }));
   sp.position.set(x,y,z); sp.scale.set(s,s,1); scene.add(sp); GLOWS.push(sp); return sp; }
 // noise textures for grass and paving
 function noiseTex(base, spot, n=2600, size=256, rep=8){ const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
@@ -98,7 +105,7 @@ const GRASS_T = noiseTex('#5f9e6c', ['#4f8c5c','#73b47f','#88c38f']);
 const ASPH_T = noiseTex('#3d3c48', ['#34333e','#4a4956','#2f2e38'], 4000, 256, 10);
 const M = (c,o={}) => new THREE.MeshStandardMaterial({ color:c, roughness:o.r??0.8, metalness:o.m??0, envMapIntensity:0.12, ...(o.x||{}) });
 const add = (geo, mat, x,y,z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast; m.receiveShadow=true; G.add(m); return m; };
-const box = (w,h,d,mat,x,y,z,r=0.06,cast=true) => add(new RoundedBoxGeometry(w,h,d,2,Math.min(r,w/2-.001,h/2-.001,d/2-.001)), mat, x,y,z,cast);
+const box = (w,h,d,mat,x,y,z,r=0.06,cast=true) => add(new RoundedBoxGeometry(w,h,d,LITE ? 1 : 2,Math.min(r,w/2-.001,h/2-.001,d/2-.001)), mat, x,y,z,cast);
 let seed = 5; const rnd = () => (seed = (seed*16807)%2147483647)/2147483647;
 const FL = 0.62;
 
@@ -114,15 +121,20 @@ const BRICK = (o={}) => { const t = brickTex(o.col, o.band, o.glass); return (w,
 const GLASSWALL = new THREE.MeshStandardMaterial({ color:0x3f5683, roughness:0.06, metalness:0.75, envMapIntensity:1.6 });
 const ROOF = M(0x6e6a78), WIN_DARK = new THREE.MeshStandardMaterial({ color:0x22304f, roughness:0.08, metalness:0.6, envMapIntensity:1.4 }), FRAME = M(0xd8d2c4, { r:0.6 }), SILL = M(0xeee8da, { r:0.5 });
 const LIT = new THREE.MeshBasicMaterial({ color:0xffc46a });
+const WIN_SKY = new THREE.MeshStandardMaterial({ color:0x3e5f8e, roughness:0.06, metalness:0.55, envMapIntensity:1.6 }), WIN_WARM = new THREE.MeshStandardMaterial({ color:0xf0c88e, roughness:0.5, emissive:0x6a4416, emissiveIntensity:0.45 });
+const REVEAL = M(0x1c2236, { r:0.9 }), TRIM = M(0xefe8dc, { r:0.6 });
+let wr = 41; const wrnd = () => (wr = (wr*16807)%2147483647)/2147483647;
 
 // a tower: body, a cream cornice, rooftop units, and windows on the faces the camera sees
 const WINDOWS = {}; const LABEL_AT = {}; const BOX = {};
-function tower(key, x, z, w, d, floors, style){
-  const h = floors*FL, y0 = key === 'n' ? 0.3 + 3*FL : 0.3;
+function tower(key, x, z, w, d, floors, style, base){
+  const h = floors*FL, y0 = base ?? (key === 'n' ? 0.3 + 3*FL : 0.3);
   const glass = style === 'glass' || !!(style && style.glassCol), o = (typeof style === 'object' && style) || {};
   const mats = !glass ? BRICK(o)(Math.max(w,d), h) : o.glassCol ? new THREE.MeshStandardMaterial({ color:o.glassCol, roughness:0.06, metalness:0.75, envMapIntensity:1.6 }) : GLASSWALL;
   box(w, h, d, mats, x, y0 + h/2, z, 0.08);
   box(w+0.15, 0.22, d+0.15, M(o.roof ?? 0xd9cdb8), x, y0 + h + 0.11, z, 0.05);   // the roof, tinted with the building
+  for (const [pw, pd, px, pz] of [[w+0.2, 0.1, x, z + d/2 + 0.05], [w+0.2, 0.1, x, z - d/2 - 0.05], [0.1, d+0.2, x - w/2 - 0.05, z], [0.1, d+0.2, x + w/2 + 0.05, z]])
+    box(pw, 0.14, pd, TRIM, px, y0 + h + 0.29, pz, 0.03, false);   // a parapet trims the roof's edge
   box(w*0.35, 0.4, d*0.3, M(0x8a8796), x - w*0.15, y0 + h + 0.42, z - d*0.1, 0.06);
   box(w*0.18, 0.3, d*0.2, M(0x9a97a6), x + w*0.25, y0 + h + 0.37, z + d*0.1, 0.05);
   const wins = WINDOWS[key] = WINDOWS[key] || [];
@@ -139,23 +151,31 @@ function tower(key, x, z, w, d, floors, style){
         add(ax === 'z' ? new THREE.BoxGeometry(gw+0.07, gh+0.07, 0.02) : new THREE.BoxGeometry(0.02, gh+0.07, gw+0.07), FRAME, ax === 'z' ? px : px - out*0.006, y, ax === 'z' ? pz - 0.006 : pz, false);
         add(ax === 'z' ? new THREE.BoxGeometry(gw+0.12, 0.035, 0.06) : new THREE.BoxGeometry(0.06, 0.035, gw+0.12), SILL, ax === 'z' ? px : px + out*0.02, y - gh/2 - 0.03, ax === 'z' ? pz + 0.02 : pz, false);
       }
-      const m = add(geo, WIN_DARK, ax === 'z' ? px : px + out*0.004, y, ax === 'z' ? pz + 0.004 : pz, false);
+      if (!glass) add(ax === 'z' ? new THREE.BoxGeometry(gw+0.02, 0.035, 0.04) : new THREE.BoxGeometry(0.04, 0.035, gw+0.02), REVEAL, ax === 'z' ? px : px + out*0.012, y + gh/2 - 0.01, ax === 'z' ? pz + 0.012 : pz, false);   // the lintel's shadow: the glass sits back
+      const wl = wrnd(), wm = glass ? WIN_DARK : wl < 0.07 ? WIN_WARM : wl < 0.4 ? WIN_SKY : WIN_DARK;
+      const m = add(geo, wm, ax === 'z' ? px : px + out*0.004, y, ax === 'z' ? pz + 0.004 : pz, false);
       m.userData.win = true; wins.push(m);
     }
   }
-  if (key[0] !== 'x'){ LABEL_AT[key] = [x, y0 + h + 0.9, z]; BOX[key] = { x, z, w, d, h: h + 0.8, y0, top: y0 + h + 0.8 }; }
+  if (key[0] !== 'x'){ LABEL_AT[key] = [x, y0 + h + 0.9, z]; BOX[key] = { x, z, w, d, h: h + 0.8, y0, top: y0 + h + 0.8, roof: y0 + h + 0.22 }; }
 }
 
 // ---- ground: slab, lawns, the street across the front, the drive with its two medians ----
 box(40.6, 1.3, 46.6, M(0x9a6a48, {r:0.9}), 0, -0.55, -4, 0.5, false); box(40.2, 1.6, 46.2, M(0x7a4f36, {r:0.95}), 0, -1.9, -4, 0.6, false); box(39.6, 0.9, 45.6, M(0x5e3b2a, {r:0.95}), 0, -3.0, -4, 0.45, false);
 box(39.9, 0.3, 45.9, new THREE.MeshStandardMaterial({ map:GRASS_T, roughness:0.95, envMapIntensity:0.08 }), 0, 0.02, -4, 0.15, false);
+function paveTex(){ const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); let r = 9; const rr = () => (r = (r*16807)%2147483647)/2147483647;
+  g.fillStyle = '#b9ab9c'; g.fillRect(0, 0, 256, 256);
+  for (let y = 0; y < 8; y++) for (let x = -1; x < 5; x++){ const v = 200 + Math.floor(rr()*22), ox = (y % 2)*32; g.fillStyle = `rgb(${v+14},${v+2},${v-10})`; g.fillRect(x*64 + ox + 2, y*32 + 2, 60, 28); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t; }
+const PAVE_T = paveTex(), pave = (w, d) => { const t = PAVE_T.clone(); t.needsUpdate = true; t.repeat.set(w/1.3, d/1.3); return new THREE.MeshStandardMaterial({ map:t, roughness:0.85, envMapIntensity:0.1 }); };
 const asphalt = new THREE.MeshStandardMaterial({ map:ASPH_T, roughness:0.42, metalness:0.15, envMapIntensity:0.5 }), curb = M(0xe7d36a, { r:0.6 }), walk = M(0x9a99a6), grass = new THREE.MeshStandardMaterial({ map:GRASS_T, color:0xbfe8c4, roughness:0.95, envMapIntensity:0.08 }), paint = new THREE.MeshBasicMaterial({ color:0xe9e9f0 });
 box(39.5, 0.06, 3.4, asphalt, 0, 0.2, 15, 0.02, false);                                   // the street in front
 box(39.5, 0.02, 0.06, curb, 0, 0.24, 14.9, 0.01, false); box(39.5, 0.02, 0.06, curb, 0, 0.24, 15.1, 0.01, false);
 box(39.5, 0.1, 1.2, walk, 0, 0.22, 12.7, 0.03, false);                                    // sidewalk
 box(10, 0.06, 20, asphalt, 0, 0.21, 2.5, 0.02, false);                                    // the drive
 for (let i=0;i<20;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48, 0.25, 12.6, 0.01, false); // crosswalk
-box(26, 0.06, 2.8, asphalt, 0, 0.21, -7.6, 0.02, false);                                  // the road across the end
+for (let i=0;i<7;i++) box(1.0, 0.02, 0.24, paint, -7.0, 0.25, 13.55 + i*0.5, 0.01, false);   // and one across the street, west of the drive
+box(26, 0.06, 2.8, pave(26, 2.8), 0, 0.21, -7.6, 0.02, false);   // the drop-off in front of Ethics, paved in warm stone                                  // the road across the end
 // lane lines and turn arrows
 for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4) box(0.06, 0.02, 0.7, paint, x, 0.25, z, 0.01, false);
 function arrow(x, z, turn){ box(0.12, 0.02, 0.8, paint, x, 0.25, z, 0.01, false);
@@ -165,9 +185,7 @@ arrow(-3.8, 10.2, 1); arrow(-2.2, 10.2, -1); arrow(-3.8, 7.6, 1); arrow(-2.2, 7.
 function pill(cx, cz, w, l, mat, y=0.27, h=0.12){ const sh = new THREE.Shape(); const r = w/2;
   sh.absarc(0, l/2 - r, r, 0, Math.PI, false); sh.absarc(0, -l/2 + r, r, Math.PI, Math.PI*2, false);
   const g = new THREE.ExtrudeGeometry(sh, { depth:h, bevelEnabled:false, curveSegments:24 }); g.rotateX(-Math.PI/2); return add(g, mat, cx, y - h/2, cz, false); }
-pill(-0.1, 7.8, 2.1, 7.2, curb, 0.24, 0.1); pill(-0.1, 7.8, 1.8, 6.9, grass, 0.3, 0.12);
-for (let i=0;i<22;i++){ const a = i/22*Math.PI, r = 0.62; box(0.22,0.18,0.22, M([0xe0414b,0xf2c14e,0xf28c28][i%3]), -0.1 + Math.cos(a)*r*(i%2?0.55:1), 0.42, 10.6 + Math.sin(a)*0.5, 0.06, false); }
-box(1.0, 0.3, 0.5, M(0xd9cdb8), -0.1, 0.45, 10.0, 0.05);                                  // the little sign in the bed
+pill(-0.1, 7.8, 3.0, 7.2, curb, 0.24, 0.1); pill(-0.1, 7.8, 2.7, 6.9, grass, 0.3, 0.12);   // wide enough at its mouth for the entrance sign
 // the back median: a keyhole, the fountain in its bulb
 pill(-0.1, -0.5, 1.6, 5.0, curb, 0.24, 0.1); pill(-0.1, -0.5, 1.3, 4.7, grass, 0.3, 0.12);
 add(new THREE.CylinderGeometry(1.5, 1.5, 0.1, 40), curb, -0.1, 0.24, -3.4, false); add(new THREE.CylinderGeometry(1.32, 1.32, 0.12, 40), grass, -0.1, 0.3, -3.4, false);
@@ -179,17 +197,83 @@ glow(-0.1, 1.0, -3.4, 2.6, 0x9fe8ff);
 // lamps along the drive's edges and the street
 const lampHead = new THREE.MeshBasicMaterial({ color:0xfff1c8 });
 function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.8, 8), M(0x2c2c36), x, 1.2, z); add(new THREE.SphereGeometry(0.16, 12, 10), lampHead, x, 2.15, z, false); glow(x, 2.15, z, 1.4);
-  const pool = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0 })); pool.rotation.x = -Math.PI/2; pool.position.set(x, 0.26, z); G.add(pool); }
+  const pool = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0.16 })); pool.rotation.x = -Math.PI/2; pool.position.set(x, 0.26, z); G.add(pool); }
 for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }
-for (let x = -18; x <= 18; x += 6) lamp(x, 13.4);
+for (let x = -18; x <= 18; x += 6) if (x) lamp(x, 13.4);   // none at the drive's mouth: it would stand in front of the sign
 // trees: the big street trees in front, evergreens and red maples along the drive
+// ---- trees and flower beds: the miniature-world kit (Jose, 2026-10-26, his references): curved trunks with
+// visible branches under organically clustered canopies, cherry trees in pinks, soft rounded shrubs, curved beds of
+// small flowers in neat stone borders. Seeded by position, so every build draws the same garden.
+const rngAt = (a, b) => { let s = Math.abs(Math.floor(a*7919 + b*104729)) % 2147483646 + 1; return () => (s = (s*16807) % 2147483647) / 2147483647; };
+const BARK = M(0x6e4a33, { r:0.95 }), BARK_B = M(0x4a3530, { r:0.95 });
+const LEAF = [0x3f7a3a, 0x4d8c40, 0x5c9c47, 0x6fae52, 0x86bf5f], BLOS = [0xe98fb0, 0xf2a6c1, 0xf6b9cf, 0xfbcfdd, 0xffe3ec];
+const LEAFM = LEAF.map(c => M(c, { r:0.85 })), BLOSM = BLOS.map(c => M(c, { r:0.8, x:{ emissive:0x3a0d1c, emissiveIntensity:0.18 } }));
+const BLOSSOMS = [];
+// a limb from (x0,y0,z0) to (x1,y1,z1), tapering
+function limb(x0, y0, z0, x1, y1, z1, r0, r1, mat){ const L = Math.hypot(x1-x0, y1-y0, z1-z0), m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, L, 7), mat);
+  m.position.set((x0+x1)/2, (y0+y1)/2, (z0+z1)/2); m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), new THREE.Vector3(x1-x0, y1-y0, z1-z0).normalize());
+  m.castShadow = true; m.receiveShadow = true; G.add(m); return m; }
 function tree(x, z, s=1, kind='round'){
-  add(new THREE.CylinderGeometry(0.09*s,0.12*s,0.6*s,6), M(0x4a3426), x, 0.5+0.3*s, z);
-  if (kind === 'cone'){ for (const [y,r,h] of [[1.0,0.75,1.1],[1.55,0.58,0.95],[2.05,0.4,0.8]]) add(new THREE.ConeGeometry(r*s, h*s, 9), new THREE.MeshStandardMaterial({ color:0x2f6447, roughness:0.9, flatShading:true, envMapIntensity:0.1 }), x, 0.5+y*s, z); }
-  else { const col = kind === 'red' ? [0x9c3b45,0xb44a50,0x863241] : [0x3c7a52,0x4a8c5e,0x356c49];
-    for (const [dx,dy,dz,r,i] of [[0,1.15,0,0.85,0],[0.42,0.95,0.2,0.6,1],[-0.4,1.0,-0.15,0.62,2],[0.05,1.55,0.05,0.55,1]]){
-      const m = add(new THREE.IcosahedronGeometry(r*s, 1), new THREE.MeshStandardMaterial({ color:col[i], roughness:0.9, flatShading:true, envMapIntensity:0.1 }), x+dx*s, 0.5+dy*s, z+dz*s); } }
+  const r = rngAt(x, z); if (kind !== 'cone') s *= 1.22;
+  if (kind === 'cone'){   // a neat clipped evergreen: stacked soft cones
+    limb(x, 0.3, z, x, 0.6*s + 0.3, z, 0.08*s, 0.06*s, BARK);
+    const dk = M(0x2f6447, { r:0.9 }), lt = M(0x3d7a52, { r:0.9 });
+    [[0.75, 0.7, 1.0], [1.25, 0.56, 0.85], [1.7, 0.4, 0.72], [2.05, 0.24, 0.5]].forEach(([y, rad, h], k) => add(new THREE.ConeGeometry(rad*s, h*s, 12), k % 2 ? lt : dk, x, 0.3 + y*s, z));
+    return; }
+  const blossom = kind === 'blossom', mats = blossom ? BLOSM : LEAFM, bark = blossom ? BARK_B : BARK;
+  if (blossom) BLOSSOMS.push([x, z, s]);
+  // a curved trunk in two pieces, then three or four branches spreading into the crown
+  const lean = (r() - 0.5)*0.35*s, lz = (r() - 0.5)*0.3*s, h1 = 0.55*s, h2 = 0.5*s;
+  const ax = x + lean*0.5, az = z + lz*0.5, bx = x + lean, bz = z + lz;
+  limb(x, 0.28, z, ax, 0.3 + h1, az, 0.13*s, 0.1*s, bark); limb(ax, 0.3 + h1, az, bx, 0.3 + h1 + h2, bz, 0.1*s, 0.075*s, bark);
+  const top = [bx, 0.3 + h1 + h2, bz], nb = 3 + (r() < 0.5 ? 1 : 0);
+  for (let k = 0; k < nb; k++){ const a = k/nb*Math.PI*2 + r()*0.8, L = (0.38 + r()*0.18)*s;
+    limb(ax, 0.3 + h1*0.95, az, top[0] + Math.cos(a)*L, top[1] + (0.2 + r()*0.2)*s, top[2] + Math.sin(a)*L, 0.06*s, 0.035*s, bark); }
+  // the crown: clustered puffs on a dome, darker below, lighter on top; the cherry also gets pale highlights
+  const cx = top[0], cy = top[1] + 0.35*s, cz = top[2], RX = (0.9 + r()*0.25)*s, RY = (0.62 + r()*0.2)*s, n = blossom ? 34 : 28;
+  for (let k = 0; k < n; k++){ const u = r(), v = r(), th = u*Math.PI*2, ph = Math.acos(1 - v*1.15), rr = 0.75 + r()*0.25;
+    const px = cx + Math.cos(th)*Math.sin(ph)*RX*rr, py = cy + Math.cos(ph)*RY*rr - 0.12*s, pz = cz + Math.sin(th)*Math.sin(ph)*RX*rr;
+    const level = Math.max(0, Math.min(mats.length - 1, Math.floor(((py - cy)/RY + 0.6) / 1.6 * mats.length + (r() - 0.5))));
+    add(new THREE.IcosahedronGeometry((0.19 + r()*0.12)*s, LITE && r() < 0.6 ? 0 : 1), mats[level], px, py, pz); }
+  add(new THREE.IcosahedronGeometry(0.7*s, 2), mats[1], cx, cy - 0.05*s, cz).scale.set(1.15, 0.8, 1.15);   // the core, so no gaps show through
+  if (blossom) for (let k = 0; k < 6; k++){ const a = r()*Math.PI*2; add(new THREE.CircleGeometry(0.06, 6), M(0xf6b9cf, { r:0.9 }), x + Math.cos(a)*(0.4 + r()*0.8)*s, 0.31, z + Math.sin(a)*(0.4 + r()*0.8)*s, false).rotation.x = -Math.PI/2; }
 }
+// a round clipped shrub
+const SHRUBM = [M(0x3f7a3a, { r:0.85 }), M(0x4f8c44, { r:0.85 }), M(0x5f9e4c, { r:0.85 })];
+function shrub(x, y, z, rad, k=1){ add(new THREE.IcosahedronGeometry(rad, LITE ? 1 : 2), SHRUBM[k % 3], x, y + rad*0.75, z).scale.y = 0.85; }
+// a curved flower bed: soil inside a ring of pale stones, filled with shrubs, lavender and clumps of small flowers
+const STONE = [M(0xd9d3c7, { r:0.7 }), M(0xcfc8bb, { r:0.7 }), M(0xe4dfd5, { r:0.7 })], SOIL = M(0x5e3f2c, { r:0.95 });
+const FLOWERS = [0xf28ab0, 0xfbd3e0, 0xffffff, 0xf7d154, 0xb9a0e6, 0xff9e7a].map(c => M(c, { r:0.75 })), LEAFLOW = M(0x4f8c44, { r:0.85 });
+const LAV = [M(0x8a6ad0, { r:0.8 }), M(0x9d7fe0, { r:0.8 })];
+function bed(pts, y=0.3, o={}){
+  const curve = new THREE.CatmullRomCurve3(pts.map(([px, pz]) => new THREE.Vector3(px, 0, pz)), true, 'centripetal'), P = curve.getSpacedPoints(Math.max(24, Math.round(curve.getLength()/0.24)));
+  const sh = new THREE.Shape(P.map(p => new THREE.Vector2(p.x, -p.z))), soil = new THREE.ExtrudeGeometry(sh, { depth:0.06, bevelEnabled:false, curveSegments:4 });
+  soil.rotateX(-Math.PI/2); add(soil, SOIL, 0, y, 0, false);
+  for (let k = 0; k < P.length - 1; k++){ const a = P[k], b = P[k+1], st = new THREE.Mesh(LITE ? new THREE.BoxGeometry(a.distanceTo(b) + 0.04, 0.12, 0.13) : new RoundedBoxGeometry(a.distanceTo(b) + 0.04, 0.12, 0.13, 2, 0.04), STONE[k % 3]);
+    st.position.set((a.x + b.x)/2, y + 0.06, (a.z + b.z)/2); st.rotation.y = -Math.atan2(b.z - a.z, b.x - a.x); st.castShadow = true; st.receiveShadow = true; G.add(st); }
+  const inside = (px, pz) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++){ const A = P[i], B = P[j]; if ((A.z > pz) !== (B.z > pz) && px < (B.x - A.x)*(pz - A.z)/(B.z - A.z) + A.x) c = !c; } return c; };
+  const edge = (px, pz) => Math.min(...P.map(p => Math.hypot(p.x - px, p.z - pz)));
+  const xs = P.map(p => p.x), zs = P.map(p => p.z), r = rngAt(pts[0][0], pts[0][1]), area = (Math.max(...xs) - Math.min(...xs))*(Math.max(...zs) - Math.min(...zs));
+  const n = Math.round(area * (o.density || 9)); let placed = 0;
+  for (let t = 0; t < n*4 && placed < n; t++){ const px = Math.min(...xs) + r()*(Math.max(...xs) - Math.min(...xs)), pz = Math.min(...zs) + r()*(Math.max(...zs) - Math.min(...zs));
+    if (!inside(px, pz) || edge(px, pz) < 0.14) continue; placed++; const pick = r(), e = edge(px, pz);
+    if (pick < 0.07 && e > 0.35) shrub(px, y + 0.04, pz, 0.18 + r()*0.1, Math.floor(r()*3));
+    else if (pick < 0.24){ for (let q = 0; q < 5; q++) add(new THREE.ConeGeometry(0.035, 0.26 + r()*0.08, 5), LAV[q % 2], px + (r() - 0.5)*0.16, y + 0.2, pz + (r() - 0.5)*0.16, false); }
+    else { const fm = FLOWERS[o.colours ? o.colours[Math.floor(r()*o.colours.length)] : Math.floor(r()*FLOWERS.length)];
+      add(new THREE.IcosahedronGeometry(0.12, LITE ? 0 : 1), LEAFLOW, px, y + 0.1, pz, false).scale.y = 0.6;
+      for (let q = 0; q < 6; q++) add(new THREE.IcosahedronGeometry(0.048, 0), fm, px + (r() - 0.5)*0.2, y + 0.16 + r()*0.05, pz + (r() - 0.5)*0.2, false); } }
+}
+// a park bench: warm wooden slats on navy iron sides
+const WOOD = M(0xa8693f, { r:0.7 }), IRON = M(0x27324d, { r:0.5, m:0.3 });
+function bench(x, z, ry=0, y=0.3){ const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; G.add(g);
+  const put = (geo, mat, px, py, pz, rx=0) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.rotation.x = rx; m.castShadow = true; m.receiveShadow = true; g.add(m); };
+  for (const k of [0, 1, 2]) put(new RoundedBoxGeometry(1.2, 0.04, 0.11, 2, 0.015), WOOD, 0, 0.27, -0.13 + k*0.13);
+  for (const k of [0, 1]) put(new RoundedBoxGeometry(1.2, 0.1, 0.035, 2, 0.015), WOOD, 0, 0.42 + k*0.14, -0.22, -0.12);
+  for (const sx of [-0.52, 0.52]){ put(new RoundedBoxGeometry(0.05, 0.27, 0.36, 2, 0.02), IRON, sx, 0.13, -0.03); put(new RoundedBoxGeometry(0.05, 0.36, 0.05, 2, 0.02), IRON, sx, 0.42, -0.23, -0.12); } }
+// a little garden light: a short post with a warm glass head
+const POST = M(0x2a2e3a, { r:0.5, m:0.3 }), LANTERN = new THREE.MeshBasicMaterial({ color:0xffe2a8 });
+function bollard(x, z, y=0.3){ add(new THREE.CylinderGeometry(0.05, 0.06, 0.4, 10), POST, x, y + 0.2, z); add(new THREE.CylinderGeometry(0.065, 0.065, 0.12, 10), LANTERN, x, y + 0.46, z, false);
+  add(new THREE.CylinderGeometry(0.08, 0.07, 0.04, 10), POST, x, y + 0.54, z); glow(x, y + 0.46, z, 0.8, 0xffd9a0); }
 for (const [x,z,s,k] of [[-10,16.9,1.0],[-3,17.2,1.1],[5,17.0,1.05],[12,17.2,0.95],[-16,16.7,0.9],[17,16.7,0.9],
   [-5.6,4,0.7,'red'],[-5.6,1.2,0.7,'red'],[-5.6,7,0.7,'red'],[0.3,6.5,0.9,'cone'],[-0.5,-1.3,0.7,'cone'],[5.8,11.2,0.8,'cone'],[6.6,10.6,0.7,'red']]) tree(x, z, s, k);
 // parked cars: along the drive's left curb and on the parking deck's roof
@@ -199,7 +283,6 @@ function parked(x, z, rot, col){ const g = new THREE.Group();
   const b2 = new THREE.Mesh(new RoundedBoxGeometry(0.42,0.15,0.5,2,0.06), new THREE.MeshStandardMaterial({ color:0x1f2633, roughness:0.1, metalness:0.6, envMapIntensity:1.5 })); b2.position.set(0,0.35,-0.05); g.add(b2);
   g.position.set(x, 0.2, z); g.rotation.y = rot; G.add(g); }
 for (let i=0;i<6;i++) parked(-4.3, 0.5 + i*1.25, 0, CARC[i%CARC.length]);
-for (let i=0;i<7;i++){ parked(8.2 + (i%2)*1.3, 3.4 + Math.floor(i/2)*1.4, Math.PI/2, CARC[(i+3)%CARC.length]); }
 // lawns at the drive's mouth; the surface lot on the left, as in the aerial photo
 box(9, 0.12, 4.5, grass, -10, 0.24, 10.2, 0.05, false); box(8, 0.12, 4.5, grass, 10.5, 0.24, 10.2, 0.05, false);
 box(8.6, 0.08, 7.2, asphalt, -14.6, 0.24, 9.8, 0.03, false);
@@ -208,7 +291,7 @@ for (let i=0;i<10;i++){ if (i === 3 || i === 8) continue; parked(-17.8 + (i%6)*1
 for (const [x,z,s,k] of [[14.2,9.0,0.9,'round'],[16.4,11.4,0.8,'cone'],[17.6,8.2,0.8,'round'],[-13,3.8,0.8,'cone'],[-15.5,2.2,0.9,'round'],[-17.6,-6,0.9,'cone'],[-13.6,-7.2,0.8,'round'],[16.8,-10.4,0.9,'cone'],[18.2,-7.2,0.8,'round'],[5.2,-20.6,0.7,'cone'],[-3.6,-20.4,0.7,'cone']]) tree(x, z, s, k);
 // the ambulance bay on the banner building's right flank: brick, a warm-lit opening; its two sliding doors are
 // captured on their own (closed, half, open) and the app opens them as the ambulance pulls in
-const BAY = { x:6.1, z:-11.2, w:2.2, h:1.3, d:2.4 };
+const BAY = { x:7.4, z:-11.2, w:2.2, h:1.3, d:2.4 };
 box(BAY.w, BAY.h, BAY.d, BRICK({ col:'#6e3a33', band:'#7a4239' })(BAY.w, BAY.h), BAY.x, 0.3 + BAY.h/2, BAY.z, 0.05);
 box(BAY.w + 0.12, 0.16, BAY.d + 0.12, M(0xd9cdb8), BAY.x, 0.3 + BAY.h + 0.08, BAY.z, 0.04);
 add(new THREE.PlaneGeometry(1.1, 1.0), new THREE.MeshBasicMaterial({ color:0xffd9a0 }), BAY.x, 0.3 + 0.5, BAY.z + BAY.d/2 + 0.01, false);   // the lit inside
@@ -219,6 +302,33 @@ const DOORM = new THREE.MeshStandardMaterial({ color:0xdfe3ea, roughness:0.5, me
 const DOORS = [-1, 1].map(sd => { const dm = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.0, 0.04), DOORM); dm.position.set(BAY.x + sd*0.27, 0.3 + 0.5, BAY.z + BAY.d/2 + 0.04); dm.castShadow = true; BAY_DOORS.add(dm);
   const st = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.06, 0.05), M(0xb8bec8)); st.position.set(BAY.x + sd*0.27, 0.3 + 0.55, BAY.z + BAY.d/2 + 0.07); BAY_DOORS.add(st); return [dm, st, sd]; });
 function bayDoors(open){ for (const [dm, st, sd] of DOORS){ const x = BAY.x + sd*(0.27 + open*0.52); dm.position.x = x; st.position.x = x; } }
+let TEX = null; const pend = [];
+// the entrance sign at the front of the drive's median, facing the street (Jose's Street View, September 2025): two
+// brick pillars with cream caps, a pale grey panel with an arched top carrying the HMH mark and the names, in a round
+// bed of white and lilac flowers with purple behind, inside a yellow curb; the evergreen stands behind it
+const SIGN = new THREE.Group(); SIGN.position.set(-0.1, 0.36, 9.7); SIGN.scale.setScalar(0.85); G.add(SIGN);   // square to the median, on its centre line
+{ const put = (geo, mat, x, y, z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = cast; m.receiveShadow = true; SIGN.add(m); return m; };
+  const brick = BRICK({ col:'#8a4636', band:'#9a5444' })(0.4, 1.2), cap = M(0xe6dccb, { r:0.6 });
+  for (const x of [-1.32, 1.32]){ put(new THREE.BoxGeometry(0.38, 1.25, 0.38), brick, x, 0.62, 0); put(new THREE.BoxGeometry(0.46, 0.1, 0.46), cap, x, 1.3, 0); }
+  const sh = new THREE.Shape(); sh.moveTo(-1.13, 0); sh.lineTo(1.13, 0); sh.lineTo(1.13, 0.78); sh.quadraticCurveTo(0, 1.02, -1.13, 0.78); sh.lineTo(-1.13, 0);
+  const panel = new THREE.ExtrudeGeometry(sh, { depth:0.14, bevelEnabled:false, curveSegments:16 }); panel.translate(0, 0, -0.07);
+  put(panel, M(0xd7dbe2, { r:0.5 }), 0, 0.28, 0); put(new THREE.BoxGeometry(2.26, 0.28, 0.2), brick, 0, 0.14, 0);
+  // the bed: a long oval in a yellow curb, rows of purple with a yellow band
+  const bed = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.1, 40), curb); bed.scale.set(1.62, 1, 0.62); bed.position.set(0, 0.0, 0.62); SIGN.add(bed);
+  const soil = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.12, 40), M(0x6a3f2c, { r:0.95 })); soil.scale.set(1.5, 1, 0.52); soil.position.set(0, 0.02, 0.62); SIGN.add(soil);
+  for (let i = 0; i < 46; i++){ const u = (i % 23) / 22, row = i < 23 ? 0 : 1, x = -1.32 + u*2.64, z = 0.62 + (row ? 0.22 : -0.08) * Math.cos((u - 0.5)*2.4);
+    put(new THREE.BoxGeometry(0.13, row ? 0.13 : 0.24, 0.16), M(row ? [0xf4f4f8, 0xc9a0e0, 0xf4f4f8][i % 3] : 0x5a3fc0, { r:0.8 }), x, row ? 0.14 : 0.2, z, false); }
+  for (let i = 0; i < 14; i++) put(new THREE.BoxGeometry(0.16, 0.13, 0.16), M([0xf4f4f8, 0xf4f4f8, 0xd8b4ec][i % 3], { r:0.8 }), -1.04 + i*0.16, 0.14, 0.98, false); }
+pend.push(() => { const c = document.createElement('canvas'); c.width = 640; c.height = 240; const g = c.getContext('2d');
+  // the mark and the words as one block, centred on the panel
+  g.font = 'italic 46px Georgia, serif'; const w1 = Math.max(g.measureText('Hackensack').width, g.measureText('Meridian Health').width);
+  g.font = '30px Georgia, serif'; const w2 = Math.max(g.measureText('Hackensack University').width, g.measureText('Medical Center').width);
+  const x0 = Math.round((640 - (140 + 22 + Math.max(w1, w2))) / 2), tx = x0 + 162;
+  g.drawImage(TEX.image, x0, 50, 140, 140);
+  g.fillStyle = '#3a4a6a'; g.textBaseline = 'alphabetic'; g.font = 'italic 46px Georgia, serif'; g.fillText('Hackensack', tx, 96); g.fillText('Meridian Health', tx, 144);
+  g.fillStyle = '#4a5878'; g.font = '30px Georgia, serif'; g.fillText('Hackensack University', tx + 2, 186); g.fillText('Medical Center', tx + 2, 220);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 0.79), new THREE.MeshBasicMaterial({ map:t, transparent:true })); face.position.set(0, 0.29 + 0.4, 0.075); SIGN.add(face); });
 // three flagpoles by the mouth of the drive, flags caught in a breeze
 for (const [x, col] of [[-7.4, 0xf4f6fa], [-6.4, 0x1f3f7a], [-5.4, 0xf4f6fa]]){
   add(new THREE.CylinderGeometry(0.035, 0.045, 4.2, 8), M(0xd8dbe3, {r:0.4, m:0.6}), x, 2.35, 12.0);
@@ -226,10 +336,29 @@ for (const [x, col] of [[-7.4, 0xf4f6fa], [-6.4, 0x1f3f7a], [-5.4, 0xf4f6fa]]){
   const fl = new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ color:col, side:THREE.DoubleSide, roughness:0.8 })); fl.position.set(x+0.47, 4.15, 12.0); fl.castShadow = true; G.add(fl); FLAGS.push(fl); }
 function waveFlags(ph){ for (const fl of FLAGS){ const pos = fl.geometry.attributes.position; for (let i=0;i<pos.count;i++){ const u = (pos.getX(i)+0.45)/0.9; pos.setZ(i, Math.sin(u*6.0 + ph)*0.07*u); } pos.needsUpdate = true; fl.geometry.computeVertexNormals(); } }
 waveFlags(0);
-// a glass canopy over the banner building's doors, lit underneath
-box(5.0, 0.12, 2.2, new THREE.MeshStandardMaterial({ color:0x9fc4dd, roughness:0.1, metalness:0.3, transparent:true, opacity:0.55 }), 0, 2.4, -8.8, 0.03);
-for (const x of [-2.2, 2.2]) add(new THREE.CylinderGeometry(0.06,0.06,2.1,8), M(0xd8dbe3,{r:0.4,m:0.6}), x, 1.35, -7.8);
-glow(0, 2.1, -8.6, 3.0, 0xffe0b0);
+// the entrance (Jose's references): a white canopy on two round columns, warm downlights in its soffit, glass doors
+// into a warm lobby, white planters with shrubs and flowers either side
+box(5.4, 0.24, 2.4, M(0xf4f0e9, { r:0.6 }), 0, 2.44, -8.75, 0.09); box(5.5, 0.07, 2.5, M(0xe0d9ce, { r:0.6 }), 0, 2.29, -8.75, 0.03);
+for (const x of [-2.2, 2.2]){ add(new THREE.CylinderGeometry(0.15, 0.15, 2.0, 20), M(0xf4f0e9, { r:0.55 }), x, 1.3, -7.75); add(new THREE.CylinderGeometry(0.2, 0.2, 0.08, 20), M(0xe0d9ce, { r:0.6 }), x, 0.3, -7.75); }
+for (let k = 0; k < 6; k++) add(new THREE.CylinderGeometry(0.08, 0.08, 0.02, 12), new THREE.MeshBasicMaterial({ color:0xfff0c8 }), -1.9 + k*0.76, 2.245, -8.45, false);
+glow(0, 1.9, -8.7, 2.4, 0xffe0b0);
+{ const lc = document.createElement('canvas'); lc.width = 512; lc.height = 256; const lg = lc.getContext('2d');
+  // the lobby seen through the glass: warm walls, ceiling lights, a wooden desk, plants
+  const grd = lg.createLinearGradient(0, 0, 0, 256); grd.addColorStop(0, '#d9a56a'); grd.addColorStop(0.55, '#f0c88e'); grd.addColorStop(1, '#c98f5a'); lg.fillStyle = grd; lg.fillRect(0, 0, 512, 256);
+  lg.fillStyle = '#fff4d6'; for (let k = 0; k < 6; k++){ lg.beginPath(); lg.ellipse(40 + k*86, 18, 22, 6, 0, 0, Math.PI*2); lg.fill(); }
+  lg.fillStyle = '#8a5a36'; lg.fillRect(140, 160, 240, 60); lg.fillStyle = '#a8703f'; lg.fillRect(140, 152, 240, 12);
+  lg.fillStyle = '#3d6a3f'; for (const x of [40, 470]){ lg.beginPath(); lg.ellipse(x, 150, 26, 44, 0, 0, Math.PI*2); lg.fill(); lg.fillStyle = '#e8e2d8'; lg.fillRect(x - 16, 190, 32, 40); lg.fillStyle = '#3d6a3f'; }
+  lg.fillStyle = '#f4f6fa'; lg.beginPath(); lg.arc(300, 128, 14, 0, Math.PI*2); lg.fill(); lg.fillRect(288, 140, 24, 24);
+  const lt = new THREE.CanvasTexture(lc); lt.colorSpace = THREE.SRGBColorSpace;
+  const lobby = new THREE.MeshBasicMaterial({ map:lt, color:0xd8d0c4 }), frame = M(0x27324d, { r:0.4, m:0.3 }), glassM = new THREE.MeshStandardMaterial({ color:0x9fc3d8, roughness:0.05, metalness:0.3, transparent:true, opacity:0.16, envMapIntensity:1.4 });
+  box(3.7, 0.05, 0.95, pave(3.7, 0.95), 0, 0.255, -9.4, 0.01, false);   // paving right up to the doors
+  add(new THREE.PlaneGeometry(3.1, 1.5), lobby, 0, 0.3 + 0.75, -9.845, false);
+  add(new THREE.BoxGeometry(3.2, 1.55, 0.02), glassM, 0, 0.3 + 0.78, -9.815, false);
+  for (const x of [-1.6, -0.8, 0, 0.8, 1.6]) add(new THREE.BoxGeometry(0.06, 1.6, 0.06), frame, x, 0.3 + 0.8, -9.8);
+  add(new THREE.BoxGeometry(3.3, 0.08, 0.07), frame, 0, 0.3 + 1.58, -9.8); add(new THREE.BoxGeometry(3.3, 0.06, 0.07), frame, 0, 0.32, -9.8);
+  for (const sx of [-1, 1]){ add(new THREE.CylinderGeometry(0.3, 0.24, 0.42, 20), M(0xf2efe9, { r:0.5 }), sx*2.85, 0.3 + 0.21, -9.35);
+    shrub(sx*2.85, 0.68, -9.35, 0.24, 1); const r = rngAt(sx, 3);
+    for (let q = 0; q < 9; q++){ const a = q/9*Math.PI*2; add(new THREE.IcosahedronGeometry(0.045, 0), FLOWERS[[0, 1, 2, 4][q % 4]], sx*2.85 + Math.cos(a)*0.24, 0.76 + r()*0.06, -9.35 + Math.sin(a)*0.24, false); } } }
 // the fountain's spray: a cone of droplets
 let SPRAY = null;
 function spray(seed){ if (SPRAY) scene.remove(SPRAY); const n = 260, pos = new Float32Array(n*3); let r = seed; const rr = () => (r = (r*16807)%2147483647)/2147483647;
@@ -237,47 +366,94 @@ function spray(seed){ if (SPRAY) scene.remove(SPRAY); const n = 260, pos = new F
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   SPRAY = new THREE.Points(g, new THREE.PointsMaterial({ color:0xdff6ff, size:0.08, transparent:true, opacity:0.9, depthWrite:false })); scene.add(SPRAY); return SPRAY; }
 // benches along the sidewalk
-for (const x of [-9, 9]) { box(1.2, 0.08, 0.4, M(0x8a5a3c), x, 0.55, 12.4, 0.02); box(1.2, 0.35, 0.06, M(0x8a5a3c), x, 0.75, 12.2, 0.02); for (const dx of [-0.5,0.5]) box(0.08,0.3,0.4, M(0x2c2c36), x+dx, 0.4, 12.4, 0.01); }
-let TEX = null; const pend = [];
+for (const x of [-14, 9]) bench(x, 12.38, 0, 0.28);
+// an entrance on a building's front (+z face at fz): canopy, columns, glass doors into a lobby, planters either side
+function lobbyTex(){ const lc = document.createElement('canvas'); lc.width = 512; lc.height = 256; const lg = lc.getContext('2d');
+  const grd = lg.createLinearGradient(0, 0, 0, 256); grd.addColorStop(0, '#d9a56a'); grd.addColorStop(0.55, '#f0c88e'); grd.addColorStop(1, '#c98f5a'); lg.fillStyle = grd; lg.fillRect(0, 0, 512, 256);
+  lg.fillStyle = '#fff4d6'; for (let k = 0; k < 6; k++){ lg.beginPath(); lg.ellipse(40 + k*86, 18, 22, 6, 0, 0, Math.PI*2); lg.fill(); }
+  lg.fillStyle = '#8a5a36'; lg.fillRect(140, 160, 240, 60); lg.fillStyle = '#a8703f'; lg.fillRect(140, 152, 240, 12);
+  for (const x of [40, 470]){ lg.fillStyle = '#3d6a3f'; lg.beginPath(); lg.ellipse(x, 150, 26, 44, 0, 0, Math.PI*2); lg.fill(); lg.fillStyle = '#e8e2d8'; lg.fillRect(x - 16, 190, 32, 40); }
+  const t = new THREE.CanvasTexture(lc); t.colorSpace = THREE.SRGBColorSpace; return t; }
+function entrance(key, cx, fz, dw=2.4){ const fr = M(0x27324d, { r:0.4, m:0.3 }), white = M(0xf4f0e9, { r:0.55 });
+  add(new THREE.PlaneGeometry(dw, 1.4), new THREE.MeshBasicMaterial({ map:lobbyTex(), color:0xd8d0c4 }), cx, 0.3 + 0.72, fz + 0.055, false);
+  add(new THREE.BoxGeometry(dw + 0.1, 1.45, 0.02), new THREE.MeshStandardMaterial({ color:0x9fc3d8, roughness:0.05, metalness:0.3, transparent:true, opacity:0.16, envMapIntensity:1.4 }), cx, 0.3 + 0.74, fz + 0.08, false);
+  for (let k = 0; k <= 3; k++) add(new THREE.BoxGeometry(0.06, 1.5, 0.06), fr, cx - dw/2 + k*dw/3, 0.3 + 0.75, fz + 0.09);
+  add(new THREE.BoxGeometry(dw + 0.2, 0.08, 0.07), fr, cx, 0.3 + 1.49, fz + 0.09);
+  box(dw + 1.6, 0.2, 1.9, white, cx, 2.25, fz + 0.95, 0.08); box(dw + 1.7, 0.06, 2.0, M(0xe0d9ce, { r:0.6 }), cx, 2.12, fz + 0.95, 0.03);
+  for (const sx of [-1, 1]){ add(new THREE.CylinderGeometry(0.13, 0.13, 1.85, 18), white, cx + sx*(dw/2 + 0.55), 1.22, fz + 1.7); }
+  for (let k = 0; k < 4; k++) add(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 12), new THREE.MeshBasicMaterial({ color:0xfff0c8 }), cx - dw/2 + 0.1 + k*(dw - 0.2)/3, 2.085, fz + 1.1, false);
+  glow(cx, 1.7, fz + 1.0, 2.0, 0xffe0b0);
+  box(dw + 1.8, 0.05, 2.3, pave(dw + 1.8, 2.3), cx, 0.255, fz + 1.15, 0.01, false);
+  for (const sx of [-1, 1]){ const px = cx + sx*(dw/2 + 1.15); add(new THREE.CylinderGeometry(0.28, 0.22, 0.4, 20), M(0xf2efe9, { r:0.5 }), px, 0.5, fz + 0.45);
+    shrub(px, 0.66, fz + 0.45, 0.22, 1); const r = rngAt(px, fz); for (let q = 0; q < 9; q++){ const a = q/9*Math.PI*2; add(new THREE.IcosahedronGeometry(0.045, 0), FLOWERS[[0, 1, 2, 4][q % 4]], px + Math.cos(a)*0.22, 0.74 + r()*0.06, fz + 0.45 + Math.sin(a)*0.22, false); } }
+  // the windows behind the doors go
+  WINDOWS[key] = (WINDOWS[key] || []).filter(m => { const p = m.position; if (p.z > fz - 0.1 && p.y < 0.3 + 1.6 && Math.abs(p.x - cx) < dw/2 + 0.15){ BASE.remove(m); return false; } return true; });
+  [...BASE.children].forEach(m => { const p = m.position; if ((m.material === FRAME || m.material === SILL || m.material === REVEAL) && p.z > fz - 0.1 && p.z < fz + 0.1 && p.y < 0.3 + 1.6 && Math.abs(p.x - cx) < dw/2 + 0.15) BASE.remove(m); }); }
 // ---- the buildings (domain keys) ----
 // Ethics: the brown-brick building at the end of the drive, two big banners on its face, evergreens in its planter
-tower('e', 0, -12.4, 9.5, 5.0, 7, { col:'#6e3a33', band:'#7a4239' });
+tower('e', 0, -13.4, 12, 7.0, 6, { col:'#6e3a33', band:'#7a4239' });   // George Link Jr. Pavilion: its OpenStreetMap outline, ~6 floors
 pend.push(() => { const b1 = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 3.4), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); b1.position.set(-2.6, 2.6, -9.86); BASE.add(b1);
   const l1 = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l1.position.set(-2.6, 3.4, -9.85); BASE.add(l1);
   const b2 = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 3.4), new THREE.MeshBasicMaterial({ color:0x1f3f7a })); b2.position.set(2.8, 2.6, -9.86); BASE.add(b2);
   const s2 = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.6), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); s2.position.set(2.8, 3.4, -9.85); BASE.add(s2); });
-pill(0, -9.2, 1.4, 9.5, curb, 0.26, 0.2).rotation.y = Math.PI/2;
-for (const x of [-3.6,-1.4,0.8,3.4]) tree(x, -9.3, 0.6, 'cone');
+for (const sx of [-1, 1]){ bed([[sx*3.3, -9.82], [sx*5.7, -9.82], [sx*5.95, -9.45], [sx*5.5, -9.08], [sx*4.4, -9.0], [sx*3.35, -9.15]], 0.24, { density:14 });
+  tree(sx*4.5, -9.45, 0.42, 'cone'); }
 // Terminology: the tall white tower behind, the HMH mark near its top
-tower('t', 0.6, -20.5, 4.6, 4.6, 14, { col:'#e9e6df', band:'#d9d4ca' });
-pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ color:0x3a4f8a })); p.position.set(0.6, 0.3+12.2*FL, -18.17); BASE.add(p);
-  const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(0.6, 0.3+12.2*FL, -18.16); BASE.add(l); });
+tower('t', 0.6, -20.1, 4.6, 4.6, 12, { col:'#8a4636', band:'#9a5444' });   // red-brown brick, as in Jose's Google Maps screenshots
+pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ color:0x3a4f8a })); p.position.set(0.6, 0.3+10.2*FL, -17.77); BASE.add(p);
+  const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(0.6, 0.3+10.2*FL, -17.76); BASE.add(l); });
 // no windows under the two banners
+WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position; if (p.z > -10 && p.y < 0.3 + 1.7 && Math.abs(p.x) < 1.75){ BASE.remove(m); return false; } return true; });
+[...BASE.children].forEach(m => { const p = m.position; if ((m.material === FRAME || m.material === SILL) && p.z > -9.95 && p.z < -9.8 && p.y < 0.3 + 1.7 && Math.abs(p.x) < 1.75) BASE.remove(m); });
 WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position, under = p.z > -10 && p.y > 0.8 && p.y < 4.4 && ((p.x > -3.55 && p.x < -1.65) || (p.x > 1.85 && p.x < 3.75)); if (under) BASE.remove(m); return !under; });
 // the long glass buildings either side of it (context)
-tower('x1', -7.8, -20.5, 9, 4.5, 7, 'glass'); tower('x2', 9.4, -20.5, 9, 4.5, 7, { col:'#6b4d6b', band:'#8a6a86' });
-for (const k of ['x1','x2']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647;  delete WINDOWS[k]; }
+tower('x2', 12, -22.4, 11, 4, 8, { col:'#5e3a34', band:'#6e4038' });   // the old brick building with rows of windows, behind
+// behind Ethics (Jose, 2026-10-26: "behind the ethics building it should have a taller building"): the old brick
+// building with rows of windows from his screenshots of the drive, 14 floors (taller than the tower, so it shows over
+// Ethics from the corner), always full height (no exam area)
+tower('x5', 1.4, -23.8, 11, 2.8, 14, { col:'#7a3f33', band:'#e6d8c2' });
+for (const k of ['x2','x5']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS[k].forEach(m => { if (rr() < 0.32) m.material = LIT; }); delete WINDOWS[k]; }
 // US Systems: the brick building on the left: cream bands, a white roof, glass on its lower floors
-tower('s', -10.2, 1.0, 7.0, 12.0, 8, {});
-box(7.1, 2*FL, 12.1, GLASSWALL, -10.2, 0.3+FL, 1.0, 0.04);
-box(7.2, 0.25, 12.2, M(0xf1f2f4), -10.2, 0.3+8*FL+0.12, 1.0, 0.04);
-// the dark parking deck on the right (context): open levels
-for (let l=0;l<7;l++){ box(6.4, 0.25, 8.2, M(0x3f4352), 9.6, 0.3+l*0.95+0.12, 6.2, 0.04); }
-for (const [dx,dz] of [[-3,-4],[3,-4],[-3,4],[3,4],[0,-4],[0,4],[-3,0],[3,0]]) box(0.28, 6.6, 0.28, M(0x3a3e4c), 9.6+dx, 0.3+3.3, 6.2+dz, 0.03);
-// Culture: the dark stepped tower behind the deck
-tower('c', 10.6, -5.2, 7.0, 8.0, 11, 'glass');
-box(5.4, 1.2*FL, 6.2, GLASSWALL, 10.6, 0.3+11*FL+0.4, -5.6, 0.05);
-// Encounter: the Helena Theurer Pavilion, back right: glass tower with the lettering, on a brick base with slit windows
-box(10, 3*FL, 7, M(0x9a5444), 15.5, 0.3+1.5*FL, -16, 0.06);
-for (let i=0;i<9;i++) box(0.16, 3*FL*0.7, 0.04, M(0xf3efe6), 11.2+i*1.05, 0.3+1.6*FL, -12.47, 0.02, false);
-tower('n', 15.5, -16.6, 9.0, 6.0, 9, 'glass');
-WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, top = p.y > 0.3 + 3*FL + 8*FL; if (top) BASE.remove(m); return !top; });
+tower('s', -9.2, 1.6, 6.5, 9.0, 6, {});   // the Jurist Research Center (OpenStreetMap outline), ~6 floors
+box(6.6, 2*FL, 9.1, GLASSWALL, -9.2, 0.3+FL, 1.6, 0.04);
+box(6.7, 0.25, 9.2, M(0xf1f2f4), -9.2, 0.3+6*FL+0.12, 1.6, 0.04);
+entrance('s', -8.6, 1.6 + 4.5 + 0.05, 2.2);
+// Culture: the big dark building right of the drive, stepping back as it rises (Jose's Google Maps screenshots,
+// 2026-10-26; it replaced a parking deck and a dark tower that were guesses). Three tiers, all Culture's.
+// (Jose's Street View, Sep 2025: maroon brick with cream bands, a dark glass block on top, columns at the ground)
+const CX = 12.4, CZ = 2.1, CW = 12.4, CD = 11.0, DARK = { col:'#7a3530', band:'#e6d8c2' }, TOPGLASS = { glassCol:0x262d3c };
+tower('c', CX, CZ, CW, CD, 4, DARK);
+tower('x3', CX + 0.4, CZ - 0.6, CW - 1.6, CD - 2.4, 3, DARK, 0.3 + 4*FL + 0.22);
+tower('x4', CX + 0.8, CZ - 1.4, CW - 3.4, CD - 5.6, 2, TOPGLASS, 0.3 + 7*FL + 0.44);
+// the colonnade along its side on the drive: brick piers under a cream beam
+for (let z = CZ - CD/2 + 0.7; z < CZ + CD/2 - 0.3; z += 1.55) box(0.3, 1.25, 0.3, M(0x7a3530, { r:0.85 }), CX - CW/2 - 0.35, 0.3 + 0.62, z, 0.03);
+box(0.5, 0.18, CD - 0.6, M(0xe6d8c2, { r:0.6 }), CX - CW/2 - 0.3, 0.3 + 1.3, CZ, 0.03);
+WINDOWS.c.push(...WINDOWS.x3, ...WINDOWS.x4); delete WINDOWS.x3; delete WINDOWS.x4;
+{ const top = 0.3 + 9*FL + 0.44; Object.assign(BOX.c, { h: top + 0.5, top: top + 0.8, roof: top + 0.22, crane: [CX + 0.8 - (CW - 3.4)*0.36, CZ - 1.4 + (CD - 5.6)*0.34] }); LABEL_AT.c = [CX + 0.8, top + 0.9, CZ - 1.4]; }
+// back left (context): the blue glass building with the lettering, on a brick base with slit windows (the
+// Helena Theurer Pavilion, a guess), its windows lit here and there
+box(10, 3*FL, 7, M(0x9a5444), -8.5, 0.3+1.5*FL, -20, 0.06);
+for (let i=0;i<9;i++) box(0.16, 3*FL*0.7, 0.04, M(0xf3efe6), -12.8+i*1.05, 0.3+1.6*FL, -16.47, 0.02, false);
+tower('x1', -8.5, -20.5, 9.0, 6.0, 9, 'glass', 0.3 + 3*FL);
+{ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS.x1.forEach(m => { if (m.position.y > 0.3 + 11*FL) BASE.remove(m); else if (rr() < 0.32) m.material = LIT; }); delete WINDOWS.x1; }
 pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
   g.fillStyle = '#ffffff'; g.font = 'bold 44px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('HACKENSACK UNIVERSITY MEDICAL CENTER', 512, 34);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const p = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 0.52), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(15.5, 0.3 + 3*FL + 9*FL - 0.33, -13.56); BASE.add(p); });
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 0.52), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(-8.5, 0.3 + 3*FL + 9*FL - 0.33, -17.46); BASE.add(p); });
+// Encounter: John Theurer Cancer Center, back right (Jose, 2026-10-26, his screenshots): orange brick with white
+// window bands, ~5 floors, a curved glass corner where its doors are, the name on its face
+const JT = { x:14.4, z:-14.6, w:10.6, d:6 };
+tower('n', JT.x, JT.z, JT.w, JT.d, 5, { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc }, 0.3);
+add(new THREE.CylinderGeometry(1.4, 1.4, 5*FL, 28, 1, false, Math.PI*0.5, Math.PI*1.5), GLASSWALL, JT.x - JT.w/2 + 0.9, 0.3 + 2.5*FL, JT.z + JT.d/2 - 0.9);
+for (let f=1;f<=5;f++) add(new THREE.TorusGeometry(1.42, 0.04, 6, 28, Math.PI*1.5), M(0xe8e4dc), JT.x - JT.w/2 + 0.9, 0.3 + f*FL, JT.z + JT.d/2 - 0.9, false).rotation.set(Math.PI/2, 0, Math.PI*0.5);
+pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#f6efe2'; g.font = 'bold 40px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JOHN THEURER CANCER CENTER', 512, 34);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.4), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(JT.x + 1.2, 0.3 + 3.5*FL, JT.z + JT.d/2 + 0.05); BASE.add(p); });
+WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, under = p.z > JT.z && p.y > 0.3 + 3*FL && p.y < 0.3 + 4*FL && p.x > JT.x - 2 && p.x < JT.x + 4.4; if (under) BASE.remove(m); return !under; });
+entrance('n', JT.x - 1.4, JT.z + JT.d/2, 2.2);
 // ---- the helipad on the white tower's roof: pad, lit H, edge lights ----
-const PAD = { x:0.6, y:0.3 + 14*FL + 0.22 + 0.06, z:-20.5 };
+const PAD = { x:0.6, y:0.3 + 12*FL + 0.22 + 0.06, z:-20.1 };
 add(new THREE.CylinderGeometry(1.7, 1.7, 0.06, 32), M(0x3a3d4c, {r:0.9}), PAD.x, PAD.y, PAD.z, false);
 add(new THREE.RingGeometry(1.35, 1.5, 32), new THREE.MeshBasicMaterial({ color:0xf4f6fa, side:THREE.DoubleSide }), PAD.x, PAD.y+0.035, PAD.z, false).rotation.x = -Math.PI/2;
 for (const [w,h,dx] of [[0.14,0.9,-0.3],[0.14,0.9,0.3],[0.5,0.14,0]]){ const hm = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); hm.rotation.x = -Math.PI/2; hm.position.set(PAD.x+dx, PAD.y+0.04, PAD.z); G.add(hm); }
@@ -313,24 +489,82 @@ function ambLights(frame){ AMB.children.filter(c => c.userData.lamp).forEach(c =
     if (on){ const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color: i ? 0x6fa0ff : 0xff5a5a, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx,ly+0.05,lz); gl.scale.set(1.3,1.3,1); gl.userData.lamp = true; AMB.add(gl); } } }
 
 // ---- people: small rounded figures, the same from any side, two walk frames (legs apart / together) ----
-const SKIN = [0xf1c9a5, 0xc68642, 0x8d5524, 0xffdbac, 0xe0ac69];
-function person(kind, i=0){ const g = new THREE.Group(); g.scale.setScalar(1.75); const skin = M(SKIN[i % SKIN.length], {r:0.9});
-  const C = { patient:[0xa9d3f0,0xa9d3f0], visitor:[0xc9583a,0x2b2f3a], nurse:[0x3aa6a0,0x3aa6a0], doctor:[0xf4f6fa,0x2f5fa6], kid:[0xf2c94c,0x2f5fa6], elder:[0x8a7cb3,0x4a4a5a] }[kind] || [0x999999,0x444444];
-  const sc = kind === 'kid' ? 0.68 : 1, H = 0.62*sc;
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.1*sc, 0.22*sc, 4, 10), M(C[0], {r:0.85})); body.position.y = 0.31*sc + 0.1; body.castShadow = true; g.add(body);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.085*sc, 12, 10), skin); head.position.y = 0.58*sc + 0.1; g.add(head);
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.088*sc, 12, 8, 0, Math.PI*2, 0, Math.PI*0.5), M([0x2b1d14,0x5a3a1a,0x1a1a1a,0xd9c27a,0x8a8a8a][i%5], {r:0.9})); hair.position.y = 0.6*sc + 0.1; g.add(hair);
-  const legs = []; for (const dx of [-0.045, 0.045]){ const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035*sc, 0.035*sc, 0.2*sc, 8), M(C[1], {r:0.9})); l.position.set(dx*sc, 0.1*sc + 0.1, 0); g.add(l); legs.push(l); }
-  g.userData.legs = legs; g.userData.h = H;
-  if (kind === 'wheel'){ // a seated figure in a wheelchair, pushed by another
-    g.clear(); const seat = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.05, 0.26), M(0x2b2f3a)); seat.position.y = 0.26; g.add(seat);
-    for (const dx of [-0.15, 0.15]){ const w = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.03, 16), M(0x3a3e4c, {r:0.6, m:0.3})); w.rotation.z = Math.PI/2; w.position.set(dx, 0.13, -0.05); g.add(w); }
-    const sb = new THREE.Mesh(new THREE.CapsuleGeometry(0.09, 0.16, 4, 10), M(0xa9d3f0)); sb.position.set(0, 0.44, 0); g.add(sb);
-    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 10), skin); sh.position.set(0, 0.66, 0); g.add(sh);
-    const pb = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.22, 4, 10), M(0x3aa6a0)); pb.position.set(0, 0.41, -0.32); pb.castShadow = true; g.add(pb);
-    const ph = new THREE.Mesh(new THREE.SphereGeometry(0.085, 12, 10), M(SKIN[(i+2)%5])); ph.position.set(0, 0.68, -0.32); g.add(ph);
-    for (const dx of [-0.045, 0.045]){ const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.2, 8), M(0x3aa6a0)); l.position.set(dx, 0.2, -0.32); g.add(l); legs.length = 0; legs.push(l); }
-    g.userData.legs = legs; g.userData.h = 0.75; }
+// ---- people: cute miniature characters (Jose, 2026-10-26, his references): a big round head with eyes that catch
+// the light, rosy cheeks and a small smile, distinct hair, compact rounded bodies in their own clothes, props. Each
+// person is a few meshes (body, head, two legs that stride), coloured per vertex, so a crowd stays cheap to draw.
+const PPL = new THREE.MeshStandardMaterial({ vertexColors:true, roughness:0.72, envMapIntensity:0.15 });
+const SKIN = [0xf3cfae, 0xc68642, 0x8d5524, 0xffdcb8, 0xe0ac69], HAIRC = [0x3b2416, 0x5a3a1a, 0x1c1410, 0xc99a5b, 0x2a1a12];
+function part(geo, col, p=[0,0,0], r=[0,0,0], s=[1,1,1]){ const g = geo.index ? geo.toNonIndexed() : geo;
+  g.applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3(...p), new THREE.Quaternion().setFromEuler(new THREE.Euler(...r)), new THREE.Vector3(...s)));
+  for (const a of Object.keys(g.attributes)) if (!['position','normal','uv'].includes(a)) g.deleteAttribute(a);
+  if (!g.attributes.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count*2), 2));
+  const c = new THREE.Color(col), n = g.attributes.position.count, ca = new Float32Array(n*3); for (let i = 0; i < n; i++){ ca[i*3] = c.r; ca[i*3+1] = c.g; ca[i*3+2] = c.b; }
+  g.setAttribute('color', new THREE.BufferAttribute(ca, 3)); return g; }
+const bake = parts => { const m = new THREE.Mesh(mergeGeometries(parts, false), PPL); m.castShadow = true; m.receiveShadow = true; return m; };
+const sph = (r, w=14, h=10) => new THREE.SphereGeometry(r, seg(w), seg(h)), pill2 = (r, l) => new THREE.CapsuleGeometry(r, l, LITE ? 2 : 4, seg(10));
+// the head around its own centre, facing +z
+function headParts(skin, style, hair, R=0.2){
+  const P = [part(sph(R, 20, 16), skin)];
+  for (const sx of [-1, 1]){
+    P.push(part(sph(R*0.13, 10, 8), 0x2a1a12, [sx*R*0.36, R*0.0, R*0.9], [0,0,0], [1, 1.3, 0.6]));            // eyes
+    P.push(part(sph(R*0.05, 6, 5), 0xffffff, [sx*R*0.36 + R*0.045, R*0.07, R*0.99]));                        // the glint
+    P.push(part(sph(R*0.15, 10, 8), 0xff9c9c, [sx*R*0.6, -R*0.24, R*0.75], [0,0,0], [1, 0.55, 0.35])); }      // cheeks
+  P.push(part(new THREE.TorusGeometry(R*0.15, R*0.035, 6, 12, Math.PI), 0x7a2e1e, [0, -R*0.22, R*0.94], [0, 0, Math.PI]));   // smile
+  P.push(part(sph(R*0.2, 8, 6), skin, [-R, -R*0.05, 0], [0,0,0], [0.45, 0.9, 0.7]), part(sph(R*0.2, 8, 6), skin, [R, -R*0.05, 0], [0,0,0], [0.45, 0.9, 0.7]));   // ears
+  const capH = new THREE.SphereGeometry(R*1.07, seg(20), seg(12), 0, Math.PI*2, 0, Math.PI*0.52);
+  if (style === 'curly'){ P.push(part(capH, hair, [0, R*0.04, -R*0.05], [-0.3, 0, 0])); for (let k = 0; k < 14; k++){ const a = k/14*Math.PI*2, up = 0.55 + (k % 2)*0.25;
+      P.push(part(sph(R*0.3, 8, 6), hair, [Math.cos(a)*R*0.82*Math.cos(up*0.9), R*(0.35 + up*0.55), -R*0.1 + Math.sin(a)*R*0.82*Math.cos(up*0.9)])); } }
+  else { P.push(part(capH, hair, [0, R*0.04, -R*0.06], [-0.32, 0, 0]));
+    P.push(part(sph(R*0.5, 12, 8), hair, [-R*0.28, R*0.62, R*0.42], [0, 0, 0.5], [1.2, 0.5, 0.7]));                     // a fringe swept to one side
+    if (style === 'bun') P.push(part(sph(R*0.42, 12, 10), hair, [0, R*0.9, -R*0.55]));
+    if (style === 'long') P.push(part(sph(R*0.78, 14, 10), hair, [0, -R*0.35, -R*0.5], [0,0,0], [1.15, 1.35, 0.55]));
+    if (style === 'bob') for (const sx of [-1, 1]) P.push(part(sph(R*0.48, 12, 8), hair, [sx*R*0.78, -R*0.15, -R*0.12])); }
+  return P; }
+// what each kind wears: [top, bottom, extra]
+const WEAR = { doctor:[0xf6f7fa, 0x2c4a7a], nurse:[0x4a90d9, 0x4a90d9], teal:[0x3aa6a0, 0x3aa6a0], visitor:[0xc9583a, 0x3d5a8a], hoodie:[0x5f8f62, 0x34466e],
+  patient:[0xa9d3f0, 0xa9d3f0], elder:[0xd9a441, 0x7a5a3a], kid:[0xf2c94c, 0x2f5fa6], sweater:[0xe9e2d0, 0x5a4a6a] };
+function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.visitor, skin = SKIN[i % SKIN.length], P = [];
+  P.push(part(pill2(0.15, 0.17), top, [0, 0.47, 0], [0,0,0], [1, 1, 0.82]));                                        // torso
+  if (kind === 'doctor'){ P.push(part(new THREE.CylinderGeometry(0.16, 0.19, 0.16, 16), top, [0, 0.36, 0], [0,0,0], [1, 1, 0.84]));   // the coat's hem
+    P.push(part(new THREE.BoxGeometry(0.09, 0.13, 0.02), 0x2c4a7a, [0, 0.55, 0.127]));                                 // scrubs at the neck
+    P.push(part(new THREE.TorusGeometry(0.075, 0.012, 6, 16, Math.PI), 0x2b2f3a, [0, 0.58, 0.13], [0, 0, Math.PI]), part(sph(0.025, 8, 6), 0xb8bec8, [0.05, 0.47, 0.135])); }   // stethoscope
+  if (kind === 'nurse' || kind === 'teal') P.push(part(new THREE.BoxGeometry(0.05, 0.035, 0.01), 0xffffff, [0.07, 0.56, 0.125]));           // name badge
+  if (kind === 'patient') P.push(part(new THREE.CylinderGeometry(0.15, 0.18, 0.18, 16), top, [0, 0.33, 0], [0,0,0], [1, 1, 0.84]));
+  if (kind === 'visitor' || kind === 'hoodie') P.push(part(new RoundedBoxGeometry(0.2, 0.24, 0.1, 2, 0.04), 0x7a5236, [0, 0.5, -0.15]));     // backpack
+  if (kind === 'elder') P.push(part(new THREE.BoxGeometry(0.03, 0.2, 0.01), 0xb08030, [0, 0.47, 0.128]));                                // cardigan opening
+  // arms: one may be raised in talk, holding something
+  for (const sx of [-1, 1]){ const up = gesture && sx === 1;
+    const rot = up ? [-1.15, 0, -0.15] : [0.05, 0, sx*0.22], sleeve = kind === 'nurse' || kind === 'teal' ? top : top;
+    const ax = sx*0.19, ay = 0.6, L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
+    P.push(part(pill2(0.055, L), sleeve, [ax + dir.x*L*0.6, ay + dir.y*L*0.6, dir.z*L*0.6], rot));
+    P.push(part(sph(0.05, 8, 6), skin, [ax + dir.x*(L + 0.06), ay + dir.y*(L + 0.06), dir.z*(L + 0.06)]));
+    if (up && kind === 'doctor') P.push(part(new THREE.BoxGeometry(0.13, 0.17, 0.02), 0xd9c29a, [ax + dir.x*0.22, ay + dir.y*0.22 - 0.04, dir.z*0.22 + 0.04], [-0.4, 0, 0]));   // clipboard
+    if (up && (kind === 'nurse' || kind === 'teal')) P.push(part(new THREE.BoxGeometry(0.14, 0.1, 0.015), 0x22283a, [ax + dir.x*0.24, ay + dir.y*0.24, dir.z*0.24 + 0.03], [-0.6, 0, 0])); }   // tablet
+  return P; }
+// a leg hangs from its hip (the mesh's origin), so a stride is a turn about it
+function leg(colour, shoe=0x2b2626){ return bake([part(pill2(0.062, 0.13), colour, [0, -0.12, 0]), part(sph(0.07, 10, 8), shoe, [0, -0.25, 0.03], [0,0,0], [1, 0.6, 1.4])]); }
+function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && i % 2 === 1){ const g = new THREE.Group(), k = kind === 'kid' ? 'kid' : kind, sc = kind === 'kid' ? 0.74 : 1;
+  const style = kind === 'elder' ? 'bob' : ['short', 'bun', 'curly', 'long', 'short'][i % 5], hair = kind === 'elder' ? 0xc9c4bc : HAIRC[i % HAIRC.length];
+  if (kind === 'wheel'){   // a patient in a wheelchair, pushed by a visitor (as in Jose's reference)
+    const C = [], navy = 0x2b3a5a, steel = 0xb8bec8;
+    C.push(part(new RoundedBoxGeometry(0.34, 0.05, 0.32, 2, 0.02), navy, [0, 0.36, 0]), part(new RoundedBoxGeometry(0.34, 0.32, 0.04, 2, 0.02), navy, [0, 0.55, -0.16]));
+    for (const sx of [-1, 1]){ C.push(part(new THREE.TorusGeometry(0.2, 0.025, 8, 20), 0x22283a, [sx*0.2, 0.22, -0.02], [0, Math.PI/2, 0]), part(new THREE.CylinderGeometry(0.17, 0.17, 0.01, 16), steel, [sx*0.2, 0.22, -0.02], [0, 0, Math.PI/2]));
+      C.push(part(new THREE.TorusGeometry(0.05, 0.015, 6, 10), 0x22283a, [sx*0.14, 0.06, 0.16], [0, Math.PI/2, 0]), part(new THREE.CylinderGeometry(0.012, 0.012, 0.36, 6), steel, [sx*0.17, 0.72, -0.2], [0.3, 0, 0])); }
+    // the patient, seated: an elder in a cardigan with grey hair
+    C.push(part(pill2(0.14, 0.12), WEAR.elder[0], [0, 0.55, -0.04], [0,0,0], [1, 1, 0.82]), part(pill2(0.06, 0.18), WEAR.elder[1], [-0.07, 0.43, 0.1], [Math.PI/2, 0, 0]), part(pill2(0.06, 0.18), WEAR.elder[1], [0.07, 0.43, 0.1], [Math.PI/2, 0, 0]));
+    for (const sx of [-1, 1]) C.push(part(pill2(0.06, 0.12), 0x7a5a3a, [sx*0.07, 0.28, 0.24]), part(sph(0.06, 8, 6), 0x2b2626, [sx*0.07, 0.17, 0.27], [0,0,0], [1, 0.6, 1.3]), part(pill2(0.05, 0.14), WEAR.elder[0], [sx*0.17, 0.55, 0.05], [0.6, 0, 0]));
+    const chair = bake(C); g.add(chair);
+    const ph = bake(headParts(SKIN[(i+3) % 5], 'bob', 0xd6d1c9)); ph.position.set(0, 0.86, -0.02); g.add(ph);
+    // the one pushing
+    const pb = bake(bodyParts('sweater', i+1, false).concat([part(pill2(0.055, 0.2), WEAR.sweater[0], [-0.17, 0.62, 0.17], [1.25, 0, 0]), part(pill2(0.055, 0.2), WEAR.sweater[0], [0.17, 0.62, 0.17], [1.25, 0, 0])]));
+    pb.position.set(0, 0, -0.5); g.add(pb);
+    const pHead = bake(headParts(SKIN[(i+1) % 5], 'bun', HAIRC[(i+1) % 5])); pHead.position.set(0, 0.84, -0.5); g.add(pHead);
+    const legs = [-1, 1].map(sx => { const l = leg(WEAR.sweater[1]); l.position.set(sx*0.065, 0.27, -0.5); g.add(l); return l; });
+    g.userData.legs = legs; g.userData.h = 1.1; g.visible = false; scene.add(g); LIVE.push(g); return g; }
+  const body = bake(bodyParts(k, i, gesture)); g.add(body);
+  const head = bake(headParts(SKIN[i % SKIN.length], style, hair)); head.position.y = 0.84; g.add(head);
+  const legs = [-1, 1].map(sx => { const l = leg(WEAR[k] ? WEAR[k][1] : 0x3d5a8a); l.position.set(sx*0.065, 0.27, 0); g.add(l); return l; });
+  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = 1.1*sc; g.userData.head = head;
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function stride(g, f){ g.userData.legs.forEach((l, k) => { l.rotation.x = f ? (k ? 0.45 : -0.45) : 0; }); }
 function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandardMaterial({ color:0xf4f6fa, roughness:0.35, metalness:0.3 });
@@ -350,19 +584,19 @@ const CAR_IN2 = vehicle('car', 0x2b2f3a);
 const LOT_A = vehicle('car', 0xe9e2d0), LOT_B = vehicle('car', 0xe9e2d0);
 for (const lx of [-0.17, 0.17]){ const h = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,6), new THREE.MeshBasicMaterial({ color:0xffffff })); h.position.set(lx, 0.2, -0.5); LOT_A.add(h);
   const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xffffff, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx, 0.2, -0.56); gl.scale.set(0.45,0.45,1); LOT_A.add(gl); }
-// people sitting on the benches: legs forward on the seat, two looks (head straight, head turned)
-function sitter(kind, i=0){ const g = new THREE.Group(); g.scale.setScalar(1.75); const skin = M(SKIN[i % SKIN.length], {r:0.9});
-  const C = { patient:[0xa9d3f0,0xa9d3f0], visitor:[0xc9583a,0x2b2f3a], elder:[0x8a7cb3,0x4a4a5a], kid:[0xf2c94c,0x2f5fa6], nurse:[0x3aa6a0,0x3aa6a0] }[kind] || [0x999999,0x444444];
-  const sc = kind === 'kid' ? 0.68 : 1;
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.1*sc, 0.2*sc, 4, 10), M(C[0], {r:0.85})); body.position.set(0, 0.2*sc, 0); body.castShadow = true; g.add(body);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.085*sc, 12, 10), skin); head.position.set(0, 0.45*sc, 0); g.add(head);
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.088*sc, 12, 8, 0, Math.PI*2, 0, Math.PI*0.5), M([0x2b1d14,0x5a3a1a,0x1a1a1a,0xd9c27a,0x8a8a8a][i%5], {r:0.9})); hair.position.set(0, 0.47*sc, 0); g.add(hair);
-  for (const dx of [-0.045, 0.045]){ const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035*sc, 0.035*sc, 0.2*sc, 8), M(C[1], {r:0.9})); l.rotation.x = Math.PI/2; l.position.set(dx*sc, 0.02*sc, 0.1*sc); g.add(l);
-    const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.035*sc, 0.035*sc, 0.16*sc, 8), M(C[1], {r:0.9})); sh.position.set(dx*sc, -0.08*sc, 0.2*sc); g.add(sh); }
-  g.userData.head = head; g.userData.hair = hair;
+// someone seated on a bench or a café chair: the origin is the seat, legs forward and down, the head turns on its own
+function sitter(kind, i=0){ const g = new THREE.Group(), sc = kind === 'kid' ? 0.74 : 1, k = WEAR[kind] ? kind : 'visitor', [top, bottom] = WEAR[k], skin = SKIN[i % SKIN.length];
+  const P = [part(pill2(0.15, 0.15), top, [0, 0.22, -0.02], [0,0,0], [1, 1, 0.82])];
+  for (const sx of [-1, 1]){ P.push(part(pill2(0.062, 0.16), bottom, [sx*0.07, 0.03, 0.12], [Math.PI/2, 0, 0]), part(pill2(0.058, 0.12), bottom, [sx*0.07, -0.12, 0.24]),
+      part(sph(0.065, 10, 8), 0x2b2626, [sx*0.07, -0.24, 0.28], [0,0,0], [1, 0.6, 1.4]));
+    P.push(part(pill2(0.052, 0.17), top, [sx*0.18, 0.22, 0.05], [0.5, 0, sx*0.1]), part(sph(0.048, 8, 6), skin, [sx*0.17, 0.12, 0.15])); }
+  g.add(bake(P));
+  const style = kind === 'elder' ? 'bob' : ['short', 'bun', 'curly', 'long', 'short'][i % 5], hair = kind === 'elder' ? 0xc9c4bc : HAIRC[i % HAIRC.length];
+  const head = bake(headParts(skin, style, hair)); head.position.y = 0.58; g.add(head);
+  g.scale.setScalar(sc); g.userData.head = head; g.userData.hair = new THREE.Object3D();
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function turnHead(g, f){ const a = f ? 0.55 : 0; g.userData.head.rotation.y = a; g.userData.hair.rotation.y = a; g.userData.hair.position.x = f ? 0.012 : 0; }
-const SITTERS = [ { g: sitter('elder', 3), at: [-9.35, 0.59, 12.4] }, { g: sitter('kid', 0), at: [-8.7, 0.59, 12.4] }, { g: sitter('visitor', 1), at: [9.3, 0.59, 12.4] } ];
+const SITTERS = [ { g: sitter('elder', 3), at: [-14.35, 0.59, 12.4] }, { g: sitter('kid', 0), at: [-13.7, 0.59, 12.4] }, { g: sitter('visitor', 1), at: [9.3, 0.59, 12.4] } ];
 // a flock of birds crossing the sky: five small dark Vs, wings up and wings down
 function flock(){ const g = new THREE.Group(); const dark = new THREE.MeshBasicMaterial({ color:0x1a1424 }); g.userData.wings = [];
   for (const [dx, dy, dz] of [[0,0,0],[-1.6,-0.4,0.6],[1.5,-0.5,0.4],[-3.0,-1.0,1.1],[2.9,-1.1,0.9]]){ const b = new THREE.Group(); b.position.set(dx, dy, dz);
@@ -371,15 +605,33 @@ function flock(){ const g = new THREE.Group(); const dark = new THREE.MeshBasicM
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function flap(g, f){ g.userData.wings.forEach(p => { p.rotation.z = p.userData.sd * (f ? -0.6 : 0.5); }); }
 const BIRDS = flock();
-// daylight: no headlight glows on the moving things (the ambulance's flashing bar is added at capture)
-{ const sp = []; LIVE.forEach(g => g.traverse(o => { if (o.isSprite) sp.push(o); })); sp.forEach(o => o.parent.remove(o)); }
-const keepStill = g => { LIVE.splice(LIVE.indexOf(g), 1); scene.remove(g); BASE.add(g); g.visible = true; return g; };
-function stand(kind, i, x, z, ry=0, f=0){ const g = keepStill(person(kind, i)); g.position.set(x, 0.1, z); g.rotation.y = ry; stride(g, f); return g; }
-function sit(kind, i, x, y, z, ry=0){ const g = keepStill(sitter(kind, i)); g.position.set(x, y, z); g.rotation.y = ry; return g; }
-for (const [k,i,x,z,ry,f] of [['doctor',3,-1.2,-7.6,0.3],['nurse',2,-0.6,-7.9,-2.6],['visitor',1,1.6,-7.5,0.8,1],['patient',4,2.3,-7.9,-0.4],['kid',0,2.0,-7.3,-0.4],
+// IDLE: people standing and sitting about, each captured alone in two frames (now a turn and a step, now a head
+// turn) that the app flips now and then; they are not in the board
+const IDLE = [];
+function stand(kind, i, x, z, ry=0, f=0){ const g = person(kind, i); g.position.set(x, 0.1, z);
+  IDLE.push({ g, set: k => { g.rotation.y = ry + (k ? 0.6 : 0); stride(g, k ? 1 - f : f); } }); return g; }
+function sit(kind, i, x, y, z, ry=0){ const g = sitter(kind, i); g.position.set(x, y, z); g.rotation.y = ry;
+  IDLE.push({ g, set: k => turnHead(g, k) }); return g; }
+// a tower crane on each building's roof, swinging its jib; the app shows it until the building is fully painted
+function crane(key){ const b = BOX[key], g = new THREE.Group(), Y = M(0xf2b33d, { r:0.6 }), D = M(0x5b5f6c, { r:0.7 });
+  // short and stout, on the roof's corner nearest the camera, its jib over the roof: low enough to stay under the badge
+  const mast = new THREE.Mesh(new THREE.BoxGeometry(0.34, 1.6, 0.34), Y); mast.position.y = 0.8; mast.castShadow = true; g.add(mast);
+  for (let k = 0; k < 4; k++){ const r = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.06, 0.4), D); r.position.y = 0.2 + k*0.4; g.add(r); }
+  const jib = new THREE.Group(); jib.position.y = 1.6; g.add(jib);
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.26, 0.26), Y); arm.position.x = 1.0; arm.castShadow = true; jib.add(arm);
+  const cw = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.46, 0.5), D); cw.position.set(-0.85, -0.22, 0); jib.add(cw);
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.42, 0.42), M(0xe9e2d0)); cab.position.set(0.15, -0.3, 0.26); jib.add(cab);
+  const peak = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.7, 4), Y); peak.position.y = 0.45; jib.add(peak);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.8, 4), D); cable.position.set(2.5, -0.4, 0); jib.add(cable);
+  const hook = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.4), M(0xc9583a)); hook.position.set(2.5, -0.85, 0); jib.add(hook);
+  if (b.crane) g.position.set(b.crane[0], b.roof, b.crane[1]); else g.position.set(b.x - b.w*0.36, b.roof, b.z + b.d*0.34); g.userData.jib = jib; g.userData.a0 = 0.15;   // the swing (a0 +- 0.5) stays across the roof, never end-on to the camera
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
+for (const [k,i,x,z,ry,f] of [['doctor',3,-1.45,-7.45,0.5],['nurse',1,-0.75,-7.85,-0.4],['wheel',2,0.55,-7.2,-0.5],['visitor',1,1.55,-7.55,-0.9,1],['kid',0,1.25,-6.95,-0.6],
     ['visitor',2,-15,12.6,1.57,1],['elder',4,-12.4,12.9,-1.57],['visitor',0,-1.5,12.5,1.57,1],['nurse',1,1.0,12.8,-1.57,1],['doctor',2,6.5,12.4,1.57],['patient',3,13.5,12.7,-1.57,1],['visitor',4,16.8,12.5,1.57],
-    ['doctor',0,-6.1,-1.2,0],['nurse',3,-6.2,3.6,3.1,1],['visitor',1,-12.6,-10.2,0.6],['kid',2,-13.2,-13.6,2.4,1],['elder',0,-17.4,-9.3,-0.8],['patient',1,15.2,-3.2,1.2],['visitor',3,16.1,-2.4,-2.0],
-    ['nurse',4,7.9,-9.2,0.2,1],['doctor',1,-5.4,-9.6,0.4],['kid',3,-9.6,10.2,0.9,1]]) stand(k, i, x, z, ry, f);
+    ['doctor',0,-5.6,-1.2,0],['nurse',3,-5.6,3.6,3.1,1],['visitor',1,-12.6,-10.2,0.6],['kid',2,-13.2,-13.6,2.4,1],['elder',0,-17.2,-9.6,-0.8],['patient',1,17.4,-5.2,1.2],['visitor',3,18.0,-4.6,-2.0],
+    ['nurse',4,7.9,-9.6,0.2,1],['doctor',1,-5.4,-9.6,0.4],['kid',3,-6.4,10.3,0.9,1],
+    ['hoodie',2,-11.8,-11.2,-1.2],['teal',3,-12.4,-12.3,-0.6,1],['doctor',1,8.6,-11.4,0.3],['sweater',4,9.3,-11.2,-2.7,1],['wheel',0,12.6,-9.3,0.6],['nurse',3,13.6,-9.1,-0.4,1],
+    ['hoodie',4,16.2,7.4,2.9],['elder',2,-16.4,-15.2,0.4,1]]) stand(k, i, x, z, ry, f);
 // the cafe on the right-hand lawn: round tables under pink and white umbrellas, people at them
 for (const [x,z,c] of [[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14e],[11.2,8.9,0x3aa6a0]]){
   add(new THREE.CylinderGeometry(0.42,0.42,0.05,20), M(0xffffff), x, 0.62, z); add(new THREE.CylinderGeometry(0.05,0.05,0.4,8), M(0x2c2c36), x, 0.42, z);
@@ -387,15 +639,45 @@ for (const [x,z,c] of [[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14
   for (const sd of [-1, 1]) add(new THREE.CylinderGeometry(0.16,0.14,0.3,12), M(0xffffff), x + sd*0.6, 0.32, z);
   sit('visitor', Math.round(x*7)%5, x - 0.6, 0.47, z, 1.57); sit(['elder','kid','nurse','patient'][Math.round(z*3)%4], Math.round(z*5)%5, x + 0.6, 0.47, z, -1.57); }
 // the garden at the back left: a pond with lily pads, a path of stepping stones, benches, cherry trees
-add(new THREE.CylinderGeometry(2.3, 2.3, 0.1, 40), M(0xd9cdb8), -15, 0.2, -11.6, false);
-add(new THREE.CylinderGeometry(2.05, 2.05, 0.12, 40), new THREE.MeshStandardMaterial({ color:0x5f8fc0, roughness:0.08, metalness:0.3, envMapIntensity:1.2 }), -15, 0.22, -11.6, false);
-for (const [dx,dz] of [[-0.8,0.4],[0.6,-0.7],[0.9,0.8]]) add(new THREE.CylinderGeometry(0.28,0.28,0.03,14), M(0x4f8c5c), -15+dx, 0.3, -11.6+dz, false);
-for (let i=0;i<7;i++) add(new THREE.CylinderGeometry(0.32,0.32,0.06,12), M(0xb0aab8), -12.2 + i*0.15, 0.22, -8.6 - i*0.62, false);
-for (const [x,z,ry] of [[-17.9,-12.6,1.57],[-15,-14.5,0]]) { box(1.2, 0.08, 0.4, M(0x8a5a3c), x, 0.55, z, 0.02).rotation.y = ry; }
-for (let i=0;i<14;i++){ const a = i/14*Math.PI*2; box(0.2,0.16,0.2, M([0xe0414b,0xf2c14e,0xf28c28,0xc9583a][i%4]), -15 + Math.cos(a)*2.55, 0.32, -11.6 + Math.sin(a)*2.55, 0.06, false); }
-for (const [x,z,s,k] of [[-18.4,-15.6,0.9,'red'],[-11.8,-15.2,0.8,'round'],[-18.6,-8.2,0.8,'red'],[-11,-6.6,0.7,'red'],[-19,-18.8,0.8,'cone'],[-14,-17.6,0.7,'red'],
-    [17.2,-9.6,0.9,'red'],[18.6,-4.6,0.8,'red'],[16.4,-0.6,0.8,'round'],[18.6,2.2,0.9,'red'],[19,-21.5,0.7,'red'],[-1.2,-23.6,0.6,'red'],[4.6,-23.4,0.6,'red'],
-    [12.6,1.6,0.7,'red'],[6.2,0.2,0.6,'red'],[-17.2,4.8,0.8,'red'],[-19,0.8,0.7,'round'],[-16,15.2,0.6,'red'],[2.4,15.4,0.6,'red'],[15,15.2,0.6,'red']]) tree(x, z, s, k);
+{ const PX = -15, PZ = -11.6;
+  const ring = new THREE.Mesh(new THREE.RingGeometry(2.25, 3.05, 64), pave(6, 6)); ring.rotation.x = -Math.PI/2; ring.position.set(PX, 0.31, PZ); ring.receiveShadow = true; G.add(ring);   // the paved walk around it
+  add(new THREE.CylinderGeometry(2.08, 2.08, 0.12, 48), new THREE.MeshStandardMaterial({ color:0x5f9ccc, roughness:0.12, metalness:0.15, envMapIntensity:1.0 }), PX, 0.22, PZ, false);
+  for (let k = 0; k < 40; k++){ const a0 = k/40*Math.PI*2, a1 = (k + 1)/40*Math.PI*2, rr = 2.15, st = new THREE.Mesh(LITE ? new THREE.BoxGeometry(2*rr*Math.sin(Math.PI/40) + 0.05, 0.16, 0.2) : new RoundedBoxGeometry(2*rr*Math.sin(Math.PI/40) + 0.05, 0.16, 0.2, 2, 0.05), STONE[k % 3]);
+    st.position.set(PX + Math.cos((a0 + a1)/2)*rr, 0.33, PZ + Math.sin((a0 + a1)/2)*rr); st.rotation.y = -(a0 + a1)/2 + Math.PI/2; st.castShadow = true; st.receiveShadow = true; G.add(st); }
+  for (const [rr, o] of [[0.55, 0.5], [1.0, 0.35], [1.45, 0.22]]){ const rip = new THREE.Mesh(new THREE.RingGeometry(rr, rr + 0.025, 48), new THREE.MeshBasicMaterial({ color:0xdff2ff, transparent:true, opacity:o })); rip.rotation.x = -Math.PI/2; rip.position.set(PX + 0.3, 0.285, PZ - 0.2); G.add(rip); }
+  for (const [dx, dz] of [[-0.8, 0.5], [0.7, -0.8], [1.0, 0.8], [-1.2, -0.6]]){ add(new THREE.CylinderGeometry(0.24, 0.24, 0.02, 14), M(0x4f8c5c), PX + dx, 0.29, PZ + dz, false); add(new THREE.IcosahedronGeometry(0.06, 0), FLOWERS[1], PX + dx + 0.06, 0.32, PZ + dz, false); }
+  // curved beds around the walk, open where the paths come in
+  for (const [a0, a1] of [[0.35, 1.35], [1.75, 2.95], [3.35, 4.3], [4.75, 5.85]]){ const pts = [];
+    for (let k = 0; k <= 4; k++){ const a = a0 + (a1 - a0)*k/4; pts.push([PX + Math.cos(a)*3.15, PZ + Math.sin(a)*3.15]); }
+    for (let k = 4; k >= 0; k--){ const a = a0 + (a1 - a0)*k/4; pts.push([PX + Math.cos(a)*3.95, PZ + Math.sin(a)*3.95]); }
+    bed(pts, 0.3, { density:12 }); }
+  add(new THREE.CylinderGeometry(0.55, 0.65, 0.2, 28), STONE[0], PX, 0.36, PZ); add(new THREE.CylinderGeometry(0.42, 0.42, 0.04, 28), new THREE.MeshStandardMaterial({ color:0x7ab6dc, roughness:0.1, metalness:0.1 }), PX, 0.47, PZ, false);
+  add(new THREE.CylinderGeometry(0.08, 0.12, 0.5, 12), STONE[2], PX, 0.65, PZ); add(new THREE.CylinderGeometry(0.28, 0.2, 0.08, 20), STONE[0], PX, 0.92, PZ);
+  add(new THREE.ConeGeometry(0.16, 0.55, 14, 1, true), new THREE.MeshStandardMaterial({ color:0xeaf6ff, transparent:true, opacity:0.6, roughness:0.1, side:THREE.DoubleSide }), PX, 1.24, PZ, false).rotation.x = Math.PI;   // the jet falling back
+  bench(PX - 2.6, PZ - 0.2, Math.PI/2); bench(PX + 0.1, PZ - 2.62, 0);
+  for (const a of [0.2, 1.55, 3.1, 4.55]) bollard(PX + Math.cos(a)*3.0, PZ + Math.sin(a)*3.0); }
+for (const [x,z,s,k] of [[-18.4,-15.6,0.9,'blossom'],[-11.8,-15.2,0.8,'round'],[-18.6,-8.2,0.8,'blossom'],[-11,-6.6,0.8,'blossom'],[-19,-18.8,0.8,'cone'],[-15,-16.4,0.8,'blossom'],
+    [17.2,-9.6,0.9,'red'],[18.6,-4.6,0.8,'red'],[19,-21.5,0.7,'red'],[-1.2,-23.6,0.6,'red'],[4.6,-23.4,0.6,'red'],
+    [-17.2,4.8,0.8,'red'],[-19,0.8,0.7,'round'],[-13,18.2,0.7,'blossom'],[-7.6,18.3,0.6,'blossom'],[0.6,18.2,0.7,'blossom'],[7.2,18.3,0.6,'blossom'],[13.4,18.2,0.7,'blossom']]) tree(x, z, s, k);
+// ---- the landscaping across the campus (Jose's references): flowers in both medians, beds along the building fronts,
+// shrubs and flowers along the street verge between its trees, more trees on the lawns; the paths stay clear ----
+bed([[-0.75, 4.9], [0.55, 4.9], [0.85, 6.2], [0.75, 8.6], [-0.1, 8.95], [-0.95, 8.6], [-1.05, 6.2]], 0.36, { density:10 });   // the front median, round its evergreen
+bed([[-0.45, -1.9], [0.25, -1.9], [0.4, -0.5], [0.25, 1.4], [-0.1, 1.75], [-0.45, 1.4], [-0.6, -0.5]], 0.36, { density:12 });  // the back median, before the fountain
+// beside US Systems' doors (the parking lot runs up to its front on the left)
+bed([[-6.95, 6.3], [-6.1, 6.3], [-5.95, 6.95], [-6.2, 7.6], [-6.9, 7.7], [-7.1, 7.0]], 0.3, { density:12 });
+bed([[-5.85, -2.4], [-5.6, -2.4], [-5.55, 5.6], [-5.85, 5.6]], 0.3, { density:14, colours:[0, 2, 3] });                       // a thin strip along its drive side
+bed([[6.35, -2.9], [6.6, -2.9], [6.6, 6.6], [6.35, 6.6]], 0.3, { density:14, colours:[0, 1, 2] });                             // and along Medical Plaza's colonnade
+bed([[13.2, 8.0], [17.9, 8.0], [18.3, 8.6], [17.6, 9.3], [15.3, 9.5], [13.4, 9.2], [12.9, 8.6]], 0.3, { density:10 });         // past the café
+for (const sx of [-1, 1]) bed([[sx*9.6, -9.9], [sx*12.4, -9.9], [sx*12.6, -9.3], [sx*12.2, -8.8], [sx*9.8, -8.8], [sx*9.4, -9.3]], 0.3, { density:11 });   // either side of Ethics
+// the verge along the street: shrubs and flower clumps between the trees
+{ const trees = [-16, -13, -10, -7.6, -3, 0.6, 5, 7.2, 12, 13.4, 17], r = rngAt(3, 18);
+  for (let x = -19.2; x <= 19.2; x += 0.42){ if (trees.some(t => Math.abs(t - x) < 1.0)) continue; const z = 18.35 + (r() - 0.5)*0.4;
+    if (r() < 0.35) shrub(x, 0.3, z, 0.22 + r()*0.08, Math.floor(r()*3));
+    else { const fm = FLOWERS[Math.floor(r()*FLOWERS.length)]; add(new THREE.IcosahedronGeometry(0.13, LITE ? 0 : 1), LEAFLOW, x, 0.4, z, false).scale.y = 0.6;
+      for (let q = 0; q < 6; q++) add(new THREE.IcosahedronGeometry(0.05, 0), fm, x + (r() - 0.5)*0.22, 0.46 + r()*0.05, z + (r() - 0.5)*0.22, false); } } }
+// more trees on the lawns, green and cherry, of different heights
+for (const [x,z,s,k] of [[-17.8,-2.8,1.0,'round'],[-12.6,-1.4,0.75,'blossom'],[-17.4,13.6,0.8,'round'],[18.6,12.6,0.75,'blossom'],[19,5.2,0.85,'round'],
+    [15.6,-12.8,0.8,'blossom'],[-6.4,-14.6,0.7,'round'],[7.2,-13.6,0.75,'blossom'],[-19.2,-22.6,0.9,'round'],[17.6,-23.6,0.8,'round']]) tree(x, z, s, k);
 // a low hedge of round bushes along the back edge
 for (let x = -19; x <= 19; x += 1.15) add(new THREE.IcosahedronGeometry(0.42 + ((x*7)%3+3)%3*0.06, 1), new THREE.MeshStandardMaterial({ color:[0x3c7a52,0x4a8c5e,0x356c49][Math.round(x*3+60)%3], roughness:0.9, flatShading:true, envMapIntensity:0.1 }), x, 0.55, -25.6);
 const WALKS = [
@@ -417,6 +699,7 @@ const full = new EffectComposer(renderer); full.setPixelRatio(2); full.setSize(W
 full.addPass(new RenderPass(scene, cam));
 const gtao = new GTAOPass(scene, cam, W*2, H*2); gtao.output = GTAOPass.OUTPUT.Default; gtao.updateGtaoMaterial({ radius:0.6, distanceExponent:1.2, thickness:1.0, scale:1.0, samples:16, distanceFallOff:1.0, screenSpaceRadius:false }); gtao.updatePdMaterial({ lumaPhi:10, depthPhi:2, normalPhi:3, radius:4, radiusExponent:1, rings:2, samples:16 }); gtao.blendIntensity = 0.85; const gtaoRender = gtao.render.bind(gtao); gtao.render = (...a) => { GLOWS.forEach(g => g.visible = false); gtaoRender(...a); GLOWS.forEach(g => g.visible = true); }; full.addPass(gtao);
 
+full.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.4, 0.45, 1.6));
 full.addPass(new OutputPass()); full.addPass(new SMAAPass(W*2, H*2));
 // the lit windows: drawn alone on black with a wide warm bloom, then black becomes transparent
 const litC = new EffectComposer(renderer); litC.setPixelRatio(2); litC.setSize(W, H);
@@ -428,7 +711,10 @@ function pack(img, q){ let x0=W,y0=H,x1=-1,y1=-1; const d = img.data;
   return { x:x0, y:y0, w, h, data:c.toDataURL('image/webp', q) }; }
 // the grade (F3): shadows lift toward lavender, highlights warm toward peach, so nothing ends pure black or
 // neutral gray. Every capture gets it except the lit windows (light on black, made transparent).
-function grade(img){ return P.has('nograde') ? img : gradeDusk(img); }
+function grade(img){ return P.has('nograde') ? img : DAY ? gradeDay(img) : gradeDusk(img); }
+// daylight grade: a touch of warmth in the highlights and lift in the shadows, no lavender cast
+function gradeDay(img){ const d = img.data; for (let i=0;i<d.length;i+=4){ if (!d[i+3]) continue; let r = d[i]/255, g = d[i+1]/255, b = d[i+2]/255; const L = 0.2126*r + 0.7152*g + 0.0722*b, s = Math.max(0, 1 - L/0.35)**2*0.12, h = Math.max(0, (L - 0.6)/0.4)**2*0.08;
+    r += s*(0.36 - r) + h*(1.0 - r); g += s*(0.32 - g) + h*(0.93 - g); b += s*(0.4 - b) + h*(0.82 - b); d[i] = r*255; d[i+1] = g*255; d[i+2] = b*255; } return img; }
 function gradeDusk(img){ const d = img.data;
   for (let i=0;i<d.length;i+=4){ if (!d[i+3]) continue; let r = d[i]/255, g = d[i+1]/255, b = d[i+2]/255;
     const L = 0.2126*r + 0.7152*g + 0.0722*b, mx = Math.max(r,g,b), sat = mx ? (mx - Math.min(r,g,b)) / mx : 0;
@@ -455,9 +741,10 @@ function webpOf(img, q){ const c = document.createElement('canvas'); c.width = W
 // no tone mapping). far: the clouds behind the board; near: the board. Each is drawn alone on black with its own
 // silhouette as alpha, edges un-mixed from the black (c/a), so the app can slide them apart without halos.
 function backdrop(){ const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-  const lg = g.createLinearGradient(0, 0, 0, H); lg.addColorStop(0, '#3a2b62'); lg.addColorStop(0.3, '#4b2a63'); lg.addColorStop(0.62, '#8a4570'); lg.addColorStop(0.85, '#c96a7c'); lg.addColorStop(1, '#e88f72'); g.fillStyle = lg; g.fillRect(0, 0, W, H);
+  const lg = g.createLinearGradient(0, 0, 0, H);
+  if (DAY){ lg.addColorStop(0, '#5f95d0'); lg.addColorStop(0.3, '#93c0ec'); lg.addColorStop(0.55, '#c3def6'); lg.addColorStop(0.8, '#93c0ec'); lg.addColorStop(1, '#5f95d0'); }   // matches the daylight card (app.css .cp-card) else { lg.addColorStop(0, '#3a2b62'); lg.addColorStop(0.3, '#4b2a63'); lg.addColorStop(0.62, '#8a4570'); lg.addColorStop(0.85, '#c96a7c'); lg.addColorStop(1, '#e88f72'); } g.fillStyle = lg; g.fillRect(0, 0, W, H);
   const pts = [[-20,-3.5,-27],[20,-3.5,-27],[20,-3.5,19],[-20,-3.5,19]].map(p => proj(p[0], p[1] - 4, p[2]));   // the board's footprint, a little below it
-  g.save(); g.filter = 'blur(26px)'; g.fillStyle = 'rgba(28,12,44,.4)'; g.beginPath(); pts.forEach(([x,y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); g.restore();
+  g.save(); g.filter = 'blur(26px)'; g.fillStyle = DAY ? 'rgba(40,62,100,.22)' : 'rgba(28,12,44,.4)'; g.beginPath(); pts.forEach(([x,y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); g.restore();
   return g.getImageData(0, 0, W, H); }
 function aloneOnBlack(far, near){ const bg = scene.background, fog = scene.fog; scene.background = new THREE.Color(0x000000); scene.fog = null;
   layerVis(false, far, near); full.render(); const shot = grab(); layerVis(true, true, true); scene.background = bg; scene.fog = fog;
@@ -511,7 +798,7 @@ window.__run = async (nolit) => {
   const place = (g, x, y, z, ry) => { g.position.set(x, y, z); g.rotation.y = ry; g.visible = true; };
   place(CAR_IN, 3.1, 0.2, 4.5, Math.PI); out.live.carIn = { img: alone(CAR_IN, () => capAlpha()), ...path([[3.1,0.4,15.5],[3.1,0.4,10],[3.1,0.4,4.5],[3.1,0.4,-1],[3.1,0.4,-6.5]], [3.1,0.4,4.5]) }; CAR_IN.visible = false;
   place(CAR_OUT, -2.8, 0.2, 4.5, 0); out.live.carOut = { img: alone(CAR_OUT, () => capAlpha()), ...path([[-2.8,0.4,-6.5],[-2.8,0.4,-1],[-2.8,0.4,4.5],[-2.8,0.4,10],[-2.8,0.4,15.5]], [-2.8,0.4,4.5]) }; CAR_OUT.visible = false;
-  place(AMB, 4.2, 0.2, 4.5, Math.PI); out.live.amb = { img: [0,1].map(f => { ambLights(f); return alone(AMB, () => capAlpha()); }), ...path([[4.2,0.5,15.5],[4.2,0.5,9],[4.2,0.5,2],[4.4,0.5,-4],[5.4,0.5,-7.2],[6.4,0.5,-8.2]], [4.2,0.5,4.5]) }; AMB.visible = false;
+  place(AMB, 4.2, 0.2, 4.5, Math.PI); out.live.amb = { img: [0,1].map(f => { ambLights(f); return alone(AMB, () => capAlpha()); }), ...path([[4.2,0.5,15.5],[4.2,0.5,9],[4.2,0.5,2],[4.4,0.5,-4],[5.4,0.5,-7.2],[6.8,0.5,-8.0],[7.4,0.5,-8.4]], [4.2,0.5,4.5]) }; AMB.visible = false;
   place(HELI, PAD.x, PAD.y + 0.5, PAD.z, Math.PI*0.15); out.live.heli = { img: [0, Math.PI/8].map(a => { HELI.userData.rotor.rotation.y = a; return alone(HELI, () => capAlpha()); }), pad: P3(PAD.x, PAD.y+0.5, PAD.z).slice(0,2),
     ...path([[26,16,-34],[14,11,-28],[5,PAD.y+4.5,-23],[PAD.x,PAD.y+1.6,PAD.z],[PAD.x,PAD.y+0.5,PAD.z]], [PAD.x, PAD.y+0.5, PAD.z]) }; HELI.visible = false;
   place(CAR_IN2, 2.0, 0.2, 2.0, Math.PI); out.live.carIn2 = { img: alone(CAR_IN2, () => capAlpha()), ...path([[2.0,0.4,15.5],[2.0,0.4,9],[2.0,0.4,2.0],[2.0,0.4,-3],[2.0,0.4,-6.5]], [2.0,0.4,2.0]) }; CAR_IN2.visible = false;
@@ -526,6 +813,19 @@ window.__run = async (nolit) => {
   place(BIRDS, 0, 12.5, -30, 0); out.live.birds = { img: [0, 1].map(f => { flap(BIRDS, f); return alone(BIRDS, () => capAlpha(0.8)); }), ...path([[-46,10,-46],[-20,12,-36],[0,12.5,-30],[22,12,-26],[48,10,-22]], [0,12.5,-30]) }; BIRDS.visible = false;
   out.live.walkers = WALKS.map(w => { const mid = w.pts[Math.floor(w.pts.length/2)]; place(w.g, mid[0], mid[1], mid[2], 0);
     const img = [0,1].map(f => { stride(w.g, f); return alone(w.g, () => capAlpha(0.8)); }); const hh = w.g.userData.h*1.75/2; const r = { img, dur: w.dur, ...path(w.pts.map(p => [p[0], p[1] + hh, p[2]]), [mid[0], mid[1] + hh, mid[2]]) }; w.g.visible = false; return r; });
+  // one picture for many small sprites: each item's frames share their union box, laid out in rows
+  const atlasOf = async items => { const loads = items.map(fr => Promise.all(fr.map(im => new Promise(r => { const i = new Image(); i.onload = () => r([im, i]); i.src = im.data; }))));
+    const all = await Promise.all(loads), cells = []; let x = 0, y = 0, rowH = 0, AW = 0;
+    for (const fr of all){ const ux = Math.min(...fr.map(([im]) => im.x)), uy = Math.min(...fr.map(([im]) => im.y)), uw = Math.max(...fr.map(([im]) => im.x + im.w)) - ux, uh = Math.max(...fr.map(([im]) => im.y + im.h)) - uy;
+      const a = []; for (const f of fr){ if (x + uw > 1600){ x = 0; y += rowH + 2; rowH = 0; } a.push([x, y]); x += uw + 2; rowH = Math.max(rowH, uh); AW = Math.max(AW, x); }
+      cells.push({ box:[ux, uy, uw, uh], a, fr }); }
+    const c = document.createElement('canvas'); c.width = AW; c.height = y + rowH; const g = c.getContext('2d');
+    for (const cl of cells) cl.fr.forEach(([im, i], k) => g.drawImage(i, cl.a[k][0] + im.x - cl.box[0], cl.a[k][1] + im.y - cl.box[1]));
+    return { atlas: { x:0, y:0, w:c.width, h:c.height, data:c.toDataURL('image/webp', 0.86) }, items: cells.map(cl => ({ box: cl.box, a: cl.a })) }; };
+  out.live.idlers = await atlasOf(IDLE.map(o => { const r = [0, 1].map(k => { o.set(k); return alone(o.g, () => capAlpha(0.9)); }); o.g.visible = false; return r; }));
+  const CR = Object.keys(BOX).map(k => [k, crane(k)]), ANG = [...Array(8)].map((_, i) => -0.5 + i/7);
+  const cr = await atlasOf(CR.map(([k, g]) => ANG.map(a => { g.userData.jib.rotation.y = g.userData.a0 + a; return alone(g, () => capAlpha(0.88)); })));
+  out.live.cranes = { atlas: cr.atlas, items: Object.fromEntries(CR.map(([k], i) => [k, cr.items[i]])) };
   CLOUDS.forEach(c => c.visible = true); FLAGS.forEach(f => f.visible = true);
   // paint layers: each building painted to 1..10 tenths, drawn in the full look on black like the board; kept
   // only where the building itself shows (its silhouette, everything in front of it occluding) and where the
@@ -547,6 +847,16 @@ window.__run = async (nolit) => {
     }
     fillAt(key, 0); scene.background = null;
   }
+  // glow layers: about half of a building's windows, the same ones at every tenth, lit where the paint has reached
+  scene.background = new THREE.Color(0x000000);
+  for (const key of (nolit ? [] : Object.keys(FILL))){
+    const b = BOX[key], wins = WINDOWS[key].slice(); for (let i = wins.length - 1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [wins[i], wins[j]] = [wins[j], wins[i]]; }
+    const some = wins.slice(0, Math.round(wins.length * 0.45));
+    out.b[key].gl = [];
+    for (let lv = 1; lv <= 10; lv++){ const cut = lv >= 10 ? 100 : 0.3 + (b.top - 0.3) * lv/10, on = new Set(some.filter(m => m.position.y < cut));
+      GLOWS.forEach(g => g.visible = false); all.forEach(o => { o.material = on.has(o) ? LIT : depthOnly; });
+      out.b[key].gl.push(capLit()); all.forEach(o => { o.material = keep.get(o); }); GLOWS.forEach(g => g.visible = true); }
+  }
   scene.fog = fogKeep; scene.background = null;
   out.fountain = proj(-0.1, 1.3, -3.4);
   out.drive = [proj(-2.8, 0.4, 15.5), proj(-2.8, 0.4, -6), proj(3.2, 0.4, -6), proj(3.2, 0.4, 15.5)];
@@ -556,9 +866,9 @@ window.__run = async (nolit) => {
 // a building's footprint belongs to it (its podium, crown and banners too); one shared cut per building.
 const FILL = {};
 // where each badge's point sits, set by hand for this camera: three rows, so five badges at phone size never
-// overlap (the projected roof tops crowd: __proj prints them). Row 1 the two back towers, row 2 the banner
-// building and the blue glass tower, row 3 the building on the left.
-const LABEL_2D = P.has('autolabels') ? {} : { t:[330,150], n:[680,150], e:[396,275], c:[690,275], s:[260,480] };
+// overlap (the projected roof tops crowd: __proj prints them). Row 1 the brick tower and JTCC, row 2 the banner
+// building and the dark stepped one, row 3 the building on the left.
+const LABEL_2D = P.has('autolabels') ? {} : { t:[330,150], n:[715,150], e:[400,280], c:[740,300], s:[300,470] };
 function fillSetup(){ if (Object.keys(FILL).length) return; BASE.updateMatrixWorld(true);
   for (const key of Object.keys(BOX)){ const b = BOX[key], F = FILL[key] = { cut: { value: -100 }, meshes: [] };
     BASE.traverse(o => { if (!o.isMesh || o.material === depthOnly) return; const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
@@ -582,6 +892,8 @@ window.__still = async () => { await TEX_LOAD(); waveFlags(1.2); fillSetup();
   const put = (g, x, y, z, ry) => { g.position.set(x, y, z); g.rotation.y = ry; g.visible = true; };
   put(CAR_IN, 3.1, 0.2, 6, Math.PI); put(CAR_OUT, -2.8, 0.2, 2, 0); put(AMB, 4.4, 0.2, -3.5, Math.PI); put(CAR_IN2, 2.0, 0.2, 9.5, Math.PI);
   STREET.forEach((o, i) => put(o.g, [-12, 9, 4, -4][i], 0.2, o.z, o.ry));
+  IDLE.forEach(o => { o.set(0); o.g.visible = true; });
+  if (P.has('cranes')) Object.keys(BOX).forEach(k => { const g = crane(k); g.userData.jib.rotation.y = g.userData.a0 + (+P.get('cranes') || 0); g.visible = true; });
   WALKS.forEach((w, i) => { const p = w.pts[(i % (w.pts.length - 1)) + 1]; put(w.g, p[0] + (i%2 ? 0.6 : -0.6), p[1] + 0.12, p[2], i%2 ? Math.PI/2 : -Math.PI/2); stride(w.g, i%2); });
   SITTERS.forEach(o => put(o.g, o.at[0], o.at[1], o.at[2], 0));
   put(HELI, PAD.x + 3, PAD.y + 3.4, PAD.z + 2, 0.6);
@@ -591,5 +903,8 @@ window.__still = async () => { await TEX_LOAD(); waveFlags(1.2); fillSetup();
   for (let i=0;i<d.length;i+=4){ const a = mk[i]/255; d[i+3] = mk[i]; if (a > 0.004 && a < 0.996) for (let k=0;k<3;k++) d[i+k] = Math.min(255, d[i+k] / a); }
   const img = grade(shot); const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(img, 0, 0); return c.toDataURL('image/png'); };
 window.__proj = () => ({ lab: Object.fromEntries(Object.keys(BOX).map(k => [k, proj(...LABEL_AT[k])])), box: Object.fromEntries(Object.keys(BOX).map(k => [k, bbox(k)])) });
+// in daylight the lamps and lit doorways glow softly, not like at night
+if (DAY) GLOWS.forEach(g => { g.material.opacity = 0.32; });
+window.__sky = () => webpOf(backdrop(), 0.9).data;
 window.__done = true;
 </script></body></html>

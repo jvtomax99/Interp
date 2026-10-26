@@ -1,52 +1,45 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-26, from the chat that ran #153 to #158.
+hands over"). This one: 2026-10-26, the campus diorama chat.
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Then
-> tell me what's being worked on now and the goal, and what was worked on
-> before, in a few short lines each, say in 2-3 lines what you'll do next,
-> and wait for my go. Plain words, say "working on it" and "done".
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`, `docs/handoff.md` and
+> `docs/features/practice-dashboard.md` (its top section, the floating
+> diorama). Then tell me what's being worked on now and the goal, and what
+> was worked on before, in a few short lines each, say in 2-3 lines what
+> you'll do next, and wait for my go. Plain words, say "working on it" and
+> "done".
 
 ## Now
 
-Nothing is open from this chat (#158 is merged and live, b1026.1522). Jose picks the next
-work. The pick on the list (`docs/PLAN.md`, Next): **S9 Home taps, part
-2**, which needs Jose first: a few runs of More, Measure smoothness on his
-phone (it lists the six slowest taps), then fix the slow ones. Offer that
-with buttons, plus "something else".
+**The campus as a crafted miniature world, in daylight: done on `claude/campus-alive`**
+(2026-10-26). Jose's two reference images and brief: lush trees and cherry
+trees, curved stone-edged flower beds, cute people (staff, visitors, a
+wheelchair), entrances with canopies, glass doors and planters (Ethics, US
+Systems, JTCC), a pond with stone rim and fountain, window depth, roof trim,
+soft daylight with a sky-blue card. In the app's pictures (`city/`) and the
+live 3D test https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX (v11). Kit and
+numbers: `docs/features/practice-dashboard.md`. Campus suites and guide pass.
+Jose said "push" on #157 (2026-10-26): main merged into it (conflicts in
+CLAUDE.md, PLAN, GUIDE_NEWS resolved), merged once its checks pass; main is
+merged into campus-alive too, whose change is next. **Waiting on Jose:** the
+fps of the live test on his iPhone (decides step b of `docs/PLAN.md` Next 2).
 
-## Before (this chat)
+## Before (the last chat's changes and where each stands)
 
-- #153 handoff notes (merged both chats' notes).
-- #154 Ask the Hub group -> `features/ask-hub.js` (live b1025.1947).
-  Caught: `ASK_STOP` builds with `foldText` at load, so it stays in
-  `index.html`; HUMC Brain's `claim()` broke on an empty region (fixed).
-- #155 Dr. Smiley's engine -> `features/smiley-engine.js` (live
-  b1025.2317). The split of `index.html` is finished: 1.15 MB to 0.96 MB.
-- #156 the 1-minute promo saved (another chat made picture, voice and
-  effects; this one added the music: v11's track with its narrator
-  removed by audio-separator, since Demucs' hosts are blocked here).
-- #158 the app's Watch video is now that film, 10% faster (54.5 s, 720p),
-  with three voice cuts fixed ("Daily drills" had lost "Da"). User Guide
-  answer and New lately card updated. Jose tried his own song
-  (`hub-promo-ost.mp4`, 81 BPM) under it and kept the current music.
-
-## Learned here
-
-- A static scan misses code run at load inside arrows (`.map(w =>
-  foldText(w))`). Run a moved file in a bare `vm` sandbox: each "X is not
-  defined" is a load-time read.
-- Removing a voice from music: `audio-separator` with
-  `UVR-MDX-NET-Inst_HQ_3.onnx` downloads and works here; Demucs,
-  Hugging Face and download.pytorch.org answer 403.
-- `promo/` changes get no version bump (`bump-version.yml` ignores it).
-
-## Not proven / open
-
-- humc-brain's double-tap checks fail now and then under load (seen on
-  `main`, 2026-10-24); not investigated.
-- The promo's music has one join (25.70 s in the 60 s cut); Jose called
-  the sample clean, but only he has listened.
+- **#157, the campus as a floating diorama**: Jose's "push" given; merging.
+- **#158, #159** (the 1-minute film, S9 Home taps closed): merged by another chat.
+- **The campus from OpenStreetMap** (third chat, 2026-10-26): five buildings
+  sized and placed from the map, JTCC is Encounter; pictures rebuilt, campus
+  suites and guide pass; on `claude/campus-alive`.
+- **Branch `claude/campus-alive`**, built on #157, no change opened yet:
+  lights back, flickering lit windows on painted floors, cranes until a
+  building is done, people about, the paint rising after practice (new
+  suite `campus-alive.cjs`), plus the screenshot fixes (red-brick HMH tower,
+  the dark stepped building as Culture). All campus suites and the guide
+  pass. **Next step:** once #157 is merged, merge `main` into it and open
+  its change for Jose.
+- Not measured: smoothness on an iPhone with this much moving (the
+  smoothness meter at the bottom of More).

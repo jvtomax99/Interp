@@ -1,0 +1,120 @@
+<title>HUMC Campus Live</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650&display=swap">
+<style>
+/* One committed evening look (the Hub's campus card): the canvas fills the screen, controls float in glass over it. */
+:root{
+  --sky:linear-gradient(#3a2b62,#8a4570 55%,#e88f72);
+  --ink:#F4F1FA; --ink-soft:#C9C2E0; --glass:rgba(24,18,52,.62); --line:rgba(255,255,255,.16);
+  --gold:#FFD27A; --gold-2:#F2A93B; --navy:#151C2C; --slow:#FF8A8A;
+  --ui:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%;background:#241a48;color:var(--ink);font-family:var(--ui);overflow:hidden;-webkit-user-select:none;user-select:none}
+#stage{position:fixed;inset:0;background:var(--sky);touch-action:none}
+#stage canvas{position:relative;display:block;width:100%;height:100%;opacity:0;transition:opacity .6s}
+body.ready #stage canvas{opacity:1}
+.sun{position:absolute;left:0;top:0;width:118px;height:118px;transform:translate(-50%,-50%);will-change:transform;pointer-events:none}
+.sun .night{display:none}.sun.is-night .day{display:none}.sun.is-night .night{display:inline}.sun.is-night .halo{opacity:.35}
+.sun .rays{animation:spin 40s linear infinite;transform-origin:0 0}
+.sun .eyes{animation:blink 5.5s infinite;transform-origin:0 0;transform-box:view-box}
+.sun .face{animation:bob 3.2s ease-in-out infinite}.sun .rays{transform-box:view-box}
+@keyframes bob{50%{transform:translateY(-2.5px) scale(1.02,.98)}}
+.sun.giggle svg{animation:giggle .9s cubic-bezier(.3,1.6,.5,1)}.sun.giggle .rays{animation-duration:2s}
+.sun .zz{animation:zz 3s ease-in-out infinite}.sun .z2{animation-delay:1.2s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.1)}}
+@keyframes giggle{0%{transform:scale(1)}20%{transform:scale(1.18,.86)}40%{transform:scale(.9,1.12) rotate(-6deg)}60%{transform:scale(1.06,.95) rotate(5deg)}80%{transform:rotate(-2deg)}100%{transform:none}}
+@keyframes zz{0%,100%{opacity:0;transform:translateY(4px)}40%,70%{opacity:1;transform:none}}
+#loading{position:fixed;inset:0;display:grid;place-items:center;font-weight:550;color:var(--ink-soft);pointer-events:none}
+body.ready #loading{display:none}
+.top{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:8px;pointer-events:none}
+.top h1{margin:0;font-size:17px;font-weight:650;letter-spacing:-.2px;flex:1;text-wrap:balance}
+.top h1 small{display:block;font-size:12px;font-weight:550;color:var(--ink-soft);letter-spacing:.02em}
+.chip{font-size:12px;font-weight:650;padding:5px 9px;border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-variant-numeric:tabular-nums}
+.chip.slow{color:var(--slow)}
+#badges{position:fixed;inset:0;pointer-events:none}
+.badge{position:absolute;left:0;top:0;pointer-events:auto;font:650 13px var(--ui);color:var(--ink);background:var(--glass);border:1.5px solid var(--line);border-radius:99px;padding:5px 10px;white-space:nowrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);cursor:pointer}
+.badge b{color:var(--gold);font-weight:650}
+.badge.on{background:linear-gradient(var(--gold),var(--gold-2));color:var(--navy)}.badge.on b{color:var(--navy)}
+.badge.done{border-color:var(--gold)}
+.badge:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#card{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 168px);background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:14px 14px 14px 16px;display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:up .45s cubic-bezier(.2,.8,.2,1)}
+#cardK{font-size:20px;font-weight:650;letter-spacing:-.3px}
+#cardP,#cardF{font-size:13px;color:var(--ink-soft);grid-column:1}
+#cardF{color:var(--gold);font-weight:550}
+.go{grid-row:1/4;grid-column:2;border:0;border-radius:99px;padding:11px 18px;font:650 15px var(--ui);color:var(--navy);background:linear-gradient(var(--gold),var(--gold-2));box-shadow:0 1px 0 0 inset rgba(255,255,255,.6),0 8px 20px -10px rgba(242,169,59,.8)}
+#cardX{grid-row:1/4;grid-column:3;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:18px}
+@keyframes up{from{transform:translateY(16px);opacity:0}}
+.sheet{position:fixed;left:0;right:0;bottom:0;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 14px) max(16px,env(safe-area-inset-left,0px));background:var(--glass);border-top:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:grid;gap:10px}
+.row{display:grid;grid-template-columns:86px 1fr auto;align-items:center;gap:10px}
+.row label{font-size:13px;font-weight:650;color:var(--ink-soft)}
+.row output{font-size:13px;font-weight:650;min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--gold);height:28px;min-width:0}
+#now{border:1px solid var(--line);background:transparent;color:var(--ink);font:650 12px var(--ui);border-radius:99px;padding:5px 10px}
+#now.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.hint{font-size:12px;color:var(--ink-soft);text-align:center;margin:0}
+@media (prefers-reduced-motion:reduce){.sun *{animation:none!important}#card{animation:none}#stage canvas{transition:none}}
+</style>
+
+<div id="stage"><div id="sun" class="sun" aria-hidden="true">
+  <svg viewBox="-70 -70 140 140" width="100%" height="100%">
+    <defs>
+      <radialGradient id="sunDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFF8C6"/><stop offset=".6" stop-color="#FFD84F"/><stop offset="1" stop-color="#FFB33A"/></radialGradient>
+      <radialGradient id="moonDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFFBEA"/><stop offset="1" stop-color="#E7DDB8"/></radialGradient>
+      <radialGradient id="blush"><stop offset="0" stop-color="#FF8FA0" stop-opacity=".85"/><stop offset="1" stop-color="#FF8FA0" stop-opacity="0"/></radialGradient>
+      <radialGradient id="halo"><stop offset=".45" stop-color="#FFE38A" stop-opacity=".55"/><stop offset="1" stop-color="#FFE38A" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle r="70" fill="url(#halo)" class="halo"/>
+    <g class="day">
+      <g class="rays"><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(0)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(30)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(60)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(90)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(120)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(150)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(180)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(210)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(240)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(270)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(300)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(330)"/></g>
+      <g class="face">
+        <circle r="37" fill="url(#sunDisc)"/>
+        <ellipse cx="-13" cy="-21" rx="11" ry="6" fill="#FFFFFF" opacity=".45" transform="rotate(-28 -13 -21)"/>
+        <circle cx="-21" cy="9" r="7.5" fill="url(#blush)"/><circle cx="21" cy="9" r="7.5" fill="url(#blush)"/>
+        <g class="eyes">
+          <ellipse cx="-12" cy="0" rx="6" ry="7.4" fill="#3B2112"/><ellipse cx="12" cy="0" rx="6" ry="7.4" fill="#3B2112"/>
+          <circle cx="-10" cy="-3" r="2.6" fill="#fff"/><circle cx="14" cy="-3" r="2.6" fill="#fff"/>
+          <circle cx="-13.6" cy="2.6" r="1.1" fill="#fff"/><circle cx="10.4" cy="2.6" r="1.1" fill="#fff"/>
+        </g>
+        <path d="M-6.5 10.5 Q0 20 6.5 10.5 Z" fill="#7A2E12"/>
+        <path d="M-3.6 15.4 Q0 13.2 3.6 15.4 Q0 18.6 -3.6 15.4Z" fill="#FF7A8A"/>
+      </g>
+    </g>
+    <g class="night">
+      <path d="M8 -32 A33 33 0 1 0 8 32 A26 26 0 1 1 8 -32Z" fill="url(#moonDisc)"/>
+      <path d="M-22 -4 q4 3 8 0" fill="none" stroke="#5A4A2A" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M-20 9 q5 5 10 1" fill="none" stroke="#5A4A2A" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="-24" cy="4" rx="4" ry="2.6" fill="#FFAFA8" opacity=".6"/>
+      <text class="zz" x="20" y="-26" font-size="14" font-weight="650" fill="#FFFBEA">z</text><text class="zz z2" x="30" y="-38" font-size="10" font-weight="650" fill="#FFFBEA">z</text>
+    </g>
+  </svg>
+</div></div>
+<div id="loading">Building the campus…</div>
+<div class="top">
+  <h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>
+  <span class="chip" id="fps">… fps</span>
+  <span class="chip" id="draws">…</span>
+</div>
+<div id="badges"></div>
+<div id="card" hidden>
+  <div id="cardK">Ethics</div>
+  <div id="cardP">George Link Jr. Pavilion</div>
+  <div id="cardF">80% built</div>
+  <button class="go" type="button" id="cardGo">Practise</button>
+  <button id="cardX" type="button" aria-label="Put it back">×</button>
+</div>
+<div class="sheet">
+  <div class="row"><label for="hour">Time of day</label><input id="hour" type="range" min="5" max="24" step="0.25" value="18.5"><button id="now" class="on" type="button">Now <output id="hourOut">6:30 pm</output></button></div>
+  <div class="row"><label for="prog">Your progress</label><input id="prog" type="range" min="0" max="100" step="1" value="60"><output id="progOut">60%</output></div>
+  <p class="hint">Drag to spin · pinch to zoom · tap a building</p>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script>addEventListener('error', e => { const l = document.getElementById('loading'); if (l) l.textContent = 'Could not draw the campus: ' + e.message; });</script>
+<script type="module">
+document.getElementById('prog').addEventListener('input', e => document.getElementById('progOut').textContent = e.target.value + '%');
+/*SCENE*/
+</script>
