@@ -28,7 +28,7 @@
  */
 
 import { allowTeam } from './_hub-access.js';
-import { callRoutine } from './_routine.js';
+import { callRoutine, clip } from './_routine.js';
 
 // This runs on every term save -- routine, high-volume work -- so it goes to
 // Claude Haiku 5.5 first (see _routine.js). Medium effort, one step above the
@@ -45,7 +45,6 @@ const EFFORT = 'medium';
 const BACKUP_MODEL = 'claude-opus-5-5';
 const BACKUP_EFFORT = 'low';
 
-const MAX_FIELD = 600;      // guards against oversized or abusive requests
 const MAX_CANDIDATES = 5;   // matches CANDIDATE_LIMIT in the client
 
 const FINDING_TYPES = [
@@ -101,10 +100,6 @@ Report a finding ONLY when one of these is true:
 Say nothing about: style, capitalisation, punctuation, a definition simply being terse, or a perfectly good term you would merely have phrased differently. A correct entry must return verdict "ok" and an empty findings array.
 
 Set verdict to "review" only if findings is non-empty. Keep each message to one sentence. Use "" for suggestion and duplicateId when they do not apply.`;
-
-function clip(v) {
-  return String(v == null ? '' : v).trim().slice(0, MAX_FIELD);
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
