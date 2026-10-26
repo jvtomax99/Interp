@@ -139,13 +139,17 @@ function drBodyArt(cls, root){
   root = root == null ? './drsmiley/' : root;
   const B = DR_BODY, img = (k, c) => { const [x, y, w, h] = B.box[k]; return `<image class="${c}" href="${root}body/${k}.webp" x="${x}" y="${y}" width="${w}" height="${h}"/>`; };
   const [hx, hy] = B.head.at, s = B.head.scale, [gw, gh] = B.head.grid;
-  const head = `<g class="db-head"><g transform="translate(${hx},${hy}) scale(${s})">`
+  // .db-idle: the life at rest (2026-10-26), CSS only so Home runs no frame loop: the arms
+  // swing a hair with each breath, the head drifts behind the chest, the weight sways
+  // from the feet. Each a wrapper of its own, so the rig's transform attributes stay its.
+  const idle = (k, at) => `<g class="db-idle db-idle-${k}" style="transform-origin:${at[0]}px ${at[1]}px">`;
+  const head = `<g class="db-head">${idle('head', B.neck)}<g transform="translate(${hx},${hy}) scale(${s})">`
     + `<image class="db-skull" href="${root}body/head.webp" x="0" y="0" width="${gw}" height="${gh}"/>`
     + `<svg class="ds-face" x="80" y="212" width="302" height="222" viewBox="0 0 ${DR_BODY_FACE_W} ${DR_BODY_FACE_H}" preserveAspectRatio="none">`
     + `<image class="ds-sheet" href="${root}face.webp" x="0" y="0" width="${DR_BODY_FACE_W * DR_BODY_FACES.length}" height="${DR_BODY_FACE_H}" preserveAspectRatio="none"/></svg>`
     + `<image class="ds-brow ds-brow-l" href="${root}brow-l.webp" x="90" y="175" width="130" height="65"/>`
     + `<image class="ds-brow ds-brow-r" href="${root}brow-r.webp" x="270" y="190" width="125" height="90"/>`
-    + '</g></g>';
+    + '</g></g></g>';
   // The drawn poses, each as drawn (-l) and mirrored (-r), hidden until a gesture swaps one in.
   const poses = layer => Object.keys(B.pose).filter(k => B.pose[k].layer === layer).map(k => {
     const [x, y, w, h] = B.pose[k].box, im = `<image href="${root}body/pose-${k}.webp" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
@@ -153,21 +157,21 @@ function drBodyArt(cls, root){
          + (B.pose[k].legs ? '' : `<g class="db-pose db-pose-${k}-r" data-pose="${k}" data-side="r" style="opacity:0">${im}</g>`);
   }).join('');
   return `<svg class="db${cls ? ' ' + cls : ''}" viewBox="0 0 ${B.w} ${B.h}" aria-hidden="true" focusable="false" style="overflow:visible">`
-    + '<g class="db-root">'
+    + idle('sway', [B.w / 2, B.feetY]) + '<g class="db-root">'
     +   `<g class="db-leg db-leg-l">${img('leg-l', 'db-leg-art')}</g><g class="db-leg db-leg-r">${img('leg-r', 'db-leg-art')}</g>`
     +   `<g class="db-poses-legs">${poses('legs')}</g>`
     +   '<g class="db-breath">'
     // the armpits: still copies of each sleeve's inner top, behind the moving arm, filling the slit an arm swung out opens
     +     `<g class="db-gusset db-gusset-l">${img('gusset-l', 'db-gusset-art')}</g><g class="db-gusset db-gusset-r">${img('gusset-r', 'db-gusset-art')}</g>`
-    +     `<g class="db-arm db-arm-l">${img('arm-upper-l', 'db-upper')}<g class="db-fore db-fore-l">${img('arm-fore-l', 'db-fore-art')}</g></g>`
-    +     `<g class="db-arm db-arm-r">${img('arm-upper-r', 'db-upper')}<g class="db-fore db-fore-r">${img('arm-fore-r', 'db-fore-art')}</g></g>`
+    +     `<g class="db-arm db-arm-l">${idle('arm-l', B.shoulder.l)}${img('arm-upper-l', 'db-upper')}<g class="db-fore db-fore-l">${img('arm-fore-l', 'db-fore-art')}</g></g></g>`
+    +     `<g class="db-arm db-arm-r">${idle('arm-r', B.shoulder.r)}${img('arm-upper-r', 'db-upper')}<g class="db-fore db-fore-r">${img('arm-fore-r', 'db-fore-art')}</g></g></g>`
     +     `<g class="db-poses-back">${poses('back')}</g>`
     +     head
     +     img('body', 'db-body')
     +     img('body-trim', 'db-body-trim').replace('/>', ' style="opacity:0"/>')   // in place of the body while a front drawing stands in for both arms
     +     `<g class="db-poses-front">${poses('front')}</g>`
     +   '</g>'
-    + '</g></svg>';
+    + '</g></g></svg>';
 }
 
 /* A pose: every joint at a number. Degrees for turns (an arm's "raise" is

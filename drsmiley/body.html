@@ -33,6 +33,18 @@
   .who .db-pose { transition: none }
   @media (prefers-reduced-motion: reduce) { .who .db-breath { animation:none } .who { transition:none } .who .db-pose, .who .db-arm, .who .db-leg { transition:none } }
   @keyframes dbBreath { 0%, 100% { transform:scale(1,1) } 50% { transform:scale(.996,1.012) } }
+  /* his life at rest, as in app.css (the .db-idle wrappers) */
+  .who .db-idle { transform-box:view-box }
+  .who .db-idle-arm-l { animation: dbIdleArmL 3.6s ease-in-out .3s infinite }
+  .who .db-idle-arm-r { animation: dbIdleArmR 3.6s ease-in-out .5s infinite }
+  .who .db-idle-head { animation: dbIdleHead 7.4s ease-in-out -1.2s infinite }
+  .who .db-idle-sway { animation: dbIdleSway 11.3s ease-in-out -3s infinite }
+  .is-still .who .db-idle { animation:none }
+  @media (prefers-reduced-motion: reduce) { .who .db-idle { animation:none } }
+  @keyframes dbIdleArmL { 0%, 100% { transform:rotate(0deg) } 50% { transform:rotate(1.6deg) } }
+  @keyframes dbIdleArmR { 0%, 100% { transform:rotate(0deg) } 50% { transform:rotate(-1.6deg) } }
+  @keyframes dbIdleHead { 0%, 100% { transform:rotate(-1deg) } 50% { transform:rotate(1deg) } }
+  @keyframes dbIdleSway { 0%, 100% { transform:rotate(-.45deg) } 50% { transform:rotate(.45deg) } }
   .bar { display:flex; flex-wrap:wrap; gap:9px; margin-top:13px }
   button, .seg { font:inherit }
   .act { min-height:44px; padding:0 17px; border:0; border-radius:999px; background:var(--paper); color:var(--ink); font-size:15px; font-weight:550; box-shadow:var(--finish); cursor:pointer;

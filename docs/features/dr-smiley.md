@@ -656,4 +656,12 @@ narrow (`fy`, `fsx`), its fists near where the rise's were, and shoots
 up; it sinks the same way before the rise takes over on the landing and
 on the way down (fists at the shoulders to arms straight up in one frame
 read as a flicker); his eyes stay open in the air, shut only for the
-landing's laugh.
+landing's laugh. At rest (the same day) he no longer
+stands as a statue between blinks: `drBodyArt` wraps each arm, the head
+and the whole figure in a `.db-idle` group of its own (the rig's transform
+attributes stay on their own groups), and CSS swings each arm 1.6 degrees
+out with the breath (a beat after the chest, the two arms not in step),
+tips the head 1 degree either way over 7.4 s, and sways him half a degree
+from his feet over 11.3 s. CSS only, so Home still runs no frame loop;
+paused off screen, none in Still or reduced motion (`app.css`, and the
+viewer's own copy).

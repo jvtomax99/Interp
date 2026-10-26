@@ -7367,6 +7367,23 @@ html.ds-still .db-host .db-breath{ animation:none; }
 .db-host .db-pose{ transition:none; }   /* drawn poses and leg plates swap at once, like face frames (DR_BODY_FADE, drsmiley/body.js) */
 @keyframes dbBreath{ 0%,100%{ transform:scale(1,1); } 50%{ transform:scale(.996,1.012); } }
 @media (prefers-reduced-motion:reduce){ .db-host .db-breath{ animation:none; } .db-host .db-pose, .db-host .db-arm, .db-host .db-leg{ transition:none; } }
+/* His life at rest (2026-10-26, drBodyArt's .db-idle wrappers): each arm swings a hair out
+   with the breath, a beat after the chest and not in step with the other; the head drifts
+   slowly, behind the chest; his weight sways from the feet. CSS only (no frame loop on
+   Home), paused off screen, none in Still or reduced motion. Origins are the rig's own
+   joints in its picture units (transform-box:view-box). */
+.db-host .db-idle{ transform-box:view-box; }
+.db-host .db-idle-arm-l{ animation:dbIdleArmL 3.6s ease-in-out .3s infinite; }
+.db-host .db-idle-arm-r{ animation:dbIdleArmR 3.6s ease-in-out .5s infinite; }
+.db-host .db-idle-head{ animation:dbIdleHead 7.4s ease-in-out -1.2s infinite; }
+.db-host .db-idle-sway{ animation:dbIdleSway 11.3s ease-in-out -3s infinite; }
+.db-host.is-offscreen .db-idle{ animation-play-state:paused; }
+html.ds-still .db-host .db-idle{ animation:none; }
+@keyframes dbIdleArmL{ 0%,100%{ transform:rotate(0deg); } 50%{ transform:rotate(1.6deg); } }
+@keyframes dbIdleArmR{ 0%,100%{ transform:rotate(0deg); } 50%{ transform:rotate(-1.6deg); } }
+@keyframes dbIdleHead{ 0%,100%{ transform:rotate(-1deg); } 50%{ transform:rotate(1deg); } }
+@keyframes dbIdleSway{ 0%,100%{ transform:rotate(-.45deg); } 50%{ transform:rotate(.45deg); } }
+@media (prefers-reduced-motion:reduce){ .db-host .db-idle{ animation:none; } }
 /* In a quiz he stands in the card's top-right corner (Jose's pick, 2026-10-24):
    a float, so the section label and the counter sit beside him and the
    question starts below his feet (clear). He bounces on a right answer,
