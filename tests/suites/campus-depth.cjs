@@ -22,7 +22,7 @@ const vars = page => page.evaluate(() => { const w = document.querySelector('#co
     const layers = await page.evaluate(() => {
       const w = document.querySelector('#content .cp-world'), kids = [...w.children];
       const sky = w.querySelector('.cp-d-sky'), far = w.querySelector('.cp-d-far'), near = w.querySelector('.cp-ground');
-      const ix = el => kids.indexOf(el), firstLit = kids.findIndex(el => el.classList.contains('cp-litw'));
+      const ix = el => kids.indexOf(el), firstLit = kids.findIndex(el => el.classList.contains('cp-paintw'));
       return { srcs: [sky, far, near].map(i => i && i.getAttribute('src')), loaded: [sky, far, near].every(i => i && i.complete && i.naturalWidth === 960),
         order: [ix(sky), ix(far), ix(near)], before: firstLit < 0 || ix(near) < firstLit, pe: [sky, far, near].map(i => getComputedStyle(i).pointerEvents),
         touch: getComputedStyle(w).touchAction };
