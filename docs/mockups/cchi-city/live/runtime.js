@@ -39,19 +39,18 @@ for (const g of groups.values()){ const geo = mergeGeometries(g.geos, false); if
   BG[g.k].add(mesh); draws++; }
 
 renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false; const shadowsDirty = () => { renderer.shadowMap.needsUpdate = true; };
-// ---- scaffolding and a crane at the top of what's built ----
-const SCAF = {}, CRANE = {};
-for (const k in BOX){ const b = BOX[k], s = new THREE.Group(), Y = M(0xf2b33d, { r:0.6 });
-  const x0 = b.x - b.w/2 - 0.15, x1 = b.x + b.w/2 + 0.15, z0 = b.z - b.d/2 - 0.15, z1 = b.z + b.d/2 + 0.15;
-  for (const [x, z] of [[x0,z0],[x1,z0],[x0,z1],[x1,z1],[(x0+x1)/2,z1],[x0,(z0+z1)/2]]){ const p = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.5, 0.08), Y); p.position.set(x, 0.55, z); s.add(p); }
-  for (const y of [0.1, 0.7, 1.3]){ for (const [w, d, x, z] of [[x1-x0, 0.08, (x0+x1)/2, z1], [x1-x0, 0.08, (x0+x1)/2, z0], [0.08, z1-z0, x0, (z0+z1)/2], [0.08, z1-z0, x1, (z0+z1)/2]]){ const r = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, d), Y); r.position.set(x, y, z); s.add(r); } }
-  const net = new THREE.Mesh(new THREE.PlaneGeometry(x1-x0, 0.9), new THREE.MeshStandardMaterial({ color:0x3aa6a0, transparent:true, opacity:0.5, side:THREE.DoubleSide })); net.position.set((x0+x1)/2, 0.75, z1 + 0.03); s.add(net);
-  BG[k].add(s); SCAF[k] = s; CRANE[k] = crane(k); BG[k].add(CRANE[k]); }
+// ---- an unfinished building is simply shorter, with its roof on (no sign of construction: Jose, 2026-10-26) ----
+const CAP = {};
+for (const k in BOX){ const b = BOX[k], cap = new THREE.Group(), roofM = M(k === 'n' ? 0xe9e4dc : 0xd9cdb8), unitM = M(0x8a8796);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(b.w + 0.15, 0.22, b.d + 0.15), roofM); slab.position.set(b.x, 0.11, b.z); cap.add(slab);
+  const u1 = new THREE.Mesh(new THREE.BoxGeometry(b.w*0.3, 0.38, b.d*0.28), unitM); u1.position.set(b.x - b.w*0.15, 0.4, b.z - b.d*0.1); cap.add(u1);
+  const u2 = new THREE.Mesh(new THREE.BoxGeometry(b.w*0.16, 0.28, b.d*0.18), unitM); u2.position.set(b.x + b.w*0.25, 0.35, b.z + b.d*0.1); cap.add(u2);
+  cap.traverse(o => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } }); BG[k].add(cap); CAP[k] = cap; }
 const BUILT = { e:0.8, t:0.35, s:0.6, n:0.5, c:0.7 };   // a sample learner, scaled by the slider
-function setProgress(p){ for (const k in BOX){ const b = BOX[k], f = Math.min(1, p * BUILT[k] / 0.6), floors = Math.round(f*20)/20;
-    const top = b.top + 0.2, cut = f >= 1 ? 999 : 0.3 + (top - 0.3) * floors;
-    CUT[k].value = cut; SCAF[k].visible = f < 1; SCAF[k].position.y = Math.max(0, cut - 0.9);
-    CRANE[k].visible = f < 1; CRANE[k].position.y = Math.max(0.3, cut - 0.1); } shadowsDirty(); }
+function setProgress(p){ for (const k in BOX){ const b = BOX[k], f = Math.min(1, p * BUILT[k] / 0.6);
+    // whole floors only: the walls stop at the top of the last finished floor and the roof sits on them
+    const floors = Math.max(1, Math.round((b.roof - 0.3) / FL)), done = Math.max(1, Math.round(f * floors)), cut = f >= 1 ? 999 : 0.3 + done * FL;
+    CUT[k].value = cut; CAP[k].visible = f < 1; CAP[k].position.y = Math.min(cut, 900) - 0.02; } shadowsDirty(); }
 
 // ---- the time of day: four looks, blended ----
 const HEMI = scene.children.find(c => c.isHemisphereLight);

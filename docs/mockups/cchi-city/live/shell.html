@@ -19,7 +19,9 @@ body.ready #stage canvas{opacity:1}
 .sun{position:absolute;left:0;top:0;width:118px;height:118px;transform:translate(-50%,-50%);will-change:transform;pointer-events:none}
 .sun .night{display:none}.sun.is-night .day{display:none}.sun.is-night .night{display:inline}.sun.is-night .halo{opacity:.35}
 .sun .rays{animation:spin 40s linear infinite;transform-origin:0 0}
-.sun .eyes{animation:blink 5.5s infinite;transform-origin:0 -5px;transform-box:view-box}
+.sun .eyes{animation:blink 5.5s infinite;transform-origin:0 0;transform-box:view-box}
+.sun .face{animation:bob 3.2s ease-in-out infinite}.sun .rays{transform-box:view-box}
+@keyframes bob{50%{transform:translateY(-2.5px) scale(1.02,.98)}}
 .sun.giggle svg{animation:giggle .9s cubic-bezier(.3,1.6,.5,1)}.sun.giggle .rays{animation-duration:2s}
 .sun .zz{animation:zz 3s ease-in-out infinite}.sun .z2{animation-delay:1.2s}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -60,19 +62,26 @@ input[type=range]{width:100%;accent-color:var(--gold);height:28px;min-width:0}
 <div id="stage"><div id="sun" class="sun" aria-hidden="true">
   <svg viewBox="-70 -70 140 140" width="100%" height="100%">
     <defs>
-      <radialGradient id="sunDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFF6B8"/><stop offset=".55" stop-color="#FFD54A"/><stop offset="1" stop-color="#FFA726"/></radialGradient>
+      <radialGradient id="sunDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFF8C6"/><stop offset=".6" stop-color="#FFD84F"/><stop offset="1" stop-color="#FFB33A"/></radialGradient>
       <radialGradient id="moonDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFFBEA"/><stop offset="1" stop-color="#E7DDB8"/></radialGradient>
+      <radialGradient id="blush"><stop offset="0" stop-color="#FF8FA0" stop-opacity=".85"/><stop offset="1" stop-color="#FF8FA0" stop-opacity="0"/></radialGradient>
       <radialGradient id="halo"><stop offset=".45" stop-color="#FFE38A" stop-opacity=".55"/><stop offset="1" stop-color="#FFE38A" stop-opacity="0"/></radialGradient>
     </defs>
     <circle r="70" fill="url(#halo)" class="halo"/>
     <g class="day">
-      <g class="rays"><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(0)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(30)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(60)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(90)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(120)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(150)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(180)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(210)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(240)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(270)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(300)"/><path d="M-5 -40 L0 -56 L5 -40Z" fill="#FFC93C" stroke="#FFC93C" stroke-width="3" stroke-linejoin="round" transform="rotate(330)"/></g>
-      <circle r="34" fill="url(#sunDisc)"/>
-      <ellipse cx="-19" cy="9" rx="7" ry="4.5" fill="#FF8A80" opacity=".55"/><ellipse cx="19" cy="9" rx="7" ry="4.5" fill="#FF8A80" opacity=".55"/>
-      <g class="eyes"><ellipse cx="-11" cy="-5" rx="4.2" ry="5.6" fill="#4A2A12"/><ellipse cx="11" cy="-5" rx="4.2" ry="5.6" fill="#4A2A12"/>
-        <circle cx="-9.6" cy="-7.4" r="1.6" fill="#fff"/><circle cx="12.4" cy="-7.4" r="1.6" fill="#fff"/></g>
-      <path d="M-14 7 Q0 22 14 7" fill="#7A3B10" stroke="#7A3B10" stroke-width="2.5" stroke-linejoin="round"/>
-      <path d="M-7 13 Q0 18.5 7 13 Q0 15 -7 13Z" fill="#FF7A6E"/>
+      <g class="rays"><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(0)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(30)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(60)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(90)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(120)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(150)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(180)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(210)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(240)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(270)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(300)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(330)"/></g>
+      <g class="face">
+        <circle r="37" fill="url(#sunDisc)"/>
+        <ellipse cx="-13" cy="-21" rx="11" ry="6" fill="#FFFFFF" opacity=".45" transform="rotate(-28 -13 -21)"/>
+        <circle cx="-21" cy="9" r="7.5" fill="url(#blush)"/><circle cx="21" cy="9" r="7.5" fill="url(#blush)"/>
+        <g class="eyes">
+          <ellipse cx="-12" cy="0" rx="6" ry="7.4" fill="#3B2112"/><ellipse cx="12" cy="0" rx="6" ry="7.4" fill="#3B2112"/>
+          <circle cx="-10" cy="-3" r="2.6" fill="#fff"/><circle cx="14" cy="-3" r="2.6" fill="#fff"/>
+          <circle cx="-13.6" cy="2.6" r="1.1" fill="#fff"/><circle cx="10.4" cy="2.6" r="1.1" fill="#fff"/>
+        </g>
+        <path d="M-6.5 10.5 Q0 20 6.5 10.5 Z" fill="#7A2E12"/>
+        <path d="M-3.6 15.4 Q0 13.2 3.6 15.4 Q0 18.6 -3.6 15.4Z" fill="#FF7A8A"/>
+      </g>
     </g>
     <g class="night">
       <path d="M8 -32 A33 33 0 1 0 8 32 A26 26 0 1 1 8 -32Z" fill="url(#moonDisc)"/>

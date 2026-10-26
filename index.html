@@ -9596,7 +9596,7 @@ function practiceMotionKeys(root){
 /* The campus comes alive: vehicles follow their projected paths (each sprite was rendered at one
    reference point; the path gives screen points and a scale per point), the ambulance pulls in and
    holds with its lights flashing, the helicopter lands and later lifts off, clouds drift, flags and
-   the fountain cycle their frames, the cranes swing (lit windows and the people about flip in CSS).
+   the fountain cycle their frames (lit windows and the people about flip in CSS).
    Web Animations, so they pause off screen. */
 let campusAnims = [];
 function campusLife(root){
@@ -9641,10 +9641,6 @@ function campusLife(root){
   world.querySelectorAll('.cp-mv').forEach(el => { const f = kf(el), n = f.length, dur = +el.dataset.dur || 20000;
     run(el, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.03 }, ...f.slice(1, -1).map((x, j) => at(x, 0.03 + 0.94*(j+1)/(n-1))), { ...f[n-1], opacity:1, offset:0.97 }, { ...f[n-1], opacity:0, offset:1 }],
       { duration: dur, iterations: Infinity, delay: +el.dataset.delay || 0, easing:'linear' }); });
-  // the cranes swing their jibs: eight frames, there and back, each held 0.45 s (frame k shows only in its slots)
-  world.querySelectorAll('.cp-crane').forEach((el, c) => { const fr = [...el.children], ks = [...fr.keys()], order = [...ks, ...ks.slice(1, -1).reverse()], n = order.length;
-    fr.forEach((f, k) => run(f, [{ opacity:0, offset:0 }, ...order.flatMap((j, s) => j !== k ? [] : [{ opacity:0, offset:Math.max(0, s/n - 0.001) }, { opacity:1, offset:s/n }, { opacity:1, offset:Math.max(s/n, (s+1)/n - 0.001) }, { opacity:0, offset:(s+1)/n }]), { opacity:0, offset:1 }],
-      { duration: n * 450, iterations: Infinity, delay: -c * 1300, easing:'linear' })); });
   const clouds = world.querySelector('.cp-clouds'); if (clouds) run(clouds, [{ transform:'translateX(-1.2cqw)' }, { transform:'translateX(1.2cqw)' }], { duration: 70000, iterations: Infinity, direction:'alternate', easing:'ease-in-out' });
 }
 // The campus cars and fountain run only while the card is on screen.

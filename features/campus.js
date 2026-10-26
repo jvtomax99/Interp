@@ -50,7 +50,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   const pos = (x, y, w, h) => `left:${(x/W*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/W*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`;
   const at = (x, y) => `left:${(x/W*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%`;
   const worst = ready.pct < 100 && ready.worst ? ready.worst.d.id : null;
-  let paint = '', hits = [], tags = '', legend = '', sig = [], cranes = '';
+  let paint = '', hits = [], tags = '', legend = '', sig = [];
   // Paint rising (Jose, 2026-10-26, "more alive"): a building whose level went up since this phone last drew the
   // campus climbs from the old tenth to the new one, a tenth at a time, then flashes warm at its top. ih_campusLv
   // keeps the levels drawn; the first visit just draws them.
@@ -68,9 +68,6 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     if (lv > was) paint += `<span class="cp-spark" style="${at(...B.label)};--s:${lv - was}"></span>`;
     // warm windows on the painted floors, flickering; after a rise they come on at its end
     if (lv && B.gl && B.gl[lv-1]) paint += `<span class="cp-paintw cp-glw${lv > was ? ' cp-rise' : ''}" style="${pos(...B.gl[lv-1])};--i:${i};--s:${lv - was}"><img class="cp-glow" src="./city/${b.key}-glow${lv}.webp" alt="" decoding="async" style="--fl:${(3.2 + i*0.7).toFixed(1)}s"></span>`;
-    // a crane swings on the roof until the building is fully painted
-    const C = M.live.cranes; if (C && lv < 10 && C.items[b.key]){ const it = C.items[b.key];
-      cranes += `<span class="cp-crane" style="${pos(...it.box)}">${it.a.map((_, k) => `<i style="${sprite(C.atlas, it, k)}"></i>`).join('')}</span>`; }
     // tap areas go in back to front (lowest on screen last), so a building in front takes the tap where boxes overlap
     hits.push([M.b[b.key].box[1] + M.b[b.key].box[3], `<button class="cp-bld" data-k="${b.key}" style="${pos(...M.b[b.key].box)}" tabindex="-1" aria-hidden="true"
         onclick="campusPick('${b.key}')"></button>`]);
@@ -93,7 +90,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     <span class="cp-veh cp-heli" ${data(L.heli)} style="${pos(...L.heli.img[0])};${origin(L.heli, L.heli.img[0])}"><img src="./city/heli0.webp" alt="" decoding="async"><img src="./city/heli1.webp" alt="" decoding="async"></span>
     ${L.bay ? `<span class="cp-bay" style="${pos(...L.bay[2])}">${L.bay.map((bx, i) => `<img src="./city/bay${i}.webp" alt="" decoding="async" style="left:${((bx[0]-L.bay[2][0])/L.bay[2][2]*100).toFixed(2)}%;width:${(bx[2]/L.bay[2][2]*100).toFixed(2)}%">`).join('')}</span>` : ''}
     ${L.lot ? `<span class="cp-veh cp-lot" ${data(L.lot)} data-ref2="${L.lot.ref2.join(',')}" data-pts2="${L.lot.pts2.map(p=>p.join(',')).join(';')}" style="${pos(...L.lot.img[0])};${origin(L.lot, L.lot.img[0])}"><img src="./city/lot0.webp" alt="" decoding="async"><img src="./city/lot1.webp" alt="" decoding="async" style="left:${((L.lot.img[1][0]-L.lot.img[0][0])/L.lot.img[0][2]*100).toFixed(2)}%;top:${((L.lot.img[1][1]-L.lot.img[0][1])/L.lot.img[0][3]*100).toFixed(2)}%;width:${(L.lot.img[1][2]/L.lot.img[0][2]*100).toFixed(2)}%;height:${(L.lot.img[1][3]/L.lot.img[0][3]*100).toFixed(2)}%"></span>` : ''}
-    ${cranes}${L.idlers ? L.idlers.items.map((it, i) => `<span class="cp-idle" style="${pos(...it.box)};--i:${i};--d:${(5 + (i*7)%5).toFixed(0)}s"><i style="${sprite(L.idlers.atlas, it, 0)}"></i><i style="${sprite(L.idlers.atlas, it, 1)}"></i></span>`).join('') : ''}
+    ${L.idlers ? L.idlers.items.map((it, i) => `<span class="cp-idle" style="${pos(...it.box)};--i:${i};--d:${(5 + (i*7)%5).toFixed(0)}s"><i style="${sprite(L.idlers.atlas, it, 0)}"></i><i style="${sprite(L.idlers.atlas, it, 1)}"></i></span>`).join('') : ''}
     ${(L.sitters || []).map((o, i) => `<span class="cp-veh cp-sit" style="${pos(...o.img[0])};--i:${i}"><img src="./city/sit${i}-0.webp" alt="" decoding="async"><img src="./city/sit${i}-1.webp" alt="" decoding="async"></span>`).join('')}
     ${L.birds ? `<span class="cp-veh cp-birds" ${data(L.birds)} style="${pos(...L.birds.img[0])};${origin(L.birds, L.birds.img[0])}"><img src="./city/birds0.webp" alt="" decoding="async"><img src="./city/birds1.webp" alt="" decoding="async"></span>` : ''}`;
   try { localStorage.setItem('ih_campusLv', JSON.stringify(now)); } catch (e) {}

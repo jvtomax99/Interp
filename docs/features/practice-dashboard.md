@@ -74,13 +74,13 @@ Then (Jose: "how can we make it more alive"; he picked all four): the
 lights are back (lamp glows and pools, headlights, bloom, the context
 towers' lit windows); `city/<key>-glow<1..10>.webp`, about half of a
 building's windows lit where the paint has reached (the same ones at every
-tenth), screen-blended and flickering (`.cp-glow`); a tower crane on each
-roof (`crane(key)`, 8 jib angles) shown until the building is at 10
-tenths, swung there and back by `campusLife` (one frame per 0.45 s); the
+tenth), screen-blended and flickering (`.cp-glow`); (cranes on unfinished roofs
+were here too, removed the same day: Jose wants no sign of construction on
+the campus; `crane(key)` still renders `cranes.webp`, which nothing shows); the
 people standing and sitting about are no longer in the board but sprites
 (`IDLE`), two frames each (a turn and a step, or a head turn) flipped by
-CSS (`.cp-idle`, `cpTurn` on a 5-9 s clock); people and cranes each come
-from one picture (`idlers.webp`, `cranes.webp`, packed by `atlasOf`; the
+CSS (`.cp-idle`, `cpTurn` on a 5-9 s clock); the people come
+from one picture (`idlers.webp`, packed by `atlasOf`; the
 manifest gives each item its box and frame cells, drawn by background
 position). Paint rising: `ih_campusLv` keeps the levels this phone last
 drew; a building now higher climbs from the old tenth, one `.cp-rise`

@@ -3904,11 +3904,9 @@
   /* warm lit windows on the painted floors: light on black, added (screen), flickering */
   .cp-glow{ pointer-events:none; mix-blend-mode:screen; animation:cpFlick var(--fl, 3.5s) ease-in-out infinite; }
   @keyframes cpFlick{ 0%,100%{ opacity:1; } 37%{ opacity:.9; } 61%{ opacity:.97; } 80%{ opacity:.88; } }
-  /* the cranes (frames of one picture, swung by campusLife) and the people about (two frames, flipped now and then) */
-  .cp-crane, .cp-idle{ position:absolute; pointer-events:none; }
-  .cp-crane i, .cp-idle i{ position:absolute; inset:0; background-image:url(./city/cranes.webp); background-repeat:no-repeat; }
-  .cp-idle i{ background-image:url(./city/idlers.webp); }
-  .cp-crane i:not(:first-child){ opacity:0; }
+  /* the people about (two frames, flipped now and then) */
+  .cp-idle{ position:absolute; pointer-events:none; }
+  .cp-idle i{ position:absolute; inset:0; background-image:url(./city/idlers.webp); background-repeat:no-repeat; }
   .cp-idle i:last-child{ animation:cpTurn var(--d, 7s) steps(1) infinite; animation-delay:calc(var(--i, 0) * -1.7s); }
   .cp-clouds{ pointer-events:none; }
   /* Depth (F3, campusDepth): the backdrop and the clouds behind the board (once the sky and the far town) sit behind the campus as their own pictures and slide
