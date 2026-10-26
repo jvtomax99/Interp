@@ -22,15 +22,15 @@ Systems, JTCC), a pond with stone rim and fountain, window depth, roof trim,
 soft daylight with a sky-blue card. In the app's pictures (`city/`) and the
 live 3D test https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX (v11). Kit and
 numbers: `docs/features/practice-dashboard.md`. Campus suites and guide pass.
-**Waiting on Jose:** his look at it, the fps of the live test on his iPhone
-(decides step b of `docs/PLAN.md` Next 2), and his "push" on #157; then merge
-main into campus-alive and open its change.
+Jose said "push" on #157 (2026-10-26): main merged into it (conflicts in
+CLAUDE.md, PLAN, GUIDE_NEWS resolved), merged once its checks pass; main is
+merged into campus-alive too, whose change is next. **Waiting on Jose:** the
+fps of the live test on his iPhone (decides step b of `docs/PLAN.md` Next 2).
 
 ## Before (the last chat's changes and where each stands)
 
-- **#157, the campus as a floating diorama** (old campus colours at
-  golden hour, progress as paint, corner view): GitHub's checks passed;
-  **waiting for Jose's "push"**.
+- **#157, the campus as a floating diorama**: Jose's "push" given; merging.
+- **#158, #159** (the 1-minute film, S9 Home taps closed): merged by another chat.
 - **The campus from OpenStreetMap** (third chat, 2026-10-26): five buildings
   sized and placed from the map, JTCC is Encounter; pictures rebuilt, campus
   suites and guide pass; on `claude/campus-alive`.

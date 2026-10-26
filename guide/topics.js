@@ -32,9 +32,9 @@ const GUIDE_SECTIONS = [
 ];
 
 const GUIDE_TOPICS = [
-  { id:'promo', section:'start', k:'video promo watch film movie clip 45 seconds introduction intro overview what is show someone new hire ceo explain the app', q:'What is Interpreter Hub? Watch the 45-second video', a:`
-    <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" playsinline webkit-playsinline preload="none" aria-label="Interpreter Hub in 45 seconds"></video></div>
-    <p>A short film about the Hub, made in 3D: why the right word matters, then the glossary (with the 3D Body coming apart), Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice and your campus, Team Chat and Dr. Smiley, with his brain. It plays with sound. Tap the square-corners button for full screen, and the <b>X</b> at the top right to come back.</p>
+  { id:'promo', section:'start', k:'video promo watch film movie clip minute 1 minute one minute introduction intro overview what is show someone new hire ceo explain the app', q:'What is Interpreter Hub? Watch the 1-minute video', a:`
+    <div class="gd-video"><video src="media/hub-promo.mp4" poster="media/hub-promo.jpg" playsinline webkit-playsinline preload="none" aria-label="Interpreter Hub in one minute"></video></div>
+    <p>A one-minute film about the Hub, made in 3D: why the right word matters, then the glossary, Translate, Doctor Prep, False Friends, the Daily Drill, CoreCHI Practice, Team Chat, the 3D Body, notifications, your knowledge brain and Ask Dr. Smiley. It plays with sound. Tap the square-corners button for full screen, and the <b>X</b> at the top right to come back.</p>
     <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
     <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
 

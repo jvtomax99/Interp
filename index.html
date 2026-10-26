@@ -5774,8 +5774,8 @@ const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
   { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',           eyebrow:'Your campus',           title:'Your HUMC campus is now a little model on a floating board: each building fills with colour as you master it' },
-  { id:'notifications', tone:'gd-n1', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
-  { id:'knowledgebrain', tone:'gd-n2', pin:'pins/wave.webp',             eyebrow:'Your knowledge brain',  title:'Every term you know lights up in a 3D brain: at the top of Term Review, or from CoreCHI Practice' },
+  { id:'promo',       tone:'gd-n1', pin:'pins/wave.webp',               eyebrow:'The video',             title:'A new 1-minute film, in 3D, with a new narrator: notifications and your knowledge brain are in it now' },
+  { id:'notifications', tone:'gd-n2', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -5945,7 +5945,7 @@ function guideOpenSheet(t){
   if(prefersAutoFocus()) sheet.querySelector('.gd-show, .gd-x').focus({ preventScroll: true });
 }
 
-/* ---- The 45-second video (media/hub-promo.mp4, made in promo/hub-blend/) ----
+/* ---- The 1-minute video (media/hub-promo.mp4, made in promo/hub-blend/) ----
    Its answer is 'promo'. Home's hello banner always has a "Watch" bubble
    (Jose, 2026-10-19); once the video has been watched on this phone
    (ih_promoSeen: played to the end or past 15 s) its ring stops turning
@@ -10530,8 +10530,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1025.2317';
-const BUILD_TIME = '2026-10-25 23:17 UTC';
+const BUILD_ID = 'b1026.1522';
+const BUILD_TIME = '2026-10-26 15:22 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

@@ -56,7 +56,8 @@ block of the same name next to the More sheet styles, overlay
   six slowest to draw (`fmTapSummary`). Safari has no Event Timing, so this
   is the phone's way to time a tap. Lab tool for the same, Chromium:
   `tests/tools/tap-hold.cjs` (a 90 ms finger, timed from the lift, TRACE=1
-  for what runs in between).
+  for what runs in between). For where a screen change's time goes after
+  that (style, layout, paint, the app's functions): `tests/tools/screen-trace.cjs`.
 - Time with the app hidden is left out (visibilitychange). Runs under 30
   frames are not saved.
 - Runs are kept on the phone only, `ih_frameMeter` (last 8, each with
