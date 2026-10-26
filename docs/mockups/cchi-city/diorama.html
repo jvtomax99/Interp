@@ -742,7 +742,7 @@ function webpOf(img, q){ const c = document.createElement('canvas'); c.width = W
 // silhouette as alpha, edges un-mixed from the black (c/a), so the app can slide them apart without halos.
 function backdrop(){ const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   const lg = g.createLinearGradient(0, 0, 0, H);
-  if (DAY){ lg.addColorStop(0, '#9cc8f0'); lg.addColorStop(0.45, '#c6e0f6'); lg.addColorStop(0.8, '#eef0f4'); lg.addColorStop(1, '#f8ece6'); } else { lg.addColorStop(0, '#3a2b62'); lg.addColorStop(0.3, '#4b2a63'); lg.addColorStop(0.62, '#8a4570'); lg.addColorStop(0.85, '#c96a7c'); lg.addColorStop(1, '#e88f72'); } g.fillStyle = lg; g.fillRect(0, 0, W, H);
+  if (DAY){ lg.addColorStop(0, '#5f95d0'); lg.addColorStop(0.3, '#93c0ec'); lg.addColorStop(0.55, '#c3def6'); lg.addColorStop(0.8, '#93c0ec'); lg.addColorStop(1, '#5f95d0'); }   // matches the daylight card (app.css .cp-card) else { lg.addColorStop(0, '#3a2b62'); lg.addColorStop(0.3, '#4b2a63'); lg.addColorStop(0.62, '#8a4570'); lg.addColorStop(0.85, '#c96a7c'); lg.addColorStop(1, '#e88f72'); } g.fillStyle = lg; g.fillRect(0, 0, W, H);
   const pts = [[-20,-3.5,-27],[20,-3.5,-27],[20,-3.5,19],[-20,-3.5,19]].map(p => proj(p[0], p[1] - 4, p[2]));   // the board's footprint, a little below it
   g.save(); g.filter = 'blur(26px)'; g.fillStyle = DAY ? 'rgba(40,62,100,.22)' : 'rgba(28,12,44,.4)'; g.beginPath(); pts.forEach(([x,y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); g.restore();
   return g.getImageData(0, 0, W, H); }
@@ -905,5 +905,6 @@ window.__still = async () => { await TEX_LOAD(); waveFlags(1.2); fillSetup();
 window.__proj = () => ({ lab: Object.fromEntries(Object.keys(BOX).map(k => [k, proj(...LABEL_AT[k])])), box: Object.fromEntries(Object.keys(BOX).map(k => [k, bbox(k)])) });
 // in daylight the lamps and lit doorways glow softly, not like at night
 if (DAY) GLOWS.forEach(g => { g.material.opacity = 0.32; });
+window.__sky = () => webpOf(backdrop(), 0.9).data;
 window.__done = true;
 </script></body></html>
