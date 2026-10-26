@@ -57,21 +57,24 @@ jobs:
 
   # The team is on iPhones: the doctor page also runs in WebKit, Safari's
   # engine. (Speech is stood in for; real voices need a real phone.)
+  # It runs inside Playwright's own image, which has WebKit and the ~180
+  # system packages it needs already in it. Installing those on the runner
+  # each time came from Ubuntu's mirror, which at times sends ~40 KB/s, and
+  # the job ran out of time before any check ran (#158, #160). The tag must
+  # match the playwright version in tests/package.json.
   webkit:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001 --ipc=host
     defaults:
       run:
         working-directory: tests
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install WebKit
-        run: |
-          npm install --no-audit --no-fund
-          npx playwright install --with-deps webkit
+      - name: Install the test tools (WebKit is in the image)
+        run: npm install --no-audit --no-fund
       - name: Doctor page and the tab bar tuck in WebKit
         run: BROWSER=webkit node run.cjs doctor-page dock-tuck startup-work
       - name: Keep the screenshots and logs
