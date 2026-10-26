@@ -255,14 +255,18 @@ pend.push(() => { const b1 = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 3.4), n
 pill(0, -9.2, 1.4, 9.5, curb, 0.26, 0.2).rotation.y = Math.PI/2;
 for (const x of [-3.6,-1.4,0.8,3.4]) tree(x, -9.3, 0.6, 'cone');
 // Terminology: the tall white tower behind, the HMH mark near its top
-tower('t', 0.6, -20.5, 4.6, 4.6, 12, { col:'#8a4636', band:'#9a5444' });   // red-brown brick, as in Jose's Google Maps screenshots
-pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ color:0x3a4f8a })); p.position.set(0.6, 0.3+10.2*FL, -18.17); BASE.add(p);
-  const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(0.6, 0.3+10.2*FL, -18.16); BASE.add(l); });
+tower('t', 0.6, -20.1, 4.6, 4.6, 12, { col:'#8a4636', band:'#9a5444' });   // red-brown brick, as in Jose's Google Maps screenshots
+pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ color:0x3a4f8a })); p.position.set(0.6, 0.3+10.2*FL, -17.77); BASE.add(p);
+  const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshBasicMaterial({ map:TEX, transparent:true })); l.position.set(0.6, 0.3+10.2*FL, -17.76); BASE.add(l); });
 // no windows under the two banners
 WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position, under = p.z > -10 && p.y > 0.8 && p.y < 4.4 && ((p.x > -3.55 && p.x < -1.65) || (p.x > 1.85 && p.x < 3.75)); if (under) BASE.remove(m); return !under; });
 // the long glass buildings either side of it (context)
 tower('x2', 12, -22.4, 11, 4, 8, { col:'#5e3a34', band:'#6e4038' });   // the old brick building with rows of windows, behind
-for (const k of ['x2']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS[k].forEach(m => { if (rr() < 0.32) m.material = LIT; }); delete WINDOWS[k]; }
+// behind Ethics (Jose, 2026-10-26: "behind the ethics building it should have a taller building"): the old brick
+// building with rows of windows from his screenshots of the drive, 14 floors (taller than the tower, so it shows over
+// Ethics from the corner), always full height (no exam area)
+tower('x5', 1.4, -23.8, 11, 2.8, 14, { col:'#7a3f33', band:'#e6d8c2' });
+for (const k of ['x2','x5']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS[k].forEach(m => { if (rr() < 0.32) m.material = LIT; }); delete WINDOWS[k]; }
 // US Systems: the brick building on the left: cream bands, a white roof, glass on its lower floors
 tower('s', -9.2, 1.6, 6.5, 9.0, 6, {});   // the Jurist Research Center (OpenStreetMap outline), ~6 floors
 box(6.6, 2*FL, 9.1, GLASSWALL, -9.2, 0.3+FL, 1.6, 0.04);
@@ -297,7 +301,7 @@ pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.
   const p = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.4), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(JT.x + 1.2, 0.3 + 1.5*FL, JT.z + JT.d/2 + 0.05); BASE.add(p); });
 WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, under = p.z > JT.z && p.y > 0.3 + FL && p.y < 0.3 + 2*FL && p.x > JT.x - 2 && p.x < JT.x + 4.4; if (under) BASE.remove(m); return !under; });
 // ---- the helipad on the white tower's roof: pad, lit H, edge lights ----
-const PAD = { x:0.6, y:0.3 + 12*FL + 0.22 + 0.06, z:-20.5 };
+const PAD = { x:0.6, y:0.3 + 12*FL + 0.22 + 0.06, z:-20.1 };
 add(new THREE.CylinderGeometry(1.7, 1.7, 0.06, 32), M(0x3a3d4c, {r:0.9}), PAD.x, PAD.y, PAD.z, false);
 add(new THREE.RingGeometry(1.35, 1.5, 32), new THREE.MeshBasicMaterial({ color:0xf4f6fa, side:THREE.DoubleSide }), PAD.x, PAD.y+0.035, PAD.z, false).rotation.x = -Math.PI/2;
 for (const [w,h,dx] of [[0.14,0.9,-0.3],[0.14,0.9,0.3],[0.5,0.14,0]]){ const hm = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({ color:0xf4f6fa })); hm.rotation.x = -Math.PI/2; hm.position.set(PAD.x+dx, PAD.y+0.04, PAD.z); G.add(hm); }
