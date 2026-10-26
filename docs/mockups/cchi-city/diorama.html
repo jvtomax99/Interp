@@ -225,6 +225,29 @@ const DOORM = new THREE.MeshStandardMaterial({ color:0xdfe3ea, roughness:0.5, me
 const DOORS = [-1, 1].map(sd => { const dm = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.0, 0.04), DOORM); dm.position.set(BAY.x + sd*0.27, 0.3 + 0.5, BAY.z + BAY.d/2 + 0.04); dm.castShadow = true; BAY_DOORS.add(dm);
   const st = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.06, 0.05), M(0xb8bec8)); st.position.set(BAY.x + sd*0.27, 0.3 + 0.55, BAY.z + BAY.d/2 + 0.07); BAY_DOORS.add(st); return [dm, st, sd]; });
 function bayDoors(open){ for (const [dm, st, sd] of DOORS){ const x = BAY.x + sd*(0.27 + open*0.52); dm.position.x = x; st.position.x = x; } }
+let TEX = null; const pend = [];
+// the entrance sign on the lawn left of the drive's mouth (Jose's photo, 2026-10-26): two brick pillars with cream
+// caps, a pale grey panel with an arched top carrying the HMH mark and the names, over a bed of purple and yellow
+// flowers inside a yellow curb; turned a little toward the corner camera
+const SIGN = new THREE.Group(); SIGN.position.set(-9.0, 0.3, 10.5); SIGN.rotation.y = -0.3; SIGN.scale.setScalar(1.3); G.add(SIGN);
+{ const put = (geo, mat, x, y, z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = cast; m.receiveShadow = true; SIGN.add(m); return m; };
+  const brick = BRICK({ col:'#8a4636', band:'#9a5444' })(0.4, 1.2), cap = M(0xe6dccb, { r:0.6 });
+  for (const x of [-1.32, 1.32]){ put(new THREE.BoxGeometry(0.38, 1.25, 0.38), brick, x, 0.62, 0); put(new THREE.BoxGeometry(0.46, 0.1, 0.46), cap, x, 1.3, 0); }
+  const sh = new THREE.Shape(); sh.moveTo(-1.13, 0); sh.lineTo(1.13, 0); sh.lineTo(1.13, 0.78); sh.quadraticCurveTo(0, 1.02, -1.13, 0.78); sh.lineTo(-1.13, 0);
+  const panel = new THREE.ExtrudeGeometry(sh, { depth:0.14, bevelEnabled:false, curveSegments:16 }); panel.translate(0, 0, -0.07);
+  put(panel, M(0xd7dbe2, { r:0.5 }), 0, 0.28, 0); put(new THREE.BoxGeometry(2.26, 0.28, 0.2), brick, 0, 0.14, 0);
+  // the bed: a long oval in a yellow curb, rows of purple with a yellow band
+  const bed = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.1, 40), curb); bed.scale.set(2.0, 1, 0.62); bed.position.set(0, 0.0, 0.62); SIGN.add(bed);
+  const soil = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.12, 40), M(0x6a3f2c, { r:0.95 })); soil.scale.set(1.86, 1, 0.52); soil.position.set(0, 0.02, 0.62); SIGN.add(soil);
+  for (let i = 0; i < 46; i++){ const u = (i % 23) / 22, row = i < 23 ? 0 : 1, x = -1.6 + u*3.2, z = 0.62 + (row ? 0.22 : -0.08) * Math.cos((u - 0.5)*2.4);
+    put(new THREE.BoxGeometry(0.16, row ? 0.13 : 0.22, 0.16), M(row ? 0x6b3fc8 : 0xf2c94c, { r:0.8 }), x, row ? 0.14 : 0.19, z, false); }
+  for (let i = 0; i < 14; i++) put(new THREE.BoxGeometry(0.16, 0.13, 0.16), M(0x7b4fd8, { r:0.8 }), -1.2 + i*0.185, 0.14, 0.98, false); }
+pend.push(() => { const c = document.createElement('canvas'); c.width = 640; c.height = 240; const g = c.getContext('2d');
+  g.drawImage(TEX.image, 26, 46, 150, 150);
+  g.fillStyle = '#3a4a6a'; g.textBaseline = 'alphabetic'; g.font = 'italic 46px Georgia, serif'; g.fillText('Hackensack', 196, 96); g.fillText('Meridian Health', 196, 144);
+  g.fillStyle = '#4a5878'; g.font = '30px Georgia, serif'; g.fillText('Hackensack University', 198, 186); g.fillText('Medical Center', 198, 220);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 0.79), new THREE.MeshBasicMaterial({ map:t, transparent:true })); face.position.set(0, 0.29 + 0.4, 0.075); SIGN.add(face); });
 // three flagpoles by the mouth of the drive, flags caught in a breeze
 for (const [x, col] of [[-7.4, 0xf4f6fa], [-6.4, 0x1f3f7a], [-5.4, 0xf4f6fa]]){
   add(new THREE.CylinderGeometry(0.035, 0.045, 4.2, 8), M(0xd8dbe3, {r:0.4, m:0.6}), x, 2.35, 12.0);
@@ -243,8 +266,7 @@ function spray(seed){ if (SPRAY) scene.remove(SPRAY); const n = 260, pos = new F
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   SPRAY = new THREE.Points(g, new THREE.PointsMaterial({ color:0xdff6ff, size:0.08, transparent:true, opacity:0.9, depthWrite:false })); scene.add(SPRAY); return SPRAY; }
 // benches along the sidewalk
-for (const x of [-9, 9]) { box(1.2, 0.08, 0.4, M(0x8a5a3c), x, 0.55, 12.4, 0.02); box(1.2, 0.35, 0.06, M(0x8a5a3c), x, 0.75, 12.2, 0.02); for (const dx of [-0.5,0.5]) box(0.08,0.3,0.4, M(0x2c2c36), x+dx, 0.4, 12.4, 0.01); }
-let TEX = null; const pend = [];
+for (const x of [-14, 9]) { box(1.2, 0.08, 0.4, M(0x8a5a3c), x, 0.55, 12.4, 0.02); box(1.2, 0.35, 0.06, M(0x8a5a3c), x, 0.75, 12.2, 0.02); for (const dx of [-0.5,0.5]) box(0.08,0.3,0.4, M(0x2c2c36), x+dx, 0.4, 12.4, 0.01); }
 // ---- the buildings (domain keys) ----
 // Ethics: the brown-brick building at the end of the drive, two big banners on its face, evergreens in its planter
 tower('e', 0, -13.4, 12, 7.0, 6, { col:'#6e3a33', band:'#7a4239' });   // George Link Jr. Pavilion: its OpenStreetMap outline, ~6 floors
@@ -386,7 +408,7 @@ function sitter(kind, i=0){ const g = new THREE.Group(); g.scale.setScalar(1.75)
   g.userData.head = head; g.userData.hair = hair;
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function turnHead(g, f){ const a = f ? 0.55 : 0; g.userData.head.rotation.y = a; g.userData.hair.rotation.y = a; g.userData.hair.position.x = f ? 0.012 : 0; }
-const SITTERS = [ { g: sitter('elder', 3), at: [-9.35, 0.59, 12.4] }, { g: sitter('kid', 0), at: [-8.7, 0.59, 12.4] }, { g: sitter('visitor', 1), at: [9.3, 0.59, 12.4] } ];
+const SITTERS = [ { g: sitter('elder', 3), at: [-14.35, 0.59, 12.4] }, { g: sitter('kid', 0), at: [-13.7, 0.59, 12.4] }, { g: sitter('visitor', 1), at: [9.3, 0.59, 12.4] } ];
 // a flock of birds crossing the sky: five small dark Vs, wings up and wings down
 function flock(){ const g = new THREE.Group(); const dark = new THREE.MeshBasicMaterial({ color:0x1a1424 }); g.userData.wings = [];
   for (const [dx, dy, dz] of [[0,0,0],[-1.6,-0.4,0.6],[1.5,-0.5,0.4],[-3.0,-1.0,1.1],[2.9,-1.1,0.9]]){ const b = new THREE.Group(); b.position.set(dx, dy, dz);
@@ -419,7 +441,7 @@ function crane(key){ const b = BOX[key], g = new THREE.Group(), Y = M(0xf2b33d, 
 for (const [k,i,x,z,ry,f] of [['doctor',3,-1.2,-7.6,0.3],['nurse',2,-0.6,-7.9,-2.6],['visitor',1,1.6,-7.5,0.8,1],['patient',4,2.3,-7.9,-0.4],['kid',0,2.0,-7.3,-0.4],
     ['visitor',2,-15,12.6,1.57,1],['elder',4,-12.4,12.9,-1.57],['visitor',0,-1.5,12.5,1.57,1],['nurse',1,1.0,12.8,-1.57,1],['doctor',2,6.5,12.4,1.57],['patient',3,13.5,12.7,-1.57,1],['visitor',4,16.8,12.5,1.57],
     ['doctor',0,-5.6,-1.2,0],['nurse',3,-5.6,3.6,3.1,1],['visitor',1,-12.6,-10.2,0.6],['kid',2,-13.2,-13.6,2.4,1],['elder',0,-17.4,-9.3,-0.8],['patient',1,17.4,-5.2,1.2],['visitor',3,18.0,-4.6,-2.0],
-    ['nurse',4,7.9,-9.6,0.2,1],['doctor',1,-5.4,-9.6,0.4],['kid',3,-9.6,10.2,0.9,1]]) stand(k, i, x, z, ry, f);
+    ['nurse',4,7.9,-9.6,0.2,1],['doctor',1,-5.4,-9.6,0.4],['kid',3,-6.4,10.3,0.9,1]]) stand(k, i, x, z, ry, f);
 // the cafe on the right-hand lawn: round tables under pink and white umbrellas, people at them
 for (const [x,z,c] of [[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14e],[11.2,8.9,0x3aa6a0]]){
   add(new THREE.CylinderGeometry(0.42,0.42,0.05,20), M(0xffffff), x, 0.62, z); add(new THREE.CylinderGeometry(0.05,0.05,0.4,8), M(0x2c2c36), x, 0.42, z);
