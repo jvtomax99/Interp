@@ -88,6 +88,15 @@ layer per tenth 0.32 s apart after 1 s, then `.cp-spark` flashes at its
 badge point and its lit windows come on; the first visit and every later
 drawing just draw. Reduced motion: no swing, flip, climb, flash or
 flicker. Suite: `campus-alive.cjs`.
+Then (Jose sent Google Maps screenshots; his pick: fix the campus from
+them, no Google data in the app): Terminology's tower is red-brown brick
+("the brick tower"), and the right side of the drive is one big dark
+building stepping back in three tiers (Culture, "the dark building on the
+right"; `tower(..., base)` stacks the tiers, `BOX.c.crane` puts its crane
+on the top tier), where a parking deck and a dark tower had been guessed.
+Google's 3D map can't be used directly (their terms; and this container
+can't reach it); OpenStreetMap outlines could be, once `overpass-api.de`
+is allowed in the environment's network settings.
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building

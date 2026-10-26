@@ -228,7 +228,9 @@ come from this alone.
   two-frame sprites (one picture for all of them, one for the cranes);
   the paint climbing a tenth at a time after practice, with a flash
   (`ih_campusLv`). New suite `campus-alive.cjs`. Guide answer updated.
-  Built on #157. Not measured yet: smoothness on an iPhone with this much
+  Then from Jose's Google Maps screenshots: the HMH tower red brick, the
+  right of the drive one big dark stepped building (Culture). Built on
+  #157. Not measured yet: smoothness on an iPhone with this much
   moving (the smoothness meter in More can tell).
 
 - 2026-10-26 The campus as a floating diorama (Jose's video, "in this
