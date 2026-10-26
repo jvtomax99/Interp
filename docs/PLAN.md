@@ -102,7 +102,26 @@ under way, then what waits on Jose, then small leftovers.
    what's left stays inline by design (phase 4, `docs/split-index.md`).
    The 1-minute promo: made (#151, #156), in the app as Home's Watch video
    with a voice fix and 10% faster (#158); `promo/hub-blend/BRIEF-60s.md`.
-2. **Smoothness, what's left.** Home taps are done (S9, Done 2026-10-26).
+2. **Campus: alive and interactive (Jose, 2026-10-26; previews in the
+   third campus chat; he picked all seven).** Waits on #157, then
+   `claude/campus-alive`. Order, one PR each:
+   a. **Live 3D test on his iPhone first** (an Artifact page: the campus
+      drawn live with three.js; spin, pinch, tap to lift, an hour slider,
+      floors rising). Gate: smooth on his phone (frame meter) and as good
+      as the pre-rendered look. Yes: b. No: the picture route (1 as
+      per-hour background and window pictures, 3 as picture layers, 7
+      dropped) and say so.
+   b. Campus drawn live in the app (`features/campus.js`), pictures kept
+      as the fallback (no WebGL, reduced motion, slow phone), windows on
+      all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
+      clock: sun moved live, no extra pictures) and 3 (floors rise,
+      replacing paint).
+   c. Overlays, either route: 4 (tap a person: a term from your glossary,
+      counts as practice; tap area bigger than the figure), 5 (fireworks,
+      ribbon, gold badge when a building is finished), 6 (weather, the
+      friendly half only: sun and a rainbow for a streak, never snow for a
+      missed day).
+3. **Smoothness, what's left.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home is still 64 ms/s on Jose's phone (Apple: 10+ is
    distracting); no step for it is open. Back to a scrolled Home opens
    the tab bar and tucks it again in the same frame (never seen; frames
@@ -227,6 +246,30 @@ come from this alone.
 
 - 2026-10-26 `api/term-check.js` uses `_routine.js`'s `clip` (same trim and
   600-character cut); its own copy and `MAX_FIELD` are gone.
+- 2026-10-26 The campus, alive (Jose: "how can we make it more alive";
+  he picked all four): lamps, headlights and bloom back; warm lit windows
+  on the painted floors (`<key>-glow1..10`, flickering); a crane on each
+  roof until the building is fully painted, swinging; the people about as
+  two-frame sprites (one picture for all of them, one for the cranes);
+  the paint climbing a tenth at a time after practice, with a flash
+  (`ih_campusLv`). New suite `campus-alive.cjs`. Guide answer updated.
+  Then from Jose's Google Maps screenshots: the HMH tower red brick, the
+  right of the drive one big dark stepped building (Culture). Built on
+  #157. Not measured yet: smoothness on an iPhone with this much
+  moving (the smoothness meter in More can tell).
+
+- 2026-10-26 The campus as a floating diorama (Jose's video, "in this
+  style"; his picks: busier, paint for progress, corner view). New source
+  `docs/mockups/cchi-city/diorama.html` + `builddiorama.cjs`; `city/`
+  re-rendered (lit layers gone, `-paint1..10` per building); card restyled
+  light; badges in three hand-set rows, Dr. Smiley steps right when needed,
+  tap areas back to front. Guide: the CoreCHI answer rewritten, a New
+  lately card (replaces the film's). Suites: campus-pick, -life (the lot
+  car's last stretch threshold for the new angle), -depth; full run.
+  Then, on Jose's "looks flat" and "I like the original colors more":
+  the live campus's colours and golden-hour light on the new board,
+  evening card kept, unstudied buildings faded (not white). Note: `docs/features/practice-dashboard.md`.
+
 - 2026-10-26 S9 Home taps, part 2: **closed, no app change** (Jose's pick
   after the findings). Taps meet the wait target on his phone; what's left
   of a screen change's hiccup is drawing the new screen itself. Tool:

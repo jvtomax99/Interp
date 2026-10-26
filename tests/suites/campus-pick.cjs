@@ -1,6 +1,6 @@
 /* Your HUMC campus on CoreCHI Practice (docs/features/practice-dashboard.md):
    each badge names its exam area; the first tap on a building or badge picks
-   it (its windows light, the scene dims, a card names the area) without
+   it (it shows in full colour, the scene dims, a card names the area) without
    starting anything; a second tap or Practise starts; the empty scene,
    close and Escape put it back; a re-render keeps the pick, a new visit
    doesn't. */
@@ -12,7 +12,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 const state = page => page.evaluate(() => {
   const w = document.querySelector('#content .cp-world'), card = document.querySelector('#content .cp-pick-in');
   const sel = [...document.querySelectorAll('#content .cp-tag.is-sel')].map(t => t.dataset.k);
-  const lit = document.querySelector('#content .cp-litsel img');
+  const lit = document.querySelector('#content .cp-paintsel img');
   return { onPractice: activeCategory === 'practice' && !!w, has: !!w && w.classList.contains('has-sel'), sel, card: card ? card.innerText.replace(/\s+/g, ' ').trim() : null,
     lit: lit ? lit.getAttribute('src') : null, shade: w ? +getComputedStyle(w.querySelector('.cp-shade')).opacity : null };
 });
@@ -60,7 +60,7 @@ const tap = async (page, sel) => { const r = await page.evaluate(sel => { const 
     let s = await state(page);
     ok(s.onPractice && s.has && s.sel.join() === 'e' && /Professional Responsibility & Ethics/.test(s.card) && /% of exam/.test(s.card) && /questions?/.test(s.card),
       'tap the building: picked, card names Ethics, still on Practice', s);
-    ok(s.lit === './city/e-lit10.webp' && s.shade > 0.9, 'its windows all light, the scene dims', s);
+    ok(s.lit === './city/e-paint10.webp' && s.shade > 0.9, 'it shows in full colour, the scene dims', s);
     const go = await page.evaluate(() => { const g = document.querySelector('#content .cp-pick .cp-play'), x = document.querySelector('#content .cp-pick-x');
       const hit = el => { const r = el.getBoundingClientRect(), h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { w: Math.round(r.width), h: Math.round(r.height), mine: !!h && el.contains(h) }; };
       return { go: hit(g), x: hit(x), label: g.getAttribute('aria-label'), text: g.textContent.trim() }; });
@@ -69,13 +69,13 @@ const tap = async (page, sel) => { const r = await page.evaluate(sel => { const 
       hid = ['.cp-chips', '.cp-go'].map(q => getComputedStyle(document.querySelector('#content ' + q)).visibility);
       return { below: c.top >= w.bottom - 1, fits: c.bottom <= f.bottom + 1, hid }; });
     ok(cover.below && cover.fits && cover.hid.join() === 'hidden,hidden', 'the card sits under the scene, in place of the chips and Play row', cover);
-    ok(go.go.mine && go.go.h >= 44 && go.x.mine && go.x.w >= 28 && /^Practise Ethics, \d+% lit$/.test(go.label) && go.text === 'Practise', 'card: Practise (named for Ethics, 44 px) and close, each takes its tap', go);
+    ok(go.go.mine && go.go.h >= 44 && go.x.mine && go.x.w >= 28 && /^Practise Ethics, \d+% painted$/.test(go.label) && go.text === 'Practise', 'card: Practise (named for Ethics, 44 px) and close, each takes its tap', go);
     await page.screenshot({ path: O + device + '-picked.png' });
 
     // another badge switches the pick
     await tap(page, '#content .cp-tag[data-k="t"]'); await wait(400);
     s = await state(page);
-    ok(s.sel.join() === 't' && /Healthcare Terminology/.test(s.card) && s.lit === './city/t-lit10.webp' && s.onPractice, 'tap another badge: the pick moves to Terminology', s);
+    ok(s.sel.join() === 't' && /Healthcare Terminology/.test(s.card) && s.lit === './city/t-paint10.webp' && s.onPractice, 'tap another badge: the pick moves to Terminology', s);
 
     // a re-render keeps it
     await page.evaluate(() => renderContent()); await wait(400);

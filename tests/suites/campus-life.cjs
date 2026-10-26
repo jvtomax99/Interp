@@ -75,7 +75,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     const driving = await at(...LOT, 0.58);
     ok(driving.lot[0] === 0 && driving.lot[1] === 1 && driving.lotAt[0] > backing.lotAt[0] + 0.08, 'then its east-facing look, well along the lane toward the drive', { backing: backing.lotAt, driving: driving.lotAt });
     const out = await at(...LOT, 0.69);
-    ok(out.lotOp === 1 && out.lotAt[1] > driving.lotAt[1] + 0.05 && out.lotAt[0] > driving.lotAt[0], 'and down the drive to the street', { driving: driving.lotAt, out: out.lotAt });
+    // corner view since 2026-10-26: the street is down and to the right of the lot's lane, so the last stretch moves less on screen
+    ok(out.lotOp === 1 && out.lotAt[1] > driving.lotAt[1] + 0.03 && out.lotAt[0] > driving.lotAt[0], 'and down the drive to the street', { driving: driving.lotAt, out: out.lotAt });
     const away = await at(...LOT, 0.85);
     ok(away.lotOp === 0, 'gone for a while before it is back in its spot', away);
     await page.evaluate(() => campusAnims.forEach(a => { a.currentTime = 46000 * 0.40 - 9000; })); await wait(200); await page.screenshot({ path: O + device + '-lot-backing.png' });

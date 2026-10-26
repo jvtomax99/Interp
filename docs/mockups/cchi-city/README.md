@@ -1,5 +1,10 @@
 # CCHI City (mockup, 2026-10-19)
 
+**Current (2026-10-26): `diorama.html` + `builddiorama.cjs`**, the floating
+board from Jose's video, in the campus's own colours (`docs/features/practice-dashboard.md`, top
+section). `entrance.html` + `buildentr.cjs` are the dusk version it was
+built from. Needs `npm install --no-save three@0.160.0` here first.
+
 Jose's ask: make CoreCHI Practice "look like a game", inspired by an
 isometric "Note Maker City" picture. Picked: CCHI City, at the top of
 CoreCHI (replacing the navy readiness card as the hero), pre-rendered 3D
