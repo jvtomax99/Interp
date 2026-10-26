@@ -64,9 +64,11 @@ from that cue list instead of `HOOK_MAP`.
   Jose has the file.
 - Music (Jose heard the 15 s sample: "clean, use it"): `assets/music-60s.m4a`, from
   `tools/music60.py` (six bars of the middle played twice, one join at 25.70 s, starts at 1.18 s so
-  its last notes land on "Safer Care." at 57.08 s). Mixed 12 dB under the voice as in v11 (voice
-  -17.3 LUFS, music set to -29.3), under the render's own voice and effects, picture copied
-  (`-c:v copy`).
+  its last notes land on "Safer Care." at 57.08 s). Mixed 12 dB under the voice as in v11, under
+  the render's own voice and effects, picture copied (`-c:v copy`, checked identical). The render's
+  voice and effects come out 3.0 dB louder than the same two files mixed alone (-14.3 against
+  -17.3 LUFS), so the music is raised by +6.7 dB, not +3.7: `renders/hub-promo-60s.mp4`, -13.2
+  LUFS. The render took 57 min on 4 cores; `renders/` stays out of git, Jose has the file.
 
 ## Not proven yet
 
