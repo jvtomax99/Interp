@@ -43,7 +43,7 @@ moon.shadow.mapSize.set(8192,8192); Object.assign(moon.shadow.camera,{left:-34,r
 const warm = new THREE.DirectionalLight(0xa99cf0, 0.45); warm.position.set(8, 14, 40); scene.add(warm);
 const rim = new THREE.DirectionalLight(0xff8f86, 1.1); rim.position.set(14, 10, -34); scene.add(rim);
 // ?day: soft warm daylight (Jose's references) instead of golden hour: a higher, whiter sun, a sky-blue fill, a faint rim
-const DAY = P.has('day');
+const DAY = !P.has('dusk');
 if (DAY){ moon.color.set(0xfff0dc); moon.intensity = 2.6; moon.position.set(-24, 40, 22); warm.color.set(0xdfe9ff); warm.intensity = 0.55; rim.color.set(0xffd2b0); rim.intensity = 0.45;
   scene.children.find(c => c.isHemisphereLight).color.set(0xd6e6ff); scene.children.find(c => c.isHemisphereLight).groundColor.set(0x8a7a62); scene.children.find(c => c.isHemisphereLight).intensity = 1.05; }
 const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -121,6 +121,9 @@ const BRICK = (o={}) => { const t = brickTex(o.col, o.band, o.glass); return (w,
 const GLASSWALL = new THREE.MeshStandardMaterial({ color:0x3f5683, roughness:0.06, metalness:0.75, envMapIntensity:1.6 });
 const ROOF = M(0x6e6a78), WIN_DARK = new THREE.MeshStandardMaterial({ color:0x22304f, roughness:0.08, metalness:0.6, envMapIntensity:1.4 }), FRAME = M(0xd8d2c4, { r:0.6 }), SILL = M(0xeee8da, { r:0.5 });
 const LIT = new THREE.MeshBasicMaterial({ color:0xffc46a });
+const WIN_SKY = new THREE.MeshStandardMaterial({ color:0x3e5f8e, roughness:0.06, metalness:0.55, envMapIntensity:1.6 }), WIN_WARM = new THREE.MeshStandardMaterial({ color:0xf0c88e, roughness:0.5, emissive:0x6a4416, emissiveIntensity:0.45 });
+const REVEAL = M(0x1c2236, { r:0.9 }), TRIM = M(0xefe8dc, { r:0.6 });
+let wr = 41; const wrnd = () => (wr = (wr*16807)%2147483647)/2147483647;
 
 // a tower: body, a cream cornice, rooftop units, and windows on the faces the camera sees
 const WINDOWS = {}; const LABEL_AT = {}; const BOX = {};
@@ -130,6 +133,8 @@ function tower(key, x, z, w, d, floors, style, base){
   const mats = !glass ? BRICK(o)(Math.max(w,d), h) : o.glassCol ? new THREE.MeshStandardMaterial({ color:o.glassCol, roughness:0.06, metalness:0.75, envMapIntensity:1.6 }) : GLASSWALL;
   box(w, h, d, mats, x, y0 + h/2, z, 0.08);
   box(w+0.15, 0.22, d+0.15, M(o.roof ?? 0xd9cdb8), x, y0 + h + 0.11, z, 0.05);   // the roof, tinted with the building
+  for (const [pw, pd, px, pz] of [[w+0.2, 0.1, x, z + d/2 + 0.05], [w+0.2, 0.1, x, z - d/2 - 0.05], [0.1, d+0.2, x - w/2 - 0.05, z], [0.1, d+0.2, x + w/2 + 0.05, z]])
+    box(pw, 0.14, pd, TRIM, px, y0 + h + 0.29, pz, 0.03, false);   // a parapet trims the roof's edge
   box(w*0.35, 0.4, d*0.3, M(0x8a8796), x - w*0.15, y0 + h + 0.42, z - d*0.1, 0.06);
   box(w*0.18, 0.3, d*0.2, M(0x9a97a6), x + w*0.25, y0 + h + 0.37, z + d*0.1, 0.05);
   const wins = WINDOWS[key] = WINDOWS[key] || [];
@@ -146,7 +151,9 @@ function tower(key, x, z, w, d, floors, style, base){
         add(ax === 'z' ? new THREE.BoxGeometry(gw+0.07, gh+0.07, 0.02) : new THREE.BoxGeometry(0.02, gh+0.07, gw+0.07), FRAME, ax === 'z' ? px : px - out*0.006, y, ax === 'z' ? pz - 0.006 : pz, false);
         add(ax === 'z' ? new THREE.BoxGeometry(gw+0.12, 0.035, 0.06) : new THREE.BoxGeometry(0.06, 0.035, gw+0.12), SILL, ax === 'z' ? px : px + out*0.02, y - gh/2 - 0.03, ax === 'z' ? pz + 0.02 : pz, false);
       }
-      const m = add(geo, WIN_DARK, ax === 'z' ? px : px + out*0.004, y, ax === 'z' ? pz + 0.004 : pz, false);
+      if (!glass) add(ax === 'z' ? new THREE.BoxGeometry(gw+0.02, 0.035, 0.04) : new THREE.BoxGeometry(0.04, 0.035, gw+0.02), REVEAL, ax === 'z' ? px : px + out*0.012, y + gh/2 - 0.01, ax === 'z' ? pz + 0.012 : pz, false);   // the lintel's shadow: the glass sits back
+      const wl = wrnd(), wm = glass ? WIN_DARK : wl < 0.07 ? WIN_WARM : wl < 0.4 ? WIN_SKY : WIN_DARK;
+      const m = add(geo, wm, ax === 'z' ? px : px + out*0.004, y, ax === 'z' ? pz + 0.004 : pz, false);
       m.userData.win = true; wins.push(m);
     }
   }
@@ -167,6 +174,7 @@ box(39.5, 0.02, 0.06, curb, 0, 0.24, 14.9, 0.01, false); box(39.5, 0.02, 0.06, c
 box(39.5, 0.1, 1.2, walk, 0, 0.22, 12.7, 0.03, false);                                    // sidewalk
 box(10, 0.06, 20, asphalt, 0, 0.21, 2.5, 0.02, false);                                    // the drive
 for (let i=0;i<20;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48, 0.25, 12.6, 0.01, false); // crosswalk
+for (let i=0;i<7;i++) box(1.0, 0.02, 0.24, paint, -7.0, 0.25, 13.55 + i*0.5, 0.01, false);   // and one across the street, west of the drive
 box(26, 0.06, 2.8, pave(26, 2.8), 0, 0.21, -7.6, 0.02, false);   // the drop-off in front of Ethics, paved in warm stone                                  // the road across the end
 // lane lines and turn arrows
 for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4) box(0.06, 0.02, 0.7, paint, x, 0.25, z, 0.01, false);
@@ -359,6 +367,28 @@ function spray(seed){ if (SPRAY) scene.remove(SPRAY); const n = 260, pos = new F
   SPRAY = new THREE.Points(g, new THREE.PointsMaterial({ color:0xdff6ff, size:0.08, transparent:true, opacity:0.9, depthWrite:false })); scene.add(SPRAY); return SPRAY; }
 // benches along the sidewalk
 for (const x of [-14, 9]) bench(x, 12.38, 0, 0.28);
+// an entrance on a building's front (+z face at fz): canopy, columns, glass doors into a lobby, planters either side
+function lobbyTex(){ const lc = document.createElement('canvas'); lc.width = 512; lc.height = 256; const lg = lc.getContext('2d');
+  const grd = lg.createLinearGradient(0, 0, 0, 256); grd.addColorStop(0, '#d9a56a'); grd.addColorStop(0.55, '#f0c88e'); grd.addColorStop(1, '#c98f5a'); lg.fillStyle = grd; lg.fillRect(0, 0, 512, 256);
+  lg.fillStyle = '#fff4d6'; for (let k = 0; k < 6; k++){ lg.beginPath(); lg.ellipse(40 + k*86, 18, 22, 6, 0, 0, Math.PI*2); lg.fill(); }
+  lg.fillStyle = '#8a5a36'; lg.fillRect(140, 160, 240, 60); lg.fillStyle = '#a8703f'; lg.fillRect(140, 152, 240, 12);
+  for (const x of [40, 470]){ lg.fillStyle = '#3d6a3f'; lg.beginPath(); lg.ellipse(x, 150, 26, 44, 0, 0, Math.PI*2); lg.fill(); lg.fillStyle = '#e8e2d8'; lg.fillRect(x - 16, 190, 32, 40); }
+  const t = new THREE.CanvasTexture(lc); t.colorSpace = THREE.SRGBColorSpace; return t; }
+function entrance(key, cx, fz, dw=2.4){ const fr = M(0x27324d, { r:0.4, m:0.3 }), white = M(0xf4f0e9, { r:0.55 });
+  add(new THREE.PlaneGeometry(dw, 1.4), new THREE.MeshBasicMaterial({ map:lobbyTex(), color:0xd8d0c4 }), cx, 0.3 + 0.72, fz + 0.055, false);
+  add(new THREE.BoxGeometry(dw + 0.1, 1.45, 0.02), new THREE.MeshStandardMaterial({ color:0x9fc3d8, roughness:0.05, metalness:0.3, transparent:true, opacity:0.16, envMapIntensity:1.4 }), cx, 0.3 + 0.74, fz + 0.08, false);
+  for (let k = 0; k <= 3; k++) add(new THREE.BoxGeometry(0.06, 1.5, 0.06), fr, cx - dw/2 + k*dw/3, 0.3 + 0.75, fz + 0.09);
+  add(new THREE.BoxGeometry(dw + 0.2, 0.08, 0.07), fr, cx, 0.3 + 1.49, fz + 0.09);
+  box(dw + 1.6, 0.2, 1.9, white, cx, 2.25, fz + 0.95, 0.08); box(dw + 1.7, 0.06, 2.0, M(0xe0d9ce, { r:0.6 }), cx, 2.12, fz + 0.95, 0.03);
+  for (const sx of [-1, 1]){ add(new THREE.CylinderGeometry(0.13, 0.13, 1.85, 18), white, cx + sx*(dw/2 + 0.55), 1.22, fz + 1.7); }
+  for (let k = 0; k < 4; k++) add(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 12), new THREE.MeshBasicMaterial({ color:0xfff0c8 }), cx - dw/2 + 0.1 + k*(dw - 0.2)/3, 2.085, fz + 1.1, false);
+  glow(cx, 1.7, fz + 1.0, 2.0, 0xffe0b0);
+  box(dw + 1.8, 0.05, 2.3, pave(dw + 1.8, 2.3), cx, 0.255, fz + 1.15, 0.01, false);
+  for (const sx of [-1, 1]){ const px = cx + sx*(dw/2 + 1.15); add(new THREE.CylinderGeometry(0.28, 0.22, 0.4, 20), M(0xf2efe9, { r:0.5 }), px, 0.5, fz + 0.45);
+    shrub(px, 0.66, fz + 0.45, 0.22, 1); const r = rngAt(px, fz); for (let q = 0; q < 9; q++){ const a = q/9*Math.PI*2; add(new THREE.IcosahedronGeometry(0.045, 0), FLOWERS[[0, 1, 2, 4][q % 4]], px + Math.cos(a)*0.22, 0.74 + r()*0.06, fz + 0.45 + Math.sin(a)*0.22, false); } }
+  // the windows behind the doors go
+  WINDOWS[key] = (WINDOWS[key] || []).filter(m => { const p = m.position; if (p.z > fz - 0.1 && p.y < 0.3 + 1.6 && Math.abs(p.x - cx) < dw/2 + 0.15){ BASE.remove(m); return false; } return true; });
+  [...BASE.children].forEach(m => { const p = m.position; if ((m.material === FRAME || m.material === SILL || m.material === REVEAL) && p.z > fz - 0.1 && p.z < fz + 0.1 && p.y < 0.3 + 1.6 && Math.abs(p.x - cx) < dw/2 + 0.15) BASE.remove(m); }); }
 // ---- the buildings (domain keys) ----
 // Ethics: the brown-brick building at the end of the drive, two big banners on its face, evergreens in its planter
 tower('e', 0, -13.4, 12, 7.0, 6, { col:'#6e3a33', band:'#7a4239' });   // George Link Jr. Pavilion: its OpenStreetMap outline, ~6 floors
@@ -387,6 +417,7 @@ for (const k of ['x2','x5']){ let r = 23; const rr = () => (r = (r*16807)%214748
 tower('s', -9.2, 1.6, 6.5, 9.0, 6, {});   // the Jurist Research Center (OpenStreetMap outline), ~6 floors
 box(6.6, 2*FL, 9.1, GLASSWALL, -9.2, 0.3+FL, 1.6, 0.04);
 box(6.7, 0.25, 9.2, M(0xf1f2f4), -9.2, 0.3+6*FL+0.12, 1.6, 0.04);
+entrance('s', -8.6, 1.6 + 4.5 + 0.05, 2.2);
 // Culture: the big dark building right of the drive, stepping back as it rises (Jose's Google Maps screenshots,
 // 2026-10-26; it replaced a parking deck and a dark tower that were guesses). Three tiers, all Culture's.
 // (Jose's Street View, Sep 2025: maroon brick with cream bands, a dark glass block on top, columns at the ground)
@@ -418,8 +449,9 @@ for (let f=1;f<=5;f++) add(new THREE.TorusGeometry(1.42, 0.04, 6, 28, Math.PI*1.
 pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
   g.fillStyle = '#f6efe2'; g.font = 'bold 40px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JOHN THEURER CANCER CENTER', 512, 34);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const p = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.4), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(JT.x + 1.2, 0.3 + 1.5*FL, JT.z + JT.d/2 + 0.05); BASE.add(p); });
-WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, under = p.z > JT.z && p.y > 0.3 + FL && p.y < 0.3 + 2*FL && p.x > JT.x - 2 && p.x < JT.x + 4.4; if (under) BASE.remove(m); return !under; });
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.4), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(JT.x + 1.2, 0.3 + 3.5*FL, JT.z + JT.d/2 + 0.05); BASE.add(p); });
+WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, under = p.z > JT.z && p.y > 0.3 + 3*FL && p.y < 0.3 + 4*FL && p.x > JT.x - 2 && p.x < JT.x + 4.4; if (under) BASE.remove(m); return !under; });
+entrance('n', JT.x - 1.4, JT.z + JT.d/2, 2.2);
 // ---- the helipad on the white tower's roof: pad, lit H, edge lights ----
 const PAD = { x:0.6, y:0.3 + 12*FL + 0.22 + 0.06, z:-20.1 };
 add(new THREE.CylinderGeometry(1.7, 1.7, 0.06, 32), M(0x3a3d4c, {r:0.9}), PAD.x, PAD.y, PAD.z, false);
@@ -598,7 +630,7 @@ for (const [k,i,x,z,ry,f] of [['doctor',3,-1.45,-7.45,0.5],['nurse',1,-0.75,-7.8
     ['visitor',2,-15,12.6,1.57,1],['elder',4,-12.4,12.9,-1.57],['visitor',0,-1.5,12.5,1.57,1],['nurse',1,1.0,12.8,-1.57,1],['doctor',2,6.5,12.4,1.57],['patient',3,13.5,12.7,-1.57,1],['visitor',4,16.8,12.5,1.57],
     ['doctor',0,-5.6,-1.2,0],['nurse',3,-5.6,3.6,3.1,1],['visitor',1,-12.6,-10.2,0.6],['kid',2,-13.2,-13.6,2.4,1],['elder',0,-17.2,-9.6,-0.8],['patient',1,17.4,-5.2,1.2],['visitor',3,18.0,-4.6,-2.0],
     ['nurse',4,7.9,-9.6,0.2,1],['doctor',1,-5.4,-9.6,0.4],['kid',3,-6.4,10.3,0.9,1],
-    ['hoodie',2,-11.8,-11.2,-1.2],['teal',3,-12.4,-12.3,-0.6,1],['doctor',1,8.6,-11.4,0.3],['sweater',4,9.3,-11.2,-2.7,1],['wheel',0,-8.2,8.6,2.6],['nurse',3,-9.0,8.9,2.2,1],
+    ['hoodie',2,-11.8,-11.2,-1.2],['teal',3,-12.4,-12.3,-0.6,1],['doctor',1,8.6,-11.4,0.3],['sweater',4,9.3,-11.2,-2.7,1],['wheel',0,12.6,-9.3,0.6],['nurse',3,13.6,-9.1,-0.4,1],
     ['hoodie',4,16.2,7.4,2.9],['elder',2,-16.4,-15.2,0.4,1]]) stand(k, i, x, z, ry, f);
 // the cafe on the right-hand lawn: round tables under pink and white umbrellas, people at them
 for (const [x,z,c] of [[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14e],[11.2,8.9,0x3aa6a0]]){
@@ -619,6 +651,9 @@ for (const [x,z,c] of [[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14
     for (let k = 0; k <= 4; k++){ const a = a0 + (a1 - a0)*k/4; pts.push([PX + Math.cos(a)*3.15, PZ + Math.sin(a)*3.15]); }
     for (let k = 4; k >= 0; k--){ const a = a0 + (a1 - a0)*k/4; pts.push([PX + Math.cos(a)*3.95, PZ + Math.sin(a)*3.95]); }
     bed(pts, 0.3, { density:12 }); }
+  add(new THREE.CylinderGeometry(0.55, 0.65, 0.2, 28), STONE[0], PX, 0.36, PZ); add(new THREE.CylinderGeometry(0.42, 0.42, 0.04, 28), new THREE.MeshStandardMaterial({ color:0x7ab6dc, roughness:0.1, metalness:0.1 }), PX, 0.47, PZ, false);
+  add(new THREE.CylinderGeometry(0.08, 0.12, 0.5, 12), STONE[2], PX, 0.65, PZ); add(new THREE.CylinderGeometry(0.28, 0.2, 0.08, 20), STONE[0], PX, 0.92, PZ);
+  add(new THREE.ConeGeometry(0.16, 0.55, 14, 1, true), new THREE.MeshStandardMaterial({ color:0xeaf6ff, transparent:true, opacity:0.6, roughness:0.1, side:THREE.DoubleSide }), PX, 1.24, PZ, false).rotation.x = Math.PI;   // the jet falling back
   bench(PX - 2.6, PZ - 0.2, Math.PI/2); bench(PX + 0.1, PZ - 2.62, 0);
   for (const a of [0.2, 1.55, 3.1, 4.55]) bollard(PX + Math.cos(a)*3.0, PZ + Math.sin(a)*3.0); }
 for (const [x,z,s,k] of [[-18.4,-15.6,0.9,'blossom'],[-11.8,-15.2,0.8,'round'],[-18.6,-8.2,0.8,'blossom'],[-11,-6.6,0.8,'blossom'],[-19,-18.8,0.8,'cone'],[-15,-16.4,0.8,'blossom'],
@@ -628,7 +663,8 @@ for (const [x,z,s,k] of [[-18.4,-15.6,0.9,'blossom'],[-11.8,-15.2,0.8,'round'],[
 // shrubs and flowers along the street verge between its trees, more trees on the lawns; the paths stay clear ----
 bed([[-0.75, 4.9], [0.55, 4.9], [0.85, 6.2], [0.75, 8.6], [-0.1, 8.95], [-0.95, 8.6], [-1.05, 6.2]], 0.36, { density:10 });   // the front median, round its evergreen
 bed([[-0.45, -1.9], [0.25, -1.9], [0.4, -0.5], [0.25, 1.4], [-0.1, 1.75], [-0.45, 1.4], [-0.6, -0.5]], 0.36, { density:12 });  // the back median, before the fountain
-bed([[-12.3, 6.45], [-6.3, 6.45], [-6.05, 6.95], [-6.4, 7.55], [-9.3, 7.7], [-12.2, 7.5], [-12.55, 6.95]], 0.3, { density:11 });  // along US Systems' front
+// beside US Systems' doors (the parking lot runs up to its front on the left)
+bed([[-6.95, 6.3], [-6.1, 6.3], [-5.95, 6.95], [-6.2, 7.6], [-6.9, 7.7], [-7.1, 7.0]], 0.3, { density:12 });
 bed([[-5.85, -2.4], [-5.6, -2.4], [-5.55, 5.6], [-5.85, 5.6]], 0.3, { density:14, colours:[0, 2, 3] });                       // a thin strip along its drive side
 bed([[6.35, -2.9], [6.6, -2.9], [6.6, 6.6], [6.35, 6.6]], 0.3, { density:14, colours:[0, 1, 2] });                             // and along Medical Plaza's colonnade
 bed([[13.2, 8.0], [17.9, 8.0], [18.3, 8.6], [17.6, 9.3], [15.3, 9.5], [13.4, 9.2], [12.9, 8.6]], 0.3, { density:10 });         // past the café
@@ -705,9 +741,10 @@ function webpOf(img, q){ const c = document.createElement('canvas'); c.width = W
 // no tone mapping). far: the clouds behind the board; near: the board. Each is drawn alone on black with its own
 // silhouette as alpha, edges un-mixed from the black (c/a), so the app can slide them apart without halos.
 function backdrop(){ const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-  const lg = g.createLinearGradient(0, 0, 0, H); lg.addColorStop(0, '#3a2b62'); lg.addColorStop(0.3, '#4b2a63'); lg.addColorStop(0.62, '#8a4570'); lg.addColorStop(0.85, '#c96a7c'); lg.addColorStop(1, '#e88f72'); g.fillStyle = lg; g.fillRect(0, 0, W, H);
+  const lg = g.createLinearGradient(0, 0, 0, H);
+  if (DAY){ lg.addColorStop(0, '#9cc8f0'); lg.addColorStop(0.45, '#c6e0f6'); lg.addColorStop(0.8, '#eef0f4'); lg.addColorStop(1, '#f8ece6'); } else { lg.addColorStop(0, '#3a2b62'); lg.addColorStop(0.3, '#4b2a63'); lg.addColorStop(0.62, '#8a4570'); lg.addColorStop(0.85, '#c96a7c'); lg.addColorStop(1, '#e88f72'); } g.fillStyle = lg; g.fillRect(0, 0, W, H);
   const pts = [[-20,-3.5,-27],[20,-3.5,-27],[20,-3.5,19],[-20,-3.5,19]].map(p => proj(p[0], p[1] - 4, p[2]));   // the board's footprint, a little below it
-  g.save(); g.filter = 'blur(26px)'; g.fillStyle = 'rgba(28,12,44,.4)'; g.beginPath(); pts.forEach(([x,y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); g.restore();
+  g.save(); g.filter = 'blur(26px)'; g.fillStyle = DAY ? 'rgba(40,62,100,.22)' : 'rgba(28,12,44,.4)'; g.beginPath(); pts.forEach(([x,y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fill(); g.restore();
   return g.getImageData(0, 0, W, H); }
 function aloneOnBlack(far, near){ const bg = scene.background, fog = scene.fog; scene.background = new THREE.Color(0x000000); scene.fog = null;
   layerVis(false, far, near); full.render(); const shot = grab(); layerVis(true, true, true); scene.background = bg; scene.fog = fog;
@@ -866,5 +903,7 @@ window.__still = async () => { await TEX_LOAD(); waveFlags(1.2); fillSetup();
   for (let i=0;i<d.length;i+=4){ const a = mk[i]/255; d[i+3] = mk[i]; if (a > 0.004 && a < 0.996) for (let k=0;k<3;k++) d[i+k] = Math.min(255, d[i+k] / a); }
   const img = grade(shot); const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').putImageData(img, 0, 0); return c.toDataURL('image/png'); };
 window.__proj = () => ({ lab: Object.fromEntries(Object.keys(BOX).map(k => [k, proj(...LABEL_AT[k])])), box: Object.fromEntries(Object.keys(BOX).map(k => [k, bbox(k)])) });
+// in daylight the lamps and lit doorways glow softly, not like at night
+if (DAY) GLOWS.forEach(g => { g.material.opacity = 0.32; });
 window.__done = true;
 </script></body></html>
