@@ -115,6 +115,19 @@ glass building with the lettering is now context back left (`x1`, a guess at
 Theurer), the old brick building with rows of windows context behind JTCC (`x2`). Left out on purpose: Women's and Children's, Imaging and the parking
 decks (they would hide the exam buildings from the corner camera, and the
 garden and café would go). Badge rows changed (`LABEL_2D`): row 1 the brick tower and JTCC.
+Then (Jose, 2026-10-26, two AI reference images: "a beautifully crafted
+miniature world", soft daylight) the scene got a kit in `diorama.html`:
+`tree()` (curved trunk, branches, clustered crown, cherry `blossom`, clipped
+`cone`), `bed(points)` (curved stone-edged beds of small flowers, lavender
+and shrubs), `shrub`, `bench`, `bollard`, `entrance(key, x, frontZ)` (canopy,
+columns, glass doors into a warm lobby, planters; at Ethics inline, US
+Systems, JTCC), cute `person()`/`sitter()` characters (vertex-coloured,
+faces, hair styles, props, a wheelchair being pushed), paving (`pave`), a
+pond with stone rim, ripples and fountain, windows with a lintel shadow, sky
+reflections and a few warm rooms, roof parapets. Daylight is the default
+(`?dusk` for the golden hour); the card's colours in `app.css` and
+`sky.webp` (`window.__sky`) match it. `LITE` (the live 3D test) uses plainer
+stones and simpler spheres: ~440k triangles instead of ~940k.
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building
