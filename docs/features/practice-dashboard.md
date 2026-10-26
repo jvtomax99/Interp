@@ -106,14 +106,15 @@ becomes the scene's -z at 0.2 units a metre; the drive itself stays wider than
 real, and the back row is pulled forward onto the board. Ethics = George Link
 Jr. Pavilion (Jose), ~6 floors, 12x7; Culture = Medical Plaza (Google labels
 it), wider than deep (12.4x11, the three tiers); US Systems = Jurist Research
-Center (guess), 6 floors, 6.5x9; Encounter = the blue glass building, now back
-left (guess: the Helena Theurer Pavilion); Terminology = the rust tower, 12
-floors (guess: part of Theurer); the old brick building with rows of windows
-is a context block back right (`x2`); the other glass context block (`x1`) is
-gone. Left out on purpose: Women's and Children's, Imaging and the parking
+Center (guess), 6 floors, 6.5x9; Encounter = John Theurer Cancer Center (Jose
+picked it from his screenshots: orange brick, white window bands, a round
+glass corner, ~5 floors; `JT`), back right, pulled forward into the open space
+behind Medical Plaza so it shows (really it is across 2nd Street); Terminology =
+the rust tower, 12 floors (guess: part of the Helena Theurer Pavilion); the blue
+glass building with the lettering is now context back left (`x1`, a guess at
+Theurer), the old brick building with rows of windows context behind JTCC (`x2`). Left out on purpose: Women's and Children's, Imaging and the parking
 decks (they would hide the exam buildings from the corner camera, and the
-garden and café would go). Badge rows changed: the glass building's badge is
-back left now (`LABEL_2D`).
+garden and café would go). Badge rows changed (`LABEL_2D`): row 1 the brick tower and JTCC.
 Progress is paint, not lit windows: the board (`near.webp`) has every
 building faded (its own colour, a third greyed and nearly half toward
 white; first white clay, too flat at 0%); `city/<key>-paint<1..10>.webp` is that building

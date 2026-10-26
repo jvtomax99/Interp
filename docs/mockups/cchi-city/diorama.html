@@ -254,7 +254,7 @@ pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), ne
 // no windows under the two banners
 WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position, under = p.z > -10 && p.y > 0.8 && p.y < 4.4 && ((p.x > -3.55 && p.x < -1.65) || (p.x > 1.85 && p.x < 3.75)); if (under) BASE.remove(m); return !under; });
 // the long glass buildings either side of it (context)
-tower('x2', 12, -18.5, 11, 6, 8, { col:'#5e3a34', band:'#6e4038' });   // the old brick building with rows of windows
+tower('x2', 12, -22.4, 11, 4, 8, { col:'#5e3a34', band:'#6e4038' });   // the old brick building with rows of windows, behind
 for (const k of ['x2']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS[k].forEach(m => { if (rr() < 0.32) m.material = LIT; }); delete WINDOWS[k]; }
 // US Systems: the brick building on the left: cream bands, a white roof, glass on its lower floors
 tower('s', -9.2, 1.6, 6.5, 9.0, 6, {});   // the Jurist Research Center (OpenStreetMap outline), ~6 floors
@@ -268,15 +268,27 @@ tower('x3', CX + 0.4, CZ - 0.6, CW - 1.6, CD - 2.4, 3, DARK, 0.3 + 4*FL + 0.22);
 tower('x4', CX + 0.8, CZ - 1.4, CW - 3.4, CD - 5.6, 2, DARK, 0.3 + 7*FL + 0.44);
 WINDOWS.c.push(...WINDOWS.x3, ...WINDOWS.x4); delete WINDOWS.x3; delete WINDOWS.x4;
 { const top = 0.3 + 9*FL + 0.44; Object.assign(BOX.c, { h: top + 0.5, top: top + 0.8, roof: top + 0.22, crane: [CX + 0.8 - (CW - 3.4)*0.36, CZ - 1.4 + (CD - 5.6)*0.34] }); LABEL_AT.c = [CX + 0.8, top + 0.9, CZ - 1.4]; }
-// Encounter: the Helena Theurer Pavilion, back right: glass tower with the lettering, on a brick base with slit windows
+// back left (context): the blue glass building with the lettering, on a brick base with slit windows (the
+// Helena Theurer Pavilion, a guess), its windows lit here and there
 box(10, 3*FL, 7, M(0x9a5444), -8.5, 0.3+1.5*FL, -20, 0.06);
 for (let i=0;i<9;i++) box(0.16, 3*FL*0.7, 0.04, M(0xf3efe6), -12.8+i*1.05, 0.3+1.6*FL, -16.47, 0.02, false);
-tower('n', -8.5, -20.5, 9.0, 6.0, 9, 'glass');
-WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, top = p.y > 0.3 + 3*FL + 8*FL; if (top) BASE.remove(m); return !top; });
+tower('x1', -8.5, -20.5, 9.0, 6.0, 9, 'glass', 0.3 + 3*FL);
+{ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS.x1.forEach(m => { if (m.position.y > 0.3 + 11*FL) BASE.remove(m); else if (rr() < 0.32) m.material = LIT; }); delete WINDOWS.x1; }
 pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
   g.fillStyle = '#ffffff'; g.font = 'bold 44px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('HACKENSACK UNIVERSITY MEDICAL CENTER', 512, 34);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   const p = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 0.52), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(-8.5, 0.3 + 3*FL + 9*FL - 0.33, -17.46); BASE.add(p); });
+// Encounter: John Theurer Cancer Center, back right (Jose, 2026-10-26, his screenshots): orange brick with white
+// window bands, ~5 floors, a curved glass corner where its doors are, the name on its face
+const JT = { x:14.4, z:-14.6, w:10.6, d:6 };
+tower('n', JT.x, JT.z, JT.w, JT.d, 5, { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc }, 0.3);
+add(new THREE.CylinderGeometry(1.4, 1.4, 5*FL, 28, 1, false, Math.PI*0.5, Math.PI*1.5), GLASSWALL, JT.x - JT.w/2 + 0.9, 0.3 + 2.5*FL, JT.z + JT.d/2 - 0.9);
+for (let f=1;f<=5;f++) add(new THREE.TorusGeometry(1.42, 0.04, 6, 28, Math.PI*1.5), M(0xe8e4dc), JT.x - JT.w/2 + 0.9, 0.3 + f*FL, JT.z + JT.d/2 - 0.9, false).rotation.set(Math.PI/2, 0, Math.PI*0.5);
+pend.push(() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#f6efe2'; g.font = 'bold 40px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JOHN THEURER CANCER CENTER', 512, 34);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.4), new THREE.MeshBasicMaterial({ map:t, transparent:true })); p.position.set(JT.x + 1.2, 0.3 + 1.5*FL, JT.z + JT.d/2 + 0.05); BASE.add(p); });
+WINDOWS.n = WINDOWS.n.filter(m => { const p = m.position, under = p.z > JT.z && p.y > 0.3 + FL && p.y < 0.3 + 2*FL && p.x > JT.x - 2 && p.x < JT.x + 4.4; if (under) BASE.remove(m); return !under; });
 // ---- the helipad on the white tower's roof: pad, lit H, edge lights ----
 const PAD = { x:0.6, y:0.3 + 12*FL + 0.22 + 0.06, z:-20.5 };
 add(new THREE.CylinderGeometry(1.7, 1.7, 0.06, 32), M(0x3a3d4c, {r:0.9}), PAD.x, PAD.y, PAD.z, false);
@@ -597,9 +609,9 @@ window.__run = async (nolit) => {
 // a building's footprint belongs to it (its podium, crown and banners too); one shared cut per building.
 const FILL = {};
 // where each badge's point sits, set by hand for this camera: three rows, so five badges at phone size never
-// overlap (the projected roof tops crowd: __proj prints them). Row 1 the brick tower, row 2 the blue glass
-// building (back left), the banner building and the dark stepped one, row 3 the building on the left.
-const LABEL_2D = P.has('autolabels') ? {} : { t:[355,150], n:[165,265], e:[455,285], c:[720,305], s:[300,470] };
+// overlap (the projected roof tops crowd: __proj prints them). Row 1 the brick tower and JTCC, row 2 the banner
+// building and the dark stepped one, row 3 the building on the left.
+const LABEL_2D = P.has('autolabels') ? {} : { t:[355,150], n:[690,150], e:[400,280], c:[740,300], s:[300,470] };
 function fillSetup(){ if (Object.keys(FILL).length) return; BASE.updateMatrixWorld(true);
   for (const key of Object.keys(BOX)){ const b = BOX[key], F = FILL[key] = { cut: { value: -100 }, meshes: [] };
     BASE.traverse(o => { if (!o.isMesh || o.material === depthOnly) return; const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
