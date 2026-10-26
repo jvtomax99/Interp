@@ -227,6 +227,18 @@ come from this alone.
 
 ## Done
 
+- 2026-10-26 The campus as a floating diorama (Jose's video, "in this
+  style"; his picks: busier, paint for progress, corner view). New source
+  `docs/mockups/cchi-city/diorama.html` + `builddiorama.cjs`; `city/`
+  re-rendered (lit layers gone, `-paint1..10` per building); card restyled
+  light; badges in three hand-set rows, Dr. Smiley steps right when needed,
+  tap areas back to front. Guide: the CoreCHI answer rewritten, a New
+  lately card (replaces the film's). Suites: campus-pick, -life (the lot
+  car's last stretch threshold for the new angle), -depth; full run.
+  Then, on Jose's "looks flat" and "I like the original colors more":
+  the live campus's colours and golden-hour light on the new board,
+  evening card kept, unstudied buildings faded (not white). Note: `docs/features/practice-dashboard.md`.
+
 - 2026-10-26 S9 Home taps, part 2: **closed, no app change** (Jose's pick
   after the findings). Taps meet the wait target on his phone; what's left
   of a screen change's hiccup is drawing the new screen itself. Tool:
