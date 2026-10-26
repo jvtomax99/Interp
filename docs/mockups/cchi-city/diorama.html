@@ -47,7 +47,7 @@ const GLOWS = [], CLOUDS = [], FLAGS = [], LIVE = [];   // LIVE: things captured
 const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
   const r = g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,236,190,1)'); r.addColorStop(.25,'rgba(255,200,120,.55)'); r.addColorStop(1,'rgba(255,170,80,0)');
   g.fillStyle = r; g.fillRect(0,0,128,128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
-function glow(x, y, z, s=1.6, col=0xffffff){ return new THREE.Sprite(); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:col, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true }));
+function glow(x, y, z, s=1.6, col=0xffffff){ const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:col, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true }));
   sp.position.set(x,y,z); sp.scale.set(s,s,1); scene.add(sp); GLOWS.push(sp); return sp; }
 // noise textures for grass and paving
 function noiseTex(base, spot, n=2600, size=256, rep=8){ const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
@@ -143,7 +143,7 @@ function tower(key, x, z, w, d, floors, style){
       m.userData.win = true; wins.push(m);
     }
   }
-  if (key[0] !== 'x'){ LABEL_AT[key] = [x, y0 + h + 0.9, z]; BOX[key] = { x, z, w, d, h: h + 0.8, y0, top: y0 + h + 0.8 }; }
+  if (key[0] !== 'x'){ LABEL_AT[key] = [x, y0 + h + 0.9, z]; BOX[key] = { x, z, w, d, h: h + 0.8, y0, top: y0 + h + 0.8, roof: y0 + h + 0.22 }; }
 }
 
 // ---- ground: slab, lawns, the street across the front, the drive with its two medians ----
@@ -179,7 +179,7 @@ glow(-0.1, 1.0, -3.4, 2.6, 0x9fe8ff);
 // lamps along the drive's edges and the street
 const lampHead = new THREE.MeshBasicMaterial({ color:0xfff1c8 });
 function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.8, 8), M(0x2c2c36), x, 1.2, z); add(new THREE.SphereGeometry(0.16, 12, 10), lampHead, x, 2.15, z, false); glow(x, 2.15, z, 1.4);
-  const pool = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0 })); pool.rotation.x = -Math.PI/2; pool.position.set(x, 0.26, z); G.add(pool); }
+  const pool = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0.16 })); pool.rotation.x = -Math.PI/2; pool.position.set(x, 0.26, z); G.add(pool); }
 for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }
 for (let x = -18; x <= 18; x += 6) lamp(x, 13.4);
 // trees: the big street trees in front, evergreens and red maples along the drive
@@ -256,7 +256,7 @@ pend.push(() => { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), ne
 WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position, under = p.z > -10 && p.y > 0.8 && p.y < 4.4 && ((p.x > -3.55 && p.x < -1.65) || (p.x > 1.85 && p.x < 3.75)); if (under) BASE.remove(m); return !under; });
 // the long glass buildings either side of it (context)
 tower('x1', -7.8, -20.5, 9, 4.5, 7, 'glass'); tower('x2', 9.4, -20.5, 9, 4.5, 7, { col:'#6b4d6b', band:'#8a6a86' });
-for (const k of ['x1','x2']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647;  delete WINDOWS[k]; }
+for (const k of ['x1','x2']){ let r = 23; const rr = () => (r = (r*16807)%2147483647)/2147483647; WINDOWS[k].forEach(m => { if (rr() < 0.32) m.material = LIT; }); delete WINDOWS[k]; }
 // US Systems: the brick building on the left: cream bands, a white roof, glass on its lower floors
 tower('s', -10.2, 1.0, 7.0, 12.0, 8, {});
 box(7.1, 2*FL, 12.1, GLASSWALL, -10.2, 0.3+FL, 1.0, 0.04);
@@ -371,11 +371,26 @@ function flock(){ const g = new THREE.Group(); const dark = new THREE.MeshBasicM
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function flap(g, f){ g.userData.wings.forEach(p => { p.rotation.z = p.userData.sd * (f ? -0.6 : 0.5); }); }
 const BIRDS = flock();
-// daylight: no headlight glows on the moving things (the ambulance's flashing bar is added at capture)
-{ const sp = []; LIVE.forEach(g => g.traverse(o => { if (o.isSprite) sp.push(o); })); sp.forEach(o => o.parent.remove(o)); }
-const keepStill = g => { LIVE.splice(LIVE.indexOf(g), 1); scene.remove(g); BASE.add(g); g.visible = true; return g; };
-function stand(kind, i, x, z, ry=0, f=0){ const g = keepStill(person(kind, i)); g.position.set(x, 0.1, z); g.rotation.y = ry; stride(g, f); return g; }
-function sit(kind, i, x, y, z, ry=0){ const g = keepStill(sitter(kind, i)); g.position.set(x, y, z); g.rotation.y = ry; return g; }
+// IDLE: people standing and sitting about, each captured alone in two frames (now a turn and a step, now a head
+// turn) that the app flips now and then; they are not in the board
+const IDLE = [];
+function stand(kind, i, x, z, ry=0, f=0){ const g = person(kind, i); g.position.set(x, 0.1, z);
+  IDLE.push({ g, set: k => { g.rotation.y = ry + (k ? 0.6 : 0); stride(g, k ? 1 - f : f); } }); return g; }
+function sit(kind, i, x, y, z, ry=0){ const g = sitter(kind, i); g.position.set(x, y, z); g.rotation.y = ry;
+  IDLE.push({ g, set: k => turnHead(g, k) }); return g; }
+// a tower crane on each building's roof, swinging its jib; the app shows it until the building is fully painted
+function crane(key){ const b = BOX[key], g = new THREE.Group(), Y = M(0xf2b33d, { r:0.6 }), D = M(0x5b5f6c, { r:0.7 });
+  const mast = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.0, 0.22), Y); mast.position.y = 1.5; mast.castShadow = true; g.add(mast);
+  for (let k = 0; k < 6; k++){ const r = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.04, 0.26), D); r.position.y = 0.25 + k*0.5; g.add(r); }
+  const jib = new THREE.Group(); jib.position.y = 3.0; g.add(jib);
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.16, 0.16), Y); arm.position.x = 1.3; arm.castShadow = true; jib.add(arm);
+  const cw = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.38, 0.4), D); cw.position.set(-1.1, -0.2, 0); jib.add(cw);
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.34, 0.34), M(0xe9e2d0)); cab.position.set(0.1, -0.24, 0.2); jib.add(cab);
+  const peak = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.9, 4), Y); peak.position.y = 0.5; jib.add(peak);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 1.6, 4), D); cable.position.set(2.9, -0.8, 0); jib.add(cable);
+  const hook = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 0.3), M(0xc9583a)); hook.position.set(2.9, -1.65, 0); jib.add(hook);
+  g.position.set(b.x - b.w*0.22, b.roof, b.z + b.d*0.18); g.userData.jib = jib; g.userData.a0 = { e:2.2, t:0.4, s:-0.6, c:2.8, n:1.2 }[key] ?? 0;
+  g.visible = false; scene.add(g); LIVE.push(g); return g; }
 for (const [k,i,x,z,ry,f] of [['doctor',3,-1.2,-7.6,0.3],['nurse',2,-0.6,-7.9,-2.6],['visitor',1,1.6,-7.5,0.8,1],['patient',4,2.3,-7.9,-0.4],['kid',0,2.0,-7.3,-0.4],
     ['visitor',2,-15,12.6,1.57,1],['elder',4,-12.4,12.9,-1.57],['visitor',0,-1.5,12.5,1.57,1],['nurse',1,1.0,12.8,-1.57,1],['doctor',2,6.5,12.4,1.57],['patient',3,13.5,12.7,-1.57,1],['visitor',4,16.8,12.5,1.57],
     ['doctor',0,-6.1,-1.2,0],['nurse',3,-6.2,3.6,3.1,1],['visitor',1,-12.6,-10.2,0.6],['kid',2,-13.2,-13.6,2.4,1],['elder',0,-17.4,-9.3,-0.8],['patient',1,15.2,-3.2,1.2],['visitor',3,16.1,-2.4,-2.0],
@@ -417,6 +432,7 @@ const full = new EffectComposer(renderer); full.setPixelRatio(2); full.setSize(W
 full.addPass(new RenderPass(scene, cam));
 const gtao = new GTAOPass(scene, cam, W*2, H*2); gtao.output = GTAOPass.OUTPUT.Default; gtao.updateGtaoMaterial({ radius:0.6, distanceExponent:1.2, thickness:1.0, scale:1.0, samples:16, distanceFallOff:1.0, screenSpaceRadius:false }); gtao.updatePdMaterial({ lumaPhi:10, depthPhi:2, normalPhi:3, radius:4, radiusExponent:1, rings:2, samples:16 }); gtao.blendIntensity = 0.85; const gtaoRender = gtao.render.bind(gtao); gtao.render = (...a) => { GLOWS.forEach(g => g.visible = false); gtaoRender(...a); GLOWS.forEach(g => g.visible = true); }; full.addPass(gtao);
 
+full.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.4, 0.45, 1.6));
 full.addPass(new OutputPass()); full.addPass(new SMAAPass(W*2, H*2));
 // the lit windows: drawn alone on black with a wide warm bloom, then black becomes transparent
 const litC = new EffectComposer(renderer); litC.setPixelRatio(2); litC.setSize(W, H);
@@ -526,6 +542,19 @@ window.__run = async (nolit) => {
   place(BIRDS, 0, 12.5, -30, 0); out.live.birds = { img: [0, 1].map(f => { flap(BIRDS, f); return alone(BIRDS, () => capAlpha(0.8)); }), ...path([[-46,10,-46],[-20,12,-36],[0,12.5,-30],[22,12,-26],[48,10,-22]], [0,12.5,-30]) }; BIRDS.visible = false;
   out.live.walkers = WALKS.map(w => { const mid = w.pts[Math.floor(w.pts.length/2)]; place(w.g, mid[0], mid[1], mid[2], 0);
     const img = [0,1].map(f => { stride(w.g, f); return alone(w.g, () => capAlpha(0.8)); }); const hh = w.g.userData.h*1.75/2; const r = { img, dur: w.dur, ...path(w.pts.map(p => [p[0], p[1] + hh, p[2]]), [mid[0], mid[1] + hh, mid[2]]) }; w.g.visible = false; return r; });
+  // one picture for many small sprites: each item's frames share their union box, laid out in rows
+  const atlasOf = async items => { const loads = items.map(fr => Promise.all(fr.map(im => new Promise(r => { const i = new Image(); i.onload = () => r([im, i]); i.src = im.data; }))));
+    const all = await Promise.all(loads), cells = []; let x = 0, y = 0, rowH = 0, AW = 0;
+    for (const fr of all){ const ux = Math.min(...fr.map(([im]) => im.x)), uy = Math.min(...fr.map(([im]) => im.y)), uw = Math.max(...fr.map(([im]) => im.x + im.w)) - ux, uh = Math.max(...fr.map(([im]) => im.y + im.h)) - uy;
+      const a = []; for (const f of fr){ if (x + uw > 1600){ x = 0; y += rowH + 2; rowH = 0; } a.push([x, y]); x += uw + 2; rowH = Math.max(rowH, uh); AW = Math.max(AW, x); }
+      cells.push({ box:[ux, uy, uw, uh], a, fr }); }
+    const c = document.createElement('canvas'); c.width = AW; c.height = y + rowH; const g = c.getContext('2d');
+    for (const cl of cells) cl.fr.forEach(([im, i], k) => g.drawImage(i, cl.a[k][0] + im.x - cl.box[0], cl.a[k][1] + im.y - cl.box[1]));
+    return { atlas: { x:0, y:0, w:c.width, h:c.height, data:c.toDataURL('image/webp', 0.86) }, items: cells.map(cl => ({ box: cl.box, a: cl.a })) }; };
+  out.live.idlers = await atlasOf(IDLE.map(o => { const r = [0, 1].map(k => { o.set(k); return alone(o.g, () => capAlpha(0.9)); }); o.g.visible = false; return r; }));
+  const CR = Object.keys(BOX).map(k => [k, crane(k)]), ANG = [...Array(8)].map((_, i) => -0.5 + i/7);
+  const cr = await atlasOf(CR.map(([k, g]) => ANG.map(a => { g.userData.jib.rotation.y = g.userData.a0 + a; return alone(g, () => capAlpha(0.88)); })));
+  out.live.cranes = { atlas: cr.atlas, items: Object.fromEntries(CR.map(([k], i) => [k, cr.items[i]])) };
   CLOUDS.forEach(c => c.visible = true); FLAGS.forEach(f => f.visible = true);
   // paint layers: each building painted to 1..10 tenths, drawn in the full look on black like the board; kept
   // only where the building itself shows (its silhouette, everything in front of it occluding) and where the
@@ -546,6 +575,16 @@ window.__run = async (nolit) => {
       out.b[key].lv.push(pack(grade(shot), 0.82));
     }
     fillAt(key, 0); scene.background = null;
+  }
+  // glow layers: about half of a building's windows, the same ones at every tenth, lit where the paint has reached
+  scene.background = new THREE.Color(0x000000);
+  for (const key of (nolit ? [] : Object.keys(FILL))){
+    const b = BOX[key], wins = WINDOWS[key].slice(); for (let i = wins.length - 1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [wins[i], wins[j]] = [wins[j], wins[i]]; }
+    const some = wins.slice(0, Math.round(wins.length * 0.45));
+    out.b[key].gl = [];
+    for (let lv = 1; lv <= 10; lv++){ const cut = lv >= 10 ? 100 : 0.3 + (b.top - 0.3) * lv/10, on = new Set(some.filter(m => m.position.y < cut));
+      GLOWS.forEach(g => g.visible = false); all.forEach(o => { o.material = on.has(o) ? LIT : depthOnly; });
+      out.b[key].gl.push(capLit()); all.forEach(o => { o.material = keep.get(o); }); GLOWS.forEach(g => g.visible = true); }
   }
   scene.fog = fogKeep; scene.background = null;
   out.fountain = proj(-0.1, 1.3, -3.4);
@@ -582,6 +621,7 @@ window.__still = async () => { await TEX_LOAD(); waveFlags(1.2); fillSetup();
   const put = (g, x, y, z, ry) => { g.position.set(x, y, z); g.rotation.y = ry; g.visible = true; };
   put(CAR_IN, 3.1, 0.2, 6, Math.PI); put(CAR_OUT, -2.8, 0.2, 2, 0); put(AMB, 4.4, 0.2, -3.5, Math.PI); put(CAR_IN2, 2.0, 0.2, 9.5, Math.PI);
   STREET.forEach((o, i) => put(o.g, [-12, 9, 4, -4][i], 0.2, o.z, o.ry));
+  IDLE.forEach(o => { o.set(0); o.g.visible = true; });
   WALKS.forEach((w, i) => { const p = w.pts[(i % (w.pts.length - 1)) + 1]; put(w.g, p[0] + (i%2 ? 0.6 : -0.6), p[1] + 0.12, p[2], i%2 ? Math.PI/2 : -Math.PI/2); stride(w.g, i%2); });
   SITTERS.forEach(o => put(o.g, o.at[0], o.at[1], o.at[2], 0));
   put(HELI, PAD.x + 3, PAD.y + 3.4, PAD.z + 2, 0.6);

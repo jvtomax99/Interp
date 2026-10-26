@@ -3426,7 +3426,7 @@
     animation:dashIn .42s var(--ease) backwards;
     animation-delay:calc(var(--i, 0) * 60ms + var(--motion-skip, 0s));
   }
-  .is-still:not(.study-flame), .is-still *:not(.study-flame, .study-streak i, .cp-paint, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-paintsel, .cp-pick-in){ animation:none !important; }
+  .is-still:not(.study-flame), .is-still *:not(.study-flame, .study-streak i, .cp-paint, .cp-glow, .cp-idle i, .cp-flag, .cp-spray, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-paintsel, .cp-pick-in){ animation:none !important; }
 
   .dash-row{ display:grid; grid-template-columns:1fr; gap:9px; max-width:760px; margin:0 0 26px 0; }
   @media (min-width:600px){ .dash-row{ grid-template-columns:1.6fr 1fr; align-items:start; } }
@@ -3895,6 +3895,21 @@
   .cp-paintw img{ width:100%; height:100%; }
   .cp-paint{ pointer-events:none; }
   @keyframes cpLight{ from{ opacity:0; } to{ opacity:1; } }
+  /* after practice the paint climbs a tenth at a time (.cp-rise, --s its step), then a warm flash at the top */
+  .cp-paintw.cp-rise{ animation:cpLight .32s ease-out backwards; animation-delay:calc(1s + var(--s, 0) * .32s); }
+  .cp-spark{ position:absolute; width:24%; aspect-ratio:1; translate:-50% -50%; border-radius:50%; pointer-events:none; opacity:0;
+    background:radial-gradient(circle, rgba(255,232,170,.95), rgba(255,184,96,.45) 34%, rgba(255,160,80,0) 70%); mix-blend-mode:screen;
+    animation:cpSpark 1.1s ease-out forwards; animation-delay:calc(1s + var(--s, 1) * .32s); }
+  @keyframes cpSpark{ 0%{ opacity:0; scale:.3; } 30%{ opacity:1; scale:1; } 100%{ opacity:0; scale:1.45; } }
+  /* warm lit windows on the painted floors: light on black, added (screen), flickering */
+  .cp-glow{ pointer-events:none; mix-blend-mode:screen; animation:cpFlick var(--fl, 3.5s) ease-in-out infinite; }
+  @keyframes cpFlick{ 0%,100%{ opacity:1; } 37%{ opacity:.9; } 61%{ opacity:.97; } 80%{ opacity:.88; } }
+  /* the cranes (frames of one picture, swung by campusLife) and the people about (two frames, flipped now and then) */
+  .cp-crane, .cp-idle{ position:absolute; pointer-events:none; }
+  .cp-crane i, .cp-idle i{ position:absolute; inset:0; background-image:url(./city/cranes.webp); background-repeat:no-repeat; }
+  .cp-idle i{ background-image:url(./city/idlers.webp); }
+  .cp-crane i:not(:first-child){ opacity:0; }
+  .cp-idle i:last-child{ animation:cpTurn var(--d, 7s) steps(1) infinite; animation-delay:calc(var(--i, 0) * -1.7s); }
   .cp-clouds{ pointer-events:none; }
   /* Depth (F3, campusDepth): the backdrop and the clouds behind the board (once the sky and the far town) sit behind the campus as their own pictures and slide
      by --dpx/--dpy (css px) as the card scrolls and while a finger drags across it; the campus never moves,
@@ -3926,7 +3941,7 @@
   .cp-dr .ds-art{ width:100%; height:100%; display:block; }
   @keyframes cpDrBob{ 50%{ transform:translateY(-4px); } }
   .cp-say p small{ display:block; font-size:10px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:#98A1B3; margin-bottom:2px; }
-  .cp-card.is-away .cp-paint, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-bay img{ animation-play-state:paused; }
+  .cp-card.is-away .cp-glow, .cp-card.is-away .cp-idle i, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-bay img{ animation-play-state:paused; }
   .cp-chips{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .cp-chip{ display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:550;
     color:rgba(255,255,255,.9); background:rgba(255,255,255,.14); }
@@ -3944,7 +3959,8 @@
   .cp-go button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
   @media (prefers-reduced-motion: reduce){
-    .cp-paint, .cp-paintw, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-bay img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
+    .cp-paint, .cp-glow, .cp-paintw, .cp-idle i, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-bay img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
+    .cp-spark{ display:none; } .cp-idle i:last-child{ opacity:0; }
     .cp-sit img:first-child{ opacity:1; } .cp-sit img:last-child{ opacity:0; } .cp-bay img:first-child{ opacity:1 !important; } .cp-bay img:not(:first-child){ opacity:0 !important; }
     .cp-go button{ transition:none; }
   }

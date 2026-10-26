@@ -40,6 +40,7 @@ const SUITES = [
   ['campus-life.cjs',     'Campus life 2: bay doors with the ambulance, the lot car, sitters, the flock, pauses, reduced motion'],
   ['glossary-cv.cjs',     'Glossary taps: off-screen cards skip layout; same pixels; Back, a jump and a redraw land where they should'],
   ['campus-depth.cjs',    'Campus depth: sky, town and campus layers; scroll and drag slide the back ones, spring home, never pick'],
+  ['campus-alive.cjs',    'Campus alive: people about, cranes until painted, lit windows, the paint rising after practice'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
 ];
