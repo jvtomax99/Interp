@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your HUMC campus in 3D</title>
+<!-- Built by docs/mockups/cchi-city/live/gen.py --app from diorama.html + runtime.js + app-shell.html; do not edit by hand -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;550;650&display=swap">
+<style>
+/* The CoreCHI campus full screen (opened from its card): the board in 3D, glass controls over it in the Hub's look. */
+:root{
+  --sky:linear-gradient(#5f95d0,#93c0ec 40%,#c3def6);
+  --ink:#151C2C; --ink-soft:#5A6478; --glass:rgba(255,255,255,.74); --line:rgba(255,255,255,.9);
+  --gold:#FFD58A; --gold-2:#FFB443; --navy:#252E6D;
+  --ui:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  --finish:0 1px 0 0 inset rgba(255,255,255,.82),0 1px 2px rgba(20,43,67,.06),0 8px 20px -12px rgba(22,55,90,.22);
+}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:#5f95d0;color:var(--ink);font-family:var(--ui);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#stage{position:fixed;inset:0;background:var(--sky);touch-action:none}
+#stage canvas{position:relative;display:block;width:100%;height:100%;opacity:0;transition:opacity .5s}
+body.ready #stage canvas{opacity:1}
+.sun{position:absolute;left:0;top:0;width:118px;height:118px;transform:translate(-50%,-50%);will-change:transform;pointer-events:none}
+.sun .night{display:none}.sun.is-night .day{display:none}.sun.is-night .night{display:inline}.sun.is-night .halo{opacity:.35}
+.sun .rays{animation:spin 40s linear infinite;transform-origin:0 0}
+.sun .eyes{animation:blink 5.5s infinite;transform-origin:0 0;transform-box:view-box}
+.sun .face{animation:bob 3.2s ease-in-out infinite}.sun .rays{transform-box:view-box}
+@keyframes bob{50%{transform:translateY(-2.5px) scale(1.02,.98)}}
+.sun.giggle svg{animation:giggle .9s cubic-bezier(.3,1.6,.5,1)}.sun.giggle .rays{animation-duration:2s}
+.sun .zz{animation:zz 3s ease-in-out infinite}.sun .z2{animation-delay:1.2s}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.1)}}
+@keyframes giggle{0%{transform:scale(1)}20%{transform:scale(1.18,.86)}40%{transform:scale(.9,1.12) rotate(-6deg)}60%{transform:scale(1.06,.95) rotate(5deg)}80%{transform:rotate(-2deg)}100%{transform:none}}
+@keyframes zz{0%,100%{opacity:0;transform:translateY(4px)}40%,70%{opacity:1;transform:none}}
+
+#loading{position:fixed;inset:0;display:grid;place-items:center;font-weight:550;color:#fff;text-shadow:0 1px 3px rgba(20,43,67,.4);pointer-events:none;padding:0 26px;text-align:center}
+body.ready #loading{display:none}
+.glass{background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);box-shadow:var(--finish);border:1px solid var(--line)}
+.top{position:fixed;top:calc(env(safe-area-inset-top,0px) + 13px);left:max(13px,env(safe-area-inset-left,0px));right:max(13px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:9px;pointer-events:none}
+.top .title{pointer-events:auto;border-radius:999px;padding:7px 13px;min-width:0}
+.top .title b{display:block;font-size:15px;font-weight:650;letter-spacing:-.2px}
+.top .title small{display:block;font-size:12px;font-weight:550;color:var(--ink-soft)}
+.top .sp{flex:1}
+.round{pointer-events:auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--ink);font:650 20px var(--ui);padding:0}
+.round svg{width:20px;height:20px}
+#badges{position:fixed;inset:0;pointer-events:none}
+.badge{position:absolute;left:0;top:0;pointer-events:auto;font:650 13px var(--ui);color:#fff;background:rgba(21,28,44,.78);border:1.5px solid rgba(255,255,255,.35);border-radius:99px;padding:6px 11px;white-space:nowrap;cursor:pointer}
+.badge b{color:var(--gold);font-weight:650}
+.badge.on{background:linear-gradient(var(--gold),var(--gold-2));color:#2a1a08;border-color:#fff}.badge.on b{color:#2a1a08}
+.badge.done{border-color:var(--gold)}
+body.is-finished .badge b{display:none}
+button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+#card{position:fixed;left:max(13px,env(safe-area-inset-left,0px));right:max(13px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 84px);border-radius:20px;padding:13px 13px 13px 17px;display:grid;grid-template-columns:1fr auto auto;gap:2px 9px;align-items:center;max-width:560px;margin:0 auto;animation:up .45s cubic-bezier(.2,.8,.2,1)}
+#cardK{font-size:20px;font-weight:650;letter-spacing:-.3px}
+#cardP,#cardF{font-size:13px;color:var(--ink-soft);grid-column:1}
+#cardF{color:#8a5a12;font-weight:650}
+.go{grid-row:1/4;grid-column:2;border:0;border-radius:14px;min-height:44px;padding:0 17px;font:650 15px var(--ui);color:#2a1a08;background:linear-gradient(180deg,var(--gold),var(--gold-2));box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 4px 0 #C9801E;cursor:pointer}
+.go:active{transform:translateY(3px);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 1px 0 #C9801E}
+#cardX{grid-row:1/4;grid-column:3;width:36px;height:36px;border-radius:50%;border:0;background:rgba(21,28,44,.08);color:var(--ink);font-size:18px;cursor:pointer}
+@keyframes up{from{transform:translateY(16px);opacity:0}}
+.bar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 17px);display:flex;justify-content:center;pointer-events:none;padding:0 13px}
+.bar .glass{pointer-events:auto;border-radius:999px;display:flex;align-items:center;gap:9px;padding:6px 6px 6px 17px}
+.bar span{font-size:13px;font-weight:550;color:var(--ink-soft);white-space:nowrap}
+#finished{border:0;border-radius:999px;min-height:44px;padding:0 17px 0 13px;display:flex;align-items:center;gap:9px;font:650 15px var(--ui);color:#fff;background:var(--navy);cursor:pointer;white-space:nowrap}
+#finished i{width:34px;height:20px;border-radius:999px;background:rgba(255,255,255,.3);position:relative;transition:background .3s}
+#finished i::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+#finished[aria-pressed="true"] i{background:#34C77B}
+#finished[aria-pressed="true"] i::after{transform:translateX(14px)}
+@media (max-width:380px){.bar span{display:none} .bar .glass{padding-left:6px}}
+@media (prefers-reduced-motion:reduce){.sun *{animation:none!important}#card{animation:none}#stage canvas{transition:none}#finished i,#finished i::after{transition:none}}
+</style>
+</head>
+<body>
+<div id="stage"><div id="sun" class="sun" aria-hidden="true">
+  <svg viewBox="-70 -70 140 140" width="100%" height="100%">
+    <defs>
+      <radialGradient id="sunDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFF8C6"/><stop offset=".6" stop-color="#FFD84F"/><stop offset="1" stop-color="#FFB33A"/></radialGradient>
+      <radialGradient id="moonDisc" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFFBEA"/><stop offset="1" stop-color="#E7DDB8"/></radialGradient>
+      <radialGradient id="blush"><stop offset="0" stop-color="#FF8FA0" stop-opacity=".85"/><stop offset="1" stop-color="#FF8FA0" stop-opacity="0"/></radialGradient>
+      <radialGradient id="halo"><stop offset=".45" stop-color="#FFE38A" stop-opacity=".55"/><stop offset="1" stop-color="#FFE38A" stop-opacity="0"/></radialGradient>
+    </defs>
+    <circle r="70" fill="url(#halo)" class="halo"/>
+    <g class="day">
+      <g class="rays"><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(0)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(30)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(60)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(90)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(120)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(150)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(180)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(210)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(240)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(270)"/><ellipse cx="0" cy="-49" rx="7.5" ry="12" fill="#FFC23D" transform="rotate(300)"/><ellipse cx="0" cy="-46" rx="6" ry="9" fill="#FFC23D" transform="rotate(330)"/></g>
+      <g class="face">
+        <circle r="37" fill="url(#sunDisc)"/>
+        <ellipse cx="-13" cy="-21" rx="11" ry="6" fill="#FFFFFF" opacity=".45" transform="rotate(-28 -13 -21)"/>
+        <circle cx="-21" cy="9" r="7.5" fill="url(#blush)"/><circle cx="21" cy="9" r="7.5" fill="url(#blush)"/>
+        <g class="eyes">
+          <ellipse cx="-12" cy="0" rx="6" ry="7.4" fill="#3B2112"/><ellipse cx="12" cy="0" rx="6" ry="7.4" fill="#3B2112"/>
+          <circle cx="-10" cy="-3" r="2.6" fill="#fff"/><circle cx="14" cy="-3" r="2.6" fill="#fff"/>
+          <circle cx="-13.6" cy="2.6" r="1.1" fill="#fff"/><circle cx="10.4" cy="2.6" r="1.1" fill="#fff"/>
+        </g>
+        <path d="M-6.5 10.5 Q0 20 6.5 10.5 Z" fill="#7A2E12"/>
+        <path d="M-3.6 15.4 Q0 13.2 3.6 15.4 Q0 18.6 -3.6 15.4Z" fill="#FF7A8A"/>
+      </g>
+    </g>
+    <g class="night">
+      <path d="M8 -32 A33 33 0 1 0 8 32 A26 26 0 1 1 8 -32Z" fill="url(#moonDisc)"/>
+      <path d="M-22 -4 q4 3 8 0" fill="none" stroke="#5A4A2A" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M-20 9 q5 5 10 1" fill="none" stroke="#5A4A2A" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="-24" cy="4" rx="4" ry="2.6" fill="#FFAFA8" opacity=".6"/>
+      <text class="zz" x="20" y="-26" font-size="14" font-weight="650" fill="#FFFBEA">z</text><text class="zz z2" x="30" y="-38" font-size="10" font-weight="650" fill="#FFFBEA">z</text>
+    </g>
+  </svg>
+</div></div>
+<div id="loading">Building your campus…</div>
+<div class="top">
+  <div class="title glass"><b>Your HUMC campus</b><small>Drag to turn · pinch to zoom</small></div>
+  <span class="sp"></span>
+  <button class="round glass" id="reset" type="button" aria-label="Back to the front view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+  <button class="round glass" id="close" type="button" aria-label="Close the 3D campus">×</button>
+</div>
+<div id="badges"></div>
+<div id="card" class="glass" hidden>
+  <div id="cardK">Ethics</div>
+  <div id="cardP">George Link Jr. Pavilion</div>
+  <div id="cardF">80% built</div>
+  <button class="go" type="button" id="cardGo">Practise</button>
+  <button id="cardX" type="button" aria-label="Put it back">×</button>
+</div>
+<div class="bar"><div class="glass"><span>How it will look</span><button id="finished" type="button" aria-pressed="false"><i></i>See it finished</button></div></div>
+
+<script>window.__APP = true; addEventListener('error', e => { const l = document.getElementById('loading'); if (l && !document.body.classList.contains('ready')) l.textContent = '3D isn\u2019t available on this device. ' + (e.message || ''); });</script>
+<script type="importmap">{"imports":{"three":"./three/three.module.min.js","three/addons/":"./three/addons/"}}</script>
+<script type="module">
+/*SCENE*/
+</script>
+</body>
+</html>

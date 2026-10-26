@@ -1,6 +1,10 @@
 
-// ==================== live runtime (the iPhone test) ====================
-const $ = id => document.getElementById(id);
+// ==================== live runtime (the iPhone test, and the app's 3D campus: APP) ====================
+// APP (campus3d/index.html, opened full screen from the CoreCHI Practice card): your own progress arrives by
+// message from the app, Practise asks the app to start that exam area, the X and Escape ask it to close.
+const APP = !!window.__APP;
+const $ = id => document.getElementById(id) || { set textContent(v){}, classList:{ toggle(){}, add(){}, remove(){} }, style:{}, set onclick(f){}, set oninput(f){}, value:0, hidden:true };
+const tell = m => { try { parent.postMessage(Object.assign({ ih:'campus3d-' + m.t }, m), location.origin); } catch (e) {} };
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NAMES = { e:['Ethics','George Link Jr. Pavilion',9], t:['Terminology','the brick tower',25], s:['US Systems','Jurist Research Center',9], n:['Encounter','John Theurer Cancer Center',45], c:['Culture','Medical Plaza',12] };
 // the HMH mark: banners and the tower's plaque
@@ -46,11 +50,16 @@ for (const k in BOX){ const b = BOX[k], cap = new THREE.Group(), roofM = M(k ===
   const u1 = new THREE.Mesh(new THREE.BoxGeometry(b.w*0.3, 0.38, b.d*0.28), unitM); u1.position.set(b.x - b.w*0.15, 0.4, b.z - b.d*0.1); cap.add(u1);
   const u2 = new THREE.Mesh(new THREE.BoxGeometry(b.w*0.16, 0.28, b.d*0.18), unitM); u2.position.set(b.x + b.w*0.25, 0.35, b.z + b.d*0.1); cap.add(u2);
   cap.traverse(o => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } }); BG[k].add(cap); CAP[k] = cap; }
-const BUILT = { e:0.8, t:0.35, s:0.6, n:0.5, c:0.7 };   // a sample learner, scaled by the slider
-function setProgress(p){ for (const k in BOX){ const b = BOX[k], f = Math.min(1, p * BUILT[k] / 0.6);
+const BUILT = { e:0.8, t:0.35, s:0.6, n:0.5, c:0.7 };   // the test page's sample learner, scaled by its slider
+// how built each building is, 0..1: the test page's slider, or (APP) your own coverage from the app; FINISHED
+// shows the campus as it will look when every building is done
+let LEVEL = { e:0, t:0, s:0, n:0, c:0 }, FINISHED = false;
+const levelOf = k => FINISHED ? 1 : Math.max(0, Math.min(1, LEVEL[k] || 0));
+function setProgress(p){ for (const k in BOX) LEVEL[k] = Math.min(1, p * BUILT[k] / 0.6); build(); }
+function build(){ for (const k in BOX){ const b = BOX[k], f = levelOf(k);
     // whole floors only: the walls stop at the top of the last finished floor and the roof sits on them
     const floors = Math.max(1, Math.round((b.roof - 0.3) / FL)), done = Math.max(1, Math.round(f * floors)), cut = f >= 1 ? 999 : 0.3 + done * FL;
-    CUT[k].value = cut; CAP[k].visible = f < 1; CAP[k].position.y = Math.min(cut, 900) - 0.02; } shadowsDirty(); }
+    CUT[k].value = cut; CAP[k].visible = f < 1; CAP[k].position.y = Math.min(cut, 900) - 0.02; } shadowsDirty(); badges(); }
 
 // ---- the time of day: four looks, blended ----
 const HEMI = scene.children.find(c => c.isHemisphereLight);
@@ -74,7 +83,7 @@ function setHour(h){ const hh = h < 5 ? h + 24 : h; let i = 0; while (i < KEYS.l
   GLOWS.forEach(g => { g.material.opacity = Math.min(1, n*1.4 + (hh > 17 && hh < 21 ? 0.6 : 0)); g.visible = g.material.opacity > 0.02; });
   const lit = n > 0.3; if (lit !== litNow){ litNow = lit; for (const k in LITM) LITM[k].forEach(m => m.material = lit ? m.userData.litM : m.userData.dark); }
   shadowsDirty(); hourNow = h;
-  const hr = Math.floor(h) % 24, mi = Math.round((h % 1) * 60) % 60; $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
+  const hr = Math.floor(h) % 24, mi = Math.round((h % 1) * 60) % 60; if (!APP) $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
 
 // ---- the living things ----
 [CAR_IN, CAR_OUT, AMB, HELI, BIRDS, CAR_IN2, ...STREET.map(o => o.g), ...WALKS.map(w => w.g), ...SITTERS.map(o => o.g)].forEach(g => g.visible = true);
@@ -137,8 +146,8 @@ ring.rotation.x = -Math.PI/2; ring.visible = false; scene.add(ring);
 let picked = null; const LIFT = {}; for (const k in BOX) LIFT[k] = { y:0, v:0 };
 function pick(k){ picked = k === picked ? null : k;
   if (picked){ const b = BOX[picked], s = Math.max(b.w, b.d)*0.62; ring.scale.set(b.w/Math.max(b.w,b.d)*s, b.d/Math.max(b.w,b.d)*s, 1); ring.position.set(b.x, 0.34, b.z); ring.visible = true;
-    const [name, place, w] = NAMES[picked], f = Math.min(1, +$('prog').value/100 * BUILT[picked] / 0.6);
-    $('cardK').textContent = name; $('cardP').textContent = `${place} · ${w}% of the exam`; $('cardF').textContent = f >= 1 ? 'Finished!' : `${Math.round(f*100)}% built`; $('card').hidden = false; }
+    const [name, place, w] = NAMES[picked], f = levelOf(picked);
+    $('cardK').textContent = name; $('cardP').textContent = `${place} · ${w}% of the exam`; $('cardF').textContent = FINISHED ? 'When you have mastered it' : f >= 1 ? 'Finished!' : `${Math.round(f*100)}% built`; $('card').hidden = false; }
   else { ring.visible = false; $('card').hidden = true; }
   document.querySelectorAll('.badge').forEach(el => el.classList.toggle('on', el.dataset.k === picked)); }
 let down = null;
@@ -154,8 +163,8 @@ $('cardX').onclick = () => pick(null);
 // ---- badges over the roofs ----
 const BADGES = {}; for (const k in BOX){ const el = document.createElement('button'); el.className = 'badge'; el.dataset.k = k; el.innerHTML = `${NAMES[k][0]} <b></b>`; el.onclick = () => pick(k); $('badges').appendChild(el); BADGES[k] = el; }
 const v3 = new THREE.Vector3();
-function badges(){ const r = renderer.domElement.getBoundingClientRect(), p = +$('prog').value/100, at = [];
-  for (const k in BOX){ const b = BOX[k], f = Math.min(1, p * BUILT[k] / 0.6), y = Math.min(b.top, CUT[k].value) + 0.9 + LIFT[k].y;
+function badges(){ const r = renderer.domElement.getBoundingClientRect(), at = [];
+  for (const k in BOX){ const b = BOX[k], f = levelOf(k), y = Math.min(b.top, CUT[k].value) + 0.9 + LIFT[k].y;
     v3.set(b.x, y, b.z).project(cam); const el = BADGES[k], txt = f >= 1 ? '★' : Math.round(f*100) + '%', bb = el.querySelector('b'); if (bb.textContent !== txt) bb.textContent = txt; el.classList.toggle('done', f >= 1);
     if (!el._w || el._t !== el.textContent){ el._t = el.textContent; el._w = el.offsetWidth; el._h = el.offsetHeight; }
     at.push({ el, x:(v3.x+1)/2*r.width, y:(1-v3.y)/2*r.height, w:el._w, h:el._h }); }
@@ -170,7 +179,24 @@ let follow = true;
 $('hour').value = nowH(); setHour(nowH());
 $('hour').oninput = e => { follow = false; $('now').classList.remove('on'); setHour(+e.target.value); };
 $('now').onclick = () => { follow = true; $('now').classList.add('on'); $('hour').value = nowH(); setHour(nowH()); };
-$('prog').oninput = e => { setProgress(+e.target.value/100); if (picked) { const k = picked; picked = null; pick(k); } }; setProgress(0.6);
+const repick = () => { if (picked){ const k = picked; picked = null; pick(k); } };
+if (!APP){ $('prog').oninput = e => { setProgress(+e.target.value/100); repick(); }; setProgress(0.6); }
+else {
+  // your coverage per building, and the names and weights the app knows, by message
+  addEventListener('message', e => { if (e.origin !== location.origin || !e.data || e.data.ih !== 'campus3d-data') return;
+    const d = e.data; for (const k in BOX) if (d.levels && k in d.levels) LEVEL[k] = +d.levels[k] || 0;
+    if (d.names) for (const k in d.names) if (NAMES[k]) NAMES[k] = [d.names[k].short || NAMES[k][0], d.names[k].place || NAMES[k][1], d.names[k].weight ?? NAMES[k][2]];
+    for (const k in BOX){ const el = BADGES[k]; el.firstChild.textContent = NAMES[k][0] + ' '; el._w = 0; }
+    build(); repick(); });
+  build(); tell({ t:'want' });
+  $('finished').onclick = () => { FINISHED = !FINISHED; $('finished').setAttribute('aria-pressed', FINISHED ? 'true' : 'false'); document.body.classList.toggle('is-finished', FINISHED); build(); repick(); };
+  $('cardGo').onclick = () => { if (picked) tell({ t:'practice', key:picked }); };
+  $('close').onclick = () => tell({ t:'close' });
+  addEventListener('keydown', e => { if (e.key === 'Escape'){ if (picked) pick(null); else tell({ t:'close' }); } });
+  $('reset').onclick = () => { cam.position.set(-34, 70, 82); controls.target.set(0.5, -1.5, -3); controls.update(); };
+  // a hidden page draws nothing
+  document.addEventListener('visibilitychange', () => { if (!document.hidden){ last = performance.now(); requestAnimationFrame(frame); } });
+}
 
 // ---- the loop, with a frame meter ----
 let slowSecs = 0, last = performance.now(), frames = 0, acc = 0, worst = 0, t0 = last;
@@ -182,7 +208,7 @@ function frame(now){ const dt = now - last; last = now; frames++; acc += dt; wor
   for (const k in BOX){ const L = LIFT[k], goal = k === picked ? 1.6 : 0; L.v += (goal - L.y)*0.12; L.v *= 0.72; L.y += L.v; if (Math.abs(L.y - BG[k].position.y) > 0.002) shadowsDirty(); BG[k].position.y = L.y; }
   if (ring.visible) ring.material.opacity = 0.6 + Math.sin(t*4)*0.3;
   if (follow && frames === 1) setHour(nowH());
-  controls.update(); renderer.render(scene, cam); badges(); sunAt(); requestAnimationFrame(frame); }
-life(0); $("draws").textContent = `${draws} draws`;
+  controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!document.hidden) requestAnimationFrame(frame); }
+life(0); if (!APP) $("draws").textContent = `${draws} draws`;
 document.body.classList.add('ready');
 requestAnimationFrame(frame);

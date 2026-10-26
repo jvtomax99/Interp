@@ -118,6 +118,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     <div class="cp-world${CAMPUS_PICK.key ? ' has-sel' : ''}" style="aspect-ratio:${W} / ${H}" data-top="${top}" onclick="campusTapOut(event)">
       ${M.layers ? `<img class="cp-depth cp-d-sky" src="./city/sky.webp" alt="" decoding="async" style="${pos(...M.layers.sky)}"><img class="cp-depth cp-d-far" src="./city/far.webp" alt="" decoding="async" style="${pos(...M.layers.far)}">
       <img class="cp-ground" src="./city/near.webp" alt="" decoding="async" style="${pos(...M.layers.near)}">` : `<img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">`}
+      <button class="cp-3d" type="button" onclick="event.stopPropagation();openCampus3d()" aria-label="Explore your campus in 3D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20 7.2v9.6L12 21.2 4 16.8V7.2z"/><path d="M4 7.2 12 11.6l8-4.4M12 11.6v9.6"/></svg>3D</button>
       ${paint}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelPaint(CAMPUS_PICK.key, top) : ''}${hits.sort((a, b) => a[0] - b[0]).map(h => h[1]).join('')}${tags}${dr}
     </div>
     <div class="cp-foot${CAMPUS_PICK.key ? ' has-sel' : ''}">
@@ -177,3 +178,46 @@ function campusGo(key){
 }
 function campusTapOut(e){ if (CAMPUS_PICK.key && !e.target.closest('.cp-bld, .cp-tag')) campusPick(null); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && CAMPUS_PICK.key && document.querySelector('#content .cp-world.has-sel')) campusPick(null); });
+
+/* The campus in 3D, full screen (Jose, 2026-10-26: "rotate, pinch to zoom, and a button to preview how the
+   buildings would look once they are completed"). campus3d/index.html (built by docs/mockups/cchi-city/live/gen.py
+   --app from the same scene as city/) runs in a frame over the app, like the brains: it asks for your progress
+   ('campus3d-want'), and asks the app to practise a building's exam area or to close. Each building stands as tall
+   as its share learned (the same coverage as the card's paint); "See it finished" shows them all done. The frame is
+   dropped once closed, so its 3D stops drawing and frees its memory. Back, Escape and leaving close it like any
+   overlay. */
+const campusCover = id => { const m = domainMastery()[id]; return m && m.total ? (m.known + m.shaky*0.5)/m.total : 0; };
+let campus3dOv = null;
+function campus3dClose(){ if (campus3dOv) campus3dOv.classList.remove('show'); }
+function openCampus3d(){
+  if (!campus3dOv){
+    campus3dOv = document.createElement('div');
+    campus3dOv.className = 'overlay c3d-ov';
+    campus3dOv.setAttribute('role', 'dialog'); campus3dOv.setAttribute('aria-modal', 'true'); campus3dOv.setAttribute('aria-label', 'Your HUMC campus in 3D');
+    document.body.appendChild(campus3dOv);
+    new MutationObserver(() => {
+      if (campus3dOv.classList.contains('show')) return;
+      setTimeout(() => { if (!campus3dOv.classList.contains('show')){ const f = campus3dOv.querySelector('iframe'); if (f) f.remove(); } }, 300);
+    }).observe(campus3dOv, { attributes:true, attributeFilter:['class'] });
+  }
+  if (!campus3dOv.querySelector('iframe')){
+    const f = document.createElement('iframe');
+    f.src = './campus3d/index.html'; f.title = 'Your HUMC campus in 3D: drag to turn, pinch to zoom, tap a building';
+    campus3dOv.appendChild(f);
+    f.addEventListener('load', () => { try { f.focus(); } catch (e) {} }, { once:true });
+  }
+  campus3dOv.classList.add('show');
+}
+window.addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data || !campus3dOv) return;
+  const m = e.data, f = campus3dOv.querySelector('iframe');
+  if (!f || e.source !== f.contentWindow) return;
+  if (m.ih === 'campus3d-close') campus3dClose();
+  else if (m.ih === 'campus3d-want'){
+    const levels = {}, names = {};
+    CAMPUS.forEach(b => { const d = CCHI_DOMAINS.find(x => x.id === b.id) || {}; levels[b.key] = campusCover(b.id); names[b.key] = { short:b.short, place:b.place, weight:d.weight }; });
+    try { e.source.postMessage({ ih:'campus3d-data', levels, names }, location.origin); } catch (err) {}
+  }
+  else if (m.ih === 'campus3d-practice' && CAMPUS.some(b => b.key === m.key)){ campus3dClose(); campusGo(String(m.key)); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && campus3dOv && campus3dOv.classList.contains('show')) campus3dClose(); });
