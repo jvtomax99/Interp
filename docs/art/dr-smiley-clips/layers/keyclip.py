@@ -32,10 +32,30 @@ def matte(rgb, bg, lo=8, hi=24, near=20):
         if seen_through(pm, rgb, bg): out |= pm
     outside = ndi.binary_dilation(out, iterations=3) & bgm                 # grown back to the wall's true edge, never into a strip
     inner = ndi.binary_erosion(~outside, iterations=2); return np.where(inner, 1.0, soft) * (~outside)
+# A green wall (the cheer, 2026-10-27: with both arms up, the raised sleeves' shadowed sides
+# are a grey wall's exact grey; nothing on him is green): keyed by how much green beats red
+# and blue in a pixel, the way a film is keyed, which no shadow or brightness change on the
+# wall upsets. The wall's own green is not even across the frame or the clip (246 at the
+# first frame, 219 by the middle), so no colour distance to one wall colour would do.
+def matte_green(rgb):
+    dom = rgb[..., 1] - np.maximum(rgb[..., 0], rgb[..., 2])
+    a = np.clip((90 - dom) / 50, 0, 1)                                     # dominance 90 and up: wall; 40 and down: him; between: the edge
+    outside = dom > 90
+    inner = ndi.binary_erosion(~outside, iterations=2); return np.where(inner, 1.0, a) * (~outside)
 sizes = []
 for i, f in enumerate(sorted(glob.glob(os.path.join(SRC, 'f*.png')))):
     P = np.asarray(fit(Image.open(f).convert('RGB')), dtype=float); P[:, :4] = P[:, 4:5]; P[:, -4:] = P[:, -5:-4]   # the clip's dark edge columns
-    bg = np.median(P[20:120, 20:120].reshape(-1, 3), 0); a = matte(P, bg)
+    bg = np.median(P[20:120, 20:120].reshape(-1, 3), 0); green = bg[1] - max(bg[0], bg[2]) > 100
+    if green:
+        a = matte_green(P)
+        m = a > .5; lab, n = ndi.label(m); sz = ndi.sum(m, lab, range(1, n + 1)); keep = lab == int(np.argmax(sz)) + 1
+        a = np.where(ndi.binary_dilation(keep, iterations=2), a, 0)               # his one shape
+        # despill: along the edge the green wall tints him; green is held down to the larger of red and blue
+        band = (a > 0) & (a < 1); spill = np.maximum(P[..., 1] - np.maximum(P[..., 0], P[..., 2]), 0)
+        P = P.copy(); P[..., 1] = np.where(band, P[..., 1] - spill, P[..., 1])
+        im = Image.fromarray(np.dstack([P, a * 255]).astype(np.uint8), 'RGBA').resize((320, 440), Image.LANCZOS)
+        out = f'{OUT}/{i:04d}.webp'; im.save(out, quality=88, method=6); sizes.append(os.path.getsize(out)); continue
+    a = matte(P, bg)
     blue = (P[..., 2] - P[..., 0]) > 22
     a[(yy > 1150) & ~ndi.binary_dilation(blue & (yy > 1150), iterations=3)] = 0   # the shadows on the floor and on the wall behind his calves: below the coat's hem only blue (trousers, shoes)
     m = a > .5; lab, n = ndi.label(m); sz = ndi.sum(m, lab, range(1, n + 1)); keep = lab == int(np.argmax(sz)) + 1
