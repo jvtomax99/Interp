@@ -131,3 +131,15 @@ He stands still for half a second, then crouches slightly, pulling both fists ba
 `keyclip.py` takes the wall's colour from the frame's corner, so a green
 wall keys with no change; its "wall-coloured pool" rules then simply
 never fire on him.
+
+## The cheer on green came back (2026-10-27): in
+
+Made from the green still (not the grey master), so his arms at the ends
+hang a few pixels closer to his body than the rig's rest; measured against
+the rig itself (the grey master's floor shadow had made the difference
+look bigger), the fade covers it. The green wall keys clean with the
+chroma key: the raised sleeves are whole. One flaw: his fists touch the
+top of the picture for 14 frames at the top of the jump and are cut flat
+there. If Jose runs it once more, the prompt above with "a small, low hop,
+his fists never higher than the top of his head" in place of the jump
+sentence, from the grey master; until then this one is in.

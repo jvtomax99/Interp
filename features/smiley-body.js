@@ -66,7 +66,8 @@ function drBodyMount(host, o){
     return body.perform(n);
   };
   m.destroy = () => { m.idle(); if(m.io) m.io.disconnect(); if(typeof drClipStop === 'function') drClipStop(m); body.stop(); drBodyMounts.delete(m); delete m.host.dataset.dbMounted; };
-  if(typeof drClipPreload === 'function') for(const k in DR_CLIPS) drClipPreload(k);
+  // the clips this host needs first, now; the rest one after another later (o.clips: Home's order; a quiz card's own)
+  if(typeof drClipPreloadSeq === 'function'){ const first = o.clips || ['bounce', 'wince', 'cheer', 'think', 'greet']; drClipPreloadSeq(first.slice(0, o.clips ? 1 : 2), 0); drClipPreloadSeq(first, o.clips ? 15000 : 4000); }
   drBodyMounts.add(m);
   drBodyStateSync(m);
   return m;

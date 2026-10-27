@@ -11,9 +11,10 @@
    features/smiley-body.js (a canvas over the SVG), or returns false (no
    such clip, Still, reduced motion, frames not loaded yet, a clip already
    playing) so the caller falls back to the rig. drClipPreload(name) fetches
-   the frames ahead of time (each mount asks for every clip once it is on
-   screen); the service worker keeps them as assets (stale-while-revalidate),
-   nothing precached: the first launch after a deploy may wave on the rig.
+   a clip's frames; drClipPreloadSeq(names, delay) fetches clips one after
+   another (a mount asks for the ones it needs first, the rest later); the
+   service worker keeps them as assets (stale-while-revalidate), nothing
+   precached: the first launch after a deploy may wave on the rig.
    Rules: docs/features/dr-smiley.md, "Clips". Loaded after smiley-body.js. */
 'use strict';
 
@@ -21,7 +22,7 @@ const DR_CLIPS = {
   // 30 fps, 320 x 440 (the master's grid scaled), from Jose's Sora clips (2026-10-27), each
   // starting and ending in the master's pose; keyed by keyclip.py, every frame checked by checkclip.py
   greet: { dir: './drsmiley/clips/wave/', n: 150, fps: 30, w: 320, h: 440 },     // the wave, 5 s
-  // cheer: the raised sleeves' shadowed sides are the wall's exact grey and key out torn (2026-10-27); waits for a clip on a green wall
+  cheer: { dir: './drsmiley/clips/cheer/', n: 210, fps: 30, w: 320, h: 440 },    // the jump with both fists up, 7 s (filmed on a green wall: on grey the raised sleeves keyed out torn)
   think: { dir: './drsmiley/clips/think/', n: 210, fps: 30, w: 320, h: 440 },    // the finger on the chin, the aha, 7 s
   wince: { dir: './drsmiley/clips/wince/', n: 180, fps: 30, w: 320, h: 440 },    // the flinch and the caring smile, 6 s
   bounce: { dir: './drsmiley/clips/thumbs/', n: 180, fps: 30, w: 320, h: 440 },  // the hop with the thumbs-up (a right answer), 6 s
@@ -46,6 +47,16 @@ function drClipPreload(name){
   entry.ready = Promise.all(loads).then(r => { entry.ok = r.every(Boolean); return entry.ok; });
   drClipFrames.set(name, entry);
   return entry;
+}
+/* Clips one after another, each once the one before has arrived, starting after a
+   delay (2026-10-27: every mount fetching all five at once, 930 frames, starved Home's
+   hello of frames in the test harness and would weigh on a phone's launch). Home asks
+   for the wave first and the rest after the hello; a quiz card for its own two first. */
+function drClipPreloadSeq(names, delayMs){
+  setTimeout(() => {
+    let p = Promise.resolve();
+    for(const n of names) p = p.then(() => { const e = drClipPreload(n); return e ? e.ready : null; });
+  }, delayMs || 0);
 }
 function drClipCan(){
   if(typeof drMode === 'function' && drMode() === 'still') return false;

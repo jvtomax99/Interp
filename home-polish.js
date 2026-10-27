@@ -1272,7 +1272,7 @@
     // Hub; double-tap his head: the HUMC Brain; press and hold: a pet.
     const bodyHost=content.querySelector('.home-body');
     if(bodyHost&&typeof window.drBodyMount==='function'){
-      const m=bodyHost.dataset.dbMounted?window.drBodyMountOf(bodyHost):window.drBodyMount(bodyHost,{quiet:true});   // quiet: his rest beats on Home are face-only, no frame loop (home-rest.cjs)
+      const m=bodyHost.dataset.dbMounted?window.drBodyMountOf(bodyHost):window.drBodyMount(bodyHost,{quiet:true,clips:['greet','cheer','think','wince','bounce']});   // the wave now, for the hello; the rest after it   // quiet: his rest beats on Home are face-only, no frame loop (home-rest.cjs)
       if(m){
         // The marker sits on the greeting, which a start-up repaint keeps (keptGreeting); #content's own classes get reset, which once showed the head and the body together.
         window.homeBody=m;bodyHost.closest('.home-greeting').classList.add('has-body');
