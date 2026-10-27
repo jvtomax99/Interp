@@ -74,3 +74,30 @@ He stands still for half a second, then lifts his right hand (on the viewer's le
 
 Verdict: the route works; the pose at the ends is the thing to fix in the
 prompt before making the other moves.
+
+## The second wave (2026-10-27): in
+
+Run with the ends fixed in the prompt (arms hanging at his sides, a closed
+smile at the start and the end): first and last frames 4.9 and 5.0 from
+the master (the first clip was 10.8 and 12.1), arms down at both ends, the
+feet on one line throughout. Keyed to `drsmiley/clips/wave/` (150 frames,
+3.8 MB) and wired in as `greet` (`features/smiley-clips.js`).
+
+## The prompts for the other big moves
+
+Same tool, same settings (portrait, 5 s, highest quality), `body-master.png`
+as the start image. Each starts and ends in the master's pose; the opening
+is the same for all four, then the move. Send every result with its tool.
+
+Opening (paste first, then the move's paragraph):
+
+```
+Animate this exact picture. The first frame is this picture, unchanged: both arms hanging straight down at his sides, hands open and relaxed beside his thighs, a closed gentle smile. The camera is locked: no zoom, no pan, no drift, no cut. The background stays one flat, even light grey the whole time, no shadows on the floor or wall, nothing else appears. His body stays in the same place and the same size. His face, hair, coat, scrubs and shoes stay exactly as drawn. 3D cartoon style, same lighting throughout. No text, no captions. At the end he returns to exactly the starting pose, arms hanging at his sides, the closed gentle smile, and stands still for the last half second.
+```
+
+| Move | File | The move (after the opening) |
+|---|---|---|
+| Cheer (a streak, a rank) | `cheer.mp4` | He stands still for half a second, then crouches slightly, pulling both fists back by his hips, and springs up into a small jump with both fists punched up above his head in a V, his mouth opening in a big happy laugh and his eyes bright. He lands softly with a little bounce, fists still up, pumps them once more, then lowers both arms back to his sides as his laugh settles into the smile. Real weight: the coat lifts with the jump and settles after the landing. |
+| Think (while Ask the Hub works) | `think.mp4` | He stands still for half a second, then raises his right hand (on the viewer's left) to his chin, the index finger resting on it, the other arm folding across his stomach under the elbow, his eyes looking up and away to one side, his head tilting a little. He holds the thought, taps his chin twice with the finger, then his eyes come back to the camera with a small "aha" lift of the brows and a smile, and both arms return to his sides. |
+| Wince (a wrong answer) | `wince.mp4` | He stands still for half a second, then flinches: both shoulders rise, both arms pull in with the hands curling together in front of his stomach, his head ducks a little to one side and his face squeezes into a sympathetic wince with the eyes shut and the mouth pulled to the side. He holds it for a moment, then relaxes: the shoulders drop, the face softens into a warm, caring smile, and both arms return to his sides. |
+| Thumbs-up (a right answer) | `thumbs.mp4` | He stands still for half a second, then does a small happy hop, both feet leaving the floor together and landing softly, as his right hand (on the viewer's left) comes up to chest height in a fist with the thumb up, pushed toward the camera, his smile widening with a proud little nod. He holds the thumbs-up for a moment with a second tiny bounce, then the arm lowers back to his side. |

@@ -7361,6 +7361,12 @@ body.pv-open{ overflow:hidden; }
    Where he stands: Home's banner (home-polish.css, .home-body) and the quiz
    card's top-right corner (.quiz-dr, below). */
 .db-host svg.db{ width:100%; height:100%; display:block; overflow:visible; }
+/* A filmed clip over the rig (features/smiley-clips.js): the canvas fills the host; is-clip fades the SVG out and it in (DR_CLIP_FADE). */
+.db-host{ position:relative; }
+.db-host .db-clip{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .15s linear; }
+.db-host.is-clip .db-clip{ opacity:1; }
+.db-host svg.db{ transition:opacity .15s linear; }
+.db-host.is-clip svg.db{ opacity:0; }
 .db-host .db-breath{ transform-box:fill-box; transform-origin:50% 100%; animation:dbBreath 3.6s ease-in-out infinite; }
 .db-host.is-offscreen .db-breath{ animation-play-state:paused; }
 html.ds-still .db-host .db-breath{ animation:none; }

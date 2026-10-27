@@ -49,17 +49,24 @@ function drBodyMount(host, o){
   const body = drBody(svg, { get mode(){ return typeof drMode === 'function' ? drMode() : 'lively'; } });
   const m = { host, svg, body, seen: true, dozed: null };
   // o.quiet (Home): rest beats are face-only, on timers, so nothing runs on the page's frames at rest.
-  m.idle = drBodyIdle(body, { canPlay: () => m.seen && m.host.isConnected && (!o.canPlay || o.canPlay()), quiet: !!o.quiet });
+  m.idle = drBodyIdle(body, { canPlay: () => m.seen && m.host.isConnected && !m.clip && (!o.canPlay || o.canPlay()), quiet: !!o.quiet });
   // Off screen: no rest beats, and the breathing pauses (nothing runs where nobody can see it).
   m.watch = () => { if(m.io) m.io.disconnect(); m.io = new IntersectionObserver(en => { m.seen = en[en.length - 1].isIntersecting; m.host.classList.toggle('is-offscreen', !m.seen); }); m.io.observe(m.host); };
   m.watch();
+  // A move with a filmed clip (features/smiley-clips.js, DR_CLIPS) plays the clip; the rig
+  // plays everything else, and the clip's move when the clip can't (Still, not loaded yet).
+  // While a clip plays, nothing else is asked of him (the rig would show through).
+  m.clip = null;
   m.act = seq => {
     const n = DR_BODY_ACT[seq] === undefined ? 'ack' : DR_BODY_ACT[seq];
     if(!n) return false;
+    if(m.clip) return false;
     if(n === 'glance') return body.busy() ? false : body.perform('glance');
+    if(typeof drClipPlay === 'function' && DR_CLIPS[n] && drClipPlay(m, n)) return true;
     return body.perform(n);
   };
-  m.destroy = () => { m.idle(); if(m.io) m.io.disconnect(); body.stop(); drBodyMounts.delete(m); delete m.host.dataset.dbMounted; };
+  m.destroy = () => { m.idle(); if(m.io) m.io.disconnect(); if(typeof drClipStop === 'function') drClipStop(m); body.stop(); drBodyMounts.delete(m); delete m.host.dataset.dbMounted; };
+  if(typeof drClipPreload === 'function') for(const k in DR_CLIPS) drClipPreload(k);
   drBodyMounts.add(m);
   drBodyStateSync(m);
   return m;
@@ -94,7 +101,7 @@ function drBodyStateSync(one){
 new MutationObserver(() => drBodyStateSync()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-dr-state'] });
 // Lively / Focused / Still changed: his held state starts over in the new mode.
 window.addEventListener('drmodechange', () => {
-  for(const m of drBodyMounts){ const s = m.body.stateName(); m.body.stop(); m.body.rest(); if(s) m.body.state(s, { restart: true }); }
+  for(const m of drBodyMounts){ const s = m.body.stateName(); if(typeof drClipStop === 'function') drClipStop(m); m.body.stop(); m.body.rest(); if(s) m.body.state(s, { restart: true }); }
 });
 // The quiz host renderContent has just painted (it calls this after the
 // practice screen): mount it, or carry the quiz body over from the old card.

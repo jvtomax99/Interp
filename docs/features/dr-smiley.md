@@ -681,3 +681,29 @@ through the wink's first frame and a smile to a laugh through `laugh1`,
 Round three of the drawings (`prompts-animation.md`): the clipboard's
 reach, hands behind his back for listening, weight on one leg for the idle
 shift, a slump for the doze.
+
+## Clips: his big moves filmed (2026-10-27)
+
+Jose: "I want it fluid and natural." The cutout rig swaps drawings, so it
+cannot be; a filmed clip can. An image-to-video tool (Sora, from his
+master picture and a prompt in `docs/art/dr-smiley-clips/prompts.md`)
+gives 5 s of him really moving; `docs/art/dr-smiley-clips/layers/keyclip.py`
+cuts each frame out of the grey wall (the floor and wall shadows dropped,
+the hair's painted rim trimmed, stray patches removed) into
+`drsmiley/clips/<move>/0000.webp` ... at 320 x 440, the master's grid.
+`features/smiley-clips.js` plays them: `DR_CLIPS` (greet: the wave, 150
+frames at 30 fps, 3.8 MB), `drClipPreload` (every mount fetches every clip
+once mounted; the frames are assets to `sw.js`, stale-while-revalidate,
+not precached, so the first launch after a deploy may wave on the rig),
+`drClipPlay(mount, name)` (a canvas over the SVG, `.db-clip` in `app.css`;
+`is-clip` on the host fades the SVG out and the canvas in over
+`DR_CLIP_FADE`, 150 ms, which hides the clip's small likeness difference
+from the master; frames drawn by wall clock, decoded a few ahead; the rig
+stopped and at rest underneath, so the hand-off is rest to rest). A
+mount's `act` plays the clip when there is one and it can (not Still, not
+reduced motion, loaded), the rig otherwise; while a clip plays nothing
+else is asked of him and the idle waits. The wave is always his right hand
+(the clip's); the rig's picked a side. The other big moves (cheer, think,
+wince, thumbs-up) are to be filmed the same way; the rig keeps the small
+life and every move without a clip. Checks: `smiley-body-app.cjs` (the
+filmed hello, Still), `smiley-gestures.cjs` (Home's greeting).

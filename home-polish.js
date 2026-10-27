@@ -562,7 +562,7 @@
       // late for the whole of it just carries on to his idle).
       if(elapsed>=GREET_AT&&!sequence.greeted){
         sequence.greeted=true;
-        if(homeBodyLive())window.homeBody.body.perform('greet');else if(elapsed<FACE_AT+FACE_MS-1600&&typeof window.drFacePlay==='function')window.drFacePlay(faceSvg,'greet',art,null,P('REACT',3));
+        if(homeBodyLive())window.homeBody.act('greet');else if(elapsed<FACE_AT+FACE_MS-1600&&typeof window.drFacePlay==='function')window.drFacePlay(faceSvg,'greet',art,null,P('REACT',3));
       }
       if(elapsed>=FACE_AT+FACE_MS&&!idleRunning&&!sequence.idled){sequence.idled=true;startIdle(button);}
       // Asked once per hello and kept on the sequence, so a hello resumed
@@ -1278,7 +1278,8 @@
         window.homeBody=m;bodyHost.closest('.home-greeting').classList.add('has-body');
         bodyHost.setAttribute('role','button');bodyHost.tabIndex=0;bodyHost.setAttribute('aria-label','Ask the Hub');bodyHost.removeAttribute('aria-hidden');
         wave.tabIndex=-1;wave.setAttribute('aria-hidden','true');
-        if(hasWavedHello||reduced.matches||(resume&&resume.elapsed>=FACE_AT))bodyHost.classList.add('is-in');
+        // A host drawn afresh by a start-up repaint after he has arrived is in at once, no second grow-in (its .92 to 1 scale showed as a small re-arrival, and a flaky check: smiley-gestures).
+        if(hasWavedHello||reduced.matches||(resume&&resume.elapsed>=FACE_AT)){bodyHost.style.transition='none';bodyHost.classList.add('is-in');void bodyHost.offsetWidth;bodyHost.style.transition='';}
         if(typeof window.smileySway==='function')window.smileySway(bodyHost,'50% 100%');
         const pettedB=typeof window.smileyPettable==='function'?window.smileyPettable(bodyHost,()=>{if(window.drSetMood)window.drSetMood('happy',180000);m.act('pet');}):()=>false;
         let headAt=0,askT=0;

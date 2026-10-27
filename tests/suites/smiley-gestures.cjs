@@ -63,6 +63,7 @@ async function playAndMeasure(page, name, o = {}){
         const host = document.querySelector('#content.is-home .home-body');
         if(host){ const r = host.getBoundingClientRect(); const m = getComputedStyle(host); const b = window.homeBody && window.homeBody.body;
           if(b){ faces.add(b.pose.face); if(b.pose.frameL) frames.add(b.pose.frameL); if(b.pose.frameR) frames.add(b.pose.frameR); }
+          if(host.classList.contains('is-clip') && host.querySelector('canvas.db-clip')) frames.add('clip');
           out.push({ t: performance.now() - t0, ratio: r.width / r.height, scale: m.scale, isIn: host.classList.contains('is-in'), x: r.x }); }
         if(performance.now() - t0 < 12000) requestAnimationFrame(tick); else res({ out, faces: [...faces], frames: [...frames] });
       };
@@ -76,7 +77,7 @@ async function playAndMeasure(page, name, o = {}){
     ok(!stretch.length, `Home greeting: his box keeps its shape on every frame (${stretch.length} bad)`);
     ok(!landedScale.length, `Home greeting: full size once he has landed (${landedScale.length} frames scaled)`);
     ok(!slide.length, `Home greeting: never slid sideways (${slide.length} frames)`);
-    ok(samples.frames.includes('wave') && samples.faces.includes('smile'), 'Home greeting: the rig played greet (the drawn wave, a smile): ' + samples.frames.join(' ') + ' | ' + samples.faces.join(' '));
+    ok(samples.frames.includes('clip') || (samples.frames.includes('wave') && samples.faces.includes('smile')), 'Home greeting: the filmed wave played over the rig (or the rig\'s drawn wave where the clip can\'t): ' + samples.frames.join(' ') + ' | ' + samples.faces.join(' '));
     await hp.screenshot({ path: OUT + 'shots/home-greet.png' });
     await ctx.close();
   }

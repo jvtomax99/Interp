@@ -38,7 +38,13 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(home.stageBody && !home.dock && home.breath === 'dbBreath' && home.images === 65, 'he is the stage for performances, the dock head stays away, he breathes', home);
   ok(!P.__errors.length, 'no page errors', P.__errors);
 
-  // The hello's greet played on the rig (the drawn wave is one of its frames); a reaction reaches him through drPerform.
+  // The hello's greet is the filmed clip (features/smiley-clips.js): the canvas over the rig at his full size, the rig hidden
+  // under it, then gone, the rig back; a greet asked again plays it again; asked during it, nothing (the rig would show through).
+  const clip = await P.evaluate(() => new Promise(res => { const m = window.homeBody, h = m.host; const out = { loaded: !!(drClipFrames.get('greet') && drClipFrames.get('greet').ok), played: m.act('greet'), during: null, again: null, hmax: 0, svgHidden: false };
+    const t0 = performance.now(); const tick = () => { const c = h.querySelector('canvas.db-clip'); if(c){ out.hmax = Math.max(out.hmax, c.getBoundingClientRect().height); if(getComputedStyle(h.querySelector('svg.db')).opacity === '0') out.svgHidden = true; if(out.during === null && performance.now() - t0 > 600) out.during = m.act('cheer'); }
+      if(m.clip && performance.now() - t0 < 8000) requestAnimationFrame(tick); else res(Object.assign(out, { gone: !h.querySelector('canvas.db-clip'), isClip: h.classList.contains('is-clip'), restPose: m.body.pose.frameL === '' && m.body.pose.aL === 0, ms: Math.round(performance.now() - t0) })); }; requestAnimationFrame(tick); }));
+  ok(clip.loaded && clip.played && clip.hmax > 200 && clip.svgHidden && clip.during === false && clip.gone && !clip.isClip && clip.restPose && clip.ms > 4000 && clip.ms < 6500, 'the filmed wave: the canvas at his size over the hidden rig, nothing else asked meanwhile, then gone and the rig at rest (about 5 s)', clip);
+  // A reaction reaches him through drPerform.
   const perf = await P.evaluate(() => new Promise(res => { const bd = window.homeBody.body; bd.stop(); bd.rest(); const seen = new Set();
     const played = drPerform('cheer', { priority: DR_P.REACT }); const t0 = performance.now();
     const tick = () => { for(const f of [bd.pose.frameL, bd.pose.frameR]) if(f) seen.add(f); if(bd.busy() && performance.now() - t0 < 5000) requestAnimationFrame(tick); else res({ played, seen: [...seen], busyAfter: bd.busy() }); }; requestAnimationFrame(tick); }));
@@ -59,6 +65,8 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
 
   // Still: one held pose, no breathing; a performance is its one frame.
   await P.evaluate(() => setSmileyMode('still')); await P.waitForTimeout(300);
+  const stillClip = await P.evaluate(() => { const m = window.homeBody; const r = m.act('greet'); const c = !!m.host.querySelector('canvas.db-clip'); m.body.stop(); m.body.rest(); return { played: r, canvas: c, mode: m.body.mode() }; });
+  ok(stillClip.mode === 'still' && !stillClip.canvas, 'Still: the filmed wave never plays, the rig shows its one pose', stillClip);
   const still = await P.evaluate(() => new Promise(res => { const bd = window.homeBody.body; drPerform('cheer'); const a = JSON.stringify(bd.pose); setTimeout(() => res({ same: JSON.stringify(bd.pose) === a, frame: bd.pose.frameL || bd.pose.frameR, breath: getComputedStyle(document.querySelector('.home-body .db-breath')).animationName, mode: bd.mode() }), 500); }));
   ok(still.mode === 'still' && still.same && still.frame === 'cheer-up' && still.breath === 'none', 'Still: his cheer is one held frame, no breathing', still);
   await P.evaluate(() => setSmileyMode('lively')); await P.waitForTimeout(1300);

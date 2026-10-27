@@ -65,6 +65,7 @@ const PRECACHE = [
   './features/smiley-performances.js',
   './drsmiley/body.js',
   './features/smiley-body.js',
+  './features/smiley-clips.js',
   // Dr. Smiley full-length (Home, a quiz)
   './drsmiley/body/arm-fore-l.webp',
   './drsmiley/body/arm-fore-r.webp',
