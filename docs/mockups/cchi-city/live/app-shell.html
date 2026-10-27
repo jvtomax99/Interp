@@ -68,7 +68,7 @@ button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 /* the time of day: the clock, today's sky as a track to slide along, and Now to follow your own clock again */
 .time{padding-left:9px}
 .time svg{flex:none;width:20px;height:20px;color:#C9801E}
-#hourOut{flex:none;width:62px;font-size:15px;font-weight:650;letter-spacing:-.2px;font-variant-numeric:tabular-nums;color:var(--ink)}
+#hourOut{flex:none;width:74px;white-space:nowrap;font-size:15px;font-weight:650;letter-spacing:-.2px;font-variant-numeric:tabular-nums;color:var(--ink)}
 #hour{flex:1;min-width:0;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;border-radius:999px;background-clip:content-box;padding:12px 0;box-sizing:border-box;cursor:pointer;touch-action:pan-x}
 #hour::-webkit-slider-runnable-track{height:20px;border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1px rgba(21,28,44,.12)}
 #hour::-moz-range-track{height:20px;border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1px rgba(21,28,44,.12)}
@@ -76,6 +76,11 @@ button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 #hour::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--gold-2);box-shadow:0 2px 6px rgba(22,55,90,.3)}
 #now{flex:none;border:1px solid rgba(21,28,44,.14);background:transparent;color:var(--ink);font:650 15px var(--ui);border-radius:999px;min-height:44px;padding:0 15px;cursor:pointer}
 #now.on{background:var(--gold);border-color:var(--gold);color:#2a1a08}
+#finished{border:0;border-radius:999px;min-height:44px;padding:0 17px 0 13px;display:flex;align-items:center;gap:9px;font:650 15px var(--ui);color:#fff;background:var(--navy);cursor:pointer;white-space:nowrap}
+#finished i{width:34px;height:20px;border-radius:999px;background:rgba(255,255,255,.3);position:relative;transition:background .3s}
+#finished i::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+#finished[aria-pressed="true"] i{background:#34C77B}
+#finished[aria-pressed="true"] i::after{transform:translateX(14px)}
 @media (max-width:380px){.bar .row.look span{display:none} .bar .row.look{padding-left:0;justify-content:center}}
 @media (prefers-reduced-motion:reduce){.sun *{animation:none!important}#card{animation:none}#stage canvas{transition:none}#finished i,#finished i::after{transition:none}}
 </style>

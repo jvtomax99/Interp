@@ -75,8 +75,13 @@ function sunSky(t){ const d = t/864e5 - 10957.5, Mn = RAD*(357.5291 + 0.98560028
   const alt = Math.asin(Math.sin(p)*Math.sin(dec) + Math.cos(p)*Math.cos(dec)*Math.cos(H)), az = Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(p) - Math.tan(dec)*Math.cos(p));
   return { alt: alt/RAD, bearing: (az/RAD + 540) % 360 }; }
 const toScene = (bearing, alt) => { const th = (bearing - DRIVE)*RAD, c = Math.cos(alt*RAD); return new THREE.Vector3(Math.sin(th)*c, Math.sin(alt*RAD), -Math.cos(th)*c); };
-// today at h o'clock on the phone's clock
-const atHour = h => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime() + h*3600e3; };
+// the clock is Hackensack's (New York time), whatever zone the phone is set to: the sun is HUMC's
+const NY = (() => { try { return new Intl.DateTimeFormat('en-US', { timeZone:'America/New_York', hourCycle:'h23', year:'numeric', month:'numeric', day:'numeric', hour:'numeric', minute:'numeric', second:'numeric' }); } catch (e) { return null; } })();
+const nyParts = t => { if (!NY) { const d = new Date(t); return [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()]; }
+  const o = {}; NY.formatToParts(t).forEach(p => o[p.type] = +p.value); return [o.year, o.month, o.day, o.hour % 24, o.minute, o.second]; };
+const nyOffset = t => { const [y, mo, d, h, mi, se] = nyParts(t); return Date.UTC(y, mo - 1, d, h, mi, se) - Math.floor(t/1000)*1000; };
+// today at h o'clock in Hackensack
+const atHour = h => { const now = Date.now(), [y, mo, d] = nyParts(now); return Date.UTC(y, mo - 1, d) + h*3600e3 - nyOffset(now); };
 const HEMI = scene.children.find(c => c.isHemisphereLight);
 const NIGHT = { sun:0x7f95ff, si:0.5, sky:0x5a6ad0, ground:0x2a2a40, hi:0.3,  rim:0.4, bg:['#0b1030','#17204a','#2a2f66'], night:1 },
   DAWN = { sun:0xff9a8a, si:1.0, sky:0x7a84c8, ground:0x3a3448, hi:0.45, rim:0.6, bg:['#27306a','#8c7aac','#f2b49c'], night:0.6 },
@@ -101,7 +106,7 @@ function setHour(h){ hourNow = ((h % 24) + 24) % 24; SKY = sunSky(atHour(hourNow
   GLOWS.forEach(g => { g.material.opacity = Math.min(1, n*1.4 + (evening && SKY.alt < 10 ? 0.6 : 0)); g.visible = g.material.opacity > 0.02; });
   const lit = n > 0.3; if (lit !== litNow){ litNow = lit; for (const k in LITM) LITM[k].forEach(m => m.material = lit ? m.userData.litM : m.userData.dark); }
   shadowsDirty();
-  const hr = Math.floor(hourNow), mi = Math.floor((hourNow % 1) * 60 + 1e-6); $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
+  const m = Math.round(hourNow*60) % 1440, hr = Math.floor(m/60), mi = m % 60; $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
 // the slider's track: today's sky, hour by hour, so you can see where the sun is up
 function dayTrack(){ const stops = []; for (let h = 0; h <= 24; h += 1){ const [A, B, f] = lookAt(sunSky(atHour(h))); stops.push(`${mix(A.bg[1], B.bg[1], f)} ${(h/24*100).toFixed(1)}%`); }
   $('hour').style.backgroundImage = `linear-gradient(90deg, ${stops.join(', ')})`; }
@@ -151,8 +156,8 @@ function sunAt(){ const day = SKY.alt > -1; SUN.classList.toggle('is-night', !da
   const h = day ? toScene(SKY.bearing, 0) : null;
   fwd.subVectors(controls.target, cam.position).setY(0).normalize(); rgt.crossVectors(fwd, up);
   const rel = h ? Math.atan2(h.dot(rgt), h.dot(fwd)) : -0.3, W = innerWidth, H = innerHeight;
-  const e = day ? Math.max(0, Math.min(1, SKY.alt / 55)) : 0.6, x = W*0.5 + rel / (75*RAD) * W*0.5;
-  const y = H*(0.36 - e*0.22) + Math.max(0, -SKY.alt)*H*0.03 + Math.cos(controls.getPolarAngle())*H*0.05, s = 0.8 + 0.25*e;
+  const e = day ? Math.max(0, Math.min(1, SKY.alt / 40)) : 0.6, x = W*0.5 + rel / (75*RAD) * W*0.5;
+  const y = H*(0.36 - e*0.22) + (day ? Math.max(0, -SKY.alt)*H*0.03 : 0) + Math.cos(controls.getPolarAngle())*H*0.05, s = 0.8 + 0.25*e;
   SUN.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) scale(${s.toFixed(3)})`; }
 function giggle(){ SUN.classList.remove('giggle'); void SUN.offsetWidth; SUN.classList.add('giggle'); }
 
@@ -201,7 +206,7 @@ function badges(){ const r = renderer.domElement.getBoundingClientRect(), at = [
     placed.push(a); a.el.style.transform = `translate(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px) translate(-50%, -100%)`; } }
 
 // ---- controls in the sheet ----
-const nowH = () => { const d = new Date(); return d.getHours() + d.getMinutes()/60; };
+const nowH = () => { const [, , , h, mi] = nyParts(Date.now()); return h + mi/60; };
 let follow = true;
 $('hour').value = nowH(); setHour(nowH()); dayTrack();
 $('hour').oninput = e => { follow = false; $('now').classList.remove('on'); $('now').setAttribute('aria-pressed', 'false'); setHour(+e.target.value); };

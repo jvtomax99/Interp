@@ -147,7 +147,7 @@ construction); "See it finished" (`#finished`, `FINISHED`) shows them all done,
 the badges lose their %. **The time of day** (Jose, 2026-10-27: "move the time of day, and the sun in
 the right place"): the sun is the real one over HUMC (`sunSky` in `runtime.js`: the usual low-precision
 solar formulas, within about a degree; checked against 2026-10-27's 7:25 sunrise, 5:56 sunset, 36° at noon,
-and June's 72.6°) for today's date at the chosen hour. A compass bearing turns into the scene by
+and June's 72.6°) for today's date at the chosen hour, on Hackensack's clock (New York time, whatever the phone's zone). A compass bearing turns into the scene by
 `bearing - DRIVE` (113°, the drive's heading), so north is (-0.92, 0, 0.39): from the front view you look
 south-east, the sun rises ahead left behind the campus, stands south (right) at noon and sets behind you.
 The light comes from it (never lower than 6°, or the shadows run off the board; after dusk it turns to the
