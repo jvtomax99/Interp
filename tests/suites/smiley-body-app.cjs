@@ -46,9 +46,9 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(clip.loaded && clip.played && clip.hmax > 200 && clip.svgHidden && clip.during === false && clip.gone && !clip.isClip && clip.restPose && clip.ms > 4000 && clip.ms < 6500, 'the filmed wave: the canvas at his size over the hidden rig, nothing else asked meanwhile, then gone and the rig at rest (about 5 s)', clip);
   // A reaction reaches him through drPerform.
   const perf = await P.evaluate(() => new Promise(res => { const bd = window.homeBody.body; bd.stop(); bd.rest(); const seen = new Set();
-    const played = drPerform('cheer', { priority: DR_P.REACT }); const t0 = performance.now();
-    const tick = () => { for(const f of [bd.pose.frameL, bd.pose.frameR]) if(f) seen.add(f); if(bd.busy() && performance.now() - t0 < 5000) requestAnimationFrame(tick); else res({ played, seen: [...seen], busyAfter: bd.busy() }); }; requestAnimationFrame(tick); }));
-  ok(perf.played && perf.seen.includes('cheer-up') && !perf.busyAfter, 'drPerform(cheer) plays on his body: the drawn fists up, then rest', perf);
+    const m = window.homeBody; const played = drPerform('cheer', { priority: DR_P.REACT }); const t0 = performance.now();
+    const tick = () => { for(const f of [bd.pose.frameL, bd.pose.frameR]) if(f) seen.add(f); if(m.clip && m.host.querySelector('canvas.db-clip')) seen.add('clip'); if((bd.busy() || m.clip) && performance.now() - t0 < 9000) requestAnimationFrame(tick); else res({ played, seen: [...seen], busyAfter: bd.busy() || !!m.clip }); }; requestAnimationFrame(tick); }));
+  ok(perf.played && (perf.seen.includes('clip') || perf.seen.includes('cheer-up')) && !perf.busyAfter, 'drPerform(cheer) plays on his body: the filmed cheer over him (or the rig\'s drawn fists), then rest', perf);
 
   // A task state is his held state; its end lets him go.
   const task = await P.evaluate(() => new Promise(res => { drTask('processing', { key: 't' }); setTimeout(() => { const a = window.homeBody.body.stateName(), frames = [window.homeBody.body.pose.frameL, window.homeBody.body.pose.frameR];
@@ -85,15 +85,15 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(quiz.mounted && quiz.h >= 100 && quiz.inCard && quiz.questionBelow && quiz.metaBeside && !quiz.dock && quiz.stage, 'in a quiz he stands in the card\'s corner, the question below his feet, the label beside him, the dock head away', quiz);
   await P.screenshot({ path: L.SHOTS + 'smiley-body-quiz.png' });
   const right = await P.evaluate(() => new Promise(res => { const svg0 = document.querySelector('.quiz-dr svg'); const seen = new Set(); answerQuiz(quizQuestions[quizIndex].a);
-    const t0 = performance.now(); const tick = () => { const bd = drQuizMount && drQuizMount.body; if(bd){ if(bd.pose.frameLegs) seen.add(bd.pose.frameLegs); if(bd.pose.frameL || bd.pose.frameR) seen.add(bd.pose.frameL || bd.pose.frameR); }
-      if(performance.now() - t0 < 2200) requestAnimationFrame(tick); else res({ seen: [...seen], sameSvg: document.querySelector('.quiz-dr svg') === svg0 || !!document.querySelector('.quiz-dr svg'), svgCount: document.querySelectorAll('svg.db').length }); }; requestAnimationFrame(tick); }));
-  ok(right.seen.includes('crouch') && right.seen.includes('thumbs-up') && right.svgCount === 1, 'a right answer: the bounce on the drawn crouch with the thumbs-up, one body only', right);
-  await P.waitForTimeout(2500);
+    const t0 = performance.now(); const tick = () => { const bd = drQuizMount && drQuizMount.body; if(bd){ if(bd.pose.frameLegs) seen.add(bd.pose.frameLegs); if(bd.pose.frameL || bd.pose.frameR) seen.add(bd.pose.frameL || bd.pose.frameR); } if(drQuizMount && drQuizMount.clip && drQuizMount.host.querySelector('canvas.db-clip')) seen.add('clip');
+      if(performance.now() - t0 < 2200) requestAnimationFrame(tick); else res({ seen: [...seen], sameSvg: document.querySelector('.quiz-dr svg') === svg0 || !!document.querySelector('.quiz-dr svg'), svgCount: document.querySelectorAll('svg.db').length, canvases: document.querySelectorAll('canvas.db-clip').length }); }; requestAnimationFrame(tick); }));
+  ok((right.seen.includes('clip') || (right.seen.includes('crouch') && right.seen.includes('thumbs-up'))) && right.svgCount === 1 && right.canvases <= 1, 'a right answer: the filmed thumbs-up in the card (or the rig\'s bounce on the drawn crouch), one body only', right);
+  await P.waitForTimeout(5500);   // the filmed thumbs-up is 6 s
   await P.evaluate(() => { rateConfidence('sure'); nextQuestion(); }); await P.waitForTimeout(900);
   const wrong = await P.evaluate(() => new Promise(res => { const q = quizQuestions[quizIndex]; const i = (q.a + 1) % q.o.length; const faces = new Set(); answerQuiz(i);
-    const t0 = performance.now(); const tick = () => { if(drQuizMount) faces.add(drQuizMount.body.pose.face); if(performance.now() - t0 < 1500) requestAnimationFrame(tick); else res([...faces]); }; requestAnimationFrame(tick); }));
-  ok(wrong.includes('worried'), 'a wrong answer: the wince (the worried face)', wrong);
-  await P.waitForTimeout(2200);
+    const t0 = performance.now(); const tick = () => { if(drQuizMount){ faces.add(drQuizMount.body.pose.face); if(drQuizMount.clip && drQuizMount.host.querySelector('canvas.db-clip')) faces.add('clip'); } if(performance.now() - t0 < 1500) requestAnimationFrame(tick); else res([...faces]); }; requestAnimationFrame(tick); }));
+  ok(wrong.includes('clip') || wrong.includes('worried'), 'a wrong answer: the filmed wince in the card (or the rig\'s, the worried face)', wrong);
+  await P.waitForTimeout(5500);   // the filmed wince is 6 s
   await P.evaluate(() => exitQuiz()); await P.waitForTimeout(800);
   const gone = await P.evaluate(() => ({ hosts: document.querySelectorAll('.quiz-dr').length, mount: !!drQuizMount, dock: document.body.classList.contains('dock-has-smiley') }));
   ok(gone.hosts === 0 && !gone.mount, 'leaving the quiz takes his body down with it', gone);
