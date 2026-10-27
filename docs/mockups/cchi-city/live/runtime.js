@@ -3,7 +3,7 @@
 // APP (campus3d/index.html, opened full screen from the CoreCHI Practice card): your own progress arrives by
 // message from the app, Practise asks the app to start that exam area, the X and Escape ask it to close.
 const APP = !!window.__APP;
-const $ = id => document.getElementById(id) || { set textContent(v){}, classList:{ toggle(){}, add(){}, remove(){} }, style:{}, set onclick(f){}, set oninput(f){}, value:0, hidden:true };
+const $ = id => document.getElementById(id) || { set textContent(v){}, classList:{ toggle(){}, add(){}, remove(){} }, style:{}, setAttribute(){}, set onclick(f){}, set oninput(f){}, value:0, hidden:true };
 const tell = m => { try { parent.postMessage(Object.assign({ ih:'campus3d-' + m.t }, m), location.origin); } catch (e) {} };
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NAMES = { e:['Ethics','George Link Jr. Pavilion',9], t:['Terminology','the brick tower',25], s:['US Systems','Jurist Research Center',9], n:['Encounter','John Theurer Cancer Center',45], c:['Culture','Medical Plaza',12] };
@@ -61,29 +61,50 @@ function build(){ for (const k in BOX){ const b = BOX[k], f = levelOf(k);
     const floors = Math.max(1, Math.round((b.roof - 0.3) / FL)), done = Math.max(1, Math.round(f * floors)), cut = f >= 1 ? 999 : 0.3 + done * FL;
     CUT[k].value = cut; CAP[k].visible = f < 1; CAP[k].position.y = Math.min(cut, 900) - 0.02; } shadowsDirty(); badges(); }
 
-// ---- the time of day: four looks, blended ----
+// ---- the time of day: the real sun over HUMC for today's date at that hour ----
+// Where the sun stands (sunSky: the usual low-precision solar formulas, within about a degree) at the main entrance,
+// 40.885 N 74.057 W. The drive heads 23 deg south of east from Prospect Ave and is the scene's -z (practice-dashboard.md),
+// so a compass bearing turns into the scene by (bearing - DRIVE): north is (-0.92, 0, 0.39). The sun rises behind
+// the campus, stands south at noon (right of the front view) and sets behind you. The looks follow its height, not
+// the clock, so sunset is golden in October at six and in June at half past eight.
+const RAD = Math.PI/180, HUMC = [40.8853, -74.0565], DRIVE = 113;
+function sunSky(t){ const d = t/864e5 - 10957.5, Mn = RAD*(357.5291 + 0.98560028*d), e = RAD*23.4397;
+  const L = Mn + RAD*(1.9148*Math.sin(Mn) + 0.02*Math.sin(2*Mn) + 0.0003*Math.sin(3*Mn)) + RAD*102.9372 + Math.PI;
+  const dec = Math.asin(Math.sin(e)*Math.sin(L)), ra = Math.atan2(Math.sin(L)*Math.cos(e), Math.cos(L)), p = HUMC[0]*RAD;
+  const H = RAD*(280.16 + 360.9856235*d) + HUMC[1]*RAD - ra;
+  const alt = Math.asin(Math.sin(p)*Math.sin(dec) + Math.cos(p)*Math.cos(dec)*Math.cos(H)), az = Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(p) - Math.tan(dec)*Math.cos(p));
+  return { alt: alt/RAD, bearing: (az/RAD + 540) % 360 }; }
+const toScene = (bearing, alt) => { const th = (bearing - DRIVE)*RAD, c = Math.cos(alt*RAD); return new THREE.Vector3(Math.sin(th)*c, Math.sin(alt*RAD), -Math.cos(th)*c); };
+// today at h o'clock on the phone's clock
+const atHour = h => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime() + h*3600e3; };
 const HEMI = scene.children.find(c => c.isHemisphereLight);
-const KEYS = [
-  { h:5,  dir:[0.3,0.12,0.9],  sun:0x7f95ff, si:0.5, sky:0x5a6ad0, ground:0x2a2a40, hi:0.3,  rim:0.4, bg:['#0b1030','#17204a','#2a2f66'], night:1 },
-  { h:7.5,dir:[0.85,0.3,0.4],  sun:0xffd2a8, si:2.3, sky:0xbcd0f2, ground:0x7d6a58, hi:0.85, rim:0.6, bg:['#6f8fd8','#f2b8a0','#ffd9b0'], night:0 },
-  { h:12, dir:[-0.25,0.95,0.3],sun:0xfff6e8, si:2.9, sky:0xcfe3ff, ground:0x8a7a60, hi:1.1,  rim:0.3, bg:['#6fa8ea','#a9d1f7','#e9f3ff'], night:0 },
-  { h:18.5,dir:[-0.8,0.33,0.22],sun:0xffa458,si:3.2, sky:0xb6a6e8, ground:0x7d5a58, hi:0.75, rim:1.1, bg:['#3a2b62','#8a4570','#e88f72'], night:0 },
-  { h:20.5,dir:[-0.7,0.2,0.3], sun:0xff7a5a, si:1.2, sky:0x6a5ab0, ground:0x3a2a40, hi:0.45, rim:0.8, bg:['#1d1844','#4b2a63','#a0507a'], night:0.6 },
-  { h:22.5,dir:[0.3,0.12,0.9], sun:0x7f95ff, si:0.55,sky:0x5a6ad0, ground:0x2a2a40, hi:0.32, rim:0.5, bg:['#0b1030','#17204a','#2a2f66'], night:1 },
-  { h:29, dir:[0.3,0.12,0.9],  sun:0x7f95ff, si:0.5, sky:0x5a6ad0, ground:0x2a2a40, hi:0.3,  rim:0.4, bg:['#0b1030','#17204a','#2a2f66'], night:1 } ];
+const NIGHT = { sun:0x7f95ff, si:0.5, sky:0x5a6ad0, ground:0x2a2a40, hi:0.3,  rim:0.4, bg:['#0b1030','#17204a','#2a2f66'], night:1 },
+  DAWN = { sun:0xff9a8a, si:1.0, sky:0x7a84c8, ground:0x3a3448, hi:0.45, rim:0.6, bg:['#27306a','#8c7aac','#f2b49c'], night:0.6 },
+  MORN = { sun:0xffd2a8, si:2.3, sky:0xbcd0f2, ground:0x7d6a58, hi:0.85, rim:0.6, bg:['#6f8fd8','#f2b8a0','#ffd9b0'], night:0 },
+  NOON = { sun:0xfff6e8, si:2.9, sky:0xcfe3ff, ground:0x8a7a60, hi:1.1,  rim:0.3, bg:['#6fa8ea','#a9d1f7','#e9f3ff'], night:0 },
+  GOLD = { sun:0xffa458, si:3.2, sky:0xb6a6e8, ground:0x7d5a58, hi:0.75, rim:1.1, bg:['#3a2b62','#8a4570','#e88f72'], night:0 },
+  DUSK = { sun:0xff7a5a, si:1.2, sky:0x6a5ab0, ground:0x3a2a40, hi:0.45, rim:0.8, bg:['#1d1844','#4b2a63','#a0507a'], night:0.6 };
+// the looks by the sun's height in degrees: dawn and morning before noon, golden hour and dusk after
+const RISE = [[-12, NIGHT], [-4, DAWN], [5, MORN], [30, NOON]], SET = [[-12, NIGHT], [-4, DUSK], [5, GOLD], [30, NOON]];
+const MOONLIGHT = new THREE.Vector3(0.3, 0.12, 0.9).normalize();
 const ca = new THREE.Color(), cb = new THREE.Color(), mix = (a, b, f) => '#' + ca.set(a).lerp(cb.set(b), f).getHexString();
-let litNow = null;
-function setHour(h){ const hh = h < 5 ? h + 24 : h; let i = 0; while (i < KEYS.length - 2 && KEYS[i+1].h <= hh) i++;
-  const A = KEYS[i], B = KEYS[i+1], f = Math.max(0, Math.min(1, (hh - A.h) / (B.h - A.h)));
-  const d = new THREE.Vector3(...A.dir).lerp(new THREE.Vector3(...B.dir), f).normalize();
+function lookAt(sky){ const K = sky.bearing < 180 ? RISE : SET; let i = 0; while (i < K.length - 2 && K[i+1][0] <= sky.alt) i++;
+  return [K[i][1], K[i+1][1], Math.max(0, Math.min(1, (sky.alt - K[i][0]) / (K[i+1][0] - K[i][0])))]; }
+let litNow = null, SKY = sunSky(Date.now());
+function setHour(h){ hourNow = ((h % 24) + 24) % 24; SKY = sunSky(atHour(hourNow)); const [A, B, f] = lookAt(SKY), evening = SKY.bearing >= 180;
+  // the light comes from the sun (never lower than 6 deg, or the shadows run off the board); after dusk, moonlight from the front
+  const d = toScene(SKY.bearing, Math.max(6, SKY.alt)).lerp(MOONLIGHT, Math.max(0, Math.min(1, (2 - SKY.alt) / 8))).normalize();
   moon.position.copy(d).multiplyScalar(44); moon.color.set(A.sun).lerp(cb.set(B.sun), f); moon.intensity = A.si + (B.si - A.si)*f;
   HEMI.color.set(A.sky).lerp(cb.set(B.sky), f); HEMI.groundColor.set(A.ground).lerp(cb.set(B.ground), f); HEMI.intensity = A.hi + (B.hi - A.hi)*f; rim.intensity = A.rim + (B.rim - A.rim)*f;
   const n = A.night + (B.night - A.night)*f;
   document.documentElement.style.setProperty('--sky', `linear-gradient(${mix(A.bg[0],B.bg[0],f)}, ${mix(A.bg[1],B.bg[1],f)} 55%, ${mix(A.bg[2],B.bg[2],f)})`);
-  GLOWS.forEach(g => { g.material.opacity = Math.min(1, n*1.4 + (hh > 17 && hh < 21 ? 0.6 : 0)); g.visible = g.material.opacity > 0.02; });
+  GLOWS.forEach(g => { g.material.opacity = Math.min(1, n*1.4 + (evening && SKY.alt < 10 ? 0.6 : 0)); g.visible = g.material.opacity > 0.02; });
   const lit = n > 0.3; if (lit !== litNow){ litNow = lit; for (const k in LITM) LITM[k].forEach(m => m.material = lit ? m.userData.litM : m.userData.dark); }
-  shadowsDirty(); hourNow = h;
-  const hr = Math.floor(h) % 24, mi = Math.round((h % 1) * 60) % 60; if (!APP) $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
+  shadowsDirty();
+  const hr = Math.floor(hourNow), mi = Math.floor((hourNow % 1) * 60 + 1e-6); $('hourOut').textContent = `${(hr % 12) || 12}:${String(mi).padStart(2,'0')} ${hr < 12 ? 'am' : 'pm'}`; }
+// the slider's track: today's sky, hour by hour, so you can see where the sun is up
+function dayTrack(){ const stops = []; for (let h = 0; h <= 24; h += 1){ const [A, B, f] = lookAt(sunSky(atHour(h))); stops.push(`${mix(A.bg[1], B.bg[1], f)} ${(h/24*100).toFixed(1)}%`); }
+  $('hour').style.backgroundImage = `linear-gradient(90deg, ${stops.join(', ')})`; }
 
 // ---- the living things ----
 [CAR_IN, CAR_OUT, AMB, HELI, BIRDS, CAR_IN2, ...STREET.map(o => o.g), ...WALKS.map(w => w.g), ...SITTERS.map(o => o.g)].forEach(g => g.visible = true);
@@ -119,13 +140,19 @@ function petalsAt(t){ for (let i = 0; i < PN; i++){ const [x, z, s, ph, a] = PD[
   petals.geometry.attributes.position.needsUpdate = true; }
 petalsAt(0);
 
-// ---- the sun: a big smiling face in the sky behind the campus, on your clock; at night a sleepy moon ----
+// ---- the sun: a big smiling face in the sky where the real sun is; at night a sleepy moon ----
+// The sky behind the board is painted, not 3D (the camera looks down on the campus, its horizon is above the
+// screen), so the face goes where the sun is across your view: straight ahead in the middle, off the side when it's
+// to your side (75 deg reaches the edge), out of sight behind you; higher on the screen the higher the sun.
 const SUN = $('sun'); let hourNow = 18.5;
-function sunAt(){ const h = hourNow, day = h >= 6 && h < 19.75, e = day ? Math.sin(Math.PI * (h - 6) / 13.75) : 0.75;
-  SUN.classList.toggle('is-night', !day);
-  const camAz = Math.atan2(cam.position.x - controls.target.x, cam.position.z - controls.target.z), sunAz = day ? -1.2 + (h - 6) / 13.75 * 2.4 : 0.6;
-  const rel = Math.atan2(Math.sin(sunAz - camAz + Math.PI), Math.cos(sunAz - camAz + Math.PI)), W = innerWidth, H = innerHeight;
-  const x = W*0.5 + Math.sin(rel)*W*0.42, y = H*(0.36 - e*0.22) + Math.cos(controls.getPolarAngle())*H*0.05, s = 0.8 + 0.25*e;
+const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
+function sunAt(){ const day = SKY.alt > -1; SUN.classList.toggle('is-night', !day);
+  // the moon isn't worked out: it stays a little left of where you look, up in the sky
+  const h = day ? toScene(SKY.bearing, 0) : null;
+  fwd.subVectors(controls.target, cam.position).setY(0).normalize(); rgt.crossVectors(fwd, up);
+  const rel = h ? Math.atan2(h.dot(rgt), h.dot(fwd)) : -0.3, W = innerWidth, H = innerHeight;
+  const e = day ? Math.max(0, Math.min(1, SKY.alt / 55)) : 0.6, x = W*0.5 + rel / (75*RAD) * W*0.5;
+  const y = H*(0.36 - e*0.22) + Math.max(0, -SKY.alt)*H*0.03 + Math.cos(controls.getPolarAngle())*H*0.05, s = 0.8 + 0.25*e;
   SUN.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) scale(${s.toFixed(3)})`; }
 function giggle(){ SUN.classList.remove('giggle'); void SUN.offsetWidth; SUN.classList.add('giggle'); }
 
@@ -176,9 +203,9 @@ function badges(){ const r = renderer.domElement.getBoundingClientRect(), at = [
 // ---- controls in the sheet ----
 const nowH = () => { const d = new Date(); return d.getHours() + d.getMinutes()/60; };
 let follow = true;
-$('hour').value = nowH(); setHour(nowH());
-$('hour').oninput = e => { follow = false; $('now').classList.remove('on'); setHour(+e.target.value); };
-$('now').onclick = () => { follow = true; $('now').classList.add('on'); $('hour').value = nowH(); setHour(nowH()); };
+$('hour').value = nowH(); setHour(nowH()); dayTrack();
+$('hour').oninput = e => { follow = false; $('now').classList.remove('on'); $('now').setAttribute('aria-pressed', 'false'); setHour(+e.target.value); };
+$('now').onclick = () => { follow = true; $('now').classList.add('on'); $('now').setAttribute('aria-pressed', 'true'); $('hour').value = nowH(); setHour(nowH()); };
 const repick = () => { if (picked){ const k = picked; picked = null; pick(k); } };
 if (!APP){ $('prog').oninput = e => { setProgress(+e.target.value/100); repick(); }; setProgress(0.6); }
 else {
@@ -207,7 +234,7 @@ function frame(now){ const dt = now - last; last = now; frames++; acc += dt; wor
   const t = (now - t0)/1000; if (!REDUCE) life(t);
   for (const k in BOX){ const L = LIFT[k], goal = k === picked ? 1.6 : 0; L.v += (goal - L.y)*0.12; L.v *= 0.72; L.y += L.v; if (Math.abs(L.y - BG[k].position.y) > 0.002) shadowsDirty(); BG[k].position.y = L.y; }
   if (ring.visible) ring.material.opacity = 0.6 + Math.sin(t*4)*0.3;
-  if (follow && frames === 1) setHour(nowH());
+  if (follow && frames === 1){ setHour(nowH()); $('hour').value = nowH(); }
   controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!document.hidden) requestAnimationFrame(frame); }
 life(0); if (!APP) $("draws").textContent = `${draws} draws`;
 document.body.classList.add('ready');

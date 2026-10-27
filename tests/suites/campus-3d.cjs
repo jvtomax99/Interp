@@ -60,6 +60,26 @@ const MASTERY = () => { window.domainMastery = () => { const out = {};
   const back = await fr.evaluate(() => ({ pressed: document.getElementById('finished').getAttribute('aria-pressed'), e: document.querySelector('.badge[data-k="e"]').textContent.trim() }));
   ok(back.pressed === 'false' && back.e === 'Ethics 70%', 'and again: back to your own progress', back);
 
+  // The time of day (Jose, 2026-10-27): a slider over today's sky, the real sun over HUMC. Noon's sun stands south,
+  // right of the front view (the drive runs 23 deg south of east, so you look south-east); at 8 am it's east, left of it;
+  // late evening is night, the moon out; Now follows the phone's clock again.
+  const tap = await fr.evaluate(() => ['hour', 'now'].map(id => { const e = document.getElementById(id), r = e.getBoundingClientRect();
+    return { id, h: Math.round(r.height), mine: document.elementFromPoint(r.left + r.width/2, r.top + r.height/2) === e }; }));
+  ok(tap.every(t => t.h >= 44 && t.mine), 'the time slider and Now: 44 px, each takes its own tap', tap);
+  const at = h => fr.evaluate(h => { const s = document.getElementById('hour'); s.value = h; s.dispatchEvent(new Event('input', { bubbles: true }));
+    return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => { const sun = document.getElementById('sun'), m = new DOMMatrix(getComputedStyle(sun).transform);
+      r({ out: document.getElementById('hourOut').textContent, now: document.getElementById('now').classList.contains('on'), night: sun.classList.contains('is-night'),
+        x: Math.round(m.m41 - innerWidth/2), sky: getComputedStyle(document.documentElement).getPropertyValue('--sky') }); }))); }, h);
+  const noon = await at(12.5), morn = await at(8), late = await at(23);
+  ok(noon.out === '12:30 pm' && !noon.now && !noon.night && noon.x > 20, 'slide to 12:30 pm: the sun is up, right of the middle (south)', noon);
+  ok(morn.out === '8:00 am' && !morn.night && morn.x < -20, '8:00 am: the sun is left of the middle (east)', morn);
+  ok(late.out === '11:00 pm' && late.night && /#0b1030/.test(late.sky), '11:00 pm: night sky, the moon out', late);
+  await at(12.5); await page.screenshot({ path: O + 'iphone-noon.png' });
+  await fr.click('#now'); await wait(300);
+  const now = await fr.evaluate(() => { const d = new Date(), h = d.getHours(); return { on: document.getElementById('now').classList.contains('on'), out: document.getElementById('hourOut').textContent,
+    want: `${(h % 12) || 12}:${String(d.getMinutes()).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'}` }; });
+  ok(now.on && now.out === now.want, 'Now: back on your own clock', now);
+
   // A building's card and its Practise: the 3D closes, that exam area starts.
   await fr.click('.badge[data-k="e"]'); await wait(700);
   const card = await fr.evaluate(() => ({ shown: !document.getElementById('card').hidden, k: document.getElementById('cardK').textContent, f: document.getElementById('cardF').textContent }));

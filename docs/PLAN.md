@@ -115,6 +115,10 @@ under way, then what waits on Jose, then small leftovers.
       picture, its **3D** button opens the campus full screen (`campus3d/`):
       drag to turn, pinch to zoom, tap a building, "See it finished". Still
       waiting on his frame-rate reading of it on his iPhone.
+   **2026-10-27 (Jose):** a time-of-day slider in the 3D view, and the sun
+      where the real one is over HUMC for that date and hour (it lit the
+      campus from the north before). `claude/campus-time`. Frame-rate
+      reading still owed.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the

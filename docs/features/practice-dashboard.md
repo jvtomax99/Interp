@@ -144,8 +144,23 @@ pipeline in `LITE` (~440k triangles), merged per building and material,
 `campus3d/three/` (copied by the same script). In 3D progress is height, not
 paint: a building stands at its finished floors with its roof on (no
 construction); "See it finished" (`#finished`, `FINISHED`) shows them all done,
-the badges lose their %. The sky and sun follow the phone's clock (the test
-page's hour slider is not in the app). Drag turns (OrbitControls, no pan,
+the badges lose their %. **The time of day** (Jose, 2026-10-27: "move the time of day, and the sun in
+the right place"): the sun is the real one over HUMC (`sunSky` in `runtime.js`: the usual low-precision
+solar formulas, within about a degree; checked against 2026-10-27's 7:25 sunrise, 5:56 sunset, 36° at noon,
+and June's 72.6°) for today's date at the chosen hour. A compass bearing turns into the scene by
+`bearing - DRIVE` (113°, the drive's heading), so north is (-0.92, 0, 0.39): from the front view you look
+south-east, the sun rises ahead left behind the campus, stands south (right) at noon and sets behind you.
+The light comes from it (never lower than 6°, or the shadows run off the board; after dusk it turns to the
+old moonlight from the front); the looks (night, dawn or dusk, morning or golden hour, noon) follow its
+height, not the clock, so sunset is golden at six in October and half past eight in June. Before this the
+light came from fixed angles (the golden hour from the north, where the sun never is here) at summer hours.
+The face in the sky goes where the sun is across your view (the sky behind the board is painted; the
+camera's horizon is above the screen): in the middle when straight ahead, at the edge at 75° to the side,
+out of sight behind you. The moon isn't worked out (it sits a little left, up). The bottom panel's first
+row: the clock, a slider whose track is today's sky hour by hour (`dayTrack`), and **Now** (gold while it
+follows the phone's clock; sliding lets go of it). The card sits above the panel (136 px). The card picture
+(`city/`) keeps its own fixed daylight from the north-west; changing it means re-rendering the pictures.
+Drag turns (OrbitControls, no pan,
 polar 0.3-1.32, distance 45-190), pinch zooms, the round arrow puts the front
 view back, a tap on a building lifts it with its card. Shadows redraw only on
 change; sharpness starts at 1.5x and steps down to 1x while under 42 fps; a
