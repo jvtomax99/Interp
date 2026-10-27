@@ -20,7 +20,9 @@ for i, f in enumerate(fs):
     lab, n = ndi.label(m); sz = ndi.sum(m, lab, range(1, n + 1))
     if n > 1:
         strays = sorted(sz)[:-1]
-        if max(strays) > 12: note(i, 'stray', f'{int(max(strays))} px')
+        if max(strays) > 12:
+            k = int(np.argsort(sz)[-2]) + 1; ys, xs = np.where(lab == k)
+            note(i, 'stray', f'{int(max(strays))} px at y{int(ys.mean())} x{int(xs.mean())}')
     holes = ndi.binary_fill_holes(m) & ~m
     lab, n = ndi.label(holes); hs = ndi.sum(holes, lab, range(1, n + 1)) if n else []
     if n and max(hs) > 6: note(i, 'hole', f'{int(max(hs))} px')
