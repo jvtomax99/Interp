@@ -48,7 +48,23 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-26, fifth chat): read this first
+## Where it stands (2026-10-27, sixth chat): read this first
+
+Jose: "I want it fluid and natural." The rig swaps drawings and cannot
+be; filmed clips can. Sora animates his master picture from a prompt
+(`docs/art/dr-smiley-clips/prompts.md`); `layers/keyclip.py` cuts each
+frame out of the grey wall at full size; `layers/checkclip.py` checks
+every frame (strays, holes, cuts, rims, jumps); `features/smiley-clips.js`
+plays a clip over the rig (`DR_CLIPS`; a canvas, a 150 ms fade each end).
+In the app on this branch: the wave (Home's hello), think, wince and the
+thumbs-up (the quiz's right answer), all clean. The cheer is not: with
+both arms up, the raised sleeves' shadowed sides are the wall's exact grey
+and keyed out torn; the prompt for it on a green wall is in prompts.md,
+waiting for Jose to run it. The rig keeps the small life and every move
+without a clip. 16 MB of frames, fetched once, not precached.
+Jose watches everything on his phone; send a video after each step.
+
+## Where it stood (2026-10-26, fifth chat)
 
 Jose watched a preview and found the moves awkward. This chat reworked them
 frame by frame on navy (`tests/tools/body-clip.cjs`, `BG=is-navy`); every
