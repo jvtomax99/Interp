@@ -101,3 +101,33 @@ Animate this exact picture. The first frame is this picture, unchanged: both arm
 | Think (while Ask the Hub works) | `think.mp4` | He stands still for half a second, then raises his right hand (on the viewer's left) to his chin, the index finger resting on it, the other arm folding across his stomach under the elbow, his eyes looking up and away to one side, his head tilting a little. He holds the thought, taps his chin twice with the finger, then his eyes come back to the camera with a small "aha" lift of the brows and a smile, and both arms return to his sides. |
 | Wince (a wrong answer) | `wince.mp4` | He stands still for half a second, then flinches: both shoulders rise, both arms pull in with the hands curling together in front of his stomach, his head ducks a little to one side and his face squeezes into a sympathetic wince with the eyes shut and the mouth pulled to the side. He holds it for a moment, then relaxes: the shoulders drop, the face softens into a warm, caring smile, and both arms return to his sides. |
 | Thumbs-up (a right answer) | `thumbs.mp4` | He stands still for half a second, then does a small happy hop, both feet leaving the floor together and landing softly, as his right hand (on the viewer's left) comes up to chest height in a fist with the thumb up, pushed toward the camera, his smile widening with a proud little nod. He holds the thumbs-up for a moment with a second tiny bounce, then the arm lowers back to his side. |
+
+## The four came back (2026-10-27, Sora): all in
+
+Cheer and think 7 s (210 frames), wince and thumbs-up 6 s (180), every one
+starting and ending within 5 of the master, arms at his sides. Keyed at
+full size with the corrected cutter and checked frame by frame
+(`layers/checkclip.py`): think, wince and thumbs-up clean; the cheer's
+frames 97 to 101 flag a "hole" that is the real gap between his raised
+fists and his head. Think, wince and thumbs-up are in the app (`think`, `wince`, `bounce`
+in `features/smiley-clips.js`). **The cheer is not:** with both arms up
+against the wall, the raised sleeves' shadowed sides are the wall's exact
+grey (3 to 4 of 255 apart, the wall's own spread is 1.4), and no cutter
+can tell them apart by colour: the sleeves came out torn. The fix is the
+film trade's: a wall of a colour he has none of. The cheer is re-run on
+a plain bright green wall (below); if that keys clean, every other move
+is re-run the same way when it is next touched, so the five match.
+
+## The cheer, on a green wall
+
+Same tool and settings, `body-master.png` as the start image:
+
+```
+Animate this exact picture of the character, but place him in front of a plain, flat, bright green screen background (chroma key green, #00FF00) instead of the grey one: the whole background is one even bright green, with no shadows, no gradient and nothing else in it, and the green never touches or tints him. The first frame shows him exactly as in this picture: both arms hanging straight down at his sides, hands open and relaxed beside his thighs, a closed gentle smile. The camera is locked: no zoom, no pan, no drift, no cut. His body stays in the same place and the same size. His face, hair, coat, scrubs and shoes stay exactly as drawn. 3D cartoon style, same lighting throughout. No text, no captions.
+
+He stands still for half a second, then crouches slightly, pulling both fists back by his hips, and springs up into a small jump with both fists punched up above his head in a V, his mouth opening in a big happy laugh and his eyes bright. He lands softly with a little bounce, fists still up, pumps them once more, then lowers both arms back to his sides as his laugh settles into the smile. At the end he returns to exactly the starting pose, arms hanging at his sides, the closed gentle smile, and stands still for the last half second.
+```
+
+`keyclip.py` takes the wall's colour from the frame's corner, so a green
+wall keys with no change; its "wall-coloured pool" rules then simply
+never fire on him.

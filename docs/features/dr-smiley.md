@@ -692,7 +692,9 @@ cuts each frame out of the grey wall (the floor and wall shadows dropped,
 the hair's painted rim trimmed, stray patches removed) into
 `drsmiley/clips/<move>/0000.webp` ... at 320 x 440, the master's grid.
 `features/smiley-clips.js` plays them: `DR_CLIPS` (greet: the wave, 150
-frames at 30 fps, 3.8 MB), `drClipPreload` (every mount fetches every clip
+frames; think 210; wince 180; bounce, the hop with the
+thumbs-up, 180; all at 30 fps, 20 MB in all, each fetched once and kept
+by the service worker), `drClipPreload` (every mount fetches every clip
 once mounted; the frames are assets to `sw.js`, stale-while-revalidate,
 not precached, so the first launch after a deploy may wave on the rig),
 `drClipPlay(mount, name)` (a canvas over the SVG, `.db-clip` in `app.css`;
@@ -703,7 +705,18 @@ stopped and at rest underneath, so the hand-off is rest to rest). A
 mount's `act` plays the clip when there is one and it can (not Still, not
 reduced motion, loaded), the rig otherwise; while a clip plays nothing
 else is asked of him and the idle waits. The wave is always his right hand
-(the clip's); the rig's picked a side. The other big moves (cheer, think,
-wince, thumbs-up) are to be filmed the same way; the rig keeps the small
-life and every move without a clip. Checks: `smiley-body-app.cjs` (the
+(the clip's); the rig's picked a side. The rig keeps the small life (breathing,
+blinks, glances, the nod, the shrug, the clipboard) and the held states;
+the filmed moves replace its own wave, think, wince and bounce (the
+cheer waits for a clip on a green wall: with both arms up, the raised
+sleeves' shadowed sides are the wall's exact grey and keyed out torn, a
+limit of colour keying, not of the cutter). `keyclip.py` had to learn two things from the wave (2026-10-27,
+Jose: "make sure you don't make a mistake cropping him out"): the coat's
+shadowed front edge is nearly the wall's grey and read as a gap when the
+frames were worked at half size (full size now, and an enclosed pool is
+him unless flat, the wall's own colour and wide), and along his legs the
+matte's alpha was too generous, a light rim (the edge's alpha now read
+from where a pixel's colour sits between the wall and the colour inside
+him). `checkclip.py` flags every frame with a stray patch, a hole, a cut
+at the frame's edge, a rim or a jump; the four clips in use pass it. Checks: `smiley-body-app.cjs` (the
 filmed hello, Still), `smiley-gestures.cjs` (Home's greeting).

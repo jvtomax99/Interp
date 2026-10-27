@@ -18,8 +18,13 @@
 'use strict';
 
 const DR_CLIPS = {
-  // 150 frames at 30 fps, 320 x 440 (the master's grid scaled), from Jose's Sora wave (2026-10-27)
-  greet: { dir: './drsmiley/clips/wave/', n: 150, fps: 30, w: 320, h: 440 },
+  // 30 fps, 320 x 440 (the master's grid scaled), from Jose's Sora clips (2026-10-27), each
+  // starting and ending in the master's pose; keyed by keyclip.py, every frame checked by checkclip.py
+  greet: { dir: './drsmiley/clips/wave/', n: 150, fps: 30, w: 320, h: 440 },     // the wave, 5 s
+  // cheer: the raised sleeves' shadowed sides are the wall's exact grey and key out torn (2026-10-27); waits for a clip on a green wall
+  think: { dir: './drsmiley/clips/think/', n: 210, fps: 30, w: 320, h: 440 },    // the finger on the chin, the aha, 7 s
+  wince: { dir: './drsmiley/clips/wince/', n: 180, fps: 30, w: 320, h: 440 },    // the flinch and the caring smile, 6 s
+  bounce: { dir: './drsmiley/clips/thumbs/', n: 180, fps: 30, w: 320, h: 440 },  // the hop with the thumbs-up (a right answer), 6 s
 };
 const DR_CLIP_FADE = 150;   // ms: the clip's first frame over the rig's rest, and back (their small likeness difference hidden)
 
