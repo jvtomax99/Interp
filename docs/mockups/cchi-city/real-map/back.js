@@ -165,7 +165,7 @@ function backTree(x, z, s, kind){ if (kind === 'cone' || kind === 'blossom') ret
   const r = rngAt(x, z), mats = kind === 'red' ? BACK_RED : BACK_LEAF, h = 1.1*s;
   limb(x, 0.28, z, x + (r() - 0.5)*0.2, 0.3 + h, z + (r() - 0.5)*0.2, 0.13*s, 0.08*s, BARK);
   for (let k = 0; k < 6; k++){ const a = r()*Math.PI*2, d = (k ? 0.45 + r()*0.25 : 0)*s; add(new THREE.IcosahedronGeometry((k ? 0.42 + r()*0.18 : 0.7)*s, 1), mats[(k + Math.floor(r()*2)) % mats.length], x + Math.cos(a)*d, 0.3 + h + 0.35*s + (k ? r()*0.35*s : 0), z + Math.sin(a)*d); } }
-for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && Math.hypot(x - 14.2, z + 44.8) > 3.4) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
+for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 8.4 && x < 12.8 && z > -46.6 && z < -40.9) && Math.hypot(x - 14.2, z + 44.8) > 3.4) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
 // ==================== the corner of Atlantic and 2nd Street (Jose's photos, 2026-10-27) ====================
 // Seen from his window at John Theurer: Don Imus - WFAN Pediatric Center on the corner, tan brick with ribbon windows
 // and its name across the curved corner; the red-brick ED with white bands beside it; behind them the Helena Theurer
@@ -217,13 +217,13 @@ function htpFL(){ return FL*1.65; }   // var: the buildings are built before thi
 // platform and 9 of glass (scene.json floors 13) the glass rises over the bridge as in his window photo, measured against Imus
 function htpMats(){ if (TERRA_M) return; const t = terraTex(); t.repeat.set(1/3.2, 1/(3*htpFL())); TERRA_M = new THREE.MeshStandardMaterial({ map:t, roughness:0.75, envMapIntensity:0.15 });
   const c = curtainTex(); c.repeat.set(1/1.4, 1/htpFL()); c.offset.set(0, -((1/htpFL()) % 1)); CURTAIN_M = new THREE.MeshStandardMaterial({ map:c, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }); }
-function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rectPts(-2.6, -57.2, 1.4, -53.5), HTP_BRIDGE = rectPts(-3.0, -53.5, 4.0, -46.3), P4 = 4*FL, ty = y0 + P4 + 0.2, th = h - P4 - 0.2, FAS = M(0xd3d6db, { r:0.5 });
+function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rectPts(9.0, -46.0, 12.2, -41.5), HTP_BRIDGE = rectPts(-3.0, -53.5, 4.0, -46.3), P4 = 4*FL, ty = y0 + P4 + 0.2, th = h - P4 - 0.2, FAS = M(0xd3d6db, { r:0.5 });
   wallsOf(b.pts, y0, P4, TERRA_M); slab(b.pts, y0 + P4, 0.2, M(0xd8d2c8), [], true);
   const T = htpTowerPts(); wallsOf(T, ty, th, CURTAIN_M); slab(T, ty + th, 0.25, M(0xc9ccd2), [], true);
   slab(T, ty - 0.08, 0.08, M(0x2f3442, { r:0.8 }));   // its dark underside where it reaches out past the platform
   for (const x of [1.5, 4.6, 7.7]) add(new THREE.CylinderGeometry(0.16, 0.16, ty - 0.3, 12), M(0xd3d6db, { r:0.5 }), x, 0.3 + (ty - 0.3)/2, -45.8);
   for (const [x, z] of [[2.6, -36.0], [5.6, -41.0]]) box(1.6, 0.5, 1.2, M(0x9a97a6), x, ty + th + 0.5, z, 0.05);
-  // the slim tower stands on a terracotta block at the bridge's far end (Google 3D: the HMH mark over terracotta)
+  // the slim tower: on Imus's side of the street, against the curved tower's far side (Jose, 2026-10-28), on terracotta
   wallsOf(HTP_SLIM, y0, ty - y0, TERRA_M); slab(HTP_SLIM, ty - 0.2, 0.2, M(0xd8d2c8), [], true);
   wallsOf(HTP_SLIM, ty, th - 0.9, CURTAIN_M); slab(HTP_SLIM, ty + th - 0.9, 0.22, M(0xc9ccd2), [], true);
   // the bridge over 2nd Street: grey fascia, terracotta above, its underside lit, columns on the sidewalks
@@ -234,7 +234,7 @@ function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rect
 pend.push(() => { CUR = 't'; const FL = htpFL(), T = htpTowerPts(), ty = 0.3 + 4*FL + 0.2, th = 13*FL - 4*FL - 0.2;
   letterAlong([T[3], ...T.slice(4), T[0]], ty + th - FL*0.45, 0.62, textCanvas(['HACKENSACK UNIVERSITY MEDICAL CENTER'], { w:2048, lh:96, font:'600 64px Georgia, serif', spacing:'4px' }), [-20, -38], 0.06);
   letterAlong([[-3.0, -53.3], [-3.0, -46.5]], 0.3 + 1.7*FL + 0.21, 0.3, textCanvas(['Helena Theurer Pavilion'], { w:1024, lh:64, font:'italic 44px Georgia, serif', col:'#55606e' }), [0.5, -50], 0.04);
-  add(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), -2.64, ty + th - 0.9 - 1.0, -55.35, false).rotation.y = -Math.PI/2;   // the HMH mark, on the slim tower's face toward the corner
+  add(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), 10.6, ty + th - 0.9 - 1.0, -46.04, false).rotation.y = Math.PI;   // the HMH mark, on the slim tower's face toward 2nd Street
   CUR = '_'; });
 
 // ---- Don Imus - WFAN Pediatric Center: tan brick, its name in three lines across the curved corner ----

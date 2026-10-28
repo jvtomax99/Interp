@@ -102,13 +102,12 @@ where the map has houses.
   a beige stair tower on its corner; a glass skybridge crosses Atlantic from
   the garage to the ED, north of Imus (where it lands is a guess).
 - His iPhone runs the preview at 60 fps (2026-10-28).
+- The slim glass tower with the HMH mark is on Imus's side of the street
+  (Jose, 2026-10-28), so it stands against the curved tower's far side, on
+  terracotta, the mark facing 2nd Street.
 
 ## Open
 
-- The slim glass tower with the HMH mark: his photos disagree on where it
-  stands (Street View: past the bridge, across the street from Imus; Google
-  3D: nothing on the garage there). Placed on a terracotta block at the
-  bridge's far end for now; ask him.
 - Other skybridges in his photos: which buildings they join is unknown.
 - The ambulance still drives to the bay on Link Pavilion's side, not the
   real ED (Creamer) on Atlantic Street.
