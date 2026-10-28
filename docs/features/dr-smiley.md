@@ -735,7 +735,15 @@ frames, from `layers/headtrack.py` (the blob of skin and hair, its centre
 per frame, smoothed; a tilt from the pupils was tried and dropped), minus
 `DR_CLIP_HEAD0`, the clips' head centre at rest. His face acts along on
 his own head (`DR_CLIP_FACES`: beats of face and brow per clip, the rig
-walking the in-betweens). The tests' harness serves `*.json` from the
+walking the in-betweens; the cheer's laugh mostly open-eyed, `laugh1`,
+shut only at the peak: shut for two seconds read as asleep). The head acts
+with the body too (a head carried flat over a jumping body read as
+hovering): it leans into sideways motion and squashes a little on a fast
+rise or drop, both from the track, about the neck. The hand-off: the
+canvas fades in over the rig at rest (`is-fading`), and only once it is
+opaque do the rig's pieces go (`is-clip`); they come back under the
+still-opaque canvas before it fades out (hiding them during the fade
+showed the background through him). The tests' harness serves `*.json` from the
 checkout for the tracks. `keyclip.py` had to learn two things from the wave (2026-10-27,
 Jose: "make sure you don't make a mistake cropping him out"): the coat's
 shadowed front edge is nearly the wall's grey and read as a gap when the
