@@ -199,7 +199,8 @@ where the map has houses.
   green, blue and peach diamonds, a round column. Imus' face on the court: grey panels with a glass band, a tall glass
   atrium with a white overhanging roof on a white column, its name low in front. The walkway over Atlantic is the
   Joseph M. Sanzari Family Walkway: grey panels with children's silhouettes and its name, glass on diagonal steel, the
-  Hackensack Meridian Health sign band, an X-braced pier at the hospital end. The court: asphalt, an island under
+  Hackensack Meridian Health sign band, an X-braced pier at the hospital end. The court: a round turnaround (Jose: "the center is circular"), asphalt in a low curb, pale concrete round it,
+  its mouth open to Atlantic; an island under
   the walkway (big evergreen, lamp, hydrant, blue sign, fence), bollards, an orange barrier. The Atlantic Street
   garage: brick spandrels and precast bands. The Mark Messier Skyway for Tomorrow's Children sign: a tan panel at
   the walkway's hospital end, beside the curved glass, facing the court. Placed by eye from the photos: the glass wall's width, the canopy, the

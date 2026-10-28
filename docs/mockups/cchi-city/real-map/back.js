@@ -524,7 +524,13 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
 // An open drop-off court between Women's and Children's (north), the curved silver building (east) and Imus (south):
 // asphalt to the curved building's overhang, steel bollards along its sidewalk, an orange barrier; at its south-west
 // corner an island under the walkway with a big evergreen, a lamp, a red hydrant, a blue sign and a black fence.
-{ slab([[-24.62,-24.6],[-17.0,-24.6],[-17.75,-27.4],[-17.4,-30.3],[-18.6,-30.0],[-22.0,-29.8],[-24.95,-29.6]], 0.17, 0.1, asphalt);
+{ // the court's middle is a round turnaround (his photo from under the overhang): a circle of asphalt in a low curb,
+  // pale concrete sidewalk round it, its mouth open to Atlantic Street on the west
+  slab([[-24.62,-24.6],[-17.0,-24.6],[-17.75,-27.4],[-17.4,-30.3],[-18.6,-30.0],[-22.0,-29.8],[-24.95,-29.6]], 0.17, 0.1, M(0xd3d0c8, { r:0.85 }));
+  const TC = { x:-21.0, z:-27.2, r:2.55 }, circ = (r, n=40) => Array.from({ length:n }, (_, k) => { const a = k/n*Math.PI*2; return [TC.x + Math.cos(a)*r, TC.z + Math.sin(a)*r]; });
+  slab(circ(TC.r + 0.12), 0.17, 0.115, M(0xbdb9b0, { r:0.8 })); slab(circ(TC.r), 0.17, 0.118, asphalt);
+  slab([[-24.95,-25.6],[TC.x - 1.2,-25.0],[TC.x - 1.2,-29.4],[-24.95,-28.9]], 0.17, 0.118, asphalt);   // the mouth to Atlantic
+  add(new THREE.BoxGeometry(0.5, 0.01, 0.25), M(0x2a2c30), TC.x + 0.3, 0.296, TC.z, false);            // a drain grate
   slab([[-24.95,-29.6],[-22.0,-29.8],[-19.3,-30.0],[-18.7,-30.6],[-18.9,-31.4],[-24.98,-31.3]], 0.17, 0.16, M(0xd6d2c8, { r:0.8 }));
   slab([[-24.6,-29.85],[-22.0,-30.0],[-19.6,-30.2],[-19.2,-30.7],[-19.4,-31.2],[-24.6,-31.15]], 0.2, 0.15, M(0x5a3a2a, { r:0.95 }));
   tree(-21.4, -30.65, 1.25, 'cone'); shrub(-20.2, 0.35, -30.55, 0.32, 1); lamp(-19.9, -30.15);
