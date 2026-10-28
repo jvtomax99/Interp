@@ -733,7 +733,13 @@ above the canvas, and the player moves the head's idle wrapper
 rig's own) each frame to where the clip's head is: `head.json` beside the
 frames, from `layers/headtrack.py` (the blob of skin and hair, its centre
 per frame, smoothed; a tilt from the pupils was tried and dropped), minus
-`DR_CLIP_HEAD0`, the clips' head centre at rest. His face acts along on
+`DR_CLIP_HEAD0`, the clips' head centre at rest. The clip's own head is
+cut off every frame by `layers/behead.py` (Jose: "the head and body
+don't fit": it is drawn about 10% bigger than his, its hair 13 px
+higher, and peeked out as a fringe around his own; 10 px of chin and
+neck stay under where his chin sits, feathered, so the collar meets it;
+the tool writes the frames in place and refreshes `head.json`). His face
+acts along on
 his own head (`DR_CLIP_FACES`: beats of face and brow per clip, the rig
 walking the in-betweens; the cheer's laugh mostly open-eyed, `laugh1`,
 shut only at the peak: shut for two seconds read as asleep). The head acts
