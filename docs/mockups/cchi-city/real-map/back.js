@@ -41,7 +41,10 @@ function blockedXZ(x, z, pad=0.6){ for (const b of SCN.blds){ if (inside(b.pts, 
 const PAVE_W = (() => { const t = PAVE_T.clone(); t.needsUpdate = true; t.repeat.set(1/1.3, 1/1.3); return new THREE.MeshStandardMaterial({ map:t, roughness:0.85, envMapIntensity:0.1 }); })();
 const yellowLine = new THREE.MeshBasicMaterial({ color:0xf2c94c });
 for (const [outer, ...holes] of SCN.aprons) slab(outer, 0.17, 0.08, PAVE_W, holes);
-for (const r of SCN.roads){ if (r.hw === 'footway'){ ribbon(r.pts, r.w, 0.17, 0.09, PAVE_W); continue; }
+// a stub of the map's service road left on the lawn between the drive and Medical Plaza, beside Link's front, showed as a
+// loose dark plate (Jose, 2026-10-28: "get rid of the circled plate"); the hand-built drive covers that road
+const STRAY = r => r.hw === 'service' && r.pts.every(([x, z]) => x > 3.2 && x < 6.5 && z > -7 && z < -3);
+for (const r of SCN.roads){ if (STRAY(r)) continue; if (r.hw === 'footway'){ ribbon(r.pts, r.w, 0.17, 0.09, PAVE_W); continue; }
   const big = r.hw !== 'service';
   if (big) ribbon(r.pts, r.w + 1.8, 0.17, 0.08, walk);
   ribbon(r.pts, r.w, 0.17, 0.088, asphalt);
