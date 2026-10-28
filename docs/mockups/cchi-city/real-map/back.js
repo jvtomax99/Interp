@@ -179,11 +179,45 @@ function entranceOn(key){ const B = BLD[key], d = DOORW[key], e = B.E[d.i], dw =
 entranceOn('t'); entranceOn('n'); entranceOn('s'); entranceOn('c');   // Link Pavilion's is the diorama's canopy at the end of the drive
 // Ethics: Link Pavilion's two big banners on its front, at the end of the drive: white with the HMH mark on the left, blue
 // on the right (his aerials, 2026-10-28)
+// Ethics: Link Pavilion's front at the head of the drive (Jose's photos, 2026-10-28): two tall U.S. News banners, white
+// under a navy band ("TOP 20 IN THE NATION, #1 IN NJ" left, "#1 HOSPITAL IN NY-NJ METRO AREA" right), between them an
+// arched window over a tall strip of dark glass; three flagpoles, evergreens, a black fence over pink flowers, the
+// wayfinding sign (EMERGENCY, Pediatric Emergency, Women's Hospital Entrance, Visitor Parking)
+function bannerTex(lines){ const c = document.createElement('canvas'); c.width = 256; c.height = 512; const g = c.getContext('2d');
+  g.fillStyle = '#f6f7f9'; g.fillRect(0, 0, 256, 512); g.fillStyle = '#2b3a6b'; g.fillRect(0, 0, 256, 92); g.fillStyle = '#5b8fd6'; g.fillRect(0, 86, 256, 6);
+  g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.font = 'bold 19px Inter, Arial, sans-serif'; g.fillText('HACKENSACK UNIVERSITY', 128, 40); g.fillText('MEDICAL CENTER', 128, 68);
+  lines.forEach(([t, col], i) => { g.fillStyle = col; g.font = 'bold 32px Inter, Arial Narrow, Arial, sans-serif'; g.fillText(t, 128, 160 + i*46); });
+  g.fillStyle = '#e9e6dc'; g.fillRect(70, 340, 116, 120); g.fillStyle = '#2b3a6b'; g.font = 'bold 26px Georgia, serif'; g.fillText('BEST', 128, 378); g.fillStyle = '#c8202e'; g.fillRect(62, 398, 132, 24); g.fillStyle = '#ffffff'; g.font = 'bold 16px Arial'; g.fillText('U.S.News', 128, 416);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; }
 pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
-  for (const [x, col] of [[-0.6, 0xf4f6fa], [2.7, 0x24467e]]) add(new THREE.PlaneGeometry(1.25, 2.0), new THREE.MeshBasicMaterial({ color:col }), x, 2.75, z, false);
-  add(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), -0.6, 3.25, z + 0.01, false);
-  for (const [y, w, h] of [[3.3, 0.9, 0.42], [2.65, 0.7, 0.5], [2.05, 0.9, 0.14]]) add(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color:0xeef2f8 }), 2.7, y, z + 0.01, false);
+  add(new THREE.PlaneGeometry(1.25, 2.5), new THREE.MeshBasicMaterial({ map:bannerTex([['TOP 20', '#2b5ea8'], ['IN THE NATION', '#1d2233'], ['#1 IN NJ.', '#1d2233']]) }), -0.6, 2.75, z, false);
+  add(new THREE.PlaneGeometry(1.25, 2.5), new THREE.MeshBasicMaterial({ map:bannerTex([['#1 HOSPITAL', '#2b5ea8'], ['IN NY-NJ', '#1d2233'], ['METRO AREA.', '#1d2233']]) }), 2.7, 2.75, z, false);
+  const dark = new THREE.MeshStandardMaterial({ color:0x1d2433, roughness:0.08, metalness:0.7, envMapIntensity:1.4 });
+  add(new THREE.PlaneGeometry(0.62, 2.3), dark, 1.05, 1.95, z + 0.01, false);
+  const arch = new THREE.Mesh(new THREE.CircleGeometry(0.31, 20, 0, Math.PI), dark); arch.position.set(1.05, 3.3, z + 0.01); G.add(arch);
+  for (const y of [1.2, 1.6, 2.0, 2.4, 2.8]) add(new THREE.PlaneGeometry(0.62, 0.025), M(0x101420), 1.05, y, z + 0.015, false);
   CUR = '_'; });
+{ const pole = M(0x22252b, { r:0.4, m:0.5 });
+  for (const [x, h, flag] of [[-0.2, 2.9, 'us'], [0.5, 2.6, 'pow'], [1.9, 2.5, 'white']]){ add(new THREE.CylinderGeometry(0.025, 0.03, h, 8), pole, x, 0.3 + h/2, -5.0);
+    add(new THREE.SphereGeometry(0.045, 8, 6), M(0xc9a64a, { r:0.3, m:0.8 }), x, 0.3 + h + 0.03, -5.0, false);
+    const f = add(new THREE.PlaneGeometry(0.62, 0.38), flag === 'us' ? new THREE.MeshStandardMaterial({ map:(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 40; const g = c.getContext('2d');
+      for (let i = 0; i < 13; i++){ g.fillStyle = i % 2 ? '#ffffff' : '#b22234'; g.fillRect(0, i*40/13, 64, 40/13 + 0.5); } g.fillStyle = '#3c3b6e'; g.fillRect(0, 0, 26, 21.5);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })(), side:THREE.DoubleSide, roughness:0.8 }) : M(flag === 'pow' ? 0x1b1d22 : 0xf2f2ee, { r:0.8, x:{ side:THREE.DoubleSide } }), x + 0.33, 0.3 + h - 0.24, -5.0, false);
+    f.rotation.y = 0.35; }
+  for (const [x, s] of [[-1.2, 0.85], [0.15, 0.75], [2.3, 0.95], [3.5, 0.7]]) tree(x, -5.45, s, 'cone');
+  box(5.4, 0.22, 0.04, M(0x1b1d22, { r:0.5, m:0.4 }), 1.1, 0.42, -4.55, 0.01);
+  for (let q = 0; q < 40; q++) add(new THREE.IcosahedronGeometry(0.05, 0), FLOWERS[q % 3 ? 0 : 1], -1.5 + q*0.135, 0.36, -4.4 + (q % 2)*0.08, false);
+  const sc = document.createElement('canvas'); sc.width = 128; sc.height = 192; const g = sc.getContext('2d');
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, 128, 192); g.fillStyle = '#2b5ea8'; g.fillRect(118, 0, 10, 192); g.fillStyle = '#d6402c'; g.fillRect(6, 70, 106, 22);
+  g.fillStyle = '#fff'; g.font = 'bold 15px Arial'; g.fillText('EMERGENCY', 12, 87); g.fillStyle = '#333'; g.font = '11px Arial';
+  ['Pediatric Emergency', "Women's Hospital", 'Visitor Parking'].forEach((t, i) => g.fillText(t, 8, 112 + i*22)); g.fillStyle = '#2b3a6b'; g.font = 'bold 12px Arial'; g.fillText('Hackensack', 30, 30); g.fillText('Meridian Health', 22, 46);
+  const st = new THREE.CanvasTexture(sc); st.colorSpace = THREE.SRGBColorSpace;
+  box(0.62, 0.95, 0.1, M(0xe9ecf0, { r:0.6 }), -0.95, 0.3 + 0.48, -4.6, 0.02); add(new THREE.PlaneGeometry(0.56, 0.84), new THREE.MeshBasicMaterial({ map:st }), -0.95, 0.3 + 0.5, -4.545, false); }
+// the bridge over the drive in front of the lobby, from Link Pavilion to Medical Plaza (Jose, 2026-10-28)
+{ const B = BRICK({ col:'#7e3b30', band:'#8a4638' })(3.6, 2*FL);
+  box(3.0, 2*FL, 2.6, B, 5.4, 0.3 + 1.4*FL + FL, -4.75, 0.04);
+  box(3.1, 0.1, 2.7, M(0xe8dcc6, { r:0.6 }), 5.4, 0.3 + 1.4*FL, -4.75, 0.02);
+  for (const x of [4.1, 4.95, 5.8, 6.65]) for (const y of [0.3 + 1.4*FL + 0.45*FL, 0.3 + 2.4*FL + 0.45*FL]) add(new THREE.PlaneGeometry(0.5, 0.26), WIN_DARK, x, y, -3.44, false); }
 // ---- the drive-through under Link Pavilion (Jose's 13 photos, 2026-10-28): the lobby's glass behind a sidewalk with steel
 // bollards, two round white columns either side of the revolving door, a crosswalk to the outer sidewalk and its brick
 // piers; past its east end, the long dark barrel canopy over a herringbone brick walk, on black posts, with lantern
