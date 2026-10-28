@@ -149,6 +149,17 @@ where the map has houses.
   Link (the live one, and the old one the map calls disused, still painted in 2020). The photo's blue-green cast is
   scaled out; the machines' colours are mostly greyed and grouped into a few shades (one mesh each).
 
+- Link Pavilion's front and Medical Plaza's drop-off, from Jose's 13 photos on the ground (2026-10-28): the front
+  entrance is a drive-through under Link Pavilion (the map's tunnel road, way 8933), so the floors above reach out
+  over the drive again (the map's stub, cut until now) on brick piers, the banners on their face; under it a grey
+  concrete soffit, the lobby's dark-framed glass, two round white columns either side of a revolving door, steel
+  bollards, a yellow curb and a crosswalk. From its east end a long dark barrel canopy on black posts runs over a
+  herringbone brick walk with lantern bollards and a red call box (where it ends is not in the photos). Medical
+  Plaza's west wing stands over the map's covered loop (ways 2222-2224) and is rosy-brown panels with cream bands.
+  The curved planted island at Link's front is gone (the drive runs there). Buildings take an `under` (a drive
+  under them): `ground` outline, `open` soffit, `floors` high. Open: the canopy's far end, the parking garage's
+  entrance in the photos ("Visitor Parking, Enter"), and whether Medical Plaza's loop has its own doors.
+
 ## Open
 
 - Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street

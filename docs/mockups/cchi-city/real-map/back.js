@@ -59,7 +59,7 @@ function wncTex(){ const c = document.createElement('canvas'); c.width = 64; c.h
 const STYLE = {
   e: { col:'#6e3a33', band:'#7a4239', roof:0xd9cdb8 },                        // George Link Jr. Pavilion: brown brick (as the hand-built one was)
   s: { col:'#7e3b37', band:'#e6d8c2', roof:0xf1f2f4, glassBase:2 },          // Jurist: brick, cream bands, glass on its two lower floors, a white roof
-  c: { col:'#7a3530', band:'#e6d8c2' },                                      // Medical Plaza: maroon brick, cream bands; steps back, dark glass on top (tiers)
+  c: { col:'#a2705f', band:'#e8dcc6' },                                      // Medical Plaza: maroon brick, cream bands; steps back, dark glass on top (tiers)
   t: { col:'#c9c2b6', band:'#efe8dc', glass:'#33456e', roof:0xe6e2da, kind:'glass' },   // Patient Pavilion: glass bands on pale stone
   n: { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc },                       // John Theurer Cancer Center: orange brick, white bands
   x8905: { tex:wncTex, roof:0xe6e2da, noWin:1 },   // Women's and Children's Pavilion: light precast, brick spandrels, teal ribbon windows, a glass grid (his aerials and Street View, 2026-10-28)
@@ -87,8 +87,10 @@ function realBuilding(b){
   const t = o.tex ? o.tex() : brickTex(o.col, o.band, o.glass || null), wall = new THREE.MeshStandardMaterial({ map:t, bumpMap:t, bumpScale:0.6, roughness:0.85, envMapIntensity:0.12 });
   t.repeat.set(1/0.9, 1/fl); t.offset.set(0, -((1/fl) % 1));
   if (gF) wallsOf(b.pts, y0, gF*fl, o.glassBase ? GLASSWALL : M(0xe4dccd, { r:0.8 }));
-  const [caps, sides] = splitCaps(new THREE.ExtrudeGeometry(shapeOf(b.pts), { depth:hb - gF*fl, bevelEnabled:false })); caps.dispose();
-  sides.rotateX(-Math.PI/2); sides.translate(0, y0 + gF*fl, 0); add(sides, wall, 0, 0, 0, true);
+  const U = b.under, uh = U ? U.floors*fl : 0;   // a drive under the building: its own ground-floor outline, a soffit over the drive
+  if (U){ wallsOf(U.ground, y0, uh, wall); slab(U.open, y0 + uh - 0.12, 0.12, M(0xc9c2b4, { r:0.9, x:{ emissive:0x6a645a } })); }   // the soffit: grey concrete, lit by its downlights
+  const [caps, sides] = splitCaps(new THREE.ExtrudeGeometry(shapeOf(b.pts), { depth:hb - Math.max(gF*fl, uh), bevelEnabled:false })); caps.dispose();
+  sides.rotateX(-Math.PI/2); sides.translate(0, y0 + Math.max(gF*fl, uh), 0); add(sides, wall, 0, 0, 0, true);
   const RF = ROOFS[b.id], roofM = M(RF ? new THREE.Color(RF.roof).getHex() : o.roof ?? (b.kind === 'garage' ? 0x9a9aa2 : 0xd9cdb8)), parapet = (E2, y) => { const geos = []; for (const e of E2){ if (e.L < 0.3) continue; const [mx, mz] = e.at(e.L/2); geos.push(placed(new THREE.BoxGeometry(e.L + 0.1, 0.14, 0.1), mx, y, mz, e.a).toNonIndexed()); }
     if (geos.length) add(mergeGeometries(geos, false), b.kind === 'house' ? M(0xe8e2d8) : TRIM, 0, 0, 0, false); };
   slab(b.pts, y0 + hb, 0.22, roofM, [], true); parapet(E, y0 + hb + 0.29);
@@ -109,7 +111,7 @@ function realBuilding(b){
         W.reveal.push(placed(new THREE.BoxGeometry(gw + 0.02, 0.035, 0.04), px + e.nx*0.012, y + gh/2 - 0.01, pz + e.nz*0.012, e.a).toNonIndexed()); }
       const r = wr(), kind = glass ? 'dark' : r < 0.07 ? 'warm' : r < 0.4 ? 'sky' : 'dark', lit = wr() < 0.5;
       W[lit ? 'lit' + kind[0].toUpperCase() + kind.slice(1) : kind].push(placed(new THREE.BoxGeometry(gw, gh, 0.03), px + e.nx*0.004, y, pz + e.nz*0.004, e.a).toNonIndexed()); } });
-  if (b.kind !== 'garage' && !o.noWin) winsOn(E, i => b.win[i], y0, gF, bodyF, door);
+  if (b.kind !== 'garage' && !o.noWin) winsOn(E, i => b.win[i], y0, Math.max(gF, U ? Math.ceil(U.floors) : 0), bodyF, door);
   // set-back tiers (Medical Plaza): brick with windows, then dark glass, each on the roof of the one below
   let yb = y0 + hb + 0.22;
   for (const T of b.tiers || []){ const th = T.floors*fl, ET = edgesOf(T.pts);
@@ -137,6 +139,16 @@ SCN.lots.length && SCN.cars.lots.forEach(([x, z, a], j) => parkedAt(x, z, a, j*3
 SCN.blds.find(b => b.key === 'x8902').floors = 5;   // the ED is five floors in the photos
 Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:5 });
 SCN.blds.find(b => b.key === 'x8892').floors = 4;   // Audrey Hepburn Children's House: four floors under its pitched roofs (Google 3D)   // a tall plant building with roof fans, not a house (Jose's photos, 2026-10-28)
+// drives under buildings (Jose's photos, 2026-10-28). Link Pavilion: its front entrance is a drive-through under the
+// building, the map's tunnel road (way 8933) at z -10, the lobby's glass behind it and the floors above reaching out over
+// the drive to the map's stub (cut before, x -2.25 to 4.46, out to z -6). Medical Plaza: its west wing stands on tall piers
+// over the map's covered loop (ways 2222-2224).
+Object.assign(SCN.blds.find(b => b.key === 'e'), { pts: (() => { const p = SCN.blds.find(b => b.key === 'e').pts, i = p.findIndex(q => q[0] === 4.46 && q[1] === -8.1);
+    return [...p.slice(0, i + 1), [4.46, -6.0], [-2.25, -6.0], ...p.slice(i + 1)]; })(),
+  under: { floors:1.4, open:rectPts(-2.25, -11.1, 4.46, -6.0),
+    ground:[[12.3,-11.79],[5.92,-11.88],[5.9,-11.24],[4.48,-11.27],[-2.2,-11.1],[-2.2,-12.73],[-8.28,-12.83],[-8.26,-13.85],[-9.71,-13.89],[-9.66,-18.62],[-8.97,-18.59],[-8.87,-21.45],[-3.28,-21.4],[-3.29,-20.84],[-2.07,-20.83],[-2.05,-24.33],[0.71,-24.29],[0.71,-26.78],[7.5,-26.71],[7.44,-19.14],[10.68,-19.11],[10.68,-18.05],[11.56,-18.03],[11.52,-13.46],[12.32,-13.43]] } });
+Object.assign(SCN.blds.find(b => b.key === 'c'), { under: { floors:2, open:[[3.55,7.42],[6.35,7.48],[6.34,-1.32],[3.74,-1.39]],
+  ground:[[5.29,9.42],[5.34,7.48],[6.35,7.48],[6.34,-1.32],[6.39,-3.56],[11.16,-3.35],[11.09,-1.08],[21.58,-0.89],[21.37,9.84]] } });
 for (const b of SCN.blds) realBuilding(b);
 // the machines on the hospital roofs, where the state's 2020 aerial shows them (aerial_roofs.py -> roofs.json): their
 // colours mostly greyed (the photo tints them) and rounded to a few shades, one merged mesh per shade
@@ -167,19 +179,43 @@ function entranceOn(key){ const B = BLD[key], d = DOORW[key], e = B.E[d.i], dw =
 entranceOn('t'); entranceOn('n'); entranceOn('s'); entranceOn('c');   // Link Pavilion's is the diorama's canopy at the end of the drive
 // Ethics: Link Pavilion's two big banners on its front, at the end of the drive: white with the HMH mark on the left, blue
 // on the right (his aerials, 2026-10-28)
-pend.push(() => { CUR = 'e'; const z = -8.1 + 0.06;
+pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
   for (const [x, col] of [[-0.6, 0xf4f6fa], [2.7, 0x24467e]]) add(new THREE.PlaneGeometry(1.25, 2.0), new THREE.MeshBasicMaterial({ color:col }), x, 2.75, z, false);
   add(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), -0.6, 3.25, z + 0.01, false);
   for (const [y, w, h] of [[3.3, 0.9, 0.42], [2.65, 0.7, 0.5], [2.05, 0.9, 0.14]]) add(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color:0xeef2f8 }), 2.7, y, z + 0.01, false);
   CUR = '_'; });
-// the curved island against Link Pavilion's front: a raised lawn in a tan curb, evergreens and shrubs, a small sign; the
-// drop-off road loops round it (his aerials)
-{ const arc = (cx, r, a0, a1, n=8) => Array.from({ length:n + 1 }, (_, k) => { const a = a0 + (a1 - a0)*k/n; return [cx + Math.cos(a)*r, -8.1 + Math.sin(a)*r]; });
-  const isl = (r) => [...arc(-1.05, r, Math.PI, Math.PI/2), ...arc(2.45, r, Math.PI/2, 0)];
-  slab(isl(1.15), 0.2, 0.16, M(0xd9b98a, { r:0.8 })); slab(isl(1.0), 0.24, 0.16, grass);
-  for (const [x, z, s] of [[-1.5, -7.45, 0.6], [-0.2, -7.55, 0.7], [1.4, -7.5, 0.62], [2.9, -7.6, 0.5]]) tree(x, z, s, 'cone');
-  shrub(-2.0, 0.42, -7.45, 0.26, 0); shrub(0.6, 0.42, -7.15, 0.24, 2); shrub(2.2, 0.42, -7.15, 0.22, 1);
-  box(0.4, 0.32, 0.06, M(0xe9eaec, { r:0.6 }), 1.0, 0.56, -7.1, 0.02); }
+// ---- the drive-through under Link Pavilion (Jose's 13 photos, 2026-10-28): the lobby's glass behind a sidewalk with steel
+// bollards, two round white columns either side of the revolving door, a crosswalk to the outer sidewalk and its brick
+// piers; past its east end, the long dark barrel canopy over a herringbone brick walk, on black posts, with lantern
+// bollards, running east along the wing's front (where it ends is not in the photos) ----
+{ const steel = M(0xc4c8ce, { r:0.25, m:0.85 }), brickP = M(0x7a3b30, { r:0.9 }), white = M(0xf2efe8, { r:0.5 }), black = M(0x22252b, { r:0.5, m:0.3 });
+  box(10.3, 0.06, 4.6, asphalt, 1.75, 0.285, -8.3, 0.02, false);                                    // the drive under the building and its curves out
+  box(6.7, 0.1, 0.55, walk, 1.13, 0.29, -10.85, 0.02, false); box(6.7, 0.02, 0.05, curb, 1.13, 0.345, -10.57, 0.01, false);   // the lobby's sidewalk, yellow curb
+  box(6.7, 0.1, 0.5, walk, 1.13, 0.29, -6.25, 0.02, false); box(6.7, 0.02, 0.05, curb, 1.13, 0.345, -6.5, 0.01, false);     // the outer one
+  for (const x of [-2.05, 1.1, 4.3]) box(0.42, 0.87, 0.42, brickP, x, 0.3 + 0.435, -6.2, 0.02);       // brick piers under the edge of the floors above
+  // the lobby: dark-framed glass, warm inside, pendant lights, the revolving door between two white columns
+  add(new THREE.PlaneGeometry(6.2, 0.82), new THREE.MeshBasicMaterial({ map:lobbyTex(), color:0xd8cfc0 }), 1.13, 0.3 + 0.41, -11.08, false);
+  add(new THREE.BoxGeometry(6.2, 0.84, 0.02), new THREE.MeshStandardMaterial({ color:0x9fb8c8, roughness:0.05, metalness:0.4, transparent:true, opacity:0.22, envMapIntensity:1.4 }), 1.13, 0.3 + 0.42, -11.06, false);
+  for (let k = 0; k <= 9; k++) add(new THREE.BoxGeometry(0.04, 0.84, 0.04), black, -1.97 + k*0.69, 0.3 + 0.42, -11.05);
+  box(6.3, 0.05, 0.05, black, 1.13, 0.3 + 0.55, -11.05, 0.01, false);
+  for (const x of [0.55, 1.65]) add(new THREE.CylinderGeometry(0.11, 0.11, 0.85, 16), white, x, 0.3 + 0.425, -10.75);
+  add(new THREE.CylinderGeometry(0.3, 0.3, 0.55, 20, 1, true), new THREE.MeshStandardMaterial({ color:0xb8d0dc, roughness:0.05, metalness:0.5, transparent:true, opacity:0.45, side:THREE.DoubleSide }), 1.1, 0.3 + 0.275, -11.0, false);
+  box(0.64, 0.06, 0.64, M(0xb9a46a, { r:0.4, m:0.6 }), 1.1, 0.3 + 0.58, -11.0, 0.02, false);
+  for (const x of [-1.2, 0.2, 2.0, 3.4]) glow(x, 0.3 + 0.62, -10.95, 0.7, 0xffd9a0);
+  for (let x = -1.8; x < 4.4; x += 0.75) add(new THREE.CylinderGeometry(0.035, 0.035, 0.2, 10), steel, x, 0.3 + 0.1, -10.65);
+  for (let i = 0; i < 10; i++) box(0.62, 0.012, 0.16, paint, -0.6, 0.32, -10.35 + i*0.39, 0.003, false);   // the crosswalk to the lobby
+  // the barrel canopy walk east along the wing's front
+  const run = [[4.7, -10.85], [8.0, -11.0], [10.4, -10.9], [12.0, -10.4], [13.2, -9.4]], rad = 0.42, cy = 0.3 + 0.62, canM = M(0x3b4049, { r:0.55, m:0.2 });
+  for (let i = 1; i < run.length; i++){ const [ax, az] = run[i-1], [bx, bz] = run[i], L = Math.hypot(bx - ax, bz - az), a = Math.atan2(bz - az, bx - ax);
+    const c = add(new THREE.CylinderGeometry(rad, rad, L + 0.04, 14, 1, true, 0, Math.PI), canM, (ax + bx)/2, cy, (az + bz)/2, true); c.material.side = THREE.DoubleSide; c.rotation.set(0, -a, Math.PI/2);
+    box(L, 0.04, 0.95, M(0x8a5546, { r:0.95 }), (ax + bx)/2, 0.245, (az + bz)/2, 0.01, false).rotation.y = -a;   // the herringbone brick walk
+    for (let t = 0; t < L; t += 0.9) for (const sd of [-1, 1]){ const x = ax + (bx - ax)*t/L - Math.sin(a)*sd*rad*0.95, z = az + (bz - az)*t/L + Math.cos(a)*sd*rad*0.95;
+      add(new THREE.CylinderGeometry(0.02, 0.02, cy - 0.3, 6), black, x, 0.3 + (cy - 0.3)/2, z); }
+    for (let t = 0.45; t < L; t += 1.8){ const x = ax + (bx - ax)*t/L + Math.sin(a)*0.62, z = az + (bz - az)*t/L - Math.cos(a)*0.62;
+      add(new THREE.BoxGeometry(0.07, 0.16, 0.07), black, x, 0.38, z); glow(x, 0.44, z, 0.35, 0xfff0d0); } }
+  add(new THREE.BoxGeometry(0.1, 0.32, 0.1), M(0xc0282c, { r:0.5 }), 9.6, 0.46, -10.2);   // the red call box by the walk
+  // under Medical Plaza's wing: the covered loop
+  box(2.8, 0.06, 8.8, asphalt, 4.95, 0.282, 3.05, 0.02, false); }
 // the Women's and Children's Pavilion's glass grid on its south face, floors 3 to 6 (his aerials)
 pend.push(() => { const E = BLD.x8905.E; let i = 0; E.forEach((e, k) => { if (e.az + e.bz > E[i].az + E[i].bz) i = k; });
   const t = curtainTex(); t.repeat.set(7.0/1.4, 4); onWall('x8905', i, 2.0, 0.3 + 4*FL, 7.0, 4*FL, new THREE.MeshStandardMaterial({ map:t, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }), 0.05); CUR = '_'; });

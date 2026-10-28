@@ -56,7 +56,7 @@ rep("for (let i=0;i<20;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48","for (let
 rep("for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4)","for (const x of [-1.8]) for (let z=10.5; z>5.5; z-=1.4)")
 rep("arrow(2.0, 9.0, 0); arrow(3.1, 9.0, 0); arrow(4.2, 9.0, 0);","arrow(2.75, 9.0, 0);")
 rep("arrow(-3.8, 10.2, 1); arrow(-2.2, 10.2, -1); arrow(-3.8, 7.6, 1); arrow(-2.2, 7.6, -1);","arrow(-2.35, 10.4, 1); arrow(-1.25, 10.4, -1); arrow(-2.35, 8.0, 1); arrow(-1.25, 8.0, -1);")
-rep("box(26, 0.06, 2.8, pave(26, 2.8), 0, 0.21, -7.6, 0.02, false);","box(13.1, 0.06, 6.0, pave(13.1, 6.0), 2.05, 0.215, -8.0, 0.02, false);")
+rep("box(26, 0.06, 2.8, pave(26, 2.8), 0, 0.21, -7.6, 0.02, false);","")   # the drop-off is now the drive under Link Pavilion (back.js)
 rep("for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }","for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z); if (z > 9.9 || z < -1.9) lamp(3.4, z); }   // Medical Plaza's colonnade lines the right side")
 # (the canopy and its lobby are dropped above: Link Pavilion's front has a curved planted island, not a canopy)
 # the café on the strip of lawn in front of Medical Plaza, either side of its doors
