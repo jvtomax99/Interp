@@ -59,18 +59,16 @@ before (Jose, 2026-10-24), each a few lines in simple words, never a
 big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
 for his go.
 
-**After every finished job, offer a new chat as buttons** (Jose,
-2026-10-25: "always give me clickable option for you to make a new chat
-for me and with a short summary of what is being worked on"; he picked
-"after each finished job" over every reply or only when heavy). Each reply
-that says "done" ends with `AskUserQuestion`: **"Start a new chat for me"**
-first, **"Keep going here"** second, and the question itself carries the
-summary (what is being worked on now and its goal, a few plain words).
-This is an offer, not the heavy-chat handover above: say which one you
-recommend (a light chat: keep going here). If he picks the new chat, do
-steps 1 to 4 above (the handoff first, then `create_session` with it and
-the two-part summary). Not during a job, not on progress replies. Where
-the buttons are missing, one plain line instead.
+**Offer a new chat only when the chat is heavy** (Jose, 2026-10-28:
+not so constantly, only when the chat feels heavy; this replaces the buttons after every finished job of
+2026-10-25). Heavy means what the handover above says: compacted, or many
+big file reads, long test output or fix rounds. Then, once, end the reply
+with `AskUserQuestion`: **"Start a new chat for me"** first, **"Keep going
+here"** second, the question carrying the summary (what is being worked on
+now and its goal, a few plain words). A finished job alone is no reason to
+ask. If he picks the new chat, do steps 1 to 4 above (the handoff first,
+then `create_session` with it and the two-part summary). Where the buttons
+are missing, one plain line instead.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
