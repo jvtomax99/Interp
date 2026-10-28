@@ -713,10 +713,15 @@ the five filmed moves replace its own wave, cheer, think, wince and
 bounce. The cheer is filmed on a green wall: on grey, with both arms up,
 the raised sleeves' shadowed sides were the wall's exact grey and keyed
 out torn; `keyclip.py` keys a green wall by how much green beats red and
-blue in each pixel (a film's chroma key) and despills the edge. Its one
-flaw: at the top of the jump his fists touch the top of the picture for
-14 frames (half a second), cut flat there; a re-run with a lower hop
-would fix it (`prompts.md`). `keyclip.py` had to learn two things from the wave (2026-10-27,
+blue in each pixel (a film's chroma key) and despills the edge. The jump
+needs room above his head: the tool frames him as the start picture
+does, so the clip is asked for with him small in the picture, in its
+lower two thirds (the framing in words; a padded start picture was
+ignored); `keyclip.py` with `FIT` scales and places his rest box onto the
+master's figure and with `TOP=200` keeps 200 rows of the grid above the
+master's top (frames 320 x 500), and `DR_CLIPS.cheer.top` has the player
+draw the canvas that much taller above the host, so the jump rises above
+the host's top instead of cutting. `keyclip.py` had to learn two things from the wave (2026-10-27,
 Jose: "make sure you don't make a mistake cropping him out"): the coat's
 shadowed front edge is nearly the wall's grey and read as a gap when the
 frames were worked at half size (full size now, and an enclosed pool is

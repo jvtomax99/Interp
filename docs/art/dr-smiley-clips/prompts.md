@@ -170,3 +170,15 @@ frames). The first green cheer stays in the app: the least lost, and on
 the fists rather than his head. A last try, if Jose wants one, says the
 framing in words ("he is small in the picture, standing in its lower two
 thirds, with empty green space above his head as tall as half of him").
+
+## The cheer with the framing in words (2026-10-28): in
+
+Saying the framing in words worked: he stands in the lower two thirds of
+the picture (y 540 to 1551 of 1686 at rest) and nothing of him leaves it,
+even at the top of the jump (his highest point 408). Keyed with
+`FIT=408,813,540,1551 TOP=200`: his rest box is scaled and placed onto
+the master's figure (head top 29, feet 1429, middle 556), and the frames
+keep 200 rows of the grid above the master's top (320 x 500 instead of
+320 x 440); `DR_CLIPS.cheer.top` makes the app draw the canvas that much
+taller above the host, so the jump rises out of the banner's bottom edge
+and never cuts. Replaces the first green cheer.

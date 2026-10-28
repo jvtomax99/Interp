@@ -13,11 +13,26 @@ import numpy as np, glob, os, sys
 from PIL import Image
 from scipy import ndimage as ndi
 SRC, OUT = sys.argv[1], sys.argv[2]; os.makedirs(OUT, exist_ok=True)
-W, H = 1070, 1470; yy, xx = np.mgrid[0:H, 0:W]
+W, H = 1070, 1470
+TOP0 = int(os.environ.get('TOP') or 0); yy, xx = np.mgrid[0:H + TOP0, 0:W]; yy = yy - TOP0   # the grid's rows above the master's top are negative
 # PAD=top,side: the clip was made from body-master-headroom.png (the master with wall added
 # above and at the sides); the frames are brought back onto the master's grid.
 PAD = [int(v) for v in os.environ['PAD'].split(',')] if os.environ.get('PAD') else None
+# FIT=x0,x1,y0,y1: his box at rest in the clip's own pixels (a clip framed with room around
+# him, the cheer of 2026-10-28); he is scaled and placed so that box lands on the master's
+# figure (head top 29, feet 1429, his middle at 556). TOP=n: the output keeps n extra rows
+# of the grid above the master's top, for a jump (the app draws the canvas that much taller
+# above the host: DR_CLIPS top).
+FIT = [int(v) for v in os.environ['FIT'].split(',')] if os.environ.get('FIT') else None
+TOP = int(os.environ.get('TOP') or 0)
+OUT_H = round(440 * (H + TOP) / H)
 def fit(im):
+    if FIT:
+        x0, x1, y0, y1 = FIT; sc = 1400 / (y1 - y0)
+        im = im.resize((round(im.size[0] * sc), round(im.size[1] * sc)), Image.LANCZOS)
+        left = round((x0 + x1) / 2 * sc - 556); top = round(y0 * sc - 29) - TOP
+        canvas = Image.new('RGB', (W, H + TOP), tuple(int(v) for v in np.median(np.asarray(im)[10:60, 10:60].reshape(-1, 3), 0)))
+        canvas.paste(im, (-left, -top)); return canvas
     if PAD:
         top, side = PAD; ph, pw = H + top, W + 2 * side
         im = im.resize((round(im.size[0] * ph / im.size[1]), ph), Image.LANCZOS); off = (im.size[0] - pw) // 2; return im.crop((off + side, top, off + side + W, top + H))
@@ -59,7 +74,7 @@ for i, f in enumerate(sorted(glob.glob(os.path.join(SRC, 'f*.png')))):
         # despill: along the edge the green wall tints him; green is held down to the larger of red and blue
         band = (a > 0) & (a < 1); spill = np.maximum(P[..., 1] - np.maximum(P[..., 0], P[..., 2]), 0)
         P = P.copy(); P[..., 1] = np.where(band, P[..., 1] - spill, P[..., 1])
-        im = Image.fromarray(np.dstack([P, a * 255]).astype(np.uint8), 'RGBA').resize((320, 440), Image.LANCZOS)
+        im = Image.fromarray(np.dstack([P, a * 255]).astype(np.uint8), 'RGBA').resize((320, OUT_H), Image.LANCZOS)
         out = f'{OUT}/{i:04d}.webp'; im.save(out, quality=88, method=6); sizes.append(os.path.getsize(out)); continue
     a = matte(P, bg)
     blue = (P[..., 2] - P[..., 0]) > 22
@@ -85,6 +100,6 @@ for i, f in enumerate(sorted(glob.glob(os.path.join(SRC, 'f*.png')))):
     P = np.where(soft[..., None], np.clip((P - bg * (1 - aa)) / aa, 0, 255), P)   # the wall blended out of the edge
     hair = (yy < 440) & (a > 0); er = ndi.gaussian_filter(ndi.binary_erosion(a > .5, iterations=2).astype(float), .8)
     a = np.where(hair, np.minimum(a, er), a)                                      # the clip paints a light rim on the hair: its outline loses 2 px
-    im = Image.fromarray(np.dstack([P, a * 255]).astype(np.uint8), 'RGBA').resize((320, 440), Image.LANCZOS)
+    im = Image.fromarray(np.dstack([P, a * 255]).astype(np.uint8), 'RGBA').resize((320, OUT_H), Image.LANCZOS)
     out = f'{OUT}/{i:04d}.webp'; im.save(out, quality=88, method=6); sizes.append(os.path.getsize(out))
 print('frames', len(sizes), '30 fps %.2f MB' % (sum(sizes) / 1e6), '15 fps %.2f MB' % (sum(sizes[::2]) / 1e6))
