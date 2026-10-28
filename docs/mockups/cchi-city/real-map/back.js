@@ -5,6 +5,7 @@
 // (1 unit is about 4.3 m), fitted to it by the drive's mouth, Jurist and Medical Plaza. Floors are read off his
 // Google 3D flyover, so they are estimates. Map data © OpenStreetMap contributors (ODbL).
 const SCN = __SCENE__;
+const ROOFS = __ROOFS__;   // roof colours and machines from the state's 2020 aerial (aerial_roofs.py)
 const [BX0, BX1, BZ0, BZ1] = SCN.board, BCX = (BX0 + BX1)/2, BCZ = (BZ0 + BZ1)/2, BW = BX1 - BX0, BD = BZ1 - BZ0;
 const inside = (pts, x, z) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++){ const [ax, az] = pts[i], [bx, bz] = pts[j]; if ((az > z) !== (bz > z) && x < (bx - ax)*(z - az)/(bz - az) + ax) c = !c; } return c; };
 function edgesOf(pts){ const out = []; for (let i = 0; i < pts.length; i++){ const [ax, az] = pts[i], [bx, bz] = pts[(i+1) % pts.length], L = Math.hypot(bx - ax, bz - az) || 1, ux = (bx - ax)/L, uz = (bz - az)/L;
@@ -88,11 +89,11 @@ function realBuilding(b){
   if (gF) wallsOf(b.pts, y0, gF*fl, o.glassBase ? GLASSWALL : M(0xe4dccd, { r:0.8 }));
   const [caps, sides] = splitCaps(new THREE.ExtrudeGeometry(shapeOf(b.pts), { depth:hb - gF*fl, bevelEnabled:false })); caps.dispose();
   sides.rotateX(-Math.PI/2); sides.translate(0, y0 + gF*fl, 0); add(sides, wall, 0, 0, 0, true);
-  const roofM = M(o.roof ?? (b.kind === 'garage' ? 0x9a9aa2 : 0xd9cdb8)), parapet = (E2, y) => { const geos = []; for (const e of E2){ if (e.L < 0.3) continue; const [mx, mz] = e.at(e.L/2); geos.push(placed(new THREE.BoxGeometry(e.L + 0.1, 0.14, 0.1), mx, y, mz, e.a).toNonIndexed()); }
+  const RF = ROOFS[b.id], roofM = M(RF ? new THREE.Color(RF.roof).getHex() : o.roof ?? (b.kind === 'garage' ? 0x9a9aa2 : 0xd9cdb8)), parapet = (E2, y) => { const geos = []; for (const e of E2){ if (e.L < 0.3) continue; const [mx, mz] = e.at(e.L/2); geos.push(placed(new THREE.BoxGeometry(e.L + 0.1, 0.14, 0.1), mx, y, mz, e.a).toNonIndexed()); }
     if (geos.length) add(mergeGeometries(geos, false), b.kind === 'house' ? M(0xe8e2d8) : TRIM, 0, 0, 0, false); };
   slab(b.pts, y0 + hb, 0.22, roofM, [], true); parapet(E, y0 + hb + 0.29);
   const [lx, lz] = b.lab, area = Math.abs(b.pts.reduce((s2, p, i) => { const q = b.pts[(i+1) % b.pts.length]; return s2 + p[0]*q[1] - q[0]*p[1]; }, 0))/2;
-  if (b.kind !== 'house' && !b.tiers){ const s2 = Math.min(2.4, Math.sqrt(area)*0.18);
+  if (b.kind !== 'house' && !b.tiers && !RF){ const s2 = Math.min(2.4, Math.sqrt(area)*0.18);
     box(s2*1.4, 0.4, s2, M(0x8a8796), lx - s2*0.3, y0 + h + 0.42, lz, 0.06); box(s2*0.7, 0.3, s2*0.6, M(0x9a97a6), lx + s2*0.7, y0 + h + 0.37, lz + s2*0.5, 0.05); }
   // windows on the outside walls: plain panes with a sill and a lintel shadow (no frames back here, to keep the phone fast)
   const glass = o.kind === 'glass', sp = b.kind === 'house' ? 1.5 : glass ? 0.75 : 1.0;
@@ -137,6 +138,13 @@ SCN.blds.find(b => b.key === 'x8902').floors = 5;   // the ED is five floors in 
 Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:5 });
 SCN.blds.find(b => b.key === 'x8892').floors = 4;   // Audrey Hepburn Children's House: four floors under its pitched roofs (Google 3D)   // a tall plant building with roof fans, not a house (Jose's photos, 2026-10-28)
 for (const b of SCN.blds) realBuilding(b);
+// the machines on the hospital roofs, where the state's 2020 aerial shows them (aerial_roofs.py -> roofs.json): their
+// colours mostly greyed (the photo tints them) and rounded to a few shades, one merged mesh per shade
+{ const byShade = {};
+  for (const b of SCN.blds){ const RF = ROOFS[b.id]; if (!RF) continue; const B = BLD[b.key], top = B.y0 + B.h + 0.22;
+    for (const [x, z, w, d, h, c] of RF.units){ const v3 = c.slice(1).match(/../g).map(v => parseInt(v, 16)), gr = (v3[0] + v3[1] + v3[2])/3, q = v3.map(v => Math.min(255, Math.round((gr + (v - gr)*0.35)/24)*24)), key = (q[0] << 16) | (q[1] << 8) | q[2];
+      (byShade[key] = byShade[key] || []).push(placed(new THREE.BoxGeometry(w, h, d), x, top + h/2, z, 0).toNonIndexed()); } }
+  for (const k in byShade) add(mergeGeometries(byShade[k], false), M(+k, { r:0.7 }), 0, 0, 0, true); }
 // an entrance on a real building's wall: canopy, columns, glass doors into a lobby, planters either side
 const DOOR_AT = {};
 function entranceOn(key){ const B = BLD[key], d = DOORW[key], e = B.E[d.i], dw = d.w, [cx, cz] = e.at(e.L/2), fr = M(0x27324d, { r:0.4, m:0.3 }), white = M(0xf4f0e9, { r:0.55 });
@@ -181,7 +189,7 @@ pend.push(() => { const E = BLD.x8905.E; let i = 0; E.forEach((e, k) => { if (e.
 // red mulch and flowers, a wayfinding sign, a hydrant and two yellow bollards at its east tip); at the pavilion's east end
 // a drive-through tunnel under it (the map's covered service road, way 4473) between red-brick piers, louvres over it;
 // across the side drive, the red-brick Creamer Imaging building with a one-floor front under a flat grey canopy that wraps
-// its corner, a red Emergency sign on it, a louvred penthouse on its roof and a tall white banner.
+// its corner, a red Emergency sign on it, its roof's machines (from the aerial) and a tall white banner.
 { const wz = x => -6.65 + (x + 27.57)/16.64*0.15;   // the pavilion's front wall (map 8905)
   const greyC = M(0x6b7079, { r:0.55, m:0.25 }), greyU = M(0xc9ccd2, { r:0.7 }), tanCol = M(0xd6c4a8, { r:0.75 }), brickP = M(0x8c4a3a, { r:0.9 });
   // the drop-off lane and the island between it and the through lane
@@ -217,8 +225,6 @@ pend.push(() => { const E = BLD.x8905.E; let i = 0; E.forEach((e, k) => { if (e.
     box(0.06, 0.24, 1.05, M(0xc8262e, { r:0.5 }), wx - 0.62, cy + 0.15, -6.0, 0.02);
     add(new THREE.PlaneGeometry(1.0, 0.19), new THREE.MeshBasicMaterial({ map:st, transparent:true }), wx - 0.655, cy + 0.15, -6.0, false).rotation.y = -Math.PI/2;
     glow(wx - 0.7, cy + 0.15, -6.0, 0.8, 0xff6a6a);
-    const B = BLD.x8907, top = B.y0 + B.h + 0.22, lou = M(0xd9cdb0, { r:0.7 });
-    box(2.4, 0.55, 1.6, lou, -6.3, top + 0.28, -8.6, 0.03); for (let k = 0; k < 6; k++) box(2.42, 0.025, 0.02, M(0xb3a68a), -6.3, top + 0.1 + k*0.08, -7.79, 0.004, false);
     pend.push(() => { add(new THREE.PlaneGeometry(0.42, 1.5), new THREE.MeshBasicMaterial({ color:0xf4f6fa }), -5.0, 0.3 + 1.25, nzw + 0.03, false);
       add(new THREE.PlaneGeometry(0.34, 0.34), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), -5.0, 0.3 + 1.75, nzw + 0.04, false); }); } }
 function onWall(key, i, s, y, w, h, mat, out=0.03){ const e = BLD[key].E[i], [cx, cz] = e.at(e.L/2); const m = add(new THREE.PlaneGeometry(w, h), mat, cx + e.ux*s + e.nx*out, y, cz + e.uz*s + e.nz*out, false); m.rotation.y = e.a; return m; }

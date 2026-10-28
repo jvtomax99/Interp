@@ -9,7 +9,7 @@ OUT = sys.argv[1]
 tmp = os.path.join(tempfile.mkdtemp(), 'live.html')
 subprocess.run([sys.executable, os.path.join(HERE, '..', 'live', 'gen.py'), tmp], check=True, stdout=subprocess.DEVNULL)
 src = open(tmp).read().split('\n')
-back = open(os.path.join(HERE, 'back.js')).read().replace('__SCENE__', json.dumps(json.load(open(os.path.join(HERE, 'scene.json'))), separators=(',', ':')))
+back = open(os.path.join(HERE, 'back.js')).read().replace('__SCENE__', json.dumps(json.load(open(os.path.join(HERE, 'scene.json'))), separators=(',', ':'))).replace('__ROOFS__', open(os.path.join(HERE, 'roofs.json')).read())
 cut = back.index('// ---- the ground behind and beside the front')
 back_pre, back_main = back[:cut], back[cut:]
 def at(prefix):   # the one line starting with prefix

@@ -16,6 +16,7 @@ https://claude.ai/artifact/7uyf7q3572hqDM9wFo7NAM, private).
 pip install shapely matplotlib     # only for steps 1-2
 python3 osm_to_json.py             # 1. map.osm.xml -> osm.json (outlines in meters), osm-check.png
 python3 scene_export.py            # 2. osm.json -> scene.json (the back, in diorama units), scene-check.png
+python3 aerial_roofs.py            # (optional) the state's 2020 aerial -> roofs.json (roof colours, rooftop machines)
 python3 build.py <out.html>        # 3. ../live/gen.py's page + back.js + scene.json -> the preview
 ```
 
@@ -139,6 +140,14 @@ where the map has houses.
   white HMH banner. The skybridge over Atlantic moved to where the map draws it (footway bridge, way 8918: the
   garage to the ED's corner by Imus); it had been over the ED's turnaround, a guess. Fixed: Imaging and the
   Hillcrest Building had lost their colours to a misplaced comment in `STYLE`.
+
+- Roofs from the state's aerial (Jose's pick, 2026-10-28, over Google, whose terms forbid building models from its
+  content): `aerial_roofs.py` reads New Jersey's Natural 2020 orthophoto (NJOGIS, img.nj.gov, 1 ft pixels, access
+  constraints "none"), warps it onto the board with the same fit, and for each hospital building takes the roof's
+  colour and boxes where machines stand (patches that differ from the roof and are not shadow), into `roofs.json`.
+  Left out: the Helena Theurer Pavilion (built after the photo) and Medical Plaza (its tiers), and both helipads on
+  Link (the live one, and the old one the map calls disused, still painted in 2020). The photo's blue-green cast is
+  scaled out; the machines' colours are mostly greyed and grouped into a few shades (one mesh each).
 
 ## Open
 
