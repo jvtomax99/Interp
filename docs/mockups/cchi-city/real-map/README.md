@@ -191,6 +191,19 @@ where the map has houses.
   barrel canopy, glass door and windows, white lettering. The canopy walk runs in front of it (Jose); the diorama's old
   ambulance bay box, which stood on the walk there, is gone (its doors moved inside Link, out of sight).
 
+- The court off Atlantic Street (Jose's 11 photos, 2026-10-28, "Don Imus area"): an open drop-off court between
+  Women's and Children's (north), the curved building the map calls the ED (east) and Imus (south). The curved
+  building is silver panels with ribbon windows (it was red brick), two floors of curved glass over the court, its
+  ground floor set back under them (`under`) on a round tan column. Women's and Children's south face on the court:
+  tan stucco, the Joseph M. Sanzari Children's Hospital entrance under a grey canopy, a green glass wall with pink,
+  green, blue and peach diamonds, a round column. Imus' face on the court: grey panels with a glass band, a tall glass
+  atrium with a white overhanging roof on a white column, its name low in front. The walkway over Atlantic is the
+  Joseph M. Sanzari Family Walkway: grey panels with children's silhouettes and its name, glass on diagonal steel, the
+  Hackensack Meridian Health sign band, an X-braced pier at the hospital end. The court: asphalt, an island under
+  the walkway (big evergreen, lamp, hydrant, blue sign, fence), bollards, an orange barrier. The Atlantic Street
+  garage: brick spandrels and precast bands. Placed by eye from the photos: the glass wall's width, the canopy, the
+  atrium.
+
 ## Open
 
 - Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street

@@ -68,7 +68,8 @@ const STYLE = {
   n: { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc },                       // John Theurer Cancer Center: orange brick, white bands
   x8905: { tex:wncTex, roof:0xe6e2da, noWin:1 },   // Women's and Children's Pavilion: light precast, brick spandrels, teal ribbon windows, a glass grid (his aerials and Street View, 2026-10-28)
   x8899: { col:'#c9b79c', band:'#dccfb9', glass:'#6d93ad', roof:0xd9d2c4, kind:'glass', baseBlock:1 },   // Imus: tan brick, ribbon windows, a pale block ground floor
-  x8902: { col:'#b8553a', band:'#f1ece4', roof:0xd6d0c4 },                 // the ED: red brick, white bands
+  x8902: { col:'#d3d6db', band:'#c3c7cd', glass:'#93aebb', roof:0xd6d0c4, noWin:1 },   // the curved building on the court (map: the ED): silver panels, ribbon windows (Jose's photos, 2026-10-28)
+  x8914: { col:'#8a4a3a', band:'#cdbfa6', glass:'#2b2e36' },                // the Atlantic Street garage: brick spandrels, precast bands, open decks (his photos)
   x7562: { col:'#c3c8cf', band:'#aab0b9', glass:'#7f8b99', roof:0xdfe2e6 },   // across 2nd Street from Theurer: silver panels (Jose's photos)
   x8907: { col:'#8a3d2e', band:'#93463a', roof:0xd6d0c4 },                  // Creamer Imaging: plain red brick (his Street View, 2026-10-28)
   x8894: { col:'#8f4a3a', band:'#e6d8c2' },
@@ -142,7 +143,9 @@ function realBuilding(b){
     if (k === 't'){ Object.assign(BOX.t, { capTower: htpTowerPts(), platTop: y0 + 4*fl + 0.2, x:5.0, z:-38.0, crane:[5.0, -38.0] }); LABEL_AT.t = [5.0, y0 + h + 0.9, -38.0]; } }   // the badge over the glass tower
   BLD[b.key] = { b, E, h, y0, fl }; }
 SCN.lots.length && SCN.cars.lots.forEach(([x, z, a], j) => parkedAt(x, z, a, j*3 + 1, 0.26));
-SCN.blds.find(b => b.key === 'x8902').floors = 5;   // the ED is five floors in the photos
+Object.assign(SCN.blds.find(b => b.key === 'x8902'), { floors:5, under: { floors:1.4,
+  ground:[[-16.3,-24.48],[-16.3,-31.4],[-16.05,-31.74],[-9.97,-31.66],[-9.95,-24.51]],
+  open:[[-16.96,-24.48],[-16.99,-25.04],[-17.62,-26.6],[-17.71,-27.45],[-17.57,-29.54],[-17.32,-30.42],[-16.88,-31.33],[-16.3,-31.4],[-16.3,-24.48]] } });   // over the court on a column (his photos)
 Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:5 });
 SCN.blds.find(b => b.key === 'x8892').floors = 4;   // Audrey Hepburn Children's House: four floors under its pitched roofs (Google 3D)   // a tall plant building with roof fans, not a house (Jose's photos, 2026-10-28)
 // drives under buildings (Jose's photos, 2026-10-28). Link Pavilion: its front entrance is a drive-through under the
@@ -373,7 +376,7 @@ function backTree(x, z, s, kind){ if (kind === 'cone' || kind === 'blossom') ret
   const r = rngAt(x, z), mats = kind === 'red' ? BACK_RED : BACK_LEAF, h = 1.1*s;
   limb(x, 0.28, z, x + (r() - 0.5)*0.2, 0.3 + h, z + (r() - 0.5)*0.2, 0.13*s, 0.08*s, BARK);
   for (let k = 0; k < 6; k++){ const a = r()*Math.PI*2, d = (k ? 0.45 + r()*0.25 : 0)*s; add(new THREE.IcosahedronGeometry((k ? 0.42 + r()*0.18 : 0.7)*s, 1), mats[(k + Math.floor(r()*2)) % mats.length], x + Math.cos(a)*d, 0.3 + h + 0.35*s + (k ? r()*0.35*s : 0), z + Math.sin(a)*d); } }
-for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 11.6 && x < 16.0 && z > -36.6 && z < -30.9) && !(x > -6.5 && x < 12.8 && z > -47 && z < -29) && !(x > 12.6 && x < 19.9 && z > -47.4 && z < -36.4)) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
+for (const [x, z, s, k] of SCN.trees) if (!(x > -24.6 && x < -16.9 && z > -31.8 && z < -24.4) && !(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 11.6 && x < 16.0 && z > -36.6 && z < -30.9) && !(x > -6.5 && x < 12.8 && z > -47 && z < -29) && !(x > 12.6 && x < 19.9 && z > -47.4 && z < -36.4)) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
 // ==================== the corner of Atlantic and 2nd Street (Jose's photos, 2026-10-27) ====================
 // Seen from his window at John Theurer: Don Imus - WFAN Pediatric Center on the corner, tan brick with ribbon windows
 // and its name across the curved corner; the red-brick ED with white bands beside it; behind them the Helena Theurer
@@ -497,11 +500,80 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
 // ---- the Atlantic Street garage's corner on the intersection: a beige stair tower with a dark slit of glass up it (Google 3D) ----
 { const st = box(1.4, 4.1, 1.4, M(0xd9c7a2, { r:0.8 }), -25.1, 0.3 + 2.05, -45.2, 0.04), slit = M(0x2a3142, { r:0.3, m:0.4 });
   add(new THREE.PlaneGeometry(0.26, 3.3), slit, -24.385, 2.25, -45.2, false).rotation.y = Math.PI/2; add(new THREE.PlaneGeometry(0.26, 3.3), slit, -25.1, 2.25, -45.915, false).rotation.y = Math.PI; }
-// ---- a glass skybridge over Atlantic Street, from the garage to the ED's corner by Imus: the map's footway bridge (way 8918;
-// it was over the ED's turnaround, a guess, until 2026-10-28) ----
-{ const glassB = new THREE.MeshStandardMaterial({ color:0x3d5578, roughness:0.08, metalness:0.6, envMapIntensity:1.4 }), frameB = M(0xd3d6db, { r:0.5 });
-  const BR = { x0:-26.12, z0:-31.19, x1:-16.85, z1:-31.64 }, bl = Math.hypot(BR.x1 - BR.x0, BR.z1 - BR.z0), ba = -Math.atan2(BR.z1 - BR.z0, BR.x1 - BR.x0), bx = (BR.x0 + BR.x1)/2, bz = (BR.z0 + BR.z1)/2;
-  box(bl, 0.8, 1.1, glassB, bx, 2.3, bz, 0.03).rotation.y = ba; box(bl + 0.1, 0.14, 1.2, frameB, bx, 2.77, bz, 0.02).rotation.y = ba; box(bl + 0.1, 0.14, 1.2, frameB, bx, 1.83, bz, 0.02).rotation.y = ba; }
+// ---- the Joseph M. Sanzari Family Walkway over Atlantic Street, from the garage to the hospital by Imus: the map's footway
+// bridge (way 8918). His photos (2026-10-28): grey panels with children's silhouettes and its name, a band of glass on
+// diagonal steel, a sign band under it (Hackensack Meridian Health, Hackensack University Medical Center), an X-braced
+// grey pier at the hospital end ----
+{ const BR = { x0:-26.12, z0:-31.19, x1:-16.85, z1:-31.64 }, bl = Math.hypot(BR.x1 - BR.x0, BR.z1 - BR.z0), ba = -Math.atan2(BR.z1 - BR.z0, BR.x1 - BR.x0), bx = (BR.x0 + BR.x1)/2, bz = (BR.z0 + BR.z1)/2;
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#c9ccd1'; g.fillRect(0, 0, 1024, 128); g.fillStyle = '#d9dce0'; g.fillRect(0, 0, 1024, 44);
+  g.fillStyle = '#5f8296'; g.fillRect(0, 46, 1024, 44); g.strokeStyle = '#e8eaee'; g.lineWidth = 3;
+  for (let x = 0; x < 1024; x += 64){ g.beginPath(); g.moveTo(x, 46); g.lineTo(x, 90); g.moveTo(x, 90); g.lineTo(x + 64, 46); g.stroke(); }
+  g.fillStyle = '#f4f5f7'; g.fillRect(0, 92, 1024, 36);
+  g.fillStyle = '#1d2230'; g.font = 'bold 20px Georgia, serif'; g.textAlign = 'center'; g.fillText('JOSEPH M. SANZARI FAMILY WALKWAY', 512, 30);
+  for (const x of [200, 250, 300, 724, 774, 824, 874]){ g.beginPath(); g.arc(x, 14, 5, 0, 7); g.fill(); g.fillRect(x - 4, 19, 8, 14); g.fillRect(x - 9, 22, 18, 3); }
+  g.font = '18px Georgia, serif'; g.fillStyle = '#26324d'; g.fillText('Hackensack Meridian Health      Hackensack University Medical Center', 512, 117);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  const side = new THREE.MeshStandardMaterial({ map:t, roughness:0.45, metalness:0.2, envMapIntensity:0.6 }), plain = M(0xc9ccd1, { r:0.5 });
+  add(new THREE.BoxGeometry(bl, 1.1, 1.1), plain, bx, 2.3, bz, true).rotation.y = ba;
+  for (const sg of [-1, 1]){ const nx = -Math.sin(ba)*sg, nz = Math.cos(ba)*sg, m = add(new THREE.PlaneGeometry(bl, 1.1), side, bx + nx*0.56, 2.3, bz + nz*0.56, false); m.rotation.y = ba + (sg < 0 ? Math.PI : 0); }
+  const grey = M(0xa9adb4, { r:0.5, m:0.2 }), px = -19.6, pz = bz + (px - bx)*Math.tan(-ba);
+  for (const o of [-0.38, 0.38]) add(new THREE.BoxGeometry(0.16, 1.45, 0.16), grey, px + o, 0.3 + 0.72, pz);
+  for (const sg of [-1, 1]){ const m = add(new THREE.BoxGeometry(0.08, 1.5, 0.08), grey, px, 0.3 + 0.72, pz); m.rotation.z = sg*0.48; } }
+// ==================== the court off Atlantic Street (Jose's 11 photos, 2026-10-28) ====================
+// An open drop-off court between Women's and Children's (north), the curved silver building (east) and Imus (south):
+// asphalt to the curved building's overhang, steel bollards along its sidewalk, an orange barrier; at its south-west
+// corner an island under the walkway with a big evergreen, a lamp, a red hydrant, a blue sign and a black fence.
+{ slab([[-24.62,-24.6],[-17.0,-24.6],[-17.75,-27.4],[-17.4,-30.3],[-18.6,-30.0],[-22.0,-29.8],[-24.95,-29.6]], 0.17, 0.1, asphalt);
+  slab([[-24.95,-29.6],[-22.0,-29.8],[-19.3,-30.0],[-18.7,-30.6],[-18.9,-31.4],[-24.98,-31.3]], 0.17, 0.16, M(0xd6d2c8, { r:0.8 }));
+  slab([[-24.6,-29.85],[-22.0,-30.0],[-19.6,-30.2],[-19.2,-30.7],[-19.4,-31.2],[-24.6,-31.15]], 0.2, 0.15, M(0x5a3a2a, { r:0.95 }));
+  tree(-21.4, -30.65, 1.25, 'cone'); shrub(-20.2, 0.35, -30.55, 0.32, 1); lamp(-19.9, -30.15);
+  add(new THREE.CylinderGeometry(0.07, 0.08, 0.28, 10), M(0xc8322c, { r:0.5 }), -19.55, 0.48, -30.3);
+  box(0.06, 0.5, 0.3, M(0x2b5ea8, { r:0.5 }), -22.6, 0.6, -30.0, 0.02);
+  box(2.4, 0.18, 0.03, M(0x1b1d22, { r:0.5, m:0.4 }), -20.6, 0.45, -30.05, 0.01);
+  const steel = M(0xc4c8ce, { r:0.25, m:0.85 });
+  for (let z = -24.9; z > -27.0; z -= 0.45) add(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), steel, -18.95 + (z + 24.9)*0.05, 0.38, z);
+  box(0.5, 0.25, 0.16, M(0xf26a1b, { r:0.6 }), -18.9, 0.4, -26.6, 0.03); }
+// the curved building's glass: two floors of curved glass along its west face, over the court, a white band under it
+{ const run = [[-16.96,-24.48],[-16.99,-25.04],[-17.62,-26.6],[-17.71,-27.45],[-17.57,-29.54],[-17.32,-30.42],[-16.88,-31.33]], fl = FL, y0 = 0.3 + 1.4*fl;
+  const t = curtainTex(); const gm = new THREE.MeshStandardMaterial({ map:t, color:0xbfe6e6, roughness:0.1, metalness:0.4, envMapIntensity:1.3 }), wb = M(0xe6e8ec, { r:0.5 });
+  for (let i = 1; i < run.length; i++){ const [ax, az] = run[i-1], [bx, bz] = run[i], L = Math.hypot(bx - ax, bz - az), mx = (ax + bx)/2, mz = (az + bz)/2, nx = -(bz - az)/L, nz = (bx - ax)/L;
+    const o = nx < 0 ? 1 : -1, a = Math.atan2(nx*o, nz*o), tt = t.clone(); tt.needsUpdate = true; tt.repeat.set(L/1.0, 2);
+    const m = add(new THREE.PlaneGeometry(L + 0.03, 1.8*fl), gm.clone(), mx + nx*o*0.05, y0 + 0.9*fl, mz + nz*o*0.05, false); m.material.map = tt; m.rotation.y = a;
+    for (const y of [y0 - 0.05, y0 + 1.8*fl + 0.04]) box(L + 0.06, 0.1, 0.3, wb, mx + nx*o*0.12, y, mz + nz*o*0.12, 0.02).rotation.y = a; }
+  add(new THREE.CylinderGeometry(0.26, 0.26, 1.4*fl, 18), M(0xcdb898, { r:0.85 }), -17.0, 0.3 + 0.7*fl, -28.1); }
+// Women's and Children's south face on the court: tan stucco, the Joseph M. Sanzari Children's Hospital entrance under a
+// grey canopy, a green glass wall above it with pink, green, blue and peach diamonds, a round column at its west end
+{ const z = -24.6, h = 6*FL;
+  const c = document.createElement('canvas'); c.width = 256; c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = '#d6b98c'; g.fillRect(0, 0, 256, 256); g.fillStyle = '#9fc9c1'; for (let r = 0; r < 6; r++) g.fillRect(60, 18 + r*40, 120, 18);
+  const tan = new THREE.CanvasTexture(c); tan.colorSpace = THREE.SRGBColorSpace;
+  add(new THREE.PlaneGeometry(5.9, h), new THREE.MeshStandardMaterial({ map:tan, roughness:0.85 }), -19.95, 0.3 + h/2, z, false).rotation.y = Math.PI;
+  const d = document.createElement('canvas'); d.width = 256; d.height = 320; const q = d.getContext('2d');
+  q.fillStyle = '#2f5a52'; q.fillRect(0, 0, 256, 320); q.strokeStyle = '#d9e2e0'; q.lineWidth = 3;
+  for (let x = 0; x <= 256; x += 21) { q.beginPath(); q.moveTo(x, 0); q.lineTo(x, 320); q.stroke(); } for (let y = 0; y <= 320; y += 26) { q.beginPath(); q.moveTo(0, y); q.lineTo(256, y); q.stroke(); }
+  q.fillStyle = 'rgba(190,240,225,.55)'; for (const [x, y] of [[42, 52], [126, 130], [189, 78], [63, 208], [210, 182]]) q.fillRect(x, y, 21, 26);
+  const dia = (x, y, col) => { q.fillStyle = col; q.beginPath(); q.moveTo(x, y - 15); q.lineTo(x + 15, y); q.lineTo(x, y + 15); q.lineTo(x - 15, y); q.fill(); };
+  dia(22, 30, '#e46fc8'); dia(90, 40, '#a6e34a'); dia(92, 74, '#a6e34a'); dia(210, 236, '#a6e34a'); dia(212, 268, '#a6e34a'); dia(178, 296, '#e46fc8'); dia(220, 300, '#e46fc8');
+  q.fillStyle = '#2d8fe0'; q.fillRect(4, 64, 36, 22); q.fillRect(56, 26, 30, 22); q.fillStyle = '#f2c9a0'; q.fillRect(108, 6, 24, 24); q.fillRect(176, 220, 24, 24);
+  const dt = new THREE.CanvasTexture(d); dt.colorSpace = THREE.SRGBColorSpace;
+  add(new THREE.PlaneGeometry(3.5, 4.4*FL), new THREE.MeshStandardMaterial({ map:dt, roughness:0.15, metalness:0.35, envMapIntensity:1.1 }), -20.85, 0.3 + 1.2*FL + 2.2*FL, z - 0.03, false).rotation.y = Math.PI;
+  add(new THREE.PlaneGeometry(3.5, 1.1*FL), new THREE.MeshStandardMaterial({ color:0x8fb4b4, roughness:0.08, metalness:0.5 }), -20.85, 0.3 + 0.55*FL, z - 0.03, false).rotation.y = Math.PI;
+  box(2.0, 0.08, 0.7, M(0xa8acb3, { r:0.4, m:0.3 }), -20.6, 0.3 + 0.62, z - 0.35, 0.02);
+  for (const x of [-21.2, -20.0]) add(new THREE.PlaneGeometry(0.5, 0.5), M(0xe9edf1, { r:0.4 }), x, 0.3 + 0.25, z - 0.04, false).rotation.y = Math.PI;
+  const tc = textCanvas(["JOSEPH M. SANZARI CHILDREN'S HOSPITAL"], { w:1024, lh:64, font:'bold 40px Inter, Arial, sans-serif', col:'#eef2f4' }), tt2 = new THREE.CanvasTexture(tc); tt2.colorSpace = THREE.SRGBColorSpace;
+  add(new THREE.PlaneGeometry(2.0, 0.13), new THREE.MeshBasicMaterial({ map:tt2, transparent:true }), -20.6, 0.3 + 0.75, z - 0.05, false).rotation.y = Math.PI;
+  add(new THREE.CylinderGeometry(0.17, 0.17, 1.2*FL, 16), M(0xcdb898, { r:0.85 }), -22.55, 0.3 + 0.6*FL, z - 0.35); }
+// Imus' face on the court: two floors of grey panels with a glass band, a tall glass atrium over them with a white
+// overhanging roof on a white tree column, its name on the low wall in front
+{ const ax = -16.05, az = -31.74, bx2 = -19.22, bz2 = -32.37, L = Math.hypot(bx2 - ax, bz2 - az), mx = (ax + bx2)/2, mz = (az + bz2)/2, a = Math.atan2(-(bz2 - az)/L*-1, (bx2 - ax)/L*-1);
+  const nx = (bz2 - az)/L, nz = -(bx2 - ax)/L, o = nz > 0 ? 1 : -1, ry = Math.atan2(nx*o, nz*o), P = (d, y, w, h, mat) => { const m = add(new THREE.PlaneGeometry(w, h), mat, mx + nx*o*d, y, mz + nz*o*d, false); m.rotation.y = ry; return m; };
+  P(0.04, 0.3 + FL, L, 2*FL, M(0xc9ccd1, { r:0.5 })); P(0.05, 0.3 + FL, L - 0.2, 0.5*FL, new THREE.MeshStandardMaterial({ color:0x6f93a6, roughness:0.08, metalness:0.5 }));
+  const g2 = curtainTex(); g2.repeat.set(L/0.9, 3); P(0.05, 0.3 + 3.5*FL, L, 3*FL, new THREE.MeshStandardMaterial({ map:g2, roughness:0.1, metalness:0.4, envMapIntensity:1.3 }));
+  box(L + 0.6, 0.08, 1.2, M(0xf2f2ef, { r:0.5 }), mx + nx*o*0.45, 0.3 + 5.1*FL, mz + nz*o*0.45, 0.02).rotation.y = ry;
+  add(new THREE.CylinderGeometry(0.05, 0.06, 5*FL, 8), M(0xf2f2ef, { r:0.5 }), mx + nx*o*0.8, 0.3 + 2.5*FL, mz + nz*o*0.8);
+  const tc = textCanvas(['DON IMUS - WFAN PEDIATRIC CENTER'], { w:1024, lh:64, font:'bold 38px Georgia, serif', col:'#2a2a2a' }), tt = new THREE.CanvasTexture(tc); tt.colorSpace = THREE.SRGBColorSpace;
+  P(0.06, 0.48, L - 0.4, 0.16, new THREE.MeshBasicMaterial({ map:tt, transparent:true })); }
 // ---- the intersection: crosswalks on all four sides, pink paving at the corners, a stop sign ----
 { // a crosswalk: bars lying along the road, side by side across it
   const across = (cx, cz, roadAlongX, n=7) => { for (let i = 0; i < n; i++){ const o = (i - (n - 1)/2)*0.37;
