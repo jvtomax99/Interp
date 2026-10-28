@@ -22,7 +22,15 @@ chat): he said it was "still not accurate to the actual location"; measured,
 the hand-built front was off (Link Pavilion a third of its real size, Jurist
 15 m off, a lot where the map has houses), so the front's three buildings now
 come from the map too and the diorama's ground (drive, canopy, café, movers)
-was refitted round them (README, "The fit"). Build: `python3 build.py
+was refitted round them (README, "The fit").
+Then, from his photos (his window at Theurer, Street View along 2nd St and
+Atlantic, Google 3D): the corner of Atlantic and 2nd, Helena Theurer
+Pavilion (big curved glass tower at the street, the bridge, the HMH tower
+on Imus's side), the little park beside it, the older orange-brick tower,
+Audrey Hepburn House, the silver plant with roof fans (README, Decisions).
+Method that worked: render the preview from the same spot as each photo
+(`window.__view`, `__built` all 1, fov ~70 for Street View) and compare side
+by side. 60 fps on his iPhone. Next: more photo areas he sends. Build: `python3 build.py
 <out.html>` there (it runs `../live/gen.py` first). Preview Artifact (private):
 https://claude.ai/artifact/7uyf7q3572hqDM9wFo7NAM. The README has the
 decisions and the open items. Waiting on Jose:

@@ -102,6 +102,18 @@ where the map has houses.
   a beige stair tower on its corner; a glass skybridge crosses Atlantic from
   the garage to the ED, north of Imus (where it lands is a guess).
 - His iPhone runs the preview at 60 fps (2026-10-28).
+- Helena Theurer Pavilion and the little park beside it (his 12 Street View
+  and Google 3D shots, 2026-10-28): the bridge sits low over the road with a
+  tall terracotta block on a deep grey band (two dark panels either side of
+  its name, the name on both faces); the overhang stands on slim grey piers
+  over a raised brick planter along the sidewalk; the older hospital tower
+  at the platform's east end (orange brick, white bands, beige base, ten
+  floors) rises behind the park; the park is a round plaza in rings of pink
+  and terracotta paving round a planted centre, red-leaf trees along the
+  street, a brick utility house, white tanks and a tent behind (it replaces
+  the diorama's pond garden); Audrey Hepburn Children's House has two grey
+  pitched roofs with dormers over four floors; the silver building with the
+  roof fans carries the HMH mark on its corner.
 - The glass tower is big (Jose, 2026-10-28, "pay attention to the upper glass
   portion, it's big"): about 16 x 17 units, its long curved face toward the
   corner, from beside the bridge to behind Imus (`htpCurve`).

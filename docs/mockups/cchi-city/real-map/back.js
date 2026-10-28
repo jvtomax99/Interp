@@ -124,7 +124,8 @@ function realBuilding(b){
   BLD[b.key] = { b, E, h, y0, fl }; }
 SCN.lots.length && SCN.cars.lots.forEach(([x, z, a], j) => parkedAt(x, z, a, j*3 + 1, 0.26));
 SCN.blds.find(b => b.key === 'x8902').floors = 5;   // the ED is five floors in the photos
-Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:5 });   // a tall plant building with roof fans, not a house (Jose's photos, 2026-10-28)
+Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:5 });
+SCN.blds.find(b => b.key === 'x8892').floors = 4;   // Audrey Hepburn Children's House: four floors under its pitched roofs (Google 3D)   // a tall plant building with roof fans, not a house (Jose's photos, 2026-10-28)
 for (const b of SCN.blds) realBuilding(b);
 // an entrance on a real building's wall: canopy, columns, glass doors into a lobby, planters either side
 const DOOR_AT = {};
@@ -165,7 +166,7 @@ function backTree(x, z, s, kind){ if (kind === 'cone' || kind === 'blossom') ret
   const r = rngAt(x, z), mats = kind === 'red' ? BACK_RED : BACK_LEAF, h = 1.1*s;
   limb(x, 0.28, z, x + (r() - 0.5)*0.2, 0.3 + h, z + (r() - 0.5)*0.2, 0.13*s, 0.08*s, BARK);
   for (let k = 0; k < 6; k++){ const a = r()*Math.PI*2, d = (k ? 0.45 + r()*0.25 : 0)*s; add(new THREE.IcosahedronGeometry((k ? 0.42 + r()*0.18 : 0.7)*s, 1), mats[(k + Math.floor(r()*2)) % mats.length], x + Math.cos(a)*d, 0.3 + h + 0.35*s + (k ? r()*0.35*s : 0), z + Math.sin(a)*d); } }
-for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 11.6 && x < 16.0 && z > -36.6 && z < -30.9) && !(x > -6.5 && x < 12.8 && z > -47 && z < -29) && Math.hypot(x - 14.2, z + 44.8) > 3.4) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
+for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 11.6 && x < 16.0 && z > -36.6 && z < -30.9) && !(x > -6.5 && x < 12.8 && z > -47 && z < -29) && !(x > 12.6 && x < 19.9 && z > -47.4 && z < -36.4)) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
 // ==================== the corner of Atlantic and 2nd Street (Jose's photos, 2026-10-27) ====================
 // Seen from his window at John Theurer: Don Imus - WFAN Pediatric Center on the corner, tan brick with ribbon windows
 // and its name across the curved corner; the red-brick ED with white bands beside it; behind them the Helena Theurer
@@ -226,19 +227,29 @@ function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rect
   wallsOf(b.pts, y0, P4, TERRA_M); slab(b.pts, y0 + P4, 0.2, M(0xd8d2c8), [], true);
   const T = htpTowerPts(); wallsOf(T, ty, th, CURTAIN_M); slab(T, ty + th, 0.25, M(0xc9ccd2), [], true);
   slab(T, ty - 0.08, 0.08, M(0x2f3442, { r:0.8 }));   // its dark underside where it reaches out past the platform
-  for (const [x, z] of [htpCurve(0.72, 0.7), htpCurve(0.88, 0.7), [8.8, -45.7], [11.6, -45.7]]) add(new THREE.CylinderGeometry(0.16, 0.16, ty - 0.3, 12), M(0xd3d6db, { r:0.5 }), x, 0.3 + (ty - 0.3)/2, z);
+  for (const [x, z] of [htpCurve(0.86, 0.7), [11.4, -45.6]]) box(0.36, ty - 0.3, 0.7, M(0xc9cdd3, { r:0.45, m:0.2 }), x, 0.3 + (ty - 0.3)/2, z, 0.03);   // slim grey piers under it
+  // under it, along the sidewalk: a raised brick planter of shrubs and red flowers
+  box(11.0, 0.45, 0.8, M(0xa0523d, { r:0.9 }), 6.2, 0.3 + 0.225, -46.9, 0.04);
+  { const r = rngAt(6, -47); for (let x = 1.1; x < 11.6; x += 0.85){ shrub(x, 0.76, -46.9 + (r() - 0.5)*0.2, 0.22 + r()*0.08, Math.floor(r()*3));
+      for (let q = 0; q < 4; q++) add(new THREE.IcosahedronGeometry(0.05, 0), FLOWERS[q % 2 ? 0 : 2], x + 0.4 + (r() - 0.5)*0.3, 0.8, -46.9 + (r() - 0.5)*0.5, false); } }
   for (const [x, z] of [[4.0, -34.0], [8.5, -38.5], [6.0, -42.5]]) box(1.6, 0.5, 1.2, M(0x9a97a6), x, ty + th + 0.5, z, 0.05);
   // the slim tower: on Imus's side of the street, against the curved tower's far side (Jose, 2026-10-28), on terracotta
   wallsOf(HTP_SLIM, y0, ty - y0, TERRA_M); slab(HTP_SLIM, ty - 0.2, 0.2, M(0xd8d2c8), [], true);
   wallsOf(HTP_SLIM, ty, th - 0.9, CURTAIN_M); slab(HTP_SLIM, ty + th - 0.9, 0.22, M(0xc9ccd2), [], true);
   // the bridge over 2nd Street: grey fascia, terracotta above, its underside lit, columns on the sidewalks
-  const by = 0.3 + 1.7*FL; slab(HTP_BRIDGE, by - 0.02, 0.06, M(0x2f3442, { r:0.8 }), [], true);
-  wallsOf(HTP_BRIDGE, by, 0.42, FAS); wallsOf(HTP_BRIDGE, by + 0.42, y0 + P4 - by - 0.42, TERRA_M); slab(HTP_BRIDGE, y0 + P4, 0.2, M(0xd8d2c8), [], true);
+  const by = 0.3 + 1.15*FL; slab(HTP_BRIDGE, by - 0.02, 0.06, M(0x2f3442, { r:0.8 }), [], true);   // low over the road, the terracotta tall above (his photos)
+  wallsOf(HTP_BRIDGE, by, 0.6, FAS); wallsOf(HTP_BRIDGE, by + 0.6, y0 + P4 - by - 0.6, TERRA_M); slab(HTP_BRIDGE, y0 + P4, 0.2, M(0xd8d2c8), [], true);
   for (const [x, z] of [[-2.6, -47.7], [0.5, -47.7], [3.6, -47.7], [-2.6, -52.3], [3.6, -52.3]]) add(new THREE.CylinderGeometry(0.16, 0.16, by - 0.3, 12), FAS, x, 0.3 + (by - 0.3)/2, z);
+  for (const [fx, ry] of [[-3.03, -Math.PI/2], [4.03, Math.PI/2]]) for (const z of [-52.1, -47.7]) add(new THREE.PlaneGeometry(1.9, 0.42), M(0x2f3540, { r:0.6 }), fx, by + 0.3, z, false).rotation.y = ry;
+  // the older hospital tower at the platform's east end, behind the little park (his Google 3D): orange brick with white
+  // bands and ribbon windows over a beige base, ten floors
+  { const OT = rectPts(19.75, -44.25, 29.15, -26.1), ofl = FL*0.8, base = 3*ofl, top = 10*ofl, mk = (col, band, glass, fl) => { const t = brickTex(col, band, glass); t.repeat.set(1/0.9, 1/fl); return new THREE.MeshStandardMaterial({ map:t, roughness:0.85, envMapIntensity:0.12 }); };
+    wallsOf(OT, y0, base, mk('#d9c9a8', '#e8dcc6', '#6f8ea8', ofl)); wallsOf(OT, y0 + base, top - base, mk('#c96a42', '#f0ece4', '#5f7f9c', ofl));
+    slab(OT, y0 + top, 0.22, M(0xd9d2c4), [], true); box(3.0, 0.7, 2.4, M(0x9a97a6), 24.4, y0 + top + 0.55, -35.0, 0.06); }
   CUR = '_'; for (let k = 0; k < 5; k++) glow(0.5, by - 0.12, -52.6 + k*1.4, 0.7, 0xffe2b0); CUR = 't'; }
 pend.push(() => { CUR = 't'; const FL = htpFL(), T = htpTowerPts(), ty = 0.3 + 4*FL + 0.2, th = 13*FL - 4*FL - 0.2;
   letterAlong([T[3], ...T.slice(4), T[0]], ty + th - FL*0.45, 0.62, textCanvas(['HACKENSACK UNIVERSITY MEDICAL CENTER'], { w:2048, lh:96, font:'600 64px Georgia, serif', spacing:'4px' }), [-20, -50], 0.06);
-  letterAlong([[-3.0, -53.3], [-3.0, -46.5]], 0.3 + 1.7*FL + 0.21, 0.3, textCanvas(['Helena Theurer Pavilion'], { w:1024, lh:64, font:'italic 44px Georgia, serif', col:'#55606e' }), [0.5, -50], 0.04);
+  for (const [x, from] of [[-3.0, [-10, -50]], [4.0, [10, -50]]]) letterAlong([[x, -51.0], [x, -48.8]], 0.3 + 1.15*FL + 0.3, 0.3, textCanvas(['Helena Theurer Pavilion'], { w:1024, lh:64, font:'italic 44px Georgia, serif', col:'#55606e' }), from, 0.04);
   add(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), 13.8, ty + th - 0.9 - 1.0, -36.04, false).rotation.y = Math.PI;   // the HMH mark, on the slim tower's face toward 2nd Street
   CUR = '_'; });
 
@@ -251,6 +262,31 @@ pend.push(() => { const B = BLD.x8899.b, run = B.pts.slice(2, 9);   // the curve
 { const y = 0.3 + 5*FL + 0.22, hous = M(0xb9bec6, { r:0.5, m:0.3 }), dark = M(0x2a2f3a, { r:0.7 }), hub = M(0x8d939e, { r:0.4, m:0.5 });
   for (let z = -56.2; z > -69; z -= 2.05){ add(new THREE.CylinderGeometry(0.86, 0.9, 0.42, 24), hous, -15.85, y + 0.21, z);
     add(new THREE.CylinderGeometry(0.72, 0.72, 0.02, 24), dark, -15.85, y + 0.43, z, false); add(new THREE.CylinderGeometry(0.16, 0.16, 0.05, 12), hub, -15.85, y + 0.45, z, false); } }
+// the silver building carries the HMH mark high on its corner, on both faces (Street View from 2nd St and Atlantic)
+pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMaterial({ map:TEX, transparent:true });
+  add(new THREE.PlaneGeometry(1.3, 1.3), mk(), -16.9, y, -54.0, false);
+  add(new THREE.PlaneGeometry(1.3, 1.3), mk(), -17.97, y, -55.3, false).rotation.y = -Math.PI/2; });
+// ---- Audrey Hepburn Children's House: red brick under two grey pitched roofs, ridges along its length (Google 3D) ----
+{ const roofM = M(0x8d939e, { r:0.7 }), y = 0.3 + 4*FL + 0.22;
+  for (const cx of [31.9, 34.8]){ const sh = new THREE.Shape([new THREE.Vector2(-1.5, 0), new THREE.Vector2(1.5, 0), new THREE.Vector2(0, 0.85)]);
+    const g = new THREE.ExtrudeGeometry(sh, { depth:9.7, bevelEnabled:false }); g.translate(cx, y, -62.4); add(g, roofM, 0, 0, 0, true);
+    for (let z = -61.4; z < -53; z += 2.2) box(0.45, 0.4, 0.5, M(0xf2ede4, { r:0.6 }), cx - 0.85, y + 0.32, z, 0.04); } }   // dormers on the street side
+// ---- the little park beside the pavilion (his Street View and Google 3D): a round plaza paved in rings of pink and
+// terracotta round a planted centre, red-leaf trees along the street, a small brick utility house with white tanks
+// and a white tent behind (it replaces the diorama's pond garden, which stood about here) ----
+{ const PX = 16.0, PZ = -43.3, PINKP = M(0xe2a593, { r:0.85 }), TERRAP = M(0xb8644a, { r:0.85 }), BEIGE = M(0xe8dcc6, { r:0.85 });
+  for (const [r0, r1, m, y] of [[2.95, 3.3, BEIGE, 0.262], [2.3, 2.95, PINKP, 0.266], [1.85, 2.3, TERRAP, 0.27], [1.3, 1.85, PINKP, 0.274], [1.0, 1.3, BEIGE, 0.278]]){
+    const g = new THREE.RingGeometry(r0, r1, 56); g.rotateX(-Math.PI/2); add(g, m, PX, y, PZ, false); }
+  add(new THREE.CylinderGeometry(1.0, 1.05, 0.24, 36), M(0x9a5a44, { r:0.9 }), PX, 0.39, PZ);   // the planted centre in a low brick ring
+  add(new THREE.CylinderGeometry(0.92, 0.92, 0.04, 36), M(0x5a4030, { r:1 }), PX, 0.52, PZ, false);
+  { const r = rngAt(PX, PZ); shrub(PX, 0.54, PZ, 0.34, 1); for (let q = 0; q < 22; q++){ const a = q/22*Math.PI*2, d = 0.5 + r()*0.32; add(new THREE.IcosahedronGeometry(0.06, 0), FLOWERS[q % 4], PX + Math.cos(a)*d, 0.58 + r()*0.04, PZ + Math.sin(a)*d, false); } }
+  for (const a of [0.6, 2.2, 3.8, 5.3]) bench(PX + Math.cos(a)*2.55, PZ + Math.sin(a)*2.55, Math.PI/2 - a, 0.27);
+  for (const a of [1.4, 3.0, 4.55, 6.0]) shrub(PX + Math.cos(a)*3.55, 0.3, PZ + Math.sin(a)*3.55, 0.3, 2);
+  for (let x = 13.3; x < 19.6; x += 1.55) tree(x, -47.1, 0.62, 'red');   // red-leaf trees along the street
+  // behind it: the brick utility house, two white tanks, a white tent
+  box(2.2, 1.1, 1.4, M(0xa0523d, { r:0.9 }), 18.5, 0.3 + 0.55, -38.3, 0.05); box(2.3, 0.1, 1.5, M(0xd8d2c8), 18.5, 0.3 + 1.15, -38.3, 0.03);
+  for (const x of [14.8, 15.6]) add(new THREE.CylinderGeometry(0.32, 0.32, 1.4, 20), M(0xf2f2f0, { r:0.4, m:0.2 }), x, 0.3 + 0.7, -38.0);
+  box(1.1, 0.9, 1.8, M(0xf4f4f2, { r:0.7 }), 16.9, 0.3 + 0.45, -38.2, 0.12); }
 // ---- the Atlantic Street garage's corner on the intersection: a beige stair tower with a dark slit of glass up it (Google 3D) ----
 { const st = box(1.4, 4.1, 1.4, M(0xd9c7a2, { r:0.8 }), -25.1, 0.3 + 2.05, -45.2, 0.04), slit = M(0x2a3142, { r:0.3, m:0.4 });
   add(new THREE.PlaneGeometry(0.26, 3.3), slit, -24.385, 2.25, -45.2, false).rotation.y = Math.PI/2; add(new THREE.PlaneGeometry(0.26, 3.3), slit, -25.1, 2.25, -45.915, false).rotation.y = Math.PI; }

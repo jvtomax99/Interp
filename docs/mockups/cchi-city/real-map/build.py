@@ -22,6 +22,8 @@ def drop(first, last):   # drop the lines from the one starting with first to th
 # old helipad on the tower), and the hedge along the old board's back edge
 drop("// Terminology: the tall white tower", "  const l = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6)")
 drop("// the long glass buildings", "for (const k of ['x2','x5'])")
+# the diorama's pond garden: the real campus has a round paved plaza there instead (back.js, Jose's photos 2026-10-28)
+drop("// the garden at the back left: a pond with lily pads", "  for (const a of [0.2, 1.55, 3.1, 4.55]) bollard(PX")
 # the hand-built front three (Jose, 2026-10-28: "still not accurate"): Link Pavilion's box, banners and planter; Jurist's
 # box; Medical Plaza's boxes and colonnade. back.js builds all three from the map, with their looks.
 drop("// Ethics: the brown-brick building at the end of the drive", "  tree(sx*4.5, -9.45, 0.42, 'cone'); }")
@@ -97,8 +99,7 @@ rep("function bed(pts, y=0.3, o={}){\n","function bed(pts, y=0.3, o={}){\n  if (
 rep("function bench(x, z, ry=0, y=0.3){ ","function bench(x, z, ry=0, y=0.3){ if (blockedXZ(x, z, 0.2)) return; ")
 rep("function stand(kind, i, x, z, ry=0, f=0){ ","function stand(kind, i, x, z, ry=0, f=0){ if (blockedXZ(x, z, 0.3)) return null; ")
 # the garden moves into the open court between Link Pavilion and the Patient Pavilion
-rep("{ const PX = -15, PZ = -11.6;","// the garden sits on the lawn between the Helena Theurer Pavilion and 2nd Street (Jose, 2026-10-27), at 60% size to fit, further along 2nd Street from the bridge\n{ const GS = new THREE.Group(); GS.position.set(14.2, 0, -44.8); GS.scale.set(0.6, 1, 0.6); BASE.add(GS); G = GS; const g0 = GLOWS.length, PX = 0, PZ = 0;")
-rep("  for (const a of [0.2, 1.55, 3.1, 4.55]) bollard(PX + Math.cos(a)*3.0, PZ + Math.sin(a)*3.0); }","  for (const a of [0.2, 1.55, 3.1, 4.55]) bollard(PX + Math.cos(a)*3.0, PZ + Math.sin(a)*3.0);\n  G = BASE; GS.updateMatrixWorld(true); GLOWS.slice(g0).forEach(sp => GS.localToWorld(sp.position)); }")
+# (the pond garden is dropped above: back.js builds the real little park beside the pavilion in its place)
 # traffic: Prospect's cars run the board's full width; cars on 2nd Street, Atlantic and Essex; walkers on their sidewalks
 rep("const CAR_IN2 = vehicle('car', 0x2b2f3a);","""const CAR_IN2 = vehicle('car', 0x2b2f3a);
 const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlA',0x5b6170,17000],['atlB',0xc9583a,19000],['essexA',0xf2c94c,12000],['essexB',0x3aa6a0,13000]]
