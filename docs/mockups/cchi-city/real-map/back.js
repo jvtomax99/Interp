@@ -59,7 +59,8 @@ function wncTex(){ const c = document.createElement('canvas'); c.width = 64; c.h
 const STYLE = {
   e: { col:'#6e3a33', band:'#7a4239', roof:0xd9cdb8 },                        // George Link Jr. Pavilion: brown brick (as the hand-built one was)
   s: { col:'#7e3b37', band:'#e6d8c2', roof:0xf1f2f4, glassBase:2 },          // Jurist: brick, cream bands, glass on its two lower floors, a white roof
-  c: { col:'#a2705f', band:'#e8dcc6' },                                      // Medical Plaza: maroon brick, cream bands; steps back, dark glass on top (tiers)
+  c: { col:'#563733', band:'#c9bfb2', roof:0xd6d0c6, kind:'glass' },                     // Medical Plaza: maroon granite, light granite bands (his photos from the court, 2026-10-28)
+  x8886: { col:'#8e857c', band:'#9c938a', glass:'#2b2e35' },                 // the Visitor Parking garage: brown-grey concrete, dark open decks
   t: { col:'#c9c2b6', band:'#efe8dc', glass:'#33456e', roof:0xe6e2da, kind:'glass' },   // Patient Pavilion: glass bands on pale stone
   n: { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc },                       // John Theurer Cancer Center: orange brick, white bands
   x8905: { tex:wncTex, roof:0xe6e2da, noWin:1 },   // Women's and Children's Pavilion: light precast, brick spandrels, teal ribbon windows, a glass grid (his aerials and Street View, 2026-10-28)
@@ -122,9 +123,11 @@ function realBuilding(b){
   if (b.tiers){ hTop = yb - 0.22 - y0; const s2 = 1.6, T = b.tiers[b.tiers.length - 1].pts, cx = T.reduce((a, p) => a + p[0], 0)/T.length, cz = T.reduce((a, p) => a + p[1], 0)/T.length;
     box(s2*1.4, 0.4, s2, M(0x8a8796), cx, yb + 0.2, cz, 0.06); }
   // Medical Plaza's colonnade on the drive (his Street View): brick piers under a cream beam, along its wall facing the drive
-  if (b.key === 'c'){ const e = E.filter(q => q.L > 5).sort((p, q) => p.nx - q.nx)[0], pm = M(0x7a3530, { r:0.85 });
-    for (let t = 0.7; t < e.L - 0.3; t += 1.55){ const [px, pz] = e.at(t); box(0.3, 1.25, 0.3, pm, px + e.nx*0.3, 0.3 + 0.62, pz + e.nz*0.3, 0.03); }
-    const [mx, mz] = e.at(e.L/2); box(e.L - 0.6, 0.18, 0.5, M(0xe6d8c2, { r:0.6 }), mx + e.nx*0.25, 0.3 + 1.3, mz + e.nz*0.25, 0.03).rotation.y = e.a; }
+  // Medical Plaza stands on square maroon piers with light granite caps, all round its open ground floor (his photos)
+  if (b.key === 'c' && b.under){ const pm = M(0x563733, { r:0.8 }), cap = M(0xc9bfb2, { r:0.7 }), ph = b.under.floors*fl;
+    for (const e of E){ if (e.L < 1.2) continue; const n = Math.max(1, Math.round(e.L/2.4));
+      for (let i = 0; i <= n; i++){ if (i === n && e.L > 1.2) continue; const [px, pz] = e.at(i*e.L/n), ix = px - e.nx*0.28 + e.ux*(i ? 0 : 0.28), iz = pz - e.nz*0.28 + e.uz*(i ? 0 : 0.28);
+        box(0.5, ph, 0.5, pm, ix, y0 + ph/2, iz, 0.02).rotation.y = e.a; box(0.56, 0.16, 0.56, cap, ix, y0 + ph - 0.1, iz, 0.02).rotation.y = e.a; } } }
   const MAT = { dark:WIN_DARK, sky:WIN_SKY, warm:WIN_WARM, litDark:WIN_DARK, litSky:WIN_SKY, litWarm:WIN_WARM, sill:SILL, reveal:REVEAL };
   for (const n in W){ if (!W[n].length) continue; const m = add(mergeGeometries(W[n], false), MAT[n], 0, 0, 0, false); if (n.startsWith('lit')) m.userData.litc = true; }
   }
@@ -147,8 +150,10 @@ Object.assign(SCN.blds.find(b => b.key === 'e'), { pts: (() => { const p = SCN.b
     return [...p.slice(0, i + 1), [4.46, -6.0], [-2.25, -6.0], ...p.slice(i + 1)]; })(),
   under: { floors:1.4, open:rectPts(-2.25, -11.1, 4.46, -6.0),
     ground:[[12.3,-11.79],[5.92,-11.88],[5.9,-11.24],[4.48,-11.27],[-2.2,-11.1],[-2.2,-12.73],[-8.28,-12.83],[-8.26,-13.85],[-9.71,-13.89],[-9.66,-18.62],[-8.97,-18.59],[-8.87,-21.45],[-3.28,-21.4],[-3.29,-20.84],[-2.07,-20.83],[-2.05,-24.33],[0.71,-24.29],[0.71,-26.78],[7.5,-26.71],[7.44,-19.14],[10.68,-19.11],[10.68,-18.05],[11.56,-18.03],[11.52,-13.46],[12.32,-13.43]] } });
-Object.assign(SCN.blds.find(b => b.key === 'c'), { under: { floors:2, open:[[3.55,7.42],[6.35,7.48],[6.34,-1.32],[3.74,-1.39]],
-  ground:[[5.29,9.42],[5.34,7.48],[6.35,7.48],[6.34,-1.32],[6.39,-3.56],[11.16,-3.35],[11.09,-1.08],[21.58,-0.89],[21.37,9.84]] } });
+// Medical Plaza: open on piers all round its ground floor (his photos from the court, 2026-10-28), the lobby walls set
+// back under the floors above; the covered loop under the west wing as before
+Object.assign(SCN.blds.find(b => b.key === 'c'), { under: { floors:2, open:SCN.blds.find(b => b.key === 'c').pts,
+  ground:[[6.35,8.62],[6.35,-2.75],[10.4,-2.6],[10.35,-0.3],[20.8,-0.1],[20.62,9.0]] } });
 for (const b of SCN.blds) realBuilding(b);
 // the machines on the hospital roofs, where the state's 2020 aerial shows them (aerial_roofs.py -> roofs.json): their
 // colours mostly greyed (the photo tints them) and rounded to a few shades, one merged mesh per shade
@@ -176,7 +181,7 @@ function entranceOn(key){ const B = BLD[key], d = DOORW[key], e = B.E[d.i], dw =
     shrub(px, 0.66, pz, 0.22, 1); const r = rngAt(px, pz); for (let q = 0; q < 9; q++){ const a = q/9*Math.PI*2; add(new THREE.IcosahedronGeometry(0.045, 0), FLOWERS[[0, 1, 2, 4][q % 4]], px + Math.cos(a)*0.22, 0.74 + r()*0.06, pz + Math.sin(a)*0.22, false); } }
   for (const sx of [-1, 1]){ const pts = [[0.35, 2.5], [0.35, 4.2], [0.9, 4.4], [1.35, 3.9], [1.3, 2.7], [0.85, 2.4]].map(([o, s]) => P(o, sx*s)); bed(pts, 0.27, { density:12 }); }
   DOOR_AT[key] = { e, P }; }
-entranceOn('t'); entranceOn('n'); entranceOn('s'); entranceOn('c');   // Link Pavilion's is the diorama's canopy at the end of the drive
+entranceOn('t'); entranceOn('n'); entranceOn('s');   // (Medical Plaza's doors are under its piers, set back: no canopy)   // Link Pavilion's is the diorama's canopy at the end of the drive
 // Ethics: Link Pavilion's two big banners on its front, at the end of the drive: white with the HMH mark on the left, blue
 // on the right (his aerials, 2026-10-28)
 // Ethics: Link Pavilion's front at the head of the drive (Jose's photos, 2026-10-28): two tall U.S. News banners, white
@@ -256,6 +261,54 @@ pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
     add(new THREE.PlaneGeometry(1.4, 0.4), new THREE.MeshBasicMaterial({ map:tt, transparent:true }), 11.3, 0.3 + 0.95, wz + 0.03, false); }
   // under Medical Plaza's wing: the covered loop
   box(2.8, 0.06, 8.8, asphalt, 4.95, 0.282, 3.05, 0.02, false); }
+// ==================== the Visitor Parking court (Jose's 8 photos, 2026-10-28) ====================
+// Between Link Pavilion's east wing, the Visitor Parking garage and Medical Plaza's tower: an asphalt court to the garage's
+// gates ("Enter | Visitor Parking | Enter" over them, gate arms, a booth), a narrow island of white stones in a yellow curb,
+// cars at the tower's foot behind a wooden guardrail on a bed of stones, a lawn with a hydrant before the garage, and a
+// crosswalk with a "State law: stop for pedestrians" sign from the paved walk by Link to the tower's corner, where steps
+// and a ramp with black railings go up between planted beds; the walk's edge in pavers with a dark brick border and a
+// yellow curb, a black iron fence and a lamp.
+{ const yellow = M(0xe9c33a, { r:0.6 }), stones = M(0xd6d2ca, { r:0.95 }), wood = M(0xb9a68a, { r:0.85 }), black = M(0x1f2228, { r:0.5, m:0.3 }), GY = 0.31;
+  box(4.75, 0.06, 6.3, asphalt, 8.78, GY - 0.03, -6.6, 0.02, false);                                       // the court
+  for (let i = 0; i < 9; i++) box(0.62, 0.012, 0.16, paint, 6.95, GY + 0.005, -9.1 + i*0.6, 0.003, false); // the crosswalk to the tower's corner
+  for (const x of [6.58, 7.32]) box(0.06, 0.012, 5.0, paint, x, GY + 0.006, -6.7, 0.003, false);
+  { const g = new THREE.Group(); g.position.set(7.65, GY, -5.4); g.rotation.y = 0.3; G.add(g);                // the stop-for-pedestrians sign in the crosswalk
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.06, 16), black); base.position.y = 0.03; g.add(base);
+    const c = document.createElement('canvas'); c.width = 64; c.height = 160; const x = c.getContext('2d'); x.fillStyle = '#d8f03a'; x.fillRect(0, 0, 64, 160); x.fillStyle = '#ffffff'; x.fillRect(6, 6, 52, 148);
+    x.fillStyle = '#d8f03a'; x.fillRect(6, 6, 52, 22); x.fillStyle = '#c8202a'; x.beginPath(); x.arc(32, 52, 14, 0, Math.PI*2); x.fill(); x.fillStyle = '#222'; x.fillRect(26, 80, 12, 40);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+    for (const ry of [0, Math.PI]){ const f = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.55), new THREE.MeshBasicMaterial({ map:t, side:THREE.FrontSide })); f.position.set(0, 0.36, ry ? -0.012 : 0.012); f.rotation.y = ry; g.add(f); } }
+  // the island of white stones, narrow and pointed toward the gates
+  { const isl = [[8.35, -7.6], [8.75, -7.55], [9.0, -6.0], [8.85, -5.3], [8.55, -5.3], [8.25, -6.0]]; slab(isl, GY, 0.1, yellow); slab(isl.map(([x, z]) => [x + (8.6 - x)*0.12, z + (-6.4 - z)*0.08]), GY + 0.02, 0.1, stones); }
+  for (const [x, z] of [[9.9, -8.2], [9.9, -4.6]]){ box(0.08, 0.012, 0.8, paint, x, GY + 0.006, z, 0.003, false); box(0.3, 0.012, 0.08, paint, x + 0.14, GY + 0.006, z - 0.34, 0.003, false); }   // arrows to the gates
+  // the garage's gates on its face to the court: a dark opening, the sign over it, red and white arms, a booth
+  { const fx = 11.06;
+    add(new THREE.PlaneGeometry(3.4, 0.42), M(0x15171c, { r:0.9 }), fx, 0.3 + 0.24, -5.6, false).rotation.y = -Math.PI/2;
+    const c = document.createElement('canvas'); c.width = 512; c.height = 48; const x = c.getContext('2d'); x.fillStyle = '#f4f5f7'; x.fillRect(0, 0, 512, 48);
+    x.fillStyle = '#2b3446'; x.font = '600 24px Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Enter', 60, 25); x.fillText('Visitor Parking', 256, 25); x.fillText('Enter', 452, 25);
+    x.fillStyle = '#b9bec8'; x.fillRect(118, 6, 2, 36); x.fillRect(392, 6, 2, 36);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+    add(new THREE.PlaneGeometry(3.0, 0.28), new THREE.MeshBasicMaterial({ map:t }), fx - 0.02, 0.3 + 0.62, -5.6, false).rotation.y = -Math.PI/2;
+    for (const z of [-6.6, -4.9]){ box(0.1, 0.25, 0.1, M(0xe9c33a), fx - 0.25, GY + 0.12, z, 0.02); const arm = box(0.03, 0.03, 0.9, M(0xffffff), fx - 0.25, GY + 0.24, z + 0.48, 0.01, false);
+      for (let k = 0; k < 3; k++) box(0.035, 0.035, 0.12, M(0xc8202a), fx - 0.25, GY + 0.24, z + 0.15 + k*0.3, 0.01, false); }
+    box(0.36, 0.42, 0.36, M(0xf0efec, { r:0.6 }), fx - 0.32, GY + 0.21, -5.75, 0.03); }
+  // the lawn with a hydrant before the garage, in a yellow curb
+  slab([[9.55, -9.5], [11.25, -9.55], [11.2, -7.2], [9.7, -7.25]], GY, 0.08, yellow); slab([[9.62, -9.45], [11.18, -9.5], [11.13, -7.28], [9.77, -7.32]], GY + 0.02, 0.08, grass);
+  add(new THREE.CylinderGeometry(0.05, 0.06, 0.2, 10), M(0xc8202a, { r:0.5 }), 10.0, GY + 0.2, -7.6);
+  // at the tower's foot: a bed of stones, a wooden guardrail, cars parked along it
+  box(4.4, 0.05, 0.42, stones, 8.8, GY + 0.02, -3.72, 0.01, false);
+  box(4.4, 0.06, 0.05, wood, 8.8, GY + 0.3, -3.98, 0.01); for (let x = 6.7; x <= 10.95; x += 1.05) box(0.07, 0.34, 0.07, wood, x, GY + 0.17, -3.98, 0.01);
+  for (const [x, ci] of [[7.6, 2], [9.6, 6]]) parkedAt(x, -4.45, Math.PI/2, ci, GY - 0.04);
+  for (const [z, ci] of [[-6.1, 0], [-7.3, 1]]) parkedAt(10.25, z, Math.PI/2, ci, GY - 0.04);                // waiting at the gates
+  // the tower's corner: steps and a ramp up under the piers, black railings, planted beds of grasses
+  for (let k = 0; k < 3; k++) box(1.0, 0.07, 0.24, M(0xd9d6cf, { r:0.8 }), 7.3, GY + 0.035 + k*0.07, -3.35 + k*0.24, 0.01);
+  box(0.9, 0.06, 1.2, M(0xd9d6cf, { r:0.8 }), 8.45, GY + 0.1, -2.9, 0.01).rotation.x = -0.12;
+  for (const x of [6.75, 7.85, 9.0]){ box(0.025, 0.025, 1.0, black, x, GY + 0.42, -3.0, 0.005, false); for (const z of [-3.45, -2.6]) box(0.025, 0.32, 0.025, black, x, GY + 0.26, z, 0.005, false); }
+  for (const [x, z] of [[6.0, -3.0], [9.8, -3.0], [10.4, -2.95]]){ bed([[x - 0.4, z - 0.25], [x + 0.4, z - 0.25], [x + 0.45, z + 0.2], [x - 0.45, z + 0.2]], GY, { density:10, colours:[2, 3] }); }
+  // the walk's edge by Link: pavers with a dark brick border and a yellow curb, a black iron fence and a lamp
+  box(6.4, 0.04, 0.16, M(0x3c3f48, { r:0.85 }), 7.9, GY + 0.01, -9.68, 0.01, false); box(6.4, 0.07, 0.06, yellow, 7.9, GY + 0.03, -9.58, 0.01, false);
+  for (let x = 9.6; x <= 11.1; x += 0.12) box(0.02, 0.38, 0.02, black, x, GY + 0.19, -9.76, 0.004, false); box(1.55, 0.03, 0.03, black, 10.35, GY + 0.36, -9.76, 0.005, false);
+  lamp(9.3, -9.8); }
 // the Women's and Children's Pavilion's glass grid on its south face, floors 3 to 6 (his aerials)
 pend.push(() => { const E = BLD.x8905.E; let i = 0; E.forEach((e, k) => { if (e.az + e.bz > E[i].az + E[i].bz) i = k; });
   const t = curtainTex(); t.repeat.set(7.0/1.4, 4); onWall('x8905', i, 2.0, 0.3 + 4*FL, 7.0, 4*FL, new THREE.MeshStandardMaterial({ map:t, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }), 0.05); CUR = '_'; });

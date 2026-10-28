@@ -103,6 +103,19 @@ where the map has houses.
   a beige stair tower on its corner; a glass skybridge crosses Atlantic from
   the garage to the ED, north of Imus (where it lands is a guess).
 - His iPhone runs the preview at 60 fps (2026-10-28).
+- The Visitor Parking court (his 8 photos, 2026-10-28): Medical Plaza is a
+  tall maroon granite tower with light granite bands (9 floors over a
+  3-floor wing, 12 in all) on square piers with light caps, its ground floor
+  open all round, the lobby set back; it was a stepped pile with dark glass
+  on top. The tower stands against the garage at the court's corner. The
+  Visitor Parking garage is 5 decks of brown-grey concrete (8 was a misread
+  of the tower in the aerial). The court between Link's east wing, the
+  garage and the tower: asphalt, the gates with "Enter | Visitor Parking |
+  Enter", arms and a booth, a pointed island of white stones in a yellow
+  curb, cars along the tower behind a wooden guardrail on stones, a lawn
+  with a hydrant, the crosswalk from the walk by Link to the tower's corner
+  with the stop-for-pedestrians sign, steps and a ramp with black railings,
+  the walk's dark brick border and yellow curb, a black fence and a lamp.
 - Moving round (Jose, 2026-10-28: "wonky and hard"): `nav.js` replaces
   OrbitControls' one-finger spin and its hard clamp at the edges (it snapped
   the view back every frame) with the Maps way: one finger drags the ground
