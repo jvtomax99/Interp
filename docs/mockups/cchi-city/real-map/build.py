@@ -51,12 +51,13 @@ def rep(a,b,cnt=1):
 rep('<title>HUMC Campus Live</title>','<title>HUMC Campus Real Layout</title>')
 # the front's ground, refitted to the map's buildings: the drive narrowed to run between Jurist and Medical Plaza (the
 # map's two lanes run there), the canopy moved onto Link Pavilion's real front wall, the drop-off paved under it
-rep("box(10, 0.06, 20, asphalt, 0, 0.21, 2.5, 0.02, false);","box(8.2, 0.06, 20, asphalt, -0.8, 0.21, 2.5, 0.02, false);")
-rep("for (let i=0;i<20;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48","for (let i=0;i<17;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48")
-rep("for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4)","for (const x of [-3.0, 1.2]) for (let z=10.5; z>-3; z-=1.4)")
-rep("arrow(2.0, 9.0, 0); arrow(3.1, 9.0, 0); arrow(4.2, 9.0, 0);","arrow(1.9, 9.0, 0); arrow(2.8, 9.0, 0);")
+rep("box(10, 0.06, 20, asphalt, 0, 0.21, 2.5, 0.02, false);","box(6.6, 0.06, 20, asphalt, 0.35, 0.21, 2.5, 0.02, false); box(2.1, 0.06, 18.2, asphalt, -3.95, 0.21, 3.0, 0.02, false); box(0.4, 0.1, 18.2, walk, -5.1, 0.22, 3.0, 0.02, false);")   # the aerial: asphalt from x -2.9 to Medical Plaza, a lane of parked cars on the left (its cars are the diorama's), a walk along Jurist
+rep("for (let i=0;i<20;i++) box(0.22, 0.02, 1.1, paint, -4.6 + i*0.48","for (let i=0;i<14;i++) box(0.22, 0.02, 1.1, paint, -2.75 + i*0.48")
+rep("for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4)","for (const x of [-1.8]) for (let z=10.5; z>5.5; z-=1.4)")
+rep("arrow(2.0, 9.0, 0); arrow(3.1, 9.0, 0); arrow(4.2, 9.0, 0);","arrow(2.75, 9.0, 0);")
+rep("arrow(-3.8, 10.2, 1); arrow(-2.2, 10.2, -1); arrow(-3.8, 7.6, 1); arrow(-2.2, 7.6, -1);","arrow(-2.35, 10.4, 1); arrow(-1.25, 10.4, -1); arrow(-2.35, 8.0, 1); arrow(-1.25, 8.0, -1);")
 rep("box(26, 0.06, 2.8, pave(26, 2.8), 0, 0.21, -7.6, 0.02, false);","box(13.1, 0.06, 6.0, pave(13.1, 6.0), 2.05, 0.215, -8.0, 0.02, false);")
-rep("for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }","for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z); if (z > 9.9 || z < -1.9) lamp(3.0, z); }   // Medical Plaza's colonnade lines the right side")
+rep("for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }","for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z); if (z > 9.9 || z < -1.9) lamp(3.4, z); }   // Medical Plaza's colonnade lines the right side")
 # (the canopy and its lobby are dropped above: Link Pavilion's front has a curved planted island, not a canopy)
 # the café on the strip of lawn in front of Medical Plaza, either side of its doors
 rep("[[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14e],[11.2,8.9,0x3aa6a0]]","[[6.4,10.95,0xe0414b],[8.4,10.95,0xf4f6fa],[18.2,10.95,0xf2c14e],[20.2,10.95,0x3aa6a0]]")
@@ -64,11 +65,11 @@ rep("[[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14e],[11.2,8.9,0x3a
 rep("{ g: person('nurse', 2), pts: [[-14,0.1,9.2],[-5.2,0.1,9.0],[-3.7,0.1,4],[-3.7,0.1,-4],[-2.4,0.1,-7.4]], dur: 34000 },",
     "{ g: person('nurse', 2), pts: [[-14,0.1,11.2],[-5.0,0.1,11.0],[-4.9,0.1,4],[-4.9,0.1,-4],[-2.7,0.1,-6.4]], dur: 34000 },")
 rep("{ g: person('doctor', 3), pts: [[2.4,0.1,-7.4],[3.7,0.1,-4],[3.7,0.1,4],[5.6,0.1,9.2],[12,0.1,9.6]], dur: 36000 },",
-    "{ g: person('doctor', 3), pts: [[4.6,0.1,-6.6],[2.9,0.1,-4],[2.9,0.1,4],[3.2,0.1,10.6],[3.6,0.1,11.95],[9,0.1,11.95]], dur: 36000 },")
+    "{ g: person('doctor', 3), pts: [[4.6,0.1,-6.6],[3.45,0.1,-4],[3.45,0.1,4],[3.45,0.1,10.6],[3.6,0.1,11.95],[9,0.1,11.95]], dur: 36000 },")
 rep("{ g: person('wheel', 4), pts: [[-13,0.1,9.6],[-6.5,0.1,9.6],[-3.7,0.1,5],[-3.7,0.1,-3],[-2.6,0.1,-7.2]], dur: 52000 },",
     "{ g: person('wheel', 4), pts: [[-13,0.1,11.4],[-4.9,0.1,11.2],[-4.9,0.1,5],[-4.9,0.1,-3],[-2.8,0.1,-6.0]], dur: 52000 },")
 rep("{ g: person('elder', 1), pts: [[1.4,0.1,-7.3],[-1.6,0.1,-7.3],[1.4,0.1,-7.3]], dur: 22000 },","{ g: person('elder', 1), pts: [[4.4,0.1,-7.6],[4.4,0.1,-6.2],[4.4,0.1,-7.6]], dur: 22000 },")
-rep("{ g: person('patient', 2), pts: [[3.7,0.1,-5.5],[3.7,0.1,2],[3.7,0.1,-5.5]], dur: 30000 },","{ g: person('patient', 2), pts: [[2.9,0.1,-5.0],[2.9,0.1,2],[2.9,0.1,-5.0]], dur: 30000 },")
+rep("{ g: person('patient', 2), pts: [[3.7,0.1,-5.5],[3.7,0.1,2],[3.7,0.1,-5.5]], dur: 30000 },","{ g: person('patient', 2), pts: [[3.45,0.1,-5.0],[3.45,0.1,2],[3.45,0.1,-5.0]], dur: 30000 },")
 rep("CAR_IN.position.set(3.1, 0.2, 15.5 - u*22)","CAR_IN.position.set(2.5, 0.2, 15.5 - u*21)")
 rep("along([[4.2,0.2,15.5],[4.2,0.2,2],[4.4,0.2,-4],[5.4,0.2,-7.2],[6.8,0.2,-8.0],[7.4,0.2,-8.4]]","along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0.2,-4],[4.6,0.2,-6.9],[6.6,0.2,-8.0],[7.4,0.2,-8.4]]")
 rep('<h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>','<h1>HUMC campus, front and back<small>Preview · live front on the real map</small></h1>')
@@ -144,6 +145,21 @@ rep("if (ring.visible) ring.material.opacity","if (ring) ring.material.opacity")
 rep("at.push({ el, x:(v3.x+1)/2*r.width, y:(1-v3.y)/2*r.height, w:el._w, h:el._h }); }","at.push({ el, x:Math.max(el._w/2 + 6, Math.min(r.width - el._w/2 - 6, (v3.x+1)/2*r.width)), y:(1-v3.y)/2*r.height, w:el._w, h:el._h, back:v3.z > 1 }); }")
 rep("controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!document.hidden) requestAnimationFrame(frame); }",
     "if (!window.__free) controls.target.set(Math.max(BX0 + 4, Math.min(BX1 - 4, controls.target.x)), -1.5, Math.max(BZ0 + 4, Math.min(BZ1 - 4, controls.target.z)));\n  controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!document.hidden) requestAnimationFrame(frame); }")
+# the drive's islands and the fountain where the state's 2020 aerial has them (2026-10-28): the back island (the fountain
+# at its head, trees down it) runs z -0.2 to 4.8 on x 0.64; the front island, narrower, z 6.2 to 11.5 on x 0.58, the
+# entrance sign at its mouth. They were about a unit west and the fountain three units north of the real ones.
+import re
+FX, FZ = 0.64, -0.2
+out, n = re.subn(r'-0\.1, ([0-9.]+), -3\.4\b', lambda m: f'{FX}, {m.group(1)}, {FZ}', out); assert n == 7, n   # the fountain's six pieces and its glow
+rep("pos[i*3] = -0.1 + Math.cos(a)*rad;", f"pos[i*3] = {FX} + Math.cos(a)*rad;"); rep("pos[i*3+2] = -3.4 + Math.sin(a)*rad;", f"pos[i*3+2] = {FZ} + Math.sin(a)*rad;")
+rep("SPA.setXYZ(i, -0.1 + Math.cos(a)*r,", f"SPA.setXYZ(i, {FX} + Math.cos(a)*r,"); rep("-3.4 + Math.sin(a)*r); }", f"{FZ} + Math.sin(a)*r); }}")
+rep("pill(-0.1, -0.5, 1.6, 5.0, curb, 0.24, 0.1); pill(-0.1, -0.5, 1.3, 4.7, grass, 0.3, 0.12);", "pill(0.64, 2.3, 1.6, 5.0, curb, 0.24, 0.1); pill(0.64, 2.3, 1.3, 4.7, grass, 0.3, 0.12);")
+rep("pill(-0.1, 7.8, 3.0, 7.2, curb, 0.24, 0.1); pill(-0.1, 7.8, 2.7, 6.9, grass, 0.3, 0.12);", "pill(0.58, 8.85, 2.2, 5.3, curb, 0.24, 0.1); pill(0.58, 8.85, 1.95, 5.05, grass, 0.3, 0.12);")
+rep("SIGN.position.set(-0.1, 0.36, 9.7); SIGN.scale.setScalar(0.85);", "SIGN.position.set(0.58, 0.36, 10.6); SIGN.scale.setScalar(0.72);")
+rep("[0.3,6.5,0.9,'cone'],[-0.5,-1.3,0.7,'cone']", "[0.58,7.75,0.8,'cone'],[0.64,2.9,0.7,'cone']")
+rep("bed([[-0.75, 4.9], [0.55, 4.9], [0.85, 6.2], [0.75, 8.6], [-0.1, 8.95], [-0.95, 8.6], [-1.05, 6.2]]", "bed([[0.0, 6.7], [1.15, 6.7], [1.3, 7.5], [1.25, 9.0], [0.58, 9.3], [-0.1, 9.0], [-0.15, 7.5]]")
+rep("bed([[-0.45, -1.9], [0.25, -1.9], [0.4, -0.5], [0.25, 1.4], [-0.1, 1.75], [-0.45, 1.4], [-0.6, -0.5]]", "bed([[0.3, 1.1], [1.0, 1.1], [1.15, 2.4], [1.0, 4.2], [0.64, 4.55], [0.28, 4.2], [0.13, 2.4]]")
+rep("CAR_OUT.position.set(-2.8, 0.2, -6.5 + u*22)", "CAR_OUT.position.set(-2.2, 0.2, -6.5 + u*22)")
 rep("cam.position.set(-34, 70, 82); controls.update();","cam.position.set(-34, 70, 82); controls.update();\nwindow.__built = o => { Object.assign(BUILT, o); setProgress(+$('prog').value/100); };\nwindow.__view = (x, y, z, tx=0.5, ty=-1.5, tz=-3) => { window.__free = true; controls.minDistance = 1; controls.maxPolarAngle = Math.PI*0.62; cam.position.set(x, y, z); controls.target.set(tx, ty, tz); controls.update(); };")
 note="/* HUMC campus, front and back (Jose, 2026-10-27/28): every building placed from his OpenStreetMap export, the front's\n   three included; the hand-built ground at the front (street, drive, fountain, drop-off) refitted around them. */\n"
 rep("window.__LITE = true;\n","window.__LITE = true;\n"+note)

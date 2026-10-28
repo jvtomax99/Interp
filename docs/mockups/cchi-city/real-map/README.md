@@ -156,10 +156,13 @@ where the map has houses.
 - Whether the red sign on Imaging's canopy really reads EMERGENCY (too blurry in his shot).
 - The ambulance still drives to the bay on Link Pavilion's side, not the
   real ED (Creamer) on Atlantic Street.
-- The front's ground is still the diorama's drawing: the drive's medians,
-  fountain and sign are from his photos, but where the map's two lanes and
-  the small loop at Medical Plaza run exactly is approximated (the map's
-  service roads inside the drive are clipped). Ask whether it matches.
+- The front's ground, from the state's 2020 aerial (2026-10-28, Jose's pick "match it to real life"): the back
+  island with the fountain at its head now runs z -0.2 to 4.8 on x 0.64 (it was a unit west, the fountain three
+  units north), the front island is narrower and shorter (z 6.2 to 11.5), the entrance sign scaled to fit its mouth;
+  asphalt from x -2.9 to Medical Plaza, a lane of parked cars on the left, two lanes out (arrows) and one in.
+  Still open: the aerial puts the drive's east curb under Medical Plaza's covered drop-off (the map's covered loop,
+  ways 2222-2224, under the building's west part), which the preview builds as solid wall; and the curved
+  planting at the drive's head on the left. Ask for street photos of the front.
 - Medical Plaza's door wall (the street side) and the café either side of
   it are placed, not known.
 - Domain weights on the cards are 9/25/9/45/12; the CoreCHI blueprint is
