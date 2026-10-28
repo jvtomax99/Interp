@@ -143,3 +143,17 @@ top of the picture for 14 frames at the top of the jump and are cut flat
 there. If Jose runs it once more, the prompt above with "a small, low hop,
 his fists never higher than the top of his head" in place of the jump
 sentence, from the grey master; until then this one is in.
+
+## The lower hop (2026-10-28) and the headroom picture
+
+The lower-hop cheer keeps his fists by his head, but at the top of the hop
+his whole body rises and the top of his hair touches the picture's edge
+for 11 frames. The tool frames him as the start image does, with his head
+near the top, so any jump leaves the picture. `body-master-headroom.png`
+(in `docs/art/dr-smiley-body/`) is the grey master with 280 px of its own
+wall added above and 102 px at each side, 1274 x 1750 (the same shape),
+so a clip started from it has room above his head. A clip made from it is
+keyed with `PAD=280,102` so the frames land on the master's grid.
+
+The prompt for it is the green-wall cheer prompt with the lower hop, run
+from the headroom picture.

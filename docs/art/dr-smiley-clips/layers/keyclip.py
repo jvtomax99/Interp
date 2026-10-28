@@ -14,7 +14,13 @@ from PIL import Image
 from scipy import ndimage as ndi
 SRC, OUT = sys.argv[1], sys.argv[2]; os.makedirs(OUT, exist_ok=True)
 W, H = 1070, 1470; yy, xx = np.mgrid[0:H, 0:W]
+# PAD=top,side: the clip was made from body-master-headroom.png (the master with wall added
+# above and at the sides); the frames are brought back onto the master's grid.
+PAD = [int(v) for v in os.environ['PAD'].split(',')] if os.environ.get('PAD') else None
 def fit(im):
+    if PAD:
+        top, side = PAD; ph, pw = H + top, W + 2 * side
+        im = im.resize((round(im.size[0] * ph / im.size[1]), ph), Image.LANCZOS); off = (im.size[0] - pw) // 2; return im.crop((off + side, top, off + side + W, top + H))
     im = im.resize((round(im.size[0] * H / im.size[1]), H), Image.LANCZOS); off = (im.size[0] - W) // 2; return im.crop((off, 0, off + W, H))
 # The wall seen through a gap in him is flat (its spread about 1.4), its own colour and wide;
 # the coat's shadowed front edge, enclosed, is as grey but varies (2.2 to 4) and is thinner.
