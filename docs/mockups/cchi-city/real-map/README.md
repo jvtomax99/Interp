@@ -86,15 +86,30 @@ where the map has houses.
 - The pond garden sits on the lawn by 2nd Street, past the pavilion's
   bridge, where the red and green trees were (his circle), at 60% size to
   stay off the drop-off drive (`GS.position` in `build.py`).
-- The pavilion's floors are 1.3x a normal floor so it towers over Imus as
-  in his window photo.
+- The pavilion's floors are 1.65x a normal floor, 4 of terracotta platform
+  and 9 of glass (scene.json floors 13), so its glass rises over the bridge
+  as in his window photo, measured against Imus and the bridge in the same
+  frame (2026-10-28; it was 1.3x and 9 in all, about half as tall).
+- Corner of Atlantic and 2nd, rechecked 2026-10-28 against his window photo,
+  Street View at 84 2nd St and two Google 3D views, each rendered from the
+  same spot: the curved glass tower moved up to the street (it stood about
+  45 m back and barely showed over the bridge), its west face bowed toward
+  the corner, its south end reaching out over the parking beside the bridge
+  on three columns; the bridge's terracotta in two staggered rows of long
+  slits; the building across 2nd Street from Theurer (map 7562) is a
+  five-floor silver building with a row of big round roof fans, not a
+  house; Imus's ground floor is pale block; the Atlantic Street garage has
+  a beige stair tower on its corner; a glass skybridge crosses Atlantic from
+  the garage to the ED, north of Imus (where it lands is a guess).
+- His iPhone runs the preview at 60 fps (2026-10-28).
 
 ## Open
 
-- His frame-rate reading on the iPhone (about 480k triangles; the live page
-  is 440k). The back's windows have no frames and its trees are lighter to
-  keep it close.
-- Skybridges in his photos: which buildings they join is unknown; ask.
+- The slim glass tower with the HMH mark: his photos disagree on where it
+  stands (Street View: past the bridge, across the street from Imus; Google
+  3D: nothing on the garage there). Placed on a terracotta block at the
+  bridge's far end for now; ask him.
+- Other skybridges in his photos: which buildings they join is unknown.
 - The ambulance still drives to the bay on Link Pavilion's side, not the
   real ED (Creamer) on Atlantic Street.
 - The front's ground is still the diorama's drawing: the drive's medians,

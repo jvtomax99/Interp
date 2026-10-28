@@ -127,9 +127,9 @@ under way, then what waits on Jose, then small leftovers.
       Pavilion"), Encounter = the real John Theurer across 2nd Street; the
       corner of Atlantic and 2nd from his photos.
       `docs/mockups/cchi-city/real-map/` (README: build, decisions, open
-      items), `claude/campus-real-map`. Next: his OK on the look and his
-      frame-rate reading, then wiring it into `campus3d/` and the card's
-      pictures (own PR).
+      items), `claude/campus-real-map`. 60 fps on his iPhone (2026-10-28).
+      Next: his OK on the look, then wiring it into `campus3d/` and the
+      card's pictures (own PR).
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
