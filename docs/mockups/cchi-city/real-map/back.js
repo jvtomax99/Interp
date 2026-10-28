@@ -248,6 +248,16 @@ pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
     for (let t = 0.45; t < L; t += 1.8){ const x = ax + (bx - ax)*t/L + Math.sin(a)*0.62, z = az + (bz - az)*t/L - Math.cos(a)*0.62;
       add(new THREE.BoxGeometry(0.07, 0.16, 0.07), black, x, 0.38, z); glow(x, 0.44, z, 0.35, 0xfff0d0); } }
   add(new THREE.BoxGeometry(0.1, 0.32, 0.1), M(0xc0282c, { r:0.5 }), 9.6, 0.46, -10.2);   // the red call box by the walk
+  // the John Apovian, M.D. Cardiac Surgery and Structural Heart Center (his photos, 2026-10-28): on Link Pavilion's wall
+  // along the canopy walk, its own lower grey barrel canopy over the door and windows, white lettering on the brick
+  { const wz = -11.83, cy2 = 0.3 + 0.48, grey = M(0x4a4f58, { r:0.5, m:0.2 });
+    const c2 = add(new THREE.CylinderGeometry(0.3, 0.3, 4.6, 14, 1, true, 0, Math.PI), grey, 8.6, cy2, wz + 0.3, true); c2.material.side = THREE.DoubleSide; c2.rotation.set(0, 0, Math.PI/2);
+    for (const x of [6.4, 8.6, 10.8]) add(new THREE.CylinderGeometry(0.018, 0.018, cy2 - 0.3, 6), M(0x22252b), x, 0.3 + (cy2 - 0.3)/2, wz + 0.58);
+    add(new THREE.PlaneGeometry(4.4, 0.42), new THREE.MeshStandardMaterial({ color:0x2a3340, roughness:0.08, metalness:0.6, envMapIntensity:1.2 }), 8.6, 0.3 + 0.22, wz + 0.02, false);
+    add(new THREE.PlaneGeometry(0.42, 0.5), new THREE.MeshStandardMaterial({ color:0x1f2733, roughness:0.1, metalness:0.5 }), 10.0, 0.3 + 0.25, wz + 0.025, false);
+    const tc = textCanvas(['John Apovian, M.D.', 'Cardiac Surgery and', 'Structural Heart Center'], { w:512, lh:48, font:'bold 34px Inter, Arial, sans-serif', col:'#ffffff' });
+    const tt = new THREE.CanvasTexture(tc); tt.colorSpace = THREE.SRGBColorSpace;
+    add(new THREE.PlaneGeometry(1.4, 0.4), new THREE.MeshBasicMaterial({ map:tt, transparent:true }), 11.3, 0.3 + 0.95, wz + 0.03, false); }
   // under Medical Plaza's wing: the covered loop
   box(2.8, 0.06, 8.8, asphalt, 4.95, 0.282, 3.05, 0.02, false); }
 // the Women's and Children's Pavilion's glass grid on its south face, floors 3 to 6 (his aerials)
