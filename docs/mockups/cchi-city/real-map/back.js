@@ -533,9 +533,19 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
   add(new THREE.BoxGeometry(0.5, 0.01, 0.25), M(0x2a2c30), TC.x + 0.3, 0.296, TC.z, false);            // a drain grate
   slab([[-24.95,-29.6],[-22.0,-29.8],[-19.3,-30.0],[-18.7,-30.6],[-18.9,-31.4],[-24.98,-31.3]], 0.17, 0.16, M(0xd6d2c8, { r:0.8 }));
   slab([[-24.6,-29.85],[-22.0,-30.0],[-19.6,-30.2],[-19.2,-30.7],[-19.4,-31.2],[-24.6,-31.15]], 0.2, 0.15, M(0x5a3a2a, { r:0.95 }));
-  tree(-21.4, -30.65, 1.25, 'cone'); shrub(-20.2, 0.35, -30.55, 0.32, 1); lamp(-19.9, -30.15);
+  tree(-20.55, -30.7, 1.2, 'cone'); shrub(-20.2, 0.35, -30.55, 0.32, 1); lamp(-19.9, -30.15);
   add(new THREE.CylinderGeometry(0.07, 0.08, 0.28, 10), M(0xc8322c, { r:0.5 }), -19.55, 0.48, -30.3);
-  box(0.06, 0.5, 0.3, M(0x2b5ea8, { r:0.5 }), -22.6, 0.6, -30.0, 0.02);
+  // its corner by Atlantic, before the walk down the hill (his photo): a pink blossom tree, round clipped bushes, and the
+  // white wayfinding sign (Cancer Center, Children's Hospital, Pediatric Center, Pediatric Center Parking)
+  tree(-22.15, -30.6, 0.95, 'blossom');   // (trees keep 0.5 off the map's Atlantic Street, which runs under this end of the island) shrub(-24.25, 0.35, -30.0, 0.26, 1); shrub(-22.7, 0.35, -30.1, 0.24, 2); shrub(-22.3, 0.35, -30.95, 0.22, 1);
+  { const c = document.createElement('canvas'); c.width = 192; c.height = 256; const g = c.getContext('2d');
+    g.fillStyle = '#f4f5f7'; g.fillRect(0, 0, 192, 256); g.fillStyle = '#2b5ea8'; for (const [x, y] of [[18,22],[30,14],[42,22],[30,30],[22,34],[38,34]]) g.fillRect(x, y, 8, 8);
+    g.fillStyle = '#1d2433'; g.font = 'bold 15px Georgia, serif'; g.fillText('Hackensack', 62, 26); g.fillText('Meridian Health', 62, 44); g.font = '12px Georgia, serif'; g.fillText('Hackensack University', 62, 62);
+    g.fillStyle = '#c9ccd2'; g.fillRect(0, 76, 192, 3); g.fillStyle = '#1d2433'; g.font = '15px Arial';
+    [['\u2191', 'Cancer Center'], ['\u2192', "Children's Hospital"], ['\u2192', 'Pediatric Center'], ['\u2191', 'Pediatric Center'], ['', 'Parking']].forEach(([ar, t], i) => { g.fillText(ar, 10, 108 + i*30); g.fillText(t, 32, 108 + i*30); });
+    const st = new THREE.CanvasTexture(c); st.colorSpace = THREE.SRGBColorSpace;
+    box(0.62, 0.85, 0.08, M(0xe9ecf0, { r:0.5 }), -24.3, 0.3 + 0.48, -29.75, 0.02);
+    add(new THREE.PlaneGeometry(0.58, 0.8), new THREE.MeshBasicMaterial({ map:st }), -24.3, 0.3 + 0.49, -29.705, false); }
   box(2.4, 0.18, 0.03, M(0x1b1d22, { r:0.5, m:0.4 }), -20.6, 0.45, -30.05, 0.01);
   const steel = M(0xc4c8ce, { r:0.25, m:0.85 });
   for (let z = -24.9; z > -27.0; z -= 0.45) add(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), steel, -18.95 + (z + 24.9)*0.05, 0.38, z);
