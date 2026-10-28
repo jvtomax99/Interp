@@ -209,6 +209,12 @@ where the map has houses.
   the walkway's hospital end, beside the curved glass, facing the court. Placed by eye from the photos: the glass wall's width, the canopy, the
   atrium.
 
+- Toy look (Jose's train-diorama video, 2026-10-28, his pick "test one area live"): `toy.js`, a "Toy look" pill on
+  the preview (left, above the sheet; `?toy=1`, kept in localStorage). Satin plastic (rougher-capped, no metal), richer
+  colours at the same brightness, a touch more fill light, no fog, a dark studio backdrop, and the miniature blur at
+  the top and bottom of the screen as a CSS backdrop blur under a gradient mask (no extra WebGL pass). Not done: baked
+  corner shading (ambient occlusion), puffy roof steam. Waiting on his look and frame-rate reading both ways.
+
 ## Open
 
 - Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street

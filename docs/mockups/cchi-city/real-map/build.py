@@ -166,6 +166,8 @@ rep("CAR_OUT.position.set(-2.8, 0.2, -6.5 + u*22)", "CAR_OUT.position.set(-2.2, 
 # moving round with fingers the Maps way (nav.js: drag the ground, pinch, twist, tilt, fly to a building, Reset view);
 # it replaces OrbitControls' spin-and-snap, whose hard clamp at the edges fought the fingers every frame
 NAV_JS = open(os.path.join(HERE, 'nav.js')).read()
+# the Toy look switch (toy.js: Jose's train-diorama video, 2026-10-28), riding after the navigation
+NAV_JS += '\n' + open(os.path.join(HERE, 'toy.js')).read()
 rep("cam.position.set(-34, 70, 82); controls.update();","cam.position.set(-34, 70, 82); controls.update();\n" + NAV_JS + "\nwindow.__built = o => { Object.assign(BUILT, o); setProgress(+$('prog').value/100); };\nwindow.__view = (x, y, z, tx=0.5, ty=-1.5, tz=-3) => { window.__free = true; controls.minDistance = 1; controls.maxPolarAngle = Math.PI*0.62; cam.position.set(x, y, z); controls.target.set(tx, ty, tz); controls.update(); };")
 note="/* HUMC campus, front and back (Jose, 2026-10-27/28): every building placed from his OpenStreetMap export, the front's\n   three included; the hand-built ground at the front (street, drive, fountain, drop-off) refitted around them. */\n"
 rep("window.__LITE = true;\n","window.__LITE = true;\n"+note)
