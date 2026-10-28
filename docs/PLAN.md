@@ -142,7 +142,9 @@ under way, then what waits on Jose, then small leftovers.
       manifest into `CAMPUS_MAP`, files into `city/`. (4) `features/campus.js`
       places renamed to the real buildings; the campus suites; the guide answer and a
       New lately card. The ambulance bay doors and the backing-out car belonged to
-      the old front (gone on the real map): ask Jose.
+      the old front (gone on the real map); Jose (2026-10-28): move them: the
+      ambulance pulls up at the real ER on Atlantic Street with its doors opening, a
+      car backs out of a spot in the Visitors parking court.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the

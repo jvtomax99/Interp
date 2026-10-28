@@ -15,48 +15,30 @@ rebuilt the front on the map.
 
 ## Now
 
-**The campus on the real map, front and back: a preview, not in the app.**
-`docs/mockups/cchi-city/real-map/`: every building from Jose's OpenStreetMap
-export at the same scale, a board twice as wide and deep. 2026-10-28 (second
-chat): he said it was "still not accurate to the actual location"; measured,
-the hand-built front was off (Link Pavilion a third of its real size, Jurist
-15 m off, a lot where the map has houses), so the front's three buildings now
-come from the map too and the diorama's ground (drive, canopy, café, movers)
-was refitted round them (README, "The fit").
-Then, from his photos (his window at Theurer, Street View along 2nd St and
-Atlantic, Google 3D): the corner of Atlantic and 2nd, Helena Theurer
-Pavilion (big curved glass tower at the street, the bridge, the HMH tower
-on Imus's side), the little park beside it, the older orange-brick tower,
-Audrey Hepburn House, the silver plant with roof fans (README, Decisions).
-Method that worked: render the preview from the same spot as each photo
-(`window.__view`, `__built` all 1, fov ~70 for Street View) and compare side
-by side. 60 fps on his iPhone. Also done: the front from his aerials (Link's
-banners and planted island at the end of the drive, no canopy; the white
-building with the glass grid is the Women's and Children's Pavilion, Jose
-confirmed; Medical Plaza stays maroon brick with dark glass tiers; Visitors
-Parking garage 8 decks), and no rooftop plate on part-built buildings.
-Next: more photo areas he sends. Preview build: check out
-`claude/campus-real-map`, `npm install --no-save three@0.160.0` in
-`docs/mockups/cchi-city/`, `pip install shapely matplotlib`, then
-`python3 build.py <out.html>` in `real-map/` and republish it to the same
-Artifact link. Build: `python3 build.py
-<out.html>` there (it runs `../live/gen.py` first). Preview Artifact (private):
-https://claude.ai/artifact/7uyf7q3572hqDM9wFo7NAM. The README has the
-decisions and the open items. Waiting on Jose:
+**The CoreCHI Practice card's pictures, made in Blender from the real-map campus.** Branch
+`claude/campus-card-blender` (off `claude/campus-real-map`, PR #167, the preview source). Plan:
+`docs/PLAN.md`, Next 2, "the card's pictures from Blender" (steps 1-4 and Jose's picks). Jose
+OK'd the look from two mock-ups (whole board from the card's angle, finished and in progress).
 
-- his OK on the look, and how it runs on his iPhone (about 480k triangles);
-- the skybridges in his photos (which buildings they join);
-- the ambulance to the real ED (Creamer, Atlantic St) instead of Link's bay;
-- the domain weights on the cards (9/25/9/45/12 vs the blueprint
-  22/22/22/15/19).
+What exists: `docs/mockups/cchi-city/real-map/toy_render.py` (Blender: toy plastic, rounded edges,
+soft sun, AgX, depth of field; `VIEWS=card`, `CARD_DIST=235`, `PROGRESS="e:0.8,..."`),
+`export_glb.cjs` (the built preview's scene to GLB in headless Chromium). Blender in this
+container: `pip download bpy` (5.0.1, cp311 wheel), `uv venv --python /usr/bin/python3.11`,
+`uv pip install` the wheel; renders ~100 s per 1 MP at 96 samples on 4 CPUs.
 
-Then, its own pull request: wire it into the app (`campus3d/` via `gen.py
---app`, and the card's pictures via `builddiorama.cjs` into `city/`), with
-the guide and the campus suites (`campus-3d campus-pick campus-alive
-campus-life campus-depth guide`).
+How the card works now: `features/campus.js` (`CAMPUS_MAP` manifest, `renderCampus`), the
+motion `campusLife`/`campusDepth` in `index.html` ("Practice dashboard motion"), pictures in
+`city/` (1.8 MB, ~150 files) made by `docs/mockups/cchi-city/builddiorama.cjs` from
+`diorama.html`'s capture pipeline (`window.__run`: `alone()` renders one object with the rest as
+depth, `path()` projects a 3D path, `pack()` crops). That pipeline is cut out of the live page
+(`live/gen.py`), so the preview page has the moving objects (CAR_IN, CAR_OUT, CAR_IN2, AMB,
+HELI, STREET, WALKS, SITTERS, BIRDS, IDLE, FLAGS, CLOUDS, spray) but not the capture code.
+Suites: `tests/suites/campus-{pick,alive,life,depth,3d}.cjs` (life expects bay and lot).
 
-Still owed from before: his frame-rate reading of the app's 3D campus
-(`campus3d/`, #165) on his iPhone.
+Idea for the build: Blender for near/paint/glow (passes: painted, clay, object-id, height,
+lit windows; each building's paint = id mask x height cut, cropped), three.js on the preview
+page for the moving sprites with the identical camera (fov 18.77 vertical, 960 x 840 at 2x, no
+view offset; Blender sensor fit vertical; three.js (x,y,z) = Blender (x,-z,y)).
 
 ## Before
 
