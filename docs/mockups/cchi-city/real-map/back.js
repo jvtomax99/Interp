@@ -542,6 +542,12 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
     const m = add(new THREE.PlaneGeometry(L + 0.03, 1.8*fl), gm.clone(), mx + nx*o*0.05, y0 + 0.9*fl, mz + nz*o*0.05, false); m.material.map = tt; m.rotation.y = a;
     for (const y of [y0 - 0.05, y0 + 1.8*fl + 0.04]) box(L + 0.06, 0.1, 0.3, wb, mx + nx*o*0.12, y, mz + nz*o*0.12, 0.02).rotation.y = a; }
   add(new THREE.CylinderGeometry(0.26, 0.26, 1.4*fl, 18), M(0xcdb898, { r:0.85 }), -17.0, 0.3 + 0.7*fl, -28.1); }
+// the Mark Messier Skyway for Tomorrow's Children sign: a tan panel at the walkway's hospital end, beside the curved
+// glass, facing the court and Atlantic Street (his photos, 2026-10-28)
+{ const c = textCanvas(['MARK MESSIER', 'SKYWAY', 'FOR', "TOMORROW'S", 'CHILDREN'], { w:320, lh:48, font:'bold 27px Georgia, serif', col:'#2b2622' });
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  box(0.14, 1.1, 0.9, M(0xcdb898, { r:0.85 }), -17.75, 2.45, -30.4, 0.02);
+  add(new THREE.PlaneGeometry(0.8, 0.9), new THREE.MeshBasicMaterial({ map:t, transparent:true }), -17.83, 2.45, -30.4, false).rotation.y = -Math.PI/2; }
 // Women's and Children's south face on the court: tan stucco, the Joseph M. Sanzari Children's Hospital entrance under a
 // grey canopy, a green glass wall above it with pink, green, blue and peach diamonds, a round column at its west end
 { const z = -24.6, h = 6*FL;

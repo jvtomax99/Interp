@@ -201,7 +201,8 @@ where the map has houses.
   Joseph M. Sanzari Family Walkway: grey panels with children's silhouettes and its name, glass on diagonal steel, the
   Hackensack Meridian Health sign band, an X-braced pier at the hospital end. The court: asphalt, an island under
   the walkway (big evergreen, lamp, hydrant, blue sign, fence), bollards, an orange barrier. The Atlantic Street
-  garage: brick spandrels and precast bands. Placed by eye from the photos: the glass wall's width, the canopy, the
+  garage: brick spandrels and precast bands. The Mark Messier Skyway for Tomorrow's Children sign: a tan panel at
+  the walkway's hospital end, beside the curved glass, facing the court. Placed by eye from the photos: the glass wall's width, the canopy, the
   atrium.
 
 ## Open
