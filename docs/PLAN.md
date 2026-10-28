@@ -128,6 +128,21 @@ under way, then what waits on Jose, then small leftovers.
       items), `claude/campus-real-map`. 60 fps on his iPhone (2026-10-28).
       Next: his OK on the look, then wiring it into `campus3d/` and the
       card's pictures (own PR).
+   **2026-10-28 (Jose): the card's pictures from Blender** (his picks: Blender for
+      pictures, "the CoreCHI Practice card", "together": the moving things re-made at
+      once). `claude/campus-card-blender`, own PR. Plan: (1) `card_capture.cjs` on
+      the built preview, camera = the card's (diorama.html's direction, pulled back to
+      the whole board, fov 18.77, 960 x 840 at 2x): every moving thing alone with the
+      rest as depth (clouds, flags, spray, cars, ambulance, helicopter, street cars,
+      walkers, sitters, birds, the people about), their paths projected; the domain
+      buildings' labels; the GLB with the moving things hidden. (2) `toy_render.py
+      card`: painted, clay, building-id, height and lit-window passes from that
+      camera. (3) `card_build.py`: near (clay), sky, far, each building's paint and
+      glow in tenths (id mask x height cut, occluded by the id pass), tap boxes, the
+      manifest into `CAMPUS_MAP`, files into `city/`. (4) `features/campus.js`
+      places renamed to the real buildings; the campus suites; the guide answer and a
+      New lately card. The ambulance bay doors and the backing-out car belonged to
+      the old front (gone on the real map): ask Jose.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
