@@ -22,7 +22,9 @@ const DR_CLIPS = {
   // 30 fps, 320 x 440 (the master's grid scaled), from Jose's Sora clips (2026-10-27), each
   // starting and ending in the master's pose; keyed by keyclip.py, every frame checked by checkclip.py
   greet: { dir: './drsmiley/clips/wave/', n: 150, fps: 30, w: 320, h: 440 },     // the wave, 5 s
-  cheer: { dir: './drsmiley/clips/cheer/', n: 210, fps: 30, w: 320, h: 440 },    // the jump with both fists up, 7 s (filmed on a green wall: on grey the raised sleeves keyed out torn)
+  // the jump with both fists up, 7 s, on a green wall (on grey the raised sleeves keyed out torn); its frames
+  // keep 200 rows of the grid above the master's top, so the jump stays in the picture: `top` (2026-10-28)
+  cheer: { dir: './drsmiley/clips/cheer/', n: 210, fps: 30, w: 320, h: 500, top: 200 },
   think: { dir: './drsmiley/clips/think/', n: 210, fps: 30, w: 320, h: 440 },    // the finger on the chin, the aha, 7 s
   wince: { dir: './drsmiley/clips/wince/', n: 180, fps: 30, w: 320, h: 440 },    // the flinch and the caring smile, 6 s
   bounce: { dir: './drsmiley/clips/thumbs/', n: 180, fps: 30, w: 320, h: 440 },  // the hop with the thumbs-up (a right answer), 6 s
@@ -75,6 +77,7 @@ function drClipPlay(m, name, done){
   m.body.stop(); m.body.rest();
   const cv = document.createElement('canvas');
   cv.className = 'db-clip'; cv.width = C.w; cv.height = C.h; cv.setAttribute('aria-hidden', 'true');
+  if(C.top){ cv.style.height = (100 * (1470 + C.top) / 1470).toFixed(3) + '%'; cv.style.top = (-100 * C.top / 1470).toFixed(3) + '%'; }   // the rows above the master's top: above the host
   const ctx = cv.getContext('2d');
   const draw = i => { ctx.clearRect(0, 0, C.w, C.h); ctx.drawImage(F.imgs[i], 0, 0, C.w, C.h); };
   const ahead = i => { for(let k = i + 1; k < Math.min(C.n, i + 6); k++){ const im = F.imgs[k]; if(im.decode && !im.__dec){ im.__dec = true; im.decode().catch(() => {}); } } };
