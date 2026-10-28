@@ -44,7 +44,8 @@ for (const [outer, ...holes] of SCN.aprons) slab(outer, 0.17, 0.08, PAVE_W, hole
 // a stub of the map's service road left on the lawn between the drive and Medical Plaza, beside Link's front, showed as a
 // loose dark plate (Jose, 2026-10-28: "get rid of the circled plate"); the hand-built drive covers that road
 const STRAY = r => r.hw === 'service' && r.pts.every(([x, z]) => x > 3.2 && x < 6.5 && z > -7 && z < -3);
-for (const r of SCN.roads){ if (STRAY(r)) continue; if (r.hw === 'footway'){ ribbon(r.pts, r.w, 0.17, 0.09, PAVE_W); continue; }
+for (const r of SCN.roads){ if (STRAY(r)) continue; if (r.hw === 'footway'){ if (Math.abs(r.pts[0][0] + 16.86) < 0.05 && Math.abs(r.pts[0][1] + 31.64) < 0.05) continue;   // the walkway's own path is up on the bridge, not across the road
+    ribbon(r.pts, r.w, 0.17, 0.09, PAVE_W); continue; }
   const big = r.hw !== 'service';
   if (big) ribbon(r.pts, r.w + 1.8, 0.17, 0.08, walk);
   ribbon(r.pts, r.w, 0.17, 0.088, asphalt);
@@ -553,30 +554,30 @@ function cherry(x, z, s=1){
 // corner an island under the walkway with a big evergreen, a lamp, a red hydrant, a blue sign and a black fence.
 { // the court's middle is a round turnaround (his photo from under the overhang): a circle of asphalt in a low curb,
   // pale concrete sidewalk round it, its mouth open to Atlantic Street on the west
-  slab([[-24.62,-24.6],[-17.0,-24.6],[-17.75,-27.4],[-17.4,-30.3],[-18.6,-30.0],[-22.0,-29.8],[-24.95,-29.6]], 0.17, 0.1, M(0xd3d0c8, { r:0.85 }));
-  const TC = { x:-21.0, z:-27.2, r:2.55 }, circ = (r, n=40) => Array.from({ length:n }, (_, k) => { const a = k/n*Math.PI*2; return [TC.x + Math.cos(a)*r, TC.z + Math.sin(a)*r]; });
+  slab([[-22.8,-24.6],[-16.3,-24.6],[-16.3,-30.2],[-18.6,-30.0],[-21.9,-29.8],[-22.4,-26.4]], 0.17, 0.1, M(0xd3d0c8, { r:0.85 }));   // from Atlantic's east sidewalk to under the overhang (Jose: it ran over the road)
+  const TC = { x:-19.2, z:-27.1, r:2.15 }, circ = (r, n=40) => Array.from({ length:n }, (_, k) => { const a = k/n*Math.PI*2; return [TC.x + Math.cos(a)*r, TC.z + Math.sin(a)*r]; });
   slab(circ(TC.r + 0.12), 0.17, 0.115, M(0xbdb9b0, { r:0.8 })); slab(circ(TC.r), 0.17, 0.118, asphalt);
-  slab([[-24.95,-25.6],[TC.x - 1.2,-25.0],[TC.x - 1.2,-29.4],[-24.95,-28.9]], 0.17, 0.118, asphalt);   // the mouth to Atlantic
+  slab([[-23.45,-25.5],[TC.x - 1.0,-25.4],[TC.x - 1.0,-28.9],[-22.95,-28.9]], 0.17, 0.118, asphalt);   // the mouth, from Atlantic's curb
   add(new THREE.BoxGeometry(0.5, 0.01, 0.25), M(0x2a2c30), TC.x + 0.3, 0.296, TC.z, false);            // a drain grate
-  slab([[-23.5,-29.7],[-22.0,-29.8],[-19.3,-30.0],[-18.7,-30.6],[-18.9,-31.4],[-23.5,-31.35]], 0.17, 0.16, M(0xd6d2c8, { r:0.8 }));   // cut back off Atlantic (Jose)
-  slab([[-23.3,-29.92],[-22.0,-30.0],[-19.6,-30.2],[-19.2,-30.7],[-19.4,-31.2],[-23.3,-31.2]], 0.2, 0.15, M(0x5a3a2a, { r:0.95 }));
-  shrub(-20.2, 0.35, -30.55, 0.32, 1); lamp(-19.9, -30.15);
-  add(new THREE.CylinderGeometry(0.07, 0.08, 0.28, 10), M(0xc8322c, { r:0.5 }), -19.55, 0.48, -30.3);
+  slab([[-21.8,-29.75],[-19.3,-29.9],[-17.9,-30.0],[-17.4,-30.6],[-17.6,-31.4],[-21.75,-31.35]], 0.17, 0.16, M(0xd6d2c8, { r:0.8 }));   // east of Atlantic's sidewalk (Jose)
+  slab([[-21.6,-29.92],[-19.3,-30.05],[-18.2,-30.15],[-17.8,-30.7],[-18.0,-31.2],[-21.6,-31.2]], 0.2, 0.15, M(0x5a3a2a, { r:0.95 }));
+  lamp(-18.3, -30.3);
+  add(new THREE.CylinderGeometry(0.07, 0.08, 0.28, 10), M(0xc8322c, { r:0.5 }), -17.95, 0.48, -30.45);
   // its corner by Atlantic, before the walk down the hill (his photo): a pink blossom tree, round clipped bushes, and the
   // white wayfinding sign (Cancer Center, Children's Hospital, Pediatric Center, Pediatric Center Parking)
-  cherry(-22.15, -30.6, 1.0);   // (kept 0.5 off the map's Atlantic Street, which runs under this end of the island) shrub(-20.9, 0.35, -30.45, 0.26, 1); shrub(-20.3, 0.35, -30.9, 0.22, 2); shrub(-21.4, 0.35, -31.0, 0.22, 1);   // (no evergreen: Jose)
+  cherry(-20.4, -30.6, 1.0); shrub(-19.2, 0.35, -30.45, 0.26, 1); shrub(-18.7, 0.35, -30.9, 0.22, 2); shrub(-19.6, 0.35, -31.0, 0.22, 1);   // (no evergreen: Jose)
   { const c = document.createElement('canvas'); c.width = 192; c.height = 256; const g = c.getContext('2d');
     g.fillStyle = '#f4f5f7'; g.fillRect(0, 0, 192, 256); g.fillStyle = '#2b5ea8'; for (const [x, y] of [[18,22],[30,14],[42,22],[30,30],[22,34],[38,34]]) g.fillRect(x, y, 8, 8);
     g.fillStyle = '#1d2433'; g.font = 'bold 15px Georgia, serif'; g.fillText('Hackensack', 62, 26); g.fillText('Meridian Health', 62, 44); g.font = '12px Georgia, serif'; g.fillText('Hackensack University', 62, 62);
     g.fillStyle = '#c9ccd2'; g.fillRect(0, 76, 192, 3); g.fillStyle = '#1d2433'; g.font = '15px Arial';
     [['\u2191', 'Cancer Center'], ['\u2192', "Children's Hospital"], ['\u2192', 'Pediatric Center'], ['\u2191', 'Pediatric Center'], ['', 'Parking']].forEach(([ar, t], i) => { g.fillText(ar, 10, 108 + i*30); g.fillText(t, 32, 108 + i*30); });
     const st = new THREE.CanvasTexture(c); st.colorSpace = THREE.SRGBColorSpace;
-    box(0.62, 0.85, 0.08, M(0xe9ecf0, { r:0.5 }), -22.95, 0.3 + 0.48, -30.05, 0.02);   // beside the cherry (Jose)
-    add(new THREE.PlaneGeometry(0.58, 0.8), new THREE.MeshBasicMaterial({ map:st }), -22.95, 0.3 + 0.49, -30.005, false); }
-  box(2.4, 0.18, 0.03, M(0x1b1d22, { r:0.5, m:0.4 }), -20.6, 0.45, -30.05, 0.01);
+    box(0.62, 0.85, 0.08, M(0xe9ecf0, { r:0.5 }), -21.25, 0.3 + 0.48, -30.05, 0.02);   // beside the cherry (Jose)
+    add(new THREE.PlaneGeometry(0.58, 0.8), new THREE.MeshBasicMaterial({ map:st }), -21.25, 0.3 + 0.49, -30.005, false); }
+  box(2.2, 0.18, 0.03, M(0x1b1d22, { r:0.5, m:0.4 }), -19.1, 0.45, -30.1, 0.01);
   const steel = M(0xc4c8ce, { r:0.25, m:0.85 });
-  for (let z = -24.9; z > -27.0; z -= 0.45) add(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), steel, -18.95 + (z + 24.9)*0.05, 0.38, z);
-  box(0.5, 0.25, 0.16, M(0xf26a1b, { r:0.6 }), -18.9, 0.4, -26.6, 0.03); }
+  for (let z = -24.9; z > -27.0; z -= 0.45) add(new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10), steel, -16.75, 0.38, z);
+  box(0.16, 0.25, 0.5, M(0xf26a1b, { r:0.6 }), -16.95, 0.4, -26.0, 0.03); }
 // the curved building's glass: two floors of curved glass along its west face, over the court, a white band under it
 { const run = [[-16.96,-24.48],[-16.99,-25.04],[-17.62,-26.6],[-17.71,-27.45],[-17.57,-29.54],[-17.32,-30.42],[-16.88,-31.33]], fl = FL, y0 = 0.3 + 1.4*fl;
   const t = curtainTex(); const gm = new THREE.MeshStandardMaterial({ map:t, color:0xbfe6e6, roughness:0.1, metalness:0.4, envMapIntensity:1.3 }), wb = M(0xe6e8ec, { r:0.5 });

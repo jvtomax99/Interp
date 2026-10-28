@@ -200,7 +200,8 @@ where the map has houses.
   atrium with a white overhanging roof on a white column, its name low in front. The walkway over Atlantic is the
   Joseph M. Sanzari Family Walkway: grey panels with children's silhouettes and its name, glass on diagonal steel, the
   Hackensack Meridian Health sign band, an X-braced pier at the hospital end. The court: a round turnaround (Jose: "the center is circular"), asphalt in a low curb, pale concrete round it,
-  its mouth open to Atlantic; an island under
+  its mouth open to Atlantic; the court's paving, turnaround and island start at Atlantic's east sidewalk
+  (they ran over the road until Jose's 2026-10-28 screenshot); an island under
   the walkway, cut back off Atlantic (Jose; no evergreen: lamp, hydrant, fence; at its corner by Atlantic, a pink cherry in full bloom (`cherry`: built by
   hand, limbs spreading wide, fine puffs from deep pink to near white, petals on the mulch and drifting), round
   bushes and the white wayfinding sign beside it, his photo), bollards, an orange barrier. The Atlantic Street
