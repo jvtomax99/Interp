@@ -221,6 +221,11 @@ where the map has houses.
   toy plastic with rounded edges (Bevel node), a warm soft sun, a sky for the bounce light, AgX, depth of field, drops
   the page's clouds, and renders front / whole / court with Cycles on the CPU (about 100 s each at 900 x 1200, 96
   samples), on a transparent film for a dark studio backdrop. Pictures only: the app can't render like this live.
+  Jose's pick for them (2026-10-28): the CoreCHI Practice card. `VIEWS=card` is the card's camera direction pulled
+  back to the whole board (`CARD_DIST`, 235); `PROGRESS="e:0.8,t:0.55,..."` paints each domain building up to that
+  share of its height, white clay above (a Z test in each copied material), as the card shows progress. Mock-ups so
+  far; the card's real pictures (near/far/sky, each building's paint in tenths, glows, the moving sprites) are
+  builddiorama.cjs's ~150 files, to be rendered from Blender in their own change.
 
 ## Open
 

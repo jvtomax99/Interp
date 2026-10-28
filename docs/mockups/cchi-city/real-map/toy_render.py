@@ -22,7 +22,7 @@ def base(o):
     P = m and m.node_tree and next((n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'), None)
     return tuple(round(c, 2) for c in P.inputs['Base Color'].default_value[:3]) if P else None
 for o in list(sc.objects):
-    if base(o) == (1.0, 0.69, 0.62) and min((o.matrix_world @ Vector(c)).z for c in o.bound_box) > 10: bpy.data.objects.remove(o)
+    if base(o) == (1.0, 0.69, 0.62): bpy.data.objects.remove(o)
 
 # ---- materials: toy plastic. Glass stays glassy; everything else gets a satin finish, a light clear coat and rounded edges
 for m in bpy.data.materials:
@@ -56,11 +56,40 @@ except Exception:
     try: sc.view_settings.look = 'Punchy'
     except Exception: pass
 
+# the CoreCHI Practice card's view (diorama.html's camera direction, -42,64,104 toward 0.5,0.5,-1.5, fov 18.77), pulled
+# back to take in the whole real board round its middle
+import math as _m
+_d = Vector((-42.5, 63.5, 105.5)).normalized(); _c = Vector((-1, -3, -29)); _p = _c + _d*float(os.environ.get('CARD_DIST', '250'))
+CARD = ((_p.x, _p.y, _p.z), (_c.x, _c.y, _c.z), 18.77, 2.2)
 VIEWS = {   # name: camera, target (the live page's own numbers), field of view (vertical, degrees), f-stop
   'front':  ((-16, 22, 28), (2, 0, -6), 30, 0.35),
   'whole':  ((-55, 70, 60), (-1, 0, -30), 30, 0.6),
   'court':  ((-40, 16, -10), (-19, 1, -29), 30, 0.25),
+  'card':   CARD,
 }
+PROG = os.environ.get('PROGRESS')   # e.g. "e:0.8,t:0.5,n:0.3,s:0.9,c:0.6": each domain building painted up to that share
+if PROG:
+    share = {k: float(v) for k, v in (p.split(':') for p in PROG.split(','))}
+    for k, f in share.items():
+        objs = [o for o in sc.objects if o.type == 'MESH' and o.name.startswith(k + '_')]
+        if not objs: continue
+        zs = [(o.matrix_world @ Vector(c)).z for o in objs for c in o.bound_box]; cut = min(zs) + (max(zs) - min(zs))*f
+        done = {}
+        for o in objs:
+            for i, m in enumerate(o.data.materials):
+                if m is None: continue
+                if m.name not in done:
+                    mm = m.copy(); nt = mm.node_tree; P = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+                    if P:
+                        geo = nt.nodes.new('ShaderNodeNewGeometry'); sep = nt.nodes.new('ShaderNodeSeparateXYZ'); cmp = nt.nodes.new('ShaderNodeMath'); cmp.operation = 'GREATER_THAN'; cmp.inputs[1].default_value = cut
+                        mix = nt.nodes.new('ShaderNodeMix'); mix.data_type = 'RGBA'; mix.inputs['B'].default_value = (0.93, 0.92, 0.9, 1)
+                        nt.links.new(geo.outputs['Position'], sep.inputs[0]); nt.links.new(sep.outputs['Z'], cmp.inputs[0]); nt.links.new(cmp.outputs[0], mix.inputs['Factor'])
+                        src = P.inputs['Base Color'].links[0].from_socket if P.inputs['Base Color'].is_linked else None
+                        if src: nt.links.new(src, mix.inputs['A'])
+                        else: mix.inputs['A'].default_value = P.inputs['Base Color'].default_value
+                        nt.links.new(mix.outputs['Result'], P.inputs['Base Color'])
+                    done[m.name] = mm
+                o.data.materials[i] = done[m.name]
 want = os.environ.get('VIEWS', 'front,whole,court').split(',')
 for name in want:
     (cx, cy, cz), (tx, ty, tz), fov, fstop = VIEWS[name]
