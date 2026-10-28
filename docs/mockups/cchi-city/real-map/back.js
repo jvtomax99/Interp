@@ -48,16 +48,25 @@ for (const r of SCN.roads){ if (r.hw === 'footway'){ ribbon(r.pts, r.w, 0.17, 0.
 for (const lot of SCN.lots) slab(lot, 0.17, 0.085, asphalt);
 
 // ---- the buildings ----
+// Women's and Children's wall, one floor a tile (bottom up): a precast sill band, a teal ribbon window, a thin precast
+// band, then a brick spandrel up to the next floor's sill (his Street View on the drive from Atlantic, 2026-10-28)
+function wncTex(){ const c = document.createElement('canvas'); c.width = 64; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#8c4a3a'; g.fillRect(0, 0, 64, 64); g.fillStyle = 'rgba(0,0,0,.07)'; for (let y = 0; y < 64; y += 4) g.fillRect(0, y, 64, 1);
+  g.fillStyle = '#d9c8ad'; g.fillRect(0, 14, 64, 9); g.fillRect(0, 47, 64, 13);
+  g.fillStyle = '#6e9fa2'; g.fillRect(0, 23, 64, 24); g.fillStyle = '#c9d4d2'; for (let x = 0; x < 64; x += 16) g.fillRect(x, 23, 2, 24);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t; }
 const STYLE = {
   e: { col:'#6e3a33', band:'#7a4239', roof:0xd9cdb8 },                        // George Link Jr. Pavilion: brown brick (as the hand-built one was)
   s: { col:'#7e3b37', band:'#e6d8c2', roof:0xf1f2f4, glassBase:2 },          // Jurist: brick, cream bands, glass on its two lower floors, a white roof
   c: { col:'#7a3530', band:'#e6d8c2' },                                      // Medical Plaza: maroon brick, cream bands; steps back, dark glass on top (tiers)
   t: { col:'#c9c2b6', band:'#efe8dc', glass:'#33456e', roof:0xe6e2da, kind:'glass' },   // Patient Pavilion: glass bands on pale stone
   n: { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc },                       // John Theurer Cancer Center: orange brick, white bands
-  x8905: { col:'#e3e5e8', band:'#cdd1d7', glass:'#5f7a98', roof:0xe6e6e4 },   // Women's and Children's Pavilion: white precast, ribbon windows, a glass grid (Jose, 2026-10-28)
+  x8905: { tex:wncTex, roof:0xe6e2da, noWin:1 },   // Women's and Children's Pavilion: light precast, brick spandrels, teal ribbon windows, a glass grid (his aerials and Street View, 2026-10-28)
   x8899: { col:'#c9b79c', band:'#dccfb9', glass:'#6d93ad', roof:0xd9d2c4, kind:'glass', baseBlock:1 },   // Imus: tan brick, ribbon windows, a pale block ground floor
-  x8902: { col:'#b8553a', band:'#f1ece4', roof:0xd6d0c4 },
-  x7562: { col:'#c3c8cf', band:'#aab0b9', glass:'#7f8b99', roof:0xdfe2e6 },   // across 2nd Street from Theurer: silver panels (Jose's photos)   // the ED: red brick, white bands x8907: { col:'#d8d0c2', band:'#b9b0a2', roof:0xd6d0c4 }, x8894: { col:'#8f4a3a', band:'#e6d8c2' },
+  x8902: { col:'#b8553a', band:'#f1ece4', roof:0xd6d0c4 },                 // the ED: red brick, white bands
+  x7562: { col:'#c3c8cf', band:'#aab0b9', glass:'#7f8b99', roof:0xdfe2e6 },   // across 2nd Street from Theurer: silver panels (Jose's photos)
+  x8907: { col:'#8a3d2e', band:'#93463a', roof:0xd6d0c4 },                  // Creamer Imaging: plain red brick (his Street View, 2026-10-28)
+  x8894: { col:'#8f4a3a', band:'#e6d8c2' },
   x8889: { col:'#9a5a46', band:'#e6d8c2' }, x8890: { col:'#e9d8b8', band:'#f6efe2' }, x8891: { col:'#b56a52', band:'#ead9c4' }, x8892: { col:'#c98a6a', band:'#f4ead8' } };
 const HOUSE_COLS = ['#d9c8a8', '#c7d1d8', '#e6d6c0', '#b9c7b0', '#d8b8a8', '#e8e2d4', '#c9b8a0'];
 const GARAGE = { col:'#cfcac0', band:'#dcd7ce', glass:'#3d404c' };
@@ -74,7 +83,7 @@ function realBuilding(b){
   if (dom){ let best = b.door ?? -1, sc = -1e9; if (best < 0) E.forEach((e, i) => { if (!b.win[i] || e.L < 5) return; const s2 = e.L*0.2 + e.nz*6; if (s2 > sc){ sc = s2; best = i; } }); DOORW[b.key] = { i:best, w:2.6 }; }
   CUR = k;
   if (b.key === 't') htpBody(b, y0, h); else {
-  const t = brickTex(o.col, o.band, o.glass || null), wall = new THREE.MeshStandardMaterial({ map:t, bumpMap:t, bumpScale:0.6, roughness:0.85, envMapIntensity:0.12 });
+  const t = o.tex ? o.tex() : brickTex(o.col, o.band, o.glass || null), wall = new THREE.MeshStandardMaterial({ map:t, bumpMap:t, bumpScale:0.6, roughness:0.85, envMapIntensity:0.12 });
   t.repeat.set(1/0.9, 1/fl); t.offset.set(0, -((1/fl) % 1));
   if (gF) wallsOf(b.pts, y0, gF*fl, o.glassBase ? GLASSWALL : M(0xe4dccd, { r:0.8 }));
   const [caps, sides] = splitCaps(new THREE.ExtrudeGeometry(shapeOf(b.pts), { depth:hb - gF*fl, bevelEnabled:false })); caps.dispose();
@@ -99,7 +108,7 @@ function realBuilding(b){
         W.reveal.push(placed(new THREE.BoxGeometry(gw + 0.02, 0.035, 0.04), px + e.nx*0.012, y + gh/2 - 0.01, pz + e.nz*0.012, e.a).toNonIndexed()); }
       const r = wr(), kind = glass ? 'dark' : r < 0.07 ? 'warm' : r < 0.4 ? 'sky' : 'dark', lit = wr() < 0.5;
       W[lit ? 'lit' + kind[0].toUpperCase() + kind.slice(1) : kind].push(placed(new THREE.BoxGeometry(gw, gh, 0.03), px + e.nx*0.004, y, pz + e.nz*0.004, e.a).toNonIndexed()); } });
-  if (b.kind !== 'garage') winsOn(E, i => b.win[i], y0, gF, bodyF, door);
+  if (b.kind !== 'garage' && !o.noWin) winsOn(E, i => b.win[i], y0, gF, bodyF, door);
   // set-back tiers (Medical Plaza): brick with windows, then dark glass, each on the roof of the one below
   let yb = y0 + hb + 0.22;
   for (const T of b.tiers || []){ const th = T.floors*fl, ET = edgesOf(T.pts);
@@ -166,6 +175,52 @@ pend.push(() => { CUR = 'e'; const z = -8.1 + 0.06;
 // the Women's and Children's Pavilion's glass grid on its south face, floors 3 to 6 (his aerials)
 pend.push(() => { const E = BLD.x8905.E; let i = 0; E.forEach((e, k) => { if (e.az + e.bz > E[i].az + E[i].bz) i = k; });
   const t = curtainTex(); t.repeat.set(7.0/1.4, 4); onWall('x8905', i, 2.0, 0.3 + 4*FL, 7.0, 4*FL, new THREE.MeshStandardMaterial({ map:t, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }), 0.05); CUR = '_'; });
+// ==================== the drive in from Atlantic, along Women's and Children's (his Street View, 2026-10-28) ====================
+// The map's service road from Atlantic runs along the pavilion's front. His four shots there: a long flat grey canopy on
+// columns over the pavilion's doors, a drop-off lane under it split from the through lane by a long island (yellow curb,
+// red mulch and flowers, a wayfinding sign, a hydrant and two yellow bollards at its east tip); at the pavilion's east end
+// a drive-through tunnel under it (the map's covered service road, way 4473) between red-brick piers, louvres over it;
+// across the side drive, the red-brick Creamer Imaging building with a one-floor front under a flat grey canopy that wraps
+// its corner, a red Emergency sign on it, a louvred penthouse on its roof and a tall white banner.
+{ const wz = x => -6.65 + (x + 27.57)/16.64*0.15;   // the pavilion's front wall (map 8905)
+  const greyC = M(0x6b7079, { r:0.55, m:0.25 }), greyU = M(0xc9ccd2, { r:0.7 }), tanCol = M(0xd6c4a8, { r:0.75 }), brickP = M(0x8c4a3a, { r:0.9 });
+  // the drop-off lane and the island between it and the through lane
+  box(12.6, 0.06, 1.05, asphalt, -17.6, 0.235, -5.25, 0.02, false);
+  pill(-18.3, -4.6, 0.34, 8.6, curb, 0.27, 0.12).rotation.y = Math.PI/2; pill(-18.3, -4.6, 0.24, 8.45, M(0x7a3a2c, { r:0.95 }), 0.3, 0.12).rotation.y = Math.PI/2;
+  { const r = rngAt(-18.3, -4.6); for (let q = 0; q < 34; q++) add(new THREE.IcosahedronGeometry(0.05, 0), FLOWERS[[0, 4, 2, 5][q % 4]], -22.3 + q*0.24 + r()*0.08, 0.38, -4.6 + (r() - 0.5)*0.12, false); }
+  for (const x of [-21.0, -19.2]) shrub(x, 0.33, -4.6, 0.13, 1);
+  for (const x of [-14.25, -14.65]){ add(new THREE.CylinderGeometry(0.045, 0.045, 0.34, 10), M(0xe8c43a, { r:0.5 }), x, 0.5, -4.6); }
+  add(new THREE.CylinderGeometry(0.05, 0.06, 0.2, 10), M(0xc8322c, { r:0.5 }), -14.45, 0.43, -4.66);
+  box(0.06, 0.5, 0.34, M(0xe9ecf2, { r:0.6 }), -15.4, 0.62, -4.6, 0.02); box(0.07, 0.08, 0.36, M(0x2b5ea8, { r:0.6 }), -15.4, 0.82, -4.6, 0.01);
+  // the canopy over the pavilion's front, on tan columns, with a glass storefront under it
+  { const x0 = -22.0, x1 = -13.3, zc = wz((x0 + x1)/2) + 0.42;
+    box(x1 - x0, 0.1, 0.84, greyC, (x0 + x1)/2, 0.3 + 0.86, zc, 0.03); box(x1 - x0 - 0.04, 0.02, 0.8, greyU, (x0 + x1)/2, 0.3 + 0.8, zc, 0.01, false);
+    for (let x = x0 + 0.45; x < x1; x += 1.45) add(new THREE.CylinderGeometry(0.09, 0.09, 0.82, 12), tanCol, x, 0.3 + 0.41, wz(x) + 0.72);
+    add(new THREE.PlaneGeometry(x1 - x0 - 0.3, 0.5), new THREE.MeshStandardMaterial({ color:0x31424f, roughness:0.08, metalness:0.6, envMapIntensity:1.2 }), (x0 + x1)/2, 0.3 + 0.3, wz((x0 + x1)/2) + 0.035, false);
+    for (let x = x0 + 1.2; x < x1 - 0.5; x += 2.4) glow(x, 0.3 + 0.55, wz(x) + 0.2, 0.6, 0xffe2b0); }
+  // a grey rolling door, then the tunnel at the east end: dark under a lintel, brick piers, two louvres over it
+  add(new THREE.PlaneGeometry(0.9, 0.55), M(0x8d9097, { r:0.6, m:0.3 }), -13.0, 0.3 + 0.28, wz(-13.0) + 0.03, false);
+  add(new THREE.PlaneGeometry(1.5, 0.8), new THREE.MeshBasicMaterial({ color:0x15171c }), -11.7, 0.3 + 0.4, wz(-11.7) + 0.02, false);
+  for (const x of [-12.5, -11.0]) box(0.24, 0.82, 0.22, brickP, x, 0.3 + 0.41, wz(x) + 0.1, 0.02);
+  box(1.75, 0.12, 0.2, tanCol, -11.75, 0.3 + 0.86, wz(-11.75) + 0.08, 0.02);
+  for (const x of [-12.15, -11.35]) box(0.6, 0.12, 0.04, M(0xe4e6ea, { r:0.5 }), x, 0.3 + 1.08, wz(x) + 0.03, 0.01, false);
+  for (const z of [-3.25, -6.15]) for (let i = 0; i < 6; i++) box(0.16, 0.012, 0.6, paint, -11.95 + i*0.28, 0.262, z + 0.3, 0.003, false);   // the crosswalks across the tunnel's mouth
+  // Creamer Imaging (map 8907): the one-floor front with a canopy wrapping its corner, the Emergency sign, the penthouse, the banner
+  { const wx = -8.88, nzw = -5.42, cy = 0.3 + 0.66;
+    box(0.6, 0.08, 6.0, greyC, wx - 0.3, cy, -8.4, 0.02); box(4.6, 0.08, 0.7, greyC, wx + 2.3 - 0.3, cy, nzw + 0.35, 0.02);
+    for (let z = -6.0; z > -11.4; z -= 1.5) add(new THREE.CylinderGeometry(0.06, 0.06, 0.62, 10), M(0x9a9ea6, { r:0.5 }), wx - 0.52, 0.3 + 0.31, z);
+    for (let x = wx + 1.2; x < wx + 4.4; x += 1.5) add(new THREE.CylinderGeometry(0.06, 0.06, 0.62, 10), M(0x9a9ea6, { r:0.5 }), x, 0.3 + 0.31, nzw + 0.62);
+    const sf = new THREE.MeshStandardMaterial({ color:0x2a3340, roughness:0.08, metalness:0.6, envMapIntensity:1.2 });
+    add(new THREE.PlaneGeometry(5.6, 0.5), sf, wx - 0.02, 0.3 + 0.27, -8.6, false).rotation.y = -Math.PI/2;
+    add(new THREE.PlaneGeometry(2.6, 0.5), sf, wx + 2.3, 0.3 + 0.27, nzw + 0.02, false);
+    const sign = textCanvas(['EMERGENCY'], { w:512, lh:96, font:'bold 64px Inter, Arial, sans-serif', col:'#ffffff' }), st = new THREE.CanvasTexture(sign); st.colorSpace = THREE.SRGBColorSpace;
+    box(0.06, 0.24, 1.05, M(0xc8262e, { r:0.5 }), wx - 0.62, cy + 0.15, -6.0, 0.02);
+    add(new THREE.PlaneGeometry(1.0, 0.19), new THREE.MeshBasicMaterial({ map:st, transparent:true }), wx - 0.655, cy + 0.15, -6.0, false).rotation.y = -Math.PI/2;
+    glow(wx - 0.7, cy + 0.15, -6.0, 0.8, 0xff6a6a);
+    const B = BLD.x8907, top = B.y0 + B.h + 0.22, lou = M(0xd9cdb0, { r:0.7 });
+    box(2.4, 0.55, 1.6, lou, -6.3, top + 0.28, -8.6, 0.03); for (let k = 0; k < 6; k++) box(2.42, 0.025, 0.02, M(0xb3a68a), -6.3, top + 0.1 + k*0.08, -7.79, 0.004, false);
+    pend.push(() => { add(new THREE.PlaneGeometry(0.42, 1.5), new THREE.MeshBasicMaterial({ color:0xf4f6fa }), -5.0, 0.3 + 1.25, nzw + 0.03, false);
+      add(new THREE.PlaneGeometry(0.34, 0.34), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), -5.0, 0.3 + 1.75, nzw + 0.04, false); }); } }
 function onWall(key, i, s, y, w, h, mat, out=0.03){ const e = BLD[key].E[i], [cx, cz] = e.at(e.L/2); const m = add(new THREE.PlaneGeometry(w, h), mat, cx + e.ux*s + e.nx*out, y, cz + e.uz*s + e.nz*out, false); m.rotation.y = e.a; return m; }
 // (the hospital's name is on the Helena Theurer Pavilion's glass tower, built below with the corner of Atlantic and 2nd)
 // Encounter: the name on John Theurer Cancer Center's face, over its doors
@@ -304,9 +359,11 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
 // ---- the Atlantic Street garage's corner on the intersection: a beige stair tower with a dark slit of glass up it (Google 3D) ----
 { const st = box(1.4, 4.1, 1.4, M(0xd9c7a2, { r:0.8 }), -25.1, 0.3 + 2.05, -45.2, 0.04), slit = M(0x2a3142, { r:0.3, m:0.4 });
   add(new THREE.PlaneGeometry(0.26, 3.3), slit, -24.385, 2.25, -45.2, false).rotation.y = Math.PI/2; add(new THREE.PlaneGeometry(0.26, 3.3), slit, -25.1, 2.25, -45.915, false).rotation.y = Math.PI; }
-// ---- a glass skybridge over Atlantic Street, from the garage to the ED, north of Imus (Google 3D; where exactly it lands is a guess) ----
+// ---- a glass skybridge over Atlantic Street, from the garage to the ED's corner by Imus: the map's footway bridge (way 8918;
+// it was over the ED's turnaround, a guess, until 2026-10-28) ----
 { const glassB = new THREE.MeshStandardMaterial({ color:0x3d5578, roughness:0.08, metalness:0.6, envMapIntensity:1.4 }), frameB = M(0xd3d6db, { r:0.5 });
-  box(8.7, 0.8, 1.1, glassB, -21.95, 2.3, -29.5, 0.03); box(8.8, 0.14, 1.2, frameB, -21.95, 2.77, -29.5, 0.02); box(8.8, 0.14, 1.2, frameB, -21.95, 1.83, -29.5, 0.02); }
+  const BR = { x0:-26.12, z0:-31.19, x1:-16.85, z1:-31.64 }, bl = Math.hypot(BR.x1 - BR.x0, BR.z1 - BR.z0), ba = -Math.atan2(BR.z1 - BR.z0, BR.x1 - BR.x0), bx = (BR.x0 + BR.x1)/2, bz = (BR.z0 + BR.z1)/2;
+  box(bl, 0.8, 1.1, glassB, bx, 2.3, bz, 0.03).rotation.y = ba; box(bl + 0.1, 0.14, 1.2, frameB, bx, 2.77, bz, 0.02).rotation.y = ba; box(bl + 0.1, 0.14, 1.2, frameB, bx, 1.83, bz, 0.02).rotation.y = ba; }
 // ---- the intersection: crosswalks on all four sides, pink paving at the corners, a stop sign ----
 { // a crosswalk: bars lying along the road, side by side across it
   const across = (cx, cz, roadAlongX, n=7) => { for (let i = 0; i < n; i++){ const o = (i - (n - 1)/2)*0.37;

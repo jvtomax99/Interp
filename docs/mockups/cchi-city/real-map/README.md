@@ -129,9 +129,22 @@ where the map has houses.
   (Jose, 2026-10-28), so it stands against the curved tower's east side, on
   terracotta, the mark facing 2nd Street.
 
+- The drive in from Atlantic Street, along Women's and Children's (his 4 Street View shots, 2026-10-28; he
+  called it the Creamer trauma center): the map's service road along the pavilion's front, with a drop-off lane
+  under a long flat grey canopy on tan columns, split off by a planted island (yellow curb, flowers, a wayfinding
+  sign, hydrant and two yellow bollards); the pavilion's wall is light tan precast with brick spandrels and teal
+  ribbon windows (his aerials read it as white); at its east end a drive-through tunnel between brick piers (the
+  map's covered service road, way 4473), crosswalks at its mouth; across the side drive, Creamer Imaging in plain
+  red brick, its front under a grey canopy wrapping the corner, a red EMERGENCY sign, a louvred penthouse and a
+  white HMH banner. The skybridge over Atlantic moved to where the map draws it (footway bridge, way 8918: the
+  garage to the ED's corner by Imus); it had been over the ED's turnaround, a guess. Fixed: Imaging and the
+  Hillcrest Building had lost their colours to a misplaced comment in `STYLE`.
+
 ## Open
 
-- Other skybridges in his photos: which buildings they join is unknown.
+- Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street
+  (way 8921) and one at x 15.7 between the pavilion and the Visitors garage (way 8911). Not built yet; ask.
+- Whether the red sign on Imaging's canopy really reads EMERGENCY (too blurry in his shot).
 - The ambulance still drives to the bay on Link Pavilion's side, not the
   real ED (Creamer) on Atlantic Street.
 - The front's ground is still the diorama's drawing: the drive's medians,
