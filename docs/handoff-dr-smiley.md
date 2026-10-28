@@ -56,12 +56,17 @@ be; filmed clips can. Sora animates his master picture from a prompt
 frame out of the grey wall at full size; `layers/checkclip.py` checks
 every frame (strays, holes, cuts, rims, jumps); `features/smiley-clips.js`
 plays a clip over the rig (`DR_CLIPS`; a canvas, a 150 ms fade each end).
-In the app on this branch: the wave (Home's hello), think, wince and the
-thumbs-up (the quiz's right answer), all clean. The cheer is not: with
-both arms up, the raised sleeves' shadowed sides are the wall's exact grey
-and keyed out torn; the prompt for it on a green wall is in prompts.md,
-waiting for Jose to run it. The rig keeps the small life and every move
-without a clip. 16 MB of frames, fetched once, not precached.
+In the app on this branch, all five: the wave (Home's hello), think,
+wince, the thumbs-up (the quiz's right answer) and the cheer, every frame
+checked clean. The cheer took four runs: on grey the raised sleeves keyed
+out torn (a green wall, keyed by chroma, fixed that); the jump left the
+picture at the top until the framing was said in words (him small, in the
+lower two thirds; a padded start picture was ignored), keyed with
+`FIT`/`TOP=200` and drawn taller above the host (`DR_CLIPS.cheer.top`).
+The rig keeps the small life and every move without a clip. 22 MB of
+frames, fetched one clip at a time (the wave first on Home), not
+precached. Next is Jose's call: going live (merge main, run every suite,
+a pull request waiting for his push).
 Jose watches everything on his phone; send a video after each step.
 
 ## Where it stood (2026-10-26, fifth chat)
