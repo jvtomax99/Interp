@@ -59,8 +59,8 @@ before (Jose, 2026-10-24), each a few lines in simple words, never a
 big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
 for his go.
 
-**Offer a new chat only when the chat is heavy** (Jose, 2026-10-28:
-not so constantly, only when the chat feels heavy; this replaces the buttons after every finished job of
+**Offer a new chat only when the chat is extremely heavy** (Jose, 2026-10-28:
+not so constantly, only when the chat feels extremely heavy; this replaces the buttons after every finished job of
 2026-10-25). Heavy means what the handover above says: compacted, or many
 big file reads, long test output or fix rounds. Then, once, end the reply
 with `AskUserQuestion`: **"Start a new chat for me"** first, **"Keep going

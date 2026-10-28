@@ -12,9 +12,9 @@ and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
 of this chat pasted in (Jose, 2026-10-23), offered as clickable buttons
 (`AskUserQuestion`), "I start it for you" first as the pick, never only
-as text to paste (Jose, 2026-10-25). **Offer a new chat only when the chat is
+as text to paste (Jose, 2026-10-25). **Offer a new chat only when the chat is extremely
 heavy** (Jose, 2026-10-28: not so constantly,
-only when the chat feels heavy; replaces the buttons after every
+only when the chat feels extremely heavy; replaces the buttons after every
 finished job, 2026-10-25): then, and only then, the same clickable buttons,
 "Start a new chat for me" first and "Keep going here" second, over a short
 summary of what is being worked on; a new chat is made only when he picks
