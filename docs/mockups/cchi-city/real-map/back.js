@@ -213,11 +213,7 @@ pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
   ['Pediatric Emergency', "Women's Hospital", 'Visitor Parking'].forEach((t, i) => g.fillText(t, 8, 112 + i*22)); g.fillStyle = '#2b3a6b'; g.font = 'bold 12px Arial'; g.fillText('Hackensack', 30, 30); g.fillText('Meridian Health', 22, 46);
   const st = new THREE.CanvasTexture(sc); st.colorSpace = THREE.SRGBColorSpace;
   box(0.62, 0.95, 0.1, M(0xe9ecf0, { r:0.6 }), -0.95, 0.3 + 0.48, -4.6, 0.02); add(new THREE.PlaneGeometry(0.56, 0.84), new THREE.MeshBasicMaterial({ map:st }), -0.95, 0.3 + 0.5, -4.545, false); }
-// the bridge over the drive in front of the lobby, from Link Pavilion to Medical Plaza (Jose, 2026-10-28)
-{ const B = BRICK({ col:'#7e3b30', band:'#8a4638' })(3.6, 2*FL);
-  box(3.0, 2*FL, 2.6, B, 5.4, 0.3 + 1.4*FL + FL, -4.75, 0.04);
-  box(3.1, 0.1, 2.7, M(0xe8dcc6, { r:0.6 }), 5.4, 0.3 + 1.4*FL, -4.75, 0.02);
-  for (const x of [4.1, 4.95, 5.8, 6.65]) for (const y of [0.3 + 1.4*FL + 0.45*FL, 0.3 + 2.4*FL + 0.45*FL]) add(new THREE.PlaneGeometry(0.5, 0.26), WIN_DARK, x, y, -3.44, false); }
+// (no bridge over the drive: the floating brick block there was removed at Jose's word, 2026-10-28)
 // ---- the drive-through under Link Pavilion (Jose's 13 photos, 2026-10-28): the lobby's glass behind a sidewalk with steel
 // bollards, two round white columns either side of the revolving door, a crosswalk to the outer sidewalk and its brick
 // piers; past its east end, the long dark barrel canopy over a herringbone brick walk, on black posts, with lantern
