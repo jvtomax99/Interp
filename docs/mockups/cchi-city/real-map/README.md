@@ -102,6 +102,15 @@ where the map has houses.
   a beige stair tower on its corner; a glass skybridge crosses Atlantic from
   the garage to the ED, north of Imus (where it lands is a guess).
 - His iPhone runs the preview at 60 fps (2026-10-28).
+- The front, from his 8 Google 3D shots (2026-10-28): Link Pavilion's two
+  banners are on its front at the end of the drive (white HMH left, blue
+  right), and a curved planted island with evergreens hugs that face, the
+  drop-off road looping round it; the white canopy and lobby are gone.
+  Medical Plaza is white precast with ribbon windows, a glass grid on its
+  Prospect face and a plain set-back block on top (6 + 2 floors; it was
+  maroon brick with dark glass tiers). The Visitors Parking garage beside
+  the drive has 8 decks. Which building the white one in his shots is was
+  read from the views, not confirmed: ask if it looks wrong.
 - Helena Theurer Pavilion and the little park beside it (his 12 Street View
   and Google 3D shots, 2026-10-28): the bridge sits low over the road with a
   tall terracotta block on a deep grey band (two dark panels either side of

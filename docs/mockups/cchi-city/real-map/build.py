@@ -30,6 +30,9 @@ drop("// Ethics: the brown-brick building at the end of the drive", "  tree(sx*4
 drop("// no windows under the two banners", "WINDOWS.e = WINDOWS.e.filter(m => { const p = m.position, under")
 drop("// US Systems: the brick building on the left", "{ const top = 0.3 + 9*FL + 0.44; Object.assign(BOX.c")
 # the surface lot on the left: the map has houses there (Jurist's neighbours on Prospect)
+# the white canopy and lobby at the end of the drive: his aerials (2026-10-28) show a curved planted island against Link
+# Pavilion's front instead, the drop-off road looping round it (back.js builds the island)
+drop("// the entrance (Jose's references): a white canopy", "    for (let q = 0; q < 9; q++){ const a = q/9*Math.PI*2; add(new THREE.IcosahedronGeometry(0.045, 0), FLOWERS[[0, 1, 2, 4][q % 4]], sx*2.85")
 drop("box(8.6, 0.08, 7.2, asphalt, -14.6, 0.24, 9.8, 0.03, false);", "for (let i=0;i<10;i++){ if (i === 3 || i === 8) continue; parked(")
 pad = drop("// back left (context): the blue glass", "for (let i=0;i<8;i++){ const a = i/8*Math.PI*2; glow(PAD.x")
 drop("for (let x = -19; x <= 19; x += 1.15) add(new THREE.IcosahedronGeometry(0.42", "for (let x = -19")
@@ -54,24 +57,19 @@ rep("for (const x of [-3.0, 2.5, 3.6]) for (let z=10.5; z>-3; z-=1.4)","for (con
 rep("arrow(2.0, 9.0, 0); arrow(3.1, 9.0, 0); arrow(4.2, 9.0, 0);","arrow(1.9, 9.0, 0); arrow(2.8, 9.0, 0);")
 rep("box(26, 0.06, 2.8, pave(26, 2.8), 0, 0.21, -7.6, 0.02, false);","box(13.1, 0.06, 6.0, pave(13.1, 6.0), 2.05, 0.215, -8.0, 0.02, false);")
 rep("for (let z = 11; z > -6; z -= 3.4){ lamp(-5.4, z); lamp(5.4, z); }","for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z); if (z > 9.9 || z < -1.9) lamp(3.0, z); }   // Medical Plaza's colonnade lines the right side")
-rep("// the entrance (Jose's references): a white canopy on two round columns, warm downlights in its soffit, glass doors\n",
-    "// the entrance (Jose's references): a white canopy on two round columns, warm downlights in its soffit, glass doors\n"
-    "// (moved onto Link Pavilion's real front wall, where the map's outline has its canopy: 1.1 right, 1.8 forward)\n"
-    "{ const EG = new THREE.Group(); EG.position.set(1.1, 0, 1.8); BASE.add(EG); G = EG; const g0 = GLOWS.length;\n")
-i=out.index("sx*2.85 + Math.cos(a)*0.24"); j=out.index("\n", i)
-out=out[:j]+"\n  G = BASE; EG.updateMatrixWorld(true); GLOWS.slice(g0).forEach(sp => EG.localToWorld(sp.position)); }"+out[j:]
+# (the canopy and its lobby are dropped above: Link Pavilion's front has a curved planted island, not a canopy)
 # the café on the strip of lawn in front of Medical Plaza, either side of its doors
 rep("[[8.6,9.6,0xe0414b],[10.6,10.4,0xf4f6fa],[8.9,11.5,0xf2c14e],[11.2,8.9,0x3aa6a0]]","[[6.4,10.95,0xe0414b],[8.4,10.95,0xf4f6fa],[18.2,10.95,0xf2c14e],[20.2,10.95,0x3aa6a0]]")
 # the walkers, the cars and the ambulance keep to the narrowed drive and out of the buildings
 rep("{ g: person('nurse', 2), pts: [[-14,0.1,9.2],[-5.2,0.1,9.0],[-3.7,0.1,4],[-3.7,0.1,-4],[-2.4,0.1,-7.4]], dur: 34000 },",
-    "{ g: person('nurse', 2), pts: [[-14,0.1,11.2],[-5.0,0.1,11.0],[-4.9,0.1,4],[-4.9,0.1,-4],[-1.4,0.1,-6.9]], dur: 34000 },")
+    "{ g: person('nurse', 2), pts: [[-14,0.1,11.2],[-5.0,0.1,11.0],[-4.9,0.1,4],[-4.9,0.1,-4],[-2.7,0.1,-6.4]], dur: 34000 },")
 rep("{ g: person('doctor', 3), pts: [[2.4,0.1,-7.4],[3.7,0.1,-4],[3.7,0.1,4],[5.6,0.1,9.2],[12,0.1,9.6]], dur: 36000 },",
-    "{ g: person('doctor', 3), pts: [[2.0,0.1,-6.6],[2.9,0.1,-4],[2.9,0.1,4],[3.2,0.1,10.6],[3.6,0.1,11.95],[9,0.1,11.95]], dur: 36000 },")
+    "{ g: person('doctor', 3), pts: [[4.6,0.1,-6.6],[2.9,0.1,-4],[2.9,0.1,4],[3.2,0.1,10.6],[3.6,0.1,11.95],[9,0.1,11.95]], dur: 36000 },")
 rep("{ g: person('wheel', 4), pts: [[-13,0.1,9.6],[-6.5,0.1,9.6],[-3.7,0.1,5],[-3.7,0.1,-3],[-2.6,0.1,-7.2]], dur: 52000 },",
-    "{ g: person('wheel', 4), pts: [[-13,0.1,11.4],[-4.9,0.1,11.2],[-4.9,0.1,5],[-4.9,0.1,-3],[-1.6,0.1,-6.6]], dur: 52000 },")
-rep("{ g: person('elder', 1), pts: [[1.4,0.1,-7.3],[-1.6,0.1,-7.3],[1.4,0.1,-7.3]], dur: 22000 },","{ g: person('elder', 1), pts: [[2.5,0.1,-7.4],[-0.3,0.1,-7.4],[2.5,0.1,-7.4]], dur: 22000 },")
+    "{ g: person('wheel', 4), pts: [[-13,0.1,11.4],[-4.9,0.1,11.2],[-4.9,0.1,5],[-4.9,0.1,-3],[-2.8,0.1,-6.0]], dur: 52000 },")
+rep("{ g: person('elder', 1), pts: [[1.4,0.1,-7.3],[-1.6,0.1,-7.3],[1.4,0.1,-7.3]], dur: 22000 },","{ g: person('elder', 1), pts: [[4.4,0.1,-7.6],[4.4,0.1,-6.2],[4.4,0.1,-7.6]], dur: 22000 },")
 rep("{ g: person('patient', 2), pts: [[3.7,0.1,-5.5],[3.7,0.1,2],[3.7,0.1,-5.5]], dur: 30000 },","{ g: person('patient', 2), pts: [[2.9,0.1,-5.0],[2.9,0.1,2],[2.9,0.1,-5.0]], dur: 30000 },")
-rep("CAR_IN.position.set(3.1, 0.2, 15.5 - u*22)","CAR_IN.position.set(2.5, 0.2, 15.5 - u*22)")
+rep("CAR_IN.position.set(3.1, 0.2, 15.5 - u*22)","CAR_IN.position.set(2.5, 0.2, 15.5 - u*21)")
 rep("along([[4.2,0.2,15.5],[4.2,0.2,2],[4.4,0.2,-4],[5.4,0.2,-7.2],[6.8,0.2,-8.0],[7.4,0.2,-8.4]]","along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0.2,-4],[4.6,0.2,-6.9],[6.6,0.2,-8.0],[7.4,0.2,-8.4]]")
 rep('<h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>','<h1>HUMC campus, front and back<small>Preview · live front on the real map</small></h1>')
 rep('<p class="hint">Drag to spin · pinch to zoom · tap a building</p>','<p class="hint">Drag to spin · two fingers to zoom and move · tap a building<br><span style="opacity:.7;font-size:10px">Map data © OpenStreetMap contributors</span></p>')
