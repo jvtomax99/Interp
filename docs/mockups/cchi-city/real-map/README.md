@@ -102,8 +102,11 @@ where the map has houses.
   a beige stair tower on its corner; a glass skybridge crosses Atlantic from
   the garage to the ED, north of Imus (where it lands is a guess).
 - His iPhone runs the preview at 60 fps (2026-10-28).
+- The glass tower is big (Jose, 2026-10-28, "pay attention to the upper glass
+  portion, it's big"): about 16 x 17 units, its long curved face toward the
+  corner, from beside the bridge to behind Imus (`htpCurve`).
 - The slim glass tower with the HMH mark is on Imus's side of the street
-  (Jose, 2026-10-28), so it stands against the curved tower's far side, on
+  (Jose, 2026-10-28), so it stands against the curved tower's east side, on
   terracotta, the mark facing 2nd Street.
 
 ## Open

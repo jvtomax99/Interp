@@ -120,7 +120,7 @@ function realBuilding(b){
   if (b.kind === 'garage') (SCN.cars.roofs[b.key] || []).forEach(([x, z, a], j) => parkedAt(x, z, a, j*5 + 3, y0 + h + 0.22));
   if (dom){ const xs = b.pts.map(p => p[0]), zs = b.pts.map(p => p[1]); LABEL_AT[k] = [lx, y0 + hTop + 0.9, lz];
     BOX[k] = { x:lx, z:lz, w:Math.max(...xs) - Math.min(...xs), d:Math.max(...zs) - Math.min(...zs), h:hTop + 0.8, y0, top:y0 + hTop + 0.8, roof:y0 + hTop + 0.22, crane:[lx, lz], pts:b.pts, halo:b.halo };
-    if (k === 't'){ Object.assign(BOX.t, { capTower: htpTowerPts(), platTop: y0 + 4*fl + 0.2, x:3.6, z:-38.9, crane:[3.6, -38.9] }); LABEL_AT.t = [3.6, y0 + h + 0.9, -38.9]; } }   // the badge over the glass tower
+    if (k === 't'){ Object.assign(BOX.t, { capTower: htpTowerPts(), platTop: y0 + 4*fl + 0.2, x:5.0, z:-38.0, crane:[5.0, -38.0] }); LABEL_AT.t = [5.0, y0 + h + 0.9, -38.0]; } }   // the badge over the glass tower
   BLD[b.key] = { b, E, h, y0, fl }; }
 SCN.lots.length && SCN.cars.lots.forEach(([x, z, a], j) => parkedAt(x, z, a, j*3 + 1, 0.26));
 SCN.blds.find(b => b.key === 'x8902').floors = 5;   // the ED is five floors in the photos
@@ -165,7 +165,7 @@ function backTree(x, z, s, kind){ if (kind === 'cone' || kind === 'blossom') ret
   const r = rngAt(x, z), mats = kind === 'red' ? BACK_RED : BACK_LEAF, h = 1.1*s;
   limb(x, 0.28, z, x + (r() - 0.5)*0.2, 0.3 + h, z + (r() - 0.5)*0.2, 0.13*s, 0.08*s, BARK);
   for (let k = 0; k < 6; k++){ const a = r()*Math.PI*2, d = (k ? 0.45 + r()*0.25 : 0)*s; add(new THREE.IcosahedronGeometry((k ? 0.42 + r()*0.18 : 0.7)*s, 1), mats[(k + Math.floor(r()*2)) % mats.length], x + Math.cos(a)*d, 0.3 + h + 0.35*s + (k ? r()*0.35*s : 0), z + Math.sin(a)*d); } }
-for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 8.4 && x < 12.8 && z > -46.6 && z < -40.9) && Math.hypot(x - 14.2, z + 44.8) > 3.4) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
+for (const [x, z, s, k] of SCN.trees) if (!(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 11.6 && x < 16.0 && z > -36.6 && z < -30.9) && !(x > -6.5 && x < 12.8 && z > -47 && z < -29) && Math.hypot(x - 14.2, z + 44.8) > 3.4) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
 // ==================== the corner of Atlantic and 2nd Street (Jose's photos, 2026-10-27) ====================
 // Seen from his window at John Theurer: Don Imus - WFAN Pediatric Center on the corner, tan brick with ribbon windows
 // and its name across the curved corner; the red-brick ED with white bands beside it; behind them the Helena Theurer
@@ -210,19 +210,24 @@ function textCanvas(lines, { w=1024, lh=64, font='bold 44px Georgia, serif', col
 // bridge; the bridge over 2nd Street ("Helena Theurer Pavilion" on its grey fascia) into the Employee Parking Garage,
 // where a slimmer glass tower with the HMH mark rises (photos from 2nd St and Jose's window, Google 3D; 2026-10-28:
 // the tower moved up to the street and made taller, it stood 45 m back and barely showed over the bridge).
-function htpTowerPts(){ const pts = [[-1.5, -46.3], [9.0, -46.3], [9.0, -31.5], [-1.5, -31.5]];
-  for (let k = 1; k < 16; k++){ const u = k/16; pts.push([-1.5 - Math.sin(u*Math.PI)*2.5, -31.5 - 14.8*u]); } return pts; }
+// (2026-10-28, "the upper glass portion, it's big": a big floor plate, its long curved face toward the corner,
+// sweeping from beside the bridge to behind Imus, as in his window photo and the Google 3D view from the southwest)
+// the curved face runs from (-3, -29.5), behind Imus, to (6, -46.3), beside the bridge (plain numbers: the buildings are
+// built before a const here would be set)
+function htpCurve(u, inset=0){ const b = Math.sin(u*Math.PI)*3.5 - inset; return [-3.0 + 9.0*u - 0.88*b, -29.5 - 16.8*u - 0.47*b]; }
+function htpTowerPts(){ const pts = [[6.0, -46.3], [12.2, -46.3], [12.2, -29.5], [-3.0, -29.5]];
+  for (let k = 1; k < 16; k++) pts.push(htpCurve(k/16)); return pts; }
 var TERRA_M = null, CURTAIN_M = null;
 function htpFL(){ return FL*1.65; }   // var: the buildings are built before this line runs; tall hospital floors. With 4 of terracotta
 // platform and 9 of glass (scene.json floors 13) the glass rises over the bridge as in his window photo, measured against Imus
 function htpMats(){ if (TERRA_M) return; const t = terraTex(); t.repeat.set(1/3.2, 1/(3*htpFL())); TERRA_M = new THREE.MeshStandardMaterial({ map:t, roughness:0.75, envMapIntensity:0.15 });
   const c = curtainTex(); c.repeat.set(1/1.4, 1/htpFL()); c.offset.set(0, -((1/htpFL()) % 1)); CURTAIN_M = new THREE.MeshStandardMaterial({ map:c, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }); }
-function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rectPts(9.0, -46.0, 12.2, -41.5), HTP_BRIDGE = rectPts(-3.0, -53.5, 4.0, -46.3), P4 = 4*FL, ty = y0 + P4 + 0.2, th = h - P4 - 0.2, FAS = M(0xd3d6db, { r:0.5 });
+function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rectPts(12.2, -36.0, 15.4, -31.5), HTP_BRIDGE = rectPts(-3.0, -53.5, 4.0, -46.3), P4 = 4*FL, ty = y0 + P4 + 0.2, th = h - P4 - 0.2, FAS = M(0xd3d6db, { r:0.5 });
   wallsOf(b.pts, y0, P4, TERRA_M); slab(b.pts, y0 + P4, 0.2, M(0xd8d2c8), [], true);
   const T = htpTowerPts(); wallsOf(T, ty, th, CURTAIN_M); slab(T, ty + th, 0.25, M(0xc9ccd2), [], true);
   slab(T, ty - 0.08, 0.08, M(0x2f3442, { r:0.8 }));   // its dark underside where it reaches out past the platform
-  for (const x of [1.5, 4.6, 7.7]) add(new THREE.CylinderGeometry(0.16, 0.16, ty - 0.3, 12), M(0xd3d6db, { r:0.5 }), x, 0.3 + (ty - 0.3)/2, -45.8);
-  for (const [x, z] of [[2.6, -36.0], [5.6, -41.0]]) box(1.6, 0.5, 1.2, M(0x9a97a6), x, ty + th + 0.5, z, 0.05);
+  for (const [x, z] of [htpCurve(0.72, 0.7), htpCurve(0.88, 0.7), [8.8, -45.7], [11.6, -45.7]]) add(new THREE.CylinderGeometry(0.16, 0.16, ty - 0.3, 12), M(0xd3d6db, { r:0.5 }), x, 0.3 + (ty - 0.3)/2, z);
+  for (const [x, z] of [[4.0, -34.0], [8.5, -38.5], [6.0, -42.5]]) box(1.6, 0.5, 1.2, M(0x9a97a6), x, ty + th + 0.5, z, 0.05);
   // the slim tower: on Imus's side of the street, against the curved tower's far side (Jose, 2026-10-28), on terracotta
   wallsOf(HTP_SLIM, y0, ty - y0, TERRA_M); slab(HTP_SLIM, ty - 0.2, 0.2, M(0xd8d2c8), [], true);
   wallsOf(HTP_SLIM, ty, th - 0.9, CURTAIN_M); slab(HTP_SLIM, ty + th - 0.9, 0.22, M(0xc9ccd2), [], true);
@@ -232,9 +237,9 @@ function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rect
   for (const [x, z] of [[-2.6, -47.7], [0.5, -47.7], [3.6, -47.7], [-2.6, -52.3], [3.6, -52.3]]) add(new THREE.CylinderGeometry(0.16, 0.16, by - 0.3, 12), FAS, x, 0.3 + (by - 0.3)/2, z);
   CUR = '_'; for (let k = 0; k < 5; k++) glow(0.5, by - 0.12, -52.6 + k*1.4, 0.7, 0xffe2b0); CUR = 't'; }
 pend.push(() => { CUR = 't'; const FL = htpFL(), T = htpTowerPts(), ty = 0.3 + 4*FL + 0.2, th = 13*FL - 4*FL - 0.2;
-  letterAlong([T[3], ...T.slice(4), T[0]], ty + th - FL*0.45, 0.62, textCanvas(['HACKENSACK UNIVERSITY MEDICAL CENTER'], { w:2048, lh:96, font:'600 64px Georgia, serif', spacing:'4px' }), [-20, -38], 0.06);
+  letterAlong([T[3], ...T.slice(4), T[0]], ty + th - FL*0.45, 0.62, textCanvas(['HACKENSACK UNIVERSITY MEDICAL CENTER'], { w:2048, lh:96, font:'600 64px Georgia, serif', spacing:'4px' }), [-20, -50], 0.06);
   letterAlong([[-3.0, -53.3], [-3.0, -46.5]], 0.3 + 1.7*FL + 0.21, 0.3, textCanvas(['Helena Theurer Pavilion'], { w:1024, lh:64, font:'italic 44px Georgia, serif', col:'#55606e' }), [0.5, -50], 0.04);
-  add(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), 10.6, ty + th - 0.9 - 1.0, -46.04, false).rotation.y = Math.PI;   // the HMH mark, on the slim tower's face toward 2nd Street
+  add(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), 13.8, ty + th - 0.9 - 1.0, -36.04, false).rotation.y = Math.PI;   // the HMH mark, on the slim tower's face toward 2nd Street
   CUR = '_'; });
 
 // ---- Don Imus - WFAN Pediatric Center: tan brick, its name in three lines across the curved corner ----
