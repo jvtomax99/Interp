@@ -221,7 +221,7 @@ pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
 // ---- the drive-through under Link Pavilion (Jose's 13 photos, 2026-10-28): the lobby's glass behind a sidewalk with steel
 // bollards, two round white columns either side of the revolving door, a crosswalk to the outer sidewalk and its brick
 // piers; past its east end, the long dark barrel canopy over a herringbone brick walk, on black posts, with lantern
-// bollards, running east along the wing's front (where it ends is not in the photos) ----
+// bollards, running east along the wing's front, in front of the Cardiac Surgery center (Jose) ----
 { const steel = M(0xc4c8ce, { r:0.25, m:0.85 }), brickP = M(0x7a3b30, { r:0.9 }), white = M(0xf2efe8, { r:0.5 }), black = M(0x22252b, { r:0.5, m:0.3 });
   box(10.3, 0.06, 4.6, asphalt, 1.75, 0.285, -8.3, 0.02, false);                                    // the drive under the building and its curves out
   box(6.7, 0.1, 0.55, walk, 1.13, 0.29, -10.85, 0.02, false); box(6.7, 0.02, 0.05, curb, 1.13, 0.345, -10.57, 0.01, false);   // the lobby's sidewalk, yellow curb
@@ -239,7 +239,7 @@ pend.push(() => { CUR = 'e'; const z = -6.0 + 0.06;
   for (let x = -1.8; x < 4.4; x += 0.75) add(new THREE.CylinderGeometry(0.035, 0.035, 0.2, 10), steel, x, 0.3 + 0.1, -10.65);
   for (let i = 0; i < 10; i++) box(0.62, 0.012, 0.16, paint, -0.6, 0.32, -10.35 + i*0.39, 0.003, false);   // the crosswalk to the lobby
   // the barrel canopy walk east along the wing's front
-  const run = [[4.7, -10.85], [8.0, -11.0], [10.4, -10.9], [12.0, -10.4], [13.2, -9.4]], rad = 0.42, cy = 0.3 + 0.62, canM = M(0x3b4049, { r:0.55, m:0.2 });
+  const run = [[4.7, -10.85], [8.0, -10.4], [10.4, -10.35], [12.0, -9.9], [13.2, -9.0]], rad = 0.42, cy = 0.3 + 0.62, canM = M(0x3b4049, { r:0.55, m:0.2 });
   for (let i = 1; i < run.length; i++){ const [ax, az] = run[i-1], [bx, bz] = run[i], L = Math.hypot(bx - ax, bz - az), a = Math.atan2(bz - az, bx - ax);
     const c = add(new THREE.CylinderGeometry(rad, rad, L + 0.04, 14, 1, true, 0, Math.PI), canM, (ax + bx)/2, cy, (az + bz)/2, true); c.material.side = THREE.DoubleSide; c.rotation.set(0, -a, Math.PI/2);
     box(L, 0.04, 0.95, M(0x8a5546, { r:0.95 }), (ax + bx)/2, 0.245, (az + bz)/2, 0.01, false).rotation.y = -a;   // the herringbone brick walk

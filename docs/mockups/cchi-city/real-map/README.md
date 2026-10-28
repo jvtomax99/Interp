@@ -165,7 +165,8 @@ where the map has houses.
   a black fence over pink flowers, the wayfinding sign. The bridge over the drive in front of the lobby runs from
   Link Pavilion to Medical Plaza (Jose: "looks right"), two brick floors on a cream band. The John Apovian, M.D.
   Cardiac Surgery and Structural Heart Center is part of Link (Jose): on its wall along the canopy walk, a lower grey
-  barrel canopy, glass door and windows, white lettering.
+  barrel canopy, glass door and windows, white lettering. The canopy walk runs in front of it (Jose); the diorama's old
+  ambulance bay box, which stood on the walk there, is gone (its doors moved inside Link, out of sight).
 
 ## Open
 

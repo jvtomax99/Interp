@@ -148,6 +148,11 @@ rep("controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!doc
 # the drive's islands and the fountain where the state's 2020 aerial has them (2026-10-28): the back island (the fountain
 # at its head, trees down it) runs z -0.2 to 4.8 on x 0.64; the front island, narrower, z 6.2 to 11.5 on x 0.58, the
 # entrance sign at its mouth. They were about a unit west and the fountain three units north of the real ones.
+# the diorama's ambulance bay box (x 7.4, z -11.2) stood on the canopy walk, in front of the Cardiac Surgery center
+# (Jose, 2026-10-28): its box, roof, lit door and glow go; its doors move inside Link Pavilion, out of sight
+rep("const BAY = { x:7.4, z:-11.2, w:2.2, h:1.3, d:2.4 };", "const BAY = { x:7.4, z:-13.6, w:2.2, h:1.3, d:2.4 };")
+for pre in ["box(BAY.w, BAY.h, BAY.d, BRICK(", "box(BAY.w + 0.12, 0.16, BAY.d + 0.12,", "add(new THREE.PlaneGeometry(1.1, 1.0), new THREE.MeshBasicMaterial({ color:0xffd9a0 }), BAY.x", "add(new THREE.PlaneGeometry(1.26, 0.08), M(0xf3efe6, {r:0.5}), BAY.x", "glow(BAY.x, 0.3 + 0.6, BAY.z + BAY.d/2 + 0.3, 1.6, 0xffd0a0);"]:
+    ln = [l for l in out.split('\n') if l.startswith(pre)]; assert len(ln) == 1, pre; out = out.replace(ln[0] + '\n', '', 1)
 import re
 FX, FZ = 0.64, -0.2
 out, n = re.subn(r'-0\.1, ([0-9.]+), -3\.4\b', lambda m: f'{FX}, {m.group(1)}, {FZ}', out); assert n == 7, n   # the fountain's six pieces and its glow
