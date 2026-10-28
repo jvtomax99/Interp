@@ -1,8 +1,10 @@
 # Step 2: osm.json to scene.json, the back of the campus in the live diorama's own units, fitted to its hand-built front.
 #   python3 scene_export.py   (needs shapely: pip install shapely; writes scene.json and scene-check.png beside it)
 # The fit: the map is turned 112 deg so Prospect Ave runs across the front, 9 m to a unit, then scaled 2.1 and moved so the
-# drive's mouth, Jurist and Medical Plaza land on the diorama's (about 4.3 m to a diorama unit). FRONT is what the diorama
-# already builds by hand: map buildings and streets inside it are clipped away.
+# drive's mouth, Jurist and Medical Plaza land on the diorama's (about 4.3 m to a diorama unit). Every building comes
+# from the map, the front's three included (Jose, 2026-10-28: "still not accurate to the actual location"). FRONT is only
+# what the diorama still builds by hand on the ground (the street, the drive, the drop-off): map streets inside it are
+# clipped away. OLD_FRONT, the hand-built front as it was, keeps its lawns free of the map's paving and trees.
 import json, math, os, random
 HERE = os.path.dirname(os.path.abspath(__file__))
 from shapely.geometry import Polygon, LineString, Point, box as sbox, MultiPolygon
@@ -14,8 +16,8 @@ def R(p):  # map meters -> real-layout units (9 m) -> live diorama units
     return (round((X-0.55)*s-0.1,2), round(15-(22-Z)*s,2))
 X0,X1,Z0,Z1=-43.0,41.0,-77.0,19.3
 BOARD=sbox(X0,Z0,X1,Z1)
-# the live front: what it already builds (its own buildings, street, drive, lot, lawns, entrance plaza), kept as is
-FRONT=unary_union([
+# the hand-built front as it was (its lawns keep the diorama's own trees and beds)
+OLD_FRONT=unary_union([
   sbox(-20,12.0,20,19.3),                 # street, sidewalk, verge (across the old board's width)
   sbox(-6,-9.0,6,13),                     # the drive and its medians
   sbox(-13.2,-9.2,13.2,-6.0),             # the drop-off in front of Ethics
@@ -26,8 +28,15 @@ FRONT=unary_union([
   sbox(5.4,7.6,18.6,13.0),                # the café lawn on the right
   sbox(6.0,-12.6,8.8,-9.8),               # the ambulance bay
 ]).buffer(0.4)
-LIVE_KEYS={'8887','8884','8885'}           # built by the live front
-DOM={'8888':('t',9),'8895':('n',5)}
+# what the diorama still builds by hand on the ground: the street, the drive (narrowed to run between Jurist and Medical
+# Plaza, as the map's two lanes do) and the drop-off paving under Link Pavilion's canopy
+FRONT=unary_union([sbox(-20,12.0,20,19.3), sbox(-4.9,-5.0,3.3,13), sbox(-4.5,-11.0,8.6,-5.0)]).buffer(0.2)
+LIVE_KEYS=set()
+# Link Pavilion's front: the map's outline takes in the canopy over its doors (a stub out to the drive); cut it off, so
+# its wall at the end of the drive runs straight and the diorama's canopy stands in front of it
+LINK_CUT=sbox(-2.4,-8.1,4.6,-6.0)
+DOM={'8888':('t',9),'8895':('n',5),'8887':('e',6),'8884':('s',6),'8885':('c',9)}
+DOOR_AT={'e':(1.1,-8.1),'s':(-9.0,10.2),'c':(13.0,9.7)}   # which wall gets the doors: the one nearest this point
 FLOORS={'8905':5,'8907':3,'8902':4,'8899':6,'8894':4,'8889':3,'8890':2,'8891':2,'8892':3,'8914':6,'8886':5,'8893':6}
 blds=[]
 for b in d['buildings']:
@@ -37,7 +46,7 @@ for b in d['buildings']:
     if P[0]==P[-1]: P=P[:-1]
     pg=Polygon(P).buffer(0)
     if not BOARD.intersects(pg) or BOARD.intersection(pg).area<0.6*pg.area: continue
-    q=pg.difference(FRONT)
+    q=pg.difference(LINK_CUT) if sid=='8887' else pg
     if q.is_empty: continue
     parts=list(q.geoms) if isinstance(q,MultiPolygon) else [q]
     parts=[p for p in parts if p.area>3.0]
@@ -52,11 +61,25 @@ for b in d['buildings']:
     a=sum(pts[i][0]*pts[(i+1)%len(pts)][1]-pts[(i+1)%len(pts)][0]*pts[i][1] for i in range(len(pts)))
     if a<0: pts=pts[::-1]
     blds.append(dict(id=sid,key=key,name=b['name'],kind='garage' if garage else 'hosp' if hosp else 'house',floors=fl,pts=pts,poly=Polygon(pts),clipped=round(1-p.area/pg.area,2)))
+    if key=='e':   # the cut wall, exactly straight from corner to corner
+        pts=[[x,-8.1 if abs(z+8.1)<0.1 else z] for x,z in pts]; pts=[p for p in pts if not (p[1]==-8.1 and -2.2<p[0]<4.4)]
+        blds[-1]['pts']=pts; blds[-1]['poly']=Polygon(pts)
+# Medical Plaza steps back as it rises (Jose's Street View): 4 floors of maroon brick, 3 more set in, 2 of dark glass on top
+for b in blds:
+    if b['key']=='c':
+        b['tiers']=[]
+        for inset,dz,fl,glass in [(0.8,-0.6,3,False),(1.9,-1.6,2,True)]:
+            g=b['poly'].buffer(-inset,join_style=2).simplify(0.05)
+            g=Polygon([(x,z+dz) for x,z in g.exterior.coords]).intersection(b['poly'].buffer(-0.3,join_style=2))
+            g=max(g.geoms,key=lambda q:q.area) if hasattr(g,'geoms') else g
+            tp=[[round(x,2),round(z,2)] for x,z in list(g.simplify(0.05).exterior.coords)[:-1]]
+            a=sum(tp[i][0]*tp[(i+1)%len(tp)][1]-tp[(i+1)%len(tp)][0]*tp[i][1] for i in range(len(tp)))
+            b['tiers'].append(dict(pts=tp[::-1] if a<0 else tp,floors=fl,glass=glass))
 for b in blds:
     if b['clipped']>0.02: print('clipped',b['id'],b['name'],b['clipped'])
 allU=unary_union([b['poly'] for b in blds])
 for b in blds:
-    others=unary_union([o['poly'] for o in blds if o is not b]+[FRONT.buffer(-0.4)])
+    others=unary_union([o['poly'] for o in blds if o is not b])
     P=b['pts'];fl=[]
     for i in range(len(P)):
         ax,az=P[i];bx,bz=P[(i+1)%len(P)];L=math.hypot(bx-ax,bz-az)
@@ -66,6 +89,8 @@ for b in blds:
         fl.append(0 if others.contains(Point((ax+bx)/2+nx*.3,(az+bz)/2+nz*.3)) else 1)
     b['win']=fl
     rp=b['poly'].representative_point(); b['lab']=[round(rp.x,2),round(rp.y,2)]
+    if b['key'] in DOOR_AT:
+        tx,tz=DOOR_AT[b['key']]; b['door']=min(range(len(P)),key=lambda i:math.hypot((P[i][0]+P[(i+1)%len(P)][0])/2-tx,(P[i][1]+P[(i+1)%len(P)][1])/2-tz))
     if b['key'][0]!='x':
         o=b['poly'].buffer(0.9,join_style=1).simplify(0.05); i=b['poly'].buffer(0.45,join_style=1).simplify(0.05)
         b['halo']=[[[round(x,2),round(z,2)] for x,z in list(g.exterior.coords)[:-1]] for g in (o,i)]
@@ -91,13 +116,13 @@ for a in d['areas']:
             lots.append([[round(x,2),round(z,2)] for x,z in list(q.exterior.coords)[:-1]])
 # aprons (paving round the hospital buildings), kept off the live front
 B=[b for b in blds if b['kind']!='house']
-ap=unary_union([b['poly'].buffer(1.5,join_style=2) for b in B]).difference(FRONT).intersection(BOARD.buffer(-0.3)).simplify(0.08)
+ap=unary_union([b['poly'].buffer(1.5,join_style=2) for b in B]).difference(FRONT).difference(OLD_FRONT).intersection(BOARD.buffer(-0.3)).simplify(0.08)
 geoms=[g for g in (ap.geoms if isinstance(ap,MultiPolygon) else [ap]) if g.area>2]
 R2=lambda a:[[round(x,2),round(z,2)] for x,z in a]
 aprons=[[R2(list(g.exterior.coords)[:-1])]+[R2(list(h.coords)[:-1]) for h in g.interiors] for g in geoms]
 # trees: street trees along the back roads, lawn trees in the open, none in the live front
 random.seed(7); pts=[]
-taken=unary_union([allU.buffer(1.4),roadU.buffer(0.7),FRONT.buffer(0.6),sbox(-60,12.2,60,16.6)]+[Polygon(l).buffer(1) for l in lots])
+taken=unary_union([allU.buffer(1.4),roadU.buffer(0.7),FRONT.buffer(0.6),OLD_FRONT.buffer(0.6),sbox(-60,12.2,60,16.6)]+[Polygon(l).buffer(1) for l in lots])
 inner=BOARD.buffer(-1.6)
 def free(c,sep): return inner.contains(c) and not taken.contains(c) and all(c.distance(o)>sep for o in pts)
 for r in roads:
@@ -176,6 +201,8 @@ for b in blds:
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 fig,ax=plt.subplots(figsize=(10,11))
 for g in (FRONT.geoms if hasattr(FRONT,'geoms') else [FRONT]): ax.fill(*g.exterior.xy,color='#7fb3ff',alpha=.4)
+for b in blds:
+    for t in b.get('tiers',[]): ax.plot(*zip(*(t['pts']+t['pts'][:1])),color='k',lw=.6)
 for b in blds:
     x,z=b['poly'].exterior.xy; ax.fill(x,z,'#c0504d' if b['kind']=='hosp' else '#999' if b['kind']=='garage' else '#d9b38c',alpha=.7,ec='k',lw=.4)
     if b['kind']!='house': ax.text(*b['lab'],(b['name'] or b['id'])[:18],fontsize=6,ha='center')

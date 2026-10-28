@@ -2,7 +2,8 @@
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
 hands over"). This one: 2026-10-28, the real-map campus chat (claude.ai,
-moved into this repo as `claude/campus-real-map`).
+moved into this repo as `claude/campus-real-map`), updated by the chat that
+rebuilt the front on the map.
 
 ## Paste this into the new chat
 
@@ -15,9 +16,13 @@ moved into this repo as `claude/campus-real-map`).
 ## Now
 
 **The campus on the real map, front and back: a preview, not in the app.**
-`docs/mockups/cchi-city/real-map/`: the diorama's hand-built front as it is,
-the rest of HUMC behind and beside it from Jose's OpenStreetMap export at the
-same scale, a board twice as wide and deep. Build: `python3 build.py
+`docs/mockups/cchi-city/real-map/`: every building from Jose's OpenStreetMap
+export at the same scale, a board twice as wide and deep. 2026-10-28 (second
+chat): he said it was "still not accurate to the actual location"; measured,
+the hand-built front was off (Link Pavilion a third of its real size, Jurist
+15 m off, a lot where the map has houses), so the front's three buildings now
+come from the map too and the diorama's ground (drive, canopy, café, movers)
+was refitted round them (README, "The fit"). Build: `python3 build.py
 <out.html>` there (it runs `../live/gen.py` first). Preview Artifact (private):
 https://claude.ai/artifact/7uyf7q3572hqDM9wFo7NAM. The README has the
 decisions and the open items. Waiting on Jose:

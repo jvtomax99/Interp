@@ -1,10 +1,12 @@
 # Campus on the real map (preview, 2026-10-27)
 
-Jose's ask: make the campus match the real HUMC campus, front and back. The
-**front** stays the hand-built diorama (`../diorama.html`: Prospect Ave, the
-drive, Jurist, Link Pavilion, Medical Plaza, the lot, the café). **Behind and
-beside it**, every building, street, lot and garage comes from his
-OpenStreetMap export (`map.osm.xml`), at the front's own scale. Not in the app
+Jose's ask: make the campus match the real HUMC campus, front and back.
+**Every building** comes from his OpenStreetMap export (`map.osm.xml`), the
+front's three included (Link Pavilion, Jurist, Medical Plaza; 2026-10-28), as do
+the streets, lots and garages beyond the front. **The ground at the front** is
+still the hand-built diorama's (`../diorama.html`: Prospect Ave, the drive with
+its medians, the fountain and the sign, the canopy and the drop-off), refitted
+around the real buildings. Not in the app
 yet: a preview page only (Artifact
 https://claude.ai/artifact/7uyf7q3572hqDM9wFo7NAM, private).
 
@@ -26,8 +28,12 @@ page: `../live/livecheck.cjs`, or Playwright at iPhone size (393 x 852).
   outlines (`realBuilding`), streets, sidewalks, lots, aprons, parked cars,
   lighter back trees, entrances, lettering along walls (`letterAlong`), and
   the corner of Atlantic and 2nd Street built from Jose's photos.
-- `build.py`: drops the diorama's guessed back buildings (brick tower, long
-  buildings, blue glass, Theurer at the back right), adds `back.js`, and
+- `build.py`: drops every hand-built building (the guessed back ones, and
+  since 2026-10-28 the front's three and the surface lot on the left, where
+  the map has houses), adds `back.js`, refits the front's ground (the drive
+  narrowed to run between Jurist and Medical Plaza, the canopy moved onto
+  Link's real front wall, the café, the walkers, cars and ambulance kept out
+  of the buildings), and
   changes the runtime for a board twice as wide and deep (shadows over the
   whole board, two-finger pan with the target kept on the board, outline
   halos on the real footprints, badges kept on screen, the garden moved).
@@ -37,14 +43,32 @@ page: `../live/livecheck.cjs`, or Playwright at iPhone size (393 x 852).
 Map turned 112 deg so Prospect runs across the front, 9 m to a unit, then
 scaled 2.1 and moved so the drive's mouth, Jurist and Medical Plaza land on
 the diorama's (about 4.3 m to a diorama unit; it was 9 m in the first
-real-layout try, which made the front look small). `FRONT` is what the
-diorama builds by hand: map buildings and streets inside it are clipped.
-Floors are not in the map; they are read off Jose's Google 3D flyover.
+real-layout try, which made the front look small). `FRONT` is the ground the
+diorama still builds by hand (the street, the drive, the drop-off): map
+streets inside it are clipped, buildings are not. `OLD_FRONT` (the hand-built
+front as it was) keeps the map's paving and trees off the front lawns.
+Link Pavilion's outline loses the stub over its doors (`LINK_CUT`: the
+map's canopy; the diorama's canopy stands there instead), so its front wall
+runs straight at z -8.1. Medical Plaza's set-back tiers (3 floors of brick,
+2 of dark glass) are its outline inset (`tiers`); `DOOR_AT` picks each front
+building's door wall. Floors are not in the map; they are read off Jose's
+Google 3D flyover (Link 6, Jurist 6, Medical Plaza 4 + 3 + 2, as the
+hand-built ones had).
+
+Before the 2026-10-28 rebuild, the hand-built front was off the real map:
+Link Pavilion a third of its real footprint (94 against 258 square units, 30%
+overlap), Jurist 15 m off, Medical Plaza 7 m off and small, a parking lot
+where the map has houses.
 
 ## Decisions (Jose, 2026-10-27/28)
 
-- Front as it is + the real back, at true scale on a bigger board (his pick
-  over squeezing the back or rebuilding the front on the map).
+- The real back at true scale on a bigger board (his pick over squeezing the
+  back). First with the hand-built front kept as it was; then, 2026-10-28,
+  "still not accurate to the actual location": the front's buildings rebuilt
+  on the map too (his pick over fixing Link alone).
+- Link Pavilion's helipad is where the map has the Emil Buehler Helipad, on
+  its east wing; its two banners hang on that wing's face, beside the
+  ambulance bay.
 - Domains: Ethics = Link Pavilion (its roof has the real helipad, the Emil
   Buehler Helipad in the map); Terminology = the map's "Patient Pavilion",
   which is the **Helena Theurer Pavilion** (photos: terracotta platform with
@@ -73,6 +97,12 @@ Floors are not in the map; they are read off Jose's Google 3D flyover.
 - Skybridges in his photos: which buildings they join is unknown; ask.
 - The ambulance still drives to the bay on Link Pavilion's side, not the
   real ED (Creamer) on Atlantic Street.
+- The front's ground is still the diorama's drawing: the drive's medians,
+  fountain and sign are from his photos, but where the map's two lanes and
+  the small loop at Medical Plaza run exactly is approximated (the map's
+  service roads inside the drive are clipped). Ask whether it matches.
+- Medical Plaza's door wall (the street side) and the café either side of
+  it are placed, not known.
 - Domain weights on the cards are 9/25/9/45/12; the CoreCHI blueprint is
   22/22/22/15/19 (Ethics, Encounter, Terminology, US Systems, Culture). Ask.
 - Into the app: `campus3d/` (`gen.py --app`) and the card's pictures

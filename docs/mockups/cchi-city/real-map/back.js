@@ -1,6 +1,7 @@
 // ==================== the back of the campus, from the real map (Jose, 2026-10-27) ====================
-// The front above is the hand-built diorama (Prospect, the drive, Jurist, Link Pavilion, Medical Plaza). Behind and
-// beside it, every building, street, lot and garage is placed from his OpenStreetMap export, at the front's own scale
+// The ground at the front is the hand-built diorama (Prospect, the drive, the fountain, the drop-off). Every building,
+// the front's three included (Jose, 2026-10-28), and every street, lot and garage beyond it is placed from his
+// OpenStreetMap export, at the front's own scale
 // (1 unit is about 4.3 m), fitted to it by the drive's mouth, Jurist and Medical Plaza. Floors are read off his
 // Google 3D flyover, so they are estimates. Map data © OpenStreetMap contributors (ODbL).
 const SCN = __SCENE__;
@@ -48,6 +49,9 @@ for (const lot of SCN.lots) slab(lot, 0.17, 0.085, asphalt);
 
 // ---- the buildings ----
 const STYLE = {
+  e: { col:'#6e3a33', band:'#7a4239', roof:0xd9cdb8 },                        // George Link Jr. Pavilion: brown brick (as the hand-built one was)
+  s: { col:'#7e3b37', band:'#e6d8c2', roof:0xf1f2f4, glassBase:2 },          // Jurist: brick, cream bands, glass on its two lower floors, a white roof
+  c: { col:'#7a3530', band:'#e6d8c2' },                                      // Medical Plaza: maroon brick, cream bands; steps back, dark glass on top (tiers)
   t: { col:'#c9c2b6', band:'#efe8dc', glass:'#33456e', roof:0xe6e2da, kind:'glass' },   // Patient Pavilion: glass bands on pale stone
   n: { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc },                       // John Theurer Cancer Center: orange brick, white bands
   x8905: { col:'#9a5444', band:'#ece4d6', glass:'#3a4f7a', roof:0xe2dccf }, x8899: { col:'#c9b79c', band:'#dccfb9', glass:'#6d93ad', roof:0xd9d2c4, kind:'glass' },   // Imus: tan brick, ribbon windows
@@ -63,41 +67,58 @@ function parkedAt(x, z, rot, ci, y){   // a parked car baked into the board (lot
 function realBuilding(b){
   const dom = b.key[0] !== 'x', k = dom ? b.key : '_', o = STYLE[b.key] || (b.kind === 'house' ? { col:HOUSE_COLS[(+b.id) % HOUSE_COLS.length], band:'#f2ece0', roof:0x8f8a92 } : b.kind === 'garage' ? GARAGE : { col:'#9a5444', band:'#e6d8c2' });
   const fl = b.kind === 'garage' ? 0.5 : b.key === 't' ? FL*1.3 : FL, y0 = 0.3, h = b.floors*fl, E = edgesOf(b.pts);   // the pavilion's hospital floors run tall
-  if (dom){ let best = -1, sc = -1e9; E.forEach((e, i) => { if (!b.win[i] || e.L < 5) return; const s2 = e.L*0.2 + e.nz*6; if (s2 > sc){ sc = s2; best = i; } }); DOORW[b.key] = { i:best, w:2.6 }; }
+  const bodyF = b.floors - (b.tiers || []).reduce((s2, T) => s2 + T.floors, 0), hb = bodyF*fl, gF = o.glassBase || 0;   // the body under any set-back tiers
+  let hTop = h;
+  if (dom){ let best = b.door ?? -1, sc = -1e9; if (best < 0) E.forEach((e, i) => { if (!b.win[i] || e.L < 5) return; const s2 = e.L*0.2 + e.nz*6; if (s2 > sc){ sc = s2; best = i; } }); DOORW[b.key] = { i:best, w:2.6 }; }
   CUR = k;
   if (b.key === 't') htpBody(b, y0, h); else {
   const t = brickTex(o.col, o.band, o.glass || null), wall = new THREE.MeshStandardMaterial({ map:t, bumpMap:t, bumpScale:0.6, roughness:0.85, envMapIntensity:0.12 });
   t.repeat.set(1/0.9, 1/fl); t.offset.set(0, -((1/fl) % 1));
-  const [caps, sides] = splitCaps(new THREE.ExtrudeGeometry(shapeOf(b.pts), { depth:h, bevelEnabled:false })); caps.dispose();
-  sides.rotateX(-Math.PI/2); sides.translate(0, y0, 0); add(sides, wall, 0, 0, 0, true);
-  slab(b.pts, y0 + h, 0.22, M(o.roof ?? (b.kind === 'garage' ? 0x9a9aa2 : 0xd9cdb8)), [], true);
-  const geos = []; for (const e of E){ if (e.L < 0.3) continue; const [mx, mz] = e.at(e.L/2); geos.push(placed(new THREE.BoxGeometry(e.L + 0.1, 0.14, 0.1), mx, y0 + h + 0.29, mz, e.a).toNonIndexed()); }
-  if (geos.length) add(mergeGeometries(geos, false), b.kind === 'house' ? M(0xe8e2d8) : TRIM, 0, 0, 0, false);
+  if (gF) wallsOf(b.pts, y0, gF*fl, GLASSWALL);
+  const [caps, sides] = splitCaps(new THREE.ExtrudeGeometry(shapeOf(b.pts), { depth:hb - gF*fl, bevelEnabled:false })); caps.dispose();
+  sides.rotateX(-Math.PI/2); sides.translate(0, y0 + gF*fl, 0); add(sides, wall, 0, 0, 0, true);
+  const roofM = M(o.roof ?? (b.kind === 'garage' ? 0x9a9aa2 : 0xd9cdb8)), parapet = (E2, y) => { const geos = []; for (const e of E2){ if (e.L < 0.3) continue; const [mx, mz] = e.at(e.L/2); geos.push(placed(new THREE.BoxGeometry(e.L + 0.1, 0.14, 0.1), mx, y, mz, e.a).toNonIndexed()); }
+    if (geos.length) add(mergeGeometries(geos, false), b.kind === 'house' ? M(0xe8e2d8) : TRIM, 0, 0, 0, false); };
+  slab(b.pts, y0 + hb, 0.22, roofM, [], true); parapet(E, y0 + hb + 0.29);
   const [lx, lz] = b.lab, area = Math.abs(b.pts.reduce((s2, p, i) => { const q = b.pts[(i+1) % b.pts.length]; return s2 + p[0]*q[1] - q[0]*p[1]; }, 0))/2;
-  if (b.kind !== 'house'){ const s2 = Math.min(2.4, Math.sqrt(area)*0.18);
+  if (b.kind !== 'house' && !b.tiers){ const s2 = Math.min(2.4, Math.sqrt(area)*0.18);
     box(s2*1.4, 0.4, s2, M(0x8a8796), lx - s2*0.3, y0 + h + 0.42, lz, 0.06); box(s2*0.7, 0.3, s2*0.6, M(0x9a97a6), lx + s2*0.7, y0 + h + 0.37, lz + s2*0.5, 0.05); }
   // windows on the outside walls: plain panes with a sill and a lintel shadow (no frames back here, to keep the phone fast)
   const glass = o.kind === 'glass', sp = b.kind === 'house' ? 1.5 : glass ? 0.75 : 1.0;
   const W = { dark:[], sky:[], warm:[], litDark:[], litSky:[], litWarm:[], sill:[], reveal:[] };
   let wr2 = (+b.id)*7 + 3; const wr = () => (wr2 = (wr2*16807)%2147483647)/2147483647;
   const door = DOORW[b.key];
-  if (b.kind !== 'garage') E.forEach((e, i) => { if (!b.win[i] || e.L < 1.2) return; const cols = Math.max(1, Math.round(e.L/sp));
-    for (let f = 0; f < b.floors; f++) for (let c = 0; c < cols; c++){
-      const tt = (c + 0.5)*e.L/cols, y = y0 + f*fl + fl*0.45, gw = Math.min(e.L/cols*0.62, 0.62), gh = fl*(b.kind === 'house' ? 0.38 : 0.42);
+  const winsOn = (E2, edgeOk, base, f0, nf, door) => E2.forEach((e, i) => { if (!edgeOk(i) || e.L < 1.2) return; const cols = Math.max(1, Math.round(e.L/sp));
+    for (let f = f0; f < nf; f++) for (let c = 0; c < cols; c++){
+      const tt = (c + 0.5)*e.L/cols, y = base + f*fl + fl*0.45, gw = Math.min(e.L/cols*0.62, 0.62), gh = fl*(b.kind === 'house' ? 0.38 : 0.42);
       if (door && door.i === i && f < 2 && Math.abs(tt - e.L/2) < door.w/2 + 0.9) continue;
       const [px, pz] = e.at(tt);
       if (!glass && b.kind !== 'house'){ W.sill.push(placed(new THREE.BoxGeometry(gw + 0.12, 0.035, 0.06), px + e.nx*0.02, y - gh/2 - 0.03, pz + e.nz*0.02, e.a).toNonIndexed());
         W.reveal.push(placed(new THREE.BoxGeometry(gw + 0.02, 0.035, 0.04), px + e.nx*0.012, y + gh/2 - 0.01, pz + e.nz*0.012, e.a).toNonIndexed()); }
       const r = wr(), kind = glass ? 'dark' : r < 0.07 ? 'warm' : r < 0.4 ? 'sky' : 'dark', lit = wr() < 0.5;
       W[lit ? 'lit' + kind[0].toUpperCase() + kind.slice(1) : kind].push(placed(new THREE.BoxGeometry(gw, gh, 0.03), px + e.nx*0.004, y, pz + e.nz*0.004, e.a).toNonIndexed()); } });
+  if (b.kind !== 'garage') winsOn(E, i => b.win[i], y0, gF, bodyF, door);
+  // set-back tiers (Medical Plaza): brick with windows, then dark glass, each on the roof of the one below
+  let yb = y0 + hb + 0.22;
+  for (const T of b.tiers || []){ const th = T.floors*fl, ET = edgesOf(T.pts);
+    wallsOf(T.pts, yb, th, T.glass ? new THREE.MeshStandardMaterial({ color:0x262d3c, roughness:0.06, metalness:0.75, envMapIntensity:1.6 }) : wall);
+    slab(T.pts, yb + th, 0.22, roofM, [], true); parapet(ET, yb + th + 0.29);
+    if (!T.glass) winsOn(ET, () => true, yb, 0, T.floors, null);
+    yb += th + 0.22; }
+  if (b.tiers){ hTop = yb - 0.22 - y0; const s2 = 1.6, T = b.tiers[b.tiers.length - 1].pts, cx = T.reduce((a, p) => a + p[0], 0)/T.length, cz = T.reduce((a, p) => a + p[1], 0)/T.length;
+    box(s2*1.4, 0.4, s2, M(0x8a8796), cx, yb + 0.2, cz, 0.06); }
+  // Medical Plaza's colonnade on the drive (his Street View): brick piers under a cream beam, along its wall facing the drive
+  if (b.key === 'c'){ const e = E.filter(q => q.L > 5).sort((p, q) => p.nx - q.nx)[0], pm = M(0x7a3530, { r:0.85 });
+    for (let t = 0.7; t < e.L - 0.3; t += 1.55){ const [px, pz] = e.at(t); box(0.3, 1.25, 0.3, pm, px + e.nx*0.3, 0.3 + 0.62, pz + e.nz*0.3, 0.03); }
+    const [mx, mz] = e.at(e.L/2); box(e.L - 0.6, 0.18, 0.5, M(0xe6d8c2, { r:0.6 }), mx + e.nx*0.25, 0.3 + 1.3, mz + e.nz*0.25, 0.03).rotation.y = e.a; }
   const MAT = { dark:WIN_DARK, sky:WIN_SKY, warm:WIN_WARM, litDark:WIN_DARK, litSky:WIN_SKY, litWarm:WIN_WARM, sill:SILL, reveal:REVEAL };
   for (const n in W){ if (!W[n].length) continue; const m = add(mergeGeometries(W[n], false), MAT[n], 0, 0, 0, false); if (n.startsWith('lit')) m.userData.litc = true; }
   }
   CUR = '_';
   const [lx, lz] = b.lab;
   if (b.kind === 'garage') (SCN.cars.roofs[b.key] || []).forEach(([x, z, a], j) => parkedAt(x, z, a, j*5 + 3, y0 + h + 0.22));
-  if (dom){ const xs = b.pts.map(p => p[0]), zs = b.pts.map(p => p[1]); LABEL_AT[k] = [lx, y0 + h + 0.9, lz];
-    BOX[k] = { x:lx, z:lz, w:Math.max(...xs) - Math.min(...xs), d:Math.max(...zs) - Math.min(...zs), h:h + 0.8, y0, top:y0 + h + 0.8, roof:y0 + h + 0.22, crane:[lx, lz], pts:b.pts, halo:b.halo };
+  if (dom){ const xs = b.pts.map(p => p[0]), zs = b.pts.map(p => p[1]); LABEL_AT[k] = [lx, y0 + hTop + 0.9, lz];
+    BOX[k] = { x:lx, z:lz, w:Math.max(...xs) - Math.min(...xs), d:Math.max(...zs) - Math.min(...zs), h:hTop + 0.8, y0, top:y0 + hTop + 0.8, roof:y0 + hTop + 0.22, crane:[lx, lz], pts:b.pts, halo:b.halo };
     if (k === 't') Object.assign(BOX.t, { capTower: htpTowerPts(), platTop: y0 + 4*fl + 0.2 }); }
   BLD[b.key] = { b, E, h, y0, fl }; }
 SCN.lots.length && SCN.cars.lots.forEach(([x, z, a], j) => parkedAt(x, z, a, j*3 + 1, 0.26));
@@ -122,7 +143,12 @@ function entranceOn(key){ const B = BLD[key], d = DOORW[key], e = B.E[d.i], dw =
     shrub(px, 0.66, pz, 0.22, 1); const r = rngAt(px, pz); for (let q = 0; q < 9; q++){ const a = q/9*Math.PI*2; add(new THREE.IcosahedronGeometry(0.045, 0), FLOWERS[[0, 1, 2, 4][q % 4]], px + Math.cos(a)*0.22, 0.74 + r()*0.06, pz + Math.sin(a)*0.22, false); } }
   for (const sx of [-1, 1]){ const pts = [[0.35, 2.5], [0.35, 4.2], [0.9, 4.4], [1.35, 3.9], [1.3, 2.7], [0.85, 2.4]].map(([o, s]) => P(o, sx*s)); bed(pts, 0.27, { density:12 }); }
   DOOR_AT[key] = { e, P }; }
-entranceOn('t'); entranceOn('n');
+entranceOn('t'); entranceOn('n'); entranceOn('s'); entranceOn('c');   // Link Pavilion's is the diorama's canopy at the end of the drive
+// Ethics: Link Pavilion's two big banners, on the face of its wing beside the ambulance bay (they hung on the hand-built one's front)
+pend.push(() => { CUR = 'e'; const z = -11.8;
+  for (const [x, col] of [[9.6, 0xf4f6fa], [11.35, 0x1f3f7a]]) add(new THREE.PlaneGeometry(1.5, 3.4), new THREE.MeshBasicMaterial({ color:col }), x, 2.6, z + 0.06, false);
+  add(new THREE.PlaneGeometry(1.1, 1.1), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), 9.6, 3.4, z + 0.07, false);
+  add(new THREE.PlaneGeometry(1.2, 0.55), new THREE.MeshBasicMaterial({ color:0xf4f6fa }), 11.35, 3.4, z + 0.07, false); CUR = '_'; });
 function onWall(key, i, s, y, w, h, mat, out=0.03){ const e = BLD[key].E[i], [cx, cz] = e.at(e.L/2); const m = add(new THREE.PlaneGeometry(w, h), mat, cx + e.ux*s + e.nx*out, y, cz + e.uz*s + e.nz*out, false); m.rotation.y = e.a; return m; }
 // (the hospital's name is on the Helena Theurer Pavilion's glass tower, built below with the corner of Atlantic and 2nd)
 // Encounter: the name on John Theurer Cancer Center's face, over its doors

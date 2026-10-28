@@ -120,9 +120,10 @@ under way, then what waits on Jose, then small leftovers.
       campus from the north before). `claude/campus-time`. Frame-rate
       reading still owed.
    **2026-10-27/28 (Jose): the campus on the real map, front and back.**
-      Preview only, not in the app: the diorama's front as it is, the rest
-      of HUMC behind and beside it from his OpenStreetMap export at the same
-      scale; Terminology = Helena Theurer Pavilion (the map's "Patient
+      Preview only, not in the app: every building from his OpenStreetMap
+      export at the same scale (2026-10-28: the front's three too, "still
+      not accurate"), the diorama's ground at the front refitted round
+      them; Terminology = Helena Theurer Pavilion (the map's "Patient
       Pavilion"), Encounter = the real John Theurer across 2nd Street; the
       corner of Atlantic and 2nd from his photos.
       `docs/mockups/cchi-city/real-map/` (README: build, decisions, open
