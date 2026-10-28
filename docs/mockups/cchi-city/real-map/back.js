@@ -520,6 +520,33 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
   const grey = M(0xa9adb4, { r:0.5, m:0.2 }), px = -19.6, pz = bz + (px - bx)*Math.tan(-ba);
   for (const o of [-0.38, 0.38]) add(new THREE.BoxGeometry(0.16, 1.45, 0.16), grey, px + o, 0.3 + 0.72, pz);
   for (const sg of [-1, 1]){ const m = add(new THREE.BoxGeometry(0.08, 1.5, 0.08), grey, px, 0.3 + 0.72, pz); m.rotation.z = sg*0.48; } }
+// a cherry in full bloom, built by hand (Jose, 2026-10-28: "make sure the cherry blossom looks beautiful"): a dark trunk
+// that leans and forks, five limbs spreading wide and up, each forking again; at every tip a cloud of blossom puffs,
+// deep pink underneath to almost white on top, so the crown reads as a wide soft umbrella; fallen petals on the mulch.
+// Its spot goes into BLOSSOMS, so the runtime's drifting petals fall from it too.
+function cherry(x, z, s=1){
+  const r = rngAt(x + 0.37, z - 0.11), bark = M(0x3b2a26, { r:0.9 });
+  const P = [0xd2457f, 0xea5f97, 0xf47aaa, 0xf998bf, 0xfcbcd6, 0xffe2ee].map(c => M(c, { r:0.7, x:{ emissive:0x7a1840, emissiveIntensity:0.16 } }));   // the vivid pink of his photo
+  BLOSSOMS.push([x, z, s*1.3]);
+  const h0 = 0.62*s, fx = x + 0.1*s, fz = z - 0.05*s;   // the trunk, leaning a little, up to its fork
+  limb(x, 0.28, z, fx, 0.3 + h0, fz, 0.13*s, 0.1*s, bark);
+  const tips = [];
+  for (let k = 0; k < 5; k++){ const a = k/5*Math.PI*2 + r()*0.7, L = (0.9 + r()*0.3)*s, up = (0.45 + r()*0.25)*s;
+    const mx = fx + Math.cos(a)*L*0.55, my = 0.3 + h0 + up*0.6, mz = fz + Math.sin(a)*L*0.55;
+    limb(fx, 0.3 + h0, fz, mx, my, mz, 0.08*s, 0.055*s, bark);
+    for (const da of [-0.45, 0.4]){ const b2 = a + da + (r() - 0.5)*0.3, L2 = (0.35 + r()*0.25)*s;
+      const tx = mx + Math.cos(b2)*L2, ty = my + (0.2 + r()*0.2)*s, tz = mz + Math.sin(b2)*L2;
+      limb(mx, my, mz, tx, ty, tz, 0.05*s, 0.025*s, bark); tips.push([tx, ty, tz]); } }
+  tips.push([fx, 0.3 + h0 + 0.85*s, fz]);   // the crown's middle
+  const lo = Math.min(...tips.map(t => t[1])) - 0.15*s, hi = Math.max(...tips.map(t => t[1])) + 0.35*s;
+  for (const [tx, ty, tz] of tips) for (let q = 0; q < 34; q++){   // many small puffs: a fine, frothy cloud
+    const th = r()*Math.PI*2, ph = Math.acos(1 - r()*1.3), d = (0.08 + r()*0.36)*s;
+    const px = tx + Math.cos(th)*Math.sin(ph)*d*1.25, py = ty + Math.cos(ph)*d*0.75 - 0.05*s, pz = tz + Math.sin(th)*Math.sin(ph)*d*1.25;
+    const lv = Math.max(0, Math.min(5, Math.round((py - lo)/(hi - lo)*5 + (r() - 0.5)*1.4)));
+    add(new THREE.IcosahedronGeometry((0.085 + r()*0.07)*s, 1), P[lv], px, py, pz); }
+  for (const [tx, ty, tz] of tips) add(new THREE.IcosahedronGeometry(0.2*s, 1), P[2], tx, ty - 0.04*s, tz).scale.set(1.3, 0.7, 1.3);   // a core under each cloud, so no sky shows through
+  for (let q = 0; q < 26; q++){ const a = r()*Math.PI*2, d = (0.2 + r()*1.1)*s;   // petals on the ground
+    add(new THREE.CircleGeometry(0.035 + r()*0.03, 5), P[3 + (q % 3)], x + Math.cos(a)*d, 0.37, z + Math.sin(a)*d, false).rotation.x = -Math.PI/2; } }
 // ==================== the court off Atlantic Street (Jose's 11 photos, 2026-10-28) ====================
 // An open drop-off court between Women's and Children's (north), the curved silver building (east) and Imus (south):
 // asphalt to the curved building's overhang, steel bollards along its sidewalk, an orange barrier; at its south-west
@@ -537,7 +564,7 @@ pend.push(() => { const y = 0.3 + 5*FL - 0.75, mk = () => new THREE.MeshBasicMat
   add(new THREE.CylinderGeometry(0.07, 0.08, 0.28, 10), M(0xc8322c, { r:0.5 }), -19.55, 0.48, -30.3);
   // its corner by Atlantic, before the walk down the hill (his photo): a pink blossom tree, round clipped bushes, and the
   // white wayfinding sign (Cancer Center, Children's Hospital, Pediatric Center, Pediatric Center Parking)
-  tree(-22.15, -30.6, 0.95, 'blossom');   // (trees keep 0.5 off the map's Atlantic Street, which runs under this end of the island) shrub(-24.25, 0.35, -30.0, 0.26, 1); shrub(-22.7, 0.35, -30.1, 0.24, 2); shrub(-22.3, 0.35, -30.95, 0.22, 1);
+  cherry(-22.15, -30.6, 1.0);   // (kept 0.5 off the map's Atlantic Street, which runs under this end of the island) shrub(-24.25, 0.35, -30.0, 0.26, 1); shrub(-22.7, 0.35, -30.1, 0.24, 2); shrub(-22.3, 0.35, -30.95, 0.22, 1);
   { const c = document.createElement('canvas'); c.width = 192; c.height = 256; const g = c.getContext('2d');
     g.fillStyle = '#f4f5f7'; g.fillRect(0, 0, 192, 256); g.fillStyle = '#2b5ea8'; for (const [x, y] of [[18,22],[30,14],[42,22],[30,30],[22,34],[38,34]]) g.fillRect(x, y, 8, 8);
     g.fillStyle = '#1d2433'; g.font = 'bold 15px Georgia, serif'; g.fillText('Hackensack', 62, 26); g.fillText('Meridian Health', 62, 44); g.font = '12px Georgia, serif'; g.fillText('Hackensack University', 62, 62);
