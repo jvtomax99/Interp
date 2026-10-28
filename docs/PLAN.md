@@ -119,6 +119,16 @@ under way, then what waits on Jose, then small leftovers.
       where the real one is over HUMC for that date and hour (it lit the
       campus from the north before). `claude/campus-time`. Frame-rate
       reading still owed.
+   **2026-10-27/28 (Jose): the campus on the real map, front and back.**
+      Preview only, not in the app: the diorama's front as it is, the rest
+      of HUMC behind and beside it from his OpenStreetMap export at the same
+      scale; Terminology = Helena Theurer Pavilion (the map's "Patient
+      Pavilion"), Encounter = the real John Theurer across 2nd Street; the
+      corner of Atlantic and 2nd from his photos.
+      `docs/mockups/cchi-city/real-map/` (README: build, decisions, open
+      items), `claude/campus-real-map`. Next: his OK on the look and his
+      frame-rate reading, then wiring it into `campus3d/` and the card's
+      pictures (own PR).
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
