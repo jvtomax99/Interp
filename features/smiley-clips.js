@@ -7,6 +7,13 @@
    that has no clip. The rig swaps drawings; a clip bends, so the two never
    mix mid-move: the clip fades in over the rig at rest and fades out to it.
 
+   His head stays his own (2026-10-28, Jose: a clip starting read as a
+   face switch; the video tool draws his face rounder, with bigger eyes):
+   the rig's head, with his 30 expressions, is drawn above the canvas and
+   rides the clip's body, moved each frame to where the clip's head is
+   (head.json beside the frames, from layers/headtrack.py), the clip's own
+   head hidden under it. Only the rig's body fades out under the clip.
+
    drClipPlay(mount, name, done): plays DR_CLIPS[name] on a mount of
    features/smiley-body.js (a canvas over the SVG), or returns false (no
    such clip, Still, reduced motion, frames not loaded yet, a clip already
@@ -31,7 +38,20 @@ const DR_CLIPS = {
 };
 const DR_CLIP_FADE = 150;   // ms: the clip's first frame over the rig's rest, and back (their small likeness difference hidden)
 
-const drClipFrames = new Map();   // name -> { imgs, ready: Promise, ok }
+// The rig's head centre at rest on the clips' 320 x 440 grid, measured the way headtrack.py
+// measures (the blob of skin and hair), and the clips' head centre at rest (their first frame).
+// A clip's head at frame i moves the rig's head by (head[i] - DR_CLIP_HEAD0), in grid px.
+const DR_CLIP_HEAD0 = [168.6, 93.4];
+// His face acts along with each clip, on his own head (the clip's face is under it): beats of
+// [at (ms from the clip's start), face, brow]. The times follow the clips' own acting.
+const DR_CLIP_FACES = {
+  greet:  [[0, 'rest', 'rest'], [500, 'smile1', 'up'], [900, 'smile', 'up'], [3400, 'smile2', 'rest'], [4300, 'smile1', 'rest'], [4700, 'rest', 'rest']],
+  cheer:  [[0, 'rest', 'rest'], [600, 'smile1', 'up'], [1500, 'laugh', 'up'], [3400, 'laughB', 'up'], [4600, 'smile', 'up'], [5800, 'smile1', 'rest'], [6500, 'rest', 'rest']],
+  think:  [[0, 'rest', 'rest'], [600, 'blink1', 'focused'], [1200, 'lookUR', 'focused'], [3200, 'lookU', 'focused'], [4400, 'lookUR', 'focused'], [5300, 'rest', 'up'], [5700, 'smile', 'rest'], [6500, 'rest', 'rest']],
+  wince:  [[0, 'rest', 'rest'], [500, 'blink2', 'caring'], [900, 'worried', 'caring'], [2600, 'sad', 'caring'], [3600, 'smile1', 'rest'], [4400, 'smile', 'rest'], [5500, 'rest', 'rest']],
+  bounce: [[0, 'rest', 'rest'], [500, 'smile1', 'up'], [1100, 'smile', 'up'], [1900, 'laugh1', 'up'], [3200, 'smile', 'up'], [4800, 'smile1', 'rest'], [5500, 'rest', 'rest']],
+};
+const drClipFrames = new Map();   // name -> { imgs, head, ready: Promise, ok }
 function drClipPreload(name){
   const C = DR_CLIPS[name];
   if(!C) return null;
@@ -45,8 +65,9 @@ function drClipPreload(name){
     im.src = C.dir + String(i).padStart(4, '0') + '.webp';
     imgs.push(im);
   }
-  const entry = { imgs, ok: false };
-  entry.ready = Promise.all(loads).then(r => { entry.ok = r.every(Boolean); return entry.ok; });
+  const entry = { imgs, head: null, ok: false };
+  const track = fetch(C.dir + 'head.json').then(r => r.ok ? r.json() : null).then(h => { entry.head = h; }).catch(() => {});
+  entry.ready = Promise.all([...loads, track]).then(r => { entry.ok = r.slice(0, C.n).every(Boolean); return entry.ok; });
   drClipFrames.set(name, entry);
   return entry;
 }
@@ -79,7 +100,17 @@ function drClipPlay(m, name, done){
   cv.className = 'db-clip'; cv.width = C.w; cv.height = C.h; cv.setAttribute('aria-hidden', 'true');
   if(C.top){ cv.style.height = (100 * (1470 + C.top) / 1470).toFixed(3) + '%'; cv.style.top = (-100 * C.top / 1470).toFixed(3) + '%'; }   // the rows above the master's top: above the host
   const ctx = cv.getContext('2d');
-  const draw = i => { ctx.clearRect(0, 0, C.w, C.h); ctx.drawImage(F.imgs[i], 0, 0, C.w, C.h); };
+  // his own head rides the clip: the SVG's head group, moved to the clip's head each frame (SVG
+  // units: the grid is 320 x 440 for 1070 x 1470, so 1 grid px is 1070/320 units); a clip with
+  // headroom (C.top) has its frames 60 rows taller, head.json in those pixels
+  // the offset goes on the head's idle wrapper (.db-idle-head), not .db-head itself: a CSS transform there would override
+  // the rig's own transform attribute on .db-head (the lift and tilt of a performance)
+  const headEl = m.svg.querySelector('.db-idle-head'), k = 1070 / 320, topRows = C.top ? Math.round(C.top * 320 / 1070) : 0;
+  const headAt = i => { const h = F.head && F.head[i]; if(!h || !headEl) return; const dx = (h[0] - DR_CLIP_HEAD0[0]) * k, dy = (h[1] - topRows - DR_CLIP_HEAD0[1]) * k; headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`; };
+  // his face along the clip: the next beat whose time has come (the rig walks the in-betweens itself)
+  const faces = DR_CLIP_FACES[name] || []; let fi = 0;
+  const faceAt = ms => { while(fi < faces.length && faces[fi][0] <= ms){ m.body.set({ face: faces[fi][1], brow: faces[fi][2] }); fi++; } };
+  const draw = i => { ctx.clearRect(0, 0, C.w, C.h); ctx.drawImage(F.imgs[i], 0, 0, C.w, C.h); headAt(i); faceAt(i * 1000 / C.fps); };
   const ahead = i => { for(let k = i + 1; k < Math.min(C.n, i + 6); k++){ const im = F.imgs[k]; if(im.decode && !im.__dec){ im.__dec = true; im.decode().catch(() => {}); } } };
   draw(0); ahead(0);
   host.appendChild(cv);
@@ -94,7 +125,7 @@ function drClipPlay(m, name, done){
     clip.stopped = true;
     draw(C.n - 1);
     host.classList.remove('is-clip');
-    clip.timer = setTimeout(() => { cv.remove(); if(m.clip === clip) m.clip = null; if(done) done(); }, DR_CLIP_FADE + 20);
+    clip.timer = setTimeout(() => { cv.remove(); if(headEl) headEl.style.transform = ''; if(m.clip === clip) m.clip = null; if(done) done(); }, DR_CLIP_FADE + 20);
   };
   const tick = now => {
     if(clip.stopped) return;
@@ -103,7 +134,7 @@ function drClipPlay(m, name, done){
     if(i >= C.n - 1) end(); else clip.raf = requestAnimationFrame(tick);
   };
   clip.raf = requestAnimationFrame(tick);
-  clip.stop = () => { if(clip.stopped) return; cancelAnimationFrame(clip.raf); clip.stopped = true; clearTimeout(clip.timer); host.classList.remove('is-clip'); cv.remove(); if(m.clip === clip) m.clip = null; };
+  clip.stop = () => { if(clip.stopped) return; cancelAnimationFrame(clip.raf); clip.stopped = true; clearTimeout(clip.timer); host.classList.remove('is-clip'); cv.remove(); if(headEl) headEl.style.transform = ''; if(m.clip === clip) m.clip = null; };
   return true;
 }
 function drClipStop(m){ if(m && m.clip) m.clip.stop(); }

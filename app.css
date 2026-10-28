@@ -7365,8 +7365,17 @@ body.pv-open{ overflow:hidden; }
 .db-host{ position:relative; }
 .db-host .db-clip{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .15s linear; }
 .db-host.is-clip .db-clip{ opacity:1; }
-.db-host svg.db{ transition:opacity .15s linear; }
-.db-host.is-clip svg.db{ opacity:0; }
+/* under a clip only the rig's body fades out; his own head stays, painted above the canvas (the SVG is above it) and moved by the
+   player to the clip's head each frame (features/smiley-clips.js: a transform on .db-idle-head). The breath group holds the arms,
+   the drawn poses, the head and the body, in that paint order; under a clip everything in it but the head goes, and its idle
+   animations (the breath's scale, the head's drift, the sway) pause so the head sits where the clip's does. */
+/* The rig shows and hides its pieces with inline opacity (cover() in drsmiley/body.js), which beats any stylesheet rule, so
+   under a clip the pieces are hidden by visibility, which the rig never sets; the fade is the canvas's own. */
+.db-host svg.db{ position:relative; z-index:1; }
+.db-host.is-clip .db-root > *, .db-host.is-clip .db-breath > *{ visibility:hidden; }
+.db-host.is-clip .db-root > .db-breath, .db-host.is-clip .db-breath > .db-head{ visibility:visible; }
+.db-host.is-clip .db-breath, .db-host.is-clip .db-idle{ animation-play-state:paused; }
+.db-host.is-clip .db-idle-head, .db-host.is-clip .db-idle-sway{ animation:none; }
 .db-host .db-breath{ transform-box:fill-box; transform-origin:50% 100%; animation:dbBreath 3.6s ease-in-out infinite; }
 .db-host.is-offscreen .db-breath{ animation-play-state:paused; }
 html.ds-still .db-host .db-breath{ animation:none; }

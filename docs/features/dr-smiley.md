@@ -721,7 +721,22 @@ ignored); `keyclip.py` with `FIT` scales and places his rest box onto the
 master's figure and with `TOP=200` keeps 200 rows of the grid above the
 master's top (frames 320 x 500), and `DR_CLIPS.cheer.top` has the player
 draw the canvas that much taller above the host, so the jump rises above
-the host's top instead of cutting. `keyclip.py` had to learn two things from the wave (2026-10-27,
+the host's top instead of cutting. **His head stays his own** (2026-10-28,
+Jose: a clip starting read as a face switch; the video tool draws his
+face rounder, with bigger eyes, the same in every clip): under a clip only
+the rig's body goes (`app.css`, `.is-clip`: everything in the breath
+group but `.db-head` is `visibility:hidden`, since the rig sets its
+pieces' opacity inline, which beats a stylesheet; its idle animations
+paused), the SVG is painted
+above the canvas, and the player moves the head's idle wrapper
+(`.db-idle-head`; a transform on `.db-head` itself would override the
+rig's own) each frame to where the clip's head is: `head.json` beside the
+frames, from `layers/headtrack.py` (the blob of skin and hair, its centre
+per frame, smoothed; a tilt from the pupils was tried and dropped), minus
+`DR_CLIP_HEAD0`, the clips' head centre at rest. His face acts along on
+his own head (`DR_CLIP_FACES`: beats of face and brow per clip, the rig
+walking the in-betweens). The tests' harness serves `*.json` from the
+checkout for the tracks. `keyclip.py` had to learn two things from the wave (2026-10-27,
 Jose: "make sure you don't make a mistake cropping him out"): the coat's
 shadowed front edge is nearly the wall's grey and read as a gap when the
 frames were worked at half size (full size now, and an enclosed pool is

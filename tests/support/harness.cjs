@@ -66,6 +66,11 @@ async function route(page, opts = {}) {
   await page.route('**/sw.js', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: fs.readFileSync(FONTS + 'g.css', 'utf8') }));
   await page.route('https://fonts.gstatic.com/**', r => { const f = FONTS + r.request().url().replace('https://fonts.gstatic.com/s/', '').replace(/\//g, '_'); return fs.existsSync(f) ? r.fulfill({ status: 200, contentType: 'font/woff2', headers: { 'access-control-allow-origin': '*' }, body: fs.readFileSync(f) }) : r.abort(); });
+  // the clips' head tracks (drsmiley/clips/<move>/head.json, features/smiley-clips.js) and other JSON data files
+  await page.route(/^https:\/\/interp\.test\/.+\.json(\?.*)?$/, r => {
+    const f = decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\//, '')), p = R + f;
+    return fs.existsSync(p) ? r.fulfill({ status: 200, contentType: 'application/json', body: fs.readFileSync(p) }) : r.fulfill({ status: 404, body: '' });
+  });
   await page.route(/\.(jpe?g|png|PNG|webp|svg|gif|ico|webmanifest)(\?.*)?$/, r => {
     const f = decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\//,''));
     let p = R + f; if (!fs.existsSync(p)) p = __dirname + '/' + f; if (!fs.existsSync(p) || /^missing/.test(f)) return r.fulfill({ status: 404, body: '' });
