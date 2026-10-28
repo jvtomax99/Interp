@@ -106,11 +106,10 @@ where the map has houses.
   banners are on its front at the end of the drive (white HMH left, blue
   right), and a curved planted island with evergreens hugs that face, the
   drop-off road looping round it; the white canopy and lobby are gone.
-  Medical Plaza is white precast with ribbon windows, a glass grid on its
-  Prospect face and a plain set-back block on top (6 + 2 floors; it was
-  maroon brick with dark glass tiers). The Visitors Parking garage beside
-  the drive has 8 decks. Which building the white one in his shots is was
-  read from the views, not confirmed: ask if it looks wrong.
+  The white precast building with ribbon windows and a big glass grid in
+  his shots is the Women's and Children's Pavilion, left of the main
+  campus (Jose; 6 floors). The Visitors Parking garage beside the drive has
+  8 decks.
 - Helena Theurer Pavilion and the little park beside it (his 12 Street View
   and Google 3D shots, 2026-10-28): the bridge sits low over the road with a
   tall terracotta block on a deep grey band (two dark panels either side of

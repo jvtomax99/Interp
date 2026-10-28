@@ -51,10 +51,11 @@ for (const lot of SCN.lots) slab(lot, 0.17, 0.085, asphalt);
 const STYLE = {
   e: { col:'#6e3a33', band:'#7a4239', roof:0xd9cdb8 },                        // George Link Jr. Pavilion: brown brick (as the hand-built one was)
   s: { col:'#7e3b37', band:'#e6d8c2', roof:0xf1f2f4, glassBase:2 },          // Jurist: brick, cream bands, glass on its two lower floors, a white roof
-  c: { col:'#e3e5e8', band:'#cdd1d7', glass:'#5f7a98', roof:0xe6e6e4 },     // Medical Plaza: white precast, ribbon windows, a glass grid on Prospect (his aerials, 2026-10-28)
+  c: { col:'#7a3530', band:'#e6d8c2' },                                      // Medical Plaza: maroon brick, cream bands; steps back, dark glass on top (tiers)
   t: { col:'#c9c2b6', band:'#efe8dc', glass:'#33456e', roof:0xe6e2da, kind:'glass' },   // Patient Pavilion: glass bands on pale stone
   n: { col:'#d0784c', band:'#f4efe6', roof:0xe9e4dc },                       // John Theurer Cancer Center: orange brick, white bands
-  x8905: { col:'#9a5444', band:'#ece4d6', glass:'#3a4f7a', roof:0xe2dccf }, x8899: { col:'#c9b79c', band:'#dccfb9', glass:'#6d93ad', roof:0xd9d2c4, kind:'glass', baseBlock:1 },   // Imus: tan brick, ribbon windows, a pale block ground floor
+  x8905: { col:'#e3e5e8', band:'#cdd1d7', glass:'#5f7a98', roof:0xe6e6e4 },   // Women's and Children's Pavilion: white precast, ribbon windows, a glass grid (Jose, 2026-10-28)
+  x8899: { col:'#c9b79c', band:'#dccfb9', glass:'#6d93ad', roof:0xd9d2c4, kind:'glass', baseBlock:1 },   // Imus: tan brick, ribbon windows, a pale block ground floor
   x8902: { col:'#b8553a', band:'#f1ece4', roof:0xd6d0c4 },
   x7562: { col:'#c3c8cf', band:'#aab0b9', glass:'#7f8b99', roof:0xdfe2e6 },   // across 2nd Street from Theurer: silver panels (Jose's photos)   // the ED: red brick, white bands x8907: { col:'#d8d0c2', band:'#b9b0a2', roof:0xd6d0c4 }, x8894: { col:'#8f4a3a', band:'#e6d8c2' },
   x8889: { col:'#9a5a46', band:'#e6d8c2' }, x8890: { col:'#e9d8b8', band:'#f6efe2' }, x8891: { col:'#b56a52', band:'#ead9c4' }, x8892: { col:'#c98a6a', band:'#f4ead8' } };
@@ -109,7 +110,7 @@ function realBuilding(b){
   if (b.tiers){ hTop = yb - 0.22 - y0; const s2 = 1.6, T = b.tiers[b.tiers.length - 1].pts, cx = T.reduce((a, p) => a + p[0], 0)/T.length, cz = T.reduce((a, p) => a + p[1], 0)/T.length;
     box(s2*1.4, 0.4, s2, M(0x8a8796), cx, yb + 0.2, cz, 0.06); }
   // Medical Plaza's colonnade on the drive (his Street View): brick piers under a cream beam, along its wall facing the drive
-  if (b.key === 'c'){ const e = E.filter(q => q.L > 5).sort((p, q) => p.nx - q.nx)[0], pm = M(0xd9dbde, { r:0.7 });
+  if (b.key === 'c'){ const e = E.filter(q => q.L > 5).sort((p, q) => p.nx - q.nx)[0], pm = M(0x7a3530, { r:0.85 });
     for (let t = 0.7; t < e.L - 0.3; t += 1.55){ const [px, pz] = e.at(t); box(0.3, 1.25, 0.3, pm, px + e.nx*0.3, 0.3 + 0.62, pz + e.nz*0.3, 0.03); }
     const [mx, mz] = e.at(e.L/2); box(e.L - 0.6, 0.18, 0.5, M(0xe6d8c2, { r:0.6 }), mx + e.nx*0.25, 0.3 + 1.3, mz + e.nz*0.25, 0.03).rotation.y = e.a; }
   const MAT = { dark:WIN_DARK, sky:WIN_SKY, warm:WIN_WARM, litDark:WIN_DARK, litSky:WIN_SKY, litWarm:WIN_WARM, sill:SILL, reveal:REVEAL };
@@ -162,9 +163,9 @@ pend.push(() => { CUR = 'e'; const z = -8.1 + 0.06;
   for (const [x, z, s] of [[-1.5, -7.45, 0.6], [-0.2, -7.55, 0.7], [1.4, -7.5, 0.62], [2.9, -7.6, 0.5]]) tree(x, z, s, 'cone');
   shrub(-2.0, 0.42, -7.45, 0.26, 0); shrub(0.6, 0.42, -7.15, 0.24, 2); shrub(2.2, 0.42, -7.15, 0.22, 1);
   box(0.4, 0.32, 0.06, M(0xe9eaec, { r:0.6 }), 1.0, 0.56, -7.1, 0.02); }
-// Medical Plaza's glass grid on its Prospect face, floors 3 to 6 (his aerials)
-pend.push(() => { CUR = 'c'; const E = BLD.c.E; let i = 0; E.forEach((e, k) => { if (e.az + e.bz > E[i].az + E[i].bz) i = k; });
-  const t = curtainTex(); t.repeat.set(6.2/1.4, 4); onWall('c', i, 3.0, 0.3 + 4*FL, 6.2, 4*FL, new THREE.MeshStandardMaterial({ map:t, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }), 0.05); CUR = '_'; });
+// the Women's and Children's Pavilion's glass grid on its south face, floors 3 to 6 (his aerials)
+pend.push(() => { const E = BLD.x8905.E; let i = 0; E.forEach((e, k) => { if (e.az + e.bz > E[i].az + E[i].bz) i = k; });
+  const t = curtainTex(); t.repeat.set(7.0/1.4, 4); onWall('x8905', i, 2.0, 0.3 + 4*FL, 7.0, 4*FL, new THREE.MeshStandardMaterial({ map:t, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }), 0.05); CUR = '_'; });
 function onWall(key, i, s, y, w, h, mat, out=0.03){ const e = BLD[key].E[i], [cx, cz] = e.at(e.L/2); const m = add(new THREE.PlaneGeometry(w, h), mat, cx + e.ux*s + e.nx*out, y, cz + e.uz*s + e.nz*out, false); m.rotation.y = e.a; return m; }
 // (the hospital's name is on the Helena Theurer Pavilion's glass tower, built below with the corner of Atlantic and 2nd)
 // Encounter: the name on John Theurer Cancer Center's face, over its doors

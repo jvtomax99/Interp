@@ -35,9 +35,9 @@ LIVE_KEYS=set()
 # Link Pavilion's front: the map's outline takes in the canopy over its doors (a stub out to the drive); cut it off, so
 # its wall at the end of the drive runs straight and the diorama's canopy stands in front of it
 LINK_CUT=sbox(-2.4,-8.1,4.6,-6.0)
-DOM={'8888':('t',13),'8895':('n',5),'8887':('e',6),'8884':('s',6),'8885':('c',8)}
+DOM={'8888':('t',13),'8895':('n',5),'8887':('e',6),'8884':('s',6),'8885':('c',9)}
 DOOR_AT={'e':(1.1,-8.1),'s':(-9.0,10.2),'c':(13.0,9.7)}   # which wall gets the doors: the one nearest this point
-FLOORS={'8905':5,'8907':3,'8902':4,'8899':6,'8894':4,'8889':3,'8890':2,'8891':2,'8892':3,'8914':6,'8886':8,'8893':6}
+FLOORS={'8905':6,'8907':3,'8902':4,'8899':6,'8894':4,'8889':3,'8890':2,'8891':2,'8892':3,'8914':6,'8886':8,'8893':6}
 blds=[]
 for b in d['buildings']:
     sid=b['id'][-4:]
@@ -68,13 +68,13 @@ for b in d['buildings']:
 for b in blds:
     if b['key']=='c':
         b['tiers']=[]
-        for inset,dz,fl,glass in [(1.0,-0.5,2,False)]:   # (2026-10-28 aerials: white, a plain set-back block on top)
+        for inset,dz,fl,glass in [(0.8,-0.6,3,False),(1.9,-1.6,2,True)]:
             g=b['poly'].buffer(-inset,join_style=2).simplify(0.05)
             g=Polygon([(x,z+dz) for x,z in g.exterior.coords]).intersection(b['poly'].buffer(-0.3,join_style=2))
             g=max(g.geoms,key=lambda q:q.area) if hasattr(g,'geoms') else g
             tp=[[round(x,2),round(z,2)] for x,z in list(g.simplify(0.05).exterior.coords)[:-1]]
             a=sum(tp[i][0]*tp[(i+1)%len(tp)][1]-tp[(i+1)%len(tp)][0]*tp[i][1] for i in range(len(tp)))
-            b['tiers'].append(dict(pts=tp[::-1] if a<0 else tp,floors=fl,glass=glass,plain=True))
+            b['tiers'].append(dict(pts=tp[::-1] if a<0 else tp,floors=fl,glass=glass))
 for b in blds:
     if b['clipped']>0.02: print('clipped',b['id'],b['name'],b['clipped'])
 allU=unary_union([b['poly'] for b in blds])
