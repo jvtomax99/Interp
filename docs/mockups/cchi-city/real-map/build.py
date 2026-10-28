@@ -73,7 +73,7 @@ rep("{ g: person('patient', 2), pts: [[3.7,0.1,-5.5],[3.7,0.1,2],[3.7,0.1,-5.5]]
 rep("CAR_IN.position.set(3.1, 0.2, 15.5 - u*22)","CAR_IN.position.set(2.5, 0.2, 15.5 - u*21)")
 rep("along([[4.2,0.2,15.5],[4.2,0.2,2],[4.4,0.2,-4],[5.4,0.2,-7.2],[6.8,0.2,-8.0],[7.4,0.2,-8.4]]","along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0.2,-4],[4.6,0.2,-6.9],[6.6,0.2,-8.0],[7.4,0.2,-8.4]]")
 rep('<h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>','<h1>HUMC campus, front and back<small>Preview · live front on the real map</small></h1>')
-rep('<p class="hint">Drag to spin · pinch to zoom · tap a building</p>','<p class="hint">Drag to spin · two fingers to zoom and move · tap a building<br><span style="opacity:.7;font-size:10px">Map data © OpenStreetMap contributors</span></p>')
+rep('<p class="hint">Drag to spin · pinch to zoom · tap a building</p>','<p class="hint">Drag to move · pinch to zoom · twist to turn · two fingers up or down to tilt · tap a building<br><span style="opacity:.7;font-size:10px">Map data © OpenStreetMap contributors</span></p>')
 rep("const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;","const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;\nlet CUR = '_';   // the building the next meshes belong to (the merge sorts them by it)")
 rep("const add = (geo, mat, x,y,z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast;","const add = (geo, mat, x,y,z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast; m.userData.k=CUR;")
 # shadows over the whole, bigger board
@@ -143,8 +143,6 @@ rep("if (picked){ const b = BOX[picked], s = Math.max(b.w, b.d)*0.62; ring.scale
 rep("else { ring.visible = false; $('card').hidden = true; }","else { $('card').hidden = true; }")
 rep("if (ring.visible) ring.material.opacity","if (ring) ring.material.opacity")
 rep("at.push({ el, x:(v3.x+1)/2*r.width, y:(1-v3.y)/2*r.height, w:el._w, h:el._h }); }","at.push({ el, x:Math.max(el._w/2 + 6, Math.min(r.width - el._w/2 - 6, (v3.x+1)/2*r.width)), y:(1-v3.y)/2*r.height, w:el._w, h:el._h, back:v3.z > 1 }); }")
-rep("controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!document.hidden) requestAnimationFrame(frame); }",
-    "if (!window.__free) controls.target.set(Math.max(BX0 + 4, Math.min(BX1 - 4, controls.target.x)), -1.5, Math.max(BZ0 + 4, Math.min(BZ1 - 4, controls.target.z)));\n  controls.update(); renderer.render(scene, cam); badges(); sunAt(); if (!document.hidden) requestAnimationFrame(frame); }")
 # the drive's islands and the fountain where the state's 2020 aerial has them (2026-10-28): the back island (the fountain
 # at its head, trees down it) runs z -0.2 to 4.8 on x 0.64; the front island, narrower, z 6.2 to 11.5 on x 0.58, the
 # entrance sign at its mouth. They were about a unit west and the fountain three units north of the real ones.
@@ -165,7 +163,10 @@ rep("[0.3,6.5,0.9,'cone'],[-0.5,-1.3,0.7,'cone']", "[0.58,7.75,0.8,'cone'],[0.64
 rep("bed([[-0.75, 4.9], [0.55, 4.9], [0.85, 6.2], [0.75, 8.6], [-0.1, 8.95], [-0.95, 8.6], [-1.05, 6.2]]", "bed([[0.0, 6.7], [1.15, 6.7], [1.3, 7.5], [1.25, 9.0], [0.58, 9.3], [-0.1, 9.0], [-0.15, 7.5]]")
 rep("bed([[-0.45, -1.9], [0.25, -1.9], [0.4, -0.5], [0.25, 1.4], [-0.1, 1.75], [-0.45, 1.4], [-0.6, -0.5]]", "bed([[0.3, 1.1], [1.0, 1.1], [1.15, 2.4], [1.0, 4.2], [0.64, 4.55], [0.28, 4.2], [0.13, 2.4]]")
 rep("CAR_OUT.position.set(-2.8, 0.2, -6.5 + u*22)", "CAR_OUT.position.set(-2.2, 0.2, -6.5 + u*22)")
-rep("cam.position.set(-34, 70, 82); controls.update();","cam.position.set(-34, 70, 82); controls.update();\nwindow.__built = o => { Object.assign(BUILT, o); setProgress(+$('prog').value/100); };\nwindow.__view = (x, y, z, tx=0.5, ty=-1.5, tz=-3) => { window.__free = true; controls.minDistance = 1; controls.maxPolarAngle = Math.PI*0.62; cam.position.set(x, y, z); controls.target.set(tx, ty, tz); controls.update(); };")
+# moving round with fingers the Maps way (nav.js: drag the ground, pinch, twist, tilt, fly to a building, Reset view);
+# it replaces OrbitControls' spin-and-snap, whose hard clamp at the edges fought the fingers every frame
+NAV_JS = open(os.path.join(HERE, 'nav.js')).read()
+rep("cam.position.set(-34, 70, 82); controls.update();","cam.position.set(-34, 70, 82); controls.update();\n" + NAV_JS + "\nwindow.__built = o => { Object.assign(BUILT, o); setProgress(+$('prog').value/100); };\nwindow.__view = (x, y, z, tx=0.5, ty=-1.5, tz=-3) => { window.__free = true; controls.minDistance = 1; controls.maxPolarAngle = Math.PI*0.62; cam.position.set(x, y, z); controls.target.set(tx, ty, tz); controls.update(); };")
 note="/* HUMC campus, front and back (Jose, 2026-10-27/28): every building placed from his OpenStreetMap export, the front's\n   three included; the hand-built ground at the front (street, drive, fountain, drop-off) refitted around them. */\n"
 rep("window.__LITE = true;\n","window.__LITE = true;\n"+note)
 rep('bottom:calc(env(safe-area-inset-bottom,0px) + 168px)', 'bottom:calc(env(safe-area-inset-bottom,0px) + 186px)')   # the card clears the taller sheet

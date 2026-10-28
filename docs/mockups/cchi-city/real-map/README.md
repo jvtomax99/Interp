@@ -103,6 +103,16 @@ where the map has houses.
   a beige stair tower on its corner; a glass skybridge crosses Atlantic from
   the garage to the ED, north of Imus (where it lands is a guess).
 - His iPhone runs the preview at 60 fps (2026-10-28).
+- Moving round (Jose, 2026-10-28: "wonky and hard"): `nav.js` replaces
+  OrbitControls' one-finger spin and its hard clamp at the edges (it snapped
+  the view back every frame) with the Maps way: one finger drags the ground
+  (the spot under it stays under it, a flick glides 16 units at most), pinch
+  zooms toward the fingers, twist turns, two fingers up or down tilt, a tap
+  on a building flies to it, Reset view goes home, the board's edges stop it
+  softly; a mouse drags, right-drags to turn and tilt, wheels to zoom. Checked
+  with simulated touches at iPhone size (drag error 0, pinch 2x about the
+  fingers, twist, tilt, edges, flight, reset). Wiring into the app takes
+  `nav.js` along (the app's round Reset button is used when present).
 - The front, from his 8 Google 3D shots (2026-10-28): Link Pavilion's two
   banners are on its front at the end of the drive (white HMH left, blue
   right), and a curved planted island with evergreens hugs that face, the
