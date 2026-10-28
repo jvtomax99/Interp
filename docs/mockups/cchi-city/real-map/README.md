@@ -215,6 +215,13 @@ where the map has houses.
   the top and bottom of the screen as a CSS backdrop blur under a gradient mask (no extra WebGL pass). Not done: baked
   corner shading (ambient occlusion), puffy roof steam. Waiting on his look and frame-rate reading both ways.
 
+- Toy look in Blender (his pick "Blender test render", 2026-10-28; the live Toy look "doesn't look like the video"):
+  `export_glb.cjs` loads the built page in headless Chromium and exports every visible mesh to GLB (no glows, no
+  shader materials); `toy_render.py` (Blender's Python module, `pip install bpy` 5.0.1 on Python 3.11) gives it satin
+  toy plastic with rounded edges (Bevel node), a warm soft sun, a sky for the bounce light, AgX, depth of field, drops
+  the page's clouds, and renders front / whole / court with Cycles on the CPU (about 100 s each at 900 x 1200, 96
+  samples), on a transparent film for a dark studio backdrop. Pictures only: the app can't render like this live.
+
 ## Open
 
 - Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street
