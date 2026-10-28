@@ -30,7 +30,16 @@ on Imus's side), the little park beside it, the older orange-brick tower,
 Audrey Hepburn House, the silver plant with roof fans (README, Decisions).
 Method that worked: render the preview from the same spot as each photo
 (`window.__view`, `__built` all 1, fov ~70 for Street View) and compare side
-by side. 60 fps on his iPhone. Next: more photo areas he sends. Build: `python3 build.py
+by side. 60 fps on his iPhone. Also done: the front from his aerials (Link's
+banners and planted island at the end of the drive, no canopy; the white
+building with the glass grid is the Women's and Children's Pavilion, Jose
+confirmed; Medical Plaza stays maroon brick with dark glass tiers; Visitors
+Parking garage 8 decks), and no rooftop plate on part-built buildings.
+Next: more photo areas he sends. Preview build: check out
+`claude/campus-real-map`, `npm install --no-save three@0.160.0` in
+`docs/mockups/cchi-city/`, `pip install shapely matplotlib`, then
+`python3 build.py <out.html>` in `real-map/` and republish it to the same
+Artifact link. Build: `python3 build.py
 <out.html>` there (it runs `../live/gen.py` first). Preview Artifact (private):
 https://claude.ai/artifact/7uyf7q3572hqDM9wFo7NAM. The README has the
 decisions and the open items. Waiting on Jose:
