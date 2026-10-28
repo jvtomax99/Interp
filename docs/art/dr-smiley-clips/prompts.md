@@ -157,3 +157,16 @@ keyed with `PAD=280,102` so the frames land on the master's grid.
 
 The prompt for it is the green-wall cheer prompt with the lower hop, run
 from the headroom picture.
+
+## Two more cheers (2026-10-28): the tool keeps its own framing
+
+The lower hop and the run from the headroom picture both came back with
+the same first frame as the green still (his head 36 px from the top of a
+1686 px picture): the tool re-used its earlier framing, whatever was
+attached. Measured by how far his feet rise, the first green cheer loses
+about 100 px of the picture at the top (the fists, 14 frames), the lower
+hop 130 (the top of his hair, 11 frames), the headroom run 172 (28
+frames). The first green cheer stays in the app: the least lost, and on
+the fists rather than his head. A last try, if Jose wants one, says the
+framing in words ("he is small in the picture, standing in its lower two
+thirds, with empty green space above his head as tall as half of him").
