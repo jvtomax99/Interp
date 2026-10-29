@@ -1,50 +1,46 @@
 # Handoff
 
-Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-28, the real-map campus chat (claude.ai,
-moved into this repo as `claude/campus-real-map`), updated by the chat that
-rebuilt the front on the map.
+Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-10-29,
+the campus chat (Blender card, real campus in 3D, Helena Theurer's height, the audit).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next 2, the campus),
-> `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md`. Then
-> tell me what's being worked on now and the goal, and what was worked on
-> before, in a few short lines each, say in 2-3 lines what you'll do next,
-> and wait for my go. Plain words, say "working on it" and "done".
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next 2, the campus, "make the campus act like real life"),
+> `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md` ("The card's pictures", "The audit"). Work on
+> branch `claude/campus-traffic`. Tell me what's being worked on now and what was worked on before, in a few short
+> lines, then start prompt 2 (traffic). Plain words, say "working on it" and "done".
 
-## Now
+## Now: prompt 2 of 4, traffic
 
-**The CoreCHI Practice card's pictures, made in Blender from the real-map campus.** Branch
-`claude/campus-card-blender` (off `claude/campus-real-map`, PR #167, the preview source). Plan:
-`docs/PLAN.md`, Next 2, "the card's pictures from Blender" (steps 1-4 and Jose's picks). Jose
-OK'd the look from two mock-ups (whole board from the card's angle, finished and in progress).
+Jose's prompts, in order (2026-10-29), each its own change:
+1. Audit every moving thing. **Done, live** (#173, b1029.1532).
+2. **Traffic: done in 3D** (2026-10-29, `claude/campus-traffic`, waiting for Jose's push; `real-map/traffic.js`, README "Traffic"). Was: "Make the cars drive like real traffic: stay in the right-hand lane, follow the real direction of
+   each street, slow down and stop at stop signs and crosswalks, turn on curves instead of sliding sideways, and never
+   overlap each other. Use the map data for which streets are one-way."
+3. **People (next):** sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing and
+   talking; never through walls, cars, trees or each other.
+4. Buildings checked against the real campus (height, floors, doors, garage entrances, bridges), with sources.
 
-What exists: `docs/mockups/cchi-city/real-map/toy_render.py` (Blender: toy plastic, rounded edges,
-soft sun, AgX, depth of field; `VIEWS=card`, `CARD_DIST=235`, `PROGRESS="e:0.8,..."`),
-`export_glb.cjs` (the built preview's scene to GLB in headless Chromium). Blender in this
-container: `pip download bpy` (5.0.1, cp311 wheel), `uv venv --python /usr/bin/python3.11`,
-`uv pip install` the wheel; renders ~100 s per 1 MP at 96 samples on 4 CPUs.
+Where things are:
+- The live scene's motion: `life(t)` in the built page; its movers and paths are set in
+  `docs/mockups/cchi-city/real-map/build.py` (block "the audit's fixes" and the rounds after it; `along()` gives
+  position and heading on a polyline). The street cars: `STREET` (Prospect), `BACKCARS` (2nd St, Atlantic B, Essex;
+  paths from `scene.json` `paths`, made by `scene_export.py` from the OSM export, which has the one-way tags).
+- Checker: `node audit.cjs campus.html out.json` (`MAP=map.png` for the picture). What it still flags: a car and a
+  person meeting at a crosswalk or corner (cars must give way: that is prompt 2), two walkers passing at a corner.
+- In 3D (`campus3d/`, `python3 build.py --app`) things move live, so giving way, stopping and queueing are possible
+  there. The card (`city/`, Blender, `card_capture.cjs` + `card_render.py` + `card_build.py --install`, ~40 min)
+  only plays fixed paths: a car's sprite has one heading per leg, so turns are cut between legs.
+- Blender here: `pip download bpy==5.0.1 --no-deps --python-version 3.11 --only-binary=:all:`, a 3.11 venv
+  (`uv venv --python /usr/bin/python3.11`) with that wheel, numpy and Pillow. three.js: `npm install --no-save
+  three@0.160.0` in `docs/mockups/cchi-city/`.
+- Gotchas found: Cycles draws coplanar ground layers black (`flat_ground_apart` in `toy_look.py`); a camera
+  projection of points goes wrong in the preview (nav.js), so the audit map draws rings in the scene instead;
+  `pgrep -f` in a wait loop matches itself.
 
-How the card works now: `features/campus.js` (`CAMPUS_MAP` manifest, `renderCampus`), the
-motion `campusLife`/`campusDepth` in `index.html` ("Practice dashboard motion"), pictures in
-`city/` (1.8 MB, ~150 files) made by `docs/mockups/cchi-city/builddiorama.cjs` from
-`diorama.html`'s capture pipeline (`window.__run`: `alone()` renders one object with the rest as
-depth, `path()` projects a 3D path, `pack()` crops). That pipeline is cut out of the live page
-(`live/gen.py`), so the preview page has the moving objects (CAR_IN, CAR_OUT, CAR_IN2, AMB,
-HELI, STREET, WALKS, SITTERS, BIRDS, IDLE, FLAGS, CLOUDS, spray) but not the capture code.
-Suites: `tests/suites/campus-{pick,alive,life,depth,3d}.cjs` (life expects bay and lot).
+## Before (this chat, all live)
 
-Idea for the build: Blender for near/paint/glow (passes: painted, clay, object-id, height,
-lit windows; each building's paint = id mask x height cut, cropped), three.js on the preview
-page for the moving sprites with the identical camera (fov 18.77 vertical, 960 x 840 at 2x, no
-view offset; Blender sensor fit vertical; three.js (x,y,z) = Blender (x,-z,y)).
-
-## Before
-
-- **#157** the campus as a floating diorama; **#164** the real HUMC layout
-  around the entrance; **#165** the campus in 3D, full screen; the time of
-  day with the real sun over HUMC (`claude/campus-time`). All live.
-- **This chat (claude.ai):** the real-map preview above, built step by step
-  with Jose from his map export, his Google 3D flyover and his photos (Street
-  View at 77 2nd St, his window at Theurer); moved into the repo here.
+- #168 the CoreCHI Practice card's pictures rendered in Blender from the real-map campus, every mover re-made.
+- #169 the 3D button opens the real campus too (`build.py --app`).
+- #170 Helena Theurer Pavilion 9 floors at 1.3x (it was 13 at 1.65x; Jose's pick).
+- #173 the audit and its fixes (269 problem spots down to crosswalk meetings).

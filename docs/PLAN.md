@@ -153,7 +153,8 @@ under way, then what waits on Jose, then small leftovers.
       (`real-map/build.py --app`, Jose: the 3D button still showed the old campus).
       **2026-10-29 (Jose): make the campus act like real life, in his four prompts, in order.** 1 the audit
       (`real-map/audit.cjs`; done: 269 spots fixed, `claude/campus-audit`), 2 traffic (lanes, one-way streets, stops
-      at signs and crosswalks, turning, no overlaps), 3 people (sidewalks, crosswalks, doors, pairs, wheelchairs,
+      at signs and crosswalks, turning, no overlaps; done in 3D 2026-10-29, `claude/campus-traffic`: `real-map/traffic.js`,
+      checked by `traffic_check.cjs`; the card not re-rendered), 3 people (sidewalks, crosswalks, doors, pairs, wheelchairs,
       waiting), 4 the buildings checked against the real campus with sources. Live behaviour (giving way) is 3D only;
       the card's movers follow fixed paths.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept

@@ -17,6 +17,7 @@ const [HTML, OUT] = process.argv.slice(2);
     const T = window.__T, L = window.__L, scene = L.scene;
     const movers = [['car in (drive)', L.CAR_IN, 'car'], ['car out (drive)', L.CAR_OUT, 'car'], ['car in 2 (drive)', L.CAR_IN2, 'car'], ['ambulance (3D)', L.AMB, 'car'],
       ...L.STREET.map((o, i) => [`Prospect car ${i}`, o.g, 'car']), ...L.BACKCARS.map((o, i) => [`back car ${i} (${['2nd St A','2nd St B','Atlantic B','Essex A','Essex B'][i]})`, o.g, 'car']),
+      ...L.TRAFFIC.MORE.map((g, i) => [`traffic car ${i}`, g, 'car']),
       ...L.WALKS.map((w, i) => [`front walker ${i}`, w.g, 'person']), ...L.BACKWALKS.map((w, i) => [`back walker ${i} (${['2nd St R','2nd St L','Atlantic L 1','Essex R','Atlantic L 2'][i]})`, w.g, 'person'])];
     const all = movers.map(m => m[1]);
     const moving = new Set(); all.forEach(g => g.traverse(o => moving.add(o)));
@@ -41,11 +42,12 @@ const [HTML, OUT] = process.argv.slice(2);
       movers.forEach(([, g], i) => track[i].push([g.position.x, g.position.y, g.position.z, g.rotation.y, g.visible]));
       // closeness at this moment
       for (let i = 0; i < movers.length; i++) for (let j = i + 1; j < movers.length; j++){ const a = track[i][track[i].length - 1], b = track[j][track[j].length - 1];
+        if (!a[4] || !b[4]) continue;   // off the board, waiting for its next run
         const ka = movers[i][2], kb = movers[j][2], lim = ka === 'car' && kb === 'car' ? 0.7 : ka === kb ? 0.25 : 0.45, d = Math.hypot(a[0] - b[0], a[2] - b[2]);
         if (d < lim && Math.abs(a[1] - b[1]) < 1) note(movers[i][0] + ' + ' + movers[j][0], 'close', (a[0] + b[0])/2, (a[2] + b[2])/2, t, d.toFixed(2) + ' apart'); } }
     movers.forEach(([who, , kind], i) => { const tr = track[i];
       for (let s = 1; s < tr.length; s++){ const [x0, y0, z0] = tr[s-1], [x, y, z, ry] = tr[s], t = s*0.25, step = Math.hypot(x - x0, z - z0);
-        if (step > 3) continue;   // wrapped round to its start
+        if (step > 3 || !tr[s][4] || !tr[s-1][4]) continue;   // wrapped round to its start, or off the board
         // bump: along the step at body height, and for a car from its two sides
         if (step > 0.01){ const h = kind === 'car' ? 0.32 : 0.45, dir = new T.Vector3(x - x0, 0, z - z0).normalize(), side = new T.Vector3(dir.z, 0, -dir.x);
           for (const o of kind === 'car' ? [-0.22, 0, 0.22] : [0]){ ray.set(new T.Vector3(x0 + side.x*o, y0 + h, z0 + side.z*o), dir); ray.far = step + (kind === 'car' ? 0.5 : 0.15);
