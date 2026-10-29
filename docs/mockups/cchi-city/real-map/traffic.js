@@ -89,11 +89,11 @@ const TRAFFIC = (() => {
     secEB: route('2nd Street east', P.secondA),
     secWB: route('2nd Street west', P.secondB),
     // Atlantic south: stop at 2nd Street, stop at Prospect, right onto Prospect
-    atlSouth: route('Atlantic south', toWB(atlSBout, 0.9), { ctrl: [{ kind: 'stop', at: [-22.04, -53.5] }, { kind: 'stop', at: atlSBout[atlSBout.length - 1] }] }),
+    atlSouth: route('Atlantic south', toWB(atlSBout, 0.9), { ctrl: [{ kind: 'stop', at: [-22.04, -53.7] }, { kind: 'stop', at: atlSBout[atlSBout.length - 1] }] }),
     // Prospect east, left onto Atlantic north (across the west-bound lane), on past 2nd Street
-    atlNorthL: route('Atlantic north (left off Prospect)', turn(EB(XL, -38), atlNBin, 1.6), { yields: [{ at: [-38, ZE], zone: 9 }], ctrl: [{ kind: 'stop', at: [-20.77, -46.6] }] }),
+    atlNorthL: route('Atlantic north (left off Prospect)', turn(EB(XL, -38), atlNBin, 1.6), { yields: [{ at: [-38, ZE], zone: 9 }], ctrl: [{ kind: 'stop', at: [-20.77, -46.3], sign: false }] }),
     // Prospect west (through the light), right onto Atlantic north
-    atlNorthR: route('Atlantic north (right off Prospect)', turn(WB(XR, -33.6), atlNBin, 1.0), { ctrl: [{ ...SIGNAL_P, at: [35.9, ZW] }, { kind: 'stop', at: [-20.77, -46.6] }] }),
+    atlNorthR: route('Atlantic north (right off Prospect)', turn(WB(XR, -33.6), atlNBin, 1.0), { ctrl: [{ ...SIGNAL_P, at: [35.9, ZW] }, { kind: 'stop', at: [-20.77, -46.3], sign: false }] }),
     // Essex south to the light, right onto Prospect (right on red after a stop)
     essexSouth: route('Essex south', toWB(essSBout, 1.0), { ctrl: [{ kind: 'signal', light: 'E', rtor: true, at: essSBout[essSBout.length - 1] }] }),
     // Prospect west to the light, right onto Essex north
@@ -109,6 +109,7 @@ const TRAFFIC = (() => {
       { yields: [{ at: [-38, ZE], zone: 9 }, { at: [-23.6, -28.0], zone: 5 }], ctrl: [{ kind: 'dwell', dur: 12, at: [-18.25, -27.05] }, { kind: 'stop', at: atlSBout[atlSBout.length - 1] }] }),
   };
   const ROUTES = Object.values(R);
+  ROUTES.forEach(r => { r.grid = new Map(); r.P.forEach((p, j) => { const k = Math.floor(p[0]) + ',' + Math.floor(p[1]); if (!r.grid.has(k)) r.grid.set(k, []); r.grid.get(k).push(j); }); });
 
   // ---- who drives what: each vehicle runs its routes in turn, with a pause off the board between runs ----
   const LIVE_CAR = vehicle('car', 0x5b6170), MORE = [LIVE_CAR, vehicle('car', 0x8d5fa8), vehicle('car', 0xe0e4ea)];
@@ -125,7 +126,6 @@ const TRAFFIC = (() => {
 
   // ---- where routes meet: crossings and merges (two routes within a car's width, coming from different places) ----
   let CID = 0; const CONF = [];
-  ROUTES.forEach(r => { r.grid = new Map(); r.P.forEach((p, j) => { const k = Math.floor(p[0]) + ',' + Math.floor(p[1]); if (!r.grid.has(k)) r.grid.set(k, []); r.grid.get(k).push(j); }); });
   for (let a = 0; a < ROUTES.length; a++) for (let b = a + 1; b < ROUTES.length; b++){ const ra = ROUTES[a], rb = ROUTES[b];
     const near = []; ra.P.forEach((p, i) => { const gx = Math.floor(p[0]), gz = Math.floor(p[1]);
       for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) for (const j of rb.grid.get((gx + dx) + ',' + (gz + dz)) || []){ const q = rb.P[j]; if (Math.hypot(p[0] - q[0], p[1] - q[1]) < 0.75) near.push([i, j]); } });
@@ -142,14 +142,10 @@ const TRAFFIC = (() => {
   ROUTES.forEach(r => r.conf.sort((x, y) => x.s0 - y.s0));
   const minorAt = (r, s) => r.minor.some(([a, b]) => s >= a && s <= b);
 
-  // ---- people: where each walker's path crosses a route ----
-  const WK = [...WALKS.map((w, i) => ({ w, off: w.off != null ? w.off : i*5000 })), ...BACKWALKS.map((w, i) => ({ w, off: w.off != null ? w.off : i*7000 }))];
-  const wAt = (k, t) => { const u = (((t*1000 + k.off) % k.w.dur) + k.w.dur) % k.w.dur / k.w.dur, p = along(k.w.pts, u); return [p[0], p[2]]; };
-  for (const r of ROUTES) WK.forEach((k, wi) => { const W = k.w.pts;
-    for (let j = 1; j < W.length; j++){ const a = [W[j-1][0], W[j-1][2]], b = [W[j][0], W[j][2]];
-      for (let i = 1; i < r.P.length; i++){ const p = r.P[i-1], q = r.P[i], d1x = b[0] - a[0], d1z = b[1] - a[1], d2x = q[0] - p[0], d2z = q[1] - p[1], den = d1x*d2z - d1z*d2x;
-        if (Math.abs(den) < 1e-9) continue; const u = ((p[0] - a[0])*d2z - (p[1] - a[1])*d2x)/den, v = ((p[0] - a[0])*d1z - (p[1] - a[1])*d1x)/den;
-        if (u >= 0 && u <= 1 && v >= 0 && v <= 1) r.peds.push({ s: (i - 1 + v)*STEP, x: a[0] + d1x*u, z: a[1] + d1z*u, wi }); } } });
+  // ---- people (people.js): where their walks cross each route, for the cars to look out for them ----
+  ROUTES.forEach(r => { r.STEP = STEP; });
+  const PEOPLE = makePeople();
+  for (const h of PEOPLE.crossWith(ROUTES)){ const r = h.car; if (!r.peds.some(q => Math.abs(q.s - h.cs) < 0.3)) r.peds.push({ s: h.cs, x: h.x, z: h.z }); }
   ROUTES.forEach(r => r.peds.sort((x, y) => x.s - y.s));
 
   // ---- the light at Prospect and Essex: Prospect green 16 s, amber 3, all red 1, Essex green 8, amber 2, all red 1 ----
@@ -188,7 +184,7 @@ const TRAFFIC = (() => {
     c.r = r; c.s = 0; c.v = Math.min(r.v0, 2.2); c.ci = 0; c.done.clear(); c.wait = 0; c.on = true; place(c); }
   function finish(c, t){ c.on = false; c.held.forEach(k => { if (k.holder === c) k.holder = null; }); c.held.clear(); c.next = t + c.gaps[c.gi++ % c.gaps.length]; c.ri++; }
   function step(t, dt){
-    const W = WK.map(k => { const p = wAt(k, t), q = wAt(k, t + 0.5); return { x: p[0], z: p[1], vx: (q[0] - p[0])*2, vz: (q[1] - p[1])*2 }; });
+    PEOPLE.step(t, dt, V); const W = PEOPLE.now();
     for (const c of V) if (!c.on && t >= c.next) start(c, t);
     const on = active();
     for (const c of on){ const r = c.r, front = c.s + c.len/2; let gap = 1e9, vl = 0, v0 = r.v0;
@@ -201,7 +197,7 @@ const TRAFFIC = (() => {
         for (let s = c.s + 0.3; s < Math.min(r.L, c.s + LOOK); s += STEP){ const p = r.P[Math.round(s/STEP)], d = Math.hypot(p[0] - o.x, p[1] - o.z);
           if (d < (dh < 1.3 ? 0.62 : 0.55 + o.len/2)){ const g = s - c.s - c.len/2 - (dh < 1.3 ? o.len/2 : o.wid/2); if (g - S0 + 0.12 < gap){ gap = g - S0 + 0.12; vl = dh < 1.3 ? o.v*Math.cos(dh) : 0; } break; } } }
       // controls: stop signs, the light, the drop-off
-      for (const k of r.ctrl){ if (c.done.has(k) || k.s < c.s - 0.5) continue; const dist = k.s - front;
+      for (const k of r.ctrl){ if (c.done.has(k) || k.s < c.s - 0.5) continue; const ks = k.kind === 'dwell' ? k.s + c.len/2 : k.s, dist = ks - front;
         if (dist > LOOK) break;
         if (k.kind === 'signal'){ const st = light(k.light, t);
           if (st === 'g' || (st === 'y' && dist < c.v*c.v/(2*B) + 0.1)){ if (dist < 0.3 || st === 'y') c.done.add(k); continue; }
@@ -209,7 +205,7 @@ const TRAFFIC = (() => {
           block(k.s); continue; }
         // stop and dwell: up to the line, a full stop, then on
         if (dist < 0.4 && c.v < 0.05){ c.wait += dt; if (c.wait > (k.kind === 'dwell' ? k.dur : 0.9)){ c.done.add(k); c.wait = 0; continue; } }
-        block(k.s); }
+        block(ks); }
       // crossings and merges: free, and (from a stop sign, or across traffic) a gap in the other stream
       const want = [];
       for (const m of r.conf){ if (m.s1 + c.len/2 + 0.4 < c.s){ if (m.c.holder === c){ m.c.holder = null; c.held.delete(m.c); } continue; }
@@ -225,8 +221,8 @@ const TRAFFIC = (() => {
       else { const m = want.find(m => m.c.holder !== c && m.s0 >= front - 0.05); if (m) block(m.s0, 0, 0.3); }
       // people on, or about to step onto, its path
       for (const pd of r.peds){ const dist = pd.s - front; if (pd.s < c.s - c.len/2) continue; if (dist > LOOK) break; if (dist < -0.1) continue;
-        const w = W[pd.wi], dx = pd.x - w.x, dz = pd.z - w.z, d = Math.hypot(dx, dz), toward = dx*w.vx + dz*w.vz > 0;
-        if (d < 0.75 || (toward && d < 0.75 + Math.hypot(w.vx, w.vz)*1.8)){ if (dist > 0.05 || c.v > 0.3) block(pd.s - 0.45, 0, 0.12); } }
+        for (const w of W){ const dx = pd.x - w.x, dz = pd.z - w.z; if (Math.abs(dx) > 3 || Math.abs(dz) > 3) continue; const d = Math.hypot(dx, dz), toward = dx*w.vx + dz*w.vz > 0;
+          if (d < 0.75 || (toward && d < 0.75 + Math.hypot(w.vx, w.vz)*1.8)){ if (dist > 0.05 || c.v > 0.3) block(pd.s - 0.45, 0, 0.12); break; } } }
       // the Intelligent Driver Model
       const ss = S0 + Math.max(0, c.v*HW + c.v*(c.v - vl)/(2*Math.sqrt(A*B)));
       let acc = A*(1 - Math.pow(c.v/Math.max(v0, 0.05), 4) - (gap < 1e8 ? Math.pow(ss/Math.max(gap + S0, 0.02), 2) : 0));
@@ -235,11 +231,11 @@ const TRAFFIC = (() => {
       if (c.s >= c.r.L) finish(c, t); else place(c); } }
   function draw(){ for (const c of V){ if (!c.on){ c.g.visible = false; c.g.position.set(c.i*5, -50, 0); continue; } c.g.visible = true; c.g.position.set(c.x, 0.2, c.z); c.g.rotation.y = c.h; } }
   function run(t){ let fresh = false;
-    if (T === null || t < T - 1e-6){ V.forEach(c => { c.on = false; c.held.clear(); c.next = c.i*1.1 + t - 45; c.ri = c.gi = 0; }); CONF.forEach(k => { k.holder = null; }); T = t - 45; fresh = true; }
+    if (T === null || t < T - 1e-6){ V.forEach(c => { c.on = false; c.held.clear(); c.next = c.i*1.1 + t - 45; c.ri = c.gi = 0; }); CONF.forEach(k => { k.holder = null; }); PEOPLE.reset(t - 45); T = t - 45; fresh = true; }
     let left = t - T; if (left > 3 && !fresh){ T = t - DT; left = DT; }   // a hidden page or a long pause: carry on from here
     while (left > 1e-6){ const d = Math.min(DT, left); T += d; left -= d; step(T, d); }
-    showLights(t); draw();
+    showLights(t); draw(); PEOPLE.draw();
     if ((t*2|0) !== AMB.userData.f){ AMB.userData.f = t*2|0; ambLights(AMB.userData.f % 2); } }
-  return { run, R, V, CONF, light, MORE };
+  return { run, R, V, CONF, light, MORE, PEOPLE };
 })();
 const traffic = t => TRAFFIC.run(t);

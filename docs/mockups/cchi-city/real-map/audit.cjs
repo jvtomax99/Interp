@@ -17,7 +17,7 @@ const [HTML, OUT] = process.argv.slice(2);
     const T = window.__T, L = window.__L, scene = L.scene;
     const movers = [['car in (drive)', L.CAR_IN, 'car'], ['car out (drive)', L.CAR_OUT, 'car'], ['car in 2 (drive)', L.CAR_IN2, 'car'], ['ambulance (3D)', L.AMB, 'car'],
       ...L.STREET.map((o, i) => [`Prospect car ${i}`, o.g, 'car']), ...L.BACKCARS.map((o, i) => [`back car ${i} (${['2nd St A','2nd St B','Atlantic B','Essex A','Essex B'][i]})`, o.g, 'car']),
-      ...L.TRAFFIC.MORE.map((g, i) => [`traffic car ${i}`, g, 'car']),
+      ...L.TRAFFIC.MORE.map((g, i) => [`traffic car ${i}`, g, 'car']), ...L.TRAFFIC.PEOPLE.EXTRA.map((g, i) => [`walker ${i} (new)`, g, 'person']),
       ...L.WALKS.map((w, i) => [`front walker ${i}`, w.g, 'person']), ...L.BACKWALKS.map((w, i) => [`back walker ${i} (${['2nd St R','2nd St L','Atlantic L 1','Essex R','Atlantic L 2'][i]})`, w.g, 'person'])];
     const all = movers.map(m => m[1]);
     const moving = new Set(); all.forEach(g => g.traverse(o => moving.add(o)));
@@ -33,6 +33,8 @@ const [HTML, OUT] = process.argv.slice(2);
     // buildings: outlines from scene.json; a drive-through's ground outline is open
     const inPoly = (pts, x, z) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++){ const [xi, zi] = pts[i], [xj, zj] = pts[j]; if ((zi > z) !== (zj > z) && x < (xj - xi)*(z - zi)/(zj - zi) + xi) c = !c; } return c; };
     const blds = L.SCN.blds.map(b => ({ name: b.name || b.id, pts: b.pts, open: (b.under && (b.under.ground || b.under.open)) || null }));
+    // the drive-through under Link Pavilion (back.js, Jose's photos): open ground under the floors above, its sidewalks and crosswalk to the lobby's door
+    blds.filter(b => /Link/.test(b.name)).forEach(b => { b.open = [[-2.3, -6.0], [4.5, -6.0], [4.5, -11.02], [-2.3, -11.02]]; });
     const inside = (x, z) => { for (const b of blds) if (inPoly(b.pts, x, z) && !(b.open && inPoly(b.open, x, z))) return b.name; return null; };
     const nearest = (x, z) => { let best = null, bd = 1e9; for (const b of blds){ const cx = b.pts.reduce((a, p) => a + p[0], 0)/b.pts.length, cz = b.pts.reduce((a, p) => a + p[1], 0)/b.pts.length, d = Math.hypot(cx - x, cz - z); if (d < bd){ bd = d; best = b.name; } } return best; };
     const issues = []; const note = (who, kind, x, z, t, what) => issues.push({ who, kind, x: +x.toFixed(2), z: +z.toFixed(2), t: +t.toFixed(2), what, near: nearest(x, z) });
