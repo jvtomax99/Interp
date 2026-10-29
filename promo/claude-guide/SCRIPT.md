@@ -1,6 +1,6 @@
 # Build apps with Claude: the script
 
-Draft 1, 2026-10-29. Waiting for Jose's OK; no voice is made until then. Facts behind every line
+Draft 2, 2026-10-29, approved by Jose (his change: "works at Hackensack", no job title). Voice: Puck, warm (`tools/voice.py`). Facts behind every line
 about Claude: `BRIEF.md`, "Checked facts". Says = the narrator, word for word (and the caption).
 Shows = the picture. Pace: about 140 words a minute, so each chapter runs about 75-90 s.
 
@@ -10,8 +10,8 @@ Shows = the picture. Pace: about 140 words a minute, so each chapter runs about 
 
 1. **Says:** Hi! I'm Dr. Smiley. I live inside an app called Interpreter Hub.
    **Shows:** Dr. Smiley pops up from the bottom, waves. The app icon bounces in beside him.
-2. **Says:** My friend Jose made it. He's a medical interpreter, not a programmer. He didn't write
-   the code. Claude did.
+2. **Says:** My friend Jose made it. He works at Hackensack, and he's not a programmer. He didn't
+   write the code. Claude did.
    **Shows:** A phone with the Hub's Home screen slides in. A little "written by Claude" tag
    flips over the code.
 3. **Says:** Here's the trick. Think of Claude as a junior developer: a fast, eager helper who

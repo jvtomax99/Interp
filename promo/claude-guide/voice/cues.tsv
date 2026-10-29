@@ -1,0 +1,41 @@
+chapter	line	start	end	caption
+1	1	0.500	4.724	Hi! I'm Dr. Smiley. I live inside an app called Interpreter Hub.
+1	2	5.144	11.757	My friend Jose made it. He works at Hackensack, and he's not a programmer. He didn't write the code. Claude did.
+1	3	12.177	18.812	Here's the trick. Think of Claude as a junior developer: a fast, eager helper who builds whatever you describe.
+1	4	19.232	22.219	You're the boss. You bring the idea. Claude does the typing.
+1	5	22.639	29.423	Step one. Before any code, ask Claude for a short plan: what the app does, who it's for, and what it will NOT do yet.
+1	6	29.843	34.963	That last part matters. Without it, your helper keeps adding things, and nothing gets finished.
+1	7	35.383	37.985	Step two. Ask for one small thing at a time.
+1	8	38.405	44.656	Step three. Check its work. Ask Claude to test it and show you a screenshot. Don't just take its word for it.
+1	9	45.076	49.065	Step four. Tell it what's wrong in plain words: where you tapped, and what happened.
+1	10	49.485	56.547	Then do it again. Plan, build, check, fix. That's how a glossary, a quiz and a 3D body ended up in one app.
+1	11	56.967	62.364	Try it today: tell Claude your app idea, and ask it to interview you until it can write the plan.
+2	1	0.500	4.404	If you keep telling Claude the same thing in every chat, there's a better way.
+2	2	4.824	10.733	Put it in your profile. Claude applies your profile instructions to every conversation you have with it.
+2	3	11.153	16.316	On claude.ai, tap your initials, then Settings, then Your Claude, then Instructions.
+2	4	16.736	22.219	Write it like you'd brief a new coworker. Who you are, what you're working on, and how you want answers.
+2	5	22.639	32.409	Here's what Jose wrote. Use plain words, I'm new to this. When there are choices, give me buttons, and tell me your pick. Challenge me. Tell me when my idea is weak.
+2	6	32.829	38.845	That last one is the most useful. A helper that always says yes will happily build a bad idea.
+2	7	39.265	43.255	Short and clear works best. A few good lines beat a long essay.
+2	8	43.675	47.707	Try it today: write five lines about how you want Claude to talk to you.
+3	1	0.500	4.660	Your profile is about you. CLAUDE.md is about your project.
+3	2	5.080	11.544	To build apps, people use Claude Code, the version of Claude that can open your project's files and change them.
+3	3	11.964	19.409	CLAUDE.md is a plain text file that lives in your project. Claude Code reads it at the start of every session.
+3	4	19.829	26.763	Think of the note you leave a babysitter. Bedtime is at eight. No candy. Don't open the back door, the dog gets out.
+3	5	27.183	33.113	For an app, it says what the app is, where everything lives, the rules, and the mistakes never to repeat.
+3	6	33.533	44.349	Here's the Hub's. A map of every file. A rule: never change the version number by hand, a robot does that. And a lesson learned the hard way: hover effects don't work on phones.
+3	7	44.769	51.212	When Claude gets something wrong and you work out why, the lesson goes in the file. The next chat already knows it.
+3	8	51.632	59.205	To start one, type slash init. Claude looks at your project and writes a first draft. Then you add what it can't see on its own.
+3	9	59.625	66.217	Keep it short. Anthropic suggests under two hundred lines. Ours grew much longer. Don't copy that part.
+3	10	66.637	71.821	Try it today: open your project in Claude Code, type slash init, and read what it wrote.
+4	1	0.500	1.737	Last one: the handoff.
+4	2	2.157	8.813	A chat with Claude has a working memory, called its context. It's measured in tokens: little pieces of words.
+4	3	9.233	13.479	Everything in the chat goes in. What you said, what Claude read, what it wrote.
+4	4	13.899	21.280	Every time you send a message, Claude re-reads the whole chat. So a long chat costs more, and its focus gets fuzzier.
+4	5	21.700	28.356	When it gets really full, Claude squeezes the old part into a summary. Anything the summary left out is gone.
+4	6	28.776	34.515	So don't wait for that. When a chat gets heavy, or a job is done, ask Claude to write a handoff.
+4	7	34.935	41.527	It's one page. What you're working on, where it stands, what's next, and the exact message to paste into a new chat.
+4	8	41.947	50.245	Open a new chat and paste it. The new chat reads your note and your CLAUDE.md, and picks up where you left off, with a clean memory.
+4	9	50.665	60.329	One more tip. If you've corrected Claude twice and it's still wrong, start fresh with one better message. Anthropic says that works better almost every time.
+4	10	60.749	65.933	Try it today: at the end of your next long chat, ask Claude to write a handoff for a new chat.
+4	11	66.353	72.668	A profile for you. A rulebook for your project. A handoff for every fresh start. Now go build something.
