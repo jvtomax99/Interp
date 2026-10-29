@@ -371,16 +371,16 @@ phone, even if he seems to be watching the chat.
 Treat the AI as a junior developer he manages, not a genie. These hold on
 every request, for every tool:
 
-**Read it back first, every request.** Before building anything, even a
-small fix, say his ask back in 2-3 plain lines (what changes, what it is
-for, what it leaves alone) and wait for his OK. If something is unclear,
-the one clarifying question goes in the same message. If the read-back is
-wrong, the code would have been too. This takes in the "Ambiguous
-request" rule above: its one question rides in the read-back. A phase
-Jose already picked in `docs/PLAN.md` counts as approved; a new chat's
-opening "2-3 lines of what it will do" (`docs/PLAN.md`) is its read-back.
-Fixing your own open change's failing checks or a reviewer's small note
-needs no read-back.
+**Read it back first, for a new feature.** Before building a new feature
+or a big change, say his ask back in 2-3 plain lines (what changes, what
+it is for, what it leaves alone) and wait for his OK. If something is
+unclear, the one clarifying question goes in the same message. If the
+read-back is wrong, the code would have been too. Small fixes, wording
+and look tweaks get no read-back: just do them (the "Ambiguous request"
+rule above still applies). A phase Jose already picked in `docs/PLAN.md`
+counts as approved; a new chat's opening "2-3 lines of what it will do"
+(`docs/PLAN.md`) is its read-back (Jose, 2026-10-29: new features only,
+not every request).
 
 **Spec before code for a new feature.** Write its note in
 `docs/features/` first: what it does, who it is for, and what it does
