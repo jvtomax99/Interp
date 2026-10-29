@@ -186,6 +186,10 @@ function drBodyArt(cls, root){
   // from the feet. Each a wrapper of its own, so the rig's transform attributes stay its.
   const idle = (k, at) => `<g class="db-idle db-idle-${k}" style="transform-origin:${at[0]}px ${at[1]}px">`;
   const head = `<g class="db-head">${idle('head', B.neck)}<g transform="translate(${hx},${hy}) scale(${s})">`
+    // the jaw's shadow behind the head (2026-10-29): the head piece's neck block is 150 px wide under a jaw 212 px wide, so
+    // when the head tilts (the rig's own drift, a filmed move) a notch of background opened between the jaw's underside and
+    // the collar; this oval, in the shadow's own colour, shows only there (the head covers it above, the coat below)
+    + `<ellipse class="db-neck" cx="240" cy="460" rx="100" ry="30" fill="#4c2e32"/>`
     + `<image class="db-skull" href="${root}body/head.webp" x="0" y="0" width="${gw}" height="${gh}"/>`
     + `<svg class="ds-face" x="80" y="212" width="302" height="222" viewBox="0 0 ${DR_BODY_FACE_W} ${DR_BODY_FACE_H}" preserveAspectRatio="none">`
     + `<image class="ds-sheet" href="${root}face.webp" x="0" y="0" width="${DR_BODY_FACE_W * DR_BODY_FACES.length}" height="${DR_BODY_FACE_H}" preserveAspectRatio="none"/></svg>`

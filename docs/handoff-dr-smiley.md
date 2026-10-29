@@ -94,7 +94,9 @@ the fingers touching his chin in the think had been cut away with the
 film's head (the stump plus the collar fill read as a blob under his
 chin), because his head was 10% smaller than the film's; `DR_BODY.head`
 and `rig.json` now scale it 1.10 about the chin (scale 1.1969, at 280.9,
-23.8; the picture's numbers kept beside). Still open (not measured as
+23.8; the picture's numbers kept beside). Then the notch under the jaw's sides when the head tilts: an oval in the
+jaw's shadow colour behind the head image (`.db-neck`), measured closed.
+Still open (not measured as
 faults): the cheer's rest head is 3.7 px right of the rig's (`FIT`), a
 small shift at its cut; the clip's head turns a little (yaw) and his
 cannot. To redo a clip:

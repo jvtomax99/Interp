@@ -777,8 +777,16 @@ under the cut (collar, lapel, neck band) at the frame's own alpha, the
 feather included (a half-clear seam along the lapel showed through
 too); wider, the lapel stood up as a white tab beside his cheek. After:
 what the window still counts is background beside his jaw, outside him.
-The rig's own rest keeps a small dark gap at the left of his collar
-(the cutout pieces, older than this).
+The rig's own notch is closed too (same day): the head piece's neck
+block is 150 px wide under a jaw 212 px wide, so when the head tilted
+(the rig's drift, a filmed move) a notch of background opened between
+the jaw's underside and the collar; `drBodyArt` draws an oval in the
+jaw's shadow colour (`.db-neck`, `#4c2e32`, 200 by 60 on the head's
+grid, centred under the chin) behind the head image, which shows only in
+that notch (the head covers it above, the coat below; in a clip it sits
+over the collar fill, where the film's own jaw shadow was). Measured on
+the flat banner through the wince: no notch in the tilt frames; what the
+neck window still counts is background beside the jaw, outside him.
 `smiley-body-app.cjs` checks every track: one entry per frame, both
 ends at the clip's rest, no tilt step over 3 degrees, and the centre's
 step a frame within the clip's budget (3 px for the wave, 3.5 the think,
