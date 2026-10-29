@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v309-b1029.1847';
+const CACHE_VERSION = 'interpreter-hub-v310-b1029.1926';
 const PRECACHE = [
   './',
   './index.html',
@@ -58,6 +58,7 @@ const PRECACHE = [
   './guide/topics.js',
   './practice/questions.js',
   './falsefriends/list.js',
+  './soundalikes/list.js',
   './features/translate.js',
   './features/3d-body.js',
   './features/term-lookup.js',
@@ -66,6 +67,7 @@ const PRECACHE = [
   './features/smiley-engine.js',
   './features/campus.js',
   './features/false-friends.js',
+  './features/sound-alikes.js',
   './features/knowledge-brain.js',
   './features/guide-front.js',
   './features/doctor-sheets.js',
@@ -234,7 +236,7 @@ self.addEventListener('fetch', event => {
    * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|soundalikes\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {

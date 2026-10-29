@@ -294,6 +294,16 @@ come from this alone.
 
 ## Done
 
+- 2026-10-29 Sound-Alikes, first version (Jose approved the plan in the
+  chat "Nesting feature application"): `soundalikes/list.js` (45 sets),
+  `features/sound-alikes.js` (Study with a speaker on every word, Drill
+  heard not read), tile, Home rail, global search, guide answer and New
+  lately card, `tests/suites/sound-alikes.cjs`. Waiting on Jose to check
+  the Spanish (`esChecked`). Spec: `docs/features/sound-alikes.md`.
+  Then dressed like CoreCHI Practice (Jose: "make it similar to the cchi
+  section", look only, no progress kept): the blue card with Drill by ear /
+  Study the list, the groups as its domain rows with List and Practise, its
+  quiz header and Exit.
 - 2026-10-26 `api/term-check.js` uses `_routine.js`'s `clip` (same trim and
   600-character cut); its own copy and `MAX_FIELD` are gone.
 - 2026-10-26 The campus, alive (Jose: "how can we make it more alive";

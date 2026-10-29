@@ -91,6 +91,8 @@ So:
 | CoreCHI practice questions (`SEED_QUESTIONS`, `CCHI_DOMAINS`) | `practice/questions.js` |
 | False Friends list (`FALSE_FRIENDS`) | `falsefriends/list.js` |
 | The False Friends screen (`renderFalseFriends`, Study and Drill, search, the risk filter) | `features/false-friends.js` |
+| Sound-Alikes list (`SOUND_ALIKES`) | `soundalikes/list.js` |
+| The Sound-Alikes screen (`renderSoundAlikes`, Study and Drill, `saSpeak`) | `features/sound-alikes.js`; `docs/features/sound-alikes.md` |
 | The Translate tool's code (`renderTranslate`, `runTranslate`…) | `features/translate.js` |
 | The 3D Body's Hub side (`anatomySync`, the `ATLAS` bridge, `atlasOnMessage`) | `features/3d-body.js` (the wall rules above still apply) |
 | Looking a term up (`openTermLookup`, its trusted sources and caches) | `features/term-lookup.js` |

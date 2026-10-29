@@ -31,6 +31,7 @@ const SUITES = [
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],
+  ['sound-alikes.cjs',    'Sound-Alikes: Home and tile, a speaker on every word, es-US voice, search, the drill heard not read, the lure counted'],
   ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
   ['memory-trainer.cjs',  'Memory trainer: way in, a round with the words hidden, chunks, longer/shorter, notes, flags, leaving'],
   ['pin-burst.cjs',       'Pin burst: plays on a tap, stops when a scroll takes the touch'],
