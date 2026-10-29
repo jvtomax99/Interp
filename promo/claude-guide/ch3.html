@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Chapter 3: CLAUDE.md, the project's rulebook</title>
+<link rel="stylesheet" href="kit/kit.css">
+<style>
+  .big{padding:40px 44px;font-size:50px;font-weight:700;text-align:center;line-height:1.15}
+  .big small{display:block;font-size:36px;font-weight:600;margin-top:10px}
+  #about{left:80px;top:420px;width:400px;transform:rotate(-4deg)}
+  #proj{left:560px;top:400px;width:440px;background:var(--sky);border-radius:30px;border:7px solid var(--ink);box-shadow:0 12px 0 var(--ink)}
+  #cc{left:110px;top:300px;width:860px;height:640px;border-radius:44px;background:#2B2A4C;border:7px solid var(--ink);box-shadow:0 14px 0 #14132a;color:#FFF6E9;padding:40px 46px}
+  #cc h3{font-size:46px;font-weight:700;margin-bottom:26px}
+  #cc h3 span{color:var(--gold)}
+  .file{position:absolute;padding:20px 26px;border-radius:20px;background:#fff;color:var(--ink);font:700 34px ui-monospace,Menlo,monospace;border:5px solid var(--ink)}
+  #pencil{left:640px;top:600px;font-size:110px;color:var(--gold)}
+  #folder{left:300px;top:640px;width:480px;height:360px}
+  #page{left:360px;top:300px;width:360px;padding:34px;background:#fff;border-radius:10px;border:6px solid var(--ink)}
+  #page b{display:block;font-size:42px;margin-bottom:14px}
+  #page i{display:block;height:16px;border-radius:8px;background:#E3E6F0;margin:14px 0}
+  .sess{width:270px;height:200px;border-radius:30px;padding:26px}
+  .sess i{display:block;height:16px;border-radius:8px;background:#E3E6F0;margin:16px 0}
+  .sess .pg{position:absolute;right:-24px;top:-34px;width:96px;height:116px;background:#fff;border:5px solid var(--ink);border-radius:6px}
+  #fridge{left:150px;top:230px;width:780px;height:1000px;border-radius:40px;background:#E8F4FB;border:10px solid var(--ink)}
+  #fridge .door{position:absolute;left:0;right:0;top:330px;height:10px;background:var(--ink)}
+  #fridge .h1{position:absolute;left:45px;top:120px;width:24px;height:150px;border-radius:12px;background:var(--ink)}
+  #fridge .h2{position:absolute;left:45px;top:420px;width:24px;height:200px;border-radius:12px;background:var(--ink)}
+  #fnote{left:300px;top:330px;width:560px;padding:40px 44px 50px;background:#fff;border-radius:8px;transform:rotate(-3deg)}
+  #fnote h4{font-size:46px;font-weight:700;margin-bottom:10px}
+  .fl{display:flex;align-items:center;gap:22px;font-size:42px;font-weight:600;margin:20px 0}
+  .fl svg{flex:none}
+  #magnet{left:540px;top:300px;width:90px;height:90px;border-radius:50%;background:#FF6B8B;border:7px solid var(--ink);box-shadow:0 8px 0 var(--ink)}
+  #puppy{left:850px;top:860px}
+  #rules{left:110px;top:300px;width:860px;padding:46px 50px 56px}
+  #rules h3{font-size:58px;font-weight:700;margin-bottom:16px}
+  .tab{display:flex;gap:24px;align-items:center;margin:22px 0;font-size:42px;font-weight:600}
+  .tab span{flex:none;width:200px;text-align:center;padding:10px 0;border-radius:999px;font-size:36px;font-weight:700;border:5px solid var(--ink)}
+  #md{left:60px;top:280px;width:960px;height:700px;overflow:hidden;padding:0}
+  #mdin{padding:40px 44px;font:500 27px/1.55 ui-monospace,Menlo,monospace;color:#3b3a5c;white-space:pre-wrap}
+  #mdin .hh{font-weight:800;color:var(--ink)}
+  #mdin .hl{background:linear-gradient(#FFB3C7,#FFB3C7) no-repeat 0 0/0% 100%;color:var(--ink);font-weight:700}
+  #mdin .gap{display:block;text-align:center;color:#b9b6cf;margin:26px 0}
+  #mdtitle{left:330px;top:215px;padding:12px 32px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:36px;font-weight:700}
+  #newline{left:90px;top:860px;width:900px;padding:34px 40px;font-size:42px;font-weight:600;background:var(--lemon);border-radius:10px;border:6px solid var(--ink)}
+  #nlin{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom}
+  #dr2{left:600px;top:470px}
+  #cmd{left:110px;top:300px;width:860px;padding:34px 40px;border-radius:30px;background:#2B2A4C;color:#FFF6E9;font:700 56px ui-monospace,Menlo,monospace;border:7px solid var(--ink)}
+  #cmd span{color:var(--gold)}
+  #typed{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom}
+  #draft{left:250px;top:450px;width:580px;padding:40px 44px;background:#fff;border:6px solid var(--ink);border-radius:10px;transform-origin:50% 0}
+  #draft b{display:block;font-size:44px;margin-bottom:12px}
+  #draft i{display:block;height:16px;border-radius:8px;background:#E3E6F0;margin:14px 0}
+  #draft .pen{background:var(--hot)}
+  #ruler{left:60px;top:250px;width:120px;height:1180px;background:var(--gold);border:6px solid var(--ink);border-radius:16px;
+    background-image:repeating-linear-gradient(#2B2A4C 0 4px,transparent 4px 59px);background-size:40px 100%;background-repeat:no-repeat}
+  #mark{left:40px;top:560px;width:620px;height:0;border-top:8px dashed var(--red)}
+  #marklbl{left:200px;top:490px;font-size:44px;font-weight:700;color:var(--red)}
+  #strip{left:420px;top:250px;width:420px;height:1700px;background:#fff;border:6px solid var(--ink);border-radius:10px;transform-origin:50% 0;padding:30px}
+  #strip i{display:block;height:14px;border-radius:7px;background:#E3E6F0;margin:16px 0}
+  #striplbl{left:470px;top:1180px;padding:14px 30px;border-radius:999px;background:var(--pink);border:5px solid var(--ink);font-size:42px;font-weight:700}
+  #try{left:90px;top:300px;width:900px;padding:50px 54px}
+  #try h2{font-size:64px;font-weight:700;margin-bottom:22px}
+  #try p{font-size:54px;line-height:1.25;font-weight:600}
+  #try code{font:700 50px ui-monospace,Menlo,monospace;background:#2B2A4C;color:var(--gold);padding:4px 16px;border-radius:12px}
+  .spark{font-size:70px;color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="72.8" data-width="1080" data-height="1920">
+  <div class="bg"></div>
+  <div class="a tag" id="tag"><b>3</b> · CLAUDE.md, the project's rulebook</div>
+
+  <!-- 1: about you / about your project -->
+  <div class="a note big st" id="about">Profile<small>about you</small></div>
+  <div class="a big" id="proj">CLAUDE.md<small>about your project</small></div>
+  <!-- 2: Claude Code opens your files and changes them -->
+  <div class="a" id="cc"><h3><span>✦</span> Claude Code</h3>
+    <div class="file" id="f1" style="left:60px;top:150px">index.html</div>
+    <div class="file" id="f2" style="left:420px;top:250px">app.css</div>
+    <div class="file" id="f3" style="left:120px;top:380px">guide.js</div>
+    <div class="file" id="f4" style="left:470px;top:470px">pins/</div></div>
+  <div class="a" id="pencil">✎</div>
+  <!-- 3: a plain text file in your project, read at every start -->
+  <svg class="a" id="folder" viewBox="0 0 480 360"><path d="M20 70 q0 -30 30 -30 h120 l40 40 h220 q30 0 30 30 v200 q0 30 -30 30 h-380 q-30 0 -30 -30z" fill="#FFC94D" stroke="#2B2A4C" stroke-width="10" stroke-linejoin="round"/>
+    <text x="240" y="230" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="46" fill="#2B2A4C">your project</text></svg>
+  <div class="a" id="page"><b>CLAUDE.md</b><i style="width:90%"></i><i></i><i style="width:70%"></i><i style="width:85%"></i></div>
+  <div id="sessions"></div>
+  <!-- 4: the babysitter's note -->
+  <div class="a" id="fridge"><div class="door"></div><div class="h1"></div><div class="h2"></div></div>
+  <div class="a st" id="fnote"><h4>For the babysitter</h4>
+    <div class="fl" id="fl1"><svg width="70" height="70" viewBox="0 0 70 70"><path d="M46 8 a28 28 0 1 0 16 44 a22 22 0 1 1 -16 -44z" fill="#FFE066" stroke="#2B2A4C" stroke-width="6"/></svg>Bedtime is at 8</div>
+    <div class="fl" id="fl2"><svg width="70" height="70" viewBox="0 0 70 70"><g stroke="#2B2A4C" stroke-width="6" stroke-linejoin="round"><path d="M20 35 l-12 -10 v20z M50 35 l12 -10 v20z" fill="#FFC6D9"/><ellipse cx="35" cy="35" rx="17" ry="13" fill="#FF8FA8"/></g><path d="M10 60 L60 10" stroke="#D6334F" stroke-width="8" stroke-linecap="round"/></svg>No candy</div>
+    <div class="fl" id="fl3"><svg width="70" height="70" viewBox="0 0 70 70"><rect x="14" y="6" width="42" height="60" rx="6" fill="#C8ECFF" stroke="#2B2A4C" stroke-width="6"/><circle cx="46" cy="38" r="4" fill="#2B2A4C"/></svg>Keep the back door shut</div></div>
+  <div class="a" id="magnet"></div>
+  <svg class="a st" id="puppy" width="210" height="190" viewBox="0 0 210 190"><g stroke="#2B2A4C" stroke-width="7" stroke-linejoin="round">
+    <path d="M40 60 q-30 10 -24 70 q20 6 34 -30z" fill="#B07A4F"/><path d="M170 60 q30 10 24 70 q-20 6 -34 -30z" fill="#B07A4F"/>
+    <ellipse cx="105" cy="105" rx="72" ry="66" fill="#E8B98A"/><ellipse cx="105" cy="138" rx="34" ry="24" fill="#FFF0DE"/></g>
+    <circle cx="78" cy="96" r="9" fill="#2B2A4C"/><circle cx="132" cy="96" r="9" fill="#2B2A4C"/><ellipse cx="105" cy="126" rx="12" ry="9" fill="#2B2A4C"/>
+    <path d="M105 136 v10 M92 150 q13 10 26 0" stroke="#2B2A4C" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M98 156 q7 18 14 0" fill="#FF6B8B" stroke="#2B2A4C" stroke-width="4"/></svg>
+  <!-- 5: what goes in it -->
+  <div class="a card" id="rules"><h3>CLAUDE.md</h3>
+    <div class="tab" id="t1"><span style="background:var(--sky)">About</span>What the app is</div>
+    <div class="tab" id="t2"><span style="background:var(--mint)">Map</span>Where everything lives</div>
+    <div class="tab" id="t3"><span style="background:var(--pink)">Rules</span>Do this, never that</div>
+    <div class="tab" id="t4"><span style="background:var(--lemon)">Lessons</span>Mistakes not to repeat</div></div>
+  <!-- 6: the Hub's real one (excerpts of CLAUDE.md, word for word) -->
+  <div class="a" id="mdtitle">The Hub's CLAUDE.md</div>
+  <div class="a card" id="md"><div id="mdin"><span class="hh">## File map</span>
+
+| File | Lines | What |
+<span class="hl" id="h1">| `index.html` | 22,252 | The whole app's markup and JS</span>
+| `app.css` | 7,325 | The app's stylesheet
+| `home-polish.css` | 1,456 | Overlay layer
+| `home-polish.js` | 1,972 | Home behaviour: hello wave
+| `pin-icons.js` | 987 | Pin/icon wiring
+<span class="gap">· · ·</span><span class="hh">## Deploying</span>
+
+Vercel auto-deploys on push to the default branch.
+
+<span class="hl" id="h2">**Never edit the version lines by hand; a GitHub Action moves them**</span>
+After every push to `main` that changes the app, a robot
+pushes one small commit, "Bump version to bMMDD.HHMM"
+<span class="gap">· · ·</span><span class="hh">## Hard-won gotchas — do not relearn these</span>
+
+<span class="hl" id="h3">- **`:hover` never fires on touchscreens.**</span> Press feedback
+  needs `:active` plus a JS `.is-pressed` class held ~260 ms.
+- **iOS auto-zooms any input under 16px font-size.**
+</div></div>
+  <!-- 7: a new lesson goes in; the next chat knows it -->
+  <div class="a" id="newline">New: <span id="nlin">always test Back after a change</span></div>
+  <!-- 8: /init -->
+  <div class="a" id="cmd"><span>&gt;</span> <span id="typed">/init</span></div>
+  <div class="a" id="draft"><b>CLAUDE.md</b><i style="width:90%"></i><i></i><i style="width:70%"></i><i style="width:85%"></i>
+    <i class="pen" id="pen1" style="width:80%"></i><i class="pen" id="pen2" style="width:60%"></i></div>
+  <!-- 9: keep it short -->
+  <div class="a" id="ruler"></div>
+  <div class="a" id="mark"></div>
+  <div class="a" id="marklbl">200 lines</div>
+  <div class="a" id="strip"></div>
+  <div class="a" id="striplbl">Ours: 510</div>
+  <!-- 10: try it today -->
+  <div class="a card" id="try"><h2>Try it today</h2><p>Open your project in Claude Code, type <code>/init</code>, and read what it wrote.</p></div>
+  <div class="a spark" id="sp1" style="left:120px;top:230px">✦</div><div class="a spark" id="sp2" style="left:900px;top:250px">✦</div>
+
+  <div id="smileywrap"></div>
+  <div id="caps"></div>
+
+  <audio id="voice" class="clip" src="voice/ch3.m4a" data-start="0" data-duration="72.77" data-track-index="20" data-volume="1"></audio>
+  <audio id="sfxmix" class="clip" src="voice/ch3.sfx.m4a" data-start="0" data-duration="72.77" data-track-index="21" data-volume="1"></audio>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="voice/ch3.beats.js"></script>
+<script src="kit/kit.js"></script>
+<script>
+const { tl, smiley, mouth, S, W, captions, sfx, pop, out, bob, stamp, done, $, B } = KIT;
+$('#smileywrap').innerHTML = smiley('dr') + smiley('dr2');
+$('#sessions').innerHTML = [0, 1, 2].map(i => `<div class="a card sess" id="ss${i}" style="left:${90 + i * 330}px;top:${620}px"><i style="width:70%"></i><i></i><div class="pg"></div></div>`).join('');
+$('#strip').innerHTML = Array.from({ length: 60 }, (_, i) => `<i style="width:${[92, 80, 100, 70, 88, 96][i % 6]}%"></i>`).join('');
+const dr = '#dr';
+
+gsap.set('#tag,#about,#proj,#cc,.file,#pencil,#folder,#page,.sess,#fridge,#fnote,.fl,#magnet,#puppy,#rules,.tab,#mdtitle,#md,#newline,#dr2,#cmd,#draft,.pen,#ruler,#mark,#marklbl,#strip,#striplbl,#try,.spark', { opacity: 0 });
+gsap.set(dr, { left: 10, top: 1010 });
+gsap.set('#dr2', { scale: 0.9 });
+
+/* 1: your profile is about you; CLAUDE.md is about your project */
+tl.fromTo(dr, { y: 900 }, { y: 0, duration: 0.7, ease: 'back.out(1.6)' }, 0.0); sfx('pop', 0.3, 0.4);
+pop('#tag', 0.5, { r: -14, to: -2 });
+pop('#about', W(1, 'profile') - 0.1, { r: -18, to: -4 });
+pop('#proj', W(1, 'CLAUDE') - 0.1, { r: 18, to: 3 });
+
+/* 2: Claude Code, the Claude that opens your project's files and changes them */
+out('#about,#proj', S(2) - 0.35);
+pop('#cc', S(2) + 0.1, { r: -4, to: 0, sound: 'switch', vol: 0.4 });
+['#f1', '#f2', '#f3', '#f4'].forEach((f, i) => pop(f, W(2, 'open') - 0.1 + i * 0.22, { r: i % 2 ? 10 : -10, to: i % 2 ? 3 : -3, sound: 'tick', vol: 0.4 }));
+pop('#pencil', W(2, 'change') - 0.2, { r: -40, sound: false });
+tl.to('#pencil', { x: -260, y: -140, rotation: -12, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 3 }, W(2, 'change'));
+['#f2', '#f4'].forEach((f, i) => tl.to(f, { backgroundColor: '#FFF27A', duration: 0.2 }, W(2, 'change') + 0.3 + i * 0.4));
+
+/* 3: a plain text file in your project, read at the start of every session */
+out('#cc,.file,#pencil', S(3) - 0.35);
+pop('#folder', S(3) - 0.05, { r: 0 });
+tl.fromTo('#page', { opacity: 0, y: 360, scale: 0.6 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'back.out(1.6)' }, W(3, 'plain') - 0.1); sfx('pop', W(3, 'plain'), 0.35);
+out('#folder', S(3, 1) - 0.3);
+tl.to('#page', { scale: 0.75, top: 230, left: 360, duration: 0.5, ease: 'power3.inOut' }, S(3, 1) - 0.3);
+[0, 1, 2].forEach(i => {
+  pop(`#ss${i}`, W(3, 'start') - 0.2 + i * 0.35, { r: 0, sound: 'pop', vol: 0.25 });
+  tl.fromTo(`#ss${i} .pg`, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2.5)' }, W(3, 'every') + i * 0.3);
+});
+
+/* 4: the note you leave a babysitter */
+out('#page,.sess', S(4) - 0.35);
+pop('#fridge', S(4) - 0.05, { r: 0, sound: false });
+pop('#fnote', W(4, 'note') - 0.1, { r: 6, to: -3, sound: 'snap', vol: 0.45 });
+pop('#magnet', W(4, 'note') + 0.15, { r: 0, sound: false });
+pop('#fl1', S(4, 1), { r: 0, sound: 'tick' }); pop('#fl2', S(4, 2), { r: 0, sound: 'tick' }); pop('#fl3', S(4, 3), { r: 0, sound: 'tick' });
+tl.fromTo('#puppy', { opacity: 0, x: 260, rotation: 20 }, { opacity: 1, x: 0, rotation: -6, duration: 0.5, ease: 'back.out(2)' }, W(4, 'dog') - 0.1); sfx('star', W(4, 'dog'), 0.5);
+tl.to('#puppy', { rotation: 6, duration: 0.2, yoyo: true, repeat: 5 }, W(4, 'dog') + 0.5);
+
+/* 5: for an app: what it is, where things live, the rules, the lessons */
+out('#fridge,#fnote,#magnet,#puppy', S(5) - 0.35);
+pop('#rules', S(5) - 0.05, { r: -4, to: -1 });
+pop('#t1', W(5, 'what the app') - 0.1, { r: 0, sound: 'tick' }); pop('#t2', W(5, 'where') - 0.1, { r: 0, sound: 'tick' });
+pop('#t3', W(5, 'the rules') - 0.1, { r: 0, sound: 'tick' }); pop('#t4', W(5, 'mistakes') - 0.1, { r: 0, sound: 'tick' });
+
+/* 6: the Hub's real one, scrolling, three lines lit as they're named */
+out('#rules', S(6) - 0.35);
+pop('#mdtitle', S(6) - 0.05, { r: -6, to: -2, sound: false });
+tl.fromTo('#md', { opacity: 0, y: 200 }, { opacity: 1, y: 0, duration: 0.55, ease: 'back.out(1.5)' }, S(6)); sfx('switch', S(6) + 0.1, 0.4);
+const lit = (h, t) => { tl.to(h, { backgroundSize: '100% 100%', duration: 0.5, ease: 'power2.out' }, t); sfx('fill', t, 0.25); };
+lit('#h1', S(6, 1));
+tl.to('#mdin', { y: () => -($('#h2').offsetTop - 320), duration: 0.9, ease: 'power3.inOut' }, S(6, 2) - 0.6);
+lit('#h2', W(6, 'never change') - 0.1);
+tl.to('#mdin', { y: () => -($('#h3').offsetTop - 300), duration: 0.9, ease: 'power3.inOut' }, S(6, 3) - 0.6);
+lit('#h3', W(6, 'hover') - 0.1);
+
+/* 7: the lesson goes in; a fresh Dr. Smiley reads it and nods */
+out('#md,#mdtitle', S(7) - 0.35);
+const nlW = 640;
+tl.fromTo('#newline', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: 'back.out(2)' }, W(7, 'lesson') - 0.6);
+tl.fromTo('#nlin', { width: 0 }, { width: nlW, duration: 1.4, ease: 'steps(32)' }, W(7, 'lesson') - 0.3);
+for (let k = 0; k < 8; k++) sfx('tick', W(7, 'lesson') - 0.3 + k * 0.17, 0.25);
+tl.fromTo('#dr2', { opacity: 0, x: 500 }, { opacity: 1, x: 0, duration: 0.6, ease: 'back.out(1.6)' }, S(7, 1) - 0.2); sfx('pop', S(7, 1), 0.4);
+tl.to('#dr2', { y: 14, duration: 0.18, yoyo: true, repeat: 3 }, W(7, 'knows'));
+tl.to('#newline', { y: -570, scale: 0.8, duration: 0.6, ease: 'power3.inOut' }, S(7, 1) - 0.3);
+
+/* 8: /init, a first draft, then you add what it can't see */
+out('#newline,#dr2', S(8) - 0.35);
+pop('#cmd', S(8), { r: 0, sound: false });
+tl.fromTo('#typed', { width: 0 }, { width: 160, duration: 0.6, ease: 'steps(5)' }, W(8, 'slash') - 0.1);
+for (let k = 0; k < 5; k++) sfx('tick', W(8, 'slash') - 0.1 + k * 0.12, 0.35);
+tl.fromTo('#draft', { opacity: 0, scaleY: 0 }, { opacity: 1, scaleY: 1, duration: 0.9, ease: 'power2.out' }, W(8, 'draft') - 0.6); sfx('fill', W(8, 'draft') - 0.5, 0.3);
+tl.fromTo('#pen1', { opacity: 1, width: '0%' }, { width: '80%', duration: 0.6, ease: 'power1.inOut' }, W(8, 'add') - 0.1);
+tl.fromTo('#pen2', { opacity: 1, width: '0%' }, { width: '60%', duration: 0.5, ease: 'power1.inOut' }, W(8, 'own') - 0.2);
+
+/* 9: keep it short; ours unrolls far past the line */
+out('#cmd,#draft', S(9) - 0.35);
+pop('#ruler', S(9) - 0.05, { r: 0, sound: false });
+tl.fromTo('#mark', { opacity: 0, scaleX: 0, transformOrigin: '0 50%' }, { opacity: 1, scaleX: 1, duration: 0.4 }, W(9, 'two hundred') - 0.2);
+pop('#marklbl', W(9, 'two hundred') + 0.1, { r: -10, to: -3, sound: 'tick' });
+tl.fromTo('#strip', { opacity: 1, scaleY: 0 }, { scaleY: 1, duration: 1.3, ease: 'power1.in' }, S(9, 2) - 0.1); sfx('fill', S(9, 2), 0.35);
+pop('#striplbl', S(9, 2) + 1.0, { r: 10, to: 4, sound: 'snap', vol: 0.4 });
+
+/* 10: try it today */
+out('#ruler,#mark,#marklbl,#strip,#striplbl', S(10) - 0.35);
+pop('#try', S(10), { r: -5, to: -1.5, sound: 'chime', vol: 0.45 });
+pop('#sp1,#sp2', S(10) + 0.4, { stagger: 0.2, sound: 'star', vol: 0.35 });
+
+/* Dr. Smiley: talking; reading the page, laughing at the puppy, sheepish at "ours grew much longer" */
+mouth('dr', 0, B.duration, [
+  { at: W(3, 'reads') - 0.1, to: W(3, 'every') + 0.3, f: 'lookUR' },
+  { at: W(4, 'dog') + 0.2, to: W(4, 'dog') + 1.0, f: 'laugh' },
+  { at: W(6, 'hover') + 0.2, to: W(6, 'hover') + 0.9, f: 'surprised' },
+  { at: S(9, 2) + 0.1, to: S(9, 3) + 0.3, f: 'worried' },
+  { at: S(9, 3) + 0.3, to: S(9, 3) + 1.0, f: 'wink' },
+  { at: B.lines.at(-1).end + 0.05, to: B.duration, f: 'smile' },
+]);
+mouth('dr2', S(7, 1) - 0.3, S(8) - 0.3, [{ at: S(7, 1) - 0.3, to: S(8), f: 'smile' }]);
+bob(dr, 1.0, B.duration - 1.5, { y: -10, r: 1.2, period: 2.2 });
+
+captions(['CLAUDE.md', 'Claude Code', 'babysitter', 'mistakes never to repeat', 'hover', 'already knows', 'slash init', 'Keep it short'], [10]);
+done();
+</script>
+</body>
+</html>
