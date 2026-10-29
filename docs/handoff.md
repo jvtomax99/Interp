@@ -10,23 +10,27 @@ the campus chat (Blender card, real campus in 3D, Helena Theurer's height, the a
 > branch `claude/campus-traffic`. Tell me what's being worked on now and what was worked on before, in a few short
 > lines, then start prompt 2 (traffic). Plain words, say "working on it" and "done".
 
-## Now: prompt 2 of 4, traffic
+## Now: prompt 4 of 4, the buildings
 
 Jose's prompts, in order (2026-10-29), each its own change:
-1. Audit every moving thing. **Done, live** (#173, b1029.1532).
-2. **Traffic: done in 3D** (2026-10-29, `claude/campus-traffic`, waiting for Jose's push; `real-map/traffic.js`, README "Traffic"). Was: "Make the cars drive like real traffic: stay in the right-hand lane, follow the real direction of
-   each street, slow down and stop at stop signs and crosswalks, turn on curves instead of sliding sideways, and never
-   overlap each other. Use the map data for which streets are one-way."
-3. **People: done in 3D** (2026-10-29, `real-map/people.js`, README "People"). Was: sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing and
-   talking; never through walls, cars, trees or each other.
-4. **Buildings (next):** checked against the real campus (height, floors, doors, garage entrances, bridges), with sources.
+1. Audit every moving thing. **Done, live** (#173).
+2. Traffic. **Done, live** (#174, b1029.1847): `real-map/traffic.js`, README "Traffic".
+3. People. **Done, live** (#175, b1029.2338): `real-map/people.js`, README "People".
+4. **Buildings (next):** every building checked against the real campus: height, floors, doors, garage entrances,
+   bridges, with sources (primary ones: HMH pages, permits, news of openings; Wikipedia alone is not enough). Report
+   what changes and what can't be proven.
+
+Open from 2 and 3: the stop signs on Atlantic at Prospect and at the drive's exit are assumed (the map has none; the one
+at Atlantic and 2nd is from Jose's photos); the walk from Jurist's walk across the drive-through's mouth to Link has no
+crosswalk in the scene (Jose to say if there is a real one); a paved apron overlaps 2nd Street at x -31.5; the card
+(`city/`) still plays fixed paths (re-render only if Jose asks).
 
 Where things are:
 - The live scene's motion: `life(t)` in the built page; its movers and paths are set in
   `docs/mockups/cchi-city/real-map/build.py` (block "the audit's fixes" and the rounds after it; `along()` gives
   position and heading on a polyline). The street cars: `STREET` (Prospect), `BACKCARS` (2nd St, Atlantic B, Essex;
   paths from `scene.json` `paths`, made by `scene_export.py` from the OSM export, which has the one-way tags).
-- Checker: `node audit.cjs campus.html out.json` (`MAP=map.png` for the picture). What it still flags: a car and a
+- Checkers: `node traffic_check.cjs campus.html 300` (cars and people, all zero on 2026-10-29); `node audit.cjs campus.html out.json` (`MAP=map.png` for the picture). What it still flags: a car and a
   person meeting at a crosswalk or corner (cars must give way: that is prompt 2), two walkers passing at a corner.
 - In 3D (`campus3d/`, `python3 build.py --app`) things move live, so giving way, stopping and queueing are possible
   there. The card (`city/`, Blender, `card_capture.cjs` + `card_render.py` + `card_build.py --install`, ~40 min)
@@ -44,3 +48,4 @@ Where things are:
 - #169 the 3D button opens the real campus too (`build.py --app`).
 - #170 Helena Theurer Pavilion 9 floors at 1.3x (it was 13 at 1.65x; Jose's pick).
 - #173 the audit and its fixes (269 problem spots down to crosswalk meetings).
+- Run one headless browser at a time here: two at once got the session killed for memory (2026-10-29).
