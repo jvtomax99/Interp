@@ -48,7 +48,49 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-27, sixth chat): read this first
+## Where it stands (2026-10-29, seventh chat): read this first
+
+**Jose is not satisfied. His words, on the last video: "He glitches. His
+movements aren't natural and it's inconsistent." Then: "This needs a lot
+more work." Treat every fix below as unproven until he says otherwise; do
+not tell him it is fixed, show him and ask.**
+
+The build: his big moves are filmed clips (Sora, from his master picture;
+`docs/art/dr-smiley-clips/prompts.md`), keyed to see-through frames
+(`layers/keyclip.py`, checked frame by frame by `layers/checkclip.py`),
+played over the rig by `features/smiley-clips.js` (`DR_CLIPS`: greet,
+cheer, think, wince, bounce). The video tool draws his face differently
+(rounder, bigger eyes), so his own rig head rides the clip's body: the
+clip's head is cut off every frame (`layers/behead.py`), his head is moved
+to the clip head's place (`head.json`, `layers/headtrack.py`) and turned
+and sized by the clip head's tilt and size (`head-pose.json`, from the
+hair's place, measured before beheading), about the neck; his face acts
+along (`DR_CLIP_FACES`). The hand-off is a cut in one paint (`is-clip`);
+cross-fades showed a ghost frame. The rig keeps the small life (breathing,
+blinks, glances, nod, shrug, clipboard) and the held states.
+
+What Jose saw and what was done, in order: a face switch at a clip's start
+(own head over the clip); the clip's head peeking out around his (beheaded);
+a ghost frame at each quiz move's start and a head carried level over a
+tilting body (the cut; the head follows the clip head's tilt and size). The
+last video was measured frame by frame (every frame, a change-per-frame
+scan and zooms) and showed no ghost; **Jose has not yet said whether it is
+right.** Tools for the next look: extract the video at 30 fps, scan the
+change per frame in his box, zoom on the flagged frames (the scratchpad
+scripts are gone with the chat; write them again, it is ten lines).
+
+What remains uncertain and worth checking first with him on the phone:
+whether the own-head approach can ever look like one drawing (the body is
+painted, the head is the flat rig; lighting and line differ), whether the
+clips' motion itself is natural enough (they are the video tool's, not
+drawn), and whether the 150 ms swaps at a clip's ends read as cuts. The
+alternatives already costed: accept the clip's own face everywhere and
+redo his head from it (big), a 3D him in Blender (`docs/art/dr-smiley-3d/`,
+proven to look like him, Jose set it aside), one long film (not reactive,
+too heavy). Keep sending phone videos after each step; he judges on his
+phone. Nothing is live; the branch never deploys.
+
+## Where it stood (2026-10-27, sixth chat): read this first
 
 Jose: "I want it fluid and natural." The rig swaps drawings and cannot
 be; filmed clips can. Sora animates his master picture from a prompt
