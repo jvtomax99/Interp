@@ -737,8 +737,43 @@ per frame, smoothed; a tilt from the pupils was tried and dropped), minus
 cut off every frame by `layers/behead.py` (Jose: "the head and body
 don't fit": it is drawn about 10% bigger than his, its hair 13 px
 higher, and peeked out as a fringe around his own; 10 px of chin and
-neck stay under where his chin sits, feathered, so the collar meets it;
-the tool writes the frames in place and refreshes `head.json`). His face
+neck stay under where his chin sits, feathered, so the collar meets it).
+**The head is followed by his hair alone, and the cut is one shape**
+(2026-10-29, Jose: "He glitches. His movements aren't natural and it's
+inconsistent", and on the next ask, "head looks stuck on"): the first
+tracker took the blob of skin and hair for the head, so a hand at his
+chin (the think, for a second), the thumb beside his face (the thumbs-up),
+a fist passing his head (the cheer) and the waving hand (twice) joined the
+blob: the head's centre slid 12 px, its tilt jumped from 5 to 16 degrees
+and its size 4% over six frames and back, and `behead.py`, cutting the
+frame's own blob above its chin, cut the hand off with the head, so hands
+vanished and came back. Now `headtrack.py` follows the hair (rigid, dark,
+nothing passes in front of it): its centroid for the place, its principal
+axis (image moments) for the tilt, its area for the size, the first frame
+fixing the head's centre against the hair; frames whose hair is off its
+neighbours are bridged. `behead.py SRC DST` cuts one shape, the first
+frame's head above 10 px under its chin plus 3 px, carried to each frame
+by that track, from the keyed frames (kept out of the repo; they are in
+git before the first beheading, commit 93c1d5f, and in the scratchpad of
+the chat that keys a clip) into `drsmiley/clips/<move>/`, the two tracks
+copied beside. A hand over the head's shape is cut there and reads as
+behind his head. Measured on the wave: the two lurches gone (the track's
+biggest step 1.7 px a frame), the hand whole at frames 48 to 105. **The
+collar stands up behind his head** (same day): the clip's head is bigger
+than his, so where its jaw sat over the lapels and the scrubs' V, cutting
+it left a wedge of background beside his own chin when the clip's head
+dipped (the wince: measured on a flat magenta banner with
+`tests/tools/home-film.cjs`, `BG`, 1,208 px at 3x in the worst frame);
+`behead.py` fills the lowest `FILL` 20 rows of the cut, in the `SPAN`
+38 columns either side of the head's centre, with the first solid pixel
+under the cut (collar, lapel, neck band) at the frame's own alpha, the
+feather included (a half-clear seam along the lapel showed through
+too); wider, the lapel stood up as a white tab beside his cheek. After:
+what the window still counts is background beside his jaw, outside him.
+The rig's own rest keeps a small dark gap at the left of his collar
+(the cutout pieces, older than this).
+`smiley-body-app.cjs` checks every track: one entry per frame, no step
+over 4 px or 3 degrees, both ends at the clip's rest. His face
 acts along on
 his own head (`DR_CLIP_FACES`: beats of face and brow per clip, the rig
 walking the in-betweens; the cheer's laugh mostly open-eyed, `laugh1`,

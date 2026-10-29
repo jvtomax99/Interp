@@ -100,6 +100,24 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(!P.__errors.length, 'no page errors', P.__errors);
   await ctx.close();
 
+  // The clips' head tracks (drsmiley/clips/<move>/head.json, head-pose.json, from layers/headtrack.py): his own head rides
+  // them, so a jump in the track is a lurch of his head. 2026-10-29 (Jose: "he glitches"): a hand at his face had joined the
+  // tracked blob, the head slid 12 px and tilted 16 degrees in a few frames and the hand was cut off with the head. The track
+  // follows the hair now: no step over 4 px or 3 degrees, as many entries as frames, and both ends at the clip's own rest.
+  console.log('== the clips\' head tracks');
+  const fs = require('fs'), path = require('path');
+  const clips = { greet: 'wave', cheer: 'cheer', think: 'think', wince: 'wince', bounce: 'thumbs' }, trackBad = [];
+  for(const [name, dir] of Object.entries(clips)){
+    const d = path.join(L.ROOT, 'drsmiley/clips', dir), n = fs.readdirSync(d).filter(f => f.endsWith('.webp')).length;
+    const head = JSON.parse(fs.readFileSync(path.join(d, 'head.json'), 'utf8')), pose = JSON.parse(fs.readFileSync(path.join(d, 'head-pose.json'), 'utf8'));
+    let step = 0, tstep = 0;
+    for(let i = 1; i < head.length; i++){ step = Math.max(step, Math.hypot(head[i][0] - head[i - 1][0], head[i][1] - head[i - 1][1])); tstep = Math.max(tstep, Math.abs(pose[i][0] - pose[i - 1][0])); }
+    const ends = Math.hypot(head[head.length - 1][0] - head[0][0], head[head.length - 1][1] - head[0][1]);
+    const r = { name, n, entries: head.length, step: +step.toFixed(1), tstep: +tstep.toFixed(1), ends: +ends.toFixed(1), scale: [Math.min(...pose.map(p => p[1])), Math.max(...pose.map(p => p[1]))] };
+    if(!(head.length === n && pose.length === n && step <= 4 && tstep <= 3 && ends <= 2 && r.scale[0] >= 0.95 && r.scale[1] <= 1.15)) trackBad.push(r);
+  }
+  ok(!trackBad.length, 'every clip\'s head track is one entry per frame, never steps more than 4 px or 3 degrees in a frame, and ends where it began', trackBad);
+
   console.log('== Home, computer');
   const { page: D, ctx: dctx } = await L.boot(b, { device: 'desktop', settle: 50 });
   await D.waitForSelector('#content.is-home .home-body', { timeout: 15000 }); await D.waitForTimeout(9000);

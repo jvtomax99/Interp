@@ -48,7 +48,40 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-29, seventh chat): read this first
+## Where it stands (2026-10-29, eighth chat): read this first
+
+**Jose is not yet satisfied; nothing below is judged right until he says
+so.** Asked what reads wrong, he picked "head looks stuck on" (buttons:
+head stuck on / moves stiff / flashes / inconsistent). Measured on his
+phone's size, frame by frame, the fault was the head tracker: it took the
+blob of skin and hair for the head, so a hand at his face joined it. Two
+effects: his own head lurched (the wave: the centre slid 12 px, the tilt
+5 to 16 degrees, the size 4%, over six frames and back, twice, as the
+hand passed), and `behead.py`, cutting the frame's own blob, cut the hand
+off with the head: the thinking hand at his chin was gone for a second
+(black blotches on his chest where it was), the thumb beside his face in
+the thumbs-up, a fist passing his head in the cheer, the waving hand
+twice. That is the "glitch". Fixed this chat: `headtrack.py` follows the
+hair alone (centroid, principal axis, area; bad frames bridged), and
+`behead.py SRC DST` cuts one shape (the first frame's head) carried by
+that track, so hands stay (a hand over the head's shape reads as behind
+it). All five clips re-cut from the keyed frames (git 93c1d5f). Wave:
+biggest head step 1.7 px a frame (was 12). Then a second fault the flat
+banner showed: a wedge of background beside his chin at the scrubs' V
+when the clip's head dips (its bigger jaw had covered the collar);
+`behead.py` now carries the collar up behind the head (`FILL`, `SPAN`).
+Filming on Home: `tests/tools/home-film.cjs` (30 fps, one PNG a frame,
+`BG='#ff00ff'` for a flat banner to count holes). `smiley-body-app.cjs` checks
+every track. Videos sent: the wave and the think, before/after.
+Details: `docs/features/dr-smiley.md`, "Clips", the paragraph "followed
+by his hair alone". Still open (not measured as faults, worth asking him):
+the thinking finger now rests a little below his chin (his head is
+smaller than the clip's, so its chin sits higher); the cheer's rest head
+is 3.7 px right of the rig's (`FIT`), a small shift at its cut; the
+clip's head turns a little (yaw) and his cannot. To redo a clip:
+`headtrack.py` on the keyed frames, then `behead.py <keyed> drsmiley/clips/<move>`.
+
+## Where it stood (2026-10-29, seventh chat)
 
 **Jose is not satisfied. His words, on the last video: "He glitches. His
 movements aren't natural and it's inconsistent." Then: "This needs a lot
