@@ -63,8 +63,7 @@ half 0.72, shut 0.75); the lot car backs out of a spot on the Visitors Parking g
 left empty in the board) and heads down the aisle (its second look moves from where it is drawn, `ref2`).
 The bay doors are gone. Unpainted clay is (0.84, 0.83, 0.81), matte (glass made clay stayed a mirror and
 read as fog). Medical Plaza's badge point is moved 60 px left (`NUDGE` in `card_build.py`) so its chip
-leaves the lot car's spot clear. Helena Theurer (Terminology) is curtain wall with no separate windows, so
-it has no lit-window layers. Movers whose path the camera never sees, or whose pose is out of frame, are
+leaves the lot car's spot clear. Helena Theurer's badge point is a row higher (60 px) so Dr. Smiley fits beside Encounter's badge; it is 9 floors at 1.3x since 2026-10-29. Movers whose path the camera never sees, or whose pose is out of frame, are
 left out (`card_build.py`): 11 walkers, 8 street cars, 15 people about. Places in the say line: Link Pavilion, Helena Theurer Pavilion, the Jurist
 Research Center, John Theurer Cancer Center, Medical Plaza. The 3D button's campus (`campus3d/`) is the
 same real map since 2026-10-29 (`real-map/build.py --app`), moved round the Maps way (`nav.js`).

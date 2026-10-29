@@ -59,7 +59,7 @@ def blur(a, r):   # about a Gaussian of radius r: three box blurs along each axi
             a = (np.take(c, range(2*k + 1, c.shape[ax]), axis=ax) - np.take(c, range(0, c.shape[ax] - 2*k - 1), axis=ax))/(2*k + 1)
     return a
 # Medical Plaza's badge sits a little to the left, off the lot car's spot on the garage deck beside it
-NUDGE = {'c': (-60, 0)}
+NUDGE = {'c': (-60, 0), 't': (0, -60)}   # and Helena Theurer's a row higher, so Dr. Smiley fits beside Encounter's
 B = {}
 for k in KEYS:
     full = exr(f'mask-{k}.exr')[..., 0]; b = C['box'][k]; top = b['top']
