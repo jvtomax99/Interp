@@ -430,8 +430,9 @@ function htpCurve(u, inset=0){ const b = Math.sin(u*Math.PI)*3.5 - inset; return
 function htpTowerPts(){ const pts = [[6.0, -46.3], [12.2, -46.3], [12.2, -29.5], [-3.0, -29.5]];
   for (let k = 1; k < 16; k++) pts.push(htpCurve(k/16)); return pts; }
 var TERRA_M = null, CURTAIN_M = null;
-function htpFL(){ return FL*1.65; }   // var: the buildings are built before this line runs; tall hospital floors. With 4 of terracotta
-// platform and 9 of glass (scene.json floors 13) the glass rises over the bridge as in his window photo, measured against Imus
+function htpFL(){ return FL*1.3; }   // var: the buildings are built before this line runs; its floors run a little tall. 9 floors, as the
+// real pavilion (Jose, 2026-10-29: "the glass upper tower is too tall"; it was 13 floors at 1.65, his pick: 9 at 1.3): 4 of
+// terracotta platform and 5 of glass (scene.json floors 9)
 function htpMats(){ if (TERRA_M) return; const t = terraTex(); t.repeat.set(1/3.2, 1/(3*htpFL())); TERRA_M = new THREE.MeshStandardMaterial({ map:t, roughness:0.75, envMapIntensity:0.15 });
   const c = curtainTex(); c.repeat.set(1/1.4, 1/htpFL()); c.offset.set(0, -((1/htpFL()) % 1)); CURTAIN_M = new THREE.MeshStandardMaterial({ map:c, roughness:0.12, metalness:0.35, envMapIntensity:1.1 }); }
 function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rectPts(12.2, -36.0, 15.4, -31.5), HTP_BRIDGE = rectPts(-3.0, -53.5, 4.0, -46.3), P4 = 4*FL, ty = y0 + P4 + 0.2, th = h - P4 - 0.2, FAS = M(0xd3d6db, { r:0.5 });
@@ -458,7 +459,7 @@ function htpBody(b, y0, h){ htpMats(); const FL = htpFL(); const HTP_SLIM = rect
     wallsOf(OT, y0, base, mk('#d9c9a8', '#e8dcc6', '#6f8ea8', ofl)); wallsOf(OT, y0 + base, top - base, mk('#c96a42', '#f0ece4', '#5f7f9c', ofl));
     slab(OT, y0 + top, 0.22, M(0xd9d2c4), [], true); box(3.0, 0.7, 2.4, M(0x9a97a6), 24.4, y0 + top + 0.55, -35.0, 0.06); }
   CUR = '_'; for (let k = 0; k < 5; k++) glow(0.5, by - 0.12, -52.6 + k*1.4, 0.7, 0xffe2b0); CUR = 't'; }
-pend.push(() => { CUR = 't'; const FL = htpFL(), T = htpTowerPts(), ty = 0.3 + 4*FL + 0.2, th = 13*FL - 4*FL - 0.2;
+pend.push(() => { CUR = 't'; const FL = htpFL(), T = htpTowerPts(), ty = 0.3 + 4*FL + 0.2, th = 9*FL - 4*FL - 0.2;
   letterAlong([T[3], ...T.slice(4), T[0]], ty + th - FL*0.45, 0.62, textCanvas(['HACKENSACK UNIVERSITY MEDICAL CENTER'], { w:2048, lh:96, font:'600 64px Georgia, serif', spacing:'4px' }), [-20, -50], 0.06);
   for (const [x, from] of [[-3.0, [-10, -50]], [4.0, [10, -50]]]) letterAlong([[x, -51.0], [x, -48.8]], 0.3 + 1.15*FL + 0.3, 0.3, textCanvas(['Helena Theurer Pavilion'], { w:1024, lh:64, font:'italic 44px Georgia, serif', col:'#55606e' }), from, 0.04);
   add(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map:TEX, transparent:true }), 13.8, ty + th - 0.9 - 1.0, -36.04, false).rotation.y = Math.PI;   // the HMH mark, on the slim tower's face toward 2nd Street

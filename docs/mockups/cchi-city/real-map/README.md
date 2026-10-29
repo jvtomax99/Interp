@@ -118,10 +118,9 @@ where the map has houses.
 - The pond garden sits on the lawn by 2nd Street, past the pavilion's
   bridge, where the red and green trees were (his circle), at 60% size to
   stay off the drop-off drive (`GS.position` in `build.py`).
-- The pavilion's floors are 1.65x a normal floor, 4 of terracotta platform
-  and 9 of glass (scene.json floors 13), so its glass rises over the bridge
-  as in his window photo, measured against Imus and the bridge in the same
-  frame (2026-10-28; it was 1.3x and 9 in all, about half as tall).
+- The pavilion: 9 floors at 1.3x a normal floor, 4 of terracotta platform and 5 of glass (scene.json floors 9), as the
+  real nine-story pavilion (2026-10-29, Jose: "the glass upper tower is too tall", his pick from three test views; on
+  2026-10-28 it had been raised to 13 floors at 1.65x from his window photo).
 - Corner of Atlantic and 2nd, rechecked 2026-10-28 against his window photo,
   Street View at 84 2nd St and two Google 3D views, each rendered from the
   same spot: the curved glass tower moved up to the street (it stood about
