@@ -115,5 +115,20 @@
     window.__timelines = window.__timelines || {};
     window.__timelines.main = tl;
   }
-  window.KIT = { tl, smiley, face, mouth, L, S, W, captions, sfx, pop, out, bob, stamp, done, $, B };
+  // the junior developer (chapter 1's robot), at his desk; ids prefixed so two can share a page
+  const robot = (p = 'r', size = 480) => `<svg viewBox="0 0 420 420" width="${size}" height="${size}">
+    <ellipse cx="210" cy="400" rx="170" ry="16" fill="#E9D6BE"/>
+    <line x1="210" y1="40" x2="210" y2="80" stroke="#2B2A4C" stroke-width="8" stroke-linecap="round"/><circle cx="210" cy="32" r="16" fill="#FF6B8B"/>
+    <rect x="110" y="78" width="200" height="150" rx="56" fill="#8FD3FF" stroke="#2B2A4C" stroke-width="8"/>
+    <rect x="140" y="112" width="140" height="78" rx="36" fill="#2B2A4C"/>
+    <ellipse cx="182" cy="150" rx="13" ry="17" fill="#7CF5FF"/><ellipse cx="238" cy="150" rx="13" ry="17" fill="#7CF5FF"/>
+    <path d="M190 176 q20 12 40 0" stroke="#7CF5FF" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="132" cy="190" r="11" fill="#FFB3C7"/><circle cx="288" cy="190" r="11" fill="#FFB3C7"/>
+    <rect x="140" y="232" width="140" height="70" rx="26" fill="#8FD3FF" stroke="#2B2A4C" stroke-width="8"/>
+    <path d="M60 310 h300 l-24 90 h-252z" fill="#FFC94D" stroke="#2B2A4C" stroke-width="8" stroke-linejoin="round"/>
+    <rect x="120" y="262" width="180" height="58" rx="10" fill="#2B2A4C" transform="skewX(-12) translate(56 0)"/>
+    <path id="${p}-armL" d="M130 270 q-30 -8 -20 -40" stroke="#2B2A4C" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path id="${p}-armR" d="M290 270 q30 -8 20 -40" stroke="#2B2A4C" stroke-width="16" fill="none" stroke-linecap="round"/></svg>`;
+  const HLS = 'font-style:normal;background:linear-gradient(transparent 52%,#FFB3C7 52%,#FFB3C7 92%,transparent 92%)';
+  window.KIT = { tl, smiley, robot, HLS, face, mouth, L, S, W, captions, sfx, pop, out, bob, stamp, done, $, B };
 })();

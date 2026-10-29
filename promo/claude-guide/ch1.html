@@ -59,6 +59,7 @@
   <div class="a" id="nocode"><div class="chip" style="background:var(--lemon)">&lt;code&gt;</div><div class="a x">×</div></div>
   <div class="a stamp" id="byclaude">Written by Claude</div>
   <!-- 3-4: the junior developer -->
+  <div class="a note st" id="trick" style="left:300px;top:520px;padding:40px 50px;font-size:66px;transform-origin:50% 50%">Here's the trick!</div>
   <div class="a st" id="robot"></div>
   <div id="chips"></div>
   <svg class="a" id="bulb" width="150" height="170" viewBox="0 0 160 180"><g stroke="#2B2A4C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
@@ -135,7 +136,7 @@ const CHIPC = ['#C8ECFF', '#FFC6D9', '#E4F7D9', '#FFF27A'];
 $('#chips').innerHTML = CODE.map((c, i) => `<div class="a chip" id="c${i}" style="background:${CHIPC[i % 4]};left:${660}px;top:${760}px">${c}</div>`).join('');
 
 // everything starts hidden; each piece pops in on its word
-gsap.set('#tag,.badge,#icon,#iconlbl,#phone,#jose,#nocode,#byclaude,#robot,#chips .chip,#bulb,#plan,#r1,#r2,#r3,#notyet,#tower,#one,#phone2,#check,#backbtn,#ripple,#bubble,#wheel,.seg,#fan .f,#try,.spark', { opacity: 0 });
+gsap.set('#trick,#tag,.badge,#icon,#iconlbl,#phone,#jose,#nocode,#byclaude,#robot,#chips .chip,#bulb,#plan,#r1,#r2,#r3,#notyet,#tower,#one,#phone2,#check,#backbtn,#ripple,#bubble,#wheel,.seg,#fan .f,#try,.spark', { opacity: 0 });
 
 /* 1: hello. Dr. Smiley rises big in the middle, waves; the app's icon pops in */
 gsap.set(dr, { left: 305, top: 470, scale: 1.45 });
@@ -157,7 +158,9 @@ stamp('#byclaude', S(2, 3) - 0.05, -10);
 
 /* 3: think of Claude as a junior developer: the robot drops onto his desk and types */
 out('#phone,#jose,#nocode,#byclaude', S(3) - 0.3);
-tl.fromTo('#robot', { opacity: 0, y: -900 }, { opacity: 1, y: 0, duration: 0.75, ease: 'bounce.out' }, W(3, 'junior') - 0.55); sfx('pop', W(3, 'junior') - 0.05, 0.45);
+pop('#trick', S(3), { r: -14, to: -4, sound: 'star', vol: 0.5 });
+out('#trick', S(3, 1) - 0.1);
+tl.fromTo('#robot', { opacity: 0, y: -900 }, { opacity: 1, y: 0, duration: 0.75, ease: 'bounce.out' }, S(3, 1) + 0.1); sfx('pop', S(3, 1) + 0.6, 0.45);
 const typeFrom = W(3, 'fast'), typeTo = S(5) - 0.4;
 tl.to('#armL', { y: -10, duration: 0.09, yoyo: true, repeat: Math.floor((typeTo - typeFrom) / 0.09), ease: 'none' }, typeFrom);
 tl.to('#armR', { y: -10, duration: 0.11, yoyo: true, repeat: Math.floor((typeTo - typeFrom) / 0.11), ease: 'none' }, typeFrom + 0.05);

@@ -43,7 +43,7 @@ def main(n):
             est = a + (b - a) * sum(len(x) for x in sents[:k + 1]) / total
             # in order, leaving a pause for each boundary still to place
             left = len(sents) - 2 - k
-            cand = list(range(last + 1, len(inside) - left))
+            cand = [j for j in range(last + 1, len(inside) - left) if inside[j][0] > t0 + 0.2]
             if cand:
                 j = min(cand, key=lambda j: abs((inside[j][0] + inside[j][1]) / 2 - est))
                 last = j; end, nxt = inside[j]
