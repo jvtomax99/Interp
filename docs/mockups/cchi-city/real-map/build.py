@@ -3,11 +3,18 @@
 # the drop-off), drops every hand-built building and adds the real campus from scene.json (back.js), front included,
 # with the runtime's changes for a board twice as wide and deep.
 #   python3 build.py <out.html>
+#   python3 build.py --app          the app's 3D campus (campus3d/index.html: gen.py --app's page, the same changes, minus
+#                                   the preview's own title, hints and Toy look switch)
 import json, os, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = sys.argv[1]
-tmp = os.path.join(tempfile.mkdtemp(), 'live.html')
-subprocess.run([sys.executable, os.path.join(HERE, '..', 'live', 'gen.py'), tmp], check=True, stdout=subprocess.DEVNULL)
+APP = '--app' in sys.argv
+if APP:   # gen.py --app writes campus3d/index.html and copies three.js beside it; this page replaces it
+    subprocess.run([sys.executable, os.path.join(HERE, '..', 'live', 'gen.py'), '--app'], check=True, stdout=subprocess.DEVNULL)
+    tmp = OUT = os.path.join(HERE, '..', '..', '..', '..', 'campus3d', 'index.html')
+else:
+    OUT = sys.argv[1]
+    tmp = os.path.join(tempfile.mkdtemp(), 'live.html')
+    subprocess.run([sys.executable, os.path.join(HERE, '..', 'live', 'gen.py'), tmp], check=True, stdout=subprocess.DEVNULL)
 src = open(tmp).read().split('\n')
 back = open(os.path.join(HERE, 'back.js')).read().replace('__SCENE__', json.dumps(json.load(open(os.path.join(HERE, 'scene.json'))), separators=(',', ':'))).replace('__ROOFS__', open(os.path.join(HERE, 'roofs.json')).read())
 cut = back.index('// ---- the ground behind and beside the front')
@@ -48,7 +55,11 @@ out='\n'.join(x for x in src if x is not None)
 def rep(a,b,cnt=1):
     global out
     assert out.count(a)==cnt,(a[:80],out.count(a)); out=out.replace(a,b)
-rep('<title>HUMC Campus Live</title>','<title>HUMC Campus Real Layout</title>')
+def page(a,b):   # the preview page's own shell (its title, heading, hints, card); the app's shell has its own
+    if not APP: rep(a,b)
+if APP:   # the app's title pill: the gestures nav.js gives, and the map's credit
+    rep('<small>Drag to turn · pinch to zoom</small></div>', '<small>Drag, pinch or twist to look round</small><small style="font-size:10px;font-weight:550;opacity:.8">Map © OpenStreetMap contributors</small></div>')
+page('<title>HUMC Campus Live</title>','<title>HUMC Campus Real Layout</title>')
 # the front's ground, refitted to the map's buildings: the drive narrowed to run between Jurist and Medical Plaza (the
 # map's two lanes run there), the canopy moved onto Link Pavilion's real front wall, the drop-off paved under it
 rep("box(10, 0.06, 20, asphalt, 0, 0.21, 2.5, 0.02, false);","box(6.6, 0.06, 20, asphalt, 0.35, 0.21, 2.5, 0.02, false); box(2.1, 0.06, 18.2, asphalt, -3.95, 0.21, 3.0, 0.02, false); box(0.4, 0.1, 18.2, walk, -5.1, 0.22, 3.0, 0.02, false);")   # the aerial: asphalt from x -2.9 to Medical Plaza, a lane of parked cars on the left (its cars are the diorama's), a walk along Jurist
@@ -72,8 +83,8 @@ rep("{ g: person('elder', 1), pts: [[1.4,0.1,-7.3],[-1.6,0.1,-7.3],[1.4,0.1,-7.3
 rep("{ g: person('patient', 2), pts: [[3.7,0.1,-5.5],[3.7,0.1,2],[3.7,0.1,-5.5]], dur: 30000 },","{ g: person('patient', 2), pts: [[3.45,0.1,-5.0],[3.45,0.1,2],[3.45,0.1,-5.0]], dur: 30000 },")
 rep("CAR_IN.position.set(3.1, 0.2, 15.5 - u*22)","CAR_IN.position.set(2.5, 0.2, 15.5 - u*21)")
 rep("along([[4.2,0.2,15.5],[4.2,0.2,2],[4.4,0.2,-4],[5.4,0.2,-7.2],[6.8,0.2,-8.0],[7.4,0.2,-8.4]]","along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0.2,-4],[4.6,0.2,-6.9],[6.6,0.2,-8.0],[7.4,0.2,-8.4]]")
-rep('<h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>','<h1>HUMC campus, front and back<small>Preview · live front on the real map</small></h1>')
-rep('<p class="hint">Drag to spin · pinch to zoom · tap a building</p>','<p class="hint">Drag to move · pinch to zoom · twist to turn · two fingers up or down to tilt · tap a building<br><span style="opacity:.7;font-size:10px">Map data © OpenStreetMap contributors</span></p>')
+page('<h1>HUMC campus, live<small>iPhone test · not in the app yet</small></h1>','<h1>HUMC campus, front and back<small>Preview · live front on the real map</small></h1>')
+page('<p class="hint">Drag to spin · pinch to zoom · tap a building</p>','<p class="hint">Drag to move · pinch to zoom · twist to turn · two fingers up or down to tilt · tap a building<br><span style="opacity:.7;font-size:10px">Map data © OpenStreetMap contributors</span></p>')
 rep("const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;","const BASE = new THREE.Group(); scene.add(BASE); let G = BASE;\nlet CUR = '_';   // the building the next meshes belong to (the merge sorts them by it)")
 rep("const add = (geo, mat, x,y,z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast;","const add = (geo, mat, x,y,z, cast=true) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=cast; m.userData.k=CUR;")
 # shadows over the whole, bigger board
@@ -114,7 +125,7 @@ rep("[CAR_IN, CAR_OUT, AMB, HELI, BIRDS, CAR_IN2, ...STREET.map(o => o.g), ...WA
     "[CAR_IN, CAR_OUT, AMB, HELI, BIRDS, CAR_IN2, ...STREET.map(o => o.g), ...BACKCARS.map(o => o.g), ...BACKWALKS.map(w => w.g), ...WALKS.map(w => w.g), ...SITTERS.map(o => o.g)].forEach(g => g.visible = true);")
 rep("SITTERS.forEach(o => o.g.position.set(...o.at)); IDLE.forEach(o => { o.set(0); o.g.visible = true; });","SITTERS.forEach(o => o.g.position.set(...o.at)); IDLE.forEach(o => { o.set(0); o.g.visible = true; });\n[...BACKCARS.map(o => o.g), ...BACKWALKS.map(w => w.g)].forEach(g => g.traverse(o => { o.castShadow = false; }));")
 # runtime
-rep("t:['Terminology','the brick tower',25]","t:['Terminology','Patient Pavilion',25]")
+rep("t:['Terminology','the brick tower',25]","t:['Terminology','Helena Theurer Pavilion',25]")
 rep("const keyOf = c => { for (const k in BOX){ const b = BOX[k]; if (Math.abs(c.x - b.x) < b.w/2 + 0.3 && Math.abs(c.z - b.z) < b.d/2 + 0.3 && c.y > 0.35) return k; } return '_'; };",
     "// a mesh belongs to the building it was made for; the front's extra pieces (tiers, glass bases, banners) to the box they sit in\nconst keyOf = (o, c) => { if (o.userData.k && o.userData.k in BOX) return o.userData.k; for (const k in BOX){ const b = BOX[k]; if (b.rect && Math.abs(c.x - b.x) < b.w/2 + 0.3 && Math.abs(c.z - b.z) < b.d/2 + 0.3 && c.y > 0.35) return k; } return '_'; };")
 rep("const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()), k = keyOf(c);","const k = (o.userData.k && o.userData.k in BOX) ? o.userData.k : keyOf(o, new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()));")
@@ -167,9 +178,9 @@ rep("CAR_OUT.position.set(-2.8, 0.2, -6.5 + u*22)", "CAR_OUT.position.set(-2.2, 
 # it replaces OrbitControls' spin-and-snap, whose hard clamp at the edges fought the fingers every frame
 NAV_JS = open(os.path.join(HERE, 'nav.js')).read()
 # the Toy look switch (toy.js: Jose's train-diorama video, 2026-10-28), riding after the navigation
-NAV_JS += '\n' + open(os.path.join(HERE, 'toy.js')).read()
+if not APP: NAV_JS += '\n' + open(os.path.join(HERE, 'toy.js')).read()
 rep("cam.position.set(-34, 70, 82); controls.update();","cam.position.set(-34, 70, 82); controls.update();\n" + NAV_JS + "\nwindow.__built = o => { Object.assign(BUILT, o); setProgress(+$('prog').value/100); };\nwindow.__view = (x, y, z, tx=0.5, ty=-1.5, tz=-3) => { window.__free = true; controls.minDistance = 1; controls.maxPolarAngle = Math.PI*0.62; cam.position.set(x, y, z); controls.target.set(tx, ty, tz); controls.update(); };")
 note="/* HUMC campus, front and back (Jose, 2026-10-27/28): every building placed from his OpenStreetMap export, the front's\n   three included; the hand-built ground at the front (street, drive, fountain, drop-off) refitted around them. */\n"
 rep("window.__LITE = true;\n","window.__LITE = true;\n"+note)
-rep('bottom:calc(env(safe-area-inset-bottom,0px) + 168px)', 'bottom:calc(env(safe-area-inset-bottom,0px) + 186px)')   # the card clears the taller sheet
+page('bottom:calc(env(safe-area-inset-bottom,0px) + 168px)', 'bottom:calc(env(safe-area-inset-bottom,0px) + 186px)')   # the card clears the taller sheet
 open(OUT, 'w').write(out); print(OUT, len(out))

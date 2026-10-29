@@ -18,6 +18,7 @@ python3 osm_to_json.py             # 1. map.osm.xml -> osm.json (outlines in met
 python3 scene_export.py            # 2. osm.json -> scene.json (the back, in diorama units), scene-check.png
 python3 aerial_roofs.py            # (optional) the state's 2020 aerial -> roofs.json (roof colours, rooftop machines)
 python3 build.py <out.html>        # 3. ../live/gen.py's page + back.js + scene.json -> the preview
+python3 build.py --app             #    or the app's 3D campus, campus3d/index.html
 ```
 
 `scene.json` is committed, so step 3 alone rebuilds the page. Step 3 runs
@@ -275,6 +276,7 @@ where the map has houses.
   it are placed, not known.
 - Domain weights on the cards are 9/25/9/45/12; the CoreCHI blueprint is
   22/22/22/15/19 (Ethics, Encounter, Terminology, US Systems, Culture). Ask.
-- Into the app: the card's pictures are in (above); `campus3d/` (`gen.py --app`) still shows the old
-  campus. Wiring it in is its own pull request.
+- Into the app: done. The card's pictures (above), and `campus3d/` (`python3 build.py --app`, 2026-10-29: the same
+  page in the app's shell, without the preview's title, hints and Toy look switch; its title pill names the gestures
+  and credits the map).
 - Map data © OpenStreetMap contributors (ODbL): the credit is on the page.

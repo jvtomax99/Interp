@@ -66,8 +66,8 @@ read as fog). Medical Plaza's badge point is moved 60 px left (`NUDGE` in `card_
 leaves the lot car's spot clear. Helena Theurer (Terminology) is curtain wall with no separate windows, so
 it has no lit-window layers. Movers whose path the camera never sees, or whose pose is out of frame, are
 left out (`card_build.py`): 11 walkers, 8 street cars, 15 people about. Places in the say line: Link Pavilion, Helena Theurer Pavilion, the Jurist
-Research Center, John Theurer Cancer Center, Medical Plaza. The 3D button's campus (`campus3d/`) is still
-the old one until it is rebuilt from the real map too.
+Research Center, John Theurer Cancer Center, Medical Plaza. The 3D button's campus (`campus3d/`) is the
+same real map since 2026-10-29 (`real-map/build.py --app`), moved round the Maps way (`nav.js`).
 
 **The floating diorama (2026-10-26; the board, camera and paint replace the scene below; the colours
 and golden-hour light below still hold).**

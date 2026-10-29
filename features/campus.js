@@ -181,7 +181,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && CAMPUS_PIC
 
 /* The campus in 3D, full screen (Jose, 2026-10-26: "rotate, pinch to zoom, and a button to preview how the
    buildings would look once they are completed"). campus3d/index.html (built by docs/mockups/cchi-city/live/gen.py
-   --app from the hand-built diorama; still the old campus, city/ is the real map) runs in a frame over the app, like the brains: it asks for your progress
+   --app via real-map/build.py --app: the real campus, the same scene as city/) runs in a frame over the app, like the brains: it asks for your progress
    ('campus3d-want'), and asks the app to practise a building's exam area or to close. Each building stands as tall
    as its share learned (the same coverage as the card's paint); "See it finished" shows them all done. The frame is
    dropped once closed, so its 3D stops drawing and frees its memory. Back, Escape and leaving close it like any
