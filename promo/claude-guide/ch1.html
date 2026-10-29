@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Chapter 1: Claude is your junior developer</title>
+<link rel="stylesheet" href="kit/kit.css">
+<style>
+  #hello{left:330px;top:470px}
+  #icon{left:640px;top:330px;width:270px;height:270px;border-radius:60px}
+  #iconlbl{left:560px;top:640px;padding:14px 30px;border-radius:999px;background:var(--sky);border:5px solid var(--ink);font-size:40px;font-weight:700}
+  #phone{left:530px;top:290px;width:460px;height:820px}
+  #phone img{margin-top:-58px}
+  #jose{left:300px;top:330px;padding:16px 30px;background:var(--pink);border:5px solid var(--ink);border-radius:20px;font-size:40px;font-weight:700}
+  #nocode{left:150px;top:560px}
+  #nocode .chip{font-size:44px;padding:16px 26px}
+  #nocode .x{left:-12px;top:-30px;font-size:120px;font-weight:700;color:var(--red);line-height:1}
+  #byclaude{left:570px;top:820px;color:var(--hot)}
+  #robot{left:500px;top:470px}
+  #bulb{left:340px;top:640px}
+  #plan{left:110px;top:330px;width:860px;padding:44px 50px 50px}
+  #plan h2{font-size:58px;font-weight:700;margin-bottom:18px}
+  .row{display:flex;align-items:center;gap:26px;margin-top:22px;font-size:46px;font-weight:600}
+  .row img{width:110px;height:110px;flex:none}
+  #notyet{left:560px;top:830px;color:var(--red)}
+  #tower{left:440px;top:300px;width:200px;height:900px;transform-origin:50% 100%}
+  .blk{position:absolute;left:0;width:200px;height:150px;border-radius:30px;background:#fff;border:6px solid var(--ink);display:grid;place-items:center}
+  .blk img{width:120px;height:120px}
+  #one{left:440px;top:700px}
+  #phone2{left:560px;top:300px;width:440px;height:800px}
+  #phone2 img{margin-top:-60px}
+  #check{left:590px;top:850px;width:220px;height:220px;border-radius:50%;background:var(--green);border:8px solid var(--ink);display:grid;place-items:center;color:#fff;font-size:150px;font-weight:700;line-height:1}
+  #backbtn{left:430px;top:420px;padding:30px 60px;border-radius:999px;background:var(--sky);border:7px solid var(--ink);box-shadow:0 12px 0 var(--ink);font-size:64px;font-weight:700}
+  #ripple{left:560px;top:460px;width:120px;height:120px;border-radius:50%;border:8px solid var(--hot)}
+  #finger{left:600px;top:500px;font-size:120px}
+  #bubble{left:330px;top:720px;width:640px;padding:34px 40px;font-size:46px;font-weight:600;border-radius:40px}
+  #wheel{left:190px;top:280px;width:700px;height:700px}
+  .seg{position:absolute;width:300px;padding:26px 0;text-align:center;border-radius:36px;border:6px solid var(--ink);box-shadow:0 10px 0 var(--ink);font-size:50px;font-weight:700}
+  #fan .f{text-align:center;font-size:44px;font-weight:700}
+  #fan .f img{width:230px;height:230px;display:block;margin:0 auto 14px}
+  #try{left:90px;top:330px;width:900px;padding:50px 54px}
+  #try h2{font-size:64px;font-weight:700;margin-bottom:22px}
+  #try p{font-size:54px;line-height:1.25;font-weight:600}
+  .spark{font-size:70px;color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="63.4" data-width="1080" data-height="1920">
+  <div class="bg"></div>
+  <div class="a tag" id="tag"><b>1</b> · Claude is your junior developer</div>
+  <div class="a badge" id="b1">STEP 1</div><div class="a badge" id="b2">STEP 2</div><div class="a badge" id="b3">STEP 3</div><div class="a badge" id="b4">STEP 4</div>
+
+  <!-- 1: hello -->
+  <img class="a st" id="icon" src="assets/appicon.png" alt="">
+  <div class="a st" id="iconlbl">Interpreter Hub</div>
+  <!-- 2: Jose made it -->
+  <div class="a phone" id="phone"><img src="assets/screens/glossary.webp" alt=""></div>
+  <div class="a st" id="jose">Made by Jose</div>
+  <div class="a" id="nocode"><div class="chip" style="background:var(--lemon)">&lt;code&gt;</div><div class="a x">×</div></div>
+  <div class="a stamp" id="byclaude">Written by Claude</div>
+  <!-- 3-4: the junior developer -->
+  <div class="a st" id="robot"></div>
+  <div id="chips"></div>
+  <svg class="a" id="bulb" width="150" height="170" viewBox="0 0 160 180"><g stroke="#2B2A4C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 20 a46 46 0 0 1 28 82 v22 h-56 v-22 a46 46 0 0 1 28 -82z" fill="#FFE066"/><path d="M60 140 h40 M64 156 h32" fill="none"/>
+    <path d="M14 46 l-12 -8 M146 46 l12 -8 M80 4 v-0" fill="none"/></g></svg>
+  <!-- 5: the plan -->
+  <div class="a card" id="plan"><h2>The plan</h2>
+    <div class="row" id="r1"><img src="assets/pins/userguide.webp" alt="">What it does</div>
+    <div class="row" id="r2"><img src="assets/pins/providers.webp" alt="">Who it's for</div>
+    <div class="row" id="r3"><img src="assets/pins/ethics.webp" alt="">What it will NOT do yet</div></div>
+  <div class="a stamp" id="notyet">Not yet</div>
+  <!-- 6: the tower that tips -->
+  <div class="a" id="tower"></div>
+  <!-- 7: one small thing -->
+  <div class="a blk st" id="one" style="position:absolute"><img src="assets/pins/translate.webp" alt=""></div>
+  <!-- 8: check its work -->
+  <div class="a phone" id="phone2"><img src="assets/screens/practice.webp" alt=""></div>
+  <div class="a" id="check">✓</div>
+  <!-- 9: say what's wrong -->
+  <div class="a" id="backbtn">‹ Back</div>
+  <div class="a" id="ripple"></div>
+  <div class="a card" id="bubble">"I tapped Back, and it took me Home."</div>
+  <!-- 10: the loop, and what it built -->
+  <div class="a" id="wheel">
+    <div class="seg" id="w1" style="left:200px;top:40px;background:var(--sky)">Plan</div>
+    <div class="seg" id="w2" style="left:400px;top:300px;background:var(--mint)">Build</div>
+    <div class="seg" id="w3" style="left:200px;top:560px;background:var(--lemon)">Check</div>
+    <div class="seg" id="w4" style="left:0;top:300px;background:var(--pink)">Fix</div>
+  </div>
+  <div id="fan">
+    <div class="a f st" id="f1" style="left:70px;top:420px"><img src="assets/pins/medical-terminology.webp" alt="">Glossary</div>
+    <div class="a f st" id="f2" style="left:415px;top:330px"><img src="assets/pins/practice.webp" alt="">Quiz</div>
+    <div class="a f st" id="f3" style="left:760px;top:420px"><img src="assets/pins/anatomy.webp" alt="">3D body</div>
+  </div>
+  <!-- 11: try it today -->
+  <div class="a card" id="try"><h2>Try it today</h2><p>Tell Claude your app idea. Ask it to <em style="font-style:normal;background:linear-gradient(transparent 52%,#FFB3C7 52%,#FFB3C7 92%,transparent 92%)">interview you</em> until it can write the plan.</p></div>
+  <div class="a spark" id="sp1" style="left:120px;top:250px">✦</div><div class="a spark" id="sp2" style="left:900px;top:280px">✦</div><div class="a spark" id="sp3" style="left:960px;top:900px">✦</div>
+
+  <div id="smileywrap"></div>
+  <div id="caps"></div>
+
+  <audio id="voice" class="clip" src="voice/ch1.m4a" data-start="0" data-duration="63.3" data-track-index="20" data-volume="1"></audio>
+  <audio id="sfxmix" class="clip" src="voice/ch1.sfx.m4a" data-start="0" data-duration="63.3" data-track-index="21" data-volume="1"></audio>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="voice/ch1.beats.js"></script>
+<script src="kit/kit.js"></script>
+<script>
+const { tl, smiley, face, mouth, S, W, captions, sfx, pop, out, bob, stamp, done, $, B } = KIT;
+const robotSvg = `<svg viewBox="0 0 420 420" width="480" height="480">
+  <ellipse cx="210" cy="400" rx="170" ry="16" fill="#E9D6BE"/>
+  <line x1="210" y1="40" x2="210" y2="80" stroke="#2B2A4C" stroke-width="8" stroke-linecap="round"/><circle cx="210" cy="32" r="16" fill="#FF6B8B"/>
+  <g id="rhead"><rect x="110" y="78" width="200" height="150" rx="56" fill="#8FD3FF" stroke="#2B2A4C" stroke-width="8"/>
+  <rect x="140" y="112" width="140" height="78" rx="36" fill="#2B2A4C"/>
+  <ellipse id="reyeL" cx="182" cy="150" rx="13" ry="17" fill="#7CF5FF"/><ellipse id="reyeR" cx="238" cy="150" rx="13" ry="17" fill="#7CF5FF"/>
+  <path d="M190 176 q20 12 40 0" stroke="#7CF5FF" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="132" cy="190" r="11" fill="#FFB3C7"/><circle cx="288" cy="190" r="11" fill="#FFB3C7"/></g>
+  <rect x="140" y="232" width="140" height="70" rx="26" fill="#8FD3FF" stroke="#2B2A4C" stroke-width="8"/>
+  <path d="M60 310 h300 l-24 90 h-252z" fill="#FFC94D" stroke="#2B2A4C" stroke-width="8" stroke-linejoin="round"/>
+  <rect x="120" y="262" width="180" height="58" rx="10" fill="#2B2A4C" transform="skewX(-12) translate(56 0)"/>
+  <path id="armL" d="M130 270 q-30 -8 -20 -40" stroke="#2B2A4C" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <path id="armR" d="M290 270 q30 -8 20 -40" stroke="#2B2A4C" stroke-width="16" fill="none" stroke-linecap="round"/></svg>`;
+$('#robot').innerHTML = robotSvg;
+$('#smileywrap').innerHTML = smiley('dr', 'grad');
+const dr = '#dr';
+
+// the tower's blocks
+const TOWER = ['translate', 'chat', 'events', 'genetics', 'pharmacy', 'laboratory'];
+$('#tower').innerHTML = TOWER.map((k, i) => `<div class="blk st" style="top:${750 - i * 150}px"><img src="assets/pins/${k}.webp" alt=""></div>`).join('');
+// code chips the robot types out
+const CODE = ['&lt;button&gt;', 'if (tap) {', 'save()', '}', 'color: blue', 'show(card)', '&lt;h1&gt;', 'let n = 1', 'fetch()', 'flex', 'return', 'onclick'];
+const CHIPC = ['#C8ECFF', '#FFC6D9', '#E4F7D9', '#FFF27A'];
+$('#chips').innerHTML = CODE.map((c, i) => `<div class="a chip" id="c${i}" style="background:${CHIPC[i % 4]};left:${660}px;top:${760}px">${c}</div>`).join('');
+
+// everything starts hidden; each piece pops in on its word
+gsap.set('#tag,.badge,#icon,#iconlbl,#phone,#jose,#nocode,#byclaude,#robot,#chips .chip,#bulb,#plan,#r1,#r2,#r3,#notyet,#tower,#one,#phone2,#check,#backbtn,#ripple,#bubble,#wheel,.seg,#fan .f,#try,.spark', { opacity: 0 });
+
+/* 1: hello. Dr. Smiley rises big in the middle, waves; the app's icon pops in */
+gsap.set(dr, { left: 305, top: 470, scale: 1.45 });
+tl.fromTo(dr, { y: 900 }, { y: 0, duration: 0.7, ease: 'back.out(1.6)' }, 0.05); sfx('pop', 0.3, 0.4);
+tl.to(dr, { rotation: -6, duration: 0.18, yoyo: true, repeat: 5, ease: 'sine.inOut' }, 0.6);
+pop('#tag', 0.9, { r: -14, to: -2 });
+pop('#icon', W(1, 'Interpreter') - 0.1, { r: 20, to: 6 });
+pop('#iconlbl', W(1, 'Hub'), { to: -4 });
+tl.to(dr, { left: 60, top: 560, scale: 1.3, duration: 0.7, ease: 'power3.inOut' }, W(1, 'Interpreter') - 0.35);
+
+/* 2: Jose made it, not a programmer; Claude wrote the code */
+out('#icon,#iconlbl', S(2) - 0.35);
+tl.to(dr, { left: 10, top: 1010, scale: 1, duration: 0.7, ease: 'power3.inOut' }, S(2) - 0.4);
+tl.fromTo('#phone', { opacity: 0, x: 600, rotation: 14 }, { opacity: 1, x: 0, rotation: 4, duration: 0.7, ease: 'back.out(1.4)' }, S(2) - 0.1); sfx('switch', S(2), 0.4);
+pop('#jose', W(2, 'Jose'), { to: -5 });
+pop('#nocode', W(2, 'programmer') - 0.25, { to: -8 });
+tl.fromTo('#nocode .x', { scale: 0 }, { scale: 1, duration: 0.3, ease: 'back.out(3)' }, W(2, 'programmer') + 0.2);
+stamp('#byclaude', S(2, 3) - 0.05, -10);
+
+/* 3: think of Claude as a junior developer: the robot drops onto his desk and types */
+out('#phone,#jose,#nocode,#byclaude', S(3) - 0.3);
+tl.fromTo('#robot', { opacity: 0, y: -900 }, { opacity: 1, y: 0, duration: 0.75, ease: 'bounce.out' }, W(3, 'junior') - 0.55); sfx('pop', W(3, 'junior') - 0.05, 0.45);
+const typeFrom = W(3, 'fast'), typeTo = S(5) - 0.4;
+tl.to('#armL', { y: -10, duration: 0.09, yoyo: true, repeat: Math.floor((typeTo - typeFrom) / 0.09), ease: 'none' }, typeFrom);
+tl.to('#armR', { y: -10, duration: 0.11, yoyo: true, repeat: Math.floor((typeTo - typeFrom) / 0.11), ease: 'none' }, typeFrom + 0.05);
+CODE.forEach((_, i) => {
+  // a chip every 0.8 s; faster on "Claude does the typing"
+  const t = i < 8 ? typeFrom + i * 0.8 : W(4, 'typing') - 0.6 + (i - 8) * 0.25;
+  const x = [-420, -250, 60, 170, -380, 120, -150, 150, -330, 40, -240, 180][i], y = -380 - (i % 3) * 90;
+  tl.fromTo(`#c${i}`, { opacity: 0, x: 0, y: 0, scale: 0.3, rotation: 0 }, { opacity: 1, x, y, scale: 1, rotation: (i % 2 ? 8 : -8), duration: 0.9, ease: 'back.out(1.5)' }, t);
+  tl.to(`#c${i}`, { opacity: 0, y: y - 120, duration: 0.5 }, t + 2.6);
+  if (i % 2 === 0) sfx('tick', t, 0.25);
+});
+
+/* 4: you're the boss: the cap lands on his head, the idea lights up */
+tl.fromTo('#dr-hat', { attr: { y: -170 }, opacity: 0 }, { attr: { y: -50 }, opacity: 1, duration: 0.55, ease: 'bounce.out' }, W(4, 'boss') - 0.3); sfx('snap', W(4, 'boss') + 0.1, 0.45);
+pop('#bulb', W(4, 'idea') - 0.15, { r: -20, to: 0, sound: 'star', vol: 0.5 });
+tl.to('#bulb', { scale: 1.12, duration: 0.25, yoyo: true, repeat: 3 }, W(4, 'idea') + 0.4);
+
+/* 5: step one, the plan, and what it will NOT do yet */
+out('#bulb', S(5) - 0.4);
+tl.to('#robot', { left: 610, top: 1110, scale: 0.42, duration: 0.6, ease: 'power3.inOut' }, S(5) - 0.4);
+const badge = (n, at) => { if (n > 1) out(`#b${n - 1}`, at - 0.25, 0.2); pop(`#b${n}`, at, { r: -16, to: -3, sound: 'tick', vol: 0.5 }); };
+badge(1, S(5));
+pop('#plan', S(5, 1) - 0.1, { r: 4, to: -1 });
+pop('#r1', W(5, 'what the app') - 0.1, { r: 0, sound: 'tick' });
+pop('#r2', W(5, 'who') - 0.1, { r: 0, sound: 'tick' });
+pop('#r3', W(5, 'and what') - 0.05, { r: 0, sound: 'tick' });
+stamp('#notyet', W(5, 'NOT') - 0.05, -9);
+
+/* 6: that last part matters: without it, a tower of features tips over */
+tl.to('#r3', { scale: 1.08, duration: 0.25, yoyo: true, repeat: 3 }, S(6));
+out('#plan,#r1,#r2,#r3,#notyet', S(6, 1) - 0.35);
+tl.set('#tower', { opacity: 1 }, S(6, 1) - 0.1);
+const tStart = S(6, 1), tTip = W(6, 'nothing') - 0.1;
+document.querySelectorAll('#tower .blk').forEach((b, i) => {
+  const t = tStart + i * (tTip - tStart - 0.2) / TOWER.length;
+  tl.fromTo(b, { opacity: 0, y: -1100 }, { opacity: 1, y: 0, duration: 0.42, ease: 'bounce.out' }, t); sfx('pop', t + 0.2, 0.3);
+});
+tl.to('#tower', { rotation: 3, duration: 0.3, yoyo: true, repeat: 5, ease: 'sine.inOut' }, tStart + 1.2);
+tl.to('#tower', { rotation: 28, duration: 0.5, ease: 'power2.in' }, tTip);
+tl.to('#tower .blk', { y: 1900, rotation: (i) => [40, -55, 70, -30, 50, -65][i], duration: 0.9, ease: 'power2.in', stagger: 0.05 }, tTip + 0.35);
+sfx('fill', tTip + 0.2, 0.3);
+tl.set('#tower', { opacity: 0 }, tTip + 1.6);
+
+/* 7: step two, one small thing at a time */
+badge(2, S(7));
+tl.fromTo('#one', { opacity: 0, x: -800, rotation: -30 }, { opacity: 1, x: 0, rotation: 0, duration: 0.6, ease: 'back.out(1.5)' }, W(7, 'one') - 0.15); sfx('pop', W(7, 'one'), 0.4);
+pop('#sp1', W(7, 'small'), { sound: 'star', vol: 0.4 });
+
+/* 8: step three, check its work */
+out('#one,#sp1', S(8) - 0.3);
+badge(3, S(8));
+tl.fromTo('#phone2', { opacity: 0, y: -1200, rotation: -10 }, { opacity: 1, y: 0, rotation: -3, duration: 0.7, ease: 'bounce.out' }, S(8, 1) - 0.2); sfx('pop', S(8, 1) + 0.2, 0.4);
+tl.to(dr, { scale: 1.08, duration: 0.4, ease: 'power2.out' }, S(8, 1));
+pop('#check', W(8, 'screenshot'), { r: -40, sound: 'success', vol: 0.45 });
+tl.to(dr, { scale: 1, duration: 0.4 }, S(8, 3));
+
+/* 9: step four, say what's wrong in plain words */
+out('#phone2,#check', S(9) - 0.3);
+badge(4, S(9));
+pop('#backbtn', W(9, 'Tell') , { r: 6 });
+tl.set('#ripple', { opacity: 1, scale: 0.2 }, W(9, 'tapped')); tl.to('#ripple', { opacity: 0, scale: 2.2, duration: 0.6, ease: 'power2.out' }, W(9, 'tapped')); sfx('tick', W(9, 'tapped'), 0.6);
+tl.to('#backbtn', { y: 10, duration: 0.08, yoyo: true, repeat: 1 }, W(9, 'tapped'));
+pop('#bubble', W(9, 'what happened') - 0.2, { r: -6, to: 2 });
+
+/* 10: plan, build, check, fix; and what came of it */
+out('#backbtn,#bubble,#b4', S(10) - 0.3);
+tl.set('#wheel', { opacity: 1 }, S(10));
+pop('#w1', W(10, 'Plan'), { r: -20, sound: 'tick' }); pop('#w2', W(10, 'build'), { r: -20, sound: 'tick' });
+pop('#w3', W(10, 'check'), { r: -20, sound: 'tick' }); pop('#w4', W(10, 'fix'), { r: -20, sound: 'tick' });
+tl.to('#wheel', { rotation: 360, duration: 1.4, ease: 'power2.inOut' }, W(10, 'fix') + 0.4); sfx('switch', W(10, 'fix') + 0.4, 0.4);
+tl.to('.seg', { rotation: -360, duration: 1.4, ease: 'power2.inOut' }, W(10, 'fix') + 0.4);
+out('#wheel', W(10, 'glossary') - 0.4);
+pop('#f1', W(10, 'glossary'), { r: -25, to: -6 }); pop('#f2', W(10, 'quiz'), { r: 20, to: 2 }); pop('#f3', W(10, '3D'), { r: 25, to: 7 });
+
+/* 11: try it today */
+out('#fan .f', S(11) - 0.35);
+pop('#try', S(11), { r: -5, to: -1.5, sound: 'chime', vol: 0.45 });
+pop('#sp1,#sp2,#sp3', S(11) + 0.4, { stagger: 0.18, sound: 'star', vol: 0.35 });
+tl.to('.spark', { rotation: 180, scale: 1.25, duration: 1.2, yoyo: true, repeat: 3, ease: 'sine.inOut' }, S(11) + 1);
+
+/* Dr. Smiley the whole time: talking with the voice, acting where the script says, a little bob */
+mouth('dr', 0, B.duration, [
+  { at: 0.2, to: 0.5, f: 'smile' },
+  { at: W(2, 'not a') - 0.05, to: W(2, 'not a') + 0.55, f: 'wink' },
+  { at: W(6, 'nothing'), to: S(7) - 0.1, f: 'worried' },
+  { at: S(8, 1), to: W(8, 'screenshot') - 0.05, f: 'doubt' },
+  { at: W(8, 'screenshot') + 0.1, to: W(8, 'screenshot') + 0.9, f: 'smile' },
+  { at: S(11) + 0.2, to: S(11) + 0.8, f: 'smile' },
+  { at: B.lines.at(-1).end + 0.05, to: B.duration, f: 'smile' },
+]);
+bob(dr, 1.6, B.duration - 2, { y: -10, r: 1.2, period: 2.2 });
+
+captions(['junior developer', 'boss', 'plan', 'NOT', 'one small thing', 'Check its work', 'plain words', 'Plan, build, check, fix'], [11]);
+done();
+</script>
+</body>
+</html>
