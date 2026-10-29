@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en" data-resolution="portrait">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Chapter 4: Handoff</title>
+<link rel="stylesheet" href="kit/kit.css">
+<style>
+  #dr2>svg{transform:scaleX(-1)}
+  #bag{left:300px;top:300px;width:480px;height:600px;transform-origin:50% 80%}
+  #ctx{left:400px;top:790px;padding:12px 30px;border-radius:999px;background:#fff;border:5px solid var(--ink);font-size:40px;font-weight:700}
+  #word{left:250px;top:250px;font-size:84px;font-weight:700;display:flex;gap:6px}
+  #word span{padding:6px 18px;border-radius:18px;border:5px solid var(--ink)}
+  .thing{position:absolute;padding:20px 26px;border-radius:24px;border:5px solid var(--ink);background:#fff;font-size:38px;font-weight:700}
+  #stack{left:700px;top:330px;width:300px;height:420px}
+  .sh{position:absolute;left:0;width:280px;height:360px;background:#fff;border:5px solid var(--ink);border-radius:12px;padding:26px}
+  .sh i{display:block;height:14px;border-radius:7px;background:#E3E6F0;margin:16px 0}
+  #meter{left:690px;top:800px;padding:20px 30px;border-radius:26px;background:var(--lemon);border:6px solid var(--ink);box-shadow:0 10px 0 var(--ink);font-size:48px;font-weight:700}
+  #cube{left:430px;top:520px;width:220px;height:220px;border-radius:28px;background:#FF8FA8;border:7px solid var(--ink);box-shadow:0 12px 0 var(--ink);display:grid;place-items:center;font-size:40px;font-weight:700}
+  #pad{left:300px;top:640px;width:380px;padding:30px;background:#fff;border:6px solid var(--ink);border-radius:10px;font-size:46px;font-weight:700}
+  #pad i{display:block;height:14px;border-radius:7px;background:#E3E6F0;margin:14px 0}
+  #ho{left:70px;top:250px;width:940px;padding:36px 42px 40px}
+  #ho h3{font-size:44px;font-weight:700}
+  #ho .sub{font-size:28px;font-weight:500;color:#77759a;margin:4px 0 14px}
+  .part{margin:16px 0;font-size:34px;line-height:1.3;font-weight:500;padding:6px 12px;border-radius:12px;
+    background:linear-gradient(#FFE3EC,#FFE3EC) no-repeat 0 0/0% 100%}
+  .part b{display:block;font-size:30px;letter-spacing:.05em;color:var(--hot);font-weight:700}
+  .part code{font:600 28px ui-monospace,Menlo,monospace}
+  #note{left:280px;top:700px;width:300px;padding:26px;transform:rotate(-6deg);background:#fff;border:6px solid var(--ink);border-radius:10px;font-size:30px;font-weight:600;line-height:1.3}
+  #note b{display:block;font-size:36px}
+  #mdpage{left:440px;top:330px;width:250px;padding:26px;background:#fff;border:6px solid var(--ink);border-radius:10px;font-size:32px;font-weight:700}
+  #mdpage i{display:block;height:12px;border-radius:6px;background:#E3E6F0;margin:12px 0}
+  #clean{left:780px;top:330px;width:200px;height:250px}
+  .try{position:absolute;width:420px;padding:30px;font-size:38px;font-weight:600;line-height:1.25}
+  .try .x{position:absolute;right:-20px;top:-40px;font-size:130px;color:var(--red);font-weight:700;line-height:1}
+  #good{left:200px;top:620px;width:680px;padding:36px;font-size:44px;font-weight:600;line-height:1.25}
+  #ok{left:820px;top:560px;width:150px;height:150px;border-radius:50%;background:var(--green);border:7px solid var(--ink);display:grid;place-items:center;color:#fff;font-size:100px;font-weight:700}
+  #src{left:250px;top:930px;padding:12px 26px;border-radius:999px;background:var(--sky);border:5px solid var(--ink);font-size:32px;font-weight:700}
+  #try{left:90px;top:300px;width:900px;padding:50px 54px}
+  #try h2{font-size:64px;font-weight:700;margin-bottom:22px}
+  #try p{font-size:54px;line-height:1.25;font-weight:600}
+  .end{position:absolute;top:330px;width:290px;text-align:center;font-size:40px;font-weight:700}
+  .end .obj{height:240px;display:grid;place-items:center;margin-bottom:16px}
+  #made{left:280px;top:760px;display:flex;align-items:center;gap:26px;padding:24px 40px;border-radius:999px;background:#fff;border:6px solid var(--ink);box-shadow:0 12px 0 var(--ink);font-size:52px;font-weight:700}
+  #made img{width:100px;height:100px;border-radius:24px}
+  .spark{font-size:70px;color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="73.7" data-width="1080" data-height="1920">
+  <div class="bg"></div>
+  <div class="a tag" id="tag"><b>4</b> · Handoff</div>
+
+  <!-- 2-5: the backpack: the chat's working memory -->
+  <svg class="a st" id="bag" viewBox="0 0 420 520">
+    <path d="M150 70 q60 -70 120 0" stroke="#2B2A4C" stroke-width="22" fill="none" stroke-linecap="round"/>
+    <path d="M60 140 q0 -70 70 -70 h160 q70 0 70 70 v300 q0 50 -50 50 h-200 q-50 0 -50 -50z" fill="#FF8FA8" stroke="#2B2A4C" stroke-width="9"/>
+    <path d="M100 300 h220 v120 q0 24 -24 24 h-172 q-24 0 -24 -24z" fill="#FFC6D9" stroke="#2B2A4C" stroke-width="8"/>
+    <rect x="180" y="330" width="60" height="22" rx="11" fill="#2B2A4C"/></svg>
+  <div class="a" id="ctx">context</div>
+  <div class="a" id="word"><span style="background:var(--sky)">in</span><span style="background:var(--lemon)">ter</span><span style="background:var(--mint)">pre</span><span style="background:var(--pink)">ter</span></div>
+  <div id="things">
+    <div class="thing" id="t1" style="left:80px;top:300px">"Make a quiz!"</div>
+    <div class="thing" id="t2" style="left:720px;top:280px;font-family:ui-monospace,Menlo,monospace">app.css</div>
+    <div class="thing" id="t3" style="left:130px;top:520px">screenshot</div>
+    <div class="thing" id="t4" style="left:700px;top:500px">"Done!"</div>
+    <div class="thing" id="t5" style="left:420px;top:240px;font-family:ui-monospace,Menlo,monospace">index.html</div>
+  </div>
+  <div class="a" id="stack"></div>
+  <div class="a" id="meter">Cost: <span id="cost">1</span>¢</div>
+  <div class="a" id="cube">summary</div>
+  <!-- 6: the handoff -->
+  <div class="a" id="pad">Handoff<i style="width:80%"></i><i></i><i style="width:60%"></i></div>
+  <!-- 7: the Hub's real one, shortened (docs/handoff.md, 2026-10-28) -->
+  <div class="a card" id="ho"><h3>docs/handoff.md</h3><div class="sub">The Hub's last one, shortened</div>
+    <div class="part" id="p1"><b>WORKING ON</b>The CoreCHI Practice card's pictures, made in Blender</div>
+    <div class="part" id="p2"><b>WHERE IT STANDS</b>Jose OK'd the look from two mock-ups</div>
+    <div class="part" id="p3"><b>NEXT</b>Steps 1-4 of the plan, in <code>docs/PLAN.md</code></div>
+    <div class="part" id="p4"><b>PASTE THIS INTO THE NEW CHAT</b>"Read <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>docs/PLAN.md</code> and <code>docs/handoff.md</code> … and wait for my go."</div></div>
+  <!-- 8: a new chat, a clean memory -->
+  <div class="a" id="note"><b>Handoff</b>Working on…<br>Next…<br>Paste this ➜</div>
+  <div class="a" id="mdpage">CLAUDE.md<i style="width:85%"></i><i></i><i style="width:60%"></i></div>
+  <svg class="a st" id="clean" viewBox="0 0 420 520"><path d="M150 70 q60 -70 120 0" stroke="#2B2A4C" stroke-width="22" fill="none" stroke-linecap="round"/>
+    <path d="M60 140 q0 -70 70 -70 h160 q70 0 70 70 v300 q0 50 -50 50 h-200 q-50 0 -50 -50z" fill="#C8ECFF" stroke="#2B2A4C" stroke-width="9"/></svg>
+  <!-- 9: corrected twice? start fresh -->
+  <div class="a card try" id="try1" style="left:90px;top:290px;transform:rotate(-3deg)">"No, the other button."<span class="x">×</span></div>
+  <div class="a card try" id="try2" style="left:560px;top:360px;transform:rotate(3deg)">"Still wrong. Try again."<span class="x">×</span></div>
+  <div class="a card" id="good">New chat: "The Back button should go to the list I came from, not Home."</div>
+  <div class="a" id="ok">✓</div>
+  <div class="a" id="src">Anthropic's Claude Code docs</div>
+  <!-- 10: try it today -->
+  <div class="a card" id="try"><h2>Try it today</h2><p>At the end of your next long chat, ask Claude to <em>write a handoff</em> for a new chat.</p></div>
+  <!-- 11: the three things -->
+  <div class="end" id="e1" style="left:40px"><div class="obj"><div class="note" style="width:220px;height:200px;transform:rotate(-5deg);padding:24px;font-size:34px">Profile</div></div>for you</div>
+  <div class="end" id="e2" style="left:395px"><div class="obj"><div style="width:220px;height:220px;background:#fff;border:6px solid #2B2A4C;border-radius:10px;padding:24px;font-size:32px;transform:rotate(2deg)">CLAUDE.md</div></div>for your project</div>
+  <div class="end" id="e3" style="left:750px"><div class="obj"><div style="width:220px;height:220px;background:#fff;border:6px solid #2B2A4C;border-radius:10px;padding:24px;font-size:32px;transform:rotate(-3deg);box-shadow:8px 8px 0 #FFC6D9">Handoff</div></div>for each fresh start</div>
+  <div class="a" id="made"><img src="assets/appicon.png" alt="">Now go build something</div>
+  <div class="a spark" id="sp1" style="left:120px;top:230px">✦</div><div class="a spark" id="sp2" style="left:900px;top:250px">✦</div><div class="a spark" id="sp3" style="left:960px;top:880px">✦</div>
+
+  <div id="smileywrap"></div>
+  <div id="caps"></div>
+
+  <audio id="voice" class="clip" src="voice/ch4.m4a" data-start="0" data-duration="73.6" data-track-index="20" data-volume="1"></audio>
+  <audio id="sfxmix" class="clip" src="voice/ch4.sfx.m4a" data-start="0" data-duration="73.6" data-track-index="21" data-volume="1"></audio>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="voice/ch4.beats.js"></script>
+<script src="kit/kit.js"></script>
+<script>
+const { tl, smiley, HLS, mouth, S, W, captions, sfx, pop, out, bob, stamp, done, $, B } = KIT;
+$('#smileywrap').innerHTML = smiley('dr') + smiley('dr2');
+$('#try em').style.cssText = HLS;
+$('#stack').innerHTML = Array.from({ length: 6 }, (_, i) => `<div class="sh" id="sh${i}" style="top:${i * 12}px;left:${i * 6}px"><i style="width:80%"></i><i></i><i style="width:60%"></i><i></i></div>`).join('');
+const dr = '#dr';
+
+gsap.set('#tag,#bag,#ctx,#word,.thing,#stack,#meter,#cube,#pad,#ho,.part,#note,#mdpage,#clean,.try,#good,#ok,#src,#try,.end,#made,.spark,#dr2', { opacity: 0 });
+gsap.set(dr, { left: 10, top: 1010 });
+gsap.set('#dr2', { left: 600, top: 1010 });
+
+/* 1: last one: two Dr. Smileys, one tired, one fresh */
+tl.fromTo(dr, { y: 900 }, { y: 0, duration: 0.7, ease: 'back.out(1.6)' }, 0.0); sfx('pop', 0.3, 0.4);
+tl.fromTo('#dr2', { opacity: 1, y: 900 }, { y: 0, duration: 0.7, ease: 'back.out(1.6)' }, 0.25); sfx('pop', 0.55, 0.4);
+pop('#tag', 0.6, { r: -14, to: -2 });
+tl.to('#dr2', { y: 900, duration: 0.5, ease: 'back.in(1.5)' }, S(2) + 0.4);
+
+/* 2: a working memory called context, measured in tokens */
+pop('#bag', W(2, 'working') - 0.2, { r: -8, to: 0 });
+pop('#ctx', W(2, 'context') - 0.1, { r: 10, to: -3, sound: 'tick' });
+pop('#word', S(2, 1) - 0.1, { r: 0, sound: false });
+// the word breaks into its pieces, then they drop into the bag
+tl.to('#word span', { x: (i) => [-50, -15, 15, 50][i], rotation: (i) => [-12, 8, -6, 12][i], duration: 0.4, ease: 'back.out(2.5)' }, W(2, 'tokens') - 0.1); sfx('snap', W(2, 'tokens'), 0.4);
+tl.to('#word span', { y: 330, x: (i) => [40, 10, -10, -40][i], scale: 0.5, opacity: 0, duration: 0.55, ease: 'power2.in', stagger: 0.12 }, W(2, 'pieces') + 0.2);
+for (let k = 0; k < 4; k++) sfx('tick', W(2, 'pieces') + 0.65 + k * 0.12, 0.3);
+
+/* 3: everything goes in: what you said, what Claude read, what it wrote; the bag bulges */
+[['#t1', 'said'], ['#t5', 'read'], ['#t2', 'read'], ['#t3', 'wrote'], ['#t4', 'wrote']].forEach(([t, w], i) => {
+  const at = W(3, w) - 0.4 + (i === 2 || i === 4 ? 0.3 : 0);
+  pop(t, at, { r: i % 2 ? 12 : -12, to: 0, vol: 0.3 });
+  tl.to(t, { left: 450, top: 520, scale: 0.3, opacity: 0, rotation: 30, duration: 0.5, ease: 'power2.in' }, at + 0.8);
+  tl.to('#bag', { scale: 1 + (i + 1) * 0.04, duration: 0.25, ease: 'back.out(3)' }, at + 1.25);
+});
+
+/* 4: every message re-reads the whole chat: the pages flip, the cost climbs, focus blurs */
+tl.to('#bag,#ctx', { x: -160, duration: 0.5, ease: 'power3.inOut' }, S(4) - 0.2);
+pop('#stack', W(4, 're-reads') - 0.3, { r: 6, to: 2 });
+document.querySelectorAll('.sh').forEach((p, i) => tl.to(p, { y: -40, rotation: -8, duration: 0.18, yoyo: true, repeat: 1 }, W(4, 're-reads') + 0.2 + i * 0.22));
+pop('#meter', W(4, 'costs') - 0.15, { r: -8, to: -2, sound: 'counter', vol: 0.35 });
+const cost = { v: 1 };
+[2, 3, 5, 8, 13].forEach((v, i) => tl.set('#cost', { innerHTML: v }, W(4, 'costs') + 0.25 + i * 0.25));
+tl.to('#bag,#stack,#ctx', { filter: 'blur(7px)', duration: 0.6 }, W(4, 'fuzzier') - 0.1);
+
+/* 5: really full: squeezed into a summary; what it left out is gone */
+out('#stack,#meter', S(5) - 0.3);
+tl.to('#bag,#stack,#ctx', { filter: 'blur(0px)', duration: 0.3 }, S(5) - 0.3);
+tl.to('#ctx', { opacity: 0, duration: 0.2 }, S(5) - 0.2);
+tl.to('#bag', { x: 0, scaleX: 0.45, scaleY: 0.38, duration: 0.6, ease: 'power3.in' }, W(5, 'squeezes') - 0.1); sfx('fill', W(5, 'squeezes'), 0.35);
+tl.set('#bag', { opacity: 0 }, W(5, 'summary') - 0.1);
+pop('#cube', W(5, 'summary') - 0.15, { r: -20, to: -4, sound: 'snap', vol: 0.5 });
+[['#t1', 380, 700], ['#t3', 640, 760], ['#t4', 500, 820]].forEach(([t, x, y], i) => {
+  // set, then to: a fromTo here would paint its start values from the first frame
+  const at = W(5, 'left out') - 0.2 + i * 0.15;
+  tl.set(t, { opacity: 1, left: 520, top: 600, scale: 0.6, rotation: 0 }, at);
+  tl.to(t, { left: x, top: y + 160, rotation: (i - 1) * 25, duration: 0.7, ease: 'power2.in' }, at);
+  tl.to(t, { opacity: 0, duration: 0.6 }, W(5, 'gone') - 0.1);
+});
+
+/* 6: don't wait: ask for a handoff */
+out('#cube', S(6) - 0.2);
+tl.fromTo('#pad', { opacity: 0, y: 300, rotation: 20 }, { opacity: 1, y: 0, rotation: -4, duration: 0.6, ease: 'back.out(1.8)' }, S(6, 1) + 0.3); sfx('pop', S(6, 1) + 0.5, 0.45);
+tl.to('#pad', { scale: 1.1, duration: 0.25, yoyo: true, repeat: 1 }, W(6, 'handoff') - 0.1); sfx('star', W(6, 'handoff'), 0.4);
+
+/* 7: one page, four parts, each lit as it's named */
+out('#pad', S(7) - 0.3);
+pop('#ho', S(7) - 0.05, { r: -3, to: 0, sound: 'switch', vol: 0.4 });
+gsap.set('.part', { opacity: 1 });
+[['#p1', 'working on'], ['#p2', 'where it stands'], ['#p3', 'next'], ['#p4', 'exact message']].forEach(([p, w]) => {
+  tl.to(p, { backgroundSize: '100% 100%', duration: 0.45, ease: 'power2.out' }, W(7, w) - 0.15); sfx('tick', W(7, w) - 0.1, 0.45);
+});
+tl.to('#p4', { scale: 1.03, duration: 0.3, yoyo: true, repeat: 3 }, W(7, 'paste'));
+
+/* 8: open a new chat, paste it: a fresh Dr. Smiley reads it and gets going */
+out('#ho', S(8) - 0.3);
+tl.fromTo('#dr2', { opacity: 1, y: 900 }, { y: 0, duration: 0.7, ease: 'back.out(1.6)' }, S(8) - 0.1); sfx('pop', S(8) + 0.2, 0.4);
+tl.fromTo('#note', { opacity: 0, left: 120, top: 760, rotation: -20 }, { opacity: 1, left: 400, top: 700, rotation: -6, duration: 0.8, ease: 'power2.inOut' }, W(8, 'paste') - 0.2); sfx('switch', W(8, 'paste'), 0.4);
+pop('#mdpage', W(8, 'CLAUDE') - 0.2, { r: 10, to: 3 });
+pop('#clean', W(8, 'clean') - 0.2, { r: -10, to: 0, sound: 'star', vol: 0.5 });
+pop('#sp3', W(8, 'clean') + 0.1, { sound: false });
+
+/* 9: corrected twice and still wrong? start fresh with one better message */
+out('#note,#mdpage,#clean,#sp3', S(9) - 0.3);
+tl.to('#dr2', { y: 900, duration: 0.5, ease: 'back.in(1.5)' }, S(9) - 0.3);
+pop('#try1', W(9, 'corrected') - 0.1, { r: -10, to: -3 });
+pop('#try2', W(9, 'twice') + 0.1, { r: 10, to: 3 });
+tl.fromTo('.try .x', { scale: 0 }, { scale: 1, duration: 0.3, ease: 'back.out(3)', stagger: 0.3 }, W(9, 'still wrong')); sfx('snap', W(9, 'still wrong') + 0.1, 0.4); sfx('snap', W(9, 'still wrong') + 0.4, 0.4);
+tl.to('.try', { opacity: 0.35, scale: 0.85, duration: 0.4 }, W(9, 'start fresh') - 0.2);
+pop('#good', W(9, 'start fresh') - 0.1, { r: -4, to: 0 });
+pop('#ok', W(9, 'better message') + 0.2, { r: -40, sound: 'success', vol: 0.45 });
+pop('#src', W(9, 'Anthropic') - 0.1, { r: 6, to: 2, sound: 'tick' });
+
+/* 10: try it today */
+out('.try,#good,#ok,#src', S(10) - 0.35);
+pop('#try', S(10), { r: -5, to: -1.5, sound: 'chime', vol: 0.45 });
+pop('#sp1,#sp2', S(10) + 0.4, { stagger: 0.2, sound: 'star', vol: 0.35 });
+
+/* 11: a profile, a rulebook, a handoff; now go build something */
+out('#try,#sp1,#sp2', S(11) - 0.35);
+pop('#e1', S(11), { r: -12 }); pop('#e2', S(11, 1), { r: 12 }); pop('#e3', S(11, 2), { r: -12 });
+pop('#made', S(11, 3) - 0.1, { r: -6, to: -2, sound: 'chime', vol: 0.5 });
+pop('#sp1,#sp2,#sp3', S(11, 3) + 0.2, { stagger: 0.15, sound: 'star', vol: 0.35 });
+tl.to(dr, { rotation: -6, duration: 0.18, yoyo: true, repeat: 7, ease: 'sine.inOut' }, S(11, 3) + 0.1);
+
+/* Dr. Smiley: tired at the start and as the chat fills; fresh again at the end */
+mouth('dr', 0, B.duration, [
+  { at: 0.3, to: 1.9, f: 'halfL' },
+  { at: W(4, 'fuzzier'), to: S(5) - 0.2, f: 'halfR' },
+  { at: W(5, 'gone'), to: S(6) - 0.1, f: 'sad' },
+  { at: W(9, 'still wrong'), to: W(9, 'start fresh') - 0.1, f: 'worried' },
+  { at: S(11, 3) + 0.1, to: B.duration, f: 'laugh' },
+]);
+mouth('dr2', 0, S(8) + 6, [{ at: 0, to: 2.2, f: 'smile' }, { at: S(8), to: S(8) + 1.5, f: 'surprised' }, { at: S(8) + 1.5, to: S(8) + 6, f: 'smile' }]);
+bob(dr, 1.0, B.duration - 3, { y: -10, r: 1.2, period: 2.2 });
+
+captions(['handoff', 'context', 'tokens', 're-reads', 'summary', 'one page', 'clean memory', 'start fresh'], [10]);
+done();
+</script>
+</body>
+</html>
